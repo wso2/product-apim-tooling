@@ -25,7 +25,7 @@ import (
 var LogoutCmd = &cobra.Command{
 	Use:   "logout",
 	Short: utils.LogoutCmdShortDesc,
-	Long: utils.LogoutCmdLongDesc,
+	Long:  utils.LogoutCmdLongDesc,
 	Run: func(cmd *cobra.Command, args []string) {
 		// TODO: Work your own magic here
 		fmt.Println("logout called")

@@ -25,7 +25,7 @@ import (
 var InitCmd = &cobra.Command{
 	Use:   "init",
 	Short: utils.InitCmdShortDesc,
-	Long: utils.InitCmdLongDesc,
+	Long:  utils.InitCmdLongDesc,
 	Run: func(cmd *cobra.Command, args []string) {
 		// TODO: Work your own magic here
 		fmt.Println("init called")

@@ -2,6 +2,17 @@ package utils
 
 import "github.com/renstrom/dedent"
 
+const FindMoreInfoMsg string = "<FindMoreInfoMsg>"
+const DoneMsg string = "Done!\n"
+const NoAPIsFoundMsg = "No APIs found for the given query!"
+
+const RootCmdShortDesc string = "CLI for Importing and Exporting APIs"
+
+var RootCmdLongDesc string = dedent.Dedent(`
+		wso2api-cli is a CLI for Importing and Exporting APIs between different environments
+		(Production, Staging, QA etc.)
+		`)
+
 // Init command related usage info
 const InitCmdShortDesc string = "Initialize wso2apim-cli with your WSO2 credentials"
 
@@ -16,9 +27,8 @@ var InitCmdExamples = dedent.Dedent(`
 		<InitCmdExamples>
 		`)
 
-
 // Logout command related usage info
-const LogoutCmdShortDesc string = "Logout from the current session"
+const LogoutCmdShortDesc string = "Logout from current session"
 
 var LogoutCmdLongDesc = dedent.Dedent(`
 		<LogoutCmdLongDesc>
@@ -45,3 +55,13 @@ var ConfigCmdLongDesc string = dedent.Dedent(`
 var ConfigCmdExamples = dedent.Dedent(`
 		<ConfigCmdExamples>
 		`)
+
+// ImportAPI command related usage info
+const ImportAPICmdShortDesc string = "Import API"
+
+var ImportAPICmdLongDesc string = "Import an API in a different environment to the current environment"
+
+var ImportAPICmdExamples = dedent.Dedent(`
+	wso2apim-cli importAPI -n TwitterAPI -v 1.0.0 -e dev
+	wso2apim-cli importAPI -n FacebookAPI -v 2.1.0 -e production
+	`)

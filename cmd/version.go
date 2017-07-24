@@ -19,16 +19,17 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/menuka94/wso2apim-cli/utils"
+	"github.com/spf13/viper"
 )
 
 // VersionCmd represents the version command
 var VersionCmd = &cobra.Command{
 	Use:   "version",
 	Short: utils.VersionCmdShortDesc,
-	Long: utils.VersionCmdLongDesc,
+	Long:  utils.VersionCmdLongDesc,
 	Run: func(cmd *cobra.Command, args []string) {
-		// TODO: Work your own magic here
-		fmt.Println("version called")
+		var version string = "0.1"
+		fmt.Println("wso2apim-cli Version " + version)
 	},
 }
 
@@ -39,7 +40,9 @@ func init() {
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// VersionCmd.PersistentFlags().String("foo", "", "A help for foo")
+	VersionCmd.PersistentFlags().String("foo", "", "A help for foo")
+	VersionCmd.PersistentFlags().StringP("full", "f", "fullValue", "show Full values")
+	viper.BindPFlag("full", RootCmd.PersistentFlags().Lookup("full"))
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
