@@ -65,3 +65,13 @@ var ImportAPICmdExamples = dedent.Dedent(`
 	wso2apim-cli importAPI -n TwitterAPI -v 1.0.0 -e dev
 	wso2apim-cli importAPI -n FacebookAPI -v 2.1.0 -e production
 	`)
+
+// ExportAPI command related usage info
+const ExportAPICmdShortDesc string = "Export API"
+
+var ExportAPICmdLongDesc string = "Export an API in the current environment to a different environment"
+
+var ExportAPICmdExamples = dedent.Dedent(`
+	wso2apim-cli exportAPI -n TwitterAPI -v 1.0.0 -e dev
+	wso2apim-cli exportAPI -n FacebookAPI -v 2.1.0 -e production
+	`)
