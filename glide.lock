@@ -1,8 +1,10 @@
 hash: 14637de5182a4b0d5903945ccb984c0a673989aa1fedd73be7ccf8812dbcf4ae
-updated: 2017-07-21T15:26:37.821405621+05:30
+updated: 2017-07-24T15:30:35.288511293+05:30
 imports:
 - name: github.com/fsnotify/fsnotify
   version: fd9ec7deca8bf46ecd2a795baaacf2b3a9be1197
+- name: github.com/go-resty/resty
+  version: cf81ed0a604d373be63b4c036c6b05c06520615f
 - name: github.com/hashicorp/hcl
   version: 5550aaba7896ad2a161888b40954bc0f0787bb81
   subpackages:
@@ -40,6 +42,10 @@ imports:
   version: 5ccb023bc27df288a957c5e994cd44fd19619465
 - name: github.com/spf13/viper
   version: 651d9d916abc3c3d6a91a12549495caba5edffd2
+- name: golang.org/x/net
+  version: ab5485076ff3407ad2d02db054635913f017b0ed
+  subpackages:
+  - publicsuffix
 - name: golang.org/x/sys
   version: d5645953809d8b4752afb2c3224b1f1ad73dfa70
   subpackages:

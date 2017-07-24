@@ -45,7 +45,7 @@ func GetBase64EncodedCredentials(key string, secret string) string {
 }
 
 // GetOAuthAccessToken implemented using go-resty/resty
-func GetOAuthAccessToken() {
+func GetOAuthAccessToken(username string, password string) {
 	url := "https://localhost:9443/oauth2/token"
 	body := `{"grant_type": "password",
 		"username": "admin",
@@ -54,7 +54,7 @@ func GetOAuthAccessToken() {
 
 	headers := make(map[string]string)
 	headers["Content-Type"] = "application/x-www-form-urlencoded"
-	headers["Authorization"] = "Bearer " + GetBase64EncodedCredentials(GetClientIDSecret())
+	headers["Authorization"] = "Bearer " + GetBase64EncodedCredentials(GetClientIDSecret(username, password))
 	resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	resp, err := resty.R().
 		SetHeaders(headers).
