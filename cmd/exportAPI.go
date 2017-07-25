@@ -31,7 +31,6 @@ var ExportAPICmd = &cobra.Command{
 	Short: utils.ExportAPICmdLongDesc,
 	Long:  utils.ExportAPICmdLongDesc,
 	Run: func(cmd *cobra.Command, args []string) {
-		// TODO: Work your own magic here
 		fmt.Println("exportAPI called")
 
 		fmt.Println("Name:", exportAPIName)
