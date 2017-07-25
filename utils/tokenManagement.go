@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 )
 
 // GetClientIDSecret implemented using go-resty
@@ -32,10 +31,10 @@ func GetClientIDSecret(username string, password string) (string, string) {
 	data := []byte(resp.Body())
 	_ = json.Unmarshal(data, &m)
 
-	client_id := m["client_id"]
-	client_secret := m["client_secret"]
+	clientID := m["client_id"]
+	clientSecret := m["client_secret"]
 
-	return client_id, client_secret
+	return clientID, clientSecret
 }
 
 func GetBase64EncodedCredentials(key string, secret string) string {
@@ -44,18 +43,16 @@ func GetBase64EncodedCredentials(key string, secret string) string {
 	return encoded
 }
 
-// GetOAuthAccessToken implemented using go-resty/resty
-func GetOAuthAccessToken(username string, password string) {
+// GetOAuthTokens implemented using go-resty/resty
+func GetOAuthTokens(username string, password string) map[string]string {
 	url := "https://localhost:9443/oauth2/token"
-	body := `{"grant_type": "password",
-		"username": "admin",
-		"password": "admin",
-		"validity_period": "3600"}`
+	body := "grant_type=password&username=admin&password=admin&validity_period=3600"
 
 	headers := make(map[string]string)
 	headers["Content-Type"] = "application/x-www-form-urlencoded"
 	headers["Authorization"] = "Bearer " + GetBase64EncodedCredentials(GetClientIDSecret(username, password))
-	resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
+	headers["Accept"] = "application/json"
+	resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTP certificates
 	resp, err := resty.R().
 		SetHeaders(headers).
 		SetBody(body).
@@ -64,13 +61,15 @@ func GetOAuthAccessToken(username string, password string) {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("\nResponse Body: %v\n", resp)
 
-	fmt.Println(body)
+	m := make(map[string]string)
+	data := []byte(resp.Body())
+	_ = json.Unmarshal(data, &m)
+
+	return m // m contains 'access_token', 'refresh_token' etc
 }
 
 func isExpired() {
-
 }
 
 func refreshToken() {
