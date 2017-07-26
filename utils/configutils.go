@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"github.com/wso2/wum-client/utils"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 )
@@ -36,7 +35,7 @@ func LoadEnvConfig(envLocalConfig string) /* EnvConfig */ {
 // Returns a pointer to env configuration
 func GetEnvConfig() *EnvConfig {
 	if &envConfig == nil {
-		utils.HandleErrorAndExit("Env configuration is not available", nil)
+		HandleErrorAndExit("Env configuration is not available", nil)
 	}
 	return &envConfig
 }
@@ -45,12 +44,12 @@ func GetEnvConfig() *EnvConfig {
 func WriteConfigFile(envConfig interface{}, envConfigFilePath string) {
 	data, err := yaml.Marshal(&envConfig)
 	if err != nil {
-		utils.HandleErrorAndExit("Unable to create Env Configuration.", err)
+		HandleErrorAndExit("Unable to create Env Configuration.", err)
 	}
 
 	err = ioutil.WriteFile(envConfigFilePath, data, 0644)
 	if err != nil {
-		utils.HandleErrorAndExit("Unable to create Env Configuration.", err)
+		HandleErrorAndExit("Unable to create Env Configuration.", err)
 	}
 }
 
