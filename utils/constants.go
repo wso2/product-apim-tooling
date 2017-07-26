@@ -6,6 +6,8 @@ const HeaderContentType string = "Content-Type"
 const HeaderAccept string = "Accept"
 const HeaderValueApplicationJSON string = "application/json"
 const HeaderValueXWWWFormUrlEncoded = "application/x-www-form-urlencoded"
+const HeaderValueAuthBearerPrefix = "Bearer"
+const HeaderValueAuthBasicPrefix = "Basic"
 const APICallTimeout = 5
 
 const (

@@ -37,16 +37,8 @@ var ExportAPICmd = &cobra.Command{
 		fmt.Println("Version:", exportAPIVersion)
 		fmt.Println("Environment:", exportEnvironment)
 
-		m := utils.GetOAuthTokens("admin", "admin")
-		accessToken := m["access_token"]
-		refreshToken := m["refresh_token"]
-		tokenType := m["token_type"]
-		expiresIn := m["expires_in"]
 
-		fmt.Println("AccessToken:", accessToken)
-		fmt.Println("RefreshToken:", refreshToken)
-		fmt.Println("TokenType:", tokenType)
-		fmt.Println("ExpiresIn:", expiresIn)
+
 	},
 }
 

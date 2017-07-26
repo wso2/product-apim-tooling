@@ -14,11 +14,9 @@ func PrintUsageErrorAndExit(msg, commandName string) {
 	os.Exit(1)
 }
 
-func PrintErrorMessageAndExit(errorMsg string, messages ...string){
+func PrintErrorMessageAndExit(errorMsg string, err error){
 	fmt.Fprintf(os.Stderr, "wso2apim: %v\n", errorMsg)
-	for _, msg := range messages {{
-		fmt.Fprintf(os.Stderr, msg)
-	}}
+	println(err)
 	os.Exit(1)
 }
 
