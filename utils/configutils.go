@@ -30,8 +30,7 @@ Load the Environments Configuration file from the config.yaml file. If the file 
 create a new config.yaml file and add default values
 Validates the configuration, if it exists
 */
-func LoadEnvConfig(envLocalConfig string) EnvConfig {
-
+func LoadEnvConfig(envLocalConfig string) /* EnvConfig */ {
 }
 
 // Returns a pointer to env configuration

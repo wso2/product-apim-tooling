@@ -12,8 +12,8 @@ func GetClientIDSecret(username string, password string) (string, string) {
 	url := "https://localhost:9443/identity/connect/register"
 	body := `{"clientName": "Test", "redirect_uris": "www.google.lk", "grant_types":"password"}`
 	headers := make(map[string]string)
-	headers["Content-Type"] = "application/json"
-	headers["Authorization"] = "Basic " + GetBase64EncodedCredentials(username, password)
+	headers[HeaderContentType] = HeaderValueApplicationJSON
+	headers[HeaderAuthorization] = "Basic " + GetBase64EncodedCredentials(username, password)
 
 	resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTPS certificates
 
@@ -46,12 +46,12 @@ func GetBase64EncodedCredentials(key string, secret string) string {
 // GetOAuthTokens implemented using go-resty/resty
 func GetOAuthTokens(username string, password string) map[string]string {
 	url := "https://localhost:9443/oauth2/token"
-	body := "grant_type=password&username=admin&password=admin&validity_period=3600"
+	body := "grant_type=password&username=" + username + "&password="+ password +"&validity_period=3600"
 
 	headers := make(map[string]string)
-	headers["Content-Type"] = "application/x-www-form-urlencoded"
-	headers["Authorization"] = "Bearer " + GetBase64EncodedCredentials(GetClientIDSecret(username, password))
-	headers["Accept"] = "application/json"
+	headers[HeaderContentType] = HeaderValueXWWWFormUrlEncoded
+	headers[HeaderAuthorization] = "Bearer " + GetBase64EncodedCredentials(GetClientIDSecret(username, password))
+	headers[HeaderAccept] = HeaderValueApplicationJSON
 	resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTP certificates
 	resp, err := resty.R().
 		SetHeaders(headers).
@@ -59,7 +59,7 @@ func GetOAuthTokens(username string, password string) map[string]string {
 		Post(url)
 
 	if err != nil {
-		panic(err)
+		HandleErrorAndExit("Unable to Connect", err)
 	}
 
 	m := make(map[string]string)
@@ -69,7 +69,7 @@ func GetOAuthTokens(username string, password string) map[string]string {
 	return m // m contains 'access_token', 'refresh_token' etc
 }
 
-func isExpired() {
+func isAccessTokenExpired() {
 }
 
 func refreshToken() {
