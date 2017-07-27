@@ -6,6 +6,8 @@ import (
 )
 
 
+// ------------------- Structs for YAML Config files ----------------------------------
+
 // For env_keys_config.yaml
 // Not to be manually edited
 type EnvKeysConfig struct {
@@ -30,6 +32,7 @@ type EnvKeys struct {
 type EnvInfo struct {
 	Endpoint     string `yaml:"endpoint"`
 }
+// ---------------- End of Structs for YAML config files ---------------------------------
 
 
 // variables

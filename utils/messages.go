@@ -5,6 +5,16 @@ import "github.com/renstrom/dedent"
 const FindMoreInfoMsg string = "<FindMoreInfoMsg>"
 const DoneMsg string = "Done!\n"
 const NoAPIsFoundMsg = "No APIs found for the given query!"
+const UnableToConnectMsg = "There was a problem connecting, please try again"
+const InvalidCredentialsMsg string = "Invalid Credentials"
+const UsernamePasswordEmptyMsg string = "Username and Password cannot be empty"
+const InvalidExpiredRefreshTokenMsg string = "Your session has timed out"
+const ErrorReadingResponseMsg string = "There was an error reading the response from the server"
+const ErrorProcessingResponseMsg string = "There was an error processing the response from the server"
+
+const DoYouWantToContinueMsg_DefaultYes string = "Do you want to continue? [Y/n] "
+const DoYouWantToContinueMsg_DefaultNo string = "Do you want to continue? [y/N] "
+const RunWSO2APIMInitToContinueMsg = "Run 'wso2apim init' to continue"
 
 const RootCmdShortDesc string = "CLI for Importing and Exporting APIs"
 

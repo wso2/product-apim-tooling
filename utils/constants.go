@@ -5,10 +5,11 @@ const HeaderAuthorization string = "Authorization"
 const HeaderContentType string = "Content-Type"
 const HeaderAccept string = "Accept"
 const HeaderValueApplicationJSON string = "application/json"
-const HeaderValueXWWWFormUrlEncoded = "application/x-www-form-urlencoded"
-const HeaderValueAuthBearerPrefix = "Bearer"
-const HeaderValueAuthBasicPrefix = "Basic"
+const HeaderValueXWWWFormUrlEncoded string = "application/x-www-form-urlencoded"
+const HeaderValueAuthBearerPrefix string = "Bearer"
+const HeaderValueAuthBasicPrefix string = "Basic"
 const APICallTimeout = 5
+const WSO2APIMUpdateTokenTimeout = 2
 
 const (
 	BYTE     = 1.0

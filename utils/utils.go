@@ -20,6 +20,12 @@ func PrintErrorMessageAndExit(errorMsg string, err error){
 	os.Exit(1)
 }
 
+func HandleUnableToConnectErrorAndExit(err error) {
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "wso2apim: %v\n", err.Error())
+	}
+}
+
 func HandleErrorAndExit(msg string, err error) {
 	if err == nil {
 		fmt.Fprintf(os.Stderr, "wso2apim: %v\n", msg)
