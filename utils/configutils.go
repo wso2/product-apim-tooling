@@ -5,19 +5,36 @@ import (
 	"io/ioutil"
 )
 
-type EnvInfo struct {
-	Endpoint     string `yaml:"endpoint"`
+
+// For env_keys_config.yaml
+// Not to be manually edited
+type EnvKeysConfig struct {
+	Environments map[string]EnvKeys `yaml:"environments"`
+}
+
+// For env_config.yaml
+// To be manually edited by the user
+type EnvConfig struct {
+	Environments map[string]EnvInfo `yaml:"environments"`
+}
+
+// To be used in env_keys_config.yaml
+type EnvKeys struct {
 	ClientID     string `yaml:"client_id"`
 	ClientSecret string `yaml:"client_secret"`
 	RefreshToken string `yaml:"refresh_token"`
 }
 
-type EnvConfig struct {
-	Environments map[string]EnvInfo `yaml:"environments"`
+
+// To be used in EnvConfig
+type EnvInfo struct {
+	Endpoint     string `yaml:"endpoint"`
 }
+
 
 // variables
 var envConfig EnvConfig
+var envKeysConfig EnvKeysConfig
 
 // Validates the configuration file
 func (envConfig *EnvConfig) validate() {
@@ -32,12 +49,20 @@ Validates the configuration, if it exists
 func LoadEnvConfig(envLocalConfig string) /* EnvConfig */ {
 }
 
-// Returns a pointer to env configuration
+// Returns a pointer to EnvConfig
 func GetEnvConfig() *EnvConfig {
 	if &envConfig == nil {
 		HandleErrorAndExit("Env configuration is not available", nil)
 	}
 	return &envConfig
+}
+
+// Returns a pointer to EnvKeysConfig
+func GetEnvKeysConfig() *EnvKeysConfig{
+	if &envKeysConfig == nil {
+		HandleErrorAndExit("EnvKeys configuration is not available", "nil")
+	}
+	return &envKeysConfig
 }
 
 // Persists the given Env configuration
@@ -54,14 +79,28 @@ func WriteConfigFile(envConfig interface{}, envConfigFilePath string) {
 }
 
 /*
+env_keys_config.yaml (Programmatically edited)
+===============
 environments:
 	dev:
-		url: https://example.com
-		client_id: eqwrewqr
-		client_secret: 192430ijasj90
+		client_id: xxxxxxxxxx
+		client_secret: xxxxxxxxxx
+		refresh_token: xxxxxxxxxx
 
 	staging:
-		url: https://example.com/staging
-		client_id: a930j
-		client_secret: 24342jl
+		client_id: xxxxxxxxxx
+		client_secret: xxxxxxxxxx
+		refresh_token: xxxxxxxxxx
  */
+
+/*
+env_config.yaml (Manually edited)
+===============
+environments:
+	dev:
+		endpoint: https://example.com/dev
+
+	staging:
+		endpoint: https://example.com/staging
+*/
+
