@@ -3,46 +3,79 @@ package utils
 import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"errors"
+	"debug/dwarf"
 )
-
 
 // ------------------- Structs for YAML Config Files ----------------------------------
 
-// For env_keys_config.yaml
+// For env_keys_all.yaml
 // Not to be manually edited
-type EnvKeysConfig struct {
+type EnvKeysAll struct {
 	Environments map[string]EnvKeys `yaml:"environments"`
 }
 
-// For env_config.yaml
+// For env_endpoints_all.yaml
 // To be manually edited by the user
-type EnvConfig struct {
-	Environments map[string]EnvInfo `yaml:"environments"`
+type EnvEndpointsAll struct {
+	Environments map[string]EnvEndpoints `yaml:"environments"`
 }
 
-// To be used in env_keys_config.yaml
 type EnvKeys struct {
 	ClientID     string `yaml:"client_id"`
-	ClientSecret string `yaml:"client_secret"`	// to be encrypted (with the user's password) and stored
+	ClientSecret string `yaml:"client_secret"` // to be encrypted (with the user's password) and stored
 }
 
-
-// To be used in EnvConfig
-type EnvInfo struct {
-	APIManagerEndpoint     string `yaml:"api_manager_endpoint"`
+type EnvEndpoints struct {
+	APIManagerEndpoint   string `yaml:"api_manager_endpoint"`
 	RegistrationEndpoint string `yaml:"registration_endpoint"`
-	TokenEndpoint string `yaml:"token_endpoint"`
+	TokenEndpoint        string `yaml:"token_endpoint"`
 }
+
 // ---------------- End of Structs for YAML Config Files ---------------------------------
 
-
 // variables
-var envConfig EnvConfig
-var envKeysConfig EnvKeysConfig
+var envEndpointsAll EnvEndpointsAll
+var envKeysAll EnvKeysAll
 
 // Validates the configuration file
-func (envConfig *EnvConfig) validate() {
+func (envEndpointsAll *EnvEndpointsAll) validate() {
 	//
+}
+
+// Read contents of env_endpoints_all.yaml
+func (envEndpointsAll *EnvEndpointsAll) ReadFromFile(data []byte) error {
+	if err := yaml.Unmarshal(data, envEndpointsAll); err != nil {
+		return err
+	}
+	for name, endpoints := range envEndpointsAll.Environments {
+		if endpoints.APIManagerEndpoint == "" {
+			return errors.New("Invalid API Manager Endpoint for " + name)
+		}
+		if endpoints.RegistrationEndpoint == "" {
+			return errors.New("Invalid Registration Endpoint for " + name)
+		}
+		if endpoints.TokenEndpoint == "" {
+			return errors.New("Invalid Token Endpoint for " + name)
+		}
+	}
+	return nil
+}
+
+// Read contents of env_keys_all.yaml
+func (envKeysAll *EnvKeysAll) ReadFromFile(data []byte) error {
+	if err := yaml.Unmarshal(data, envKeysAll); err != nil {
+		return err
+	}
+	for name, keys := range envKeysAll.Environments {
+		if keys.ClientID == "" {
+			return errors.New("Invalid ClientID for " + name)
+		}
+		if keys.ClientSecret == "" {
+			return errors.New("Invalid ClientSecret for " + name)
+		}
+		return nil
+	}
 }
 
 /**
@@ -50,23 +83,23 @@ Load the Environments Configuration file from the config.yaml file. If the file 
 create a new config.yaml file and add default values
 Validates the configuration, if it exists
 */
-func LoadEnvConfig(envLocalConfig string) /* EnvConfig */ {
+func LoadEnvConfig(envLocalConfig string) /* EnvEndpointsAll */ {
 }
 
-// Returns a pointer to EnvConfig
-func GetEnvConfig() *EnvConfig {
-	if &envConfig == nil {
+// Returns a pointer to EnvEndpointsAll
+func GetEnvEndpointsAll() *EnvEndpointsAll {
+	if &envEndpointsAll == nil {
 		HandleErrorAndExit("Env configuration is not available", nil)
 	}
-	return &envConfig
+	return &envEndpointsAll
 }
 
-// Returns a pointer to EnvKeysConfig
-func GetEnvKeysConfig() *EnvKeysConfig{
-	if &envKeysConfig == nil {
+// Returns a pointer to EnvKeysAll
+func GetEnvKeysAll() *EnvKeysAll {
+	if &envKeysAll == nil {
 		HandleErrorAndExit("EnvKeys configuration is not available", nil)
 	}
-	return &envKeysConfig
+	return &envKeysAll
 }
 
 // Persists the given Env configuration
@@ -111,4 +144,3 @@ environments:
 		registration_endpoint: xxxxxxxxxx
 		token_endpoint: xxxxxxxxx
 */
-

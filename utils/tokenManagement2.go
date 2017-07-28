@@ -37,7 +37,7 @@ type APIErrResp struct {
 // Get an access token from WSO2 Update with the given username and the password using the
 // 'password' grant type of Oauth2.
 // This method returns an error only if the username or password is incorrect.
-func GetAccessToken(username string, password []byte, envInfo EnvInfo, envKeys EnvKeys, scope string) (TokenResponse, error) {
+func GetAccessToken(username string, password []byte, envInfo EnvEndpoints, envKeys EnvKeys, scope string) (TokenResponse, error) {
 	payload := url.Values{}
 	payload.Add("grant_type", "password")
 	payload.Add("username", username)
@@ -83,7 +83,7 @@ func ProcessServerResponse(resp *http.Response, v interface{}) error {
 
 // Invokes the configured token API of the API gateway. This method can be used to get access tokens
 // as well as renew access tokens using the refresh token.
-func InvokeTokenAPI(payload url.Values, envInfo EnvInfo, envKeys EnvKeys) (TokenResponse, error) {
+func InvokeTokenAPI(payload url.Values, envInfo EnvEndpoints, envKeys EnvKeys) (TokenResponse, error) {
 	Logln("Invoking WSO2 Token API")
 	req, err := http.NewRequest("POST", envInfo.TokenEndpoint, bytes.NewBufferString(payload.Encode()))
 	if err != nil {

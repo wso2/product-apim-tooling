@@ -61,6 +61,18 @@ func invokeRequest(req *http.Request, timeout time.Duration) *http.Response {
 	return httpResp
 }
 
+func WriteFile(filename string, data []byte, perm os.FileMode) error {
+	f, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, perm)
+	if err != nil {
+		return err
+	}
+	n, err := f.Write(data)
+	if err1 := f.Close(); err == nil {
+		err = err1
+	}
+	return err
+}
+
 /*
 func makeAPICall(req *http.Request) *http.Response {
 	// Invoke request
@@ -73,7 +85,7 @@ func makeAPICall(req *http.Request) *http.Response {
 		// then Authenticate() will notify and exit
 		Authenticate()
 
-		envConfig :=  GetEnvConfig()
+		envEndpointsAll :=  GetEnvConfig()
 	}
 }
 */
