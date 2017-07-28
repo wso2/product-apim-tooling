@@ -6,7 +6,7 @@ import (
 )
 
 
-// ------------------- Structs for YAML Config files ----------------------------------
+// ------------------- Structs for YAML Config Files ----------------------------------
 
 // For env_keys_config.yaml
 // Not to be manually edited
@@ -33,7 +33,7 @@ type EnvInfo struct {
 	RegistrationEndpoint string `yaml:"registration_endpoint"`
 	TokenEndpoint string `yaml:"token_endpoint"`
 }
-// ---------------- End of Structs for YAML config files ---------------------------------
+// ---------------- End of Structs for YAML Config Files ---------------------------------
 
 
 // variables
@@ -64,7 +64,7 @@ func GetEnvConfig() *EnvConfig {
 // Returns a pointer to EnvKeysConfig
 func GetEnvKeysConfig() *EnvKeysConfig{
 	if &envKeysConfig == nil {
-		HandleErrorAndExit("EnvKeys configuration is not available", "nil")
+		HandleErrorAndExit("EnvKeys configuration is not available", nil)
 	}
 	return &envKeysConfig
 }

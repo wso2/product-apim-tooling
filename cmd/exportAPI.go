@@ -27,7 +27,7 @@ var exportEnvironment string
 
 // ExportAPICmd represents the exportAPI command
 var ExportAPICmd = &cobra.Command{
-	Use:   "exportAPI (--name <name-of-the-api> --version <version-of-the-api> --environment <environment-to-which-the-api-should-be-exported>)",
+	Use:   "exportAPI (--name <name-of-the-api> --version <version-of-the-api> --environment <environment-from-which-the-api-should-be-exported>)",
 	Short: utils.ExportAPICmdLongDesc,
 	Long:  utils.ExportAPICmdLongDesc,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -37,8 +37,10 @@ var ExportAPICmd = &cobra.Command{
 		fmt.Println("Version:", exportAPIVersion)
 		fmt.Println("Environment:", exportEnvironment)
 
-
-
+		clientID, clientSecret := utils.GetClientIDSecret("admin", "admin")
+		m := utils.GetOAuthTokens("admin", "admin", utils.GetBase64EncodedCredentials(clientID, clientSecret))
+		fmt.Println("AccessToken:", m["access_token"])
+		fmt.Println("RefreshToken:", m["refresh_token"])
 	},
 }
 

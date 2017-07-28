@@ -10,6 +10,7 @@ const HeaderValueAuthBearerPrefix string = "Bearer"
 const HeaderValueAuthBasicPrefix string = "Basic"
 const APICallTimeout = 5
 const WSO2APIMUpdateTokenTimeout = 2
+const DefaultTokenValidityPeriod string = "3600"
 
 const (
 	BYTE     = 1.0

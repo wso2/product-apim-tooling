@@ -5,7 +5,7 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
-	"strconv"
+	"fmt"
 )
 
 // GetClientIDSecret implemented using go-resty
@@ -16,20 +16,17 @@ func GetClientIDSecret(username string, password string) (string, string) {
 	body := `{"clientName": "Test", "redirect_uris": "www.google.lk", "grant_types":"password"}`
 	headers := make(map[string]string)
 	headers[HeaderContentType] = HeaderValueApplicationJSON
-	headers[HeaderAuthorization] = HeaderValueAuthBasicPrefix + GetBase64EncodedCredentials(username, password)
+	headers[HeaderAuthorization] = HeaderValueAuthBasicPrefix + " " + GetBase64EncodedCredentials(username, password)
 
 	resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTPS certificates
 
 	// POST request using resty
-	resp, err := resty.R().
-		SetHeaders(headers).
-		SetBody(body).
-		Post(url)
+	resp, err := InvokePOSTRequest(url, headers, body)
 
 	if err != nil {
+		fmt.Println("Error in connecting:")
 		panic(err)
 	}
-	// fmt.Printf("\nResponse Body: %v\n", resp)
 
 	m := make(map[string]string)	// a map to hold response data
 	data := []byte(resp.Body())
@@ -39,6 +36,13 @@ func GetClientIDSecret(username string, password string) (string, string) {
 	clientSecret := m["client_secret"]
 
 	return clientID, clientSecret
+}
+
+
+func InvokePOSTRequest(url string, headers map[string]string, body string) (*resty.Response, error){
+	resp, err := resty.R().SetHeaders(headers).SetBody(body).Post(url)
+
+	return resp, err
 }
 
 // Encode the concatenation of two strings (using ":")
@@ -53,12 +57,9 @@ func GetBase64EncodedCredentials(key string, secret string) string {
 // GetOAuthTokens implemented using go-resty/resty
 // provide username, password, and validity period for the access token
 // returns the response as a map
-func GetOAuthTokens(username string, password string, b64EncodedClientIDClientSecret string,validityPeriod string) map[string]string {
-	_, err := strconv.Atoi(validityPeriod)
-	if err != nil {
-		PrintErrorMessageAndExit("Validity Period should be an Integer", err)
-	}
+func GetOAuthTokens(username string, password string, b64EncodedClientIDClientSecret string) map[string]string {
 	url := "https://localhost:9443/oauth2/token"
+	validityPeriod := DefaultTokenValidityPeriod
 	body := "grant_type=password&username=" + username + "&password="+ password +"&validity_period=" + validityPeriod
 
 	// set headers
@@ -68,13 +69,10 @@ func GetOAuthTokens(username string, password string, b64EncodedClientIDClientSe
 	headers[HeaderAccept] = HeaderValueApplicationJSON
 
 	resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTP certificates
-	resp, err := resty.R().
-		SetHeaders(headers).
-		SetBody(body).
-		Post(url)
+	resp, err := InvokePOSTRequest(url, headers, body)
 
 	if err != nil {
-		HandleErrorAndExit("Unable to Connect", err)
+		HandleErrorAndExit("Unable to Connect", nil)
 	}
 
 	m := make(map[string]string)	// a map to hold response data
