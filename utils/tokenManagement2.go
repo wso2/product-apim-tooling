@@ -37,7 +37,7 @@ type APIErrResp struct {
 // Get an access token from WSO2 Update with the given username and the password using the
 // 'password' grant type of Oauth2.
 // This method returns an error only if the username or password is incorrect.
-func GetAccessToken(username string, password []byte, updateRepo EnvKeysConfig, scope string) (TokenResponse, error) {
+func GetAccessToken(username string, password []byte, envInfo EnvInfo, envKeys EnvKeys, scope string) (TokenResponse, error) {
 	payload := url.Values{}
 	payload.Add("grant_type", "password")
 	payload.Add("username", username)
@@ -48,7 +48,7 @@ func GetAccessToken(username string, password []byte, updateRepo EnvKeysConfig, 
 	}
 	// Get an access token and a refresh token
 	fmt.Fprintln(os.Stderr, "Authenticating...")
-	return InvokeTokenAPI(payload, updateRepo)
+	return InvokeTokenAPI(payload, envInfo, envKeys)
 }
 
 func ProcessResponseFromServer(resp *http.Response, v interface{}) {
@@ -83,15 +83,16 @@ func ProcessServerResponse(resp *http.Response, v interface{}) error {
 
 // Invokes the configured token API of the API gateway. This method can be used to get access tokens
 // as well as renew access tokens using the refresh token.
-func InvokeTokenAPI(payload url.Values, updateRepo EnvKeysConfig) (TokenResponse, error) {
-	Logln("Invoking WSO2 Update Token API")
-	req, err := http.NewRequest("POST", updateRepo.TokenURL, bytes.NewBufferString(payload.Encode()))
+func InvokeTokenAPI(payload url.Values, envInfo EnvInfo, envKeys EnvKeys) (TokenResponse, error) {
+	Logln("Invoking WSO2 Token API")
+	req, err := http.NewRequest("POST", envInfo.TokenEndpoint, bytes.NewBufferString(payload.Encode()))
 	if err != nil {
 		HandleUnableToConnectErrorAndExit(err)
 	}
 
-	req.Header.Add(HeaderAuthorization, "Basic "+updateRepo.AppKey)
-	req.Header.Add(HeaderContentType, "application/x-www-form-urlencoded")
+	appKey := GetBase64EncodedCredentials(envKeys.ClientID, envKeys.ClientSecret)
+	req.Header.Add(HeaderAuthorization, "Basic " + appKey)
+	req.Header.Add(HeaderContentType, HeaderValueXWWWFormUrlEncoded)
 	resp := SendRequest(req, time.Duration(WSO2APIMUpdateTokenTimeout*time.Minute))
 
 	Logf("Response status code is %d.\n", resp.StatusCode)

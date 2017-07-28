@@ -23,14 +23,15 @@ type EnvConfig struct {
 // To be used in env_keys_config.yaml
 type EnvKeys struct {
 	ClientID     string `yaml:"client_id"`
-	ClientSecret string `yaml:"client_secret"`
-	RefreshToken string `yaml:"refresh_token"`
+	ClientSecret string `yaml:"client_secret"`	// to be encrypted (with the user's password) and stored
 }
 
 
 // To be used in EnvConfig
 type EnvInfo struct {
-	Endpoint     string `yaml:"endpoint"`
+	APIManagerEndpoint     string `yaml:"api_manager_endpoint"`
+	RegistrationEndpoint string `yaml:"registration_endpoint"`
+	TokenEndpoint string `yaml:"token_endpoint"`
 }
 // ---------------- End of Structs for YAML config files ---------------------------------
 
@@ -101,9 +102,13 @@ env_config.yaml (Manually edited)
 ===============
 environments:
 	dev:
-		endpoint: https://example.com/dev
+		apim_endpoint: xxxxxxxxx
+		registration_endpoint: xxxxxxxxxx
+		token_endpoint: xxxxxxxxx
 
 	staging:
-		endpoint: https://example.com/staging
+		apim_endpoint: xxxxxxxxx
+		registration_endpoint: xxxxxxxxxx
+		token_endpoint: xxxxxxxxx
 */
 
