@@ -41,8 +41,24 @@ func ExportAPI(name string, version string, url string, accessToken string) *res
 	return resp
 }
 
-func ImportAPI(name string, version string, environemnt string){
+func ImportAPI(name string, version string, url string, accessToken string) *resty.Response {
+	query := "name:" + name
+	url = url + query
+	fmt.Println("ImportAPI: URL:", url)
+	headers := make(map[string]string)
+	headers[HeaderAuthorization] = HeaderValueAuthBearerPrefix + " " + accessToken
+	headers[HeaderAccept] = HeaderValueApplicationZip
 
+	resp, err := resty.R().
+		SetHeaders(headers).
+		Get(url)
+
+	if err != nil {
+		fmt.Println("Error importing API:", name)
+		panic(err)
+	}
+
+	return resp
 }
 
 func PrintErrorMessageAndExit(errorMsg string, err error){
