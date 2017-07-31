@@ -18,6 +18,7 @@ type EnvEndpointsAll struct {
 type EnvKeys struct {
 	ClientID     string `yaml:"client_id"`
 	ClientSecret string `yaml:"client_secret"` // to be encrypted (with the user's password) and stored
+	Username string		`yaml:"username"`
 }
 
 type EnvEndpoints struct {
@@ -47,6 +48,7 @@ Validates the configuration, if it exists
 func LoadEnvConfig(envLocalConfig string) /* EnvEndpointsAll */ {
 }
 
+/*
 // Returns a pointer to EnvEndpointsAll
 func GetEnvEndpointsAll() *EnvEndpointsAll {
 	if &envEndpointsAll == nil {
@@ -62,6 +64,7 @@ func GetEnvKeysAll() *EnvKeysAll {
 	}
 	return &envKeysAll
 }
+*/
 
 
 /*
@@ -71,12 +74,12 @@ environments:
 	dev:
 		client_id: xxxxxxxxxx
 		client_secret: xxxxxxxxxx
-		refresh_token: xxxxxxxxxx
+		username: xxxxxx
 
 	staging:
 		client_id: xxxxxxxxxx
 		client_secret: xxxxxxxxxx
-		refresh_token: xxxxxxxxxx
+		username: xxxxxx
  */
 
 /*

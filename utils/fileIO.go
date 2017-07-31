@@ -20,14 +20,29 @@ func WriteConfigFile(c interface{}, envConfigFilePath string) {
 }
 
 func WriteEnvKeysToFile() {
-	// Generate client_id, client_secret pairs based on registration endpoints in env_endpoints_all.yaml
+	fmt.Println("WriteEnvKeysToFlie() called")
+	var envKeysAll EnvKeysAll
+	envKeysAll.Environments = make(map[string]EnvKeys)
+
+	username := "admin"
+	password := "admin"
+
+	// Generate (client_id, client_secret) pairs based on registration endpoints in env_endpoints_all.yaml
+	envEndpointsAll := GetEnvEndpointsFromFile()
+	for env, endpoints := range envEndpointsAll.Environments {
+		clientID, clientSecret := GetClientIDSecret(username, password, endpoints.RegistrationEndpoint)
+		envKeysAll.Environments[env] = EnvKeys{clientID, clientSecret, username}
+	}
+
+	WriteConfigFile(envKeysAll, "env_keys_all.yaml")
+
 }
 
 // Read and return EnvKeysAll
 func GetEnvKeysFromFile() *EnvKeysAll{
 	data, err := ioutil.ReadFile("./env_keys_all.yaml")
 	if err != nil {
-		fmt.Println("Error in reading env_keys_all.yaml")
+		fmt.Println("Error reading env_keys_all.yaml")
 		panic(err)
 	}
 
@@ -40,6 +55,24 @@ func GetEnvKeysFromFile() *EnvKeysAll{
 
 	return &envKeysAll
 }
+
+// Read and return EnvEndpointsAll
+func GetEnvEndpointsFromFile() *EnvEndpointsAll {
+	data, err := ioutil.ReadFile("./env_endpoints_all.yaml")
+	if err != nil {
+		fmt.Println("Error reading env_endpoints_all.yaml")
+		panic(err)
+	}
+
+	var envEndpointsAll EnvEndpointsAll
+	if err := envEndpointsAll.ReadEnvEndpointsFromFile(data); err != nil {
+		fmt.Println("Error parsing env_endpoints_all.yaml")
+		panic(err)
+	}
+
+	return &envEndpointsAll
+}
+
 
 // Read and validate contents of env_endpoints_all.yaml
 // will throw errors if the any of the lines is blank

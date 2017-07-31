@@ -35,10 +35,6 @@ var ImportAPICmd = &cobra.Command{
 		fmt.Println("Name:", importAPIName)
 		fmt.Println("Version:", importAPIVersion)
 		fmt.Println("Environment:", importEnvironment)
-
-		clientID, clientSecret := utils.GetClientIDSecret("admin", "admin")
-		fmt.Println("ClientID:", clientID)
-		fmt.Println("ClientSecret:", clientSecret)
 	},
 }
 

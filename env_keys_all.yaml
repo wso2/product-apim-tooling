@@ -1,0 +1,13 @@
+environments:
+  dev:
+    client_id: hz1mX1AZrupWVgLhgn0XVledsw0a
+    client_secret: HUV54Uc_mciSHFSGPmPlTZGvTTIa
+    username: admin
+  qa:
+    client_id: 82_riv3HS0wzrVE1vCZIc6DcJJca
+    client_secret: yfaSFNcREm1bZBCRuRLYhmu7rrAa
+    username: admin
+  staging:
+    client_id: H7c5SBxS2ZA3RqXyYgHLGhfUFmoa
+    client_secret: 3PAaxiEk8wdX29FdYsgz1hVapwsa
+    username: admin

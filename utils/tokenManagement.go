@@ -11,8 +11,7 @@ import (
 // GetClientIDSecret implemented using go-resty
 // provide username, password
 // returns client_id, client_secret
-func GetClientIDSecret(username string, password string) (string, string) {
-	url := "https://localhost:9443/identity/connect/register"
+func GetClientIDSecret(username string, password string, url string) (string, string) {
 	body := `{"clientName": "Test", "redirect_uris": "www.google.lk", "grant_types":"password"}`
 	headers := make(map[string]string)
 	headers[HeaderContentType] = HeaderValueApplicationJSON
@@ -37,8 +36,6 @@ func GetClientIDSecret(username string, password string) (string, string) {
 
 	return clientID, clientSecret
 }
-
-
 
 
 // Encode the concatenation of two strings (using ":")

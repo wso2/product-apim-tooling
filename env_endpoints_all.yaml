@@ -1,13 +1,13 @@
 environments:
   dev:
     api_manager_endpoint: dev_apim_endpoint
-    registration_endpoint: dev_reg_endpoint
-    token_endpoint: dev_token_endpoint
+    registration_endpoint: "https://localhost:9443/identity/connect/register"
+    token_endpoint: "https://localhost:9443/oauth2/token"
   staging:
     api_manager_endpoint: staging_apim_endpoing
-    registration_endpoint: staging_reg_endpoint
-    token_endpoint: staging_token_endpoint
+    registration_endpoint: "https://localhost:9443/identity/connect/register"
+    token_endpoint: "https://localhost:9443/oauth2/token"
   qa:
     api_manager_endpoint: qa_apim_endpoing
-    registration_endpoint: qa_reg_endpoint
-    token_endpoint: qa_token_endpoint
+    registration_endpoint: "https://localhost:9443/identity/connect/register"
+    token_endpoint: "https://localhost:9443/oauth2/token"
