@@ -27,7 +27,7 @@ func ExportAPI(name string, version string, url string, accessToken string) *res
 	fmt.Println("ExportAPI: URL:", url)
 	headers := make(map[string]string)
 	headers[HeaderAuthorization] = HeaderValueAuthBearerPrefix + " " + accessToken
-	headers[HeaderProduces] = HeaderValueApplicationZip
+	headers[HeaderAccept] = HeaderValueApplicationZip
 
 	resp, err := resty.R().
 					SetHeaders(headers).

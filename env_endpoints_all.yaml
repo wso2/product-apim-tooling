@@ -1,0 +1,13 @@
+environments:
+  dev:
+    api_manager_endpoint: dev_apim_endpoint
+    registration_endpoint: dev_reg_endpoint
+    token_endpoint: dev_token_endpoint
+  staging:
+    api_manager_endpoint: staging_apim_endpoing
+    registration_endpoint: staging_reg_endpoint
+    token_endpoint: staging_token_endpoint
+  qa:
+    api_manager_endpoint: qa_apim_endpoing
+    registration_endpoint: qa_reg_endpoint
+    token_endpoint: qa_token_endpoint
