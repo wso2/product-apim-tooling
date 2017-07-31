@@ -39,8 +39,11 @@ var ExportAPICmd = &cobra.Command{
 
 		clientID, clientSecret := utils.GetClientIDSecret("admin", "admin")
 		m := utils.GetOAuthTokens("admin", "admin", utils.GetBase64EncodedCredentials(clientID, clientSecret))
+
+		url := "https://localhost:9292/api/am/publisher/v1.0/export/apis?query="
 		fmt.Println("AccessToken:", m["access_token"])
-		fmt.Println("RefreshToken:", m["refresh_token"])
+		response := utils.ExportAPI(exportAPIName, exportAPIVersion, url, m["access_token"])
+		fmt.Printf("%v\n", response)
 	},
 }
 

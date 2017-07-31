@@ -39,11 +39,7 @@ func GetClientIDSecret(username string, password string) (string, string) {
 }
 
 
-func InvokePOSTRequest(url string, headers map[string]string, body string) (*resty.Response, error){
-	resp, err := resty.R().SetHeaders(headers).SetBody(body).Post(url)
 
-	return resp, err
-}
 
 // Encode the concatenation of two strings (using ":")
 // provide two strings

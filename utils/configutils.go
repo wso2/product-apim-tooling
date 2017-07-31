@@ -4,7 +4,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"errors"
-	"debug/dwarf"
 )
 
 // ------------------- Structs for YAML Config Files ----------------------------------
@@ -74,8 +73,8 @@ func (envKeysAll *EnvKeysAll) ReadFromFile(data []byte) error {
 		if keys.ClientSecret == "" {
 			return errors.New("Invalid ClientSecret for " + name)
 		}
-		return nil
 	}
+	return nil
 }
 
 /**

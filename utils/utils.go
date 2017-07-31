@@ -6,12 +6,43 @@ import (
 	"net/http"
 	"time"
 	"log"
+	"github.com/go-resty/resty"
 )
 
 func PrintUsageErrorAndExit(msg, commandName string) {
 	fmt.Fprintf(os.Stderr, "wso2apim: %v\n", msg)
 	fmt.Fprintf(os.Stderr, "Try wso2apim %v --help for more information.\n", commandName)
 	os.Exit(1)
+}
+
+func InvokePOSTRequest(url string, headers map[string]string, body string) (*resty.Response, error){
+	resp, err := resty.R().SetHeaders(headers).SetBody(body).Post(url)
+
+	return resp, err
+}
+
+func ExportAPI(name string, version string, url string, accessToken string) *resty.Response{
+	query := "name:" + name
+	url = url + query
+	fmt.Println("ExportAPI: URL:", url)
+	headers := make(map[string]string)
+	headers[HeaderAuthorization] = HeaderValueAuthBearerPrefix + " " + accessToken
+	headers[HeaderProduces] = HeaderValueApplicationZip
+
+	resp, err := resty.R().
+					SetHeaders(headers).
+					Get(url)
+
+	if err != nil {
+		fmt.Println("Error exporting API:", name)
+		panic(err)
+	}
+
+	return resp
+}
+
+func ImportAPI(name string, version string, environemnt string){
+
 }
 
 func PrintErrorMessageAndExit(errorMsg string, err error){
@@ -70,6 +101,7 @@ func WriteFile(filename string, data []byte, perm os.FileMode) error {
 	if err1 := f.Close(); err == nil {
 		err = err1
 	}
+	fmt.Printf("n: %v\n", n)
 	return err
 }
 
