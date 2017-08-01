@@ -65,7 +65,14 @@ func init() {
 	// when this action is called directly.
 	RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
-	utils.WriteEnvKeysToFile()
+	envs := []string{"dev", "staging", "qa", "production", "deployment"}
+
+	for _, env := range envs {
+		fmt.Printf("Env %s exists in endpoints file: %t\n", env, utils.EnvExistsInEnvEndpointsFile(env))
+		fmt.Printf("Env %s exists in keys file: %t\n", env, utils.EnvExistsInEnvKeysFile(env))
+		fmt.Println()
+	}
+	fmt.Println()
 }
 
 // initConfig reads in config file and ENV variables if set.
