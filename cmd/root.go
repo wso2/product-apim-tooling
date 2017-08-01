@@ -65,14 +65,8 @@ func init() {
 	// when this action is called directly.
 	RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
-	envs := []string{"dev", "staging", "qa", "production", "deployment"}
-
-	for _, env := range envs {
-		fmt.Printf("Env %s exists in endpoints file: %t\n", env, utils.EnvExistsInEnvEndpointsFile(env))
-		fmt.Printf("Env %s exists in keys file: %t\n", env, utils.EnvExistsInEnvKeysFile(env))
-		fmt.Println()
-	}
-	fmt.Println()
+	//clientID, clientSecret := utils.GetClientIDSecret("admin", "admin","https://")
+	//utils.GetOAuthTokens("admin","admin","https://localhost")
 }
 
 // initConfig reads in config file and ENV variables if set.

@@ -40,6 +40,7 @@ func WriteEnvKeysToFile() {
 
 }
 
+// Get keys of environment 'env' from the file env_keys_all.yaml
 func GetKeysOfEnvironment(env string, password string) *EnvKeys {
 	envKeysAll := GetEnvKeysFromFile()
 	for _env, keys := range envKeysAll.Environments {
@@ -54,7 +55,7 @@ func GetKeysOfEnvironment(env string, password string) *EnvKeys {
 
 // Return true if 'env' exists in the env_keys_all.yaml
 // and false otherwise
-func EnvExistsInEnvKeysFile(env string) bool {
+func EnvExistsInKeysFile(env string) bool {
 	envKeysAll := GetEnvKeysFromFile()
 	for _env, _ := range envKeysAll.Environments {
 		if _env == env {
@@ -66,7 +67,7 @@ func EnvExistsInEnvKeysFile(env string) bool {
 
 // Returns true if 'env' exists in env_endpoints_all.yaml
 // and false otherwise
-func EnvExistsInEnvEndpointsFile(env string) bool {
+func EnvExistsInEndpointsFile(env string) bool {
 	envEndpointsAll := GetEnvEndpointsFromFile()
 	for _env, _ := range envEndpointsAll.Environments {
 		if _env == env {
