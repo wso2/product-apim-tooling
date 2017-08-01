@@ -1,13 +1,13 @@
 environments:
   dev:
-    client_id: hz1mX1AZrupWVgLhgn0XVledsw0a
-    client_secret: HUV54Uc_mciSHFSGPmPlTZGvTTIa
+    client_id: Pxn76oD0WGa8fmiR2_qqhO0f0mka
+    client_secret: S1jCFIg5z38aAnJ5SLo1cGME3j8CIaK7g_2nviPftx5vl4AnIbRmGoRqfQ8=
     username: admin
   qa:
-    client_id: 82_riv3HS0wzrVE1vCZIc6DcJJca
-    client_secret: yfaSFNcREm1bZBCRuRLYhmu7rrAa
+    client_id: CGfChqzj7YoFwlnJ7pOniqLUs8Ia
+    client_secret: TprwFijwuvc2qb-EDn1Cov1D31I2GpEzAXsrx2xEvG0WcQn7W1Ai2-HLPlk=
     username: admin
   staging:
-    client_id: H7c5SBxS2ZA3RqXyYgHLGhfUFmoa
-    client_secret: 3PAaxiEk8wdX29FdYsgz1hVapwsa
+    client_id: jPnfQ6uRtOSguXZQbRcUxOTzfoca
+    client_secret: -r7rnZuFDi0DUVy5K1kEcRjlkdTxb_Ls0oC8c2t3T2yDZa7rLpYgsymw8mk=
     username: admin

@@ -26,12 +26,14 @@ func WriteEnvKeysToFile() {
 
 	username := "admin"
 	password := "admin"
+	hashedPassword := GetMD5Hash(password)
 
 	// Generate (client_id, client_secret) pairs based on registration endpoints in env_endpoints_all.yaml
 	envEndpointsAll := GetEnvEndpointsFromFile()
 	for env, endpoints := range envEndpointsAll.Environments {
 		clientID, clientSecret := GetClientIDSecret(username, password, endpoints.RegistrationEndpoint)
-		envKeysAll.Environments[env] = EnvKeys{clientID, clientSecret, username}
+		clientSecretEncrypted := Encrypt([]byte(hashedPassword), clientSecret)
+		envKeysAll.Environments[env] = EnvKeys{clientID,clientSecretEncrypted , username}
 	}
 
 	WriteConfigFile(envKeysAll, "env_keys_all.yaml")
