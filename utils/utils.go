@@ -6,12 +6,33 @@ import (
 	"time"
 	"log"
 	"github.com/go-resty/resty"
+	"bufio"
+	"os"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 func InvokePOSTRequest(url string, headers map[string]string, body string) (*resty.Response, error){
 	resp, err := resty.R().SetHeaders(headers).SetBody(body).Post(url)
 
 	return resp, err
+}
+
+func PromptUsername() string {
+	reader := bufio.NewReader(os.Stdin)
+
+	fmt.Print("Enter Username: ")
+	username, _ := reader.ReadString('\n')
+
+	return username
+}
+
+func PromptPassword() string{
+	fmt.Print("Enter Password: ")
+	bytePassword, _ := terminal.ReadPassword(0)
+	password := string(bytePassword)
+
+	defer fmt.Println()
+	return password
 }
 
 

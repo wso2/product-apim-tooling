@@ -40,7 +40,7 @@ func GetKeysOfEnvironment(env string, password string) *EnvKeys {
 }
 
 // Return EnvEndpoints for a given environment
-func GetEndpointsOfEnvironment(env string) *EnvEndpoints{
+func GetEndpointsOfEnvironment(env string) *EnvEndpoints {
 	envEndpointsAll := GetEnvEndpointsFromFile()
 	for _env, endpoints := range envEndpointsAll.Environments {
 		if _env == env {
@@ -48,20 +48,20 @@ func GetEndpointsOfEnvironment(env string) *EnvEndpoints{
 		}
 	}
 
-	return &EnvEndpoints{"","",""}
+	return &EnvEndpoints{"", "", ""}
 }
 
-func GetAPIMEndpointOfEnv(env string) string{
+func GetAPIMEndpointOfEnv(env string) string {
 	envEndpoints := GetEndpointsOfEnvironment(env)
 	return envEndpoints.APIManagerEndpoint
 }
 
-func GetTokenEndpointOfEnv(env string) string{
+func GetTokenEndpointOfEnv(env string) string {
 	envEndpoints := GetEndpointsOfEnvironment(env)
 	return envEndpoints.TokenEndpoint
 }
 
-func GetRegistrationEndpointOfEnv(env string) string{
+func GetRegistrationEndpointOfEnv(env string) string {
 	envEndpoints := GetEndpointsOfEnvironment(env)
 	return envEndpoints.RegistrationEndpoint
 }
