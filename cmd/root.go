@@ -65,8 +65,25 @@ func init() {
 	// when this action is called directly.
 	RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
-	//clientID, clientSecret := utils.GetClientIDSecret("admin", "admin","https://")
-	//utils.GetOAuthTokens("admin","admin","https://localhost")
+	// Temporary code
+
+	//clientID, clientSecret := utils.GetClientIDSecret("admin", "admin","https://localhost:9443/identity/connect/register")
+	//b64EncodedIDSecret := utils.GetBase64EncodedCredentials(clientID, clientSecret)
+	//m := utils.GetOAuthTokens("admin","admin", b64EncodedIDSecret)
+	//fmt.Println("AccessToken:", m["access_token"])
+
+	env := "staging"
+	envEndpoints := utils.GetEndpointsOfEnvironment(env)
+
+	fmt.Println("APIM Endpoint:", envEndpoints.APIManagerEndpoint)
+	fmt.Println("Reg. Endpoint:", envEndpoints.RegistrationEndpoint)
+	fmt.Println("Token Endpoint:", envEndpoints.TokenEndpoint)
+
+	fmt.Printf("APIM Endpoint of %s: %s\n", env, utils.GetAPIMEndpointOfEnv(env))
+	fmt.Printf("Reg. Endpoint of %s: %s\n", env, utils.GetRegistrationEndpointOfEnv(env))
+	fmt.Printf("Token Endpoint of %s: %s\n", env, utils.GetTokenEndpointOfEnv(env))
+
+	fmt.Println()
 }
 
 // initConfig reads in config file and ENV variables if set.

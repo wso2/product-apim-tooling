@@ -14,6 +14,7 @@ func InvokePOSTRequest(url string, headers map[string]string, body string) (*res
 	return resp, err
 }
 
+
 func ExportAPI(name string, version string, url string, accessToken string) *resty.Response{
 	query := "name:" + name
 	url = url + query
@@ -54,8 +55,6 @@ func ImportAPI(name string, version string, url string, accessToken string) *res
 
 	return resp
 }
-
-
 
 func Authenticate() {
 
