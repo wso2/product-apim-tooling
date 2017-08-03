@@ -60,10 +60,17 @@ func ImportAPI(name string, version string, url string, accessToken string) *res
 	query := "name:" + name
 	url = url + query
 	fmt.Println("ImportAPI: URL:", url)
+
 	headers := make(map[string]string)
+
 	headers[HeaderAuthorization] = HeaderValueAuthBearerPrefix + " " + accessToken
+	// headers["Authorization"] = "Bearer " + accessToken
+
 	headers[HeaderAccept] = HeaderValueApplicationZip
+	// headers["Accept"] = "application/zip"
+
 	headers[HeaderConsumes]= HeaderValueMultiPartFormData
+	// headers["Consumes"] = "multipart/form-data"
 
 	resp, err := resty.R().
 		SetHeaders(headers).

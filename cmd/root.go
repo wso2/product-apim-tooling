@@ -51,7 +51,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	cobra.EnableCommandSorting = false
-	RootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "enable verbose mode")
+	RootCmd.PersistentFlags().BoolVar(&Verbose, "verbose", false, "enable verbose mode")
 	RootCmd.PersistentFlags().StringP("author", "a", "Menuka Warushavithana", "Author of the project")
 
 	viper.BindPFlag("author", RootCmd.PersistentFlags().Lookup("author"))
@@ -67,11 +67,11 @@ func init() {
 
 	// Temporary code
 
-	username := utils.PromptUsername()
-	password := utils.PromptPassword()
-
-	fmt.Println("username:", username)
-	fmt.Println("password:", password)
+	//username := utils.PromptUsername()
+	//password := utils.PromptPassword()
+	//
+	//fmt.Println("username:", username)
+	//fmt.Println("password:", password)
 
 	//clientID, clientSecret := utils.GetClientIDSecret("admin", "admin","https://localhost:9443/identity/connect/register")
 	//b64EncodedIDSecret := utils.GetBase64EncodedCredentials(clientID, clientSecret)

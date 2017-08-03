@@ -36,22 +36,13 @@ var ExportAPICmd = &cobra.Command{
 		fmt.Println("Name:", exportAPIName)
 		fmt.Println("Version:", exportAPIVersion)
 		fmt.Println("Environment:", exportEnvironment)
-
-		//clientID, clientSecret := utils.GetClientIDSecret("admin", "admin")
-		//m := utils.GetOAuthTokens("admin", "admin", utils.GetBase64EncodedCredentials(clientID, clientSecret))
-		//
-		//url := "https://localhost:9292/api/am/publisher/v1.0/export/apis?query="
-		//fmt.Println("AccessToken:", m["access_token"])
-		//response := utils.ExportAPI(exportAPIName, exportAPIVersion, url, m["access_token"])
-		//fmt.Printf("%v\n", response)
-
 	},
 }
 
 func init() {
 	RootCmd.AddCommand(ExportAPICmd)
 	ExportAPICmd.Flags().StringVarP(&exportAPIName, "name", "n", "", "Name of the API to be exported")
-	ExportAPICmd.Flags().StringVarP(&exportAPIVersion, "version", "s", "", "Version of the API to be exported")
+	ExportAPICmd.Flags().StringVarP(&exportAPIVersion, "version", "v", "", "Version of the API to be exported")
 	ExportAPICmd.Flags().StringVarP(&exportEnvironment, "environment", "e", "", "Environment to which the API should be exported")
 
 	// Here you will define your flags and configuration settings.

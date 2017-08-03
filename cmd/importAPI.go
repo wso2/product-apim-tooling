@@ -15,6 +15,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/menuka94/wso2apim-cli/utils"
+	"log"
 )
 
 var importAPIName string
@@ -32,16 +33,26 @@ var ImportAPICmd = &cobra.Command{
 			fmt.Println(key, ":", arg)
 		}
 
-		fmt.Println("Name:", importAPIName)
-		fmt.Println("Version:", importAPIVersion)
-		fmt.Println("Environment:", importEnvironment)
+		if utils.EnvExistsInEndpointsFile(importEnvironment) {
+			username := utils.GetUsernameOfEnv(importEnvironment)
+			fmt.Println("Username:", username)
+			password := utils.PromptPassword()
+			clientID := utils.GetClientIDOfEnv(importEnvironment)
+			clientSecret := utils.GetClientSecretOfEnv(importEnvironment, password)
+
+			fmt.Println("ClientID:", clientID)
+			fmt.Println("ClientSecret:", clientSecret)
+		}else{
+			// env_endpoints_all.yaml file is not configured properly by the user
+			log.Fatal("Error: env_endpoints_all.yaml does not contain necessary information for environment " + importEnvironment)
+		}
 	},
 }
 
 func init() {
 	RootCmd.AddCommand(ImportAPICmd)
 	ImportAPICmd.Flags().StringVarP(&importAPIName, "name", "n", "", "Name of the API to be imported")
-	ImportAPICmd.Flags().StringVarP(&importAPIVersion, "version", "s", "", "Version of the API to be imported")
+	ImportAPICmd.Flags().StringVarP(&importAPIVersion, "version", "v", "", "Version of the API to be imported")
 	ImportAPICmd.Flags().StringVarP(&importEnvironment, "environment", "e", "", "Environment from the which the API should be imported")
 
 	// Here you will define your flags and configuration settings.
