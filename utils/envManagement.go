@@ -3,7 +3,7 @@ package utils
 // Return true if 'env' exists in the env_keys_all.yaml
 // and false otherwise
 func EnvExistsInKeysFile(env string) bool {
-	envKeysAll := GetEnvKeysFromFile()
+	envKeysAll := GetEnvKeysAllFromFile()
 	for _env, _ := range envKeysAll.Environments {
 		if _env == env {
 			return true
@@ -15,7 +15,7 @@ func EnvExistsInKeysFile(env string) bool {
 // Returns true if 'env' exists in env_endpoints_all.yaml
 // and false otherwise
 func EnvExistsInEndpointsFile(env string) bool {
-	envEndpointsAll := GetEnvEndpointsFromFile()
+	envEndpointsAll := GetEnvEndpointsAllFromFile()
 	for _env, _ := range envEndpointsAll.Environments {
 		if _env == env {
 			return true
@@ -25,10 +25,18 @@ func EnvExistsInEndpointsFile(env string) bool {
 	return false
 }
 
+// Insert new env entry to env_keys_all.yaml
+func AddNewEnvToKeysFile(name string, envKeys EnvKeys) {
+	envKeysAll := GetEnvKeysAllFromFile()
+	envKeysAll.Environments[name] = envKeys
+
+	WriteConfigFile(envKeysAll, "./env_keys_all.yaml")
+}
+
 // Get keys of environment 'env' from the file env_keys_all.yaml
 // client_secret is not decrypted
 func GetKeysOfEnvironment(env string) *EnvKeys {
-	envKeysAll := GetEnvKeysFromFile()
+	envKeysAll := GetEnvKeysAllFromFile()
 	for _env, keys := range envKeysAll.Environments {
 		if _env == env {
 			return &keys
@@ -42,7 +50,7 @@ func GetKeysOfEnvironment(env string) *EnvKeys {
 
 // Return EnvEndpoints for a given environment
 func GetEndpointsOfEnvironment(env string) *EnvEndpoints {
-	envEndpointsAll := GetEnvEndpointsFromFile()
+	envEndpointsAll := GetEnvEndpointsAllFromFile()
 	for _env, endpoints := range envEndpointsAll.Environments {
 		if _env == env {
 			return &endpoints

@@ -67,8 +67,8 @@ func init() {
 
 	// Temporary code
 
-	//username := utils.PromptUsername()
-	//password := utils.PromptPassword()
+	//username := utils.PromptForUsername()
+	//password := utils.PromptForPassword()
 	//
 	//fmt.Println("username:", username)
 	//fmt.Println("password:", password)

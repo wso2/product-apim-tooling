@@ -14,8 +14,12 @@ import (
 func GetClientIDSecret(username string, password string, url string) (string, string) {
 	body := `{"clientName": "Test", "redirect_uris": "www.google.lk", "grant_types":"password"}`
 	headers := make(map[string]string)
+
 	headers[HeaderContentType] = HeaderValueApplicationJSON
+	// headers["Content-Type"] = "application/json"
+
 	headers[HeaderAuthorization] = HeaderValueAuthBasicPrefix + " " + GetBase64EncodedCredentials(username, password)
+	// headers["Authorization"] = "Basic " + GetBase64EncodedCredentials(username, password)
 
 	resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTPS certificates
 
@@ -50,8 +54,7 @@ func GetBase64EncodedCredentials(key string, secret string) string {
 // GetOAuthTokens implemented using go-resty/resty
 // provide username, password, and validity period for the access token
 // returns the response as a map
-func GetOAuthTokens(username string, password string, b64EncodedClientIDClientSecret string) map[string]string {
-	url := "https://localhost:9443/oauth2/token"
+func GetOAuthTokens(username string, password string, b64EncodedClientIDClientSecret string, url string) map[string]string {
 	validityPeriod := DefaultTokenValidityPeriod
 	body := "grant_type=password&username=" + username + "&password="+ password +"&validity_period=" + validityPeriod
 

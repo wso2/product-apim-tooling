@@ -17,7 +17,7 @@ func InvokePOSTRequest(url string, headers map[string]string, body string) (*res
 	return resp, err
 }
 
-func PromptUsername() string {
+func PromptForUsername() string {
 	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Print("Enter Username: ")
@@ -26,7 +26,7 @@ func PromptUsername() string {
 	return username
 }
 
-func PromptPassword() string{
+func PromptForPassword() string{
 	fmt.Print("Enter Password: ")
 	bytePassword, _ := terminal.ReadPassword(0)
 	password := string(bytePassword)
@@ -58,7 +58,8 @@ func ExportAPI(name string, version string, url string, accessToken string) *res
 
 func ImportAPI(name string, version string, url string, accessToken string) *resty.Response {
 	query := "name:" + name
-	url = url + query
+	file := "@" + query
+	fmt.Println("File:", file)
 	fmt.Println("ImportAPI: URL:", url)
 
 	headers := make(map[string]string)

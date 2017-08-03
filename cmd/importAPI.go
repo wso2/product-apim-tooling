@@ -16,6 +16,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/menuka94/wso2apim-cli/utils"
 	"log"
+	"strings"
 )
 
 var importAPIName string
@@ -34,15 +35,44 @@ var ImportAPICmd = &cobra.Command{
 		}
 
 		if utils.EnvExistsInEndpointsFile(importEnvironment) {
-			username := utils.GetUsernameOfEnv(importEnvironment)
-			fmt.Println("Username:", username)
-			password := utils.PromptPassword()
-			clientID := utils.GetClientIDOfEnv(importEnvironment)
-			clientSecret := utils.GetClientSecretOfEnv(importEnvironment, password)
 
-			fmt.Println("ClientID:", clientID)
-			fmt.Println("ClientSecret:", clientSecret)
-		}else{
+			registrationEndpoint := utils.GetRegistrationEndpointOfEnv(importEnvironment)
+			apiManagerEndpoint := utils.GetAPIMEndpointOfEnv(importEnvironment)
+			tokenEndpoint := utils.GetTokenEndpointOfEnv(importEnvironment)
+
+			if utils.EnvExistsInKeysFile(importEnvironment) {
+				// client_id, client_secret exists in file
+				username := utils.GetUsernameOfEnv(importEnvironment)
+				fmt.Println("Username:", username)
+				password := utils.PromptForPassword()
+				clientID := utils.GetClientIDOfEnv(importEnvironment)
+				clientSecret := utils.GetClientSecretOfEnv(importEnvironment, password)
+
+				fmt.Println("ClientID:", clientID)
+				fmt.Println("ClientSecret:", clientSecret)
+			} else {
+				// env exists in endpoints file, but not in keys file
+				// no client_id, client_secret in file
+				// Get new values
+				username := strings.TrimSpace(utils.PromptForUsername())
+				password := utils.PromptForPassword()
+
+				fmt.Println("\nUsername: " + username + "\n")
+				clientID, clientSecret := utils.GetClientIDSecret(username, password, registrationEndpoint)
+
+				// Persist clientID, clientSecret, Username in file
+				encryptedClientSecret := utils.Encrypt([]byte(utils.GetMD5Hash(password)), clientSecret)
+				envKeys := utils.EnvKeys{clientID, encryptedClientSecret, username}
+				utils.AddNewEnvToKeysFile(importEnvironment, envKeys)
+
+				// Get OAuth Tokens
+				m := utils.GetOAuthTokens(username, password, utils.GetBase64EncodedCredentials(clientID, clientSecret), tokenEndpoint)
+				accessToken := m["access_token"]
+
+				resp := utils.ImportAPI(importAPIName, importAPIVersion, apiManagerEndpoint, accessToken)
+				fmt.Printf("Response: %+v\n", resp)
+			}
+		} else {
 			// env_endpoints_all.yaml file is not configured properly by the user
 			log.Fatal("Error: env_endpoints_all.yaml does not contain necessary information for environment " + importEnvironment)
 		}

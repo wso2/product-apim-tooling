@@ -3,3 +3,7 @@ environments:
     client_id: Pxn76oD0WGa8fmiR2_qqhO0f0mka
     client_secret: S1jCFIg5z38aAnJ5SLo1cGME3j8CIaK7g_2nviPftx5vl4AnIbRmGoRqfQ8=
     username: admin
+  staging:
+    client_id: 7cmGQrZJfykegkZyhdNnPJ3eE2Ua
+    client_secret: s5lR-ge18a5qMvLApgjuSea0mwCMYbTSxsr2HG1RnKNz-J3YRs01fzvJIrA=
+    username: admin

@@ -19,6 +19,7 @@ func WriteConfigFile(c interface{}, envConfigFilePath string) {
 	}
 }
 
+/*
 func WriteEnvKeysToFile() {
 	fmt.Println("WriteEnvKeysToFlie() called")
 	var envKeysAll EnvKeysAll
@@ -29,7 +30,7 @@ func WriteEnvKeysToFile() {
 	hashedPassword := GetMD5Hash(password)
 
 	// Generate (client_id, client_secret) pairs based on registration endpoints in env_endpoints_all.yaml
-	envEndpointsAll := GetEnvEndpointsFromFile()
+	envEndpointsAll := GetEnvEndpointsAllFromFile()
 	for env, endpoints := range envEndpointsAll.Environments {
 		clientID, clientSecret := GetClientIDSecret(username, password, endpoints.RegistrationEndpoint)
 		clientSecretEncrypted := Encrypt([]byte(hashedPassword), clientSecret)
@@ -39,13 +40,13 @@ func WriteEnvKeysToFile() {
 	WriteConfigFile(envKeysAll, "env_keys_all.yaml")
 
 }
-
+*/
 
 
 
 
 // Read and return EnvKeysAll
-func GetEnvKeysFromFile() EnvKeysAll{
+func GetEnvKeysAllFromFile() EnvKeysAll{
 	data, err := ioutil.ReadFile("./env_keys_all.yaml")
 	if err != nil {
 		fmt.Println("Error reading env_keys_all.yaml")
@@ -63,7 +64,7 @@ func GetEnvKeysFromFile() EnvKeysAll{
 }
 
 // Read and return EnvEndpointsAll
-func GetEnvEndpointsFromFile() *EnvEndpointsAll {
+func GetEnvEndpointsAllFromFile() *EnvEndpointsAll {
 	data, err := ioutil.ReadFile("./env_endpoints_all.yaml")
 	if err != nil {
 		fmt.Println("Error reading env_endpoints_all.yaml")
