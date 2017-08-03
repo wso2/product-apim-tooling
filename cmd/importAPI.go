@@ -41,11 +41,16 @@ var ImportAPICmd = &cobra.Command{
 			tokenEndpoint := utils.GetTokenEndpointOfEnv(importEnvironment)
 
 			if utils.EnvExistsInKeysFile(importEnvironment) {
-				// client_id, client_secret exists in file
+				// client_id, client_secret,username exists in file
+				// get username from file
 				username := utils.GetUsernameOfEnv(importEnvironment)
 				fmt.Println("Username:", username)
-				password := utils.PromptForPassword()
+
+				// get client_id from file
 				clientID := utils.GetClientIDOfEnv(importEnvironment)
+
+				// password is needed to decrypt client_secret
+				password := utils.PromptForPassword()
 				clientSecret := utils.GetClientSecretOfEnv(importEnvironment, password)
 
 				fmt.Println("ClientID:", clientID)

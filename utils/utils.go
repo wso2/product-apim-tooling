@@ -37,8 +37,8 @@ func PromptForPassword() string{
 
 
 func ExportAPI(name string, version string, url string, accessToken string) *resty.Response{
-	query := "name:" + name
-	url = url + query
+	query := name
+	url += query
 	fmt.Println("ExportAPI: URL:", url)
 	headers := make(map[string]string)
 	headers[HeaderAuthorization] = HeaderValueAuthBearerPrefix + " " + accessToken
@@ -57,7 +57,7 @@ func ExportAPI(name string, version string, url string, accessToken string) *res
 }
 
 func ImportAPI(name string, version string, url string, accessToken string) *resty.Response {
-	query := "name:" + name
+	query := name
 	file := "@" + query
 	fmt.Println("File:", file)
 	fmt.Println("ImportAPI: URL:", url)
