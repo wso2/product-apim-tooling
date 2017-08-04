@@ -1,13 +1,17 @@
 *.class
 build
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
 # Package Files #
 *.jar
 *.war
 *.ear
+*.zip
+
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
@@ -19,3 +23,7 @@ vendor/
 .idea/
 .settings
 .vscode
+
+
+# Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
+.glide/

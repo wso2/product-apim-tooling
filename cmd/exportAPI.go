@@ -21,6 +21,7 @@ import (
 	"github.com/menuka94/wso2apim-cli/utils"
 	"strings"
 	"log"
+	"io/ioutil"
 )
 
 var exportAPIName string
@@ -69,7 +70,6 @@ var ExportAPICmd = &cobra.Command{
 				encryptedClientSecret := utils.Encrypt([]byte(utils.GetMD5Hash(password)), clientSecret)
 				envKeys := utils.EnvKeys{clientID, encryptedClientSecret, username}
 				utils.AddNewEnvToKeysFile(exportEnvironment, envKeys)
-
 			}
 
 			// Get OAuth Tokens
@@ -78,10 +78,22 @@ var ExportAPICmd = &cobra.Command{
 			fmt.Println("AccessToken:", accessToken)
 
 			resp := utils.ExportAPI(exportAPIName, exportAPIVersion, apiManagerEndpoint, accessToken)
-			fmt.Printf("\nResponseCode: %v\n", resp.StatusCode())
+
+			// Print info on response
 			fmt.Printf("ResponseStatus: %v\n", resp.Status())
 			fmt.Printf("Error: %v\n", resp.Error())
-			fmt.Printf("Response Body: %v\n", resp.Body())
+			//fmt.Printf("Response Body: %v\n", resp.Body())
+
+			if resp.StatusCode() == 200 {
+				// Write to file
+				filename := exportAPIName + ".zip"
+				err := ioutil.WriteFile("./" + filename, resp.Body(), 0644)
+				if err != nil {
+					fmt.Println("Error creating zip archive")
+					panic(err)
+				}
+			}
+
 		} else {
 			// env_endpoints_all.yaml file is not configured properly by the user
 			log.Fatal("Error: env_endpoints_all.yaml does not contain necessary information for environment " + exportEnvironment)

@@ -41,6 +41,7 @@ func ExportAPI(name string, version string, url string, accessToken string) *res
 	} else {
 		url += "/export/apis"
 	}
+
 	query := "?query=" + name
 	url += query
 	fmt.Println("ExportAPI: URL:", url)

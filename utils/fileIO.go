@@ -42,11 +42,8 @@ func WriteEnvKeysToFile() {
 }
 */
 
-
-
-
 // Read and return EnvKeysAll
-func GetEnvKeysAllFromFile() EnvKeysAll{
+func GetEnvKeysAllFromFile() EnvKeysAll {
 	data, err := ioutil.ReadFile("./env_keys_all.yaml")
 	if err != nil {
 		fmt.Println("Error reading env_keys_all.yaml")
@@ -79,7 +76,6 @@ func GetEnvEndpointsAllFromFile() *EnvEndpointsAll {
 
 	return &envEndpointsAll
 }
-
 
 // Read and validate contents of env_endpoints_all.yaml
 // will throw errors if the any of the lines is blank

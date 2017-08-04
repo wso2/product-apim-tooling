@@ -47,7 +47,6 @@ func GetKeysOfEnvironment(env string) *EnvKeys {
 	return &EnvKeys{"", "", ""}
 }
 
-
 // Return EnvEndpoints for a given environment
 func GetEndpointsOfEnvironment(env string) *EnvEndpoints {
 	envEndpointsAll := GetEnvEndpointsAllFromFile()
