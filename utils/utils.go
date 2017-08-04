@@ -11,7 +11,7 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
-func InvokePOSTRequest(url string, headers map[string]string, body string) (*resty.Response, error){
+func InvokePOSTRequest(url string, headers map[string]string, body string) (*resty.Response, error) {
 	resp, err := resty.R().SetHeaders(headers).SetBody(body).Post(url)
 
 	return resp, err
@@ -26,7 +26,7 @@ func PromptForUsername() string {
 	return username
 }
 
-func PromptForPassword() string{
+func PromptForPassword() string {
 	fmt.Print("Enter Password: ")
 	bytePassword, _ := terminal.ReadPassword(0)
 	password := string(bytePassword)
@@ -35,9 +35,13 @@ func PromptForPassword() string{
 	return password
 }
 
-
-func ExportAPI(name string, version string, url string, accessToken string) *resty.Response{
-	query := name
+func ExportAPI(name string, version string, url string, accessToken string) *resty.Response {
+	if string(url[len(url)-1]) == "/" {
+		url += "export/apis"
+	} else {
+		url += "/export/apis"
+	}
+	query := "?query=" + name
 	url += query
 	fmt.Println("ExportAPI: URL:", url)
 	headers := make(map[string]string)
@@ -45,8 +49,8 @@ func ExportAPI(name string, version string, url string, accessToken string) *res
 	headers[HeaderAccept] = HeaderValueApplicationZip
 
 	resp, err := resty.R().
-					SetHeaders(headers).
-					Get(url)
+		SetHeaders(headers).
+		Get(url)
 
 	if err != nil {
 		fmt.Println("Error exporting API:", name)
@@ -57,6 +61,12 @@ func ExportAPI(name string, version string, url string, accessToken string) *res
 }
 
 func ImportAPI(name string, version string, url string, accessToken string) *resty.Response {
+	if string(url[len(url)-1]) == "/" {
+		url += "imports/api"
+	} else {
+		url += "/imports/api"
+	}
+
 	query := name
 	file := "@" + query
 	fmt.Println("File:", file)
@@ -70,7 +80,7 @@ func ImportAPI(name string, version string, url string, accessToken string) *res
 	headers[HeaderAccept] = HeaderValueApplicationZip
 	// headers["Accept"] = "application/zip"
 
-	headers[HeaderConsumes]= HeaderValueMultiPartFormData
+	headers[HeaderConsumes] = HeaderValueMultiPartFormData
 	// headers["Consumes"] = "multipart/form-data"
 
 	resp, err := resty.R().
@@ -110,4 +120,3 @@ func invokeRequest(req *http.Request, timeout time.Duration) *http.Response {
 
 	return httpResp
 }
-

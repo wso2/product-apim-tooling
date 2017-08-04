@@ -40,14 +40,18 @@ var ExportAPICmd = &cobra.Command{
 			registrationEndpoint := utils.GetRegistrationEndpointOfEnv(exportEnvironment)
 			apiManagerEndpoint := utils.GetAPIMEndpointOfEnv(exportEnvironment)
 			tokenEndpoint := utils.GetTokenEndpointOfEnv(exportEnvironment)
+			var username string
+			var password string
+			var clientID string
+			var clientSecret string
 
 			if utils.EnvExistsInKeysFile(exportEnvironment) {
 				// client_id, client_secret exists in file
-				username := utils.GetUsernameOfEnv(exportEnvironment)
+				username = utils.GetUsernameOfEnv(exportEnvironment)
 				fmt.Println("Username:", username)
-				password := utils.PromptForPassword()
-				clientID := utils.GetClientIDOfEnv(exportEnvironment)
-				clientSecret := utils.GetClientSecretOfEnv(exportEnvironment, password)
+				password = utils.PromptForPassword()
+				clientID = utils.GetClientIDOfEnv(exportEnvironment)
+				clientSecret = utils.GetClientSecretOfEnv(exportEnvironment, password)
 
 				fmt.Println("ClientID:", clientID)
 				fmt.Println("ClientSecret:", clientSecret)
@@ -55,24 +59,29 @@ var ExportAPICmd = &cobra.Command{
 				// env exists in endpoints file, but not in keys file
 				// no client_id, client_secret in file
 				// Get new values
-				username := strings.TrimSpace(utils.PromptForUsername())
-				password := utils.PromptForPassword()
+				username = strings.TrimSpace(utils.PromptForUsername())
+				password = utils.PromptForPassword()
 
 				fmt.Println("\nUsername: " + username + "\n")
-				clientID, clientSecret := utils.GetClientIDSecret(username, password, registrationEndpoint)
+				clientID, clientSecret = utils.GetClientIDSecret(username, password, registrationEndpoint)
 
 				// Persist clientID, clientSecret, Username in file
 				encryptedClientSecret := utils.Encrypt([]byte(utils.GetMD5Hash(password)), clientSecret)
 				envKeys := utils.EnvKeys{clientID, encryptedClientSecret, username}
 				utils.AddNewEnvToKeysFile(exportEnvironment, envKeys)
 
-				// Get OAuth Tokens
-				m := utils.GetOAuthTokens(username, password, utils.GetBase64EncodedCredentials(clientID, clientSecret), tokenEndpoint)
-				accessToken := m["access_token"]
-
-				resp := utils.ExportAPI(exportAPIName, exportAPIVersion, apiManagerEndpoint, accessToken)
-				fmt.Printf("Response: %+v\n", resp)
 			}
+
+			// Get OAuth Tokens
+			m := utils.GetOAuthTokens(username, password, utils.GetBase64EncodedCredentials(clientID, clientSecret), tokenEndpoint)
+			accessToken := m["access_token"]
+			fmt.Println("AccessToken:", accessToken)
+
+			resp := utils.ExportAPI(exportAPIName, exportAPIVersion, apiManagerEndpoint, accessToken)
+			fmt.Printf("\nResponseCode: %v\n", resp.StatusCode())
+			fmt.Printf("ResponseStatus: %v\n", resp.Status())
+			fmt.Printf("Error: %v\n", resp.Error())
+			fmt.Printf("Response Body: %v\n", resp.Body())
 		} else {
 			// env_endpoints_all.yaml file is not configured properly by the user
 			log.Fatal("Error: env_endpoints_all.yaml does not contain necessary information for environment " + exportEnvironment)
