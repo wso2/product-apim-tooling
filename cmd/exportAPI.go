@@ -86,17 +86,21 @@ var ExportAPICmd = &cobra.Command{
 
 			if resp.StatusCode() == 200 {
 				// Write to file
+				directory := "./exported"
 				filename := exportAPIName + ".zip"
-				err := ioutil.WriteFile("./" + filename, resp.Body(), 0644)
+				err := ioutil.WriteFile(directory+"/"+filename, resp.Body(), 0644)
 				if err != nil {
 					fmt.Println("Error creating zip archive")
 					panic(err)
 				}
+				fmt.Println("Succesfully wrote to file")
+			} else if resp.StatusCode() == 500 {
+				fmt.Println("Incorrect password")
 			}
 
 		} else {
 			// env_endpoints_all.yaml file is not configured properly by the user
-			log.Fatal("Error: env_endpoints_all.yaml does not contain necessary information for environment " + exportEnvironment)
+			log.Fatal("Error: env_endpoints_all.yaml does not contain necessary information for the environment " + exportEnvironment)
 		}
 	},
 }

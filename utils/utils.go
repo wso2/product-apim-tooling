@@ -9,6 +9,8 @@ import (
 	"bufio"
 	"os"
 	"golang.org/x/crypto/ssh/terminal"
+	"crypto/tls"
+	"strings"
 )
 
 func InvokePOSTRequest(url string, headers map[string]string, body string) (*resty.Response, error) {
@@ -36,11 +38,11 @@ func PromptForPassword() string {
 }
 
 func ExportAPI(name string, version string, url string, accessToken string) *resty.Response {
-	if string(url[len(url)-1]) == "/" {
-		url += "export/apis"
-	} else {
-		url += "/export/apis"
+	// append '/' to the end if there isn't one already
+	if string(url[len(url)-1]) != "/" {
+		url += "/"
 	}
+	url += "export/apis"
 
 	query := "?query=" + name
 	url += query
@@ -62,31 +64,39 @@ func ExportAPI(name string, version string, url string, accessToken string) *res
 }
 
 func ImportAPI(name string, version string, url string, accessToken string) *resty.Response {
-	if string(url[len(url)-1]) == "/" {
-		url += "imports/api"
-	} else {
-		url += "/imports/api"
+	// append '/' to the end if there isn't one already
+	if string(url[len(url)-1]) != "/" {
+		url += "/"
 	}
+	url += "imports/api"
 
-	query := name
-	file := "@" + query
+	file := "./exported/" + name + ".zip"
 	fmt.Println("File:", file)
 	fmt.Println("ImportAPI: URL:", url)
+	body := strings.NewReader("------WebKitFormBoundary7MA4YWxkTrZu0gW\r" +
+		"Content-Disposition: form-data; name=\"file\"; filename=\"harrypotter.zip\"\r\nContent-Type: application/zip\r" +
+		"\r" +
+		"\r" +
+		"------WebKitFormBoundary7MA4YWxkTrZu0gW--")
 
 	headers := make(map[string]string)
 
 	headers[HeaderAuthorization] = HeaderValueAuthBearerPrefix + " " + accessToken
 	// headers["Authorization"] = "Bearer " + accessToken
 
-	headers[HeaderAccept] = HeaderValueApplicationZip
-	// headers["Accept"] = "application/zip"
+	headers[HeaderAccept] = "application/json"
+
+	headers[HeaderContentType] = HeaderValueMultiPartFormData
+	// headers["Content-Type"] = "multipart/form-data"
 
 	headers[HeaderConsumes] = HeaderValueMultiPartFormData
 	// headers["Consumes"] = "multipart/form-data"
 
+	resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTPS certificates
 	resp, err := resty.R().
 		SetHeaders(headers).
-		Get(url)
+		SetBody(body).
+		Put(url)
 
 	if err != nil {
 		fmt.Println("Error importing API:", name)

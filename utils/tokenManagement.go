@@ -107,14 +107,4 @@ func GetAccessTokenUsingRefreshToken(refreshToken string, b64encodedKeySecret st
 	_ = json.Unmarshal(data, &m)	// add response data to m
 
 	return m // m contains 'access_token', 'refresh_token' etc
-
-
-}
-
-func isAccessTokenExpired() {
-
-}
-
-func refreshToken() {
-
 }
