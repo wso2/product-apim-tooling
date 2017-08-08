@@ -22,6 +22,7 @@ import (
 	"strings"
 	"log"
 	"io/ioutil"
+	"os"
 )
 
 var exportAPIName string
@@ -87,6 +88,12 @@ var ExportAPICmd = &cobra.Command{
 			if resp.StatusCode() == 200 {
 				// Write to file
 				directory := "./exported"
+
+				// create directory if it doesn't exist
+				if _, err := os.Stat(directory); os.IsNotExist(err) {
+					os.Mkdir(directory, 0777)
+				}
+
 				filename := exportAPIName + ".zip"
 				err := ioutil.WriteFile(directory+"/"+filename, resp.Body(), 0644)
 				if err != nil {
