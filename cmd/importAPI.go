@@ -15,8 +15,12 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/menuka94/wso2apim-cli/utils"
+	constants "github.com/menuka94/wso2apim-cli/utils"
 	"log"
 	"strings"
+	"github.com/go-resty/resty"
+	"io/ioutil"
+	"crypto/tls"
 )
 
 var importAPIName string
@@ -81,15 +85,70 @@ var ImportAPICmd = &cobra.Command{
 			accessToken := m["access_token"]
 			fmt.Println("AccessToken:", accessToken)
 
-			resp := utils.ImportAPI(importAPIName, importAPIVersion, apiManagerEndpoint, accessToken)
+			resp := ImportAPI(importAPIName, importAPIVersion, apiManagerEndpoint, accessToken)
 			fmt.Printf("Status: %v\n", resp.Status())
 			fmt.Printf("Errors: %v\n", resp.Error())
-			fmt.Printf("Body: %v\n", resp.Body())
+			fmt.Printf("Body: %s\n", resp.Body())
 		} else {
 			// env_endpoints_all.yaml file is not configured properly by the user
 			log.Fatal("Error: env_endpoints_all.yaml does not contain necessary information for the environment " + importEnvironment)
 		}
 	},
+}
+
+
+func ImportAPI(name string, version string, url string, accessToken string) *resty.Response {
+	// append '/' to the end if there isn't one already
+	if string(url[len(url)-1]) != "/" {
+		url += "/"
+	}
+	url += "imports/api"
+
+	file := "./exported/" + name + ".zip"
+	fmt.Println("File:", file)
+	fmt.Println("ImportAPI: URL:", url)
+	//body := `{
+	//			"Content-Disposition": "form-data",
+	//			"name": "file",
+	//			"filename" "`+ file +`",
+	//			"Content-Type": "application/zip"
+	//		 }`
+	//
+	//body = dedent.Dedent(body)
+
+	headers := make(map[string]string)
+
+	headers[constants.HeaderAuthorization] = constants.HeaderValueAuthBearerPrefix + " " + accessToken
+	// headers["Authorization"] = "Bearer " + accessToken
+
+	//headers[HeaderAccept] = "application/json"
+
+	//headers[HeaderContentType] = HeaderValueMultiPartFormData
+	// headers["Content-Type"] = "multipart/form-data"
+
+	openFlie, _ := ioutil.ReadFile(file)
+
+
+	resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTPS certificates
+	resp, err := resty.R().
+		SetHeaders(headers).
+	//SetFile("file", file).
+	//SetFileReader("filename", "got.zip", bytes.NewReader(openFlie)).
+	//SetFormData(map[string]string{
+	//	"Content-Disposition": "form-data",
+	//	"name": "file",
+	//	//"filename": file,
+	//	"Content-Type": "application/zip",
+	//}).
+		SetBody(openFlie).
+		Put(url)
+
+	if err != nil {
+		fmt.Println("Error importing API:", name)
+		panic(err)
+	}
+
+	return resp
 }
 
 func init() {

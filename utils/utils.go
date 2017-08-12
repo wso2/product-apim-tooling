@@ -9,8 +9,6 @@ import (
 	"bufio"
 	"os"
 	"golang.org/x/crypto/ssh/terminal"
-	"crypto/tls"
-	"strings"
 )
 
 func InvokePOSTRequest(url string, headers map[string]string, body string) (*resty.Response, error) {
@@ -37,74 +35,6 @@ func PromptForPassword() string {
 	return password
 }
 
-func ExportAPI(name string, version string, url string, accessToken string) *resty.Response {
-	// append '/' to the end if there isn't one already
-	if string(url[len(url)-1]) != "/" {
-		url += "/"
-	}
-	url += "export/apis"
-
-	query := "?query=" + name
-	url += query
-	fmt.Println("ExportAPI: URL:", url)
-	headers := make(map[string]string)
-	headers[HeaderAuthorization] = HeaderValueAuthBearerPrefix + " " + accessToken
-	headers[HeaderAccept] = HeaderValueApplicationZip
-
-	resp, err := resty.R().
-		SetHeaders(headers).
-		Get(url)
-
-	if err != nil {
-		fmt.Println("Error exporting API:", name)
-		panic(err)
-	}
-
-	return resp
-}
-
-func ImportAPI(name string, version string, url string, accessToken string) *resty.Response {
-	// append '/' to the end if there isn't one already
-	if string(url[len(url)-1]) != "/" {
-		url += "/"
-	}
-	url += "imports/api"
-
-	file := "./exported/" + name + ".zip"
-	fmt.Println("File:", file)
-	fmt.Println("ImportAPI: URL:", url)
-	body := strings.NewReader("------WebKitFormBoundary7MA4YWxkTrZu0gW\r" +
-		"Content-Disposition: form-data; name=\"file\"; filename=\"harrypotter.zip\"\r\nContent-Type: application/zip\r" +
-		"\r" +
-		"\r" +
-		"------WebKitFormBoundary7MA4YWxkTrZu0gW--")
-
-	headers := make(map[string]string)
-
-	headers[HeaderAuthorization] = HeaderValueAuthBearerPrefix + " " + accessToken
-	// headers["Authorization"] = "Bearer " + accessToken
-
-	headers[HeaderAccept] = "application/json"
-
-	headers[HeaderContentType] = HeaderValueMultiPartFormData
-	// headers["Content-Type"] = "multipart/form-data"
-
-	headers[HeaderConsumes] = HeaderValueMultiPartFormData
-	// headers["Consumes"] = "multipart/form-data"
-
-	resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTPS certificates
-	resp, err := resty.R().
-		SetHeaders(headers).
-		SetBody(body).
-		Put(url)
-
-	if err != nil {
-		fmt.Println("Error importing API:", name)
-		panic(err)
-	}
-
-	return resp
-}
 
 func Authenticate() {
 

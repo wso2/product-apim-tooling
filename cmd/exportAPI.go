@@ -19,10 +19,13 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/menuka94/wso2apim-cli/utils"
+	constants "github.com/menuka94/wso2apim-cli/utils"
 	"strings"
 	"log"
 	"io/ioutil"
 	"os"
+	"github.com/go-resty/resty"
+
 )
 
 var exportAPIName string
@@ -78,7 +81,7 @@ var ExportAPICmd = &cobra.Command{
 			accessToken := m["access_token"]
 			fmt.Println("AccessToken:", accessToken)
 
-			resp := utils.ExportAPI(exportAPIName, exportAPIVersion, apiManagerEndpoint, accessToken)
+			resp := ExportAPI(exportAPIName, exportAPIVersion, apiManagerEndpoint, accessToken)
 
 			// Print info on response
 			fmt.Printf("ResponseStatus: %v\n", resp.Status())
@@ -111,6 +114,34 @@ var ExportAPICmd = &cobra.Command{
 		}
 	},
 }
+
+
+func ExportAPI(name string, version string, url string, accessToken string) *resty.Response {
+	// append '/' to the end if there isn't one already
+	if string(url[len(url)-1]) != "/" {
+		url += "/"
+	}
+	url += "export/apis"
+
+	query := "?query=" + name
+	url += query
+	fmt.Println("ExportAPI: URL:", url)
+	headers := make(map[string]string)
+	headers[constants.HeaderAuthorization] = constants.HeaderValueAuthBearerPrefix + " " + accessToken
+	headers[constants.HeaderAccept] = constants.HeaderValueApplicationZip
+
+	resp, err := resty.R().
+		SetHeaders(headers).
+		Get(url)
+
+	if err != nil {
+		fmt.Println("Error exporting API:", name)
+		panic(err)
+	}
+
+	return resp
+}
+
 
 func init() {
 	RootCmd.AddCommand(ExportAPICmd)
