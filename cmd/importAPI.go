@@ -15,12 +15,11 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/menuka94/wso2apim-cli/utils"
-	constants "github.com/menuka94/wso2apim-cli/utils"
 	"log"
 	"strings"
-	"github.com/go-resty/resty"
-	"io/ioutil"
 	"crypto/tls"
+	"net/http"
+	"io/ioutil"
 )
 
 var importAPIName string
@@ -58,14 +57,14 @@ var ImportAPICmd = &cobra.Command{
 				// get client_id from file
 				clientID = utils.GetClientIDOfEnv(importEnvironment)
 
-				// password is needed to decrypt client_secret
+				// get client_secret from file, password needed to decrypt client_secret
 				password = utils.PromptForPassword()
 				clientSecret = utils.GetClientSecretOfEnv(importEnvironment, password)
 
 				fmt.Println("ClientID:", clientID)
 				fmt.Println("ClientSecret:", clientSecret)
 			} else {
-				// env exists in endpoints file, but not in keys file
+				// env exists in endpoints file, but not in keys file (first use of the tool)
 				// no client_id, client_secret in file
 				// Get new values
 				username = strings.TrimSpace(utils.PromptForUsername())
@@ -86,9 +85,10 @@ var ImportAPICmd = &cobra.Command{
 			fmt.Println("AccessToken:", accessToken)
 
 			resp := ImportAPI(importAPIName, importAPIVersion, apiManagerEndpoint, accessToken)
-			fmt.Printf("Status: %v\n", resp.Status())
-			fmt.Printf("Errors: %v\n", resp.Error())
-			fmt.Printf("Body: %s\n", resp.Body())
+			fmt.Printf("Status: %v\n", resp.Status)
+			//fmt.Printf("Errors: %v\n", resp.Error)
+			fmt.Println("Header:", resp.Header)
+			fmt.Printf("Body: %s\n", resp.Body)
 		} else {
 			// env_endpoints_all.yaml file is not configured properly by the user
 			log.Fatal("Error: env_endpoints_all.yaml does not contain necessary information for the environment " + importEnvironment)
@@ -97,7 +97,7 @@ var ImportAPICmd = &cobra.Command{
 }
 
 
-func ImportAPI(name string, version string, url string, accessToken string) *resty.Response {
+func ImportAPI(name string, version string, url string, accessToken string) *http.Response{
 	// append '/' to the end if there isn't one already
 	if string(url[len(url)-1]) != "/" {
 		url += "/"
@@ -107,45 +107,38 @@ func ImportAPI(name string, version string, url string, accessToken string) *res
 	file := "./exported/" + name + ".zip"
 	fmt.Println("File:", file)
 	fmt.Println("ImportAPI: URL:", url)
-	//body := `{
-	//			"Content-Disposition": "form-data",
-	//			"name": "file",
-	//			"filename" "`+ file +`",
-	//			"Content-Type": "application/zip"
-	//		 }`
-	//
-	//body = dedent.Dedent(body)
+	//headers[constants.HeaderConsumes]  = constants.HeaderValueMultiPartFormData
 
-	headers := make(map[string]string)
+	//openFile, _ := ioutil.ReadFile(file)
+	//osOpen, err := os.Open(file)
+	//if err != nil {
+	//	fmt.Println("Error opening file:")
+	//	panic(err)
+	//}
 
-	headers[constants.HeaderAuthorization] = constants.HeaderValueAuthBearerPrefix + " " + accessToken
-	// headers["Authorization"] = "Bearer " + accessToken
+	payload := strings.NewReader("------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"file\"; filename=\"" + file + "\r\nContent-Type: application/zip\r\n\r\n\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW--")
 
-	//headers[HeaderAccept] = "application/json"
+	req, _ := http.NewRequest("PUT", url, payload)
 
-	//headers[HeaderContentType] = HeaderValueMultiPartFormData
-	// headers["Content-Type"] = "multipart/form-data"
+	req.Header.Add("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
+	req.Header.Add("Authorization", "Bearer " + accessToken)
+	 //req.Header.Add("cache-control", "no-cache")
 
-	openFlie, _ := ioutil.ReadFile(file)
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
 
+	client := &http.Client{Transport: tr}
+	resp, _ := client.Do(req)
 
-	resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTPS certificates
-	resp, err := resty.R().
-		SetHeaders(headers).
-	//SetFile("file", file).
-	//SetFileReader("filename", "got.zip", bytes.NewReader(openFlie)).
-	//SetFormData(map[string]string{
-	//	"Content-Disposition": "form-data",
-	//	"name": "file",
-	//	//"filename": file,
-	//	"Content-Type": "application/zip",
-	//}).
-		SetBody(openFlie).
-		Put(url)
+	if resp != nil {
 
-	if err != nil {
-		fmt.Println("Error importing API:", name)
-		panic(err)
+		body, _ := ioutil.ReadAll(resp.Body)
+
+		fmt.Println(resp)
+		fmt.Println(string(body))
+	} else {
+		fmt.Println("Null Response")
 	}
 
 	return resp
