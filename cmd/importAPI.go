@@ -19,7 +19,11 @@ import (
 	"strings"
 	"crypto/tls"
 	"net/http"
-	"io/ioutil"
+	"os"
+	"bytes"
+	"path/filepath"
+	"io"
+	"mime/multipart"
 )
 
 var importAPIName string
@@ -86,9 +90,11 @@ var ImportAPICmd = &cobra.Command{
 
 			resp := ImportAPI(importAPIName, importAPIVersion, apiManagerEndpoint, accessToken)
 			fmt.Printf("Status: %v\n", resp.Status)
+			if resp.StatusCode == 200 {
+				fmt.Println("Header:", resp.Header)
+				fmt.Printf("Body: %s\n", resp.Body)
+			}
 			//fmt.Printf("Errors: %v\n", resp.Error)
-			fmt.Println("Header:", resp.Header)
-			fmt.Printf("Body: %s\n", resp.Body)
 		} else {
 			// env_endpoints_all.yaml file is not configured properly by the user
 			log.Fatal("Error: env_endpoints_all.yaml does not contain necessary information for the environment " + importEnvironment)
@@ -96,52 +102,80 @@ var ImportAPICmd = &cobra.Command{
 	},
 }
 
-
 func ImportAPI(name string, version string, url string, accessToken string) *http.Response{
 	// append '/' to the end if there isn't one already
 	if string(url[len(url)-1]) != "/" {
 		url += "/"
 	}
-	url += "imports/api"
+	url += "import/apis"
 
-	file := "./exported/" + name + ".zip"
-	fmt.Println("File:", file)
-	fmt.Println("ImportAPI: URL:", url)
-	//headers[constants.HeaderConsumes]  = constants.HeaderValueMultiPartFormData
+	filepath, _ := os.Getwd()
+	filepath += "/exported/" + name + ".zip"
+	extraParams := map[string]string {
+		//"name": "file",
+		//"file": filepath,
+		//"Content-Disposition": "multipart/form-data",
+		//"Content-Type": "application/zip",
+	}
 
-	//openFile, _ := ioutil.ReadFile(file)
-	//osOpen, err := os.Open(file)
-	//if err != nil {
-	//	fmt.Println("Error opening file:")
-	//	panic(err)
-	//}
-
-	payload := strings.NewReader("------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"file\"; filename=\"" + file + "\r\nContent-Type: application/zip\r\n\r\n\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW--")
-
-	req, _ := http.NewRequest("PUT", url, payload)
-
-	req.Header.Add("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	req.Header.Add("Authorization", "Bearer " + accessToken)
-	 //req.Header.Add("cache-control", "no-cache")
+	req, err := newFileUploadRequest(url, extraParams, "file", filepath, accessToken)
+	if err != nil {
+		fmt.Println("Error creating request")
+		log.Fatal(err)
+		panic(err)
+	}
 
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 
 	client := &http.Client{Transport: tr}
-	resp, _ := client.Do(req)
+	resp, err := client.Do(req)
 
-	if resp != nil {
-
-		body, _ := ioutil.ReadAll(resp.Body)
-
-		fmt.Println(resp)
-		fmt.Println(string(body))
+	if err != nil {
+		log.Fatal(err)
 	} else {
-		fmt.Println("Null Response")
+		var bodyContent []byte
+		fmt.Println(resp.StatusCode)
+		fmt.Println(resp.Header)
+		resp.Body.Read(bodyContent)
+		resp.Body.Close()
+		fmt.Println(bodyContent)
 	}
 
 	return resp
+}
+
+func newFileUploadRequest(uri string, params map[string]string, paramName, path string, accessToken string) (*http.Request, error){
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, err := writer.CreateFormFile(paramName, filepath.Base(path))
+	if err != nil {
+		return nil, err
+	}
+	_, err = io.Copy(part, file)
+
+	for key, val := range params {
+		_ = writer.WriteField(key, val)
+	}
+	err = writer.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	request, err := http.NewRequest("PUT", uri, body)
+	request.Header.Add(utils.HeaderAuthorization, utils.HeaderValueAuthBearerPrefix + " " +accessToken)
+	request.Header.Add(utils.HeaderContentType, writer.FormDataContentType())
+	request.Header.Add("Accept", "*/*")
+	request.Header.Add("Connection", "keep-alive")
+
+	return request, err
 }
 
 func init() {
