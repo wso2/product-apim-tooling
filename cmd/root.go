@@ -66,18 +66,7 @@ func init() {
 	RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 	// Temporary code
-
-	//username := utils.PromptForUsername()
-	//password := utils.PromptForPassword()
-	//
-	//fmt.Println("username:", username)
-	//fmt.Println("password:", password)
-
-	//clientID, clientSecret := utils.GetClientIDSecret("admin", "admin","https://localhost:9443/identity/connect/register")
-	//b64EncodedIDSecret := utils.GetBase64EncodedCredentials(clientID, clientSecret)
-	//m := utils.GetOAuthTokens("admin","admin", b64EncodedIDSecret, "https://localhost:9443/oauth2/token")
-	//fmt.Println("AccessToken:", m["access_token"])
-
+	utils.ZipDir("./exported/admin-got-1.0.0", "./got.zip")
 }
 
 // initConfig reads in config file and ENV variables if set.
