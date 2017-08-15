@@ -27,7 +27,6 @@ import (
 )
 
 var importAPIName string
-var importAPIVersion string
 var importEnvironment string
 
 // ImportAPICmd represents the importAPI command
@@ -51,6 +50,17 @@ var ImportAPICmd = &cobra.Command{
 			var password string
 			var clientID string
 			var clientSecret string
+
+			// validate input
+			if importAPIName == "" {
+				log.Fatal("Filename cannot be blank.")
+				os.Exit(1)
+			}
+			if importEnvironment == "" {
+				log.Fatal("Environment cannot be blank.")
+				os.Exit(1)
+			}
+			// end of validate input
 
 			if utils.EnvExistsInKeysFile(importEnvironment) {
 				// client_id, client_secret,username exists in file
@@ -88,7 +98,7 @@ var ImportAPICmd = &cobra.Command{
 			accessToken := m["access_token"]
 			fmt.Println("AccessToken:", accessToken)
 
-			resp := ImportAPI(importAPIName, importAPIVersion, apiManagerEndpoint, accessToken)
+			resp := ImportAPI(importAPIName, apiManagerEndpoint, accessToken)
 			fmt.Printf("Status: %v\n", resp.Status)
 			if resp.StatusCode == 200 {
 				fmt.Println("Header:", resp.Header)
@@ -102,7 +112,7 @@ var ImportAPICmd = &cobra.Command{
 	},
 }
 
-func ImportAPI(name string, version string, url string, accessToken string) *http.Response{
+func ImportAPI(name string, url string, accessToken string) *http.Response{
 	// append '/' to the end if there isn't one already
 	if string(url[len(url)-1]) != "/" {
 		url += "/"
@@ -110,7 +120,7 @@ func ImportAPI(name string, version string, url string, accessToken string) *htt
 	url += "import/apis"
 
 	filepath, _ := os.Getwd()
-	filepath += "/exported/" + name + ".zip"
+	filepath += "/exported/" + name
 	extraParams := map[string]string {
 		//"name": "file",
 		//"file": filepath,
@@ -181,7 +191,6 @@ func newFileUploadRequest(uri string, params map[string]string, paramName, path 
 func init() {
 	RootCmd.AddCommand(ImportAPICmd)
 	ImportAPICmd.Flags().StringVarP(&importAPIName, "name", "n", "", "Name of the API to be imported")
-	ImportAPICmd.Flags().StringVarP(&importAPIVersion, "version", "v", "", "Version of the API to be imported")
 	ImportAPICmd.Flags().StringVarP(&importEnvironment, "environment", "e", "", "Environment from the which the API should be imported")
 
 	// Here you will define your flags and configuration settings.
