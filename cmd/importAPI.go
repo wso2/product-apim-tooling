@@ -119,13 +119,10 @@ func ImportAPI(name string, url string, accessToken string) *http.Response{
 	}
 	url += "import/apis"
 
+
 	filepath, _ := os.Getwd()
 	filepath += "/exported/" + name
 	extraParams := map[string]string {
-		//"name": "file",
-		//"file": filepath,
-		//"Content-Disposition": "multipart/form-data",
-		//"Content-Type": "application/zip",
 	}
 
 	req, err := newFileUploadRequest(url, extraParams, "file", filepath, accessToken)

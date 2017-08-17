@@ -26,6 +26,7 @@ import (
 	"os"
 	"github.com/go-resty/resty"
 
+	"regexp"
 )
 
 var exportAPIName string
@@ -122,6 +123,11 @@ func ExportAPI(name string, version string, url string, accessToken string) *res
 		url += "/"
 	}
 	url += "export/apis"
+
+	// check if zip exists
+	hasZipExtension, _ := regexp.MatchString(`^\S+\.zip$`, name)
+	fmt.Println(hasZipExtension)
+
 
 	query := "?query=" + name
 	url += query

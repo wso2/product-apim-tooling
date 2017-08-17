@@ -66,7 +66,7 @@ func init() {
 	RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 	// Temporary code
-	utils.ZipDir("./exported/admin-got-1.0.0", "./got.zip")
+	//utils.ZipDir("./exported/admin-got-1.0.0", "./exported/got.zip")
 }
 
 // initConfig reads in config file and ENV variables if set.
