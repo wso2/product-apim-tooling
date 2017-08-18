@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"fmt"
+	"os"
 )
 
 func WriteConfigFile(c interface{}, envConfigFilePath string) {
@@ -47,7 +48,8 @@ func GetEnvKeysAllFromFile() EnvKeysAll {
 	data, err := ioutil.ReadFile("./env_keys_all.yaml")
 	if err != nil {
 		fmt.Println("Error reading env_keys_all.yaml")
-		panic(err)
+		_,_ = os.Create("./env_keys_all.yaml")
+		data, err = ioutil.ReadFile("./env_keys_all.yaml")
 	}
 
 	var envKeysAll EnvKeysAll

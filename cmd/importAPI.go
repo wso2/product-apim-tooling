@@ -31,7 +31,7 @@ var importEnvironment string
 
 // ImportAPICmd represents the importAPI command
 var ImportAPICmd = &cobra.Command{
-	Use:   "importAPI (--name <name-of-the-api> --version <version-of-the-api> --environment <environment-to-which-the-api-should-be-imported>)",
+	Use:   "importAPI (--name <name-of-the-api> --environment <environment-to-which-the-api-should-be-imported>)",
 	Short: utils.ImportAPICmdShortDesc,
 	Long:  utils.ImportAPICmdLongDesc,
 	Run: func(cmd *cobra.Command, args []string) {
