@@ -4,7 +4,7 @@ import (
 	"github.com/jhoonb/archivex"
 )
 
-func IsDirectory(input string) bool{
+func IsDirectory(input string) bool {
 	return false
 }
 
@@ -14,5 +14,3 @@ func ZipDir(source, target string) {
 	zip.AddAll(source, true)
 	zip.Close()
 }
-
-

@@ -85,3 +85,16 @@ var ExportAPICmdExamples = dedent.Dedent(`
 	wso2apim-cli exportAPI -n TwitterAPI -v 1.0.0 -e dev
 	wso2apim-cli exportAPI -n FacebookAPI -v 2.1.0 -e production
 	`)
+
+// List command related usage Info
+
+const ListCmdShortDesc string = "List APIs in an environment"
+
+var ListCmdLongDesc string = dedent.Dedent(`
+			Display a list containing all the APIs available in the environment specified by flag -e
+		`)
+
+var ListCmdExamples = dedent.Dedent(`
+		wso2apim-cli list -e dev
+		wso2apim-cli list -e staging
+		`)

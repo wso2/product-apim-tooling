@@ -48,7 +48,7 @@ func GetEnvKeysAllFromFile() EnvKeysAll {
 	data, err := ioutil.ReadFile("./env_keys_all.yaml")
 	if err != nil {
 		fmt.Println("Error reading env_keys_all.yaml")
-		_,_ = os.Create("./env_keys_all.yaml")
+		_, _ = os.Create("./env_keys_all.yaml")
 		data, err = ioutil.ReadFile("./env_keys_all.yaml")
 	}
 

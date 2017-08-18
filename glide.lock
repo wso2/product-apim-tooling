@@ -1,5 +1,5 @@
 hash: 14637de5182a4b0d5903945ccb984c0a673989aa1fedd73be7ccf8812dbcf4ae
-updated: 2017-08-09T20:21:41.731297882+05:30
+updated: 2017-08-18T10:47:19.185583599+05:30
 imports:
 - name: github.com/fsnotify/fsnotify
   version: fd9ec7deca8bf46ecd2a795baaacf2b3a9be1197
@@ -18,6 +18,8 @@ imports:
   - json/token
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
+- name: github.com/jhoonb/archivex
+  version: be4efa7ec0c38ab76d56037014c90d48d6b13037
 - name: github.com/magiconair/properties
   version: 9c47895dc1ce54302908ab8a43385d1f5df2c11c
 - name: github.com/mitchellh/mapstructure

@@ -47,3 +47,6 @@ hs_err_pid*
 # YAML Config Files
 env_endpoints_all.yaml
 env_keys_all.yaml
+
+# Binaries
+wso2apim-cli

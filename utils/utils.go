@@ -35,7 +35,6 @@ func PromptForPassword() string {
 	return password
 }
 
-
 func Authenticate() {
 
 }

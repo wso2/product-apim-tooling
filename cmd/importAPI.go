@@ -112,17 +112,16 @@ var ImportAPICmd = &cobra.Command{
 	},
 }
 
-func ImportAPI(name string, url string, accessToken string) *http.Response{
+func ImportAPI(name string, url string, accessToken string) *http.Response {
 	// append '/' to the end if there isn't one already
 	if string(url[len(url)-1]) != "/" {
 		url += "/"
 	}
 	url += "import/apis"
 
-
 	filepath, _ := os.Getwd()
 	filepath += "/exported/" + name
-	extraParams := map[string]string {
+	extraParams := map[string]string{
 	}
 
 	req, err := newFileUploadRequest(url, extraParams, "file", filepath, accessToken)
@@ -153,7 +152,7 @@ func ImportAPI(name string, url string, accessToken string) *http.Response{
 	return resp
 }
 
-func newFileUploadRequest(uri string, params map[string]string, paramName, path string, accessToken string) (*http.Request, error){
+func newFileUploadRequest(uri string, params map[string]string, paramName, path string, accessToken string) (*http.Request, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -177,7 +176,7 @@ func newFileUploadRequest(uri string, params map[string]string, paramName, path 
 	}
 
 	request, err := http.NewRequest("PUT", uri, body)
-	request.Header.Add(utils.HeaderAuthorization, utils.HeaderValueAuthBearerPrefix + " " +accessToken)
+	request.Header.Add(utils.HeaderAuthorization, utils.HeaderValueAuthBearerPrefix+" "+accessToken)
 	request.Header.Add(utils.HeaderContentType, writer.FormDataContentType())
 	request.Header.Add("Accept", "*/*")
 	request.Header.Add("Connection", "keep-alive")

@@ -1,6 +1,5 @@
 package utils
 
-
 // ------------------- Structs for YAML Config Files ----------------------------------
 
 // For env_keys_all.yaml
@@ -18,13 +17,28 @@ type EnvEndpointsAll struct {
 type EnvKeys struct {
 	ClientID     string `yaml:"client_id"`
 	ClientSecret string `yaml:"client_secret"` // to be encrypted (with the user's password) and stored
-	Username string		`yaml:"username"`
+	Username     string        `yaml:"username"`
 }
 
 type EnvEndpoints struct {
 	APIManagerEndpoint   string `yaml:"api_manager_endpoint"`
 	RegistrationEndpoint string `yaml:"registration_endpoint"`
 	TokenEndpoint        string `yaml:"token_endpoint"`
+}
+
+type API struct {
+	ID              string `json:"id"`
+	Name            string `json:"name"`
+	Context         string `json:"context"`
+	Version         string `json:"version"`
+	Provider        string `json:"provider"`
+	LifeCycleStatus string `json:"lifeCycleStatus"`
+	WorkflowStatus  string `json:"workflowStatus"`
+}
+
+type APIListResponse struct {
+	Count int32 `json:"count"`
+	List []API `json:"list"`
 }
 
 // ---------------- End of Structs for YAML Config Files ---------------------------------
@@ -37,8 +51,6 @@ var envKeysAll EnvKeysAll
 func (envEndpointsAll *EnvEndpointsAll) validate() {
 	//
 }
-
-
 
 /**
 Load the Environments Configuration file from the config.yaml file. If the file is not there
@@ -65,7 +77,6 @@ func GetEnvKeysAll() *EnvKeysAll {
 	return &envKeysAll
 }
 */
-
 
 /*
 env_keys_config.yaml (Programmatically edited)

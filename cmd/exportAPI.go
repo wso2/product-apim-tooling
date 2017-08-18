@@ -116,7 +116,6 @@ var ExportAPICmd = &cobra.Command{
 	},
 }
 
-
 func ExportAPI(name string, version string, url string, accessToken string) *resty.Response {
 	// append '/' to the end if there isn't one already
 	if string(url[len(url)-1]) != "/" {
@@ -127,7 +126,6 @@ func ExportAPI(name string, version string, url string, accessToken string) *res
 	// check if zip exists
 	hasZipExtension, _ := regexp.MatchString(`^\S+\.zip$`, name)
 	fmt.Println(hasZipExtension)
-
 
 	query := "?query=" + name
 	url += query
@@ -147,7 +145,6 @@ func ExportAPI(name string, version string, url string, accessToken string) *res
 
 	return resp
 }
-
 
 func init() {
 	RootCmd.AddCommand(ExportAPICmd)

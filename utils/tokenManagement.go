@@ -31,16 +31,15 @@ func GetClientIDSecret(username string, password string, url string) (string, st
 		panic(err)
 	}
 
-	m := make(map[string]string)	// a map to hold response data
+	m := make(map[string]string) // a map to hold response data
 	data := []byte(resp.Body())
-	_ = json.Unmarshal(data, &m)	// add response data to m
+	_ = json.Unmarshal(data, &m) // add response data to m
 
 	clientID := m["client_id"]
 	clientSecret := m["client_secret"]
 
 	return clientID, clientSecret
 }
-
 
 // Encode the concatenation of two strings (using ":")
 // provide two strings
@@ -56,12 +55,12 @@ func GetBase64EncodedCredentials(key string, secret string) string {
 // returns the response as a map
 func GetOAuthTokens(username string, password string, b64EncodedClientIDClientSecret string, url string) map[string]string {
 	validityPeriod := DefaultTokenValidityPeriod
-	body := "grant_type=password&username=" + username + "&password="+ password +"&validity_period=" + validityPeriod
+	body := "grant_type=password&username=" + username + "&password=" + password + "&validity_period=" + validityPeriod
 
 	// set headers
 	headers := make(map[string]string)
 	headers[HeaderContentType] = HeaderValueXWWWFormUrlEncoded
-	headers[HeaderAuthorization] = HeaderValueAuthBearerPrefix + " "+ b64EncodedClientIDClientSecret
+	headers[HeaderAuthorization] = HeaderValueAuthBearerPrefix + " " + b64EncodedClientIDClientSecret
 	headers[HeaderAccept] = HeaderValueApplicationJSON
 
 	resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTP certificates
@@ -71,9 +70,9 @@ func GetOAuthTokens(username string, password string, b64EncodedClientIDClientSe
 		HandleErrorAndExit("Unable to Connect", nil)
 	}
 
-	m := make(map[string]string)	// a map to hold response data
+	m := make(map[string]string) // a map to hold response data
 	data := []byte(resp.Body())
-	_ = json.Unmarshal(data, &m)	// add response data to m
+	_ = json.Unmarshal(data, &m) // add response data to m
 
 	return m // m contains 'access_token', 'refresh_token' etc
 }
@@ -81,13 +80,13 @@ func GetOAuthTokens(username string, password string, b64EncodedClientIDClientSe
 // GetAccessTokenUsingRefreshToken implemented using resty
 // provide refreshToken (decrypted), and base64(clientID:clientSecret)
 // returns the response as a map
-func GetAccessTokenUsingRefreshToken(refreshToken string, b64encodedKeySecret string) map[string]string{
+func GetAccessTokenUsingRefreshToken(refreshToken string, b64encodedKeySecret string) map[string]string {
 	url := "https://localhost:9443/oauth2/token"
 	body := "grant_type=refresh_token&refresh_token=" + refreshToken + "&validity_period=3600&scopes="
 
 	// set headers
 	headers := make(map[string]string)
-	headers[HeaderAuthorization] = HeaderValueAuthBearerPrefix + " "+ b64encodedKeySecret
+	headers[HeaderAuthorization] = HeaderValueAuthBearerPrefix + " " + b64encodedKeySecret
 	headers[HeaderContentType] = HeaderValueXWWWFormUrlEncoded
 	headers[HeaderAccept] = HeaderValueApplicationJSON
 
@@ -102,9 +101,9 @@ func GetAccessTokenUsingRefreshToken(refreshToken string, b64encodedKeySecret st
 		HandleErrorAndExit("Unable to Connect", err)
 	}
 
-	m := make(map[string]string)	// a map to hold response data
+	m := make(map[string]string) // a map to hold response data
 	data := []byte(resp.Body())
-	_ = json.Unmarshal(data, &m)	// add response data to m
+	_ = json.Unmarshal(data, &m) // add response data to m
 
 	return m // m contains 'access_token', 'refresh_token' etc
 }
