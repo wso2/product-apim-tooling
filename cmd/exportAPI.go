@@ -35,7 +35,7 @@ var exportEnvironment string
 
 // ExportAPICmd represents the exportAPI command
 var ExportAPICmd = &cobra.Command{
-	Use:   "exportAPI (--name <name-of-the-api> --version <version-of-the-api> --environment <environment-from-which-the-api-should-be-exported>)",
+	Use:   "export-api (--name <name-of-the-api> --version <version-of-the-api> --environment <environment-from-which-the-api-should-be-exported>)",
 	Short: utils.ExportAPICmdLongDesc,
 	Long:  utils.ExportAPICmdLongDesc,
 	Run: func(cmd *cobra.Command, args []string) {
