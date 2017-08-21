@@ -73,26 +73,13 @@ var ListCmd = &cobra.Command{
 			accessToken := m["access_token"]
 			fmt.Println("AccessToken:", accessToken)
 
-			resp, err := GetAPIList(accessToken, apiManagerEndpoint)
-			fmt.Println("Status:", resp.Status())
+			count, apis, err := GetAPIList("", accessToken, apiManagerEndpoint)
 
 			if err == nil{
-				if resp.StatusCode() == 200 {
-					apiListResponse := &utils.APIListResponse{}
-					unmarshalError := json.Unmarshal([]byte(resp.Body()), &apiListResponse)
-
-					if unmarshalError != nil {
-						fmt.Println("UnmarshalError")
-						panic(unmarshalError)
+					fmt.Println("Count:", count)
+					for _, api := range apis {
+						fmt.Println(api.Name + " v" + api.Version)
 					}
-
-					fmt.Println("Count:", apiListResponse.Count)
-					for _, api := range apiListResponse.List {
-						fmt.Println(api.Name + " " + api.Version)
-					}
-				}else{
-					fmt.Println("Error:", resp.Status())
-				}
 			}else{
 				fmt.Println("Error:")
 				panic(err)
@@ -101,21 +88,38 @@ var ListCmd = &cobra.Command{
 	},
 }
 
-func GetAPIList(accessToken string, apiManagerEndpoint string) (*resty.Response, error){
+func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (int32, []utils.API, error){
 	url := apiManagerEndpoint
 
 	// append '/' to the end if there isn't one already
 	if string(url[len(url)-1]) != "/" {
 		url += "/"
 	}
-	url += "apis"
+	url += "apis?query=" + query
+	fmt.Println("URL:", url)
 
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 	resp, err := resty.R().
 			SetHeaders(headers).
 			Get(url)
-	return resp, err
+
+
+	fmt.Println("GetAPIList(): Response:", resp.Status())
+	if resp.StatusCode() == 200 {
+		apiListResponse := &utils.APIListResponse{}
+		unmarshalError := json.Unmarshal([]byte(resp.Body()), &apiListResponse)
+
+		if unmarshalError != nil {
+			fmt.Println("UnmarshalError")
+			panic(unmarshalError)
+		}
+
+		return apiListResponse.Count, apiListResponse.List, err
+	}else{
+		return 0, nil, err
+	}
+
 }
 
 func init() {

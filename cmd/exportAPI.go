@@ -104,7 +104,16 @@ var ExportAPICmd = &cobra.Command{
 					fmt.Println("Error creating zip archive")
 					panic(err)
 				}
-				fmt.Println("Succesfully wrote to file")
+				fmt.Println("Succesfully exported and wrote to file")
+
+				numberOfAPIsExported, _, err := GetAPIList(exportAPIName, accessToken, apiManagerEndpoint)
+				if err == nil{
+					fmt.Println("Number of APIs exported: ", numberOfAPIsExported)
+				}else{
+					fmt.Println("Error:")
+					panic(err)
+				}
+
 			} else if resp.StatusCode() == 500 {
 				fmt.Println("Incorrect password")
 			}
