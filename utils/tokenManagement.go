@@ -6,7 +6,59 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"os"
+	"github.com/menuka94/wso2apim-cli-before-upstream-pull/utils"
+	"strings"
+	"errors"
 )
+
+func ExecutePreCommand(environment string) (string, string, error){
+	if utils.EnvExistsInEndpointsFile(environment) {
+		registrationEndpoint := utils.GetRegistrationEndpointOfEnv(environment)
+		apiManagerEndpoint := utils.GetAPIMEndpointOfEnv(environment)
+		tokenEndpoint := utils.GetTokenEndpointOfEnv(environment)
+		var username string
+		var password string
+		var clientID string
+		var clientSecret string
+
+		if utils.EnvExistsInKeysFile(environment) {
+			// client_id, client_secret exists in file
+			username = utils.GetUsernameOfEnv(environment)
+			fmt.Println("Username:", username)
+			password = utils.PromptForPassword()
+			clientID = utils.GetClientIDOfEnv(environment)
+			clientSecret = utils.GetClientSecretOfEnv(environment, password)
+
+			fmt.Println("ClientID:", clientID)
+			fmt.Println("ClientSecret:", clientSecret)
+		} else {
+			// env exists in endpoints file, but not in keys file
+			// no client_id, client_secret in file
+			// Get new values
+			username = strings.TrimSpace(utils.PromptForUsername())
+			password = utils.PromptForPassword()
+
+			fmt.Println("\nUsername: " + username + "\n")
+			clientID, clientSecret = utils.GetClientIDSecret(username, password, registrationEndpoint)
+
+			// Persist clientID, clientSecret, Username in file
+			encryptedClientSecret := utils.Encrypt([]byte(utils.GetMD5Hash(password)), clientSecret)
+			envKeys := utils.EnvKeys{clientID, encryptedClientSecret, username}
+			utils.AddNewEnvToKeysFile(environment, envKeys)
+		}
+
+		// Get OAuth Tokens
+		m := utils.GetOAuthTokens(username, password, utils.GetBase64EncodedCredentials(clientID, clientSecret), tokenEndpoint)
+		accessToken := m["access_token"]
+		fmt.Println("AccessToken:", accessToken)
+
+		return accessToken, apiManagerEndpoint, nil
+	}else{
+		return "", "", errors.New("Details incorrect/unavailable for environment "+ environment)
+	}
+}
+
 
 // GetClientIDSecret implemented using go-resty
 // provide username, password
@@ -105,5 +157,11 @@ func GetAccessTokenUsingRefreshToken(refreshToken string, b64encodedKeySecret st
 	data := []byte(resp.Body())
 	_ = json.Unmarshal(data, &m) // add response data to m
 
-	return m // m contains 'access_token', 'refresh_token' etc
+	if resp.StatusCode() == 200 {
+		fmt.Println("OAuth Tokens Received")
+	}else if resp.StatusCode() == 400{
+		fmt.Println("Error:", m["error_description"])
+		os.Exit(1)
+	}
+	return m
 }

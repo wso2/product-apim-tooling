@@ -16,7 +16,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/menuka94/wso2apim-cli/utils"
 	"log"
-	"strings"
 	"crypto/tls"
 	"net/http"
 	"os"
@@ -40,63 +39,9 @@ var ImportAPICmd = &cobra.Command{
 			fmt.Println(key, ":", arg)
 		}
 
-		if utils.EnvExistsInEndpointsFile(importEnvironment) {
+		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(importEnvironment)
 
-			registrationEndpoint := utils.GetRegistrationEndpointOfEnv(importEnvironment)
-			apiManagerEndpoint := utils.GetAPIMEndpointOfEnv(importEnvironment)
-			tokenEndpoint := utils.GetTokenEndpointOfEnv(importEnvironment)
-
-			var username string
-			var password string
-			var clientID string
-			var clientSecret string
-
-			// validate input
-			if importAPIName == "" {
-				log.Fatal("Filename cannot be blank.")
-				os.Exit(1)
-			}
-			if importEnvironment == "" {
-				log.Fatal("Environment cannot be blank.")
-				os.Exit(1)
-			}
-			// end of validate input
-
-			if utils.EnvExistsInKeysFile(importEnvironment) {
-				// client_id, client_secret,username exists in file
-				// get username from file
-				username = utils.GetUsernameOfEnv(importEnvironment)
-				fmt.Println("Username:", username)
-
-				// get client_id from file
-				clientID = utils.GetClientIDOfEnv(importEnvironment)
-
-				// get client_secret from file, password needed to decrypt client_secret
-				password = utils.PromptForPassword()
-				clientSecret = utils.GetClientSecretOfEnv(importEnvironment, password)
-
-				fmt.Println("ClientID:", clientID)
-				fmt.Println("ClientSecret:", clientSecret)
-			} else {
-				// env exists in endpoints file, but not in keys file (first use of the tool)
-				// no client_id, client_secret in file
-				// Get new values
-				username = strings.TrimSpace(utils.PromptForUsername())
-				password = utils.PromptForPassword()
-
-				fmt.Println("\nUsername: " + username + "\n")
-				clientID, clientSecret = utils.GetClientIDSecret(username, password, registrationEndpoint)
-
-				// Persist clientID, clientSecret, Username in file
-				encryptedClientSecret := utils.Encrypt([]byte(utils.GetMD5Hash(password)), clientSecret)
-				envKeys := utils.EnvKeys{clientID, encryptedClientSecret, username}
-				utils.AddNewEnvToKeysFile(importEnvironment, envKeys)
-			}
-
-			// Get OAuth Tokens
-			m := utils.GetOAuthTokens(username, password, utils.GetBase64EncodedCredentials(clientID, clientSecret), tokenEndpoint)
-			accessToken := m["access_token"]
-			fmt.Println("AccessToken:", accessToken)
+		if preCommandErr == nil {
 
 			resp := ImportAPI(importAPIName, apiManagerEndpoint, accessToken)
 			fmt.Printf("Status: %v\n", resp.Status)
@@ -107,7 +52,7 @@ var ImportAPICmd = &cobra.Command{
 			//fmt.Printf("Errors: %v\n", resp.Error)
 		} else {
 			// env_endpoints_all.yaml file is not configured properly by the user
-			log.Fatal("Error: env_endpoints_all.yaml does not contain necessary information for the environment " + importEnvironment)
+			log.Fatal("Error:", preCommandErr)
 		}
 	},
 }

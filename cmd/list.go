@@ -19,9 +19,10 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/menuka94/wso2apim-cli/utils"
-	"strings"
 	"github.com/go-resty/resty"
 	"encoding/json"
+	"log"
+	"crypto/tls"
 )
 
 var listEnvironment string
@@ -33,46 +34,10 @@ var ListCmd = &cobra.Command{
 	Long:  utils.ListCmdLongDesc,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("list called")
-		if utils.EnvExistsInEndpointsFile(listEnvironment) {
-			registrationEndpoint := utils.GetRegistrationEndpointOfEnv(listEnvironment)
-			apiManagerEndpoint := utils.GetAPIMEndpointOfEnv(listEnvironment)
-			tokenEndpoint := utils.GetTokenEndpointOfEnv(listEnvironment)
-			var username string
-			var password string
-			var clientID string
-			var clientSecret string
 
-			if utils.EnvExistsInKeysFile(listEnvironment){
-				// client_id, client_secret exists in file
-				username = utils.GetUsernameOfEnv(listEnvironment)
-				fmt.Println("Username:", username)
-				password = utils.PromptForPassword()
-				clientID = utils.GetClientIDOfEnv(listEnvironment)
-				clientSecret = utils.GetClientSecretOfEnv(listEnvironment, password)
+		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(listEnvironment)
 
-				fmt.Println("ClientID:", clientID)
-				fmt.Println("ClientSecret:", clientSecret)
-			}else{
-				// env exists in endpoints file, but not in keys file
-				// no client_id, client_secret in file
-				// Get new values
-				username = strings.TrimSpace(utils.PromptForUsername())
-				password = utils.PromptForPassword()
-
-				fmt.Println("\nUsername:", username)
-				clientID, clientSecret = utils.GetClientIDSecret(username, password, registrationEndpoint)
-
-				// Persist clientID, clientSecret, Username in file
-				encryptedClientSecret := utils.Encrypt([]byte(utils.GetMD5Hash(password)), clientSecret)
-				envKeys := utils.EnvKeys{clientID, encryptedClientSecret, username}
-				utils.AddNewEnvToKeysFile(exportEnvironment, envKeys)
-			}
-
-			// Get OAuth Tokens
-			m := utils.GetOAuthTokens(username, password, utils.GetBase64EncodedCredentials(clientID, clientSecret), tokenEndpoint)
-			accessToken := m["access_token"]
-			fmt.Println("AccessToken:", accessToken)
-
+		if preCommandErr == nil {
 			count, apis, err := GetAPIList("", accessToken, apiManagerEndpoint)
 
 			if err == nil{
@@ -81,14 +46,17 @@ var ListCmd = &cobra.Command{
 						fmt.Println(api.Name + " v" + api.Version)
 					}
 			}else{
-				fmt.Println("Error:")
+				fmt.Println("Error in GetAPIList():")
 				panic(err)
 			}
+		}else{
+			log.Fatal("Cmd 'list'::Error: ", preCommandErr)
 		}
 	},
 }
 
 func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (int32, []utils.API, error){
+	fmt.Println("========== Starting GetAPIList()")
 	url := apiManagerEndpoint
 
 	// append '/' to the end if there isn't one already
@@ -100,9 +68,13 @@ func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (in
 
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
+
+	resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTPS certificates
 	resp, err := resty.R().
 			SetHeaders(headers).
 			Get(url)
+
+	fmt.Println("")
 
 
 	fmt.Println("GetAPIList(): Response:", resp.Status())
@@ -115,8 +87,10 @@ func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (in
 			panic(unmarshalError)
 		}
 
-		return apiListResponse.Count, apiListResponse.List, err
+		fmt.Println("========== Stopping GetAPIList()")
+		return apiListResponse.Count, apiListResponse.List, nil
 	}else{
+		fmt.Println("========== Stopping GetAPIList()")
 		return 0, nil, err
 	}
 

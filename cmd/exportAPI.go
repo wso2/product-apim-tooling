@@ -20,13 +20,13 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/menuka94/wso2apim-cli/utils"
 	constants "github.com/menuka94/wso2apim-cli/utils"
-	"strings"
 	"log"
 	"io/ioutil"
 	"os"
 	"github.com/go-resty/resty"
 
 	"regexp"
+	"crypto/tls"
 )
 
 var exportAPIName string
@@ -41,47 +41,9 @@ var ExportAPICmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("exportAPI called")
 
-		if utils.EnvExistsInEndpointsFile(exportEnvironment) {
+		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(exportEnvironment)
 
-			registrationEndpoint := utils.GetRegistrationEndpointOfEnv(exportEnvironment)
-			apiManagerEndpoint := utils.GetAPIMEndpointOfEnv(exportEnvironment)
-			tokenEndpoint := utils.GetTokenEndpointOfEnv(exportEnvironment)
-			var username string
-			var password string
-			var clientID string
-			var clientSecret string
-
-			if utils.EnvExistsInKeysFile(exportEnvironment) {
-				// client_id, client_secret exists in file
-				username = utils.GetUsernameOfEnv(exportEnvironment)
-				fmt.Println("Username:", username)
-				password = utils.PromptForPassword()
-				clientID = utils.GetClientIDOfEnv(exportEnvironment)
-				clientSecret = utils.GetClientSecretOfEnv(exportEnvironment, password)
-
-				fmt.Println("ClientID:", clientID)
-				fmt.Println("ClientSecret:", clientSecret)
-			} else {
-				// env exists in endpoints file, but not in keys file
-				// no client_id, client_secret in file
-				// Get new values
-				username = strings.TrimSpace(utils.PromptForUsername())
-				password = utils.PromptForPassword()
-
-				fmt.Println("\nUsername: " + username + "\n")
-				clientID, clientSecret = utils.GetClientIDSecret(username, password, registrationEndpoint)
-
-				// Persist clientID, clientSecret, Username in file
-				encryptedClientSecret := utils.Encrypt([]byte(utils.GetMD5Hash(password)), clientSecret)
-				envKeys := utils.EnvKeys{clientID, encryptedClientSecret, username}
-				utils.AddNewEnvToKeysFile(exportEnvironment, envKeys)
-			}
-
-			// Get OAuth Tokens
-			m := utils.GetOAuthTokens(username, password, utils.GetBase64EncodedCredentials(clientID, clientSecret), tokenEndpoint)
-			accessToken := m["access_token"]
-			fmt.Println("AccessToken:", accessToken)
-
+		if preCommandErr == nil {
 			resp := ExportAPI(exportAPIName, exportAPIVersion, apiManagerEndpoint, accessToken)
 
 			// Print info on response
@@ -118,9 +80,8 @@ var ExportAPICmd = &cobra.Command{
 				fmt.Println("Incorrect password")
 			}
 
-		} else {
-			// env_endpoints_all.yaml file is not configured properly by the user
-			log.Fatal("Error: env_endpoints_all.yaml does not contain necessary information for the environment " + exportEnvironment)
+		} else{
+			log.Fatal("Error: ", preCommandErr)
 		}
 	},
 }
@@ -143,6 +104,7 @@ func ExportAPI(name string, version string, url string, accessToken string) *res
 	headers[constants.HeaderAuthorization] = constants.HeaderValueAuthBearerPrefix + " " + accessToken
 	headers[constants.HeaderAccept] = constants.HeaderValueApplicationZip
 
+	resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTPS certificates
 	resp, err := resty.R().
 		SetHeaders(headers).
 		Get(url)
