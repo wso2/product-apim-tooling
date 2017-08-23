@@ -51,3 +51,8 @@ env_keys_all.yaml
 # Binaries
 wso2apim-cli
 wso2apim
+
+
+# Test Coverage Indicators
+utils/c.out
+utils/coverage.html

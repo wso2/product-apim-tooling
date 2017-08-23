@@ -69,7 +69,7 @@ var ConfigCmdExamples = dedent.Dedent(`
 // ImportAPI command related usage info
 const ImportAPICmdShortDesc string = "Import API"
 
-var ImportAPICmdLongDesc string = "Import an API in a different environment to the current environment"
+var ImportAPICmdLongDesc string = "Import an API to an environment"
 
 var ImportAPICmdExamples = dedent.Dedent(`
 	wso2apim-cli importAPI -n TwitterAPI -v 1.0.0 -e dev
@@ -79,7 +79,7 @@ var ImportAPICmdExamples = dedent.Dedent(`
 // ExportAPI command related usage info
 const ExportAPICmdShortDesc string = "Export API"
 
-var ExportAPICmdLongDesc string = "Export an API in the current environment to a different environment"
+var ExportAPICmdLongDesc string = "Export an API from an environment"
 
 var ExportAPICmdExamples = dedent.Dedent(`
 	wso2apim-cli exportAPI -n TwitterAPI -v 1.0.0 -e dev

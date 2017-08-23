@@ -25,6 +25,7 @@ type EnvEndpoints struct {
 	RegistrationEndpoint string `yaml:"registration_endpoint"`
 	TokenEndpoint        string `yaml:"token_endpoint"`
 }
+// ---------------- End of Structs for YAML Config Files ---------------------------------
 
 type API struct {
 	ID              string `json:"id"`
@@ -40,70 +41,3 @@ type APIListResponse struct {
 	Count int32 `json:"count"`
 	List []API `json:"list"`
 }
-
-// ---------------- End of Structs for YAML Config Files ---------------------------------
-
-// variables
-var envEndpointsAll EnvEndpointsAll
-var envKeysAll EnvKeysAll
-
-// Validates the configuration file
-func (envEndpointsAll *EnvEndpointsAll) validate() {
-	//
-}
-
-/**
-Load the Environments Configuration file from the config.yaml file. If the file is not there
-create a new config.yaml file and add default values
-Validates the configuration, if it exists
-*/
-func LoadEnvConfig(envLocalConfig string) /* EnvEndpointsAll */ {
-}
-
-/*
-// Returns a pointer to EnvEndpointsAll
-func GetEnvEndpointsAll() *EnvEndpointsAll {
-	if &envEndpointsAll == nil {
-		HandleErrorAndExit("Env configuration is not available", nil)
-	}
-	return &envEndpointsAll
-}
-
-// Returns a pointer to EnvKeysAll
-func GetEnvKeysAll() *EnvKeysAll {
-	if &envKeysAll == nil {
-		HandleErrorAndExit("EnvKeys configuration is not available", nil)
-	}
-	return &envKeysAll
-}
-*/
-
-/*
-env_keys_config.yaml (Programmatically edited)
-===============
-environments:
-	dev:
-		client_id: xxxxxxxxxx
-		client_secret: xxxxxxxxxx
-		username: xxxxxx
-
-	staging:
-		client_id: xxxxxxxxxx
-		client_secret: xxxxxxxxxx
-		username: xxxxxx
- */
-
-/*
-env_config.yaml (Manually edited)
-===============
-environments:
-	dev:
-		apim_endpoint: xxxxxxxxx
-		registration_endpoint: xxxxxxxxxx
-		token_endpoint: xxxxxxxxx
-
-	staging:
-		apim_endpoint: xxxxxxxxx
-		registration_endpoint: xxxxxxxxxx
-		token_endpoint: xxxxxxxxx
-*/

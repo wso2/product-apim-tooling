@@ -29,7 +29,7 @@ var cfgFile string
 
 // This represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:   "wso2apim",
+	Use:   "wso2apim-cli",
 	Short: utils.RootCmdShortDesc,
 	Long:  utils.RootCmdLongDesc,
 

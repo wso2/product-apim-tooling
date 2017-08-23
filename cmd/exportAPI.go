@@ -38,7 +38,7 @@ var FlagPassword string
 // ExportAPICmd represents the exportAPI command
 var ExportAPICmd = &cobra.Command{
 	Use:   "export-api (--name <name-of-the-api> --version <version-of-the-api> --environment <environment-from-which-the-api-should-be-exported>)",
-	Short: utils.ExportAPICmdLongDesc,
+	Short: utils.ExportAPICmdShortDesc,
 	Long:  utils.ExportAPICmdLongDesc,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("exportAPI called")
@@ -124,7 +124,6 @@ func ExportAPI(name string, version string, url string, accessToken string) *res
 func init() {
 	RootCmd.AddCommand(ExportAPICmd)
 	ExportAPICmd.Flags().StringVarP(&exportAPIName, "name", "n", "", "Name of the API to be exported")
-	//ExportAPICmd.MarkFlagRequired("name")
 	ExportAPICmd.Flags().StringVarP(&exportAPIVersion, "version", "v", "", "Version of the API to be exported")
 	ExportAPICmd.Flags().StringVarP(&exportEnvironment, "environment", "e", "", "Environment to which the API should be exported")
 
