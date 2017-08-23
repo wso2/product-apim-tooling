@@ -1,5 +1,7 @@
 package utils
 
+import "errors"
+
 // Return true if 'env' exists in the env_keys_all.yaml
 // and false otherwise
 func EnvExistsInKeysFile(env string) bool {
@@ -31,6 +33,22 @@ func AddNewEnvToKeysFile(name string, envKeys EnvKeys) {
 	envKeysAll.Environments[name] = envKeys
 
 	WriteConfigFile(envKeysAll, "./env_keys_all.yaml")
+}
+
+func RemoveEnvFromKeysFile(env string) (error){
+	envKeysAll := GetEnvKeysAllFromFile()
+	if EnvExistsInEndpointsFile(env){
+		if EnvExistsInKeysFile(env){
+			delete(envKeysAll.Environments, env)
+			WriteConfigFile(envKeysAll, "./env_keys_all.yaml")
+			return nil
+		}else{
+			return errors.New("Environment is not initialized yet. No user data to reset")
+		}
+	}else{
+		return errors.New("Environment not found in env_endpoints_all.yaml")
+	}
+
 }
 
 // Get keys of environment 'env' from the file env_keys_all.yaml

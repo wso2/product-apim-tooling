@@ -29,7 +29,7 @@ var cfgFile string
 
 // This represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:   "wso2apim-cli",
+	Use:   "wso2apim",
 	Short: utils.RootCmdShortDesc,
 	Long:  utils.RootCmdLongDesc,
 
@@ -51,8 +51,8 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	cobra.EnableCommandSorting = false
-	RootCmd.PersistentFlags().BoolVar(&Verbose, "verbose", false, "enable verbose mode")
-	RootCmd.PersistentFlags().StringP("author", "a", "Menuka Warushavithana", "Author of the project")
+	RootCmd.PersistentFlags().BoolVar(&Verbose, "verbose", false, "Enable verbose mode")
+	RootCmd.PersistentFlags().StringP("author", "a", "", "WSO2")
 
 	viper.BindPFlag("author", RootCmd.PersistentFlags().Lookup("author"))
 

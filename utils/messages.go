@@ -98,3 +98,15 @@ var ListCmdExamples = dedent.Dedent(`
 		wso2apim-cli list -e dev
 		wso2apim-cli list -e staging
 		`)
+
+// ResetUser command related usage Info
+
+const ResetUserCmdShortDesc string = "Reset user of an environment"
+var ResetUserCmdLongDesc = dedent.Dedent(`
+	Reset user data of a particular environment (Clear the entry in env_keys_all.yaml file)
+	`)
+
+var ReseUserCmdExamples = dedent.Dedent(`
+		wso2apim-cli reset-user -e dev
+		wso2apim-cli reset-user -e staging
+		`)

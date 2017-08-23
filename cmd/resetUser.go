@@ -21,28 +21,38 @@ import (
 	"github.com/menuka94/wso2apim-cli/utils"
 )
 
-// LogoutCmd represents the logout command
-var LogoutCmd = &cobra.Command{
-	Use:   "logout",
-	Short: utils.LogoutCmdShortDesc,
-	Long:  utils.LogoutCmdLongDesc,
+var resetUserEnvironment string
+
+// ResetUserCmd represents the resetUser command
+var ResetUserCmd = &cobra.Command{
+	Use:   "reset-user",
+	Short: utils.ResetUserCmdShortDesc,
+	Long: utils.ResetUserCmdLongDesc,
 	Run: func(cmd *cobra.Command, args []string) {
-		// TODO: Work your own magic here
-		fmt.Println("logout called")
+		fmt.Println("resetUser called")
+
+		err := utils.RemoveEnvFromKeysFile(resetUserEnvironment)
+		if err != nil {
+			fmt.Println("Error clearning user data for environment: " + resetUserEnvironment)
+			panic(err)
+		}else{
+			fmt.Println("Successfully cleared user data for environment: " + resetUserEnvironment)
+		}
 	},
 }
 
 func init() {
-	RootCmd.AddCommand(LogoutCmd)
+	RootCmd.AddCommand(ResetUserCmd)
+	ResetUserCmd.Flags().StringVarP(&resetUserEnvironment, "environment", "e", "", "Clear user details of an environment")
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// LogoutCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// ResetUserCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// LogoutCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// ResetUserCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 }

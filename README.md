@@ -25,6 +25,11 @@ Complete the config file `env_endpoints_all.yaml` before starting the tool.
         Example:
             wso2apim list -e dev
             wso2ppim list -e staging 
+    reset-user
+        Flags
+            --environment, -e
+        Example:
+            wso2paim reset-user -e dev
     version
         wso2apim version 
 #### Global Flags
