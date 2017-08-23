@@ -35,17 +35,20 @@ func AddNewEnvToKeysFile(name string, envKeys EnvKeys) {
 	WriteConfigFile(envKeysAll, "./env_keys_all.yaml")
 }
 
-func RemoveEnvFromKeysFile(env string) (error){
+func RemoveEnvFromKeysFile(env string) (error) {
+	if env == "" {
+		return errors.New("Environment cannot be blank")
+	}
 	envKeysAll := GetEnvKeysAllFromFile()
-	if EnvExistsInEndpointsFile(env){
-		if EnvExistsInKeysFile(env){
+	if EnvExistsInEndpointsFile(env) {
+		if EnvExistsInKeysFile(env) {
 			delete(envKeysAll.Environments, env)
 			WriteConfigFile(envKeysAll, "./env_keys_all.yaml")
 			return nil
-		}else{
+		} else {
 			return errors.New("Environment is not initialized yet. No user data to reset")
 		}
-	}else{
+	} else {
 		return errors.New("Environment not found in env_endpoints_all.yaml")
 	}
 
@@ -53,58 +56,56 @@ func RemoveEnvFromKeysFile(env string) (error){
 
 // Get keys of environment 'env' from the file env_keys_all.yaml
 // client_secret is not decrypted
-func GetKeysOfEnvironment(env string) *EnvKeys {
+func GetKeysOfEnvironment(env string) (*EnvKeys, error) {
 	envKeysAll := GetEnvKeysAllFromFile()
 	for _env, keys := range envKeysAll.Environments {
 		if _env == env {
-			return &keys
+			return &keys, nil
 		}
 	}
 
-	// TODO: Throw error instead of returning an empty object
-	return &EnvKeys{"", "", ""}
+	return nil, errors.New("Error getting keys of environment '" + env + "'")
 }
 
 // Return EnvEndpoints for a given environment
-func GetEndpointsOfEnvironment(env string) *EnvEndpoints {
+func GetEndpointsOfEnvironment(env string) (*EnvEndpoints, error) {
 	envEndpointsAll := GetEnvEndpointsAllFromFile()
 	for _env, endpoints := range envEndpointsAll.Environments {
 		if _env == env {
-			return &endpoints
+			return &endpoints, nil
 		}
 	}
 
-	// TODO: Throw error instead of returning an empty object
-	return &EnvEndpoints{"", "", ""}
+	return nil, errors.New("Error getting endpoints of environment '" + env + "'")
 }
 
 // Get APIMEndpoint of a given environment
 func GetAPIMEndpointOfEnv(env string) string {
-	envEndpoints := GetEndpointsOfEnvironment(env)
+	envEndpoints, _ := GetEndpointsOfEnvironment(env)
 	return envEndpoints.APIManagerEndpoint
 }
 
 // Get TokenEndpoint of a given environment
 func GetTokenEndpointOfEnv(env string) string {
-	envEndpoints := GetEndpointsOfEnvironment(env)
+	envEndpoints, _ := GetEndpointsOfEnvironment(env)
 	return envEndpoints.TokenEndpoint
 }
 
 // Get RegistrationEndpoint of a given environment
 func GetRegistrationEndpointOfEnv(env string) string {
-	envEndpoints := GetEndpointsOfEnvironment(env)
+	envEndpoints, _ := GetEndpointsOfEnvironment(env)
 	return envEndpoints.RegistrationEndpoint
 }
 
 // Get username of an environment given the environment
 func GetUsernameOfEnv(env string) string {
-	envKeys := GetKeysOfEnvironment(env)
+	envKeys, _ := GetKeysOfEnvironment(env)
 	return envKeys.Username
 }
 
 // Get client_id of an environment given the environment
 func GetClientIDOfEnv(env string) string {
-	envKeys := GetKeysOfEnvironment(env)
+	envKeys, _ := GetKeysOfEnvironment(env)
 	return envKeys.ClientID
 }
 
@@ -112,7 +113,7 @@ func GetClientIDOfEnv(env string) string {
 // password is needed to decrypt client_secret
 // decryption_key = md5(password)
 func GetClientSecretOfEnv(env string, password string) string {
-	envKeys := GetKeysOfEnvironment(env)
+	envKeys, _ := GetKeysOfEnvironment(env)
 	decryptedClientSecret := Decrypt([]byte(GetMD5Hash(password)), envKeys.ClientSecret)
 	return decryptedClientSecret
 }

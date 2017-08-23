@@ -21,7 +21,7 @@ func WriteConfigFile(c interface{}, envConfigFilePath string) {
 }
 
 // Read and return EnvKeysAll
-func GetEnvKeysAllFromFile() EnvKeysAll {
+func GetEnvKeysAllFromFile() *EnvKeysAll {
 	data, err := ioutil.ReadFile("./env_keys_all.yaml")
 	if err != nil {
 		fmt.Println("Error reading env_keys_all.yaml")
@@ -36,7 +36,7 @@ func GetEnvKeysAllFromFile() EnvKeysAll {
 	}
 	//fmt.Printf("%+v\n", envKeysAll)
 
-	return envKeysAll
+	return &envKeysAll
 }
 
 // Read and return EnvEndpointsAll
