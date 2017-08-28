@@ -66,7 +66,14 @@ func init() {
 	RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 	// Temporary code
-	//utils.ZipDir("./exported/admin-got-1.0.0", "./exported/got.zip")
+	//rootDir := "/home/menuka/.go/src/github.com/menuka94/wso2apim-cli/"
+	//err := utils.ZipDir(rootDir + "exported/hogwarts", rootDir + "exported/hogwarts.zip" )
+	//if err == nil {
+	//	fmt.Println("Directory Zipped Successfully")
+	//}else{
+	//	fmt.Println("Error: ", err)
+	//	os.Exit(1)
+	//}
 }
 
 // initConfig reads in config file and ENV variables if set.

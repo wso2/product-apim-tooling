@@ -65,18 +65,30 @@ func ImportAPI(name string, url string, accessToken string) *http.Response {
 	}
 	url += "import/apis"
 
+	filePath, _ := os.Getwd()
+	filePath += "/exported/" + name
+	fmt.Println("filePath:", filePath)
+
 	// check if '.zip' exists in the input 'name'
 	hasZipExtension, _ := regexp.MatchString(`^\S+\.zip$`, name)
 
 	if hasZipExtension {
 		// import the zip file directly
+		fmt.Println("hasZipExtension: ", true)
 
 	}else{
+		fmt.Println("hasZipExtension: ", false)
 		// search for a directory with the given name
+		destination, _ := os.Getwd()
+		destination += "/exported/" + name + ".zip"
+		err := utils.ZipDir(filePath,  destination)
+		if err != nil {
+			fmt.Println("Error:", err)
+			os.Exit(1)
+		}
+		filePath += ".zip"
 	}
 
-	filePath, _ := os.Getwd()
-	filePath += "/exported/" + name
 	extraParams := map[string]string{}
 
 	req, err := newFileUploadRequest(url, extraParams, "file", filePath, accessToken)
