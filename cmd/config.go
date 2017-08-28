@@ -17,15 +17,15 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
 	"github.com/menuka94/wso2apim-cli/utils"
+	"github.com/spf13/cobra"
 )
 
 // ConfigCmd represents the config command
 var ConfigCmd = &cobra.Command{
 	Use:   "config",
 	Short: utils.ConfigCmdShortDesc,
-	Long: utils.ConfigCmdLongDesc,
+	Long:  utils.ConfigCmdLongDesc,
 	Run: func(cmd *cobra.Command, args []string) {
 		// TODO: Work your own magic here
 		fmt.Println("config called")

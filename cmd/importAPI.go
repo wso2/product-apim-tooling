@@ -13,16 +13,17 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
-	"github.com/menuka94/wso2apim-cli/utils"
-	"log"
+	"bytes"
 	"crypto/tls"
+	"github.com/menuka94/wso2apim-cli/utils"
+	"github.com/spf13/cobra"
+	"io"
+	"log"
+	"mime/multipart"
 	"net/http"
 	"os"
-	"bytes"
 	"path/filepath"
-	"io"
-	"mime/multipart"
+	"regexp"
 )
 
 var importAPIName string
@@ -64,12 +65,21 @@ func ImportAPI(name string, url string, accessToken string) *http.Response {
 	}
 	url += "import/apis"
 
-	filepath, _ := os.Getwd()
-	filepath += "/exported/" + name
-	extraParams := map[string]string{
+	// check if '.zip' exists in the input 'name'
+	hasZipExtension, _ := regexp.MatchString(`^\S+\.zip$`, name)
+
+	if hasZipExtension {
+		// import the zip file directly
+
+	}else{
+		// search for a directory with the given name
 	}
 
-	req, err := newFileUploadRequest(url, extraParams, "file", filepath, accessToken)
+	filePath, _ := os.Getwd()
+	filePath += "/exported/" + name
+	extraParams := map[string]string{}
+
+	req, err := newFileUploadRequest(url, extraParams, "file", filePath, accessToken)
 	if err != nil {
 		fmt.Println("Error creating request")
 		log.Fatal(err)

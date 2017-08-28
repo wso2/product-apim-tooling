@@ -7,28 +7,27 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"github.com/menuka94/wso2apim-cli-before-upstream-pull/utils"
 	"strings"
 	"errors"
 )
 
 func ExecutePreCommand(environment string) (string, string, error){
-	if utils.EnvExistsInEndpointsFile(environment) {
-		registrationEndpoint := utils.GetRegistrationEndpointOfEnv(environment)
-		apiManagerEndpoint := utils.GetAPIMEndpointOfEnv(environment)
-		tokenEndpoint := utils.GetTokenEndpointOfEnv(environment)
+	if EnvExistsInEndpointsFile(environment) {
+		registrationEndpoint := GetRegistrationEndpointOfEnv(environment)
+		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment)
+		tokenEndpoint := GetTokenEndpointOfEnv(environment)
 		var username string
 		var password string
 		var clientID string
 		var clientSecret string
 
-		if utils.EnvExistsInKeysFile(environment) {
+		if EnvExistsInKeysFile(environment) {
 			// client_id, client_secret exists in file
-			username = utils.GetUsernameOfEnv(environment)
+			username = GetUsernameOfEnv(environment)
 			fmt.Println("Username:", username)
-			password = utils.PromptForPassword()
-			clientID = utils.GetClientIDOfEnv(environment)
-			clientSecret = utils.GetClientSecretOfEnv(environment, password)
+			password = PromptForPassword()
+			clientID = GetClientIDOfEnv(environment)
+			clientSecret = GetClientSecretOfEnv(environment, password)
 
 			fmt.Println("ClientID:", clientID)
 			fmt.Println("ClientSecret:", clientSecret)
@@ -36,20 +35,20 @@ func ExecutePreCommand(environment string) (string, string, error){
 			// env exists in endpoints file, but not in keys file
 			// no client_id, client_secret in file
 			// Get new values
-			username = strings.TrimSpace(utils.PromptForUsername())
-			password = utils.PromptForPassword()
+			username = strings.TrimSpace(PromptForUsername())
+			password = PromptForPassword()
 
 			fmt.Println("\nUsername: " + username + "\n")
-			clientID, clientSecret = utils.GetClientIDSecret(username, password, registrationEndpoint)
+			clientID, clientSecret = GetClientIDSecret(username, password, registrationEndpoint)
 
 			// Persist clientID, clientSecret, Username in file
-			encryptedClientSecret := utils.Encrypt([]byte(utils.GetMD5Hash(password)), clientSecret)
-			envKeys := utils.EnvKeys{clientID, encryptedClientSecret, username}
-			utils.AddNewEnvToKeysFile(environment, envKeys)
+			encryptedClientSecret := Encrypt([]byte(GetMD5Hash(password)), clientSecret)
+			envKeys := EnvKeys{clientID, encryptedClientSecret, username}
+			AddNewEnvToKeysFile(environment, envKeys)
 		}
 
 		// Get OAuth Tokens
-		m := utils.GetOAuthTokens(username, password, utils.GetBase64EncodedCredentials(clientID, clientSecret), tokenEndpoint)
+		m := GetOAuthTokens(username, password, GetBase64EncodedCredentials(clientID, clientSecret), tokenEndpoint)
 		accessToken := m["access_token"]
 		fmt.Println("AccessToken:", accessToken)
 

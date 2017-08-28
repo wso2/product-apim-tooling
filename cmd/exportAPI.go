@@ -16,16 +16,14 @@ package cmd
 
 import (
 	"fmt"
-
-	"github.com/spf13/cobra"
+	"github.com/go-resty/resty"
 	"github.com/menuka94/wso2apim-cli/utils"
 	constants "github.com/menuka94/wso2apim-cli/utils"
-	"log"
+	"github.com/spf13/cobra"
 	"io/ioutil"
+	"log"
 	"os"
-	"github.com/go-resty/resty"
 
-	"regexp"
 	"crypto/tls"
 )
 
@@ -73,9 +71,9 @@ var ExportAPICmd = &cobra.Command{
 				fmt.Println("Succesfully exported and wrote to file")
 
 				numberOfAPIsExported, _, err := GetAPIList(exportAPIName, accessToken, apiManagerEndpoint)
-				if err == nil{
+				if err == nil {
 					fmt.Println("Number of APIs exported: ", numberOfAPIsExported)
-				}else{
+				} else {
 					fmt.Println("Error:")
 					panic(err)
 				}
@@ -84,7 +82,7 @@ var ExportAPICmd = &cobra.Command{
 				fmt.Println("Incorrect password")
 			}
 
-		} else{
+		} else {
 			log.Fatal("Error: ", preCommandErr)
 		}
 	},
@@ -96,10 +94,6 @@ func ExportAPI(name string, version string, url string, accessToken string) *res
 		url += "/"
 	}
 	url += "export/apis"
-
-	// check if zip exists
-	hasZipExtension, _ := regexp.MatchString(`^\S+\.zip$`, name)
-	fmt.Println(hasZipExtension)
 
 	query := "?query=" + name
 	url += query
@@ -127,8 +121,8 @@ func init() {
 	ExportAPICmd.Flags().StringVarP(&exportAPIVersion, "version", "v", "", "Version of the API to be exported")
 	ExportAPICmd.Flags().StringVarP(&exportEnvironment, "environment", "e", "", "Environment to which the API should be exported")
 
-	ExportAPICmd.Flags().StringVarP(&FlagUsername, "username", "u", "","Username")
-	ExportAPICmd.Flags().StringVarP(&FlagPassword, "password", "p", "","Password")
+	ExportAPICmd.Flags().StringVarP(&FlagUsername, "username", "u", "", "Username")
+	ExportAPICmd.Flags().StringVarP(&FlagPassword, "password", "p", "", "Password")
 
 	// Here you will define your flags and configuration settings.
 

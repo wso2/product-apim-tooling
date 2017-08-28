@@ -17,8 +17,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
 	"github.com/menuka94/wso2apim-cli/utils"
+	"github.com/spf13/cobra"
 )
 
 // InitCmd represents the init command

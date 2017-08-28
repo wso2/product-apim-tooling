@@ -17,12 +17,12 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
-	"github.com/menuka94/wso2apim-cli/utils"
-	"github.com/go-resty/resty"
-	"encoding/json"
-	"log"
 	"crypto/tls"
+	"encoding/json"
+	"github.com/go-resty/resty"
+	"github.com/menuka94/wso2apim-cli/utils"
+	"github.com/spf13/cobra"
+	"log"
 )
 
 var listEnvironment string
@@ -40,22 +40,22 @@ var ListCmd = &cobra.Command{
 		if preCommandErr == nil {
 			count, apis, err := GetAPIList("", accessToken, apiManagerEndpoint)
 
-			if err == nil{
-					fmt.Println("Count:", count)
-					for _, api := range apis {
-						fmt.Println(api.Name + " v" + api.Version)
-					}
-			}else{
+			if err == nil {
+				fmt.Println("Count:", count)
+				for _, api := range apis {
+					fmt.Println(api.Name + " v" + api.Version)
+				}
+			} else {
 				fmt.Println("Error in GetAPIList():")
 				panic(err)
 			}
-		}else{
+		} else {
 			log.Fatal("Cmd 'list'::Error: ", preCommandErr)
 		}
 	},
 }
 
-func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (int32, []utils.API, error){
+func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (int32, []utils.API, error) {
 	fmt.Println("========== Starting GetAPIList()")
 	url := apiManagerEndpoint
 
@@ -71,11 +71,10 @@ func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (in
 
 	resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTPS certificates
 	resp, err := resty.R().
-			SetHeaders(headers).
-			Get(url)
+		SetHeaders(headers).
+		Get(url)
 
 	fmt.Println("")
-
 
 	fmt.Println("GetAPIList(): Response:", resp.Status())
 	if resp.StatusCode() == 200 {
@@ -89,7 +88,7 @@ func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (in
 
 		fmt.Println("========== Stopping GetAPIList()")
 		return apiListResponse.Count, apiListResponse.List, nil
-	}else{
+	} else {
 		fmt.Println("========== Stopping GetAPIList()")
 		return 0, nil, err
 	}
@@ -99,7 +98,6 @@ func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (in
 func init() {
 	RootCmd.AddCommand(ListCmd)
 	ListCmd.Flags().StringVarP(&listEnvironment, "environment", "e", "", "Environment to be searched")
-
 
 	// Here you will define your flags and configuration settings.
 

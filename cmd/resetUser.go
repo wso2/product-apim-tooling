@@ -17,8 +17,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
 	"github.com/menuka94/wso2apim-cli/utils"
+	"github.com/spf13/cobra"
 )
 
 var resetUserEnvironment string
@@ -27,7 +27,7 @@ var resetUserEnvironment string
 var ResetUserCmd = &cobra.Command{
 	Use:   "reset-user",
 	Short: utils.ResetUserCmdShortDesc,
-	Long: utils.ResetUserCmdLongDesc,
+	Long:  utils.ResetUserCmdLongDesc,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("resetUser called")
 
@@ -35,7 +35,7 @@ var ResetUserCmd = &cobra.Command{
 		if err != nil {
 			fmt.Println("Error clearning user data for environment: " + resetUserEnvironment)
 			panic(err)
-		}else{
+		} else {
 			fmt.Println("Successfully cleared user data for environment: " + resetUserEnvironment)
 		}
 	},
