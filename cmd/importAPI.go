@@ -28,6 +28,8 @@ import (
 
 var importAPIName string
 var importEnvironment string
+var ImportAPICmdUsername string
+var ImportAPICmdPassword string
 
 // ImportAPICmd represents the importAPI command
 var ImportAPICmd = &cobra.Command{
@@ -40,7 +42,7 @@ var ImportAPICmd = &cobra.Command{
 			fmt.Println(key, ":", arg)
 		}
 
-		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(importEnvironment)
+		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(importEnvironment, ImportAPICmdUsername, ImportAPICmdPassword)
 
 		if preCommandErr == nil {
 
@@ -155,6 +157,8 @@ func init() {
 	RootCmd.AddCommand(ImportAPICmd)
 	ImportAPICmd.Flags().StringVarP(&importAPIName, "name", "n", "", "Name of the API to be imported")
 	ImportAPICmd.Flags().StringVarP(&importEnvironment, "environment", "e", "", "Environment from the which the API should be imported")
+	ImportAPICmd.Flags().StringVarP(&ImportAPICmdUsername, "username", "u", "", "Username")
+	ImportAPICmd.Flags().StringVarP(&ImportAPICmdPassword, "password", "p", "", "Password")
 
 	// Here you will define your flags and configuration settings.
 

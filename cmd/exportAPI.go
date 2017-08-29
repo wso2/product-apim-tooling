@@ -30,8 +30,8 @@ import (
 var exportAPIName string
 var exportAPIVersion string
 var exportEnvironment string
-var FlagUsername string
-var FlagPassword string
+var ExportAPICmdUsername string
+var ExportAPICmdPassword string
 
 // ExportAPICmd represents the exportAPI command
 var ExportAPICmd = &cobra.Command{
@@ -41,7 +41,7 @@ var ExportAPICmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("exportAPI called")
 
-		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(exportEnvironment)
+		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(exportEnvironment, ExportAPICmdUsername, ExportAPICmdPassword)
 
 		if preCommandErr == nil {
 			resp := ExportAPI(exportAPIName, exportAPIVersion, apiManagerEndpoint, accessToken)
@@ -121,8 +121,8 @@ func init() {
 	ExportAPICmd.Flags().StringVarP(&exportAPIVersion, "version", "v", "", "Version of the API to be exported")
 	ExportAPICmd.Flags().StringVarP(&exportEnvironment, "environment", "e", "", "Environment to which the API should be exported")
 
-	ExportAPICmd.Flags().StringVarP(&FlagUsername, "username", "u", "", "Username")
-	ExportAPICmd.Flags().StringVarP(&FlagPassword, "password", "p", "", "Password")
+	ExportAPICmd.Flags().StringVarP(&ExportAPICmdUsername, "username", "u", "", "Username")
+	ExportAPICmd.Flags().StringVarP(&ExportAPICmdPassword, "password", "p", "", "Password")
 
 	// Here you will define your flags and configuration settings.
 

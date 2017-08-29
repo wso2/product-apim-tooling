@@ -26,6 +26,8 @@ import (
 )
 
 var listEnvironment string
+var ListCmdUsername string
+var ListCmdPassword string
 
 // ListCmd represents the list command
 var ListCmd = &cobra.Command{
@@ -35,13 +37,21 @@ var ListCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("list called")
 
-		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(listEnvironment)
+		var accessToken, apiManagerEndpoint string
+		var preCommandErr error
+
+		if ListCmdUsername == "" && ListCmdPassword == "" {
+			accessToken, apiManagerEndpoint, preCommandErr = utils.ExecutePreCommand(listEnvironment, ListCmdUsername, ListCmdPassword)
+		}else if ListCmdUsername != "" && ListCmdPassword != "" {
+		}else{
+			log.Fatal("Incorrect command. Run 'wso2apim --help' to see details")
+		}
 
 		if preCommandErr == nil {
 			count, apis, err := GetAPIList("", accessToken, apiManagerEndpoint)
 
 			if err == nil {
-				fmt.Println("Count:", count)
+				fmt.Println("No. of APIs:", count)
 				for _, api := range apis {
 					fmt.Println(api.Name + " v" + api.Version)
 				}
@@ -56,11 +66,10 @@ var ListCmd = &cobra.Command{
 }
 
 func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (int32, []utils.API, error) {
-	fmt.Println("========== Starting GetAPIList()")
 	url := apiManagerEndpoint
 
 	// append '/' to the end if there isn't one already
-	if string(url[len(url)-1]) != "/" {
+	if url != "" && string(url[len(url)-1]) != "/" {
 		url += "/"
 	}
 	url += "apis?query=" + query
@@ -86,10 +95,8 @@ func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (in
 			panic(unmarshalError)
 		}
 
-		fmt.Println("========== Stopping GetAPIList()")
 		return apiListResponse.Count, apiListResponse.List, nil
 	} else {
-		fmt.Println("========== Stopping GetAPIList()")
 		return 0, nil, err
 	}
 
@@ -98,6 +105,8 @@ func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (in
 func init() {
 	RootCmd.AddCommand(ListCmd)
 	ListCmd.Flags().StringVarP(&listEnvironment, "environment", "e", "", "Environment to be searched")
+	ListCmd.Flags().StringVarP(&ListCmdUsername, "usrename", "u", "", "Username")
+	ListCmd.Flags().StringVarP(&ListCmdPassword, "password", "p", "", "Password")
 
 	// Here you will define your flags and configuration settings.
 
