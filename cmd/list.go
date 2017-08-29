@@ -37,15 +37,7 @@ var ListCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("list called")
 
-		var accessToken, apiManagerEndpoint string
-		var preCommandErr error
-
-		if ListCmdUsername == "" && ListCmdPassword == "" {
-			accessToken, apiManagerEndpoint, preCommandErr = utils.ExecutePreCommand(listEnvironment, ListCmdUsername, ListCmdPassword)
-		}else if ListCmdUsername != "" && ListCmdPassword != "" {
-		}else{
-			log.Fatal("Incorrect command. Run 'wso2apim --help' to see details")
-		}
+		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(listEnvironment, ListCmdUsername, ListCmdPassword)
 
 		if preCommandErr == nil {
 			count, apis, err := GetAPIList("", accessToken, apiManagerEndpoint)

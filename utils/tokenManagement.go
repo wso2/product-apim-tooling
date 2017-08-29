@@ -13,7 +13,7 @@ import (
 
 // Returns the AccessToken, APIManagerEndpoint, Errors given an Environment
 // Deals with generating tokens needed for executing a particular command
-func ExecutePreCommand(environment string, flagUsername string, flagPassword string) (string, string, error){
+func ExecutePreCommand(environment string, flagUsername string, flagPassword string) (string, string, error) {
 	if EnvExistsInEndpointsFile(environment) {
 		registrationEndpoint := GetRegistrationEndpointOfEnv(environment)
 		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment)
@@ -32,27 +32,27 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 				// flagUsername is not blank
 				if flagUsername != username {
 					// username entered with flag -u is not the same as username found in env_keys_all.yaml file
-					fmt.Println("Username entered is not found under '"+environment +"' in env_keys_all.yaml file")
+					fmt.Println("Username entered is not found under '" + environment + "' in env_keys_all.yaml file")
 					//log.Println("Execute 'wso2apim reset-user -e " + environment +"' to clear user data")
-					fmt.Println("Execute 'wso2apim reset-user -e " + environment +"' to clear user data")
+					fmt.Println("Execute 'wso2apim reset-user -e " + environment + "' to clear user data")
 					os.Exit(1)
-				}else {
+				} else {
 					// username entered with flag -u is the same as username found in env_keys_all.yaml file
 					if flagPassword == "" {
 						fmt.Println("For Username: " + username)
 						password = PromptForPassword()
-					}else{
+					} else {
 						// flagPassword is not blank
 						// no need of prompting for password now
 						password = flagPassword
 					}
 				}
-			}else{
+			} else {
 				// flagUsername is blank
 				if flagPassword != "" {
 					// flagPassword is not blank
 					password = flagPassword
-				}else{
+				} else {
 					// flagPassword is blank
 					fmt.Println("For username: " + username)
 					password = PromptForPassword()
@@ -78,16 +78,15 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 					// flagPassword is blank
 					fmt.Println("For Username: " + username)
 					password = PromptForPassword()
-				}else{
+				} else {
 					// flagPassword is not blank
 					password = flagPassword
 				}
-			}else{
+			} else {
 				// flagUsername is blank
 				username = strings.TrimSpace(PromptForUsername())
 				password = PromptForPassword()
 			}
-
 
 			fmt.Println("\nUsername: " + username + "\n")
 			clientID, clientSecret, err = GetClientIDSecret(username, password, registrationEndpoint)
@@ -95,7 +94,6 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 			if err != nil {
 				fmt.Println("Error:", err)
 			}
-
 
 			// Persist clientID, clientSecret, Username in file
 			encryptedClientSecret := Encrypt([]byte(GetMD5Hash(password)), clientSecret)
@@ -109,11 +107,10 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 		fmt.Println("AccessToken:", accessToken)
 
 		return accessToken, apiManagerEndpoint, nil
-	}else{
-		return "", "", errors.New("Details incorrect/unavailable for environment "+ environment)
+	} else {
+		return "", "", errors.New("Details incorrect/unavailable for environment " + environment)
 	}
 }
-
 
 // GetClientIDSecret implemented using go-resty
 // provide username, password
@@ -183,4 +180,3 @@ func GetOAuthTokens(username string, password string, b64EncodedClientIDClientSe
 
 	return m // m contains 'access_token', 'refresh_token' etc
 }
-
