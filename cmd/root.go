@@ -24,7 +24,7 @@ import (
 	"log"
 )
 
-var Verbose bool
+var verbose bool
 var cfgFile string
 
 // This represents the base command when called without any subcommands
@@ -51,7 +51,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	cobra.EnableCommandSorting = false
-	RootCmd.PersistentFlags().BoolVar(&Verbose, "verbose", false, "Enable verbose mode")
+	RootCmd.PersistentFlags().BoolVar(&verbose, "verbose", false, "Enable verbose mode")
 	RootCmd.PersistentFlags().StringP("author", "a", "", "WSO2")
 
 	viper.BindPFlag("author", RootCmd.PersistentFlags().Lookup("author"))
@@ -78,6 +78,10 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+	if verbose {
+		utils.EnableVerboseMode()
+	}
+
 	if cfgFile != "" { // enable ability to specify config file via flag
 		viper.SetConfigFile(cfgFile)
 	}

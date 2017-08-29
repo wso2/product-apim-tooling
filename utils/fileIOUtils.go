@@ -43,8 +43,9 @@ func GetEnvKeysAllFromFile() *EnvKeysAll {
 func GetEnvEndpointsAllFromFile() *EnvEndpointsAll {
 	data, err := ioutil.ReadFile("./env_endpoints_all.yaml")
 	if err != nil {
-		fmt.Println("Error reading env_endpoints_all.yaml")
-		panic(err)
+		//fmt.Println("Error reading env_endpoints_all.yaml")
+		fmt.Println("File Not Found: env_endpoints_all.yaml")
+		os.Exit(1)
 	}
 
 	var envEndpointsAll EnvEndpointsAll

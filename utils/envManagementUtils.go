@@ -1,6 +1,9 @@
 package utils
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 // Return true if 'env' exists in the env_keys_all.yaml
 // and false otherwise
@@ -30,6 +33,16 @@ func EnvExistsInEndpointsFile(env string) bool {
 // Insert new env entry to env_keys_all.yaml
 func AddNewEnvToKeysFile(name string, envKeys EnvKeys) {
 	envKeysAll := GetEnvKeysAllFromFile()
+	fmt.Println("EnvKeysAll:", envKeysAll)
+	if envKeysAll == nil{
+		fmt.Println("envKeysAll is nil")
+		envKeysAll = new(EnvKeysAll)
+	}
+
+	if envKeysAll.Environments == nil {
+		fmt.Println("envKeysAll.Environments is nil")
+		envKeysAll.Environments = make(map[string]EnvKeys)
+	}
 	envKeysAll.Environments[name] = envKeys
 
 	WriteConfigFile(envKeysAll, "./env_keys_all.yaml")
