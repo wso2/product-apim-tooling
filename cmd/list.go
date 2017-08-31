@@ -26,8 +26,8 @@ import (
 )
 
 var listEnvironment string
-var ListCmdUsername string
-var ListCmdPassword string
+var listCmdUsername string
+var listCmdPassword string
 
 // ListCmd represents the list command
 var ListCmd = &cobra.Command{
@@ -37,7 +37,7 @@ var ListCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("list called")
 
-		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(listEnvironment, ListCmdUsername, ListCmdPassword)
+		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(listEnvironment, listCmdUsername, listCmdPassword)
 
 		if preCommandErr == nil {
 			count, apis, err := GetAPIList("", accessToken, apiManagerEndpoint)
@@ -97,8 +97,8 @@ func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (in
 func init() {
 	RootCmd.AddCommand(ListCmd)
 	ListCmd.Flags().StringVarP(&listEnvironment, "environment", "e", "", "Environment to be searched")
-	ListCmd.Flags().StringVarP(&ListCmdUsername, "usrename", "u", "", "Username")
-	ListCmd.Flags().StringVarP(&ListCmdPassword, "password", "p", "", "Password")
+	ListCmd.Flags().StringVarP(&listCmdUsername, "usrename", "u", "", "Username")
+	ListCmd.Flags().StringVarP(&listCmdPassword, "password", "p", "", "Password")
 
 	// Here you will define your flags and configuration settings.
 

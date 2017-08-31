@@ -4,8 +4,12 @@
 Config file `env_endpoints_all.yaml` should be completed before starting the tool.
 
 #### Usage 
+```bash
      wso2apim [command]
+```
 #### Commands
+```bash
+
     export-api
         Flags
             Required
@@ -54,6 +58,10 @@ Config file `env_endpoints_all.yaml` should be completed before starting the too
             wso2paim reset-user -e dev
     version
         wso2apim version 
+        
+```
 #### Global Flags
+```bash
     --verbose
     --help, -h
+```

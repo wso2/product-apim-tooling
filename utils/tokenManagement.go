@@ -132,7 +132,8 @@ func GetClientIDSecret(username string, password string, url string) (string, st
 
 	if err != nil {
 		fmt.Println("Error in connecting:")
-		panic(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
 
 	m := make(map[string]string) // a map to hold response data
