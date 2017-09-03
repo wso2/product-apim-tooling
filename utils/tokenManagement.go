@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 	"errors"
+	"net/http"
 )
 
 // Returns the AccessToken, APIManagerEndpoint, Errors given an Environment
@@ -102,7 +103,7 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 		}
 
 		// Get OAuth Tokens
-		m := GetOAuthTokens(username, password, GetBase64EncodedCredentials(clientID, clientSecret), tokenEndpoint)
+		m, _ := GetOAuthTokens(username, password, GetBase64EncodedCredentials(clientID, clientSecret), tokenEndpoint)
 		accessToken := m["access_token"]
 		fmt.Println("AccessToken:", accessToken)
 
@@ -136,6 +137,10 @@ func GetClientIDSecret(username string, password string, url string) (string, st
 		os.Exit(1)
 	}
 
+	if resp.StatusCode() != http.StatusOK {
+		return "", "", errors.New("Request didn't respond 200 OK: " + resp.Status())
+	}
+
 	m := make(map[string]string) // a map to hold response data
 	data := []byte(resp.Body())
 	err = json.Unmarshal(data, &m) // add response data to m
@@ -158,7 +163,7 @@ func GetBase64EncodedCredentials(key string, secret string) string {
 // GetOAuthTokens implemented using go-resty/resty
 // provide username, password, and validity period for the access token
 // returns the response as a map
-func GetOAuthTokens(username string, password string, b64EncodedClientIDClientSecret string, url string) map[string]string {
+func GetOAuthTokens(username string, password string, b64EncodedClientIDClientSecret string, url string) (map[string]string, error){
 	validityPeriod := DefaultTokenValidityPeriod
 	body := "grant_type=password&username=" + username + "&password=" + password + "&validity_period=" + validityPeriod
 
@@ -175,9 +180,14 @@ func GetOAuthTokens(username string, password string, b64EncodedClientIDClientSe
 		HandleErrorAndExit("Unable to Connect", nil)
 	}
 
+
+	if resp.StatusCode() != http.StatusOK {
+		return nil, errors.New("Request didn't respond 200 OK: " + resp.Status())
+	}
+
 	m := make(map[string]string) // a map to hold response data
 	data := []byte(resp.Body())
 	_ = json.Unmarshal(data, &m) // add response data to m
 
-	return m // m contains 'access_token', 'refresh_token' etc
+	return m, nil // m contains 'access_token', 'refresh_token' etc
 }
