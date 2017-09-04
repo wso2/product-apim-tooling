@@ -123,6 +123,8 @@ func GetClientIDSecret(username string, password string, url string) (string, st
 	headers[HeaderContentType] = HeaderValueApplicationJSON
 	// headers["Content-Type"] = "application/json"
 
+	//headers["Accept"] = HeaderValueApplicationJSON
+
 	headers[HeaderAuthorization] = HeaderValueAuthBasicPrefix + " " + GetBase64EncodedCredentials(username, password)
 	// headers["Authorization"] = "Basic " + GetBase64EncodedCredentials(username, password)
 
@@ -140,6 +142,11 @@ func GetClientIDSecret(username string, password string, url string) (string, st
 	if resp.StatusCode() != http.StatusOK {
 		return "", "", errors.New("Request didn't respond 200 OK: " + resp.Status())
 	}
+
+	fmt.Println("Status:", resp.Status())
+	fmt.Println("Content-Type:", resp.Header().Get("Content-Type"))
+	fmt.Println("Sample-Header:", resp.Header().Get("Sample-Header"))
+	fmt.Printf("Response Body: %s\n",resp.Body())
 
 	m := make(map[string]string) // a map to hold response data
 	data := []byte(resp.Body())
@@ -179,7 +186,6 @@ func GetOAuthTokens(username string, password string, b64EncodedClientIDClientSe
 	if err != nil {
 		HandleErrorAndExit("Unable to Connect", nil)
 	}
-
 
 	if resp.StatusCode() != http.StatusOK {
 		return nil, errors.New("Request didn't respond 200 OK: " + resp.Status())

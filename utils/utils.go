@@ -35,9 +35,6 @@ func PromptForPassword() string {
 	return password
 }
 
-func Authenticate() {
-
-}
 
 // Send the HTTP request to the server. Default timeout is one minute
 func SendRequest(req *http.Request, timeout time.Duration) *http.Response {
