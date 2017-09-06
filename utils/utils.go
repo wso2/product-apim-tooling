@@ -2,15 +2,13 @@ package utils
 
 import (
 	"fmt"
-	"net/http"
-	"time"
-	"log"
 	"github.com/go-resty/resty"
 	"bufio"
 	"os"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
+// Invoke http-post request using go-resty
 func InvokePOSTRequest(url string, headers map[string]string, body string) (*resty.Response, error) {
 	resp, err := resty.R().SetHeaders(headers).SetBody(body).Post(url)
 
@@ -36,24 +34,3 @@ func PromptForPassword() string {
 }
 
 
-// Send the HTTP request to the server. Default timeout is one minute
-func SendRequest(req *http.Request, timeout time.Duration) *http.Response {
-	client := &http.Client{
-		Timeout: timeout,
-	}
-	resp, err := client.Do(req)
-	if err != nil {
-		// TODO: Handle accordingly
-	}
-	return resp
-}
-
-// invoke the client request and handle error scenarios
-func invokeRequest(req *http.Request, timeout time.Duration) *http.Response {
-	httpResp := SendRequest(req, timeout)
-	log.Printf("Status Code: %v\n", httpResp.Status)
-
-	// TODO:: handle error responses
-
-	return httpResp
-}

@@ -6,10 +6,6 @@ import (
 	"fmt"
 )
 
-func IsDirectory(input string) bool {
-	return false
-}
-
 func ZipDir(source, target string) (error){
 	err := os.Chdir(source)
 	if err == nil {
