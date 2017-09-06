@@ -18,10 +18,8 @@ import (
 	"fmt"
 	"github.com/go-resty/resty"
 	"github.com/menuka94/wso2apim-cli/utils"
-	constants "github.com/menuka94/wso2apim-cli/utils"
 	"github.com/spf13/cobra"
 	"io/ioutil"
-	"log"
 	"os"
 
 	"crypto/tls"
@@ -39,7 +37,7 @@ var ExportAPICmd = &cobra.Command{
 	Short: utils.ExportAPICmdShortDesc,
 	Long:  utils.ExportAPICmdLongDesc,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("exportAPI called")
+		utils.Logln("export-api called")
 
 		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(exportEnvironment, exportAPICmdUsername, exportAPICmdPassword)
 
@@ -47,8 +45,8 @@ var ExportAPICmd = &cobra.Command{
 			resp := ExportAPI(exportAPIName, exportAPIVersion, apiManagerEndpoint, accessToken)
 
 			// Print info on response
-			fmt.Printf("ResponseStatus: %v\n", resp.Status())
-			fmt.Printf("Error: %v\n", resp.Error())
+			utils.Logln("ResponseStatus: %v\n", resp.Status())
+			utils.Logln("Error: %v\n", resp.Error())
 			//fmt.Printf("Response Body: %v\n", resp.Body())
 
 			if resp.StatusCode() == 200 {
@@ -65,8 +63,7 @@ var ExportAPICmd = &cobra.Command{
 				err := ioutil.WriteFile(directory+"/"+filename, resp.Body(), 0644)
 				// permissoin 644 : Only the owner can read and write.. Everyone else can only read.
 				if err != nil {
-					fmt.Println("Error creating zip archive")
-					panic(err)
+					utils.HandleErrorAndExit("Error creating zip archive", err)
 				}
 				fmt.Println("Succesfully exported and wrote to file")
 
@@ -74,8 +71,7 @@ var ExportAPICmd = &cobra.Command{
 				if err == nil {
 					fmt.Println("Number of APIs exported: ", numberOfAPIsExported)
 				} else {
-					fmt.Println("Error:")
-					panic(err)
+					utils.HandleErrorAndExit("Error getting list of APIs", err)
 				}
 
 			} else if resp.StatusCode() == 500 {
@@ -83,7 +79,7 @@ var ExportAPICmd = &cobra.Command{
 			}
 
 		} else {
-			log.Fatal("Error: ", preCommandErr)
+			utils.Logln(utils.LogPrefixError + preCommandErr.Error())
 		}
 	},
 }
@@ -99,8 +95,8 @@ func ExportAPI(name string, version string, url string, accessToken string) *res
 	url += query
 	fmt.Println("ExportAPI: URL:", url)
 	headers := make(map[string]string)
-	headers[constants.HeaderAuthorization] = constants.HeaderValueAuthBearerPrefix + " " + accessToken
-	headers[constants.HeaderAccept] = constants.HeaderValueApplicationZip
+	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
+	headers[utils.HeaderAccept] = utils.HeaderValueApplicationZip
 
 	resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTPS certificates
 	resp, err := resty.R().
@@ -108,8 +104,7 @@ func ExportAPI(name string, version string, url string, accessToken string) *res
 		Get(url)
 
 	if err != nil {
-		fmt.Println("Error exporting API:", name)
-		panic(err)
+		utils.HandleErrorAndExit("Error exporting API:" + name, err)
 	}
 
 	return resp

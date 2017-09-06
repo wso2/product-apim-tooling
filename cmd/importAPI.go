@@ -37,7 +37,7 @@ var ImportAPICmd = &cobra.Command{
 	Short: utils.ImportAPICmdShortDesc,
 	Long:  utils.ImportAPICmdLongDesc,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("importAPI called")
+		utils.Logln(utils.LogPrefixInfo + "import-api called")
 		for key, arg := range args {
 			fmt.Println(key, ":", arg)
 		}
@@ -47,7 +47,7 @@ var ImportAPICmd = &cobra.Command{
 		if preCommandErr == nil {
 
 			resp := ImportAPI(importAPIName, apiManagerEndpoint, accessToken)
-			fmt.Printf("Status: %v\n", resp.Status)
+			utils.Logln(utils.LogPrefixInfo+"Status: %v\n", resp.Status)
 			if resp.StatusCode == 200 {
 				fmt.Println("Header:", resp.Header)
 				fmt.Printf("Body: %s\n", resp.Body)
@@ -56,6 +56,7 @@ var ImportAPICmd = &cobra.Command{
 		} else {
 			// env_endpoints_all.yaml file is not configured properly by the user
 			log.Fatal("Error:", preCommandErr)
+			utils.Logln(utils.LogPrefixError + preCommandErr.Error())
 		}
 	},
 }
@@ -76,17 +77,16 @@ func ImportAPI(name string, url string, accessToken string) *http.Response {
 
 	if hasZipExtension {
 		// import the zip file directly
-		fmt.Println("hasZipExtension: ", true)
+		//fmt.Println("hasZipExtension: ", true)
 
-	}else{
-		fmt.Println("hasZipExtension: ", false)
+	} else {
+		//fmt.Println("hasZipExtension: ", false)
 		// search for a directory with the given name
 		destination, _ := os.Getwd()
 		destination += "/exported/" + name + ".zip"
-		err := utils.ZipDir(filePath,  destination)
+		err := utils.ZipDir(filePath, destination)
 		if err != nil {
-			fmt.Println("Error:", err)
-			os.Exit(1)
+			utils.HandleErrorAndExit("Error creating zip archive", err)
 		}
 		filePath += ".zip"
 	}
@@ -95,9 +95,7 @@ func ImportAPI(name string, url string, accessToken string) *http.Response {
 
 	req, err := newFileUploadRequest(url, extraParams, "file", filePath, accessToken)
 	if err != nil {
-		fmt.Println("Error creating request")
-		log.Fatal(err)
-		panic(err)
+		utils.HandleErrorAndExit("Error forming request", err)
 	}
 
 	tr := &http.Transport{
@@ -108,7 +106,7 @@ func ImportAPI(name string, url string, accessToken string) *http.Response {
 	resp, err := client.Do(req)
 
 	if err != nil {
-		log.Fatal(err)
+		utils.Logln(utils.LogPrefixError, err)
 	} else {
 		var bodyContent []byte
 		fmt.Println(resp.StatusCode)

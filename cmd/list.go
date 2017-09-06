@@ -22,7 +22,6 @@ import (
 	"github.com/go-resty/resty"
 	"github.com/menuka94/wso2apim-cli/utils"
 	"github.com/spf13/cobra"
-	"log"
 )
 
 var listEnvironment string
@@ -35,7 +34,7 @@ var ListCmd = &cobra.Command{
 	Short: utils.ListCmdShortDesc,
 	Long:  utils.ListCmdLongDesc,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("list called")
+		utils.Logln("list called")
 
 		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(listEnvironment, listCmdUsername, listCmdPassword)
 
@@ -48,11 +47,10 @@ var ListCmd = &cobra.Command{
 					fmt.Println(api.Name + " v" + api.Version)
 				}
 			} else {
-				fmt.Println("Error in GetAPIList():")
-				panic(err)
+				utils.Logln(utils.LogPrefixError + "Getting List of APIs", err)
 			}
 		} else {
-			log.Fatal("Cmd 'list'::Error: ", preCommandErr)
+			utils.Logln(utils.LogPrefixError + "calling 'list'"+ preCommandErr.Error())
 		}
 	},
 }
@@ -84,7 +82,7 @@ func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (in
 
 		if unmarshalError != nil {
 			fmt.Println("UnmarshalError")
-			panic(unmarshalError)
+			utils.HandleErrorAndExit(utils.LogPrefixError + "Unmarshall Error", unmarshalError)
 		}
 
 		return apiListResponse.Count, apiListResponse.List, nil

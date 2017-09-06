@@ -47,10 +47,10 @@ Config file `env_endpoints_all.yaml` should be completed before starting the too
                 --password, -p 
         Examples:
             wso2apim list -e dev
-            wso2ppim list -e staging 
-            wso2ppim list -e staging -u admin -p 123456
-            wso2ppim list -e staging -u admin
-            wso2ppim list -e staging -p 123456
+            wso2apim list -e staging 
+            wso2apim list -e staging -u admin -p 123456
+            wso2apim list -e staging -u admin
+            wso2apim list -e staging -p 123456
     reset-user
         Flags
             --environment, -e
