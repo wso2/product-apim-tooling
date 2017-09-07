@@ -1,10 +1,10 @@
 package utils
 
 import (
-	"testing"
-	"fmt"
-	"net/http/httptest"
 	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	"github.com/renstrom/dedent"
 )
 
@@ -63,12 +63,7 @@ func TestGetClientIDSecretOK(t *testing.T) {
 	}))
 	defer registrationStub.Close()
 
-	fmt.Println("URL:", registrationStub.URL)
-
 	clientID, clientSecret, err := GetClientIDSecret("admin", "admin", registrationStub.URL)
-	fmt.Println("ClientID:", clientID)
-	fmt.Println("ClientSecret:", clientSecret)
-	fmt.Println("Error:", err)
 	if err != nil {
 		t.Error("Error receving response")
 	}
@@ -121,10 +116,11 @@ func TestGetOAuthTokensOK(t *testing.T) {
 			{"access_token":"a2e5c3ac-68e6-4d78-a8a1-b2b0372cb575",
 			 "refresh_token":"fe8f8400-05c9-430f-8e2f-4f3b2fbd01f8",
 			 "expires_in":1487166427829,
-			 "scopes":["apim:api_view","apim:api_create","apim:api_publish",
-				"apim:tier_view","apim:tier_manage","apim:subscription_view",
-				"apim:subscription_block","apim:subscribe"
-				]
+			 "scopes":
+					["apim:api_view","apim:api_create","apim:api_publish",
+					 "apim:tier_view","apim:tier_manage","apim:subscription_view",
+					 "apim:subscription_block","apim:subscribe"
+					]
 			}
 		`)
 
@@ -137,10 +133,56 @@ func TestGetOAuthTokensOK(t *testing.T) {
 		t.Error("Error in GetOAuthTokens()")
 	}
 
-	if m["refresh_token"] != "fe8f8400-05c9-430f-8e2f-4f3b2fbd01f8"{
+	if m["refresh_token"] != "fe8f8400-05c9-430f-8e2f-4f3b2fbd01f8" {
 		t.Error("Error in GetOAuthTokens(): Incorrect RefreshToken")
 	}
-	if m["access_token"] != "a2e5c3ac-68e6-4d78-a8a1-b2b0372cb575"{
+	if m["access_token"] != "a2e5c3ac-68e6-4d78-a8a1-b2b0372cb575" {
 		t.Error("Error in GetOAuthTokens(): Incorrect AccessToken")
+	}
+}
+
+func TestExecutePreCommand(t *testing.T) {
+	type args struct {
+		environment  string
+		flagUsername string
+		flagPassword string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		want1   string
+		wantErr bool
+	}{
+	// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, got1, err := ExecutePreCommand(tt.args.environment, tt.args.flagUsername, tt.args.flagPassword)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ExecutePreCommand() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("ExecutePreCommand() got = %v, want %v", got, tt.want)
+			}
+			if got1 != tt.want1 {
+				t.Errorf("ExecutePreCommand() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}
+
+func TestHandleFlagsUsernamePassword(t *testing.T) {
+	typedUsername := ""
+	typedPassword := ""
+	returnedUsername, returnedPassword := HandleFlagsUsernamePasswordWithEnvInEndpointsFile("", "")
+	
+	if typedUsername != returnedUsername {
+		t.Errorf("Expected '%s', got '%s'\n", typedUsername, returnedUsername)
+	}
+
+	if typedPassword != returnedPassword {
+		t.Errorf("Expected '%s', got '%s'\n", typedPassword, returnedPassword)
 	}
 }

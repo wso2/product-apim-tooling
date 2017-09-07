@@ -1,9 +1,9 @@
 package utils
 
 import (
-	"testing"
-	"net/http/httptest"
 	"net/http"
+	"net/http/httptest"
+	"testing"
 )
 
 func TestInvokePOSTRequestUnreachable(t *testing.T) {
@@ -39,3 +39,34 @@ func TestInvokePOSTRequestOK(t *testing.T) {
 	}
 }
 
+func TestPromptForUsername(t *testing.T) {
+	tests := []struct {
+		name string
+		want string
+	}{
+	// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := PromptForUsername(); got != tt.want {
+				t.Errorf("PromptForUsername() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestPromptForPassword(t *testing.T) {
+	tests := []struct {
+		name string
+		want string
+	}{
+	// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := PromptForPassword(); got != tt.want {
+				t.Errorf("PromptForPassword() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

@@ -10,6 +10,7 @@ import (
 	"strings"
 	"errors"
 	"net/http"
+	"github.com/wso2/wum-client/utils"
 )
 
 // Returns the AccessToken, APIManagerEndpoint, Errors given an Environment
@@ -26,13 +27,14 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 		var err error
 
 		if EnvExistsInKeysFile(environment) {
-			// client_id, client_secret exists in file
+			// client_id, client_secret, and username exist in file
 			username = GetUsernameOfEnv(environment)
 
 			if flagUsername != "" {
 				// flagUsername is not blank
 				if flagUsername != username {
 					// username entered with flag -u is not the same as username found in env_keys_all.yaml file
+					utils.Logln(LogPrefixWarning + "Username entered with flag -u for the environment '"+environment+"' is not the same as username found in env_keys_all.yaml file")
 					fmt.Println("Username entered is not found under '" + environment + "' in env_keys_all.yaml file")
 					//log.Println("Execute 'wso2apim reset-user -e " + environment +"' to clear user data")
 					fmt.Println("Execute 'wso2apim reset-user -e " + environment + "' to clear user data")
@@ -72,22 +74,7 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 			// first use of the environment
 			// Get new values
 
-			if flagUsername != "" {
-				// flagUsername is not blank
-				username = flagUsername
-				if flagPassword == "" {
-					// flagPassword is blank
-					fmt.Println("For Username: " + username)
-					password = PromptForPassword()
-				} else {
-					// flagPassword is not blank
-					password = flagPassword
-				}
-			} else {
-				// flagUsername is blank
-				username = strings.TrimSpace(PromptForUsername())
-				password = PromptForPassword()
-			}
+			username, password := HandleFlagsUsernamePasswordWithEnvInEndpointsFile(flagUsername, flagPassword)
 
 			fmt.Println("\nUsername: " + username + "\n")
 			clientID, clientSecret, err = GetClientIDSecret(username, password, registrationEndpoint)
@@ -112,6 +99,30 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 		return "", "", errors.New("Details incorrect/unavailable for environment " + environment)
 	}
 }
+
+// Method for
+
+func HandleFlagsUsernamePasswordWithEnvInEndpointsFile(flagUsername string, flagPassword string) (username, password string) {
+	if flagUsername != "" {
+		// flagUsername is not blank
+		username = flagUsername
+		if flagPassword == "" {
+			// flagPassword is blank
+			fmt.Println("For Username: " + username)
+			password = PromptForPassword()
+		} else {
+			// flagPassword is not blank
+			password = flagPassword
+		}
+	} else {
+		// flagUsername is blank
+		username = strings.TrimSpace(PromptForUsername())
+		password = PromptForPassword()
+	}
+
+	return username, password
+}
+
 
 // GetClientIDSecret implemented using go-resty
 // provide username, password
@@ -142,11 +153,6 @@ func GetClientIDSecret(username string, password string, url string) (string, st
 	if resp.StatusCode() != http.StatusOK {
 		return "", "", errors.New("Request didn't respond 200 OK: " + resp.Status())
 	}
-
-	fmt.Println("Status:", resp.Status())
-	fmt.Println("Content-Type:", resp.Header().Get("Content-Type"))
-	fmt.Println("Sample-Header:", resp.Header().Get("Sample-Header"))
-	fmt.Printf("Response Body: %s\n",resp.Body())
 
 	m := make(map[string]string) // a map to hold response data
 	data := []byte(resp.Body())

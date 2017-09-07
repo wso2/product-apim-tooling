@@ -58,7 +58,7 @@ func TestZipDirOK(t *testing.T) {
 	defer file.Close()
 
 	// Write content to file
-	_, err = file.WriteString("Test line\n")
+	_, err = file.WriteString("abcdefgh\n")
 	if err != nil {
 		t.Errorf("Error writing content to file: %s\n", err)
 	}
