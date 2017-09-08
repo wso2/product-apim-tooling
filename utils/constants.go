@@ -3,9 +3,16 @@ package utils
 const EnvConfigFileName string = "env_config.yaml"
 const HeaderAuthorization string = "Authorization"
 const HeaderContentType string = "Content-Type"
+const HeaderConnection string = "Connection"
 const HeaderAccept string = "Accept"
 const HeaderProduces string = "Produces"
 const HeaderConsumes string = "Consumes"
+const HeaderContentEncoding string = "Content-Encoding"
+const HeaderTransferEncoding string = "transfer-encoding"
+
+const HeaderValueChunked string = "chunked"
+const HeaderValueGZIP string = "gzip"
+const HeaderValueKeepAlive string = "keep-alive"
 const HeaderValueApplicationZip = "application/zip"
 const HeaderValueApplicationJSON string = "application/json"
 const HeaderValueXWWWFormUrlEncoded string = "application/x-www-form-urlencoded"
@@ -18,10 +25,3 @@ const DefaultTokenValidityPeriod string = "3600"
 const LogPrefixInfo = "[INFO]: "
 const LogPrefixWarning = "[WARN]: "
 const LogPrefixError = "[ERROR]: "
-
-const (
-	BYTE     = 1.0
-	KILOBYTE = 1024 * BYTE
-	MEGABYTE = 1024 * KILOBYTE
-	GIGABYTE = 1024 * MEGABYTE
-)

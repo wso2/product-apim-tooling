@@ -91,7 +91,7 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 		m, _ := GetOAuthTokens(username, password, GetBase64EncodedCredentials(clientID, clientSecret), tokenEndpoint)
 		accessToken := m["access_token"]
 
-		//fmt.Println("AccessToken:", accessToken)
+		Logln(LogPrefixInfo+"AccessToken:", accessToken)
 
 		return accessToken, apiManagerEndpoint, nil
 	} else {
@@ -197,7 +197,8 @@ func GetOAuthTokens(username string, password string, b64EncodedClientIDClientSe
 	}
 
 	if resp.StatusCode() != http.StatusOK {
-		HandleErrorAndExit("Unable to connect", errors.New("Status: "+ resp.Status()))
+		HandleErrorAndExit("Unable to connect", errors.New("Status: "+resp.Status()))
+		return nil, nil
 	}
 
 	m := make(map[string]string) // a map to hold response data

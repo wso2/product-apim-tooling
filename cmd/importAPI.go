@@ -121,6 +121,8 @@ func ImportAPI(name string, url string, accessToken string) *http.Response {
 	return resp
 }
 
+
+// Helper functoin for
 func newFileUploadRequest(uri string, params map[string]string, paramName, path string, accessToken string) (*http.Request, error) {
 	file, err := os.Open(path)
 	if err != nil {
@@ -147,12 +149,13 @@ func newFileUploadRequest(uri string, params map[string]string, paramName, path 
 	request, err := http.NewRequest("PUT", uri, body)
 	request.Header.Add(utils.HeaderAuthorization, utils.HeaderValueAuthBearerPrefix+" "+accessToken)
 	request.Header.Add(utils.HeaderContentType, writer.FormDataContentType())
-	request.Header.Add("Accept", "*/*")
-	request.Header.Add("Connection", "keep-alive")
+	request.Header.Add(utils.HeaderAccept, "*/*")
+	request.Header.Add(utils.HeaderConnection, utils.HeaderValueKeepAlive)
 
 	return request, err
 }
 
+// Generated with Cobra
 func init() {
 	RootCmd.AddCommand(ImportAPICmd)
 	ImportAPICmd.Flags().StringVarP(&importAPIName, "name", "n", "", "Name of the API to be imported")

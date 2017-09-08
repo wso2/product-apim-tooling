@@ -50,22 +50,7 @@ var ExportAPICmd = &cobra.Command{
 			//fmt.Printf("Response Body: %v\n", resp.Body())
 
 			if resp.StatusCode() == 200 {
-				// Write to file
-				directory := "./exported"
-
-				// create directory if it doesn't exist
-				if _, err := os.Stat(directory); os.IsNotExist(err) {
-					os.Mkdir(directory, 0777)
-					// permission 777 : Everyone can read, write, and execute
-				}
-
-				filename := exportAPIName + ".zip"
-				err := ioutil.WriteFile(directory+"/"+filename, resp.Body(), 0644)
-				// permissoin 644 : Only the owner can read and write.. Everyone else can only read.
-				if err != nil {
-					utils.HandleErrorAndExit("Error creating zip archive", err)
-				}
-				fmt.Println("Succesfully exported and wrote to file")
+				WriteToZip(exportAPIName, resp)
 
 				numberOfAPIsExported, _, err := GetAPIList(exportAPIName, accessToken, apiManagerEndpoint)
 				if err == nil {
@@ -76,6 +61,8 @@ var ExportAPICmd = &cobra.Command{
 
 			} else if resp.StatusCode() == 500 {
 				fmt.Println("Incorrect password")
+			} else {
+				utils.Logln(utils.LogPrefixWarning + resp.Status())
 			}
 
 		} else {
@@ -84,6 +71,28 @@ var ExportAPICmd = &cobra.Command{
 	},
 }
 
+// Input name of the API, and the resty response (only 200 OK) returned from APIM Endpoint
+// Exported API will be written to a zip file
+func WriteToZip(exportAPIName string, resp *resty.Response) {
+	// Write to file
+	directory := "./exported"
+	// create directory if it doesn't exist
+	if _, err := os.Stat(directory); os.IsNotExist(err) {
+		os.Mkdir(directory, 0777)
+		// permission 777 : Everyone can read, write, and execute
+	}
+	filename := exportAPIName + ".zip"
+	err := ioutil.WriteFile(directory+"/"+filename, resp.Body(), 0644)
+	// permission 644 : Only the owner can read and write.. Everyone else can only read.
+	if err != nil {
+		utils.HandleErrorAndExit("Error creating zip archive", err)
+	}
+	fmt.Println("Succesfully exported and wrote to file")
+}
+
+
+// Input name of the API, version of the API, APIM Endpoint, and AccessToken
+// Response will be returned after processing the request
 func ExportAPI(name string, version string, url string, accessToken string) *resty.Response {
 	// append '/' to the end if there isn't one already
 	if string(url[len(url)-1]) != "/" {
@@ -111,6 +120,7 @@ func ExportAPI(name string, version string, url string, accessToken string) *res
 	return resp
 }
 
+// Generated with Cobra
 func init() {
 	RootCmd.AddCommand(ExportAPICmd)
 	ExportAPICmd.Flags().StringVarP(&exportAPIName, "name", "n", "", "Name of the API to be exported")

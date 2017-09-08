@@ -78,27 +78,6 @@ func TestGetClientIDSecretOK(t *testing.T) {
 
 }
 
-func TestGetOAuthTokensUnreachable(t *testing.T) {
-	var oauthStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			t.Errorf("Expected 'POST', got '%s'\n", r.Method)
-		}
-
-		if r.Header.Get(HeaderContentType) != HeaderValueXWWWFormUrlEncoded {
-			t.Errorf("Exptected '"+HeaderValueXWWWFormUrlEncoded+"', got '%s'\n", r.Header.Get(HeaderContentType))
-		}
-
-		w.WriteHeader(http.StatusServiceUnavailable)
-		w.Header().Set(HeaderContentType, HeaderValueApplicationJSON)
-	}))
-	defer oauthStub.Close()
-
-	_, err := GetOAuthTokens("", "", "", oauthStub.URL)
-	if err == nil {
-		t.Errorf("GetOAuthTokens() didn't return an error")
-	}
-}
-
 func TestGetOAuthTokensOK(t *testing.T) {
 	var oauthStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
