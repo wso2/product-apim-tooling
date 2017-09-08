@@ -15,9 +15,9 @@ const HeaderValueMultiPartFormData string = "multipart/form-data"
 const APICallTimeout = 5
 const WSO2APIMUpdateTokenTimeout = 2
 const DefaultTokenValidityPeriod string = "3600"
-const LogPrefixInfo = "INFO: "
-const LogPrefixWarning = "WARN: "
-const LogPrefixError = "ERROR: "
+const LogPrefixInfo = "[INFO]: "
+const LogPrefixWarning = "[WARN]: "
+const LogPrefixError = "[ERROR]: "
 
 const (
 	BYTE     = 1.0

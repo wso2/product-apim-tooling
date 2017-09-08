@@ -75,7 +75,7 @@ func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (in
 
 	fmt.Println("")
 
-	fmt.Println("GetAPIList(): Response:", resp.Status())
+	utils.Logln(utils.LogPrefixInfo + "GetAPIList(): Response:", resp.Status())
 	if resp.StatusCode() == 200 {
 		apiListResponse := &utils.APIListResponse{}
 		unmarshalError := json.Unmarshal([]byte(resp.Body()), &apiListResponse)

@@ -34,7 +34,7 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 				// flagUsername is not blank
 				if flagUsername != username {
 					// username entered with flag -u is not the same as username found in env_keys_all.yaml file
-					utils.Logln(LogPrefixWarning + "Username entered with flag -u for the environment '"+environment+"' is not the same as username found in env_keys_all.yaml file")
+					utils.Logln(LogPrefixWarning + "Username entered with flag -u for the environment '" + environment + "' is not the same as username found in env_keys_all.yaml file")
 					fmt.Println("Username entered is not found under '" + environment + "' in env_keys_all.yaml file")
 					//log.Println("Execute 'wso2apim reset-user -e " + environment +"' to clear user data")
 					fmt.Println("Execute 'wso2apim reset-user -e " + environment + "' to clear user data")
@@ -65,9 +65,8 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 			clientID = GetClientIDOfEnv(environment)
 			clientSecret = GetClientSecretOfEnv(environment, password)
 
-			fmt.Println("Username:", username)
-			fmt.Println("ClientID:", clientID)
-			fmt.Println("ClientSecret:", clientSecret)
+			utils.Logln(LogPrefixInfo+"Username:", username)
+			utils.Logln(LogPrefixInfo+"ClientID:", clientID)
 		} else {
 			// env exists in endpoints file, but not in keys file
 			// no client_id, client_secret in file
@@ -92,7 +91,8 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 		// Get OAuth Tokens
 		m, _ := GetOAuthTokens(username, password, GetBase64EncodedCredentials(clientID, clientSecret), tokenEndpoint)
 		accessToken := m["access_token"]
-		fmt.Println("AccessToken:", accessToken)
+
+		//fmt.Println("AccessToken:", accessToken)
 
 		return accessToken, apiManagerEndpoint, nil
 	} else {
@@ -116,13 +116,13 @@ func HandleFlagsUsernamePasswordWithEnvInEndpointsFile(flagUsername string, flag
 		}
 	} else {
 		// flagUsername is blank
+		// doesn't matter is flagPassword is blank or not
 		username = strings.TrimSpace(PromptForUsername())
 		password = PromptForPassword()
 	}
 
 	return username, password
 }
-
 
 // GetClientIDSecret implemented using go-resty
 // provide username, password
@@ -151,6 +151,9 @@ func GetClientIDSecret(username string, password string, url string) (string, st
 	}
 
 	if resp.StatusCode() != http.StatusOK {
+		if resp.StatusCode() == http.StatusUnauthorized {
+			HandleErrorAndExit("Incorrect Username/Password combination", errors.New("401 Unauthorized"))
+		}
 		return "", "", errors.New("Request didn't respond 200 OK: " + resp.Status())
 	}
 
@@ -176,7 +179,7 @@ func GetBase64EncodedCredentials(key string, secret string) string {
 // GetOAuthTokens implemented using go-resty/resty
 // provide username, password, and validity period for the access token
 // returns the response as a map
-func GetOAuthTokens(username string, password string, b64EncodedClientIDClientSecret string, url string) (map[string]string, error){
+func GetOAuthTokens(username string, password string, b64EncodedClientIDClientSecret string, url string) (map[string]string, error) {
 	validityPeriod := DefaultTokenValidityPeriod
 	body := "grant_type=password&username=" + username + "&password=" + password + "&validity_period=" + validityPeriod
 
@@ -194,7 +197,7 @@ func GetOAuthTokens(username string, password string, b64EncodedClientIDClientSe
 	}
 
 	if resp.StatusCode() != http.StatusOK {
-		return nil, errors.New("Request didn't respond 200 OK: " + resp.Status())
+		HandleErrorAndExit("Unable to connect", errors.New("Status: "+ resp.Status()))
 	}
 
 	m := make(map[string]string) // a map to hold response data

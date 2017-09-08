@@ -50,9 +50,11 @@ var ImportAPICmd = &cobra.Command{
 			utils.Logln(utils.LogPrefixInfo+"Status: %v\n", resp.Status)
 			if resp.StatusCode == 200 {
 				fmt.Println("Header:", resp.Header)
-				fmt.Printf("Body: %s\n", resp.Body)
+				fmt.Println("Body:", resp.Body)
+			}else{
+				fmt.Println("Status: ", resp.Status)
+				utils.Logln(utils.LogPrefixError + resp.Status)
 			}
-			//fmt.Printf("Errors: %v\n", resp.Error)
 		} else {
 			// env_endpoints_all.yaml file is not configured properly by the user
 			log.Fatal("Error:", preCommandErr)

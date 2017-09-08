@@ -99,6 +99,7 @@ func ExportAPI(name string, version string, url string, accessToken string) *res
 	headers[utils.HeaderAccept] = utils.HeaderValueApplicationZip
 
 	resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTPS certificates
+	utils.Logln("")
 	resp, err := resty.R().
 		SetHeaders(headers).
 		Get(url)
