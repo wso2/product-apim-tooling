@@ -50,7 +50,8 @@ var ListCmd = &cobra.Command{
 				utils.Logln(utils.LogPrefixError + "Getting List of APIs", err)
 			}
 		} else {
-			utils.Logln(utils.LogPrefixError + "calling 'list'"+ preCommandErr.Error())
+			utils.Logln(utils.LogPrefixError + "calling 'list' "+ preCommandErr.Error())
+			fmt.Println("Error calling 'list'", preCommandErr.Error())
 		}
 	},
 }

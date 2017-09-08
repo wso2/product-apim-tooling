@@ -96,7 +96,7 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 
 		return accessToken, apiManagerEndpoint, nil
 	} else {
-		return "", "", errors.New("Details incorrect/unavailable for environment " + environment)
+		return "", "", errors.New("Details incorrect/unavailable for environment '" + environment + "' in env_endpoints_all.yaml")
 	}
 }
 
