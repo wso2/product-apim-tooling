@@ -10,7 +10,6 @@ import (
 	"strings"
 	"errors"
 	"net/http"
-	"github.com/wso2/wum-client/utils"
 )
 
 // Returns the AccessToken, APIManagerEndpoint, Errors given an Environment
@@ -34,7 +33,7 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 				// flagUsername is not blank
 				if flagUsername != username {
 					// username entered with flag -u is not the same as username found in env_keys_all.yaml file
-					utils.Logln(LogPrefixWarning + "Username entered with flag -u for the environment '" + environment + "' is not the same as username found in env_keys_all.yaml file")
+					Logln(LogPrefixWarning + "Username entered with flag -u for the environment '" + environment + "' is not the same as username found in env_keys_all.yaml file")
 					fmt.Println("Username entered is not found under '" + environment + "' in env_keys_all.yaml file")
 					//log.Println("Execute 'wso2apim reset-user -e " + environment +"' to clear user data")
 					fmt.Println("Execute 'wso2apim reset-user -e " + environment + "' to clear user data")
@@ -65,8 +64,8 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 			clientID = GetClientIDOfEnv(environment)
 			clientSecret = GetClientSecretOfEnv(environment, password)
 
-			utils.Logln(LogPrefixInfo+"Username:", username)
-			utils.Logln(LogPrefixInfo+"ClientID:", clientID)
+			Logln(LogPrefixInfo+"Username:", username)
+			Logln(LogPrefixInfo+"ClientID:", clientID)
 		} else {
 			// env exists in endpoints file, but not in keys file
 			// no client_id, client_secret in file
@@ -193,7 +192,8 @@ func GetOAuthTokens(username string, password string, b64EncodedClientIDClientSe
 	resp, err := InvokePOSTRequest(url, headers, body)
 
 	if err != nil {
-		HandleErrorAndExit("Unable to Connect", nil)
+		Logln(LogPrefixError + "connecting to " + url)
+		HandleErrorAndExit("Unable to Connect", err)
 	}
 
 	if resp.StatusCode() != http.StatusOK {
