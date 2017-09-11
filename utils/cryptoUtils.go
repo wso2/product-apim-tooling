@@ -49,7 +49,7 @@ func Decrypt(key []byte, cryptoText string) string {
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		panic(err)
+		HandleErrorAndExit("Error in decryption", err)
 	}
 
 	// The IV needs to be unique, but not secure. Therefore it's common to

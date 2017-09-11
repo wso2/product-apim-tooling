@@ -15,19 +15,19 @@ import (
 // Returns the AccessToken, APIManagerEndpoint, Errors given an Environment
 // Deals with generating tokens needed for executing a particular command
 func ExecutePreCommand(environment string, flagUsername string, flagPassword string) (string, string, error) {
-	if EnvExistsInEndpointsFile(environment) {
-		registrationEndpoint := GetRegistrationEndpointOfEnv(environment)
-		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment)
-		tokenEndpoint := GetTokenEndpointOfEnv(environment)
+	if EnvExistsInEndpointsFile(environment, EnvEndpointsAllFilePath) {
+		registrationEndpoint := GetRegistrationEndpointOfEnv(environment, EnvEndpointsAllFilePath)
+		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment, EnvEndpointsAllFilePath)
+		tokenEndpoint := GetTokenEndpointOfEnv(environment, EnvEndpointsAllFilePath)
 		var username string
 		var password string
 		var clientID string
 		var clientSecret string
 		var err error
 
-		if EnvExistsInKeysFile(environment) {
+		if EnvExistsInKeysFile(environment, EnvKeysAllFilePath) {
 			// client_id, client_secret, and username exist in file
-			username = GetUsernameOfEnv(environment)
+			username = GetUsernameOfEnv(environment, EnvKeysAllFilePath)
 
 			if flagUsername != "" {
 				// flagUsername is not blank
@@ -61,8 +61,8 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 				}
 			}
 
-			clientID = GetClientIDOfEnv(environment)
-			clientSecret = GetClientSecretOfEnv(environment, password)
+			clientID = GetClientIDOfEnv(environment, EnvKeysAllFilePath)
+			clientSecret = GetClientSecretOfEnv(environment, password, EnvKeysAllFilePath)
 
 			Logln(LogPrefixInfo+"Username:", username)
 			Logln(LogPrefixInfo+"ClientID:", clientID)
@@ -84,7 +84,7 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 			// Persist clientID, clientSecret, Username in file
 			encryptedClientSecret := Encrypt([]byte(GetMD5Hash(password)), clientSecret)
 			envKeys := EnvKeys{clientID, encryptedClientSecret, username}
-			AddNewEnvToKeysFile(environment, envKeys)
+			AddNewEnvToKeysFile(environment, envKeys, EnvKeysAllFilePath)
 		}
 
 		// Get OAuth Tokens

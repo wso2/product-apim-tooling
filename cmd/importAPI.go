@@ -51,7 +51,7 @@ var ImportAPICmd = &cobra.Command{
 			if resp.StatusCode == 200 {
 				fmt.Println("Header:", resp.Header)
 				fmt.Println("Body:", resp.Body)
-			}else{
+			} else {
 				fmt.Println("Status: ", resp.Status)
 				utils.Logln(utils.LogPrefixError + resp.Status)
 			}
@@ -121,8 +121,7 @@ func ImportAPI(name string, url string, accessToken string) *http.Response {
 	return resp
 }
 
-
-// Helper functoin for
+// Helper function for forming multi-part form data
 func newFileUploadRequest(uri string, params map[string]string, paramName, path string, accessToken string) (*http.Request, error) {
 	file, err := os.Open(path)
 	if err != nil {
