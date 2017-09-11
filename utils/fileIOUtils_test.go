@@ -1,3 +1,4 @@
+// +integration
 package utils
 
 import (
@@ -6,25 +7,52 @@ import (
 	"io/ioutil"
 )
 
-var testKeysFilePath string = ApplicationRoot + "/test_keys_config.yaml"
-var testEndpointsFilePath string = ApplicationRoot + "/test_endpoints_config.yaml"
+const testKeysFilePath string = ApplicationRoot + "/test_keys_config.yaml"
+const testEndpointsFilePath string = ApplicationRoot + "/test_endpoints_config.yaml"
 var envKeysAll *EnvKeysAll = new(EnvKeysAll)
 var envEndpointsAll *EnvEndpointsAll = new(EnvEndpointsAll)
+const devName string = "dev"
+const qaName string = "qa"
+const devUsername string = "dev-username"
+const qaUsername string = "qa-username"
+const devPassword string = "dev-password"
+const qaPassword string = "qa-password"
+
 
 // helper function for testing
 func writeCorrectKeys(){
-	envKeysAll.Environments  = make(map[string]EnvKeys)
-	envKeysAll.Environments["dev"] = EnvKeys{"dev-client-id", "dev-client-secret", "dev-username"}
-	envKeysAll.Environments["qa"] = EnvKeys{"qa-client-id", "qa-client-secret", "qa-username"}
+	initSampleKeys()
 	WriteConfigFile(envKeysAll, testKeysFilePath)
+}
+
+func getSampleKeys() *EnvKeysAll {
+	initSampleKeys()
+	return envKeysAll
+}
+
+func getSampleEndpoints() *EnvEndpointsAll {
+	return envEndpointsAll
+}
+
+func initSampleKeys() {
+	envKeysAll.Environments = make(map[string]EnvKeys)
+	devEncryptedClientSecret := Encrypt([]byte(GetMD5Hash(devPassword)), "dev-client-secret")
+	qaEncryptedClientSecret := Encrypt([]byte(GetMD5Hash(qaPassword)), "qa-client-secret")
+	envKeysAll.Environments[devName] = EnvKeys{"dev-client-id", devEncryptedClientSecret, "dev-username"}
+	envKeysAll.Environments[qaName] = EnvKeys{"qa-client-id", qaEncryptedClientSecret, "qa-username"}
 }
 
 // helper function for testing
 func writeCorrectEndpoints() {
-	envEndpointsAll.Environments = make(map[string]EnvEndpoints)
-	envEndpointsAll.Environments["dev"] = EnvEndpoints{"dev-apim-endpoint", "dev-reg-endpoint", "dev-token-endpoint"}
-	envEndpointsAll.Environments["qa"] = EnvEndpoints{"qa-apim-endpoint", "qa-reg-endpoint", "dev-token-endpoint"}
+	initSampleEndpoints()
 	WriteConfigFile(envEndpointsAll, testEndpointsFilePath)
+}
+func initSampleEndpoints() {
+	envEndpointsAll.Environments = make(map[string]EnvEndpoints)
+	envEndpointsAll.Environments[devName] = EnvEndpoints{"dev-apim-endpoint",
+		"dev-reg-endpoint", "dev-token-endpoint"}
+	envEndpointsAll.Environments[qaName] = EnvEndpoints{"qa-apim-endpoint",
+		"qa-reg-endpoint", "dev-token-endpoint"}
 }
 
 func TestWriteConfigFile(t *testing.T) {
@@ -39,8 +67,8 @@ func TestGetEnvKeysAllFromFile1(t *testing.T) {
 	writeCorrectKeys()
 	envKeysAllReturned := GetEnvKeysAllFromFile(testKeysFilePath)
 
-	if envKeysAllReturned.Environments["dev"] != envKeysAll.Environments["dev"] ||
-		 envKeysAllReturned.Environments["qa"] != envKeysAll.Environments["qa"] {
+	if envKeysAllReturned.Environments[devName] != envKeysAll.Environments[devName] ||
+		 envKeysAllReturned.Environments[qaName] != envKeysAll.Environments[qaName] {
 		t.Errorf("Error in GetEnvKeysAllFromFile()")
 	}
 
@@ -50,37 +78,18 @@ func TestGetEnvKeysAllFromFile1(t *testing.T) {
 	}
 }
 
-func TestGetEnvKeysAllFromFile2(t *testing.T) {
-	// testing for incorrect data
-	var envIncorrectKeysAll *EnvKeysAll = new(EnvKeysAll)
-	envIncorrectKeysAll.Environments  = make(map[string]EnvKeys)
-	envIncorrectKeysAll.Environments["dev"] = EnvKeys{"", "", "dev-username"}
-
-	WriteConfigFile(envIncorrectKeysAll, testKeysFilePath)
-	envKeysAllReturned := GetEnvKeysAllFromFile(testKeysFilePath)
-
-	if envKeysAllReturned.Environments["dev"] != envIncorrectKeysAll.Environments["dev"] ||
-		envKeysAllReturned.Environments["qa"] != envIncorrectKeysAll.Environments["qa"] {
-		t.Errorf("Error in GetEnvKeysAllFromFile()")
-	}
-
-	var err = os.Remove(testKeysFilePath)
-	if err != nil {
-		t.Errorf("Error deleting file " + testKeysFilePath)
-	}
-}
-
+/*
 func TestGetEnvKeysAllFromFile3(t *testing.T) {
 	// testing for incorrect data
 	var envIncorrectKeysAll *EnvKeysAll = new(EnvKeysAll)
 	envIncorrectKeysAll.Environments  = make(map[string]EnvKeys)
-	envIncorrectKeysAll.Environments["dev"] = EnvKeys{"dev-client-id", "", "dev-username"}
+	envIncorrectKeysAll.Environments[devName] = EnvKeys{"dev-client-id", "", devUsername}
 
 	WriteConfigFile(envIncorrectKeysAll, testKeysFilePath)
 	envKeysAllReturned := GetEnvKeysAllFromFile(testKeysFilePath)
 
-	if envKeysAllReturned.Environments["dev"] != envIncorrectKeysAll.Environments["dev"] ||
-		envKeysAllReturned.Environments["qa"] != envIncorrectKeysAll.Environments["qa"] {
+	if envKeysAllReturned.Environments[devName] != envIncorrectKeysAll.Environments[devName] ||
+		envKeysAllReturned.Environments[qaName] != envIncorrectKeysAll.Environments[qaName] {
 		t.Errorf("Error in GetEnvKeysAllFromFile()")
 	}
 
@@ -89,14 +98,15 @@ func TestGetEnvKeysAllFromFile3(t *testing.T) {
 		t.Errorf("Error deleting file " + testKeysFilePath)
 	}
 }
+*/
 
 func TestGetEnvEndpointsAllFromFile(t *testing.T) {
 	// testing for correct data
 	writeCorrectEndpoints()
 	envEndpointsAllReturned := GetEnvEndpointsAllFromFile(testEndpointsFilePath)
 
-	if envEndpointsAllReturned.Environments["dev"] != envEndpointsAllReturned.Environments["dev"] ||
-		envEndpointsAllReturned.Environments["qa"] != envEndpointsAllReturned.Environments["qa"] {
+	if envEndpointsAllReturned.Environments[devName] != envEndpointsAllReturned.Environments[devName] ||
+		envEndpointsAllReturned.Environments[qaName] != envEndpointsAllReturned.Environments[qaName] {
 		t.Errorf("Error in GetEnvEndpointsAllFromFile()")
 	}
 

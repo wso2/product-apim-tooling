@@ -32,6 +32,7 @@ func GetEnvKeysAllFromFile(filePath string) *EnvKeysAll {
 	var envKeysAll EnvKeysAll
 	if err := envKeysAll.ParseEnvKeysFromFile(data); err != nil {
 		fmt.Println(LogPrefixError + "parsing " + filePath)
+		return nil
 	}
 
 	return &envKeysAll
