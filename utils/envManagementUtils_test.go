@@ -3,11 +3,13 @@ package utils
 import (
 )
 
+
 /*
 func TestEnvExistsInEndpointsFile(t *testing.T) {
 	env := "dev"
+	workingDir, _ := os.Getwd()
 	envExistsInEndpointsFile := EnvExistsInEndpointsFile(env)
-	data, err := ioutil.ReadFile("../env_endpoints_all.yaml")
+	data, err := ioutil.ReadFile(workingDir +"/" + EnvEndpointsAllFileName)
 	if err != nil {
 		fmt.Println("Error:", err)
 	}

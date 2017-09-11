@@ -21,33 +21,33 @@ func WriteConfigFile(c interface{}, envConfigFilePath string) {
 }
 
 // Read and return EnvKeysAll
-func GetEnvKeysAllFromFile() *EnvKeysAll {
-	data, err := ioutil.ReadFile("./env_keys_all.yaml")
+func GetEnvKeysAllFromFile(filePath string) *EnvKeysAll {
+	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		fmt.Println("Error reading env_keys_all.yaml")
-		os.Create("./env_keys_all.yaml")
-		data, err = ioutil.ReadFile("./env_keys_all.yaml")
+		fmt.Println("Error reading " + filePath)
+		os.Create(filePath)
+		data, err = ioutil.ReadFile(filePath)
 	}
 
 	var envKeysAll EnvKeysAll
 	if err := envKeysAll.ReadEnvKeysFromFile(data); err != nil {
-		fmt.Println(LogPrefixError + "parsing env_keys_all.yaml")
+		fmt.Println(LogPrefixError + "parsing " + filePath)
 	}
 
 	return &envKeysAll
 }
 
 // Read and return EnvEndpointsAll
-func GetEnvEndpointsAllFromFile() *EnvEndpointsAll {
-	data, err := ioutil.ReadFile("./env_endpoints_all.yaml")
+func GetEnvEndpointsAllFromFile(filePath string) *EnvEndpointsAll {
+	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		HandleErrorAndExit("File Not Found: env_endpoints_all.yaml", nil)
+		HandleErrorAndExit("File Not Found: "+filePath, nil)
 	}
 
 	var envEndpointsAll EnvEndpointsAll
 	if err := envEndpointsAll.ReadEnvEndpointsFromFile(data); err != nil {
 		fmt.Println()
-		HandleErrorAndExit("Error parsing env_endpoints_all.yaml", nil)
+		HandleErrorAndExit("Error parsing "+filePath, nil)
 	}
 
 	return &envEndpointsAll

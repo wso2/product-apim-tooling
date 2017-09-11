@@ -1,6 +1,10 @@
 package utils
 
-const EnvConfigFileName string = "env_config.yaml"
+const EnvKeysAllFileName string = "env_keys_all.yaml"
+const EnvKeysAllFilePath string = "/home/menuka/.go/src/github.com/menuka94/" + EnvKeysAllFileName
+const EnvEndpointsAllFileName string = "env_endpoints_all.yaml"
+const EnvEndpointsAllFilePath string = "/home/menuka/.go/src/github.com/menuka94/" + EnvEndpointsAllFileName
+
 const HeaderAuthorization string = "Authorization"
 const HeaderContentType string = "Content-Type"
 const HeaderConnection string = "Connection"
