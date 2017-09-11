@@ -7,9 +7,8 @@ import (
 /*
 func TestEnvExistsInEndpointsFile(t *testing.T) {
 	env := "dev"
-	workingDir, _ := os.Getwd()
 	envExistsInEndpointsFile := EnvExistsInEndpointsFile(env)
-	data, err := ioutil.ReadFile(workingDir +"/" + EnvEndpointsAllFileName)
+	data, err := ioutil.ReadFile(EnvEndpointsAllFilePath)
 	if err != nil {
 		fmt.Println("Error:", err)
 	}
@@ -27,7 +26,7 @@ func TestEnvExistsInEndpointsFile(t *testing.T) {
 		}
 	}
 }
-*/
+/*
 
 /*
 func TestEnvExistsInKeysFile(t *testing.T) {

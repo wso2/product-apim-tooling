@@ -1,9 +1,10 @@
 package utils
 
+const ApplicationRoot string = "/home/menuka/.go/src/github.com/menuka94/wso2apim-cli"
 const EnvKeysAllFileName string = "env_keys_all.yaml"
-const EnvKeysAllFilePath string = "/home/menuka/.go/src/github.com/menuka94/" + EnvKeysAllFileName
+const EnvKeysAllFilePath string = ApplicationRoot + "/" + EnvKeysAllFileName
 const EnvEndpointsAllFileName string = "env_endpoints_all.yaml"
-const EnvEndpointsAllFilePath string = "/home/menuka/.go/src/github.com/menuka94/" + EnvEndpointsAllFileName
+const EnvEndpointsAllFilePath string = ApplicationRoot +  "/" + EnvEndpointsAllFileName
 
 const HeaderAuthorization string = "Authorization"
 const HeaderContentType string = "Content-Type"

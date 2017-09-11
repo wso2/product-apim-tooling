@@ -30,7 +30,7 @@ func GetEnvKeysAllFromFile(filePath string) *EnvKeysAll {
 	}
 
 	var envKeysAll EnvKeysAll
-	if err := envKeysAll.ReadEnvKeysFromFile(data); err != nil {
+	if err := envKeysAll.ParseEnvKeysFromFile(data); err != nil {
 		fmt.Println(LogPrefixError + "parsing " + filePath)
 	}
 
@@ -45,8 +45,7 @@ func GetEnvEndpointsAllFromFile(filePath string) *EnvEndpointsAll {
 	}
 
 	var envEndpointsAll EnvEndpointsAll
-	if err := envEndpointsAll.ReadEnvEndpointsFromFile(data); err != nil {
-		fmt.Println()
+	if err := envEndpointsAll.ParseEnvEndpointsFromFile(data); err != nil {
 		HandleErrorAndExit("Error parsing "+filePath, nil)
 	}
 
@@ -55,7 +54,7 @@ func GetEnvEndpointsAllFromFile(filePath string) *EnvEndpointsAll {
 
 // Read and validate contents of env_endpoints_all.yaml
 // will throw errors if the any of the lines is blank
-func (envEndpointsAll *EnvEndpointsAll) ReadEnvEndpointsFromFile(data []byte) error {
+func (envEndpointsAll *EnvEndpointsAll) ParseEnvEndpointsFromFile(data []byte) error {
 	if err := yaml.Unmarshal(data, envEndpointsAll); err != nil {
 		return err
 	}
@@ -75,7 +74,7 @@ func (envEndpointsAll *EnvEndpointsAll) ReadEnvEndpointsFromFile(data []byte) er
 
 // Read and validate contents of env_keys_all.yaml
 // will throw errors if the any of the lines is blank
-func (envKeysAll *EnvKeysAll) ReadEnvKeysFromFile(data []byte) error {
+func (envKeysAll *EnvKeysAll) ParseEnvKeysFromFile(data []byte) error {
 	if err := yaml.Unmarshal(data, envKeysAll); err != nil {
 		return err
 	}
