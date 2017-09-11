@@ -1,40 +1,105 @@
 package cmd
 
 import (
-	"reflect"
 	"testing"
-
+	"net/http/httptest"
+	"net/http"
+	"fmt"
+	"strings"
+	"github.com/renstrom/dedent"
 	"github.com/menuka94/wso2apim-cli/utils"
 )
 
-func TestGetAPIList(t *testing.T) {
-	type args struct {
-		query              string
-		accessToken        string
-		apiManagerEndpoint string
+func TestGetAPIListOK(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		if r.Method != http.MethodGet {
+			t.Errorf("Expected method '%s', got '%s'\n", http.MethodGet, r.Method)
+		}
+		w.Header().Set(utils.HeaderContentType, utils.HeaderValueApplicationJSON)
+
+		if !strings.Contains(r.Header.Get(utils.HeaderAuthorization), utils.HeaderValueAuthBearerPrefix) {
+			t.Errorf("Error in Authorization Header. Got '%s'\n", w.Header().Get(utils.HeaderAuthorization))
+		}
+
+		body := dedent.Dedent(`
+			{
+	"count": 3,
+	"list": [
+	  		 {
+	     	  	"id": "17e0f83c-dce5-4e9b-aa6a-db49b55591c5",
+	      		 "name": "test1",
+	       	"context": "/test1",
+	      		 "version": "1.0.0",
+	       		"provider": "admin",
+	      		 "lifeCycleStatus": "Created",
+	     		  "workflowStatus": "APPROVED",
+	      		 "securityScheme": []
+	   },
+	   {
+	       "id": "9c740e42-309e-44aa-a8e1-6b8830aa7146",
+	  	     "name": "test2",
+	  	     "context": "/test2",
+	   	    "version": "1.0.0",
+	 	      "provider": "admin",
+	 	      "lifeCycleStatus": "Created",
+	 	      "workflowStatus": "APPROVED",
+	 	      "securityScheme": []
+	   },
+	   {
+	      	 "id": "39899b8c-5893-4864-a935-9c149bc7461d",
+	      	 "name": "test3",
+	      	 "context": "/test3",
+	     	  "version": "1.0",
+	     	  "provider": "admin",
+	      	 "lifeCycleStatus": "Created",
+	     	  "workflowStatus": "APPROVED",
+	      	 "securityScheme": [
+	      	     "Oauth"
+	   	 ]
+		   }
+	]
+			}`)
+
+	w.Write([]byte(body))
+	}))
+	defer server.Close()
+
+	count, apiList, err := GetAPIList("", "access_token", server.URL)
+	fmt.Println("Count:", count)
+	fmt.Println("List:", apiList)
+
+	if count != 3 {
+		t.Errorf("Incorrect count. Exptected %d, got %d\n" , 3, count)
 	}
-	tests := []struct {
-		name    string
-		args    args
-		want    int32
-		want1   []utils.API
-		wantErr bool
-	}{
-	// TODO: Add test cases.
+
+	if err != nil {
+		t.Error("Error" + err.Error())
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, got1, err := GetAPIList(tt.args.query, tt.args.accessToken, tt.args.apiManagerEndpoint)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("GetAPIList() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != tt.want {
-				t.Errorf("GetAPIList() got = %v, want %v", got, tt.want)
-			}
-			if !reflect.DeepEqual(got1, tt.want1) {
-				t.Errorf("GetAPIList() got1 = %v, want %v", got1, tt.want1)
-			}
-		})
+
+}
+
+func TestGetAPIListUnreachable(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusServiceUnavailable)
+		if r.Method != http.MethodGet {
+			t.Errorf("Expected method '%s', got '%s'\n", http.MethodGet, r.Method)
+		}
+		//if !strings.Contains(w.Header().Get(utils.HeaderAuthorization), "Bearer") {
+		//	t.Error("Error in Authorization Header")
+		//}
+	}))
+	defer server.Close()
+	
+	count, list, err := GetAPIList("", "access_token", server.URL)
+	if count != 0 {
+		t.Errorf("Incorrect Count. Expected %d, got %d\n", 0, count)
+	}
+	if list != nil {
+		t.Errorf("")
+	}
+
+	if err == nil {
+		t.Error("Error should not be nil")
 	}
 }

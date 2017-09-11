@@ -22,6 +22,7 @@ import (
 	"github.com/go-resty/resty"
 	"github.com/menuka94/wso2apim-cli/utils"
 	"github.com/spf13/cobra"
+	"errors"
 )
 
 var listEnvironment string
@@ -74,9 +75,12 @@ func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (in
 		SetHeaders(headers).
 		Get(url)
 
-	fmt.Println("")
+	if err != nil {
+		utils.HandleErrorAndExit("Unable to connect to " + url, err)
+	}
 
 	utils.Logln(utils.LogPrefixInfo + "GetAPIList(): Response:", resp.Status())
+
 	if resp.StatusCode() == 200 {
 		apiListResponse := &utils.APIListResponse{}
 		unmarshalError := json.Unmarshal([]byte(resp.Body()), &apiListResponse)
@@ -88,7 +92,7 @@ func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (in
 
 		return apiListResponse.Count, apiListResponse.List, nil
 	} else {
-		return 0, nil, err
+		return 0, nil, errors.New(resp.Status())
 	}
 
 }
