@@ -42,12 +42,12 @@ func GetEnvKeysAllFromFile(filePath string) *EnvKeysAll {
 func GetEnvEndpointsAllFromFile(filePath string) *EnvEndpointsAll {
 	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		HandleErrorAndExit("File Not Found: "+filePath, nil)
+		HandleErrorAndExit("File Not Found: "+filePath, err)
 	}
 
 	var envEndpointsAll EnvEndpointsAll
 	if err := envEndpointsAll.ParseEnvEndpointsFromFile(data); err != nil {
-		HandleErrorAndExit("Error parsing "+filePath, nil)
+		HandleErrorAndExit("Error parsing "+filePath, err)
 	}
 
 	return &envEndpointsAll
@@ -61,13 +61,13 @@ func (envEndpointsAll *EnvEndpointsAll) ParseEnvEndpointsFromFile(data []byte) e
 	}
 	for name, endpoints := range envEndpointsAll.Environments {
 		if endpoints.APIManagerEndpoint == "" {
-			return errors.New("Invalid API Manager Endpoint for " + name)
+			return errors.New("Blank API Manager Endpoint for " + name)
 		}
 		if endpoints.RegistrationEndpoint == "" {
-			return errors.New("Invalid Registration Endpoint for " + name)
+			return errors.New("Blank Registration Endpoint for " + name)
 		}
 		if endpoints.TokenEndpoint == "" {
-			return errors.New("Invalid Token Endpoint for " + name)
+			return errors.New("Blank Token Endpoint for " + name)
 		}
 	}
 	return nil
@@ -81,10 +81,10 @@ func (envKeysAll *EnvKeysAll) ParseEnvKeysFromFile(data []byte) error {
 	}
 	for name, keys := range envKeysAll.Environments {
 		if keys.ClientID == "" {
-			return errors.New("Invalid ClientID for " + name)
+			return errors.New("Blank ClientID for " + name)
 		}
 		if keys.ClientSecret == "" {
-			return errors.New("Invalid ClientSecret for " + name)
+			return errors.New("Blank ClientSecret for " + name)
 		}
 	}
 	return nil

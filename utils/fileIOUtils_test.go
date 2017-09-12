@@ -38,8 +38,8 @@ func initSampleKeys() {
 	envKeysAll.Environments = make(map[string]EnvKeys)
 	devEncryptedClientSecret := Encrypt([]byte(GetMD5Hash(devPassword)), "dev-client-secret")
 	qaEncryptedClientSecret := Encrypt([]byte(GetMD5Hash(qaPassword)), "qa-client-secret")
-	envKeysAll.Environments[devName] = EnvKeys{"dev-client-id", devEncryptedClientSecret, "dev-username"}
-	envKeysAll.Environments[qaName] = EnvKeys{"qa-client-id", qaEncryptedClientSecret, "qa-username"}
+	envKeysAll.Environments[devName] = EnvKeys{"dev-client-id", devEncryptedClientSecret, devUsername}
+	envKeysAll.Environments[qaName] = EnvKeys{"qa-client-id", qaEncryptedClientSecret, qaUsername}
 }
 
 // helper function for testing

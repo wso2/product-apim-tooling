@@ -19,6 +19,9 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 		registrationEndpoint := GetRegistrationEndpointOfEnv(environment, EnvEndpointsAllFilePath)
 		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment, EnvEndpointsAllFilePath)
 		tokenEndpoint := GetTokenEndpointOfEnv(environment, EnvEndpointsAllFilePath)
+
+		fmt.Println("Reg Endpoint read:", registrationEndpoint)
+
 		var username string
 		var password string
 		var clientID string
@@ -72,7 +75,23 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 			// first use of the environment
 			// Get new values
 
-			username, password := HandleFlagsUsernamePasswordWithEnvInEndpointsFile(flagUsername, flagPassword)
+			if flagUsername != "" {
+				// flagUsername is not blank
+				username = flagUsername
+				if flagPassword == "" {
+					// flagPassword is blank
+					fmt.Println("For Username: " + username)
+					password = PromptForPassword()
+				} else {
+					// flagPassword is not blank
+					password = flagPassword
+				}
+			} else {
+				// flagUsername is blank
+				// doesn't matter is flagPassword is blank or not
+				username = strings.TrimSpace(PromptForUsername())
+				password = PromptForPassword()
+			}
 
 			fmt.Println("\nUsername: " + username + "\n")
 			clientID, clientSecret, err = GetClientIDSecret(username, password, registrationEndpoint)
@@ -98,8 +117,6 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 		return "", "", errors.New("Details incorrect/unavailable for environment '" + environment + "' in env_endpoints_all.yaml")
 	}
 }
-
-// Method for
 
 func HandleFlagsUsernamePasswordWithEnvInEndpointsFile(flagUsername string, flagPassword string) (username, password string) {
 	if flagUsername != "" {
@@ -133,8 +150,6 @@ func GetClientIDSecret(username string, password string, url string) (string, st
 	headers[HeaderContentType] = HeaderValueApplicationJSON
 	// headers["Content-Type"] = "application/json"
 
-	//headers["Accept"] = HeaderValueApplicationJSON
-
 	headers[HeaderAuthorization] = HeaderValueAuthBasicPrefix + " " + GetBase64EncodedCredentials(username, password)
 	// headers["Authorization"] = "Basic " + GetBase64EncodedCredentials(username, password)
 
@@ -144,26 +159,35 @@ func GetClientIDSecret(username string, password string, url string) (string, st
 	resp, err := InvokePOSTRequest(url, headers, body)
 
 	if err != nil {
-		fmt.Println("Error in connecting:")
-		fmt.Println(err)
-		os.Exit(1)
+		HandleErrorAndExit("Error in connecting", err)
 	}
 
-	if resp.StatusCode() != http.StatusOK {
+	Logln("GetClientIDSecret(): Status - " + resp.Status())
+
+	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
+		// 200 OK or 201 Created
+		//m := make(map[string]string) // a map to hold response data
+		registrationResponse := RegistrationResponse{}
+		data := []byte(resp.Body())
+		err = json.Unmarshal(data, &registrationResponse) // add response data to m
+
+		//clientID := m["client_id"]
+		//clientSecret := m["client_secret"]
+
+		clientID := registrationResponse.ClientID
+		clientSecret := registrationResponse.ClientSecret
+
+		return clientID, clientSecret, err
+
+	} else {
+		//fmt.Println("Error:", resp.Error())
+		//fmt.Printf("Body: %s\n", resp.Body())
 		if resp.StatusCode() == http.StatusUnauthorized {
 			HandleErrorAndExit("Incorrect Username/Password combination", errors.New("401 Unauthorized"))
 		}
 		return "", "", errors.New("Request didn't respond 200 OK: " + resp.Status())
 	}
 
-	m := make(map[string]string) // a map to hold response data
-	data := []byte(resp.Body())
-	err = json.Unmarshal(data, &m) // add response data to m
-
-	clientID := m["client_id"]
-	clientSecret := m["client_secret"]
-
-	return clientID, clientSecret, err
 }
 
 // Encode the concatenation of two strings (using ":")

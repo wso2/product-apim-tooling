@@ -59,9 +59,11 @@ func RemoveEnvFromKeysFile(env string, filePath string) (error) {
 			WriteConfigFile(envKeysAll, filePath)
 			return nil
 		} else {
+			// env doesn't exist in keys file
 			return errors.New("environment is not initialized yet. No user data to reset")
 		}
 	} else {
+		// env doesn't exist in endpoints file
 		return errors.New("environment not found in " + filePath)
 	}
 
