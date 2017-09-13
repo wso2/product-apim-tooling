@@ -118,28 +118,6 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 	}
 }
 
-func HandleFlagsUsernamePasswordWithEnvInEndpointsFile(flagUsername string, flagPassword string) (username, password string) {
-	if flagUsername != "" {
-		// flagUsername is not blank
-		username = flagUsername
-		if flagPassword == "" {
-			// flagPassword is blank
-			fmt.Println("For Username: " + username)
-			password = PromptForPassword()
-		} else {
-			// flagPassword is not blank
-			password = flagPassword
-		}
-	} else {
-		// flagUsername is blank
-		// doesn't matter is flagPassword is blank or not
-		username = strings.TrimSpace(PromptForUsername())
-		password = PromptForPassword()
-	}
-
-	return username, password
-}
-
 // GetClientIDSecret implemented using go-resty
 // provide username, password
 // returns client_id, client_secret

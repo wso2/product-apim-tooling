@@ -5,6 +5,8 @@ const EnvKeysAllFileName string = "env_keys_all.yaml"
 const EnvKeysAllFilePath string = ApplicationRoot + "/" + EnvKeysAllFileName
 const EnvEndpointsAllFileName string = "env_endpoints_all.yaml"
 const EnvEndpointsAllFilePath string = ApplicationRoot +  "/" + EnvEndpointsAllFileName
+const ExportedAPIsDirectoryName string = "exported"
+const ExportedAPIDirectoryPath string = ApplicationRoot + "/" + ExportedAPIsDirectoryName
 
 const HeaderAuthorization string = "Authorization"
 const HeaderContentType string = "Content-Type"

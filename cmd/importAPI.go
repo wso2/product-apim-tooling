@@ -70,8 +70,7 @@ func ImportAPI(name string, url string, accessToken string) *http.Response {
 	}
 	url += "import/apis"
 
-	filePath, _ := os.Getwd()
-	filePath += "/exported/" + name
+	filePath := utils.ExportedAPIDirectoryPath + "/" + name
 	fmt.Println("filePath:", filePath)
 
 	// check if '.zip' exists in the input 'name'
@@ -84,8 +83,7 @@ func ImportAPI(name string, url string, accessToken string) *http.Response {
 	} else {
 		//fmt.Println("hasZipExtension: ", false)
 		// search for a directory with the given name
-		destination, _ := os.Getwd()
-		destination += "/exported/" + name + ".zip"
+		destination := utils.ExportedAPIDirectoryPath + "/" + name + ".zip"
 		err := utils.ZipDir(filePath, destination)
 		if err != nil {
 			utils.HandleErrorAndExit("Error creating zip archive", err)

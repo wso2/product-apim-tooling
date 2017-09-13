@@ -75,7 +75,7 @@ var ExportAPICmd = &cobra.Command{
 // Exported API will be written to a zip file
 func WriteToZip(exportAPIName string, resp *resty.Response) {
 	// Write to file
-	directory := "./exported"
+	directory := utils.ExportedAPIDirectoryPath
 	// create directory if it doesn't exist
 	if _, err := os.Stat(directory); os.IsNotExist(err) {
 		os.Mkdir(directory, 0777)

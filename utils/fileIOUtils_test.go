@@ -13,10 +13,10 @@ var envKeysAll *EnvKeysAll = new(EnvKeysAll)
 var envEndpointsAll *EnvEndpointsAll = new(EnvEndpointsAll)
 const devName string = "dev"
 const qaName string = "qa"
-const devUsername string = "dev-username"
-const qaUsername string = "qa-username"
-const devPassword string = "dev-password"
-const qaPassword string = "qa-password"
+const devUsername string = "dev_username"
+const qaUsername string = "qa_username"
+const devPassword string = "dev_password"
+const qaPassword string = "qa_password"
 
 
 // helper function for testing
@@ -36,10 +36,10 @@ func getSampleEndpoints() *EnvEndpointsAll {
 
 func initSampleKeys() {
 	envKeysAll.Environments = make(map[string]EnvKeys)
-	devEncryptedClientSecret := Encrypt([]byte(GetMD5Hash(devPassword)), "dev-client-secret")
-	qaEncryptedClientSecret := Encrypt([]byte(GetMD5Hash(qaPassword)), "qa-client-secret")
-	envKeysAll.Environments[devName] = EnvKeys{"dev-client-id", devEncryptedClientSecret, devUsername}
-	envKeysAll.Environments[qaName] = EnvKeys{"qa-client-id", qaEncryptedClientSecret, qaUsername}
+	devEncryptedClientSecret := Encrypt([]byte(GetMD5Hash(devPassword)), "dev_client_secret")
+	qaEncryptedClientSecret := Encrypt([]byte(GetMD5Hash(qaPassword)), "qa_client_secret")
+	envKeysAll.Environments[devName] = EnvKeys{"dev_client_id", devEncryptedClientSecret, devUsername}
+	envKeysAll.Environments[qaName] = EnvKeys{"qa_client_id", qaEncryptedClientSecret, qaUsername}
 }
 
 // helper function for testing
@@ -49,10 +49,10 @@ func writeCorrectEndpoints() {
 }
 func initSampleEndpoints() {
 	envEndpointsAll.Environments = make(map[string]EnvEndpoints)
-	envEndpointsAll.Environments[devName] = EnvEndpoints{"dev-apim-endpoint",
-		"dev-reg-endpoint", "dev-token-endpoint"}
-	envEndpointsAll.Environments[qaName] = EnvEndpoints{"qa-apim-endpoint",
-		"qa-reg-endpoint", "dev-token-endpoint"}
+	envEndpointsAll.Environments[devName] = EnvEndpoints{"dev_apim_endpoint",
+		"dev_reg_endpoint", "dev_token_endpoint"}
+	envEndpointsAll.Environments[qaName] = EnvEndpoints{"qa_apim_endpoint",
+		"qa_reg_endpoint", "dev_token_endpoint"}
 }
 
 func TestWriteConfigFile(t *testing.T) {
@@ -83,7 +83,7 @@ func TestGetEnvKeysAllFromFile3(t *testing.T) {
 	// testing for incorrect data
 	var envIncorrectKeysAll *EnvKeysAll = new(EnvKeysAll)
 	envIncorrectKeysAll.Environments  = make(map[string]EnvKeys)
-	envIncorrectKeysAll.Environments[devName] = EnvKeys{"dev-client-id", "", devUsername}
+	envIncorrectKeysAll.Environments[devName] = EnvKeys{"dev_client_id", "", devUsername}
 
 	WriteConfigFile(envIncorrectKeysAll, testKeysFilePath)
 	envKeysAllReturned := GetEnvKeysAllFromFile(testKeysFilePath)

@@ -1,5 +1,5 @@
 hash: 14637de5182a4b0d5903945ccb984c0a673989aa1fedd73be7ccf8812dbcf4ae
-updated: 2017-08-29T10:08:09.366277586+05:30
+updated: 2017-09-13T09:18:15.974435747+05:30
 imports:
 - name: github.com/fsnotify/fsnotify
   version: fd9ec7deca8bf46ecd2a795baaacf2b3a9be1197
@@ -49,7 +49,7 @@ imports:
   subpackages:
   - ssh/terminal
 - name: golang.org/x/net
-  version: 66aacef3dd8a676686c7ae3716979581e8b03c47
+  version: b129b8e0fbeb39c8358e51a07ab6c50ad415e72e
   subpackages:
   - publicsuffix
 - name: golang.org/x/sys

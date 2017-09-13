@@ -152,16 +152,3 @@ func TestExecutePreCommand(t *testing.T) {
 	}
 }
 
-func TestHandleFlagsUsernamePassword(t *testing.T) {
-	typedUsername := ""
-	typedPassword := ""
-	returnedUsername, returnedPassword := HandleFlagsUsernamePasswordWithEnvInEndpointsFile("", "")
-	
-	if typedUsername != returnedUsername {
-		t.Errorf("Expected '%s', got '%s'\n", typedUsername, returnedUsername)
-	}
-
-	if typedPassword != returnedPassword {
-		t.Errorf("Expected '%s', got '%s'\n", typedPassword, returnedPassword)
-	}
-}
