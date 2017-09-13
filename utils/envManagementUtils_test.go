@@ -3,7 +3,6 @@ package utils
 import (
 	"testing"
 	"os"
-	"fmt"
 )
 
 func TestEnvExistsInKeysFile(t *testing.T) {
@@ -126,35 +125,78 @@ func TestGetUsernameOfEnv(t *testing.T) {
 
 func TestAddNewEnvToKeysFile1(t *testing.T) {
 	writeCorrectKeys()
-	var envKeys EnvKeys = EnvKeys{"staging-username", "staging-client-id", "staging-client-secret"}
+	var envKeys EnvKeys = EnvKeys{"staging_username", "staging_client_id", "staging_client_secret"}
 
 	AddNewEnvToKeysFile("staging", envKeys, testKeysFilePath)
 	defer os.Remove(testKeysFilePath)
 }
 
 func TestAddNewEnvToKeysFile2(t *testing.T) {
-	var envKeys EnvKeys = EnvKeys{"staging-username", "staging-client-id", "staging-client-secret"}
+	var envKeys EnvKeys = EnvKeys{"staging_username", "staging_client_id", "staging_client_secret"}
 
 	AddNewEnvToKeysFile("staging", envKeys, testKeysFilePath)
 	defer os.Remove(testKeysFilePath)
 }
 
-/*
-func TestRemoveEnvFromKeysFile(t *testing.T) {
+// Case 1: Correct Details
+func TestRemoveEnvFromKeysFile1(t *testing.T) {
 	writeCorrectEndpoints()
 	writeCorrectKeys()
-	err := RemoveEnvFromKeysFile(devName, testKeysFilePath)
+	err := RemoveEnvFromKeysFile(devName, testKeysFilePath, testEndpointsFilePath)
 	if err != nil {
 		t.Error("Error removing env from keys file: " + err.Error())
 	}
 
 	defer removeFiles()
 }
-*/
+
+// Case 2: Env not available in keys file
+func TestRemoveEnvFromKeysFile2(t *testing.T) {
+	writeCorrectEndpoints()
+
+	// write incorrect keys
+	envKeysAll.Environments = make(map[string]EnvKeys)
+	qaEncryptedClientSecret := Encrypt([]byte(GetMD5Hash(qaPassword)), "qa_client_secret")
+	envKeysAll.Environments[qaName] = EnvKeys{"qa_client_id", qaEncryptedClientSecret, qaUsername}
+	WriteConfigFile(envKeysAll, testKeysFilePath)
+	// end of writing incorrect keys
+
+	err := RemoveEnvFromKeysFile(devName, testKeysFilePath, testEndpointsFilePath)
+	if err == nil {
+		t.Error("No error returned. 'Env not found in keys file' error expected")
+	}
+
+	defer removeFiles()
+}
+
+// Case 4: Incorrect Endpoints
+func TestRemoveEnvFromKeysFile4(t *testing.T) {
+	// writing incorrect endpoints
+	envEndpointsAll.Environments = make(map[string]EnvEndpoints)
+	envEndpointsAll.Environments[devName] = EnvEndpoints{"dev_apim_endpoint",
+		"dev_reg_endpoint", "dev_token_endpoint"}
+	WriteConfigFile(envEndpointsAll, testEndpointsFilePath)
+	// end of writing incorrect endpoints
+
+	err := RemoveEnvFromKeysFile(qaName, testKeysFilePath, testEndpointsFilePath)
+	if err == nil {
+		t.Error("No error returned. 'Env not found in endpoints file' error expected")
+	}
+
+	defer os.Remove(testEndpointsFilePath)
+}
+
+// Case 3: Environment is blank
+func TestRemoveEnvFromKeysFile3(t *testing.T) {
+	err := RemoveEnvFromKeysFile("", testKeysFilePath, testEndpointsFilePath)
+	if err == nil {
+		t.Error("No error returned. 'Env cannot be blank' error expected")
+	}
+}
 
 func removeFiles() {
-	err := os.Remove(testEndpointsFilePath)
-	fmt.Println("Error removing endpoints file:", err.Error())
-	err = os.Remove(testKeysFilePath)
-	fmt.Println("Error removing keys file:", err.Error())
+	_ = os.Remove(testEndpointsFilePath)
+	//fmt.Println("Error removing endpoints file:", err.Error())
+	_ = os.Remove(testKeysFilePath)
+	//fmt.Println("Error removing keys file:", err.Error())
 }

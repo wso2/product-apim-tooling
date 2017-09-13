@@ -48,15 +48,17 @@ func AddNewEnvToKeysFile(name string, envKeys EnvKeys, filePath string) {
 	WriteConfigFile(envKeysAll, filePath)
 }
 
-func RemoveEnvFromKeysFile(env string, filePath string) (error) {
+func RemoveEnvFromKeysFile(env string, keysFilePath string, endpointsFilePath string) (error) {
+	fmt.Println("RemoveEnvFromKeysFile(): KeysFilePath:", keysFilePath)
+	fmt.Println("RemoveEnvFromKeysFile(): EndpointsFilePath:", endpointsFilePath)
 	if env == "" {
 		return errors.New("environment cannot be blank")
 	}
-	envKeysAll := GetEnvKeysAllFromFile(filePath)
-	if EnvExistsInEndpointsFile(env, filePath) {
-		if EnvExistsInKeysFile(env, filePath) {
+	envKeysAll := GetEnvKeysAllFromFile(keysFilePath)
+	if EnvExistsInEndpointsFile(env, endpointsFilePath) {
+		if EnvExistsInKeysFile(env, keysFilePath) {
 			delete(envKeysAll.Environments, env)
-			WriteConfigFile(envKeysAll, filePath)
+			WriteConfigFile(envKeysAll, keysFilePath)
 			return nil
 		} else {
 			// env doesn't exist in keys file
@@ -64,7 +66,7 @@ func RemoveEnvFromKeysFile(env string, filePath string) (error) {
 		}
 	} else {
 		// env doesn't exist in endpoints file
-		return errors.New("environment not found in " + filePath)
+		return errors.New("environment not found in " + endpointsFilePath)
 	}
 
 }

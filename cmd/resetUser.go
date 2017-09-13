@@ -31,7 +31,7 @@ var ResetUserCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + "reset-user called")
 
-		err := utils.RemoveEnvFromKeysFile(resetUserEnvironment, utils.EnvKeysAllFilePath)
+		err := utils.RemoveEnvFromKeysFile(resetUserEnvironment, utils.EnvKeysAllFilePath, utils.EnvEndpointsAllFilePath)
 		if err != nil {
 			utils.HandleErrorAndExit("Error clearing user data for environment " + resetUserEnvironment, err)
 		} else {
