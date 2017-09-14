@@ -46,7 +46,7 @@ var ImportAPICmd = &cobra.Command{
 
 		if preCommandErr == nil {
 
-			resp := ImportAPI(importAPIName, apiManagerEndpoint, accessToken)
+			resp, _ := ImportAPI(importAPIName, apiManagerEndpoint, accessToken)
 			utils.Logln(utils.LogPrefixInfo+"Status: %v\n", resp.Status)
 			if resp.StatusCode == 200 {
 				fmt.Println("Header:", resp.Header)
@@ -63,14 +63,14 @@ var ImportAPICmd = &cobra.Command{
 	},
 }
 
-func ImportAPI(name string, url string, accessToken string) *http.Response {
+func ImportAPI(name string, url string, accessToken string) (*http.Response, error) {
 	// append '/' to the end if there isn't one already
 	if string(url[len(url)-1]) != "/" {
 		url += "/"
 	}
 	url += "import/apis"
 
-	filePath := utils.ExportedAPIDirectoryPath + "/" + name
+	filePath := utils.ExportedAPIsDirectoryPath + "/" + name
 	fmt.Println("filePath:", filePath)
 
 	// check if '.zip' exists in the input 'name'
@@ -83,7 +83,7 @@ func ImportAPI(name string, url string, accessToken string) *http.Response {
 	} else {
 		//fmt.Println("hasZipExtension: ", false)
 		// search for a directory with the given name
-		destination := utils.ExportedAPIDirectoryPath + "/" + name + ".zip"
+		destination := utils.ExportedAPIsDirectoryPath + "/" + name + ".zip"
 		err := utils.ZipDir(filePath, destination)
 		if err != nil {
 			utils.HandleErrorAndExit("Error creating zip archive", err)
@@ -93,7 +93,7 @@ func ImportAPI(name string, url string, accessToken string) *http.Response {
 
 	extraParams := map[string]string{}
 
-	req, err := newFileUploadRequest(url, extraParams, "file", filePath, accessToken)
+	req, err := NewFileUploadRequest(url, extraParams, "file", filePath, accessToken)
 	if err != nil {
 		utils.HandleErrorAndExit("Error forming request", err)
 	}
@@ -108,19 +108,19 @@ func ImportAPI(name string, url string, accessToken string) *http.Response {
 	if err != nil {
 		utils.Logln(utils.LogPrefixError, err)
 	} else {
-		var bodyContent []byte
+		//var bodyContent []byte
 		fmt.Println(resp.StatusCode)
 		fmt.Println(resp.Header)
-		resp.Body.Read(bodyContent)
-		resp.Body.Close()
-		fmt.Println(bodyContent)
+		//resp.Body.Read(bodyContent)
+		//resp.Body.Close()
+		//fmt.Println(bodyContent)
 	}
 
-	return resp
+	return resp, err
 }
 
 // Helper function for forming multi-part form data
-func newFileUploadRequest(uri string, params map[string]string, paramName, path string, accessToken string) (*http.Request, error) {
+func NewFileUploadRequest(uri string, params map[string]string, paramName, path string, accessToken string) (*http.Request, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -143,7 +143,7 @@ func newFileUploadRequest(uri string, params map[string]string, paramName, path 
 		return nil, err
 	}
 
-	request, err := http.NewRequest("PUT", uri, body)
+	request, err := http.NewRequest(http.MethodPut, uri, body)
 	request.Header.Add(utils.HeaderAuthorization, utils.HeaderValueAuthBearerPrefix+" "+accessToken)
 	request.Header.Add(utils.HeaderContentType, writer.FormDataContentType())
 	request.Header.Add(utils.HeaderAccept, "*/*")
