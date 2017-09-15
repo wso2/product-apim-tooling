@@ -1,9 +1,0 @@
-environments:
-  dev:
-    client_id:
-    client_secret:
-    username:
-  staging:
-    client_id:
-    client_secret:
-    username:

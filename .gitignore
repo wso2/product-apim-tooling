@@ -27,8 +27,10 @@ build
 hs_err_pid*
 *.iml
 
-vendor/
-exported/
+
+import-export-cli/vendor
+import-export-cli/exported
+!import-export-cli/exported/sampleapi.zip
 
 # IDEs
 .idea/
@@ -37,7 +39,7 @@ exported/
 
 
 # Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
-.glide/
+import-export-cli/.glide/
 *.tar.gz
 *.rar
 
@@ -45,15 +47,15 @@ exported/
 hs_err_pid*
 
 # YAML Config Files
-env_endpoints_all.yaml
-env_keys_all.yaml
+import-export-cli/env_endpoints_all.yaml
+import-export-cli/env_keys_all.yaml
 
 # Binaries
-wso2apim-cli
-wso2apim
+import-export-cli/import-export-cli
 
 
 # Test Coverage Indicators
-utils/c.out
-utils/coverage.out
-utils/coverage.html
+
+import-export-cli/utils/c.out
+import-export-cli/utils/coverage.out
+import-export-cli/utils/coverage.html
