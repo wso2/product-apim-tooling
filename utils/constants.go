@@ -1,13 +1,16 @@
 package utils
 
+import "os"
+
 // File Names and Paths
+const PathSeparator_ string = string(os.PathSeparator)
 const ApplicationRoot string = "/home/menuka/.go/src/github.com/menuka94/wso2apim-cli"
 const EnvKeysAllFileName string = "env_keys_all.yaml"
-const EnvKeysAllFilePath string = ApplicationRoot + "/" + EnvKeysAllFileName
+const EnvKeysAllFilePath string = ApplicationRoot + PathSeparator_ + EnvKeysAllFileName
 const EnvEndpointsAllFileName string = "env_endpoints_all.yaml"
-const EnvEndpointsAllFilePath string = ApplicationRoot +  "/" + EnvEndpointsAllFileName
+const EnvEndpointsAllFilePath string = ApplicationRoot +  PathSeparator_ + EnvEndpointsAllFileName
 const ExportedAPIsDirectoryName string = "exported"
-const ExportedAPIsDirectoryPath string = ApplicationRoot + "/" + ExportedAPIsDirectoryName
+const ExportedAPIsDirectoryPath string = ApplicationRoot + PathSeparator_ + ExportedAPIsDirectoryName
 
 // Headers and Header Values
 const HeaderAuthorization string = "Authorization"

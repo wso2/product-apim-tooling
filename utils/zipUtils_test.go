@@ -14,11 +14,10 @@ func TestZipDirError(t *testing.T) {
 
 func TestZipDirOK(t *testing.T) {
 	directoryName := "wso2apimZipTest"
-	workingDir, _ := os.Getwd()
 
-	directoryPath := workingDir + "/" + directoryName
+	directoryPath := ApplicationRoot + PathSeparator_ + directoryName
 	fileName := "test.txt"
-	filePath := directoryPath + "/" + fileName
+	filePath := directoryPath + PathSeparator_ + fileName
 
 	os.Mkdir(directoryPath, os.ModePerm)
 
@@ -69,7 +68,7 @@ func TestZipDirOK(t *testing.T) {
 		t.Errorf("Error saving file: %s\n", err)
 	}
 
-	zipFile := directoryPath + "/testZip.zip"
+	zipFile := directoryPath + PathSeparator_ +"testZip.zip"
 
 	// now try compressing
 	err = ZipDir(directoryPath, zipFile)

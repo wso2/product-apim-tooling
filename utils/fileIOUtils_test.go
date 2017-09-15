@@ -7,8 +7,10 @@ import (
 	"io/ioutil"
 )
 
-const testKeysFilePath string = ApplicationRoot + "/test_keys_config.yaml"
-const testEndpointsFilePath string = ApplicationRoot + "/test_endpoints_config.yaml"
+const testKeysFileName string = "test_keys_config.yaml"
+const testEndpointsFileName string = "test_endpoints_config.yaml"
+const testKeysFilePath string = ApplicationRoot + PathSeparator_ + testKeysFileName
+const testEndpointsFilePath string = ApplicationRoot + PathSeparator_ + testEndpointsFileName
 var envKeysAll *EnvKeysAll = new(EnvKeysAll)
 var envEndpointsAll *EnvEndpointsAll = new(EnvEndpointsAll)
 const devName string = "dev"
