@@ -28,6 +28,7 @@ hs_err_pid*
 *.iml
 
 
+vendor
 import-export-cli/vendor
 import-export-cli/exported
 !import-export-cli/exported/sampleapi.zip
@@ -52,6 +53,7 @@ import-export-cli/env_keys_all.yaml
 
 # Binaries
 import-export-cli/import-export-cli
+import-export-cli/wso2apim-cli
 
 
 # Test Coverage Indicators
