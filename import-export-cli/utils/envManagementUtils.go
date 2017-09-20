@@ -27,7 +27,7 @@ import (
 // and false otherwise
 func EnvExistsInKeysFile(env string, filePath string) bool {
 	envKeysAll := GetEnvKeysAllFromFile(filePath)
-	for _env, _ := range envKeysAll.Environments {
+	for _env := range envKeysAll.Environments {
 		if _env == env {
 			return true
 		}
@@ -39,7 +39,7 @@ func EnvExistsInKeysFile(env string, filePath string) bool {
 // and false otherwise
 func EnvExistsInEndpointsFile(env string, filePath string) bool {
 	envEndpointsAll := GetEnvEndpointsAllFromFile(filePath)
-	for _env, _ := range envEndpointsAll.Environments {
+	for _env := range envEndpointsAll.Environments {
 		if _env == env {
 			return true
 		}

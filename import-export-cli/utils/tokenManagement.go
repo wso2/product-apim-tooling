@@ -32,6 +32,7 @@ import (
 
 // Returns the AccessToken, APIManagerEndpoint, Errors given an Environment
 // Deals with generating tokens needed for executing a particular command
+// including (export-api, import-api, list)
 func ExecutePreCommand(environment string, flagUsername string, flagPassword string) (string, string, error) {
 	if EnvExistsInEndpointsFile(environment, EnvEndpointsAllFilePath) {
 		registrationEndpoint := GetRegistrationEndpointOfEnv(environment, EnvEndpointsAllFilePath)
@@ -53,7 +54,8 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 			if flagUsername != "" {
 				// flagUsername is not blank
 				if flagUsername != username {
-					// username entered with flag -u is not the same as username found in env_keys_all.yaml file
+					// username entered with flag -u is not the same as username found
+					// in env_keys_all.yaml file
 					Logln(LogPrefixWarning + "Username entered with flag -u for the environment '" + environment + "' is not the same as username found in env_keys_all.yaml file")
 					fmt.Println("Username entered is not found under '" + environment + "' in env_keys_all.yaml file")
 					//log.Println("Execute 'wso2apim reset-user -e " + environment +"' to clear user data")
@@ -125,8 +127,9 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 		}
 
 		// Get OAuth Tokens
-		m, _ := GetOAuthTokens(username, password, GetBase64EncodedCredentials(clientID, clientSecret), tokenEndpoint)
-		accessToken := m["access_token"]
+		responseDataMap, _ := GetOAuthTokens(username, password,
+			GetBase64EncodedCredentials(clientID, clientSecret), tokenEndpoint)
+		accessToken := responseDataMap["access_token"]
 
 		Logln(LogPrefixInfo+"AccessToken:", accessToken)
 
@@ -166,9 +169,6 @@ func GetClientIDSecret(username string, password string, url string) (string, st
 		registrationResponse := RegistrationResponse{}
 		data := []byte(resp.Body())
 		err = json.Unmarshal(data, &registrationResponse) // add response data to m
-
-		//clientID := m["client_id"]
-		//clientSecret := m["client_secret"]
 
 		clientID := registrationResponse.ClientID
 		clientSecret := registrationResponse.ClientSecret
@@ -221,9 +221,9 @@ func GetOAuthTokens(username string, password string, b64EncodedClientIDClientSe
 		return nil, nil
 	}
 
-	m := make(map[string]string) // a map to hold response data
+	responseDataMap := make(map[string]string) // a map to hold response data
 	data := []byte(resp.Body())
-	_ = json.Unmarshal(data, &m) // add response data to m
+	_ = json.Unmarshal(data, &responseDataMap) // add response data to m
 
-	return m, nil // m contains 'access_token', 'refresh_token' etc
+	return responseDataMap, nil // contains 'access_token', 'refresh_token' etc
 }

@@ -14,17 +14,18 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package cmd
 
 import (
 	"fmt"
-	"github.com/go-resty/resty"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"github.com/spf13/cobra"
 	"io/ioutil"
 	"os"
+
+	"github.com/go-resty/resty"
+	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 
 	"crypto/tls"
 )
@@ -104,6 +105,9 @@ func ExportAPI(name string, version string, url string, accessToken string) *res
 	url += "export/apis"
 
 	query := "?query=" + name
+
+	// TODO:: Add 'version' to the query (make sure the backend supports attribute searching)
+
 	url += query
 	fmt.Println("ExportAPI: URL:", url)
 	headers := make(map[string]string)
@@ -111,6 +115,7 @@ func ExportAPI(name string, version string, url string, accessToken string) *res
 	headers[utils.HeaderAccept] = utils.HeaderValueApplicationZip
 
 	resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTPS certificates
+
 	utils.Logln("")
 	resp, err := resty.R().
 		SetHeaders(headers).
@@ -132,14 +137,4 @@ func init() {
 
 	ExportAPICmd.Flags().StringVarP(&exportAPICmdUsername, "username", "u", "", "Username")
 	ExportAPICmd.Flags().StringVarP(&exportAPICmdPassword, "password", "p", "", "Password")
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// ExportAPICmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// ExportAPICmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

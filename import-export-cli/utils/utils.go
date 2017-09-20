@@ -47,7 +47,6 @@ func PromptForPassword() string {
 	bytePassword, _ := terminal.ReadPassword(0)
 	password := string(bytePassword)
 
-	defer fmt.Println()
 	return password
 }
 

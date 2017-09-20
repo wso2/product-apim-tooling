@@ -1,10 +1,10 @@
 hash: 77d05a45eabce95f3bc4faadaec735f9f4ffd30a8813274780201e89bfec6038
-updated: 2017-09-15T11:35:09.956171422+05:30
+updated: 2017-09-20T10:08:32.602711478+05:30
 imports:
 - name: github.com/fsnotify/fsnotify
   version: 4da3e2cfbabc9f751898f250b49f2439785783a1
 - name: github.com/go-resty/resty
-  version: 1ce868830ea2c45d4011f66efac54ae5772897eb
+  version: f8e1383e6f5517d12177adc8396e39862e2503e2
 - name: github.com/hashicorp/hcl
   version: 68e816d1c783414e79bc65b3994d9ab6b0a722ab
   subpackages:
@@ -43,20 +43,20 @@ imports:
 - name: github.com/spf13/viper
   version: 25b30aa063fc18e48662b86996252eabdcf2f0c7
 - name: golang.org/x/crypto
-  version: faadfbdc035307d901e69eea569f5dda451a3ee3
+  version: 7d9177d70076375b9a59c8fde23d52d9c4a7ecd5
   subpackages:
   - ssh/terminal
 - name: golang.org/x/net
-  version: 859d1a86bb617c0c20d154590c3c5d3fcb670b07
+  version: 8351a756f30f1297fe94bbf4b767ec589c6ea6d0
   subpackages:
   - publicsuffix
 - name: golang.org/x/sys
-  version: 062cd7e4e68206d8bab9b18396626e855c992658
+  version: b6e1ae21643682ce023deb8d152024597b0e9bb4
   subpackages:
   - unix
   - windows
 - name: golang.org/x/text
-  version: 14c0d48ead0cd47e3104ada247d91be04afc7a5a
+  version: 1cbadb444a806fd9430d14ad08967ed91da4fa0a
   subpackages:
   - transform
   - unicode/norm

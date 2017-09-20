@@ -25,7 +25,6 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"log"
 )
 
 var verbose bool
@@ -89,8 +88,4 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
-}
-
-func importAPI(cmd *cobra.Command, args []string) {
-	log.Println("importAPI command is executed")
 }

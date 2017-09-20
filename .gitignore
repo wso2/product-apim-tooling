@@ -36,7 +36,7 @@ import-export-cli/exported
 # IDEs
 .idea/
 .settings
-.vscode
+.vscode/
 
 
 # Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736

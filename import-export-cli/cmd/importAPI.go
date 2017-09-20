@@ -14,7 +14,7 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package cmd
 
@@ -23,8 +23,6 @@ import (
 
 	"bytes"
 	"crypto/tls"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"github.com/spf13/cobra"
 	"io"
 	"log"
 	"mime/multipart"
@@ -32,6 +30,9 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+
+	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 var importAPIName string
@@ -167,14 +168,4 @@ func init() {
 	ImportAPICmd.Flags().StringVarP(&importEnvironment, "environment", "e", "", "Environment from the which the API should be imported")
 	ImportAPICmd.Flags().StringVarP(&importAPICmdUsername, "username", "u", "", "Username")
 	ImportAPICmd.Flags().StringVarP(&importAPICmdPassword, "password", "p", "", "Password")
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// ImportAPICmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// ImportAPICmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

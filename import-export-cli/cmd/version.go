@@ -39,17 +39,7 @@ var VersionCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(VersionCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
 	VersionCmd.PersistentFlags().String("foo", "", "A help for foo")
 	VersionCmd.PersistentFlags().StringP("full", "f", "fullValue", "show Full values")
 	viper.BindPFlag("full", RootCmd.PersistentFlags().Lookup("full"))
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// VersionCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-
 }
