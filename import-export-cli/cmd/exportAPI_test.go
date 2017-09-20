@@ -35,7 +35,8 @@ func TestExportAPI(t *testing.T) {
 		}
 
 		if r.Header.Get(utils.HeaderAccept) != utils.HeaderValueApplicationZip {
-			t.Errorf("Expected '"+utils.HeaderValueApplicationZip+"', got '%s'\n", r.Header.Get(utils.HeaderContentType))
+			t.Errorf("Expected '"+utils.HeaderValueApplicationZip+"', got '%s'\n",
+				r.Header.Get(utils.HeaderContentType))
 		}
 
 		w.WriteHeader(http.StatusOK)

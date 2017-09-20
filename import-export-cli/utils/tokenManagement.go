@@ -56,7 +56,8 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 				if flagUsername != username {
 					// username entered with flag -u is not the same as username found
 					// in env_keys_all.yaml file
-					Logln(LogPrefixWarning + "Username entered with flag -u for the environment '" + environment + "' is not the same as username found in env_keys_all.yaml file")
+					Logln(LogPrefixWarning + "Username entered with flag -u for the environment '" + environment +
+						"' is not the same as username found in env_keys_all.yaml file")
 					fmt.Println("Username entered is not found under '" + environment + "' in env_keys_all.yaml file")
 					//log.Println("Execute 'wso2apim reset-user -e " + environment +"' to clear user data")
 					fmt.Println("Execute 'wso2apim reset-user -e " + environment + "' to clear user data")
@@ -135,7 +136,8 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 
 		return accessToken, apiManagerEndpoint, nil
 	} else {
-		return "", "", errors.New("Details incorrect/unavailable for environment '" + environment + "' in env_endpoints_all.yaml")
+		return "", "", errors.New("Details incorrect/unavailable for environment '" + environment + "' in " +
+			"env_endpoints_all.yaml")
 	}
 }
 
@@ -198,7 +200,8 @@ func GetBase64EncodedCredentials(key string, secret string) string {
 // GetOAuthTokens implemented using go-resty/resty
 // provide username, password, and validity period for the access token
 // returns the response as a map
-func GetOAuthTokens(username string, password string, b64EncodedClientIDClientSecret string, url string) (map[string]string, error) {
+func GetOAuthTokens(username string, password string,
+	b64EncodedClientIDClientSecret string, url string) (map[string]string, error) {
 	validityPeriod := DefaultTokenValidityPeriod
 	body := "grant_type=password&username=" + username + "&password=" + password + "&validity_period=" + validityPeriod
 

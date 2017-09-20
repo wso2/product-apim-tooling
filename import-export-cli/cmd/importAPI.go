@@ -51,7 +51,8 @@ var ImportAPICmd = &cobra.Command{
 			fmt.Println(key, ":", arg)
 		}
 
-		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(importEnvironment, importAPICmdUsername, importAPICmdPassword)
+		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(importEnvironment, importAPICmdUsername,
+			importAPICmdPassword)
 
 		if preCommandErr == nil {
 
@@ -129,7 +130,8 @@ func ImportAPI(name string, url string, accessToken string) (*http.Response, err
 }
 
 // Helper function for forming multi-part form data
-func NewFileUploadRequest(uri string, params map[string]string, paramName, path string, accessToken string) (*http.Request, error) {
+func NewFileUploadRequest(uri string, params map[string]string, paramName, path string,
+	accessToken string) (*http.Request,error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -164,8 +166,10 @@ func NewFileUploadRequest(uri string, params map[string]string, paramName, path 
 // Generated with Cobra
 func init() {
 	RootCmd.AddCommand(ImportAPICmd)
-	ImportAPICmd.Flags().StringVarP(&importAPIName, "name", "n", "", "Name of the API to be imported")
-	ImportAPICmd.Flags().StringVarP(&importEnvironment, "environment", "e", "", "Environment from the which the API should be imported")
+	ImportAPICmd.Flags().StringVarP(&importAPIName, "name", "n", "",
+		"Name of the API to be imported")
+	ImportAPICmd.Flags().StringVarP(&importEnvironment, "environment", "e", "",
+		"Environment from the which the API should be imported")
 	ImportAPICmd.Flags().StringVarP(&importAPICmdUsername, "username", "u", "", "Username")
 	ImportAPICmd.Flags().StringVarP(&importAPICmdPassword, "password", "p", "", "Password")
 }

@@ -41,7 +41,8 @@ var ListCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln("list called")
 
-		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(listEnvironment, listCmdUsername, listCmdPassword)
+		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(listEnvironment, listCmdUsername,
+listCmdPassword)
 
 		if preCommandErr == nil {
 			count, apis, err := GetAPIList("", accessToken, apiManagerEndpoint)
@@ -103,7 +104,8 @@ func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (in
 
 func init() {
 	RootCmd.AddCommand(ListCmd)
-	ListCmd.Flags().StringVarP(&listEnvironment, "environment", "e", "", "Environment to be searched")
+	ListCmd.Flags().StringVarP(&listEnvironment, "environment", "e", "",
+		"Environment to be searched")
 	ListCmd.Flags().StringVarP(&listCmdUsername, "usrename", "u", "", "Username")
 	ListCmd.Flags().StringVarP(&listCmdPassword, "password", "p", "", "Password")
 }
