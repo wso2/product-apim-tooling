@@ -12,6 +12,14 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+
+/*****************************************************************
+ *  Class name : Wso2Api
+ * Attributes : HttpsUrlConnection, DataOutPutStream, BufferReader, StringBuffer, URL, JSONParser
+ * Methods : getClientIdAndSecret, getAccessToken, SaveAPI
+ * Functionality : Contains the methods to obtain the access token and push the API to the cloud
+ * Visibility : Public
+ * ****************************************************************/
 public class Wso2Api {
 
     private Logger LOGGER = LoggerFactory.getLogger(Wso2Api.class);
@@ -28,8 +36,10 @@ public class Wso2Api {
     private JSONParser parser;
 
     /*
-    *This method returns the token to create the api.
-    * Need those classes from swaggeraHub to figure out the way to obtain user credentials.
+    * Method name : getClientIdAndSecret
+    * Functionality : Obtains the client ID and client secret for the given email, organization key and password
+    * @param : String, String, String
+    * @return : String
     * */
     public String getClientIdAndSecret(String email, String organizationKey, String password) throws IOException {
         String encodeString = email + "@" + organizationKey + ":" + password;
@@ -74,7 +84,10 @@ public class Wso2Api {
 
 
     /*
-    * This method is to obtain the access token for creating the api.
+    * Method name : getAccessToken
+    * Functionality : Obtains the access token with the use of given client ID and client secret
+    * @param : String, String, String
+    * @return : String
     * */
     public String getAccessToken(String email, String organizationKey, String password) throws IOException {
 
@@ -133,9 +146,12 @@ public class Wso2Api {
 
 
     /*
-    * This method saves the API in the API cloud.
+    * Method name : saveAPI
+    * Functionality : Creates an API in the api cloud
+    * @param : String, String
+    * @return : void
     * */
-    public void saveApi(String swagger, String accessToken) {
+    public void saveAPI(String swagger, String accessToken) {
 
         try {
             url = new URL(API_CREATE_CLOUD_URL);

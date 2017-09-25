@@ -10,6 +10,13 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+
+/*****************************************************************
+ *  Class name : Wso2ApiGatewayPlugin
+ * Methods : beforeApiVersionSaved, afterApiVersionSaved, convertYamlToJson
+ * Functionality : Contains the method to push the API to the cloud
+ * Visibility : Public
+ * ****************************************************************/
 public class Wso2ApiGatewayPlugin {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Wso2ApiGatewayPlugin.class);
