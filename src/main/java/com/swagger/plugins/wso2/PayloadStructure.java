@@ -36,8 +36,8 @@ public class PayloadStructure {
         this.endpointConfig = endpointConfig;
     }
 
-    public CorsConfiguration getCorsConfiguration() {
-        return corsConfiguration;
+    public  CorsConfiguration getCorsConfiguration() {
+        return this.corsConfiguration;
     }
 
     public void setCorsConfiguration(CorsConfiguration corsConfiguration) {

@@ -1,7 +1,9 @@
 package com.swagger.plugins.wso2;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
-import io.swagger.models.Info;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.models.Scheme;
 import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.util.*;
@@ -9,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.List;
 
 
 /*****************************************************************
@@ -20,7 +23,7 @@ import java.io.IOException;
 public class Wso2ApiGatewayPlugin {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Wso2ApiGatewayPlugin.class);
-
+    private String accessToken;
 
     /*
     * Trigger before an API is saved.
@@ -45,23 +48,21 @@ public class Wso2ApiGatewayPlugin {
 
 
     /*
-    * Triggered after an API is saved.
+    * Method name : afterApiVersionSaved
+    * Functionality : Sets the essential values of the swagger definition elements to payload elements
+    * @param : String
+    * @return : void
     * */
-    public void afterApiVersionSaved(String swaggerYaml) {
-        Swagger swagger = null;
-        try {
-            swagger = Json.mapper().readValue(convertYamlToJson(swaggerYaml), Swagger.class);
-        } catch (IOException e) {
-            e.printStackTrace();
-            LOGGER.error("Swagger definition is invalid or not readable");
-        }
+    public void afterApiVersionSaved(String email, String organizationKey, String password, String swaggerDefinition, String context) throws IOException {
 
-        Info swaggerInfo = swagger.getInfo();
-        String apiName = swaggerInfo.getTitle();
-        String apiVersion = swaggerInfo.getVersion();
+        PayloadConfiguration configuration = new PayloadConfiguration();
 
+        String pa = configuration.configurePayload(email, organizationKey, swaggerDefinition, context);
 
-
+        Wso2Api api = new Wso2Api();
+        api.getClientIdAndSecret(email,organizationKey, password);
+        accessToken = api.getAccessToken(email,organizationKey,password);
+        api.saveAPI(pa,accessToken);
     }
 
     public String convertYamlToJson(String swaggerYaml) {
