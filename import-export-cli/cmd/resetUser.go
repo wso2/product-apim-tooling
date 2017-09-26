@@ -31,7 +31,7 @@ var resetUserEnvironment string
 var ResetUserCmd = &cobra.Command{
 	Use:   "reset-user",
 	Short: utils.ResetUserCmdShortDesc,
-	Long:  utils.ResetUserCmdLongDesc,
+	Long:  utils.ResetUserCmdLongDesc + utils.ResetUserCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + "reset-user called")
 

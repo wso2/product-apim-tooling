@@ -20,6 +20,8 @@ package utils
 
 import "os"
 
+const ProjectName string = "wso2apim-cli"
+
 // File Names and Paths
 const PathSeparator_ string = string(os.PathSeparator)
 const ApplicationRoot string = "/home/menuka/.go/src/github" +

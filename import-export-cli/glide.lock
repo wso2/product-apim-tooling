@@ -1,5 +1,5 @@
 hash: 77d05a45eabce95f3bc4faadaec735f9f4ffd30a8813274780201e89bfec6038
-updated: 2017-09-20T10:08:32.602711478+05:30
+updated: 2017-09-25T09:51:22.780417116+05:30
 imports:
 - name: github.com/fsnotify/fsnotify
   version: 4da3e2cfbabc9f751898f250b49f2439785783a1
@@ -25,7 +25,7 @@ imports:
 - name: github.com/mitchellh/mapstructure
   version: d0303fe809921458f417bcf828397a65db30a7e4
 - name: github.com/pelletier/go-toml
-  version: 1d6b12b7cb290426e27e6b4e38b89fcda3aeef03
+  version: 16398bac157da96aa88f98a2df640c7f32af1da2
 - name: github.com/renstrom/dedent
   version: 020d11c3b9c0c7a3c2efcc8e5cf5b9ef7bcea21f
 - name: github.com/spf13/afero
@@ -47,11 +47,11 @@ imports:
   subpackages:
   - ssh/terminal
 - name: golang.org/x/net
-  version: 8351a756f30f1297fe94bbf4b767ec589c6ea6d0
+  version: 0744d001aa8470aaa53df28d32e5ceeb8af9bd70
   subpackages:
   - publicsuffix
 - name: golang.org/x/sys
-  version: b6e1ae21643682ce023deb8d152024597b0e9bb4
+  version: 429f518978ab01db8bb6f44b66785088e7fba58b
   subpackages:
   - unix
   - windows

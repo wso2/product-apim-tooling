@@ -37,7 +37,7 @@ var listCmdPassword string
 var ListCmd = &cobra.Command{
 	Use:   "list",
 	Short: utils.ListCmdShortDesc,
-	Long:  utils.ListCmdLongDesc,
+	Long:  utils.ListCmdLongDesc + utils.ListCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln("list called")
 

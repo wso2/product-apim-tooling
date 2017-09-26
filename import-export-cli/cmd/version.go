@@ -30,7 +30,7 @@ import (
 var VersionCmd = &cobra.Command{
 	Use:   "version",
 	Short: utils.VersionCmdShortDesc,
-	Long:  utils.VersionCmdLongDesc,
+	Long:  utils.VersionCmdLongDesc + utils.VersionCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		var version string = "0.1"
 		fmt.Println("wso2apim-cli Version " + version)

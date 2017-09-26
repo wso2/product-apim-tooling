@@ -44,7 +44,7 @@ var importAPICmdPassword string
 var ImportAPICmd = &cobra.Command{
 	Use:   "import-api (--name <name-of-the-api> --environment <environment-to-which-the-api-should-be-imported>)",
 	Short: utils.ImportAPICmdShortDesc,
-	Long:  utils.ImportAPICmdLongDesc,
+	Long:  utils.ImportAPICmdLongDesc + utils.ImportAPICmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + "import-api called")
 		for key, arg := range args {

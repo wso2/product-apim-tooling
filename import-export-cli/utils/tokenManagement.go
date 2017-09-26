@@ -226,7 +226,7 @@ func GetOAuthTokens(username string, password string,
 
 	responseDataMap := make(map[string]string) // a map to hold response data
 	data := []byte(resp.Body())
-	_ = json.Unmarshal(data, &responseDataMap) // add response data to m
+	_ = json.Unmarshal(data, &responseDataMap) // add response data to the map
 
 	return responseDataMap, nil // contains 'access_token', 'refresh_token' etc
 }
