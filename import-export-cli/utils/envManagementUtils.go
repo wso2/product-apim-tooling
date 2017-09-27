@@ -37,7 +37,7 @@ func EnvExistsInKeysFile(env string, filePath string) bool {
 
 // Returns true if 'env' exists in env_endpoints_all.yaml
 // and false otherwise
-func EnvExistsInEndpointsFile(env string, filePath string) bool {
+func EnvExistsInMainConfigFile(env string, filePath string) bool {
 	envEndpointsAll := GetMainConfigFromFile(filePath)
 	for _env := range envEndpointsAll.Environments {
 		if _env == env {
@@ -73,7 +73,7 @@ func RemoveEnvFromKeysFile(env string, keysFilePath string, endpointsFilePath st
 		return errors.New("environment cannot be blank")
 	}
 	envKeysAll := GetEnvKeysAllFromFile(keysFilePath)
-	if EnvExistsInEndpointsFile(env, endpointsFilePath) {
+	if EnvExistsInMainConfigFile(env, endpointsFilePath) {
 		if EnvExistsInKeysFile(env, keysFilePath) {
 			delete(envKeysAll.Environments, env)
 			WriteConfigFile(envKeysAll, keysFilePath)

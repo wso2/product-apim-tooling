@@ -34,7 +34,7 @@ import (
 // Deals with generating tokens needed for executing a particular command
 // including (export-api, import-api, list)
 func ExecutePreCommand(environment string, flagUsername string, flagPassword string) (string, string, error) {
-	if EnvExistsInEndpointsFile(environment, MainConfigFilePath) {
+	if EnvExistsInMainConfigFile(environment, MainConfigFilePath) {
 		registrationEndpoint := GetRegistrationEndpointOfEnv(environment, MainConfigFilePath)
 		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment, MainConfigFilePath)
 		tokenEndpoint := GetTokenEndpointOfEnv(environment, MainConfigFilePath)

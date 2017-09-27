@@ -49,21 +49,21 @@ func TestEnvExistsInKeysFile(t *testing.T) {
 func TestEnvExistsInEndpointsFile(t *testing.T) {
 	writeCorrectEndpoints()
 
-	returned := EnvExistsInEndpointsFile(devName, testEndpointsFilePath)
+	returned := EnvExistsInMainConfigFile(devName, testEndpointsFilePath)
 
 	if !returned {
-		t.Errorf("Error in EnvExistsInEndpointsFile(). Returned: %t\n", returned)
+		t.Errorf("Error in EnvExistsInMainConfigFile(). Returned: %t\n", returned)
 	}
 
-	returned = EnvExistsInEndpointsFile(qaName, testEndpointsFilePath)
+	returned = EnvExistsInMainConfigFile(qaName, testEndpointsFilePath)
 
 	if !returned {
-		t.Errorf("Error in EnvExistsInEndpointsFile(). Returned: %t\n", returned)
+		t.Errorf("Error in EnvExistsInMainConfigFile(). Returned: %t\n", returned)
 	}
 
-	returned = EnvExistsInEndpointsFile("staging", testEndpointsFilePath) // not available
+	returned = EnvExistsInMainConfigFile("staging", testEndpointsFilePath) // not available
 	if returned {
-		t.Error("Error in EnvExistsInEndpointsFile(). False Positive")
+		t.Error("Error in EnvExistsInMainConfigFile(). False Positive")
 	}
 	defer os.Remove(testEndpointsFilePath)
 
