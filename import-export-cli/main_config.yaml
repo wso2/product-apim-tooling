@@ -1,0 +1,23 @@
+config:
+  http_request_timeout: 2500
+  skip_tls_verify: true
+  export_directory: /home/exported
+
+environments:
+  dev:
+    api_manager_endpoint: "https://localhost:9292/api/am/publisher/v1.0"
+    registration_endpoint: "https://localhost:9443/identity/connect/register"
+    token_endpoint: "https://localhost:9443/oauth2/token"
+  staging:
+    api_manager_endpoint: "https://localhost:9292/api/am/publisher/v1.0"
+    registration_endpoint: "https://localhost:9443/identity/connect/register"
+    token_endpoint: "https://localhost:9443/oauth2/token"
+  qa:
+    api_manager_endpoint: "https://localhost:9292/api/am/publisher/v1.0"
+    registration_endpoint: "https://localhost:9443/identity/connect/register"
+    token_endpoint: "https://localhost:9443/oauth2/token"
+  production:
+    api_manager_endpoint: "https://localhost:9292/api/am/publisher/v1.0"
+    registration_endpoint: "https://localhost:9443/identity/connect/register"
+    token_endpoint: "https://localhost:9443/oauth2/token"
+

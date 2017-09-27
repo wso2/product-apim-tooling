@@ -28,8 +28,8 @@ const ApplicationRoot string = "/home/menuka/.go/src/github" +
 	".com/wso2/product-apim-tooling/import-export-cli" // TODO:: Change to a generic root
 const EnvKeysAllFileName string = "env_keys_all.yaml"
 const EnvKeysAllFilePath string = ApplicationRoot + PathSeparator_ + EnvKeysAllFileName
-const EnvEndpointsAllFileName string = "env_endpoints_all.yaml"
-const EnvEndpointsAllFilePath string = ApplicationRoot + PathSeparator_ + EnvEndpointsAllFileName
+const MainConfigFileName string = "main_config.yaml"
+const MainConfigFilePath string = ApplicationRoot + PathSeparator_ + MainConfigFileName
 const ExportedAPIsDirectoryName string = "exported"
 const ExportedAPIsDirectoryPath string = ApplicationRoot + PathSeparator_ + ExportedAPIsDirectoryName
 

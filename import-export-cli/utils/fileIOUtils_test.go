@@ -30,7 +30,7 @@ const testEndpointsFileName string = "test_endpoints_config.yaml"
 const testKeysFilePath string = ApplicationRoot + PathSeparator_ + testKeysFileName
 const testEndpointsFilePath string = ApplicationRoot + PathSeparator_ + testEndpointsFileName
 var envKeysAll *EnvKeysAll = new(EnvKeysAll)
-var envEndpointsAll *EnvEndpointsAll = new(EnvEndpointsAll)
+var envEndpointsAll *MainConfig = new(MainConfig)
 const devName string = "dev"
 const qaName string = "qa"
 const devUsername string = "dev_username"
@@ -50,7 +50,7 @@ func getSampleKeys() *EnvKeysAll {
 	return envKeysAll
 }
 
-func getSampleEndpoints() *EnvEndpointsAll {
+func getSampleEndpoints() *MainConfig {
 	return envEndpointsAll
 }
 
@@ -123,11 +123,11 @@ func TestGetEnvKeysAllFromFile3(t *testing.T) {
 func TestGetEnvEndpointsAllFromFile(t *testing.T) {
 	// testing for correct data
 	writeCorrectEndpoints()
-	envEndpointsAllReturned := GetEnvEndpointsAllFromFile(testEndpointsFilePath)
+	envEndpointsAllReturned := GetMainConfigFromFile(testEndpointsFilePath)
 
 	if envEndpointsAllReturned.Environments[devName] != envEndpointsAllReturned.Environments[devName] ||
 		envEndpointsAllReturned.Environments[qaName] != envEndpointsAllReturned.Environments[qaName] {
-		t.Errorf("Error in GetEnvEndpointsAllFromFile()")
+		t.Errorf("Error in GetMainConfigFromFile()")
 	}
 
 	var err = os.Remove(testEndpointsFilePath)
@@ -137,13 +137,13 @@ func TestGetEnvEndpointsAllFromFile(t *testing.T) {
 }
 
 func TestEnvEndpointsAll_ParseEnvEndpointsFromFile(t *testing.T) {
-	var envEndpointsAllLocal EnvEndpointsAll
+	var envEndpointsAllLocal MainConfig
 	writeCorrectEndpoints()
 	data, err := ioutil.ReadFile(testEndpointsFilePath)
 	if err != nil {
 		t.Error("Error")
 	}
-	envEndpointsAllLocal.ParseEnvEndpointsFromFile(data)
+	envEndpointsAllLocal.ParseMainConfigFromFile(data)
 
 	var err1 = os.Remove(testEndpointsFilePath)
 	if err1 != nil {

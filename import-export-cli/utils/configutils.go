@@ -26,10 +26,17 @@ type EnvKeysAll struct {
 	Environments map[string]EnvKeys `yaml:"environments"`
 }
 
-// For env_endpoints_all.yaml
+// For main_config.yaml
 // To be manually edited by the user
-type EnvEndpointsAll struct {
+type MainConfig struct {
+	Config Config `yaml:"config"`
 	Environments map[string]EnvEndpoints `yaml:"environments"`
+}
+
+type Config struct {
+	HttpRequestTimeout int `yaml:"http_request_timeout"`
+	SkipTLSVerification bool `yaml:"skip_tls_verification"`
+	ExportDirectory string `yaml:"export_directory"`
 }
 
 type EnvKeys struct {

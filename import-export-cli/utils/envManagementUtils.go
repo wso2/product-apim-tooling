@@ -38,7 +38,7 @@ func EnvExistsInKeysFile(env string, filePath string) bool {
 // Returns true if 'env' exists in env_endpoints_all.yaml
 // and false otherwise
 func EnvExistsInEndpointsFile(env string, filePath string) bool {
-	envEndpointsAll := GetEnvEndpointsAllFromFile(filePath)
+	envEndpointsAll := GetMainConfigFromFile(filePath)
 	for _env := range envEndpointsAll.Environments {
 		if _env == env {
 			return true
@@ -104,8 +104,8 @@ func GetKeysOfEnvironment(env string, filePath string) (*EnvKeys, error) {
 
 // Return EnvEndpoints for a given environment
 func GetEndpointsOfEnvironment(env string, filePath string) (*EnvEndpoints, error) {
-	envEndpointsAll := GetEnvEndpointsAllFromFile(filePath)
-	for _env, endpoints := range envEndpointsAll.Environments {
+	mainConfig := GetMainConfigFromFile(filePath)
+	for _env, endpoints := range mainConfig.Environments {
 		if _env == env {
 			return &endpoints, nil
 		}

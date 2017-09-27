@@ -56,28 +56,28 @@ func GetEnvKeysAllFromFile(filePath string) *EnvKeysAll {
 	return &envKeysAll
 }
 
-// Read and return EnvEndpointsAll
-func GetEnvEndpointsAllFromFile(filePath string) *EnvEndpointsAll {
+// Read and return MainConfig
+func GetMainConfigFromFile(filePath string) *MainConfig {
 	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		HandleErrorAndExit("File Not Found: "+filePath, err)
 	}
 
-	var envEndpointsAll EnvEndpointsAll
-	if err := envEndpointsAll.ParseEnvEndpointsFromFile(data); err != nil {
+	var mainConfig MainConfig
+	if err := mainConfig.ParseMainConfigFromFile(data); err != nil {
 		HandleErrorAndExit("Error parsing "+filePath, err)
 	}
 
-	return &envEndpointsAll
+	return &mainConfig
 }
 
-// Read and validate contents of env_endpoints_all.yaml
+// Read and validate contents of main_config.yaml
 // will throw errors if the any of the lines is blank
-func (envEndpointsAll *EnvEndpointsAll) ParseEnvEndpointsFromFile(data []byte) error {
-	if err := yaml.Unmarshal(data, envEndpointsAll); err != nil {
+func (mainConfig *MainConfig) ParseMainConfigFromFile(data []byte) error {
+	if err := yaml.Unmarshal(data, mainConfig); err != nil {
 		return err
 	}
-	for name, endpoints := range envEndpointsAll.Environments {
+	for name, endpoints := range mainConfig.Environments {
 		if endpoints.APIManagerEndpoint == "" {
 			return errors.New("Blank API Manager Endpoint for " + name)
 		}

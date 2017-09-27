@@ -34,10 +34,10 @@ import (
 // Deals with generating tokens needed for executing a particular command
 // including (export-api, import-api, list)
 func ExecutePreCommand(environment string, flagUsername string, flagPassword string) (string, string, error) {
-	if EnvExistsInEndpointsFile(environment, EnvEndpointsAllFilePath) {
-		registrationEndpoint := GetRegistrationEndpointOfEnv(environment, EnvEndpointsAllFilePath)
-		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment, EnvEndpointsAllFilePath)
-		tokenEndpoint := GetTokenEndpointOfEnv(environment, EnvEndpointsAllFilePath)
+	if EnvExistsInEndpointsFile(environment, MainConfigFilePath) {
+		registrationEndpoint := GetRegistrationEndpointOfEnv(environment, MainConfigFilePath)
+		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment, MainConfigFilePath)
+		tokenEndpoint := GetTokenEndpointOfEnv(environment, MainConfigFilePath)
 
 		fmt.Println("Reg Endpoint read:", registrationEndpoint)
 
@@ -137,7 +137,7 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 		return accessToken, apiManagerEndpoint, nil
 	} else {
 		return "", "", errors.New("Details incorrect/unavailable for environment '" + environment + "' in " +
-			"env_endpoints_all.yaml")
+			MainConfigFilePath)
 	}
 }
 
@@ -154,7 +154,10 @@ func GetClientIDSecret(username string, password string, url string) (string, st
 	headers[HeaderAuthorization] = HeaderValueAuthBasicPrefix + " " + GetBase64EncodedCredentials(username, password)
 	// headers["Authorization"] = "Basic " + GetBase64EncodedCredentials(username, password)
 
-	resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTPS certificates
+
+	if SkipTLSVerify{
+		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTPS certificates
+	}
 
 	// POST request using resty
 	resp, err := InvokePOSTRequest(url, headers, body)
@@ -185,7 +188,6 @@ func GetClientIDSecret(username string, password string, url string) (string, st
 		}
 		return "", "", errors.New("Request didn't respond 200 OK: " + resp.Status())
 	}
-
 }
 
 // Encode the concatenation of two strings (using ":")
@@ -211,7 +213,10 @@ func GetOAuthTokens(username string, password string,
 	headers[HeaderAuthorization] = HeaderValueAuthBearerPrefix + " " + b64EncodedClientIDClientSecret
 	headers[HeaderAccept] = HeaderValueApplicationJSON
 
-	resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTP certificates
+	if SkipTLSVerify{
+		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTP certificates
+	}
+
 	resp, err := InvokePOSTRequest(url, headers, body)
 
 	if err != nil {
