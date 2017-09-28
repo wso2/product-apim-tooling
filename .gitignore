@@ -27,10 +27,11 @@ build
 hs_err_pid*
 *.iml
 
-
 vendor
 import-export-cli/vendor
 import-export-cli/exported
+
+# Keep a sample API for testing
 !import-export-cli/exported/sampleapi.zip
 
 # IDEs
@@ -49,6 +50,7 @@ hs_err_pid*
 
 # YAML Config Files
 import-export-cli/env_endpoints_all.yaml
+import-export-cli/main_config.yaml
 import-export-cli/env_keys_all.yaml
 
 # Binaries

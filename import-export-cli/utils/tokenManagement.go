@@ -59,7 +59,6 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 					Logln(LogPrefixWarning + "Username entered with flag -u for the environment '" + environment +
 						"' is not the same as username found in env_keys_all.yaml file")
 					fmt.Println("Username entered is not found under '" + environment + "' in env_keys_all.yaml file")
-					//log.Println("Execute 'wso2apim reset-user -e " + environment +"' to clear user data")
 					fmt.Println("Execute 'wso2apim reset-user -e " + environment + "' to clear user data")
 					os.Exit(1)
 				} else {
@@ -132,7 +131,7 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 			GetBase64EncodedCredentials(clientID, clientSecret), tokenEndpoint)
 		accessToken := responseDataMap["access_token"]
 
-		Logln(LogPrefixInfo+"AccessToken:", accessToken)
+		Logln(LogPrefixInfo+"AccessToken:", accessToken) // TODO:: Remove in production
 
 		return accessToken, apiManagerEndpoint, nil
 	} else {
@@ -163,17 +162,16 @@ func GetClientIDSecret(username string, password string, url string) (string, st
 	resp, err := InvokePOSTRequest(url, headers, body)
 
 	if err != nil {
-		HandleErrorAndExit("Error in connecting", err)
+		HandleErrorAndExit("Error in connecting.", err)
 	}
 
 	Logln("GetClientIDSecret(): Status - " + resp.Status())
 
 	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
 		// 200 OK or 201 Created
-		//m := make(map[string]string) // a map to hold response data
 		registrationResponse := RegistrationResponse{}
 		data := []byte(resp.Body())
-		err = json.Unmarshal(data, &registrationResponse) // add response data to m
+		err = json.Unmarshal(data, &registrationResponse)
 
 		clientID := registrationResponse.ClientID
 		clientSecret := registrationResponse.ClientSecret
@@ -184,7 +182,7 @@ func GetClientIDSecret(username string, password string, url string) (string, st
 		//fmt.Println("Error:", resp.Error())
 		//fmt.Printf("Body: %s\n", resp.Body())
 		if resp.StatusCode() == http.StatusUnauthorized {
-			HandleErrorAndExit("Incorrect Username/Password combination", errors.New("401 Unauthorized"))
+			HandleErrorAndExit("Incorrect Username/Password combination.", errors.New("401 Unauthorized"))
 		}
 		return "", "", errors.New("Request didn't respond 200 OK: " + resp.Status())
 	}
@@ -221,11 +219,11 @@ func GetOAuthTokens(username string, password string,
 
 	if err != nil {
 		Logln(LogPrefixError + "connecting to " + url)
-		HandleErrorAndExit("Unable to Connect", err)
+		HandleErrorAndExit("Unable to Connect.", err)
 	}
 
 	if resp.StatusCode() != http.StatusOK {
-		HandleErrorAndExit("Unable to connect", errors.New("Status: "+resp.Status()))
+		HandleErrorAndExit("Unable to connect.", errors.New("Status: "+resp.Status()))
 		return nil, nil
 	}
 

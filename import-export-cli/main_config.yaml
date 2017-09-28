@@ -7,10 +7,6 @@ environments:
     api_manager_endpoint: https://localhost:9292/api/am/publisher/v1.0
     registration_endpoint: https://localhost:9443/identity/connect/register
     token_endpoint: https://localhost:9443/oauth2/token
-  dev1:
-    api_manager_endpoint: apimArg
-    registration_endpoint: regArg
-    token_endpoint: tokenArg
   production:
     api_manager_endpoint: https://localhost:9292/api/am/publisher/v1.0
     registration_endpoint: https://localhost:9443/identity/connect/register

@@ -58,6 +58,4 @@ const LogPrefixWarning = "[WARN]: "
 const LogPrefixError = "[ERROR]: "
 
 // Other
-const APICallTimeout = 5
-const WSO2APIMUpdateTokenTimeout = 2
 const DefaultTokenValidityPeriod string = "3600"

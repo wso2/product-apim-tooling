@@ -67,14 +67,14 @@ func AddNewEnvToKeysFile(name string, envKeys EnvKeys, filePath string) {
 }
 
 func RemoveEnvFromKeysFile(env string, keysFilePath string, endpointsFilePath string) (error) {
-	fmt.Println("RemoveEnvFromKeysFile(): KeysFilePath:", keysFilePath)
-	fmt.Println("RemoveEnvFromKeysFile(): EndpointsFilePath:", endpointsFilePath)
 	if env == "" {
 		return errors.New("environment cannot be blank")
 	}
 	envKeysAll := GetEnvKeysAllFromFile(keysFilePath)
 	if EnvExistsInMainConfigFile(env, endpointsFilePath) {
+		Logln(LogPrefixInfo + "Environment '" + env + "' exists in file " + MainConfigFilePath)
 		if EnvExistsInKeysFile(env, keysFilePath) {
+			Logln(LogPrefixInfo + "Environment '" + env + "' exists in file " + EnvKeysAllFilePath)
 			delete(envKeysAll.Environments, env)
 			WriteConfigFile(envKeysAll, keysFilePath)
 			return nil
@@ -86,7 +86,22 @@ func RemoveEnvFromKeysFile(env string, keysFilePath string, endpointsFilePath st
 		// env doesn't exist in endpoints file
 		return errors.New("environment not found in " + endpointsFilePath)
 	}
+}
 
+func RemoveEnvFromMainConfigFile(env string, endpointsFilePath string) error {
+	if env == "" {
+		return errors.New("environment cannot be blank")
+	}
+	mainConfig := GetMainConfigFromFile(endpointsFilePath)
+	if EnvExistsInMainConfigFile(env, endpointsFilePath) {
+		Logln(LogPrefixInfo + "Environment '" + env + "' exists in file " + endpointsFilePath)
+		delete(mainConfig.Environments, env)
+		WriteConfigFile(mainConfig, endpointsFilePath)
+		return nil
+	} else {
+		// env doesn't exist in endpoints file
+		return errors.New("environment not found in " + endpointsFilePath)
+	}
 }
 
 // Get keys of environment 'env' from the file env_keys_all.yaml

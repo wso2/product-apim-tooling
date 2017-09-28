@@ -21,7 +21,11 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"errors"
+	"fmt"
 )
+
+var flagRemoveEnvName string // name of the environment to be removed
 
 // removeEnvCmd represents the removeEnv command
 var removeEnvCmd = &cobra.Command{
@@ -30,9 +34,42 @@ var removeEnvCmd = &cobra.Command{
 	Long:  utils.RemoveEnvCmdLongDesc + utils.RemoveEnvCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + "remove-env called")
+		err := removeEnv(flagRemoveEnvName)
+		if err != nil {
+			utils.HandleErrorAndExit("Error removing environment", err)
+		}
 	},
+}
+
+func removeEnv(envName string) error {
+	if envName == "" {
+		return errors.New("name of the environment cannot be blank")
+	}
+	if utils.EnvExistsInMainConfigFile(envName, utils.MainConfigFilePath) {
+		var err error
+		if utils.EnvExistsInKeysFile(envName, utils.EnvKeysAllFilePath) {
+			// if the environment exists in keys file, it has to be cleared first
+			err = utils.RemoveEnvFromKeysFile(envName, utils.EnvKeysAllFilePath, utils.MainConfigFilePath)
+		} else {
+			// environment exists only in MainConfig file
+			err = utils.RemoveEnvFromMainConfigFile(envName, utils.MainConfigFilePath)
+		}
+
+		if err != nil {
+			return err
+		}
+	} else {
+		// environment does not exist in keys file. Unable to remove
+		return errors.New("environment '" + envName + "' not found in " + utils.EnvKeysAllFilePath)
+	}
+
+	fmt.Println("Successfully removed environment")
+
+	return nil
 }
 
 func init() {
 	RootCmd.AddCommand(removeEnvCmd)
+	removeEnvCmd.Flags().StringVarP(&flagRemoveEnvName, "name", "n", "",
+		"Name of the environment to be removed")
 }

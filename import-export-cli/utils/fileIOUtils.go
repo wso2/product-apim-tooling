@@ -29,12 +29,12 @@ import (
 func WriteConfigFile(c interface{}, envConfigFilePath string) {
 	data, err := yaml.Marshal(&c)
 	if err != nil {
-		HandleErrorAndExit("Unable to create Env Configuration.", err)
+		HandleErrorAndExit("Unable to write configuration to file.", err)
 	}
 
 	err = ioutil.WriteFile(envConfigFilePath, data, 0644)
 	if err != nil {
-		HandleErrorAndExit("Unable to create Env Configuration.", err)
+		HandleErrorAndExit("Unable to write configuration to file.", err)
 	}
 }
 

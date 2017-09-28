@@ -25,29 +25,32 @@ import (
 	"fmt"
 )
 
-var flagEnvName string
-var flagTokenEndpoint string
-var flagRegistrationEndpoint string
-var flagAPIManagerEndpoint string
+var flagAddEnvName string           // name of the environment to be added
+var flagTokenEndpoint string        // token endpoint of the environment to be added
+var flagRegistrationEndpoint string // registration endpoint of the environment to be added
+var flagAPIManagerEndpoint string   // api manager endpoint of the environment to be added
 
 // addEnvCmd represents the addEnv command
 var addEnvCmd = &cobra.Command{
 	Use:   "add-env",
 	Short: utils.AddEnvCmdShortDesc,
-	Long: utils.AddEnvCmdLongDesc + utils.AddEnvCmdExamples,
+	Long:  utils.AddEnvCmdLongDesc + utils.AddEnvCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + "add-env called")
-		err := addEnv(flagEnvName, flagAPIManagerEndpoint, flagRegistrationEndpoint, flagTokenEndpoint)
+		err := addEnv(flagAddEnvName, flagAPIManagerEndpoint, flagRegistrationEndpoint, flagTokenEndpoint)
 		if err != nil {
-			utils.HandleErrorAndExit("Error in adding environment", err)
+			utils.HandleErrorAndExit("Error adding environment", err)
 		}
 	},
 }
 
-func addEnv(envName string, apimEndpoint string, regEndpoint string, tokenEndpoint string) error{
+func addEnv(envName string, apimEndpoint string, regEndpoint string, tokenEndpoint string) error {
 	mainConfig := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
 
-	if apimEndpoint == "" || regEndpoint == "" || tokenEndpoint == ""{
+	if envName == "" {
+		return errors.New("name of the environment cannot be blank")
+	}
+	if apimEndpoint == "" || regEndpoint == "" || tokenEndpoint == "" {
 		return errors.New("none of the 3 endpoints can be blank")
 	}
 	if utils.EnvExistsInMainConfigFile(envName, utils.MainConfigFilePath) {
@@ -70,7 +73,7 @@ func addEnv(envName string, apimEndpoint string, regEndpoint string, tokenEndpoi
 func init() {
 	RootCmd.AddCommand(addEnvCmd)
 
-	addEnvCmd.Flags().StringVarP(&flagEnvName, "name", "n", "",
+	addEnvCmd.Flags().StringVarP(&flagAddEnvName, "name", "n", "",
 		"Name of the environment to be added")
 	addEnvCmd.Flags().StringVar(&flagAPIManagerEndpoint, "apim", "",
 		"API Manager endpoint for the environment")
