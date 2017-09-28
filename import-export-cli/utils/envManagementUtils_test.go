@@ -47,61 +47,61 @@ func TestEnvExistsInKeysFile(t *testing.T) {
 }
 
 func TestEnvExistsInEndpointsFile(t *testing.T) {
-	writeCorrectEndpoints()
+	writeCorrectMainConfig()
 
-	returned := EnvExistsInMainConfigFile(devName, testEndpointsFilePath)
-
-	if !returned {
-		t.Errorf("Error in EnvExistsInMainConfigFile(). Returned: %t\n", returned)
-	}
-
-	returned = EnvExistsInMainConfigFile(qaName, testEndpointsFilePath)
+	returned := EnvExistsInMainConfigFile(devName, testMainConfigFilePath)
 
 	if !returned {
 		t.Errorf("Error in EnvExistsInMainConfigFile(). Returned: %t\n", returned)
 	}
 
-	returned = EnvExistsInMainConfigFile("staging", testEndpointsFilePath) // not available
+	returned = EnvExistsInMainConfigFile(qaName, testMainConfigFilePath)
+
+	if !returned {
+		t.Errorf("Error in EnvExistsInMainConfigFile(). Returned: %t\n", returned)
+	}
+
+	returned = EnvExistsInMainConfigFile("staging", testMainConfigFilePath) // not available
 	if returned {
 		t.Error("Error in EnvExistsInMainConfigFile(). False Positive")
 	}
-	defer os.Remove(testEndpointsFilePath)
+	defer os.Remove(testMainConfigFilePath)
 
 }
 
 func TestGetAPIMEndpointOfEnv(t *testing.T) {
-	writeCorrectEndpoints()
+	writeCorrectMainConfig()
 
-	returnedEndpoint := GetAPIMEndpointOfEnv(devName, testEndpointsFilePath)
-	expectedEndpoint := getSampleEndpoints().Environments[devName].APIManagerEndpoint
+	returnedEndpoint := GetAPIMEndpointOfEnv(devName, testMainConfigFilePath)
+	expectedEndpoint := getSampleMainConfig().Environments[devName].APIManagerEndpoint
 	if returnedEndpoint != expectedEndpoint {
 		t.Errorf("Expected '%s', got '%s'\n", expectedEndpoint, returnedEndpoint)
 	}
-	defer os.Remove(testEndpointsFilePath)
+	defer os.Remove(testMainConfigFilePath)
 
 }
 
 func TestGetTokenEndpointOfEnv(t *testing.T) {
-	writeCorrectEndpoints()
+	writeCorrectMainConfig()
 
-	returnedEndpoint := GetTokenEndpointOfEnv(devName, testEndpointsFilePath)
-	expectedEndpoint := getSampleEndpoints().Environments[devName].TokenEndpoint
+	returnedEndpoint := GetTokenEndpointOfEnv(devName, testMainConfigFilePath)
+	expectedEndpoint := getSampleMainConfig().Environments[devName].TokenEndpoint
 	if returnedEndpoint != expectedEndpoint {
 		t.Errorf("Expected '%s', got '%s'\n", expectedEndpoint, returnedEndpoint)
 	}
-	defer os.Remove(testEndpointsFilePath)
+	defer os.Remove(testMainConfigFilePath)
 
 }
 
 func TestGetRegistrationEndpointOfEnv(t *testing.T) {
-	writeCorrectEndpoints()
+	writeCorrectMainConfig()
 
-	returnedEndpoint := GetRegistrationEndpointOfEnv(devName, testEndpointsFilePath)
-	expectedEndpoint := getSampleEndpoints().Environments[devName].RegistrationEndpoint
+	returnedEndpoint := GetRegistrationEndpointOfEnv(devName, testMainConfigFilePath)
+	expectedEndpoint := getSampleMainConfig().Environments[devName].RegistrationEndpoint
 	if returnedEndpoint != expectedEndpoint {
 		t.Errorf("Expected '%s', got '%s'\n", expectedEndpoint, returnedEndpoint)
 	}
-	defer os.Remove(testEndpointsFilePath)
+	defer os.Remove(testMainConfigFilePath)
 
 }
 
@@ -158,9 +158,9 @@ func TestAddNewEnvToKeysFile2(t *testing.T) {
 
 // Case 1: Correct Details
 func TestRemoveEnvFromKeysFile1(t *testing.T) {
-	writeCorrectEndpoints()
+	writeCorrectMainConfig()
 	writeCorrectKeys()
-	err := RemoveEnvFromKeysFile(devName, testKeysFilePath, testEndpointsFilePath)
+	err := RemoveEnvFromKeysFile(devName, testKeysFilePath, testMainConfigFilePath)
 	if err != nil {
 		t.Error("Error removing env from keys file: " + err.Error())
 	}
@@ -170,7 +170,7 @@ func TestRemoveEnvFromKeysFile1(t *testing.T) {
 
 // Case 2: Env not available in keys file
 func TestRemoveEnvFromKeysFile2(t *testing.T) {
-	writeCorrectEndpoints()
+	writeCorrectMainConfig()
 
 	// write incorrect keys
 	envKeysAll.Environments = make(map[string]EnvKeys)
@@ -179,7 +179,7 @@ func TestRemoveEnvFromKeysFile2(t *testing.T) {
 	WriteConfigFile(envKeysAll, testKeysFilePath)
 	// end of writing incorrect keys
 
-	err := RemoveEnvFromKeysFile(devName, testKeysFilePath, testEndpointsFilePath)
+	err := RemoveEnvFromKeysFile(devName, testKeysFilePath, testMainConfigFilePath)
 	if err == nil {
 		t.Error("No error returned. 'Env not found in keys file' error expected")
 	}
@@ -190,30 +190,30 @@ func TestRemoveEnvFromKeysFile2(t *testing.T) {
 // Case 4: Incorrect Endpoints
 func TestRemoveEnvFromKeysFile4(t *testing.T) {
 	// writing incorrect endpoints
-	envEndpointsAll.Environments = make(map[string]EnvEndpoints)
-	envEndpointsAll.Environments[devName] = EnvEndpoints{"dev_apim_endpoint",
+	mainConfig.Environments = make(map[string]EnvEndpoints)
+	mainConfig.Environments[devName] = EnvEndpoints{"dev_apim_endpoint",
 		"dev_reg_endpoint", "dev_token_endpoint"}
-	WriteConfigFile(envEndpointsAll, testEndpointsFilePath)
+	WriteConfigFile(mainConfig, testMainConfigFilePath)
 	// end of writing incorrect endpoints
 
-	err := RemoveEnvFromKeysFile(qaName, testKeysFilePath, testEndpointsFilePath)
+	err := RemoveEnvFromKeysFile(qaName, testKeysFilePath, testMainConfigFilePath)
 	if err == nil {
 		t.Error("No error returned. 'Env not found in endpoints file' error expected")
 	}
 
-	defer os.Remove(testEndpointsFilePath)
+	defer os.Remove(testMainConfigFilePath)
 }
 
 // Case 3: Environment is blank
 func TestRemoveEnvFromKeysFile3(t *testing.T) {
-	err := RemoveEnvFromKeysFile("", testKeysFilePath, testEndpointsFilePath)
+	err := RemoveEnvFromKeysFile("", testKeysFilePath, testMainConfigFilePath)
 	if err == nil {
 		t.Error("No error returned. 'Env cannot be blank' error expected")
 	}
 }
 
 func removeFiles() {
-	_ = os.Remove(testEndpointsFilePath)
+	_ = os.Remove(testMainConfigFilePath)
 	//fmt.Println("Error removing endpoints file:", err.Error())
 	_ = os.Remove(testKeysFilePath)
 	//fmt.Println("Error removing keys file:", err.Error())

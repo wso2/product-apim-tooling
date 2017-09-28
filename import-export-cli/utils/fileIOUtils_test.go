@@ -26,11 +26,11 @@ import (
 )
 
 const testKeysFileName string = "test_keys_config.yaml"
-const testEndpointsFileName string = "test_endpoints_config.yaml"
+const testMainConfigFileName string = "test_main_config.yaml"
 const testKeysFilePath string = ApplicationRoot + PathSeparator_ + testKeysFileName
-const testEndpointsFilePath string = ApplicationRoot + PathSeparator_ + testEndpointsFileName
+const testMainConfigFilePath string = ApplicationRoot + PathSeparator_ + testMainConfigFileName
 var envKeysAll *EnvKeysAll = new(EnvKeysAll)
-var envEndpointsAll *MainConfig = new(MainConfig)
+var mainConfig *MainConfig = new(MainConfig)
 const devName string = "dev"
 const qaName string = "qa"
 const devUsername string = "dev_username"
@@ -50,8 +50,8 @@ func getSampleKeys() *EnvKeysAll {
 	return envKeysAll
 }
 
-func getSampleEndpoints() *MainConfig {
-	return envEndpointsAll
+func getSampleMainConfig() *MainConfig {
+	return mainConfig
 }
 
 func initSampleKeys() {
@@ -63,15 +63,16 @@ func initSampleKeys() {
 }
 
 // helper function for testing
-func writeCorrectEndpoints() {
-	initSampleEndpoints()
-	WriteConfigFile(envEndpointsAll, testEndpointsFilePath)
+func writeCorrectMainConfig() {
+	initSampleMainConfig()
+	WriteConfigFile(mainConfig, testMainConfigFilePath)
 }
-func initSampleEndpoints() {
-	envEndpointsAll.Environments = make(map[string]EnvEndpoints)
-	envEndpointsAll.Environments[devName] = EnvEndpoints{"dev_apim_endpoint",
+func initSampleMainConfig() {
+	mainConfig.Config = Config{2500, true, "/home/exported"}
+	mainConfig.Environments = make(map[string]EnvEndpoints)
+	mainConfig.Environments[devName] = EnvEndpoints{"dev_apim_endpoint",
 		"dev_reg_endpoint", "dev_token_endpoint"}
-	envEndpointsAll.Environments[qaName] = EnvEndpoints{"qa_apim_endpoint",
+	mainConfig.Environments[qaName] = EnvEndpoints{"qa_apim_endpoint",
 		"qa_reg_endpoint", "dev_token_endpoint"}
 }
 
@@ -120,34 +121,34 @@ func TestGetEnvKeysAllFromFile3(t *testing.T) {
 }
 */
 
-func TestGetEnvEndpointsAllFromFile(t *testing.T) {
+func TestGetMainConfigFromFile(t *testing.T) {
 	// testing for correct data
-	writeCorrectEndpoints()
-	envEndpointsAllReturned := GetMainConfigFromFile(testEndpointsFilePath)
+	writeCorrectMainConfig()
+	mainConfigReturned := GetMainConfigFromFile(testMainConfigFilePath)
 
-	if envEndpointsAllReturned.Environments[devName] != envEndpointsAllReturned.Environments[devName] ||
-		envEndpointsAllReturned.Environments[qaName] != envEndpointsAllReturned.Environments[qaName] {
+	if mainConfigReturned.Environments[devName] != mainConfigReturned.Environments[devName] ||
+		mainConfigReturned.Environments[qaName] != mainConfigReturned.Environments[qaName] {
 		t.Errorf("Error in GetMainConfigFromFile()")
 	}
 
-	var err = os.Remove(testEndpointsFilePath)
+	var err = os.Remove(testMainConfigFilePath)
 	if err != nil {
 		t.Errorf("Error deleting file " + testKeysFilePath)
 	}
 }
 
-func TestEnvEndpointsAll_ParseEnvEndpointsFromFile(t *testing.T) {
+func TestMainConfig_ParseMainConfigFromFile(t *testing.T) {
 	var envEndpointsAllLocal MainConfig
-	writeCorrectEndpoints()
-	data, err := ioutil.ReadFile(testEndpointsFilePath)
+	writeCorrectMainConfig()
+	data, err := ioutil.ReadFile(testMainConfigFilePath)
 	if err != nil {
 		t.Error("Error")
 	}
 	envEndpointsAllLocal.ParseMainConfigFromFile(data)
 
-	var err1 = os.Remove(testEndpointsFilePath)
+	var err1 = os.Remove(testMainConfigFilePath)
 	if err1 != nil {
-		t.Errorf("Error deleting file " + testEndpointsFilePath)
+		t.Errorf("Error deleting file " + testMainConfigFilePath)
 	}
 }
 
