@@ -48,19 +48,20 @@ func addEnv(envName string, apimEndpoint string, regEndpoint string, tokenEndpoi
 	mainConfig := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
 
 	if envName == "" {
+		// name of the environment is blank
 		return errors.New("name of the environment cannot be blank")
 	}
 	if apimEndpoint == "" || regEndpoint == "" || tokenEndpoint == "" {
+		// at least one of the 3 endpoints is blank
 		return errors.New("none of the 3 endpoints can be blank")
 	}
 	if utils.EnvExistsInMainConfigFile(envName, utils.MainConfigFilePath) {
+		// environment already exists
 		return errors.New("environment '" + envName + "' already exists in " + utils.MainConfigFilePath)
 	}
 
-	var envEndpoints utils.EnvEndpoints = utils.EnvEndpoints{}
-	envEndpoints.RegistrationEndpoint = regEndpoint
-	envEndpoints.TokenEndpoint = tokenEndpoint
-	envEndpoints.APIManagerEndpoint = apimEndpoint
+	var envEndpoints utils.EnvEndpoints = utils.EnvEndpoints{APIManagerEndpoint:apimEndpoint,
+			TokenEndpoint:tokenEndpoint, RegistrationEndpoint:regEndpoint}
 
 	mainConfig.Environments[envName] = envEndpoints
 	utils.WriteConfigFile(mainConfig, utils.MainConfigFilePath)

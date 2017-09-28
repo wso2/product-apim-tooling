@@ -126,8 +126,8 @@ func TestGetMainConfigFromFile(t *testing.T) {
 	writeCorrectMainConfig()
 	mainConfigReturned := GetMainConfigFromFile(testMainConfigFilePath)
 
-	if mainConfigReturned.Environments[devName] != mainConfigReturned.Environments[devName] ||
-		mainConfigReturned.Environments[qaName] != mainConfigReturned.Environments[qaName] {
+	if mainConfigReturned.Environments[devName] != mainConfig.Environments[devName] ||
+		mainConfigReturned.Environments[qaName] != mainConfig.Environments[qaName] {
 		t.Errorf("Error in GetMainConfigFromFile()")
 	}
 
