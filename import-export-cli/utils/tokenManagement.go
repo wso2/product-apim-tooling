@@ -154,7 +154,7 @@ func GetClientIDSecret(username string, password string, url string) (string, st
 	// headers["Authorization"] = "Basic " + GetBase64EncodedCredentials(username, password)
 
 
-	if SkipTLSVerify{
+	if SkipTLSVerification {
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTPS certificates
 	}
 
@@ -211,7 +211,7 @@ func GetOAuthTokens(username string, password string,
 	headers[HeaderAuthorization] = HeaderValueAuthBearerPrefix + " " + b64EncodedClientIDClientSecret
 	headers[HeaderAccept] = HeaderValueApplicationJSON
 
-	if SkipTLSVerify{
+	if SkipTLSVerification {
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTP certificates
 	}
 

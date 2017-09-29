@@ -63,11 +63,15 @@ func init() {
 	// Cobra supports Persistent Flags, which, if defined here,
 	// will be global for your application.
 
-	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "",
-		"config file (default is $HOME/.wso2apim-cli.yaml)")
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	// Init ConfigVars
+	err := utils.SetConfigVars()
+	if err != nil {
+		utils.HandleErrorAndExit("Error reading " + utils.MainConfigFilePath + ".", err)
+	}
 
 }
 

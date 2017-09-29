@@ -33,6 +33,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"time"
 )
 
 var importAPIName string
@@ -47,9 +48,6 @@ var ImportAPICmd = &cobra.Command{
 	Long:  utils.ImportAPICmdLongDesc + utils.ImportAPICmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + "import-api called")
-		for key, arg := range args {
-			fmt.Println(key, ":", arg)
-		}
 
 		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(importEnvironment, importAPICmdUsername,
 			importAPICmdPassword)
@@ -60,7 +58,6 @@ var ImportAPICmd = &cobra.Command{
 			utils.Logln(utils.LogPrefixInfo+"Status: %v\n", resp.Status)
 			if resp.StatusCode == 200 {
 				fmt.Println("Header:", resp.Header)
-				fmt.Println("Body:", resp.Body)
 			} else {
 				fmt.Println("Status: ", resp.Status)
 				utils.Logln(utils.LogPrefixError + resp.Status)
@@ -102,17 +99,27 @@ func ImportAPI(name string, url string, accessToken string) (*http.Response, err
 	}
 
 	extraParams := map[string]string{}
+	// TODO:: Add extraParams as necessary
 
 	req, err := NewFileUploadRequest(url, extraParams, "file", filePath, accessToken)
 	if err != nil {
-		utils.HandleErrorAndExit("Error forming request", err)
+		utils.HandleErrorAndExit("Error creating request.", err)
 	}
 
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	var tr *http.Transport
+	if utils.SkipTLSVerification {
+		tr = &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+	}else{
+		tr = &http.Transport{}
 	}
 
-	client := &http.Client{Transport: tr}
+	client := &http.Client{
+		Transport: tr,
+		Timeout: time.Duration(utils.HttpRequestTimeout) * time.Second,
+	}
+
 	resp, err := client.Do(req)
 
 	if err != nil {
@@ -130,6 +137,7 @@ func ImportAPI(name string, url string, accessToken string) (*http.Response, err
 }
 
 // Helper function for forming multi-part form data
+// Returns the formed http request and errors
 func NewFileUploadRequest(uri string, params map[string]string, paramName, path string,
 	accessToken string) (*http.Request,error) {
 	file, err := os.Open(path)

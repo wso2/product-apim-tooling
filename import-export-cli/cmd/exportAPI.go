@@ -116,7 +116,7 @@ func ExportAPI(name string, version string, url string, accessToken string) *res
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 	headers[utils.HeaderAccept] = utils.HeaderValueApplicationZip
 
-	if utils.SkipTLSVerify {
+	if utils.SkipTLSVerification {
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTPS certificates
 	}
 

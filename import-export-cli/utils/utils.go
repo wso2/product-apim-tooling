@@ -24,10 +24,12 @@ import (
 	"bufio"
 	"os"
 	"golang.org/x/crypto/ssh/terminal"
+	"time"
 )
 
 // Invoke http-post request using go-resty
 func InvokePOSTRequest(url string, headers map[string]string, body string) (*resty.Response, error) {
+	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Second)
 	resp, err := resty.R().SetHeaders(headers).SetBody(body).Post(url)
 
 	return resp, err
@@ -46,7 +48,7 @@ func PromptForPassword() string {
 	fmt.Print("Enter Password: ")
 	bytePassword, _ := terminal.ReadPassword(0)
 	password := string(bytePassword)
-
+	fmt.Println()
 	return password
 }
 
