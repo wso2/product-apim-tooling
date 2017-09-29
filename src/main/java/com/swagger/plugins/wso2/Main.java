@@ -1,6 +1,6 @@
 package com.swagger.plugins.wso2;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 
@@ -12,13 +12,12 @@ import java.io.IOException;
  * Visibility : Public
  * ****************************************************************/
 public class Main {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, ParseException {
 
         String swaggerDef2 = "{\"swagger\":\"2.0\",\"info\":{\"description\":\"This is a test API.\",\"version\":\"1.0.0\",\"title\":\"TestAPI\",\"contact\":{\"email\":\"you@your-company.com\"},\"license\":{\"name\":\"Apache 2.0\",\"url\":\"http://www.apache.org/licenses/LICENSE-2.0.html\"}},\"tags\":[{\"name\":\"admins\",\"description\":\"Secured Admin-only calls\"},{\"name\":\"developers\",\"description\":\"Operations available to regular developers\"}],\"paths\":{\"/inventory\":{\"post\":{\"tags\":[\"admins\"],\"summary\":\"adds an inventory item\",\"operationId\":\"addInventory\",\"description\":\"Adds an item to the system\",\"consumes\":[\"application/json\"],\"produces\":[\"application/json\"],\"parameters\":[{\"in\":\"body\",\"name\":\"inventoryItem\",\"description\":\"Inventory item to add\",\"schema\":{\"$ref\":\"#/definitions/InventoryItem\"}}],\"responses\":{\"201\":{\"description\":\"item created\"},\"400\":{\"description\":\"invalid input, object invalid\"},\"409\":{\"description\":\"an existing item already exists\"}}}}},\"definitions\":{\"InventoryItem\":{\"type\":\"object\",\"required\":[\"id\",\"name\",\"manufacturer\",\"releaseDate\"],\"properties\":{\"id\":{\"type\":\"string\",\"format\":\"uuid\",\"example\":\"d290f1ee-6c54-4b01-90e6-d701748f0851\"},\"name\":{\"type\":\"string\",\"example\":\"Widget Adapter\"},\"releaseDate\":{\"type\":\"string\",\"format\":\"int32\",\"example\":\"2016-08-29T09:12:33.001Z\"},\"manufacturer\":{\"$ref\":\"#/definitions/Manufacturer\"}}},\"Manufacturer\":{\"required\":[\"name\"],\"properties\":{\"name\":{\"type\":\"string\",\"example\":\"ACME Corporation\"},\"homePage\":{\"type\":\"string\",\"format\":\"url\",\"example\":\"https://www.acme-corp.com\"},\"phone\":{\"type\":\"string\",\"example\":\"408-867-5309\"}}}}}";
 
         Wso2ApiGatewayPlugin plugin = new Wso2ApiGatewayPlugin();
         plugin.afterApiVersionSaved("akilaaroshana@hotmail.com","ms9714", "Akilahotmail123", swaggerDef2, "test");
-
 
     }
 }

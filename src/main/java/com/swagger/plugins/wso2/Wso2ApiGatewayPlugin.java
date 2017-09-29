@@ -7,6 +7,7 @@ import io.swagger.models.Scheme;
 import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.util.*;
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,23 +29,23 @@ public class Wso2ApiGatewayPlugin {
     /*
     * Trigger before an API is saved.
     * */
-    public String beforeApiVersionSaved(String swaggerYaml) throws Exception {
-        Swagger swagger = null;
-
-        try {
-            LOGGER.info("Convert swaggerYaml to a POJO");
-            swagger = Json.mapper().readValue(convertYamlToJson(swaggerYaml), Swagger.class);
-            if (swagger == null) {
-                throw new Exception();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            LOGGER.warn("swagger object is null");
-        }
-
-        return null;
-
-    }
+//    public String beforeApiVersionSaved(String swaggerYaml) throws Exception {
+//        Swagger swagger = null;
+//
+//        try {
+//            LOGGER.info("Convert swaggerYaml to a POJO");
+//            swagger = Json.mapper().readValue(convertYamlToJson(swaggerYaml), Swagger.class);
+//            if (swagger == null) {
+//                throw new Exception();
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            LOGGER.warn("swagger object is null");
+//        }
+//
+//        return null;
+//
+//    }
 
 
     /*
@@ -53,27 +54,14 @@ public class Wso2ApiGatewayPlugin {
     * @param : String
     * @return : void
     * */
-    public void afterApiVersionSaved(String email, String organizationKey, String password, String swaggerDefinition, String context) throws IOException {
+    public void afterApiVersionSaved(String email, String organizationKey, String password, String swaggerDefinition, String context) throws IOException, ParseException {
 
         PayloadConfiguration configuration = new PayloadConfiguration();
 
         String pa = configuration.configurePayload(email, organizationKey, swaggerDefinition, context);
 
         Wso2Api api = new Wso2Api();
-        api.getClientIdAndSecret(email,organizationKey, password);
         accessToken = api.getAccessToken(email,organizationKey,password);
         api.saveAPI(pa,accessToken);
     }
-
-    public String convertYamlToJson(String swaggerYaml) {
-        Swagger swagger = null;
-        try {
-            JsonNode node = Yaml.mapper().readValue(swaggerYaml, JsonNode.class);
-            swagger = new SwaggerParser().read(node);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return Json.pretty(swagger);
-    }
-
 }

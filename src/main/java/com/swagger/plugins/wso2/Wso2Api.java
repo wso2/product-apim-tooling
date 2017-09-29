@@ -1,6 +1,11 @@
 package com.swagger.plugins.wso2;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -28,12 +33,21 @@ public class Wso2Api {
     private static final String DYNAMIC_CLIENT_REGISTRATION_URL = "https://api.cloud.wso2.com/client-registration/v0.11/register";
     private static final String TOKEN_API_URL = "https://gateway.api.cloud.wso2.com/token";
 
-    private HttpsURLConnection connection;
-    private DataOutputStream dataOutputStream;
+    private CloseableHttpClient httpClient;
     private BufferedReader inDataStream;
-    private StringBuffer response;
-    private URL url;
+    private StringBuffer responseBody;
+    private HttpResponse response;
     private JSONParser parser;
+
+    public String getAuthorizationPayload(String email, String organizationKey) {
+        return "{\n" +
+                "    \"callbackUrl\": \"www.google.lk\",\n" +
+                "    \"clientName\": \"rest_api_publisher\",\n" +
+                "    \"owner\":\""+email+"@"+organizationKey+"\",\n" +
+                "    \"grantType\": \"password refresh_token\",\n" +
+                "    \"saasApp\": true\n" +
+                "}";
+    }
 
     /*
     * Method name : getClientIdAndSecret
@@ -41,45 +55,43 @@ public class Wso2Api {
     * @param : String, String, String
     * @return : String
     * */
-    public String getClientIdAndSecret(String email, String organizationKey, String password) throws IOException {
+    public String getClientIdAndSecret(String email, String organizationKey, String password) throws IOException, ParseException {
+
         String encodeString = email + "@" + organizationKey + ":" + password;
-        String authorizationPayload = "{\n" +
-                "    \"callbackUrl\": \"www.google.lk\",\n" +
-                "    \"clientName\": \"rest_api_publisher\",\n" +
-                "    \"owner\":\""+email+"@"+organizationKey+"\",\n" +
-                "    \"grantType\": \"password refresh_token\",\n" +
-                "    \"saasApp\": true\n" +
-                "}";
-        try {
-            url = new URL(DYNAMIC_CLIENT_REGISTRATION_URL);
-            try {
-                connection = (HttpsURLConnection) url.openConnection();
-                connection.setRequestMethod("POST");
-                connection.setRequestProperty("Content-Type", "application/json");
-                connection.setRequestProperty("Authorization", "Basic " + Base64.encodeBase64String(encodeString.getBytes()));
-                connection.setDoOutput(true);
+        String encodedString = Base64.encodeBase64String(encodeString.getBytes());
+        StringEntity authorizationPayload = new StringEntity(getAuthorizationPayload(email, organizationKey));
 
-                dataOutputStream = new DataOutputStream(connection.getOutputStream());
-                dataOutputStream.writeBytes(authorizationPayload);
+        httpClient = HttpClients.createDefault();
+        HttpPost clientIdAndSecretRequest = new HttpPost(DYNAMIC_CLIENT_REGISTRATION_URL);
+        clientIdAndSecretRequest.setHeader("Authorization","Basic "+encodedString);
+        clientIdAndSecretRequest.setHeader("Content-Type","application/json");
+        clientIdAndSecretRequest.setEntity(authorizationPayload);
 
-                inDataStream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String line;
-                response = new StringBuffer();
-                while ((line = inDataStream.readLine()) != null)
-                    response.append(line);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            dataOutputStream.flush();
-            dataOutputStream.close();
-            inDataStream.close();
+        response = httpClient.execute(clientIdAndSecretRequest);
+
+        //Use this space to handle exceptions
+
+        inDataStream = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+        responseBody = new StringBuffer();
+        String line;
+        while ((line = inDataStream.readLine()) != null) {
+            responseBody.append(line);
         }
-        return response.toString();
+        httpClient.close();
+
+        parser = new JSONParser();
+        String clientId = null;
+        String clientSecret = null;
+
+        JSONObject clientIdAndSecretJson = (JSONObject) parser.parse(responseBody.toString());
+        clientId = clientIdAndSecretJson.get("clientId").toString();
+        clientSecret = clientIdAndSecretJson.get("clientSecret").toString();
+
+        String toEncode = clientId+":"+clientSecret;
+        String encodedIdAndSecret = Base64.encodeBase64String(toEncode.getBytes());
+
+        return encodedIdAndSecret;
+
     }
 
 
@@ -89,55 +101,35 @@ public class Wso2Api {
     * @param : String, String, String
     * @return : String
     * */
-    public String getAccessToken(String email, String organizationKey, String password) throws IOException {
+    public String getAccessToken(String email, String organizationKey, String password) throws IOException, ParseException {
 
         String clientIdAndSecret = getClientIdAndSecret(email, organizationKey, password);
+        StringEntity authorizationPayload = new StringEntity("scope=apim:api_create&grant_type=password&username="+email+"@ms9714&password="+password);
+
+        httpClient = HttpClients.createDefault();
+        HttpPost accessTokenRequest = new HttpPost(TOKEN_API_URL);
+        accessTokenRequest.setHeader("Authorization","Basic "+clientIdAndSecret);
+        accessTokenRequest.setHeader("Content-Type", "application/x-www-form-urlencoded");
+        accessTokenRequest.setEntity(authorizationPayload);
+
+        response = httpClient.execute(accessTokenRequest);
+
+        //Use this space to handle exceptions
+
+        inDataStream = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+        responseBody = new StringBuffer();
+        String line;
+        while ((line = inDataStream.readLine()) != null) {
+            responseBody.append(line);
+        }
+        httpClient.close();
 
         parser = new JSONParser();
-        String clientId = null;
-        String clientSecret = null;
-        try {
-            JSONObject clientIdAndSecretJson = (JSONObject) parser.parse(clientIdAndSecret);
-            clientId = clientIdAndSecretJson.get("clientId").toString();
-            clientSecret = clientIdAndSecretJson.get("clientSecret").toString();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        String accessToken;
 
-        String toEncode = clientId+":"+clientSecret;
+        JSONObject accessTokenJson = (JSONObject) parser.parse(responseBody.toString());
+        accessToken = accessTokenJson.get("access_token").toString();
 
-        try {
-            url = new URL(TOKEN_API_URL);
-            connection = (HttpsURLConnection) url.openConnection();
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
-            connection.setRequestProperty("Authorization", "Basic "+ Base64.encodeBase64String(toEncode.getBytes()));
-            connection.setDoOutput(true);
-
-            dataOutputStream = new DataOutputStream(connection.getOutputStream());
-            dataOutputStream.writeBytes("scope=apim:api_create&grant_type=password&username="+email+"@ms9714&password="+password);
-
-            response = new StringBuffer();
-            inDataStream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String line;
-            response = new StringBuffer();
-            while ((line = inDataStream.readLine()) != null)
-                response.append(line);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            dataOutputStream.flush();
-            dataOutputStream.close();
-            inDataStream.close();
-        }
-        parser = new JSONParser();
-        String accessToken = null;
-        try {
-            JSONObject accessTokenJson = (JSONObject) parser.parse(response.toString());
-            accessToken = accessTokenJson.get("access_token").toString();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
         return accessToken;
     }
 
@@ -151,42 +143,29 @@ public class Wso2Api {
     * @param : String, String
     * @return : void
     * */
-    public void saveAPI(String swagger, String accessToken) {
+    public void saveAPI(String swagger, String accessToken) throws IOException {
 
-        try {
-            url = new URL(API_CREATE_CLOUD_URL);
-            try {
-                connection = (HttpsURLConnection) url.openConnection();
-                connection.setRequestMethod("POST");
-                connection.setRequestProperty("Authorization", "Bearer "+ accessToken);
-                connection.setRequestProperty("Content-Type", "application/json");
-                connection.setDoOutput(true);
+        StringEntity creationPayload = new StringEntity(swagger);
 
-                dataOutputStream = new DataOutputStream(connection.getOutputStream());
-                dataOutputStream.writeBytes(swagger);
+        httpClient = HttpClients.createDefault();
+        HttpPost createApiRequest = new HttpPost(API_CREATE_CLOUD_URL);
+        createApiRequest.setHeader("Authorization","Bearer "+accessToken);
+        createApiRequest.setHeader("Content-Type","application/json");
+        createApiRequest.setEntity(creationPayload);
 
+        response = httpClient.execute(createApiRequest);
 
-                inDataStream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String line;
-                StringBuffer response = new StringBuffer();
-                while ((line = inDataStream.readLine()) != null)
-                    response.append(line);
+        //Use this space to handle exceptions
 
-
-
-                System.out.println(response.toString());
-                LOGGER.info("The api is created in the cloud successfully.");
-                LOGGER.warn("The access token expires in an hour");
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                dataOutputStream.flush();
-                dataOutputStream.close();
-                inDataStream.close();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        inDataStream = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+        responseBody = new StringBuffer();
+        String line;
+        while ((line = inDataStream.readLine()) != null) {
+            responseBody.append(line);
         }
+        httpClient.close();
+
+        System.out.println(responseBody.toString());
     }
 }
 
