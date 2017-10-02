@@ -17,7 +17,7 @@ import java.util.List;
 
 /*****************************************************************
  *  Class name : Wso2ApiGatewayPlugin
- * Methods : beforeApiVersionSaved, afterApiVersionSaved, convertYamlToJson
+ * Methods : beforeApiVersionSaved, afterApiVersionSaved
  * Functionality : Contains the method to push the API to the cloud
  * Visibility : Public
  * ****************************************************************/
@@ -54,7 +54,7 @@ public class Wso2ApiGatewayPlugin {
     * @param : String
     * @return : void
     * */
-    public void afterApiVersionSaved(String email, String organizationKey, String password, String swaggerDefinition, String context) throws IOException, ParseException {
+    public void afterApiVersionSaved(String email, String organizationKey, String password, String swaggerDefinition, String context) throws IOException, ParseException, PluginExecutionException {
 
         PayloadConfiguration configuration = new PayloadConfiguration();
 

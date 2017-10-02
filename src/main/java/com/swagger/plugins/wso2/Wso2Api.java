@@ -1,7 +1,7 @@
 package com.swagger.plugins.wso2;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -12,16 +12,13 @@ import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 
 /*****************************************************************
  *  Class name : Wso2Api
- * Attributes : HttpsUrlConnection, DataOutPutStream, BufferReader, StringBuffer, URL, JSONParser
- * Methods : getClientIdAndSecret, getAccessToken, SaveAPI
+ * Attributes : httpClient, inDataStream, inputStream, inputStreamReader, responseBody, response, parser
+ * Methods : getAuthorizationPayload, getClientIdAndSecret, getAccessToken, SaveAPI
  * Functionality : Contains the methods to obtain the access token and push the API to the cloud
  * Visibility : Public
  * ****************************************************************/
@@ -35,8 +32,10 @@ public class Wso2Api {
 
     private CloseableHttpClient httpClient;
     private BufferedReader inDataStream;
+    private InputStream inputStream;
+    private InputStreamReader inputStreamReader;
     private StringBuffer responseBody;
-    private HttpResponse response;
+    private CloseableHttpResponse response;
     private JSONParser parser;
 
     public String getAuthorizationPayload(String email, String organizationKey) {
@@ -51,120 +50,171 @@ public class Wso2Api {
 
     /*
     * Method name : getClientIdAndSecret
-    * Functionality : Obtains the client ID and client secret for the given email, organization key and password
+    * Functionality : Returns the Base64 encoded string of the format (clientId:clientSecret) for a given email, organization key and password.
     * @param : String, String, String
     * @return : String
     * */
-    public String getClientIdAndSecret(String email, String organizationKey, String password) throws IOException, ParseException {
+    public String getClientIdAndSecret(String email, String organizationKey, String password) throws IOException, ParseException, PluginExecutionException {
 
         String encodeString = email + "@" + organizationKey + ":" + password;
-        String encodedString = Base64.encodeBase64String(encodeString.getBytes());
+        String encodedString = Base64.encodeBase64String(encodeString.getBytes("UTF-8"));
         StringEntity authorizationPayload = new StringEntity(getAuthorizationPayload(email, organizationKey));
 
-        httpClient = HttpClients.createDefault();
-        HttpPost clientIdAndSecretRequest = new HttpPost(DYNAMIC_CLIENT_REGISTRATION_URL);
-        clientIdAndSecretRequest.setHeader("Authorization","Basic "+encodedString);
-        clientIdAndSecretRequest.setHeader("Content-Type","application/json");
-        clientIdAndSecretRequest.setEntity(authorizationPayload);
+        String clientId;
+        String clientSecret;
 
-        response = httpClient.execute(clientIdAndSecretRequest);
+        try {
+            httpClient = HttpClients.createDefault();
+            HttpPost clientIdAndSecretRequest = new HttpPost(DYNAMIC_CLIENT_REGISTRATION_URL);
+            clientIdAndSecretRequest.setHeader("Authorization","Basic "+encodedString);
+            clientIdAndSecretRequest.setHeader("Content-Type","application/json");
+            clientIdAndSecretRequest.setEntity(authorizationPayload);
 
-        //Use this space to handle exceptions
+            LOGGER.info("Calling dynamic client registration endpoint");
+            response = httpClient.execute(clientIdAndSecretRequest);
 
-        inDataStream = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-        responseBody = new StringBuffer();
-        String line;
-        while ((line = inDataStream.readLine()) != null) {
-            responseBody.append(line);
+
+            if (response.getStatusLine().getStatusCode() == 401) {
+                throw new PluginExecutionException("Unauthorized request, check email, organizationKey, password");
+            } else if (response.getStatusLine().getStatusCode() == 400) {
+                throw new PluginExecutionException("Bad Request, check content");
+            }
+
+            inputStream = response.getEntity().getContent();
+            inputStreamReader = new InputStreamReader(inputStream);
+            inDataStream = new BufferedReader(inputStreamReader);
+            responseBody = new StringBuffer();
+            String line;
+            while ((line = inDataStream.readLine()) != null) {
+                responseBody.append(line);
+            }
+
+            LOGGER.info("Received the payload");
+
+            parser = new JSONParser();
+            JSONObject clientIdAndSecretJson = (JSONObject) parser.parse(responseBody.toString());
+            clientId = clientIdAndSecretJson.get("clientId").toString();
+            clientSecret = clientIdAndSecretJson.get("clientSecret").toString();
+
+        } catch (IOException e) {
+            throw e;
+        } catch (ParseException e) {
+            throw e;
+        }finally {
+            httpClient.close();
         }
-        httpClient.close();
-
-        parser = new JSONParser();
-        String clientId = null;
-        String clientSecret = null;
-
-        JSONObject clientIdAndSecretJson = (JSONObject) parser.parse(responseBody.toString());
-        clientId = clientIdAndSecretJson.get("clientId").toString();
-        clientSecret = clientIdAndSecretJson.get("clientSecret").toString();
 
         String toEncode = clientId+":"+clientSecret;
-        String encodedIdAndSecret = Base64.encodeBase64String(toEncode.getBytes());
+        String encodedIdAndSecret = Base64.encodeBase64String(toEncode.getBytes("UTF-8"));
 
+        System.out.println("Response code of :");
+        System.out.println(response.getStatusLine().getStatusCode());
+        LOGGER.info("Returning the encoded clientId and clientSecret");
         return encodedIdAndSecret;
-
     }
 
 
     /*
     * Method name : getAccessToken
-    * Functionality : Obtains the access token with the use of given client ID and client secret
+    * Functionality : Returns the access token obtained using the client Id and client secret.
     * @param : String, String, String
     * @return : String
     * */
-    public String getAccessToken(String email, String organizationKey, String password) throws IOException, ParseException {
+    public String getAccessToken(String email, String organizationKey, String password) throws IOException, ParseException, PluginExecutionException {
 
         String clientIdAndSecret = getClientIdAndSecret(email, organizationKey, password);
         StringEntity authorizationPayload = new StringEntity("scope=apim:api_create&grant_type=password&username="+email+"@ms9714&password="+password);
 
-        httpClient = HttpClients.createDefault();
-        HttpPost accessTokenRequest = new HttpPost(TOKEN_API_URL);
-        accessTokenRequest.setHeader("Authorization","Basic "+clientIdAndSecret);
-        accessTokenRequest.setHeader("Content-Type", "application/x-www-form-urlencoded");
-        accessTokenRequest.setEntity(authorizationPayload);
-
-        response = httpClient.execute(accessTokenRequest);
-
-        //Use this space to handle exceptions
-
-        inDataStream = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-        responseBody = new StringBuffer();
-        String line;
-        while ((line = inDataStream.readLine()) != null) {
-            responseBody.append(line);
-        }
-        httpClient.close();
-
-        parser = new JSONParser();
+        JSONObject accessTokenJson;
         String accessToken;
 
-        JSONObject accessTokenJson = (JSONObject) parser.parse(responseBody.toString());
-        accessToken = accessTokenJson.get("access_token").toString();
+        try {
+            httpClient = HttpClients.createDefault();
+            HttpPost accessTokenRequest = new HttpPost(TOKEN_API_URL);
+            accessTokenRequest.setHeader("Authorization","Basic "+clientIdAndSecret);
+            accessTokenRequest.setHeader("Content-Type", "application/x-www-form-urlencoded");
+            accessTokenRequest.setEntity(authorizationPayload);
 
+            LOGGER.info("Issuing REST call to Token API");
+            response = httpClient.execute(accessTokenRequest);
+
+            if (response.getStatusLine().getStatusCode() == 401) {
+                throw new PluginExecutionException("Unauthorized request, check email, organizationKey, password");
+            } else if (response.getStatusLine().getStatusCode() == 400) {
+                throw new PluginExecutionException("Bad Request, check content");
+            }
+
+            inDataStream = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+            responseBody = new StringBuffer();
+            String line;
+            while ((line = inDataStream.readLine()) != null) {
+                responseBody.append(line);
+            }
+
+            LOGGER.info("Received response");
+
+            parser = new JSONParser();
+            accessTokenJson = (JSONObject) parser.parse(responseBody.toString());
+
+        } catch (IOException e) {
+            throw e;
+        } catch (ParseException e) {
+            throw e;
+        }
+        finally {
+            httpClient.close();
+        }
+
+        accessToken = accessTokenJson.get("access_token").toString();
+        System.out.println("Response code :");
+        System.out.println(response.getStatusLine().getStatusCode());
+        LOGGER.info("Returning the access token");
         return accessToken;
     }
 
-
-
-
-
     /*
     * Method name : saveAPI
-    * Functionality : Creates an API in the api cloud
+    * Functionality : Creates an API in the api cloud and prints the response of the details of the API made.
     * @param : String, String
     * @return : void
     * */
-    public void saveAPI(String swagger, String accessToken) throws IOException {
+    public void saveAPI(String swagger, String accessToken) throws IOException, PluginExecutionException {
 
         StringEntity creationPayload = new StringEntity(swagger);
 
-        httpClient = HttpClients.createDefault();
-        HttpPost createApiRequest = new HttpPost(API_CREATE_CLOUD_URL);
-        createApiRequest.setHeader("Authorization","Bearer "+accessToken);
-        createApiRequest.setHeader("Content-Type","application/json");
-        createApiRequest.setEntity(creationPayload);
+        try {
+            httpClient = HttpClients.createDefault();
+            HttpPost createApiRequest = new HttpPost(API_CREATE_CLOUD_URL);
+            createApiRequest.setHeader("Authorization","Bearer "+accessToken);
+            createApiRequest.setHeader("Content-Type","application/json");
+            createApiRequest.setEntity(creationPayload);
 
-        response = httpClient.execute(createApiRequest);
+            LOGGER.info("Creating the API in the cloud");
+            response = httpClient.execute(createApiRequest);
 
-        //Use this space to handle exceptions
+            if (response.getStatusLine().getStatusCode() == 401) {
+                throw new PluginExecutionException("Unauthorized request");
+            } else if(response.getStatusLine().getStatusCode() == 409) {
+                throw new PluginExecutionException("An API with the same name and the context already exists");
+            }
 
-        inDataStream = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-        responseBody = new StringBuffer();
-        String line;
-        while ((line = inDataStream.readLine()) != null) {
-            responseBody.append(line);
+            inDataStream = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+            responseBody = new StringBuffer();
+            String line;
+            while ((line = inDataStream.readLine()) != null) {
+                responseBody.append(line);
+            }
+
+            LOGGER.info("The API is created in the cloud");
+
+        } catch (IOException e) {
+            throw e;
+        } finally {
+            httpClient.close();
         }
-        httpClient.close();
 
+        System.out.println("Response code :");
+        System.out.println(response.getStatusLine().getStatusCode());
         System.out.println(responseBody.toString());
     }
 }

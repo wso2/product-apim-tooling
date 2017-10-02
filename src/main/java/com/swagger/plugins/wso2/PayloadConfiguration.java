@@ -1,6 +1,7 @@
 package com.swagger.plugins.wso2;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.models.Swagger;
 import io.swagger.util.Json;
@@ -40,7 +41,7 @@ public class PayloadConfiguration {
         String jsonPayload = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(payloadStructure);
     }
 
-    public String configurePayload(String email, String organizationKey, String swaggerDefinition, String context) throws IOException {
+    public String configurePayload(String email, String organizationKey, String swaggerDefinition, String context) throws IOException, PluginExecutionException {
         Swagger swagger = null;
         String[] schemes = {"http","https"};
         String[] defaultTier = {"Unlimited"};
@@ -48,7 +49,13 @@ public class PayloadConfiguration {
 
         //Getting pojo into the method
         PayloadStructure structure = new PayloadStructure();
-        swagger = Json.mapper().readValue(swaggerDefinition, Swagger.class);
+
+
+        try {
+            swagger = Json.mapper().readValue(swaggerDefinition, Swagger.class);
+        } catch (JsonMappingException e) {
+            throw new PluginExecutionException("Swagger definition is invalid or not readable");
+        }
 
         structure.setName(swagger.getInfo().getTitle());
         structure.setVersion(swagger.getInfo().getVersion());
