@@ -59,3 +59,4 @@ const LogPrefixError = "[ERROR]: "
 
 // Other
 const DefaultTokenValidityPeriod string = "3600"
+const DefaultHttpRequestTimeout string = "unlimited"

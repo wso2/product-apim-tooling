@@ -77,7 +77,7 @@ func ImportAPI(name string, url string, accessToken string) (*http.Response, err
 	}
 	url += "import/apis"
 
-	filePath := utils.ExportedAPIsDirectoryPath + utils.PathSeparator_ + name
+	filePath := utils.ExportDirectory + utils.PathSeparator_ + name
 	fmt.Println("filePath:", filePath)
 
 	// check if '.zip' exists in the input 'name'

@@ -23,7 +23,8 @@ import (
 	"reflect"
 	"os"
 	"io/ioutil"
-	"fmt"
+	"strings"
+	"strconv"
 )
 
 var HttpRequestTimeout int = 2500
@@ -31,34 +32,42 @@ var SkipTLSVerification bool = true
 var ExportDirectory string
 
 
-func SetConfigVars() (error){
-	mainConfig := GetMainConfigFromFile(MainConfigFilePath)
-	fmt.Println("httprequesttimeout:", mainConfig.Config.HttpRequestTimeout)
-	fmt.Println("skiptlsverification:", mainConfig.Config.SkipTLSVerification)
-	fmt.Println("exportdirectory:", mainConfig.Config.ExportDirectory)
+func SetConfigVars(mainConfigFilePath string) (error){
+	mainConfig := GetMainConfigFromFile(mainConfigFilePath)
+	Logln(LogPrefixInfo + " reading '" + mainConfigFilePath + "'")
 
 	// validate config vars
 	if reflect.ValueOf(mainConfig.Config.HttpRequestTimeout).Kind() != reflect.Int {
+		// value of httpRequestTimeout is not an int
+		Logln(LogPrefixError + "value of HttpRequestTimeout in '" + mainConfigFilePath + "' is not an integer")
 		return errors.New("invalid value for HttpRequestTimeout. Should be an integer")
 	}
 	if !(mainConfig.Config.HttpRequestTimeout >= 0)  {
-		return errors.New("invalid HttpRequestTimeout")
+		Logln(LogPrefixWarning + "value of HttpRequestTimeout in '" + mainConfigFilePath + "' is less than zero")
+		Logln(LogPrefixInfo + " setting HttpRequestTimeout to " + DefaultHttpRequestTimeout)
+		// default it unlimited
 	}
 	if reflect.ValueOf(mainConfig.Config.SkipTLSVerification).Kind() != reflect.Bool {
+		// value of SkipTLSVerification is not a boolean
 		return errors.New("invalid value for SkipTLSVerification. Should be true/false")
 	}
-	fmt.Println("Test 5")
-	if mainConfig.Config.ExportDirectory == "" || len(mainConfig.Config.ExportDirectory) == 0{
-		errors.New("exportDirectory cannot be blank")
+	if strings.TrimSpace(mainConfig.Config.ExportDirectory) == "" ||
+		len(strings.TrimSpace(mainConfig.Config.ExportDirectory)) == 0{
+		return errors.New("exportDirectory cannot be blank")
 	}
 	if !IsValid(mainConfig.Config.ExportDirectory) {
-		errors.New("export Directory path in valid or the user doesn't have necessary privileges")
+		Logln(LogPrefixWarning + "export Directory path invalid or the user doesn't have necessary privileges")
+
 	}
 
-
 	HttpRequestTimeout = mainConfig.Config.HttpRequestTimeout
+	Logln(LogPrefixInfo + "Setting HttpTimeoutRequest to " + string(mainConfig.Config.HttpRequestTimeout))
+
 	SkipTLSVerification = mainConfig.Config.SkipTLSVerification
+	Logln(LogPrefixInfo + "Setting SkipTLSVerification to " + strconv.FormatBool(mainConfig.Config.SkipTLSVerification))
+
 	ExportDirectory = mainConfig.Config.ExportDirectory
+	Logln(LogPrefixInfo + "Setting ExportDirectory " + mainConfig.Config.ExportDirectory)
 
 	return nil
 }

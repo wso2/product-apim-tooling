@@ -68,7 +68,7 @@ func init() {
 	RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 	// Init ConfigVars
-	err := utils.SetConfigVars()
+	err := utils.SetConfigVars(utils.MainConfigFilePath)
 	if err != nil {
 		utils.HandleErrorAndExit("Error reading " + utils.MainConfigFilePath + ".", err)
 	}
