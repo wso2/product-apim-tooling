@@ -123,7 +123,7 @@ public class Wso2Api {
     public String getAccessToken(String email, String organizationKey, String password) throws IOException, ParseException, PluginExecutionException {
 
         String clientIdAndSecret = getClientIdAndSecret(email, organizationKey, password);
-        StringEntity authorizationPayload = new StringEntity("scope=apim:api_create&grant_type=password&username="+email+"@ms9714&password="+password);
+        StringEntity authorizationPayload = new StringEntity("scope=apim:api_create&grant_type=password&username="+email+"@"+organizationKey+"&password="+password);
 
         JSONObject accessTokenJson;
         String accessToken;

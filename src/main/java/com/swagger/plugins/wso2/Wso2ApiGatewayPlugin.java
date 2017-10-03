@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.List;
 
 
 /*****************************************************************
@@ -24,6 +23,12 @@ import java.util.List;
 public class Wso2ApiGatewayPlugin {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Wso2ApiGatewayPlugin.class);
+    private static final String WSO2_API_ID_EXTENSION = "x-wso2-api-id";
+    private String userEmail;
+    private String userPassword;
+    private String userOrganizationKey;
+    private String apiId;
+    private String apiVersion;
     private String accessToken;
 
     /*
@@ -54,11 +59,11 @@ public class Wso2ApiGatewayPlugin {
     * @param : String
     * @return : void
     * */
-    public void afterApiVersionSaved(String email, String organizationKey, String password, String swaggerDefinition, String context) throws IOException, ParseException, PluginExecutionException {
+    public void afterApiVersionSaved(String email, String organizationKey, String password, String swaggerDefinition, String version, String context) throws IOException, ParseException, PluginExecutionException {
 
         PayloadConfiguration configuration = new PayloadConfiguration();
 
-        String pa = configuration.configurePayload(email, organizationKey, swaggerDefinition, context);
+        String pa = configuration.configurePayload(email, organizationKey, swaggerDefinition, version, context);
 
         Wso2Api api = new Wso2Api();
         accessToken = api.getAccessToken(email,organizationKey,password);
