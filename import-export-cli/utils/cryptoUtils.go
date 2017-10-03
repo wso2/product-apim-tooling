@@ -14,19 +14,19 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package utils
 
 import (
 	"crypto/aes"
-	"io"
 	"crypto/cipher"
-	"fmt"
+	"crypto/md5"
 	"crypto/rand"
 	"encoding/base64"
-	"crypto/md5"
 	"encoding/hex"
+	"fmt"
+	"io"
 )
 
 // Returns md5 hash of a given string

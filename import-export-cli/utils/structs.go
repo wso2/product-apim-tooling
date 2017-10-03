@@ -14,7 +14,7 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package utils
 
@@ -29,14 +29,14 @@ type EnvKeysAll struct {
 // For main_config.yaml
 // To be manually edited by the user
 type MainConfig struct {
-	Config Config `yaml:"config"`
+	Config       Config                  `yaml:"config"`
 	Environments map[string]EnvEndpoints `yaml:"environments"`
 }
 
 type Config struct {
-	HttpRequestTimeout int `yaml:"http_request_timeout"`
-	SkipTLSVerification bool `yaml:"skip_tls_verification"`
-	ExportDirectory string `yaml:"export_directory"`
+	HttpRequestTimeout  int    `yaml:"http_request_timeout"`
+	SkipTLSVerification bool   `yaml:"skip_tls_verification"`
+	ExportDirectory     string `yaml:"export_directory"`
 }
 
 type EnvKeys struct {
@@ -71,10 +71,10 @@ type RegistrationResponse struct {
 }
 
 type TokenResponse struct {
-	AccessToken string `json:"access_token"`
+	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
-	TokenType string `json:"token_type"`
-	ExpiresIn int32 `json:"expires_in"`
+	TokenType    string `json:"token_type"`
+	ExpiresIn    int32  `json:"expires_in"`
 }
 
 type APIListResponse struct {

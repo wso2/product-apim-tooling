@@ -14,16 +14,16 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package utils
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/go-resty/resty"
-	"bufio"
-	"os"
 	"golang.org/x/crypto/ssh/terminal"
+	"os"
 	"time"
 )
 
@@ -51,5 +51,3 @@ func PromptForPassword() string {
 	fmt.Println()
 	return password
 }
-
-

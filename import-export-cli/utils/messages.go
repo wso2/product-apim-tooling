@@ -14,7 +14,7 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package utils
 
@@ -39,12 +39,12 @@ var RootCmdLongDesc string = dedent.Dedent(`
 		`)
 
 // Init command related usage info
-const InitCmdShortDesc string = "Initialize " +ProjectName+" with your WSO2 credentials"
+const InitCmdShortDesc string = "Initialize " + ProjectName + " with your WSO2 credentials"
 
 var InitCmdLongDesc = dedent.Dedent(`
-		Initialize `+ProjectName+` with your WSO2 credentials
+		Initialize ` + ProjectName + ` with your WSO2 credentials
 
-		You need a WSO2 account to start using `+ProjectName+`.
+		You need a WSO2 account to start using ` + ProjectName + `.
 		Don't have one yet? Sign up at https://wso2.com/user/register
 		`)
 
@@ -70,8 +70,8 @@ var ImportAPICmdLongDesc string = "Import an API to an environment"
 
 var ImportAPICmdExamples = dedent.Dedent(`
 		Examples:
-		`+ProjectName+` importAPI -n TwitterAPI -v 1.0.0 -e dev
-		`+ProjectName+` importAPI -n FacebookAPI -v 2.1.0 -e production
+		` + ProjectName + ` importAPI -n TwitterAPI -v 1.0.0 -e dev
+		` + ProjectName + ` importAPI -n FacebookAPI -v 2.1.0 -e production
 	`)
 
 // ExportAPI command related usage info
@@ -81,8 +81,8 @@ var ExportAPICmdLongDesc string = "Export an API from an environment"
 
 var ExportAPICmdExamples = dedent.Dedent(`
 		Examples:
-		`+ProjectName+` exportAPI -n TwitterAPI -v 1.0.0 -e dev
-		`+ProjectName+` exportAPI -n FacebookAPI -v 2.1.0 -e production
+		` + ProjectName + ` exportAPI -n TwitterAPI -v 1.0.0 -e dev
+		` + ProjectName + ` exportAPI -n FacebookAPI -v 2.1.0 -e production
 	`)
 
 // List command related usage Info
@@ -95,8 +95,8 @@ var ListCmdLongDesc string = dedent.Dedent(`
 
 var ListCmdExamples = dedent.Dedent(`
 		Examples:
-		`+ProjectName+` list -e dev
-		`+ProjectName+` list -e staging
+		` + ProjectName + ` list -e dev
+		` + ProjectName + ` list -e staging
 	`)
 
 // ResetUser command related usage Info
@@ -109,8 +109,8 @@ var ResetUserCmdLongDesc = dedent.Dedent(`
 
 var ResetUserCmdExamples = dedent.Dedent(`
 		Examples:
-		`+ProjectName+` reset-user -e dev
-		`+ProjectName+` reset-user -e staging
+		` + ProjectName + ` reset-user -e dev
+		` + ProjectName + ` reset-user -e staging
 		`)
 
 // AddEnv command related Info

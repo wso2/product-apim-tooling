@@ -14,25 +14,24 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package utils
 
 import (
 	"errors"
-	"reflect"
-	"os"
 	"io/ioutil"
-	"strings"
+	"os"
+	"reflect"
 	"strconv"
+	"strings"
 )
 
 var HttpRequestTimeout int = 2500
 var SkipTLSVerification bool = true
 var ExportDirectory string
 
-
-func SetConfigVars(mainConfigFilePath string) (error){
+func SetConfigVars(mainConfigFilePath string) error {
 	mainConfig := GetMainConfigFromFile(mainConfigFilePath)
 	Logln(LogPrefixInfo + " reading '" + mainConfigFilePath + "'")
 
@@ -42,7 +41,7 @@ func SetConfigVars(mainConfigFilePath string) (error){
 		Logln(LogPrefixError + "value of HttpRequestTimeout in '" + mainConfigFilePath + "' is not an integer")
 		return errors.New("invalid value for HttpRequestTimeout. Should be an integer")
 	}
-	if !(mainConfig.Config.HttpRequestTimeout >= 0)  {
+	if !(mainConfig.Config.HttpRequestTimeout >= 0) {
 		Logln(LogPrefixWarning + "value of HttpRequestTimeout in '" + mainConfigFilePath + "' is less than zero")
 		Logln(LogPrefixInfo + " setting HttpRequestTimeout to " + DefaultHttpRequestTimeout)
 		// default it unlimited
@@ -52,7 +51,7 @@ func SetConfigVars(mainConfigFilePath string) (error){
 		return errors.New("invalid value for SkipTLSVerification. Should be true/false")
 	}
 	if strings.TrimSpace(mainConfig.Config.ExportDirectory) == "" ||
-		len(strings.TrimSpace(mainConfig.Config.ExportDirectory)) == 0{
+		len(strings.TrimSpace(mainConfig.Config.ExportDirectory)) == 0 {
 		return errors.New("exportDirectory cannot be blank")
 	}
 	if !IsValid(mainConfig.Config.ExportDirectory) {
@@ -88,4 +87,3 @@ func IsValid(fp string) bool {
 
 	return false
 }
-

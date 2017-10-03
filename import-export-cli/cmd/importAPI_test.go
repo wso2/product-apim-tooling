@@ -14,17 +14,17 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package cmd
 
 import (
-	"testing"
-	"net/http/httptest"
 	"github.com/renstrom/dedent"
-	"net/http"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"net/http"
+	"net/http/httptest"
 	"strings"
+	"testing"
 )
 
 func TestImportAPI(t *testing.T) {
@@ -77,7 +77,7 @@ func TestNewFileUploadRequest(t *testing.T) {
 	defer server.Close()
 
 	extraParams := map[string]string{}
-	filePath := utils.ExportedAPIsDirectoryPath  + utils.PathSeparator_+ "sampleapi.zip"
+	filePath := utils.ExportedAPIsDirectoryPath + utils.PathSeparator_ + "sampleapi.zip"
 	accessToken := "access-token"
 	_, err := NewFileUploadRequest(server.URL, extraParams, "file", filePath, accessToken)
 	if err != nil {

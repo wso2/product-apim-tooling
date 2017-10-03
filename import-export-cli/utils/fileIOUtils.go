@@ -14,15 +14,15 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package utils
 
 import (
-	"gopkg.in/yaml.v2"
 	"errors"
-	"io/ioutil"
 	"fmt"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
 	"os"
 )
 

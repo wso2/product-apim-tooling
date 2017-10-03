@@ -19,10 +19,10 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"errors"
 	"fmt"
+	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 var flagRemoveEnvName string // name of the environment to be removed

@@ -111,13 +111,13 @@ func ImportAPI(name string, url string, accessToken string) (*http.Response, err
 		tr = &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		}
-	}else{
+	} else {
 		tr = &http.Transport{}
 	}
 
 	client := &http.Client{
 		Transport: tr,
-		Timeout: time.Duration(utils.HttpRequestTimeout) * time.Second,
+		Timeout:   time.Duration(utils.HttpRequestTimeout) * time.Second,
 	}
 
 	resp, err := client.Do(req)
@@ -139,7 +139,7 @@ func ImportAPI(name string, url string, accessToken string) (*http.Response, err
 // Helper function for forming multi-part form data
 // Returns the formed http request and errors
 func NewFileUploadRequest(uri string, params map[string]string, paramName, path string,
-	accessToken string) (*http.Request,error) {
+	accessToken string) (*http.Request, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err

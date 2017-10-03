@@ -14,18 +14,18 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package cmd
 
 import (
-	"testing"
-	"net/http/httptest"
-	"net/http"
 	"fmt"
-	"strings"
 	"github.com/renstrom/dedent"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
 )
 
 func TestGetAPIListOK(t *testing.T) {
@@ -79,7 +79,7 @@ func TestGetAPIListOK(t *testing.T) {
 	]
 			}`)
 
-	w.Write([]byte(body))
+		w.Write([]byte(body))
 	}))
 	defer server.Close()
 
@@ -88,7 +88,7 @@ func TestGetAPIListOK(t *testing.T) {
 	fmt.Println("List:", apiList)
 
 	if count != 3 {
-		t.Errorf("Incorrect count. Exptected %d, got %d\n" , 3, count)
+		t.Errorf("Incorrect count. Exptected %d, got %d\n", 3, count)
 	}
 
 	if err != nil {
@@ -108,7 +108,7 @@ func TestGetAPIListUnreachable(t *testing.T) {
 		//}
 	}))
 	defer server.Close()
-	
+
 	count, list, err := GetAPIList("", "access_token", server.URL)
 	if count != 0 {
 		t.Errorf("Incorrect Count. Expected %d, got %d\n", 0, count)

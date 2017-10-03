@@ -14,23 +14,25 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 // +integration
 package utils
 
 import (
-	"testing"
-	"os"
 	"io/ioutil"
+	"os"
+	"testing"
 )
 
 const testKeysFileName string = "test_keys_config.yaml"
 const testMainConfigFileName string = "test_main_config.yaml"
 const testKeysFilePath string = ApplicationRoot + PathSeparator_ + testKeysFileName
 const testMainConfigFilePath string = ApplicationRoot + PathSeparator_ + testMainConfigFileName
+
 var envKeysAll *EnvKeysAll = new(EnvKeysAll)
 var mainConfig *MainConfig = new(MainConfig)
+
 const devName string = "dev"
 const qaName string = "qa"
 const devUsername string = "dev_username"
@@ -38,9 +40,8 @@ const qaUsername string = "qa_username"
 const devPassword string = "dev_password"
 const qaPassword string = "qa_password"
 
-
 // helper function for testing
-func writeCorrectKeys(){
+func writeCorrectKeys() {
 	initSampleKeys()
 	WriteConfigFile(envKeysAll, testKeysFilePath)
 }
@@ -89,7 +90,7 @@ func TestGetEnvKeysAllFromFile1(t *testing.T) {
 	envKeysAllReturned := GetEnvKeysAllFromFile(testKeysFilePath)
 
 	if envKeysAllReturned.Environments[devName] != envKeysAll.Environments[devName] ||
-		 envKeysAllReturned.Environments[qaName] != envKeysAll.Environments[qaName] {
+		envKeysAllReturned.Environments[qaName] != envKeysAll.Environments[qaName] {
 		t.Errorf("Error in GetEnvKeysAllFromFile()")
 	}
 
@@ -166,4 +167,3 @@ func TestEnvKeysAll_ParseEnvKeysFromFile(t *testing.T) {
 		t.Errorf("Error deleting file " + testKeysFilePath)
 	}
 }
-

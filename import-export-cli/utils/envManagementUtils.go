@@ -14,7 +14,7 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package utils
 
@@ -66,7 +66,7 @@ func AddNewEnvToKeysFile(name string, envKeys EnvKeys, filePath string) {
 	WriteConfigFile(envKeysAll, filePath)
 }
 
-func RemoveEnvFromKeysFile(env string, keysFilePath string, endpointsFilePath string) (error) {
+func RemoveEnvFromKeysFile(env string, keysFilePath string, endpointsFilePath string) error {
 	if env == "" {
 		return errors.New("environment cannot be blank")
 	}

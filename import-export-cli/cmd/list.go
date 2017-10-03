@@ -14,7 +14,7 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package cmd
 
@@ -23,10 +23,10 @@ import (
 
 	"crypto/tls"
 	"encoding/json"
-	"github.com/go-resty/resty"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"github.com/spf13/cobra"
 	"errors"
+	"github.com/go-resty/resty"
+	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 var listEnvironment string
@@ -42,7 +42,7 @@ var ListCmd = &cobra.Command{
 		utils.Logln("list called")
 
 		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(listEnvironment, listCmdUsername,
-listCmdPassword)
+			listCmdPassword)
 
 		if preCommandErr == nil {
 			count, apis, err := GetAPIList("", accessToken, apiManagerEndpoint)
@@ -53,10 +53,10 @@ listCmdPassword)
 					fmt.Println(api.Name + " v" + api.Version)
 				}
 			} else {
-				utils.Logln(utils.LogPrefixError + "Getting List of APIs", err)
+				utils.Logln(utils.LogPrefixError+"Getting List of APIs", err)
 			}
 		} else {
-			utils.Logln(utils.LogPrefixError + "calling 'list' "+ preCommandErr.Error())
+			utils.Logln(utils.LogPrefixError + "calling 'list' " + preCommandErr.Error())
 			fmt.Println("Error calling 'list'", preCommandErr.Error())
 		}
 	},
@@ -81,10 +81,10 @@ func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (in
 		Get(url)
 
 	if err != nil {
-		utils.HandleErrorAndExit("Unable to connect to " + url, err)
+		utils.HandleErrorAndExit("Unable to connect to "+url, err)
 	}
 
-	utils.Logln(utils.LogPrefixInfo + "GetAPIList(): Response:", resp.Status())
+	utils.Logln(utils.LogPrefixInfo+"GetAPIList(): Response:", resp.Status())
 
 	if resp.StatusCode() == 200 {
 		apiListResponse := &utils.APIListResponse{}
@@ -92,7 +92,7 @@ func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (in
 
 		if unmarshalError != nil {
 			fmt.Println("UnmarshalError")
-			utils.HandleErrorAndExit(utils.LogPrefixError + "Unmarshall Error", unmarshalError)
+			utils.HandleErrorAndExit(utils.LogPrefixError+"Unmarshall Error", unmarshalError)
 		}
 
 		return apiListResponse.Count, apiListResponse.List, nil

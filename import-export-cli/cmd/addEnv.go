@@ -19,10 +19,10 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"errors"
 	"fmt"
+	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 var flagAddEnvName string           // name of the environment to be added
@@ -60,8 +60,8 @@ func addEnv(envName string, apimEndpoint string, regEndpoint string, tokenEndpoi
 		return errors.New("environment '" + envName + "' already exists in " + utils.MainConfigFilePath)
 	}
 
-	var envEndpoints utils.EnvEndpoints = utils.EnvEndpoints{APIManagerEndpoint:apimEndpoint,
-			TokenEndpoint:tokenEndpoint, RegistrationEndpoint:regEndpoint}
+	var envEndpoints utils.EnvEndpoints = utils.EnvEndpoints{APIManagerEndpoint: apimEndpoint,
+		TokenEndpoint: tokenEndpoint, RegistrationEndpoint: regEndpoint}
 
 	mainConfig.Environments[envName] = envEndpoints
 	utils.WriteConfigFile(mainConfig, utils.MainConfigFilePath)

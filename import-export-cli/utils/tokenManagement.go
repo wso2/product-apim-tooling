@@ -14,20 +14,20 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package utils
 
 import (
-	"github.com/go-resty/resty"
 	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/go-resty/resty"
+	"net/http"
 	"os"
 	"strings"
-	"errors"
-	"net/http"
 )
 
 // Returns the AccessToken, APIManagerEndpoint, Errors given an Environment
@@ -152,7 +152,6 @@ func GetClientIDSecret(username string, password string, url string) (string, st
 
 	headers[HeaderAuthorization] = HeaderValueAuthBasicPrefix + " " + GetBase64EncodedCredentials(username, password)
 	// headers["Authorization"] = "Basic " + GetBase64EncodedCredentials(username, password)
-
 
 	if SkipTLSVerification {
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTPS certificates

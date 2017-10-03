@@ -14,7 +14,7 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package utils
 
@@ -23,7 +23,7 @@ import (
 	"os"
 )
 
-func ZipDir(source, target string) (error){
+func ZipDir(source, target string) error {
 	err := os.Chdir(source)
 	if err == nil {
 		Logln(LogPrefixInfo + "Directory " + source + " exists")
@@ -34,7 +34,7 @@ func ZipDir(source, target string) (error){
 		zip.Close()
 		Logln(LogPrefixInfo + "Compression completed: Find file " + target)
 		return nil
-	}else{
+	} else {
 		Logln(LogPrefixError + "Compressing " + source)
 		return err
 	}

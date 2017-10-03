@@ -14,13 +14,13 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package utils
 
 import (
-	"testing"
 	"os"
+	"testing"
 )
 
 func TestEnvExistsInKeysFile(t *testing.T) {

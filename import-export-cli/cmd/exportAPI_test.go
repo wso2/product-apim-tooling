@@ -14,18 +14,18 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package cmd
 
 import (
 	"testing"
 
-	"net/http/httptest"
-	"net/http"
+	"fmt"
 	"github.com/renstrom/dedent"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"fmt"
+	"net/http"
+	"net/http/httptest"
 )
 
 func TestExportAPI(t *testing.T) {

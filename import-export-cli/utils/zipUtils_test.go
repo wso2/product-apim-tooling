@@ -14,13 +14,13 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package utils
 
 import (
-	"testing"
 	"os"
+	"testing"
 )
 
 func TestZipDirError(t *testing.T) {
@@ -86,7 +86,7 @@ func TestZipDirOK(t *testing.T) {
 		t.Errorf("Error saving file: %s\n", err)
 	}
 
-	zipFile := directoryPath + PathSeparator_ +"testZip.zip"
+	zipFile := directoryPath + PathSeparator_ + "testZip.zip"
 
 	// now try compressing
 	err = ZipDir(directoryPath, zipFile)

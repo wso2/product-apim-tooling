@@ -14,7 +14,7 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package utils
 
@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"os"
 )
-
 
 func HandleErrorAndExit(msg string, err error) {
 	if err == nil {
@@ -34,7 +33,7 @@ func HandleErrorAndExit(msg string, err error) {
 	defer printAndExit()
 }
 
-func printAndExit(){
+func printAndExit() {
 	fmt.Println("Exiting...")
 	os.Exit(1)
 }
