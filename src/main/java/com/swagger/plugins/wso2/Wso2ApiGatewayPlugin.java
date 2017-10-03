@@ -1,11 +1,6 @@
 package com.swagger.plugins.wso2;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.models.Scheme;
 import io.swagger.models.Swagger;
-import io.swagger.parser.SwaggerParser;
 import io.swagger.util.*;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
@@ -29,44 +24,77 @@ public class Wso2ApiGatewayPlugin {
     private String userOrganizationKey;
     private String apiId;
     private String apiVersion;
-    private String accessToken;
-
-    /*
-    * Trigger before an API is saved.
-    * */
-//    public String beforeApiVersionSaved(String swaggerYaml) throws Exception {
-//        Swagger swagger = null;
-//
-//        try {
-//            LOGGER.info("Convert swaggerYaml to a POJO");
-//            swagger = Json.mapper().readValue(convertYamlToJson(swaggerYaml), Swagger.class);
-//            if (swagger == null) {
-//                throw new Exception();
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            LOGGER.warn("swagger object is null");
-//        }
-//
-//        return null;
-//
-//    }
+    private String context;
 
 
-    /*
-    * Method name : afterApiVersionSaved
-    * Functionality : Sets the essential values of the swagger definition elements to payload elements
-    * @param : String
-    * @return : void
-    * */
-    public void afterApiVersionSaved(String email, String organizationKey, String password, String swaggerDefinition, String version, String context) throws IOException, ParseException, PluginExecutionException {
+    /**
+     * This method is triggered before saving the API to ensure whether a valid identifier exists.
+     * @param triggeredByUUID
+     * @param objectPath
+     * @param swaggerYaml Contains the swagger definition
+     * @param forceUpdate
+     * @param isPrivate
+     * @return Returns the swaggerYaml after ensuring a valid api identifier exists
+     * @throws PluginExecutionException
+     */
+
+    //@Override
+    public String beforeApiVersionSaved(String triggeredByUUID, String objectPath, String swaggerYaml,
+                                        Boolean forceUpdate,/*Collection<SpecEntry> links,*/
+                                        Boolean isPrivate) throws PluginExecutionException {
+        Swagger swagger;
+
+        try {
+            swagger = Json.mapper().readValue(PayloadConfiguration.convertYamlToJson(swaggerYaml), Swagger.class);
+            if (swagger == null) {
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            throw  new PluginExecutionException("Swagger definition is invalid or not readable");
+        }
+        return "";
+    }
+
+    /**
+     * Perform the deployment to WSO2 API cloud during the SAVE operation.
+     * @param swaggerYaml
+     * @throws PluginExecutionException
+     * @throws IOException
+     * @throws ParseException
+     */
+
+    //@Override
+    public void afterApiVersionSaved(/*String triggeredByUUID, String objectPath, */String swaggerYaml)
+            throws PluginExecutionException, IOException, ParseException {
 
         PayloadConfiguration configuration = new PayloadConfiguration();
+        configure();
+        String creationPayload = configuration.configurePayload(userEmail, userOrganizationKey, swaggerYaml,
+                apiVersion, context);
 
-        String pa = configuration.configurePayload(email, organizationKey, swaggerDefinition, version, context);
 
         Wso2Api api = new Wso2Api();
-        accessToken = api.getAccessToken(email,organizationKey,password);
-        api.saveAPI(pa,accessToken);
+        String accessToken;
+
+        accessToken = api.getAccessToken(userEmail, userOrganizationKey, userPassword);
+        api.saveAPI(creationPayload, accessToken);
     }
+
+    /**
+     * Called when triggering the Plugin.  The `config` value will be supplied and populated with all
+     * `required` values from the configurationSchema, and any optional values specified by the user
+     * in the integrations interface.
+     */
+
+    //@Override
+    public void configure() {
+        this.userEmail = "yolom@seekjobs4u.com";
+        this.userOrganizationKey = "yolo4958";
+        this.userPassword = "Yolofernando123";
+        this.context = "pet";
+        this.apiVersion = "1.0.0";
+    }
+
+
+
 }

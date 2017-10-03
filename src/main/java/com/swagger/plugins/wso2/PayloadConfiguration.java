@@ -2,10 +2,13 @@ package com.swagger.plugins.wso2;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.models.Info;
 import io.swagger.models.Swagger;
+import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
+import io.swagger.util.Yaml;
 import org.apache.http.entity.StringEntity;
 
 import java.io.IOException;
@@ -19,61 +22,48 @@ import java.io.IOException;
  * ****************************************************************/
 public class PayloadConfiguration {
 
-    ObjectMapper mapper;
-
-    /*
-    * Method name : payloadToPojo
-    * Functionality : Converts the string payload to a java pojo
-    * @param : String
-    * @return : void
-    * */
-    public void payloadToPojo(String payload) throws IOException {
-        mapper = new ObjectMapper();
-        PayloadStructure structure = mapper.readValue(payload, PayloadStructure.class);
-    }
-
-    /*
-    * Method name : pojoToPayload
-    * Functionality : Converts java pojo to a json
-    * @param : PayloadStructure
-    * @return : void
-    * */
-    public void pojoToPayload(PayloadStructure payloadStructure) throws JsonProcessingException {
-        mapper = new ObjectMapper();
-        String jsonPayload = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(payloadStructure);
-    }
-
-    public String configurePayload(String email, String organizationKey, String swaggerDefinition, String version, String context) throws IOException, PluginExecutionException {
-        Swagger swagger;
-        String[] schemes = {"http","https"};
-        String[] defaultTier = {"Unlimited"};
-        ObjectMapper objectMapper = new ObjectMapper();
+    /**
+     * Configures the paylod to create an API in the cloud setting relevant values from the swagger definition.
+     * @param email
+     * @param organizationKey
+     * @param swaggerYaml
+     * @param version
+     * @param context
+     * @return Returns the configured payload
+     * @throws PluginExecutionException
+     */
+    public String configurePayload(String email, String organizationKey, String swaggerYaml, String version,
+                                   String context) throws PluginExecutionException {
 
         //Getting pojo into the method
         PayloadStructure structure = new PayloadStructure();
-
+        ObjectMapper objectMapper;
+        Swagger swagger;
+        String payload;
+        String[] schemes = {"http","https"};
+        String[] defaultTier = {"Unlimited"};
 
         try {
-            swagger = Json.mapper().readValue(swaggerDefinition, Swagger.class);
-        } catch (JsonMappingException e) {
+            objectMapper = new ObjectMapper();
+            swagger = Json.mapper().readValue(convertYamlToJson(swaggerYaml), Swagger.class);
+        } catch (Exception e) {
             throw new PluginExecutionException("Swagger definition is invalid or not readable");
         }
 
-        //Values to add
-        swagger.setBasePath(context);
+        //Setting relevant values to pojo using swagger object.
 
         Info info = new Info();
+        //Storing the API name in a variable as it cannot be overridden.
         String name = swagger.getInfo().getTitle();
         swagger.setInfo(info.title(name));
-//        String ver = swagger.getInfo().getVersion();
         swagger.setInfo(info.version(version));
-//        System.out.println(swagger.getInfo().getVersion());
+        swagger.setBasePath(context);
 
         structure.setName(swagger.getInfo().getTitle());
         structure.setVersion(swagger.getInfo().getVersion());
         structure.setContext(swagger.getBasePath());
         structure.setProvider(email+"@"+organizationKey);
-        structure.setApiDefinition(swaggerDefinition);
+        structure.setApiDefinition(convertYamlToJson(swaggerYaml));
         structure.setIsDefaultVersion(false);
         structure.setTransport(schemes);
         structure.setTiers(defaultTier);
@@ -83,9 +73,30 @@ public class PayloadConfiguration {
         structure.setCorsConfiguration(configuration);
 
         //Converting the pojo to json
-        String payload = objectMapper.writeValueAsString(structure);
-        System.out.println(payload);
+        try {
+            payload = objectMapper.writeValueAsString(structure);
+        } catch (JsonProcessingException e) {
+            throw new PluginExecutionException("Error when converting pojo to json");
+        }
         return payload;
+    }
+
+    /**
+     * Converts a Yaml to Json
+     * @param swaggerYaml
+     * @return Returns the json string of the yaml
+     */
+    public static String convertYamlToJson(String swaggerYaml) {
+        Swagger swagger = null;
+        try {
+            JsonNode node = Yaml.mapper().readValue(swaggerYaml, JsonNode.class);
+            swagger = new SwaggerParser().read(node);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String json =  Json.pretty(swagger);
+        return json;
+
     }
 
 }

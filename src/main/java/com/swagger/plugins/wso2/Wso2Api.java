@@ -27,7 +27,8 @@ public class Wso2Api {
     private Logger LOGGER = LoggerFactory.getLogger(Wso2Api.class);
 
     private static final String API_CREATE_CLOUD_URL = "https://api.cloud.wso2.com/api/am/publisher/v0.11/apis";
-    private static final String DYNAMIC_CLIENT_REGISTRATION_URL = "https://api.cloud.wso2.com/client-registration/v0.11/register";
+    private static final String DYNAMIC_CLIENT_REGISTRATION_URL = "https://api.cloud.wso2.com/client-registration/" +
+                                                                  "v0.11/register";
     private static final String TOKEN_API_URL = "https://gateway.api.cloud.wso2.com/token";
 
     private CloseableHttpClient httpClient;
@@ -48,13 +49,18 @@ public class Wso2Api {
                 "}";
     }
 
-    /*
-    * Method name : getClientIdAndSecret
-    * Functionality : Returns the Base64 encoded string of the format (clientId:clientSecret) for a given email, organization key and password.
-    * @param : String, String, String
-    * @return : String
-    * */
-    public String getClientIdAndSecret(String email, String organizationKey, String password) throws IOException, ParseException, PluginExecutionException {
+    /**
+     * Returns the Base64 encoded string of the format (clientId:clientSecret) for a given email organization key
+     * and password.
+     * @param email
+     * @param organizationKey
+     * @param password
+     * @return Returns the Base64 encoded string of the format [clientId:clientSeret]
+     * @throws ParseException
+     * @throws PluginExecutionException
+     */
+    public String getClientIdAndSecret(String email, String organizationKey, String password) throws IOException,
+            ParseException, PluginExecutionException {
 
         String encodeString = email + "@" + organizationKey + ":" + password;
         String encodedString = Base64.encodeBase64String(encodeString.getBytes("UTF-8"));
@@ -107,23 +113,27 @@ public class Wso2Api {
         String toEncode = clientId+":"+clientSecret;
         String encodedIdAndSecret = Base64.encodeBase64String(toEncode.getBytes("UTF-8"));
 
-        System.out.println("Response code of :");
-        System.out.println(response.getStatusLine().getStatusCode());
         LOGGER.info("Returning the encoded clientId and clientSecret");
         return encodedIdAndSecret;
     }
 
 
-    /*
-    * Method name : getAccessToken
-    * Functionality : Returns the access token obtained using the client Id and client secret.
-    * @param : String, String, String
-    * @return : String
-    * */
-    public String getAccessToken(String email, String organizationKey, String password) throws IOException, ParseException, PluginExecutionException {
+    /**
+     * Returns the access token obtained using the client Id and client secret.
+     * @param email
+     * @param organizationKey
+     * @param password
+     * @return Returns the access token for creating an API in the cloud
+     * @throws IOException
+     * @throws ParseException
+     * @throws PluginExecutionException
+     */
+    public String getAccessToken(String email, String organizationKey, String password) throws IOException,
+            ParseException, PluginExecutionException {
 
         String clientIdAndSecret = getClientIdAndSecret(email, organizationKey, password);
-        StringEntity authorizationPayload = new StringEntity("scope=apim:api_create&grant_type=password&username="+email+"@"+organizationKey+"&password="+password);
+        StringEntity authorizationPayload = new StringEntity("scope=apim:api_create&grant_type=password&username="+
+                email+"@"+organizationKey+"&password="+password);
 
         JSONObject accessTokenJson;
         String accessToken;
@@ -166,18 +176,17 @@ public class Wso2Api {
         }
 
         accessToken = accessTokenJson.get("access_token").toString();
-        System.out.println("Response code :");
-        System.out.println(response.getStatusLine().getStatusCode());
         LOGGER.info("Returning the access token");
         return accessToken;
     }
 
-    /*
-    * Method name : saveAPI
-    * Functionality : Creates an API in the api cloud and prints the response of the details of the API made.
-    * @param : String, String
-    * @return : void
-    * */
+    /**
+     * Creates an API in the api cloud and prints the response of the details of the API made.
+     * @param swagger
+     * @param accessToken
+     * @throws IOException
+     * @throws PluginExecutionException
+     */
     public void saveAPI(String swagger, String accessToken) throws IOException, PluginExecutionException {
 
         StringEntity creationPayload = new StringEntity(swagger);
@@ -196,6 +205,8 @@ public class Wso2Api {
                 throw new PluginExecutionException("Unauthorized request");
             } else if(response.getStatusLine().getStatusCode() == 409) {
                 throw new PluginExecutionException("An API with the same name and the context already exists");
+            } else if (response.getStatusLine().getStatusCode() == 400) {
+                throw new PluginExecutionException("Bad content");
             }
 
             inDataStream = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
@@ -205,7 +216,9 @@ public class Wso2Api {
                 responseBody.append(line);
             }
 
-            LOGGER.info("The API is created in the cloud");
+            if (response.getStatusLine().getStatusCode() == 201) {
+                LOGGER.info("The API is created in the cloud");
+            }
 
         } catch (IOException e) {
             throw e;
@@ -213,8 +226,6 @@ public class Wso2Api {
             httpClient.close();
         }
 
-        System.out.println("Response code :");
-        System.out.println(response.getStatusLine().getStatusCode());
         System.out.println(responseBody.toString());
     }
 }

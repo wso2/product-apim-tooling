@@ -25,13 +25,20 @@ public class Wso2ApiTest {
 
         CloseableHttpResponse response = Mockito.mock(CloseableHttpResponse.class);
         CloseableHttpClient httpClient = Mockito.mock(CloseableHttpClient.class);
-        HttpPost clientIdAndSecretRequest = new HttpPost("https://api.cloud.wso2.com/client-registration/v0.11/register");
-        clientIdAndSecretRequest.setHeader("Authorization","Basic YWtpbGFhcm9zaGFuYUBob3RtYWlsLmNvbUBtczk3MTQ6QWtpbGFob3RtYWlsMTIz");
+        HttpPost clientIdAndSecretRequest = new HttpPost("https://api.cloud.wso2.com/client-registration/v0.11/" +
+                "register");
+        clientIdAndSecretRequest.setHeader("Authorization","Basic " +
+                "YWtpbGFhcm9zaGFuYUBob3RtYWlsLmNvbUBtczk3MTQ6QWtpbGFob3RtYWlsMTIz");
         clientIdAndSecretRequest.setHeader("Content-Type","application/json");
         clientIdAndSecretRequest.setEntity(authorizationPayload);
         Mockito.when(httpClient.execute(clientIdAndSecretRequest)).thenReturn(response);
 
-        String token = api.getClientIdAndSecret("akilaaroshana@hotmail.com", "ms9714", "Akilahotmail123");
-        Assert.assertEquals("UE03azdsUWZaR05LTXlxdHp0VHJmczRFbEtvYTpxcGRjQlF1X3pVTkhmMmZwSGVjTjBydThocU1h", token);
+        String token = api.getClientIdAndSecret("akilaaroshana@hotmail.com", "ms9714",
+                "Akilahotmail123");
+        Assert.assertEquals("UE03azdsUWZaR05LTXlxdHp0VHJmczRFbEtvYTpxcGRjQlF1X3pVTkhmMmZwSGVjTjBydThocU1h",
+                token);
     }
+
+
+    //Test for apis with same name but with different versions.
 }
