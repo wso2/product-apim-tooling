@@ -2,6 +2,7 @@ package com.swagger.plugins.wso2;
 
 import io.swagger.models.Swagger;
 import io.swagger.util.*;
+import org.apache.commons.lang3.StringUtils;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +53,22 @@ public class Wso2ApiGatewayPlugin {
         } catch (Exception e) {
             throw  new PluginExecutionException("Swagger definition is invalid or not readable");
         }
-        return "";
+
+        if (swagger.getVendorExtensions() == null || swagger.getVendorExtensions().get(WSO2_API_ID_EXTENSION) == null) {
+            if (StringUtils.isBlank(apiId)) {
+                swagger.vendorExtension(WSO2_API_ID_EXTENSION, System.currentTimeMillis());
+            } else {
+              swagger.vendorExtension(WSO2_API_ID_EXTENSION,apiId);
+            }
+        } else {
+            return swaggerYaml;
+        }
+
+        try {
+            return Yaml.mapper().writeValueAsString(swagger);
+        } catch (Exception e) {
+            throw new PluginExecutionException("Swagger definition is invalid or not readable ");
+        }
     }
 
     /**
@@ -70,7 +86,7 @@ public class Wso2ApiGatewayPlugin {
         PayloadConfiguration configuration = new PayloadConfiguration();
         configure();
         String creationPayload = configuration.configurePayload(userEmail, userOrganizationKey, swaggerYaml,
-                apiVersion, context);
+                apiVersion, context, apiId);
 
 
         Wso2Api api = new Wso2Api();
@@ -91,7 +107,7 @@ public class Wso2ApiGatewayPlugin {
         this.userEmail = "yolom@seekjobs4u.com";
         this.userOrganizationKey = "yolo4958";
         this.userPassword = "Yolofernando123";
-        this.context = "pet";
+        this.context = "application";
         this.apiVersion = "1.0.0";
     }
 

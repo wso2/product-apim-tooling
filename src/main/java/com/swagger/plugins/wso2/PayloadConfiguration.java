@@ -33,7 +33,7 @@ public class PayloadConfiguration {
      * @throws PluginExecutionException
      */
     public String configurePayload(String email, String organizationKey, String swaggerYaml, String version,
-                                   String context) throws PluginExecutionException {
+                                   String context, String apiId) throws PluginExecutionException {
 
         //Getting pojo into the method
         PayloadStructure structure = new PayloadStructure();

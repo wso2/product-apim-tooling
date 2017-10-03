@@ -79,7 +79,6 @@ public class Wso2Api {
             LOGGER.info("Calling dynamic client registration endpoint");
             response = httpClient.execute(clientIdAndSecretRequest);
 
-
             if (response.getStatusLine().getStatusCode() == 401) {
                 throw new PluginExecutionException("Unauthorized request, check email, organizationKey, password");
             } else if (response.getStatusLine().getStatusCode() == 400) {
