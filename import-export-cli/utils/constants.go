@@ -24,14 +24,15 @@ const ProjectName string = "wso2apim-cli"
 
 // File Names and Paths
 const PathSeparator_ string = string(os.PathSeparator)
-const ApplicationRoot string = "/home/menuka/.go/src/github" +
-	".com/wso2/product-apim-tooling/import-export-cli" // TODO:: Change to a generic root
+//var ApplicationRoot string = "/home/menuka/go/src/github" +
+//	".com/wso2/product-apim-tooling/import-export-cli" // TODO:: Change to a generic root
+var ApplicationRoot, _ = os.Getwd()
 const EnvKeysAllFileName string = "env_keys_all.yaml"
-const EnvKeysAllFilePath string = ApplicationRoot + PathSeparator_ + EnvKeysAllFileName
+var EnvKeysAllFilePath string = ApplicationRoot + PathSeparator_ + EnvKeysAllFileName
 const MainConfigFileName string = "main_config.yaml"
-const MainConfigFilePath string = ApplicationRoot + PathSeparator_ + MainConfigFileName
+var MainConfigFilePath string = ApplicationRoot + PathSeparator_ + MainConfigFileName
 const ExportedAPIsDirectoryName string = "exported"
-const ExportedAPIsDirectoryPath string = ApplicationRoot + PathSeparator_ + ExportedAPIsDirectoryName
+var ExportedAPIsDirectoryPath string = ApplicationRoot + PathSeparator_ + ExportedAPIsDirectoryName
 
 // Headers and Header Values
 const HeaderAuthorization string = "Authorization"

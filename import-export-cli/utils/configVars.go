@@ -30,6 +30,7 @@ import (
 var HttpRequestTimeout int = 2500
 var SkipTLSVerification bool = true
 var ExportDirectory string
+var ConfigDirectory string
 
 func SetConfigVars(mainConfigFilePath string) error {
 	mainConfig := GetMainConfigFromFile(mainConfigFilePath)
@@ -56,7 +57,6 @@ func SetConfigVars(mainConfigFilePath string) error {
 	}
 	if !IsValid(mainConfig.Config.ExportDirectory) {
 		Logln(LogPrefixWarning + "export Directory path invalid or the user doesn't have necessary privileges")
-
 	}
 
 	HttpRequestTimeout = mainConfig.Config.HttpRequestTimeout
@@ -67,6 +67,9 @@ func SetConfigVars(mainConfigFilePath string) error {
 
 	ExportDirectory = mainConfig.Config.ExportDirectory
 	Logln(LogPrefixInfo + "Setting ExportDirectory " + mainConfig.Config.ExportDirectory)
+
+	Logln(LogPrefixInfo + "Setting ConfigDirectory" + mainConfig.Config.ConfigDirectory)
+	ConfigDirectory = mainConfig.Config.ConfigDirectory
 
 	return nil
 }
