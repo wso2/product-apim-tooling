@@ -1,7 +1,6 @@
 package com.swagger.plugins.wso2;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.models.Info;
@@ -9,7 +8,6 @@ import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
-import org.apache.http.entity.StringEntity;
 
 import java.io.IOException;
 
@@ -33,13 +31,14 @@ public class PayloadConfiguration {
      * @throws PluginExecutionException
      */
     public String configurePayload(String email, String organizationKey, String swaggerYaml, String version,
-                                   String context, String apiId) throws PluginExecutionException {
+                                   String context, String apiId) throws PluginExecutionException, IOException {
 
         //Getting pojo into the method
         PayloadStructure structure = new PayloadStructure();
         ObjectMapper objectMapper;
         Swagger swagger;
         String payload;
+        //Setting default values
         String[] schemes = {"http","https"};
         String[] defaultTier = {"Unlimited"};
 
@@ -86,7 +85,7 @@ public class PayloadConfiguration {
      * @param swaggerYaml
      * @return Returns the json string of the yaml
      */
-    public static String convertYamlToJson(String swaggerYaml) {
+    public static String convertYamlToJson(String swaggerYaml) throws IOException {
         Swagger swagger = null;
         try {
             JsonNode node = Yaml.mapper().readValue(swaggerYaml, JsonNode.class);
@@ -95,8 +94,11 @@ public class PayloadConfiguration {
             e.printStackTrace();
         }
         String json =  Json.pretty(swagger);
-        return json;
 
+        //Minifying json and return
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode = objectMapper.readValue(json, JsonNode.class);
+        return jsonNode.toString();
     }
 
 }

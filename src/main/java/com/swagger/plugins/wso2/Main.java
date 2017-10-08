@@ -1,6 +1,7 @@
 package com.swagger.plugins.wso2;
 
 import org.json.simple.parser.ParseException;
+import org.omg.PortableInterceptor.ServerRequestInfo;
 
 import java.io.IOException;
 
@@ -14,7 +15,7 @@ import java.io.IOException;
 public class Main {
     public static void main(String[] args) throws IOException, ParseException, PluginExecutionException {
 
-        String simpleApi = "swagger: '2.0'\n" +
+        String swaggerSimpleYaml = "swagger: '2.0'\n" +
                 "info:\n" +
                 "  description: This is a simple API\n" +
                 "  version: 1.0.0\n" +
@@ -140,7 +141,6 @@ public class Main {
                 " - https";
 
         Wso2ApiGatewayPlugin plugin = new Wso2ApiGatewayPlugin();
-        plugin.afterApiVersionSaved(simpleApi);
-
+        plugin.afterApiVersionSaved(swaggerSimpleYaml);
     }
 }

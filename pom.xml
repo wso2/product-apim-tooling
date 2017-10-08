@@ -23,18 +23,14 @@
 
     <dependencies>
 
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.api</artifactId>
-            <version>6.1.66</version>
-        </dependency>
-
+        <!-- Dependency for swagger-parser -->
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-parser</artifactId>
             <version>1.0.31</version>
         </dependency>
 
+        <!-- Dependency for Logging -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -49,6 +45,7 @@
         </dependency>
         <!-- THIS DEPENDENCY MADE THE SLF4J ERROR DISAPPEARED -->
 
+        <!-- Dependencies for generating pojos and minifying jsons and converting yamls to jsons  -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
@@ -61,7 +58,13 @@
             <version>2.7.4</version>
         </dependency>
 
-        <!-- Dependency for Base64 Encoding-->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.5.3</version>
+        </dependency>
+
+        <!-- Dependencies for Base64 Encoding-->
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
@@ -87,6 +90,7 @@
             <version>4.5.3</version>
         </dependency>
 
+        <!-- Dependencies for testing -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

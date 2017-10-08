@@ -88,7 +88,6 @@ public class Wso2ApiGatewayPlugin {
         String creationPayload = configuration.configurePayload(userEmail, userOrganizationKey, swaggerYaml,
                 apiVersion, context, apiId);
 
-
         Wso2Api api = new Wso2Api();
         String accessToken;
 
@@ -107,7 +106,8 @@ public class Wso2ApiGatewayPlugin {
         this.userEmail = "yolom@seekjobs4u.com";
         this.userOrganizationKey = "yolo4958";
         this.userPassword = "Yolofernando123";
-        this.context = "application";
+        // The "/" is compulsory for the context otherwise the server will return code 400 instead of 409.
+        this.context = "/"+"application";
         this.apiVersion = "1.0.0";
     }
 
