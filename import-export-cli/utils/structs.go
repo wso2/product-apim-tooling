@@ -37,7 +37,6 @@ type Config struct {
 	HttpRequestTimeout  int    `yaml:"http_request_timeout"`
 	SkipTLSVerification bool   `yaml:"skip_tls_verification"`
 	ExportDirectory     string `yaml:"export_directory"`
-	ConfigDirectory string `yaml:"config_directory"`
 }
 
 type EnvKeys struct {
