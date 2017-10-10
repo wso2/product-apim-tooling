@@ -10,7 +10,7 @@ import java.io.IOException;
 /*****************************************************************
  *  Class name : Main
  * Methods : main
- * Functionality : For testing purposes
+ * Functionality : Executes the application
  * Visibility : Public
  * ****************************************************************/
 public class Main {
@@ -24,15 +24,15 @@ public class Main {
         String path6 = "/home/akila/Akila/swagger-wso2-integration-local/src/test/java/com/swagger/pluigns/wso2/OAuth2Application.yaml";
         String path7 = "/home/akila/Akila/swagger-wso2-integration-local/src/test/java/com/swagger/pluigns/wso2/OAuth2AccessCode.yaml";
 
-
         Wso2ApiGatewayPlugin plugin = new Wso2ApiGatewayPlugin();
         plugin.afterApiVersionSaved(Main.fileReader(path1));
     }
 
     /**
      * This method not mandatory for the application, just implemented to get the content of different yaml files.
-     * Therefore, findBug errors can be ommitted.
-     * @param path
+     *
+     * Therefore, findBug errors can be omitted.
+     * @param path Path of the yaml file
      * @return
      */
     public static String fileReader(String path) {

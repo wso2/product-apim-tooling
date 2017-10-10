@@ -7,6 +7,8 @@ import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -19,28 +21,31 @@ import java.io.IOException;
  * ****************************************************************/
 public class PayloadConfiguration {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(PayloadConfiguration.class);
+
     /**
      * Configures the paylod to create an API in the cloud setting relevant values from the swagger definition.
-     * @param email
-     * @param organizationKey
-     * @param swaggerYaml
-     * @param context
+     *
+     * @param email             Email of the cloud account to export the API
+     * @param organizationKey   The key generated using email and password
+     * @param swaggerYaml       The swagger definition of the API to be exported to the cloud
+     * @param context           The context for the API in the cloud
      * @return Returns the configured payload
      * @throws PluginExecutionException
      */
     public String configurePayload(String email, String organizationKey, String swaggerYaml,
                                    String context) throws PluginExecutionException, IOException {
 
-        PayloadStructure structure = new PayloadStructure();
         ObjectMapper objectMapper;
         Swagger swagger;
         String payload;
 
-        //Setting default values
+        LOGGER.info("Setting default values for the payload");
         String[] schemes = {"http","https"};
         String[] defaultTier = {"Unlimited"};
         String visibility = "PUBLIC";
 
+        LOGGER.info("Creating the swagger POJO for extracting info from the swagger definition");
         try {
             objectMapper = new ObjectMapper();
             swagger = Json.mapper().readValue(convertYamlToJson(swaggerYaml), Swagger.class);
@@ -48,13 +53,18 @@ public class PayloadConfiguration {
             throw new PluginExecutionException("Swagger definition is invalid or not readable");
         }
 
+        LOGGER.info("Getting info from swagger POJO");
         String name = swagger.getInfo().getTitle();
         String version = swagger.getInfo().getVersion();
         String description = swagger.getInfo().getDescription();
 
+        LOGGER.info("Setting the context for the API");
         swagger.setBasePath(context);
 
-        //Setting values to the pojo
+        LOGGER.info("Creating the POJO for the payload to create the API");
+        PayloadStructure structure = new PayloadStructure();
+
+        LOGGER.info("Setting the essential values for the POJO to create an API in the cloud");
         structure.setName(name);
         structure.setVersion(version);
         structure.setDescription(description);
@@ -69,12 +79,13 @@ public class PayloadConfiguration {
         CorsConfiguration configuration = new CorsConfiguration(false);
         structure.setCorsConfiguration(configuration);
 
-        //Converting the pojo to json
+        LOGGER.info("Converting the POJO to a json string");
         try {
             payload = objectMapper.writeValueAsString(structure);
         } catch (JsonProcessingException e) {
             throw new PluginExecutionException("Error when converting pojo to json");
         }
+        LOGGER.info("Returning the payload for creating the API in the cloud");
         return payload;
     }
 
@@ -85,6 +96,8 @@ public class PayloadConfiguration {
      */
     public static String convertYamlToJson(String swaggerYaml) throws IOException {
         Swagger swagger = null;
+
+        LOGGER.info("Parsing Yaml to JSON");
         try {
             JsonNode node = Yaml.mapper().readValue(swaggerYaml, JsonNode.class);
             swagger = new SwaggerParser().read(node);
@@ -93,9 +106,11 @@ public class PayloadConfiguration {
         }
         String json =  Json.pretty(swagger);
 
-        //Minifying json and return
+        LOGGER.info("Minifying the JSON");
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readValue(json, JsonNode.class);
+
+        LOGGER.info("Returning the minified JSON");
         return jsonNode.toString();
     }
 
