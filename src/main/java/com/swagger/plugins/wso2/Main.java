@@ -26,10 +26,16 @@ public class Main {
 
 
         Wso2ApiGatewayPlugin plugin = new Wso2ApiGatewayPlugin();
-        plugin.afterApiVersionSaved(Main.fileReder(path1));
+        plugin.afterApiVersionSaved(Main.fileReader(path1));
     }
 
-    public static String fileReder(String path) {
+    /**
+     * This method not mandatory for the application, just implemented to get the content of different yaml files.
+     * Therefore, findBug errors can be ommitted.
+     * @param path
+     * @return
+     */
+    public static String fileReader(String path) {
 
         StringBuffer buffer = new StringBuffer();
         BufferedReader br = null;

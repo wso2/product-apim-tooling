@@ -50,11 +50,11 @@ public class PayloadStructure {
     }
 
     public String[] getTiers() {
-        return tiers;
+        return tiers.clone();
     }
 
     public void setTiers(String[] tiers) {
-        this.tiers = tiers;
+        this.tiers = tiers.clone();
     }
 
     public boolean getIsDefaultVersion() {
@@ -66,11 +66,11 @@ public class PayloadStructure {
     }
 
     public String[] getTransport() {
-        return transport;
+        return transport.clone();
     }
 
     public void setTransport(String[] transport) {
-        this.transport = transport;
+        this.transport = transport.clone();
     }
 
     public String getVisibility() {

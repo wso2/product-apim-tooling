@@ -82,7 +82,7 @@ public class Wso2Api implements HttpConnectionService{
             }
 
             inputStream = response.getEntity().getContent();
-            inputStreamReader = new InputStreamReader(inputStream);
+            inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
             inDataStream = new BufferedReader(inputStreamReader);
             responseBody = new StringBuffer();
             String line;
@@ -145,7 +145,7 @@ public class Wso2Api implements HttpConnectionService{
                 throw new PluginExecutionException("Bad Request, check content");
             }
 
-            inDataStream = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+            inDataStream = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
             responseBody = new StringBuffer();
             String line;
             while ((line = inDataStream.readLine()) != null) {
@@ -196,7 +196,7 @@ public class Wso2Api implements HttpConnectionService{
                 throw new PluginExecutionException("Bad content");
             }
 
-            inDataStream = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+            inDataStream = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
             responseBody = new StringBuffer();
             String line;
             while ((line = inDataStream.readLine()) != null) {
@@ -228,10 +228,10 @@ public class Wso2Api implements HttpConnectionService{
 
         String tokenPrefix = "Basic ";
         String contentType = "application/json";
-        if (url == API_CREATE_CLOUD_URL) {
+        if (url.equals(API_CREATE_CLOUD_URL)) {
             tokenPrefix = "Bearer ";
         }
-        if (url == TOKEN_API_URL) {
+        if (url.equals(TOKEN_API_URL)) {
             contentType = "application/x-www-form-urlencoded";
         }
 

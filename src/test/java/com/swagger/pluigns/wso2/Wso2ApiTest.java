@@ -78,7 +78,7 @@ public class Wso2ApiTest {
     @Test
     public void saveApiTest() throws ParseException, PluginExecutionException, IOException {
 
-        String yaml = Main.fileReder("/home/akila/Akila/swagger-wso2-integration-local/src/test/" +
+        String yaml = Main.fileReader("/home/akila/Akila/swagger-wso2-integration-local/src/test/" +
                 "java/com/swagger/pluigns/wso2/SwaggerSimpleApi.yaml");
 
         Wso2Api wso2Api = Mockito.mock(Wso2Api.class);
