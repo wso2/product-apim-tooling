@@ -211,7 +211,8 @@ function installCheck() {
     }
     if(system.files.fileExistsAtPath('/usr/local/importExportCLI/bin/importExportCLI')) {
 	    my.result.title = 'Previous Installation Detected';
-	    my.result.message = 'A previous installation of ImportExportCLI exists at /usr/local/importExportCLI. This installer will remove the previous installation prior to installing. Please back up any data before proceeding.';
+	    my.result.message = 'A previous installation of ImportExportCLI exists at /usr/local/importExportCLI. This
+	installer will remove the previous installation prior to installing. Please back up any data before proceeding.';
 	    my.result.type = 'Warning';
 	    return false;
 	}

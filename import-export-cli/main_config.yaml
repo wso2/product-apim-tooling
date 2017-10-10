@@ -1,7 +1,7 @@
 config:
   http_request_timeout: 2500
   skip_tls_verification: true
-  export_directory: /home/menuka/exported
+  export_directory: /home/menuka/.go/src/github.com/wso2/product-apim-tooling/import-export-cli/exported
 environments:
   dev:
     api_manager_endpoint: https://localhost:9292/api/am/publisher/v1.0

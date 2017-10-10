@@ -69,6 +69,7 @@ func init() {
 
 	// Init ConfigVars
 	err := utils.SetConfigVars(utils.MainConfigFilePath)
+	fmt.Println("MainConfigFilePath: os.Getwd(): " + utils.MainConfigFilePath)
 	if err != nil {
 		utils.HandleErrorAndExit("Error reading "+utils.MainConfigFilePath+".", err)
 	}
@@ -77,7 +78,8 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	if verbose {
+	// TODO:: switch condition in production. Verbose on by default in development
+	if !verbose {
 		utils.EnableVerboseMode()
 	}
 

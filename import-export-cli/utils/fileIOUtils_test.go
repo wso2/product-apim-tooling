@@ -69,8 +69,7 @@ func writeCorrectMainConfig() {
 	WriteConfigFile(mainConfig, testMainConfigFilePath)
 }
 func initSampleMainConfig() {
-	dir, _ := os.Getwd()
-	mainConfig.Config = Config{2500, true, "/home/exported", dir}
+	mainConfig.Config = Config{2500, true, "/home/exported"}
 	mainConfig.Environments = make(map[string]EnvEndpoints)
 	mainConfig.Environments[devName] = EnvEndpoints{"dev_apim_endpoint",
 		"dev_reg_endpoint", "dev_token_endpoint"}

@@ -90,7 +90,7 @@ var ExportAPICmdExamples = dedent.Dedent(`
 const ListCmdShortDesc string = "List APIs in an environment"
 
 var ListCmdLongDesc string = dedent.Dedent(`
-			Display a list containing all the APIs available in the environment specified by flag -e
+			Display a list containing all the APIs available in the environment specified by flag (--environment, -e)
 	`)
 
 var ListCmdExamples = dedent.Dedent(`
@@ -104,36 +104,62 @@ var ListCmdExamples = dedent.Dedent(`
 const ResetUserCmdShortDesc string = "Reset user of an environment"
 
 var ResetUserCmdLongDesc = dedent.Dedent(`
-	Reset user data of a particular environment (Clear the entry in env_keys_all.yaml file)
+		Reset user data of a particular environment (Clear the entry in env_keys_all.yaml file)
 	`)
 
 var ResetUserCmdExamples = dedent.Dedent(`
 		Examples:
 		` + ProjectName + ` reset-user -e dev
 		` + ProjectName + ` reset-user -e staging
-		`)
+	`)
 
 // AddEnv command related Info
 const AddEnvCmdShortDesc string = "Add Environment to Config file"
 
 var AddEnvCmdLongDesc = dedent.Dedent(`
-			Add new environment and its related endpoints to the config file	
-		`)
+		Add new environment and its related endpoints to the config file
+	`)
 
 var AddEnvCmdExamples = dedent.Dedent(`
 		Examples:
-		` + ProjectName + ` add-env -n production  --reg http://localhost/reg --apim http://localhost/apim --token
-		http://localhost/token
-		`)
+		` + ProjectName + ` add-env -n production  --reg http://localhost/reg \
+						--apim http://localhost/apim \
+						--token http://localhost/token
+	`)
 
 // RemoveEnv command related Info
 const RemoveEnvCmdShortDesc string = "Remove Environment from Config file"
 
 var RemoveEnvCmdLongDesc = dedent.Dedent(`
 		Remove Environment and its related endpoints from the config file
-    	`)
+    `)
 
 var RemoveEnvCmdExamples string = dedent.Dedent(`
 		Examples:
 		` + ProjectName + ` remove-env -n production
-		`)
+	`)
+
+// Set command related Info
+const SetCmdShortDesc string = "Set configuration"
+
+var SetCmdLongDesc = dedent.Dedent(`
+			Set configuration parameters. Use at least one of the following flags
+				* --skip-tls-verfication <true>/<false>
+				* --http-request-timeout <time-in-milli-seconds>
+				* --export-directory <path-to-directory-where-apis-should-be-saved>
+	`)
+
+var SetCmdExamples = dedent.Dedent(`
+			Examples:
+			`+ ProjectName +` set --skip-tls-verification true \
+				--http-request-timeout 3600 \
+				--export-directory /home/user/exported-apis
+
+			`+ ProjectName +` set --skip-tls-verification false \
+				--http-request-timeout 5000 \
+				--export-directory /media/user/apis
+
+			`+ ProjectName +` set --skip-tls-verification false
+
+			`+ ProjectName +` set --http-request-timeout 5000
+	`)

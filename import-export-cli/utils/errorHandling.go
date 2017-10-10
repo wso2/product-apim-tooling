@@ -24,6 +24,12 @@ import (
 )
 
 func HandleErrorAndExit(msg string, err error) {
+	fmt.Println("\n=======  DEUBG LOG ==================")
+	// TODO:: Remove debug log in production
+	for i := 1; i <= 6; i++ {
+		fmt.Println(WhereAmI(i))
+	}
+	fmt.Println("=======  END OF DEUBG LOG ===========\n")
 	if err == nil {
 		fmt.Fprintf(os.Stderr, "wso2apim: %v\n", msg)
 	} else {
