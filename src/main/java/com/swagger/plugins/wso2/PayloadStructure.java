@@ -11,6 +11,7 @@ public class PayloadStructure {
     private String name;
     private String context;
     private String version;
+    private String description;
     private String provider;
     private String apiDefinition;
     private boolean isDefaultVersion;
@@ -19,6 +20,10 @@ public class PayloadStructure {
     private String visibility;
     private String endpointConfig;
     private CorsConfiguration corsConfiguration;
+
+    public String getDescription() { return description; }
+
+    public void setDescription(String description) { this.description = description; }
 
     public String getApiDefinition() {
         return apiDefinition;

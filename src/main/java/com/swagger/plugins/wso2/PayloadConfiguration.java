@@ -54,12 +54,14 @@ public class PayloadConfiguration {
         Info info = new Info();
         //Storing the API name in a variable as it cannot be overridden.
         String name = swagger.getInfo().getTitle();
+        String description = swagger.getInfo().getDescription();
         swagger.setInfo(info.title(name));
         swagger.setInfo(info.version(version));
         swagger.setBasePath(context);
 
         structure.setName(swagger.getInfo().getTitle());
         structure.setVersion(swagger.getInfo().getVersion());
+        structure.setDescription(description);
         structure.setContext(swagger.getBasePath());
         structure.setProvider(email+"@"+organizationKey);
         structure.setApiDefinition(convertYamlToJson(swaggerYaml));
