@@ -107,7 +107,7 @@ public class Wso2ApiGatewayPlugin {
         this.userOrganizationKey = "yolo4958";
         this.userPassword = "Yolofernando123";
         // The "/" is compulsory for the context otherwise the server will return code 400 instead of 409.
-        this.context = "/"+"application";
+        this.context = "/"+"test";
         this.apiVersion = "1.0.0";
     }
 
