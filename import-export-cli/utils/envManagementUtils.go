@@ -48,7 +48,7 @@ func EnvExistsInMainConfigFile(env string, filePath string) bool {
 	return false
 }
 
-// Insert new env entry to env_keys_all.yaml
+// Insert new env entry to keys file (env_keys_all.yaml)
 func AddNewEnvToKeysFile(name string, envKeys EnvKeys, filePath string) {
 	envKeysAll := GetEnvKeysAllFromFile(filePath)
 	fmt.Println("EnvKeysAll:", envKeysAll)
@@ -66,16 +66,24 @@ func AddNewEnvToKeysFile(name string, envKeys EnvKeys, filePath string) {
 	WriteConfigFile(envKeysAll, filePath)
 }
 
+// used with 'reset-user' command
+// does not remove env from endpoints file
 func RemoveEnvFromKeysFile(env string, keysFilePath string, endpointsFilePath string) error {
+	/*
+	 endpointsFilePath is passed to check if it exists in endpoints
+	 env CANNOT exist only in keys file
+	 env CAN exist only in endpoints file (env not initialized i.e. not used with a command)
+	 */
 	if env == "" {
 		return errors.New("environment cannot be blank")
 	}
 	envKeysAll := GetEnvKeysAllFromFile(keysFilePath)
 	if EnvExistsInMainConfigFile(env, endpointsFilePath) {
-		Logln(LogPrefixInfo + "Environment '" + env + "' exists in file " + MainConfigFilePath)
+		Logln(LogPrefixInfo + "Environment '" + env + "' exists in file " + endpointsFilePath)
 		if EnvExistsInKeysFile(env, keysFilePath) {
-			Logln(LogPrefixInfo + "Environment '" + env + "' exists in file " + EnvKeysAllFilePath)
+			Logln(LogPrefixInfo + "Environment '" + env + "' exists in file " + keysFilePath)
 			delete(envKeysAll.Environments, env)
+			Logln(LogPrefixInfo + "removing environment '" + env + "' from '" + keysFilePath + "'")
 			WriteConfigFile(envKeysAll, keysFilePath)
 			return nil
 		} else {
@@ -84,10 +92,12 @@ func RemoveEnvFromKeysFile(env string, keysFilePath string, endpointsFilePath st
 		}
 	} else {
 		// env doesn't exist in endpoints file
+		// nothing to remove
 		return errors.New("environment not found in " + endpointsFilePath)
 	}
 }
 
+// Input: name of the environment to be removed
 func RemoveEnvFromMainConfigFile(env string, endpointsFilePath string) error {
 	if env == "" {
 		return errors.New("environment cannot be blank")

@@ -56,10 +56,9 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 				if flagUsername != username {
 					// username entered with flag -u is not the same as username found
 					// in env_keys_all.yaml file
-					Logln(LogPrefixWarning + "Username entered with flag -u for the environment '" + environment +
-						"' is not the same as username found in env_keys_all.yaml file")
-					fmt.Println("Username entered is not found under '" + environment + "' in env_keys_all.yaml file")
-					fmt.Println("Execute 'wso2apim reset-user -e " + environment + "' to clear user data")
+					fmt.Println(LogPrefixWarning + "Username entered with flag -u for the environment '" + environment +
+						"' is not the same as username found in file '"+ EnvKeysAllFilePath +"'")
+					fmt.Println("Execute '" + ProjectName + " reset-user -e " + environment + "' to clear user data")
 					os.Exit(1)
 				} else {
 					// username entered with flag -u is the same as username found in env_keys_all.yaml file

@@ -3,14 +3,6 @@ config:
   skip_tls_verification: true
   export_directory: /home/menuka/.go/src/github.com/wso2/product-apim-tooling/import-export-cli/exported
 environments:
-  dev:
-    api_manager_endpoint: https://localhost:9292/api/am/publisher/v1.0
-    registration_endpoint: https://localhost:9443/identity/connect/register
-    token_endpoint: https://localhost:9443/oauth2/token
-  production:
-    api_manager_endpoint: https://localhost:9292/api/am/publisher/v1.0
-    registration_endpoint: https://localhost:9443/identity/connect/register
-    token_endpoint: https://localhost:9443/oauth2/token
   qa:
     api_manager_endpoint: https://localhost:9292/api/am/publisher/v1.0
     registration_endpoint: https://localhost:9443/identity/connect/register
