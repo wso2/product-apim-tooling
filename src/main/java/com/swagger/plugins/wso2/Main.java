@@ -31,7 +31,7 @@ public class Main {
 
     public static String fileReder(String path) {
 
-        String content = "";
+        StringBuffer buffer = new StringBuffer();
         BufferedReader br = null;
         FileReader fr = null;
 
@@ -42,7 +42,8 @@ public class Main {
             String sCurrentLine;
 
             while ((sCurrentLine = br.readLine()) != null) {
-                content += sCurrentLine + "\n";
+                buffer.append(sCurrentLine);
+                buffer.append("\n");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -56,7 +57,7 @@ public class Main {
                 ex.printStackTrace();
             }
         }
-        return content;
+        return buffer.toString();
     }
 
 }

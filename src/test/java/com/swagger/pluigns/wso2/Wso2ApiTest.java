@@ -87,7 +87,7 @@ public class Wso2ApiTest {
         System.out.println(accessToken);
         PayloadConfiguration configuration = new PayloadConfiguration();
 
-        String payload = configuration.configurePayload("yolom@seekjobs4u.com", "yolo4958", yaml, "1.0.0", "sample", "id");
+        String payload = configuration.configurePayload("yolom@seekjobs4u.com", "yolo4958", yaml, "sample");
 
         StringEntity stringEntity = new StringEntity(payload);
 

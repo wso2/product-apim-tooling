@@ -3,7 +3,6 @@ package com.swagger.plugins.wso2;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.models.Info;
 import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
@@ -25,22 +24,22 @@ public class PayloadConfiguration {
      * @param email
      * @param organizationKey
      * @param swaggerYaml
-     * @param version
      * @param context
      * @return Returns the configured payload
      * @throws PluginExecutionException
      */
-    public String configurePayload(String email, String organizationKey, String swaggerYaml, String version,
-                                   String context, String apiId) throws PluginExecutionException, IOException {
+    public String configurePayload(String email, String organizationKey, String swaggerYaml,
+                                   String context) throws PluginExecutionException, IOException {
 
-        //Getting pojo into the method
         PayloadStructure structure = new PayloadStructure();
         ObjectMapper objectMapper;
         Swagger swagger;
         String payload;
+
         //Setting default values
         String[] schemes = {"http","https"};
         String[] defaultTier = {"Unlimited"};
+        String visibility = "PUBLIC";
 
         try {
             objectMapper = new ObjectMapper();
@@ -49,18 +48,15 @@ public class PayloadConfiguration {
             throw new PluginExecutionException("Swagger definition is invalid or not readable");
         }
 
-        //Setting relevant values to pojo using swagger object.
-
-        Info info = new Info();
-        //Storing the API name in a variable as it cannot be overridden.
         String name = swagger.getInfo().getTitle();
+        String version = swagger.getInfo().getVersion();
         String description = swagger.getInfo().getDescription();
-        swagger.setInfo(info.title(name));
-        swagger.setInfo(info.version(version));
+
         swagger.setBasePath(context);
 
-        structure.setName(swagger.getInfo().getTitle());
-        structure.setVersion(swagger.getInfo().getVersion());
+        //Setting values to the pojo
+        structure.setName(name);
+        structure.setVersion(version);
         structure.setDescription(description);
         structure.setContext(swagger.getBasePath());
         structure.setProvider(email+"@"+organizationKey);
@@ -68,7 +64,7 @@ public class PayloadConfiguration {
         structure.setIsDefaultVersion(false);
         structure.setTransport(schemes);
         structure.setTiers(defaultTier);
-        structure.setVisibility("PUBLIC");
+        structure.setVisibility(visibility);
         structure.setEndpointConfig("");
         CorsConfiguration configuration = new CorsConfiguration(false);
         structure.setCorsConfiguration(configuration);
@@ -84,7 +80,7 @@ public class PayloadConfiguration {
 
     /**
      * Converts a Yaml to Json
-     * @param swaggerYaml
+     * @param swaggerYaml The swagger drfinition of the API to be exported to the cloud
      * @return Returns the json string of the yaml
      */
     public static String convertYamlToJson(String swaggerYaml) throws IOException {

@@ -22,7 +22,7 @@ import java.io.*;
  * Functionality : Contains the methods to obtain the access token and push the API to the cloud
  * Visibility : Public
  * ****************************************************************/
-public class Wso2Api {
+public class Wso2Api implements HttpConnectionService{
 
     private Logger LOGGER = LoggerFactory.getLogger(Wso2Api.class);
 
@@ -52,12 +52,12 @@ public class Wso2Api {
     /**
      * Returns the Base64 encoded string of the format (clientId:clientSecret) for a given email organization key
      * and password.
-     * @param email
-     * @param organizationKey
-     * @param password
+     * @param email Email of the cloud account to export the API
+     * @param organizationKey the key generated in the API cloud for the given credentials, unique for the cloud account
+     * @param password Password of the cloud account to export the API
      * @return Returns the Base64 encoded string of the format [clientId:clientSeret]
      * @throws ParseException
-     * @throws PluginExecutionException
+     * @throws PluginExecutionException Custom exception to make the exception more readable
      */
     public String getClientIdAndSecret(String email, String organizationKey, String password) throws IOException,
             ParseException, PluginExecutionException {
@@ -70,14 +70,10 @@ public class Wso2Api {
         String clientSecret;
 
         try {
-            httpClient = HttpClients.createDefault();
-            HttpPost clientIdAndSecretRequest = new HttpPost(DYNAMIC_CLIENT_REGISTRATION_URL);
-            clientIdAndSecretRequest.setHeader("Authorization","Basic "+encodedString);
-            clientIdAndSecretRequest.setHeader("Content-Type","application/json");
-            clientIdAndSecretRequest.setEntity(authorizationPayload);
+
+            response = getHttpResponse(DYNAMIC_CLIENT_REGISTRATION_URL, encodedString, authorizationPayload);
 
             LOGGER.info("Calling dynamic client registration endpoint");
-            response = httpClient.execute(clientIdAndSecretRequest);
 
             if (response.getStatusLine().getStatusCode() == 401) {
                 throw new PluginExecutionException("Unauthorized request, check email, organizationKey, password");
@@ -118,14 +114,14 @@ public class Wso2Api {
 
 
     /**
-     * Returns the access token obtained using the client Id and client secret.
-     * @param email
-     * @param organizationKey
-     * @param password
+     * Returns the access token obtained using the client Id and client secret
+     * @param email Email of the cloud account to export the API
+     * @param organizationKey the key generated in the API cloud for the given credentials, unique for the cloud account
+     * @param password Password of the cloud account to export the API
      * @return Returns the access token for creating an API in the cloud
      * @throws IOException
      * @throws ParseException
-     * @throws PluginExecutionException
+     * @throws PluginExecutionException Custom exception to make the exception more readable
      */
     public String getAccessToken(String email, String organizationKey, String password) throws IOException,
             ParseException, PluginExecutionException {
@@ -138,14 +134,10 @@ public class Wso2Api {
         String accessToken;
 
         try {
-            httpClient = HttpClients.createDefault();
-            HttpPost accessTokenRequest = new HttpPost(TOKEN_API_URL);
-            accessTokenRequest.setHeader("Authorization","Basic "+clientIdAndSecret);
-            accessTokenRequest.setHeader("Content-Type", "application/x-www-form-urlencoded");
-            accessTokenRequest.setEntity(authorizationPayload);
+
+            response = getHttpResponse(TOKEN_API_URL, clientIdAndSecret, authorizationPayload);
 
             LOGGER.info("Issuing REST call to Token API");
-            response = httpClient.execute(accessTokenRequest);
 
             if (response.getStatusLine().getStatusCode() == 401) {
                 throw new PluginExecutionException("Unauthorized request, check email, organizationKey, password");
@@ -180,25 +172,21 @@ public class Wso2Api {
     }
 
     /**
-     * Creates an API in the api cloud and prints the response of the details of the API made.
-     * @param swagger
-     * @param accessToken
+     * Creates an API in the api cloud and prints the response of the details of the API made
+     * @param payload Payload for the api creation http request
+     * @param accessToken Access token for creating the API in the cloud
      * @throws IOException
-     * @throws PluginExecutionException
+     * @throws PluginExecutionException Custom exception to make the exception more readable
      */
-    public void saveAPI(String swagger, String accessToken) throws IOException, PluginExecutionException {
+    public void saveAPI(String payload, String accessToken) throws IOException, PluginExecutionException {
 
-        StringEntity creationPayload = new StringEntity(swagger);
+        StringEntity creationPayload = new StringEntity(payload);
 
         try {
-            httpClient = HttpClients.createDefault();
-            HttpPost createApiRequest = new HttpPost(API_CREATE_CLOUD_URL);
-            createApiRequest.setHeader("Authorization","Bearer "+accessToken);
-            createApiRequest.setHeader("Content-Type","application/json");
-            createApiRequest.setEntity(creationPayload);
+
+            response = getHttpResponse(API_CREATE_CLOUD_URL, accessToken, creationPayload);
 
             LOGGER.info("Creating the API in the cloud");
-            response = httpClient.execute(createApiRequest);
 
             if (response.getStatusLine().getStatusCode() == 401) {
                 throw new PluginExecutionException("Unauthorized request");
@@ -227,5 +215,35 @@ public class Wso2Api {
 
         System.out.println(responseBody.toString());
     }
+
+    /**
+     * Makes http requests to the specified URLs with suitable token prefix and content-type and returns the response
+     * @param url URL which the request is made
+     * @param token Token for authoring the request
+     * @param payload Body of the request
+     * @return Returns the response of the http request made
+     * @throws IOException
+     */
+    public CloseableHttpResponse getHttpResponse(String url, String token, StringEntity payload) throws IOException {
+
+        String tokenPrefix = "Basic ";
+        String contentType = "application/json";
+        if (url == API_CREATE_CLOUD_URL) {
+            tokenPrefix = "Bearer ";
+        }
+        if (url == TOKEN_API_URL) {
+            contentType = "application/x-www-form-urlencoded";
+        }
+
+        httpClient = HttpClients.createDefault();
+        HttpPost apiRequest = new HttpPost(url);
+        apiRequest.setHeader("Authorization", tokenPrefix + token);
+        apiRequest.setHeader("Content-Type", contentType);
+        apiRequest.setEntity(payload);
+
+        response = httpClient.execute(apiRequest);
+        return response;
+    }
+
 }
 

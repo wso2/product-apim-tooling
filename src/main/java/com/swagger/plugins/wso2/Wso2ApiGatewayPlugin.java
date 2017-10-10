@@ -24,7 +24,6 @@ public class Wso2ApiGatewayPlugin {
     private String userPassword;
     private String userOrganizationKey;
     private String apiId;
-    private String apiVersion;
     private String context;
 
 
@@ -32,7 +31,7 @@ public class Wso2ApiGatewayPlugin {
      * This method is triggered before saving the API to ensure whether a valid identifier exists.
      * @param triggeredByUUID
      * @param objectPath
-     * @param swaggerYaml Contains the swagger definition
+     * @param swaggerYaml The swagger drfinition of the API to be exported to the cloud
      * @param forceUpdate
      * @param isPrivate
      * @return Returns the swaggerYaml after ensuring a valid api identifier exists
@@ -73,7 +72,7 @@ public class Wso2ApiGatewayPlugin {
 
     /**
      * Perform the deployment to WSO2 API cloud during the SAVE operation.
-     * @param swaggerYaml
+     * @param swaggerYaml The swagger drfinition of the API to be exported to the cloud
      * @throws PluginExecutionException
      * @throws IOException
      * @throws ParseException
@@ -85,8 +84,7 @@ public class Wso2ApiGatewayPlugin {
 
         PayloadConfiguration configuration = new PayloadConfiguration();
         configure();
-        String creationPayload = configuration.configurePayload(userEmail, userOrganizationKey, swaggerYaml,
-                apiVersion, context, apiId);
+        String creationPayload = configuration.configurePayload(userEmail, userOrganizationKey, swaggerYaml, context);
 
         Wso2Api api = new Wso2Api();
         String accessToken;
@@ -108,7 +106,6 @@ public class Wso2ApiGatewayPlugin {
         this.userPassword = "Yolofernando123";
         // The "/" is compulsory for the context otherwise the server will return code 400 instead of 409.
         this.context = "/"+"test";
-        this.apiVersion = "1.0.0";
     }
 
 
