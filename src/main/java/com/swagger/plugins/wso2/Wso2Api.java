@@ -44,6 +44,7 @@ public class Wso2Api implements HttpConnectionService{
     private String accessToken;
 
     /**
+     * Returns the payload for request of getting client id and secret.
      *
      * @param email             Email of the cloud account to export the API
      * @param organizationKey   The key generated in the API cloud for the given credentials, unique for the cloud
@@ -63,6 +64,7 @@ public class Wso2Api implements HttpConnectionService{
     /**
      * Returns the Base64 encoded string of the format (clientId:clientSecret) for a given email organization key
      * and password.
+     *
      * @param email             Email of the cloud account to export the API
      * @param organizationKey   The key generated in the API cloud for the given credentials, unique for the cloud
      *                          account
@@ -127,6 +129,7 @@ public class Wso2Api implements HttpConnectionService{
 
     /**
      * Returns the access token obtained using the client Id and client secret
+     *
      * @param email             Email of the cloud account to export the API
      * @param organizationKey   the key generated in the API cloud for the given credentials, unique for the cloud
      *                          account
@@ -183,6 +186,7 @@ public class Wso2Api implements HttpConnectionService{
 
     /**
      * Creates an API in the api cloud and prints the response of the details of the API made
+     *
      * @param payload       Payload for the api creation http request
      * @throws IOException
      * @throws PluginExecutionException Custom exception to make the exception more readable
@@ -228,6 +232,7 @@ public class Wso2Api implements HttpConnectionService{
 
     /**
      * Makes http requests to the specified URLs with suitable token prefix and content-type and returns the response
+     *
      * @param url       URL which the request is made
      * @param token     Token for authoring the request
      * @param payload   Body of the request

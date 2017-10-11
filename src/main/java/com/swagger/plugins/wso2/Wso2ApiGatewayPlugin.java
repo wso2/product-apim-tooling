@@ -114,6 +114,7 @@ public class Wso2ApiGatewayPlugin {
 
     /**
      * Returns a model with user to obtain user's email address, password, organization key and context
+     *
      * @return Returns a model
      */
     public Model getConfigurationSchema() {

@@ -91,6 +91,7 @@ public class PayloadConfiguration {
 
     /**
      * Converts a Yaml to Json
+     *
      * @param swaggerYaml The swagger drfinition of the API to be exported to the cloud
      * @return Returns the json string of the yaml
      */
