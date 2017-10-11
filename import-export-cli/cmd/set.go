@@ -19,10 +19,9 @@
 package cmd
 
 import (
-
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"os"
+	"fmt"
 )
 
 var flagHttpRequestTimeout int
@@ -33,22 +32,56 @@ var flagExportDirectory string
 var SetCmd = &cobra.Command{
 	Use:   "set",
 	Short: utils.SetCmdShortDesc,
-	Long: utils.SetCmdLongDesc + utils.SetCmdExamples,
+	Long:  utils.SetCmdLongDesc + utils.SetCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + "set called")
+
+		// read the existing config vars
+		configVars := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
+
+		if flagHttpRequestTimeout > 0 {
+			configVars.Config.HttpRequestTimeout = flagHttpRequestTimeout
+		}else{
+			fmt.Println("Invalid input for flag --http-request-timeout")
+		}
+
+		// boolean flag. no need to validate. default is set to false
+		configVars.Config.SkipTLSVerification = flagSkipTLSVerification
+
+		if flagExportDirectory != "" && utils.IsValid(flagExportDirectory) {
+			configVars.Config.ExportDirectory = flagExportDirectory
+		}else{
+			fmt.Println("Invalid input for flag --export-directory")
+		}
+
+		utils.WriteConfigFile(configVars, utils.MainConfigFilePath)
 	},
 }
 
 func init() {
 	RootCmd.AddCommand(SetCmd)
 
-	workingDir, _ := os.Getwd()
-	defaultExportDirectory := workingDir + utils.PathSeparator_ + "exported"
+	var defaultHttpRequestTimeout int
+	var defaultExportDirectory string
+	var defaultSkipTLSVerification bool
 
-	SetCmd.Flags().IntVar(&flagHttpRequestTimeout, "http-request-timeout", 10000,
+	// read current values in file to be passed into default values for flags below
+	mainConfig := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
+
+	defaultSkipTLSVerification = mainConfig.Config.SkipTLSVerification
+
+	if mainConfig.Config.HttpRequestTimeout != 0 {
+		defaultHttpRequestTimeout = mainConfig.Config.HttpRequestTimeout
+	}
+
+	if mainConfig.Config.ExportDirectory != "" {
+		defaultExportDirectory = mainConfig.Config.ExportDirectory
+	}
+
+	SetCmd.Flags().IntVar(&flagHttpRequestTimeout, "http-request-timeout", defaultHttpRequestTimeout,
 		"Timeout for HTTP Client")
-	SetCmd.Flags().BoolVar(&flagSkipTLSVerification, "skip-tls-verification", false,
-		"Skip SSL/TLS verification" )
+	SetCmd.Flags().BoolVar(&flagSkipTLSVerification, "skip-tls-verification", defaultSkipTLSVerification,
+		"Skip SSL/TLS verification")
 	SetCmd.Flags().StringVar(&flagExportDirectory, "export-directory", defaultExportDirectory,
 		"Path to directory where APIs should be saved")
 }

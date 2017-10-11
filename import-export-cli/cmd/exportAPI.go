@@ -131,7 +131,7 @@ func ExportAPI(name string, version string, url string, accessToken string) *res
 	return resp
 }
 
-// Generated with Cobra
+// init using Cobra
 func init() {
 	RootCmd.AddCommand(ExportAPICmd)
 	ExportAPICmd.Flags().StringVarP(&exportAPIName, "name", "n", "",
