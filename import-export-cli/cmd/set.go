@@ -25,7 +25,6 @@ import (
 )
 
 var flagHttpRequestTimeout int
-var flagSkipTLSVerification bool
 var flagExportDirectory string
 
 // SetCmd represents the 'set' command
@@ -45,9 +44,6 @@ var SetCmd = &cobra.Command{
 			fmt.Println("Invalid input for flag --http-request-timeout")
 		}
 
-		// boolean flag. no need to validate. default is set to false
-		configVars.Config.SkipTLSVerification = flagSkipTLSVerification
-
 		if flagExportDirectory != "" && utils.IsValid(flagExportDirectory) {
 			configVars.Config.ExportDirectory = flagExportDirectory
 		}else{
@@ -63,12 +59,9 @@ func init() {
 
 	var defaultHttpRequestTimeout int
 	var defaultExportDirectory string
-	var defaultSkipTLSVerification bool
 
 	// read current values in file to be passed into default values for flags below
 	mainConfig := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
-
-	defaultSkipTLSVerification = mainConfig.Config.SkipTLSVerification
 
 	if mainConfig.Config.HttpRequestTimeout != 0 {
 		defaultHttpRequestTimeout = mainConfig.Config.HttpRequestTimeout
@@ -80,8 +73,6 @@ func init() {
 
 	SetCmd.Flags().IntVar(&flagHttpRequestTimeout, "http-request-timeout", defaultHttpRequestTimeout,
 		"Timeout for HTTP Client")
-	SetCmd.Flags().BoolVar(&flagSkipTLSVerification, "skip-tls-verification", defaultSkipTLSVerification,
-		"Skip SSL/TLS verification")
 	SetCmd.Flags().StringVar(&flagExportDirectory, "export-directory", defaultExportDirectory,
 		"Path to directory where APIs should be saved")
 }

@@ -1,5 +1,7 @@
 # CLI for Importing and Exporting APIs
-## WSO2 API Manager 3.0.0
+## For WSO2 API Manager 3.0.0
+
+Command Line tool for importing and exporting APIs between different API Environemnts
 
 #### Usage 
 ```bash
@@ -84,16 +86,27 @@
 ```bash
         Flags
             --environment, -e
-        Example:
-            wso2paim reset-user -e dev
+        Examples:
+            wso2apim reset-user -e dev
 ```
 * #### version
 ```bash
         wso2apim version 
 ``` 
+
+* #### set
+```bash
+        Flags
+            --httpRequestTimeout
+            --exportDirectory
+        Examples:
+            wso2apim set --httpRequestTimeout 10000
+            wso2apim set --exportDirectory /home/user/exported 
+```
         
 #### Global Flags
 ```bash
     --verbose
+    --insecure, -k
     --help, -h
 ```

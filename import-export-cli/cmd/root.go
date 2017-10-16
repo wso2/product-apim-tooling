@@ -29,6 +29,7 @@ import (
 
 var verbose bool
 var cfgFile string
+var insecure bool
 
 // This represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
@@ -55,6 +56,8 @@ func init() {
 
 	cobra.EnableCommandSorting = false
 	RootCmd.PersistentFlags().BoolVar(&verbose, "verbose", false, "Enable verbose mode")
+	RootCmd.PersistentFlags().BoolVarP(&insecure, "insecure","k", false, "Allow connections to SLL endpoints " +
+		"without certs")
 	RootCmd.PersistentFlags().StringP("author", "a", "", "WSO2")
 
 	viper.BindPFlag("author", RootCmd.PersistentFlags().Lookup("author"))
@@ -80,6 +83,10 @@ func initConfig() {
 	// TODO:: switch condition in production. Verbose on by default in development
 	if !verbose {
 		utils.EnableVerboseMode()
+	}
+
+	if insecure {
+		utils.SkipTLSVerification = true
 	}
 
 	if cfgFile != "" { // enable ability to specify config file via flag

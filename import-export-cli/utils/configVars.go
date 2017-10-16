@@ -23,7 +23,6 @@ import (
 	"io/ioutil"
 	"os"
 	"reflect"
-	"strconv"
 	"strings"
 )
 
@@ -46,10 +45,6 @@ func SetConfigVars(mainConfigFilePath string) error {
 		Logln(LogPrefixInfo + " setting HttpRequestTimeout to " + DefaultHttpRequestTimeout)
 		// default it unlimited
 	}
-	if reflect.ValueOf(mainConfig.Config.SkipTLSVerification).Kind() != reflect.Bool {
-		// value of SkipTLSVerification is not a boolean
-		return errors.New("invalid value for SkipTLSVerification. Should be true/false")
-	}
 	if strings.TrimSpace(mainConfig.Config.ExportDirectory) == "" ||
 		len(strings.TrimSpace(mainConfig.Config.ExportDirectory)) == 0 {
 		return errors.New("exportDirectory cannot be blank")
@@ -60,9 +55,6 @@ func SetConfigVars(mainConfigFilePath string) error {
 
 	HttpRequestTimeout = mainConfig.Config.HttpRequestTimeout
 	Logln(LogPrefixInfo + "Setting HttpTimeoutRequest to " + string(mainConfig.Config.HttpRequestTimeout))
-
-	SkipTLSVerification = mainConfig.Config.SkipTLSVerification
-	Logln(LogPrefixInfo + "Setting SkipTLSVerification to " + strconv.FormatBool(mainConfig.Config.SkipTLSVerification))
 
 	ExportDirectory = mainConfig.Config.ExportDirectory
 	Logln(LogPrefixInfo + "Setting ExportDirectory " + mainConfig.Config.ExportDirectory)

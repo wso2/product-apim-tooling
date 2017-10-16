@@ -1,6 +1,5 @@
 config:
   http_request_timeout: 5000
-  skip_tls_verification: true
 #  export_directory: /home/menuka/.go/src/github.com/wso2/product-apim-tooling/import-export-cli/exported
   export_directory: /home/menuka/exported/new
 environments:
@@ -12,7 +11,7 @@ environments:
     api_manager_endpoint: https://localhost:9292/api/am/publisher/v1.0
     registration_endpoint: https://localhost:9443/identity/connect/register
     token_endpoint: https://localhost:9443/oauth2/token
-  qa:
+  default:
     api_manager_endpoint: https://localhost:9292/api/am/publisher/v1.0
     registration_endpoint: https://localhost:9443/identity/connect/register
     token_endpoint: https://localhost:9443/oauth2/token
