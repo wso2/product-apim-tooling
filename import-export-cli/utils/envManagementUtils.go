@@ -177,3 +177,24 @@ func GetClientSecretOfEnv(env string, password string, filePath string) string {
 	decryptedClientSecret := Decrypt([]byte(GetMD5Hash(password)), envKeys.ClientSecret)
 	return decryptedClientSecret
 }
+
+// check if an environment by the name 'default' exists in the mainConfig file
+// input the path to main_config file
+func IsDefaultEnvPresent(mainConfigFilePath string) bool {
+	mainConfig := GetMainConfigFromFile(mainConfigFilePath)
+	for envName, _ := range mainConfig.Environments {
+		if envName == DefaultEnvironmentName {
+			return true
+		}
+	}
+	return false
+}
+
+// return the name of default environment, if it exists
+// Currently, the name should be literally 'default'
+func GetDefaultEnvironment(mainConfigFilePath string) string {
+	if IsDefaultEnvPresent(mainConfigFilePath) {
+		return DefaultEnvironmentName
+	}
+	return ""
+}

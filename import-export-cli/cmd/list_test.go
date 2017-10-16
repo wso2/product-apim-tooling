@@ -94,7 +94,6 @@ func TestGetAPIListOK(t *testing.T) {
 	if err != nil {
 		t.Error("Error" + err.Error())
 	}
-
 }
 
 func TestGetAPIListUnreachable(t *testing.T) {

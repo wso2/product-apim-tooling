@@ -39,17 +39,17 @@ func WriteConfigFile(c interface{}, envConfigFilePath string) {
 }
 
 // Read and return EnvKeysAll
-func GetEnvKeysAllFromFile(filePath string) *EnvKeysAll {
-	data, err := ioutil.ReadFile(filePath)
+func GetEnvKeysAllFromFile(envKeysAllFilePath string) *EnvKeysAll {
+	data, err := ioutil.ReadFile(envKeysAllFilePath)
 	if err != nil {
-		fmt.Println("Error reading " + filePath)
-		os.Create(filePath)
-		data, err = ioutil.ReadFile(filePath)
+		fmt.Println("Error reading " + envKeysAllFilePath)
+		os.Create(envKeysAllFilePath)
+		data, err = ioutil.ReadFile(envKeysAllFilePath)
 	}
 
 	var envKeysAll EnvKeysAll
 	if err := envKeysAll.ParseEnvKeysFromFile(data); err != nil {
-		fmt.Println(LogPrefixError + "parsing " + filePath)
+		fmt.Println(LogPrefixError + "parsing " + envKeysAllFilePath)
 		return nil
 	}
 
@@ -60,12 +60,12 @@ func GetEnvKeysAllFromFile(filePath string) *EnvKeysAll {
 func GetMainConfigFromFile(filePath string) *MainConfig {
 	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		HandleErrorAndExit("File Not Found: "+filePath, err)
+		HandleErrorAndExit("MainConfig: File Not Found: "+filePath, err)
 	}
 
 	var mainConfig MainConfig
 	if err := mainConfig.ParseMainConfigFromFile(data); err != nil {
-		HandleErrorAndExit("Error parsing "+filePath, err)
+		HandleErrorAndExit("MainConfig: Error parsing "+filePath, err)
 	}
 
 	return &mainConfig

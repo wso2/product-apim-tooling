@@ -47,7 +47,7 @@ func TestEnvExistsInKeysFile(t *testing.T) {
 }
 
 func TestEnvExistsInEndpointsFile(t *testing.T) {
-	writeCorrectMainConfig()
+	WriteCorrectMainConfig()
 
 	returned := EnvExistsInMainConfigFile(devName, testMainConfigFilePath)
 
@@ -70,7 +70,7 @@ func TestEnvExistsInEndpointsFile(t *testing.T) {
 }
 
 func TestGetAPIMEndpointOfEnv(t *testing.T) {
-	writeCorrectMainConfig()
+	WriteCorrectMainConfig()
 
 	returnedEndpoint := GetAPIMEndpointOfEnv(devName, testMainConfigFilePath)
 	expectedEndpoint := getSampleMainConfig().Environments[devName].APIManagerEndpoint
@@ -82,7 +82,7 @@ func TestGetAPIMEndpointOfEnv(t *testing.T) {
 }
 
 func TestGetTokenEndpointOfEnv(t *testing.T) {
-	writeCorrectMainConfig()
+	WriteCorrectMainConfig()
 
 	returnedEndpoint := GetTokenEndpointOfEnv(devName, testMainConfigFilePath)
 	expectedEndpoint := getSampleMainConfig().Environments[devName].TokenEndpoint
@@ -94,7 +94,7 @@ func TestGetTokenEndpointOfEnv(t *testing.T) {
 }
 
 func TestGetRegistrationEndpointOfEnv(t *testing.T) {
-	writeCorrectMainConfig()
+	WriteCorrectMainConfig()
 
 	returnedEndpoint := GetRegistrationEndpointOfEnv(devName, testMainConfigFilePath)
 	expectedEndpoint := getSampleMainConfig().Environments[devName].RegistrationEndpoint
@@ -158,7 +158,7 @@ func TestAddNewEnvToKeysFile2(t *testing.T) {
 
 // Case 1: Correct Details
 func TestRemoveEnvFromKeysFile1(t *testing.T) {
-	writeCorrectMainConfig()
+	WriteCorrectMainConfig()
 	writeCorrectKeys()
 	err := RemoveEnvFromKeysFile(devName, testKeysFilePath, testMainConfigFilePath)
 	if err != nil {
@@ -170,7 +170,7 @@ func TestRemoveEnvFromKeysFile1(t *testing.T) {
 
 // Case 2: Env not available in keys file
 func TestRemoveEnvFromKeysFile2(t *testing.T) {
-	writeCorrectMainConfig()
+	WriteCorrectMainConfig()
 
 	// write incorrect keys
 	envKeysAll.Environments = make(map[string]EnvKeys)

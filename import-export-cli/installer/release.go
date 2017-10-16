@@ -23,6 +23,7 @@ var importExportCLIPOS string
 var importExportCLIPArch string
 
 //const resourceStore = "https://cdn-updates.private.wso2.com/importExportCLI-build-resources/"
+
 const resourceStore = "https://github.com/wso2/product-apim-tooling/" // TODO:: Add a working resourceStore
 
 var windowsData = map[string]string{

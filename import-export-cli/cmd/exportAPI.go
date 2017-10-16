@@ -104,6 +104,7 @@ func ExportAPI(name string, version string, url string, accessToken string) *res
 	if string(url[len(url)-1]) != "/" {
 		url += "/"
 	}
+
 	url += "export/apis"
 
 	query := "?query=" + name
@@ -138,9 +139,8 @@ func init() {
 		"Name of the API to be exported")
 	ExportAPICmd.Flags().StringVarP(&exportAPIVersion, "version", "v", "",
 		"Version of the API to be exported")
-	ExportAPICmd.Flags().StringVarP(&exportEnvironment, "environment", "e", "",
-		"Environment to which the API "+
-			"should be exported")
+	ExportAPICmd.Flags().StringVarP(&exportEnvironment, "environment", "e",
+		utils.GetDefaultEnvironment(utils.MainConfigFilePath), "Environment to which the API should be exported")
 
 	ExportAPICmd.Flags().StringVarP(&exportAPICmdUsername, "username", "u", "", "Username")
 	ExportAPICmd.Flags().StringVarP(&exportAPICmdPassword, "password", "p", "", "Password")

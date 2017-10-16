@@ -57,7 +57,7 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 					// username entered with flag -u is not the same as username found
 					// in env_keys_all.yaml file
 					fmt.Println(LogPrefixWarning + "Username entered with flag -u for the environment '" + environment +
-						"' is not the same as username found in file '"+ EnvKeysAllFilePath +"'")
+						"' is not the same as username found in file '" + EnvKeysAllFilePath + "'")
 					fmt.Println("Execute '" + ProjectName + " reset-user -e " + environment + "' to clear user data")
 					os.Exit(1)
 				} else {
@@ -134,6 +134,12 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 
 		return accessToken, apiManagerEndpoint, nil
 	} else {
+		// env does not exist in main config file
+		if environment == "" {
+			return "", "", errors.New("no environment specified. Either specify it using the -e flag or name one of " +
+				"the environments in '" + MainConfigFileName + "' to 'default'")
+		}
+
 		return "", "", errors.New("Details incorrect/unavailable for environment '" + environment + "' in " +
 			MainConfigFilePath)
 	}

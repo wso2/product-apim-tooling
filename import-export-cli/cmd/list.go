@@ -49,8 +49,14 @@ var ListCmd = &cobra.Command{
 
 			if err == nil {
 				fmt.Println("No. of APIs:", count)
+				if len(apis) != 0 {
+					fmt.Println("----------------------------")
+				}
 				for _, api := range apis {
 					fmt.Println(api.Name + " v" + api.Version)
+				}
+				if len(apis) != 0 {
+					fmt.Println("----------------------------")
 				}
 			} else {
 				utils.Logln(utils.LogPrefixError+"Getting List of APIs", err)
@@ -104,8 +110,8 @@ func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (in
 
 func init() {
 	RootCmd.AddCommand(ListCmd)
-	ListCmd.Flags().StringVarP(&listEnvironment, "environment", "e", "",
-		"Environment to be searched")
-	ListCmd.Flags().StringVarP(&listCmdUsername, "usrename", "u", "", "Username")
+	ListCmd.Flags().StringVarP(&listEnvironment, "environment", "e",
+		utils.GetDefaultEnvironment(utils.MainConfigFilePath),"Environment to be searched")
+	ListCmd.Flags().StringVarP(&listCmdUsername, "username", "u", "", "Username")
 	ListCmd.Flags().StringVarP(&listCmdPassword, "password", "p", "", "Password")
 }

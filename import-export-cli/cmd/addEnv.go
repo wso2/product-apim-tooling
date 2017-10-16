@@ -37,15 +37,17 @@ var addEnvCmd = &cobra.Command{
 	Long:  utils.AddEnvCmdLongDesc + utils.AddEnvCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + "add-env called")
-		err := addEnv(flagAddEnvName, flagAPIManagerEndpoint, flagRegistrationEndpoint, flagTokenEndpoint)
+		err := addEnv(flagAddEnvName, flagAPIManagerEndpoint, flagRegistrationEndpoint, flagTokenEndpoint,
+			utils.MainConfigFilePath)
 		if err != nil {
 			utils.HandleErrorAndExit("Error adding environment", err)
 		}
 	},
 }
 
-func addEnv(envName string, apimEndpoint string, regEndpoint string, tokenEndpoint string) error {
-	mainConfig := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
+func addEnv(envName string, apimEndpoint string, regEndpoint string, tokenEndpoint string,
+	mainConfigFilePath string) error {
+	mainConfig := utils.GetMainConfigFromFile(mainConfigFilePath)
 
 	if envName == "" {
 		// name of the environment is blank
@@ -55,13 +57,16 @@ func addEnv(envName string, apimEndpoint string, regEndpoint string, tokenEndpoi
 		// at least one of the 3 endpoints is blank
 		return errors.New("none of the 3 endpoints can be blank")
 	}
-	if utils.EnvExistsInMainConfigFile(envName, utils.MainConfigFilePath) {
+	if utils.EnvExistsInMainConfigFile(envName, mainConfigFilePath) {
 		// environment already exists
 		return errors.New("environment '" + envName + "' already exists in " + utils.MainConfigFilePath)
 	}
 
-	var envEndpoints utils.EnvEndpoints = utils.EnvEndpoints{APIManagerEndpoint: apimEndpoint,
-		TokenEndpoint: tokenEndpoint, RegistrationEndpoint: regEndpoint}
+	var envEndpoints utils.EnvEndpoints = utils.EnvEndpoints{
+											APIManagerEndpoint: apimEndpoint,
+											TokenEndpoint: tokenEndpoint,
+											RegistrationEndpoint: regEndpoint,
+										  }
 
 	mainConfig.Environments[envName] = envEndpoints
 	utils.WriteConfigFile(mainConfig, utils.MainConfigFilePath)

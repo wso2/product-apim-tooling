@@ -26,13 +26,11 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
 	"net/http/httptest"
-	"log"
 )
 
 func TestExportAPI(t *testing.T) {
 	var server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
-			log.Fatal(utils.WhereAmI())
 			t.Errorf("Expected 'GET', got '%s'\n", r.Method)
 		}
 

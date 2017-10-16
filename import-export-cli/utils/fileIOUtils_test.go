@@ -63,11 +63,12 @@ func initSampleKeys() {
 	envKeysAll.Environments[qaName] = EnvKeys{"qa_client_id", qaEncryptedClientSecret, qaUsername}
 }
 
-// helper function for testing
-func writeCorrectMainConfig() {
+// helper function for unit-testing
+func WriteCorrectMainConfig() {
 	initSampleMainConfig()
 	WriteConfigFile(mainConfig, testMainConfigFilePath)
 }
+
 func initSampleMainConfig() {
 	mainConfig.Config = Config{2500, true, "/home/exported"}
 	mainConfig.Environments = make(map[string]EnvEndpoints)
@@ -124,7 +125,7 @@ func TestGetEnvKeysAllFromFile3(t *testing.T) {
 
 func TestGetMainConfigFromFile(t *testing.T) {
 	// testing for correct data
-	writeCorrectMainConfig()
+	WriteCorrectMainConfig()
 	mainConfigReturned := GetMainConfigFromFile(testMainConfigFilePath)
 
 	if mainConfigReturned.Environments[devName] != mainConfig.Environments[devName] ||
@@ -140,7 +141,7 @@ func TestGetMainConfigFromFile(t *testing.T) {
 
 func TestMainConfig_ParseMainConfigFromFile(t *testing.T) {
 	var envEndpointsAllLocal MainConfig
-	writeCorrectMainConfig()
+	WriteCorrectMainConfig()
 	data, err := ioutil.ReadFile(testMainConfigFilePath)
 	if err != nil {
 		t.Error("Error")
