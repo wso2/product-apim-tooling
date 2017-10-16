@@ -17,5 +17,6 @@ package main
 import "github.com/wso2/product-apim-tooling/import-export-cli/cmd"
 
 func main() {
+
 	cmd.Execute()
 }

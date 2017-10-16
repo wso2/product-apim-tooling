@@ -14,7 +14,7 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package utils
 
@@ -24,14 +24,15 @@ const ProjectName string = "wso2apim-cli"
 
 // File Names and Paths
 const PathSeparator_ string = string(os.PathSeparator)
-const ApplicationRoot string = "/home/menuka/.go/src/github" +
-	".com/wso2/product-apim-tooling/import-export-cli" // TODO:: Change to a generic root
+var ApplicationRoot, _ = os.Getwd()
+//var ApplicationRoot  = "/home/menuka/.go/src/github.com/wso2/product-apim-tooling/import-export-cli"
 const EnvKeysAllFileName string = "env_keys_all.yaml"
-const EnvKeysAllFilePath string = ApplicationRoot + PathSeparator_ + EnvKeysAllFileName
+var EnvKeysAllFilePath string = ApplicationRoot + PathSeparator_ + EnvKeysAllFileName
 const MainConfigFileName string = "main_config.yaml"
-const MainConfigFilePath string = ApplicationRoot + PathSeparator_ + MainConfigFileName
+var MainConfigFilePath string = ApplicationRoot + PathSeparator_ + MainConfigFileName
 const ExportedAPIsDirectoryName string = "exported"
-const ExportedAPIsDirectoryPath string = ApplicationRoot + PathSeparator_ + ExportedAPIsDirectoryName
+var ExportedAPIsDirectoryPath string = ApplicationRoot + PathSeparator_ + ExportedAPIsDirectoryName
+const DefaultEnvironmentName string = "default"
 
 // Headers and Header Values
 const HeaderAuthorization string = "Authorization"
@@ -58,6 +59,5 @@ const LogPrefixWarning = "[WARN]: "
 const LogPrefixError = "[ERROR]: "
 
 // Other
-const APICallTimeout = 5
-const WSO2APIMUpdateTokenTimeout = 2
 const DefaultTokenValidityPeriod string = "3600"
+const DefaultHttpRequestTimeout string = "unlimited"

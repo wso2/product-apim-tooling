@@ -14,20 +14,24 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package utils
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/go-resty/resty"
-	"bufio"
-	"os"
 	"golang.org/x/crypto/ssh/terminal"
+	"os"
+	"time"
+	"runtime"
+	"strings"
 )
 
 // Invoke http-post request using go-resty
 func InvokePOSTRequest(url string, headers map[string]string, body string) (*resty.Response, error) {
+	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Second)
 	resp, err := resty.R().SetHeaders(headers).SetBody(body).Post(url)
 
 	return resp, err
@@ -46,8 +50,29 @@ func PromptForPassword() string {
 	fmt.Print("Enter Password: ")
 	bytePassword, _ := terminal.ReadPassword(0)
 	password := string(bytePassword)
-
+	fmt.Println()
 	return password
 }
 
+// return a string containing the file name, function name
+// and the line number of a specified entry on the call stack
+func WhereAmI(depthList ...int) string {
+	var depth int
+	if depthList == nil {
+		depth = 1
+	} else {
+		depth = depthList[0]
+	}
+	function, file, line, _ := runtime.Caller(depth)
+	return fmt.Sprintf("File: %s  Function: %s Line: %d", chopPath(file), runtime.FuncForPC(function).Name(), line)
+}
 
+// return the source filename after the last slash
+func chopPath(original string) string {
+	i := strings.LastIndex(original, "/")
+	if i == -1 {
+		return original
+	} else {
+		return original[i+1:]
+	}
+}

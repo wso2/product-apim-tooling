@@ -82,7 +82,7 @@ var ExportAPICmd = &cobra.Command{
 // Exported API will be written to a zip file
 func WriteToZip(exportAPIName string, resp *resty.Response) {
 	// Write to file
-	directory := utils.ExportedAPIsDirectoryPath
+	directory := utils.ExportDirectory
 	// create directory if it doesn't exist
 	if _, err := os.Stat(directory); os.IsNotExist(err) {
 		os.Mkdir(directory, 0777)
@@ -104,6 +104,7 @@ func ExportAPI(name string, version string, url string, accessToken string) *res
 	if string(url[len(url)-1]) != "/" {
 		url += "/"
 	}
+
 	url += "export/apis"
 
 	query := "?query=" + name
@@ -116,9 +117,10 @@ func ExportAPI(name string, version string, url string, accessToken string) *res
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 	headers[utils.HeaderAccept] = utils.HeaderValueApplicationZip
 
-	resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTPS certificates
+	if utils.SkipTLSVerification {
+		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTPS certificates
+	}
 
-	utils.Logln("")
 	resp, err := resty.R().
 		SetHeaders(headers).
 		Get(url)
@@ -130,16 +132,15 @@ func ExportAPI(name string, version string, url string, accessToken string) *res
 	return resp
 }
 
-// Generated with Cobra
+// init using Cobra
 func init() {
 	RootCmd.AddCommand(ExportAPICmd)
 	ExportAPICmd.Flags().StringVarP(&exportAPIName, "name", "n", "",
 		"Name of the API to be exported")
 	ExportAPICmd.Flags().StringVarP(&exportAPIVersion, "version", "v", "",
 		"Version of the API to be exported")
-	ExportAPICmd.Flags().StringVarP(&exportEnvironment, "environment", "e", "",
-		"Environment to which the API "+
-			"should be exported")
+	ExportAPICmd.Flags().StringVarP(&exportEnvironment, "environment", "e",
+		utils.GetDefaultEnvironment(utils.MainConfigFilePath), "Environment to which the API should be exported")
 
 	ExportAPICmd.Flags().StringVarP(&exportAPICmdUsername, "username", "u", "", "Username")
 	ExportAPICmd.Flags().StringVarP(&exportAPICmdPassword, "password", "p", "", "Password")

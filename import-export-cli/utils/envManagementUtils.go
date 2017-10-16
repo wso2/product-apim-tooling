@@ -14,7 +14,7 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package utils
 
@@ -48,7 +48,7 @@ func EnvExistsInMainConfigFile(env string, filePath string) bool {
 	return false
 }
 
-// Insert new env entry to env_keys_all.yaml
+// Insert new env entry to keys file (env_keys_all.yaml)
 func AddNewEnvToKeysFile(name string, envKeys EnvKeys, filePath string) {
 	envKeysAll := GetEnvKeysAllFromFile(filePath)
 	fmt.Println("EnvKeysAll:", envKeysAll)
@@ -66,16 +66,24 @@ func AddNewEnvToKeysFile(name string, envKeys EnvKeys, filePath string) {
 	WriteConfigFile(envKeysAll, filePath)
 }
 
-func RemoveEnvFromKeysFile(env string, keysFilePath string, endpointsFilePath string) (error) {
-	fmt.Println("RemoveEnvFromKeysFile(): KeysFilePath:", keysFilePath)
-	fmt.Println("RemoveEnvFromKeysFile(): EndpointsFilePath:", endpointsFilePath)
+// used with 'reset-user' command
+// does not remove env from endpoints file
+func RemoveEnvFromKeysFile(env string, keysFilePath string, endpointsFilePath string) error {
+	/*
+	 endpointsFilePath is passed to check if it exists in endpoints
+	 env CANNOT exist only in keys file
+	 env CAN exist only in endpoints file (env not initialized i.e. not used with a command)
+	 */
 	if env == "" {
 		return errors.New("environment cannot be blank")
 	}
 	envKeysAll := GetEnvKeysAllFromFile(keysFilePath)
 	if EnvExistsInMainConfigFile(env, endpointsFilePath) {
+		Logln(LogPrefixInfo + "Environment '" + env + "' exists in file " + endpointsFilePath)
 		if EnvExistsInKeysFile(env, keysFilePath) {
+			Logln(LogPrefixInfo + "Environment '" + env + "' exists in file " + keysFilePath)
 			delete(envKeysAll.Environments, env)
+			Logln(LogPrefixInfo + "removing environment '" + env + "' from '" + keysFilePath + "'")
 			WriteConfigFile(envKeysAll, keysFilePath)
 			return nil
 		} else {
@@ -84,9 +92,26 @@ func RemoveEnvFromKeysFile(env string, keysFilePath string, endpointsFilePath st
 		}
 	} else {
 		// env doesn't exist in endpoints file
+		// nothing to remove
 		return errors.New("environment not found in " + endpointsFilePath)
 	}
+}
 
+// Input: name of the environment to be removed
+func RemoveEnvFromMainConfigFile(env string, endpointsFilePath string) error {
+	if env == "" {
+		return errors.New("environment cannot be blank")
+	}
+	mainConfig := GetMainConfigFromFile(endpointsFilePath)
+	if EnvExistsInMainConfigFile(env, endpointsFilePath) {
+		Logln(LogPrefixInfo + "Environment '" + env + "' exists in file " + endpointsFilePath)
+		delete(mainConfig.Environments, env)
+		WriteConfigFile(mainConfig, endpointsFilePath)
+		return nil
+	} else {
+		// env doesn't exist in endpoints file
+		return errors.New("environment not found in " + endpointsFilePath)
+	}
 }
 
 // Get keys of environment 'env' from the file env_keys_all.yaml
@@ -151,4 +176,25 @@ func GetClientSecretOfEnv(env string, password string, filePath string) string {
 	envKeys, _ := GetKeysOfEnvironment(env, filePath)
 	decryptedClientSecret := Decrypt([]byte(GetMD5Hash(password)), envKeys.ClientSecret)
 	return decryptedClientSecret
+}
+
+// check if an environment by the name 'default' exists in the mainConfig file
+// input the path to main_config file
+func IsDefaultEnvPresent(mainConfigFilePath string) bool {
+	mainConfig := GetMainConfigFromFile(mainConfigFilePath)
+	for envName, _ := range mainConfig.Environments {
+		if envName == DefaultEnvironmentName {
+			return true
+		}
+	}
+	return false
+}
+
+// return the name of default environment, if it exists
+// Currently, the name should be literally 'default'
+func GetDefaultEnvironment(mainConfigFilePath string) string {
+	if IsDefaultEnvPresent(mainConfigFilePath) {
+		return DefaultEnvironmentName
+	}
+	return ""
 }

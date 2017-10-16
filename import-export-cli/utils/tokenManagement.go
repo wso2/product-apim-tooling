@@ -14,20 +14,20 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package utils
 
 import (
-	"github.com/go-resty/resty"
 	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/go-resty/resty"
+	"net/http"
 	"os"
 	"strings"
-	"errors"
-	"net/http"
 )
 
 // Returns the AccessToken, APIManagerEndpoint, Errors given an Environment
@@ -56,11 +56,9 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 				if flagUsername != username {
 					// username entered with flag -u is not the same as username found
 					// in env_keys_all.yaml file
-					Logln(LogPrefixWarning + "Username entered with flag -u for the environment '" + environment +
-						"' is not the same as username found in env_keys_all.yaml file")
-					fmt.Println("Username entered is not found under '" + environment + "' in env_keys_all.yaml file")
-					//log.Println("Execute 'wso2apim reset-user -e " + environment +"' to clear user data")
-					fmt.Println("Execute 'wso2apim reset-user -e " + environment + "' to clear user data")
+					fmt.Println(LogPrefixWarning + "Username entered with flag -u for the environment '" + environment +
+						"' is not the same as username found in file '" + EnvKeysAllFilePath + "'")
+					fmt.Println("Execute '" + ProjectName + " reset-user -e " + environment + "' to clear user data")
 					os.Exit(1)
 				} else {
 					// username entered with flag -u is the same as username found in env_keys_all.yaml file
@@ -132,10 +130,16 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 			GetBase64EncodedCredentials(clientID, clientSecret), tokenEndpoint)
 		accessToken := responseDataMap["access_token"]
 
-		Logln(LogPrefixInfo+"AccessToken:", accessToken)
+		Logln(LogPrefixInfo+"AccessToken:", accessToken) // TODO:: Remove in production
 
 		return accessToken, apiManagerEndpoint, nil
 	} else {
+		// env does not exist in main config file
+		if environment == "" {
+			return "", "", errors.New("no environment specified. Either specify it using the -e flag or name one of " +
+				"the environments in '" + MainConfigFileName + "' to 'default'")
+		}
+
 		return "", "", errors.New("Details incorrect/unavailable for environment '" + environment + "' in " +
 			MainConfigFilePath)
 	}
@@ -154,8 +158,7 @@ func GetClientIDSecret(username string, password string, url string) (string, st
 	headers[HeaderAuthorization] = HeaderValueAuthBasicPrefix + " " + GetBase64EncodedCredentials(username, password)
 	// headers["Authorization"] = "Basic " + GetBase64EncodedCredentials(username, password)
 
-
-	if SkipTLSVerify{
+	if SkipTLSVerification {
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTPS certificates
 	}
 
@@ -163,17 +166,16 @@ func GetClientIDSecret(username string, password string, url string) (string, st
 	resp, err := InvokePOSTRequest(url, headers, body)
 
 	if err != nil {
-		HandleErrorAndExit("Error in connecting", err)
+		HandleErrorAndExit("Error in connecting.", err)
 	}
 
 	Logln("GetClientIDSecret(): Status - " + resp.Status())
 
 	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
 		// 200 OK or 201 Created
-		//m := make(map[string]string) // a map to hold response data
 		registrationResponse := RegistrationResponse{}
 		data := []byte(resp.Body())
-		err = json.Unmarshal(data, &registrationResponse) // add response data to m
+		err = json.Unmarshal(data, &registrationResponse)
 
 		clientID := registrationResponse.ClientID
 		clientSecret := registrationResponse.ClientSecret
@@ -184,7 +186,7 @@ func GetClientIDSecret(username string, password string, url string) (string, st
 		//fmt.Println("Error:", resp.Error())
 		//fmt.Printf("Body: %s\n", resp.Body())
 		if resp.StatusCode() == http.StatusUnauthorized {
-			HandleErrorAndExit("Incorrect Username/Password combination", errors.New("401 Unauthorized"))
+			HandleErrorAndExit("Incorrect Username/Password combination.", errors.New("401 Unauthorized"))
 		}
 		return "", "", errors.New("Request didn't respond 200 OK: " + resp.Status())
 	}
@@ -213,7 +215,7 @@ func GetOAuthTokens(username string, password string,
 	headers[HeaderAuthorization] = HeaderValueAuthBearerPrefix + " " + b64EncodedClientIDClientSecret
 	headers[HeaderAccept] = HeaderValueApplicationJSON
 
-	if SkipTLSVerify{
+	if SkipTLSVerification {
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTP certificates
 	}
 
@@ -221,11 +223,11 @@ func GetOAuthTokens(username string, password string,
 
 	if err != nil {
 		Logln(LogPrefixError + "connecting to " + url)
-		HandleErrorAndExit("Unable to Connect", err)
+		HandleErrorAndExit("Unable to Connect.", err)
 	}
 
 	if resp.StatusCode() != http.StatusOK {
-		HandleErrorAndExit("Unable to connect", errors.New("Status: "+resp.Status()))
+		HandleErrorAndExit("Unable to connect.", errors.New("Status: "+resp.Status()))
 		return nil, nil
 	}
 

@@ -14,7 +14,7 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package cmd
 
@@ -22,9 +22,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 var verbose bool
@@ -63,17 +63,22 @@ func init() {
 	// Cobra supports Persistent Flags, which, if defined here,
 	// will be global for your application.
 
-	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "",
-		"config file (default is $HOME/.wso2apim-cli.yaml)")
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	// Init ConfigVars
+	err := utils.SetConfigVars(utils.MainConfigFilePath)
+	if err != nil {
+		utils.HandleErrorAndExit("Error reading "+utils.MainConfigFilePath+".", err)
+	}
 
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	if verbose {
+	// TODO:: switch condition in production. Verbose on by default in development
+	if !verbose {
 		utils.EnableVerboseMode()
 	}
 
