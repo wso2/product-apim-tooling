@@ -1,6 +1,7 @@
 package com.swagger.plugins.wso2;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -33,10 +34,7 @@ public class Wso2Api implements HttpConnectionService{
     private static final String TOKEN_API_URL = "https://gateway.api.cloud.wso2.com/token";
 
     private CloseableHttpClient httpClient;
-    private BufferedReader inDataStream;
-    private InputStream inputStream;
-    private InputStreamReader inputStreamReader;
-    private StringBuffer responseBody;
+    private String content;
     private CloseableHttpResponse response;
     private JSONParser parser;
 
@@ -95,19 +93,11 @@ public class Wso2Api implements HttpConnectionService{
                 throw new PluginExecutionException("Bad Request, check content");
             }
 
-            inputStream = response.getEntity().getContent();
-            inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
-            inDataStream = new BufferedReader(inputStreamReader);
-            responseBody = new StringBuffer();
-            String line;
-            while ((line = inDataStream.readLine()) != null) {
-                responseBody.append(line);
-            }
-
+            content = new String(IOUtils.toByteArray(response.getEntity().getContent()));
             LOGGER.info("Received the response");
 
             parser = new JSONParser();
-            JSONObject clientIdAndSecretJson = (JSONObject) parser.parse(responseBody.toString());
+            JSONObject clientIdAndSecretJson = (JSONObject) parser.parse(content);
             clientId = clientIdAndSecretJson.get("clientId").toString();
             clientSecret = clientIdAndSecretJson.get("clientSecret").toString();
 
@@ -123,7 +113,6 @@ public class Wso2Api implements HttpConnectionService{
 
         LOGGER.info("Obtaining the encoded clientId and clientSecret");
         encodedIdAndSecret = Base64.encodeBase64String(toEncode.getBytes("UTF-8"));
-
     }
 
 
@@ -158,17 +147,11 @@ public class Wso2Api implements HttpConnectionService{
                 throw new PluginExecutionException("Bad Request, check content");
             }
 
-            inDataStream = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
-            responseBody = new StringBuffer();
-            String line;
-            while ((line = inDataStream.readLine()) != null) {
-                responseBody.append(line);
-            }
-
+            content = new String(IOUtils.toByteArray(response.getEntity().getContent()));
             LOGGER.info("Received the response");
 
             parser = new JSONParser();
-            accessTokenJson = (JSONObject) parser.parse(responseBody.toString());
+            accessTokenJson = (JSONObject) parser.parse(content);
 
         } catch (IOException e) {
             throw e;
@@ -208,12 +191,7 @@ public class Wso2Api implements HttpConnectionService{
                 throw new PluginExecutionException("Bad content");
             }
 
-            inDataStream = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
-            responseBody = new StringBuffer();
-            String line;
-            while ((line = inDataStream.readLine()) != null) {
-                responseBody.append(line);
-            }
+            content = new String(IOUtils.toByteArray(response.getEntity().getContent()));
 
             if (response.getStatusLine().getStatusCode() == 201) {
                 LOGGER.info("The API is created in the cloud");
@@ -227,7 +205,7 @@ public class Wso2Api implements HttpConnectionService{
             httpClient.close();
         }
 
-        System.out.println(responseBody.toString());
+        System.out.println(content);
     }
 
     /**

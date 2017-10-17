@@ -105,9 +105,9 @@ public class Wso2ApiGatewayPlugin {
      * in the integrations interface.
      */
     public void configure() {
-        this.userEmail = "yolom@seekjobs4u.com";
-        this.userOrganizationKey = "yolo4958";
-        this.userPassword = "Yolofernando123";
+        this.userEmail = "fpk11@geronra.com";
+        this.userOrganizationKey = "testusercompany";
+        this.userPassword = "Testuser1";
         // The "/" is compulsory for the context otherwise the server will return code 400 instead of 409.
         this.context = "/"+"simple";
     }
