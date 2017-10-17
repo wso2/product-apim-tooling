@@ -56,8 +56,8 @@ func init() {
 
 	cobra.EnableCommandSorting = false
 	RootCmd.PersistentFlags().BoolVar(&verbose, "verbose", false, "Enable verbose mode")
-	RootCmd.PersistentFlags().BoolVarP(&insecure, "insecure","k", false, "Allow connections to SLL endpoints " +
-		"without certs")
+	RootCmd.PersistentFlags().BoolVarP(&insecure, "insecure","k", false,
+		"Allow connections to SLL endpoints without certs")
 	RootCmd.PersistentFlags().StringP("author", "a", "", "WSO2")
 
 	viper.BindPFlag("author", RootCmd.PersistentFlags().Lookup("author"))
@@ -85,6 +85,7 @@ func initConfig() {
 		utils.EnableVerboseMode()
 	}
 
+	fmt.Println("Insecure:", insecure)
 	if insecure {
 		utils.SkipTLSVerification = true
 	}

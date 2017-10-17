@@ -27,7 +27,7 @@ import (
 )
 
 var HttpRequestTimeout int = 2500
-var SkipTLSVerification bool = true
+var SkipTLSVerification bool
 var ExportDirectory string
 
 func SetConfigVars(mainConfigFilePath string) error {
