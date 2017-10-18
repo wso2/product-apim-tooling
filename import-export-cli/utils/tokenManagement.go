@@ -39,7 +39,8 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment, MainConfigFilePath)
 		tokenEndpoint := GetTokenEndpointOfEnv(environment, MainConfigFilePath)
 
-		fmt.Println("Reg Endpoint read:", registrationEndpoint)
+		Logln(LogPrefixInfo + "Environment: '" + environment + "'")
+		Logln(LogPrefixInfo + "Reg Endpoint read:", registrationEndpoint)
 
 		var username string
 		var password string

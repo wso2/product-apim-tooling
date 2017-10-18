@@ -54,6 +54,7 @@ import-export-cli/env_keys_all.yaml
 # Binaries
 import-export-cli/import-export-cli
 import-export-cli/wso2apim-cli
+import-export-cli/build/
 
 
 # Test Coverage Indicators
@@ -61,3 +62,4 @@ import-export-cli/wso2apim-cli
 import-export-cli/utils/c.out
 import-export-cli/utils/coverage.out
 import-export-cli/utils/coverage.html
+import-export-cli/wso2apim

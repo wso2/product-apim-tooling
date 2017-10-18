@@ -3,7 +3,7 @@
 
 Command Line tool for importing and exporting APIs between different API Environemnts
 
-#### Usage 
+## Usage 
 ```bash
      wso2apim [command]
 ```
@@ -109,4 +109,27 @@ Command Line tool for importing and exporting APIs between different API Environ
     --verbose
     --insecure, -k
     --help, -h
+```
+
+<hr/>
+
+## Creating Binaries
+
+### Linux
+```
+go build -o build/wso2apim
+```
+### Windows
+* 32 bit version
+```
+env GOOS=windows GOARCH=386 go build -o build/wso2apim.exe main.go
+```
+* 64 bit version
+```
+env GOOS=windows GOARCH=amd64 go build -o build/wso2apim.exe main.go
+```
+
+### Mac
+```
+env GOOS=darwin GOARCH=arm build -o build/wso2apim main.go
 ```

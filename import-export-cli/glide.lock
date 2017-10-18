@@ -1,12 +1,12 @@
 hash: 77d05a45eabce95f3bc4faadaec735f9f4ffd30a8813274780201e89bfec6038
-updated: 2017-10-16T09:44:26.184125191+05:30
+updated: 2017-10-18T09:36:51.027733674+05:30
 imports:
 - name: github.com/fsnotify/fsnotify
   version: 4da3e2cfbabc9f751898f250b49f2439785783a1
 - name: github.com/go-resty/resty
   version: 9ac9c42358f7c3c69ac9f8610e8790d7c338e85d
 - name: github.com/hashicorp/hcl
-  version: 42e33e2d55a0ff1d6263f738896ea8c13571a8d0
+  version: 23c074d0eceb2b8a5bfdbb271ab780cde70f05a8
   subpackages:
   - hcl/ast
   - hcl/parser
@@ -23,7 +23,7 @@ imports:
 - name: github.com/magiconair/properties
   version: 8d7837e64d3c1ee4e54a880c5a920ab4316fc90a
 - name: github.com/mitchellh/mapstructure
-  version: d0303fe809921458f417bcf828397a65db30a7e4
+  version: 06020f85339e21b2478f756a78e295255ffa4d6a
 - name: github.com/pelletier/go-toml
   version: 2009e44b6f182e34d8ce081ac2767622937ea3d4
 - name: github.com/renstrom/dedent
@@ -39,7 +39,7 @@ imports:
 - name: github.com/spf13/jwalterweatherman
   version: 12bd96e66386c1960ab0f74ced1362f66f552f7b
 - name: github.com/spf13/pflag
-  version: a9789e855c7696159b7db0db7f440b449edf2b31
+  version: 1f33b80956cde38911d1f23d764deb8d77a649ce
 - name: github.com/spf13/viper
   version: 25b30aa063fc18e48662b86996252eabdcf2f0c7
 - name: golang.org/x/crypto
@@ -47,11 +47,11 @@ imports:
   subpackages:
   - ssh/terminal
 - name: golang.org/x/net
-  version: a04bdaca5b32abe1c069418fb7088ae607de5bd0
+  version: 1087133bc4af3073e18add999345c6ae75918503
   subpackages:
   - publicsuffix
 - name: golang.org/x/sys
-  version: 686000749eaec0b8855b8eef5336cf63899fe51d
+  version: 8dbc5d05d6edcc104950cc299a1ce6641235bc86
   subpackages:
   - unix
   - windows

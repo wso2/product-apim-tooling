@@ -4,14 +4,14 @@ config:
   export_directory: /home/menuka/exported/new
 environments:
   apim1:
-    api_manager_endpoint: https://35.187.83.50:9292/api/am/publisher/v1.0
-    registration_endpoint: https://35.187.83.50:9443/identity/connect/register
-    token_endpoint: https://35.187.83.50:9443/oauth2/token
+    api_manager_endpoint: https://35.195.132.29:9292/api/am/publisher/v1.0
+    registration_endpoint: https://35.195.132.29:9443/identity/connect/register
+    token_endpoint: https://35.195.132.29:9443/oauth2/token
   dev:
     api_manager_endpoint: https://localhost:9292/api/am/publisher/v1.0
     registration_endpoint: https://localhost:9443/identity/connect/register
     token_endpoint: https://localhost:9443/oauth2/token
-  default:
+  staging:
     api_manager_endpoint: https://localhost:9292/api/am/publisher/v1.0
     registration_endpoint: https://localhost:9443/identity/connect/register
     token_endpoint: https://localhost:9443/oauth2/token
