@@ -4,7 +4,8 @@ import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.Swagger;
 import io.swagger.models.properties.StringProperty;
-import io.swagger.util.*;
+import io.swagger.util.Json;
+import io.swagger.util.Yaml;
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
@@ -16,12 +17,13 @@ import java.io.IOException;
 /*****************************************************************
  *  Class name : Wso2ApiGatewayPlugin
  * Methods : beforeApiVersionSaved, afterApiVersionSaved, configure, getConfigurationSchema
+ * Attributes : log, userEmail, userPassword, userOrganizationKey, apiId, context
  * Functionality : Contains the methods to check api identifier, obtain user inputs and push the API to the cloud
  * Visibility : Public
  * ****************************************************************/
 public class Wso2ApiGatewayPlugin {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Wso2ApiGatewayPlugin.class);
+    private static final Logger log = LoggerFactory.getLogger(Wso2ApiGatewayPlugin.class);
     private static final String WSO2_API_ID_EXTENSION = "x-wso2-api-id";
     private String userEmail;
     private String userPassword;
@@ -29,21 +31,20 @@ public class Wso2ApiGatewayPlugin {
     private String apiId;               //apiId will be used when calling the beforeApiVersionSaved method
     private String context;
 
-
     /**
      * This method is triggered before saving the API to ensure whether a valid identifier exists.
      *
      * @param triggeredByUUID
      * @param objectPath
-     * @param swaggerYaml The swagger drfinition of the API to be exported to the cloud
+     * @param swaggerYaml The swagger definition of the API to be exported to the cloud
      * @param forceUpdate
      * @param isPrivate
      * @return Returns the swaggerYaml after ensuring a valid api identifier exists
      * @throws PluginExecutionException
      */
     public String beforeApiVersionSaved(String triggeredByUUID, String objectPath, String swaggerYaml,
-                                        Boolean forceUpdate,/*Collection<SpecEntry> links,*/
-                                        Boolean isPrivate) throws PluginExecutionException {
+                                        Boolean forceUpdate, /*Collection<SpecEntry> links,*/Boolean isPrivate)
+            throws PluginExecutionException {
         Swagger swagger;
 
         try {
@@ -52,7 +53,7 @@ public class Wso2ApiGatewayPlugin {
                 throw new Exception();
             }
         } catch (Exception e) {
-            LOGGER.error("Swagger definition is invalid or not readable");
+            log.error("Swagger definition is invalid or not readable");
             throw  new PluginExecutionException("Swagger definition is invalid or not readable");
         }
 
@@ -60,7 +61,7 @@ public class Wso2ApiGatewayPlugin {
             if (StringUtils.isBlank(apiId)) {
                 swagger.vendorExtension(WSO2_API_ID_EXTENSION, System.currentTimeMillis());
             } else {
-              swagger.vendorExtension(WSO2_API_ID_EXTENSION, apiId);
+                swagger.vendorExtension(WSO2_API_ID_EXTENSION, apiId);
             }
         } else {
             return swaggerYaml;
@@ -69,7 +70,7 @@ public class Wso2ApiGatewayPlugin {
         try {
             return Yaml.mapper().writeValueAsString(swagger);
         } catch (Exception e) {
-            LOGGER.error("Swagger definition is invalid or not readable");
+            log.error("Swagger definition is invalid or not readable");
             throw new PluginExecutionException("Swagger definition is invalid or not readable ");
         }
     }
@@ -78,38 +79,36 @@ public class Wso2ApiGatewayPlugin {
      * Perform the deployment to WSO2 API cloud during the SAVE operation.
      *
      * @param swaggerYaml The swagger definition of the API to be exported to the cloud
-     * @throws PluginExecutionException
-     * @throws IOException
-     * @throws ParseException
+     * @throws PluginExecutionException Custom exception to make the exception more readable
+     * @throws IOException              Thrown if an error is occurred in input/output process
+     * @throws ParseException           Thrown if an error is occurred in parsing
      */
     public void afterApiVersionSaved(/*String triggeredByUUID, String objectPath, */String swaggerYaml)
             throws PluginExecutionException, IOException, ParseException {
 
         PayloadConfiguration configuration = new PayloadConfiguration();
 
-        LOGGER.info("Obtaining user inputs");
+        log.info("Obtaining user inputs");
         configure();
 
-        LOGGER.info("Creating the payload from user inputs");
+        log.info("Creating the payload from user inputs");
         String creationPayload = configuration.configurePayload(userEmail, userOrganizationKey, swaggerYaml, context);
 
         Wso2Api api = new Wso2Api();
-        api.getClientIdAndSecret(userEmail, userOrganizationKey, userPassword);
-        api.getAccessToken(userEmail, userOrganizationKey, userPassword);
-        api.saveAPI(creationPayload);
+        api.saveAPI(userEmail, userOrganizationKey, userPassword, creationPayload);
     }
 
     /**
-     * Called when triggering the Plugin.  The `config` value will be supplied and populated with all
+     * Called when triggering the Plugin. The `config` value will be supplied and populated with all
      * `required` values from the configurationSchema, and any optional values specified by the user
      * in the integrations interface.
      */
     public void configure() {
-        this.userEmail = "fpk11@geronra.com";
-        this.userOrganizationKey = "testusercompany";
-        this.userPassword = "Testuser1";
-        // The "/" is compulsory for the context otherwise the server will return code 400 instead of 409.
-        this.context = "/"+"simple";
+        //For now, user inputs are set to get as command line arguments
+        this.userEmail = System.getProperty("email");
+        this.userOrganizationKey = System.getProperty("orgKey");
+        this.userPassword = System.getProperty("pass");
+        this.context = "/" + System.getProperty("context");
     }
 
     /**

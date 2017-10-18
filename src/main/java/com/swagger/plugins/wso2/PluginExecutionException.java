@@ -6,7 +6,7 @@ package com.swagger.plugins.wso2;
  * Functionality : This is a custom exception
  * Visibility : Public
  * ****************************************************************/
-public class PluginExecutionException extends Exception{
+public class PluginExecutionException extends Exception {
 
     public PluginExecutionException(String message) {
         super(message);

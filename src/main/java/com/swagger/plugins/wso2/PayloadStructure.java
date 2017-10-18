@@ -2,7 +2,7 @@ package com.swagger.plugins.wso2;
 
 
 /*****************************************************************
- *  Class name : PayloadStructure
+ * Class name : PayloadStructure
  * Functionality : Contains getters and setters of the elements of the payload
  * Visibility : Public
  * ****************************************************************/
@@ -15,15 +15,19 @@ public class PayloadStructure {
     private String provider;
     private String apiDefinition;
     private boolean isDefaultVersion;
-    private String[] transport;
-    private String[] tiers;
+    private String[] transport = null;
+    private String[] tiers = null;
     private String visibility;
     private String endpointConfig;
     private CorsConfiguration corsConfiguration;
 
-    public String getDescription() { return description; }
+    public String getDescription() {
+        return description;
+    }
 
-    public void setDescription(String description) { this.description = description; }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public String getApiDefinition() {
         return apiDefinition;

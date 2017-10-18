@@ -8,7 +8,7 @@ import java.io.IOException;
 
 
 /*****************************************************************
- *  Class name : Main
+ * Class name : Main
  * Methods : main
  * Functionality : Executes the application
  * Visibility : Public
@@ -16,13 +16,20 @@ import java.io.IOException;
 public class Main {
     public static void main(String[] args) throws IOException, ParseException, PluginExecutionException {
 
-        String path1 = "/home/akila/Akila/swagger-wso2-integration-local/src/test/java/com/swagger/pluigns/wso2/SwaggerSimpleApi.yaml";
-        String path2 = "/home/akila/Akila/swagger-wso2-integration-local/src/test/java/com/swagger/pluigns/wso2/SwaggerPetStore.yaml";
-        String path3 = "/home/akila/Akila/swagger-wso2-integration-local/src/test/java/com/swagger/pluigns/wso2/SwaggerOAuth2Implicit.yaml";
-        String path4 = "/home/akila/Akila/swagger-wso2-integration-local/src/test/java/com/swagger/pluigns/wso2/SwaggerHomeIOT.yaml";
-        String path5 = "/home/akila/Akila/swagger-wso2-integration-local/src/test/java/com/swagger/pluigns/wso2/OAuth2Password.yaml";
-        String path6 = "/home/akila/Akila/swagger-wso2-integration-local/src/test/java/com/swagger/pluigns/wso2/OAuth2Application.yaml";
-        String path7 = "/home/akila/Akila/swagger-wso2-integration-local/src/test/java/com/swagger/pluigns/wso2/OAuth2AccessCode.yaml";
+        String path1 = "/home/akila/Akila/swagger-wso2-integration-local/src/test/java/com/swagger/pluigns/" +
+                "wso2/SwaggerSimpleApi.yaml";
+        String path2 = "/home/akila/Akila/swagger-wso2-integration-local/src/test/java/com/swagger/pluigns/" +
+                "wso2/SwaggerPetStore.yaml";
+        String path3 = "/home/akila/Akila/swagger-wso2-integration-local/src/test/java/com/swagger/pluigns/" +
+                "wso2/SwaggerOAuth2Implicit.yaml";
+        String path4 = "/home/akila/Akila/swagger-wso2-integration-local/src/test/java/com/swagger/pluigns/" +
+                "wso2/SwaggerHomeIOT.yaml";
+        String path5 = "/home/akila/Akila/swagger-wso2-integration-local/src/test/java/com/swagger/pluigns/" +
+                "wso2/OAuth2Password.yaml";
+        String path6 = "/home/akila/Akila/swagger-wso2-integration-local/src/test/java/com/swagger/pluigns/" +
+                "wso2/OAuth2Application.yaml";
+        String path7 = "/home/akila/Akila/swagger-wso2-integration-local/src/test/java/com/swagger/pluigns/" +
+                "wso2/OAuth2AccessCode.yaml";
 
         Wso2ApiGatewayPlugin plugin = new Wso2ApiGatewayPlugin();
         plugin.afterApiVersionSaved(Main.fileReader(path1));
@@ -33,9 +40,9 @@ public class Main {
      *
      * Therefore, findBug errors can be omitted.
      * @param path Path of the yaml file
-     * @return
+     * @return Returns the content of the Yaml file of the provided path.
      */
-    public static String fileReader(String path) {
+    public static String fileReader(String path) throws IOException {
 
         StringBuffer buffer = new StringBuffer();
         BufferedReader br = null;
@@ -52,15 +59,17 @@ public class Main {
                 buffer.append("\n");
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw e;
         } finally {
             try {
-                if (br != null)
+                if (br != null) {
                     br.close();
-                if (fr != null)
+                }
+                if (fr != null) {
                     fr.close();
+                }
             } catch (IOException ex) {
-                ex.printStackTrace();
+                throw ex;
             }
         }
         return buffer.toString();

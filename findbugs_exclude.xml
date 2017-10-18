@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<FindBugsFilter>
+    <Match>
+        <Class name="com.swagger.plugins.wso2.Main"/>
+    </Match>
+</FindBugsFilter>
