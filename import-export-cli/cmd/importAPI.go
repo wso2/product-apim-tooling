@@ -29,7 +29,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"regexp"
 
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -70,38 +69,25 @@ var ImportAPICmd = &cobra.Command{
 	},
 }
 
-func ImportAPI(name string, url string, accessToken string) (*http.Response, error) {
+// ImportAPI function is used with import-api command
+// @param name: name of the API (zipped file) to be imported
+// @param apiManagerEndpoint: API Manager endpoint for the environment
+// @param accessToken: OAuth2.0 access token for the resource accessing
+func ImportAPI(name string, apiManagerEndpoint string, accessToken string) (*http.Response, error) {
 	// append '/' to the end if there isn't one already
-	if string(url[len(url)-1]) != "/" {
-		url += "/"
+	if string(apiManagerEndpoint[len(apiManagerEndpoint)-1]) != "/" {
+		apiManagerEndpoint += "/"
 	}
-	url += "import/apis"
+	apiManagerEndpoint += "import/apis"
 
 	filePath := utils.ExportDirectory + utils.PathSeparator_ + name
+	// file is assumed to be a zip archive
 	fmt.Println("filePath:", filePath)
-
-	// check if '.zip' exists in the input 'name'
-	hasZipExtension, _ := regexp.MatchString(`^\S+\.zip$`, name)
-
-	if hasZipExtension {
-		// import the zip file directly
-		//fmt.Println("hasZipExtension: ", true)
-
-	} else {
-		//fmt.Println("hasZipExtension: ", false)
-		// search for a directory with the given name
-		destination := utils.ExportedAPIsDirectoryPath + utils.PathSeparator_ + name + ".zip"
-		err := utils.ZipDir(filePath, destination)
-		if err != nil {
-			utils.HandleErrorAndExit("Error creating zip archive", err)
-		}
-		filePath += ".zip"
-	}
 
 	extraParams := map[string]string{}
 	// TODO:: Add extraParams as necessary
 
-	req, err := NewFileUploadRequest(url, extraParams, "file", filePath, accessToken)
+	req, err := NewFileUploadRequest(apiManagerEndpoint, extraParams, "file", filePath, accessToken)
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating request.", err)
 	}
@@ -126,8 +112,14 @@ func ImportAPI(name string, url string, accessToken string) (*http.Response, err
 		utils.Logln(utils.LogPrefixError, err)
 	} else {
 		//var bodyContent []byte
-		fmt.Println(resp.StatusCode)
-		fmt.Println(resp.Header)
+
+		if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
+
+		}
+
+		fmt.Println("Successfully imported API '" + name + "'")
+		utils.Logln(utils.LogPrefixInfo + "Status: " + resp.Status)
+		//fmt.Println(resp.Header)
 		//resp.Body.Read(bodyContent)
 		//resp.Body.Close()
 		//fmt.Println(bodyContent)

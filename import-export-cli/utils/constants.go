@@ -20,7 +20,7 @@ package utils
 
 import "os"
 
-const ProjectName string = "wso2apim-cli"
+const ProjectName string = "wso2apim"
 
 // File Names and Paths
 const PathSeparator_ string = string(os.PathSeparator)
@@ -67,4 +67,4 @@ const LogPrefixError = "[ERROR]: "
 
 // Other
 const DefaultTokenValidityPeriod string = "3600"
-const DefaultHttpRequestTimeout string = "unlimited"
+const DefaultHttpRequestTimeout string = "10000"

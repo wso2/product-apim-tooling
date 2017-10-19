@@ -33,7 +33,7 @@ var insecure bool
 
 // This represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:   "wso2apim-cli",
+	Use:   "wso2apim",
 	Short: utils.RootCmdShortDesc,
 	Long:  utils.RootCmdLongDesc,
 
@@ -80,12 +80,11 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	// TODO:: switch condition in production. Verbose on by default in development
-	if !verbose {
+	if verbose {
 		utils.EnableVerboseMode()
 	}
 
-	fmt.Println("Insecure:", insecure)
+	utils.Logln(utils.LogPrefixInfo +"Insecure:", insecure)
 	if insecure {
 		utils.SkipTLSVerification = true
 	}

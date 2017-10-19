@@ -1,17 +1,17 @@
 config:
   http_request_timeout: 5000
 #  export_directory: /home/menuka/.go/src/github.com/wso2/product-apim-tooling/import-export-cli/exported
-  export_directory: /home/menuka/exported/new
+  export_directory: /home/menuka/Documents/exported
 environments:
   apim1:
     api_manager_endpoint: https://35.195.132.29:9292/api/am/publisher/v1.0
     registration_endpoint: https://35.195.132.29:9443/identity/connect/register
     token_endpoint: https://35.195.132.29:9443/oauth2/token
+  apim2:
+    api_manager_endpoint: https://35.195.203.88:9292/api/am/publisher/v1.0
+    registration_endpoint: https://35.195.203.88:9443/identity/connect/register
+    token_endpoint: https://35.195.203.88:9443/oauth2/token
   dev:
-    api_manager_endpoint: https://localhost:9292/api/am/publisher/v1.0
-    registration_endpoint: https://localhost:9443/identity/connect/register
-    token_endpoint: https://localhost:9443/oauth2/token
-  staging:
     api_manager_endpoint: https://localhost:9292/api/am/publisher/v1.0
     registration_endpoint: https://localhost:9443/identity/connect/register
     token_endpoint: https://localhost:9443/oauth2/token

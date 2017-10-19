@@ -216,7 +216,6 @@ func GetOAuthTokens(username string, password string,
 	headers[HeaderAuthorization] = HeaderValueAuthBearerPrefix + " " + b64EncodedClientIDClientSecret
 	headers[HeaderAccept] = HeaderValueApplicationJSON
 
-	fmt.Println("tokenManagement.go: 218: SkipTLSVerification", SkipTLSVerification)
 	if SkipTLSVerification {
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTP certificates
 	}
