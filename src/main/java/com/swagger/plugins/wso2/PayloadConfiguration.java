@@ -40,12 +40,12 @@ public class PayloadConfiguration {
         Swagger swagger;
         String payload;
 
-        log.info("Setting default values for the api creation payload");
+        log.debug("Setting default values for the api creation payload");
         String[] schemes = {"http", "https"};
         String[] defaultTier = {"Unlimited"};
         String visibility = "PUBLIC";
 
-        log.info("Creating the swagger POJO for extracting info from the swagger definition");
+        log.debug("Creating the swagger POJO for extracting info from the swagger definition");
         try {
             objectMapper = new ObjectMapper();
             swagger = Json.mapper().readValue(convertYamlToJson(swaggerYaml), Swagger.class);
@@ -54,18 +54,18 @@ public class PayloadConfiguration {
             throw new PluginExecutionException("Swagger definition is invalid or not readable");
         }
 
-        log.info("Getting info from swagger POJO");
+        log.debug("Getting info from swagger POJO");
         String name = swagger.getInfo().getTitle();
         String version = swagger.getInfo().getVersion();
         String description = swagger.getInfo().getDescription();
 
-        log.info("Setting the context for the API");
+        log.debug("Setting the context for the API");
         swagger.setBasePath(context);
 
-        log.info("Creating the POJO for the payload to create the API");
+        log.debug("Creating the POJO for the payload to create the API");
         PayloadStructure structure = new PayloadStructure();
 
-        log.info("Setting the values for the POJO to create an API in the cloud");
+        log.debug("Setting the values for the POJO to create an API in the cloud");
         structure.setName(name);
         structure.setVersion(version);
         structure.setDescription(description);
@@ -80,14 +80,14 @@ public class PayloadConfiguration {
         CorsConfiguration configuration = new CorsConfiguration(false);
         structure.setCorsConfiguration(configuration);
 
-        log.info("Converting the POJO to a json string");
+        log.debug("Converting the POJO to a json string");
         try {
             payload = objectMapper.writeValueAsString(structure);
         } catch (JsonProcessingException jsonProcessingException) {
             log.error("Error while converting the POJO to json", jsonProcessingException);
             throw new PluginExecutionException("Error when converting pojo to json");
         }
-        log.info("Returning the payload for creating the API in the cloud");
+        log.debug("Returning the payload for creating the API in the cloud");
         return payload;
     }
 
@@ -100,7 +100,7 @@ public class PayloadConfiguration {
     public static String convertYamlToJson(String swaggerYaml) throws IOException {
         Swagger swagger;
 
-        log.info("Parsing Yaml to JSON");
+        log.debug("Parsing Yaml to JSON");
         try {
             JsonNode node = Yaml.mapper().readValue(swaggerYaml, JsonNode.class);
             swagger = new SwaggerParser().read(node);
@@ -110,11 +110,11 @@ public class PayloadConfiguration {
         }
         String json =  Json.pretty(swagger);
 
-        log.info("Minifying the JSON");
+        log.debug("Minifying the JSON");
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readValue(json, JsonNode.class);
 
-        log.info("Returning the minified JSON");
+        log.debug("Returning the minified JSON");
         return jsonNode.toString();
     }
 

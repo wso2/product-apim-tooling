@@ -88,13 +88,13 @@ public class Wso2ApiGatewayPlugin {
 
         PayloadConfiguration configuration = new PayloadConfiguration();
 
-        log.info("Obtaining user inputs");
+        log.debug("Obtaining user inputs");
         configure();
 
-        log.info("Creating the payload from user inputs");
+        log.debug("Creating the payload from user inputs");
         String creationPayload = configuration.configurePayload(userEmail, userOrganizationKey, swaggerYaml, context);
 
-        Wso2Api api = new Wso2Api();
+        WSO2Api api = new WSO2Api();
         api.saveAPI(userEmail, userOrganizationKey, userPassword, creationPayload);
     }
 
