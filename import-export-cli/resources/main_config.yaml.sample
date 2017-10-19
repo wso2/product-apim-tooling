@@ -1,0 +1,17 @@
+config:
+  http_timeout: 2500
+  skip_tls_verify: true
+
+environments:
+  dev:
+    api_manager_endpoint: ""
+    registration_endpoint: ""
+    token_endpoint: ""
+  staging:
+    api_manager_endpoint: ""
+    registration_endpoint: ""
+    token_endpoint: ""
+  qa:
+    api_manager_endpoint: ""
+    registration_endpoint: ""
+    token_endpoint: ""
