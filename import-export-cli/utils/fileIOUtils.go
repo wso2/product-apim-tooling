@@ -107,3 +107,15 @@ func (envKeysAll *EnvKeysAll) ParseEnvKeysFromFile(data []byte) error {
 	}
 	return nil
 }
+
+// Check whether the file exists.
+func IsFileExist(path string) bool {
+	if _, err := os.Stat(path); err != nil {
+		if os.IsNotExist(err) {
+			return false
+		} else {
+			HandleErrorAndExit(fmt.Sprintf(UnableToReadFileMsg, path), err)
+		}
+	}
+	return true
+}

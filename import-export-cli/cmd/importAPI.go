@@ -80,7 +80,7 @@ func ImportAPI(name string, apiManagerEndpoint string, accessToken string) (*htt
 	}
 	apiManagerEndpoint += "import/apis"
 
-	filePath := utils.ExportDirectory + utils.PathSeparator_ + name
+	filePath := filepath.Join(utils.ExportDirectory, name)
 	// file is assumed to be a zip archive
 	fmt.Println("filePath:", filePath)
 

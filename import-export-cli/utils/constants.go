@@ -18,26 +18,29 @@
 
 package utils
 
-import "os"
+import (
+	"os"
+	"path/filepath"
+)
 
 const ProjectName string = "wso2apim"
 
 // File Names and Paths
-const PathSeparator_ string = string(os.PathSeparator)
+//const PathSeparator_ string = string(os.PathSeparator)
 
 var ApplicationRoot, _ = os.Getwd()
 
 const EnvKeysAllFileName string = "env_keys_all.yaml"
 
-var EnvKeysAllFilePath string = ApplicationRoot + PathSeparator_ + EnvKeysAllFileName
+var EnvKeysAllFilePath string = filepath.Join(ApplicationRoot, EnvKeysAllFileName)
 
 const MainConfigFileName string = "main_config.yaml"
 
-var MainConfigFilePath string = ApplicationRoot + PathSeparator_ + MainConfigFileName
+var MainConfigFilePath string = filepath.Join(ApplicationRoot, MainConfigFileName)
 
 const ExportedAPIsDirectoryName string = "exported"
 
-var ExportedAPIsDirectoryPath string = ApplicationRoot + PathSeparator_ + ExportedAPIsDirectoryName
+var ExportedAPIsDirectoryPath string = filepath.Join(ApplicationRoot, ExportedAPIsDirectoryName)
 
 const DefaultEnvironmentName string = "default"
 

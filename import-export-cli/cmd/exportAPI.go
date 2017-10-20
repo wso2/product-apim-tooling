@@ -28,6 +28,7 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 
 	"crypto/tls"
+	"path/filepath"
 )
 
 var exportAPIName string
@@ -89,7 +90,8 @@ func WriteToZip(exportAPIName string, resp *resty.Response) {
 		// permission 777 : Everyone can read, write, and execute
 	}
 	filename := exportAPIName + ".zip"
-	err := ioutil.WriteFile(directory+utils.PathSeparator_+filename, resp.Body(), 0644)
+	pFile := filepath.Join(directory, filename)
+	err := ioutil.WriteFile(pFile, resp.Body(), 0644)
 	// permission 644 : Only the owner can read and write.. Everyone else can only read.
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating zip archive", err)

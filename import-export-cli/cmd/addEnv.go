@@ -45,6 +45,7 @@ var addEnvCmd = &cobra.Command{
 	},
 }
 
+//
 func addEnv(envName string, apimEndpoint string, regEndpoint string, tokenEndpoint string,
 	mainConfigFilePath string) error {
 	mainConfig := utils.GetMainConfigFromFile(mainConfigFilePath)

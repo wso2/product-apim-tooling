@@ -25,6 +25,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"time"
 )
 
 var verbose bool
@@ -82,6 +83,8 @@ func init() {
 func initConfig() {
 	if verbose {
 		utils.EnableVerboseMode()
+		t := time.Now()
+		utils.Logf("Executed ImportExportCLI on %v\n", t.Format(time.RFC1123))
 	}
 
 	utils.Logln(utils.LogPrefixInfo +"Insecure:", insecure)
@@ -89,6 +92,7 @@ func initConfig() {
 		utils.SkipTLSVerification = true
 	}
 
+	/*
 	if cfgFile != "" { // enable ability to specify config file via flag
 		viper.SetConfigFile(cfgFile)
 	}
@@ -101,4 +105,5 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
+	*/
 }
