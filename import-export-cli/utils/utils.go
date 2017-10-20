@@ -31,8 +31,16 @@ import (
 
 // Invoke http-post request using go-resty
 func InvokePOSTRequest(url string, headers map[string]string, body string) (*resty.Response, error) {
-	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Second)
+	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
 	resp, err := resty.R().SetHeaders(headers).SetBody(body).Post(url)
+
+	return resp, err
+}
+
+// Invoke http-get request using go-resty
+func InvokeGETRequest(url string , headers map[string]string) (*resty.Response, error) {
+	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
+	resp, err := resty.R().SetHeaders(headers).Get(url)
 
 	return resp, err
 }
@@ -52,6 +60,12 @@ func PromptForPassword() string {
 	password := string(bytePassword)
 	fmt.Println()
 	return password
+}
+
+// ShowHelpCommandTip function will print the instructions for displaying help info on a specific command
+// @params cmdLiteral Command on which help command is to be displayed
+func ShowHelpCommandTip(cmdLiteral string) {
+	fmt.Printf("Execute '%s %s --help' for more info.\n", ProjectName, cmdLiteral)
 }
 
 // return a string containing the file name, function name

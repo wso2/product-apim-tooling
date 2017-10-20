@@ -27,7 +27,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 
-	"crypto/tls"
 	"path/filepath"
 )
 
@@ -119,13 +118,7 @@ func ExportAPI(name string, version string, url string, accessToken string) *res
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 	headers[utils.HeaderAccept] = utils.HeaderValueApplicationZip
 
-	if utils.SkipTLSVerification {
-		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTPS certificates
-	}
-
-	resp, err := resty.R().
-		SetHeaders(headers).
-		Get(url)
+	resp, err := utils.InvokeGETRequest(url, headers)
 
 	if err != nil {
 		utils.HandleErrorAndExit("Error exporting API: "+name, err)

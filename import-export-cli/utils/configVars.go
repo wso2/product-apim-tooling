@@ -26,7 +26,7 @@ import (
 	"strings"
 )
 
-var HttpRequestTimeout int = 2500
+var HttpRequestTimeout = DefaultHttpRequestTimeout
 var SkipTLSVerification bool
 var ExportDirectory string
 
@@ -42,8 +42,7 @@ func SetConfigVars(mainConfigFilePath string) error {
 	}
 	if !(mainConfig.Config.HttpRequestTimeout >= 0) {
 		Logln(LogPrefixWarning + "value of HttpRequestTimeout in '" + mainConfigFilePath + "' is less than zero")
-		Logln(LogPrefixInfo + " setting HttpRequestTimeout to " + DefaultHttpRequestTimeout)
-		// default it unlimited
+		Logln(LogPrefixInfo + " setting HttpRequestTimeout to " + string(DefaultHttpRequestTimeout))
 	}
 	if strings.TrimSpace(mainConfig.Config.ExportDirectory) == "" ||
 		len(strings.TrimSpace(mainConfig.Config.ExportDirectory)) == 0 {

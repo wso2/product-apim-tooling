@@ -54,6 +54,7 @@ var InitCmdExamples = dedent.Dedent(`
 		`)
 
 // Version command related usage info
+const VersionCmdLiteral string = "version"
 const VersionCmdShortDesc string = "Display Version on current `+ProjectName+`"
 
 var VersionCmdLongDesc string = dedent.Dedent(`
@@ -65,6 +66,7 @@ var VersionCmdExamples = dedent.Dedent(`
 		`)
 
 // ImportAPI command related usage info
+const ImportAPICmdLiteral string = "import-api"
 const ImportAPICmdShortDesc string = "Import API"
 
 var ImportAPICmdLongDesc string = "Import an API to an environment"
@@ -76,6 +78,7 @@ var ImportAPICmdExamples = dedent.Dedent(`
 	`)
 
 // ExportAPI command related usage info
+const ExportAPICmdLiteral string = "export-api"
 const ExportAPICmdShortDesc string = "Export API"
 
 var ExportAPICmdLongDesc string = "Export an API from an environment"
@@ -88,6 +91,7 @@ var ExportAPICmdExamples = dedent.Dedent(`
 
 // List command related usage Info
 
+const ListCmdLiteral string = "list"
 const ListCmdShortDesc string = "List APIs in an environment"
 
 var ListCmdLongDesc string = dedent.Dedent(`
@@ -102,6 +106,7 @@ var ListCmdExamples = dedent.Dedent(`
 
 // ResetUser command related usage Info
 
+const ResetUserCmdLiteral string = "reset-user"
 const ResetUserCmdShortDesc string = "Reset user of an environment"
 
 var ResetUserCmdLongDesc = dedent.Dedent(`
@@ -115,6 +120,7 @@ var ResetUserCmdExamples = dedent.Dedent(`
 	`)
 
 // AddEnv command related Info
+const AddEnvCmdLiteral string = "add-env"
 const AddEnvCmdShortDesc string = "Add Environment to Config file"
 
 var AddEnvCmdLongDesc = dedent.Dedent(`
@@ -129,6 +135,7 @@ var AddEnvCmdExamples = dedent.Dedent(`
 	`)
 
 // RemoveEnv command related Info
+const RemoveEnvCmdLiteral string = "remove-env"
 const RemoveEnvCmdShortDesc string = "Remove Environment from Config file"
 
 var RemoveEnvCmdLongDesc = dedent.Dedent(`
@@ -141,6 +148,7 @@ var RemoveEnvCmdExamples string = dedent.Dedent(`
 	`)
 
 // Set command related Info
+const SetCmdLiteral string = "set"
 const SetCmdShortDesc string = "Set configuration"
 
 var SetCmdLongDesc = dedent.Dedent(`

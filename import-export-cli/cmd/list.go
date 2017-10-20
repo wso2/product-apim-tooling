@@ -21,10 +21,8 @@ package cmd
 import (
 	"fmt"
 
-	"crypto/tls"
 	"encoding/json"
 	"errors"
-	"github.com/go-resty/resty"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
@@ -48,6 +46,7 @@ var ListCmd = &cobra.Command{
 			count, apis, err := GetAPIList("", accessToken, apiManagerEndpoint)
 
 			if err == nil {
+				// Printing the list of available APIs
 				fmt.Println("No. of APIs:", count)
 				if len(apis) != 0 {
 					fmt.Println("----------------------------")
@@ -81,24 +80,20 @@ func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (in
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 
-	resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTPS certificates
-	resp, err := resty.R().
-		SetHeaders(headers).
-		Get(url)
+	resp, err := utils.InvokeGETRequest(url, headers)
 
 	if err != nil {
 		utils.HandleErrorAndExit("Unable to connect to "+url, err)
 	}
 
-	utils.Logln(utils.LogPrefixInfo+"GetAPIList(): Response:", resp.Status())
+	utils.Logln(utils.LogPrefixInfo+"Response:", resp.Status())
 
 	if resp.StatusCode() == 200 {
 		apiListResponse := &utils.APIListResponse{}
 		unmarshalError := json.Unmarshal([]byte(resp.Body()), &apiListResponse)
 
 		if unmarshalError != nil {
-			fmt.Println("UnmarshalError")
-			utils.HandleErrorAndExit(utils.LogPrefixError+"Unmarshall Error", unmarshalError)
+			utils.HandleErrorAndExit(utils.LogPrefixError+"invalid JSON response", unmarshalError)
 		}
 
 		return apiListResponse.Count, apiListResponse.List, nil
@@ -111,7 +106,7 @@ func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (in
 func init() {
 	RootCmd.AddCommand(ListCmd)
 	ListCmd.Flags().StringVarP(&listEnvironment, "environment", "e",
-		utils.GetDefaultEnvironment(utils.MainConfigFilePath),"Environment to be searched")
+		utils.GetDefaultEnvironment(utils.MainConfigFilePath), "Environment to be searched")
 	ListCmd.Flags().StringVarP(&listCmdUsername, "username", "u", "", "Username")
 	ListCmd.Flags().StringVarP(&listCmdPassword, "password", "p", "", "Password")
 }

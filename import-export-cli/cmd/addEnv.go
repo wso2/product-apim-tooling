@@ -56,7 +56,8 @@ func addEnv(envName string, apimEndpoint string, regEndpoint string, tokenEndpoi
 	}
 	if apimEndpoint == "" || regEndpoint == "" || tokenEndpoint == "" {
 		// at least one of the 3 endpoints is blank
-		return errors.New("none of the 3 endpoints can be blank")
+		utils.ShowHelpCommandTip(utils.AddEnvCmdLiteral)
+		return errors.New("endpoints cannot be blank")
 	}
 	if utils.EnvExistsInMainConfigFile(envName, mainConfigFilePath) {
 		// environment already exists
@@ -72,7 +73,7 @@ func addEnv(envName string, apimEndpoint string, regEndpoint string, tokenEndpoi
 	mainConfig.Environments[envName] = envEndpoints
 	utils.WriteConfigFile(mainConfig, utils.MainConfigFilePath)
 
-	fmt.Println("Successfully added environment '" + envName + "'")
+	fmt.Printf("Successfully added environment '%s'\n", envName)
 
 	return nil
 }

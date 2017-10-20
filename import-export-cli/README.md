@@ -121,14 +121,14 @@ go build -o build/wso2apim
 ### Windows
 * 32 bit version
 ```
-env GOOS=windows GOARCH=386 go build -o build/wso2apim.exe main.go
+env GOOS=windows GOARCH=386 go build -o build/wso2apim.exe import-export-cli.go
 ```
 * 64 bit version
 ```
-env GOOS=windows GOARCH=amd64 go build -o build/wso2apim.exe main.go
+env GOOS=windows GOARCH=amd64 go build -o build/wso2apim.exe import-export-cli.go
 ```
 
 ### Mac
 ```
-env GOOS=darwin GOARCH=arm build -o build/wso2apim main.go
+env GOOS=darwin GOARCH=arm build -o build/wso2apim import-export-cli.go
 ```
