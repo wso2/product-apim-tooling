@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 
 /*****************************************************************
@@ -33,7 +34,7 @@ public class WSO2Api {
     private static final String DYNAMIC_CLIENT_REGISTRATION_URL = "https://api.cloud.wso2.com/client-registration/" +
                                                                   "v0.11/register";
     private static final String TOKEN_API_URL = "https://gateway.api.cloud.wso2.com/token";
-    
+
     /**
      * Returns the payload for request of getting client id and secret.
      *
@@ -63,17 +64,25 @@ public class WSO2Api {
      *                                  cloud
      *                                  account
      * @param password                  Password of the cloud account to export the API
-     * @throws ParseException           Thrown if an error is occurred when parsing the content of the response to json
-     *                                  object
      * @throws PluginExecutionException Custom exception to make the exception more readable
      */
-    private String getClientIdAndSecret(String email, String organizationKey, String password) throws IOException,
-            ParseException, PluginExecutionException {
+    private String getClientIdAndSecret(String email, String organizationKey, String password) throws
+            PluginExecutionException {
 
+        StringEntity authorizationPayload;
         String stringToEncode = email + "@" + organizationKey + ":" + password;
         String encodedString = Base64.encodeBase64String(stringToEncode.getBytes(Charsets.UTF_8));
-        StringEntity authorizationPayload = new StringEntity(getAuthorizationPayload(email, organizationKey)
-                .toString());
+
+        try {
+            authorizationPayload = new StringEntity(getAuthorizationPayload(email, organizationKey)
+                    .toString());
+        } catch (UnsupportedEncodingException unsupportedEncodingException) {
+            log.error("The character encoding is not supported for the payload", unsupportedEncodingException);
+            throw new PluginExecutionException("The character encoding is not supported");
+        } catch (ParseException e) {
+            log.error("Erro while parsing");
+            throw new PluginExecutionException("Error while parsing");
+        }
 
         String clientId;
         String clientSecret;
@@ -90,6 +99,13 @@ public class WSO2Api {
             } else if (response.getStatusLine().getStatusCode() == 400) {
                 log.error("Error making the request to dynamic client registration endpoint, malformed request body");
                 throw new PluginExecutionException("Bad Request, check content");
+            } else {
+                if (response.getStatusLine().getStatusCode() == 200) {
+                    log.debug("Client id and client secret request successful");
+                } else {
+                    log.error("Client id and client secret request unsuccessful");
+                    throw new PluginExecutionException("Requesting client id and client secret was unsuccessful");
+                }
             }
 
             String content = new String(IOUtils.toByteArray(response.getEntity().getContent()), Charsets.UTF_8);
@@ -102,10 +118,10 @@ public class WSO2Api {
 
         } catch (IOException ioException) {
             log.error("Error while making the http call to dynamic client registration endpoint", ioException);
-            throw ioException;
+            throw new PluginExecutionException("Error while making http call to dynamic client registration endpoint");
         } catch (ParseException parseException) {
             log.error("Error while parsing the http response to json", parseException);
-            throw parseException;
+            throw new PluginExecutionException("Error parsing the response to json");
         }
 
         String toEncode = clientId + ":" + clientSecret;
@@ -122,24 +138,28 @@ public class WSO2Api {
      *                                  cloud
      *                                  account
      * @param password                  Password of the cloud account to export the API
-     * @throws IOException              Thrown if an error is occurred in input/output process
-     * @throws ParseException           Thrown if an error is occured when parsing the content of the response to json
-     *                                  object
      * @throws PluginExecutionException Custom exception to make the exception more readable
      */
-    private String getAccessToken(String email, String organizationKey, String password) throws IOException,
-            ParseException, PluginExecutionException {
+    private String getAccessToken(String email, String organizationKey, String password) throws
+            PluginExecutionException {
 
+        HttpResponse response;
+        String content;
+        StringEntity authorizationPayload;
+        JSONObject accessTokenJson;
         String encodedIdAndSecret = getClientIdAndSecret(email, organizationKey, password);
 
-        StringEntity authorizationPayload = new StringEntity("scope=apim:api_create&grant_type=password&username=" +
-                email + "@" + organizationKey + "&password=" + password);
-
-        JSONObject accessTokenJson;
+        try {
+            authorizationPayload = new StringEntity("scope=apim:api_create&grant_type=password&username=" +
+                    email + "@" + organizationKey + "&password=" + password);
+        } catch (UnsupportedEncodingException unsupportedEncodingException) {
+            log.error("The character encoding is not supported for the payload", unsupportedEncodingException);
+            throw new PluginExecutionException("The character encoding is not supported");
+        }
 
         try {
             log.debug("Issuing REST call to Token API");
-            HttpResponse response = makeHttpRequest(TOKEN_API_URL, encodedIdAndSecret, authorizationPayload);
+            response = makeHttpRequest(TOKEN_API_URL, encodedIdAndSecret, authorizationPayload);
 
             if (response.getStatusLine().getStatusCode() == 401) {
                 log.error("Error making the request to token API, the request is unauthorized");
@@ -147,20 +167,27 @@ public class WSO2Api {
             } else if (response.getStatusLine().getStatusCode() == 400) {
                 log.error("Error making the request to token API, malformed request body");
                 throw new PluginExecutionException("Bad Request, check content");
+            } else {
+                if (response.getStatusLine().getStatusCode() == 200) {
+                    log.debug("Access token request successful");
+                } else {
+                    log.error("Access token request unsuccessful");
+                    throw new PluginExecutionException("Error obtaining the access token");
+                }
             }
 
-            String content = new String(IOUtils.toByteArray(response.getEntity().getContent()), Charsets.UTF_8);
+            content = new String(IOUtils.toByteArray(response.getEntity().getContent()), Charsets.UTF_8);
             log.debug("Received the response");
 
             JSONParser parser = new JSONParser();
             accessTokenJson = (JSONObject) parser.parse(content);
 
         } catch (IOException ioException) {
-            log.error("Error while making the http call to token api", ioException);
-            throw ioException;
+            log.error("Error while making the http call to token API", ioException);
+            throw new PluginExecutionException("Error while making http call to token API");
         } catch (ParseException parseException) {
             log.error("Error while parsing the http response to json", parseException);
-            throw parseException;
+            throw new PluginExecutionException("Error while parsing the http response to json");
         }
 
         log.debug("Obtaining the access token");
@@ -175,20 +202,29 @@ public class WSO2Api {
      *                                  cloud
      * @param password                  Password of the cloud account to export the API
      * @param payload                   Payload for the api creation http request
-     * @throws IOException              Thrown if an error is occurred in input/output process
      * @throws PluginExecutionException Custom exception to make the exception more readable
-     * @throws ParseException           Thrown if an error is occurred when parsing the content of the response to
-     *                                  json object
      */
-    public void saveAPI(String email, String organizationKey, String password, String payload) throws IOException,
-            PluginExecutionException, ParseException {
+    public void saveAPI(String email, String organizationKey, String password, String payload) throws
+            PluginExecutionException {
 
+        HttpResponse response;
+        StringEntity creationPayload;
         String accessToken = getAccessToken(email, organizationKey, password);
 
-        StringEntity creationPayload = new StringEntity(payload);
+        try {
+            creationPayload = new StringEntity(payload);
+        } catch (UnsupportedEncodingException unsupportedEncodingException) {
+            log.error("The character encoding is not supported for the payload", unsupportedEncodingException);
+            throw new PluginExecutionException("The character encoding is not supported");
+        }
 
-        log.debug("Creating the API in the cloud");
-        HttpResponse response = makeHttpRequest(API_CREATE_CLOUD_URL, accessToken, creationPayload);
+        try {
+            log.debug("Creating the API in the cloud");
+            response = makeHttpRequest(API_CREATE_CLOUD_URL, accessToken, creationPayload);
+        } catch (IOException e) {
+            log.error("Error making the API in the cloud");
+            throw new PluginExecutionException("Error making the API in the cloud");
+        }
 
         if (response.getStatusLine().getStatusCode() == 401) {
             log.error("Error while creating the API, the request is unauthorized");
@@ -199,12 +235,15 @@ public class WSO2Api {
         } else if (response.getStatusLine().getStatusCode() == 400) {
             log.error("Error creating the API, already exists with a different context");
             throw new PluginExecutionException("Bad content");
-        }
-
-        if (response.getStatusLine().getStatusCode() == 201) {
-            log.debug("The API is created in the cloud");
+        } else if (response.getStatusLine().getStatusCode() == 415) {
+            log.error("Unsupported media type");
+            throw new PluginExecutionException("Error creating the API, unsupported media type");
         } else {
-            log.debug("The API is not created in the cloud");
+            if (response.getStatusLine().getStatusCode() == 201) {
+                log.debug("The API is created in the cloud");
+            } else {
+                log.debug("The API is not created in the cloud");
+            }
         }
     }
 
@@ -225,10 +264,10 @@ public class WSO2Api {
 
         String tokenPrefix = "Basic ";
         String contentType = "application/json";
-        if (url.equals(API_CREATE_CLOUD_URL)) {
+        if (API_CREATE_CLOUD_URL.equals(url)) {
             tokenPrefix = "Bearer ";
         }
-        if (url.equals(TOKEN_API_URL)) {
+        if (TOKEN_API_URL.equals(url)) {
             contentType = "application/x-www-form-urlencoded";
         }
             httpClient = HttpClients.createDefault();

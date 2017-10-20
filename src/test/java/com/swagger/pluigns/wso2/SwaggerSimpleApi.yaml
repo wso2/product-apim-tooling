@@ -119,6 +119,6 @@ definitions:
         example: 408-867-5309
 # Added by API Auto Mocking Plugin
 host: virtserver.swaggerhub.com
-basePath: /yolom4/SimpleApi/1.0.0
+basePath: /simple
 schemes:
  - https

@@ -28,29 +28,26 @@ public class PayloadConfiguration {
      *
      * @param email                     Email of the cloud account to export the API
      * @param organizationKey           The key generated using email and password
-     * @param swaggerYaml               The swagger definition of the API to be exported to the cloud
-     * @param context                   The context of the API to be exported to the cloud
+     * @param swagger                   The POJO of the swagger definition
      * @return                          Returns the configured payload
      * @throws PluginExecutionException Custom exception to make the exception more readable
      */
-    public String configurePayload(String email, String organizationKey, String swaggerYaml,
-                                   String context) throws PluginExecutionException, IOException {
+    public String configurePayload(String email, String organizationKey, Swagger swagger) throws
+            PluginExecutionException, IOException {
 
-        ObjectMapper objectMapper;
-        Swagger swagger;
         String payload;
+        String swaggerYaml;
 
         log.debug("Setting default values for the api creation payload");
         String[] schemes = {"http", "https"};
         String[] defaultTier = {"Unlimited"};
         String visibility = "PUBLIC";
 
-        log.debug("Creating the swagger POJO for extracting info from the swagger definition");
+        log.debug("Converting swagger POJO to a yaml to assign to the payload");
         try {
-            objectMapper = new ObjectMapper();
-            swagger = Json.mapper().readValue(convertYamlToJson(swaggerYaml), Swagger.class);
-        } catch (Exception ioException) {
-            log.error("Error while creating the swagger POJO", ioException);
+            swaggerYaml = Yaml.mapper().writeValueAsString(swagger);
+        } catch (Exception exception) {
+            log.error("Swagger definition is invalid or not readable", exception);
             throw new PluginExecutionException("Swagger definition is invalid or not readable");
         }
 
@@ -59,8 +56,8 @@ public class PayloadConfiguration {
         String version = swagger.getInfo().getVersion();
         String description = swagger.getInfo().getDescription();
 
-        log.debug("Setting the context for the API");
-        swagger.setBasePath(context);
+//        log.debug("Setting the context for the API");
+//        swagger.setBasePath(context);
 
         log.debug("Creating the POJO for the payload to create the API");
         PayloadStructure structure = new PayloadStructure();
@@ -82,6 +79,7 @@ public class PayloadConfiguration {
 
         log.debug("Converting the POJO to a json string");
         try {
+            ObjectMapper objectMapper = new ObjectMapper();
             payload = objectMapper.writeValueAsString(structure);
         } catch (JsonProcessingException jsonProcessingException) {
             log.error("Error while converting the POJO to json", jsonProcessingException);
@@ -97,22 +95,25 @@ public class PayloadConfiguration {
      * @param swaggerYaml   The swagger definition of the API to be exported to the cloud
      * @return              Returns the json string of the Yaml
      */
-    public static String convertYamlToJson(String swaggerYaml) throws IOException {
+    public static String convertYamlToJson(String swaggerYaml) throws PluginExecutionException {
         Swagger swagger;
-
+        String json;
+        JsonNode jsonNode;
         log.debug("Parsing Yaml to JSON");
         try {
             JsonNode node = Yaml.mapper().readValue(swaggerYaml, JsonNode.class);
             swagger = new SwaggerParser().read(node);
+
+            json =  Json.pretty(swagger);
+
+            log.debug("Minifying the JSON");
+            ObjectMapper objectMapper = new ObjectMapper();
+            jsonNode = objectMapper.readValue(json, JsonNode.class);
+
         } catch (IOException ioException) {
             log.error("Error while converting the Yaml to Json", ioException);
-            throw  ioException;
+            throw  new PluginExecutionException("Error converting the Yaml to Json");
         }
-        String json =  Json.pretty(swagger);
-
-        log.debug("Minifying the JSON");
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode jsonNode = objectMapper.readValue(json, JsonNode.class);
 
         log.debug("Returning the minified JSON");
         return jsonNode.toString();

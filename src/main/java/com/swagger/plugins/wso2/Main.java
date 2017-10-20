@@ -32,7 +32,8 @@ public class Main {
                 "wso2/OAuth2AccessCode.yaml";
 
         Wso2ApiGatewayPlugin plugin = new Wso2ApiGatewayPlugin();
-        plugin.afterApiVersionSaved(Main.fileReader(path1));
+        String yaml = plugin.beforeApiVersionSaved(fileReader(path1));
+        plugin.afterApiVersionSaved(yaml);
     }
 
     /**

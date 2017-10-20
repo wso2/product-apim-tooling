@@ -1,5 +1,6 @@
 package com.swagger.plugins.wso2;
 
+import io.swagger.models.Info;
 import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.Swagger;
@@ -7,7 +8,6 @@ import io.swagger.models.properties.StringProperty;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
 import org.apache.commons.lang3.StringUtils;
-import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,21 +29,16 @@ public class Wso2ApiGatewayPlugin {
     private String userPassword;
     private String userOrganizationKey;
     private String apiId;               //apiId will be used when calling the beforeApiVersionSaved method
-    private String context;
 
     /**
      * This method is triggered before saving the API to ensure whether a valid identifier exists.
      *
-     * @param triggeredByUUID
-     * @param objectPath
      * @param swaggerYaml The swagger definition of the API to be exported to the cloud
-     * @param forceUpdate
-     * @param isPrivate
      * @return Returns the swaggerYaml after ensuring a valid api identifier exists
-     * @throws PluginExecutionException
+     * @throws PluginExecutionException Custom exception to make the exception more readable
      */
-    public String beforeApiVersionSaved(String triggeredByUUID, String objectPath, String swaggerYaml,
-                                        Boolean forceUpdate, /*Collection<SpecEntry> links,*/Boolean isPrivate)
+    public String beforeApiVersionSaved(/*String triggeredByUUID, String objectPath, */String swaggerYaml/*,
+                                        Boolean forceUpdate, Collection<SpecEntry> links, Boolean isPrivate*/)
             throws PluginExecutionException {
         Swagger swagger;
 
@@ -80,11 +75,28 @@ public class Wso2ApiGatewayPlugin {
      *
      * @param swaggerYaml The swagger definition of the API to be exported to the cloud
      * @throws PluginExecutionException Custom exception to make the exception more readable
-     * @throws IOException              Thrown if an error is occurred in input/output process
-     * @throws ParseException           Thrown if an error is occurred in parsing
      */
     public void afterApiVersionSaved(/*String triggeredByUUID, String objectPath, */String swaggerYaml)
-            throws PluginExecutionException, IOException, ParseException {
+            throws PluginExecutionException {
+
+        Swagger swagger;
+        try {
+            swagger = Json.mapper().readValue(PayloadConfiguration.convertYamlToJson(swaggerYaml), Swagger.class);
+        } catch (Exception exception) {
+            log.error("Swagger definition is invalid or not readable", exception);
+            throw new PluginExecutionException("Swagger definition is invalid or not readable");
+        }
+        Info info = swagger.getInfo();
+        if (info == null || (StringUtils.isBlank(info.getTitle()))) {
+            log.error("Missing info section in definition");
+            throw new PluginExecutionException("Definition must have an info section with a unique title.");
+        }
+        if (StringUtils.isBlank(swagger.getBasePath())) {
+            log.error("Missing basepath in definition");
+            throw new PluginExecutionException("Definition must have a unique 'basepath' section");
+        }
+
+//        String apiId = String.valueOf(swagger.getVendorExtensions().get(WSO2_API_ID_EXTENSION));
 
         PayloadConfiguration configuration = new PayloadConfiguration();
 
@@ -92,7 +104,13 @@ public class Wso2ApiGatewayPlugin {
         configure();
 
         log.debug("Creating the payload from user inputs");
-        String creationPayload = configuration.configurePayload(userEmail, userOrganizationKey, swaggerYaml, context);
+        String creationPayload;
+        try {
+            creationPayload = configuration.configurePayload(userEmail, userOrganizationKey, swagger);
+        } catch (IOException e) {
+            log.error("Error while input/output operation");
+            throw new PluginExecutionException("Error while input/output operation");
+        }
 
         WSO2Api api = new WSO2Api();
         api.saveAPI(userEmail, userOrganizationKey, userPassword, creationPayload);
@@ -108,7 +126,6 @@ public class Wso2ApiGatewayPlugin {
         this.userEmail = System.getProperty("email");
         this.userOrganizationKey = System.getProperty("orgKey");
         this.userPassword = System.getProperty("pass");
-        this.context = "/" + System.getProperty("context");
     }
 
     /**
