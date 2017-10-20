@@ -112,7 +112,7 @@ public class Wso2ApiGatewayPlugin {
             throw new PluginExecutionException("Error while input/output operation");
         }
 
-        WSO2Api api = new WSO2Api();
+        WSO2Api api = new WSO2Api(new MakeHttpRequestService());
         api.saveAPI(userEmail, userOrganizationKey, userPassword, creationPayload);
     }
 

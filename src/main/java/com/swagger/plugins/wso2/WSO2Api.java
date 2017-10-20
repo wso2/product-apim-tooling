@@ -4,10 +4,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClients;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -34,6 +31,12 @@ public class WSO2Api {
     private static final String DYNAMIC_CLIENT_REGISTRATION_URL = "https://api.cloud.wso2.com/client-registration/" +
                                                                   "v0.11/register";
     private static final String TOKEN_API_URL = "https://gateway.api.cloud.wso2.com/token";
+
+    private HttpRequestService httpRequestService;
+
+    public WSO2Api(HttpRequestService httpRequestService) {
+        this.httpRequestService = httpRequestService;
+    }
 
     /**
      * Returns the payload for request of getting client id and secret.
@@ -69,6 +72,7 @@ public class WSO2Api {
     private String getClientIdAndSecret(String email, String organizationKey, String password) throws
             PluginExecutionException {
 
+        HttpResponse response;
         StringEntity authorizationPayload;
         String stringToEncode = email + "@" + organizationKey + ":" + password;
         String encodedString = Base64.encodeBase64String(stringToEncode.getBytes(Charsets.UTF_8));
@@ -89,8 +93,9 @@ public class WSO2Api {
 
         try {
             log.debug("Calling dynamic client registration endpoint");
-            HttpResponse response = makeHttpRequest(DYNAMIC_CLIENT_REGISTRATION_URL, encodedString,
-                    authorizationPayload);
+
+            response = httpRequestService.makePostRequest(DYNAMIC_CLIENT_REGISTRATION_URL,
+                    "Basic", encodedString, "application/json", authorizationPayload);
 
             if (response.getStatusLine().getStatusCode() == 401) {
                 log.error("Error making the request to dynamic client registration endpoint, the request" +
@@ -159,7 +164,9 @@ public class WSO2Api {
 
         try {
             log.debug("Issuing REST call to Token API");
-            response = makeHttpRequest(TOKEN_API_URL, encodedIdAndSecret, authorizationPayload);
+
+            response = httpRequestService.makePostRequest(TOKEN_API_URL, "Basic", encodedIdAndSecret,
+                    "application/x-www-form-urlencoded", authorizationPayload);
 
             if (response.getStatusLine().getStatusCode() == 401) {
                 log.error("Error making the request to token API, the request is unauthorized");
@@ -218,13 +225,9 @@ public class WSO2Api {
             throw new PluginExecutionException("The character encoding is not supported");
         }
 
-        try {
             log.debug("Creating the API in the cloud");
-            response = makeHttpRequest(API_CREATE_CLOUD_URL, accessToken, creationPayload);
-        } catch (IOException e) {
-            log.error("Error making the API in the cloud");
-            throw new PluginExecutionException("Error making the API in the cloud");
-        }
+            response = httpRequestService.makePostRequest(API_CREATE_CLOUD_URL, "Bearer", accessToken,
+                "application/json", creationPayload);
 
         if (response.getStatusLine().getStatusCode() == 401) {
             log.error("Error while creating the API, the request is unauthorized");
@@ -245,38 +248,6 @@ public class WSO2Api {
                 log.debug("The API is not created in the cloud");
             }
         }
-    }
-
-    /**
-     * Makes http requests to the specified URLs with suitable token prefix and content-type and returns the response
-     *
-     * @param url           URL which the request is made
-     * @param token         Token for authoring the request
-     * @param payload       Body of the request
-     * @return              Returns the response of the http request made
-     * @throws IOException  Thrown if an error is occurred in input/output process
-     */
-    private HttpResponse makeHttpRequest(String url, String token, StringEntity payload) throws IOException {
-
-        HttpClient httpClient;
-        HttpResponse response;
-        HttpPost apiRequest;
-
-        String tokenPrefix = "Basic ";
-        String contentType = "application/json";
-        if (API_CREATE_CLOUD_URL.equals(url)) {
-            tokenPrefix = "Bearer ";
-        }
-        if (TOKEN_API_URL.equals(url)) {
-            contentType = "application/x-www-form-urlencoded";
-        }
-            httpClient = HttpClients.createDefault();
-            apiRequest = new HttpPost(url);
-            apiRequest.setHeader("Authorization", tokenPrefix + token);
-            apiRequest.setHeader("Content-Type", contentType);
-            apiRequest.setEntity(payload);
-            response = httpClient.execute(apiRequest);
-        return response;
     }
 }
 
