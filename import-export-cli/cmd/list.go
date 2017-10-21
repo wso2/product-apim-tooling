@@ -25,6 +25,8 @@ import (
 	"errors"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"github.com/olekukonko/tablewriter"
+	"os"
 )
 
 var listEnvironment string
@@ -48,15 +50,7 @@ var ListCmd = &cobra.Command{
 			if err == nil {
 				// Printing the list of available APIs
 				fmt.Println("No. of APIs:", count)
-				if len(apis) != 0 {
-					fmt.Println("----------------------------")
-				}
-				for _, api := range apis {
-					fmt.Println(api.Name + " v" + api.Version)
-				}
-				if len(apis) != 0 {
-					fmt.Println("----------------------------")
-				}
+				printAPIs(apis)
 			} else {
 				utils.Logln(utils.LogPrefixError+"Getting List of APIs", err)
 			}
@@ -65,6 +59,24 @@ var ListCmd = &cobra.Command{
 			fmt.Println("Error calling 'list'", preCommandErr.Error())
 		}
 	},
+}
+
+func printAPIs(apis []utils.API) {
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"Name", "Version", "Context", "LifeCycleStatus", "ID"})
+
+	data := [][]string{}
+
+	for _, api := range apis {
+		data = append(data, []string{api.Name, api.Version, api.Context, api.LifeCycleStatus, api.ID})
+	}
+
+	for _, v := range data {
+		table.Append(v)
+	}
+
+	table.Render() // Send output
+
 }
 
 func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (int32, []utils.API, error) {

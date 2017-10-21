@@ -1,6 +1,6 @@
 config:
   http_timeout: 2500
-  skip_tls_verify: true
+  export_directory: .
 
 environments:
   dev:
