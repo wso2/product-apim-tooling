@@ -44,6 +44,7 @@ var ResetUserCmd = &cobra.Command{
 	},
 }
 
+// init using Cobra
 func init() {
 	RootCmd.AddCommand(ResetUserCmd)
 	ResetUserCmd.Flags().StringVarP(&resetUserEnvironment, "environment", "e",

@@ -28,6 +28,7 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 
 	"path/filepath"
+	"net/http"
 )
 
 var exportAPIName string
@@ -56,7 +57,7 @@ var ExportAPICmd = &cobra.Command{
 			utils.Logln("Error: %v\n", resp.Error())
 			//fmt.Printf("Response Body: %v\n", resp.Body())
 
-			if resp.StatusCode() == 200 {
+			if resp.StatusCode() == http.StatusOK {
 				WriteToZip(exportAPIName, resp)
 
 				numberOfAPIsExported, _, err := GetAPIList(exportAPIName, accessToken, apiManagerEndpoint)
@@ -66,7 +67,7 @@ var ExportAPICmd = &cobra.Command{
 					utils.HandleErrorAndExit("Error getting list of APIs", err)
 				}
 
-			} else if resp.StatusCode() == 500 {
+			} else if resp.StatusCode() == http.StatusInternalServerError {
 				fmt.Println("Incorrect password")
 			} else {
 				utils.Logln(utils.LogPrefixWarning + resp.Status())
@@ -78,7 +79,9 @@ var ExportAPICmd = &cobra.Command{
 	},
 }
 
-// Input name of the API, and the resty response (only 200 OK) returned from APIM Endpoint
+// WriteToZip
+// @param exportAPIName : Name of the API to be exported
+// @param resp : Response returned from making the HTTP request (only pass a 200 OK)
 // Exported API will be written to a zip file
 func WriteToZip(exportAPIName string, resp *resty.Response) {
 	// Write to file
@@ -98,27 +101,31 @@ func WriteToZip(exportAPIName string, resp *resty.Response) {
 	fmt.Println("Succesfully exported and wrote to file")
 }
 
-// Input name of the API, version of the API, APIM Endpoint, and AccessToken
-// Response will be returned after processing the request
-func ExportAPI(name string, version string, url string, accessToken string) *resty.Response {
+// ExportAPI
+// @param name : Name of the API to be exported
+// @param version : Version of the API to be exported
+// @param apimEndpoint : API Manager Endpoint for the environment
+// @param accessToken : Access Token for the resource
+// @return response Response in the form of *resty.Response
+func ExportAPI(name string, version string, apimEndpoint string, accessToken string) *resty.Response {
 	// append '/' to the end if there isn't one already
-	if string(url[len(url)-1]) != "/" {
-		url += "/"
+	if string(apimEndpoint[len(apimEndpoint)-1]) != "/" {
+		apimEndpoint += "/"
 	}
 
-	url += "export/apis"
+	apimEndpoint += "export/apis"
 
 	query := "?query=" + name
 
 	// TODO:: Add 'version' to the query (make sure the backend supports attribute searching)
 
-	url += query
-	fmt.Println("ExportAPI: URL:", url)
+	apimEndpoint += query
+	fmt.Println("ExportAPI: URL:", apimEndpoint)
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 	headers[utils.HeaderAccept] = utils.HeaderValueApplicationZip
 
-	resp, err := utils.InvokeGETRequest(url, headers)
+	resp, err := utils.InvokeGETRequest(apimEndpoint, headers)
 
 	if err != nil {
 		utils.HandleErrorAndExit("Error exporting API: "+name, err)

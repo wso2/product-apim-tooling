@@ -128,6 +128,7 @@ func ImportAPI(name string, apiManagerEndpoint string, accessToken string) (*htt
 	return resp, err
 }
 
+// NewFileUploadRequest form an HTTP Put request
 // Helper function for forming multi-part form data
 // Returns the formed http request and errors
 func NewFileUploadRequest(uri string, params map[string]string, paramName, path string,
@@ -163,7 +164,7 @@ func NewFileUploadRequest(uri string, params map[string]string, paramName, path 
 	return request, err
 }
 
-// Generated with Cobra
+// init using Cobra
 func init() {
 	RootCmd.AddCommand(ImportAPICmd)
 	ImportAPICmd.Flags().StringVarP(&importAPIName, "name", "n", "",

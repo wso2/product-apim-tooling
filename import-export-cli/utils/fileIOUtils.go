@@ -26,6 +26,9 @@ import (
 	"os"
 )
 
+// WriteConfigFile
+// @param c : data
+// @param envConfigFilePath : Path to file where env endpoints are stored
 func WriteConfigFile(c interface{}, envConfigFilePath string) {
 	data, err := yaml.Marshal(&c)
 	if err != nil {

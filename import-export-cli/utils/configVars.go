@@ -30,6 +30,9 @@ var HttpRequestTimeout = DefaultHttpRequestTimeout
 var SkipTLSVerification bool
 var ExportDirectory string
 
+// SetConfigVars
+// @param mainConfigFilePath : Path to file where Configuration details are stored
+// @return error
 func SetConfigVars(mainConfigFilePath string) error {
 	mainConfig := GetMainConfigFromFile(mainConfigFilePath)
 	Logln(LogPrefixInfo + " reading '" + mainConfigFilePath + "'")
@@ -61,6 +64,8 @@ func SetConfigVars(mainConfigFilePath string) error {
 	return nil
 }
 
+// IsValid
+// @param fp : FilePath
 // Attempt to create a file and delete it right after
 func IsValid(fp string) bool {
 	// Check if file already exists

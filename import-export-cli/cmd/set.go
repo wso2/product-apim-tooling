@@ -54,6 +54,7 @@ var SetCmd = &cobra.Command{
 	},
 }
 
+// init using Cobra
 func init() {
 	RootCmd.AddCommand(SetCmd)
 

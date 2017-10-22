@@ -30,8 +30,11 @@ import (
 	"strings"
 )
 
-// Returns the AccessToken, APIManagerEndpoint, Errors given an Environment
-// Deals with generating tokens needed for executing a particular command
+// ExecutePreCommand deals with generating tokens needed for executing a particular command
+// @param environment : Environment on which the particular command is run
+// @param flagUsername : Username entered using the flag --username (-u). Could be blank
+// @param flagPassword : Password entered using the flag --password (-p). Could be blank
+// @return AccessToken, APIManagerEndpoint, Errors
 // including (export-api, import-api, list)
 func ExecutePreCommand(environment string, flagUsername string, flagPassword string) (string, string, error) {
 	if EnvExistsInMainConfigFile(environment, MainConfigFilePath) {
@@ -147,8 +150,10 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 }
 
 // GetClientIDSecret implemented using go-resty
-// provide username, password
-// returns client_id, client_secret
+// @param username : Username for application server account
+// @param password : Password for application server account
+// @param url : Registration Endpoint for the environment
+// @return client_id, client_secret, error
 func GetClientIDSecret(username string, password string, url string) (string, string, error) {
 	body := `{"clientName": "Test", "redirect_uris": "www.google.lk", "grant_types":"password"}`
 	headers := make(map[string]string)
@@ -170,7 +175,7 @@ func GetClientIDSecret(username string, password string, url string) (string, st
 		HandleErrorAndExit("Error in connecting.", err)
 	}
 
-	Logln("GetClientIDSecret(): Status - " + resp.Status())
+	Logln("Getting ClientID, ClientSecret: Status - " + resp.Status())
 
 	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
 		// 200 OK or 201 Created

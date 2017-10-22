@@ -37,6 +37,7 @@ var VersionCmd = &cobra.Command{
 	},
 }
 
+// init using Cobra
 func init() {
 	RootCmd.AddCommand(VersionCmd)
 	VersionCmd.PersistentFlags().String("foo", "", "A help for foo")

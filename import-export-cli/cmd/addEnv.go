@@ -45,7 +45,13 @@ var addEnvCmd = &cobra.Command{
 	},
 }
 
-//
+// addEnv adds a new environment and its endpoints and writes to config file
+// @param envName : Name of the Environment
+// @param apimEndpoint : API Manager Endpoint for the environment
+// @param regEndpoint : Registration Endpoint for the environment
+// @param tokenEndpoint : Token Endpoint for the environment
+// @param mainConfigFilePath : Path to file where env endpoints are stored
+// @return error
 func addEnv(envName string, apimEndpoint string, regEndpoint string, tokenEndpoint string,
 	mainConfigFilePath string) error {
 	mainConfig := utils.GetMainConfigFromFile(mainConfigFilePath)
@@ -78,6 +84,7 @@ func addEnv(envName string, apimEndpoint string, regEndpoint string, tokenEndpoi
 	return nil
 }
 
+// init using Cobra
 func init() {
 	RootCmd.AddCommand(addEnvCmd)
 

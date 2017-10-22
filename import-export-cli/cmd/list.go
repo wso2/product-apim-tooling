@@ -27,6 +27,7 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"github.com/olekukonko/tablewriter"
 	"os"
+	"net/http"
 )
 
 var listEnvironment string
@@ -61,6 +62,7 @@ var ListCmd = &cobra.Command{
 	},
 }
 
+// @param apis : array of API objects
 func printAPIs(apis []utils.API) {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"Name", "Version", "Context", "LifeCycleStatus", "ID"})
@@ -79,6 +81,13 @@ func printAPIs(apis []utils.API) {
 
 }
 
+// GetAPIList
+// @param query : string to be matched against the API names
+// @param accessToken : Access Token for the environment
+// @param apiManagerEndpoint : API Manager Endpoint for the environment
+// @return count (no. of APIs)
+// @return array of API objects
+// @return error
 func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (int32, []utils.API, error) {
 	url := apiManagerEndpoint
 
@@ -100,7 +109,7 @@ func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (in
 
 	utils.Logln(utils.LogPrefixInfo+"Response:", resp.Status())
 
-	if resp.StatusCode() == 200 {
+	if resp.StatusCode() == http.StatusOK {
 		apiListResponse := &utils.APIListResponse{}
 		unmarshalError := json.Unmarshal([]byte(resp.Body()), &apiListResponse)
 
@@ -115,6 +124,7 @@ func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (in
 
 }
 
+// init using Cobra
 func init() {
 	RootCmd.AddCommand(ListCmd)
 	ListCmd.Flags().StringVarP(&listEnvironment, "environment", "e",

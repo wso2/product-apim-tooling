@@ -23,7 +23,10 @@ import (
 	"fmt"
 )
 
-// Return true if 'env' exists in the env_keys_all.yaml
+// EnvExistsInKeysFile
+// @param env : Name of the Environment
+// @param filePath : Path to file where env keys are stored
+// @return bool : true if 'env' exists in the env_keys_all.yaml
 // and false otherwise
 func EnvExistsInKeysFile(env string, filePath string) bool {
 	envKeysAll := GetEnvKeysAllFromFile(filePath)
@@ -35,7 +38,10 @@ func EnvExistsInKeysFile(env string, filePath string) bool {
 	return false
 }
 
-// Returns true if 'env' exists in env_endpoints_all.yaml
+// EnvExistsMainConfigFile
+// @param env : Name of the Environment
+// @param filePath : Path to file where env endpoints are stored
+// @return bool : true if 'env' exists in the main_config.yaml
 // and false otherwise
 func EnvExistsInMainConfigFile(env string, filePath string) bool {
 	envEndpointsAll := GetMainConfigFromFile(filePath)
@@ -48,7 +54,11 @@ func EnvExistsInMainConfigFile(env string, filePath string) bool {
 	return false
 }
 
+// AndNewEnvToKeysFile
 // Insert new env entry to keys file (env_keys_all.yaml)
+// @param name : Name of the environment
+// @param envKeys : EnvKeys object for the environment
+// @param filePath : Path to file where env keys are stored
 func AddNewEnvToKeysFile(name string, envKeys EnvKeys, filePath string) {
 	envKeysAll := GetEnvKeysAllFromFile(filePath)
 	fmt.Println("EnvKeysAll:", envKeysAll)
@@ -66,8 +76,10 @@ func AddNewEnvToKeysFile(name string, envKeys EnvKeys, filePath string) {
 	WriteConfigFile(envKeysAll, filePath)
 }
 
+// RemoveEnvFromKeysFiles
 // used with 'reset-user' command
 // does not remove env from endpoints file
+// @param env 
 func RemoveEnvFromKeysFile(env string, keysFilePath string, endpointsFilePath string) error {
 	/*
 	 endpointsFilePath is passed to check if it exists in endpoints
@@ -97,7 +109,8 @@ func RemoveEnvFromKeysFile(env string, keysFilePath string, endpointsFilePath st
 	}
 }
 
-// Input: name of the environment to be removed
+// @param env : Environment to be removed from file
+// @param endpointsFilePath : Path to file where env endpoints are stored
 func RemoveEnvFromMainConfigFile(env string, endpointsFilePath string) error {
 	if env == "" {
 		return errors.New("environment cannot be blank")
@@ -116,6 +129,10 @@ func RemoveEnvFromMainConfigFile(env string, endpointsFilePath string) error {
 
 // Get keys of environment 'env' from the file env_keys_all.yaml
 // client_secret is not decrypted
+// @param env : name of the environment
+// @param filePath : Path to file where env keys are stored
+// @return *EnvKeys
+// @return error
 func GetKeysOfEnvironment(env string, filePath string) (*EnvKeys, error) {
 	envKeysAll := GetEnvKeysAllFromFile(filePath)
 	for _env, keys := range envKeysAll.Environments {

@@ -40,7 +40,7 @@ type Config struct {
 
 type EnvKeys struct {
 	ClientID     string `yaml:"client_id"`
-	ClientSecret string `yaml:"client_secret"` // to be encrypted (with the user's password) and stored
+	ClientSecret string `yaml:"client_secret"` // encrypted (with the user's password) and stored
 	Username     string `yaml:"username"`
 }
 

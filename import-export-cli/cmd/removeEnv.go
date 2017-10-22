@@ -34,36 +34,41 @@ var removeEnvCmd = &cobra.Command{
 	Long:  utils.RemoveEnvCmdLongDesc + utils.RemoveEnvCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + "remove-env called")
-		err := removeEnv(flagNameOfEnvToBeRemoved)
+		err := removeEnv(flagNameOfEnvToBeRemoved, utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
 		if err != nil {
 			utils.HandleErrorAndExit("Error removing environment", err)
 		}
 	},
 }
 
-// to be used only with 'remove-env' command
-func removeEnv(envName string) error {
+// removeEnv
+// to be used with 'remove-env' command
+// @param envName : Name of the environment to be removed from the
+// @param mainConfigFilePath : Path to file where env endpoints are stored
+// @param envKeysFilePath : Path to file where env keys are stored
+// @return error
+func removeEnv(envName string, mainConfigFilePath string, envKeysFilePath string) error {
 	if envName == "" {
 		return errors.New("name of the environment cannot be blank")
 	}
-	if utils.EnvExistsInMainConfigFile(envName, utils.MainConfigFilePath) {
+	if utils.EnvExistsInMainConfigFile(envName, mainConfigFilePath) {
 		var err error
 		if utils.EnvExistsInKeysFile(envName, utils.EnvKeysAllFilePath) {
 			// environment exists in keys file, it has to be cleared first
-			err = utils.RemoveEnvFromKeysFile(envName, utils.EnvKeysAllFilePath, utils.MainConfigFilePath)
+			err = utils.RemoveEnvFromKeysFile(envName, envKeysFilePath, mainConfigFilePath)
 			if err != nil {
 				return err
 			}
 		}
 		// remove env from mainConfig file (endpoints file)
-		err = utils.RemoveEnvFromMainConfigFile(envName, utils.MainConfigFilePath)
+		err = utils.RemoveEnvFromMainConfigFile(envName, mainConfigFilePath)
 
 		if err != nil {
 			return err
 		}
 	} else {
 		// environment does not exist in mainConfig file (endpoints file). Nothing to remove
-		return errors.New("environment '" + envName + "' not found in " + utils.MainConfigFilePath)
+		return errors.New("environment '" + envName + "' not found in " + mainConfigFilePath)
 	}
 
 	fmt.Println("Successfully removed environment '" + envName + "'")
@@ -72,6 +77,7 @@ func removeEnv(envName string) error {
 	return nil
 }
 
+// init using Cobra
 func init() {
 	RootCmd.AddCommand(removeEnvCmd)
 	removeEnvCmd.Flags().StringVarP(&flagNameOfEnvToBeRemoved, "name", "n",
