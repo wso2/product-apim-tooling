@@ -60,21 +60,23 @@ var ExportAPICmd = &cobra.Command{
 			if resp.StatusCode() == http.StatusOK {
 				WriteToZip(exportAPIName, resp)
 
+				// only to get the number of APIs exported
 				numberOfAPIsExported, _, err := GetAPIList(exportAPIName, accessToken, apiManagerEndpoint)
 				if err == nil {
-					fmt.Println("Number of APIs exported: ", numberOfAPIsExported)
+					fmt.Println("Number of APIs exported:", numberOfAPIsExported)
 				} else {
 					utils.HandleErrorAndExit("Error getting list of APIs", err)
 				}
-
 			} else if resp.StatusCode() == http.StatusInternalServerError {
+				// 500 Internal Server Error
 				fmt.Println("Incorrect password")
 			} else {
-				utils.Logln(utils.LogPrefixWarning + resp.Status())
+				// neither 200 nor 500
+				fmt.Println("Error exporting API:", resp.Status())
 			}
-
 		} else {
-			utils.Logln(utils.LogPrefixError + preCommandErr.Error())
+			// error exporting API
+			fmt.Println("Error exporting API:" + preCommandErr.Error())
 		}
 	},
 }
