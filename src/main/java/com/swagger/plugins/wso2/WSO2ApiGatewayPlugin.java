@@ -15,20 +15,21 @@ import java.io.IOException;
 
 
 /*****************************************************************
- *  Class name : Wso2ApiGatewayPlugin
+ *  Class name : WSO2ApiGatewayPlugin
  * Methods : beforeApiVersionSaved, afterApiVersionSaved, configure, getConfigurationSchema
  * Attributes : log, userEmail, userPassword, userOrganizationKey, apiId, context
  * Functionality : Contains the methods to check api identifier, obtain user inputs and push the API to the cloud
  * Visibility : Public
  * ****************************************************************/
-public class Wso2ApiGatewayPlugin {
+public class WSO2ApiGatewayPlugin {
 
-    private static final Logger log = LoggerFactory.getLogger(Wso2ApiGatewayPlugin.class);
+    private static final Logger log = LoggerFactory.getLogger(WSO2ApiGatewayPlugin.class);
+
     private static final String WSO2_API_ID_EXTENSION = "x-wso2-api-id";
     private String userEmail;
     private String userPassword;
     private String userOrganizationKey;
-    private String apiId;               //apiId will be used when calling the beforeApiVersionSaved method
+    private String apiId;
 
     /**
      * This method is triggered before saving the API to ensure whether a valid identifier exists.
@@ -96,8 +97,6 @@ public class Wso2ApiGatewayPlugin {
             throw new PluginExecutionException("Definition must have a unique 'basepath' section");
         }
 
-//        String apiId = String.valueOf(swagger.getVendorExtensions().get(WSO2_API_ID_EXTENSION));
-
         PayloadConfiguration configuration = new PayloadConfiguration();
 
         log.debug("Obtaining user inputs");
@@ -121,11 +120,12 @@ public class Wso2ApiGatewayPlugin {
      * `required` values from the configurationSchema, and any optional values specified by the user
      * in the integrations interface.
      */
-    public void configure() {
+    private void configure() {
         //For now, user inputs are set to get as command line arguments
         this.userEmail = System.getProperty("email");
         this.userOrganizationKey = System.getProperty("orgKey");
         this.userPassword = System.getProperty("pass");
+        this.apiId = System.getProperty("id");
     }
 
     /**

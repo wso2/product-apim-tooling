@@ -56,9 +56,6 @@ public class PayloadConfiguration {
         String version = swagger.getInfo().getVersion();
         String description = swagger.getInfo().getDescription();
 
-//        log.debug("Setting the context for the API");
-//        swagger.setBasePath(context);
-
         log.debug("Creating the POJO for the payload to create the API");
         PayloadStructure structure = new PayloadStructure();
 

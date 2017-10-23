@@ -1,0 +1,45 @@
+swagger: '2.0'
+paths:
+  /CheckPhoneNumber:
+    get:
+      responses:
+        '200':
+          description: ''
+      produces:
+        - application/xml
+      consumes:
+        - application/json
+      parameters:
+        - name: PhoneNumber
+          in: query
+          required: true
+          type: string
+          description: Give the phone number to be validated
+        - name: LicenseKey
+          in: query
+          required: true
+          type: string
+          description: Give the license key as 0 for testing purpose
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+    post:
+      responses:
+        '200':
+          description: ''
+      parameters:
+        - name: Payload
+          description: Request Body
+          required: false
+          in: body
+          schema:
+            type: object
+            properties:
+              payload:
+                type: string
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+info:
+  title: PhoneVerificationTest
+  version: 1.0.0
+
+basePath: phoneverifyapi1

@@ -30,8 +30,10 @@ public class Main {
                 "wso2/OAuth2Application.yaml";
         String path7 = "/home/akila/Akila/swagger-wso2-integration-local/src/test/java/com/swagger/pluigns/" +
                 "wso2/OAuth2AccessCode.yaml";
+        String path8 = "/home/akila/Akila/swagger-wso2-integration-local/src/test/java/com/swagger/pluigns/" +
+                "wso2/PhoneVerifyApi.yaml";
 
-        Wso2ApiGatewayPlugin plugin = new Wso2ApiGatewayPlugin();
+        WSO2ApiGatewayPlugin plugin = new WSO2ApiGatewayPlugin();
         String yaml = plugin.beforeApiVersionSaved(fileReader(path1));
         plugin.afterApiVersionSaved(yaml);
     }
