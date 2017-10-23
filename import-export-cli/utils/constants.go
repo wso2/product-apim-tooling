@@ -19,16 +19,15 @@
 package utils
 
 import (
-	"os"
 	"path/filepath"
 )
 
 const ProjectName string = "wso2apim"
 
 // File Names and Paths
-//const PathSeparator_ string = string(os.PathSeparator)
 
-var ApplicationRoot, _ = os.Getwd()
+//var ApplicationRoot, _ = os.Getwd()
+var ApplicationRoot  = "/home/menuka/.go/src/github.com/wso2/product-apim-tooling/import-export-cli"
 
 const EnvKeysAllFileName string = "env_keys_all.yaml"
 
