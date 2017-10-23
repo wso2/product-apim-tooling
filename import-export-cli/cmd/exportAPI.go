@@ -53,8 +53,8 @@ var ExportAPICmd = &cobra.Command{
 			resp := ExportAPI(exportAPIName, exportAPIVersion, apiManagerEndpoint, accessToken)
 
 			// Print info on response
-			utils.Logln("ResponseStatus: %v\n", resp.Status())
-			utils.Logln("Error: %v\n", resp.Error())
+			utils.Logf("ResponseStatus: %v\n", resp.Status())
+			utils.Logf("Error: %v\n", resp.Error())
 			//fmt.Printf("Response Body: %v\n", resp.Body())
 
 			if resp.StatusCode() == http.StatusOK {

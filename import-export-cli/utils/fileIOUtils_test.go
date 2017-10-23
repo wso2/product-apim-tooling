@@ -23,12 +23,13 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
+	"path/filepath"
 )
 
 const testKeysFileName string = "test_keys_config.yaml"
 const testMainConfigFileName string = "test_main_config.yaml"
-var testKeysFilePath string = ApplicationRoot + PathSeparator_ + testKeysFileName
-var testMainConfigFilePath string = ApplicationRoot + PathSeparator_ + testMainConfigFileName
+var testKeysFilePath string = filepath.Join(ApplicationRoot, testKeysFileName)
+var testMainConfigFilePath string = filepath.Join(ApplicationRoot, testMainConfigFileName)
 
 var envKeysAll *EnvKeysAll = new(EnvKeysAll)
 var mainConfig *MainConfig = new(MainConfig)
@@ -70,7 +71,7 @@ func WriteCorrectMainConfig() {
 }
 
 func initSampleMainConfig() {
-	mainConfig.Config = Config{2500, true, "/home/exported"}
+	mainConfig.Config = Config{2500,"/home/exported"}
 	mainConfig.Environments = make(map[string]EnvEndpoints)
 	mainConfig.Environments[devName] = EnvEndpoints{"dev_apim_endpoint",
 		"dev_reg_endpoint", "dev_token_endpoint"}

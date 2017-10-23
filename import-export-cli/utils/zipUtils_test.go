@@ -21,6 +21,7 @@ package utils
 import (
 	"os"
 	"testing"
+	"path/filepath"
 )
 
 func TestZipDirError(t *testing.T) {
@@ -33,9 +34,9 @@ func TestZipDirError(t *testing.T) {
 func TestZipDirOK(t *testing.T) {
 	directoryName := "wso2apimZipTest"
 
-	directoryPath := ApplicationRoot + PathSeparator_ + directoryName
+	directoryPath := filepath.Join(ApplicationRoot, directoryName)
 	fileName := "test.txt"
-	filePath := directoryPath + PathSeparator_ + fileName
+	filePath := filepath.Join(directoryPath, fileName)
 
 	os.Mkdir(directoryPath, os.ModePerm)
 
@@ -86,7 +87,7 @@ func TestZipDirOK(t *testing.T) {
 		t.Errorf("Error saving file: %s\n", err)
 	}
 
-	zipFile := directoryPath + PathSeparator_ + "testZip.zip"
+	zipFile := filepath.Join(directoryPath, "testZip.zip")
 
 	// now try compressing
 	err = ZipDir(directoryPath, zipFile)

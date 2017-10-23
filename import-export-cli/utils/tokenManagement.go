@@ -134,7 +134,7 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 			GetBase64EncodedCredentials(clientID, clientSecret), tokenEndpoint)
 		accessToken := responseDataMap["access_token"]
 
-		Logln(LogPrefixInfo+"AccessToken:", accessToken) // TODO:: Remove in production
+		//Logln(LogPrefixInfo+"AccessToken:", accessToken)
 
 		return accessToken, apiManagerEndpoint, nil
 	} else {
@@ -192,6 +192,7 @@ func GetClientIDSecret(username string, password string, url string) (string, st
 		//fmt.Println("Error:", resp.Error())
 		//fmt.Printf("Body: %s\n", resp.Body())
 		if resp.StatusCode() == http.StatusUnauthorized {
+			// 401 Unauthorized
 			HandleErrorAndExit("Incorrect Username/Password combination.", errors.New("401 Unauthorized"))
 		}
 		return "", "", errors.New("Request didn't respond 200 OK: " + resp.Status())

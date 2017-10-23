@@ -50,8 +50,11 @@ var ListCmd = &cobra.Command{
 
 			if err == nil {
 				// Printing the list of available APIs
+				fmt.Println("Environment:", listEnvironment)
 				fmt.Println("No. of APIs:", count)
-				printAPIs(apis)
+				if count > 0 {
+					printAPIs(apis)
+				}
 			} else {
 				utils.Logln(utils.LogPrefixError+"Getting List of APIs", err)
 			}
