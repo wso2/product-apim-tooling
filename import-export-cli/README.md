@@ -3,10 +3,30 @@
 
 Command Line tool for importing and exporting APIs between different API Environemnts
 
+## Getting Started
+
+- ### Building
+    Execute ```build.sh``` to build for necessary platforms. Further instructions will be available upon executing 
+    build.sh
+      
+- ### Running
+    Extract the compressed archive generated to a desired location
+    Then execute ```{extracted-location}/bin/wso2apim``` to start the application
+    Execute ```{extracted-location}/bin/wso2apim --help``` for further instructions
+
+- ### Adding Environments
+    Add environments by either manually editing ```{extracted-location}/main_config.yaml``` or using the command
+    ```wso2apim set``` command.
+    Type ```wso2apim set --help``` for detailed instructions
+
+<hr/>
+<br/>
+
 ## Usage 
 ```bash
      wso2apim [command]
 ```
+
 ### Commands
    * #### export-api
 ```bash
@@ -109,26 +129,4 @@ Command Line tool for importing and exporting APIs between different API Environ
     --verbose
     --insecure, -k
     --help, -h
-```
-<hr/>
-
-## Creating Binaries
-
-### Linux
-```
-go build -o build/wso2apim
-```
-### Windows
-* 32 bit version
-```
-env GOOS=windows GOARCH=386 go build -o build/wso2apim.exe import-export-cli.go
-```
-* 64 bit version
-```
-env GOOS=windows GOARCH=amd64 go build -o build/wso2apim.exe import-export-cli.go
-```
-
-### Mac
-```
-env GOOS=darwin GOARCH=arm build -o build/wso2apim import-export-cli.go
 ```
