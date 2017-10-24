@@ -75,6 +75,7 @@ public class PayloadConfiguration {
         structure.setCorsConfiguration(configuration);
 
         log.debug("Converting the POJO to a json string");
+
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             payload = objectMapper.writeValueAsString(structure);
@@ -82,6 +83,7 @@ public class PayloadConfiguration {
             log.error("Error while converting the POJO to json", jsonProcessingException);
             throw new PluginExecutionException("Error when converting pojo to json");
         }
+
         log.debug("Returning the payload for creating the API in the cloud");
         return payload;
     }

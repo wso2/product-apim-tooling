@@ -31,7 +31,6 @@ public class WSO2Api {
 
     private Logger log = LoggerFactory.getLogger(WSO2Api.class);
 
-    private static final String WSO2_API_ID_EXTENSION = "x-wso2-api-id";
     private static final String API_CLOUD_URL = "https://api.cloud.wso2.com/api/am/publisher/v0.11/apis/";
     private static final String DYNAMIC_CLIENT_REGISTRATION_URL = "https://api.cloud.wso2.com/client-registration/" +
                                                                   "v0.11/register";
@@ -257,16 +256,16 @@ public class WSO2Api {
 
         try {
             content = new String(IOUtils.toByteArray(response.getEntity().getContent()), Charsets.UTF_8);
-        } catch (IOException e) {
-            log.error("Error while searching APIs.");
+        } catch (IOException ioException) {
+            log.error("Error while searching APIs.", ioException);
             throw new PluginExecutionException("Error while searching APIs");
         }
 
         JSONParser parser = new JSONParser();
         try {
             responseJson = (JSONObject) parser.parse(content);
-        } catch (ParseException e) {
-            log.error("Error while parsing search API response");
+        } catch (ParseException parseException) {
+            log.error("Error while parsing search API response", parseException);
             throw  new PluginExecutionException("Error parsing search API response to json");
         }
 
@@ -292,7 +291,6 @@ public class WSO2Api {
         return null;
     }
 
-
     /**
      *
      * @param email                     Email of the cloud account to export the API
@@ -309,7 +307,7 @@ public class WSO2Api {
         String accessToken = getAccessToken(email, organizationKey, password, "create");
         HttpResponse response = httpRequestService.makePutRequest(API_CLOUD_URL + apiIdentifier, "Bearer",
                 accessToken, "application/json", payload);
-
+        System.out.println(response.getStatusLine().getStatusCode());
         if (response.getStatusLine().getStatusCode() == 200) {
             log.debug("The API is updated");
         } else {
@@ -321,8 +319,8 @@ public class WSO2Api {
                 throw new PluginExecutionException("Forbidden. The request must be conditional but no condition" +
                         " has been specified.");
             } else if (response.getStatusLine().getStatusCode() == 404) {
-                log.error("Not Found. The resource to be updated does not exist.");
-                throw new PluginExecutionException("Not Found. The resource to be updated does not exist.");
+                log.error("Nothing to update");
+                throw new PluginExecutionException("Nothing to update");
             } else if (response.getStatusLine().getStatusCode() == 412) {
                 log.error("Precondition Failed. The request has not been performed because one of the preconditions" +
                         " is not met.");
@@ -333,7 +331,6 @@ public class WSO2Api {
             }
         }
     }
-
 
     /**
      * Creates an API in the api cloud and prints the response of the details of the API made
@@ -350,8 +347,6 @@ public class WSO2Api {
 
         StringEntity creationPayload;
         HttpResponse postResponse;
-        HttpResponse swaggerResponse;
-        String content;
         Swagger swagger;
         JSONObject swaggerDefinitionJson;
 
@@ -405,43 +400,7 @@ public class WSO2Api {
             }
 
         } else {
-
-            String accessToken = getAccessToken(email, organizationKey, password, "view");
-            swaggerResponse = httpRequestService.makeGetRequest(API_CLOUD_URL + apiIdentifier + "/swagger",
-                    "Bearer", accessToken,
-                    "application/json");
-
-            if (swaggerResponse.getStatusLine().getStatusCode() == 200) {
-                log.debug("OK. Requested swagger document of the API is returned");
-            } else {
-                if (swaggerResponse.getStatusLine().getStatusCode() == 404) {
-                    log.error("Not Found. Requested API does not exist.");
-                    throw new PluginExecutionException("Not Found. Requested API does not exist.");
-                } else if (swaggerResponse.getStatusLine().getStatusCode() == 406) {
-                    log.error("Not Acceptable. The requested media type is not supported");
-                    throw new PluginExecutionException("Not Acceptable. The requested media type is not supported");
-                }
-            }
-
-            try {
-                content = new String(IOUtils.toByteArray(swaggerResponse.getEntity().getContent()), Charsets.UTF_8);
-            } catch (IOException e) {
-                log.error("Error while checking for unique identifier");
-                throw new PluginExecutionException("Error while checking for unique identifier");
-            }
-
-            JSONObject jsonObject;
-
-            try {
-                jsonObject = (JSONObject) parser.parse(content);
-            } catch (ParseException e) {
-                log.error("Error while parsing the response to json");
-                throw new PluginExecutionException("Error while parsing the response to json");
-            }
-
-            if (jsonObject.get(WSO2_API_ID_EXTENSION) != null) {
-                updateApi(email, organizationKey, password, apiIdentifier, creationPayload);
-            }
+            updateApi(email, organizationKey, password, apiIdentifier, creationPayload);
         }
     }
 }

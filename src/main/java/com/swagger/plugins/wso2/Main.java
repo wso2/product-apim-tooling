@@ -34,8 +34,7 @@ public class Main {
                 "wso2/PhoneVerifyApi.yaml";
 
         WSO2ApiGatewayPlugin plugin = new WSO2ApiGatewayPlugin();
-        String yaml = plugin.beforeApiVersionSaved(fileReader(path1));
-        plugin.afterApiVersionSaved(yaml);
+        plugin.afterApiVersionSaved(fileReader(path2));
     }
 
     /**

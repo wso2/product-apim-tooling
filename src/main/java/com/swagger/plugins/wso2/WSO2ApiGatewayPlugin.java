@@ -6,7 +6,6 @@ import io.swagger.models.ModelImpl;
 import io.swagger.models.Swagger;
 import io.swagger.models.properties.StringProperty;
 import io.swagger.util.Json;
-import io.swagger.util.Yaml;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,51 +24,9 @@ public class WSO2ApiGatewayPlugin {
 
     private static final Logger log = LoggerFactory.getLogger(WSO2ApiGatewayPlugin.class);
 
-    private static final String WSO2_API_ID_EXTENSION = "x-wso2-api-id";
     private String userEmail;
     private String userPassword;
     private String userOrganizationKey;
-    private String apiId;
-
-    /**
-     * This method is triggered before saving the API to ensure whether a valid identifier exists.
-     *
-     * @param swaggerYaml The swagger definition of the API to be exported to the cloud
-     * @return Returns the swaggerYaml after ensuring a valid api identifier exists
-     * @throws PluginExecutionException Custom exception to make the exception more readable
-     */
-    public String beforeApiVersionSaved(/*String triggeredByUUID, String objectPath, */String swaggerYaml/*,
-                                        Boolean forceUpdate, Collection<SpecEntry> links, Boolean isPrivate*/)
-            throws PluginExecutionException {
-        Swagger swagger;
-
-        try {
-            swagger = Json.mapper().readValue(PayloadConfiguration.convertYamlToJson(swaggerYaml), Swagger.class);
-            if (swagger == null) {
-                throw new Exception();
-            }
-        } catch (Exception e) {
-            log.error("Swagger definition is invalid or not readable");
-            throw  new PluginExecutionException("Swagger definition is invalid or not readable");
-        }
-
-        if (swagger.getVendorExtensions() == null || swagger.getVendorExtensions().get(WSO2_API_ID_EXTENSION) == null) {
-            if (StringUtils.isBlank(apiId)) {
-                swagger.vendorExtension(WSO2_API_ID_EXTENSION, System.currentTimeMillis());
-            } else {
-                swagger.vendorExtension(WSO2_API_ID_EXTENSION, apiId);
-            }
-        } else {
-            return swaggerYaml;
-        }
-
-        try {
-            return Yaml.mapper().writeValueAsString(swagger);
-        } catch (Exception e) {
-            log.error("Swagger definition is invalid or not readable");
-            throw new PluginExecutionException("Swagger definition is invalid or not readable ");
-        }
-    }
 
     /**
      * Perform the deployment to WSO2 API cloud during the SAVE operation.
@@ -125,7 +82,6 @@ public class WSO2ApiGatewayPlugin {
         this.userEmail = System.getProperty("email");
         this.userOrganizationKey = System.getProperty("orgKey");
         this.userPassword = System.getProperty("pass");
-        this.apiId = System.getProperty("id");
     }
 
     /**
