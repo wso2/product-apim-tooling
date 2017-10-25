@@ -24,7 +24,6 @@ import (
 	"bytes"
 	"crypto/tls"
 	"io"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -33,6 +32,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"time"
+	"regexp"
 )
 
 var importAPIName string
@@ -52,9 +52,7 @@ var ImportAPICmd = &cobra.Command{
 			importAPICmdPassword)
 
 		if preCommandErr == nil {
-
 			resp, _ := ImportAPI(importAPIName, apiManagerEndpoint, accessToken)
-			utils.Logln(utils.LogPrefixInfo+"Status: %v\n", resp.Status)
 			if resp.StatusCode == 200 {
 				fmt.Println("Header:", resp.Header)
 			} else {
@@ -62,8 +60,8 @@ var ImportAPICmd = &cobra.Command{
 				utils.Logln(utils.LogPrefixError + resp.Status)
 			}
 		} else {
-			// env_endpoints_all.yaml file is not configured properly by the user
-			log.Fatal("Error:", preCommandErr)
+			// env_endpoints file is not configured properly by the user
+			fmt.Println("Error:", preCommandErr)
 			utils.Logln(utils.LogPrefixError + preCommandErr.Error())
 		}
 	},
@@ -81,8 +79,25 @@ func ImportAPI(name string, apiManagerEndpoint string, accessToken string) (*htt
 	apiManagerEndpoint += "import/apis"
 
 	filePath := filepath.Join(utils.ExportDirectory, name)
-	// file is assumed to be a zip archive
 	fmt.Println("filePath:", filePath)
+
+	// check if '.zip' exists in the input 'name'
+	hasZipExtension, _ := regexp.MatchString(`^\S+\.zip$`, name)
+
+	if hasZipExtension {
+		// import the zip file directly
+		//fmt.Println("hasZipExtension: ", true)
+
+	} else {
+		//fmt.Println("hasZipExtension: ", false)
+		// search for a directory with the given name
+		destination := filepath.Join(utils.ExportedAPIsDirectoryPath, name + ".zip")
+		err := utils.ZipDir(filePath, destination)
+		if err != nil {
+			utils.HandleErrorAndExit("Error creating zip archive", err)
+		}
+		filePath += ".zip"
+	}
 
 	extraParams := map[string]string{}
 	// TODO:: Add extraParams as necessary
@@ -114,11 +129,12 @@ func ImportAPI(name string, apiManagerEndpoint string, accessToken string) (*htt
 		//var bodyContent []byte
 
 		if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
-
+			fmt.Println("Successfully imported API '" + name + "'")
+		}else{
+			fmt.Println("Error importing API.")
+			fmt.Println( "Status: " + resp.Status)
 		}
 
-		fmt.Println("Successfully imported API '" + name + "'")
-		utils.Logln(utils.LogPrefixInfo + "Status: " + resp.Status)
 		//fmt.Println(resp.Header)
 		//resp.Body.Read(bodyContent)
 		//resp.Body.Close()

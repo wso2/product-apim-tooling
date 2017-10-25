@@ -35,8 +35,8 @@ const DoYouWantToContinueMsg_DefaultNo string = "Do you want to continue? [y/N] 
 const RootCmdShortDesc string = "CLI for Importing and Exporting APIs"
 
 var RootCmdLongDesc string = dedent.Dedent(`
-		` + ProjectName + ` is a CLI for Importing and Exporting APIs between different environments
-		(Production, Staging, QA etc.)
+		` + CLIName + ` is a Command Line Tool for Importing and Exporting APIs between different environments
+		(Dev, Production, Staging, QA etc.)
 		`)
 
 // Init command related usage info
@@ -62,7 +62,7 @@ var VersionCmdLongDesc string = dedent.Dedent(`
 		`)
 
 var VersionCmdExamples = dedent.Dedent(`
-		` + ProjectName + ` version
+		` + ProjectName + ` ` + VersionCmdLiteral + `
 		`)
 
 // ImportAPI command related usage info
@@ -73,8 +73,8 @@ var ImportAPICmdLongDesc string = "Import an API to an environment"
 
 var ImportAPICmdExamples = dedent.Dedent(`
 		Examples:
-		` + ProjectName + ` importAPI -n TwitterAPI -v 1.0.0 -e dev
-		` + ProjectName + ` importAPI -n FacebookAPI -v 2.1.0 -e production
+		` + ProjectName + ` ` + ImportAPICmdLiteral + ` -n TwitterAPI.zip -e dev
+		` + ProjectName + ` ` + ImportAPICmdLiteral + ` -n FacebookAPI.zip -e production
 	`)
 
 // ExportAPI command related usage info
@@ -85,8 +85,8 @@ var ExportAPICmdLongDesc string = "Export an API from an environment"
 
 var ExportAPICmdExamples = dedent.Dedent(`
 		Examples:
-		` + ProjectName + ` exportAPI -n TwitterAPI -v 1.0.0 -e dev
-		` + ProjectName + ` exportAPI -n FacebookAPI -v 2.1.0 -e production
+		` + ProjectName + ` ` + ExportAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -e dev
+		` + ProjectName + ` ` + ExportAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 -e production
 	`)
 
 // List command related usage Info
@@ -100,8 +100,8 @@ var ListCmdLongDesc string = dedent.Dedent(`
 
 var ListCmdExamples = dedent.Dedent(`
 		Examples:
-		` + ProjectName + ` list -e dev
-		` + ProjectName + ` list -e staging
+		` + ProjectName + ` ` + ListCmdLiteral + ` -e dev
+		` + ProjectName + ` ` + ListCmdLiteral + ` -e staging
 	`)
 
 // ResetUser command related usage Info
@@ -115,8 +115,8 @@ var ResetUserCmdLongDesc = dedent.Dedent(`
 
 var ResetUserCmdExamples = dedent.Dedent(`
 		Examples:
-		` + ProjectName + ` reset-user -e dev
-		` + ProjectName + ` reset-user -e staging
+		` + ProjectName + ` ` + ResetUserCmdLiteral + ` -e dev
+		` + ProjectName + ` ` + ResetUserCmdLiteral + `reset-user -e staging
 	`)
 
 // AddEnv command related Info
@@ -129,7 +129,7 @@ var AddEnvCmdLongDesc = dedent.Dedent(`
 
 var AddEnvCmdExamples = dedent.Dedent(`
 		Examples:
-		` + ProjectName + ` add-env -n production  --reg http://localhost/reg \
+		` + ProjectName + ` ` + AddEnvCmdLiteral + ` -n production  --registration http://localhost/reg \
 						--apim http://localhost/apim \
 						--token http://localhost/token
 	`)
@@ -144,7 +144,7 @@ var RemoveEnvCmdLongDesc = dedent.Dedent(`
 
 var RemoveEnvCmdExamples string = dedent.Dedent(`
 		Examples:
-		` + ProjectName + ` remove-env -n production
+		` + ProjectName + ` ` + RemoveEnvCmdLiteral + ` -n production
 	`)
 
 // Set command related Info
@@ -153,22 +153,17 @@ const SetCmdShortDesc string = "Set configuration"
 
 var SetCmdLongDesc = dedent.Dedent(`
 			Set configuration parameters. Use at least one of the following flags
-				* --skip-tls-verfication <true>/<false>
 				* --http-request-timeout <time-in-milli-seconds>
 				* --export-directory <path-to-directory-where-apis-should-be-saved>
 	`)
 
 var SetCmdExamples = dedent.Dedent(`
 			Examples:
-			`+ ProjectName +` set --skip-tls-verification true \
-				--http-request-timeout 3600 \
-				--export-directory /home/user/exported-apis
+			` + ProjectName + ` ` + SetCmdLiteral + ` --http-request-timeout 3600 \
+								  --export-directory /home/user/exported-apis
 
-			`+ ProjectName +` set --skip-tls-verification false \
-				--http-request-timeout 5000 \
-				--export-directory /media/user/apis
+			` + ProjectName + ` ` + SetCmdLiteral + ` --http-request-timeout 5000 \
+								  --export-directory /media/user/apis
 
-			`+ ProjectName +` set --skip-tls-verification false
-
-			`+ ProjectName +` set --http-request-timeout 5000
+			` + ProjectName + ` ` + SetCmdLiteral + ` --http-request-timeout 5000
 	`)

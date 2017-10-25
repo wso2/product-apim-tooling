@@ -134,7 +134,7 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 			GetBase64EncodedCredentials(clientID, clientSecret), tokenEndpoint)
 		accessToken := responseDataMap["access_token"]
 
-		Logln(LogPrefixInfo+"AccessToken:", accessToken) // TODO:: Remove in production
+		Logln(LogPrefixInfo+"[Remove in Production] AccessToken:", accessToken) // TODO:: Remove in production
 
 		return accessToken, apiManagerEndpoint, nil
 	} else {

@@ -113,8 +113,8 @@ do
     zipdir="${buildPath}/$filename"
     mkdir -p $zipdir
 
-    cp -r "${baseDir}/resources/README.txt" $zipdir > /dev/null 2>&1
-    cp -r "${baseDir}/resources/LICENSE.txt" $zipdir > /dev/null 2>&1
+    cp -r "${baseDir}/resources/README.md" $zipdir > /dev/null 2>&1
+    cp -r "${baseDir}/resources/LICENSE" $zipdir > /dev/null 2>&1
 
     # set destination path for binary
     destination="$zipdir/bin/$output"
@@ -122,7 +122,7 @@ do
     #echo "GOOS=$goos GOARCH=$goarch go build -x -o $destination $target"
     GOOS=$goos GOARCH=$goarch go build -gcflags=-trimpath=$GOPATH -asmflags=-trimpath=$GOPATH -ldflags "-X import-export-cli.ImportExportCLIVersion=$build_version -X 'import-export-cli.buildDate=$(date -u '+%Y-%m-%d
     %H:%M:%S UTC')'" -o $destination $target
-    cp -r "${baseDir}/resources/main_config.yaml.sample" "${zipdir}/bin" > /dev/null 2>&1
+    cp -r "${baseDir}/resources/main_config.yaml" "${zipdir}/bin" > /dev/null 2>&1
 
     pwd=`pwd`
     cd $buildPath
