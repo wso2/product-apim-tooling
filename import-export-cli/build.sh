@@ -11,9 +11,8 @@ function showUsageAndExit() {
     echo -en "  -f\t"
     echo "[OPTIONAL] Cross compile for all the list of platforms. If not specified, the specified target file will be cross compiled only for the autodetected native platform."
     echo
-    echo "Ex: "$'\e[1m'"./build.sh -t import-export-cli.go -v 1.0.0 -f"$'\e[0m'" - Builds ImportExportCLI for version 1.0.0 for all
-    the
-    platforms"
+    echo "Ex: "$'\e[1m'"./build.sh -t apimcli.go -v 1.0.0 -f"$'\e[0m'" - Builds ImportExportCLI for version
+     1.0.0 for all the platforms"
     echo
     exit 1
 }

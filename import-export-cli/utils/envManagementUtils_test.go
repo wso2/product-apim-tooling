@@ -73,7 +73,7 @@ func TestGetAPIMEndpointOfEnv(t *testing.T) {
 	WriteCorrectMainConfig()
 
 	returnedEndpoint := GetAPIMEndpointOfEnv(devName, testMainConfigFilePath)
-	expectedEndpoint := getSampleMainConfig().Environments[devName].APIManagerEndpoint
+	expectedEndpoint := getSampleMainConfig().Environments[devName].PublisherEndpoint
 	if returnedEndpoint != expectedEndpoint {
 		t.Errorf("Expected '%s', got '%s'\n", expectedEndpoint, returnedEndpoint)
 	}

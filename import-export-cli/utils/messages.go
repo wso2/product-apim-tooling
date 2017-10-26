@@ -35,7 +35,7 @@ const DoYouWantToContinueMsg_DefaultNo string = "Do you want to continue? [y/N] 
 const RootCmdShortDesc string = "CLI for Importing and Exporting APIs"
 
 var RootCmdLongDesc string = dedent.Dedent(`
-		` + CLIName + ` is a Command Line Tool for Importing and Exporting APIs between different environments
+		` + ProjectName + ` is a Command Line Tool for Importing and Exporting APIs between different environments
 		(Dev, Production, Staging, QA etc.)
 		`)
 
@@ -55,7 +55,7 @@ var InitCmdExamples = dedent.Dedent(`
 
 // Version command related usage info
 const VersionCmdLiteral string = "version"
-const VersionCmdShortDesc string = "Display Version on current `+ProjectName+`"
+const VersionCmdShortDesc string = "Display Version on current "+ProjectName
 
 var VersionCmdLongDesc string = dedent.Dedent(`
 		Display the current version of this command line tool

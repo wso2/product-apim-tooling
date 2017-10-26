@@ -52,8 +52,7 @@ import-export-cli/env_endpoints_all.yaml
 import-export-cli/env_keys_all.yaml
 
 # Binaries
-import-export-cli/import-export-cli
-import-export-cli/wso2apim-cli
+import-export-cli/apimcli
 import-export-cli/build/
 
 
@@ -62,4 +61,3 @@ import-export-cli/build/
 import-export-cli/utils/c.out
 import-export-cli/utils/coverage.out
 import-export-cli/utils/coverage.html
-import-export-cli/wso2apim

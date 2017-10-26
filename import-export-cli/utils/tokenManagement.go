@@ -34,7 +34,7 @@ import (
 // @param environment : Environment on which the particular command is run
 // @param flagUsername : Username entered using the flag --username (-u). Could be blank
 // @param flagPassword : Password entered using the flag --password (-p). Could be blank
-// @return AccessToken, APIManagerEndpoint, Errors
+// @return AccessToken, PublisherEndpoint, Errors
 // including (export-api, import-api, list)
 func ExecutePreCommand(environment string, flagUsername string, flagPassword string) (string, string, error) {
 	if EnvExistsInMainConfigFile(environment, MainConfigFilePath) {

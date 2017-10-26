@@ -1,9 +1,9 @@
 config:
-  http_timeout: 2500
-  export_directory: .
+  http_request_timeout: 2500
+  export_directory: exported
 
 environments:
   sample-env:
-    api_manager_endpoint: sample-apim-endpoint
+    publisher_endpoint: sample-publisher-endpoint
     registration_endpoint: sample-reg-endpoint
     token_endpoint: sample-token-endpoint

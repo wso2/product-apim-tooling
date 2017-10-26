@@ -35,7 +35,7 @@ import (
 	"regexp"
 )
 
-var importAPIName string
+var importAPIFile string
 var importEnvironment string
 var importAPICmdUsername string
 var importAPICmdPassword string
@@ -52,11 +52,12 @@ var ImportAPICmd = &cobra.Command{
 			importAPICmdPassword)
 
 		if preCommandErr == nil {
-			resp, _ := ImportAPI(importAPIName, apiManagerEndpoint, accessToken)
+			resp, _ := ImportAPI(importAPIFile, apiManagerEndpoint, accessToken)
 			if resp.StatusCode == 200 {
-				fmt.Println("Header:", resp.Header)
+				utils.Logln("Header:", resp.Header)
+				fmt.Println("Succesfully imported API!")
 			} else {
-				fmt.Println("Status: ", resp.Status)
+				fmt.Println("Error importing API")
 				utils.Logln(utils.LogPrefixError + resp.Status)
 			}
 		} else {
@@ -183,7 +184,7 @@ func NewFileUploadRequest(uri string, params map[string]string, paramName, path 
 // init using Cobra
 func init() {
 	RootCmd.AddCommand(ImportAPICmd)
-	ImportAPICmd.Flags().StringVarP(&importAPIName, "name", "n", "",
+	ImportAPICmd.Flags().StringVarP(&importAPIFile, "file", "f", "",
 		"Name of the API to be imported")
 	ImportAPICmd.Flags().StringVarP(&importEnvironment, "environment", "e",
 		utils.GetDefaultEnvironment(utils.MainConfigFilePath), "Environment from the which the API should be imported")

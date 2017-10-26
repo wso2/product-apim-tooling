@@ -100,7 +100,7 @@ func WriteToZip(exportAPIName string, resp *resty.Response) {
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating zip archive", err)
 	}
-	fmt.Println("Succesfully exported and wrote to file")
+	fmt.Println("Succesfully exported API!")
 }
 
 // ExportAPI
@@ -122,7 +122,7 @@ func ExportAPI(name string, version string, apimEndpoint string, accessToken str
 	// TODO:: Add 'version' to the query (make sure the backend supports attribute searching)
 
 	apimEndpoint += query
-	fmt.Println("ExportAPI: URL:", apimEndpoint)
+	utils.Logln(utils.LogPrefixInfo + "ExportAPI: URL:", apimEndpoint)
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 	headers[utils.HeaderAccept] = utils.HeaderValueApplicationZip

@@ -81,7 +81,7 @@ func (mainConfig *MainConfig) ParseMainConfigFromFile(data []byte) error {
 		return err
 	}
 	for name, endpoints := range mainConfig.Environments {
-		if endpoints.APIManagerEndpoint == "" {
+		if endpoints.PublisherEndpoint == "" {
 			return errors.New("Blank API Manager Endpoint for " + name)
 		}
 		if endpoints.RegistrationEndpoint == "" {

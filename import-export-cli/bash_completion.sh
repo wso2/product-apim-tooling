@@ -58,7 +58,5 @@ import_export_cli()
     return 0
 }
 
-complete -F import_export_cli import-export-cli
-complete -F import_export_cli wso2apim
-complete -F import_export_cli ./import-export-cli
-complete -F import_export_cli ./wso2apim
+complete -F import_export_cli apimcli
+complete -F import_export_cli ./apimcli

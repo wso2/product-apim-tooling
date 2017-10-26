@@ -23,8 +23,7 @@ import (
 	"os"
 )
 
-const ProjectName string = "wso2apim"
-const CLIName string = "import-export-cli"
+const ProjectName string = "apimcli"
 
 // File Names and Paths
 

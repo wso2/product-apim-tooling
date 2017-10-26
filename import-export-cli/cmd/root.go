@@ -23,7 +23,6 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"time"
 )
@@ -60,9 +59,9 @@ func init() {
 	RootCmd.PersistentFlags().BoolVar(&verbose, "verbose", false, "Enable verbose mode")
 	RootCmd.PersistentFlags().BoolVarP(&insecure, "insecure", "k", false,
 		"Allow connections to SSL endpoints without certs")
-	RootCmd.PersistentFlags().StringP("author", "a", "", "WSO2")
+	//RootCmd.PersistentFlags().StringP("author", "a", "", "WSO2")
 
-	viper.BindPFlag("author", RootCmd.PersistentFlags().Lookup("author"))
+	//viper.BindPFlag("author", RootCmd.PersistentFlags().Lookup("author"))
 
 	// Here you will define your flags and configuration settings.
 	// Cobra supports Persistent Flags, which, if defined here,

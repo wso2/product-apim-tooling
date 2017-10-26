@@ -3,22 +3,18 @@ config:
   export_directory: /home/menuka/Documents/exported
 environments:
   dev:
-    api_manager_endpoint: https://localhost:9292/api/am/publisher/v1.0
+    publisher_endpoint: https://localhost:9292/api/am/publisher/v1.0
     registration_endpoint: https://localhost:9443/identity/connect/register
     token_endpoint: https://localhost:9443/oauth2/token
   staging:
-    api_manager_endpoint: https://localhost:9292/api/am/publisher/v1.0
+    publisher_endpoint: https://localhost:9292/api/am/publisher/v1.0
     registration_endpoint: https://localhost:9443/identity/connect/register
     token_endpoint: https://localhost:9443/oauth2/token
-  testEnv:
-    api_manager_endpoint: https://example.com/apim
-    registration_endpoint: https://example.com/reg
-    token_endpoint: https://example.com/token
   vm1:
-    api_manager_endpoint: https://35.195.132.29:9292/api/am/publisher/v1.0
+    publisher_endpoint: https://35.195.132.29:9292/api/am/publisher/v1.0
     registration_endpoint: https://35.195.132.29:9443/identity/connect/register
     token_endpoint: https://35.195.132.29:9443/oauth2/token
   vm2:
-    api_manager_endpoint: https://35.195.70.177:9292/api/am/publisher/v1.0
+    publisher_endpoint: https://35.195.70.177:9292/api/am/publisher/v1.0
     registration_endpoint: https://35.195.70.177:9443/identity/connect/register
     token_endpoint: https://35.195.70.177:9443/oauth2/token
