@@ -58,7 +58,7 @@ var ExportAPICmd = &cobra.Command{
 			//fmt.Printf("Response Body: %v\n", resp.Body())
 
 			if resp.StatusCode() == http.StatusOK {
-				WriteToZip(exportAPIName, resp)
+				WriteToZip(exportAPIName, exportAPIVersion, resp)
 
 				// only to get the number of APIs exported
 				numberOfAPIsExported, _, err := GetAPIList(exportAPIName, accessToken, apiManagerEndpoint)
@@ -85,7 +85,7 @@ var ExportAPICmd = &cobra.Command{
 // @param exportAPIName : Name of the API to be exported
 // @param resp : Response returned from making the HTTP request (only pass a 200 OK)
 // Exported API will be written to a zip file
-func WriteToZip(exportAPIName string, resp *resty.Response) {
+func WriteToZip(exportAPIName string, exportAPIVersion string, resp *resty.Response) {
 	// Write to file
 	directory := utils.ExportDirectory
 	// create directory if it doesn't exist
@@ -93,7 +93,7 @@ func WriteToZip(exportAPIName string, resp *resty.Response) {
 		os.Mkdir(directory, 0777)
 		// permission 777 : Everyone can read, write, and execute
 	}
-	filename := exportAPIName + ".zip"
+	filename := exportAPIName + "_" + exportAPIVersion + ".zip"	// MyAPI_1.0.0.zip
 	pFile := filepath.Join(directory, filename)
 	err := ioutil.WriteFile(pFile, resp.Body(), 0644)
 	// permission 644 : Only the owner can read and write.. Everyone else can only read.
