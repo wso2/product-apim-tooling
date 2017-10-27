@@ -23,15 +23,33 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"github.com/renstrom/dedent"
 )
 
 var resetUserEnvironment string
 
+// ResetUser command related usage Info
+
+const ResetUserCmdLiteral string = "reset-user"
+const ResetUserCmdShortDesc string = "Reset user of an environment"
+
+var ResetUserCmdLongDesc = dedent.Dedent(`
+		Reset user data of a particular environment (Clear the entry in env_keys_all.yaml file)
+	`)
+
+var ResetUserCmdExamples = dedent.Dedent(`
+		Examples:
+		` + utils.ProjectName + ` ` + ResetUserCmdLiteral + ` -e dev
+		` + utils.ProjectName + ` ` + ResetUserCmdLiteral + `reset-user -e staging
+	`)
+
+
+
 // ResetUserCmd represents the resetUser command
 var ResetUserCmd = &cobra.Command{
-	Use:   "reset-user",
-	Short: utils.ResetUserCmdShortDesc,
-	Long:  utils.ResetUserCmdLongDesc + utils.ResetUserCmdExamples,
+	Use:   ResetUserCmdLiteral,
+	Short: ResetUserCmdShortDesc,
+	Long:  ResetUserCmdLongDesc + ResetUserCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + "reset-user called")
 

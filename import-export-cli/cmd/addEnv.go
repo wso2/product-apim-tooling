@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"github.com/renstrom/dedent"
 )
 
 var flagAddEnvName string           // name of the environment to be added
@@ -30,11 +31,28 @@ var flagTokenEndpoint string        // token endpoint of the environment to be a
 var flagRegistrationEndpoint string // registration endpoint of the environment to be added
 var flagAPIManagerEndpoint string   // api manager endpoint of the environment to be added
 
+// AddEnv command related Info
+const AddEnvCmdLiteral string = "add-env"
+const AddEnvCmdShortDesc string = "Add Environment to Config file"
+
+var AddEnvCmdLongDesc = dedent.Dedent(`
+		Add new environment and its related endpoints to the config file
+	`)
+
+var AddEnvCmdExamples = dedent.Dedent(`
+		Examples:
+		` + utils.ProjectName + ` ` + AddEnvCmdLiteral + ` -n production  --registration http://localhost/reg \
+						--apim http://localhost/apim \
+						--token http://localhost/token
+	`)
+
+
+
 // addEnvCmd represents the addEnv command
 var addEnvCmd = &cobra.Command{
-	Use:   "add-env",
-	Short: utils.AddEnvCmdShortDesc,
-	Long:  utils.AddEnvCmdLongDesc + utils.AddEnvCmdExamples,
+	Use:   AddEnvCmdLiteral,
+	Short: AddEnvCmdShortDesc,
+	Long:  AddEnvCmdLongDesc + AddEnvCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + "add-env called")
 		err := addEnv(flagAddEnvName, flagAPIManagerEndpoint, flagRegistrationEndpoint, flagTokenEndpoint,
@@ -62,7 +80,7 @@ func addEnv(envName string, apimEndpoint string, regEndpoint string, tokenEndpoi
 	}
 	if apimEndpoint == "" || regEndpoint == "" || tokenEndpoint == "" {
 		// at least one of the 3 endpoints is blank
-		utils.ShowHelpCommandTip(utils.AddEnvCmdLiteral)
+		utils.ShowHelpCommandTip(AddEnvCmdLiteral)
 		return errors.New("endpoints cannot be blank")
 	}
 	if utils.EnvExistsInMainConfigFile(envName, mainConfigFilePath) {

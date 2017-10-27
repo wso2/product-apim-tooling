@@ -53,6 +53,7 @@ import-export-cli/env_keys_all.yaml
 
 # Binaries
 import-export-cli/apimcli
+import-export-cli/import-export-cli
 import-export-cli/build/
 
 

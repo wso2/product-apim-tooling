@@ -24,13 +24,27 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"github.com/renstrom/dedent"
 )
+
+// Version command related usage info
+const VersionCmdLiteral string = "version"
+const VersionCmdShortDesc string = "Display Version on current "+utils.ProjectName
+
+var VersionCmdLongDesc string = dedent.Dedent(`
+		Display the current version of this command line tool
+		`)
+
+var VersionCmdExamples = dedent.Dedent(`
+		` + utils.ProjectName + ` ` + VersionCmdLiteral + `
+		`)
+
 
 // VersionCmd represents the version command
 var VersionCmd = &cobra.Command{
 	Use:   "version",
-	Short: utils.VersionCmdShortDesc,
-	Long:  utils.VersionCmdLongDesc + utils.VersionCmdExamples,
+	Short: VersionCmdShortDesc,
+	Long:  VersionCmdLongDesc + VersionCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		var version string = "0.1"
 		fmt.Println("wso2apim-cli Version " + version)

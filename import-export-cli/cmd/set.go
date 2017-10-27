@@ -22,16 +22,38 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"fmt"
+	"github.com/renstrom/dedent"
 )
 
 var flagHttpRequestTimeout int
 var flagExportDirectory string
 
+// Set command related Info
+const SetCmdLiteral string = "set"
+const SetCmdShortDesc string = "Set configuration"
+
+var SetCmdLongDesc = dedent.Dedent(`
+			Set configuration parameters. Use at least one of the following flags
+				* --http-request-timeout <time-in-milli-seconds>
+				* --export-directory <path-to-directory-where-apis-should-be-saved>
+	`)
+
+var SetCmdExamples = dedent.Dedent(`
+			Examples:
+			` + utils.ProjectName + ` ` + SetCmdLiteral + ` --http-request-timeout 3600 \
+								  --export-directory /home/user/exported-apis
+
+			` + utils.ProjectName + ` ` + SetCmdLiteral + ` --http-request-timeout 5000 \
+								  --export-directory /media/user/apis
+
+			` + utils.ProjectName + ` ` + SetCmdLiteral + ` --http-request-timeout 5000
+	`)
+
 // SetCmd represents the 'set' command
 var SetCmd = &cobra.Command{
 	Use:   "set",
-	Short: utils.SetCmdShortDesc,
-	Long:  utils.SetCmdLongDesc + utils.SetCmdExamples,
+	Short: SetCmdShortDesc,
+	Long:  SetCmdLongDesc + SetCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + "set called")
 

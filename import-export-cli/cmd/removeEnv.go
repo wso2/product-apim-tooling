@@ -23,15 +23,30 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"github.com/renstrom/dedent"
 )
 
 var flagNameOfEnvToBeRemoved string // name of the environment to be removed
 
+// RemoveEnv command related Info
+const RemoveEnvCmdLiteral string = "remove-env"
+const RemoveEnvCmdShortDesc string = "Remove Environment from Config file"
+
+var RemoveEnvCmdLongDesc = dedent.Dedent(`
+		Remove Environment and its related endpoints from the config file
+    `)
+
+var RemoveEnvCmdExamples string = dedent.Dedent(`
+		Examples:
+		` + utils.ProjectName + ` ` + RemoveEnvCmdLiteral + ` -n production
+	`)
+
+
 // removeEnvCmd represents the removeEnv command
 var removeEnvCmd = &cobra.Command{
-	Use:   "remove-env",
-	Short: utils.RemoveEnvCmdShortDesc,
-	Long:  utils.RemoveEnvCmdLongDesc + utils.RemoveEnvCmdExamples,
+	Use:   RemoveEnvCmdLiteral,
+	Short: RemoveEnvCmdShortDesc,
+	Long:  RemoveEnvCmdLongDesc + RemoveEnvCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + "remove-env called")
 		err := removeEnv(flagNameOfEnvToBeRemoved, utils.MainConfigFilePath, utils.EnvKeysAllFilePath)

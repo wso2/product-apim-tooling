@@ -25,17 +25,26 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"time"
+	"github.com/renstrom/dedent"
 )
 
 var verbose bool
 var cfgFile string
 var insecure bool
 
+// RootCmd related info
+const RootCmdShortDesc string = "CLI for Importing and Exporting APIs"
+
+var RootCmdLongDesc string = dedent.Dedent(`
+		` + utils.ProjectName + ` is a Command Line Tool for Importing and Exporting APIs between different environments
+		(Dev, Production, Staging, QA etc.)
+		`)
+
 // This represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:   "wso2apim",
-	Short: utils.RootCmdShortDesc,
-	Long:  utils.RootCmdLongDesc,
+	Use:   utils.ProjectName,
+	Short: RootCmdShortDesc,
+	Long:  RootCmdLongDesc,
 
 	// Uncomment the following line if your bare application
 	// has an action associated with it:

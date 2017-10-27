@@ -29,6 +29,7 @@ import (
 
 	"path/filepath"
 	"net/http"
+	"github.com/renstrom/dedent"
 )
 
 var exportAPIName string
@@ -37,12 +38,26 @@ var exportEnvironment string
 var exportAPICmdUsername string
 var exportAPICmdPassword string
 
+// ExportAPI command related usage info
+const ExportAPICmdLiteral string = "export-api"
+const ExportAPICmdShortDesc string = "Export API"
+
+var ExportAPICmdLongDesc string = "Export an API from an environment"
+
+var ExportAPICmdExamples = dedent.Dedent(`
+		Examples:
+		` + utils.ProjectName + ` ` + ExportAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -e dev
+		` + utils.ProjectName + ` ` + ExportAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 -e production
+	`)
+
+
+
 // ExportAPICmd represents the exportAPI command
 var ExportAPICmd = &cobra.Command{
-	Use: "export-api (--name <name-of-the-api> --version <version-of-the-api> --environment " +
+	Use: ExportAPICmdLiteral + " (--name <name-of-the-api> --version <version-of-the-api> --environment " +
 		"<environment-from-which-the-api-should-be-exported>)",
-	Short: utils.ExportAPICmdShortDesc,
-	Long:  utils.ExportAPICmdLongDesc + utils.ExportAPICmdExamples,
+	Short: ExportAPICmdShortDesc,
+	Long:  ExportAPICmdLongDesc + ExportAPICmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln("export-api called")
 

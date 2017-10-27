@@ -33,6 +33,7 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"time"
 	"regexp"
+	"github.com/renstrom/dedent"
 )
 
 var importAPIFile string
@@ -40,11 +41,26 @@ var importEnvironment string
 var importAPICmdUsername string
 var importAPICmdPassword string
 
+// ImportAPI command related usage info
+const ImportAPICmdLiteral string = "import-api"
+const ImportAPICmdShortDesc string = "Import API"
+
+var ImportAPICmdLongDesc string = "Import an API to an environment"
+
+var ImportAPICmdExamples = dedent.Dedent(`
+		Examples:
+		` + utils.ProjectName + ` ` + ImportAPICmdLiteral + ` -n TwitterAPI.zip -e dev
+		` + utils.ProjectName + ` ` + ImportAPICmdLiteral + ` -n FacebookAPI.zip -e production
+	`)
+
+
+
 // ImportAPICmd represents the importAPI command
 var ImportAPICmd = &cobra.Command{
-	Use:   "import-api (--name <name-of-the-api> --environment <environment-to-which-the-api-should-be-imported>)",
-	Short: utils.ImportAPICmdShortDesc,
-	Long:  utils.ImportAPICmdLongDesc + utils.ImportAPICmdExamples,
+	Use:   ImportAPICmdLiteral + " (--name <name-of-the-api> --environment " +
+		"<environment-to-which-the-api-should-be-imported>)",
+	Short: ImportAPICmdShortDesc,
+	Long:  ImportAPICmdLongDesc + ImportAPICmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + "import-api called")
 

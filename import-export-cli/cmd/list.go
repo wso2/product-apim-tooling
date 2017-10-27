@@ -28,19 +28,37 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"os"
 	"net/http"
+	"github.com/renstrom/dedent"
 )
 
 var listEnvironment string
 var listCmdUsername string
 var listCmdPassword string
 
+// List command related usage Info
+
+const ListCmdLiteral string = "list"
+const ListCmdShortDesc string = "List APIs in an environment"
+
+var ListCmdLongDesc string = dedent.Dedent(`
+			Display a list containing all the APIs available in the environment specified by flag (--environment, -e)
+	`)
+
+var ListCmdExamples = dedent.Dedent(`
+		Examples:
+		` + utils.ProjectName + ` ` + ListCmdLiteral + ` -e dev
+		` + utils.ProjectName + ` ` + ListCmdLiteral + ` -e staging
+	`)
+
+
+
 // ListCmd represents the list command
 var ListCmd = &cobra.Command{
-	Use:   "list",
-	Short: utils.ListCmdShortDesc,
-	Long:  utils.ListCmdLongDesc + utils.ListCmdExamples,
+	Use:   ListCmdLiteral,
+	Short: ListCmdShortDesc,
+	Long:  ListCmdLongDesc + ListCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln("list called")
+		utils.Logln(utils.LogPrefixInfo + "list called")
 
 		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(listEnvironment, listCmdUsername,
 			listCmdPassword)
@@ -65,6 +83,7 @@ var ListCmd = &cobra.Command{
 	},
 }
 
+// printAPIs
 // @param apis : array of API objects
 func printAPIs(apis []utils.API) {
 	table := tablewriter.NewWriter(os.Stdout)
@@ -99,7 +118,7 @@ func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (in
 		url += "/"
 	}
 	url += "apis?query=" + query
-	fmt.Println("URL:", url)
+	utils.Logln(utils.LogPrefixInfo+"URL:", url)
 
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
