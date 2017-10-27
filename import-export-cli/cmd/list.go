@@ -37,28 +37,28 @@ var listCmdPassword string
 
 // List command related usage Info
 
-const ListCmdLiteral string = "list"
-const ListCmdShortDesc string = "List APIs in an environment"
+const listCmdLiteral string = "list"
+const listCmdShortDesc string = "List APIs in an environment"
 
-var ListCmdLongDesc string = dedent.Dedent(`
+var listCmdLongDesc string = dedent.Dedent(`
 			Display a list containing all the APIs available in the environment specified by flag (--environment, -e)
 	`)
 
-var ListCmdExamples = dedent.Dedent(`
+var listCmdExamples = dedent.Dedent(`
 		Examples:
-		` + utils.ProjectName + ` ` + ListCmdLiteral + ` -e dev
-		` + utils.ProjectName + ` ` + ListCmdLiteral + ` -e staging
+		` + utils.ProjectName + ` ` + listCmdLiteral + ` -e dev
+		` + utils.ProjectName + ` ` + listCmdLiteral + ` -e staging
 	`)
 
 
 
 // ListCmd represents the list command
 var ListCmd = &cobra.Command{
-	Use:   ListCmdLiteral,
-	Short: ListCmdShortDesc,
-	Long:  ListCmdLongDesc + ListCmdExamples,
+	Use:   listCmdLiteral,
+	Short: listCmdShortDesc,
+	Long:  listCmdLongDesc + listCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + "list called")
+		utils.Logln(utils.LogPrefixInfo + listCmdLiteral + " called")
 
 		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(listEnvironment, listCmdUsername,
 			listCmdPassword)

@@ -29,33 +29,33 @@ var flagHttpRequestTimeout int
 var flagExportDirectory string
 
 // Set command related Info
-const SetCmdLiteral string = "set"
-const SetCmdShortDesc string = "Set configuration"
+const setCmdLiteral string = "set"
+const setCmdShortDesc string = "Set configuration"
 
-var SetCmdLongDesc = dedent.Dedent(`
+var setCmdLongDesc = dedent.Dedent(`
 			Set configuration parameters. Use at least one of the following flags
 				* --http-request-timeout <time-in-milli-seconds>
 				* --export-directory <path-to-directory-where-apis-should-be-saved>
 	`)
 
-var SetCmdExamples = dedent.Dedent(`
+var setCmdExamples = dedent.Dedent(`
 			Examples:
-			` + utils.ProjectName + ` ` + SetCmdLiteral + ` --http-request-timeout 3600 \
+			` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 3600 \
 								  --export-directory /home/user/exported-apis
 
-			` + utils.ProjectName + ` ` + SetCmdLiteral + ` --http-request-timeout 5000 \
+			` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000 \
 								  --export-directory /media/user/apis
 
-			` + utils.ProjectName + ` ` + SetCmdLiteral + ` --http-request-timeout 5000
+			` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000
 	`)
 
 // SetCmd represents the 'set' command
 var SetCmd = &cobra.Command{
 	Use:   "set",
-	Short: SetCmdShortDesc,
-	Long:  SetCmdLongDesc + SetCmdExamples,
+	Short: setCmdShortDesc,
+	Long:  setCmdLongDesc + setCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + "set called")
+		utils.Logln(utils.LogPrefixInfo + setCmdLiteral + " called")
 
 		// read the existing config vars
 		configVars := utils.GetMainConfigFromFile(utils.MainConfigFilePath)

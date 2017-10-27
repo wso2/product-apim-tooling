@@ -93,7 +93,7 @@ func initConfig() {
 	if verbose {
 		utils.EnableVerboseMode()
 		t := time.Now()
-		utils.Logf("Executed ImportExportCLI on %v\n", t.Format(time.RFC1123))
+		utils.Logf("Executed ImportExportCLI (%s) on %v\n", utils.ProjectName, t.Format(time.RFC1123))
 	}
 
 	utils.Logln(utils.LogPrefixInfo+"Insecure:", insecure)

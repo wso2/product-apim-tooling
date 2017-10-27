@@ -32,16 +32,16 @@ var flagRegistrationEndpoint string // registration endpoint of the environment 
 var flagAPIManagerEndpoint string   // api manager endpoint of the environment to be added
 
 // AddEnv command related Info
-const AddEnvCmdLiteral string = "add-env"
-const AddEnvCmdShortDesc string = "Add Environment to Config file"
+const addEnvCmdLiteral string = "add-env"
+const addEnvCmdShortDesc string = "Add Environment to Config file"
 
-var AddEnvCmdLongDesc = dedent.Dedent(`
+var addEnvCmdLongDesc = dedent.Dedent(`
 		Add new environment and its related endpoints to the config file
 	`)
 
-var AddEnvCmdExamples = dedent.Dedent(`
+var addEnvCmdExamples = dedent.Dedent(`
 		Examples:
-		` + utils.ProjectName + ` ` + AddEnvCmdLiteral + ` -n production  --registration http://localhost/reg \
+		` + utils.ProjectName + ` ` + addEnvCmdLiteral + ` -n production  --registration http://localhost/reg \
 						--apim http://localhost/apim \
 						--token http://localhost/token
 	`)
@@ -50,11 +50,11 @@ var AddEnvCmdExamples = dedent.Dedent(`
 
 // addEnvCmd represents the addEnv command
 var addEnvCmd = &cobra.Command{
-	Use:   AddEnvCmdLiteral,
-	Short: AddEnvCmdShortDesc,
-	Long:  AddEnvCmdLongDesc + AddEnvCmdExamples,
+	Use:   addEnvCmdLiteral,
+	Short: addEnvCmdShortDesc,
+	Long:  addEnvCmdLongDesc + addEnvCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + "add-env called")
+		utils.Logln(utils.LogPrefixInfo + addEnvCmdLiteral +" called")
 		err := addEnv(flagAddEnvName, flagAPIManagerEndpoint, flagRegistrationEndpoint, flagTokenEndpoint,
 			utils.MainConfigFilePath)
 		if err != nil {
@@ -80,7 +80,7 @@ func addEnv(envName string, apimEndpoint string, regEndpoint string, tokenEndpoi
 	}
 	if apimEndpoint == "" || regEndpoint == "" || tokenEndpoint == "" {
 		// at least one of the 3 endpoints is blank
-		utils.ShowHelpCommandTip(AddEnvCmdLiteral)
+		utils.ShowHelpCommandTip(addEnvCmdLiteral)
 		return errors.New("endpoints cannot be blank")
 	}
 	if utils.EnvExistsInMainConfigFile(envName, mainConfigFilePath) {

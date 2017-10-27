@@ -30,28 +30,28 @@ var resetUserEnvironment string
 
 // ResetUser command related usage Info
 
-const ResetUserCmdLiteral string = "reset-user"
-const ResetUserCmdShortDesc string = "Reset user of an environment"
+const resetUserCmdLiteral string = "reset-user"
+const resetUserCmdShortDesc string = "Reset user of an environment"
 
-var ResetUserCmdLongDesc = dedent.Dedent(`
+var resetUserCmdLongDesc = dedent.Dedent(`
 		Reset user data of a particular environment (Clear the entry in env_keys_all.yaml file)
 	`)
 
-var ResetUserCmdExamples = dedent.Dedent(`
+var resetUserCmdExamples = dedent.Dedent(`
 		Examples:
-		` + utils.ProjectName + ` ` + ResetUserCmdLiteral + ` -e dev
-		` + utils.ProjectName + ` ` + ResetUserCmdLiteral + `reset-user -e staging
+		` + utils.ProjectName + ` ` + resetUserCmdLiteral + ` -e dev
+		` + utils.ProjectName + ` ` + resetUserCmdLiteral + `reset-user -e staging
 	`)
 
 
 
 // ResetUserCmd represents the resetUser command
 var ResetUserCmd = &cobra.Command{
-	Use:   ResetUserCmdLiteral,
-	Short: ResetUserCmdShortDesc,
-	Long:  ResetUserCmdLongDesc + ResetUserCmdExamples,
+	Use:   resetUserCmdLiteral,
+	Short: resetUserCmdShortDesc,
+	Long:  resetUserCmdLongDesc + resetUserCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + "reset-user called")
+		utils.Logln(utils.LogPrefixInfo + resetUserCmdLiteral + " called")
 
 		err := utils.RemoveEnvFromKeysFile(resetUserEnvironment, utils.EnvKeysAllFilePath, utils.MainConfigFilePath)
 		if err != nil {

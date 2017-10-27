@@ -29,26 +29,26 @@ import (
 var flagNameOfEnvToBeRemoved string // name of the environment to be removed
 
 // RemoveEnv command related Info
-const RemoveEnvCmdLiteral string = "remove-env"
-const RemoveEnvCmdShortDesc string = "Remove Environment from Config file"
+const removeEnvCmdLiteral string = "remove-env"
+const removeEnvCmdShortDesc string = "Remove Environment from Config file"
 
-var RemoveEnvCmdLongDesc = dedent.Dedent(`
+var removeEnvCmdLongDesc = dedent.Dedent(`
 		Remove Environment and its related endpoints from the config file
     `)
 
-var RemoveEnvCmdExamples string = dedent.Dedent(`
+var removeEnvCmdExamples string = dedent.Dedent(`
 		Examples:
-		` + utils.ProjectName + ` ` + RemoveEnvCmdLiteral + ` -n production
+		` + utils.ProjectName + ` ` + removeEnvCmdLiteral + ` -n production
 	`)
 
 
 // removeEnvCmd represents the removeEnv command
 var removeEnvCmd = &cobra.Command{
-	Use:   RemoveEnvCmdLiteral,
-	Short: RemoveEnvCmdShortDesc,
-	Long:  RemoveEnvCmdLongDesc + RemoveEnvCmdExamples,
+	Use:   removeEnvCmdLiteral,
+	Short: removeEnvCmdShortDesc,
+	Long:  removeEnvCmdLongDesc + removeEnvCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + "remove-env called")
+		utils.Logln(utils.LogPrefixInfo + removeEnvCmdLiteral + " called")
 		err := removeEnv(flagNameOfEnvToBeRemoved, utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
 		if err != nil {
 			utils.HandleErrorAndExit("Error removing environment", err)

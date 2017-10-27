@@ -39,27 +39,27 @@ var exportAPICmdUsername string
 var exportAPICmdPassword string
 
 // ExportAPI command related usage info
-const ExportAPICmdLiteral string = "export-api"
-const ExportAPICmdShortDesc string = "Export API"
+const exportAPICmdLiteral string = "export-api"
+const exportAPICmdShortDesc string = "Export API"
 
-var ExportAPICmdLongDesc string = "Export an API from an environment"
+var exportAPICmdLongDesc string = "Export an API from an environment"
 
-var ExportAPICmdExamples = dedent.Dedent(`
+var exportAPICmdExamples = dedent.Dedent(`
 		Examples:
-		` + utils.ProjectName + ` ` + ExportAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -e dev
-		` + utils.ProjectName + ` ` + ExportAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 -e production
+		` + utils.ProjectName + ` ` + exportAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -e dev
+		` + utils.ProjectName + ` ` + exportAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 -e production
 	`)
 
 
 
 // ExportAPICmd represents the exportAPI command
 var ExportAPICmd = &cobra.Command{
-	Use: ExportAPICmdLiteral + " (--name <name-of-the-api> --version <version-of-the-api> --environment " +
+	Use: exportAPICmdLiteral + " (--name <name-of-the-api> --version <version-of-the-api> --environment " +
 		"<environment-from-which-the-api-should-be-exported>)",
-	Short: ExportAPICmdShortDesc,
-	Long:  ExportAPICmdLongDesc + ExportAPICmdExamples,
+	Short: exportAPICmdShortDesc,
+	Long:  exportAPICmdLongDesc + exportAPICmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln("export-api called")
+		utils.Logln(utils.LogPrefixInfo + exportAPICmdLiteral + " called")
 
 		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(exportEnvironment, exportAPICmdUsername,
 			exportAPICmdPassword)

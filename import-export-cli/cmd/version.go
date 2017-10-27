@@ -28,26 +28,26 @@ import (
 )
 
 // Version command related usage info
-const VersionCmdLiteral string = "version"
-const VersionCmdShortDesc string = "Display Version on current "+utils.ProjectName
+const versionCmdLiteral string = "version"
+const versionCmdShortDesc string = "Display Version on current "+utils.ProjectName
 
-var VersionCmdLongDesc string = dedent.Dedent(`
+var versionCmdLongDesc string = dedent.Dedent(`
 		Display the current version of this command line tool
 		`)
 
-var VersionCmdExamples = dedent.Dedent(`
-		` + utils.ProjectName + ` ` + VersionCmdLiteral + `
+var versionCmdExamples = dedent.Dedent(`
+		` + utils.ProjectName + ` ` + versionCmdLiteral + `
 		`)
 
 
 // VersionCmd represents the version command
 var VersionCmd = &cobra.Command{
-	Use:   "version",
-	Short: VersionCmdShortDesc,
-	Long:  VersionCmdLongDesc + VersionCmdExamples,
+	Use:   versionCmdLiteral,
+	Short: versionCmdShortDesc,
+	Long:  versionCmdLongDesc + versionCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		var version string = "0.1"
-		fmt.Println("wso2apim-cli Version " + version)
+		fmt.Println(utils.ProjectName + " Version: " + version)
 	},
 }
 

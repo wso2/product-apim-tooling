@@ -42,27 +42,27 @@ var importAPICmdUsername string
 var importAPICmdPassword string
 
 // ImportAPI command related usage info
-const ImportAPICmdLiteral string = "import-api"
-const ImportAPICmdShortDesc string = "Import API"
+const importAPICmdLiteral string = "import-api"
+const importAPICmdShortDesc string = "Import API"
 
-var ImportAPICmdLongDesc string = "Import an API to an environment"
+var importAPICmdLongDesc string = "Import an API to an environment"
 
-var ImportAPICmdExamples = dedent.Dedent(`
+var importAPICmdExamples = dedent.Dedent(`
 		Examples:
-		` + utils.ProjectName + ` ` + ImportAPICmdLiteral + ` -n TwitterAPI.zip -e dev
-		` + utils.ProjectName + ` ` + ImportAPICmdLiteral + ` -n FacebookAPI.zip -e production
+		` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -n TwitterAPI.zip -e dev
+		` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -n FacebookAPI.zip -e production
 	`)
 
 
 
 // ImportAPICmd represents the importAPI command
 var ImportAPICmd = &cobra.Command{
-	Use:   ImportAPICmdLiteral + " (--name <name-of-the-api> --environment " +
+	Use:   importAPICmdLiteral + " (--name <name-of-the-api> --environment " +
 		"<environment-to-which-the-api-should-be-imported>)",
-	Short: ImportAPICmdShortDesc,
-	Long:  ImportAPICmdLongDesc + ImportAPICmdExamples,
+	Short: importAPICmdShortDesc,
+	Long:  importAPICmdLongDesc + importAPICmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + "import-api called")
+		utils.Logln(utils.LogPrefixInfo + importAPICmdLiteral + " called")
 
 		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(importEnvironment, importAPICmdUsername,
 			importAPICmdPassword)
