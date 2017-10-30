@@ -62,7 +62,7 @@ var envsCmd = &cobra.Command{
 			table.Append(v)
 		}
 
-		fmt.Printf("Environments available in '%s'\n", utils.MainConfigFileName)
+		fmt.Printf("Environments available in file '%s'\n", utils.MainConfigFileName)
 		table.Render()
 	},
 }

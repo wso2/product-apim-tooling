@@ -63,7 +63,7 @@ Command Line tool for importing and exporting APIs between different API Environ
             apimcli import-api -n TestAPI.zip -e dev -p 123456 
             apimcli import-api -n TestAPI -e dev
 ```
-* #### list
+* #### list apis
 ```bash
         Flags:
             Required:
@@ -78,6 +78,15 @@ Command Line tool for importing and exporting APIs between different API Environ
             apimcli list -e staging -u admin
             apimcli list -e staging -p 123456
 ```
+
+*  #### list envs
+```bash
+        Flags:
+            None
+        Example:
+            apimcli list envs
+```
+
 * #### add-env
 ```bash
         Flags:
