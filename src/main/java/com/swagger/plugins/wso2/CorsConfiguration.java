@@ -1,10 +1,10 @@
 package com.swagger.plugins.wso2;
 
 /*****************************************************************
- * Class name : CorsConfiguration
- * Attributes : corsConfigurationEnabled
+ * Class name :    CorsConfiguration
+ * Attributes :    corsConfigurationEnabled
  * Functionality : Represents the nested element(corsConfiguration) of the payload
- * Visibility : Public
+ * Visibility :    Public
  * ****************************************************************/
 public class CorsConfiguration {
 

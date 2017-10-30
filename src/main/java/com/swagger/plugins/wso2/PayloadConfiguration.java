@@ -14,10 +14,10 @@ import java.io.IOException;
 
 
 /*****************************************************************
- * Class name : PayloadConfiguration
- * Methods : configurePayload, payloadToPojo
- * Functionality : Contains the method to convert string payload to a java pojo
- * Visibility : Public
+ * Class name :    PayloadConfiguration
+ * Methods :       configurePayload, convertYamlToJson
+ * Functionality : Contains the methods to configure the API creation payload
+ * Visibility :    Public
  * ****************************************************************/
 public class PayloadConfiguration {
 
@@ -26,13 +26,11 @@ public class PayloadConfiguration {
     /**
      * Configures the payload to create an API in the cloud setting relevant values from the swagger definition.
      *
-     * @param email                     Email of the cloud account to export the API
-     * @param organizationKey           The key generated using email and password
-     * @param swagger                   The POJO of the swagger definition
-     * @return                          Returns the configured payload
+     * @param swagger The POJO of the swagger definition
+     * @return Returns the configured payload
      * @throws PluginExecutionException Custom exception to make the exception more readable
      */
-    public String configurePayload(String email, String organizationKey, Swagger swagger) throws
+    public String configurePayload(Swagger swagger) throws
             PluginExecutionException, IOException {
 
         String payload;
@@ -64,7 +62,6 @@ public class PayloadConfiguration {
         structure.setVersion(version);
         structure.setDescription(description);
         structure.setContext(swagger.getBasePath());
-        structure.setProvider(email + "@" + organizationKey);
         structure.setApiDefinition(convertYamlToJson(swaggerYaml));
         structure.setIsDefaultVersion(false);
         structure.setTransport(schemes);
@@ -75,7 +72,6 @@ public class PayloadConfiguration {
         structure.setCorsConfiguration(configuration);
 
         log.debug("Converting the POJO to a json string");
-
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             payload = objectMapper.writeValueAsString(structure);

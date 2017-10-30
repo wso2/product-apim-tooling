@@ -34,15 +34,15 @@ public class Main {
                 "wso2/PhoneVerifyApi.yaml";
 
         WSO2ApiGatewayPlugin plugin = new WSO2ApiGatewayPlugin();
-        plugin.afterApiVersionSaved(fileReader(path2));
+        String swaggerYaml = plugin.beforeApiVersionSaved(fileReader(path1));
+        plugin.afterApiVersionSaved(swaggerYaml);
     }
 
     /**
      * This method not mandatory for the application, just implemented to get the content of different yaml files.
-     *
      * Therefore, findBug errors can be omitted.
      * @param path Path of the yaml file
-     * @return Returns the content of the Yaml file of the provided path.
+     * @return     Returns the content of the Yaml file of the provided path.
      */
     public static String fileReader(String path) throws IOException {
 

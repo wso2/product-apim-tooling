@@ -4,10 +4,10 @@ import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
 
 /*****************************************************************
- * Interface name : HttpRequestService
+ * Interface name :   HttpRequestService
  * Abstract Methods : makePostRequest, makePutRequest, makeGetRequest
- * Functionality : Contains the signatures of the methods to be implemented to make the http requests
- * Visibility : Public
+ * Functionality :    Contains the signatures of the methods to be implemented to make the http requests
+ * Visibility :       Public
  * ****************************************************************/
 public interface HttpRequestService {
 

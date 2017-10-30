@@ -2,9 +2,9 @@ package com.swagger.plugins.wso2;
 
 
 /*****************************************************************
- *  Class name : PluginExcecutionException
+ *  Class name :   PluginExcecutionException
  * Functionality : This is a custom exception
- * Visibility : Public
+ * Visibility :    Public
  * ****************************************************************/
 public class PluginExecutionException extends Exception {
 

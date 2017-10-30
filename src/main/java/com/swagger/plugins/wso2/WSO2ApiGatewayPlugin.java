@@ -14,28 +14,20 @@ import java.io.IOException;
 
 
 /*****************************************************************
- *  Class name : WSO2ApiGatewayPlugin
- * Methods : beforeApiVersionSaved, afterApiVersionSaved, configure, getConfigurationSchema
- * Attributes : log, userEmail, userPassword, userOrganizationKey, apiId, context
+ *  Class name :   WSO2ApiGatewayPlugin
+ * Methods :       beforeApiVersionSaved, afterApiVersionSaved, configure, getConfigurationSchema
+ * Attributes :    log, userEmail, userPassword, userOrganizationKey, apiId, context
  * Functionality : Contains the methods to check api identifier, obtain user inputs and push the API to the cloud
- * Visibility : Public
+ * Visibility :    Public
  * ****************************************************************/
 public class WSO2ApiGatewayPlugin {
 
     private static final Logger log = LoggerFactory.getLogger(WSO2ApiGatewayPlugin.class);
 
-    private String userEmail;
-    private String userPassword;
-    private String userOrganizationKey;
+    private String accessToken;
 
-    /**
-     * Perform the deployment to WSO2 API cloud during the SAVE operation.
-     *
-     * @param swaggerYaml The swagger definition of the API to be exported to the cloud
-     * @throws PluginExecutionException Custom exception to make the exception more readable
-     */
-    public void afterApiVersionSaved(/*String triggeredByUUID, String objectPath, */String swaggerYaml)
-            throws PluginExecutionException {
+    public String beforeApiVersionSaved(/*String triggeredByUUID, String objectPath, */String swaggerYaml/*,
+     Boolean forceUpdate, Collection<SpecEntry> links, Boolean isPrivate*/) throws PluginExecutionException {
 
         Swagger swagger;
         try {
@@ -50,9 +42,22 @@ public class WSO2ApiGatewayPlugin {
             throw new PluginExecutionException("Definition must have an info section with a unique title.");
         }
         if (StringUtils.isBlank(swagger.getBasePath())) {
-            log.error("Missing basepath in definition");
+            log.error("Missing base path in definition");
             throw new PluginExecutionException("Definition must have a unique 'basepath' section");
         }
+        return swaggerYaml;
+    }
+
+    /**
+     * Perform the deployment to WSO2 API cloud during the SAVE operation.
+     *
+     * @param swaggerYaml               The swagger definition of the API to be exported to the cloud
+     * @throws PluginExecutionException Custom exception to make the exception more readable
+     */
+    public void afterApiVersionSaved(/*String triggeredByUUID, String objectPath, */String swaggerYaml)
+            throws PluginExecutionException {
+
+        Swagger swagger;
 
         PayloadConfiguration configuration = new PayloadConfiguration();
 
@@ -61,15 +66,17 @@ public class WSO2ApiGatewayPlugin {
 
         log.debug("Creating the payload from user inputs");
         String creationPayload;
+
         try {
-            creationPayload = configuration.configurePayload(userEmail, userOrganizationKey, swagger);
+            swagger = Json.mapper().readValue(PayloadConfiguration.convertYamlToJson(swaggerYaml), Swagger.class);
+            creationPayload = configuration.configurePayload(swagger);
         } catch (IOException e) {
             log.error("Error while input/output operation");
             throw new PluginExecutionException("Error while input/output operation");
         }
 
         WSO2Api api = new WSO2Api(new MakeHttpRequestService());
-        api.saveAPI(userEmail, userOrganizationKey, userPassword, creationPayload);
+        api.saveAPI(accessToken, creationPayload);
     }
 
     /**
@@ -79,9 +86,7 @@ public class WSO2ApiGatewayPlugin {
      */
     private void configure() {
         //For now, user inputs are set to get as command line arguments
-        this.userEmail = System.getProperty("email");
-        this.userOrganizationKey = System.getProperty("orgKey");
-        this.userPassword = System.getProperty("pass");
+        this.accessToken = System.getProperty("token");
     }
 
     /**
@@ -91,25 +96,14 @@ public class WSO2ApiGatewayPlugin {
      */
     public Model getConfigurationSchema() {
         ModelImpl model = new ModelImpl()
-                .description("Exports your API to WSO2 API cloud.  When you save, your API will be exported to" +
-                        " your WSO2 API cloud account. The Vendor extension 'x-wso2-api-id' will be added to this" +
-                        " Swagger definition file in order to link it with the API saved into your WSO2 API cloud" +
-                        " account.")
-                .property("userEmail", new StringProperty()
+                .description("Exports the API to your WSO2 API Cloud instance. When you save, your API will" +
+                        " be exported to your WSO2 API Cloud account. If the API already exists in your WSO2 API " +
+                        "Cloud instance, the API will be updated.")
+                .property("token", new StringProperty()
                         .required(true)
-                        .title("Email")
-                        .description("The email address of the WSO2 API cloud account."))
-                .property("password", new StringProperty()
-                        .title("userPassword")
-                        .description("The password of the WSO2 API cloud account."))
-                .property("organizationKey", new StringProperty()
-                        .required(true)
-                        .title("organizationKey")
-                        .description("The organization key of the WSO2 API cloud account."))
-                .property("context", new StringProperty()
-                        .required(true)
-                        .title("Context")
-                        .description("The context of the API exported to WSO2 API cloud."));
+                        .title("WSO2 API Cloud API Access Token")
+                        .description("Access token to authorize SwaggerHub to export/update APIs to/in the WSO2 API " +
+                                "Cloud"));
         return model;
     }
 

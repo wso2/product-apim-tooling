@@ -2,5 +2,6 @@
 *.iml
 *.ipr
 *.iws
+*.yaml
 target
 findbugs_exclude.xml

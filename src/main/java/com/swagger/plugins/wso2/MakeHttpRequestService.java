@@ -13,11 +13,11 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 /*****************************************************************
- * Class name : MakeHttpRequestService
+ * Class name :             MakeHttpRequestService
  * Implemented interfaces : HttpRequestService
- * Methods : makePostRequest, makePutRequest, makeGetRequest
- * Functionality : Contains the implementations of the methods in the HttpRequestService interface
- * Visibility : Public
+ * Methods :                makePostRequest, makePutRequest, makeGetRequest
+ * Functionality :          Contains the implementations of the methods in the HttpRequestService interface
+ * Visibility :             Public
  * ****************************************************************/
 public class MakeHttpRequestService implements HttpRequestService {
 

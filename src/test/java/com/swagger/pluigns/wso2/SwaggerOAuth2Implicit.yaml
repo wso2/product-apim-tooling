@@ -48,3 +48,4 @@ paths:
       responses:
         200:
           description: OK
+basePath: api/v1
