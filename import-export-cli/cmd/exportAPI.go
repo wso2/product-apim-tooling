@@ -50,8 +50,6 @@ var exportAPICmdExamples = dedent.Dedent(`
 		` + utils.ProjectName + ` ` + exportAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 -e production
 	`)
 
-
-
 // ExportAPICmd represents the exportAPI command
 var ExportAPICmd = &cobra.Command{
 	Use: exportAPICmdLiteral + " (--name <name-of-the-api> --version <version-of-the-api> --environment " +

@@ -29,7 +29,7 @@ import (
 var flagAddEnvName string           // name of the environment to be added
 var flagTokenEndpoint string        // token endpoint of the environment to be added
 var flagRegistrationEndpoint string // registration endpoint of the environment to be added
-var flagAPIManagerEndpoint string   // api manager endpoint of the environment to be added
+var flagPublisherEndpoint string    // api manager endpoint of the environment to be added
 
 // AddEnv command related Info
 const addEnvCmdLiteral string = "add-env"
@@ -42,11 +42,9 @@ var addEnvCmdLongDesc = dedent.Dedent(`
 var addEnvCmdExamples = dedent.Dedent(`
 		Examples:
 		` + utils.ProjectName + ` ` + addEnvCmdLiteral + ` -n production  --registration http://localhost/reg \
-						--apim http://localhost/apim \
+						--publisher http://localhost/apim/publisher \
 						--token http://localhost/token
 	`)
-
-
 
 // addEnvCmd represents the addEnv command
 var addEnvCmd = &cobra.Command{
@@ -54,8 +52,8 @@ var addEnvCmd = &cobra.Command{
 	Short: addEnvCmdShortDesc,
 	Long:  addEnvCmdLongDesc + addEnvCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + addEnvCmdLiteral +" called")
-		err := addEnv(flagAddEnvName, flagAPIManagerEndpoint, flagRegistrationEndpoint, flagTokenEndpoint,
+		utils.Logln(utils.LogPrefixInfo + addEnvCmdLiteral + " called")
+		err := addEnv(flagAddEnvName, flagPublisherEndpoint, flagRegistrationEndpoint, flagTokenEndpoint,
 			utils.MainConfigFilePath)
 		if err != nil {
 			utils.HandleErrorAndExit("Error adding environment", err)
@@ -65,12 +63,12 @@ var addEnvCmd = &cobra.Command{
 
 // addEnv adds a new environment and its endpoints and writes to config file
 // @param envName : Name of the Environment
-// @param apimEndpoint : API Manager Endpoint for the environment
-// @param regEndpoint : Registration Endpoint for the environment
+// @param publisherEndpoint : API Manager Endpoint for the environment
+// @param regEndpoint : Registratiopin Endpoint for the environment
 // @param tokenEndpoint : Token Endpoint for the environment
 // @param mainConfigFilePath : Path to file where env endpoints are stored
 // @return error
-func addEnv(envName string, apimEndpoint string, regEndpoint string, tokenEndpoint string,
+func addEnv(envName string, publisherEndpoint string, regEndpoint string, tokenEndpoint string,
 	mainConfigFilePath string) error {
 	mainConfig := utils.GetMainConfigFromFile(mainConfigFilePath)
 
@@ -78,7 +76,7 @@ func addEnv(envName string, apimEndpoint string, regEndpoint string, tokenEndpoi
 		// name of the environment is blank
 		return errors.New("name of the environment cannot be blank")
 	}
-	if apimEndpoint == "" || regEndpoint == "" || tokenEndpoint == "" {
+	if publisherEndpoint == "" || regEndpoint == "" || tokenEndpoint == "" {
 		// at least one of the 3 endpoints is blank
 		utils.ShowHelpCommandTip(addEnvCmdLiteral)
 		return errors.New("endpoints cannot be blank")
@@ -89,10 +87,10 @@ func addEnv(envName string, apimEndpoint string, regEndpoint string, tokenEndpoi
 	}
 
 	var envEndpoints utils.EnvEndpoints = utils.EnvEndpoints{
-											PublisherEndpoint:    apimEndpoint,
-											TokenEndpoint:        tokenEndpoint,
-											RegistrationEndpoint: regEndpoint,
-										  }
+		PublisherEndpoint:    publisherEndpoint,
+		TokenEndpoint:        tokenEndpoint,
+		RegistrationEndpoint: regEndpoint,
+	}
 
 	mainConfig.Environments[envName] = envEndpoints
 	utils.WriteConfigFile(mainConfig, utils.MainConfigFilePath)
@@ -108,10 +106,10 @@ func init() {
 
 	addEnvCmd.Flags().StringVarP(&flagAddEnvName, "name", "n", "",
 		"Name of the environment to be added")
-	addEnvCmd.Flags().StringVar(&flagAPIManagerEndpoint, "apim", "",
+	addEnvCmd.Flags().StringVarP(&flagPublisherEndpoint, "publisher", "p", "",
 		"API Manager endpoint for the environment")
-	addEnvCmd.Flags().StringVar(&flagTokenEndpoint, "token", "",
+	addEnvCmd.Flags().StringVarP(&flagTokenEndpoint, "token", "t", "",
 		"Token endpoint for the environment")
-	addEnvCmd.Flags().StringVar(&flagRegistrationEndpoint, "registration", "",
+	addEnvCmd.Flags().StringVarP(&flagRegistrationEndpoint, "registration", "r", "",
 		"Registration endpoint for the environment")
 }

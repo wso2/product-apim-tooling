@@ -19,12 +19,12 @@ import_export_cli()
             return 0
             ;;
         list)
-            local flags="--environment -e --help -h"
+            local flags="apis envs"
             COMPREPLY=( $(compgen -W "${flags}" -- ${current}) )
             return 0
             ;;
         add-env)
-            local flags="--name -n --apim --registration --token --help -h"
+            local flags="--name -n --publisher --registration --token --help -h"
             COMPREPLY=( $(compgen -W "${flags}" -- ${current}) )
             return 0
             ;;

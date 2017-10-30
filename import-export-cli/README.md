@@ -83,9 +83,9 @@ Command Line tool for importing and exporting APIs between different API Environ
         Flags:
             Required:
                 --name, -n (Name of the environment)
-                --apim (API Manager endpoint)
-                --registration (Registration Endpoint)
-                --token (Token Endpoint)
+                --publisher, -p (Publisher endpoint)
+                --registration, -r (Registration Endpoint)
+                --token, -t (Token Endpoint)
             Examples:
                 apimcli add-env -n dev \
                 --apim https://localhost:9292/api/am/publisher/v1.0 \

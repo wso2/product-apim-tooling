@@ -23,6 +23,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/renstrom/dedent"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"github.com/olekukonko/tablewriter"
+	"os"
+	"fmt"
 )
 
 // envsCmd related info
@@ -43,20 +46,29 @@ var envsCmd = &cobra.Command{
 	Long: EnvsCmdLongDesc + EnvsCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + EnvsCmdLiteral + " called")
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"Name", "Publisher Endpoint", "Registration Endpoint", "Token Endpoint"})
+
+		data := [][]string{}
+
+		envs := utils.GetMainConfigFromFile(utils.MainConfigFilePath).Environments
+
+		for env, endpoints := range envs {
+			data = append(data, []string{env, endpoints.PublisherEndpoint, endpoints.RegistrationEndpoint,
+												endpoints.TokenEndpoint})
+		}
+
+		for _, v := range data {
+			table.Append(v)
+		}
+
+		fmt.Printf("Environments available in '%s'\n", utils.MainConfigFileName)
+		table.Render()
 	},
 }
 
+
 func init() {
 	ListCmd.AddCommand(envsCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// envsCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// envsCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 }
