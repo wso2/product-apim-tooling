@@ -57,11 +57,11 @@ Command Line tool for importing and exporting APIs between different API Environ
                 --username, -u 
                 --password, -p 
         Examples:
-            apimcli import-api -n TestAPI.zip -e dev
-            apimcli import-api -n TestAPI.zip -e dev -u admin -p 123456
-            apimcli import-api -n TestAPI.zip -e dev -u admin
-            apimcli import-api -n TestAPI.zip -e dev -p 123456 
-            apimcli import-api -n TestAPI -e dev
+            apimcli import-api -f dev/TestAPI.zip -e dev
+            apimcli import-api -f qa/TestAPI.zip -e dev -u admin -p 123456
+            apimcli import-api -f staging/TestAPI.zip -e dev -u admin
+            apimcli import-api -f production/TestAPI.zip -e dev -p 123456 
+            apimcli import-api -f TestAPI -e dev
 ```
 * #### list apis
 ```bash

@@ -34,6 +34,7 @@ import (
 	"time"
 	"regexp"
 	"github.com/renstrom/dedent"
+	"strings"
 )
 
 var importAPIFile string
@@ -87,19 +88,29 @@ var ImportAPICmd = &cobra.Command{
 // ImportAPI function is used with import-api command
 // @param name: name of the API (zipped file) to be imported
 // @param apiManagerEndpoint: API Manager endpoint for the environment
-// @param accessToken: OAuth2.0 access token for the resource accessing
-func ImportAPI(name string, apiManagerEndpoint string, accessToken string) (*http.Response, error) {
+// @param accessToken: OAuth2.0 access token for the resource being accessed
+func ImportAPI(query string, apiManagerEndpoint string, accessToken string) (*http.Response, error) {
 	// append '/' to the end if there isn't one already
 	if string(apiManagerEndpoint[len(apiManagerEndpoint)-1]) != "/" {
 		apiManagerEndpoint += "/"
 	}
 	apiManagerEndpoint += "import/apis"
 
-	filePath := filepath.Join(utils.ExportDirectory, name)
-	fmt.Println("filePath:", filePath)
+	sourceEnv := strings.Split(query, "/")[0]	// environment from which the API was exported
+	utils.Logln(utils.LogPrefixInfo + "Source Environment: " + sourceEnv)
 
-	// check if '.zip' exists in the input 'name'
-	hasZipExtension, _ := regexp.MatchString(`^\S+\.zip$`, name)
+	sourceEnvDirExists, _ := utils.IsDirExists(filepath.Join(utils.ExportedAPIsDirectoryPath, sourceEnv))
+	if !sourceEnvDirExists {
+		utils.HandleErrorAndExit("wrong directory '"+ sourceEnv +"'. Check source environment and try again", nil)
+	}
+
+	fileName := query 	// ex:- fileName = dev/twitterapi_1.0.0.zip
+
+	zipFilePath := filepath.Join(utils.ExportDirectory, fileName)
+	fmt.Println("ZipFilePath:", zipFilePath)
+
+	// check if '.zip' exists in the input 'fileName'
+	hasZipExtension, _ := regexp.MatchString(`^\S+\.zip$`, fileName)
 
 	if hasZipExtension {
 		// import the zip file directly
@@ -107,19 +118,19 @@ func ImportAPI(name string, apiManagerEndpoint string, accessToken string) (*htt
 
 	} else {
 		//fmt.Println("hasZipExtension: ", false)
-		// search for a directory with the given name
-		destination := filepath.Join(utils.ExportedAPIsDirectoryPath, name + ".zip")
-		err := utils.ZipDir(filePath, destination)
+		// search for a directory with the given fileName
+		destination := filepath.Join(utils.ExportedAPIsDirectoryPath, fileName+ ".zip")
+		err := utils.ZipDir(zipFilePath, destination)
 		if err != nil {
 			utils.HandleErrorAndExit("Error creating zip archive", err)
 		}
-		filePath += ".zip"
+		zipFilePath += ".zip"
 	}
 
 	extraParams := map[string]string{}
 	// TODO:: Add extraParams as necessary
 
-	req, err := NewFileUploadRequest(apiManagerEndpoint, extraParams, "file", filePath, accessToken)
+	req, err := NewFileUploadRequest(apiManagerEndpoint, extraParams, "file", zipFilePath, accessToken)
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating request.", err)
 	}
@@ -146,7 +157,7 @@ func ImportAPI(name string, apiManagerEndpoint string, accessToken string) (*htt
 		//var bodyContent []byte
 
 		if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
-			fmt.Println("Successfully imported API '" + name + "'")
+			fmt.Println("Successfully imported API '" + fileName + "'")
 		}else{
 			fmt.Println("Error importing API.")
 			fmt.Println( "Status: " + resp.Status)

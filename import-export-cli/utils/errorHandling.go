@@ -33,9 +33,9 @@ func HandleErrorAndExit(msg string, err error) {
 	fmt.Println("=======  END OF DEBUG LOG ===========\n")
 	*/
 	if err == nil {
-		fmt.Fprintf(os.Stderr, "wso2apim: %v\n", msg)
+		fmt.Fprintf(os.Stderr, "%s: %v\n", ProjectName, msg)
 	} else {
-		fmt.Fprintf(os.Stderr, "wso2apim: %v Reason: %v\n", msg, err.Error())
+		fmt.Fprintf(os.Stderr, "%s: %v Reason: %v\n", ProjectName, msg, err.Error())
 		Logln(LogPrefixError + msg + ": " + err.Error())
 	}
 	defer printAndExit()
