@@ -1,5 +1,6 @@
 package com.swagger.plugins.wso2;
 
+import com.smartbear.swaggerhub.plugins.PluginExecutionException;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
 
@@ -35,7 +36,7 @@ public interface HttpRequestService {
      * @throws PluginExecutionException Custom exception to make the exception more readable
      */
     HttpResponse makePutRequest(String url, String tokenPrefix, String token, String contentType, StringEntity payload)
-            throws PluginExecutionException;
+            throws com.smartbear.swaggerhub.plugins.PluginExecutionException;
 
     /**
      * Makes a GET request and returns the response
@@ -48,5 +49,5 @@ public interface HttpRequestService {
      * @throws PluginExecutionException Custom exception to make the exception more readable
      */
     HttpResponse makeGetRequest(String url, String tokenPrefix, String token, String contentType)
-            throws PluginExecutionException;
+            throws com.smartbear.swaggerhub.plugins.PluginExecutionException;
 }

@@ -1,5 +1,6 @@
 package com.swagger.plugins.wso2;
 
+import com.smartbear.swaggerhub.plugins.PluginExecutionException;
 import io.swagger.models.Swagger;
 import io.swagger.util.Json;
 import org.apache.commons.io.Charsets;
@@ -50,8 +51,7 @@ public class WSO2Api {
      * @return                          Returns true if the API already exists, else returns false
      * @throws PluginExecutionException Custom exception to make the exception more readable
      */
-    private String getApiIdentifier(String accessToken, Swagger swagger) throws
-            PluginExecutionException {
+    private String getApiIdentifier(String accessToken, Swagger swagger) throws PluginExecutionException {
 
         HttpResponse response;
         String content;
@@ -65,29 +65,32 @@ public class WSO2Api {
         } else {
             if (response.getStatusLine().getStatusCode() == 406) {
                 log.error("Not acceptable, the requested media is not supported");
-                throw new PluginExecutionException("Not acceptable, the requested media is not supported");
+                throw new PluginExecutionException(PluginExecutionException.INVALID_INPUT, "Not acceptable, the " +
+                        "requested media is not supported");
             } else if (response.getStatusLine().getStatusCode() == 401) {
                 log.error("Unauthorized request");
-                throw new PluginExecutionException("Unauthorized request");
+                throw new PluginExecutionException(PluginExecutionException.INVALID_INPUT, "Unauthorized request");
             } else {
                 log.error("The API list is not returned");
-                throw new PluginExecutionException("The API list is not returned");
+                throw new PluginExecutionException(PluginExecutionException.INVALID_INPUT, "The API list is not" +
+                        " returned");
             }
         }
 
         try {
             content = new String(IOUtils.toByteArray(response.getEntity().getContent()), Charsets.UTF_8);
-        } catch (IOException ioException) {
-            log.error("Error while searching APIs.", ioException);
-            throw new PluginExecutionException("Error while searching APIs");
+        } catch (IOException e) {
+            log.error("Error while searching APIs.", e);
+            throw new PluginExecutionException(PluginExecutionException.INVALID_INPUT, "Error while searching APIs");
         }
 
         JSONParser parser = new JSONParser();
         try {
             responseJson = (JSONObject) parser.parse(content);
-        } catch (ParseException parseException) {
-            log.error("Error while parsing search API response", parseException);
-            throw  new PluginExecutionException("Error parsing search API response to json");
+        } catch (ParseException e) {
+            log.error("Error while parsing search API response", e);
+            throw  new PluginExecutionException(PluginExecutionException.INVALID_INPUT, "Error parsing search API" +
+                    " response to json");
         }
 
         String version = swagger.getInfo().getVersion();
@@ -123,7 +126,8 @@ public class WSO2Api {
     private void updateApi(String accessToken, String apiIdentifier,
                           StringEntity payload) throws PluginExecutionException {
 
-        HttpResponse response = httpRequestService.makePutRequest(PUBLISHER_API_ENDPOINT + apiIdentifier, "Bearer",
+        HttpResponse response = httpRequestService.makePutRequest(PUBLISHER_API_ENDPOINT + apiIdentifier,
+                "Bearer",
                 accessToken, "application/json", payload);
 
         if (response.getStatusLine().getStatusCode() == 200) {
@@ -131,24 +135,28 @@ public class WSO2Api {
         } else {
             if (response.getStatusLine().getStatusCode() == 400) {
                 log.error("Bad Request. Invalid request or validation error");
-                throw new PluginExecutionException("Bad Request. Invalid request or validation error");
+                throw new PluginExecutionException(PluginExecutionException.INVALID_INPUT, "Bad Request. Invalid " +
+                        "request or validation error");
             } else if (response.getStatusLine().getStatusCode() == 403) {
                 log.error("Forbidden. The request must be conditional but no condition has been specified.");
-                throw new PluginExecutionException("Forbidden. The request must be conditional but no condition" +
-                        " has been specified.");
+                throw new PluginExecutionException(PluginExecutionException.INVALID_INPUT, "Forbidden. The request " +
+                        "must be conditional but no condition " +
+                        "has been specified.");
             } else if (response.getStatusLine().getStatusCode() == 404) {
                 log.error("Nothing to update");
-                throw new PluginExecutionException("Nothing to update");
+                throw new PluginExecutionException(PluginExecutionException.INVALID_INPUT, "Nothing to update");
             } else if (response.getStatusLine().getStatusCode() == 412) {
                 log.error("Precondition Failed. The request has not been performed because one of the preconditions" +
                         " is not met.");
-                throw new PluginExecutionException("Precondition Failed. The request has not been performed because" +
-                        " one of the preconditions is not met.");
+                throw new PluginExecutionException(PluginExecutionException.INVALID_INPUT, "Precondition Failed. The " +
+                        "request has not been performed because one of the preconditions is not met.");
             } else if (response.getStatusLine().getStatusCode() == 401) {
                 log.error("Unauthorized request");
-                throw new PluginExecutionException("Unauthorized request");
+                throw new com.smartbear.swaggerhub.plugins.
+                        PluginExecutionException(PluginExecutionException.INVALID_INPUT, "Unauthorized request");
             } else {
                 log.error("The API is not updated");
+                throw new PluginExecutionException(PluginExecutionException.INVALID_INPUT, "The API is not updated");
             }
         }
     }
@@ -160,8 +168,7 @@ public class WSO2Api {
      * @param payload                   Body of the API http request to create an API
      * @throws PluginExecutionException Custom exception to make the exception more readable
      */
-    public void saveAPI(String accessToken, String payload) throws
-            PluginExecutionException {
+    public void saveAPI(String accessToken, String payload) throws PluginExecutionException {
 
         StringEntity creationPayload;
         HttpResponse postResponse;
@@ -172,27 +179,29 @@ public class WSO2Api {
 
         try {
             swaggerDefinitionJson = (JSONObject) parser.parse(payload);
-        } catch (ParseException parseException) {
-            log.error("Error parsing payload", parseException);
-            throw new PluginExecutionException("Error parsing payload");
+        } catch (ParseException e) {
+            log.error("Error parsing payload", e);
+            throw new PluginExecutionException(PluginExecutionException.INVALID_INPUT, "Error parsing payload");
         }
 
         String definition = swaggerDefinitionJson.get("apiDefinition").toString();
 
         try {
             swagger = Json.mapper().readValue(definition, Swagger.class);
-        } catch (IOException ioException) {
-            log.error("Error parsing swagger definition", ioException);
-            throw new PluginExecutionException("Error parsing swagger definition");
+        } catch (IOException e) {
+            log.error("Error parsing swagger definition", e);
+            throw new PluginExecutionException(PluginExecutionException.INVALID_INPUT, "Error parsing swagger " +
+                    "definition");
         }
 
         String apiIdentifier = getApiIdentifier(accessToken, swagger);
 
         try {
             creationPayload = new StringEntity(payload);
-        } catch (UnsupportedEncodingException unsupportedEncodingException) {
-            log.error("The character encoding is not supported for the payload", unsupportedEncodingException);
-            throw new PluginExecutionException("The character encoding is not supported");
+        } catch (UnsupportedEncodingException e) {
+            log.error("The character encoding is not supported for the payload", e);
+            throw new PluginExecutionException(PluginExecutionException.INVALID_INPUT, "The character encoding is" +
+                    " not supported");
         }
 
         if (apiIdentifier == null) {
@@ -206,15 +215,20 @@ public class WSO2Api {
             } else {
                 if (postResponse.getStatusLine().getStatusCode() == 400) {
                 log.error("Error creating the API, already exists with a different context");
-                throw new PluginExecutionException("Bad content");
+                throw new com.smartbear.swaggerhub.plugins.
+                        PluginExecutionException(PluginExecutionException.INVALID_INPUT, "Bad content");
                 } else if (postResponse.getStatusLine().getStatusCode() == 415) {
                     log.error("Unsupported media type");
-                    throw new PluginExecutionException("Error creating the API, unsupported media type");
+                    throw new com.smartbear.swaggerhub.plugins.
+                            PluginExecutionException(PluginExecutionException.INVALID_INPUT, "Error creating the API," +
+                            " unsupported media type");
                 } else if (postResponse.getStatusLine().getStatusCode() == 401) {
                     log.error("Unauthorized request");
-                    throw new PluginExecutionException("Unauthorized request");
+                    throw new PluginExecutionException(PluginExecutionException.INVALID_INPUT, "Unauthorized request");
                 } else {
                     log.debug("The API is not created in the cloud");
+                    throw new PluginExecutionException(PluginExecutionException.INVALID_INPUT, "The API is not" +
+                            " created in the WSO2 API Cloud");
                 }
             }
 

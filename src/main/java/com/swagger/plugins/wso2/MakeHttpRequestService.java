@@ -1,5 +1,6 @@
 package com.swagger.plugins.wso2;
 
+import com.smartbear.swaggerhub.plugins.PluginExecutionException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -44,9 +45,10 @@ public class MakeHttpRequestService implements HttpRequestService {
         postRequest.setEntity(payload);
         try {
             response = httpClient.execute(postRequest);
-        } catch (IOException ioException) {
-            log.error("Error making POST request", ioException);
-            throw new PluginExecutionException("Error making POST request");
+        } catch (IOException e) {
+            log.error("Error making POST request", e);
+            throw new com.smartbear.swaggerhub.plugins.
+                    PluginExecutionException(PluginExecutionException.INVALID_INPUT, "Error making POST request");
         }
         return response;
     }
@@ -71,9 +73,10 @@ public class MakeHttpRequestService implements HttpRequestService {
         putRequest.setEntity(payload);
         try {
             response = httpClient.execute(putRequest);
-        } catch (IOException ioException) {
-            log.error("Error making PUT request", ioException);
-            throw new PluginExecutionException("Error making PUT request");
+        } catch (IOException e) {
+            log.error("Error making PUT request", e);
+            throw new com.smartbear.swaggerhub.plugins.
+                    PluginExecutionException(PluginExecutionException.INVALID_INPUT, "Error making PUT request");
         }
         return response;
     }
@@ -89,7 +92,7 @@ public class MakeHttpRequestService implements HttpRequestService {
      * @throws PluginExecutionException Custom exception to make the exception more readable
      */
     public HttpResponse makeGetRequest(String url, String tokenPrefix, String token, String contentType)
-            throws PluginExecutionException {
+            throws com.smartbear.swaggerhub.plugins.PluginExecutionException {
         HttpResponse response;
         HttpClient httpClient = HttpClients.createDefault();
         HttpGet getRequest = new HttpGet(url);
@@ -97,9 +100,10 @@ public class MakeHttpRequestService implements HttpRequestService {
         getRequest.setHeader("Content-Type", contentType);
         try {
             response = httpClient.execute(getRequest);
-        } catch (IOException ioException) {
-            log.error("Error making GET request", ioException);
-            throw new PluginExecutionException("Error making GET request");
+        } catch (IOException e) {
+            log.error("Error making GET request", e);
+            throw new com.smartbear.swaggerhub.plugins.
+                    PluginExecutionException(PluginExecutionException.INVALID_INPUT, "Error making GET request");
         }
         return response;
     }

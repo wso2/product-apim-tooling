@@ -3,6 +3,7 @@ package com.swagger.plugins.wso2;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.smartbear.swaggerhub.plugins.PluginExecutionException;
 import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
@@ -30,8 +31,7 @@ public class PayloadConfiguration {
      * @return Returns the configured payload
      * @throws PluginExecutionException Custom exception to make the exception more readable
      */
-    public String configurePayload(Swagger swagger) throws
-            PluginExecutionException, IOException {
+    public String configurePayload(Swagger swagger) throws PluginExecutionException/*, IOException */ {
 
         String payload;
         String swaggerYaml;
@@ -44,9 +44,11 @@ public class PayloadConfiguration {
         log.debug("Converting swagger POJO to a yaml to assign to the payload");
         try {
             swaggerYaml = Yaml.mapper().writeValueAsString(swagger);
-        } catch (Exception exception) {
-            log.error("Swagger definition is invalid or not readable", exception);
-            throw new PluginExecutionException("Swagger definition is invalid or not readable");
+        } catch (Exception e) {
+            log.error("Swagger definition is invalid or not readable", e);
+            throw new com.smartbear.swaggerhub.plugins.
+                    PluginExecutionException(PluginExecutionException.INVALID_INPUT, "Swagger definition is" +
+                    " invalid or not readable");
         }
 
         log.debug("Getting info from swagger POJO");
@@ -75,9 +77,11 @@ public class PayloadConfiguration {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             payload = objectMapper.writeValueAsString(structure);
-        } catch (JsonProcessingException jsonProcessingException) {
-            log.error("Error while converting the POJO to json", jsonProcessingException);
-            throw new PluginExecutionException("Error when converting pojo to json");
+        } catch (JsonProcessingException e) {
+            log.error("Error while converting the POJO to json", e);
+            throw new com.smartbear.swaggerhub.plugins.
+                    PluginExecutionException(PluginExecutionException.INVALID_INPUT, "Error when converting pojo " +
+                    "to json");
         }
 
         log.debug("Returning the payload for creating the API in the cloud");
@@ -105,9 +109,11 @@ public class PayloadConfiguration {
             ObjectMapper objectMapper = new ObjectMapper();
             jsonNode = objectMapper.readValue(json, JsonNode.class);
 
-        } catch (IOException ioException) {
-            log.error("Error while converting the Yaml to Json", ioException);
-            throw  new PluginExecutionException("Error converting the Yaml to Json");
+        } catch (IOException e) {
+            log.error("Error while converting the Yaml to Json", e);
+            throw  new com.smartbear.swaggerhub.plugins.
+                    PluginExecutionException(PluginExecutionException.INVALID_INPUT, "Error converting the Yaml" +
+                    " to Json");
         }
 
         log.debug("Returning the minified JSON");

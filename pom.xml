@@ -177,6 +177,14 @@
                     <executable>maven</executable>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
@@ -258,6 +266,14 @@
             <version>${maven.failsafe.plugin.version}</version>
             <type>maven-plugin</type>
         </dependency>
+
+
+        <dependency>
+            <groupId>com.swaggerhub.plugin</groupId>
+            <artifactId>swaggerhub-plugins-sdk</artifactId>
+            <version>${swaggerhub.plugin.version}</version>
+        </dependency>
+
     </dependencies>
 
     <properties>
@@ -279,5 +295,6 @@
         <maven.failsafe.plugin.version>2.19.1</maven.failsafe.plugin.version>
         <maven.findbugs.plugin.version>3.0.0</maven.findbugs.plugin.version>
         <maven.exec.plugin.version>1.6.0</maven.exec.plugin.version>
+        <swaggerhub.plugin.version>0.1.0</swaggerhub.plugin.version>
     </properties>
 </project>
