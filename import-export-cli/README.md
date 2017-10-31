@@ -8,6 +8,8 @@ Command Line tool for importing and exporting APIs between different API Environ
 - ### Building
     Execute ```build.sh``` to build for necessary platforms. Further instructions will be available upon executing 
     build.sh
+    
+    Created packages will be available at `target` directory
       
 - ### Running
     Extract the compressed archive generated to a desired location

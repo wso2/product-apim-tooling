@@ -1,6 +1,6 @@
 config:
-  http_timeout: 2500
-  export_directory: .
+  http_timeout: 100000
+  export_directory: exported
 
 environments:
   dev:

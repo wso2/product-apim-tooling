@@ -50,15 +50,13 @@ var importAPICmdLongDesc string = "Import an API to an environment"
 
 var importAPICmdExamples = dedent.Dedent(`
 		Examples:
-		` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -n TwitterAPI.zip -e dev
-		` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -n FacebookAPI.zip -e production
+		` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -n qa/TwitterAPI.zip -e dev
+		` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -n staging/FacebookAPI.zip -e production
 	`)
-
-
 
 // ImportAPICmd represents the importAPI command
 var ImportAPICmd = &cobra.Command{
-	Use:   importAPICmdLiteral + " (--name <name-of-the-api> --environment " +
+	Use:   importAPICmdLiteral + " (--file <api-zip-file> --environment " +
 		"<environment-to-which-the-api-should-be-imported>)",
 	Short: importAPICmdShortDesc,
 	Long:  importAPICmdLongDesc + importAPICmdExamples,
