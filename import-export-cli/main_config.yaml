@@ -2,19 +2,11 @@ config:
   http_request_timeout: 3600
   export_directory: /home/menuka/Documents/exported
 environments:
-  staging:
-    publisher_endpoint: https://localhost:9292/api/am/publisher/v1.0
+  dev:
+    api_manager_endpoint: https://172.21.0.1:9443
     registration_endpoint: https://localhost:9443/identity/connect/register
     token_endpoint: https://localhost:9443/oauth2/token
   testEnv:
-    publisher_endpoint: publisher
+    api_manager_endpoint: api_manager
     registration_endpoint: registration
     token_endpoint: token
-  vm1:
-    publisher_endpoint: https://35.195.132.29:9292/api/am/publisher/v1.0
-    registration_endpoint: https://35.195.132.29:9443/identity/connect/register
-    token_endpoint: https://35.195.132.29:9443/oauth2/token
-  vm2:
-    publisher_endpoint: https://35.195.70.177:9292/api/am/publisher/v1.0
-    registration_endpoint: https://35.195.70.177:9443/identity/connect/register
-    token_endpoint: https://35.195.70.177:9443/oauth2/token

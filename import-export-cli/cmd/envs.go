@@ -54,7 +54,7 @@ var envsCmd = &cobra.Command{
 		envs := utils.GetMainConfigFromFile(utils.MainConfigFilePath).Environments
 
 		for env, endpoints := range envs {
-			data = append(data, []string{env, endpoints.PublisherEndpoint, endpoints.RegistrationEndpoint,
+			data = append(data, []string{env, endpoints.APIManagerEndpoint, endpoints.RegistrationEndpoint,
 												endpoints.TokenEndpoint})
 		}
 

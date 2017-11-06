@@ -45,7 +45,7 @@ type EnvKeys struct {
 }
 
 type EnvEndpoints struct {
-	PublisherEndpoint    string `yaml:"publisher_endpoint"`
+	APIManagerEndpoint   string `yaml:"api_manager_endpoint"`
 	RegistrationEndpoint string `yaml:"registration_endpoint"`
 	TokenEndpoint        string `yaml:"token_endpoint"`
 }

@@ -63,7 +63,7 @@ var ImportAPICmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + importAPICmdLiteral + " called")
 
-		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(importEnvironment, importAPICmdUsername,
+		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommandWithOAuth(importEnvironment, importAPICmdUsername,
 			importAPICmdPassword)
 
 		if preCommandErr == nil {

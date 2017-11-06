@@ -42,6 +42,8 @@ const ExportedAPIsDirectoryName string = "exported"
 
 var ExportedAPIsDirectoryPath string = filepath.Join(ApplicationRoot, ExportedAPIsDirectoryName)
 
+const ApiImportExportProduct string = "api-import-export-2.1.0-v2"
+
 const DefaultEnvironmentName string = "default"
 
 // Headers and Header Values

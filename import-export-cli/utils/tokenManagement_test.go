@@ -155,16 +155,16 @@ func TestExecutePreCommand(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1, err := ExecutePreCommand(tt.args.environment, tt.args.flagUsername, tt.args.flagPassword)
+			got, got1, err := ExecutePreCommandWithOAuth(tt.args.environment, tt.args.flagUsername, tt.args.flagPassword)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ExecutePreCommand() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ExecutePreCommandWithOAuth() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
-				t.Errorf("ExecutePreCommand() got = %v, want %v", got, tt.want)
+				t.Errorf("ExecutePreCommandWithOAuth() got = %v, want %v", got, tt.want)
 			}
 			if got1 != tt.want1 {
-				t.Errorf("ExecutePreCommand() got1 = %v, want %v", got1, tt.want1)
+				t.Errorf("ExecutePreCommandWithOAuth() got1 = %v, want %v", got1, tt.want1)
 			}
 		})
 	}

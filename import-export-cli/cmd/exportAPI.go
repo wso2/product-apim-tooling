@@ -35,6 +35,7 @@ import (
 var exportAPIName string
 var exportAPIVersion string
 var exportEnvironment string
+var exportProvider string
 var exportAPICmdUsername string
 var exportAPICmdPassword string
 
@@ -42,7 +43,7 @@ var exportAPICmdPassword string
 const exportAPICmdLiteral string = "export-api"
 const exportAPICmdShortDesc string = "Export API"
 
-var exportAPICmdLongDesc string = "Export an API from an environment"
+var exportAPICmdLongDesc string = "Export APIs from an environment"
 
 var exportAPICmdExamples = dedent.Dedent(`
 		Examples:
@@ -59,11 +60,12 @@ var ExportAPICmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + exportAPICmdLiteral + " called")
 
-		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(exportEnvironment, exportAPICmdUsername,
+		b64encodedCredentials, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommandWithBasicAuth(exportEnvironment,
+			exportAPICmdUsername,
 			exportAPICmdPassword)
 
 		if preCommandErr == nil {
-			resp := ExportAPI(exportAPIName, exportAPIVersion, apiManagerEndpoint, accessToken)
+			resp := ExportAPI(exportAPIName, exportAPIVersion, exportProvider, apiManagerEndpoint, b64encodedCredentials)
 
 			// Print info on response
 			utils.Logf("ResponseStatus: %v\n", resp.Status())
@@ -74,7 +76,7 @@ var ExportAPICmd = &cobra.Command{
 				WriteToZip(exportAPIName, exportAPIVersion, exportEnvironment, resp)
 
 				// only to get the number of APIs exported
-				numberOfAPIsExported, _, err := GetAPIList(exportAPIName, accessToken, apiManagerEndpoint)
+				numberOfAPIsExported, _, err := GetAPIList(exportAPIName, b64encodedCredentials, apiManagerEndpoint)
 				if err == nil {
 					fmt.Println("Number of APIs exported:", numberOfAPIsExported)
 				} else {
@@ -122,22 +124,19 @@ func WriteToZip(exportAPIName string, exportAPIVersion string, exportEnvironment
 // @param apimEndpoint : API Manager Endpoint for the environment
 // @param accessToken : Access Token for the resource
 // @return response Response in the form of *resty.Response
-func ExportAPI(name string, version string, apimEndpoint string, accessToken string) *resty.Response {
+func ExportAPI(name string, version string, provider string, apimEndpoint string,
+	b64encodedCredentials string) *resty.Response {
 	// append '/' to the end if there isn't one already
 	if string(apimEndpoint[len(apimEndpoint)-1]) != "/" {
 		apimEndpoint += "/"
 	}
 
-	apimEndpoint += "export/apis"
-
-	query := "?query=" + name
-
-	// TODO:: Add 'version' to the query (make sure the backend supports attribute searching)
+	query := utils.ApiImportExportProduct + "/export-api?name=" + name + "&version=" + version + "&provider=" + provider
 
 	apimEndpoint += query
 	utils.Logln(utils.LogPrefixInfo + "ExportAPI: URL:", apimEndpoint)
 	headers := make(map[string]string)
-	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
+	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + b64encodedCredentials
 	headers[utils.HeaderAccept] = utils.HeaderValueApplicationZip
 
 	resp, err := utils.InvokeGETRequest(apimEndpoint, headers)
@@ -156,6 +155,8 @@ func init() {
 		"Name of the API to be exported")
 	ExportAPICmd.Flags().StringVarP(&exportAPIVersion, "version", "v", "",
 		"Version of the API to be exported")
+	ExportAPICmd.Flags().StringVarP(&exportProvider, "provider", "r", "",
+		"Provider of the API")
 	ExportAPICmd.Flags().StringVarP(&exportEnvironment, "environment", "e",
 		utils.GetDefaultEnvironment(utils.MainConfigFilePath), "Environment to which the API should be exported")
 

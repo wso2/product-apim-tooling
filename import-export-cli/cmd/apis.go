@@ -55,7 +55,7 @@ var apisCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + apisCmdLiteral + " called")
 
-		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(listEnvironment, listCmdUsername,
+		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommandWithOAuth(listEnvironment, listCmdUsername,
 			listCmdPassword)
 
 		if preCommandErr == nil {
@@ -121,7 +121,6 @@ func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (in
 	}
 
 }
-
 
 // printAPIs
 // @param apis : array of API objects

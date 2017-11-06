@@ -87,7 +87,7 @@ func addEnv(envName string, publisherEndpoint string, regEndpoint string, tokenE
 	}
 
 	var envEndpoints utils.EnvEndpoints = utils.EnvEndpoints{
-		PublisherEndpoint:    publisherEndpoint,
+		APIManagerEndpoint:   publisherEndpoint,
 		TokenEndpoint:        tokenEndpoint,
 		RegistrationEndpoint: regEndpoint,
 	}

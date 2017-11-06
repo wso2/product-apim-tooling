@@ -30,13 +30,125 @@ import (
 	"strings"
 )
 
-// ExecutePreCommand deals with generating tokens needed for executing a particular command
+
+// ExecutePreCommandWithBasicAuth deals with generating tokens needed for executing a particular command
 // @param environment : Environment on which the particular command is run
 // @param flagUsername : Username entered using the flag --username (-u). Could be blank
 // @param flagPassword : Password entered using the flag --password (-p). Could be blank
-// @return AccessToken, PublisherEndpoint, Errors
+// @return b64encodedCredentials, APIManagerEndpoint, Errors
+// including (export-api, import-api, list)e
+func ExecutePreCommandWithBasicAuth(environment string, flagUsername string,
+	flagPassword string) (b64encodedCredentials string, apiManagerEndpoint string, err error) {
+	if EnvExistsInMainConfigFile(environment, MainConfigFilePath) {
+		//registrationEndpoint := GetRegistrationEndpointOfEnv(environment, MainConfigFilePath)
+		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment, MainConfigFilePath)
+		//tokenEndpoint := GetTokenEndpointOfEnv(environment, MainConfigFilePath)
+
+		Logln(LogPrefixInfo + "Environment: '" + environment + "'")
+
+		var username string
+		var password string
+		var err error
+
+		if EnvExistsInKeysFile(environment, EnvKeysAllFilePath) {
+			// client_id, client_secret, and username exist in file
+			username = GetUsernameOfEnv(environment, EnvKeysAllFilePath)
+
+			if flagUsername != "" {
+				// flagUsername is not blank
+				if flagUsername != username {
+					// username entered with flag -u is not the same as username found
+					// in env_keys_all.yaml file
+					fmt.Println(LogPrefixWarning + "Username entered with flag -u for the environment '" + environment +
+						"' is not the same as username found in file '" + EnvKeysAllFilePath + "'")
+					fmt.Println("Execute '" + ProjectName + " reset-user -e " + environment + "' to clear user data")
+					os.Exit(1)
+				} else {
+					// username entered with flag -u is the same as username found in env_keys_all.yaml file
+					if flagPassword == "" {
+						fmt.Println("For Username: " + username)
+						password = PromptForPassword()
+					} else {
+						// flagPassword is not blank
+						// no need of prompting for password now
+						password = flagPassword
+					}
+				}
+			} else {
+				// flagUsername is blank
+				if flagPassword != "" {
+					// flagPassword is not blank
+					password = flagPassword
+				} else {
+					// flagPassword is blank
+					fmt.Println("For username: " + username)
+					password = PromptForPassword()
+				}
+			}
+
+		} else {
+			// env exists in endpoints file, but not in keys file
+			// no client_id, client_secret in file
+			// first use of the environment
+			// Get new values
+
+			if flagUsername != "" {
+				// flagUsername is not blank
+				username = flagUsername
+				if flagPassword == "" {
+					// flagPassword is blank
+					fmt.Println("For Username: " + username)
+					password = PromptForPassword()
+				} else {
+					// flagPassword is not blank
+					password = flagPassword
+				}
+			} else {
+				// flagUsername is blank
+				// doesn't matter is flagPassword is blank or not
+				username = strings.TrimSpace(PromptForUsername())
+				password = PromptForPassword()
+			}
+
+			fmt.Println("\nUsername: " + username + "\n")
+
+			if err != nil {
+				fmt.Println("Error:", err)
+			}
+
+			// Persist clientID, clientSecret, Username in file
+			//encryptedClientSecret := Encrypt([]byte(GetMD5Hash(password)), clientSecret)
+			//envKeys := EnvKeys{clientID, encryptedClientSecret, username}
+			//AddNewEnvToKeysFile(environment, envKeys, EnvKeysAllFilePath)
+		}
+
+		// Get Base64 Encoded Username:Password
+		b64encodedCredentials:= GetBase64EncodedCredentials(username, password)
+
+		Logln(LogPrefixInfo+"[Remove in Production] Base64EncodedCredentials:", b64encodedCredentials)
+		// TODO:: Remove in production
+
+		return b64encodedCredentials, apiManagerEndpoint, nil
+	} else {
+		// env does not exist in main config file
+		if environment == "" {
+			return "", "", errors.New("no environment specified. Either specify it using the -e flag or name one of " +
+				"the environments in '" + MainConfigFileName + "' to 'default'")
+		}
+
+		return "", "", errors.New("Details incorrect/unavailable for environment '" + environment + "' in " +
+			MainConfigFilePath)
+	}
+}
+
+// ExecutePreCommandWithOAuth deals with generating tokens needed for executing a particular command
+// @param environment : Environment on which the particular command is run
+// @param flagUsername : Username entered using the flag --username (-u). Could be blank
+// @param flagPassword : Password entered using the flag --password (-p). Could be blank
+// @return AccessToken, APIManagerEndpoint, Errors
 // including (export-api, import-api, list)
-func ExecutePreCommand(environment string, flagUsername string, flagPassword string) (string, string, error) {
+func ExecutePreCommandWithOAuth(environment string, flagUsername string,
+	flagPassword string) (accessToken string, apiManagerEndpoint string, err error) {
 	if EnvExistsInMainConfigFile(environment, MainConfigFilePath) {
 		registrationEndpoint := GetRegistrationEndpointOfEnv(environment, MainConfigFilePath)
 		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment, MainConfigFilePath)
@@ -154,7 +266,7 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 // @param password : Password for application server account
 // @param url : Registration Endpoint for the environment
 // @return client_id, client_secret, error
-func GetClientIDSecret(username string, password string, url string) (string, string, error) {
+func GetClientIDSecret(username string, password string, url string) (clientID string, clientSecret string, err error) {
 	body := `{"clientName": "Test", "redirect_uris": "www.google.lk", "grant_types":"password"}`
 	headers := make(map[string]string)
 
@@ -199,7 +311,7 @@ func GetClientIDSecret(username string, password string, url string) (string, st
 // Encode the concatenation of two strings (using ":")
 // provide two strings
 // returns base64Encode(key:secret)
-func GetBase64EncodedCredentials(key string, secret string) string {
+func GetBase64EncodedCredentials(key string, secret string) (encodedValue string) {
 	line := key + ":" + secret
 	encoded := base64.StdEncoding.EncodeToString([]byte(line))
 	return encoded
@@ -211,7 +323,8 @@ func GetBase64EncodedCredentials(key string, secret string) string {
 func GetOAuthTokens(username string, password string,
 	b64EncodedClientIDClientSecret string, url string) (map[string]string, error) {
 	validityPeriod := DefaultTokenValidityPeriod
-	body := "grant_type=password&username=" + username + "&password=" + password + "&validity_period=" + validityPeriod
+	body := "grant_type=password&username=" + username + "&password=" + password + "&validity_period=" +
+		validityPeriod
 
 	// set headers
 	headers := make(map[string]string)
