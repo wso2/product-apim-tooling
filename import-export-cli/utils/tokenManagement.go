@@ -164,9 +164,6 @@ func GetClientIDSecret(username string, password string, url string) (string, st
 	headers[HeaderAuthorization] = HeaderValueAuthBasicPrefix + " " + GetBase64EncodedCredentials(username, password)
 	// headers["Authorization"] = "Basic " + GetBase64EncodedCredentials(username, password)
 
-	if SkipTLSVerification {
-		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTPS certificates
-	}
 
 	// POST request using resty
 	resp, err := InvokePOSTRequest(url, headers, body)

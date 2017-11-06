@@ -27,10 +27,14 @@ import (
 	"time"
 	"runtime"
 	"strings"
+	"crypto/tls"
 )
 
 // Invoke http-post request using go-resty
 func InvokePOSTRequest(url string, headers map[string]string, body string) (*resty.Response, error) {
+	if SkipTLSVerification {
+		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTPS certificates
+	}
 	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
 	resp, err := resty.R().SetHeaders(headers).SetBody(body).Post(url)
 
@@ -39,6 +43,9 @@ func InvokePOSTRequest(url string, headers map[string]string, body string) (*res
 
 // Invoke http-get request using go-resty
 func InvokeGETRequest(url string , headers map[string]string) (*resty.Response, error) {
+	if SkipTLSVerification {
+		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTPS certificates
+	}
 	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
 	resp, err := resty.R().SetHeaders(headers).Get(url)
 
