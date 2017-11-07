@@ -268,7 +268,7 @@ func ExecutePreCommandWithOAuth(environment string, flagUsername string,
 // @param url : Registration Endpoint for the environment
 // @return client_id, client_secret, error
 func GetClientIDSecret(username string, password string, url string) (clientID string, clientSecret string, err error) {
-	body := dedent.Dedent(`{"clientName": "rest_api_store",
+	body := dedent.Dedent(`{"clientName": "rest_api_publisher",
 								  "callbackUrl": "www.google.lk",
 								  "grantType":"password refresh_token",
 								  "saasApp": true,
@@ -330,7 +330,7 @@ func GetOAuthTokens(username string, password string,
 	b64EncodedClientIDClientSecret string, url string) (map[string]string, error) {
 	validityPeriod := DefaultTokenValidityPeriod
 	body := "grant_type=password&username=" + username + "&password=" + password + "&validity_period=" +
-		validityPeriod + "&scope=apim:subscribe"
+		validityPeriod + "&scope=apim:api_view"
 
 	// set headers
 	headers := make(map[string]string)
