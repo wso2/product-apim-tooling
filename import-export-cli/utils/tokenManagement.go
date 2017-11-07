@@ -19,17 +19,15 @@
 package utils
 
 import (
-	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/go-resty/resty"
 	"net/http"
 	"os"
 	"strings"
+	"github.com/renstrom/dedent"
 )
-
 
 // ExecutePreCommandWithBasicAuth deals with generating tokens needed for executing a particular command
 // @param environment : Environment on which the particular command is run
@@ -123,7 +121,7 @@ func ExecutePreCommandWithBasicAuth(environment string, flagUsername string,
 		}
 
 		// Get Base64 Encoded Username:Password
-		b64encodedCredentials:= GetBase64EncodedCredentials(username, password)
+		b64encodedCredentials := GetBase64EncodedCredentials(username, password)
 
 		Logln(LogPrefixInfo+"[Remove in Production] Base64EncodedCredentials:", b64encodedCredentials)
 		// TODO:: Remove in production
@@ -155,7 +153,7 @@ func ExecutePreCommandWithOAuth(environment string, flagUsername string,
 		tokenEndpoint := GetTokenEndpointOfEnv(environment, MainConfigFilePath)
 
 		Logln(LogPrefixInfo + "Environment: '" + environment + "'")
-		Logln(LogPrefixInfo + "Reg Endpoint read:", registrationEndpoint)
+		Logln(LogPrefixInfo+"Reg Endpoint read:", registrationEndpoint)
 
 		var username string
 		var password string
@@ -235,6 +233,9 @@ func ExecutePreCommandWithOAuth(environment string, flagUsername string,
 				fmt.Println("Error:", err)
 			}
 
+			fmt.Println("ClientID:", clientID)
+			fmt.Println("ClientSecret:", clientSecret)
+
 			// Persist clientID, clientSecret, Username in file
 			encryptedClientSecret := Encrypt([]byte(GetMD5Hash(password)), clientSecret)
 			envKeys := EnvKeys{clientID, encryptedClientSecret, username}
@@ -267,7 +268,13 @@ func ExecutePreCommandWithOAuth(environment string, flagUsername string,
 // @param url : Registration Endpoint for the environment
 // @return client_id, client_secret, error
 func GetClientIDSecret(username string, password string, url string) (clientID string, clientSecret string, err error) {
-	body := `{"clientName": "Test", "redirect_uris": "www.google.lk", "grant_types":"password"}`
+	body := dedent.Dedent(`{"clientName": "rest_api_store",
+								  "callbackUrl": "www.google.lk",
+								  "grantType":"password refresh_token",
+								  "saasApp": true,
+								  "owner": "admin",
+								  "tokenScope": "Production"
+							     }`)
 	headers := make(map[string]string)
 
 	headers[HeaderContentType] = HeaderValueApplicationJSON
@@ -275,7 +282,6 @@ func GetClientIDSecret(username string, password string, url string) (clientID s
 
 	headers[HeaderAuthorization] = HeaderValueAuthBasicPrefix + " " + GetBase64EncodedCredentials(username, password)
 	// headers["Authorization"] = "Basic " + GetBase64EncodedCredentials(username, password)
-
 
 	// POST request using resty
 	resp, err := InvokePOSTRequest(url, headers, body)
@@ -298,8 +304,8 @@ func GetClientIDSecret(username string, password string, url string) (clientID s
 		return clientID, clientSecret, err
 
 	} else {
-		//fmt.Println("Error:", resp.Error())
-		//fmt.Printf("Body: %s\n", resp.Body())
+		fmt.Println("Error:", resp.Error())
+		fmt.Printf("Body: %s\n", resp.Body())
 		if resp.StatusCode() == http.StatusUnauthorized {
 			// 401 Unauthorized
 			HandleErrorAndExit("Incorrect Username/Password combination.", errors.New("401 Unauthorized"))
@@ -324,7 +330,7 @@ func GetOAuthTokens(username string, password string,
 	b64EncodedClientIDClientSecret string, url string) (map[string]string, error) {
 	validityPeriod := DefaultTokenValidityPeriod
 	body := "grant_type=password&username=" + username + "&password=" + password + "&validity_period=" +
-		validityPeriod
+		validityPeriod + "&scope=apim:subscribe"
 
 	// set headers
 	headers := make(map[string]string)
@@ -332,14 +338,10 @@ func GetOAuthTokens(username string, password string,
 	headers[HeaderAuthorization] = HeaderValueAuthBearerPrefix + " " + b64EncodedClientIDClientSecret
 	headers[HeaderAccept] = HeaderValueApplicationJSON
 
-	if SkipTLSVerification {
-		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTP certificates
-	}
-
+	Logln(LogPrefixError + "connecting to " + url)
 	resp, err := InvokePOSTRequest(url, headers, body)
 
 	if err != nil {
-		Logln(LogPrefixError + "connecting to " + url)
 		HandleErrorAndExit("Unable to Connect.", err)
 	}
 

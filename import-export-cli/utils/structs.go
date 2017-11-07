@@ -63,10 +63,11 @@ type API struct {
 }
 
 type RegistrationResponse struct {
-	ClientSecretExpiresAt string `json:"client_secret_expires_at"`
-	ClientID              string `json:"client_id"`
-	ClientSecret          string `json:"client_secret"`
-	ClientName            string `json:"client_name"`
+	ClientID              string `json:"clientId"`
+	ClientSecret          string `json:"clientSecret"`
+	ClientName            string `json:"clientName"`
+	CallBackURL string `json:"callBackURL"`
+	JsonString string `json:"jsonString"`
 }
 
 type TokenResponse struct {

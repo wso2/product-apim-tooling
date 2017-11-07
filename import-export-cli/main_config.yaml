@@ -4,9 +4,5 @@ config:
 environments:
   dev:
     api_manager_endpoint: https://172.21.0.1:9443
-    registration_endpoint: https://localhost:9443/identity/connect/register
-    token_endpoint: https://localhost:9443/oauth2/token
-  testEnv:
-    api_manager_endpoint: api_manager
-    registration_endpoint: registration
-    token_endpoint: token
+    registration_endpoint: http://localhost:9763/client-registration/v0.11/register
+    token_endpoint: https://172.21.0.1:8243/token

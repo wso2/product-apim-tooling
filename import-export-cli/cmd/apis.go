@@ -93,7 +93,7 @@ func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (in
 	if url != "" && string(url[len(url)-1]) != "/" {
 		url += "/"
 	}
-	url += "apis?query=" + query
+	url += "api/am/publisher/v0.11/apis"
 	utils.Logln(utils.LogPrefixInfo+"URL:", url)
 
 	headers := make(map[string]string)
