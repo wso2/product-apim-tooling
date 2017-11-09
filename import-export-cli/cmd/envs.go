@@ -45,7 +45,7 @@ var envsCmd = &cobra.Command{
 	Short: EnvsCmdShortDesc,
 	Long: EnvsCmdLongDesc + EnvsCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + EnvsCmdLiteral + " called")
+		utils.Logln(utils.LogPrefixInfo + listCmdLiteral + " " + EnvsCmdLiteral + " called")
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"Name", "Publisher Endpoint", "Registration Endpoint", "Token Endpoint"})
 

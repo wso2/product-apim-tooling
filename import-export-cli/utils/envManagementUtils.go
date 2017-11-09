@@ -20,7 +20,6 @@ package utils
 
 import (
 	"errors"
-	"fmt"
 )
 
 // EnvExistsInKeysFile
@@ -61,14 +60,14 @@ func EnvExistsInMainConfigFile(env string, filePath string) bool {
 // @param filePath : Path to file where env keys are stored
 func AddNewEnvToKeysFile(name string, envKeys EnvKeys, filePath string) {
 	envKeysAll := GetEnvKeysAllFromFile(filePath)
-	fmt.Println("EnvKeysAll:", envKeysAll)
+	//Logf("%sEnvKeysAll: %+v\n", LogPrefixInfo, envKeysAll)
 	if envKeysAll == nil {
-		fmt.Println("envKeysAll is nil")
+		Logln(LogPrefixWarning + "envKeysAll is nil")
 		envKeysAll = new(EnvKeysAll)
 	}
 
 	if envKeysAll.Environments == nil {
-		fmt.Println("envKeysAll.Environments is nil")
+		Logln(LogPrefixWarning + "No data in " + EnvKeysAllFilePath)
 		envKeysAll.Environments = make(map[string]EnvKeys)
 	}
 	envKeysAll.Environments[name] = envKeys
