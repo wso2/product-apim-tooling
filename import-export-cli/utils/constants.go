@@ -64,9 +64,9 @@ const HeaderValueAuthBasicPrefix string = "Basic"
 const HeaderValueMultiPartFormData string = "multipart/form-data"
 
 // Logging Prefixes
-const LogPrefixInfo = "[INFO]: "
-const LogPrefixWarning = "[WARN]: "
-const LogPrefixError = "[ERROR]: "
+const LogPrefixInfo = "[INFO] "
+const LogPrefixWarning = "[WARN] "
+const LogPrefixError = "[ERROR] "
 
 // Other
 const DefaultTokenValidityPeriod string = "3600"

@@ -45,7 +45,7 @@ func WriteConfigFile(c interface{}, envConfigFilePath string) {
 func GetEnvKeysAllFromFile(envKeysAllFilePath string) *EnvKeysAll {
 	data, err := ioutil.ReadFile(envKeysAllFilePath)
 	if err != nil {
-		fmt.Println("Error reading " + envKeysAllFilePath)
+		Logln(LogPrefixError + "Reading " + envKeysAllFilePath)
 		os.Create(envKeysAllFilePath)
 		data, err = ioutil.ReadFile(envKeysAllFilePath)
 	}

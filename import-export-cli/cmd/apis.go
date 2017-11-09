@@ -53,7 +53,7 @@ var apisCmd = &cobra.Command{
 	Short: apisCmdShortDesc,
 	Long:  apisCmdLongDesc + apisCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + apisCmdLiteral + " called")
+		utils.Logln(utils.LogPrefixInfo + listCmdLiteral + " " + apisCmdLiteral + " called")
 
 		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(listEnvironment, listCmdUsername,
 			listCmdPassword)
@@ -72,8 +72,7 @@ var apisCmd = &cobra.Command{
 				utils.Logln(utils.LogPrefixError+"Getting List of APIs", err)
 			}
 		} else {
-			utils.Logln(utils.LogPrefixError + "calling 'list' " + preCommandErr.Error())
-			fmt.Println("Error calling 'list'", preCommandErr.Error())
+			utils.HandleErrorAndExit("Error calling '"+listCmdLiteral + " " + apisCmdLiteral+"'", preCommandErr)
 		}
 	},
 }

@@ -60,7 +60,7 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 				if flagUsername != username {
 					// username entered with flag -u is not the same as username found
 					// in env_keys_all.yaml file
-					fmt.Println(LogPrefixWarning + "Username entered with flag -u for the environment '" + environment +
+					fmt.Println("Username entered with flag -u for the environment '" + environment +
 						"' is not the same as username found in file '" + EnvKeysAllFilePath + "'")
 					fmt.Println("Execute '" + ProjectName + " reset-user -e " + environment + "' to clear user data")
 					os.Exit(1)
@@ -169,10 +169,10 @@ func GetClientIDSecret(username string, password string, url string) (string, st
 	resp, err := InvokePOSTRequest(url, headers, body)
 
 	if err != nil {
-		HandleErrorAndExit("Error in connecting.", err)
+		HandleErrorAndExit("Registration -- Error in connecting.", err)
 	}
 
-	Logln("Getting ClientID, ClientSecret: Status - " + resp.Status())
+	Logln(LogPrefixInfo + "Getting ClientID, ClientSecret: Status - " + resp.Status())
 
 	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
 		// 200 OK or 201 Created
@@ -196,7 +196,7 @@ func GetClientIDSecret(username string, password string, url string) (string, st
 	}
 }
 
-// Encode the concatenation of two strings (using ":")
+// GetBase64EncodedCredentials encodes the concatenation of two strings (using ":")
 // provide two strings
 // returns base64Encode(key:secret)
 func GetBase64EncodedCredentials(key string, secret string) string {

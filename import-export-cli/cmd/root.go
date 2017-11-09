@@ -91,9 +91,12 @@ func init() {
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	if verbose {
+		utils.IsVerbose = true
 		utils.EnableVerboseMode()
 		t := time.Now()
-		utils.Logf("Executed ImportExportCLI (%s) on %v\n", utils.ProjectName, t.Format(time.RFC1123))
+		utils.Logf(utils.LogPrefixInfo + "Executed ImportExportCLI (%s) on %v\n", utils.ProjectName, t.Format(time.RFC1123))
+	}else{
+		utils.IsVerbose = false
 	}
 
 	utils.Logln(utils.LogPrefixInfo+"Insecure:", insecure)
