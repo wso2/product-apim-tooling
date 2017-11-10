@@ -1,5 +1,5 @@
 config:
-  http_request_timeout: 3600
+  http_request_timeout: 1000000
   export_directory: /home/menuka/Documents/exported
 environments:
   dev:
