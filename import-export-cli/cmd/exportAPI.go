@@ -132,7 +132,11 @@ func ExportAPI(name string, version string, apimEndpoint string, accessToken str
 
 	query := "?query=" + name
 
-	// TODO:: Add 'version' to the query (make sure the backend supports attribute searching)
+	/*
+	 TODO:: Add 'version' to the query (make sure the backend supports attribute searching)
+	 i.e. 'query' should be changed as follows
+	 query := "?query=name:" + name + ",version=" + version
+	*/
 
 	apimEndpoint += query
 	utils.Logln(utils.LogPrefixInfo + "ExportAPI: URL:", apimEndpoint)
