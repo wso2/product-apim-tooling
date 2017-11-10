@@ -31,7 +31,7 @@ public class PayloadConfiguration {
      * @return Returns the configured payload
      * @throws PluginExecutionException Custom exception to make the exception more readable
      */
-    public String configurePayload(Swagger swagger) throws PluginExecutionException/*, IOException */ {
+    public String configurePayload(Swagger swagger) throws PluginExecutionException {
 
         String payload;
         String swaggerYaml;
@@ -91,8 +91,9 @@ public class PayloadConfiguration {
     /**
      * Converts a Yaml to Json
      *
-     * @param swaggerYaml   The swagger definition of the API to be exported to the cloud
-     * @return              Returns the json string of the Yaml
+     * @param swaggerYaml               The swagger definition of the API to be exported to the cloud
+     * @return                          Returns the json string of the Yaml
+     * @throws PluginExecutionException Thrown when an exception is caught while the plugin executes
      */
     public static String convertYamlToJson(String swaggerYaml) throws PluginExecutionException {
         Swagger swagger;

@@ -99,18 +99,23 @@ public class WSO2Api {
         JSONArray apiList = (JSONArray) responseJson.get("list");
 
         JSONObject api;
-        int length = apiList.size();
+        int length;
         int apiIndex;
 
-        for (apiIndex = 0; apiIndex < length; apiIndex++) {
-            api = (JSONObject) apiList.get(apiIndex);
-            if (name.equals(api.get("name")) && version.equals(api.get("version"))) {
-                return api.get("id").toString();
-            } else {
-                if (apiIndex == length - 1) {
-                    return null;
+        if (!apiList.isEmpty()) {
+            length = apiList.size();
+            for (apiIndex = 0; apiIndex < length; apiIndex++) {
+                api = (JSONObject) apiList.get(apiIndex);
+                if (name.equals(api.get("name")) && version.equals(api.get("version"))) {
+                    return api.get("id").toString();
+                } else {
+                    if (apiIndex == length - 1) {
+                        return null;
+                    }
                 }
             }
+        } else {
+            return null;
         }
         return null;
     }
@@ -162,6 +167,43 @@ public class WSO2Api {
     }
 
     /**
+     * Makes a HTTP request to create an API
+     *
+     * @param accessToken Access Token to authorize SwaggerHub to access WSO2 API Cloud
+     * @param payload     Body of the request to be made
+     * @throws PluginExecutionException
+     */
+    private void createApi(String accessToken, StringEntity payload) throws PluginExecutionException {
+
+        log.debug("Creating the API in the cloud");
+        HttpResponse postResponse = httpRequestService.makePostRequest(PUBLISHER_API_ENDPOINT, "Bearer",
+                accessToken, "application/json", payload);
+
+        if (postResponse.getStatusLine().getStatusCode() == 201) {
+            log.debug("The API is created in the cloud");
+        } else {
+            if (postResponse.getStatusLine().getStatusCode() == 400) {
+                log.error("Error creating the API, already exists with a different context");
+                throw new com.smartbear.swaggerhub.plugins.
+                        PluginExecutionException(PluginExecutionException.INVALID_INPUT, "Bad content");
+            } else if (postResponse.getStatusLine().getStatusCode() == 415) {
+                log.error("Unsupported media type");
+                throw new com.smartbear.swaggerhub.plugins.
+                        PluginExecutionException(PluginExecutionException.INVALID_INPUT, "Error creating the API," +
+                        " unsupported media type");
+            } else if (postResponse.getStatusLine().getStatusCode() == 401) {
+                log.error("Unauthorized request");
+                throw new PluginExecutionException(PluginExecutionException.INVALID_INPUT, "Unauthorized request");
+            } else {
+                log.debug("The API is not created in the cloud");
+                throw new PluginExecutionException(PluginExecutionException.INVALID_INPUT, "The API is not" +
+                        " created in the WSO2 API Cloud");
+            }
+        }
+
+    }
+
+    /**
      * Creates an API in the api cloud and prints the response of the details of the API made
      *
      * @param accessToken               Access Token to authorize SwaggerHub to access WSO2 API Cloud
@@ -171,7 +213,6 @@ public class WSO2Api {
     public void saveAPI(String accessToken, String payload) throws PluginExecutionException {
 
         StringEntity creationPayload;
-        HttpResponse postResponse;
         Swagger swagger;
         JSONObject swaggerDefinitionJson;
 
@@ -205,33 +246,7 @@ public class WSO2Api {
         }
 
         if (apiIdentifier == null) {
-
-            log.debug("Creating the API in the cloud");
-            postResponse = httpRequestService.makePostRequest(PUBLISHER_API_ENDPOINT, "Bearer", accessToken,
-                    "application/json", creationPayload);
-
-            if (postResponse.getStatusLine().getStatusCode() == 201) {
-                log.debug("The API is created in the cloud");
-            } else {
-                if (postResponse.getStatusLine().getStatusCode() == 400) {
-                log.error("Error creating the API, already exists with a different context");
-                throw new com.smartbear.swaggerhub.plugins.
-                        PluginExecutionException(PluginExecutionException.INVALID_INPUT, "Bad content");
-                } else if (postResponse.getStatusLine().getStatusCode() == 415) {
-                    log.error("Unsupported media type");
-                    throw new com.smartbear.swaggerhub.plugins.
-                            PluginExecutionException(PluginExecutionException.INVALID_INPUT, "Error creating the API," +
-                            " unsupported media type");
-                } else if (postResponse.getStatusLine().getStatusCode() == 401) {
-                    log.error("Unauthorized request");
-                    throw new PluginExecutionException(PluginExecutionException.INVALID_INPUT, "Unauthorized request");
-                } else {
-                    log.debug("The API is not created in the cloud");
-                    throw new PluginExecutionException(PluginExecutionException.INVALID_INPUT, "The API is not" +
-                            " created in the WSO2 API Cloud");
-                }
-            }
-
+            createApi(accessToken, creationPayload);
         } else {
             updateApi(accessToken, apiIdentifier, creationPayload);
         }
