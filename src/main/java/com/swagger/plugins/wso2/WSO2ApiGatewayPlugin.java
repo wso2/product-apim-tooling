@@ -143,20 +143,18 @@ public class WSO2ApiGatewayPlugin extends AnnotatedPlugin implements BeforeApiVe
     /**
      * Returns a model with user to obtain user's email address, password, organization key and context
      *
-     * @param globalConfiguration
+     * @param configuration
      * @return
      */
     @Override
-    public Model getConfigurationSchema(Configuration globalConfiguration) {
-        return new ModelImpl()
-                .description("Exports the API to your WSO2 API Cloud instance. When you save, your API will" +
-                        " be exported to your WSO2 API Cloud account. If the API already exists in your WSO2 API " +
-                        "Cloud instance, the API will be updated.")
-                .property("token", new StringProperty()
-                        .required(true)
-                        .title("WSO2 API Cloud API Access Token")
-                        .description("Access token to authorize SwaggerHub to export/update APIs to/in the WSO2 API " +
-                                "Cloud"));
+    public Model getConfigurationSchema(Configuration configuration) {
+        StringProperty property = new StringProperty();
+        property._enum(SwaggerhubLifecycleEvent.BEFORE_API_VERSION_SAVED.name());
+        property._enum(SwaggerhubLifecycleEvent.AFTER_API_VERSION_SAVED.name());
+        return (new ModelImpl().description("Exports the API to your WSO2 API Cloud instance. When you save, your" +
+                " API will be exported to your WSO2 API Cloud account. If the API already exists in your WSO2 API " +
+                "Cloud instance, the API will be updated.")).property("token",
+                (new StringProperty()).required(true).title("WSO2 API Access Token"));
     }
 
     @Override
