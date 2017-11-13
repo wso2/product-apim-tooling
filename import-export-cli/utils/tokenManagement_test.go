@@ -41,10 +41,10 @@ func TestGetBase64EncodedCredentials(t *testing.T) {
 func TestGetClientIDSecretUnreachable(t *testing.T) {
 	var registrationStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
-			t.Errorf("Expected 'POST', got '%s'\n", r.Method)
+			t.Errorf("Expected '%s', got '%s'\n",http.MethodPost, r.Method)
 		}
 		if r.Header.Get(HeaderContentType) != HeaderValueApplicationJSON {
-			t.Errorf("Expected '"+HeaderValueApplicationJSON+"', got '%s'\n", r.Header.Get(HeaderContentType))
+			t.Errorf("Expected '%s', got '%s'\n",HeaderValueApplicationJSON, r.Header.Get(HeaderContentType))
 		}
 
 		w.WriteHeader(http.StatusServiceUnavailable)
@@ -64,11 +64,11 @@ func TestGetClientIDSecretOK(t *testing.T) {
 	var registrationStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		if r.Method != http.MethodPost {
-			t.Errorf("Expected 'POST', got '%s'\n", r.Method)
+			t.Errorf("Expected '%s', got '%s'\n", http.MethodPost, r.Method)
 		}
 
 		if r.Header.Get(HeaderContentType) != HeaderValueApplicationJSON {
-			t.Errorf("Expected '"+HeaderValueApplicationJSON+"', got '%s'\n", r.Header.Get(HeaderContentType))
+			t.Errorf("Expected '%s', got '%s'\n",HeaderValueApplicationJSON, r.Header.Get(HeaderContentType))
 		}
 
 		w.WriteHeader(http.StatusOK)
@@ -93,17 +93,16 @@ func TestGetClientIDSecretOK(t *testing.T) {
 	if clientSecret != "ecb105a0-117c-463d-9376-442d24864f26" {
 		t.Error("Invalid ClientSecret")
 	}
-
 }
 
 func TestGetOAuthTokensOK(t *testing.T) {
 	var oauthStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
-			t.Errorf("Expected 'POST', got '%s'\n", r.Method)
+			t.Errorf("Expected '%s', got '%s'\n",http.MethodPost, r.Method)
 		}
 
 		if r.Header.Get(HeaderContentType) != HeaderValueXWWWFormUrlEncoded {
-			t.Errorf("Expected '"+HeaderValueXWWWFormUrlEncoded+"', got '%s'\n", r.Header.Get(HeaderContentType))
+			t.Errorf("Expected '%s', got '%s'\n",HeaderValueXWWWFormUrlEncoded, r.Header.Get(HeaderContentType))
 		}
 
 		w.WriteHeader(http.StatusOK)
