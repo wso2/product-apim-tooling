@@ -9,6 +9,7 @@ import com.smartbear.swaggerhub.plugins.PluginExecutionException;
 import com.smartbear.swaggerhub.plugins.PluginInfo;
 import com.smartbear.swaggerhub.plugins.lifecycle.AfterApiVersionSavedPlugin;
 import com.smartbear.swaggerhub.plugins.lifecycle.BeforeApiVersionSavedPlugin;
+import com.smartbear.swaggerhub.plugins.lifecycle.SwaggerhubLifecycleEvent;
 import com.smartbear.swaggerhub.plugins.model.SpecEntry;
 
 import io.swagger.models.Info;
@@ -23,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -50,8 +52,9 @@ public class WSO2ApiGatewayPlugin extends AnnotatedPlugin implements BeforeApiVe
 
     private String accessToken;
 
-    public WSO2ApiGatewayPlugin(List<String> backupLifeCycleEvents) {
-        super(backupLifeCycleEvents);
+    public WSO2ApiGatewayPlugin() {
+        super(Arrays.asList(SwaggerhubLifecycleEvent.BEFORE_API_VERSION_SAVED.name(),
+                SwaggerhubLifecycleEvent.AFTER_API_VERSION_SAVED.name()));
     }
 
     /**
