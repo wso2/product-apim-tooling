@@ -45,6 +45,7 @@ func TestExportAPI(t *testing.T) {
 		w.Header().Set(utils.HeaderTransferEncoding, utils.HeaderValueChunked)
 
 		body := dedent.Dedent(`
+
 		`)
 
 		w.Write([]byte(body))

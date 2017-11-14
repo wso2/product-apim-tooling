@@ -26,14 +26,12 @@ import (
 var IsVerbose bool
 
 func HandleErrorAndExit(msg string, err error) {
-	/*
 	fmt.Println("\n=======  DEBUG LOG ==================")
 	// TODO:: Remove debug log in production
 	for i := 1; i <= 6; i++ {
 		fmt.Println(WhereAmI(i))
 	}
 	fmt.Println("=======  END OF DEBUG LOG ===========\n")
-	*/
 	if err == nil {
 		fmt.Fprintf(os.Stderr, "%s: %v\n", ProjectName, msg)
 	} else {

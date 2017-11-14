@@ -80,6 +80,7 @@ func init() {
 	// when this action is called directly.
 	RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
+
 	// Init ConfigVars
 	err := utils.SetConfigVars(utils.MainConfigFilePath)
 	if err != nil {

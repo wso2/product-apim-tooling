@@ -57,6 +57,7 @@ func TestImportAPI(t *testing.T) {
 }
 */
 
+
 func TestNewFileUploadRequest(t *testing.T) {
 	var server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPut {
@@ -80,7 +81,7 @@ func TestNewFileUploadRequest(t *testing.T) {
 	defer server.Close()
 
 	extraParams := map[string]string{}
-	filePath := filepath.Join(utils.ExportedAPIsDirectoryPath, "sampleapi.zip")
+	filePath := filepath.Join(utils.ApplicationRoot, "sampleapi.zip")
 	accessToken := "access-token"
 	_, err := NewFileUploadRequest(server.URL, extraParams, "file", filePath, accessToken)
 	if err != nil {
