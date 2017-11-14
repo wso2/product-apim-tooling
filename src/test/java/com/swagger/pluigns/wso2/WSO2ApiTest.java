@@ -14,6 +14,7 @@ import org.mockito.Mockito;
 
 public class WSO2ApiTest {
 
+    WSO2Api api;
     HttpRequestService httpRequestService;
     String accessToken;
     String payload;
@@ -28,6 +29,8 @@ public class WSO2ApiTest {
     public void init() throws Exception {
 
         httpRequestService = Mockito.mock(HttpRequestService.class);
+        api = new WSO2Api(httpRequestService);
+
         accessToken = "f96f3947-c5a5-3d79-9ff9-2729de4f9d42";
 
         payload = "{\"name\":\"Simple Inventory API\",\"context\":\"/simple\",\"version\":\"1.0.0\",\"description\":" +
@@ -105,7 +108,6 @@ public class WSO2ApiTest {
                 "        }\n" +
                 "    ]\n" +
                 "}";
-        WSO2Api api = new WSO2Api(httpRequestService);
         mockGetRequest(stream, 200);
         mockPutRequest(200);
 
@@ -150,7 +152,6 @@ public class WSO2ApiTest {
                 "        }\n" +
                 "    ]\n" +
                 "}";
-        WSO2Api api = new WSO2Api(httpRequestService);
         mockGetRequest(stream, 200);
         mockPostRequest(201);
 
@@ -172,7 +173,6 @@ public class WSO2ApiTest {
                 "    \"previous\": \"\",\n" +
                 "    \"list\": []\n" +
                 "}";
-        WSO2Api api = new WSO2Api(httpRequestService);
         mockGetRequest(stream, 200);
         mockPostRequest(201);
 
@@ -190,8 +190,6 @@ public class WSO2ApiTest {
      */
     @Test (expected = PluginExecutionException.class)
     public void testSaveApiForNoApiListIsReturenedError() throws Exception {
-        WSO2Api api = new WSO2Api(httpRequestService);
-
         HttpResponse responseGet = Mockito.mock(HttpResponse.class);
         StatusLine statusLineGet = Mockito.mock(StatusLine.class);
         Mockito.when(responseGet.getStatusLine()).thenReturn(statusLineGet);
@@ -209,9 +207,6 @@ public class WSO2ApiTest {
      */
     @Test (expected = PluginExecutionException.class)
     public void testSaveApiForUnauthorizedRequest() throws Exception {
-
-        WSO2Api api = new WSO2Api(httpRequestService);
-
         HttpResponse responseGet = Mockito.mock(HttpResponse.class);
         StatusLine statusLineGet = Mockito.mock(StatusLine.class);
         Mockito.when(responseGet.getStatusLine()).thenReturn(statusLineGet);
@@ -220,7 +215,6 @@ public class WSO2ApiTest {
                 Mockito.anyString())).thenReturn(responseGet);
 
         api.saveAPI(accessToken, payload);
-
     }
 
     /**
@@ -230,9 +224,6 @@ public class WSO2ApiTest {
      */
     @Test (expected = PluginExecutionException.class)
     public void testSaveApiForUnsupportedMediaType() throws Exception {
-
-        WSO2Api api = new WSO2Api(httpRequestService);
-
         HttpResponse responseGet = Mockito.mock(HttpResponse.class);
         StatusLine statusLineGet = Mockito.mock(StatusLine.class);
         Mockito.when(responseGet.getStatusLine()).thenReturn(statusLineGet);
@@ -268,7 +259,6 @@ public class WSO2ApiTest {
                 "        }\n" +
                 "    ]\n" +
                 "}";
-        WSO2Api api = new WSO2Api(httpRequestService);
         mockGetRequest(stream, 200);
         mockPutRequest(400);
         api.saveAPI(accessToken, payload);
@@ -298,7 +288,6 @@ public class WSO2ApiTest {
                 "        }\n" +
                 "    ]\n" +
                 "}";
-        WSO2Api api = new WSO2Api(httpRequestService);
         mockGetRequest(stream, 200);
         mockPutRequest(403);
         api.saveAPI(accessToken, payload);
@@ -328,7 +317,6 @@ public class WSO2ApiTest {
                 "        }\n" +
                 "    ]\n" +
                 "}";
-        WSO2Api api = new WSO2Api(httpRequestService);
         mockGetRequest(stream, 200);
         mockPutRequest(404);
         api.saveAPI(accessToken, payload);
@@ -358,7 +346,6 @@ public class WSO2ApiTest {
                 "        }\n" +
                 "    ]\n" +
                 "}";
-        WSO2Api api = new WSO2Api(httpRequestService);
         mockGetRequest(stream, 200);
         mockPutRequest(412);
         api.saveAPI(accessToken, payload);
@@ -388,7 +375,6 @@ public class WSO2ApiTest {
                 "        }\n" +
                 "    ]\n" +
                 "}";
-        WSO2Api api = new WSO2Api(httpRequestService);
         mockGetRequest(stream, 200);
         mockPutRequest(401);
         api.saveAPI(accessToken, payload);
@@ -418,7 +404,6 @@ public class WSO2ApiTest {
                 "        }\n" +
                 "    ]\n" +
                 "}";
-        WSO2Api api = new WSO2Api(httpRequestService);
         mockGetRequest(stream, 200);
         mockPutRequest(999);
         api.saveAPI(accessToken, payload);
@@ -439,7 +424,6 @@ public class WSO2ApiTest {
                 "    \"previous\": \"\",\n" +
                 "    \"list\": []\n" +
                 "}";
-        WSO2Api api = new WSO2Api(httpRequestService);
         mockGetRequest(stream, 200);
         mockPostRequest(400);
         api.saveAPI(accessToken, payload);
@@ -458,7 +442,6 @@ public class WSO2ApiTest {
                 "    \"previous\": \"\",\n" +
                 "    \"list\": []\n" +
                 "}";
-        WSO2Api api = new WSO2Api(httpRequestService);
         mockGetRequest(stream, 200);
         mockPostRequest(401);
         api.saveAPI(accessToken, payload);
@@ -478,7 +461,6 @@ public class WSO2ApiTest {
                 "    \"previous\": \"\",\n" +
                 "    \"list\": []\n" +
                 "}";
-        WSO2Api api = new WSO2Api(httpRequestService);
         mockGetRequest(stream, 200);
         mockPostRequest(415);
         api.saveAPI(accessToken, payload);
@@ -497,7 +479,6 @@ public class WSO2ApiTest {
                 "    \"previous\": \"\",\n" +
                 "    \"list\": []\n" +
                 "}";
-        WSO2Api api = new WSO2Api(httpRequestService);
         mockGetRequest(stream, 200);
         mockPostRequest(999);
         api.saveAPI(accessToken, payload);
