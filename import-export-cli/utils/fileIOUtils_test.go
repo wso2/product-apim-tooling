@@ -169,3 +169,39 @@ func TestEnvKeysAll_ParseEnvKeysFromFile(t *testing.T) {
 		t.Errorf("Error deleting file " + testKeysFilePath)
 	}
 }
+
+// test for a file that does not exist
+func TestIsFileExist1(t *testing.T) {
+	isFileExist := IsFileExist("random-string")
+	if isFileExist {
+		t.Errorf("Expected '%t' for a file that does not exist, got '%t' instead\n", false, true)
+	}
+}
+
+// test for a file that does exist
+func TestIsFileExist2(t *testing.T) {
+	isFileExist := IsFileExist("./fileIOUtils.go")
+	if !isFileExist {
+		t.Errorf("Expected '%t' for a file that does exist,  got '%t' instead\n", true, false)
+	}
+}
+
+// test for directory that does not exist
+func TestIsDirExist1(t *testing.T) {
+	isDirExist, _ := IsDirExist("random-string")
+	if isDirExist {
+		t.Errorf("Expected '%t' for a directoroy that does not exist, got '%t' instead\n", false, true)
+	}
+}
+
+// test for a directory that does exist
+func TestIsDirExist2(t *testing.T) {
+	tempDirName := "tempDir"
+	os.Mkdir(tempDirName, os.ModePerm)
+	isDirExist, _ := IsDirExist(tempDirName)
+	if !isDirExist {
+		t.Error("Expected '%t' for a directory that does exist, got '%t' instead\n", true, false)
+	}
+
+	defer os.Remove(tempDirName)
+}

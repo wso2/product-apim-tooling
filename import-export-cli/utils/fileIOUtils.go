@@ -124,7 +124,7 @@ func IsFileExist(path string) bool {
 }
 
 // exists returns whether the given file or directory exists or not
-func IsDirExists(path string) (bool, error) {
+func IsDirExist(path string) (bool, error) {
 	_, err := os.Stat(path)
 	if err == nil {
 		return true, nil

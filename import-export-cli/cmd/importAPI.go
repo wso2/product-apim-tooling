@@ -97,7 +97,7 @@ func ImportAPI(query string, apiManagerEndpoint string, accessToken string) (*ht
 	sourceEnv := strings.Split(query, "/")[0]	// environment from which the API was exported
 	utils.Logln(utils.LogPrefixInfo + "Source Environment: " + sourceEnv)
 
-	sourceEnvDirExists, _ := utils.IsDirExists(filepath.Join(utils.ExportedAPIsDirectoryPath, sourceEnv))
+	sourceEnvDirExists, _ := utils.IsDirExist(filepath.Join(utils.ExportedAPIsDirectoryPath, sourceEnv))
 	if !sourceEnvDirExists {
 		utils.HandleErrorAndExit("wrong directory '"+ sourceEnv +"'. Check source environment and try again", nil)
 	}
