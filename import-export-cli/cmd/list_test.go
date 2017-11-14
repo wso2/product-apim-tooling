@@ -113,7 +113,7 @@ func TestGetAPIListUnreachable(t *testing.T) {
 		t.Errorf("Incorrect Count. Expected %d, got %d\n", 0, count)
 	}
 	if list != nil {
-		t.Errorf("")
+		t.Errorf("Expected an error, got nil instead")
 	}
 
 	if err == nil {

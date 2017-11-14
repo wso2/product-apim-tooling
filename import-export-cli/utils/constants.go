@@ -24,11 +24,14 @@ import (
 )
 
 const ProjectName string = "apimcli"
+const ConfigDirectoryName = "wso2-apim-cli-config"
 
 // File Names and Paths
 
-var ApplicationRoot, _ = os.Getwd()
-//var ApplicationRoot  = "/home/menuka/.go/src/github.com/wso2/product-apim-tooling/import-export-cli"
+var CurrentDir, _ = os.Getwd()
+var ApplicationRoot = CurrentDir
+
+//var ApplicationRoot = "/home/menuka/.go/src/github.com/wso2/product-apim-tooling/import-export-cli"
 
 const EnvKeysAllFileName string = "env_keys_all.yaml"
 
@@ -70,4 +73,4 @@ const LogPrefixError = "[ERROR] "
 
 // Other
 const DefaultTokenValidityPeriod string = "3600"
-const DefaultHttpRequestTimeout int = 10000
+const DefaultHttpRequestTimeout int = 100000
