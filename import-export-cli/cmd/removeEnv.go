@@ -26,7 +26,7 @@ import (
 	"github.com/renstrom/dedent"
 )
 
-var flagNameOfEnvToBeRemoved string // name of the environment to be removed
+var flagNameOfEnvToBeRemoved string
 
 // RemoveEnv command related Info
 const removeEnvCmdLiteral string = "remove-env"
