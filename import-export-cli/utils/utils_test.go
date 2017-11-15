@@ -41,7 +41,12 @@ func TestInvokePOSTRequestUnreachable(t *testing.T) {
 
 }
 
+func GetInvokeGETRequestOK(t *testing.T) {
+
+}
+
 func TestInvokePOSTRequestOK(t *testing.T) {
+	SkipTLSVerification = true
 	var httpStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("Expected 'POST', got '%s'\n", r.Method)
@@ -57,28 +62,12 @@ func TestInvokePOSTRequestOK(t *testing.T) {
 	}
 }
 
-func TestPromptForUsername(t *testing.T) {
-	tests := []struct {
-		name string
-		want string
-	}{
-	// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := PromptForUsername(); got != tt.want {
-				t.Errorf("PromptForUsername() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestPromptForPassword(t *testing.T) {
 	tests := []struct {
 		name string
 		want string
 	}{
-	// TODO: Add test cases.
+		{name: "admin", want: ""},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -87,4 +76,30 @@ func TestPromptForPassword(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestChopPath(t *testing.T){
+	tests := []struct {
+		source string
+		expected string
+	}{
+		{source: "/user/home", expected: "home"},
+		{source: "home", expected: "home"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.source, func(t *testing.T) {
+			if got := chopPath(tt.source); got != tt.expected {
+				t.Errorf("PromptForPassword() = %v, expected %v", got, tt.expected)
+			}
+		})
+	}
+}
+
+func TestWhereAmI(t *testing.T) {
+	WhereAmI(5)
+	WhereAmI()
+}
+
+func TestShowHelpCommandTip(t *testing.T) {
+	ShowHelpCommandTip("export-api")
 }

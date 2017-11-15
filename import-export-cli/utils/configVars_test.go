@@ -30,7 +30,7 @@ func TestSetConfigVarsIncorrect1(t *testing.T) {
 		t.Errorf("Expected error, got nil\n")
 	}
 
-	os.Remove(testIncorrectMainConfigFilePath)
+	defer os.Remove(testIncorrectMainConfigFilePath)
 }
 
 func TestSetConfigVarsIncorrect2(t *testing.T) {
@@ -46,7 +46,7 @@ func TestSetConfigVarsIncorrect2(t *testing.T) {
 		t.Errorf("Expected error, got nil\n")
 	}
 
-	os.Remove(testIncorrectMainConfigFilePath)
+	defer os.Remove(testIncorrectMainConfigFilePath)
 }
 
 
