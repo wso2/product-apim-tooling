@@ -36,7 +36,7 @@ import (
 // @param flagPassword : Password entered using the flag --password (-p). Could be blank
 // @return AccessToken, PublisherEndpoint, Errors
 // including (export-api, import-api, list)
-func ExecutePreCommand(environment string, flagUsername string, flagPassword string) (string, string, error) {
+func ExecutePreCommand(environment string, flagUsername string, flagPassword string) (accessToken string, publisherEndpoint string, err error) {
 	if EnvExistsInMainConfigFile(environment, MainConfigFilePath) {
 		registrationEndpoint := GetRegistrationEndpointOfEnv(environment, MainConfigFilePath)
 		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment, MainConfigFilePath)

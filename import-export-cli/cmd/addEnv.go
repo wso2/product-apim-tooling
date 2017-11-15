@@ -70,7 +70,6 @@ var addEnvCmd = &cobra.Command{
 // @return error
 func addEnv(envName string, publisherEndpoint string, regEndpoint string, tokenEndpoint string,
 	mainConfigFilePath string) error {
-	mainConfig := utils.GetMainConfigFromFile(mainConfigFilePath)
 
 	if envName == "" {
 		// name of the environment is blank
@@ -83,7 +82,7 @@ func addEnv(envName string, publisherEndpoint string, regEndpoint string, tokenE
 	}
 	if utils.EnvExistsInMainConfigFile(envName, mainConfigFilePath) {
 		// environment already exists
-		return errors.New("environment '" + envName + "' already exists in " + utils.MainConfigFilePath)
+		return errors.New("environment '" + envName + "' already exists in " + mainConfigFilePath)
 	}
 
 	var envEndpoints utils.EnvEndpoints = utils.EnvEndpoints{
@@ -92,8 +91,10 @@ func addEnv(envName string, publisherEndpoint string, regEndpoint string, tokenE
 		RegistrationEndpoint: regEndpoint,
 	}
 
+	mainConfig := utils.GetMainConfigFromFile(mainConfigFilePath)
+
 	mainConfig.Environments[envName] = envEndpoints
-	utils.WriteConfigFile(mainConfig, utils.MainConfigFilePath)
+	utils.WriteConfigFile(mainConfig, mainConfigFilePath)
 
 	fmt.Printf("Successfully added environment '%s'\n", envName)
 
