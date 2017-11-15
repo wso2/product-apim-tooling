@@ -68,7 +68,7 @@ func removeEnv(envName string, mainConfigFilePath string, envKeysFilePath string
 	}
 	if utils.EnvExistsInMainConfigFile(envName, mainConfigFilePath) {
 		var err error
-		if utils.EnvExistsInKeysFile(envName, utils.EnvKeysAllFilePath) {
+		if utils.EnvExistsInKeysFile(envName, envKeysFilePath) {
 			// environment exists in keys file, it has to be cleared first
 			err = utils.RemoveEnvFromKeysFile(envName, envKeysFilePath, mainConfigFilePath)
 			if err != nil {
