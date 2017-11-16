@@ -1,4 +1,5 @@
-import_export_cli()
+# copy this file to /etc/bash_completion.d/ and source it to enable bash completion
+_apimcli()
 {
     local current previous options base
     COMPREPLY=()
@@ -58,5 +59,7 @@ import_export_cli()
     return 0
 }
 
-complete -F import_export_cli apimcli
-complete -F import_export_cli ./apimcli
+complete -F _apimcli apimcli
+complete -F _apimcli ./apimcli
+complete -F _apimcli import-export-cli
+complete -F _apimcli ./import-export-cli

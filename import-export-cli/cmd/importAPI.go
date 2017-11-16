@@ -67,7 +67,12 @@ var ImportAPICmd = &cobra.Command{
 			importAPICmdPassword)
 
 		if preCommandErr == nil {
-			resp, _ := ImportAPI(importAPIFile, apiManagerEndpoint, accessToken)
+			resp, err := ImportAPI(importAPIFile, apiManagerEndpoint, accessToken)
+
+			if err != nil {
+				utils.HandleErrorAndExit("error importing API", err)
+			}
+
 			if resp.StatusCode == 200 {
 				utils.Logln("Header:", resp.Header)
 				fmt.Println("Succesfully imported API!")
@@ -75,6 +80,8 @@ var ImportAPICmd = &cobra.Command{
 				fmt.Println("Error importing API")
 				utils.Logln(utils.LogPrefixError + resp.Status)
 			}
+
+
 		} else {
 			// env_endpoints file is not configured properly by the user
 			fmt.Println("Error:", preCommandErr)
@@ -94,13 +101,13 @@ func ImportAPI(query string, apiManagerEndpoint string, accessToken string) (*ht
 	}
 	apiManagerEndpoint += "import/apis"
 
-	sourceEnv := strings.Split(query, "/")[0]	// environment from which the API was exported
+	sourceEnv := strings.Split(query, utils.PathSeparator_)[0]	// environment from which the API was exported
 	utils.Logln(utils.LogPrefixInfo + "Source Environment: " + sourceEnv)
 
-	sourceEnvDirExists, _ := utils.IsDirExist(filepath.Join(utils.ExportedAPIsDirectoryPath, sourceEnv))
-	if !sourceEnvDirExists {
-		utils.HandleErrorAndExit("wrong directory '"+ sourceEnv +"'. Check source environment and try again", nil)
-	}
+	//sourceEnvDirExists, _ := utils.IsDirExist(filepath.Join(utils.ExportedAPIsDirectoryPath, sourceEnv))
+	//if !sourceEnvDirExists {
+	//	return nil, errors.New("wrong directory '"+sourceEnv+"'")
+	//}
 
 	fileName := query 	// ex:- fileName = dev/twitterapi_1.0.0.zip
 
