@@ -81,10 +81,18 @@ func TestNewFileUploadRequest(t *testing.T) {
 	defer server.Close()
 
 	extraParams := map[string]string{}
-	filePath := filepath.Join(utils.ApplicationRoot, "sampleapi.zip")
+	filePath := filepath.Join(utils.CurrentDir, "sampleapi.zip")
 	accessToken := "access-token"
 	_, err := NewFileUploadRequest(server.URL, extraParams, "file", filePath, accessToken)
 	if err != nil {
 		t.Errorf("Error: %s\n", err.Error())
 	}
+}
+
+func TestPrintAPIS(t *testing.T){
+	var apis = []utils.API{
+		{Context:"context", ID:"id", LifeCycleStatus:"created", Name:"test-api", Provider:"admin", Version:"1.0.0",
+		WorkflowStatus:"work-flow-status"},
+	}
+	printAPIs(apis)
 }
