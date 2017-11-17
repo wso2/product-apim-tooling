@@ -121,7 +121,6 @@
                     <xmlOutput>true</xmlOutput>
                     <findbugsXmlOutputDirectory>${project.build.directory}/findbugs
                     </findbugsXmlOutputDirectory>
-                    <excludeFilterFile>findbugs_exclude.xml</excludeFilterFile>
                 </configuration>
                 <executions>
                     <execution>
