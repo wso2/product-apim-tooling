@@ -56,18 +56,22 @@ var importAPICmdExamples = dedent.Dedent(`
 
 // ImportAPICmd represents the importAPI command
 var ImportAPICmd = &cobra.Command{
-	Use:   importAPICmdLiteral + " (--file <api-zip-file> --environment " +
+	Use: importAPICmdLiteral + " (--file <api-zip-file> --environment " +
 		"<environment-to-which-the-api-should-be-imported>)",
 	Short: importAPICmdShortDesc,
 	Long:  importAPICmdLongDesc + importAPICmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + importAPICmdLiteral + " called")
 
-		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommandWithOAuth(importEnvironment, importAPICmdUsername,
+		b64encodedCredentials, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommandWithBasicAuth(importEnvironment, importAPICmdUsername,
 			importAPICmdPassword)
 
 		if preCommandErr == nil {
-			resp, _ := ImportAPI(importAPIFile, apiManagerEndpoint, accessToken)
+			resp, err := ImportAPI(importAPIFile, apiManagerEndpoint, b64encodedCredentials)
+			if err != nil {
+				utils.HandleErrorAndExit("Error importing API", err)
+			}
+
 			if resp.StatusCode == 200 {
 				utils.Logln("Header:", resp.Header)
 				fmt.Println("Succesfully imported API!")
@@ -92,17 +96,18 @@ func ImportAPI(query string, apiManagerEndpoint string, accessToken string) (*ht
 	if string(apiManagerEndpoint[len(apiManagerEndpoint)-1]) != "/" {
 		apiManagerEndpoint += "/"
 	}
-	apiManagerEndpoint += "import/apis"
+	apiManagerEndpoint += utils.ApiImportExportProduct + "/" + "import-api"
+	utils.Logln(utils.LogPrefixInfo + "Import URL: " + apiManagerEndpoint)
 
-	sourceEnv := strings.Split(query, "/")[0]	// environment from which the API was exported
+	sourceEnv := strings.Split(query, "/")[0] // environment from which the API was exported
 	utils.Logln(utils.LogPrefixInfo + "Source Environment: " + sourceEnv)
 
-	sourceEnvDirExists, _ := utils.IsDirExists(filepath.Join(utils.ExportedAPIsDirectoryPath, sourceEnv))
-	if !sourceEnvDirExists {
-		utils.HandleErrorAndExit("wrong directory '"+ sourceEnv +"'. Check source environment and try again", nil)
-	}
+	//sourceEnvDirExists, _ := utils.IsDirExists(filepath.Join(utils.ExportedAPIsDirectoryPath, sourceEnv))
+	//if !sourceEnvDirExists {
+	//	utils.HandleErrorAndExit("wrong directory '"+ sourceEnv +"'. Check source environment and try again", nil)
+	//}
 
-	fileName := query 	// ex:- fileName = dev/twitterapi_1.0.0.zip
+	fileName := query // ex:- fileName = dev/twitterapi_1.0.0.zip
 
 	zipFilePath := filepath.Join(utils.ExportDirectory, fileName)
 	fmt.Println("ZipFilePath:", zipFilePath)
@@ -117,7 +122,7 @@ func ImportAPI(query string, apiManagerEndpoint string, accessToken string) (*ht
 	} else {
 		//fmt.Println("hasZipExtension: ", false)
 		// search for a directory with the given fileName
-		destination := filepath.Join(utils.ExportedAPIsDirectoryPath, fileName+ ".zip")
+		destination := filepath.Join(utils.ExportedAPIsDirectoryPath, fileName+".zip")
 		err := utils.ZipDir(zipFilePath, destination)
 		if err != nil {
 			utils.HandleErrorAndExit("Error creating zip archive", err)
@@ -155,10 +160,11 @@ func ImportAPI(query string, apiManagerEndpoint string, accessToken string) (*ht
 		//var bodyContent []byte
 
 		if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
+			// 201 Created or 200 OK
 			fmt.Println("Successfully imported API '" + fileName + "'")
-		}else{
+		} else {
 			fmt.Println("Error importing API.")
-			fmt.Println( "Status: " + resp.Status)
+			fmt.Println("Status: " + resp.Status)
 		}
 
 		//fmt.Println(resp.Header)
@@ -174,7 +180,7 @@ func ImportAPI(query string, apiManagerEndpoint string, accessToken string) (*ht
 // Helper function for forming multi-part form data
 // Returns the formed http request and errors
 func NewFileUploadRequest(uri string, params map[string]string, paramName, path string,
-	accessToken string) (*http.Request, error) {
+	b64encodedCredentials string) (*http.Request, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -197,8 +203,8 @@ func NewFileUploadRequest(uri string, params map[string]string, paramName, path 
 		return nil, err
 	}
 
-	request, err := http.NewRequest(http.MethodPut, uri, body)
-	request.Header.Add(utils.HeaderAuthorization, utils.HeaderValueAuthBearerPrefix+" "+accessToken)
+	request, err := http.NewRequest(http.MethodPost, uri, body)
+	request.Header.Add(utils.HeaderAuthorization, utils.HeaderValueAuthBasicPrefix+" "+b64encodedCredentials)
 	request.Header.Add(utils.HeaderContentType, writer.FormDataContentType())
 	request.Header.Add(utils.HeaderAccept, "*/*")
 	request.Header.Add(utils.HeaderConnection, utils.HeaderValueKeepAlive)

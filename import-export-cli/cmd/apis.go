@@ -19,7 +19,6 @@
 package cmd
 
 import (
-
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"github.com/renstrom/dedent"
@@ -43,8 +42,8 @@ var apisCmdLongDesc = dedent.Dedent(`
 		Display a list of APIs in the environment specified by the flag --environment, -e
 	`)
 var apisCmdExamples = dedent.Dedent(`
-	`+utils.ProjectName + ` `+ apisCmdLiteral +` `+ listCmdLiteral +` -e dev
-	`+utils.ProjectName + ` `+ apisCmdLiteral +` `+ listCmdLiteral +` -e staging
+	` + utils.ProjectName + ` ` + apisCmdLiteral + ` ` + listCmdLiteral + ` -e dev
+	` + utils.ProjectName + ` ` + apisCmdLiteral + ` ` + listCmdLiteral + ` -e staging
 	`)
 
 // apisCmd represents the apis command
@@ -77,7 +76,6 @@ var apisCmd = &cobra.Command{
 		}
 	},
 }
-
 
 // GetAPIList
 // @param query : string to be matched against the API names
