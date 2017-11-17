@@ -1,3 +1,21 @@
+/*
+*  Copyright (c) 2005-2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*  WSO2 Inc. licenses this file to you under the Apache License,
+*  Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+ */
+
 package com.swagger.plugins.wso2;
 
 import com.smartbear.swaggerhub.plugins.PluginExecutionException;
@@ -17,20 +35,18 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-
-/*****************************************************************
- * Class name :    WSO2Api
- * Attributes :    httpRequestService
- * Constants :     PUBLISHER_API_ENDPOINT
- * Methods :       getApiIdentifier, updateApi, saveApi
- * Functionality : Contains the methods to export/update the API to/in the WSO2 API Cloud
- * Visibility :    Public
- * ****************************************************************/
+/**
+ *
+ * Class with the logic to export an API to the WSO2 API management cloud
+ *
+ */
 public class WSO2Api {
 
     private Logger log = LoggerFactory.getLogger(WSO2Api.class);
 
     private static final String PUBLISHER_API_ENDPOINT = "https://api.cloud.wso2.com/api/am/publisher/v0.11/apis/";
+    private static final String CONTENT_TYPE = "application/json";
+    private static final String TOKEN_PREFIX = "Bearer";
 
     private HttpRequestService httpRequestService;
 
@@ -46,10 +62,10 @@ public class WSO2Api {
     /**
      * Checks whether the API already exists in the cloud according to the name and the version of the API
      *
-     * @param accessToken               Access Token to authorize SwaggerHub to access WSO2 API Cloud
-     * @param swagger                   The POJO of the swagger definition
+     * @param accessToken               Access Token to authorize SwaggerHub to access WSO2 API management cloud
+     * @param swagger                   POJO of the swagger definition
      * @return                          Returns true if the API already exists, else returns false
-     * @throws PluginExecutionException Custom exception to make the exception more readable
+     * @throws PluginExecutionException Thrown when an exception is caught while the plugin executes
      */
     private String getApiIdentifier(String accessToken, Swagger swagger) throws PluginExecutionException {
 
@@ -57,8 +73,8 @@ public class WSO2Api {
         String content;
         JSONObject responseJson;
 
-        response = httpRequestService.makeGetRequest(PUBLISHER_API_ENDPOINT, "Bearer", accessToken,
-                "application/json");
+        response = httpRequestService.makeGetRequest(PUBLISHER_API_ENDPOINT, TOKEN_PREFIX, accessToken,
+                CONTENT_TYPE);
 
         if (response.getStatusLine().getStatusCode() == 200) {
             log.debug("The API list is returned");
@@ -121,19 +137,18 @@ public class WSO2Api {
     }
 
     /**
-     * MakES a HTTP request to the publisher API to update an API
+     * MakeS a HTTP request to update an API
      *
      * @param accessToken               Access Token to authorize SwaggerHub to access WSO2 API Cloud
      * @param apiIdentifier             Identifier of the API
      * @param payload                   Body of the request to be made
-     * @throws PluginExecutionException Custom exception to make the exception more readable
+     * @throws PluginExecutionException Thrown when an exception is caught while the plugin executes
      */
     private void updateApi(String accessToken, String apiIdentifier,
                           StringEntity payload) throws PluginExecutionException {
 
         HttpResponse response = httpRequestService.makePutRequest(PUBLISHER_API_ENDPOINT + apiIdentifier,
-                "Bearer",
-                accessToken, "application/json", payload);
+                TOKEN_PREFIX, accessToken, CONTENT_TYPE, payload);
 
         if (response.getStatusLine().getStatusCode() == 200) {
             log.debug("The API is updated");
@@ -169,15 +184,15 @@ public class WSO2Api {
     /**
      * Makes a HTTP request to create an API
      *
-     * @param accessToken Access Token to authorize SwaggerHub to access WSO2 API Cloud
-     * @param payload     Body of the request to be made
-     * @throws PluginExecutionException
+     * @param accessToken               Access Token to authorize SwaggerHub to access WSO2 API Cloud
+     * @param payload                   Body of the request to be made
+     * @throws PluginExecutionException Thrown when an exception is caught while the plugin executes
      */
     private void createApi(String accessToken, StringEntity payload) throws PluginExecutionException {
 
         log.debug("Creating the API in the cloud");
-        HttpResponse postResponse = httpRequestService.makePostRequest(PUBLISHER_API_ENDPOINT, "Bearer",
-                accessToken, "application/json", payload);
+        HttpResponse postResponse = httpRequestService.makePostRequest(PUBLISHER_API_ENDPOINT, TOKEN_PREFIX,
+                accessToken, CONTENT_TYPE, payload);
 
         if (postResponse.getStatusLine().getStatusCode() == 201) {
             log.debug("The API is created in the cloud");
@@ -200,15 +215,14 @@ public class WSO2Api {
                         " created in the WSO2 API Cloud");
             }
         }
-
     }
 
     /**
-     * Creates an API in the api cloud and prints the response of the details of the API made
+     * Creates/updates an API in the cloud
      *
      * @param accessToken               Access Token to authorize SwaggerHub to access WSO2 API Cloud
      * @param payload                   Body of the API http request to create an API
-     * @throws PluginExecutionException Custom exception to make the exception more readable
+     * @throws PluginExecutionException Thrown when an exception is caught while the plugin executes
      */
     public void saveAPI(String accessToken, String payload) throws PluginExecutionException {
 

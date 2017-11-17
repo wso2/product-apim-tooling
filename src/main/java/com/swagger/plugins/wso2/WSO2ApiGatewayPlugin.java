@@ -1,3 +1,21 @@
+/*
+*  Copyright (c) 2005-2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*  WSO2 Inc. licenses this file to you under the Apache License,
+*  Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+ */
+
 package com.swagger.plugins.wso2;
 
 import com.smartbear.config.Configuration;
@@ -27,14 +45,11 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 
-/*****************************************************************
- *  Class name :   WSO2ApiGatewayPlugin
- * Methods :       beforeApiVersionSaved, afterApiVersionSaved, configure, getConfigurationSchema
- * Attributes :    log, userEmail, userPassword, userOrganizationKey, apiId, context
- * Functionality : Contains the methods to check api identifier, obtain user inputs and push the API to the cloud
- * Visibility :    Public
- * ****************************************************************/
-
+/**
+ *
+ * Info of the plugin
+ *
+ */
 @PluginInfo(
         name = "WSO2 API Cloud",
         version = "1.0.0",
@@ -43,6 +58,11 @@ import java.util.Collection;
         failureBehaviour = Plugin.FailureBehavior.CONTINUE
 )
 
+/**
+ *
+ * Class with the methods to execute the plugin correctly
+ *
+ */
 public class WSO2ApiGatewayPlugin extends AnnotatedPlugin implements BeforeApiVersionSavedPlugin,
         AfterApiVersionSavedPlugin {
 
@@ -64,8 +84,8 @@ public class WSO2ApiGatewayPlugin extends AnnotatedPlugin implements BeforeApiVe
      * @param forceUpdate
      * @param links
      * @param isPrivate
-     * @return
-     * @throws PluginExecutionException
+     * @return Returns the swagger definition
+     * @throws PluginExecutionException Thrown when an exception is caught while the plugin executes
      */
     @Override
     public String beforeApiVersionSaved(String triggeredByUUID, String objectPath, String swaggerYaml,
@@ -101,7 +121,7 @@ public class WSO2ApiGatewayPlugin extends AnnotatedPlugin implements BeforeApiVe
      * @param triggeredByUUID
      * @param objectPath
      * @param swaggerYaml
-     * @throws PluginExecutionException
+     * @throws PluginExecutionException Thrown when an exception is caught while the plugin executes
      */
     @Override
     public void afterApiVersionSaved(String triggeredByUUID, String objectPath, String swaggerYaml) throws
@@ -141,10 +161,10 @@ public class WSO2ApiGatewayPlugin extends AnnotatedPlugin implements BeforeApiVe
     }
 
     /**
-     * Returns a model with user to obtain user's email address, password, organization key and context
+     * Use a `Model` to define the user-specified configuration values
      *
      * @param configuration
-     * @return
+     * @return Returns a model to obtain the user values
      */
     @Override
     public Model getConfigurationSchema(Configuration configuration) {

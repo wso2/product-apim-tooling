@@ -1,7 +1,8 @@
+#IDEA
 .idea
 *.iml
 *.ipr
 *.iws
-*.yaml
+
+#MAVEN
 target
-findbugs_exclude.xml
