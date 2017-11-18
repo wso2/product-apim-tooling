@@ -71,7 +71,7 @@ var ExportAPICmd = &cobra.Command{
 			//fmt.Printf("Response Body: %v\n", resp.Body())
 
 			if resp.StatusCode() == http.StatusOK {
-				WriteToZip(exportAPIName, exportAPIVersion, exportEnvironment, resp)
+				WriteToZip(exportAPIName, exportAPIVersion, exportEnvironment, utils.ExportDirectory, resp)
 
 				// only to get the number of APIs exported
 				numberOfAPIsExported, _, err := GetAPIList(exportAPIName, accessToken, apiManagerEndpoint)
@@ -98,9 +98,9 @@ var ExportAPICmd = &cobra.Command{
 // @param exportAPIName : Name of the API to be exported
 // @param resp : Response returned from making the HTTP request (only pass a 200 OK)
 // Exported API will be written to a zip file
-func WriteToZip(exportAPIName string, exportAPIVersion string, exportEnvironment string, resp *resty.Response) {
+func WriteToZip(exportAPIName, exportAPIVersion, exportEnvironment, exportDirectory string, resp *resty.Response) {
 	// Write to file
-	directory := filepath.Join(utils.ExportDirectory, exportEnvironment)
+	directory := filepath.Join(exportDirectory, exportEnvironment)
 	// create directory if it doesn't exist
 	if _, err := os.Stat(directory); os.IsNotExist(err) {
 		os.Mkdir(directory, 0777)
@@ -122,13 +122,13 @@ func WriteToZip(exportAPIName string, exportAPIVersion string, exportEnvironment
 // @param apimEndpoint : API Manager Endpoint for the environment
 // @param accessToken : Access Token for the resource
 // @return response Response in the form of *resty.Response
-func ExportAPI(name string, version string, apimEndpoint string, accessToken string) *resty.Response {
+func ExportAPI(name string, version string, publisherEndpoint string, accessToken string) *resty.Response {
 	// append '/' to the end if there isn't one already
-	if string(apimEndpoint[len(apimEndpoint)-1]) != "/" {
-		apimEndpoint += "/"
+	if string(publisherEndpoint[len(publisherEndpoint)-1]) != "/" {
+		publisherEndpoint += "/"
 	}
 
-	apimEndpoint += "export/apis"
+	publisherEndpoint += "export/apis"
 
 	query := "?query=" + name
 
@@ -138,13 +138,13 @@ func ExportAPI(name string, version string, apimEndpoint string, accessToken str
 	 query := "?query=name:" + name + ",version=" + version
 	*/
 
-	apimEndpoint += query
-	utils.Logln(utils.LogPrefixInfo + "ExportAPI: URL:", apimEndpoint)
+	publisherEndpoint += query
+	utils.Logln(utils.LogPrefixInfo + "ExportAPI: URL:", publisherEndpoint)
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 	headers[utils.HeaderAccept] = utils.HeaderValueApplicationZip
 
-	resp, err := utils.InvokeGETRequest(apimEndpoint, headers)
+	resp, err := utils.InvokeGETRequest(publisherEndpoint, headers)
 
 	if err != nil {
 		utils.HandleErrorAndExit("Error exporting API: "+name, err)

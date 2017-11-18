@@ -26,6 +26,7 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
 	"net/http/httptest"
+	"github.com/go-resty/resty"
 )
 
 func TestExportAPI(t *testing.T) {
@@ -54,4 +55,13 @@ func TestExportAPI(t *testing.T) {
 
 	resp := ExportAPI("test", "1.0", server.URL, "")
 	fmt.Println(resp)
+}
+
+func TestWriteToZip(t *testing.T) {
+	name := "sampleapi"
+	version := "1.0.0"
+	environment := "dev"
+	response := new(resty.Response)
+	exportDirectory := utils.CurrentDir
+	WriteToZip(name, version, environment, exportDirectory, response)
 }
