@@ -154,7 +154,7 @@ func TestExecutePreCommand(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1, err := ExecutePreCommand(tt.args.environment, tt.args.flagUsername, tt.args.flagPassword)
+			got, got1, err := ExecutePreCommand(tt.args.environment, tt.args.flagUsername, tt.args.flagPassword, "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ExecutePreCommand() error = %v, wantErr %v", err, tt.wantErr)
 				return

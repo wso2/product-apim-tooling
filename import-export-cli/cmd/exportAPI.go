@@ -60,7 +60,7 @@ var ExportAPICmd = &cobra.Command{
 		utils.Logln(utils.LogPrefixInfo + exportAPICmdLiteral + " called")
 
 		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(exportEnvironment, exportAPICmdUsername,
-			exportAPICmdPassword)
+			exportAPICmdPassword, utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
 
 		if preCommandErr == nil {
 			resp := ExportAPI(exportAPIName, exportAPIVersion, apiManagerEndpoint, accessToken)

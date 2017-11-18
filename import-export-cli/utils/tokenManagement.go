@@ -34,13 +34,16 @@ import (
 // @param environment : Environment on which the particular command is run
 // @param flagUsername : Username entered using the flag --username (-u). Could be blank
 // @param flagPassword : Password entered using the flag --password (-p). Could be blank
+// @param mainConfigFilePath : Path to file where env_endpoints are stored
+// @param envKeysAllFilePath : Path to file where env_keys are stored
 // @return AccessToken, PublisherEndpoint, Errors
 // including (export-api, import-api, list)
-func ExecutePreCommand(environment string, flagUsername string, flagPassword string) (accessToken string, publisherEndpoint string, err error) {
-	if EnvExistsInMainConfigFile(environment, MainConfigFilePath) {
-		registrationEndpoint := GetRegistrationEndpointOfEnv(environment, MainConfigFilePath)
-		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment, MainConfigFilePath)
-		tokenEndpoint := GetTokenEndpointOfEnv(environment, MainConfigFilePath)
+func ExecutePreCommand(environment, flagUsername, flagPassword, mainConfigFilePath,
+	envKeysAllFilePath string) (accessToken string, publisherEndpoint string, err error) {
+	if EnvExistsInMainConfigFile(environment, mainConfigFilePath) {
+		registrationEndpoint := GetRegistrationEndpointOfEnv(environment, mainConfigFilePath)
+		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment, mainConfigFilePath)
+		tokenEndpoint := GetTokenEndpointOfEnv(environment, mainConfigFilePath)
 
 		Logln(LogPrefixInfo + "Environment: '" + environment + "'")
 		Logln(LogPrefixInfo + "Reg Endpoint read:", registrationEndpoint)
@@ -51,9 +54,9 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 		var clientSecret string
 		var err error
 
-		if EnvExistsInKeysFile(environment, EnvKeysAllFilePath) {
+		if EnvExistsInKeysFile(environment, envKeysAllFilePath) {
 			// client_id, client_secret, and username exist in file
-			username = GetUsernameOfEnv(environment, EnvKeysAllFilePath)
+			username = GetUsernameOfEnv(environment, envKeysAllFilePath)
 
 			if flagUsername != "" {
 				// flagUsername is not blank
@@ -61,7 +64,7 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 					// username entered with flag -u is not the same as username found
 					// in env_keys_all.yaml file
 					fmt.Println("Username entered with flag -u for the environment '" + environment +
-						"' is not the same as username found in file '" + EnvKeysAllFilePath + "'")
+						"' is not the same as username found in file '" + envKeysAllFilePath + "'")
 					fmt.Println("Execute '" + ProjectName + " reset-user -e " + environment + "' to clear user data")
 					os.Exit(1)
 				} else {
@@ -87,8 +90,8 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 				}
 			}
 
-			clientID = GetClientIDOfEnv(environment, EnvKeysAllFilePath)
-			clientSecret = GetClientSecretOfEnv(environment, password, EnvKeysAllFilePath)
+			clientID = GetClientIDOfEnv(environment, envKeysAllFilePath)
+			clientSecret = GetClientSecretOfEnv(environment, password, envKeysAllFilePath)
 
 			Logln(LogPrefixInfo+"Username:", username)
 			Logln(LogPrefixInfo+"ClientID:", clientID)
@@ -126,7 +129,7 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 			// Persist clientID, clientSecret, Username in file
 			encryptedClientSecret := Encrypt([]byte(GetMD5Hash(password)), clientSecret)
 			envKeys := EnvKeys{clientID, encryptedClientSecret, username}
-			AddNewEnvToKeysFile(environment, envKeys, EnvKeysAllFilePath)
+			AddNewEnvToKeysFile(environment, envKeys, envKeysAllFilePath)
 		}
 
 		// Get OAuth Tokens
@@ -145,7 +148,7 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 		}
 
 		return "", "", errors.New("Details incorrect/unavailable for environment '" + environment + "' in " +
-			MainConfigFilePath)
+			mainConfigFilePath)
 	}
 }
 
