@@ -67,7 +67,7 @@ var ImportAPICmd = &cobra.Command{
 			importAPICmdPassword)
 
 		if preCommandErr == nil {
-			resp, err := ImportAPI(importAPIFile, apiManagerEndpoint, accessToken)
+			resp, err := ImportAPI(importAPIFile, apiManagerEndpoint, accessToken, utils.ExportDirectory)
 
 			if err != nil {
 				utils.HandleErrorAndExit("error importing API", err)
@@ -94,7 +94,7 @@ var ImportAPICmd = &cobra.Command{
 // @param name: name of the API (zipped file) to be imported
 // @param apiManagerEndpoint: API Manager endpoint for the environment
 // @param accessToken: OAuth2.0 access token for the resource being accessed
-func ImportAPI(query string, apiManagerEndpoint string, accessToken string) (*http.Response, error) {
+func ImportAPI(query string, apiManagerEndpoint string, accessToken string, exportDirectory string) (*http.Response, error) {
 	// append '/' to the end if there isn't one already
 	if string(apiManagerEndpoint[len(apiManagerEndpoint)-1]) != "/" {
 		apiManagerEndpoint += "/"
@@ -111,7 +111,7 @@ func ImportAPI(query string, apiManagerEndpoint string, accessToken string) (*ht
 
 	fileName := query 	// ex:- fileName = dev/twitterapi_1.0.0.zip
 
-	zipFilePath := filepath.Join(utils.ExportDirectory, fileName)
+	zipFilePath := filepath.Join(exportDirectory, fileName)
 	fmt.Println("ZipFilePath:", zipFilePath)
 
 	// check if '.zip' exists in the input 'fileName'
