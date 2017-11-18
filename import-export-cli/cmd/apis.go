@@ -56,7 +56,7 @@ var apisCmd = &cobra.Command{
 		utils.Logln(utils.LogPrefixInfo + listCmdLiteral + " " + apisCmdLiteral + " called")
 
 		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(listEnvironment, listCmdUsername,
-			listCmdPassword)
+			listCmdPassword, utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
 
 		if preCommandErr == nil {
 			count, apis, err := GetAPIList("", accessToken, apiManagerEndpoint)
