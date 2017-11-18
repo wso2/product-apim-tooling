@@ -27,7 +27,7 @@ import (
 func TestInvokePOSTRequestUnreachable(t *testing.T) {
 	var httpStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
-			t.Errorf("Expected 'POST', got '%s'\n", r.Method)
+			t.Errorf("Expected '%s', got '%s'\n", http.MethodPost, r.Method)
 		}
 
 		w.WriteHeader(http.StatusInternalServerError)
@@ -42,7 +42,19 @@ func TestInvokePOSTRequestUnreachable(t *testing.T) {
 }
 
 func GetInvokeGETRequestOK(t *testing.T) {
+	var httpStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			t.Errorf("Expected '%s', got '%s'\n", http.MethodGet, r.Method)
+		}
 
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer httpStub.Close()
+
+	resp, err := InvokePOSTRequest(httpStub.URL, make(map[string]string), "")
+	if resp.StatusCode() != http.StatusInternalServerError {
+		t.Errorf("Error in InvokePOSTRequest(): %s\n", err)
+	}
 }
 
 func TestInvokePOSTRequestOK(t *testing.T) {
