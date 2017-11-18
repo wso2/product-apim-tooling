@@ -35,12 +35,10 @@ import (
 // @param flagPassword : Password entered using the flag --password (-p). Could be blank
 // @return b64encodedCredentials, APIManagerEndpoint, Errors
 // including (export-api, import-api, list)e
-func ExecutePreCommandWithBasicAuth(environment string, flagUsername string,
-	flagPassword string) (b64encodedCredentials string, apiManagerEndpoint string, err error) {
+func ExecutePreCommandWithBasicAuth(environment, flagUsername, flagPassword, mainConfigFilePath,
+	envKeysAllFilePath string) (b64encodedCredentials string, apiManagerEndpoint string, err error) {
 	if EnvExistsInMainConfigFile(environment, MainConfigFilePath) {
-		//registrationEndpoint := GetRegistrationEndpointOfEnv(environment, MainConfigFilePath)
-		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment, MainConfigFilePath)
-		//tokenEndpoint := GetTokenEndpointOfEnv(environment, MainConfigFilePath)
+		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment, mainConfigFilePath)
 
 		Logln(LogPrefixInfo + "Environment: '" + environment + "'")
 
@@ -48,9 +46,9 @@ func ExecutePreCommandWithBasicAuth(environment string, flagUsername string,
 		var password string
 		var err error
 
-		if EnvExistsInKeysFile(environment, EnvKeysAllFilePath) {
+		if EnvExistsInKeysFile(environment, envKeysAllFilePath) {
 			// client_id, client_secret, and username exist in file
-			username = GetUsernameOfEnv(environment, EnvKeysAllFilePath)
+			username = GetUsernameOfEnv(environment, envKeysAllFilePath)
 
 			if flagUsername != "" {
 				// flagUsername is not blank
@@ -135,7 +133,7 @@ func ExecutePreCommandWithBasicAuth(environment string, flagUsername string,
 		}
 
 		return "", "", errors.New("Details incorrect/unavailable for environment '" + environment + "' in " +
-			MainConfigFilePath)
+			mainConfigFilePath)
 	}
 }
 
@@ -145,12 +143,12 @@ func ExecutePreCommandWithBasicAuth(environment string, flagUsername string,
 // @param flagPassword : Password entered using the flag --password (-p). Could be blank
 // @return AccessToken, APIManagerEndpoint, Errors
 // including (export-api, import-api, list)
-func ExecutePreCommandWithOAuth(environment string, flagUsername string,
-	flagPassword string) (accessToken string, apiManagerEndpoint string, err error) {
+func ExecutePreCommandWithOAuth(environment, flagUsername, flagPassword, mainConfigFilePath,
+	envKeysAllFilePath string) (accessToken string, apiManagerEndpoint string, err error) {
 	if EnvExistsInMainConfigFile(environment, MainConfigFilePath) {
 		registrationEndpoint := GetRegistrationEndpointOfEnv(environment, MainConfigFilePath)
-		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment, MainConfigFilePath)
-		tokenEndpoint := GetTokenEndpointOfEnv(environment, MainConfigFilePath)
+		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment, mainConfigFilePath)
+		tokenEndpoint := GetTokenEndpointOfEnv(environment, mainConfigFilePath)
 
 		Logln(LogPrefixInfo + "Environment: '" + environment + "'")
 		Logln(LogPrefixInfo+"Reg Endpoint read:", registrationEndpoint)
@@ -161,9 +159,9 @@ func ExecutePreCommandWithOAuth(environment string, flagUsername string,
 		var clientSecret string
 		var err error
 
-		if EnvExistsInKeysFile(environment, EnvKeysAllFilePath) {
+		if EnvExistsInKeysFile(environment, envKeysAllFilePath) {
 			// client_id, client_secret, and username exist in file
-			username = GetUsernameOfEnv(environment, EnvKeysAllFilePath)
+			username = GetUsernameOfEnv(environment, envKeysAllFilePath)
 
 			if flagUsername != "" {
 				// flagUsername is not blank
@@ -197,8 +195,8 @@ func ExecutePreCommandWithOAuth(environment string, flagUsername string,
 				}
 			}
 
-			clientID = GetClientIDOfEnv(environment, EnvKeysAllFilePath)
-			clientSecret = GetClientSecretOfEnv(environment, password, EnvKeysAllFilePath)
+			clientID = GetClientIDOfEnv(environment, envKeysAllFilePath)
+			clientSecret = GetClientSecretOfEnv(environment, password, envKeysAllFilePath)
 
 			Logln(LogPrefixInfo+"Username:", username)
 			Logln(LogPrefixInfo+"ClientID:", clientID)
@@ -239,7 +237,7 @@ func ExecutePreCommandWithOAuth(environment string, flagUsername string,
 			// Persist clientID, clientSecret, Username in file
 			encryptedClientSecret := Encrypt([]byte(GetMD5Hash(password)), clientSecret)
 			envKeys := EnvKeys{clientID, encryptedClientSecret, username}
-			AddNewEnvToKeysFile(environment, envKeys, EnvKeysAllFilePath)
+			AddNewEnvToKeysFile(environment, envKeys, envKeysAllFilePath)
 		}
 
 		// Get OAuth Tokens
@@ -258,7 +256,7 @@ func ExecutePreCommandWithOAuth(environment string, flagUsername string,
 		}
 
 		return "", "", errors.New("Details incorrect/unavailable for environment '" + environment + "' in " +
-			MainConfigFilePath)
+			mainConfigFilePath)
 	}
 }
 
@@ -267,7 +265,7 @@ func ExecutePreCommandWithOAuth(environment string, flagUsername string,
 // @param password : Password for application server account
 // @param url : Registration Endpoint for the environment
 // @return client_id, client_secret, error
-func GetClientIDSecret(username string, password string, url string) (clientID string, clientSecret string, err error) {
+func GetClientIDSecret(username, password, url string) (clientID string, clientSecret string, err error) {
 	body := dedent.Dedent(`{"clientName": "rest_api_publisher",
 								  "callbackUrl": "www.google.lk",
 								  "grantType":"password refresh_token",
@@ -317,7 +315,7 @@ func GetClientIDSecret(username string, password string, url string) (clientID s
 // Encode the concatenation of two strings (using ":")
 // provide two strings
 // returns base64Encode(key:secret)
-func GetBase64EncodedCredentials(key string, secret string) (encodedValue string) {
+func GetBase64EncodedCredentials(key, secret string) (encodedValue string) {
 	line := key + ":" + secret
 	encoded := base64.StdEncoding.EncodeToString([]byte(line))
 	return encoded
@@ -326,8 +324,7 @@ func GetBase64EncodedCredentials(key string, secret string) (encodedValue string
 // GetOAuthTokens implemented using go-resty/resty
 // provide username, password, and validity period for the access token
 // returns the response as a map
-func GetOAuthTokens(username string, password string,
-	b64EncodedClientIDClientSecret string, url string) (map[string]string, error) {
+func GetOAuthTokens(username, password, b64EncodedClientIDClientSecret, url string) (map[string]string, error) {
 	validityPeriod := DefaultTokenValidityPeriod
 	body := "grant_type=password&username=" + username + "&password=" + password + "&validity_period=" +
 		validityPeriod + "&scope=apim:api_view"

@@ -60,9 +60,9 @@ var ExportAPICmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + exportAPICmdLiteral + " called")
 
-		b64encodedCredentials, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommandWithBasicAuth(exportEnvironment,
-			exportAPICmdUsername,
-			exportAPICmdPassword)
+		b64encodedCredentials, apiManagerEndpoint, preCommandErr :=
+			utils.ExecutePreCommandWithBasicAuth(exportEnvironment, exportAPICmdUsername, exportAPICmdPassword,
+				utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
 
 		if preCommandErr == nil {
 			resp := ExportAPI(exportAPIName, exportAPIVersion, exportProvider, apiManagerEndpoint, b64encodedCredentials)
@@ -100,7 +100,7 @@ var ExportAPICmd = &cobra.Command{
 // @param exportAPIName : Name of the API to be exported
 // @param resp : Response returned from making the HTTP request (only pass a 200 OK)
 // Exported API will be written to a zip file
-func WriteToZip(exportAPIName string, exportAPIVersion string, exportEnvironment string, resp *resty.Response) {
+func WriteToZip(exportAPIName, exportAPIVersion, exportEnvironment string, resp *resty.Response) {
 	// Write to file
 	directory := filepath.Join(utils.ExportDirectory, exportEnvironment)
 	// create directory if it doesn't exist
@@ -124,8 +124,7 @@ func WriteToZip(exportAPIName string, exportAPIVersion string, exportEnvironment
 // @param apimEndpoint : API Manager Endpoint for the environment
 // @param accessToken : Access Token for the resource
 // @return response Response in the form of *resty.Response
-func ExportAPI(name string, version string, provider string, apimEndpoint string,
-	b64encodedCredentials string) *resty.Response {
+func ExportAPI(name, version, provider, apimEndpoint, b64encodedCredentials string) *resty.Response {
 	// append '/' to the end if there isn't one already
 	if string(apimEndpoint[len(apimEndpoint)-1]) != "/" {
 		apimEndpoint += "/"

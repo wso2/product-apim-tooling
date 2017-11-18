@@ -63,8 +63,9 @@ var ImportAPICmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + importAPICmdLiteral + " called")
 
-		b64encodedCredentials, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommandWithBasicAuth(importEnvironment, importAPICmdUsername,
-			importAPICmdPassword)
+		b64encodedCredentials, apiManagerEndpoint, preCommandErr :=
+			utils.ExecutePreCommandWithBasicAuth(importEnvironment, importAPICmdUsername, importAPICmdPassword,
+				utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
 
 		if preCommandErr == nil {
 			resp, err := ImportAPI(importAPIFile, apiManagerEndpoint, b64encodedCredentials)
@@ -91,7 +92,7 @@ var ImportAPICmd = &cobra.Command{
 // @param name: name of the API (zipped file) to be imported
 // @param apiManagerEndpoint: API Manager endpoint for the environment
 // @param accessToken: OAuth2.0 access token for the resource being accessed
-func ImportAPI(query string, apiManagerEndpoint string, accessToken string) (*http.Response, error) {
+func ImportAPI(query, apiManagerEndpoint, accessToken string) (*http.Response, error) {
 	// append '/' to the end if there isn't one already
 	if string(apiManagerEndpoint[len(apiManagerEndpoint)-1]) != "/" {
 		apiManagerEndpoint += "/"
@@ -179,7 +180,7 @@ func ImportAPI(query string, apiManagerEndpoint string, accessToken string) (*ht
 // NewFileUploadRequest form an HTTP Put request
 // Helper function for forming multi-part form data
 // Returns the formed http request and errors
-func NewFileUploadRequest(uri string, params map[string]string, paramName, path string,
+func NewFileUploadRequest(uri string, params map[string]string, paramName, path,
 	b64encodedCredentials string) (*http.Request, error) {
 	file, err := os.Open(path)
 	if err != nil {

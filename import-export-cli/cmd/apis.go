@@ -54,8 +54,9 @@ var apisCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + apisCmdLiteral + " called")
 
-		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommandWithOAuth(listEnvironment, listCmdUsername,
-			listCmdPassword)
+		accessToken, apiManagerEndpoint, preCommandErr :=
+			utils.ExecutePreCommandWithOAuth(listEnvironment, listCmdUsername, listCmdPassword,
+				utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
 
 		if preCommandErr == nil {
 			count, apis, err := GetAPIList("", accessToken, apiManagerEndpoint)
@@ -84,7 +85,7 @@ var apisCmd = &cobra.Command{
 // @return count (no. of APIs)
 // @return array of API objects
 // @return error
-func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (int32, []utils.API, error) {
+func GetAPIList(query, accessToken, apiManagerEndpoint string) (int32, []utils.API, error) {
 	url := apiManagerEndpoint
 
 	// append '/' to the end if there isn't one already

@@ -62,7 +62,7 @@ var removeEnvCmd = &cobra.Command{
 // @param mainConfigFilePath : Path to file where env endpoints are stored
 // @param envKeysFilePath : Path to file where env keys are stored
 // @return error
-func removeEnv(envName string, mainConfigFilePath string, envKeysFilePath string) error {
+func removeEnv(envName, mainConfigFilePath, envKeysFilePath string) error {
 	if envName == "" {
 		return errors.New("name of the environment cannot be blank")
 	}

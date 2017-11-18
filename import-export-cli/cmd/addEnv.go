@@ -68,8 +68,7 @@ var addEnvCmd = &cobra.Command{
 // @param tokenEndpoint : Token Endpoint for the environment
 // @param mainConfigFilePath : Path to file where env endpoints are stored
 // @return error
-func addEnv(envName string, publisherEndpoint string, regEndpoint string, tokenEndpoint string,
-	mainConfigFilePath string) error {
+func addEnv(envName, publisherEndpoint, regEndpoint, tokenEndpoint, mainConfigFilePath string) error {
 	mainConfig := utils.GetMainConfigFromFile(mainConfigFilePath)
 
 	if envName == "" {
