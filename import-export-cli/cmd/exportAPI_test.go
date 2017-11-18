@@ -51,6 +51,6 @@ func TestExportAPI(t *testing.T) {
 	}))
 	defer server.Close()
 
-	resp := ExportAPI("test", "1.0", server.URL, "")
+	resp := ExportAPI("test", "1.0","admin", server.URL, "")
 	fmt.Println(resp)
 }

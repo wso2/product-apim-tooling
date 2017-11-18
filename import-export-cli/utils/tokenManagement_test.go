@@ -74,8 +74,8 @@ func TestGetClientIDSecretOK(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set(HeaderContentType, HeaderValueApplicationJSON)
 		body := dedent.Dedent(`{"client_name":"Test1",
-									"client_id":"be88563b-21cb-417c-b574-bf1079959679",
-									"client_secret":"ecb105a0-117c-463d-9376-442d24864f26"}`)
+									"clientId":"be88563b-21cb-417c-b574-bf1079959679",
+									"clientSecret":"ecb105a0-117c-463d-9376-442d24864f26"}`)
 
 		w.Write([]byte(body))
 	}))

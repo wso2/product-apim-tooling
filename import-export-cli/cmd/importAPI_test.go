@@ -80,7 +80,7 @@ func TestNewFileUploadRequest(t *testing.T) {
 	defer server.Close()
 
 	extraParams := map[string]string{}
-	filePath := filepath.Join(utils.ExportedAPIsDirectoryPath, "sampleapi.zip")
+	filePath := filepath.Join( "sampleapi.zip")
 	accessToken := "access-token"
 	_, err := NewFileUploadRequest(server.URL, extraParams, "file", filePath, accessToken)
 	if err != nil {

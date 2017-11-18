@@ -131,15 +131,19 @@ func ExportAPI(name string, version string, provider string, apimEndpoint string
 		apimEndpoint += "/"
 	}
 
-	query := utils.ApiImportExportProduct + "/export-api?name=" + name + "&version=" + version + "&provider=" + provider
+	query := utils.ApiImportExportProduct + "/export-api?name=" + name + "&version=" + version
 
-	apimEndpoint += query
-	utils.Logln(utils.LogPrefixInfo + "ExportAPI: URL:", apimEndpoint)
+	if provider != "" {
+		query += "&provider=" + provider
+	}
+
+	url := apimEndpoint + query
+	utils.Logln(utils.LogPrefixInfo + "ExportAPI: URL:", url)
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + b64encodedCredentials
 	headers[utils.HeaderAccept] = utils.HeaderValueApplicationZip
 
-	resp, err := utils.InvokeGETRequest(apimEndpoint, headers)
+	resp, err := utils.InvokeGETRequest(url, headers)
 
 	if err != nil {
 		utils.HandleErrorAndExit("Error exporting API: "+name, err)
