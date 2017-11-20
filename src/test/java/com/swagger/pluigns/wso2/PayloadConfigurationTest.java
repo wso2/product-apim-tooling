@@ -12,6 +12,7 @@ public class PayloadConfigurationTest {
     Swagger swagger;
     String swaggerDefinition;
     String expectedPayload;
+    String swaggerJson;
 
     /**
      * This method initializes the variables before tests are executed
@@ -146,7 +147,154 @@ public class PayloadConfigurationTest {
                 "schemes:\n" +
                 " - https";
 
-        swagger = Json.mapper().readValue(PayloadConfiguration.convertYamlToJson(swaggerDefinition), Swagger.class);
+        swaggerJson = "{\n" +
+                "  \"swagger\" : \"2.0\",\n" +
+                "  \"info\" : {\n" +
+                "    \"description\" : \"This is a simple API\",\n" +
+                "    \"version\" : \"1.0.0\",\n" +
+                "    \"title\" : \"Simple Inventory API\",\n" +
+                "    \"contact\" : {\n" +
+                "      \"email\" : \"you@your-company.com\"\n" +
+                "    },\n" +
+                "    \"license\" : {\n" +
+                "      \"name\" : \"Apache 2.0\",\n" +
+                "      \"url\" : \"http://www.apache.org/licenses/LICENSE-2.0.html\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"host\" : \"virtserver.swaggerhub.com\",\n" +
+                "  \"basePath\" : \"/simple\",\n" +
+                "  \"tags\" : [ {\n" +
+                "    \"name\" : \"admins\",\n" +
+                "    \"description\" : \"Secured Admin-only calls\"\n" +
+                "  }, {\n" +
+                "    \"name\" : \"developers\",\n" +
+                "    \"description\" : \"Operations available to regular developers\"\n" +
+                "  } ],\n" +
+                "  \"schemes\" : [ \"https\" ],\n" +
+                "  \"paths\" : {\n" +
+                "    \"/inventory\" : {\n" +
+                "      \"get\" : {\n" +
+                "        \"tags\" : [ \"developers\" ],\n" +
+                "        \"summary\" : \"searches inventory\",\n" +
+                "        \"description\" : \"By passing in the appropriate options, you can search for\\navailable" +
+                " inventory in the system\\n\",\n" +
+                "        \"operationId\" : \"searchInventory\",\n" +
+                "        \"produces\" : [ \"application/json\" ],\n" +
+                "        \"parameters\" : [ {\n" +
+                "          \"name\" : \"searchString\",\n" +
+                "          \"in\" : \"query\",\n" +
+                "          \"description\" : \"pass an optional search string for looking up inventory\",\n" +
+                "          \"required\" : false,\n" +
+                "          \"type\" : \"string\"\n" +
+                "        }, {\n" +
+                "          \"name\" : \"skip\",\n" +
+                "          \"in\" : \"query\",\n" +
+                "          \"description\" : \"number of records to skip for pagination\",\n" +
+                "          \"required\" : false,\n" +
+                "          \"type\" : \"integer\",\n" +
+                "          \"minimum\" : 0,\n" +
+                "          \"format\" : \"int32\"\n" +
+                "        }, {\n" +
+                "          \"name\" : \"limit\",\n" +
+                "          \"in\" : \"query\",\n" +
+                "          \"description\" : \"maximum number of records to return\",\n" +
+                "          \"required\" : false,\n" +
+                "          \"type\" : \"integer\",\n" +
+                "          \"maximum\" : 50,\n" +
+                "          \"minimum\" : 0,\n" +
+                "          \"format\" : \"int32\"\n" +
+                "        } ],\n" +
+                "        \"responses\" : {\n" +
+                "          \"200\" : {\n" +
+                "            \"description\" : \"search results matching criteria\",\n" +
+                "            \"schema\" : {\n" +
+                "              \"type\" : \"array\",\n" +
+                "              \"items\" : {\n" +
+                "                \"$ref\" : \"#/definitions/InventoryItem\"\n" +
+                "              }\n" +
+                "            }\n" +
+                "          },\n" +
+                "          \"400\" : {\n" +
+                "            \"description\" : \"bad input parameter\"\n" +
+                "          }\n" +
+                "        }\n" +
+                "      },\n" +
+                "      \"post\" : {\n" +
+                "        \"tags\" : [ \"admins\" ],\n" +
+                "        \"summary\" : \"adds an inventory item\",\n" +
+                "        \"description\" : \"Adds an item to the system\",\n" +
+                "        \"operationId\" : \"addInventory\",\n" +
+                "        \"consumes\" : [ \"application/json\" ],\n" +
+                "        \"produces\" : [ \"application/json\" ],\n" +
+                "        \"parameters\" : [ {\n" +
+                "          \"in\" : \"body\",\n" +
+                "          \"name\" : \"inventoryItem\",\n" +
+                "          \"description\" : \"Inventory item to add\",\n" +
+                "          \"required\" : false,\n" +
+                "          \"schema\" : {\n" +
+                "            \"$ref\" : \"#/definitions/InventoryItem\"\n" +
+                "          }\n" +
+                "        } ],\n" +
+                "        \"responses\" : {\n" +
+                "          \"201\" : {\n" +
+                "            \"description\" : \"item created\"\n" +
+                "          },\n" +
+                "          \"400\" : {\n" +
+                "            \"description\" : \"invalid input, object invalid\"\n" +
+                "          },\n" +
+                "          \"409\" : {\n" +
+                "            \"description\" : \"an existing item already exists\"\n" +
+                "          }\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"definitions\" : {\n" +
+                "    \"InventoryItem\" : {\n" +
+                "      \"type\" : \"object\",\n" +
+                "      \"required\" : [ \"id\", \"manufacturer\", \"name\", \"releaseDate\" ],\n" +
+                "      \"properties\" : {\n" +
+                "        \"id\" : {\n" +
+                "          \"type\" : \"string\",\n" +
+                "          \"format\" : \"uuid\",\n" +
+                "          \"example\" : \"d290f1ee-6c54-4b01-90e6-d701748f0851\"\n" +
+                "        },\n" +
+                "        \"name\" : {\n" +
+                "          \"type\" : \"string\",\n" +
+                "          \"example\" : \"Widget Adapter\"\n" +
+                "        },\n" +
+                "        \"releaseDate\" : {\n" +
+                "          \"type\" : \"string\",\n" +
+                "          \"format\" : \"int32\",\n" +
+                "          \"example\" : \"2016-08-29T09:12:33.001Z\"\n" +
+                "        },\n" +
+                "        \"manufacturer\" : {\n" +
+                "          \"$ref\" : \"#/definitions/Manufacturer\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    },\n" +
+                "    \"Manufacturer\" : {\n" +
+                "      \"required\" : [ \"name\" ],\n" +
+                "      \"properties\" : {\n" +
+                "        \"name\" : {\n" +
+                "          \"type\" : \"string\",\n" +
+                "          \"example\" : \"ACME Corporation\"\n" +
+                "        },\n" +
+                "        \"homePage\" : {\n" +
+                "          \"type\" : \"string\",\n" +
+                "          \"format\" : \"url\",\n" +
+                "          \"example\" : \"https://www.acme-corp.com\"\n" +
+                "        },\n" +
+                "        \"phone\" : {\n" +
+                "          \"type\" : \"string\",\n" +
+                "          \"example\" : \"408-867-5309\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+
+        swagger = Json.mapper().readValue(swaggerJson, Swagger.class);
     }
 
     /**
@@ -158,54 +306,68 @@ public class PayloadConfigurationTest {
     public void testConfigurePayload() throws Exception {
 
         expectedPayload = "{\"name\":\"Simple Inventory API\",\"context\":\"/simple\",\"version\":\"1.0.0\"," +
-                "\"description\":\"This is a simple API\",\"apiDefinition\":\"{\\\"swagger\\\":\\\"2.0\\\"," +
-                "\\\"info\\\":{\\\"description\\\":\\\"This is a simple API\\\",\\\"version\\\":\\\"1.0.0\\\"," +
-                "\\\"title\\\":\\\"Simple Inventory API\\\",\\\"contact\\\":{\\\"email\\\":" +
-                "\\\"you@your-company.com\\\"},\\\"license\\\":{\\\"name\\\":\\\"Apache 2.0\\\"," +
-                "\\\"url\\\":\\\"http://www.apache.org/licenses/LICENSE-2.0.html\\\"}},\\\"host\\\":" +
-                "\\\"virtserver.swaggerhub.com\\\",\\\"basePath\\\":\\\"/simple\\\",\\\"tags\\\":[{\\\"name\\\":" +
-                "\\\"admins\\\",\\\"description\\\":\\\"Secured Admin-only calls\\\"},{\\\"name\\\":" +
-                "\\\"developers\\\",\\\"description\\\":\\\"Operations available to regular developers\\\"}]," +
-                "\\\"schemes\\\":[\\\"https\\\"],\\\"paths\\\":{\\\"/inventory\\\":{\\\"get\\\":{\\\"tags\\\":" +
-                "[\\\"developers\\\"],\\\"summary\\\":\\\"searches inventory\\\",\\\"description\\\":" +
-                "\\\"By passing in the appropriate options, you can search for\\\\navailable inventory in the " +
-                "system\\\\n\\\",\\\"operationId\\\":\\\"searchInventory\\\",\\\"produces\\\":" +
-                "[\\\"application/json\\\"],\\\"parameters\\\":[{\\\"name\\\":\\\"searchString\\\",\\\"in\\\":" +
-                "\\\"query\\\",\\\"description\\\":\\\"pass an optional search string for looking up inventory\\\"," +
-                "\\\"required\\\":false,\\\"type\\\":\\\"string\\\"},{\\\"name\\\":\\\"skip\\\",\\\"in\\\":" +
-                "\\\"query\\\",\\\"description\\\":\\\"number of records to skip for pagination\\\"," +
-                "\\\"required\\\":false,\\\"type\\\":\\\"integer\\\",\\\"minimum\\\":0,\\\"format\\\":" +
-                "\\\"int32\\\"},{\\\"name\\\":\\\"limit\\\",\\\"in\\\":\\\"query\\\",\\\"description\\\":" +
-                "\\\"maximum number of records to return\\\",\\\"required\\\":false,\\\"type\\\":\\\"integer\\\"," +
-                "\\\"maximum\\\":50,\\\"minimum\\\":0,\\\"format\\\":\\\"int32\\\"}],\\\"responses\\\":{\\\"200\\\":" +
-                "{\\\"description\\\":\\\"search results matching criteria\\\",\\\"schema\\\":{\\\"type\\\":" +
-                "\\\"array\\\",\\\"items\\\":{\\\"$ref\\\":\\\"#/definitions/InventoryItem\\\"}}},\\\"400\\\":" +
-                "{\\\"description\\\":\\\"bad input parameter\\\"}}},\\\"post\\\":{\\\"tags\\\":[\\\"admins\\\"]," +
-                "\\\"summary\\\":\\\"adds an inventory item\\\",\\\"description\\\":" +
-                "\\\"Adds an item to the system\\\",\\\"operationId\\\":\\\"addInventory\\\",\\\"consumes\\\":" +
-                "[\\\"application/json\\\"],\\\"produces\\\":[\\\"application/json\\\"],\\\"parameters\\\":" +
-                "[{\\\"in\\\":\\\"body\\\",\\\"name\\\":\\\"inventoryItem\\\",\\\"description\\\":" +
-                "\\\"Inventory item to add\\\",\\\"required\\\":false,\\\"schema\\\":{\\\"$ref\\\":" +
-                "\\\"#/definitions/InventoryItem\\\"}}],\\\"responses\\\":{\\\"201\\\":{\\\"description\\\":" +
-                "\\\"item created\\\"},\\\"400\\\":{\\\"description\\\":\\\"invalid input, object invalid\\\"}," +
-                "\\\"409\\\":{\\\"description\\\":\\\"an existing item already exists\\\"}}}}},\\\"definitions\\\":" +
-                "{\\\"InventoryItem\\\":{\\\"type\\\":\\\"object\\\",\\\"required\\\":[\\\"id\\\"," +
-                "\\\"manufacturer\\\",\\\"name\\\",\\\"releaseDate\\\"],\\\"properties\\\":{\\\"id\\\":" +
-                "{\\\"type\\\":\\\"string\\\",\\\"format\\\":\\\"uuid\\\",\\\"example\\\":" +
-                "\\\"d290f1ee-6c54-4b01-90e6-d701748f0851\\\"},\\\"name\\\":{\\\"type\\\":\\\"string\\\"," +
-                "\\\"example\\\":\\\"Widget Adapter\\\"},\\\"releaseDate\\\":{\\\"type\\\":\\\"string\\\"," +
-                "\\\"format\\\":\\\"int32\\\",\\\"example\\\":\\\"2016-08-29T09:12:33.001Z\\\"},\\\"manufacturer\\\":" +
-                "{\\\"$ref\\\":\\\"#/definitions/Manufacturer\\\"}}},\\\"Manufacturer\\\":" +
-                "{\\\"required\\\":[\\\"name\\\"],\\\"properties\\\":{\\\"name\\\":{\\\"type\\\":\\" +
-                "\"string\\\",\\\"example\\\":\\\"ACME Corporation\\\"},\\\"homePage\\\":{\\\"type\\\":" +
-                "\\\"string\\\",\\\"format\\\":\\\"url\\\",\\\"example\\\":\\\"https://www.acme-corp.com\\\"}," +
-                "\\\"phone\\\":{\\\"type\\\":\\\"string\\\",\\\"example\\\":\\\"408-867-5309\\\"}}}}}\"," +
-                "\"isDefaultVersion\":false,\"transport\":[\"http\",\"https\"],\"tiers\":[\"Unlimited\"]," +
-                "\"visibility\":\"PUBLIC\",\"endpointConfig\":\"\",\"corsConfiguration\":" +
-                "{\"corsConfigurationEnabled\":false}}";
+                "\"description\":\"This is a simple API\",\"apiDefinition\":\"{\\n  \\\"swagger\\\" : " +
+                "\\\"2.0\\\",\\n  \\\"info\\\" : {\\n    \\\"description\\\" : \\\"This is a simple API\\\",\\n    " +
+                "\\\"version\\\" : \\\"1.0.0\\\",\\n    \\\"title\\\" : \\\"Simple Inventory API\\\",\\n    \\\"con" +
+                "tact\\\" : {\\n      \\\"email\\\" : \\\"you@your-company.com\\\"\\n    },\\n    \\\"license\\\" " +
+                ": {\\n      \\\"name\\\" : \\\"Apache 2.0\\\",\\n      \\\"url\\\" : \\\"http://www.apache.org/lic" +
+                "enses/LICENSE-2.0.html\\\"\\n    }\\n  },\\n  \\\"host\\\" : \\\"virtserver.swaggerhub.com\\\",\\n" +
+                "  \\\"basePath\\\" : \\\"/simple\\\",\\n  \\\"tags\\\" : [ {\\n    \\\"name\\\" : \\\"admins\\\"," +
+                "\\n    \\\"description\\\" : \\\"Secured Admin-only calls\\\"\\n  }, {\\n    \\\"name\\\" : \\\"d" +
+                "evelopers\\\",\\n    \\\"description\\\" : \\\"Operations available to regular developers\\\"\\n " +
+                " } ],\\n  \\\"schemes\\\" : [ \\\"https\\\" ],\\n  \\\"paths\\\" : {\\n    \\\"/inventory\\\" : {" +
+                "\\n      \\\"get\\\" : {\\n        \\\"tags\\\" : [ \\\"developers\\\" ],\\n        \\\"summary\\\"" +
+                " : \\\"searches inventory\\\",\\n        \\\"description\\\" : \\\"By passing in the appropriate o" +
+                "ptions, you can search for\\\\navailable inventory in the system\\\\n\\\",\\n        \\\"operati" +
+                "onId\\\" : \\\"searchInventory\\\",\\n        \\\"produces\\\" : [ \\\"application/json\\\" ],\\" +
+                "n        \\\"parameters\\\" : [ {\\n          \\\"name\\\" : \\\"searchString\\\",\\n          \\" +
+                "\"in\\\" : \\\"query\\\",\\n          \\\"description\\\" : \\\"pass an optional search string f" +
+                "or looking up inventory\\\",\\n          \\\"required\\\" : false,\\n          \\\"type\\\" : \\" +
+                "\"string\\\"\\n        }, {\\n          \\\"name\\\" : \\\"skip\\\",\\n          \\\"in\\\" : \\" +
+                "\"query\\\",\\n          \\\"description\\\" : \\\"number of records to skip for pagination\\\"," +
+                "\\n          \\\"required\\\" : false,\\n          \\\"type\\\" : \\\"integer\\\",\\n          \\" +
+                "\"minimum\\\" : 0,\\n          \\\"format\\\" : \\\"int32\\\"\\n        }, {\\n          \\\"nam" +
+                "e\\\" : \\\"limit\\\",\\n          \\\"in\\\" : \\\"query\\\",\\n          \\\"description\\\" :" +
+                " \\\"maximum number of records to return\\\",\\n          \\\"required\\\" : false,\\n          " +
+                "\\\"type\\\" : \\\"integer\\\",\\n          \\\"maximum\\\" : 50,\\n          \\\"minimum\\\" : " +
+                "0,\\n          \\\"format\\\" : \\\"int32\\\"\\n        } ],\\n        \\\"responses\\\" : {\\n " +
+                "         \\\"200\\\" : {\\n            \\\"description\\\" : \\\"search results matching criteria" +
+                "\\\",\\n            \\\"schema\\\" : {\\n              \\\"type\\\" : \\\"array\\\",\\n          " +
+                "    \\\"items\\\" : {\\n                \\\"$ref\\\" : \\\"#/definitions/InventoryItem\\\"\\n    " +
+                "          }\\n            }\\n          },\\n          \\\"400\\\" : {\\n            \\\"descriptio" +
+                "n\\\" : \\\"bad input parameter\\\"\\n          }\\n        }\\n      },\\n      \\\"post\\\" : {\\" +
+                "n        \\\"tags\\\" : [ \\\"admins\\\" ],\\n        \\\"summary\\\" : \\\"adds an inventory ite" +
+                "m\\\",\\n        \\\"description\\\" : \\\"Adds an item to the system\\\",\\n        \\\"operation" +
+                "Id\\\" : \\\"addInventory\\\",\\n        \\\"consumes\\\" : [ \\\"application/json\\\" ],\\n     " +
+                "   \\\"produces\\\" : [ \\\"application/json\\\" ],\\n        \\\"parameters\\\" : [ {\\n       " +
+                "   \\\"in\\\" : \\\"body\\\",\\n          \\\"name\\\" : \\\"inventoryItem\\\",\\n          \\\"d" +
+                "escription\\\" : \\\"Inventory item to add\\\",\\n          \\\"required\\\" : false,\\n          " +
+                "\\\"schema\\\" : {\\n            \\\"$ref\\\" : \\\"#/definitions/InventoryItem\\\"\\n          " +
+                "}\\n        } ],\\n        \\\"responses\\\" : {\\n          \\\"201\\\" : {\\n            \\\"d" +
+                "escription\\\" : \\\"item created\\\"\\n          },\\n          \\\"400\\\" : {\\n            \\" +
+                "\"description\\\" : \\\"invalid input, object invalid\\\"\\n          },\\n          \\\"409\\\"" +
+                " : {\\n            \\\"description\\\" : \\\"an existing item already exists\\\"\\n          }\\n " +
+                "       }\\n      }\\n    }\\n  },\\n  \\\"definitions\\\" : {\\n    \\\"InventoryItem\\\" : {\\n" +
+                "      \\\"type\\\" : \\\"object\\\",\\n      \\\"required\\\" : [ \\\"id\\\", \\\"manufacturer\\\"" +
+                ", \\\"name\\\", \\\"releaseDate\\\" ],\\n      \\\"properties\\\" : {\\n        \\\"id\\\" : {\\" +
+                "n          \\\"type\\\" : \\\"string\\\",\\n          \\\"format\\\" : \\\"uuid\\\",\\n         " +
+                " \\\"example\\\" : \\\"d290f1ee-6c54-4b01-90e6-d701748f0851\\\"\\n        },\\n        \\\"name\\" +
+                "\" : {\\n          \\\"type\\\" : \\\"string\\\",\\n          \\\"example\\\" : \\\"Widget Adapt" +
+                "er\\\"\\n        },\\n        \\\"releaseDate\\\" : {\\n          \\\"type\\\" : \\\"string\\\"" +
+                ",\\n          \\\"format\\\" : \\\"int32\\\",\\n          \\\"example\\\" : \\\"2016-08-29T09:12" +
+                ":33.001Z\\\"\\n        },\\n        \\\"manufacturer\\\" : {\\n          \\\"$ref\\\" : \\\"#/de" +
+                "finitions/Manufacturer\\\"\\n        }\\n      }\\n    },\\n    \\\"Manufacturer\\\" : {\\n     " +
+                " \\\"required\\\" : [ \\\"name\\\" ],\\n      \\\"properties\\\" : {\\n        \\\"name\\\" : {\\" +
+                "n          \\\"type\\\" : \\\"string\\\",\\n          \\\"example\\\" : \\\"ACME Corporation\\\"" +
+                "\\n        },\\n        \\\"homePage\\\" : {\\n          \\\"type\\\" : \\\"string\\\",\\n       " +
+                "   \\\"format\\\" : \\\"url\\\",\\n          \\\"example\\\" : \\\"https://www.acme-corp.com\\\"" +
+                "\\n        },\\n        \\\"phone\\\" : {\\n          \\\"type\\\" : \\\"string\\\",\\n         " +
+                " \\\"example\\\" : \\\"408-867-5309\\\"\\n        }\\n      }\\n    }\\n  }\\n}\",\"isDefaultVe" +
+                "rsion\":false,\"transport\":[\"http\",\"https\"],\"tiers\":[\"Unlimited\"],\"visibility\":\"PUB" +
+                "LIC\",\"endpointConfig\":\"\",\"corsConfiguration\":{\"corsConfigurationEnabled\":false}}";
 
         PayloadConfiguration payloadConfiguration = new PayloadConfiguration();
-        String payload = payloadConfiguration.configurePayload(swagger);
+        String payload = payloadConfiguration.configurePayload(swagger, swaggerJson);
         Assert.assertEquals(expectedPayload, payload);
     }
 
@@ -217,43 +379,153 @@ public class PayloadConfigurationTest {
     @Test
     public void testConvertYamlToJson() throws Exception {
 
-        String expectedJson = "{\"swagger\":\"2.0\",\"info\":{\"description\":\"This is a simple API\",\"version\":" +
-                "\"1.0.0\",\"title\":\"Simple Inventory API\",\"contact\":{\"email\":\"you@your-company.com\"}," +
-                "\"license\":{\"name\":\"Apache 2.0\",\"url\":\"http://www.apache.org/licenses/LICENSE-2.0.html\"}}," +
-                "\"host\":\"virtserver.swaggerhub.com\",\"basePath\":\"/simple\",\"tags\":[{\"name\":\"admins\"," +
-                "\"description\":\"Secured Admin-only calls\"},{\"name\":\"developers\",\"description\":" +
-                "\"Operations available to regular developers\"}],\"schemes\":[\"https\"],\"paths\":" +
-                "{\"/inventory\":{\"get\":{\"tags\":[\"developers\"],\"summary\":\"searches inventory\"," +
-                "\"description\":\"By passing in the appropriate options, you can search for\\navailable" +
-                " inventory in the system\\n\",\"operationId\":\"searchInventory\",\"produces\":" +
-                "[\"application/json\"],\"parameters\":[{\"name\":\"searchString\",\"in\":\"query\"," +
-                "\"description\":\"pass an optional search string for looking up inventory\",\"required\":" +
-                "false,\"type\":\"string\"},{\"name\":\"skip\",\"in\":\"query\",\"description\":\"number of" +
-                " records to skip for pagination\",\"required\":false,\"type\":\"integer\",\"minimum\":" +
-                "0,\"format\":\"int32\"},{\"name\":\"limit\",\"in\":\"query\",\"description\":" +
-                "\"maximum number of records to return\",\"required\":false,\"type\":\"integer\",\"maximum\":5" +
-                "0,\"minimum\":0,\"format\":\"int32\"}],\"responses\":{\"200\":{\"description\":\"" +
-                "search results matching criteria\",\"schema\":{\"type\":\"array\",\"items\":{\"$ref\":\"" +
-                "#/definitions/InventoryItem\"}}},\"400\":{\"description\":\"bad input parameter\"}}},\"post\"" +
-                ":{\"tags\":[\"admins\"],\"summary\":\"adds an inventory item\",\"description\":\"Adds an ite" +
-                "m to the system\",\"operationId\":\"addInventory\",\"consumes\":[\"application/json\"],\"pro" +
-                "duces\":[\"application/json\"],\"parameters\":[{\"in\":\"body\",\"name\":\"inventoryItem\",\"" +
-                "description\":\"Inventory item to add\",\"required\":false,\"schema\":{\"$ref\":\"#/definitio" +
-                "ns/InventoryItem\"}}],\"responses\":{\"201\":{\"description\":\"item created\"},\"400\":{\"de" +
-                "scription\":\"invalid input, object invalid\"},\"409\":{\"description\":\"an existing item al" +
-                "ready exists\"}}}}},\"definitions\":{\"InventoryItem\":{\"type\":\"object\",\"required\":[\"i" +
-                "d\",\"manufacturer\",\"name\",\"releaseDate\"],\"properties\":{\"id\":{\"type\":\"string\",\"" +
-                "format\":\"uuid\",\"example\":\"d290f1ee-6c54-4b01-90e6-d701748f0851\"},\"name\":{\"type\":\"" +
-                "string\",\"example\":\"Widget Adapter\"},\"releaseDate\":{\"type\":\"string\",\"format\":\"in" +
-                "t32\",\"example\":\"2016-08-29T09:12:33.001Z\"},\"manufacturer\":{\"$ref\":\"#/definitions/Ma" +
-                "nufacturer\"}}},\"Manufacturer\":{\"required\":[\"name\"],\"properties\":{\"name\":{\"type\":" +
-                "\"string\",\"example\":\"ACME Corporation\"},\"homePage\":{\"type\":\"string\",\"format\":\"u" +
-                "rl\",\"example\":\"https://www.acme-corp.com\"},\"phone\":{\"type\":\"string\",\"example\":\"4" +
-                "08-867-5309\"}}}}}";
+        String expectedJson = "{\n" +
+                "  \"swagger\" : \"2.0\",\n" +
+                "  \"info\" : {\n" +
+                "    \"description\" : \"This is a simple API\",\n" +
+                "    \"version\" : \"1.0.0\",\n" +
+                "    \"title\" : \"Simple Inventory API\",\n" +
+                "    \"contact\" : {\n" +
+                "      \"email\" : \"you@your-company.com\"\n" +
+                "    },\n" +
+                "    \"license\" : {\n" +
+                "      \"name\" : \"Apache 2.0\",\n" +
+                "      \"url\" : \"http://www.apache.org/licenses/LICENSE-2.0.html\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"host\" : \"virtserver.swaggerhub.com\",\n" +
+                "  \"basePath\" : \"/simple\",\n" +
+                "  \"tags\" : [ {\n" +
+                "    \"name\" : \"admins\",\n" +
+                "    \"description\" : \"Secured Admin-only calls\"\n" +
+                "  }, {\n" +
+                "    \"name\" : \"developers\",\n" +
+                "    \"description\" : \"Operations available to regular developers\"\n" +
+                "  } ],\n" +
+                "  \"schemes\" : [ \"https\" ],\n" +
+                "  \"paths\" : {\n" +
+                "    \"/inventory\" : {\n" +
+                "      \"get\" : {\n" +
+                "        \"tags\" : [ \"developers\" ],\n" +
+                "        \"summary\" : \"searches inventory\",\n" +
+                "        \"description\" : \"By passing in the appropriate options, you can search for\\navailable " +
+                "inventory in the system\\n\",\n" +
+                "        \"operationId\" : \"searchInventory\",\n" +
+                "        \"produces\" : [ \"application/json\" ],\n" +
+                "        \"parameters\" : [ {\n" +
+                "          \"name\" : \"searchString\",\n" +
+                "          \"in\" : \"query\",\n" +
+                "          \"description\" : \"pass an optional search string for looking up inventory\",\n" +
+                "          \"required\" : false,\n" +
+                "          \"type\" : \"string\"\n" +
+                "        }, {\n" +
+                "          \"name\" : \"skip\",\n" +
+                "          \"in\" : \"query\",\n" +
+                "          \"description\" : \"number of records to skip for pagination\",\n" +
+                "          \"required\" : false,\n" +
+                "          \"type\" : \"integer\",\n" +
+                "          \"minimum\" : 0,\n" +
+                "          \"format\" : \"int32\"\n" +
+                "        }, {\n" +
+                "          \"name\" : \"limit\",\n" +
+                "          \"in\" : \"query\",\n" +
+                "          \"description\" : \"maximum number of records to return\",\n" +
+                "          \"required\" : false,\n" +
+                "          \"type\" : \"integer\",\n" +
+                "          \"maximum\" : 50,\n" +
+                "          \"minimum\" : 0,\n" +
+                "          \"format\" : \"int32\"\n" +
+                "        } ],\n" +
+                "        \"responses\" : {\n" +
+                "          \"200\" : {\n" +
+                "            \"description\" : \"search results matching criteria\",\n" +
+                "            \"schema\" : {\n" +
+                "              \"type\" : \"array\",\n" +
+                "              \"items\" : {\n" +
+                "                \"$ref\" : \"#/definitions/InventoryItem\"\n" +
+                "              }\n" +
+                "            }\n" +
+                "          },\n" +
+                "          \"400\" : {\n" +
+                "            \"description\" : \"bad input parameter\"\n" +
+                "          }\n" +
+                "        }\n" +
+                "      },\n" +
+                "      \"post\" : {\n" +
+                "        \"tags\" : [ \"admins\" ],\n" +
+                "        \"summary\" : \"adds an inventory item\",\n" +
+                "        \"description\" : \"Adds an item to the system\",\n" +
+                "        \"operationId\" : \"addInventory\",\n" +
+                "        \"consumes\" : [ \"application/json\" ],\n" +
+                "        \"produces\" : [ \"application/json\" ],\n" +
+                "        \"parameters\" : [ {\n" +
+                "          \"in\" : \"body\",\n" +
+                "          \"name\" : \"inventoryItem\",\n" +
+                "          \"description\" : \"Inventory item to add\",\n" +
+                "          \"required\" : false,\n" +
+                "          \"schema\" : {\n" +
+                "            \"$ref\" : \"#/definitions/InventoryItem\"\n" +
+                "          }\n" +
+                "        } ],\n" +
+                "        \"responses\" : {\n" +
+                "          \"201\" : {\n" +
+                "            \"description\" : \"item created\"\n" +
+                "          },\n" +
+                "          \"400\" : {\n" +
+                "            \"description\" : \"invalid input, object invalid\"\n" +
+                "          },\n" +
+                "          \"409\" : {\n" +
+                "            \"description\" : \"an existing item already exists\"\n" +
+                "          }\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"definitions\" : {\n" +
+                "    \"InventoryItem\" : {\n" +
+                "      \"type\" : \"object\",\n" +
+                "      \"required\" : [ \"id\", \"manufacturer\", \"name\", \"releaseDate\" ],\n" +
+                "      \"properties\" : {\n" +
+                "        \"id\" : {\n" +
+                "          \"type\" : \"string\",\n" +
+                "          \"format\" : \"uuid\",\n" +
+                "          \"example\" : \"d290f1ee-6c54-4b01-90e6-d701748f0851\"\n" +
+                "        },\n" +
+                "        \"name\" : {\n" +
+                "          \"type\" : \"string\",\n" +
+                "          \"example\" : \"Widget Adapter\"\n" +
+                "        },\n" +
+                "        \"releaseDate\" : {\n" +
+                "          \"type\" : \"string\",\n" +
+                "          \"format\" : \"int32\",\n" +
+                "          \"example\" : \"2016-08-29T09:12:33.001Z\"\n" +
+                "        },\n" +
+                "        \"manufacturer\" : {\n" +
+                "          \"$ref\" : \"#/definitions/Manufacturer\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    },\n" +
+                "    \"Manufacturer\" : {\n" +
+                "      \"required\" : [ \"name\" ],\n" +
+                "      \"properties\" : {\n" +
+                "        \"name\" : {\n" +
+                "          \"type\" : \"string\",\n" +
+                "          \"example\" : \"ACME Corporation\"\n" +
+                "        },\n" +
+                "        \"homePage\" : {\n" +
+                "          \"type\" : \"string\",\n" +
+                "          \"format\" : \"url\",\n" +
+                "          \"example\" : \"https://www.acme-corp.com\"\n" +
+                "        },\n" +
+                "        \"phone\" : {\n" +
+                "          \"type\" : \"string\",\n" +
+                "          \"example\" : \"408-867-5309\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
 
-        String json = PayloadConfiguration.convertYamlToJson(swaggerDefinition);
-        Assert.assertEquals(expectedJson, json);
-
+        Assert.assertEquals(expectedJson, swaggerJson);
     }
-
 }
