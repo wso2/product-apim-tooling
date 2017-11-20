@@ -18,6 +18,7 @@
 
 package com.swagger.plugins.wso2;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.smartbear.config.Configuration;
 import com.smartbear.swaggerhub.plugins.AnnotatedPlugin;
 import com.smartbear.swaggerhub.plugins.Plugin;
@@ -34,9 +35,12 @@ import io.swagger.models.Info;
 import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.Swagger;
+import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.models.properties.StringProperty;
 
+import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
+import io.swagger.util.Yaml;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +48,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 /**
  *
@@ -94,10 +99,10 @@ public class WSO2ApiGatewayPlugin extends AnnotatedPlugin implements BeforeApiVe
 
         Swagger swagger;
         try {
-            swagger = Json.mapper().readValue(PayloadConfiguration.convertYamlToJson(swaggerYaml), Swagger.class);
+            swagger = Json.mapper().readValue((swaggerYaml), Swagger.class);
         } catch (Exception exception) {
             log.error("Swagger definition is invalid or not readable", exception);
-            throw new com.smartbear.swaggerhub.plugins.PluginExecutionException(PluginExecutionException.INVALID_INPUT,
+            throw new PluginExecutionException(PluginExecutionException.INVALID_INPUT,
                     "Swagger definition is invalid or not readable");
         }
         Info info = swagger.getInfo();
@@ -112,7 +117,6 @@ public class WSO2ApiGatewayPlugin extends AnnotatedPlugin implements BeforeApiVe
                     "unique 'basepath' section");
         }
         return swaggerYaml;
-
     }
 
     /**
@@ -128,6 +132,7 @@ public class WSO2ApiGatewayPlugin extends AnnotatedPlugin implements BeforeApiVe
             PluginExecutionException {
 
         Swagger swagger;
+        String swaggerJson = convertSwaggerToJson(swaggerYaml);
 
         PayloadConfiguration configuration = new PayloadConfiguration();
 
@@ -135,8 +140,8 @@ public class WSO2ApiGatewayPlugin extends AnnotatedPlugin implements BeforeApiVe
         String creationPayload;
 
         try {
-            swagger = Json.mapper().readValue(PayloadConfiguration.convertYamlToJson(swaggerYaml), Swagger.class);
-            creationPayload = configuration.configurePayload(swagger);
+            swagger = Json.mapper().readValue(swaggerJson, Swagger.class);
+            creationPayload = configuration.configurePayload(swagger, swaggerJson);
         } catch (IOException e) {
             log.error("Error while input/output operation");
             throw new PluginExecutionException(PluginExecutionException.INVALID_INPUT, "Error while input/output" +
@@ -180,5 +185,32 @@ public class WSO2ApiGatewayPlugin extends AnnotatedPlugin implements BeforeApiVe
     @Override
     protected boolean process(PluginExecution pluginExecution) {
         return false;
+    }
+
+    /**
+     * Helper to convert a Swagger definition, in YAML, into JSON and also fully resolve
+     * any remotely defined objects, which may be private
+     *
+     * @param swaggerYaml               Swagger definition in yaml format
+     * @return                          Returns the json of the yaml provided
+     * @throws PluginExecutionException Thrown when an exception is caught while the plugin executes
+     **/
+    private String convertSwaggerToJson(String swaggerYaml) throws PluginExecutionException {
+        try {
+            List<AuthorizationValue> auth = null;
+            if (accessToken != null) {
+                AuthorizationValue authValue = new AuthorizationValue()
+                        .type("header")
+                        .keyName("Authorization")
+                        .value(accessToken);
+                auth = Arrays.asList(authValue);
+            }
+            JsonNode node = Yaml.mapper().readValue(swaggerYaml, JsonNode.class);
+            Swagger swagger = new SwaggerParser().read(node, auth, true);
+            return Json.pretty(swagger);
+        } catch (IOException e) {
+            throw new PluginExecutionException(PluginExecutionException.INVALID_INPUT, "Error while converting " +
+                    "SwaggerYaml to Json");
+        }
     }
 }

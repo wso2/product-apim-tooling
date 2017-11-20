@@ -19,17 +19,12 @@
 package com.swagger.plugins.wso2;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smartbear.swaggerhub.plugins.PluginExecutionException;
 import io.swagger.models.Swagger;
-import io.swagger.parser.SwaggerParser;
-import io.swagger.util.Json;
-import io.swagger.util.Yaml;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 /**
  *
@@ -47,25 +42,14 @@ public class PayloadConfiguration {
      * @return                          Returns the configured payload
      * @throws PluginExecutionException Custom exception to make the exception more readable
      */
-    public String configurePayload(Swagger swagger) throws PluginExecutionException {
+    public String configurePayload(Swagger swagger, String swaggerJson) throws PluginExecutionException {
 
         String payload;
-        String swaggerYaml;
 
         log.debug("Setting default values for the api creation payload");
         String[] schemes = {"http", "https"};
         String[] defaultTier = {"Unlimited"};
         String visibility = "PUBLIC";
-
-        log.debug("Converting swagger POJO to a yaml to assign to the payload");
-        try {
-            swaggerYaml = Yaml.mapper().writeValueAsString(swagger);
-        } catch (Exception e) {
-            log.error("Swagger definition is invalid or not readable", e);
-            throw new com.smartbear.swaggerhub.plugins.
-                    PluginExecutionException(PluginExecutionException.INVALID_INPUT, "Swagger definition is" +
-                    " invalid or not readable");
-        }
 
         log.debug("Getting info from swagger POJO");
         String name = swagger.getInfo().getTitle();
@@ -80,7 +64,7 @@ public class PayloadConfiguration {
         structure.setVersion(version);
         structure.setDescription(description);
         structure.setContext(swagger.getBasePath());
-        structure.setApiDefinition(convertYamlToJson(swaggerYaml));
+        structure.setApiDefinition(swaggerJson);
         structure.setIsDefaultVersion(false);
         structure.setTransport(schemes);
         structure.setTiers(defaultTier);
@@ -103,38 +87,4 @@ public class PayloadConfiguration {
         log.debug("Returning the payload for creating the API in the cloud");
         return payload;
     }
-
-    /**
-     * Converts a Yaml to Json
-     *
-     * @param swaggerYaml               The swagger definition of the API to be exported to the cloud
-     * @return                          Returns the json string of the Yaml
-     * @throws PluginExecutionException Thrown when an exception is caught while the plugin executes
-     */
-    public static String convertYamlToJson(String swaggerYaml) throws PluginExecutionException {
-        Swagger swagger;
-        String json;
-        JsonNode jsonNode;
-        log.debug("Parsing Yaml to JSON");
-        try {
-            JsonNode node = Yaml.mapper().readValue(swaggerYaml, JsonNode.class);
-            swagger = new SwaggerParser().read(node);
-
-            json =  Json.pretty(swagger);
-
-            log.debug("Minifying the JSON");
-            ObjectMapper objectMapper = new ObjectMapper();
-            jsonNode = objectMapper.readValue(json, JsonNode.class);
-
-        } catch (IOException e) {
-            log.error("Error while converting the Yaml to Json", e);
-            throw  new com.smartbear.swaggerhub.plugins.
-                    PluginExecutionException(PluginExecutionException.INVALID_INPUT, "Error converting the Yaml" +
-                    " to Json");
-        }
-
-        log.debug("Returning the minified JSON");
-        return jsonNode.toString();
-    }
-
 }
