@@ -65,7 +65,8 @@ var ExportAPICmd = &cobra.Command{
 				utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
 
 		if preCommandErr == nil {
-			resp := ExportAPI(exportAPIName, exportAPIVersion, exportProvider, apiManagerEndpoint, b64encodedCredentials)
+			resp := ExportAPI(exportAPIName, exportAPIVersion, exportProvider, apiManagerEndpoint,
+				b64encodedCredentials)
 
 			// Print info on response
 			utils.Logf("ResponseStatus: %v\n", resp.Status())
@@ -75,8 +76,11 @@ var ExportAPICmd = &cobra.Command{
 			if resp.StatusCode() == http.StatusOK {
 				WriteToZip(exportAPIName, exportAPIVersion, exportEnvironment, resp)
 
+				accessToken, apiManagerEndpoint, err := utils.ExecutePreCommandWithOAuth(exportEnvironment,
+					exportAPICmdUsername, exportAPICmdPassword, utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
+
 				// only to get the number of APIs exported
-				numberOfAPIsExported, _, err := GetAPIList(exportAPIName, b64encodedCredentials, apiManagerEndpoint)
+				numberOfAPIsExported, _, err := GetAPIList(exportAPIName, accessToken, apiManagerEndpoint)
 				if err == nil {
 					fmt.Println("Number of APIs exported:", numberOfAPIsExported)
 				} else {
@@ -137,7 +141,7 @@ func ExportAPI(name, version, provider, apimEndpoint, b64encodedCredentials stri
 	}
 
 	url := apimEndpoint + query
-	utils.Logln(utils.LogPrefixInfo + "ExportAPI: URL:", url)
+	utils.Logln(utils.LogPrefixInfo+"ExportAPI: URL:", url)
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + b64encodedCredentials
 	headers[utils.HeaderAccept] = utils.HeaderValueApplicationZip

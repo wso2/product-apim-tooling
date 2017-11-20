@@ -73,8 +73,9 @@ var ImportAPICmd = &cobra.Command{
 				utils.HandleErrorAndExit("Error importing API", err)
 			}
 
-			if resp.StatusCode == 200 {
-				utils.Logln("Header:", resp.Header)
+			if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusCreated {
+				// 200 OK or 201 Created
+				utils.Logln(utils.LogPrefixInfo + "Header:", resp.Header)
 				fmt.Println("Succesfully imported API!")
 			} else {
 				fmt.Println("Error importing API")

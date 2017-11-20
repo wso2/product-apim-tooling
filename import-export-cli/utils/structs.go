@@ -53,13 +53,12 @@ type EnvEndpoints struct {
 // ---------------- End of Structs for YAML Config Files ---------------------------------
 
 type API struct {
-	ID              string `json:"id"`
-	Name            string `json:"name"`
-	Context         string `json:"context"`
-	Version         string `json:"version"`
-	Provider        string `json:"provider"`
-	LifeCycleStatus string `json:"lifeCycleStatus"`
-	WorkflowStatus  string `json:"workflowStatus"`
+	ID             string `json:"id"`
+	Name           string `json:"name"`
+	Context        string `json:"context"`
+	Version        string `json:"version"`
+	Provider       string `json:"provider"`
+	Status         string `json:"status"`
 }
 
 type RegistrationResponse struct {

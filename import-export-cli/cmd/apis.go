@@ -85,7 +85,7 @@ var apisCmd = &cobra.Command{
 // @return count (no. of APIs)
 // @return array of API objects
 // @return error
-func GetAPIList(query, accessToken, apiManagerEndpoint string) (int32, []utils.API, error) {
+func GetAPIList(query, accessToken, apiManagerEndpoint string) (count int32, apis []utils.API, err error) {
 	url := apiManagerEndpoint
 
 	// append '/' to the end if there isn't one already
@@ -125,12 +125,12 @@ func GetAPIList(query, accessToken, apiManagerEndpoint string) (int32, []utils.A
 // @param apis : array of API objects
 func printAPIs(apis []utils.API) {
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Name", "Version", "Context", "LifeCycleStatus", "ID"})
+	table.SetHeader([]string{"Name", "Version", "Context", "Status", "Provider", "ID"})
 
 	data := [][]string{}
 
 	for _, api := range apis {
-		data = append(data, []string{api.Name, api.Version, api.Context, api.LifeCycleStatus, api.ID})
+		data = append(data, []string{api.Name, api.Version, api.Context, api.Status, api.Provider, api.ID})
 	}
 
 	for _, v := range data {
