@@ -43,7 +43,7 @@ var apisCmdLongDesc = dedent.Dedent(`
 	`)
 var apisCmdExamples = dedent.Dedent(`
 	` + utils.ProjectName + ` ` + apisCmdLiteral + ` ` + listCmdLiteral + ` -e dev
-	` + utils.ProjectName + ` ` + apisCmdLiteral + ` ` + listCmdLiteral + ` -e staging
+	` + utils.ProjectName + ` ` + apisCmdLiteral + ` ` + listCmdLiteral + ` -e staging -u admin -p admin
 	`)
 
 // apisCmd represents the apis command

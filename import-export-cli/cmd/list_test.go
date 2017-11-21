@@ -50,9 +50,7 @@ func TestGetAPIListOK(t *testing.T) {
 	       	"context": "/test1",
 	      		 "version": "1.0.0",
 	       		"provider": "admin",
-	      		 "lifeCycleStatus": "Created",
-	     		  "workflowStatus": "APPROVED",
-	      		 "securityScheme": []
+	      		 "status": "Created",
 	   },
 	   {
 	       "id": "9c740e42-309e-44aa-a8e1-6b8830aa7146",
@@ -60,9 +58,7 @@ func TestGetAPIListOK(t *testing.T) {
 	  	     "context": "/test2",
 	   	    "version": "1.0.0",
 	 	      "provider": "admin",
-	 	      "lifeCycleStatus": "Created",
-	 	      "workflowStatus": "APPROVED",
-	 	      "securityScheme": []
+	 	      "status": "Created",
 	   },
 	   {
 	      	 "id": "39899b8c-5893-4864-a935-9c149bc7461d",
@@ -70,10 +66,7 @@ func TestGetAPIListOK(t *testing.T) {
 	      	 "context": "/test3",
 	     	  "version": "1.0",
 	     	  "provider": "admin",
-	      	 "lifeCycleStatus": "Created",
-	     	  "workflowStatus": "APPROVED",
-	      	 "securityScheme": [
-	      	     "Oauth"
+	      	 "status": "Created",
 	   	 ]
 		   }
 	]

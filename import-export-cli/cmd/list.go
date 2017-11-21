@@ -24,9 +24,7 @@ import (
 	"github.com/renstrom/dedent"
 )
 
-
 // List command related usage Info
-
 const listCmdLiteral string = "list"
 const listCmdShortDesc string = "List APIs in an environment or List the environments"
 
@@ -42,8 +40,6 @@ var listCmdExamples = dedent.Dedent(`
 		` + utils.ProjectName + ` ` + listCmdLiteral + ` `+ apisCmdLiteral+` -e dev
 	`)
 
-
-
 // ListCmd represents the list command
 var ListCmd = &cobra.Command{
 	Use:   listCmdLiteral,
@@ -52,11 +48,8 @@ var ListCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + listCmdLiteral + " called")
 
-
 	},
 }
-
-
 
 // init using Cobra
 func init() {

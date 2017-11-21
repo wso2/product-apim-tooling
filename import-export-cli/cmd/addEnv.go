@@ -41,9 +41,10 @@ var addEnvCmdLongDesc = dedent.Dedent(`
 
 var addEnvCmdExamples = dedent.Dedent(`
 		Examples:
-		` + utils.ProjectName + ` ` + addEnvCmdLiteral + ` -n production  --registration http://localhost/reg \
-						--publisher http://localhost/apim/publisher \
-						--token http://localhost/token
+		` + utils.ProjectName + ` ` + addEnvCmdLiteral + ` -n production \
+						--registration http://localhost:9763/client-registration/v0.11/register \
+						--apim  https://localhost:9443 \
+						--token https://localhost:8243/token
 	`)
 
 // addEnvCmd represents the addEnv command
@@ -82,7 +83,7 @@ func addEnv(envName, publisherEndpoint, regEndpoint, tokenEndpoint, mainConfigFi
 	}
 	if utils.EnvExistsInMainConfigFile(envName, mainConfigFilePath) {
 		// environment already exists
-		return errors.New("environment '" + envName + "' already exists in " + utils.MainConfigFilePath)
+		return errors.New("environment '" + envName + "' already exists in " + mainConfigFilePath)
 	}
 
 	var envEndpoints utils.EnvEndpoints = utils.EnvEndpoints{
@@ -92,7 +93,7 @@ func addEnv(envName, publisherEndpoint, regEndpoint, tokenEndpoint, mainConfigFi
 	}
 
 	mainConfig.Environments[envName] = envEndpoints
-	utils.WriteConfigFile(mainConfig, utils.MainConfigFilePath)
+	utils.WriteConfigFile(mainConfig, mainConfigFilePath)
 
 	fmt.Printf("Successfully added environment '%s'\n", envName)
 
@@ -105,7 +106,7 @@ func init() {
 
 	addEnvCmd.Flags().StringVarP(&flagAddEnvName, "name", "n", "",
 		"Name of the environment to be added")
-	addEnvCmd.Flags().StringVarP(&flagPublisherEndpoint, "publisher", "p", "",
+	addEnvCmd.Flags().StringVarP(&flagPublisherEndpoint, "apim", "a", "",
 		"API Manager endpoint for the environment")
 	addEnvCmd.Flags().StringVarP(&flagTokenEndpoint, "token", "t", "",
 		"Token endpoint for the environment")

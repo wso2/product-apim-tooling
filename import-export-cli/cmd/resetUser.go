@@ -43,8 +43,6 @@ var resetUserCmdExamples = dedent.Dedent(`
 		` + utils.ProjectName + ` ` + resetUserCmdLiteral + `reset-user -e staging
 	`)
 
-
-
 // ResetUserCmd represents the resetUser command
 var ResetUserCmd = &cobra.Command{
 	Use:   resetUserCmdLiteral,

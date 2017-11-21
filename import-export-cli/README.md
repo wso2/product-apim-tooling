@@ -1,5 +1,5 @@
 # CLI for Importing and Exporting APIs
-## For WSO2 API Manager 3.0.0
+## For WSO2 API Manager 2.1.0
 
 Command Line tool for importing and exporting APIs between different API Environemnts
 

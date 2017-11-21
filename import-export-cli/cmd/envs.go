@@ -67,8 +67,6 @@ var envsCmd = &cobra.Command{
 	},
 }
 
-
 func init() {
 	ListCmd.AddCommand(envsCmd)
-
 }

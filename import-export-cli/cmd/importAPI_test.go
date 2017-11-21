@@ -64,7 +64,8 @@ func TestNewFileUploadRequest(t *testing.T) {
 		}
 
 		if !strings.Contains(r.Header.Get(utils.HeaderAccept), utils.HeaderValueMultiPartFormData) {
-			t.Errorf("Expected '"+utils.HeaderValueApplicationZip+"', got '%s'\n", r.Header.Get(utils.HeaderContentType))
+			t.Errorf("Expected '"+utils.HeaderValueApplicationZip+"', got '%s'\n",
+				r.Header.Get(utils.HeaderContentType))
 		}
 
 		w.WriteHeader(http.StatusOK)
@@ -80,7 +81,7 @@ func TestNewFileUploadRequest(t *testing.T) {
 	defer server.Close()
 
 	extraParams := map[string]string{}
-	filePath := filepath.Join( "sampleapi.zip")
+	filePath := filepath.Join("sampleapi.zip")
 	accessToken := "access-token"
 	_, err := NewFileUploadRequest(server.URL, extraParams, "file", filePath, accessToken)
 	if err != nil {

@@ -36,7 +36,7 @@ import (
 // @return b64encodedCredentials, APIManagerEndpoint, Errors
 // including (export-api, import-api, list)e
 func ExecutePreCommandWithBasicAuth(environment, flagUsername, flagPassword, mainConfigFilePath,
-	envKeysAllFilePath string) (b64encodedCredentials string, apiManagerEndpoint string, err error) {
+envKeysAllFilePath string) (b64encodedCredentials string, apiManagerEndpoint string, err error) {
 	if EnvExistsInMainConfigFile(environment, MainConfigFilePath) {
 		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment, mainConfigFilePath)
 
@@ -55,8 +55,8 @@ func ExecutePreCommandWithBasicAuth(environment, flagUsername, flagPassword, mai
 				if flagUsername != username {
 					// username entered with flag -u is not the same as username found
 					// in env_keys_all.yaml file
-					fmt.Println(LogPrefixWarning + "Username entered with flag -u for the environment '" + environment +
-						"' is not the same as username found in file '" + EnvKeysAllFilePath + "'")
+					fmt.Println(LogPrefixWarning + "Username entered with flag -u for the environment '" +
+						environment + "' is not the same as username found in file '" + EnvKeysAllFilePath + "'")
 					fmt.Println("Execute '" + ProjectName + " reset-user -e " + environment + "' to clear user data")
 					os.Exit(1)
 				} else {
@@ -111,11 +111,6 @@ func ExecutePreCommandWithBasicAuth(environment, flagUsername, flagPassword, mai
 			if err != nil {
 				fmt.Println("Error:", err)
 			}
-
-			// Persist clientID, clientSecret, Username in file
-			//encryptedClientSecret := Encrypt([]byte(GetMD5Hash(password)), clientSecret)
-			//envKeys := EnvKeys{clientID, encryptedClientSecret, username}
-			//AddNewEnvToKeysFile(environment, envKeys, EnvKeysAllFilePath)
 		}
 
 		// Get Base64 Encoded Username:Password
@@ -128,12 +123,13 @@ func ExecutePreCommandWithBasicAuth(environment, flagUsername, flagPassword, mai
 	} else {
 		// env does not exist in main config file
 		if environment == "" {
-			return "", "", errors.New("no environment specified. Either specify it using the -e flag or name one of " +
-				"the environments in '" + MainConfigFileName + "' to 'default'")
+			return "", "",
+				errors.New("no environment specified. Either specify it using the -e flag or name one of " +
+					"the environments in '" + MainConfigFileName + "' to 'default'")
 		}
 
-		return "", "", errors.New("Details incorrect/unavailable for environment '" + environment + "' in " +
-			mainConfigFilePath)
+		return "", "",
+			errors.New("Details incorrect/unavailable for environment '" + environment + "' in " + mainConfigFilePath)
 	}
 }
 
@@ -144,7 +140,7 @@ func ExecutePreCommandWithBasicAuth(environment, flagUsername, flagPassword, mai
 // @return AccessToken, APIManagerEndpoint, Errors
 // including (export-api, import-api, list)
 func ExecutePreCommandWithOAuth(environment, flagUsername, flagPassword, mainConfigFilePath,
-	envKeysAllFilePath string) (accessToken string, apiManagerEndpoint string, err error) {
+envKeysAllFilePath string) (accessToken string, apiManagerEndpoint string, err error) {
 	if EnvExistsInMainConfigFile(environment, MainConfigFilePath) {
 		registrationEndpoint := GetRegistrationEndpointOfEnv(environment, MainConfigFilePath)
 		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment, mainConfigFilePath)
@@ -168,8 +164,8 @@ func ExecutePreCommandWithOAuth(environment, flagUsername, flagPassword, mainCon
 				if flagUsername != username {
 					// username entered with flag -u is not the same as username found
 					// in env_keys_all.yaml file
-					fmt.Println(LogPrefixWarning + "Username entered with flag -u for the environment '" + environment +
-						"' is not the same as username found in file '" + EnvKeysAllFilePath + "'")
+					fmt.Println(LogPrefixWarning + "Username entered with flag -u for the environment '" +
+						environment + "' is not the same as username found in file '" + EnvKeysAllFilePath + "'")
 					fmt.Println("Execute '" + ProjectName + " reset-user -e " + environment + "' to clear user data")
 					os.Exit(1)
 				} else {
@@ -219,7 +215,7 @@ func ExecutePreCommandWithOAuth(environment, flagUsername, flagPassword, mainCon
 				}
 			} else {
 				// flagUsername is blank
-				// doesn't matter is flagPassword is blank or not
+				// doesn't matter if flagPassword is blank or not
 				username = strings.TrimSpace(PromptForUsername())
 				password = PromptForPassword()
 			}
@@ -251,12 +247,13 @@ func ExecutePreCommandWithOAuth(environment, flagUsername, flagPassword, mainCon
 	} else {
 		// env does not exist in main config file
 		if environment == "" {
-			return "", "", errors.New("no environment specified. Either specify it using the -e flag or name one of " +
-				"the environments in '" + MainConfigFileName + "' to 'default'")
+			return "", "",
+				errors.New("no environment specified. Either specify it using the -e flag or name one of " +
+					"the environments in '" + MainConfigFileName + "' to 'default'")
 		}
 
-		return "", "", errors.New("Details incorrect/unavailable for environment '" + environment + "' in " +
-			mainConfigFilePath)
+		return "", "", errors.New("Details incorrect/unavailable for environment '" +
+			environment + "' in " + mainConfigFilePath)
 	}
 }
 
@@ -322,8 +319,12 @@ func GetBase64EncodedCredentials(key, secret string) (encodedValue string) {
 }
 
 // GetOAuthTokens implemented using go-resty/resty
-// provide username, password, and validity period for the access token
-// returns the response as a map
+// @param username
+// @param password
+// @param b64EncodedClientIDClientSecret
+// @param url : OAuth token endpoint
+// @return response as a map
+// @return error
 func GetOAuthTokens(username, password, b64EncodedClientIDClientSecret, url string) (map[string]string, error) {
 	validityPeriod := DefaultTokenValidityPeriod
 	body := "grant_type=password&username=" + username + "&password=" + password + "&validity_period=" +

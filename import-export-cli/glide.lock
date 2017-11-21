@@ -1,5 +1,5 @@
 hash: 77d05a45eabce95f3bc4faadaec735f9f4ffd30a8813274780201e89bfec6038
-updated: 2017-10-22T18:59:33.495815014+05:30
+updated: 2017-11-21T10:04:47.237410337+05:30
 imports:
 - name: github.com/fsnotify/fsnotify
   version: 4da3e2cfbabc9f751898f250b49f2439785783a1
@@ -31,7 +31,7 @@ imports:
 - name: github.com/pelletier/go-toml
   version: 2009e44b6f182e34d8ce081ac2767622937ea3d4
 - name: github.com/renstrom/dedent
-  version: 020d11c3b9c0c7a3c2efcc8e5cf5b9ef7bcea21f
+  version: a1eba44eaecc89804e4b05ce2d17168eb353d524
 - name: github.com/spf13/afero
   version: e67d870304c4bca21331b02f414f970df13aa694
   subpackages:

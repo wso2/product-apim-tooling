@@ -50,8 +50,8 @@ var importAPICmdLongDesc string = "Import an API to an environment"
 
 var importAPICmdExamples = dedent.Dedent(`
 		Examples:
-		` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -n qa/TwitterAPI.zip -e dev
-		` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -n staging/FacebookAPI.zip -e production
+		` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f qa/TwitterAPI.zip -e dev
+		` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f staging/FacebookAPI.zip -e production -u admin -p admin
 	`)
 
 // ImportAPICmd represents the importAPI command
@@ -68,7 +68,7 @@ var ImportAPICmd = &cobra.Command{
 				utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
 
 		if preCommandErr == nil {
-			resp, err := ImportAPI(importAPIFile, apiManagerEndpoint, b64encodedCredentials)
+			resp, err := ImportAPI(importAPIFile, apiManagerEndpoint, b64encodedCredentials, utils.ExportDirectory)
 			if err != nil {
 				utils.HandleErrorAndExit("Error importing API", err)
 			}
@@ -93,7 +93,7 @@ var ImportAPICmd = &cobra.Command{
 // @param name: name of the API (zipped file) to be imported
 // @param apiManagerEndpoint: API Manager endpoint for the environment
 // @param accessToken: OAuth2.0 access token for the resource being accessed
-func ImportAPI(query, apiManagerEndpoint, accessToken string) (*http.Response, error) {
+func ImportAPI(query, apiManagerEndpoint, accessToken, exportDirectory string) (*http.Response, error) {
 	// append '/' to the end if there isn't one already
 	if string(apiManagerEndpoint[len(apiManagerEndpoint)-1]) != "/" {
 		apiManagerEndpoint += "/"
@@ -104,14 +104,9 @@ func ImportAPI(query, apiManagerEndpoint, accessToken string) (*http.Response, e
 	sourceEnv := strings.Split(query, "/")[0] // environment from which the API was exported
 	utils.Logln(utils.LogPrefixInfo + "Source Environment: " + sourceEnv)
 
-	//sourceEnvDirExists, _ := utils.IsDirExists(filepath.Join(utils.ExportedAPIsDirectoryPath, sourceEnv))
-	//if !sourceEnvDirExists {
-	//	utils.HandleErrorAndExit("wrong directory '"+ sourceEnv +"'. Check source environment and try again", nil)
-	//}
-
 	fileName := query // ex:- fileName = dev/twitterapi_1.0.0.zip
 
-	zipFilePath := filepath.Join(utils.ExportDirectory, fileName)
+	zipFilePath := filepath.Join(exportDirectory, fileName)
 	fmt.Println("ZipFilePath:", zipFilePath)
 
 	// check if '.zip' exists in the input 'fileName'
