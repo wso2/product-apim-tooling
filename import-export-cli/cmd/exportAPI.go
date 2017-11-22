@@ -21,6 +21,7 @@ package cmd
 import (
 	"fmt"
 	"io/ioutil"
+	"net/url"
 	"os"
 
 	"github.com/go-resty/resty"
@@ -68,7 +69,6 @@ var ExportAPICmd = &cobra.Command{
 			// Print info on response
 			utils.Logf("ResponseStatus: %v\n", resp.Status())
 			utils.Logf("Error: %v\n", resp.Error())
-			//fmt.Printf("Response Body: %v\n", resp.Body())
 
 			if resp.StatusCode() == http.StatusOK {
 				WriteToZip(exportAPIName, exportAPIVersion, exportEnvironment, utils.ExportDirectory, resp)
@@ -128,15 +128,17 @@ func ExportAPI(name string, version string, publisherEndpoint string, accessToke
 		publisherEndpoint += "/"
 	}
 
-	publisherEndpoint += "export/apis"
+	publisherEndpoint += "export/apis?query="
 
-	query := "?query=" + name
+	query := ""
+	if name != "" {
+		query += name
+		if version != "" {
+			query += ",version:" + version
+		}
+	}
 
-	/*
-	 TODO:: Add 'version' to the query (make sure the backend supports attribute searching)
-	 i.e. 'query' should be changed as follows
-	 query := "?query=name:" + name + ",version=" + version
-	*/
+	query = (&url.URL{Path: query}).String() // url path encode the query
 
 	url := publisherEndpoint + query
 	utils.Logln(utils.LogPrefixInfo+"ExportAPI: URL:", url)
