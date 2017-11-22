@@ -21,17 +21,17 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/renstrom/dedent"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"github.com/renstrom/dedent"
 )
 
 var resetUserEnvironment string
 
 // ResetUser command related usage Info
 
-const resetUserCmdLiteral string = "reset-user"
-const resetUserCmdShortDesc string = "Reset user of an environment"
+const resetUserCmdLiteral = "reset-user"
+const resetUserCmdShortDesc = "Reset user of an environment"
 
 var resetUserCmdLongDesc = dedent.Dedent(`
 		Reset user data of a particular environment (Clear the entry in env_keys_all.yaml file)

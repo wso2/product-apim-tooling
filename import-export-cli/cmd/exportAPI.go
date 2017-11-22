@@ -27,9 +27,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 
-	"path/filepath"
-	"net/http"
 	"github.com/renstrom/dedent"
+	"net/http"
+	"path/filepath"
 )
 
 var exportAPIName string
@@ -40,10 +40,10 @@ var exportAPICmdUsername string
 var exportAPICmdPassword string
 
 // ExportAPI command related usage info
-const exportAPICmdLiteral string = "export-api"
-const exportAPICmdShortDesc string = "Export API"
+const exportAPICmdLiteral = "export-api"
+const exportAPICmdShortDesc = "Export API"
 
-var exportAPICmdLongDesc string = "Export APIs from an environment"
+var exportAPICmdLongDesc = "Export APIs from an environment"
 
 var exportAPICmdExamples = dedent.Dedent(`
 		Examples:

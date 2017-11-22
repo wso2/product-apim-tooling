@@ -20,14 +20,14 @@ package utils
 
 import (
 	"bufio"
+	"crypto/tls"
 	"fmt"
 	"github.com/go-resty/resty"
 	"golang.org/x/crypto/ssh/terminal"
 	"os"
-	"time"
 	"runtime"
 	"strings"
-	"crypto/tls"
+	"time"
 )
 
 // Invoke http-post request using go-resty

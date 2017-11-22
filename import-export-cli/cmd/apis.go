@@ -19,15 +19,15 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"github.com/renstrom/dedent"
-	"github.com/olekukonko/tablewriter"
-	"os"
-	"fmt"
-	"net/http"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"github.com/olekukonko/tablewriter"
+	"github.com/renstrom/dedent"
+	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"net/http"
+	"os"
 )
 
 var listEnvironment string
@@ -35,8 +35,8 @@ var listCmdUsername string
 var listCmdPassword string
 
 // apisCmd related info
-const apisCmdLiteral string = "apis"
-const apisCmdShortDesc string = "Display a list of APIs in an environment"
+const apisCmdLiteral = "apis"
+const apisCmdShortDesc = "Display a list of APIs in an environment"
 
 var apisCmdLongDesc = dedent.Dedent(`
 		Display a list of APIs in the environment specified by the flag --environment, -e
@@ -127,7 +127,7 @@ func printAPIs(apis []utils.API) {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"Name", "Version", "Context", "Status", "Provider", "ID"})
 
-	data := [][]string{}
+	var data [][]string
 
 	for _, api := range apis {
 		data = append(data, []string{api.Name, api.Version, api.Context, api.Status, api.Provider, api.ID})

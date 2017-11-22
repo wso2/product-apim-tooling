@@ -23,10 +23,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/renstrom/dedent"
 	"net/http"
 	"os"
 	"strings"
-	"github.com/renstrom/dedent"
 )
 
 // ExecutePreCommandWithBasicAuth deals with generating tokens needed for executing a particular command

@@ -19,18 +19,17 @@
 package cmd
 
 import (
-
-	"github.com/spf13/cobra"
-	"github.com/renstrom/dedent"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"github.com/olekukonko/tablewriter"
-	"os"
 	"fmt"
+	"github.com/olekukonko/tablewriter"
+	"github.com/renstrom/dedent"
+	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"os"
 )
 
 // envsCmd related info
-const EnvsCmdLiteral string = "envs"
-const EnvsCmdShortDesc string = "Display the list of environments"
+const EnvsCmdLiteral = "envs"
+const EnvsCmdShortDesc = "Display the list of environments"
 var EnvsCmdLongDesc = dedent.Dedent(`
 		Display a list of environments defined in '`+utils.MainConfigFileName+`' file
 	`)
@@ -49,7 +48,7 @@ var envsCmd = &cobra.Command{
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"Name", "Publisher Endpoint", "Registration Endpoint", "Token Endpoint"})
 
-		data := [][]string{}
+		var data [][]string
 
 		envs := utils.GetMainConfigFromFile(utils.MainConfigFilePath).Environments
 

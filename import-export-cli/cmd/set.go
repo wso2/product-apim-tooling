@@ -19,18 +19,18 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"fmt"
 	"github.com/renstrom/dedent"
+	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 var flagHttpRequestTimeout int
 var flagExportDirectory string
 
 // Set command related Info
-const setCmdLiteral string = "set"
-const setCmdShortDesc string = "Set configuration"
+const setCmdLiteral = "set"
+const setCmdShortDesc = "Set configuration"
 
 var setCmdLongDesc = dedent.Dedent(`
 			Set configuration parameters. Use at least one of the following flags

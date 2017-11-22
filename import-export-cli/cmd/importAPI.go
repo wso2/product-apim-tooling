@@ -29,12 +29,12 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/renstrom/dedent"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"time"
 	"regexp"
-	"github.com/renstrom/dedent"
 	"strings"
+	"time"
 )
 
 var importAPIFile string
@@ -43,10 +43,10 @@ var importAPICmdUsername string
 var importAPICmdPassword string
 
 // ImportAPI command related usage info
-const importAPICmdLiteral string = "import-api"
-const importAPICmdShortDesc string = "Import API"
+const importAPICmdLiteral = "import-api"
+const importAPICmdShortDesc = "Import API"
 
-var importAPICmdLongDesc string = "Import an API to an environment"
+var importAPICmdLongDesc = "Import an API to an environment"
 
 var importAPICmdExamples = dedent.Dedent(`
 		Examples:

@@ -143,14 +143,14 @@ func TestGetUsernameOfEnv(t *testing.T) {
 
 func TestAddNewEnvToKeysFile1(t *testing.T) {
 	writeCorrectKeys()
-	var envKeys EnvKeys = EnvKeys{"staging_username", "staging_client_id", "staging_client_secret"}
+	var envKeys = EnvKeys{"staging_username", "staging_client_id", "staging_client_secret"}
 
 	AddNewEnvToKeysFile("staging", envKeys, testKeysFilePath)
 	defer os.Remove(testKeysFilePath)
 }
 
 func TestAddNewEnvToKeysFile2(t *testing.T) {
-	var envKeys EnvKeys = EnvKeys{"staging_username", "staging_client_id", "staging_client_secret"}
+	var envKeys = EnvKeys{"staging_username", "staging_client_id", "staging_client_secret"}
 
 	AddNewEnvToKeysFile("staging", envKeys, testKeysFilePath)
 	defer os.Remove(testKeysFilePath)

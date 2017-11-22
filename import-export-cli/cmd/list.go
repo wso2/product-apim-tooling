@@ -19,16 +19,16 @@
 package cmd
 
 import (
+	"github.com/renstrom/dedent"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"github.com/renstrom/dedent"
 )
 
 // List command related usage Info
-const listCmdLiteral string = "list"
-const listCmdShortDesc string = "List APIs in an environment or List the environments"
+const listCmdLiteral = "list"
+const listCmdShortDesc = "List APIs in an environment or List the environments"
 
-var listCmdLongDesc string = dedent.Dedent(`
+var listCmdLongDesc = dedent.Dedent(`
 			Display a list containing all the APIs available in the environment specified by flag (--environment, -e)
 			OR
 			List all the environments
@@ -36,8 +36,8 @@ var listCmdLongDesc string = dedent.Dedent(`
 
 var listCmdExamples = dedent.Dedent(`
 		Examples:
-		` + utils.ProjectName + ` ` + listCmdLiteral +  ` `+ EnvsCmdLiteral + `
-		` + utils.ProjectName + ` ` + listCmdLiteral + ` `+ apisCmdLiteral+` -e dev
+		` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + EnvsCmdLiteral + `
+		` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + apisCmdLiteral + ` -e dev
 	`)
 
 // ListCmd represents the list command
