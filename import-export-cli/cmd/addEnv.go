@@ -21,9 +21,9 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"github.com/renstrom/dedent"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"github.com/renstrom/dedent"
 )
 
 var flagAddEnvName string           // name of the environment to be added
@@ -32,8 +32,8 @@ var flagRegistrationEndpoint string // registration endpoint of the environment 
 var flagPublisherEndpoint string    // api manager endpoint of the environment to be added
 
 // AddEnv command related Info
-const addEnvCmdLiteral string = "add-env"
-const addEnvCmdShortDesc string = "Add Environment to Config file"
+const addEnvCmdLiteral = "add-env"
+const addEnvCmdShortDesc = "Add Environment to Config file"
 
 var addEnvCmdLongDesc = dedent.Dedent(`
 		Add new environment and its related endpoints to the config file
@@ -85,7 +85,7 @@ func addEnv(envName string, publisherEndpoint string, regEndpoint string, tokenE
 		return errors.New("environment '" + envName + "' already exists in " + mainConfigFilePath)
 	}
 
-	var envEndpoints utils.EnvEndpoints = utils.EnvEndpoints{
+	var envEndpoints = utils.EnvEndpoints{
 		PublisherEndpoint:    publisherEndpoint,
 		TokenEndpoint:        tokenEndpoint,
 		RegistrationEndpoint: regEndpoint,

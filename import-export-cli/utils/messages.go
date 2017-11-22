@@ -19,17 +19,17 @@
 package utils
 
 
-const DoneMsg string = "Done!\n"
+const DoneMsg = "Done!\n"
 const UnableToConnectMsg = "There was a problem connecting, please try again"
-const InvalidCredentialsMsg string = "Invalid Credentials"
-const UsernamePasswordEmptyMsg string = "Username and Password cannot be empty"
-const InvalidExpiredRefreshTokenMsg string = "Your session has timed out"
-const ErrorReadingResponseMsg string = "There was an error reading the response from the server"
-const ErrorProcessingResponseMsg string = "There was an error processing the response from the server"
-const UnableToReadFileMsg string = "unable to read file '%v'"
+const InvalidCredentialsMsg = "Invalid Credentials"
+const UsernamePasswordEmptyMsg = "Username and Password cannot be empty"
+const InvalidExpiredRefreshTokenMsg = "Your session has timed out"
+const ErrorReadingResponseMsg = "There was an error reading the response from the server"
+const ErrorProcessingResponseMsg = "There was an error processing the response from the server"
+const UnableToReadFileMsg = "unable to read file '%v'"
 
-const DoYouWantToContinueMsg_DefaultYes string = "Do you want to continue? [Y/n] "
-const DoYouWantToContinueMsg_DefaultNo string = "Do you want to continue? [y/N] "
+const DoYouWantToContinueMsg_DefaultYes = "Do you want to continue? [Y/n] "
+const DoYouWantToContinueMsg_DefaultNo = "Do you want to continue? [y/N] "
 
 
 

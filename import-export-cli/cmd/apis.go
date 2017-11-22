@@ -37,8 +37,8 @@ var listApisCmdPassword string
 var listApisCmdQuery string
 
 // apisCmd related info
-const apisCmdLiteral string = "apis"
-const apisCmdShortDesc string = "Display a list of APIs in an environment"
+const apisCmdLiteral = "apis"
+const apisCmdShortDesc = "Display a list of APIs in an environment"
 
 var apisCmdLongDesc = dedent.Dedent(`
 		Display a list of APIs in the environment specified by the flag --environment, -e
@@ -133,7 +133,7 @@ func printAPIs(apis []utils.API) {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"Name", "Version", "Context", "LifeCycleStatus", "ID"})
 
-	data := [][]string{}
+	var data [][]string
 
 	for _, api := range apis {
 		data = append(data, []string{api.Name, api.Version, api.Context, api.LifeCycleStatus, api.ID})

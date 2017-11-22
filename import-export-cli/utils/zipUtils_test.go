@@ -20,8 +20,8 @@ package utils
 
 import (
 	"os"
-	"testing"
 	"path/filepath"
+	"testing"
 )
 
 func TestZipDirError(t *testing.T) {

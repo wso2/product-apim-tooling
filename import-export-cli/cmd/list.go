@@ -26,10 +26,10 @@ import (
 
 // List command related usage Info
 
-const listCmdLiteral string = "list"
-const listCmdShortDesc string = "List APIs in an environment or List the environments"
+const listCmdLiteral = "list"
+const listCmdShortDesc = "List APIs in an environment or List the environments"
 
-var listCmdLongDesc string = dedent.Dedent(`
+var listCmdLongDesc = dedent.Dedent(`
 			Display a list containing all the APIs available in the environment specified by flag (--environment, -e)
 			OR
 			List all the environments

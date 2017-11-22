@@ -23,9 +23,9 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
 	"net/http/httptest"
+	"path/filepath"
 	"strings"
 	"testing"
-	"path/filepath"
 )
 
 // TestImportAPISuccessful - 200 OK
