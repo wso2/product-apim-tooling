@@ -19,11 +19,10 @@
 package cmd
 
 import (
+	"github.com/renstrom/dedent"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"github.com/renstrom/dedent"
 )
-
 
 // List command related usage Info
 
@@ -38,11 +37,9 @@ var listCmdLongDesc string = dedent.Dedent(`
 
 var listCmdExamples = dedent.Dedent(`
 		Examples:
-		` + utils.ProjectName + ` ` + listCmdLiteral +  ` `+ EnvsCmdLiteral + `
-		` + utils.ProjectName + ` ` + listCmdLiteral + ` `+ apisCmdLiteral+` -e dev
+		` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + EnvsCmdLiteral + `
+		` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + apisCmdLiteral + ` -e dev
 	`)
-
-
 
 // ListCmd represents the list command
 var ListCmd = &cobra.Command{
@@ -52,11 +49,8 @@ var ListCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + listCmdLiteral + " called")
 
-
 	},
 }
-
-
 
 // init using Cobra
 func init() {

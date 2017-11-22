@@ -27,9 +27,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 
-	"path/filepath"
-	"net/http"
 	"github.com/renstrom/dedent"
+	"net/http"
+	"path/filepath"
 )
 
 var exportAPIName string
@@ -138,13 +138,13 @@ func ExportAPI(name string, version string, publisherEndpoint string, accessToke
 	 query := "?query=name:" + name + ",version=" + version
 	*/
 
-	publisherEndpoint += query
-	utils.Logln(utils.LogPrefixInfo + "ExportAPI: URL:", publisherEndpoint)
+	url := publisherEndpoint + query
+	utils.Logln(utils.LogPrefixInfo+"ExportAPI: URL:", url)
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 	headers[utils.HeaderAccept] = utils.HeaderValueApplicationZip
 
-	resp, err := utils.InvokeGETRequest(publisherEndpoint, headers)
+	resp, err := utils.InvokeGETRequest(url, headers)
 
 	if err != nil {
 		utils.HandleErrorAndExit("Error exporting API: "+name, err)
