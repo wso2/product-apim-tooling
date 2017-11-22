@@ -21,22 +21,22 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"github.com/renstrom/dedent"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"github.com/renstrom/dedent"
 )
 
 var flagNameOfEnvToBeRemoved string
 
 // RemoveEnv command related Info
-const removeEnvCmdLiteral string = "remove-env"
-const removeEnvCmdShortDesc string = "Remove Environment from Config file"
+const removeEnvCmdLiteral = "remove-env"
+const removeEnvCmdShortDesc = "Remove Environment from Config file"
 
 var removeEnvCmdLongDesc = dedent.Dedent(`
 		Remove Environment and its related endpoints from the config file
     `)
 
-var removeEnvCmdExamples string = dedent.Dedent(`
+var removeEnvCmdExamples = dedent.Dedent(`
 		Examples:
 		` + utils.ProjectName + ` ` + removeEnvCmdLiteral + ` -n production
 	`)

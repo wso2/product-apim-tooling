@@ -40,10 +40,10 @@ var exportAPICmdUsername string
 var exportAPICmdPassword string
 
 // ExportAPI command related usage info
-const exportAPICmdLiteral string = "export-api"
-const exportAPICmdShortDesc string = "Export API"
+const exportAPICmdLiteral = "export-api"
+const exportAPICmdShortDesc = "Export API"
 
-var exportAPICmdLongDesc string = "Export an API from an environment"
+var exportAPICmdLongDesc = "Export an API from an environment"
 
 var exportAPICmdExamples = dedent.Dedent(`
 		Examples:
@@ -60,8 +60,8 @@ var ExportAPICmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + exportAPICmdLiteral + " called")
 
-		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(exportEnvironment, exportAPICmdUsername,
-			exportAPICmdPassword, utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
+		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(exportEnvironment,
+			exportAPICmdUsername, exportAPICmdPassword, utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
 
 		if preCommandErr == nil {
 			resp := ExportAPI(exportAPIName, exportAPIVersion, apiManagerEndpoint, accessToken)

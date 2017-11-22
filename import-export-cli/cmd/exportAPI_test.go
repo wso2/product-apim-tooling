@@ -22,11 +22,11 @@ import (
 	"testing"
 
 	"fmt"
+	"github.com/go-resty/resty"
 	"github.com/renstrom/dedent"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
 	"net/http/httptest"
-	"github.com/go-resty/resty"
 )
 
 func TestExportAPI(t *testing.T) {

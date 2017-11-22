@@ -198,7 +198,7 @@ func GetClientSecretOfEnv(env string, password string, filePath string) string {
 // input the path to main_config file
 func IsDefaultEnvPresent(mainConfigFilePath string) bool {
 	mainConfig := GetMainConfigFromFile(mainConfigFilePath)
-	for envName, _ := range mainConfig.Environments {
+	for envName := range mainConfig.Environments {
 		if envName == DefaultEnvironmentName {
 			return true
 		}

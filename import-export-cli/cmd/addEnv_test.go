@@ -19,10 +19,10 @@
 package cmd
 
 import (
-	"testing"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"path/filepath"
 	"os"
+	"path/filepath"
+	"testing"
 )
 
 // TestAddEnv1 - Blank Env Name

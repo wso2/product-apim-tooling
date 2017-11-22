@@ -1,9 +1,9 @@
 package utils
 
 import (
-	"testing"
 	"os"
 	"path/filepath"
+	"testing"
 )
 
 func TestSetConfigVarsCorrect(t *testing.T) {

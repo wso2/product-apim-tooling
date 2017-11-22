@@ -1,10 +1,10 @@
 package cmd
 
 import (
-	"testing"
-	"path/filepath"
-	"os"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"os"
+	"path/filepath"
+	"testing"
 )
 
 // TestRemoveEnv1 - Correct Details
