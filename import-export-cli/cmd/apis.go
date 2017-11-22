@@ -19,21 +19,22 @@
 package cmd
 
 import (
-
-	"github.com/spf13/cobra"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"github.com/renstrom/dedent"
-	"github.com/olekukonko/tablewriter"
-	"os"
-	"fmt"
-	"net/http"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"github.com/olekukonko/tablewriter"
+	"github.com/renstrom/dedent"
+	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"net/http"
+	"net/url"
+	"os"
 )
 
-var listEnvironment string
-var listCmdUsername string
-var listCmdPassword string
+var listApisCmdEnvironment string
+var listApisCmdUsername string
+var listApisCmdPassword string
+var listApisCmdQuery string
 
 // apisCmd related info
 const apisCmdLiteral string = "apis"
@@ -43,8 +44,8 @@ var apisCmdLongDesc = dedent.Dedent(`
 		Display a list of APIs in the environment specified by the flag --environment, -e
 	`)
 var apisCmdExamples = dedent.Dedent(`
-	`+utils.ProjectName + ` `+ apisCmdLiteral +` `+ listCmdLiteral +` -e dev
-	`+utils.ProjectName + ` `+ apisCmdLiteral +` `+ listCmdLiteral +` -e staging
+	` + utils.ProjectName + ` ` + apisCmdLiteral + ` ` + listCmdLiteral + ` -e dev
+	` + utils.ProjectName + ` ` + apisCmdLiteral + ` ` + listCmdLiteral + ` -e staging
 	`)
 
 // apisCmd represents the apis command
@@ -55,15 +56,18 @@ var apisCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + listCmdLiteral + " " + apisCmdLiteral + " called")
 
-		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(listEnvironment, listCmdUsername,
-			listCmdPassword, utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
+		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(listApisCmdEnvironment, listApisCmdUsername,
+			listApisCmdPassword, utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
 
 		if preCommandErr == nil {
-			count, apis, err := GetAPIList("", accessToken, apiManagerEndpoint)
+			if listApisCmdQuery != "" {
+				fmt.Println("Search query:", listApisCmdQuery)
+			}
+			count, apis, err := GetAPIList(listApisCmdQuery, accessToken, apiManagerEndpoint)
 
 			if err == nil {
 				// Printing the list of available APIs
-				fmt.Println("Environment:", listEnvironment)
+				fmt.Println("Environment:", listApisCmdEnvironment)
 				fmt.Println("No. of APIs:", count)
 				if count > 0 {
 					printAPIs(apis)
@@ -72,11 +76,10 @@ var apisCmd = &cobra.Command{
 				utils.Logln(utils.LogPrefixError+"Getting List of APIs", err)
 			}
 		} else {
-			utils.HandleErrorAndExit("Error calling '"+listCmdLiteral + " " + apisCmdLiteral+"'", preCommandErr)
+			utils.HandleErrorAndExit("Error calling '"+listCmdLiteral+" "+apisCmdLiteral+"'", preCommandErr)
 		}
 	},
 }
-
 
 // GetAPIList
 // @param query : string to be matched against the API names
@@ -86,22 +89,25 @@ var apisCmd = &cobra.Command{
 // @return array of API objects
 // @return error
 func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (int32, []utils.API, error) {
-	url := apiManagerEndpoint
-
 	// append '/' to the end if there isn't one already
-	if url != "" && string(url[len(url)-1]) != "/" {
-		url += "/"
+	if apiManagerEndpoint != "" && string(apiManagerEndpoint[len(apiManagerEndpoint)-1]) != "/" {
+		apiManagerEndpoint += "/"
 	}
-	url += "apis?query=" + query
-	utils.Logln(utils.LogPrefixInfo+"URL:", url)
+
+	// url path encode query
+	encodedQuery := (&url.URL{Path: query}).String()
+
+	finalUrl := apiManagerEndpoint + "apis?query=" + encodedQuery
+
+	utils.Logln(utils.LogPrefixInfo+"URL:", finalUrl)
 
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 
-	resp, err := utils.InvokeGETRequest(url, headers)
+	resp, err := utils.InvokeGETRequest(finalUrl, headers)
 
 	if err != nil {
-		utils.HandleErrorAndExit("Unable to connect to "+url, err)
+		utils.HandleErrorAndExit("Unable to connect to "+finalUrl, err)
 	}
 
 	utils.Logln(utils.LogPrefixInfo+"Response:", resp.Status())
@@ -120,7 +126,6 @@ func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (in
 	}
 
 }
-
 
 // printAPIs
 // @param apis : array of API objects
@@ -145,8 +150,10 @@ func printAPIs(apis []utils.API) {
 func init() {
 	ListCmd.AddCommand(apisCmd)
 
-	apisCmd.Flags().StringVarP(&listEnvironment, "environment", "e",
+	apisCmd.Flags().StringVarP(&listApisCmdEnvironment, "environment", "e",
 		utils.GetDefaultEnvironment(utils.MainConfigFilePath), "Environment to be searched")
-	apisCmd.Flags().StringVarP(&listCmdUsername, "username", "u", "", "Username")
-	apisCmd.Flags().StringVarP(&listCmdPassword, "password", "p", "", "Password")
+	apisCmd.Flags().StringVarP(&listApisCmdQuery, "query", "q", "",
+		"(Optional) query to search for APIs")
+	apisCmd.Flags().StringVarP(&listApisCmdUsername, "username", "u", "", "Username")
+	apisCmd.Flags().StringVarP(&listApisCmdPassword, "password", "p", "", "Password")
 }
