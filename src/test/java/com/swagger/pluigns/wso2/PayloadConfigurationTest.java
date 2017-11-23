@@ -35,7 +35,7 @@ public class PayloadConfigurationTest {
     /**
      * This method initializes the variables before tests are executed
      *
-     * @throws Exception
+     * @throws Exception Thrown if an exception occur
      */
     @Before
     public void init() throws Exception {
@@ -49,7 +49,7 @@ public class PayloadConfigurationTest {
     /**
      * This test method is to check whether the payload is returned correctly for creating the API in the cloud
      *
-     * @throws Exception
+     * @throws Exception Thrown if an exception occur
      */
     @Test
     public void testConfigurePayload() throws Exception {

@@ -41,7 +41,7 @@ public class WSO2ApiTest {
     /**
      * This method initializes the variables before tests are executed
      *
-     * @throws Exception
+     * @throws Exception Thrown if an exception occur
      */
     @Before
     public void init() throws Exception {
@@ -60,7 +60,7 @@ public class WSO2ApiTest {
      * This test method is for checking whether the API is updated if the API already exists in the WSO2 API management
      * cloud
      *
-     * @throws Exception
+     * @throws Exception Thrown if an exception occur
      */
     @Test
     public void testSaveApiForApiAlreadyExists() throws Exception {
@@ -78,7 +78,7 @@ public class WSO2ApiTest {
      * This test method is for checking whether the API is created if the API is not found among the existing APIs in
      * the WSO2 API management cloud
      *
-     * @throws Exception
+     * @throws Exception Thrown if an exception occur
      */
     @Test
     public void testSaveApiForNoMatchingApiFound() throws Exception {
@@ -95,7 +95,7 @@ public class WSO2ApiTest {
     /**
      * This test method is to check whether the API is created if there are no APIs in the WSO2 API management cloud
      *
-     * @throws Exception
+     * @throws Exception Thrown if an exception occur
      */
     @Test
     public void testSaveApiForNoApiInTheCloud() throws Exception {
@@ -114,7 +114,7 @@ public class WSO2ApiTest {
      * This test method is to check whether an exception is thrown if no API list is returned from the WSO2 API
      * management cloud
      *
-     * @throws Exception
+     * @throws Exception Thrown if an exception occur
      */
     @Test (expected = PluginExecutionException.class)
     public void testSaveApiForNoApiListIsReturenedError() throws Exception {
@@ -131,7 +131,7 @@ public class WSO2ApiTest {
     /**
      * This test method is to check whether an exception is thrown if the request to search APIs is unauthorized
      *
-     * @throws Exception
+     * @throws Exception Thrown if an exception occur
      */
     @Test (expected = PluginExecutionException.class)
     public void testSaveApiForUnauthorizedRequest() throws Exception {
@@ -148,7 +148,7 @@ public class WSO2ApiTest {
     /**
      * This test method is to check whether an exception is thrown if the content type is not supported
      *
-     * @throws Exception
+     * @throws Exception Thrown if an exception occur
      */
     @Test (expected = PluginExecutionException.class)
     public void testSaveApiForUnsupportedMediaType() throws Exception {
@@ -160,13 +160,12 @@ public class WSO2ApiTest {
                 Mockito.anyString())).thenReturn(responseGet);
 
         api.saveAPI(accessToken, payload);
-
     }
 
     /**
      * This test method is to check whether an exception is thrown the API update request contains bad content
      *
-     * @throws Exception
+     * @throws Exception Thrown if an exception occur
      */
     @Test (expected = PluginExecutionException.class)
     public void testSaveApiForBadApiUpdateRequest() throws Exception {
@@ -180,7 +179,7 @@ public class WSO2ApiTest {
     /**
      * This test method is to check whether an exception is thrown if the request is not conditional
      *
-     * @throws Exception
+     * @throws Exception Thrown if an exception occur
      */
     @Test (expected = PluginExecutionException.class)
     public void testSaveApiForConditionalUpdateRequest() throws Exception {
@@ -194,7 +193,7 @@ public class WSO2ApiTest {
     /**
      * This test method is to check whether an exception is thrown if the resource to update is not found
      *
-     * @throws Exception
+     * @throws Exception Thrown if an exception occur
      */
     @Test (expected = PluginExecutionException.class)
     public void testSaveApiForResourceNotFoundToUpdate() throws Exception {
@@ -208,7 +207,7 @@ public class WSO2ApiTest {
     /**
      * This test method is to check whether an exception is thrown if one of the preconditions are not met
      *
-     * @throws Exception
+     * @throws Exception Thrown if an exception occur
      */
     @Test (expected = PluginExecutionException.class)
     public void testSaveApiForUpdateRequestPrecondition() throws Exception {
@@ -222,7 +221,7 @@ public class WSO2ApiTest {
     /**
      * This test method is to check whether an exception is thrown if the API update request is unauthorized
      *
-     * @throws Exception
+     * @throws Exception Thrown if an exception occur
      */
     @Test (expected = PluginExecutionException.class)
     public void testSaveApiForUnauthorizedUpdateRequest() throws Exception {
@@ -236,7 +235,7 @@ public class WSO2ApiTest {
     /**
      *
      *
-     * @throws Exception
+     * @throws Exception Thrown if an exception occur
      */
     @Test (expected = PluginExecutionException.class)
     public void testSaveApiForApiIsNotUpdated() throws Exception {
@@ -252,7 +251,7 @@ public class WSO2ApiTest {
     /**
      * This test method is to check whether an exception is thrown if the API create request has bad content
      *
-     * @throws Exception
+     * @throws Exception Thrown if an exception occur
      */
     @Test (expected = PluginExecutionException.class)
     public void testSaveApiForBadContentInApiCreationRequest() throws Exception {
@@ -266,7 +265,7 @@ public class WSO2ApiTest {
     /**
      * This test method is to check whether an exception is thrown if API create request is unauthorized
      *
-     * @throws Exception
+     * @throws Exception Thrown if an exception occur
      */
     @Test (expected = PluginExecutionException.class)
     public void testSaveApiForUnauthorizedApiCreationRequest() throws Exception {
@@ -281,7 +280,7 @@ public class WSO2ApiTest {
      * This test method is to check whether an exception is thrown if media type of the API create request is not
      * supported
      *
-     * @throws Exception
+     * @throws Exception Thrown if an exception occur
      */
     @Test (expected = PluginExecutionException.class)
     public void testSaveApiForUnsupportedMediaTypeInApiCreateRequest() throws Exception {
@@ -295,7 +294,7 @@ public class WSO2ApiTest {
     /**
      *
      *
-     * @throws Exception
+     * @throws Exception Thrown if an exception occur
      */
     @Test (expected = PluginExecutionException.class)
     public void testSaveApiForApiIsNotCreatedInCloud() throws Exception {
@@ -311,7 +310,7 @@ public class WSO2ApiTest {
      *
      * @param stream Hard coded data stream for mocking
      * @param code Response code of the request
-     * @throws Exception
+     * @throws Exception Thrown if an exception occur
      */
     private void mockGetRequest(String stream, int code) throws Exception {
         HttpResponse responseGet = Mockito.mock(HttpResponse.class);
@@ -329,7 +328,7 @@ public class WSO2ApiTest {
      * Contains code for mocking the POST request
      *
      * @param code Response code of the request
-     * @throws Exception
+     * @throws Exception Thrown if an exception occur
      */
     private void mockPostRequest(int code) throws Exception {
         HttpResponse responsePost = Mockito.mock(HttpResponse.class);
@@ -344,7 +343,7 @@ public class WSO2ApiTest {
      * Contains code for mocking the PUT request
      *
      * @param code Response code of the request
-     * @throws Exception
+     * @throws Exception Thrown if an exception occur
      */
     private void mockPutRequest(int code) throws Exception {
         HttpResponse responsePut = Mockito.mock(HttpResponse.class);
