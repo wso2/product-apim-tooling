@@ -75,17 +75,6 @@ var ExportAPICmd = &cobra.Command{
 
 			if resp.StatusCode() == http.StatusOK {
 				WriteToZip(exportAPIName, exportAPIVersion, exportEnvironment, resp)
-
-				accessToken, apiManagerEndpoint, err := utils.ExecutePreCommandWithOAuth(exportEnvironment,
-					exportAPICmdUsername, exportAPICmdPassword, utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
-
-				// only to get the number of APIs exported
-				numberOfAPIsExported, _, err := GetAPIList(exportAPIName, accessToken, apiManagerEndpoint)
-				if err == nil {
-					fmt.Println("Number of APIs exported:", numberOfAPIsExported)
-				} else {
-					utils.HandleErrorAndExit("Error getting list of APIs", err)
-				}
 			} else if resp.StatusCode() == http.StatusInternalServerError {
 				// 500 Internal Server Error
 				fmt.Println("Incorrect password")

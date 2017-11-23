@@ -36,7 +36,7 @@ import (
 // @return b64encodedCredentials, APIManagerEndpoint, Errors
 // including (export-api, import-api, list)e
 func ExecutePreCommandWithBasicAuth(environment, flagUsername, flagPassword, mainConfigFilePath,
-envKeysAllFilePath string) (b64encodedCredentials string, apiManagerEndpoint string, err error) {
+	envKeysAllFilePath string) (b64encodedCredentials string, apiManagerEndpoint string, err error) {
 	if EnvExistsInMainConfigFile(environment, MainConfigFilePath) {
 		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment, mainConfigFilePath)
 
@@ -140,7 +140,7 @@ envKeysAllFilePath string) (b64encodedCredentials string, apiManagerEndpoint str
 // @return AccessToken, APIManagerEndpoint, Errors
 // including (export-api, import-api, list)
 func ExecutePreCommandWithOAuth(environment, flagUsername, flagPassword, mainConfigFilePath,
-envKeysAllFilePath string) (accessToken string, apiManagerEndpoint string, err error) {
+	envKeysAllFilePath string) (accessToken string, apiManagerEndpoint string, err error) {
 	if EnvExistsInMainConfigFile(environment, MainConfigFilePath) {
 		registrationEndpoint := GetRegistrationEndpointOfEnv(environment, MainConfigFilePath)
 		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment, mainConfigFilePath)
@@ -227,9 +227,6 @@ envKeysAllFilePath string) (accessToken string, apiManagerEndpoint string, err e
 				fmt.Println("Error:", err)
 			}
 
-			fmt.Println("ClientID:", clientID)
-			fmt.Println("ClientSecret:", clientSecret)
-
 			// Persist clientID, clientSecret, Username in file
 			encryptedClientSecret := Encrypt([]byte(GetMD5Hash(password)), clientSecret)
 			envKeys := EnvKeys{clientID, encryptedClientSecret, username}
@@ -248,7 +245,7 @@ envKeysAllFilePath string) (accessToken string, apiManagerEndpoint string, err e
 		// env does not exist in main config file
 		if environment == "" {
 			return "", "",
-				errors.New("no environment specified. Either specify it using the -e flag or name one of " +
+				errors.New("no environment specified. Either specify it using the -e flag or rename one of " +
 					"the environments in '" + MainConfigFileName + "' to 'default'")
 		}
 

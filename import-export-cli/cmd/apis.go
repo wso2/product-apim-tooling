@@ -63,7 +63,7 @@ var apisCmd = &cobra.Command{
 				utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
 
 		if preCommandErr == nil {
-			count, apis, err := GetAPIList("", accessToken, apiManagerEndpoint)
+			count, apis, err := GetAPIList(listApisCmdQuery, accessToken, apiManagerEndpoint)
 
 			if err == nil {
 				// Printing the list of available APIs
@@ -77,7 +77,7 @@ var apisCmd = &cobra.Command{
 			}
 		} else {
 			utils.Logln(utils.LogPrefixError + "calling 'list' " + preCommandErr.Error())
-			fmt.Println("Error calling 'list'", preCommandErr.Error())
+			utils.HandleErrorAndExit("Error calling '"+apisCmdLiteral+"'", preCommandErr)
 		}
 	},
 }
@@ -90,7 +90,7 @@ var apisCmd = &cobra.Command{
 // @return array of API objects
 // @return error
 func GetAPIList(query, accessToken, apiManagerEndpoint string) (count int32, apis []utils.API, err error) {
-	url_ := apiManagerEndpoint
+	url_ := apiManagerEndpoint // 'url_' instead of 'url' to avoid confusion with 'net/url'
 
 	// append '/' to the end if there isn't one already
 	if url_ != "" && string(url_[len(url_)-1]) != "/" {
@@ -98,9 +98,10 @@ func GetAPIList(query, accessToken, apiManagerEndpoint string) (count int32, api
 	}
 	url_ += "api/am/publisher/v0.11/apis"
 
-	if query != "" {
-		query = (&url.URL{Path: query}).String()
-	}
+	fmt.Println("Query before encoding:", query)
+	encodedQuery, _ := url.Parse(query) // convert query into a url-path-encoded string
+	fmt.Println("Query after encoding:", encodedQuery.String())
+	url_ += "?query=" + encodedQuery.String()
 	utils.Logln(utils.LogPrefixInfo+"URL:", url_)
 
 	headers := make(map[string]string)

@@ -28,7 +28,6 @@ const ProjectName = "apimcli"
 // File Names and Paths
 
 var ApplicationRoot, _ = os.Getwd()
-//var ApplicationRoot  = "/home/menuka/.go/src/github.com/wso2/product-apim-tooling/import-export-cli"
 
 const EnvKeysAllFileName = "env_keys_all.yaml"
 
