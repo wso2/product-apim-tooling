@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2005-2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -27,12 +27,14 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
+	"net/url"
 	"os"
 )
 
-var listEnvironment string
-var listCmdUsername string
-var listCmdPassword string
+var listApisCmdEnvironment string
+var listApisCmdUsername string
+var listApisCmdPassword string
+var listApisCmdQuery string
 
 // apisCmd related info
 const apisCmdLiteral = "apis"
@@ -55,7 +57,7 @@ var apisCmd = &cobra.Command{
 		utils.Logln(utils.LogPrefixInfo + apisCmdLiteral + " called")
 
 		accessToken, apiManagerEndpoint, preCommandErr :=
-			utils.ExecutePreCommandWithOAuth(listEnvironment, listCmdUsername, listCmdPassword,
+			utils.ExecutePreCommandWithOAuth(listApisCmdEnvironment, listApisCmdUsername, listApisCmdPassword,
 				utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
 
 		if preCommandErr == nil {
@@ -63,7 +65,7 @@ var apisCmd = &cobra.Command{
 
 			if err == nil {
 				// Printing the list of available APIs
-				fmt.Println("Environment:", listEnvironment)
+				fmt.Println("Environment:", listApisCmdEnvironment)
 				fmt.Println("No. of APIs:", count)
 				if count > 0 {
 					printAPIs(apis)
@@ -93,6 +95,10 @@ func GetAPIList(query, accessToken, apiManagerEndpoint string) (count int32, api
 		url += "/"
 	}
 	url += "api/am/publisher/v0.11/apis"
+
+	if query != "" {
+		query = (&url.URL{Path: query}).String()
+	}
 	utils.Logln(utils.LogPrefixInfo+"URL:", url)
 
 	headers := make(map[string]string)
@@ -144,8 +150,10 @@ func printAPIs(apis []utils.API) {
 func init() {
 	ListCmd.AddCommand(apisCmd)
 
-	apisCmd.Flags().StringVarP(&listEnvironment, "environment", "e",
+	apisCmd.Flags().StringVarP(&listApisCmdEnvironment, "environment", "e",
 		utils.GetDefaultEnvironment(utils.MainConfigFilePath), "Environment to be searched")
-	apisCmd.Flags().StringVarP(&listCmdUsername, "username", "u", "", "Username")
-	apisCmd.Flags().StringVarP(&listCmdPassword, "password", "p", "", "Password")
+	apisCmd.Flags().StringVarP(&listApisCmdQuery, "query", "q", "",
+		"(Optional) query for searching APIs")
+	apisCmd.Flags().StringVarP(&listApisCmdUsername, "username", "u", "", "Username")
+	apisCmd.Flags().StringVarP(&listApisCmdPassword, "password", "p", "", "Password")
 }

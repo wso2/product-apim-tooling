@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2005-2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -29,7 +29,7 @@ import (
 
 // Version command related usage info
 const versionCmdLiteral = "version"
-const versionCmdShortDesc = "Display Version on current "+utils.ProjectName
+const versionCmdShortDesc = "Display Version on current " + utils.ProjectName
 
 var versionCmdLongDesc = dedent.Dedent(`
 		Display the current version of this command line tool
@@ -38,7 +38,6 @@ var versionCmdLongDesc = dedent.Dedent(`
 var versionCmdExamples = dedent.Dedent(`
 		` + utils.ProjectName + ` ` + versionCmdLiteral + `
 		`)
-
 
 // VersionCmd represents the version command
 var VersionCmd = &cobra.Command{

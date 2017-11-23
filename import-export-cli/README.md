@@ -6,6 +6,8 @@ Command Line tool for importing and exporting APIs between different API Environ
 ## Getting Started
 
 - ### Building
+    Prerequisites: You need to have Go 1.8.x installed locally to build from the source
+    
     Execute ```build.sh``` to build for necessary platforms. Further instructions will be available upon executing 
     build.sh
     

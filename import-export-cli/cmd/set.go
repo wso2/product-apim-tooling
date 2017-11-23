@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2005-2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -62,13 +62,13 @@ var SetCmd = &cobra.Command{
 
 		if flagHttpRequestTimeout > 0 {
 			configVars.Config.HttpRequestTimeout = flagHttpRequestTimeout
-		}else{
+		} else {
 			fmt.Println("Invalid input for flag --http-request-timeout")
 		}
 
 		if flagExportDirectory != "" && utils.IsValid(flagExportDirectory) {
 			configVars.Config.ExportDirectory = flagExportDirectory
-		}else{
+		} else {
 			fmt.Println("Invalid input for flag --export-directory")
 		}
 
