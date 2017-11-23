@@ -1,0 +1,32 @@
+{
+  "count": 2,
+  "next": "",
+  "previous": "",
+  "list": [
+    {
+      "id": "d5fc26bb-055b-4c8b-bc3f-f7f97d512b25",
+      "name": "PhoneVerificationTest",
+      "description": null,
+      "context": "/t/samscompany/phoneverifyapi1",
+      "version": "1.0.0",
+      "provider": "j4ppk@averdov.com@samscompany",
+      "status": "CREATED",
+      "thumbnailUri": null
+    },
+    {
+      "id": "9f7691ba-833e-4127-a119-cb629add253d",
+      "name": "PizzaShackAPI",
+      "description": "This document describe a RESTFul API for Pizza Shack online pizza delivery store.\r\n",
+      "context": "/t/samscompany/pizzashack",
+      "version": "1.0.0",
+      "provider": "j4ppk@averdov.com@samscompany",
+      "status": "CREATED",
+      "thumbnailUri": null
+    }
+  ],
+  "pagination": {
+    "total": 2,
+    "offset": 0,
+    "limit": 25
+  }
+}

@@ -51,52 +51,7 @@ public class WSO2ApiTest {
 
         accessToken = "f96f3947-c5a5-3d79-9ff9-2729de4f9d42";
 
-        payload = "{\"name\":\"Simple Inventory API\",\"context\":\"/simple\",\"version\":\"1.0.0\",\"description\":" +
-                "\"This is a simple API\",\"apiDefinition\":\"{\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":" +
-                "{\\\"description\\\":\\\"This is a simple API\\\",\\\"version\\\":\\\"1.0.0\\\"," +
-                "\\\"title\\\":\\\"Simple Inventory API\\\",\\\"contact\\\":{\\\"email\\\":" +
-                "\\\"you@your-company.com\\\"},\\\"license\\\":{\\\"name\\\":\\\"Apache 2.0\\\"," +
-                "\\\"url\\\":\\\"http://www.apache.org/licenses/LICENSE-2.0.html\\\"}},\\\"host\\\":" +
-                "\\\"virtserver.swaggerhub.com\\\",\\\"basePath\\\":\\\"/simple\\\",\\\"tags\\\":[{\\\"name\\\":" +
-                "\\\"admins\\\",\\\"description\\\":\\\"Secured Admin-only calls\\\"},{\\\"name\\\":" +
-                "\\\"developers\\\",\\\"description\\\":\\\"Operations available to regular developers\\\"}]," +
-                "\\\"schemes\\\":[\\\"https\\\"],\\\"paths\\\":{\\\"/inventory\\\":{\\\"get\\\":{\\\"tags\\\":" +
-                "[\\\"developers\\\"],\\\"summary\\\":\\\"searches inventory\\\",\\\"description\\\":" +
-                "\\\"By passing in the appropriate options, you can search for\\\\navailable inventory in the " +
-                "system\\\\n\\\",\\\"operationId\\\":\\\"searchInventory\\\",\\\"produces\\\":" +
-                "[\\\"application/json\\\"],\\\"parameters\\\":[{\\\"name\\\":\\\"searchString\\\",\\\"in\\\":" +
-                "\\\"query\\\",\\\"description\\\":\\\"pass an optional search string for looking up inventory\\\"," +
-                "\\\"required\\\":false,\\\"type\\\":\\\"string\\\"},{\\\"name\\\":\\\"skip\\\",\\\"in\\\":" +
-                "\\\"query\\\",\\\"description\\\":\\\"number of records to skip for pagination\\\"," +
-                "\\\"required\\\":false,\\\"type\\\":\\\"integer\\\",\\\"minimum\\\":0,\\\"format\\\":" +
-                "\\\"int32\\\"},{\\\"name\\\":\\\"limit\\\",\\\"in\\\":\\\"query\\\",\\\"description\\\":" +
-                "\\\"maximum number of records to return\\\",\\\"required\\\":false,\\\"type\\\":\\\"integer\\\"," +
-                "\\\"maximum\\\":50,\\\"minimum\\\":0,\\\"format\\\":\\\"int32\\\"}],\\\"responses\\\":{\\\"200\\\":" +
-                "{\\\"description\\\":\\\"search results matching criteria\\\",\\\"schema\\\":{\\\"type\\\":" +
-                "\\\"array\\\",\\\"items\\\":{\\\"$ref\\\":\\\"#/definitions/InventoryItem\\\"}}},\\\"400\\\":" +
-                "{\\\"description\\\":\\\"bad input parameter\\\"}}},\\\"post\\\":{\\\"tags\\\":[\\\"admins\\\"]," +
-                "\\\"summary\\\":\\\"adds an inventory item\\\",\\\"description\\\":" +
-                "\\\"Adds an item to the system\\\",\\\"operationId\\\":\\\"addInventory\\\",\\\"consumes\\\":" +
-                "[\\\"application/json\\\"],\\\"produces\\\":[\\\"application/json\\\"],\\\"parameters\\\":" +
-                "[{\\\"in\\\":\\\"body\\\",\\\"name\\\":\\\"inventoryItem\\\",\\\"description\\\":" +
-                "\\\"Inventory item to add\\\",\\\"required\\\":false,\\\"schema\\\":{\\\"$ref\\\":" +
-                "\\\"#/definitions/InventoryItem\\\"}}],\\\"responses\\\":{\\\"201\\\":{\\\"description\\\":" +
-                "\\\"item created\\\"},\\\"400\\\":{\\\"description\\\":\\\"invalid input, object invalid\\\"}," +
-                "\\\"409\\\":{\\\"description\\\":\\\"an existing item already exists\\\"}}}}},\\\"definitions\\\":" +
-                "{\\\"InventoryItem\\\":{\\\"type\\\":\\\"object\\\",\\\"required\\\":[\\\"id\\\"," +
-                "\\\"manufacturer\\\",\\\"name\\\",\\\"releaseDate\\\"],\\\"properties\\\":{\\\"id\\\":" +
-                "{\\\"type\\\":\\\"string\\\",\\\"format\\\":\\\"uuid\\\",\\\"example\\\":" +
-                "\\\"d290f1ee-6c54-4b01-90e6-d701748f0851\\\"},\\\"name\\\":{\\\"type\\\":\\\"string\\\"," +
-                "\\\"example\\\":\\\"Widget Adapter\\\"},\\\"releaseDate\\\":{\\\"type\\\":\\\"string\\\"," +
-                "\\\"format\\\":\\\"int32\\\",\\\"example\\\":\\\"2016-08-29T09:12:33.001Z\\\"},\\\"manufacturer\\\":" +
-                "{\\\"$ref\\\":\\\"#/definitions/Manufacturer\\\"}}},\\\"Manufacturer\\\":" +
-                "{\\\"required\\\":[\\\"name\\\"],\\\"properties\\\":{\\\"name\\\":{\\\"type\\\":\\" +
-                "\"string\\\",\\\"example\\\":\\\"ACME Corporation\\\"},\\\"homePage\\\":{\\\"type\\\":" +
-                "\\\"string\\\",\\\"format\\\":\\\"url\\\",\\\"example\\\":\\\"https://www.acme-corp.com\\\"}," +
-                "\\\"phone\\\":{\\\"type\\\":\\\"string\\\",\\\"example\\\":\\\"408-867-5309\\\"}}}}}\"," +
-                "\"isDefaultVersion\":false,\"transport\":[\"http\",\"https\"],\"tiers\":[\"Unlimited\"]," +
-                "\"visibility\":\"PUBLIC\",\"endpointConfig\":\"\",\"corsConfiguration\":" +
-                "{\"corsConfigurationEnabled\":false}}";
+        payload = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("api-creation-payload.json"));
 
         payloadEntity = new StringEntity(payload);
     }
@@ -109,23 +64,8 @@ public class WSO2ApiTest {
      */
     @Test
     public void testSaveApiForApiAlreadyExists() throws Exception {
-        String stream = "{\n" +
-                "    \"count\": 1,\n" +
-                "    \"next\": \"\",\n" +
-                "    \"previous\": \"\",\n" +
-                "    \"list\": [\n" +
-                "        {\n" +
-                "            \"id\": \"5e26110f-9991-4778-ba36-fd117ddd1fa9\",\n" +
-                "            \"name\": \"Simple Inventory API\",\n" +
-                "            \"description\": \"This is a simple API\",\n" +
-                "            \"context\": \"/t/testusercom8168/simple\",\n" +
-                "            \"version\": \"1.0.0\",\n" +
-                "            \"provider\": \"fpk11@geronra.com@testusercom8168\",\n" +
-                "            \"status\": \"CREATED\",\n" +
-                "            \"thumbnailUri\": null\n" +
-                "        }\n" +
-                "    ]\n" +
-                "}";
+        String stream = IOUtils.toString(getClass().getClassLoader()
+                .getResourceAsStream("inventory-api-search-response.json"));
         mockGetRequest(stream, 200);
         mockPutRequest(200);
 
@@ -142,34 +82,8 @@ public class WSO2ApiTest {
      */
     @Test
     public void testSaveApiForNoMatchingApiFound() throws Exception {
-        String stream = "{\n" +
-                "    \"count\": 2,\n" +
-                "    \"next\": \"\",\n" +
-                "    \"previous\": \"\",\n" +
-                "    \"list\": [\n" +
-                "        {\n" +
-                "            \"id\": \"d425dd83-1851-4371-8c83-996aba6a45ac\",\n" +
-                "            \"name\": \"Sample Implicit Flow OAuth2 Project\",\n" +
-                "            \"description\": \"This is an example of using OAuth2 Implicit Flow in a " +
-                "specification to describe security to your API.\",\n" +
-                "            \"context\": \"/t/testusercom8168/api/v1\",\n" +
-                "            \"version\": \"1.0.0\",\n" +
-                "            \"provider\": \"fpk11@geronra.com@testusercom8168\",\n" +
-                "            \"status\": \"CREATED\"\n" +
-                "        },\n" +
-                "        {\n" +
-                "            \"id\": \"69d85f37-dd1a-4e08-a2d9-9392bdd5530e\",\n" +
-                "            \"name\": \"Swagger Petstore\",\n" +
-                "            \"description\": \"This is a sample server Petstore yahoo server.  " +
-                "You can find\\nout more about Swagger at\\n[http://swagger.io](http://swagger.io) or " +
-                "on\\n[irc.freenode.net, #swagger](http://swagger.io/irc/).\\n\",\n" +
-                "            \"context\": \"/t/testusercom8168/v2\",\n" +
-                "            \"version\": \"1.0.0\",\n" +
-                "            \"provider\": \"fpk11@geronra.com@testusercom8168\",\n" +
-                "            \"status\": \"CREATED\"\n" +
-                "        }\n" +
-                "    ]\n" +
-                "}";
+        String stream = IOUtils.toString(getClass().getClassLoader()
+                .getResourceAsStream("unmatched-apis-search-response.json"));
         mockGetRequest(stream, 200);
         mockPostRequest(201);
 
@@ -185,12 +99,8 @@ public class WSO2ApiTest {
      */
     @Test
     public void testSaveApiForNoApiInTheCloud() throws Exception {
-        String stream = "{\n" +
-                "    \"count\": 0,\n" +
-                "    \"next\": \"\",\n" +
-                "    \"previous\": \"\",\n" +
-                "    \"list\": []\n" +
-                "}";
+        String stream = IOUtils.toString(getClass().getClassLoader()
+                .getResourceAsStream("empty-api-list-search-response.json"));
         mockGetRequest(stream, 200);
         mockPostRequest(201);
 
@@ -260,23 +170,8 @@ public class WSO2ApiTest {
      */
     @Test (expected = PluginExecutionException.class)
     public void testSaveApiForBadApiUpdateRequest() throws Exception {
-        String stream = "{\n" +
-                "    \"count\": 1,\n" +
-                "    \"next\": \"\",\n" +
-                "    \"previous\": \"\",\n" +
-                "    \"list\": [\n" +
-                "        {\n" +
-                "            \"id\": \"5e26110f-9991-4778-ba36-fd117ddd1fa9\",\n" +
-                "            \"name\": \"Simple Inventory API\",\n" +
-                "            \"description\": \"This is a simple API\",\n" +
-                "            \"context\": \"/t/testusercom8168/simple\",\n" +
-                "            \"version\": \"1.0.0\",\n" +
-                "            \"provider\": \"fpk11@geronra.com@testusercom8168\",\n" +
-                "            \"status\": \"CREATED\",\n" +
-                "            \"thumbnailUri\": null\n" +
-                "        }\n" +
-                "    ]\n" +
-                "}";
+        String stream = IOUtils.toString(getClass().getClassLoader()
+                .getResourceAsStream("inventory-api-search-response.json"));
         mockGetRequest(stream, 200);
         mockPutRequest(400);
         api.saveAPI(accessToken, payload);
@@ -289,23 +184,8 @@ public class WSO2ApiTest {
      */
     @Test (expected = PluginExecutionException.class)
     public void testSaveApiForConditionalUpdateRequest() throws Exception {
-        String stream = "{\n" +
-                "    \"count\": 1,\n" +
-                "    \"next\": \"\",\n" +
-                "    \"previous\": \"\",\n" +
-                "    \"list\": [\n" +
-                "        {\n" +
-                "            \"id\": \"5e26110f-9991-4778-ba36-fd117ddd1fa9\",\n" +
-                "            \"name\": \"Simple Inventory API\",\n" +
-                "            \"description\": \"This is a simple API\",\n" +
-                "            \"context\": \"/t/testusercom8168/simple\",\n" +
-                "            \"version\": \"1.0.0\",\n" +
-                "            \"provider\": \"fpk11@geronra.com@testusercom8168\",\n" +
-                "            \"status\": \"CREATED\",\n" +
-                "            \"thumbnailUri\": null\n" +
-                "        }\n" +
-                "    ]\n" +
-                "}";
+        String stream = IOUtils.toString(getClass().getClassLoader()
+                .getResourceAsStream("inventory-api-search-response.json"));
         mockGetRequest(stream, 200);
         mockPutRequest(403);
         api.saveAPI(accessToken, payload);
@@ -318,23 +198,8 @@ public class WSO2ApiTest {
      */
     @Test (expected = PluginExecutionException.class)
     public void testSaveApiForResourceNotFoundToUpdate() throws Exception {
-        String stream = "{\n" +
-                "    \"count\": 1,\n" +
-                "    \"next\": \"\",\n" +
-                "    \"previous\": \"\",\n" +
-                "    \"list\": [\n" +
-                "        {\n" +
-                "            \"id\": \"5e26110f-9991-4778-ba36-fd117ddd1fa9\",\n" +
-                "            \"name\": \"Simple Inventory API\",\n" +
-                "            \"description\": \"This is a simple API\",\n" +
-                "            \"context\": \"/t/testusercom8168/simple\",\n" +
-                "            \"version\": \"1.0.0\",\n" +
-                "            \"provider\": \"fpk11@geronra.com@testusercom8168\",\n" +
-                "            \"status\": \"CREATED\",\n" +
-                "            \"thumbnailUri\": null\n" +
-                "        }\n" +
-                "    ]\n" +
-                "}";
+        String stream = IOUtils.toString(getClass().getClassLoader()
+                .getResourceAsStream("inventory-api-search-response.json"));
         mockGetRequest(stream, 200);
         mockPutRequest(404);
         api.saveAPI(accessToken, payload);
@@ -347,23 +212,8 @@ public class WSO2ApiTest {
      */
     @Test (expected = PluginExecutionException.class)
     public void testSaveApiForUpdateRequestPrecondition() throws Exception {
-        String stream = "{\n" +
-                "    \"count\": 1,\n" +
-                "    \"next\": \"\",\n" +
-                "    \"previous\": \"\",\n" +
-                "    \"list\": [\n" +
-                "        {\n" +
-                "            \"id\": \"5e26110f-9991-4778-ba36-fd117ddd1fa9\",\n" +
-                "            \"name\": \"Simple Inventory API\",\n" +
-                "            \"description\": \"This is a simple API\",\n" +
-                "            \"context\": \"/t/testusercom8168/simple\",\n" +
-                "            \"version\": \"1.0.0\",\n" +
-                "            \"provider\": \"fpk11@geronra.com@testusercom8168\",\n" +
-                "            \"status\": \"CREATED\",\n" +
-                "            \"thumbnailUri\": null\n" +
-                "        }\n" +
-                "    ]\n" +
-                "}";
+        String stream = IOUtils.toString(getClass().getClassLoader()
+                .getResourceAsStream("inventory-api-search-response.json"));
         mockGetRequest(stream, 200);
         mockPutRequest(412);
         api.saveAPI(accessToken, payload);
@@ -376,23 +226,8 @@ public class WSO2ApiTest {
      */
     @Test (expected = PluginExecutionException.class)
     public void testSaveApiForUnauthorizedUpdateRequest() throws Exception {
-        String stream = "{\n" +
-                "    \"count\": 1,\n" +
-                "    \"next\": \"\",\n" +
-                "    \"previous\": \"\",\n" +
-                "    \"list\": [\n" +
-                "        {\n" +
-                "            \"id\": \"5e26110f-9991-4778-ba36-fd117ddd1fa9\",\n" +
-                "            \"name\": \"Simple Inventory API\",\n" +
-                "            \"description\": \"This is a simple API\",\n" +
-                "            \"context\": \"/t/testusercom8168/simple\",\n" +
-                "            \"version\": \"1.0.0\",\n" +
-                "            \"provider\": \"fpk11@geronra.com@testusercom8168\",\n" +
-                "            \"status\": \"CREATED\",\n" +
-                "            \"thumbnailUri\": null\n" +
-                "        }\n" +
-                "    ]\n" +
-                "}";
+        String stream = IOUtils.toString(getClass().getClassLoader()
+                .getResourceAsStream("inventory-api-search-response.json"));
         mockGetRequest(stream, 200);
         mockPutRequest(401);
         api.saveAPI(accessToken, payload);
@@ -405,23 +240,8 @@ public class WSO2ApiTest {
      */
     @Test (expected = PluginExecutionException.class)
     public void testSaveApiForApiIsNotUpdated() throws Exception {
-        String stream = "{\n" +
-                "    \"count\": 1,\n" +
-                "    \"next\": \"\",\n" +
-                "    \"previous\": \"\",\n" +
-                "    \"list\": [\n" +
-                "        {\n" +
-                "            \"id\": \"5e26110f-9991-4778-ba36-fd117ddd1fa9\",\n" +
-                "            \"name\": \"Simple Inventory API\",\n" +
-                "            \"description\": \"This is a simple API\",\n" +
-                "            \"context\": \"/t/testusercom8168/simple\",\n" +
-                "            \"version\": \"1.0.0\",\n" +
-                "            \"provider\": \"fpk11@geronra.com@testusercom8168\",\n" +
-                "            \"status\": \"CREATED\",\n" +
-                "            \"thumbnailUri\": null\n" +
-                "        }\n" +
-                "    ]\n" +
-                "}";
+        String stream = IOUtils.toString(getClass().getClassLoader()
+                .getResourceAsStream("inventory-api-search-response.json"));
         mockGetRequest(stream, 200);
         mockPutRequest(999);
         api.saveAPI(accessToken, payload);
@@ -436,12 +256,8 @@ public class WSO2ApiTest {
      */
     @Test (expected = PluginExecutionException.class)
     public void testSaveApiForBadContentInApiCreationRequest() throws Exception {
-        String stream = "{\n" +
-                "    \"count\": 0,\n" +
-                "    \"next\": \"\",\n" +
-                "    \"previous\": \"\",\n" +
-                "    \"list\": []\n" +
-                "}";
+        String stream = IOUtils.toString(getClass().getClassLoader()
+                .getResourceAsStream("empty-api-list-search-response.json"));
         mockGetRequest(stream, 200);
         mockPostRequest(400);
         api.saveAPI(accessToken, payload);
@@ -454,12 +270,8 @@ public class WSO2ApiTest {
      */
     @Test (expected = PluginExecutionException.class)
     public void testSaveApiForUnauthorizedApiCreationRequest() throws Exception {
-        String stream = "{\n" +
-                "    \"count\": 0,\n" +
-                "    \"next\": \"\",\n" +
-                "    \"previous\": \"\",\n" +
-                "    \"list\": []\n" +
-                "}";
+        String stream = IOUtils.toString(getClass().getClassLoader()
+                .getResourceAsStream("empty-api-list-search-response.json"));
         mockGetRequest(stream, 200);
         mockPostRequest(401);
         api.saveAPI(accessToken, payload);
@@ -473,12 +285,8 @@ public class WSO2ApiTest {
      */
     @Test (expected = PluginExecutionException.class)
     public void testSaveApiForUnsupportedMediaTypeInApiCreateRequest() throws Exception {
-        String stream = "{\n" +
-                "    \"count\": 0,\n" +
-                "    \"next\": \"\",\n" +
-                "    \"previous\": \"\",\n" +
-                "    \"list\": []\n" +
-                "}";
+        String stream = IOUtils.toString(getClass().getClassLoader()
+                .getResourceAsStream("empty-api-list-search-response.json"));
         mockGetRequest(stream, 200);
         mockPostRequest(415);
         api.saveAPI(accessToken, payload);
@@ -491,12 +299,8 @@ public class WSO2ApiTest {
      */
     @Test (expected = PluginExecutionException.class)
     public void testSaveApiForApiIsNotCreatedInCloud() throws Exception {
-        String stream = "{\n" +
-                "    \"count\": 0,\n" +
-                "    \"next\": \"\",\n" +
-                "    \"previous\": \"\",\n" +
-                "    \"list\": []\n" +
-                "}";
+        String stream = IOUtils.toString(getClass().getClassLoader()
+                .getResourceAsStream("empty-api-list-search-response.json"));
         mockGetRequest(stream, 200);
         mockPostRequest(999);
         api.saveAPI(accessToken, payload);
