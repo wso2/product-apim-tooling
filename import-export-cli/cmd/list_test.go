@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2005-2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -43,41 +43,32 @@ func TestGetAPIListOK(t *testing.T) {
 		body := dedent.Dedent(`
 			{
 	"count": 3,
-	"list": [
-	  		 {
-	     	  	"id": "17e0f83c-dce5-4e9b-aa6a-db49b55591c5",
-	      		 "name": "test1",
-	       	"context": "/test1",
-	      		 "version": "1.0.0",
-	       		"provider": "admin",
-	      		 "lifeCycleStatus": "Created",
-	     		  "workflowStatus": "APPROVED",
-	      		 "securityScheme": []
-	   },
-	   {
-	       "id": "9c740e42-309e-44aa-a8e1-6b8830aa7146",
-	  	     "name": "test2",
-	  	     "context": "/test2",
-	   	    "version": "1.0.0",
-	 	      "provider": "admin",
-	 	      "lifeCycleStatus": "Created",
-	 	      "workflowStatus": "APPROVED",
-	 	      "securityScheme": []
-	   },
-	   {
-	      	 "id": "39899b8c-5893-4864-a935-9c149bc7461d",
-	      	 "name": "test3",
-	      	 "context": "/test3",
-	     	  "version": "1.0",
-	     	  "provider": "admin",
-	      	 "lifeCycleStatus": "Created",
-	     	  "workflowStatus": "APPROVED",
-	      	 "securityScheme": [
-	      	     "Oauth"
-	   	 ]
-		   }
+	"list": [{
+			"id": "17e0f83c-dce5-4e9b-aa6a-db49b55591c5",
+			"name": "test1",
+			"context": "/test1",
+			"version": "1.0.0",
+			"provider": "admin",
+			"status": "Created"
+		},
+		{
+			"id": "9c740e42-309e-44aa-a8e1-6b8830aa7146",
+			"name": "test2",
+			"context": "/test2",
+			"version": "1.0.0",
+			"provider": "admin",
+			"status": "Created"
+		},
+		{
+			"id": "39899b8c-5893-4864-a935-9c149bc7461d",
+			"name": "test3",
+			"context": "/test3",
+			"version": "1.0",
+			"provider": "admin",
+			"status": "Created"
+		}
 	]
-			}`)
+}`)
 
 		w.Write([]byte(body))
 	}))

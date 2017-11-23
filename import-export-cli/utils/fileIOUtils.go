@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2005-2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -26,6 +26,9 @@ import (
 	"os"
 )
 
+// WriteConfigFile
+// @param c : data
+// @param envConfigFilePath : Path to file where env endpoints are stored
 func WriteConfigFile(c interface{}, envConfigFilePath string) {
 	data, err := yaml.Marshal(&c)
 	if err != nil {
@@ -106,4 +109,28 @@ func (envKeysAll *EnvKeysAll) ParseEnvKeysFromFile(data []byte) error {
 		}
 	}
 	return nil
+}
+
+// Check whether the file exists.
+func IsFileExist(path string) bool {
+	if _, err := os.Stat(path); err != nil {
+		if os.IsNotExist(err) {
+			return false
+		} else {
+			HandleErrorAndExit(fmt.Sprintf(UnableToReadFileMsg, path), err)
+		}
+	}
+	return true
+}
+
+// exists returns whether the given file or directory exists or not
+func IsDirExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return true, err
 }

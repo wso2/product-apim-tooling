@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2005-2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -35,13 +35,12 @@ type MainConfig struct {
 
 type Config struct {
 	HttpRequestTimeout  int    `yaml:"http_request_timeout"`
-	SkipTLSVerification bool   `yaml:"skip_tls_verification"`
 	ExportDirectory     string `yaml:"export_directory"`
 }
 
 type EnvKeys struct {
 	ClientID     string `yaml:"client_id"`
-	ClientSecret string `yaml:"client_secret"` // to be encrypted (with the user's password) and stored
+	ClientSecret string `yaml:"client_secret"` // encrypted (with the user's password) and stored
 	Username     string `yaml:"username"`
 }
 
@@ -54,20 +53,20 @@ type EnvEndpoints struct {
 // ---------------- End of Structs for YAML Config Files ---------------------------------
 
 type API struct {
-	ID              string `json:"id"`
-	Name            string `json:"name"`
-	Context         string `json:"context"`
-	Version         string `json:"version"`
-	Provider        string `json:"provider"`
-	LifeCycleStatus string `json:"lifeCycleStatus"`
-	WorkflowStatus  string `json:"workflowStatus"`
+	ID             string `json:"id"`
+	Name           string `json:"name"`
+	Context        string `json:"context"`
+	Version        string `json:"version"`
+	Provider       string `json:"provider"`
+	Status         string `json:"status"`
 }
 
 type RegistrationResponse struct {
-	ClientSecretExpiresAt string `json:"client_secret_expires_at"`
-	ClientID              string `json:"client_id"`
-	ClientSecret          string `json:"client_secret"`
-	ClientName            string `json:"client_name"`
+	ClientID              string `json:"clientId"`
+	ClientSecret          string `json:"clientSecret"`
+	ClientName            string `json:"clientName"`
+	CallBackURL string `json:"callBackURL"`
+	JsonString string `json:"jsonString"`
 }
 
 type TokenResponse struct {

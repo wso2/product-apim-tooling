@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2005-2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -21,22 +21,36 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/renstrom/dedent"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
+// Version command related usage info
+const versionCmdLiteral = "version"
+const versionCmdShortDesc = "Display Version on current " + utils.ProjectName
+
+var versionCmdLongDesc = dedent.Dedent(`
+		Display the current version of this command line tool
+		`)
+
+var versionCmdExamples = dedent.Dedent(`
+		` + utils.ProjectName + ` ` + versionCmdLiteral + `
+		`)
+
 // VersionCmd represents the version command
 var VersionCmd = &cobra.Command{
-	Use:   "version",
-	Short: utils.VersionCmdShortDesc,
-	Long:  utils.VersionCmdLongDesc + utils.VersionCmdExamples,
+	Use:   versionCmdLiteral,
+	Short: versionCmdShortDesc,
+	Long:  versionCmdLongDesc + versionCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		var version string = "0.1"
-		fmt.Println("wso2apim-cli Version " + version)
+		var version = "0.1"
+		fmt.Println(utils.ProjectName + " Version: " + version)
 	},
 }
 
+// init using Cobra
 func init() {
 	RootCmd.AddCommand(VersionCmd)
 	VersionCmd.PersistentFlags().String("foo", "", "A help for foo")

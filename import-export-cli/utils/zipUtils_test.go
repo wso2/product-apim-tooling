@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2005-2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -20,6 +20,7 @@ package utils
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -33,9 +34,9 @@ func TestZipDirError(t *testing.T) {
 func TestZipDirOK(t *testing.T) {
 	directoryName := "wso2apimZipTest"
 
-	directoryPath := ApplicationRoot + PathSeparator_ + directoryName
+	directoryPath := filepath.Join(ApplicationRoot, directoryName)
 	fileName := "test.txt"
-	filePath := directoryPath + PathSeparator_ + fileName
+	filePath := filepath.Join(directoryPath, fileName)
 
 	os.Mkdir(directoryPath, os.ModePerm)
 
@@ -86,7 +87,7 @@ func TestZipDirOK(t *testing.T) {
 		t.Errorf("Error saving file: %s\n", err)
 	}
 
-	zipFile := directoryPath + PathSeparator_ + "testZip.zip"
+	zipFile := filepath.Join(directoryPath, "testZip.zip")
 
 	// now try compressing
 	err = ZipDir(directoryPath, zipFile)

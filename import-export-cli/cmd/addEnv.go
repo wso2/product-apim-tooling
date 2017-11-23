@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2005-2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -21,6 +21,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"github.com/renstrom/dedent"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
@@ -28,16 +29,32 @@ import (
 var flagAddEnvName string           // name of the environment to be added
 var flagTokenEndpoint string        // token endpoint of the environment to be added
 var flagRegistrationEndpoint string // registration endpoint of the environment to be added
-var flagAPIManagerEndpoint string   // api manager endpoint of the environment to be added
+var flagPublisherEndpoint string    // api manager endpoint of the environment to be added
+
+// AddEnv command related Info
+const addEnvCmdLiteral = "add-env"
+const addEnvCmdShortDesc = "Add Environment to Config file"
+
+var addEnvCmdLongDesc = dedent.Dedent(`
+		Add new environment and its related endpoints to the config file
+	`)
+
+var addEnvCmdExamples = dedent.Dedent(`
+		Examples:
+		` + utils.ProjectName + ` ` + addEnvCmdLiteral + ` -n production \
+						--registration http://localhost:9763/client-registration/v0.11/register \
+						--apim  https://localhost:9443 \
+						--token https://localhost:8243/token
+	`)
 
 // addEnvCmd represents the addEnv command
 var addEnvCmd = &cobra.Command{
-	Use:   "add-env",
-	Short: utils.AddEnvCmdShortDesc,
-	Long:  utils.AddEnvCmdLongDesc + utils.AddEnvCmdExamples,
+	Use:   addEnvCmdLiteral,
+	Short: addEnvCmdShortDesc,
+	Long:  addEnvCmdLongDesc + addEnvCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + "add-env called")
-		err := addEnv(flagAddEnvName, flagAPIManagerEndpoint, flagRegistrationEndpoint, flagTokenEndpoint,
+		utils.Logln(utils.LogPrefixInfo + addEnvCmdLiteral + " called")
+		err := addEnv(flagAddEnvName, flagPublisherEndpoint, flagRegistrationEndpoint, flagTokenEndpoint,
 			utils.MainConfigFilePath)
 		if err != nil {
 			utils.HandleErrorAndExit("Error adding environment", err)
@@ -45,46 +62,54 @@ var addEnvCmd = &cobra.Command{
 	},
 }
 
-func addEnv(envName string, apimEndpoint string, regEndpoint string, tokenEndpoint string,
-	mainConfigFilePath string) error {
+// addEnv adds a new environment and its endpoints and writes to config file
+// @param envName : Name of the Environment
+// @param publisherEndpoint : API Manager Endpoint for the environment
+// @param regEndpoint : Registratiopin Endpoint for the environment
+// @param tokenEndpoint : Token Endpoint for the environment
+// @param mainConfigFilePath : Path to file where env endpoints are stored
+// @return error
+func addEnv(envName, publisherEndpoint, regEndpoint, tokenEndpoint, mainConfigFilePath string) error {
 	mainConfig := utils.GetMainConfigFromFile(mainConfigFilePath)
 
 	if envName == "" {
 		// name of the environment is blank
 		return errors.New("name of the environment cannot be blank")
 	}
-	if apimEndpoint == "" || regEndpoint == "" || tokenEndpoint == "" {
+	if publisherEndpoint == "" || regEndpoint == "" || tokenEndpoint == "" {
 		// at least one of the 3 endpoints is blank
-		return errors.New("none of the 3 endpoints can be blank")
+		utils.ShowHelpCommandTip(addEnvCmdLiteral)
+		return errors.New("endpoints cannot be blank")
 	}
 	if utils.EnvExistsInMainConfigFile(envName, mainConfigFilePath) {
 		// environment already exists
-		return errors.New("environment '" + envName + "' already exists in " + utils.MainConfigFilePath)
+		return errors.New("environment '" + envName + "' already exists in " + mainConfigFilePath)
 	}
 
-	var envEndpoints utils.EnvEndpoints = utils.EnvEndpoints{
-											APIManagerEndpoint: apimEndpoint,
-											TokenEndpoint: tokenEndpoint,
-											RegistrationEndpoint: regEndpoint,
-										  }
+	var envEndpoints = utils.EnvEndpoints{
+		APIManagerEndpoint:   publisherEndpoint,
+		TokenEndpoint:        tokenEndpoint,
+		RegistrationEndpoint: regEndpoint,
+	}
 
 	mainConfig.Environments[envName] = envEndpoints
-	utils.WriteConfigFile(mainConfig, utils.MainConfigFilePath)
+	utils.WriteConfigFile(mainConfig, mainConfigFilePath)
 
-	fmt.Println("Successfully added environment '" + envName + "'")
+	fmt.Printf("Successfully added environment '%s'\n", envName)
 
 	return nil
 }
 
+// init using Cobra
 func init() {
 	RootCmd.AddCommand(addEnvCmd)
 
 	addEnvCmd.Flags().StringVarP(&flagAddEnvName, "name", "n", "",
 		"Name of the environment to be added")
-	addEnvCmd.Flags().StringVar(&flagAPIManagerEndpoint, "apim", "",
+	addEnvCmd.Flags().StringVarP(&flagPublisherEndpoint, "apim", "a", "",
 		"API Manager endpoint for the environment")
-	addEnvCmd.Flags().StringVar(&flagTokenEndpoint, "token", "",
+	addEnvCmd.Flags().StringVarP(&flagTokenEndpoint, "token", "t", "",
 		"Token endpoint for the environment")
-	addEnvCmd.Flags().StringVar(&flagRegistrationEndpoint, "registration", "",
+	addEnvCmd.Flags().StringVarP(&flagRegistrationEndpoint, "registration", "r", "",
 		"Registration endpoint for the environment")
 }

@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2005-2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -23,9 +23,12 @@ import (
 	"fmt"
 )
 
-// Return true if 'env' exists in the env_keys_all.yaml
+// EnvExistsInKeysFile
+// @param env : Name of the Environment
+// @param filePath : Path to file where env keys are stored
+// @return bool : true if 'env' exists in the env_keys_all.yaml
 // and false otherwise
-func EnvExistsInKeysFile(env string, filePath string) bool {
+func EnvExistsInKeysFile(env, filePath string) bool {
 	envKeysAll := GetEnvKeysAllFromFile(filePath)
 	for _env := range envKeysAll.Environments {
 		if _env == env {
@@ -35,9 +38,12 @@ func EnvExistsInKeysFile(env string, filePath string) bool {
 	return false
 }
 
-// Returns true if 'env' exists in env_endpoints_all.yaml
+// EnvExistsMainConfigFile
+// @param env : Name of the Environment
+// @param filePath : Path to file where env endpoints are stored
+// @return bool : true if 'env' exists in the main_config.yaml
 // and false otherwise
-func EnvExistsInMainConfigFile(env string, filePath string) bool {
+func EnvExistsInMainConfigFile(env, filePath string) bool {
 	envEndpointsAll := GetMainConfigFromFile(filePath)
 	for _env := range envEndpointsAll.Environments {
 		if _env == env {
@@ -48,7 +54,11 @@ func EnvExistsInMainConfigFile(env string, filePath string) bool {
 	return false
 }
 
+// AndNewEnvToKeysFile
 // Insert new env entry to keys file (env_keys_all.yaml)
+// @param name : Name of the environment
+// @param envKeys : EnvKeys object for the environment
+// @param filePath : Path to file where env keys are stored
 func AddNewEnvToKeysFile(name string, envKeys EnvKeys, filePath string) {
 	envKeysAll := GetEnvKeysAllFromFile(filePath)
 	fmt.Println("EnvKeysAll:", envKeysAll)
@@ -66,11 +76,13 @@ func AddNewEnvToKeysFile(name string, envKeys EnvKeys, filePath string) {
 	WriteConfigFile(envKeysAll, filePath)
 }
 
+// RemoveEnvFromKeysFiles
 // used with 'reset-user' command
 // does not remove env from endpoints file
-func RemoveEnvFromKeysFile(env string, keysFilePath string, endpointsFilePath string) error {
+// @param env 
+func RemoveEnvFromKeysFile(env, keysFilePath, mainConfigFilePath string) error {
 	/*
-	 endpointsFilePath is passed to check if it exists in endpoints
+	 mainConfigFilePath is passed to check if it exists in endpoints
 	 env CANNOT exist only in keys file
 	 env CAN exist only in endpoints file (env not initialized i.e. not used with a command)
 	 */
@@ -78,8 +90,8 @@ func RemoveEnvFromKeysFile(env string, keysFilePath string, endpointsFilePath st
 		return errors.New("environment cannot be blank")
 	}
 	envKeysAll := GetEnvKeysAllFromFile(keysFilePath)
-	if EnvExistsInMainConfigFile(env, endpointsFilePath) {
-		Logln(LogPrefixInfo + "Environment '" + env + "' exists in file " + endpointsFilePath)
+	if EnvExistsInMainConfigFile(env, mainConfigFilePath) {
+		Logln(LogPrefixInfo + "Environment '" + env + "' exists in file " + mainConfigFilePath)
 		if EnvExistsInKeysFile(env, keysFilePath) {
 			Logln(LogPrefixInfo + "Environment '" + env + "' exists in file " + keysFilePath)
 			delete(envKeysAll.Environments, env)
@@ -93,12 +105,13 @@ func RemoveEnvFromKeysFile(env string, keysFilePath string, endpointsFilePath st
 	} else {
 		// env doesn't exist in endpoints file
 		// nothing to remove
-		return errors.New("environment not found in " + endpointsFilePath)
+		return errors.New("environment not found in " + mainConfigFilePath)
 	}
 }
 
-// Input: name of the environment to be removed
-func RemoveEnvFromMainConfigFile(env string, endpointsFilePath string) error {
+// @param env : Environment to be removed from file
+// @param endpointsFilePath : Path to file where env endpoints are stored
+func RemoveEnvFromMainConfigFile(env, endpointsFilePath string) error {
 	if env == "" {
 		return errors.New("environment cannot be blank")
 	}
@@ -116,6 +129,10 @@ func RemoveEnvFromMainConfigFile(env string, endpointsFilePath string) error {
 
 // Get keys of environment 'env' from the file env_keys_all.yaml
 // client_secret is not decrypted
+// @param env : name of the environment
+// @param filePath : Path to file where env keys are stored
+// @return *EnvKeys
+// @return error
 func GetKeysOfEnvironment(env string, filePath string) (*EnvKeys, error) {
 	envKeysAll := GetEnvKeysAllFromFile(filePath)
 	for _env, keys := range envKeysAll.Environments {
@@ -140,31 +157,31 @@ func GetEndpointsOfEnvironment(env string, filePath string) (*EnvEndpoints, erro
 }
 
 // Get APIMEndpoint of a given environment
-func GetAPIMEndpointOfEnv(env string, filePath string) string {
+func GetAPIMEndpointOfEnv(env, filePath string) string {
 	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
 	return envEndpoints.APIManagerEndpoint
 }
 
 // Get TokenEndpoint of a given environment
-func GetTokenEndpointOfEnv(env string, filePath string) string {
+func GetTokenEndpointOfEnv(env, filePath string) string {
 	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
 	return envEndpoints.TokenEndpoint
 }
 
 // Get RegistrationEndpoint of a given environment
-func GetRegistrationEndpointOfEnv(env string, filePath string) string {
+func GetRegistrationEndpointOfEnv(env, filePath string) string {
 	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
 	return envEndpoints.RegistrationEndpoint
 }
 
 // Get username of an environment given the environment
-func GetUsernameOfEnv(env string, filePath string) string {
+func GetUsernameOfEnv(env, filePath string) string {
 	envKeys, _ := GetKeysOfEnvironment(env, filePath)
 	return envKeys.Username
 }
 
 // Get client_id of an environment given the environment
-func GetClientIDOfEnv(env string, filePath string) string {
+func GetClientIDOfEnv(env, filePath string) string {
 	envKeys, _ := GetKeysOfEnvironment(env, filePath)
 	return envKeys.ClientID
 }
@@ -172,7 +189,7 @@ func GetClientIDOfEnv(env string, filePath string) string {
 // Get decrypted client_secret of an environment given the environment and password
 // password is needed to decrypt client_secret
 // decryption_key = md5(password)
-func GetClientSecretOfEnv(env string, password string, filePath string) string {
+func GetClientSecretOfEnv(env, password, filePath string) string {
 	envKeys, _ := GetKeysOfEnvironment(env, filePath)
 	decryptedClientSecret := Decrypt([]byte(GetMD5Hash(password)), envKeys.ClientSecret)
 	return decryptedClientSecret
@@ -182,7 +199,7 @@ func GetClientSecretOfEnv(env string, password string, filePath string) string {
 // input the path to main_config file
 func IsDefaultEnvPresent(mainConfigFilePath string) bool {
 	mainConfig := GetMainConfigFromFile(mainConfigFilePath)
-	for envName, _ := range mainConfig.Environments {
+	for envName := range mainConfig.Environments {
 		if envName == DefaultEnvironmentName {
 			return true
 		}

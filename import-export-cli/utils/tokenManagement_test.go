@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2005-2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -74,8 +74,8 @@ func TestGetClientIDSecretOK(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set(HeaderContentType, HeaderValueApplicationJSON)
 		body := dedent.Dedent(`{"client_name":"Test1",
-									"client_id":"be88563b-21cb-417c-b574-bf1079959679",
-									"client_secret":"ecb105a0-117c-463d-9376-442d24864f26"}`)
+									"clientId":"be88563b-21cb-417c-b574-bf1079959679",
+									"clientSecret":"ecb105a0-117c-463d-9376-442d24864f26"}`)
 
 		w.Write([]byte(body))
 	}))
@@ -144,27 +144,26 @@ func TestExecutePreCommand(t *testing.T) {
 		flagUsername string
 		flagPassword string
 	}
-	tests := []struct {
+	var tests []struct {
 		name    string
 		args    args
 		want    string
 		want1   string
 		wantErr bool
-	}{
-	// TODO: Add test cases.
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1, err := ExecutePreCommand(tt.args.environment, tt.args.flagUsername, tt.args.flagPassword)
+			got, got1, err := ExecutePreCommandWithOAuth(tt.args.environment, tt.args.flagUsername,
+				tt.args.flagPassword, "", "")
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ExecutePreCommand() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ExecutePreCommandWithOAuth() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
-				t.Errorf("ExecutePreCommand() got = %v, want %v", got, tt.want)
+				t.Errorf("ExecutePreCommandWithOAuth() got = %v, want %v", got, tt.want)
 			}
 			if got1 != tt.want1 {
-				t.Errorf("ExecutePreCommand() got1 = %v, want %v", got1, tt.want1)
+				t.Errorf("ExecutePreCommandWithOAuth() got1 = %v, want %v", got1, tt.want1)
 			}
 		})
 	}

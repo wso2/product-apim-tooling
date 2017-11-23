@@ -1,22 +1,12 @@
 config:
-  http_request_timeout: 5000
-  skip_tls_verification: true
-#  export_directory: /home/menuka/.go/src/github.com/wso2/product-apim-tooling/import-export-cli/exported
-  export_directory: /home/menuka/exported/new
+  http_request_timeout: 3600
+  export_directory: /home/menuka/Documents/exported
 environments:
-  apim1:
-    api_manager_endpoint: https://35.187.83.50:9292/api/am/publisher/v1.0
-    registration_endpoint: https://35.187.83.50:9443/identity/connect/register
-    token_endpoint: https://35.187.83.50:9443/oauth2/token
   dev:
-    api_manager_endpoint: https://localhost:9292/api/am/publisher/v1.0
-    registration_endpoint: https://localhost:9443/identity/connect/register
-    token_endpoint: https://localhost:9443/oauth2/token
-  qa:
-    api_manager_endpoint: https://localhost:9292/api/am/publisher/v1.0
-    registration_endpoint: https://localhost:9443/identity/connect/register
-    token_endpoint: https://localhost:9443/oauth2/token
-  staging:
-    api_manager_endpoint: https://localhost:9292/api/am/publisher/v1.0
-    registration_endpoint: https://localhost:9443/identity/connect/register
-    token_endpoint: https://localhost:9443/oauth2/token
+    api_manager_endpoint: https://localhost:9443
+    registration_endpoint: http://localhost:9763/client-registration/v0.11/register
+    token_endpoint: https://localhost:8243/token
+  gcloud1:
+    api_manager_endpoint: https://104.196.50.59:9443
+    registration_endpoint: http://104.196.50.59:9763/client-registration/v0.11/register
+    token_endpoint: https://104.196.50.59:8243/token

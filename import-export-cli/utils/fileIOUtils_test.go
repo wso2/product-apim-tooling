@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2005-2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -22,23 +22,24 @@ package utils
 import (
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"testing"
 )
 
-const testKeysFileName string = "test_keys_config.yaml"
-const testMainConfigFileName string = "test_main_config.yaml"
-var testKeysFilePath string = ApplicationRoot + PathSeparator_ + testKeysFileName
-var testMainConfigFilePath string = ApplicationRoot + PathSeparator_ + testMainConfigFileName
+const testKeysFileName = "test_keys_config.yaml"
+const testMainConfigFileName = "test_main_config.yaml"
+var testKeysFilePath = filepath.Join(ApplicationRoot, testKeysFileName)
+var testMainConfigFilePath = filepath.Join(ApplicationRoot, testMainConfigFileName)
 
-var envKeysAll *EnvKeysAll = new(EnvKeysAll)
-var mainConfig *MainConfig = new(MainConfig)
+var envKeysAll = new(EnvKeysAll)
+var mainConfig = new(MainConfig)
 
-const devName string = "dev"
-const qaName string = "qa"
-const devUsername string = "dev_username"
-const qaUsername string = "qa_username"
-const devPassword string = "dev_password"
-const qaPassword string = "qa_password"
+const devName = "dev"
+const qaName = "qa"
+const devUsername = "dev_username"
+const qaUsername = "qa_username"
+const devPassword = "dev_password"
+const qaPassword = "qa_password"
 
 // helper function for testing
 func writeCorrectKeys() {
@@ -70,7 +71,7 @@ func WriteCorrectMainConfig() {
 }
 
 func initSampleMainConfig() {
-	mainConfig.Config = Config{2500, true, "/home/exported"}
+	mainConfig.Config = Config{2500,"/home/exported"}
 	mainConfig.Environments = make(map[string]EnvEndpoints)
 	mainConfig.Environments[devName] = EnvEndpoints{"dev_apim_endpoint",
 		"dev_reg_endpoint", "dev_token_endpoint"}

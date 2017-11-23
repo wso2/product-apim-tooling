@@ -1,0 +1,8 @@
+config:
+  http_request_timeout: 100000
+  export_directory: /home/user/Documents/exported
+environments:
+  dev:
+    api_manager_endpoint: https://localhost:9443
+    registration_endpoint: http://localhost:9763/client-registration/v0.11/register
+    token_endpoint: https://localhost:8243/token

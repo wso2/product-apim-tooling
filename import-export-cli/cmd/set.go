@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2005-2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -19,38 +19,56 @@
 package cmd
 
 import (
+	"fmt"
+	"github.com/renstrom/dedent"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"fmt"
 )
 
 var flagHttpRequestTimeout int
-var flagSkipTLSVerification bool
 var flagExportDirectory string
+
+// Set command related Info
+const setCmdLiteral = "set"
+const setCmdShortDesc = "Set configuration"
+
+var setCmdLongDesc = dedent.Dedent(`
+			Set configuration parameters. Use at least one of the following flags
+				* --http-request-timeout <time-in-milli-seconds>
+				* --export-directory <path-to-directory-where-apis-should-be-saved>
+	`)
+
+var setCmdExamples = dedent.Dedent(`
+			Examples:
+			` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 3600 \
+								  --export-directory /home/user/exported-apis
+
+			` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000 \
+								  --export-directory /media/user/apis
+
+			` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000
+	`)
 
 // SetCmd represents the 'set' command
 var SetCmd = &cobra.Command{
 	Use:   "set",
-	Short: utils.SetCmdShortDesc,
-	Long:  utils.SetCmdLongDesc + utils.SetCmdExamples,
+	Short: setCmdShortDesc,
+	Long:  setCmdLongDesc + setCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + "set called")
+		utils.Logln(utils.LogPrefixInfo + setCmdLiteral + " called")
 
 		// read the existing config vars
 		configVars := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
 
 		if flagHttpRequestTimeout > 0 {
 			configVars.Config.HttpRequestTimeout = flagHttpRequestTimeout
-		}else{
+		} else {
 			fmt.Println("Invalid input for flag --http-request-timeout")
 		}
 
-		// boolean flag. no need to validate. default is set to false
-		configVars.Config.SkipTLSVerification = flagSkipTLSVerification
-
 		if flagExportDirectory != "" && utils.IsValid(flagExportDirectory) {
 			configVars.Config.ExportDirectory = flagExportDirectory
-		}else{
+		} else {
 			fmt.Println("Invalid input for flag --export-directory")
 		}
 
@@ -58,17 +76,15 @@ var SetCmd = &cobra.Command{
 	},
 }
 
+// init using Cobra
 func init() {
 	RootCmd.AddCommand(SetCmd)
 
 	var defaultHttpRequestTimeout int
 	var defaultExportDirectory string
-	var defaultSkipTLSVerification bool
 
 	// read current values in file to be passed into default values for flags below
 	mainConfig := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
-
-	defaultSkipTLSVerification = mainConfig.Config.SkipTLSVerification
 
 	if mainConfig.Config.HttpRequestTimeout != 0 {
 		defaultHttpRequestTimeout = mainConfig.Config.HttpRequestTimeout
@@ -80,8 +96,6 @@ func init() {
 
 	SetCmd.Flags().IntVar(&flagHttpRequestTimeout, "http-request-timeout", defaultHttpRequestTimeout,
 		"Timeout for HTTP Client")
-	SetCmd.Flags().BoolVar(&flagSkipTLSVerification, "skip-tls-verification", defaultSkipTLSVerification,
-		"Skip SSL/TLS verification")
 	SetCmd.Flags().StringVar(&flagExportDirectory, "export-directory", defaultExportDirectory,
 		"Path to directory where APIs should be saved")
 }

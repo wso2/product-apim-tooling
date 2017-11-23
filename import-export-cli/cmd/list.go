@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2005-2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -19,99 +19,39 @@
 package cmd
 
 import (
-	"fmt"
-
-	"crypto/tls"
-	"encoding/json"
-	"errors"
-	"github.com/go-resty/resty"
+	"github.com/renstrom/dedent"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-var listEnvironment string
-var listCmdUsername string
-var listCmdPassword string
+// List command related usage Info
+const listCmdLiteral = "list"
+const listCmdShortDesc = "List APIs in an environment or List the environments"
+
+var listCmdLongDesc = dedent.Dedent(`
+			Display a list containing all the APIs available in the environment specified by flag (--environment, -e)
+			OR
+			List all the environments
+	`)
+
+var listCmdExamples = dedent.Dedent(`
+		Examples:
+		` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + EnvsCmdLiteral + `
+		` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + apisCmdLiteral + ` -e dev
+	`)
 
 // ListCmd represents the list command
 var ListCmd = &cobra.Command{
-	Use:   "list",
-	Short: utils.ListCmdShortDesc,
-	Long:  utils.ListCmdLongDesc + utils.ListCmdExamples,
+	Use:   listCmdLiteral,
+	Short: listCmdShortDesc,
+	Long:  listCmdLongDesc + listCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln("list called")
+		utils.Logln(utils.LogPrefixInfo + listCmdLiteral + " called")
 
-		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(listEnvironment, listCmdUsername,
-			listCmdPassword)
-
-		if preCommandErr == nil {
-			count, apis, err := GetAPIList("", accessToken, apiManagerEndpoint)
-
-			if err == nil {
-				fmt.Println("No. of APIs:", count)
-				if len(apis) != 0 {
-					fmt.Println("----------------------------")
-				}
-				for _, api := range apis {
-					fmt.Println(api.Name + " v" + api.Version)
-				}
-				if len(apis) != 0 {
-					fmt.Println("----------------------------")
-				}
-			} else {
-				utils.Logln(utils.LogPrefixError+"Getting List of APIs", err)
-			}
-		} else {
-			utils.Logln(utils.LogPrefixError + "calling 'list' " + preCommandErr.Error())
-			fmt.Println("Error calling 'list'", preCommandErr.Error())
-		}
 	},
 }
 
-func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (int32, []utils.API, error) {
-	url := apiManagerEndpoint
-
-	// append '/' to the end if there isn't one already
-	if url != "" && string(url[len(url)-1]) != "/" {
-		url += "/"
-	}
-	url += "apis?query=" + query
-	fmt.Println("URL:", url)
-
-	headers := make(map[string]string)
-	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
-
-	resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTPS certificates
-	resp, err := resty.R().
-		SetHeaders(headers).
-		Get(url)
-
-	if err != nil {
-		utils.HandleErrorAndExit("Unable to connect to "+url, err)
-	}
-
-	utils.Logln(utils.LogPrefixInfo+"GetAPIList(): Response:", resp.Status())
-
-	if resp.StatusCode() == 200 {
-		apiListResponse := &utils.APIListResponse{}
-		unmarshalError := json.Unmarshal([]byte(resp.Body()), &apiListResponse)
-
-		if unmarshalError != nil {
-			fmt.Println("UnmarshalError")
-			utils.HandleErrorAndExit(utils.LogPrefixError+"Unmarshall Error", unmarshalError)
-		}
-
-		return apiListResponse.Count, apiListResponse.List, nil
-	} else {
-		return 0, nil, errors.New(resp.Status())
-	}
-
-}
-
+// init using Cobra
 func init() {
 	RootCmd.AddCommand(ListCmd)
-	ListCmd.Flags().StringVarP(&listEnvironment, "environment", "e",
-		utils.GetDefaultEnvironment(utils.MainConfigFilePath),"Environment to be searched")
-	ListCmd.Flags().StringVarP(&listCmdUsername, "username", "u", "", "Username")
-	ListCmd.Flags().StringVarP(&listCmdPassword, "password", "p", "", "Password")
 }

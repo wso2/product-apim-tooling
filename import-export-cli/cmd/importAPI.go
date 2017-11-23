@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2005-2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -24,64 +24,93 @@ import (
 	"bytes"
 	"crypto/tls"
 	"io"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
-	"regexp"
 
+	"github.com/renstrom/dedent"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"regexp"
+	"strings"
 	"time"
 )
 
-var importAPIName string
+var importAPIFile string
 var importEnvironment string
 var importAPICmdUsername string
 var importAPICmdPassword string
 
+// ImportAPI command related usage info
+const importAPICmdLiteral = "import-api"
+const importAPICmdShortDesc = "Import API"
+
+var importAPICmdLongDesc = "Import an API to an environment"
+
+var importAPICmdExamples = dedent.Dedent(`
+		Examples:
+		` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f qa/TwitterAPI.zip -e dev
+		` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f staging/FacebookAPI.zip -e production -u admin -p admin
+	`)
+
 // ImportAPICmd represents the importAPI command
 var ImportAPICmd = &cobra.Command{
-	Use:   "import-api (--name <name-of-the-api> --environment <environment-to-which-the-api-should-be-imported>)",
-	Short: utils.ImportAPICmdShortDesc,
-	Long:  utils.ImportAPICmdLongDesc + utils.ImportAPICmdExamples,
+	Use: importAPICmdLiteral + " (--file <api-zip-file> --environment " +
+		"<environment-to-which-the-api-should-be-imported>)",
+	Short: importAPICmdShortDesc,
+	Long:  importAPICmdLongDesc + importAPICmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + "import-api called")
+		utils.Logln(utils.LogPrefixInfo + importAPICmdLiteral + " called")
 
-		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(importEnvironment, importAPICmdUsername,
-			importAPICmdPassword)
+		b64encodedCredentials, apiManagerEndpoint, preCommandErr :=
+			utils.ExecutePreCommandWithBasicAuth(importEnvironment, importAPICmdUsername, importAPICmdPassword,
+				utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
 
 		if preCommandErr == nil {
+			resp, err := ImportAPI(importAPIFile, apiManagerEndpoint, b64encodedCredentials, utils.ExportDirectory)
+			if err != nil {
+				utils.HandleErrorAndExit("Error importing API", err)
+			}
 
-			resp, _ := ImportAPI(importAPIName, apiManagerEndpoint, accessToken)
-			utils.Logln(utils.LogPrefixInfo+"Status: %v\n", resp.Status)
-			if resp.StatusCode == 200 {
-				fmt.Println("Header:", resp.Header)
+			if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusCreated {
+				// 200 OK or 201 Created
+				utils.Logln(utils.LogPrefixInfo + "Header:", resp.Header)
+				fmt.Println("Succesfully imported API!")
 			} else {
-				fmt.Println("Status: ", resp.Status)
+				fmt.Println("Error importing API")
 				utils.Logln(utils.LogPrefixError + resp.Status)
 			}
 		} else {
-			// env_endpoints_all.yaml file is not configured properly by the user
-			log.Fatal("Error:", preCommandErr)
+			// env_endpoints file is not configured properly by the user
+			fmt.Println("Error:", preCommandErr)
 			utils.Logln(utils.LogPrefixError + preCommandErr.Error())
 		}
 	},
 }
 
-func ImportAPI(name string, url string, accessToken string) (*http.Response, error) {
+// ImportAPI function is used with import-api command
+// @param name: name of the API (zipped file) to be imported
+// @param apiManagerEndpoint: API Manager endpoint for the environment
+// @param accessToken: OAuth2.0 access token for the resource being accessed
+func ImportAPI(query, apiManagerEndpoint, accessToken, exportDirectory string) (*http.Response, error) {
 	// append '/' to the end if there isn't one already
-	if string(url[len(url)-1]) != "/" {
-		url += "/"
+	if string(apiManagerEndpoint[len(apiManagerEndpoint)-1]) != "/" {
+		apiManagerEndpoint += "/"
 	}
-	url += "import/apis"
+	apiManagerEndpoint += utils.ApiImportExportProduct + "/" + "import-api"
+	utils.Logln(utils.LogPrefixInfo + "Import URL: " + apiManagerEndpoint)
 
-	filePath := utils.ExportDirectory + utils.PathSeparator_ + name
-	fmt.Println("filePath:", filePath)
+	sourceEnv := strings.Split(query, "/")[0] // environment from which the API was exported
+	utils.Logln(utils.LogPrefixInfo + "Source Environment: " + sourceEnv)
 
-	// check if '.zip' exists in the input 'name'
-	hasZipExtension, _ := regexp.MatchString(`^\S+\.zip$`, name)
+	fileName := query // ex:- fileName = dev/twitterapi_1.0.0.zip
+
+	zipFilePath := filepath.Join(exportDirectory, fileName)
+	fmt.Println("ZipFilePath:", zipFilePath)
+
+	// check if '.zip' exists in the input 'fileName'
+	hasZipExtension, _ := regexp.MatchString(`^\S+\.zip$`, fileName)
 
 	if hasZipExtension {
 		// import the zip file directly
@@ -89,19 +118,19 @@ func ImportAPI(name string, url string, accessToken string) (*http.Response, err
 
 	} else {
 		//fmt.Println("hasZipExtension: ", false)
-		// search for a directory with the given name
-		destination := utils.ExportedAPIsDirectoryPath + utils.PathSeparator_ + name + ".zip"
-		err := utils.ZipDir(filePath, destination)
+		// search for a directory with the given fileName
+		destination := filepath.Join(utils.ExportedAPIsDirectoryPath, fileName+".zip")
+		err := utils.ZipDir(zipFilePath, destination)
 		if err != nil {
 			utils.HandleErrorAndExit("Error creating zip archive", err)
 		}
-		filePath += ".zip"
+		zipFilePath += ".zip"
 	}
 
 	extraParams := map[string]string{}
 	// TODO:: Add extraParams as necessary
 
-	req, err := NewFileUploadRequest(url, extraParams, "file", filePath, accessToken)
+	req, err := NewFileUploadRequest(apiManagerEndpoint, extraParams, "file", zipFilePath, accessToken)
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating request.", err)
 	}
@@ -126,8 +155,16 @@ func ImportAPI(name string, url string, accessToken string) (*http.Response, err
 		utils.Logln(utils.LogPrefixError, err)
 	} else {
 		//var bodyContent []byte
-		fmt.Println(resp.StatusCode)
-		fmt.Println(resp.Header)
+
+		if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
+			// 201 Created or 200 OK
+			fmt.Println("Successfully imported API '" + fileName + "'")
+		} else {
+			fmt.Println("Error importing API.")
+			fmt.Println("Status: " + resp.Status)
+		}
+
+		//fmt.Println(resp.Header)
 		//resp.Body.Read(bodyContent)
 		//resp.Body.Close()
 		//fmt.Println(bodyContent)
@@ -136,10 +173,11 @@ func ImportAPI(name string, url string, accessToken string) (*http.Response, err
 	return resp, err
 }
 
+// NewFileUploadRequest form an HTTP Put request
 // Helper function for forming multi-part form data
 // Returns the formed http request and errors
-func NewFileUploadRequest(uri string, params map[string]string, paramName, path string,
-	accessToken string) (*http.Request, error) {
+func NewFileUploadRequest(uri string, params map[string]string, paramName, path,
+	b64encodedCredentials string) (*http.Request, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -162,8 +200,8 @@ func NewFileUploadRequest(uri string, params map[string]string, paramName, path 
 		return nil, err
 	}
 
-	request, err := http.NewRequest(http.MethodPut, uri, body)
-	request.Header.Add(utils.HeaderAuthorization, utils.HeaderValueAuthBearerPrefix+" "+accessToken)
+	request, err := http.NewRequest(http.MethodPost, uri, body)
+	request.Header.Add(utils.HeaderAuthorization, utils.HeaderValueAuthBasicPrefix+" "+b64encodedCredentials)
 	request.Header.Add(utils.HeaderContentType, writer.FormDataContentType())
 	request.Header.Add(utils.HeaderAccept, "*/*")
 	request.Header.Add(utils.HeaderConnection, utils.HeaderValueKeepAlive)
@@ -171,10 +209,10 @@ func NewFileUploadRequest(uri string, params map[string]string, paramName, path 
 	return request, err
 }
 
-// Generated with Cobra
+// init using Cobra
 func init() {
 	RootCmd.AddCommand(ImportAPICmd)
-	ImportAPICmd.Flags().StringVarP(&importAPIName, "name", "n", "",
+	ImportAPICmd.Flags().StringVarP(&importAPIFile, "file", "f", "",
 		"Name of the API to be imported")
 	ImportAPICmd.Flags().StringVarP(&importEnvironment, "environment", "e",
 		utils.GetDefaultEnvironment(utils.MainConfigFilePath), "Environment from the which the API should be imported")

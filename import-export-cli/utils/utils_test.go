@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2005-2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -58,11 +58,9 @@ func TestInvokePOSTRequestOK(t *testing.T) {
 }
 
 func TestPromptForUsername(t *testing.T) {
-	tests := []struct {
+	var tests []struct {
 		name string
 		want string
-	}{
-	// TODO: Add test cases.
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -74,11 +72,9 @@ func TestPromptForUsername(t *testing.T) {
 }
 
 func TestPromptForPassword(t *testing.T) {
-	tests := []struct {
+	var tests []struct {
 		name string
 		want string
-	}{
-	// TODO: Add test cases.
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
