@@ -3,28 +3,9 @@
 
 Command Line tool for importing and exporting APIs between different API Environemnts
 
-## Getting Started
-
-- ### Building
-    Execute ```build.sh``` to build for necessary platforms. Further instructions will be available upon executing 
-    build.sh
-      
-- ### Running
-    Extract the compressed archive generated to a desired location
-    Then execute ```{extracted-location}/bin/wso2apim``` to start the application
-    Execute ```{extracted-location}/bin/wso2apim --help``` for further instructions
-
-- ### Adding Environments
-    Add environments by either manually editing ```{extracted-location}/main_config.yaml``` or using the command
-    ```wso2apim set``` command.
-    Type ```wso2apim set --help``` for detailed instructions
-
-<hr/>
-<br/>
-
 ## Usage 
 ```bash
-     wso2apim [command]
+     apimcli [command]
 ```
 
 ### Commands
@@ -39,10 +20,10 @@ Command Line tool for importing and exporting APIs between different API Environ
                 --username, -u
                 --password, -p
         Examples:
-            wso2apim export-api -n TestAPI -v 1.0.1 -e staging
-            wso2apim export-api -n TestAPI -v 1.0.1 -e staging -u admin -p 123456
-            wso2apim export-api -n TestAPI -v 1.0.1 -e staging -u admin
-            wso2apim export-api -n TestAPI -v 1.0.1 -e staging -p 123456
+            apimcli export-api -n TestAPI -v 1.0.1 -e staging
+            apimcli export-api -n TestAPI -v 1.0.1 -e staging -u admin -p 123456
+            apimcli export-api -n TestAPI -v 1.0.1 -e staging -u admin
+            apimcli export-api -n TestAPI -v 1.0.1 -e staging -p 123456
 ```
 
 
@@ -51,19 +32,19 @@ Command Line tool for importing and exporting APIs between different API Environ
 ```bash
         Flags:
             Required:
-                --name, -n
+                --file, -f
                 --environment, -e
             Optional:
                 --username, -u 
                 --password, -p 
         Examples:
-            wso2apim import-api -n TestAPI.zip -e dev
-            wso2apim import-api -n TestAPI.zip -e dev -u admin -p 123456
-            wso2apim import-api -n TestAPI.zip -e dev -u admin
-            wso2apim import-api -n TestAPI.zip -e dev -p 123456 
-            wso2apim import-api -n TestAPI -e dev
+            apimcli import-api -f dev/TestAPI_1.0.0.zip -e dev
+            apimcli import-api -f qa/TestAPI_1.2.1.zip -e dev -u admin -p 123456
+            apimcli import-api -f staging/TestAPI_2.1.3.zip -e dev -u admin
+            apimcli import-api -f production/TestAPI_3.1.0.zip -e dev -p 123456 
+            apimcli import-api -f TestAPI_1.2.1.zip -e dev
 ```
-* #### list
+* #### list apis
 ```bash
         Flags:
             Required:
@@ -72,22 +53,31 @@ Command Line tool for importing and exporting APIs between different API Environ
                 --username, -u 
                 --password, -p 
         Examples:
-            wso2apim list -e dev
-            wso2apim list -e staging 
-            wso2apim list -e staging -u admin -p 123456
-            wso2apim list -e staging -u admin
-            wso2apim list -e staging -p 123456
+            apimcli list -e dev
+            apimcli list -e staging 
+            apimcli list -e staging -u admin -p 123456
+            apimcli list -e staging -u admin
+            apimcli list -e staging -p 123456
 ```
+
+*  #### list envs
+```bash
+        Flags:
+            None
+        Example:
+            apimcli list envs
+```
+
 * #### add-env
 ```bash
         Flags:
             Required:
                 --name, -n (Name of the environment)
-                --apim (API Manager endpoint)
-                --registration (Registration Endpoint)
-                --token (Token Endpoint)
+                --publisher, -p (Publisher endpoint)
+                --registration, -r (Registration Endpoint)
+                --token, -t (Token Endpoint)
             Examples:
-                wso2apim add-env -n dev \
+                apimcli add-env -n dev \
                 --apim https://localhost:9292/api/am/publisher/v1.0 \
                 --registration https://localhost:9443/identity/connect/register \
                 --token https: https://localhost:9443/oauth2/token
@@ -98,7 +88,7 @@ Command Line tool for importing and exporting APIs between different API Environ
             Required:
                 --name, -n (Name of the environment)
             Examples:
-                wso2apim remove-env -n dev
+                apimcli remove-env -n dev
                 
 ```
 
@@ -107,11 +97,11 @@ Command Line tool for importing and exporting APIs between different API Environ
         Flags
             --environment, -e
         Examples:
-            wso2apim reset-user -e dev
+            apimcli reset-user -e dev
 ```
 * #### version
 ```bash
-        wso2apim version 
+        apimcli version 
 ``` 
 
 * #### set
@@ -120,8 +110,8 @@ Command Line tool for importing and exporting APIs between different API Environ
             --httpRequestTimeout
             --exportDirectory
         Examples:
-            wso2apim set --httpRequestTimeout 10000
-            wso2apim set --exportDirectory /home/user/exported 
+            apimcli set --httpRequestTimeout 10000
+            apimcli set --exportDirectory /home/user/exported 
 ```
         
 #### Global Flags
@@ -130,4 +120,3 @@ Command Line tool for importing and exporting APIs between different API Environ
     --insecure, -k
     --help, -h
 ```
-

@@ -6,20 +6,28 @@ Command Line tool for importing and exporting APIs between different API Environ
 ## Getting Started
 
 - ### Building
-    Execute ```build.sh``` to build for necessary platforms. Further instructions will be available upon executing 
-    build.sh
+    Prerequisites: You need to have [Go 1.8.x](https://golang.org/dl) and [Glide](https://github.com/Masterminds/glide#install) installed locally to build from the source
     
-    Created packages will be available at `target` directory
+    Execute ```./build.sh -t apimcli.go -v 1.0.0 -f``` to build for all platforms.
+    
+    Created packages will be available at `build/target` directory
       
 - ### Running
-    Extract the compressed archive generated to a desired location
-    Then execute ```import-export-cli/bin/apimcli``` to start the application
-    Execute ```import-export-cli/bin/apimcli --help``` for further instructions
+    Extract the compressed archive generated to a desired location.
+    
+    Then execute ```import-export-cli/apimcli``` to start the application.
+    
+    Execute ```import-export-cli/apimcli --help``` for further instructions.
 
 - ### Adding Environments
     Add environments by either manually editing ```import-export-cli/bin/main_config.yaml``` or using the command
     ```apimcli set``` command.
+    
     Type ```apimcli set --help``` for detailed instructions
+    
+  ### Command Autocompletion (For Bash Only)
+    Copy the file `apimcli_bash_completion.sh` to `/etc/bash_completion.d/` and source it with
+    `source /etc/bash_completion.d/apimcli_bash_completion.sh` to enable bash auto-completion.
 
 <hr/>
 <br/>
@@ -53,17 +61,17 @@ Command Line tool for importing and exporting APIs between different API Environ
 ```bash
         Flags:
             Required:
-                --name, -n
+                --file, -f
                 --environment, -e
             Optional:
                 --username, -u 
                 --password, -p 
         Examples:
-            apimcli import-api -f dev/TestAPI.zip -e dev
-            apimcli import-api -f qa/TestAPI.zip -e dev -u admin -p 123456
-            apimcli import-api -f staging/TestAPI.zip -e dev -u admin
-            apimcli import-api -f production/TestAPI.zip -e dev -p 123456 
-            apimcli import-api -f TestAPI -e dev
+            apimcli import-api -f dev/TestAPI_1.0.0.zip -e dev
+            apimcli import-api -f qa/TestAPI_1.2.1.zip -e dev -u admin -p 123456
+            apimcli import-api -f staging/TestAPI_2.1.3.zip -e dev -u admin
+            apimcli import-api -f production/TestAPI_3.1.0.zip -e dev -p 123456 
+            apimcli import-api -f TestAPI_1.2.1.zip -e dev
 ```
 * #### list apis
 ```bash
