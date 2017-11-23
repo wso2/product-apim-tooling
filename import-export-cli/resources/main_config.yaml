@@ -4,6 +4,6 @@ config:
 
 environments:
   sample-env:
-    publisher_endpoint: sample-publisher-endpoint
+    api_manager_endpoint: sample-publisher-endpoint
     registration_endpoint: sample-reg-endpoint
     token_endpoint: sample-token-endpoint

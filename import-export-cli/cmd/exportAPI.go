@@ -47,8 +47,8 @@ var exportAPICmdLongDesc = "Export APIs from an environment"
 
 var exportAPICmdExamples = dedent.Dedent(`
 		Examples:
-		` + utils.ProjectName + ` ` + exportAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -e dev
-		` + utils.ProjectName + ` ` + exportAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 -e production
+		` + utils.ProjectName + ` ` + exportAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -e dev --provider admin
+		` + utils.ProjectName + ` ` + exportAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 -e production --provider admin
 	`)
 
 // ExportAPICmd represents the exportAPI command

@@ -45,6 +45,8 @@ var apisCmdLongDesc = dedent.Dedent(`
 	`)
 var apisCmdExamples = dedent.Dedent(`
 	` + utils.ProjectName + ` ` + apisCmdLiteral + ` ` + listCmdLiteral + ` -e dev
+	` + utils.ProjectName + ` ` + apisCmdLiteral + ` ` + listCmdLiteral + ` -e dev -q version:1.0.0
+	` + utils.ProjectName + ` ` + apisCmdLiteral + ` ` + listCmdLiteral + ` -e prod -q provider:admin
 	` + utils.ProjectName + ` ` + apisCmdLiteral + ` ` + listCmdLiteral + ` -e staging -u admin -p admin
 	`)
 
@@ -88,26 +90,26 @@ var apisCmd = &cobra.Command{
 // @return array of API objects
 // @return error
 func GetAPIList(query, accessToken, apiManagerEndpoint string) (count int32, apis []utils.API, err error) {
-	url := apiManagerEndpoint
+	url_ := apiManagerEndpoint
 
 	// append '/' to the end if there isn't one already
-	if url != "" && string(url[len(url)-1]) != "/" {
-		url += "/"
+	if url_ != "" && string(url_[len(url_)-1]) != "/" {
+		url_ += "/"
 	}
-	url += "api/am/publisher/v0.11/apis"
+	url_ += "api/am/publisher/v0.11/apis"
 
 	if query != "" {
 		query = (&url.URL{Path: query}).String()
 	}
-	utils.Logln(utils.LogPrefixInfo+"URL:", url)
+	utils.Logln(utils.LogPrefixInfo+"URL:", url_)
 
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 
-	resp, err := utils.InvokeGETRequest(url, headers)
+	resp, err := utils.InvokeGETRequest(url_, headers)
 
 	if err != nil {
-		utils.HandleErrorAndExit("Unable to connect to "+url, err)
+		utils.HandleErrorAndExit("Unable to connect to "+url_, err)
 	}
 
 	utils.Logln(utils.LogPrefixInfo+"Response:", resp.Status())

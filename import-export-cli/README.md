@@ -1,27 +1,33 @@
 # CLI for Importing and Exporting APIs
-## For WSO2 API Manager 2.1.0
+## For WSO2 API Manager 2.1.x
 
 Command Line tool for importing and exporting APIs between different API Environemnts
 
 ## Getting Started
 
 - ### Building
-    Prerequisites: You need to have Go 1.8.x installed locally to build from the source
+    Prerequisites: You need to have [Go 1.8.x](https://golang.org/dl) and [Glide](https://github.com/Masterminds/glide#install) installed locally to build from the source
     
-    Execute ```build.sh``` to build for necessary platforms. Further instructions will be available upon executing 
-    build.sh
+    Execute ```./build.sh -t apimcli.go -v 1.0.0 -f``` to build for all platforms.
     
-    Created packages will be available at `target` directory
+    Created packages will be available at `build/target` directory
       
 - ### Running
-    Extract the compressed archive generated to a desired location
-    Then execute ```import-export-cli/bin/apimcli``` to start the application
-    Execute ```import-export-cli/bin/apimcli --help``` for further instructions
+    Extract the compressed archive generated to a desired location.
+    
+    Then execute ```import-export-cli/bin/apimcli``` to start the application.
+    
+    Execute ```import-export-cli/bin/apimcli --help``` for further instructions.
 
 - ### Adding Environments
     Add environments by either manually editing ```import-export-cli/bin/main_config.yaml``` or using the command
     ```apimcli set``` command.
+    
     Type ```apimcli set --help``` for detailed instructions
+    
+  ### Command Autocompletion (For Bash Only)
+    Copy the file `apimcli_bash_completion.sh` to `/etc/bash_completion.d/` and source it with
+    `source /etc/bash_completion.d/apimcli_bash_completion.sh` to enable bash auto-completion.
 
 <hr/>
 <br/>
@@ -49,22 +55,21 @@ Command Line tool for importing and exporting APIs between different API Environ
             apimcli export-api -n TestAPI -v 1.0.1 -e staging -p 123456
 ```
 
-
 * #### import-api
     
 ```bash
         Flags:
             Required:
-                --name, -n
+                --file, -f
                 --environment, -e
             Optional:
                 --username, -u 
                 --password, -p 
         Examples:
-            apimcli import-api -f dev/TestAPI.zip -e dev
-            apimcli import-api -f qa/TestAPI.zip -e dev -u admin -p 123456
-            apimcli import-api -f staging/TestAPI.zip -e dev -u admin
-            apimcli import-api -f production/TestAPI.zip -e dev -p 123456 
+            apimcli import-api -f dev/TestAPI_1.0.0.zip -e dev
+            apimcli import-api -f qa/TestAPI_2.0.0.zip -e dev -u admin -p 123456
+            apimcli import-api -f staging/TestAPI_1.1.zip -e dev -u admin
+            apimcli import-api -f production/TestAPI_3.0.1.zip -e dev -p 123456 
             apimcli import-api -f TestAPI -e dev
 ```
 * #### list apis
@@ -75,12 +80,14 @@ Command Line tool for importing and exporting APIs between different API Environ
             Optional:
                 --username, -u 
                 --password, -p 
+                --query, -q
         Examples:
-            apimcli list -e dev
-            apimcli list -e staging 
-            apimcli list -e staging -u admin -p 123456
-            apimcli list -e staging -u admin
-            apimcli list -e staging -p 123456
+            apimcli list apis -e dev
+            apimcli list apis -e prod -q version:1.0.0 
+            apimcli list apis -e prod -q provider:admin 
+            apimcli list apis -e staging 
+            apimcli list apis -e staging -u admin -p 123456
+            apimcli list apis -e staging -p 123456
 ```
 
 *  #### list envs
