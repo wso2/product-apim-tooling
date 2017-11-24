@@ -269,14 +269,13 @@
             <version>${maven.failsafe.plugin.version}</version>
             <type>maven-plugin</type>
         </dependency>
-
-
+        <!-- This is the dependency for SwaggerHub custom plugin classes
+             this is added to the maven local repo with the .jar SmartBear provided manually -->
         <dependency>
             <groupId>com.swaggerhub.plugin</groupId>
             <artifactId>swaggerhub-plugins-sdk</artifactId>
             <version>${swaggerhub.plugin.version}</version>
         </dependency>
-
     </dependencies>
 
     <properties>

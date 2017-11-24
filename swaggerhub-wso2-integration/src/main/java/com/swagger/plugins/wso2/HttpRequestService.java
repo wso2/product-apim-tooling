@@ -53,7 +53,7 @@ public interface HttpRequestService {
      * @throws PluginExecutionException Thrown when an exception is caught while the plugin executes
      */
     HttpResponse makePutRequest(String url, String tokenPrefix, String token, String contentType, StringEntity payload)
-            throws com.smartbear.swaggerhub.plugins.PluginExecutionException;
+            throws PluginExecutionException;
 
     /**
      * Makes a GET request and returns the response
@@ -66,5 +66,5 @@ public interface HttpRequestService {
      * @throws PluginExecutionException Thrown when an exception is caught while the plugin executes
      */
     HttpResponse makeGetRequest(String url, String tokenPrefix, String token, String contentType)
-            throws com.smartbear.swaggerhub.plugins.PluginExecutionException;
+            throws PluginExecutionException;
 }
