@@ -39,6 +39,8 @@ import java.io.IOException;
 public class MakeHttpRequestService implements HttpRequestService {
 
     private static final Logger log = LoggerFactory.getLogger(MakeHttpRequestService.class);
+    private static final String AUTHORIZATION_HEADER = "Authorization";
+    private static final String CONTENT_TYPE_HEADER = "Content-Type";
 
     /**
      * Makes a POST request to the given url and returns the response
@@ -56,8 +58,8 @@ public class MakeHttpRequestService implements HttpRequestService {
         HttpResponse response;
         HttpClient httpClient = HttpClients.createDefault();
         HttpPost postRequest = new HttpPost(url);
-        postRequest.setHeader("Authorization", tokenPrefix + " " + token);
-        postRequest.setHeader("Content-Type", contentType);
+        postRequest.setHeader(AUTHORIZATION_HEADER, tokenPrefix + " " + token);
+        postRequest.setHeader(CONTENT_TYPE_HEADER, contentType);
         postRequest.setEntity(payload);
         try {
             response = httpClient.execute(postRequest);
@@ -84,8 +86,8 @@ public class MakeHttpRequestService implements HttpRequestService {
         HttpResponse response;
         HttpClient httpClient = HttpClients.createDefault();
         HttpPut putRequest = new HttpPut(url);
-        putRequest.setHeader("Authorization", tokenPrefix + " " + token);
-        putRequest.setHeader("Content-Type", contentType);
+        putRequest.setHeader(AUTHORIZATION_HEADER, tokenPrefix + " " + token);
+        putRequest.setHeader(CONTENT_TYPE_HEADER, contentType);
         putRequest.setEntity(payload);
         try {
             response = httpClient.execute(putRequest);
@@ -112,8 +114,8 @@ public class MakeHttpRequestService implements HttpRequestService {
         HttpResponse response;
         HttpClient httpClient = HttpClients.createDefault();
         HttpGet getRequest = new HttpGet(url);
-        getRequest.setHeader("Authorization", tokenPrefix + " " + token);
-        getRequest.setHeader("Content-Type", contentType);
+        getRequest.setHeader(AUTHORIZATION_HEADER, tokenPrefix + " " + token);
+        getRequest.setHeader(CONTENT_TYPE_HEADER, contentType);
         try {
             response = httpClient.execute(getRequest);
         } catch (IOException e) {
