@@ -5,27 +5,35 @@ Command Line tool for importing and exporting APIs between different API Environ
 
 ## Getting Started
 
+- ### Setting up the development environment
+    1. Install [Go 1.8.x](https://golang.org/dl)
+    2. Setup `$GOROOT` and `$GOPATH` correctly : [Tutorial](https://www.goinggo.net/2016/05/installing-go-and-your-workspace.html) 
+    3. [Install Glide](https://github.com/Masterminds/glide#install) - The Dependency manager for Go
+    4. Clone the [repository](https://github.com/wso2/product-apim-tooling) to your `$GOPATH` such that the project location is `$GOPATH/src/github.com/wso2/product-apim-tooling` (This is mandatory for Go's dependencies to identify each other)
+    5. `cd` into `product-apim-tooling/import-export-cli` 
+    6. Execute `glide install` to download all the dependencies
+
 - ### Building
-    Prerequisites: You need to have [Go 1.8.x](https://golang.org/dl) and [Glide](https://github.com/Masterminds/glide#install) installed locally to build from the source
+    `cd` into `product-apim-tooling/import-export-cli`
     
-    Execute ```./build.sh -t apimcli.go -v 1.0.0 -f``` to build for all platforms.
+    Execute `./build.sh -t apimcli.go -v 1.0.0 -f` to build for all platforms.
     
     Created packages will be available at `build/target` directory
       
 - ### Running
-    Extract the compressed archive generated to a desired location.
+    Select a generated archive suitable for your platform and extract it to a desired location.
     
-    Then execute ```import-export-cli/bin/apimcli``` to start the application.
+    Then execute `apimcli` to start the application.
     
-    Execute ```import-export-cli/bin/apimcli --help``` for further instructions.
+    Execute `apimcli --help` for further instructions.
 
 - ### Adding Environments
-    Add environments by either manually editing ```import-export-cli/bin/main_config.yaml``` or using the command
-    ```apimcli set``` command.
+    Add environments by either manually editing `main_config.yaml` or using the command
+    `apimcli set`.
     
-    Type ```apimcli set --help``` for detailed instructions
+    Execute `set --help` for detailed instructions
     
-  ### Command Autocompletion (For Bash Only)
+- ### Command Autocompletion (For Bash Only)
     Copy the file `apimcli_bash_completion.sh` to `/etc/bash_completion.d/` and source it with
     `source /etc/bash_completion.d/apimcli_bash_completion.sh` to enable bash auto-completion.
 

@@ -111,3 +111,12 @@ func TestGetAPIListUnreachable(t *testing.T) {
 		t.Error("Error should not be nil")
 	}
 }
+
+func TestPrintApis(t *testing.T) {
+	var apis = []utils.API{
+		{ID: "1", Name: "sampleapi", Context: "/sampleapi", Version: "1.0.0", Provider: "admin", Status: "CREATED"},
+		{ID: "2", Name: "sampleapi2", Context: "/sampleapi2", Version: "1.0.0", Provider: "admin", Status: "CREATED"},
+	}
+
+	printAPIs(apis)
+}

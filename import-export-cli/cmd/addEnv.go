@@ -69,14 +69,12 @@ var addEnvCmd = &cobra.Command{
 // @param tokenEndpoint : Token Endpoint for the environment
 // @param mainConfigFilePath : Path to file where env endpoints are stored
 // @return error
-func addEnv(envName, publisherEndpoint, regEndpoint, tokenEndpoint, mainConfigFilePath string) error {
-	mainConfig := utils.GetMainConfigFromFile(mainConfigFilePath)
-
+func addEnv(envName, apiManagerEndpoint, regEndpoint, tokenEndpoint, mainConfigFilePath string) error {
 	if envName == "" {
 		// name of the environment is blank
 		return errors.New("name of the environment cannot be blank")
 	}
-	if publisherEndpoint == "" || regEndpoint == "" || tokenEndpoint == "" {
+	if apiManagerEndpoint == "" || regEndpoint == "" || tokenEndpoint == "" {
 		// at least one of the 3 endpoints is blank
 		utils.ShowHelpCommandTip(addEnvCmdLiteral)
 		return errors.New("endpoints cannot be blank")
@@ -86,8 +84,10 @@ func addEnv(envName, publisherEndpoint, regEndpoint, tokenEndpoint, mainConfigFi
 		return errors.New("environment '" + envName + "' already exists in " + mainConfigFilePath)
 	}
 
+	mainConfig := utils.GetMainConfigFromFile(mainConfigFilePath)
+
 	var envEndpoints = utils.EnvEndpoints{
-		APIManagerEndpoint:   publisherEndpoint,
+		APIManagerEndpoint:   apiManagerEndpoint,
 		TokenEndpoint:        tokenEndpoint,
 		RegistrationEndpoint: regEndpoint,
 	}
