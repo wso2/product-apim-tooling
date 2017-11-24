@@ -1,13 +1,3 @@
-<<<<<<< HEAD
-#IDEA
-.idea
-*.iml
-*.ipr
-*.iws
-
-#MAVEN
-target
-=======
 build
 # Compiled class file
 *.class
@@ -77,4 +67,14 @@ import-export-cli/utils/coverage.out
 import-export-cli/utils/coverage.html
 
 # ==================
->>>>>>> 0495f3de0670ba66ec80a8eed47f1d8da94478eb
+
+# Swaggerhub-wso2-integration
+#============================
+
+# IDE
+*.ipr
+*.iws
+
+# Maven
+target
+
