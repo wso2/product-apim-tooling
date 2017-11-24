@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2005-2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -23,14 +23,16 @@ import (
 	"io/ioutil"
 	"os"
 	"reflect"
-	"strconv"
 	"strings"
 )
 
-var HttpRequestTimeout int = 2500
-var SkipTLSVerification bool = true
+var HttpRequestTimeout = DefaultHttpRequestTimeout
+var SkipTLSVerification bool
 var ExportDirectory string
 
+// SetConfigVars
+// @param mainConfigFilePath : Path to file where Configuration details are stored
+// @return error
 func SetConfigVars(mainConfigFilePath string) error {
 	mainConfig := GetMainConfigFromFile(mainConfigFilePath)
 	Logln(LogPrefixInfo + " reading '" + mainConfigFilePath + "'")
@@ -43,12 +45,7 @@ func SetConfigVars(mainConfigFilePath string) error {
 	}
 	if !(mainConfig.Config.HttpRequestTimeout >= 0) {
 		Logln(LogPrefixWarning + "value of HttpRequestTimeout in '" + mainConfigFilePath + "' is less than zero")
-		Logln(LogPrefixInfo + " setting HttpRequestTimeout to " + DefaultHttpRequestTimeout)
-		// default it unlimited
-	}
-	if reflect.ValueOf(mainConfig.Config.SkipTLSVerification).Kind() != reflect.Bool {
-		// value of SkipTLSVerification is not a boolean
-		return errors.New("invalid value for SkipTLSVerification. Should be true/false")
+		Logln(LogPrefixInfo + " setting HttpRequestTimeout to " + string(DefaultHttpRequestTimeout))
 	}
 	if strings.TrimSpace(mainConfig.Config.ExportDirectory) == "" ||
 		len(strings.TrimSpace(mainConfig.Config.ExportDirectory)) == 0 {
@@ -61,15 +58,14 @@ func SetConfigVars(mainConfigFilePath string) error {
 	HttpRequestTimeout = mainConfig.Config.HttpRequestTimeout
 	Logln(LogPrefixInfo + "Setting HttpTimeoutRequest to " + string(mainConfig.Config.HttpRequestTimeout))
 
-	SkipTLSVerification = mainConfig.Config.SkipTLSVerification
-	Logln(LogPrefixInfo + "Setting SkipTLSVerification to " + strconv.FormatBool(mainConfig.Config.SkipTLSVerification))
-
 	ExportDirectory = mainConfig.Config.ExportDirectory
 	Logln(LogPrefixInfo + "Setting ExportDirectory " + mainConfig.Config.ExportDirectory)
 
 	return nil
 }
 
+// IsValid
+// @param fp : FilePath
 // Attempt to create a file and delete it right after
 func IsValid(fp string) bool {
 	// Check if file already exists

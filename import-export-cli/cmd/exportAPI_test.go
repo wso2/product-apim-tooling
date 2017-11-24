@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2005-2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"fmt"
+	"github.com/go-resty/resty"
 	"github.com/renstrom/dedent"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
@@ -45,6 +46,7 @@ func TestExportAPI(t *testing.T) {
 		w.Header().Set(utils.HeaderTransferEncoding, utils.HeaderValueChunked)
 
 		body := dedent.Dedent(`
+
 		`)
 
 		w.Write([]byte(body))
@@ -53,4 +55,13 @@ func TestExportAPI(t *testing.T) {
 
 	resp := ExportAPI("test", "1.0", server.URL, "")
 	fmt.Println(resp)
+}
+
+func TestWriteToZip(t *testing.T) {
+	name := "sampleapi"
+	version := "1.0.0"
+	environment := "dev"
+	response := new(resty.Response)
+	exportDirectory := utils.CurrentDir
+	WriteToZip(name, version, environment, exportDirectory, response)
 }

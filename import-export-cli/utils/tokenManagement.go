@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2005-2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -30,16 +30,23 @@ import (
 	"strings"
 )
 
-// Returns the AccessToken, APIManagerEndpoint, Errors given an Environment
-// Deals with generating tokens needed for executing a particular command
+// ExecutePreCommand deals with generating tokens needed for executing a particular command
+// @param environment : Environment on which the particular command is run
+// @param flagUsername : Username entered using the flag --username (-u). Could be blank
+// @param flagPassword : Password entered using the flag --password (-p). Could be blank
+// @param mainConfigFilePath : Path to file where env_endpoints are stored
+// @param envKeysAllFilePath : Path to file where env_keys are stored
+// @return AccessToken, PublisherEndpoint, Errors
 // including (export-api, import-api, list)
-func ExecutePreCommand(environment string, flagUsername string, flagPassword string) (string, string, error) {
-	if EnvExistsInMainConfigFile(environment, MainConfigFilePath) {
-		registrationEndpoint := GetRegistrationEndpointOfEnv(environment, MainConfigFilePath)
-		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment, MainConfigFilePath)
-		tokenEndpoint := GetTokenEndpointOfEnv(environment, MainConfigFilePath)
+func ExecutePreCommand(environment, flagUsername, flagPassword, mainConfigFilePath,
+	envKeysAllFilePath string) (accessToken string, publisherEndpoint string, err error) {
+	if EnvExistsInMainConfigFile(environment, mainConfigFilePath) {
+		registrationEndpoint := GetRegistrationEndpointOfEnv(environment, mainConfigFilePath)
+		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment, mainConfigFilePath)
+		tokenEndpoint := GetTokenEndpointOfEnv(environment, mainConfigFilePath)
 
-		fmt.Println("Reg Endpoint read:", registrationEndpoint)
+		Logln(LogPrefixInfo + "Environment: '" + environment + "'")
+		Logln(LogPrefixInfo + "Reg Endpoint read:", registrationEndpoint)
 
 		var username string
 		var password string
@@ -47,17 +54,17 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 		var clientSecret string
 		var err error
 
-		if EnvExistsInKeysFile(environment, EnvKeysAllFilePath) {
+		if EnvExistsInKeysFile(environment, envKeysAllFilePath) {
 			// client_id, client_secret, and username exist in file
-			username = GetUsernameOfEnv(environment, EnvKeysAllFilePath)
+			username = GetUsernameOfEnv(environment, envKeysAllFilePath)
 
 			if flagUsername != "" {
 				// flagUsername is not blank
 				if flagUsername != username {
 					// username entered with flag -u is not the same as username found
 					// in env_keys_all.yaml file
-					fmt.Println(LogPrefixWarning + "Username entered with flag -u for the environment '" + environment +
-						"' is not the same as username found in file '" + EnvKeysAllFilePath + "'")
+					fmt.Println("Username entered with flag -u for the environment '" + environment +
+						"' is not the same as username found in file '" + envKeysAllFilePath + "'")
 					fmt.Println("Execute '" + ProjectName + " reset-user -e " + environment + "' to clear user data")
 					os.Exit(1)
 				} else {
@@ -83,8 +90,8 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 				}
 			}
 
-			clientID = GetClientIDOfEnv(environment, EnvKeysAllFilePath)
-			clientSecret = GetClientSecretOfEnv(environment, password, EnvKeysAllFilePath)
+			clientID = GetClientIDOfEnv(environment, envKeysAllFilePath)
+			clientSecret = GetClientSecretOfEnv(environment, password, envKeysAllFilePath)
 
 			Logln(LogPrefixInfo+"Username:", username)
 			Logln(LogPrefixInfo+"ClientID:", clientID)
@@ -122,7 +129,7 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 			// Persist clientID, clientSecret, Username in file
 			encryptedClientSecret := Encrypt([]byte(GetMD5Hash(password)), clientSecret)
 			envKeys := EnvKeys{clientID, encryptedClientSecret, username}
-			AddNewEnvToKeysFile(environment, envKeys, EnvKeysAllFilePath)
+			AddNewEnvToKeysFile(environment, envKeys, envKeysAllFilePath)
 		}
 
 		// Get OAuth Tokens
@@ -130,7 +137,7 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 			GetBase64EncodedCredentials(clientID, clientSecret), tokenEndpoint)
 		accessToken := responseDataMap["access_token"]
 
-		Logln(LogPrefixInfo+"AccessToken:", accessToken) // TODO:: Remove in production
+		Logln(LogPrefixInfo+"[Remove in Production] AccessToken:", accessToken) // TODO:: Remove in production
 
 		return accessToken, apiManagerEndpoint, nil
 	} else {
@@ -141,13 +148,15 @@ func ExecutePreCommand(environment string, flagUsername string, flagPassword str
 		}
 
 		return "", "", errors.New("Details incorrect/unavailable for environment '" + environment + "' in " +
-			MainConfigFilePath)
+			mainConfigFilePath)
 	}
 }
 
 // GetClientIDSecret implemented using go-resty
-// provide username, password
-// returns client_id, client_secret
+// @param username : Username for application server account
+// @param password : Password for application server account
+// @param url : Registration Endpoint for the environment
+// @return client_id, client_secret, error
 func GetClientIDSecret(username string, password string, url string) (string, string, error) {
 	body := `{"clientName": "Test", "redirect_uris": "www.google.lk", "grant_types":"password"}`
 	headers := make(map[string]string)
@@ -158,18 +167,15 @@ func GetClientIDSecret(username string, password string, url string) (string, st
 	headers[HeaderAuthorization] = HeaderValueAuthBasicPrefix + " " + GetBase64EncodedCredentials(username, password)
 	// headers["Authorization"] = "Basic " + GetBase64EncodedCredentials(username, password)
 
-	if SkipTLSVerification {
-		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTPS certificates
-	}
 
 	// POST request using resty
 	resp, err := InvokePOSTRequest(url, headers, body)
 
 	if err != nil {
-		HandleErrorAndExit("Error in connecting.", err)
+		HandleErrorAndExit("Registration -- Error in connecting.", err)
 	}
 
-	Logln("GetClientIDSecret(): Status - " + resp.Status())
+	Logln(LogPrefixInfo + "Getting ClientID, ClientSecret: Status - " + resp.Status())
 
 	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
 		// 200 OK or 201 Created
@@ -186,13 +192,14 @@ func GetClientIDSecret(username string, password string, url string) (string, st
 		//fmt.Println("Error:", resp.Error())
 		//fmt.Printf("Body: %s\n", resp.Body())
 		if resp.StatusCode() == http.StatusUnauthorized {
+			// 401 Unauthorized
 			HandleErrorAndExit("Incorrect Username/Password combination.", errors.New("401 Unauthorized"))
 		}
 		return "", "", errors.New("Request didn't respond 200 OK: " + resp.Status())
 	}
 }
 
-// Encode the concatenation of two strings (using ":")
+// GetBase64EncodedCredentials encodes the concatenation of two strings (using ":")
 // provide two strings
 // returns base64Encode(key:secret)
 func GetBase64EncodedCredentials(key string, secret string) string {

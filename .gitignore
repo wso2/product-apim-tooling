@@ -28,36 +28,42 @@ hs_err_pid*
 *.iml
 
 vendor
-import-export-cli/vendor
-
-# Keep a sample API for testing
-!import-export-cli/exported/sampleapi.zip
 
 # IDEs
 .idea/
 .settings
 .vscode/
 
-
-# Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
-import-export-cli/.glide/
 *.tar.gz
 *.rar
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
+
+# Import Export CLI
+# =================
+
+# Binaries
+import-export-cli/apimcli
+import-export-cli/import-export-cli
+import-export-cli/build/
+
+# Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
+import-export-cli/.glide/
+
+import-export-cli/vendor
+
+# Keep a sample API for testing
+!import-export-cli/cmd/sampleapi.zip
+
 # YAML Config Files
 import-export-cli/env_endpoints_all.yaml
 import-export-cli/env_keys_all.yaml
 
-# Binaries
-import-export-cli/import-export-cli
-import-export-cli/wso2apim-cli
-
-
 # Test Coverage Indicators
-
 import-export-cli/utils/c.out
 import-export-cli/utils/coverage.out
 import-export-cli/utils/coverage.html
+
+# ==================

@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2005-2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -35,18 +35,17 @@ type MainConfig struct {
 
 type Config struct {
 	HttpRequestTimeout  int    `yaml:"http_request_timeout"`
-	SkipTLSVerification bool   `yaml:"skip_tls_verification"`
 	ExportDirectory     string `yaml:"export_directory"`
 }
 
 type EnvKeys struct {
 	ClientID     string `yaml:"client_id"`
-	ClientSecret string `yaml:"client_secret"` // to be encrypted (with the user's password) and stored
+	ClientSecret string `yaml:"client_secret"` // encrypted (with the user's password) and stored
 	Username     string `yaml:"username"`
 }
 
 type EnvEndpoints struct {
-	APIManagerEndpoint   string `yaml:"api_manager_endpoint"`
+	PublisherEndpoint    string `yaml:"publisher_endpoint"`
 	RegistrationEndpoint string `yaml:"registration_endpoint"`
 	TokenEndpoint        string `yaml:"token_endpoint"`
 }

@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2005-2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -21,19 +21,37 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/renstrom/dedent"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 var resetUserEnvironment string
 
+// ResetUser command related usage Info
+
+const resetUserCmdLiteral = "reset-user"
+const resetUserCmdShortDesc = "Reset user of an environment"
+
+var resetUserCmdLongDesc = dedent.Dedent(`
+		Reset user data of a particular environment (Clear the entry in env_keys_all.yaml file)
+	`)
+
+var resetUserCmdExamples = dedent.Dedent(`
+		Examples:
+		` + utils.ProjectName + ` ` + resetUserCmdLiteral + ` -e dev
+		` + utils.ProjectName + ` ` + resetUserCmdLiteral + `reset-user -e staging
+	`)
+
+
+
 // ResetUserCmd represents the resetUser command
 var ResetUserCmd = &cobra.Command{
-	Use:   "reset-user",
-	Short: utils.ResetUserCmdShortDesc,
-	Long:  utils.ResetUserCmdLongDesc + utils.ResetUserCmdExamples,
+	Use:   resetUserCmdLiteral,
+	Short: resetUserCmdShortDesc,
+	Long:  resetUserCmdLongDesc + resetUserCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + "reset-user called")
+		utils.Logln(utils.LogPrefixInfo + resetUserCmdLiteral + " called")
 
 		err := utils.RemoveEnvFromKeysFile(resetUserEnvironment, utils.EnvKeysAllFilePath, utils.MainConfigFilePath)
 		if err != nil {
@@ -44,6 +62,7 @@ var ResetUserCmd = &cobra.Command{
 	},
 }
 
+// init using Cobra
 func init() {
 	RootCmd.AddCommand(ResetUserCmd)
 	ResetUserCmd.Flags().StringVarP(&resetUserEnvironment, "environment", "e",

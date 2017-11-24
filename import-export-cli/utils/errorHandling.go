@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2005-2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -23,6 +23,8 @@ import (
 	"os"
 )
 
+var IsVerbose bool
+
 func HandleErrorAndExit(msg string, err error) {
 	fmt.Println("\n=======  DEBUG LOG ==================")
 	// TODO:: Remove debug log in production
@@ -31,15 +33,20 @@ func HandleErrorAndExit(msg string, err error) {
 	}
 	fmt.Println("=======  END OF DEBUG LOG ===========\n")
 	if err == nil {
-		fmt.Fprintf(os.Stderr, "wso2apim: %v\n", msg)
+		fmt.Fprintf(os.Stderr, "%s: %v\n", ProjectName, msg)
 	} else {
-		fmt.Fprintf(os.Stderr, "wso2apim: %v Reason: %v\n", msg, err.Error())
+		fmt.Fprintf(os.Stderr, "%s: %v Reason: %v\n", ProjectName, msg, err.Error())
 		Logln(LogPrefixError + msg + ": " + err.Error())
 	}
+
+
 	defer printAndExit()
 }
 
 func printAndExit() {
-	fmt.Println("Exiting...")
+	fmt.Println("Exit status 1")
+	if !IsVerbose {
+		fmt.Println("Execute with --verbose to see detailed info.")
+	}
 	os.Exit(1)
 }

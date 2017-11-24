@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2005-2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -73,7 +73,7 @@ func TestGetAPIMEndpointOfEnv(t *testing.T) {
 	WriteCorrectMainConfig()
 
 	returnedEndpoint := GetAPIMEndpointOfEnv(devName, testMainConfigFilePath)
-	expectedEndpoint := getSampleMainConfig().Environments[devName].APIManagerEndpoint
+	expectedEndpoint := getSampleMainConfig().Environments[devName].PublisherEndpoint
 	if returnedEndpoint != expectedEndpoint {
 		t.Errorf("Expected '%s', got '%s'\n", expectedEndpoint, returnedEndpoint)
 	}
@@ -143,14 +143,14 @@ func TestGetUsernameOfEnv(t *testing.T) {
 
 func TestAddNewEnvToKeysFile1(t *testing.T) {
 	writeCorrectKeys()
-	var envKeys EnvKeys = EnvKeys{"staging_username", "staging_client_id", "staging_client_secret"}
+	var envKeys = EnvKeys{"staging_username", "staging_client_id", "staging_client_secret"}
 
 	AddNewEnvToKeysFile("staging", envKeys, testKeysFilePath)
 	defer os.Remove(testKeysFilePath)
 }
 
 func TestAddNewEnvToKeysFile2(t *testing.T) {
-	var envKeys EnvKeys = EnvKeys{"staging_username", "staging_client_id", "staging_client_secret"}
+	var envKeys = EnvKeys{"staging_username", "staging_client_id", "staging_client_secret"}
 
 	AddNewEnvToKeysFile("staging", envKeys, testKeysFilePath)
 	defer os.Remove(testKeysFilePath)

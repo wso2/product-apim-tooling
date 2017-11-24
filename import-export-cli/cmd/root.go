@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2005-2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -22,19 +22,29 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/renstrom/dedent"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"time"
 )
 
 var verbose bool
 var cfgFile string
+var insecure bool
+
+// RootCmd related info
+const RootCmdShortDesc = "CLI for Importing and Exporting APIs"
+
+var RootCmdLongDesc = dedent.Dedent(`
+		` + utils.ProjectName + ` is a Command Line Tool for Importing and Exporting APIs between different environments
+		(Dev, Production, Staging, QA etc.)
+		`)
 
 // This represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:   "wso2apim-cli",
-	Short: utils.RootCmdShortDesc,
-	Long:  utils.RootCmdLongDesc,
+	Use:   utils.ProjectName,
+	Short: RootCmdShortDesc,
+	Long:  RootCmdLongDesc,
 
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
@@ -50,14 +60,17 @@ func Execute() {
 	}
 }
 
+// init using Cobra
 func init() {
 	cobra.OnInitialize(initConfig)
 
 	cobra.EnableCommandSorting = false
 	RootCmd.PersistentFlags().BoolVar(&verbose, "verbose", false, "Enable verbose mode")
-	RootCmd.PersistentFlags().StringP("author", "a", "", "WSO2")
+	RootCmd.PersistentFlags().BoolVarP(&insecure, "insecure", "k", false,
+		"Allow connections to SSL endpoints without certs")
+	//RootCmd.PersistentFlags().StringP("author", "a", "", "WSO2")
 
-	viper.BindPFlag("author", RootCmd.PersistentFlags().Lookup("author"))
+	//viper.BindPFlag("author", RootCmd.PersistentFlags().Lookup("author"))
 
 	// Here you will define your flags and configuration settings.
 	// Cobra supports Persistent Flags, which, if defined here,
@@ -66,6 +79,7 @@ func init() {
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
 
 	// Init ConfigVars
 	err := utils.SetConfigVars(utils.MainConfigFilePath)
@@ -77,11 +91,21 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	// TODO:: switch condition in production. Verbose on by default in development
-	if !verbose {
+	if verbose {
+		utils.IsVerbose = true
 		utils.EnableVerboseMode()
+		t := time.Now()
+		utils.Logf(utils.LogPrefixInfo + "Executed ImportExportCLI (%s) on %v\n", utils.ProjectName, t.Format(time.RFC1123))
+	}else{
+		utils.IsVerbose = false
 	}
 
+	utils.Logln(utils.LogPrefixInfo+"Insecure:", insecure)
+	if insecure {
+		utils.SkipTLSVerification = true
+	}
+
+	/*
 	if cfgFile != "" { // enable ability to specify config file via flag
 		viper.SetConfigFile(cfgFile)
 	}
@@ -94,4 +118,5 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
+	*/
 }

@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2005-2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -18,46 +18,61 @@
 
 package utils
 
-import "os"
+import (
+	"os"
+	"path/filepath"
+)
 
-const ProjectName string = "wso2apim-cli"
+const ProjectName = "apimcli"
+const ConfigDirectoryName = "wso2-apim-cli-config"
 
 // File Names and Paths
-const PathSeparator_ string = string(os.PathSeparator)
-var ApplicationRoot, _ = os.Getwd()
-//var ApplicationRoot  = "/home/menuka/.go/src/github.com/wso2/product-apim-tooling/import-export-cli"
-const EnvKeysAllFileName string = "env_keys_all.yaml"
-var EnvKeysAllFilePath string = ApplicationRoot + PathSeparator_ + EnvKeysAllFileName
-const MainConfigFileName string = "main_config.yaml"
-var MainConfigFilePath string = ApplicationRoot + PathSeparator_ + MainConfigFileName
-const ExportedAPIsDirectoryName string = "exported"
-var ExportedAPIsDirectoryPath string = ApplicationRoot + PathSeparator_ + ExportedAPIsDirectoryName
-const DefaultEnvironmentName string = "default"
+
+var CurrentDir, _ = os.Getwd()
+var ApplicationRoot = CurrentDir
+
+var PathSeparator_ = string(os.PathSeparator)
+
+//var ApplicationRoot = "/home/menuka/.go/src/github.com/wso2/product-apim-tooling/import-export-cli"
+
+const EnvKeysAllFileName = "env_keys_all.yaml"
+
+var EnvKeysAllFilePath = filepath.Join(ApplicationRoot, EnvKeysAllFileName)
+
+const MainConfigFileName = "main_config.yaml"
+
+var MainConfigFilePath = filepath.Join(ApplicationRoot, MainConfigFileName)
+
+const ExportedAPIsDirectoryName = "exported"
+
+var ExportedAPIsDirectoryPath = filepath.Join(ApplicationRoot, ExportedAPIsDirectoryName)
+
+const DefaultEnvironmentName = "default"
 
 // Headers and Header Values
-const HeaderAuthorization string = "Authorization"
-const HeaderContentType string = "Content-Type"
-const HeaderConnection string = "Connection"
-const HeaderAccept string = "Accept"
-const HeaderProduces string = "Produces"
-const HeaderConsumes string = "Consumes"
-const HeaderContentEncoding string = "Content-Encoding"
-const HeaderTransferEncoding string = "transfer-encoding"
-const HeaderValueChunked string = "chunked"
-const HeaderValueGZIP string = "gzip"
-const HeaderValueKeepAlive string = "keep-alive"
+const HeaderAuthorization = "Authorization"
+const HeaderContentType = "Content-Type"
+const HeaderConnection = "Connection"
+const HeaderAccept = "Accept"
+const HeaderProduces = "Produces"
+const HeaderConsumes = "Consumes"
+const HeaderContentEncoding = "Content-Encoding"
+const HeaderTransferEncoding = "transfer-encoding"
+const HeaderValueChunked = "chunked"
+const HeaderValueGZIP = "gzip"
+const HeaderValueKeepAlive = "keep-alive"
 const HeaderValueApplicationZip = "application/zip"
-const HeaderValueApplicationJSON string = "application/json"
-const HeaderValueXWWWFormUrlEncoded string = "application/x-www-form-urlencoded"
-const HeaderValueAuthBearerPrefix string = "Bearer"
-const HeaderValueAuthBasicPrefix string = "Basic"
-const HeaderValueMultiPartFormData string = "multipart/form-data"
+const HeaderValueApplicationJSON = "application/json"
+const HeaderValueXWWWFormUrlEncoded = "application/x-www-form-urlencoded"
+const HeaderValueAuthBearerPrefix = "Bearer"
+const HeaderValueAuthBasicPrefix = "Basic"
+const HeaderValueMultiPartFormData = "multipart/form-data"
 
 // Logging Prefixes
-const LogPrefixInfo = "[INFO]: "
-const LogPrefixWarning = "[WARN]: "
-const LogPrefixError = "[ERROR]: "
+const LogPrefixInfo = "[INFO] "
+const LogPrefixWarning = "[WARN] "
+const LogPrefixError = "[ERROR] "
 
 // Other
-const DefaultTokenValidityPeriod string = "3600"
-const DefaultHttpRequestTimeout string = "unlimited"
+const DefaultTokenValidityPeriod = "3600"
+const DefaultHttpRequestTimeout = 100000
