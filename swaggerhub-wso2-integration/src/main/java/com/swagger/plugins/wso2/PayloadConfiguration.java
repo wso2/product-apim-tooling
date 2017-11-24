@@ -73,8 +73,8 @@ public class PayloadConfiguration {
         CorsConfiguration configuration = new CorsConfiguration(false);
         structure.setCorsConfiguration(configuration);
 
-        log.debug("Converting the POJO to a json string");
         try {
+            log.debug("Converting the POJO to a json string");
             ObjectMapper objectMapper = new ObjectMapper();
             payload = objectMapper.writeValueAsString(structure);
         } catch (JsonProcessingException e) {
