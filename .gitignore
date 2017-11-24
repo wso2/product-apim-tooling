@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #IDEA
 .idea
 *.iml
@@ -6,3 +7,74 @@
 
 #MAVEN
 target
+=======
+build
+# Compiled class file
+*.class
+
+# Log file
+*.log
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.ear
+*.zip
+
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+*.iml
+
+vendor
+
+# IDEs
+.idea/
+.settings
+.vscode/
+
+*.tar.gz
+*.rar
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+
+# Import Export CLI
+# =================
+
+# Binaries
+import-export-cli/apimcli
+import-export-cli/import-export-cli
+import-export-cli/build/
+
+# Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
+import-export-cli/.glide/
+
+import-export-cli/vendor
+
+# Keep a sample API for testing
+!import-export-cli/cmd/sampleapi.zip
+
+# YAML Config Files
+import-export-cli/env_endpoints_all.yaml
+import-export-cli/env_keys_all.yaml
+
+# Test Coverage Indicators
+import-export-cli/utils/c.out
+import-export-cli/utils/coverage.out
+import-export-cli/utils/coverage.html
+
+# ==================
+>>>>>>> 0495f3de0670ba66ec80a8eed47f1d8da94478eb
