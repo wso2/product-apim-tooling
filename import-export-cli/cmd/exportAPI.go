@@ -38,6 +38,7 @@ var exportAPIVersion string
 var exportEnvironment string
 var exportAPICmdUsername string
 var exportAPICmdPassword string
+var exportAPICmdToken string
 
 // ExportAPI command related usage info
 const exportAPICmdLiteral = "export-api"
@@ -60,36 +61,51 @@ var ExportAPICmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + exportAPICmdLiteral + " called")
 
-		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(exportEnvironment,
-			exportAPICmdUsername, exportAPICmdPassword, utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
-
-		if preCommandErr == nil {
-			resp := ExportAPI(exportAPIName, exportAPIVersion, apiManagerEndpoint, accessToken)
-
-			// Print info on response
-			utils.Logf("ResponseStatus: %v\n", resp.Status())
-			utils.Logf("Error: %v\n", resp.Error())
-
-			if resp.StatusCode() == http.StatusOK {
-				WriteToZip(exportAPIName, exportAPIVersion, exportEnvironment, utils.ExportDirectory, resp)
-
-				// only to get the number of APIs exported
-				numberOfAPIsExported, _, err := GetAPIList(exportAPIName, accessToken, apiManagerEndpoint)
-				if err == nil {
-					fmt.Println("Number of APIs exported:", numberOfAPIsExported)
-				} else {
-					utils.HandleErrorAndExit("Error getting list of APIs", err)
-				}
-			} else if resp.StatusCode() == http.StatusInternalServerError {
-				// 500 Internal Server Error
-				fmt.Println("Incorrect password")
+		if exportAPICmdToken != "" {
+			// token provided with --token (-t) flag
+			if exportAPICmdUsername != "" || exportAPICmdPassword != "" {
+				// username and/or password provided with -u and/or -p flags
+				// Error
+				utils.HandleErrorAndExit("username/password provided with OAuth token.", nil)
 			} else {
-				// neither 200 nor 500
-				fmt.Println("Error exporting API:", resp.Status())
+				// token only, proceed with token
+				//publisherEndpoint := utils.GetPublisherEndpointOfEnv(exportEnvironment, utils.MainConfigFilePath)
+				//ExportAPI(exportAPIName, exportAPIVersion, publisherEndpoint, exportAPICmdToken)
 			}
 		} else {
-			// error exporting API
-			fmt.Println("Error exporting API:" + preCommandErr.Error())
+			// no token provided with --token (-t) flag
+			// proceed with username and password
+			accessToken, publisherEndpoint, preCommandErr := utils.ExecutePreCommand(exportEnvironment,
+				exportAPICmdUsername, exportAPICmdPassword, utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
+
+			if preCommandErr == nil {
+				resp := ExportAPI(exportAPIName, exportAPIVersion, publisherEndpoint, accessToken)
+
+				// Print info on response
+				utils.Logf("ResponseStatus: %v\n", resp.Status())
+				utils.Logf("Error: %v\n", resp.Error())
+
+				if resp.StatusCode() == http.StatusOK {
+					WriteToZip(exportAPIName, exportAPIVersion, exportEnvironment, utils.ExportDirectory, resp)
+
+					// only to get the number of APIs exported
+					numberOfAPIsExported, _, err := GetAPIList(exportAPIName, accessToken, publisherEndpoint)
+					if err == nil {
+						fmt.Println("Number of APIs exported:", numberOfAPIsExported)
+					} else {
+						utils.HandleErrorAndExit("Error getting list of APIs", err)
+					}
+				} else if resp.StatusCode() == http.StatusInternalServerError {
+					// 500 Internal Server Error
+					fmt.Println("Incorrect password")
+				} else {
+					// neither 200 nor 500
+					fmt.Println("Error exporting API:", resp.Status())
+				}
+			} else {
+				// error exporting API
+				fmt.Println("Error exporting API:" + preCommandErr.Error())
+			}
 		}
 	},
 }
@@ -164,6 +180,8 @@ func init() {
 		"Version of the API to be exported")
 	ExportAPICmd.Flags().StringVarP(&exportEnvironment, "environment", "e",
 		utils.GetDefaultEnvironment(utils.MainConfigFilePath), "Environment to which the API should be exported")
+	ExportAPICmd.Flags().StringVarP(&exportAPICmdToken, "token", "t", "",
+		"An OAuth2 token to be used instead of username and password")
 
 	ExportAPICmd.Flags().StringVarP(&exportAPICmdUsername, "username", "u", "", "Username")
 	ExportAPICmd.Flags().StringVarP(&exportAPICmdPassword, "password", "p", "", "Password")

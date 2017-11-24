@@ -35,6 +35,7 @@ var listApisCmdEnvironment string
 var listApisCmdUsername string
 var listApisCmdPassword string
 var listApisCmdQuery string
+var listApisCmdToken string
 
 // apisCmd related info
 const apisCmdLiteral = "apis"
@@ -56,27 +57,40 @@ var apisCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + listCmdLiteral + " " + apisCmdLiteral + " called")
 
-		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(listApisCmdEnvironment, listApisCmdUsername,
-			listApisCmdPassword, utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
-
-		if preCommandErr == nil {
-			if listApisCmdQuery != "" {
-				fmt.Println("Search query:", listApisCmdQuery)
-			}
-			count, apis, err := GetAPIList(listApisCmdQuery, accessToken, apiManagerEndpoint)
-
-			if err == nil {
-				// Printing the list of available APIs
-				fmt.Println("Environment:", listApisCmdEnvironment)
-				fmt.Println("No. of APIs:", count)
-				if count > 0 {
-					printAPIs(apis)
-				}
+		if exportAPICmdToken != "" {
+			// token provided with --token (-t) flag
+			if exportAPICmdUsername != "" || exportAPICmdPassword != "" {
+				// username and/or password provided with -u and/or -p flags
+				// Error
+				utils.HandleErrorAndExit("username/password provided with OAuth token.", nil)
 			} else {
-				utils.Logln(utils.LogPrefixError+"Getting List of APIs", err)
+				// token only, proceed with token
 			}
 		} else {
-			utils.HandleErrorAndExit("Error calling '"+listCmdLiteral+" "+apisCmdLiteral+"'", preCommandErr)
+			// no token provided with --token (-t) flag
+			// proceed with username and password
+			accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(listApisCmdEnvironment, listApisCmdUsername,
+				listApisCmdPassword, utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
+
+			if preCommandErr == nil {
+				if listApisCmdQuery != "" {
+					fmt.Println("Search query:", listApisCmdQuery)
+				}
+				count, apis, err := GetAPIList(listApisCmdQuery, accessToken, apiManagerEndpoint)
+
+				if err == nil {
+					// Printing the list of available APIs
+					fmt.Println("Environment:", listApisCmdEnvironment)
+					fmt.Println("No. of APIs:", count)
+					if count > 0 {
+						printAPIs(apis)
+					}
+				} else {
+					utils.Logln(utils.LogPrefixError+"Getting List of APIs", err)
+				}
+			} else {
+				utils.HandleErrorAndExit("Error calling '"+listCmdLiteral+" "+apisCmdLiteral+"'", preCommandErr)
+			}
 		}
 	},
 }
@@ -154,6 +168,8 @@ func init() {
 		utils.GetDefaultEnvironment(utils.MainConfigFilePath), "Environment to be searched")
 	apisCmd.Flags().StringVarP(&listApisCmdQuery, "query", "q", "",
 		"(Optional) query to search for APIs")
+	apisCmd.Flags().StringVarP(&listApisCmdToken, "token", "t", "",
+		"OAuth token to be used instead of username and password")
 	apisCmd.Flags().StringVarP(&listApisCmdUsername, "username", "u", "", "Username")
 	apisCmd.Flags().StringVarP(&listApisCmdPassword, "password", "p", "", "Password")
 }

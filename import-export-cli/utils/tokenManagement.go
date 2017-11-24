@@ -42,7 +42,7 @@ func ExecutePreCommand(environment, flagUsername, flagPassword, mainConfigFilePa
 	envKeysAllFilePath string) (accessToken string, publisherEndpoint string, err error) {
 	if EnvExistsInMainConfigFile(environment, mainConfigFilePath) {
 		registrationEndpoint := GetRegistrationEndpointOfEnv(environment, mainConfigFilePath)
-		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment, mainConfigFilePath)
+		apiManagerEndpoint := GetPublisherEndpointOfEnv(environment, mainConfigFilePath)
 		tokenEndpoint := GetTokenEndpointOfEnv(environment, mainConfigFilePath)
 
 		Logln(LogPrefixInfo + "Environment: '" + environment + "'")
