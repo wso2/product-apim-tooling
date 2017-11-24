@@ -26,8 +26,9 @@ import (
 const ProjectName = "apimcli"
 
 // File Names and Paths
+var CurrentDir, _ = os.Getwd()
 
-var ApplicationRoot, _ = os.Getwd()
+var ApplicationRoot = CurrentDir
 
 const EnvKeysAllFileName = "env_keys_all.yaml"
 

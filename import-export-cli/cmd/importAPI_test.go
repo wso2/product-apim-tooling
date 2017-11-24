@@ -28,11 +28,10 @@ import (
 	"testing"
 )
 
-/*
 func TestImportAPI(t *testing.T) {
 	var server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPut {
-			t.Errorf("Expected 'PUT', got '%s'\n", r.Method)
+		if r.Method != http.MethodPost {
+			t.Errorf("Expected '%s', got '%s'\n", http.MethodPost, r.Method)
 		}
 
 		w.WriteHeader(http.StatusOK)
@@ -50,12 +49,11 @@ func TestImportAPI(t *testing.T) {
 	name := "sampleapi.zip"
 	accessToken := "access-token"
 
-	_, err := ImportAPI(name, server.URL, accessToken)
+	_, err := ImportAPI(name, server.URL, accessToken, "")
 	if err != nil {
 		t.Errorf("Error: %s\n", err.Error())
 	}
 }
-*/
 
 func TestNewFileUploadRequest(t *testing.T) {
 	var server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
