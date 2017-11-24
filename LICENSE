@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-
-=======
->>>>>>> 0495f3de0670ba66ec80a8eed47f1d8da94478eb
+                                 
                                  Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -182,11 +179,7 @@
    APPENDIX: How to apply the Apache License to your work.
 
       To apply the Apache License to your work, attach the following
-<<<<<<< HEAD
       boilerplate notice, with the fields enclosed by brackets "[]"
-=======
-      boilerplate notice, with the fields enclosed by brackets "{}"
->>>>>>> 0495f3de0670ba66ec80a8eed47f1d8da94478eb
       replaced with your own identifying information. (Don't include
       the brackets!)  The text should be enclosed in the appropriate
       comment syntax for the file format. We also recommend that a
@@ -194,11 +187,7 @@
       same "printed page" as the copyright notice for easier
       identification within third-party archives.
 
-<<<<<<< HEAD
    Copyright [yyyy] [name of copyright owner]
-=======
-   Copyright {yyyy} {name of copyright owner}
->>>>>>> 0495f3de0670ba66ec80a8eed47f1d8da94478eb
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -210,8 +199,4 @@
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
-<<<<<<< HEAD
    limitations under the License.
-=======
-   limitations under the License.
->>>>>>> 0495f3de0670ba66ec80a8eed47f1d8da94478eb
