@@ -19,6 +19,8 @@
 package cmd
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"fmt"
@@ -64,4 +66,5 @@ func TestWriteToZip(t *testing.T) {
 	response := new(resty.Response)
 	exportDirectory := utils.CurrentDir
 	WriteToZip(name, version, environment, exportDirectory, response)
+	defer os.RemoveAll(filepath.Join(exportDirectory, "dev"))
 }
