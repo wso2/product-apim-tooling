@@ -47,7 +47,7 @@ func TestEnvExistsInKeysFile(t *testing.T) {
 }
 
 func TestEnvExistsInEndpointsFile(t *testing.T) {
-	WriteCorrectMainConfig()
+	WriteTestMainConfig()
 
 	returned := EnvExistsInMainConfigFile(devName, testMainConfigFilePath)
 
@@ -70,10 +70,10 @@ func TestEnvExistsInEndpointsFile(t *testing.T) {
 }
 
 func TestGetAPIMEndpointOfEnv(t *testing.T) {
-	WriteCorrectMainConfig()
+	WriteTestMainConfig()
 
 	returnedEndpoint := GetPublisherEndpointOfEnv(devName, testMainConfigFilePath)
-	expectedEndpoint := getSampleMainConfig().Environments[devName].PublisherEndpoint
+	expectedEndpoint := getTestMainConfig().Environments[devName].PublisherEndpoint
 	if returnedEndpoint != expectedEndpoint {
 		t.Errorf("Expected '%s', got '%s'\n", expectedEndpoint, returnedEndpoint)
 	}
@@ -82,10 +82,10 @@ func TestGetAPIMEndpointOfEnv(t *testing.T) {
 }
 
 func TestGetTokenEndpointOfEnv(t *testing.T) {
-	WriteCorrectMainConfig()
+	WriteTestMainConfig()
 
 	returnedEndpoint := GetTokenEndpointOfEnv(devName, testMainConfigFilePath)
-	expectedEndpoint := getSampleMainConfig().Environments[devName].TokenEndpoint
+	expectedEndpoint := getTestMainConfig().Environments[devName].TokenEndpoint
 	if returnedEndpoint != expectedEndpoint {
 		t.Errorf("Expected '%s', got '%s'\n", expectedEndpoint, returnedEndpoint)
 	}
@@ -94,10 +94,10 @@ func TestGetTokenEndpointOfEnv(t *testing.T) {
 }
 
 func TestGetRegistrationEndpointOfEnv(t *testing.T) {
-	WriteCorrectMainConfig()
+	WriteTestMainConfig()
 
 	returnedEndpoint := GetRegistrationEndpointOfEnv(devName, testMainConfigFilePath)
-	expectedEndpoint := getSampleMainConfig().Environments[devName].RegistrationEndpoint
+	expectedEndpoint := getTestMainConfig().Environments[devName].RegistrationEndpoint
 	if returnedEndpoint != expectedEndpoint {
 		t.Errorf("Expected '%s', got '%s'\n", expectedEndpoint, returnedEndpoint)
 	}
@@ -109,7 +109,7 @@ func TestGetClientIDOfEnv(t *testing.T) {
 	writeCorrectKeys()
 
 	returnedKey := GetClientIDOfEnv(devName, testKeysFilePath)
-	expectedKey := getSampleKeys().Environments[devName].ClientID
+	expectedKey := getTestKeys().Environments[devName].ClientID
 	if returnedKey != expectedKey {
 		t.Errorf("Expected '%s', got '%s'\n", expectedKey, returnedKey)
 	}
@@ -121,7 +121,7 @@ func TestGetClientSecretOfEnv(t *testing.T) {
 	writeCorrectKeys()
 
 	returnedKey := GetClientSecretOfEnv(devName, devPassword, testKeysFilePath)
-	expectedKey := Decrypt([]byte(GetMD5Hash(devPassword)), getSampleKeys().Environments[devName].ClientSecret)
+	expectedKey := Decrypt([]byte(GetMD5Hash(devPassword)), getTestKeys().Environments[devName].ClientSecret)
 
 	if returnedKey != expectedKey {
 		t.Errorf("Expected '%s', got '%s'\n", expectedKey, returnedKey)
@@ -133,7 +133,7 @@ func TestGetUsernameOfEnv(t *testing.T) {
 	writeCorrectKeys()
 
 	returnedKey := GetUsernameOfEnv(devName, testKeysFilePath)
-	expectedKey := getSampleKeys().Environments[devName].Username
+	expectedKey := getTestKeys().Environments[devName].Username
 
 	if returnedKey != expectedKey {
 		t.Errorf("Expected '%s', got '%s'\n", expectedKey, returnedKey)
@@ -158,7 +158,7 @@ func TestAddNewEnvToKeysFile2(t *testing.T) {
 
 // Case 1: Correct Details
 func TestRemoveEnvFromKeysFile1(t *testing.T) {
-	WriteCorrectMainConfig()
+	WriteTestMainConfig()
 	writeCorrectKeys()
 	err := RemoveEnvFromKeysFile(devName, testKeysFilePath, testMainConfigFilePath)
 	if err != nil {
@@ -170,7 +170,7 @@ func TestRemoveEnvFromKeysFile1(t *testing.T) {
 
 // Case 2: Env not available in keys file
 func TestRemoveEnvFromKeysFile2(t *testing.T) {
-	WriteCorrectMainConfig()
+	WriteTestMainConfig()
 
 	// write incorrect keys
 	envKeysAll.Environments = make(map[string]EnvKeys)

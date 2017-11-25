@@ -25,7 +25,7 @@ import (
 )
 
 func TestSetConfigVarsCorrect(t *testing.T) {
-	WriteCorrectMainConfig()
+	WriteTestMainConfig()
 	err := SetConfigVars(testMainConfigFilePath)
 
 	if err != nil {

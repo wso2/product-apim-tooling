@@ -46,7 +46,7 @@ func ExecutePreCommand(environment, flagUsername, flagPassword, mainConfigFilePa
 		tokenEndpoint := GetTokenEndpointOfEnv(environment, mainConfigFilePath)
 
 		Logln(LogPrefixInfo + "Environment: '" + environment + "'")
-		Logln(LogPrefixInfo + "Reg Endpoint read:", registrationEndpoint)
+		Logln(LogPrefixInfo+"Reg Endpoint read:", registrationEndpoint)
 
 		var username string
 		var password string
@@ -166,7 +166,6 @@ func GetClientIDSecret(username string, password string, url string) (string, st
 
 	headers[HeaderAuthorization] = HeaderValueAuthBasicPrefix + " " + GetBase64EncodedCredentials(username, password)
 	// headers["Authorization"] = "Basic " + GetBase64EncodedCredentials(username, password)
-
 
 	// POST request using resty
 	resp, err := InvokePOSTRequest(url, headers, body)

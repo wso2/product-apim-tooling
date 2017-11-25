@@ -41,7 +41,8 @@ func TestInvokePOSTRequestUnreachable(t *testing.T) {
 
 }
 
-func GetInvokeGETRequestOK(t *testing.T) {
+func TestInvokeGETRequestOK(t *testing.T) {
+	SkipTLSVerification = true
 	var httpStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			t.Errorf("Expected '%s', got '%s'\n", http.MethodGet, r.Method)
@@ -51,7 +52,7 @@ func GetInvokeGETRequestOK(t *testing.T) {
 	}))
 	defer httpStub.Close()
 
-	resp, err := InvokePOSTRequest(httpStub.URL, make(map[string]string), "")
+	resp, err := InvokeGETRequest(httpStub.URL, make(map[string]string))
 	if resp.StatusCode() != http.StatusInternalServerError {
 		t.Errorf("Error in InvokePOSTRequest(): %s\n", err)
 	}
@@ -90,9 +91,9 @@ func TestPromptForPassword(t *testing.T) {
 	}
 }
 
-func TestChopPath(t *testing.T){
+func TestChopPath(t *testing.T) {
 	tests := []struct {
-		source string
+		source   string
 		expected string
 	}{
 		{source: "/user/home", expected: "home"},
