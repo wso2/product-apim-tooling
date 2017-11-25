@@ -51,6 +51,7 @@ func TestSetConfigVarsIncorrect1(t *testing.T) {
 	defer os.Remove(testIncorrectMainConfigFilePath)
 }
 
+// test case 2 - negative value for httpRequestTimeout
 func TestSetConfigVarsIncorrect2(t *testing.T) {
 	testIncorrectMainConfig := new(MainConfig)
 	testIncorrectMainConfigFileName := "test_incorrect_main_config.yaml"
@@ -81,5 +82,3 @@ func TestIsValid2(t *testing.T) {
 	IsValid(filePath)
 	os.Remove(filePath)
 }
-
-

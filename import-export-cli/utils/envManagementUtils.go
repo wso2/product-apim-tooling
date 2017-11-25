@@ -60,7 +60,6 @@ func EnvExistsInMainConfigFile(env string, filePath string) bool {
 // @param filePath : Path to file where env keys are stored
 func AddNewEnvToKeysFile(name string, envKeys EnvKeys, filePath string) {
 	envKeysAll := GetEnvKeysAllFromFile(filePath)
-	//Logf("%sEnvKeysAll: %+v\n", LogPrefixInfo, envKeysAll)
 	if envKeysAll == nil {
 		Logln(LogPrefixWarning + "envKeysAll is nil")
 		envKeysAll = new(EnvKeysAll)
@@ -78,13 +77,13 @@ func AddNewEnvToKeysFile(name string, envKeys EnvKeys, filePath string) {
 // RemoveEnvFromKeysFiles
 // used with 'reset-user' command
 // does not remove env from endpoints file
-// @param env 
+// @param env
 func RemoveEnvFromKeysFile(env string, keysFilePath string, endpointsFilePath string) error {
 	/*
 	 endpointsFilePath is passed to check if it exists in endpoints
 	 env CANNOT exist only in keys file
-	 env CAN exist only in endpoints file (env not initialized i.e. not used with a command)
-	 */
+	 env CAN exist only in endpoints file (env not initialized i.e. not used with a command just yet)
+	*/
 	if env == "" {
 		return errors.New("environment cannot be blank")
 	}
@@ -206,7 +205,7 @@ func IsDefaultEnvPresent(mainConfigFilePath string) bool {
 	return false
 }
 
-// return the name of default environment, if it exists
+// return the name of default environment, if it exists.
 // Currently, the name should be literally 'default'
 func GetDefaultEnvironment(mainConfigFilePath string) string {
 	if IsDefaultEnvPresent(mainConfigFilePath) {

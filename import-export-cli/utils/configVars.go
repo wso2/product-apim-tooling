@@ -22,7 +22,6 @@ import (
 	"errors"
 	"io/ioutil"
 	"os"
-	"reflect"
 	"strings"
 )
 
@@ -38,11 +37,6 @@ func SetConfigVars(mainConfigFilePath string) error {
 	Logln(LogPrefixInfo + " reading '" + mainConfigFilePath + "'")
 
 	// validate config vars
-	if reflect.ValueOf(mainConfig.Config.HttpRequestTimeout).Kind() != reflect.Int {
-		// value of httpRequestTimeout is not an int
-		Logln(LogPrefixError + "value of HttpRequestTimeout in '" + mainConfigFilePath + "' is not an integer")
-		return errors.New("invalid value for HttpRequestTimeout. Should be an integer")
-	}
 	if !(mainConfig.Config.HttpRequestTimeout >= 0) {
 		Logln(LogPrefixWarning + "value of HttpRequestTimeout in '" + mainConfigFilePath + "' is less than zero")
 		Logln(LogPrefixInfo + " setting HttpRequestTimeout to " + string(DefaultHttpRequestTimeout))

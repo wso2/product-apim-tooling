@@ -97,6 +97,7 @@ func TestGetOAuthTokensOK(t *testing.T) {
 	}
 }
 
+// test case 1 - MainConfig file available, flagUsername not blank, flagPassword not blank
 func TestExecutePreCommand1(t *testing.T) {
 	var registrationStub = getRegistrationStubOK(t)
 	var oauthStub = getOAuthStubOK(t)
@@ -123,6 +124,80 @@ func TestExecutePreCommand1(t *testing.T) {
 	WriteConfigFile(envKeysAll, keysAllFilePath)
 
 	ExecutePreCommand("dev", "dev_username", "dev_password", mainConfigFilePath, keysAllFilePath)
+
+	defer func() {
+		os.Remove(mainConfigFilePath)
+		os.Remove(keysAllFilePath)
+		apimStub.Close()
+		oauthStub.Close()
+		registrationStub.Close()
+	}()
+}
+
+// test case 5 - MainConfig file available, flagUsername not blank, flagPassword blank
+func TestExecutePreCommand5(t *testing.T) {
+	var registrationStub = getRegistrationStubOK(t)
+	var oauthStub = getOAuthStubOK(t)
+	var apimStub = getApimStubOK(t)
+
+	// endpoints
+	mainConfig := new(MainConfig)
+	mainConfigFileName := "test_main_config.yaml"
+	mainConfigFilePath := filepath.Join(CurrentDir, mainConfigFileName)
+
+	mainConfig.Config = Config{2500, "/home/exported"}
+	mainConfig.Environments = make(map[string]EnvEndpoints)
+	mainConfig.Environments[devName] = EnvEndpoints{apimStub.URL,
+		registrationStub.URL, oauthStub.URL}
+	WriteConfigFile(mainConfig, mainConfigFilePath)
+
+	// keys
+	envKeysAll := new(EnvKeysAll)
+	keysAllFileName := "test_keys_all.yaml"
+	keysAllFilePath := filepath.Join(CurrentDir, keysAllFileName)
+	envKeysAll.Environments = make(map[string]EnvKeys)
+	devEncryptedClientSecret := Encrypt([]byte(GetMD5Hash(devPassword)), "dev_client_secret")
+	envKeysAll.Environments[devName] = EnvKeys{"dev_client_id", devEncryptedClientSecret, devUsername}
+	WriteConfigFile(envKeysAll, keysAllFilePath)
+
+	ExecutePreCommand("dev", "dev_username", "", mainConfigFilePath, keysAllFilePath)
+
+	defer func() {
+		os.Remove(mainConfigFilePath)
+		os.Remove(keysAllFilePath)
+		apimStub.Close()
+		oauthStub.Close()
+		registrationStub.Close()
+	}()
+}
+
+// test case 6 - MainConfig file available, flagUsername blank, flagPassword not blank
+func TestExecutePreCommand6(t *testing.T) {
+	var registrationStub = getRegistrationStubOK(t)
+	var oauthStub = getOAuthStubOK(t)
+	var apimStub = getApimStubOK(t)
+
+	// endpoints
+	mainConfig := new(MainConfig)
+	mainConfigFileName := "test_main_config.yaml"
+	mainConfigFilePath := filepath.Join(CurrentDir, mainConfigFileName)
+
+	mainConfig.Config = Config{2500, "/home/exported"}
+	mainConfig.Environments = make(map[string]EnvEndpoints)
+	mainConfig.Environments[devName] = EnvEndpoints{apimStub.URL,
+		registrationStub.URL, oauthStub.URL}
+	WriteConfigFile(mainConfig, mainConfigFilePath)
+
+	// keys
+	envKeysAll := new(EnvKeysAll)
+	keysAllFileName := "test_keys_all.yaml"
+	keysAllFilePath := filepath.Join(CurrentDir, keysAllFileName)
+	envKeysAll.Environments = make(map[string]EnvKeys)
+	devEncryptedClientSecret := Encrypt([]byte(GetMD5Hash(devPassword)), "dev_client_secret")
+	envKeysAll.Environments[devName] = EnvKeys{"dev_client_id", devEncryptedClientSecret, devUsername}
+	WriteConfigFile(envKeysAll, keysAllFilePath)
+
+	ExecutePreCommand("dev", "", "dev-password", mainConfigFilePath, keysAllFilePath)
 
 	defer func() {
 		os.Remove(mainConfigFilePath)

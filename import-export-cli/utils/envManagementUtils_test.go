@@ -20,6 +20,7 @@ package utils
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -66,7 +67,6 @@ func TestEnvExistsInEndpointsFile(t *testing.T) {
 		t.Error("Error in EnvExistsInMainConfigFile(). False Positive")
 	}
 	defer os.Remove(testMainConfigFilePath)
-
 }
 
 func TestGetAPIMEndpointOfEnv(t *testing.T) {
@@ -165,7 +165,10 @@ func TestRemoveEnvFromKeysFile1(t *testing.T) {
 		t.Error("Error removing env from keys file: " + err.Error())
 	}
 
-	defer removeFiles()
+	defer func() {
+		os.Remove(testMainConfigFilePath)
+		os.Remove(testKeysFilePath)
+	}()
 }
 
 // Case 2: Env not available in keys file
@@ -184,7 +187,10 @@ func TestRemoveEnvFromKeysFile2(t *testing.T) {
 		t.Error("No error returned. 'Env not found in keys file' error expected")
 	}
 
-	defer removeFiles()
+	defer func() {
+		os.Remove(testMainConfigFilePath)
+		os.Remove(testKeysFilePath)
+	}()
 }
 
 // Case 4: Incorrect Endpoints
@@ -212,9 +218,128 @@ func TestRemoveEnvFromKeysFile3(t *testing.T) {
 	}
 }
 
-func removeFiles() {
-	_ = os.Remove(testMainConfigFilePath)
-	//fmt.Println("Error removing endpoints file:", err.Error())
-	_ = os.Remove(testKeysFilePath)
-	//fmt.Println("Error removing keys file:", err.Error())
+func TestIsDefaultEnvPresent1(t *testing.T) {
+	testMainConfigFileName := "test_main_config.yaml"
+	testMainConfigFilePath := filepath.Join(CurrentDir, testMainConfigFileName)
+	mainConfig := new(MainConfig)
+	mainConfig.Environments = make(map[string]EnvEndpoints)
+	mainConfig.Environments[DefaultEnvironmentName] = EnvEndpoints{
+		"default-publisher",
+		"default-reg",
+		"default-token",
+	}
+
+	WriteConfigFile(mainConfig, testMainConfigFilePath)
+
+	isDefaultEnvPresent := IsDefaultEnvPresent(testMainConfigFilePath)
+	if !isDefaultEnvPresent {
+		t.Errorf("Expected '%t', got '%t'\n", true, false)
+	}
+
+	defer os.Remove(testMainConfigFilePath)
+}
+
+func TestIsDefaultEnvPresent2(t *testing.T) {
+	testMainConfigFileName := "test_main_config.yaml"
+	testMainConfigFilePath := filepath.Join(CurrentDir, testMainConfigFileName)
+	mainConfig := new(MainConfig)
+	mainConfig.Environments = make(map[string]EnvEndpoints)
+
+	WriteConfigFile(mainConfig, testMainConfigFilePath)
+
+	isDefaultEnvPresent := IsDefaultEnvPresent(testMainConfigFilePath)
+	if isDefaultEnvPresent {
+		t.Errorf("Expected '%t', got '%t'\n", false, true)
+	}
+
+	defer os.Remove(testMainConfigFilePath)
+}
+
+// test case 1 - default env present
+func TestGetDefaultEnvironment1(t *testing.T) {
+	testMainConfigFileName := "test_main_config.yaml"
+	testMainConfigFilePath := filepath.Join(CurrentDir, testMainConfigFileName)
+	mainConfig := new(MainConfig)
+	mainConfig.Environments = make(map[string]EnvEndpoints)
+	mainConfig.Environments[DefaultEnvironmentName] = EnvEndpoints{
+		"default-publisher",
+		"default-reg",
+		"default-token",
+	}
+
+	WriteConfigFile(mainConfig, testMainConfigFilePath)
+
+	defaultEnv := GetDefaultEnvironment(testMainConfigFilePath)
+	if defaultEnv == "" {
+		t.Errorf("Expected '%s', got '%s'\n", "emtpy-string", defaultEnv)
+	}
+
+	defer os.Remove(testMainConfigFilePath)
+}
+
+// test case 2 - default env absent
+func TestGetDefaultEnvironment2(t *testing.T) {
+	testMainConfigFileName := "test_main_config.yaml"
+	testMainConfigFilePath := filepath.Join(CurrentDir, testMainConfigFileName)
+	mainConfig := new(MainConfig)
+	mainConfig.Environments = make(map[string]EnvEndpoints)
+
+	WriteConfigFile(mainConfig, testMainConfigFilePath)
+
+	defaultEnv := GetDefaultEnvironment(testMainConfigFilePath)
+	if defaultEnv != "" {
+		t.Errorf("Expected '%s', got '%s'\n", " defaultEnv", "empty-string")
+	}
+
+	defer os.Remove(testMainConfigFilePath)
+}
+
+// test case 1 - input env blank
+func TestRemoveEnvFromMainConfigFile1(t *testing.T) {
+	err := RemoveEnvFromMainConfigFile("", "")
+	if err == nil {
+		t.Errorf("Expected '%s', got '%s' instead\n", err, "nil")
+	}
+}
+
+// test case 2 - input env valid and available in file
+func TestRemoveEnvFromMainConfigFile2(t *testing.T) {
+	testMainConfigFileName := "test_main_config.yaml"
+	testMainConfigFilePath := filepath.Join(CurrentDir, testMainConfigFileName)
+	mainConfig := new(MainConfig)
+	mainConfig.Environments = make(map[string]EnvEndpoints)
+	mainConfig.Environments["dev"] = EnvEndpoints{
+		"default-publisher",
+		"default-reg",
+		"default-token",
+	}
+
+	WriteConfigFile(mainConfig, testMainConfigFilePath)
+	err := RemoveEnvFromMainConfigFile("dev", testMainConfigFilePath)
+	if err != nil {
+		t.Errorf("Expected '%s', got '%s' instead\n", "nil", err)
+	}
+
+	defer os.Remove(testMainConfigFilePath)
+}
+
+// test case 3 - input env valid but not available in file
+func TestRemoveEnvFromMainConfigFile3(t *testing.T) {
+	testMainConfigFileName := "test_main_config.yaml"
+	testMainConfigFilePath := filepath.Join(CurrentDir, testMainConfigFileName)
+	mainConfig := new(MainConfig)
+	mainConfig.Environments = make(map[string]EnvEndpoints)
+	mainConfig.Environments["dev"] = EnvEndpoints{
+		"default-publisher",
+		"default-reg",
+		"default-token",
+	}
+
+	WriteConfigFile(mainConfig, testMainConfigFilePath)
+	err := RemoveEnvFromMainConfigFile("not-available", testMainConfigFilePath)
+	if err == nil {
+		t.Errorf("Expected '%s', got '%s' instead\n", err, "nil")
+	}
+
+	defer os.Remove(testMainConfigFilePath)
 }
