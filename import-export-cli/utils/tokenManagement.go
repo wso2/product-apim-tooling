@@ -141,8 +141,8 @@ func ExecutePreCommandWithBasicAuth(environment, flagUsername, flagPassword, mai
 // including (export-api, import-api, list)
 func ExecutePreCommandWithOAuth(environment, flagUsername, flagPassword, mainConfigFilePath,
 	envKeysAllFilePath string) (accessToken string, apiManagerEndpoint string, err error) {
-	if EnvExistsInMainConfigFile(environment, MainConfigFilePath) {
-		registrationEndpoint := GetRegistrationEndpointOfEnv(environment, MainConfigFilePath)
+	if EnvExistsInMainConfigFile(environment, mainConfigFilePath) {
+		registrationEndpoint := GetRegistrationEndpointOfEnv(environment, mainConfigFilePath)
 		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment, mainConfigFilePath)
 		tokenEndpoint := GetTokenEndpointOfEnv(environment, mainConfigFilePath)
 
