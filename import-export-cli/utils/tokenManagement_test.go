@@ -61,24 +61,7 @@ func TestGetClientIDSecretUnreachable(t *testing.T) {
 }
 
 func TestGetClientIDSecretOK(t *testing.T) {
-	var registrationStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		if r.Method != http.MethodPost {
-			t.Errorf("Expected 'POST', got '%s'\n", r.Method)
-		}
-
-		if r.Header.Get(HeaderContentType) != HeaderValueApplicationJSON {
-			t.Errorf("Expected '"+HeaderValueApplicationJSON+"', got '%s'\n", r.Header.Get(HeaderContentType))
-		}
-
-		w.WriteHeader(http.StatusOK)
-		w.Header().Set(HeaderContentType, HeaderValueApplicationJSON)
-		body := dedent.Dedent(`{"client_name":"Test1",
-									"clientId":"be88563b-21cb-417c-b574-bf1079959679",
-									"clientSecret":"ecb105a0-117c-463d-9376-442d24864f26"}`)
-
-		w.Write([]byte(body))
-	}))
+	var registrationStub = getRegistrationStub(t)
 	defer registrationStub.Close()
 
 	clientID, clientSecret, err := GetClientIDSecret("admin", "admin", registrationStub.URL)
@@ -97,6 +80,53 @@ func TestGetClientIDSecretOK(t *testing.T) {
 }
 
 func TestGetOAuthTokensOK(t *testing.T) {
+	var oauthStub = getOAuthStub(t)
+	defer oauthStub.Close()
+
+	m, err := GetOAuthTokens("admin", "admin", "", oauthStub.URL)
+	if err != nil {
+		t.Error("Error in GetOAuthTokens()")
+	}
+
+	if m["refresh_token"] != "fe8f8400-05c9-430f-8e2f-4f3b2fbd01f8" {
+		t.Error("Error in GetOAuthTokens(): Incorrect RefreshToken")
+	}
+	if m["access_token"] != "a2e5c3ac-68e6-4d78-a8a1-b2b0372cb575" {
+		t.Error("Error in GetOAuthTokens(): Incorrect AccessToken")
+	}
+}
+
+func TestExecutePreCommandWithBasicAuth(t *testing.T) {
+
+}
+
+func TestExecutePreCommandWithOAuth(t *testing.T) {
+
+}
+
+func getRegistrationStub(t *testing.T) *httptest.Server {
+	var registrationStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		if r.Method != http.MethodPost {
+			t.Errorf("Expected 'POST', got '%s'\n", r.Method)
+		}
+
+		if r.Header.Get(HeaderContentType) != HeaderValueApplicationJSON {
+			t.Errorf("Expected '"+HeaderValueApplicationJSON+"', got '%s'\n", r.Header.Get(HeaderContentType))
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Header().Set(HeaderContentType, HeaderValueApplicationJSON)
+		body := dedent.Dedent(`{"client_name":"Test1",
+									"clientId":"be88563b-21cb-417c-b574-bf1079959679",
+									"clientSecret":"ecb105a0-117c-463d-9376-442d24864f26"}`)
+
+		w.Write([]byte(body))
+	}))
+	return registrationStub
+}
+
+func getOAuthStub(t *testing.T) *httptest.Server {
 	var oauthStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("Expected 'POST', got '%s'\n", r.Method)
@@ -123,48 +153,5 @@ func TestGetOAuthTokensOK(t *testing.T) {
 
 		w.Write([]byte(body))
 	}))
-	defer oauthStub.Close()
-
-	m, err := GetOAuthTokens("admin", "admin", "", oauthStub.URL)
-	if err != nil {
-		t.Error("Error in GetOAuthTokens()")
-	}
-
-	if m["refresh_token"] != "fe8f8400-05c9-430f-8e2f-4f3b2fbd01f8" {
-		t.Error("Error in GetOAuthTokens(): Incorrect RefreshToken")
-	}
-	if m["access_token"] != "a2e5c3ac-68e6-4d78-a8a1-b2b0372cb575" {
-		t.Error("Error in GetOAuthTokens(): Incorrect AccessToken")
-	}
-}
-
-func TestExecutePreCommand(t *testing.T) {
-	type args struct {
-		environment  string
-		flagUsername string
-		flagPassword string
-	}
-	var tests []struct {
-		name    string
-		args    args
-		want    string
-		want1   string
-		wantErr bool
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, got1, err := ExecutePreCommandWithOAuth(tt.args.environment, tt.args.flagUsername,
-				tt.args.flagPassword, "", "")
-			if (err != nil) != tt.wantErr {
-				t.Errorf("ExecutePreCommandWithOAuth() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != tt.want {
-				t.Errorf("ExecutePreCommandWithOAuth() got = %v, want %v", got, tt.want)
-			}
-			if got1 != tt.want1 {
-				t.Errorf("ExecutePreCommandWithOAuth() got1 = %v, want %v", got1, tt.want1)
-			}
-		})
-	}
+	return oauthStub
 }
