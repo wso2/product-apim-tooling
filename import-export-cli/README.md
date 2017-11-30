@@ -5,6 +5,7 @@ Command Line tool for importing and exporting APIs between different API Environ
 
 ## Getting Started
 
+### Building from source (Alternatively, download a packaged executable at [here]())
 - ### Setting up the development environment
     1. Install [Go 1.8.x](https://golang.org/dl)
     2. Setup `$GOROOT` and `$GOPATH` correctly : [Tutorial](https://www.goinggo.net/2016/05/installing-go-and-your-workspace.html) 
@@ -27,11 +28,14 @@ Command Line tool for importing and exporting APIs between different API Environ
     
     Execute `import-export-cli/apimcli --help` for further instructions.
 
+<hr/>
+<br/>
+
 - ### Adding Environments
     Add environments by either manually editing `import-export-cli/bin/main_config.yaml` or using the command
-    `apimcli set` command.
+    `apimcli add-env` command.
     
-    Type `apimcli set --help` for detailed instructions
+    Type `apimcli add-env --help` for detailed instructions
     
   ### Command Autocompletion (For Bash Only)
     Copy the file `apimcli_bash_completion.sh` to `/etc/bash_completion.d/` and source it with
@@ -154,6 +158,9 @@ Command Line tool for importing and exporting APIs between different API Environ
 #### Global Flags
 ```bash
     --verbose
+        Enable verbose logs (Provides more information on execution)
     --insecure, -k
+        Allow connections to SSL sites without certs
     --help, -h
+        Display information and example usage of a command
 ```
