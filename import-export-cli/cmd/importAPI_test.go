@@ -53,7 +53,7 @@ func TestImportAPI(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %s\n", err.Error())
 	}
-	utils.SkipTLSVerification = true
+	utils.Insecure = true
 	_, err = ImportAPI(name, server.URL, accessToken, "")
 	if err != nil {
 		t.Errorf("Error: %s\n", err.Error())

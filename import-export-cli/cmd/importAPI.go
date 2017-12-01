@@ -136,7 +136,7 @@ func ImportAPI(query, apiManagerEndpoint, accessToken, exportDirectory string) (
 	}
 
 	var tr *http.Transport
-	if utils.SkipTLSVerification {
+	if utils.Insecure {
 		tr = &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		}

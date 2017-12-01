@@ -98,7 +98,7 @@ func initConfig() {
 
 	utils.Logln(utils.LogPrefixInfo+"Insecure:", insecure)
 	if insecure {
-		utils.SkipTLSVerification = true
+		utils.Insecure = true
 	}
 
 	/*
