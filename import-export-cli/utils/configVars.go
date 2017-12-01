@@ -26,7 +26,7 @@ import (
 )
 
 var HttpRequestTimeout = DefaultHttpRequestTimeout
-var SkipTLSVerification bool
+var Insecure bool
 var ExportDirectory string
 
 // SetConfigVars

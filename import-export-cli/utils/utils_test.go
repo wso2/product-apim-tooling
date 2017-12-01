@@ -42,7 +42,7 @@ func TestInvokePOSTRequestUnreachable(t *testing.T) {
 }
 
 func TestInvokeGETRequestOK(t *testing.T) {
-	SkipTLSVerification = true
+	Insecure = true
 	var httpStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			t.Errorf("Expected '%s', got '%s'\n", http.MethodGet, r.Method)
@@ -59,7 +59,7 @@ func TestInvokeGETRequestOK(t *testing.T) {
 }
 
 func TestInvokePOSTRequestOK(t *testing.T) {
-	SkipTLSVerification = true
+	Insecure = true
 	var httpStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("Expected 'POST', got '%s'\n", r.Method)

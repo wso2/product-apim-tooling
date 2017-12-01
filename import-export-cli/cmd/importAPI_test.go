@@ -50,7 +50,7 @@ func TestImportAPISuccessful(t *testing.T) {
 	name := "sampleapi.zip"
 	accessToken := "access-token"
 
-	utils.SkipTLSVerification = true
+	utils.Insecure = true
 
 	_, err := ImportAPI(name, server.URL, accessToken, utils.CurrentDir)
 	if err != nil {
@@ -80,7 +80,7 @@ func TestImportAPIError(t *testing.T) {
 	name := "sampleapi.zip"
 	accessToken := "access-token"
 
-	utils.SkipTLSVerification = true
+	utils.Insecure = true
 
 	_, err := ImportAPI(name, server.URL, accessToken, utils.CurrentDir)
 	if err != nil {

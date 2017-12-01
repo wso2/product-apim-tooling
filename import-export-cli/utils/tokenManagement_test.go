@@ -83,7 +83,7 @@ func TestGetClientIDSecretOK(t *testing.T) {
 }
 
 func TestGetOAuthTokensOK(t *testing.T) {
-	SkipTLSVerification = true
+	Insecure = true
 	var oauthStub = getOAuthStubOK(t)
 	defer oauthStub.Close()
 

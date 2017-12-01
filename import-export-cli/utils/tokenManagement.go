@@ -221,7 +221,7 @@ func GetOAuthTokens(username string, password string,
 	headers[HeaderAuthorization] = HeaderValueAuthBearerPrefix + " " + b64EncodedClientIDClientSecret
 	headers[HeaderAccept] = HeaderValueApplicationJSON
 
-	if SkipTLSVerification {
+	if Insecure {
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTP certificates
 	}
 
