@@ -24,7 +24,6 @@ import (
 )
 
 const ProjectName = "apimcli"
-const ConfigDirectoryName = "wso2-apim-cli-config"
 
 // File Names and Paths
 
@@ -32,8 +31,6 @@ var CurrentDir, _ = os.Getwd()
 var ApplicationRoot = CurrentDir
 
 var PathSeparator_ = string(os.PathSeparator)
-
-//var ApplicationRoot = "/home/menuka/.go/src/github.com/wso2/product-apim-tooling/import-export-cli"
 
 const EnvKeysAllFileName = "env_keys_all.yaml"
 

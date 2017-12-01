@@ -27,6 +27,9 @@ import (
 	"testing"
 )
 
+const sampleAccessToken = "a2e5c3ac-68e6-4d78-a8a1-b2b0372cb575"
+const sampleRefreshToken = "fe8f8400-05c9-430f-8e2f-4f3b2fbd01f8"
+
 func TestGetBase64EncodedCredentials(t *testing.T) {
 	usernames := []string{"admin", "user", "admin"}
 	passwords := []string{"admin", "password", "123456"}
@@ -89,10 +92,10 @@ func TestGetOAuthTokensOK(t *testing.T) {
 		t.Error("Error in GetOAuthTokens()")
 	}
 
-	if m["refresh_token"] != "fe8f8400-05c9-430f-8e2f-4f3b2fbd01f8" {
+	if m["refresh_token"] != sampleRefreshToken {
 		t.Error("Error in GetOAuthTokens(): Incorrect RefreshToken")
 	}
-	if m["access_token"] != "a2e5c3ac-68e6-4d78-a8a1-b2b0372cb575" {
+	if m["access_token"] != sampleAccessToken {
 		t.Error("Error in GetOAuthTokens(): Incorrect AccessToken")
 	}
 }
@@ -123,7 +126,19 @@ func TestExecutePreCommand1(t *testing.T) {
 	envKeysAll.Environments[devName] = EnvKeys{"dev_client_id", devEncryptedClientSecret, devUsername}
 	WriteConfigFile(envKeysAll, keysAllFilePath)
 
-	ExecutePreCommand("dev", "dev_username", "dev_password", mainConfigFilePath, keysAllFilePath)
+	accessToken, publisherEndpoint, err := ExecutePreCommand("dev", "dev_username", "dev_password", mainConfigFilePath, keysAllFilePath)
+
+	if accessToken != sampleAccessToken {
+		t.Errorf("Expected '%s', got '%s' instead\n", sampleAccessToken, accessToken)
+	}
+
+	if publisherEndpoint != apimStub.URL {
+		t.Errorf("Expected '%s', got '%s' instead\n", apimStub.URL, publisherEndpoint)
+	}
+
+	if err != nil {
+		t.Errorf("Expected '%s', got '%s' instead\n", "nil", err)
+	}
 
 	defer func() {
 		os.Remove(mainConfigFilePath)
@@ -160,7 +175,19 @@ func TestExecutePreCommand5(t *testing.T) {
 	envKeysAll.Environments[devName] = EnvKeys{"dev_client_id", devEncryptedClientSecret, devUsername}
 	WriteConfigFile(envKeysAll, keysAllFilePath)
 
-	ExecutePreCommand("dev", "dev_username", "", mainConfigFilePath, keysAllFilePath)
+	accessToken, publisherEndpoint, err := ExecutePreCommand("dev", "dev_username", "", mainConfigFilePath, keysAllFilePath)
+
+	if accessToken != sampleAccessToken {
+		t.Errorf("Expected '%s', got '%s' instead\n", sampleAccessToken, accessToken)
+	}
+
+	if publisherEndpoint != apimStub.URL {
+		t.Errorf("Expected '%s', got '%s' instead\n", apimStub.URL, publisherEndpoint)
+	}
+
+	if err != nil {
+		t.Errorf("Expected '%s', got '%s' instead\n", "nil", err)
+	}
 
 	defer func() {
 		os.Remove(mainConfigFilePath)
@@ -197,7 +224,19 @@ func TestExecutePreCommand6(t *testing.T) {
 	envKeysAll.Environments[devName] = EnvKeys{"dev_client_id", devEncryptedClientSecret, devUsername}
 	WriteConfigFile(envKeysAll, keysAllFilePath)
 
-	ExecutePreCommand("dev", "", "dev-password", mainConfigFilePath, keysAllFilePath)
+	accessToken, publisherEndpoint, err := ExecutePreCommand("dev", "", "dev-password", mainConfigFilePath, keysAllFilePath)
+
+	if accessToken != sampleAccessToken {
+		t.Errorf("Expected '%s', got '%s' instead\n", sampleAccessToken, accessToken)
+	}
+
+	if publisherEndpoint != apimStub.URL {
+		t.Errorf("Expected '%s', got '%s' instead\n", apimStub.URL, publisherEndpoint)
+	}
+
+	if err != nil {
+		t.Errorf("Expected '%s', got '%s' instead\n", "nil", err)
+	}
 
 	defer func() {
 		os.Remove(mainConfigFilePath)
@@ -307,8 +346,8 @@ func getOAuthStubOK(t *testing.T) *httptest.Server {
 		w.Header().Set(HeaderContentType, HeaderValueApplicationJSON)
 
 		body := dedent.Dedent(`
-			{"access_token":"a2e5c3ac-68e6-4d78-a8a1-b2b0372cb575",
-			 "refresh_token":"fe8f8400-05c9-430f-8e2f-4f3b2fbd01f8",
+			{"access_token":"` + sampleAccessToken + `",
+			 "refresh_token":"` + sampleRefreshToken + `",
 			 "expires_in":1487166427829,
 			 "scopes":
 					["apim:api_view","apim:api_create","apim:api_publish",

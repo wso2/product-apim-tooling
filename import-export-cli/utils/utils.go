@@ -42,7 +42,7 @@ func InvokePOSTRequest(url string, headers map[string]string, body string) (*res
 }
 
 // Invoke http-get request using go-resty
-func InvokeGETRequest(url string , headers map[string]string) (*resty.Response, error) {
+func InvokeGETRequest(url string, headers map[string]string) (*resty.Response, error) {
 	if SkipTLSVerification {
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTPS certificates
 	}
@@ -97,4 +97,3 @@ func chopPath(original string) string {
 		return original[i+1:]
 	}
 }
-

@@ -39,7 +39,7 @@ import (
 // @return AccessToken, PublisherEndpoint, Errors
 // including (export-api, import-api, list)
 func ExecutePreCommand(environment, flagUsername, flagPassword, mainConfigFilePath,
-envKeysAllFilePath string) (accessToken string, publisherEndpoint string, err error) {
+	envKeysAllFilePath string) (accessToken string, publisherEndpoint string, err error) {
 	if EnvExistsInMainConfigFile(environment, mainConfigFilePath) {
 		registrationEndpoint := GetRegistrationEndpointOfEnv(environment, mainConfigFilePath)
 		apiManagerEndpoint := GetPublisherEndpointOfEnv(environment, mainConfigFilePath)
