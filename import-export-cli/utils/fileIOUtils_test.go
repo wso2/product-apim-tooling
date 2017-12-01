@@ -28,6 +28,7 @@ import (
 
 const testKeysFileName = "test_keys_config.yaml"
 const testMainConfigFileName = "test_main_config.yaml"
+
 var testKeysFilePath = filepath.Join(ApplicationRoot, testKeysFileName)
 var testMainConfigFilePath = filepath.Join(ApplicationRoot, testMainConfigFileName)
 
@@ -71,7 +72,7 @@ func WriteCorrectMainConfig() {
 }
 
 func initSampleMainConfig() {
-	mainConfig.Config = Config{2500,"/home/exported"}
+	mainConfig.Config = Config{2500, "/home/exported"}
 	mainConfig.Environments = make(map[string]EnvEndpoints)
 	mainConfig.Environments[devName] = EnvEndpoints{"dev_apim_endpoint",
 		"dev_reg_endpoint", "dev_token_endpoint"}
@@ -96,10 +97,7 @@ func TestGetEnvKeysAllFromFile1(t *testing.T) {
 		t.Errorf("Error in GetEnvKeysAllFromFile()")
 	}
 
-	var err = os.Remove(testKeysFilePath)
-	if err != nil {
-		t.Errorf("Error deleting file " + testKeysFilePath)
-	}
+	defer os.Remove(testKeysFilePath)
 }
 
 /*
@@ -117,10 +115,7 @@ func TestGetEnvKeysAllFromFile3(t *testing.T) {
 		t.Errorf("Error in GetEnvKeysAllFromFile()")
 	}
 
-	var err = os.Remove(testKeysFilePath)
-	if err != nil {
-		t.Errorf("Error deleting file " + testKeysFilePath)
-	}
+	defer os.Remove(testKeysFilePath)
 }
 */
 
@@ -140,7 +135,8 @@ func TestGetMainConfigFromFile(t *testing.T) {
 	}
 }
 
-func TestMainConfig_ParseMainConfigFromFile(t *testing.T) {
+// test case 1 - correct endpoints file
+func TestMainConfig_ParseMainConfigFromFile1(t *testing.T) {
 	var envEndpointsAllLocal MainConfig
 	WriteCorrectMainConfig()
 	data, err := ioutil.ReadFile(testMainConfigFilePath)
@@ -155,7 +151,74 @@ func TestMainConfig_ParseMainConfigFromFile(t *testing.T) {
 	}
 }
 
-func TestEnvKeysAll_ParseEnvKeysFromFile(t *testing.T) {
+// test case 2 - incorrect endpoints (blank apim endpoint)
+func TestMainConfig_ParseMainConfigFromFile2(t *testing.T) {
+
+	mainConfig := new(MainConfig)
+	mainConfigFileName := "test_main_config.yaml"
+	mainConfigFilePath := filepath.Join(CurrentDir, mainConfigFileName)
+
+	mainConfig.Environments = make(map[string]EnvEndpoints)
+	mainConfig.Environments[devName] = EnvEndpoints{"",
+		"dev_reg_endpoint", "dev_token_endpoint"}
+	WriteConfigFile(mainConfig, mainConfigFilePath)
+
+	data, _ := ioutil.ReadFile(testMainConfigFilePath)
+
+	err := mainConfig.ParseMainConfigFromFile(data)
+	if err == nil {
+		t.Errorf("Expected '%s', got '%s' instead\n", "error", err)
+	}
+
+	defer os.Remove(testMainConfigFilePath)
+}
+
+// test case 3 - incorrect endpoints (blank reg endpoint)
+func TestMainConfig_ParseMainConfigFromFile3(t *testing.T) {
+
+	mainConfig := new(MainConfig)
+	mainConfigFileName := "test_main_config.yaml"
+	mainConfigFilePath := filepath.Join(CurrentDir, mainConfigFileName)
+
+	mainConfig.Environments = make(map[string]EnvEndpoints)
+	mainConfig.Environments[devName] = EnvEndpoints{"dev_apim_endpoint",
+		"", "dev_token_endpoint"}
+	WriteConfigFile(mainConfig, mainConfigFilePath)
+
+	data, _ := ioutil.ReadFile(testMainConfigFilePath)
+
+	err := mainConfig.ParseMainConfigFromFile(data)
+	if err == nil {
+		t.Errorf("Expected '%s', got '%s' instead\n", "error", err)
+	}
+
+	defer os.Remove(testMainConfigFilePath)
+}
+
+// test case 4 - incorrect endpoints (blank token endpoint)
+func TestMainConfig_ParseMainConfigFromFile4(t *testing.T) {
+
+	mainConfig := new(MainConfig)
+	mainConfigFileName := "test_main_config.yaml"
+	mainConfigFilePath := filepath.Join(CurrentDir, mainConfigFileName)
+
+	mainConfig.Environments = make(map[string]EnvEndpoints)
+	mainConfig.Environments[devName] = EnvEndpoints{"dev_apim_endpoint",
+		"dev_reg_endpoint", ""}
+	WriteConfigFile(mainConfig, mainConfigFilePath)
+
+	data, _ := ioutil.ReadFile(testMainConfigFilePath)
+
+	err := mainConfig.ParseMainConfigFromFile(data)
+	if err == nil {
+		t.Errorf("Expected '%s', got '%s' instead\n", "error", err)
+	}
+
+	defer os.Remove(testMainConfigFilePath)
+}
+
+// test case1 - correct keys
+func TestEnvKeysAll_ParseEnvKeysFromFile1(t *testing.T) {
 	var envKeysAllLocal EnvKeysAll
 	writeCorrectKeys()
 	data, err := ioutil.ReadFile(testKeysFilePath)
@@ -168,4 +231,81 @@ func TestEnvKeysAll_ParseEnvKeysFromFile(t *testing.T) {
 	if err1 != nil {
 		t.Errorf("Error deleting file " + testKeysFilePath)
 	}
+}
+
+// test case 2 - incorrect keys (blank clientID)
+func TestEnvKeysAll_ParseEnvKeysFromFile2(t *testing.T) {
+	envKeysAll := new(EnvKeysAll)
+	testKeysFileName := "test_env_keys_all.yaml"
+	testKeysFilePath := filepath.Join(CurrentDir, testKeysFileName)
+
+	// write incorrect keys
+	envKeysAll.Environments = make(map[string]EnvKeys)
+	qaEncryptedClientSecret := Encrypt([]byte(GetMD5Hash(qaPassword)), "qa_client_secret")
+	envKeysAll.Environments[qaName] = EnvKeys{"", qaEncryptedClientSecret, qaUsername}
+	WriteConfigFile(envKeysAll, testKeysFilePath)
+
+	data, _ := ioutil.ReadFile(testKeysFilePath)
+	err := envKeysAll.ParseEnvKeysFromFile(data)
+	if err == nil {
+		t.Errorf("Expected '%s', got '%s' instead\n", "error", err)
+	}
+
+	defer os.Remove(testKeysFilePath)
+}
+
+// test case 3 - incorrect keys (blank clientSecret)
+func TestEnvKeysAll_ParseEnvKeysFromFile3(t *testing.T) {
+	envKeysAll := new(EnvKeysAll)
+	testKeysFileName := "test_env_keys_all.yaml"
+	testKeysFilePath := filepath.Join(CurrentDir, testKeysFileName)
+
+	// write incorrect keys
+	envKeysAll.Environments = make(map[string]EnvKeys)
+	envKeysAll.Environments[qaName] = EnvKeys{"client-id", "", qaUsername}
+	WriteConfigFile(envKeysAll, testKeysFilePath)
+
+	data, _ := ioutil.ReadFile(testKeysFilePath)
+	err := envKeysAll.ParseEnvKeysFromFile(data)
+	if err == nil {
+		t.Errorf("Expected '%s', got '%s' instead\n", "error", err)
+	}
+
+	defer os.Remove(testKeysFilePath)
+}
+
+// test case 1 - for a file that does not exist
+func TestIsFileExist1(t *testing.T) {
+	isFileExist := IsFileExist("random-string")
+	if isFileExist {
+		t.Errorf("Expected '%t' for a file that does not exist, got '%t' instead\n", false, true)
+	}
+}
+
+// test for a file that does exist
+func TestIsFileExist2(t *testing.T) {
+	isFileExist := IsFileExist("./fileIOUtils.go")
+	if !isFileExist {
+		t.Errorf("Expected '%t' for a file that does exist,  got '%t' instead\n", true, false)
+	}
+}
+
+// test case 1 - for directory that does not exist
+func TestIsDirExist1(t *testing.T) {
+	isDirExist, _ := IsDirExists("random-string")
+	if isDirExist {
+		t.Errorf("Expected '%t' for a directoroy that does not exist, got '%t' instead\n", false, true)
+	}
+}
+
+// test case 2 - for a directory that does exist
+func TestIsDirExist2(t *testing.T) {
+	tempDirName := "tempDir"
+	os.Mkdir(tempDirName, os.ModePerm)
+	isDirExist, _ := IsDirExists(tempDirName)
+	if !isDirExist {
+		t.Error("Expected '%t' for a directory that does exist, got '%t' instead\n", true, false)
+	}
+
+	defer os.Remove(tempDirName)
 }

@@ -27,15 +27,15 @@ import (
 
 // TestRemoveEnv1 - Correct Details
 func TestRemoveEnv1(t *testing.T) {
-	sampleMainConfigFileName := "sample_main_config.yaml"
-	sampleMainConfigFilePath := filepath.Join(utils.ApplicationRoot, sampleMainConfigFileName)
+	testMainConfigFileName := "sample_main_config.yaml"
+	testMainConfigFilePath := filepath.Join(utils.ApplicationRoot, testMainConfigFileName)
 
-	var sampleMainConfig = new(utils.MainConfig)
-	sampleMainConfig.Config = utils.Config{10000, ""}
-	sampleMainConfig.Environments = make(map[string]utils.EnvEndpoints)
-	sampleMainConfig.Environments["dev"] = utils.EnvEndpoints{"sample-publisher-endpoint",
+	var mainConfig = new(utils.MainConfig)
+	mainConfig.Config = utils.Config{10000, ""}
+	mainConfig.Environments = make(map[string]utils.EnvEndpoints)
+	mainConfig.Environments["dev"] = utils.EnvEndpoints{"sample-publisher-endpoint",
 		"sample-reg-endpoint", "sample-token-endpoint"}
-	utils.WriteConfigFile(sampleMainConfig, sampleMainConfigFilePath)
+	utils.WriteConfigFile(mainConfig, testMainConfigFilePath)
 
 	sampleEnvKeysAllFileName := "sample_env_keys_all.yaml"
 	sampleEnvKeysAllFilePath := filepath.Join(utils.ApplicationRoot, sampleEnvKeysAllFileName)
@@ -45,7 +45,7 @@ func TestRemoveEnv1(t *testing.T) {
 		"username"}
 	utils.WriteConfigFile(sampleEnvKeysAll, sampleEnvKeysAllFilePath)
 
-	err := removeEnv("dev", sampleMainConfigFilePath, sampleEnvKeysAllFilePath)
+	err := removeEnv("dev", testMainConfigFilePath, sampleEnvKeysAllFilePath)
 
 	if err != nil {
 		t.Errorf("Expected nil, got '%s'\n", err.Error())
@@ -53,7 +53,7 @@ func TestRemoveEnv1(t *testing.T) {
 
 	defer func() {
 		os.Remove(sampleEnvKeysAllFilePath)
-		os.Remove(sampleMainConfigFilePath)
+		os.Remove(testMainConfigFilePath)
 		os.Remove(filepath.Join(utils.CurrentDir, utils.EnvKeysAllFileName))
 	}()
 
