@@ -27,7 +27,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
-	"net/url"
 	"os"
 )
 
@@ -98,10 +97,12 @@ func GetAPIList(query, accessToken, apiManagerEndpoint string) (count int32, api
 	}
 	url_ += "api/am/publisher/v0.11/apis"
 
-	fmt.Println("Query before encoding:", query)
-	encodedQuery, _ := url.Parse(query) // convert query into a url-path-encoded string
-	fmt.Println("Query after encoding:", encodedQuery.String())
-	url_ += "?query=" + encodedQuery.String()
+	/*
+		fmt.Println("Query before encoding:", query)
+		encodedQuery, _ := url.Parse(query) // convert query into a url-path-encoded string
+		fmt.Println("Query after encoding:", encodedQuery.String())
+		url_ += "?query=" + encodedQuery.String()
+	*/
 	utils.Logln(utils.LogPrefixInfo+"URL:", url_)
 
 	headers := make(map[string]string)

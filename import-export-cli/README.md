@@ -52,16 +52,17 @@ Command Line tool for importing and exporting APIs between different API Environ
             Required:
                 --name, -n
                 --version, -v
+                --provider, -r
                 --environment, -e
             Optional:
                 --username, -u
                 --password, -p
                 NOTE: user will be prompted to enter credentials if they are not provided with these flags
         Examples:
-            apimcli export-api -n TestAPI -v 1.0.1 -e staging
-            apimcli export-api -n TestAPI -v 1.0.1 -e staging -u admin -p 123456
-            apimcli export-api -n TestAPI -v 1.0.1 -e staging -u admin
-            apimcli export-api -n TestAPI -v 1.0.1 -e staging -p 123456
+            apimcli export-api -n TestAPI -v 1.0.1 -r admin -e staging
+            apimcli export-api -n TestAPI -v 1.0.1 -r admin -e staging -u admin -p 123456
+            apimcli export-api -n TestAPI -v 1.0.1 -r admin -e staging -u admin
+            apimcli export-api -n TestAPI -v 1.0.1 -r admin -e staging -p 123456
 ```
 
 * #### import-api
