@@ -100,18 +100,154 @@ func TestGetOAuthTokensOK(t *testing.T) {
 	}
 }
 
-func TestExecutePreCommandWithBasicAuth(t *testing.T) {
+// test case 1 - env exists in both endpoints (mainConfig) file and keys file
+func TestExecutePreCommandWithBasicAuth1(t *testing.T) {
 	var apimStub = getApimStubOK(t)
+	var registrationStub = getRegistrationStubOK(t)
+	var oauthStub = getOAuthStubOK(t)
 
 	// endpoints
 	mainConfig := new(MainConfig)
 	mainConfigFileName := "test_main_config.yaml"
 	mainConfigFilePath := filepath.Join(CurrentDir, mainConfigFileName)
+	mainConfig.Config = Config{2500, "/home/exported"}
+	mainConfig.Environments = make(map[string]EnvEndpoints)
+	mainConfig.Environments[devName] = EnvEndpoints{apimStub.URL,
+		registrationStub.URL, oauthStub.URL}
 	WriteConfigFile(mainConfig, mainConfigFilePath)
+
+	// keys
+	envKeysAll := new(EnvKeysAll)
+	keysAllFileName := "test_keys_all.yaml"
+	keysAllFilePath := filepath.Join(CurrentDir, keysAllFileName)
+	envKeysAll.Environments = make(map[string]EnvKeys)
+	devEncryptedClientSecret := Encrypt([]byte(GetMD5Hash(devPassword)), "dev_client_secret")
+	envKeysAll.Environments[devName] = EnvKeys{"dev_client_id", devEncryptedClientSecret, devUsername}
+	WriteConfigFile(envKeysAll, keysAllFilePath)
+
+	b64encodedCredentials, apimEndpoint, err := ExecutePreCommandWithBasicAuth(devName, devUsername, "admin", mainConfigFilePath, keysAllFilePath)
+
+	expected := GetBase64EncodedCredentials(devUsername, "admin")
+
+	if b64encodedCredentials != expected {
+		t.Errorf("Expected '%s', got '%s' instead\n", expected, b64encodedCredentials)
+	}
+
+	if apimEndpoint != apimStub.URL {
+		t.Errorf("Expected '%s', got '%s', instead\n", apimStub.URL, apimEndpoint)
+	}
+
+	if err != nil {
+		t.Errorf("Expected '%s', got '%s' instead\n", "nil", err)
+	}
+
+	defer func() {
+		os.Remove(mainConfigFilePath)
+		os.Remove(keysAllFilePath)
+		apimStub.Close()
+		oauthStub.Close()
+		registrationStub.Close()
+	}()
+}
+
+// test case 2 - env exists only in endpoints (mainConfig) file
+func TestExecutePreCommandWithBasicAuth2(t *testing.T) {
+	var apimStub = getApimStubOK(t)
+	var registrationStub = getRegistrationStubOK(t)
+	var oauthStub = getOAuthStubOK(t)
+
+	// endpoints
+	mainConfig := new(MainConfig)
+	mainConfigFileName := "test_main_config.yaml"
+	mainConfigFilePath := filepath.Join(CurrentDir, mainConfigFileName)
+	mainConfig.Config = Config{2500, "/home/exported"}
+	mainConfig.Environments = make(map[string]EnvEndpoints)
+	mainConfig.Environments[devName] = EnvEndpoints{apimStub.URL,
+		registrationStub.URL, oauthStub.URL}
+	WriteConfigFile(mainConfig, mainConfigFilePath)
+
+	// keys
+	envKeysAll := new(EnvKeysAll)
+	keysAllFileName := "test_keys_all.yaml"
+	keysAllFilePath := filepath.Join(CurrentDir, keysAllFileName)
+	envKeysAll.Environments = make(map[string]EnvKeys)
+	WriteConfigFile(envKeysAll, keysAllFilePath)
+
+	b64encodedCredentials, apimEndpoint, err := ExecutePreCommandWithBasicAuth(devName, devUsername, "admin", mainConfigFilePath, keysAllFilePath)
+
+	expected := GetBase64EncodedCredentials(devUsername, "admin")
+
+	if b64encodedCredentials != expected {
+		t.Errorf("Expected '%s', got '%s' instead\n", expected, b64encodedCredentials)
+	}
+
+	if apimEndpoint != apimStub.URL {
+		t.Errorf("Expected '%s', got '%s', instead\n", apimStub.URL, apimEndpoint)
+	}
+
+	if err != nil {
+		t.Errorf("Expected '%s', got '%s' instead\n", "nil", err)
+	}
 
 	defer func() {
 		os.Remove(mainConfigFilePath)
 		apimStub.Close()
+		oauthStub.Close()
+		registrationStub.Close()
+	}()
+
+}
+
+// test case 3 - env does not exist in either file
+func TestExecutePreCommandWithBasicAuth3(t *testing.T) {
+	// endpoints
+	mainConfig := new(MainConfig)
+	mainConfigFileName := "test_main_config.yaml"
+	mainConfigFilePath := filepath.Join(CurrentDir, mainConfigFileName)
+	mainConfig.Config = Config{2500, "/home/exported"}
+	mainConfig.Environments = make(map[string]EnvEndpoints)
+	WriteConfigFile(mainConfig, mainConfigFilePath)
+
+	// keys
+	envKeysAll := new(EnvKeysAll)
+	keysAllFileName := "test_keys_all.yaml"
+	keysAllFilePath := filepath.Join(CurrentDir, keysAllFileName)
+	envKeysAll.Environments = make(map[string]EnvKeys)
+	WriteConfigFile(envKeysAll, keysAllFilePath)
+
+	// non blank flagUsername and flagPassword
+	b64encodedCredentials, apimEndpoint, err := ExecutePreCommandWithBasicAuth(devName, devUsername, "admin", mainConfigFilePath, keysAllFilePath)
+
+	if b64encodedCredentials != "" {
+		t.Errorf("Expected '%s', got '%s' instead\n", "<blank>", b64encodedCredentials)
+	}
+
+	if apimEndpoint != "" {
+		t.Errorf("Expected '%s', got '%s', instead\n", "<blank>", apimEndpoint)
+	}
+
+	if err == nil {
+		t.Errorf("Expected '%s', got '%s' instead\n", "err", "nil")
+	}
+
+	// blank env name
+	b64encodedCredentials, apimEndpoint, err = ExecutePreCommandWithBasicAuth("", devUsername, "admin", mainConfigFilePath, keysAllFilePath)
+
+	if b64encodedCredentials != "" {
+		t.Errorf("Expected '%s', got '%s' instead\n", "<blank>", b64encodedCredentials)
+	}
+
+	if apimEndpoint != "" {
+		t.Errorf("Expected '%s', got '%s', instead\n", "<blank>", apimEndpoint)
+	}
+
+	if err == nil {
+		t.Errorf("Expected '%s', got '%s' instead\n", "err", "nil")
+	}
+
+	defer func() {
+		os.Remove(mainConfigFilePath)
+		os.Remove(keysAllFilePath)
 	}()
 }
 

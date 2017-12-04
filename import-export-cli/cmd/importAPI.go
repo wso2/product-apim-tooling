@@ -32,7 +32,6 @@ import (
 	"github.com/renstrom/dedent"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"regexp"
 	"strings"
 	"time"
 )
@@ -75,7 +74,7 @@ var ImportAPICmd = &cobra.Command{
 
 			if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusCreated {
 				// 200 OK or 201 Created
-				utils.Logln(utils.LogPrefixInfo + "Header:", resp.Header)
+				utils.Logln(utils.LogPrefixInfo+"Header:", resp.Header)
 				fmt.Println("Succesfully imported API!")
 			} else {
 				fmt.Println("Error importing API")
@@ -110,22 +109,22 @@ func ImportAPI(query, apiManagerEndpoint, accessToken, exportDirectory string) (
 	fmt.Println("ZipFilePath:", zipFilePath)
 
 	// check if '.zip' exists in the input 'fileName'
-	hasZipExtension, _ := regexp.MatchString(`^\S+\.zip$`, fileName)
+	//hasZipExtension, _ := regexp.MatchString(`^\S+\.zip$`, fileName)
 
-	if hasZipExtension {
-		// import the zip file directly
-		//fmt.Println("hasZipExtension: ", true)
-
-	} else {
-		//fmt.Println("hasZipExtension: ", false)
-		// search for a directory with the given fileName
-		destination := filepath.Join(utils.ExportedAPIsDirectoryPath, fileName+".zip")
-		err := utils.ZipDir(zipFilePath, destination)
-		if err != nil {
-			utils.HandleErrorAndExit("Error creating zip archive", err)
-		}
-		zipFilePath += ".zip"
-	}
+	//if hasZipExtension {
+	//	// import the zip file directly
+	//	//fmt.Println("hasZipExtension: ", true)
+	//
+	//} else {
+	//	//fmt.Println("hasZipExtension: ", false)
+	//	// search for a directory with the given fileName
+	//	destination := filepath.Join(exportDirectory, fileName+".zip")
+	//	err := utils.ZipDir(zipFilePath, destination)
+	//	if err != nil {
+	//		utils.HandleErrorAndExit("Error creating zip archive", err)
+	//	}
+	//	zipFilePath += ".zip"
+	//}
 
 	extraParams := map[string]string{}
 	// TODO:: Add extraParams as necessary

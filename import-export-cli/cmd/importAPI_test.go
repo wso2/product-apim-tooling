@@ -28,7 +28,7 @@ import (
 	"testing"
 )
 
-func TestImportAPI(t *testing.T) {
+func TestImportAPI1(t *testing.T) {
 	var server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("Expected '%s', got '%s' instead\n", http.MethodPost, r.Method)

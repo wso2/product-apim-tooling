@@ -25,7 +25,6 @@ import (
 	"fmt"
 	"github.com/renstrom/dedent"
 	"net/http"
-	"os"
 	"strings"
 )
 
@@ -37,7 +36,7 @@ import (
 // including (export-api, import-api, list)e
 func ExecutePreCommandWithBasicAuth(environment, flagUsername, flagPassword, mainConfigFilePath,
 	envKeysAllFilePath string) (b64encodedCredentials string, apiManagerEndpoint string, err error) {
-	if EnvExistsInMainConfigFile(environment, MainConfigFilePath) {
+	if EnvExistsInMainConfigFile(environment, mainConfigFilePath) {
 		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment, mainConfigFilePath)
 
 		Logln(LogPrefixInfo + "Environment: '" + environment + "'")
@@ -55,10 +54,10 @@ func ExecutePreCommandWithBasicAuth(environment, flagUsername, flagPassword, mai
 				if flagUsername != username {
 					// username entered with flag -u is not the same as username found
 					// in env_keys_all.yaml file
-					fmt.Println(LogPrefixWarning + "Username entered with flag -u for the environment '" +
+					fmt.Println("Username entered with flag -u for the environment '" +
 						environment + "' is not the same as username found in file '" + EnvKeysAllFilePath + "'")
 					fmt.Println("Execute '" + ProjectName + " reset-user -e " + environment + "' to clear user data")
-					os.Exit(1)
+					HandleErrorAndExit("Username mismatch", nil)
 				} else {
 					// username entered with flag -u is the same as username found in env_keys_all.yaml file
 					if flagPassword == "" {
@@ -116,9 +115,6 @@ func ExecutePreCommandWithBasicAuth(environment, flagUsername, flagPassword, mai
 		// Get Base64 Encoded Username:Password
 		b64encodedCredentials := GetBase64EncodedCredentials(username, password)
 
-		Logln(LogPrefixInfo+"[Remove in Production] Base64EncodedCredentials:", b64encodedCredentials)
-		// TODO:: Remove in production
-
 		return b64encodedCredentials, apiManagerEndpoint, nil
 	} else {
 		// env does not exist in main config file
@@ -164,10 +160,10 @@ func ExecutePreCommandWithOAuth(environment, flagUsername, flagPassword, mainCon
 				if flagUsername != username {
 					// username entered with flag -u is not the same as username found
 					// in env_keys_all.yaml file
-					fmt.Println(LogPrefixWarning + "Username entered with flag -u for the environment '" +
+					fmt.Println("Username entered with flag -u for the environment '" +
 						environment + "' is not the same as username found in file '" + EnvKeysAllFilePath + "'")
 					fmt.Println("Execute '" + ProjectName + " reset-user -e " + environment + "' to clear user data")
-					os.Exit(1)
+					HandleErrorAndExit("Username mismatch", nil)
 				} else {
 					// username entered with flag -u is the same as username found in env_keys_all.yaml file
 					if flagPassword == "" {
