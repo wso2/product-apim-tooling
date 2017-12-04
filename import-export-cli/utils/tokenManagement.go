@@ -137,8 +137,6 @@ func ExecutePreCommand(environment, flagUsername, flagPassword, mainConfigFilePa
 			GetBase64EncodedCredentials(clientID, clientSecret), tokenEndpoint)
 		accessToken := responseDataMap["access_token"]
 
-		Logln(LogPrefixInfo+"[Remove in Production] AccessToken:", accessToken) // TODO:: Remove in production
-
 		return accessToken, apiManagerEndpoint, nil
 	} else {
 		// env does not exist in main config file

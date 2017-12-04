@@ -21,7 +21,6 @@ package cmd
 import (
 	"fmt"
 	"io/ioutil"
-	"net/url"
 	"os"
 
 	"github.com/go-resty/resty"
@@ -149,12 +148,8 @@ func ExportAPI(name string, version string, publisherEndpoint string, accessToke
 	query := ""
 	if name != "" {
 		query += name
-		if version != "" {
-			query += ",version:" + version
-		}
+		// TODO: add version to the query after making sure carbon-apimgt backend supports it
 	}
-
-	query = (&url.URL{Path: query}).String() // url path encode the query
 
 	url := publisherEndpoint + query
 	utils.Logln(utils.LogPrefixInfo+"ExportAPI: URL:", url)

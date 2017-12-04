@@ -1,6 +1,6 @@
 config:
   http_request_timeout: 1000000
-  export_directory: /home/menuka/Documents/exported
+  export_directory: /home/menuka/Desktop/exported
 environments:
   dev:
     publisher_endpoint: https://localhost:9292/api/am/publisher/v1.0
