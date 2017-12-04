@@ -74,7 +74,7 @@ var ExportAPICmd = &cobra.Command{
 			//fmt.Printf("Response Body: %v\n", resp.Body())
 
 			if resp.StatusCode() == http.StatusOK {
-				WriteToZip(exportAPIName, exportAPIVersion, exportEnvironment, resp)
+				WriteToZip(exportAPIName, exportAPIVersion, exportEnvironment, utils.ExportDirectory, resp)
 			} else if resp.StatusCode() == http.StatusInternalServerError {
 				// 500 Internal Server Error
 				fmt.Println("Incorrect password")
@@ -93,9 +93,9 @@ var ExportAPICmd = &cobra.Command{
 // @param exportAPIName : Name of the API to be exported
 // @param resp : Response returned from making the HTTP request (only pass a 200 OK)
 // Exported API will be written to a zip file
-func WriteToZip(exportAPIName, exportAPIVersion, exportEnvironment string, resp *resty.Response) {
+func WriteToZip(exportAPIName, exportAPIVersion, exportEnvironment, exportDirectory string, resp *resty.Response) {
 	// Write to file
-	directory := filepath.Join(utils.ExportDirectory, exportEnvironment)
+	directory := filepath.Join(exportDirectory, exportEnvironment)
 	// create directory if it doesn't exist
 	if _, err := os.Stat(directory); os.IsNotExist(err) {
 		os.Mkdir(directory, 0777)

@@ -19,6 +19,9 @@
 package cmd
 
 import (
+	"github.com/go-resty/resty"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"fmt"
@@ -51,6 +54,16 @@ func TestExportAPI(t *testing.T) {
 	}))
 	defer server.Close()
 
-	resp := ExportAPI("test", "1.0","admin", server.URL, "")
+	resp := ExportAPI("test", "1.0", "admin", server.URL, "")
 	fmt.Println(resp)
+}
+
+func TestWriteToZip(t *testing.T) {
+	name := "sampleapi"
+	version := "1.0.0"
+	environment := "dev"
+	response := new(resty.Response)
+	exportDirectory := utils.CurrentDir
+	WriteToZip(name, version, environment, exportDirectory, response)
+	defer os.RemoveAll(filepath.Join(exportDirectory, "dev"))
 }

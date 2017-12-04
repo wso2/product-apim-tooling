@@ -21,10 +21,15 @@ package utils
 import (
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/renstrom/dedent"
 )
+
+const sampleAccessToken = "a2e5c3ac-68e6-4d78-a8a1-b2b0372cb575"
+const sampleRefreshToken = "fe8f8400-05c9-430f-8e2f-4f3b2fbd01f8"
 
 func TestGetBase64EncodedCredentials(t *testing.T) {
 	usernames := []string{"admin", "user", "admin"}
@@ -41,10 +46,10 @@ func TestGetBase64EncodedCredentials(t *testing.T) {
 func TestGetClientIDSecretUnreachable(t *testing.T) {
 	var registrationStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
-			t.Errorf("Expected 'POST', got '%s'\n", r.Method)
+			t.Errorf("Expected 'POST', got '%s' instead\n", r.Method)
 		}
 		if r.Header.Get(HeaderContentType) != HeaderValueApplicationJSON {
-			t.Errorf("Expected '"+HeaderValueApplicationJSON+"', got '%s'\n", r.Header.Get(HeaderContentType))
+			t.Errorf("Expected '%s', got '%s' instead\n", HeaderValueApplicationJSON, r.Header.Get(HeaderContentType))
 		}
 
 		w.WriteHeader(http.StatusServiceUnavailable)
@@ -61,24 +66,7 @@ func TestGetClientIDSecretUnreachable(t *testing.T) {
 }
 
 func TestGetClientIDSecretOK(t *testing.T) {
-	var registrationStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		if r.Method != http.MethodPost {
-			t.Errorf("Expected 'POST', got '%s'\n", r.Method)
-		}
-
-		if r.Header.Get(HeaderContentType) != HeaderValueApplicationJSON {
-			t.Errorf("Expected '"+HeaderValueApplicationJSON+"', got '%s'\n", r.Header.Get(HeaderContentType))
-		}
-
-		w.WriteHeader(http.StatusOK)
-		w.Header().Set(HeaderContentType, HeaderValueApplicationJSON)
-		body := dedent.Dedent(`{"client_name":"Test1",
-									"clientId":"be88563b-21cb-417c-b574-bf1079959679",
-									"clientSecret":"ecb105a0-117c-463d-9376-442d24864f26"}`)
-
-		w.Write([]byte(body))
-	}))
+	var registrationStub = getRegistrationStubOK(t)
 	defer registrationStub.Close()
 
 	clientID, clientSecret, err := GetClientIDSecret("admin", "admin", registrationStub.URL)
@@ -93,25 +81,390 @@ func TestGetClientIDSecretOK(t *testing.T) {
 	if clientSecret != "ecb105a0-117c-463d-9376-442d24864f26" {
 		t.Error("Invalid ClientSecret")
 	}
-
 }
 
 func TestGetOAuthTokensOK(t *testing.T) {
+	var oauthStub = getOAuthStubOK(t)
+	defer oauthStub.Close()
+
+	m, err := GetOAuthTokens("admin", "admin", "", oauthStub.URL)
+	if err != nil {
+		t.Error("Error in GetOAuthTokens()")
+	}
+
+	if m["refresh_token"] != sampleRefreshToken {
+		t.Error("Error in GetOAuthTokens(): Incorrect RefreshToken")
+	}
+	if m["access_token"] != sampleAccessToken {
+		t.Error("Error in GetOAuthTokens(): Incorrect AccessToken")
+	}
+}
+
+// test case 1 - env exists in both endpoints (mainConfig) file and keys file
+func TestExecutePreCommandWithBasicAuth1(t *testing.T) {
+	var apimStub = getApimStubOK(t)
+	var registrationStub = getRegistrationStubOK(t)
+	var oauthStub = getOAuthStubOK(t)
+
+	// endpoints
+	mainConfig := new(MainConfig)
+	mainConfigFileName := "test_main_config.yaml"
+	mainConfigFilePath := filepath.Join(CurrentDir, mainConfigFileName)
+	mainConfig.Config = Config{2500, "/home/exported"}
+	mainConfig.Environments = make(map[string]EnvEndpoints)
+	mainConfig.Environments[devName] = EnvEndpoints{apimStub.URL,
+		registrationStub.URL, oauthStub.URL}
+	WriteConfigFile(mainConfig, mainConfigFilePath)
+
+	// keys
+	envKeysAll := new(EnvKeysAll)
+	keysAllFileName := "test_keys_all.yaml"
+	keysAllFilePath := filepath.Join(CurrentDir, keysAllFileName)
+	envKeysAll.Environments = make(map[string]EnvKeys)
+	devEncryptedClientSecret := Encrypt([]byte(GetMD5Hash(devPassword)), "dev_client_secret")
+	envKeysAll.Environments[devName] = EnvKeys{"dev_client_id", devEncryptedClientSecret, devUsername}
+	WriteConfigFile(envKeysAll, keysAllFilePath)
+
+	b64encodedCredentials, apimEndpoint, err := ExecutePreCommandWithBasicAuth(devName, devUsername, "admin", mainConfigFilePath, keysAllFilePath)
+
+	expected := GetBase64EncodedCredentials(devUsername, "admin")
+
+	if b64encodedCredentials != expected {
+		t.Errorf("Expected '%s', got '%s' instead\n", expected, b64encodedCredentials)
+	}
+
+	if apimEndpoint != apimStub.URL {
+		t.Errorf("Expected '%s', got '%s', instead\n", apimStub.URL, apimEndpoint)
+	}
+
+	if err != nil {
+		t.Errorf("Expected '%s', got '%s' instead\n", "nil", err)
+	}
+
+	defer func() {
+		os.Remove(mainConfigFilePath)
+		os.Remove(keysAllFilePath)
+		apimStub.Close()
+		oauthStub.Close()
+		registrationStub.Close()
+	}()
+}
+
+// test case 2 - env exists only in endpoints (mainConfig) file
+func TestExecutePreCommandWithBasicAuth2(t *testing.T) {
+	var apimStub = getApimStubOK(t)
+	var registrationStub = getRegistrationStubOK(t)
+	var oauthStub = getOAuthStubOK(t)
+
+	// endpoints
+	mainConfig := new(MainConfig)
+	mainConfigFileName := "test_main_config.yaml"
+	mainConfigFilePath := filepath.Join(CurrentDir, mainConfigFileName)
+	mainConfig.Config = Config{2500, "/home/exported"}
+	mainConfig.Environments = make(map[string]EnvEndpoints)
+	mainConfig.Environments[devName] = EnvEndpoints{apimStub.URL,
+		registrationStub.URL, oauthStub.URL}
+	WriteConfigFile(mainConfig, mainConfigFilePath)
+
+	// keys
+	envKeysAll := new(EnvKeysAll)
+	keysAllFileName := "test_keys_all.yaml"
+	keysAllFilePath := filepath.Join(CurrentDir, keysAllFileName)
+	envKeysAll.Environments = make(map[string]EnvKeys)
+	WriteConfigFile(envKeysAll, keysAllFilePath)
+
+	b64encodedCredentials, apimEndpoint, err := ExecutePreCommandWithBasicAuth(devName, devUsername, "admin", mainConfigFilePath, keysAllFilePath)
+
+	expected := GetBase64EncodedCredentials(devUsername, "admin")
+
+	if b64encodedCredentials != expected {
+		t.Errorf("Expected '%s', got '%s' instead\n", expected, b64encodedCredentials)
+	}
+
+	if apimEndpoint != apimStub.URL {
+		t.Errorf("Expected '%s', got '%s', instead\n", apimStub.URL, apimEndpoint)
+	}
+
+	if err != nil {
+		t.Errorf("Expected '%s', got '%s' instead\n", "nil", err)
+	}
+
+	defer func() {
+		os.Remove(mainConfigFilePath)
+		apimStub.Close()
+		oauthStub.Close()
+		registrationStub.Close()
+	}()
+
+}
+
+// test case 3 - env does not exist in either file
+func TestExecutePreCommandWithBasicAuth3(t *testing.T) {
+	// endpoints
+	mainConfig := new(MainConfig)
+	mainConfigFileName := "test_main_config.yaml"
+	mainConfigFilePath := filepath.Join(CurrentDir, mainConfigFileName)
+	mainConfig.Config = Config{2500, "/home/exported"}
+	mainConfig.Environments = make(map[string]EnvEndpoints)
+	WriteConfigFile(mainConfig, mainConfigFilePath)
+
+	// keys
+	envKeysAll := new(EnvKeysAll)
+	keysAllFileName := "test_keys_all.yaml"
+	keysAllFilePath := filepath.Join(CurrentDir, keysAllFileName)
+	envKeysAll.Environments = make(map[string]EnvKeys)
+	WriteConfigFile(envKeysAll, keysAllFilePath)
+
+	// non blank flagUsername and flagPassword
+	b64encodedCredentials, apimEndpoint, err := ExecutePreCommandWithBasicAuth(devName, devUsername, "admin", mainConfigFilePath, keysAllFilePath)
+
+	if b64encodedCredentials != "" {
+		t.Errorf("Expected '%s', got '%s' instead\n", "<blank>", b64encodedCredentials)
+	}
+
+	if apimEndpoint != "" {
+		t.Errorf("Expected '%s', got '%s', instead\n", "<blank>", apimEndpoint)
+	}
+
+	if err == nil {
+		t.Errorf("Expected '%s', got '%s' instead\n", "err", "nil")
+	}
+
+	// blank env name
+	b64encodedCredentials, apimEndpoint, err = ExecutePreCommandWithBasicAuth("", devUsername, "admin", mainConfigFilePath, keysAllFilePath)
+
+	if b64encodedCredentials != "" {
+		t.Errorf("Expected '%s', got '%s' instead\n", "<blank>", b64encodedCredentials)
+	}
+
+	if apimEndpoint != "" {
+		t.Errorf("Expected '%s', got '%s', instead\n", "<blank>", apimEndpoint)
+	}
+
+	if err == nil {
+		t.Errorf("Expected '%s', got '%s' instead\n", "err", "nil")
+	}
+
+	defer func() {
+		os.Remove(mainConfigFilePath)
+		os.Remove(keysAllFilePath)
+	}()
+}
+
+// test case 1 - env exists in both endpoints (mainConfig) file and keys file
+func TestExecutePreCommandWithOAuth1(t *testing.T) {
+	var apimStub = getApimStubOK(t)
+	var oauthStub = getOAuthStubOK(t)
+	var registrationStub = getRegistrationStubOK(t)
+
+	// endpoints
+	mainConfig := new(MainConfig)
+	mainConfigFileName := "test_main_config.yaml"
+	mainConfigFilePath := filepath.Join(CurrentDir, mainConfigFileName)
+
+	mainConfig.Config = Config{2500, "/home/exported"}
+	mainConfig.Environments = make(map[string]EnvEndpoints)
+	mainConfig.Environments[devName] = EnvEndpoints{apimStub.URL,
+		registrationStub.URL, oauthStub.URL}
+	WriteConfigFile(mainConfig, mainConfigFilePath)
+
+	// keys
+	envKeysAll := new(EnvKeysAll)
+	keysAllFileName := "test_keys_all.yaml"
+	keysAllFilePath := filepath.Join(CurrentDir, keysAllFileName)
+	envKeysAll.Environments = make(map[string]EnvKeys)
+	devEncryptedClientSecret := Encrypt([]byte(GetMD5Hash(devPassword)), "dev_client_secret")
+	envKeysAll.Environments[devName] = EnvKeys{"dev_client_id", devEncryptedClientSecret, devUsername}
+	WriteConfigFile(envKeysAll, keysAllFilePath)
+
+	accessToken, apimEndpoint, err := ExecutePreCommandWithOAuth(devName, devUsername, "admin", mainConfigFilePath, keysAllFilePath)
+	if accessToken != sampleAccessToken {
+		t.Errorf("Expected accessToken: '%s', got '%s' instead\n", sampleAccessToken, accessToken)
+	}
+
+	if apimEndpoint != apimStub.URL {
+		t.Errorf("Expected apimEndpoint: '%s', got '%s' instead\n", apimStub.URL, apimEndpoint)
+	}
+
+	if err != nil {
+		t.Errorf("Expected '%s', got '%s' instead\n", "nil", err)
+	}
+
+	defer func() {
+		os.Remove(mainConfigFilePath)
+		os.Remove(keysAllFilePath)
+		apimStub.Close()
+		registrationStub.Close()
+		oauthStub.Close()
+	}()
+}
+
+// test case 2 - env exists only in endpoints (mainConfg) file
+func TestExecutePreCommandWithOAuth2(t *testing.T) {
+	var apimStub = getApimStubOK(t)
+	var oauthStub = getOAuthStubOK(t)
+	var registrationStub = getRegistrationStubOK(t)
+
+	// endpoints
+	mainConfig := new(MainConfig)
+	mainConfigFileName := "test_main_config.yaml"
+	mainConfigFilePath := filepath.Join(CurrentDir, mainConfigFileName)
+
+	mainConfig.Config = Config{2500, "/home/exported"}
+	mainConfig.Environments = make(map[string]EnvEndpoints)
+	mainConfig.Environments[devName] = EnvEndpoints{apimStub.URL,
+		registrationStub.URL, oauthStub.URL}
+	WriteConfigFile(mainConfig, mainConfigFilePath)
+
+	// keys
+	envKeysAll := new(EnvKeysAll)
+	keysAllFileName := "test_keys_all.yaml"
+	keysAllFilePath := filepath.Join(CurrentDir, keysAllFileName)
+	envKeysAll.Environments = make(map[string]EnvKeys)
+	WriteConfigFile(envKeysAll, keysAllFilePath)
+
+	accessToken, apimEndpoint, err := ExecutePreCommandWithOAuth(devName, devUsername, "admin", mainConfigFilePath, keysAllFilePath)
+	if accessToken != sampleAccessToken {
+		t.Errorf("Expected accessToken: '%s', got '%s' instead\n", sampleAccessToken, accessToken)
+	}
+
+	if apimEndpoint != apimStub.URL {
+		t.Errorf("Expected apimEndpoint: '%s', got '%s' instead\n", apimStub.URL, apimEndpoint)
+	}
+
+	if err != nil {
+		t.Errorf("Expected '%s', got '%s' instead\n", "nil", err)
+	}
+
+	defer func() {
+		os.Remove(mainConfigFilePath)
+		os.Remove(keysAllFilePath)
+		apimStub.Close()
+		registrationStub.Close()
+		oauthStub.Close()
+	}()
+}
+
+// test case 3 - env does not exist in either file
+func TestExecutePreCommandWithOAuth3(t *testing.T) {
+	var apimStub = getApimStubOK(t)
+	var oauthStub = getOAuthStubOK(t)
+	var registrationStub = getRegistrationStubOK(t)
+
+	// endpoints
+	mainConfig := new(MainConfig)
+	mainConfigFileName := "test_main_config.yaml"
+	mainConfigFilePath := filepath.Join(CurrentDir, mainConfigFileName)
+
+	mainConfig.Config = Config{2500, "/home/exported"}
+	mainConfig.Environments = make(map[string]EnvEndpoints)
+	WriteConfigFile(mainConfig, mainConfigFilePath)
+
+	// keys
+	envKeysAll := new(EnvKeysAll)
+	keysAllFileName := "test_keys_all.yaml"
+	keysAllFilePath := filepath.Join(CurrentDir, keysAllFileName)
+	envKeysAll.Environments = make(map[string]EnvKeys)
+	WriteConfigFile(envKeysAll, keysAllFilePath)
+
+	accessToken, apimEndpoint, err := ExecutePreCommandWithOAuth(devName, devUsername, "admin", mainConfigFilePath, keysAllFilePath)
+	if accessToken != "" {
+		t.Errorf("Expected accessToken: '%s', got '%s' instead\n", "", accessToken)
+	}
+
+	if apimEndpoint != "" {
+		t.Errorf("Expected apimEndpoint: '%s', got '%s' instead\n", "", apimEndpoint)
+	}
+
+	if err == nil {
+		t.Errorf("Expected '%s', got '%s' instead\n", err, "nil")
+	}
+
+	defer func() {
+		os.Remove(mainConfigFilePath)
+		os.Remove(keysAllFilePath)
+		apimStub.Close()
+		registrationStub.Close()
+		oauthStub.Close()
+	}()
+}
+
+// test case 4 - blank env name
+func TestExecutePreCommandWithOAuth4(t *testing.T) {
+	var apimStub = getApimStubOK(t)
+	var oauthStub = getOAuthStubOK(t)
+	var registrationStub = getRegistrationStubOK(t)
+
+	// endpoints
+	mainConfig := new(MainConfig)
+	mainConfigFileName := "test_main_config.yaml"
+	mainConfigFilePath := filepath.Join(CurrentDir, mainConfigFileName)
+
+	mainConfig.Config = Config{2500, "/home/exported"}
+	mainConfig.Environments = make(map[string]EnvEndpoints)
+	WriteConfigFile(mainConfig, mainConfigFilePath)
+
+	accessToken, apimEndpoint, err := ExecutePreCommandWithOAuth("", devUsername, "admin", mainConfigFilePath, "")
+	if accessToken != "" {
+		t.Errorf("Expected accessToken: '%s', got '%s' instead\n", "", accessToken)
+	}
+
+	if apimEndpoint != "" {
+		t.Errorf("Expected apimEndpoint: '%s', got '%s' instead\n", "", apimEndpoint)
+	}
+
+	if err == nil {
+		t.Errorf("Expected '%s', got '%s' instead\n", err, "nil")
+	}
+
+	defer func() {
+		os.Remove(mainConfigFilePath)
+		apimStub.Close()
+		registrationStub.Close()
+		oauthStub.Close()
+	}()
+}
+
+// Registration Server - OK
+func getRegistrationStubOK(t *testing.T) *httptest.Server {
+	var registrationStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		if r.Method != http.MethodPost {
+			t.Errorf("Expected '%s', got '%s' instead\n", http.MethodPost, r.Method)
+		}
+
+		if r.Header.Get(HeaderContentType) != HeaderValueApplicationJSON {
+			t.Errorf("Expected '%s', got '%s' instead\n", HeaderValueApplicationJSON, r.Header.Get(HeaderContentType))
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Header().Set(HeaderContentType, HeaderValueApplicationJSON)
+		body := dedent.Dedent(`{"client_name":"Test1",
+									"clientId":"be88563b-21cb-417c-b574-bf1079959679",
+									"clientSecret":"ecb105a0-117c-463d-9376-442d24864f26"}`)
+
+		w.Write([]byte(body))
+	}))
+	return registrationStub
+}
+
+// OAuth Server - OK
+func getOAuthStubOK(t *testing.T) *httptest.Server {
 	var oauthStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
-			t.Errorf("Expected 'POST', got '%s'\n", r.Method)
+			t.Errorf("Expected '%s', got '%s' instead\n", http.MethodPost, r.Method)
 		}
 
 		if r.Header.Get(HeaderContentType) != HeaderValueXWWWFormUrlEncoded {
-			t.Errorf("Expected '"+HeaderValueXWWWFormUrlEncoded+"', got '%s'\n", r.Header.Get(HeaderContentType))
+			t.Errorf("Expected '%s', got '%s' instead\n", HeaderValueXWWWFormUrlEncoded, r.Header.Get(HeaderContentType))
 		}
 
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set(HeaderContentType, HeaderValueApplicationJSON)
 
 		body := dedent.Dedent(`
-			{"access_token":"a2e5c3ac-68e6-4d78-a8a1-b2b0372cb575",
-			 "refresh_token":"fe8f8400-05c9-430f-8e2f-4f3b2fbd01f8",
+			{"access_token": "` + sampleAccessToken + `",
+			 "refresh_token":"` + sampleRefreshToken + `",
 			 "expires_in":1487166427829,
 			 "scopes":
 					["apim:api_view","apim:api_create","apim:api_publish",
@@ -123,48 +476,21 @@ func TestGetOAuthTokensOK(t *testing.T) {
 
 		w.Write([]byte(body))
 	}))
-	defer oauthStub.Close()
-
-	m, err := GetOAuthTokens("admin", "admin", "", oauthStub.URL)
-	if err != nil {
-		t.Error("Error in GetOAuthTokens()")
-	}
-
-	if m["refresh_token"] != "fe8f8400-05c9-430f-8e2f-4f3b2fbd01f8" {
-		t.Error("Error in GetOAuthTokens(): Incorrect RefreshToken")
-	}
-	if m["access_token"] != "a2e5c3ac-68e6-4d78-a8a1-b2b0372cb575" {
-		t.Error("Error in GetOAuthTokens(): Incorrect AccessToken")
-	}
+	return oauthStub
 }
 
-func TestExecutePreCommand(t *testing.T) {
-	type args struct {
-		environment  string
-		flagUsername string
-		flagPassword string
-	}
-	var tests []struct {
-		name    string
-		args    args
-		want    string
-		want1   string
-		wantErr bool
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, got1, err := ExecutePreCommandWithOAuth(tt.args.environment, tt.args.flagUsername,
-				tt.args.flagPassword, "", "")
-			if (err != nil) != tt.wantErr {
-				t.Errorf("ExecutePreCommandWithOAuth() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != tt.want {
-				t.Errorf("ExecutePreCommandWithOAuth() got = %v, want %v", got, tt.want)
-			}
-			if got1 != tt.want1 {
-				t.Errorf("ExecutePreCommandWithOAuth() got1 = %v, want %v", got1, tt.want1)
-			}
-		})
-	}
+// API Manager - OK
+func getApimStubOK(t *testing.T) *httptest.Server {
+	var apimStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	return apimStub
+}
+
+// API Manager - Service Unavailable
+func getApimStubError(t *testing.T) *httptest.Server {
+	var apimStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusServiceUnavailable)
+	}))
+	return apimStub
 }

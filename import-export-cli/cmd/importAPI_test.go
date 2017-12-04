@@ -28,10 +28,10 @@ import (
 	"testing"
 )
 
-func TestImportAPI(t *testing.T) {
+func TestImportAPI1(t *testing.T) {
 	var server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
-			t.Errorf("Expected '%s', got '%s'\n", http.MethodPost, r.Method)
+			t.Errorf("Expected '%s', got '%s' instead\n", http.MethodPost, r.Method)
 		}
 
 		w.WriteHeader(http.StatusOK)
@@ -53,16 +53,21 @@ func TestImportAPI(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %s\n", err.Error())
 	}
+	utils.Insecure = true
+	_, err = ImportAPI(name, server.URL, accessToken, "")
+	if err != nil {
+		t.Errorf("Error: %s\n", err.Error())
+	}
 }
 
 func TestNewFileUploadRequest(t *testing.T) {
 	var server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPut {
-			t.Errorf("Expected 'PUT', got '%s'\n", r.Method)
+			t.Errorf("Expected '%s', got '%s' instead\n", http.MethodPut, r.Method)
 		}
 
 		if !strings.Contains(r.Header.Get(utils.HeaderAccept), utils.HeaderValueMultiPartFormData) {
-			t.Errorf("Expected '"+utils.HeaderValueApplicationZip+"', got '%s'\n",
+			t.Errorf("Expected '%s', got '%s' instead\n", utils.HeaderValueApplicationZip,
 				r.Header.Get(utils.HeaderContentType))
 		}
 
