@@ -21,13 +21,17 @@ package com.swagger.plugins.wso2;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.smartbear.config.Configuration;
 import com.smartbear.swaggerhub.plugins.AnnotatedPlugin;
+import com.smartbear.swaggerhub.plugins.IntegrationPlugin;
+import com.smartbear.swaggerhub.plugins.LifecycleEvent;
 import com.smartbear.swaggerhub.plugins.Plugin;
 import com.smartbear.swaggerhub.plugins.PluginConfigurationException;
 import com.smartbear.swaggerhub.plugins.PluginExecution;
 import com.smartbear.swaggerhub.plugins.PluginExecutionException;
 import com.smartbear.swaggerhub.plugins.PluginInfo;
 import com.smartbear.swaggerhub.plugins.lifecycle.AfterApiVersionSavedPlugin;
+import com.smartbear.swaggerhub.plugins.lifecycle.AfterApiVersionSavedPluginExecutor;
 import com.smartbear.swaggerhub.plugins.lifecycle.BeforeApiVersionSavedPlugin;
+import com.smartbear.swaggerhub.plugins.lifecycle.BeforeApiVersionSavedPluginExecutor;
 import com.smartbear.swaggerhub.plugins.lifecycle.SwaggerhubLifecycleEvent;
 import com.smartbear.swaggerhub.plugins.model.SpecEntry;
 
@@ -69,7 +73,7 @@ import java.util.List;
  *
  */
 public class WSO2ApiGatewayPlugin extends AnnotatedPlugin implements BeforeApiVersionSavedPlugin,
-        AfterApiVersionSavedPlugin {
+        AfterApiVersionSavedPlugin, IntegrationPlugin {
 
     private static final Logger log = LoggerFactory.getLogger(WSO2ApiGatewayPlugin.class);
 
@@ -98,8 +102,9 @@ public class WSO2ApiGatewayPlugin extends AnnotatedPlugin implements BeforeApiVe
             PluginExecutionException {
 
         Swagger swagger;
+
         try {
-            swagger = Json.mapper().readValue((swaggerYaml), Swagger.class);
+            swagger = Json.mapper().readValue(convertSwaggerToJson(swaggerYaml), Swagger.class);
         } catch (Exception exception) {
             log.error("Swagger definition is invalid or not readable", exception);
             throw new PluginExecutionException(PluginExecutionException.INVALID_INPUT,
@@ -182,9 +187,43 @@ public class WSO2ApiGatewayPlugin extends AnnotatedPlugin implements BeforeApiVe
                 (new StringProperty()).required(true).title("WSO2 API Access Token"));
     }
 
+    /**
+     *
+     *
+     * @param pluginExecution
+     * @return
+     */
     @Override
     protected boolean process(PluginExecution pluginExecution) {
-        return false;
+        try {
+            final String userUUID = pluginExecution.getTriggeredByUserId();
+            final Object[] args = pluginExecution.getInputArgs();
+            final LifecycleEvent lifecycleEvent = pluginExecution.getLifecycleEvent();
+
+            if (lifecycleEvent == SwaggerhubLifecycleEvent.AFTER_API_VERSION_SAVED) {
+                String path = (String) args[AfterApiVersionSavedPluginExecutor.OBJECT_PATH];
+                String swagger = (String) args[AfterApiVersionSavedPluginExecutor.SWAGGER_YAML];
+                afterApiVersionSaved(userUUID, path, swagger);
+            } else if (lifecycleEvent == SwaggerhubLifecycleEvent.BEFORE_API_VERSION_SAVED) {
+                String path = (String) args[BeforeApiVersionSavedPluginExecutor.OBJECT_PATH];
+                String swagger = (String) args[BeforeApiVersionSavedPluginExecutor.SWAGGER_YAML];
+                String output = beforeApiVersionSaved(userUUID, path, swagger, null, null,
+                        null);
+                Object[] outputArgs = new Object[args.length];
+
+                System.arraycopy(args, 0, outputArgs, 0, args.length);
+
+                if (output != null) {
+                    outputArgs[BeforeApiVersionSavedPluginExecutor.SWAGGER_YAML] = output;
+                }
+                pluginExecution.setOutputArgs(outputArgs);
+            }
+        } catch (Exception e) {
+            log.error("Failed to execute plugin", e);
+            pluginExecution.addFailure(this.getName(), e.getMessage());
+            return false;
+        }
+        return true;
     }
 
     /**
