@@ -214,7 +214,7 @@ func init() {
 	ImportAPICmd.Flags().StringVarP(&importAPIFile, "file", "f", "",
 		"Name of the API to be imported")
 	ImportAPICmd.Flags().StringVarP(&importEnvironment, "environment", "e",
-		utils.GetDefaultEnvironment(utils.MainConfigFilePath), "Environment from the which the API should be imported")
+		utils.DefaultEnvironmentName, "Environment from the which the API should be imported")
 	ImportAPICmd.Flags().StringVarP(&importAPICmdUsername, "username", "u", "", "Username")
 	ImportAPICmd.Flags().StringVarP(&importAPICmdPassword, "password", "p", "", "Password")
 }

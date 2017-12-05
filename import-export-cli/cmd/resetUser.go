@@ -64,5 +64,5 @@ var ResetUserCmd = &cobra.Command{
 func init() {
 	RootCmd.AddCommand(ResetUserCmd)
 	ResetUserCmd.Flags().StringVarP(&resetUserEnvironment, "environment", "e",
-		utils.GetDefaultEnvironment(utils.MainConfigFilePath), "Clear user details of an environment")
+		utils.DefaultEnvironmentName, "Clear user details of an environment")
 }

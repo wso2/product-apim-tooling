@@ -154,7 +154,7 @@ func init() {
 	ExportAPICmd.Flags().StringVarP(&exportProvider, "provider", "r", "",
 		"Provider of the API")
 	ExportAPICmd.Flags().StringVarP(&exportEnvironment, "environment", "e",
-		utils.GetDefaultEnvironment(utils.MainConfigFilePath), "Environment to which the API should be exported")
+		utils.DefaultEnvironmentName, "Environment to which the API should be exported")
 
 	ExportAPICmd.Flags().StringVarP(&exportAPICmdUsername, "username", "u", "", "Username")
 	ExportAPICmd.Flags().StringVarP(&exportAPICmdPassword, "password", "p", "", "Password")

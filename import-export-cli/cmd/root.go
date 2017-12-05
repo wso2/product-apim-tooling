@@ -62,6 +62,8 @@ func Execute() {
 
 // init using Cobra
 func init() {
+	createConfigFiles()
+
 	cobra.OnInitialize(initConfig)
 
 	cobra.EnableCommandSorting = false
@@ -88,6 +90,34 @@ func init() {
 
 }
 
+func createConfigFiles() {
+	err := utils.CreateDirIfNotExist(utils.ConfigDirPath)
+	if err != nil {
+		utils.HandleErrorAndExit("Error creating config directory: "+utils.ConfigDirPath, err)
+	}
+
+	err = utils.CreateDirIfNotExist(utils.DefaultExportDirPath)
+	if err != nil {
+		utils.HandleErrorAndExit("Error creating config directory: "+utils.DefaultExportDirPath, err)
+	}
+
+	if !utils.IsFileExist(utils.MainConfigFilePath) {
+		var mainConfig = new(utils.MainConfig)
+		mainConfig.Config = utils.Config{utils.DefaultHttpRequestTimeout, utils.DefaultExportDirPath}
+		mainConfig.Environments = make(map[string]utils.EnvEndpoints)
+		mainConfig.Environments["sampleEnv"] = utils.EnvEndpoints{
+			"https://localhost/apim",
+			"https://localhost/register",
+			"https://localhost/token",
+		}
+		utils.WriteConfigFile(mainConfig, utils.MainConfigFilePath)
+	}
+
+	if !utils.IsFileExist(utils.EnvKeysAllFilePath) {
+		os.Create(utils.EnvKeysAllFilePath)
+	}
+}
+
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	if verbose {
@@ -102,17 +132,17 @@ func initConfig() {
 	}
 
 	/*
-	if cfgFile != "" { // enable ability to specify config file via flag
-		viper.SetConfigFile(cfgFile)
-	}
+		if cfgFile != "" { // enable ability to specify config file via flag
+			viper.SetConfigFile(cfgFile)
+		}
 
-	viper.SetConfigName(".wso2apim-cli") // name of config file (without extension)
-	viper.AddConfigPath("$HOME")         // adding home directory as first search path
-	viper.AutomaticEnv()                 // read in environment variables that match
+		viper.SetConfigName(".wso2apim-cli") // name of config file (without extension)
+		viper.AddConfigPath("$HOME")         // adding home directory as first search path
+		viper.AutomaticEnv()                 // read in environment variables that match
 
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
-	}
+		// If a config file is found, read it in.
+		if err := viper.ReadInConfig(); err == nil {
+			fmt.Println("Using config file:", viper.ConfigFileUsed())
+		}
 	*/
 }

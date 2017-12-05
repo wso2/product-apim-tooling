@@ -96,5 +96,5 @@ func removeEnv(envName, mainConfigFilePath, envKeysFilePath string) error {
 func init() {
 	RootCmd.AddCommand(removeEnvCmd)
 	removeEnvCmd.Flags().StringVarP(&flagNameOfEnvToBeRemoved, "name", "n",
-		utils.GetDefaultEnvironment(utils.MainConfigFilePath), "Name of the environment to be removed")
+		utils.DefaultEnvironmentName, "Name of the environment to be removed")
 }

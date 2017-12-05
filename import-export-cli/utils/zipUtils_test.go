@@ -34,7 +34,7 @@ func TestZipDirError(t *testing.T) {
 func TestZipDirOK(t *testing.T) {
 	directoryName := "wso2apimZipTest"
 
-	directoryPath := filepath.Join(ApplicationRoot, directoryName)
+	directoryPath := filepath.Join(ConfigDirPath, directoryName)
 	fileName := "test.txt"
 	filePath := filepath.Join(directoryPath, fileName)
 

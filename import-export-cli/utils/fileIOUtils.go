@@ -134,3 +134,10 @@ func IsDirExists(path string) (bool, error) {
 	}
 	return true, err
 }
+
+func CreateDirIfNotExist(path string) (err error) {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		os.Mkdir(path, os.ModePerm)
+	}
+	return err
+}

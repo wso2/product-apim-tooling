@@ -20,7 +20,7 @@ func TestSetConfigVarsCorrect(t *testing.T) {
 func TestSetConfigVarsIncorrect1(t *testing.T) {
 	testIncorrectMainConfig := new(MainConfig)
 	testIncorrectMainConfigFileName := "test_incorrect_main_config.yaml"
-	testIncorrectMainConfigFilePath := filepath.Join(ApplicationRoot, testIncorrectMainConfigFileName)
+	testIncorrectMainConfigFilePath := filepath.Join(ConfigDirPath, testIncorrectMainConfigFileName)
 	testIncorrectMainConfig.Config = Config{0, ""}
 	WriteConfigFile(testIncorrectMainConfig, testIncorrectMainConfigFilePath)
 
@@ -36,7 +36,7 @@ func TestSetConfigVarsIncorrect1(t *testing.T) {
 func TestSetConfigVarsIncorrect2(t *testing.T) {
 	testIncorrectMainConfig := new(MainConfig)
 	testIncorrectMainConfigFileName := "test_incorrect_main_config.yaml"
-	testIncorrectMainConfigFilePath := filepath.Join(ApplicationRoot, testIncorrectMainConfigFileName)
+	testIncorrectMainConfigFilePath := filepath.Join(ConfigDirPath, testIncorrectMainConfigFileName)
 	testIncorrectMainConfig.Config = Config{-10, ""}
 	WriteConfigFile(testIncorrectMainConfig, testIncorrectMainConfigFilePath)
 
