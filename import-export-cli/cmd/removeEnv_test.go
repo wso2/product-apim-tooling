@@ -28,7 +28,7 @@ import (
 // TestRemoveEnv1 - Correct Details
 func TestRemoveEnv1(t *testing.T) {
 	sampleMainConfigFileName := "sample_main_config.yaml"
-	sampleMainConfigFilePath := filepath.Join(utils.ApplicationRoot, sampleMainConfigFileName)
+	sampleMainConfigFilePath := filepath.Join(utils.ConfigDirPath, sampleMainConfigFileName)
 
 	var sampleMainConfig = new(utils.MainConfig)
 	sampleMainConfig.Config = utils.Config{10000, ""}
@@ -38,7 +38,7 @@ func TestRemoveEnv1(t *testing.T) {
 	utils.WriteConfigFile(sampleMainConfig, sampleMainConfigFilePath)
 
 	sampleEnvKeysAllFileName := "sample_env_keys_all.yaml"
-	sampleEnvKeysAllFilePath := filepath.Join(utils.ApplicationRoot, sampleEnvKeysAllFileName)
+	sampleEnvKeysAllFilePath := filepath.Join(utils.ConfigDirPath, sampleEnvKeysAllFileName)
 	var sampleEnvKeysAll = new(utils.EnvKeysAll)
 	sampleEnvKeysAll.Environments = make(map[string]utils.EnvKeys)
 	sampleEnvKeysAll.Environments["dev"] = utils.EnvKeys{"clien-id", "client-secret",
@@ -62,7 +62,7 @@ func TestRemoveEnv1(t *testing.T) {
 // TestRemoveEnv2 - Remove blank env name
 func TestRemoveEnv2(t *testing.T) {
 	sampleMainConfigFileName := "sample_main_config.yaml"
-	sampleMainConfigFilePath := filepath.Join(utils.ApplicationRoot, sampleMainConfigFileName)
+	sampleMainConfigFilePath := filepath.Join(utils.ConfigDirPath, sampleMainConfigFileName)
 
 	var sampleMainConfig = new(utils.MainConfig)
 	sampleMainConfig.Config = utils.Config{10000, ""}
@@ -82,7 +82,7 @@ func TestRemoveEnv2(t *testing.T) {
 // TestRemoveEnv4 - Remove an environment that doesn't exist
 func TestRemoveEnv3(t *testing.T) {
 	sampleMainConfigFileName := "sample_main_config.yaml"
-	sampleMainConfigFilePath := filepath.Join(utils.ApplicationRoot, sampleMainConfigFileName)
+	sampleMainConfigFilePath := filepath.Join(utils.ConfigDirPath, sampleMainConfigFileName)
 
 	var sampleMainConfig = new(utils.MainConfig)
 	sampleMainConfig.Config = utils.Config{10000, ""}

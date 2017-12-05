@@ -120,7 +120,7 @@ func ImportAPI(query string, apiManagerEndpoint string, accessToken string, expo
 	sourceEnv := strings.Split(query, utils.PathSeparator_)[0] // environment from which the API was exported
 	utils.Logln(utils.LogPrefixInfo + "Source Environment: " + sourceEnv)
 
-	//sourceEnvDirExists, _ := utils.IsDirExist(filepath.Join(utils.ExportedAPIsDirectoryPath, sourceEnv))
+	//sourceEnvDirExists, _ := utils.IsDirExist(filepath.Join(utils.exportDirPath, sourceEnv))
 	//if !sourceEnvDirExists {
 	//	return nil, errors.New("wrong directory '"+sourceEnv+"'")
 	//}
@@ -136,7 +136,7 @@ func ImportAPI(query string, apiManagerEndpoint string, accessToken string, expo
 	if !hasZipExtension {
 		//fmt.Println("hasZipExtension: ", false)
 		// search for a directory with the given fileName
-		destination := filepath.Join(utils.ExportedAPIsDirectoryPath, fileName+".zip")
+		destination := filepath.Join(utils.ExportDirPath, fileName+".zip")
 		err := utils.ZipDir(zipFilePath, destination)
 		if err != nil {
 			utils.HandleErrorAndExit("Error creating zip archive", err)
@@ -231,7 +231,7 @@ func init() {
 	ImportAPICmd.Flags().StringVarP(&flagImportApiFile, "file", "f", "",
 		"Name of the API to be imported")
 	ImportAPICmd.Flags().StringVarP(&flagImportApiEnvironment, "environment", "e",
-		utils.GetDefaultEnvironment(utils.MainConfigFilePath), "Environment from the which the API should be imported")
+		utils.DefaultEnvironmentName, "Environment from the which the API should be imported")
 	ImportAPICmd.Flags().StringVarP(&flagImportApiCmdToken, "token", "t",
 		"", "OAuth token to be used instead of username and password")
 	ImportAPICmd.Flags().StringVarP(&importAPICmdUsername, "username", "u", "", "Username")

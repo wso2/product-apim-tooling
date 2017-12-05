@@ -112,7 +112,7 @@ func (envKeysAll *EnvKeysAll) ParseEnvKeysFromFile(data []byte) error {
 }
 
 // Check whether the file exists.
-func IsFileExist(path string) bool {
+func IsFileExist(path string) (isFileExist bool) {
 	if _, err := os.Stat(path); err != nil {
 		if os.IsNotExist(err) {
 			return false
@@ -133,4 +133,12 @@ func IsDirExist(path string) (bool, error) {
 		return false, nil
 	}
 	return true, err
+}
+
+func CreateDirIfNotExist(path string) (err error) {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		os.Mkdir(path, os.ModePerm)
+	}
+
+	return err
 }

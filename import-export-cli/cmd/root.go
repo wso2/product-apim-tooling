@@ -62,6 +62,8 @@ func Execute() {
 
 // init using Cobra
 func init() {
+	createConfigFiles()
+
 	cobra.OnInitialize(initConfig)
 
 	cobra.EnableCommandSorting = false
@@ -80,7 +82,6 @@ func init() {
 	// when this action is called directly.
 	RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
-
 	// Init ConfigVars
 	err := utils.SetConfigVars(utils.MainConfigFilePath)
 	if err != nil {
@@ -89,14 +90,41 @@ func init() {
 
 }
 
+func createConfigFiles() {
+	err := utils.CreateDirIfNotExist(utils.ConfigDirPath)
+	if err != nil {
+		utils.HandleErrorAndExit("Error creating config directory: "+utils.ConfigDirPath, err)
+	}
+
+	err = utils.CreateDirIfNotExist(utils.ExportDirPath)
+	if err != nil {
+		utils.HandleErrorAndExit("Error creating config directory: "+utils.ConfigDirPath, err)
+	}
+
+	if !utils.IsFileExist(utils.MainConfigFilePath) {
+		var mainConfig = new(utils.MainConfig)
+		mainConfig.Config = utils.Config{utils.DefaultHttpRequestTimeout, utils.ExportDirPath}
+		mainConfig.Environments = make(map[string]utils.EnvEndpoints)
+		mainConfig.Environments["testEnv"] = utils.EnvEndpoints{
+			"https://localhost/publisher",
+			"http://localhost/register",
+			"http://localhost/token",
+		}
+		utils.WriteConfigFile(mainConfig, utils.MainConfigFilePath)
+	}
+	if !utils.IsFileExist(utils.EnvKeysAllFilePath) {
+		os.Create(utils.EnvKeysAllFilePath)
+	}
+}
+
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	if verbose {
 		utils.IsVerbose = true
 		utils.EnableVerboseMode()
 		t := time.Now()
-		utils.Logf(utils.LogPrefixInfo + "Executed ImportExportCLI (%s) on %v\n", utils.ProjectName, t.Format(time.RFC1123))
-	}else{
+		utils.Logf(utils.LogPrefixInfo+"Executed ImportExportCLI (%s) on %v\n", utils.ProjectName, t.Format(time.RFC1123))
+	} else {
 		utils.IsVerbose = false
 	}
 
@@ -106,17 +134,17 @@ func initConfig() {
 	}
 
 	/*
-	if cfgFile != "" { // enable ability to specify config file via flag
-		viper.SetConfigFile(cfgFile)
-	}
+		if cfgFile != "" { // enable ability to specify config file via flag
+			viper.SetConfigFile(cfgFile)
+		}
 
-	viper.SetConfigName(".wso2apim-cli") // name of config file (without extension)
-	viper.AddConfigPath("$HOME")         // adding home directory as first search path
-	viper.AutomaticEnv()                 // read in environment variables that match
+		viper.SetConfigName(".wso2apim-cli") // name of config file (without extension)
+		viper.AddConfigPath("$HOME")         // adding home directory as first search path
+		viper.AutomaticEnv()                 // read in environment variables that match
 
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
-	}
+		// If a config file is found, read it in.
+		if err := viper.ReadInConfig(); err == nil {
+			fmt.Println("Using config file:", viper.ConfigFileUsed())
+		}
 	*/
 }

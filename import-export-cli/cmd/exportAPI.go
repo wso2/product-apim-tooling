@@ -201,7 +201,7 @@ func init() {
 	ExportAPICmd.Flags().StringVarP(&flagExportAPIVersion, "version", "v", "",
 		"Version of the API to be exported")
 	ExportAPICmd.Flags().StringVarP(&flagExportEnvironment, "environment", "e",
-		utils.GetDefaultEnvironment(utils.MainConfigFilePath), "Environment to which the API should be exported")
+		utils.DefaultEnvironmentName, "Environment to which the API should be exported")
 	ExportAPICmd.Flags().StringVarP(&flagExportAPICmdToken, "token", "t", "",
 		"An OAuth2 token to be used instead of username and password")
 

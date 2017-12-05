@@ -162,14 +162,13 @@ func printAPIs(apis []utils.API) {
 	}
 
 	table.Render() // Send output
-
 }
 
 func init() {
 	ListCmd.AddCommand(apisCmd)
 
 	apisCmd.Flags().StringVarP(&listApisCmdEnvironment, "environment", "e",
-		utils.GetDefaultEnvironment(utils.MainConfigFilePath), "Environment to be searched")
+		utils.DefaultEnvironmentName, "Environment to be searched")
 	apisCmd.Flags().StringVarP(&listApisCmdQuery, "query", "q", "",
 		"(Optional) query to search for APIs")
 	apisCmd.Flags().StringVarP(&listApisCmdToken, "token", "t", "",
