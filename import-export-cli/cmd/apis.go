@@ -57,42 +57,46 @@ var apisCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + listCmdLiteral + " " + apisCmdLiteral + " called")
 
-		if exportAPICmdToken != "" {
-			// token provided with --token (-t) flag
-			if exportAPICmdUsername != "" || exportAPICmdPassword != "" {
-				// username and/or password provided with -u and/or -p flags
-				// Error
-				utils.HandleErrorAndExit("username/password provided with OAuth token.", nil)
+		executeListApisCmd()
+	},
+}
+
+func executeListApisCmd() {
+	if exportAPICmdToken != "" {
+		// token provided with --token (-t) flag
+		if exportAPICmdUsername != "" || exportAPICmdPassword != "" {
+			// username and/or password provided with -u and/or -p flags
+			// Error
+			utils.HandleErrorAndExit("username/password provided with OAuth token.", nil)
+		} else {
+			// token only, proceed with token
+		}
+	} else {
+		// no token provided with --token (-t) flag
+		// proceed with username and password
+		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(listApisCmdEnvironment, listApisCmdUsername,
+			listApisCmdPassword, utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
+
+		if preCommandErr == nil {
+			if listApisCmdQuery != "" {
+				fmt.Println("Search query:", listApisCmdQuery)
+			}
+			count, apis, err := GetAPIList(listApisCmdQuery, accessToken, apiManagerEndpoint)
+
+			if err == nil {
+				// Printing the list of available APIs
+				fmt.Println("Environment:", listApisCmdEnvironment)
+				fmt.Println("No. of APIs:", count)
+				if count > 0 {
+					printAPIs(apis)
+				}
 			} else {
-				// token only, proceed with token
+				utils.Logln(utils.LogPrefixError+"Getting List of APIs", err)
 			}
 		} else {
-			// no token provided with --token (-t) flag
-			// proceed with username and password
-			accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(listApisCmdEnvironment, listApisCmdUsername,
-				listApisCmdPassword, utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
-
-			if preCommandErr == nil {
-				if listApisCmdQuery != "" {
-					fmt.Println("Search query:", listApisCmdQuery)
-				}
-				count, apis, err := GetAPIList(listApisCmdQuery, accessToken, apiManagerEndpoint)
-
-				if err == nil {
-					// Printing the list of available APIs
-					fmt.Println("Environment:", listApisCmdEnvironment)
-					fmt.Println("No. of APIs:", count)
-					if count > 0 {
-						printAPIs(apis)
-					}
-				} else {
-					utils.Logln(utils.LogPrefixError+"Getting List of APIs", err)
-				}
-			} else {
-				utils.HandleErrorAndExit("Error calling '"+listCmdLiteral+" "+apisCmdLiteral+"'", preCommandErr)
-			}
+			utils.HandleErrorAndExit("Error calling '"+listCmdLiteral+" "+apisCmdLiteral+"'", preCommandErr)
 		}
-	},
+	}
 }
 
 // GetAPIList

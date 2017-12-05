@@ -56,24 +56,28 @@ var SetCmd = &cobra.Command{
 	Long:  setCmdLongDesc + setCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + setCmdLiteral + " called")
-
-		// read the existing config vars
-		configVars := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
-
-		if flagHttpRequestTimeout > 0 {
-			configVars.Config.HttpRequestTimeout = flagHttpRequestTimeout
-		}else{
-			fmt.Println("Invalid input for flag --http-request-timeout")
-		}
-
-		if flagExportDirectory != "" && utils.IsValid(flagExportDirectory) {
-			configVars.Config.ExportDirectory = flagExportDirectory
-		}else{
-			fmt.Println("Invalid input for flag --export-directory")
-		}
-
-		utils.WriteConfigFile(configVars, utils.MainConfigFilePath)
+		executeSetCmd(utils.MainConfigFilePath)
 	},
+}
+
+func executeSetCmd(mainConfigFilePath string) {
+	// read the existing config vars
+	configVars := utils.GetMainConfigFromFile(mainConfigFilePath)
+
+	if flagHttpRequestTimeout > 0 {
+		configVars.Config.HttpRequestTimeout = flagHttpRequestTimeout
+	} else {
+		fmt.Println("Invalid input for flag --http-request-timeout")
+	}
+
+	if flagExportDirectory != "" && utils.IsValid(flagExportDirectory) {
+		configVars.Config.ExportDirectory = flagExportDirectory
+	} else {
+		fmt.Println("Invalid input for flag --export-directory")
+	}
+
+	utils.WriteConfigFile(configVars, mainConfigFilePath)
+
 }
 
 // init using Cobra

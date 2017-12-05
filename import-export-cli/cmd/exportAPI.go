@@ -59,54 +59,58 @@ var ExportAPICmd = &cobra.Command{
 	Long:  exportAPICmdLongDesc + exportAPICmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + exportAPICmdLiteral + " called")
+		executeExportApiCmd(utils.MainConfigFilePath, utils.EnvKeysAllFilePath, utils.ExportDirectory)
+	},
+}
 
-		if exportAPICmdToken != "" {
-			// token provided with --token (-t) flag
-			if exportAPICmdUsername != "" || exportAPICmdPassword != "" {
-				// username and/or password provided with -u and/or -p flags
-				// Error
-				utils.HandleErrorAndExit("username/password provided with OAuth token.", nil)
+func executeExportApiCmd(mainConfigFilePath, envKeysAllFilePath, exportDirectory string) {
+	if exportAPICmdToken != "" {
+		// token provided with --token (-t) flag
+		if exportAPICmdUsername != "" || exportAPICmdPassword != "" {
+			// username and/or password provided with -u and/or -p flags
+			// Error
+			utils.HandleErrorAndExit("username/password provided with OAuth token.", nil)
+		} else {
+			// token only, proceed with token
+			//publisherEndpoint := utils.GetPublisherEndpointOfEnv(exportEnvironment, utils.MainConfigFilePath)
+			//ExportAPI(exportAPIName, exportAPIVersion, publisherEndpoint, exportAPICmdToken)
+			fmt.Println("Token: " + exportAPICmdToken)
+		}
+	} else {
+		// no token provided with --token (-t) flag
+		// proceed with username and password
+		accessToken, publisherEndpoint, preCommandErr := utils.ExecutePreCommand(exportEnvironment,
+			exportAPICmdUsername, exportAPICmdPassword, mainConfigFilePath, envKeysAllFilePath)
+
+		if preCommandErr == nil {
+			resp := getExportApiResponse(exportAPIName, exportAPIVersion, publisherEndpoint, accessToken)
+
+			// Print info on response
+			utils.Logf("ResponseStatus: %v\n", resp.Status())
+			utils.Logf("Error: %v\n", resp.Error())
+
+			if resp.StatusCode() == http.StatusOK {
+				WriteToZip(exportAPIName, exportAPIVersion, exportEnvironment, exportDirectory, resp)
+
+				// only to get the number of APIs exported
+				numberOfAPIsExported, _, err := GetAPIList(exportAPIName, accessToken, publisherEndpoint)
+				if err == nil {
+					fmt.Println("Number of APIs exported:", numberOfAPIsExported)
+				} else {
+					utils.HandleErrorAndExit("Error getting list of APIs", err)
+				}
+			} else if resp.StatusCode() == http.StatusInternalServerError {
+				// 500 Internal Server Error
+				fmt.Println("Incorrect password")
 			} else {
-				// token only, proceed with token
-				//publisherEndpoint := utils.GetPublisherEndpointOfEnv(exportEnvironment, utils.MainConfigFilePath)
-				//ExportAPI(exportAPIName, exportAPIVersion, publisherEndpoint, exportAPICmdToken)
+				// neither 200 nor 500
+				fmt.Println("Error exporting API:", resp.Status())
 			}
 		} else {
-			// no token provided with --token (-t) flag
-			// proceed with username and password
-			accessToken, publisherEndpoint, preCommandErr := utils.ExecutePreCommand(exportEnvironment,
-				exportAPICmdUsername, exportAPICmdPassword, utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
-
-			if preCommandErr == nil {
-				resp := ExportAPI(exportAPIName, exportAPIVersion, publisherEndpoint, accessToken)
-
-				// Print info on response
-				utils.Logf("ResponseStatus: %v\n", resp.Status())
-				utils.Logf("Error: %v\n", resp.Error())
-
-				if resp.StatusCode() == http.StatusOK {
-					WriteToZip(exportAPIName, exportAPIVersion, exportEnvironment, utils.ExportDirectory, resp)
-
-					// only to get the number of APIs exported
-					numberOfAPIsExported, _, err := GetAPIList(exportAPIName, accessToken, publisherEndpoint)
-					if err == nil {
-						fmt.Println("Number of APIs exported:", numberOfAPIsExported)
-					} else {
-						utils.HandleErrorAndExit("Error getting list of APIs", err)
-					}
-				} else if resp.StatusCode() == http.StatusInternalServerError {
-					// 500 Internal Server Error
-					fmt.Println("Incorrect password")
-				} else {
-					// neither 200 nor 500
-					fmt.Println("Error exporting API:", resp.Status())
-				}
-			} else {
-				// error exporting API
-				fmt.Println("Error exporting API:" + preCommandErr.Error())
-			}
+			// error exporting API
+			fmt.Println("Error exporting API:" + preCommandErr.Error())
 		}
-	},
+	}
 }
 
 // WriteToZip
@@ -137,7 +141,7 @@ func WriteToZip(exportAPIName, exportAPIVersion, exportEnvironment, exportDirect
 // @param apimEndpoint : API Manager Endpoint for the environment
 // @param accessToken : Access Token for the resource
 // @return response Response in the form of *resty.Response
-func ExportAPI(name string, version string, publisherEndpoint string, accessToken string) *resty.Response {
+func getExportApiResponse(name string, version string, publisherEndpoint string, accessToken string) *resty.Response {
 	// append '/' to the end if there isn't one already
 	if string(publisherEndpoint[len(publisherEndpoint)-1]) != "/" {
 		publisherEndpoint += "/"

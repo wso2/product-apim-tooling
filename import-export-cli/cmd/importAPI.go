@@ -63,44 +63,47 @@ var ImportAPICmd = &cobra.Command{
 	Long:  importAPICmdLongDesc + importAPICmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + importAPICmdLiteral + " called")
-
-		if exportAPICmdToken != "" {
-			// token provided with --token (-t) flag
-			if exportAPICmdUsername != "" || exportAPICmdPassword != "" {
-				// username and/or password provided with -u and/or -p flags
-				// Error
-				utils.HandleErrorAndExit("username/password provided with OAuth token.", nil)
-			} else {
-				// token only, proceed with token
-			}
-		} else {
-			// no token provided with --token (-t) flag
-			// proceed with username and password
-			accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(importEnvironment,
-				importAPICmdUsername, importAPICmdPassword, utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
-
-			if preCommandErr == nil {
-				resp, err := ImportAPI(importAPIFile, apiManagerEndpoint, accessToken, utils.ExportDirectory)
-
-				if err != nil {
-					utils.HandleErrorAndExit("error importing API", err)
-				}
-
-				if resp.StatusCode == 200 {
-					utils.Logln("Header:", resp.Header)
-					fmt.Println("Succesfully imported API!")
-				} else {
-					fmt.Println("Error importing API")
-					utils.Logln(utils.LogPrefixError + resp.Status)
-				}
-
-			} else {
-				// env_endpoints file is not configured properly by the user
-				fmt.Println("Error:", preCommandErr)
-				utils.Logln(utils.LogPrefixError + preCommandErr.Error())
-			}
-		}
+		executeImportApiCmd(utils.MainConfigFilePath, utils.EnvKeysAllFilePath, utils.ExportDirectory)
 	},
+}
+
+func executeImportApiCmd(mainConfigFilePath, keysAllFilePath, exportDirectory string) {
+	if exportAPICmdToken != "" {
+		// token provided with --token (-t) flag
+		if exportAPICmdUsername != "" || exportAPICmdPassword != "" {
+			// username and/or password provided with -u and/or -p flags
+			// Error
+			utils.HandleErrorAndExit("username/password provided with OAuth token.", nil)
+		} else {
+			// token only, proceed with token
+		}
+	} else {
+		// no token provided with --token (-t) flag
+		// proceed with username and password
+		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(importEnvironment,
+			importAPICmdUsername, importAPICmdPassword, mainConfigFilePath, keysAllFilePath)
+
+		if preCommandErr == nil {
+			resp, err := ImportAPI(importAPIFile, apiManagerEndpoint, accessToken, exportDirectory)
+
+			if err != nil {
+				utils.HandleErrorAndExit("error importing API", err)
+			}
+
+			if resp.StatusCode == 200 {
+				utils.Logln("Header:", resp.Header)
+				fmt.Println("Succesfully imported API!")
+			} else {
+				fmt.Println("Error importing API")
+				utils.Logln(utils.LogPrefixError + resp.Status)
+			}
+
+		} else {
+			// env_endpoints file is not configured properly by the user
+			fmt.Println("Error:", preCommandErr)
+			utils.Logln(utils.LogPrefixError + preCommandErr.Error())
+		}
+	}
 }
 
 // ImportAPI function is used with import-api command

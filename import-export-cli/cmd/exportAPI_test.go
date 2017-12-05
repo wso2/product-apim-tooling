@@ -23,7 +23,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"fmt"
 	"github.com/go-resty/resty"
 	"github.com/renstrom/dedent"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -55,8 +54,10 @@ func TestExportAPI(t *testing.T) {
 	}))
 	defer server.Close()
 
-	resp := ExportAPI("test", "1.0", server.URL, "")
-	fmt.Println(resp)
+	resp := getExportApiResponse("test", "1.0", server.URL, "")
+	if resp == nil {
+		t.Errorf("Expected not-nil response. Got nil\n")
+	}
 }
 
 func TestWriteToZip(t *testing.T) {
