@@ -136,6 +136,7 @@ func ExecutePreCommand(environment, flagUsername, flagPassword, mainConfigFilePa
 		responseDataMap, _ := GetOAuthTokens(username, password,
 			GetBase64EncodedCredentials(clientID, clientSecret), tokenEndpoint)
 		accessToken := responseDataMap["access_token"]
+		Logln(LogPrefixInfo+"[Remove in production] AccessToken: ", accessToken)
 
 		return accessToken, apiManagerEndpoint, nil
 	} else {

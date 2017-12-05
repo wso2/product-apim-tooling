@@ -37,11 +37,11 @@ import (
 	"time"
 )
 
-var importAPIFile string
-var importEnvironment string
+var flagImportApiFile string
+var flagImportApiEnvironment string
 var importAPICmdUsername string
 var importAPICmdPassword string
-var importAPICmdToken string
+var flagImportApiCmdToken string
 
 // ImportAPI command related usage info
 const importAPICmdLiteral = "import-api"
@@ -68,7 +68,7 @@ var ImportAPICmd = &cobra.Command{
 }
 
 func executeImportApiCmd(mainConfigFilePath, keysAllFilePath, exportDirectory string) {
-	if exportAPICmdToken != "" {
+	if flagExportAPICmdToken != "" {
 		// token provided with --token (-t) flag
 		if exportAPICmdUsername != "" || exportAPICmdPassword != "" {
 			// username and/or password provided with -u and/or -p flags
@@ -80,11 +80,11 @@ func executeImportApiCmd(mainConfigFilePath, keysAllFilePath, exportDirectory st
 	} else {
 		// no token provided with --token (-t) flag
 		// proceed with username and password
-		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(importEnvironment,
+		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(flagImportApiEnvironment,
 			importAPICmdUsername, importAPICmdPassword, mainConfigFilePath, keysAllFilePath)
 
 		if preCommandErr == nil {
-			resp, err := ImportAPI(importAPIFile, apiManagerEndpoint, accessToken, exportDirectory)
+			resp, err := ImportAPI(flagImportApiFile, apiManagerEndpoint, accessToken, exportDirectory)
 
 			if err != nil {
 				utils.HandleErrorAndExit("error importing API", err)
@@ -133,11 +133,7 @@ func ImportAPI(query string, apiManagerEndpoint string, accessToken string, expo
 	// check if '.zip' exists in the input 'fileName'
 	hasZipExtension, _ := regexp.MatchString(`^\S+\.zip$`, fileName)
 
-	if hasZipExtension {
-		// import the zip file directly
-		//fmt.Println("hasZipExtension: ", true)
-
-	} else {
+	if !hasZipExtension {
 		//fmt.Println("hasZipExtension: ", false)
 		// search for a directory with the given fileName
 		destination := filepath.Join(utils.ExportedAPIsDirectoryPath, fileName+".zip")
@@ -159,7 +155,7 @@ func ImportAPI(query string, apiManagerEndpoint string, accessToken string, expo
 	var tr *http.Transport
 	if utils.Insecure {
 		tr = &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // to bypass errors in SSL certificates
 		}
 	} else {
 		tr = &http.Transport{}
@@ -232,11 +228,11 @@ func NewFileUploadRequest(uri string, params map[string]string, paramName, path 
 // init using Cobra
 func init() {
 	RootCmd.AddCommand(ImportAPICmd)
-	ImportAPICmd.Flags().StringVarP(&importAPIFile, "file", "f", "",
+	ImportAPICmd.Flags().StringVarP(&flagImportApiFile, "file", "f", "",
 		"Name of the API to be imported")
-	ImportAPICmd.Flags().StringVarP(&importEnvironment, "environment", "e",
+	ImportAPICmd.Flags().StringVarP(&flagImportApiEnvironment, "environment", "e",
 		utils.GetDefaultEnvironment(utils.MainConfigFilePath), "Environment from the which the API should be imported")
-	ImportAPICmd.Flags().StringVarP(&importAPICmdToken, "token", "t",
+	ImportAPICmd.Flags().StringVarP(&flagImportApiCmdToken, "token", "t",
 		"", "OAuth token to be used instead of username and password")
 	ImportAPICmd.Flags().StringVarP(&importAPICmdUsername, "username", "u", "", "Username")
 	ImportAPICmd.Flags().StringVarP(&importAPICmdPassword, "password", "p", "", "Password")

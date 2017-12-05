@@ -62,7 +62,7 @@ var apisCmd = &cobra.Command{
 }
 
 func executeListApisCmd() {
-	if exportAPICmdToken != "" {
+	if flagExportAPICmdToken != "" {
 		// token provided with --token (-t) flag
 		if exportAPICmdUsername != "" || exportAPICmdPassword != "" {
 			// username and/or password provided with -u and/or -p flags
