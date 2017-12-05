@@ -162,7 +162,7 @@ func GetClientIDSecret(username string, password string, url string) (string, st
 	headers[HeaderContentType] = HeaderValueApplicationJSON
 	// headers["Content-Type"] = "application/json"
 
-	headers[HeaderAuthorization] = HeaderValueAuthBasicPrefix + " " + GetBase64EncodedCredentials(username, password)
+	headers[HeaderAuthorization] = HeaderValueAuthPrefixBasic + " " + GetBase64EncodedCredentials(username, password)
 	// headers["Authorization"] = "Basic " + GetBase64EncodedCredentials(username, password)
 
 	// POST request using resty
@@ -216,7 +216,7 @@ func GetOAuthTokens(username string, password string,
 	// set headers
 	headers := make(map[string]string)
 	headers[HeaderContentType] = HeaderValueXWWWFormUrlEncoded
-	headers[HeaderAuthorization] = HeaderValueAuthBearerPrefix + " " + b64EncodedClientIDClientSecret
+	headers[HeaderAuthorization] = HeaderValueAuthPrefixBearer + " " + b64EncodedClientIDClientSecret
 	headers[HeaderAccept] = HeaderValueApplicationJSON
 
 	if Insecure {

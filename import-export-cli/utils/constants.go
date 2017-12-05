@@ -61,8 +61,8 @@ const HeaderValueKeepAlive = "keep-alive"
 const HeaderValueApplicationZip = "application/zip"
 const HeaderValueApplicationJSON = "application/json"
 const HeaderValueXWWWFormUrlEncoded = "application/x-www-form-urlencoded"
-const HeaderValueAuthBearerPrefix = "Bearer"
-const HeaderValueAuthBasicPrefix = "Basic"
+const HeaderValueAuthPrefixBearer = "Bearer"
+const HeaderValueAuthPrefixBasic = "Basic"
 const HeaderValueMultiPartFormData = "multipart/form-data"
 
 // Logging Prefixes

@@ -36,7 +36,7 @@ func TestGetAPIListOK(t *testing.T) {
 		}
 		w.Header().Set(utils.HeaderContentType, utils.HeaderValueApplicationJSON)
 
-		if !strings.Contains(r.Header.Get(utils.HeaderAuthorization), utils.HeaderValueAuthBearerPrefix) {
+		if !strings.Contains(r.Header.Get(utils.HeaderAuthorization), utils.HeaderValueAuthPrefixBearer) {
 			t.Errorf("Error in Authorization Header. Got '%s'\n", w.Header().Get(utils.HeaderAuthorization))
 		}
 

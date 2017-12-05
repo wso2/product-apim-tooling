@@ -120,7 +120,7 @@ func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (in
 	utils.Logln(utils.LogPrefixInfo+"URL:", finalUrl)
 
 	headers := make(map[string]string)
-	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
+	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthPrefixBearer + " " + accessToken
 
 	resp, err := utils.InvokeGETRequest(finalUrl, headers)
 

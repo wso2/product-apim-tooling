@@ -158,7 +158,7 @@ func getExportApiResponse(name string, version string, publisherEndpoint string,
 	url := publisherEndpoint + query
 	utils.Logln(utils.LogPrefixInfo+"ExportAPI: URL:", url)
 	headers := make(map[string]string)
-	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
+	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthPrefixBearer + " " + accessToken
 	headers[utils.HeaderAccept] = utils.HeaderValueApplicationZip
 
 	resp, err := utils.InvokeGETRequest(url, headers)
