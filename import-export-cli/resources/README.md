@@ -3,6 +3,19 @@
 
 Command Line tool for importing and exporting APIs between different API Environemnts
 
+- ### Adding Environments
+    Add environments by either manually adding details to `$HOME/.wso2apim-cli/main_config.yaml` or using the command
+    `apimcli add-env` command.
+    
+    Type `apimcli add-env --help` for detailed instructions
+    
+  ### Command Autocompletion (For Bash Only)
+    Copy the file `apimcli_bash_completion.sh` to `/etc/bash_completion.d/` and source it with
+    `source /etc/bash_completion.d/apimcli_bash_completion.sh` to enable bash auto-completion.
+
+<hr/>
+<br/>
+
 ## Usage 
 ```bash
      apimcli [command]
@@ -117,6 +130,9 @@ Command Line tool for importing and exporting APIs between different API Environ
 #### Global Flags
 ```bash
     --verbose
+        Enable verbose logs (Provides more information on execution)
     --insecure, -k
+        Allow connections to SSL sites without certs
     --help, -h
+        Display information and example usage of a command
 ```

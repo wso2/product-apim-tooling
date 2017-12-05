@@ -24,15 +24,16 @@ Command Line tool for importing and exporting APIs between different API Environ
 - ### Running
     Extract the compressed archive generated to a desired location.
     
-    Then execute `import-export-cli/apimcli` to start the application.
+    Then execute `./apimcli` to start the application. (Being inside `product-apim-tooling/import-export-cli`)
     
-    Execute `import-export-cli/apimcli --help` for further instructions.
-
+    Execute `/apimcli --help` for further instructions.
+    
+    NOTE: To execute the tool from anywhere, append the location of the executable (apimcli) to your $PATH variable.
 <hr/>
 <br/>
 
 - ### Adding Environments
-    Add environments by either manually editing `import-export-cli/bin/main_config.yaml` or using the command
+    Add environments by either manually adding details to `$HOME/.wso2apim-cli/main_config.yaml` or using the command
     `apimcli add-env` command.
     
     Type `apimcli add-env --help` for detailed instructions

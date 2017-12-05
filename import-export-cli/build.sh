@@ -112,9 +112,8 @@ do
     zipdir="${buildPath}/$filename"
     mkdir -p $zipdir
 
-    cp -r "${baseDir}/resources/README.md" $zipdir > /dev/null 2>&1
+    cp -r "${baseDir}/resources/README.html.desktop" $zipdir > /dev/null 2>&1
     cp -r "${baseDir}/LICENSE" $zipdir > /dev/null 2>&1
-    cp -r "${baseDir}/resources/exported" ${zipdir} > /dev/null 2>&1
 
     # set destination path for binary
     destination="$zipdir/$output"
