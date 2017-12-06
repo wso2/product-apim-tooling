@@ -21,8 +21,7 @@ Command Line tool for importing and exporting APIs between different API Environ
     Created packages will be available at `build/target` directory
       
 - ### Running
-    Select a generated archive suitable for your platform and extract it to a desired location.
-    
+    Select a generated archive suitable for your platform (Mac, Windows, Linux) and extract it to a desired location and`cd` into it.
     Then execute `apimcli` to start the application.
     > NOTE: Execute `./apimcli` if the working directory is the same where the executable resides
     
@@ -36,6 +35,7 @@ Command Line tool for importing and exporting APIs between different API Environ
     > NOTE: Directory structure for configuration files (`$HOME/.wso2apimcli`) will be created upon execution of `apimcli`
     
     Execute `apimcli add-env --help` for detailed instructions
+    > Under environment, `api_manager_endpoint`, `registration_endpoint`, `token_endpoint` fields are mandatory. Others are optional
     
 - ### Command Autocompletion (For Bash Only)
     Copy the file `apimcli_bash_completion.sh` to `/etc/bash_completion.d/` and source it with
@@ -167,7 +167,7 @@ Command Line tool for importing and exporting APIs between different API Environ
 ```bash
         Flags
             --http-request-timeout
-            --export-rdirectory
+            --export-directory
         Examples:
             apimcli set --http-request-timeout 10000
             apimcli set --export-directory /home/user/exported 

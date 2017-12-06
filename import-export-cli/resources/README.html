@@ -3,7 +3,17 @@
 <p>Command Line tool for importing and exporting APIs between different API Environemnts</p>
 <h2 id="getting-started">Getting Started</h2>
 <ul>
-
+    <li><h3 id="running">Running</h3>
+        <p> Select an  archive suitable for your platform (Mac, Windows, Linux) and extract it to a desired
+            location and<code>cd</code> into it.<br> Then execute <code>apimcli</code> to start the application.</p>
+        <blockquote>
+            <p>NOTE: Execute <code>./apimcli</code> if the working directory is the same where the executable resides
+            </p>
+            <p>Add the location of extracted folder to your system&#39;s $PATH variable to access the executable from
+                anywhere </p>
+        </blockquote>
+        <p> Execute <code>apimcli --help</code> for further instructions.</p>
+    </li>
     <li><h3 id="adding-environments">Adding Environments</h3>
         <p> Add environments by either manually editing <code>$HOME/.wso2apimcli/main_config.yaml</code> or using the
             command<br> <code>apimcli add-env</code>.</p>
@@ -12,6 +22,10 @@
                 execution of <code>apimcli</code></p>
         </blockquote>
         <p> Execute <code>apimcli add-env --help</code> for detailed instructions</p>
+        <blockquote>
+            <p>Under environment, <code>api_manager_endpoint</code>, <code>registration_endpoint</code>, <code>token_endpoint</code>
+                fields are mandatory. Others are optional</p>
+        </blockquote>
     </li>
     <li><h3 id="command-autocompletion-for-bash-only-">Command Autocompletion (For Bash Only)</h3>
         <p> Copy the file <code>apimcli_bash_completion.sh</code> to <code>/etc/bash_completion.d/</code> and source it
@@ -137,7 +151,7 @@
     <li><h4 id="set">set</h4>
         <pre><code class="lang-bash">      Flags
           --http-request-timeout
-          --export-rdirectory
+          --export-directory
       Examples:
           apimcli set --http-request-timeout 10000
           apimcli set --export-directory /home/user/exported
