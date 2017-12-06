@@ -260,10 +260,8 @@ func GetClientIDSecret(username, password, url string) (clientID string, clientS
 	headers := make(map[string]string)
 
 	headers[HeaderContentType] = HeaderValueApplicationJSON
-	// headers["Content-Type"] = "application/json"
 
 	headers[HeaderAuthorization] = HeaderValueAuthBasicPrefix + " " + GetBase64EncodedCredentials(username, password)
-	// headers["Authorization"] = "Basic " + GetBase64EncodedCredentials(username, password)
 
 	// POST request using resty
 	resp, err := InvokePOSTRequest(url, headers, body)
