@@ -167,14 +167,20 @@ func GetApiImportExportEndpointOfEnv(env, filePath string) string {
 	} else {
 		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
 		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
-		return apiManagerEndpoint + apiImportExportProduct
+		return apiManagerEndpoint + defaultApiImportExportProduct
 	}
 }
 
 // Get ApiListEndpoint of a given environment
 func GetApiListEndpointOfEnv(env, filePath string) string {
 	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
-	return envEndpoints.ApiListEndpoint
+	if !(envEndpoints.ApiListEndpoint == "" || envEndpoints == nil) {
+		return envEndpoints.ApiListEndpoint
+	} else {
+		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
+		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
+		return apiManagerEndpoint + defaultApiListEndpointSuffix
+	}
 }
 
 // Get TokenEndpoint of a given environment

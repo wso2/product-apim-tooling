@@ -46,7 +46,8 @@ const DefaultExportDirName = "exported"
 
 var DefaultExportDirPath = filepath.Join(ConfigDirPath, DefaultExportDirName)
 
-const apiImportExportProduct = "api-import-export-2.1.0-v3"
+const defaultApiImportExportProduct = "api-import-export-2.1.0-v3"
+const defaultApiListEndpointSuffix = "api/am/publisher/v0.11/apis"
 
 const DefaultEnvironmentName = "default"
 

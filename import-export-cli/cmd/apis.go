@@ -33,7 +33,6 @@ import (
 var listApisCmdEnvironment string
 var listApisCmdUsername string
 var listApisCmdPassword string
-var listApisCmdQuery string
 
 // apisCmd related info
 const apisCmdLiteral = "apis"
@@ -61,12 +60,13 @@ var apisCmd = &cobra.Command{
 }
 
 func executeApisCmd(mainConfigFilePath, envKeysAllFilePath string) {
-	accessToken, apiManagerEndpoint, preCommandErr :=
+	accessToken, _, preCommandErr :=
 		utils.ExecutePreCommandWithOAuth(listApisCmdEnvironment, listApisCmdUsername, listApisCmdPassword,
 			mainConfigFilePath, envKeysAllFilePath)
 
 	if preCommandErr == nil {
-		count, apis, err := GetAPIList(listApisCmdQuery, accessToken, apiManagerEndpoint)
+		apiListEndpoint := utils.GetApiListEndpointOfEnv(listApisCmdEnvironment, mainConfigFilePath)
+		count, apis, err := GetAPIList("", accessToken, apiListEndpoint)
 
 		if err == nil {
 			// Printing the list of available APIs
@@ -91,30 +91,16 @@ func executeApisCmd(mainConfigFilePath, envKeysAllFilePath string) {
 // @return count (no. of APIs)
 // @return array of API objects
 // @return error
-func GetAPIList(query, accessToken, apiManagerEndpoint string) (count int32, apis []utils.API, err error) {
-	url_ := apiManagerEndpoint // 'url_' instead of 'url' to avoid confusion with 'net/url'
-
-	// append '/' to the end if there isn't one already
-	if url_ != "" && string(url_[len(url_)-1]) != "/" {
-		url_ += "/"
-	}
-	url_ += "api/am/publisher/v0.11/apis"
-
-	/*
-		fmt.Println("Query before encoding:", query)
-		encodedQuery, _ := url.Parse(query) // convert query into a url-path-encoded string
-		fmt.Println("Query after encoding:", encodedQuery.String())
-		url_ += "?query=" + encodedQuery.String()
-	*/
-	utils.Logln(utils.LogPrefixInfo+"URL:", url_)
+func GetAPIList(query, accessToken, apiListEndpoint string) (count int32, apis []utils.API, err error) {
+	utils.Logln(utils.LogPrefixInfo+"URL:", apiListEndpoint)
 
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 
-	resp, err := utils.InvokeGETRequest(url_, headers)
+	resp, err := utils.InvokeGETRequest(apiListEndpoint, headers)
 
 	if err != nil {
-		utils.HandleErrorAndExit("Unable to connect to "+url_, err)
+		utils.HandleErrorAndExit("Unable to connect to "+apiListEndpoint, err)
 	}
 
 	utils.Logln(utils.LogPrefixInfo+"Response:", resp.Status())
@@ -158,8 +144,6 @@ func init() {
 
 	apisCmd.Flags().StringVarP(&listApisCmdEnvironment, "environment", "e",
 		utils.DefaultEnvironmentName, "Environment to be searched")
-	apisCmd.Flags().StringVarP(&listApisCmdQuery, "query", "q", "",
-		"(Optional) query for searching APIs")
 	apisCmd.Flags().StringVarP(&listApisCmdUsername, "username", "u", "", "Username")
 	apisCmd.Flags().StringVarP(&listApisCmdPassword, "password", "p", "", "Password")
 }
