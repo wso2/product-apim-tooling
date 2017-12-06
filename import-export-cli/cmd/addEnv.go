@@ -92,7 +92,7 @@ func addEnv(envName, apiManagerEndpoint, regEndpoint, tokenEndpoint, mainConfigF
 	mainConfig := utils.GetMainConfigFromFile(mainConfigFilePath)
 
 	var envEndpoints = utils.EnvEndpoints{
-		APIManagerEndpoint:   apiManagerEndpoint,
+		ApiManagerEndpoint:   apiManagerEndpoint,
 		TokenEndpoint:        tokenEndpoint,
 		RegistrationEndpoint: regEndpoint,
 	}

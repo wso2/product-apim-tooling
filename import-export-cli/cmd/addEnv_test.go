@@ -64,8 +64,12 @@ func TestAddEnv3(t *testing.T) {
 	var sampleMainConnfig = new(utils.MainConfig)
 	sampleMainConnfig.Config = utils.Config{10000, ""}
 	sampleMainConnfig.Environments = make(map[string]utils.EnvEndpoints)
-	sampleMainConnfig.Environments["dev"] = utils.EnvEndpoints{"sample-publisher-endpoint",
-		"sample-reg-endpoint", "sample-token-endpoint"}
+	sampleMainConnfig.Environments["dev"] = utils.EnvEndpoints{
+		"sample-publisher-endpoint",
+		"sample-import-export-endpoint",
+		"sample-list-endpoint",
+		"sample-reg-endpoint",
+		"sample-token-endpoint"}
 	utils.WriteConfigFile(sampleMainConnfig, sampleMainConfigFilePath)
 
 	envName := "dev"
@@ -89,8 +93,12 @@ func TestAddEnv4(t *testing.T) {
 	var sampleMainConnfig = new(utils.MainConfig)
 	sampleMainConnfig.Config = utils.Config{10000, ""}
 	sampleMainConnfig.Environments = make(map[string]utils.EnvEndpoints)
-	sampleMainConnfig.Environments["dev"] = utils.EnvEndpoints{"sample-publisher-endpoint",
-		"sample-reg-endpoint", "sample-token-endpoint"}
+	sampleMainConnfig.Environments["dev"] = utils.EnvEndpoints{
+		"sample-publisher-endpoint",
+		"sample-import-export-endpoint",
+		"sample-list-endpoint",
+		"sample-reg-endpoint",
+		"sample-token-endpoint"}
 	utils.WriteConfigFile(sampleMainConnfig, sampleMainConfigFilePath)
 
 	envName := "new-env"

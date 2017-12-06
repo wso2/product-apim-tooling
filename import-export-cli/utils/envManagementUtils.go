@@ -156,7 +156,7 @@ func GetEndpointsOfEnvironment(env string, filePath string) (*EnvEndpoints, erro
 // Get APIMEndpoint of a given environment
 func GetAPIMEndpointOfEnv(env, filePath string) string {
 	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
-	return envEndpoints.APIManagerEndpoint
+	return envEndpoints.ApiManagerEndpoint
 }
 
 // Get TokenEndpoint of a given environment

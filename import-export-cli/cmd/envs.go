@@ -60,7 +60,7 @@ func printEnvs(envs map[string]utils.EnvEndpoints) {
 	var data [][]string
 
 	for env, endpoints := range envs {
-		data = append(data, []string{env, endpoints.APIManagerEndpoint, endpoints.RegistrationEndpoint,
+		data = append(data, []string{env, endpoints.ApiManagerEndpoint, endpoints.RegistrationEndpoint,
 			endpoints.TokenEndpoint})
 	}
 

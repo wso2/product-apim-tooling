@@ -107,6 +107,8 @@ func createConfigFiles() {
 		mainConfig.Environments = make(map[string]utils.EnvEndpoints)
 		mainConfig.Environments["sampleEnv"] = utils.EnvEndpoints{
 			"https://localhost/apim",
+			"https://localhost/api-import-export",
+			"https://localhost/publisher/apis",
 			"https://localhost/register",
 			"https://localhost/token",
 		}

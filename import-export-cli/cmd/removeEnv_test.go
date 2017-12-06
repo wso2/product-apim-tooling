@@ -33,8 +33,13 @@ func TestRemoveEnv1(t *testing.T) {
 	var mainConfig = new(utils.MainConfig)
 	mainConfig.Config = utils.Config{10000, ""}
 	mainConfig.Environments = make(map[string]utils.EnvEndpoints)
-	mainConfig.Environments["dev"] = utils.EnvEndpoints{"sample-publisher-endpoint",
-		"sample-reg-endpoint", "sample-token-endpoint"}
+	mainConfig.Environments["dev"] = utils.EnvEndpoints{
+		"sample-publisher-endpoint",
+		"sample-import-export-endpoint",
+		"sample-list-endpoint",
+		"sample-reg-endpoint",
+		"sample-token-endpoint",
+	}
 	utils.WriteConfigFile(mainConfig, testMainConfigFilePath)
 
 	sampleEnvKeysAllFileName := "sample_env_keys_all.yaml"
@@ -67,8 +72,13 @@ func TestRemoveEnv2(t *testing.T) {
 	var sampleMainConfig = new(utils.MainConfig)
 	sampleMainConfig.Config = utils.Config{10000, ""}
 	sampleMainConfig.Environments = make(map[string]utils.EnvEndpoints)
-	sampleMainConfig.Environments["dev"] = utils.EnvEndpoints{"sample-publisher-endpoint",
-		"sample-reg-endpoint", "sample-token-endpoint"}
+	sampleMainConfig.Environments["dev"] = utils.EnvEndpoints{
+		"sample-publisher-endpoint",
+		"sample-import-export-endpoint",
+		"sample-list-endpoint",
+		"sample-reg-endpoint",
+		"sample-token-endpoint",
+	}
 	utils.WriteConfigFile(sampleMainConfig, sampleMainConfigFilePath)
 
 	err := removeEnv("", sampleMainConfigFilePath, "")
@@ -87,8 +97,13 @@ func TestRemoveEnv3(t *testing.T) {
 	var sampleMainConfig = new(utils.MainConfig)
 	sampleMainConfig.Config = utils.Config{10000, ""}
 	sampleMainConfig.Environments = make(map[string]utils.EnvEndpoints)
-	sampleMainConfig.Environments["dev"] = utils.EnvEndpoints{"sample-publisher-endpoint",
-		"sample-reg-endpoint", "sample-token-endpoint"}
+	sampleMainConfig.Environments["dev"] = utils.EnvEndpoints{
+		"sample-publisher-endpoint",
+		"sample-import-export-endpoint",
+		"sample-list-endpoint",
+		"sample-reg-endpoint",
+		"sample-token-endpoint",
+	}
 	utils.WriteConfigFile(sampleMainConfig, sampleMainConfigFilePath)
 
 	err := removeEnv("new-dev", sampleMainConfigFilePath, "")

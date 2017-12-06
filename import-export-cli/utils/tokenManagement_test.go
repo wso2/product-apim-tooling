@@ -112,8 +112,13 @@ func TestExecutePreCommandWithBasicAuth1(t *testing.T) {
 	mainConfigFilePath := filepath.Join(CurrentDir, mainConfigFileName)
 	mainConfig.Config = Config{2500, "/home/exported"}
 	mainConfig.Environments = make(map[string]EnvEndpoints)
-	mainConfig.Environments[devName] = EnvEndpoints{apimStub.URL,
-		registrationStub.URL, oauthStub.URL}
+	mainConfig.Environments[devName] = EnvEndpoints{
+		apimStub.URL,
+		apimStub.URL + "/api-import-export",
+		apimStub.URL + "/publisher/apis",
+		registrationStub.URL,
+		oauthStub.URL,
+	}
 	WriteConfigFile(mainConfig, mainConfigFilePath)
 
 	// keys
@@ -162,8 +167,13 @@ func TestExecutePreCommandWithBasicAuth2(t *testing.T) {
 	mainConfigFilePath := filepath.Join(CurrentDir, mainConfigFileName)
 	mainConfig.Config = Config{2500, "/home/exported"}
 	mainConfig.Environments = make(map[string]EnvEndpoints)
-	mainConfig.Environments[devName] = EnvEndpoints{apimStub.URL,
-		registrationStub.URL, oauthStub.URL}
+	mainConfig.Environments[devName] = EnvEndpoints{
+		apimStub.URL,
+		apimStub.URL + "/api-import-export",
+		apimStub.URL + "/publisher/apis",
+		registrationStub.URL,
+		oauthStub.URL,
+	}
 	WriteConfigFile(mainConfig, mainConfigFilePath)
 
 	// keys
@@ -264,8 +274,13 @@ func TestExecutePreCommandWithOAuth1(t *testing.T) {
 
 	mainConfig.Config = Config{2500, "/home/exported"}
 	mainConfig.Environments = make(map[string]EnvEndpoints)
-	mainConfig.Environments[devName] = EnvEndpoints{apimStub.URL,
-		registrationStub.URL, oauthStub.URL}
+	mainConfig.Environments[devName] = EnvEndpoints{
+		apimStub.URL,
+		apimStub.URL + "/api-import-export",
+		apimStub.URL + "/publisher/apis",
+		registrationStub.URL,
+		oauthStub.URL,
+	}
 	WriteConfigFile(mainConfig, mainConfigFilePath)
 
 	// keys
@@ -312,8 +327,13 @@ func TestExecutePreCommandWithOAuth2(t *testing.T) {
 
 	mainConfig.Config = Config{2500, "/home/exported"}
 	mainConfig.Environments = make(map[string]EnvEndpoints)
-	mainConfig.Environments[devName] = EnvEndpoints{apimStub.URL,
-		registrationStub.URL, oauthStub.URL}
+	mainConfig.Environments[devName] = EnvEndpoints{
+		apimStub.URL,
+		apimStub.URL + "/api-import-export",
+		apimStub.URL + "/publisher/apis",
+		registrationStub.URL,
+		oauthStub.URL,
+	}
 	WriteConfigFile(mainConfig, mainConfigFilePath)
 
 	// keys

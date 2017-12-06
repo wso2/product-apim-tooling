@@ -32,7 +32,7 @@ import (
 // @param environment : Environment on which the particular command is run
 // @param flagUsername : Username entered using the flag --username (-u). Could be blank
 // @param flagPassword : Password entered using the flag --password (-p). Could be blank
-// @return b64encodedCredentials, APIManagerEndpoint, Errors
+// @return b64encodedCredentials, ApiManagerEndpoint, Errors
 // including (export-api, import-api, list)e
 func ExecutePreCommandWithBasicAuth(environment, flagUsername, flagPassword, mainConfigFilePath,
 	envKeysAllFilePath string) (b64encodedCredentials string, apiManagerEndpoint string, err error) {
@@ -133,7 +133,7 @@ func ExecutePreCommandWithBasicAuth(environment, flagUsername, flagPassword, mai
 // @param environment : Environment on which the particular command is run
 // @param flagUsername : Username entered using the flag --username (-u). Could be blank
 // @param flagPassword : Password entered using the flag --password (-p). Could be blank
-// @return AccessToken, APIManagerEndpoint, Errors
+// @return AccessToken, ApiManagerEndpoint, Errors
 // including (export-api, import-api, list)
 func ExecutePreCommandWithOAuth(environment, flagUsername, flagPassword, mainConfigFilePath,
 	envKeysAllFilePath string) (accessToken string, apiManagerEndpoint string, err error) {

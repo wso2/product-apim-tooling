@@ -74,10 +74,20 @@ func WriteCorrectMainConfig() {
 func initSampleMainConfig() {
 	mainConfig.Config = Config{2500, "/home/exported"}
 	mainConfig.Environments = make(map[string]EnvEndpoints)
-	mainConfig.Environments[devName] = EnvEndpoints{"dev_apim_endpoint",
-		"dev_reg_endpoint", "dev_token_endpoint"}
-	mainConfig.Environments[qaName] = EnvEndpoints{"qa_apim_endpoint",
-		"qa_reg_endpoint", "dev_token_endpoint"}
+	mainConfig.Environments[devName] = EnvEndpoints{
+		"dev_apim_endpoint",
+		"dev_import_export_endpoint",
+		"dev_list_endpoint",
+		"dev_reg_endpoint",
+		"dev_token_endpoint",
+	}
+	mainConfig.Environments[qaName] = EnvEndpoints{
+		"qa_apim_endpoint",
+		"qa_import_export_endpoint",
+		"qa_list_endpoint",
+		"qa_reg_endpoint",
+		"dev_token_endpoint",
+	}
 }
 
 func TestWriteConfigFile(t *testing.T) {
@@ -159,7 +169,7 @@ func TestMainConfig_ParseMainConfigFromFile2(t *testing.T) {
 	mainConfigFilePath := filepath.Join(CurrentDir, mainConfigFileName)
 
 	mainConfig.Environments = make(map[string]EnvEndpoints)
-	mainConfig.Environments[devName] = EnvEndpoints{"",
+	mainConfig.Environments[devName] = EnvEndpoints{"", "", "",
 		"dev_reg_endpoint", "dev_token_endpoint"}
 	WriteConfigFile(mainConfig, mainConfigFilePath)
 
@@ -181,7 +191,7 @@ func TestMainConfig_ParseMainConfigFromFile3(t *testing.T) {
 	mainConfigFilePath := filepath.Join(CurrentDir, mainConfigFileName)
 
 	mainConfig.Environments = make(map[string]EnvEndpoints)
-	mainConfig.Environments[devName] = EnvEndpoints{"dev_apim_endpoint",
+	mainConfig.Environments[devName] = EnvEndpoints{"dev_apim_endpoint", "", "",
 		"", "dev_token_endpoint"}
 	WriteConfigFile(mainConfig, mainConfigFilePath)
 
@@ -203,7 +213,7 @@ func TestMainConfig_ParseMainConfigFromFile4(t *testing.T) {
 	mainConfigFilePath := filepath.Join(CurrentDir, mainConfigFileName)
 
 	mainConfig.Environments = make(map[string]EnvEndpoints)
-	mainConfig.Environments[devName] = EnvEndpoints{"dev_apim_endpoint",
+	mainConfig.Environments[devName] = EnvEndpoints{"dev_apim_endpoint", "", "",
 		"dev_reg_endpoint", ""}
 	WriteConfigFile(mainConfig, mainConfigFilePath)
 
