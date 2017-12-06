@@ -111,6 +111,7 @@ func WriteToZip(exportAPIName, exportAPIVersion, exportEnvironment, exportDirect
 		utils.HandleErrorAndExit("Error creating zip archive", err)
 	}
 	fmt.Println("Succesfully exported API!")
+	fmt.Println("Find the exported API at " + pFile)
 }
 
 // ExportAPI
@@ -125,11 +126,7 @@ func getExportApiResponse(name, version, provider, apimEndpoint, b64encodedCrede
 		apimEndpoint += "/"
 	}
 
-	query := utils.ApiImportExportProduct + "/export-api?name=" + name + "&version=" + version
-
-	if provider != "" {
-		query += "&provider=" + provider
-	}
+	query := utils.ApiImportExportProduct + "/export-api?name=" + name + "&version=" + version + "&provider=" + provider
 
 	url := apimEndpoint + query
 	utils.Logln(utils.LogPrefixInfo+"ExportAPI: URL:", url)
