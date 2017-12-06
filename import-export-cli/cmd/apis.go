@@ -56,29 +56,32 @@ var apisCmd = &cobra.Command{
 	Long:  apisCmdLongDesc + apisCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + apisCmdLiteral + " called")
+		executeApisCmd(utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
+	},
+}
 
-		accessToken, apiManagerEndpoint, preCommandErr :=
-			utils.ExecutePreCommandWithOAuth(listApisCmdEnvironment, listApisCmdUsername, listApisCmdPassword,
-				utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
+func executeApisCmd(mainConfigFilePath, envKeysAllFilePath string) {
+	accessToken, apiManagerEndpoint, preCommandErr :=
+		utils.ExecutePreCommandWithOAuth(listApisCmdEnvironment, listApisCmdUsername, listApisCmdPassword,
+			mainConfigFilePath, envKeysAllFilePath)
 
-		if preCommandErr == nil {
-			count, apis, err := GetAPIList(listApisCmdQuery, accessToken, apiManagerEndpoint)
+	if preCommandErr == nil {
+		count, apis, err := GetAPIList(listApisCmdQuery, accessToken, apiManagerEndpoint)
 
-			if err == nil {
-				// Printing the list of available APIs
-				fmt.Println("Environment:", listApisCmdEnvironment)
-				fmt.Println("No. of APIs:", count)
-				if count > 0 {
-					printAPIs(apis)
-				}
-			} else {
-				utils.Logln(utils.LogPrefixError+"Getting List of APIs", err)
+		if err == nil {
+			// Printing the list of available APIs
+			fmt.Println("Environment:", listApisCmdEnvironment)
+			fmt.Println("No. of APIs:", count)
+			if count > 0 {
+				printAPIs(apis)
 			}
 		} else {
-			utils.Logln(utils.LogPrefixError + "calling 'list' " + preCommandErr.Error())
-			utils.HandleErrorAndExit("Error calling '"+apisCmdLiteral+"'", preCommandErr)
+			utils.Logln(utils.LogPrefixError+"Getting List of APIs", err)
 		}
-	},
+	} else {
+		utils.Logln(utils.LogPrefixError + "calling 'list' " + preCommandErr.Error())
+		utils.HandleErrorAndExit("Error calling '"+apisCmdLiteral+"'", preCommandErr)
+	}
 }
 
 // GetAPIList
@@ -148,14 +151,13 @@ func printAPIs(apis []utils.API) {
 	}
 
 	table.Render() // Send output
-
 }
 
 func init() {
 	ListCmd.AddCommand(apisCmd)
 
 	apisCmd.Flags().StringVarP(&listApisCmdEnvironment, "environment", "e",
-		utils.GetDefaultEnvironment(utils.MainConfigFilePath), "Environment to be searched")
+		utils.DefaultEnvironmentName, "Environment to be searched")
 	apisCmd.Flags().StringVarP(&listApisCmdQuery, "query", "q", "",
 		"(Optional) query for searching APIs")
 	apisCmd.Flags().StringVarP(&listApisCmdUsername, "username", "u", "", "Username")

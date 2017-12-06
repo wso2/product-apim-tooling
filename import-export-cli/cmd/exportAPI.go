@@ -49,6 +49,7 @@ var exportAPICmdExamples = dedent.Dedent(`
 		Examples:
 		` + utils.ProjectName + ` ` + exportAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -e dev --provider admin
 		` + utils.ProjectName + ` ` + exportAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 -e production --provider admin
+		NOTE: all three flags (--name (-n), --version (-v), --provider (-r)) are mandatory
 	`)
 
 // ExportAPICmd represents the exportAPI command
@@ -59,34 +60,35 @@ var ExportAPICmd = &cobra.Command{
 	Long:  exportAPICmdLongDesc + exportAPICmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + exportAPICmdLiteral + " called")
-
-		b64encodedCredentials, apiManagerEndpoint, preCommandErr :=
-			utils.ExecutePreCommandWithBasicAuth(exportEnvironment, exportAPICmdUsername, exportAPICmdPassword,
-				utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
-
-		if preCommandErr == nil {
-			resp := ExportAPI(exportAPIName, exportAPIVersion, exportProvider, apiManagerEndpoint,
-				b64encodedCredentials)
-
-			// Print info on response
-			utils.Logf("ResponseStatus: %v\n", resp.Status())
-			utils.Logf("Error: %v\n", resp.Error())
-			//fmt.Printf("Response Body: %v\n", resp.Body())
-
-			if resp.StatusCode() == http.StatusOK {
-				WriteToZip(exportAPIName, exportAPIVersion, exportEnvironment, utils.ExportDirectory, resp)
-			} else if resp.StatusCode() == http.StatusInternalServerError {
-				// 500 Internal Server Error
-				fmt.Println("Incorrect password")
-			} else {
-				// neither 200 nor 500
-				fmt.Println("Error exporting API:", resp.Status())
-			}
-		} else {
-			// error exporting API
-			fmt.Println("Error exporting API:" + preCommandErr.Error())
-		}
+		executeExportAPICmd(utils.MainConfigFilePath, utils.EnvKeysAllFilePath, utils.ExportDirectory)
 	},
+}
+
+func executeExportAPICmd(mainConfigFilePath, envKeysAllFilePath, exportDirectory string) {
+	b64encodedCredentials, apiManagerEndpoint, preCommandErr :=
+		utils.ExecutePreCommandWithBasicAuth(exportEnvironment, exportAPICmdUsername, exportAPICmdPassword,
+			mainConfigFilePath, envKeysAllFilePath)
+
+	if preCommandErr == nil {
+		resp := getExportApiResponse(exportAPIName, exportAPIVersion, exportProvider, apiManagerEndpoint,
+			b64encodedCredentials)
+
+		// Print info on response
+		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
+
+		if resp.StatusCode() == http.StatusOK {
+			WriteToZip(exportAPIName, exportAPIVersion, exportEnvironment, exportDirectory, resp)
+		} else if resp.StatusCode() == http.StatusInternalServerError {
+			// 500 Internal Server Error
+			fmt.Println("Incorrect password")
+		} else {
+			// neither 200 nor 500
+			fmt.Println("Error exporting API:", resp.Status())
+		}
+	} else {
+		// error exporting API
+		fmt.Println("Error exporting API:" + preCommandErr.Error())
+	}
 }
 
 // WriteToZip
@@ -117,7 +119,7 @@ func WriteToZip(exportAPIName, exportAPIVersion, exportEnvironment, exportDirect
 // @param apimEndpoint : API Manager Endpoint for the environment
 // @param accessToken : Access Token for the resource
 // @return response Response in the form of *resty.Response
-func ExportAPI(name, version, provider, apimEndpoint, b64encodedCredentials string) *resty.Response {
+func getExportApiResponse(name, version, provider, apimEndpoint, b64encodedCredentials string) *resty.Response {
 	// append '/' to the end if there isn't one already
 	if string(apimEndpoint[len(apimEndpoint)-1]) != "/" {
 		apimEndpoint += "/"
@@ -154,7 +156,7 @@ func init() {
 	ExportAPICmd.Flags().StringVarP(&exportProvider, "provider", "r", "",
 		"Provider of the API")
 	ExportAPICmd.Flags().StringVarP(&exportEnvironment, "environment", "e",
-		utils.GetDefaultEnvironment(utils.MainConfigFilePath), "Environment to which the API should be exported")
+		utils.DefaultEnvironmentName, "Environment to which the API should be exported")
 
 	ExportAPICmd.Flags().StringVarP(&exportAPICmdUsername, "username", "u", "", "Username")
 	ExportAPICmd.Flags().StringVarP(&exportAPICmdPassword, "password", "p", "", "Password")

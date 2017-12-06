@@ -29,8 +29,8 @@ import (
 const testKeysFileName = "test_keys_config.yaml"
 const testMainConfigFileName = "test_main_config.yaml"
 
-var testKeysFilePath = filepath.Join(ApplicationRoot, testKeysFileName)
-var testMainConfigFilePath = filepath.Join(ApplicationRoot, testMainConfigFileName)
+var testKeysFilePath = filepath.Join(ConfigDirPath, testKeysFileName)
+var testMainConfigFilePath = filepath.Join(ConfigDirPath, testMainConfigFileName)
 
 var envKeysAll = new(EnvKeysAll)
 var mainConfig = new(MainConfig)

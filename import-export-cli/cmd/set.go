@@ -40,11 +40,9 @@ var setCmdLongDesc = dedent.Dedent(`
 
 var setCmdExamples = dedent.Dedent(`
 			Examples:
-			` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 3600 \
-								  --export-directory /home/user/exported-apis
+			` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 3600 --export-directory /home/user/exported-apis
 
-			` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000 \
-								  --export-directory /media/user/apis
+			` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000 --export-directory C:\Documents\exported
 
 			` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000
 	`)
@@ -56,24 +54,24 @@ var SetCmd = &cobra.Command{
 	Long:  setCmdLongDesc + setCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + setCmdLiteral + " called")
-
-		// read the existing config vars
-		configVars := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
-
-		if flagHttpRequestTimeout > 0 {
-			configVars.Config.HttpRequestTimeout = flagHttpRequestTimeout
-		} else {
-			fmt.Println("Invalid input for flag --http-request-timeout")
-		}
-
-		if flagExportDirectory != "" && utils.IsValid(flagExportDirectory) {
-			configVars.Config.ExportDirectory = flagExportDirectory
-		} else {
-			fmt.Println("Invalid input for flag --export-directory")
-		}
-
-		utils.WriteConfigFile(configVars, utils.MainConfigFilePath)
+		executeSetCmd(utils.MainConfigFilePath, utils.ExportDirectory)
 	},
+}
+
+func executeSetCmd(mainConfigFilePath, exportDirectory string) {
+	// read the existing config vars
+	configVars := utils.GetMainConfigFromFile(mainConfigFilePath)
+	if flagHttpRequestTimeout > 0 {
+		configVars.Config.HttpRequestTimeout = flagHttpRequestTimeout
+	} else {
+		fmt.Println("Invalid input for flag --http-request-timeout")
+	}
+	if flagExportDirectory != "" && utils.IsValid(flagExportDirectory) {
+		configVars.Config.ExportDirectory = flagExportDirectory
+	} else {
+		fmt.Println("Invalid input for flag --export-directory")
+	}
+	utils.WriteConfigFile(configVars, mainConfigFilePath)
 }
 
 // init using Cobra

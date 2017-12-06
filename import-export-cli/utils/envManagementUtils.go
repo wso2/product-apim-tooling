@@ -20,7 +20,6 @@ package utils
 
 import (
 	"errors"
-	"fmt"
 )
 
 // EnvExistsInKeysFile
@@ -61,14 +60,12 @@ func EnvExistsInMainConfigFile(env, filePath string) bool {
 // @param filePath : Path to file where env keys are stored
 func AddNewEnvToKeysFile(name string, envKeys EnvKeys, filePath string) {
 	envKeysAll := GetEnvKeysAllFromFile(filePath)
-	fmt.Println("EnvKeysAll:", envKeysAll)
+	Logln(LogPrefixInfo+"EnvKeysAll:", envKeysAll)
 	if envKeysAll == nil {
-		fmt.Println("envKeysAll is nil")
 		envKeysAll = new(EnvKeysAll)
 	}
 
 	if envKeysAll.Environments == nil {
-		fmt.Println("envKeysAll.Environments is nil")
 		envKeysAll.Environments = make(map[string]EnvKeys)
 	}
 	envKeysAll.Environments[name] = envKeys
@@ -79,13 +76,13 @@ func AddNewEnvToKeysFile(name string, envKeys EnvKeys, filePath string) {
 // RemoveEnvFromKeysFiles
 // used with 'reset-user' command
 // does not remove env from endpoints file
-// @param env 
+// @param env
 func RemoveEnvFromKeysFile(env, keysFilePath, mainConfigFilePath string) error {
 	/*
 	 mainConfigFilePath is passed to check if it exists in endpoints
 	 env CANNOT exist only in keys file
 	 env CAN exist only in endpoints file (env not initialized i.e. not used with a command)
-	 */
+	*/
 	if env == "" {
 		return errors.New("environment cannot be blank")
 	}

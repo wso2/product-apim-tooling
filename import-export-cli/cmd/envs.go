@@ -68,7 +68,7 @@ func printEnvs(envs map[string]utils.EnvEndpoints) {
 		table.Append(v)
 	}
 
-	fmt.Printf("Environments available in file '%s'\n", utils.MainConfigFileName)
+	fmt.Printf("Environments available in file '%s'\n", utils.MainConfigFilePath)
 	table.Render()
 
 }
