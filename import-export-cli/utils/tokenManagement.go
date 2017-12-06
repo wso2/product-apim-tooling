@@ -37,7 +37,7 @@ import (
 func ExecutePreCommandWithBasicAuth(environment, flagUsername, flagPassword, mainConfigFilePath,
 	envKeysAllFilePath string) (b64encodedCredentials string, apiManagerEndpoint string, err error) {
 	if EnvExistsInMainConfigFile(environment, mainConfigFilePath) {
-		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment, mainConfigFilePath)
+		apiManagerEndpoint := GetApiManagerEndpointOfEnv(environment, mainConfigFilePath)
 
 		Logln(LogPrefixInfo + "Environment: '" + environment + "'")
 
@@ -105,8 +105,6 @@ func ExecutePreCommandWithBasicAuth(environment, flagUsername, flagPassword, mai
 				password = PromptForPassword()
 			}
 
-			fmt.Println("\nUsername: " + username + "\n")
-
 			if err != nil {
 				fmt.Println("Error:", err)
 			}
@@ -139,7 +137,7 @@ func ExecutePreCommandWithOAuth(environment, flagUsername, flagPassword, mainCon
 	envKeysAllFilePath string) (accessToken string, apiManagerEndpoint string, err error) {
 	if EnvExistsInMainConfigFile(environment, mainConfigFilePath) {
 		registrationEndpoint := GetRegistrationEndpointOfEnv(environment, mainConfigFilePath)
-		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment, mainConfigFilePath)
+		apiManagerEndpoint := GetApiManagerEndpointOfEnv(environment, mainConfigFilePath)
 		tokenEndpoint := GetTokenEndpointOfEnv(environment, mainConfigFilePath)
 
 		Logln(LogPrefixInfo + "Environment: '" + environment + "'")
@@ -216,7 +214,6 @@ func ExecutePreCommandWithOAuth(environment, flagUsername, flagPassword, mainCon
 				password = PromptForPassword()
 			}
 
-			fmt.Println("\nUsername: " + username + "\n")
 			clientID, clientSecret, err = GetClientIDSecret(username, password, registrationEndpoint)
 
 			if err != nil {
@@ -234,7 +231,7 @@ func ExecutePreCommandWithOAuth(environment, flagUsername, flagPassword, mainCon
 			GetBase64EncodedCredentials(clientID, clientSecret), tokenEndpoint)
 		accessToken := responseDataMap["access_token"]
 
-		Logln(LogPrefixInfo+"[Remove in Production] AccessToken:", accessToken) // TODO:: Remove in production
+		//Logln(LogPrefixInfo+"[Remove in Production] AccessToken:", accessToken) // TODO:: Remove in production
 
 		return accessToken, apiManagerEndpoint, nil
 	} else {

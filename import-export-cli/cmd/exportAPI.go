@@ -65,12 +65,13 @@ var ExportAPICmd = &cobra.Command{
 }
 
 func executeExportAPICmd(mainConfigFilePath, envKeysAllFilePath, exportDirectory string) {
-	b64encodedCredentials, apiManagerEndpoint, preCommandErr :=
+	b64encodedCredentials, _, preCommandErr :=
 		utils.ExecutePreCommandWithBasicAuth(exportEnvironment, exportAPICmdUsername, exportAPICmdPassword,
 			mainConfigFilePath, envKeysAllFilePath)
 
 	if preCommandErr == nil {
-		resp := getExportApiResponse(exportAPIName, exportAPIVersion, exportProvider, apiManagerEndpoint,
+		apiImportExportEndpoint := utils.GetApiImportExportEndpointOfEnv(exportEnvironment, mainConfigFilePath)
+		resp := getExportApiResponse(exportAPIName, exportAPIVersion, exportProvider, apiImportExportEndpoint,
 			b64encodedCredentials)
 
 		// Print info on response
@@ -120,15 +121,11 @@ func WriteToZip(exportAPIName, exportAPIVersion, exportEnvironment, exportDirect
 // @param apimEndpoint : API Manager Endpoint for the environment
 // @param accessToken : Access Token for the resource
 // @return response Response in the form of *resty.Response
-func getExportApiResponse(name, version, provider, apimEndpoint, b64encodedCredentials string) *resty.Response {
-	// append '/' to the end if there isn't one already
-	if string(apimEndpoint[len(apimEndpoint)-1]) != "/" {
-		apimEndpoint += "/"
-	}
+func getExportApiResponse(name, version, provider, apiImportExportEndpoint, b64encodedCredentials string) *resty.Response {
+	apiImportExportEndpoint = utils.AppendSlashToString(apiImportExportEndpoint)
+	query := "export-api?name=" + name + "&version=" + version + "&provider=" + provider
 
-	query := utils.ApiImportExportProduct + "/export-api?name=" + name + "&version=" + version + "&provider=" + provider
-
-	url := apimEndpoint + query
+	url := apiImportExportEndpoint + query
 	utils.Logln(utils.LogPrefixInfo+"ExportAPI: URL:", url)
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + b64encodedCredentials
