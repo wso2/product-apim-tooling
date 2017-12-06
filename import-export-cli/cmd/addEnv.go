@@ -26,10 +26,12 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-var flagAddEnvName string           // name of the environment to be added
-var flagTokenEndpoint string        // token endpoint of the environment to be added
-var flagRegistrationEndpoint string // registration endpoint of the environment to be added
-var flagPublisherEndpoint string    // api manager endpoint of the environment to be added
+var flagAddEnvName string              // name of the environment to be added
+var flagTokenEndpoint string           // token endpoint of the environment to be added
+var flagApiImportExportEndpoint string // ApiImportExportEndpoint of the environment to be added
+var flagApiListEndpoint string         // ApiListEnvironment of the environment to be added
+var flagRegistrationEndpoint string    // registration endpoint of the environment to be added
+var flagApiManagerEndpoint string      // api manager endpoint of the environment to be added
 
 // AddEnv command related Info
 const addEnvCmdLiteral = "add-env"
@@ -42,7 +44,14 @@ var addEnvCmdLongDesc = dedent.Dedent(`
 var addEnvCmdExamples = dedent.Dedent(`
 		Examples:
 		` + utils.ProjectName + ` ` + addEnvCmdLiteral + ` -n production \
-						--registration http://localhost:9763/client-registration/v0.11/register \
+						--registration https://localhost:9763/client-registration/v0.11/register \
+						--apim  https://localhost:9443 \
+						--token https://localhost:8243/token
+
+		` + utils.ProjectName + ` ` + addEnvCmdLiteral + ` -n test \
+						--registration https://localhost:9763/client-registration/v0.11/register \
+					    --import-export https://localhost:9443/api-import-export-2.1.0-v3 \
+						--list https://localhsot:9443/api/am/publisher/v0.11/apis \
 						--apim  https://localhost:9443 \
 						--token https://localhost:8243/token
 	`)
@@ -59,12 +68,16 @@ var addEnvCmd = &cobra.Command{
 }
 
 func executeAddEnvCmd(mainConfigFilePath string) {
-	err := addEnv(flagAddEnvName, flagPublisherEndpoint, flagRegistrationEndpoint, flagTokenEndpoint,
-		mainConfigFilePath)
+	envEndpoints := new(utils.EnvEndpoints)
+	envEndpoints.ApiManagerEndpoint = flagApiManagerEndpoint
+	envEndpoints.RegistrationEndpoint = flagRegistrationEndpoint
+	envEndpoints.ApiImportExportEndpoint = flagApiImportExportEndpoint
+	envEndpoints.ApiListEndpoint = flagApiListEndpoint
+	envEndpoints.TokenEndpoint = flagTokenEndpoint
+	err := addEnv(flagAddEnvName, envEndpoints, mainConfigFilePath)
 	if err != nil {
 		utils.HandleErrorAndExit("Error adding environment", err)
 	}
-
 }
 
 // addEnv adds a new environment and its endpoints and writes to config file
@@ -74,13 +87,13 @@ func executeAddEnvCmd(mainConfigFilePath string) {
 // @param tokenEndpoint : Token Endpoint for the environment
 // @param mainConfigFilePath : Path to file where env endpoints are stored
 // @return error
-func addEnv(envName, apiManagerEndpoint, regEndpoint, tokenEndpoint, mainConfigFilePath string) error {
+func addEnv(envName string, envEndpoints *utils.EnvEndpoints, mainConfigFilePath string) error {
 	if envName == "" {
 		// name of the environment is blank
 		return errors.New("name of the environment cannot be blank")
 	}
-	if apiManagerEndpoint == "" || regEndpoint == "" || tokenEndpoint == "" {
-		// at least one of the 3 endpoints is blank
+	if envEndpoints.ApiManagerEndpoint == "" || envEndpoints.RegistrationEndpoint == "" || envEndpoints.TokenEndpoint == "" {
+		// at least one of the 3 mandatory endpoints is blank
 		utils.ShowHelpCommandTip(addEnvCmdLiteral)
 		return errors.New("endpoints cannot be blank")
 	}
@@ -91,13 +104,21 @@ func addEnv(envName, apiManagerEndpoint, regEndpoint, tokenEndpoint, mainConfigF
 
 	mainConfig := utils.GetMainConfigFromFile(mainConfigFilePath)
 
-	var envEndpoints = utils.EnvEndpoints{
-		ApiManagerEndpoint:   apiManagerEndpoint,
-		TokenEndpoint:        tokenEndpoint,
-		RegistrationEndpoint: regEndpoint,
+	var validatedEnvEndpoints = utils.EnvEndpoints{
+		ApiManagerEndpoint:   envEndpoints.ApiManagerEndpoint,
+		TokenEndpoint:        envEndpoints.TokenEndpoint,
+		RegistrationEndpoint: envEndpoints.RegistrationEndpoint,
 	}
 
-	mainConfig.Environments[envName] = envEndpoints
+	if envEndpoints.ApiImportExportEndpoint != "" {
+		validatedEnvEndpoints.ApiImportExportEndpoint = envEndpoints.ApiImportExportEndpoint
+	}
+
+	if envEndpoints.ApiListEndpoint != "" {
+		validatedEnvEndpoints.ApiListEndpoint = envEndpoints.ApiListEndpoint
+	}
+
+	mainConfig.Environments[envName] = validatedEnvEndpoints
 	utils.WriteConfigFile(mainConfig, mainConfigFilePath)
 
 	fmt.Printf("Successfully added environment '%s'\n", envName)
@@ -109,12 +130,12 @@ func addEnv(envName, apiManagerEndpoint, regEndpoint, tokenEndpoint, mainConfigF
 func init() {
 	RootCmd.AddCommand(addEnvCmd)
 
-	addEnvCmd.Flags().StringVarP(&flagAddEnvName, "name", "n", "",
-		"Name of the environment to be added")
-	addEnvCmd.Flags().StringVarP(&flagPublisherEndpoint, "apim", "a", "",
-		"API Manager endpoint for the environment")
-	addEnvCmd.Flags().StringVarP(&flagTokenEndpoint, "token", "t", "",
-		"Token endpoint for the environment")
-	addEnvCmd.Flags().StringVarP(&flagRegistrationEndpoint, "registration", "r", "",
+	addEnvCmd.Flags().StringVarP(&flagAddEnvName, "name", "n", "", "Name of the environment to be added")
+	addEnvCmd.Flags().StringVar(&flagApiManagerEndpoint, "apim", "", "API Manager endpoint for the environment")
+	addEnvCmd.Flags().StringVar(&flagApiImportExportEndpoint, "import-export", "",
+		"API Import Export endpoint for the environment")
+	addEnvCmd.Flags().StringVar(&flagApiListEndpoint, "list", "", "API List endpoint for the environment")
+	addEnvCmd.Flags().StringVar(&flagTokenEndpoint, "token", "", "Token endpoint for the environment")
+	addEnvCmd.Flags().StringVar(&flagRegistrationEndpoint, "registration", "",
 		"Registration endpoint for the environment")
 }

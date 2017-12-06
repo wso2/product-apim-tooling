@@ -49,7 +49,13 @@ var envsCmd = &cobra.Command{
 
 		envs := utils.GetMainConfigFromFile(utils.MainConfigFilePath).Environments
 
-		printEnvs(envs)
+		if len(envs) > 0 {
+			printEnvs(envs)
+		} else {
+			fmt.Println("No environments in " + utils.MainConfigFilePath)
+			utils.ShowHelpCommandTip(addEnvCmdLiteral)
+		}
+
 	},
 }
 
@@ -70,7 +76,6 @@ func printEnvs(envs map[string]utils.EnvEndpoints) {
 
 	fmt.Printf("Environments available in file '%s'\n", utils.MainConfigFilePath)
 	table.Render()
-
 }
 
 func init() {
