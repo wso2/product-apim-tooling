@@ -49,6 +49,7 @@ var exportAPICmdExamples = dedent.Dedent(`
 		Examples:
 		` + utils.ProjectName + ` ` + exportAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -e dev --provider admin
 		` + utils.ProjectName + ` ` + exportAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 -e production --provider admin
+		NOTE: all three flags (--name (-n), --version (-v), --provider (-r)) are mandatory
 	`)
 
 // ExportAPICmd represents the exportAPI command
@@ -73,9 +74,7 @@ func executeExportAPICmd(mainConfigFilePath, envKeysAllFilePath, exportDirectory
 			b64encodedCredentials)
 
 		// Print info on response
-		utils.Logf("ResponseStatus: %v\n", resp.Status())
-		utils.Logf("Error: %v\n", resp.Error())
-		//fmt.Printf("Response Body: %v\n", resp.Body())
+		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
 
 		if resp.StatusCode() == http.StatusOK {
 			WriteToZip(exportAPIName, exportAPIVersion, exportEnvironment, exportDirectory, resp)

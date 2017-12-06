@@ -28,7 +28,7 @@ const ProjectName = "apimcli"
 // File Names and Paths
 var CurrentDir, _ = os.Getwd()
 
-const ConfigDirName = ".wso2apim-cli"
+const ConfigDirName = ".wso2apimcli"
 
 var HomeDirectory = os.Getenv("HOME")
 
@@ -42,9 +42,9 @@ const MainConfigFileName = "main_config.yaml"
 
 var MainConfigFilePath = filepath.Join(ConfigDirPath, MainConfigFileName)
 
-const ExportedAPIsDirectoryName = "exported"
+const DefaultExportDirName = "exported"
 
-var DefaultExportDirPath = filepath.Join(ConfigDirPath, ExportedAPIsDirectoryName)
+var DefaultExportDirPath = filepath.Join(ConfigDirPath, DefaultExportDirName)
 
 const ApiImportExportProduct = "api-import-export-2.1.0-v3"
 

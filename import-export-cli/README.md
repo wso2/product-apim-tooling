@@ -24,25 +24,38 @@ Command Line tool for importing and exporting APIs between different API Environ
     Select a generated archive suitable for your platform and extract it to a desired location.
     
     Then execute `apimcli` to start the application.
+    > NOTE: Execute `./apimcli` if the working directory is the same where the executable resides
+    
+    > Add the location of extracted folder to your system's $PATH variable to access the executable from anywhere 
     
     Execute `apimcli --help` for further instructions.
 
 - ### Adding Environments
-    Add environments by either manually editing `main_config.yaml` or using the command
-    `apimcli set`.
+    Add environments by either manually editing `$HOME/.wso2apimcli/main_config.yaml` or using the command
+    `apimcli add-env`.
+    > NOTE: Directory structure for configuration files (`$HOME/.wso2apimcli`) will be created upon execution of `apimcli`
     
-    Execute `set --help` for detailed instructions
+    Execute `apimcli add-env --help` for detailed instructions
     
 - ### Command Autocompletion (For Bash Only)
     Copy the file `apimcli_bash_completion.sh` to `/etc/bash_completion.d/` and source it with
     `source /etc/bash_completion.d/apimcli_bash_completion.sh` to enable bash auto-completion.
 
-<hr/>
-<br/>
+***
 
 ## Usage 
 ```bash
      apimcli [command]
+```
+
+#### Global Flags
+```bash
+      --verbose
+           Enable verbose logs (Provides more information on execution)
+      --insecure, -k
+          Allow connections to SSL sites without certs
+      --help, -h
+          Display information and example usage of a command
 ```
 
 ### Commands
@@ -124,7 +137,9 @@ Command Line tool for importing and exporting APIs between different API Environ
                 --registration https://localhost:9443/identity/connect/register \
                 --token https: https://localhost:9443/oauth2/token
 ```
+
 * #### remove-env
+
 ```bash
         Flags:
             Required:
@@ -135,12 +150,14 @@ Command Line tool for importing and exporting APIs between different API Environ
 ```
 
 * #### reset-user
+
 ```bash
         Flags
             --environment, -e
         Examples:
             apimcli reset-user -e dev
 ```
+
 * #### version
 ```bash
         apimcli version 
@@ -149,19 +166,9 @@ Command Line tool for importing and exporting APIs between different API Environ
 * #### set
 ```bash
         Flags
-            --httpRequestTimeout
-            --exportDirectory
+            --http-request-timeout
+            --export-rdirectory
         Examples:
-            apimcli set --httpRequestTimeout 10000
-            apimcli set --exportDirectory /home/user/exported 
-```
-        
-#### Global Flags
-```bash
-      --verbose
-           Enable verbose logs (Provides more information on execution)
-      --insecure, -k
-          Allow connections to SSL sites without certs
-      --help, -h
-          Display information and example usage of a command
+            apimcli set --http-request-timeout 10000
+            apimcli set --export-directory /home/user/exported 
 ```

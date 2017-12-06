@@ -40,11 +40,9 @@ var setCmdLongDesc = dedent.Dedent(`
 
 var setCmdExamples = dedent.Dedent(`
 			Examples:
-			` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 3600 \
-								  --export-directory /home/user/exported-apis
+			` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 3600 --export-directory /home/user/exported-apis
 
-			` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000 \
-								  --export-directory /media/user/apis
+			` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000 --export-directory C:\Documents\exported
 
 			` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000
 	`)

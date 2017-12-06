@@ -84,7 +84,8 @@ fi
 #platforms="linux/amd64/linux/x64"
 #platforms="darwin/amd64/macosx/x64"
 if [ "${full_build}" == "true" ]; then
-    echo "Building "$'\e[1m'"${filename^^}:${build_version}"$'\e[0m'" for all platforms..."
+# the following line give an error in MacOS
+#    echo "Building "$'\e[1m'"${filename^^}:${build_version}"$'\e[0m'" for all platforms..."
     platforms="darwin/amd64/macosx/x64 linux/386/linux/i586 linux/amd64/linux/x64 windows/386/windows/i586 windows/amd64/windows/x64"
 else
     detectPlatformSpecificBuild
@@ -112,9 +113,8 @@ do
     zipdir="${buildPath}/$filename"
     mkdir -p $zipdir
 
-    cp -r "${baseDir}/resources/README.md" $zipdir > /dev/null 2>&1
+    cp -r "${baseDir}/resources/README.html" $zipdir > /dev/null 2>&1
     cp -r "${baseDir}/LICENSE" $zipdir > /dev/null 2>&1
-    cp -r "${baseDir}/resources/exported" ${zipdir} > /dev/null 2>&1
 
     # set destination path for binary
     destination="$zipdir/$output"
@@ -122,7 +122,6 @@ do
     #echo "GOOS=$goos GOARCH=$goarch go build -x -o $destination $target"
     GOOS=$goos GOARCH=$goarch go build -gcflags=-trimpath=$GOPATH -asmflags=-trimpath=$GOPATH -ldflags "-X import-export-cli.ImportExportCLIVersion=$build_version -X 'import-export-cli.buildDate=$(date -u '+%Y-%m-%d
     %H:%M:%S UTC')'" -o $destination $target
-    cp -r "${baseDir}/resources/main_config.yaml" "${zipdir}" > /dev/null 2>&1
 
     pwd=`pwd`
     cd $buildPath

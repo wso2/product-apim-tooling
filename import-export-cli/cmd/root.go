@@ -36,7 +36,7 @@ var insecure bool
 const RootCmdShortDesc = "CLI for Importing and Exporting APIs"
 
 var RootCmdLongDesc = dedent.Dedent(`
-		` + utils.ProjectName + ` is a Command Line Tool for Importing and Exporting APIs between different environments
+		` + utils.ProjectName + ` is a Command Line Tool for Importing and Exporting APIs between different environments of WSO2 API Manager 2.1.x
 		(Dev, Production, Staging, QA etc.)
 		`)
 
