@@ -54,12 +54,17 @@ var addEnvCmd = &cobra.Command{
 	Long:  addEnvCmdLongDesc + addEnvCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + addEnvCmdLiteral + " called")
-		err := addEnv(flagAddEnvName, flagPublisherEndpoint, flagRegistrationEndpoint, flagTokenEndpoint,
-			utils.MainConfigFilePath)
-		if err != nil {
-			utils.HandleErrorAndExit("Error adding environment", err)
-		}
+		executeAddEnvCmd(utils.MainConfigFilePath)
 	},
+}
+
+func executeAddEnvCmd(mainConfigFilePath string) {
+	err := addEnv(flagAddEnvName, flagPublisherEndpoint, flagRegistrationEndpoint, flagTokenEndpoint,
+		mainConfigFilePath)
+	if err != nil {
+		utils.HandleErrorAndExit("Error adding environment", err)
+	}
+
 }
 
 // addEnv adds a new environment and its endpoints and writes to config file

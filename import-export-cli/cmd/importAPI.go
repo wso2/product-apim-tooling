@@ -61,31 +61,34 @@ var ImportAPICmd = &cobra.Command{
 	Long:  importAPICmdLongDesc + importAPICmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + importAPICmdLiteral + " called")
-
-		b64encodedCredentials, apiManagerEndpoint, preCommandErr :=
-			utils.ExecutePreCommandWithBasicAuth(importEnvironment, importAPICmdUsername, importAPICmdPassword,
-				utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
-
-		if preCommandErr == nil {
-			resp, err := ImportAPI(importAPIFile, apiManagerEndpoint, b64encodedCredentials, utils.ExportDirectory)
-			if err != nil {
-				utils.HandleErrorAndExit("Error importing API", err)
-			}
-
-			if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusCreated {
-				// 200 OK or 201 Created
-				utils.Logln(utils.LogPrefixInfo+"Header:", resp.Header)
-				fmt.Println("Succesfully imported API!")
-			} else {
-				fmt.Println("Error importing API")
-				utils.Logln(utils.LogPrefixError + resp.Status)
-			}
-		} else {
-			// env_endpoints file is not configured properly by the user
-			fmt.Println("Error:", preCommandErr)
-			utils.Logln(utils.LogPrefixError + preCommandErr.Error())
-		}
+		executeImportAPICmd(utils.MainConfigFilePath, utils.EnvKeysAllFilePath, utils.ExportDirectory)
 	},
+}
+
+func executeImportAPICmd(mainConfigFilePath, envKeysAllFilePath, exportDirectory string) {
+	b64encodedCredentials, apiManagerEndpoint, preCommandErr :=
+		utils.ExecutePreCommandWithBasicAuth(importEnvironment, importAPICmdUsername, importAPICmdPassword,
+			mainConfigFilePath, envKeysAllFilePath)
+
+	if preCommandErr == nil {
+		resp, err := ImportAPI(importAPIFile, apiManagerEndpoint, b64encodedCredentials, exportDirectory)
+		if err != nil {
+			utils.HandleErrorAndExit("Error importing API", err)
+		}
+
+		if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusCreated {
+			// 200 OK or 201 Created
+			utils.Logln(utils.LogPrefixInfo+"Header:", resp.Header)
+			fmt.Println("Succesfully imported API!")
+		} else {
+			fmt.Println("Error importing API")
+			utils.Logln(utils.LogPrefixError + resp.Status)
+		}
+	} else {
+		// env_endpoints file is not configured properly by the user
+		fmt.Println("Error:", preCommandErr)
+		utils.Logln(utils.LogPrefixError + preCommandErr.Error())
+	}
 }
 
 // ImportAPI function is used with import-api command
