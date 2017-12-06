@@ -105,10 +105,3 @@ func AppendSlashToString(input string) string {
 	}
 	return input
 }
-
-func RemoveSlashFromString(input string) string {
-	if string(input[len(input)-1]) == "/" {
-		input = input[:len(input)-1]
-	}
-	return input
-}

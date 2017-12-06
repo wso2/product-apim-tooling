@@ -60,7 +60,7 @@ var apisCmd = &cobra.Command{
 }
 
 func executeApisCmd(mainConfigFilePath, envKeysAllFilePath string) {
-	accessToken, _, preCommandErr :=
+	accessToken, preCommandErr :=
 		utils.ExecutePreCommandWithOAuth(listApisCmdEnvironment, listApisCmdUsername, listApisCmdPassword,
 			mainConfigFilePath, envKeysAllFilePath)
 

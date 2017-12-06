@@ -66,7 +66,7 @@ var ImportAPICmd = &cobra.Command{
 }
 
 func executeImportAPICmd(mainConfigFilePath, envKeysAllFilePath, exportDirectory string) {
-	b64encodedCredentials, _, preCommandErr :=
+	b64encodedCredentials, preCommandErr :=
 		utils.ExecutePreCommandWithBasicAuth(importEnvironment, importAPICmdUsername, importAPICmdPassword,
 			mainConfigFilePath, envKeysAllFilePath)
 
