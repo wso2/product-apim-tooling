@@ -1,9 +1,0 @@
-config:
-  http_request_timeout: 2500
-  export_directory: exported
-
-environments:
-  sample-env:
-    publisher_endpoint: sample-publisher-endpoint
-    registration_endpoint: sample-reg-endpoint
-    token_endpoint: sample-token-endpoint

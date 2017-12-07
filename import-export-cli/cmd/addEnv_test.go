@@ -59,7 +59,7 @@ func TestAddEnv2(t *testing.T) {
 func TestAddEnv3(t *testing.T) {
 
 	sampleMainConfigFileName := "sample_main_config.yaml"
-	sampleMainConfigFilePath := filepath.Join(utils.ApplicationRoot, sampleMainConfigFileName)
+	sampleMainConfigFilePath := filepath.Join(utils.ConfigDirPath, sampleMainConfigFileName)
 
 	var sampleMainConnfig = new(utils.MainConfig)
 	sampleMainConnfig.Config = utils.Config{10000, ""}
@@ -85,7 +85,7 @@ func TestAddEnv3(t *testing.T) {
 // TetsAddEnv4 - Correct Details - Successfully add new environment
 func TestAddEnv4(t *testing.T) {
 	sampleMainConfigFileName := "sample_main_config.yaml"
-	sampleMainConfigFilePath := filepath.Join(utils.ApplicationRoot, sampleMainConfigFileName)
+	sampleMainConfigFilePath := filepath.Join(utils.ConfigDirPath, sampleMainConfigFileName)
 
 	var sampleMainConnfig = new(utils.MainConfig)
 	sampleMainConnfig.Config = utils.Config{10000, ""}

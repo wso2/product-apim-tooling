@@ -42,11 +42,11 @@ func ExecutePreCommand(environment, flagUsername, flagPassword, mainConfigFilePa
 	envKeysAllFilePath string) (accessToken string, publisherEndpoint string, err error) {
 	if EnvExistsInMainConfigFile(environment, mainConfigFilePath) {
 		registrationEndpoint := GetRegistrationEndpointOfEnv(environment, mainConfigFilePath)
-		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment, mainConfigFilePath)
+		apiManagerEndpoint := GetPublisherEndpointOfEnv(environment, mainConfigFilePath)
 		tokenEndpoint := GetTokenEndpointOfEnv(environment, mainConfigFilePath)
 
 		Logln(LogPrefixInfo + "Environment: '" + environment + "'")
-		Logln(LogPrefixInfo + "Reg Endpoint read:", registrationEndpoint)
+		Logln(LogPrefixInfo+"Reg Endpoint read:", registrationEndpoint)
 
 		var username string
 		var password string
@@ -136,8 +136,7 @@ func ExecutePreCommand(environment, flagUsername, flagPassword, mainConfigFilePa
 		responseDataMap, _ := GetOAuthTokens(username, password,
 			GetBase64EncodedCredentials(clientID, clientSecret), tokenEndpoint)
 		accessToken := responseDataMap["access_token"]
-
-		Logln(LogPrefixInfo+"[Remove in Production] AccessToken:", accessToken) // TODO:: Remove in production
+		Logln(LogPrefixInfo+"[Remove in production] AccessToken: ", accessToken)
 
 		return accessToken, apiManagerEndpoint, nil
 	} else {
@@ -164,9 +163,8 @@ func GetClientIDSecret(username string, password string, url string) (string, st
 	headers[HeaderContentType] = HeaderValueApplicationJSON
 	// headers["Content-Type"] = "application/json"
 
-	headers[HeaderAuthorization] = HeaderValueAuthBasicPrefix + " " + GetBase64EncodedCredentials(username, password)
+	headers[HeaderAuthorization] = HeaderValueAuthPrefixBasic + " " + GetBase64EncodedCredentials(username, password)
 	// headers["Authorization"] = "Basic " + GetBase64EncodedCredentials(username, password)
-
 
 	// POST request using resty
 	resp, err := InvokePOSTRequest(url, headers, body)
@@ -219,10 +217,10 @@ func GetOAuthTokens(username string, password string,
 	// set headers
 	headers := make(map[string]string)
 	headers[HeaderContentType] = HeaderValueXWWWFormUrlEncoded
-	headers[HeaderAuthorization] = HeaderValueAuthBearerPrefix + " " + b64EncodedClientIDClientSecret
+	headers[HeaderAuthorization] = HeaderValueAuthPrefixBearer + " " + b64EncodedClientIDClientSecret
 	headers[HeaderAccept] = HeaderValueApplicationJSON
 
-	if SkipTLSVerification {
+	if Insecure {
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTP certificates
 	}
 

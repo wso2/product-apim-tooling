@@ -1,0 +1,142 @@
+<h1 id="cli-for-importing-and-exporting-apis">CLI for Importing and Exporting APIs</h1>
+<h2 id="for-wso2-api-manager-3-0-0">For WSO2 API Manager 3.0.0</h2>
+<p>Command Line tool for importing and exporting APIs between different API Environemnts</p>
+<h2 id="getting-started">Getting Started</h2>
+<h3 id="building-from-source">Building from source</h3>
+<ul>
+    <li><h3 id="running">Running</h3>
+        <p> Execute <code>./apimcli</code> (or <code>apimcli.exe</code> in Windows) to start the application. (Being inside <code>product-apim-tooling/import-export-cli</code>)
+        </p>
+        <p> Execute <code>./apimcli --help</code> for further instructions.</p>
+        <p> NOTE: To execute the tool from anywhere, append the location of the executable (apimcli) to your $PATH
+            variable.</p>
+    </li>
+</ul>
+<hr>
+<ul>
+    <li><h3 id="adding-environments">Adding Environments</h3>
+        <p> Add environments by either manually adding details to <code>$HOME/.wso2apim-cli/main_config.yaml</code> or
+            using the command<br> <code>apimcli add-env</code> command.</p>
+        <p> Type <code>apimcli add-env --help</code> for detailed instructions</p>
+        <h3 id="command-autocompletion-for-bash-only-">Command Autocompletion (For Bash Only)</h3>
+        <p> Copy the file <code>apimcli_bash_completion.sh</code> to <code>/etc/bash_completion.d/</code> and source it
+            with<br> <code>source /etc/bash_completion.d/apimcli_bash_completion.sh</code> to enable bash
+            auto-completion.</p>
+    </li>
+</ul>
+<hr>
+<h2 id="usage">Usage</h2>
+<pre><code class="lang-bash">     apimcli [command]
+</code></pre>
+<h4 id="global-flags">Global Flags</h4>
+<pre><code class="lang-bash">    --verbose
+        Enable verbose logs (Provides more information on execution)
+    --insecure, -k
+        Allow connections to SSL sites without certs
+    --help, -h
+        Display information and example usage of a command
+</code></pre>
+<h3 id="commands">Commands</h3>
+<ul>
+    <li><h4 id="export-api">export-api</h4>
+        <pre><code class="lang-bash">   Flags:
+       Required:
+           --name, -n
+           --version, -v
+           --environment, -e
+       Optional:
+           --username, -u
+           --password, -p
+   Examples:
+       apimcli export-api -n TestAPI -v 1.0.1 -e staging
+       apimcli export-api -n TestAPI -v 1.0.1 -e staging -u admin -p 123456
+       apimcli export-api -n TestAPI -v 1.0.1 -e staging -u admin
+       apimcli export-api -n TestAPI -v 1.0.1 -e staging -p 123456
+</code></pre>
+    </li>
+</ul>
+<ul>
+    <li><h4 id="import-api">import-api</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --file, -f
+              --environment, -e
+          Optional:
+              --username, -u 
+              --password, -p 
+      Examples:
+          apimcli import-api -f dev/TestAPI_1.0.0.zip -e dev
+          apimcli import-api -f qa/TestAPI_1.2.1.zip -e dev -u admin -p 123456
+          apimcli import-api -f staging/TestAPI_2.1.3.zip -e dev -u admin
+          apimcli import-api -f production/TestAPI_3.1.0.zip -e dev -p 123456 
+          apimcli import-api -f TestAPI_1.2.1.zip -e dev
+</code></pre>
+    </li>
+    <li><h4 id="list-apis">list apis</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --username, -u 
+              --password, -p 
+      Examples:
+          apimcli list -e dev
+          apimcli list -e staging 
+          apimcli list -e staging -u admin -p 123456
+          apimcli list -e staging -u admin
+          apimcli list -e staging -p 123456
+</code></pre>
+    </li>
+    <li><h4 id="list-envs">list envs</h4>
+        <pre><code class="lang-bash">     Flags:
+         None
+     Example:
+         apimcli list envs
+</code></pre>
+    </li>
+    <li><h4 id="add-env">add-env</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --name, -n (Name of the environment)
+              --publisher, -p (Publisher endpoint)
+              --registration, -r (Registration Endpoint)
+              --token, -t (Token Endpoint)
+          Examples:
+              apimcli add-env -n dev \
+              --apim https://localhost:9292/api/am/publisher/v1.0 \
+              --registration https://localhost:9443/identity/connect/register \
+              --token https: https://localhost:9443/oauth2/token
+</code></pre>
+    </li>
+    <li><h4 id="remove-env">remove-env</h4>
+        <p>```bash</p>
+        <pre><code>  Flags:
+      Required:
+          --name, -n (Name of the environment)
+      Examples:
+          apimcli remove-env -n dev
+</code></pre>
+    </li>
+</ul>
+<pre><code class="lang-bash">
+* #### reset-user
+        Flags
+            --environment, -e
+        Examples:
+            apimcli reset-user -e dev
+</code></pre>
+<ul>
+    <li><h4 id="version">version</h4>
+        <pre><code class="lang-bash">      apimcli version
+</code></pre>
+    </li>
+    <li><h4 id="set">set</h4>
+        <pre><code class="lang-bash">      Flags
+          --httpRequestTimeout
+          --exportDirectory
+      Examples:
+          apimcli set --httpRequestTimeout 10000
+          apimcli set --exportDirectory /home/user/exported
+</code></pre>
+    </li>
+</ul>

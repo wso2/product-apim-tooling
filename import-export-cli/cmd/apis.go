@@ -35,6 +35,7 @@ var listApisCmdEnvironment string
 var listApisCmdUsername string
 var listApisCmdPassword string
 var listApisCmdQuery string
+var listApisCmdToken string
 
 // apisCmd related info
 const apisCmdLiteral = "apis"
@@ -56,6 +57,23 @@ var apisCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + listCmdLiteral + " " + apisCmdLiteral + " called")
 
+		executeListApisCmd()
+	},
+}
+
+func executeListApisCmd() {
+	if flagExportAPICmdToken != "" {
+		// token provided with --token (-t) flag
+		if exportAPICmdUsername != "" || exportAPICmdPassword != "" {
+			// username and/or password provided with -u and/or -p flags
+			// Error
+			utils.HandleErrorAndExit("username/password provided with OAuth token.", nil)
+		} else {
+			// token only, proceed with token
+		}
+	} else {
+		// no token provided with --token (-t) flag
+		// proceed with username and password
 		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(listApisCmdEnvironment, listApisCmdUsername,
 			listApisCmdPassword, utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
 
@@ -78,7 +96,7 @@ var apisCmd = &cobra.Command{
 		} else {
 			utils.HandleErrorAndExit("Error calling '"+listCmdLiteral+" "+apisCmdLiteral+"'", preCommandErr)
 		}
-	},
+	}
 }
 
 // GetAPIList
@@ -102,7 +120,7 @@ func GetAPIList(query string, accessToken string, apiManagerEndpoint string) (in
 	utils.Logln(utils.LogPrefixInfo+"URL:", finalUrl)
 
 	headers := make(map[string]string)
-	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
+	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthPrefixBearer + " " + accessToken
 
 	resp, err := utils.InvokeGETRequest(finalUrl, headers)
 
@@ -144,16 +162,17 @@ func printAPIs(apis []utils.API) {
 	}
 
 	table.Render() // Send output
-
 }
 
 func init() {
 	ListCmd.AddCommand(apisCmd)
 
 	apisCmd.Flags().StringVarP(&listApisCmdEnvironment, "environment", "e",
-		utils.GetDefaultEnvironment(utils.MainConfigFilePath), "Environment to be searched")
+		utils.DefaultEnvironmentName, "Environment to be searched")
 	apisCmd.Flags().StringVarP(&listApisCmdQuery, "query", "q", "",
 		"(Optional) query to search for APIs")
+	apisCmd.Flags().StringVarP(&listApisCmdToken, "token", "t", "",
+		"OAuth token to be used instead of username and password")
 	apisCmd.Flags().StringVarP(&listApisCmdUsername, "username", "u", "", "Username")
 	apisCmd.Flags().StringVarP(&listApisCmdPassword, "password", "p", "", "Password")
 }

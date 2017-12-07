@@ -28,8 +28,9 @@ import (
 
 const testKeysFileName = "test_keys_config.yaml"
 const testMainConfigFileName = "test_main_config.yaml"
-var testKeysFilePath = filepath.Join(ApplicationRoot, testKeysFileName)
-var testMainConfigFilePath = filepath.Join(ApplicationRoot, testMainConfigFileName)
+
+var testKeysFilePath = filepath.Join(ConfigDirPath, testKeysFileName)
+var testMainConfigFilePath = filepath.Join(ConfigDirPath, testMainConfigFileName)
 
 var envKeysAll = new(EnvKeysAll)
 var mainConfig = new(MainConfig)
@@ -47,12 +48,12 @@ func writeCorrectKeys() {
 	WriteConfigFile(envKeysAll, testKeysFilePath)
 }
 
-func getSampleKeys() *EnvKeysAll {
+func getTestKeys() *EnvKeysAll {
 	initSampleKeys()
 	return envKeysAll
 }
 
-func getSampleMainConfig() *MainConfig {
+func getTestMainConfig() *MainConfig {
 	return mainConfig
 }
 
@@ -65,13 +66,13 @@ func initSampleKeys() {
 }
 
 // helper function for unit-testing
-func WriteCorrectMainConfig() {
-	initSampleMainConfig()
+func WriteTestMainConfig() {
+	initTestMainConfig()
 	WriteConfigFile(mainConfig, testMainConfigFilePath)
 }
 
-func initSampleMainConfig() {
-	mainConfig.Config = Config{2500,"/home/exported"}
+func initTestMainConfig() {
+	mainConfig.Config = Config{2500, "/home/exported"}
 	mainConfig.Environments = make(map[string]EnvEndpoints)
 	mainConfig.Environments[devName] = EnvEndpoints{"dev_apim_endpoint",
 		"dev_reg_endpoint", "dev_token_endpoint"}
@@ -126,7 +127,7 @@ func TestGetEnvKeysAllFromFile3(t *testing.T) {
 
 func TestGetMainConfigFromFile(t *testing.T) {
 	// testing for correct data
-	WriteCorrectMainConfig()
+	WriteTestMainConfig()
 	mainConfigReturned := GetMainConfigFromFile(testMainConfigFilePath)
 
 	if mainConfigReturned.Environments[devName] != mainConfig.Environments[devName] ||
@@ -142,7 +143,7 @@ func TestGetMainConfigFromFile(t *testing.T) {
 
 func TestMainConfig_ParseMainConfigFromFile(t *testing.T) {
 	var envEndpointsAllLocal MainConfig
-	WriteCorrectMainConfig()
+	WriteTestMainConfig()
 	data, err := ioutil.ReadFile(testMainConfigFilePath)
 	if err != nil {
 		t.Error("Error")

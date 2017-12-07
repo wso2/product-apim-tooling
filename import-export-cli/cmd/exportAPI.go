@@ -21,7 +21,6 @@ package cmd
 import (
 	"fmt"
 	"io/ioutil"
-	"net/url"
 	"os"
 
 	"github.com/go-resty/resty"
@@ -33,11 +32,12 @@ import (
 	"path/filepath"
 )
 
-var exportAPIName string
-var exportAPIVersion string
-var exportEnvironment string
+var flagExportAPIName string
+var flagExportAPIVersion string
+var flagExportEnvironment string
 var exportAPICmdUsername string
 var exportAPICmdPassword string
+var flagExportAPICmdToken string
 
 // ExportAPI command related usage info
 const exportAPICmdLiteral = "export-api"
@@ -59,22 +59,64 @@ var ExportAPICmd = &cobra.Command{
 	Long:  exportAPICmdLongDesc + exportAPICmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + exportAPICmdLiteral + " called")
+		executeExportApiCmd(utils.MainConfigFilePath, utils.EnvKeysAllFilePath, utils.ExportDirectory)
+	},
+}
 
-		accessToken, apiManagerEndpoint, preCommandErr := utils.ExecutePreCommand(exportEnvironment,
-			exportAPICmdUsername, exportAPICmdPassword, utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
-
-		if preCommandErr == nil {
-			resp := ExportAPI(exportAPIName, exportAPIVersion, apiManagerEndpoint, accessToken)
+func executeExportApiCmd(mainConfigFilePath, envKeysAllFilePath, exportDirectory string) {
+	if flagExportAPICmdToken != "" {
+		// token provided with --token (-t) flag
+		if exportAPICmdUsername != "" || exportAPICmdPassword != "" {
+			// username and/or password provided with -u and/or -p flags
+			// Error
+			utils.HandleErrorAndExit("username/password provided with OAuth token.", nil)
+		} else {
+			// token only, proceed with token
+			//publisherEndpoint := utils.GetPublisherEndpointOfEnv(flagExportEnvironment, utils.MainConfigFilePath)
+			//ExportAPI(exportAPIName, exportAPIVersion, publisherEndpoint, exportAPICmdToken)
+			fmt.Println("Token: " + flagExportAPICmdToken)
+			publisherEndpoint := utils.GetPublisherEndpointOfEnv(flagExportEnvironment, mainConfigFilePath)
+			accessToken := flagExportAPICmdToken
+			resp := getExportApiResponse(flagExportAPIName, flagExportAPIVersion, publisherEndpoint, accessToken)
 
 			// Print info on response
-			utils.Logf("ResponseStatus: %v\n", resp.Status())
-			utils.Logf("Error: %v\n", resp.Error())
+			utils.Logln(utils.LogPrefixInfo + "ExportAPI-ResponseStatus: " + resp.Status())
 
 			if resp.StatusCode() == http.StatusOK {
-				WriteToZip(exportAPIName, exportAPIVersion, exportEnvironment, utils.ExportDirectory, resp)
+				WriteToZip(flagExportAPIName, flagExportAPIVersion, flagExportEnvironment, exportDirectory, resp)
 
 				// only to get the number of APIs exported
-				numberOfAPIsExported, _, err := GetAPIList(exportAPIName, accessToken, apiManagerEndpoint)
+				numberOfAPIsExported, _, err := GetAPIList(flagExportAPIName, accessToken, publisherEndpoint)
+				if err == nil {
+					fmt.Println("Number of APIs exported:", numberOfAPIsExported)
+				} else {
+					utils.HandleErrorAndExit("Error getting list of APIs", err)
+				}
+			} else if resp.StatusCode() == http.StatusInternalServerError {
+				// 500 Internal Server Error
+				fmt.Println("Incorrect password")
+			} else {
+				// neither 200 nor 500
+				fmt.Println("Error exporting API:", resp.Status())
+			}
+		}
+	} else {
+		// no token provided with --token (-t) flag
+		// proceed with username and password
+		accessToken, publisherEndpoint, preCommandErr := utils.ExecutePreCommand(flagExportEnvironment,
+			exportAPICmdUsername, exportAPICmdPassword, mainConfigFilePath, envKeysAllFilePath)
+
+		if preCommandErr == nil {
+			resp := getExportApiResponse(flagExportAPIName, flagExportAPIVersion, publisherEndpoint, accessToken)
+
+			// Print info on response
+			utils.Logln(utils.LogPrefixInfo + "ExportAPI-ResponseStatus: " + resp.Status())
+
+			if resp.StatusCode() == http.StatusOK {
+				WriteToZip(flagExportAPIName, flagExportAPIVersion, flagExportEnvironment, exportDirectory, resp)
+
+				// only to get the number of APIs exported
+				numberOfAPIsExported, _, err := GetAPIList(flagExportAPIName, accessToken, publisherEndpoint)
 				if err == nil {
 					fmt.Println("Number of APIs exported:", numberOfAPIsExported)
 				} else {
@@ -91,7 +133,7 @@ var ExportAPICmd = &cobra.Command{
 			// error exporting API
 			fmt.Println("Error exporting API:" + preCommandErr.Error())
 		}
-	},
+	}
 }
 
 // WriteToZip
@@ -122,7 +164,7 @@ func WriteToZip(exportAPIName, exportAPIVersion, exportEnvironment, exportDirect
 // @param apimEndpoint : API Manager Endpoint for the environment
 // @param accessToken : Access Token for the resource
 // @return response Response in the form of *resty.Response
-func ExportAPI(name string, version string, publisherEndpoint string, accessToken string) *resty.Response {
+func getExportApiResponse(name string, version string, publisherEndpoint string, accessToken string) *resty.Response {
 	// append '/' to the end if there isn't one already
 	if string(publisherEndpoint[len(publisherEndpoint)-1]) != "/" {
 		publisherEndpoint += "/"
@@ -133,17 +175,13 @@ func ExportAPI(name string, version string, publisherEndpoint string, accessToke
 	query := ""
 	if name != "" {
 		query += name
-		if version != "" {
-			query += ",version:" + version
-		}
+		// TODO: add version to the query after making sure carbon-apimgt backend supports it
 	}
-
-	query = (&url.URL{Path: query}).String() // url path encode the query
 
 	url := publisherEndpoint + query
 	utils.Logln(utils.LogPrefixInfo+"ExportAPI: URL:", url)
 	headers := make(map[string]string)
-	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
+	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthPrefixBearer + " " + accessToken
 	headers[utils.HeaderAccept] = utils.HeaderValueApplicationZip
 
 	resp, err := utils.InvokeGETRequest(url, headers)
@@ -158,12 +196,14 @@ func ExportAPI(name string, version string, publisherEndpoint string, accessToke
 // init using Cobra
 func init() {
 	RootCmd.AddCommand(ExportAPICmd)
-	ExportAPICmd.Flags().StringVarP(&exportAPIName, "name", "n", "",
+	ExportAPICmd.Flags().StringVarP(&flagExportAPIName, "name", "n", "",
 		"Name of the API to be exported")
-	ExportAPICmd.Flags().StringVarP(&exportAPIVersion, "version", "v", "",
+	ExportAPICmd.Flags().StringVarP(&flagExportAPIVersion, "version", "v", "",
 		"Version of the API to be exported")
-	ExportAPICmd.Flags().StringVarP(&exportEnvironment, "environment", "e",
-		utils.GetDefaultEnvironment(utils.MainConfigFilePath), "Environment to which the API should be exported")
+	ExportAPICmd.Flags().StringVarP(&flagExportEnvironment, "environment", "e",
+		utils.DefaultEnvironmentName, "Environment to which the API should be exported")
+	ExportAPICmd.Flags().StringVarP(&flagExportAPICmdToken, "token", "t", "",
+		"An OAuth2 token to be used instead of username and password")
 
 	ExportAPICmd.Flags().StringVarP(&exportAPICmdUsername, "username", "u", "", "Username")
 	ExportAPICmd.Flags().StringVarP(&exportAPICmdPassword, "password", "p", "", "Password")

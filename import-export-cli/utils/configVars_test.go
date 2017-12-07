@@ -25,7 +25,7 @@ import (
 )
 
 func TestSetConfigVarsCorrect(t *testing.T) {
-	WriteCorrectMainConfig()
+	WriteTestMainConfig()
 	err := SetConfigVars(testMainConfigFilePath)
 
 	if err != nil {
@@ -38,7 +38,7 @@ func TestSetConfigVarsCorrect(t *testing.T) {
 func TestSetConfigVarsIncorrect1(t *testing.T) {
 	testIncorrectMainConfig := new(MainConfig)
 	testIncorrectMainConfigFileName := "test_incorrect_main_config.yaml"
-	testIncorrectMainConfigFilePath := filepath.Join(ApplicationRoot, testIncorrectMainConfigFileName)
+	testIncorrectMainConfigFilePath := filepath.Join(ConfigDirPath, testIncorrectMainConfigFileName)
 	testIncorrectMainConfig.Config = Config{0, ""}
 	WriteConfigFile(testIncorrectMainConfig, testIncorrectMainConfigFilePath)
 
@@ -51,10 +51,11 @@ func TestSetConfigVarsIncorrect1(t *testing.T) {
 	defer os.Remove(testIncorrectMainConfigFilePath)
 }
 
+// test case 2 - negative value for httpRequestTimeout
 func TestSetConfigVarsIncorrect2(t *testing.T) {
 	testIncorrectMainConfig := new(MainConfig)
 	testIncorrectMainConfigFileName := "test_incorrect_main_config.yaml"
-	testIncorrectMainConfigFilePath := filepath.Join(ApplicationRoot, testIncorrectMainConfigFileName)
+	testIncorrectMainConfigFilePath := filepath.Join(ConfigDirPath, testIncorrectMainConfigFileName)
 	testIncorrectMainConfig.Config = Config{-10, ""}
 	WriteConfigFile(testIncorrectMainConfig, testIncorrectMainConfigFilePath)
 
@@ -81,5 +82,3 @@ func TestIsValid2(t *testing.T) {
 	IsValid(filePath)
 	os.Remove(filePath)
 }
-
-

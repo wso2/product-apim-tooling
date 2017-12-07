@@ -30,44 +30,50 @@ import (
 // envsCmd related info
 const EnvsCmdLiteral = "envs"
 const EnvsCmdShortDesc = "Display the list of environments"
+
 var EnvsCmdLongDesc = dedent.Dedent(`
-		Display a list of environments defined in '`+utils.MainConfigFileName+`' file
+		Display a list of environments defined in '` + utils.MainConfigFileName + `' file
 	`)
 
 var EnvsCmdExamples = dedent.Dedent(`
-		`+utils.ProjectName+` list envs
+		` + utils.ProjectName + ` list envs
 	`)
 
 // envsCmd represents the envs command
 var envsCmd = &cobra.Command{
 	Use:   EnvsCmdLiteral,
 	Short: EnvsCmdShortDesc,
-	Long: EnvsCmdLongDesc + EnvsCmdExamples,
+	Long:  EnvsCmdLongDesc + EnvsCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + listCmdLiteral + " " + EnvsCmdLiteral + " called")
-		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"Name", "Publisher Endpoint", "Registration Endpoint", "Token Endpoint"})
-
-		var data [][]string
 
 		envs := utils.GetMainConfigFromFile(utils.MainConfigFilePath).Environments
-
-		for env, endpoints := range envs {
-			data = append(data, []string{env, endpoints.PublisherEndpoint, endpoints.RegistrationEndpoint,
-												endpoints.TokenEndpoint})
+		if len(envs) > 0 {
+			printEnvs(envs)
+		} else {
+			fmt.Println("No configured environments found")
 		}
-
-		for _, v := range data {
-			table.Append(v)
-		}
-
 		fmt.Printf("Environments available in file '%s'\n", utils.MainConfigFileName)
-		table.Render()
 	},
 }
 
+func printEnvs(envEndpoints map[string]utils.EnvEndpoints) {
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"Name", "Publisher Endpoint", "Registration Endpoint", "Token Endpoint"})
+	var data [][]string
+
+	for env, endpoints := range envEndpoints {
+		data = append(data, []string{env, endpoints.PublisherEndpoint, endpoints.RegistrationEndpoint,
+			endpoints.TokenEndpoint})
+	}
+
+	for _, v := range data {
+		table.Append(v)
+	}
+
+	table.Render()
+}
 
 func init() {
 	ListCmd.AddCommand(envsCmd)
-
 }

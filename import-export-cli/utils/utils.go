@@ -32,8 +32,8 @@ import (
 
 // Invoke http-post request using go-resty
 func InvokePOSTRequest(url string, headers map[string]string, body string) (*resty.Response, error) {
-	if SkipTLSVerification {
-		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTPS certificates
+	if Insecure {
+		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
 	}
 	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
 	resp, err := resty.R().SetHeaders(headers).SetBody(body).Post(url)
@@ -42,9 +42,9 @@ func InvokePOSTRequest(url string, headers map[string]string, body string) (*res
 }
 
 // Invoke http-get request using go-resty
-func InvokeGETRequest(url string , headers map[string]string) (*resty.Response, error) {
-	if SkipTLSVerification {
-		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in HTTPS certificates
+func InvokeGETRequest(url string, headers map[string]string) (*resty.Response, error) {
+	if Insecure {
+		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
 	}
 	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
 	resp, err := resty.R().SetHeaders(headers).Get(url)
@@ -70,7 +70,7 @@ func PromptForPassword() string {
 }
 
 // ShowHelpCommandTip function will print the instructions for displaying help info on a specific command
-// @params cmdLiteral Command on which help command is to be displayed
+// @params cmdLiteral : Command on which help command is to be displayed
 func ShowHelpCommandTip(cmdLiteral string) {
 	fmt.Printf("Execute '%s %s --help' for more info.\n", ProjectName, cmdLiteral)
 }
@@ -97,4 +97,3 @@ func chopPath(original string) string {
 		return original[i+1:]
 	}
 }
-

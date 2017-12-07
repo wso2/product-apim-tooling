@@ -24,28 +24,30 @@ import (
 )
 
 const ProjectName = "apimcli"
-const ConfigDirectoryName = "wso2-apim-cli-config"
 
 // File Names and Paths
-
 var CurrentDir, _ = os.Getwd()
-var ApplicationRoot = CurrentDir
+
+const ConfigDirName = ".wso2apimcli"
+
+var HomeDirectory = os.Getenv("HOME")
+var ConfigDirPath = filepath.Join(HomeDirectory, ConfigDirName)
 
 var PathSeparator_ = string(os.PathSeparator)
 
-//var ApplicationRoot = "/home/menuka/.go/src/github.com/wso2/product-apim-tooling/import-export-cli"
-
 const EnvKeysAllFileName = "env_keys_all.yaml"
 
-var EnvKeysAllFilePath = filepath.Join(ApplicationRoot, EnvKeysAllFileName)
+var EnvKeysAllFilePath = filepath.Join(ConfigDirPath, EnvKeysAllFileName)
 
 const MainConfigFileName = "main_config.yaml"
+const SampleMainConfigFileName = "main_config.yaml.sample"
 
-var MainConfigFilePath = filepath.Join(ApplicationRoot, MainConfigFileName)
+var MainConfigFilePath = filepath.Join(ConfigDirPath, MainConfigFileName)
+var SampleMainConfigFilePath = filepath.Join(ConfigDirPath, SampleMainConfigFileName)
 
-const ExportedAPIsDirectoryName = "exported"
+const ExportDirName = "exported"
 
-var ExportedAPIsDirectoryPath = filepath.Join(ApplicationRoot, ExportedAPIsDirectoryName)
+var ExportDirPath = filepath.Join(ConfigDirPath, ExportDirName)
 
 const DefaultEnvironmentName = "default"
 
@@ -64,8 +66,8 @@ const HeaderValueKeepAlive = "keep-alive"
 const HeaderValueApplicationZip = "application/zip"
 const HeaderValueApplicationJSON = "application/json"
 const HeaderValueXWWWFormUrlEncoded = "application/x-www-form-urlencoded"
-const HeaderValueAuthBearerPrefix = "Bearer"
-const HeaderValueAuthBasicPrefix = "Basic"
+const HeaderValueAuthPrefixBearer = "Bearer"
+const HeaderValueAuthPrefixBasic = "Basic"
 const HeaderValueMultiPartFormData = "multipart/form-data"
 
 // Logging Prefixes

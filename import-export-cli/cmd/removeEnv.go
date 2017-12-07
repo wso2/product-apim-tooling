@@ -41,7 +41,6 @@ var removeEnvCmdExamples = dedent.Dedent(`
 		` + utils.ProjectName + ` ` + removeEnvCmdLiteral + ` -n production
 	`)
 
-
 // removeEnvCmd represents the removeEnv command
 var removeEnvCmd = &cobra.Command{
 	Use:   removeEnvCmdLiteral,
@@ -49,11 +48,15 @@ var removeEnvCmd = &cobra.Command{
 	Long:  removeEnvCmdLongDesc + removeEnvCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + removeEnvCmdLiteral + " called")
-		err := removeEnv(flagNameOfEnvToBeRemoved, utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
-		if err != nil {
-			utils.HandleErrorAndExit("Error removing environment", err)
-		}
+		executeRemoveEnvCmd(utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
 	},
+}
+
+func executeRemoveEnvCmd(mainConfigFilePath, keysAllFilePath string) {
+	err := removeEnv(flagNameOfEnvToBeRemoved, mainConfigFilePath, keysAllFilePath)
+	if err != nil {
+		utils.HandleErrorAndExit("Error removing environment", err)
+	}
 }
 
 // removeEnv
@@ -96,5 +99,5 @@ func removeEnv(envName string, mainConfigFilePath string, envKeysFilePath string
 func init() {
 	RootCmd.AddCommand(removeEnvCmd)
 	removeEnvCmd.Flags().StringVarP(&flagNameOfEnvToBeRemoved, "name", "n",
-		utils.GetDefaultEnvironment(utils.MainConfigFilePath), "Name of the environment to be removed")
+		utils.DefaultEnvironmentName, "Name of the environment to be removed")
 }

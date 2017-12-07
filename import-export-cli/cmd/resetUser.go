@@ -43,8 +43,6 @@ var resetUserCmdExamples = dedent.Dedent(`
 		` + utils.ProjectName + ` ` + resetUserCmdLiteral + `reset-user -e staging
 	`)
 
-
-
 // ResetUserCmd represents the resetUser command
 var ResetUserCmd = &cobra.Command{
 	Use:   resetUserCmdLiteral,
@@ -52,19 +50,22 @@ var ResetUserCmd = &cobra.Command{
 	Long:  resetUserCmdLongDesc + resetUserCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + resetUserCmdLiteral + " called")
-
-		err := utils.RemoveEnvFromKeysFile(resetUserEnvironment, utils.EnvKeysAllFilePath, utils.MainConfigFilePath)
-		if err != nil {
-			utils.HandleErrorAndExit("Error clearing user data for environment "+resetUserEnvironment, err)
-		} else {
-			fmt.Println("Successfully cleared user data for environment: " + resetUserEnvironment)
-		}
+		executeResetUserCmd(utils.EnvKeysAllFilePath, utils.MainConfigFilePath)
 	},
+}
+
+func executeResetUserCmd(keysAllFilePath, mainConfigFilePath string) {
+	err := utils.RemoveEnvFromKeysFile(resetUserEnvironment, keysAllFilePath, mainConfigFilePath)
+	if err != nil {
+		utils.HandleErrorAndExit("Error clearing user data for environment "+resetUserEnvironment, err)
+	} else {
+		fmt.Println("Successfully cleared user data for environment: " + resetUserEnvironment)
+	}
 }
 
 // init using Cobra
 func init() {
 	RootCmd.AddCommand(ResetUserCmd)
 	ResetUserCmd.Flags().StringVarP(&resetUserEnvironment, "environment", "e",
-		utils.GetDefaultEnvironment(utils.MainConfigFilePath), "Clear user details of an environment")
+		utils.DefaultEnvironmentName, "Clear user details of an environment")
 }
