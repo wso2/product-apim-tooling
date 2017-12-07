@@ -87,7 +87,6 @@ func init() {
 	if err != nil {
 		utils.HandleErrorAndExit("Error reading "+utils.MainConfigFilePath+".", err)
 	}
-
 }
 
 func createConfigFiles() {
@@ -104,14 +103,21 @@ func createConfigFiles() {
 	if !utils.IsFileExist(utils.MainConfigFilePath) {
 		var mainConfig = new(utils.MainConfig)
 		mainConfig.Config = utils.Config{utils.DefaultHttpRequestTimeout, utils.ExportDirPath}
+		utils.WriteConfigFile(mainConfig, utils.MainConfigFilePath)
+	}
+
+	if !utils.IsFileExist(utils.SampleMainConfigFilePath) {
+		var mainConfig = new(utils.MainConfig)
+		mainConfig.Config = utils.Config{utils.DefaultHttpRequestTimeout, utils.ExportDirPath}
 		mainConfig.Environments = make(map[string]utils.EnvEndpoints)
-		mainConfig.Environments["testEnv"] = utils.EnvEndpoints{
+		mainConfig.Environments["sampleEnv"] = utils.EnvEndpoints{
 			"https://localhost/publisher",
 			"http://localhost/register",
 			"http://localhost/token",
 		}
-		utils.WriteConfigFile(mainConfig, utils.MainConfigFilePath)
+		utils.WriteConfigFile(mainConfig, utils.SampleMainConfigFilePath)
 	}
+
 	if !utils.IsFileExist(utils.EnvKeysAllFilePath) {
 		os.Create(utils.EnvKeysAllFilePath)
 	}

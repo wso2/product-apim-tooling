@@ -48,7 +48,11 @@ var envsCmd = &cobra.Command{
 		utils.Logln(utils.LogPrefixInfo + listCmdLiteral + " " + EnvsCmdLiteral + " called")
 
 		envs := utils.GetMainConfigFromFile(utils.MainConfigFilePath).Environments
-		printEnvs(envs)
+		if len(envs) > 0 {
+			printEnvs(envs)
+		} else {
+			fmt.Println("No configured environments found")
+		}
 		fmt.Printf("Environments available in file '%s'\n", utils.MainConfigFileName)
 	},
 }

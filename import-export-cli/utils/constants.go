@@ -40,8 +40,10 @@ const EnvKeysAllFileName = "env_keys_all.yaml"
 var EnvKeysAllFilePath = filepath.Join(ConfigDirPath, EnvKeysAllFileName)
 
 const MainConfigFileName = "main_config.yaml"
+const SampleMainConfigFileName = "main_config.yaml.sample"
 
 var MainConfigFilePath = filepath.Join(ConfigDirPath, MainConfigFileName)
+var SampleMainConfigFilePath = filepath.Join(ConfigDirPath, SampleMainConfigFileName)
 
 const ExportDirName = "exported"
 
