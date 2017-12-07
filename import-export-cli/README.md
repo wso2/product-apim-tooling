@@ -5,7 +5,7 @@ Command Line tool for importing and exporting APIs between different API Environ
 
 ## Getting Started
 
-### Building from source (Alternatively, download a packaged executable at [here]())
+### Building from source 
 - ### Setting up the development environment
     1. Install [Go 1.8.x](https://golang.org/dl)
     2. Setup `$GOROOT` and `$GOPATH` correctly : [Tutorial](https://www.goinggo.net/2016/05/installing-go-and-your-workspace.html) 
@@ -17,7 +17,7 @@ Command Line tool for importing and exporting APIs between different API Environ
 - ### Building
    `cd` into `product-apim-tooling/import-export-cli`
    
-    Execute `./build.sh -t apimcli.go -v 1.0.0 -f` to build for all platforms.
+    Execute `./build.sh -t apimcli.go -v 1.0.0 -f` to build for all platforms. (Can only be built in Mac or Linux)
       
     Created packages will be available at `build/target` directory
     
@@ -26,14 +26,14 @@ Command Line tool for importing and exporting APIs between different API Environ
     
     Then execute `./apimcli` to start the application. (Being inside `product-apim-tooling/import-export-cli`)
     
-    Execute `/apimcli --help` for further instructions.
+    Execute `./apimcli --help` for further instructions.
     
     NOTE: To execute the tool from anywhere, append the location of the executable (apimcli) to your $PATH variable.
-<hr/>
-<br/>
+    
+***
 
 - ### Adding Environments
-    Add environments by either manually adding details to `$HOME/.wso2apim-cli/main_config.yaml` or using the command
+    Add environments by either manually adding details to `$HOME/.wso2apimcli/main_config.yaml` or using the command
     `apimcli add-env` command.
     
     Type `apimcli add-env --help` for detailed instructions
@@ -42,12 +42,21 @@ Command Line tool for importing and exporting APIs between different API Environ
     Copy the file `apimcli_bash_completion.sh` to `/etc/bash_completion.d/` and source it with
     `source /etc/bash_completion.d/apimcli_bash_completion.sh` to enable bash auto-completion.
 
-<hr/>
-<br/>
+***
 
 ## Usage 
 ```bash
      apimcli [command]
+```
+
+#### Global Flags
+```bash
+    --verbose
+        Enable verbose logs (Provides more information on execution)
+    --insecure, -k
+        Allow connections to SSL sites without certs
+    --help, -h
+        Display information and example usage of a command
 ```
 
 ### Commands
@@ -68,9 +77,7 @@ Command Line tool for importing and exporting APIs between different API Environ
             apimcli export-api -n TestAPI -v 1.0.1 -e staging -p 123456
 ```
 
-
 * #### import-api
-    
 ```bash
         Flags:
             Required:
@@ -86,6 +93,7 @@ Command Line tool for importing and exporting APIs between different API Environ
             apimcli import-api -f production/TestAPI_3.1.0.zip -e dev -p 123456 
             apimcli import-api -f TestAPI_1.2.1.zip -e dev
 ```
+
 * #### list apis
 ```bash
         Flags:
@@ -124,6 +132,7 @@ Command Line tool for importing and exporting APIs between different API Environ
                 --registration https://localhost:9443/identity/connect/register \
                 --token https: https://localhost:9443/oauth2/token
 ```
+
 * #### remove-env
 ```bash
         Flags:
@@ -141,6 +150,7 @@ Command Line tool for importing and exporting APIs between different API Environ
         Examples:
             apimcli reset-user -e dev
 ```
+
 * #### version
 ```bash
         apimcli version 
@@ -154,14 +164,4 @@ Command Line tool for importing and exporting APIs between different API Environ
         Examples:
             apimcli set --httpRequestTimeout 10000
             apimcli set --exportDirectory /home/user/exported 
-```
-        
-#### Global Flags
-```bash
-    --verbose
-        Enable verbose logs (Provides more information on execution)
-    --insecure, -k
-        Allow connections to SSL sites without certs
-    --help, -h
-        Display information and example usage of a command
 ```

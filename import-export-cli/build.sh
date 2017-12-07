@@ -84,7 +84,8 @@ fi
 #platforms="linux/amd64/linux/x64"
 #platforms="darwin/amd64/macosx/x64"
 if [ "${full_build}" == "true" ]; then
-    echo "Building "$'\e[1m'"${filename^^}:${build_version}"$'\e[0m'" for all platforms..."
+# following line causes an error in MacOS
+#    echo "Building "$'\e[1m'"${filename^^}:${build_version}"$'\e[0m'" for all platforms..."
     platforms="darwin/amd64/macosx/x64 linux/386/linux/i586 linux/amd64/linux/x64 windows/386/windows/i586 windows/amd64/windows/x64"
 else
     detectPlatformSpecificBuild
@@ -112,7 +113,7 @@ do
     zipdir="${buildPath}/$filename"
     mkdir -p $zipdir
 
-    cp -r "${baseDir}/resources/README.html.desktop" $zipdir > /dev/null 2>&1
+    cp -r "${baseDir}/resources/README.html" $zipdir > /dev/null 2>&1
     cp -r "${baseDir}/LICENSE" $zipdir > /dev/null 2>&1
 
     # set destination path for binary

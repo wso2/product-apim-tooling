@@ -28,7 +28,7 @@ const ProjectName = "apimcli"
 // File Names and Paths
 var CurrentDir, _ = os.Getwd()
 
-const ConfigDirName = ".wso2apim-cli"
+const ConfigDirName = ".wso2apimcli"
 
 var HomeDirectory = os.Getenv("HOME")
 var ConfigDirPath = filepath.Join(HomeDirectory, ConfigDirName)
