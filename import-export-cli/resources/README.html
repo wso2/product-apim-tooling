@@ -80,11 +80,11 @@
               --username, -u 
               --password, -p 
       Examples:
-          apimcli list -e dev
-          apimcli list -e staging 
-          apimcli list -e staging -u admin -p 123456
-          apimcli list -e staging -u admin
-          apimcli list -e staging -p 123456
+          apimcli list apis -e dev
+          apimcli list apis -e staging
+          apimcli list apis -e staging -u admin -p 123456
+          apimcli list apis -e staging -u admin
+          apimcli list apis -e staging -p 123456
 </code></pre>
     </li>
     <li><h4 id="list-envs">list envs</h4>
@@ -103,7 +103,7 @@
               --token, -t (Token Endpoint)
           Examples:
               apimcli add-env -n dev \
-              --apim https://localhost:9292/api/am/publisher/v1.0 \
+              --publisher https://localhost:9292/api/am/publisher/v1.0 \
               --registration https://localhost:9443/identity/connect/register \
               --token https: https://localhost:9443/oauth2/token
 </code></pre>
