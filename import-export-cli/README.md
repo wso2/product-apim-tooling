@@ -103,11 +103,11 @@ Command Line tool for importing and exporting APIs between different API Environ
                 --username, -u 
                 --password, -p 
         Examples:
-            apimcli list -e dev
-            apimcli list -e staging 
-            apimcli list -e staging -u admin -p 123456
-            apimcli list -e staging -u admin
-            apimcli list -e staging -p 123456
+            apimcli list apis -e dev
+            apimcli list apis -e staging 
+            apimcli list apis -e staging -u admin -p 123456
+            apimcli list apis -e staging -u admin
+            apimcli list apis -e staging -p 123456
 ```
 
 *  #### list envs
@@ -128,9 +128,9 @@ Command Line tool for importing and exporting APIs between different API Environ
                 --token, -t (Token Endpoint)
             Examples:
                 apimcli add-env -n dev \
-                --apim https://localhost:9292/api/am/publisher/v1.0 \
+                --publisher https://localhost:9292/api/am/publisher/v1.0 \
                 --registration https://localhost:9443/identity/connect/register \
-                --token https: https://localhost:9443/oauth2/token
+                --token https://localhost:9443/oauth2/token
 ```
 
 * #### remove-env
