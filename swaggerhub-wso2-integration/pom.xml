@@ -225,7 +225,7 @@
             <artifactId>jackson-databind</artifactId>
             <version>${com.fasterxml.jackson.core.version}</version>
         </dependency>
-        <!-- Dependencies for Base64 Encoding-->
+        <!-- Apache commons -->
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
@@ -244,7 +244,6 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
-        <!-- Dependencies for testing -->
         <dependency>
             <groupId>org.jacoco</groupId>
             <artifactId>org.jacoco.agent</artifactId>
@@ -256,12 +255,6 @@
             <artifactId>mockito-all</artifactId>
             <version>${org.mockito.version}</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock</artifactId>
-            <version>${org.powermock.version}</version>
-            <type>pom</type>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.plugins</groupId>
@@ -292,7 +285,6 @@
         <junit.version>4.12</junit.version>
         <org.jacoco.version>0.7.9</org.jacoco.version>
         <org.mockito.version>1.10.19</org.mockito.version>
-        <org.powermock.version>1.6.4</org.powermock.version>
         <maven.surefire.plugin.version>2.18.1</maven.surefire.plugin.version>
         <maven.failsafe.plugin.version>2.19.1</maven.failsafe.plugin.version>
         <maven.findbugs.plugin.version>3.0.0</maven.findbugs.plugin.version>
