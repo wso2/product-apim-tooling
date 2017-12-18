@@ -1,0 +1,22 @@
+{
+  "count": 1,
+  "next": "",
+  "previous": "",
+  "list": [
+    {
+      "id": "8fb0a5ec-bf24-466e-9936-a8377f895015",
+      "name": "Simple Inventory API",
+      "description": "This is a simple API",
+      "context": "/t/samscompany/api/v1",
+      "version": "1.0.0",
+      "provider": "j4ppk@averdov.com@samscompany",
+      "status": "CREATED",
+      "thumbnailUri": null
+    }
+  ],
+  "pagination": {
+    "total": 1,
+    "offset": 0,
+    "limit": 25
+  }
+}

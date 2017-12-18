@@ -67,3 +67,14 @@ import-export-cli/utils/coverage.out
 import-export-cli/utils/coverage.html
 
 # ==================
+
+# Swaggerhub-wso2-integration
+#============================
+
+# IDE
+*.ipr
+*.iws
+
+# Maven
+target
+
