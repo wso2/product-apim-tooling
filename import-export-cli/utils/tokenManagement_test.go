@@ -112,8 +112,13 @@ func TestExecutePreCommandWithBasicAuth1(t *testing.T) {
 	mainConfigFilePath := filepath.Join(CurrentDir, mainConfigFileName)
 	mainConfig.Config = Config{2500, "/home/exported"}
 	mainConfig.Environments = make(map[string]EnvEndpoints)
-	mainConfig.Environments[devName] = EnvEndpoints{apimStub.URL,
-		registrationStub.URL, oauthStub.URL}
+	mainConfig.Environments[devName] = EnvEndpoints{
+		apimStub.URL,
+		apimStub.URL + "/api-import-export",
+		apimStub.URL + "/publisher/apis",
+		registrationStub.URL,
+		oauthStub.URL,
+	}
 	WriteConfigFile(mainConfig, mainConfigFilePath)
 
 	// keys
@@ -125,16 +130,12 @@ func TestExecutePreCommandWithBasicAuth1(t *testing.T) {
 	envKeysAll.Environments[devName] = EnvKeys{"dev_client_id", devEncryptedClientSecret, devUsername}
 	WriteConfigFile(envKeysAll, keysAllFilePath)
 
-	b64encodedCredentials, apimEndpoint, err := ExecutePreCommandWithBasicAuth(devName, devUsername, "admin", mainConfigFilePath, keysAllFilePath)
+	b64encodedCredentials, err := ExecutePreCommandWithBasicAuth(devName, devUsername, "admin", mainConfigFilePath, keysAllFilePath)
 
 	expected := GetBase64EncodedCredentials(devUsername, "admin")
 
 	if b64encodedCredentials != expected {
 		t.Errorf("Expected '%s', got '%s' instead\n", expected, b64encodedCredentials)
-	}
-
-	if apimEndpoint != apimStub.URL {
-		t.Errorf("Expected '%s', got '%s', instead\n", apimStub.URL, apimEndpoint)
 	}
 
 	if err != nil {
@@ -162,8 +163,13 @@ func TestExecutePreCommandWithBasicAuth2(t *testing.T) {
 	mainConfigFilePath := filepath.Join(CurrentDir, mainConfigFileName)
 	mainConfig.Config = Config{2500, "/home/exported"}
 	mainConfig.Environments = make(map[string]EnvEndpoints)
-	mainConfig.Environments[devName] = EnvEndpoints{apimStub.URL,
-		registrationStub.URL, oauthStub.URL}
+	mainConfig.Environments[devName] = EnvEndpoints{
+		apimStub.URL,
+		apimStub.URL + "/api-import-export",
+		apimStub.URL + "/publisher/apis",
+		registrationStub.URL,
+		oauthStub.URL,
+	}
 	WriteConfigFile(mainConfig, mainConfigFilePath)
 
 	// keys
@@ -173,16 +179,12 @@ func TestExecutePreCommandWithBasicAuth2(t *testing.T) {
 	envKeysAll.Environments = make(map[string]EnvKeys)
 	WriteConfigFile(envKeysAll, keysAllFilePath)
 
-	b64encodedCredentials, apimEndpoint, err := ExecutePreCommandWithBasicAuth(devName, devUsername, "admin", mainConfigFilePath, keysAllFilePath)
+	b64encodedCredentials, err := ExecutePreCommandWithBasicAuth(devName, devUsername, "admin", mainConfigFilePath, keysAllFilePath)
 
 	expected := GetBase64EncodedCredentials(devUsername, "admin")
 
 	if b64encodedCredentials != expected {
 		t.Errorf("Expected '%s', got '%s' instead\n", expected, b64encodedCredentials)
-	}
-
-	if apimEndpoint != apimStub.URL {
-		t.Errorf("Expected '%s', got '%s', instead\n", apimStub.URL, apimEndpoint)
 	}
 
 	if err != nil {
@@ -216,14 +218,10 @@ func TestExecutePreCommandWithBasicAuth3(t *testing.T) {
 	WriteConfigFile(envKeysAll, keysAllFilePath)
 
 	// non blank flagUsername and flagPassword
-	b64encodedCredentials, apimEndpoint, err := ExecutePreCommandWithBasicAuth(devName, devUsername, "admin", mainConfigFilePath, keysAllFilePath)
+	b64encodedCredentials, err := ExecutePreCommandWithBasicAuth(devName, devUsername, "admin", mainConfigFilePath, keysAllFilePath)
 
 	if b64encodedCredentials != "" {
 		t.Errorf("Expected '%s', got '%s' instead\n", "<blank>", b64encodedCredentials)
-	}
-
-	if apimEndpoint != "" {
-		t.Errorf("Expected '%s', got '%s', instead\n", "<blank>", apimEndpoint)
 	}
 
 	if err == nil {
@@ -231,14 +229,10 @@ func TestExecutePreCommandWithBasicAuth3(t *testing.T) {
 	}
 
 	// blank env name
-	b64encodedCredentials, apimEndpoint, err = ExecutePreCommandWithBasicAuth("", devUsername, "admin", mainConfigFilePath, keysAllFilePath)
+	b64encodedCredentials, err = ExecutePreCommandWithBasicAuth("", devUsername, "admin", mainConfigFilePath, keysAllFilePath)
 
 	if b64encodedCredentials != "" {
 		t.Errorf("Expected '%s', got '%s' instead\n", "<blank>", b64encodedCredentials)
-	}
-
-	if apimEndpoint != "" {
-		t.Errorf("Expected '%s', got '%s', instead\n", "<blank>", apimEndpoint)
 	}
 
 	if err == nil {
@@ -264,8 +258,13 @@ func TestExecutePreCommandWithOAuth1(t *testing.T) {
 
 	mainConfig.Config = Config{2500, "/home/exported"}
 	mainConfig.Environments = make(map[string]EnvEndpoints)
-	mainConfig.Environments[devName] = EnvEndpoints{apimStub.URL,
-		registrationStub.URL, oauthStub.URL}
+	mainConfig.Environments[devName] = EnvEndpoints{
+		apimStub.URL,
+		apimStub.URL + "/api-import-export",
+		apimStub.URL + "/publisher/apis",
+		registrationStub.URL,
+		oauthStub.URL,
+	}
 	WriteConfigFile(mainConfig, mainConfigFilePath)
 
 	// keys
@@ -277,13 +276,9 @@ func TestExecutePreCommandWithOAuth1(t *testing.T) {
 	envKeysAll.Environments[devName] = EnvKeys{"dev_client_id", devEncryptedClientSecret, devUsername}
 	WriteConfigFile(envKeysAll, keysAllFilePath)
 
-	accessToken, apimEndpoint, err := ExecutePreCommandWithOAuth(devName, devUsername, "admin", mainConfigFilePath, keysAllFilePath)
+	accessToken, err := ExecutePreCommandWithOAuth(devName, devUsername, "admin", mainConfigFilePath, keysAllFilePath)
 	if accessToken != sampleAccessToken {
 		t.Errorf("Expected accessToken: '%s', got '%s' instead\n", sampleAccessToken, accessToken)
-	}
-
-	if apimEndpoint != apimStub.URL {
-		t.Errorf("Expected apimEndpoint: '%s', got '%s' instead\n", apimStub.URL, apimEndpoint)
 	}
 
 	if err != nil {
@@ -312,8 +307,13 @@ func TestExecutePreCommandWithOAuth2(t *testing.T) {
 
 	mainConfig.Config = Config{2500, "/home/exported"}
 	mainConfig.Environments = make(map[string]EnvEndpoints)
-	mainConfig.Environments[devName] = EnvEndpoints{apimStub.URL,
-		registrationStub.URL, oauthStub.URL}
+	mainConfig.Environments[devName] = EnvEndpoints{
+		apimStub.URL,
+		apimStub.URL + "/api-import-export",
+		apimStub.URL + "/publisher/apis",
+		registrationStub.URL,
+		oauthStub.URL,
+	}
 	WriteConfigFile(mainConfig, mainConfigFilePath)
 
 	// keys
@@ -323,13 +323,9 @@ func TestExecutePreCommandWithOAuth2(t *testing.T) {
 	envKeysAll.Environments = make(map[string]EnvKeys)
 	WriteConfigFile(envKeysAll, keysAllFilePath)
 
-	accessToken, apimEndpoint, err := ExecutePreCommandWithOAuth(devName, devUsername, "admin", mainConfigFilePath, keysAllFilePath)
+	accessToken, err := ExecutePreCommandWithOAuth(devName, devUsername, "admin", mainConfigFilePath, keysAllFilePath)
 	if accessToken != sampleAccessToken {
 		t.Errorf("Expected accessToken: '%s', got '%s' instead\n", sampleAccessToken, accessToken)
-	}
-
-	if apimEndpoint != apimStub.URL {
-		t.Errorf("Expected apimEndpoint: '%s', got '%s' instead\n", apimStub.URL, apimEndpoint)
 	}
 
 	if err != nil {
@@ -367,13 +363,9 @@ func TestExecutePreCommandWithOAuth3(t *testing.T) {
 	envKeysAll.Environments = make(map[string]EnvKeys)
 	WriteConfigFile(envKeysAll, keysAllFilePath)
 
-	accessToken, apimEndpoint, err := ExecutePreCommandWithOAuth(devName, devUsername, "admin", mainConfigFilePath, keysAllFilePath)
+	accessToken, err := ExecutePreCommandWithOAuth(devName, devUsername, "admin", mainConfigFilePath, keysAllFilePath)
 	if accessToken != "" {
 		t.Errorf("Expected accessToken: '%s', got '%s' instead\n", "", accessToken)
-	}
-
-	if apimEndpoint != "" {
-		t.Errorf("Expected apimEndpoint: '%s', got '%s' instead\n", "", apimEndpoint)
 	}
 
 	if err == nil {
@@ -404,13 +396,9 @@ func TestExecutePreCommandWithOAuth4(t *testing.T) {
 	mainConfig.Environments = make(map[string]EnvEndpoints)
 	WriteConfigFile(mainConfig, mainConfigFilePath)
 
-	accessToken, apimEndpoint, err := ExecutePreCommandWithOAuth("", devUsername, "admin", mainConfigFilePath, "")
+	accessToken, err := ExecutePreCommandWithOAuth("", devUsername, "admin", mainConfigFilePath, "")
 	if accessToken != "" {
 		t.Errorf("Expected accessToken: '%s', got '%s' instead\n", "", accessToken)
-	}
-
-	if apimEndpoint != "" {
-		t.Errorf("Expected apimEndpoint: '%s', got '%s' instead\n", "", apimEndpoint)
 	}
 
 	if err == nil {

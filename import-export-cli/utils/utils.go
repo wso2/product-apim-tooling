@@ -97,3 +97,11 @@ func chopPath(original string) string {
 		return original[i+1:]
 	}
 }
+
+// Append a slash to a string if there isn't one already
+func AppendSlashToString(input string) string {
+	if string(input[len(input)-1]) != "/" {
+		input += "/"
+	}
+	return input
+}

@@ -154,9 +154,33 @@ func GetEndpointsOfEnvironment(env string, filePath string) (*EnvEndpoints, erro
 }
 
 // Get APIMEndpoint of a given environment
-func GetAPIMEndpointOfEnv(env, filePath string) string {
+func GetApiManagerEndpointOfEnv(env, filePath string) string {
 	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
-	return envEndpoints.APIManagerEndpoint
+	return envEndpoints.ApiManagerEndpoint
+}
+
+// Get ApiImportExportEndpoint of a given environment
+func GetApiImportExportEndpointOfEnv(env, filePath string) string {
+	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
+	if !(envEndpoints.ApiImportExportEndpoint == "" || envEndpoints == nil) {
+		return envEndpoints.ApiImportExportEndpoint
+	} else {
+		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
+		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
+		return apiManagerEndpoint + defaultApiImportExportProduct
+	}
+}
+
+// Get ApiListEndpoint of a given environment
+func GetApiListEndpointOfEnv(env, filePath string) string {
+	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
+	if !(envEndpoints.ApiListEndpoint == "" || envEndpoints == nil) {
+		return envEndpoints.ApiListEndpoint
+	} else {
+		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
+		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
+		return apiManagerEndpoint + defaultApiListEndpointSuffix
+	}
 }
 
 // Get TokenEndpoint of a given environment

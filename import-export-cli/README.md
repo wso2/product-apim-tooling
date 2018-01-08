@@ -21,8 +21,7 @@ Command Line tool for importing and exporting APIs between different API Environ
     Created packages will be available at `build/target` directory
       
 - ### Running
-    Select a generated archive suitable for your platform and extract it to a desired location.
-    
+    Select a generated archive suitable for your platform (Mac, Windows, Linux) and extract it to a desired location and`cd` into it.
     Then execute `apimcli` to start the application.
     > NOTE: Execute `./apimcli` if the working directory is the same where the executable resides
     
@@ -36,6 +35,7 @@ Command Line tool for importing and exporting APIs between different API Environ
     > NOTE: Directory structure for configuration files (`$HOME/.wso2apimcli`) will be created upon execution of `apimcli`
     
     Execute `apimcli add-env --help` for detailed instructions
+    > Under environment, `api_manager_endpoint`, `registration_endpoint`, `token_endpoint` fields are mandatory. Others are optional
     
 - ### Command Autocompletion (For Bash Only)
     Copy the file `apimcli_bash_completion.sh` to `/etc/bash_completion.d/` and source it with
@@ -128,13 +128,24 @@ Command Line tool for importing and exporting APIs between different API Environ
         Flags:
             Required:
                 --name, -n (Name of the environment)
-                --apim, -a (API Manager endpoint)
-                --registration, -r (Registration Endpoint)
-                --token, -t (Token Endpoint)
-            Examples:
-                apimcli add-env -n dev \
+                --apim (API Manager endpoint)
+                --registration (Registration Endpoint)
+                --token (Token Endpoint)
+            Optional:
+                --import-export (API Import Export Endpoint for environment)
+                --list (API List endpoint for environment)
+            
+        Examples:
+           apimcli add-env -n dev \
                 --apim https://localhost:9443 \ 
                 --registration https://localhost:9443/identity/connect/register \
+                --token https: https://localhost:9443/oauth2/token
+                
+           apimcli add-env -n prod \
+                --apim https://localhost:9443 \ 
+                --registration https://localhost:9443/identity/connect/register \
+                --import-export https://localhost:9443/api-import-export-2.1.0-v3 \
+                --list https://localhsot:9443/api/am/publisher/v0.11/apis \
                 --token https: https://localhost:9443/oauth2/token
 ```
 
@@ -167,7 +178,7 @@ Command Line tool for importing and exporting APIs between different API Environ
 ```bash
         Flags
             --http-request-timeout
-            --export-rdirectory
+            --export-directory
         Examples:
             apimcli set --http-request-timeout 10000
             apimcli set --export-directory /home/user/exported 

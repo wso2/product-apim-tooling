@@ -66,12 +66,13 @@ var ImportAPICmd = &cobra.Command{
 }
 
 func executeImportAPICmd(mainConfigFilePath, envKeysAllFilePath, exportDirectory string) {
-	b64encodedCredentials, apiManagerEndpoint, preCommandErr :=
+	b64encodedCredentials, preCommandErr :=
 		utils.ExecutePreCommandWithBasicAuth(importEnvironment, importAPICmdUsername, importAPICmdPassword,
 			mainConfigFilePath, envKeysAllFilePath)
 
 	if preCommandErr == nil {
-		resp, err := ImportAPI(importAPIFile, apiManagerEndpoint, b64encodedCredentials, exportDirectory)
+		apiImportExportEndpoint := utils.GetApiImportExportEndpointOfEnv(importEnvironment, mainConfigFilePath)
+		resp, err := ImportAPI(importAPIFile, apiImportExportEndpoint, b64encodedCredentials, exportDirectory)
 		if err != nil {
 			utils.HandleErrorAndExit("Error importing API", err)
 		}
@@ -95,13 +96,11 @@ func executeImportAPICmd(mainConfigFilePath, envKeysAllFilePath, exportDirectory
 // @param name: name of the API (zipped file) to be imported
 // @param apiManagerEndpoint: API Manager endpoint for the environment
 // @param accessToken: OAuth2.0 access token for the resource being accessed
-func ImportAPI(query, apiManagerEndpoint, accessToken, exportDirectory string) (*http.Response, error) {
-	// append '/' to the end if there isn't one already
-	if string(apiManagerEndpoint[len(apiManagerEndpoint)-1]) != "/" {
-		apiManagerEndpoint += "/"
-	}
-	apiManagerEndpoint += utils.ApiImportExportProduct + "/" + "import-api"
-	utils.Logln(utils.LogPrefixInfo + "Import URL: " + apiManagerEndpoint)
+func ImportAPI(query, apiImportExportEndpoint, accessToken, exportDirectory string) (*http.Response, error) {
+	apiImportExportEndpoint = utils.AppendSlashToString(apiImportExportEndpoint)
+
+	apiImportExportEndpoint += "import-api"
+	utils.Logln(utils.LogPrefixInfo + "Import URL: " + apiImportExportEndpoint)
 
 	sourceEnv := strings.Split(query, "/")[0] // environment from which the API was exported
 	utils.Logln(utils.LogPrefixInfo + "Source Environment: " + sourceEnv)
@@ -132,7 +131,7 @@ func ImportAPI(query, apiManagerEndpoint, accessToken, exportDirectory string) (
 	extraParams := map[string]string{}
 	// TODO:: Add extraParams as necessary
 
-	req, err := NewFileUploadRequest(apiManagerEndpoint, extraParams, "file", zipFilePath, accessToken)
+	req, err := NewFileUploadRequest(apiImportExportEndpoint, extraParams, "file", zipFilePath, accessToken)
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating request.", err)
 	}

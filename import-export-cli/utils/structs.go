@@ -34,8 +34,8 @@ type MainConfig struct {
 }
 
 type Config struct {
-	HttpRequestTimeout  int    `yaml:"http_request_timeout"`
-	ExportDirectory     string `yaml:"export_directory"`
+	HttpRequestTimeout int    `yaml:"http_request_timeout"`
+	ExportDirectory    string `yaml:"export_directory"`
 }
 
 type EnvKeys struct {
@@ -45,28 +45,30 @@ type EnvKeys struct {
 }
 
 type EnvEndpoints struct {
-	APIManagerEndpoint   string `yaml:"api_manager_endpoint"`
-	RegistrationEndpoint string `yaml:"registration_endpoint"`
-	TokenEndpoint        string `yaml:"token_endpoint"`
+	ApiManagerEndpoint      string `yaml:"api_manager_endpoint"`
+	ApiImportExportEndpoint string `yaml:"api_import_export_endpoint"`
+	ApiListEndpoint         string `yaml:"api_list_endpoint"`
+	RegistrationEndpoint    string `yaml:"registration_endpoint"`
+	TokenEndpoint           string `yaml:"token_endpoint"`
 }
 
 // ---------------- End of Structs for YAML Config Files ---------------------------------
 
 type API struct {
-	ID             string `json:"id"`
-	Name           string `json:"name"`
-	Context        string `json:"context"`
-	Version        string `json:"version"`
-	Provider       string `json:"provider"`
-	Status         string `json:"status"`
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Context  string `json:"context"`
+	Version  string `json:"version"`
+	Provider string `json:"provider"`
+	Status   string `json:"status"`
 }
 
 type RegistrationResponse struct {
-	ClientID              string `json:"clientId"`
-	ClientSecret          string `json:"clientSecret"`
-	ClientName            string `json:"clientName"`
-	CallBackURL string `json:"callBackURL"`
-	JsonString string `json:"jsonString"`
+	ClientID     string `json:"clientId"`
+	ClientSecret string `json:"clientSecret"`
+	ClientName   string `json:"clientName"`
+	CallBackURL  string `json:"callBackURL"`
+	JsonString   string `json:"jsonString"`
 }
 
 type TokenResponse struct {

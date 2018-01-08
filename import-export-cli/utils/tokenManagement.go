@@ -32,13 +32,11 @@ import (
 // @param environment : Environment on which the particular command is run
 // @param flagUsername : Username entered using the flag --username (-u). Could be blank
 // @param flagPassword : Password entered using the flag --password (-p). Could be blank
-// @return b64encodedCredentials, APIManagerEndpoint, Errors
-// including (export-api, import-api, list)e
+// @return b64encodedCredentials, ApiManagerEndpoint, Errors
+// including (export-api, import-api)
 func ExecutePreCommandWithBasicAuth(environment, flagUsername, flagPassword, mainConfigFilePath,
-	envKeysAllFilePath string) (b64encodedCredentials string, apiManagerEndpoint string, err error) {
+	envKeysAllFilePath string) (b64encodedCredentials string, err error) {
 	if EnvExistsInMainConfigFile(environment, mainConfigFilePath) {
-		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment, mainConfigFilePath)
-
 		Logln(LogPrefixInfo + "Environment: '" + environment + "'")
 
 		var username string
@@ -105,8 +103,6 @@ func ExecutePreCommandWithBasicAuth(environment, flagUsername, flagPassword, mai
 				password = PromptForPassword()
 			}
 
-			fmt.Println("\nUsername: " + username + "\n")
-
 			if err != nil {
 				fmt.Println("Error:", err)
 			}
@@ -115,16 +111,16 @@ func ExecutePreCommandWithBasicAuth(environment, flagUsername, flagPassword, mai
 		// Get Base64 Encoded Username:Password
 		b64encodedCredentials := GetBase64EncodedCredentials(username, password)
 
-		return b64encodedCredentials, apiManagerEndpoint, nil
+		return b64encodedCredentials, nil
 	} else {
 		// env does not exist in main config file
 		if environment == "" {
-			return "", "",
+			return "",
 				errors.New("no environment specified. Either specify it using the -e flag or name one of " +
 					"the environments in '" + MainConfigFileName + "' to 'default'")
 		}
 
-		return "", "",
+		return "",
 			errors.New("Details incorrect/unavailable for environment '" + environment + "' in " + mainConfigFilePath)
 	}
 }
@@ -133,13 +129,12 @@ func ExecutePreCommandWithBasicAuth(environment, flagUsername, flagPassword, mai
 // @param environment : Environment on which the particular command is run
 // @param flagUsername : Username entered using the flag --username (-u). Could be blank
 // @param flagPassword : Password entered using the flag --password (-p). Could be blank
-// @return AccessToken, APIManagerEndpoint, Errors
+// @return AccessToken, ApiManagerEndpoint, Errors
 // including (export-api, import-api, list)
 func ExecutePreCommandWithOAuth(environment, flagUsername, flagPassword, mainConfigFilePath,
-	envKeysAllFilePath string) (accessToken string, apiManagerEndpoint string, err error) {
+	envKeysAllFilePath string) (accessToken string, err error) {
 	if EnvExistsInMainConfigFile(environment, mainConfigFilePath) {
 		registrationEndpoint := GetRegistrationEndpointOfEnv(environment, mainConfigFilePath)
-		apiManagerEndpoint := GetAPIMEndpointOfEnv(environment, mainConfigFilePath)
 		tokenEndpoint := GetTokenEndpointOfEnv(environment, mainConfigFilePath)
 
 		Logln(LogPrefixInfo + "Environment: '" + environment + "'")
@@ -216,7 +211,6 @@ func ExecutePreCommandWithOAuth(environment, flagUsername, flagPassword, mainCon
 				password = PromptForPassword()
 			}
 
-			fmt.Println("\nUsername: " + username + "\n")
 			clientID, clientSecret, err = GetClientIDSecret(username, password, registrationEndpoint)
 
 			if err != nil {
@@ -234,19 +228,19 @@ func ExecutePreCommandWithOAuth(environment, flagUsername, flagPassword, mainCon
 			GetBase64EncodedCredentials(clientID, clientSecret), tokenEndpoint)
 		accessToken := responseDataMap["access_token"]
 
-		Logln(LogPrefixInfo+"[Remove in Production] AccessToken:", accessToken) // TODO:: Remove in production
+		//Logln(LogPrefixInfo+"[Remove in Production] AccessToken:", accessToken) // TODO:: Remove in production
 
-		return accessToken, apiManagerEndpoint, nil
+		return accessToken, nil
 	} else {
 		// env does not exist in main config file
 		if environment == "" {
-			return "", "",
+			return "",
 				errors.New("no environment specified. Either specify it using the -e flag or rename one of " +
 					"the environments in '" + MainConfigFileName + "' to 'default'")
 		}
 
-		return "", "", errors.New("Details incorrect/unavailable for environment '" +
-			environment + "' in " + mainConfigFilePath)
+		return "", errors.New("No environment specified or details incorrect/unavailable for environment '" +
+			environment + "' in " + mainConfigFilePath + "")
 	}
 }
 
@@ -266,10 +260,8 @@ func GetClientIDSecret(username, password, url string) (clientID string, clientS
 	headers := make(map[string]string)
 
 	headers[HeaderContentType] = HeaderValueApplicationJSON
-	// headers["Content-Type"] = "application/json"
 
 	headers[HeaderAuthorization] = HeaderValueAuthBasicPrefix + " " + GetBase64EncodedCredentials(username, password)
-	// headers["Authorization"] = "Basic " + GetBase64EncodedCredentials(username, password)
 
 	// POST request using resty
 	resp, err := InvokePOSTRequest(url, headers, body)
@@ -343,7 +335,7 @@ func GetOAuthTokens(username, password, b64EncodedClientIDClientSecret, url stri
 
 	responseDataMap := make(map[string]string) // a map to hold response data
 	data := []byte(resp.Body())
-	_ = json.Unmarshal(data, &responseDataMap) // add response data to the map
+	json.Unmarshal(data, &responseDataMap) // add response data to the map
 
 	return responseDataMap, nil // contains 'access_token', 'refresh_token' etc
 }

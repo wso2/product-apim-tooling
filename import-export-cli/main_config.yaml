@@ -4,6 +4,7 @@ config:
 environments:
   dev:
     api_manager_endpoint: https://localhost:9443
+    api_import_export_endpoint:  https://localhost:9443/api-import-export-2.1.0-v3
     registration_endpoint: http://localhost:9763/client-registration/v0.11/register
     token_endpoint: https://localhost:8243/token
   gcloud1:

@@ -39,14 +39,18 @@ const EnvKeysAllFileName = "env_keys_all.yaml"
 var EnvKeysAllFilePath = filepath.Join(ConfigDirPath, EnvKeysAllFileName)
 
 const MainConfigFileName = "main_config.yaml"
+const SampleMainConfigFileName = "main_config.yaml.sample"
 
 var MainConfigFilePath = filepath.Join(ConfigDirPath, MainConfigFileName)
+var SampleMainConfigFilePath = filepath.Join(ConfigDirPath, SampleMainConfigFileName)
+
 
 const DefaultExportDirName = "exported"
 
 var DefaultExportDirPath = filepath.Join(ConfigDirPath, DefaultExportDirName)
 
-const ApiImportExportProduct = "api-import-export-2.1.0-v3"
+const defaultApiImportExportProduct = "api-import-export-2.1.0-v3"
+const defaultApiListEndpointSuffix = "api/am/publisher/v0.11/apis"
 
 const DefaultEnvironmentName = "default"
 

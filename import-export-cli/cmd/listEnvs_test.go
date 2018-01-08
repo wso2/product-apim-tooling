@@ -27,6 +27,8 @@ func TestPrintEnvs(t *testing.T) {
 	envEndpoints := make(map[string]utils.EnvEndpoints)
 	envEndpoints["dev"] = utils.EnvEndpoints{
 		"apim-endpoint",
+		"import-export-endpoint",
+		"list-endpoint",
 		"reg-endpoint",
 		"token-endpoint",
 	}

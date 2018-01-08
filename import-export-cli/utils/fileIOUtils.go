@@ -81,7 +81,7 @@ func (mainConfig *MainConfig) ParseMainConfigFromFile(data []byte) error {
 		return err
 	}
 	for name, endpoints := range mainConfig.Environments {
-		if endpoints.APIManagerEndpoint == "" {
+		if endpoints.ApiManagerEndpoint == "" {
 			return errors.New("Blank API Manager Endpoint for " + name)
 		}
 		if endpoints.RegistrationEndpoint == "" {
@@ -90,6 +90,8 @@ func (mainConfig *MainConfig) ParseMainConfigFromFile(data []byte) error {
 		if endpoints.TokenEndpoint == "" {
 			return errors.New("Blank Token Endpoint for " + name)
 		}
+		// ApiImportExportEndpoint is not mandatory
+		// ApiListEndpoint is not mandatory
 	}
 	return nil
 }
