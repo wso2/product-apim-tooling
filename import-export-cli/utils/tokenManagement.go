@@ -35,7 +35,7 @@ import (
 // @return b64encodedCredentials, ApiManagerEndpoint, Errors
 // including (export-api, import-api)
 func ExecutePreCommandWithBasicAuth(environment, flagUsername, flagPassword, mainConfigFilePath,
-	envKeysAllFilePath string) (b64encodedCredentials string, err error) {
+envKeysAllFilePath string) (b64encodedCredentials string, err error) {
 	if EnvExistsInMainConfigFile(environment, mainConfigFilePath) {
 		Logln(LogPrefixInfo + "Environment: '" + environment + "'")
 
@@ -132,7 +132,7 @@ func ExecutePreCommandWithBasicAuth(environment, flagUsername, flagPassword, mai
 // @return AccessToken, ApiManagerEndpoint, Errors
 // including (export-api, import-api, list)
 func ExecutePreCommandWithOAuth(environment, flagUsername, flagPassword, mainConfigFilePath,
-	envKeysAllFilePath string) (accessToken string, err error) {
+envKeysAllFilePath string) (accessToken string, err error) {
 	if EnvExistsInMainConfigFile(environment, mainConfigFilePath) {
 		registrationEndpoint := GetRegistrationEndpointOfEnv(environment, mainConfigFilePath)
 		tokenEndpoint := GetTokenEndpointOfEnv(environment, mainConfigFilePath)
@@ -254,7 +254,7 @@ func GetClientIDSecret(username, password, url string) (clientID string, clientS
 								  "callbackUrl": "www.google.lk",
 								  "grantType":"password refresh_token",
 								  "saasApp": true,
-								  "owner": "admin",
+								  "owner": "` + username + `",
 								  "tokenScope": "Production"
 							     }`)
 	headers := make(map[string]string)
