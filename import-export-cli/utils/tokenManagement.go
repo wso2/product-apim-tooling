@@ -250,7 +250,7 @@ envKeysAllFilePath string) (accessToken string, err error) {
 // @param url : Registration Endpoint for the environment
 // @return client_id, client_secret, error
 func GetClientIDSecret(username, password, url string) (clientID string, clientSecret string, err error) {
-	body := dedent.Dedent(`{"clientName": "rest_api_publisher",
+	body := dedent.Dedent(`{"clientName": "rest_api_import_export",
 								  "callbackUrl": "www.google.lk",
 								  "grantType":"password refresh_token",
 								  "saasApp": true,
