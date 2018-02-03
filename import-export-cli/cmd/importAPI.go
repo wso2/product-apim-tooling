@@ -61,7 +61,8 @@ var ImportAPICmd = &cobra.Command{
 	Long:  importAPICmdLongDesc + importAPICmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + importAPICmdLiteral + " called")
-		executeImportAPICmd(utils.MainConfigFilePath, utils.EnvKeysAllFilePath, utils.ExportDirectory)
+		var apisExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedApisDirName)
+		executeImportAPICmd(utils.MainConfigFilePath, utils.EnvKeysAllFilePath, apisExportDirectory)
 	},
 }
 
