@@ -54,6 +54,11 @@ var addEnvCmdExamples = dedent.Dedent(`
 						--list https://localhsot:9443/api/am/publisher/v0.11/apis \
 						--apim  https://localhost:9443 \
 						--token https://localhost:8243/token
+
+		` + utils.ProjectName + ` ` + addEnvCmdLiteral + ` -n dev --apim https://localhost:9443 \
+						--token	https://localhost:8243/token \
+						--registration http://localhost:9763/client-registration/v0.11/register
+
 	`)
 
 // addEnvCmd represents the addEnv command
@@ -71,6 +76,7 @@ func executeAddEnvCmd(mainConfigFilePath string) {
 	envEndpoints := new(utils.EnvEndpoints)
 	envEndpoints.ApiManagerEndpoint = flagApiManagerEndpoint
 	envEndpoints.RegistrationEndpoint = flagRegistrationEndpoint
+
 	envEndpoints.ApiImportExportEndpoint = flagApiImportExportEndpoint
 	envEndpoints.ApiListEndpoint = flagApiListEndpoint
 	envEndpoints.TokenEndpoint = flagTokenEndpoint

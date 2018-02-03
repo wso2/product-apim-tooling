@@ -26,6 +26,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"time"
+	"path/filepath"
 )
 
 var verbose bool
@@ -101,6 +102,9 @@ func createConfigFiles() {
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating config directory: "+utils.DefaultExportDirPath, err)
 	}
+
+	utils.CreateDirIfNotExist(filepath.Join(utils.DefaultExportDirPath, utils.ExportedApisDirName))
+	utils.CreateDirIfNotExist(filepath.Join(utils.DefaultExportDirPath, utils.ExportedAppsDirName))
 
 	if !utils.IsFileExist(utils.MainConfigFilePath) {
 		var mainConfig = new(utils.MainConfig)

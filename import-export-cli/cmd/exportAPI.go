@@ -60,7 +60,8 @@ var ExportAPICmd = &cobra.Command{
 	Long:  exportAPICmdLongDesc + exportAPICmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + exportAPICmdLiteral + " called")
-		executeExportAPICmd(utils.MainConfigFilePath, utils.EnvKeysAllFilePath, utils.ExportDirectory)
+		var apisExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedApisDirName)
+		executeExportAPICmd(utils.MainConfigFilePath, utils.EnvKeysAllFilePath, apisExportDirectory)
 	},
 }
 
@@ -118,8 +119,8 @@ func WriteToZip(exportAPIName, exportAPIVersion, exportEnvironment, exportDirect
 // ExportAPI
 // @param name : Name of the API to be exported
 // @param version : Version of the API to be exported
-// @param apimEndpoint : API Manager Endpoint for the environment
-// @param accessToken : Access Token for the resource
+// @param apiImportExportEndpoint : API Import Export Endpoint for the environment
+// @param  b64encodedCredentials: Base64 Encoded 'username:password'
 // @return response Response in the form of *resty.Response
 func getExportApiResponse(name, version, provider, apiImportExportEndpoint, b64encodedCredentials string) *resty.Response {
 	apiImportExportEndpoint = utils.AppendSlashToString(apiImportExportEndpoint)
