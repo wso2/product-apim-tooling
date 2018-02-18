@@ -66,8 +66,10 @@ func TestAddEnv3(t *testing.T) {
 	sampleMainConnfig.Environments["dev"] = utils.EnvEndpoints{
 		"sample-publisher-endpoint",
 		"sample-import-export-endpoint",
-		"sample-list-endpoint",
+		"sample-api-list-endpoint",
+		"sample-application-list-endpoint",
 		"sample-reg-endpoint",
+		"sample-admin-endpoint",
 		"sample-token-endpoint"}
 	utils.WriteConfigFile(sampleMainConnfig, sampleMainConfigFilePath)
 
@@ -94,8 +96,10 @@ func TestAddEnv4(t *testing.T) {
 	sampleMainConnfig.Environments["dev"] = utils.EnvEndpoints{
 		"sample-publisher-endpoint",
 		"sample-import-export-endpoint",
-		"sample-list-endpoint",
+		"sample-api-list-endpoint",
+		"sample-application-list-endpoint",
 		"sample-reg-endpoint",
+		"sample-admin-endpoint",
 		"sample-token-endpoint"}
 	utils.WriteConfigFile(sampleMainConnfig, sampleMainConfigFilePath)
 

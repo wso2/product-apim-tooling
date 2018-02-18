@@ -48,7 +48,9 @@ type EnvEndpoints struct {
 	ApiManagerEndpoint      string `yaml:"api_manager_endpoint"`
 	ApiImportExportEndpoint string `yaml:"api_import_export_endpoint"`
 	ApiListEndpoint         string `yaml:"api_list_endpoint"`
+	AppListEndpoint			string `yaml:"application_list_endpoint"`
 	RegistrationEndpoint    string `yaml:"registration_endpoint"`
+	AdminEndpoint           string `yaml:"admin_endpoint"`
 	TokenEndpoint           string `yaml:"token_endpoint"`
 }
 
