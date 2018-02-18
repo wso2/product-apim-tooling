@@ -195,6 +195,18 @@ func GetApiListEndpointOfEnv(env, filePath string) string {
 	}
 }
 
+// Get ApplicationListEndpoint of a given environment
+func GetApplicationListEndpointOfEnv(env, filePath string) string {
+	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
+	if !(envEndpoints.AppListEndpoint == "" || envEndpoints == nil) {
+		return envEndpoints.AppListEndpoint
+	} else {
+		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
+		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
+		return apiManagerEndpoint+defaultApplicationListEndpointSuffix
+	}
+}
+
 // Get TokenEndpoint of a given environment
 func GetTokenEndpointOfEnv(env, filePath string) string {
 	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)

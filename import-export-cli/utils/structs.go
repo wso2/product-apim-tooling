@@ -65,6 +65,14 @@ type API struct {
 	Status   string `json:"status"`
 }
 
+type Application struct {
+	ID         string `json:"applicationId"`
+	Name       string `json:"name"`
+	Owner 	   string `json:"owner"`
+	Status     string `json:"status"`
+	GroupID    string `json:"groupId"`
+}
+
 type RegistrationResponse struct {
 	ClientID     string `json:"clientId"`
 	ClientSecret string `json:"clientSecret"`
@@ -83,4 +91,9 @@ type TokenResponse struct {
 type APIListResponse struct {
 	Count int32 `json:"count"`
 	List  []API `json:"list"`
+}
+
+type ApplicationListResponse struct {
+	Count int32         `json:"count"`
+	List  []Application `json:"list"`
 }
