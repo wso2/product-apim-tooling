@@ -171,6 +171,18 @@ func GetApiImportExportEndpointOfEnv(env, filePath string) string {
 	}
 }
 
+// Get AdminEndpoint of a given environment
+func GetAdminEndpointOfEnv(env, filePath string) string {
+	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
+	if !(envEndpoints.AdminEndpoint == "" || envEndpoints == nil) {
+		return envEndpoints.AdminEndpoint
+	} else {
+		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
+		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
+		return apiManagerEndpoint + defaultApplicationImportExportSuffix
+	}
+}
+
 // Get ApiListEndpoint of a given environment
 func GetApiListEndpointOfEnv(env, filePath string) string {
 	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)

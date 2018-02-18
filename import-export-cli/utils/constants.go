@@ -52,7 +52,9 @@ const ExportedAppsDirName = "apps"
 var DefaultExportDirPath = filepath.Join(ConfigDirPath, DefaultExportDirName)
 
 const defaultApiImportExportProduct = "api-import-export-2.1.0-v3"
+const defaultApplicationImportExportSuffix = "api/am/admin/v0.11"
 const defaultApiListEndpointSuffix = "api/am/publisher/v0.11/apis"
+const defaultApplicationListEndpointSuffix = "api/am/admin/v0.11/applications"
 
 const DefaultEnvironmentName = "default"
 
@@ -79,6 +81,9 @@ const HeaderValueMultiPartFormData = "multipart/form-data"
 const LogPrefixInfo = "[INFO]: "
 const LogPrefixWarning = "[WARN]: "
 const LogPrefixError = "[ERROR]: "
+
+// String Constants
+const SearchAndTag = "&"
 
 // Other
 const DefaultTokenValidityPeriod = "3600"
