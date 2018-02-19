@@ -65,7 +65,8 @@ var ImportAppCmd = &cobra.Command{
 	Long:  importAppCmdLongDesc + importAppCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + importAppCmdLiteral + " called")
-		executeImportAppCmd(importAppOwner, utils.MainConfigFilePath, utils.EnvKeysAllFilePath, utils.ExportDirectory)
+		var appsExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedAppsDirName)
+		executeImportAppCmd(importAppOwner, utils.MainConfigFilePath, utils.EnvKeysAllFilePath, appsExportDirectory)
 	},
 }
 
@@ -214,13 +215,13 @@ func init() {
 	ImportAppCmd.Flags().StringVarP(&importAppFile, "file", "f", "",
 		"Name of the Application to be imported")
 	ImportAppCmd.Flags().StringVarP(&importAppOwner, "owner", "o", "",
-		"Name of the desired owner of the Application by Importer")
+		"Name of the target owner of the Application as desired by the Importer")
 	ImportAppCmd.Flags().StringVarP(&importAppEnvironment, "environment", "e",
 		utils.DefaultEnvironmentName, "Environment from the which the Application should be imported")
 	ImportAppCmd.Flags().BoolVarP(&preserveOwner, "perserveOwner", "r", false,
 		"Preserves app owner")
 	ImportAppCmd.Flags().BoolVarP(&skipSubscriptions, "skipSubscriptions", "s", false,
-		"Adds subscriptions of the Application")
+		"Skip subscriptions of the Application")
 	ImportAppCmd.Flags().StringVarP(&importAppCmdUsername, "username", "u", "", "Username")
 	ImportAppCmd.Flags().StringVarP(&importAppCmdPassword, "password", "p", "", "Password")
 }

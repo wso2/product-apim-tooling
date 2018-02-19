@@ -37,7 +37,7 @@ var listAppsCmdPassword string
 
 // appsCmd related info
 const appsCmdLiteral = "apps"
-const appsCmdShortDesc = "Display a list of Applications in an environment specific to the user"
+const appsCmdShortDesc = "Display a list of Applications in an environment specific to an owner"
 
 var appsCmdLongDesc = dedent.Dedent(`
 		Display a list of Applications of the user in the environment specified by the flag --environment, -e
