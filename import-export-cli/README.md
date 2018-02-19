@@ -139,7 +139,7 @@ Command Line tool for importing and exporting APIs/Applications between differen
             Optional
                   --skipSubscriptions, -s    
                   --owner, -o        
-                  --perserveOwner, -r        
+                  --preserveOwner, -r        
                   --username, -u      
                   --password, -p     
         Examples:      

@@ -203,7 +203,7 @@ func GetApplicationListEndpointOfEnv(env, filePath string) string {
 	} else {
 		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
 		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
-		return apiManagerEndpoint+defaultApplicationListEndpointSuffix
+		return apiManagerEndpoint + defaultApplicationListEndpointSuffix
 	}
 }
 

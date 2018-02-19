@@ -1,6 +1,6 @@
-<h1 id="cli-for-importing-and-exporting-apis">CLI for Importing and Exporting APIs</h1>
+<h1 id="cli-for-importing-and-exporting-apis-and-applications">CLI for Importing and Exporting APIs and Applications</h1>
 <h2 id="for-wso2-api-manager-2-1-x">For WSO2 API Manager 2.1.x</h2>
-<p>Command Line tool for importing and exporting APIs between different API Environemnts</p>
+<p>Command Line tool for importing and exporting APIs and Applications between different API Environments</p>
 <h2 id="getting-started">Getting Started</h2>
 <ul>
     <li><h3 id="running">Running</h3>
@@ -86,6 +86,42 @@
             apimcli import-api -f TestAPI -e dev
 </code></pre>
 <ul>
+    <li><h4 id="export-app">export-app</h4>
+        <pre><code class="lang-bash">   Flags:
+       Required:
+            --name, -n
+            --owner, -o
+            --environment, -e
+       Optional:
+            --username, -u
+            --password, -p
+            NOTE: user will be prompted to enter credentials if they are not provided with these flags
+   Examples:
+            apimcli export-app -n SampleApp -o admin -e dev
+            apimcli export-app -n SampleApp -o admin -e prod
+</code></pre>
+    </li>
+</ul>
+<ul>
+    <li><h4 id="import-app">import-app</h4>
+    </li>
+</ul>
+<pre><code class="lang-bash">        Flags:
+            Required
+                  --file, -f
+                  --environment, -e
+            Optional
+                  --skipSubscriptions, -s
+                  --owner, -o
+                  --preserveOwner, -r
+                  --file, -f
+                  --environment, -e
+        Examples:
+            apimcli import-app -f qa/apps/sampleApp.zip -e dev
+            apimcli Import App -f staging/apps/sampleApp.zip -e prod -o testUser -u admin -p admin
+            apimcli import-app -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -e staging
+</code></pre>
+<ul>
     <li><h4 id="list-apis">list apis</h4>
         <pre><code class="lang-bash">      Flags:
           Required:
@@ -102,6 +138,19 @@
           apimcli list apis -e staging 
           apimcli list apis -e staging -u admin -p 123456
           apimcli list apis -e staging -p 123456
+</code></pre>
+    </li>
+    <li><h4 id="list-apps">list apps</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required
+                  --environment, -e
+                  --owner, -o
+            Optional
+                  --username, -u
+                  --password, -p
+        Examples:
+            apimcli list apps -e dev -o admin
+            apimcli list apps -e staging -o sampleUser -u admin -p 123456
 </code></pre>
     </li>
     <li><h4 id="list-envs">list envs</h4>

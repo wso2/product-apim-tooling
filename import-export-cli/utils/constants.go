@@ -44,7 +44,6 @@ const SampleMainConfigFileName = "main_config.yaml.sample"
 var MainConfigFilePath = filepath.Join(ConfigDirPath, MainConfigFileName)
 var SampleMainConfigFilePath = filepath.Join(ConfigDirPath, SampleMainConfigFileName)
 
-
 const DefaultExportDirName = "exported"
 const ExportedApisDirName = "apis"
 const ExportedAppsDirName = "apps"
