@@ -94,10 +94,10 @@ func executeImportAppCmd(importAppOwner, mainConfigFilePath, envKeysAllFilePath,
 			fmt.Println("Invalid Credentials or You may not have enough permission!")
 		} else if resp.StatusCode == http.StatusForbidden {
 			// 401 Unauthorized
-			fmt.Printf("Invalid Owner!"+ "\nNOTE: Cross Tenant Imports are not allowed!\n")
+			fmt.Printf("Invalid Owner!" + "\nNOTE: Cross Tenant Imports are not allowed!\n")
 		} else {
-		fmt.Println("Error importing Application")
-		utils.Logln(utils.LogPrefixError + resp.Status)
+			fmt.Println("Error importing Application")
+			utils.Logln(utils.LogPrefixError + resp.Status)
 		}
 	} else {
 		// env_endpoints file is not configured properly by the user
@@ -122,31 +122,12 @@ func ImportApplication(query, appOwner, adminEndpiont, accessToken, exportDirect
 	sourceEnv := strings.Split(query, "/")[0] // environment from which the Application was exported
 	utils.Logln(utils.LogPrefixInfo + "Source Environment: " + sourceEnv)
 
-	fileName := query // ex:- fileName = dev/sampleApp.zip //TODO change the ex here appropriately
+	fileName := query // ex:- fileName = dev/sampleApp.zip
 
 	zipFilePath := filepath.Join(exportDirectory, fileName)
 	fmt.Println("ZipFilePath:", zipFilePath)
 
-	// check if '.zip' exists in the input 'fileName'
-	//hasZipExtension, _ := regexp.MatchString(`^\S+\.zip$`, fileName)
-
-	//if hasZipExtension {
-	//	// import the zip file directly
-	//	//fmt.Println("hasZipExtension: ", true)
-	//
-	//} else {
-	//	//fmt.Println("hasZipExtension: ", false)
-	//	// search for a directory with the given fileName
-	//	destination := filepath.Join(exportDirectory, fileName+".zip")
-	//	err := utils.ZipDir(zipFilePath, destination)
-	//	if err != nil {
-	//		utils.HandleErrorAndExit("Error creating zip archive", err)
-	//	}
-	//	zipFilePath += ".zip"
-	//}
-
 	extraParams := map[string]string{}
-	// TODO:: Add extraParams as necessary
 
 	req, err := NewAppFileUploadRequest(url, extraParams, "file", zipFilePath, accessToken)
 	if err != nil {

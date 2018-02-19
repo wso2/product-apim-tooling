@@ -56,7 +56,8 @@ var ExportAppCmd = &cobra.Command{
 	Long:  exportAppCmdLongDesc + exportAppCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + exportAppCmdLiteral + " called")
-		executeExportAppCmd(utils.MainConfigFilePath, utils.EnvKeysAllFilePath, utils.ExportDirectory)
+		var appsExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedAppsDirName)
+		executeExportAppCmd(utils.MainConfigFilePath, utils.EnvKeysAllFilePath, appsExportDirectory)
 	},
 }
 
@@ -95,7 +96,7 @@ func executeExportAppCmd(mainConfigFilePath, envKeysAllFilePath, exportDirectory
 func WriteApplicationToZip(exportAppName, exportAppOwner, exportEnvironment, exportDirectory string,
 	resp *resty.Response) {
 	// Write to file
-	directory := filepath.Join(exportDirectory, exportEnvironment, utils.DefaultApplicationExportDirName)
+	directory := filepath.Join(exportDirectory, exportEnvironment)
 	// create directory if it doesn't exist
 	if _, err := os.Stat(directory); os.IsNotExist(err) {
 		os.Mkdir(directory, 0777)
