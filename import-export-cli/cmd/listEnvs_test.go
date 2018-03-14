@@ -28,8 +28,10 @@ func TestPrintEnvs(t *testing.T) {
 	envEndpoints["dev"] = utils.EnvEndpoints{
 		"apim-endpoint",
 		"import-export-endpoint",
-		"list-endpoint",
-		"reg-endpoint",
+		"api-list-endpoint",
+		"application-list-endpoint",
+		"token-endpoint",
+		"admin-endpoint",
 		"token-endpoint",
 	}
 	printEnvs(envEndpoints)

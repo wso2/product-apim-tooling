@@ -52,6 +52,18 @@ func InvokeGETRequest(url string, headers map[string]string) (*resty.Response, e
 	return resp, err
 }
 
+// Invoke http-get request with query param
+func InvokeGETRequestWithQueryParam(queryParam string, paramValue string, url string, headers map[string]string) (
+	*resty.Response, error) {
+	if Insecure {
+		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+	}
+	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
+	resp, err := resty.R().SetHeaders(headers).SetQueryParam(queryParam, paramValue).Get(url)
+
+	return resp, err
+}
+
 func PromptForUsername() string {
 	reader := bufio.NewReader(os.Stdin)
 

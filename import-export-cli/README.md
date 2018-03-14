@@ -1,7 +1,7 @@
-# CLI for Importing and Exporting APIs
+# CLI for Importing and Exporting APIs and Applications
 ## For WSO2 API Manager 2.1.x
 
-Command Line tool for importing and exporting APIs between different API Environemnts
+Command Line tool for importing and exporting APIs/Applications between different API Environemnts
 
 ## Getting Started
 
@@ -113,6 +113,53 @@ Command Line tool for importing and exporting APIs between different API Environ
             apimcli list apis -e staging 
             apimcli list apis -e staging -u admin -p 123456
             apimcli list apis -e staging -p 123456
+```
+
+* #### export-app
+```bash
+        Flags
+            Required:
+                 --name, -n          
+                 --owner, -o         
+                 --environment, -e
+            Optional
+                 --username, -u
+                 --password, -p   
+                 NOTE: user will be prompted to enter credentials if they are not provided with these flags
+        Examples:        
+            apimcli export-app -n SampleApp -o admin -e dev
+            apimcli export-app -n SampleApp -o admin -e prod         
+```
+* #### import-app
+```bash    
+        Flags
+            Required
+                  --file, -f          
+                  --environment, -e   
+            Optional
+                  --skipSubscriptions, -s    
+                  --owner, -o        
+                  --preserveOwner, -r        
+                  --username, -u      
+                  --password, -p     
+        Examples:      
+            apimcli import-app -f qa/apps/sampleApp.zip -e dev
+            apimcli Import App -f staging/apps/sampleApp.zip -e prod -o testUser -u admin -p admin
+            apimcli import-app -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -e staging               
+```
+* #### list apps
+```bash
+        Flags
+            Required
+                  --environment, -e          
+                  --owner, -o         
+            Optional
+                  --username, -u             
+                  --password, -p             
+        Examples:
+            apimcli list apps -e dev -o admin 
+            apimcli list apps -e staging -o sampleUser -u admin -p 123456                         
+
 ```
 
 *  #### list envs

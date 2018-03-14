@@ -120,3 +120,85 @@ func TestPrintApis(t *testing.T) {
 
 	printAPIs(apis)
 }
+
+func TestGetApplicationListOK(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		if r.Method != http.MethodGet {
+			t.Errorf("Expected method '%s', got '%s'\n", http.MethodGet, r.Method)
+		}
+		w.Header().Set(utils.HeaderContentType, utils.HeaderValueApplicationJSON)
+
+		if !strings.Contains(r.Header.Get(utils.HeaderAuthorization), utils.HeaderValueAuthBearerPrefix) {
+			t.Errorf("Error in Authorization Header. Got '%s'\n", w.Header().Get(utils.HeaderAuthorization))
+		}
+
+		body := dedent.Dedent(`
+			{
+    "count": 2,
+    "list": [
+        {
+            "applicationId": "0e09806c-65bb-4114-b483-3f7521e51a70",
+            "name": "testApp1",
+            "owner": "admin",
+            "status": "APPROVED",
+            "groupId": ""
+        },
+        {
+            "applicationId": "d2b2a966-97e6-40da-9f73-7202d6c2bf9b",
+            "name": "testApp2",
+            "owner": "admin",
+            "status": "APPROVED",
+            "groupId": "testGrp"
+        }
+		
+    ]
+}`)
+
+		w.Write([]byte(body))
+	}))
+	defer server.Close()
+
+	count, appList, err := GetApplicationList("admin", "access_token", server.URL)
+	fmt.Println("Count:", count)
+	fmt.Println("List:", appList)
+
+	if count != 2 {
+		t.Errorf("Incorrect count. Exptected %d, got %d\n", 3, count)
+	}
+
+	if err != nil {
+		t.Error("Error" + err.Error())
+	}
+}
+
+func TestGetApplicationListUnreachable(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusServiceUnavailable)
+		if r.Method != http.MethodGet {
+			t.Errorf("Expected method '%s', got '%s'\n", http.MethodGet, r.Method)
+		}
+	}))
+	defer server.Close()
+
+	count, list, err := GetAPIList("", "access_token", server.URL)
+	if count != 0 {
+		t.Errorf("Incorrect Count. Expected %d, got %d\n", 0, count)
+	}
+	if list != nil {
+		t.Errorf("")
+	}
+
+	if err == nil {
+		t.Error("Error should not be nil")
+	}
+}
+
+func TestPrintApps(t *testing.T) {
+	var apps = []utils.Application{
+		{ID: "2995a4d5-284a-484d-9fb8-ae9e403b67b0", Name: "sampleApp1", Owner: "admin", Status: "APPROVED", GroupID: "testGrp"},
+		{ID: "4559b42e-7b53-47a9-88cd-218bbca4094c", Name: "sampleApp2", Owner: "admin", Status: "APPROVED", GroupID: ""},
+	}
+
+	printApps(apps)
+}

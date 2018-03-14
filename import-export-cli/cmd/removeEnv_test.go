@@ -36,8 +36,10 @@ func TestRemoveEnv1(t *testing.T) {
 	mainConfig.Environments["dev"] = utils.EnvEndpoints{
 		"sample-publisher-endpoint",
 		"sample-import-export-endpoint",
-		"sample-list-endpoint",
+		"sample-api-list-endpoint",
+		"sample-application-list-endpoint",
 		"sample-reg-endpoint",
+		"sample-admin-endpoint",
 		"sample-token-endpoint",
 	}
 	utils.WriteConfigFile(mainConfig, testMainConfigFilePath)
@@ -75,8 +77,10 @@ func TestRemoveEnv2(t *testing.T) {
 	sampleMainConfig.Environments["dev"] = utils.EnvEndpoints{
 		"sample-publisher-endpoint",
 		"sample-import-export-endpoint",
-		"sample-list-endpoint",
+		"sample-api-list-endpoint",
+		"sample-application-list-endpoint",
 		"sample-reg-endpoint",
+		"sample-admin-endpoint",
 		"sample-token-endpoint",
 	}
 	utils.WriteConfigFile(sampleMainConfig, sampleMainConfigFilePath)
@@ -100,8 +104,10 @@ func TestRemoveEnv3(t *testing.T) {
 	sampleMainConfig.Environments["dev"] = utils.EnvEndpoints{
 		"sample-publisher-endpoint",
 		"sample-import-export-endpoint",
-		"sample-list-endpoint",
+		"sample-api-list-endpoint",
+		"sample-application-list-endpoint",
 		"sample-reg-endpoint",
+		"sample-admin-endpoint",
 		"sample-token-endpoint",
 	}
 	utils.WriteConfigFile(sampleMainConfig, sampleMainConfigFilePath)

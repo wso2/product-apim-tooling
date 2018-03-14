@@ -30,8 +30,10 @@ var flagAddEnvName string              // name of the environment to be added
 var flagTokenEndpoint string           // token endpoint of the environment to be added
 var flagApiImportExportEndpoint string // ApiImportExportEndpoint of the environment to be added
 var flagApiListEndpoint string         // ApiListEnvironment of the environment to be added
+var flagAppListEndpoint string         // ApplicationListEndpoint of the environment to be added
 var flagRegistrationEndpoint string    // registration endpoint of the environment to be added
 var flagApiManagerEndpoint string      // api manager endpoint of the environment to be added
+var flagAdminEndpoint string           // admin endpoint of the environment to be added
 
 // AddEnv command related Info
 const addEnvCmdLiteral = "add-env"
@@ -79,6 +81,8 @@ func executeAddEnvCmd(mainConfigFilePath string) {
 
 	envEndpoints.ApiImportExportEndpoint = flagApiImportExportEndpoint
 	envEndpoints.ApiListEndpoint = flagApiListEndpoint
+	envEndpoints.AppListEndpoint = flagAppListEndpoint
+	envEndpoints.AdminEndpoint = flagAdminEndpoint
 	envEndpoints.TokenEndpoint = flagTokenEndpoint
 	err := addEnv(flagAddEnvName, envEndpoints, mainConfigFilePath)
 	if err != nil {
@@ -140,8 +144,10 @@ func init() {
 	addEnvCmd.Flags().StringVar(&flagApiManagerEndpoint, "apim", "", "API Manager endpoint for the environment")
 	addEnvCmd.Flags().StringVar(&flagApiImportExportEndpoint, "import-export", "",
 		"API Import Export endpoint for the environment")
-	addEnvCmd.Flags().StringVar(&flagApiListEndpoint, "list", "", "API List endpoint for the environment")
+	addEnvCmd.Flags().StringVar(&flagApiListEndpoint, "api_list", "", "API List endpoint for the environment")
+	addEnvCmd.Flags().StringVar(&flagAppListEndpoint, "app_list", "", "Application List endpoint for the environment")
 	addEnvCmd.Flags().StringVar(&flagTokenEndpoint, "token", "", "Token endpoint for the environment")
 	addEnvCmd.Flags().StringVar(&flagRegistrationEndpoint, "registration", "",
 		"Registration endpoint for the environment")
+	addEnvCmd.Flags().StringVar(&flagAdminEndpoint, "admin", "", "Admin endpoint for the environment")
 }

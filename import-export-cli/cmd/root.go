@@ -34,10 +34,10 @@ var cfgFile string
 var insecure bool
 
 // RootCmd related info
-const RootCmdShortDesc = "CLI for Importing and Exporting APIs"
+const RootCmdShortDesc = "CLI for Importing and Exporting APIs and Applications"
 
 var RootCmdLongDesc = dedent.Dedent(`
-		` + utils.ProjectName + ` is a Command Line Tool for Importing and Exporting APIs between different environments of WSO2 API Manager 2.1.x
+		` + utils.ProjectName + ` is a Command Line Tool for Importing and Exporting APIs and Applications between different environments of WSO2 API Manager 2.1.x
 		(Dev, Production, Staging, QA etc.)
 		`)
 
@@ -120,14 +120,18 @@ func createConfigFiles() {
 			"https://localhost/apim",
 			"https://localhost/api-import-export",
 			"https://localhost/publisher/apis",
+			"https://localhost:9443/api/am/admin/v0.11/applications",
 			"https://localhost/register",
+			"https://localhost:9443/api/am/admin/v0.11",
 			"https://localhost/token",
 		}
 		mainConfig.Environments["sample-env2"] = utils.EnvEndpoints{
 			"https://localhost/apim",
 			"",
 			"",
+			"",
 			"https://localhost/register",
+			"",
 			"https://localhost/token",
 		}
 		utils.WriteConfigFile(mainConfig, utils.SampleMainConfigFilePath)

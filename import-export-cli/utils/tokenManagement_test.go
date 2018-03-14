@@ -116,7 +116,9 @@ func TestExecutePreCommandWithBasicAuth1(t *testing.T) {
 		apimStub.URL,
 		apimStub.URL + "/api-import-export",
 		apimStub.URL + "/publisher/apis",
+		apimStub.URL + "/admin/applications",
 		registrationStub.URL,
+		apimStub.URL + "/admin",
 		oauthStub.URL,
 	}
 	WriteConfigFile(mainConfig, mainConfigFilePath)
@@ -167,7 +169,9 @@ func TestExecutePreCommandWithBasicAuth2(t *testing.T) {
 		apimStub.URL,
 		apimStub.URL + "/api-import-export",
 		apimStub.URL + "/publisher/apis",
+		apimStub.URL + "/admin/applications",
 		registrationStub.URL,
+		apimStub.URL + "/admin",
 		oauthStub.URL,
 	}
 	WriteConfigFile(mainConfig, mainConfigFilePath)
@@ -262,7 +266,9 @@ func TestExecutePreCommandWithOAuth1(t *testing.T) {
 		apimStub.URL,
 		apimStub.URL + "/api-import-export",
 		apimStub.URL + "/publisher/apis",
+		apimStub.URL + "/admin/applications",
 		registrationStub.URL,
+		apimStub.URL + "/admin",
 		oauthStub.URL,
 	}
 	WriteConfigFile(mainConfig, mainConfigFilePath)
@@ -311,7 +317,9 @@ func TestExecutePreCommandWithOAuth2(t *testing.T) {
 		apimStub.URL,
 		apimStub.URL + "/api-import-export",
 		apimStub.URL + "/publisher/apis",
+		apimStub.URL + "/admin/applications",
 		registrationStub.URL,
+		apimStub.URL + "/admin",
 		oauthStub.URL,
 	}
 	WriteConfigFile(mainConfig, mainConfigFilePath)

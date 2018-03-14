@@ -209,8 +209,10 @@ func TestRemoveEnvFromKeysFile4(t *testing.T) {
 	mainConfig.Environments[devName] = EnvEndpoints{
 		"dev_apim_endpoint",
 		"dev_import_export_endpoint",
-		"dev_list_endpoint",
+		"dev_api_list_endpoint",
+		"dev_application_list_endpoint",
 		"dev_reg_endpoint",
+		"dev_admin_endpoint",
 		"dev_token_endpoint",
 	}
 	WriteConfigFile(mainConfig, testMainConfigFilePath)
@@ -240,8 +242,10 @@ func TestIsDefaultEnvPresent1(t *testing.T) {
 	mainConfig.Environments[DefaultEnvironmentName] = EnvEndpoints{
 		"default-publisher",
 		"default-import-export",
-		"default-list",
+		"default-api-list",
+		"default-application-list",
 		"default-reg",
+		"default-admin",
 		"default-token",
 	}
 
@@ -280,8 +284,10 @@ func TestGetDefaultEnvironment1(t *testing.T) {
 	mainConfig.Environments[DefaultEnvironmentName] = EnvEndpoints{
 		"default-publisher",
 		"default-import-export",
-		"default-list",
+		"default-api-list",
+		"default-application-list",
 		"default-reg",
+		"default-admin",
 		"default-token",
 	}
 
@@ -329,8 +335,10 @@ func TestRemoveEnvFromMainConfigFile2(t *testing.T) {
 	mainConfig.Environments["dev"] = EnvEndpoints{
 		"default-publisher",
 		"default-import-export",
-		"default-list",
+		"default-api-list",
+		"default-application-list",
 		"default-reg",
+		"default-admin",
 		"default-token",
 	}
 
@@ -352,8 +360,10 @@ func TestRemoveEnvFromMainConfigFile3(t *testing.T) {
 	mainConfig.Environments["dev"] = EnvEndpoints{
 		"default-publisher",
 		"default-import-export",
-		"default-list",
+		"default-api-list",
+		"default-application-list",
 		"default-reg",
+		"default-admin",
 		"default-token",
 	}
 
@@ -372,8 +382,10 @@ func TestGetEndpointsOfEnvironment(t *testing.T) {
 	mainConfig.Environments["dev"] = EnvEndpoints{
 		"default-publisher",
 		"default-import-export",
-		"default-list",
+		"default-api-list",
+		"default-application-list",
 		"default-reg",
+		"default-admin",
 		"default-token",
 	}
 
