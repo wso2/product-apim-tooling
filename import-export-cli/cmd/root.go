@@ -120,9 +120,9 @@ func createConfigFiles() {
 			"https://localhost/apim",
 			"https://localhost/api-import-export",
 			"https://localhost/publisher/apis",
-			"https://localhost:9443/api/am/admin/v0.11/applications",
+			"https://localhost:9443/api/am/admin/v0.12/applications",
 			"https://localhost/register",
-			"https://localhost:9443/api/am/admin/v0.11",
+			"https://localhost:9443/api/am/admin/v0.12",
 			"https://localhost/token",
 		}
 		mainConfig.Environments["sample-env2"] = utils.EnvEndpoints{

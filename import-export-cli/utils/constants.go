@@ -50,10 +50,10 @@ const ExportedAppsDirName = "apps"
 
 var DefaultExportDirPath = filepath.Join(ConfigDirPath, DefaultExportDirName)
 
-const defaultApiImportExportProduct = "api-import-export-2.1.0-v3"
-const defaultApplicationImportExportSuffix = "api/am/admin/v0.11"
-const defaultApiListEndpointSuffix = "api/am/publisher/v0.11/apis"
-const defaultApplicationListEndpointSuffix = "api/am/admin/v0.11/applications"
+const defaultApiImportExportProduct = "api-import-export-2.2.0-v2"
+const defaultApplicationImportExportSuffix = "api/am/admin/v0.12"
+const defaultApiListEndpointSuffix = "api/am/publisher/v0.12/apis"
+const defaultApplicationListEndpointSuffix = "api/am/admin/v0.12/applications"
 
 const DefaultEnvironmentName = "default"
 
