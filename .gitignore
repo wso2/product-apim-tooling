@@ -54,8 +54,9 @@ import-export-cli/.glide/
 
 import-export-cli/vendor
 
-# Keep a sample API for testing
+# Sample API and App for testing
 !import-export-cli/cmd/sampleapi.zip
+!import-export-cli/cmd/sampleApp.zip
 
 # YAML Config Files
 import-export-cli/env_endpoints_all.yaml
