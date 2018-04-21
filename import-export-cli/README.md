@@ -17,7 +17,7 @@ Command Line tool for importing and exporting APIs between different API Environ
 - ### Building
    `cd` into `product-apim-tooling/import-export-cli`
    
-    Execute `./build.sh -t apimcli.go -v 1.0.0 -f` to build for all platforms. (Can only be built in Mac or Linux)
+    Execute `./build.sh -t apimcli.go -v 2.0.0 -f` to build for all platforms. (Can only be built in Mac or Linux)
       
     Created packages will be available at `build/target` directory
     
