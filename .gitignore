@@ -16,7 +16,6 @@ build
 *.war
 *.ear
 
-
 # Binaries for programs and plugins
 *.exe
 *.dll
