@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <project xmlns="http://Maven.apache.org/POM/4.0.0"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://Maven.apache.org/POM/4.0.0 http://Maven.apache.org/xsd/Maven-4.0.0.xsd">
+
+    <!--<parent>-->
+        <!--<groupId>org.wso2.am</groupId>-->
+        <!--<artifactId>am-distribution-parent</artifactId>-->
+        <!--<version>2.2.1-SNAPSHOT</version>-->
+        <!--<relativePath>../pom.xml</relativePath>-->
+    <!--</parent>-->
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.wso2.am</groupId>
+    <artifactId>wso2am-update-test-tool</artifactId>
+    <version>0.97-SNAPSHOT</version>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>extract-docs-from-components</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <property name="tempdir" value="target/wso2am-update-test-tool" />
+                                <mkdir dir="${tempdir}" />
+                                <copy todir="${tempdir}/" overwrite="false">
+                                    <fileset dir="target/classes/">
+                                    </fileset>
+                                </copy>
+                                <unzip src="${tempdir}/apache-jmeter-4.0.zip" dest="${tempdir}/"/>
+                                <delete file="${tempdir}/apache-jmeter-4.0.zip" />
+                                <mkdir dir="${tempdir}/resources/apis" />
+                                <mkdir dir="${tempdir}/resources/applications" />
+                                <zip destfile="target/wso2-update-test-tool.zip" basedir="${tempdir}" update="true"/>
+                                <delete dir="${tempdir}"/>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+     </build>
+</project>
