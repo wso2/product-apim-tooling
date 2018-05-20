@@ -15,7 +15,7 @@ build
 *.jar
 *.war
 *.ear
-*.zip
+
 
 # Binaries for programs and plugins
 *.exe
