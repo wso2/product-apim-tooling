@@ -52,7 +52,45 @@ Installation & Running
 	* Also find log.jtl file to view the summary results.
 
 4. If you already have specified input details to create APIs/Applications on new server (without grabbing APIs/Applications details from latest stable deployment)
-		  1. Please keep those files under corresponding folders(apis/applications) under resources directory.
-  		2. Make sure you specified newly downloaded WUM updated distribution details under new instance in conf/config.json file.
-   Now you can run the run.sh script with specified command line argument. (um - user defined mode )
-		sh run.sh um or ./run.sh um
+		1. Please keep those files under corresponding folders(apis/applications) under resources directory.
+		2. Make sure that you specified the newly downloaded WUM updated distribution details under "newInstance" in conf/config.json file.
+		3. Keep blank for "currentInstance" details since you want to connect to new instance only.(username and password must be blank).
+	              ex:{
+			  "currentInstance": {
+			      "username":  "",
+			      "password":  "",
+			      "clientRegisterUrl": "",
+			      "accessTokenUrl":    "",
+			      "APIsPublisherUrl":  "",
+			      "APIsStoreUrl":      "",
+			      "applicationsStoreUrl":  "",
+			      "subscriptionsStoreUrl": "",
+			  },
+			  "newInstance": {
+			      "username":  "admin",
+			      "password":  "admin",
+			      "clientRegisterUrl": "https://localhost:9446/client-registration/v0.12/register",
+			      "accessTokenUrl":    "https://localhost:8246/token",
+			      "APIsPublisherUrl":  "https://localhost:9446/api/am/publisher/v0.12/apis",
+			      "APIsStoreUrl":      "https://localhost:9446/api/am/store/v0.12/apis",
+			      "applicationsStoreUrl":  "https://localhost:9446/api/am/store/v0.12/applications",
+			      "subscriptionsStoreUrl": "https://localhost:9446/api/am/store/v0.12/subscriptions"
+			  },
+			   "numberOfAPIsToConsider":  "10",
+			   "numberOfApplicationsToConsider":  "10"
+			  }
+
+   Now you can run the tool as specified in section 3.
+
+5. If you only want to grab the applications and APIs details from latest stable deployment and save it into files. (without pushing those APIs/Applications details to newly downloaded distribution)
+		1. Please keep corresponding APIs and applications folders empty under resources directory.
+		2. Make sure that you specified last stable deployment details of the API Manager (vanilla or WUM updated) under "currentInstance" in conf/config.json file.
+		3. Keep blank for "newInstance" details since you want to connect to current instance only.(username and password must be blank).
+  Now you can run the tool as specified in section 3.
+
+6. To delete APIs, applications input files and JMeter related .log, .jtl files; Run the clean.sh or clean.bat script based on your operating system.
+	on Linux-
+		sh clean.sh or ./clean.sh
+	on Windows-
+		clean.bat
+

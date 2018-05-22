@@ -1,24 +1,26 @@
 {
   "currentInstance": {
-    	"username":  "john",
-      "password":  "john123",
+    	"username":  "admin",
+        "password":  "admin",
     	"clientRegisterUrl": "https://localhost:9443/client-registration/v0.12/register",
     	"accessTokenUrl":    "https://localhost:8243/token",
     	"APIsPublisherUrl":  "https://localhost:9443/api/am/publisher/v0.12/apis",
     	"APIsStoreUrl":      "https://localhost:9443/api/am/store/v0.12/apis",
     	"applicationsStoreUrl":  "https://localhost:9443/api/am/store/v0.12/applications",
     	"subscriptionsStoreUrl": "https://localhost:9443/api/am/store/v0.12/subscriptions",
-    	"numberOfAPIsToConsider":  "10",
-    	"numberOfApplicationsToConsider":  "10"
 	},
+
   "newInstance": {
     	"username":  "admin",
-      "password":  "admin",
+        "password":  "admin",
     	"clientRegisterUrl": "https://localhost:9446/client-registration/v0.12/register",
     	"accessTokenUrl":    "https://localhost:8246/token",
     	"APIsPublisherUrl":  "https://localhost:9446/api/am/publisher/v0.12/apis",
     	"APIsStoreUrl":      "https://localhost:9446/api/am/store/v0.12/apis",
     	"applicationsStoreUrl":  "https://localhost:9446/api/am/store/v0.12/applications",
     	"subscriptionsStoreUrl": "https://localhost:9446/api/am/store/v0.12/subscriptions"
-	}
+	},
+
+   "numberOfAPIsToConsider":  "10",
+   "numberOfApplicationsToConsider":  "10"
 }
