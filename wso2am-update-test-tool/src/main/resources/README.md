@@ -24,8 +24,8 @@ Installation & Running
 	Note: Following configurations need to be done before executing this tool. (It's already set up to defaults values).
 
  	* Please provide user-name and password of your currently running distribution and newly updated WUM distribution.
-		"username":  "john",
-		"password":  "john123",
+		"username":  "admin",
+		"password":  "admin",
 	* Please provide requested URLs.
 		1. Endpoint to obtain the consumer key/secret key pair by calling the dynamic client registration .
 			"clientRegisterUrl": "https://localhost:9443/client-registration/v0.12/register",\
