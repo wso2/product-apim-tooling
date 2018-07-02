@@ -21,6 +21,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+
 	"github.com/renstrom/dedent"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -126,6 +127,14 @@ func addEnv(envName string, envEndpoints *utils.EnvEndpoints, mainConfigFilePath
 
 	if envEndpoints.ApiListEndpoint != "" {
 		validatedEnvEndpoints.ApiListEndpoint = envEndpoints.ApiListEndpoint
+	}
+
+	if envEndpoints.AppListEndpoint != "" {
+		validatedEnvEndpoints.AppListEndpoint = envEndpoints.AppListEndpoint
+	}
+
+	if envEndpoints.AdminEndpoint != "" {
+		validatedEnvEndpoints.AdminEndpoint = envEndpoints.AdminEndpoint
 	}
 
 	mainConfig.Environments[envName] = validatedEnvEndpoints

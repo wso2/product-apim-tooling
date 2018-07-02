@@ -87,7 +87,8 @@ Command Line tool for importing and exporting APIs/Applications between differen
                 --environment, -e
             Optional:
                 --username, -u 
-                --password, -p 
+                --password, -p
+		--preserve-provider, -r 
                 NOTE: user will be prompted to enter credentials if they are not provided with these flags
         Examples:
             apimcli import-api -f dev/TestAPI_1.0.0.zip -e dev
@@ -95,6 +96,7 @@ Command Line tool for importing and exporting APIs/Applications between differen
             apimcli import-api -f staging/TestAPI_1.1.zip -e dev -u admin
             apimcli import-api -f production/TestAPI_3.0.1.zip -e dev -p 123456 
             apimcli import-api -f TestAPI -e dev
+            apimcli import-api -f TestAPI -e dev -r=false
 ```
 * #### list apis
 ```bash
@@ -144,7 +146,7 @@ Command Line tool for importing and exporting APIs/Applications between differen
                   --password, -p     
         Examples:      
             apimcli import-app -f qa/apps/sampleApp.zip -e dev
-            apimcli Import App -f staging/apps/sampleApp.zip -e prod -o testUser -u admin -p admin
+            apimcli Import-app -f staging/apps/sampleApp.zip -e prod -o testUser -u admin -p admin
             apimcli import-app -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -e staging               
 ```
 * #### list apps
