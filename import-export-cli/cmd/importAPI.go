@@ -19,27 +19,29 @@
 package cmd
 
 import (
-	"fmt"
-
 	"bytes"
 	"crypto/tls"
+	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
+
+	"strings"
+	"time"
 
 	"github.com/renstrom/dedent"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"strings"
-	"time"
 )
 
 var importAPIFile string
 var importEnvironment string
 var importAPICmdUsername string
 var importAPICmdPassword string
+var importAPICmdPreserveProvider bool
 
 // ImportAPI command related usage info
 const importAPICmdLiteral = "import-api"
@@ -73,7 +75,9 @@ func executeImportAPICmd(mainConfigFilePath, envKeysAllFilePath, exportDirectory
 
 	if preCommandErr == nil {
 		apiImportExportEndpoint := utils.GetApiImportExportEndpointOfEnv(importEnvironment, mainConfigFilePath)
+
 		resp, err := ImportAPI(importAPIFile, apiImportExportEndpoint, b64encodedCredentials, exportDirectory)
+
 		if err != nil {
 			utils.HandleErrorAndExit("Error importing API", err)
 		}
@@ -101,6 +105,8 @@ func ImportAPI(query, apiImportExportEndpoint, accessToken, exportDirectory stri
 	apiImportExportEndpoint = utils.AppendSlashToString(apiImportExportEndpoint)
 
 	apiImportExportEndpoint += "import-api"
+	apiImportExportEndpoint += "?preserveProvider=" +
+		strconv.FormatBool(importAPICmdPreserveProvider)
 	utils.Logln(utils.LogPrefixInfo + "Import URL: " + apiImportExportEndpoint)
 
 	sourceEnv := strings.Split(query, "/")[0] // environment from which the API was exported
@@ -220,4 +226,6 @@ func init() {
 		utils.DefaultEnvironmentName, "Environment from the which the API should be imported")
 	ImportAPICmd.Flags().StringVarP(&importAPICmdUsername, "username", "u", "", "Username")
 	ImportAPICmd.Flags().StringVarP(&importAPICmdPassword, "password", "p", "", "Password")
+	ImportAPICmd.Flags().BoolVar(&importAPICmdPreserveProvider, "preserve-provider", true,
+		"Preserve existing provider of API after exporting")
 }
