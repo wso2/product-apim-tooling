@@ -146,7 +146,7 @@ Command Line tool for importing and exporting APIs/Applications between differen
                   --password, -p     
         Examples:      
             apimcli import-app -f qa/apps/sampleApp.zip -e dev
-            apimcli Import-app -f staging/apps/sampleApp.zip -e prod -o testUser -u admin -p admin
+            apimcli import-app -f staging/apps/sampleApp.zip -e prod -o testUser -u admin -p admin
             apimcli import-app -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -e staging               
 ```
 * #### list apps
