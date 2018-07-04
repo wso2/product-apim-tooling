@@ -45,7 +45,7 @@ var VersionCmd = &cobra.Command{
 	Short: versionCmdShortDesc,
 	Long:  versionCmdLongDesc + versionCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		var version = "0.2"
+		var version = "1.1.0"
 		fmt.Println(utils.ProjectName + " Version: " + version)
 	},
 }
