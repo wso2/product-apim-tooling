@@ -22,11 +22,12 @@ import (
 	"fmt"
 	"os"
 
+	"path/filepath"
+	"time"
+
 	"github.com/renstrom/dedent"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"time"
-	"path/filepath"
 )
 
 var verbose bool
@@ -37,7 +38,7 @@ var insecure bool
 const RootCmdShortDesc = "CLI for Importing and Exporting APIs and Applications"
 
 var RootCmdLongDesc = dedent.Dedent(`
-		` + utils.ProjectName + ` is a Command Line Tool for Importing and Exporting APIs and Applications between different environments of WSO2 API Manager 2.2.0
+		` + utils.ProjectName + ` is a Command Line Tool for Importing and Exporting APIs and Applications between different environments of WSO2 API Manager
 		(Dev, Production, Staging, QA etc.)
 		`)
 
