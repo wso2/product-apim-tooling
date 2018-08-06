@@ -217,7 +217,7 @@ func GetOAuthTokens(username string, password string,
 	// set headers
 	headers := make(map[string]string)
 	headers[HeaderContentType] = HeaderValueXWWWFormUrlEncoded
-	headers[HeaderAuthorization] = HeaderValueAuthPrefixBearer + " " + b64EncodedClientIDClientSecret
+	headers[HeaderAuthorization] = HeaderValueAuthPrefixBasic + " " + b64EncodedClientIDClientSecret
 	headers[HeaderAccept] = HeaderValueApplicationJSON
 
 	if Insecure {
