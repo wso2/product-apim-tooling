@@ -128,9 +128,9 @@ Command Line tool for importing and exporting APIs between different API Environ
                 --token, -t (Token Endpoint)
             Examples:
                 apimcli add-env -n dev \
-                --publisher https://localhost:9292/api/am/publisher/v1.0 \
-                --registration https://localhost:9443/identity/connect/register \
-                --token https://localhost:9443/oauth2/token
+                --publisher https://localhost:9443/api/am/publisher/v1.0 \
+                --registration https://localhost:9443/api/identity/oauth2/dcr/v1.0/register \
+                --token https://localhost:9443/api/auth/oauth2/v1.0/token
 ```
 
 * #### remove-env
