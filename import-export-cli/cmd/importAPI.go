@@ -216,7 +216,7 @@ func NewFileUploadRequest(uri string, params map[string]string, paramName, path 
 		return nil, err
 	}
 
-	request, err := http.NewRequest(http.MethodPut, uri, body)
+	request, err := http.NewRequest(http.MethodPost, uri, body)
 	request.Header.Add(utils.HeaderAuthorization, utils.HeaderValueAuthPrefixBearer+" "+accessToken)
 	request.Header.Add(utils.HeaderContentType, writer.FormDataContentType())
 	request.Header.Add(utils.HeaderAccept, "*/*")
