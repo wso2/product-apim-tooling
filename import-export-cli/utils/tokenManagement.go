@@ -157,7 +157,16 @@ func ExecutePreCommand(environment, flagUsername, flagPassword, mainConfigFilePa
 // @param url : Registration Endpoint for the environment
 // @return client_id, client_secret, error
 func GetClientIDSecret(username string, password string, url string) (string, string, error) {
-	body := `{"clientName": "Test", "redirect_uris": "www.google.lk", "grant_types":"password"}`
+	//body := `{"clientName": "Test", "redirect_uris": "www.google.lk", "grant_types":"password"}`
+	body := `{"redirect_uris": [
+		"http://localhost"
+		],
+		"client_name": "name_1",
+			"grant_types": [
+		"password"
+		]
+	}`
+
 	headers := make(map[string]string)
 
 	headers[HeaderContentType] = HeaderValueApplicationJSON
@@ -217,7 +226,7 @@ func GetOAuthTokens(username string, password string,
 	// set headers
 	headers := make(map[string]string)
 	headers[HeaderContentType] = HeaderValueXWWWFormUrlEncoded
-	headers[HeaderAuthorization] = HeaderValueAuthPrefixBearer + " " + b64EncodedClientIDClientSecret
+	headers[HeaderAuthorization] = HeaderValueAuthPrefixBasic + " " + b64EncodedClientIDClientSecret
 	headers[HeaderAccept] = HeaderValueApplicationJSON
 
 	if Insecure {
