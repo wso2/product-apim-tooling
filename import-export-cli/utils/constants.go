@@ -47,6 +47,7 @@ var SampleMainConfigFilePath = filepath.Join(ConfigDirPath, SampleMainConfigFile
 const DefaultExportDirName = "exported"
 const ExportedApisDirName = "apis"
 const ExportedAppsDirName = "apps"
+const ExportedMigrationArtifactsDirName = "all"
 
 var DefaultExportDirPath = filepath.Join(ConfigDirPath, DefaultExportDirName)
 

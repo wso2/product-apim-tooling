@@ -34,7 +34,7 @@ import (
 
 var exportAPIName string
 var exportAPIVersion string
-var exportEnvironment string
+var exportEnvironment string  // define this in a global level class
 var exportProvider string
 var exportAPICmdUsername string
 var exportAPICmdPassword string
