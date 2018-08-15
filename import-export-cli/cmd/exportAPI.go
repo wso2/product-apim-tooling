@@ -34,10 +34,7 @@ import (
 
 var exportAPIName string
 var exportAPIVersion string
-var exportEnvironment string  // define this in a global level class
 var exportProvider string
-var exportAPICmdUsername string
-var exportAPICmdPassword string
 
 // ExportAPI command related usage info
 const exportAPICmdLiteral = "export-api"
@@ -67,19 +64,19 @@ var ExportAPICmd = &cobra.Command{
 
 func executeExportAPICmd(mainConfigFilePath, envKeysAllFilePath, exportDirectory string) {
 	b64encodedCredentials, preCommandErr :=
-		utils.ExecutePreCommandWithBasicAuth(exportEnvironment, exportAPICmdUsername, exportAPICmdPassword,
+		utils.ExecutePreCommandWithBasicAuth(cmdExportEnvironment, cmdUsername, cmdPassword,
 			mainConfigFilePath, envKeysAllFilePath)
 
 	if preCommandErr == nil {
-		apiImportExportEndpoint := utils.GetApiImportExportEndpointOfEnv(exportEnvironment, mainConfigFilePath)
+		apiImportExportEndpoint := utils.GetApiImportExportEndpointOfEnv(cmdExportEnvironment, mainConfigFilePath)
 		resp := getExportApiResponse(exportAPIName, exportAPIVersion, exportProvider, apiImportExportEndpoint,
 			b64encodedCredentials)
 
 		// Print info on response
 		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
-
+		apiZipLocationPath := filepath.Join(exportDirectory, cmdExportEnvironment)
 		if resp.StatusCode() == http.StatusOK {
-			WriteToZip(exportAPIName, exportAPIVersion, exportEnvironment, exportDirectory, resp)
+			WriteToZip(exportAPIName, exportAPIVersion, apiZipLocationPath, resp)
 		} else if resp.StatusCode() == http.StatusInternalServerError {
 			// 500 Internal Server Error
 			fmt.Println("Incorrect password")
@@ -97,16 +94,16 @@ func executeExportAPICmd(mainConfigFilePath, envKeysAllFilePath, exportDirectory
 // @param exportAPIName : Name of the API to be exported
 // @param resp : Response returned from making the HTTP request (only pass a 200 OK)
 // Exported API will be written to a zip file
-func WriteToZip(exportAPIName, exportAPIVersion, exportEnvironment, exportDirectory string, resp *resty.Response) {
+func WriteToZip(exportAPIName, exportAPIVersion, zipLocationPath string, resp *resty.Response) {
 	// Write to file
-	directory := filepath.Join(exportDirectory, exportEnvironment)
+	//directory := filepath.Join(exportDirectory, cmdExportEnvironment)
 	// create directory if it doesn't exist
-	if _, err := os.Stat(directory); os.IsNotExist(err) {
-		os.Mkdir(directory, 0777)
+	if _, err := os.Stat(zipLocationPath); os.IsNotExist(err) {
+		os.Mkdir(zipLocationPath, 0777)
 		// permission 777 : Everyone can read, write, and execute
 	}
 	zipFilename := exportAPIName + "_" + exportAPIVersion + ".zip" // MyAPI_1.0.0.zip
-	pFile := filepath.Join(directory, zipFilename)
+	pFile := filepath.Join(zipLocationPath, zipFilename)
 	err := ioutil.WriteFile(pFile, resp.Body(), 0644)
 	// permission 644 : Only the owner can read and write.. Everyone else can only read.
 	if err != nil {
@@ -150,9 +147,9 @@ func init() {
 		"Version of the API to be exported")
 	ExportAPICmd.Flags().StringVarP(&exportProvider, "provider", "r", "",
 		"Provider of the API")
-	ExportAPICmd.Flags().StringVarP(&exportEnvironment, "environment", "e",
+	ExportAPICmd.Flags().StringVarP(&cmdExportEnvironment, "environment", "e",
 		utils.DefaultEnvironmentName, "Environment to which the API should be exported")
 
-	ExportAPICmd.Flags().StringVarP(&exportAPICmdUsername, "username", "u", "", "Username")
-	ExportAPICmd.Flags().StringVarP(&exportAPICmdPassword, "password", "p", "", "Password")
+	ExportAPICmd.Flags().StringVarP(&cmdUsername, "username", "u", "", "Username")
+	ExportAPICmd.Flags().StringVarP(&cmdPassword, "password", "p", "", "Password")
 }

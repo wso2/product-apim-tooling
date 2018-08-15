@@ -33,6 +33,9 @@ import (
 var verbose bool
 var cfgFile string
 var insecure bool
+var cmdPassword string
+var cmdUsername string
+var cmdExportEnvironment string
 
 // RootCmd related info
 const RootCmdShortDesc = "CLI for Importing and Exporting APIs and Applications"

@@ -28,12 +28,12 @@ import (
 	"errors"
 	"github.com/olekukonko/tablewriter"
 	"os"
+	"github.com/go-resty/resty"
 )
 
 var listAppsCmdEnvironment string
 var listAppsCmdAppOwner string
-var listAppsCmdUsername string
-var listAppsCmdPassword string
+
 
 // appsCmd related info
 const appsCmdLiteral = "apps"
@@ -63,7 +63,7 @@ var appsCmd = &cobra.Command{
 
 func executeAppsCmd(appOwner, mainConfigFilePath, envKeysAllFilePath string) {
 	accessToken, preCommandErr :=
-		utils.ExecutePreCommandWithOAuth(listAppsCmdEnvironment, listAppsCmdUsername, listAppsCmdPassword,
+		utils.ExecutePreCommandWithOAuth(listAppsCmdEnvironment, cmdUsername, cmdPassword,
 			mainConfigFilePath, envKeysAllFilePath)
 
 	if preCommandErr == nil {
@@ -101,8 +101,12 @@ func GetApplicationList(appOwner, accessToken, applicationListEndpoint string) (
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 
-	resp, err := utils.InvokeGETRequestWithQueryParam("user", appOwner, applicationListEndpoint, headers)
-
+	var resp *resty.Response
+	if (appOwner == "") {
+		resp, err = utils.InvokeGETRequest(applicationListEndpoint, headers)
+	} else {
+		resp, err = utils.InvokeGETRequestWithQueryParam("user", appOwner, applicationListEndpoint, headers)
+	}
 	if err != nil {
 		utils.HandleErrorAndExit("Unable to connect to "+applicationListEndpoint, err)
 	}
@@ -148,6 +152,6 @@ func init() {
 		utils.DefaultEnvironmentName, "Environment to be searched")
 	appsCmd.Flags().StringVarP(&listAppsCmdAppOwner, "owner", "o", "",
 		"Owner of the Application")
-	appsCmd.Flags().StringVarP(&listAppsCmdUsername, "username", "u", "", "Username")
-	appsCmd.Flags().StringVarP(&listAppsCmdPassword, "password", "p", "", "Password")
+	appsCmd.Flags().StringVarP(&cmdUsername, "username", "u", "", "Username")
+	appsCmd.Flags().StringVarP(&cmdPassword, "password", "p", "", "Password")
 }

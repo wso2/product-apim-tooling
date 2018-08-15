@@ -64,6 +64,7 @@ func TestWriteToZip(t *testing.T) {
 	environment := "dev"
 	response := new(resty.Response)
 	exportDirectory := utils.CurrentDir
-	WriteToZip(name, version, environment, exportDirectory, response)
+	zipLocationPath := filepath.Join(exportDirectory, environment)
+	WriteToZip(name, version, zipLocationPath, response)
 	defer os.RemoveAll(filepath.Join(exportDirectory, "dev"))
 }

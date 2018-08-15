@@ -24,7 +24,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
-)
+	)
 
 // WriteConfigFile
 // @param c : data
@@ -140,6 +140,14 @@ func IsDirExists(path string) (bool, error) {
 func CreateDirIfNotExist(path string) (err error) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		os.Mkdir(path, os.ModePerm)
+	}
+	return err
+}
+
+func CreateDir(path string) (err error) {
+	err =	os.Mkdir(path, os.ModePerm)
+	if (err != nil) {
+		fmt.Println("Error in creating the directory:" + path + "\n"+ err.Error())
 	}
 	return err
 }

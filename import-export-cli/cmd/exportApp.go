@@ -32,8 +32,6 @@ import (
 
 var exportAppName string
 var exportAppOwner string
-var exportAppCmdUsername string
-var exportAppCmdPassword string
 
 //var flagExportAPICmdToken string
 // ExportApp command related usage info
@@ -56,25 +54,24 @@ var ExportAppCmd = &cobra.Command{
 	Long:  exportAppCmdLongDesc + exportAppCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + exportAppCmdLiteral + " called")
-		var appsExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedAppsDirName)
-		executeExportAppCmd(utils.MainConfigFilePath, utils.EnvKeysAllFilePath, appsExportDirectory)
+		var appsExportDirectoryPath = filepath.Join(utils.ExportDirectory, utils.ExportedAppsDirName, cmdExportEnvironment)
+		executeExportAppCmd(utils.MainConfigFilePath, utils.EnvKeysAllFilePath, appsExportDirectoryPath)
 	},
 }
 
-func executeExportAppCmd(mainConfigFilePath, envKeysAllFilePath, exportDirectory string) {
+func executeExportAppCmd(mainConfigFilePath, envKeysAllFilePath, appsExportDirectoryPath string) {
 	accessToken, preCommandErr :=
-		utils.ExecutePreCommandWithOAuth(exportEnvironment, exportAppCmdUsername, exportAppCmdPassword,
+		utils.ExecutePreCommandWithOAuth(cmdExportEnvironment, cmdUsername, cmdPassword,
 			mainConfigFilePath, envKeysAllFilePath)
 
 	if preCommandErr == nil {
-		adminEndpiont := utils.GetAdminEndpointOfEnv(exportEnvironment, mainConfigFilePath)
+		adminEndpiont := utils.GetAdminEndpointOfEnv(cmdExportEnvironment, mainConfigFilePath)
 		resp := getExportAppResponse(exportAppName, exportAppOwner, adminEndpiont, accessToken)
 
 		// Print info on response
 		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
-
 		if resp.StatusCode() == http.StatusOK {
-			WriteApplicationToZip(exportAppName, exportAppOwner, exportEnvironment, exportDirectory, resp)
+			WriteApplicationToZip(exportAppName, exportAppOwner, appsExportDirectoryPath, resp)
 		} else if resp.StatusCode() == http.StatusUnauthorized {
 			// 401 Unauthenticated request
 			fmt.Println("Incorrect Password!")
@@ -93,17 +90,17 @@ func executeExportAppCmd(mainConfigFilePath, envKeysAllFilePath, exportDirectory
 // @param exportAppOwner : Owner of the Application to be exported
 // @param resp : Response returned from making the HTTP request (only pass a 200 OK)
 // Exported Application will be written to a zip file
-func WriteApplicationToZip(exportAppName, exportAppOwner, exportEnvironment, exportDirectory string,
+func WriteApplicationToZip(exportAppName, exportAppOwner, zipLocationPath string,
 	resp *resty.Response) {
 	// Write to file
-	directory := filepath.Join(exportDirectory, exportEnvironment)
+	//directory := filepath.Join(exportDirectory, exportEnvironment)
 	// create directory if it doesn't exist
-	if _, err := os.Stat(directory); os.IsNotExist(err) {
-		os.Mkdir(directory, 0777)
+	if _, err := os.Stat(zipLocationPath); os.IsNotExist(err) {
+		os.Mkdir(zipLocationPath, 0777)
 		// permission 777 : Everyone can read, write, and execute
 	}
 	zipFilename := exportAppOwner + "_" + exportAppName + ".zip" // admin_testApp.zip
-	pFile := filepath.Join(directory, zipFilename)
+	pFile := filepath.Join(zipLocationPath, zipFilename)
 	err := ioutil.WriteFile(pFile, resp.Body(), 0644)
 	// permission 644 : Only the owner can read and write.. Everyone else can only read.
 	if err != nil {
@@ -144,8 +141,8 @@ func init() {
 		"Name of the Application to be exported")
 	ExportAppCmd.Flags().StringVarP(&exportAppOwner, "owner", "o", "",
 		"Owner of the Application to be exported")
-	ExportAppCmd.Flags().StringVarP(&exportEnvironment, "environment", "e",
+	ExportAppCmd.Flags().StringVarP(&cmdExportEnvironment, "environment", "e",
 		utils.DefaultEnvironmentName, "Environment to which the Application should be exported")
-	ExportAppCmd.Flags().StringVarP(&exportAppCmdUsername, "username", "u", "", "Username")
-	ExportAppCmd.Flags().StringVarP(&exportAppCmdPassword, "password", "p", "", "Password")
+	ExportAppCmd.Flags().StringVarP(&cmdUsername, "username", "u", "", "Username")
+	ExportAppCmd.Flags().StringVarP(&cmdPassword, "password", "p", "", "Password")
 }
