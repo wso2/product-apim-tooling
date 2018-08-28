@@ -84,8 +84,8 @@ func executeExportAPPsCmd(mainConfigFilePath, envKeysAllFilePath, directoryMigra
 		return preCommandErr
 	}
 
-	applicationListEndpoint := utils.GetApplicationListEndpointOfEnv(cmdExportEnvironment, mainConfigFilePath)
-	count, apps, err := GetApplicationList("", accessToken, applicationListEndpoint)
+	applicationListEndpointofAdminApi := utils.GetAdminEndpointOfEnv(cmdExportEnvironment, mainConfigFilePath) + "/" + "applications"
+	count, apps, err := GetApplicationList("", accessToken, applicationListEndpointofAdminApi)
 
 	if err == nil {
 		// Printing the list of available Applications
