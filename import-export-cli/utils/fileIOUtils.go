@@ -151,3 +151,11 @@ func CreateDir(path string) (err error) {
 	}
 	return err
 }
+
+func RemoveDirectory(path string) (err error) {
+	err = os.RemoveAll(path)
+	if (err != nil) {
+		fmt.Println("Error in deleting the directory:" + path + "\n"+ err.Error())
+	}
+	return err
+}

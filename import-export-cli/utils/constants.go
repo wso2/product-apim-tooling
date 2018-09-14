@@ -47,7 +47,7 @@ var SampleMainConfigFilePath = filepath.Join(ConfigDirPath, SampleMainConfigFile
 const DefaultExportDirName = "exported"
 const ExportedApisDirName = "apis"
 const ExportedAppsDirName = "apps"
-const ExportedMigrationArtifactsDirName = "all"
+const ExportedMigrationArtifactsDirName = "migration"
 
 var DefaultExportDirPath = filepath.Join(ConfigDirPath, DefaultExportDirName)
 
@@ -88,3 +88,6 @@ const SearchAndTag = "&"
 // Other
 const DefaultTokenValidityPeriod = "3600"
 const DefaultHttpRequestTimeout = 10000
+
+//migration export
+const MaxAPIsToExportOnce = 25
