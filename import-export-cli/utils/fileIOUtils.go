@@ -159,3 +159,23 @@ func RemoveDirectory(path string) (err error) {
 	}
 	return err
 }
+
+func RemoveDirectoryIfExists(path string) (err error) {
+	if exists, err := IsDirExists(path); exists {
+		err = os.RemoveAll(path)
+		if (err != nil) {
+			fmt.Println("Error in deleting the directory:" + path + "\n" + err.Error())
+		}
+	}
+	return err
+}
+
+func RemoveFileIfExists(path string) (err error) {
+	if exists := IsFileExist(path); exists {
+		err = os.Remove(path)
+		if (err != nil) {
+			fmt.Println("Error in deleting the directory:" + path + "\n" + err.Error())
+		}
+	}
+	return err
+}
