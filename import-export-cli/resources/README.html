@@ -1,5 +1,5 @@
 <h1 id="cli-for-importing-and-exporting-apis-and-applications">CLI for Importing and Exporting APIs and Applications</h1>
-<h2 id="for-wso2-api-manager-2-2.0">For WSO2 API Manager 2.2.0</h2>
+<h2 id="for-wso2-api-manager-2-2.0">For WSO2 API Manager 2.6.0</h2>
 <p>Command Line tool for importing and exporting APIs and Applications between different API Environments</p>
 <h2 id="getting-started">Getting Started</h2>
 <ul>
@@ -162,27 +162,28 @@
     </li>
     <li><h4 id="add-env">add-env</h4>
         <pre><code class="lang-bash">      Flags:
-          Required:
-              --name, -n (Name of the environment)
-              --apim (API Manager endpoint)
-              --registration (Registration Endpoint)
-              --token (Token Endpoint)
-          Optional:
-              --import-export (API Import Export Endpoint for environment)
-              --list (API List endpoint for environment)
+        Required:
+            --name, -n (Name of the environment)
+            --apim (API Manager endpoint)
+            --registration (Registration Endpoint)
+            --token (Token Endpoint)
+        Optional:
+            --import-export (API Import Export Endpoint for environment)
+            --list (API List endpoint for environment)
 
-      Examples:
-         apimcli add-env -n dev \
-              --apim https://localhost:9443 \ 
-              --registration https://localhost:9443/identity/connect/register \
-              --token https: https://localhost:9443/oauth2/token
-
-         apimcli add-env -n prod \
-              --apim https://localhost:9443 \ 
-              --registration https://localhost:9443/identity/connect/register \
-              --import-export https://localhost:9443/api-import-export-2.2.0-v2 \
-              --list https://localhsot:9443/api/am/publisher/v0.12/apis \
-              --token https: https://localhost:9443/oauth2/token
+        Examples:
+        apimcli add-env -n dev \
+            --apim https://localhost:9443 \ 
+            --registration https://localhost:9443/client-registration/v0.14/register \
+            --token https://localhost:9443/oauth2/token
+            
+        apimcli add-env -n prod \
+            --apim https://localhost:9443 \ 
+            --registration https://localhost:9443/client-registration/v0.14/register \
+            --import-export https://localhost:9443/api-import-export-2.6.0-v0 \
+            --api_list https://localhost:9443/api/am/publisher/v0.14/apis \
+            --app_list https://localhost:9443/api/am/admin/v0.14/applications \
+            --token https://localhost:9443/oauth2/token
 </code></pre>
     </li>
     <li><h4 id="remove-env">remove-env</h4>

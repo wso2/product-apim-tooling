@@ -47,20 +47,20 @@ var addEnvCmdLongDesc = dedent.Dedent(`
 var addEnvCmdExamples = dedent.Dedent(`
 		Examples:
 		` + utils.ProjectName + ` ` + addEnvCmdLiteral + ` -n production \
-						--registration https://localhost:9763/client-registration/v0.12/register \
+						--registration https://localhost:9763/client-registration/v0.14/register \
 						--apim  https://localhost:9443 \
 						--token https://localhost:8243/token
 
 		` + utils.ProjectName + ` ` + addEnvCmdLiteral + ` -n test \
-						--registration https://localhost:9763/client-registration/v0.12/register \
-					    --import-export https://localhost:9443/api-import-export-2.2.0-v2 \
-						--list https://localhsot:9443/api/am/publisher/v0.12/apis \
+						--registration https://localhost:9763/client-registration/v0.14/register \
+					    --import-export https://localhost:9443/api-import-export-2.6.0-v0 \
+						--list https://localhsot:9443/api/am/publisher/v0.14/apis \
 						--apim  https://localhost:9443 \
 						--token https://localhost:8243/token
 
 		` + utils.ProjectName + ` ` + addEnvCmdLiteral + ` -n dev --apim https://localhost:9443 \
 						--token	https://localhost:8243/token \
-						--registration http://localhost:9763/client-registration/v0.12/register
+						--registration http://localhost:9763/client-registration/v0.14/register
 
 	`)
 
