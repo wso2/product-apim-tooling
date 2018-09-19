@@ -97,3 +97,10 @@ type ApplicationListResponse struct {
 	Count int32         `json:"count"`
 	List  []Application `json:"list"`
 }
+
+type MigrationApisExportMetadata struct {
+	IterationNo	 int `yaml:"iteratoin_no"`
+	User 					 string 	`yaml:"user"`
+	OnTenant				 string		`yaml:"on_tenant"`
+	ApiListToExport  []API `yaml:"apis_to_export"`
+}

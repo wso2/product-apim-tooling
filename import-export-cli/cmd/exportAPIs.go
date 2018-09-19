@@ -6,8 +6,9 @@ import (
 	"path/filepath"
 	"fmt"
 	"net/http"
-				"strconv"
-	)
+	"strconv"
+	"os"
+)
 
 const exportAPIsCmdLiteral = "export-apis"
 const exportAPIsCmdShortDesc = "Export APIs"
@@ -15,6 +16,18 @@ const exportAPIsCmdShortDesc = "Export APIs"
 var exportAPIsCmdLongDesc = "Export all the APIs of the tenant from an APIM 2.x environment environment, to be imported " +
 	"into 3.0.0 environment"
 var exportAPIsCmdExamples = ""
+var apiExportDir string
+var offset int  //from which # of API, the APIs will be fetched from APIM server
+var count int32 // size of API list to be exported / number of  APIs left to be exported from last iteration
+var apis [] utils.API
+var exportRelatedFilesPath string
+//e.g. /home/samithac/.wso2apimcli/exported/migration/production-2.5/wso2-dot-org
+var startFromBeginning bool
+
+var isProcessCompleted bool
+var iterationNo int
+var startingApiIndexFromList int
+var mainConfigFilePath string
 
 var ExportAPIsCmd = &cobra.Command{
 	Use: exportAPIsCmdLiteral + " (--environment " +
@@ -25,25 +38,18 @@ var ExportAPIsCmd = &cobra.Command{
 		//use log package for in-detail logging ; https://golangcode.com/add-line-numbers-to-log-output/
 		utils.Logln(utils.LogPrefixInfo + exportAPIsCmdLiteral + " called")
 		var artifactExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedMigrationArtifactsDirName)
-		executeExportAPIsCmd(utils.MainConfigFilePath, utils.EnvKeysAllFilePath, artifactExportDirectory)
+		executeExportAPIsCmd(artifactExportDirectory)
 	},
 }
 
-func executeExportAPIsCmd(mainConfigFilePath, envKeysAllFilePath, exportDirectory string) {
+func executeExportAPIsCmd(exportDirectory string) {
 	//create dir structure
-	var apiExportDir = createExportAPIsDirStructure(exportDirectory)
-	var offset= 0 // this is the begining API index
-	var count int32 = 0 // size of API list to be exported / number of  APIs left to be exported from last iteration
-	var apis[] utils.API
-	var exportRelatedFilesPath = filepath.Join(exportDirectory, cmdExportEnvironment,
+	apiExportDir = createExportAPIsDirStructure(exportDirectory)
+	exportRelatedFilesPath = filepath.Join(exportDirectory, cmdExportEnvironment,
 		utils.GetMigrationExportTenantDirName(cmdResourceTenantDomain))
-		//e.g. /home/samithac/.wso2apimcli/exported/migration/production-2.5/wso2-dot-org
-	var startFromBeginning = false
-
-	var lastSuceededAPI utils.API
-	var isProcessCompleted = false
-	var iterationNo int = 1
-	var startingApiIndexFromList = 0
+	//e.g. /home/samithac/.wso2apimcli/exported/migration/production-2.5/wso2-dot-org
+	startFromBeginning = false
+	isProcessCompleted = false
 
 	fmt.Println("\nExporting APIs for the migration to APIM 3.0.0")
 
@@ -77,97 +83,118 @@ func executeExportAPIsCmd(mainConfigFilePath, envKeysAllFilePath, exportDirector
 
 	if ((utils.IsFileExist(filepath.Join(exportRelatedFilesPath, utils.LastSucceededApiFileName))) && !startFromBeginning) {
 		// set offset, iteration from files
-		iterationNo, lastSuceededAPI, isProcessCompleted = utils.ReadLastSuceededAPIFileData(exportRelatedFilesPath);
-		//read  migration-apis-export-metadata.json file and set
-		// 	- apis[]
-		// 	- startingApiIndexFromList
-		//  - count = api_list_size_in_file - (indexoflast_suceeded+1)
-	} else { // start from beginning
+		var lastSuceededAPI utils.API
 
-		//cleaning existing old files (if exists) related to exportation
-		error := utils.RemoveDirectoryIfExists(filepath.Join(exportRelatedFilesPath, utils.ExportedApisDirName))
-		error = utils.RemoveFileIfExists(filepath.Join(exportRelatedFilesPath, utils.MigrationApisExportMetadataFileName))
-		error = utils.RemoveFileIfExists(filepath.Join(exportRelatedFilesPath, utils.LastSucceededApiFileName))
-		if (error != nil) {
-			utils.HandleErrorAndExit("Error occurred while cleaning existing old files (if exists) related to "+
-				"exportation", error)
+		iterationNo, lastSuceededAPI = utils.ReadLastSuceededAPIFileData(exportRelatedFilesPath);
+		var migrationApisExportMetadata utils.MigrationApisExportMetadata
+		migrationApisExportMetadata.ReadMigrationApisExportMetadataFile(filepath.Join(exportRelatedFilesPath,
+			utils.MigrationAPIsExportMetadataFileName))
+		apis = migrationApisExportMetadata.ApiListToExport
+
+		startingApiIndexFromList = getLastSuceededApiIndex(lastSuceededAPI) + 1
+
+		//find # of APIs left to be exported
+		var lastSucceededAPInumber = getLastSuceededApiIndex(lastSuceededAPI) + 1
+		count = int32(len(apis) - lastSucceededAPInumber)
+
+		if (count == 0) {
+			// last set of apis in last iteration had been completed (and operation had halted at that point).
+			// So get the next set of APIs for next iteration
+			offset = utils.MaxAPIsToExportOnce * iterationNo
+			iterationNo++
+			startingApiIndexFromList = 0
+			count, apis = getAPIList()
+			if (len(apis) > 0) {
+				utils.WriteMigrationApisExportMetadataFile(apis, cmdResourceTenantDomain, cmdUsername,
+					exportRelatedFilesPath, iterationNo)
+			} else {
+				println("All the APIs has been exported and so the execution of export-apis command is completed successfully")
+				os.Exit(1)
+			}
 		}
-
-		offset = 0; // this is the beginning API index
-		iterationNo = 1;
-		startingApiIndexFromList = 0;
-		count, apis = getAPIList(mainConfigFilePath, envKeysAllFilePath, offset)
-		//write  migration-apis-export-metadata.yaml file
+	} else { // start from beginning
+		prepareStartFromBeginning()
 	}
 
 	if (count == 0) {
 		fmt.Println("No APIs available to be exported..!")
-		/*
-		1- WRITE ON last-succeeded-api.log 'COMPLETED'
-		2-
-
-		*/
 	} else {
 		for (count > 0) {
-			fmt.Println("Found ", count, "of APIs to be exported in the iteration #" + strconv.Itoa(iterationNo))
+			fmt.Println("Found ", count, "of APIs to be exported in the iteration #"+strconv.Itoa(iterationNo))
 			//get basic Auth credentials
 			b64encodedCredentials, preCommandErr :=
 				utils.ExecutePreCommandWithBasicAuth(cmdExportEnvironment, cmdUsername, cmdPassword,
-					mainConfigFilePath, envKeysAllFilePath)
+					utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
 			if preCommandErr != nil {
 				utils.Logln("Error generating base64 encoded credentials for Basic Authentication:")
 				//return preCommandErr
 			}
 			for i := startingApiIndexFromList; i < len(apis); i++ {
+				/*if( (i==2) && (iterationNo == 2)) {
+					os.Exit(1)
+				}*/
+
 				exportAPIName := apis[i].Name
 				exportAPIVersion := apis[i].Version
 				exportApiProvider := apis[i].Provider
-				apiImportExportEndpoint := utils.GetApiImportExportEndpointOfEnv(cmdExportEnvironment, mainConfigFilePath)
+				apiImportExportEndpoint := utils.GetApiImportExportEndpointOfEnv(cmdExportEnvironment, utils.MainConfigFilePath)
 				resp := getExportApiResponse(exportAPIName, exportAPIVersion, exportApiProvider, apiImportExportEndpoint,
-					b64encodedCredentials) // TODO Handle errors in getExportApiResponse()
+					b64encodedCredentials)
 
 				// Print info on response
 				utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
 
 				if resp.StatusCode() == http.StatusOK {
-					//artifactExportDirectory >> use a suitable dynamic folder name instead of 'Migration-1' and also change
-					// WriteToZip function
 					WriteToZip(exportAPIName, exportAPIVersion, apiExportDir, resp)
+					//write on last-succeeded-api.log
+					utils.WriteLastSuceededAPIFileData(exportRelatedFilesPath, iterationNo, apis[i])
 				} else {
 					fmt.Println("Error exporting API:", exportAPIName, "-", exportAPIVersion, " of Provider:", exportApiProvider)
-					//return errors.New(resp.String())
 				}
 			}
 
-			//iterate apis
-			//Is it required to stop exporting process once an error in single API occurs?
-			for _, api := range apis {
-				exportAPIName := api.Name
-				exportAPIVersion := api.Version
-				exportApiProvider := api.Provider
-				apiImportExportEndpoint := utils.GetApiImportExportEndpointOfEnv(cmdExportEnvironment, mainConfigFilePath)
-				resp := getExportApiResponse(exportAPIName, exportAPIVersion, exportApiProvider, apiImportExportEndpoint,
-					b64encodedCredentials) // TODO Handle errors in getExportApiResponse()
-
-				// Print info on response
-				utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
-
-				if resp.StatusCode() == http.StatusOK {
-					//artifactExportDirectory >> use a suitable dynamic folder name instead of 'Migration-1' and also change
-					// WriteToZip function
-					WriteToZip(exportAPIName, exportAPIVersion, apiExportDir, resp)
-				} else {
-					fmt.Println("Error exporting API:", exportAPIName, "-", exportAPIVersion, " of Provider:", exportApiProvider)
-					//return errors.New(resp.String())
-				}
-			}
 			offset = utils.MaxAPIsToExportOnce * iterationNo
 			iterationNo++
-			count, apis = getAPIList(mainConfigFilePath, envKeysAllFilePath, offset)
+			count, apis = getAPIList()
+			startingApiIndexFromList = 0
+			if (len(apis) > 0) {
+				utils.WriteMigrationApisExportMetadataFile(apis, cmdResourceTenantDomain, cmdUsername,
+					exportRelatedFilesPath, iterationNo)
+			}
 		}
+		fmt.Println("All the APIs has been exported and so the execusion of export-apis command is completed successfully")
 	}
 }
+func getLastSuceededApiIndex(lastSuceededApi utils.API) (int) {
+	for i := 0; i < len(apis); i++ {
+		if ((apis[i].Name == lastSuceededApi.Name) &&
+			(apis[i].Provider == lastSuceededApi.Provider) &&
+			(apis[i].Version == lastSuceededApi.Version)) {
+			return i
+		}
+	}
+	return -1
+}
 
+func prepareStartFromBeginning() {
+	//cleaning existing old files (if exists) related to exportation
+	error := utils.RemoveDirectoryIfExists(filepath.Join(exportRelatedFilesPath, utils.ExportedApisDirName))
+	error = utils.RemoveFileIfExists(filepath.Join(exportRelatedFilesPath, utils.MigrationAPIsExportMetadataFileName))
+	error = utils.RemoveFileIfExists(filepath.Join(exportRelatedFilesPath, utils.LastSucceededApiFileName))
+	if (error != nil) {
+		utils.HandleErrorAndExit("Error occurred while cleaning existing old files (if exists) related to "+
+			"exportation", error)
+	}
+
+	offset = 0;
+	iterationNo = 1;
+	startingApiIndexFromList = 0;
+	count, apis = getAPIList()
+	//write  migration-apis-export-metadata.yaml file
+	utils.WriteMigrationApisExportMetadataFile(apis, cmdResourceTenantDomain, cmdUsername,
+		exportRelatedFilesPath, iterationNo)
+
+}
 
 func createExportAPIsDirStructure(artifactExportDirectory string) string {
 	//create required directory structure
@@ -183,7 +210,7 @@ func createExportAPIsDirStructure(artifactExportDirectory string) string {
 	createDirError = utils.CreateDirIfNotExist(migrationsArtifactsEnvPath)
 	createDirError = utils.CreateDirIfNotExist(migrationsArtifactsEnvTenantPath)
 
-	if dirExists,_ := utils.IsDirExists(migrationsArtifactsEnvTenantApisPath); dirExists {
+	if dirExists, _ := utils.IsDirExists(migrationsArtifactsEnvTenantApisPath); dirExists {
 		if (cmdForceStartFromBegin) {
 			utils.RemoveDirectory(migrationsArtifactsEnvTenantApisPath)
 			createDirError = utils.CreateDir(migrationsArtifactsEnvTenantApisPath)
@@ -199,12 +226,12 @@ func createExportAPIsDirStructure(artifactExportDirectory string) string {
 	return migrationsArtifactsEnvTenantApisPath
 }
 
-func getAPIList(mainConfigFilePath string, envKeysAllFilePath string, offset int) (count int32, apis []utils.API) {
+func getAPIList() (count int32, apis []utils.API) {
 	accessToken, preCommandErr :=
 		utils.ExecutePreCommandWithOAuth(cmdExportEnvironment, cmdUsername, cmdPassword,
-			mainConfigFilePath, envKeysAllFilePath)
+			utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
 	if preCommandErr == nil {
-		apiListEndpoint := utils.GetApiListEndpointOfEnv(cmdExportEnvironment, mainConfigFilePath)
+		apiListEndpoint := utils.GetApiListEndpointOfEnv(cmdExportEnvironment, utils.MainConfigFilePath)
 		apiListEndpoint += "?limit=" + strconv.Itoa(utils.MaxAPIsToExportOnce) + "&offset=" + strconv.Itoa(offset)
 		if (cmdResourceTenantDomain != "") {
 			apiListEndpoint += "&tenantDomain=" + cmdResourceTenantDomain
@@ -216,7 +243,7 @@ func getAPIList(mainConfigFilePath string, envKeysAllFilePath string, offset int
 			utils.HandleErrorAndExit(utils.LogPrefixError+"Getting List of APIs", err)
 		}
 	} else {
-		utils.HandleErrorAndExit(utils.LogPrefixError + "Error in getting access token for user while getting " +
+		utils.HandleErrorAndExit(utils.LogPrefixError+"Error in getting access token for user while getting "+
 			"the list of APIs: ", preCommandErr)
 	}
 	return 0, nil
