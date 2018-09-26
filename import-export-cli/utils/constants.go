@@ -93,4 +93,5 @@ const DefaultHttpRequestTimeout = 10000
 const MaxAPIsToExportOnce = 4
 const MigrationAPIsExportMetadataFileName = "migration-apis-export-metadata.yaml"
 const LastSucceededApiFileName = "last-succeeded-api.log"
-const LastSuceededContentDelimiter = " "
+const LastSuceededContentDelimiter = " " // space
+const DefaultResourceTenantDomain = "tenant-default"

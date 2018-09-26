@@ -17,7 +17,7 @@ func GetMigrationExportTenantDirName(cmdResourceTenantDomain string) (resourceTe
 	   } else {*/
 		// if username doesn't contain '@' decide the tenant as 'carbon.super'
 		// Only super admin can avoid passing the tenant domain. Other tenant admins must pass tenant domain with -t
-		resourceTenantDirName = "tenant-default"
+		resourceTenantDirName = DefaultResourceTenantDomain
 		//}
 	} else {
 		resourceTenantDirName = cmdResourceTenantDomain;
