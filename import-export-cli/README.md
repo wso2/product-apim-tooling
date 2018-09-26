@@ -1,5 +1,5 @@
 # CLI for Importing and Exporting APIs and Applications
-## For WSO2 API Manager 2.2.0
+## For WSO2 API Manager 2.6.0
 
 Command Line tool for importing and exporting APIs/Applications between different API Environemnts
 
@@ -187,15 +187,16 @@ Command Line tool for importing and exporting APIs/Applications between differen
         Examples:
            apimcli add-env -n dev \
                 --apim https://localhost:9443 \ 
-                --registration https://localhost:9443/identity/connect/register \
-                --token https: https://localhost:9443/oauth2/token
+                --registration https://localhost:9443/client-registration/v0.14/register \
+                --token https://localhost:9443/oauth2/token
                 
            apimcli add-env -n prod \
                 --apim https://localhost:9443 \ 
-                --registration https://localhost:9443/identity/connect/register \
-                --import-export https://localhost:9443/api-import-export-2.2.0-v2 \
-                --list https://localhsot:9443/api/am/publisher/v0.12/apis \
-                --token https: https://localhost:9443/oauth2/token
+                --registration https://localhost:9443/client-registration/v0.14/register \
+                --import-export https://localhost:9443/api-import-export-2.6.0-v0 \
+                --api_list https://localhost:9443/api/am/publisher/v0.14/apis \
+                --app_list https://localhost:9443/api/am/admin/v0.14/applications \
+                --token https://localhost:9443/oauth2/token
 ```
 
 * #### remove-env
