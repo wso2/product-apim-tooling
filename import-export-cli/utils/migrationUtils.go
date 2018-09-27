@@ -4,21 +4,12 @@ import (
 	"strings"
 	"io/ioutil"
 	"path/filepath"
-	"strconv"
 	"gopkg.in/yaml.v2"
 )
 
 func GetMigrationExportTenantDirName(cmdResourceTenantDomain string) (resourceTenantDirName string) {
 	if (cmdResourceTenantDomain == "") {
-		/*if(strings.Contains(cmdUsername, "@") ){
-		   //get tenant domain by splitting the username
-		   //Ok to get as this? Email user name will conflict this
-		   //cmdResourceTenantDomain = strings.Split(cmdUsername, "@")[1]
-	   } else {*/
-		// if username doesn't contain '@' decide the tenant as 'carbon.super'
-		// Only super admin can avoid passing the tenant domain. Other tenant admins must pass tenant domain with -t
 		resourceTenantDirName = DefaultResourceTenantDomain
-		//}
 	} else {
 		resourceTenantDirName = cmdResourceTenantDomain;
 	}
@@ -29,25 +20,23 @@ func GetMigrationExportTenantDirName(cmdResourceTenantDomain string) (resourceTe
 	return resourceTenantDirName
 }
 
-func ReadLastSuceededAPIFileData(exportRelatedFilesPath string) (int, API) {
+func ReadLastSucceededAPIFileData(exportRelatedFilesPath string) (API) {
 	var lastSucceededApiFilePath = filepath.Join(exportRelatedFilesPath, LastSucceededApiFileName)
 	data, err := ioutil.ReadFile(lastSucceededApiFilePath)
 	str := string(data)
 	var splittedString = strings.Split(str, " ")
-	var api = API{"", strings.TrimSpace(splittedString[1]), "", strings.TrimSpace(splittedString[2]), strings.TrimSpace(splittedString[3]), ""}
+	var api = API{"", strings.TrimSpace(splittedString[0]), "", strings.TrimSpace(splittedString[1]), strings.TrimSpace(splittedString[2]), ""}
 
 	if err != nil {
 		HandleErrorAndExit("Error in reading file "+lastSucceededApiFilePath, err)
 	}
-
-	var iterationNo, _ = strconv.Atoi(splittedString[0])
-	return iterationNo, api
+	return api
 }
 
-func WriteLastSuceededAPIFileData(exportRelatedFilesPath string, iterationNo int, api API) {
+func WriteLastSuceededAPIFileData(exportRelatedFilesPath string, api API) {
 	var lastSucceededApiFilePath = filepath.Join(exportRelatedFilesPath, LastSucceededApiFileName)
 	var content []byte
-	content = []byte(strconv.Itoa(iterationNo) + LastSuceededContentDelimiter + api.Name + LastSuceededContentDelimiter + api.Version + LastSuceededContentDelimiter + api.Provider)
+	content = []byte(api.Name + LastSuceededContentDelimiter + api.Version + LastSuceededContentDelimiter + api.Provider)
 	var error = ioutil.WriteFile(lastSucceededApiFilePath, content, 0644)
 
 	if (error != nil) {
@@ -58,7 +47,7 @@ func WriteLastSuceededAPIFileData(exportRelatedFilesPath string, iterationNo int
 func (migrationApisExportMetadata *MigrationApisExportMetadata) ReadMigrationApisExportMetadataFile(filePath string) error {
 	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		HandleErrorAndExit("MainConfig: File Not Found: "+filePath, err)
+		HandleErrorAndExit("migration-apis-export-metadata.yaml: File Not Found: "+filePath, err)
 	}
 	if err := yaml.Unmarshal(data, migrationApisExportMetadata); err != nil {
 		return err
@@ -67,9 +56,9 @@ func (migrationApisExportMetadata *MigrationApisExportMetadata) ReadMigrationApi
 }
 
 func WriteMigrationApisExportMetadataFile(apis []API, cmdResourceTenantDomain string,
-	cmdUsername string, exportRelatedFilesPath string, iterationNo int) {
+	cmdUsername string, exportRelatedFilesPath string, apiListOffset int) {
 	var exportMetaData = new(MigrationApisExportMetadata)
-	exportMetaData.IterationNo = iterationNo
+	exportMetaData.ApiListOffset = apiListOffset
 	exportMetaData.ApiListToExport = apis
 	exportMetaData.OnTenant = cmdResourceTenantDomain
 	exportMetaData.User = cmdUsername

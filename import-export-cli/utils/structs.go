@@ -99,7 +99,7 @@ type ApplicationListResponse struct {
 }
 
 type MigrationApisExportMetadata struct {
-	IterationNo	 int `yaml:"iteratoin_no"`
+	ApiListOffset int `yaml:"api_list_offset"`
 	User 					 string 	`yaml:"user"`
 	OnTenant				 string		`yaml:"on_tenant"`
 	ApiListToExport  []API `yaml:"apis_to_export"`
