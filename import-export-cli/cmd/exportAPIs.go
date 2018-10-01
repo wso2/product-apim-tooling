@@ -1,3 +1,21 @@
+/*
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*  WSO2 Inc. licenses this file to you under the Apache License,
+*  Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+ */
+
 package cmd
 
 import (
@@ -5,10 +23,10 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"path/filepath"
 	"fmt"
-	"net/http"
 	"strconv"
 	"os"
-	)
+	"net/http"
+)
 
 const exportAPIsCmdLiteral = "export-apis"
 const exportAPIsCmdShortDesc = "Export APIs"
@@ -17,16 +35,13 @@ var exportAPIsCmdLongDesc = "Export all the APIs of the tenant from an APIM 2.x 
 	"into 3.0.0 environment"
 var exportAPIsCmdExamples = ""
 var apiExportDir string
-//var offset int  //from which # of API, the APIs will be fetched from APIM server
-var apiListOffset int
-var count int32 // size of API list to be exported / number of  APIs left to be exported from last iteration
+var apiListOffset int //from which index of API, the APIs will be fetched from APIM server
+var count int32 // size of API list to be exported or number of  APIs left to be exported from last iteration
 var apis [] utils.API
 var exportRelatedFilesPath string
 //e.g. /home/samithac/.wso2apimcli/exported/migration/production-2.5/wso2-dot-org
 var startFromBeginning bool
-
 var isProcessCompleted bool
-//var iterationNo int
 var startingApiIndexFromList int
 var mainConfigFilePath string
 
@@ -43,6 +58,9 @@ var ExportAPIsCmd = &cobra.Command{
 	},
 }
 
+// Do operations to export APIs for the migration into the directory passed as exportDirectory
+// <export_directory> is the patch defined in main_config.yaml
+// exportDirectory = <export_directory>/migration/
 func executeExportAPIsCmd(exportDirectory string) {
 	//create dir structure
 	apiExportDir = createExportAPIsDirStructure(exportDirectory)
@@ -58,56 +76,31 @@ func executeExportAPIsCmd(exportDirectory string) {
 	}
 
 	if ((utils.IsFileExist(filepath.Join(exportRelatedFilesPath, utils.LastSucceededApiFileName))) && !startFromBeginning) {
-		var lastSuceededAPI utils.API
-		lastSuceededAPI = utils.ReadLastSucceededAPIFileData(exportRelatedFilesPath);
-		var migrationApisExportMetadata utils.MigrationApisExportMetadata
-		migrationApisExportMetadata.ReadMigrationApisExportMetadataFile(filepath.Join(exportRelatedFilesPath,
-			utils.MigrationAPIsExportMetadataFileName))
-		apis = migrationApisExportMetadata.ApiListToExport
-		apiListOffset = migrationApisExportMetadata.ApiListOffset
-		startingApiIndexFromList = getLastSuceededApiIndex(lastSuceededAPI) + 1
-
-		//find count of APIs left to be exported
-		var lastSucceededAPInumber = getLastSuceededApiIndex(lastSuceededAPI) + 1
-		count = int32(len(apis) - lastSucceededAPInumber)
-
-		if (count == 0) {
-			//last iteration had been completed successfully but operation had halted at that point.
-			//So get the next set of APIs for next iteration
-			apiListOffset += utils.MaxAPIsToExportOnce
-			startingApiIndexFromList = 0
-			count, apis = getAPIList()
-			if (len(apis) > 0) {
-				utils.WriteMigrationApisExportMetadataFile(apis, cmdResourceTenantDomain, cmdUsername,
-					exportRelatedFilesPath, apiListOffset)
-			} else {
-				println("All the APIs has been exported and so the execution of export-apis command is completed successfully")
-				os.Exit(1)
-			}
-		}
-	} else { // start from beginning
+		prepareResumption()
+	} else {
 		prepareStartFromBeginning()
 	}
 
+	exportAPIs()
+}
+
+// Do the API exportation
+func exportAPIs() {
 	if (count == 0) {
 		fmt.Println("No APIs available to be exported..!")
 	} else {
 		for (count > 0) {
-			fmt.Println("Found ", count, "of APIs to be exported in the iteration beginning with the offset #"+
-				strconv.Itoa(apiListOffset) + " with a maximum limit of " + strconv.Itoa(utils.MaxAPIsToExportOnce))
+			utils.Logln("Found ", count, "of APIs to be exported in the iteration beginning with the offset #"+
+				strconv.Itoa(apiListOffset) + ". Maximum limit of APIs exported in single iteration is " +
+				strconv.Itoa(utils.MaxAPIsToExportOnce))
 			//get basic Auth credentials
 			b64encodedCredentials, preCommandErr :=
 				utils.ExecutePreCommandWithBasicAuth(cmdExportEnvironment, cmdUsername, cmdPassword,
 					utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
 			if preCommandErr != nil {
 				utils.Logln("Error generating base64 encoded credentials for Basic Authentication:")
-				//return preCommandErr
 			}
 			for i := startingApiIndexFromList; i < len(apis); i++ {
-				/*if( (i==2) && (apiListOffset == 8)) {
-					os.Exit(1)
-				}*/
-
 				exportAPIName := apis[i].Name
 				exportAPIVersion := apis[i].Version
 				exportApiProvider := apis[i].Provider
@@ -115,20 +108,17 @@ func executeExportAPIsCmd(exportDirectory string) {
 				resp := getExportApiResponse(exportAPIName, exportAPIVersion, exportApiProvider, apiImportExportEndpoint,
 					b64encodedCredentials)
 
-				// Print info on response
-				utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
-
 				if resp.StatusCode() == http.StatusOK {
+					utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
 					WriteToZip(exportAPIName, exportAPIVersion, apiExportDir, resp)
 					//write on last-succeeded-api.log
 					utils.WriteLastSuceededAPIFileData(exportRelatedFilesPath, apis[i])
 				} else {
 					fmt.Println("Error exporting API:", exportAPIName, "-", exportAPIVersion, " of Provider:", exportApiProvider)
+					utils.PrintErrorResponseAndExit(resp)
 				}
 			}
 
-			//offset = utils.MaxAPIsToExportOnce * iterationNo
-			//iterationNo++
 			apiListOffset += utils.MaxAPIsToExportOnce
 			count, apis = getAPIList()
 			startingApiIndexFromList = 0
@@ -137,9 +127,42 @@ func executeExportAPIsCmd(exportDirectory string) {
 					exportRelatedFilesPath, apiListOffset)
 			}
 		}
-		fmt.Println("All the APIs has been exported and so the execution of export-apis command is completed successfully")
+		fmt.Println("\nCommand: export-apis execution completed !")
 	}
 }
+
+//  Prepare resumption of previous-halted export-apis operation
+func prepareResumption() {
+	var lastSuceededAPI utils.API
+	lastSuceededAPI = utils.ReadLastSucceededAPIFileData(exportRelatedFilesPath)
+	var migrationApisExportMetadata utils.MigrationApisExportMetadata
+	migrationApisExportMetadata.ReadMigrationApisExportMetadataFile(filepath.Join(exportRelatedFilesPath,
+		utils.MigrationAPIsExportMetadataFileName))
+	apis = migrationApisExportMetadata.ApiListToExport
+	apiListOffset = migrationApisExportMetadata.ApiListOffset
+	startingApiIndexFromList = getLastSuceededApiIndex(lastSuceededAPI) + 1
+
+	//find count of APIs left to be exported
+	var lastSucceededAPInumber = getLastSuceededApiIndex(lastSuceededAPI) + 1
+	count = int32(len(apis) - lastSucceededAPInumber)
+
+	if (count == 0) {
+		//last iteration had been completed successfully but operation had halted at that point.
+		//So get the next set of APIs for next iteration
+		apiListOffset += utils.MaxAPIsToExportOnce
+		startingApiIndexFromList = 0
+		count, apis = getAPIList()
+		if (len(apis) > 0) {
+			utils.WriteMigrationApisExportMetadataFile(apis, cmdResourceTenantDomain, cmdUsername,
+				exportRelatedFilesPath, apiListOffset)
+		} else {
+			fmt.Println("Command: export-apis execution completed !")
+			os.Exit(1)
+		}
+	}
+}
+
+// get the index of the finally (successfully) exported API from the list of APIs listed in migration-apis-export-metadata.yaml
 func getLastSuceededApiIndex(lastSuceededApi utils.API) (int) {
 	for i := 0; i < len(apis); i++ {
 		if ((apis[i].Name == lastSuceededApi.Name) &&
@@ -151,7 +174,12 @@ func getLastSuceededApiIndex(lastSuceededApi utils.API) (int) {
 	return -1
 }
 
+
+// Delete directories where the APIs are exported, reset the indexes, get first API list and write the
+// migration-apis-export-metadata.yaml file
 func prepareStartFromBeginning() {
+	fmt.Println("Cleaning all the previously exported APIs of the given target tenant, in the given environment if " +
+		"any, and prepare to export APIs from beginning\n")
 	//cleaning existing old files (if exists) related to exportation
 	error := utils.RemoveDirectoryIfExists(filepath.Join(exportRelatedFilesPath, utils.ExportedApisDirName))
 	error = utils.RemoveFileIfExists(filepath.Join(exportRelatedFilesPath, utils.MigrationAPIsExportMetadataFileName))
@@ -161,10 +189,8 @@ func prepareStartFromBeginning() {
 			"exportation", error)
 	}
 
-	//offset = 0;
 	apiListOffset = 0
-	//iterationNo = 1;
-	startingApiIndexFromList = 0;
+	startingApiIndexFromList = 0
 	count, apis = getAPIList()
 	//write  migration-apis-export-metadata.yaml file
 	utils.WriteMigrationApisExportMetadataFile(apis, cmdResourceTenantDomain, cmdUsername,
@@ -172,8 +198,8 @@ func prepareStartFromBeginning() {
 
 }
 
+// Create the required directory structure to save the exported APIs
 func createExportAPIsDirStructure(artifactExportDirectory string) string {
-	//create required directory structure
 	var resourceTenantDirName = utils.GetMigrationExportTenantDirName(cmdResourceTenantDomain)
 
 	var createDirError error
@@ -202,6 +228,7 @@ func createExportAPIsDirStructure(artifactExportDirectory string) string {
 	return migrationsArtifactsEnvTenantApisPath
 }
 
+// Get the list of APIs from the defined offset index, upto the limit of constant value utils.MaxAPIsToExportOnce
 func getAPIList() (count int32, apis []utils.API) {
 	accessToken, preCommandErr :=
 		utils.ExecutePreCommandWithOAuth(cmdExportEnvironment, cmdUsername, cmdPassword,

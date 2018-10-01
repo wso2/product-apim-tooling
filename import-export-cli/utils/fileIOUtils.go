@@ -29,13 +29,13 @@ import (
 // WriteConfigFile
 // @param c : data
 // @param envConfigFilePath : Path to file where env endpoints are stored
-func WriteConfigFile(c interface{}, envConfigFilePath string) {
+func WriteConfigFile(c interface{}, configFilePath string) {
 	data, err := yaml.Marshal(&c)
 	if err != nil {
 		HandleErrorAndExit("Unable to write configuration to file.", err)
 	}
 
-	err = ioutil.WriteFile(envConfigFilePath, data, 0644)
+	err = ioutil.WriteFile(configFilePath, data, 0644)
 	if err != nil {
 		HandleErrorAndExit("Unable to write configuration to file.", err)
 	}
@@ -160,6 +160,7 @@ func RemoveDirectory(path string) (err error) {
 	return err
 }
 
+// Delete a directory if it exists in the given path
 func RemoveDirectoryIfExists(path string) (err error) {
 	if exists, err := IsDirExists(path); exists {
 		err = os.RemoveAll(path)
@@ -170,6 +171,7 @@ func RemoveDirectoryIfExists(path string) (err error) {
 	return err
 }
 
+// Delete a file if it exists in the given path
 func RemoveFileIfExists(path string) (err error) {
 	if exists := IsFileExist(path); exists {
 		err = os.Remove(path)

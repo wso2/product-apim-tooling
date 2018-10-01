@@ -20,6 +20,7 @@ package utils
 import (
 	"fmt"
 	"os"
+	"github.com/go-resty/resty"
 )
 
 func HandleErrorAndExit(msg string, err error) {
@@ -43,4 +44,13 @@ func HandleErrorAndExit(msg string, err error) {
 func printAndExit() {
 	fmt.Println("Exit status 1")
 	os.Exit(1)
+}
+
+// Log information of erroneous http response and exit program
+func PrintErrorResponseAndExit(response *resty.Response) {
+	fmt.Printf("\nResponse Status: %v. %v \n", response.Status(),response)
+	Logf("\nResponse Headers: %v", response.Header())
+	Logf("\nResponse Time:%v", response.Time())
+	Logf("\nResponse Received At:%v", response.ReceivedAt())
+	printAndExit()
 }
