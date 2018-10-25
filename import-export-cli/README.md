@@ -35,7 +35,7 @@ Command Line tool for importing and exporting APIs/Applications between differen
     > NOTE: Directory structure for configuration files (`$HOME/.wso2apimcli`) will be created upon execution of `apimcli`
     
     Execute `apimcli add-env --help` for detailed instructions
-    > Under environment, `api_manager_endpoint`, `registration_endpoint`, `token_endpoint` fields are mandatory. Others are optional
+    > Under environment, `api_manager_endpoint`, `registration_endpoint`, `token_endpoint` fields are mandatory. 
     
 - ### Command Autocompletion (For Bash Only)
     Copy the file `apimcli_bash_completion.sh` to `/etc/bash_completion.d/` and source it with
@@ -67,15 +67,17 @@ Command Line tool for importing and exporting APIs/Applications between differen
                 --version, -v
                 --provider, -r
                 --environment, -e
+		--insecure, -k
+          	Allow connections to SSL sites without certs
             Optional:
                 --username, -u
                 --password, -p
                 NOTE: user will be prompted to enter credentials if they are not provided with these flags
         Examples:
-            apimcli export-api -n TestAPI -v 1.0.1 -r admin -e staging
-            apimcli export-api -n TestAPI -v 1.0.1 -r admin -e staging -u admin -p 123456
-            apimcli export-api -n TestAPI -v 1.0.1 -r admin -e staging -u admin
-            apimcli export-api -n TestAPI -v 1.0.1 -r admin -e staging -p 123456
+            apimcli export-api -n TestAPI -v 1.0.1 -r admin -e staging -k
+            apimcli export-api -n TestAPI -v 1.0.1 -r admin -e staging -u admin -p 123456 -k
+            apimcli export-api -n TestAPI -v 1.0.1 -r admin -e staging -u admin -k
+            apimcli export-api -n TestAPI -v 1.0.1 -r admin -e staging -p 123456 -k
 ```
 
 * #### import-api
@@ -85,36 +87,40 @@ Command Line tool for importing and exporting APIs/Applications between differen
             Required:
                 --file, -f
                 --environment, -e
+		--insecure, -k
+          	Allow connections to SSL sites without certs
             Optional:
                 --username, -u 
                 --password, -p
 		--preserve-provider, -r 
                 NOTE: user will be prompted to enter credentials if they are not provided with these flags
         Examples:
-            apimcli import-api -f dev/TestAPI_1.0.0.zip -e dev
-            apimcli import-api -f qa/TestAPI_2.0.0.zip -e dev -u admin -p 123456
-            apimcli import-api -f staging/TestAPI_1.1.zip -e dev -u admin
-            apimcli import-api -f production/TestAPI_3.0.1.zip -e dev -p 123456 
-            apimcli import-api -f TestAPI -e dev
-            apimcli import-api -f TestAPI -e dev -r=false
+            apimcli import-api -f dev/TestAPI_1.0.0.zip -e dev -k
+            apimcli import-api -f qa/TestAPI_2.0.0.zip -e dev -u admin -p 123456 -k
+            apimcli import-api -f staging/TestAPI_1.1.zip -e dev -u admin -k
+            apimcli import-api -f production/TestAPI_3.0.1.zip -e dev -p 123456 -k
+            apimcli import-api -f TestAPI -e dev -k
+            apimcli import-api -f TestAPI -e dev -r=false -k
 ```
 * #### list apis
 ```bash
         Flags:
             Required:
                 --environment, -e
+		--insecure, -k
+          	Allow connections to SSL sites without certs
             Optional:
                 --username, -u 
                 --password, -p 
                 NOTE: user will be prompted to enter credentials if they are not provided with these flags
                 --query, -q
         Examples:
-            apimcli list apis -e dev
-            apimcli list apis -e prod -q version:1.0.0 
-            apimcli list apis -e prod -q provider:admin 
-            apimcli list apis -e staging 
-            apimcli list apis -e staging -u admin -p 123456
-            apimcli list apis -e staging -p 123456
+            apimcli list apis -e dev -k
+            apimcli list apis -e prod -q version:1.0.0 -k
+            apimcli list apis -e prod -q provider:admin -k
+            apimcli list apis -e staging -k
+            apimcli list apis -e staging -u admin -p 123456 -k
+            apimcli list apis -e staging -p 123456 -k
 ```
 
 * #### export-app
@@ -124,13 +130,15 @@ Command Line tool for importing and exporting APIs/Applications between differen
                  --name, -n          
                  --owner, -o         
                  --environment, -e
+		 --insecure, -k
+          	Allow connections to SSL sites without certs
             Optional
                  --username, -u
                  --password, -p   
                  NOTE: user will be prompted to enter credentials if they are not provided with these flags
         Examples:        
-            apimcli export-app -n SampleApp -o admin -e dev
-            apimcli export-app -n SampleApp -o admin -e prod         
+            apimcli export-app -n SampleApp -o admin -e dev -k
+            apimcli export-app -n SampleApp -o admin -e prod -k        
 ```
 * #### import-app
 ```bash    
@@ -138,6 +146,8 @@ Command Line tool for importing and exporting APIs/Applications between differen
             Required
                   --file, -f          
                   --environment, -e   
+		  --insecure, -k
+          	Allow connections to SSL sites without certs
             Optional
                   --skipSubscriptions, -s    
                   --owner, -o        
@@ -145,22 +155,24 @@ Command Line tool for importing and exporting APIs/Applications between differen
                   --username, -u      
                   --password, -p     
         Examples:      
-            apimcli import-app -f qa/apps/sampleApp.zip -e dev
-            apimcli import-app -f staging/apps/sampleApp.zip -e prod -o testUser -u admin -p admin
-            apimcli import-app -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -e staging               
+            apimcli import-app -f qa/apps/sampleApp.zip -e dev -k
+            apimcli import-app -f staging/apps/sampleApp.zip -e prod -o testUser -u admin -p admin -k
+            apimcli import-app -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -e staging -k               
 ```
 * #### list apps
 ```bash
         Flags
             Required
                   --environment, -e          
-                  --owner, -o         
+                  --owner, -o
+		  --insecure, -k
+          	  Allow connections to SSL sites without certs
             Optional
                   --username, -u             
                   --password, -p             
         Examples:
-            apimcli list apps -e dev -o admin 
-            apimcli list apps -e staging -o sampleUser -u admin -p 123456                         
+            apimcli list apps -e dev -o admin -k
+            apimcli list apps -e staging -o sampleUser -u admin -p 123456 -k                       
 
 ```
 
@@ -176,27 +188,32 @@ Command Line tool for importing and exporting APIs/Applications between differen
 ```bash
         Flags:
             Required:
-                --name, -n (Name of the environment)
-                --apim (API Manager endpoint)
-                --registration (Registration Endpoint)
-                --token (Token Endpoint)
-            Optional:
-                --import-export (API Import Export Endpoint for environment)
-                --list (API List endpoint for environment)
+                --registration (Registration endpoint)
+                --apim (API Manager endpoint) 
+                --token (Token endpoint) 
+		--import-export (Endpoint for environment) 
+                --admin (Admin REST API endpoint) 
+                --api_list (API listing REST API endpoint)
+                --app_list (Application listing REST API endpoint)
             
-        Examples:
+        Examples:  
            apimcli add-env -n dev \
-                --apim https://localhost:9443 \ 
-                --registration https://localhost:9443/client-registration/v0.14/register \
-                --token https://localhost:9443/oauth2/token
-                
-           apimcli add-env -n prod \
-                --apim https://localhost:9443 \ 
-                --registration https://localhost:9443/client-registration/v0.14/register \
-                --import-export https://localhost:9443/api-import-export-2.6.0-v0 \
-                --api_list https://localhost:9443/api/am/publisher/v0.14/apis \
-                --app_list https://localhost:9443/api/am/admin/v0.14/applications \
-                --token https://localhost:9443/oauth2/token
+                      --registration https://localhost:9443/client-registration/v0.14/register \
+                      --apim https://localhost:9443 \
+                      --token https://localhost:8243/token \
+                      --import-export https://localhost:9443/api-import-export-2.6.0-v0 \
+                      --admin https://localhost:9443/api/am/admin/v0.14 \
+                      --api_list https://localhost:9443/api/am/publisher/v0.14/apis \
+                      --app_list https://localhost:9443/api/am/store/v0.14/applications
+		      
+	   apimcli add-env -n prod \
+                      --registration https://localhost:9444/client-registration/v0.14/register \
+                      --apim https://localhost:9444 \
+                      --token https://localhost:8244/token \
+                      --import-export https://localhost:9444/api-import-export-2.6.0-v0 \
+                      --admin https://localhost:9444/api/am/admin/v0.14 \
+                      --api_list https://localhost:9444/api/am/publisher/v0.14/apis \
+                      --app_list https://localhost:9444/api/am/store/v0.14/applications
 ```
 
 * #### remove-env
