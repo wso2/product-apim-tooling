@@ -104,3 +104,11 @@ type MigrationApisExportMetadata struct {
 	OnTenant				 string		`yaml:"on_tenant"`
 	ApiListToExport  []API `yaml:"apis_to_export"`
 }
+
+type HttpErrorResponse struct {
+	Code int `json:"code"`
+	Status string `json:"message"`
+	Description string `json:"description"`
+	MoreInfo string `json:"moreInfo"`
+	Error []error `json:"error"`
+}

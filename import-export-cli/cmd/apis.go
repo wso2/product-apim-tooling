@@ -28,6 +28,7 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
 	"os"
+	"github.com/spf13/cast"
 )
 
 var listApisCmdEnvironment string
@@ -115,7 +116,7 @@ func GetAPIList(query, accessToken, apiListEndpoint string) (count int32, apis [
 
 		return apiListResponse.Count, apiListResponse.List, nil
 	} else {
-		return 0, nil, errors.New(resp.Status())
+		return 0, nil, errors.New(cast.ToString(resp.Body()))
 	}
 
 }

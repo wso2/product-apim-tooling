@@ -26,14 +26,20 @@ import (
 	"strconv"
 	"os"
 	"net/http"
-)
+	"github.com/renstrom/dedent"
+	"github.com/spf13/cast"
+	)
 
 const exportAPIsCmdLiteral = "export-apis"
-const exportAPIsCmdShortDesc = "Export APIs"
+const exportAPIsCmdShortDesc = "Export APIs for migration"
 
-var exportAPIsCmdLongDesc = "Export all the APIs of the tenant from an APIM 2.x environment environment, to be imported " +
+var exportAPIsCmdLongDesc = "Export all the APIs of a tenant from an APIM 2.6.0 environment environment, to be imported " +
 	"into 3.0.0 environment"
-var exportAPIsCmdExamples = ""
+var exportAPIsCmdExamples = dedent.Dedent(`
+		Examples:
+		` + utils.ProjectName + ` ` + exportAPIsCmdLiteral + ` -e production-2.6.0 -u wso2admin@wso2.org -p 12345 -t wso2.org -k --force
+		` + utils.ProjectName + ` ` + exportAPIsCmdLiteral + ` -e production-2.6.0 -u admin -p admin -k
+	`)
 var apiExportDir string
 var apiListOffset int //from which index of API, the APIs will be fetched from APIM server
 var count int32 // size of API list to be exported or number of  APIs left to be exported from last iteration
@@ -46,12 +52,11 @@ var startingApiIndexFromList int
 var mainConfigFilePath string
 
 var ExportAPIsCmd = &cobra.Command{
-	Use: exportAPIsCmdLiteral + " (--environment " +
-		"<environment-from-which-artifacts-should-be-exported>)",
+	Use: exportAPIsCmdLiteral + " [--environment " +
+		"<environment-from-which-artifacts-should-be-exported>] -u <user_name> -p <password> [-t <Tenant-domain-of-the-resources-to-be-exported>] [--force]",
 	Short: exportAPIsCmdShortDesc,
 	Long:  exportAPIsCmdLongDesc + exportAPIsCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		//use log package for in-detail logging ; https://golangcode.com/add-line-numbers-to-log-output/
 		utils.Logln(utils.LogPrefixInfo + exportAPIsCmdLiteral + " called")
 		var artifactExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedMigrationArtifactsDirName)
 		executeExportAPIsCmd(artifactExportDirectory)
@@ -70,7 +75,7 @@ func executeExportAPIsCmd(exportDirectory string) {
 	startFromBeginning = false
 	isProcessCompleted = false
 
-	fmt.Println("\nExporting APIs for the migration to APIM 3.0.0")
+	fmt.Println("\nExporting APIs for the migration...")
 	if (cmdForceStartFromBegin) {
 		startFromBeginning = true
 	}
@@ -89,6 +94,7 @@ func exportAPIs() {
 	if (count == 0) {
 		fmt.Println("No APIs available to be exported..!")
 	} else {
+		var counterSuceededAPIs = 0
 		for (count > 0) {
 			utils.Logln("Found ", count, "of APIs to be exported in the iteration beginning with the offset #"+
 				strconv.Itoa(apiListOffset) + ". Maximum limit of APIs exported in single iteration is " +
@@ -112,12 +118,14 @@ func exportAPIs() {
 					utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
 					WriteToZip(exportAPIName, exportAPIVersion, apiExportDir, resp)
 					//write on last-succeeded-api.log
+					counterSuceededAPIs++
 					utils.WriteLastSuceededAPIFileData(exportRelatedFilesPath, apis[i])
 				} else {
 					fmt.Println("Error exporting API:", exportAPIName, "-", exportAPIVersion, " of Provider:", exportApiProvider)
 					utils.PrintErrorResponseAndExit(resp)
 				}
 			}
+			fmt.Println("Batch of "+ cast.ToString(count) + " APIs exported successfully..!")
 
 			apiListOffset += utils.MaxAPIsToExportOnce
 			count, apis = getAPIList()
@@ -127,6 +135,8 @@ func exportAPIs() {
 					exportRelatedFilesPath, apiListOffset)
 			}
 		}
+		fmt.Println("\nTotal number of APIs exported : " + cast.ToString(counterSuceededAPIs))
+		fmt.Println("API export path: " + apiExportDir)
 		fmt.Println("\nCommand: export-apis execution completed !")
 	}
 }
@@ -174,7 +184,6 @@ func getLastSuceededApiIndex(lastSuceededApi utils.API) (int) {
 	return -1
 }
 
-
 // Delete directories where the APIs are exported, reset the indexes, get first API list and write the
 // migration-apis-export-metadata.yaml file
 func prepareStartFromBeginning() {
@@ -195,7 +204,6 @@ func prepareStartFromBeginning() {
 	//write  migration-apis-export-metadata.yaml file
 	utils.WriteMigrationApisExportMetadataFile(apis, cmdResourceTenantDomain, cmdUsername,
 		exportRelatedFilesPath, apiListOffset)
-
 }
 
 // Create the required directory structure to save the exported APIs
@@ -243,10 +251,10 @@ func getAPIList() (count int32, apis []utils.API) {
 		if err == nil {
 			return count, apis
 		} else {
-			utils.HandleErrorAndExit(utils.LogPrefixError+"Getting List of APIs", err)
+			utils.HandleErrorAndExit(utils.LogPrefixError + "Getting List of APIs.", utils.GetHttpErrorResponse(err))
 		}
 	} else {
-		utils.HandleErrorAndExit(utils.LogPrefixError+"Error in getting access token for user while getting "+
+		utils.HandleErrorAndExit(utils.LogPrefixError + "Error in getting access token for user while getting " +
 			"the list of APIs: ", preCommandErr)
 	}
 	return 0, nil
@@ -258,8 +266,9 @@ func init() {
 		utils.DefaultEnvironmentName, "Environment to which the API should be exported")
 	ExportAPIsCmd.Flags().StringVarP(&cmdResourceTenantDomain, "tenant", "t", "",
 		"Tenant domain of the resources to be exported")
-	ExportAPIsCmd.Flags().StringVarP(&cmdUsername, "username", "u", "", "Username")
-	ExportAPIsCmd.Flags().StringVarP(&cmdPassword, "password", "p", "", "Password")
+	ExportAPIsCmd.Flags().StringVarP(&cmdUsername, "username", "u", "", "User's Username")
+	ExportAPIsCmd.Flags().StringVarP(&cmdPassword, "password", "p", "", "User's Password")
 	ExportAPIsCmd.PersistentFlags().BoolVarP(&cmdForceStartFromBegin, "force", "", false,
-		"Allow connections to SSL endpoints without certs")
+		"Clean all the previously exported APIs of the given target tenant, in the given environment if " +
+			"any, and to export APIs from beginning")
 }

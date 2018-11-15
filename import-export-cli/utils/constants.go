@@ -90,7 +90,7 @@ const DefaultTokenValidityPeriod = "3600"
 const DefaultHttpRequestTimeout = 10000
 
 //migration export
-const MaxAPIsToExportOnce = 5
+const MaxAPIsToExportOnce = 20
 const MigrationAPIsExportMetadataFileName = "migration-apis-export-metadata.yaml"
 const LastSucceededApiFileName = "last-succeeded-api.log"
 const LastSuceededContentDelimiter = " " // space

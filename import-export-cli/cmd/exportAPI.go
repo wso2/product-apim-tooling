@@ -35,6 +35,7 @@ import (
 var exportAPIName string
 var exportAPIVersion string
 var exportProvider string
+var runnigExportApiCommand bool
 
 // ExportAPI command related usage info
 const exportAPICmdLiteral = "export-api"
@@ -63,6 +64,7 @@ var ExportAPICmd = &cobra.Command{
 }
 
 func executeExportAPICmd(mainConfigFilePath, envKeysAllFilePath, exportDirectory string) {
+	runnigExportApiCommand = true
 	b64encodedCredentials, preCommandErr :=
 		utils.ExecutePreCommandWithBasicAuth(cmdExportEnvironment, cmdUsername, cmdPassword,
 			mainConfigFilePath, envKeysAllFilePath)
@@ -109,8 +111,10 @@ func WriteToZip(exportAPIName, exportAPIVersion, zipLocationPath string, resp *r
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating zip archive", err)
 	}
-	fmt.Println("Succesfully exported API!")
-	fmt.Println("Find the exported API at " + pFile)
+	if(runnigExportApiCommand) {
+		fmt.Println("Successfully exported API!")
+		fmt.Println("Find the exported API at " + pFile)
+	}
 }
 
 // ExportAPI
