@@ -34,7 +34,6 @@ import (
 var listAppsCmdEnvironment string
 var listAppsCmdAppOwner string
 
-
 // appsCmd related info
 const appsCmdLiteral = "apps"
 const appsCmdShortDesc = "Display a list of Applications in an environment specific to an owner"
