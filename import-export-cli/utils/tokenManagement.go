@@ -321,7 +321,7 @@ func GetOAuthTokens(username, password, b64EncodedClientIDClientSecret, url stri
 	headers[HeaderAuthorization] = HeaderValueAuthBasicPrefix + " " + b64EncodedClientIDClientSecret
 	headers[HeaderAccept] = HeaderValueApplicationJSON
 
-	Logln(LogPrefixError + "connecting to " + url)
+	Logln(LogPrefixInfo + "connecting to " + url)
 	resp, err := InvokePOSTRequest(url, headers, body)
 
 	if err != nil {

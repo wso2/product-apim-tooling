@@ -28,6 +28,8 @@ import (
 	"runtime"
 	"strings"
 	"time"
+	"path/filepath"
+	"io/ioutil"
 )
 
 // Invoke http-post request using go-resty
@@ -116,4 +118,24 @@ func AppendSlashToString(input string) string {
 		input += "/"
 	}
 	return input
+}
+
+func WriteToFileSystem(exportAPIName, exportAPIVersion, exportEnvironment, exportDirectory string, resp *resty.Response) {
+	// Write to file
+	directory := filepath.Join(exportDirectory, exportEnvironment)
+	// create directory if it doesn't exist
+	if _, err := os.Stat(directory); os.IsNotExist(err) {
+		os.Mkdir(directory, 0777)
+		// permission 777 : Everyone can read, write, and execute
+	}
+	zipFilename := exportAPIName + "_" + exportAPIVersion + ".zip" // MyAPI_1.0.0.zip
+	pFile := filepath.Join(directory, zipFilename)
+	err := ioutil.WriteFile(pFile, resp.Body(), 0644)
+	// permission 644 : Only the owner can read and write.. Everyone else can only read.
+	if err != nil {
+		HandleErrorAndExit("Error creating zip archive", err)
+	}
+	fmt.Println("Succesfully exported API!")
+	fmt.Println("Find the exported API at " + pFile)
+
 }

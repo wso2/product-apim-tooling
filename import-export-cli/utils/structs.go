@@ -97,3 +97,18 @@ type ApplicationListResponse struct {
 	Count int32         `json:"count"`
 	List  []Application `json:"list"`
 }
+
+type MigrationApisExportMetadata struct {
+	ApiListOffset int `yaml:"api_list_offset"`
+	User 					 string 	`yaml:"user"`
+	OnTenant				 string		`yaml:"on_tenant"`
+	ApiListToExport  []API `yaml:"apis_to_export"`
+}
+
+type HttpErrorResponse struct {
+	Code int `json:"code"`
+	Status string `json:"message"`
+	Description string `json:"description"`
+	MoreInfo string `json:"moreInfo"`
+	Error []error `json:"error"`
+}

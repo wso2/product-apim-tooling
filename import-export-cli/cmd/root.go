@@ -33,6 +33,11 @@ import (
 var verbose bool
 var cfgFile string
 var insecure bool
+var cmdPassword string
+var cmdUsername string
+var cmdExportEnvironment string
+var cmdResourceTenantDomain string
+var cmdForceStartFromBegin bool
 
 // RootCmd related info
 const RootCmdShortDesc = "CLI for Importing and Exporting APIs and Applications"
@@ -82,7 +87,6 @@ func init() {
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 	// Init ConfigVars
 	err := utils.SetConfigVars(utils.MainConfigFilePath)
@@ -106,6 +110,7 @@ func createConfigFiles() {
 
 	utils.CreateDirIfNotExist(filepath.Join(utils.DefaultExportDirPath, utils.ExportedApisDirName))
 	utils.CreateDirIfNotExist(filepath.Join(utils.DefaultExportDirPath, utils.ExportedAppsDirName))
+	utils.CreateDirIfNotExist(filepath.Join(utils.DefaultExportDirPath, utils.ExportedMigrationArtifactsDirName))
 
 	if !utils.IsFileExist(utils.MainConfigFilePath) {
 		var mainConfig = new(utils.MainConfig)

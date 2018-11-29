@@ -20,6 +20,10 @@ package utils
 import (
 	"fmt"
 	"os"
+	"github.com/go-resty/resty"
+	"github.com/spf13/cast"
+	"encoding/json"
+	"errors"
 )
 
 func HandleErrorAndExit(msg string, err error) {
@@ -35,7 +39,6 @@ func HandleErrorAndExit(msg string, err error) {
 		fmt.Fprintf(os.Stderr, "%s: %v\n", ProjectName, msg)
 	} else {
 		fmt.Fprintf(os.Stderr, "%s: %v Reason: %v\n", ProjectName, msg, err.Error())
-		Logln(LogPrefixError + msg + ": " + err.Error())
 	}
 	defer printAndExit()
 }
@@ -43,4 +46,20 @@ func HandleErrorAndExit(msg string, err error) {
 func printAndExit() {
 	fmt.Println("Exit status 1")
 	os.Exit(1)
+}
+
+// Log information of erroneous http response and exit program
+func PrintErrorResponseAndExit(response *resty.Response) {
+	fmt.Printf("\nResponse Status: %v. \n", response.Status())
+	Logf("\nResponse :%v", cast.ToString(response.Body()))
+	Logf("\nResponse Headers: %v", response.Header())
+	Logf("\nResponse Time:%v", response.Time())
+	Logf("\nResponse Received At:%v", response.ReceivedAt())
+	printAndExit()
+}
+
+func GetHttpErrorResponse(err error) error {
+	var errorResponse HttpErrorResponse
+	json.Unmarshal([]byte(err.Error()), &errorResponse)
+	return errors.New(cast.ToString(errorResponse.Code) + "-" + errorResponse.Status + " : "+ errorResponse.Description)
 }
