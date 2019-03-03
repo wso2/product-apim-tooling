@@ -24,11 +24,11 @@ import (
 	"fmt"
 	"github.com/olekukonko/tablewriter"
 	"github.com/renstrom/dedent"
+	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
 	"os"
-	"github.com/spf13/cast"
 )
 
 var listApisCmdEnvironment string
@@ -137,6 +137,16 @@ func printAPIs(apis []utils.API) {
 		table.Append(v)
 	}
 
+	// Change table lines
+	table.SetCenterSeparator("")
+	table.SetColumnSeparator("")
+	table.SetRowSeparator("")
+	table.SetHeaderLine(false)
+
+	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
+
+	table.SetBorder(false)
 	table.Render() // Send output
 }
 
