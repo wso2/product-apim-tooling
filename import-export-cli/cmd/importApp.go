@@ -21,19 +21,19 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
-	"github.com/renstrom/dedent"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"net/http"
-	"crypto/tls"
-	"time"
-	"strings"
-	"path/filepath"
 	"bytes"
-	"mime/multipart"
+	"crypto/tls"
+	"github.com/renstrom/dedent"
+	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"io"
+	"mime/multipart"
+	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
+	"time"
 )
 
 var importAppFile string
@@ -178,7 +178,7 @@ func ImportApplication(query, appOwner, adminEndpiont, accessToken, exportDirect
 // Helper function for forming multi-part form data
 // Returns the formed http request and errors
 func NewAppFileUploadRequest(uri string, params map[string]string, paramName, path,
-accessToken string) (*http.Request, error) {
+	accessToken string) (*http.Request, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err

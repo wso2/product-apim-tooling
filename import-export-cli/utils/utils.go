@@ -24,12 +24,12 @@ import (
 	"fmt"
 	"github.com/go-resty/resty"
 	"golang.org/x/crypto/ssh/terminal"
+	"io/ioutil"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
-	"path/filepath"
-	"io/ioutil"
 )
 
 // Invoke http-post request using go-resty

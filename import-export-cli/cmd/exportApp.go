@@ -19,15 +19,15 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"github.com/renstrom/dedent"
-	"net/http"
 	"fmt"
 	"github.com/go-resty/resty"
-	"path/filepath"
-	"os"
+	"github.com/renstrom/dedent"
+	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"io/ioutil"
+	"net/http"
+	"os"
+	"path/filepath"
 )
 
 var exportAppName string
@@ -46,6 +46,7 @@ var exportAppCmdExamples = dedent.Dedent(`
 		` + utils.ProjectName + ` ` + exportAppCmdLiteral + ` -n SampleApp -o admin -e prod
 		NOTE: Flag --name (-n) and --owner (-o) are mandatory
 	`)
+
 // exportAppCmd represents the exportApp command
 var ExportAppCmd = &cobra.Command{
 	Use: exportAppCmdLiteral + " (--name <name-of-the-application> --owner <owner-of-the-application> --environment " +

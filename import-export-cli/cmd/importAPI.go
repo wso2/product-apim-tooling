@@ -186,7 +186,7 @@ func ImportAPI(query, apiImportExportEndpoint, accessToken, exportDirectory stri
 			return nil, errors.New(resp.Status)
 		}
 	}
-	
+
 	return resp, err
 }
 

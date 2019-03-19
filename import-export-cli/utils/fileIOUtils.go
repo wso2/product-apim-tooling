@@ -24,7 +24,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
-	)
+)
 
 // WriteConfigFile
 // @param c : data
@@ -145,17 +145,17 @@ func CreateDirIfNotExist(path string) (err error) {
 }
 
 func CreateDir(path string) (err error) {
-	err =	os.Mkdir(path, os.ModePerm)
-	if (err != nil) {
-		fmt.Println("Error in creating the directory:" + path + "\n"+ err.Error())
+	err = os.Mkdir(path, os.ModePerm)
+	if err != nil {
+		fmt.Println("Error in creating the directory:" + path + "\n" + err.Error())
 	}
 	return err
 }
 
 func RemoveDirectory(path string) (err error) {
 	err = os.RemoveAll(path)
-	if (err != nil) {
-		fmt.Println("Error in deleting the directory:" + path + "\n"+ err.Error())
+	if err != nil {
+		fmt.Println("Error in deleting the directory:" + path + "\n" + err.Error())
 	}
 	return err
 }
@@ -164,7 +164,7 @@ func RemoveDirectory(path string) (err error) {
 func RemoveDirectoryIfExists(path string) (err error) {
 	if exists, err := IsDirExists(path); exists {
 		err = os.RemoveAll(path)
-		if (err != nil) {
+		if err != nil {
 			fmt.Println("Error in deleting the directory:" + path + "\n" + err.Error())
 		}
 	}
@@ -175,7 +175,7 @@ func RemoveDirectoryIfExists(path string) (err error) {
 func RemoveFileIfExists(path string) (err error) {
 	if exists := IsFileExist(path); exists {
 		err = os.Remove(path)
-		if (err != nil) {
+		if err != nil {
 			fmt.Println("Error in deleting the directory:" + path + "\n" + err.Error())
 		}
 	}
