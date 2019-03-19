@@ -6,12 +6,11 @@ Command Line tool for importing and exporting APIs/Applications between differen
 ## Getting Started
 
 - ### Setting up the development environment
-    1. Install [Go 1.8.x](https://golang.org/dl)
-    2. Setup `$GOROOT` and `$GOPATH` correctly : [Tutorial](https://www.goinggo.net/2016/05/installing-go-and-your-workspace.html) 
-    3. [Install Glide](https://github.com/Masterminds/glide#install) - The Dependency manager for Go
-    4. Clone the [repository](https://github.com/wso2/product-apim-tooling) to your `$GOPATH` such that the project location is `$GOPATH/src/github.com/wso2/product-apim-tooling` (This is mandatory for Go's dependencies to identify each other)
-    5. `cd` into `product-apim-tooling/import-export-cli` 
-    6. Execute `glide install` to download all the dependencies
+    1. Install [Go 1.12.x](https://golang.org/dl)
+    2. Fork the [repository](https://github.com/wso2/product-apim-tooling)
+    3. Clone your fork into any directory
+    5. `cd` into cloned directory and then cd into `product-apim-tooling/import-export-cli`
+    6. Execute `go mod vendor` or `go mod download` to download all the dependencies
 
 - ### Building
     `cd` into `product-apim-tooling/import-export-cli`
