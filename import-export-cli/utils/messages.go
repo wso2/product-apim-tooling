@@ -18,7 +18,6 @@
 
 package utils
 
-
 const DoneMsg = "Done!\n"
 const UnableToConnectMsg = "There was a problem connecting, please try again"
 const InvalidCredentialsMsg = "Invalid Credentials"
@@ -30,9 +29,3 @@ const UnableToReadFileMsg = "unable to read file '%v'"
 
 const DoYouWantToContinueMsg_DefaultYes = "Do you want to continue? [Y/n] "
 const DoYouWantToContinueMsg_DefaultNo = "Do you want to continue? [y/N] "
-
-
-
-
-
-

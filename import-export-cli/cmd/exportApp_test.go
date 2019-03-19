@@ -19,15 +19,15 @@
 package cmd
 
 import (
-	"testing"
-	"net/http/httptest"
-	"net/http"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"github.com/renstrom/dedent"
 	"fmt"
 	"github.com/go-resty/resty"
+	"github.com/renstrom/dedent"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"testing"
 )
 
 func TestExportApp(t *testing.T) {

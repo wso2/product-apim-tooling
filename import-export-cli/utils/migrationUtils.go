@@ -19,30 +19,30 @@
 package utils
 
 import (
-	"strings"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"path/filepath"
-	"gopkg.in/yaml.v2"
+	"strings"
 )
 
 // Compose the name of the tenant specific directory to save migration artifacts
 // Actual tenant name cmdResourceTenantDomain will be changed to replace '.' with '-dot-'
 // If the -t option is not given in with the command, a default name 'tenant-default' will be passed
 func GetMigrationExportTenantDirName(cmdResourceTenantDomain string) (resourceTenantDirName string) {
-	if (cmdResourceTenantDomain == "") {
+	if cmdResourceTenantDomain == "" {
 		resourceTenantDirName = DefaultResourceTenantDomain
 	} else {
-		resourceTenantDirName = cmdResourceTenantDomain;
+		resourceTenantDirName = cmdResourceTenantDomain
 	}
 
-	if (strings.Contains(cmdResourceTenantDomain, ".")) {
+	if strings.Contains(cmdResourceTenantDomain, ".") {
 		resourceTenantDirName = strings.Replace(cmdResourceTenantDomain, ".", "-dot-", -1)
 	}
 	return resourceTenantDirName
 }
 
 // Read the details of finally and successfully exported API into the last-succeeded-api.log file
-func ReadLastSucceededAPIFileData(exportRelatedFilesPath string) (API) {
+func ReadLastSucceededAPIFileData(exportRelatedFilesPath string) API {
 	var lastSucceededApiFilePath = filepath.Join(exportRelatedFilesPath, LastSucceededApiFileName)
 	data, err := ioutil.ReadFile(lastSucceededApiFilePath)
 	str := string(data)
@@ -62,7 +62,7 @@ func WriteLastSuceededAPIFileData(exportRelatedFilesPath string, api API) {
 	content = []byte(api.Name + LastSuceededContentDelimiter + api.Version + LastSuceededContentDelimiter + api.Provider)
 	var error = ioutil.WriteFile(lastSucceededApiFilePath, content, 0644)
 
-	if (error != nil) {
+	if error != nil {
 		HandleErrorAndExit("Error in writing file "+lastSucceededApiFilePath, error)
 	}
 }

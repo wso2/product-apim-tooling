@@ -111,7 +111,7 @@ func WriteToZip(exportAPIName, exportAPIVersion, zipLocationPath string, resp *r
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating zip archive", err)
 	}
-	if(runnigExportApiCommand) {
+	if runnigExportApiCommand {
 		fmt.Println("Successfully exported API!")
 		fmt.Println("Find the exported API at " + pFile)
 	}

@@ -66,13 +66,6 @@ buildPath="$rootPath/${buildDir}"
 echo "Cleaning build path ${buildDir}..."
 rm -rf $buildPath
 
-type glide >/dev/null 2>&1 || { echo >&2 "Glide dependency management is needed to build the ImportExportCLI
-(https://glide
-.sh/).  Aborting."; exit 1; }
-echo "Setting up dependencies..."
-glide install
-echo
-
 filename=$(basename ${target})
 baseDir=$(dirname ${target})
 if [ ".go" == ${filename:(-3)} ]

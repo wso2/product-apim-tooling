@@ -19,16 +19,16 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-	"github.com/renstrom/dedent"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"fmt"
-	"net/http"
 	"encoding/json"
 	"errors"
-	"github.com/olekukonko/tablewriter"
-	"os"
+	"fmt"
 	"github.com/go-resty/resty"
+	"github.com/olekukonko/tablewriter"
+	"github.com/renstrom/dedent"
+	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"net/http"
+	"os"
 )
 
 var listAppsCmdEnvironment string
@@ -101,7 +101,7 @@ func GetApplicationList(appOwner, accessToken, applicationListEndpoint string) (
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 
 	var resp *resty.Response
-	if (appOwner == "") {
+	if appOwner == "" {
 		resp, err = utils.InvokeGETRequest(applicationListEndpoint, headers)
 	} else {
 		resp, err = utils.InvokeGETRequestWithQueryParam("user", appOwner, applicationListEndpoint, headers)
