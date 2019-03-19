@@ -21,8 +21,10 @@ package cmd
 import (
 	"bytes"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -85,7 +87,7 @@ func executeImportAPICmd(mainConfigFilePath, envKeysAllFilePath, exportDirectory
 		if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusCreated {
 			// 200 OK or 201 Created
 			utils.Logln(utils.LogPrefixInfo+"Header:", resp.Header)
-			fmt.Println("Succesfully imported API!")
+			fmt.Println("Successfully imported API!")
 		} else {
 			fmt.Println("Error importing API")
 			utils.Logln(utils.LogPrefixError + resp.Status)
@@ -158,26 +160,33 @@ func ImportAPI(query, apiImportExportEndpoint, accessToken, exportDirectory stri
 	}
 
 	resp, err := client.Do(req)
+	defer resp.Body.Close()
 
 	if err != nil {
 		utils.Logln(utils.LogPrefixError, err)
 	} else {
 		//var bodyContent []byte
-
 		if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
 			// 201 Created or 200 OK
 			fmt.Println("Successfully imported API '" + fileName + "'")
 		} else {
+			// We have an HTTP error
 			fmt.Println("Error importing API.")
 			fmt.Println("Status: " + resp.Status)
+
+			boduBuf, err := ioutil.ReadAll(resp.Body)
+
+			if err != nil {
+				return nil, err
+			}
+
+			strBody := string(boduBuf)
+			fmt.Println("Response:", strBody)
+
+			return nil, errors.New(resp.Status)
 		}
-
-		//fmt.Println(resp.Header)
-		//resp.Body.Read(bodyContent)
-		//resp.Body.Close()
-		//fmt.Println(bodyContent)
 	}
-
+	
 	return resp, err
 }
 
