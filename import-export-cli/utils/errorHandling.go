@@ -40,7 +40,8 @@ func HandleErrorAndExit(msg string, err error) {
 	} else {
 		fmt.Fprintf(os.Stderr, "%s: %v Reason: %v\n", ProjectName, msg, err.Error())
 	}
-	defer printAndExit()
+
+	printAndExit()
 }
 
 func printAndExit() {
