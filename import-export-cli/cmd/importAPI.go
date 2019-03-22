@@ -137,7 +137,6 @@ func ImportAPI(query, apiImportExportEndpoint, accessToken, exportDirectory stri
 		if err != nil {
 			utils.HandleErrorAndExit("Unable to create archive", err)
 		}
-
 		// change our zip file path to new archive
 		zipFilePath = tmpZip.Name()
 	}

@@ -32,7 +32,7 @@ func ZipDir(source, target string) error {
 	if err != nil {
 		return err
 	}
-	defer zipFile.Close()
+	defer zipFile.Close() // close the archive when exit
 
 	archive := zip.NewWriter(zipFile)
 	defer archive.Close()
@@ -60,7 +60,6 @@ func ZipDir(source, target string) error {
 		if baseDir != "" {
 			header.Name = filepath.Join(baseDir, strings.TrimPrefix(path, source))
 		}
-
 		if info.IsDir() {
 			header.Name += "/"
 		} else {
@@ -71,7 +70,6 @@ func ZipDir(source, target string) error {
 		if err != nil {
 			return err
 		}
-
 		if info.IsDir() {
 			return nil
 		}
@@ -81,9 +79,9 @@ func ZipDir(source, target string) error {
 			return err
 		}
 		defer file.Close()
+
 		_, err = io.Copy(writer, file)
 		return err
 	})
-
 	return err
 }
