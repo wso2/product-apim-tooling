@@ -115,14 +115,14 @@ func ImportAPI(query, apiImportExportEndpoint, accessToken, exportDirectory stri
 	utils.Logln(utils.LogPrefixInfo + "Source Environment: " + sourceEnv)
 
 	fileName := query // ex:- fileName = dev/twitterapi_1.0.0.zip
-	
+
 	var zipFilePath string = fileName
-	// Test if we can find the file in the current workdirectory
+	// Test if we can find the file in the current work directory
 	if _, err := os.Stat(fileName); os.IsNotExist(err) {
-		// Doesnt exist... Check if available in the default exportDirectory
+		// Doesn't exist... Check if available in the default exportDirectory
 		zipFilePath = filepath.Join(exportDirectory, fileName)
 		if _, err := os.Stat(zipFilePath); os.IsNotExist(err) {
-			utils.HandleErrorAndExit("Cant find API file " + zipFilePath + " to import", err)
+			utils.HandleErrorAndExit("Cant find API file "+zipFilePath+" to import", err)
 		}
 	}
 
