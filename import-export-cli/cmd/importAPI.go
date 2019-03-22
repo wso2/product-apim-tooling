@@ -119,16 +119,16 @@ func ImportAPI(query, apiImportExportEndpoint, accessToken, exportDirectory stri
 	zipFilePath := fileName
 
 	// Check whether the given path is a directory
-	// If it is a directory archive it
+	// If it is a directory, archive it
 	if info, err := os.Stat(fileName); err == nil && info.IsDir() {
 		fmt.Println(fileName + " is a directory")
 		fmt.Println("Creating an archive from the directory...")
 
+		// create a temp file in OS temp directory
 		tmpZip, err := ioutil.TempFile("", fileName+"*.zip")
 		if err != nil {
 			utils.HandleErrorAndExit("Error creating archive", err)
 		}
-
 		// schedule to delete the temp file
 		defer os.Remove(tmpZip.Name())
 
