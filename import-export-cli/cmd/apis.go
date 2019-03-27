@@ -21,7 +21,6 @@ package cmd
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/olekukonko/tablewriter"
 	"github.com/renstrom/dedent"
 	"github.com/spf13/cast"
@@ -70,11 +69,10 @@ func executeApisCmd(mainConfigFilePath, envKeysAllFilePath string) {
 		count, apis, err := GetAPIList("", accessToken, apiListEndpoint)
 
 		if err == nil {
+			printAPIs(apis)
 			// Printing the list of available APIs
-			fmt.Println("Environment:", listApisCmdEnvironment)
-			fmt.Println("No. of APIs:", count)
-			if count > 0 {
-				printAPIs(apis)
+			if count == 0 {
+				utils.Logln(utils.LogPrefixWarning + "No APIs found in environment - " + listApisCmdEnvironment)
 			}
 		} else {
 			utils.Logln(utils.LogPrefixError+"Getting List of APIs", err)
