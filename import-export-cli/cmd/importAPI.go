@@ -72,7 +72,6 @@ var ImportAPICmd = &cobra.Command{
 }
 
 func executeImportAPICmd(mainConfigFilePath, envKeysAllFilePath, exportDirectory string) {
-	fmt.Println(importAPIUpdate)
 	b64encodedCredentials, preCommandErr :=
 		utils.ExecutePreCommandWithBasicAuth(importEnvironment, importAPICmdUsername, importAPICmdPassword,
 			mainConfigFilePath, envKeysAllFilePath)
@@ -177,34 +176,37 @@ func ImportAPI(query, apiImportExportEndpoint, accessToken, exportDirectory stri
 	}
 
 	resp, err := client.Do(req)
-	defer resp.Body.Close()
-
 	if err != nil {
 		utils.Logln(utils.LogPrefixError, err)
+		return nil, err
+	}
+
+	//var bodyContent []byte
+	if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
+		// 201 Created or 200 OK
+		fmt.Println("Successfully imported API '" + fileName + "'")
 	} else {
-		//var bodyContent []byte
-		if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
-			// 201 Created or 200 OK
-			fmt.Println("Successfully imported API '" + fileName + "'")
-		} else {
-			// We have an HTTP error
-			fmt.Println("Error importing API.")
-			fmt.Println("Status: " + resp.Status)
+		// We have an HTTP error
+		fmt.Println("Error importing API.")
+		fmt.Println("Status: " + resp.Status)
 
-			boduBuf, err := ioutil.ReadAll(resp.Body)
-
-			if err != nil {
-				return nil, err
-			}
-
-			strBody := string(boduBuf)
-			fmt.Println("Response:", strBody)
-
-			return nil, errors.New(resp.Status)
+		bodyBuf, err := ioutil.ReadAll(resp.Body)
+		_ = resp.Body.Close()
+		if err != nil {
+			return nil, err
 		}
+
+		strBody := string(bodyBuf)
+		fmt.Println("Response:", strBody)
+
+		return nil, errors.New(resp.Status)
 	}
 
 	return resp, err
+}
+
+func getAPIID(name, accessToken string) (string, error) {
+	return "", nil
 }
 
 // NewFileUploadRequest form an HTTP Put request
