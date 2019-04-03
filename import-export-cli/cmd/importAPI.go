@@ -44,6 +44,7 @@ var importEnvironment string
 var importAPICmdUsername string
 var importAPICmdPassword string
 var importAPICmdPreserveProvider bool
+var importAPIUpdate bool
 
 // ImportAPI command related usage info
 const importAPICmdLiteral = "import-api"
@@ -71,6 +72,7 @@ var ImportAPICmd = &cobra.Command{
 }
 
 func executeImportAPICmd(mainConfigFilePath, envKeysAllFilePath, exportDirectory string) {
+	fmt.Println(importAPIUpdate)
 	b64encodedCredentials, preCommandErr :=
 		utils.ExecutePreCommandWithBasicAuth(importEnvironment, importAPICmdUsername, importAPICmdPassword,
 			mainConfigFilePath, envKeysAllFilePath)
@@ -116,7 +118,7 @@ func ImportAPI(query, apiImportExportEndpoint, accessToken, exportDirectory stri
 
 	fileName := query // ex:- fileName = dev/twitterapi_1.0.0.zip
 
-	var zipFilePath string = fileName
+	var zipFilePath = fileName
 	// Test if we can find the file in the current work directory
 	if _, err := os.Stat(fileName); os.IsNotExist(err) {
 		// Doesn't exist... Check if available in the default exportDirectory
@@ -246,4 +248,6 @@ func init() {
 	ImportAPICmd.Flags().StringVarP(&importAPICmdPassword, "password", "p", "", "Password")
 	ImportAPICmd.Flags().BoolVar(&importAPICmdPreserveProvider, "preserve-provider", true,
 		"Preserve existing provider of API after exporting")
+	ImportAPICmd.Flags().BoolVarP(&importAPIUpdate, "update", "", false, "Update API "+
+		"if exists. Otherwise it will create API")
 }
