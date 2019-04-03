@@ -9,7 +9,6 @@ require (
 	github.com/go-resty/resty v0.0.0-20171018191538-8b5e3f91fbea
 	github.com/hashicorp/hcl v0.0.0-20171017181929-23c074d0eceb // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
-	github.com/jhoonb/archivex v0.0.0-20170408192736-be4efa7ec0c3
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/magiconair/properties v0.0.0-20170902060319-8d7837e64d3c // indirect
 	github.com/mattn/go-runewidth v0.0.0-20161012013512-737072b4e32b // indirect
