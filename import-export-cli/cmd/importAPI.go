@@ -184,6 +184,7 @@ func ImportAPI(query, apiImportExportEndpoint, accessToken, exportDirectory stri
 	//var bodyContent []byte
 	if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
 		// 201 Created or 200 OK
+		_ = resp.Body.Close()
 		fmt.Println("Successfully imported API '" + fileName + "'")
 	} else {
 		// We have an HTTP error
