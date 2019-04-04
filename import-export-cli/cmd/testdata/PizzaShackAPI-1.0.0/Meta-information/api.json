@@ -1,0 +1,156 @@
+{
+  "id": {
+    "providerName": "admin",
+    "apiName": "PizzaShackAPI",
+    "version": "1.0.0"
+  },
+  "uuid": "3572e0be-c930-4c4a-b053-dddd0baac871",
+  "description": "This is a simple API for Pizza Shack online pizza delivery store.",
+  "type": "HTTP",
+  "context": "/pizzashack/1.0.0",
+  "contextTemplate": "/pizzashack/{version}",
+  "tags": [
+    "pizza"
+  ],
+  "documents": [],
+  "lastUpdated": "Mar 26, 2019 10:34:16 AM",
+  "availableTiers": [
+    {
+      "name": "Unlimited",
+      "displayName": "Unlimited",
+      "description": "Allows unlimited requests",
+      "requestsPerMin": 2147483647,
+      "requestCount": 2147483647,
+      "unitTime": 0,
+      "timeUnit": "ms",
+      "tierPlan": "FREE",
+      "stopOnQuotaReached": true
+    }
+  ],
+  "availableSubscriptionLevelPolicies": [],
+  "uriTemplates": [
+    {
+      "uriTemplate": "/order/{orderId}",
+      "httpVerb": "GET",
+      "authType": "Any",
+      "httpVerbs": [
+        "GET",
+        "DELETE",
+        "PUT"
+      ],
+      "authTypes": [
+        "Any",
+        "Any",
+        "Any"
+      ],
+      "throttlingConditions": [],
+      "throttlingTier": "Unlimited",
+      "throttlingTiers": [
+        "Unlimited",
+        "Unlimited",
+        "Unlimited"
+      ],
+      "mediationScript": "null",
+      "scopes": [
+        null,
+        null,
+        null
+      ],
+      "mediationScripts": {}
+    },
+    {
+      "uriTemplate": "/menu",
+      "httpVerb": "GET",
+      "authType": "Any",
+      "httpVerbs": [
+        "GET"
+      ],
+      "authTypes": [
+        "Any"
+      ],
+      "throttlingConditions": [],
+      "throttlingTier": "Unlimited",
+      "throttlingTiers": [
+        "Unlimited"
+      ],
+      "mediationScript": "null",
+      "scopes": [
+        null
+      ],
+      "mediationScripts": {}
+    },
+    {
+      "uriTemplate": "/order",
+      "httpVerb": "POST",
+      "authType": "Any",
+      "httpVerbs": [
+        "POST"
+      ],
+      "authTypes": [
+        "Any"
+      ],
+      "throttlingConditions": [],
+      "throttlingTier": "Unlimited",
+      "throttlingTiers": [
+        "Unlimited"
+      ],
+      "mediationScript": "null",
+      "scopes": [
+        null
+      ],
+      "mediationScripts": {}
+    }
+  ],
+  "apiHeaderChanged": false,
+  "apiResourcePatternsChanged": false,
+  "status": "PUBLISHED",
+  "technicalOwner": "John Doe",
+  "technicalOwnerEmail": "architecture@pizzashack.com",
+  "businessOwner": "Jane Roe",
+  "businessOwnerEmail": "marketing@pizzashack.com",
+  "visibility": "public",
+  "endpointSecured": false,
+  "endpointAuthDigest": false,
+  "transports": "http,https",
+  "advertiseOnly": false,
+  "corsConfiguration": {
+    "corsConfigurationEnabled": false,
+    "accessControlAllowOrigins": [
+      "*"
+    ],
+    "accessControlAllowCredentials": false,
+    "accessControlAllowHeaders": [
+      "authorization",
+      "Access-Control-Allow-Origin",
+      "Content-Type",
+      "SOAPAction"
+    ],
+    "accessControlAllowMethods": [
+      "GET",
+      "PUT",
+      "POST",
+      "DELETE",
+      "PATCH",
+      "OPTIONS"
+    ]
+  },
+  "endpointConfig": "{\"production_endpoints\":[{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\",\"config\":{\"suspendDuration\":\"700\",\"suspendMaxDuration\":\"600\",\"factor\":\"4\",\"retryErroCode\":\"101505\",\"retryTimeOut\":\"60\",\"retryDelay\":\"200\",\"actionSelect\":\"fault\",\"actionDuration\":\"30000\"}},{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api2/\",\"endpoint_type\":\"http\",\"template_not_supported\":false},{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api3/\",\"endpoint_type\":\"http\",\"template_not_supported\":false}],\"sandbox_endpoints\":[{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\",\"config\":null},{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/2\",\"endpoint_type\":\"http\",\"template_not_supported\":false}],\"endpoint_type\":\"load_balance\",\"algoCombo\":\"org.apache.synapse.endpoints.algorithms.RoundRobin\",\"algoClassName\":\"org.apache.synapse.endpoints.algorithms.RoundRobin\",\"sessionManagement\":\"\",\"sessionTimeOut\":\"\"}",
+  "responseCache": "Disabled",
+  "cacheTimeout": 300,
+  "implementation": "ENDPOINT",
+  "scopes": [],
+  "isDefaultVersion": false,
+  "isPublishedDefaultVersion": false,
+  "environments": [
+    "Production and Sandbox"
+  ],
+  "createdTime": "1552985189708",
+  "additionalProperties": {},
+  "environmentList": [
+    "SANDBOX",
+    "PRODUCTION"
+  ],
+  "accessControl": "all",
+  "rating": 0.0,
+  "isLatest": true
+}
