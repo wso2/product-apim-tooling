@@ -91,11 +91,13 @@ func executeApisCmd(mainConfigFilePath, envKeysAllFilePath string) {
 // @return array of API objects
 // @return error
 func GetAPIList(query, accessToken, apiListEndpoint string) (count int32, apis []utils.API, err error) {
-	utils.Logln(utils.LogPrefixInfo+"URL:", apiListEndpoint)
-
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 
+	if query != "" {
+		apiListEndpoint += "?query=" + query
+	}
+	utils.Logln(utils.LogPrefixInfo+"URL:", apiListEndpoint)
 	resp, err := utils.InvokeGETRequest(apiListEndpoint, headers)
 
 	if err != nil {
