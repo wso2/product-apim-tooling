@@ -19,8 +19,10 @@
 package cmd
 
 import (
+	"archive/zip"
 	"bytes"
 	"crypto/tls"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -28,6 +30,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 	"strconv"
 
@@ -50,6 +53,16 @@ var importAPIUpdate bool
 const importAPICmdLiteral = "import-api"
 const importAPICmdShortDesc = "Import API"
 
+type API struct {
+	ID IdInfo `json:"id"`
+}
+
+type IdInfo struct {
+	Name     string `json:"apiName"`
+	Version  string `json:"version"`
+	Provider string `json:"providerName"`
+}
+
 var importAPICmdLongDesc = "Import an API to an environment"
 
 var importAPICmdExamples = dedent.Dedent(`
@@ -58,7 +71,7 @@ var importAPICmdExamples = dedent.Dedent(`
 		` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f staging/FacebookAPI.zip -e production -u admin -p admin
 	`)
 
-// ImportAPICmd represents the importAPI command
+// ImportAPICmd represents the importAPI commandIDInfo
 var ImportAPICmd = &cobra.Command{
 	Use: importAPICmdLiteral + " (--file <api-zip-file> --environment " +
 		"<environment-to-which-the-api-should-be-imported>)",
@@ -153,6 +166,8 @@ func ImportAPI(query, apiImportExportEndpoint, accessToken, exportDirectory stri
 
 	fmt.Println("ZipFilePath:", zipFilePath)
 
+	_, _ = getAPIInfo(zipFilePath)
+
 	extraParams := map[string]string{}
 	// TODO:: Add extraParams as necessary
 
@@ -206,8 +221,69 @@ func ImportAPI(query, apiImportExportEndpoint, accessToken, exportDirectory stri
 	return resp, err
 }
 
-func getAPIID(name, accessToken string) (string, error) {
-	return "", nil
+func getAPIInfo(filePath string) (*API, error) {
+	info, err := os.Stat(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	var buffer []byte
+	if info.IsDir() {
+		filePath = path.Join(filePath, "Meta-information", "api.json")
+		fmt.Println(filePath)
+		if _, err := os.Stat(filePath); os.IsNotExist(err) {
+			return nil, err
+		}
+
+		// read file
+		buffer, err = ioutil.ReadFile(filePath)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		// try reading zip file
+		r, err := zip.OpenReader(filePath)
+		if err != nil {
+			return nil, err
+		}
+		defer r.Close()
+
+		for _, file := range r.File {
+			// find api.json file inside the archive
+			if strings.Contains(file.Name, "api.json") {
+				rc, err := file.Open()
+				if err != nil {
+					return nil, err
+				}
+
+				buffer, err = ioutil.ReadAll(rc)
+				if err != nil {
+					_ = rc.Close()
+					return nil, err
+				}
+
+				_ = rc.Close()
+				break
+			}
+		}
+	}
+
+	api, err := extractAPIInfo(buffer)
+	if err != nil {
+		return nil, err
+	}
+
+	return api, nil
+}
+
+func extractAPIInfo(jsonContent []byte) (*API, error) {
+	api := &API{}
+	err := json.Unmarshal(jsonContent, &api)
+	if err != nil {
+		return nil, err
+	}
+
+	return api, nil
 }
 
 // NewFileUploadRequest form an HTTP Put request
