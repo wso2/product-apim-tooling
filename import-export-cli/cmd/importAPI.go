@@ -29,11 +29,11 @@ import (
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
 	"strconv"
-
 	"strings"
 	"time"
 
@@ -96,6 +96,7 @@ func executeImportAPICmd(mainConfigFilePath, envKeysAllFilePath, exportDirectory
 
 		if err != nil {
 			utils.HandleErrorAndExit("Error importing API", err)
+			return
 		}
 
 		if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusCreated {
@@ -113,114 +114,8 @@ func executeImportAPICmd(mainConfigFilePath, envKeysAllFilePath, exportDirectory
 	}
 }
 
-// ImportAPI function is used with import-api command
-// @param name: name of the API (zipped file) to be imported
-// @param apiManagerEndpoint: API Manager endpoint for the environment
-// @param accessToken: OAuth2.0 access token for the resource being accessed
-func ImportAPI(query, apiImportExportEndpoint, accessToken, exportDirectory string) (*http.Response, error) {
-	apiImportExportEndpoint = utils.AppendSlashToString(apiImportExportEndpoint)
 
-	apiImportExportEndpoint += "import-api"
-	apiImportExportEndpoint += "?preserveProvider=" +
-		strconv.FormatBool(importAPICmdPreserveProvider)
-	utils.Logln(utils.LogPrefixInfo + "Import URL: " + apiImportExportEndpoint)
-
-	sourceEnv := strings.Split(query, "/")[0] // environment from which the API was exported
-	utils.Logln(utils.LogPrefixInfo + "Source Environment: " + sourceEnv)
-
-	// fileName can be a environment related path like dev/PizzaShackAPI.zip
-	fileName := query
-	zipFilePath := fileName
-
-	// Check whether the given path is a directory
-	// If it is a directory, archive it
-	if info, err := os.Stat(fileName); err == nil && info.IsDir() {
-		fmt.Println(fileName + " is a directory")
-		fmt.Println("Creating an archive from the directory...")
-
-		// create a temp file in OS temp directory
-		tmpZip, err := ioutil.TempFile("", fileName+"*.zip")
-		if err != nil {
-			utils.HandleErrorAndExit("Error creating archive", err)
-		}
-		// schedule to delete the temp file
-		defer os.Remove(tmpZip.Name())
-
-		// zip the given directory
-		err = utils.ZipDir(fileName, tmpZip.Name())
-		if err != nil {
-			utils.HandleErrorAndExit("Unable to create archive", err)
-		}
-		// change our zip file path to new archive
-		zipFilePath = tmpZip.Name()
-	}
-
-	// Test if we can find the zip file in the current work directory
-	if _, err := os.Stat(fileName); os.IsNotExist(err) {
-		// Doesn't exist... Check if available in the default exportDirectory
-		zipFilePath = filepath.Join(exportDirectory, fileName)
-		if _, err := os.Stat(zipFilePath); os.IsNotExist(err) {
-			utils.HandleErrorAndExit("Cant find API file "+zipFilePath+" to import", err)
-		}
-	}
-
-	fmt.Println("ZipFilePath:", zipFilePath)
-
-	_, _ = getAPIInfo(zipFilePath)
-
-	extraParams := map[string]string{}
-	// TODO:: Add extraParams as necessary
-
-	req, err := NewFileUploadRequest(apiImportExportEndpoint, extraParams, "file", zipFilePath, accessToken)
-	if err != nil {
-		utils.HandleErrorAndExit("Error creating request.", err)
-	}
-
-	var tr *http.Transport
-	if utils.Insecure {
-		tr = &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}
-	} else {
-		tr = &http.Transport{}
-	}
-
-	client := &http.Client{
-		Transport: tr,
-		Timeout:   time.Duration(utils.HttpRequestTimeout) * time.Second,
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		utils.Logln(utils.LogPrefixError, err)
-		return nil, err
-	}
-
-	//var bodyContent []byte
-	if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
-		// 201 Created or 200 OK
-		_ = resp.Body.Close()
-		fmt.Println("Successfully imported API '" + fileName + "'")
-	} else {
-		// We have an HTTP error
-		fmt.Println("Error importing API.")
-		fmt.Println("Status: " + resp.Status)
-
-		bodyBuf, err := ioutil.ReadAll(resp.Body)
-		_ = resp.Body.Close()
-		if err != nil {
-			return nil, err
-		}
-
-		strBody := string(bodyBuf)
-		fmt.Println("Response:", strBody)
-
-		return nil, errors.New(resp.Status)
-	}
-
-	return resp, err
-}
-
+// getAPIInfo scans filePath and returns API or an error
 func getAPIInfo(filePath string) (*API, error) {
 	info, err := os.Stat(filePath)
 	if err != nil {
@@ -276,6 +171,7 @@ func getAPIInfo(filePath string) (*API, error) {
 	return api, nil
 }
 
+// extractAPIInfo extracts API information from jsonContent
 func extractAPIInfo(jsonContent []byte) (*API, error) {
 	api := &API{}
 	err := json.Unmarshal(jsonContent, &api)
@@ -286,10 +182,170 @@ func extractAPIInfo(jsonContent []byte) (*API, error) {
 	return api, nil
 }
 
+// ImportAPI function is used with import-api command
+// @param name: name of the API (zipped file) to be imported
+// @param apiManagerEndpoint: API Manager endpoint for the environment
+// @param accessToken: OAuth2.0 access token for the resource being accessed
+func ImportAPI(query, apiImportExportEndpoint, accessToken, exportDirectory string) (*http.Response, error) {
+	updateAPI := false
+	apiImportExportEndpoint = utils.AppendSlashToString(apiImportExportEndpoint)
+
+	sourceEnv := strings.Split(query, "/")[0] // environment from which the API was exported
+	utils.Logln(utils.LogPrefixInfo + "Source Environment: " + sourceEnv)
+
+	// fileName can be a environment related path like dev/PizzaShackAPI.zip
+	fileName := query
+	zipFilePath := fileName
+
+	// Check whether the given path is a directory
+	// If it is a directory, archive it
+	if info, err := os.Stat(fileName); err == nil && info.IsDir() {
+		fmt.Println(fileName + " is a directory")
+		fmt.Println("Creating an archive from the directory...")
+
+		// create a temp file in OS temp directory
+		tmpZip, err := ioutil.TempFile("", fileName+"*.zip")
+		if err != nil {
+			utils.HandleErrorAndExit("Error creating archive", err)
+		}
+		// schedule to delete the temp file
+		defer os.Remove(tmpZip.Name())
+
+		// zip the given directory
+		err = utils.ZipDir(fileName, tmpZip.Name())
+		if err != nil {
+			utils.HandleErrorAndExit("Unable to create archive", err)
+		}
+		// change our zip file path to new archive
+		zipFilePath = tmpZip.Name()
+	}
+
+	// Test if we can find the zip file in the current work directory
+	if _, err := os.Stat(fileName); os.IsNotExist(err) {
+		// Doesn't exist... Check if available in the default exportDirectory
+		zipFilePath = filepath.Join(exportDirectory, fileName)
+		if _, err := os.Stat(zipFilePath); os.IsNotExist(err) {
+			utils.HandleErrorAndExit("Cant find API file "+zipFilePath+" to import", err)
+			return nil, err
+		}
+	}
+
+	fmt.Println("ZipFilePath:", zipFilePath)
+
+	apiID := ""
+	if importAPIUpdate {
+		utils.Logln("Reading API meta data from: ", zipFilePath)
+		api, err := getAPIInfo(zipFilePath)
+
+		if err != nil {
+			return nil, err
+		}
+
+		if api.ID.Name == "" || api.ID.Provider == "" || api.ID.Version == "" {
+			utils.Logln(utils.LogPrefixInfo, "API: ", api)
+			return nil, errors.New("invalid api information")
+		}
+
+		// check for API existence
+		accessOAuthToken, err :=
+			utils.ExecutePreCommandWithOAuth(importEnvironment, importAPICmdUsername, importAPICmdPassword,
+				utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
+
+
+		if err != nil {
+			return nil, err
+		}
+
+		apiQuery := fmt.Sprintf("name:%s provider:%s version:%s", api.ID.Name, api.ID.Provider, api.ID.Version)
+		count, apis, err := GetAPIList(url.QueryEscape(apiQuery), accessOAuthToken,
+			utils.GetApiListEndpointOfEnv(importEnvironment, utils.MainConfigFilePath))
+
+		if err != nil {
+			return nil, err
+		}
+
+		if count == 0 {
+			fmt.Println("The specified API was not found.")
+			fmt.Printf("Creating: %s %s\n", api.ID.Name, api.ID.Version)
+		} else {
+			fmt.Println("Existing API found, attempting to update it...")
+			utils.Logln("API ID:", apis[0].ID)
+			updateAPI = true
+			apiID = apis[0].ID
+		}
+	}
+
+	extraParams := map[string]string{}
+	// TODO:: Add extraParams as necessary
+
+	httpMethod := ""
+	if updateAPI {
+		httpMethod = http.MethodPut
+		apiImportExportEndpoint += apiID
+	} else {
+		httpMethod = http.MethodPost
+		apiImportExportEndpoint += "import-api"
+	}
+
+	apiImportExportEndpoint += "?preserveProvider=" +
+		strconv.FormatBool(importAPICmdPreserveProvider)
+	utils.Logln(utils.LogPrefixInfo + "Import URL: " + apiImportExportEndpoint)
+
+	req, err := NewFileUploadRequest(apiImportExportEndpoint, httpMethod, extraParams, "file",
+		zipFilePath, accessToken)
+	if err != nil {
+		utils.HandleErrorAndExit("Error creating request.", err)
+	}
+
+	var tr *http.Transport
+	if utils.Insecure {
+		tr = &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+	} else {
+		tr = &http.Transport{}
+	}
+
+	client := &http.Client{
+		Transport: tr,
+		Timeout:   time.Duration(utils.HttpRequestTimeout) * time.Second,
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		utils.Logln(utils.LogPrefixError, err)
+		return nil, err
+	}
+
+	//var bodyContent []byte
+	if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
+		// 201 Created or 200 OK
+		_ = resp.Body.Close()
+		fmt.Println("Successfully imported API '" + fileName + "'")
+	} else {
+		// We have an HTTP error
+		fmt.Println("Error importing API.")
+		fmt.Println("Status: " + resp.Status)
+
+		bodyBuf, err := ioutil.ReadAll(resp.Body)
+		_ = resp.Body.Close()
+		if err != nil {
+			return nil, err
+		}
+
+		strBody := string(bodyBuf)
+		fmt.Println("Response:", strBody)
+
+		return nil, errors.New(resp.Status)
+	}
+
+	return resp, err
+}
+
 // NewFileUploadRequest form an HTTP Put request
 // Helper function for forming multi-part form data
 // Returns the formed http request and errors
-func NewFileUploadRequest(uri string, params map[string]string, paramName, path,
+func NewFileUploadRequest(uri string, method string, params map[string]string, paramName, path,
 	b64encodedCredentials string) (*http.Request, error) {
 	file, err := os.Open(path)
 	if err != nil {
@@ -313,7 +369,7 @@ func NewFileUploadRequest(uri string, params map[string]string, paramName, path,
 		return nil, err
 	}
 
-	request, err := http.NewRequest(http.MethodPost, uri, body)
+	request, err := http.NewRequest(method, uri, body)
 	request.Header.Add(utils.HeaderAuthorization, utils.HeaderValueAuthBasicPrefix+" "+b64encodedCredentials)
 	request.Header.Add(utils.HeaderContentType, writer.FormDataContentType())
 	request.Header.Add(utils.HeaderAccept, "*/*")
