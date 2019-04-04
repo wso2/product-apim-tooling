@@ -21,13 +21,14 @@ package cmd
 import (
 	"encoding/json"
 	"errors"
+	"net/http"
+	"os"
+
 	"github.com/olekukonko/tablewriter"
 	"github.com/renstrom/dedent"
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"net/http"
-	"os"
 )
 
 var listApisCmdEnvironment string
