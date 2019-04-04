@@ -19,15 +19,16 @@
 package cmd
 
 import (
-	"github.com/renstrom/dedent"
-	"github.com/stretchr/testify/assert"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/renstrom/dedent"
+	"github.com/stretchr/testify/assert"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 func TestImportAPI1(t *testing.T) {
