@@ -114,7 +114,6 @@ func executeImportAPICmd(mainConfigFilePath, envKeysAllFilePath, exportDirectory
 	}
 }
 
-
 // getAPIInfo scans filePath and returns API or an error
 func getAPIInfo(filePath string) (*API, error) {
 	info, err := os.Stat(filePath)
