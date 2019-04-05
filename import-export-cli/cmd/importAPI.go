@@ -250,7 +250,6 @@ func ImportAPI(query, apiImportExportEndpoint, accessToken, exportDirectory stri
 			utils.ExecutePreCommandWithOAuth(importEnvironment, importAPICmdUsername, importAPICmdPassword,
 				utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
 
-
 		if err != nil {
 			return nil, err
 		}
