@@ -235,7 +235,6 @@ func ImportAPI(query, apiImportExportEndpoint, accessToken, exportDirectory stri
 	if importAPIUpdate {
 		utils.Logln("Reading API meta data from: ", zipFilePath)
 		api, err := getAPIInfo(zipFilePath)
-
 		if err != nil {
 			return nil, err
 		}
@@ -249,7 +248,6 @@ func ImportAPI(query, apiImportExportEndpoint, accessToken, exportDirectory stri
 		accessOAuthToken, err :=
 			utils.ExecutePreCommandWithOAuth(importEnvironment, importAPICmdUsername, importAPICmdPassword,
 				utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
-
 		if err != nil {
 			return nil, err
 		}
@@ -257,7 +255,6 @@ func ImportAPI(query, apiImportExportEndpoint, accessToken, exportDirectory stri
 		apiQuery := fmt.Sprintf("name:%s provider:%s version:%s", api.ID.Name, api.ID.Provider, api.ID.Version)
 		count, apis, err := GetAPIList(url.QueryEscape(apiQuery), accessOAuthToken,
 			utils.GetApiListEndpointOfEnv(importEnvironment, utils.MainConfigFilePath))
-
 		if err != nil {
 			return nil, err
 		}
