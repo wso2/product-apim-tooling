@@ -71,7 +71,7 @@ var importAPICmdExamples = dedent.Dedent(`
 		` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f staging/FacebookAPI.zip -e production -u admin -p admin
 	`)
 
-// ImportAPICmd represents the importAPI commandIDInfo
+// ImportAPICmd represents the importAPI command
 var ImportAPICmd = &cobra.Command{
 	Use: importAPICmdLiteral + " (--file <api-zip-file> --environment " +
 		"<environment-to-which-the-api-should-be-imported>)",
