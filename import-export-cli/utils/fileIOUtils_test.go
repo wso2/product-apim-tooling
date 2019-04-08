@@ -318,7 +318,7 @@ func TestIsDirExist2(t *testing.T) {
 	os.Mkdir(tempDirName, os.ModePerm)
 	isDirExist, _ := IsDirExists(tempDirName)
 	if !isDirExist {
-		t.Error("Expected '%t' for a directory that does exist, got '%t' instead\n", true, false)
+		t.Errorf("Expected '%t' for a directory that does exist, got '%t' instead\n", true, false)
 	}
 
 	defer os.Remove(tempDirName)

@@ -114,10 +114,36 @@ func ImportAPI(query, apiImportExportEndpoint, accessToken, exportDirectory stri
 	sourceEnv := strings.Split(query, "/")[0] // environment from which the API was exported
 	utils.Logln(utils.LogPrefixInfo + "Source Environment: " + sourceEnv)
 
-	fileName := query // ex:- fileName = dev/twitterapi_1.0.0.zip
+	// fileName can be a environment related path like dev/PizzaShackAPI.zip
+	fileName := query
+	zipFilePath := fileName
 
-	var zipFilePath string = fileName
-	// Test if we can find the file in the current work directory
+	// Check whether the given path is a directory
+	// If it is a directory, archive it
+	if info, err := os.Stat(fileName); err == nil && info.IsDir() {
+		// Get base name of the file
+		fileBase := filepath.Base(fileName)
+		fmt.Println(fileBase + " is a directory")
+		fmt.Println("Creating an archive from the directory...")
+
+		// create a temp file in OS temp directory
+		tmpZip, err := ioutil.TempFile("", fileBase+"*.zip")
+		if err != nil {
+			utils.HandleErrorAndExit("Error creating archive", err)
+		}
+		// schedule to delete the temp file
+		defer os.Remove(tmpZip.Name())
+
+		// zip the given directory
+		err = utils.Zip(fileName, tmpZip.Name())
+		if err != nil {
+			utils.HandleErrorAndExit("Unable to create archive", err)
+		}
+		// change our zip file path to new archive
+		zipFilePath = tmpZip.Name()
+	}
+
+	// Test if we can find the zip file in the current work directory
 	if _, err := os.Stat(fileName); os.IsNotExist(err) {
 		// Doesn't exist... Check if available in the default exportDirectory
 		zipFilePath = filepath.Join(exportDirectory, fileName)
@@ -127,24 +153,6 @@ func ImportAPI(query, apiImportExportEndpoint, accessToken, exportDirectory stri
 	}
 
 	fmt.Println("ZipFilePath:", zipFilePath)
-
-	// check if '.zip' exists in the input 'fileName'
-	//hasZipExtension, _ := regexp.MatchString(`^\S+\.zip$`, fileName)
-
-	//if hasZipExtension {
-	//	// import the zip file directly
-	//	//fmt.Println("hasZipExtension: ", true)
-	//
-	//} else {
-	//	//fmt.Println("hasZipExtension: ", false)
-	//	// search for a directory with the given fileName
-	//	destination := filepath.Join(exportDirectory, fileName+".zip")
-	//	err := utils.ZipDir(zipFilePath, destination)
-	//	if err != nil {
-	//		utils.HandleErrorAndExit("Error creating zip archive", err)
-	//	}
-	//	zipFilePath += ".zip"
-	//}
 
 	extraParams := map[string]string{}
 	// TODO:: Add extraParams as necessary
