@@ -25,9 +25,9 @@ import (
 )
 
 func TestZipDirError(t *testing.T) {
-	err := ZipDir("", "")
+	err := Zip("", "")
 	if err == nil {
-		t.Errorf("ZipDir() didn't return an error for invalid source and destination")
+		t.Errorf("Zip() didn't return an error for invalid source and destination")
 	}
 }
 
@@ -90,7 +90,7 @@ func TestZipDirOK(t *testing.T) {
 	zipFile := filepath.Join(directoryPath, "testZip.zip")
 
 	// now try compressing
-	err = ZipDir(directoryPath, zipFile)
+	err = Zip(directoryPath, zipFile)
 
 	if err != nil {
 		t.Errorf("Error compressing directory: %s\n", err)

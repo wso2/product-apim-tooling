@@ -199,11 +199,13 @@ func ImportAPI(query, apiImportExportEndpoint, accessToken, exportDirectory stri
 	// Check whether the given path is a directory
 	// If it is a directory, archive it
 	if info, err := os.Stat(fileName); err == nil && info.IsDir() {
-		fmt.Println(fileName + " is a directory")
+		// Get base name of the file
+		fileBase := filepath.Base(fileName)
+		fmt.Println(fileBase + " is a directory")
 		fmt.Println("Creating an archive from the directory...")
 
 		// create a temp file in OS temp directory
-		tmpZip, err := ioutil.TempFile("", fileName+"*.zip")
+		tmpZip, err := ioutil.TempFile("", fileBase+"*.zip")
 		if err != nil {
 			utils.HandleErrorAndExit("Error creating archive", err)
 		}
@@ -211,7 +213,7 @@ func ImportAPI(query, apiImportExportEndpoint, accessToken, exportDirectory stri
 		defer os.Remove(tmpZip.Name())
 
 		// zip the given directory
-		err = utils.ZipDir(fileName, tmpZip.Name())
+		err = utils.Zip(fileName, tmpZip.Name())
 		if err != nil {
 			utils.HandleErrorAndExit("Unable to create archive", err)
 		}

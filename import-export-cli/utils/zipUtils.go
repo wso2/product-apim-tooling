@@ -26,8 +26,8 @@ import (
 	"strings"
 )
 
-// ZipDir will create an archive from source and store it in target
-func ZipDir(source, target string) error {
+// Zip will create an archive from source and store it in target
+func Zip(source, target string) error {
 	zipFile, err := os.Create(target)
 	if err != nil {
 		return err
@@ -37,51 +37,66 @@ func ZipDir(source, target string) error {
 	archive := zip.NewWriter(zipFile)
 	defer archive.Close()
 
-	info, err := os.Stat(source)
+	fileInfo, err := os.Stat(source)
 	if err != nil {
-		return nil
+		return err
 	}
 
+	// Get base directory if this is a directory
 	var baseDir string
-	if info.IsDir() {
+	if fileInfo.IsDir() {
 		baseDir = filepath.Base(source)
 	}
 
-	filepath.Walk(source, func(path string, info os.FileInfo, err error) error {
+	// Walk through the source path to generate an archive
+	// Walk accepts a WalkFn which has signature of func(path string, info os.FileInfo, err error) error
+	// Walk will return any error to err while walking
+	err = filepath.Walk(source, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 
+		// Create a partial zip header from current file or directory
 		header, err := zip.FileInfoHeader(info)
 		if err != nil {
 			return err
 		}
 
+		// If baseDir is not empty it means we need to strip source from path, so we can get a relative filename from
+		// base.
 		if baseDir != "" {
 			header.Name = filepath.Join(baseDir, strings.TrimPrefix(path, source))
 		}
 		if info.IsDir() {
+			// add directory to zip archive
 			header.Name += "/"
 		} else {
+			// add a file to zip archive using deflate algorithm
 			header.Method = zip.Deflate
 		}
+		Logln("Creating:", header.Name)
 
+		// Create an archive writer
 		writer, err := archive.CreateHeader(header)
 		if err != nil {
 			return err
 		}
+		// if this is a directory we don't copy, we only add header
 		if info.IsDir() {
 			return nil
 		}
 
+		// open the file for reading
 		file, err := os.Open(path)
 		if err != nil {
 			return err
 		}
 		defer file.Close()
 
+		// copy contents of the file to the archive
 		_, err = io.Copy(writer, file)
 		return err
 	})
+
 	return err
 }
