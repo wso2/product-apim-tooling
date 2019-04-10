@@ -1,0 +1,18 @@
+environments:
+  - name: dev
+    endpoints:
+     production:
+       url: 'http://dev.foo.com'
+       config:
+         retryTimeOut: 'foo'
+         retryDelay: 70
+         factor: 2
+
+  - name: test
+    endpoints:
+      production:
+        url: 'http://test.foo.com'
+        config:
+          retryTimeOut: 60
+      sandbox:
+        url: '$TEST_SANDBOX'
