@@ -4,7 +4,7 @@
     "apiName": "PizzaShackAPI",
     "version": "1.0.0"
   },
-  "uuid": "3572e0be-c930-4c4a-b053-dddd0baac871",
+  "uuid": "030ec8ec-898f-4be0-be2a-26d877c333cb",
   "description": "This is a simple API for Pizza Shack online pizza delivery store.",
   "type": "HTTP",
   "context": "/pizzashack/1.0.0",
@@ -13,7 +13,7 @@
     "pizza"
   ],
   "documents": [],
-  "lastUpdated": "Mar 26, 2019 10:34:16 AM",
+  "lastUpdated": "Apr 10, 2019 3:28:40 PM",
   "availableTiers": [
     {
       "name": "Unlimited",
@@ -103,7 +103,7 @@
   ],
   "apiHeaderChanged": false,
   "apiResourcePatternsChanged": false,
-  "status": "PUBLISHED",
+  "status": "CREATED",
   "technicalOwner": "John Doe",
   "technicalOwnerEmail": "architecture@pizzashack.com",
   "businessOwner": "Jane Roe",
@@ -134,7 +134,7 @@
       "OPTIONS"
     ]
   },
-  "endpointConfig": "{\"production_endpoints\":[{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\",\"config\":{\"suspendDuration\":\"700\",\"suspendMaxDuration\":\"600\",\"factor\":\"4\",\"retryErroCode\":\"101505\",\"retryTimeOut\":\"60\",\"retryDelay\":\"200\",\"actionSelect\":\"fault\",\"actionDuration\":\"30000\"}},{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api2/\",\"endpoint_type\":\"http\",\"template_not_supported\":false},{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api3/\",\"endpoint_type\":\"http\",\"template_not_supported\":false}],\"sandbox_endpoints\":[{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\",\"config\":null},{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/2\",\"endpoint_type\":\"http\",\"template_not_supported\":false}],\"endpoint_type\":\"load_balance\",\"algoCombo\":\"org.apache.synapse.endpoints.algorithms.RoundRobin\",\"algoClassName\":\"org.apache.synapse.endpoints.algorithms.RoundRobin\",\"sessionManagement\":\"\",\"sessionTimeOut\":\"\"}",
+  "endpointConfig": "{\"production_endpoints\":{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\",\"config\":{\"suspendErrorCode\":\"101501\",\"suspendDuration\":\"40\",\"suspendMaxDuration\":\"400\",\"factor\":\"4\",\"actionSelect\":\"fault\",\"actionDuration\":\"3000\"}},\"sandbox_endpoints\":{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\",\"config\":null},\"endpoint_type\":\"http\"}",
   "responseCache": "Disabled",
   "cacheTimeout": 300,
   "implementation": "ENDPOINT",
@@ -144,13 +144,14 @@
   "environments": [
     "Production and Sandbox"
   ],
-  "createdTime": "1552985189708",
+  "createdTime": "1554380865606",
   "additionalProperties": {},
   "environmentList": [
     "SANDBOX",
     "PRODUCTION"
   ],
+  "apiSecurity": "oauth2",
   "accessControl": "all",
   "rating": 0.0,
-  "isLatest": true
+  "isLatest": false
 }
