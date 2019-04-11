@@ -57,6 +57,7 @@ import-export-cli/vendor
 # Sample API and App for testing
 !import-export-cli/cmd/sampleapi.zip
 !import-export-cli/cmd/sampleApp.zip
+!import-export-cli/cmd/testdata/*.zip
 
 # YAML Config Files
 import-export-cli/env_endpoints_all.yaml

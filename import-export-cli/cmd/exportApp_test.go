@@ -20,14 +20,15 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/go-resty/resty"
-	"github.com/renstrom/dedent"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/go-resty/resty"
+	"github.com/renstrom/dedent"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 func TestExportApp(t *testing.T) {
@@ -60,9 +61,9 @@ func TestExportApp(t *testing.T) {
 func TestWriteApplicationToZip(t *testing.T) {
 	name := "sampleApp"
 	owner := "admin"
-	environment := "dev"
+	//environment := "dev"
 	response := new(resty.Response)
 	exportDirectory := utils.CurrentDir
-	WriteApplicationToZip(name, owner, environment, exportDirectory, response)
+	WriteApplicationToZip(name, owner, exportDirectory, response)
 	defer os.RemoveAll(filepath.Join(exportDirectory, "dev"))
 }
