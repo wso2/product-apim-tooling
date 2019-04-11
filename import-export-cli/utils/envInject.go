@@ -1,15 +1,19 @@
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 	"regexp"
 
+	"github.com/Jeffail/gabs"
+
 	"gopkg.in/yaml.v2"
 )
 
+// Match for $VAR and capture VAR inside a group
 var re = regexp.MustCompile(`\$(\w+)`)
 
 type ErrRequiredEnvKeyMissing struct {
@@ -27,8 +31,8 @@ type Configuration struct {
 }
 
 type Endpoint struct {
-	Url    *string        `yaml:"url"`
-	Config *Configuration `yaml:"config"`
+	Url    *string        `yaml:"url" json:"url"`
+	Config *Configuration `yaml:"config" json:"config"`
 }
 
 type EndpointData struct {
@@ -43,6 +47,10 @@ type Environment struct {
 
 type APIConfig struct {
 	Environments []Environment `yaml:"environments"`
+}
+
+type APIEndpointConfig struct {
+	EPConfig string `json:"endpointConfig"`
 }
 
 func injectEnv(str string) (string, error) {
@@ -83,6 +91,62 @@ func LoadConfigFromFile(path string) (*APIConfig, error) {
 	if err != nil {
 		return nil, err
 	}
+	apiConfig, err := LoadConfig(r)
+	_ = r.Close()
 
-	return LoadConfig(r)
+	return apiConfig, err
+}
+
+func LoadAPIFromFile(path string) ([]byte, error) {
+	r, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	data, err := ioutil.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
+	_ = r.Close()
+
+	return data, err
+}
+
+func ExtractAPIEndpointConfig(b []byte) (string, error) {
+	apiConfig := &APIEndpointConfig{}
+	err := json.Unmarshal(b, &apiConfig)
+	if err != nil {
+		return "", err
+	}
+
+	return apiConfig.EPConfig, err
+}
+
+func MergeAPIConfig(source, config []byte) (string, error) {
+	configJSON, err := gabs.ParseJSON(config)
+	if err != nil {
+		return "", err
+	}
+
+	sourceJSON, err := gabs.ParseJSON(source)
+	if err != nil {
+		return "", err
+	}
+
+	err = sourceJSON.MergeFn(configJSON, func(destination, source interface{}) interface{} {
+		if source == nil {
+			return destination
+		}
+		return source
+	})
+
+	return sourceJSON.String(), nil
+}
+
+func (config APIConfig) ContainsEnv(key string) bool {
+	for _, env := range config.Environments {
+		if env.Name == key {
+			return true
+		}
+	}
+	return false
 }
