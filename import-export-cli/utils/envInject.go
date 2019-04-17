@@ -57,6 +57,7 @@ func injectEnv(str string) (string, error) {
 	matches := re.FindAllStringSubmatch(str, -1) // matches is [][]string
 
 	for _, match := range matches {
+		Logln("Looking for: ", match[0])
 		if os.Getenv(match[1]) == "" {
 			return "", &ErrRequiredEnvKeyMissing{Key: match[0]}
 		}
@@ -121,32 +122,38 @@ func ExtractAPIEndpointConfig(b []byte) (string, error) {
 	return apiConfig.EPConfig, err
 }
 
-func MergeAPIConfig(source, config []byte) (string, error) {
-	configJSON, err := gabs.ParseJSON(config)
+// MergeJSON secondSource with firstSource and returns merged JSON string
+// Note: Fields in firstSource are merged with secondSource.
+// If a field is not presented in secondSource, the one in firstSource will be preserved.
+// If not a field from secondSource will replace it.
+func MergeJSON(firstSource, secondSource []byte) ([]byte, error) {
+	secondSourceJSON, err := gabs.ParseJSON(secondSource)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	sourceJSON, err := gabs.ParseJSON(source)
+	firstSourceJSON, err := gabs.ParseJSON(firstSource)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	err = sourceJSON.MergeFn(configJSON, func(destination, source interface{}) interface{} {
+	err = firstSourceJSON.MergeFn(secondSourceJSON, func(destination, source interface{}) interface{} {
 		if source == nil {
 			return destination
 		}
 		return source
 	})
 
-	return sourceJSON.String(), nil
+	return firstSourceJSON.Bytes(), nil
 }
 
-func (config APIConfig) ContainsEnv(key string) bool {
-	for _, env := range config.Environments {
+func (config APIConfig) GetEnv(key string) *EndpointData {
+	for index, env := range config.Environments {
+		fmt.Println("Looking", index, env.Name)
 		if env.Name == key {
-			return true
+			fmt.Println("found", index)
+			return config.Environments[index].Endpoints
 		}
 	}
-	return false
+	return nil
 }

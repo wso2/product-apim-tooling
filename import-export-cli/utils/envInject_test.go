@@ -83,10 +83,10 @@ func TestMergeAPIConfig(t *testing.T) {
 	assert.Nil(t, err, "Error should be nil for correct yaml loading")
 	config, err := json.Marshal(configData.Environments[0].Endpoints)
 
-	merged, err := MergeAPIConfig([]byte(endpointData), config)
+	merged, err := MergeJSON([]byte(endpointData), config)
 	assert.Nil(t, err, "Error should be nil for successful merging")
 
-	jsonObj, err := gabs.ParseJSON([]byte(merged))
+	jsonObj, err := gabs.ParseJSON(merged)
 	assert.Nil(t, err, "Merged should be valid json")
 
 	suspendDuration, ok := jsonObj.Path("production_endpoints.config.suspendDuration").Data().(string)
@@ -102,6 +102,6 @@ func TestAPIConfig_ContainsEnv(t *testing.T) {
 	configData, err := LoadConfigFromFile("testdata/.apim-vars.yml")
 	assert.Nil(t, err, "Error should be nil for correct yaml loading")
 
-	assert.True(t, configData.ContainsEnv("dev"), "Should contain correct environment")
-	assert.False(t, configData.ContainsEnv("prod"), "Should not contain undefined environment")
+	assert.NotNil(t, configData.GetEnv("dev"), "Should contain correct environment")
+	assert.Nil(t, configData.GetEnv("prod"), "Should not contain undefined environment")
 }
