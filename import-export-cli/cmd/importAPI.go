@@ -37,6 +37,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Jeffail/gabs"
+
 	"github.com/renstrom/dedent"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -48,10 +50,15 @@ var importAPICmdUsername string
 var importAPICmdPassword string
 var importAPICmdPreserveProvider bool
 var importAPIUpdate bool
+var importAPIConfigFile string
+var importAPIInject bool
 
 // ImportAPI command related usage info
 const importAPICmdLiteral = "import-api"
 const importAPICmdShortDesc = "Import API"
+
+const DefaultAPIMConfigFileName = ".apim-vars.yml"
+const APIMENV = "APIMENV"
 
 type API struct {
 	ID IdInfo `json:"id"`
@@ -92,7 +99,7 @@ func executeImportAPICmd(mainConfigFilePath, envKeysAllFilePath, exportDirectory
 	if preCommandErr == nil {
 		apiImportExportEndpoint := utils.GetApiImportExportEndpointOfEnv(importEnvironment, mainConfigFilePath)
 
-		resp, err := ImportAPI(importAPIFile, apiImportExportEndpoint, b64encodedCredentials, exportDirectory)
+		resp, err := ImportAPI(importAPIFile, apiImportExportEndpoint, b64encodedCredentials, exportDirectory, importAPIConfigFile)
 
 		if err != nil {
 			utils.HandleErrorAndExit("Error importing API", err)
@@ -181,19 +188,90 @@ func extractAPIInfo(jsonContent []byte) (*API, error) {
 	return api, nil
 }
 
+// mergeAPI merge API in filepath(this points to a directory extracted by tool) with configuration given in configPath
+// it returns the directory containing merged files
+func mergeAPI(filepath, configPath string) (string, error) {
+	utils.Logln(configPath + " found")
+	utils.Logln("Scanning...")
+
+	// load configuration from yml file
+	apiConfig, err := utils.LoadConfigFromFile(configPath)
+	if err != nil {
+		return "", err
+	}
+
+	// get APIMENV from system and check. It is required to do a configuration merge
+	apimEnv := os.Getenv(APIMENV)
+	if apimEnv == "" {
+		return "", errors.New("please set " + APIMENV + " in your environment")
+	}
+
+	// copy filepath to a temp location for variable injection
+	tmpDir, err := ioutil.TempDir("", "apim")
+	if err != nil {
+		return "", err
+	}
+
+	// copy contents to a directory which contains base name of original
+	newPath := path.Join(tmpDir, path.Base(filepath))
+	err = utils.CopyDir(filepath, newPath)
+	if err != nil {
+		return "", err
+	}
+
+	// read api from Meta-information
+	apiPath := path.Join(newPath, "Meta-information", "api.json")
+	utils.Logln("Reading API definition from: ", apiPath)
+	api, err := gabs.ParseJSONFile(apiPath)
+	if err != nil {
+		return "", err
+	}
+	// extract endpointConfig from file
+	apiEndpointData, err := utils.ExtractAPIEndpointConfig(api.Bytes())
+	if err != nil {
+		return "", err
+	}
+
+	// check whether APIMENV is included in api configuration
+	endpointConfig := apiConfig.GetEnv(apimEnv)
+	if endpointConfig == nil {
+		return "", fmt.Errorf("%s does not exists in configuration file", apimEnv)
+	}
+	configData, err := json.Marshal(endpointConfig)
+	if err != nil {
+		return "", err
+	}
+	mergedADIEndpoints, err := utils.MergeJSON([]byte(apiEndpointData), configData)
+	if err != nil {
+		return "", err
+	}
+
+	utils.Logln("Writing merged API to:", apiPath)
+	// replace original endpointConfig with merged version
+	_, err = api.SetP(string(mergedADIEndpoints), "endpointConfig")
+	if err != nil {
+		return "", err
+	}
+
+	// write this to disk
+	err = ioutil.WriteFile(apiPath, api.Bytes(), 0644)
+	if err != nil {
+		return "", err
+	}
+
+	return newPath, nil
+}
+
 // ImportAPI function is used with import-api command
 // @param name: name of the API (zipped file) to be imported
 // @param apiManagerEndpoint: API Manager endpoint for the environment
 // @param accessToken: OAuth2.0 access token for the resource being accessed
-func ImportAPI(query, apiImportExportEndpoint, accessToken, exportDirectory string) (*http.Response, error) {
+func ImportAPI(importPath, apiImportExportEndpoint, accessToken, exportDirectory, configPath string) (*http.Response, error) {
 	updateAPI := false
 	apiImportExportEndpoint = utils.AppendSlashToString(apiImportExportEndpoint)
 
-	sourceEnv := strings.Split(query, "/")[0] // environment from which the API was exported
-	utils.Logln(utils.LogPrefixInfo + "Source Environment: " + sourceEnv)
-
 	// fileName can be a environment related path like dev/PizzaShackAPI.zip
-	fileName := query
+	fileName := importPath
 	zipFilePath := fileName
 
 	// Check whether the given path is a directory
@@ -202,18 +280,57 @@ func ImportAPI(query, apiImportExportEndpoint, accessToken, exportDirectory stri
 		// Get base name of the file
 		fileBase := filepath.Base(fileName)
 		fmt.Println(fileBase + " is a directory")
-		fmt.Println("Creating an archive from the directory...")
 
+		if importAPIInject {
+			utils.Logln("Looking up for " + configPath)
+			if info, err := os.Stat(configPath); err == nil && info.IsDir() {
+				// Need to check whether given file is a directory
+				utils.HandleErrorAndExit("Error", errors.New(configPath+"is a directory"))
+			} else if os.IsNotExist(err) && configPath != DefaultAPIMConfigFileName {
+				// config file is not mandatory. But if the given config file is not the default one need to check for
+				// existence and return error if not found
+				utils.HandleErrorAndExit("Error", err)
+			}
+
+			mergedAPIDir, err := mergeAPI(fileName, configPath)
+			if err != nil {
+				utils.HandleErrorAndExit("Error merging configuration", err)
+			}
+
+			// delete the temp directory on return
+			defer func() {
+				utils.Logln("Deleting:", mergedAPIDir)
+				err := os.RemoveAll(mergedAPIDir)
+				if err != nil {
+					utils.HandleErrorAndExit("Error deleting file:", err)
+				}
+			}()
+
+			fileName = mergedAPIDir
+		}
+
+		fmt.Println("Creating an archive from the directory...")
 		// create a temp file in OS temp directory
 		tmpZip, err := ioutil.TempFile("", fileBase+"*.zip")
 		if err != nil {
 			utils.HandleErrorAndExit("Error creating archive", err)
 		}
-		// schedule to delete the temp file
-		defer os.Remove(tmpZip.Name())
+		// delete the temp zip file on return
+		defer func() {
+			utils.Logln("Deleting:", tmpZip.Name())
+			err := os.Remove(tmpZip.Name())
+			if err != nil {
+				utils.HandleErrorAndExit("Error deleting file:", err)
+			}
+		}()
 
 		// zip the given directory
-		err = utils.Zip(fileName, tmpZip.Name())
+		absFilePath, err := filepath.Abs(fileName)
+		if err != nil {
+			utils.HandleErrorAndExit("Error:", err)
+		}
+		utils.Logln("Zipping: ", absFilePath)
+		err = utils.Zip(absFilePath, tmpZip.Name())
 		if err != nil {
 			utils.HandleErrorAndExit("Unable to create archive", err)
 		}
@@ -231,7 +348,7 @@ func ImportAPI(query, apiImportExportEndpoint, accessToken, exportDirectory stri
 		}
 	}
 
-	fmt.Println("ZipFilePath:", zipFilePath)
+	fmt.Println("Zip filepath:", zipFilePath)
 
 	apiID := ""
 	if importAPIUpdate {
@@ -388,4 +505,9 @@ func init() {
 		"Preserve existing provider of API after exporting")
 	ImportAPICmd.Flags().BoolVarP(&importAPIUpdate, "update", "", false, "Update API "+
 		"if exists. Otherwise it will create API")
+	ImportAPICmd.Flags().StringVarP(&importAPIConfigFile, "config", "", DefaultAPIMConfigFileName,
+		"Provide a API Manager configuration file. If the file was found application will search for APIMENV environment"+
+			"key in your system. If the above environment variable was not an error will be thrown")
+	ImportAPICmd.Flags().BoolVarP(&importAPIInject, "inject", "", false, "Inject variables defined"+
+		"in config file to the given API.")
 }
