@@ -347,8 +347,7 @@ func ImportAPI(importPath, apiImportExportEndpoint, accessToken, exportDirectory
 			return nil, err
 		}
 	}
-
-	fmt.Println("Zip filepath:", zipFilePath)
+	utils.Logln("Archive path:", zipFilePath)
 
 	apiID := ""
 	if importAPIUpdate {

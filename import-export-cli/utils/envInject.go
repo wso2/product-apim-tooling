@@ -16,7 +16,9 @@ import (
 // Match for $VAR and capture VAR inside a group
 var re = regexp.MustCompile(`\$(\w+)`)
 
+// ErrRequiredEnvKeyMissing represents error used for indicate environment key missing
 type ErrRequiredEnvKeyMissing struct {
+	// Key is the missing entity
 	Key string
 }
 
@@ -24,37 +26,57 @@ func (e ErrRequiredEnvKeyMissing) Error() string {
 	return fmt.Sprintf("%s is required, please set the environment variable", e.Key)
 }
 
+// Configuration represents endpoint config
 type Configuration struct {
+	// RetryTimeOut for endpoint
 	RetryTimeOut *int `yaml:"retryTimeOut" json:"retryTimeOut,string"`
-	RetryDelay   *int `yaml:"retryDelay" json:"retryDelay,string"`
-	Factor       *int `yaml:"factor" json:"factor,string"`
+	// RetryDelay for endpoint
+	RetryDelay *int `yaml:"retryDelay" json:"retryDelay,string"`
+	// Factor used for config
+	Factor *int `yaml:"factor" json:"factor,string"`
 }
 
+// Endpoint details
 type Endpoint struct {
-	Url    *string        `yaml:"url" json:"url"`
+	// Url of the endpoint
+	Url *string `yaml:"url" json:"url"`
+	// Config of endpoint
 	Config *Configuration `yaml:"config" json:"config"`
 }
 
+// EndpointData contains details about endpoints
 type EndpointData struct {
+	// Production endpoint
 	Production *Endpoint `yaml:"production" json:"production_endpoints"`
-	Sandbox    *Endpoint `yaml:"sandbox" json:"sandbox_endpoints"`
+	// Sandbox endpoint
+	Sandbox *Endpoint `yaml:"sandbox" json:"sandbox_endpoints"`
 }
 
+// Environment represents an api environment
 type Environment struct {
-	Name      string        `yaml:"name"`
+	// Name of the environment
+	Name string `yaml:"name"`
+	// Endpoints contain deatails about endpoints in a configuration
 	Endpoints *EndpointData `yaml:"endpoints"`
 }
 
+// APIConfig represents environments defined in configuration file
 type APIConfig struct {
+	// Environments contains all environments in a configuration
 	Environments []Environment `yaml:"environments"`
 }
 
+// APIEndpointConfig contains details about endpoints in an API
 type APIEndpointConfig struct {
+	// EPConfig is representing endpoint configuration
 	EPConfig string `json:"endpointConfig"`
 }
 
-func injectEnv(str string) (string, error) {
-	matches := re.FindAllStringSubmatch(str, -1) // matches is [][]string
+// injectEnv injects variables from environment to the content. It uses regex to match variables and look up them in the
+// environment before processing.
+// returns an error if anything happen
+func injectEnv(content string) (string, error) {
+	matches := re.FindAllStringSubmatch(content, -1) // matches is [][]string
 
 	for _, match := range matches {
 		Logln("Looking for: ", match[0])
@@ -63,10 +85,11 @@ func injectEnv(str string) (string, error) {
 		}
 	}
 
-	expanded := os.ExpandEnv(str)
+	expanded := os.ExpandEnv(content)
 	return expanded, nil
 }
 
+// LoadConfig loads an configuration from a reader. It returns an error or a valid APIConfig
 func LoadConfig(r io.Reader) (*APIConfig, error) {
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
@@ -87,6 +110,7 @@ func LoadConfig(r io.Reader) (*APIConfig, error) {
 	return config, nil
 }
 
+// LoadConfigFromFile loads a configuration YAML file located in path. It returns an error or a valid APIConfig
 func LoadConfigFromFile(path string) (*APIConfig, error) {
 	r, err := os.Open(path)
 	if err != nil {
@@ -98,6 +122,7 @@ func LoadConfigFromFile(path string) (*APIConfig, error) {
 	return apiConfig, err
 }
 
+// LoadAPIFromFile loads API file from the path and returns a slice of bytes or an error
 func LoadAPIFromFile(path string) ([]byte, error) {
 	r, err := os.Open(path)
 	if err != nil {
@@ -112,6 +137,7 @@ func LoadAPIFromFile(path string) ([]byte, error) {
 	return data, err
 }
 
+// ExtractAPIEndpointConfig extracts API endpoint information from a slice of byte b
 func ExtractAPIEndpointConfig(b []byte) (string, error) {
 	apiConfig := &APIEndpointConfig{}
 	err := json.Unmarshal(b, &apiConfig)
@@ -147,6 +173,7 @@ func MergeJSON(firstSource, secondSource []byte) ([]byte, error) {
 	return firstSourceJSON.Bytes(), nil
 }
 
+// GetEnv returns the EndpointData associated for key in the APIConfig, if not found returns nil
 func (config APIConfig) GetEnv(key string) *EndpointData {
 	for index, env := range config.Environments {
 		fmt.Println("Looking", index, env.Name)
