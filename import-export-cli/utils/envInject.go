@@ -176,9 +176,7 @@ func MergeJSON(firstSource, secondSource []byte) ([]byte, error) {
 // GetEnv returns the EndpointData associated for key in the APIConfig, if not found returns nil
 func (config APIConfig) GetEnv(key string) *EndpointData {
 	for index, env := range config.Environments {
-		fmt.Println("Looking", index, env.Name)
 		if env.Name == key {
-			fmt.Println("found", index)
 			return config.Environments[index].Endpoints
 		}
 	}
