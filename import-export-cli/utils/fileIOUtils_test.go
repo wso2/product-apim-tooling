@@ -22,8 +22,11 @@ package utils
 import (
 	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 const testKeysFileName = "test_keys_config.yaml"
@@ -55,6 +58,15 @@ func getSampleKeys() *EnvKeysAll {
 
 func getSampleMainConfig() *MainConfig {
 	return mainConfig
+}
+
+func fileExists(name string) bool {
+	if _, err := os.Stat(name); err != nil {
+		if os.IsNotExist(err) {
+			return false
+		}
+	}
+	return true
 }
 
 func initSampleKeys() {
@@ -322,4 +334,68 @@ func TestIsDirExist2(t *testing.T) {
 	}
 
 	defer os.Remove(tempDirName)
+}
+
+func TestCopyFileNotExists(t *testing.T) {
+	tmpFile, err := ioutil.TempFile("testdata", "")
+	assert.Nil(t, err, "Should be able to create a temp file")
+
+	err = CopyFile("notexists", tmpFile.Name())
+	assert.Error(t, err, "Should return error when copying non existing file")
+
+	// delete temp file
+	_ = os.Remove(tmpFile.Name())
+}
+
+func TestCopyFileExists(t *testing.T) {
+	tmpFile, err := ioutil.TempFile("testdata", "")
+	assert.Nil(t, err, "Should be able to create a temp file")
+
+	err = CopyFile("testdata/api.json", tmpFile.Name())
+	assert.Nil(t, err, "Should return no error when copying existing file")
+
+	original, err := ioutil.ReadFile("testdata/api.json")
+	assert.Nil(t, err, "Should be able to read original file")
+
+	copied, err := ioutil.ReadFile(tmpFile.Name())
+	assert.Nil(t, err, "Should be able to read copied file")
+	assert.ElementsMatch(t, original, copied, "should be same content")
+
+	// delete temp file
+	_ = os.Remove(tmpFile.Name())
+}
+
+func TestCopyDirNotExists(t *testing.T) {
+	tmpDir, err := ioutil.TempDir("testdata", "")
+	assert.Nil(t, err, "Should be able to create a temp directory")
+
+	err = CopyDir("notexists", tmpDir)
+	assert.Error(t, err, "Should return error when copying non existing directory")
+
+	// delete temp file
+	_ = os.Remove(tmpDir)
+}
+
+func TestCopyDirTargetExists(t *testing.T) {
+	tmpDir, err := ioutil.TempDir("testdata", "")
+	assert.Nil(t, err, "Should be able to create a temp directory")
+
+	err = CopyDir("testdata/fakedir", tmpDir)
+	assert.Error(t, err, "Should return error when target exists")
+
+	// delete temp file
+	_ = os.Remove(tmpDir)
+}
+
+func TestCopyDirTargetNotExists(t *testing.T) {
+	tmpDir := "tmp"
+
+	err := CopyDir("testdata/fakedir", tmpDir)
+	assert.Nil(t, err, "Should return no error when target not exists")
+
+	assert.True(t, fileExists(path.Join(tmpDir, "BAR")), "BAR should exist in tmpdir")
+	assert.True(t, fileExists(path.Join(tmpDir, "subdir", "FOO")), "FOO should exist in tmpdir")
+
+	// delete temp file
+	_ = os.RemoveAll(tmpDir)
 }
