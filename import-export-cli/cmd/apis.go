@@ -21,13 +21,14 @@ package cmd
 import (
 	"encoding/json"
 	"errors"
+	"net/http"
+	"os"
+
 	"github.com/olekukonko/tablewriter"
 	"github.com/renstrom/dedent"
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"net/http"
-	"os"
 )
 
 var listApisCmdEnvironment string
@@ -91,11 +92,13 @@ func executeApisCmd(mainConfigFilePath, envKeysAllFilePath string) {
 // @return array of API objects
 // @return error
 func GetAPIList(query, accessToken, apiListEndpoint string) (count int32, apis []utils.API, err error) {
-	utils.Logln(utils.LogPrefixInfo+"URL:", apiListEndpoint)
-
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 
+	if query != "" {
+		apiListEndpoint += "?query=" + query
+	}
+	utils.Logln(utils.LogPrefixInfo+"URL:", apiListEndpoint)
 	resp, err := utils.InvokeGETRequest(apiListEndpoint, headers)
 
 	if err != nil {

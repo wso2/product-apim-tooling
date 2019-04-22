@@ -19,13 +19,16 @@
 package cmd
 
 import (
-	"github.com/renstrom/dedent"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/renstrom/dedent"
+	"github.com/stretchr/testify/assert"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 func TestImportAPI1(t *testing.T) {
@@ -86,8 +89,106 @@ func TestNewFileUploadRequest(t *testing.T) {
 	extraParams := map[string]string{}
 	filePath := filepath.Join("sampleapi.zip")
 	accessToken := "access-token"
-	_, err := NewFileUploadRequest(server.URL, extraParams, "file", filePath, accessToken)
+	_, err := NewFileUploadRequest(server.URL, http.MethodPost, extraParams, "file", filePath, accessToken)
 	if err != nil {
 		t.Errorf("Error: %s\n", err.Error())
 	}
+}
+
+func TestExtractAPIInfoWithCorrectJSON(t *testing.T) {
+	// Correct json
+	content := `{
+	  "id": {
+		"providerName": "admin",
+		"apiName": "APIName",
+		"version": "1.0.0"
+	  },
+	  "uuid": "e4d0c1be-44e9-43ad-b434-f8e2f02dad11",
+	  "description": "Some API Description",
+	  "type": "HTTP",
+	  "context": "/api/1.0.0",
+	  "contextTemplate": "/api/{version}",
+	  "tags": [
+		"api"
+	  ]
+	}`
+
+	api, err := extractAPIInfo([]byte(content))
+	assert.Equal(t, api, &API{IdInfo{Provider: "admin", Version: "1.0.0", Name: "APIName"}},
+		"Should parse correct json")
+	assert.Equal(t, err, nil, "Should return nil error for correct json")
+}
+
+func TestExtractAPIInfoWhenIDTagMissing(t *testing.T) {
+	// When ID tag missing
+	content := `{
+	  "uuid": "e4d0c1be-44e9-43ad-b434-f8e2f02dad11",
+	  "description": "Some API Description",
+	  "type": "HTTP",
+	  "context": "/api/1.0.0",
+	  "contextTemplate": "/api/{version}",
+	  "tags": [
+		"api"
+	  ]
+	}`
+
+	api, err := extractAPIInfo([]byte(content))
+	assert.Equal(t, &API{}, api, "Should return empty IDInfo when ID tag missing")
+	assert.Nil(t, err, "Should return nil error")
+}
+
+func TestExtractAPIInfoWithMalformedJSON(t *testing.T) {
+	// Malformed json
+	content := `{
+	  "uuid": "e4d0c1be-44e9-43ad-b434-f8e2f02dad11",
+	  "description": "Some API Description",
+	  "type": "HTTP",
+	  "context": "/api/1.0.0",
+	  "contextTemplate": "/api/{version}",
+	  "tags": [
+		"api"
+	  
+	}`
+
+	api, err := extractAPIInfo([]byte(content))
+	assert.Nil(t, api, "Should return nil API struct")
+	assert.Error(t, err, "Should return an error regarding malformed json")
+}
+
+func TestGetAPIInfoCorrectZip(t *testing.T) {
+	api, err := getAPIInfo("testdata/PizzaShackAPI_1.0.0.zip")
+	assert.Nil(t, err, "Should return nil error on reading correct zip files")
+	assert.Equal(t, &API{IdInfo{Name: "PizzaShackAPI", Version: "1.0.0", Provider: "admin"}}, api,
+		"Should return correct values for ID info")
+}
+
+func TestGetAPIInfoCorrectDirectoryStructure(t *testing.T) {
+	api, err := getAPIInfo("testdata/PizzaShackAPI-1.0.0")
+	assert.Nil(t, err, "Should return nil error on reading correct directories")
+	assert.Equal(t, &API{IdInfo{Name: "PizzaShackAPI", Version: "1.0.0", Provider: "admin"}}, api,
+		"Should return correct values for ID info")
+}
+
+func TestGetAPIInfoMalformedZip(t *testing.T) {
+	api, err := getAPIInfo("testdata/PizzaShackAPI_1.0.0-malformed.zip")
+	assert.Error(t, err, "Should return error on reading malformed zip files")
+	assert.True(t, os.IsNotExist(err), "File not found error must be thrown")
+	assert.Nil(t, api,
+		"Should return nil for malformed directories")
+}
+
+func TestGetAPIInfoMalformedDirectory(t *testing.T) {
+	api, err := getAPIInfo("testdata/PizzaShackAPI_1.0.0-malformed")
+	assert.Error(t, err, "Should return error on reading malformed directories")
+	assert.True(t, os.IsNotExist(err), "File not found error must be thrown")
+	assert.Nil(t, api,
+		"Should return nil for malformed directories")
+}
+
+func TestGetAPIInfoCorruptedZip(t *testing.T) {
+	api, err := getAPIInfo("testdata/PizzaShackAPI_1.0.0-corrupted.zip")
+	assert.Error(t, err, "Should return error on reading malformed zip files")
+	assert.EqualError(t, err, "zip: not a valid zip file", "Should return error with invalid zip")
+	assert.Nil(t, api,
+		"Should return nil for malformed directories")
 }
