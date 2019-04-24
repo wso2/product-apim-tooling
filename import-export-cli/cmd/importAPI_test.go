@@ -49,18 +49,15 @@ func TestImportAPI1(t *testing.T) {
 	}))
 	defer server.Close()
 
-	name := "sampleapi.zip"
+	name := "PizzaShackAPI_1.0.0.zip"
 	accessToken := "access-token"
 
-	_, err := ImportAPI(name, server.URL, accessToken, "")
-	if err != nil {
-		t.Errorf("Error: %s\n", err.Error())
-	}
+	err := ImportAPI(name, server.URL, accessToken, "testdata", "")
+	assert.Nil(t, err, "Error should be nil")
+
 	utils.Insecure = true
-	_, err = ImportAPI(name, server.URL, accessToken, "")
-	if err != nil {
-		t.Errorf("Error: %s\n", err.Error())
-	}
+	err = ImportAPI(name, server.URL, accessToken, "testdata", "")
+	assert.Nil(t, err, "Error should be nil")
 }
 
 func TestNewFileUploadRequest(t *testing.T) {
@@ -114,7 +111,7 @@ func TestExtractAPIInfoWithCorrectJSON(t *testing.T) {
 	}`
 
 	api, err := extractAPIInfo([]byte(content))
-	assert.Equal(t, api, &API{IdInfo{Provider: "admin", Version: "1.0.0", Name: "APIName"}},
+	assert.Equal(t, api, &ApiInfo{IdInfo{Provider: "admin", Version: "1.0.0", Name: "APIName"}},
 		"Should parse correct json")
 	assert.Equal(t, err, nil, "Should return nil error for correct json")
 }
@@ -133,7 +130,7 @@ func TestExtractAPIInfoWhenIDTagMissing(t *testing.T) {
 	}`
 
 	api, err := extractAPIInfo([]byte(content))
-	assert.Equal(t, &API{}, api, "Should return empty IDInfo when ID tag missing")
+	assert.Equal(t, &ApiInfo{}, api, "Should return empty IDInfo when ID tag missing")
 	assert.Nil(t, err, "Should return nil error")
 }
 
@@ -158,14 +155,14 @@ func TestExtractAPIInfoWithMalformedJSON(t *testing.T) {
 func TestGetAPIInfoCorrectZip(t *testing.T) {
 	api, err := getAPIInfo("testdata/PizzaShackAPI_1.0.0.zip")
 	assert.Nil(t, err, "Should return nil error on reading correct zip files")
-	assert.Equal(t, &API{IdInfo{Name: "PizzaShackAPI", Version: "1.0.0", Provider: "admin"}}, api,
+	assert.Equal(t, &ApiInfo{IdInfo{Name: "PizzaShackAPI", Version: "1.0.0", Provider: "admin"}}, api,
 		"Should return correct values for ID info")
 }
 
 func TestGetAPIInfoCorrectDirectoryStructure(t *testing.T) {
 	api, err := getAPIInfo("testdata/PizzaShackAPI-1.0.0")
 	assert.Nil(t, err, "Should return nil error on reading correct directories")
-	assert.Equal(t, &API{IdInfo{Name: "PizzaShackAPI", Version: "1.0.0", Provider: "admin"}}, api,
+	assert.Equal(t, &ApiInfo{IdInfo{Name: "PizzaShackAPI", Version: "1.0.0", Provider: "admin"}}, api,
 		"Should return correct values for ID info")
 }
 

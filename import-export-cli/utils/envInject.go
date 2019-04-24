@@ -56,7 +56,9 @@ type EndpointData struct {
 type Environment struct {
 	// Name of the environment
 	Name string `yaml:"name"`
-	// Endpoints contain deatails about endpoints in a configuration
+	// Status of the API
+	Status string `yaml:"status"`
+	// Endpoints contain details about endpoints in a configuration
 	Endpoints *EndpointData `yaml:"endpoints"`
 }
 
@@ -174,10 +176,10 @@ func MergeJSON(firstSource, secondSource []byte) ([]byte, error) {
 }
 
 // GetEnv returns the EndpointData associated for key in the APIConfig, if not found returns nil
-func (config APIConfig) GetEnv(key string) *EndpointData {
+func (config APIConfig) GetEnv(key string) *Environment {
 	for index, env := range config.Environments {
 		if env.Name == key {
-			return config.Environments[index].Endpoints
+			return &config.Environments[index]
 		}
 	}
 	return nil
