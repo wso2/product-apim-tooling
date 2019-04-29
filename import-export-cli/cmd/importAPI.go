@@ -271,15 +271,10 @@ func ImportAPI(importPath, apiImportExportEndpoint, accessToken, exportDirectory
 				return err
 			}
 
-			// get APIMENV from system and check. It is required to do a configuration merge
-			apimEnv := os.Getenv(APIMENV)
-			if apimEnv == "" {
-				return errors.New("please set " + APIMENV + " in your environment")
-			}
-			// check whether APIMENV is included in api configuration
-			endpointConfig := apiConfig.GetEnv(apimEnv)
+			// check whether import environment is included in api configuration
+			endpointConfig := apiConfig.GetEnv(importEnvironment)
 			if endpointConfig == nil {
-				return fmt.Errorf("%s does not exists in configuration file", apimEnv)
+				return fmt.Errorf("%s does not exists in configuration file", importEnvironment)
 			}
 
 			utils.Logln("Merging...")
@@ -553,9 +548,9 @@ func init() {
 		"Preserve existing provider of API after exporting")
 	ImportAPICmd.Flags().BoolVarP(&importAPIUpdate, "update", "", false, "Update API "+
 		"if exists. Otherwise it will create API")
+	// TODO: finalize a good name for file
 	ImportAPICmd.Flags().StringVarP(&importAPIConfigFile, "config", "", DefaultAPIMConfigFileName,
-		"Provide a API Manager configuration file. If the file was found application will search for APIMENV environment"+
-			"key in your system. If the above environment variable was not an error will be thrown")
+		"Provide a API Manager configuration file.")
 	ImportAPICmd.Flags().BoolVarP(&importAPIInject, "inject", "", false, "Inject variables defined"+
 		"in config file to the given API.")
 }
