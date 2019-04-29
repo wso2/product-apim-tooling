@@ -21,19 +21,20 @@ package cmd
 import (
 	"encoding/json"
 	"errors"
-	"net/http"
-	"os"
-
+	"fmt"
 	"github.com/olekukonko/tablewriter"
 	"github.com/renstrom/dedent"
-	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/formatter"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"net/http"
+	"os"
 )
 
 var listApisCmdEnvironment string
 var listApisCmdUsername string
 var listApisCmdPassword string
+var listApisCmdFormat string
 
 // apisCmd related info
 const apisCmdLiteral = "apis"
@@ -60,6 +61,18 @@ var apisCmd = &cobra.Command{
 	},
 }
 
+
+type API utils.API
+
+func (api *API) MarshalJSON() ([]byte, error) {
+	return formatter.MarshalJSON(api)
+}
+
+type APIListResponse struct {
+	Count int32 `json:"count"`
+	List  []API `json:"list"`
+}
+
 func executeApisCmd(mainConfigFilePath, envKeysAllFilePath string) {
 	accessToken, preCommandErr :=
 		utils.ExecutePreCommandWithOAuth(listApisCmdEnvironment, listApisCmdUsername, listApisCmdPassword,
@@ -70,11 +83,11 @@ func executeApisCmd(mainConfigFilePath, envKeysAllFilePath string) {
 		count, apis, err := GetAPIList("", accessToken, apiListEndpoint)
 
 		if err == nil {
-			printAPIs(apis)
-			// Printing the list of available APIs
-			if count == 0 {
-				utils.Logln(utils.LogPrefixWarning + "No APIs found in environment - " + listApisCmdEnvironment)
+			apiDefs := make([]API, count)
+			for i, api := range apis {
+				apiDefs[i] = API(api)
 			}
+			printAPIs(apiDefs, listApisCmdFormat)
 		} else {
 			utils.Logln(utils.LogPrefixError+"Getting List of APIs", err)
 		}
@@ -117,38 +130,44 @@ func GetAPIList(query, accessToken, apiListEndpoint string) (count int32, apis [
 
 		return apiListResponse.Count, apiListResponse.List, nil
 	} else {
-		return 0, nil, errors.New(cast.ToString(resp.Body()))
+		return 0, nil, errors.New(string(resp.Body()))
 	}
 
 }
 
 // printAPIs
 // @param apis : array of API objects
-func printAPIs(apis []utils.API) {
-	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Name", "Version", "Context", "Status", "Provider", "ID"})
+func printAPIs(apis []API, format string) {
+	if format == "" {
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"Name", "Version", "Context", "Status", "Provider", "ID"})
 
-	var data [][]string
+		var data [][]string
+		for _, api := range apis {
+			data = append(data, []string{api.Name, api.Version, api.Context, api.Status, api.Provider, api.ID})
+		}
 
-	for _, api := range apis {
-		data = append(data, []string{api.Name, api.Version, api.Context, api.Status, api.Provider, api.ID})
+		for _, v := range data {
+			table.Append(v)
+		}
+
+		// Change table lines
+		table.SetCenterSeparator("")
+		table.SetColumnSeparator("")
+		table.SetRowSeparator("")
+		table.SetHeaderLine(false)
+
+		table.SetAlignment(tablewriter.ALIGN_LEFT)
+		table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
+
+		table.SetBorder(false)
+		table.Render() // Send output
+	} else {
+		err := formatter.Execute(os.Stdout, formatter.NewBasicFormatter("apis"), format, apis)
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
-
-	for _, v := range data {
-		table.Append(v)
-	}
-
-	// Change table lines
-	table.SetCenterSeparator("")
-	table.SetColumnSeparator("")
-	table.SetRowSeparator("")
-	table.SetHeaderLine(false)
-
-	table.SetAlignment(tablewriter.ALIGN_LEFT)
-	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
-
-	table.SetBorder(false)
-	table.Render() // Send output
 }
 
 func init() {
@@ -158,4 +177,6 @@ func init() {
 		utils.DefaultEnvironmentName, "Environment to be searched")
 	apisCmd.Flags().StringVarP(&listApisCmdUsername, "username", "u", "", "Username")
 	apisCmd.Flags().StringVarP(&listApisCmdPassword, "password", "p", "", "Password")
+	apisCmd.Flags().StringVarP(&listApisCmdFormat, "format", "", "", "Pretty-print apis " +
+		"using Go Templates. Use {{ jsonPretty . }} to list all fields")
 }

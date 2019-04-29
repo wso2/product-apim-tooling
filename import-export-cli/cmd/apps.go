@@ -26,6 +26,7 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"github.com/renstrom/dedent"
 	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/formatter"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
 	"os"
@@ -33,10 +34,13 @@ import (
 
 var listAppsCmdEnvironment string
 var listAppsCmdAppOwner string
+var listAppsCmdFormat string
 
 // appsCmd related info
 const appsCmdLiteral = "apps"
 const appsCmdShortDesc = "Display a list of Applications in an environment specific to an owner"
+
+type App utils.Application
 
 var appsCmdLongDesc = dedent.Dedent(`
 		Display a list of Applications of the user in the environment specified by the flag --environment, -e
@@ -71,11 +75,11 @@ func executeAppsCmd(appOwner, mainConfigFilePath, envKeysAllFilePath string) {
 
 		if err == nil {
 			// Printing the list of available Applications
-			fmt.Println("Environment:", listAppsCmdEnvironment)
-			fmt.Println("No. of Applications:", count)
-			if count > 0 {
-				printApps(apps)
+			appsDef := make([]App, count)
+			for i, app := range apps {
+				appsDef[i] = App(app)
 			}
+			printApps(appsDef, listAppsCmdFormat)
 		} else {
 			utils.Logln(utils.LogPrefixError+"Getting List of Applications", err)
 		}
@@ -127,21 +131,37 @@ func GetApplicationList(appOwner, accessToken, applicationListEndpoint string) (
 	}
 }
 
-func printApps(apps []utils.Application) {
-	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"ID", "Name", "Owner", "Status", "Group-ID"})
+func printApps(apps []App, format string) {
+	fmt.Println(apps)
+	if format == "" {
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"ID", "Name", "Owner", "Status", "Group-ID"})
 
-	var data [][]string
+		var data [][]string
+		for _, app := range apps {
+			data = append(data, []string{app.ID, app.Name, app.Owner, app.Status, app.GroupID})
+		}
+		for _, v := range data {
+			table.Append(v)
+		}
 
-	for _, app := range apps {
-		data = append(data, []string{app.ID, app.Name, app.Owner, app.Status, app.GroupID})
+		// Change table lines
+		table.SetCenterSeparator("")
+		table.SetColumnSeparator("")
+		table.SetRowSeparator("")
+		table.SetHeaderLine(false)
+
+		table.SetAlignment(tablewriter.ALIGN_LEFT)
+		table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
+
+		table.SetBorder(false)
+		table.Render() // Send output
+	} else {
+		err := formatter.Execute(os.Stdout, formatter.NewBasicFormatter("apps"), format, apps)
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
-
-	for _, v := range data {
-		table.Append(v)
-	}
-
-	table.Render()
 }
 
 func init() {
@@ -153,4 +173,6 @@ func init() {
 		"Owner of the Application")
 	appsCmd.Flags().StringVarP(&cmdUsername, "username", "u", "", "Username")
 	appsCmd.Flags().StringVarP(&cmdPassword, "password", "p", "", "Password")
+	appsCmd.Flags().StringVarP(&listAppsCmdFormat, "format", "", "", "Pretty-print output"+
+		"using Go templates. Use {{jsonPretty .}} to list all fields")
 }
