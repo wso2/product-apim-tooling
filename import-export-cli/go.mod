@@ -12,9 +12,7 @@ require (
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/magiconair/properties v0.0.0-20170902060319-8d7837e64d3c // indirect
-	github.com/mattn/go-runewidth v0.0.0-20161012013512-737072b4e32b // indirect
 	github.com/mitchellh/mapstructure v0.0.0-20171017171808-06020f85339e // indirect
-	github.com/olekukonko/tablewriter v0.0.0-20170925234030-a7a4c189eb47
 	github.com/pelletier/go-toml v0.0.0-20171001224747-2009e44b6f18 // indirect
 	github.com/renstrom/dedent v1.0.0
 	github.com/spf13/afero v0.0.0-20171008182726-e67d870304c4 // indirect
