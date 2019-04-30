@@ -20,89 +20,106 @@ package formatter
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
-	"reflect"
 	"strings"
+	"text/tabwriter"
 	"text/template"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/templates"
 )
 
-// MarshalJSON marshals x into json
-// But it creates json fields with Title case like Id, Name
-func MarshalJSON(x interface{}) ([]byte, error) {
-	m, err := marshalMap(x)
+// TableFormatKey is the identifier used for table
+const TableFormatKey = "table"
+
+// Format is an alias for a string used for formatting
+type Format string
+
+// IsTable returns true if format string is prefixed with table
+func (f Format) IsTable() bool {
+	return strings.HasPrefix(string(f), TableFormatKey)
+}
+
+// Context keeps data about a format operation
+type Context struct {
+	// Output is used to write the output
+	Output io.Writer
+	// Format is used to keep format string
+	Format Format
+
+	// internal usage
+	finalFormat string
+	buffer      *bytes.Buffer
+}
+
+// NewContext creates a context with initialized fields
+func NewContext(output io.Writer, format string) *Context {
+	return &Context{Output: output, Format: Format(format), buffer: &bytes.Buffer{}}
+}
+
+// preFormat will clean format string
+func (ctx *Context) preFormat() {
+	format := string(ctx.Format)
+
+	if ctx.Format.IsTable() {
+		// if table is found skip it and take the rest
+		format = format[len(TableFormatKey):]
+	}
+
+	format = strings.TrimSpace(format)
+	// this is done to avoid treating \t \n as template strings. This replaces them as special characters
+	replacer := strings.NewReplacer(`\t`, "\t", `\n`, "\n")
+	format = replacer.Replace(format)
+	ctx.finalFormat = format
+}
+
+// parseTemplate will create a new template with basic functions
+func (ctx Context) parseTemplate() (*template.Template, error) {
+	tmpl, err := templates.NewBasicFormatter("").Parse(ctx.finalFormat)
 	if err != nil {
-		return nil, err
+		return tmpl, fmt.Errorf("Template parsing error: %v\n", err)
 	}
-	return json.Marshal(m)
+	return tmpl, nil
 }
 
-// marshalMap marshals x to map[string]interface{}
-// NOTE: this method only work for plain structs, nested structs are not marshaled correctly
-func marshalMap(x interface{}) (map[string]interface{}, error) {
-	val := reflect.ValueOf(x)
-	if val.Kind() != reflect.Ptr {
-		return nil, fmt.Errorf("expected a pointer to a struct, got %v", val.Kind())
+// postFormat will output to writer
+func (ctx *Context) postFormat(template *template.Template, headers interface{}) {
+	if ctx.Format.IsTable() {
+		// create a tab writer using Output
+		w := tabwriter.NewWriter(ctx.Output, 20, 1, 3, ' ', 0)
+		// print headers
+		_ = template.Funcs(templates.HeaderFuncs).Execute(w, headers)
+		_, _ = w.Write([]byte{'\n'})
+		// write buffer to the w
+		// in this case anything in buffer will be rendered by tabwiter to the Output
+		// buffer contains data to be written
+		_, _ = ctx.buffer.WriteTo(w)
+		// flush will perform actual write to the writer
+		_ = w.Flush()
+	} else {
+		// just write it as normal
+		_, _ = ctx.buffer.WriteTo(ctx.Output)
 	}
-	if val.IsNil() {
-		return nil, fmt.Errorf("expected a pointer to a struct, got nil pointer")
-	}
-	values := val.Elem()
-	if values.Kind() != reflect.Struct {
-		return nil, fmt.Errorf("expected a pointer to a struct, got a pointer to %v", values.Kind())
-	}
-	fields := reflect.TypeOf(x)
-	num := fields.Elem().NumField()
-	m := make(map[string]interface{})
-	for i := 0; i < num; i++ {
-		fieldName := fields.Elem().Field(i).Name
-		fieldValue := values.Field(i).Interface()
-		m[fieldName] = fieldValue
-	}
-	return m, nil
 }
 
-// contains helper functions for common printing
-var basicFunc = template.FuncMap{
-	"json": func(v interface{}) string {
-		buf := &bytes.Buffer{}
-		encoder := json.NewEncoder(buf)
-		encoder.SetEscapeHTML(false)
-		_ = encoder.Encode(v)
-		return strings.TrimSpace(buf.String())
-	},
-	"jsonPretty": func(v interface{}) string {
-		buf := &bytes.Buffer{}
-		encoder := json.NewEncoder(buf)
-		encoder.SetEscapeHTML(false)
-		encoder.SetIndent("", "  ")
-		_ = encoder.Encode(v)
-		return strings.TrimSpace(buf.String())
-	},
-	"split": strings.Split,
-	"upper": strings.ToUpper,
-	"lower": strings.ToLower,
-	"title": strings.Title,
-	"join":  strings.Join,
-}
+// Renderer is used to render a particular resource using templates
+type Renderer func(io.Writer, *template.Template) error
 
-// NewBasicFormatter creates a new template engine with name
-func NewBasicFormatter(name string) *template.Template {
-	tmpl := template.New(name).Funcs(basicFunc)
-	return tmpl
-}
-
-// Execute template on provided writer
-func Execute(w io.Writer, t *template.Template, format string, data interface{}) error {
-	apiTmpl, err := t.Parse(format)
+// Write writes data using r and headers
+func (ctx *Context) Write(r Renderer, headers interface{}) error {
+	// prepare formatting
+	ctx.preFormat()
+	// parse template
+	tmpl, err := ctx.parseTemplate()
 	if err != nil {
 		return err
 	}
-	err = apiTmpl.Execute(w, data)
-	if err != nil {
+	// using renderer provided render collection
+	// Note: See the renderer implementation in cmd/apis.go for more
+	if err = r(ctx.buffer, tmpl); err != nil {
 		return err
 	}
-	_, err = w.Write([]byte{'\n'})
-	return err
+	// write results to writer
+	ctx.postFormat(tmpl, headers)
+	return nil
 }
