@@ -112,15 +112,6 @@ func TestGetAPIListUnreachable(t *testing.T) {
 	}
 }
 
-func TestPrintApis(t *testing.T) {
-	var apis = []utils.API{
-		{ID: "1", Name: "sampleapi", Context: "/sampleapi", Version: "1.0.0", Provider: "admin", Status: "CREATED"},
-		{ID: "2", Name: "sampleapi2", Context: "/sampleapi2", Version: "1.0.0", Provider: "admin", Status: "CREATED"},
-	}
-
-	printAPIs(apis)
-}
-
 func TestGetApplicationListOK(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -192,13 +183,4 @@ func TestGetApplicationListUnreachable(t *testing.T) {
 	if err == nil {
 		t.Error("Error should not be nil")
 	}
-}
-
-func TestPrintApps(t *testing.T) {
-	var apps = []utils.Application{
-		{ID: "2995a4d5-284a-484d-9fb8-ae9e403b67b0", Name: "sampleApp1", Owner: "admin", Status: "APPROVED", GroupID: "testGrp"},
-		{ID: "4559b42e-7b53-47a9-88cd-218bbca4094c", Name: "sampleApp2", Owner: "admin", Status: "APPROVED", GroupID: ""},
-	}
-
-	printApps(apps)
 }
