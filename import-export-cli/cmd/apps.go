@@ -23,13 +23,24 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-resty/resty"
-	"github.com/olekukonko/tablewriter"
 	"github.com/renstrom/dedent"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/formatter"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"io"
 	"net/http"
 	"os"
+	"text/template"
+)
+
+const (
+	appIdHeader      = "ID"
+	appNameHeader    = "NAME"
+	appOwnerHeader   = "OWNER"
+	appStatusHeader  = "STATUS"
+	appGroupIdHeader = "GROUP ID"
+
+	defaultAppTableFormat = "table {{.Id}}\t{{.Name}}\t{{.Owner}}\t{{.Status}}\t{{.GroupId}}"
 )
 
 var listAppsCmdEnvironment string
@@ -40,7 +51,44 @@ var listAppsCmdFormat string
 const appsCmdLiteral = "apps"
 const appsCmdShortDesc = "Display a list of Applications in an environment specific to an owner"
 
-type App utils.Application
+// app contains information about util.Application
+type app struct {
+	id      string
+	name    string
+	owner   string
+	status  string
+	groupId string
+}
+
+// creates a new app definition from utils.Application
+func newAppDefinitionFromApplication(a utils.Application) *app {
+	return &app{a.ID, a.Name, a.Owner, a.Status, a.GroupID}
+}
+
+// Id of application
+func (a app) Id() string {
+	return a.id
+}
+
+// Name of application
+func (a app) Name() string {
+	return a.name
+}
+
+// Owner of application
+func (a app) Owner() string {
+	return a.owner
+}
+
+// Status of application
+func (a app) Status() string {
+	return a.status
+}
+
+// GroupId of application
+func (a app) GroupId() string {
+	return a.groupId
+}
 
 var appsCmdLongDesc = dedent.Dedent(`
 		Display a list of Applications of the user in the environment specified by the flag --environment, -e
@@ -71,15 +119,11 @@ func executeAppsCmd(appOwner, mainConfigFilePath, envKeysAllFilePath string) {
 
 	if preCommandErr == nil {
 		applicationListEndpoint := utils.GetApplicationListEndpointOfEnv(listAppsCmdEnvironment, mainConfigFilePath)
-		count, apps, err := GetApplicationList(appOwner, accessToken, applicationListEndpoint)
+		_, apps, err := GetApplicationList(appOwner, accessToken, applicationListEndpoint)
 
 		if err == nil {
 			// Printing the list of available Applications
-			appsDef := make([]App, count)
-			for i, app := range apps {
-				appsDef[i] = App(app)
-			}
-			printApps(appsDef, listAppsCmdFormat)
+			printApps(apps, listAppsCmdFormat)
 		} else {
 			utils.Logln(utils.LogPrefixError+"Getting List of Applications", err)
 		}
@@ -131,36 +175,37 @@ func GetApplicationList(appOwner, accessToken, applicationListEndpoint string) (
 	}
 }
 
-func printApps(apps []App, format string) {
-	fmt.Println(apps)
+func printApps(apps []utils.Application, format string) {
 	if format == "" {
-		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"ID", "Name", "Owner", "Status", "Group-ID"})
+		format = defaultAppTableFormat
+	}
+	// create new app context with standard output
+	appContext := formatter.NewContext(os.Stdout, format)
 
-		var data [][]string
-		for _, app := range apps {
-			data = append(data, []string{app.ID, app.Name, app.Owner, app.Status, app.GroupID})
+	// create a new renderer function which iterate collection of apps
+	renderer := func(w io.Writer, t *template.Template) error {
+		for _, a := range apps {
+			if err := t.Execute(w, newAppDefinitionFromApplication(a)); err != nil {
+				return err
+			}
+			// write a new line after executing template
+			_, _ = w.Write([]byte{'\n'})
 		}
-		for _, v := range data {
-			table.Append(v)
-		}
+		return nil
+	}
 
-		// Change table lines
-		table.SetCenterSeparator("")
-		table.SetColumnSeparator("")
-		table.SetRowSeparator("")
-		table.SetHeaderLine(false)
+	// headers for table
+	apiTableHeaders := map[string]string{
+		"Id":      appIdHeader,
+		"Name":    appNameHeader,
+		"Status":  appStatusHeader,
+		"Owner":   appOwnerHeader,
+		"GroupId": appGroupIdHeader,
+	}
 
-		table.SetAlignment(tablewriter.ALIGN_LEFT)
-		table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
-
-		table.SetBorder(false)
-		table.Render() // Send output
-	} else {
-		err := formatter.Execute(os.Stdout, formatter.NewBasicFormatter("apps"), format, apps)
-		if err != nil {
-			fmt.Println(err)
-		}
+	// execute context
+	if err := appContext.Write(renderer, apiTableHeaders); err != nil {
+		fmt.Println("Error executing template:", err.Error())
 	}
 }
 
