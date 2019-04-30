@@ -195,7 +195,7 @@ func printApps(apps []utils.Application, format string) {
 	}
 
 	// headers for table
-	apiTableHeaders := map[string]string{
+	appTableHeaders := map[string]string{
 		"Id":      appIdHeader,
 		"Name":    appNameHeader,
 		"Status":  appStatusHeader,
@@ -204,7 +204,7 @@ func printApps(apps []utils.Application, format string) {
 	}
 
 	// execute context
-	if err := appContext.Write(renderer, apiTableHeaders); err != nil {
+	if err := appContext.Write(renderer, appTableHeaders); err != nil {
 		fmt.Println("Error executing template:", err.Error())
 	}
 }
