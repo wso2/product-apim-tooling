@@ -56,8 +56,6 @@ type EndpointData struct {
 type Environment struct {
 	// Name of the environment
 	Name string `yaml:"name"`
-	// Status of the API
-	Status string `yaml:"status"`
 	// Endpoints contain details about endpoints in a configuration
 	Endpoints *EndpointData `yaml:"endpoints"`
 }

@@ -58,7 +58,6 @@ const importAPICmdLiteral = "import-api"
 const importAPICmdShortDesc = "Import API"
 
 const DefaultAPIMConfigFileName = ".apim-vars.yml"
-const APIMENV = "APIMENV"
 
 type ApiInfo struct {
 	ID IdInfo `json:"id"`
@@ -236,7 +235,6 @@ func mergeAPI(apiFilePath string, endpointConfig *utils.Environment) (string, er
 // @param apiManagerEndpoint: API Manager endpoint for the environment
 // @param accessToken: OAuth2.0 access token for the resource being accessed
 func ImportAPI(importPath, apiImportExportEndpoint, accessToken, exportDirectory, configPath string) error {
-	apiStatus := ""
 	apiID := ""
 	updateAPI := false
 	apiImportExportEndpoint = utils.AppendSlashToString(apiImportExportEndpoint)
@@ -292,10 +290,6 @@ func ImportAPI(importPath, apiImportExportEndpoint, accessToken, exportDirectory
 				}
 			}()
 
-			// check whether API status is defined
-			if endpointConfig.Status != "" {
-				apiStatus = endpointConfig.Status
-			}
 			fileName = mergedAPIDir
 		}
 
@@ -391,43 +385,7 @@ func ImportAPI(importPath, apiImportExportEndpoint, accessToken, exportDirectory
 		strconv.FormatBool(importAPICmdPreserveProvider)
 	utils.Logln(utils.LogPrefixInfo + "Import URL: " + apiImportExportEndpoint)
 	err = importAPI(apiImportExportEndpoint, httpMethod, zipFilePath, accessToken, extraParams)
-	if err != nil {
-		return err
-	}
-
-	// check whether API state change is also required
-	if apiStatus != "" {
-		utils.Logln(utils.LogPrefixInfo + fmt.Sprintf("Attempting to set API status to '%s'", apiStatus))
-		// check whether we already have apiID, if not acquire it
-		if apiID == "" {
-			utils.Logln("Attempting to acquire api ID from API Manager")
-			// Get ID for the API
-			maxAttempts := 5
-			sleepTime := 2 * time.Second
-			for i := 0; i < maxAttempts; i++ {
-				utils.Logln(utils.LogPrefixInfo + "Attempt " + strconv.Itoa(i+1))
-				id, err := getApiID(apiInfo.ID.Name, apiInfo.ID.Version, apiInfo.ID.Provider, importEnvironment, accessOAuthToken)
-				if err != nil {
-					return err
-				}
-				if id != "" {
-					apiID = id
-					break
-				}
-				utils.Logln(utils.LogPrefixInfo+"Retrying in", sleepTime)
-				time.Sleep(sleepTime)
-			}
-		}
-
-		utils.Logln("API ID:", apiID)
-		// change api status
-		err = changeAPIStatusByID(apiID, apiStatus, importEnvironment, accessOAuthToken)
-		if err != nil {
-			return err
-		}
-		fmt.Printf("Successfully set API status to '%s'\n", apiStatus)
-	}
-	return nil
+	return err
 }
 
 // getApiID returns id of the API by using apiInfo which contains name, version and provider as info
