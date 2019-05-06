@@ -21,19 +21,33 @@ package cmd
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"net/http"
 	"os"
+	"text/template"
 
-	"github.com/olekukonko/tablewriter"
 	"github.com/renstrom/dedent"
-	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/formatter"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+)
+
+const (
+	apiIdHeader       = "ID"
+	apiNameHeader     = "NAME"
+	apiContextHeader  = "CONTEXT"
+	apiVersionHeader  = "VERSION"
+	apiProviderHeader = "PROVIDER"
+	apiStatusHeader   = "STATUS"
+
+	defaultApiTableFormat = "table {{.Id}}\t{{.Name}}\t{{.Version}}\t{{.Context}}\t{{.Status}}\t{{.Provider}}"
 )
 
 var listApisCmdEnvironment string
 var listApisCmdUsername string
 var listApisCmdPassword string
+var listApisCmdFormat string
 
 // apisCmd related info
 const apisCmdLiteral = "apis"
@@ -60,6 +74,56 @@ var apisCmd = &cobra.Command{
 	},
 }
 
+// api holds information about an API for outputting
+type api struct {
+	id       string
+	name     string
+	context  string
+	version  string
+	provider string
+	status   string
+}
+
+// creates a new api from utils.API
+func newApiDefinitionFromAPI(a utils.API) *api {
+	return &api{a.ID, a.Name, a.Context, a.Version, a.Provider, a.Status}
+}
+
+// Id of api
+func (a api) Id() string {
+	return a.id
+}
+
+// Name of api
+func (a api) Name() string {
+	return a.name
+}
+
+// Context of api
+func (a api) Context() string {
+	return a.context
+}
+
+// Version of api
+func (a api) Version() string {
+	return a.version
+}
+
+// Status of api
+func (a api) Status() string {
+	return a.status
+}
+
+// Provider of api
+func (a api) Provider() string {
+	return a.provider
+}
+
+// MarshalJSON marshals api using custom marshaller which uses methods instead of fields
+func (a *api) MarshalJSON() ([]byte, error) {
+	return formatter.MarshalJSON(a)
+}
+
 func executeApisCmd(mainConfigFilePath, envKeysAllFilePath string) {
 	accessToken, preCommandErr :=
 		utils.ExecutePreCommandWithOAuth(listApisCmdEnvironment, listApisCmdUsername, listApisCmdPassword,
@@ -67,14 +131,10 @@ func executeApisCmd(mainConfigFilePath, envKeysAllFilePath string) {
 
 	if preCommandErr == nil {
 		apiListEndpoint := utils.GetApiListEndpointOfEnv(listApisCmdEnvironment, mainConfigFilePath)
-		count, apis, err := GetAPIList("", accessToken, apiListEndpoint)
+		_, apis, err := GetAPIList("", accessToken, apiListEndpoint)
 
 		if err == nil {
-			printAPIs(apis)
-			// Printing the list of available APIs
-			if count == 0 {
-				utils.Logln(utils.LogPrefixWarning + "No APIs found in environment - " + listApisCmdEnvironment)
-			}
+			printAPIs(apis, listApisCmdFormat)
 		} else {
 			utils.Logln(utils.LogPrefixError+"Getting List of APIs", err)
 		}
@@ -117,38 +177,44 @@ func GetAPIList(query, accessToken, apiListEndpoint string) (count int32, apis [
 
 		return apiListResponse.Count, apiListResponse.List, nil
 	} else {
-		return 0, nil, errors.New(cast.ToString(resp.Body()))
+		return 0, nil, errors.New(string(resp.Body()))
 	}
 
 }
 
 // printAPIs
-// @param apis : array of API objects
-func printAPIs(apis []utils.API) {
-	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Name", "Version", "Context", "Status", "Provider", "ID"})
+func printAPIs(apis []utils.API, format string) {
+	if format == "" {
+		format = defaultApiTableFormat
+	}
+	// create api context with standard output
+	apiContext := formatter.NewContext(os.Stdout, format)
 
-	var data [][]string
-
-	for _, api := range apis {
-		data = append(data, []string{api.Name, api.Version, api.Context, api.Status, api.Provider, api.ID})
+	// create a new renderer function which iterate collection
+	renderer := func(w io.Writer, t *template.Template) error {
+		for _, a := range apis {
+			if err := t.Execute(w, newApiDefinitionFromAPI(a)); err != nil {
+				return err
+			}
+			_, _ = w.Write([]byte{'\n'})
+		}
+		return nil
 	}
 
-	for _, v := range data {
-		table.Append(v)
+	// headers for table
+	apiTableHeaders := map[string]string{
+		"Id":       apiIdHeader,
+		"Name":     apiNameHeader,
+		"Context":  apiContextHeader,
+		"Version":  apiVersionHeader,
+		"Status":   apiStatusHeader,
+		"Provider": apiProviderHeader,
 	}
 
-	// Change table lines
-	table.SetCenterSeparator("")
-	table.SetColumnSeparator("")
-	table.SetRowSeparator("")
-	table.SetHeaderLine(false)
-
-	table.SetAlignment(tablewriter.ALIGN_LEFT)
-	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
-
-	table.SetBorder(false)
-	table.Render() // Send output
+	// execute context
+	if err := apiContext.Write(renderer, apiTableHeaders); err != nil {
+		fmt.Println("Error executing template:", err.Error())
+	}
 }
 
 func init() {
@@ -158,4 +224,6 @@ func init() {
 		utils.DefaultEnvironmentName, "Environment to be searched")
 	apisCmd.Flags().StringVarP(&listApisCmdUsername, "username", "u", "", "Username")
 	apisCmd.Flags().StringVarP(&listApisCmdPassword, "password", "p", "", "Password")
+	apisCmd.Flags().StringVarP(&listApisCmdFormat, "format", "", "", "Pretty-print apis "+
+		"using Go Templates. Use {{ jsonPretty . }} to list all fields")
 }
