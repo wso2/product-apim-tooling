@@ -72,10 +72,10 @@ type APIEndpointConfig struct {
 	EPConfig string `json:"endpointConfig"`
 }
 
-// injectEnv injects variables from environment to the content. It uses regex to match variables and look up them in the
+// InjectEnv injects variables from environment to the content. It uses regex to match variables and look up them in the
 // environment before processing.
 // returns an error if anything happen
-func injectEnv(content string) (string, error) {
+func InjectEnv(content string) (string, error) {
 	matches := re.FindAllStringSubmatch(content, -1) // matches is [][]string
 
 	for _, match := range matches {
@@ -96,7 +96,7 @@ func LoadConfig(r io.Reader) (*APIConfig, error) {
 		return nil, err
 	}
 
-	str, err := injectEnv(string(data))
+	str, err := InjectEnv(string(data))
 	if err != nil {
 		return nil, err
 	}
