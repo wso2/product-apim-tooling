@@ -25,7 +25,9 @@ var (
 )
 
 const (
-	timeFormat   = "Jan _2, 2006 03:04:05 PM"
+	// Time format which used to output date for api
+	timeFormat = "Jan _2, 2006 03:04:05 PM"
+	// default tiers of API Manager
 	defaultTiers = `
 [
 	{
@@ -74,6 +76,7 @@ const (
     }
 ]
 `
+	// default cors configuration
 	defaultCorsConfig = `
 {
     "corsConfigurationEnabled": false,
@@ -99,6 +102,7 @@ const (
 `
 )
 
+// APIDefinition represents an API artifact in APIM
 type APIDefinition struct {
 	ID                                 ID                `json:"id,omitempty"`
 	UUID                               string            `json:"uuid,omitempty"`
@@ -192,6 +196,7 @@ type CorsConfiguration struct {
 	AccessControlAllowMethods     []string `json:"accessControlAllowMethods"`
 }
 
+// directories to be created
 var dirs = []string{
 	"Meta-information",
 	"Image",
@@ -203,6 +208,7 @@ var dirs = []string{
 	"Sequences/out-sequence",
 }
 
+// createDirectories will create dirs in current working directory
 func createDirectories() error {
 	for _, dir := range dirs {
 		utils.Logln(utils.LogPrefixInfo + "Creating directory " + filepath.FromSlash(dir))
@@ -214,6 +220,7 @@ func createDirectories() error {
 	return nil
 }
 
+// newApiDefinitionWithDefaults creates a definition with defaults
 func newApiDefinitionWithDefaults() *APIDefinition {
 	def := &APIDefinition{}
 	def.ID.ProviderName = "admin"
@@ -250,6 +257,7 @@ func newApiDefinitionWithDefaults() *APIDefinition {
 	return def
 }
 
+// getDefaultTiers populates default tiers
 func getDefaultTiers() []AvailableTiers {
 	var tiers []AvailableTiers
 	err := json.Unmarshal([]byte(defaultTiers), &tiers)
@@ -259,6 +267,7 @@ func getDefaultTiers() []AvailableTiers {
 	return tiers
 }
 
+// getDefaultCORS populates cors config
 func getDefaultCORS() CorsConfiguration {
 	var cors CorsConfiguration
 	err := json.Unmarshal([]byte(defaultCorsConfig), &cors)
@@ -268,6 +277,8 @@ func getDefaultCORS() CorsConfiguration {
 	return cors
 }
 
+// loads swagger from swaggerDoc
+// swagger2.0/openapi3.0 specs are supported
 func loadSwagger(swaggerDoc string) (*openapi3.Swagger, []byte, error) {
 	utils.Logln(utils.LogPrefixInfo + "Loading swagger from " + swaggerDoc)
 	buffer, err := ioutil.ReadFile(swaggerDoc)
@@ -282,6 +293,7 @@ func loadSwagger(swaggerDoc string) (*openapi3.Swagger, []byte, error) {
 	return sw, buffer, nil
 }
 
+// generateFieldsFromSwagger using swagger
 func (def *APIDefinition) generateFieldsFromSwagger(swagger *openapi3.Swagger) {
 	def.ID.APIName = utils.ToPascalCase(swagger.Info.Title)
 	def.ID.Version = swagger.Info.Version
@@ -314,6 +326,7 @@ func (def *APIDefinition) generateFieldsFromSwagger(swagger *openapi3.Swagger) {
 	def.URITemplates = uriTemplates
 }
 
+// getHttpVerbs generates verbs for api definition
 func getHttpVerbs(item *openapi3.PathItem) (verbs []string) {
 	if item.Get != nil {
 		verbs = append(verbs, "GET")
@@ -351,6 +364,7 @@ func hasPrefix(buf []byte, prefix []byte) bool {
 	return bytes.HasPrefix(trim, prefix)
 }
 
+// executeInitCmd will run init command
 func executeInitCmd() error {
 	pwd, err := os.Getwd()
 	if err != nil {
