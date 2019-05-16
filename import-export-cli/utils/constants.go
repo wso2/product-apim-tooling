@@ -40,9 +40,11 @@ var EnvKeysAllFilePath = filepath.Join(ConfigDirPath, EnvKeysAllFileName)
 
 const MainConfigFileName = "main_config.yaml"
 const SampleMainConfigFileName = "main_config.yaml.sample"
+const DefaultAPISpecFileName = "default_api.yaml"
 
 var MainConfigFilePath = filepath.Join(ConfigDirPath, MainConfigFileName)
 var SampleMainConfigFilePath = filepath.Join(ConfigDirPath, SampleMainConfigFileName)
+var DefaultAPISpecFilePath = filepath.Join(ConfigDirPath, DefaultAPISpecFileName)
 
 const DefaultExportDirName = "exported"
 const ExportedApisDirName = "apis"

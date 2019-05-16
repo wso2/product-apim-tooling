@@ -13,7 +13,7 @@ import (
 
 func TestInjectEnvShouldFailWhenEnvNotPresent(t *testing.T) {
 	data := `$MYVAR`
-	str, err := injectEnv(data)
+	str, err := InjectEnv(data)
 	assert.Equal(t, "", str, "Should return empty string")
 	assert.Error(t, err, "Should return an error")
 	assert.EqualError(t, err, "$MYVAR is required, please set the environment variable")
@@ -22,7 +22,7 @@ func TestInjectEnvShouldFailWhenEnvNotPresent(t *testing.T) {
 func TestInjectEnvShouldPassWhenEnvPresents(t *testing.T) {
 	data := `$MYVAR`
 	_ = os.Setenv("MYVAR", "myval")
-	str, err := injectEnv(data)
+	str, err := InjectEnv(data)
 	assert.Nil(t, err, "Error should be null")
 	assert.Equal(t, "myval", str, "Should correctly replace environment variable")
 }

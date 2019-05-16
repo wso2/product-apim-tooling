@@ -20,6 +20,8 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/wso2/product-apim-tooling/import-export-cli/defaults"
+	"io/ioutil"
 	"os"
 
 	"path/filepath"
@@ -145,6 +147,13 @@ func createConfigFiles() {
 
 	if !utils.IsFileExist(utils.EnvKeysAllFilePath) {
 		os.Create(utils.EnvKeysAllFilePath)
+	}
+
+	if !utils.IsFileExist(utils.DefaultAPISpecFilePath) {
+		err = ioutil.WriteFile(utils.DefaultAPISpecFilePath, defaults.ApiSpecYaml, os.ModePerm)
+		if err != nil {
+			utils.HandleErrorAndExit("Error creating default api spec file", err)
+		}
 	}
 }
 

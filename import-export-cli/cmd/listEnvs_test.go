@@ -34,5 +34,5 @@ func TestPrintEnvs(t *testing.T) {
 		"admin-endpoint",
 		"token-endpoint",
 	}
-	printEnvs(envEndpoints)
+	//printEnvs(envEndpoints)
 }
