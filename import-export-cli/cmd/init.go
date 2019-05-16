@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 	"time"
 	"unicode"
 
@@ -271,7 +270,6 @@ func getDefaultCORS() CorsConfiguration {
 
 func loadSwagger(swaggerDoc string) (*openapi3.Swagger, []byte, error) {
 	utils.Logln(utils.LogPrefixInfo + "Loading swagger from " + swaggerDoc)
-
 	buffer, err := ioutil.ReadFile(swaggerDoc)
 	if err != nil {
 		return nil, nil, err
@@ -281,21 +279,11 @@ func loadSwagger(swaggerDoc string) (*openapi3.Swagger, []byte, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-
 	return sw, buffer, nil
 }
 
-func toPascalCase(s string) string {
-	builder := strings.Builder{}
-	tokens := strings.Split(strings.TrimSpace(s), " ")
-	for _, token := range tokens {
-		builder.WriteString(strings.Title(token))
-	}
-	return builder.String()
-}
-
 func (def *APIDefinition) generateFieldsFromSwagger(swagger *openapi3.Swagger) {
-	def.ID.APIName = toPascalCase(swagger.Info.Title)
+	def.ID.APIName = utils.ToPascalCase(swagger.Info.Title)
 	def.ID.Version = swagger.Info.Version
 	def.Description = swagger.Info.Description
 	def.Context = fmt.Sprintf("/%s/%s", def.ID.APIName, def.ID.Version)
@@ -418,7 +406,7 @@ func executeInitCmd() error {
 
 	// use api definition if given
 	if initCmdApiDefinitionPath != "" {
-		// read file
+		// read definition file
 		utils.Logln(utils.LogPrefixInfo + "Reading API Definition from " + initCmdApiDefinitionPath)
 		content, err := ioutil.ReadFile(initCmdApiDefinitionPath)
 		if err != nil {
@@ -426,7 +414,7 @@ func executeInitCmd() error {
 		}
 
 		apiDef := newApiDefinitionWithDefaults()
-
+		// inject from env if requested
 		if initCmdEnvInject {
 			utils.Logln(utils.LogPrefixInfo + "Injecting variables to definition from environment")
 			data, err := utils.InjectEnv(string(content))
@@ -435,7 +423,7 @@ func executeInitCmd() error {
 			}
 			content = []byte(data)
 		}
-
+		// read from yaml definition
 		err = yaml.Unmarshal(content, &apiDef)
 		if err != nil {
 			return err
@@ -446,11 +434,13 @@ func executeInitCmd() error {
 		if err != nil {
 			return err
 		}
+		// marshal new def
 		newDefBytes, err := json.Marshal(apiDef)
 		if err != nil {
 			return err
 		}
 
+		// merge two definitions
 		finalDefBytes, err := utils.MergeJSON(originalDefBytes, newDefBytes)
 		if err != nil {
 			return err
@@ -460,11 +450,12 @@ func executeInitCmd() error {
 			return err
 		}
 	}
-
+	// indent json with two spaces
 	indentedDefBytes, err := json.MarshalIndent(def, "", "  ")
 	if err != nil {
 		return err
 	}
+	// write to the disk
 	apiJSONPath := filepath.FromSlash("Meta-information/api.json")
 	utils.Logln(utils.LogPrefixInfo + "Writing " + apiJSONPath)
 	err = ioutil.WriteFile(apiJSONPath, indentedDefBytes, os.ModePerm)
@@ -490,7 +481,7 @@ func init() {
 	InitCommand.Flags().StringVarP(&initCmdApiDefinitionPath, "definition", "d", "", "Provide"+
 		"a YAML definition of API")
 	InitCommand.Flags().StringVarP(&initCmdSwaggerPath, "swagger", "s", "", "Provide a swagger"+
-		"file for the API(json/yaml are supported)")
+		"file for the API (json/yaml)")
 	InitCommand.Flags().BoolVarP(&initCmdEnvInject, "env-inject", "", false, "Inject "+
 		"environment variables to definition file")
 }

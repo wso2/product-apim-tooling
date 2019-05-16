@@ -67,10 +67,6 @@ func Test_loadSwagger3YAML(t *testing.T) {
 	assert.NotNil(t, sw.Paths, "Paths should not be nil")
 }
 
-func Test_toPascalCase(t *testing.T) {
-	assert.Equal(t, "MyPascalCaseText", toPascalCase("     my pascal          case text  "))
-}
-
 func Test_APIDefinition_generateFieldsFromSwagger(t *testing.T) {
 	sw, _, err := loadSwagger("testdata/swaggers/swagger-3.json")
 	assert.Nil(t, err, "Loads correct swagger without errors")
