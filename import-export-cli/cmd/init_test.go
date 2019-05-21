@@ -14,15 +14,26 @@ func Test_createDirectories(t *testing.T) {
 	assert.Nil(t, err, "Temp directory should be created")
 	err = os.Chdir(name)
 	assert.Nil(t, err, "Should be able to change directory")
-	err = createDirectories()
+	err = createDirectories("")
 	assert.Nil(t, err, "Should be no errors when creating directory structure")
-
 	for _, dir := range dirs {
 		dirPath := filepath.FromSlash(dir)
 		assert.DirExists(t, dirPath, "Directory "+dirPath+" should be created")
 	}
+	_ = os.RemoveAll(name)
+}
 
-	_ = os.Chdir("..")
+func Test_createDirectoriesWithName(t *testing.T) {
+	name, err := ioutil.TempDir("", "")
+	assert.Nil(t, err, "Temp directory should be created")
+	err = os.Chdir(name)
+	assert.Nil(t, err, "Should be able to change directory")
+	err = createDirectories("lorem")
+	assert.Nil(t, err, "Should be no errors when creating directory structure")
+	for _, dir := range dirs {
+		dirPath := filepath.Join("lorem", filepath.FromSlash(dir))
+		assert.DirExists(t, dirPath, "Directory "+dirPath+" should be created")
+	}
 	_ = os.RemoveAll(name)
 }
 
@@ -71,7 +82,7 @@ func Test_APIDefinition_generateFieldsFromSwagger(t *testing.T) {
 	sw, _, err := loadSwagger("testdata/swaggers/swagger-3.json")
 	assert.Nil(t, err, "Loads correct swagger without errors")
 	def := newApiDefinitionWithDefaults()
-	def.generateFieldsFromSwagger(sw)
+	def.generateFieldsFromSwagger3(sw)
 
 	assert.Equal(t, "SwaggerPetstore", def.ID.APIName, "Should correctly output name")
 	assert.Equal(t, "/SwaggerPetstore/1.0.0", def.Context, "Should return correct context")

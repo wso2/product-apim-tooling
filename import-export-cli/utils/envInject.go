@@ -167,6 +167,9 @@ func MergeJSON(firstSource, secondSource []byte) ([]byte, error) {
 		if source == nil {
 			return destination
 		}
+		if s, ok := source.(string); ok && s == "" {
+			return destination
+		}
 		return source
 	})
 

@@ -4,13 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/ghodss/yaml"
 	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
 	"strconv"
 	"time"
 	"unicode"
+
+	"github.com/ghodss/yaml"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/spf13/cobra"
@@ -19,10 +21,15 @@ import (
 )
 
 var (
+	initCmdOutputDir         string
 	initCmdSwaggerPath       string
 	initCmdApiDefinitionPath string
 	initCmdEnvInject         bool
 )
+
+type Swagger2SpecPartial struct {
+	BasePath string `json:"basePath,omitempty" yaml:"basePath,omitempty"`
+}
 
 const (
 	// Time format which used to output date for api
@@ -108,8 +115,8 @@ type APIDefinition struct {
 	UUID                               string            `json:"uuid,omitempty"`
 	Description                        string            `json:"description,omitempty"`
 	Type                               string            `json:"type,omitempty"`
-	Context                            string            `json:"context,omitempty"`
-	ContextTemplate                    string            `json:"contextTemplate,omitempty"`
+	Context                            string            `json:"context"`
+	ContextTemplate                    string            `json:"contextTemplate"`
 	Tags                               []string          `json:"tags"`
 	Documents                          []interface{}     `json:"documents"`
 	LastUpdated                        string            `json:"lastUpdated,omitempty"`
@@ -151,20 +158,20 @@ type APIDefinition struct {
 	IsLatest                           bool              `json:"isLatest"`
 }
 type ID struct {
-	ProviderName string `json:"providerName,omitempty"`
-	APIName      string `json:"apiName,omitempty"`
-	Version      string `json:"version,omitempty"`
+	ProviderName string `json:"providerName"`
+	APIName      string `json:"apiName"`
+	Version      string `json:"version"`
 }
 type AvailableTiers struct {
-	Name               string `json:"name"`
-	DisplayName        string `json:"displayName"`
-	Description        string `json:"description"`
-	RequestsPerMin     int    `json:"requestsPerMin"`
-	RequestCount       int    `json:"requestCount"`
-	UnitTime           int    `json:"unitTime"`
-	TimeUnit           string `json:"timeUnit"`
-	TierPlan           string `json:"tierPlan"`
-	StopOnQuotaReached bool   `json:"stopOnQuotaReached"`
+	Name               string `json:"name,omitempty"`
+	DisplayName        string `json:"displayName,omitempty"`
+	Description        string `json:"description,omitempty"`
+	RequestsPerMin     int    `json:"requestsPerMin,omitempty"`
+	RequestCount       int    `json:"requestCount,omitempty"`
+	UnitTime           int    `json:"unitTime,omitempty"`
+	TimeUnit           string `json:"timeUnit,omitempty"`
+	TierPlan           string `json:"tierPlan,omitempty"`
+	StopOnQuotaReached bool   `json:"stopOnQuotaReached,omitempty"`
 }
 type Scopes struct {
 	Key         string `json:"key"`
@@ -176,17 +183,17 @@ type Scopes struct {
 type MediationScripts struct {
 }
 type URITemplates struct {
-	URITemplate          string           `json:"uriTemplate"`
-	HTTPVerb             string           `json:"httpVerb"`
-	AuthType             string           `json:"authType"`
-	HTTPVerbs            []string         `json:"httpVerbs"`
-	AuthTypes            []string         `json:"authTypes"`
-	ThrottlingConditions []interface{}    `json:"throttlingConditions"`
-	ThrottlingTier       string           `json:"throttlingTier"`
-	ThrottlingTiers      []string         `json:"throttlingTiers"`
-	MediationScript      string           `json:"mediationScript"`
-	Scopes               []*Scopes        `json:"scopes"`
-	MediationScripts     MediationScripts `json:"mediationScripts"`
+	URITemplate          string           `json:"uriTemplate,omitempty"`
+	HTTPVerb             string           `json:"httpVerb,omitempty"`
+	AuthType             string           `json:"authType,omitempty"`
+	HTTPVerbs            []string         `json:"httpVerbs,omitempty"`
+	AuthTypes            []string         `json:"authTypes,omitempty"`
+	ThrottlingConditions []interface{}    `json:"throttlingConditions,omitempty"`
+	ThrottlingTier       string           `json:"throttlingTier,omitempty"`
+	ThrottlingTiers      []string         `json:"throttlingTiers,omitempty"`
+	MediationScript      string           `json:"mediationScript,omitempty"`
+	Scopes               []*Scopes        `json:"scopes,omitempty"`
+	MediationScripts     MediationScripts `json:"mediationScripts,omitempty"`
 }
 type CorsConfiguration struct {
 	CorsConfigurationEnabled      bool     `json:"corsConfigurationEnabled"`
@@ -209,15 +216,34 @@ var dirs = []string{
 }
 
 // createDirectories will create dirs in current working directory
-func createDirectories() error {
+func createDirectories(name string) error {
 	for _, dir := range dirs {
-		utils.Logln(utils.LogPrefixInfo + "Creating directory " + filepath.FromSlash(dir))
-		err := os.MkdirAll(filepath.FromSlash(dir), os.ModePerm)
+		dirPath := filepath.Join(name, filepath.FromSlash(dir))
+		utils.Logln(utils.LogPrefixInfo + "Creating directory " + dirPath)
+		err := os.MkdirAll(dirPath, os.ModePerm)
 		if err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+// loadDefaultSpecFromDisk loads api definition stored in HOME/.wso2apimcli/default_api.yaml
+func loadDefaultSpecFromDisk() (*APIDefinition, error) {
+	defaultData, err := ioutil.ReadFile(utils.DefaultAPISpecFilePath)
+	if err != nil {
+		return nil, err
+	}
+
+	def := &APIDefinition{}
+	err = yaml.Unmarshal(defaultData, &def)
+	if err != nil {
+		return nil, err
+	}
+
+	def.LastUpdated = time.Now().Format(timeFormat)
+	def.CreatedTime = strconv.FormatInt(time.Now().Unix(), 10)
+	return def, nil
 }
 
 // newApiDefinitionWithDefaults creates a definition with defaults
@@ -293,8 +319,8 @@ func loadSwagger(swaggerDoc string) (*openapi3.Swagger, []byte, error) {
 	return sw, buffer, nil
 }
 
-// generateFieldsFromSwagger using swagger
-func (def *APIDefinition) generateFieldsFromSwagger(swagger *openapi3.Swagger) {
+// generateFieldsFromSwagger3 using swagger
+func (def *APIDefinition) generateFieldsFromSwagger3(swagger *openapi3.Swagger) {
 	def.ID.APIName = utils.ToPascalCase(swagger.Info.Title)
 	def.ID.Version = swagger.Info.Version
 	def.Description = swagger.Info.Description
@@ -366,14 +392,32 @@ func hasPrefix(buf []byte, prefix []byte) bool {
 
 // executeInitCmd will run init command
 func executeInitCmd() error {
-	pwd, err := os.Getwd()
+	var dir string
+	if initCmdOutputDir != "" {
+		err := os.MkdirAll(initCmdOutputDir, os.ModePerm)
+		if err != nil {
+			return err
+		}
+		p, err := filepath.Abs(initCmdOutputDir)
+		if err != nil {
+			return err
+		}
+		dir = p
+	} else {
+		pwd, err := os.Getwd()
+		if err != nil {
+			return err
+		}
+		dir = pwd
+	}
+	fmt.Println("Initializing a new APIM project in", dir)
+
+	def, err := loadDefaultSpecFromDisk()
 	if err != nil {
 		return err
 	}
-	fmt.Println("Initializing a new APIM project in", pwd)
 
-	def := newApiDefinitionWithDefaults()
-	err = createDirectories()
+	err = createDirectories(initCmdOutputDir)
 	if err != nil {
 		return err
 	}
@@ -385,7 +429,7 @@ func executeInitCmd() error {
 		if err != nil {
 			return err
 		}
-		def.generateFieldsFromSwagger(sw)
+		def.generateFieldsFromSwagger3(sw)
 
 		// put swagger file to corresponding directory
 		// if swagger is either from json or yaml source it will be properly indented with two spaces
@@ -404,8 +448,14 @@ func executeInitCmd() error {
 				return err
 			}
 		}
+		// set context based on basepath if presented(only for swagger 2.0)
+		if basePath, ok := holder["basePath"]; ok {
+			def.Context = path.Clean(fmt.Sprintf("/%s/%s", basePath, sw.Info.Version))
+			def.ContextTemplate = path.Clean(fmt.Sprintf("/%s/{version}", basePath))
+		}
+
 		// add indention with two spaces
-		swaggerSavePath := filepath.FromSlash("Meta-information/swagger.json")
+		swaggerSavePath := filepath.Join(initCmdOutputDir, filepath.FromSlash("Meta-information/swagger.json"))
 		utils.Logln(utils.LogPrefixInfo + "Writing " + swaggerSavePath)
 		data, err := json.MarshalIndent(holder, "", "  ")
 		if err != nil {
@@ -427,7 +477,7 @@ func executeInitCmd() error {
 			return err
 		}
 
-		apiDef := newApiDefinitionWithDefaults()
+		apiDef := &APIDefinition{}
 		// inject from env if requested
 		if initCmdEnvInject {
 			utils.Logln(utils.LogPrefixInfo + "Injecting variables to definition from environment")
@@ -459,10 +509,12 @@ func executeInitCmd() error {
 		if err != nil {
 			return err
 		}
-		err = json.Unmarshal(finalDefBytes, &def)
+		tmpDef := &APIDefinition{}
+		err = json.Unmarshal(finalDefBytes, &tmpDef)
 		if err != nil {
 			return err
 		}
+		def = tmpDef
 	}
 	// indent json with two spaces
 	indentedDefBytes, err := json.MarshalIndent(def, "", "  ")
@@ -470,7 +522,7 @@ func executeInitCmd() error {
 		return err
 	}
 	// write to the disk
-	apiJSONPath := filepath.FromSlash("Meta-information/api.json")
+	apiJSONPath := filepath.Join(initCmdOutputDir, filepath.FromSlash("Meta-information/api.json"))
 	utils.Logln(utils.LogPrefixInfo + "Writing " + apiJSONPath)
 	err = ioutil.WriteFile(apiJSONPath, indentedDefBytes, os.ModePerm)
 	fmt.Println("Project initialized")
@@ -492,6 +544,8 @@ var InitCommand = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(InitCommand)
+	InitCommand.Flags().StringVarP(&initCmdOutputDir, "output", "o", "", "Output directory for API. When not "+
+		"provided project will be initialized in current working directory")
 	InitCommand.Flags().StringVarP(&initCmdApiDefinitionPath, "definition", "d", "", "Provide"+
 		"a YAML definition of API")
 	InitCommand.Flags().StringVarP(&initCmdSwaggerPath, "swagger", "s", "", "Provide a swagger"+
