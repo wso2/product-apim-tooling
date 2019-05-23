@@ -546,8 +546,8 @@ func init() {
 	RootCmd.AddCommand(InitCommand)
 	InitCommand.Flags().StringVarP(&initCmdOutputDir, "output", "o", "", "Output directory for API. When not "+
 		"provided project will be initialized in current working directory")
-	InitCommand.Flags().StringVarP(&initCmdApiDefinitionPath, "definition", "d", "", "Provide"+
-		"a YAML definition of API")
+	InitCommand.Flags().StringVarP(&initCmdApiDefinitionPath, "definition", "d", "", "Provide a "+
+		"YAML definition of API")
 	InitCommand.Flags().StringVarP(&initCmdSwaggerPath, "swagger", "s", "", "Provide a swagger"+
 		"file for the API (json/yaml)")
 	InitCommand.Flags().BoolVarP(&initCmdEnvInject, "env-inject", "", false, "Inject "+
