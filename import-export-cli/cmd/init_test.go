@@ -37,19 +37,6 @@ func Test_createDirectoriesWithName(t *testing.T) {
 	_ = os.RemoveAll(name)
 }
 
-func Test_getDefaultTiers(t *testing.T) {
-	tiers := getDefaultTiers()
-	assert.Equal(t, 4, len(tiers), "Should load four default tiers")
-	assert.Equal(t, "Bronze", tiers[0].Name, "Should get correct name")
-	assert.Equal(t, "Allows 1000 requests per minute", tiers[0].Description, "Should get correct description")
-}
-
-func Test_getDefaultCORS(t *testing.T) {
-	cors := getDefaultCORS()
-	assert.Equal(t, false, cors.CorsConfigurationEnabled, "Should load default")
-	assert.Equal(t, 6, len(cors.AccessControlAllowMethods), "Should load correct values")
-}
-
 func Test_loadSwagger2(t *testing.T) {
 	sw, _, err := loadSwagger("testdata/swaggers/swagger-2.json")
 	assert.Nil(t, err, "Loads correct swagger without errors")
@@ -81,7 +68,7 @@ func Test_loadSwagger3YAML(t *testing.T) {
 func Test_APIDefinition_generateFieldsFromSwagger(t *testing.T) {
 	sw, _, err := loadSwagger("testdata/swaggers/swagger-3.json")
 	assert.Nil(t, err, "Loads correct swagger without errors")
-	def := newApiDefinitionWithDefaults()
+	def := &APIDefinition{}
 	def.generateFieldsFromSwagger3(sw)
 
 	assert.Equal(t, "SwaggerPetstore", def.ID.APIName, "Should correctly output name")
