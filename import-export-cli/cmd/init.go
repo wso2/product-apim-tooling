@@ -407,10 +407,11 @@ func executeInitCmd() error {
 }
 
 var InitCommand = &cobra.Command{
-	Use:   "init [project path]",
-	Short: "initialize a new project in given path",
-	Long:  "initialize a new project in given path. If a openAPI definition provided API will be populated with details from it",
-	Args:  cobra.MinimumNArgs(1),
+	Use:     "init [project path]",
+	Short:   "initialize a new project in given path",
+	Long:    "initialize a new project in given path. If a openAPI definition provided API will be populated with details from it",
+	Example: "apimcli init myapi --openapi petstore.yaml",
+	Args:    cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + "init called")
 		initCmdOutputDir = args[0]
