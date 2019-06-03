@@ -19,11 +19,9 @@
 package cmd
 
 import (
-	"fmt"
-
 	"bytes"
 	"crypto/tls"
-	"github.com/renstrom/dedent"
+	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"io"
@@ -48,21 +46,19 @@ var skipSubscriptions bool
 const importAppCmdLiteral = "import-app"
 const importAppCmdShortDesc = "Import App"
 
-var importAppCmdLongDesc = "Import an Application to an environment"
+const importAppCmdLongDesc = "Import an Application to an environment"
 
-var importAppCmdExamples = dedent.Dedent(`
-		Examples:
-		` + utils.ProjectName + ` ` + importAppCmdLiteral + ` -f qa/apps/sampleApp.zip -e dev
-		` + utils.ProjectName + ` ` + importAppCmdShortDesc + ` -f staging/apps/sampleApp.zip -e prod -o testUser -u admin -p admin
-		` + utils.ProjectName + ` ` + importAppCmdLiteral + ` -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -e prod
-	`)
+const importAppCmdExamples = utils.ProjectName + ` ` + importAppCmdLiteral + ` -f qa/apps/sampleApp.zip -e dev
+` + utils.ProjectName + ` ` + importAppCmdShortDesc + ` -f staging/apps/sampleApp.zip -e prod -o testUser -u admin -p admin
+` + utils.ProjectName + ` ` + importAppCmdLiteral + ` -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -e prod`
 
 // importAppCmd represents the importApp command
 var ImportAppCmd = &cobra.Command{
 	Use: importAppCmdLiteral + " (--file <app-zip-file> --environment " +
 		"<environment-to-which-the-app-should-be-imported>)",
-	Short: importAppCmdShortDesc,
-	Long:  importAppCmdLongDesc + importAppCmdExamples,
+	Short:   importAppCmdShortDesc,
+	Long:    importAppCmdLongDesc,
+	Example: importAppCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + importAppCmdLiteral + " called")
 		var appsExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedAppsDirName)
