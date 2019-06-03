@@ -20,8 +20,6 @@ package cmd
 
 import (
 	"fmt"
-
-	"github.com/renstrom/dedent"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -30,20 +28,15 @@ import (
 // Version command related usage info
 const versionCmdLiteral = "version"
 const versionCmdShortDesc = "Display Version on current " + utils.ProjectName
-
-var versionCmdLongDesc = dedent.Dedent(`
-		Display the current version of this command line tool
-		`)
-
-var versionCmdExamples = dedent.Dedent(`
-		` + utils.ProjectName + ` ` + versionCmdLiteral + `
-		`)
+const versionCmdLongDesc = "Display the current version of this command line tool"
+const versionCmdExamples = utils.ProjectName + " " + versionCmdLiteral
 
 // VersionCmd represents the version command
 var VersionCmd = &cobra.Command{
-	Use:   versionCmdLiteral,
-	Short: versionCmdShortDesc,
-	Long:  versionCmdLongDesc + versionCmdExamples,
+	Use:     versionCmdLiteral,
+	Short:   versionCmdShortDesc,
+	Long:    versionCmdLongDesc,
+	Example: versionCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		var version = "1.1.0"
 		fmt.Println(utils.ProjectName + " Version: " + version)

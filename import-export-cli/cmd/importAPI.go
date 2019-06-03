@@ -25,6 +25,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/Jeffail/gabs"
+	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -36,12 +39,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/Jeffail/gabs"
-
-	"github.com/renstrom/dedent"
-	"github.com/spf13/cobra"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 var importAPIFile string
@@ -70,20 +67,18 @@ type IdInfo struct {
 	Provider string `json:"providerName"`
 }
 
-var importAPICmdLongDesc = "Import an API to an environment"
+const importAPICmdLongDesc = "Import an API to an environment"
 
-var importAPICmdExamples = dedent.Dedent(`
-		Examples:
-		` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f qa/TwitterAPI.zip -e dev
-		` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f staging/FacebookAPI.zip -e production -u admin -p admin
-	`)
+const importAPICmdExamples = utils.ProjectName + ` ` + importAPICmdLiteral + ` -f qa/TwitterAPI.zip -e dev
+` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f staging/FacebookAPI.zip -e production -u admin -p admin`
 
 // ImportAPICmd represents the importAPI command
 var ImportAPICmd = &cobra.Command{
 	Use: importAPICmdLiteral + " (--file <api-zip-file> --environment " +
 		"<environment-to-which-the-api-should-be-imported>)",
-	Short: importAPICmdShortDesc,
-	Long:  importAPICmdLongDesc + importAPICmdExamples,
+	Short:   importAPICmdShortDesc,
+	Long:    importAPICmdLongDesc,
+	Example: importAPICmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + importAPICmdLiteral + " called")
 		var apisExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedApisDirName)

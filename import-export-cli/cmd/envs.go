@@ -24,7 +24,6 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/renstrom/dedent"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/formatter"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -49,13 +48,9 @@ var envsCmdFormat string
 const EnvsCmdLiteral = "envs"
 const EnvsCmdShortDesc = "Display the list of environments"
 
-var EnvsCmdLongDesc = dedent.Dedent(`
-		Display a list of environments defined in '` + utils.MainConfigFileName + `' file
-	`)
+const EnvsCmdLongDesc = `Display a list of environments defined in '` + utils.MainConfigFileName + `' file`
 
-var EnvsCmdExamples = dedent.Dedent(`
-		` + utils.ProjectName + ` list envs
-	`)
+const EnvsCmdExamples = utils.ProjectName + " list envs"
 
 // endpoint contains information about endpoint of API Manager
 type endpoints struct {
@@ -129,9 +124,10 @@ func (e *endpoints) MarshalJSON() ([]byte, error) {
 
 // envsCmd represents the envs command
 var envsCmd = &cobra.Command{
-	Use:   EnvsCmdLiteral,
-	Short: EnvsCmdShortDesc,
-	Long:  EnvsCmdLongDesc + EnvsCmdExamples,
+	Use:     EnvsCmdLiteral,
+	Short:   EnvsCmdShortDesc,
+	Long:    EnvsCmdLongDesc,
+	Example: EnvsCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + EnvsCmdLiteral + " called")
 		envs := utils.GetMainConfigFromFile(utils.MainConfigFilePath).Environments

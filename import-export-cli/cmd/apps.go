@@ -22,15 +22,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/go-resty/resty"
-	"github.com/renstrom/dedent"
-	"github.com/spf13/cobra"
-	"github.com/wso2/product-apim-tooling/import-export-cli/formatter"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"io"
 	"net/http"
 	"os"
 	"text/template"
+
+	"github.com/go-resty/resty"
+	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/formatter"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 const (
@@ -90,22 +90,19 @@ func (a app) GroupId() string {
 	return a.groupId
 }
 
-var appsCmdLongDesc = dedent.Dedent(`
-		Display a list of Applications of the user in the environment specified by the flag --environment, -e
-	`)
+const appsCmdLongDesc = "Display a list of Applications of the user in the environment specified by the flag --environment, -e"
 
-var appsCmdExamples = dedent.Dedent(`
-	` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e dev
-	` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e dev -o sampleUser
-	` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e prod -o sampleUser -u admin
-	` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e staging -o sampleUser -u admin -p admin
-	`)
+const appsCmdExamples = utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e dev
+` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e dev -o sampleUser
+` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e prod -o sampleUser -u admin
+` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e staging -o sampleUser -u admin -p admin`
 
 // appsCmd represents the apps command
 var appsCmd = &cobra.Command{
-	Use:   appsCmdLiteral,
-	Short: appsCmdShortDesc,
-	Long:  appsCmdLongDesc + appsCmdExamples,
+	Use:     appsCmdLiteral,
+	Short:   appsCmdShortDesc,
+	Long:    appsCmdLongDesc,
+	Example: appsCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + appsCmdLiteral + " called")
 		executeAppsCmd(listAppsCmdAppOwner, utils.MainConfigFilePath, utils.EnvKeysAllFilePath)

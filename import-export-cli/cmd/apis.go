@@ -27,7 +27,6 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/renstrom/dedent"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/formatter"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -53,21 +52,19 @@ var listApisCmdFormat string
 const apisCmdLiteral = "apis"
 const apisCmdShortDesc = "Display a list of APIs in an environment"
 
-var apisCmdLongDesc = dedent.Dedent(`
-		Display a list of APIs in the environment specified by the flag --environment, -e
-	`)
-var apisCmdExamples = dedent.Dedent(`
-	` + utils.ProjectName + ` ` + apisCmdLiteral + ` ` + listCmdLiteral + ` -e dev
-	` + utils.ProjectName + ` ` + apisCmdLiteral + ` ` + listCmdLiteral + ` -e dev -q version:1.0.0
-	` + utils.ProjectName + ` ` + apisCmdLiteral + ` ` + listCmdLiteral + ` -e prod -q provider:admin
-	` + utils.ProjectName + ` ` + apisCmdLiteral + ` ` + listCmdLiteral + ` -e staging -u admin -p admin
-	`)
+const apisCmdLongDesc = `Display a list of APIs in the environment specified by the flag --environment, -e`
+
+var apisCmdExamples = utils.ProjectName + ` ` + apisCmdLiteral + ` ` + listCmdLiteral + ` -e dev
+` + utils.ProjectName + ` ` + apisCmdLiteral + ` ` + listCmdLiteral + ` -e dev -q version:1.0.0
+` + utils.ProjectName + ` ` + apisCmdLiteral + ` ` + listCmdLiteral + ` -e prod -q provider:admin
+` + utils.ProjectName + ` ` + apisCmdLiteral + ` ` + listCmdLiteral + ` -e staging -u admin -p admin`
 
 // apisCmd represents the apis command
 var apisCmd = &cobra.Command{
-	Use:   apisCmdLiteral,
-	Short: apisCmdShortDesc,
-	Long:  apisCmdLongDesc + apisCmdExamples,
+	Use:     apisCmdLiteral,
+	Short:   apisCmdShortDesc,
+	Long:    apisCmdLongDesc,
+	Example: apisCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + apisCmdLiteral + " called")
 		executeApisCmd(utils.MainConfigFilePath, utils.EnvKeysAllFilePath)

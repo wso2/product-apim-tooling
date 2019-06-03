@@ -20,7 +20,6 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/renstrom/dedent"
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -33,13 +32,11 @@ import (
 const exportAPIsCmdLiteral = "export-apis"
 const exportAPIsCmdShortDesc = "Export APIs for migration"
 
-var exportAPIsCmdLongDesc = "Export all the APIs of a tenant from an APIM 2.6.0 environment environment, to be imported " +
+const exportAPIsCmdLongDesc = "Export all the APIs of a tenant from an APIM 2.6.0 environment environment, to be imported " +
 	"into 3.0.0 environment"
-var exportAPIsCmdExamples = dedent.Dedent(`
-		Examples:
-		` + utils.ProjectName + ` ` + exportAPIsCmdLiteral + ` -e production-2.6.0 -u wso2admin@wso2.org -p 12345 -t wso2.org -k --force
-		` + utils.ProjectName + ` ` + exportAPIsCmdLiteral + ` -e production-2.6.0 -u admin -p admin -k
-	`)
+const exportAPIsCmdExamples = utils.ProjectName + ` ` + exportAPIsCmdLiteral + ` -e production-2.6.0 -u wso2admin@wso2.org -p 12345 -t wso2.org -k --force
+		` + utils.ProjectName + ` ` + exportAPIsCmdLiteral + ` -e production-2.6.0 -u admin -p admin -k`
+
 var apiExportDir string
 var apiListOffset int //from which index of API, the APIs will be fetched from APIM server
 var count int32       // size of API list to be exported or number of  APIs left to be exported from last iteration
@@ -55,8 +52,9 @@ var mainConfigFilePath string
 var ExportAPIsCmd = &cobra.Command{
 	Use: exportAPIsCmdLiteral + " [--environment " +
 		"<environment-from-which-artifacts-should-be-exported>] -u <user_name> -p <password> [-t <Tenant-domain-of-the-resources-to-be-exported>] [--force]",
-	Short: exportAPIsCmdShortDesc,
-	Long:  exportAPIsCmdLongDesc + exportAPIsCmdExamples,
+	Short:   exportAPIsCmdShortDesc,
+	Long:    exportAPIsCmdLongDesc,
+	Example: exportAPIsCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + exportAPIsCmdLiteral + " called")
 		var artifactExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedMigrationArtifactsDirName)
