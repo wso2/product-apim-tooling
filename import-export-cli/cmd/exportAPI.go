@@ -27,7 +27,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 
-	"github.com/renstrom/dedent"
 	"net/http"
 	"path/filepath"
 )
@@ -41,21 +40,19 @@ var runnigExportApiCommand bool
 const exportAPICmdLiteral = "export-api"
 const exportAPICmdShortDesc = "Export API"
 
-var exportAPICmdLongDesc = "Export APIs from an environment"
+const exportAPICmdLongDesc = "Export APIs from an environment"
 
-var exportAPICmdExamples = dedent.Dedent(`
-		Examples:
-		` + utils.ProjectName + ` ` + exportAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -e dev --provider admin
-		` + utils.ProjectName + ` ` + exportAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 -e production --provider admin
-		NOTE: all three flags (--name (-n), --version (-v), --provider (-r)) are mandatory
-	`)
+const exportAPICmdExamples = utils.ProjectName + ` ` + exportAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -e dev --provider admin
+` + utils.ProjectName + ` ` + exportAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 -e production --provider admin
+NOTE: all three flags (--name (-n), --version (-v), --provider (-r)) are mandatory`
 
 // ExportAPICmd represents the exportAPI command
 var ExportAPICmd = &cobra.Command{
 	Use: exportAPICmdLiteral + " (--name <name-of-the-api> --version <version-of-the-api> --environment " +
 		"<environment-from-which-the-api-should-be-exported>)",
-	Short: exportAPICmdShortDesc,
-	Long:  exportAPICmdLongDesc + exportAPICmdExamples,
+	Short:   exportAPICmdShortDesc,
+	Long:    exportAPICmdLongDesc,
+	Example: exportAPICmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + exportAPICmdLiteral + " called")
 		var apisExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedApisDirName)

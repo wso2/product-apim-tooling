@@ -19,7 +19,6 @@
 package cmd
 
 import (
-	"github.com/renstrom/dedent"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
@@ -28,24 +27,20 @@ import (
 const listCmdLiteral = "list"
 const listCmdShortDesc = "List APIs/Applications in an environment or List the environments"
 
-var listCmdLongDesc = dedent.Dedent(`
-			Display a list containing all the APIs available in the environment specified by flag (--environment, -e)/
-			Display a list of Applications of a specific user in the environment specified by flag (--environment, -e)
-			OR
-			List all the environments
-	`)
+const listCmdLongDesc = `Display a list containing all the APIs available in the environment specified by flag (--environment, -e)/
+Display a list of Applications of a specific user in the environment specified by flag (--environment, -e)
+OR
+List all the environments`
 
-var listCmdExamples = dedent.Dedent(`
-		Examples:
-		` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + EnvsCmdLiteral + `
-		` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + apisCmdLiteral + ` -e dev
-	`)
+const listCmdExamples = utils.ProjectName + ` ` + listCmdLiteral + ` ` + EnvsCmdLiteral + `
+` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + apisCmdLiteral + ` -e dev`
 
 // ListCmd represents the list command
 var ListCmd = &cobra.Command{
-	Use:   listCmdLiteral,
-	Short: listCmdShortDesc,
-	Long:  listCmdLongDesc + listCmdExamples,
+	Use:     listCmdLiteral,
+	Short:   listCmdShortDesc,
+	Long:    listCmdLongDesc,
+	Example: listCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + listCmdLiteral + " called")
 

@@ -21,7 +21,6 @@ package cmd
 import (
 	"fmt"
 	"github.com/go-resty/resty"
-	"github.com/renstrom/dedent"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"io/ioutil"
@@ -38,21 +37,19 @@ var exportAppOwner string
 const exportAppCmdLiteral = "export-app"
 const exportAppCmdShortDesc = "Export App"
 
-var exportAppCmdLongDesc = "Export an Application from a specified  environment"
+const exportAppCmdLongDesc = "Export an Application from a specified  environment"
 
-var exportAppCmdExamples = dedent.Dedent(`
-		Examples:
-		` + utils.ProjectName + ` ` + exportAppCmdLiteral + ` -n SampleApp -o admin -e dev
-		` + utils.ProjectName + ` ` + exportAppCmdLiteral + ` -n SampleApp -o admin -e prod
-		NOTE: Flag --name (-n) and --owner (-o) are mandatory
-	`)
+const exportAppCmdExamples = utils.ProjectName + ` ` + exportAppCmdLiteral + ` -n SampleApp -o admin -e dev
+` + utils.ProjectName + ` ` + exportAppCmdLiteral + ` -n SampleApp -o admin -e prod
+NOTE: Flag --name (-n) and --owner (-o) are mandatory`
 
 // exportAppCmd represents the exportApp command
 var ExportAppCmd = &cobra.Command{
 	Use: exportAppCmdLiteral + " (--name <name-of-the-application> --owner <owner-of-the-application> --environment " +
 		"<environment-from-which-the-app-should-be-exported>)",
-	Short: exportAppCmdShortDesc,
-	Long:  exportAppCmdLongDesc + exportAppCmdExamples,
+	Short:   exportAppCmdShortDesc,
+	Long:    exportAppCmdLongDesc,
+	Example: exportAppCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + exportAppCmdLiteral + " called")
 		var appsExportDirectoryPath = filepath.Join(utils.ExportDirectory, utils.ExportedAppsDirName, cmdExportEnvironment)

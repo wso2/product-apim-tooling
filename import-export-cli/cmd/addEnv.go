@@ -22,7 +22,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/renstrom/dedent"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
@@ -39,36 +38,29 @@ var flagAdminEndpoint string           // admin endpoint of the environment to b
 // AddEnv command related Info
 const addEnvCmdLiteral = "add-env"
 const addEnvCmdShortDesc = "Add Environment to Config file"
+const addEnvCmdLongDesc = "Add new environment and its related endpoints to the config file"
+const addEnvCmdExamples = utils.ProjectName + ` ` + addEnvCmdLiteral + ` -n production \
+--registration https://localhost:9763/client-registration/v0.14/register \
+--apim  https://localhost:9443 \
+--token https://localhost:8243/token
 
-var addEnvCmdLongDesc = dedent.Dedent(`
-		Add new environment and its related endpoints to the config file
-	`)
+` + utils.ProjectName + ` ` + addEnvCmdLiteral + ` -n test \
+--registration https://localhost:9763/client-registration/v0.14/register \
+--import-export https://localhost:9443/api-import-export-2.6.0-v0 \
+--list https://localhsot:9443/api/am/publisher/v0.14/apis \
+--apim  https://localhost:9443 \
+--token https://localhost:8243/token
 
-var addEnvCmdExamples = dedent.Dedent(`
-		Examples:
-		` + utils.ProjectName + ` ` + addEnvCmdLiteral + ` -n production \
-						--registration https://localhost:9763/client-registration/v0.14/register \
-						--apim  https://localhost:9443 \
-						--token https://localhost:8243/token
-
-		` + utils.ProjectName + ` ` + addEnvCmdLiteral + ` -n test \
-						--registration https://localhost:9763/client-registration/v0.14/register \
-					    --import-export https://localhost:9443/api-import-export-2.6.0-v0 \
-						--list https://localhsot:9443/api/am/publisher/v0.14/apis \
-						--apim  https://localhost:9443 \
-						--token https://localhost:8243/token
-
-		` + utils.ProjectName + ` ` + addEnvCmdLiteral + ` -n dev --apim https://localhost:9443 \
-						--token	https://localhost:8243/token \
-						--registration http://localhost:9763/client-registration/v0.14/register
-
-	`)
+` + utils.ProjectName + ` ` + addEnvCmdLiteral + ` -n dev --apim https://localhost:9443 \
+--token	https://localhost:8243/token \
+--registration http://localhost:9763/client-registration/v0.14/register`
 
 // addEnvCmd represents the addEnv command
 var addEnvCmd = &cobra.Command{
-	Use:   addEnvCmdLiteral,
-	Short: addEnvCmdShortDesc,
-	Long:  addEnvCmdLongDesc + addEnvCmdExamples,
+	Use:     addEnvCmdLiteral,
+	Short:   addEnvCmdShortDesc,
+	Long:    addEnvCmdLongDesc,
+	Example: addEnvCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + addEnvCmdLiteral + " called")
 		executeAddEnvCmd(utils.MainConfigFilePath)

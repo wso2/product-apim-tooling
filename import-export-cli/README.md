@@ -18,6 +18,11 @@ Command Line tool for importing and exporting APIs/Applications between differen
     Execute `./build.sh -t apimcli.go -v 1.0.0 -f` to build for all platforms.
     
     Created packages will be available at `build/target` directory
+
+- ### Generating docs
+    After changing commands run following to generate documents and shell completions
+    `go run tools/gen.go`
+    Commit changes to version control
       
 - ### Running
     Select a generated archive suitable for your platform (Mac, Windows, Linux) and extract it to a desired location and`cd` into it.
