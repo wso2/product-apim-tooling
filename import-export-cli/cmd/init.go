@@ -441,8 +441,8 @@ func init() {
 	RootCmd.AddCommand(InitCommand)
 	InitCommand.Flags().StringVarP(&initCmdApiDefinitionPath, "definition", "d", "", "Provide a "+
 		"YAML definition of API")
-	InitCommand.Flags().StringVarP(&initCmdSwaggerPath, "openapi", "", "", "Provide an OpenAPI"+
-		"file for the API (json/yaml)")
+	InitCommand.Flags().StringVarP(&initCmdSwaggerPath, "openapi", "", "", "Provide an OpenAPI "+
+		"definition for the API (json/yaml)")
 	InitCommand.Flags().BoolVarP(&initCmdEnvInject, "env-inject", "", false, "Inject "+
 		"environment variables to definition file")
 	InitCommand.Flags().BoolVarP(&initCmdForced, "force", "f", false, "Force create project")

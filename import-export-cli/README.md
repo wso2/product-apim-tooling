@@ -41,8 +41,8 @@ Command Line tool for importing and exporting APIs/Applications between differen
     Execute `apimcli add-env --help` for detailed instructions
     > Under environment, `api_manager_endpoint`, `registration_endpoint`, `token_endpoint` fields are mandatory. Others are optional
     
-- ### Command Autocompletion (For Bash Only)
-    Copy the file `apimcli_bash_completion.sh` to `/etc/bash_completion.d/` and source it with
+- ### Command Autocomplete
+    Copy the file `shell-completions/apimcli_bash_completion.sh` to `/etc/bash_completion.d/` and source it with
     `source /etc/bash_completion.d/apimcli_bash_completion.sh` to enable bash auto-completion.
 
 ***
