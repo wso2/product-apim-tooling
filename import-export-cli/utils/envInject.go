@@ -47,9 +47,9 @@ type Endpoint struct {
 // EndpointData contains details about endpoints
 type EndpointData struct {
 	// Production endpoint
-	Production *Endpoint `yaml:"production" json:"production_endpoints"`
+	Production *Endpoint `yaml:"production" json:"production_endpoints,omitempty"`
 	// Sandbox endpoint
-	Sandbox *Endpoint `yaml:"sandbox" json:"sandbox_endpoints"`
+	Sandbox *Endpoint `yaml:"sandbox" json:"sandbox_endpoints,omitempty"`
 }
 
 // Environment represents an api environment
