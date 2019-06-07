@@ -54,7 +54,7 @@ var importAPIInject bool
 const importAPICmdLiteral = "import-api"
 const importAPICmdShortDesc = "Import API"
 
-const DefaultAPIMConfigFileName = ".apim-vars.yml"
+const DefaultAPIMConfigFileName = "api_params.yml"
 
 type ApiInfo struct {
 	ID IdInfo `json:"id"`
@@ -238,6 +238,30 @@ func ImportAPI(importPath, apiImportExportEndpoint, accessToken, exportDirectory
 	fileName := importPath
 	zipFilePath := fileName
 
+	// if file is a zip path and apiInject must done it is wise to extract the archive into a directory
+	// then perform injection as zip files are not mutable
+	if importAPIInject {
+		if info, err := os.Stat(fileName); err == nil && !info.IsDir() {
+			if strings.ToLower(filepath.Ext(info.Name())) == ".zip" {
+				fmt.Println(fileName + " is a zip archive")
+				tmpDir, err := ioutil.TempDir("", "apim")
+				if err != nil {
+					return err
+				}
+				//defer os.RemoveAll(tmpDir)
+				fmt.Println("Extracting", fileName, "to", tmpDir)
+				n, err := utils.Unzip(fileName, tmpDir)
+				if err != nil {
+					return err
+				}
+				if len(n) == 0 {
+					return fmt.Errorf("invalid API archive")
+				}
+				r := strings.TrimPrefix(n[0], tmpDir)
+				fileName = filepath.Join(tmpDir, strings.Split(path.Clean(r), string(os.PathSeparator))[0])
+			}
+		}
+	}
 	// Check whether the given path is a directory
 	// If it is a directory, archive it
 	if info, err := os.Stat(fileName); err == nil && info.IsDir() {
@@ -277,13 +301,13 @@ func ImportAPI(importPath, apiImportExportEndpoint, accessToken, exportDirectory
 			}
 
 			// delete the temp directory on return
-			defer func() {
-				utils.Logln("Deleting:", mergedAPIDir)
-				err := os.RemoveAll(mergedAPIDir)
-				if err != nil {
-					utils.HandleErrorAndExit("Error deleting directory:", err)
-				}
-			}()
+			//defer func() {
+			//	utils.Logln("Deleting:", mergedAPIDir)
+			//	err := os.RemoveAll(mergedAPIDir)
+			//	if err != nil {
+			//		utils.HandleErrorAndExit("Error deleting directory:", err)
+			//	}
+			//}()
 
 			fileName = mergedAPIDir
 		}
@@ -317,7 +341,7 @@ func ImportAPI(importPath, apiImportExportEndpoint, accessToken, exportDirectory
 		zipFilePath = tmpZip.Name()
 	}
 
-	// Test if we can find the zip file in the current work directory
+	// Test if we can find the zip file in the given path
 	if _, err := os.Stat(fileName); os.IsNotExist(err) {
 		// Doesn't exist... Check if available in the default exportDirectory
 		zipFilePath = filepath.Join(exportDirectory, fileName)
