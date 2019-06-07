@@ -60,8 +60,8 @@ type Environment struct {
 	Endpoints *EndpointData `yaml:"endpoints"`
 }
 
-// APIConfig represents environments defined in configuration file
-type APIConfig struct {
+// ApiParams represents environments defined in configuration file
+type ApiParams struct {
 	// Environments contains all environments in a configuration
 	Environments []Environment `yaml:"environments"`
 }
@@ -89,8 +89,8 @@ func InjectEnv(content string) (string, error) {
 	return expanded, nil
 }
 
-// LoadConfig loads an configuration from a reader. It returns an error or a valid APIConfig
-func LoadConfig(r io.Reader) (*APIConfig, error) {
+// LoadApiParams loads an configuration from a reader. It returns an error or a valid ApiParams
+func LoadApiParams(r io.Reader) (*ApiParams, error) {
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
 		return nil, err
@@ -101,22 +101,22 @@ func LoadConfig(r io.Reader) (*APIConfig, error) {
 		return nil, err
 	}
 
-	config := &APIConfig{}
-	err = yaml.Unmarshal([]byte(str), &config)
+	apiParams := &ApiParams{}
+	err = yaml.Unmarshal([]byte(str), &apiParams)
 	if err != nil {
 		return nil, err
 	}
 
-	return config, nil
+	return apiParams, nil
 }
 
-// LoadConfigFromFile loads a configuration YAML file located in path. It returns an error or a valid APIConfig
-func LoadConfigFromFile(path string) (*APIConfig, error) {
+// LoadApiParamsFromFile loads a configuration YAML file located in path. It returns an error or a valid ApiParams
+func LoadApiParamsFromFile(path string) (*ApiParams, error) {
 	r, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
-	apiConfig, err := LoadConfig(r)
+	apiConfig, err := LoadApiParams(r)
 	_ = r.Close()
 
 	return apiConfig, err
@@ -176,8 +176,8 @@ func MergeJSON(firstSource, secondSource []byte) ([]byte, error) {
 	return firstSourceJSON.Bytes(), nil
 }
 
-// GetEnv returns the EndpointData associated for key in the APIConfig, if not found returns nil
-func (config APIConfig) GetEnv(key string) *Environment {
+// GetEnv returns the EndpointData associated for key in the ApiParams, if not found returns nil
+func (config ApiParams) GetEnv(key string) *Environment {
 	for index, env := range config.Environments {
 		if env.Name == key {
 			return &config.Environments[index]

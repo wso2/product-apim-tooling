@@ -110,16 +110,15 @@ func TestExtractAPIInfoWithCorrectJSON(t *testing.T) {
 	  ]
 	}`
 
-	api, err := extractAPIInfo([]byte(content))
-	assert.Equal(t, api, &ApiInfo{IdInfo{Provider: "admin", Version: "1.0.0", Name: "APIName"}},
-		"Should parse correct json")
+	api, err := extractAPIDefinition([]byte(content))
 	assert.Equal(t, err, nil, "Should return nil error for correct json")
+	assert.Equal(t, api.ID, ID{ProviderName: "admin", Version: "1.0.0", APIName: "APIName"},
+		"Should parse correct json")
 }
 
 func TestExtractAPIInfoWhenIDTagMissing(t *testing.T) {
 	// When ID tag missing
 	content := `{
-	  "uuid": "e4d0c1be-44e9-43ad-b434-f8e2f02dad11",
 	  "description": "Some API Description",
 	  "type": "HTTP",
 	  "context": "/api/1.0.0",
@@ -129,9 +128,9 @@ func TestExtractAPIInfoWhenIDTagMissing(t *testing.T) {
 	  ]
 	}`
 
-	api, err := extractAPIInfo([]byte(content))
-	assert.Equal(t, &ApiInfo{}, api, "Should return empty IDInfo when ID tag missing")
+	api, err := extractAPIDefinition([]byte(content))
 	assert.Nil(t, err, "Should return nil error")
+	assert.Equal(t, ID{}, api.ID, "Should return empty IDInfo when ID tag missing")
 }
 
 func TestExtractAPIInfoWithMalformedJSON(t *testing.T) {
@@ -147,27 +146,27 @@ func TestExtractAPIInfoWithMalformedJSON(t *testing.T) {
 	  
 	}`
 
-	api, err := extractAPIInfo([]byte(content))
+	api, err := extractAPIDefinition([]byte(content))
 	assert.Nil(t, api, "Should return nil API struct")
 	assert.Error(t, err, "Should return an error regarding malformed json")
 }
 
 func TestGetAPIInfoCorrectZip(t *testing.T) {
-	api, err := getAPIInfo("testdata/PizzaShackAPI_1.0.0.zip")
+	api, err := getAPIDefinition("testdata/PizzaShackAPI_1.0.0.zip")
 	assert.Nil(t, err, "Should return nil error on reading correct zip files")
-	assert.Equal(t, &ApiInfo{IdInfo{Name: "PizzaShackAPI", Version: "1.0.0", Provider: "admin"}}, api,
+	assert.Equal(t, ID{APIName: "PizzaShackAPI", Version: "1.0.0", ProviderName: "admin"}, api.ID,
 		"Should return correct values for ID info")
 }
 
 func TestGetAPIInfoCorrectDirectoryStructure(t *testing.T) {
-	api, err := getAPIInfo("testdata/PizzaShackAPI-1.0.0")
+	api, err := getAPIDefinition("testdata/PizzaShackAPI-1.0.0")
 	assert.Nil(t, err, "Should return nil error on reading correct directories")
-	assert.Equal(t, &ApiInfo{IdInfo{Name: "PizzaShackAPI", Version: "1.0.0", Provider: "admin"}}, api,
+	assert.Equal(t, ID{APIName: "PizzaShackAPI", Version: "1.0.0", ProviderName: "admin"}, api.ID,
 		"Should return correct values for ID info")
 }
 
 func TestGetAPIInfoMalformedZip(t *testing.T) {
-	api, err := getAPIInfo("testdata/PizzaShackAPI_1.0.0-malformed.zip")
+	api, err := getAPIDefinition("testdata/PizzaShackAPI_1.0.0-malformed.zip")
 	assert.Error(t, err, "Should return error on reading malformed zip files")
 	assert.True(t, os.IsNotExist(err), "File not found error must be thrown")
 	assert.Nil(t, api,
@@ -175,7 +174,7 @@ func TestGetAPIInfoMalformedZip(t *testing.T) {
 }
 
 func TestGetAPIInfoMalformedDirectory(t *testing.T) {
-	api, err := getAPIInfo("testdata/PizzaShackAPI_1.0.0-malformed")
+	api, err := getAPIDefinition("testdata/PizzaShackAPI_1.0.0-malformed")
 	assert.Error(t, err, "Should return error on reading malformed directories")
 	assert.True(t, os.IsNotExist(err), "File not found error must be thrown")
 	assert.Nil(t, api,
@@ -183,7 +182,7 @@ func TestGetAPIInfoMalformedDirectory(t *testing.T) {
 }
 
 func TestGetAPIInfoCorruptedZip(t *testing.T) {
-	api, err := getAPIInfo("testdata/PizzaShackAPI_1.0.0-corrupted.zip")
+	api, err := getAPIDefinition("testdata/PizzaShackAPI_1.0.0-corrupted.zip")
 	assert.Error(t, err, "Should return error on reading malformed zip files")
 	assert.EqualError(t, err, "zip: not a valid zip file", "Should return error with invalid zip")
 	assert.Nil(t, api,

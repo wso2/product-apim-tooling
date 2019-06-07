@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"text/template"
 	"unicode"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/defaults"
@@ -252,6 +253,26 @@ func hasPrefix(buf []byte, prefix []byte) bool {
 	return bytes.HasPrefix(trim, prefix)
 }
 
+func generateConfig(file string) error {
+	envs := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
+	t, err := template.New("").Parse(defaults.ApiVarsTmpl)
+	if err != nil {
+		return err
+	}
+
+	f, err := os.Create(file)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	err = t.Execute(f, envs.Environments)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // executeInitCmd will run init command
 func executeInitCmd() error {
 	var dir string
@@ -331,6 +352,7 @@ func executeInitCmd() error {
 		}
 	} else {
 		// create an empty swagger
+		utils.Logln(utils.LogPrefixInfo + "Writing " + swaggerSavePath)
 		err = ioutil.WriteFile(swaggerSavePath, defaults.Swagger, os.ModePerm)
 		if err != nil {
 			return err
@@ -397,8 +419,17 @@ func executeInitCmd() error {
 	if err != nil {
 		return err
 	}
-	utils.Logln(utils.LogPrefixInfo + "Writing README")
-	err = ioutil.WriteFile(filepath.Join(initCmdOutputDir, "README.txt"), defaults.ProjectReadme, os.ModePerm)
+
+	apimProjConfigFilePath := filepath.Join(initCmdOutputDir, DefaultAPIMParamsFileName)
+	utils.Logln(utils.LogPrefixInfo + "Writing " + apimProjConfigFilePath)
+	err = generateConfig(apimProjConfigFilePath)
+	if err != nil {
+		return err
+	}
+
+	apimProjReadmeFilePath := filepath.Join(initCmdOutputDir, "README.txt")
+	utils.Logln(utils.LogPrefixInfo + "Writing " + apimProjReadmeFilePath)
+	err = ioutil.WriteFile(apimProjReadmeFilePath, defaults.ProjectReadme, os.ModePerm)
 	if err != nil {
 		return err
 	}

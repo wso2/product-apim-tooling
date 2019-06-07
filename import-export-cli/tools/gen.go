@@ -13,6 +13,7 @@ import (
 
 func main() {
 	log.Println("Generating docs...")
+	cmd.RootCmd.DisableAutoGenTag = true
 	err := doc.GenMarkdownTree(cmd.RootCmd, "docs")
 	if err != nil {
 		log.Fatal(err)
