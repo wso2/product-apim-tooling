@@ -13,7 +13,7 @@ import (
 
 func TestInjectEnvShouldFailWhenEnvNotPresent(t *testing.T) {
 	data := `$MYVAR`
-	str, err := injectEnv(data)
+	str, err := InjectEnv(data)
 	assert.Equal(t, "", str, "Should return empty string")
 	assert.Error(t, err, "Should return an error")
 	assert.EqualError(t, err, "$MYVAR is required, please set the environment variable")
@@ -22,13 +22,13 @@ func TestInjectEnvShouldFailWhenEnvNotPresent(t *testing.T) {
 func TestInjectEnvShouldPassWhenEnvPresents(t *testing.T) {
 	data := `$MYVAR`
 	_ = os.Setenv("MYVAR", "myval")
-	str, err := injectEnv(data)
+	str, err := InjectEnv(data)
 	assert.Nil(t, err, "Error should be null")
 	assert.Equal(t, "myval", str, "Should correctly replace environment variable")
 }
 
-func TestLoadConfigFromFileValidYAML(t *testing.T) {
-	conf, err := LoadConfigFromFile("testdata/.apim-vars.yml")
+func TestLoadApiParamsFromFileValidYAML(t *testing.T) {
+	conf, err := LoadApiParamsFromFile("testdata/api_params.yml")
 	assert.Nil(t, err, "Should return nil for correctly parsed files")
 	assert.Equal(t, 2, len(conf.Environments), "Should return two environments")
 	assert.Equal(t, "dev", conf.Environments[0].Name, "Should have correct name for environment")
@@ -38,14 +38,14 @@ func TestLoadConfigFromFileValidYAML(t *testing.T) {
 	assert.Nil(t, conf.Environments[0].Endpoints.Sandbox, "Should return nil for ignored fields on yaml")
 }
 
-func TestLoadConfigFromFileInvalidYAML(t *testing.T) {
-	conf, err := LoadConfigFromFile("testdata/.apim-vars-invalid.yml")
+func TestLoadApiParamsFromFileInvalidYAML(t *testing.T) {
+	conf, err := LoadApiParamsFromFile("testdata/api_params-invalid.yml")
 	assert.Error(t, err, "Should return an error for invalid yaml files")
 	assert.Nil(t, conf, "Should return nil when errors are returned")
 }
 
-func TestLoadConfigFromFileWithoutEnv(t *testing.T) {
-	conf, err := LoadConfigFromFile("testdata/.apim-vars-env.yml")
+func TestLoadApiParamsFromFileWithoutEnv(t *testing.T) {
+	conf, err := LoadApiParamsFromFile("testdata/api_params-env.yml")
 	assert.Error(t, err, "Should return error when environment variables not present")
 	assert.Nil(t, conf, "Conf should be nil")
 }
@@ -53,7 +53,7 @@ func TestLoadConfigFromFileWithoutEnv(t *testing.T) {
 func TestLoadConfigWithEnv(t *testing.T) {
 	_ = os.Setenv("FOO_DEV_RETRY", "10")
 	_ = os.Setenv("FOO_SANDBOX", "http://127.0.0.1")
-	conf, err := LoadConfigFromFile("testdata/.apim-vars-env.yml")
+	conf, err := LoadApiParamsFromFile("testdata/api_params-env.yml")
 	assert.Nil(t, err, "Should return empty error on correct reading")
 	assert.Equal(t, 10, *conf.Environments[0].Endpoints.Production.Config.RetryTimeOut)
 	assert.Equal(t, "http://127.0.0.1", *conf.Environments[1].Endpoints.Sandbox.Url)
@@ -79,7 +79,7 @@ func TestMergeAPIConfig(t *testing.T) {
 	assert.Nil(t, err, "Error should be nil for correct json loading")
 	endpointData, err := ExtractAPIEndpointConfig(apiData)
 	assert.Nil(t, err, "Error should be nil for correct json extraction")
-	configData, err := LoadConfigFromFile("testdata/.apim-vars.yml")
+	configData, err := LoadApiParamsFromFile("testdata/api_params.yml")
 	assert.Nil(t, err, "Error should be nil for correct yaml loading")
 	config, err := json.Marshal(configData.Environments[0].Endpoints)
 
@@ -99,7 +99,7 @@ func TestMergeAPIConfig(t *testing.T) {
 }
 
 func TestAPIConfig_ContainsEnv(t *testing.T) {
-	configData, err := LoadConfigFromFile("testdata/.apim-vars.yml")
+	configData, err := LoadApiParamsFromFile("testdata/api_params.yml")
 	assert.Nil(t, err, "Error should be nil for correct yaml loading")
 
 	assert.NotNil(t, configData.GetEnv("dev"), "Should contain correct environment")

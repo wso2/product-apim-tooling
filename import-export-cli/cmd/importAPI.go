@@ -25,9 +25,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/Jeffail/gabs"
-	"github.com/spf13/cobra"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -39,6 +36,10 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Jeffail/gabs"
+	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 var importAPIFile string
@@ -51,31 +52,20 @@ var importAPIConfigFile string
 var importAPIInject bool
 
 // ImportAPI command related usage info
+const DefaultAPIMParamsFileName = "api_params.yaml"
 const importAPICmdLiteral = "import-api"
 const importAPICmdShortDesc = "Import API"
-
-const DefaultAPIMConfigFileName = ".apim-vars.yml"
-const APIMENV = "APIMENV"
-
-type ApiInfo struct {
-	ID IdInfo `json:"id"`
-}
-
-type IdInfo struct {
-	Name     string `json:"apiName"`
-	Version  string `json:"version"`
-	Provider string `json:"providerName"`
-}
-
 const importAPICmdLongDesc = "Import an API to an environment"
 
 const importAPICmdExamples = utils.ProjectName + ` ` + importAPICmdLiteral + ` -f qa/TwitterAPI.zip -e dev
-` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f staging/FacebookAPI.zip -e production -u admin -p admin`
+` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f staging/FacebookAPI.zip -e production -u admin -p admin
+` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f ~/myapi -e production -u admin -p admin --update
+` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f ~/myapi -e production -u admin -p admin --update --inject`
 
 // ImportAPICmd represents the importAPI command
 var ImportAPICmd = &cobra.Command{
-	Use: importAPICmdLiteral + " (--file <api-zip-file> --environment " +
-		"<environment-to-which-the-api-should-be-imported>)",
+	Use: importAPICmdLiteral + " --file <Path to API> --environment " +
+		"<Environment to be imported>",
 	Short:   importAPICmdShortDesc,
 	Long:    importAPICmdLongDesc,
 	Example: importAPICmdExamples,
@@ -86,6 +76,7 @@ var ImportAPICmd = &cobra.Command{
 	},
 }
 
+// executeImportAPICmd executes the import api command
 func executeImportAPICmd(mainConfigFilePath, envKeysAllFilePath, exportDirectory string) {
 	b64encodedCredentials, preCommandErr :=
 		utils.ExecutePreCommandWithBasicAuth(importEnvironment, importAPICmdUsername, importAPICmdPassword,
@@ -105,8 +96,19 @@ func executeImportAPICmd(mainConfigFilePath, envKeysAllFilePath, exportDirectory
 	}
 }
 
-// getAPIInfo scans filePath and returns API or an error
-func getAPIInfo(filePath string) (*ApiInfo, error) {
+// extractAPIDefinition extracts API information from jsonContent
+func extractAPIDefinition(jsonContent []byte) (*APIDefinition, error) {
+	api := &APIDefinition{}
+	err := json.Unmarshal(jsonContent, &api)
+	if err != nil {
+		return nil, err
+	}
+
+	return api, nil
+}
+
+// getAPIDefinition scans filePath and returns APIDefinition or an error
+func getAPIDefinition(filePath string) (*APIDefinition, error) {
 	info, err := os.Stat(filePath)
 	if err != nil {
 		return nil, err
@@ -115,7 +117,6 @@ func getAPIInfo(filePath string) (*ApiInfo, error) {
 	var buffer []byte
 	if info.IsDir() {
 		filePath = path.Join(filePath, "Meta-information", "api.json")
-		fmt.Println(filePath)
 		if _, err := os.Stat(filePath); os.IsNotExist(err) {
 			return nil, err
 		}
@@ -153,276 +154,186 @@ func getAPIInfo(filePath string) (*ApiInfo, error) {
 		}
 	}
 
-	api, err := extractAPIInfo(buffer)
+	api, err := extractAPIDefinition(buffer)
 	if err != nil {
 		return nil, err
 	}
-
 	return api, nil
 }
 
-// extractAPIInfo extracts API information from jsonContent
-func extractAPIInfo(jsonContent []byte) (*ApiInfo, error) {
-	api := &ApiInfo{}
-	err := json.Unmarshal(jsonContent, &api)
-	if err != nil {
-		return nil, err
-	}
-
-	return api, nil
-}
-
-// mergeAPI merge API in filepath(this points to a directory extracted by tool) with configuration given in configPath
-// it returns the directory containing merged files
-func mergeAPI(apiFilePath string, endpointConfig *utils.Environment) (string, error) {
-	// copy apiFilePath to a temp location for variable injection
-	tmpDir, err := ioutil.TempDir("", "apim")
-	if err != nil {
-		return "", err
-	}
-
-	// copy contents to a directory which contains base name of original
-	newPath := path.Join(tmpDir, path.Base(apiFilePath))
-	err = utils.CopyDir(apiFilePath, newPath)
-	if err != nil {
-		return "", err
-	}
-
+// mergeAPI merges environmentParams to the API given in apiDirectory
+// for now only Endpoints are merged
+func mergeAPI(apiDirectory string, environmentParams *utils.Environment) error {
 	// read api from Meta-information
-	apiPath := path.Join(newPath, "Meta-information", "api.json")
-	utils.Logln("Reading API definition from: ", apiPath)
+	apiPath := path.Join(apiDirectory, "Meta-information", "api.json")
+	utils.Logln(utils.LogPrefixInfo+"Reading API definition from: ", apiPath)
 	api, err := gabs.ParseJSONFile(apiPath)
 	if err != nil {
-		return "", err
+		return err
 	}
-	// extract endpointConfig from file
+	// extract environmentParams from file
 	apiEndpointData, err := utils.ExtractAPIEndpointConfig(api.Bytes())
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	configData, err := json.Marshal(endpointConfig.Endpoints)
+	configData, err := json.Marshal(environmentParams.Endpoints)
 	if err != nil {
-		return "", err
+		return err
 	}
-	mergedADIEndpoints, err := utils.MergeJSON([]byte(apiEndpointData), configData)
+	mergedAPIEndpoints, err := utils.MergeJSON([]byte(apiEndpointData), configData)
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	utils.Logln("Writing merged API to:", apiPath)
+	utils.Logln(utils.LogPrefixInfo+"Writing merged API to:", apiPath)
 	// replace original endpointConfig with merged version
-	_, err = api.SetP(string(mergedADIEndpoints), "endpointConfig")
+	_, err = api.SetP(string(mergedAPIEndpoints), "endpointConfig")
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	// write this to disk
 	err = ioutil.WriteFile(apiPath, api.Bytes(), 0644)
 	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// resolveImportFilePath resolves the archive/directory for import
+// First will resolve in given path, if not found will try to load from exported directory
+func resolveImportFilePath(file, defaultExportDirectory string) (string, error) {
+	// check current path
+	utils.Logln(utils.LogPrefixInfo + "Resolving for API path...")
+	if _, err := os.Stat(file); os.IsNotExist(err) {
+		// if the file not in given path it might be inside exported directory
+		utils.Logln(utils.LogPrefixInfo+"Looking for API in", defaultExportDirectory)
+		file = filepath.Join(defaultExportDirectory, file)
+		if _, err := os.Stat(file); os.IsNotExist(err) {
+			return "", err
+		}
+	}
+	absPath, err := filepath.Abs(file)
+	if err != nil {
 		return "", err
 	}
 
-	return newPath, nil
+	return absPath, nil
 }
 
-// ImportAPI function is used with import-api command
-// @param name: name of the API (zipped file) to be imported
-// @param apiManagerEndpoint: API Manager endpoint for the environment
-// @param accessToken: OAuth2.0 access token for the resource being accessed
-func ImportAPI(importPath, apiImportExportEndpoint, accessToken, exportDirectory, configPath string) error {
-	apiStatus := ""
-	apiID := ""
-	updateAPI := false
-	apiImportExportEndpoint = utils.AppendSlashToString(apiImportExportEndpoint)
-
-	// fileName can be a environment related path like dev/PizzaShackAPI.zip
-	fileName := importPath
-	zipFilePath := fileName
-
-	// Check whether the given path is a directory
-	// If it is a directory, archive it
-	if info, err := os.Stat(fileName); err == nil && info.IsDir() {
-		// Get base name of the file
-		fileBase := filepath.Base(fileName)
-		fmt.Println(fileBase + " is a directory")
-
-		if importAPIInject {
-			utils.Logln("Looking up for " + configPath)
-			if info, err := os.Stat(configPath); err == nil && info.IsDir() {
-				// Need to check whether given file is a directory
-				return errors.New(configPath + "is a directory")
-			} else if os.IsNotExist(err) && configPath != DefaultAPIMConfigFileName {
-				// config file is not mandatory. But if the given config file is not the default one need to check for
-				// existence and return error if not found
-				return err
-			}
-
-			utils.Logln(configPath + " found")
-			utils.Logln("Scanning...")
-			// load configuration from yml file
-			apiConfig, err := utils.LoadConfigFromFile(configPath)
-			if err != nil {
-				return err
-			}
-
-			// check whether import environment is included in api configuration
-			endpointConfig := apiConfig.GetEnv(importEnvironment)
-			if endpointConfig == nil {
-				return fmt.Errorf("%s does not exists in configuration file", importEnvironment)
-			}
-
-			utils.Logln("Merging...")
-			mergedAPIDir, err := mergeAPI(fileName, endpointConfig)
-			if err != nil {
-				return err
-			}
-
-			// delete the temp directory on return
-			defer func() {
-				utils.Logln("Deleting:", mergedAPIDir)
-				err := os.RemoveAll(mergedAPIDir)
-				if err != nil {
-					utils.HandleErrorAndExit("Error deleting directory:", err)
-				}
-			}()
-
-			// check whether API status is defined
-			if endpointConfig.Status != "" {
-				apiStatus = endpointConfig.Status
-			}
-			fileName = mergedAPIDir
-		}
-
-		fmt.Println("Creating an archive from the directory...")
-		// create a temp file in OS temp directory
-		tmpZip, err := ioutil.TempFile("", fileBase+"*.zip")
-		if err != nil {
-			return err
-		}
-		// delete the temp zip file on return
-		defer func() {
-			utils.Logln("Deleting:", tmpZip.Name())
-			err := os.Remove(tmpZip.Name())
-			if err != nil {
-				utils.HandleErrorAndExit("Error deleting file:", err)
-			}
-		}()
-
-		// zip the given directory
-		absFilePath, err := filepath.Abs(fileName)
-		if err != nil {
-			return err
-		}
-		utils.Logln("Zipping: ", absFilePath)
-		err = utils.Zip(absFilePath, tmpZip.Name())
-		if err != nil {
-			return err
-		}
-		// change our zip file path to new archive
-		zipFilePath = tmpZip.Name()
-	}
-
-	// Test if we can find the zip file in the current work directory
-	if _, err := os.Stat(fileName); os.IsNotExist(err) {
-		// Doesn't exist... Check if available in the default exportDirectory
-		zipFilePath = filepath.Join(exportDirectory, fileName)
-		if _, err := os.Stat(zipFilePath); os.IsNotExist(err) {
-			return err
-		}
-	}
-	utils.Logln("Archive path:", zipFilePath)
-
-	accessOAuthToken, err :=
-		utils.ExecutePreCommandWithOAuth(importEnvironment, importAPICmdUsername, importAPICmdPassword,
-			utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
+// extractArchive extracts the API and give the path.
+// In API Manager archive there is a directory in the root which contains the API
+// this function returns it appended to the destination path
+func extractArchive(src, dest string) (string, error) {
+	files, err := utils.Unzip(src, dest)
 	if err != nil {
-		return err
+		return "", err
 	}
-
-	// Get API info
-	apiInfo, err := getAPIInfo(zipFilePath)
-	if err != nil {
-		return err
+	if len(files) == 0 {
+		return "", fmt.Errorf("invalid API archive")
 	}
-	if importAPIUpdate {
-		utils.Logln("Reading API meta data from: ", zipFilePath)
+	r := strings.TrimPrefix(files[0], src)
+	return filepath.Join(dest, strings.Split(path.Clean(r), string(os.PathSeparator))[0]), nil
+}
 
-		if apiInfo.ID.Name == "" || apiInfo.ID.Provider == "" || apiInfo.ID.Version == "" {
-			utils.Logln(utils.LogPrefixInfo, "API: ", apiInfo)
-			return errors.New("invalid api information")
+// resolveAPIParamsPath resolves api_params.yaml path
+// First it will look at BasePath f the import path (the last directory)
+// If not found it will look at current working directory
+// If a path is provided search ends looking up at that path
+func resolveAPIParamsPath(importPath, paramPath string) (string, error) {
+	utils.Logln(utils.LogPrefixInfo + "Scanning for " + DefaultAPIMParamsFileName)
+	if paramPath == DefaultAPIMParamsFileName {
+		// look in the basepath of importPath
+		base := filepath.Dir(importPath)
+		utils.Logln(utils.LogPrefixInfo+"Scanning in", base)
+		fp := filepath.Join(base, DefaultAPIMParamsFileName)
+		if info, err := os.Stat(fp); err == nil && !info.IsDir() {
+			// found api_params.yml in the basepath
+			return fp, nil
 		}
 
-		// check for API existence
-		id, err := getApiID(apiInfo.ID.Name, apiInfo.ID.Version, apiInfo.ID.Provider, importEnvironment, accessOAuthToken)
+		// look in the current working directory
+		wd, err := os.Getwd()
 		if err != nil {
-			return err
+			return "", err
+		}
+		utils.Logln(utils.LogPrefixInfo+"Scanning in", wd)
+		fp = filepath.Join(wd, DefaultAPIMParamsFileName)
+		if info, err := os.Stat(fp); err == nil && !info.IsDir() {
+			// found api_params.yml in the cwd
+			return fp, nil
 		}
 
-		if id == "" {
-			fmt.Println("The specified API was not found.")
-			fmt.Printf("Creating: %s %s\n", apiInfo.ID.Name, apiInfo.ID.Version)
-		} else {
-			fmt.Println("Existing API found, attempting to update it...")
-			utils.Logln("API ID:", id)
-			apiID = id
-			updateAPI = true
-		}
-	}
-
-	extraParams := map[string]string{}
-	// TODO:: Add extraParams as necessary
-
-	httpMethod := ""
-	if updateAPI {
-		httpMethod = http.MethodPut
-		apiImportExportEndpoint += apiID
+		// no luck, it means paramPath is missing
+		return "", fmt.Errorf("could not find %s. Please check %s exists in basepath of "+
+			"import location or current working directory", DefaultAPIMParamsFileName, DefaultAPIMParamsFileName)
 	} else {
-		httpMethod = http.MethodPost
-		apiImportExportEndpoint += "import-api"
+		if info, err := os.Stat(paramPath); err == nil && !info.IsDir() {
+			return paramPath, nil
+		}
+		return "", fmt.Errorf("could not find %s", paramPath)
 	}
+}
 
-	apiImportExportEndpoint += "?preserveProvider=" +
-		strconv.FormatBool(importAPICmdPreserveProvider)
-	utils.Logln(utils.LogPrefixInfo + "Import URL: " + apiImportExportEndpoint)
-	err = importAPI(apiImportExportEndpoint, httpMethod, zipFilePath, accessToken, extraParams)
+// injectParamsToAPI injects ApiParams to API located in importPath using importEnvironment and returns the path to
+// injected API location
+func injectParamsToAPI(importPath, apiParamsPath, importEnvironment string) (string, error) {
+	var dirPath string
+	fileIsDir := false
+	file := importPath
+
+	paramsPath, err := resolveAPIParamsPath(file, apiParamsPath)
 	if err != nil {
-		return err
+		return "", err
+	}
+	utils.Logln(utils.LogPrefixInfo+"Loading parameters from", paramsPath)
+	apiParams, err := utils.LoadApiParamsFromFile(paramsPath)
+	if err != nil {
+		return "", err
+	}
+	// check whether import environment is included in api configuration
+	envParams := apiParams.GetEnv(importEnvironment)
+	if envParams == nil {
+		return "", fmt.Errorf("%s does not exists in %s", importEnvironment, paramsPath)
 	}
 
-	// check whether API state change is also required
-	if apiStatus != "" {
-		utils.Logln(utils.LogPrefixInfo + fmt.Sprintf("Attempting to set API status to '%s'", apiStatus))
-		// check whether we already have apiID, if not acquire it
-		if apiID == "" {
-			utils.Logln("Attempting to acquire api ID from API Manager")
-			// Get ID for the API
-			maxAttempts := 5
-			sleepTime := 2 * time.Second
-			for i := 0; i < maxAttempts; i++ {
-				utils.Logln(utils.LogPrefixInfo + "Attempt " + strconv.Itoa(i+1))
-				id, err := getApiID(apiInfo.ID.Name, apiInfo.ID.Version, apiInfo.ID.Provider, importEnvironment, accessOAuthToken)
-				if err != nil {
-					return err
-				}
-				if id != "" {
-					apiID = id
-					break
-				}
-				utils.Logln(utils.LogPrefixInfo+"Retrying in", sleepTime)
-				time.Sleep(sleepTime)
-			}
-		}
+	// create a temp directory
+	tmpDir, err := ioutil.TempDir("", "apim")
+	if err != nil {
+		_ = os.RemoveAll(tmpDir)
+		return "", err
+	}
 
-		utils.Logln("API ID:", apiID)
-		// change api status
-		err = changeAPIStatusByID(apiID, apiStatus, importEnvironment, accessOAuthToken)
+	if info, err := os.Stat(file); err == nil {
+		fileIsDir = info.IsDir()
+	} else {
+		return "", err
+	}
+	if fileIsDir {
+		// copy dir to a temp location
+		utils.Logln(utils.LogPrefixInfo+"Copying from", file, "to", tmpDir)
+		dest := path.Join(tmpDir, filepath.Base(file))
+		err = utils.CopyDir(file, dest)
 		if err != nil {
-			return err
+			return "", err
 		}
-		fmt.Printf("Successfully set API status to '%s'\n", apiStatus)
+		dirPath = dest
+	} else {
+		// try to extract archive
+		utils.Logln(utils.LogPrefixInfo+"Extracting", file, "to", tmpDir)
+		finalPath, err := extractArchive(file, tmpDir)
+		if err != nil {
+			return "", err
+		}
+		dirPath = finalPath
 	}
-	return nil
+
+	err = mergeAPI(dirPath, envParams)
+	if err != nil {
+		return "", err
+	}
+	return dirPath, nil
 }
 
 // getApiID returns id of the API by using apiInfo which contains name, version and provider as info
@@ -440,6 +351,66 @@ func getApiID(name, version, provider, environment, accessOAuthToken string) (st
 		return "", nil
 	}
 	return apis[0].ID, nil
+}
+
+// validateApiDefinition validates an API against rules
+func validateApiDefinition(def *APIDefinition) error {
+	utils.Logln(utils.LogPrefixInfo + "Validating API")
+	if def.ID.APIName == "" {
+		return errors.New("apiName is required")
+	}
+	if def.ID.Version == "" {
+		return errors.New("version is required")
+	}
+	if def.Context == "" {
+		return errors.New("context is required")
+	}
+	if def.ContextTemplate == "" {
+		return errors.New("contextTemplate is required")
+	}
+	if !strings.HasPrefix(def.Context, "/") {
+		return errors.New("context should begin with a /")
+	}
+	if !strings.HasPrefix(def.ContextTemplate, "/") {
+		return errors.New("contextTemplate should begin with a /")
+	}
+	return nil
+}
+
+// NewFileUploadRequest forms an HTTP request
+// Helper function for forming multi-part form data
+// Returns the formed http request and errors
+func NewFileUploadRequest(uri string, method string, params map[string]string, paramName, path,
+	b64encodedCredentials string) (*http.Request, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, err := writer.CreateFormFile(paramName, filepath.Base(path))
+	if err != nil {
+		return nil, err
+	}
+	_, err = io.Copy(part, file)
+
+	for key, val := range params {
+		_ = writer.WriteField(key, val)
+	}
+	err = writer.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	request, err := http.NewRequest(method, uri, body)
+	request.Header.Add(utils.HeaderAuthorization, utils.HeaderValueAuthBasicPrefix+" "+b64encodedCredentials)
+	request.Header.Add(utils.HeaderContentType, writer.FormDataContentType())
+	request.Header.Add(utils.HeaderAccept, "*/*")
+	request.Header.Add(utils.HeaderConnection, utils.HeaderValueKeepAlive)
+
+	return request, err
 }
 
 // importAPI imports an API to the API manager
@@ -494,40 +465,106 @@ func importAPI(endpoint, httpMethod, filePath, accessToken string, extraParams m
 	}
 }
 
-// NewFileUploadRequest forms an HTTP request
-// Helper function for forming multi-part form data
-// Returns the formed http request and errors
-func NewFileUploadRequest(uri string, method string, params map[string]string, paramName, path,
-	b64encodedCredentials string) (*http.Request, error) {
-	file, err := os.Open(path)
+// ImportAPI function is used with import-api command
+// @param name: name of the API (zipped file) to be imported
+// @param apiManagerEndpoint: API Manager endpoint for the environment
+// @param accessToken: OAuth2.0 access token for the resource being accessed
+func ImportAPI(importPath, apiImportExportEndpoint, accessToken, exportDirectory, apiParamsPath string) error {
+	apiFilePath, err := resolveImportFilePath(importPath, exportDirectory)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	defer file.Close()
+	utils.Logln(utils.LogPrefixInfo+"API Location:", apiFilePath)
 
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	part, err := writer.CreateFormFile(paramName, filepath.Base(path))
+	// inject if required
+	if importAPIInject {
+		utils.Logln(utils.LogPrefixInfo + "Injecting parameters to the API")
+		injectedPath, err := injectParamsToAPI(importPath, apiParamsPath, importEnvironment)
+		if err != nil {
+			return err
+		}
+		defer func() {
+			utils.Logln(utils.LogPrefixInfo+"Deleting", injectedPath)
+			err := os.RemoveAll(injectedPath)
+			if err != nil {
+				utils.Logln(utils.LogPrefixError + err.Error())
+			}
+		}()
+		apiFilePath = injectedPath
+	}
+
+	// Get API info
+	apiInfo, err := getAPIDefinition(apiFilePath)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	_, err = io.Copy(part, file)
-
-	for key, val := range params {
-		_ = writer.WriteField(key, val)
-	}
-	err = writer.Close()
-	if err != nil {
-		return nil, err
+	// validate definition
+	if err = validateApiDefinition(apiInfo); err != nil {
+		return err
 	}
 
-	request, err := http.NewRequest(method, uri, body)
-	request.Header.Add(utils.HeaderAuthorization, utils.HeaderValueAuthBasicPrefix+" "+b64encodedCredentials)
-	request.Header.Add(utils.HeaderContentType, writer.FormDataContentType())
-	request.Header.Add(utils.HeaderAccept, "*/*")
-	request.Header.Add(utils.HeaderConnection, utils.HeaderValueKeepAlive)
+	// if apiFilePath contains a directory, zip it
+	if info, err := os.Stat(apiFilePath); err == nil && info.IsDir() {
+		tmp, err := ioutil.TempFile("", "api-artifact*.zip")
+		if err != nil {
+			return err
+		}
+		utils.Logln(utils.LogPrefixInfo+"Creating API artifact", tmp.Name())
+		err = utils.Zip(apiFilePath, tmp.Name())
+		if err != nil {
+			return err
+		}
+		defer func() {
+			utils.Logln(utils.LogPrefixInfo+"Deleting", tmp.Name())
+			err := os.Remove(tmp.Name())
+			if err != nil {
+				utils.Logln(utils.LogPrefixError + err.Error())
+			}
+		}()
+		apiFilePath = tmp.Name()
+	}
 
-	return request, err
+	apiID := ""
+	updateAPI := false
+	if importAPIUpdate {
+		accessOAuthToken, err :=
+			utils.ExecutePreCommandWithOAuth(importEnvironment, importAPICmdUsername, importAPICmdPassword,
+				utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
+		if err != nil {
+			return err
+		}
+
+		// check for API existence
+		id, err := getApiID(apiInfo.ID.APIName, apiInfo.ID.Version, apiInfo.ID.ProviderName, importEnvironment, accessOAuthToken)
+		if err != nil {
+			return err
+		}
+
+		if id == "" {
+			fmt.Println("The specified API was not found.")
+			fmt.Printf("Creating: %s %s\n", apiInfo.ID.APIName, apiInfo.ID.Version)
+		} else {
+			fmt.Println("Existing API found, attempting to update it...")
+			utils.Logln("API ID:", id)
+			apiID = id
+			updateAPI = true
+		}
+	}
+
+	extraParams := map[string]string{}
+	httpMethod := ""
+	if updateAPI {
+		httpMethod = http.MethodPut
+		apiImportExportEndpoint += "/" + apiID
+	} else {
+		httpMethod = http.MethodPost
+		apiImportExportEndpoint += "/import-api"
+	}
+	apiImportExportEndpoint += "?preserveProvider=" +
+		strconv.FormatBool(importAPICmdPreserveProvider)
+	utils.Logln(utils.LogPrefixInfo + "Import URL: " + apiImportExportEndpoint)
+	err = importAPI(apiImportExportEndpoint, httpMethod, apiFilePath, accessToken, extraParams)
+	return err
 }
 
 // init using Cobra
@@ -536,16 +573,18 @@ func init() {
 	ImportAPICmd.Flags().StringVarP(&importAPIFile, "file", "f", "",
 		"Name of the API to be imported")
 	ImportAPICmd.Flags().StringVarP(&importEnvironment, "environment", "e",
-		utils.DefaultEnvironmentName, "Environment from the which the API should be imported")
+		"", "Environment from the which the API should be imported")
 	ImportAPICmd.Flags().StringVarP(&importAPICmdUsername, "username", "u", "", "Username")
 	ImportAPICmd.Flags().StringVarP(&importAPICmdPassword, "password", "p", "", "Password")
 	ImportAPICmd.Flags().BoolVar(&importAPICmdPreserveProvider, "preserve-provider", true,
 		"Preserve existing provider of API after exporting")
 	ImportAPICmd.Flags().BoolVarP(&importAPIUpdate, "update", "", false, "Update API "+
 		"if exists. Otherwise it will create API")
-	// TODO: finalize a good name for file
-	ImportAPICmd.Flags().StringVarP(&importAPIConfigFile, "config", "", DefaultAPIMConfigFileName,
-		"Provide a API Manager configuration file.")
+	ImportAPICmd.Flags().StringVarP(&importAPIConfigFile, "params", "", DefaultAPIMParamsFileName,
+		"Provide a API Manager params file")
 	ImportAPICmd.Flags().BoolVarP(&importAPIInject, "inject", "", false, "Inject variables defined"+
-		"in config file to the given API.")
+		"in params file to the given API.")
+	// Mark required flags
+	_ = ImportAPICmd.MarkFlagRequired("environment")
+	_ = ImportAPICmd.MarkFlagRequired("file")
 }

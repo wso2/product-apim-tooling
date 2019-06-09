@@ -47,23 +47,21 @@ type Endpoint struct {
 // EndpointData contains details about endpoints
 type EndpointData struct {
 	// Production endpoint
-	Production *Endpoint `yaml:"production" json:"production_endpoints"`
+	Production *Endpoint `yaml:"production" json:"production_endpoints,omitempty"`
 	// Sandbox endpoint
-	Sandbox *Endpoint `yaml:"sandbox" json:"sandbox_endpoints"`
+	Sandbox *Endpoint `yaml:"sandbox" json:"sandbox_endpoints,omitempty"`
 }
 
 // Environment represents an api environment
 type Environment struct {
 	// Name of the environment
 	Name string `yaml:"name"`
-	// Status of the API
-	Status string `yaml:"status"`
 	// Endpoints contain details about endpoints in a configuration
 	Endpoints *EndpointData `yaml:"endpoints"`
 }
 
-// APIConfig represents environments defined in configuration file
-type APIConfig struct {
+// ApiParams represents environments defined in configuration file
+type ApiParams struct {
 	// Environments contains all environments in a configuration
 	Environments []Environment `yaml:"environments"`
 }
@@ -74,14 +72,14 @@ type APIEndpointConfig struct {
 	EPConfig string `json:"endpointConfig"`
 }
 
-// injectEnv injects variables from environment to the content. It uses regex to match variables and look up them in the
+// InjectEnv injects variables from environment to the content. It uses regex to match variables and look up them in the
 // environment before processing.
 // returns an error if anything happen
-func injectEnv(content string) (string, error) {
+func InjectEnv(content string) (string, error) {
 	matches := re.FindAllStringSubmatch(content, -1) // matches is [][]string
 
 	for _, match := range matches {
-		Logln("Looking for: ", match[0])
+		Logln("Looking for:", match[0])
 		if os.Getenv(match[1]) == "" {
 			return "", &ErrRequiredEnvKeyMissing{Key: match[0]}
 		}
@@ -91,34 +89,34 @@ func injectEnv(content string) (string, error) {
 	return expanded, nil
 }
 
-// LoadConfig loads an configuration from a reader. It returns an error or a valid APIConfig
-func LoadConfig(r io.Reader) (*APIConfig, error) {
+// LoadApiParams loads an configuration from a reader. It returns an error or a valid ApiParams
+func LoadApiParams(r io.Reader) (*ApiParams, error) {
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}
 
-	str, err := injectEnv(string(data))
+	str, err := InjectEnv(string(data))
 	if err != nil {
 		return nil, err
 	}
 
-	config := &APIConfig{}
-	err = yaml.Unmarshal([]byte(str), &config)
+	apiParams := &ApiParams{}
+	err = yaml.Unmarshal([]byte(str), &apiParams)
 	if err != nil {
 		return nil, err
 	}
 
-	return config, nil
+	return apiParams, nil
 }
 
-// LoadConfigFromFile loads a configuration YAML file located in path. It returns an error or a valid APIConfig
-func LoadConfigFromFile(path string) (*APIConfig, error) {
+// LoadApiParamsFromFile loads a configuration YAML file located in path. It returns an error or a valid ApiParams
+func LoadApiParamsFromFile(path string) (*ApiParams, error) {
 	r, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
-	apiConfig, err := LoadConfig(r)
+	apiConfig, err := LoadApiParams(r)
 	_ = r.Close()
 
 	return apiConfig, err
@@ -169,14 +167,17 @@ func MergeJSON(firstSource, secondSource []byte) ([]byte, error) {
 		if source == nil {
 			return destination
 		}
+		if s, ok := source.(string); ok && s == "" {
+			return destination
+		}
 		return source
 	})
 
 	return firstSourceJSON.Bytes(), nil
 }
 
-// GetEnv returns the EndpointData associated for key in the APIConfig, if not found returns nil
-func (config APIConfig) GetEnv(key string) *Environment {
+// GetEnv returns the EndpointData associated for key in the ApiParams, if not found returns nil
+func (config ApiParams) GetEnv(key string) *Environment {
 	for index, env := range config.Environments {
 		if env.Name == key {
 			return &config.Environments[index]
