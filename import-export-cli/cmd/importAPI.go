@@ -246,7 +246,6 @@ func extractArchive(src, dest string) (string, error) {
 		return "", fmt.Errorf("invalid API archive")
 	}
 	r := strings.TrimPrefix(files[0], src)
-	fmt.Println(files[0], src)
 	return filepath.Join(dest, strings.Split(path.Clean(r), string(os.PathSeparator))[0]), nil
 }
 
