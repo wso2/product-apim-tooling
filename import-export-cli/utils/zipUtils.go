@@ -75,7 +75,7 @@ func Zip(source, target string) error {
 			// add a file to zip archive using deflate algorithm
 			header.Method = zip.Deflate
 		}
-		Logln("Creating:", header.Name)
+		Logln(LogPrefixInfo+ "Creating:", header.Name)
 
 		// Create an archive writer
 		writer, err := archive.CreateHeader(header)

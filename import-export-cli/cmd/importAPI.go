@@ -178,7 +178,7 @@ func getAPIDefinition(filePath string) (*APIDefinition, error) {
 func mergeAPI(apiDirectory string, environmentParams *utils.Environment) error {
 	// read api from Meta-information
 	apiPath := path.Join(apiDirectory, "Meta-information", "api.json")
-	utils.Logln("Reading API definition from: ", apiPath)
+	utils.Logln(utils.LogPrefixInfo+"Reading API definition from: ", apiPath)
 	api, err := gabs.ParseJSONFile(apiPath)
 	if err != nil {
 		return err
@@ -198,7 +198,7 @@ func mergeAPI(apiDirectory string, environmentParams *utils.Environment) error {
 		return err
 	}
 
-	utils.Logln("Writing merged API to:", apiPath)
+	utils.Logln(utils.LogPrefixInfo+"Writing merged API to:", apiPath)
 	// replace original endpointConfig with merged version
 	_, err = api.SetP(string(mergedAPIEndpoints), "endpointConfig")
 	if err != nil {
@@ -246,7 +246,6 @@ func extractArchive(src, dest string) (string, error) {
 		return "", fmt.Errorf("invalid API archive")
 	}
 	r := strings.TrimPrefix(files[0], src)
-	fmt.Println(files[0], src)
 	return filepath.Join(dest, strings.Split(path.Clean(r), string(os.PathSeparator))[0]), nil
 }
 
