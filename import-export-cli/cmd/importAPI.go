@@ -52,21 +52,9 @@ var importAPIConfigFile string
 var importAPIInject bool
 
 // ImportAPI command related usage info
+const DefaultAPIMParamsFileName = "api_params.yaml"
 const importAPICmdLiteral = "import-api"
 const importAPICmdShortDesc = "Import API"
-
-const DefaultAPIMParamsFileName = "api_params.yaml"
-
-type ApiInfo struct {
-	ID IdInfo `json:"id"`
-}
-
-type IdInfo struct {
-	Name     string `json:"apiName"`
-	Version  string `json:"version"`
-	Provider string `json:"providerName"`
-}
-
 const importAPICmdLongDesc = "Import an API to an environment"
 
 const importAPICmdExamples = utils.ProjectName + ` ` + importAPICmdLiteral + ` -f qa/TwitterAPI.zip -e dev
