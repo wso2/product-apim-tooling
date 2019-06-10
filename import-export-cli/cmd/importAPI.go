@@ -33,6 +33,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -50,6 +51,8 @@ var importAPICmdPreserveProvider bool
 var importAPIUpdate bool
 var importAPIConfigFile string
 var importAPIInject bool
+
+var reApiName = regexp.MustCompile(`[~!@#;:%^*()+={}|\\<>"',&\/$]`)
 
 // ImportAPI command related usage info
 const DefaultAPIMParamsFileName = "api_params.yaml"
@@ -244,10 +247,20 @@ func extractArchive(src, dest string) (string, error) {
 func resolveAPIParamsPath(importPath, paramPath string) (string, error) {
 	utils.Logln(utils.LogPrefixInfo + "Scanning for " + DefaultAPIMParamsFileName)
 	if paramPath == DefaultAPIMParamsFileName {
+		// look in importpath
+		if stat, err := os.Stat(importPath); err == nil && stat.IsDir() {
+			loc := filepath.Join(importPath, DefaultAPIMParamsFileName)
+			utils.Logln(utils.LogPrefixInfo+"Scanning for", loc)
+			if info, err := os.Stat(loc); err == nil && !info.IsDir() {
+				// found api_params.yml in the importpath
+				return loc, nil
+			}
+		}
+
 		// look in the basepath of importPath
 		base := filepath.Dir(importPath)
-		utils.Logln(utils.LogPrefixInfo+"Scanning in", base)
 		fp := filepath.Join(base, DefaultAPIMParamsFileName)
+		utils.Logln(utils.LogPrefixInfo+"Scanning for", fp)
 		if info, err := os.Stat(fp); err == nil && !info.IsDir() {
 			// found api_params.yml in the basepath
 			return fp, nil
@@ -258,7 +271,7 @@ func resolveAPIParamsPath(importPath, paramPath string) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		utils.Logln(utils.LogPrefixInfo+"Scanning in", wd)
+		utils.Logln(utils.LogPrefixInfo+"Scanning for", wd)
 		fp = filepath.Join(wd, DefaultAPIMParamsFileName)
 		if info, err := os.Stat(fp); err == nil && !info.IsDir() {
 			// found api_params.yml in the cwd
@@ -353,19 +366,28 @@ func getApiID(name, version, provider, environment, accessOAuthToken string) (st
 	return apis[0].ID, nil
 }
 
-// validateApiDefinition validates an API against rules
+// isEmpty returns true when a given string is empty
+func isEmpty(s string) bool {
+	return len(strings.TrimSpace(s)) == 0
+}
+
+// validateApiDefinition validates an API against basic rules
 func validateApiDefinition(def *APIDefinition) error {
 	utils.Logln(utils.LogPrefixInfo + "Validating API")
-	if def.ID.APIName == "" {
+	if isEmpty(def.ID.APIName) {
 		return errors.New("apiName is required")
 	}
-	if def.ID.Version == "" {
+	if reApiName.MatchString(def.ID.APIName) {
+		return errors.New(`apiName contains one or more illegal characters (~!@#;:%^*()+={}|\\<>"',&\/$)`)
+	}
+
+	if isEmpty(def.ID.Version) {
 		return errors.New("version is required")
 	}
-	if def.Context == "" {
+	if isEmpty(def.Context) {
 		return errors.New("context is required")
 	}
-	if def.ContextTemplate == "" {
+	if isEmpty(def.ContextTemplate) {
 		return errors.New("contextTemplate is required")
 	}
 	if !strings.HasPrefix(def.Context, "/") {
@@ -479,7 +501,7 @@ func ImportAPI(importPath, apiImportExportEndpoint, accessToken, exportDirectory
 	// inject if required
 	if importAPIInject {
 		utils.Logln(utils.LogPrefixInfo + "Injecting parameters to the API")
-		injectedPath, err := injectParamsToAPI(importPath, apiParamsPath, importEnvironment)
+		injectedPath, err := injectParamsToAPI(apiFilePath, apiParamsPath, importEnvironment)
 		if err != nil {
 			return err
 		}
