@@ -476,13 +476,9 @@ func ImportAPI(importPath, apiImportExportEndpoint, accessToken, exportDirectory
 	}
 	utils.Logln(utils.LogPrefixInfo+"API Location:", apiFilePath)
 
-	// inject if required
-	if importAPIInject {
-		utils.Logln(utils.LogPrefixInfo + "Injecting parameters to the API")
-		injectedPath, err := injectParamsToAPI(importPath, apiParamsPath, importEnvironment)
-		if err != nil {
-			return err
-		}
+	utils.Logln(utils.LogPrefixInfo + "Attempting to inject parameters to the API")
+	injectedPath, err := injectParamsToAPI(importPath, apiParamsPath, importEnvironment)
+	if err == nil {
 		defer func() {
 			utils.Logln(utils.LogPrefixInfo+"Deleting", injectedPath)
 			err := os.RemoveAll(injectedPath)
