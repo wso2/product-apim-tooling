@@ -50,7 +50,6 @@ var importAPICmdPassword string
 var importAPICmdPreserveProvider bool
 var importAPIUpdate bool
 var importAPIConfigFile string
-var importAPIInject bool
 
 var reApiName = regexp.MustCompile(`[~!@#;:%^*()+={}|\\<>"',&\/$]`)
 
@@ -119,13 +118,13 @@ func getAPIDefinition(filePath string) (*APIDefinition, error) {
 
 	var buffer []byte
 	if info.IsDir() {
-		filePath = path.Join(filePath, "Meta-information", "api.json")
+		apiFilePath := path.Join(filePath, "Meta-information", "api.json")
 		if _, err := os.Stat(filePath); os.IsNotExist(err) {
 			return nil, err
 		}
 
 		// read file
-		buffer, err = ioutil.ReadFile(filePath)
+		buffer, err = ioutil.ReadFile(apiFilePath)
 		if err != nil {
 			return nil, err
 		}
@@ -150,7 +149,6 @@ func getAPIDefinition(filePath string) (*APIDefinition, error) {
 					_ = rc.Close()
 					return nil, err
 				}
-
 				_ = rc.Close()
 				break
 			}
@@ -168,7 +166,7 @@ func getAPIDefinition(filePath string) (*APIDefinition, error) {
 // for now only Endpoints are merged
 func mergeAPI(apiDirectory string, environmentParams *utils.Environment) error {
 	// read api from Meta-information
-	apiPath := path.Join(apiDirectory, "Meta-information", "api.json")
+	apiPath := filepath.Join(apiDirectory, "Meta-information", "api.json")
 	utils.Logln(utils.LogPrefixInfo+"Reading API definition from: ", apiPath)
 	api, err := gabs.ParseJSONFile(apiPath)
 	if err != nil {
@@ -189,13 +187,14 @@ func mergeAPI(apiDirectory string, environmentParams *utils.Environment) error {
 		return err
 	}
 
-	utils.Logln(utils.LogPrefixInfo+"Writing merged API to:", apiPath)
+	utils.Logln(utils.LogPrefixInfo+"Merging API")
 	// replace original endpointConfig with merged version
 	_, err = api.SetP(string(mergedAPIEndpoints), "endpointConfig")
 	if err != nil {
 		return err
 	}
 
+	utils.Logln(utils.LogPrefixInfo+"Writing merged API to:", apiPath)
 	// write this to disk
 	err = ioutil.WriteFile(apiPath, api.Bytes(), 0644)
 	if err != nil {
@@ -245,7 +244,7 @@ func extractArchive(src, dest string) (string, error) {
 // If not found it will look at current working directory
 // If a path is provided search ends looking up at that path
 func resolveAPIParamsPath(importPath, paramPath string) (string, error) {
-	utils.Logln(utils.LogPrefixInfo + "Scanning for " + DefaultAPIMParamsFileName)
+	utils.Logln(utils.LogPrefixInfo + "Scanning for parameters file")
 	if paramPath == DefaultAPIMParamsFileName {
 		// look in importpath
 		if stat, err := os.Stat(importPath); err == nil && stat.IsDir() {
@@ -289,28 +288,8 @@ func resolveAPIParamsPath(importPath, paramPath string) (string, error) {
 	}
 }
 
-// injectParamsToAPI injects ApiParams to API located in importPath using importEnvironment and returns the path to
-// injected API location
-func injectParamsToAPI(importPath, apiParamsPath, importEnvironment string) (string, error) {
-	var dirPath string
+func getTempApiDirectory(file string) (string, error) {
 	fileIsDir := false
-	file := importPath
-
-	paramsPath, err := resolveAPIParamsPath(file, apiParamsPath)
-	if err != nil {
-		return "", err
-	}
-	utils.Logln(utils.LogPrefixInfo+"Loading parameters from", paramsPath)
-	apiParams, err := utils.LoadApiParamsFromFile(paramsPath)
-	if err != nil {
-		return "", err
-	}
-	// check whether import environment is included in api configuration
-	envParams := apiParams.GetEnv(importEnvironment)
-	if envParams == nil {
-		return "", fmt.Errorf("%s does not exists in %s", importEnvironment, paramsPath)
-	}
-
 	// create a temp directory
 	tmpDir, err := ioutil.TempDir("", "apim")
 	if err != nil {
@@ -331,7 +310,7 @@ func injectParamsToAPI(importPath, apiParamsPath, importEnvironment string) (str
 		if err != nil {
 			return "", err
 		}
-		dirPath = dest
+		return dest, nil
 	} else {
 		// try to extract archive
 		utils.Logln(utils.LogPrefixInfo+"Extracting", file, "to", tmpDir)
@@ -339,14 +318,29 @@ func injectParamsToAPI(importPath, apiParamsPath, importEnvironment string) (str
 		if err != nil {
 			return "", err
 		}
-		dirPath = finalPath
+		return finalPath, nil
+	}
+}
+
+// injectParamsToAPI injects ApiParams to API located in importPath using importEnvironment and returns the path to
+// injected API location
+func injectParamsToAPI(importPath, paramsPath, importEnvironment string) error {
+	utils.Logln(utils.LogPrefixInfo+"Loading parameters from", paramsPath)
+	apiParams, err := utils.LoadApiParamsFromFile(paramsPath)
+	if err != nil {
+		return err
+	}
+	// check whether import environment is included in api configuration
+	envParams := apiParams.GetEnv(importEnvironment)
+	if envParams == nil {
+		return fmt.Errorf("%s does not exists in %s", importEnvironment, paramsPath)
 	}
 
-	err = mergeAPI(dirPath, envParams)
+	err = mergeAPI(importPath, envParams)
 	if err != nil {
-		return "", err
+		return err
 	}
-	return dirPath, nil
+	return nil
 }
 
 // getApiID returns id of the API by using apiInfo which contains name, version and provider as info
@@ -369,6 +363,34 @@ func getApiID(name, version, provider, environment, accessOAuthToken string) (st
 // isEmpty returns true when a given string is empty
 func isEmpty(s string) bool {
 	return len(strings.TrimSpace(s)) == 0
+}
+
+func populateApiWithDefaults(def *APIDefinition) (dirty bool) {
+	dirty = false
+	if def.ContextTemplate == "" {
+		if !strings.Contains(def.Context, "{version}") {
+			def.ContextTemplate = path.Clean(def.Context + "/{version}")
+			def.Context = strings.ReplaceAll(def.ContextTemplate, "{version}", def.ID.Version)
+		} else {
+			def.Context = path.Clean(def.Context)
+			def.ContextTemplate = def.Context
+			def.Context = strings.ReplaceAll(def.Context, "{version}", def.ID.Version)
+		}
+		dirty = true
+	}
+	if def.Tags == nil {
+		def.Tags = []string{}
+		dirty = true
+	}
+	if def.URITemplates == nil {
+		def.URITemplates = []URITemplates{}
+		dirty = true
+	}
+	if def.Implementation == "" {
+		def.Implementation = "ENDPOINT"
+		dirty = true
+	}
+	return
 }
 
 // validateApiDefinition validates an API against basic rules
@@ -498,23 +520,52 @@ func ImportAPI(importPath, apiImportExportEndpoint, accessToken, exportDirectory
 	}
 	utils.Logln(utils.LogPrefixInfo+"API Location:", apiFilePath)
 
+	utils.Logln(utils.LogPrefixInfo+"Creating workspace")
+	tmpPath, err := getTempApiDirectory(apiFilePath)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		utils.Logln(utils.LogPrefixInfo+"Deleting", tmpPath)
+		err := os.RemoveAll(tmpPath)
+		if err != nil {
+			utils.Logln(utils.LogPrefixError + err.Error())
+		}
+	}()
+	apiFilePath = tmpPath
+
 	utils.Logln(utils.LogPrefixInfo + "Attempting to inject parameters to the API")
-	injectedPath, err := injectParamsToAPI(importPath, apiParamsPath, importEnvironment)
-	if err == nil {
-		defer func() {
-			utils.Logln(utils.LogPrefixInfo+"Deleting", injectedPath)
-			err := os.RemoveAll(injectedPath)
-			if err != nil {
-				utils.Logln(utils.LogPrefixError + err.Error())
-			}
-		}()
-		apiFilePath = injectedPath
+	paramsPath, err := resolveAPIParamsPath(importPath, apiParamsPath)
+	if err != nil && apiParamsPath != DefaultAPIMParamsFileName {
+		return err
+	}
+	if paramsPath != "" {
+		err := injectParamsToAPI(apiFilePath, paramsPath, importEnvironment)
+		if err != nil {
+			return err
+		}
 	}
 
 	// Get API info
 	apiInfo, err := getAPIDefinition(apiFilePath)
 	if err != nil {
 		return err
+	}
+	// Fill with defaults
+	if populateApiWithDefaults(apiInfo) {
+		utils.Logln(utils.LogPrefixInfo+"API is populated with defaults")
+		// api is dirty, write it to disk
+		buf, err := json.MarshalIndent(apiInfo, "", "  ")
+		if err != nil {
+			return err
+		}
+		p := filepath.Join(apiFilePath, "Meta-information", "api.json")
+		utils.Logln(utils.LogPrefixInfo+"Writing", p)
+
+		err = ioutil.WriteFile(p, buf, 0644)
+		if err != nil {
+			return err
+		}
 	}
 	// validate definition
 	if err = validateApiDefinition(apiInfo); err != nil {
@@ -600,8 +651,6 @@ func init() {
 		"if exists. Otherwise it will create API")
 	ImportAPICmd.Flags().StringVarP(&importAPIConfigFile, "params", "", DefaultAPIMParamsFileName,
 		"Provide a API Manager params file")
-	ImportAPICmd.Flags().BoolVarP(&importAPIInject, "inject", "", false, "Inject variables defined"+
-		"in params file to the given API.")
 	// Mark required flags
 	_ = ImportAPICmd.MarkFlagRequired("environment")
 	_ = ImportAPICmd.MarkFlagRequired("file")
