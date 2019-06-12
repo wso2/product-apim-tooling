@@ -24,14 +24,15 @@ var ProjectReadme = []byte(`WSO2 API Manager Project
 Project structure
 ================================
 
+├── api_params.yaml
 ├── Docs
-│   └── FileContents # holds documents
+│   └── FileContents
 ├── Image
 ├── Meta-information
-│   ├── api.json # information of API
-│   └── swagger.json # swagger definition for API
-├── README
-└── Sequences # sequences
+│   ├── api.json
+│   └── swagger.json
+├── README.txt
+└── Sequences
     ├── fault-sequence
     ├── in-sequence
     └── out-sequence
@@ -59,7 +60,8 @@ apimcli import-api [directory path]
 Publishing API Project
 ================================
 
-Change status field in api.json from CREATED to PUBLISHED and import it`)
+Change status field in api.json from CREATED to PUBLISHED and import it
+`)
 
 var Swagger = []byte(`{
   "paths": {
@@ -76,9 +78,9 @@ var Swagger = []byte(`{
   "openapi": "3.0.0"
 }`)
 
-const ApiVarsTmpl = `environments: {{ range $name, $elem := . }}
+const ApiVarsTmpl = `environments:{{- range $name, $elem := . }}
   - name: {{ $name }}
     endpoints:
-     production:
-      url: ''
-{{ end }}`
+      production:
+        url: ''
+{{- end }}`
