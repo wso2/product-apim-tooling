@@ -1,8 +1,9 @@
 package credentials
 
 import (
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"path/filepath"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 var DefaultConfigFile = "keys.json"
