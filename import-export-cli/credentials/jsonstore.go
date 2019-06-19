@@ -76,7 +76,7 @@ func (s *JsonStore) Get(env string) (Credential, error) {
 		}
 		return credential, nil
 	}
-	return Credential{}, fmt.Errorf("%s was not configured, please configure it by using add-env", env)
+	return Credential{}, &CredentialNotFound{Env: env}
 }
 
 func (s *JsonStore) Set(env, username, password, clientId, clientSecret string) error {
@@ -104,4 +104,9 @@ func (s *JsonStore) Erase(env string) error {
 
 func (s *JsonStore) IsKeychainEnabled() bool {
 	return s.credentials.CredStore != ""
+}
+
+func (s *JsonStore) Has(env string) bool {
+	_, ok := s.credentials.Environments[env]
+	return ok
 }

@@ -57,7 +57,12 @@ var loginCmd = &cobra.Command{
 			loginPassword = strings.TrimRight(strings.TrimSuffix(string(data), "\n"), "\r")
 		}
 
-		err := runLogin(environment, loginUsername, loginPassword)
+		store, err := credentials.GetDefaultCredentialStore()
+		if err != nil {
+			fmt.Println("Error occurred while loading credential store : ", err)
+			os.Exit(1)
+		}
+		err = runLogin(store, environment, loginUsername, loginPassword)
 		if err != nil {
 			fmt.Println("Error occurred while login : ", err)
 			os.Exit(1)
@@ -65,7 +70,7 @@ var loginCmd = &cobra.Command{
 	},
 }
 
-func runLogin(environment, username, password string) error {
+func runLogin(store credentials.Store, environment, username, password string) error {
 	if !utils.EnvExistsInMainConfigFile(environment, utils.MainConfigFilePath) {
 		fmt.Println(environment, "does not exists. Add it using add-env")
 		os.Exit(1)
@@ -87,11 +92,6 @@ func runLogin(environment, username, password string) error {
 		}
 		password = string(pass)
 		fmt.Println()
-	}
-
-	store, err := credentials.GetDefaultCredentialStore()
-	if err != nil {
-		return err
 	}
 
 	registrationEndpoint := utils.GetRegistrationEndpointOfEnv(environment, utils.MainConfigFilePath)
