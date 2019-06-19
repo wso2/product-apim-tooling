@@ -284,11 +284,11 @@ func GetClientIDSecret(username, password, url string) (clientID string, clientS
 		return clientID, clientSecret, err
 
 	} else {
-		fmt.Println("Error:", resp.Error())
-		fmt.Printf("Body: %s\n", resp.Body())
+		Logf("Error: %s\n", resp.Error())
+		Logf("Body: %s\n", resp.Body())
 		if resp.StatusCode() == http.StatusUnauthorized {
 			// 401 Unauthorized
-			HandleErrorAndExit("Incorrect Username/Password combination.", errors.New("401 Unauthorized"))
+			return "", "", fmt.Errorf("invalid username/password combination")
 		}
 		return "", "", errors.New("Request didn't respond 200 OK: " + resp.Status())
 	}
