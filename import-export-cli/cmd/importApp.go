@@ -22,8 +22,6 @@ import (
 	"bytes"
 	"crypto/tls"
 	"fmt"
-	"github.com/spf13/cobra"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -32,6 +30,10 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 var importAppFile string
@@ -49,7 +51,7 @@ const importAppCmdShortDesc = "Import App"
 const importAppCmdLongDesc = "Import an Application to an environment"
 
 const importAppCmdExamples = utils.ProjectName + ` ` + importAppCmdLiteral + ` -f qa/apps/sampleApp.zip -e dev
-` + utils.ProjectName + ` ` + importAppCmdShortDesc + ` -f staging/apps/sampleApp.zip -e prod -o testUser -u admin -p admin
+` + utils.ProjectName + ` ` + importAppCmdShortDesc + ` -f staging/apps/sampleApp.zip -e prod -o testUser
 ` + utils.ProjectName + ` ` + importAppCmdLiteral + ` -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -e prod`
 
 // importAppCmd represents the importApp command
@@ -62,44 +64,43 @@ var ImportAppCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + importAppCmdLiteral + " called")
 		var appsExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedAppsDirName)
-		executeImportAppCmd(importAppOwner, utils.MainConfigFilePath, utils.EnvKeysAllFilePath, appsExportDirectory)
+		cred, err := getCredentials(importAppEnvironment)
+		if err != nil {
+			utils.HandleErrorAndExit("Error getting credentials", err)
+		}
+		executeImportAppCmd(cred, importAppOwner, appsExportDirectory)
 	},
 }
 
-func executeImportAppCmd(importAppOwner, mainConfigFilePath, envKeysAllFilePath, exportDirectory string) {
-	accessToken, preCommandErr :=
-		utils.ExecutePreCommandWithOAuth(importAppEnvironment, importAppCmdUsername, importAppCmdPassword,
-			mainConfigFilePath, envKeysAllFilePath)
+func executeImportAppCmd(credential credentials.Credential, importAppOwner, exportDirectory string) {
+	accessToken, err := credentials.GetOAuthAccessToken(credential, importAppEnvironment)
+	if err != nil {
+		utils.HandleErrorAndExit("Error getting OAuth Tokens", err)
+	}
 
-	if preCommandErr == nil {
-		adminEndpiont := utils.GetAdminEndpointOfEnv(importAppEnvironment, mainConfigFilePath)
-		resp, err := ImportApplication(importAppFile, importAppOwner, adminEndpiont, accessToken, exportDirectory)
-		if err != nil {
-			utils.HandleErrorAndExit("Error importing Application", err)
-		}
+	adminEndpoint := utils.GetAdminEndpointOfEnv(importAppEnvironment, utils.MainConfigFilePath)
+	resp, err := ImportApplication(importAppFile, importAppOwner, adminEndpoint, accessToken, exportDirectory)
+	if err != nil {
+		utils.HandleErrorAndExit("Error importing Application", err)
+	}
 
-		if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusCreated {
-			// 200 OK or 201 Created
-			utils.Logln(utils.LogPrefixInfo+"Header:", resp.Header)
-			fmt.Println("Succesfully imported Application!")
-		} else if resp.StatusCode == http.StatusMultiStatus {
-			// 207 Multi Status
-			fmt.Printf("\nPartially imported Application" +
-				"\nNOTE: One or more subscriptions were not imported due to unavailability of APIs/Tiers\n")
-		} else if resp.StatusCode == http.StatusUnauthorized {
-			// 401 Unauthorized
-			fmt.Println("Invalid Credentials or You may not have enough permission!")
-		} else if resp.StatusCode == http.StatusForbidden {
-			// 401 Unauthorized
-			fmt.Printf("Invalid Owner!" + "\nNOTE: Cross Tenant Imports are not allowed!\n")
-		} else {
-			fmt.Println("Error importing Application")
-			utils.Logln(utils.LogPrefixError + resp.Status)
-		}
+	if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusCreated {
+		// 200 OK or 201 Created
+		utils.Logln(utils.LogPrefixInfo+"Header:", resp.Header)
+		fmt.Println("Succesfully imported Application!")
+	} else if resp.StatusCode == http.StatusMultiStatus {
+		// 207 Multi Status
+		fmt.Printf("\nPartially imported Application" +
+			"\nNOTE: One or more subscriptions were not imported due to unavailability of APIs/Tiers\n")
+	} else if resp.StatusCode == http.StatusUnauthorized {
+		// 401 Unauthorized
+		fmt.Println("Invalid Credentials or You may not have enough permission!")
+	} else if resp.StatusCode == http.StatusForbidden {
+		// 401 Unauthorized
+		fmt.Printf("Invalid Owner!" + "\nNOTE: Cross Tenant Imports are not allowed!\n")
 	} else {
-		// env_endpoints file is not configured properly by the user
-		fmt.Println("Error:", preCommandErr)
-		utils.Logln(utils.LogPrefixError + preCommandErr.Error())
+		fmt.Println("Error importing Application")
+		utils.Logln(utils.LogPrefixError + resp.Status)
 	}
 }
 
@@ -213,11 +214,11 @@ func init() {
 	ImportAppCmd.Flags().StringVarP(&importAppOwner, "owner", "o", "",
 		"Name of the target owner of the Application as desired by the Importer")
 	ImportAppCmd.Flags().StringVarP(&importAppEnvironment, "environment", "e",
-		utils.DefaultEnvironmentName, "Environment from the which the Application should be imported")
+		"", "Environment from the which the Application should be imported")
 	ImportAppCmd.Flags().BoolVarP(&preserveOwner, "preserveOwner", "r", false,
 		"Preserves app owner")
 	ImportAppCmd.Flags().BoolVarP(&skipSubscriptions, "skipSubscriptions", "s", false,
 		"Skip subscriptions of the Application")
-	ImportAppCmd.Flags().StringVarP(&importAppCmdUsername, "username", "u", "", "Username")
-	ImportAppCmd.Flags().StringVarP(&importAppCmdPassword, "password", "p", "", "Password")
+
+	_ = ImportAPICmd.MarkFlagRequired("environment")
 }

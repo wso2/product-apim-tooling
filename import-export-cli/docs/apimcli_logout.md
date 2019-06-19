@@ -1,27 +1,26 @@
-## apimcli remove-env
+## apimcli logout
 
-Remove Environment from Config file
+logout to from an API Manager
 
 ### Synopsis
 
 
-Remove Environment and its related endpoints from the config file
+logout from an API Manager environment
 
 ```
-apimcli remove-env [flags]
+apimcli logout [environment] [flags]
 ```
 
 ### Examples
 
 ```
-apimcli remove-env -n production
+apimcli logout dev
 ```
 
 ### Options
 
 ```
-  -h, --help          help for remove-env
-  -n, --name string   Name of the environment to be removed
+  -h, --help   help for logout
 ```
 
 ### Options inherited from parent commands

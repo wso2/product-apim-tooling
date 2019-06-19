@@ -21,12 +21,10 @@ apimcli export-apis -e production-2.6.0 -u wso2admin@wso2.org -p 12345 -t wso2.o
 ### Options
 
 ```
-  -e, --environment string   Environment to which the API should be exported (default "default")
+  -e, --environment string   Environment to which the API should be exported
       --force                Clean all the previously exported APIs of the given target tenant, in the given environment if any, and to export APIs from beginning
   -h, --help                 help for export-apis
-  -p, --password string      User's Password
   -t, --tenant string        Tenant domain of the resources to be exported
-  -u, --username string      User's Username
 ```
 
 ### Options inherited from parent commands

@@ -75,7 +75,12 @@ func removeEnv(envName, mainConfigFilePath, envKeysFilePath string) error {
 		}
 		// remove env from mainConfig file (endpoints file)
 		err = utils.RemoveEnvFromMainConfigFile(envName, mainConfigFilePath)
+		if err != nil {
+			return err
+		}
 
+		// remove keys also
+		err = runLogout(envName)
 		if err != nil {
 			return err
 		}
@@ -94,5 +99,6 @@ func removeEnv(envName, mainConfigFilePath, envKeysFilePath string) error {
 func init() {
 	RootCmd.AddCommand(removeEnvCmd)
 	removeEnvCmd.Flags().StringVarP(&flagNameOfEnvToBeRemoved, "name", "n",
-		utils.DefaultEnvironmentName, "Name of the environment to be removed")
+		"", "Name of the environment to be removed")
+	_ = removeEnvCmd.MarkFlagRequired("name")
 }

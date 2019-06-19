@@ -118,28 +118,10 @@ func createConfigFiles() {
 	}
 
 	if !utils.IsFileExist(utils.SampleMainConfigFilePath) {
-		var mainConfig = new(utils.MainConfig)
-		mainConfig.Config = utils.Config{utils.DefaultHttpRequestTimeout, utils.DefaultExportDirPath}
-		mainConfig.Environments = make(map[string]utils.EnvEndpoints)
-		mainConfig.Environments["sample-env1"] = utils.EnvEndpoints{
-			"https://localhost/apim",
-			"https://localhost/api-import-export",
-			"https://localhost/publisher/apis",
-			"https://localhost:9443/api/am/admin/v0.14/applications",
-			"https://localhost/register",
-			"https://localhost:9443/api/am/admin/v0.14",
-			"https://localhost/token",
+		err = ioutil.WriteFile(utils.SampleMainConfigFilePath, defaults.SampleConfig, os.ModePerm)
+		if err != nil {
+			utils.HandleErrorAndExit("Error creating default api spec file", err)
 		}
-		mainConfig.Environments["sample-env2"] = utils.EnvEndpoints{
-			"https://localhost/apim",
-			"",
-			"",
-			"",
-			"https://localhost/register",
-			"",
-			"https://localhost/token",
-		}
-		utils.WriteConfigFile(mainConfig, utils.SampleMainConfigFilePath)
 	}
 
 	if !utils.IsFileExist(utils.EnvKeysAllFilePath) {

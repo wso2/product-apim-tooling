@@ -7,17 +7,24 @@ import (
 	"os"
 )
 
+// PlainTextWarnMessage warning message
 const PlainTextWarnMessage = "WARNING: credentials are stored as a plain text in %s\n"
 
+// JsonStore is storing keys in json format
 type JsonStore struct {
-	Path        string
+	// Path to file
+	Path string
+
+	// internal usage
 	credentials Credentials
 }
 
+// NewJsonStore creates a new store
 func NewJsonStore(path string) *JsonStore {
 	return &JsonStore{Path: path}
 }
 
+// Load json store
 func (s *JsonStore) Load() error {
 	if info, err := os.Stat(s.Path); err == nil && !info.IsDir() {
 		data, err := ioutil.ReadFile(s.Path)
@@ -41,6 +48,7 @@ func (s *JsonStore) Load() error {
 	return nil
 }
 
+// saves to disk
 func (s *JsonStore) persist() error {
 	data, err := json.MarshalIndent(s.credentials, "", "  ")
 	if err != nil {
@@ -53,6 +61,7 @@ func (s *JsonStore) persist() error {
 	return nil
 }
 
+// Get credential for env
 func (s *JsonStore) Get(env string) (Credential, error) {
 	if cred, ok := s.credentials.Environments[env]; ok {
 		username, err := Base64Decode(cred.Username)
@@ -76,9 +85,10 @@ func (s *JsonStore) Get(env string) (Credential, error) {
 		}
 		return credential, nil
 	}
-	return Credential{}, &CredentialNotFound{Env: env}
+	return Credential{}, fmt.Errorf("credentials not found for %s, use login", env)
 }
 
+// Set credentials for env using username, password, clientId, clientSecret
 func (s *JsonStore) Set(env, username, password, clientId, clientSecret string) error {
 	s.credentials.Environments[env] = Credential{
 		Username:     Base64Encode(username),
@@ -94,6 +104,7 @@ func (s *JsonStore) Set(env, username, password, clientId, clientSecret string) 
 	return nil
 }
 
+// Erase an env
 func (s *JsonStore) Erase(env string) error {
 	if _, ok := s.credentials.Environments[env]; !ok {
 		return fmt.Errorf("%s was not found", env)
@@ -102,10 +113,12 @@ func (s *JsonStore) Erase(env string) error {
 	return s.persist()
 }
 
+// IsKeychainEnabled returns if another store is activated
 func (s *JsonStore) IsKeychainEnabled() bool {
 	return s.credentials.CredStore != ""
 }
 
+// Has env in the store
 func (s *JsonStore) Has(env string) bool {
 	_, ok := s.credentials.Environments[env]
 	return ok

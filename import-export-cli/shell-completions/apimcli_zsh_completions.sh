@@ -8,7 +8,7 @@ case $state in
   level1)
     case $words[1] in
       apimcli)
-        _arguments '1: :(add-env export-api export-apis export-app help import-api import-app init list remove-env reset-user set version)'
+        _arguments '1: :(add-env export-api export-apis export-app help import-api import-app init list login logout remove-env set version)'
       ;;
       *)
         _arguments '*: :_files'

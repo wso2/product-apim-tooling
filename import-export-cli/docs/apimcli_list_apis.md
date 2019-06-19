@@ -17,17 +17,16 @@ apimcli list apis [flags]
 apimcli apis list -e dev
 apimcli apis list -e dev -q version:1.0.0
 apimcli apis list -e prod -q provider:admin
-apimcli apis list -e staging -u admin -p admin
+apimcli apis list -e staging
 ```
 
 ### Options
 
 ```
-  -e, --environment string   Environment to be searched (default "default")
+  -e, --environment string   Environment to be searched
       --format string        Pretty-print apis using Go Templates. Use {{ jsonPretty . }} to list all fields
   -h, --help                 help for apis
-  -p, --password string      Password
-  -u, --username string      Username
+  -q, --query string         Query pattern
 ```
 
 ### Options inherited from parent commands

@@ -19,6 +19,7 @@
 package cmd
 
 import (
+	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -50,13 +51,12 @@ func TestImportAPI1(t *testing.T) {
 	defer server.Close()
 
 	name := "PizzaShackAPI_1.0.0.zip"
-	accessToken := "access-token"
 
-	err := ImportAPI(name, server.URL, accessToken, "testdata", "")
+	err := ImportAPI(credentials.Credential{}, name, server.URL, "testdata", "")
 	assert.Nil(t, err, "Error should be nil")
 
 	utils.Insecure = true
-	err = ImportAPI(name, server.URL, accessToken, "testdata", "")
+	err = ImportAPI(credentials.Credential{}, name, server.URL, "testdata", "")
 	assert.Nil(t, err, "Error should be nil")
 }
 
@@ -84,7 +84,7 @@ func TestNewFileUploadRequest(t *testing.T) {
 	defer server.Close()
 
 	extraParams := map[string]string{}
-	filePath := filepath.Join("sampleapi.zip")
+	filePath := filepath.FromSlash("testdata/sampleapi.zip")
 	accessToken := "access-token"
 	_, err := NewFileUploadRequest(server.URL, http.MethodPost, extraParams, "file", filePath, accessToken)
 	if err != nil {

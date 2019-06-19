@@ -15,21 +15,19 @@ apimcli import-app (--file <app-zip-file> --environment <environment-to-which-th
 
 ```
 apimcli import-app -f qa/apps/sampleApp.zip -e dev
-apimcli Import App -f staging/apps/sampleApp.zip -e prod -o testUser -u admin -p admin
+apimcli Import App -f staging/apps/sampleApp.zip -e prod -o testUser
 apimcli import-app -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -e prod
 ```
 
 ### Options
 
 ```
-  -e, --environment string   Environment from the which the Application should be imported (default "default")
+  -e, --environment string   Environment from the which the Application should be imported
   -f, --file string          Name of the Application to be imported
   -h, --help                 help for import-app
   -o, --owner string         Name of the target owner of the Application as desired by the Importer
-  -p, --password string      Password
   -r, --preserveOwner        Preserves app owner
   -s, --skipSubscriptions    Skip subscriptions of the Application
-  -u, --username string      Username
 ```
 
 ### Options inherited from parent commands

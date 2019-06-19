@@ -9,29 +9,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_createDirectories(t *testing.T) {
-	name, err := ioutil.TempDir("", "")
-	assert.Nil(t, err, "Temp directory should be created")
-	err = os.Chdir(name)
-	assert.Nil(t, err, "Should be able to change directory")
-	err = createDirectories("")
-	assert.Nil(t, err, "Should be no errors when creating directory structure")
-	for _, dir := range dirs {
-		dirPath := filepath.FromSlash(dir)
-		assert.DirExists(t, dirPath, "Directory "+dirPath+" should be created")
-	}
-	_ = os.RemoveAll(name)
-}
-
 func Test_createDirectoriesWithName(t *testing.T) {
 	name, err := ioutil.TempDir("", "")
 	assert.Nil(t, err, "Temp directory should be created")
-	err = os.Chdir(name)
-	assert.Nil(t, err, "Should be able to change directory")
-	err = createDirectories("lorem")
+	err = createDirectories(filepath.Join(name, "lorem"))
 	assert.Nil(t, err, "Should be no errors when creating directory structure")
 	for _, dir := range dirs {
-		dirPath := filepath.Join("lorem", filepath.FromSlash(dir))
+		dirPath := filepath.Join(name, "lorem", filepath.FromSlash(dir))
 		assert.DirExists(t, dirPath, "Directory "+dirPath+" should be created")
 	}
 	_ = os.RemoveAll(name)

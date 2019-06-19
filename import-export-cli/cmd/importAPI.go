@@ -25,6 +25,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -43,58 +44,57 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-var importAPIFile string
-var importEnvironment string
-var importAPICmdUsername string
-var importAPICmdPassword string
-var importAPICmdPreserveProvider bool
-var importAPIUpdate bool
-var importAPIConfigFile string
+var (
+	importAPIFile                string
+	importEnvironment            string
+	importAPICmdUsername         string
+	importAPICmdPassword         string
+	importAPICmdPreserveProvider bool
+	importAPIUpdate              bool
+	importAPIParamsFile          string
+	reApiName                    = regexp.MustCompile(`[~!@#;:%^*()+={}|\\<>"',&/$]`)
+)
 
-var reApiName = regexp.MustCompile(`[~!@#;:%^*()+={}|\\<>"',&\/$]`)
-
-// ImportAPI command related usage info
-const DefaultAPIMParamsFileName = "api_params.yaml"
-const importAPICmdLiteral = "import-api"
-const importAPICmdShortDesc = "Import API"
-const importAPICmdLongDesc = "Import an API to an environment"
+const (
+	// ImportAPI command related usage info
+	DefaultAPIMParamsFileName = "api_params.yaml"
+	importAPICmdLiteral       = "import-api"
+	importAPICmdShortDesc     = "Import API"
+	importAPICmdLongDesc      = "Import an API to an environment"
+)
 
 const importAPICmdExamples = utils.ProjectName + ` ` + importAPICmdLiteral + ` -f qa/TwitterAPI.zip -e dev
-` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f staging/FacebookAPI.zip -e production -u admin -p admin
-` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f ~/myapi -e production -u admin -p admin --update
-` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f ~/myapi -e production -u admin -p admin --update --inject`
+` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f staging/FacebookAPI.zip -e production
+` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f ~/myapi -e production --update
+` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f ~/myapi -e production --update --inject`
 
 // ImportAPICmd represents the importAPI command
 var ImportAPICmd = &cobra.Command{
-	Use: importAPICmdLiteral + " --file <Path to API> --environment " +
-		"<Environment to be imported>",
+	Use: importAPICmdLiteral + " --file <PATH_TO_API> --environment " +
+		"<ENVIRONMENT>",
 	Short:   importAPICmdShortDesc,
 	Long:    importAPICmdLongDesc,
 	Example: importAPICmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + importAPICmdLiteral + " called")
 		var apisExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedApisDirName)
-		executeImportAPICmd(utils.MainConfigFilePath, utils.EnvKeysAllFilePath, apisExportDirectory)
+
+		cred, err := getCredentials(importEnvironment)
+		if err != nil {
+			utils.HandleErrorAndExit("Error getting credentials", err)
+		}
+
+		executeImportAPICmd(cred, apisExportDirectory)
 	},
 }
 
 // executeImportAPICmd executes the import api command
-func executeImportAPICmd(mainConfigFilePath, envKeysAllFilePath, exportDirectory string) {
-	b64encodedCredentials, preCommandErr :=
-		utils.ExecutePreCommandWithBasicAuth(importEnvironment, importAPICmdUsername, importAPICmdPassword,
-			mainConfigFilePath, envKeysAllFilePath)
-
-	if preCommandErr == nil {
-		apiImportExportEndpoint := utils.GetApiImportExportEndpointOfEnv(importEnvironment, mainConfigFilePath)
-		err := ImportAPI(importAPIFile, apiImportExportEndpoint, b64encodedCredentials, exportDirectory, importAPIConfigFile)
-		if err != nil {
-			utils.HandleErrorAndExit("Error importing API", err)
-			return
-		}
-	} else {
-		// env_endpoints file is not configured properly by the user
-		fmt.Println("Error:", preCommandErr)
-		utils.Logln(utils.LogPrefixError + preCommandErr.Error())
+func executeImportAPICmd(credential credentials.Credential, exportDirectory string) {
+	apiImportExportEndpoint := utils.GetApiImportExportEndpointOfEnv(importEnvironment, utils.MainConfigFilePath)
+	err := ImportAPI(credential, importAPIFile, apiImportExportEndpoint, exportDirectory, importAPIParamsFile)
+	if err != nil {
+		utils.HandleErrorAndExit("Error importing API", err)
+		return
 	}
 }
 
@@ -187,7 +187,7 @@ func mergeAPI(apiDirectory string, environmentParams *utils.Environment) error {
 		return err
 	}
 
-	utils.Logln(utils.LogPrefixInfo+"Merging API")
+	utils.Logln(utils.LogPrefixInfo + "Merging API")
 	// replace original endpointConfig with merged version
 	_, err = api.SetP(string(mergedAPIEndpoints), "endpointConfig")
 	if err != nil {
@@ -513,14 +513,14 @@ func importAPI(endpoint, httpMethod, filePath, accessToken string, extraParams m
 // @param name: name of the API (zipped file) to be imported
 // @param apiManagerEndpoint: API Manager endpoint for the environment
 // @param accessToken: OAuth2.0 access token for the resource being accessed
-func ImportAPI(importPath, apiImportExportEndpoint, accessToken, exportDirectory, apiParamsPath string) error {
+func ImportAPI(credential credentials.Credential, importPath, apiImportExportEndpoint, exportDirectory, apiParamsPath string) error {
 	apiFilePath, err := resolveImportFilePath(importPath, exportDirectory)
 	if err != nil {
 		return err
 	}
 	utils.Logln(utils.LogPrefixInfo+"API Location:", apiFilePath)
 
-	utils.Logln(utils.LogPrefixInfo+"Creating workspace")
+	utils.Logln(utils.LogPrefixInfo + "Creating workspace")
 	tmpPath, err := getTempApiDirectory(apiFilePath)
 	if err != nil {
 		return err
@@ -536,7 +536,7 @@ func ImportAPI(importPath, apiImportExportEndpoint, accessToken, exportDirectory
 
 	utils.Logln(utils.LogPrefixInfo + "Attempting to inject parameters to the API")
 	paramsPath, err := resolveAPIParamsPath(importPath, apiParamsPath)
-	if err != nil && apiParamsPath != DefaultAPIMParamsFileName {
+	if err != nil && apiParamsPath != DefaultAPIMParamsFileName && apiParamsPath != "" {
 		return err
 	}
 	if paramsPath != "" {
@@ -553,7 +553,7 @@ func ImportAPI(importPath, apiImportExportEndpoint, accessToken, exportDirectory
 	}
 	// Fill with defaults
 	if populateApiWithDefaults(apiInfo) {
-		utils.Logln(utils.LogPrefixInfo+"API is populated with defaults")
+		utils.Logln(utils.LogPrefixInfo + "API is populated with defaults")
 		// api is dirty, write it to disk
 		buf, err := json.MarshalIndent(apiInfo, "", "  ")
 		if err != nil {
@@ -596,9 +596,7 @@ func ImportAPI(importPath, apiImportExportEndpoint, accessToken, exportDirectory
 	apiID := ""
 	updateAPI := false
 	if importAPIUpdate {
-		accessOAuthToken, err :=
-			utils.ExecutePreCommandWithOAuth(importEnvironment, importAPICmdUsername, importAPICmdPassword,
-				utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
+		accessOAuthToken, err := credentials.GetOAuthAccessToken(credential, importEnvironment)
 		if err != nil {
 			return err
 		}
@@ -632,7 +630,9 @@ func ImportAPI(importPath, apiImportExportEndpoint, accessToken, exportDirectory
 	apiImportExportEndpoint += "?preserveProvider=" +
 		strconv.FormatBool(importAPICmdPreserveProvider)
 	utils.Logln(utils.LogPrefixInfo + "Import URL: " + apiImportExportEndpoint)
-	err = importAPI(apiImportExportEndpoint, httpMethod, apiFilePath, accessToken, extraParams)
+
+	basicAuthToken := credentials.GetBasicAuth(credential)
+	err = importAPI(apiImportExportEndpoint, httpMethod, apiFilePath, basicAuthToken, extraParams)
 	return err
 }
 
@@ -643,13 +643,11 @@ func init() {
 		"Name of the API to be imported")
 	ImportAPICmd.Flags().StringVarP(&importEnvironment, "environment", "e",
 		"", "Environment from the which the API should be imported")
-	ImportAPICmd.Flags().StringVarP(&importAPICmdUsername, "username", "u", "", "Username")
-	ImportAPICmd.Flags().StringVarP(&importAPICmdPassword, "password", "p", "", "Password")
 	ImportAPICmd.Flags().BoolVar(&importAPICmdPreserveProvider, "preserve-provider", true,
 		"Preserve existing provider of API after exporting")
 	ImportAPICmd.Flags().BoolVarP(&importAPIUpdate, "update", "", false, "Update API "+
 		"if exists. Otherwise it will create API")
-	ImportAPICmd.Flags().StringVarP(&importAPIConfigFile, "params", "", DefaultAPIMParamsFileName,
+	ImportAPICmd.Flags().StringVarP(&importAPIParamsFile, "params", "", DefaultAPIMParamsFileName,
 		"Provide a API Manager params file")
 	// Mark required flags
 	_ = ImportAPICmd.MarkFlagRequired("environment")

@@ -20,6 +20,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"io/ioutil"
 	"os"
 
@@ -56,36 +57,35 @@ var ExportAPICmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + exportAPICmdLiteral + " called")
 		var apisExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedApisDirName)
-		executeExportAPICmd(utils.MainConfigFilePath, utils.EnvKeysAllFilePath, apisExportDirectory)
+
+		cred, err := getCredentials(cmdExportEnvironment)
+		if err != nil {
+			utils.HandleErrorAndExit("Error getting credentials", err)
+		}
+
+		executeExportAPICmd(cred, apisExportDirectory)
 	},
 }
 
-func executeExportAPICmd(mainConfigFilePath, envKeysAllFilePath, exportDirectory string) {
+func executeExportAPICmd(credential credentials.Credential, exportDirectory string) {
 	runnigExportApiCommand = true
-	b64encodedCredentials, preCommandErr :=
-		utils.ExecutePreCommandWithBasicAuth(cmdExportEnvironment, cmdUsername, cmdPassword,
-			mainConfigFilePath, envKeysAllFilePath)
+	b64encodedCredentials := credentials.GetBasicAuth(credential)
 
-	if preCommandErr == nil {
-		apiImportExportEndpoint := utils.GetApiImportExportEndpointOfEnv(cmdExportEnvironment, mainConfigFilePath)
-		resp := getExportApiResponse(exportAPIName, exportAPIVersion, exportProvider, apiImportExportEndpoint,
-			b64encodedCredentials)
+	apiImportExportEndpoint := utils.GetApiImportExportEndpointOfEnv(cmdExportEnvironment, utils.MainConfigFilePath)
+	resp := getExportApiResponse(exportAPIName, exportAPIVersion, exportProvider, apiImportExportEndpoint,
+		b64encodedCredentials)
 
-		// Print info on response
-		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
-		apiZipLocationPath := filepath.Join(exportDirectory, cmdExportEnvironment)
-		if resp.StatusCode() == http.StatusOK {
-			WriteToZip(exportAPIName, exportAPIVersion, apiZipLocationPath, resp)
-		} else if resp.StatusCode() == http.StatusInternalServerError {
-			// 500 Internal Server Error
-			fmt.Println("Incorrect password")
-		} else {
-			// neither 200 nor 500
-			fmt.Println("Error exporting API:", resp.Status())
-		}
+	// Print info on response
+	utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
+	apiZipLocationPath := filepath.Join(exportDirectory, cmdExportEnvironment)
+	if resp.StatusCode() == http.StatusOK {
+		WriteToZip(exportAPIName, exportAPIVersion, apiZipLocationPath, resp)
+	} else if resp.StatusCode() == http.StatusInternalServerError {
+		// 500 Internal Server Error
+		fmt.Println("Incorrect password")
 	} else {
-		// error exporting API
-		fmt.Println("Error exporting API:" + preCommandErr.Error())
+		// neither 200 nor 500
+		fmt.Println("Error exporting API:", resp.Status())
 	}
 }
 
@@ -95,10 +95,13 @@ func executeExportAPICmd(mainConfigFilePath, envKeysAllFilePath, exportDirectory
 // Exported API will be written to a zip file
 func WriteToZip(exportAPIName, exportAPIVersion, zipLocationPath string, resp *resty.Response) {
 	// Write to file
-	//directory := filepath.Join(exportDirectory, cmdExportEnvironment)
+	//directory := filepath.Join(exportDirectory, cmdcmdExportEnvironment)
 	// create directory if it doesn't exist
 	if _, err := os.Stat(zipLocationPath); os.IsNotExist(err) {
-		os.Mkdir(zipLocationPath, 0777)
+		err = os.Mkdir(zipLocationPath, 0777)
+		if err != nil {
+			utils.HandleErrorAndExit("Error creating zip archive", err)
+		}
 		// permission 777 : Everyone can read, write, and execute
 	}
 	zipFilename := exportAPIName + "_" + exportAPIVersion + ".zip" // MyAPI_1.0.0.zip
@@ -149,8 +152,6 @@ func init() {
 	ExportAPICmd.Flags().StringVarP(&exportProvider, "provider", "r", "",
 		"Provider of the API")
 	ExportAPICmd.Flags().StringVarP(&cmdExportEnvironment, "environment", "e",
-		utils.DefaultEnvironmentName, "Environment to which the API should be exported")
-
-	ExportAPICmd.Flags().StringVarP(&cmdUsername, "username", "u", "", "Username")
-	ExportAPICmd.Flags().StringVarP(&cmdPassword, "password", "p", "", "Password")
+		"", "Environment to which the API should be exported")
+	_ = ExportAPICmd.MarkFlagRequired("environment")
 }

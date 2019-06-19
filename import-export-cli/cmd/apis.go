@@ -27,6 +27,8 @@ import (
 	"os"
 	"text/template"
 
+	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
+
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/formatter"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -44,9 +46,8 @@ const (
 )
 
 var listApisCmdEnvironment string
-var listApisCmdUsername string
-var listApisCmdPassword string
 var listApisCmdFormat string
+var listApisCmdQuery string
 
 // apisCmd related info
 const apisCmdLiteral = "apis"
@@ -57,7 +58,7 @@ const apisCmdLongDesc = `Display a list of APIs in the environment specified by 
 var apisCmdExamples = utils.ProjectName + ` ` + apisCmdLiteral + ` ` + listCmdLiteral + ` -e dev
 ` + utils.ProjectName + ` ` + apisCmdLiteral + ` ` + listCmdLiteral + ` -e dev -q version:1.0.0
 ` + utils.ProjectName + ` ` + apisCmdLiteral + ` ` + listCmdLiteral + ` -e prod -q provider:admin
-` + utils.ProjectName + ` ` + apisCmdLiteral + ` ` + listCmdLiteral + ` -e staging -u admin -p admin`
+` + utils.ProjectName + ` ` + apisCmdLiteral + ` ` + listCmdLiteral + ` -e staging`
 
 // apisCmd represents the apis command
 var apisCmd = &cobra.Command{
@@ -67,7 +68,11 @@ var apisCmd = &cobra.Command{
 	Example: apisCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + apisCmdLiteral + " called")
-		executeApisCmd(utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
+		cred, err := getCredentials(listApisCmdEnvironment)
+		if err != nil {
+			utils.HandleErrorAndExit("Error getting credentials", err)
+		}
+		executeApisCmd(cred)
 	},
 }
 
@@ -121,23 +126,19 @@ func (a *api) MarshalJSON() ([]byte, error) {
 	return formatter.MarshalJSON(a)
 }
 
-func executeApisCmd(mainConfigFilePath, envKeysAllFilePath string) {
-	accessToken, preCommandErr :=
-		utils.ExecutePreCommandWithOAuth(listApisCmdEnvironment, listApisCmdUsername, listApisCmdPassword,
-			mainConfigFilePath, envKeysAllFilePath)
+func executeApisCmd(credential credentials.Credential) {
+	accessToken, err := credentials.GetOAuthAccessToken(credential, listApisCmdEnvironment)
+	if err != nil {
+		utils.Logln(utils.LogPrefixError + "calling 'list' " + err.Error())
+		utils.HandleErrorAndExit("Error calling '"+apisCmdLiteral+"'", err)
+	}
 
-	if preCommandErr == nil {
-		apiListEndpoint := utils.GetApiListEndpointOfEnv(listApisCmdEnvironment, mainConfigFilePath)
-		_, apis, err := GetAPIList("", accessToken, apiListEndpoint)
-
-		if err == nil {
-			printAPIs(apis, listApisCmdFormat)
-		} else {
-			utils.Logln(utils.LogPrefixError+"Getting List of APIs", err)
-		}
+	apiListEndpoint := utils.GetApiListEndpointOfEnv(listApisCmdEnvironment, utils.MainConfigFilePath)
+	_, apis, err := GetAPIList(listApisCmdQuery, accessToken, apiListEndpoint)
+	if err == nil {
+		printAPIs(apis, listApisCmdFormat)
 	} else {
-		utils.Logln(utils.LogPrefixError + "calling 'list' " + preCommandErr.Error())
-		utils.HandleErrorAndExit("Error calling '"+apisCmdLiteral+"'", preCommandErr)
+		utils.Logln(utils.LogPrefixError+"Getting List of APIs", err)
 	}
 }
 
@@ -218,9 +219,10 @@ func init() {
 	ListCmd.AddCommand(apisCmd)
 
 	apisCmd.Flags().StringVarP(&listApisCmdEnvironment, "environment", "e",
-		utils.DefaultEnvironmentName, "Environment to be searched")
-	apisCmd.Flags().StringVarP(&listApisCmdUsername, "username", "u", "", "Username")
-	apisCmd.Flags().StringVarP(&listApisCmdPassword, "password", "p", "", "Password")
+		"", "Environment to be searched")
+	apisCmd.Flags().StringVarP(&listApisCmdQuery, "query", "q",
+		"", "Query pattern")
 	apisCmd.Flags().StringVarP(&listApisCmdFormat, "format", "", "", "Pretty-print apis "+
 		"using Go Templates. Use {{ jsonPretty . }} to list all fields")
+	_ = apisCmd.MarkFlagRequired("environment")
 }

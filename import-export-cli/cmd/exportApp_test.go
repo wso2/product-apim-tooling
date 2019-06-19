@@ -20,10 +20,11 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/assert"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/go-resty/resty"
@@ -63,7 +64,9 @@ func TestWriteApplicationToZip(t *testing.T) {
 	owner := "admin"
 	//environment := "dev"
 	response := new(resty.Response)
-	exportDirectory := utils.CurrentDir
+
+	exportDirectory, err := ioutil.TempDir("", "")
+	assert.Nil(t, err, "should be able to create temp directory")
+	defer os.RemoveAll(exportDirectory)
 	WriteApplicationToZip(name, owner, exportDirectory, response)
-	defer os.RemoveAll(filepath.Join(exportDirectory, "dev"))
 }

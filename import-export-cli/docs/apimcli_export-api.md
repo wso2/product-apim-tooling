@@ -22,12 +22,10 @@ NOTE: all three flags (--name (-n), --version (-v), --provider (-r)) are mandato
 ### Options
 
 ```
-  -e, --environment string   Environment to which the API should be exported (default "default")
+  -e, --environment string   Environment to which the API should be exported
   -h, --help                 help for export-api
   -n, --name string          Name of the API to be exported
-  -p, --password string      Password
   -r, --provider string      Provider of the API
-  -u, --username string      Username
   -v, --version string       Version of the API to be exported
 ```
 

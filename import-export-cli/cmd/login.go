@@ -109,6 +109,28 @@ func runLogin(store credentials.Store, environment, username, password string) e
 	return nil
 }
 
+func getCredentials(env string) (credentials.Credential, error) {
+	// get tokens or login
+	store, err := credentials.GetDefaultCredentialStore()
+	if err != nil {
+		return credentials.Credential{}, err
+	}
+	// check for creds
+	if !store.Has(env) {
+		fmt.Println("Login to", env)
+		err = runLogin(store, env, "", "")
+		if err != nil {
+			return credentials.Credential{}, err
+		}
+		fmt.Println()
+	}
+	cred, err := store.Get(env)
+	if err != nil {
+		return credentials.Credential{}, err
+	}
+	return cred, nil
+}
+
 // init using Cobra
 func init() {
 	RootCmd.AddCommand(loginCmd)

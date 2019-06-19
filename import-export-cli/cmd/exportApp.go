@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"github.com/go-resty/resty"
 	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"io/ioutil"
 	"net/http"
@@ -53,17 +54,20 @@ var ExportAppCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + exportAppCmdLiteral + " called")
 		var appsExportDirectoryPath = filepath.Join(utils.ExportDirectory, utils.ExportedAppsDirName, cmdExportEnvironment)
-		executeExportAppCmd(utils.MainConfigFilePath, utils.EnvKeysAllFilePath, appsExportDirectoryPath)
+
+		cred, err := getCredentials(cmdExportEnvironment)
+		if err != nil {
+			utils.HandleErrorAndExit("Error getting credentials", err)
+		}
+		executeExportAppCmd(cred, appsExportDirectoryPath)
 	},
 }
 
-func executeExportAppCmd(mainConfigFilePath, envKeysAllFilePath, appsExportDirectoryPath string) {
-	accessToken, preCommandErr :=
-		utils.ExecutePreCommandWithOAuth(cmdExportEnvironment, cmdUsername, cmdPassword,
-			mainConfigFilePath, envKeysAllFilePath)
+func executeExportAppCmd(credential credentials.Credential, appsExportDirectoryPath string) {
+	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, cmdExportEnvironment)
 
 	if preCommandErr == nil {
-		adminEndpiont := utils.GetAdminEndpointOfEnv(cmdExportEnvironment, mainConfigFilePath)
+		adminEndpiont := utils.GetAdminEndpointOfEnv(cmdExportEnvironment, utils.MainConfigFilePath)
 		resp := getExportAppResponse(exportAppName, exportAppOwner, adminEndpiont, accessToken)
 
 		// Print info on response
@@ -140,7 +144,6 @@ func init() {
 	ExportAppCmd.Flags().StringVarP(&exportAppOwner, "owner", "o", "",
 		"Owner of the Application to be exported")
 	ExportAppCmd.Flags().StringVarP(&cmdExportEnvironment, "environment", "e",
-		utils.DefaultEnvironmentName, "Environment to which the Application should be exported")
-	ExportAppCmd.Flags().StringVarP(&cmdUsername, "username", "u", "", "Username")
-	ExportAppCmd.Flags().StringVarP(&cmdPassword, "password", "p", "", "Password")
+		"", "Environment to which the Application should be exported")
+	_ = ExportAppCmd.MarkFlagRequired("environment")
 }
