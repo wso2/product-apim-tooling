@@ -40,7 +40,7 @@ type APIDefinition struct {
 	Description                        string             `json:"description,omitempty"`
 	Type                               string             `json:"type,omitempty"`
 	Context                            string             `json:"context"`
-	ContextTemplate                    string             `json:"contextTemplate"`
+	ContextTemplate                    string             `json:"contextTemplate,omitempty"`
 	Tags                               []string           `json:"tags"`
 	Documents                          []interface{}      `json:"documents,omitempty"`
 	LastUpdated                        string             `json:"lastUpdated,omitempty"`
