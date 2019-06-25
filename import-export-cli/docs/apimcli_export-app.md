@@ -22,12 +22,10 @@ NOTE: Flag --name (-n) and --owner (-o) are mandatory
 ### Options
 
 ```
-  -e, --environment string   Environment to which the Application should be exported (default "default")
+  -e, --environment string   Environment to which the Application should be exported
   -h, --help                 help for export-app
   -n, --name string          Name of the Application to be exported
   -o, --owner string         Owner of the Application to be exported
-  -p, --password string      Password
-  -u, --username string      Username
 ```
 
 ### Options inherited from parent commands

@@ -50,12 +50,12 @@ func TestImportApplication1(t *testing.T) {
 	owner := "admin"
 	accessToken := "access-token"
 
-	_, err := ImportApplication(name, owner, server.URL, accessToken, "")
+	_, err := ImportApplication(name, owner, server.URL, accessToken, "testdata")
 	if err != nil {
 		t.Errorf("Error: %s\n", err.Error())
 	}
 	utils.Insecure = true
-	_, err = ImportApplication(name, owner, server.URL, accessToken, "")
+	_, err = ImportApplication(name, owner, server.URL, accessToken, "testdata")
 	if err != nil {
 		t.Errorf("Error: %s\n", err.Error())
 	}
@@ -85,7 +85,7 @@ func TestNewAppFileUploadRequest(t *testing.T) {
 	defer server.Close()
 
 	extraParams := map[string]string{}
-	filePath := filepath.Join("sampleApp.zip")
+	filePath := filepath.FromSlash("testdata/sampleApp.zip")
 	accessToken := "access-token"
 	_, err := NewAppFileUploadRequest(server.URL, extraParams, "file", filePath, accessToken)
 	if err != nil {

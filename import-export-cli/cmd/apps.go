@@ -27,6 +27,8 @@ import (
 	"os"
 	"text/template"
 
+	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
+
 	"github.com/go-resty/resty"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/formatter"
@@ -94,8 +96,8 @@ const appsCmdLongDesc = "Display a list of Applications of the user in the envir
 
 const appsCmdExamples = utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e dev
 ` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e dev -o sampleUser
-` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e prod -o sampleUser -u admin
-` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e staging -o sampleUser -u admin -p admin`
+` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e prod -o sampleUser
+` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e staging -o sampleUser`
 
 // appsCmd represents the apps command
 var appsCmd = &cobra.Command{
@@ -105,31 +107,30 @@ var appsCmd = &cobra.Command{
 	Example: appsCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + appsCmdLiteral + " called")
-		executeAppsCmd(listAppsCmdAppOwner, utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
+		cred, err := getCredentials(listAppsCmdEnvironment)
+		if err != nil {
+			utils.HandleErrorAndExit("Error getting credentials", err)
+		}
+		executeAppsCmd(cred, listAppsCmdAppOwner)
 	},
 }
 
-func executeAppsCmd(appOwner, mainConfigFilePath, envKeysAllFilePath string) {
-	accessToken, preCommandErr :=
-		utils.ExecutePreCommandWithOAuth(listAppsCmdEnvironment, cmdUsername, cmdPassword,
-			mainConfigFilePath, envKeysAllFilePath)
-
-	if preCommandErr == nil {
-		applicationListEndpoint := utils.GetApplicationListEndpointOfEnv(listAppsCmdEnvironment, mainConfigFilePath)
-		_, apps, err := GetApplicationList(appOwner, accessToken, applicationListEndpoint)
-
-		if err == nil {
-			// Printing the list of available Applications
-			printApps(apps, listAppsCmdFormat)
-		} else {
-			utils.Logln(utils.LogPrefixError+"Getting List of Applications", err)
-		}
-
-	} else {
-		utils.Logln(utils.LogPrefixError + "calling 'list' " + preCommandErr.Error())
-		utils.HandleErrorAndExit("Error calling '"+appsCmdLiteral+"'", preCommandErr)
+func executeAppsCmd(credential credentials.Credential, appOwner string) {
+	accessToken, err := credentials.GetOAuthAccessToken(credential, listAppsCmdEnvironment)
+	if err != nil {
+		utils.Logln(utils.LogPrefixError + "calling 'list' " + err.Error())
+		utils.HandleErrorAndExit("Error calling '"+appsCmdLiteral+"'", err)
 	}
 
+	applicationListEndpoint := utils.GetApplicationListEndpointOfEnv(listAppsCmdEnvironment, utils.MainConfigFilePath)
+	_, apps, err := GetApplicationList(appOwner, accessToken, applicationListEndpoint)
+
+	if err == nil {
+		// Printing the list of available Applications
+		printApps(apps, listAppsCmdFormat)
+	} else {
+		utils.Logln(utils.LogPrefixError+"Getting List of Applications", err)
+	}
 }
 
 //Get Application List
@@ -210,11 +211,10 @@ func init() {
 	ListCmd.AddCommand(appsCmd)
 
 	appsCmd.Flags().StringVarP(&listAppsCmdEnvironment, "environment", "e",
-		utils.DefaultEnvironmentName, "Environment to be searched")
+		"", "Environment to be searched")
 	appsCmd.Flags().StringVarP(&listAppsCmdAppOwner, "owner", "o", "",
 		"Owner of the Application")
-	appsCmd.Flags().StringVarP(&cmdUsername, "username", "u", "", "Username")
-	appsCmd.Flags().StringVarP(&cmdPassword, "password", "p", "", "Password")
 	appsCmd.Flags().StringVarP(&listAppsCmdFormat, "format", "", "", "Pretty-print output"+
 		"using Go templates. Use {{jsonPretty .}} to list all fields")
+	_ = appsCmd.MarkFlagRequired("environment")
 }

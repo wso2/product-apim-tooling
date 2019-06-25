@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
 	"os"
@@ -48,6 +49,7 @@ var startFromBeginning bool
 var isProcessCompleted bool
 var startingApiIndexFromList int
 var mainConfigFilePath string
+var credential credentials.Credential
 
 var ExportAPIsCmd = &cobra.Command{
 	Use: exportAPIsCmdLiteral + " [--environment " +
@@ -58,6 +60,12 @@ var ExportAPIsCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + exportAPIsCmdLiteral + " called")
 		var artifactExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedMigrationArtifactsDirName)
+
+		cred, err := getCredentials(cmdExportEnvironment)
+		if err != nil {
+			utils.HandleErrorAndExit("Error getting credentials", err)
+		}
+		credential = cred
 		executeExportAPIsCmd(artifactExportDirectory)
 	},
 }
@@ -99,12 +107,7 @@ func exportAPIs() {
 				strconv.Itoa(apiListOffset)+". Maximum limit of APIs exported in single iteration is "+
 				strconv.Itoa(utils.MaxAPIsToExportOnce))
 			//get basic Auth credentials
-			b64encodedCredentials, preCommandErr :=
-				utils.ExecutePreCommandWithBasicAuth(cmdExportEnvironment, cmdUsername, cmdPassword,
-					utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
-			if preCommandErr != nil {
-				utils.Logln("Error generating base64 encoded credentials for Basic Authentication:")
-			}
+			b64encodedCredentials := credentials.GetBasicAuth(credential)
 			for i := startingApiIndexFromList; i < len(apis); i++ {
 				exportAPIName := apis[i].Name
 				exportAPIVersion := apis[i].Version
@@ -237,9 +240,7 @@ func createExportAPIsDirStructure(artifactExportDirectory string) string {
 
 // Get the list of APIs from the defined offset index, upto the limit of constant value utils.MaxAPIsToExportOnce
 func getAPIList() (count int32, apis []utils.API) {
-	accessToken, preCommandErr :=
-		utils.ExecutePreCommandWithOAuth(cmdExportEnvironment, cmdUsername, cmdPassword,
-			utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
+	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, cmdExportEnvironment)
 	if preCommandErr == nil {
 		apiListEndpoint := utils.GetApiListEndpointOfEnv(cmdExportEnvironment, utils.MainConfigFilePath)
 		apiListEndpoint += "?limit=" + strconv.Itoa(utils.MaxAPIsToExportOnce) + "&offset=" + strconv.Itoa(apiListOffset)
@@ -262,12 +263,11 @@ func getAPIList() (count int32, apis []utils.API) {
 func init() {
 	RootCmd.AddCommand(ExportAPIsCmd)
 	ExportAPIsCmd.Flags().StringVarP(&cmdExportEnvironment, "environment", "e",
-		utils.DefaultEnvironmentName, "Environment to which the API should be exported")
+		"", "Environment to which the API should be exported")
 	ExportAPIsCmd.Flags().StringVarP(&cmdResourceTenantDomain, "tenant", "t", "",
 		"Tenant domain of the resources to be exported")
-	ExportAPIsCmd.Flags().StringVarP(&cmdUsername, "username", "u", "", "User's Username")
-	ExportAPIsCmd.Flags().StringVarP(&cmdPassword, "password", "p", "", "User's Password")
 	ExportAPIsCmd.PersistentFlags().BoolVarP(&cmdForceStartFromBegin, "force", "", false,
 		"Clean all the previously exported APIs of the given target tenant, in the given environment if "+
 			"any, and to export APIs from beginning")
+	_ = ExportAPIsCmd.MarkFlagRequired("environment")
 }

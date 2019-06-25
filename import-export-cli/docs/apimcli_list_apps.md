@@ -16,19 +16,17 @@ apimcli list apps [flags]
 ```
 apimcli list apps -e dev
 apimcli list apps -e dev -o sampleUser
-apimcli list apps -e prod -o sampleUser -u admin
-apimcli list apps -e staging -o sampleUser -u admin -p admin
+apimcli list apps -e prod -o sampleUser
+apimcli list apps -e staging -o sampleUser
 ```
 
 ### Options
 
 ```
-  -e, --environment string   Environment to be searched (default "default")
+  -e, --environment string   Environment to be searched
       --format string        Pretty-print outputusing Go templates. Use {{jsonPretty .}} to list all fields
   -h, --help                 help for apps
   -o, --owner string         Owner of the Application
-  -p, --password string      Password
-  -u, --username string      Username
 ```
 
 ### Options inherited from parent commands

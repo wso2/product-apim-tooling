@@ -1,3 +1,21 @@
+/*
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*  WSO2 Inc. licenses this file to you under the Apache License,
+*  Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+ */
+
 package cmd
 
 import (
@@ -9,29 +27,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_createDirectories(t *testing.T) {
-	name, err := ioutil.TempDir("", "")
-	assert.Nil(t, err, "Temp directory should be created")
-	err = os.Chdir(name)
-	assert.Nil(t, err, "Should be able to change directory")
-	err = createDirectories("")
-	assert.Nil(t, err, "Should be no errors when creating directory structure")
-	for _, dir := range dirs {
-		dirPath := filepath.FromSlash(dir)
-		assert.DirExists(t, dirPath, "Directory "+dirPath+" should be created")
-	}
-	_ = os.RemoveAll(name)
-}
-
 func Test_createDirectoriesWithName(t *testing.T) {
 	name, err := ioutil.TempDir("", "")
 	assert.Nil(t, err, "Temp directory should be created")
-	err = os.Chdir(name)
-	assert.Nil(t, err, "Should be able to change directory")
-	err = createDirectories("lorem")
+	err = createDirectories(filepath.Join(name, "lorem"))
 	assert.Nil(t, err, "Should be no errors when creating directory structure")
 	for _, dir := range dirs {
-		dirPath := filepath.Join("lorem", filepath.FromSlash(dir))
+		dirPath := filepath.Join(name, "lorem", filepath.FromSlash(dir))
 		assert.DirExists(t, dirPath, "Directory "+dirPath+" should be created")
 	}
 	_ = os.RemoveAll(name)
