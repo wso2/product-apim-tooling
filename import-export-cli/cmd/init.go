@@ -82,6 +82,8 @@ type APIDefinition struct {
 	FaultSequence                      string             `json:"faultSequence,omitempty"`
 	AdvertiseOnly                      bool               `json:"advertiseOnly,omitempty"`
 	CorsConfiguration                  *CorsConfiguration `json:"corsConfiguration,omitempty"`
+	ProductionUrl                      string             `json:"productionUrl,omitempty"`
+	SandboxUrl                         string             `json:"sandboxUrl,omitempty"`
 	EndpointConfig                     *string            `json:"endpointConfig,omitempty"`
 	ResponseCache                      string             `json:"responseCache,omitempty"`
 	CacheTimeout                       int                `json:"cacheTimeout,omitempty"`

@@ -47,8 +47,6 @@ import (
 var (
 	importAPIFile                string
 	importEnvironment            string
-	importAPICmdUsername         string
-	importAPICmdPassword         string
 	importAPICmdPreserveProvider bool
 	importAPIUpdate              bool
 	importAPIParamsFile          string
@@ -182,6 +180,7 @@ func mergeAPI(apiDirectory string, environmentParams *utils.Environment) error {
 	if err != nil {
 		return err
 	}
+
 	mergedAPIEndpoints, err := utils.MergeJSON([]byte(apiEndpointData), configData)
 	if err != nil {
 		return err
@@ -365,6 +364,64 @@ func isEmpty(s string) bool {
 	return len(strings.TrimSpace(s)) == 0
 }
 
+func preProcessAPI(apiDirectory string) error {
+	dirty := false
+	apiPath := filepath.Join(apiDirectory, "Meta-information", "api.json")
+	utils.Logln(utils.LogPrefixInfo+"Loading API definition from: ", apiPath)
+	api, err := gabs.ParseJSONFile(apiPath)
+	if err != nil {
+		return err
+	}
+
+	// preprocess endpoint config
+	if !api.Exists("endpointConfig") {
+		dirty = true
+		conf, err := gabs.ParseJSON([]byte(`{"endpoint_type":"http"}`))
+		if err != nil {
+			return err
+		}
+
+		if api.Exists("productionUrl") {
+			_, err = conf.SetP(api.Path("productionUrl").Data(), "production_endpoints.url")
+			if err != nil {
+				return err
+			}
+			_, err = conf.SetP("null", "production_endpoints.config")
+			if err != nil {
+				return err
+			}
+			_ = api.Delete("productionUrl")
+		}
+		if api.Exists("sandboxUrl") {
+			_, err = conf.SetP(api.Path("sandboxUrl").Data(), "sandbox_endpoints.url")
+			if err != nil {
+				return err
+			}
+			_, err = conf.SetP("null", "sandbox_endpoints.config")
+			if err != nil {
+				return err
+			}
+			_ = api.Delete("sandboxUrl")
+		}
+
+		_, err = api.SetP(conf.String(), "endpointConfig")
+		if err != nil {
+			return err
+		}
+	}
+
+	if dirty {
+		utils.Logln(utils.LogPrefixInfo+"Writing preprocessed API to:", apiPath)
+		// write this to disk
+		err = ioutil.WriteFile(apiPath, api.Bytes(), 0644)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func populateApiWithDefaults(def *APIDefinition) (dirty bool) {
 	dirty = false
 	if def.ContextTemplate == "" {
@@ -510,9 +567,6 @@ func importAPI(endpoint, httpMethod, filePath, accessToken string, extraParams m
 }
 
 // ImportAPI function is used with import-api command
-// @param name: name of the API (zipped file) to be imported
-// @param apiManagerEndpoint: API Manager endpoint for the environment
-// @param accessToken: OAuth2.0 access token for the resource being accessed
 func ImportAPI(credential credentials.Credential, importPath, apiImportExportEndpoint, exportDirectory, apiParamsPath string) error {
 	apiFilePath, err := resolveImportFilePath(importPath, exportDirectory)
 	if err != nil {
@@ -533,6 +587,12 @@ func ImportAPI(credential credentials.Credential, importPath, apiImportExportEnd
 		}
 	}()
 	apiFilePath = tmpPath
+
+	utils.Logln(utils.LogPrefixInfo + "Pre Processing API...")
+	err = preProcessAPI(apiFilePath)
+	if err != nil {
+		return err
+	}
 
 	utils.Logln(utils.LogPrefixInfo + "Attempting to inject parameters to the API")
 	paramsPath, err := resolveAPIParamsPath(importPath, apiParamsPath)
@@ -612,7 +672,7 @@ func ImportAPI(credential credentials.Credential, importPath, apiImportExportEnd
 			fmt.Printf("Creating: %s %s\n", apiInfo.ID.APIName, apiInfo.ID.Version)
 		} else {
 			fmt.Println("Existing API found, attempting to update it...")
-			utils.Logln("API ID:", id)
+			fmt.Println("API ID:", id)
 			apiID = id
 			updateAPI = true
 		}
