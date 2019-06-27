@@ -19,6 +19,7 @@
 package cmd
 
 import (
+	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -40,39 +41,39 @@ func Test_createDirectoriesWithName(t *testing.T) {
 }
 
 func Test_loadSwagger2(t *testing.T) {
-	sw, _, err := loadSwagger("testdata/swaggers/swagger-2.json")
+	doc, err := loadSwagger("testdata/swaggers/swagger-2.json")
 	assert.Nil(t, err, "Loads correct swagger without errors")
-	assert.Equal(t, "Simple API overview", sw.Info.Title, "Loads correct title")
-	assert.NotNil(t, sw.Paths, "Paths should not be nil")
+	assert.Equal(t, "Simple API overview", doc.Spec().Info.Title, "Loads correct title")
+	assert.NotNil(t, doc.Spec().Paths.Paths, "Paths should not be nil")
 }
 
 func Test_loadSwagger2YAML(t *testing.T) {
-	sw, _, err := loadSwagger("testdata/swaggers/swagger-2.yaml")
+	doc, err := loadSwagger("testdata/swaggers/swagger-2.yaml")
 	assert.Nil(t, err, "Loads correct swagger without errors")
-	assert.Equal(t, "Simple API overview", sw.Info.Title, "Loads correct title")
-	assert.NotNil(t, sw.Paths, "Paths should not be nil")
+	assert.Equal(t, "Simple API overview", doc.Spec().Info.Title, "Loads correct title")
+	assert.NotNil(t, doc.Spec().Paths.Paths, "Paths should not be nil")
 }
 
 func Test_loadSwagger3(t *testing.T) {
-	sw, _, err := loadSwagger("testdata/swaggers/swagger-3.json")
+	doc, err := loadSwagger("testdata/swaggers/swagger-3.json")
 	assert.Nil(t, err, "Loads correct swagger without errors")
-	assert.Equal(t, "Swagger Petstore", sw.Info.Title, "Loads correct title")
-	assert.NotNil(t, sw.Paths, "Paths should not be nil")
+	assert.Equal(t, "Swagger Petstore", doc.Spec().Info.Title, "Loads correct title")
+	assert.NotNil(t, doc.Spec().Paths.Paths, "Paths should not be nil")
 }
 
 func Test_loadSwagger3YAML(t *testing.T) {
-	sw, _, err := loadSwagger("testdata/swaggers/swagger-3.yaml")
+	doc, err := loadSwagger("testdata/swaggers/swagger-3.yaml")
 	assert.Nil(t, err, "Loads correct swagger without errors")
-	assert.Equal(t, "Swagger Petstore", sw.Info.Title, "Loads correct title")
-	assert.NotNil(t, sw.Paths, "Paths should not be nil")
+	assert.Equal(t, "Swagger Petstore", doc.Spec().Info.Title, "Loads correct title")
+	assert.NotNil(t, doc.Spec().Paths.Paths, "Paths should not be nil")
 }
 
 func Test_APIDefinition_generateFieldsFromSwagger(t *testing.T) {
-	sw, _, err := loadSwagger("testdata/swaggers/swagger-3.json")
+	doc, err := loadSwagger("testdata/swaggers/swagger-3.json")
 	assert.Nil(t, err, "Loads correct swagger without errors")
-	def := &APIDefinition{}
-	def.generateFieldsFromSwagger3(sw)
-
+	def := &v2.APIDefinition{}
+	err = v2.Swagger2Populate(def, doc)
+	assert.Nil(t, err, "Populate without errors")
 	assert.Equal(t, "SwaggerPetstore", def.ID.APIName, "Should correctly output name")
 	assert.Equal(t, "/SwaggerPetstore/1.0.0", def.Context, "Should return correct context")
 	assert.Equal(t, 14, len(def.URITemplates), "Should return correct number of uri templates")

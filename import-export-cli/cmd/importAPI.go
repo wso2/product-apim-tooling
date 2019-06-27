@@ -26,6 +26,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
+	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -97,8 +98,8 @@ func executeImportAPICmd(credential credentials.Credential, exportDirectory stri
 }
 
 // extractAPIDefinition extracts API information from jsonContent
-func extractAPIDefinition(jsonContent []byte) (*APIDefinition, error) {
-	api := &APIDefinition{}
+func extractAPIDefinition(jsonContent []byte) (*v2.APIDefinition, error) {
+	api := &v2.APIDefinition{}
 	err := json.Unmarshal(jsonContent, &api)
 	if err != nil {
 		return nil, err
@@ -108,7 +109,7 @@ func extractAPIDefinition(jsonContent []byte) (*APIDefinition, error) {
 }
 
 // getAPIDefinition scans filePath and returns APIDefinition or an error
-func getAPIDefinition(filePath string) (*APIDefinition, error) {
+func getAPIDefinition(filePath string) (*v2.APIDefinition, error) {
 	info, err := os.Stat(filePath)
 	if err != nil {
 		return nil, err
@@ -422,7 +423,7 @@ func preProcessAPI(apiDirectory string) error {
 	return nil
 }
 
-func populateApiWithDefaults(def *APIDefinition) (dirty bool) {
+func populateApiWithDefaults(def *v2.APIDefinition) (dirty bool) {
 	dirty = false
 	if def.ContextTemplate == "" {
 		if !strings.Contains(def.Context, "{version}") {
@@ -440,7 +441,7 @@ func populateApiWithDefaults(def *APIDefinition) (dirty bool) {
 		dirty = true
 	}
 	if def.URITemplates == nil {
-		def.URITemplates = []URITemplates{}
+		def.URITemplates = []v2.URITemplates{}
 		dirty = true
 	}
 	if def.Implementation == "" {
@@ -451,7 +452,7 @@ func populateApiWithDefaults(def *APIDefinition) (dirty bool) {
 }
 
 // validateApiDefinition validates an API against basic rules
-func validateApiDefinition(def *APIDefinition) error {
+func validateApiDefinition(def *v2.APIDefinition) error {
 	utils.Logln(utils.LogPrefixInfo + "Validating API")
 	if isEmpty(def.ID.APIName) {
 		return errors.New("apiName is required")
