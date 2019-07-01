@@ -98,5 +98,5 @@ const ApiVarsTmpl = `environments:{{- range $name, $elem := . }}
   - name: {{ $name }}
     endpoints:
       production:
-        url: ''
+      sandbox:
 {{- end }}`

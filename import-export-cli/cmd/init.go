@@ -22,13 +22,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/go-openapi/loads"
-	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"text/template"
 	"unicode"
+
+	"github.com/Jeffail/gabs"
+	"github.com/go-openapi/loads"
+	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/defaults"
 
@@ -183,8 +185,13 @@ func executeInitCmd() error {
 			def.SandboxUrl = ""
 		}
 
+		data, err := gabs.ParseJSON(doc.Raw())
+		if err != nil {
+			return err
+		}
+
 		// write to file
-		err = ioutil.WriteFile(swaggerSavePath, doc.Raw(), os.ModePerm)
+		err = ioutil.WriteFile(swaggerSavePath, data.BytesIndent("", "  "), os.ModePerm)
 		if err != nil {
 			return err
 		}
@@ -258,9 +265,9 @@ func executeInitCmd() error {
 		return err
 	}
 
-	apimProjConfigFilePath := filepath.Join(initCmdOutputDir, DefaultAPIMParamsFileName)
-	utils.Logln(utils.LogPrefixInfo + "Writing " + apimProjConfigFilePath)
-	err = scaffoldParams(apimProjConfigFilePath)
+	apimProjParamsFilePath := filepath.Join(initCmdOutputDir, DefaultAPIMParamsFileName)
+	utils.Logln(utils.LogPrefixInfo + "Writing " + apimProjParamsFilePath)
+	err = scaffoldParams(apimProjParamsFilePath)
 	if err != nil {
 		return err
 	}
