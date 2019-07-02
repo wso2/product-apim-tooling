@@ -38,8 +38,6 @@ import (
 
 var importAppFile string
 var importAppEnvironment string
-var importAppCmdUsername string
-var importAppCmdPassword string
 var importAppOwner string
 var preserveOwner bool
 var skipSubscriptions bool
@@ -122,7 +120,10 @@ func ImportApplication(query, appOwner, adminEndpiont, accessToken, exportDirect
 
 	fileName := query // ex:- fileName = dev/sampleApp.zip
 
-	zipFilePath := filepath.Join(exportDirectory, fileName)
+	zipFilePath, err := resolveImportFilePath(fileName, exportDirectory)
+	if err != nil {
+		utils.HandleErrorAndExit("Error resolving filepath", err)
+	}
 	fmt.Println("ZipFilePath:", zipFilePath)
 
 	extraParams := map[string]string{}
