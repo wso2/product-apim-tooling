@@ -23,16 +23,16 @@ var ApiSpecYaml = []byte(`id:
   version: ''
   apiName: ''
 context: ''
-contextTemplate: ''
-type: HTTP
+type: 'HTTP'
 tags: []
 availableTiers:
 - name: 'Unlimited'
 uriTemplates: []
-status: CREATED
+status: 'CREATED'
 visibility: 'public'
 transports: 'http,https'
-endpointConfig: '{"production_endpoints":{"url":"http://localhost:8080", "config":"null"}, "endpoint_type":"http"}'
+productionUrl: 'http://localhost:8080'
+sandboxUrl: 'http://localhost:8081'
 `)
 
 var ProjectReadme = []byte(`WSO2 API Manager Project
@@ -91,12 +91,12 @@ var Swagger = []byte(`{
       }
     }
   },
-  "openapi": "3.0.0"
+  "swagger": "2.0"
 }`)
 
 const ApiVarsTmpl = `environments:{{- range $name, $elem := . }}
   - name: {{ $name }}
     endpoints:
       production:
-        url: ''
+      sandbox:
 {{- end }}`

@@ -24,16 +24,18 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
 	"path/filepath"
 	"text/template"
 	"unicode"
+
+	"github.com/Jeffail/gabs"
+	"github.com/go-openapi/loads"
+	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/defaults"
 
 	"github.com/ghodss/yaml"
 
-	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/spf13/cobra"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -49,100 +51,6 @@ var (
 
 type Swagger2SpecPartial struct {
 	BasePath string `json:"basePath,omitempty" yaml:"basePath,omitempty"`
-}
-
-// APIDefinition represents an API artifact in APIM
-type APIDefinition struct {
-	ID                                 ID                 `json:"id,omitempty"`
-	UUID                               string             `json:"uuid,omitempty"`
-	Description                        string             `json:"description,omitempty"`
-	Type                               string             `json:"type,omitempty"`
-	Context                            string             `json:"context"`
-	ContextTemplate                    string             `json:"contextTemplate,omitempty"`
-	Tags                               []string           `json:"tags"`
-	Documents                          []interface{}      `json:"documents,omitempty"`
-	LastUpdated                        string             `json:"lastUpdated,omitempty"`
-	AvailableTiers                     []AvailableTiers   `json:"availableTiers,omitempty"`
-	AvailableSubscriptionLevelPolicies []interface{}      `json:"availableSubscriptionLevelPolicies,omitempty"`
-	URITemplates                       []URITemplates     `json:"uriTemplates"`
-	APIHeaderChanged                   bool               `json:"apiHeaderChanged,omitempty"`
-	APIResourcePatternsChanged         bool               `json:"apiResourcePatternsChanged,omitempty"`
-	Status                             string             `json:"status,omitempty"`
-	TechnicalOwner                     string             `json:"technicalOwner,omitempty"`
-	TechnicalOwnerEmail                string             `json:"technicalOwnerEmail,omitempty"`
-	BusinessOwner                      string             `json:"businessOwner,omitempty"`
-	BusinessOwnerEmail                 string             `json:"businessOwnerEmail,omitempty"`
-	Visibility                         string             `json:"visibility,omitempty"`
-	EndpointSecured                    bool               `json:"endpointSecured,omitempty"`
-	EndpointAuthDigest                 bool               `json:"endpointAuthDigest,omitempty"`
-	EndpointUTUsername                 string             `json:"endpointUTUsername,omitempty"`
-	Transports                         string             `json:"transports,omitempty"`
-	InSequence                         string             `json:"inSequence,omitempty"`
-	OutSequence                        string             `json:"outSequence,omitempty"`
-	FaultSequence                      string             `json:"faultSequence,omitempty"`
-	AdvertiseOnly                      bool               `json:"advertiseOnly,omitempty"`
-	CorsConfiguration                  *CorsConfiguration `json:"corsConfiguration,omitempty"`
-	EndpointConfig                     *string            `json:"endpointConfig,omitempty"`
-	ResponseCache                      string             `json:"responseCache,omitempty"`
-	CacheTimeout                       int                `json:"cacheTimeout,omitempty"`
-	Implementation                     string             `json:"implementation,omitempty"`
-	AuthorizationHeader                string             `json:"authorizationHeader,omitempty"`
-	Scopes                             []interface{}      `json:"scopes,omitempty"`
-	IsDefaultVersion                   bool               `json:"isDefaultVersion,omitempty"`
-	IsPublishedDefaultVersion          bool               `json:"isPublishedDefaultVersion,omitempty"`
-	Environments                       []string           `json:"environments,omitempty"`
-	CreatedTime                        string             `json:"createdTime,omitempty"`
-	AdditionalProperties               map[string]string  `json:"additionalProperties,omitempty"`
-	EnvironmentList                    []string           `json:"environmentList,omitempty"`
-	APISecurity                        string             `json:"apiSecurity,omitempty"`
-	AccessControl                      string             `json:"accessControl,omitempty"`
-	Rating                             float64            `json:"rating,omitempty"`
-	IsLatest                           bool               `json:"isLatest,omitempty"`
-}
-type ID struct {
-	ProviderName string `json:"providerName"`
-	APIName      string `json:"apiName"`
-	Version      string `json:"version"`
-}
-type AvailableTiers struct {
-	Name               string `json:"name,omitempty"`
-	DisplayName        string `json:"displayName,omitempty"`
-	Description        string `json:"description,omitempty"`
-	RequestsPerMin     int    `json:"requestsPerMin,omitempty"`
-	RequestCount       int    `json:"requestCount,omitempty"`
-	UnitTime           int    `json:"unitTime,omitempty"`
-	TimeUnit           string `json:"timeUnit,omitempty"`
-	TierPlan           string `json:"tierPlan,omitempty"`
-	StopOnQuotaReached bool   `json:"stopOnQuotaReached,omitempty"`
-}
-type Scopes struct {
-	Key         string `json:"key,omitempty"`
-	Name        string `json:"name,omitempty"`
-	Roles       string `json:"roles,omitempty"`
-	Description string `json:"description,omitempty"`
-	ID          int    `json:"id,omitempty"`
-}
-type MediationScripts struct {
-}
-type URITemplates struct {
-	URITemplate          string            `json:"uriTemplate,omitempty"`
-	HTTPVerb             string            `json:"httpVerb,omitempty"`
-	AuthType             string            `json:"authType,omitempty"`
-	HTTPVerbs            []string          `json:"httpVerbs,omitempty"`
-	AuthTypes            []string          `json:"authTypes,omitempty"`
-	ThrottlingConditions []interface{}     `json:"throttlingConditions,omitempty"`
-	ThrottlingTier       string            `json:"throttlingTier,omitempty"`
-	ThrottlingTiers      []string          `json:"throttlingTiers,omitempty"`
-	MediationScript      string            `json:"mediationScript,omitempty"`
-	Scopes               []*Scopes         `json:"scopes,omitempty"`
-	MediationScripts     *MediationScripts `json:"mediationScripts,omitempty"`
-}
-type CorsConfiguration struct {
-	CorsConfigurationEnabled      bool     `json:"corsConfigurationEnabled,omitempty"`
-	AccessControlAllowOrigins     []string `json:"accessControlAllowOrigins,omitempty"`
-	AccessControlAllowCredentials bool     `json:"accessControlAllowCredentials,omitempty"`
-	AccessControlAllowHeaders     []string `json:"accessControlAllowHeaders,omitempty"`
-	AccessControlAllowMethods     []string `json:"accessControlAllowMethods,omitempty"`
 }
 
 // directories to be created
@@ -171,12 +79,12 @@ func createDirectories(name string) error {
 }
 
 // loadDefaultSpecFromDisk loads api definition stored in HOME/.wso2apimcli/default_api.yaml
-func loadDefaultSpecFromDisk() (*APIDefinition, error) {
+func loadDefaultSpecFromDisk() (*v2.APIDefinition, error) {
 	defaultData, err := ioutil.ReadFile(utils.DefaultAPISpecFilePath)
 	if err != nil {
 		return nil, err
 	}
-	def := &APIDefinition{}
+	def := &v2.APIDefinition{}
 	err = yaml.Unmarshal(defaultData, &def)
 	if err != nil {
 		return nil, err
@@ -186,77 +94,9 @@ func loadDefaultSpecFromDisk() (*APIDefinition, error) {
 
 // loads swagger from swaggerDoc
 // swagger2.0/OpenAPI3.0 specs are supported
-func loadSwagger(swaggerDoc string) (*openapi3.Swagger, []byte, error) {
+func loadSwagger(swaggerDoc string) (*loads.Document, error) {
 	utils.Logln(utils.LogPrefixInfo + "Loading swagger from " + swaggerDoc)
-	buffer, err := ioutil.ReadFile(swaggerDoc)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	sw, err := openapi3.NewSwaggerLoader().LoadSwaggerFromData(buffer)
-	if err != nil {
-		return nil, nil, err
-	}
-	return sw, buffer, nil
-}
-
-// generateFieldsFromSwagger3 using swagger
-func (def *APIDefinition) generateFieldsFromSwagger3(swagger *openapi3.Swagger) {
-	def.ID.APIName = utils.ToPascalCase(swagger.Info.Title)
-	def.ID.Version = swagger.Info.Version
-	def.Description = swagger.Info.Description
-	def.Context = fmt.Sprintf("/%s/%s", def.ID.APIName, def.ID.Version)
-	def.ContextTemplate = fmt.Sprintf("/%s/{version}", def.ID.APIName)
-
-	var uriTemplates []URITemplates
-	for uri, info := range swagger.Paths {
-		uriTemplate := URITemplates{}
-		uriTemplate.URITemplate = uri
-		verbs := getHttpVerbs(info)
-		uriTemplate.HTTPVerbs = verbs
-		if len(verbs) > 0 {
-			uriTemplate.HTTPVerb = verbs[0]
-		}
-		authTypes := make([]string, len(verbs))
-		throttlingTiers := make([]string, len(verbs))
-		for i := 0; i < len(verbs); i++ {
-			authTypes[i] = "Any"
-			throttlingTiers[i] = "Unlimited"
-		}
-		uriTemplate.AuthType = "Any"
-		uriTemplate.AuthTypes = authTypes
-		uriTemplate.ThrottlingTier = "Unlimited"
-		uriTemplate.ThrottlingTiers = throttlingTiers
-		uriTemplate.Scopes = make([]*Scopes, len(verbs))
-		uriTemplates = append(uriTemplates, uriTemplate)
-	}
-	def.URITemplates = uriTemplates
-}
-
-// getHttpVerbs generates verbs for api definition
-func getHttpVerbs(item *openapi3.PathItem) (verbs []string) {
-	if item.Get != nil {
-		verbs = append(verbs, "GET")
-	}
-	if item.Post != nil {
-		verbs = append(verbs, "POST")
-	}
-	if item.Put != nil {
-		verbs = append(verbs, "PUT")
-	}
-	if item.Delete != nil {
-		verbs = append(verbs, "DELETE")
-	}
-	if item.Patch != nil {
-		verbs = append(verbs, "PATCH")
-	}
-	if item.Head != nil {
-		verbs = append(verbs, "HEAD")
-	}
-	if item.Options != nil {
-		verbs = append(verbs, "OPTIONS")
-	}
-	return
+	return loads.Spec(swaggerDoc)
 }
 
 // hasJSONPrefix returns true if the provided buffer appears to start with
@@ -271,7 +111,7 @@ func hasPrefix(buf []byte, prefix []byte) bool {
 	return bytes.HasPrefix(trim, prefix)
 }
 
-func generateConfig(file string) error {
+func scaffoldParams(file string) error {
 	envs := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
 	t, err := template.New("").Parse(defaults.ApiVarsTmpl)
 	if err != nil {
@@ -328,43 +168,30 @@ func executeInitCmd() error {
 	// use swagger to auto generate
 	if initCmdSwaggerPath != "" {
 		// load swagger from path
-		sw, buff, err := loadSwagger(initCmdSwaggerPath)
+		doc, err := loadSwagger(initCmdSwaggerPath)
 		if err != nil {
 			return err
 		}
-		def.generateFieldsFromSwagger3(sw)
-
-		// put swagger file to corresponding directory
-		// if swagger is either from json or yaml source it will be properly indented with two spaces
-		// before saving into directory
-		var holder map[string]interface{}
-		if hasJSONPrefix(buff) {
-			// try to unmarshal json
-			err = json.Unmarshal(buff, &holder)
-			if err != nil {
-				return err
-			}
-		} else {
-			// try to unmarshal yaml
-			err = yaml.Unmarshal(buff, &holder)
-			if err != nil {
-				return err
-			}
-		}
-		// set context based on basePath if presented(only for swagger 2.0)
-		if basePath, ok := holder["basePath"]; ok {
-			def.Context = path.Clean(fmt.Sprintf("/%s/%s", basePath, sw.Info.Version))
-			def.ContextTemplate = path.Clean(fmt.Sprintf("/%s/{version}", basePath))
-		}
-
-		// add indention with two spaces
-		utils.Logln(utils.LogPrefixInfo + "Writing " + swaggerSavePath)
-		data, err := json.MarshalIndent(holder, "", "  ")
+		// We use swagger2 loader. It works fine for now
+		// Since we don't use 3.0 specific details its ok
+		// otherwise please use v2.openAPI3 loaders
+		err = v2.Swagger2Populate(def, doc)
 		if err != nil {
 			return err
 		}
+
+		if def.EndpointConfig != nil {
+			def.ProductionUrl = ""
+			def.SandboxUrl = ""
+		}
+
+		data, err := gabs.ParseJSON(doc.Raw())
+		if err != nil {
+			return err
+		}
+
 		// write to file
-		err = ioutil.WriteFile(swaggerSavePath, data, os.ModePerm)
+		err = ioutil.WriteFile(swaggerSavePath, data.BytesIndent("", "  "), os.ModePerm)
 		if err != nil {
 			return err
 		}
@@ -386,7 +213,7 @@ func executeInitCmd() error {
 			return err
 		}
 
-		apiDef := &APIDefinition{}
+		apiDef := &v2.APIDefinition{}
 		// inject from env if requested
 		if initCmdEnvInject {
 			utils.Logln(utils.LogPrefixInfo + "Injecting variables to definition from environment")
@@ -418,7 +245,7 @@ func executeInitCmd() error {
 		if err != nil {
 			return err
 		}
-		tmpDef := &APIDefinition{}
+		tmpDef := &v2.APIDefinition{}
 		err = json.Unmarshal(finalDefBytes, &tmpDef)
 		if err != nil {
 			return err
@@ -438,9 +265,9 @@ func executeInitCmd() error {
 		return err
 	}
 
-	apimProjConfigFilePath := filepath.Join(initCmdOutputDir, DefaultAPIMParamsFileName)
-	utils.Logln(utils.LogPrefixInfo + "Writing " + apimProjConfigFilePath)
-	err = generateConfig(apimProjConfigFilePath)
+	apimProjParamsFilePath := filepath.Join(initCmdOutputDir, DefaultAPIMParamsFileName)
+	utils.Logln(utils.LogPrefixInfo + "Writing " + apimProjParamsFilePath)
+	err = scaffoldParams(apimProjParamsFilePath)
 	if err != nil {
 		return err
 	}

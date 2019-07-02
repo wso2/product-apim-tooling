@@ -20,6 +20,7 @@ package cmd
 
 import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
+	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -112,7 +113,7 @@ func TestExtractAPIInfoWithCorrectJSON(t *testing.T) {
 
 	api, err := extractAPIDefinition([]byte(content))
 	assert.Equal(t, err, nil, "Should return nil error for correct json")
-	assert.Equal(t, api.ID, ID{ProviderName: "admin", Version: "1.0.0", APIName: "APIName"},
+	assert.Equal(t, api.ID, v2.ID{ProviderName: "admin", Version: "1.0.0", APIName: "APIName"},
 		"Should parse correct json")
 }
 
@@ -130,7 +131,7 @@ func TestExtractAPIInfoWhenIDTagMissing(t *testing.T) {
 
 	api, err := extractAPIDefinition([]byte(content))
 	assert.Nil(t, err, "Should return nil error")
-	assert.Equal(t, ID{}, api.ID, "Should return empty IDInfo when ID tag missing")
+	assert.Equal(t, v2.ID{}, api.ID, "Should return empty IDInfo when ID tag missing")
 }
 
 func TestExtractAPIInfoWithMalformedJSON(t *testing.T) {
@@ -154,14 +155,14 @@ func TestExtractAPIInfoWithMalformedJSON(t *testing.T) {
 func TestGetAPIInfoCorrectZip(t *testing.T) {
 	api, err := getAPIDefinition("testdata/PizzaShackAPI_1.0.0.zip")
 	assert.Nil(t, err, "Should return nil error on reading correct zip files")
-	assert.Equal(t, ID{APIName: "PizzaShackAPI", Version: "1.0.0", ProviderName: "admin"}, api.ID,
+	assert.Equal(t, v2.ID{APIName: "PizzaShackAPI", Version: "1.0.0", ProviderName: "admin"}, api.ID,
 		"Should return correct values for ID info")
 }
 
 func TestGetAPIInfoCorrectDirectoryStructure(t *testing.T) {
 	api, err := getAPIDefinition("testdata/PizzaShackAPI-1.0.0")
 	assert.Nil(t, err, "Should return nil error on reading correct directories")
-	assert.Equal(t, ID{APIName: "PizzaShackAPI", Version: "1.0.0", ProviderName: "admin"}, api.ID,
+	assert.Equal(t, v2.ID{APIName: "PizzaShackAPI", Version: "1.0.0", ProviderName: "admin"}, api.ID,
 		"Should return correct values for ID info")
 }
 
