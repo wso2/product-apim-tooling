@@ -52,12 +52,22 @@ type EndpointData struct {
 	Sandbox *Endpoint `yaml:"sandbox" json:"sandbox_endpoints,omitempty"`
 }
 
+// Cert stores certificate details
+type Cert struct {
+	Host        string `yaml:"host" json:"hostName"`
+	Alias       string `yaml:"alias" json:"alias"`
+	Path        string `yaml:"path" json:"-"`
+	Certificate string `json:"certificate"`
+}
+
 // Environment represents an api environment
 type Environment struct {
 	// Name of the environment
 	Name string `yaml:"name"`
 	// Endpoints contain details about endpoints in a configuration
 	Endpoints *EndpointData `yaml:"endpoints"`
+	// Certs for environment
+	Certs []Cert `yaml:"certs"`
 }
 
 // ApiParams represents environments defined in configuration file
