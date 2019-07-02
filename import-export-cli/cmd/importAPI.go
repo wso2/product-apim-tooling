@@ -23,10 +23,9 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
+	"encoding/pem"
 	"errors"
 	"fmt"
-	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
-	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -40,6 +39,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mitchellh/go-homedir"
+	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
+	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
+
 	"github.com/Jeffail/gabs"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -51,6 +54,7 @@ var (
 	importAPICmdPreserveProvider bool
 	importAPIUpdate              bool
 	importAPIParamsFile          string
+	importAPIDebugMode           bool
 	reApiName                    = regexp.MustCompile(`[~!@#;:%^*()+={}|\\<>"',&/$]`)
 )
 
@@ -322,6 +326,68 @@ func getTempApiDirectory(file string) (string, error) {
 	}
 }
 
+func resolveCertPath(importPath, p string) (string, error) {
+	// look in importPath
+	utils.Logln(utils.LogPrefixInfo+"Resolving for", p)
+	certfile := filepath.Join(importPath, p)
+	utils.Logln(utils.LogPrefixInfo + "Looking in project directory")
+	if info, err := os.Stat(certfile); err == nil && !info.IsDir() {
+		// found file return it
+		return certfile, nil
+	}
+
+	utils.Logln(utils.LogPrefixInfo + "Looking for absolute path")
+	// try for an absolute path
+	p, err := homedir.Expand(filepath.Clean(p))
+	if err != nil {
+		return "", err
+	}
+
+	if p != "" {
+		return p, nil
+	}
+
+	return "", fmt.Errorf("%s not found", p)
+}
+
+// generateCertificates for the API
+func generateCertificates(importPath string, environment *utils.Environment) error {
+	var certs []utils.Cert
+
+	if len(environment.Certs) == 0 {
+		return nil
+	}
+
+	for _, cert := range environment.Certs {
+		// read cert
+		p, err := resolveCertPath(importPath, cert.Path)
+		if err != nil {
+			return err
+		}
+		pubPEMData, err := ioutil.ReadFile(p)
+		if err != nil {
+			return err
+		}
+		// get cert
+		block, _ := pem.Decode(pubPEMData)
+		enc := credentials.Base64Encode(string(block.Bytes))
+		cert.Certificate = enc
+		certs = append(certs, cert)
+	}
+
+	data, err := json.MarshalIndent(certs, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	// filepath to save certs
+	fp := filepath.Join(importPath, "Meta-information", "endpoint_certificates.json")
+	utils.Logln(utils.LogPrefixInfo+"Writing", fp)
+	err = ioutil.WriteFile(fp, data, os.ModePerm)
+
+	return err
+}
+
 // injectParamsToAPI injects ApiParams to API located in importPath using importEnvironment and returns the path to
 // injected API location
 func injectParamsToAPI(importPath, paramsPath, importEnvironment string) error {
@@ -340,6 +406,12 @@ func injectParamsToAPI(importPath, paramsPath, importEnvironment string) error {
 	if err != nil {
 		return err
 	}
+
+	err = generateCertificates(importPath, envParams)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -581,6 +653,10 @@ func ImportAPI(credential credentials.Credential, importPath, apiImportExportEnd
 		return err
 	}
 	defer func() {
+		if importAPIDebugMode {
+			utils.Logln(utils.LogPrefixInfo+"Leaving", tmpPath)
+			return
+		}
 		utils.Logln(utils.LogPrefixInfo+"Deleting", tmpPath)
 		err := os.RemoveAll(tmpPath)
 		if err != nil {
@@ -645,6 +721,10 @@ func ImportAPI(credential credentials.Credential, importPath, apiImportExportEnd
 			return err
 		}
 		defer func() {
+			if importAPIDebugMode {
+				utils.Logln(utils.LogPrefixInfo+"Leaving", tmp.Name())
+				return
+			}
 			utils.Logln(utils.LogPrefixInfo+"Deleting", tmp.Name())
 			err := os.Remove(tmp.Name())
 			if err != nil {
@@ -710,6 +790,7 @@ func init() {
 		"if exists. Otherwise it will create API")
 	ImportAPICmd.Flags().StringVarP(&importAPIParamsFile, "params", "", DefaultAPIMParamsFileName,
 		"Provide a API Manager params file")
+	ImportAPICmd.Flags().BoolVarP(&importAPIDebugMode, "debug", "", false, "Enable debug mode")
 	// Mark required flags
 	_ = ImportAPICmd.MarkFlagRequired("environment")
 	_ = ImportAPICmd.MarkFlagRequired("file")
