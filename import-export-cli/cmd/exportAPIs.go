@@ -20,14 +20,15 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cast"
-	"github.com/spf13/cobra"
-	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
+
+	"github.com/spf13/cast"
+	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 const exportAPIsCmdLiteral = "export-apis"
@@ -113,8 +114,8 @@ func exportAPIs() {
 				exportAPIVersion := apis[i].Version
 				exportApiProvider := apis[i].Provider
 				apiImportExportEndpoint := utils.GetApiImportExportEndpointOfEnv(cmdExportEnvironment, utils.MainConfigFilePath)
-				resp := getExportApiResponse(exportAPIName, exportAPIVersion, exportApiProvider, apiImportExportEndpoint,
-					b64encodedCredentials)
+				resp := getExportApiResponse(exportAPIName, exportAPIVersion, exportApiProvider, exportAPIFormat, apiImportExportEndpoint,
+					b64encodedCredentials, exportAPIPreserveStatus)
 
 				if resp.StatusCode() == http.StatusOK {
 					utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
@@ -269,5 +270,8 @@ func init() {
 	ExportAPIsCmd.PersistentFlags().BoolVarP(&cmdForceStartFromBegin, "force", "", false,
 		"Clean all the previously exported APIs of the given target tenant, in the given environment if "+
 			"any, and to export APIs from beginning")
+	ExportAPIsCmd.Flags().BoolVarP(&exportAPIPreserveStatus, "preserveStatus", "", true,
+		"Preserve API status when exporting. Otherwise API will be exported in CREATED status")
+	ExportAPIsCmd.Flags().StringVarP(&exportAPIFormat, "format", "", "json", "File format of exported archive")
 	_ = ExportAPIsCmd.MarkFlagRequired("environment")
 }

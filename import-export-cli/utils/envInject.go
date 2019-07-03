@@ -8,6 +8,8 @@ import (
 	"os"
 	"regexp"
 
+	"github.com/hashicorp/go-multierror"
+
 	"github.com/Jeffail/gabs"
 
 	"gopkg.in/yaml.v2"
@@ -86,13 +88,20 @@ type APIEndpointConfig struct {
 // environment before processing.
 // returns an error if anything happen
 func InjectEnv(content string) (string, error) {
+	var errorResults error
+	missingEnvKeys := false
 	matches := re.FindAllStringSubmatch(content, -1) // matches is [][]string
 
 	for _, match := range matches {
 		Logln("Looking for:", match[0])
 		if os.Getenv(match[1]) == "" {
-			return "", &ErrRequiredEnvKeyMissing{Key: match[0]}
+			missingEnvKeys = true
+			errorResults = multierror.Append(errorResults, &ErrRequiredEnvKeyMissing{Key: match[0]})
 		}
+	}
+
+	if missingEnvKeys {
+		return "", errorResults
 	}
 
 	expanded := os.ExpandEnv(content)

@@ -19,7 +19,7 @@
 package defaults
 
 var SampleConfig = []byte(`config: 
-  export_directory: /home/kasun/.wso2apimcli/exported
+  export_directory: /home/wso2user/.wso2apimcli/exported
   http_request_timeout: 10000
 environments: 
   sample-env1: 

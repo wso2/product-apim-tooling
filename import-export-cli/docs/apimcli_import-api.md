@@ -28,7 +28,8 @@ apimcli import-api -f ~/myapi -e production --update --inject
   -h, --help                 help for import-api
       --params string        Provide a API Manager params file (default "api_params.yaml")
       --preserve-provider    Preserve existing provider of API after exporting (default true)
-      --update               Update API if exists. Otherwise it will create API
+      --skipCleanup          Leave all temporary files created during import process
+      --update               Update an existing API or create a new API
 ```
 
 ### Options inherited from parent commands

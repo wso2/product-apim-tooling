@@ -21,10 +21,9 @@ apimcli init myapi --openapi petstore.yaml
 
 ```
   -d, --definition string   Provide a YAML definition of API
-      --env-inject          Inject environment variables to definition file
   -f, --force               Force create project
   -h, --help                help for init
-      --openapi string      Provide an OpenAPI definition for the API (json/yaml)
+      --oas string          Provide an OpenAPI specification file for the API
 ```
 
 ### Options inherited from parent commands

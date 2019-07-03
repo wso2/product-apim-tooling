@@ -19,7 +19,6 @@
 package cmd
 
 import (
-	"archive/zip"
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
@@ -54,7 +53,7 @@ var (
 	importAPICmdPreserveProvider bool
 	importAPIUpdate              bool
 	importAPIParamsFile          string
-	importAPIDebugMode           bool
+	importAPISkipCleanup         bool
 	reApiName                    = regexp.MustCompile(`[~!@#;:%^*()+={}|\\<>"',&/$]`)
 )
 
@@ -121,42 +120,61 @@ func getAPIDefinition(filePath string) (*v2.APIDefinition, error) {
 
 	var buffer []byte
 	if info.IsDir() {
-		apiFilePath := path.Join(filePath, "Meta-information", "api.json")
-		if _, err := os.Stat(filePath); os.IsNotExist(err) {
-			return nil, err
-		}
-
-		// read file
-		buffer, err = ioutil.ReadFile(apiFilePath)
+		_, content, err := resolveYamlOrJson(path.Join(filePath, "Meta-information", "api"))
 		if err != nil {
 			return nil, err
 		}
-	} else {
-		// try reading zip file
-		r, err := zip.OpenReader(filePath)
-		if err != nil {
-			return nil, err
-		}
-		defer r.Close()
-
-		for _, file := range r.File {
-			// find api.json file inside the archive
-			if strings.Contains(file.Name, "api.json") {
-				rc, err := file.Open()
-				if err != nil {
-					return nil, err
-				}
-
-				buffer, err = ioutil.ReadAll(rc)
-				if err != nil {
-					_ = rc.Close()
-					return nil, err
-				}
-				_ = rc.Close()
-				break
-			}
-		}
+		buffer = content
+		//apiFilePath := path.Join(filePath, "Meta-information", "api.yaml")
+		//if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		//	return nil, err
+		//}
+		//
+		//// read file
+		//buffer, err = ioutil.ReadFile(apiFilePath)
+		//if err != nil {
+		//	return nil, err
+		//}
 	}
+	//} else {
+	//	// try reading zip file
+	//	r, err := zip.OpenReader(filePath)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//	defer r.Close()
+	//
+	//	for _, file := range r.File {
+	//		// find api.yaml or api.json file inside the archive
+	//		if strings.Contains(file.Name, "api.yaml") {
+	//			rc, err := file.Open()
+	//			if err != nil {
+	//				return nil, err
+	//			}
+	//
+	//			buffer, err = ioutil.ReadAll(rc)
+	//			if err != nil {
+	//				_ = rc.Close()
+	//				return nil, err
+	//			}
+	//			_ = rc.Close()
+	//			break
+	//		} else if strings.Contains(file.Name, "api.json") {
+	//			rc, err := file.Open()
+	//			if err != nil {
+	//				return nil, err
+	//			}
+	//
+	//			buffer, err = ioutil.ReadAll(rc)
+	//			if err != nil {
+	//				_ = rc.Close()
+	//				return nil, err
+	//			}
+	//			_ = rc.Close()
+	//			break
+	//		}
+	//	}
+	//}
 
 	api, err := extractAPIDefinition(buffer)
 	if err != nil {
@@ -169,9 +187,13 @@ func getAPIDefinition(filePath string) (*v2.APIDefinition, error) {
 // for now only Endpoints are merged
 func mergeAPI(apiDirectory string, environmentParams *utils.Environment) error {
 	// read api from Meta-information
-	apiPath := filepath.Join(apiDirectory, "Meta-information", "api.json")
+	apiPath := filepath.Join(apiDirectory, "Meta-information", "api.yaml")
 	utils.Logln(utils.LogPrefixInfo+"Reading API definition from: ", apiPath)
-	api, err := gabs.ParseJSONFile(apiPath)
+	jsonContent, err := utils.LoadYamlAsJson(apiPath)
+	if err != nil {
+		return err
+	}
+	api, err := gabs.ParseJSON(jsonContent)
 	if err != nil {
 		return err
 	}
@@ -200,7 +222,11 @@ func mergeAPI(apiDirectory string, environmentParams *utils.Environment) error {
 
 	utils.Logln(utils.LogPrefixInfo+"Writing merged API to:", apiPath)
 	// write this to disk
-	err = ioutil.WriteFile(apiPath, api.Bytes(), 0644)
+	content, err := utils.JsonToYaml(api.Bytes())
+	if err != nil {
+		return err
+	}
+	err = ioutil.WriteFile(apiPath, content, 0644)
 	if err != nil {
 		return err
 	}
@@ -265,7 +291,7 @@ func resolveAPIParamsPath(importPath, paramPath string) (string, error) {
 		fp := filepath.Join(base, DefaultAPIMParamsFileName)
 		utils.Logln(utils.LogPrefixInfo+"Scanning for", fp)
 		if info, err := os.Stat(fp); err == nil && !info.IsDir() {
-			// found api_params.yml in the basepath
+			// found api_params.yml in the base path
 			return fp, nil
 		}
 
@@ -326,6 +352,44 @@ func getTempApiDirectory(file string) (string, error) {
 	}
 }
 
+// resolveYamlOrJson for a given filepath.
+// first it will look for the yaml file, if not will fallback for json
+// give filename without extension so resolver will resolve for file
+// fn is resolved filename, jsonContent is file as a json object, error if anything wrong happen(or both files does not exists)
+func resolveYamlOrJson(filename string) (string, []byte, error) {
+	// lookup for yaml
+	yamlFp := filename + ".yaml"
+	if info, err := os.Stat(yamlFp); err == nil && !info.IsDir() {
+		utils.Logln(utils.LogPrefixInfo+"Loading", yamlFp)
+		// read it
+		fn := yamlFp
+		yamlContent, err := ioutil.ReadFile(fn)
+		if err != nil {
+			return "", nil, err
+		}
+		// load it as yaml
+		jsonContent, err := utils.YamlToJson(yamlContent)
+		if err != nil {
+			return "", nil, err
+		}
+		return fn, jsonContent, nil
+	}
+
+	jsonFp := filename + ".json"
+	if info, err := os.Stat(jsonFp); err == nil && !info.IsDir() {
+		utils.Logln(utils.LogPrefixInfo+"Loading", jsonFp)
+		// read it
+		fn := jsonFp
+		jsonContent, err := ioutil.ReadFile(fn)
+		if err != nil {
+			return "", nil, err
+		}
+		return fn, jsonContent, nil
+	}
+
+	return "", nil, fmt.Errorf("%s was not found as a YAML or JSON", filename)
+}
+
 func resolveCertPath(importPath, p string) (string, error) {
 	// look in importPath
 	utils.Logln(utils.LogPrefixInfo+"Resolving for", p)
@@ -375,15 +439,20 @@ func generateCertificates(importPath string, environment *utils.Environment) err
 		certs = append(certs, cert)
 	}
 
-	data, err := json.MarshalIndent(certs, "", "  ")
+	data, err := json.Marshal(certs)
+	if err != nil {
+		return err
+	}
+
+	yamlContent, err := utils.JsonToYaml(data)
 	if err != nil {
 		return err
 	}
 
 	// filepath to save certs
-	fp := filepath.Join(importPath, "Meta-information", "endpoint_certificates.json")
+	fp := filepath.Join(importPath, "Meta-information", "endpoint_certificates.yaml")
 	utils.Logln(utils.LogPrefixInfo+"Writing", fp)
-	err = ioutil.WriteFile(fp, data, os.ModePerm)
+	err = ioutil.WriteFile(fp, yamlContent, os.ModePerm)
 
 	return err
 }
@@ -439,9 +508,13 @@ func isEmpty(s string) bool {
 
 func preProcessAPI(apiDirectory string) error {
 	dirty := false
-	apiPath := filepath.Join(apiDirectory, "Meta-information", "api.json")
+	apiPath, jsonData, err := resolveYamlOrJson(filepath.Join(apiDirectory, "Meta-information", "api"))
+	if err != nil {
+		return err
+	}
 	utils.Logln(utils.LogPrefixInfo+"Loading API definition from: ", apiPath)
-	api, err := gabs.ParseJSONFile(apiPath)
+
+	api, err := gabs.ParseJSON(jsonData)
 	if err != nil {
 		return err
 	}
@@ -484,9 +557,14 @@ func preProcessAPI(apiDirectory string) error {
 	}
 
 	if dirty {
-		utils.Logln(utils.LogPrefixInfo+"Writing preprocessed API to:", apiPath)
+		yamlApiPath := filepath.Join(apiDirectory, "Meta-information", "api.yaml")
+		utils.Logln(utils.LogPrefixInfo+"Writing preprocessed API to:", yamlApiPath)
+		content, err := utils.JsonToYaml(api.Bytes())
+		if err != nil {
+			return err
+		}
 		// write this to disk
-		err = ioutil.WriteFile(apiPath, api.Bytes(), 0644)
+		err = ioutil.WriteFile(yamlApiPath, content, 0644)
 		if err != nil {
 			return err
 		}
@@ -653,7 +731,7 @@ func ImportAPI(credential credentials.Credential, importPath, apiImportExportEnd
 		return err
 	}
 	defer func() {
-		if importAPIDebugMode {
+		if importAPISkipCleanup {
 			utils.Logln(utils.LogPrefixInfo+"Leaving", tmpPath)
 			return
 		}
@@ -692,14 +770,18 @@ func ImportAPI(credential credentials.Credential, importPath, apiImportExportEnd
 	if populateApiWithDefaults(apiInfo) {
 		utils.Logln(utils.LogPrefixInfo + "API is populated with defaults")
 		// api is dirty, write it to disk
-		buf, err := json.MarshalIndent(apiInfo, "", "  ")
+		buf, err := json.Marshal(apiInfo)
 		if err != nil {
 			return err
 		}
-		p := filepath.Join(apiFilePath, "Meta-information", "api.json")
+		yamlContent, err := utils.JsonToYaml(buf)
+		if err != nil {
+			return err
+		}
+		p := filepath.Join(apiFilePath, "Meta-information", "api.yaml")
 		utils.Logln(utils.LogPrefixInfo+"Writing", p)
 
-		err = ioutil.WriteFile(p, buf, 0644)
+		err = ioutil.WriteFile(p, yamlContent, 0644)
 		if err != nil {
 			return err
 		}
@@ -721,7 +803,7 @@ func ImportAPI(credential credentials.Credential, importPath, apiImportExportEnd
 			return err
 		}
 		defer func() {
-			if importAPIDebugMode {
+			if importAPISkipCleanup {
 				utils.Logln(utils.LogPrefixInfo+"Leaving", tmp.Name())
 				return
 			}
@@ -786,11 +868,12 @@ func init() {
 		"", "Environment from the which the API should be imported")
 	ImportAPICmd.Flags().BoolVar(&importAPICmdPreserveProvider, "preserve-provider", true,
 		"Preserve existing provider of API after exporting")
-	ImportAPICmd.Flags().BoolVarP(&importAPIUpdate, "update", "", false, "Update API "+
-		"if exists. Otherwise it will create API")
+	ImportAPICmd.Flags().BoolVarP(&importAPIUpdate, "update", "", false, "Update an "+
+		"existing API or create a new API")
 	ImportAPICmd.Flags().StringVarP(&importAPIParamsFile, "params", "", DefaultAPIMParamsFileName,
 		"Provide a API Manager params file")
-	ImportAPICmd.Flags().BoolVarP(&importAPIDebugMode, "debug", "", false, "Enable debug mode")
+	ImportAPICmd.Flags().BoolVarP(&importAPISkipCleanup, "skipCleanup", "", false, "Leave "+
+		"all temporary files created during import process")
 	// Mark required flags
 	_ = ImportAPICmd.MarkFlagRequired("environment")
 	_ = ImportAPICmd.MarkFlagRequired("file")

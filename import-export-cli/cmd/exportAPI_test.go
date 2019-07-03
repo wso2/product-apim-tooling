@@ -19,16 +19,18 @@
 package cmd
 
 import (
-	"github.com/go-resty/resty"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/go-resty/resty"
+
 	"fmt"
-	"github.com/renstrom/dedent"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
 	"net/http/httptest"
+
+	"github.com/renstrom/dedent"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 func TestExportAPI(t *testing.T) {
@@ -54,7 +56,7 @@ func TestExportAPI(t *testing.T) {
 	}))
 	defer server.Close()
 
-	resp := getExportApiResponse("test", "1.0", "admin", server.URL, "")
+	resp := getExportApiResponse("test", "1.0", "admin", "json", server.URL, "", false)
 	fmt.Println(resp)
 }
 
