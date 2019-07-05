@@ -32,6 +32,7 @@ import (
 
 var exportAppName string
 var exportAppOwner string
+var exportAppWithKeys bool
 
 //var flagExportAPICmdToken string
 // ExportApp command related usage info
@@ -108,7 +109,7 @@ func WriteApplicationToZip(exportAppName, exportAppOwner, zipLocationPath string
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating zip archive", err)
 	}
-	fmt.Println("Succesfully exported Application!")
+	fmt.Println("Successfully exported Application!")
 	fmt.Println("Find the exported Application at " + pFile)
 }
 
@@ -120,6 +121,10 @@ func WriteApplicationToZip(exportAppName, exportAppOwner, zipLocationPath string
 func getExportAppResponse(name, owner, adminEndpoint, accessToken string) *resty.Response {
 	adminEndpoint = utils.AppendSlashToString(adminEndpoint)
 	query := "export/applications?appName=" + name + utils.SearchAndTag + "appOwner=" + owner
+
+	if exportAppWithKeys {
+		query += "&withKeys=true"
+	}
 
 	url := adminEndpoint + query
 	utils.Logln(utils.LogPrefixInfo+"ExportApp: URL:", url)
@@ -145,5 +150,7 @@ func init() {
 		"Owner of the Application to be exported")
 	ExportAppCmd.Flags().StringVarP(&cmdExportEnvironment, "environment", "e",
 		"", "Environment to which the Application should be exported")
+	ExportAppCmd.Flags().BoolVarP(&exportAppWithKeys, "withKeys", "",
+		false, "Export keys for the application")
 	_ = ExportAppCmd.MarkFlagRequired("environment")
 }
