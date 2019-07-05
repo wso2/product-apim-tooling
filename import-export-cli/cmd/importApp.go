@@ -117,11 +117,6 @@ func ImportApplication(filename, appOwner, adminEndpiont, accessToken, exportDir
 		utils.SearchAndTag + "update=" + strconv.FormatBool(importAppUpdateApplication)
 	utils.Logln(utils.LogPrefixInfo + "Import URL: " + applicationImportEndpoint)
 
-	//sourceEnv := strings.Split(query, "/")[0] // environment from which the Application was exported
-	//utils.Logln(utils.LogPrefixInfo + "Source Environment: " + sourceEnv)
-	//
-	//fileName := query // ex:- fileName = dev/sampleApp.zip
-
 	zipFilePath, err := resolveImportFilePath(filename, exportDirectory)
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating request.", err)
