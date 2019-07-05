@@ -23,6 +23,7 @@ apimcli import-api -f ~/myapi -e production --update --inject
 ### Options
 
 ```
+      --debug                Enable debug mode
   -e, --environment string   Environment from the which the API should be imported
   -f, --file string          Name of the API to be imported
   -h, --help                 help for import-api
