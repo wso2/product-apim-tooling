@@ -58,6 +58,8 @@ then
   showUsageAndExit
 fi
 
+echo "Generating code..."
+go generate ./...
 
 rootPath=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 buildDir="build/target"
