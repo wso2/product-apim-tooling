@@ -125,57 +125,9 @@ func getAPIDefinition(filePath string) (*v2.APIDefinition, error) {
 			return nil, err
 		}
 		buffer = content
-		//apiFilePath := path.Join(filePath, "Meta-information", "api.yaml")
-		//if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		//	return nil, err
-		//}
-		//
-		//// read file
-		//buffer, err = ioutil.ReadFile(apiFilePath)
-		//if err != nil {
-		//	return nil, err
-		//}
+	} else {
+		return nil, fmt.Errorf("looking for directory, found %s", info.Name())
 	}
-	//} else {
-	//	// try reading zip file
-	//	r, err := zip.OpenReader(filePath)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//	defer r.Close()
-	//
-	//	for _, file := range r.File {
-	//		// find api.yaml or api.json file inside the archive
-	//		if strings.Contains(file.Name, "api.yaml") {
-	//			rc, err := file.Open()
-	//			if err != nil {
-	//				return nil, err
-	//			}
-	//
-	//			buffer, err = ioutil.ReadAll(rc)
-	//			if err != nil {
-	//				_ = rc.Close()
-	//				return nil, err
-	//			}
-	//			_ = rc.Close()
-	//			break
-	//		} else if strings.Contains(file.Name, "api.json") {
-	//			rc, err := file.Open()
-	//			if err != nil {
-	//				return nil, err
-	//			}
-	//
-	//			buffer, err = ioutil.ReadAll(rc)
-	//			if err != nil {
-	//				_ = rc.Close()
-	//				return nil, err
-	//			}
-	//			_ = rc.Close()
-	//			break
-	//		}
-	//	}
-	//}
-
 	api, err := extractAPIDefinition(buffer)
 	if err != nil {
 		return nil, err
