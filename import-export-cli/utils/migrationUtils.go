@@ -71,7 +71,7 @@ func WriteLastSuceededAPIFileData(exportRelatedFilesPath string, api API) {
 func (migrationApisExportMetadata *MigrationApisExportMetadata) ReadMigrationApisExportMetadataFile(filePath string) error {
 	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		HandleErrorAndExit("migration-apis-export-metadata.yaml: File Not Found: "+filePath, err)
+		return err
 	}
 	if err := yaml.Unmarshal(data, migrationApisExportMetadata); err != nil {
 		return err

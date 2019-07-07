@@ -20,6 +20,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/hashicorp/go-multierror"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -149,8 +150,12 @@ func prepareResumption() {
 	var lastSuceededAPI utils.API
 	lastSuceededAPI = utils.ReadLastSucceededAPIFileData(exportRelatedFilesPath)
 	var migrationApisExportMetadata utils.MigrationApisExportMetadata
-	migrationApisExportMetadata.ReadMigrationApisExportMetadataFile(filepath.Join(exportRelatedFilesPath,
+	err := migrationApisExportMetadata.ReadMigrationApisExportMetadataFile(filepath.Join(exportRelatedFilesPath,
 		utils.MigrationAPIsExportMetadataFileName))
+	if err != nil {
+		utils.HandleErrorAndExit("Error loading metadata for resume from"+filepath.Join(exportRelatedFilesPath,
+			utils.MigrationAPIsExportMetadataFileName), err)
+	}
 	apis = migrationApisExportMetadata.ApiListToExport
 	apiListOffset = migrationApisExportMetadata.ApiListOffset
 	startingApiIndexFromList = getLastSuceededApiIndex(lastSuceededAPI) + 1
@@ -191,14 +196,17 @@ func getLastSuceededApiIndex(lastSuceededApi utils.API) int {
 // migration-apis-export-metadata.yaml file
 func prepareStartFromBeginning() {
 	fmt.Println("Cleaning all the previously exported APIs of the given target tenant, in the given environment if " +
-		"any, and prepare to export APIs from beginning\n")
+		"any, and prepare to export APIs from beginning")
 	//cleaning existing old files (if exists) related to exportation
-	error := utils.RemoveDirectoryIfExists(filepath.Join(exportRelatedFilesPath, utils.ExportedApisDirName))
-	error = utils.RemoveFileIfExists(filepath.Join(exportRelatedFilesPath, utils.MigrationAPIsExportMetadataFileName))
-	error = utils.RemoveFileIfExists(filepath.Join(exportRelatedFilesPath, utils.LastSucceededApiFileName))
-	if error != nil {
+	var err error
+	err = multierror.Append(err,
+		utils.RemoveDirectoryIfExists(filepath.Join(exportRelatedFilesPath, utils.ExportedApisDirName)),
+		utils.RemoveFileIfExists(filepath.Join(exportRelatedFilesPath, utils.MigrationAPIsExportMetadataFileName)),
+		utils.RemoveFileIfExists(filepath.Join(exportRelatedFilesPath, utils.LastSucceededApiFileName)),
+	)
+	if err != nil {
 		utils.HandleErrorAndExit("Error occurred while cleaning existing old files (if exists) related to "+
-			"exportation", error)
+			"exportation", err)
 	}
 
 	apiListOffset = 0
