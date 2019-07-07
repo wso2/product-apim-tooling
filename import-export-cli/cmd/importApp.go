@@ -28,7 +28,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -38,11 +37,11 @@ import (
 
 var importAppFile string
 var importAppEnvironment string
-var importAppCmdUsername string
-var importAppCmdPassword string
 var importAppOwner string
 var preserveOwner bool
 var skipSubscriptions bool
+var importAppSkipKeys bool
+var importAppUpdateApplication bool
 
 // ImportApp command related usage info
 const importAppCmdLiteral = "import-app"
@@ -87,7 +86,7 @@ func executeImportAppCmd(credential credentials.Credential, importAppOwner, expo
 	if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusCreated {
 		// 200 OK or 201 Created
 		utils.Logln(utils.LogPrefixInfo+"Header:", resp.Header)
-		fmt.Println("Succesfully imported Application!")
+		fmt.Println("Successfully imported Application!")
 	} else if resp.StatusCode == http.StatusMultiStatus {
 		// 207 Multi Status
 		fmt.Printf("\nPartially imported Application" +
@@ -108,21 +107,20 @@ func executeImportAppCmd(credential credentials.Credential, importAppOwner, expo
 // @param name: name of the Application (zipped file) to be imported
 // @param apiManagerEndpoint: API Manager endpoint for the environment
 // @param accessToken: OAuth2.0 access token for the resource being accessed
-func ImportApplication(query, appOwner, adminEndpiont, accessToken, exportDirectory string) (*http.Response, error) {
+func ImportApplication(filename, appOwner, adminEndpiont, accessToken, exportDirectory string) (*http.Response, error) {
 	adminEndpiont = utils.AppendSlashToString(adminEndpiont)
 
 	applicationImportEndpoint := adminEndpiont + "import/applications"
 	url := applicationImportEndpoint + "?appOwner=" + appOwner + utils.SearchAndTag + "preserveOwner=" +
 		strconv.FormatBool(preserveOwner) + utils.SearchAndTag + "skipSubscriptions=" +
-		strconv.FormatBool(skipSubscriptions)
+		strconv.FormatBool(skipSubscriptions) + utils.SearchAndTag + "skipApplicationKeys=" + strconv.FormatBool(importAppSkipKeys) +
+		utils.SearchAndTag + "update=" + strconv.FormatBool(importAppUpdateApplication)
 	utils.Logln(utils.LogPrefixInfo + "Import URL: " + applicationImportEndpoint)
 
-	sourceEnv := strings.Split(query, "/")[0] // environment from which the Application was exported
-	utils.Logln(utils.LogPrefixInfo + "Source Environment: " + sourceEnv)
-
-	fileName := query // ex:- fileName = dev/sampleApp.zip
-
-	zipFilePath := filepath.Join(exportDirectory, fileName)
+	zipFilePath, err := resolveImportFilePath(filename, exportDirectory)
+	if err != nil {
+		utils.HandleErrorAndExit("Error creating request.", err)
+	}
 	fmt.Println("ZipFilePath:", zipFilePath)
 
 	extraParams := map[string]string{}
@@ -156,7 +154,7 @@ func ImportApplication(query, appOwner, adminEndpiont, accessToken, exportDirect
 		if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK ||
 			resp.StatusCode == http.StatusMultiStatus {
 			// 207 Multi Status or 201 Created or 200 OK
-			fmt.Printf("\nCompleted importing the Application '" + fileName + "'\n")
+			fmt.Printf("\nCompleted importing the Application '" + filename + "'\n")
 		} else {
 			fmt.Printf("\nUnable to import the Application\n")
 			fmt.Println("Status: " + resp.Status)
@@ -219,6 +217,10 @@ func init() {
 		"Preserves app owner")
 	ImportAppCmd.Flags().BoolVarP(&skipSubscriptions, "skipSubscriptions", "s", false,
 		"Skip subscriptions of the Application")
+	ImportAppCmd.Flags().BoolVarP(&importAppSkipKeys, "skipKeys", "", false,
+		"Skip importing keys of application")
+	ImportAppCmd.Flags().BoolVarP(&importAppUpdateApplication, "update", "", false,
+		"Update application or create new")
 
 	_ = ImportAPICmd.MarkFlagRequired("environment")
 }

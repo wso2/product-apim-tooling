@@ -26,7 +26,7 @@ NOTE: Flag --name (-n) and --owner (-o) are mandatory
   -h, --help                 help for export-app
   -n, --name string          Name of the Application to be exported
   -o, --owner string         Owner of the Application to be exported
-      --with-keys            Export keys for the application
+      --withKeys             Export keys for the application
 ```
 
 ### Options inherited from parent commands
