@@ -19,13 +19,13 @@
 package cmd
 
 import (
+	"github.com/stretchr/testify/assert"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/go-resty/resty"
 
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 
@@ -56,8 +56,9 @@ func TestExportAPI(t *testing.T) {
 	}))
 	defer server.Close()
 
-	resp := getExportApiResponse("test", "1.0", "admin", "json", server.URL, "", false)
-	fmt.Println(resp)
+	resp, err := getExportApiResponse("test", "1.0", "admin", "json", server.URL, "", false)
+	assert.Nil(t, err, "Error should be nil")
+	assert.Equal(t, 200, resp.StatusCode())
 }
 
 func TestWriteToZip(t *testing.T) {

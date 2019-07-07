@@ -115,8 +115,11 @@ func exportAPIs() {
 				exportAPIVersion := apis[i].Version
 				exportApiProvider := apis[i].Provider
 				apiImportExportEndpoint := utils.GetApiImportExportEndpointOfEnv(cmdExportEnvironment, utils.MainConfigFilePath)
-				resp := getExportApiResponse(exportAPIName, exportAPIVersion, exportApiProvider, exportAPIFormat, apiImportExportEndpoint,
+				resp, err := getExportApiResponse(exportAPIName, exportAPIVersion, exportApiProvider, exportAPIFormat, apiImportExportEndpoint,
 					b64encodedCredentials, exportAPIPreserveStatus)
+				if err != nil {
+					utils.HandleErrorAndExit("Error exporting", err)
+				}
 
 				if resp.StatusCode() == http.StatusOK {
 					utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())

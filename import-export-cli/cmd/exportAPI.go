@@ -76,9 +76,11 @@ func executeExportAPICmd(credential credentials.Credential, exportDirectory stri
 	b64encodedCredentials := credentials.GetBasicAuth(credential)
 
 	apiImportExportEndpoint := utils.GetApiImportExportEndpointOfEnv(cmdExportEnvironment, utils.MainConfigFilePath)
-	resp := getExportApiResponse(exportAPIName, exportAPIVersion, exportProvider, exportAPIFormat, apiImportExportEndpoint,
+	resp, err := getExportApiResponse(exportAPIName, exportAPIVersion, exportProvider, exportAPIFormat, apiImportExportEndpoint,
 		b64encodedCredentials, exportAPIPreserveStatus)
-
+	if err != nil {
+		utils.HandleErrorAndExit("Error while exporting", err)
+	}
 	// Print info on response
 	utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
 	apiZipLocationPath := filepath.Join(exportDirectory, cmdExportEnvironment)
@@ -86,10 +88,10 @@ func executeExportAPICmd(credential credentials.Credential, exportDirectory stri
 		WriteToZip(exportAPIName, exportAPIVersion, apiZipLocationPath, resp)
 	} else if resp.StatusCode() == http.StatusInternalServerError {
 		// 500 Internal Server Error
-		fmt.Println("Incorrect password")
+		fmt.Println(string(resp.Body()))
 	} else {
 		// neither 200 nor 500
-		fmt.Println("Error exporting API:", resp.Status())
+		fmt.Println("Error exporting API:", resp.Status(), "\n", string(resp.Body()))
 	}
 }
 
@@ -127,7 +129,7 @@ func WriteToZip(exportAPIName, exportAPIVersion, zipLocationPath string, resp *r
 // @param apiImportExportEndpoint : API Import Export Endpoint for the environment
 // @param  b64encodedCredentials: Base64 Encoded 'username:password'
 // @return response Response in the form of *resty.Response
-func getExportApiResponse(name, version, provider, format, apiImportExportEndpoint, b64encodedCredentials string, preserveStatus bool) *resty.Response {
+func getExportApiResponse(name, version, provider, format, apiImportExportEndpoint, b64encodedCredentials string, preserveStatus bool) (*resty.Response, error) {
 	apiImportExportEndpoint = utils.AppendSlashToString(apiImportExportEndpoint)
 	query := "export-api?name=" + name + "&version=" + version + "&provider=" + provider +
 		"&preserveStatus=" + strconv.FormatBool(preserveStatus) +
@@ -142,10 +144,10 @@ func getExportApiResponse(name, version, provider, format, apiImportExportEndpoi
 	resp, err := utils.InvokeGETRequest(url, headers)
 
 	if err != nil {
-		utils.HandleErrorAndExit("Error exporting API: "+name, err)
+		return nil, err
 	}
 
-	return resp
+	return resp, nil
 }
 
 // init using Cobra
