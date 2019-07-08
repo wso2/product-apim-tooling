@@ -10,7 +10,7 @@
 ├── Meta-information
 │   ├── api.json
 │   └── swagger.json
-├── README.txt
+├── README.md
 └── Sequences
     ├── fault-sequence
     ├── in-sequence

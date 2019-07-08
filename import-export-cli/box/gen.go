@@ -56,6 +56,7 @@ func main() {
 			log.Println(path, "is a file, baking in...")
 			b, err := ioutil.ReadFile(path)
 			if err != nil {
+				log.Printf("Error reading %s: %s", path, err)
 				return err
 			}
 			resources[relativePath] = b
@@ -64,7 +65,7 @@ func main() {
 	})
 
 	if err != nil {
-		log.Fatal("Error walking through resources:",err)
+		log.Fatal("Error walking through resources directory:",err)
 	}
 
 	f, err := os.Create(blob)
