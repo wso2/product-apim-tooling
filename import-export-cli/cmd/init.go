@@ -28,7 +28,8 @@ import (
 	"text/template"
 	"unicode"
 
-	"github.com/Jeffail/gabs"
+	yaml2 "gopkg.in/yaml.v2"
+
 	"github.com/go-openapi/loads"
 	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 
@@ -45,13 +46,8 @@ var (
 	initCmdOutputDir         string
 	initCmdSwaggerPath       string
 	initCmdApiDefinitionPath string
-	initCmdEnvInject         bool
 	initCmdForced            bool
 )
-
-type Swagger2SpecPartial struct {
-	BasePath string `json:"basePath,omitempty" yaml:"basePath,omitempty"`
-}
 
 // directories to be created
 var dirs = []string{
@@ -134,7 +130,7 @@ func scaffoldParams(file string) error {
 // executeInitCmd will run init command
 func executeInitCmd() error {
 	var dir string
-	swaggerSavePath := filepath.Join(initCmdOutputDir, filepath.FromSlash("Meta-information/swagger.json"))
+	swaggerSavePath := filepath.Join(initCmdOutputDir, filepath.FromSlash("Meta-information/swagger.yaml"))
 
 	if initCmdOutputDir != "" {
 		err := os.MkdirAll(initCmdOutputDir, os.ModePerm)
@@ -185,13 +181,14 @@ func executeInitCmd() error {
 			def.SandboxUrl = ""
 		}
 
-		data, err := gabs.ParseJSON(doc.Raw())
+		// convert and save swagger as yaml
+		yamlSwagger, err := utils.JsonToYaml(doc.Raw())
 		if err != nil {
 			return err
 		}
 
 		// write to file
-		err = ioutil.WriteFile(swaggerSavePath, data.BytesIndent("", "  "), os.ModePerm)
+		err = ioutil.WriteFile(swaggerSavePath, yamlSwagger, os.ModePerm)
 		if err != nil {
 			return err
 		}
@@ -214,17 +211,17 @@ func executeInitCmd() error {
 		}
 
 		apiDef := &v2.APIDefinition{}
-		// inject from env if requested
-		if initCmdEnvInject {
-			utils.Logln(utils.LogPrefixInfo + "Injecting variables to definition from environment")
-			data, err := utils.InjectEnv(string(content))
-			if err != nil {
-				return err
-			}
-			content = []byte(data)
+
+		// substitute env variables
+		utils.Logln(utils.LogPrefixInfo + "Substituting environment variables")
+		data, err := utils.InjectEnv(string(content))
+		if err != nil {
+			return err
 		}
+		content = []byte(data)
+
 		// read from yaml definition
-		err = yaml.Unmarshal(content, &apiDef)
+		err = yaml2.Unmarshal(content, &apiDef)
 		if err != nil {
 			return err
 		}
@@ -252,15 +249,16 @@ func executeInitCmd() error {
 		}
 		def = tmpDef
 	}
-	// indent json with two spaces
-	indentedDefBytes, err := json.MarshalIndent(def, "", "  ")
+
+	apiData, err := yaml2.Marshal(def)
 	if err != nil {
 		return err
 	}
+
 	// write to the disk
-	apiJSONPath := filepath.Join(initCmdOutputDir, filepath.FromSlash("Meta-information/api.json"))
+	apiJSONPath := filepath.Join(initCmdOutputDir, filepath.FromSlash("Meta-information/api.yaml"))
 	utils.Logln(utils.LogPrefixInfo + "Writing " + apiJSONPath)
-	err = ioutil.WriteFile(apiJSONPath, indentedDefBytes, os.ModePerm)
+	err = ioutil.WriteFile(apiJSONPath, apiData, os.ModePerm)
 	if err != nil {
 		return err
 	}
@@ -278,7 +276,9 @@ func executeInitCmd() error {
 	if err != nil {
 		return err
 	}
+
 	fmt.Println("Project initialized")
+	fmt.Println("Open README file to learn more")
 	return nil
 }
 
@@ -317,9 +317,7 @@ func init() {
 	RootCmd.AddCommand(InitCommand)
 	InitCommand.Flags().StringVarP(&initCmdApiDefinitionPath, "definition", "d", "", "Provide a "+
 		"YAML definition of API")
-	InitCommand.Flags().StringVarP(&initCmdSwaggerPath, "openapi", "", "", "Provide an OpenAPI "+
-		"definition for the API (json/yaml)")
-	InitCommand.Flags().BoolVarP(&initCmdEnvInject, "env-inject", "", false, "Inject "+
-		"environment variables to definition file")
+	InitCommand.Flags().StringVarP(&initCmdSwaggerPath, "oas", "", "", "Provide an OpenAPI "+
+		"specification file for the API")
 	InitCommand.Flags().BoolVarP(&initCmdForced, "force", "f", false, "Force create project")
 }

@@ -20,9 +20,11 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"io/ioutil"
 	"os"
+	"strconv"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 
 	"github.com/go-resty/resty"
 	"github.com/spf13/cobra"
@@ -35,6 +37,8 @@ import (
 var exportAPIName string
 var exportAPIVersion string
 var exportProvider string
+var exportAPIPreserveStatus bool
+var exportAPIFormat string
 var runnigExportApiCommand bool
 
 // ExportAPI command related usage info
@@ -72,9 +76,11 @@ func executeExportAPICmd(credential credentials.Credential, exportDirectory stri
 	b64encodedCredentials := credentials.GetBasicAuth(credential)
 
 	apiImportExportEndpoint := utils.GetApiImportExportEndpointOfEnv(cmdExportEnvironment, utils.MainConfigFilePath)
-	resp := getExportApiResponse(exportAPIName, exportAPIVersion, exportProvider, apiImportExportEndpoint,
-		b64encodedCredentials)
-
+	resp, err := getExportApiResponse(exportAPIName, exportAPIVersion, exportProvider, exportAPIFormat, apiImportExportEndpoint,
+		b64encodedCredentials, exportAPIPreserveStatus)
+	if err != nil {
+		utils.HandleErrorAndExit("Error while exporting", err)
+	}
 	// Print info on response
 	utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
 	apiZipLocationPath := filepath.Join(exportDirectory, cmdExportEnvironment)
@@ -82,10 +88,10 @@ func executeExportAPICmd(credential credentials.Credential, exportDirectory stri
 		WriteToZip(exportAPIName, exportAPIVersion, apiZipLocationPath, resp)
 	} else if resp.StatusCode() == http.StatusInternalServerError {
 		// 500 Internal Server Error
-		fmt.Println("Incorrect password")
+		fmt.Println(string(resp.Body()))
 	} else {
 		// neither 200 nor 500
-		fmt.Println("Error exporting API:", resp.Status())
+		fmt.Println("Error exporting API:", resp.Status(), "\n", string(resp.Body()))
 	}
 }
 
@@ -123,9 +129,13 @@ func WriteToZip(exportAPIName, exportAPIVersion, zipLocationPath string, resp *r
 // @param apiImportExportEndpoint : API Import Export Endpoint for the environment
 // @param  b64encodedCredentials: Base64 Encoded 'username:password'
 // @return response Response in the form of *resty.Response
-func getExportApiResponse(name, version, provider, apiImportExportEndpoint, b64encodedCredentials string) *resty.Response {
+func getExportApiResponse(name, version, provider, format, apiImportExportEndpoint, b64encodedCredentials string, preserveStatus bool) (*resty.Response, error) {
 	apiImportExportEndpoint = utils.AppendSlashToString(apiImportExportEndpoint)
-	query := "export-api?name=" + name + "&version=" + version + "&provider=" + provider
+	query := "export-api?name=" + name + "&version=" + version + "&provider=" + provider +
+		"&preserveStatus=" + strconv.FormatBool(preserveStatus)
+	if format != "" {
+		query += "&format=" + format
+	}
 
 	url := apiImportExportEndpoint + query
 	utils.Logln(utils.LogPrefixInfo+"ExportAPI: URL:", url)
@@ -136,10 +146,10 @@ func getExportApiResponse(name, version, provider, apiImportExportEndpoint, b64e
 	resp, err := utils.InvokeGETRequest(url, headers)
 
 	if err != nil {
-		utils.HandleErrorAndExit("Error exporting API: "+name, err)
+		return nil, err
 	}
 
-	return resp
+	return resp, nil
 }
 
 // init using Cobra
@@ -153,5 +163,8 @@ func init() {
 		"Provider of the API")
 	ExportAPICmd.Flags().StringVarP(&cmdExportEnvironment, "environment", "e",
 		"", "Environment to which the API should be exported")
+	ExportAPICmd.Flags().BoolVarP(&exportAPIPreserveStatus, "preserveStatus", "", true,
+		"Preserve API status when exporting. Otherwise API will be exported in CREATED status")
+	ExportAPICmd.Flags().StringVarP(&exportAPIFormat, "format", "", "", "File format of exported archive(json or yaml)")
 	_ = ExportAPICmd.MarkFlagRequired("environment")
 }

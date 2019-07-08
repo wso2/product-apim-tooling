@@ -16,7 +16,6 @@ func TestInjectEnvShouldFailWhenEnvNotPresent(t *testing.T) {
 	str, err := InjectEnv(data)
 	assert.Equal(t, "", str, "Should return empty string")
 	assert.Error(t, err, "Should return an error")
-	assert.EqualError(t, err, "$MYVAR is required, please set the environment variable")
 }
 
 func TestInjectEnvShouldPassWhenEnvPresents(t *testing.T) {

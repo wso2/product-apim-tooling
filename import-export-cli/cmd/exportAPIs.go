@@ -20,14 +20,16 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cast"
-	"github.com/spf13/cobra"
-	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"github.com/hashicorp/go-multierror"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
+
+	"github.com/spf13/cast"
+	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 const exportAPIsCmdLiteral = "export-apis"
@@ -113,8 +115,11 @@ func exportAPIs() {
 				exportAPIVersion := apis[i].Version
 				exportApiProvider := apis[i].Provider
 				apiImportExportEndpoint := utils.GetApiImportExportEndpointOfEnv(cmdExportEnvironment, utils.MainConfigFilePath)
-				resp := getExportApiResponse(exportAPIName, exportAPIVersion, exportApiProvider, apiImportExportEndpoint,
-					b64encodedCredentials)
+				resp, err := getExportApiResponse(exportAPIName, exportAPIVersion, exportApiProvider, exportAPIFormat, apiImportExportEndpoint,
+					b64encodedCredentials, exportAPIPreserveStatus)
+				if err != nil {
+					utils.HandleErrorAndExit("Error exporting", err)
+				}
 
 				if resp.StatusCode() == http.StatusOK {
 					utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
@@ -148,8 +153,12 @@ func prepareResumption() {
 	var lastSuceededAPI utils.API
 	lastSuceededAPI = utils.ReadLastSucceededAPIFileData(exportRelatedFilesPath)
 	var migrationApisExportMetadata utils.MigrationApisExportMetadata
-	migrationApisExportMetadata.ReadMigrationApisExportMetadataFile(filepath.Join(exportRelatedFilesPath,
+	err := migrationApisExportMetadata.ReadMigrationApisExportMetadataFile(filepath.Join(exportRelatedFilesPath,
 		utils.MigrationAPIsExportMetadataFileName))
+	if err != nil {
+		utils.HandleErrorAndExit("Error loading metadata for resume from"+filepath.Join(exportRelatedFilesPath,
+			utils.MigrationAPIsExportMetadataFileName), err)
+	}
 	apis = migrationApisExportMetadata.ApiListToExport
 	apiListOffset = migrationApisExportMetadata.ApiListOffset
 	startingApiIndexFromList = getLastSuceededApiIndex(lastSuceededAPI) + 1
@@ -190,14 +199,17 @@ func getLastSuceededApiIndex(lastSuceededApi utils.API) int {
 // migration-apis-export-metadata.yaml file
 func prepareStartFromBeginning() {
 	fmt.Println("Cleaning all the previously exported APIs of the given target tenant, in the given environment if " +
-		"any, and prepare to export APIs from beginning\n")
+		"any, and prepare to export APIs from beginning")
 	//cleaning existing old files (if exists) related to exportation
-	error := utils.RemoveDirectoryIfExists(filepath.Join(exportRelatedFilesPath, utils.ExportedApisDirName))
-	error = utils.RemoveFileIfExists(filepath.Join(exportRelatedFilesPath, utils.MigrationAPIsExportMetadataFileName))
-	error = utils.RemoveFileIfExists(filepath.Join(exportRelatedFilesPath, utils.LastSucceededApiFileName))
-	if error != nil {
+	var err error
+	err = multierror.Append(err,
+		utils.RemoveDirectoryIfExists(filepath.Join(exportRelatedFilesPath, utils.ExportedApisDirName)),
+		utils.RemoveFileIfExists(filepath.Join(exportRelatedFilesPath, utils.MigrationAPIsExportMetadataFileName)),
+		utils.RemoveFileIfExists(filepath.Join(exportRelatedFilesPath, utils.LastSucceededApiFileName)),
+	)
+	if err != nil {
 		utils.HandleErrorAndExit("Error occurred while cleaning existing old files (if exists) related to "+
-			"exportation", error)
+			"exportation", err)
 	}
 
 	apiListOffset = 0
@@ -269,5 +281,8 @@ func init() {
 	ExportAPIsCmd.PersistentFlags().BoolVarP(&cmdForceStartFromBegin, "force", "", false,
 		"Clean all the previously exported APIs of the given target tenant, in the given environment if "+
 			"any, and to export APIs from beginning")
+	ExportAPIsCmd.Flags().BoolVarP(&exportAPIPreserveStatus, "preserveStatus", "", true,
+		"Preserve API status when exporting. Otherwise API will be exported in CREATED status")
+	ExportAPIsCmd.Flags().StringVarP(&exportAPIFormat, "format", "", "json", "File format of exported archive")
 	_ = ExportAPIsCmd.MarkFlagRequired("environment")
 }

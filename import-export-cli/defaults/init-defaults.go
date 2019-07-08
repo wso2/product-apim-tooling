@@ -19,20 +19,18 @@
 package defaults
 
 var ApiSpecYaml = []byte(`id:
-  providerName: 'admin'
-  version: ''
-  apiName: ''
-context: ''
-type: 'HTTP'
-tags: []
+  providerName: admin
+  version: 1.0.0
+  apiName: 
+context: 
+type: HTTP
 availableTiers:
-- name: 'Unlimited'
-uriTemplates: []
-status: 'CREATED'
-visibility: 'public'
-transports: 'http,https'
-productionUrl: 'http://localhost:8080'
-sandboxUrl: 'http://localhost:8081'
+- name: Unlimited
+status: CREATED
+visibility: public
+transports: http,https
+productionUrl: http://localhost:8080
+sandboxUrl: http://localhost:8081
 `)
 
 var ProjectReadme = []byte(`WSO2 API Manager Project

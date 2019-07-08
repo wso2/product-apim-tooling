@@ -19,16 +19,18 @@
 package cmd
 
 import (
-	"github.com/go-resty/resty"
+	"github.com/stretchr/testify/assert"
 	"os"
 	"path/filepath"
 	"testing"
 
-	"fmt"
-	"github.com/renstrom/dedent"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"github.com/go-resty/resty"
+
 	"net/http"
 	"net/http/httptest"
+
+	"github.com/renstrom/dedent"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 func TestExportAPI(t *testing.T) {
@@ -54,8 +56,9 @@ func TestExportAPI(t *testing.T) {
 	}))
 	defer server.Close()
 
-	resp := getExportApiResponse("test", "1.0", "admin", server.URL, "")
-	fmt.Println(resp)
+	resp, err := getExportApiResponse("test", "1.0", "admin", "json", server.URL, "", false)
+	assert.Nil(t, err, "Error should be nil")
+	assert.Equal(t, 200, resp.StatusCode())
 }
 
 func TestWriteToZip(t *testing.T) {

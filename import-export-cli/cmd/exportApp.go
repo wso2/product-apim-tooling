@@ -69,18 +69,17 @@ func executeExportAppCmd(credential credentials.Credential, appsExportDirectoryP
 
 	if preCommandErr == nil {
 		adminEndpiont := utils.GetAdminEndpointOfEnv(cmdExportEnvironment, utils.MainConfigFilePath)
-		resp := getExportAppResponse(exportAppName, exportAppOwner, adminEndpiont, accessToken)
+		resp, err := getExportAppResponse(exportAppName, exportAppOwner, adminEndpiont, accessToken)
+		if err != nil {
+			utils.HandleErrorAndExit("Error exporting Application: "+exportAppName, err)
+		}
 
 		// Print info on response
 		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
 		if resp.StatusCode() == http.StatusOK {
 			WriteApplicationToZip(exportAppName, exportAppOwner, appsExportDirectoryPath, resp)
-		} else if resp.StatusCode() == http.StatusUnauthorized {
-			// 401 Unauthenticated request
-			fmt.Println("Incorrect Password!")
 		} else {
-			// neither 200 nor 500
-			fmt.Println("Error exporting Application:", resp.Status())
+			fmt.Println("Error " + string(resp.Body()))
 		}
 	} else {
 		// error exporting Application
@@ -118,7 +117,7 @@ func WriteApplicationToZip(exportAppName, exportAppOwner, zipLocationPath string
 // @param apimEndpoint : API Manager Endpoint for the environment
 // @param accessToken : Access Token for the resource
 // @return response Response in the form of *resty.Response
-func getExportAppResponse(name, owner, adminEndpoint, accessToken string) *resty.Response {
+func getExportAppResponse(name, owner, adminEndpoint, accessToken string) (*resty.Response, error) {
 	adminEndpoint = utils.AppendSlashToString(adminEndpoint)
 	query := "export/applications?appName=" + name + utils.SearchAndTag + "appOwner=" + owner
 
@@ -133,12 +132,10 @@ func getExportAppResponse(name, owner, adminEndpoint, accessToken string) *resty
 	headers[utils.HeaderAccept] = utils.HeaderValueApplicationZip
 
 	resp, err := utils.InvokeGETRequest(url, headers)
-
 	if err != nil {
-		utils.HandleErrorAndExit("Error exporting Application: "+name, err)
+		return nil, err
 	}
-
-	return resp
+	return resp, nil
 }
 
 //init using Cobra

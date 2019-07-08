@@ -19,14 +19,15 @@
 package cmd
 
 import (
-	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
-	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
+	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 
 	"github.com/renstrom/dedent"
 	"github.com/stretchr/testify/assert"
@@ -51,7 +52,7 @@ func TestImportAPI1(t *testing.T) {
 	}))
 	defer server.Close()
 
-	name := "PizzaShackAPI_1.0.0.zip"
+	name := "PizzaShackAPI-1.0.0"
 
 	err := ImportAPI(credentials.Credential{}, name, server.URL, "testdata", "")
 	assert.Nil(t, err, "Error should be nil")
@@ -152,13 +153,6 @@ func TestExtractAPIInfoWithMalformedJSON(t *testing.T) {
 	assert.Error(t, err, "Should return an error regarding malformed json")
 }
 
-func TestGetAPIInfoCorrectZip(t *testing.T) {
-	api, err := getAPIDefinition("testdata/PizzaShackAPI_1.0.0.zip")
-	assert.Nil(t, err, "Should return nil error on reading correct zip files")
-	assert.Equal(t, v2.ID{APIName: "PizzaShackAPI", Version: "1.0.0", ProviderName: "admin"}, api.ID,
-		"Should return correct values for ID info")
-}
-
 func TestGetAPIInfoCorrectDirectoryStructure(t *testing.T) {
 	api, err := getAPIDefinition("testdata/PizzaShackAPI-1.0.0")
 	assert.Nil(t, err, "Should return nil error on reading correct directories")
@@ -166,26 +160,10 @@ func TestGetAPIInfoCorrectDirectoryStructure(t *testing.T) {
 		"Should return correct values for ID info")
 }
 
-func TestGetAPIInfoMalformedZip(t *testing.T) {
-	api, err := getAPIDefinition("testdata/PizzaShackAPI_1.0.0-malformed.zip")
-	assert.Error(t, err, "Should return error on reading malformed zip files")
-	assert.True(t, os.IsNotExist(err), "File not found error must be thrown")
-	assert.Nil(t, api,
-		"Should return nil for malformed directories")
-}
-
 func TestGetAPIInfoMalformedDirectory(t *testing.T) {
 	api, err := getAPIDefinition("testdata/PizzaShackAPI_1.0.0-malformed")
 	assert.Error(t, err, "Should return error on reading malformed directories")
 	assert.True(t, os.IsNotExist(err), "File not found error must be thrown")
-	assert.Nil(t, api,
-		"Should return nil for malformed directories")
-}
-
-func TestGetAPIInfoCorruptedZip(t *testing.T) {
-	api, err := getAPIDefinition("testdata/PizzaShackAPI_1.0.0-corrupted.zip")
-	assert.Error(t, err, "Should return error on reading malformed zip files")
-	assert.EqualError(t, err, "zip: not a valid zip file", "Should return error with invalid zip")
 	assert.Nil(t, api,
 		"Should return nil for malformed directories")
 }
