@@ -11,6 +11,8 @@ Command Line tool for importing and exporting APIs/Applications between differen
     3. Clone your fork into any directory
     5. `cd` into cloned directory and then cd into `product-apim-tooling/import-export-cli`
     6. Execute `go mod vendor` or `go mod download` to download all the dependencies
+    7. Run `go generate ./...` to pack resources
+    8. Run `go build apimcli.go` to build and test program
 
 - ### Building
     `cd` into `product-apim-tooling/import-export-cli`
