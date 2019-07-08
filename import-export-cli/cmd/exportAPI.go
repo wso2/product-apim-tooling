@@ -132,8 +132,10 @@ func WriteToZip(exportAPIName, exportAPIVersion, zipLocationPath string, resp *r
 func getExportApiResponse(name, version, provider, format, apiImportExportEndpoint, b64encodedCredentials string, preserveStatus bool) (*resty.Response, error) {
 	apiImportExportEndpoint = utils.AppendSlashToString(apiImportExportEndpoint)
 	query := "export-api?name=" + name + "&version=" + version + "&provider=" + provider +
-		"&preserveStatus=" + strconv.FormatBool(preserveStatus) +
-		"&format=" + format
+		"&preserveStatus=" + strconv.FormatBool(preserveStatus)
+	if format != "" {
+		query += "&format=" + format
+	}
 
 	url := apiImportExportEndpoint + query
 	utils.Logln(utils.LogPrefixInfo+"ExportAPI: URL:", url)
@@ -163,6 +165,6 @@ func init() {
 		"", "Environment to which the API should be exported")
 	ExportAPICmd.Flags().BoolVarP(&exportAPIPreserveStatus, "preserveStatus", "", true,
 		"Preserve API status when exporting. Otherwise API will be exported in CREATED status")
-	ExportAPICmd.Flags().StringVarP(&exportAPIFormat, "format", "", "json", "File format of exported archive")
+	ExportAPICmd.Flags().StringVarP(&exportAPIFormat, "format", "", "", "File format of exported archive(json or yaml)")
 	_ = ExportAPICmd.MarkFlagRequired("environment")
 }
