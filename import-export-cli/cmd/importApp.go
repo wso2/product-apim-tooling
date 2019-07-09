@@ -213,7 +213,7 @@ func init() {
 		"Name of the target owner of the Application as desired by the Importer")
 	ImportAppCmd.Flags().StringVarP(&importAppEnvironment, "environment", "e",
 		"", "Environment from the which the Application should be imported")
-	ImportAppCmd.Flags().BoolVarP(&preserveOwner, "preserveOwner", "r", false,
+	ImportAppCmd.Flags().BoolVarP(&preserveOwner, "preserveOwner", "", false,
 		"Preserves app owner")
 	ImportAppCmd.Flags().BoolVarP(&skipSubscriptions, "skipSubscriptions", "s", false,
 		"Skip subscriptions of the Application")
