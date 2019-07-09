@@ -28,12 +28,12 @@ import (
 	"text/template"
 	"unicode"
 
+	"github.com/wso2/product-apim-tooling/import-export-cli/box"
+
 	yaml2 "gopkg.in/yaml.v2"
 
 	"github.com/go-openapi/loads"
 	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
-
-	"github.com/wso2/product-apim-tooling/import-export-cli/defaults"
 
 	"github.com/ghodss/yaml"
 
@@ -109,7 +109,8 @@ func hasPrefix(buf []byte, prefix []byte) bool {
 
 func scaffoldParams(file string) error {
 	envs := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
-	t, err := template.New("").Parse(defaults.ApiVarsTmpl)
+	tmpl, _ := box.Get("/init/api_params.tmpl")
+	t, err := template.New("").Parse(string(tmpl))
 	if err != nil {
 		return err
 	}
@@ -195,7 +196,8 @@ func executeInitCmd() error {
 	} else {
 		// create an empty swagger
 		utils.Logln(utils.LogPrefixInfo + "Writing " + swaggerSavePath)
-		err = ioutil.WriteFile(swaggerSavePath, defaults.Swagger, os.ModePerm)
+		swaggerDoc, _ := box.Get("/init/swagger-default.yaml")
+		err = ioutil.WriteFile(swaggerSavePath, swaggerDoc, os.ModePerm)
 		if err != nil {
 			return err
 		}
@@ -270,9 +272,10 @@ func executeInitCmd() error {
 		return err
 	}
 
-	apimProjReadmeFilePath := filepath.Join(initCmdOutputDir, "README.txt")
+	apimProjReadmeFilePath := filepath.Join(initCmdOutputDir, "README.md")
 	utils.Logln(utils.LogPrefixInfo + "Writing " + apimProjReadmeFilePath)
-	err = ioutil.WriteFile(apimProjReadmeFilePath, defaults.ProjectReadme, os.ModePerm)
+	readme, _ := box.Get("/init/README.md")
+	err = ioutil.WriteFile(apimProjReadmeFilePath, readme, os.ModePerm)
 	if err != nil {
 		return err
 	}
@@ -284,9 +287,9 @@ func executeInitCmd() error {
 
 var InitCommand = &cobra.Command{
 	Use:     "init [project path]",
-	Short:   "initialize a new project in given path",
-	Long:    "initialize a new project in given path. If a openAPI definition provided API will be populated with details from it",
-	Example: "apimcli init myapi --openapi petstore.yaml",
+	Short:   "Initialize a new project in given path",
+	Long:    "Initialize a new project in given path. If a OpenAPI specification provided API will be populated with details from it",
+	Example: "apimcli init myapi --oas petstore.yaml",
 	Args:    cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + "init called")

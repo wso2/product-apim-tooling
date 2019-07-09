@@ -26,7 +26,7 @@ apimcli import-app -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions 
   -f, --file string          Name of the Application to be imported
   -h, --help                 help for import-app
   -o, --owner string         Name of the target owner of the Application as desired by the Importer
-  -r, --preserveOwner        Preserves app owner
+      --preserveOwner        Preserves app owner
       --skipKeys             Skip importing keys of application
   -s, --skipSubscriptions    Skip subscriptions of the Application
       --update               Update application or create new

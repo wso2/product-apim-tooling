@@ -1,0 +1,6 @@
+environments:{{- range $name, $elem := . }}
+  - name: {{ $name }}
+    endpoints:
+      production:
+      sandbox:
+{{- end }}

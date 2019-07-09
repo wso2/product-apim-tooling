@@ -1,0 +1,26 @@
+swagger: '2.0'
+info:
+  title: Sample Swagger Specification
+  version: 1.0.0
+paths:
+  /*:
+    get:
+      responses:
+        '200':
+          description: ''
+    post:
+      responses:
+        '200':
+          description: ''
+    put:
+      responses:
+        '200':
+          description: ''
+    delete:
+      responses:
+        '200':
+          description: ''
+    patch:
+      responses:
+        '200':
+          description: ''

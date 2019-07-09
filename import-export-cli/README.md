@@ -11,6 +11,8 @@ Command Line tool for importing and exporting APIs/Applications between differen
     3. Clone your fork into any directory
     5. `cd` into cloned directory and then cd into `product-apim-tooling/import-export-cli`
     6. Execute `go mod vendor` or `go mod download` to download all the dependencies
+    7. Run `go generate ./...` to pack resources
+    8. Run `go build apimcli.go` to build and test program
 
 - ### Building
     `cd` into `product-apim-tooling/import-export-cli`
@@ -18,6 +20,17 @@ Command Line tool for importing and exporting APIs/Applications between differen
     Execute `./build.sh -t apimcli.go -v 1.0.0 -f` to build for all platforms.
     
     Created packages will be available at `build/target` directory
+
+- ### Resources
+    All the resources(Markdown files, templates etc) need to be stored inside box/resources directory
+    You can create sub directories as you like.
+    
+    Run `go generate ./...` to bake your files into go files.
+    Then refer to them using `box.Get(filename)`. Always use relative path to resources directory with a leading slash(/)
+    
+    For example: For a file in `box/resources/init/file` you can retrieve it using `box.Get("/init/file)`
+    
+    Commit blob.go to VCS    
 
 - ### Generating docs
     After changing commands run following to generate documents and shell completions
