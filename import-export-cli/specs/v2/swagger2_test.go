@@ -60,14 +60,6 @@ func Test_swagger2WSO2SandboxEndpoints(t *testing.T) {
 	assert.ElementsMatch(t, petstoreProdUrls, ep.Urls, "should have same elements")
 }
 
-func Test_swagger2HTTPVerbs(t *testing.T) {
-	doc, err := loads.Spec("testdata/petstore_swagger2.yaml")
-	assert.Nil(t, err, "err should be nil")
-	item := doc.Spec().Paths.Paths["/pet/findByStatus"]
-	verbs := swagger2GetHttpVerbs(item)
-	assert.ElementsMatch(t, []string{"GET"}, verbs, "Should return correct values")
-}
-
 func TestSwagger2Populate(t *testing.T) {
 	var def APIDefinition
 	doc, err := loads.Spec("testdata/petstore_swagger2.yaml")

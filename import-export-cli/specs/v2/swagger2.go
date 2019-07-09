@@ -24,7 +24,6 @@ import (
 
 	"github.com/Jeffail/gabs"
 	"github.com/go-openapi/loads"
-	"github.com/go-openapi/spec"
 	"github.com/mitchellh/mapstructure"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
@@ -80,32 +79,6 @@ func swagger2XWSO2SandboxEndpoints(document *loads.Document) (*Endpoints, bool, 
 		return &sandboxEp, true, nil
 	}
 	return &Endpoints{}, false, nil
-}
-
-// oai3GetHttpVerbs generates verbs for api definition
-func swagger2GetHttpVerbs(item spec.PathItem) (verbs []string) {
-	if item.Get != nil {
-		verbs = append(verbs, "GET")
-	}
-	if item.Post != nil {
-		verbs = append(verbs, "POST")
-	}
-	if item.Put != nil {
-		verbs = append(verbs, "PUT")
-	}
-	if item.Delete != nil {
-		verbs = append(verbs, "DELETE")
-	}
-	if item.Patch != nil {
-		verbs = append(verbs, "PATCH")
-	}
-	if item.Head != nil {
-		verbs = append(verbs, "HEAD")
-	}
-	if item.Options != nil {
-		verbs = append(verbs, "OPTIONS")
-	}
-	return
 }
 
 // BuildAPIMEndpoints builds endpointConfig for given config
@@ -267,29 +240,5 @@ func Swagger2Populate(def *APIDefinition, document *loads.Document) error {
 		}
 		def.EndpointConfig = &ep
 	}
-
-	var uriTemplates []URITemplates
-	for uri, info := range document.Spec().Paths.Paths {
-		uriTemplate := URITemplates{}
-		uriTemplate.URITemplate = uri
-		verbs := swagger2GetHttpVerbs(info)
-		uriTemplate.HTTPVerbs = verbs
-		if len(verbs) > 0 {
-			uriTemplate.HTTPVerb = verbs[0]
-		}
-		authTypes := make([]string, len(verbs))
-		throttlingTiers := make([]string, len(verbs))
-		for i := 0; i < len(verbs); i++ {
-			authTypes[i] = "Any"
-			throttlingTiers[i] = "Unlimited"
-		}
-		uriTemplate.AuthType = "Any"
-		uriTemplate.AuthTypes = authTypes
-		uriTemplate.ThrottlingTier = "Unlimited"
-		uriTemplate.ThrottlingTiers = throttlingTiers
-		uriTemplate.Scopes = make([]*Scopes, len(verbs))
-		uriTemplates = append(uriTemplates, uriTemplate)
-	}
-	def.URITemplates = uriTemplates
 	return nil
 }
