@@ -2,7 +2,7 @@
 
 ## Project structure
 
-```
+```bash
 ├── api_params.yaml
 ├── Docs
 │   └── FileContents
