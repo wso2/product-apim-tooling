@@ -26,7 +26,7 @@ apimcli is a Command Line Tool for Importing and Exporting APIs and Applications
 * [apimcli init](apimcli_init.md)	 - Initialize a new project in given path
 * [apimcli list](apimcli_list.md)	 - List APIs/Applications in an environment or List the environments
 * [apimcli login](apimcli_login.md)	 - Login to an API Manager
-* [apimcli logout](apimcli_logout.md)	 - logout to from an API Manager
+* [apimcli logout](apimcli_logout.md)	 - Logout to from an API Manager
 * [apimcli remove-env](apimcli_remove-env.md)	 - Remove Environment from Config file
 * [apimcli set](apimcli_set.md)	 - Set configuration
 * [apimcli version](apimcli_version.md)	 - Display Version on current apimcli

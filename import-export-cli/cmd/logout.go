@@ -28,8 +28,8 @@ import (
 )
 
 const logoutCmdLiteral = "logout [environment]"
-const logoutCmdShortDesc = "logout to from an API Manager"
-const logoutCmdLongDesc = `logout from an API Manager environment`
+const logoutCmdShortDesc = "Logout to from an API Manager"
+const logoutCmdLongDesc = `Logout from an API Manager environment`
 const logoutCmdExamples = utils.ProjectName + " logout dev"
 
 // logoutCmd represents the logout command

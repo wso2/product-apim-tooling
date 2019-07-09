@@ -1,11 +1,11 @@
 ## apimcli logout
 
-logout to from an API Manager
+Logout to from an API Manager
 
 ### Synopsis
 
 
-logout from an API Manager environment
+Logout from an API Manager environment
 
 ```
 apimcli logout [environment] [flags]
