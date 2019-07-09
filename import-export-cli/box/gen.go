@@ -36,7 +36,7 @@ func FormatByteSlice(sl []byte) string {
 }
 
 func main() {
-	log.Println("Baking resources...")
+	log.Println("Baking resources... \U0001F4E6")
 
 	if _, err := os.Stat("resources"); os.IsNotExist(err) {
 		log.Fatal("Resources directory does not exists")
@@ -50,10 +50,10 @@ func main() {
 		}
 		relativePath := filepath.ToSlash(strings.TrimPrefix(path, "resources"))
 		if info.IsDir() {
-			log.Println(path, "is a directory, skipping...")
+			log.Println(path, "is a directory, skipping... \U0001F47B")
 			return nil
 		} else {
-			log.Println(path, "is a file, baking in...")
+			log.Println(path, "is a file, baking in... \U0001F31F")
 			b, err := ioutil.ReadFile(path)
 			if err != nil {
 				log.Printf("Error reading %s: %s", path, err)
@@ -90,5 +90,6 @@ func main() {
 		log.Fatal("Error writing blob file", err)
 	}
 
-	log.Println("Baking resources done...")
+	log.Println("Baking resources done... \U0001F680")
+	log.Println("DO NOT COMMIT defaults/blob.go \U0001F47B")
 }
