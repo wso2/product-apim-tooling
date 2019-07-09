@@ -1,11 +1,11 @@
 ## apimcli init
 
-initialize a new project in given path
+Initialize a new project in given path
 
 ### Synopsis
 
 
-initialize a new project in given path. If a openAPI definition provided API will be populated with details from it
+Initialize a new project in given path. If a OpenAPI specification provided API will be populated with details from it
 
 ```
 apimcli init [project path] [flags]
@@ -14,7 +14,7 @@ apimcli init [project path] [flags]
 ### Examples
 
 ```
-apimcli init myapi --openapi petstore.yaml
+apimcli init myapi --oas petstore.yaml
 ```
 
 ### Options
