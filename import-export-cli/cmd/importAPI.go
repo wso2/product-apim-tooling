@@ -173,6 +173,7 @@ func mergeAPI(apiDirectory string, environmentParams *utils.Environment) error {
 		return err
 	}
 
+	apiPath = filepath.Join(apiDirectory, "Meta-information", "api.yaml")
 	utils.Logln(utils.LogPrefixInfo+"Writing merged API to:", apiPath)
 	// write this to disk
 	content, err := utils.JsonToYaml(api.Bytes())
