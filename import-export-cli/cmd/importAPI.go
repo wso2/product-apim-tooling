@@ -139,12 +139,13 @@ func getAPIDefinition(filePath string) (*v2.APIDefinition, error) {
 // for now only Endpoints are merged
 func mergeAPI(apiDirectory string, environmentParams *utils.Environment) error {
 	// read api from Meta-information
-	apiPath := filepath.Join(apiDirectory, "Meta-information", "api.yaml")
-	utils.Logln(utils.LogPrefixInfo+"Reading API definition from: ", apiPath)
-	jsonContent, err := utils.LoadYamlAsJson(apiPath)
+	apiPath := filepath.Join(apiDirectory, "Meta-information", "api")
+	utils.Logln(utils.LogPrefixInfo+"Reading API definition: ")
+	fp, jsonContent, err := resolveYamlOrJson(apiPath)
 	if err != nil {
 		return err
 	}
+	utils.Logln(utils.LogPrefixInfo+"Loaded definition from:", fp)
 	api, err := gabs.ParseJSON(jsonContent)
 	if err != nil {
 		return err
