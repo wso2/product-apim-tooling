@@ -19,7 +19,6 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"net/http"
@@ -55,8 +54,9 @@ func TestExportApp(t *testing.T) {
 	}))
 	defer server.Close()
 
-	resp := getExportAppResponse("testApp", "admin", server.URL, "")
-	fmt.Println(resp)
+	resp, err := getExportAppResponse("testApp", "admin", server.URL, "")
+	assert.Nil(t, err, "Error should be nil")
+	assert.Equal(t, 200, resp.StatusCode(), "Should return correct status code")
 }
 
 func TestWriteApplicationToZip(t *testing.T) {

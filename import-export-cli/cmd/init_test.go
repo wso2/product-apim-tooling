@@ -76,5 +76,4 @@ func Test_APIDefinition_generateFieldsFromSwagger(t *testing.T) {
 	assert.Nil(t, err, "Populate without errors")
 	assert.Equal(t, "SwaggerPetstore", def.ID.APIName, "Should correctly output name")
 	assert.Equal(t, "/SwaggerPetstore/1.0.0", def.Context, "Should return correct context")
-	assert.Equal(t, 14, len(def.URITemplates), "Should return correct number of uri templates")
 }
