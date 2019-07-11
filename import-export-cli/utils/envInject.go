@@ -56,9 +56,13 @@ type EndpointData struct {
 
 // Cert stores certificate details
 type Cert struct {
+	// Host of the certificate
 	Host        string `yaml:"host" json:"hostName"`
+	// Alias for certificate
 	Alias       string `yaml:"alias" json:"alias"`
+	// Path for certificate file
 	Path        string `yaml:"path" json:"-"`
+	// Certificate is used for internal purposes, it contains secret in base64
 	Certificate string `json:"certificate"`
 }
 
@@ -68,6 +72,8 @@ type Environment struct {
 	Name string `yaml:"name"`
 	// Endpoints contain details about endpoints in a configuration
 	Endpoints *EndpointData `yaml:"endpoints"`
+	// GatewayEnvironments contains environments that used to deploy API
+	GatewayEnvironments []string `yaml:"gatewayEnvironments"`
 	// Certs for environment
 	Certs []Cert `yaml:"certs"`
 }
@@ -84,10 +90,10 @@ type APIEndpointConfig struct {
 	EPConfig string `json:"endpointConfig"`
 }
 
-// InjectEnv injects variables from environment to the content. It uses regex to match variables and look up them in the
+// EnvSubstitute substitutes variables from environment to the content. It uses regex to match variables and look up them in the
 // environment before processing.
 // returns an error if anything happen
-func InjectEnv(content string) (string, error) {
+func EnvSubstitute(content string) (string, error) {
 	var errorResults error
 	missingEnvKeys := false
 	matches := re.FindAllStringSubmatch(content, -1) // matches is [][]string
@@ -115,7 +121,7 @@ func LoadApiParams(r io.Reader) (*ApiParams, error) {
 		return nil, err
 	}
 
-	str, err := InjectEnv(string(data))
+	str, err := EnvSubstitute(string(data))
 	if err != nil {
 		return nil, err
 	}

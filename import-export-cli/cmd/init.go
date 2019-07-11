@@ -216,7 +216,7 @@ func executeInitCmd() error {
 
 		// substitute env variables
 		utils.Logln(utils.LogPrefixInfo + "Substituting environment variables")
-		data, err := utils.InjectEnv(string(content))
+		data, err := utils.EnvSubstitute(string(content))
 		if err != nil {
 			return err
 		}
