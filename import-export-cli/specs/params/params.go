@@ -1,32 +1,14 @@
-package utils
+package params
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
-	"regexp"
 
-	"github.com/hashicorp/go-multierror"
-
-	"github.com/Jeffail/gabs"
-
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"gopkg.in/yaml.v2"
 )
-
-// Match for $VAR and capture VAR inside a group
-var re = regexp.MustCompile(`\$(\w+)`)
-
-// ErrRequiredEnvKeyMissing represents error used for indicate environment key missing
-type ErrRequiredEnvKeyMissing struct {
-	// Key is the missing entity
-	Key string
-}
-
-func (e ErrRequiredEnvKeyMissing) Error() string {
-	return fmt.Sprintf("%s is required, please set the environment variable", e.Key)
-}
 
 // Configuration represents endpoint config
 type Configuration struct {
@@ -57,11 +39,11 @@ type EndpointData struct {
 // Cert stores certificate details
 type Cert struct {
 	// Host of the certificate
-	Host        string `yaml:"host" json:"hostName"`
+	Host string `yaml:"host" json:"hostName"`
 	// Alias for certificate
-	Alias       string `yaml:"alias" json:"alias"`
+	Alias string `yaml:"alias" json:"alias"`
 	// Path for certificate file
-	Path        string `yaml:"path" json:"-"`
+	Path string `yaml:"path" json:"-"`
 	// Certificate is used for internal purposes, it contains secret in base64
 	Certificate string `json:"certificate"`
 }
@@ -90,30 +72,6 @@ type APIEndpointConfig struct {
 	EPConfig string `json:"endpointConfig"`
 }
 
-// EnvSubstitute substitutes variables from environment to the content. It uses regex to match variables and look up them in the
-// environment before processing.
-// returns an error if anything happen
-func EnvSubstitute(content string) (string, error) {
-	var errorResults error
-	missingEnvKeys := false
-	matches := re.FindAllStringSubmatch(content, -1) // matches is [][]string
-
-	for _, match := range matches {
-		Logln("Looking for:", match[0])
-		if os.Getenv(match[1]) == "" {
-			missingEnvKeys = true
-			errorResults = multierror.Append(errorResults, &ErrRequiredEnvKeyMissing{Key: match[0]})
-		}
-	}
-
-	if missingEnvKeys {
-		return "", errorResults
-	}
-
-	expanded := os.ExpandEnv(content)
-	return expanded, nil
-}
-
 // LoadApiParams loads an configuration from a reader. It returns an error or a valid ApiParams
 func LoadApiParams(r io.Reader) (*ApiParams, error) {
 	data, err := ioutil.ReadAll(r)
@@ -121,7 +79,7 @@ func LoadApiParams(r io.Reader) (*ApiParams, error) {
 		return nil, err
 	}
 
-	str, err := EnvSubstitute(string(data))
+	str, err := utils.EnvSubstitute(string(data))
 	if err != nil {
 		return nil, err
 	}
@@ -147,21 +105,6 @@ func LoadApiParamsFromFile(path string) (*ApiParams, error) {
 	return apiConfig, err
 }
 
-// LoadAPIFromFile loads API file from the path and returns a slice of bytes or an error
-func LoadAPIFromFile(path string) ([]byte, error) {
-	r, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	data, err := ioutil.ReadAll(r)
-	if err != nil {
-		return nil, err
-	}
-	_ = r.Close()
-
-	return data, err
-}
-
 // ExtractAPIEndpointConfig extracts API endpoint information from a slice of byte b
 func ExtractAPIEndpointConfig(b []byte) (string, error) {
 	apiConfig := &APIEndpointConfig{}
@@ -173,33 +116,6 @@ func ExtractAPIEndpointConfig(b []byte) (string, error) {
 	return apiConfig.EPConfig, err
 }
 
-// MergeJSON secondSource with firstSource and returns merged JSON string
-// Note: Fields in firstSource are merged with secondSource.
-// If a field is not presented in secondSource, the one in firstSource will be preserved.
-// If not a field from secondSource will replace it.
-func MergeJSON(firstSource, secondSource []byte) ([]byte, error) {
-	secondSourceJSON, err := gabs.ParseJSON(secondSource)
-	if err != nil {
-		return nil, err
-	}
-
-	firstSourceJSON, err := gabs.ParseJSON(firstSource)
-	if err != nil {
-		return nil, err
-	}
-
-	err = firstSourceJSON.MergeFn(secondSourceJSON, func(destination, source interface{}) interface{} {
-		if source == nil {
-			return destination
-		}
-		if s, ok := source.(string); ok && s == "" {
-			return destination
-		}
-		return source
-	})
-
-	return firstSourceJSON.Bytes(), nil
-}
 
 // GetEnv returns the EndpointData associated for key in the ApiParams, if not found returns nil
 func (config ApiParams) GetEnv(key string) *Environment {
@@ -210,3 +126,4 @@ func (config ApiParams) GetEnv(key string) *Environment {
 	}
 	return nil
 }
+

@@ -20,6 +20,7 @@ package v2
 
 import (
 	"fmt"
+	"github.com/wso2/product-apim-tooling/import-export-cli/specs/params"
 	"path"
 
 	"github.com/Jeffail/gabs"
@@ -136,12 +137,12 @@ func buildFailOver(production *Endpoints, sandbox *Endpoints) string {
 }
 
 func buildFailOverUrls(jsonObj *gabs.Container, endpoints *Endpoints, eptype string) {
-	_, _ = jsonObj.Set(utils.Endpoint{Url: &endpoints.Urls[0]}, fmt.Sprintf("%s_endpoints", eptype))
+	_, _ = jsonObj.Set(params.Endpoint{Url: &endpoints.Urls[0]}, fmt.Sprintf("%s_endpoints", eptype))
 	rest := endpoints.Urls[1:]
 	if len(rest) > 0 {
-		fo := make([]utils.Endpoint, len(rest))
+		fo := make([]params.Endpoint, len(rest))
 		for i := 0; i < len(fo); i++ {
-			fo[i] = utils.Endpoint{Url: &rest[i]}
+			fo[i] = params.Endpoint{Url: &rest[i]}
 		}
 		if len(fo) > 0 {
 			_, _ = jsonObj.Set(fo, fmt.Sprintf("%s_failovers", eptype))
@@ -159,17 +160,17 @@ func buildLoadBalancedEndpoints(production *Endpoints, sandbox *Endpoints) strin
 		    "sessionTimeOut": ""
 		}
 	`))
-	prodEps := make([]utils.Endpoint, len(production.Urls))
+	prodEps := make([]params.Endpoint, len(production.Urls))
 	for i := 0; i < len(prodEps); i++ {
-		prodEps[i] = utils.Endpoint{Url: &production.Urls[i]}
+		prodEps[i] = params.Endpoint{Url: &production.Urls[i]}
 	}
 	if len(prodEps) > 0 {
 		_, _ = jsonObj.Set(prodEps, "production_endpoints")
 	}
 
-	sandboxEps := make([]utils.Endpoint, len(sandbox.Urls))
+	sandboxEps := make([]params.Endpoint, len(sandbox.Urls))
 	for i := 0; i < len(sandboxEps); i++ {
-		sandboxEps[i] = utils.Endpoint{Url: &sandbox.Urls[i]}
+		sandboxEps[i] = params.Endpoint{Url: &sandbox.Urls[i]}
 	}
 	if len(sandboxEps) > 0 {
 		_, _ = jsonObj.Set(sandboxEps, "sandbox_endpoints")
@@ -182,12 +183,12 @@ func buildHttpEndpoint(production *Endpoints, sandbox *Endpoints) string {
 	jsonObj := gabs.New()
 	_, _ = jsonObj.Set(EpHttp, "endpoint_type")
 	if len(production.Urls) > 0 {
-		var ep utils.Endpoint
+		var ep params.Endpoint
 		ep.Url = &production.Urls[0]
 		_, _ = jsonObj.SetP(ep, "production_endpoints")
 	}
 	if len(sandbox.Urls) > 0 {
-		var ep utils.Endpoint
+		var ep params.Endpoint
 		ep.Url = &sandbox.Urls[0]
 		_, _ = jsonObj.SetP(ep, "sandbox_endpoints")
 	}

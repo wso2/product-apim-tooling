@@ -38,6 +38,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/wso2/product-apim-tooling/import-export-cli/specs/params"
+
 	"github.com/mitchellh/go-homedir"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
@@ -137,10 +139,10 @@ func getAPIDefinition(filePath string) (*v2.APIDefinition, error) {
 
 // mergeAPI merges environmentParams to the API given in apiDirectory
 // for now only Endpoints are merged
-func mergeAPI(apiDirectory string, environmentParams *utils.Environment) error {
+func mergeAPI(apiDirectory string, environmentParams *params.Environment) error {
 	// read api from Meta-information
 	apiPath := filepath.Join(apiDirectory, "Meta-information", "api")
-	utils.Logln(utils.LogPrefixInfo+"Reading API definition: ")
+	utils.Logln(utils.LogPrefixInfo + "Reading API definition: ")
 	fp, jsonContent, err := resolveYamlOrJson(apiPath)
 	if err != nil {
 		return err
@@ -151,7 +153,7 @@ func mergeAPI(apiDirectory string, environmentParams *utils.Environment) error {
 		return err
 	}
 	// extract environmentParams from file
-	apiEndpointData, err := utils.ExtractAPIEndpointConfig(api.Bytes())
+	apiEndpointData, err := params.ExtractAPIEndpointConfig(api.Bytes())
 	if err != nil {
 		return err
 	}
@@ -168,8 +170,10 @@ func mergeAPI(apiDirectory string, environmentParams *utils.Environment) error {
 
 	utils.Logln(utils.LogPrefixInfo + "Merging API")
 	// replace original endpointConfig with merged version
-	_, err = api.SetP(string(mergedAPIEndpoints), "endpointConfig")
-	if err != nil {
+	if _, err := api.SetP(string(mergedAPIEndpoints), "endpointConfig"); err != nil {
+		return err
+	}
+	if _, err := api.SetP(environmentParams.GatewayEnvironments, "environments"); err != nil {
 		return err
 	}
 
@@ -369,8 +373,8 @@ func resolveCertPath(importPath, p string) (string, error) {
 }
 
 // generateCertificates for the API
-func generateCertificates(importPath string, environment *utils.Environment) error {
-	var certs []utils.Cert
+func generateCertificates(importPath string, environment *params.Environment) error {
+	var certs []params.Cert
 
 	if len(environment.Certs) == 0 {
 		return nil
@@ -415,7 +419,7 @@ func generateCertificates(importPath string, environment *utils.Environment) err
 // injected API location
 func injectParamsToAPI(importPath, paramsPath, importEnvironment string) error {
 	utils.Logln(utils.LogPrefixInfo+"Loading parameters from", paramsPath)
-	apiParams, err := utils.LoadApiParamsFromFile(paramsPath)
+	apiParams, err := params.LoadApiParamsFromFile(paramsPath)
 	if err != nil {
 		return err
 	}

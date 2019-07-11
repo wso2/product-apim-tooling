@@ -1,29 +1,30 @@
-package utils
+package params
 
 import (
 	"encoding/json"
+	"github.com/Jeffail/gabs"
+	"github.com/stretchr/testify/assert"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
-
-	"github.com/Jeffail/gabs"
-
-	"github.com/stretchr/testify/assert"
 )
 
-func TestInjectEnvShouldFailWhenEnvNotPresent(t *testing.T) {
-	data := `$MYVAR`
-	str, err := EnvSubstitute(data)
-	assert.Equal(t, "", str, "Should return empty string")
-	assert.Error(t, err, "Should return an error")
-}
+// loadAPIFromFile loads API file from the path and returns a slice of bytes or an error
+func loadAPIFromFile(path string) ([]byte, error) {
+	r, err := os.Open(filepath.FromSlash(path))
+	if err != nil {
+		return nil, err
+	}
+	data, err := ioutil.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
+	_ = r.Close()
 
-func TestInjectEnvShouldPassWhenEnvPresents(t *testing.T) {
-	data := `$MYVAR`
-	_ = os.Setenv("MYVAR", "myval")
-	str, err := EnvSubstitute(data)
-	assert.Nil(t, err, "Error should be null")
-	assert.Equal(t, "myval", str, "Should correctly replace environment variable")
+	return data, err
 }
 
 func TestLoadApiParamsFromFileValidYAML(t *testing.T) {
@@ -59,13 +60,13 @@ func TestLoadConfigWithEnv(t *testing.T) {
 }
 
 func TestLoadAPIFromFile(t *testing.T) {
-	apiData, err := LoadAPIFromFile("testdata/api.json")
+	apiData, err := loadAPIFromFile("testdata/api.json")
 	assert.Nil(t, err, "Error should be nil when correct json loaded")
 	assert.True(t, len(apiData) > 0, "API data should be greater than zero for correct file")
 }
 
 func TestExtractAPIEndpointConfig(t *testing.T) {
-	apiData, err := LoadAPIFromFile("testdata/api.json")
+	apiData, err := loadAPIFromFile("testdata/api.json")
 	assert.Nil(t, err, "Error should be nil for correct json loading")
 	endpointData, err := ExtractAPIEndpointConfig(apiData)
 	assert.Nil(t, err, "Error should be nil for unmarshal json")
@@ -74,7 +75,7 @@ func TestExtractAPIEndpointConfig(t *testing.T) {
 }
 
 func TestMergeAPIConfig(t *testing.T) {
-	apiData, err := LoadAPIFromFile("testdata/api.json")
+	apiData, err := loadAPIFromFile("testdata/api.json")
 	assert.Nil(t, err, "Error should be nil for correct json loading")
 	endpointData, err := ExtractAPIEndpointConfig(apiData)
 	assert.Nil(t, err, "Error should be nil for correct json extraction")
@@ -82,7 +83,7 @@ func TestMergeAPIConfig(t *testing.T) {
 	assert.Nil(t, err, "Error should be nil for correct yaml loading")
 	config, err := json.Marshal(configData.Environments[0].Endpoints)
 
-	merged, err := MergeJSON([]byte(endpointData), config)
+	merged, err := utils.MergeJSON([]byte(endpointData), config)
 	assert.Nil(t, err, "Error should be nil for successful merging")
 
 	jsonObj, err := gabs.ParseJSON(merged)
@@ -104,3 +105,4 @@ func TestAPIConfig_ContainsEnv(t *testing.T) {
 	assert.NotNil(t, configData.GetEnv("dev"), "Should contain correct environment")
 	assert.Nil(t, configData.GetEnv("prod"), "Should not contain undefined environment")
 }
+
