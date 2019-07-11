@@ -20,7 +20,6 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/hashicorp/go-multierror"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -201,13 +200,15 @@ func prepareStartFromBeginning() {
 	fmt.Println("Cleaning all the previously exported APIs of the given target tenant, in the given environment if " +
 		"any, and prepare to export APIs from beginning")
 	//cleaning existing old files (if exists) related to exportation
-	var err error
-	err = multierror.Append(err,
-		utils.RemoveDirectoryIfExists(filepath.Join(exportRelatedFilesPath, utils.ExportedApisDirName)),
-		utils.RemoveFileIfExists(filepath.Join(exportRelatedFilesPath, utils.MigrationAPIsExportMetadataFileName)),
-		utils.RemoveFileIfExists(filepath.Join(exportRelatedFilesPath, utils.LastSucceededApiFileName)),
-	)
-	if err != nil {
+	if err := utils.RemoveDirectoryIfExists(filepath.Join(exportRelatedFilesPath, utils.ExportedApisDirName)); err != nil {
+		utils.HandleErrorAndExit("Error occurred while cleaning existing old files (if exists) related to "+
+			"exportation", err)
+	}
+	if err := utils.RemoveFileIfExists(filepath.Join(exportRelatedFilesPath, utils.MigrationAPIsExportMetadataFileName)); err != nil {
+		utils.HandleErrorAndExit("Error occurred while cleaning existing old files (if exists) related to "+
+			"exportation", err)
+	}
+	if err := utils.RemoveFileIfExists(filepath.Join(exportRelatedFilesPath, utils.LastSucceededApiFileName)); err != nil {
 		utils.HandleErrorAndExit("Error occurred while cleaning existing old files (if exists) related to "+
 			"exportation", err)
 	}
