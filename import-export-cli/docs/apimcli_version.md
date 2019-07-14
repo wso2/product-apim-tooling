@@ -20,9 +20,7 @@ apimcli version
 ### Options
 
 ```
-      --foo string    A help for foo
-  -f, --full string   show Full values (default "fullValue")
-  -h, --help          help for version
+  -h, --help   help for version
 ```
 
 ### Options inherited from parent commands

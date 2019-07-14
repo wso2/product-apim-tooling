@@ -20,12 +20,14 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 // Version command related usage info
+var Version = "v1.0.0"
+var BuildDate = ""
 const versionCmdLiteral = "version"
 const versionCmdShortDesc = "Display Version on current " + utils.ProjectName
 const versionCmdLongDesc = "Display the current version of this command line tool"
@@ -38,15 +40,12 @@ var VersionCmd = &cobra.Command{
 	Long:    versionCmdLongDesc,
 	Example: versionCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		var version = "1.1.0"
-		fmt.Println(utils.ProjectName + " Version: " + version)
+		fmt.Println("Version:", Version)
+		fmt.Println("Build Date:", BuildDate)
 	},
 }
 
 // init using Cobra
 func init() {
 	RootCmd.AddCommand(VersionCmd)
-	VersionCmd.PersistentFlags().String("foo", "", "A help for foo")
-	VersionCmd.PersistentFlags().StringP("full", "f", "fullValue", "show Full values")
-	viper.BindPFlag("full", RootCmd.PersistentFlags().Lookup("full"))
 }

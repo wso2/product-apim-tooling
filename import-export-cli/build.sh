@@ -115,8 +115,10 @@ do
     destination="$zipdir/$output"
 
     #echo "GOOS=$goos GOARCH=$goarch go build -x -o $destination $target"
-    GOOS=$goos GOARCH=$goarch go build -gcflags=-trimpath=$GOPATH -asmflags=-trimpath=$GOPATH -ldflags "-X import-export-cli.ImportExportCLIVersion=$build_version -X 'import-export-cli.buildDate=$(date -u '+%Y-%m-%d
-    %H:%M:%S UTC')'" -o $destination $target
+    GOOS=$goos GOARCH=$goarch go build \
+     -gcflags=-trimpath=$GOPATH -asmflags=-trimpath=$GOPATH \
+     -ldflags "-X 'import-export-cli.ImportExportCLIVersion=$build_version' -X 'github.com/wso2/product-apim-tooling/import-export-cli/cmd.Version=$build_version' -X 'github.com/wso2/product-apim-tooling/import-export-cli/cmd.BuildDate=$(date -u '+%Y-%m-%d %H:%M:%S UTC')'" \
+     -o $destination $target
 
     pwd=`pwd`
     cd $buildPath
