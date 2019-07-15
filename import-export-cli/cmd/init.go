@@ -49,6 +49,10 @@ var (
 	initCmdForced            bool
 )
 
+const initCmdExample = `apimcli init myapi --oas petstore.yaml
+apimcli init Petstore --oas https://petstore.swagger.io/v2/swagger.json
+apimcli init MyAwesomeAPI --oas ./swagger.yaml -d definition.yaml`
+
 // directories to be created
 var dirs = []string{
 	"Meta-information",
@@ -286,11 +290,11 @@ func executeInitCmd() error {
 }
 
 var InitCommand = &cobra.Command{
-	Use:     "init [project path]",
-	Short:   "Initialize a new project in given path",
-	Long:    "Initialize a new project in given path. If a OpenAPI specification provided API will be populated with details from it",
-	Example: "apimcli init myapi --oas petstore.yaml",
-	Args:    cobra.MinimumNArgs(1),
+	Use:   "init [project path]",
+	Short: "Initialize a new project in given path",
+	Long:  "Initialize a new project in given path. If a OpenAPI specification provided API will be populated with details from it",
+	Example: initCmdExample,
+	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + "init called")
 		initCmdOutputDir = args[0]
