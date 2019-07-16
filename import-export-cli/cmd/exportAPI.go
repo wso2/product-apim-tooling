@@ -133,7 +133,6 @@ func getExportApiResponse(name, version, provider, format, apiImportExportEndpoi
 	apiImportExportEndpoint = utils.AppendSlashToString(apiImportExportEndpoint)
 	query := "export-api?name=" + name + "&version=" + version + "&provider=" + provider +
 		"&preserveStatus=" + strconv.FormatBool(preserveStatus)
-	fmt.Println("format",format)
 	if format != "" {
 		query += "&format=" + format
 	}
