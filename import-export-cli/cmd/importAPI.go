@@ -114,27 +114,27 @@ func extractAPIDefinition(jsonContent []byte) (*v2.APIDefinition, error) {
 }
 
 // getAPIDefinition scans filePath and returns APIDefinition or an error
-func getAPIDefinition(filePath string) (*v2.APIDefinition, error) {
+func getAPIDefinition(filePath string) (*v2.APIDefinition, []byte, error) {
 	info, err := os.Stat(filePath)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	var buffer []byte
 	if info.IsDir() {
 		_, content, err := resolveYamlOrJson(path.Join(filePath, "Meta-information", "api"))
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		buffer = content
 	} else {
-		return nil, fmt.Errorf("looking for directory, found %s", info.Name())
+		return nil, nil, fmt.Errorf("looking for directory, found %s", info.Name())
 	}
 	api, err := extractAPIDefinition(buffer)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return api, nil
+	return api, buffer, nil
 }
 
 // mergeAPI merges environmentParams to the API given in apiDirectory
@@ -720,7 +720,7 @@ func ImportAPI(credential credentials.Credential, importPath, apiImportExportEnd
 	}
 
 	// Get API info
-	apiInfo, err := getAPIDefinition(apiFilePath)
+	apiInfo, originalContent, err := getAPIDefinition(apiFilePath)
 	if err != nil {
 		return err
 	}
@@ -732,7 +732,21 @@ func ImportAPI(credential credentials.Credential, importPath, apiImportExportEnd
 		if err != nil {
 			return err
 		}
-		yamlContent, err := utils.JsonToYaml(buf)
+
+		newContent, err := gabs.ParseJSON(buf)
+		if err != nil {
+			return err
+		}
+		originalContent, err := gabs.ParseJSON(originalContent)
+		if err != nil {
+			return err
+		}
+		result, err := utils.MergeJSON(originalContent.Bytes(), newContent.Bytes())
+		if err != nil {
+			return err
+		}
+
+		yamlContent, err := utils.JsonToYaml(result)
 		if err != nil {
 			return err
 		}

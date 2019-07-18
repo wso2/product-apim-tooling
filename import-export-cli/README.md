@@ -30,7 +30,7 @@ Command Line tool for importing and exporting APIs/Applications between differen
     
     For example: For a file in `box/resources/init/file` you can retrieve it using `box.Get("/init/file)`
     
-    Commit blob.go to VCS    
+    **DO NOT COMMIT blob.go to VCS**    
 
 - ### Generating docs
     After changing commands run following to generate documents and shell completions

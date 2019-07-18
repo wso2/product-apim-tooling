@@ -15,6 +15,8 @@ apimcli init [project path] [flags]
 
 ```
 apimcli init myapi --oas petstore.yaml
+apimcli init Petstore --oas https://petstore.swagger.io/v2/swagger.json
+apimcli init MyAwesomeAPI --oas ./swagger.yaml -d definition.yaml
 ```
 
 ### Options

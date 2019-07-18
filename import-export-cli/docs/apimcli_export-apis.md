@@ -23,7 +23,7 @@ apimcli export-apis -e production-2.6.0 -u wso2admin@wso2.org -p 12345 -t wso2.o
 ```
   -e, --environment string   Environment to which the API should be exported
       --force                Clean all the previously exported APIs of the given target tenant, in the given environment if any, and to export APIs from beginning
-      --format string        File format of exported archive (default "json")
+      --format string        File format of exported archives(json or yaml)
   -h, --help                 help for export-apis
       --preserveStatus       Preserve API status when exporting. Otherwise API will be exported in CREATED status (default true)
   -t, --tenant string        Tenant domain of the resources to be exported

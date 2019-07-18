@@ -44,6 +44,7 @@ var apiListOffset int //from which index of API, the APIs will be fetched from A
 var count int32       // size of API list to be exported or number of  APIs left to be exported from last iteration
 var apis []utils.API
 var exportRelatedFilesPath string
+var exportAPIsFormat string
 
 //e.g. /home/samithac/.wso2apimcli/exported/migration/production-2.5/wso2-dot-org
 var startFromBeginning bool
@@ -114,7 +115,7 @@ func exportAPIs() {
 				exportAPIVersion := apis[i].Version
 				exportApiProvider := apis[i].Provider
 				apiImportExportEndpoint := utils.GetApiImportExportEndpointOfEnv(cmdExportEnvironment, utils.MainConfigFilePath)
-				resp, err := getExportApiResponse(exportAPIName, exportAPIVersion, exportApiProvider, exportAPIFormat, apiImportExportEndpoint,
+				resp, err := getExportApiResponse(exportAPIName, exportAPIVersion, exportApiProvider, exportAPIsFormat, apiImportExportEndpoint,
 					b64encodedCredentials, exportAPIPreserveStatus)
 				if err != nil {
 					utils.HandleErrorAndExit("Error exporting", err)
@@ -284,6 +285,6 @@ func init() {
 			"any, and to export APIs from beginning")
 	ExportAPIsCmd.Flags().BoolVarP(&exportAPIPreserveStatus, "preserveStatus", "", true,
 		"Preserve API status when exporting. Otherwise API will be exported in CREATED status")
-	ExportAPIsCmd.Flags().StringVarP(&exportAPIFormat, "format", "", "json", "File format of exported archive")
+	ExportAPIsCmd.Flags().StringVarP(&exportAPIsFormat, "format", "", "", "File format of exported archives(json or yaml)")
 	_ = ExportAPIsCmd.MarkFlagRequired("environment")
 }
