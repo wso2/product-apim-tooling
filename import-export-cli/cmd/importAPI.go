@@ -677,14 +677,14 @@ func importAPI(endpoint, httpMethod, filePath, accessToken string, extraParams m
 
 // ImportAPI function is used with import-api command
 func ImportAPI(credential credentials.Credential, importPath, apiImportExportEndpoint, exportDirectory, apiParamsPath string) error {
-	apiFilePath, err := resolveImportFilePath(importPath, exportDirectory)
+	resolvedApiFilePath, err := resolveImportFilePath(importPath, exportDirectory)
 	if err != nil {
 		return err
 	}
-	utils.Logln(utils.LogPrefixInfo+"API Location:", apiFilePath)
+	utils.Logln(utils.LogPrefixInfo+"API Location:", resolvedApiFilePath)
 
 	utils.Logln(utils.LogPrefixInfo + "Creating workspace")
-	tmpPath, err := getTempApiDirectory(apiFilePath)
+	tmpPath, err := getTempApiDirectory(resolvedApiFilePath)
 	if err != nil {
 		return err
 	}
@@ -699,7 +699,7 @@ func ImportAPI(credential credentials.Credential, importPath, apiImportExportEnd
 			utils.Logln(utils.LogPrefixError + err.Error())
 		}
 	}()
-	apiFilePath = tmpPath
+	apiFilePath := tmpPath
 
 	utils.Logln(utils.LogPrefixInfo + "Pre Processing API...")
 	err = preProcessAPI(apiFilePath)
