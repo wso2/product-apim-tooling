@@ -708,7 +708,7 @@ func ImportAPI(credential credentials.Credential, importPath, apiImportExportEnd
 	}
 
 	utils.Logln(utils.LogPrefixInfo + "Attempting to inject parameters to the API")
-	paramsPath, err := resolveAPIParamsPath(importPath, apiParamsPath)
+	paramsPath, err := resolveAPIParamsPath(resolvedApiFilePath, apiParamsPath)
 	if err != nil && apiParamsPath != DefaultAPIMParamsFileName && apiParamsPath != "" {
 		return err
 	}
