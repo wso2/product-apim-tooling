@@ -1,0 +1,10 @@
+apiVersion: wso2.com/v1alpha1
+kind: API
+metadata:
+  name: <apiName>
+spec:
+  definition:
+    configmapName: <configmapName>
+    type: swagger
+  replicas: <replicas>
+  mode: privateJet
