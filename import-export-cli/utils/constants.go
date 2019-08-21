@@ -42,13 +42,10 @@ const MainConfigFileName = "main_config.yaml"
 const SampleMainConfigFileName = "main_config.yaml.sample"
 const DefaultAPISpecFileName = "default_api.yaml"
 
-//const KubernetesConfigFileName  = "kubernetes_config.yaml"
 
 var MainConfigFilePath = filepath.Join(ConfigDirPath, MainConfigFileName)
 var SampleMainConfigFilePath = filepath.Join(ConfigDirPath, SampleMainConfigFileName)
 var DefaultAPISpecFilePath = filepath.Join(ConfigDirPath, DefaultAPISpecFileName)
-
-//var KubernetesConfigFilePath = filepath.Join(ConfigDirPath, KubernetesConfigFileName)
 
 const DefaultExportDirName = "exported"
 const ExportedApisDirName = "apis"

@@ -54,10 +54,6 @@ type EnvEndpoints struct {
 	AdminEndpoint           string `yaml:"admin_endpoint"`
 	TokenEndpoint           string `yaml:"token_endpoint"`
 }
-
-//type KubernetesConfig struct {
-//	Mode bool `yaml:"mode"`
-//}
 // ---------------- End of Structs for YAML Config Files ---------------------------------
 
 type API struct {
