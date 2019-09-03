@@ -1,21 +1,24 @@
 /*
-Copyright © 2019 NAME HERE <EMAIL ADDRESS>
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*  WSO2 Inc. licenses this file to you under the Apache License,
+*  Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+ */
 package cmd
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"github.com/ghodss/yaml"
@@ -23,6 +26,7 @@ import (
 	wso2v1alpha1 "github.com/wso2/k8s-apim-operator/apim-operator/pkg/apis/wso2/v1alpha1"
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -40,7 +44,6 @@ const apiLongDesc = `Add, Update and Delete APIs in kubernetes cluster. JSON and
 available modes are as follows
 * kubernetes`
 const apiExamples = utils.ProjectName + " add/update " + apiCmdLiteral + ` -n petstore --from-file=./Swagger.json --replicas=3 --namespace=wso2`
-
 const addCmdLiteral = "add"
 const addCmdShortDesc = "Add an API to the kubernetes cluster"
 const addCmdLongDesc = `Add an API from a Swagger file to the kubernetes cluster. JSON and YAML formats are accepted.
@@ -55,7 +58,6 @@ var addCmd = &cobra.Command{
 	Long:    addCmdLongDesc,
 	Example: addCmdExamples,
 }
-
 var addApiCmd = &cobra.Command{
 	Use:     apiCmdLiteral,
 	Short:   apiCmdShortDesc,
@@ -69,11 +71,14 @@ var addApiCmd = &cobra.Command{
 				utils.HandleErrorAndExit("Required flags are missing. API name and swagger file paths are required",
 					errors.New("required flags missing"))
 			} else {
-				err := createConfigMapWithNamespace()
+				configMapName := flagApiName + "-swagger"
+				//creating kubernetes configmap with swagger definition
+				err := createConfigMapWithNamespace(configMapName, flagSwaggerFilePath, flagNamespace)
 				if err != nil {
 					utils.HandleErrorAndExit("Error creating configmap", err)
 				}
-				createAPI()
+				//create API
+				createAPI(flagApiName, flagNamespace, configMapName, flagReplicas, "")
 			}
 		} else {
 			utils.HandleErrorAndExit("set mode to kubernetes with command - apimcli set-mode kubernetes ",
@@ -83,9 +88,8 @@ var addApiCmd = &cobra.Command{
 	},
 }
 
-func createConfigMapWithNamespace() error {
-
-	configMapName := flagApiName + "-swagger"
+//create configmap with swagger definition
+func createConfigMapWithNamespace(configMapName string, filePath string, namespace string) error {
 	fmt.Println("creating configmap with swagger definition")
 	cmd := exec.Command(
 		utils.Kubectl,
@@ -93,47 +97,47 @@ func createConfigMapWithNamespace() error {
 		"configmap",
 		configMapName,
 		"--from-file",
-		flagSwaggerFilePath,
-		"-n", flagNamespace,
+		filePath,
+		"-n", namespace,
 	)
-	cmd.Stderr = os.Stderr
-	out, err := cmd.Output()
+	//print kubernetes error commands
+	var errBuf, outBuf bytes.Buffer
+	cmd.Stderr = io.MultiWriter(os.Stderr, &errBuf)
+	cmd.Stdout = io.MultiWriter(os.Stdout, &outBuf)
+	err := cmd.Run()
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(out))
 	return nil
 }
 
-func createAPI() {
-
+func createAPI(name string, namespace string, configMapName string, replicas int, timestamp string) {
+	//get API definition from file
 	apiConfigMapData, _ := box.Get("/kubernetes_resources/api_cr.yaml")
-
 	apiConfigMap := &wso2v1alpha1.API{}
 	errUnmarshal := yaml.Unmarshal(apiConfigMapData, apiConfigMap)
 	if errUnmarshal != nil {
 		utils.HandleErrorAndExit("Error unmarshal api configmap into struct ", errUnmarshal)
 	}
-
 	//assigning values to API cr
-	apiConfigMap.Name = flagApiName
-	apiConfigMap.Namespace = flagNamespace
-	apiConfigMap.Spec.Definition.ConfigmapName = flagApiName + "-swagger"
-	apiConfigMap.Spec.Replicas = flagReplicas
-
-	fmt.Println(apiConfigMap)
-
+	apiConfigMap.Name = name
+	apiConfigMap.Namespace = namespace
+	apiConfigMap.Spec.Definition.ConfigmapName = configMapName
+	apiConfigMap.Spec.Replicas = replicas
+	if timestamp != "" {
+		//set update timestamp
+		apiConfigMap.Spec.UpdateTimeStamp = timestamp
+	}
 	byteVal, errMarshal := yaml.Marshal(apiConfigMap)
 	if errMarshal != nil {
 		utils.HandleErrorAndExit("Error marshal api configmap ", errMarshal)
 	}
-
+	//write configmap to a temp file
 	tmpFile, err := ioutil.TempFile(os.TempDir(), "apicr-*.yaml")
 	if err != nil {
 		log.Fatal("Cannot create temporary file", err)
 	}
 	defer os.Remove(tmpFile.Name())
-
 	if _, err = tmpFile.Write(byteVal); err != nil {
 		log.Fatal("Failed to write to temporary file", err)
 	}
@@ -141,29 +145,28 @@ func createAPI() {
 	if err := tmpFile.Close(); err != nil {
 		log.Fatal(err)
 	}
+	//execute kubernetes command to create or update api from file
 	cmd := exec.Command(
 		utils.Kubectl,
 		"apply",
 		"-f",
 		tmpFile.Name(),
-		"-n", flagNamespace,
+		"-n", namespace,
 	)
-	cmd.Stderr = os.Stderr
-	out, err := cmd.Output()
-	if err != nil {
-		fmt.Println(err)
+	var errBuf, outBuf bytes.Buffer
+	cmd.Stderr = io.MultiWriter(os.Stderr, &errBuf)
+	cmd.Stdout = io.MultiWriter(os.Stdout, &outBuf)
+	errAddApi := cmd.Run()
+	if errAddApi != nil {
+		fmt.Println(errAddApi)
 	}
-	fmt.Println(string(out))
-
 }
 
 func init() {
 	RootCmd.AddCommand(addCmd)
 	addCmd.AddCommand(addApiCmd)
-
 	addApiCmd.Flags().StringVarP(&flagApiName, "name", "n", "", "Name of the API")
-	addApiCmd.Flags().StringVar(&flagSwaggerFilePath, "from-file", "", "Path to swagger file")
+	addApiCmd.Flags().StringVarP(&flagSwaggerFilePath, "from-file", "f", "", "Path to swagger file")
 	addApiCmd.Flags().IntVar(&flagReplicas, "replicas", 1, "replica set")
 	addApiCmd.Flags().StringVar(&flagNamespace, "namespace", "", "namespace of API")
-
 }

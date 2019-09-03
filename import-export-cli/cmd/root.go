@@ -19,8 +19,10 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -43,13 +45,11 @@ var cmdForceStartFromBegin bool
 
 // RootCmd related info
 const RootCmdShortDesc = "CLI for Importing and Exporting APIs and Applications"
-
 const RootCmdLongDesc = utils.ProjectName + ` is a Command Line Tool for Importing and Exporting APIs and Applications between different environments of WSO2 API Manager
 (Dev, Production, Staging, QA etc.)`
 
 //Get config to check mode
 var configVars = utils.GetMainConfigFromFile(utils.MainConfigFilePath)
-
 // This represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use: utils.ProjectName,
@@ -179,7 +179,6 @@ func initConfig() {
 		}
 	*/
 }
-
 //diable flags when the mode set to kubernetes
 func setDisableFlagParsing() bool {
 	if configVars.Config.KubernetesMode {
@@ -188,16 +187,17 @@ func setDisableFlagParsing() bool {
 		return false
 	}
 }
-
 //execute kubernetes commands
 func executeKubernetes(arg ...string) {
 	cmd := exec.Command(
 		utils.Kubectl,
 		arg...,
 	)
-	out, err := cmd.Output()
+	var errBuf, outBuf bytes.Buffer
+	cmd.Stderr = io.MultiWriter(os.Stderr, &errBuf)
+	cmd.Stdout = io.MultiWriter(os.Stdout, &outBuf)
+	err := cmd.Run()
 	if err != nil {
 		utils.HandleErrorAndExit("Error executing kubernetes commands ", err)
 	}
-	fmt.Println(string(out))
 }
