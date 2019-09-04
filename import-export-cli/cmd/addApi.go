@@ -31,6 +31,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 )
 
 var flagApiName string
@@ -72,10 +73,44 @@ var addApiCmd = &cobra.Command{
 					errors.New("required flags missing"))
 			} else {
 				configMapName := flagApiName + "-swagger"
-				//creating kubernetes configmap with swagger definition
-				err := createConfigMapWithNamespace(configMapName, flagSwaggerFilePath, flagNamespace)
+				fi, err := os.Stat(flagSwaggerFilePath)
 				if err != nil {
-					utils.HandleErrorAndExit("Error creating configmap", err)
+					fmt.Println(err)
+					return
+				}
+				switch mode := fi.Mode(); {
+				//check if the swagger path is a Dir
+				case mode.IsDir():
+					//get swagger definition
+					swaggerPath := filepath.Join(flagSwaggerFilePath, filepath.FromSlash("Meta-information/swagger.yaml"))
+					//creating kubernetes configmap with swagger definition
+					errConf := createConfigMapWithNamespace(configMapName, swaggerPath, flagNamespace)
+					if errConf != nil {
+						utils.HandleErrorAndExit("Error creating configmap", err)
+					}
+					//get interceptors if available
+					interceptorsPath := filepath.Join(flagSwaggerFilePath, filepath.FromSlash("Interceptors"))
+					//check interceptors dir is not empty
+					f, err := os.Open(interceptorsPath)
+					if err != nil {
+						utils.HandleErrorAndExit("cannot open interceptors Dir", err)
+					}
+					defer f.Close()
+					_, err = f.Readdir(1)
+					if err == nil {
+						//creating kubernetes configmap with interceptors
+						errConfInt := createConfigMapWithNamespace(flagApiName+"-interceptors", interceptorsPath, flagNamespace)
+						if errConfInt != nil {
+							utils.HandleErrorAndExit("Error creating configmap for interceptors", err)
+						}
+					}
+				//check if the swagger path is a file
+				case mode.IsRegular():
+					//creating kubernetes configmap with swagger definition
+					errConf := createConfigMapWithNamespace(configMapName, flagSwaggerFilePath, flagNamespace)
+					if errConf != nil {
+						utils.HandleErrorAndExit("Error creating configmap", err)
+					}
 				}
 				//create API
 				createAPI(flagApiName, flagNamespace, configMapName, flagReplicas, "")
