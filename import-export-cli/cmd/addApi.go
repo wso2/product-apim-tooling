@@ -52,6 +52,8 @@ available modes are as follows
 * kubernetes`
 const addCmdExamples = utils.ProjectName + " " + apiCmdLiteral + " " + `-n petstore --from-file=./Swagger.json --replicas=3 --namespace=wso2`
 
+var interceptorsConfName string
+
 // addApiCmd represents the addApi command
 var addCmd = &cobra.Command{
 	Use:     addCmdLiteral,
@@ -84,36 +86,25 @@ var addApiCmd = &cobra.Command{
 					//get swagger definition
 					swaggerPath := filepath.Join(flagSwaggerFilePath, filepath.FromSlash("Meta-information/swagger.yaml"))
 					//creating kubernetes configmap with swagger definition
-					errConf := createConfigMapWithNamespace(configMapName, swaggerPath, flagNamespace)
+					fmt.Println("creating configmap with swagger definition")
+					errConf := createConfigMapWithNamespace(configMapName, swaggerPath, flagNamespace, utils.Create)
 					if errConf != nil {
 						utils.HandleErrorAndExit("Error creating configmap", err)
 					}
-					//get interceptors if available
-					interceptorsPath := filepath.Join(flagSwaggerFilePath, filepath.FromSlash("Interceptors"))
-					//check interceptors dir is not empty
-					f, err := os.Open(interceptorsPath)
-					if err != nil {
-						utils.HandleErrorAndExit("cannot open interceptors Dir", err)
-					}
-					defer f.Close()
-					_, err = f.Readdir(1)
-					if err == nil {
-						//creating kubernetes configmap with interceptors
-						errConfInt := createConfigMapWithNamespace(flagApiName+"-interceptors", interceptorsPath, flagNamespace)
-						if errConfInt != nil {
-							utils.HandleErrorAndExit("Error creating configmap for interceptors", err)
-						}
-					}
+					//handle interceptors
+					interceptorsConfName = flagApiName + "-interceptors"
+					handleInterceptors(interceptorsConfName, flagSwaggerFilePath, "create", flagNamespace)
 				//check if the swagger path is a file
 				case mode.IsRegular():
 					//creating kubernetes configmap with swagger definition
-					errConf := createConfigMapWithNamespace(configMapName, flagSwaggerFilePath, flagNamespace)
+					fmt.Println("creating configmap with swagger definition")
+					errConf := createConfigMapWithNamespace(configMapName, flagSwaggerFilePath, flagNamespace, utils.Create)
 					if errConf != nil {
 						utils.HandleErrorAndExit("Error creating configmap", err)
 					}
 				}
 				//create API
-				createAPI(flagApiName, flagNamespace, configMapName, flagReplicas, "")
+				createAPI(flagApiName, flagNamespace, configMapName, flagReplicas, "", interceptorsConfName)
 			}
 		} else {
 			utils.HandleErrorAndExit("set mode to kubernetes with command - apimcli set-mode kubernetes ",
@@ -124,11 +115,10 @@ var addApiCmd = &cobra.Command{
 }
 
 //create configmap with swagger definition
-func createConfigMapWithNamespace(configMapName string, filePath string, namespace string) error {
-	fmt.Println("creating configmap with swagger definition")
+func createConfigMapWithNamespace(configMapName string, filePath string, namespace string, operation string) error {
 	cmd := exec.Command(
 		utils.Kubectl,
-		"create",
+		operation,
 		"configmap",
 		configMapName,
 		"--from-file",
@@ -146,7 +136,7 @@ func createConfigMapWithNamespace(configMapName string, filePath string, namespa
 	return nil
 }
 
-func createAPI(name string, namespace string, configMapName string, replicas int, timestamp string) {
+func createAPI(name string, namespace string, configMapName string, replicas int, timestamp string, interceptorConfName string) {
 	//get API definition from file
 	apiConfigMapData, _ := box.Get("/kubernetes_resources/api_cr.yaml")
 	apiConfigMap := &wso2v1alpha1.API{}
@@ -162,6 +152,9 @@ func createAPI(name string, namespace string, configMapName string, replicas int
 	if timestamp != "" {
 		//set update timestamp
 		apiConfigMap.Spec.UpdateTimeStamp = timestamp
+	}
+	if interceptorConfName != "" {
+		apiConfigMap.Spec.InterceptorConfName = interceptorConfName
 	}
 	byteVal, errMarshal := yaml.Marshal(apiConfigMap)
 	if errMarshal != nil {
@@ -194,6 +187,27 @@ func createAPI(name string, namespace string, configMapName string, replicas int
 	errAddApi := cmd.Run()
 	if errAddApi != nil {
 		fmt.Println(errAddApi)
+	}
+}
+
+func handleInterceptors(configMapName string, path string, operation string, namespace string) {
+
+	//get interceptors if available
+	interceptorsPath := filepath.Join(path, filepath.FromSlash("Interceptors"))
+	//check interceptors dir is not empty
+	file, err := os.Open(interceptorsPath)
+	if err != nil {
+		utils.HandleErrorAndExit("cannot open interceptors Dir", err)
+	}
+	defer file.Close()
+	_, err = file.Readdir(1)
+	if err == nil {
+		//creating kubernetes configmap with interceptors
+		fmt.Println("creating configmap with interceptors")
+		errConfInt := createConfigMapWithNamespace(configMapName, interceptorsPath, namespace, operation)
+		if errConfInt != nil {
+			utils.HandleErrorAndExit("Error creating configmap for interceptors", err)
+		}
 	}
 }
 

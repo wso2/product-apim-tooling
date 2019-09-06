@@ -21,6 +21,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -36,6 +38,7 @@ const updateCmdShortDesc = "Update an API to the kubernetes cluster"
 const updateCmdLongDesc = `Update an API with different Swagger file in the kubernetes cluster. JSON and YAML formats are accepted.`
 const updateCmdExamples = utils.ProjectName + " " + updateCmdLiteral + " " + apiCmdLiteral + " " + `-n petstore --from-file=./Swagger.json --replicas=3 --namespace=wso2`
 
+var updatedInterceptorConfName string
 var updateCmd = &cobra.Command{
 	Use:     updateCmdLiteral,
 	Short:   updateCmdShortDesc,
@@ -62,13 +65,36 @@ var updateApiCmd = &cobra.Command{
 				timestamp := time.Now().Format("20060102150405")
 				//create new configmap with updated swagger file
 				updateConfigMapName := updateflagApiName + "-swagger-up" + "-" + timestamp
-				err := createConfigMapWithNamespace(updateConfigMapName, updateflagSwaggerFilePath, updateflagNamespace)
+				fi, err := os.Stat(updateflagSwaggerFilePath)
 				if err != nil {
-					utils.HandleErrorAndExit("Error creating configmap", err)
+					fmt.Println(err)
+					return
+				}
+				switch mode := fi.Mode(); {
+				case mode.IsDir():
+					//get swagger definition
+					swaggerPath := filepath.Join(updateflagSwaggerFilePath, filepath.FromSlash("Meta-information/swagger.yaml"))
+					//creating kubernetes configmap with swagger definition
+					fmt.Println("creating configmap with swagger definition")
+					errConf := createConfigMapWithNamespace(updateConfigMapName, swaggerPath, updateflagNamespace, utils.Create)
+					if errConf != nil {
+						utils.HandleErrorAndExit("Error creating configmap", err)
+					}
+					//handle interceptors
+					updatedInterceptorConfName = updateflagApiName + "-interceptors-up-" + timestamp
+					handleInterceptors(updatedInterceptorConfName, updateflagSwaggerFilePath, "create", updateflagNamespace)
+
+				case mode.IsRegular():
+					//creating kubernetes configmap with swagger definition
+					fmt.Println("creating configmap with swagger definition")
+					err := createConfigMapWithNamespace(updateConfigMapName, updateflagSwaggerFilePath, updateflagNamespace, utils.Create)
+					if err != nil {
+						utils.HandleErrorAndExit("Error creating configmap", err)
+					}
 				}
 				//update the API
 				fmt.Println("updating the API Kind")
-				createAPI(updateflagApiName, updateflagNamespace, updateConfigMapName, updateflagReplicas, timestamp)
+				createAPI(updateflagApiName, updateflagNamespace, updateConfigMapName, updateflagReplicas, timestamp, updatedInterceptorConfName)
 			}
 		} else {
 			utils.HandleErrorAndExit("set mode to kubernetes with command - apimcli set-mode kubernetes ",
