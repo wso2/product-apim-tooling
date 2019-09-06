@@ -48,19 +48,22 @@ const apiExamples = utils.ProjectName + " add/update " + apiCmdLiteral + ` -n pe
 const addCmdLiteral = "add"
 const addCmdShortDesc = "Add an API to the kubernetes cluster"
 const addCmdLongDesc = `Add an API from a Swagger file to the kubernetes cluster. JSON and YAML formats are accepted.
-available modes are as follows
-* kubernetes`
-const addCmdExamples = utils.ProjectName + " " + apiCmdLiteral + " " + `-n petstore --from-file=./Swagger.json --replicas=3 --namespace=wso2`
+To execute kubernetes commands set mode to Kubernetes`
+const addCmdExamples = utils.ProjectName + " " + addCmdLiteral + " "+ apiCmdLiteral + " " + `-n petstore --from-file=./Swagger.json --replicas=1 --namespace=wso2
+
+` + utils.ProjectName + " " + addCmdLiteral + " "+ apiCmdLiteral + " " + `-n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apimcli/myapi --replicas=1 --namespace=wso2`
 
 var interceptorsConfName string
 
-// addApiCmd represents the addApi command
+// addCmd represents the add command
 var addCmd = &cobra.Command{
 	Use:     addCmdLiteral,
 	Short:   addCmdShortDesc,
 	Long:    addCmdLongDesc,
 	Example: addCmdExamples,
 }
+
+// addApiCmd represents the api command
 var addApiCmd = &cobra.Command{
 	Use:     apiCmdLiteral,
 	Short:   apiCmdShortDesc,

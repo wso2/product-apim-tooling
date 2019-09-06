@@ -35,10 +35,14 @@ var updateflagNamespace string
 
 const updateCmdLiteral = "update"
 const updateCmdShortDesc = "Update an API to the kubernetes cluster"
-const updateCmdLongDesc = `Update an API with different Swagger file in the kubernetes cluster. JSON and YAML formats are accepted.`
-const updateCmdExamples = utils.ProjectName + " " + updateCmdLiteral + " " + apiCmdLiteral + " " + `-n petstore --from-file=./Swagger.json --replicas=3 --namespace=wso2`
+const updateCmdLongDesc = `Update an existing API with  Swagger file in the kubernetes cluster. JSON and YAML formats are accepted.`
+const updateCmdExamples = utils.ProjectName + " " + updateCmdLiteral + " " + apiCmdLiteral + " " + `-n petstore --from-file=./Swagger.json --replicas=1 --namespace=wso2
+
+`  + utils.ProjectName + " " + updateCmdLiteral + " "+ apiCmdLiteral + " " + `-n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apimcli/myapi --replicas=1 --namespace=wso2`
 
 var updatedInterceptorConfName string
+
+// updateCmd represents the update command
 var updateCmd = &cobra.Command{
 	Use:     updateCmdLiteral,
 	Short:   updateCmdShortDesc,
