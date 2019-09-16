@@ -19,13 +19,16 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"strings"
 )
 
 var flagHttpRequestTimeout int
 var flagExportDirectory string
+var flagKubernetesMode string
 
 // Set command related Info
 const setCmdLiteral = "set"
@@ -33,11 +36,14 @@ const setCmdShortDesc = "Set configuration"
 
 const setCmdLongDesc = `Set configuration parameters. Use at least one of the following flags
 * --http-request-timeout <time-in-milli-seconds>
-* --export-directory <path-to-directory-where-apis-should-be-saved>`
+* --export-directory <path-to-directory-where-apis-should-be-saved>
+* --mode <mode-of-apimcli>`
 
 const setCmdExamples = utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 3600 --export-directory /home/user/exported-apis
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000 --export-directory C:\Documents\exported
-` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000`
+` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000
+` + utils.ProjectName + ` ` + setCmdLiteral + ` --mode kubernetes
+` + utils.ProjectName + ` ` + setCmdLiteral + ` --mode none`
 
 // SetCmd represents the 'set' command
 var SetCmd = &cobra.Command{
@@ -64,6 +70,18 @@ func executeSetCmd(mainConfigFilePath, exportDirectory string) {
 	} else {
 		fmt.Println("Invalid input for flag --export-directory")
 	}
+	if flagKubernetesMode != "" {
+		if strings.EqualFold(flagKubernetesMode, "kubernetes") || strings.EqualFold(flagKubernetesMode, "k8s") {
+			configVars.Config.KubernetesMode = true
+		} else if strings.EqualFold(flagKubernetesMode, "none") {
+			configVars.Config.KubernetesMode = false
+		} else {
+			utils.HandleErrorAndExit("Error changing mode ",
+				errors.New("mode should be set to either kubernetes or none"))
+		}
+	} else {
+		fmt.Println("Invalid input for flag --mode")
+	}
 	utils.WriteConfigFile(configVars, mainConfigFilePath)
 }
 
@@ -89,4 +107,5 @@ func init() {
 		"Timeout for HTTP Client")
 	SetCmd.Flags().StringVar(&flagExportDirectory, "export-directory", defaultExportDirectory,
 		"Path to directory where APIs should be saved")
+	SetCmd.Flags().StringVarP(&flagKubernetesMode, "mode", "m", "", "mode of apimcli")
 }

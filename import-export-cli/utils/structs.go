@@ -36,6 +36,7 @@ type MainConfig struct {
 type Config struct {
 	HttpRequestTimeout int    `yaml:"http_request_timeout"`
 	ExportDirectory    string `yaml:"export_directory"`
+	KubernetesMode     bool   `yaml:"kubernetes_mode"`
 }
 
 type EnvKeys struct {
@@ -53,7 +54,6 @@ type EnvEndpoints struct {
 	AdminEndpoint           string `yaml:"admin_endpoint"`
 	TokenEndpoint           string `yaml:"token_endpoint"`
 }
-
 // ---------------- End of Structs for YAML Config Files ---------------------------------
 
 type API struct {

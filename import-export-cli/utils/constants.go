@@ -90,6 +90,9 @@ const SearchAndTag = "&"
 // Other
 const DefaultTokenValidityPeriod = "3600"
 const DefaultHttpRequestTimeout = 10000
+const DefaultKubernetesMode = false
+const Kubectl = "kubectl"
+const Create = "create"
 
 //migration export
 const MaxAPIsToExportOnce = 20

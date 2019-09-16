@@ -19,11 +19,13 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
+	"github.com/wso2/product-apim-tooling/import-export-cli/box"
+	"io"
 	"io/ioutil"
 	"os"
-
-	"github.com/wso2/product-apim-tooling/import-export-cli/box"
+	"os/exec"
 
 	"path/filepath"
 	"time"
@@ -43,19 +45,29 @@ var cmdForceStartFromBegin bool
 
 // RootCmd related info
 const RootCmdShortDesc = "CLI for Importing and Exporting APIs and Applications"
-
 const RootCmdLongDesc = utils.ProjectName + ` is a Command Line Tool for Importing and Exporting APIs and Applications between different environments of WSO2 API Manager
 (Dev, Production, Staging, QA etc.)`
 
+//Get config to check mode
+var configVars = utils.GetMainConfigFromFile(utils.MainConfigFilePath)
 // This represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:   utils.ProjectName,
-	Short: RootCmdShortDesc,
-	Long:  RootCmdLongDesc,
-
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	//	Run: func(cmd *cobra.Command, args []string) { },
+	Use: utils.ProjectName,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if configVars.Config.KubernetesMode {
+			return cobra.ArbitraryArgs(cmd, args)
+		} else {
+			return cobra.NoArgs(cmd, args)
+		}
+	},
+	DisableFlagParsing: setDisableFlagParsing(),
+	Short:              RootCmdShortDesc,
+	Long:               RootCmdLongDesc,
+	Run: func(cmd *cobra.Command, args []string) {
+		if configVars.Config.KubernetesMode {
+			executeKubernetes(args...)
+		}
+	},
 }
 
 // Execute adds all child commands to the root command sets flags appropriately.
@@ -114,7 +126,7 @@ func createConfigFiles() {
 
 	if !utils.IsFileExist(utils.MainConfigFilePath) {
 		var mainConfig = new(utils.MainConfig)
-		mainConfig.Config = utils.Config{utils.DefaultHttpRequestTimeout, utils.DefaultExportDirPath}
+		mainConfig.Config = utils.Config{utils.DefaultHttpRequestTimeout, utils.DefaultExportDirPath, utils.DefaultKubernetesMode}
 		utils.WriteConfigFile(mainConfig, utils.MainConfigFilePath)
 	}
 
@@ -166,4 +178,26 @@ func initConfig() {
 			fmt.Println("Using config file:", viper.ConfigFileUsed())
 		}
 	*/
+}
+//diable flags when the mode set to kubernetes
+func setDisableFlagParsing() bool {
+	if configVars.Config.KubernetesMode {
+		return true
+	} else {
+		return false
+	}
+}
+//execute kubernetes commands
+func executeKubernetes(arg ...string) {
+	cmd := exec.Command(
+		utils.Kubectl,
+		arg...,
+	)
+	var errBuf, outBuf bytes.Buffer
+	cmd.Stderr = io.MultiWriter(os.Stderr, &errBuf)
+	cmd.Stdout = io.MultiWriter(os.Stdout, &outBuf)
+	err := cmd.Run()
+	if err != nil {
+		utils.HandleErrorAndExit("Error executing kubernetes commands ", err)
+	}
 }

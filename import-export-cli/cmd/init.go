@@ -63,6 +63,7 @@ var dirs = []string{
 	"Sequences/fault-sequence",
 	"Sequences/in-sequence",
 	"Sequences/out-sequence",
+	"Interceptors",
 }
 
 // createDirectories will create dirs in current working directory
@@ -290,11 +291,11 @@ func executeInitCmd() error {
 }
 
 var InitCommand = &cobra.Command{
-	Use:   "init [project path]",
-	Short: "Initialize a new project in given path",
-	Long:  "Initialize a new project in given path. If a OpenAPI specification provided API will be populated with details from it",
+	Use:     "init [project path]",
+	Short:   "Initialize a new project in given path",
+	Long:    "Initialize a new project in given path. If a OpenAPI specification provided API will be populated with details from it",
 	Example: initCmdExample,
-	Args: cobra.MinimumNArgs(1),
+	Args:    cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + "init called")
 		initCmdOutputDir = args[0]
