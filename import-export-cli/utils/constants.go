@@ -101,6 +101,6 @@ const LastSucceededApiFileName = "last-succeeded-api.log"
 const LastSuceededContentDelimiter = " " // space
 const DefaultResourceTenantDomain = "tenant-default"
 const ApplicationId = "applicationId"
-const ApiId = "appiId"
+const ApiId = "apiId"
 const DefaultCliApp = "default-apimcli"
 const DefaultTokenType = "JWT"
