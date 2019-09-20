@@ -102,5 +102,5 @@ const LastSuceededContentDelimiter = " " // space
 const DefaultResourceTenantDomain = "tenant-default"
 const ApplicationId = "applicationId"
 const ApiId = "apiId"
-const DefaultCliApp = "default-apimcli"
+const DefaultCliApp = "default-apimcli-app"
 const DefaultTokenType = "JWT"
