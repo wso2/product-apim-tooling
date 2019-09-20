@@ -21,7 +21,7 @@ apimcli set --http-request-timeout 3600 --export-directory /home/user/exported-a
 apimcli set --http-request-timeout 5000 --export-directory C:\Documents\exported
 apimcli set --http-request-timeout 5000
 apimcli set --mode kubernetes
-apimcli set --mode none
+apimcli set --mode default
 ```
 
 ### Options
