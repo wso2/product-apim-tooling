@@ -20,9 +20,9 @@ apimcli get-keys -n TwitterAPI -v 1.0.0 -e dev --provider admin
 ### Options
 
 ```
-  -n, --apiName string       API to be generated keys
   -e, --environment string   Key generation environment
   -h, --help                 help for get-keys
+  -n, --name string          API to be generated keys
   -r, --provider string      Provider of the API
   -v, --version string       Version of the API
 ```

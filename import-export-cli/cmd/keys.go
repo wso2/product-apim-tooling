@@ -603,7 +603,7 @@ func prepScopeValues(scope []string) string {
 func init() {
 	RootCmd.AddCommand(genKeyCmd)
 	genKeyCmd.Flags().StringVarP(&keyGenEnv, "environment", "e", "", "Key generation environment")
-	genKeyCmd.Flags().StringVarP(&apiName, "apiName", "n", "", "API to be generated keys")
+	genKeyCmd.Flags().StringVarP(&apiName, "name", "n", "", "API to be generated keys")
 	genKeyCmd.Flags().StringVarP(&apiVersion, "version", "v", "", "Version of the API")
 	genKeyCmd.Flags().StringVarP(&apiProvider, "provider", "r", "", "Provider of the API")
 	_ = genKeyCmd.MarkFlagRequired("environment")
