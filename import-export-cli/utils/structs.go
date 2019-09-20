@@ -112,3 +112,133 @@ type HttpErrorResponse struct {
 	MoreInfo    string  `json:"moreInfo"`
 	Error       []error `json:"error"`
 }
+
+//Key generation response
+type KeygenResponse struct {
+	CallbackURL         interface{} `json:"callbackUrl"`
+	ConsumerKey         string      `json:"consumerKey"`
+	ConsumerSecret      string      `json:"consumerSecret"`
+	GroupID             interface{} `json:"groupId"`
+	KeyState            string      `json:"keyState"`
+	KeyType             string      `json:"keyType"`
+	SupportedGrantTypes []string    `json:"supportedGrantTypes"`
+	Token               struct {
+		AccessToken  string   `json:"accessToken"`
+		TokenScopes  []string `json:"tokenScopes"`
+		ValidityTime int      `json:"expires_in"`
+	} `json:"token"`
+}
+
+//Applications get response structure
+type AppData struct {
+	Count    int    `json:"count"`
+	Next     string `json:"next"`
+	Previous string `json:"previous"`
+	List     []struct {
+		ApplicationID  string `json:"applicationId"`
+		Name           string `json:"name"`
+		Subscriber     string `json:"subscriber"`
+		ThrottlingTier string `json:"throttlingTier"`
+		Description    string `json:"description"`
+		Status         string `json:"status"`
+		GroupID        string `json:"groupId"`
+		Attributes     struct {
+		} `json:"attributes"`
+	} `json:"list"`
+}
+
+//Specific application details structure
+type AppDetails struct {
+	GroupID        string      `json:"groupId"`
+	CallbackURL    interface{} `json:"callbackUrl"`
+	Subscriber     string      `json:"subscriber"`
+	ThrottlingTier string      `json:"throttlingTier"`
+	ApplicationID  string      `json:"applicationId"`
+	Description    interface{} `json:"description"`
+	Status         string      `json:"status"`
+	Name           string      `json:"name"`
+	Keys           []struct {
+		ConsumerKey         string      `json:"consumerKey"`
+		ConsumerSecret      string      `json:"consumerSecret"`
+		KeyState            string      `json:"keyState"`
+		KeyType             string      `json:"keyType"`
+		SupportedGrantTypes interface{} `json:"supportedGrantTypes"`
+		Token               struct {
+			ValidityTime int      `json:"validityTime"`
+			AccessToken  string   `json:"accessToken"`
+			TokenScopes  []string `json:"tokenScopes"`
+		} `json:"token"`
+	} `json:"keys"`
+}
+
+type App struct {
+	ApplicationID     string        `json:"applicationId"`
+	Name              string        `json:"name"`
+	ThrottlingPolicy  string        `json:"throttlingPolicy"`
+	Description       string        `json:"description"`
+	TokenType         string        `json:"tokenType"`
+	Status            string        `json:"status"`
+	Groups            []interface{} `json:"groups"`
+	SubscriptionCount int           `json:"subscriptionCount"`
+	Keys              []interface{} `json:"keys"`
+	Attributes        struct {
+	} `json:"attributes"`
+	SubscriptionScopes []interface{} `json:"subscriptionScopes"`
+	Owner              string        `json:"owner"`
+}
+//Specific subscription details
+type Subscription struct {
+	Tier           string `json:"tier"`
+	SubscriptionID string `json:"subscriptionId"`
+	APIIdentifier  string `json:"apiIdentifier"`
+	ApplicationID  string `json:"applicationId"`
+	Status         string `json:"status"`
+}
+
+
+//API Search response struct
+type ApiSearch struct {
+	Count    int    `json:"count"`
+	Next     string `json:"next"`
+	Previous string `json:"previous"`
+	List     []struct {
+		ID           string      `json:"id"`
+		Name         string      `json:"name"`
+		Description  interface{} `json:"description"`
+		Context      string      `json:"context"`
+		Version      string      `json:"version"`
+		Provider     string      `json:"provider"`
+		Status       string      `json:"status"`
+		ThumbnailURI interface{} `json:"thumbnailUri"`
+	} `json:"list"`
+	Pagination struct {
+		Total  int `json:"total"`
+		Offset int `json:"offset"`
+		Limit  int `json:"limit"`
+	} `json:"pagination"`
+}
+
+//Subscriptions details response struct
+type SubscriptionDetail struct {
+	Count    int    `json:"count"`
+	Next     string `json:"next"`
+	Previous string `json:"previous"`
+	List     []struct {
+		SubscriptionID string `json:"subscriptionId"`
+		ApplicationID  string `json:"applicationId"`
+		APIIdentifier  string `json:"apiIdentifier"`
+		Tier           string `json:"tier"`
+		Status         string `json:"status"`
+	} `json:"list"`
+}
+
+
+//Scope details response struct
+type Scopes struct {
+	List []struct {
+		Key         string `json:"key"`
+		Name        string `json:"name"`
+		Roles       string `json:"roles"`
+		Description string `json:"description"`
+	} `json:"list"`
+}

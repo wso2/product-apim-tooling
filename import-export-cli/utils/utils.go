@@ -66,6 +66,30 @@ func InvokeGETRequestWithQueryParam(queryParam string, paramValue string, url st
 	return resp, err
 }
 
+// Invoke http-get request with multiple query params
+func InvokeGETRequestWithMultipleQueryParams(queryParam map[string]string, url string, headers map[string]string) (
+	*resty.Response, error) {
+	if Insecure {
+		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+	}
+	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
+	resp, err := resty.R().SetHeaders(headers).SetQueryParams(queryParam).Get(url)
+
+	return resp, err
+}
+
+//Invoke POST request with query parameters
+func InvokePostRequestWithQueryParam(queryParam map[string]string, url string, headers map[string]string, body string) (
+	*resty.Response, error) {
+	if Insecure {
+		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+	}
+	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
+	resp, err := resty.R().SetHeaders(headers).SetQueryParams(queryParam).SetBody(body).Post(url)
+
+	return resp, err
+}
+
 func PromptForUsername() string {
 	reader := bufio.NewReader(os.Stdin)
 
