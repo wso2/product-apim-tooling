@@ -226,6 +226,63 @@ __handle_word()
     __handle_word
 }
 
+_apimcli_add_api()
+{
+    last_command="apimcli_add_api"
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--from-file=")
+    two_word_flags+=("-f")
+    local_nonpersistent_flags+=("--from-file=")
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    flags+=("--name=")
+    two_word_flags+=("-n")
+    local_nonpersistent_flags+=("--name=")
+    flags+=("--namespace=")
+    local_nonpersistent_flags+=("--namespace=")
+    flags+=("--replicas=")
+    local_nonpersistent_flags+=("--replicas=")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_apimcli_add()
+{
+    last_command="apimcli_add"
+    commands=()
+    commands+=("api")
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
 _apimcli_add-env()
 {
     last_command="apimcli_add-env"
@@ -368,6 +425,43 @@ _apimcli_export-app()
     local_nonpersistent_flags+=("--owner=")
     flags+=("--withKeys")
     local_nonpersistent_flags+=("--withKeys")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_flag+=("--environment=")
+    must_have_one_flag+=("-e")
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_apimcli_get-keys()
+{
+    last_command="apimcli_get-keys"
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--apiName=")
+    two_word_flags+=("-n")
+    local_nonpersistent_flags+=("--apiName=")
+    flags+=("--environment=")
+    two_word_flags+=("-e")
+    local_nonpersistent_flags+=("--environment=")
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    flags+=("--provider=")
+    two_word_flags+=("-r")
+    local_nonpersistent_flags+=("--provider=")
+    flags+=("--version=")
+    two_word_flags+=("-v")
+    local_nonpersistent_flags+=("--version=")
     flags+=("--insecure")
     flags+=("-k")
     flags+=("--verbose")
@@ -709,6 +803,66 @@ _apimcli_set()
     local_nonpersistent_flags+=("--help")
     flags+=("--http-request-timeout=")
     local_nonpersistent_flags+=("--http-request-timeout=")
+    flags+=("--mode=")
+    two_word_flags+=("-m")
+    local_nonpersistent_flags+=("--mode=")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_apimcli_update_api()
+{
+    last_command="apimcli_update_api"
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--from-file=")
+    two_word_flags+=("-f")
+    local_nonpersistent_flags+=("--from-file=")
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    flags+=("--name=")
+    two_word_flags+=("-n")
+    local_nonpersistent_flags+=("--name=")
+    flags+=("--namespace=")
+    local_nonpersistent_flags+=("--namespace=")
+    flags+=("--replicas=")
+    local_nonpersistent_flags+=("--replicas=")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_apimcli_update()
+{
+    last_command="apimcli_update"
+    commands=()
+    commands+=("api")
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
     flags+=("--insecure")
     flags+=("-k")
     flags+=("--verbose")
@@ -745,10 +899,12 @@ _apimcli()
 {
     last_command="apimcli"
     commands=()
+    commands+=("add")
     commands+=("add-env")
     commands+=("export-api")
     commands+=("export-apis")
     commands+=("export-app")
+    commands+=("get-keys")
     commands+=("import-api")
     commands+=("import-app")
     commands+=("init")
@@ -757,6 +913,7 @@ _apimcli()
     commands+=("logout")
     commands+=("remove-env")
     commands+=("set")
+    commands+=("update")
     commands+=("version")
 
     flags=()

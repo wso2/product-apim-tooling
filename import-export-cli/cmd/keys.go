@@ -32,9 +32,9 @@ import (
 
 // keys command related Info
 const genKeyCmdLiteral = "get-keys"
-const genKeyCmdShortDesc = "Generate keys to invoke the API"
+const genKeyCmdShortDesc = "Generate access token to invoke the API"
 const genKeyCmdLongDesc = `Generate JWT token to invoke the API by subscribing to a default application for testing purposes`
-const genKeyCmdExamples = utils.ProjectName + genKeyCmdLiteral + ` -n TwitterAPI -v 1.0.0 -e dev --provider admin`
+const genKeyCmdExamples = utils.ProjectName + " " + genKeyCmdLiteral + ` -n TwitterAPI -v 1.0.0 -e dev --provider admin`
 
 var keyGenEnv string
 var apiName string
@@ -605,6 +605,6 @@ func init() {
 	genKeyCmd.Flags().StringVarP(&keyGenEnv, "environment", "e", "", "Key generation environment")
 	genKeyCmd.Flags().StringVarP(&apiName, "apiName", "n", "", "API to be generated keys")
 	genKeyCmd.Flags().StringVarP(&apiVersion, "version", "v", "", "Version of the API")
-	genKeyCmd.Flags().StringVarP(&apiProvider, "provider", "p", "", "Provider of the API")
+	genKeyCmd.Flags().StringVarP(&apiProvider, "provider", "r", "", "Provider of the API")
 	_ = genKeyCmd.MarkFlagRequired("environment")
 }

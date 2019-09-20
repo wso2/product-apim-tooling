@@ -14,10 +14,10 @@ apimcli list apis [flags]
 ### Examples
 
 ```
-apimcli list apis -e dev
-apimcli list apis -e dev -q version:1.0.0
-apimcli list apis -e prod -q provider:admin
-apimcli list apis-e staging
+apimcli apis list -e dev
+apimcli apis list -e dev -q version:1.0.0
+apimcli apis list -e prod -q provider:admin
+apimcli apis list -e staging
 ```
 
 ### Options
