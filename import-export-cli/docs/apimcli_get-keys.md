@@ -1,32 +1,30 @@
 ## apimcli get-keys
 
-Generate access token 
+Generate access token to invoke the API
 
 ### Synopsis
 
 
-Get API subscribed to a default application and generate access token
+Generate JWT token to invoke the API by subscribing to a default application for testing purposes
 
 ```
-apimcli get-keys (--name <name-of-the-api> --version <version-of-the-api> --environment <environment-from-which-the-api-should-be-exported> --provider <API provider name>) [flags]
+apimcli get-keys [flags]
 ```
 
 ### Examples
 
 ```
 apimcli get-keys -n TwitterAPI -v 1.0.0 -e dev --provider admin
-apimcli get-keys -n FacebookAPI -v 2.1.0 -e production --provider admin
-NOTE: all three flags (--name (-n), --version (-v), --provider (-r)) are mandatory
 ```
 
 ### Options
 
 ```
-  -e, --environment string   Environment to which the API should be exported
-  -h, --help                 help for export-api
-  -n, --name string          Name of the API to be exported
-      --provider string      Provider of the API
-  -v, --version string       Version of the API to be exported
+  -e, --environment string   Key generation environment
+  -h, --help                 help for get-keys
+  -n, --name string          API to be generated keys
+  -r, --provider string      Provider of the API
+  -v, --version string       Version of the API
 ```
 
 ### Options inherited from parent commands

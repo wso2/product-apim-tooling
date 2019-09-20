@@ -43,7 +43,7 @@ const setCmdExamples = utils.ProjectName + ` ` + setCmdLiteral + ` --http-reques
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000 --export-directory C:\Documents\exported
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --mode kubernetes
-` + utils.ProjectName + ` ` + setCmdLiteral + ` --mode none`
+` + utils.ProjectName + ` ` + setCmdLiteral + ` --mode default`
 
 // SetCmd represents the 'set' command
 var SetCmd = &cobra.Command{
@@ -73,7 +73,7 @@ func executeSetCmd(mainConfigFilePath, exportDirectory string) {
 	if flagKubernetesMode != "" {
 		if strings.EqualFold(flagKubernetesMode, "kubernetes") || strings.EqualFold(flagKubernetesMode, "k8s") {
 			configVars.Config.KubernetesMode = true
-		} else if strings.EqualFold(flagKubernetesMode, "none") {
+		} else if strings.EqualFold(flagKubernetesMode, "default") {
 			configVars.Config.KubernetesMode = false
 		} else {
 			utils.HandleErrorAndExit("Error changing mode ",
