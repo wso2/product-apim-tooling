@@ -65,7 +65,6 @@ func TestAddEnv3(t *testing.T) {
 	sampleMainConnfig.Environments = make(map[string]utils.EnvEndpoints)
 	sampleMainConnfig.Environments["dev"] = utils.EnvEndpoints{
 		"sample-publisher-endpoint",
-		"sample-import-export-endpoint",
 		"sample-api-list-endpoint",
 		"sample-application-list-endpoint",
 		"sample-reg-endpoint",
@@ -95,7 +94,6 @@ func TestAddEnv4(t *testing.T) {
 	sampleMainConnfig.Environments = make(map[string]utils.EnvEndpoints)
 	sampleMainConnfig.Environments["dev"] = utils.EnvEndpoints{
 		"sample-publisher-endpoint",
-		"sample-import-export-endpoint",
 		"sample-api-list-endpoint",
 		"sample-application-list-endpoint",
 		"sample-reg-endpoint",

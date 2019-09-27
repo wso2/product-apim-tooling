@@ -74,9 +74,8 @@ var ExportAPICmd = &cobra.Command{
 func executeExportAPICmd(credential credentials.Credential, exportDirectory string) {
 	runnigExportApiCommand = true
 	b64encodedCredentials := credentials.GetBasicAuth(credential)
-
-	apiImportExportEndpoint := utils.GetApiImportExportEndpointOfEnv(cmdExportEnvironment, utils.MainConfigFilePath)
-	resp, err := getExportApiResponse(exportAPIName, exportAPIVersion, exportProvider, exportAPIFormat, apiImportExportEndpoint,
+	adminEndpoint := utils.GetAdminEndpointOfEnv(cmdExportEnvironment, utils.MainConfigFilePath)
+	resp, err := getExportApiResponse(exportAPIName, exportAPIVersion, exportProvider, exportAPIFormat, adminEndpoint,
 		b64encodedCredentials, exportAPIPreserveStatus)
 	if err != nil {
 		utils.HandleErrorAndExit("Error while exporting", err)
@@ -126,18 +125,18 @@ func WriteToZip(exportAPIName, exportAPIVersion, zipLocationPath string, resp *r
 // ExportAPI
 // @param name : Name of the API to be exported
 // @param version : Version of the API to be exported
-// @param apiImportExportEndpoint : API Import Export Endpoint for the environment
+// @param adminEndpoint : API Manager Admin Endpoint for the environment
 // @param  b64encodedCredentials: Base64 Encoded 'username:password'
 // @return response Response in the form of *resty.Response
-func getExportApiResponse(name, version, provider, format, apiImportExportEndpoint, b64encodedCredentials string, preserveStatus bool) (*resty.Response, error) {
-	apiImportExportEndpoint = utils.AppendSlashToString(apiImportExportEndpoint)
-	query := "export-api?name=" + name + "&version=" + version + "&provider=" + provider +
+func getExportApiResponse(name, version, provider, format, adminEndpoint, b64encodedCredentials string, preserveStatus bool) (*resty.Response, error) {
+	adminEndpoint = utils.AppendSlashToString(adminEndpoint)
+	query := "export/api?name=" + name + "&version=" + version + "&providerName=" + provider +
 		"&preserveStatus=" + strconv.FormatBool(preserveStatus)
 	if format != "" {
 		query += "&format=" + format
 	}
 
-	url := apiImportExportEndpoint + query
+	url := adminEndpoint + query
 	utils.Logln(utils.LogPrefixInfo+"ExportAPI: URL:", url)
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + b64encodedCredentials

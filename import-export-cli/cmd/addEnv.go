@@ -26,14 +26,13 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-var flagAddEnvName string              // name of the environment to be added
-var flagTokenEndpoint string           // token endpoint of the environment to be added
-var flagApiImportExportEndpoint string // ApiImportExportEndpoint of the environment to be added
-var flagApiListEndpoint string         // ApiListEnvironment of the environment to be added
-var flagAppListEndpoint string         // ApplicationListEndpoint of the environment to be added
-var flagRegistrationEndpoint string    // registration endpoint of the environment to be added
-var flagApiManagerEndpoint string      // api manager endpoint of the environment to be added
-var flagAdminEndpoint string           // admin endpoint of the environment to be added
+var flagAddEnvName string           // name of the environment to be added
+var flagTokenEndpoint string        // token endpoint of the environment to be added
+var flagApiListEndpoint string      // ApiListEnvironment of the environment to be added
+var flagAppListEndpoint string      // ApplicationListEndpoint of the environment to be added
+var flagRegistrationEndpoint string // registration endpoint of the environment to be added
+var flagApiManagerEndpoint string   // api manager endpoint of the environment to be added
+var flagAdminEndpoint string        // admin endpoint of the environment to be added
 
 // AddEnv command related Info
 const addEnvCmdLiteral = "add-env"
@@ -46,7 +45,6 @@ const addEnvCmdExamples = utils.ProjectName + ` ` + addEnvCmdLiteral + ` -n prod
 
 ` + utils.ProjectName + ` ` + addEnvCmdLiteral + ` -n test \
 --registration https://localhost:9443/client-registration/v0.14/register \
---import-export https://localhost:9443/api-import-export-2.6.0-v0 \
 --list https://localhsot:9443/api/am/publisher/v0.14/apis \
 --apim  https://localhost:9443 \
 --token https://localhost:8243/token
@@ -72,7 +70,6 @@ func executeAddEnvCmd(mainConfigFilePath string) {
 	envEndpoints.ApiManagerEndpoint = flagApiManagerEndpoint
 	envEndpoints.RegistrationEndpoint = flagRegistrationEndpoint
 
-	envEndpoints.ApiImportExportEndpoint = flagApiImportExportEndpoint
 	envEndpoints.ApiListEndpoint = flagApiListEndpoint
 	envEndpoints.AppListEndpoint = flagAppListEndpoint
 	envEndpoints.AdminEndpoint = flagAdminEndpoint
@@ -86,7 +83,7 @@ func executeAddEnvCmd(mainConfigFilePath string) {
 // addEnv adds a new environment and its endpoints and writes to config file
 // @param envName : Name of the Environment
 // @param publisherEndpoint : API Manager Endpoint for the environment
-// @param regEndpoint : Registratiopin Endpoint for the environment
+// @param regEndpoint : Registration Endpoint for the environment
 // @param tokenEndpoint : Token Endpoint for the environment
 // @param mainConfigFilePath : Path to file where env endpoints are stored
 // @return error
@@ -111,10 +108,6 @@ func addEnv(envName string, envEndpoints *utils.EnvEndpoints, mainConfigFilePath
 		ApiManagerEndpoint:   envEndpoints.ApiManagerEndpoint,
 		TokenEndpoint:        envEndpoints.TokenEndpoint,
 		RegistrationEndpoint: envEndpoints.RegistrationEndpoint,
-	}
-
-	if envEndpoints.ApiImportExportEndpoint != "" {
-		validatedEnvEndpoints.ApiImportExportEndpoint = envEndpoints.ApiImportExportEndpoint
 	}
 
 	if envEndpoints.ApiListEndpoint != "" {
@@ -143,8 +136,6 @@ func init() {
 
 	addEnvCmd.Flags().StringVarP(&flagAddEnvName, "name", "n", "", "Name of the environment to be added")
 	addEnvCmd.Flags().StringVar(&flagApiManagerEndpoint, "apim", "", "API Manager endpoint for the environment")
-	addEnvCmd.Flags().StringVar(&flagApiImportExportEndpoint, "import-export", "",
-		"API Import Export endpoint for the environment")
 	addEnvCmd.Flags().StringVar(&flagApiListEndpoint, "api_list", "", "API List endpoint for the environment")
 	addEnvCmd.Flags().StringVar(&flagAppListEndpoint, "app_list", "", "Application List endpoint for the environment")
 	addEnvCmd.Flags().StringVar(&flagTokenEndpoint, "token", "", "Token endpoint for the environment")

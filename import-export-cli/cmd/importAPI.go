@@ -94,8 +94,8 @@ var ImportAPICmd = &cobra.Command{
 
 // executeImportAPICmd executes the import api command
 func executeImportAPICmd(credential credentials.Credential, exportDirectory string) {
-	apiImportExportEndpoint := utils.GetApiImportExportEndpointOfEnv(importEnvironment, utils.MainConfigFilePath)
-	err := ImportAPI(credential, importAPIFile, apiImportExportEndpoint, exportDirectory, importAPIParamsFile)
+	adminEndpoint := utils.GetAdminEndpointOfEnv(importEnvironment, utils.MainConfigFilePath)
+	err := ImportAPI(credential, importAPIFile, adminEndpoint, exportDirectory, importAPIParamsFile)
 	if err != nil {
 		utils.HandleErrorAndExit("Error importing API", err)
 		return
@@ -676,7 +676,7 @@ func importAPI(endpoint, httpMethod, filePath, accessToken string, extraParams m
 }
 
 // ImportAPI function is used with import-api command
-func ImportAPI(credential credentials.Credential, importPath, apiImportExportEndpoint, exportDirectory, apiParamsPath string) error {
+func ImportAPI(credential credentials.Credential, importPath, adminEndpoint, exportDirectory, apiParamsPath string) error {
 	resolvedApiFilePath, err := resolveImportFilePath(importPath, exportDirectory)
 	if err != nil {
 		return err
@@ -788,7 +788,6 @@ func ImportAPI(credential credentials.Credential, importPath, apiImportExportEnd
 		apiFilePath = tmp.Name()
 	}
 
-	apiID := ""
 	updateAPI := false
 	if importAPIUpdate {
 		accessOAuthToken, err := credentials.GetOAuthAccessToken(credential, importEnvironment)
@@ -796,8 +795,13 @@ func ImportAPI(credential credentials.Credential, importPath, apiImportExportEnd
 			return err
 		}
 
+		providerName := apiInfo.ID.ProviderName
+
+		if !importAPICmdPreserveProvider {
+			providerName = credential.Username
+		}
 		// check for API existence
-		id, err := getApiID(apiInfo.ID.APIName, apiInfo.ID.Version, apiInfo.ID.ProviderName, importEnvironment, accessOAuthToken)
+		id, err := getApiID(apiInfo.ID.APIName, apiInfo.ID.Version, providerName, importEnvironment, accessOAuthToken)
 		if err != nil {
 			return err
 		}
@@ -808,26 +812,24 @@ func ImportAPI(credential credentials.Credential, importPath, apiImportExportEnd
 		} else {
 			fmt.Println("Existing API found, attempting to update it...")
 			fmt.Println("API ID:", id)
-			apiID = id
 			updateAPI = true
 		}
 	}
 
 	extraParams := map[string]string{}
 	httpMethod := ""
+	httpMethod = http.MethodPost
+	adminEndpoint += "/import/api"
 	if updateAPI {
-		httpMethod = http.MethodPut
-		apiImportExportEndpoint += "/" + apiID
+		adminEndpoint += "?overwrite=" + strconv.FormatBool(true) + "&preserveProvider=" +
+			strconv.FormatBool(importAPICmdPreserveProvider)
 	} else {
-		httpMethod = http.MethodPost
-		apiImportExportEndpoint += "/import-api"
+		adminEndpoint += "?preserveProvider=" + strconv.FormatBool(importAPICmdPreserveProvider)
 	}
-	apiImportExportEndpoint += "?preserveProvider=" +
-		strconv.FormatBool(importAPICmdPreserveProvider)
-	utils.Logln(utils.LogPrefixInfo + "Import URL: " + apiImportExportEndpoint)
+	utils.Logln(utils.LogPrefixInfo + "Import URL: " + adminEndpoint)
 
 	basicAuthToken := credentials.GetBasicAuth(credential)
-	err = importAPI(apiImportExportEndpoint, httpMethod, apiFilePath, basicAuthToken, extraParams)
+	err = importAPI(adminEndpoint, httpMethod, apiFilePath, basicAuthToken, extraParams)
 	return err
 }
 
@@ -839,7 +841,7 @@ func init() {
 	ImportAPICmd.Flags().StringVarP(&importEnvironment, "environment", "e",
 		"", "Environment from the which the API should be imported")
 	ImportAPICmd.Flags().BoolVar(&importAPICmdPreserveProvider, "preserve-provider", true,
-		"Preserve existing provider of API after exporting")
+		"Preserve existing provider of API after importing")
 	ImportAPICmd.Flags().BoolVarP(&importAPIUpdate, "update", "", false, "Update an "+
 		"existing API or create a new API")
 	ImportAPICmd.Flags().StringVarP(&importAPIParamsFile, "params", "", DefaultAPIMParamsFileName,

@@ -3,8 +3,7 @@ config:
   http_request_timeout: 10000
 environments:
   sample-env1:
-    admin_endpoint: "https://localhost:9443/api/am/admin/v0.14"
-    api_import_export_endpoint: "https://localhost/api-import-export"
+    admin_endpoint: "https://localhost:9443/api/am/admin/v0.15"
     api_list_endpoint: "https://localhost/publisher/apis"
     api_manager_endpoint: "https://localhost/apim"
     application_list_endpoint: "https://localhost:9443/api/am/admin/v0.14/applications"
@@ -12,7 +11,6 @@ environments:
     token_endpoint: "https://localhost/token"
   sample-env2:
     admin_endpoint: ""
-    api_import_export_endpoint: ""
     api_list_endpoint: ""
     api_manager_endpoint: "https://localhost/apim"
     application_list_endpoint: ""

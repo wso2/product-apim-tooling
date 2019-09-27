@@ -114,9 +114,9 @@ func exportAPIs() {
 				exportAPIName := apis[i].Name
 				exportAPIVersion := apis[i].Version
 				exportApiProvider := apis[i].Provider
-				apiImportExportEndpoint := utils.GetApiImportExportEndpointOfEnv(cmdExportEnvironment, utils.MainConfigFilePath)
-				resp, err := getExportApiResponse(exportAPIName, exportAPIVersion, exportApiProvider, exportAPIsFormat, apiImportExportEndpoint,
-					b64encodedCredentials, exportAPIPreserveStatus)
+				adminEndpoint := utils.GetAdminEndpointOfEnv(cmdExportEnvironment, utils.MainConfigFilePath)
+				resp, err := getExportApiResponse(exportAPIName, exportAPIVersion, exportApiProvider, exportAPIsFormat,
+					adminEndpoint, b64encodedCredentials, exportAPIPreserveStatus)
 				if err != nil {
 					utils.HandleErrorAndExit("Error exporting", err)
 				}

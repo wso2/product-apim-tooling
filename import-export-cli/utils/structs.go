@@ -46,14 +46,14 @@ type EnvKeys struct {
 }
 
 type EnvEndpoints struct {
-	ApiManagerEndpoint      string `yaml:"api_manager_endpoint"`
-	ApiImportExportEndpoint string `yaml:"api_import_export_endpoint"`
-	ApiListEndpoint         string `yaml:"api_list_endpoint"`
-	AppListEndpoint         string `yaml:"application_list_endpoint"`
-	RegistrationEndpoint    string `yaml:"registration_endpoint"`
-	AdminEndpoint           string `yaml:"admin_endpoint"`
-	TokenEndpoint           string `yaml:"token_endpoint"`
+	ApiManagerEndpoint   string `yaml:"api_manager_endpoint"`
+	ApiListEndpoint      string `yaml:"api_list_endpoint"`
+	AppListEndpoint      string `yaml:"application_list_endpoint"`
+	RegistrationEndpoint string `yaml:"registration_endpoint"`
+	AdminEndpoint        string `yaml:"admin_endpoint"`
+	TokenEndpoint        string `yaml:"token_endpoint"`
 }
+
 // ---------------- End of Structs for YAML Config Files ---------------------------------
 
 type API struct {
@@ -186,6 +186,7 @@ type App struct {
 	SubscriptionScopes []interface{} `json:"subscriptionScopes"`
 	Owner              string        `json:"owner"`
 }
+
 //Specific subscription details
 type Subscription struct {
 	Tier           string `json:"tier"`
@@ -194,7 +195,6 @@ type Subscription struct {
 	ApplicationID  string `json:"applicationId"`
 	Status         string `json:"status"`
 }
-
 
 //API Search response struct
 type ApiSearch struct {
@@ -231,7 +231,6 @@ type SubscriptionDetail struct {
 		Status         string `json:"status"`
 	} `json:"list"`
 }
-
 
 //Scope details response struct
 type Scopes struct {
