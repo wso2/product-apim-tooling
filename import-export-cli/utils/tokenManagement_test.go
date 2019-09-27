@@ -114,7 +114,6 @@ func TestExecutePreCommandWithBasicAuth1(t *testing.T) {
 	mainConfig.Environments = make(map[string]EnvEndpoints)
 	mainConfig.Environments[devName] = EnvEndpoints{
 		apimStub.URL,
-		apimStub.URL + "/api-import-export",
 		apimStub.URL + "/publisher/apis",
 		apimStub.URL + "/admin/applications",
 		registrationStub.URL,
@@ -167,7 +166,6 @@ func TestExecutePreCommandWithBasicAuth2(t *testing.T) {
 	mainConfig.Environments = make(map[string]EnvEndpoints)
 	mainConfig.Environments[devName] = EnvEndpoints{
 		apimStub.URL,
-		apimStub.URL + "/api-import-export",
 		apimStub.URL + "/publisher/apis",
 		apimStub.URL + "/admin/applications",
 		registrationStub.URL,
@@ -264,7 +262,6 @@ func TestExecutePreCommandWithOAuth1(t *testing.T) {
 	mainConfig.Environments = make(map[string]EnvEndpoints)
 	mainConfig.Environments[devName] = EnvEndpoints{
 		apimStub.URL,
-		apimStub.URL + "/api-import-export",
 		apimStub.URL + "/publisher/apis",
 		apimStub.URL + "/admin/applications",
 		registrationStub.URL,
@@ -315,7 +312,6 @@ func TestExecutePreCommandWithOAuth2(t *testing.T) {
 	mainConfig.Environments = make(map[string]EnvEndpoints)
 	mainConfig.Environments[devName] = EnvEndpoints{
 		apimStub.URL,
-		apimStub.URL + "/api-import-export",
 		apimStub.URL + "/publisher/apis",
 		apimStub.URL + "/admin/applications",
 		registrationStub.URL,

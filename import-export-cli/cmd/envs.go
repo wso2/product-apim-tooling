@@ -35,7 +35,6 @@ const (
 	envsRegistrationEndpointHeader = "REGISTRATION ENDPOINT"
 	envsTokenEndpointHeader        = "TOKEN ENDPOINT"
 	envsAdminEndpointHeader        = "ADMIN ENDPOINT"
-	envsImportExportEndpoint       = "IMPORT/EXPORT ENDPOINT"
 	envsApiManagerEndpoint         = "API MANAGER ENDPOINT"
 	envsApplicationEndpoint        = "APPLICATION ENDPOINT"
 
@@ -59,7 +58,6 @@ type endpoints struct {
 	registrationEndpoint string
 	tokenEndpoint        string
 	adminEndpoint        string
-	importExportEndpoint string
 	apiManagerEndpoint   string
 	applicationEndpoint  string
 }
@@ -70,7 +68,6 @@ func newEndpointFromEnvEndpoints(name string, e utils.EnvEndpoints) *endpoints {
 		adminEndpoint:        e.AdminEndpoint,
 		apiManagerEndpoint:   e.ApiManagerEndpoint,
 		applicationEndpoint:  e.AppListEndpoint,
-		importExportEndpoint: e.ApiImportExportEndpoint,
 		publisherEndpoint:    e.ApiListEndpoint,
 		registrationEndpoint: e.RegistrationEndpoint,
 		tokenEndpoint:        e.TokenEndpoint,
@@ -105,11 +102,6 @@ func (e endpoints) ApplicationEndpoint() string {
 // ApiManagerEndpoint
 func (e endpoints) ApiManagerEndpoint() string {
 	return e.apiManagerEndpoint
-}
-
-// ImportExportEndpoint
-func (e endpoints) ImportExportEndpoint() string {
-	return e.importExportEndpoint
 }
 
 // AdminEndpoint
@@ -161,7 +153,6 @@ func printEnvs(envData map[string]utils.EnvEndpoints, format string) {
 		"RegistrationEndpoint": envsRegistrationEndpointHeader,
 		"TokenEndpoint":        envsTokenEndpointHeader,
 		"AdminEndpoint":        envsAdminEndpointHeader,
-		"ImportExportEndpoint": envsImportExportEndpoint,
 		"ApiManagerEndpoint":   envsApiManagerEndpoint,
 		"ApplicationEndpoint":  envsApplicationEndpoint,
 	}

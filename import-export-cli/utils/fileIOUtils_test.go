@@ -88,7 +88,6 @@ func initSampleMainConfig() {
 	mainConfig.Environments = make(map[string]EnvEndpoints)
 	mainConfig.Environments[devName] = EnvEndpoints{
 		"dev_apim_endpoint",
-		"dev_import_export_endpoint",
 		"dev_api_list_endpoint",
 		"dev_application_list_endpoint",
 		"dev_reg_endpoint",
@@ -97,7 +96,6 @@ func initSampleMainConfig() {
 	}
 	mainConfig.Environments[qaName] = EnvEndpoints{
 		"qa_apim_endpoint",
-		"qa_import_export_endpoint",
 		"qa_api_list_endpoint",
 		"qa_application_list_endpoint",
 		"qa_reg_endpoint",
@@ -186,7 +184,7 @@ func TestMainConfig_ParseMainConfigFromFile2(t *testing.T) {
 
 	mainConfig.Environments = make(map[string]EnvEndpoints)
 	mainConfig.Environments[devName] = EnvEndpoints{"", "", "",
-		"", "dev_reg_endpoint", "", "dev_token_endpoint"}
+		"dev_reg_endpoint", "", "dev_token_endpoint"}
 	WriteConfigFile(mainConfig, mainConfigFilePath)
 
 	data, _ := ioutil.ReadFile(testMainConfigFilePath)
@@ -208,7 +206,7 @@ func TestMainConfig_ParseMainConfigFromFile3(t *testing.T) {
 
 	mainConfig.Environments = make(map[string]EnvEndpoints)
 	mainConfig.Environments[devName] = EnvEndpoints{"dev_apim_endpoint", "", "",
-		"", "", "", "dev_token_endpoint"}
+		"", "", "dev_token_endpoint"}
 	WriteConfigFile(mainConfig, mainConfigFilePath)
 
 	data, _ := ioutil.ReadFile(testMainConfigFilePath)
@@ -230,7 +228,7 @@ func TestMainConfig_ParseMainConfigFromFile4(t *testing.T) {
 
 	mainConfig.Environments = make(map[string]EnvEndpoints)
 	mainConfig.Environments[devName] = EnvEndpoints{"dev_apim_endpoint", "", "",
-		"", "dev_reg_endpoint", "", ""}
+		"dev_reg_endpoint", "", ""}
 	WriteConfigFile(mainConfig, mainConfigFilePath)
 
 	data, _ := ioutil.ReadFile(testMainConfigFilePath)
