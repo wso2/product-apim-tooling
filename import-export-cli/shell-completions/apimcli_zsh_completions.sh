@@ -17,13 +17,13 @@ case $state in
   ;;
   level2)
     case $words[2] in
+      add)
+        _arguments '2: :(api help)'
+      ;;
       list)
         _arguments '2: :(apis apps envs help)'
       ;;
       update)
-        _arguments '2: :(api help)'
-      ;;
-      add)
         _arguments '2: :(api help)'
       ;;
       *)
