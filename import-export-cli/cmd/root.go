@@ -42,14 +42,13 @@ var cmdUsername string
 var cmdExportEnvironment string
 var cmdResourceTenantDomain string
 var cmdForceStartFromBegin bool
+var configVars *utils.MainConfig
 
 // RootCmd related info
 const RootCmdShortDesc = "CLI for Importing and Exporting APIs and Applications"
 const RootCmdLongDesc = utils.ProjectName + ` is a Command Line Tool for Importing and Exporting APIs and Applications between different environments of WSO2 API Manager
 (Dev, Production, Staging, QA etc.)`
 
-//Get config to check mode
-var configVars = utils.GetMainConfigFromFile(utils.MainConfigFilePath)
 // This represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use: utils.ProjectName,
@@ -82,6 +81,8 @@ func Execute() {
 // init using Cobra
 func init() {
 	createConfigFiles()
+	//Get config to check mode
+	configVars = utils.GetMainConfigFromFile(utils.MainConfigFilePath)
 
 	cobra.OnInitialize(initConfig)
 
@@ -179,14 +180,16 @@ func initConfig() {
 		}
 	*/
 }
+
 //diable flags when the mode set to kubernetes
 func setDisableFlagParsing() bool {
-	if configVars.Config.KubernetesMode {
+	if configVars != nil && configVars.Config.KubernetesMode {
 		return true
 	} else {
 		return false
 	}
 }
+
 //execute kubernetes commands
 func executeKubernetes(arg ...string) {
 	cmd := exec.Command(
