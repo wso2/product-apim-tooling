@@ -83,7 +83,7 @@ func executeExportAPICmd(credential credentials.Credential, exportDirectory stri
 			utils.HandleErrorAndExit("Error while exporting", err)
 		}
 		// Print info on response
-		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
+		utils.Logf(utils.LogPrefixInfo + "ResponseStatus: %v\n", resp.Status())
 		apiZipLocationPath := filepath.Join(exportDirectory, cmdExportEnvironment)
 		if resp.StatusCode() == http.StatusOK {
 			WriteToZip(exportAPIName, exportAPIVersion, apiZipLocationPath, resp)
