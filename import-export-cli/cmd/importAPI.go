@@ -591,7 +591,7 @@ func validateApiDefinition(def *v2.APIDefinition) error {
 // Helper function for forming multi-part form data
 // Returns the formed http request and errors
 func NewFileUploadRequest(uri string, method string, params map[string]string, paramName, path,
-	b64encodedCredentials string) (*http.Request, error) {
+	accessToken string) (*http.Request, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -615,7 +615,7 @@ func NewFileUploadRequest(uri string, method string, params map[string]string, p
 	}
 
 	request, err := http.NewRequest(method, uri, body)
-	request.Header.Add(utils.HeaderAuthorization, utils.HeaderValueAuthBasicPrefix+" "+b64encodedCredentials)
+	request.Header.Add(utils.HeaderAuthorization, utils.HeaderValueAuthBearerPrefix+" "+accessToken)
 	request.Header.Add(utils.HeaderContentType, writer.FormDataContentType())
 	request.Header.Add(utils.HeaderAccept, "*/*")
 	request.Header.Add(utils.HeaderConnection, utils.HeaderValueKeepAlive)
@@ -816,9 +816,12 @@ func ImportAPI(credential credentials.Credential, importPath, adminEndpoint, exp
 		}
 	}
 
+	accessOAuthToken, err := credentials.GetOAuthAccessToken(credential, importEnvironment)
+	if err != nil {
+		utils.HandleErrorAndExit("Error getting OAuth Tokens", err)
+	}
 	extraParams := map[string]string{}
-	httpMethod := ""
-	httpMethod = http.MethodPost
+	httpMethod := http.MethodPost
 	adminEndpoint += "/import/api"
 	if updateAPI {
 		adminEndpoint += "?overwrite=" + strconv.FormatBool(true) + "&preserveProvider=" +
@@ -828,8 +831,7 @@ func ImportAPI(credential credentials.Credential, importPath, adminEndpoint, exp
 	}
 	utils.Logln(utils.LogPrefixInfo + "Import URL: " + adminEndpoint)
 
-	basicAuthToken := credentials.GetBasicAuth(credential)
-	err = importAPI(adminEndpoint, httpMethod, apiFilePath, basicAuthToken, extraParams)
+	err = importAPI(adminEndpoint, httpMethod, apiFilePath, accessOAuthToken, extraParams)
 	return err
 }
 

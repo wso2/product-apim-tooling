@@ -108,29 +108,33 @@ func exportAPIs() {
 			utils.Logln("Found ", count, "of APIs to be exported in the iteration beginning with the offset #"+
 				strconv.Itoa(apiListOffset)+". Maximum limit of APIs exported in single iteration is "+
 				strconv.Itoa(utils.MaxAPIsToExportOnce))
-			//get basic Auth credentials
-			b64encodedCredentials := credentials.GetBasicAuth(credential)
-			for i := startingApiIndexFromList; i < len(apis); i++ {
-				exportAPIName := apis[i].Name
-				exportAPIVersion := apis[i].Version
-				exportApiProvider := apis[i].Provider
-				adminEndpoint := utils.GetAdminEndpointOfEnv(cmdExportEnvironment, utils.MainConfigFilePath)
-				resp, err := getExportApiResponse(exportAPIName, exportAPIVersion, exportApiProvider, exportAPIsFormat,
-					adminEndpoint, b64encodedCredentials, exportAPIPreserveStatus)
-				if err != nil {
-					utils.HandleErrorAndExit("Error exporting", err)
-				}
+			accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, cmdExportEnvironment)
+			if preCommandErr == nil {
+				for i := startingApiIndexFromList; i < len(apis); i++ {
+					exportAPIName := apis[i].Name
+					exportAPIVersion := apis[i].Version
+					exportApiProvider := apis[i].Provider
+					adminEndpoint := utils.GetAdminEndpointOfEnv(cmdExportEnvironment, utils.MainConfigFilePath)
+					resp, err := getExportApiResponse(exportAPIName, exportAPIVersion, exportApiProvider, exportAPIsFormat,
+						adminEndpoint, accessToken, exportAPIPreserveStatus)
+					if err != nil {
+						utils.HandleErrorAndExit("Error exporting", err)
+					}
 
-				if resp.StatusCode() == http.StatusOK {
-					utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
-					WriteToZip(exportAPIName, exportAPIVersion, apiExportDir, resp)
-					//write on last-succeeded-api.log
-					counterSuceededAPIs++
-					utils.WriteLastSuceededAPIFileData(exportRelatedFilesPath, apis[i])
-				} else {
-					fmt.Println("Error exporting API:", exportAPIName, "-", exportAPIVersion, " of Provider:", exportApiProvider)
-					utils.PrintErrorResponseAndExit(resp)
+					if resp.StatusCode() == http.StatusOK {
+						utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
+						WriteToZip(exportAPIName, exportAPIVersion, apiExportDir, resp)
+						//write on last-succeeded-api.log
+						counterSuceededAPIs++
+						utils.WriteLastSuceededAPIFileData(exportRelatedFilesPath, apis[i])
+					} else {
+						fmt.Println("Error exporting API:", exportAPIName, "-", exportAPIVersion, " of Provider:", exportApiProvider)
+						utils.PrintErrorResponseAndExit(resp)
+					}
 				}
+			} else {
+				// error getting OAuth tokens
+				fmt.Println("Error getting OAuth Tokens : " + preCommandErr.Error())
 			}
 			fmt.Println("Batch of " + cast.ToString(count) + " APIs exported successfully..!")
 

@@ -313,7 +313,8 @@ func GetBase64EncodedCredentials(key, secret string) (encodedValue string) {
 func GetOAuthTokens(username, password, b64EncodedClientIDClientSecret, url string) (map[string]string, error) {
 	validityPeriod := DefaultTokenValidityPeriod
 	body := "grant_type=password&username=" + username + "&password=" + password + "&validity_period=" +
-		validityPeriod + "&scope=apim:api_view+apim:app_import_export+apim:app_owner_change+apim:subscribe+apim:api_publish"
+		validityPeriod + "&scope=apim:api_view+apim:app_import_export+apim:app_owner_change+apim:subscribe" +
+		"+apim:api_publish+apim:api_import_export"
 
 	// set headers
 	headers := make(map[string]string)
