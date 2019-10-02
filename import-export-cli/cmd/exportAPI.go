@@ -73,24 +73,30 @@ var ExportAPICmd = &cobra.Command{
 
 func executeExportAPICmd(credential credentials.Credential, exportDirectory string) {
 	runnigExportApiCommand = true
-	b64encodedCredentials := credentials.GetBasicAuth(credential)
-	adminEndpoint := utils.GetAdminEndpointOfEnv(cmdExportEnvironment, utils.MainConfigFilePath)
-	resp, err := getExportApiResponse(exportAPIName, exportAPIVersion, exportProvider, exportAPIFormat, adminEndpoint,
-		b64encodedCredentials, exportAPIPreserveStatus)
-	if err != nil {
-		utils.HandleErrorAndExit("Error while exporting", err)
-	}
-	// Print info on response
-	utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
-	apiZipLocationPath := filepath.Join(exportDirectory, cmdExportEnvironment)
-	if resp.StatusCode() == http.StatusOK {
-		WriteToZip(exportAPIName, exportAPIVersion, apiZipLocationPath, resp)
-	} else if resp.StatusCode() == http.StatusInternalServerError {
-		// 500 Internal Server Error
-		fmt.Println(string(resp.Body()))
+	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, cmdExportEnvironment)
+
+	if preCommandErr == nil {
+		adminEndpoint := utils.GetAdminEndpointOfEnv(cmdExportEnvironment, utils.MainConfigFilePath)
+		resp, err := getExportApiResponse(exportAPIName, exportAPIVersion, exportProvider, exportAPIFormat, adminEndpoint,
+			accessToken, exportAPIPreserveStatus)
+		if err != nil {
+			utils.HandleErrorAndExit("Error while exporting", err)
+		}
+		// Print info on response
+		utils.Logf(utils.LogPrefixInfo + "ResponseStatus: %v\n", resp.Status())
+		apiZipLocationPath := filepath.Join(exportDirectory, cmdExportEnvironment)
+		if resp.StatusCode() == http.StatusOK {
+			WriteToZip(exportAPIName, exportAPIVersion, apiZipLocationPath, resp)
+		} else if resp.StatusCode() == http.StatusInternalServerError {
+			// 500 Internal Server Error
+			fmt.Println(string(resp.Body()))
+		} else {
+			// neither 200 nor 500
+			fmt.Println("Error exporting API:", resp.Status(), "\n", string(resp.Body()))
+		}
 	} else {
-		// neither 200 nor 500
-		fmt.Println("Error exporting API:", resp.Status(), "\n", string(resp.Body()))
+		// error exporting Api
+		fmt.Println("Error getting OAuth tokens while exporting API:" + preCommandErr.Error())
 	}
 }
 
@@ -126,9 +132,9 @@ func WriteToZip(exportAPIName, exportAPIVersion, zipLocationPath string, resp *r
 // @param name : Name of the API to be exported
 // @param version : Version of the API to be exported
 // @param adminEndpoint : API Manager Admin Endpoint for the environment
-// @param  b64encodedCredentials: Base64 Encoded 'username:password'
+// @param accessToken : Access Token for the resource
 // @return response Response in the form of *resty.Response
-func getExportApiResponse(name, version, provider, format, adminEndpoint, b64encodedCredentials string, preserveStatus bool) (*resty.Response, error) {
+func getExportApiResponse(name, version, provider, format, adminEndpoint, accessToken string, preserveStatus bool) (*resty.Response, error) {
 	adminEndpoint = utils.AppendSlashToString(adminEndpoint)
 	query := "export/api?name=" + name + "&version=" + version + "&providerName=" + provider +
 		"&preserveStatus=" + strconv.FormatBool(preserveStatus)
@@ -139,7 +145,7 @@ func getExportApiResponse(name, version, provider, format, adminEndpoint, b64enc
 	url := adminEndpoint + query
 	utils.Logln(utils.LogPrefixInfo+"ExportAPI: URL:", url)
 	headers := make(map[string]string)
-	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + b64encodedCredentials
+	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 	headers[utils.HeaderAccept] = utils.HeaderValueApplicationZip
 
 	resp, err := utils.InvokeGETRequest(url, headers)

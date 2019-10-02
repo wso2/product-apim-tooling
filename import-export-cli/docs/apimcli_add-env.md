@@ -21,7 +21,7 @@ apimcli add-env -n production \
 
 apimcli add-env -n test \
 --registration https://localhost:9443/client-registration/v0.14/register \
---list https://localhsot:9443/api/am/publisher/v0.14/apis \
+--api_list https://localhsot:9443/api/am/publisher/v0.14/apis \
 --apim  https://localhost:9443 \
 --token https://localhost:8243/token
 

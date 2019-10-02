@@ -6,7 +6,7 @@ environments:
     admin_endpoint: "https://localhost:9443/api/am/admin/v0.15"
     api_list_endpoint: "https://localhost/publisher/apis"
     api_manager_endpoint: "https://localhost/apim"
-    application_list_endpoint: "https://localhost:9443/api/am/admin/v0.14/applications"
+    application_list_endpoint: "https://localhost:9443/api/am/admin/v0.15/applications"
     registration_endpoint: "https://localhost/register"
     token_endpoint: "https://localhost/token"
   sample-env2:

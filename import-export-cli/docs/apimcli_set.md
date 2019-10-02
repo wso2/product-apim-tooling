@@ -29,7 +29,7 @@ apimcli set --mode default
 ```
       --export-directory string    Path to directory where APIs should be saved (default "/home/dushaniw/.wso2apimcli/exported")
   -h, --help                       help for set
-      --http-request-timeout int   Timeout for HTTP Client (default 5000)
+      --http-request-timeout int   Timeout for HTTP Client (default 10000)
   -m, --mode string                mode of apimcli
 ```
 

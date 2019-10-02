@@ -77,6 +77,18 @@ func GetMainConfigFromFile(filePath string) *MainConfig {
 	return &mainConfig
 }
 
+// Read and return MainConfig. Silently catch the error  when config file is not found
+func GetMainConfigFromFileSilently(filePath string) *MainConfig {
+	var mainConfig MainConfig
+	data, err := ioutil.ReadFile(filePath)
+	if err == nil {
+		if err := mainConfig.ParseMainConfigFromFile(data); err != nil {
+			HandleErrorAndExit("MainConfig: Error parsing "+filePath, err)
+		}
+	}
+	return &mainConfig
+}
+
 // Read and validate contents of main_config.yaml
 // will throw errors if the any of the lines is blank
 func (mainConfig *MainConfig) ParseMainConfigFromFile(data []byte) error {
