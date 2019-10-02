@@ -81,8 +81,6 @@ func Execute() {
 // init using Cobra
 func init() {
 	createConfigFiles()
-	//Get config to check mode
-	configVars = utils.GetMainConfigFromFile(utils.MainConfigFilePath)
 
 	cobra.OnInitialize(initConfig)
 
@@ -181,8 +179,10 @@ func initConfig() {
 	*/
 }
 
-//diable flags when the mode set to kubernetes
+//disable flags when the mode set to kubernetes
 func setDisableFlagParsing() bool {
+	//Get config to check mode
+	configVars = utils.GetMainConfigFromFileSilently(utils.MainConfigFilePath)
 	if configVars != nil && configVars.Config.KubernetesMode {
 		return true
 	} else {
