@@ -24,7 +24,7 @@ apimcli set --http-request-timeout 5000
 ### Options
 
 ```
-      --export-directory string    Path to directory where APIs should be saved (default "/home/kasun/.wso2apimcli/exported")
+      --export-directory string    Path to directory where APIs should be saved (default on Unix, including macOS "$HOME/.wso2apimcli/exported", default on Windows "%HOME%\.wso2apimcli\exported")
   -h, --help                       help for set
       --http-request-timeout int   Timeout for HTTP Client (default 10000)
 ```
