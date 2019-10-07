@@ -54,8 +54,8 @@ const ExportedMigrationArtifactsDirName = "migration"
 var DefaultExportDirPath = filepath.Join(ConfigDirPath, DefaultExportDirName)
 
 const defaultApiApplicationImportExportSuffix = "api/am/admin/v0.15"
-const defaultApiListEndpointSuffix = "api/am/publisher/v0.14/apis"
-const defaultApplicationListEndpointSuffix = "api/am/admin/v0.14/applications"
+const defaultApiListEndpointSuffix = "api/am/publisher/v0.15/apis"
+const defaultApplicationListEndpointSuffix = "api/am/admin/v0.15/applications"
 
 const DefaultEnvironmentName = "default"
 
