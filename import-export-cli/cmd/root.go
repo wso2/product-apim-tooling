@@ -42,12 +42,15 @@ var cmdUsername string
 var cmdExportEnvironment string
 var cmdResourceTenantDomain string
 var cmdForceStartFromBegin bool
-var configVars *utils.MainConfig
 
 // RootCmd related info
 const RootCmdShortDesc = "CLI for Importing and Exporting APIs and Applications"
 const RootCmdLongDesc = utils.ProjectName + ` is a Command Line Tool for Importing and Exporting APIs and Applications between different environments of WSO2 API Manager
 (Dev, Production, Staging, QA etc.)`
+
+
+//Get config to check mode
+var configVars = utils.GetMainConfigFromFile(utils.MainConfigFilePath)
 
 // This represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
@@ -127,7 +130,8 @@ func createConfigFiles() {
 
 	if !utils.IsFileExist(utils.MainConfigFilePath) {
 		var mainConfig = new(utils.MainConfig)
-		mainConfig.Config = utils.Config{utils.DefaultHttpRequestTimeout, utils.DefaultExportDirPath, utils.DefaultKubernetesMode}
+		mainConfig.Config = utils.Config{utils.DefaultHttpRequestTimeout,
+			utils.DefaultExportDirPath, utils.DefaultKubernetesMode, utils.DefaultTokenType}
 		utils.WriteConfigFile(mainConfig, utils.MainConfigFilePath)
 	}
 

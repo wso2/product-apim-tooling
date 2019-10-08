@@ -40,7 +40,8 @@ var keyGenEnv string
 var apiName string
 var apiVersion string
 var apiProvider string
-
+var tokenType string
+var throttlingTier string
 
 var genKeyCmd = &cobra.Command{
 	Use:     genKeyCmdLiteral,
@@ -60,6 +61,12 @@ var genKeyCmd = &cobra.Command{
 		accessToken, err := generateAccessToken(cred)
 		//searcg if the default cli application already exists
 		appId, err := searchApplication(utils.DefaultCliApp, accessToken)
+		//retrieving subscription tiers
+		tiers, err := getAvailableAPITiers(accessToken)
+		if tiers != nil {
+			//Needs an available subscription tier when creating application
+			throttlingTier = tiers[0]
+		}
 		//if the application exists
 		if appId != "" {
 			fmt.Println("Application already exists")
@@ -74,6 +81,37 @@ var genKeyCmd = &cobra.Command{
 			//retrieve application specific details
 			appDetails, err := getApplicationDetails(appId, accessToken)
 			if appDetails != nil {
+				//Reading configuration to check if the application needs to be updated
+				configVars := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
+				tokenType = configVars.Config.TokenType
+				// check if the token type of the config file and the token type of the application is different
+				// tokenType (read form the config file should not be null if the application needs to be updated)
+				if tokenType != appDetails.TokenType && tokenType != "" {
+					//Request body for the store rest api
+
+					body := dedent.Dedent(`{
+								"tokenType": "` + configVars.Config.TokenType + `",
+								"name": "` + utils.DefaultCliApp + `",
+								"throttlingTier" : "` + throttlingTier + `"
+							}`)
+					fmt.Println("Updating application as token type is changed to: " + tokenType)
+					updatedApp, updateError := updateApplicationDetails(appId, body, accessToken)
+
+					if updatedApp != nil && updateError == nil {
+						fmt.Println("Updated application successfully")
+					} else if updateError != nil {
+						fmt.Println("Error while updating the application. : ", updateError)
+					}
+					fmt.Println("Regenerating application keys")
+					//Once the application is updated with the token type, client credentials needs to be generated
+					response, err := regenerateConsumerSecret(appDetails.Keys[0].ConsumerKey, accessToken)
+					if err != nil {
+						fmt.Println("Error occurred while regenerating the consumer key and consumer secret for the app ", appId)
+					} else {
+						fmt.Println("Regenerated application keys successfully")
+					}
+					appDetails.Keys[0].ConsumerSecret = response.ConsumerSecret
+				}
 				//Generate access token for the default cli application
 				token, err := getNewToken(appDetails, scopes)
 				if accessToken != "" {
@@ -96,7 +134,6 @@ var genKeyCmd = &cobra.Command{
 			}
 			//Search the if the given API is present
 			subId, err := subscribe(appId, accessToken)
-
 			if subId != "" {
 				//todo:Handle subscription
 			}
@@ -117,6 +154,19 @@ var genKeyCmd = &cobra.Command{
 	},
 }
 
+func getAvailableAPITiers(accessToken string) ([]string, error) {
+	apiId, err := searchApi(accessToken)
+	if apiId == "" && err != nil {
+		fmt.Println("Error occurred while searching the API: ", apiName)
+	}
+	api, err := getApi(apiId, accessToken)
+	if err == nil && api != nil {
+		return api.Tiers, err
+	} else {
+		return nil, err
+	}
+}
+
 // Calling DCR endpoint
 // @param credential : Username and Password
 // @return client_id, client_secret, error
@@ -134,7 +184,6 @@ func callDCREndpoint(credential credentials.Credential) (string, string, error) 
 							   	"grantType":"password refresh_token",
 							   	"saasApp": true,
 							   	"owner": "` + credential.Username + `",
-							  	"tokenScope": "apim:subscribe:"
 							}`)
 	registrationEndpoint := utils.GetRegistrationEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
 	//Calling the DCR endpoint
@@ -204,6 +253,40 @@ func generateAccessToken(credential credentials.Credential) (string, error) {
 	}
 }
 
+// Regenerate consumer key and secret of the application
+// @param consumerKey : Consumer key of the application
+// @param accessToken : Access token to authenticate the store REST API
+// @return KeygenResponse, error
+func regenerateConsumerSecret(consumerKey string, accessToken string) (*utils.KeygenResponse, error) {
+	applicationEndpoint := utils.GetApplicationListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
+	url := applicationEndpoint + "/regenerate-consumersecret"
+	headers := make(map[string]string)
+	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
+	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
+
+
+	body := dedent.Dedent(`{"consumerKey": "` + consumerKey + `"}`)
+	resp, err := utils.InvokePOSTRequest(url, headers, body)
+
+	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
+		// 200 OK or 201 Created
+		keygenResp := &utils.KeygenResponse{}
+		data := []byte(resp.Body())
+		err = json.Unmarshal(data, &keygenResp)
+
+		return keygenResp, err
+
+	} else {
+		utils.Logf("Error: %s\n", resp.Error())
+		utils.Logf("Body: %s\n", resp.Body())
+		if resp.StatusCode() == http.StatusUnauthorized {
+			// 401 Unauthorized
+			return nil, fmt.Errorf("invalid username/password combination")
+		}
+		return nil, errors.New("Request didn't respond 200 OK: " + resp.Status())
+	}
+}
+
 // Search if the application exists with the name
 // @param appName : Name of the application
 // @param accessToken : Access token to authenticate the store REST API
@@ -236,8 +319,6 @@ func searchApplication(appName string, accessToken string) (string, error) {
 		}
 		return "", errors.New("Request didn't respond 200 OK: " + resp.Status())
 	}
-
-	return "", errors.New("Request didn't respond 200 OK: " + resp.Status())
 }
 
 // Searching if the API is available
@@ -289,19 +370,18 @@ func searchApi(accessToken string) (string, error) {
 // @param appId : Appplication ID to subscribe the API
 // @param accessToken : Token to call rest API
 // @return subscriptionId, error
-func subscribe( appId string, accessToken string) (string, error) {
+func subscribe(appId string, accessToken string) (string, error) {
 	apiId, err := searchApi(accessToken)
-
-	if apiId != "" && err != nil {
+	if apiId != "" && err == nil {
 		//If the API is present, subscribe that API to the application
 		fmt.Println("API name: ", apiName, "version: ", apiVersion, "exists")
 		subId, err := subscribeApi(apiId, appId, accessToken)
-		if subId != "" {	
+		if subId != "" {
 			fmt.Println("Successfully subscribed to the App")
 		} else {
 			fmt.Println("Error while subscribing to the application:", err)
 		}
-		return  subId, err
+		return subId, err
 	} else {
 		return "", errors.New("API is not found. Name: " + apiName + " version: " + apiVersion)
 	}
@@ -311,14 +391,14 @@ func subscribe( appId string, accessToken string) (string, error) {
 // @param apiId : API ID to retrieve the information
 // @param accessToken : token to call the rest API
 // @return API, error
-func getApi(apiId string, accessToken string) (*utils.API, error) {
+func getApi(apiId string, accessToken string) (*utils.APIData, error) {
 	apiEndpoint := utils.GetApiListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath) + "/" + apiId
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 	resp, err := utils.InvokeGETRequest(apiEndpoint, headers)
 	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
 		// 200 OK or 201 Created
-		apiData := &utils.API{}
+		apiData := &utils.APIData{}
 		data := []byte(resp.Body())
 		err = json.Unmarshal(data, &apiData)
 		return apiData, err
@@ -348,8 +428,7 @@ func subscribeApi(apiId string, appId string, accessToken string) (string, error
 	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
 	//Prepping query parameters
 	queryParams := map[string]string{
-		utils.ApiId:         apiId,
-		utils.ApplicationId: appId}
+		utils.ApiId: apiId}
 	//Checking if there is a subscription of given API to the give application
 	subResp, subErr := utils.InvokeGETRequestWithMultipleQueryParams(queryParams, subEndpoint, headers)
 
@@ -359,32 +438,37 @@ func subscribeApi(apiId string, appId string, accessToken string) (string, error
 		data := []byte(subResp.Body())
 		subErr = json.Unmarshal(data, &subscription)
 		if subscription.Count != 0 {
-			//If an subscription exists, then return the subscription ID
-			return subscription.List[0].SubscriptionID, subErr
-		} else {
-			//If there is no subscription, make a subscription
-			body := dedent.Dedent(`{
-				    					"tier": "Unlimited",
-   										"apiIdentifier": "` + apiId + `",
-    									"applicationId": "` + appId + `"
-									}`)
-			resp, err := utils.InvokePOSTRequest(subEndpoint, headers, body)
-			if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
-				// 200 OK or 201 Created
-				fmt.Println("API ", apiName ,":", apiVersion, "subscribed successfully.")
-				subscription := &utils.Subscription{}
-				data := []byte(resp.Body())
-				err = json.Unmarshal(data, &subscription)
-				return subscription.SubscriptionID, err
-			} else {
-				utils.Logf("Error: %s\n", resp.Error())
-				utils.Logf("Body: %s\n", resp.Body())
-				if resp.StatusCode() == http.StatusUnauthorized {
-					// 401 Unauthorized
-					return "", fmt.Errorf("invalid username/password combination")
+
+			for _, sub := range subscription.List {
+				//If an subscription exists, then return the subscription ID
+				if sub.ApplicationID == appId {
+					return sub.SubscriptionID, subErr
 				}
-				return "", errors.New("Request didn't respond 200 OK: " + resp.Status())
 			}
+		}
+		//If there is no subscription, make a subscription
+		body := dedent.Dedent(`{
+			"tier": "` + throttlingTier + `",
+			"apiIdentifier": "` + apiId + `",
+			"applicationId": "` + appId + `"
+		}`)
+		resp, err := utils.InvokePOSTRequest(subEndpoint, headers, body)
+		fmt.Println("Subscribed to API")
+		if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
+			// 200 OK or 201 Created
+			fmt.Println("API ", apiName, ":", apiVersion, "subscribed successfully.")
+			subscription := &utils.Subscription{}
+			data := []byte(resp.Body())
+			err = json.Unmarshal(data, &subscription)
+			return subscription.SubscriptionID, err
+		} else {
+			utils.Logf("Error: %s\n", resp.Error())
+			utils.Logf("Body: %s\n", resp.Body())
+			if resp.StatusCode() == http.StatusUnauthorized {
+				// 401 Unauthorized
+				return "", fmt.Errorf("invalid username/password combination")
+			}
+			return "", errors.New("Request didn't respond 200 OK: " + resp.Status())
 		}
 	} else {
 		utils.Logf("Error: %s\n", subResp.Error())
@@ -394,8 +478,6 @@ func subscribeApi(apiId string, appId string, accessToken string) (string, error
 		}
 		return "", errors.New("Request didn't respond 200 OK: " + subResp.Status())
 	}
-
-
 }
 
 // Get application details
@@ -427,6 +509,37 @@ func getApplicationDetails(appId string, accessToken string) (*utils.AppDetails,
 	}
 }
 
+// Get application details
+// @param appId : Application ID
+// @param accessToken : token to call the store rest API
+// @return AppDetails, error
+func updateApplicationDetails(appId string, body string, accessToken string) (*utils.AppDetails, error) {
+
+	applicationEndpoint := utils.GetApplicationListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath) + "/" + appId
+	//Prepping headers
+	headers := make(map[string]string)
+	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
+	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
+
+	//Retrieving the details of the particular application
+	resp, err := utils.InvokePutRequest(nil, applicationEndpoint, headers, body)
+	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
+		// 200 OK or 201 Created
+		appData := &utils.AppDetails{}
+		data := []byte(resp.Body())
+		err = json.Unmarshal(data, &appData)
+		return appData, err
+	} else {
+		utils.Logf("Error: %s\n", resp.Error())
+		utils.Logf("Body: %s\n", resp.Body())
+		if resp.StatusCode() == http.StatusUnauthorized {
+			// 401 Unauthorized
+			return nil, fmt.Errorf("invalid username/password combination")
+		}
+		return nil, errors.New("Request didn't respond 200 OK: " + resp.Status())
+	}
+}
+
 // Create application with a default name in a given environment
 // @param accessToken : access token to call the store rest API
 // @return client_id, client_secret, error
@@ -436,14 +549,14 @@ func createApplication(accessToken string) (string, string, error) {
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
-
+	conf := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
 	body := dedent.Dedent(`{
-								"throttlingTier": "Unlimited",
-								"description": "Default application for apimcli testing purposes",
-								"name": "` + utils.DefaultCliApp + `",
-								"callbackUrl": "http://my.server.com/callback",
-                                "tokenType": "`+ utils.DefaultTokenType + `"
-							}`)
+				"throttlingTier": "` + throttlingTier + `",
+				"description": "Default application for apimcli testing purposes",
+				"name": "` + utils.DefaultCliApp + `",
+				"callbackUrl": "http://my.server.com/callback",
+				"tokenType": "` + conf.Config.TokenType + `"
+			}`)
 
 	resp, err := utils.InvokePOSTRequest(applicationEndpoint, headers, body)
 
@@ -525,7 +638,7 @@ func getScopes(appId string, accessToken string) ([]string, error) {
 		data := []byte(resp.Body())
 		err = json.Unmarshal(data, &scopes)
 		var scp = make([]string, len(scopes.List))
-		for i := 0;  i< len(scopes.List); i++ {
+		for i := 0; i < len(scopes.List); i++ {
 			scp[i] = scopes.List[i].Key
 		}
 		return scp, err
@@ -588,8 +701,8 @@ func generateApplicationKeys(appId string, token string, scope []string) (string
 // @return string with formatted scope
 func prepScopeValues(scope []string) string {
 	scopeParam := ""
-	for i :=0 ; i < len(scope) ; i++ {
-		if i == len(scope) -1 {
+	for i := 0; i < len(scope); i++ {
+		if i == len(scope)-1 {
 			scopeParam += "\"" + scope[i] + "\""
 		} else {
 			scopeParam += "\"" + scope[i] + "\", "
@@ -597,7 +710,6 @@ func prepScopeValues(scope []string) string {
 	}
 	return scopeParam
 }
-
 
 //init function to add the cli command to the root command
 func init() {

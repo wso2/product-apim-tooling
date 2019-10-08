@@ -78,6 +78,18 @@ func InvokeGETRequestWithMultipleQueryParams(queryParam map[string]string, url s
 	return resp, err
 }
 
+// Invoke http-get request
+func InvokePutRequest(queryParam map[string]string, url string, headers map[string]string,  body string) (
+	*resty.Response, error) {
+	if Insecure {
+		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+	}
+	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
+	resp, err := resty.R().SetHeaders(headers).SetQueryParams(queryParam).SetBody(body).Put(url)
+
+	return resp, err
+}
+
 //Invoke POST request with query parameters
 func InvokePostRequestWithQueryParam(queryParam map[string]string, url string, headers map[string]string, body string) (
 	*resty.Response, error) {
