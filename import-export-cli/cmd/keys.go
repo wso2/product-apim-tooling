@@ -61,35 +61,39 @@ func getKeys() {
 	if err != nil {
 		utils.HandleErrorAndExit("Error getting credentials", err)
 	}
+	utils.Logln(utils.LogPrefixInfo + "Retrieved credentials of the environment successfully")
 	//Calling the DCR endpoint to get the credentials of the env
 	cred.ClientId, cred.ClientSecret, err = callDCREndpoint(cred)
 	//If the DCR call fails exit with the error
 	if err != nil {
 		utils.HandleErrorAndExit("Internal error occurred", err)
 	}
+	utils.Logln(utils.LogPrefixInfo + "Called DCR endpoint successfully")
 	//generating access token for the env based on the credentials
 	accessToken, err := generateAccessToken(cred)
-	fmt.Println(accessToken)
 	if err != nil {
 		utils.HandleErrorAndExit("Internal error occurred", err)
 	}
-	//searcg if the default cli application already exists
-	appId, err := searchApplication(utils.DefaultCliApp, accessToken)
-	if err != nil {
-		utils.HandleErrorAndExit("Internal error occurred", err)
-	}
+	utils.Logln(utils.LogPrefixInfo + "Generated accesstoken to call the store rest APIs.")
 	//retrieving subscription tiers
 	tiers, err := getAvailableAPITiers(accessToken)
 
 	if tiers != nil && err == nil {
+		utils.Logln(utils.LogPrefixInfo + "Retrieved available subscription tiers of the API: ", tiers)
 		//Needs an available subscription tier when creating application
 		throttlingTier = tiers[0]
 	} else {
 		utils.HandleErrorAndExit("Please check the API details and try again.", err)
 	}
+	//search if the default cli application already exists
+	appId, err := searchApplication(utils.DefaultCliApp, accessToken)
+	if err != nil {
+		utils.HandleErrorAndExit("Internal error occurred", err)
+	}
+	utils.Logln(utils.LogPrefixInfo + "Searched if application exists.")
 	//if the application exists
 	if appId != "" {
-		fmt.Println("Application already exists")
+		utils.Logln(utils.LogPrefixInfo + "Application already exists")
 		//Search the if the given API is present
 		subId, err := subscribe(appId, accessToken)
 		//If subscrition fails
@@ -122,15 +126,15 @@ func getKeys() {
 								"name": "` + utils.DefaultCliApp + `",
 								"throttlingTier" : "` + throttlingTier + `"
 							}`)
-					fmt.Println("Updating application as token type is changed to: " + tokenType)
+					utils.Logln(utils.LogPrefixInfo + "Updating application as token type is changed to: " + tokenType)
 					updatedApp, updateError := updateApplicationDetails(appId, body, accessToken)
 
 					if updatedApp != nil && updateError == nil {
-						fmt.Println("Updated application successfully")
+						utils.Logln(utils.LogPrefixInfo + "Updated application successfully")
 					} else if updateError != nil {
 						fmt.Println("Error while updating the application. : ", updateError)
 					}
-					fmt.Println("Regenerating application keys")
+					utils.Logln(utils.LogPrefixInfo + "Regenerating application keys")
 					//Once the application is updated with the token type, client credentials needs to be generated
 					var keygenResponse *utils.KeygenResponse
 					var keyGenErr error
@@ -143,7 +147,7 @@ func getKeys() {
 					if keyGenErr != nil {
 						fmt.Println("Error occurred while regenerating the keys for the app ", appId)
 					} else {
-						fmt.Println("Regenerated application keys successfully")
+						utils.Logln(utils.LogPrefixInfo + "Regenerated application keys successfully")
 					}
 					appDetails.Keys[0].ConsumerSecret = keygenResponse.ConsumerSecret
 				}
@@ -164,7 +168,7 @@ func getKeys() {
 		createdAppId, appName, err := createApplication(accessToken)
 		appId = createdAppId
 		if createdAppId != "" || appName != "" {
-			fmt.Println("Created application: ", appName)
+			utils.Logln(utils.LogPrefixInfo + "Created application: ", appName)
 		} else {
 			//if error occurred while creating the application, then
 			utils.HandleErrorAndExit("Error while creating the application:", err)
@@ -226,7 +230,7 @@ func callDCREndpoint(credential credentials.Credential) (string, string, error) 
 	registrationEndpoint := utils.GetRegistrationEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
 	//Calling the DCR endpoint
 	resp, err := utils.InvokePOSTRequest(registrationEndpoint, headers, body)
-	utils.Logln("Getting ClientID, ClientSecret: Status - " + resp.Status())
+	utils.Logln(utils.LogPrefixInfo + "Getting ClientID, ClientSecret: Status - " + resp.Status())
 
 	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
 		// 200 OK or 201 Created
@@ -413,7 +417,7 @@ func subscribe(appId string, accessToken string) (string, error) {
 	apiId, err := searchApi(accessToken)
 	if apiId != "" && err == nil {
 		//If the API is present, subscribe that API to the application
-		fmt.Println("API name: ", apiName, "version: ", apiVersion, "exists")
+		fmt.Println("API name: ", apiName, "& version: ", apiVersion, "exists")
 		subId, err := subscribeApi(apiId, appId, accessToken)
 		if subId != "" {
 			fmt.Println("API ", apiName, ":", apiVersion, "subscribed successfully.")
@@ -671,7 +675,6 @@ func getScopes(appId string, accessToken string) ([]string, error) {
 	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
 		// 200 OK or 201 Created
 		scopes := &utils.Scopes{}
-		fmt.Println(scopes)
 		data := []byte(resp.Body())
 		err = json.Unmarshal(data, &scopes)
 		var scp = make([]string, len(scopes.List))
