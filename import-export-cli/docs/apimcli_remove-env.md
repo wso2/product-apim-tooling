@@ -20,8 +20,8 @@ apimcli remove-env -n production
 ### Options
 
 ```
-  -h, --help          help for remove-env
-  -n, --name string   Name of the environment to be removed
+  -e, --environment string   Name of the environment to be removed
+  -h, --help                 help for remove-env
 ```
 
 ### Options inherited from parent commands

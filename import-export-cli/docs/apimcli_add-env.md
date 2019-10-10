@@ -37,8 +37,8 @@ apimcli add-env -n dev --apim https://localhost:9443 \
       --api_list string       API List endpoint for the environment
       --apim string           API Manager endpoint for the environment
       --app_list string       Application List endpoint for the environment
+  -e, --environment string    Name of the environment to be added
   -h, --help                  help for add-env
-  -n, --name string           Name of the environment to be added
       --registration string   Registration endpoint for the environment
       --token string          Token endpoint for the environment
 ```
