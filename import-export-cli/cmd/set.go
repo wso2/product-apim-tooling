@@ -29,6 +29,7 @@ import (
 var flagHttpRequestTimeout int
 var flagExportDirectory string
 var flagKubernetesMode string
+var flagTokenType string
 
 // Set command related Info
 const setCmdLiteral = "set"
@@ -42,6 +43,8 @@ const setCmdLongDesc = `Set configuration parameters. Use at least one of the fo
 const setCmdExamples = utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 3600 --export-directory /home/user/exported-apis
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000 --export-directory C:\Documents\exported
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000
+` + utils.ProjectName + ` ` + setCmdLiteral + ` --token-type JWT
+` + utils.ProjectName + ` ` + setCmdLiteral + ` --token-type OAUTH
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --mode kubernetes
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --mode default`
 
@@ -79,8 +82,17 @@ func executeSetCmd(mainConfigFilePath, exportDirectory string) {
 			utils.HandleErrorAndExit("Error changing mode ",
 				errors.New("mode should be set to either kubernetes or none"))
 		}
-	} else {
-		fmt.Println("Invalid input for flag --mode")
+	}
+	if flagTokenType != "" {
+		if strings.EqualFold(flagTokenType, "jwt") {
+			configVars.Config.TokenType = "JWT"
+		} else if strings.EqualFold(flagTokenType, "oauth") {
+			configVars.Config.TokenType = "OAUTH"
+		} else {
+			utils.HandleErrorAndExit("Error setting token type ",
+				errors.New("Token type should be either JWT or OAuth"))
+		}
+		fmt.Println("Token type set to: ", flagTokenType)
 	}
 	utils.WriteConfigFile(configVars, mainConfigFilePath)
 }
@@ -107,5 +119,7 @@ func init() {
 		"Timeout for HTTP Client")
 	SetCmd.Flags().StringVar(&flagExportDirectory, "export-directory", defaultExportDirectory,
 		"Path to directory where APIs should be saved")
+	SetCmd.Flags().StringVarP(&flagTokenType, "token-type", "t", "JWT",
+		"Type of the token to be generated")
 	SetCmd.Flags().StringVarP(&flagKubernetesMode, "mode", "m", "", "mode of apimcli")
 }

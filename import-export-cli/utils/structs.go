@@ -37,6 +37,7 @@ type Config struct {
 	HttpRequestTimeout int    `yaml:"http_request_timeout"`
 	ExportDirectory    string `yaml:"export_directory"`
 	KubernetesMode     bool   `yaml:"kubernetes_mode"`
+	TokenType          string `yaml:"token_type"`
 }
 
 type EnvKeys struct {
@@ -156,6 +157,7 @@ type AppDetails struct {
 	ApplicationID  string      `json:"applicationId"`
 	Description    interface{} `json:"description"`
 	Status         string      `json:"status"`
+	TokenType      string	   `json:"tokenType"`
 	Name           string      `json:"name"`
 	Keys           []struct {
 		ConsumerKey         string      `json:"consumerKey"`
@@ -240,4 +242,37 @@ type Scopes struct {
 		Roles       string `json:"roles"`
 		Description string `json:"description"`
 	} `json:"list"`
+}
+
+
+//get detailed API response
+type APIData struct {
+	ThumbnailURL        interface{} `json:"thumbnailUrl"`
+	Tiers               []string    `json:"tiers"`
+	BusinessInformation struct {
+		TechnicalOwner      string `json:"technicalOwner"`
+		TechnicalOwnerEmail string `json:"technicalOwnerEmail"`
+		BusinessOwner       string `json:"businessOwner"`
+		BusinessOwnerEmail  string `json:"businessOwnerEmail"`
+	} `json:"businessInformation"`
+	APIDefinition    string      `json:"apiDefinition"`
+	WsdlURI          interface{} `json:"wsdlUri"`
+	IsDefaultVersion bool        `json:"isDefaultVersion"`
+	EndpointURLs     []struct {
+		EnvironmentName string `json:"environmentName"`
+		EnvironmentType string `json:"environmentType"`
+		EnvironmentURLs struct {
+			HTTP  string `json:"http"`
+			HTTPS string `json:"https"`
+		} `json:"environmentURLs"`
+	} `json:"endpointURLs"`
+	Transport   []string `json:"transport"`
+	Tags        []string `json:"tags"`
+	Version     string   `json:"version"`
+	Description string   `json:"description"`
+	Provider    string   `json:"provider"`
+	Name        string   `json:"name"`
+	Context     string   `json:"context"`
+	ID          string   `json:"id"`
+	Status      string   `json:"status"`
 }

@@ -426,17 +426,18 @@ func injectParamsToAPI(importPath, paramsPath, importEnvironment string) error {
 	// check whether import environment is included in api configuration
 	envParams := apiParams.GetEnv(importEnvironment)
 	if envParams == nil {
-		return fmt.Errorf("%s does not exists in %s", importEnvironment, paramsPath)
-	}
+		fmt.Println("Using default values as the environment is not present in api_param.yaml file")
+	} else {
+		//If environment parameters are present in parameter file
+		err = mergeAPI(importPath, envParams)
+		if err != nil {
+			return err
+		}
 
-	err = mergeAPI(importPath, envParams)
-	if err != nil {
-		return err
-	}
-
-	err = generateCertificates(importPath, envParams)
-	if err != nil {
-		return err
+		err = generateCertificates(importPath, envParams)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -713,6 +714,7 @@ func ImportAPI(credential credentials.Credential, importPath, adminEndpoint, exp
 		return err
 	}
 	if paramsPath != "" {
+		//Reading API params file and populate api.yaml
 		err := injectParamsToAPI(apiFilePath, paramsPath, importEnvironment)
 		if err != nil {
 			return err
