@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
@@ -79,10 +80,13 @@ func removeEnv(envName, mainConfigFilePath, envKeysFilePath string) error {
 			return err
 		}
 
-		// remove keys also
-		err = runLogout(envName)
-		if err != nil {
-			return err
+		// remove keys also if user has already logged into this environment
+		store, err := credentials.GetDefaultCredentialStore()
+		if store.Has(envName) {
+			err = runLogout(envName)
+			if err != nil {
+				return err
+			}
 		}
 	} else {
 		// environment does not exist in mainConfig file (endpoints file). Nothing to remove
@@ -98,7 +102,7 @@ func removeEnv(envName, mainConfigFilePath, envKeysFilePath string) error {
 // init using Cobra
 func init() {
 	RootCmd.AddCommand(removeEnvCmd)
-	removeEnvCmd.Flags().StringVarP(&flagNameOfEnvToBeRemoved, "name", "n",
+	removeEnvCmd.Flags().StringVarP(&flagNameOfEnvToBeRemoved, "environment", "e",
 		"", "Name of the environment to be removed")
-	_ = removeEnvCmd.MarkFlagRequired("name")
+	_ = removeEnvCmd.MarkFlagRequired("environment")
 }

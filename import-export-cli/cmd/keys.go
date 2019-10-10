@@ -51,39 +51,67 @@ var genKeyCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		utils.Logln(utils.LogPrefixInfo + genKeyCmdLiteral + " called")
-		cred, err := getCredentials(keyGenEnv)
-		if err != nil {
-			utils.HandleErrorAndExit("Error getting credentials", err)
-		}
-		//Calling the DCR endpoint to get the credentials of the env
-		cred.ClientId, cred.ClientSecret, err = callDCREndpoint(cred)
-		//generating access token for the env based on the credentials
-		accessToken, err := generateAccessToken(cred)
-		//searcg if the default cli application already exists
-		appId, err := searchApplication(utils.DefaultCliApp, accessToken)
-		//retrieving subscription tiers
-		tiers, err := getAvailableAPITiers(accessToken)
-		if tiers != nil {
-			//Needs an available subscription tier when creating application
-			throttlingTier = tiers[0]
-		}
-		//if the application exists
-		if appId != "" {
-			fmt.Println("Application already exists")
-			//Search the if the given API is present
-			subId, err := subscribe(appId, accessToken)
+		getKeys()
+	},
+}
 
-			if subId != "" {
-				//todo:Handle subscription
-			}
+//Subscribe the given API to the default application and generate an access token
+func getKeys() {
+	cred, err := getCredentials(keyGenEnv)
+	if err != nil {
+		utils.HandleErrorAndExit("Error getting credentials", err)
+	}
+	//Calling the DCR endpoint to get the credentials of the env
+	cred.ClientId, cred.ClientSecret, err = callDCREndpoint(cred)
+	//If the DCR call fails exit with the error
+	if err != nil {
+		utils.HandleErrorAndExit("Internal error occurred", err)
+	}
+	//generating access token for the env based on the credentials
+	accessToken, err := generateAccessToken(cred)
+	fmt.Println(accessToken)
+	if err != nil {
+		utils.HandleErrorAndExit("Internal error occurred", err)
+	}
+	//searcg if the default cli application already exists
+	appId, err := searchApplication(utils.DefaultCliApp, accessToken)
+	if err != nil {
+		utils.HandleErrorAndExit("Internal error occurred", err)
+	}
+	//retrieving subscription tiers
+	tiers, err := getAvailableAPITiers(accessToken)
 
-			scopes, err := getScopes(appId, accessToken)
-			//retrieve application specific details
-			appDetails, err := getApplicationDetails(appId, accessToken)
-			if appDetails != nil {
-				//Reading configuration to check if the application needs to be updated
-				configVars := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
-				tokenType = configVars.Config.TokenType
+	if tiers != nil && err == nil {
+		//Needs an available subscription tier when creating application
+		throttlingTier = tiers[0]
+	} else {
+		utils.HandleErrorAndExit("Please check the API details and try again.", err)
+	}
+	//if the application exists
+	if appId != "" {
+		fmt.Println("Application already exists")
+		//Search the if the given API is present
+		subId, err := subscribe(appId, accessToken)
+		//If subscrition fails
+		if subId == "" && err != nil {
+			utils.HandleErrorAndExit("Error occurred while subscribing.", err)
+		}
+
+		scopes, err := getScopes(appId, accessToken)
+		//retrieve application specific details
+		appDetails, err := getApplicationDetails(appId, accessToken)
+		if appDetails != nil {
+			//Reading configuration to check if the application needs to be updated
+			configVars := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
+			tokenType = configVars.Config.TokenType
+			if len(appDetails.Keys) == 0 {
+				//If the application is already created but the keys have not generated in the first time
+				keygenResponse, err := generateApplicationKeys(appId, accessToken, scopes)
+				if keygenResponse == nil && err != nil {
+					utils.HandleErrorAndExit("Error occurred while generating application keys.", err)
+				}
+				fmt.Println("AccessToken: ", keygenResponse.Token.AccessToken)
+			} else {
 				// check if the token type of the config file and the token type of the application is different
 				// tokenType (read form the config file should not be null if the application needs to be updated)
 				if tokenType != appDetails.TokenType && tokenType != "" {
@@ -104,13 +132,20 @@ var genKeyCmd = &cobra.Command{
 					}
 					fmt.Println("Regenerating application keys")
 					//Once the application is updated with the token type, client credentials needs to be generated
-					response, err := regenerateConsumerSecret(appDetails.Keys[0].ConsumerKey, accessToken)
-					if err != nil {
-						fmt.Println("Error occurred while regenerating the consumer key and consumer secret for the app ", appId)
+					var keygenResponse *utils.KeygenResponse
+					var keyGenErr error
+					if len(appDetails.Keys) == 0 {
+						//If the application is already created but the keys have not generated in the first time
+						keygenResponse, keyGenErr = generateApplicationKeys(appId, accessToken, scopes)
+					} else {
+						keygenResponse, keyGenErr = regenerateConsumerSecret(appDetails.Keys[0].ConsumerKey, accessToken)
+					}
+					if keyGenErr != nil {
+						fmt.Println("Error occurred while regenerating the keys for the app ", appId)
 					} else {
 						fmt.Println("Regenerated application keys successfully")
 					}
-					appDetails.Keys[0].ConsumerSecret = response.ConsumerSecret
+					appDetails.Keys[0].ConsumerSecret = keygenResponse.ConsumerSecret
 				}
 				//Generate access token for the default cli application
 				token, err := getNewToken(appDetails, scopes)
@@ -119,45 +154,48 @@ var genKeyCmd = &cobra.Command{
 				} else {
 					fmt.Println("Error while generating token: ", err)
 				}
-			} else {
-				fmt.Println("Error while creating the application:", err)
 			}
 		} else {
-			//If the default cli appId does not exist in the environment
-			//Create the application
-			createdAppId, appName, err := createApplication(accessToken)
-			appId = createdAppId
-			if createdAppId != "" || appName != "" {
-				fmt.Println("Created application: ", appName)
-			} else {
-				fmt.Println("Error while creating the application:", err)
-			}
-			//Search the if the given API is present
-			subId, err := subscribe(appId, accessToken)
-			if subId != "" {
-				//todo:Handle subscription
-			}
-			scopes, err := getScopes(appId, accessToken)
-
-			if scopes == nil {
-				fmt.Println("Error while retrieving scopes ", err)
-			}
-			//Generate the tokens
-			accessToken, refreshToken, err := generateApplicationKeys(appId, accessToken, scopes)
-			if accessToken != "" || refreshToken != "" {
-				fmt.Println("Access token: ", accessToken)
-			} else {
-				fmt.Println("Error while generating token: ", err)
-			}
+			fmt.Println("Error while retrieving the application:", err)
 		}
+	} else {
+		//If the default cli appId does not exist in the environment
+		//Create the application
+		createdAppId, appName, err := createApplication(accessToken)
+		appId = createdAppId
+		if createdAppId != "" || appName != "" {
+			fmt.Println("Created application: ", appName)
+		} else {
+			//if error occurred while creating the application, then
+			utils.HandleErrorAndExit("Error while creating the application:", err)
+		}
+		//Search the if the given API is present
+		subId, err := subscribe(appId, accessToken)
+		//If subscription failed
+		if subId == "" && err != nil {
+			utils.HandleErrorAndExit("Error occurred while subscribing.", err)
+		}
+		scopes, err := getScopes(appId, accessToken)
+		//If errors occurred while retrieving scopes
+		if scopes == nil && err != nil {
+			fmt.Println("Error while retrieving scopes ", err)
+		}
+		//Generate the tokens
+		keygenResponse, err:= generateApplicationKeys(appId, accessToken, scopes)
 
-	},
+		if keygenResponse.Token.AccessToken != ""  {
+			fmt.Println("Access token: ", accessToken)
+		} else {
+			fmt.Println("Error while generating token: ", err)
+		}
+	}
+
 }
 
 func getAvailableAPITiers(accessToken string) ([]string, error) {
 	apiId, err := searchApi(accessToken)
 	if apiId == "" && err != nil {
-		fmt.Println("Error occurred while searching the API: ", apiName)
+		return nil, err
 	}
 	api, err := getApi(apiId, accessToken)
 	if err == nil && api != nil {
@@ -183,12 +221,11 @@ func callDCREndpoint(credential credentials.Credential) (string, string, error) 
 							   	"callbackUrl": "www.google.lk",
 							   	"grantType":"password refresh_token",
 							   	"saasApp": true,
-							   	"owner": "` + credential.Username + `",
+							   	"owner": "` + credential.Username + `"
 							}`)
 	registrationEndpoint := utils.GetRegistrationEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
 	//Calling the DCR endpoint
 	resp, err := utils.InvokePOSTRequest(registrationEndpoint, headers, body)
-
 	utils.Logln("Getting ClientID, ClientSecret: Status - " + resp.Status())
 
 	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
@@ -219,7 +256,6 @@ func callDCREndpoint(credential credentials.Credential) (string, string, error) 
 func generateAccessToken(credential credentials.Credential) (string, error) {
 	//Base64 encoding the credentials
 	b64encodedCredentials := credentials.Base64Encode(fmt.Sprintf("%s:%s", credential.ClientId, credential.ClientSecret))
-
 	//Prepping the headers
 	headers := make(map[string]string)
 	headers[utils.HeaderContentType] = utils.HeaderValueXWWWFormUrlEncoded
@@ -326,7 +362,9 @@ func searchApplication(appName string, accessToken string) (string, error) {
 // @return apiId, error
 func searchApi(accessToken string) (string, error) {
 	//API endpoint of the environment from the config file
-	apiEndpoint := utils.GetApiListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
+	apiEndpoint := utils.GetApplicationListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
+	apiEndpoint = strings.Replace(apiEndpoint, "applications", "apis", -1)
+
 	//Prepping headers
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
@@ -351,7 +389,8 @@ func searchApi(accessToken string) (string, error) {
 			apiId := apiData.List[0].ID
 			return apiId, err
 		}
-		return "", nil
+		return "", errors.New("Requested API is not available in the store. API: " + apiName +
+										" Version: " + apiVersion + " Provider: " + apiProvider)
 	} else {
 		utils.Logf("Error: %s\n", resp.Error())
 		utils.Logf("Body: %s\n", resp.Body())
@@ -377,7 +416,7 @@ func subscribe(appId string, accessToken string) (string, error) {
 		fmt.Println("API name: ", apiName, "version: ", apiVersion, "exists")
 		subId, err := subscribeApi(apiId, appId, accessToken)
 		if subId != "" {
-			fmt.Println("Successfully subscribed to the App")
+			fmt.Println("API ", apiName, ":", apiVersion, "subscribed successfully.")
 		} else {
 			fmt.Println("Error while subscribing to the application:", err)
 		}
@@ -453,10 +492,8 @@ func subscribeApi(apiId string, appId string, accessToken string) (string, error
 			"applicationId": "` + appId + `"
 		}`)
 		resp, err := utils.InvokePOSTRequest(subEndpoint, headers, body)
-		fmt.Println("Subscribed to API")
 		if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
 			// 200 OK or 201 Created
-			fmt.Println("API ", apiName, ":", apiVersion, "subscribed successfully.")
 			subscription := &utils.Subscription{}
 			data := []byte(resp.Body())
 			err = json.Unmarshal(data, &subscription)
@@ -658,7 +695,7 @@ func getScopes(appId string, accessToken string) ([]string, error) {
 // @param token : token to invoke the store rest API
 // @param scope[] : Scopes to retrieve the token
 // @return client_id, client_secret, error
-func generateApplicationKeys(appId string, token string, scope []string) (string, string, error) {
+func generateApplicationKeys(appId string, token string, scope []string) (*utils.KeygenResponse, error) {
 
 	applicationEndpoint := utils.GetApplicationListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath) + "/generate-keys"
 	headers := make(map[string]string)
@@ -680,17 +717,15 @@ func generateApplicationKeys(appId string, token string, scope []string) (string
 		keygenResponse := &utils.KeygenResponse{}
 		data := []byte(resp.Body())
 		err = json.Unmarshal(data, &keygenResponse)
-		accessToken := keygenResponse.Token.AccessToken
-		refreshToken := keygenResponse.Token.AccessToken
-		return accessToken, refreshToken, err
+		return keygenResponse, err
 	} else {
 		utils.Logf("Error: %s\n", resp.Error())
 		utils.Logf("Body: %s\n", resp.Body())
 		if resp.StatusCode() == http.StatusUnauthorized {
 			// 401 Unauthorized
-			return "", "", fmt.Errorf("invalid username/password combination")
+			return nil, fmt.Errorf("invalid username/password combination")
 		}
-		return "", "", errors.New("Request didn't respond 200 OK: " + resp.Status())
+		return nil, errors.New("Request didn't respond 200 OK: " + resp.Status())
 	}
 }
 

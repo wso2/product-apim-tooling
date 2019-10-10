@@ -134,7 +134,7 @@ func addEnv(envName string, envEndpoints *utils.EnvEndpoints, mainConfigFilePath
 func init() {
 	RootCmd.AddCommand(addEnvCmd)
 
-	addEnvCmd.Flags().StringVarP(&flagAddEnvName, "name", "n", "", "Name of the environment to be added")
+	addEnvCmd.Flags().StringVarP(&flagAddEnvName, "environment", "e", "", "Name of the environment to be added")
 	addEnvCmd.Flags().StringVar(&flagApiManagerEndpoint, "apim", "", "API Manager endpoint for the environment")
 	addEnvCmd.Flags().StringVar(&flagApiListEndpoint, "api_list", "", "API List endpoint for the environment")
 	addEnvCmd.Flags().StringVar(&flagAppListEndpoint, "app_list", "", "Application List endpoint for the environment")
