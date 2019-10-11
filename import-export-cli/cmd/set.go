@@ -119,7 +119,7 @@ func init() {
 		"Timeout for HTTP Client")
 	SetCmd.Flags().StringVar(&flagExportDirectory, "export-directory", defaultExportDirectory,
 		"Path to directory where APIs should be saved")
-	SetCmd.Flags().StringVarP(&flagTokenType, "token-type", "t", "JWT",
+	SetCmd.Flags().StringVarP(&flagTokenType, "token-type", "t", "",
 		"Type of the token to be generated")
 	SetCmd.Flags().StringVarP(&flagKubernetesMode, "mode", "m", "", "mode of apimcli")
 }
