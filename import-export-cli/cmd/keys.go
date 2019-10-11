@@ -108,53 +108,46 @@ func getKeys() {
 			//Reading configuration to check if the application needs to be updated
 			configVars := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
 			tokenType = configVars.Config.TokenType
+			//Check if the token type of the application has been updated
+			if tokenType != appDetails.TokenType && tokenType != "" {
+				//Request body for the store rest api
+				body := dedent.Dedent(`{
+								"tokenType": "` + configVars.Config.TokenType + `",
+								"name": "` + utils.DefaultCliApp + `",
+								"throttlingTier" : "` + throttlingTier + `"
+							}`)
+				utils.Logln(utils.LogPrefixInfo + "Updating application as token type is changed to: " + tokenType)
+				updatedApp, updateError := updateApplicationDetails(appId, body, accessToken)
+
+				if updatedApp != nil && updateError == nil {
+					utils.Logln(utils.LogPrefixInfo + "Updated application successfully")
+				} else if updateError != nil {
+					fmt.Println("Error while updating the application. : ", updateError)
+				}
+				//if keys have been already generated before, then update the consumer key and secret
+				if len(appDetails.Keys) != 0 {
+					keygenResponse, keyGenErr := regenerateConsumerSecret(appDetails.Keys[0].ConsumerKey, accessToken)
+					if keyGenErr != nil {
+						fmt.Println("Error occurred while regenerating the keys for the app ", appId)
+					} else {
+						appDetails.Keys[0].ConsumerSecret = keygenResponse.ConsumerSecret
+						utils.Logln(utils.LogPrefixInfo + "Regenerated application keys successfully")
+					}
+				}
+			}
+			//If keys have not been generated before but the application is created
 			if len(appDetails.Keys) == 0 {
 				//If the application is already created but the keys have not generated in the first time
 				keygenResponse, err := generateApplicationKeys(appId, accessToken, scopes)
 				if keygenResponse == nil && err != nil {
 					utils.HandleErrorAndExit("Error occurred while generating application keys.", err)
 				}
-				fmt.Println("AccessToken: ", keygenResponse.Token.AccessToken)
+				fmt.Println("Access Token: ", keygenResponse.Token.AccessToken)
 			} else {
-				// check if the token type of the config file and the token type of the application is different
-				// tokenType (read form the config file should not be null if the application needs to be updated)
-				if tokenType != appDetails.TokenType && tokenType != "" {
-					//Request body for the store rest api
-
-					body := dedent.Dedent(`{
-								"tokenType": "` + configVars.Config.TokenType + `",
-								"name": "` + utils.DefaultCliApp + `",
-								"throttlingTier" : "` + throttlingTier + `"
-							}`)
-					utils.Logln(utils.LogPrefixInfo + "Updating application as token type is changed to: " + tokenType)
-					updatedApp, updateError := updateApplicationDetails(appId, body, accessToken)
-
-					if updatedApp != nil && updateError == nil {
-						utils.Logln(utils.LogPrefixInfo + "Updated application successfully")
-					} else if updateError != nil {
-						fmt.Println("Error while updating the application. : ", updateError)
-					}
-					utils.Logln(utils.LogPrefixInfo + "Regenerating application keys")
-					//Once the application is updated with the token type, client credentials needs to be generated
-					var keygenResponse *utils.KeygenResponse
-					var keyGenErr error
-					if len(appDetails.Keys) == 0 {
-						//If the application is already created but the keys have not generated in the first time
-						keygenResponse, keyGenErr = generateApplicationKeys(appId, accessToken, scopes)
-					} else {
-						keygenResponse, keyGenErr = regenerateConsumerSecret(appDetails.Keys[0].ConsumerKey, accessToken)
-					}
-					if keyGenErr != nil {
-						fmt.Println("Error occurred while regenerating the keys for the app ", appId)
-					} else {
-						utils.Logln(utils.LogPrefixInfo + "Regenerated application keys successfully")
-					}
-					appDetails.Keys[0].ConsumerSecret = keygenResponse.ConsumerSecret
-				}
-				//Generate access token for the default cli application
+				//If the keys have not been generated and the applciation is updated
 				token, err := getNewToken(appDetails, scopes)
 				if accessToken != "" {
-					fmt.Println("Access token: ", token)
+					fmt.Println("Access Token: ", token)
 				} else {
 					fmt.Println("Error while generating token: ", err)
 				}
@@ -188,7 +181,7 @@ func getKeys() {
 		keygenResponse, err:= generateApplicationKeys(appId, accessToken, scopes)
 
 		if keygenResponse.Token.AccessToken != ""  {
-			fmt.Println("Access token: ", accessToken)
+			fmt.Println("Access Token: ", keygenResponse.Token.AccessToken)
 		} else {
 			fmt.Println("Error while generating token: ", err)
 		}
