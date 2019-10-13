@@ -48,25 +48,21 @@ const RootCmdShortDesc = "CLI for Importing and Exporting APIs and Applications"
 const RootCmdLongDesc = utils.ProjectName + ` is a Command Line Tool for Importing and Exporting APIs and Applications between different environments of WSO2 API Manager
 (Dev, Production, Staging, QA etc.)`
 
-
-//Get config to check mode
-var configVars = utils.GetMainConfigFromFile(utils.MainConfigFilePath)
-
 // This represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use: utils.ProjectName,
 	Args: func(cmd *cobra.Command, args []string) error {
-		if configVars.Config.KubernetesMode {
+		if isK8sEnabled() {
 			return cobra.ArbitraryArgs(cmd, args)
 		} else {
 			return cobra.NoArgs(cmd, args)
 		}
 	},
-	DisableFlagParsing: setDisableFlagParsing(),
+	DisableFlagParsing: isK8sEnabled(),
 	Short:              RootCmdShortDesc,
 	Long:               RootCmdLongDesc,
 	Run: func(cmd *cobra.Command, args []string) {
-		if configVars.Config.KubernetesMode {
+		if isK8sEnabled() {
 			executeKubernetes(args...)
 		} else {
 			cmd.Help()
@@ -186,9 +182,9 @@ func initConfig() {
 }
 
 //disable flags when the mode set to kubernetes
-func setDisableFlagParsing() bool {
+func isK8sEnabled() bool {
 	//Get config to check mode
-	configVars = utils.GetMainConfigFromFileSilently(utils.MainConfigFilePath)
+	configVars := utils.GetMainConfigFromFileSilently(utils.MainConfigFilePath)
 	if configVars != nil && configVars.Config.KubernetesMode {
 		return true
 	} else {
