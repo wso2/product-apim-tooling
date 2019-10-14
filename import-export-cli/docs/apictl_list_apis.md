@@ -1,4 +1,4 @@
-## apimctl list apis
+## apictl list apis
 
 Display a list of APIs in an environment
 
@@ -8,16 +8,16 @@ Display a list of APIs in an environment
 Display a list of APIs in the environment specified by the flag --environment, -e
 
 ```
-apimctl list apis [flags]
+apictl list apis [flags]
 ```
 
 ### Examples
 
 ```
-apimctl apis list -e dev
-apimctl apis list -e dev -q version:1.0.0
-apimctl apis list -e prod -q provider:admin
-apimctl apis list -e staging
+apictl apis list -e dev
+apictl apis list -e dev -q version:1.0.0
+apictl apis list -e prod -q provider:admin
+apictl apis list -e staging
 ```
 
 ### Options
@@ -37,5 +37,5 @@ apimctl apis list -e staging
 ```
 
 ### SEE ALSO
-* [apimctl list](apimctl_list.md)	 - List APIs/Applications in an environment or List the environments
+* [apictl list](apictl_list.md)	 - List APIs/Applications in an environment or List the environments
 

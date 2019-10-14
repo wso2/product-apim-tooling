@@ -23,12 +23,12 @@ import (
 	"path/filepath"
 )
 
-const ProjectName = "apimctl"
+const ProjectName = "apictl"
 
 // File Names and Paths
 var CurrentDir, _ = os.Getwd()
 
-const ConfigDirName = ".wso2apimctl"
+const ConfigDirName = ".wso2apictl"
 
 var HomeDirectory = os.Getenv("HOME")
 
@@ -101,5 +101,5 @@ const LastSuceededContentDelimiter = " " // space
 const DefaultResourceTenantDomain = "tenant-default"
 const ApplicationId = "applicationId"
 const ApiId = "apiId"
-const DefaultCliApp = "default-apimctl-app"
+const DefaultCliApp = "default-apictl-app"
 const DefaultTokenType = "JWT"

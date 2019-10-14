@@ -1,4 +1,4 @@
-## apimctl update
+## apictl update
 
 Update an API to the kubernetes cluster
 
@@ -10,9 +10,9 @@ Update an existing API with  Swagger file in the kubernetes cluster. JSON and YA
 ### Examples
 
 ```
-apimctl update api -n petstore --from-file=./Swagger.json --replicas=1 --namespace=wso2
+apictl update api -n petstore --from-file=./Swagger.json --replicas=1 --namespace=wso2
 
-apimctl update api -n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apimctl/myapi --replicas=1 --namespace=wso2
+apictl update api -n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi --replicas=1 --namespace=wso2
 ```
 
 ### Options
@@ -29,6 +29,6 @@ apimctl update api -n petstore --from-file=./product-apim-tooling/import-export-
 ```
 
 ### SEE ALSO
-* [apimctl](apimctl.md)	 - CLI for Importing and Exporting APIs and Applications
-* [apimctl update api](apimctl_update_api.md)	 - handle APIs in kubernetes cluster 
+* [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
+* [apictl update api](apictl_update_api.md)	 - handle APIs in kubernetes cluster 
 

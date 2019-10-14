@@ -31,7 +31,7 @@ Replace `Meta-information/swagger.yaml` **with your swagger file** (JSON also su
 Edit `api_params.yaml` and add your endpoint specific URLs there.
 
 import api as usual with
-`apimctl import-api [directory path]`
+`apictl import-api [directory path]`
 
 ## Publishing API Project
 

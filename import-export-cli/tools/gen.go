@@ -25,13 +25,13 @@ func main() {
 	}
 
 	log.Println("Generating bash completions...")
-	err = cmd.RootCmd.GenBashCompletionFile(filepath.FromSlash("./shell-completions/apimctl_bash_completions.sh"))
+	err = cmd.RootCmd.GenBashCompletionFile(filepath.FromSlash("./shell-completions/apictl_bash_completions.sh"))
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	log.Println("Generating zsh completions...")
-	err = cmd.RootCmd.GenZshCompletionFile(filepath.FromSlash("./shell-completions/apimctl_zsh_completions.sh"))
+	err = cmd.RootCmd.GenZshCompletionFile(filepath.FromSlash("./shell-completions/apictl_zsh_completions.sh"))
 	if err != nil {
 		log.Fatal(err)
 	}

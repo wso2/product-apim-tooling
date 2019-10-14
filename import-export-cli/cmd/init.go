@@ -49,9 +49,9 @@ var (
 	initCmdForced            bool
 )
 
-const initCmdExample = `apimctl init myapi --oas petstore.yaml
-apimctl init Petstore --oas https://petstore.swagger.io/v2/swagger.json
-apimctl init MyAwesomeAPI --oas ./swagger.yaml -d definition.yaml`
+const initCmdExample = `apictl init myapi --oas petstore.yaml
+apictl init Petstore --oas https://petstore.swagger.io/v2/swagger.json
+apictl init MyAwesomeAPI --oas ./swagger.yaml -d definition.yaml`
 
 // directories to be created
 var dirs = []string{
@@ -79,7 +79,7 @@ func createDirectories(name string) error {
 	return nil
 }
 
-// loadDefaultSpecFromDisk loads api definition stored in HOME/.wso2apimctl/default_api.yaml
+// loadDefaultSpecFromDisk loads api definition stored in HOME/.wso2apictl/default_api.yaml
 func loadDefaultSpecFromDisk() (*v2.APIDefinition, error) {
 	defaultData, err := ioutil.ReadFile(utils.DefaultAPISpecFilePath)
 	if err != nil {

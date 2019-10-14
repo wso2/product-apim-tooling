@@ -1,4 +1,4 @@
-## apimctl list envs
+## apictl list envs
 
 Display the list of environments
 
@@ -8,13 +8,13 @@ Display the list of environments
 Display a list of environments defined in 'main_config.yaml' file
 
 ```
-apimctl list envs [flags]
+apictl list envs [flags]
 ```
 
 ### Examples
 
 ```
-apimctl list envs
+apictl list envs
 ```
 
 ### Options
@@ -32,5 +32,5 @@ apimctl list envs
 ```
 
 ### SEE ALSO
-* [apimctl list](apimctl_list.md)	 - List APIs/Applications in an environment or List the environments
+* [apictl list](apictl_list.md)	 - List APIs/Applications in an environment or List the environments
 
