@@ -1,4 +1,4 @@
-## apimcli import-api
+## apimctl import-api
 
 Import API
 
@@ -8,16 +8,16 @@ Import API
 Import an API to an environment
 
 ```
-apimcli import-api --file <PATH_TO_API> --environment <ENVIRONMENT> [flags]
+apimctl import-api --file <PATH_TO_API> --environment <ENVIRONMENT> [flags]
 ```
 
 ### Examples
 
 ```
-apimcli import-api -f qa/TwitterAPI.zip -e dev
-apimcli import-api -f staging/FacebookAPI.zip -e production
-apimcli import-api -f ~/myapi -e production --update
-apimcli import-api -f ~/myapi -e production --update --inject
+apimctl import-api -f qa/TwitterAPI.zip -e dev
+apimctl import-api -f staging/FacebookAPI.zip -e production
+apimctl import-api -f ~/myapi -e production --update
+apimctl import-api -f ~/myapi -e production --update --inject
 ```
 
 ### Options
@@ -40,5 +40,5 @@ apimcli import-api -f ~/myapi -e production --update --inject
 ```
 
 ### SEE ALSO
-* [apimcli](apimcli.md)	 - CLI for Importing and Exporting APIs and Applications
+* [apimctl](apimctl.md)	 - CLI for Importing and Exporting APIs and Applications
 

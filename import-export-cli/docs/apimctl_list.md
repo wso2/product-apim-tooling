@@ -1,4 +1,4 @@
-## apimcli list
+## apimctl list
 
 List APIs/Applications in an environment or List the environments
 
@@ -11,14 +11,14 @@ OR
 List all the environments
 
 ```
-apimcli list [flags]
+apimctl list [flags]
 ```
 
 ### Examples
 
 ```
-apimcli list envs
-apimcli list apis -e dev
+apimctl list envs
+apimctl list apis -e dev
 ```
 
 ### Options
@@ -35,8 +35,8 @@ apimcli list apis -e dev
 ```
 
 ### SEE ALSO
-* [apimcli](apimcli.md)	 - CLI for Importing and Exporting APIs and Applications
-* [apimcli list apis](apimcli_list_apis.md)	 - Display a list of APIs in an environment
-* [apimcli list apps](apimcli_list_apps.md)	 - Display a list of Applications in an environment specific to an owner
-* [apimcli list envs](apimcli_list_envs.md)	 - Display the list of environments
+* [apimctl](apimctl.md)	 - CLI for Importing and Exporting APIs and Applications
+* [apimctl list apis](apimctl_list_apis.md)	 - Display a list of APIs in an environment
+* [apimctl list apps](apimctl_list_apps.md)	 - Display a list of Applications in an environment specific to an owner
+* [apimctl list envs](apimctl_list_envs.md)	 - Display the list of environments
 

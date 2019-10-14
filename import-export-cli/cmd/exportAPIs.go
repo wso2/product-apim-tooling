@@ -46,7 +46,7 @@ var apis []utils.API
 var exportRelatedFilesPath string
 var exportAPIsFormat string
 
-//e.g. /home/samithac/.wso2apimcli/exported/migration/production-2.5/wso2-dot-org
+//e.g. /home/samithac/.wso2apimctl/exported/migration/production-2.5/wso2-dot-org
 var startFromBeginning bool
 var isProcessCompleted bool
 var startingApiIndexFromList int
@@ -80,7 +80,7 @@ func executeExportAPIsCmd(exportDirectory string) {
 	apiExportDir = createExportAPIsDirStructure(exportDirectory)
 	exportRelatedFilesPath = filepath.Join(exportDirectory, cmdExportEnvironment,
 		utils.GetMigrationExportTenantDirName(cmdResourceTenantDomain))
-	//e.g. /home/samithac/.wso2apimcli/exported/migration/production-2.5/wso2-dot-org
+	//e.g. /home/samithac/.wso2apimctl/exported/migration/production-2.5/wso2-dot-org
 	startFromBeginning = false
 	isProcessCompleted = false
 

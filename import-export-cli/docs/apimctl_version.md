@@ -1,6 +1,6 @@
-## apimcli version
+## apimctl version
 
-Display Version on current apimcli
+Display Version on current apimctl
 
 ### Synopsis
 
@@ -8,13 +8,13 @@ Display Version on current apimcli
 Display the current version of this command line tool
 
 ```
-apimcli version [flags]
+apimctl version [flags]
 ```
 
 ### Examples
 
 ```
-apimcli version
+apimctl version
 ```
 
 ### Options
@@ -31,5 +31,5 @@ apimcli version
 ```
 
 ### SEE ALSO
-* [apimcli](apimcli.md)	 - CLI for Importing and Exporting APIs and Applications
+* [apimctl](apimctl.md)	 - CLI for Importing and Exporting APIs and Applications
 

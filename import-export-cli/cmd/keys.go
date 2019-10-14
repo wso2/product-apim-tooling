@@ -586,7 +586,7 @@ func createApplication(accessToken string) (string, string, error) {
 	conf := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
 	body := dedent.Dedent(`{
 				"throttlingTier": "` + throttlingTier + `",
-				"description": "Default application for apimcli testing purposes",
+				"description": "Default application for apimctl testing purposes",
 				"name": "` + utils.DefaultCliApp + `",
 				"callbackUrl": "http://my.server.com/callback",
 				"tokenType": "` + conf.Config.TokenType + `"

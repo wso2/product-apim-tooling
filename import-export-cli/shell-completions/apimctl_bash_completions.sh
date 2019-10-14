@@ -1,4 +1,4 @@
-# bash completion for apimcli                              -*- shell-script -*-
+# bash completion for apimctl                              -*- shell-script -*-
 
 __debug()
 {
@@ -226,9 +226,9 @@ __handle_word()
     __handle_word
 }
 
-_apimcli_add_api()
+_apimctl_add_api()
 {
-    last_command="apimcli_add_api"
+    last_command="apimctl_add_api"
     commands=()
 
     flags=()
@@ -259,9 +259,9 @@ _apimcli_add_api()
     noun_aliases=()
 }
 
-_apimcli_add()
+_apimctl_add()
 {
-    last_command="apimcli_add"
+    last_command="apimctl_add"
     commands=()
     commands+=("api")
 
@@ -283,9 +283,9 @@ _apimcli_add()
     noun_aliases=()
 }
 
-_apimcli_add-env()
+_apimctl_add-env()
 {
-    last_command="apimcli_add-env"
+    last_command="apimctl_add-env"
     commands=()
 
     flags=()
@@ -321,9 +321,9 @@ _apimcli_add-env()
     noun_aliases=()
 }
 
-_apimcli_export-api()
+_apimctl_export-api()
 {
-    last_command="apimcli_export-api"
+    last_command="apimctl_export-api"
     commands=()
 
     flags=()
@@ -362,9 +362,9 @@ _apimcli_export-api()
     noun_aliases=()
 }
 
-_apimcli_export-apis()
+_apimctl_export-apis()
 {
-    last_command="apimcli_export-apis"
+    last_command="apimctl_export-apis"
     commands=()
 
     flags=()
@@ -398,9 +398,9 @@ _apimcli_export-apis()
     noun_aliases=()
 }
 
-_apimcli_export-app()
+_apimctl_export-app()
 {
-    last_command="apimcli_export-app"
+    last_command="apimctl_export-app"
     commands=()
 
     flags=()
@@ -434,9 +434,9 @@ _apimcli_export-app()
     noun_aliases=()
 }
 
-_apimcli_get-keys()
+_apimctl_get-keys()
 {
-    last_command="apimcli_get-keys"
+    last_command="apimctl_get-keys"
     commands=()
 
     flags=()
@@ -471,9 +471,9 @@ _apimcli_get-keys()
     noun_aliases=()
 }
 
-_apimcli_import-api()
+_apimctl_import-api()
 {
-    last_command="apimcli_import-api"
+    last_command="apimctl_import-api"
     commands=()
 
     flags=()
@@ -512,9 +512,9 @@ _apimcli_import-api()
     noun_aliases=()
 }
 
-_apimcli_import-app()
+_apimctl_import-app()
 {
-    last_command="apimcli_import-app"
+    last_command="apimctl_import-app"
     commands=()
 
     flags=()
@@ -553,9 +553,9 @@ _apimcli_import-app()
     noun_aliases=()
 }
 
-_apimcli_init()
+_apimctl_init()
 {
-    last_command="apimcli_init"
+    last_command="apimctl_init"
     commands=()
 
     flags=()
@@ -584,9 +584,9 @@ _apimcli_init()
     noun_aliases=()
 }
 
-_apimcli_list_apis()
+_apimctl_list_apis()
 {
-    last_command="apimcli_list_apis"
+    last_command="apimctl_list_apis"
     commands=()
 
     flags=()
@@ -617,9 +617,9 @@ _apimcli_list_apis()
     noun_aliases=()
 }
 
-_apimcli_list_apps()
+_apimctl_list_apps()
 {
-    last_command="apimcli_list_apps"
+    last_command="apimctl_list_apps"
     commands=()
 
     flags=()
@@ -650,9 +650,9 @@ _apimcli_list_apps()
     noun_aliases=()
 }
 
-_apimcli_list_envs()
+_apimctl_list_envs()
 {
-    last_command="apimcli_list_envs"
+    last_command="apimctl_list_envs"
     commands=()
 
     flags=()
@@ -675,9 +675,9 @@ _apimcli_list_envs()
     noun_aliases=()
 }
 
-_apimcli_list()
+_apimctl_list()
 {
-    last_command="apimcli_list"
+    last_command="apimctl_list"
     commands=()
     commands+=("apis")
     commands+=("apps")
@@ -701,9 +701,9 @@ _apimcli_list()
     noun_aliases=()
 }
 
-_apimcli_login()
+_apimctl_login()
 {
-    last_command="apimcli_login"
+    last_command="apimctl_login"
     commands=()
 
     flags=()
@@ -732,9 +732,9 @@ _apimcli_login()
     noun_aliases=()
 }
 
-_apimcli_logout()
+_apimctl_logout()
 {
-    last_command="apimcli_logout"
+    last_command="apimctl_logout"
     commands=()
 
     flags=()
@@ -755,9 +755,9 @@ _apimcli_logout()
     noun_aliases=()
 }
 
-_apimcli_remove-env()
+_apimctl_remove-env()
 {
-    last_command="apimcli_remove-env"
+    last_command="apimctl_remove-env"
     commands=()
 
     flags=()
@@ -783,9 +783,9 @@ _apimcli_remove-env()
     noun_aliases=()
 }
 
-_apimcli_set()
+_apimctl_set()
 {
-    last_command="apimcli_set"
+    last_command="apimctl_set"
     commands=()
 
     flags=()
@@ -816,9 +816,9 @@ _apimcli_set()
     noun_aliases=()
 }
 
-_apimcli_update_api()
+_apimctl_update_api()
 {
-    last_command="apimcli_update_api"
+    last_command="apimctl_update_api"
     commands=()
 
     flags=()
@@ -849,9 +849,9 @@ _apimcli_update_api()
     noun_aliases=()
 }
 
-_apimcli_update()
+_apimctl_update()
 {
-    last_command="apimcli_update"
+    last_command="apimctl_update"
     commands=()
     commands+=("api")
 
@@ -873,9 +873,9 @@ _apimcli_update()
     noun_aliases=()
 }
 
-_apimcli_version()
+_apimctl_version()
 {
-    last_command="apimcli_version"
+    last_command="apimctl_version"
     commands=()
 
     flags=()
@@ -896,9 +896,9 @@ _apimcli_version()
     noun_aliases=()
 }
 
-_apimcli()
+_apimctl()
 {
-    last_command="apimcli"
+    last_command="apimctl"
     commands=()
     commands+=("add")
     commands+=("add-env")
@@ -935,7 +935,7 @@ _apimcli()
     noun_aliases=()
 }
 
-__start_apimcli()
+__start_apimctl()
 {
     local cur prev words cword
     declare -A flaghash 2>/dev/null || :
@@ -951,7 +951,7 @@ __start_apimcli()
     local local_nonpersistent_flags=()
     local flags_with_completion=()
     local flags_completion=()
-    local commands=("apimcli")
+    local commands=("apimctl")
     local must_have_one_flag=()
     local must_have_one_noun=()
     local last_command
@@ -961,9 +961,9 @@ __start_apimcli()
 }
 
 if [[ $(type -t compopt) = "builtin" ]]; then
-    complete -o default -F __start_apimcli apimcli
+    complete -o default -F __start_apimctl apimctl
 else
-    complete -o default -o nospace -F __start_apimcli apimcli
+    complete -o default -o nospace -F __start_apimctl apimctl
 fi
 
 # ex: ts=4 sw=4 et filetype=sh

@@ -1,4 +1,4 @@
-## apimcli get-keys
+## apimctl get-keys
 
 Generate access token to invoke the API
 
@@ -8,13 +8,13 @@ Generate access token to invoke the API
 Generate JWT token to invoke the API by subscribing to a default application for testing purposes
 
 ```
-apimcli get-keys [flags]
+apimctl get-keys [flags]
 ```
 
 ### Examples
 
 ```
-apimcli get-keys -n TwitterAPI -v 1.0.0 -e dev --provider admin
+apimctl get-keys -n TwitterAPI -v 1.0.0 -e dev --provider admin
 ```
 
 ### Options
@@ -35,5 +35,5 @@ apimcli get-keys -n TwitterAPI -v 1.0.0 -e dev --provider admin
 ```
 
 ### SEE ALSO
-* [apimcli](apimcli.md)	 - CLI for Importing and Exporting APIs and Applications
+* [apimctl](apimctl.md)	 - CLI for Importing and Exporting APIs and Applications
 

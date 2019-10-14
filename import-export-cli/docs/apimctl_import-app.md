@@ -1,4 +1,4 @@
-## apimcli import-app
+## apimctl import-app
 
 Import App
 
@@ -8,15 +8,15 @@ Import App
 Import an Application to an environment
 
 ```
-apimcli import-app (--file <app-zip-file> --environment <environment-to-which-the-app-should-be-imported>) [flags]
+apimctl import-app (--file <app-zip-file> --environment <environment-to-which-the-app-should-be-imported>) [flags]
 ```
 
 ### Examples
 
 ```
-apimcli import-app -f qa/apps/sampleApp.zip -e dev
-apimcli Import App -f staging/apps/sampleApp.zip -e prod -o testUser
-apimcli import-app -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -e prod
+apimctl import-app -f qa/apps/sampleApp.zip -e dev
+apimctl Import App -f staging/apps/sampleApp.zip -e prod -o testUser
+apimctl import-app -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -e prod
 ```
 
 ### Options
@@ -40,5 +40,5 @@ apimcli import-app -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions 
 ```
 
 ### SEE ALSO
-* [apimcli](apimcli.md)	 - CLI for Importing and Exporting APIs and Applications
+* [apimctl](apimctl.md)	 - CLI for Importing and Exporting APIs and Applications
 
