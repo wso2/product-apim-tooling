@@ -51,7 +51,7 @@ const addCmdLongDesc = `Add an API from a Swagger file to the kubernetes cluster
 To execute kubernetes commands set mode to Kubernetes`
 const addCmdExamples = utils.ProjectName + " " + addCmdLiteral + " "+ apiCmdLiteral + " " + `-n petstore --from-file=./Swagger.json --replicas=1 --namespace=wso2
 
-` + utils.ProjectName + " " + addCmdLiteral + " "+ apiCmdLiteral + " " + `-n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apimctl/myapi --replicas=1 --namespace=wso2`
+` + utils.ProjectName + " " + addCmdLiteral + " "+ apiCmdLiteral + " " + `-n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi --replicas=1 --namespace=wso2`
 
 var interceptorsConfName string
 
@@ -110,7 +110,7 @@ var addApiCmd = &cobra.Command{
 				createAPI(flagApiName, flagNamespace, configMapName, flagReplicas, "", interceptorsConfName)
 			}
 		} else {
-			utils.HandleErrorAndExit("set mode to kubernetes with command - apimctl set-mode kubernetes ",
+			utils.HandleErrorAndExit("set mode to kubernetes with command - apictl set-mode kubernetes ",
 				errors.New("mode should be set to kubernetes"))
 		}
 

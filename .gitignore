@@ -45,7 +45,7 @@ hs_err_pid*
 # =================
 
 # Binaries
-import-export-cli/apimctl
+import-export-cli/apictl
 import-export-cli/import-export-cli
 import-export-cli/build/
 

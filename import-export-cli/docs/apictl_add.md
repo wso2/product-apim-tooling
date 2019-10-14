@@ -1,4 +1,4 @@
-## apimctl add
+## apictl add
 
 Add an API to the kubernetes cluster
 
@@ -11,9 +11,9 @@ To execute kubernetes commands set mode to Kubernetes
 ### Examples
 
 ```
-apimctl add api -n petstore --from-file=./Swagger.json --replicas=1 --namespace=wso2
+apictl add api -n petstore --from-file=./Swagger.json --replicas=1 --namespace=wso2
 
-apimctl add api -n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apimctl/myapi --replicas=1 --namespace=wso2
+apictl add api -n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi --replicas=1 --namespace=wso2
 ```
 
 ### Options
@@ -30,6 +30,6 @@ apimctl add api -n petstore --from-file=./product-apim-tooling/import-export-cli
 ```
 
 ### SEE ALSO
-* [apimctl](apimctl.md)	 - CLI for Importing and Exporting APIs and Applications
-* [apimctl add api](apimctl_add_api.md)	 - handle APIs in kubernetes cluster 
+* [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
+* [apictl add api](apictl_add_api.md)	 - handle APIs in kubernetes cluster 
 

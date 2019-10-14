@@ -38,7 +38,7 @@ const setCmdShortDesc = "Set configuration"
 const setCmdLongDesc = `Set configuration parameters. Use at least one of the following flags
 * --http-request-timeout <time-in-milli-seconds>
 * --export-directory <path-to-directory-where-apis-should-be-saved>
-* --mode <mode-of-apimctl>`
+* --mode <mode-of-apictl>`
 
 const setCmdExamples = utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 3600 --export-directory /home/user/exported-apis
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000 --export-directory C:\Documents\exported
@@ -121,5 +121,5 @@ func init() {
 		"Path to directory where APIs should be saved")
 	SetCmd.Flags().StringVarP(&flagTokenType, "token-type", "t", "",
 		"Type of the token to be generated")
-	SetCmd.Flags().StringVarP(&flagKubernetesMode, "mode", "m", "", "mode of apimctl")
+	SetCmd.Flags().StringVarP(&flagKubernetesMode, "mode", "m", "", "mode of apictl")
 }

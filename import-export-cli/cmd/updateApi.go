@@ -38,7 +38,7 @@ const updateCmdShortDesc = "Update an API to the kubernetes cluster"
 const updateCmdLongDesc = `Update an existing API with  Swagger file in the kubernetes cluster. JSON and YAML formats are accepted.`
 const updateCmdExamples = utils.ProjectName + " " + updateCmdLiteral + " " + apiCmdLiteral + " " + `-n petstore --from-file=./Swagger.json --replicas=1 --namespace=wso2
 
-`  + utils.ProjectName + " " + updateCmdLiteral + " "+ apiCmdLiteral + " " + `-n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apimctl/myapi --replicas=1 --namespace=wso2`
+`  + utils.ProjectName + " " + updateCmdLiteral + " "+ apiCmdLiteral + " " + `-n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi --replicas=1 --namespace=wso2`
 
 var updatedInterceptorConfName string
 
@@ -101,7 +101,7 @@ var updateApiCmd = &cobra.Command{
 				createAPI(updateflagApiName, updateflagNamespace, updateConfigMapName, updateflagReplicas, timestamp, updatedInterceptorConfName)
 			}
 		} else {
-			utils.HandleErrorAndExit("set mode to kubernetes with command - apimctl set-mode kubernetes ",
+			utils.HandleErrorAndExit("set mode to kubernetes with command - apictl set-mode kubernetes ",
 				errors.New("mode should be set to kubernetes"))
 		}
 

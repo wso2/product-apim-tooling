@@ -5,37 +5,37 @@
 <ul>
     <li><h3 id="running">Running</h3>
         <p> Select a generated archive suitable for your platform (Mac, Windows, Linux) and extract it to a desired
-            location and <code>cd</code> into it.<br> Then execute <code>apimctl</code> to start the application.</p>
+            location and <code>cd</code> into it.<br> Then execute <code>apictl</code> to start the application.</p>
         <blockquote>
-            <p>NOTE: Execute <code>./apimctl</code> if the working directory is the same where the executable resides
+            <p>NOTE: Execute <code>./apictl</code> if the working directory is the same where the executable resides
             </p>
             <p>Add the location of extracted folder to your system&#39;s $PATH variable to access the executable from
                 anywhere </p>
         </blockquote>
-        <p> Execute <code>apimctl --help</code> for further instructions.</p>
+        <p> Execute <code>apictl --help</code> for further instructions.</p>
     </li>
     <li><h3 id="adding-environments">Adding Environments</h3>
-        <p> Add environments by either manually editing <code>$HOME/.wso2apimctl/main_config.yaml</code> or using the
-            command<br> <code>apimctl add-env</code>.</p>
+        <p> Add environments by either manually editing <code>$HOME/.wso2apictl/main_config.yaml</code> or using the
+            command<br> <code>apictl add-env</code>.</p>
         <blockquote>
-            <p>NOTE: Directory structure for configuration files (<code>$HOME/.wso2apimctl</code>) will be created upon
-                execution of <code>apimctl</code></p>
+            <p>NOTE: Directory structure for configuration files (<code>$HOME/.wso2apictl</code>) will be created upon
+                execution of <code>apictl</code></p>
         </blockquote>
-        <p> Execute <code>apimctl add-env --help</code> for detailed instructions</p>
+        <p> Execute <code>apictl add-env --help</code> for detailed instructions</p>
         <blockquote>
             <p>Under environment, <code>api_manager_endpoint</code>, <code>registration_endpoint</code>, <code>token_endpoint</code>
                 fields are mandatory. Others are optional</p>
         </blockquote>
     </li>
     <li><h3 id="command-autocompletion-for-bash-only-">Command Autocompletion (For Bash Only)</h3>
-        <p> Copy the file <code>apimctl_bash_completion.sh</code> to <code>/etc/bash_completion.d/</code> and source it
-            with<br> <code>source /etc/bash_completion.d/apimctl_bash_completion.sh</code> to enable bash
+        <p> Copy the file <code>apictl_bash_completion.sh</code> to <code>/etc/bash_completion.d/</code> and source it
+            with<br> <code>source /etc/bash_completion.d/apictl_bash_completion.sh</code> to enable bash
             auto-completion.</p>
     </li>
 </ul>
 <hr>
 <h2 id="usage">Usage</h2>
-<pre><code class="lang-bash">     apimctl [command]
+<pre><code class="lang-bash">     apictl [command]
 </code></pre>
 <h4 id="global-flags">Global Flags</h4>
 <pre><code class="lang-bash">      --verbose
@@ -59,10 +59,10 @@
            --password, -p
            NOTE: user will be prompted to enter credentials if they are not provided with these flags
    Examples:
-       apimctl export-api -n TestAPI -v 1.0.1 -r admin -e staging
-       apimctl export-api -n TestAPI -v 1.0.1 -r admin -e staging -u admin -p 123456
-       apimctl export-api -n TestAPI -v 1.0.1 -r admin -e staging -u admin
-       apimctl export-api -n TestAPI -v 1.0.1 -r admin -e staging -p 123456
+       apictl export-api -n TestAPI -v 1.0.1 -r admin -e staging
+       apictl export-api -n TestAPI -v 1.0.1 -r admin -e staging -u admin -p 123456
+       apictl export-api -n TestAPI -v 1.0.1 -r admin -e staging -u admin
+       apictl export-api -n TestAPI -v 1.0.1 -r admin -e staging -p 123456
 </code></pre>
     </li>
 </ul>
@@ -79,11 +79,11 @@
                 --password, -p 
                 NOTE: user will be prompted to enter credentials if they are not provided with these flags
         Examples:
-            apimctl import-api -f dev/TestAPI_1.0.0.zip -e dev
-            apimctl import-api -f qa/TestAPI_2.0.0.zip -e dev -u admin -p 123456
-            apimctl import-api -f staging/TestAPI_1.1.zip -e dev -u admin
-            apimctl import-api -f production/TestAPI_3.0.1.zip -e dev -p 123456
-            apimctl import-api -f TestAPI -e dev
+            apictl import-api -f dev/TestAPI_1.0.0.zip -e dev
+            apictl import-api -f qa/TestAPI_2.0.0.zip -e dev -u admin -p 123456
+            apictl import-api -f staging/TestAPI_1.1.zip -e dev -u admin
+            apictl import-api -f production/TestAPI_3.0.1.zip -e dev -p 123456
+            apictl import-api -f TestAPI -e dev
 </code></pre>
 <ul>
     <li><h4 id="export-app">export-app</h4>
@@ -97,8 +97,8 @@
             --password, -p
             NOTE: user will be prompted to enter credentials if they are not provided with these flags
    Examples:
-            apimctl export-app -n SampleApp -o admin -e dev
-            apimctl export-app -n SampleApp -o admin -e prod
+            apictl export-app -n SampleApp -o admin -e dev
+            apictl export-app -n SampleApp -o admin -e prod
 </code></pre>
     </li>
 </ul>
@@ -117,9 +117,9 @@
                   --file, -f
                   --environment, -e
         Examples:
-            apimctl import-app -f qa/apps/sampleApp.zip -e dev
-            apimctl Import App -f staging/apps/sampleApp.zip -e prod -o testUser -u admin -p admin
-            apimctl import-app -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -e staging
+            apictl import-app -f qa/apps/sampleApp.zip -e dev
+            apictl Import App -f staging/apps/sampleApp.zip -e prod -o testUser -u admin -p admin
+            apictl import-app -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -e staging
 </code></pre>
 <ul>
     <li><h4 id="list-apis">list apis</h4>
@@ -132,12 +132,12 @@
               NOTE: user will be prompted to enter credentials if they are not provided with these flags
               --query, -q
       Examples:
-          apimctl list apis -e dev
-          apimctl list apis -e prod -q version:1.0.0
-          apimctl list apis -e prod -q provider:admin
-          apimctl list apis -e staging
-          apimctl list apis -e staging -u admin -p 123456
-          apimctl list apis -e staging -p 123456
+          apictl list apis -e dev
+          apictl list apis -e prod -q version:1.0.0
+          apictl list apis -e prod -q provider:admin
+          apictl list apis -e staging
+          apictl list apis -e staging -u admin -p 123456
+          apictl list apis -e staging -p 123456
 </code></pre>
     </li>
     <li><h4 id="list-apps">list apps</h4>
@@ -149,15 +149,15 @@
                   --username, -u
                   --password, -p
         Examples:
-            apimctl list apps -e dev -o admin
-            apimctl list apps -e staging -o sampleUser -u admin -p 123456
+            apictl list apps -e dev -o admin
+            apictl list apps -e staging -o sampleUser -u admin -p 123456
 </code></pre>
     </li>
     <li><h4 id="list-envs">list envs</h4>
         <pre><code class="lang-bash">     Flags:
          None
      Example:
-         apimctl list envs
+         apictl list envs
 </code></pre>
     </li>
     <li><h4 id="add-env">add-env</h4>
@@ -172,12 +172,12 @@
             --list (API List endpoint for environment)
 
         Examples:
-        apimctl add-env -n dev \
+        apictl add-env -n dev \
             --apim https://localhost:9443 \ 
             --registration https://localhost:9443/client-registration/v0.15/register \
             --token https://localhost:9443/oauth2/token
             
-        apimctl add-env -n prod \
+        apictl add-env -n prod \
             --apim https://localhost:9443 \ 
             --registration https://localhost:9443/client-registration/v0.15/register \
             --api_list https://localhost:9443/api/am/publisher/v0.15/apis \
@@ -192,7 +192,7 @@
             Required:
                 --name, -n (Name of the environment)
             Examples:
-                apimctl remove-env -n dev
+                apictl remove-env -n dev
 </code></pre>
 <ul>
     <li><h4 id="reset-user">reset-user</h4>
@@ -201,11 +201,11 @@
 <pre><code class="lang-bash">        Flags
             --environment, -e
         Examples:
-            apimctl reset-user -e dev
+            apictl reset-user -e dev
 </code></pre>
 <ul>
     <li><h4 id="version">version</h4>
-        <pre><code class="lang-bash">      apimctl version
+        <pre><code class="lang-bash">      apictl version
 </code></pre>
     </li>
     <li><h4 id="set">set</h4>
@@ -213,8 +213,8 @@
           --http-request-timeout
           --export-directory
       Examples:
-          apimctl set --http-request-timeout 10000
-          apimctl set --export-directory /home/user/exported
+          apictl set --http-request-timeout 10000
+          apictl set --export-directory /home/user/exported
 </code></pre>
     </li>
 </ul>
@@ -230,7 +230,7 @@
             --password, -p
             NOTE: user will be prompted to enter credentials if they are not provided with these flags
    Examples:
-            apimctl get-keys -n PizzaShackAPI --version 1.0.0 -e dev --provider admin
+            apictl get-keys -n PizzaShackAPI --version 1.0.0 -e dev --provider admin
 </code></pre>
     </li>
 </ul>

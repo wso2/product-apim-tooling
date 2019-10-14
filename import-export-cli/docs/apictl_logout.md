@@ -1,4 +1,4 @@
-## apimctl logout
+## apictl logout
 
 Logout to from an API Manager
 
@@ -8,13 +8,13 @@ Logout to from an API Manager
 Logout from an API Manager environment
 
 ```
-apimctl logout [environment] [flags]
+apictl logout [environment] [flags]
 ```
 
 ### Examples
 
 ```
-apimctl logout dev
+apictl logout dev
 ```
 
 ### Options
@@ -31,5 +31,5 @@ apimctl logout dev
 ```
 
 ### SEE ALSO
-* [apimctl](apimctl.md)	 - CLI for Importing and Exporting APIs and Applications
+* [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
 

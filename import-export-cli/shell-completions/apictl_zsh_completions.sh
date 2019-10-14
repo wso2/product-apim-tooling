@@ -1,4 +1,4 @@
-#compdef apimctl
+#compdef apictl
 
 _arguments \
   '1: :->level1' \
@@ -7,7 +7,7 @@ _arguments \
 case $state in
   level1)
     case $words[1] in
-      apimctl)
+      apictl)
         _arguments '1: :(add add-env export-api export-apis export-app get-keys help import-api import-app init list login logout remove-env set update version)'
       ;;
       *)

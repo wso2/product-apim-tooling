@@ -15,6 +15,6 @@ Follow the following steps to make a contribution to this tool.
 ## Tips
  * This command line tool is created on top of [Cobra](https://github.com/spf13/cobra)
  * Cobra's [README](https://github.com/spf13/cobra/blob/master/README.md) provides detailed information on developing command line tools.
- * For example: To add a new command named `apps` (so that the command would be `apimctl apps`) the following cobra command needs to be executed
+ * For example: To add a new command named `apps` (so that the command would be `apictl apps`) the following cobra command needs to be executed
 
     `cobra add apps`

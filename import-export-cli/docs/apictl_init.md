@@ -1,4 +1,4 @@
-## apimctl init
+## apictl init
 
 Initialize a new project in given path
 
@@ -8,15 +8,15 @@ Initialize a new project in given path
 Initialize a new project in given path. If a OpenAPI specification provided API will be populated with details from it
 
 ```
-apimctl init [project path] [flags]
+apictl init [project path] [flags]
 ```
 
 ### Examples
 
 ```
-apimctl init myapi --oas petstore.yaml
-apimctl init Petstore --oas https://petstore.swagger.io/v2/swagger.json
-apimctl init MyAwesomeAPI --oas ./swagger.yaml -d definition.yaml
+apictl init myapi --oas petstore.yaml
+apictl init Petstore --oas https://petstore.swagger.io/v2/swagger.json
+apictl init MyAwesomeAPI --oas ./swagger.yaml -d definition.yaml
 ```
 
 ### Options
@@ -36,5 +36,5 @@ apimctl init MyAwesomeAPI --oas ./swagger.yaml -d definition.yaml
 ```
 
 ### SEE ALSO
-* [apimctl](apimctl.md)	 - CLI for Importing and Exporting APIs and Applications
+* [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
 
