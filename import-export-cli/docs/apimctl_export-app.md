@@ -1,4 +1,4 @@
-## apimcli export-app
+## apimctl export-app
 
 Export App
 
@@ -8,14 +8,14 @@ Export App
 Export an Application from a specified  environment
 
 ```
-apimcli export-app (--name <name-of-the-application> --owner <owner-of-the-application> --environment <environment-from-which-the-app-should-be-exported>) [flags]
+apimctl export-app (--name <name-of-the-application> --owner <owner-of-the-application> --environment <environment-from-which-the-app-should-be-exported>) [flags]
 ```
 
 ### Examples
 
 ```
-apimcli export-app -n SampleApp -o admin -e dev
-apimcli export-app -n SampleApp -o admin -e prod
+apimctl export-app -n SampleApp -o admin -e dev
+apimctl export-app -n SampleApp -o admin -e prod
 NOTE: Flag --name (-n) and --owner (-o) are mandatory
 ```
 
@@ -37,5 +37,5 @@ NOTE: Flag --name (-n) and --owner (-o) are mandatory
 ```
 
 ### SEE ALSO
-* [apimcli](apimcli.md)	 - CLI for Importing and Exporting APIs and Applications
+* [apimctl](apimctl.md)	 - CLI for Importing and Exporting APIs and Applications
 

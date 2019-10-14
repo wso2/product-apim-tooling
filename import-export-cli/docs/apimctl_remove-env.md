@@ -1,4 +1,4 @@
-## apimcli remove-env
+## apimctl remove-env
 
 Remove Environment from Config file
 
@@ -8,13 +8,13 @@ Remove Environment from Config file
 Remove Environment and its related endpoints from the config file
 
 ```
-apimcli remove-env [flags]
+apimctl remove-env [flags]
 ```
 
 ### Examples
 
 ```
-apimcli remove-env -n production
+apimctl remove-env -n production
 ```
 
 ### Options
@@ -32,5 +32,5 @@ apimcli remove-env -n production
 ```
 
 ### SEE ALSO
-* [apimcli](apimcli.md)	 - CLI for Importing and Exporting APIs and Applications
+* [apimctl](apimctl.md)	 - CLI for Importing and Exporting APIs and Applications
 

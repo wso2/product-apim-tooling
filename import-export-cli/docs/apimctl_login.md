@@ -1,4 +1,4 @@
-## apimcli login
+## apimctl login
 
 Login to an API Manager
 
@@ -8,15 +8,15 @@ Login to an API Manager
 Login to an API Manager using credentials
 
 ```
-apimcli login [environment] [flags]
+apimctl login [environment] [flags]
 ```
 
 ### Examples
 
 ```
-apimcli login dev -u admin -p admin
-apimcli login dev -u admin
-cat ~/.mypassword | apimcli login dev -u admin
+apimctl login dev -u admin -p admin
+apimctl login dev -u admin
+cat ~/.mypassword | apimctl login dev -u admin
 ```
 
 ### Options
@@ -36,5 +36,5 @@ cat ~/.mypassword | apimcli login dev -u admin
 ```
 
 ### SEE ALSO
-* [apimcli](apimcli.md)	 - CLI for Importing and Exporting APIs and Applications
+* [apimctl](apimctl.md)	 - CLI for Importing and Exporting APIs and Applications
 

@@ -1,4 +1,4 @@
-## apimcli export-apis
+## apimctl export-apis
 
 Export APIs for migration
 
@@ -8,14 +8,14 @@ Export APIs for migration
 Export all the APIs of a tenant from an APIM 2.6.0 environment environment, to be imported into 3.0.0 environment
 
 ```
-apimcli export-apis [--environment <environment-from-which-artifacts-should-be-exported>] -u <user_name> -p <password> [-t <Tenant-domain-of-the-resources-to-be-exported>] [--force] [flags]
+apimctl export-apis [--environment <environment-from-which-artifacts-should-be-exported>] -u <user_name> -p <password> [-t <Tenant-domain-of-the-resources-to-be-exported>] [--force] [flags]
 ```
 
 ### Examples
 
 ```
-apimcli export-apis -e production-2.6.0 -u wso2admin@wso2.org -p 12345 -t wso2.org -k --force
-		apimcli export-apis -e production-2.6.0 -u admin -p admin -k
+apimctl export-apis -e production-2.6.0 -u wso2admin@wso2.org -p 12345 -t wso2.org -k --force
+		apimctl export-apis -e production-2.6.0 -u admin -p admin -k
 ```
 
 ### Options
@@ -37,5 +37,5 @@ apimcli export-apis -e production-2.6.0 -u wso2admin@wso2.org -p 12345 -t wso2.o
 ```
 
 ### SEE ALSO
-* [apimcli](apimcli.md)	 - CLI for Importing and Exporting APIs and Applications
+* [apimctl](apimctl.md)	 - CLI for Importing and Exporting APIs and Applications
 

@@ -1,4 +1,4 @@
-## apimcli list apps
+## apimctl list apps
 
 Display a list of Applications in an environment specific to an owner
 
@@ -8,16 +8,16 @@ Display a list of Applications in an environment specific to an owner
 Display a list of Applications of the user in the environment specified by the flag --environment, -e
 
 ```
-apimcli list apps [flags]
+apimctl list apps [flags]
 ```
 
 ### Examples
 
 ```
-apimcli list apps -e dev
-apimcli list apps -e dev -o sampleUser
-apimcli list apps -e prod -o sampleUser
-apimcli list apps -e staging -o sampleUser
+apimctl list apps -e dev
+apimctl list apps -e dev -o sampleUser
+apimctl list apps -e prod -o sampleUser
+apimctl list apps -e staging -o sampleUser
 ```
 
 ### Options
@@ -37,5 +37,5 @@ apimcli list apps -e staging -o sampleUser
 ```
 
 ### SEE ALSO
-* [apimcli list](apimcli_list.md)	 - List APIs/Applications in an environment or List the environments
+* [apimctl list](apimctl_list.md)	 - List APIs/Applications in an environment or List the environments
 

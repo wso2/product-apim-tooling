@@ -1,4 +1,4 @@
-## apimcli add api
+## apimctl update api
 
 handle APIs in kubernetes cluster 
 
@@ -10,13 +10,13 @@ available modes are as follows
 * kubernetes
 
 ```
-apimcli add api [flags]
+apimctl update api [flags]
 ```
 
 ### Examples
 
 ```
-apimcli add/update api -n petstore --from-file=./Swagger.json --replicas=3 --namespace=wso2
+apimctl add/update api -n petstore --from-file=./Swagger.json --replicas=3 --namespace=wso2
 ```
 
 ### Options
@@ -37,5 +37,5 @@ apimcli add/update api -n petstore --from-file=./Swagger.json --replicas=3 --nam
 ```
 
 ### SEE ALSO
-* [apimcli add](apimcli_add.md)	 - Add an API to the kubernetes cluster
+* [apimctl update](apimctl_update.md)	 - Update an API to the kubernetes cluster
 
