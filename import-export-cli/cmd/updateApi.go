@@ -98,7 +98,7 @@ var updateApiCmd = &cobra.Command{
 				}
 				//update the API
 				fmt.Println("updating the API Kind")
-				createAPI(updateflagApiName, updateflagNamespace, updateConfigMapName, updateflagReplicas, timestamp, updatedInterceptorConfName)
+				createAPI(updateflagApiName, updateflagNamespace, updateConfigMapName, updateflagReplicas, timestamp, updatedInterceptorConfName, false)
 			}
 		} else {
 			utils.HandleErrorAndExit("set mode to kubernetes with command - apictl set-mode kubernetes ",

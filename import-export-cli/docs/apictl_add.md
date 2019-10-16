@@ -13,7 +13,7 @@ To execute kubernetes commands set mode to Kubernetes
 ```
 apictl add api -n petstore --from-file=./Swagger.json --replicas=1 --namespace=wso2
 
-apictl add api -n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi --replicas=1 --namespace=wso2
+apictl add api -n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi --replicas=1 --namespace=wso2 --override=true
 ```
 
 ### Options
