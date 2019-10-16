@@ -38,7 +38,7 @@ const (
 	envsApiManagerEndpoint         = "API MANAGER ENDPOINT"
 	envsApplicationEndpoint        = "APPLICATION ENDPOINT"
 
-	defaulEnvsTableFormat = "table {{.Name}}\t{{.PublisherEndpoint}}\t{{.RegistrationEndpoint}}\t{{.TokenEndpoint}}"
+	defaulEnvsTableFormat = "table {{.Name}}\t{{.ApiManagerEndpoint}}\t{{.RegistrationEndpoint}}\t{{.TokenEndpoint}}"
 )
 
 var envsCmdFormat string
