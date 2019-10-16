@@ -163,21 +163,20 @@
     <li><h4 id="add-env">add-env</h4>
         <pre><code class="lang-bash">      Flags:
         Required:
-            --name, -n (Name of the environment)
+            --environment, -e (Name of the environment)
             --apim (API Manager endpoint)
             --registration (Registration Endpoint)
             --token (Token Endpoint)
         Optional:
-            --import-export (API Import Export Endpoint for environment)
             --list (API List endpoint for environment)
 
         Examples:
-        apictl add-env -n dev \
+        apictl add-env -e dev \
             --apim https://localhost:9443 \ 
             --registration https://localhost:9443/client-registration/v0.15/register \
             --token https://localhost:9443/oauth2/token
             
-        apictl add-env -n prod \
+        apictl add-env -e prod \
             --apim https://localhost:9443 \ 
             --registration https://localhost:9443/client-registration/v0.15/register \
             --api_list https://localhost:9443/api/am/publisher/v0.15/apis \
@@ -190,9 +189,9 @@
 </ul>
 <pre><code class="lang-bash">        Flags:
             Required:
-                --name, -n (Name of the environment)
+                --environment, -e (Name of the environment)
             Examples:
-                apictl remove-env -n dev
+                apictl remove-env -e dev
 </code></pre>
 <ul>
     <li><h4 id="reset-user">reset-user</h4>

@@ -14,7 +14,7 @@ apictl remove-env [flags]
 ### Examples
 
 ```
-apictl remove-env -n production
+apictl remove-env -e production
 ```
 
 ### Options

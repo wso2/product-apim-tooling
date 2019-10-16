@@ -34,7 +34,7 @@ const removeEnvCmdShortDesc = "Remove Environment from Config file"
 
 const removeEnvCmdLongDesc = `Remove Environment and its related endpoints from the config file`
 
-const removeEnvCmdExamples = utils.ProjectName + ` ` + removeEnvCmdLiteral + ` -n production`
+const removeEnvCmdExamples = utils.ProjectName + ` ` + removeEnvCmdLiteral + ` -e production`
 
 // removeEnvCmd represents the removeEnv command
 var removeEnvCmd = &cobra.Command{

@@ -14,18 +14,18 @@ apictl add-env [flags]
 ### Examples
 
 ```
-apictl add-env -n production \
+apictl add-env -e production \
 --registration https://localhost:9443/client-registration/v0.15/register \
 --apim  https://localhost:9443 \
 --token https://localhost:8243/token
 
-apictl add-env -n test \
+apictl add-env -e test \
 --registration https://localhost:9443/client-registration/v0.15/register \
 --api_list https://localhsot:9443/api/am/publisher/v0.15/apis \
 --apim  https://localhost:9443 \
 --token https://localhost:8243/token
 
-apictl add-env -n dev --apim https://localhost:9443 \
+apictl add-env -e dev --apim https://localhost:9443 \
 --token	https://localhost:8243/token \
 --registration http://localhost:9763/client-registration/v0.15/register
 ```
