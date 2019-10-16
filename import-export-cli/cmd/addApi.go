@@ -38,6 +38,7 @@ var flagApiName string
 var flagSwaggerFilePath string
 var flagReplicas int
 var flagNamespace string
+var flagOverride bool
 
 const apiCmdLiteral = "api"
 const apiCmdShortDesc = "handle APIs in kubernetes cluster "
@@ -51,7 +52,7 @@ const addCmdLongDesc = `Add an API from a Swagger file to the kubernetes cluster
 To execute kubernetes commands set mode to Kubernetes`
 const addCmdExamples = utils.ProjectName + " " + addCmdLiteral + " "+ apiCmdLiteral + " " + `-n petstore --from-file=./Swagger.json --replicas=1 --namespace=wso2
 
-` + utils.ProjectName + " " + addCmdLiteral + " "+ apiCmdLiteral + " " + `-n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi --replicas=1 --namespace=wso2`
+` + utils.ProjectName + " " + addCmdLiteral + " "+ apiCmdLiteral + " " + `-n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi --replicas=1 --namespace=wso2 --override=true`
 
 var interceptorsConfName string
 
@@ -107,7 +108,7 @@ var addApiCmd = &cobra.Command{
 					}
 				}
 				//create API
-				createAPI(flagApiName, flagNamespace, configMapName, flagReplicas, "", interceptorsConfName)
+				createAPI(flagApiName, flagNamespace, configMapName, flagReplicas, "", interceptorsConfName, flagOverride)
 			}
 		} else {
 			utils.HandleErrorAndExit("set mode to kubernetes with command - apictl set-mode kubernetes ",
@@ -139,7 +140,7 @@ func createConfigMapWithNamespace(configMapName string, filePath string, namespa
 	return nil
 }
 
-func createAPI(name string, namespace string, configMapName string, replicas int, timestamp string, interceptorConfName string) {
+func createAPI(name string, namespace string, configMapName string, replicas int, timestamp string, interceptorConfName string, override bool) {
 	//get API definition from file
 	apiConfigMapData, _ := box.Get("/kubernetes_resources/api_cr.yaml")
 	apiConfigMap := &wso2v1alpha1.API{}
@@ -152,6 +153,7 @@ func createAPI(name string, namespace string, configMapName string, replicas int
 	apiConfigMap.Namespace = namespace
 	apiConfigMap.Spec.Definition.ConfigmapName = configMapName
 	apiConfigMap.Spec.Replicas = replicas
+	apiConfigMap.Spec.Override = override
 	if timestamp != "" {
 		//set update timestamp
 		apiConfigMap.Spec.UpdateTimeStamp = timestamp
@@ -221,4 +223,5 @@ func init() {
 	addApiCmd.Flags().StringVarP(&flagSwaggerFilePath, "from-file", "f", "", "Path to swagger file")
 	addApiCmd.Flags().IntVar(&flagReplicas, "replicas", 1, "replica set")
 	addApiCmd.Flags().StringVar(&flagNamespace, "namespace", "", "namespace of API")
+	addApiCmd.Flags().BoolVarP(&flagOverride, "override", "", false,"Property to override the existing docker image with same name and version")
 }
