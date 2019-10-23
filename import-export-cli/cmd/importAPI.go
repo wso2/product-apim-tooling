@@ -224,7 +224,7 @@ func extractArchive(src, dest string) (string, error) {
 		return "", fmt.Errorf("invalid API archive")
 	}
 	r := strings.TrimPrefix(files[0], src)
-	return filepath.Join(dest, strings.Split(path.Clean(r), string(os.PathSeparator))[0]), nil
+	return filepath.Join(dest, strings.Split(filepath.Clean(r), string(os.PathSeparator))[0]), nil
 }
 
 // resolveAPIParamsPath resolves api_params.yaml path
