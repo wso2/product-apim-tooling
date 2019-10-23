@@ -15,7 +15,7 @@ apictl import-app (--file <app-zip-file> --environment <environment-to-which-the
 
 ```
 apictl import-app -f qa/apps/sampleApp.zip -e dev
-apictl Import App -f staging/apps/sampleApp.zip -e prod -o testUser
+apictl import-app -f staging/apps/sampleApp.zip -e prod -o testUser
 apictl import-app -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -e prod
 ```
 
