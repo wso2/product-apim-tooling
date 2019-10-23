@@ -50,7 +50,7 @@ const importAppCmdShortDesc = "Import App"
 const importAppCmdLongDesc = "Import an Application to an environment"
 
 const importAppCmdExamples = utils.ProjectName + ` ` + importAppCmdLiteral + ` -f qa/apps/sampleApp.zip -e dev
-` + utils.ProjectName + ` ` + importAppCmdShortDesc + ` -f staging/apps/sampleApp.zip -e prod -o testUser
+` + utils.ProjectName + ` ` + importAppCmdLiteral + ` -f staging/apps/sampleApp.zip -e prod -o testUser
 ` + utils.ProjectName + ` ` + importAppCmdLiteral + ` -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -e prod`
 
 // importAppCmd represents the importApp command
