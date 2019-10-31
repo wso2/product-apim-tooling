@@ -20,8 +20,9 @@ package v2
 
 import (
 	"fmt"
-	"github.com/wso2/product-apim-tooling/import-export-cli/specs/params"
 	"path"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/specs/params"
 
 	"github.com/Jeffail/gabs"
 	"github.com/go-openapi/loads"
@@ -213,8 +214,8 @@ func Swagger2Populate(def *APIDefinition, document *loads.Document) error {
 
 	// override basepath if wso2 extension provided
 	if basepath, ok := swagger2XWO2BasePath(document); ok {
-		def.Context = path.Clean(fmt.Sprintf("/%s/%s", basepath, def.ID.Version))
-		def.ContextTemplate = path.Clean(fmt.Sprintf("/%s/{version}", basepath))
+		def.Context = path.Clean(basepath)
+		def.ContextTemplate = path.Clean(basepath)
 	}
 
 	cors, ok, err := swagger2XWSO2Cors(document)
