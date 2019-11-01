@@ -198,7 +198,7 @@ func buildHttpEndpoint(production *Endpoints, sandbox *Endpoints) string {
 
 // generateFieldsFromSwagger3 using swagger
 func Swagger2Populate(def *APIDefinition, document *loads.Document) error {
-	def.ID.APIName = utils.ToPascalCase(document.Spec().Info.Title)
+	def.ID.APIName = document.Spec().Info.Title
 	def.ID.Version = document.Spec().Info.Version
 	def.ID.ProviderName = "admin"
 	def.Description = document.Spec().Info.Description
