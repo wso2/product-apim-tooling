@@ -27,7 +27,7 @@ import (
 	"github.com/Jeffail/gabs"
 	"github.com/go-openapi/loads"
 	"github.com/mitchellh/mapstructure"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+
 )
 
 func swagger2XWO2BasePath(document *loads.Document) (string, bool) {
