@@ -26,6 +26,7 @@ import (
 	"github.com/renstrom/dedent"
 	"net/http"
 	"strings"
+	encodeURL "net/url"
 )
 
 // ExecutePreCommandWithBasicAuth deals with generating tokens needed for executing a particular command
@@ -312,7 +313,7 @@ func GetBase64EncodedCredentials(key, secret string) (encodedValue string) {
 // @return error
 func GetOAuthTokens(username, password, b64EncodedClientIDClientSecret, url string) (map[string]string, error) {
 	validityPeriod := DefaultTokenValidityPeriod
-	body := "grant_type=password&username=" + username + "&password=" + password + "&validity_period=" +
+	body := "grant_type=password&username=" + username + "&password=" + encodeURL.QueryEscape(password) + "&validity_period=" +
 		validityPeriod + "&scope=apim:api_view+apim:app_import_export+apim:app_owner_change+apim:subscribe+apim:api_publish"
 
 	// set headers
