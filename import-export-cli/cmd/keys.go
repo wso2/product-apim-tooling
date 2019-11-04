@@ -28,6 +28,7 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
 	"strings"
+	encodeURL "net/url"
 )
 
 // keys command related Info
@@ -262,7 +263,7 @@ func generateAccessToken(credential credentials.Credential) (string, error) {
 	//Retrieving the token endpoint of the relevant environment
 	tokenEndpoint := utils.GetTokenEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
 	//Prepping query params
-	body := "grant_type=password&username=" + credential.Username + "&password=" + credential.Password + "&validity_period=" +
+	body := "grant_type=password&username=" + credential.Username + "&password=" + encodeURL.QueryEscape(credential.Password) + "&validity_period=" +
 		utils.DefaultTokenValidityPeriod + "&scope=apim:api_view+apim:subscribe+apim:api_publish"
 
 	//Call to the token endpoint with the necessary payload
