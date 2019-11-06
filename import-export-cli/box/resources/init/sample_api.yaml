@@ -1,0 +1,61 @@
+id: # ID of API
+  providerName: admin # Provider name for API [required]
+  apiName: SwaggerPetstore # Name of the API without Spaces(see publisher UI for more) [required]
+  version: 1.0.0 # Version of API(required)
+description: 'This is a sample server Petstore server.' # Description of API
+type: HTTP # Type of API {HTTP|WS} [required]
+context: /v2 # Context of API with a leading slash, CLI tool will append version on import(if you want to put version like /1.0.0/v2 just set context to /{version}/v2 please refer UI for this) [required]
+tags: # tags for API as a list
+  - pets
+  - petstore
+  - swagger
+availableTiers: # available tiers as a list, Silver, Bronze etc
+  - name: Unlimited
+status: PUBLISHED # Lifecycle status of the API, Set this to Created or Published or Prototyped on first import [required]
+technicalOwner: John Doe # Technical owner (plea)
+technicalOwnerEmail: john@doe.com #  Email of the technical owner
+businessOwner: Jane Doe # Business Owner
+businessOwnerEmail: jane@doe.com # Email of business owner
+visibility: public # visibility of API, either public or private [required]
+endpointSecured: false # is endpoint secured true|false
+transports: http,https # Transport protocol in comma separated list
+inSequence: debug_in_flow # In sequence name(put this xml file in corresponding directory{described in doc})
+outSequence: json_to_xml_out_message # Out sequence name(put this xml file in corresponding directory{described in doc})
+faultSequence: json_fault # Fault sequence name(put this xml file in corresponding directory{described in doc})
+corsConfiguration: # CORS settings
+  corsConfigurationEnabled: true # is cors enabled ?
+  accessControlAllowOrigins: # Allowd origins for CORS in a List * is for any
+    - '*'
+  accessControlAllowCredentials: true # Allow credentials 
+  accessControlAllowHeaders: # allowed headers as a list
+    - authorization
+    - Access-Control-Allow-Origin
+    - Content-Type
+    - SOAPAction
+  accessControlAllowMethods: # allowed methods as a list
+    - GET
+    - PUT
+    - POST
+    - DELETE
+    - PATCH
+    - OPTIONS
+
+# Note, either endpointConfig or productionUrl or sandboxUrl should present.
+# If endpointConfig is not present and productionUrl or sandboxUrl presents CLI will automatically generate endpointConfig
+# based on urls given, on init Users will have a field to fill for this prod and sandbox urls
+productionUrl: "http://dev.wso2.com" # production url for API
+sandboxUrl: "https://dev.sb.wso2.com" # sandbox url for API
+endpointConfig: '{"production_endpoints":{"config":{"factor":"6","retryDelay":"90","retryTimeOut":"60"},"template_not_supported":false,"url":"https://dev.wso2.com"},"sandbox_endpoints":{"config":null,"template_not_supported":false,"url":"http://localhost:8081"},"endpoint_type":"http"}' # endpoint configuration(direct editing not recommended)
+isDefaultVersion: false # Is API default? if set to true APIM will discard version and make API default
+isPublishedDefaultVersion: false # Is default version published?
+environments: # Gateway environments as a list
+  - Production and Sandbox
+additionalProperties: # Additional properties of API as key:value paris
+  prop1: val1
+  prop2: val2
+environmentList: # Environments supported as a list
+  - SANDBOX
+  - PRODUCTION
+apiSecurity: oauth2,mutualssl # security of API as a comma separated list. For example oauth2, mutualssl
+rating: 0.0 # rating of API
+isLatest: true # is the latest version ?
