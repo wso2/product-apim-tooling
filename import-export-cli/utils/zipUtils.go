@@ -66,7 +66,10 @@ func Zip(source, target string) error {
 		// If baseDir is not empty it means we need to strip source from path, so we can get a relative filename from
 		// base.
 		if baseDir != "" {
-			header.Name = filepath.Join(baseDir, strings.TrimPrefix(path, source))
+			// Replace system specific path seperator with forward slash '/' as the separator as required by the 
+			// ZIP spec (4.4.17.1) https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT
+			var resource string = filepath.Join(baseDir, strings.TrimPrefix(path, source))
+			header.Name = strings.ReplaceAll(resource, string(filepath.Separator), "/")
 		}
 		if info.IsDir() {
 			// add directory to zip archive
