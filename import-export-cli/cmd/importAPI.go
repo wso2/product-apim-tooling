@@ -293,7 +293,7 @@ func getTempApiDirectory(file string) (string, error) {
 	if fileIsDir {
 		// copy dir to a temp location
 		utils.Logln(utils.LogPrefixInfo+"Copying from", file, "to", tmpDir)
-		dest := path.Join(tmpDir, filepath.Base(file))
+		dest := filepath.Join(tmpDir, filepath.Base(file))
 		err = utils.CopyDir(file, dest)
 		if err != nil {
 			return "", err
