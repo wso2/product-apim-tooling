@@ -1,0 +1,754 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+
+WSO2 Inc. licenses this file to you under the Apache License,
+Version 2.0 (the "License"); you may not use this file except
+in compliance with the License.
+
+You may obtain a copy of the License at
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied. See the License for the
+specific language governing permissions and limitations
+under the License. -->
+
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.1.1 r1855137">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="DOS Attack" enabled="true">
+      <stringProp name="TestPlan.comments"></stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">true</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+        <collectionProp name="Arguments.arguments"/>
+      </elementProp>
+      <stringProp name="TestPlan.user_define_classpath"></stringProp>
+    </TestPlan>
+    <hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Configure the Attack" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">1</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">1</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"></stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+      </ThreadGroup>
+      <hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">SampleResult.setIgnore();</stringProp>
+        </JSR223Sampler>
+        <hashTree>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor " enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">@Grab(&apos;org.yaml:snakeyaml:1.17&apos;)
+
+import org.yaml.snakeyaml.Yaml;
+import org.apache.jmeter.services.FileServer;
+import tools.User;
+import tools.API;
+
+String baseDir = FileServer.getFileServer().getBaseDir();
+
+Yaml ymlparser = new Yaml();
+
+//Main config data
+Map config = ymlparser.load((baseDir + &quot;/../../../../config/apim.yaml&quot; as File).text);
+List apis = config.find{it.key==&quot;apis&quot;}?.value;
+
+//attack tool configurations
+Map attackConfig = ymlparser.load((baseDir + &quot;/../../../../config/attack-tool.yaml&quot; as File).text);
+Map generalConfig = attackConfig.find{it.key==&quot;general_config&quot;}?.value;
+Map apiHost = generalConfig.find{it.key==&quot;api_host&quot;}?.value;
+String gatewayProtocol = apiHost.find{it.key==&quot;protocol&quot;}?.value;
+String gatewayHost = apiHost.find{it.key==&quot;ip&quot;}?.value;
+String nioPtTransportPort = apiHost.find{it.key==&quot;port&quot;}?.value;
+List userAgents = generalConfig.find{it.key==&quot;user_agents&quot;}?.value;
+String attackDurationPerApi = generalConfig.find{it.key==&quot;attack_duration&quot;}?.value;
+String scenarioName = generalConfig.find{it.key==&quot;scenario&quot;}?.value;
+List postData = generalConfig.find{it.key==&quot;payloads&quot;}?.value;
+
+
+//Parsing user ips,tokens and cookies
+File csvfile = new File(baseDir + &quot;/../../../traffic-tool/data/scenario/&quot; + scenarioName + &quot;/token_ip_cookie.csv&quot; );
+List lines =csvfile.readLines();
+ArrayList userList = new ArrayList();
+for(line in lines)
+{
+	String[] userData = line.split(&quot;,&quot;);
+
+	//ip,cookie,token,apiname
+	User tempUser = new User(userData[2],userData[3],userData[0],userData[1]);
+	userList.add(tempUser);
+	
+}
+
+//Creating API instances
+ArrayList apiList = new ArrayList();
+Random rand = new Random();
+for(api in apis)
+{
+	API temp = new API(api[&quot;name&quot;],api[&quot;context&quot;],api[&quot;version&quot;].toString(),api[&quot;resources&quot;]);
+	// filter users subcribed to the API from the user list
+	temp.buildUserList(userList);
+	// Selecting a random user per API for DOS attack
+	def users = temp.getUserList();
+	User randomUser = users.get(rand.nextInt(users.size()))
+	temp.setSingleUser(randomUser);
+	apiList.add(temp);
+}
+
+
+// Creating properties to be used in the threads
+props.put(&quot;baseDir&quot;,baseDir);
+props.put(&quot;gatewayProtocol&quot;, gatewayProtocol);
+props.put(&quot;gatewayHost&quot;, gatewayHost);
+props.put(&quot;nioPtTransportPort&quot;, nioPtTransportPort);
+props.put(&quot;userAgents&quot;,userAgents);
+props.put(&quot;postData&quot;,postData);
+props.put(&quot;attackDurationPerApi&quot;,attackDurationPerApi);
+props.put(&quot;apiList&quot;,apiList);
+
+
+
+//Defining column names in the data set
+String logString = &quot;TimeStamp,URL,Method,Connection,Authorization,accept,client-ip,x-forwarded-for,Content-Type,Host,Response Code,User-agent\n&quot;;
+File dataSetCSV = new File(baseDir + &quot;/../../../../dataset/attack/DOS.csv&quot; );
+FileWriter fw = new FileWriter(dataSetCSV,false);
+fw.write(logString);
+fw.close();
+
+</stringProp>
+            <stringProp name="TestPlan.comments">Parse configurations, instantiate API and User objects </stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+        </hashTree>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Perform the attack" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">1</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">${__P(Threads,100)}</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"></stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+      </ThreadGroup>
+      <hashTree>
+        <OnceOnlyController guiclass="OnceOnlyControllerGui" testclass="OnceOnlyController" testname="Once Only Controller" enabled="true"/>
+        <hashTree>
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler" enabled="true">
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="script">SampleResult.setIgnore();</stringProp>
+            <stringProp name="scriptLanguage">groovy</stringProp>
+          </JSR223Sampler>
+          <hashTree>
+            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor " enabled="true">
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="script">import tools.User;
+import tools.API
+
+// Create a API list local to the thread
+def apiList = props.get(&quot;apiList&quot;);
+int i = 1;
+for (api in apiList)
+{
+	vars.putObject(&quot;api_&quot; + i,api);
+	i++;
+}
+
+</stringProp>
+              <stringProp name="scriptLanguage">groovy</stringProp>
+            </JSR223PreProcessor>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">long attackDurationPerAPI = Integer.parseInt(props.get(&quot;attackDurationPerApi&quot;));
+long currentTime = System.currentTimeMillis();
+long stopTime = currentTime + attackDurationPerAPI.intValue() * 1000;
+vars.put(&quot;TestStopTime&quot;,&quot;&quot; + stopTime);</stringProp>
+          <stringProp name="TestPlan.comments">Setting the attack duration</stringProp>
+        </JSR223Sampler>
+        <hashTree/>
+        <ForeachController guiclass="ForeachControlPanel" testclass="ForeachController" testname="ForEach Controller" enabled="true">
+          <stringProp name="ForeachController.inputVal">api</stringProp>
+          <stringProp name="ForeachController.returnVal">apiInstance</stringProp>
+          <boolProp name="ForeachController.useSeparator">true</boolProp>
+        </ForeachController>
+        <hashTree>
+          <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+            <boolProp name="ResultCollector.error_logging">false</boolProp>
+            <objProp>
+              <name>saveConfig</name>
+              <value class="SampleSaveConfiguration">
+                <time>true</time>
+                <latency>true</latency>
+                <timestamp>true</timestamp>
+                <success>true</success>
+                <label>true</label>
+                <code>true</code>
+                <message>true</message>
+                <threadName>true</threadName>
+                <dataType>true</dataType>
+                <encoding>false</encoding>
+                <assertions>true</assertions>
+                <subresults>true</subresults>
+                <responseData>false</responseData>
+                <samplerData>false</samplerData>
+                <xml>false</xml>
+                <fieldNames>true</fieldNames>
+                <responseHeaders>false</responseHeaders>
+                <requestHeaders>false</requestHeaders>
+                <responseDataOnError>false</responseDataOnError>
+                <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+                <assertionsResultsToSave>0</assertionsResultsToSave>
+                <bytes>true</bytes>
+                <sentBytes>true</sentBytes>
+                <url>true</url>
+                <threadCounts>true</threadCounts>
+                <idleTime>true</idleTime>
+                <connectTime>true</connectTime>
+              </value>
+            </objProp>
+            <stringProp name="filename"></stringProp>
+            <boolProp name="ResultCollector.success_only_logging">true</boolProp>
+          </ResultCollector>
+          <hashTree/>
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">import tools.API
+import tools.User
+
+API currentAPI = vars.getObject(&quot;apiInstance&quot;)
+
+// Adding API details as Jmeter variables
+vars.put(&quot;currentAPIName&quot;,currentAPI.getName());
+vars.put(&quot;currentAPIContext&quot;,currentAPI.getContext());
+vars.put(&quot;currentAPIVersion&quot;,currentAPI.getVersion());
+vars.putObject(&quot;currentAPIUsers&quot;,currentAPI.getUserList())
+vars.putObject(&quot;currentAPIResources&quot;,currentAPI.getResources())
+
+// Adding user details as Jmeter variables
+vars.put(&quot;randomUserIP&quot;,currentAPI.getSingleUser().getIp());
+vars.put(&quot;randomUserCookie&quot;,currentAPI.getSingleUser().getCookie());
+vars.put(&quot;randomUserToken&quot;,currentAPI.getSingleUser().getToken());
+vars.put(&quot;randomUserApiName&quot;,currentAPI.getSingleUser().getApiName());
+
+
+</stringProp>
+            <stringProp name="TestPlan.comments">Process the API data for the ForEach Controller / Selecting a random user per API for the DOS attack</stringProp>
+          </JSR223Sampler>
+          <hashTree/>
+          <WhileController guiclass="WhileControllerGui" testclass="WhileController" testname="While Controller" enabled="true">
+            <stringProp name="WhileController.condition">${__javaScript(( ${__time(,)} &lt;= ${TestStopTime}), )}</stringProp>
+          </WhileController>
+          <hashTree>
+            <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+              <boolProp name="ResultCollector.error_logging">false</boolProp>
+              <objProp>
+                <name>saveConfig</name>
+                <value class="SampleSaveConfiguration">
+                  <time>true</time>
+                  <latency>true</latency>
+                  <timestamp>true</timestamp>
+                  <success>true</success>
+                  <label>true</label>
+                  <code>true</code>
+                  <message>true</message>
+                  <threadName>true</threadName>
+                  <dataType>true</dataType>
+                  <encoding>false</encoding>
+                  <assertions>true</assertions>
+                  <subresults>true</subresults>
+                  <responseData>false</responseData>
+                  <samplerData>false</samplerData>
+                  <xml>false</xml>
+                  <fieldNames>true</fieldNames>
+                  <responseHeaders>false</responseHeaders>
+                  <requestHeaders>false</requestHeaders>
+                  <responseDataOnError>false</responseDataOnError>
+                  <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+                  <assertionsResultsToSave>0</assertionsResultsToSave>
+                  <bytes>true</bytes>
+                  <sentBytes>true</sentBytes>
+                  <url>true</url>
+                  <threadCounts>true</threadCounts>
+                  <idleTime>true</idleTime>
+                  <connectTime>true</connectTime>
+                </value>
+              </objProp>
+              <stringProp name="filename"></stringProp>
+            </ResultCollector>
+            <hashTree/>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import tools.User;
+import org.apache.commons.text.RandomStringGenerator;
+
+def users = vars.getObject(&quot;currentAPIUsers&quot;);
+
+Random rand = new Random();
+Random rand2 = new Random();
+
+// selecting a random user agent to insert into request header
+def userAgents = props.get(&quot;userAgents&quot;);
+def randomUserAgent = userAgents.get(rand.nextInt(userAgents.size()));
+vars.put(&quot;randomUserAgent&quot;,randomUserAgent)
+
+
+// Selecting random request body data (only to be used in POST)
+def postData = props.get(&quot;postData&quot;);
+def randomRequestBody = postData.get(rand.nextInt(postData.size()));
+vars.putObject(&quot;randomRequestBody&quot;,randomRequestBody)
+
+
+// selecting a random resource from the API to send a request
+def currentApiResources = vars.getObject(&quot;currentAPIResources&quot;);
+def randomResource = currentApiResources.get(rand2.nextInt(currentApiResources.size()));
+vars.put(&quot;currentAPIResourceMethod&quot;,randomResource.get(&quot;method&quot;).toString());
+vars.put(&quot;currentAPIResourcePath&quot;,randomResource.get(&quot;path&quot;).toString());
+
+// path parameter for delete request
+def path = rand.nextInt(10000);
+vars.put(&apos;pathParam&apos;,path.toString());</stringProp>
+              <stringProp name="TestPlan.comments">Selecting a random user agents and random resources to be used in the requests</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <IfController guiclass="IfControllerPanel" testclass="IfController" testname="If Controller GET" enabled="true">
+              <stringProp name="IfController.condition">//${__groovy(vars.get(&quot;currentAPIResourceMethod&quot;).equals(&quot;GET&quot;),)}
+//${currentAPIResourceMethod} == &quot;GET&quot;
+${__groovy(&quot;${currentAPIResourceMethod}&quot;==&quot;GET&quot;)}</stringProp>
+              <boolProp name="IfController.evaluateAll">false</boolProp>
+            </IfController>
+            <hashTree>
+              <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP GET" enabled="true">
+                <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+                  <collectionProp name="Arguments.arguments"/>
+                </elementProp>
+                <stringProp name="HTTPSampler.domain">${__property(gatewayHost)}</stringProp>
+                <stringProp name="HTTPSampler.port">${__property(nioPtTransportPort)}</stringProp>
+                <stringProp name="HTTPSampler.protocol">${__property(gatewayProtocol)}</stringProp>
+                <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+                <stringProp name="HTTPSampler.path">${currentAPIContext}/${currentAPIVersion}/${currentAPIResourcePath}</stringProp>
+                <stringProp name="HTTPSampler.method">GET</stringProp>
+                <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+                <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+                <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+                <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+                <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+                <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+                <stringProp name="HTTPSampler.response_timeout"></stringProp>
+              </HTTPSamplerProxy>
+              <hashTree>
+                <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+                  <collectionProp name="HeaderManager.headers">
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">Authorization </stringProp>
+                      <stringProp name="Header.value">Bearer ${randomUserToken}</stringProp>
+                    </elementProp>
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">accept</stringProp>
+                      <stringProp name="Header.value">application/json</stringProp>
+                    </elementProp>
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">client-ip</stringProp>
+                      <stringProp name="Header.value">${randomUserIP}</stringProp>
+                    </elementProp>
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">x-forwarded-for</stringProp>
+                      <stringProp name="Header.value">${randomUserIP}</stringProp>
+                    </elementProp>
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">cookie</stringProp>
+                      <stringProp name="Header.value">${randomUserCookie}</stringProp>
+                    </elementProp>
+                    <elementProp name="Content-Type" elementType="Header">
+                      <stringProp name="Header.name">Content-Type</stringProp>
+                      <stringProp name="Header.value">application/json</stringProp>
+                    </elementProp>
+                    <elementProp name="User-Agent" elementType="Header">
+                      <stringProp name="Header.name">User-Agent</stringProp>
+                      <stringProp name="Header.value">${randomUserAgent}</stringProp>
+                    </elementProp>
+                  </collectionProp>
+                </HeaderManager>
+                <hashTree/>
+                <CookieManager guiclass="CookiePanel" testclass="CookieManager" testname="HTTP Cookie Manager" enabled="true">
+                  <collectionProp name="CookieManager.cookies"/>
+                  <boolProp name="CookieManager.clearEachIteration">false</boolProp>
+                </CookieManager>
+                <hashTree/>
+              </hashTree>
+            </hashTree>
+            <IfController guiclass="IfControllerPanel" testclass="IfController" testname="If Controller POST" enabled="true">
+              <stringProp name="IfController.condition">//${__groovy(vars.get(&quot;currentAPIResourceMethod&quot;).equals(&quot;GET&quot;),)}
+//${currentAPIResourceMethod} == &quot;GET&quot;
+${__groovy(&quot;${currentAPIResourceMethod}&quot;==&quot;POST&quot;)}</stringProp>
+              <boolProp name="IfController.evaluateAll">false</boolProp>
+            </IfController>
+            <hashTree>
+              <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP POST" enabled="true">
+                <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+                <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+                  <collectionProp name="Arguments.arguments">
+                    <elementProp name="" elementType="HTTPArgument">
+                      <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                      <stringProp name="Argument.value">${randomRequestBody}</stringProp>
+                      <stringProp name="Argument.metadata">=</stringProp>
+                    </elementProp>
+                  </collectionProp>
+                </elementProp>
+                <stringProp name="HTTPSampler.domain">${__property(gatewayHost)}</stringProp>
+                <stringProp name="HTTPSampler.port">${__property(nioPtTransportPort)}</stringProp>
+                <stringProp name="HTTPSampler.protocol">${__property(gatewayProtocol)}</stringProp>
+                <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+                <stringProp name="HTTPSampler.path">${currentAPIContext}/${currentAPIVersion}/${currentAPIResourcePath}</stringProp>
+                <stringProp name="HTTPSampler.method">POST</stringProp>
+                <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+                <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+                <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+                <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+                <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+                <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+                <stringProp name="HTTPSampler.response_timeout"></stringProp>
+              </HTTPSamplerProxy>
+              <hashTree>
+                <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+                  <collectionProp name="HeaderManager.headers">
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">Authorization </stringProp>
+                      <stringProp name="Header.value">Bearer ${randomUserToken}</stringProp>
+                    </elementProp>
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">accept</stringProp>
+                      <stringProp name="Header.value">application/json</stringProp>
+                    </elementProp>
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">client-ip</stringProp>
+                      <stringProp name="Header.value">${randomUserIP}</stringProp>
+                    </elementProp>
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">x-forwarded-for</stringProp>
+                      <stringProp name="Header.value">${randomUserIP}</stringProp>
+                    </elementProp>
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">cookie</stringProp>
+                      <stringProp name="Header.value">${randomUserCookie}</stringProp>
+                    </elementProp>
+                    <elementProp name="Content-Type" elementType="Header">
+                      <stringProp name="Header.name">Content-Type</stringProp>
+                      <stringProp name="Header.value">application/json</stringProp>
+                    </elementProp>
+                    <elementProp name="User-Agent" elementType="Header">
+                      <stringProp name="Header.name">User-Agent</stringProp>
+                      <stringProp name="Header.value">${randomUserAgent}</stringProp>
+                    </elementProp>
+                  </collectionProp>
+                </HeaderManager>
+                <hashTree/>
+                <CookieManager guiclass="CookiePanel" testclass="CookieManager" testname="HTTP Cookie Manager" enabled="true">
+                  <collectionProp name="CookieManager.cookies"/>
+                  <boolProp name="CookieManager.clearEachIteration">false</boolProp>
+                </CookieManager>
+                <hashTree/>
+              </hashTree>
+            </hashTree>
+            <IfController guiclass="IfControllerPanel" testclass="IfController" testname="If Controller PUT" enabled="true">
+              <stringProp name="IfController.condition">//${__groovy(vars.get(&quot;currentAPIResourceMethod&quot;).equals(&quot;GET&quot;),)}
+//${currentAPIResourceMethod} == &quot;GET&quot;
+${__groovy(&quot;${currentAPIResourceMethod}&quot;==&quot;PUT&quot;)}</stringProp>
+              <boolProp name="IfController.evaluateAll">false</boolProp>
+            </IfController>
+            <hashTree>
+              <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP PUT" enabled="true">
+                <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+                  <collectionProp name="Arguments.arguments"/>
+                </elementProp>
+                <stringProp name="HTTPSampler.domain">${__property(gatewayHost)}</stringProp>
+                <stringProp name="HTTPSampler.port">${__property(nioPtTransportPort)}</stringProp>
+                <stringProp name="HTTPSampler.protocol">${__property(gatewayProtocol)}</stringProp>
+                <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+                <stringProp name="HTTPSampler.path">${currentAPIContext}/${currentAPIVersion}/${currentAPIResourcePath}</stringProp>
+                <stringProp name="HTTPSampler.method">PUT</stringProp>
+                <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+                <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+                <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+                <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+                <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+                <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+                <stringProp name="HTTPSampler.response_timeout"></stringProp>
+              </HTTPSamplerProxy>
+              <hashTree>
+                <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+                  <collectionProp name="HeaderManager.headers">
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">Authorization</stringProp>
+                      <stringProp name="Header.value">Bearer ${randomUserToken}</stringProp>
+                    </elementProp>
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">accept</stringProp>
+                      <stringProp name="Header.value">application/json</stringProp>
+                    </elementProp>
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">client-ip</stringProp>
+                      <stringProp name="Header.value">${randomUserIP}</stringProp>
+                    </elementProp>
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">x-forwarded-for</stringProp>
+                      <stringProp name="Header.value">${randomUserIP}</stringProp>
+                    </elementProp>
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">cookie</stringProp>
+                      <stringProp name="Header.value">${randomUserCookie}</stringProp>
+                    </elementProp>
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">Content-Type</stringProp>
+                      <stringProp name="Header.value">application/json</stringProp>
+                    </elementProp>
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">User-Agent</stringProp>
+                      <stringProp name="Header.value">${randomUserAgent}</stringProp>
+                    </elementProp>
+                  </collectionProp>
+                </HeaderManager>
+                <hashTree/>
+                <CookieManager guiclass="CookiePanel" testclass="CookieManager" testname="HTTP Cookie Manager" enabled="true">
+                  <collectionProp name="CookieManager.cookies"/>
+                  <boolProp name="CookieManager.clearEachIteration">false</boolProp>
+                </CookieManager>
+                <hashTree/>
+              </hashTree>
+            </hashTree>
+            <IfController guiclass="IfControllerPanel" testclass="IfController" testname="If Controller DELETE" enabled="true">
+              <stringProp name="IfController.condition">//${__groovy(vars.get(&quot;currentAPIResourceMethod&quot;).equals(&quot;GET&quot;),)}
+//${currentAPIResourceMethod} == &quot;GET&quot;
+${__groovy(&quot;${currentAPIResourceMethod}&quot;==&quot;DELETE&quot;)}</stringProp>
+              <boolProp name="IfController.evaluateAll">false</boolProp>
+            </IfController>
+            <hashTree>
+              <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP DELETE" enabled="true">
+                <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+                  <collectionProp name="Arguments.arguments"/>
+                </elementProp>
+                <stringProp name="HTTPSampler.domain">${__property(gatewayHost)}</stringProp>
+                <stringProp name="HTTPSampler.port">${__property(nioPtTransportPort)}</stringProp>
+                <stringProp name="HTTPSampler.protocol">${__property(gatewayProtocol)}</stringProp>
+                <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+                <stringProp name="HTTPSampler.path">${currentAPIContext}/${currentAPIVersion}/${currentAPIResourcePath}/${pathParam}</stringProp>
+                <stringProp name="HTTPSampler.method">DELETE</stringProp>
+                <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+                <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+                <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+                <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+                <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+                <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+                <stringProp name="HTTPSampler.response_timeout"></stringProp>
+              </HTTPSamplerProxy>
+              <hashTree>
+                <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+                  <collectionProp name="HeaderManager.headers">
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">Authorization</stringProp>
+                      <stringProp name="Header.value">Bearer ${randomUserToken}</stringProp>
+                    </elementProp>
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">accept</stringProp>
+                      <stringProp name="Header.value">application/json</stringProp>
+                    </elementProp>
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">client-ip</stringProp>
+                      <stringProp name="Header.value">${randomUserIP}</stringProp>
+                    </elementProp>
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">x-forwarded-for</stringProp>
+                      <stringProp name="Header.value">${randomUserIP}</stringProp>
+                    </elementProp>
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">cookie</stringProp>
+                      <stringProp name="Header.value">${randomUserCookie}</stringProp>
+                    </elementProp>
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">Content-Type</stringProp>
+                      <stringProp name="Header.value">application/json</stringProp>
+                    </elementProp>
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">User-Agent</stringProp>
+                      <stringProp name="Header.value">${randomUserAgent}</stringProp>
+                    </elementProp>
+                  </collectionProp>
+                </HeaderManager>
+                <hashTree/>
+                <CookieManager guiclass="CookiePanel" testclass="CookieManager" testname="HTTP Cookie Manager" enabled="true">
+                  <collectionProp name="CookieManager.cookies"/>
+                  <boolProp name="CookieManager.clearEachIteration">false</boolProp>
+                </CookieManager>
+                <hashTree/>
+              </hashTree>
+            </hashTree>
+            <IfController guiclass="IfControllerPanel" testclass="IfController" testname="If Controller PATCH" enabled="true">
+              <stringProp name="IfController.condition">//${__groovy(vars.get(&quot;currentAPIResourceMethod&quot;).equals(&quot;GET&quot;),)}
+//${currentAPIResourceMethod} == &quot;GET&quot;
+${__groovy(&quot;${currentAPIResourceMethod}&quot;==&quot;PATCH&quot;)}</stringProp>
+              <boolProp name="IfController.evaluateAll">false</boolProp>
+            </IfController>
+            <hashTree>
+              <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP PATCH" enabled="true">
+                <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+                  <collectionProp name="Arguments.arguments"/>
+                </elementProp>
+                <stringProp name="HTTPSampler.domain">${__property(gatewayHost)}</stringProp>
+                <stringProp name="HTTPSampler.port">${__property(nioPtTransportPort)}</stringProp>
+                <stringProp name="HTTPSampler.protocol">${__property(gatewayProtocol)}</stringProp>
+                <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+                <stringProp name="HTTPSampler.path">${currentAPIContext}/${currentAPIVersion}/${currentAPIResourcePath}</stringProp>
+                <stringProp name="HTTPSampler.method">PATCH</stringProp>
+                <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+                <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+                <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+                <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+                <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+                <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+                <stringProp name="HTTPSampler.response_timeout"></stringProp>
+              </HTTPSamplerProxy>
+              <hashTree>
+                <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+                  <collectionProp name="HeaderManager.headers">
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">Authorization</stringProp>
+                      <stringProp name="Header.value">Bearer ${randomUserToken}</stringProp>
+                    </elementProp>
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">accept</stringProp>
+                      <stringProp name="Header.value">application/json</stringProp>
+                    </elementProp>
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">client-ip</stringProp>
+                      <stringProp name="Header.value">${randomUserIP}</stringProp>
+                    </elementProp>
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">x-forwarded-for</stringProp>
+                      <stringProp name="Header.value">${randomUserIP}</stringProp>
+                    </elementProp>
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">cookie</stringProp>
+                      <stringProp name="Header.value">${randomUserCookie}</stringProp>
+                    </elementProp>
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">Content-Type</stringProp>
+                      <stringProp name="Header.value">application/json</stringProp>
+                    </elementProp>
+                    <elementProp name="" elementType="Header">
+                      <stringProp name="Header.name">User-Agent</stringProp>
+                      <stringProp name="Header.value">${randomUserAgent}</stringProp>
+                    </elementProp>
+                  </collectionProp>
+                </HeaderManager>
+                <hashTree/>
+                <CookieManager guiclass="CookiePanel" testclass="CookieManager" testname="HTTP Cookie Manager" enabled="true">
+                  <collectionProp name="CookieManager.cookies"/>
+                  <boolProp name="CookieManager.clearEachIteration">false</boolProp>
+                </CookieManager>
+                <hashTree/>
+              </hashTree>
+            </hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import org.apache.jmeter.protocol.http.sampler.HTTPSampleResult;
+import org.apache.jmeter.protocol.http.sampler.HTTPSamplerProxy;
+import org.apache.jmeter.protocol.http.control.HeaderManager;
+
+//Extracting header data and response code from request
+HTTPSamplerProxy previousSampler = ctx.getPreviousSampler();
+CookieManager cookieManager = previousSampler.getCookieManager();
+HTTPSampleResult previousResult = (HTTPSampleResult)ctx.getPreviousResult();
+
+def headers = previousResult.getRequestHeaders().split(&quot;\n&quot;);
+def responseCode = previousResult.getResponseCode();
+def httpMethod = previousResult.getHTTPMethod();
+
+// Preparing the data string to be written on to the dataset csv
+String dataString = &quot;&quot;;
+String userAgent;
+String timeStamp = new java.text.SimpleDateFormat(&quot;yyyy-MM-dd H:mm:ss.S&quot;).format(new Date());
+String url = previousResult.getUrlAsString();
+
+
+dataString = String.format(&quot;%s,%s,%s,&quot;,timeStamp,url,httpMethod);
+for (header in headers)
+{
+	values = header.split(&quot;: &quot;);
+
+	// seperating required headers from the request headers array.
+	if(values[0].equals(&quot;Connection&quot;) || values[0].startsWith(&quot;Authorization&quot;) || values[0].equals(&quot;accept&quot;) || values[0].equals(&quot;client-ip&quot;) || 
+	values[0].equals(&quot;x-forwarded-for&quot;) || values[0].equals(&quot;Content-Type&quot;) || values[0].equals(&quot;Host&quot;))
+	{
+		dataString += values[1] + &quot;,&quot; ;
+	}
+	else if(values[0].equals(&quot;User-Agent&quot;))
+	{
+		userAgent = values[1];
+	}
+	
+}
+dataString += String.format(&quot;%s,\&quot;%s\&quot;\n&quot;,responseCode,userAgent);
+
+//writing the string to DOS.csv
+baseDir = props.get(&quot;baseDir&quot;);
+File dataSetCSV = new File( baseDir + &quot;/../../../../dataset/attack/DOS.csv&quot;);
+FileWriter fw = new FileWriter(dataSetCSV,true);
+fw.write(dataString);
+fw.close();</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">long attackDurationPerAPI = Integer.parseInt(props.get(&quot;attackDurationPerApi&quot;));
+long currentTime = System.currentTimeMillis();
+long stopTime = currentTime + attackDurationPerAPI.intValue() * 1000;
+vars.put(&quot;TestStopTime&quot;,&quot;&quot;+ stopTime);</stringProp>
+            <stringProp name="TestPlan.comments">Resetting the timer after an attack on API finishes.</stringProp>
+          </JSR223Sampler>
+          <hashTree/>
+        </hashTree>
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>

@@ -1,0 +1,79 @@
+# version of the wso2 api manager (state as either 2.6 or 3.0)
+apim_version: 2.6
+
+# endpoints of the wso2 api manager
+apim_endpoints:
+  token_registration_endpoint: /client-registration/v0.14/register
+  token_endpoint: /token
+  publisher_api: /api/am/publisher/v0.14/apis
+  store_application: /api/am/store/v0.14/applications
+  store_subscription: /api/am/store/v0.14/subscriptions
+  user_signup: /store/site/blocks/user/sign-up/ajax/user-add.jag
+  delete_user: /services/RemoteUserStoreManagerService.RemoteUserStoreManagerServiceHttpsSoap11Endpoint
+
+# api manager management console ports and configurations
+management_console:
+  protocol: https
+  host: 10.100.8.34
+  servlet_transport_port_https: 9443
+  servlet_transport_port_http: 9763
+
+api_manager:
+  nio_pt_transport_port: 8243
+
+# details of APIs in the scenario
+apis:
+  - name: news
+    context: news
+    version: 1
+    resources:
+     - method: GET
+       path: menu
+
+
+  - name: places
+    context: places
+    version: 1
+    resources:
+      - method: GET
+        path: menu
+
+  - name: payment
+    context: payment
+    version: 1
+    resources:
+      - method: GET
+        path: menu
+      - method: POST
+        path: order
+      - method: DELETE
+        path: order
+
+  - name: map
+    context: map
+    version: 1
+    resources:
+      - method: GET
+        path: menu
+      - method: DELETE
+        path: order
+
+  - name: weather
+    context: weather
+    version: 1
+    resources:
+      - method: GET
+        path: menu
+#      - method: DELETE
+#        path: order
+
+
+  - name: cricket
+    context: cricket
+    version: 1
+    resources:
+      - method: GET
+        path: menu
+#      - method: DELETE
+#        path: order
+

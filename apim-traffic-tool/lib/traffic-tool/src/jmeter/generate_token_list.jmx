@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.1.1 r1855137">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Generate tokens" enabled="true">
+      <stringProp name="TestPlan.comments"></stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">true</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+        <collectionProp name="Arguments.arguments"/>
+      </elementProp>
+      <stringProp name="TestPlan.user_define_classpath"></stringProp>
+    </TestPlan>
+    <hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Setup Properties" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">1</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">1</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"></stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+      </ThreadGroup>
+      <hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Load and set APIM properties" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">SampleResult.setIgnore();</stringProp>
+        </JSR223Sampler>
+        <hashTree>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">false</stringProp>
+            <stringProp name="script">@Grab(&apos;org.yaml:snakeyaml:1.17&apos;)
+
+import org.yaml.snakeyaml.Yaml;
+import org.apache.jmeter.services.FileServer;
+
+String baseDir = FileServer.getFileServer().getBaseDir()
+
+Yaml ymlparser = new Yaml()
+
+Map config = ymlparser.load((baseDir+&quot;/../../../../config/apim.yaml&quot; as File).text)
+
+Map apim_endpoints = config.find{it.key==&quot;apim_endpoints&quot;}?.value
+String token_endpoint = apim_endpoints.find{it.key==&quot;token_endpoint&quot;}?.value
+
+Map managementConsole = config.find{it.key==&quot;management_console&quot;}?.value
+String gatewayProtocol = managementConsole.find{it.key==&quot;protocol&quot;}?.value
+String gatewayHost = managementConsole.find{it.key==&quot;host&quot;}?.value
+String gatewayServeletPortHTTPS = managementConsole.find{it.key==&quot;servlet_transport_port_https&quot;}?.value
+
+Map apiManager = config.find{it.key==&quot;api_manager&quot;}?.value
+String nioPtTransportPort = apiManager.find{it.key==&quot;nio_pt_transport_port&quot;}?.value
+
+Map trafficConfig = ymlparser.load((baseDir+&quot;/../../../../config/traffic-tool.yaml&quot; as File).text)
+
+String scenario_base_path = baseDir + &quot;/../../data/scenario/&quot; + trafficConfig.find{it.key==&quot;scenario_name&quot;}?.value
+
+Map api = trafficConfig.find{it.key==&quot;api&quot;}?.value
+String production_endpoint = api.find{it.key==&quot;production_endpoint&quot;}?.value
+String sandbox_endpoint = api.find{it.key==&quot;sandbox_endpoint&quot;}?.value
+String apiThrottlingTier = api.find{it.key==&quot;throttling_tier&quot;}?.value
+String apiVisibility = api.find{it.key==&quot;visibility&quot;}?.value
+
+props.put(&quot;gatewayProtocol&quot;, gatewayProtocol);
+props.put(&quot;gatewayHost&quot;, gatewayHost);
+props.put(&quot;gatewayServeletPortHTTPS&quot;, gatewayServeletPortHTTPS);
+props.put(&quot;nioPtTransportPort&quot;, nioPtTransportPort);
+props.put(&quot;production_endpoint&quot;, production_endpoint);
+props.put(&quot;sandbox_endpoint&quot;, sandbox_endpoint);
+props.put(&quot;apiThrottlingTier&quot;, apiThrottlingTier);
+props.put(&quot;apiVisibility&quot;, apiVisibility);
+props.put(&quot;scenarioBasePath&quot;, scenario_base_path);
+props.put(&quot;token_endpoint&quot;, token_endpoint);
+</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+        </hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Write header of the token file" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">SampleResult.setIgnore();</stringProp>
+        </JSR223Sampler>
+        <hashTree>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">
+FileWriter fstream = new FileWriter(props.get(&quot;scenarioBasePath&quot;) + &quot;/api_invoke_tokens.csv&quot;, true);
+BufferedWriter out = new BufferedWriter(fstream);
+out.write(&apos;username,app_name,access_token\n&apos;);
+out.close();
+fstream.close();
+</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+        </hashTree>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Generate token list" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">1</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">1</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"></stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+      </ThreadGroup>
+      <hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Load APIM properties and set global variables" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">SampleResult.setIgnore();</stringProp>
+        </JSR223Sampler>
+        <hashTree>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">false</stringProp>
+            <stringProp name="script">
+String final_string = &quot;&quot;;
+
+vars.put(&quot;token_endpoint&quot;, props.get(&quot;token_endpoint&quot;));
+
+vars.put(&quot;gatewayProtocol&quot;, props.get(&quot;gatewayProtocol&quot;));
+vars.put(&quot;gatewayHost&quot;, props.get(&quot;gatewayHost&quot;));
+vars.put(&quot;gatewayServeletPort&quot;, props.get(&quot;gatewayServeletPortHTTPS&quot;));
+vars.put(&quot;nioPtTransportPort&quot;, props.get(&quot;nioPtTransportPort&quot;));
+vars.put(&quot;production_endpoint&quot;, props.get(&quot;production_endpoint&quot;));
+vars.put(&quot;sandbox_endpoint&quot;, props.get(&quot;sandbox_endpoint&quot;));
+vars.put(&quot;throttlingTier&quot;, props.get(&quot;apiThrottlingTier&quot;));
+vars.put(&quot;visibility&quot;, props.get(&quot;apiVisibility&quot;));
+vars.put(&quot;final_string&quot;, final_string);
+</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+        </hashTree>
+        <WhileController guiclass="WhileControllerGui" testclass="WhileController" testname="While Controller" enabled="true">
+          <stringProp name="WhileController.condition">${username}</stringProp>
+        </WhileController>
+        <hashTree>
+          <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config" enabled="true">
+            <stringProp name="filename">${__BeanShell(props.get(&quot;scenarioBasePath&quot;))}/data/user_app_pattern.csv</stringProp>
+            <stringProp name="fileEncoding">UTF-8</stringProp>
+            <stringProp name="variableNames">username,app_name</stringProp>
+            <boolProp name="ignoreFirstLine">false</boolProp>
+            <stringProp name="delimiter">,</stringProp>
+            <boolProp name="quotedData">false</boolProp>
+            <boolProp name="recycle">false</boolProp>
+            <boolProp name="stopThread">true</boolProp>
+            <stringProp name="shareMode">shareMode.group</stringProp>
+          </CSVDataSet>
+          <hashTree/>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Generate token" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">grant_type=password&amp;username=${username}&amp;password=${username}&amp;scope=apim:api_view</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain">${gatewayHost}</stringProp>
+            <stringProp name="HTTPSampler.port">${nioPtTransportPort}</stringProp>
+            <stringProp name="HTTPSampler.protocol">${gatewayProtocol}</stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">${token_endpoint}</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+              <collectionProp name="HeaderManager.headers">
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">Authorization</stringProp>
+                  <stringProp name="Header.value">Basic ${consumer_key_secret}</stringProp>
+                </elementProp>
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">Content-Type</stringProp>
+                  <stringProp name="Header.value">application/x-www-form-urlencoded</stringProp>
+                </elementProp>
+              </collectionProp>
+            </HeaderManager>
+            <hashTree/>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="49586">200</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.custom_message"></stringProp>
+              <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">16</intProp>
+            </ResponseAssertion>
+            <hashTree/>
+            <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="JSON Extractor" enabled="true">
+              <stringProp name="JSONPostProcessor.referenceNames">accessToken</stringProp>
+              <stringProp name="JSONPostProcessor.jsonPathExprs">$.access_token</stringProp>
+              <stringProp name="JSONPostProcessor.match_numbers">1</stringProp>
+              <stringProp name="JSONPostProcessor.defaultValues">NOT_FOUND</stringProp>
+            </JSONPostProcessor>
+            <hashTree/>
+            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">
+String appName = vars.get(&quot;app_name&quot;);
+
+String keySecret = &quot;&quot;;
+
+String fileContent = new File(props.get(&quot;scenarioBasePath&quot;) + &quot;/api_invoke_key_secret.csv&quot;).text;
+String[] lines = fileContent.split(&quot;\n&quot;);
+
+for(String line:lines) {
+    String[] data = line.split(&quot;,&quot;);
+    if(appName.equals(data[0])) {
+    	keySecret = data[1];
+    	break;
+    }
+}
+
+vars.put(&quot;consumer_key_secret&quot;,new String(keySecret));
+</stringProp>
+            </JSR223PreProcessor>
+            <hashTree/>
+            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">
+String final_string = vars.get(&quot;final_string&quot;);
+
+String username = vars.get(&quot;username&quot;);
+String app_name = vars.get(&quot;app_name&quot;);
+String access_token = vars.get(&quot;accessToken&quot;);
+
+String current_line = username + &apos;,&apos; + app_name + &apos;,&apos; + access_token + &apos;\n&apos;;
+final_string += current_line;
+
+vars.put(&quot;final_string&quot;, final_string);
+
+// write each token to the file [PLEASE DELETE THE FILE BEFORE RUNNING THIS, IF FILE ALREADY EXISTS]
+FileWriter fstream = new FileWriter(props.get(&quot;scenarioBasePath&quot;) + &quot;/api_invoke_tokens.csv&quot;, true);
+BufferedWriter out = new BufferedWriter(fstream);
+out.write(current_line);
+out.close();
+fstream.close();
+</stringProp>
+            </JSR223PostProcessor>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+      <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+        <boolProp name="ResultCollector.error_logging">false</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <time>true</time>
+            <latency>true</latency>
+            <timestamp>true</timestamp>
+            <success>true</success>
+            <label>true</label>
+            <code>true</code>
+            <message>true</message>
+            <threadName>true</threadName>
+            <dataType>true</dataType>
+            <encoding>false</encoding>
+            <assertions>true</assertions>
+            <subresults>true</subresults>
+            <responseData>false</responseData>
+            <samplerData>false</samplerData>
+            <xml>false</xml>
+            <fieldNames>true</fieldNames>
+            <responseHeaders>false</responseHeaders>
+            <requestHeaders>false</requestHeaders>
+            <responseDataOnError>false</responseDataOnError>
+            <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+            <assertionsResultsToSave>0</assertionsResultsToSave>
+            <bytes>true</bytes>
+            <sentBytes>true</sentBytes>
+            <url>true</url>
+            <threadCounts>true</threadCounts>
+            <idleTime>true</idleTime>
+            <connectTime>true</connectTime>
+          </value>
+        </objProp>
+        <stringProp name="filename"></stringProp>
+      </ResultCollector>
+      <hashTree/>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>
