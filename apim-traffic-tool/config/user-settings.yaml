@@ -1,0 +1,5 @@
+# define user path variables here
+path_variables:
+  jmeter: /home/user123/Applications/apache-jmeter-5.1.1/bin
+resources:
+  ip_database: IP2LOCATION-LITE-DB5.CSV

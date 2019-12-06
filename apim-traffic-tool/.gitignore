@@ -1,0 +1,8 @@
+/lib/traffic-tool/data/scenario/scenario_example/api_invoke_key_secret.csv
+/lib/traffic-tool/data/scenario/scenario_example/api_invoke_tokens.csv
+/lib/traffic-tool/data/scenario/scenario_example/token_ip_cookie.csv
+/lib/traffic-tool/data/scenario/scenario_example/data/user_app_pattern.csv
+/lib/traffic-tool/data/scenario/scenario_example/data/user_generation.csv
+/venv
+/lib/attack-tool/src/python/utils/__pycache__/
+/.idea

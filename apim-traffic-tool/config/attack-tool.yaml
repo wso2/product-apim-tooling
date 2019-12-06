@@ -1,0 +1,50 @@
+# General Configurations of the attack tool
+general_config:
+  # details for all hosted APIs. Attack tool will invoke according to these configurations
+  api_host:
+    protocol: https
+    ip: 10.100.8.34
+    port: 8243
+
+  # Attack tool will randomly append one of the following user agents to the request header
+  user_agents:
+    - Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.1.3) Gecko/20090913 Firefox/3.5.3
+    - Mozilla/5.0 (Windows; U; Windows NT 6.1; en; rv:1.9.1.3) Gecko/20090824 Firefox/3.5.3 (.NET CLR 3.5.30729)
+    - Mozilla/5.0 (Windows; U; Windows NT 5.2; en-US; rv:1.9.1.3) Gecko/20090824 Firefox/3.5.3 (.NET CLR 3.5.30729)
+    - Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.1) Gecko/20090718 Firefox/3.5.1
+    - Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/532.1 (KHTML, like Gecko) Chrome/4.0.219.6 Safari/532.1
+    - Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; WOW64; Trident/4.0; SLCC2; .NET CLR 2.0.50727; InfoPath.2)
+    - Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0; SLCC1; .NET CLR 2.0.50727; .NET CLR 1.1.4322; .NET CLR 3.5.30729; .NET CLR 3.0.30729)
+    - Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.2; Win64; x64; Trident/4.0)
+    - Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; SV1; .NET CLR 2.0.50727; InfoPath.2)
+    - Mozilla/5.0 (Windows; U; MSIE 7.0; Windows NT 6.0; en-US)
+    - Mozilla/4.0 (compatible; MSIE 6.1; Windows XP)
+    - Opera/9.80 (Windows NT 5.2; U; ru) Presto/2.5.22 Version/10.51
+
+  # Attack duration in seconds. In DOS/DDOS attacks this duration will be per API
+  attack_duration: 900
+
+  # Number of processes or threads used to achieve concurrency
+  number_of_processes: 100
+
+  # Scenario name
+  scenario: scenario_example
+
+  # Payloads for the request body. Attack tool will randomly select one of the following payloads when sending POST and PUT requests
+  payloads:
+    - '{"customerName": "Tom","delivered": true,"address": "customer_address","pizzaType": "customer_pizza","creditCardNumber": "customer_credit_card","quantity": 0,"orderId": "1"}'
+    - '{"customerName": "John","delivered": true,"address": "customer_address","pizzaType": "customer_pizza","creditCardNumber": "customer_credit_card","quantity": 0,"orderId": "1"}'
+    - '{"customerName": "Tim","delivered": true,"address": "customer_address","pizzaType": "customer_pizza","creditCardNumber": "customer_credit_card","quantity": 0,"orderId": "1"}'
+
+# Attack specific configurations
+attacks:
+  abnormal_token_usage:
+    # Attack tool will use a random value between the min and max scalars to multiply the request count in normal traffic.
+    min_request_scalar: 3
+    max_request_scalar: 6
+    # Number of compromised users being simulated
+    compromised_user_count: 10
+
+  stolen_token:
+    # Number of compromised users being simulated
+    compromised_user_count: 10
