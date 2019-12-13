@@ -61,6 +61,11 @@ def generate_cookie():
 
 
 def simulate_user(user_data):
+    """
+      Simulate the behaviour of a user during the attack duration.
+      :param user_data: A dictionary containing the user data
+      :return: None
+      """
     global attack_duration, protocol, host, port, payloads, user_agents, start_time, dataset_path, invoke_patterns
 
     up_time = datetime.now() - start_time
