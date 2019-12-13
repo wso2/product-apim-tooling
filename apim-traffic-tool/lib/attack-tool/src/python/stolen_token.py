@@ -190,4 +190,4 @@ if __name__ == '__main__':
             break
 
     # cleaning up the processes at exit
-    atexit.register(util_methods.cleanup)
+    atexit.register(util_methods.cleanup, process_list=process_list)

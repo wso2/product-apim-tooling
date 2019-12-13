@@ -164,4 +164,4 @@ if __name__ == '__main__':
             util_methods.log(attack_tool_log_path, log_string, "a")
             break
 
-    atexit.register(util_methods.cleanup)
+    atexit.register(util_methods.cleanup, process_list=process_list)
