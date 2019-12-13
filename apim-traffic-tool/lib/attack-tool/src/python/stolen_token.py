@@ -13,28 +13,23 @@
 # KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations
 # under the License.
-import sys
-from multiprocessing.dummy import Pool
-from multiprocessing import Process, Value
+
+import atexit
+import ipaddress
 import os
 import pickle
+import random
+import string
+import sys
 import time
-import atexit
+from datetime import datetime
+from multiprocessing import Process
+
+import numpy as np
 import requests
 import yaml
-import string
-from datetime import datetime
+
 from utils import util_methods
-import ipaddress
-import random
-import numpy as np
-from utils.util_methods import generate_biased_random
-
-
-# def cleanup():
-#     global process_list
-#     for p in process_list:
-#         p.terminate()
 
 
 def generate_unique_ip():
@@ -65,78 +60,12 @@ def generate_cookie():
     return cookie
 
 
-# def generate_method_invoke_pattern(app):
-#     probability_list = []
-#     iterations = 0
-#     DIFF_THRESHOLD = 0.5
-#     PROB_ADJUSTMENT = 0.075
-#
-#     for scenario in app:
-#         iterations += scenario[0]
-#         probability_list.append(scenario[0])
-#
-#     probability_list = list(map(lambda x: x / iterations, probability_list))
-#
-#     # increase probabilities if it's too small compared to max value
-#     for i in range(len(probability_list)):
-#         max_pro = max(probability_list)
-#         if max_pro - probability_list[i] >= DIFF_THRESHOLD:
-#             probability_list[i] = probability_list[i] + PROB_ADJUSTMENT
-#             probability_list[probability_list.index(max_pro)] = max_pro - PROB_ADJUSTMENT
-#
-#     # prepare request pattern from list indices
-#     method_pattern = np.random.choice(len(app), size=iterations, p=probability_list)
-#     return method_pattern
-
-
-def execute_scenario(username, scenario):
-    """
-    Execute a scenario from the scenario pool to simulate the usage of a stolen token
-    :param scenario: A list containing a scenario
-    :return: none
-    """
-    global attack_duration, protocol, host, port, payloads, user_agents, start_time, dataset_path
-
-    up_time = datetime.now() - start_time
-
-    if up_time.seconds < attack_duration:
-        for app in scenario.values():
-            request_target = app[0]
-            # context = scenario[1]
-            # version = scenario[2]
-            # resource_path = scenario[3]
-            path = app[2]
-            token = app[3]
-            method = app[4]
-
-            request_path = "{}://{}:{}/{}".format(protocol, host, port, path)
-            random_user_agent = random.choice(user_agents)
-            random_ip = generate_unique_ip()
-            random_cookie = generate_cookie()
-            random_payload = random.choice(payloads)
-            accept = content_type = "application/json"
-
-            for i in range(request_target):
-                up_time = datetime.now() - start_time
-                if up_time.seconds >= attack_duration:
-                    break
-                try:
-                    response = util_methods.send_simple_request(request_path, method, token, random_ip, random_cookie, accept, content_type, random_user_agent, payload=random_payload)
-                    request_info = "{},{},{},{},{},{},{},{},{},\"{}\",{}".format(datetime.now(), random_ip, token, method, request_path, random_cookie, accept, content_type, random_ip,
-                                                                                 random_user_agent,
-                                                                                 response.status_code,
-                                                                                 )
-                    util_methods.log(dataset_path, request_info, "a")
-                except requests.exceptions.RequestException:
-                    msg_string = "[Error] {} - Request Failure\n\t {}".format(datetime.now(), str(ex))
-                    print(msg_string)
-                    util_methods.log(attack_tool_log_path, msg_string, "a")
-
-                # sleep the process for a random period of time between 0 and 5 seconds but biased to 0
-                time.sleep(abs(int(np.random.normal() * 10)))
-
-
 def simulate_user(user_data):
+    """
+      Simulate the behaviour of a user during the attack duration.
+      :param user_data: A dictionary containing the user data
+      :return: None
+      """
     global attack_duration, protocol, host, port, payloads, user_agents, start_time, dataset_path, invoke_patterns
 
     up_time = datetime.now() - start_time
@@ -260,21 +189,5 @@ if __name__ == '__main__':
             util_methods.log(attack_tool_log_path, log_string, "a")
             break
 
-    atexit.register(util_methods.cleanup)
-
-    # process_pool = Pool(processes=process_count)
-    #
-    # # Executing scenarios until the attack duration elapses
-    # while True:
-    #     time_elapsed = datetime.now() - start_time
-    #     if time_elapsed.seconds >= attack_duration:
-    #         log_string = "[INFO] {} - Attack terminated successfully. Time elapsed: {} minutes".format(datetime.now(), time_elapsed.seconds / 60.0)
-    #         print(log_string)
-    #         util_methods.log(attack_tool_log_path, log_string, "a")
-    #         break
-    #     else:
-    #         process_pool.map(execute_scenario, scenario_pool)
-    #
-    # # closes the process pool and wait for the processes to finish
-    # process_pool.close()
-    # process_pool.join()
+    # cleaning up the processes at exit
+    atexit.register(util_methods.cleanup, process_list=process_list)

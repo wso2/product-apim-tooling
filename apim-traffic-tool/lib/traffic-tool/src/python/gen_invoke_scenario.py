@@ -27,7 +27,6 @@ import pandas as pd
 import sys
 from scipy.stats import norm
 
-
 # variables
 scenario_name = None
 ip_dataset_name = None
@@ -39,7 +38,7 @@ user_cookie = {}
 users_apps = {}
 scenario_pool = {}
 scenario_distribution = []
-existing_no_of_user_combinations = 0         # to validate the user count
+existing_no_of_user_combinations = 0  # to validate the user count
 total_no_of_user_combinations = 0
 used_ips = []
 ip_dataset = None
@@ -55,22 +54,24 @@ try:
     scenario_name = traffic_config['scenario_name']
     user_agents = traffic_config['user_agents']
 
-    with open(abs_path+'/../../../../config/apim.yaml', 'r') as file:
+    with open(abs_path + '/../../../../config/apim.yaml', 'r') as file:
         apim_config = yaml.load(file, Loader=yaml.FullLoader)
     apis = apim_config['apis']
 
-    with open(abs_path+'/../../../../config/user-settings.yaml', 'r') as file:
+    with open(abs_path + '/../../../../config/user-settings.yaml', 'r') as file:
         user_settings = yaml.load(file, Loader=yaml.FullLoader)
     ip_dataset_name = user_settings['resources']['ip_database']
+    dataset_column_order = user_settings['resources']['column_order']
 
 except FileNotFoundError as e:
     print('[ERROR] {} gen_invoke_scenario.py: {}: {}'.format(str(datetime.now()), e.strerror, e.filename))
     sys.exit()
 
-
 '''
     This function will write the given log output to the log.txt file
 '''
+
+
 def log(tag, write_string):
     with open(abs_path + '/../../../../logs/traffic-tool.log', 'a+') as file:
         file.write("[{}] ".format(tag) + str(datetime.now()) + ": " + write_string + "\n")
@@ -79,6 +80,8 @@ def log(tag, write_string):
 '''
     This function will return the invoke path for a given api and http method
 '''
+
+
 def getPath(api_name, method):
     global apis
 
@@ -95,6 +98,8 @@ def getPath(api_name, method):
 '''
     This function will return an integer slightly varied to the given median
 '''
+
+
 def varySlightly(median):
     st_div = 1
     return abs(int(norm.rvs(loc=median, scale=st_div)))
@@ -103,10 +108,17 @@ def varySlightly(median):
 '''
     This function will return a randomly generated ipv4 address for a given country
 '''
-def ipGen(country):
-    global used_ips, ip_dataset
 
-    ip_range = ip_dataset.loc[ip_dataset['country_name'] == country][['ip_from', 'ip_to']]
+
+def ipGen(country):
+    global used_ips, ip_dataset, dataset_column_order
+
+    country_name_index = int(dataset_column_order['country_name']) - 1
+    ip_from_index = int(dataset_column_order['ip_from']) - 1
+    ip_to_index = int(dataset_column_order['ip_to']) - 1
+
+    ip_range = ip_dataset.loc[ip_dataset.iloc[:, country_name_index] == country].iloc[:, ip_from_index:ip_to_index + 1]
+
     if len(ip_range) > 0:
         ip_decs = ip_range.sample(n=1).values[0]
 
@@ -117,6 +129,7 @@ def ipGen(country):
             temp_ip = ipaddress.IPv4Address._string_from_ip_int(random.randint(ip_decs[0], ip_decs[1]))
 
         used_ips.append(temp_ip)
+
         return temp_ip
 
     else:
@@ -126,6 +139,8 @@ def ipGen(country):
 '''
     This function will return a randomly generated cookie
 '''
+
+
 def getCookie():
     lettersAndDigits = string.ascii_lowercase + string.digits
     cookie = 'JSESSIONID='
@@ -136,7 +151,9 @@ def getCookie():
 '''
     This function will return a list of unique cookies
 '''
-def genUniqueCookieList(count:int):
+
+
+def genUniqueCookieList(count: int):
     cookie_list = set()
     while len(cookie_list) != count:
         cookie_list.add(getCookie())
@@ -152,10 +169,10 @@ def genUniqueCookieList(count:int):
 
 try:
     # read and load the ip database
-    ip_dataset = pd.read_csv(abs_path+'/../../../../resources/libraries/{}'.format(ip_dataset_name))
+    ip_dataset = pd.read_csv(abs_path + '/../../../../resources/libraries/{}'.format(ip_dataset_name), header=None)
 
     # generate a set of ips and cookies for each user
-    with open(abs_path+'/../../data/scenario/{}/data/user_generation.csv'.format(scenario_name)) as file:
+    with open(abs_path + '/../../data/scenario/{}/data/user_generation.csv'.format(scenario_name)) as file:
         userlist = file.readlines()
 
         cookie_list = genUniqueCookieList(len(userlist))
@@ -206,7 +223,7 @@ for row in user_token.itertuples():
 
 try:
     # generate scenario data according to the script and append to the pool
-    with open(abs_path+'/../../data/scenario/{}/data/invoke_scenario.yaml'.format(scenario_name)) as file:
+    with open(abs_path + '/../../data/scenario/{}/data/invoke_scenario.yaml'.format(scenario_name)) as file:
         invoke_scenario = yaml.load(file, Loader=yaml.FullLoader)
     scenario_data = invoke_scenario['invoke_scenario']
 
@@ -225,8 +242,10 @@ for item in scenario_data:
     total_no_of_user_combinations += user_count
     if total_no_of_user_combinations > existing_no_of_user_combinations:
         # invalid no of users (cannot execute the scenario)
-        log("ERROR", "Invalid number of user count declared in 'invoke_scenario.yaml'. Expected {} user combinations. Found {} or more.".format(existing_no_of_user_combinations, total_no_of_user_combinations))
-        raise ArithmeticError("Invalid number of user count declared in 'invoke_scenario.yaml'. Expected {} user combinations. Found {} or more.".format(existing_no_of_user_combinations, total_no_of_user_combinations))
+        log("ERROR",
+            "Invalid number of user count declared in 'invoke_scenario.yaml'. Expected {} user combinations. Found {} or more.".format(existing_no_of_user_combinations, total_no_of_user_combinations))
+        raise ArithmeticError(
+            "Invalid number of user count declared in 'invoke_scenario.yaml'. Expected {} user combinations. Found {} or more.".format(existing_no_of_user_combinations, total_no_of_user_combinations))
 
     users = []
     for i in range(user_count):
