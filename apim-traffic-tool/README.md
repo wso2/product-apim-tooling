@@ -40,7 +40,7 @@ The attack tool will attack WSO2 API Manager throughout a user specified time. A
    - Download and add apache ivy jar file (https://ant.apache.org/ivy/download.cgi)
    - Add attack tool helper package (can be found from `<TOOL_HOME>/resources/add-on/attack-tool-helpers.jar`)
 
-8. Download a IP Geolocation Database from https://www.ipinfodb.com/free-database and add it to `<TOOL_HOME>/resources/libraries/` directory. Include name of the added file in `<TOOL_HOME>/config/user-settings.yaml` file infront of `ip_database` under `resources` (include name with the csv file extension). 
+8. Download a IP Geolocation Database from https://www.ipinfodb.com/free-database and add it to `<TOOL_HOME>/resources/libraries/` directory. Include name of the added file in `<TOOL_HOME>/config/user-settings.yaml` file in front of `ip_database` under `resources` (include name with the csv file extension). Make sure the column order of the database schema matches with the column order in `user-settings.yaml` file.  
 > Above link contains two types of datasets "Free IP Geolocation Databases" and "Free IP Proxy Databases". Please download a IP Geolocation dataset.
 
 9. By default, access tokens get expired after 60 minutes time interval. So if you are planning to simulate a traffic for more than 1 hour duration, please configure WSO2 API Manager and APIM Traffic Tool as below.
