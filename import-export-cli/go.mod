@@ -14,7 +14,6 @@ require (
 	github.com/magiconair/properties v0.0.0-20170902060319-8d7837e64d3c
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.1.2
-	github.com/pborman/uuid v1.2.0 // indirect
 	github.com/renstrom/dedent v1.0.0
 	github.com/spf13/cast v1.1.0
 	github.com/spf13/cobra v0.0.1
