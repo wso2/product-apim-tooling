@@ -50,9 +50,9 @@ const addCmdLiteral = "add"
 const addCmdShortDesc = "Add an API to the kubernetes cluster"
 const addCmdLongDesc = `Add an API from a Swagger file to the kubernetes cluster. JSON and YAML formats are accepted.
 To execute kubernetes commands set mode to Kubernetes`
-const addCmdExamples = utils.ProjectName + " " + addCmdLiteral + " "+ apiCmdLiteral + " " + `-n petstore --from-file=./Swagger.json --replicas=1 --namespace=wso2
+const addCmdExamples = utils.ProjectName + " " + addCmdLiteral + " " + apiCmdLiteral + " " + `-n petstore --from-file=./Swagger.json --replicas=1 --namespace=wso2
 
-` + utils.ProjectName + " " + addCmdLiteral + " "+ apiCmdLiteral + " " + `-n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi --replicas=1 --namespace=wso2 --override=true`
+` + utils.ProjectName + " " + addCmdLiteral + " " + apiCmdLiteral + " " + `-n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi --replicas=1 --namespace=wso2 --override=true`
 
 var interceptorsConfName string
 
@@ -74,7 +74,7 @@ var addApiCmd = &cobra.Command{
 		utils.Logln(utils.LogPrefixInfo + apiCmdLiteral + " called")
 		configVars := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
 		if configVars.Config.KubernetesMode {
-			if flagApiName == "" && flagSwaggerFilePath == "" {
+			if flagApiName == "" || flagSwaggerFilePath == "" {
 				utils.HandleErrorAndExit("Required flags are missing. API name and swagger file paths are required",
 					errors.New("required flags missing"))
 			} else {
@@ -223,5 +223,5 @@ func init() {
 	addApiCmd.Flags().StringVarP(&flagSwaggerFilePath, "from-file", "f", "", "Path to swagger file")
 	addApiCmd.Flags().IntVar(&flagReplicas, "replicas", 1, "replica set")
 	addApiCmd.Flags().StringVar(&flagNamespace, "namespace", "", "namespace of API")
-	addApiCmd.Flags().BoolVarP(&flagOverride, "override", "", false,"Property to override the existing docker image with same name and version")
+	addApiCmd.Flags().BoolVarP(&flagOverride, "override", "", false, "Property to override the existing docker image with same name and version")
 }
