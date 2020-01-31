@@ -22,14 +22,15 @@ import (
 	"bufio"
 	"crypto/tls"
 	"fmt"
-	"github.com/go-resty/resty"
-	"golang.org/x/crypto/ssh/terminal"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/go-resty/resty"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 // Invoke http-post request using go-resty
@@ -79,7 +80,7 @@ func InvokeGETRequestWithMultipleQueryParams(queryParam map[string]string, url s
 }
 
 // Invoke http-get request
-func InvokePutRequest(queryParam map[string]string, url string, headers map[string]string,  body string) (
+func InvokePutRequest(queryParam map[string]string, url string, headers map[string]string, body string) (
 	*resty.Response, error) {
 	if Insecure {
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates

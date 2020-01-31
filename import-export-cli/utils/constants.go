@@ -86,14 +86,28 @@ const LogPrefixError = "[ERROR]: "
 // String Constants
 const SearchAndTag = "&"
 
-// Other
-const DefaultTokenValidityPeriod = "3600"
-const DefaultHttpRequestTimeout = 10000
+// Kubernetes Constants
 const DefaultKubernetesMode = false
 const Kubectl = "kubectl"
 const Create = "create"
+const K8sApply = "apply"
+const K8sDelete = "delete"
+const K8sSecret = "secret"
+const K8sSecretTypeGeneric = "generic"
+const K8sDockerSecretName = "docker-config"
+const K8sDockerSecretKeyName = "config.json"
 
-//migration export
+// Operator Hub Constants
+const OlmCrdUrlTemplate = "https://github.com/operator-framework/operator-lifecycle-manager/releases/download/%s/crds.yaml"
+const OlmOlmUrlTemplate = "https://github.com/operator-framework/operator-lifecycle-manager/releases/download/%s/olm.yaml"
+const OperatorYamlUrl = "https://operatorhub.io/install/api-operator.yaml"
+const DockerRegistryUrl = "https://index.docker.io/v1/"
+
+// Other
+const DefaultTokenValidityPeriod = "3600"
+const DefaultHttpRequestTimeout = 10000
+
+// Migration export
 const MaxAPIsToExportOnce = 20
 const MigrationAPIsExportMetadataFileName = "migration-apis-export-metadata.yaml"
 const LastSucceededApiFileName = "last-succeeded-api.log"
