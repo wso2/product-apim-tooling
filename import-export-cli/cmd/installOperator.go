@@ -23,9 +23,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/cbroglie/mustache"
-	"io/ioutil"
-	"log"
-	"os"
+	"github.com/wso2/product-apim-tooling/import-export-cli/box"
 	"os/exec"
 	"strings"
 
@@ -142,37 +140,14 @@ func createDockerSecret(registryUrl string, username string, password string) {
 	if err != nil {
 		utils.HandleErrorAndExit("Error marshalling docker secret credentials ", err)
 	}
+	encodedAuthJson := base64.StdEncoding.EncodeToString(authJsonByte)
 
-	// write config-map to a temp file
-	tempFile, err := ioutil.TempFile(os.TempDir(), "docker-secret-*.json")
+	secretTemplate, _ := box.Get("/kubernetes_resources/registry_secret_mustache.yaml")
+	secretYaml, err := mustache.Render(string(secretTemplate), map[string]string{
+		"encodedJson": encodedAuthJson,
+	})
 	if err != nil {
-		log.Fatal("Cannot create temporary file", err)
-	}
-	defer os.Remove(tempFile.Name())
-
-	if _, err := tempFile.Write(authJsonByte); err != nil {
-		log.Fatal("Failed to write to temporary file", err)
-	}
-	// Close the file
-	if err := tempFile.Close(); err != nil {
-		log.Fatal(err)
-	}
-
-	// get yaml output of k8s secret for accessing registry
-	cmdCreate := exec.Command(
-		utils.Kubectl,
-		utils.Create,
-		utils.K8sSecret,
-		utils.K8sSecretTypeGeneric,
-		utils.K8sDockerSecretName,
-		fmt.Sprintf("--from-file=%s=%s", utils.K8sDockerSecretKeyName, tempFile.Name()),
-		"--dry-run",
-		"-o", "yaml",
-	)
-
-	output, err := cmdCreate.Output()
-	if err != nil {
-		utils.HandleErrorAndExit("Error rendering k8s secret for registry credentials", err)
+		utils.HandleErrorAndExit("Error rendering docker secret credentials", err)
 	}
 
 	// execute kubernetes command to create secret for accessing registry
@@ -184,15 +159,13 @@ func createDockerSecret(registryUrl string, username string, password string) {
 	)
 
 	pipe, err := cmd.StdinPipe()
-	pipe.Write(output)
+	pipe.Write([]byte(secretYaml))
 	pipe.Close()
 
-	output, err = cmd.Output()
-
+	output, err := cmd.Output()
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating k8s secret for registry credentials", err)
 	}
-
 	fmt.Println(string(output))
 }
 
