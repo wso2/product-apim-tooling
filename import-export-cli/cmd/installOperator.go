@@ -24,7 +24,6 @@ import (
 	"fmt"
 	"github.com/cbroglie/mustache"
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
-	"os/exec"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -86,21 +85,11 @@ to quickly create a Cobra application.`,
 func installOLM(version string) {
 	utils.Logln(utils.LogPrefixInfo + "Installing OLM")
 
-	cmd := exec.Command(
-		utils.Kubectl,
-		utils.K8sApply,
-		"-f",
-		fmt.Sprintf(utils.OlmCrdUrlTemplate, version),
-		"-f",
-		fmt.Sprintf(utils.OlmOlmUrlTemplate, version),
-	)
-
-	output, err := cmd.Output()
+	// apply OperatorHub CRDs and OLM
+	err := utils.K8sApplyFromFile(fmt.Sprintf(utils.OlmCrdUrlTemplate, version), fmt.Sprintf(utils.OlmOlmUrlTemplate, version))
 	if err != nil {
-		utils.HandleErrorAndExit("Error installing Operator-Hub OLM tool", err)
+		utils.HandleErrorAndExit("Error installing OLM", err)
 	}
-
-	fmt.Println(string(output))
 }
 
 // installApiOperator installs WSO2 api-operator
@@ -111,26 +100,17 @@ func installApiOperator(isLocalInstallation bool) {
 		operatorFile = utils.OperatorYamlUrl
 	}
 
-	// Install the operator by running the following command
-	cmd := exec.Command(
-		utils.Kubectl,
-		utils.K8sApply,
-		"-f",
-		operatorFile,
-	)
-
-	output, err := cmd.Output()
+	// apply WSO2 api-operator via OperatorHub
+	err := utils.K8sApplyFromFile(operatorFile)
 	if err != nil {
-		utils.HandleErrorAndExit("Error installing WSO2 api-operator", err)
+		utils.HandleErrorAndExit("Error API Operator through Operator-Hub", err)
 	}
-
-	fmt.Println(string(output))
 }
 
 // createDockerSecret creates K8S secret with credentials for docker registry
 func createDockerSecret(registryUrl string, username string, password string) {
 	encodedCredential := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
-	auth := Auth{Auths: map[string]Credential{registryUrl: Credential{
+	auth := Auth{Auths: map[string]Credential{registryUrl: {
 		Auth:     encodedCredential,
 		Username: username,
 		Password: password,
@@ -150,23 +130,10 @@ func createDockerSecret(registryUrl string, username string, password string) {
 		utils.HandleErrorAndExit("Error rendering docker secret credentials", err)
 	}
 
-	// execute kubernetes command to create secret for accessing registry
-	cmd := exec.Command(
-		utils.Kubectl,
-		utils.K8sApply,
-		"-f",
-		"-",
-	)
-
-	pipe, err := cmd.StdinPipe()
-	pipe.Write([]byte(secretYaml))
-	pipe.Close()
-
-	output, err := cmd.Output()
-	if err != nil {
-		utils.HandleErrorAndExit("Error creating k8s secret for registry credentials", err)
+	// apply created secret yaml file
+	if err := utils.K8sApplyFromStdin(secretYaml); err != nil {
+		utils.HandleErrorAndExit("Error creating docker secret credentials", err)
 	}
-	fmt.Println(string(output))
 }
 
 // createControllerConfigs downloads the mustache, replaces repository value and creates the config: `controller-config`
@@ -189,32 +156,17 @@ func createControllerConfigs(repository string, isLocalInstallation bool) {
 		mustacheTemplate = ""
 	}
 
-	k8sConfigMap, err := mustache.Render(mustacheTemplate, map[string]string{
+	k8sConfigs, err := mustache.Render(mustacheTemplate, map[string]string{
 		"usernameDockerRegistry": repository,
 	})
 	if err != nil {
 		utils.HandleErrorAndExit("Error rendering controller-configs", err)
 	}
 
-	// execute kubernetes command to create secret for accessing registry
-	cmd := exec.Command(
-		utils.Kubectl,
-		utils.K8sApply,
-		"-f",
-		"-",
-	)
-
-	pipe, err := cmd.StdinPipe()
-	pipe.Write([]byte(k8sConfigMap))
-	pipe.Close()
-
-	output, err := cmd.Output()
-
-	if err != nil {
-		utils.HandleErrorAndExit("Error creating controller configs", err)
+	// apply created secret yaml file
+	if err := utils.K8sApplyFromStdin(k8sConfigs); err != nil {
+		utils.HandleErrorAndExit("Error creating controller-configs", err)
 	}
-
-	fmt.Println(string(output))
 }
 
 // readInputs reads docker-registry URL, repository, username and password from the user
