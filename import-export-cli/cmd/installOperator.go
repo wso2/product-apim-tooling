@@ -73,11 +73,11 @@ to quickly create a Cobra application.`,
 		isLocalInstallation := flagApiOperatorFile != ""
 		if !isLocalInstallation {
 			installOLM("0.13.0")
-			installApiOperator(isLocalInstallation)
+			installApiOperatorOperatorHub()
 		}
 
 		createDockerSecret(registryUrl, username, password)
-		createControllerConfigs(repository, isLocalInstallation) //TODO: renuka have to configure repository
+		createControllerConfigs(repository, isLocalInstallation)
 	},
 }
 
@@ -96,17 +96,17 @@ func installOLM(version string) {
 		utils.HandleErrorAndExit("Error installing OLM", err)
 	}
 
-	if err := utils.ExecuteCommand(utils.Kubectl, "rollout", "status", "-w", "deployment/olm-operator", "-n", olmNamespace); err != nil {
+	if err := utils.ExecuteCommand(utils.Kubectl, utils.K8sRollOut, "status", "-w", "deployment/olm-operator", "-n", olmNamespace); err != nil {
 		utils.HandleErrorAndExit("Error installing OLM: Rolling out deployment OLM Operator", err)
 	}
 
-	if err := utils.ExecuteCommand(utils.Kubectl, "rollout", "status", "-w", "deployment/catalog-operator", "-n", olmNamespace); err != nil {
+	if err := utils.ExecuteCommand(utils.Kubectl, utils.K8sRollOut, "status", "-w", "deployment/catalog-operator", "-n", olmNamespace); err != nil {
 		utils.HandleErrorAndExit("Error installing OLM: Rolling out deployment Catalog Operator", err)
 	}
 
 	csvPhase := ""
 	for i := 50; i > 0 && csvPhase != csvPhaseSuccessed; i-- {
-		newCsvPhase, err := utils.GetCommandOutput(utils.Kubectl, "get", "csv", "-n", olmNamespace, "packageserver", "-o", `jsonpath='{.status.phase}"`)
+		newCsvPhase, err := utils.GetCommandOutput(utils.Kubectl, utils.K8sGet, utils.K8sCsv, "-n", olmNamespace, "packageserver", "-o", `jsonpath='{.status.phase}"`)
 		if err != nil {
 			utils.HandleErrorAndExit("Error installing OLM: Getting csv phase", err)
 		}
@@ -126,19 +126,14 @@ func installOLM(version string) {
 	}
 }
 
-// installApiOperator installs WSO2 api-operator from Operator-Hub
-func installApiOperator(isLocalInstallation bool) {
-	utils.Logln(utils.LogPrefixInfo + "Installing API Operator")
-	operatorFile := flagApiOperatorFile
-	if !isLocalInstallation {
-		utils.Logln(utils.LogPrefixInfo + "Installing API Operator from Operator-Hub")
-		operatorFile = utils.OperatorYamlUrl
-	}
+// installApiOperatorOperatorHub installs WSO2 api-operator from Operator-Hub
+func installApiOperatorOperatorHub() {
+	utils.Logln(utils.LogPrefixInfo + "Installing API Operator from Operator-Hub")
+	operatorFile := utils.OperatorYamlUrl
 
-	// apply WSO2 api-operator via OperatorHub
 	err := utils.K8sApplyFromFile(operatorFile)
 	if err != nil {
-		utils.HandleErrorAndExit("Error installing API Operator", err)
+		utils.HandleErrorAndExit("Error installing API Operator from Operator-Hub", err)
 	}
 }
 
@@ -173,19 +168,21 @@ func createDockerSecret(registryUrl string, username string, password string) {
 
 // createControllerConfigs downloads the mustache, replaces repository value and creates the config: `controller-config`
 func createControllerConfigs(repository string, isLocalInstallation bool) {
-	utils.Logln(utils.LogPrefixInfo + "Installing controller configs")
 	var mustacheTemplate string
 
 	if !isLocalInstallation {
-		// read from GitHub
-		mustacheGistUrl := `https://gist.githubusercontent.com/renuka-fernando/6d6c64c786e6d13742e802534de3da4e/raw/d6191bc60f3bae659749e9db5f882bef6d1d062a/controller_conf.yaml`
+		utils.Logln(utils.LogPrefixInfo + "Installing controller configs")
 
+		// TODO: renuka replace this url (configuration?)
+		mustacheGistUrl := `https://gist.githubusercontent.com/renuka-fernando/6d6c64c786e6d13742e802534de3da4e/raw/d6191bc60f3bae659749e9db5f882bef6d1d062a/controller_conf.yaml`
 		templateBytes, err := utils.ReadFromUrl(mustacheGistUrl)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading controller-configs from server", err)
 		}
 		mustacheTemplate = string(templateBytes)
 	} else {
+		utils.Logln(utils.LogPrefixInfo + "Installing API operator from local file and create controller configs")
+
 		// read from local file
 		// TODO: renuka read from file
 		mustacheTemplate = ""
@@ -208,7 +205,7 @@ func createControllerConfigs(repository string, isLocalInstallation bool) {
 func readInputs() (string, string, string, string) {
 	isConfirm := false
 	registryUrl := ""
-	repository := "renukafernando-test"
+	repository := ""
 	username := ""
 	password := ""
 	var err error
@@ -217,6 +214,11 @@ func readInputs() (string, string, string, string) {
 		registryUrl, err = utils.ReadInputString("Enter Docker-Registry URL", utils.DockerRegistryUrl, utils.UrlValidationRegex, true)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading Docker-Registry URL", err)
+		}
+
+		repository, err = utils.ReadInputString("Enter Repository Name", "", utils.UsernameValidationRegex, true)
+		if err != nil {
+			utils.HandleErrorAndExit("Error reading Repository Name", err)
 		}
 
 		username, err = utils.ReadInputString("Enter Username", "", utils.UsernameValidationRegex, true)

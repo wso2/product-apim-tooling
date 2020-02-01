@@ -91,11 +91,13 @@ const DefaultKubernetesMode = false
 const Kubectl = "kubectl"
 const Create = "create"
 const K8sApply = "apply"
-const K8sDelete = "delete"
-const K8sSecret = "secret"
-const K8sSecretTypeGeneric = "generic"
-const K8sDockerSecretName = "docker-config"
-const K8sDockerSecretKeyName = "config.json"
+const K8sRollOut = "rollout"
+const K8sGet = "get"
+const K8sCsv = "csv"
+
+// Regex Validation
+const UsernameValidationRegex = `^[\w\d\-]+$`
+const UrlValidationRegex = `^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$`
 
 // Operator Hub Constants
 const OlmCrdUrlTemplate = "https://github.com/operator-framework/operator-lifecycle-manager/releases/download/%s/crds.yaml"

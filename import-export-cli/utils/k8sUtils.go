@@ -22,22 +22,17 @@ func K8sApplyFromStdin(stdInput string) error {
 	return ExecuteCommandFromStdin(stdInput, Kubectl, K8sApply, "-f", "-")
 }
 
-// ExecuteCommand executes the command with args and print output, errors in standard output, error
+// ExecuteCommand executes the command with args and prints output, errors in standard output, error
 func ExecuteCommand(command string, args ...string) error {
 	cmd := exec.Command(command, args...)
-	var errBuf, outBuf bytes.Buffer
-	cmd.Stderr = io.MultiWriter(os.Stderr, &errBuf)
-	cmd.Stdout = io.MultiWriter(os.Stdout, &outBuf)
-
+	setCommandOutAndError(cmd)
 	return cmd.Run()
 }
 
-// ExecuteCommandFromStdin executes the command with args with getting input from standard input and print output, errors in standard output, error
+// ExecuteCommandFromStdin executes the command with args and prints output the standard output
 func ExecuteCommandFromStdin(stdInput string, command string, args ...string) error {
 	cmd := exec.Command(command, args...)
-	var errBuf, outBuf bytes.Buffer
-	cmd.Stderr = io.MultiWriter(os.Stderr, &errBuf)
-	cmd.Stdout = io.MultiWriter(os.Stdout, &outBuf)
+	setCommandOutAndError(cmd)
 
 	pipe, err := cmd.StdinPipe()
 	if err != nil {
@@ -56,9 +51,15 @@ func ExecuteCommandFromStdin(stdInput string, command string, args ...string) er
 // GetCommandOutput executes a command and returns the output
 func GetCommandOutput(command string, args ...string) (string, error) {
 	cmd := exec.Command(command, args...)
-	var errBuf bytes.Buffer
-	cmd.Stderr = io.MultiWriter(os.Stderr, &errBuf)
+	setCommandOutAndError(cmd)
 
 	output, err := cmd.Output()
 	return string(output), err
+}
+
+// setCommandOutAndError sets the output and error of the command cmd to the standard output and error
+func setCommandOutAndError(cmd *exec.Cmd) {
+	var errBuf, outBuf bytes.Buffer
+	cmd.Stderr = io.MultiWriter(os.Stderr, &errBuf)
+	cmd.Stdout = io.MultiWriter(os.Stdout, &outBuf)
 }

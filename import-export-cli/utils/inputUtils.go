@@ -11,9 +11,6 @@ import (
 	"syscall"
 )
 
-const UsernameValidationRegex = `^[\w\d\-]+$`
-const UrlValidationRegex = `^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$`
-
 // ReadInputString reads input from user with prompting printText and validating against regex: validRegex
 func ReadInputString(printText string, defaultVal string, validRegex string, retryOnInvalid bool) (string, error) {
 	retry := true
