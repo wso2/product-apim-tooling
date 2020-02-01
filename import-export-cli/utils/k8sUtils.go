@@ -14,7 +14,17 @@ func K8sApplyFromFile(fileList ...string) error {
 		kubectlArgs = append(kubectlArgs, "-f", file)
 	}
 
-	cmd := exec.Command("kubectl", kubectlArgs...)
+	return ExecuteCommand(Kubectl, kubectlArgs...)
+}
+
+// K8sApplyFromStdin applies resources from standard input
+func K8sApplyFromStdin(stdInput string) error {
+	return ExecuteCommandFromStdin(stdInput, Kubectl, K8sApply, "-f", "-")
+}
+
+// ExecuteCommand executes the command with args and print output, errors in standard output, error
+func ExecuteCommand(command string, args ...string) error {
+	cmd := exec.Command(command, args...)
 	var errBuf, outBuf bytes.Buffer
 	cmd.Stderr = io.MultiWriter(os.Stderr, &errBuf)
 	cmd.Stdout = io.MultiWriter(os.Stdout, &outBuf)
@@ -22,15 +32,9 @@ func K8sApplyFromFile(fileList ...string) error {
 	return cmd.Run()
 }
 
-// K8sApplyFromStdin applies resources from standard input
-func K8sApplyFromStdin(stdInput string) error {
-	cmd := exec.Command(
-		Kubectl,
-		K8sApply,
-		"-f",
-		"-",
-	)
-
+// ExecuteCommandFromStdin executes the command with args with getting input from standard input and print output, errors in standard output, error
+func ExecuteCommandFromStdin(stdInput string, command string, args ...string) error {
+	cmd := exec.Command(command, args...)
 	var errBuf, outBuf bytes.Buffer
 	cmd.Stderr = io.MultiWriter(os.Stderr, &errBuf)
 	cmd.Stdout = io.MultiWriter(os.Stdout, &outBuf)
@@ -47,4 +51,14 @@ func K8sApplyFromStdin(stdInput string) error {
 	}
 
 	return cmd.Run()
+}
+
+// GetCommandOutput executes a command and returns the output
+func GetCommandOutput(command string, args ...string) (string, error) {
+	cmd := exec.Command(command, args...)
+	var errBuf bytes.Buffer
+	cmd.Stderr = io.MultiWriter(os.Stderr, &errBuf)
+
+	output, err := cmd.Output()
+	return string(output), err
 }

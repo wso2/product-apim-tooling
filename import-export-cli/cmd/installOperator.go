@@ -25,6 +25,7 @@ import (
 	"github.com/cbroglie/mustache"
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -65,19 +66,18 @@ to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + installOperatorCmdLiteral + " called")
 
-		isLocalInstallation := flagApiOperatorFile != ""
-		if !isLocalInstallation {
-			installOLM("0.13.0")
-		}
-
 		// OLM installation requires time to install before installing the WSO2 API Operator
 		// Hence getting user inputs
 		registryUrl, repository, username, password := readInputs()
 
-		createDockerSecret(registryUrl, username, password)
-		installApiOperator(isLocalInstallation)
-		createControllerConfigs(repository, isLocalInstallation) //TODO: renuka have to configure repository
+		isLocalInstallation := flagApiOperatorFile != ""
+		if !isLocalInstallation {
+			installOLM("0.13.0")
+			installApiOperator(isLocalInstallation)
+		}
 
+		createDockerSecret(registryUrl, username, password)
+		createControllerConfigs(repository, isLocalInstallation) //TODO: renuka have to configure repository
 	},
 }
 
@@ -85,25 +85,60 @@ to quickly create a Cobra application.`,
 func installOLM(version string) {
 	utils.Logln(utils.LogPrefixInfo + "Installing OLM")
 
+	// this implements the logic in
+	// https://github.com/operator-framework/operator-lifecycle-manager/releases/download/0.13.0/install.sh
+	olmNamespace := "olm"
+	csvPhaseSuccessed := "Succeeded"
+
 	// apply OperatorHub CRDs and OLM
 	err := utils.K8sApplyFromFile(fmt.Sprintf(utils.OlmCrdUrlTemplate, version), fmt.Sprintf(utils.OlmOlmUrlTemplate, version))
 	if err != nil {
 		utils.HandleErrorAndExit("Error installing OLM", err)
 	}
+
+	if err := utils.ExecuteCommand(utils.Kubectl, "rollout", "status", "-w", "deployment/olm-operator", "-n", olmNamespace); err != nil {
+		utils.HandleErrorAndExit("Error installing OLM: Rolling out deployment OLM Operator", err)
+	}
+
+	if err := utils.ExecuteCommand(utils.Kubectl, "rollout", "status", "-w", "deployment/catalog-operator", "-n", olmNamespace); err != nil {
+		utils.HandleErrorAndExit("Error installing OLM: Rolling out deployment Catalog Operator", err)
+	}
+
+	csvPhase := ""
+	for i := 50; i > 0 && csvPhase != csvPhaseSuccessed; i-- {
+		newCsvPhase, err := utils.GetCommandOutput(utils.Kubectl, "get", "csv", "-n", olmNamespace, "packageserver", "-o", `jsonpath='{.status.phase}"`)
+		if err != nil {
+			utils.HandleErrorAndExit("Error installing OLM: Getting csv phase", err)
+		}
+
+		// only print new phase
+		if csvPhase != newCsvPhase {
+			fmt.Println("Package server phase: " + newCsvPhase)
+			csvPhase = newCsvPhase
+		}
+
+		// sleep 1 second
+		time.Sleep(1e9)
+	}
+
+	if csvPhase != csvPhaseSuccessed {
+		utils.HandleErrorAndExit("Error installing OLM: CSV Package Server failed to reach phase succeeded", nil)
+	}
 }
 
-// installApiOperator installs WSO2 api-operator
+// installApiOperator installs WSO2 api-operator from Operator-Hub
 func installApiOperator(isLocalInstallation bool) {
 	utils.Logln(utils.LogPrefixInfo + "Installing API Operator")
 	operatorFile := flagApiOperatorFile
 	if !isLocalInstallation {
+		utils.Logln(utils.LogPrefixInfo + "Installing API Operator from Operator-Hub")
 		operatorFile = utils.OperatorYamlUrl
 	}
 
 	// apply WSO2 api-operator via OperatorHub
 	err := utils.K8sApplyFromFile(operatorFile)
 	if err != nil {
-		utils.HandleErrorAndExit("Error API Operator through Operator-Hub", err)
+		utils.HandleErrorAndExit("Error installing API Operator", err)
 	}
 }
 
