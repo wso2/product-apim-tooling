@@ -3,7 +3,7 @@ general_config:
   # details for all hosted APIs. Attack tool will invoke according to these configurations
   api_host:
     protocol: https
-    ip: 10.100.8.34
+    ip: 127.0.0.1
     port: 8243
 
   # Attack tool will randomly append one of the following user agents to the request header
@@ -35,6 +35,14 @@ general_config:
     - '{"customerName": "Tom","delivered": true,"address": "customer_address","pizzaType": "customer_pizza","creditCardNumber": "customer_credit_card","quantity": 0,"orderId": "1"}'
     - '{"customerName": "John","delivered": true,"address": "customer_address","pizzaType": "customer_pizza","creditCardNumber": "customer_credit_card","quantity": 0,"orderId": "1"}'
     - '{"customerName": "Tim","delivered": true,"address": "customer_address","pizzaType": "customer_pizza","creditCardNumber": "customer_credit_card","quantity": 0,"orderId": "1"}'
+
+  # sleep patterns for simulating the attackers(time duration between the requests will be according to these patterns)
+  time_patterns:
+    pattern1: 0,0,0,2,0,0,2,2,1,0,0,0,0,0,2,3,0,0,0,1,0,0,1,0,0,1,1,0,0
+    pattern2: 0,5,1,0,6,0,2,100,10,0,0,0,3600,0,0,1,0,0,1,20,0,0,6,8,0,1,0,0,0,0,5,0,10
+    pattern3: 1,0,0,0,3,0,2,1,0,0,60,0,20,0,10,12,0,0,0,0,0,0,5,1,20,1,1,1,0,5,8,12,10,0
+    pattern4: 4,3,5,8,2,0,7,0,1500,1,1,30,20,8,2,2,2,10,15,2,2,0,16,0,90,0,11,0,2,2,2,3,2,2,5,10,0,30,20,100,150,5,0,3,30,10,10,11,5,0,30,500,0,0,0,2,60,0,10,5,3,1,2
+    pattern5: 900,3600,200
 
 # Attack specific configurations
 attacks:
