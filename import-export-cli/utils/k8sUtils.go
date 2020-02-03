@@ -51,7 +51,8 @@ func ExecuteCommandFromStdin(stdInput string, command string, args ...string) er
 // GetCommandOutput executes a command and returns the output
 func GetCommandOutput(command string, args ...string) (string, error) {
 	cmd := exec.Command(command, args...)
-	setCommandOutAndError(cmd)
+	var errBuf bytes.Buffer
+	cmd.Stderr = io.MultiWriter(os.Stderr, &errBuf)
 
 	output, err := cmd.Output()
 	return string(output), err

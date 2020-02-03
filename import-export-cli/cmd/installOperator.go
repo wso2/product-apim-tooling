@@ -23,7 +23,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/cbroglie/mustache"
+	"github.com/heroku/docker-registry-client/registry"
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
+	"gopkg.in/yaml.v2"
+	"regexp"
 	"strings"
 	"time"
 
@@ -39,19 +42,6 @@ var flagApiOperatorFile string
 //var flagUsername string
 //var flagPassword string
 //var flagBatchMod bool
-
-// These types define authorization credentials for docker-config
-// Credential represents a credential for a docker registry
-type Credential struct {
-	Auth     string `json:"auth"`
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-// Auth represents list of docker registries with credentials
-type Auth struct {
-	Auths map[string]Credential `json:"auths"`
-}
 
 // installOperatorCmd represents the installOperator command
 var installOperatorCmd = &cobra.Command{
@@ -69,7 +59,6 @@ to quickly create a Cobra application.`,
 		// OLM installation requires time to install before installing the WSO2 API Operator
 		// Hence getting user inputs
 		registryUrl, repository, username, password := readInputs()
-
 		isLocalInstallation := flagApiOperatorFile != ""
 		if !isLocalInstallation {
 			installOLM("0.13.0")
@@ -96,17 +85,18 @@ func installOLM(version string) {
 		utils.HandleErrorAndExit("Error installing OLM", err)
 	}
 
+	// rolling out
 	if err := utils.ExecuteCommand(utils.Kubectl, utils.K8sRollOut, "status", "-w", "deployment/olm-operator", "-n", olmNamespace); err != nil {
 		utils.HandleErrorAndExit("Error installing OLM: Rolling out deployment OLM Operator", err)
 	}
-
 	if err := utils.ExecuteCommand(utils.Kubectl, utils.K8sRollOut, "status", "-w", "deployment/catalog-operator", "-n", olmNamespace); err != nil {
 		utils.HandleErrorAndExit("Error installing OLM: Rolling out deployment Catalog Operator", err)
 	}
 
+	// wait max 50s to csv phase to be succeeded
 	csvPhase := ""
 	for i := 50; i > 0 && csvPhase != csvPhaseSuccessed; i-- {
-		newCsvPhase, err := utils.GetCommandOutput(utils.Kubectl, utils.K8sGet, utils.K8sCsv, "-n", olmNamespace, "packageserver", "-o", `jsonpath='{.status.phase}"`)
+		newCsvPhase, err := utils.GetCommandOutput(utils.Kubectl, utils.K8sGet, utils.K8sCsv, "-n", olmNamespace, "packageserver", "-o", `jsonpath={.status.phase}`)
 		if err != nil {
 			utils.HandleErrorAndExit("Error installing OLM: Getting csv phase", err)
 		}
@@ -140,18 +130,21 @@ func installApiOperatorOperatorHub() {
 // createDockerSecret creates K8S secret with credentials for docker registry
 func createDockerSecret(registryUrl string, username string, password string) {
 	encodedCredential := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
-	auth := Auth{Auths: map[string]Credential{registryUrl: {
-		Auth:     encodedCredential,
-		Username: username,
-		Password: password,
-	}}}
-
+	auth := map[string]map[string]map[string]string{
+		"auths": {
+			registryUrl: {
+				"auth":     encodedCredential,
+				"username": username,
+				"password": password,
+			},
+		},
+	}
 	authJsonByte, err := json.Marshal(auth)
 	if err != nil {
 		utils.HandleErrorAndExit("Error marshalling docker secret credentials ", err)
 	}
-	encodedAuthJson := base64.StdEncoding.EncodeToString(authJsonByte)
 
+	encodedAuthJson := base64.StdEncoding.EncodeToString(authJsonByte)
 	secretTemplate, _ := box.Get("/kubernetes_resources/registry_secret_mustache.yaml")
 	secretYaml, err := mustache.Render(string(secretTemplate), map[string]string{
 		"encodedJson": encodedAuthJson,
@@ -168,35 +161,35 @@ func createDockerSecret(registryUrl string, username string, password string) {
 
 // createControllerConfigs downloads the mustache, replaces repository value and creates the config: `controller-config`
 func createControllerConfigs(repository string, isLocalInstallation bool) {
-	var mustacheTemplate string
+	utils.Logln(utils.LogPrefixInfo + "Installing controller configs")
+	configFile := flagApiOperatorFile
 
 	if !isLocalInstallation {
-		utils.Logln(utils.LogPrefixInfo + "Installing controller configs")
-
 		// TODO: renuka replace this url (configuration?)
-		mustacheGistUrl := `https://gist.githubusercontent.com/renuka-fernando/6d6c64c786e6d13742e802534de3da4e/raw/d6191bc60f3bae659749e9db5f882bef6d1d062a/controller_conf.yaml`
-		templateBytes, err := utils.ReadFromUrl(mustacheGistUrl)
-		if err != nil {
-			utils.HandleErrorAndExit("Error reading controller-configs from server", err)
-		}
-		mustacheTemplate = string(templateBytes)
-	} else {
-		utils.Logln(utils.LogPrefixInfo + "Installing API operator from local file and create controller configs")
-
-		// read from local file
-		// TODO: renuka read from file
-		mustacheTemplate = ""
+		configFile = `https://gist.githubusercontent.com/renuka-fernando/6d6c64c786e6d13742e802534de3da4e/raw/3a654b9f54d1115532ca757c108b98bff09bcd74/controller_conf.yaml`
 	}
 
-	k8sConfigs, err := mustache.Render(mustacheTemplate, map[string]string{
-		"usernameDockerRegistry": repository,
-	})
+	if err := utils.K8sApplyFromFile(configFile); err != nil {
+		utils.HandleErrorAndExit("Error creating configurations", err)
+	}
+
+	controllerConfigMapYaml, err := utils.GetCommandOutput(utils.Kubectl, utils.K8sGet, "cm", "controller-config", "-n", "wso2-system", "-o", "yaml")
 	if err != nil {
-		utils.HandleErrorAndExit("Error rendering controller-configs", err)
+		utils.HandleErrorAndExit("Error reading controller-config", err)
 	}
 
-	// apply created secret yaml file
-	if err := utils.K8sApplyFromStdin(k8sConfigs); err != nil {
+	controllerConfigMap := make(map[interface{}]interface{})
+	if err := yaml.Unmarshal([]byte(controllerConfigMapYaml), &controllerConfigMap); err != nil {
+		utils.HandleErrorAndExit("Error reading controller-config", err)
+	}
+	controllerConfigMap["data"].(map[interface{}]interface{})["dockerRegistry"] = repository
+
+	configuredConfigMap, err := yaml.Marshal(controllerConfigMap)
+	if err != nil {
+		utils.HandleErrorAndExit("Error rendering controller-config", err)
+	}
+
+	if err := utils.K8sApplyFromStdin(string(configuredConfigMap)); err != nil {
 		utils.HandleErrorAndExit("Error creating controller-configs", err)
 	}
 }
@@ -211,12 +204,12 @@ func readInputs() (string, string, string, string) {
 	var err error
 
 	for !isConfirm {
-		registryUrl, err = utils.ReadInputString("Enter Docker-Registry URL", utils.DockerRegistryUrl, utils.UrlValidationRegex, true)
+		registryUrl, err = utils.ReadInputString("Enter Docker-Registry URL", utils.DockerRegistryUrl, "", true)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading Docker-Registry URL", err)
 		}
 
-		repository, err = utils.ReadInputString("Enter Repository Name", "", utils.UsernameValidationRegex, true)
+		repository, err = utils.ReadInputString("Enter Repository Name", "docker.io/library", utils.UsernameValidationRegex, true)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading Repository Name", err)
 		}
@@ -229,6 +222,11 @@ func readInputs() (string, string, string, string) {
 		password, err = utils.ReadPassword("Enter Password")
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading Password", err)
+		}
+
+		isCredentialsValid, err := validateDockerRegistry(registryUrl, repository, username, password)
+		if !isCredentialsValid {
+			utils.HandleErrorAndExit("Error connecting to Docker Registry", err)
 		}
 
 		fmt.Println("")
@@ -246,6 +244,19 @@ func readInputs() (string, string, string, string) {
 	}
 
 	return registryUrl, repository, username, password
+}
+
+func validateDockerRegistry(registryUrl string, repository string, username string, password string) (bool, error) {
+	// remove version tag if exists
+	regExpString := `\/v[\d.-]*\/?$`
+	regExp := regexp.MustCompile(regExpString)
+	registryUrl = regExp.ReplaceAllString(registryUrl, "")
+
+	_, err := registry.New(registryUrl+"/"+repository, username, password)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 // init using Cobra
