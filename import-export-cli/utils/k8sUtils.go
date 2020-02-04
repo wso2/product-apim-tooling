@@ -29,6 +29,13 @@ func ExecuteCommand(command string, args ...string) error {
 	return cmd.Run()
 }
 
+// ExecuteCommandWithoutPrintingErrors executes the command with args and prints output, standard output
+func ExecuteCommandWithoutPrintingErrors(command string, args ...string) error {
+	cmd := exec.Command(command, args...)
+	setCommandOutOnly(cmd)
+	return cmd.Run()
+}
+
 // ExecuteCommandFromStdin executes the command with args and prints output the standard output
 func ExecuteCommandFromStdin(stdInput string, command string, args ...string) error {
 	cmd := exec.Command(command, args...)
@@ -62,5 +69,11 @@ func GetCommandOutput(command string, args ...string) (string, error) {
 func setCommandOutAndError(cmd *exec.Cmd) {
 	var errBuf, outBuf bytes.Buffer
 	cmd.Stderr = io.MultiWriter(os.Stderr, &errBuf)
+	cmd.Stdout = io.MultiWriter(os.Stdout, &outBuf)
+}
+
+// setCommandOutOnly sets the output the command cmd to the standard output and not sets the error
+func setCommandOutOnly(cmd *exec.Cmd) {
+	var outBuf bytes.Buffer
 	cmd.Stdout = io.MultiWriter(os.Stdout, &outBuf)
 }

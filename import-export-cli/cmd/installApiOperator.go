@@ -23,10 +23,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/cbroglie/mustache"
-	"github.com/heroku/docker-registry-client/registry"
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
 	"gopkg.in/yaml.v2"
-	"regexp"
 	"strings"
 	"time"
 
@@ -34,7 +32,7 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-const installOperatorCmdLiteral = "operator"
+const installApiOperatorCmdLiteral = "api-operator"
 
 var flagApiOperatorFile string
 
@@ -43,9 +41,9 @@ var flagApiOperatorFile string
 //var flagPassword string
 //var flagBatchMod bool
 
-// installOperatorCmd represents the installOperator command
-var installOperatorCmd = &cobra.Command{
-	Use:   installOperatorCmdLiteral,
+// installApiOperatorCmd represents the install api-operator command
+var installApiOperatorCmd = &cobra.Command{
+	Use:   installApiOperatorCmdLiteral,
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
@@ -54,14 +52,14 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + installOperatorCmdLiteral + " called")
+		utils.Logln(utils.LogPrefixInfo + installApiOperatorCmdLiteral + " called")
 
 		// OLM installation requires time to install before installing the WSO2 API Operator
 		// Hence getting user inputs
 		registryUrl, repository, username, password := readInputs()
 		isLocalInstallation := flagApiOperatorFile != ""
 		if !isLocalInstallation {
-			installOLM("0.13.0")
+			installOLM(utils.OlmVersion)
 			installApiOperatorOperatorHub()
 		}
 
@@ -96,7 +94,7 @@ func installOLM(version string) {
 	// wait max 50s to csv phase to be succeeded
 	csvPhase := ""
 	for i := 50; i > 0 && csvPhase != csvPhaseSuccessed; i-- {
-		newCsvPhase, err := utils.GetCommandOutput(utils.Kubectl, utils.K8sGet, utils.K8sCsv, "-n", olmNamespace, "packageserver", "-o", `jsonpath={.status.phase}`)
+		newCsvPhase, err := utils.GetCommandOutput(utils.Kubectl, utils.K8sGet, utils.OperatorCsv, "-n", olmNamespace, "packageserver", "-o", `jsonpath={.status.phase}`)
 		if err != nil {
 			utils.HandleErrorAndExit("Error installing OLM: Getting csv phase", err)
 		}
@@ -162,6 +160,7 @@ func createDockerSecret(registryUrl string, username string, password string) {
 // createControllerConfigs downloads the mustache, replaces repository value and creates the config: `controller-config`
 func createControllerConfigs(repository string, isLocalInstallation bool) {
 	utils.Logln(utils.LogPrefixInfo + "Installing controller configs")
+	fmt.Println("Installing controller configurations...")
 	configFile := flagApiOperatorFile
 
 	if !isLocalInstallation {
@@ -169,26 +168,47 @@ func createControllerConfigs(repository string, isLocalInstallation bool) {
 		configFile = `https://gist.githubusercontent.com/renuka-fernando/6d6c64c786e6d13742e802534de3da4e/raw/3a654b9f54d1115532ca757c108b98bff09bcd74/controller_conf.yaml`
 	}
 
-	if err := utils.K8sApplyFromFile(configFile); err != nil {
-		utils.HandleErrorAndExit("Error creating configurations", err)
+	// apply all files without printing errors
+	if err := utils.ExecuteCommandWithoutPrintingErrors(utils.Kubectl, utils.K8sApply, "-f", configFile); err != nil {
+		fmt.Println("Installing controller configurations...")
+
+		// if error then wait for namespace and the resource type security
+		for i := 20; i > 0; i-- {
+			if err := utils.ExecuteCommand(utils.Kubectl, utils.K8sGet, "securities.wso2.com"); err == nil {
+				break
+			}
+
+			time.Sleep(1e9) // sleep 1 second
+		}
+
+		// apply again with printing errors
+		if err := utils.K8sApplyFromFile(configFile); err != nil {
+			utils.HandleErrorAndExit("Error creating configurations", err)
+		}
 	}
 
-	controllerConfigMapYaml, err := utils.GetCommandOutput(utils.Kubectl, utils.K8sGet, "cm", "controller-config", "-n", "wso2-system", "-o", "yaml")
+	// get controller config config map
+	controllerConfigMapYaml, err := utils.GetCommandOutput(
+		utils.Kubectl, utils.K8sGet, "cm", utils.ApiOpControllerConfigMap,
+		"-n", utils.ApiOpWso2Namespace,
+		"-o", "yaml",
+	)
 	if err != nil {
 		utils.HandleErrorAndExit("Error reading controller-config", err)
 	}
 
+	// replace registry
 	controllerConfigMap := make(map[interface{}]interface{})
 	if err := yaml.Unmarshal([]byte(controllerConfigMapYaml), &controllerConfigMap); err != nil {
 		utils.HandleErrorAndExit("Error reading controller-config", err)
 	}
 	controllerConfigMap["data"].(map[interface{}]interface{})["dockerRegistry"] = repository
-
 	configuredConfigMap, err := yaml.Marshal(controllerConfigMap)
 	if err != nil {
 		utils.HandleErrorAndExit("Error rendering controller-config", err)
 	}
 
+	// apply controller config config map back
 	if err := utils.K8sApplyFromStdin(string(configuredConfigMap)); err != nil {
 		utils.HandleErrorAndExit("Error creating controller-configs", err)
 	}
@@ -209,7 +229,7 @@ func readInputs() (string, string, string, string) {
 			utils.HandleErrorAndExit("Error reading Docker-Registry URL", err)
 		}
 
-		repository, err = utils.ReadInputString("Enter Repository Name", "docker.io/library", utils.UsernameValidationRegex, true)
+		repository, err = utils.ReadInputString("Enter Repository Name", "", utils.UsernameValidationRegex, true)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading Repository Name", err)
 		}
@@ -226,7 +246,7 @@ func readInputs() (string, string, string, string) {
 
 		isCredentialsValid, err := validateDockerRegistry(registryUrl, repository, username, password)
 		if !isCredentialsValid {
-			utils.HandleErrorAndExit("Error connecting to Docker Registry", err)
+			utils.HandleErrorAndExit("Error connecting to Docker Registry repository using credentials", err)
 		}
 
 		fmt.Println("")
@@ -246,25 +266,31 @@ func readInputs() (string, string, string, string) {
 	return registryUrl, repository, username, password
 }
 
+// validateDockerRegistry validates the credentials against registry url and repository
 func validateDockerRegistry(registryUrl string, repository string, username string, password string) (bool, error) {
 	// remove version tag if exists
-	regExpString := `\/v[\d.-]*\/?$`
-	regExp := regexp.MustCompile(regExpString)
-	registryUrl = regExp.ReplaceAllString(registryUrl, "")
+	//regExpString := `\/v[\d.-]*\/?$`
+	//regExp := regexp.MustCompile(regExpString)
+	//registryUrl = regExp.ReplaceAllString(registryUrl, "")
+	//
+	//hub, err := registry.New(registryUrl, username, password)
+	//if err != nil {
+	//	return false, err
+	//}
+	//
+	//if _, err := hub.Repositories(); err != nil {
+	//	return false, err
+	//}
 
-	_, err := registry.New(registryUrl+"/"+repository, username, password)
-	if err != nil {
-		return false, err
-	}
 	return true, nil
 }
 
 // init using Cobra
 func init() {
-	installCmd.AddCommand(installOperatorCmd)
-	installOperatorCmd.Flags().StringVarP(&flagApiOperatorFile, "from-file", "f", "", "Path to API Operator directory")
-	//installOperatorCmd.Flags().StringVarP(&flagRegistryHost, "registry-host", "h", "", "URL of the registry host")
-	//installOperatorCmd.Flags().StringVarP(&flagUsername, "username", "u", "", "Username for the registry repository")
-	//installOperatorCmd.Flags().StringVarP(&flagPassword, "password", "p", "", "Password for the registry repository user")
-	//installOperatorCmd.Flags().BoolVarP(&flagBatchMod, "batch-mod", "B", false, "Run in non-interactive (batch) mode")
+	installCmd.AddCommand(installApiOperatorCmd)
+	installApiOperatorCmd.Flags().StringVarP(&flagApiOperatorFile, "from-file", "f", "", "Path to API Operator directory")
+	//installApiOperatorCmd.Flags().StringVarP(&flagRegistryHost, "registry-host", "h", "", "URL of the registry host")
+	//installApiOperatorCmd.Flags().StringVarP(&flagUsername, "username", "u", "", "Username for the registry repository")
+	//installApiOperatorCmd.Flags().StringVarP(&flagPassword, "password", "p", "", "Password for the registry repository user")
+	//installApiOperatorCmd.Flags().BoolVarP(&flagBatchMod, "batch-mod", "B", false, "Run in non-interactive (batch) mode")
 }

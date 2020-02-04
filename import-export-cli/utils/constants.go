@@ -91,9 +91,13 @@ const DefaultKubernetesMode = false
 const Kubectl = "kubectl"
 const Create = "create"
 const K8sApply = "apply"
+const K8sDelete = "delete"
 const K8sRollOut = "rollout"
 const K8sGet = "get"
-const K8sCsv = "csv"
+
+// WSO2 API Operator constats
+const ApiOpControllerConfigMap = "controller-config"
+const ApiOpWso2Namespace = "wso2-system"
 
 // Regex Validation
 const UsernameValidationRegex = `^[\w\d\-]+$`
@@ -103,7 +107,9 @@ const UrlValidationRegex = `^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/
 const OlmCrdUrlTemplate = "https://github.com/operator-framework/operator-lifecycle-manager/releases/download/%s/crds.yaml"
 const OlmOlmUrlTemplate = "https://github.com/operator-framework/operator-lifecycle-manager/releases/download/%s/olm.yaml"
 const OperatorYamlUrl = "https://operatorhub.io/install/api-operator.yaml"
-const DockerRegistryUrl = "https://index.docker.io/v1/"
+const DockerRegistryUrl = "https://index.docker.io/v2/"
+const OperatorCsv = "csv"
+const OlmVersion = "0.13.0"
 
 // Other
 const DefaultTokenValidityPeriod = "3600"
