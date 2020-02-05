@@ -111,7 +111,7 @@ var addApiCmd = &cobra.Command{
 				createAPI(flagApiName, flagNamespace, configMapName, flagReplicas, "", interceptorsConfName, flagOverride)
 			}
 		} else {
-			utils.HandleErrorAndExit("set mode to kubernetes with command - apictl set-mode kubernetes ",
+			utils.HandleErrorAndExit("set mode to kubernetes with command: apictl set --mode kubernetes",
 				errors.New("mode should be set to kubernetes"))
 		}
 
