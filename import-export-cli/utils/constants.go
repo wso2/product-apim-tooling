@@ -98,6 +98,10 @@ const K8sGet = "get"
 // WSO2 API Operator constats
 const ApiOpControllerConfigMap = "controller-config"
 const ApiOpWso2Namespace = "wso2-system"
+const ApiOpCrdApi = "apis.wso2.com"
+const ApiOpCrdRateLimiting = "ratelimitings.wso2.com"
+const ApiOpCrdSecurity = "securities.wso2.com"
+const ApiOpCrdTargetEndpoint = "targetendpoints.wso2.com"
 
 // Regex Validation
 const UsernameValidationRegex = `^[\w\d\-]+$`

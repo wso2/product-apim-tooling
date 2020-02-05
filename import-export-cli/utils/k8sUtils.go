@@ -2,10 +2,37 @@ package utils
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"os"
 	"os/exec"
+	"time"
 )
+
+func K8sWaitForResourceType(maxTimeSec int, resourceTypes ...string) error {
+	if maxTimeSec < 0 {
+		return errors.New("'maxTimeSec' should be non negative")
+	}
+
+	noErrors := false
+	for i := maxTimeSec; i > 0 && !noErrors; i-- {
+		for _, resourceType := range resourceTypes {
+			noErrors = true
+			if err := ExecuteCommandWithoutPrintingErrors(Kubectl, K8sGet, resourceType); err != nil {
+				noErrors = false
+				continue
+			}
+		}
+
+		time.Sleep(1e9) // sleep 1 second
+	}
+
+	if !noErrors {
+		return errors.New("kubernetes resources not installed")
+	}
+
+	return nil
+}
 
 // K8sApplyFromFile applies resources from list of files, urls or directories
 func K8sApplyFromFile(fileList ...string) error {

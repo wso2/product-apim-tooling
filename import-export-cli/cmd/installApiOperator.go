@@ -77,9 +77,18 @@ func installOLM(version string) {
 	olmNamespace := "olm"
 	csvPhaseSuccessed := "Succeeded"
 
-	// apply OperatorHub CRDs and OLM
-	err := utils.K8sApplyFromFile(fmt.Sprintf(utils.OlmCrdUrlTemplate, version), fmt.Sprintf(utils.OlmOlmUrlTemplate, version))
-	if err != nil {
+	// apply OperatorHub CRDs
+	if err := utils.K8sApplyFromFile(fmt.Sprintf(utils.OlmCrdUrlTemplate, version)); err != nil {
+		utils.HandleErrorAndExit("Error installing OLM", err)
+	}
+
+	// wait for OperatorHub CRDs
+	if err := utils.K8sWaitForResourceType(10, "clusterserviceversions.operators.coreos.com", "catalogsources.operators.coreos.com", "operatorgroups.operators.coreos.com"); err != nil {
+		utils.HandleErrorAndExit("Error installing OLM", err)
+	}
+
+	// apply OperatorHub OLM
+	if err := utils.K8sApplyFromFile(fmt.Sprintf(utils.OlmOlmUrlTemplate, version)); err != nil {
 		utils.HandleErrorAndExit("Error installing OLM", err)
 	}
 
@@ -173,13 +182,7 @@ func createControllerConfigs(repository string, isLocalInstallation bool) {
 		fmt.Println("Installing controller configurations...")
 
 		// if error then wait for namespace and the resource type security
-		for i := 20; i > 0; i-- {
-			if err := utils.ExecuteCommand(utils.Kubectl, utils.K8sGet, "securities.wso2.com"); err == nil {
-				break
-			}
-
-			time.Sleep(1e9) // sleep 1 second
-		}
+		_ = utils.K8sWaitForResourceType(20, utils.ApiOpCrdSecurity)
 
 		// apply again with printing errors
 		if err := utils.K8sApplyFromFile(configFile); err != nil {
