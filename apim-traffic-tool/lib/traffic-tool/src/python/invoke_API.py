@@ -21,6 +21,7 @@ import pickle
 import random
 import sys
 import time
+from collections import defaultdict
 from datetime import datetime
 from multiprocessing import Process, Value
 
@@ -70,7 +71,23 @@ def loadConfig():
     with open(abs_path + '/../../data/access_pattern/invoke_patterns.yaml') as pattern_file:
         invoke_patterns = yaml.load(pattern_file, Loader=yaml.FullLoader)
 
-    time_patterns = invoke_patterns['time_patterns']
+    time_patterns = process_time_patterns(invoke_patterns['time_patterns'])
+
+
+def process_time_patterns(patterns: dict) -> defaultdict:
+    """
+    Process time patterns to obtain mean and standard deviation to be used with distributions.
+    :param patterns: Patterns dictionary.
+    :return: Dictionary with mean and std for each pattern.
+    """
+    processed_patterns = defaultdict()
+
+    for key, pattern in patterns.items():
+        pattern = list(map(int, pattern.split(',')))
+        mean = np.mean(pattern)
+        std = np.std(pattern)
+        processed_patterns[key] = {'mean': mean, 'std': std}
+    return processed_patterns
 
 
 def log(tag, write_string):
@@ -152,8 +169,8 @@ def sendRequest(url_protocol, url_ip, url_port, path, access_token, method, user
             code = '400'
             res_txt = 'Invalid type'
 
-    except Exception as e:
-        log("ERROR", str(e))
+    except Exception as err:
+        log("ERROR", str(err))
         code = '521'
 
     # user agent is wrapped around quotes because there are commas in the user agent and they clash with the commas in csv file
@@ -178,7 +195,6 @@ def runInvoker(user_scenario, connection_refuse_count):
     global script_start_time, script_runtime
 
     appNames = list(user_scenario.keys())
-    it = 0
 
     while True:
         app_name = appNames[random.randint(0, len(appNames) - 1)]
@@ -226,24 +242,18 @@ def runInvoker(user_scenario, connection_refuse_count):
             if time_pattern is None:
                 time_pattern = scenario[8]
                 time_pattern = time_patterns.get(time_pattern)
-                if type(time_pattern) is str:
-                    time_pattern = [int(t) for t in time_pattern.split(',')]
-                else:
-                    time_pattern = [time_pattern]
 
             # send the request
             try:
+                if heavy_traffic != 'true':
+                    sleep_time = np.absolute(np.random.normal(time_pattern['mean'], time_pattern['std']))
+                    time.sleep(sleep_time)
                 res_code, res_txt = sendRequest(host_protocol, host_ip, host_port, path, access_token, method, user_ip, cookie, user_agent)
                 if res_code == '521':
                     connection_refuse_count.value += 1
-                if heavy_traffic != 'true':
-                    sleep_time_mean = int(time_pattern[it % len(time_pattern)])
-                    sleep_time_std = 5
-                    sleep_time = np.absolute(np.random.normal(sleep_time_mean, sleep_time_std))
-                    time.sleep(sleep_time)
-                it += 1
-            except Exception as e:
-                log('ERROR', str(e))
+
+            except Exception as err:
+                log('ERROR', str(err))
                 connection_refuse_count.value += 1
 
         up_time = datetime.now() - script_start_time
