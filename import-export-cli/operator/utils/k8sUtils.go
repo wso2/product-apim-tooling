@@ -1,8 +1,27 @@
+/*
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*  WSO2 Inc. licenses this file to you under the Apache License,
+*  Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+ */
+
 package utils
 
 import (
 	"bytes"
 	"errors"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"io"
 	"os"
 	"os/exec"
@@ -18,7 +37,7 @@ func K8sWaitForResourceType(maxTimeSec int, resourceTypes ...string) error {
 	for i := maxTimeSec; i > 0 && !noErrors; i-- {
 		for _, resourceType := range resourceTypes {
 			noErrors = true
-			if err := ExecuteCommandWithoutPrintingErrors(Kubectl, K8sGet, resourceType); err != nil {
+			if err := ExecuteCommandWithoutPrintingErrors(utils.Kubectl, utils.K8sGet, resourceType); err != nil {
 				noErrors = false
 				continue
 			}
@@ -36,17 +55,17 @@ func K8sWaitForResourceType(maxTimeSec int, resourceTypes ...string) error {
 
 // K8sApplyFromFile applies resources from list of files, urls or directories
 func K8sApplyFromFile(fileList ...string) error {
-	kubectlArgs := []string{K8sApply}
+	kubectlArgs := []string{utils.K8sApply}
 	for _, file := range fileList {
 		kubectlArgs = append(kubectlArgs, "-f", file)
 	}
 
-	return ExecuteCommand(Kubectl, kubectlArgs...)
+	return ExecuteCommand(utils.Kubectl, kubectlArgs...)
 }
 
 // K8sApplyFromStdin applies resources from standard input
 func K8sApplyFromStdin(stdInput string) error {
-	return ExecuteCommandFromStdin(stdInput, Kubectl, K8sApply, "-f", "-")
+	return ExecuteCommandFromStdin(stdInput, utils.Kubectl, utils.K8sApply, "-f", "-")
 }
 
 // ExecuteCommand executes the command with args and prints output, errors in standard output, error

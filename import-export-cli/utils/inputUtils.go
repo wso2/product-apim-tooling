@@ -1,3 +1,21 @@
+/*
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*  WSO2 Inc. licenses this file to you under the Apache License,
+*  Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+ */
+
 package utils
 
 import (
@@ -7,19 +25,42 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"syscall"
 )
 
 // ReadInputString reads input from user with prompting printText and validating against regex: validRegex
 func ReadInputString(printText string, defaultVal string, validRegex string, retryOnInvalid bool) (string, error) {
+	validate := func(value string) bool {
+		reg := regexp.MustCompile(validRegex)
+		return reg.MatchString(value)
+	}
+
+	return readInput(printText, defaultVal, validate, retryOnInvalid)
+}
+
+// ReadOption reads an option from user
+func ReadOption(printText string, defaultVal int, maxValue int, retryOnInvalid bool) (int, error) {
+	validate := func(value string) bool {
+		option, _ := strconv.Atoi(value)
+		return option > 0 && option <= maxValue
+	}
+
+	optionStr, err := readInput(printText, strconv.Itoa(defaultVal), validate, retryOnInvalid)
+	if err != nil {
+		return 0, err
+	}
+
+	return strconv.Atoi(optionStr)
+}
+
+// readInput reads input from user with prompting printText
+func readInput(printText string, defaultVal string, validate func(value string) bool, retryOnInvalid bool) (string, error) {
 	retry := true
 	value := ""
 	reader := bufio.NewReader(os.Stdin)
-	text := printText + ": "
-	if defaultVal != "" {
-		text += defaultVal + ": "
-	}
+	text := fmt.Sprintf("%s: %s: ", printText, defaultVal)
 
 	for retry {
 		fmt.Print(text)
@@ -34,8 +75,7 @@ func ReadInputString(printText string, defaultVal string, validRegex string, ret
 			return defaultVal, nil
 		}
 
-		reg := regexp.MustCompile(validRegex)
-		isValid := reg.MatchString(value)
+		isValid := validate(value)
 		if !retryOnInvalid && !isValid {
 			return value, errors.New("input validation failed")
 		}

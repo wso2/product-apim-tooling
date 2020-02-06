@@ -104,8 +104,9 @@ const ApiOpCrdSecurity = "securities.wso2.com"
 const ApiOpCrdTargetEndpoint = "targetendpoints.wso2.com"
 
 // Regex Validation
-const UsernameValidationRegex = `^[\w\d\-]+$`
-const UrlValidationRegex = `^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$`
+const UsernameValidRegex = `^[\w\d\-]+$`
+const PositiveNoValidRegex = `^[1-9]\d*$`
+const UrlValidRegex = `^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$`
 
 // Operator Hub Constants
 const OlmCrdUrlTemplate = "https://github.com/operator-framework/operator-lifecycle-manager/releases/download/%s/crds.yaml"
