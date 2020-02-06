@@ -177,3 +177,20 @@ def generate_method_invoke_pattern(app):
 def cleanup(process_list):
     for p in process_list:
         p.terminate()
+
+
+def process_time_patterns(patterns: dict) -> defaultdict:
+    """
+    Process time patterns to obtain mean and standard deviation to be used with distributions.
+    :param patterns: Patterns dictionary.
+    :return: Dictionary with mean and std for each pattern.
+    """
+    processed_patterns = defaultdict()
+
+    for key, pattern in patterns.items():
+        pattern = list(map(int, pattern.split(',')))
+        mean = np.mean(pattern)
+        std = np.std(pattern)
+        processed_patterns[key] = {'mean': mean, 'std': std}
+    return processed_patterns
+
