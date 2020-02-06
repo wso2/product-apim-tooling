@@ -21,18 +21,19 @@ package registry
 import (
 	"errors"
 	"fmt"
-	utils2 "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
+	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"gopkg.in/yaml.v2"
 	"sort"
 )
 
 type Registry struct {
-	Name    string
-	Caption string
-	Option  int
-	Read    func()
-	Run     func()
+	Name       string
+	Caption    string
+	Repository *string
+	Option     int
+	Read       func()
+	Run        func()
 }
 
 var registries = make(map[int]*Registry)
@@ -43,6 +44,9 @@ func ReadInputs() {
 }
 
 func CreateSecret() {
+	// set registry first since this can throw error if api operator not installed. If error occur no need to rollback secret.
+	updateCtrlConfig(registries[optionToExec].Name, *registries[optionToExec].Repository)
+	// create secret
 	registries[optionToExec].Run()
 }
 
@@ -67,10 +71,10 @@ func ChooseRegistry() {
 	optionToExec = option
 }
 
-// setRegistryRepositoryOnControllerConfig sets the repository value in the config: `controller-config`
-func setRegistryRepositoryOnControllerConfig(repository string) {
+// updateCtrlConfig sets the repository type value and the repository in the config: `controller-config`
+func updateCtrlConfig(registryType string, repository string) {
 	// get controller config config map
-	controllerConfigMapYaml, err := utils2.GetCommandOutput(
+	controllerConfigMapYaml, err := k8sUtils.GetCommandOutput(
 		utils.Kubectl, utils.K8sGet, "cm", utils.ApiOpControllerConfigMap,
 		"-n", utils.ApiOpWso2Namespace,
 		"-o", "yaml",
@@ -80,20 +84,21 @@ func setRegistryRepositoryOnControllerConfig(repository string) {
 			errors.New("error reading controller-config"))
 	}
 
-	// replace registry
 	controllerConfigMap := make(map[interface{}]interface{})
 	if err := yaml.Unmarshal([]byte(controllerConfigMapYaml), &controllerConfigMap); err != nil {
 		utils.HandleErrorAndExit("Error reading controller-config", err)
 	}
 
-	controllerConfigMap["data"].(map[interface{}]interface{})["dockerRegistry"] = repository
+	// replace configs
+	controllerConfigMap["data"].(map[interface{}]interface{})[k8sUtils.CtrlConfigRegType] = registryType
+	controllerConfigMap["data"].(map[interface{}]interface{})[k8sUtils.CtrlConfigReg] = repository
 	configuredConfigMap, err := yaml.Marshal(controllerConfigMap)
 	if err != nil {
 		utils.HandleErrorAndExit("Error rendering controller-config", err)
 	}
 
 	// apply controller config config map back
-	if err := utils2.K8sApplyFromStdin(string(configuredConfigMap)); err != nil {
+	if err := k8sUtils.K8sApplyFromStdin(string(configuredConfigMap)); err != nil {
 		utils.HandleErrorAndExit("Error creating controller-configs", err)
 	}
 }

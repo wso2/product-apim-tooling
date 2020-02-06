@@ -139,8 +139,7 @@ func createControllerConfigs(isLocalInstallation bool) {
 	configFile := flagApiOperatorFile
 
 	if !isLocalInstallation {
-		// TODO: renuka replace this url (configuration?)
-		configFile = `https://gist.githubusercontent.com/renuka-fernando/6d6c64c786e6d13742e802534de3da4e/raw/3a654b9f54d1115532ca757c108b98bff09bcd74/controller_conf.yaml`
+		configFile = k8sUtils.OperatorConfigFileUrl
 	}
 
 	// apply all files without printing errors

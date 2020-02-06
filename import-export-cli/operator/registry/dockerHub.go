@@ -31,6 +31,10 @@ import (
 	"strings"
 )
 
+const DockerRegistryUrl = "https://index.docker.io/v1/"
+
+var dockerRepo = new(string)
+
 var dockerHubValues = struct {
 	repository string
 	username   string
@@ -38,18 +42,18 @@ var dockerHubValues = struct {
 }{}
 
 var DockerHubRegistry = &Registry{
-	Name:    "DOCKER_HUB",
-	Caption: "Docker Hub",
-	Option:  1,
+	Name:       "DOCKER_HUB",
+	Caption:    "Docker Hub",
+	Repository: dockerRepo,
+	Option:     1,
 	Read: func() {
 		repository, username, password := readDockerHubInputs()
+		*dockerRepo = repository
 		dockerHubValues.repository = repository
 		dockerHubValues.username = username
 		dockerHubValues.password = password
 	},
 	Run: func() {
-		// set registry first since this can throw error if api operator not installed. If error occur no need to rollback secret.
-		setRegistryRepositoryOnControllerConfig(dockerHubValues.repository)
 		createDockerSecret(dockerHubValues.username, dockerHubValues.password)
 		dockerHubValues.password = "" // clear password
 	},
@@ -90,7 +94,7 @@ func readDockerHubInputs() (string, string, string) {
 
 		fmt.Println("")
 		fmt.Println("Repository: " + repository)
-		fmt.Println("Username           : " + username)
+		fmt.Println("Username  : " + username)
 
 		isConfirmStr, err := utils.ReadInputString("Confirm configurations", "Y", "", false)
 		if err != nil {
@@ -122,10 +126,9 @@ func validateDockerHubCredentials(repository string, username string, password s
 func createDockerSecret(username string, password string) {
 	encodedCredential := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
 
-	registryUrl := utils.DockerRegistryUrl
 	auth := map[string]map[string]map[string]string{
 		"auths": {
-			registryUrl: {
+			DockerRegistryUrl: {
 				"auth":     encodedCredential,
 				"username": username,
 				"password": password,

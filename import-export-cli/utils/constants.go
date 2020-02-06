@@ -112,7 +112,6 @@ const UrlValidRegex = `^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]
 const OlmCrdUrlTemplate = "https://github.com/operator-framework/operator-lifecycle-manager/releases/download/%s/crds.yaml"
 const OlmOlmUrlTemplate = "https://github.com/operator-framework/operator-lifecycle-manager/releases/download/%s/olm.yaml"
 const OperatorYamlUrl = "https://operatorhub.io/install/api-operator.yaml"
-const DockerRegistryUrl = "https://index.docker.io/v2/"
 const OperatorCsv = "csv"
 const OlmVersion = "0.13.0"
 
