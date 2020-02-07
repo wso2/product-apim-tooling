@@ -75,7 +75,7 @@ func ChooseRegistry() {
 func updateCtrlConfig(registryType string, repository string) {
 	// get controller config config map
 	controllerConfigMapYaml, err := k8sUtils.GetCommandOutput(
-		utils.Kubectl, utils.K8sGet, "cm", utils.ApiOpControllerConfigMap,
+		utils.Kubectl, utils.K8sGet, utils.K8sConfigMap, utils.ApiOpControllerConfigMap,
 		"-n", utils.ApiOpWso2Namespace,
 		"-o", "yaml",
 	)
@@ -105,7 +105,10 @@ func updateCtrlConfig(registryType string, repository string) {
 
 func add(registry *Registry) {
 	if registry.Option < 1 {
-		utils.HandleErrorAndExit("Error adding registry", errors.New("option should be positive"))
+		utils.HandleErrorAndExit("Error adding registry: "+registry.Name, errors.New("'option' should be positive"))
+	}
+	if registries[registry.Option] != nil {
+		utils.HandleErrorAndExit("Error adding registry"+registry.Name, errors.New("duplicate 'options' values"))
 	}
 
 	registries[registry.Option] = registry

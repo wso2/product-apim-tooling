@@ -33,7 +33,7 @@ import (
 
 const DockerRegistryUrl = "https://index.docker.io/v1/"
 
-var dockerRepo = new(string)
+var dockerHubRepo = new(string)
 
 var dockerHubValues = struct {
 	repository string
@@ -44,11 +44,11 @@ var dockerHubValues = struct {
 var DockerHubRegistry = &Registry{
 	Name:       "DOCKER_HUB",
 	Caption:    "Docker Hub",
-	Repository: dockerRepo,
+	Repository: dockerHubRepo,
 	Option:     1,
 	Read: func() {
 		repository, username, password := readDockerHubInputs()
-		*dockerRepo = repository
+		*dockerHubRepo = repository
 		dockerHubValues.repository = repository
 		dockerHubValues.username = username
 		dockerHubValues.password = password
@@ -122,7 +122,7 @@ func validateDockerHubCredentials(repository string, username string, password s
 	return resp.StatusCode == 200, nil //TODO: renuka: use reposity as well to validate
 }
 
-// createDockerSecret creates K8S secret with credentials for docker registry
+// createDockerSecret creates K8S secret with credentials for Docker Hub
 func createDockerSecret(username string, password string) {
 	encodedCredential := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
 

@@ -37,7 +37,7 @@ func ReadInputString(printText string, defaultVal string, validRegex string, ret
 		return reg.MatchString(value)
 	}
 
-	return readInput(printText, defaultVal, validate, retryOnInvalid)
+	return ReadInput(printText, defaultVal, validate, "", retryOnInvalid)
 }
 
 // ReadOption reads an option from user
@@ -47,7 +47,7 @@ func ReadOption(printText string, defaultVal int, maxValue int, retryOnInvalid b
 		return option > 0 && option <= maxValue
 	}
 
-	optionStr, err := readInput(printText, strconv.Itoa(defaultVal), validate, retryOnInvalid)
+	optionStr, err := ReadInput(printText, strconv.Itoa(defaultVal), validate, "Choose a number", retryOnInvalid)
 	if err != nil {
 		return 0, err
 	}
@@ -55,8 +55,8 @@ func ReadOption(printText string, defaultVal int, maxValue int, retryOnInvalid b
 	return strconv.Atoi(optionStr)
 }
 
-// readInput reads input from user with prompting printText
-func readInput(printText string, defaultVal string, validate func(value string) bool, retryOnInvalid bool) (string, error) {
+// ReadInput reads input from user with prompting printText
+func ReadInput(printText string, defaultVal string, validate func(value string) bool, invalidText string, retryOnInvalid bool) (string, error) {
 	retry := true
 	value := ""
 	reader := bufio.NewReader(os.Stdin)
@@ -76,8 +76,12 @@ func readInput(printText string, defaultVal string, validate func(value string) 
 		}
 
 		isValid := validate(value)
-		if !retryOnInvalid && !isValid {
-			return value, errors.New("input validation failed")
+
+		if !isValid {
+			fmt.Println(invalidText)
+			if !retryOnInvalid {
+				return value, errors.New("input validation failed")
+			}
 		}
 
 		retry = retryOnInvalid && !isValid

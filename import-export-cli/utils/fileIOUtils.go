@@ -298,3 +298,21 @@ func CopyDir(src string, dst string) (err error) {
 
 	return
 }
+
+// CreateTempFile creates a temporary file in the OS' temp directory
+// example pattern "docker-secret-*.yaml"
+func CreateTempFile(pattern string, content []byte) (string, error) {
+	tmpFile, err := ioutil.TempFile(os.TempDir(), pattern)
+	if err != nil {
+		return "", err
+	}
+	if _, err = tmpFile.Write(content); err != nil {
+		return "", err
+	}
+	// Close the file
+	if err := tmpFile.Close(); err != nil {
+		return "", err
+	}
+
+	return tmpFile.Name(), nil
+}

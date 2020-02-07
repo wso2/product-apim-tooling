@@ -94,6 +94,8 @@ const K8sApply = "apply"
 const K8sDelete = "delete"
 const K8sRollOut = "rollout"
 const K8sGet = "get"
+const K8sConfigMap = "configmap"
+const K8sSecret = "secret"
 
 // WSO2 API Operator constats
 const ApiOpControllerConfigMap = "controller-config"
