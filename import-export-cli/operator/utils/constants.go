@@ -9,4 +9,4 @@ const OperatorConfigFileUrl = `https://gist.githubusercontent.com/renuka-fernand
 
 // registry specific config maps and secrets names
 // Amazon ECR
-const AmazonEcrDockerConfig = "docker-config"
+const AwsCredentialsVolume = "aws-cred"

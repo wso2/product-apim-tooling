@@ -40,8 +40,10 @@ func readAmazonEcrInputs() (string, string) {
 	credFile := ""
 	var err error
 
+	amazonRepositoryRegex := `\.amazonaws\.com\/.*$` //TODO: renuka make this regex more specif with finding repo syntax
+
 	for !isConfirm {
-		repository, err = utils.ReadInputString("Enter repository name", "", utils.UsernameValidRegex, true)
+		repository, err = utils.ReadInputString("Enter repository name (<aws_account_id.dkr.ecr.region.amazonaws.com>/repository)", utils.Default{IsDefault: false}, amazonRepositoryRegex, true)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading DockerHub repository name from user", err)
 		}
@@ -51,7 +53,7 @@ func readAmazonEcrInputs() (string, string) {
 			defaultLocation = filepath.Join(defaultLocation, ".aws", "credentials")
 		} // else ignore and make defaultLocation = ""
 
-		credFile, err = utils.ReadInput("Amazon credential file", defaultLocation, utils.IsFileExist, "Invalid file", true)
+		credFile, err = utils.ReadInput("Amazon credential file", utils.Default{Value: defaultLocation, IsDefault: true}, utils.IsFileExist, "Invalid file", true)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading amazon credential file from user", err)
 		}
@@ -60,7 +62,7 @@ func readAmazonEcrInputs() (string, string) {
 		fmt.Println("Repository     : " + repository)
 		fmt.Println("Credential File: " + credFile)
 
-		isConfirmStr, err := utils.ReadInputString("Confirm configurations", "Y", "", false)
+		isConfirmStr, err := utils.ReadInputString("Confirm configurations", utils.Default{Value: "Y", IsDefault: true}, "", false)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading user input Confirmation", err)
 		}
@@ -85,7 +87,7 @@ func createAmazonEcrConfig() {
 	// render config map
 	configMap, err := k8sUtils.GetCommandOutput(
 		utils.Kubectl, utils.Create, utils.K8sConfigMap,
-		k8sUtils.AmazonEcrDockerConfig, "--from-file=config.json="+tempFile,
+		utils.ConfigJsonVolume, "--from-file=config.json="+tempFile,
 		"--dry-run", "-o", "yaml",
 	)
 	if err != nil {
@@ -102,7 +104,7 @@ func createAmazonEcrCred(credFile string) {
 	// render secret
 	secret, err := k8sUtils.GetCommandOutput(
 		utils.Kubectl, utils.Create, utils.K8sSecret, "generic",
-		k8sUtils.AmazonEcrDockerConfig, "--from-file=credentials="+credFile,
+		k8sUtils.AwsCredentialsVolume, "--from-file=credentials="+credFile,
 		"--dry-run", "-o", "yaml",
 	)
 	if err != nil {

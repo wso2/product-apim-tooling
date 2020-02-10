@@ -30,14 +30,19 @@ import (
 	"syscall"
 )
 
+type Default struct {
+	Value     string
+	IsDefault bool
+}
+
 // ReadInputString reads input from user with prompting printText and validating against regex: validRegex
-func ReadInputString(printText string, defaultVal string, validRegex string, retryOnInvalid bool) (string, error) {
+func ReadInputString(printText string, defaultVal Default, validRegex string, retryOnInvalid bool) (string, error) {
 	validate := func(value string) bool {
 		reg := regexp.MustCompile(validRegex)
 		return reg.MatchString(value)
 	}
 
-	return ReadInput(printText, defaultVal, validate, "", retryOnInvalid)
+	return ReadInput(printText, defaultVal, validate, "Please try again. Invalid input.", retryOnInvalid)
 }
 
 // ReadOption reads an option from user
@@ -47,7 +52,7 @@ func ReadOption(printText string, defaultVal int, maxValue int, retryOnInvalid b
 		return option > 0 && option <= maxValue
 	}
 
-	optionStr, err := ReadInput(printText, strconv.Itoa(defaultVal), validate, "Choose a number", retryOnInvalid)
+	optionStr, err := ReadInput(printText, Default{Value: strconv.Itoa(defaultVal), IsDefault: true}, validate, "Choose a number", retryOnInvalid)
 	if err != nil {
 		return 0, err
 	}
@@ -56,11 +61,14 @@ func ReadOption(printText string, defaultVal int, maxValue int, retryOnInvalid b
 }
 
 // ReadInput reads input from user with prompting printText
-func ReadInput(printText string, defaultVal string, validate func(value string) bool, invalidText string, retryOnInvalid bool) (string, error) {
+func ReadInput(printText string, defaultVal Default, validate func(value string) bool, invalidText string, retryOnInvalid bool) (string, error) {
 	retry := true
 	value := ""
 	reader := bufio.NewReader(os.Stdin)
-	text := fmt.Sprintf("%s: %s: ", printText, defaultVal)
+	text := fmt.Sprintf("%s: ", printText)
+	if defaultVal.IsDefault {
+		text = fmt.Sprintf("%s: %s: ", printText, defaultVal.Value)
+	}
 
 	for retry {
 		fmt.Print(text)
@@ -71,8 +79,8 @@ func ReadInput(printText string, defaultVal string, validate func(value string) 
 			return "", err
 		}
 
-		if value == "" {
-			return defaultVal, nil
+		if value == "" && defaultVal.IsDefault {
+			return defaultVal.Value, nil
 		}
 
 		isValid := validate(value)

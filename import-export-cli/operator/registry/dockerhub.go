@@ -65,12 +65,12 @@ func readDockerHubInputs() (string, string, string) {
 	var err error
 
 	for !isConfirm {
-		repository, err = utils.ReadInputString("Enter repository name", "", utils.UsernameValidRegex, true)
+		repository, err = utils.ReadInputString("Enter repository name", utils.Default{Value: "", IsDefault: true}, utils.UsernameValidRegex, true)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading DockerHub repository name from user", err)
 		}
 
-		username, err = utils.ReadInputString("Enter username", "", utils.UsernameValidRegex, true)
+		username, err = utils.ReadInputString("Enter username", utils.Default{Value: "", IsDefault: false}, utils.UsernameValidRegex, true)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading username from user", err)
 		}
@@ -93,7 +93,7 @@ func readDockerHubInputs() (string, string, string) {
 		fmt.Println("Repository: " + repository)
 		fmt.Println("Username  : " + username)
 
-		isConfirmStr, err := utils.ReadInputString("Confirm configurations", "Y", "", false)
+		isConfirmStr, err := utils.ReadInputString("Confirm configurations", utils.Default{Value: "Y", IsDefault: true}, "", false)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading user input Confirmation", err)
 		}
