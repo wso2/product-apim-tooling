@@ -89,9 +89,10 @@ func updateCtrlConfig(registryType string, repository string) {
 		utils.HandleErrorAndExit("Error reading controller-config", err)
 	}
 
-	// replace configs
+	// set configurations
 	controllerConfigMap["data"].(map[interface{}]interface{})[k8sUtils.CtrlConfigRegType] = registryType
 	controllerConfigMap["data"].(map[interface{}]interface{})[k8sUtils.CtrlConfigReg] = repository
+
 	configuredConfigMap, err := yaml.Marshal(controllerConfigMap)
 	if err != nil {
 		utils.HandleErrorAndExit("Error rendering controller-config", err)

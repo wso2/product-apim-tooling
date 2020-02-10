@@ -96,6 +96,7 @@ const K8sRollOut = "rollout"
 const K8sGet = "get"
 const K8sConfigMap = "configmap"
 const K8sSecret = "secret"
+const K8sSecretDockerRegType = "docker-registry"
 
 // WSO2 API Operator constats
 const ApiOpControllerConfigMap = "controller-config"
@@ -104,6 +105,7 @@ const ApiOpCrdApi = "apis.wso2.com"
 const ApiOpCrdRateLimiting = "ratelimitings.wso2.com"
 const ApiOpCrdSecurity = "securities.wso2.com"
 const ApiOpCrdTargetEndpoint = "targetendpoints.wso2.com"
+const ConfigJsonVolume = "config-json"
 
 // Regex Validation
 const UsernameValidRegex = `^[\w\d\-]+$`

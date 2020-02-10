@@ -20,11 +20,8 @@ package registry
 
 import (
 	"bytes"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/cbroglie/mustache"
-	"github.com/wso2/product-apim-tooling/import-export-cli/box"
 	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
@@ -119,38 +116,25 @@ func validateDockerHubCredentials(repository string, username string, password s
 		return false, err
 	}
 	_ = resp.Body.Close()
-	return resp.StatusCode == 200, nil //TODO: renuka: use reposity as well to validate
+	return resp.StatusCode == 200, nil //TODO: renuka: use repository as well to validate
 }
 
 // createDockerSecret creates K8S secret with credentials for Docker Hub
 func createDockerSecret(username string, password string) {
-	encodedCredential := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
+	dockerSecret, err := k8sUtils.GetCommandOutput(
+		utils.Kubectl, utils.Create, utils.K8sSecret, utils.K8sSecretDockerRegType, utils.ConfigJsonVolume,
+		"--docker-server", "https://index.docker.io/v1/",
+		"--docker-username", username,
+		"--docker-password", password,
+		"--dry-run", "-o", "yaml",
+	)
 
-	auth := map[string]map[string]map[string]string{
-		"auths": {
-			DockerRegistryUrl: {
-				"auth":     encodedCredential,
-				"username": username,
-				"password": password,
-			},
-		},
-	}
-	authJsonByte, err := json.Marshal(auth)
 	if err != nil {
-		utils.HandleErrorAndExit("Error marshalling docker secret credentials ", err)
-	}
-
-	encodedAuthJson := base64.StdEncoding.EncodeToString(authJsonByte)
-	secretTemplate, _ := box.Get("/kubernetes_resources/registry_secret_mustache.yaml")
-	secretYaml, err := mustache.Render(string(secretTemplate), map[string]string{
-		"encodedJson": encodedAuthJson,
-	})
-	if err != nil {
-		utils.HandleErrorAndExit("Error rendering docker secret credentials", err)
+		utils.HandleErrorAndExit("Error rendering kubernetes secret for Docker Hub", err)
 	}
 
 	// apply created secret yaml file
-	if err := k8sUtils.K8sApplyFromStdin(secretYaml); err != nil {
+	if err := k8sUtils.K8sApplyFromStdin(dockerSecret); err != nil {
 		utils.HandleErrorAndExit("Error creating docker secret credentials", err)
 	}
 }
