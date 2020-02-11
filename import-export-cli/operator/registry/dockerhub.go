@@ -123,7 +123,7 @@ func validateDockerHubCredentials(repository string, username string, password s
 func createDockerSecret(username string, password string) {
 	dockerSecret, err := k8sUtils.GetCommandOutput(
 		utils.Kubectl, utils.Create, utils.K8sSecret, utils.K8sSecretDockerRegType, utils.ConfigJsonVolume,
-		"--docker-server", "https://index.docker.io/v1/",
+		"--docker-server", DockerRegistryUrl,
 		"--docker-username", username,
 		"--docker-password", password,
 		"--dry-run", "-o", "yaml",

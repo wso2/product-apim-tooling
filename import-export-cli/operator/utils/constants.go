@@ -10,3 +10,5 @@ const OperatorConfigFileUrl = `https://gist.githubusercontent.com/renuka-fernand
 // registry specific config maps and secrets names
 // Amazon ECR
 const AwsCredentialsVolume = "aws-cred"
+const GcrSvcAccKeyVolume = "gcr-key"
+const GcrSvcAccKeyFile = "gcr_key.json"

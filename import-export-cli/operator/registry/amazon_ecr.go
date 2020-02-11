@@ -29,7 +29,7 @@ var AmazonEcrRegistry = &Registry{
 	},
 	Run: func() {
 		createAmazonEcrConfig()
-		createAmazonEcrCred(amazonEcrValues.credFile)
+		k8sUtils.K8sCreateSecretFromFile(k8sUtils.AwsCredentialsVolume, amazonEcrValues.credFile, "credentials")
 	},
 }
 
@@ -97,23 +97,6 @@ func createAmazonEcrConfig() {
 	// apply config map
 	if err = k8sUtils.K8sApplyFromStdin(configMap); err != nil {
 		utils.HandleErrorAndExit("Error creating docker config for Amazon ECR", err)
-	}
-}
-
-func createAmazonEcrCred(credFile string) {
-	// render secret
-	secret, err := k8sUtils.GetCommandOutput(
-		utils.Kubectl, utils.Create, utils.K8sSecret, "generic",
-		k8sUtils.AwsCredentialsVolume, "--from-file=credentials="+credFile,
-		"--dry-run", "-o", "yaml",
-	)
-	if err != nil {
-		utils.HandleErrorAndExit("Error creating secret for Amazon ECR", err)
-	}
-
-	// apply secret
-	if err = k8sUtils.K8sApplyFromStdin(secret); err != nil {
-		utils.HandleErrorAndExit("Error creating secret for Amazon ECR", err)
 	}
 }
 

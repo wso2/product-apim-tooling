@@ -21,6 +21,7 @@ package utils
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"io"
 	"os"
@@ -51,6 +52,30 @@ func K8sWaitForResourceType(maxTimeSec int, resourceTypes ...string) error {
 	}
 
 	return nil
+}
+
+func K8sCreateSecretFromFile(secretName string, filePath string, renamedFile string) {
+	var fromFile string
+	if renamedFile == "" {
+		fromFile = fmt.Sprintf("--from-file=%s", filePath)
+	} else {
+		fromFile = fmt.Sprintf("--from-file=%s=%s", renamedFile, filePath)
+	}
+
+	// render secret
+	secret, err := GetCommandOutput(
+		utils.Kubectl, utils.Create, utils.K8sSecret, "generic",
+		secretName, fromFile,
+		"--dry-run", "-o", "yaml",
+	)
+	if err != nil {
+		utils.HandleErrorAndExit("Error creating secret from file", err)
+	}
+
+	// apply secret
+	if err = K8sApplyFromStdin(secret); err != nil {
+		utils.HandleErrorAndExit("Error creating secret from file", err)
+	}
 }
 
 // K8sApplyFromFile applies resources from list of files, urls or directories
