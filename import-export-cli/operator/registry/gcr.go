@@ -19,16 +19,18 @@
 package registry
 
 import (
+	"encoding/json"
 	"fmt"
 	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"io/ioutil"
 	"strings"
 )
 
 var gcrRepo = new(string)
 
 var gcrValues = struct {
-	repository    string
+	project       string
 	svcAccKeyFile string
 }{}
 
@@ -38,36 +40,29 @@ var GcrRegistry = &Registry{
 	Repository: gcrRepo,
 	Option:     3,
 	Read: func() {
-		repository, svcAccKeyFile := readGcrInputs()
-		*gcrRepo = repository
-		gcrValues.repository = repository
+		svcAccKeyFile := readGcrInputs()
+		gcrValues.project = getProjectName(svcAccKeyFile)
 		gcrValues.svcAccKeyFile = svcAccKeyFile
+		*gcrRepo = gcrValues.project
 	},
 	Run: func() {
 		k8sUtils.K8sCreateSecretFromFile(k8sUtils.GcrSvcAccKeyVolume, gcrValues.svcAccKeyFile, k8sUtils.GcrSvcAccKeyFile)
 	},
 }
 
-// readDockerHubInputs reads docker-registry URL, username and password from the user
-func readGcrInputs() (string, string) {
+// readGcrInputs reads the GCR service account key json file from user
+func readGcrInputs() string {
 	isConfirm := false
-	repository := ""
 	svcAccKeyFile := ""
 	var err error
 
 	for !isConfirm {
-		repository, err = utils.ReadInputString("Enter project name", utils.Default{Value: "", IsDefault: true}, utils.UsernameValidRegex, true)
-		if err != nil {
-			utils.HandleErrorAndExit("Error reading GCR project name from user", err)
-		}
-
 		svcAccKeyFile, err = utils.ReadInput("GCR service account key json file", utils.Default{IsDefault: false}, utils.IsFileExist, "Invalid file", true)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading GCR service account key json file from user", err)
 		}
 
 		fmt.Println("")
-		fmt.Println("Project                                  : " + repository)
 		fmt.Println("UserGCR service account key json filename: " + svcAccKeyFile)
 
 		isConfirmStr, err := utils.ReadInputString("Confirm configurations", utils.Default{Value: "Y", IsDefault: true}, "", false)
@@ -79,7 +74,20 @@ func readGcrInputs() (string, string) {
 		isConfirm = isConfirmStr == "Y" || isConfirmStr == "YES"
 	}
 
-	return repository, svcAccKeyFile
+	return svcAccKeyFile
+}
+
+func getProjectName(filePath string) string {
+	data, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		utils.HandleErrorAndExit("Error reading GCR service account key json file", err)
+	}
+	svcAccKey := make(map[string]string)
+	if err = json.Unmarshal(data, &svcAccKey); err != nil {
+		utils.HandleErrorAndExit("Error unmarshal GCR service account key json file", err)
+	}
+
+	return svcAccKey["project_id"]
 }
 
 func init() {
