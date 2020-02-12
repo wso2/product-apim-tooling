@@ -29,7 +29,3 @@ COMPROMISED_USER_COUNT = 'compromised_user_count'
 STOLEN_TOKEN = 'stolen_token'
 ATTACKS = 'attacks'
 TIME_PATTERNS = 'time_patterns'
-
-
-
-
