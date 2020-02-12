@@ -27,6 +27,11 @@ import (
 )
 
 func HandleErrorAndExit(msg string, err error) {
+	HandleErrorAndContinue(msg, err)
+	printAndExit()
+}
+
+func HandleErrorAndContinue(msg string, err error) {
 	/*
 		fmt.Println("\n=======  DEBUG LOG ==================")
 		// TODO:: Remove debug log in production
@@ -40,8 +45,6 @@ func HandleErrorAndExit(msg string, err error) {
 	} else {
 		fmt.Fprintf(os.Stderr, "%s: %v Reason: %v\n", ProjectName, msg, err.Error())
 	}
-
-	printAndExit()
 }
 
 func printAndExit() {

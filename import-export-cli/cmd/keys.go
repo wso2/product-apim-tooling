@@ -27,8 +27,8 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
-	"strings"
 	encodeURL "net/url"
+	"strings"
 )
 
 // keys command related Info
@@ -112,46 +112,55 @@ func getKeys() {
 			//Check if the token type of the application has been updated
 			if tokenType != appDetails.TokenType && tokenType != "" {
 				//Request body for the store rest api
-				body := dedent.Dedent(`{
-								"tokenType": "` + configVars.Config.TokenType + `",
-								"name": "` + utils.DefaultCliApp + `",
-								"throttlingTier" : "` + throttlingTier + `"
-							}`)
+				appUpdateReq := utils.AppCreateRequest{
+					Name:             utils.DefaultCliApp,
+					ThrottlingPolicy: throttlingTier,
+					Description:      "Default CLI Application",
+					TokenType:        configVars.Config.TokenType,
+				}
+				body, err := json.Marshal(appUpdateReq);
+				if body == nil && err != nil {
+					utils.HandleErrorAndExit("Error occurred while creating CLI application update request.", err)
+				}
 				utils.Logln(utils.LogPrefixInfo + "Updating application as token type is changed to: " + tokenType)
-				updatedApp, updateError := updateApplicationDetails(appId, body, accessToken)
+				updatedApp, updateError := updateApplicationDetails(appId, string(body), accessToken)
 
 				if updatedApp != nil && updateError == nil {
 					utils.Logln(utils.LogPrefixInfo + "Updated application successfully")
 				} else if updateError != nil {
 					fmt.Println("Error while updating the application. : ", updateError)
 				}
-				//if keys have been already generated before, then update the consumer key and secret
-				if len(appDetails.Keys) != 0 {
-					keygenResponse, keyGenErr := regenerateConsumerSecret(appDetails.Keys[0].ConsumerKey, accessToken)
-					if keyGenErr != nil {
-						fmt.Println("Error occurred while regenerating the keys for the app ", appId)
-					} else {
-						appDetails.Keys[0].ConsumerSecret = keygenResponse.ConsumerSecret
-						utils.Logln(utils.LogPrefixInfo + "Regenerated application keys successfully")
-					}
-				}
 			}
-			//If keys have not been generated before but the application is created
-			if len(appDetails.Keys) == 0 {
-				//If the application is already created but the keys have not generated in the first time
-				keygenResponse, err := generateApplicationKeys(appId, accessToken, scopes)
-				if keygenResponse == nil && err != nil {
-					utils.HandleErrorAndExit("Error occurred while generating application keys.", err)
+			//retrieve keys of application to see if there are already generated keys
+			appKeys, keysErr := getApplicationKeys(appId, accessToken)
+			if keysErr != nil {
+				utils.HandleErrorAndExit("Error occurred while getting application keys.", keysErr)
+			}
+
+			//if keys have been already generated before, then update the consumer key and secret
+			if appKeys.Count != 0 {
+				keygenResponse, keyGenErr := regenerateConsumerSecret(appId, "PRODUCTION", accessToken)
+				if keyGenErr != nil {
+					fmt.Println("Error occurred while regenerating the keys for the app ", appId)
+				} else {
+					appKeys.List[0].ConsumerSecret = keygenResponse.ConsumerSecret
+					utils.Logln(utils.LogPrefixInfo + "Regenerated application keys successfully")
 				}
-				fmt.Println("Access Token: ", keygenResponse.Token.AccessToken)
-			} else {
-				//If the keys have not been generated and the applciation is updated
-				token, err := getNewToken(appDetails, scopes)
+
+				//If the keys have not been generated and the application is updated
+				token, err := getNewToken(&appKeys.List[0], scopes)
 				if accessToken != "" {
 					fmt.Println("Access Token: ", token)
 				} else {
 					fmt.Println("Error while generating token: ", err)
 				}
+			} else {
+				//If the application is already created but the keys have not generated in the first time
+				keygenResponse, err := generateApplicationKeys(appId, accessToken)
+				if keygenResponse == nil && err != nil {
+					utils.HandleErrorAndExit("Error occurred while generating application keys.", err)
+				}
+				fmt.Println("Access Token: ", keygenResponse.Token.AccessToken)
 			}
 		} else {
 			fmt.Println("Error while retrieving the application:", err)
@@ -176,18 +185,23 @@ func getKeys() {
 		scopes, err := getScopes(appId, accessToken)
 		//If errors occurred while retrieving scopes
 		if scopes == nil && err != nil {
-			fmt.Println("Error while retrieving scopes ", err)
+			utils.HandleErrorAndExit("Error while retrieving scopes ", err)
 		}
 		//Generate the tokens
-		keygenResponse, err:= generateApplicationKeys(appId, accessToken, scopes)
-
-		if keygenResponse.Token.AccessToken != ""  {
-			fmt.Println("Access Token: ", keygenResponse.Token.AccessToken)
+		keygenResponse, err:= generateApplicationKeys(appId, accessToken)
+		if err != nil {
+			utils.HandleErrorAndExit("Error while generating application keys", err)
+		}
+		appKey := &utils.ApplicationKey{}
+		appKey.ConsumerKey = keygenResponse.ConsumerKey;
+		appKey.ConsumerSecret = keygenResponse.ConsumerSecret;
+		token, err := getNewToken(appKey, scopes)
+		if token != ""  {
+			fmt.Println("Access Token: ", token)
 		} else {
 			fmt.Println("Error while generating token: ", err)
 		}
 	}
-
 }
 
 func getAvailableAPITiers(accessToken string) ([]string, error) {
@@ -197,7 +211,7 @@ func getAvailableAPITiers(accessToken string) ([]string, error) {
 	}
 	api, err := getApi(apiId, accessToken)
 	if err == nil && api != nil {
-		return api.Tiers, err
+		return api.Policies, err
 	} else {
 		return nil, err
 	}
@@ -224,6 +238,10 @@ func callDCREndpoint(credential credentials.Credential) (string, string, error) 
 	registrationEndpoint := utils.GetRegistrationEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
 	//Calling the DCR endpoint
 	resp, err := utils.InvokePOSTRequest(registrationEndpoint, headers, body)
+	if err != nil {
+		utils.HandleErrorAndExit("DCR request failed. Reason: ", err)
+	}
+
 	utils.Logln(utils.LogPrefixInfo + "Getting ClientID, ClientSecret: Status - " + resp.Status())
 
 	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
@@ -243,9 +261,8 @@ func callDCREndpoint(credential credentials.Credential) (string, string, error) 
 			// 401 Unauthorized
 			return "", "", fmt.Errorf("invalid username/password combination")
 		}
-		return "", "", errors.New("Request didn't respond 200 OK: " + resp.Status())
+		return "", "", errors.New("Request didn't respond 200 OK for DCR request. Status: " + resp.Status())
 	}
-	return "", "", errors.New("Request didn't respond 200 OK: " + resp.Status())
 }
 
 // Get tokens for
@@ -263,8 +280,9 @@ func generateAccessToken(credential credentials.Credential) (string, error) {
 	//Retrieving the token endpoint of the relevant environment
 	tokenEndpoint := utils.GetTokenEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
 	//Prepping query params
-	body := "grant_type=password&username=" + credential.Username + "&password=" + encodeURL.QueryEscape(credential.Password) + "&validity_period=" +
-		utils.DefaultTokenValidityPeriod + "&scope=apim:api_view+apim:subscribe+apim:api_publish"
+	body := "grant_type=password&username=" + credential.Username + "&password=" +
+		encodeURL.QueryEscape(credential.Password) + "&validity_period=" + string(utils.DefaultTokenValidityPeriod) +
+		"&scope=apim:api_view+apim:subscribe+apim:api_publish"
 
 	//Call to the token endpoint with the necessary payload
 	resp, err := utils.InvokePOSTRequest(tokenEndpoint, headers, body)
@@ -283,28 +301,26 @@ func generateAccessToken(credential credentials.Credential) (string, error) {
 		}
 		return keygenResponse.AccessToken, err
 	} else {
-		return "", errors.New("Request didn't respond 200 OK: " + resp.Status())
+		return "", errors.New("Request didn't respond 200 OK for generating an access token. Status: " + resp.Status())
 	}
 }
 
-// Regenerate consumer key and secret of the application
-// @param consumerKey : Consumer key of the application
-// @param accessToken : Access token to authenticate the store REST API
+// Regenerate consumer secret of the application
+// @param appId : ID of the application
+// @param keyType : key Type of the application. Allowed values: PRODUCTION, SANDBOX
 // @return KeygenResponse, error
-func regenerateConsumerSecret(consumerKey string, accessToken string) (*utils.KeygenResponse, error) {
+func regenerateConsumerSecret(appId string, keyType string, accessToken string) (*utils.ConsumerSecretRegenResponse,
+		error) {
 	applicationEndpoint := utils.GetApplicationListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
-	url := applicationEndpoint + "/regenerate-consumersecret"
+	url := applicationEndpoint + "/" + appId + "/keys/" + keyType + "/regenerate-secret"
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
 
-
-	body := dedent.Dedent(`{"consumerKey": "` + consumerKey + `"}`)
-	resp, err := utils.InvokePOSTRequest(url, headers, body)
-
+	resp, err := utils.InvokePOSTRequestWithoutBody(url, headers)
 	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
 		// 200 OK or 201 Created
-		keygenResp := &utils.KeygenResponse{}
+		keygenResp := &utils.ConsumerSecretRegenResponse{}
 		data := []byte(resp.Body())
 		err = json.Unmarshal(data, &keygenResp)
 
@@ -317,7 +333,8 @@ func regenerateConsumerSecret(consumerKey string, accessToken string) (*utils.Ke
 			// 401 Unauthorized
 			return nil, fmt.Errorf("invalid username/password combination")
 		}
-		return nil, errors.New("Request didn't respond 200 OK: " + resp.Status())
+		return nil, errors.New("Request didn't respond 200 OK for regenerating the consumer secret. " +
+			"Status: " + resp.Status())
 	}
 }
 
@@ -335,7 +352,7 @@ func searchApplication(appName string, accessToken string) (string, error) {
 
 	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
 		// 200 OK or 201 Created
-		appData := &utils.AppData{}
+		appData := &utils.AppList{}
 		data := []byte(resp.Body())
 		err = json.Unmarshal(data, &appData)
 		if appData.Count != 0 {
@@ -351,7 +368,8 @@ func searchApplication(appName string, accessToken string) (string, error) {
 			// 401 Unauthorized
 			return "", fmt.Errorf("invalid username/password combination")
 		}
-		return "", errors.New("Request didn't respond 200 OK: " + resp.Status())
+		return "", errors.New("Request didn't respond 200 OK for searching existing applications. " +
+			"Status: " + resp.Status())
 	}
 }
 
@@ -396,11 +414,8 @@ func searchApi(accessToken string) (string, error) {
 			// 401 Unauthorized
 			return "", fmt.Errorf("invalid username/password combination")
 		}
-		return "", errors.New("Request didn't respond 200 OK: " + resp.Status())
+		return "", errors.New("Request didn't respond 200 OK for searching APIs. Status: " + resp.Status())
 	}
-
-	return "", errors.New("Request didn't respond 200 OK: " + resp.Status())
-
 }
 
 // Subscribe API to a given application
@@ -446,7 +461,7 @@ func getApi(apiId string, accessToken string) (*utils.APIData, error) {
 			// 401 Unauthorized
 			return nil, fmt.Errorf("invalid username/password combination")
 		}
-		return nil, errors.New("Request didn't respond 200 OK: " + resp.Status())
+		return nil, errors.New("Request didn't respond 200 OK for retrieving API details. Status: " + resp.Status())
 	}
 }
 
@@ -471,7 +486,7 @@ func subscribeApi(apiId string, appId string, accessToken string) (string, error
 
 	if subResp.StatusCode() == http.StatusOK || subResp.StatusCode() == http.StatusCreated {
 		// 200 OK or 201 Created
-		subscription := &utils.SubscriptionDetail{}
+		subscription := &utils.SubscriptionList{}
 		data := []byte(subResp.Body())
 		subErr = json.Unmarshal(data, &subscription)
 		if subscription.Count != 0 {
@@ -483,13 +498,17 @@ func subscribeApi(apiId string, appId string, accessToken string) (string, error
 				}
 			}
 		}
+		subscriptionReq := &utils.SubscriptionCreateRequest{
+			APIID:            apiId,
+			ApplicationID:    appId,
+			ThrottlingPolicy: throttlingTier,
+		}
 		//If there is no subscription, make a subscription
-		body := dedent.Dedent(`{
-			"tier": "` + throttlingTier + `",
-			"apiIdentifier": "` + apiId + `",
-			"applicationId": "` + appId + `"
-		}`)
-		resp, err := utils.InvokePOSTRequest(subEndpoint, headers, body)
+		body, err := json.Marshal(subscriptionReq);
+		if body == nil && err != nil {
+			utils.HandleErrorAndExit("Error occurred while creating CLI application subscription request.", err)
+		}
+		resp, err := utils.InvokePOSTRequest(subEndpoint, headers, string(body))
 		if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
 			// 200 OK or 201 Created
 			subscription := &utils.Subscription{}
@@ -503,7 +522,7 @@ func subscribeApi(apiId string, appId string, accessToken string) (string, error
 				// 401 Unauthorized
 				return "", fmt.Errorf("invalid username/password combination")
 			}
-			return "", errors.New("Request didn't respond 200 OK: " + resp.Status())
+			return "", errors.New("Request didn't respond 200 OK for subscribing to the API. Status: " + resp.Status())
 		}
 	} else {
 		utils.Logf("Error: %s\n", subResp.Error())
@@ -540,11 +559,43 @@ func getApplicationDetails(appId string, accessToken string) (*utils.AppDetails,
 			// 401 Unauthorized
 			return nil, fmt.Errorf("invalid username/password combination")
 		}
-		return nil, errors.New("Request didn't respond 200 OK: " + resp.Status())
+		return nil, errors.New("Request didn't respond 200 OK for retrieving application details. " +
+			"Status: " + resp.Status())
 	}
 }
 
-// Get application details
+// Get application keys
+// @param appId : Application ID
+// @param accessToken : token to call the store rest API
+// @return AppDetails, error
+func getApplicationKeys(appId string, accessToken string) (*utils.AppKeyList, error) {
+
+	applicationEndpoint := utils.GetApplicationListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath) +
+		"/" + appId + "/keys"
+	//Prepping headers
+	headers := make(map[string]string)
+	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
+	//Retrieving the details of the particular application
+	resp, err := utils.InvokeGETRequest(applicationEndpoint, headers)
+	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
+		// 200 OK or 201 Created
+		keyData := &utils.AppKeyList{}
+		data := []byte(resp.Body())
+		err = json.Unmarshal(data, &keyData)
+		return keyData, err
+	} else {
+		utils.Logf("Error: %s\n", resp.Error())
+		utils.Logf("Body: %s\n", resp.Body())
+		if resp.StatusCode() == http.StatusUnauthorized {
+			// 401 Unauthorized
+			return nil, fmt.Errorf("invalid username/password combination")
+		}
+		return nil, errors.New("Request didn't respond 200 OK for retrieving App key information. " +
+			"Status: " + resp.Status())
+	}
+}
+
+// Update application details
 // @param appId : Application ID
 // @param accessToken : token to call the store rest API
 // @return AppDetails, error
@@ -571,7 +622,7 @@ func updateApplicationDetails(appId string, body string, accessToken string) (*u
 			// 401 Unauthorized
 			return nil, fmt.Errorf("invalid username/password combination")
 		}
-		return nil, errors.New("Request didn't respond 200 OK: " + resp.Status())
+		return nil, errors.New("Request didn't respond 200 OK for updating application. Status: " + resp.Status())
 	}
 }
 
@@ -585,16 +636,17 @@ func createApplication(accessToken string) (string, string, error) {
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
 	conf := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
-	body := dedent.Dedent(`{
-				"throttlingTier": "` + throttlingTier + `",
-				"description": "Default application for apictl testing purposes",
-				"name": "` + utils.DefaultCliApp + `",
-				"callbackUrl": "http://my.server.com/callback",
-				"tokenType": "` + conf.Config.TokenType + `"
-			}`)
-
-	resp, err := utils.InvokePOSTRequest(applicationEndpoint, headers, body)
-
+	appUpdateReq := utils.AppCreateRequest{
+		Name:             utils.DefaultCliApp,
+		ThrottlingPolicy: throttlingTier,
+		Description:      "Default application for apictl testing purposes",
+		TokenType:        conf.Config.TokenType,
+	}
+	body, err := json.Marshal(appUpdateReq);
+	if body == nil && err != nil {
+		utils.HandleErrorAndExit("Error occurred while creating CLI application update request.", err)
+	}
+	resp, err := utils.InvokePOSTRequest(applicationEndpoint, headers, string(body))
 	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
 		// 200 OK or 201 Created
 		applicationResponse := &utils.Application{}
@@ -611,22 +663,22 @@ func createApplication(accessToken string) (string, string, error) {
 			// 401 Unauthorized
 			return "", "", fmt.Errorf("invalid username/password combination")
 		}
-		return "", "", errors.New("Request didn't respond 200 OK: " + resp.Status())
+		return "", "", errors.New("Request didn't respond 200 OK for application creation. Status: " + resp.Status())
 	}
 }
 
 // Calling token endpoint to get access token for the already created application
-// @param AppDetails : Details of the particular applications
+// @param key : Details of the particular key
 // @param scopes[] : scopes to generate the token
 // @return accessToken, error
-func getNewToken(details *utils.AppDetails, scopes []string) (string, error) {
+func getNewToken(key *utils.ApplicationKey, scopes []string) (string, error) {
 	tokenEndpoint := utils.GetTokenEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
 
 	body := "grant_type=client_credentials&scope=" + strings.Join(scopes, " ")
 
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " +
-		utils.GetBase64EncodedCredentials(details.Keys[0].ConsumerKey, details.Keys[0].ConsumerSecret)
+		utils.GetBase64EncodedCredentials(key.ConsumerKey, key.ConsumerSecret)
 
 	headers[utils.HeaderContentType] = utils.HeaderValueXWWWFormUrlEncoded
 	headers[utils.HeaderAccept] = utils.HeaderValueApplicationJSON
@@ -649,7 +701,7 @@ func getNewToken(details *utils.AppDetails, scopes []string) (string, error) {
 			// 401 Unauthorized
 			return "", fmt.Errorf("invalid username/password combination")
 		}
-		return "", errors.New("Request didn't respond 200 OK: " + resp.Status())
+		return "", errors.New("Request didn't respond 200 OK for generating a new token. Status: " + resp.Status())
 	}
 
 }
@@ -659,56 +711,45 @@ func getNewToken(details *utils.AppDetails, scopes []string) (string, error) {
 // @param accessToken : accesstoken to call the store rest API
 // @return scope[], error
 func getScopes(appId string, accessToken string) ([]string, error) {
-
-	applicationEndpoint := utils.GetApplicationListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath) + "/scopes/" + appId
-	headers := make(map[string]string)
-	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
-
-	resp, err := utils.InvokeGETRequest(applicationEndpoint, headers)
-
-	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
-		// 200 OK or 201 Created
-		scopes := &utils.Scopes{}
-		data := []byte(resp.Body())
-		err = json.Unmarshal(data, &scopes)
-		var scp = make([]string, len(scopes.List))
-		for i := 0; i < len(scopes.List); i++ {
-			scp[i] = scopes.List[i].Key
+	appDetails, err := getApplicationDetails(appId, accessToken)
+	if err != nil || appDetails == nil {
+		utils.HandleErrorAndContinue("Error occurred while retrieving subscribed scopes. " +
+			"Scopes may not be included in the access token", err)
+	}
+	if len(appDetails.SubscriptionScopes) > 0 {
+		scopesCount := len(appDetails.SubscriptionScopes)
+		var scopes = make([]string, scopesCount)
+		for i := 0; i < scopesCount; i++ {
+			scopes[i] = appDetails.SubscriptionScopes[i].Key
 		}
-		return scp, err
+		return scopes, nil
 	} else {
-		utils.Logf("Error: %s\n", resp.Error())
-		utils.Logf("Body: %s\n", resp.Body())
-		if resp.StatusCode() == http.StatusUnauthorized {
-			// 401 Unauthorized
-			return nil, fmt.Errorf("invalid username/password combination")
-		}
-		return nil, errors.New("Request didn't respond 200 OK: " + resp.Status())
+		return nil, nil
 	}
 }
 
 // Generate client credentials for the application first time and generate access token
 // @param appId : application ID of the app to be generated keys
 // @param token : token to invoke the store rest API
-// @param scope[] : Scopes to retrieve the token
 // @return client_id, client_secret, error
-func generateApplicationKeys(appId string, token string, scope []string) (*utils.KeygenResponse, error) {
+func generateApplicationKeys(appId string, token string) (*utils.KeygenResponse, error) {
 
-	applicationEndpoint := utils.GetApplicationListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath) + "/generate-keys"
+	applicationEndpoint := utils.GetApplicationListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath) +
+		"/" + appId + "/generate-keys"
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + token
-	queryParams := map[string]string{utils.ApplicationId: appId}
 	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
-	scopeParam := prepScopeValues(scope)
-	body := dedent.Dedent(`{
-								  "validityTime": "` + utils.DefaultTokenValidityPeriod + `",
-								  "keyType": "PRODUCTION",
-								  "accessAllowDomains": [ "ALL" ],
-								  "scopes": [` + scopeParam + `],
-								  "supportedGrantTypes": [ "urn:ietf:params:oauth:grant-type:saml2-bearer", "iwa:ntlm", "refresh_token", "client_credentials", "password" ]
-							  }`)
+	generateKeyReq := utils.KeygenRequest{
+		KeyType:                 "PRODUCTION",
+		GrantTypesToBeSupported: []string{"refresh_token", "password", "client_credentials"},
+		ValidityTime:            utils.DefaultTokenValidityPeriod,
+	}
+	body, err := json.Marshal(generateKeyReq);
+	if body == nil && err != nil {
+		utils.HandleErrorAndExit("Error occurred while creating CLI application key generation request.", err)
+	}
 
-	resp, err := utils.InvokePostRequestWithQueryParam(queryParams, applicationEndpoint, headers, body)
+	resp, err := utils.InvokePOSTRequest(applicationEndpoint, headers, string(body))
 	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
 		// 200 OK or 201 Created
 		keygenResponse := &utils.KeygenResponse{}
@@ -722,7 +763,7 @@ func generateApplicationKeys(appId string, token string, scope []string) (*utils
 			// 401 Unauthorized
 			return nil, fmt.Errorf("invalid username/password combination")
 		}
-		return nil, errors.New("Request didn't respond 200 OK: " + resp.Status())
+		return nil, errors.New("Request didn't respond 200 OK for application key generation. Status: " + resp.Status())
 	}
 }
 

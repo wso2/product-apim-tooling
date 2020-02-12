@@ -43,6 +43,17 @@ func InvokePOSTRequest(url string, headers map[string]string, body string) (*res
 	return resp, err
 }
 
+// Invoke http-post request without body using go-resty
+func InvokePOSTRequestWithoutBody(url string, headers map[string]string) (*resty.Response, error) {
+	if Insecure {
+		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+	}
+	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
+	resp, err := resty.R().SetHeaders(headers).Post(url)
+
+	return resp, err
+}
+
 // Invoke http-get request using go-resty
 func InvokeGETRequest(url string, headers map[string]string) (*resty.Response, error) {
 	if Insecure {
