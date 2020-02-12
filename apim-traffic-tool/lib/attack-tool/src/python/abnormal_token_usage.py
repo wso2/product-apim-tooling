@@ -27,6 +27,7 @@ import requests
 import yaml
 
 from utils import util_methods
+from constants import *
 
 
 def simulate_user(user_data):
@@ -41,24 +42,27 @@ def simulate_user(user_data):
     up_time = datetime.now() - start_time
 
     if up_time.seconds < attack_duration:
-        for app in user_data.values():
-            invoke_pattern_iterator = 0
+        for app_name, app in user_data.items():
+            sleep_pattern = invoke_patterns[random.choice(list(invoke_patterns.keys()))]
 
             for scenario in app:
                 scenario[0] *= random.randint(min_request_multiplier, max_request_multiplier)
 
             invoke_pattern_indices = util_methods.generate_method_invoke_pattern(app)
+
             for i in invoke_pattern_indices:
                 up_time = datetime.now() - start_time
 
                 if up_time.seconds >= attack_duration:
                     break
 
+                sleep_time = np.absolute(np.random.normal(sleep_pattern['mean'], sleep_pattern['std']))
+                time.sleep(sleep_time)
+
                 scenario = app[i]
                 path = scenario[2]
                 token = scenario[3]
                 method = scenario[4]
-                pattern = invoke_patterns[random.choice(list(invoke_patterns.keys()))].split(',')
                 request_path = "{}://{}:{}/{}".format(protocol, host, port, path)
                 random_user_agent = scenario[7]
                 ip = scenario[5]
@@ -78,9 +82,6 @@ def simulate_user(user_data):
                     print(msg_string)
                     util_methods.log(attack_tool_log_path, msg_string, "a")
 
-                time.sleep(int(pattern[invoke_pattern_iterator % len(pattern)]))
-                invoke_pattern_iterator += 1
-
 
 # Program Execution
 if __name__ == '__main__':
@@ -88,28 +89,13 @@ if __name__ == '__main__':
     attack_tool_log_path = "../../../../../../logs/attack-tool.log"
 
     # constants
-
-    COMPROMISED_USER_COUNT = 'compromised_user_count'
     MIN_REQUEST_SCALAR = 'min_request_scalar'
     MAX_REQUEST_SCALAR = 'max_request_scalar'
     ABNORMAL_TOKEN_USAGE = 'abnormal_token_usage'
-    ATTACKS = 'attacks'
-    NUMBER_OF_PROCESSES = 'number_of_processes'
-    USER_AGENTS = 'user_agents'
-    PAYLOADS = 'payloads'
-    ATTACK_DURATION = 'attack_duration'
-    PORT = 'port'
-    IP = 'ip'
-    PROTOCOL = 'protocol'
-    API_HOST = 'api_host'
-    GENERAL_CONFIG = 'general_config'
 
     try:
         with open(os.path.abspath(os.path.join(__file__, "../../../../traffic-tool/data/runtime_data/scenario_pool.sav")), "rb") as scenario_file:
             scenario_pool = pickle.load(scenario_file, )
-
-        with open(os.path.abspath(os.path.join(__file__, "../../../../traffic-tool/data/access_pattern/invoke_patterns.yaml")), "rb") as pattern_file:
-            invoke_patterns = yaml.load(pattern_file, Loader=yaml.FullLoader)['time_patterns']
 
         with open(os.path.abspath(os.path.join(__file__, "../../../../../config/attack-tool.yaml")), "r") as attack_config_file:
             attack_config = yaml.load(attack_config_file, Loader=yaml.FullLoader)
@@ -130,6 +116,8 @@ if __name__ == '__main__':
     max_request_multiplier = attack_config[ATTACKS][ABNORMAL_TOKEN_USAGE][MAX_REQUEST_SCALAR]
     min_request_multiplier = attack_config[ATTACKS][ABNORMAL_TOKEN_USAGE][MIN_REQUEST_SCALAR]
     compromised_user_count = attack_config[ATTACKS][ABNORMAL_TOKEN_USAGE][COMPROMISED_USER_COUNT]
+    invoke_patterns = util_methods.process_time_patterns(attack_config[GENERAL_CONFIG][TIME_PATTERNS])
+
     start_time = datetime.now()
 
     # Recording column names in the dataset csv file
@@ -148,6 +136,7 @@ if __name__ == '__main__':
 
     compromised_users = np.random.choice(list(scenario_pool.values()), size=compromised_user_count, replace=False)
     process_list = []
+
     for user in compromised_users:
         process = Process(target=simulate_user, args=(user,))
         process.daemon = False
