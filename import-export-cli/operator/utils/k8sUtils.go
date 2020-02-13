@@ -54,6 +54,30 @@ func K8sWaitForResourceType(maxTimeSec int, resourceTypes ...string) error {
 	return nil
 }
 
+// K8sCreateSecretFromInputs creates K8S secret with credentials
+func K8sCreateSecretFromInputs(secretName string, server string, username string, password string) {
+	if username == "" {
+		username = "N/A"
+		password = "N/A"
+	}
+	dockerSecret, err := GetCommandOutput(
+		utils.Kubectl, utils.Create, utils.K8sSecret, utils.K8sSecretDockerRegType, secretName,
+		"--docker-server", server,
+		"--docker-username", username,
+		"--docker-password", password,
+		"--dry-run", "-o", "yaml",
+	)
+
+	if err != nil {
+		utils.HandleErrorAndExit("Error rendering kubernetes secret for Docker Hub", err)
+	}
+
+	// apply created secret yaml file
+	if err := K8sApplyFromStdin(dockerSecret); err != nil {
+		utils.HandleErrorAndExit("Error creating docker secret credentials", err)
+	}
+}
+
 func K8sCreateSecretFromFile(secretName string, filePath string, renamedFile string) {
 	var fromFile string
 	if renamedFile == "" {

@@ -11,4 +11,5 @@ const OperatorConfigFileUrl = `https://gist.githubusercontent.com/renuka-fernand
 // Amazon ECR
 const AwsCredentialsVolume = "aws-cred"
 const GcrSvcAccKeyVolume = "gcr-key"
+const GcrPullSecretVolume = "gcr-pull-secret"
 const GcrSvcAccKeyFile = "gcr_key.json"

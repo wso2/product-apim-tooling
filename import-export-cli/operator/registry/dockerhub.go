@@ -40,7 +40,7 @@ var dockerHubValues = struct {
 
 var DockerHubRegistry = &Registry{
 	Name:       "DOCKER_HUB",
-	Caption:    "Docker Hub",
+	Caption:    "Docker Hub (Or others, quay.io)",
 	Repository: dockerHubRepo,
 	Option:     1,
 	Read: func() {
@@ -51,7 +51,7 @@ var DockerHubRegistry = &Registry{
 		dockerHubValues.password = password
 	},
 	Run: func() {
-		createDockerSecret(dockerHubValues.username, dockerHubValues.password)
+		k8sUtils.K8sCreateSecretFromInputs(utils.ConfigJsonVolume, getRegistryUrl(dockerHubValues.repository), dockerHubValues.username, dockerHubValues.password)
 		dockerHubValues.password = "" // clear password
 	},
 }
@@ -64,13 +64,15 @@ func readDockerHubInputs() (string, string, string) {
 	password := ""
 	var err error
 
+	const repositoryValidRegex = `^[\w\d\-\.\:]*\/?[\w\d\-]+$`
+
 	for !isConfirm {
-		repository, err = utils.ReadInputString("Enter repository name", utils.Default{Value: "", IsDefault: true}, utils.UsernameValidRegex, true)
+		repository, err = utils.ReadInputString("Enter repository name (docker.io/john or quay.io/mark)", utils.Default{Value: "", IsDefault: true}, repositoryValidRegex, true)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading DockerHub repository name from user", err)
 		}
 
-		username, err = utils.ReadInputString("Enter username", utils.Default{Value: "", IsDefault: false}, utils.UsernameValidRegex, true)
+		username, err = utils.ReadInputString("Enter username", utils.Default{Value: "", IsDefault: true}, utils.UsernameValidRegex, true)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading username from user", err)
 		}
@@ -80,13 +82,16 @@ func readDockerHubInputs() (string, string, string) {
 			utils.HandleErrorAndExit("Error reading password from user", err)
 		}
 
-		isCredentialsValid, err := validateDockerHubCredentials(repository, username, password)
-		if err != nil {
-			utils.HandleErrorAndExit("Error connecting to Docker Registry repository using credentials", err)
-		}
+		// only validate credentials if registry is DockerHub
+		if getRegistryUrl(dockerHubValues.repository) == DockerRegistryUrl {
+			isCredentialsValid, err := validateDockerHubCredentials(repository, username, password)
+			if err != nil {
+				utils.HandleErrorAndExit("Error connecting to Docker Registry repository using credentials", err)
+			}
 
-		if !isCredentialsValid {
-			utils.HandleErrorAndExit("Invalid credentials", err)
+			if !isCredentialsValid {
+				utils.HandleErrorAndExit("Invalid credentials", err)
+			}
 		}
 
 		fmt.Println("")
@@ -105,6 +110,16 @@ func readDockerHubInputs() (string, string, string) {
 	return repository, username, password
 }
 
+func getRegistryUrl(repository string) string {
+	names := strings.SplitN(repository, "/", 2)
+
+	if len(names) == 2 && names[0] != "docker.io" {
+		return names[0]
+	}
+
+	return DockerRegistryUrl
+}
+
 // validateDockerHubCredentials validates the credentials for the repository
 func validateDockerHubCredentials(repository string, username string, password string) (bool, error) {
 	cred, err := json.Marshal(map[string]string{
@@ -117,26 +132,6 @@ func validateDockerHubCredentials(repository string, username string, password s
 	}
 	_ = resp.Body.Close()
 	return resp.StatusCode == 200, nil //TODO: renuka: use repository as well to validate
-}
-
-// createDockerSecret creates K8S secret with credentials for Docker Hub
-func createDockerSecret(username string, password string) {
-	dockerSecret, err := k8sUtils.GetCommandOutput(
-		utils.Kubectl, utils.Create, utils.K8sSecret, utils.K8sSecretDockerRegType, utils.ConfigJsonVolume,
-		"--docker-server", DockerRegistryUrl,
-		"--docker-username", username,
-		"--docker-password", password,
-		"--dry-run", "-o", "yaml",
-	)
-
-	if err != nil {
-		utils.HandleErrorAndExit("Error rendering kubernetes secret for Docker Hub", err)
-	}
-
-	// apply created secret yaml file
-	if err := k8sUtils.K8sApplyFromStdin(dockerSecret); err != nil {
-		utils.HandleErrorAndExit("Error creating docker secret credentials", err)
-	}
 }
 
 func init() {
