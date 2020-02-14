@@ -58,12 +58,12 @@ type EnvEndpoints struct {
 // ---------------- End of Structs for YAML Config Files ---------------------------------
 
 type API struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	Context  string `json:"context"`
-	Version  string `json:"version"`
-	Provider string `json:"provider"`
-	Status   string `json:"status"`
+	ID       		string `json:"id"`
+	Name     		string `json:"name"`
+	Context  		string `json:"context"`
+	Version  		string `json:"version"`
+	Provider 		string `json:"provider"`
+	LifeCycleStatus string `json:"lifeCycleStatus"`
 }
 
 type Application struct {
@@ -114,6 +114,13 @@ type HttpErrorResponse struct {
 	Error       []error `json:"error"`
 }
 
+//Key generation request
+type KeygenRequest struct {
+	KeyType                 string   `json:"keyType"`
+	GrantTypesToBeSupported []string `json:"grantTypesToBeSupported"`
+	ValidityTime            int      `json:"validityTime"`
+}
+
 //Key generation response
 type KeygenResponse struct {
 	CallbackURL         interface{} `json:"callbackUrl"`
@@ -130,149 +137,173 @@ type KeygenResponse struct {
 	} `json:"token"`
 }
 
+//Application Keys
+type AppKeyList struct {
+	Count int `json:"count"`
+	List  []ApplicationKey `json:"list"`
+}
+
+// Consumer Secret regeneration response
+type ConsumerSecretRegenResponse struct {
+	ConsumerKey    string `json:"consumerKey"`
+	ConsumerSecret string `json:"consumerSecret"`
+}
+
 //Applications get response structure
-type AppData struct {
-	Count    int    `json:"count"`
-	Next     string `json:"next"`
-	Previous string `json:"previous"`
-	List     []struct {
-		ApplicationID  string `json:"applicationId"`
-		Name           string `json:"name"`
-		Subscriber     string `json:"subscriber"`
-		ThrottlingTier string `json:"throttlingTier"`
-		Description    string `json:"description"`
-		Status         string `json:"status"`
-		GroupID        string `json:"groupId"`
-		Attributes     struct {
+type AppList struct {
+	Count int `json:"count"`
+	List  []struct {
+		ApplicationID     string        `json:"applicationId"`
+		Name              string        `json:"name"`
+		Owner             string        `json:"owner"`
+		ThrottlingPolicy  string        `json:"throttlingPolicy"`
+		Description       interface{}   `json:"description"`
+		Status            string        `json:"status"`
+		Groups            []interface{} `json:"groups"`
+		SubscriptionCount int           `json:"subscriptionCount"`
+		Attributes        struct {
 		} `json:"attributes"`
 	} `json:"list"`
+	Pagination struct {
+		Offset   int    `json:"offset"`
+		Limit    int    `json:"limit"`
+		Total    int    `json:"total"`
+		Next     string `json:"next"`
+		Previous string `json:"previous"`
+	} `json:"pagination"`
 }
 
 //Specific application details structure
 type AppDetails struct {
-	GroupID        string      `json:"groupId"`
-	CallbackURL    interface{} `json:"callbackUrl"`
-	Subscriber     string      `json:"subscriber"`
-	ThrottlingTier string      `json:"throttlingTier"`
-	ApplicationID  string      `json:"applicationId"`
-	Description    interface{} `json:"description"`
-	Status         string      `json:"status"`
-	TokenType      string	   `json:"tokenType"`
-	Name           string      `json:"name"`
-	Keys           []struct {
-		ConsumerKey         string      `json:"consumerKey"`
-		ConsumerSecret      string      `json:"consumerSecret"`
-		KeyState            string      `json:"keyState"`
-		KeyType             string      `json:"keyType"`
-		SupportedGrantTypes interface{} `json:"supportedGrantTypes"`
-		Token               struct {
-			ValidityTime int      `json:"validityTime"`
-			AccessToken  string   `json:"accessToken"`
-			TokenScopes  []string `json:"tokenScopes"`
-		} `json:"token"`
-	} `json:"keys"`
-}
-
-type App struct {
 	ApplicationID     string        `json:"applicationId"`
 	Name              string        `json:"name"`
 	ThrottlingPolicy  string        `json:"throttlingPolicy"`
-	Description       string        `json:"description"`
+	Description       interface{}   `json:"description"`
 	TokenType         string        `json:"tokenType"`
 	Status            string        `json:"status"`
 	Groups            []interface{} `json:"groups"`
 	SubscriptionCount int           `json:"subscriptionCount"`
-	Keys              []interface{} `json:"keys"`
+	Keys              []ApplicationKey
 	Attributes        struct {
 	} `json:"attributes"`
-	SubscriptionScopes []interface{} `json:"subscriptionScopes"`
-	Owner              string        `json:"owner"`
+	SubscriptionScopes []struct {
+		Key         string   `json:"key"`
+		Name        string   `json:"name"`
+		Roles       []string `json:"roles"`
+		Description string   `json:"description"`
+	} `json:"subscriptionScopes"`
+	Owner       string `json:"owner"`
+	HashEnabled bool   `json:"hashEnabled"`
 }
 
-//Specific subscription details
+// Application key details
+type ApplicationKey struct {
+	ConsumerKey         string      `json:"consumerKey"`
+	ConsumerSecret      string      `json:"consumerSecret"`
+	SupportedGrantTypes []string    `json:"supportedGrantTypes"`
+	CallbackURL         interface{} `json:"callbackUrl"`
+	KeyState            string      `json:"keyState"`
+	KeyType             string      `json:"keyType"`
+}
+
+// Application creation request
+type AppCreateRequest struct {
+	Name             string `json:"name"`
+	ThrottlingPolicy string `json:"throttlingPolicy"`
+	Description      string `json:"description"`
+	TokenType        string `json:"tokenType"`
+}
+
+//Subscriptions List response struct
+type SubscriptionList struct {
+	Count      int            `json:"count"`
+	List       []Subscription `json:"list"`
+	Pagination interface{}    `json:"pagination"`
+}
+
+//Subscription
 type Subscription struct {
-	Tier           string `json:"tier"`
 	SubscriptionID string `json:"subscriptionId"`
-	APIIdentifier  string `json:"apiIdentifier"`
 	ApplicationID  string `json:"applicationId"`
-	Status         string `json:"status"`
+	APIID          string `json:"apiId"`
+	APIInfo        struct {
+		ID              string `json:"id"`
+		Name            string `json:"name"`
+		Context         string `json:"context"`
+		Version         string `json:"version"`
+		Provider        string `json:"provider"`
+		LifeCycleStatus string `json:"lifeCycleStatus"`
+	} `json:"apiInfo"`
+	ApplicationInfo struct {
+		ApplicationID string        `json:"applicationId"`
+		Name          string        `json:"name"`
+		Status        string        `json:"status"`
+		Groups        []interface{} `json:"groups"`
+		Owner         string        `json:"owner"`
+	} `json:"applicationInfo"`
+	ThrottlingPolicy  string      `json:"throttlingPolicy"`
+	Status            string      `json:"status"`
+	RedirectionParams interface{} `json:"redirectionParams"`
 }
 
-//API Search response struct
+//Subscription creation request
+type SubscriptionCreateRequest struct {
+	ApplicationID  string `json:"applicationId"`
+	APIID          string `json:"apiId"`
+	ThrottlingPolicy  string      `json:"throttlingPolicy"`
+}
+
+//API Search response struct. This includes common attributes for both store and publisher REST API search
 type ApiSearch struct {
-	Count    int    `json:"count"`
-	Next     string `json:"next"`
-	Previous string `json:"previous"`
-	List     []struct {
-		ID           string      `json:"id"`
-		Name         string      `json:"name"`
-		Description  interface{} `json:"description"`
-		Context      string      `json:"context"`
-		Version      string      `json:"version"`
-		Provider     string      `json:"provider"`
-		Status       string      `json:"status"`
-		ThumbnailURI interface{} `json:"thumbnailUri"`
+	Count int `json:"count"`
+	List  []struct {
+		ID                 string        `json:"id"`
+		Name               string        `json:"name"`
+		Description        interface{}   `json:"description"`
+		Context            string        `json:"context"`
+		Version            string        `json:"version"`
+		Provider           string        `json:"provider"`
+		Type               string        `json:"type"`
+		LifeCycleStatus    string        `json:"lifeCycleStatus"`
 	} `json:"list"`
 	Pagination struct {
-		Total  int `json:"total"`
-		Offset int `json:"offset"`
-		Limit  int `json:"limit"`
+		Offset   int    `json:"offset"`
+		Limit    int    `json:"limit"`
+		Total    int    `json:"total"`
+		Next     string `json:"next"`
+		Previous string `json:"previous"`
 	} `json:"pagination"`
 }
 
-//Subscriptions details response struct
-type SubscriptionDetail struct {
-	Count    int    `json:"count"`
-	Next     string `json:"next"`
-	Previous string `json:"previous"`
-	List     []struct {
-		SubscriptionID string `json:"subscriptionId"`
-		ApplicationID  string `json:"applicationId"`
-		APIIdentifier  string `json:"apiIdentifier"`
-		Tier           string `json:"tier"`
-		Status         string `json:"status"`
-	} `json:"list"`
-}
-
-//Scope details response struct
-type Scopes struct {
-	List []struct {
-		Key         string `json:"key"`
-		Name        string `json:"name"`
-		Roles       string `json:"roles"`
-		Description string `json:"description"`
-	} `json:"list"`
-}
-
-
 //get detailed API response
 type APIData struct {
-	ThumbnailURL        interface{} `json:"thumbnailUrl"`
-	Tiers               []string    `json:"tiers"`
+	ID                      string        `json:"id"`
+	Name                    string        `json:"name"`
+	Description             string        `json:"description"`
+	Context                 string        `json:"context"`
+	Version                 string        `json:"version"`
+	Provider                string        `json:"provider"`
+	LifeCycleStatus         string        `json:"lifeCycleStatus"`
+	HasThumbnail            interface{}   `json:"hasThumbnail"`
+	Policies                []string      `json:"policies"`
 	BusinessInformation struct {
-		TechnicalOwner      string `json:"technicalOwner"`
-		TechnicalOwnerEmail string `json:"technicalOwnerEmail"`
 		BusinessOwner       string `json:"businessOwner"`
 		BusinessOwnerEmail  string `json:"businessOwnerEmail"`
+		TechnicalOwner      string `json:"technicalOwner"`
+		TechnicalOwnerEmail string `json:"technicalOwnerEmail"`
 	} `json:"businessInformation"`
-	APIDefinition    string      `json:"apiDefinition"`
-	WsdlURI          interface{} `json:"wsdlUri"`
-	IsDefaultVersion bool        `json:"isDefaultVersion"`
-	EndpointURLs     []struct {
-		EnvironmentName string `json:"environmentName"`
-		EnvironmentType string `json:"environmentType"`
-		EnvironmentURLs struct {
-			HTTP  string `json:"http"`
-			HTTPS string `json:"https"`
-		} `json:"environmentURLs"`
-	} `json:"endpointURLs"`
-	Transport   []string `json:"transport"`
-	Tags        []string `json:"tags"`
-	Version     string   `json:"version"`
-	Description string   `json:"description"`
-	Provider    string   `json:"provider"`
-	Name        string   `json:"name"`
-	Context     string   `json:"context"`
-	ID          string   `json:"id"`
-	Status      string   `json:"status"`
+	WsdlInfo                interface{}   `json:"wsdlInfo"`
+	WsdlURL                 interface{}   `json:"wsdlUrl"`
+	IsDefaultVersion        bool          `json:"isDefaultVersion"`
+	EndpointConfig  struct {
+		EndpointType     string `json:"endpoint_type"`
+		SandboxEndpoints struct {
+			URL string `json:"url"`
+		} `json:"sandbox_endpoints"`
+		ProductionEndpoints struct {
+			URL string `json:"url"`
+		} `json:"production_endpoints"`
+	} `json:"endpointConfig"`
+	Transport               []string      `json:"transport"`
+	Tags                    []string      `json:"tags"`
 }

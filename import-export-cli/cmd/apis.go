@@ -42,7 +42,7 @@ const (
 	apiProviderHeader = "PROVIDER"
 	apiStatusHeader   = "STATUS"
 
-	defaultApiTableFormat = "table {{.Id}}\t{{.Name}}\t{{.Version}}\t{{.Context}}\t{{.Status}}\t{{.Provider}}"
+	defaultApiTableFormat = "table {{.Id}}\t{{.Name}}\t{{.Version}}\t{{.Context}}\t{{.LifeCycleStatus}}\t{{.Provider}}"
 )
 
 var listApisCmdEnvironment string
@@ -78,17 +78,18 @@ var apisCmd = &cobra.Command{
 
 // api holds information about an API for outputting
 type api struct {
-	id       string
-	name     string
-	context  string
-	version  string
-	provider string
-	status   string
+	id       		string
+	name     		string
+	context  		string
+	version  		string
+	provider 		string
+	lifeCycleStatus	string
 }
 
 // creates a new api from utils.API
 func newApiDefinitionFromAPI(a utils.API) *api {
-	return &api{a.ID, a.Name, a.Context, a.Version, a.Provider, a.Status}
+	return &api{a.ID, a.Name, a.Context, a.Version, a.Provider,
+		a.LifeCycleStatus}
 }
 
 // Id of api
@@ -111,9 +112,9 @@ func (a api) Version() string {
 	return a.version
 }
 
-// Status of api
-func (a api) Status() string {
-	return a.status
+// Lifecycle Status of api
+func (a api) LifeCycleStatus() string {
+	return a.lifeCycleStatus
 }
 
 // Provider of api
@@ -201,12 +202,12 @@ func printAPIs(apis []utils.API, format string) {
 
 	// headers for table
 	apiTableHeaders := map[string]string{
-		"Id":       apiIdHeader,
-		"Name":     apiNameHeader,
-		"Context":  apiContextHeader,
-		"Version":  apiVersionHeader,
-		"Status":   apiStatusHeader,
-		"Provider": apiProviderHeader,
+		"Id"				: apiIdHeader,
+		"Name"				: apiNameHeader,
+		"Context"			: apiContextHeader,
+		"Version"			: apiVersionHeader,
+		"LifeCycleStatus"	: apiStatusHeader,
+		"Provider"			: apiProviderHeader,
 	}
 
 	// execute context

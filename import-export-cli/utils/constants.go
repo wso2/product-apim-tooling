@@ -53,9 +53,9 @@ const ExportedMigrationArtifactsDirName = "migration"
 
 var DefaultExportDirPath = filepath.Join(ConfigDirPath, DefaultExportDirName)
 
-const defaultApiApplicationImportExportSuffix = "api/am/admin/v0.15"
-const defaultApiListEndpointSuffix = "api/am/publisher/v0.15/apis"
-const defaultApplicationListEndpointSuffix = "api/am/admin/v0.15/applications"
+const defaultApiApplicationImportExportSuffix = "api/am/admin/v0.16"
+const defaultApiListEndpointSuffix = "api/am/publisher/v1/apis"
+const defaultApplicationListEndpointSuffix = "api/am/admin/v1/applications"
 
 const DefaultEnvironmentName = "default"
 
@@ -87,7 +87,7 @@ const LogPrefixError = "[ERROR]: "
 const SearchAndTag = "&"
 
 // Other
-const DefaultTokenValidityPeriod = "3600"
+const DefaultTokenValidityPeriod = 3600
 const DefaultHttpRequestTimeout = 10000
 const DefaultKubernetesMode = false
 const Kubectl = "kubectl"
