@@ -22,6 +22,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
+	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"io"
 	"io/ioutil"
 	"os"
@@ -127,7 +128,7 @@ func createConfigFiles() {
 	if !utils.IsFileExist(utils.MainConfigFilePath) {
 		var mainConfig = new(utils.MainConfig)
 		mainConfig.Config = utils.Config{utils.DefaultHttpRequestTimeout,
-			utils.DefaultExportDirPath, utils.DefaultKubernetesMode, utils.DefaultTokenType}
+			utils.DefaultExportDirPath, k8sUtils.DefaultKubernetesMode, utils.DefaultTokenType}
 		utils.WriteConfigFile(mainConfig, utils.MainConfigFilePath)
 	}
 
@@ -195,7 +196,7 @@ func isK8sEnabled() bool {
 //execute kubernetes commands
 func executeKubernetes(arg ...string) {
 	cmd := exec.Command(
-		utils.Kubectl,
+		k8sUtils.Kubectl,
 		arg...,
 	)
 	var errBuf, outBuf bytes.Buffer

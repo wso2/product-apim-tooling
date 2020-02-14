@@ -52,7 +52,7 @@ var GcrRegistry = &Registry{
 		}
 
 		k8sUtils.K8sCreateSecretFromFile(k8sUtils.GcrSvcAccKeyVolume, gcrValues.svcAccKeyFile, k8sUtils.GcrSvcAccKeyFile)
-		k8sUtils.K8sCreateSecretFromInputs(utils.ConfigJsonVolume, "gcr.io", "_json_key", string(data))
+		k8sUtils.K8sCreateSecretFromInputs(k8sUtils.ConfigJsonVolume, "gcr.io", "_json_key", string(data))
 	},
 }
 

@@ -75,8 +75,8 @@ func ChooseRegistry() {
 func updateCtrlConfig(registryType string, repository string) {
 	// get controller config config map
 	controllerConfigMapYaml, err := k8sUtils.GetCommandOutput(
-		utils.Kubectl, utils.K8sGet, utils.K8sConfigMap, utils.ApiOpControllerConfigMap,
-		"-n", utils.ApiOpWso2Namespace,
+		k8sUtils.Kubectl, k8sUtils.K8sGet, k8sUtils.K8sConfigMap, k8sUtils.ApiOpControllerConfigMap,
+		"-n", k8sUtils.ApiOpWso2Namespace,
 		"-o", "yaml",
 	)
 	if err != nil {

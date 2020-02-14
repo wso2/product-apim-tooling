@@ -20,6 +20,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"os"
 	"path/filepath"
@@ -80,7 +81,7 @@ var updateApiCmd = &cobra.Command{
 					swaggerPath := filepath.Join(updateflagSwaggerFilePath, filepath.FromSlash("Meta-information/swagger.yaml"))
 					//creating kubernetes configmap with swagger definition
 					fmt.Println("creating configmap with swagger definition")
-					errConf := createConfigMapWithNamespace(updateConfigMapName, swaggerPath, updateflagNamespace, utils.Create)
+					errConf := createConfigMapWithNamespace(updateConfigMapName, swaggerPath, updateflagNamespace, k8sUtils.K8sCreate)
 					if errConf != nil {
 						utils.HandleErrorAndExit("Error creating configmap", err)
 					}
@@ -91,7 +92,7 @@ var updateApiCmd = &cobra.Command{
 				case mode.IsRegular():
 					//creating kubernetes configmap with swagger definition
 					fmt.Println("creating configmap with swagger definition")
-					err := createConfigMapWithNamespace(updateConfigMapName, updateflagSwaggerFilePath, updateflagNamespace, utils.Create)
+					err := createConfigMapWithNamespace(updateConfigMapName, updateflagSwaggerFilePath, updateflagNamespace, k8sUtils.K8sCreate)
 					if err != nil {
 						utils.HandleErrorAndExit("Error creating configmap", err)
 					}

@@ -38,7 +38,7 @@ func K8sWaitForResourceType(maxTimeSec int, resourceTypes ...string) error {
 	for i := maxTimeSec; i > 0 && !noErrors; i-- {
 		for _, resourceType := range resourceTypes {
 			noErrors = true
-			if err := ExecuteCommandWithoutPrintingErrors(utils.Kubectl, utils.K8sGet, resourceType); err != nil {
+			if err := ExecuteCommandWithoutPrintingErrors(Kubectl, K8sGet, resourceType); err != nil {
 				noErrors = false
 				continue
 			}
@@ -61,7 +61,7 @@ func K8sCreateSecretFromInputs(secretName string, server string, username string
 		password = "N/A"
 	}
 	dockerSecret, err := GetCommandOutput(
-		utils.Kubectl, utils.Create, utils.K8sSecret, utils.K8sSecretDockerRegType, secretName,
+		Kubectl, K8sCreate, K8sSecret, K8sSecretDockerRegType, secretName,
 		"--docker-server", server,
 		"--docker-username", username,
 		"--docker-password", password,
@@ -88,7 +88,7 @@ func K8sCreateSecretFromFile(secretName string, filePath string, renamedFile str
 
 	// render secret
 	secret, err := GetCommandOutput(
-		utils.Kubectl, utils.Create, utils.K8sSecret, "generic",
+		Kubectl, K8sCreate, K8sSecret, "generic",
 		secretName, fromFile,
 		"--dry-run", "-o", "yaml",
 	)
@@ -104,17 +104,17 @@ func K8sCreateSecretFromFile(secretName string, filePath string, renamedFile str
 
 // K8sApplyFromFile applies resources from list of files, urls or directories
 func K8sApplyFromFile(fileList ...string) error {
-	kubectlArgs := []string{utils.K8sApply}
+	kubectlArgs := []string{K8sApply}
 	for _, file := range fileList {
 		kubectlArgs = append(kubectlArgs, "-f", file)
 	}
 
-	return ExecuteCommand(utils.Kubectl, kubectlArgs...)
+	return ExecuteCommand(Kubectl, kubectlArgs...)
 }
 
 // K8sApplyFromStdin applies resources from standard input
 func K8sApplyFromStdin(stdInput string) error {
-	return ExecuteCommandFromStdin(stdInput, utils.Kubectl, utils.K8sApply, "-f", "-")
+	return ExecuteCommandFromStdin(stdInput, Kubectl, K8sApply, "-f", "-")
 }
 
 // ExecuteCommand executes the command with args and prints output, errors in standard output, error

@@ -56,7 +56,7 @@ to quickly create a Cobra application.`,
 
 		isLocalInstallation := flagApiOperatorFile != ""
 		if !isLocalInstallation {
-			installOLM(utils.OlmVersion)
+			installOLM(k8sUtils.OlmVersion)
 			installApiOperatorOperatorHub()
 		}
 
@@ -76,7 +76,7 @@ func installOLM(version string) {
 	csvPhaseSuccessed := "Succeeded"
 
 	// apply OperatorHub CRDs
-	if err := k8sUtils.K8sApplyFromFile(fmt.Sprintf(utils.OlmCrdUrlTemplate, version)); err != nil {
+	if err := k8sUtils.K8sApplyFromFile(fmt.Sprintf(k8sUtils.OlmCrdUrlTemplate, version)); err != nil {
 		utils.HandleErrorAndExit("Error installing OLM", err)
 	}
 
@@ -86,22 +86,22 @@ func installOLM(version string) {
 	}
 
 	// apply OperatorHub OLM
-	if err := k8sUtils.K8sApplyFromFile(fmt.Sprintf(utils.OlmOlmUrlTemplate, version)); err != nil {
+	if err := k8sUtils.K8sApplyFromFile(fmt.Sprintf(k8sUtils.OlmOlmUrlTemplate, version)); err != nil {
 		utils.HandleErrorAndExit("Error installing OLM", err)
 	}
 
 	// rolling out
-	if err := k8sUtils.ExecuteCommand(utils.Kubectl, utils.K8sRollOut, "status", "-w", "deployment/olm-operator", "-n", olmNamespace); err != nil {
+	if err := k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sRollOut, "status", "-w", "deployment/olm-operator", "-n", olmNamespace); err != nil {
 		utils.HandleErrorAndExit("Error installing OLM: Rolling out deployment OLM Operator", err)
 	}
-	if err := k8sUtils.ExecuteCommand(utils.Kubectl, utils.K8sRollOut, "status", "-w", "deployment/catalog-operator", "-n", olmNamespace); err != nil {
+	if err := k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sRollOut, "status", "-w", "deployment/catalog-operator", "-n", olmNamespace); err != nil {
 		utils.HandleErrorAndExit("Error installing OLM: Rolling out deployment Catalog Operator", err)
 	}
 
 	// wait max 50s to csv phase to be succeeded
 	csvPhase := ""
 	for i := 50; i > 0 && csvPhase != csvPhaseSuccessed; i-- {
-		newCsvPhase, err := k8sUtils.GetCommandOutput(utils.Kubectl, utils.K8sGet, utils.OperatorCsv, "-n", olmNamespace, "packageserver", "-o", `jsonpath={.status.phase}`)
+		newCsvPhase, err := k8sUtils.GetCommandOutput(k8sUtils.Kubectl, k8sUtils.K8sGet, k8sUtils.OperatorCsv, "-n", olmNamespace, "packageserver", "-o", `jsonpath={.status.phase}`)
 		if err != nil {
 			utils.HandleErrorAndExit("Error installing OLM: Getting csv phase", err)
 		}
@@ -124,7 +124,7 @@ func installOLM(version string) {
 // installApiOperatorOperatorHub installs WSO2 api-operator from Operator-Hub
 func installApiOperatorOperatorHub() {
 	utils.Logln(utils.LogPrefixInfo + "Installing API Operator from Operator-Hub")
-	operatorFile := utils.OperatorYamlUrl
+	operatorFile := k8sUtils.OperatorYamlUrl
 
 	err := k8sUtils.K8sApplyFromFile(operatorFile)
 	if err != nil {
@@ -143,11 +143,11 @@ func createControllerConfigs(isLocalInstallation bool) {
 	}
 
 	// apply all files without printing errors
-	if err := k8sUtils.ExecuteCommandWithoutPrintingErrors(utils.Kubectl, utils.K8sApply, "-f", configFile); err != nil {
+	if err := k8sUtils.ExecuteCommandWithoutPrintingErrors(k8sUtils.Kubectl, k8sUtils.K8sApply, "-f", configFile); err != nil {
 		fmt.Println("Installing controller configurations...")
 
 		// if error then wait for namespace and the resource type security
-		_ = k8sUtils.K8sWaitForResourceType(20, utils.ApiOpCrdSecurity)
+		_ = k8sUtils.K8sWaitForResourceType(20, k8sUtils.ApiOpCrdSecurity)
 
 		// apply again with printing errors
 		if err := k8sUtils.K8sApplyFromFile(configFile); err != nil {

@@ -86,8 +86,8 @@ func createAmazonEcrConfig() {
 
 	// render config map
 	configMap, err := k8sUtils.GetCommandOutput(
-		utils.Kubectl, utils.Create, utils.K8sConfigMap,
-		utils.ConfigJsonVolume, "--from-file=config.json="+tempFile,
+		k8sUtils.Kubectl, k8sUtils.K8sCreate, k8sUtils.K8sConfigMap,
+		k8sUtils.ConfigJsonVolume, "--from-file=config.json="+tempFile,
 		"--dry-run", "-o", "yaml",
 	)
 	if err != nil {
