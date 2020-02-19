@@ -25,28 +25,30 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
+const changeCmdLiteral = "change"
+const changeCmdShortDesc = "Change a configuration"
+const changeCmdLongDesc = "Change a configuration in k8s cluster resource"
+const changeCmdExamples = utils.ProjectName + ` ` + changeCmdLiteral + ` ` + changeDockerRegistryCmdLiteral
+
 // changeCmd represents the change command
 var changeCmd = &cobra.Command{
-	Use:   "change",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Use:     changeCmdLiteral,
+	Short:   changeCmdShortDesc,
+	Long:    changeCmdLongDesc,
+	Example: changeCmdExamples,
 }
+
+const changeDockerRegistryCmdLiteral = "registry"
+const changeDockerRegistryCmdShortDesc = "Change the registry"
+const changeDockerRegistryCmdLongDesc = "Change the registry to be pushed the built micro-gateway image"
+const changeDockerRegistryCmdExamples = utils.ProjectName + ` ` + changeCmdLiteral + ` ` + changeDockerRegistryCmdLiteral
 
 // changeDockerRegistryCmd represents the change registry command
 var changeDockerRegistryCmd = &cobra.Command{
-	Use:   "registry",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Use:     changeDockerRegistryCmdLiteral,
+	Short:   changeDockerRegistryCmdShortDesc,
+	Long:    changeDockerRegistryCmdLongDesc,
+	Example: changeDockerRegistryCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		configVars := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
 		if !configVars.Config.KubernetesMode {

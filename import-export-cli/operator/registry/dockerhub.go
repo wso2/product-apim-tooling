@@ -67,7 +67,7 @@ func readDockerHubInputs() (string, string, string) {
 	const repositoryValidRegex = `^[\w\d\-\.\:]*\/?[\w\d\-]+$`
 
 	for !isConfirm {
-		repository, err = utils.ReadInputString("Enter repository name (docker.io/john or quay.io/mark)", utils.Default{Value: "", IsDefault: true}, repositoryValidRegex, true)
+		repository, err = utils.ReadInputString("Enter repository name (john or quay.io/mark)", utils.Default{Value: "", IsDefault: true}, repositoryValidRegex, true)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading DockerHub repository name from user", err)
 		}
@@ -83,7 +83,7 @@ func readDockerHubInputs() (string, string, string) {
 		}
 
 		// only validate credentials if registry is DockerHub
-		if getRegistryUrl(dockerHubValues.repository) == DockerRegistryUrl {
+		if getRegistryUrl(repository) == DockerRegistryUrl {
 			isCredentialsValid, err := validateDockerHubCredentials(repository, username, password)
 			if err != nil {
 				utils.HandleErrorAndExit("Error connecting to Docker Registry repository using credentials", err)
@@ -113,7 +113,7 @@ func readDockerHubInputs() (string, string, string) {
 func getRegistryUrl(repository string) string {
 	names := strings.SplitN(repository, "/", 2)
 
-	if len(names) == 2 && names[0] != "docker.io" {
+	if len(names) == 2 {
 		return names[0]
 	}
 

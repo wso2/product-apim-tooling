@@ -19,14 +19,13 @@ const ApiOpCrdApi = "apis.wso2.com"
 const ApiOpCrdRateLimiting = "ratelimitings.wso2.com"
 const ApiOpCrdSecurity = "securities.wso2.com"
 const ApiOpCrdTargetEndpoint = "targetendpoints.wso2.com"
-const ConfigJsonVolume = "config-json"
 
 // Operator Hub Constants
 const OlmCrdUrlTemplate = "https://github.com/operator-framework/operator-lifecycle-manager/releases/download/%s/crds.yaml"
 const OlmOlmUrlTemplate = "https://github.com/operator-framework/operator-lifecycle-manager/releases/download/%s/olm.yaml"
 const OperatorYamlUrl = "https://operatorhub.io/install/api-operator.yaml"
 const OperatorCsv = "csv"
-const OlmVersion = "0.13.0"
+const OlmVersion = "0.13.0" //TODO: renuka export default to env variable and read from it
 
 // constants of K8s ConfigMap: controller-config
 const CtrlConfigRegType = "registryType"
@@ -35,9 +34,13 @@ const CtrlConfigReg = "repositoryName"
 // TODO: renuka replace this url (configuration?)
 const OperatorConfigFileUrl = `https://gist.githubusercontent.com/renuka-fernando/6d6c64c786e6d13742e802534de3da4e/raw/72fe433e463c14952fd5685ac04bfc5ed8ae357c/controller_conf.yaml`
 
-// registry specific config maps and secrets names
+// Registry specific config maps and secrets names
+// Common
+const ConfigJsonVolume = "config-json"
+
 // Amazon ECR
 const AwsCredentialsVolume = "aws-cred"
+
+// GCR
 const GcrSvcAccKeyVolume = "gcr-key"
-const GcrPullSecretVolume = "gcr-pull-secret"
 const GcrSvcAccKeyFile = "gcr_key.json"

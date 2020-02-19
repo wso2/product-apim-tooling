@@ -29,24 +29,20 @@ import (
 )
 
 const installApiOperatorCmdLiteral = "api-operator"
+const installApiOperatorCmdShortDesc = "Install API Operator"
+const installApiOperatorCmdLongDesc = "Install API Operator in the configured K8s cluster"
+const installApiOperatorCmdExamples = utils.ProjectName + ` ` + installApiOperatorCmdLiteral + `
+` + utils.ProjectName + ` ` + installApiOperatorCmdLiteral + ` -f path/to/operator/configs
+` + utils.ProjectName + ` ` + installApiOperatorCmdLiteral + ` -f path/to/operator/config/file.yaml`
 
 var flagApiOperatorFile string
 
-//var flagRegistryHost string
-//var flagUsername string
-//var flagPassword string
-//var flagBatchMod bool
-
 // installApiOperatorCmd represents the install api-operator command
 var installApiOperatorCmd = &cobra.Command{
-	Use:   installApiOperatorCmdLiteral,
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Use:     installApiOperatorCmdLiteral,
+	Short:   installApiOperatorCmdShortDesc,
+	Long:    installApiOperatorCmdLongDesc,
+	Example: installApiOperatorCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + installApiOperatorCmdLiteral + " called")
 
@@ -56,12 +52,19 @@ to quickly create a Cobra application.`,
 
 		isLocalInstallation := flagApiOperatorFile != ""
 		if !isLocalInstallation {
+			fmt.Println("[Installing OLM]")
 			installOLM(k8sUtils.OlmVersion)
+
+			fmt.Println("[Installing API Operator]")
 			installApiOperatorOperatorHub()
 		}
 
+		// installing operator and configs if -f flag given
+		// otherwise settings configs only
 		createControllerConfigs(isLocalInstallation)
 		registry.CreateSecret()
+
+		fmt.Println("[Setting to K8s Mode]")
 		setToK8sMode()
 	},
 }
@@ -73,7 +76,7 @@ func installOLM(version string) {
 	// this implements the logic in
 	// https://github.com/operator-framework/operator-lifecycle-manager/releases/download/0.13.0/install.sh
 	olmNamespace := "olm"
-	csvPhaseSuccessed := "Succeeded"
+	csvPhaseSucceeded := "Succeeded"
 
 	// apply OperatorHub CRDs
 	if err := k8sUtils.K8sApplyFromFile(fmt.Sprintf(k8sUtils.OlmCrdUrlTemplate, version)); err != nil {
@@ -100,7 +103,7 @@ func installOLM(version string) {
 
 	// wait max 50s to csv phase to be succeeded
 	csvPhase := ""
-	for i := 50; i > 0 && csvPhase != csvPhaseSuccessed; i-- {
+	for i := 50; i > 0 && csvPhase != csvPhaseSucceeded; i-- {
 		newCsvPhase, err := k8sUtils.GetCommandOutput(k8sUtils.Kubectl, k8sUtils.K8sGet, k8sUtils.OperatorCsv, "-n", olmNamespace, "packageserver", "-o", `jsonpath={.status.phase}`)
 		if err != nil {
 			utils.HandleErrorAndExit("Error installing OLM: Getting csv phase", err)
@@ -116,7 +119,7 @@ func installOLM(version string) {
 		time.Sleep(1e9)
 	}
 
-	if csvPhase != csvPhaseSuccessed {
+	if csvPhase != csvPhaseSucceeded {
 		utils.HandleErrorAndExit("Error installing OLM: CSV Package Server failed to reach phase succeeded", nil)
 	}
 }
@@ -135,16 +138,18 @@ func installApiOperatorOperatorHub() {
 // createControllerConfigs creates configs
 func createControllerConfigs(isLocalInstallation bool) {
 	utils.Logln(utils.LogPrefixInfo + "Installing controller configs")
-	fmt.Println("Installing controller configurations...")
 	configFile := flagApiOperatorFile
 
-	if !isLocalInstallation {
+	if isLocalInstallation {
+		fmt.Println("[Installing API Operator]")
+	} else {
+		fmt.Println("[Setting configs]")
 		configFile = k8sUtils.OperatorConfigFileUrl
 	}
 
 	// apply all files without printing errors
 	if err := k8sUtils.ExecuteCommandWithoutPrintingErrors(k8sUtils.Kubectl, k8sUtils.K8sApply, "-f", configFile); err != nil {
-		fmt.Println("Installing controller configurations...")
+		fmt.Println("Waiting for resource creation...")
 
 		// if error then wait for namespace and the resource type security
 		_ = k8sUtils.K8sWaitForResourceType(20, k8sUtils.ApiOpCrdSecurity)
@@ -156,7 +161,7 @@ func createControllerConfigs(isLocalInstallation bool) {
 	}
 }
 
-// setToK8sMode sets the apictl mode to kubernetes
+// setToK8sMode sets the "api-ctl" mode to kubernetes
 func setToK8sMode() {
 	// read the existing config vars
 	configVars := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
@@ -168,8 +173,4 @@ func setToK8sMode() {
 func init() {
 	installCmd.AddCommand(installApiOperatorCmd)
 	installApiOperatorCmd.Flags().StringVarP(&flagApiOperatorFile, "from-file", "f", "", "Path to API Operator directory")
-	//installApiOperatorCmd.Flags().StringVarP(&flagRegistryHost, "registry-host", "h", "", "URL of the registry host")
-	//installApiOperatorCmd.Flags().StringVarP(&flagUsername, "username", "u", "", "Username for the registry repository")
-	//installApiOperatorCmd.Flags().StringVarP(&flagPassword, "password", "p", "", "Password for the registry repository user")
-	//installApiOperatorCmd.Flags().BoolVarP(&flagBatchMod, "batch-mod", "B", false, "Run in non-interactive (batch) mode")
 }
