@@ -62,7 +62,7 @@ var installApiOperatorCmd = &cobra.Command{
 		// installing operator and configs if -f flag given
 		// otherwise settings configs only
 		createControllerConfigs(isLocalInstallation)
-		registry.CreateSecret()
+		registry.UpdateConfigsSecrets()
 
 		fmt.Println("[Setting to K8s Mode]")
 		setToK8sMode()

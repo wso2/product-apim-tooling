@@ -43,7 +43,7 @@ func ReadInputs() {
 	registries[optionToExec].Read()
 }
 
-func CreateSecret() {
+func UpdateConfigsSecrets() {
 	// set registry first since this can throw error if api operator not installed. If error occur no need to rollback secret.
 	updateCtrlConfig(registries[optionToExec].Name, *registries[optionToExec].Repository)
 	// create secret

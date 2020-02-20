@@ -20,6 +20,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/operator/registry"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -50,14 +51,17 @@ var changeDockerRegistryCmd = &cobra.Command{
 	Long:    changeDockerRegistryCmdLongDesc,
 	Example: changeDockerRegistryCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
+		utils.Logln(fmt.Sprintf("%s%s %s called", utils.LogPrefixInfo, changeCmdLiteral, changeDockerRegistryCmdLiteral))
 		configVars := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
 		if !configVars.Config.KubernetesMode {
 			utils.HandleErrorAndExit("set mode to kubernetes with command: apictl set --mode kubernetes",
 				errors.New("mode should be set to kubernetes"))
 		}
 
+		// read inputs for docker registry
 		registry.ChooseRegistry()
-		registry.CreateSecret()
+		registry.ReadInputs()
+		registry.UpdateConfigsSecrets()
 	},
 }
 

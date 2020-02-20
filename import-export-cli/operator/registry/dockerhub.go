@@ -28,14 +28,16 @@ import (
 	"strings"
 )
 
-const DockerRegistryUrl = "https://index.docker.io/v1/"
+const DockerHubRegistryUrl = "https://index.docker.io/v1/"
+const DockerHubInputPrefix = "docker.io"
 
 var dockerHubRepo = new(string)
 
 var dockerHubValues = struct {
-	repository string
-	username   string
-	password   string // TODO: renuka: password should be byte[], strings can be exploited from memory
+	repository    string
+	repositoryUrl string
+	username      string
+	password      string // TODO: renuka: password should be byte[], strings can be exploited from memory
 }{}
 
 var DockerHubRegistry = &Registry{
@@ -45,13 +47,20 @@ var DockerHubRegistry = &Registry{
 	Option:     1,
 	Read: func() {
 		repository, username, password := readDockerHubInputs()
-		*dockerHubRepo = repository
-		dockerHubValues.repository = repository
+
+		dockerHubValues.repositoryUrl = getRegistryUrl(repository)
 		dockerHubValues.username = username
 		dockerHubValues.password = password
+
+		// Docker Hub not supports "docker.io/foo" hence make repository as "foo"
+		if isDockerHub(repository) {
+			repository = strings.TrimPrefix(repository, DockerHubInputPrefix+"/")
+		}
+		*dockerHubRepo = repository
+		dockerHubValues.repository = repository
 	},
 	Run: func() {
-		k8sUtils.K8sCreateSecretFromInputs(k8sUtils.ConfigJsonVolume, getRegistryUrl(dockerHubValues.repository), dockerHubValues.username, dockerHubValues.password)
+		k8sUtils.K8sCreateSecretFromInputs(k8sUtils.ConfigJsonVolume, dockerHubValues.repositoryUrl, dockerHubValues.username, dockerHubValues.password)
 		dockerHubValues.password = "" // clear password
 	},
 }
@@ -67,7 +76,7 @@ func readDockerHubInputs() (string, string, string) {
 	const repositoryValidRegex = `^[\w\d\-\.\:]*\/?[\w\d\-]+$`
 
 	for !isConfirm {
-		repository, err = utils.ReadInputString("Enter repository name (john or quay.io/mark)", utils.Default{Value: "", IsDefault: true}, repositoryValidRegex, true)
+		repository, err = utils.ReadInputString(fmt.Sprintf("Enter repository name (%s/john | quay.io/mark | 10.100.5.225:5000/jennifer)", DockerHubInputPrefix), utils.Default{Value: "", IsDefault: true}, repositoryValidRegex, true)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading DockerHub repository name from user", err)
 		}
@@ -83,14 +92,14 @@ func readDockerHubInputs() (string, string, string) {
 		}
 
 		// only validate credentials if registry is DockerHub
-		if getRegistryUrl(repository) == DockerRegistryUrl {
+		if isDockerHub(repository) {
 			isCredentialsValid, err := validateDockerHubCredentials(repository, username, password)
 			if err != nil {
 				utils.HandleErrorAndExit("Error connecting to Docker Registry repository using credentials", err)
 			}
 
 			if !isCredentialsValid {
-				utils.HandleErrorAndExit("Invalid credentials", err)
+				utils.HandleErrorAndExit("Invalid credentials for Docker Hub", err)
 			}
 		}
 
@@ -110,14 +119,27 @@ func readDockerHubInputs() (string, string, string) {
 	return repository, username, password
 }
 
+func isDockerHub(repository string) bool {
+	return strings.HasPrefix(repository, DockerHubInputPrefix)
+}
+
+// getRegistryUrl returns the registry URL for given repository
 func getRegistryUrl(repository string) string {
 	names := strings.SplitN(repository, "/", 2)
 
+	// if "docker.io/foo" return "https://index.docker.io/v1/"
+	// Docker Hub not supports "docker.io" as registry url hence make it as "https://index.docker.io/v1/"
+	if isDockerHub(repository) {
+		return DockerHubRegistryUrl
+	}
+
+	// if "myDomain.com:5000/foo" return "myDomain.com:5000"
 	if len(names) == 2 {
 		return names[0]
 	}
 
-	return DockerRegistryUrl
+	// if "myDomain.com:5000" return "myDomain.com:5000"
+	return repository
 }
 
 // validateDockerHubCredentials validates the credentials for the repository
