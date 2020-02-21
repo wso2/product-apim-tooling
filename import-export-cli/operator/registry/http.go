@@ -63,12 +63,12 @@ func readHttpRepInputs() (string, string, string) {
 	const repositoryValidRegex = `^[\w\d\-\.\:]*\/?[\w\d\-]+$`
 
 	for !isConfirm {
-		repository, err = utils.ReadInputString("Enter private registry (10.100.5.225:5000/jennifer)", utils.Default{Value: "", IsDefault: true}, repositoryValidRegex, true)
+		repository, err = utils.ReadInputString("Enter private registry (10.100.5.225:5000/jennifer)", utils.Default{Value: "", IsDefault: false}, repositoryValidRegex, true)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading DockerHub repository name from user", err)
 		}
 
-		username, err = utils.ReadInputString("Enter username", utils.Default{Value: "", IsDefault: true}, utils.UsernameValidRegex, true)
+		username, err = utils.ReadInputString("Enter username", utils.Default{Value: "", IsDefault: false}, utils.UsernameValidRegex, true)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading username from user", err)
 		}

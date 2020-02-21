@@ -58,7 +58,7 @@ func ChooseRegistry() {
 	sort.Ints(keys)
 
 	// print all repository types
-	fmt.Println("Choose repository type:")
+	fmt.Println("Choose registry type:")
 	for _, key := range keys {
 		fmt.Printf("%d: %s\n", key, registries[key].Caption)
 	}

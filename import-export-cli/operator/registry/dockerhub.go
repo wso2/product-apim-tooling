@@ -76,12 +76,12 @@ func readDockerHubInputs() (string, string, string) {
 	const repositoryValidRegex = `^[\w\d\-\.\:]*\/?[\w\d\-]+$`
 
 	for !isConfirm {
-		repository, err = utils.ReadInputString(fmt.Sprintf("Enter repository name (%s/john | quay.io/mark | 10.100.5.225:5000/jennifer)", DockerHubInputPrefix), utils.Default{Value: "", IsDefault: true}, repositoryValidRegex, true)
+		repository, err = utils.ReadInputString(fmt.Sprintf("Enter repository name (%s/john | quay.io/mark | 10.100.5.225:5000/jennifer)", DockerHubInputPrefix), utils.Default{Value: "", IsDefault: false}, repositoryValidRegex, true)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading DockerHub repository name from user", err)
 		}
 
-		username, err = utils.ReadInputString("Enter username", utils.Default{Value: "", IsDefault: true}, utils.UsernameValidRegex, true)
+		username, err = utils.ReadInputString("Enter username", utils.Default{Value: "", IsDefault: false}, utils.UsernameValidRegex, true)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading username from user", err)
 		}

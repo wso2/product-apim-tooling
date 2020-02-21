@@ -69,7 +69,7 @@ func readGcrInputs() string {
 		}
 
 		fmt.Println("")
-		fmt.Println("UserGCR service account key json filename: " + svcAccKeyFile)
+		fmt.Println("GCR service account key json file: " + svcAccKeyFile)
 
 		isConfirmStr, err := utils.ReadInputString("Confirm configurations", utils.Default{Value: "Y", IsDefault: true}, "", false)
 		if err != nil {

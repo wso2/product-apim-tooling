@@ -20,11 +20,10 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/operator/olm"
 	"github.com/wso2/product-apim-tooling/import-export-cli/operator/registry"
 	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
-	"time"
-
-	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
@@ -53,10 +52,10 @@ var installApiOperatorCmd = &cobra.Command{
 		isLocalInstallation := flagApiOperatorFile != ""
 		if !isLocalInstallation {
 			fmt.Println("[Installing OLM]")
-			installOLM(k8sUtils.OlmVersion)
+			olm.InstallOLM(olm.Version)
 
 			fmt.Println("[Installing API Operator]")
-			installApiOperatorOperatorHub()
+			olm.InstallApiOperator()
 		}
 
 		// installing operator and configs if -f flag given
@@ -67,72 +66,6 @@ var installApiOperatorCmd = &cobra.Command{
 		fmt.Println("[Setting to K8s Mode]")
 		setToK8sMode()
 	},
-}
-
-// installOLM installs Operator Lifecycle Manager (OLM) with the given version
-func installOLM(version string) {
-	utils.Logln(utils.LogPrefixInfo + "Installing OLM")
-
-	// this implements the logic in
-	// https://github.com/operator-framework/operator-lifecycle-manager/releases/download/0.13.0/install.sh
-	olmNamespace := "olm"
-	csvPhaseSucceeded := "Succeeded"
-
-	// apply OperatorHub CRDs
-	if err := k8sUtils.K8sApplyFromFile(fmt.Sprintf(k8sUtils.OlmCrdUrlTemplate, version)); err != nil {
-		utils.HandleErrorAndExit("Error installing OLM", err)
-	}
-
-	// wait for OperatorHub CRDs
-	if err := k8sUtils.K8sWaitForResourceType(10, "clusterserviceversions.operators.coreos.com", "catalogsources.operators.coreos.com", "operatorgroups.operators.coreos.com"); err != nil {
-		utils.HandleErrorAndExit("Error installing OLM", err)
-	}
-
-	// apply OperatorHub OLM
-	if err := k8sUtils.K8sApplyFromFile(fmt.Sprintf(k8sUtils.OlmOlmUrlTemplate, version)); err != nil {
-		utils.HandleErrorAndExit("Error installing OLM", err)
-	}
-
-	// rolling out
-	if err := k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sRollOut, "status", "-w", "deployment/olm-operator", "-n", olmNamespace); err != nil {
-		utils.HandleErrorAndExit("Error installing OLM: Rolling out deployment OLM Operator", err)
-	}
-	if err := k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sRollOut, "status", "-w", "deployment/catalog-operator", "-n", olmNamespace); err != nil {
-		utils.HandleErrorAndExit("Error installing OLM: Rolling out deployment Catalog Operator", err)
-	}
-
-	// wait max 50s to csv phase to be succeeded
-	csvPhase := ""
-	for i := 50; i > 0 && csvPhase != csvPhaseSucceeded; i-- {
-		newCsvPhase, err := k8sUtils.GetCommandOutput(k8sUtils.Kubectl, k8sUtils.K8sGet, k8sUtils.OperatorCsv, "-n", olmNamespace, "packageserver", "-o", `jsonpath={.status.phase}`)
-		if err != nil {
-			utils.HandleErrorAndExit("Error installing OLM: Getting csv phase", err)
-		}
-
-		// only print new phase
-		if csvPhase != newCsvPhase {
-			fmt.Println("Package server phase: " + newCsvPhase)
-			csvPhase = newCsvPhase
-		}
-
-		// sleep 1 second
-		time.Sleep(1e9)
-	}
-
-	if csvPhase != csvPhaseSucceeded {
-		utils.HandleErrorAndExit("Error installing OLM: CSV Package Server failed to reach phase succeeded", nil)
-	}
-}
-
-// installApiOperatorOperatorHub installs WSO2 api-operator from Operator-Hub
-func installApiOperatorOperatorHub() {
-	utils.Logln(utils.LogPrefixInfo + "Installing API Operator from Operator-Hub")
-	operatorFile := k8sUtils.OperatorYamlUrl
-
-	err := k8sUtils.K8sApplyFromFile(operatorFile)
-	if err != nil {
-		utils.HandleErrorAndExit("Error installing API Operator from Operator-Hub", err)
-	}
 }
 
 // createControllerConfigs creates configs
