@@ -1,4 +1,4 @@
-# Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+# Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 #
 # WSO2 Inc. licenses this file to you under the Apache License,
 # Version 2.0 (the "License"); you may not use this file except
@@ -29,6 +29,7 @@ import numpy as np
 import requests
 import yaml
 
+from constants import *
 from utils import util_methods
 
 
@@ -69,10 +70,10 @@ def simulate_user(user_data):
     global attack_duration, protocol, host, port, payloads, user_agents, start_time, dataset_path, invoke_patterns
 
     up_time = datetime.now() - start_time
+    sleep_pattern = invoke_patterns[random.choice(list(invoke_patterns.keys()))]
 
     if up_time.seconds < attack_duration:
         for app in user_data.values():
-            invoke_pattern_iterator = 0
 
             invoke_pattern_indices = util_methods.generate_method_invoke_pattern(app)
 
@@ -82,11 +83,13 @@ def simulate_user(user_data):
                 if up_time.seconds >= attack_duration:
                     break
 
+                sleep_time = np.absolute(np.random.normal(sleep_pattern['mean'], sleep_pattern['std']))
+                time.sleep(sleep_time)
+
                 scenario = app[i]
                 path = scenario[2]
                 token = scenario[3]
                 method = scenario[4]
-                pattern = invoke_patterns[random.choice(list(invoke_patterns.keys()))].split(',')
                 request_path = "{}://{}:{}/{}".format(protocol, host, port, path)
                 random_user_agent = random.choice(user_agents)
                 random_ip = generate_unique_ip()
@@ -106,9 +109,6 @@ def simulate_user(user_data):
                     print(msg_string)
                     util_methods.log(attack_tool_log_path, msg_string, "a")
 
-                time.sleep(int(pattern[invoke_pattern_iterator % len(pattern)]))
-                invoke_pattern_iterator += 1
-
 
 # Program Execution
 if __name__ == '__main__':
@@ -116,28 +116,15 @@ if __name__ == '__main__':
     attack_tool_log_path = "../../../../../../logs/attack-tool.log"
 
     # Constants
-    GENERAL_CONFIG = 'general_config'
-    API_HOST = 'api_host'
-    NUMBER_OF_PROCESSES = 'number_of_processes'
-    USER_AGENTS = 'user_agents'
-    PAYLOADS = 'payloads'
-    ATTACK_DURATION = 'attack_duration'
-    PORT = 'port'
-    IP = 'ip'
-    PROTOCOL = 'protocol'
-    COMPROMISED_USER_COUNT = 'compromised_user_count'
     STOLEN_TOKEN = 'stolen_token'
-    ATTACKS = 'attacks'
 
     try:
         with open(os.path.abspath(os.path.join(__file__, "../../../../traffic-tool/data/runtime_data/scenario_pool.sav")), "rb") as scenario_file:
             scenario_pool = pickle.load(scenario_file, )
 
-        with open(os.path.abspath(os.path.join(__file__, "../../../../traffic-tool/data/access_pattern/invoke_patterns.yaml")), "rb") as pattern_file:
-            invoke_patterns = yaml.load(pattern_file, Loader=yaml.FullLoader)['time_patterns']
-
         with open(os.path.abspath(os.path.join(__file__, "../../../../../config/attack-tool.yaml")), "r") as attack_config_file:
             attack_config = yaml.load(attack_config_file, Loader=yaml.FullLoader)
+
     except FileNotFoundError as ex:
         error_string = "[ERROR] {} - {}: \'{}\'".format(datetime.now(), ex.strerror, ex.filename)
         print(error_string)
@@ -153,6 +140,7 @@ if __name__ == '__main__':
     user_agents = attack_config[GENERAL_CONFIG][USER_AGENTS]
     process_count = attack_config[GENERAL_CONFIG][NUMBER_OF_PROCESSES]
     compromised_user_count = attack_config[ATTACKS][STOLEN_TOKEN][COMPROMISED_USER_COUNT]
+    invoke_patterns = util_methods.process_time_patterns(attack_config[GENERAL_CONFIG][TIME_PATTERNS])
 
     # Recording column names in the dataset csv file
     dataset_path = "../../../../../../dataset/attack/stolen_token.csv"
@@ -173,6 +161,7 @@ if __name__ == '__main__':
 
     compromised_users = np.random.choice(list(scenario_pool.values()), size=compromised_user_count, replace=False)
     process_list = []
+
     for user in compromised_users:
         process = Process(target=simulate_user, args=(user,))
         process.daemon = False

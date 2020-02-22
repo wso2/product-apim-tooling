@@ -1,4 +1,4 @@
-# Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+# Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 #
 # WSO2 Inc. licenses this file to you under the Apache License,
 # Version 2.0 (the "License"); you may not use this file except
@@ -151,6 +151,11 @@ def generate_biased_random(minimum, maximum, exp):
 
 
 def generate_method_invoke_pattern(app):
+    """
+    Generates a method invoke pattern according to the likelihood of each scenario getting called.
+    :param app: A list containing scenarios
+    :return: Method invoke pattern list with scenario indexes as elements
+    """
     probability_list = []
     iterations = 0
     DIFF_THRESHOLD = 0.5
@@ -175,5 +180,27 @@ def generate_method_invoke_pattern(app):
 
 
 def cleanup(process_list):
+    """
+    Terminates a given list of processes
+    :param process_list: List of processes that need to be terminated
+    :return: None
+    """
     for p in process_list:
         p.terminate()
+
+
+def process_time_patterns(patterns: dict) -> defaultdict:
+    """
+    Process time patterns to obtain mean and standard deviation to be used with distributions.
+    :param patterns: Patterns dictionary.
+    :return: Dictionary with mean and std for each pattern.
+    """
+    processed_patterns = defaultdict()
+
+    for key, pattern in patterns.items():
+        pattern = list(map(int, pattern.split(',')))
+        mean = np.mean(pattern)
+        std = np.std(pattern)
+        processed_patterns[key] = {'mean': mean, 'std': std}
+    return processed_patterns
+

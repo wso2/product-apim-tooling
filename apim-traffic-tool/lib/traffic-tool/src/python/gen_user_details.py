@@ -1,5 +1,4 @@
-
-# Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+# Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 #
 # WSO2 Inc. licenses this file to you under the Apache License,
 # Version 2.0 (the "License"); you may not use this file except
@@ -33,7 +32,7 @@ abs_path = os.path.abspath(os.path.dirname(__file__))
 
 # load and set configurations
 try:
-    with open(abs_path+'/../../../../config/traffic-tool.yaml', 'r') as file:
+    with open(abs_path + '/../../../../config/traffic-tool.yaml', 'r') as file:
         traffic_config = yaml.load(file, Loader=yaml.FullLoader)
     scenario_name = traffic_config['scenario_name']
     no_of_users = int(traffic_config['tool_config']['no_of_users'])
@@ -47,10 +46,13 @@ except FileNotFoundError as e:
     sys.exit()
 
 
-'''
+def gen_user_n_pw(firstname: str, num: int):
+    """
     This function will return a username and password for a given user (username and password are considered as the same)
-'''
-def genUnPw(firstname:str, num:int):
+    :param firstname: User's first name
+    :param num: User number
+    :return: User name for the user
+    """
     username = firstname.lower() + str(num)
     if len(username) < 5:
         username += '123'
@@ -58,13 +60,15 @@ def genUnPw(firstname:str, num:int):
     return username
 
 
-'''
+def generate_user(num: int):
+    """
     This function will generate random user details (for a single user)
-'''
-def generateUser(num:int):
+    :param num: User number
+    :return: Details of the user
+    """
     user = []
     firstname = faker.first_name()
-    username = genUnPw(firstname, num)
+    username = gen_user_n_pw(firstname, num)
     user.append(username)
     user.append(username)
     user.append(firstname)
@@ -80,83 +84,86 @@ def generateUser(num:int):
     return user
 
 
-'''
+def app_user_scenario():
+    """
     This function will generate app name, username pattern according to the scenario
-'''
-def app_userScenario():
+    :return: None
+    """
     finalArr = []
     finalStr = ""
 
-    individual_app_users = int(no_of_users * 3/5)
-    only_onlineShopping = int(individual_app_users*1/4)
-    only_cricScore = int(individual_app_users*1/6)
+    individual_app_users = int(no_of_users * 3 / 5)
+    only_onlineShopping = int(individual_app_users * 1 / 4)
+    only_cricScore = int(individual_app_users * 1 / 6)
     only_taxi = individual_app_users - (only_onlineShopping + only_cricScore)
 
-    all_app = int((no_of_users - individual_app_users) * 1/4)
-    shopping_taxi = int((no_of_users - individual_app_users) * 1/4)
-    shopping_cricScore = int((no_of_users - individual_app_users) * 1/8)
+    all_app = int((no_of_users - individual_app_users) * 1 / 4)
+    shopping_taxi = int((no_of_users - individual_app_users) * 1 / 4)
+    shopping_cricScore = int((no_of_users - individual_app_users) * 1 / 8)
     taxi_cricScore = no_of_users - individual_app_users - (all_app + shopping_taxi + shopping_cricScore)
 
-    finalArr.append([ usernames[i]+",Online Shopping\n" for i in range(0, only_onlineShopping) ])     # only online shopping app users
-    finalArr.append([ usernames[i]+",CricScore\n" for i in range(only_onlineShopping, only_onlineShopping+only_cricScore) ])     # only cricscore app users
-    finalArr.append([ usernames[i]+",Taxi\n" for i in range(only_onlineShopping+only_cricScore, only_onlineShopping+only_cricScore+only_taxi) ])     # only taxi app users
+    finalArr.append([usernames[i] + ",Online Shopping\n" for i in range(0, only_onlineShopping)])  # only online shopping app users
+    finalArr.append([usernames[i] + ",CricScore\n" for i in range(only_onlineShopping, only_onlineShopping + only_cricScore)])  # only cricscore app users
+    finalArr.append([usernames[i] + ",Taxi\n" for i in range(only_onlineShopping + only_cricScore, only_onlineShopping + only_cricScore + only_taxi)])  # only taxi app users
 
     v1 = individual_app_users + shopping_taxi
-    finalArr.append([ usernames[i]+",Online Shopping\n" for i in range(individual_app_users, v1) ])  # both shopping and taxi app users
-    finalArr.append([ usernames[i]+",Taxi\n" for i in range(individual_app_users, v1) ])
+    finalArr.append([usernames[i] + ",Online Shopping\n" for i in range(individual_app_users, v1)])  # both shopping and taxi app users
+    finalArr.append([usernames[i] + ",Taxi\n" for i in range(individual_app_users, v1)])
 
     v2 = v1 + shopping_cricScore
-    finalArr.append([ usernames[i]+",Online Shopping\n" for i in range(v1, v2) ])  # both shopping and cricscore app users
-    finalArr.append([ usernames[i]+",CricScore\n" for i in range(v1, v2) ])
+    finalArr.append([usernames[i] + ",Online Shopping\n" for i in range(v1, v2)])  # both shopping and cricscore app users
+    finalArr.append([usernames[i] + ",CricScore\n" for i in range(v1, v2)])
 
     v3 = v2 + taxi_cricScore
-    finalArr.append([ usernames[i]+",Taxi\n" for i in range(v2, v3) ])  # both taxi and cricscore app users
-    finalArr.append([ usernames[i]+",CricScore\n" for i in range(v2, v3) ])
+    finalArr.append([usernames[i] + ",Taxi\n" for i in range(v2, v3)])  # both taxi and cricscore app users
+    finalArr.append([usernames[i] + ",CricScore\n" for i in range(v2, v3)])
 
     v4 = v3 + all_app
-    finalArr.append([ usernames[i]+",Online Shopping\n" for i in range(v3, v4) ])  # all 3 app users
-    finalArr.append([ usernames[i]+",Taxi\n" for i in range(v3, v4) ])
-    finalArr.append([ usernames[i]+",CricScore\n" for i in range(v3, v4) ])
+    finalArr.append([usernames[i] + ",Online Shopping\n" for i in range(v3, v4)])  # all 3 app users
+    finalArr.append([usernames[i] + ",Taxi\n" for i in range(v3, v4)])
+    finalArr.append([usernames[i] + ",CricScore\n" for i in range(v3, v4)])
 
     for outer in finalArr:
         for inner in outer:
             finalStr += inner
 
-    file = open(abs_path+'/../../data/scenario/{}/data/user_app_pattern.csv'.format(scenario_name), 'w')
-    file.write(finalStr)
-    file.close()
+    output = open(abs_path + '/../../data/scenario/{}/data/user_app_pattern.csv'.format(scenario_name), 'w')
+    output.write(finalStr)
+    output.close()
 
     print('[INFO] {}: User app pattern generation successful!'.format(str(datetime.now())))
 
 
-'''
+def gen_users_csv():
+    """
     This function will generate given number of users and write data to a csv file
     data format: <username>, <password>, <first_name>, <last_name>, <organization>, <country>, <email>, <no(land)>, <no(mobile)>, <IM>, <url>
     delimiter : '$$ '
-'''
-def genUsersCSV():
+    :return: None
+    """
     csvString = ""
     for i in range(no_of_users):
-        userArr = generateUser(i+1)
+        userArr = generate_user(i + 1)
         for ele in userArr:
             csvString += ele + '$$ '
         csvString += '\n'
 
-    file = open(abs_path+'/../../data/scenario/{}/data/user_generation.csv'.format(scenario_name), 'w')
-    file.write(csvString)
-    file.close()
+    output = open(abs_path + '/../../data/scenario/{}/data/user_generation.csv'.format(scenario_name), 'w')
+    output.write(csvString)
+    output.close()
     print('[INFO] {}: User generation successful!'.format(str(datetime.now())))
 
 
-# execute
-parser = argparse.ArgumentParser("generate user details")
-parser.add_argument("option", help="Pass 0 to generate only user details. Pass 1 to generate user details and the scenario distribution", type=int)
-args = parser.parse_args()
+if __name__ == "__main__":
+    # execute
+    parser = argparse.ArgumentParser("generate user details")
+    parser.add_argument("option", help="Pass 0 to generate only user details. Pass 1 to generate user details and the scenario distribution", type=int)
+    args = parser.parse_args()
 
-if args.option == 0:
-    genUsersCSV()
-elif args.option == 1:
-    genUsersCSV()
-    app_userScenario()
-else:
-    print("[INFO] {}: Invalid argument value {}!".format(str(datetime.now()), args.option))
+    if args.option == 0:
+        gen_users_csv()
+    elif args.option == 1:
+        gen_users_csv()
+        app_user_scenario()
+    else:
+        print("[INFO] {}: Invalid argument value {}!".format(str(datetime.now()), args.option))
