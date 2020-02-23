@@ -229,9 +229,9 @@ case "$1" in
     exit 0
   ;;
   setup)
-    echo "Enter ex to setup for example scenario. Any other key to generate the scenario"
+    echo "Enter '0' to setup for custom scenario. Any other key to generate a random scenario"
     read KEY
-    if [ $KEY == "ex" ]
+    if [ $KEY == "0" ]
     then
       func_gen_example_scenario 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log
       func_create_scenario 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log
