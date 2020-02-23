@@ -2,5 +2,4 @@
 *
 # Except these files
 !.gitignore
-!invoke_scenario.yaml
-
+!ex_invoke_scenario.yaml
