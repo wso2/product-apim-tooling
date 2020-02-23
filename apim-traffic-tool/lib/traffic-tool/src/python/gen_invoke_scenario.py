@@ -20,10 +20,10 @@ import pickle
 import random
 import string
 import sys
-from datetime import datetime
-
 import pandas as pd
 import yaml
+from datetime import datetime
+from utils import util_methods
 from faker import Factory
 from scipy.stats import norm
 
@@ -51,12 +51,11 @@ abs_path = os.path.abspath(os.path.dirname(__file__))
 try:
     with open(abs_path + '/../../../../config/traffic-tool.yaml', 'r') as file:
         traffic_config = yaml.load(file, Loader=yaml.FullLoader)
-    scenario_name = traffic_config['scenario_name']
     user_agents = traffic_config['user_agents']
 
-    with open(abs_path + '/../../../../config/apim.yaml', 'r') as file:
-        apim_config = yaml.load(file, Loader=yaml.FullLoader)
-    apis = apim_config['apis']
+    with open(abs_path + '/../../../../config/api_details.yaml', 'r') as file:
+        api_config = yaml.load(file, Loader=yaml.FullLoader)
+    apis = api_config['apis']
 
     with open(abs_path + '/../../../../config/user-settings.yaml', 'r') as file:
         user_settings = yaml.load(file, Loader=yaml.FullLoader)
@@ -64,19 +63,10 @@ try:
     dataset_column_order = user_settings['resources']['column_order']
 
 except FileNotFoundError as e:
-    print('[ERROR] {} gen_invoke_scenario.py: {}: {}'.format(str(datetime.now()), e.strerror, e.filename))
+    out_txt = 'FileNotFoundError in gen_invoke_scenario.py: {}: {}'.format(e.strerror, e.filename)
+    util_methods.log('traffic-tool.log', 'ERROR', out_txt)
+    print('[ERROR] {}'.format(out_txt))
     sys.exit()
-
-
-def log(tag, write_string):
-    """
-    This function will write the given log output to the log.txt file
-    :param tag: Log tag
-    :param write_string: Message to be written
-    :return: None
-    """
-    with open(abs_path + '/../../../../logs/traffic-tool.log', 'a+') as log_file:
-        log_file.write("[{}] ".format(tag) + str(datetime.now()) + ": " + write_string + "\n")
 
 
 def getPath(api_name, method):
@@ -164,9 +154,9 @@ def genUniqueCookieList(count: int):
 
 if __name__ == "__main__":
     '''
-        Execute the script and generate the user scenario distribution
-        Usage: python3 gen_invoke_scenario.py
-        output folders: lib/traffic-tool/data/scenario/ and lib/traffic-tool/data/runtime_data/
+    Execute the script and generate the user scenario distribution
+    Usage: python3 gen_invoke_scenario.py
+    output folders: lib/traffic-tool/data/scenario/ and lib/traffic-tool/data/runtime_data/
     '''
 
     try:
@@ -174,32 +164,35 @@ if __name__ == "__main__":
         ip_dataset = pd.read_csv(abs_path + '/../../../../resources/libraries/{}'.format(ip_dataset_name), header=None)
 
         # generate a set of ips and cookies for each user
-        with open(abs_path + '/../../data/scenario/{}/data/user_generation.csv'.format(scenario_name)) as file:
-            userlist = file.readlines()
+        with open(abs_path + '/../../data/scenario/user_details.yaml', 'r') as user_file:
+            userlist = yaml.load(user_file, Loader=yaml.FullLoader)
 
-            cookie_list = genUniqueCookieList(len(userlist))
+        cookie_list = genUniqueCookieList(len(userlist['users']))
 
-            for user in userlist:
-                username = user.split('$$ ')[0]
-                country = user.split('$$ ')[5]
-                user_country.update({username: country})
-                user_ip.update({username: ipGen(country)})
-                user_cookie.update({username: cookie_list.pop()})
+        for user in userlist['users']:
+            username = user['username']
+            country = user['country']
+            user_country.update({username: country})
+            user_ip.update({username: ipGen(country)})
+            user_cookie.update({username: cookie_list.pop()})
 
         # read user token csv file
-        user_token = pd.read_csv(abs_path + '/../../data/scenario/{}/api_invoke_tokens.csv'.format(scenario_name))
+        user_token = pd.read_csv(abs_path + '/../../data/scenario/api_invoke_tokens.csv')
 
     except FileNotFoundError as e:
-        print('[ERROR] {} gen_invoke_scenario.py: {}: {}'.format(str(datetime.now()), e.strerror, e.filename))
-        log('ERROR', '{}: {}'.format(e.strerror, e.filename))
+        out_txt = 'FileNotFoundError in gen_invoke_scenario.py: {}: {}'.format(e.strerror, e.filename)
+        util_methods.log('traffic-tool.log', 'ERROR', out_txt)
+        print('[ERROR] FileNotFoundError in gen_invoke_scenario.py: {}'.format(str(e)))
         sys.exit()
     except pd.errors.EmptyDataError as e:
-        print('[ERROR] {} gen_invoke_scenario.py: {}'.format(str(datetime.now()), e))
-        log('ERROR', '{}'.format(str(e)))
+        out_txt = 'EmptyDataError in gen_invoke_scenario.py: {}'.format(str(e))
+        util_methods.log('traffic-tool.log', 'ERROR', out_txt)
+        print('[ERROR] {}'.format(out_txt))
         sys.exit()
     except Exception as e:
-        print('[ERROR] {} gen_invoke_scenario.py: {}'.format(str(datetime.now()), e))
-        log('ERROR', '{}'.format(str(e)))
+        out_txt = 'Exception in gen_invoke_scenario.py: {}'.format(e)
+        util_methods.log('traffic-tool.log', 'ERROR', out_txt)
+        print('[ERROR] {}'.format(out_txt))
         sys.exit()
 
     # filter out unique app names and prepare dictionary
@@ -225,13 +218,14 @@ if __name__ == "__main__":
 
     try:
         # generate scenario data according to the script and append to the pool
-        with open(abs_path + '/../../data/scenario/{}/data/invoke_scenario.yaml'.format(scenario_name)) as file:
+        with open(abs_path + '/../../data/scenario/invoke_scenario.yaml') as file:
             invoke_scenario = yaml.load(file, Loader=yaml.FullLoader)
         scenario_data = invoke_scenario['invoke_scenario']
 
     except FileNotFoundError as e:
-        print('[ERROR] {} gen_invoke_scenario.py: {}: {}'.format(str(datetime.now()), e.strerror, e.filename))
-        log('ERROR', '{}: {}'.format(e.strerror, e.filename))
+        out_txt = 'FileNotFoundError in gen_invoke_scenario.py: {}: {}'.format(e.strerror, e.filename)
+        util_methods.log('traffic-tool.log', 'ERROR', out_txt)
+        print('[ERROR] {}'.format(out_txt))
         sys.exit()
 
     for item in scenario_data:
@@ -244,7 +238,7 @@ if __name__ == "__main__":
         total_no_of_user_combinations += user_count
         if total_no_of_user_combinations > existing_no_of_user_combinations:
             # invalid no of users (cannot execute the scenario)
-            log("ERROR",
+            util_methods.log('traffic-tool.log', "ERROR",
                 "Invalid number of user count declared in 'invoke_scenario.yaml'. Expected {} user combinations. Found {} or more.".format(existing_no_of_user_combinations, total_no_of_user_combinations))
             raise ArithmeticError(
                 "Invalid number of user count declared in 'invoke_scenario.yaml'. Expected {} user combinations. Found {} or more.".format(existing_no_of_user_combinations, total_no_of_user_combinations))
@@ -274,11 +268,11 @@ if __name__ == "__main__":
         user_cookie = row[3]
         write_str += access_token + ',' + api_name + ',' + ip_address + ',' + user_cookie + "\n"
 
-    with open(abs_path + '/../../data/scenario/{}/token_ip_cookie.csv'.format(scenario_name), 'w') as file:
+    with open(abs_path + '/../../data/scenario/token_ip_cookie.csv', 'w') as file:
         file.write(write_str)
 
     # saving scenario pool to a pickle file
     pickle.dump(scenario_pool, open(abs_path + "/../../data/runtime_data/scenario_pool.sav", "wb"))
 
-    log("INFO", "User scenario distribution generated successfully")
-    print('[INFO] {}: User scenario distribution generated successfully'.format(str(datetime.now())))
+    util_methods.log('traffic-tool.log', "INFO", "User scenario distribution generated successfully")
+    print('[INFO] User scenario distribution generated successfully')

@@ -20,11 +20,11 @@ import os
 import pickle
 import random
 import sys
-from datetime import datetime
-from multiprocessing import Process, Value
-
 import numpy as np
 import yaml
+from datetime import datetime
+from multiprocessing import Process, Value
+from utils import util_methods
 
 # variables
 no_of_data_points = None
@@ -56,17 +56,6 @@ def loadConfig():
         invoke_patterns = yaml.load(pattern_file, Loader=yaml.FullLoader)
 
     time_patterns = invoke_patterns['time_patterns']
-
-
-def log(tag, write_string):
-    """
-    This function will write the given log output to the log.txt file
-    :param tag: Log tag
-    :param write_string: Message to be written
-    :return: None
-    """
-    with open(abs_path + '/../../../../logs/traffic-tool.log', 'a+') as log_file:
-        log_file.write("[{}] ".format(tag) + str(datetime.now()) + ": " + write_string + "\n")
 
 
 def writeInvokeData(timestamp, path, access_token, method, user_ip, cookie, user_agent):
@@ -172,7 +161,6 @@ def runInvoker(user_scenario, current_data_points):
 
 
 if __name__ == "__main__":
-
     '''
         Generate the dataset according to the scenario
         Usage: python3 gen_invoke_data.py filename
@@ -180,7 +168,7 @@ if __name__ == "__main__":
     '''
 
     parser = argparse.ArgumentParser("generate traffic data")
-    parser.add_argument("filename", help="Enter a filename to write final output", type=str)
+    parser.add_argument("filename", help="Enter a filename to write final output (without extension)", type=str)
     args = parser.parse_args()
     filename = args.filename + ".csv"
 
@@ -188,10 +176,12 @@ if __name__ == "__main__":
     try:
         loadConfig()
     except FileNotFoundError as e:
-        log('ERROR', '{}: {}'.format(e.strerror, e.filename))
+        util_methods.log('traffic-tool.log', 'ERROR', str(e))
+        print('[ERROR] {}'.format(str(e)))
         sys.exit()
     except Exception as e:
-        log('ERROR', '{}'.format(str(e)))
+        util_methods.log('traffic-tool.log', 'ERROR', str(e))
+        print('[ERROR] {}'.format(str(e)))
         sys.exit()
 
     with open(abs_path + '/../../../../dataset/generated-traffic/{}'.format(filename), 'w') as file:
@@ -201,7 +191,8 @@ if __name__ == "__main__":
         # load and set the scenario pool
         scenario_pool = pickle.load(open(abs_path + "/../../data/runtime_data/scenario_pool.sav", "rb"))
     except FileNotFoundError as e:
-        log('ERROR', '{}: {}'.format(e.strerror, e.filename))
+        util_methods.log('traffic-tool.log', 'ERROR', str(e))
+        print('[ERROR] {}'.format(str(e)))
         sys.exit()
 
     # record script start_time
@@ -211,7 +202,7 @@ if __name__ == "__main__":
 
     # create and start a process for each user
     for key_uname, val_scenario in scenario_pool.items():
-        process = Process(target=runInvoker, args=(key_uname, val_scenario, current_data_points))
+        process = Process(target=runInvoker, args=(val_scenario, current_data_points))
         process.daemon = False
         processes_list.append(process)
         process.start()
@@ -220,7 +211,7 @@ if __name__ == "__main__":
             file.write(str(process.pid) + '\n')
 
     print("[INFO] Scenario loaded successfully. Wait until data generation complete!")
-    log("INFO", "Scenario loaded successfully. Wait until data generation complete!")
+    util_methods.log("traffic-tool.log", "INFO", "Scenario loaded successfully. Wait until data generation complete!")
 
     while True:
         if current_data_points.value >= no_of_data_points:
@@ -231,7 +222,7 @@ if __name__ == "__main__":
 
             time_elapsed = datetime.now() - script_start_time
             print("[INFO] Data generated successfully. Time elapsed: {} seconds".format(time_elapsed.seconds))
-            log("INFO", "Data generated successfully. Time elapsed: {} seconds".format(time_elapsed.seconds))
+            util_methods.log("traffic-tool.log", "INFO", "Data generated successfully. Time elapsed: {} seconds".format(time_elapsed.seconds))
             break
         else:
             pass

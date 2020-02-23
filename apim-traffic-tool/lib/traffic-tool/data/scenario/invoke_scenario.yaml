@@ -1,0 +1,121 @@
+invoke_scenario:
+- app_name: Online Shopping
+  no_of_users: 2
+  time_pattern: pattern5
+  api_calls:
+  - api: News
+    method: GET
+    no_of_requests: 18
+  - api: Places
+    method: GET
+    no_of_requests: 13
+  - api: Payment
+    method: GET
+    no_of_requests: 11
+  - api: Payment
+    method: POST
+    no_of_requests: 9
+  - api: Payment
+    method: DELETE
+    no_of_requests: 7
+- app_name: Online Shopping
+  no_of_users: 7
+  time_pattern: pattern9
+  api_calls:
+  - api: News
+    method: GET
+    no_of_requests: 56
+  - api: Places
+    method: GET
+    no_of_requests: 32
+  - api: Payment
+    method: GET
+    no_of_requests: 51
+  - api: Payment
+    method: POST
+    no_of_requests: 28
+  - api: Payment
+    method: DELETE
+    no_of_requests: 15
+- app_name: Taxi
+  no_of_users: 2
+  time_pattern: pattern2
+  api_calls:
+  - api: Map
+    method: GET
+    no_of_requests: 12
+  - api: Map
+    method: DELETE
+    no_of_requests: 10
+  - api: Places
+    method: GET
+    no_of_requests: 16
+  - api: Weather
+    method: GET
+    no_of_requests: 16
+  - api: Weather
+    method: DELETE
+    no_of_requests: 8
+  - api: Payment
+    method: GET
+    no_of_requests: 18
+  - api: Payment
+    method: POST
+    no_of_requests: 6
+  - api: Payment
+    method: DELETE
+    no_of_requests: 11
+- app_name: Taxi
+  no_of_users: 6
+  time_pattern: pattern1
+  api_calls:
+  - api: Map
+    method: GET
+    no_of_requests: 34
+  - api: Map
+    method: DELETE
+    no_of_requests: 15
+  - api: Places
+    method: GET
+    no_of_requests: 53
+  - api: Weather
+    method: GET
+    no_of_requests: 56
+  - api: Weather
+    method: DELETE
+    no_of_requests: 18
+  - api: Payment
+    method: GET
+    no_of_requests: 39
+  - api: Payment
+    method: POST
+    no_of_requests: 18
+  - api: Payment
+    method: DELETE
+    no_of_requests: 25
+- app_name: CricScore
+  no_of_users: 2
+  time_pattern: pattern2
+  api_calls:
+  - api: News
+    method: GET
+    no_of_requests: 19
+  - api: Cricket
+    method: GET
+    no_of_requests: 10
+  - api: Cricket
+    method: DELETE
+    no_of_requests: 9
+- app_name: CricScore
+  no_of_users: 3
+  time_pattern: pattern4
+  api_calls:
+  - api: News
+    method: GET
+    no_of_requests: 44
+  - api: Cricket
+    method: GET
+    no_of_requests: 54
+  - api: Cricket
+    method: DELETE
+    no_of_requests: 18

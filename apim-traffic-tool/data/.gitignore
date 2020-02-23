@@ -1,4 +1,18 @@
 # Ignore everything in this directory
 *
-# Except this file
+
+# Except these files
 !.gitignore
+
+
+# ...even if they are in subdirectories
+!*/
+
+# if the files are in subdirectories
+!/swagger/cricket.json
+!/swagger/map.json
+!/swagger/news.json
+!/swagger/payment.json
+!/swagger/places.json
+!/swagger/weather.json
+

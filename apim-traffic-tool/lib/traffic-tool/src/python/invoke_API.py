@@ -21,14 +21,15 @@ import pickle
 import random
 import sys
 import time
-from collections import defaultdict
-from datetime import datetime
-from multiprocessing import Process, Value
-
 import numpy as np
 import requests
 import urllib3
 import yaml
+from collections import defaultdict
+from datetime import datetime
+from multiprocessing import Process, Value
+from utils import util_methods
+
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -88,17 +89,6 @@ def process_time_patterns(patterns: dict) -> defaultdict:
         std = np.std(pattern)
         processed_patterns[key] = {'mean': mean, 'std': std}
     return processed_patterns
-
-
-def log(tag, write_string):
-    """
-    This function will write the given log output to the log.txt file
-    :param tag: Log tag
-    :param write_string: Message to be written
-    :return: None
-    """
-    with open(abs_path + '/../../../../logs/traffic-tool.log', 'a+') as log_file:
-        log_file.write("[{}] ".format(tag) + str(datetime.now()) + ": " + write_string + "\n")
 
 
 def sendRequest(url_protocol, url_ip, url_port, path, access_token, method, user_ip, cookie, user_agent):
@@ -170,8 +160,10 @@ def sendRequest(url_protocol, url_ip, url_port, path, access_token, method, user
             res_txt = 'Invalid type'
 
     except Exception as err:
-        log("ERROR", str(err))
         code = '521'
+        log_txt = "sendRequest(). responseCode: " + str(code) + ", errorLog: " + str(err) + ", method: " + method + ", url: " + url
+        util_methods.log('traffic-requests.log', 'ERROR', log_txt)
+        util_methods.log('traffic-tool.log', 'ERROR', str(err))
 
     # user agent is wrapped around quotes because there are commas in the user agent and they clash with the commas in csv file
     write_string = str(
@@ -188,8 +180,8 @@ def runInvoker(user_scenario, connection_refuse_count):
     """
     This function will take a given invoke scenario and execute it.
     Supposed to be executed from a process.
-    :param user_scenario:
-    :param connection_refuse_count:
+    :param user_scenario: User scenario data
+    :param connection_refuse_count: Current connection refuse count
     :return: None
     """
     global script_start_time, script_runtime
@@ -248,12 +240,12 @@ def runInvoker(user_scenario, connection_refuse_count):
                 if heavy_traffic != 'true':
                     sleep_time = np.absolute(np.random.normal(time_pattern['mean'], time_pattern['std']))
                     time.sleep(sleep_time)
-                res_code, res_txt = sendRequest(host_protocol, host_ip, host_port, path, access_token, method, user_ip, cookie, user_agent)
+                res_code = sendRequest(host_protocol, host_ip, host_port, path, access_token, method, user_ip, cookie, user_agent)[0]
                 if res_code == '521':
                     connection_refuse_count.value += 1
 
             except Exception as err:
-                log('ERROR', str(err))
+                util_methods.log('traffic-tool.log', 'ERROR', str(err))
                 connection_refuse_count.value += 1
 
         up_time = datetime.now() - script_start_time
@@ -264,14 +256,14 @@ def runInvoker(user_scenario, connection_refuse_count):
 
 
 if __name__ == "__main__":
-
     """
         Execute the scenario and generate the dataset
         Usage: python3 invoke_API.py filename exec_time
         output folder: dataset/traffic/
     """
+
     parser = argparse.ArgumentParser("run traffic tool")
-    parser.add_argument("filename", help="Enter a filename to write final output", type=str)
+    parser.add_argument("filename", help="Enter a filename to write final output (without extension)", type=str)
     parser.add_argument("runtime", help="Enter the script execution time in minutes", type=float)
     args = parser.parse_args()
     filename = args.filename + ".csv"
@@ -281,10 +273,10 @@ if __name__ == "__main__":
     try:
         loadConfig()
     except FileNotFoundError as e:
-        log('ERROR', '{}: {}'.format(e.strerror, e.filename))
+        util_methods.log('traffic-tool.log', 'ERROR', str(e))
         sys.exit()
     except Exception as e:
-        log('ERROR', '{}'.format(str(e)))
+        util_methods.log('traffic-tool.log', 'ERROR', str(e))
         sys.exit()
 
     with open(abs_path + '/../../../../dataset/traffic/{}'.format(filename), 'w') as file:
@@ -294,7 +286,7 @@ if __name__ == "__main__":
         # load and set the scenario pool
         scenario_pool = pickle.load(open(abs_path + "/../../data/runtime_data/scenario_pool.sav", "rb"))
     except FileNotFoundError as e:
-        log('ERROR', '{}: {}'.format(e.strerror, e.filename))
+        util_methods.log('traffic-tool.log', 'ERROR', str(e))
         sys.exit()
 
     # record script start_time
@@ -313,7 +305,7 @@ if __name__ == "__main__":
             file.write(str(process.pid) + '\n')
 
     print("[INFO] Scenario loaded successfully. Wait {} minutes to complete the script!".format(str(script_runtime / 60)))
-    log("INFO", "Scenario loaded successfully. Wait {} minutes to complete the script!".format(str(script_runtime / 60)))
+    util_methods.log("traffic-tool.log", "INFO", "Scenario loaded successfully. Wait {} minutes to complete the script!".format(str(script_runtime / 60)))
 
     while True:
         time_elapsed = datetime.now() - script_start_time
@@ -325,7 +317,7 @@ if __name__ == "__main__":
                 file.write('')
 
             print("[INFO] Script terminated successfully. Time elapsed: {} minutes".format(time_elapsed.seconds / 60.0))
-            log("INFO", "Script terminated successfully. Time elapsed: {} minutes".format(time_elapsed.seconds / 60.0))
+            util_methods.log("traffic-tool.log", "INFO", "Script terminated successfully. Time elapsed: {} minutes".format(time_elapsed.seconds / 60.0))
             break
 
         elif connection_refuse_count.value > max_connection_refuse_count:
@@ -334,7 +326,7 @@ if __name__ == "__main__":
             with open(abs_path + '/../../data/runtime_data/traffic_processes.pid', 'w') as file:
                 file.write('')
             print("[ERROR] Terminating the program due to maximum no of connection refuses!")
-            log("ERROR", "Terminating the program due to maximum no of connection refuses!")
+            util_methods.log("traffic-tool.log", "ERROR", "Terminating the program due to maximum no of connection refuses!")
             break
 
         else:
