@@ -23,12 +23,13 @@ import sys
 import pandas as pd
 import yaml
 from datetime import datetime
-from utils import util_methods
+from utils import log
 from faker import Factory
 from scipy.stats import norm
 
 # variables
-scenario_name = None
+logger = log.setLogger('gen_invoke_scenario')
+
 ip_dataset_name = None
 apis = None
 invoke_scenario = None
@@ -64,8 +65,7 @@ try:
 
 except FileNotFoundError as e:
     out_txt = 'FileNotFoundError in gen_invoke_scenario.py: {}: {}'.format(e.strerror, e.filename)
-    util_methods.log('traffic-tool.log', 'ERROR', out_txt)
-    print('[ERROR] {}'.format(out_txt))
+    logger.exception(out_txt)
     sys.exit()
 
 
@@ -116,7 +116,7 @@ def ipGen(country):
         ip_decs = ip_range.sample(n=1).values[0]
 
         random.seed()
-        temp_ip = ipaddress.IPv4Address._string_from_ip_int(random.randint(ip_decs[0], ip_decs[1]))
+        temp_ip = ipaddress.IPv4Address._string_from_ip_int(random.randint(int(ip_decs[0]), int(ip_decs[1])))
         while temp_ip in used_ips:
             temp_ip = ipaddress.IPv4Address._string_from_ip_int(random.randint(ip_decs[0], ip_decs[1]))
 
@@ -181,18 +181,15 @@ if __name__ == "__main__":
 
     except FileNotFoundError as e:
         out_txt = 'FileNotFoundError in gen_invoke_scenario.py: {}: {}'.format(e.strerror, e.filename)
-        util_methods.log('traffic-tool.log', 'ERROR', out_txt)
-        print('[ERROR] FileNotFoundError in gen_invoke_scenario.py: {}'.format(str(e)))
+        logger.exception(out_txt)
         sys.exit()
     except pd.errors.EmptyDataError as e:
         out_txt = 'EmptyDataError in gen_invoke_scenario.py: {}'.format(str(e))
-        util_methods.log('traffic-tool.log', 'ERROR', out_txt)
-        print('[ERROR] {}'.format(out_txt))
+        logger.exception(out_txt)
         sys.exit()
     except Exception as e:
         out_txt = 'Exception in gen_invoke_scenario.py: {}'.format(e)
-        util_methods.log('traffic-tool.log', 'ERROR', out_txt)
-        print('[ERROR] {}'.format(out_txt))
+        logger.exception(out_txt)
         sys.exit()
 
     # filter out unique app names and prepare dictionary
@@ -224,8 +221,7 @@ if __name__ == "__main__":
 
     except FileNotFoundError as e:
         out_txt = 'FileNotFoundError in gen_invoke_scenario.py: {}: {}'.format(e.strerror, e.filename)
-        util_methods.log('traffic-tool.log', 'ERROR', out_txt)
-        print('[ERROR] {}'.format(out_txt))
+        logger.exception(out_txt)
         sys.exit()
 
     for item in scenario_data:
@@ -238,7 +234,7 @@ if __name__ == "__main__":
         total_no_of_user_combinations += user_count
         if total_no_of_user_combinations > existing_no_of_user_combinations:
             # invalid no of users (cannot execute the scenario)
-            util_methods.log('traffic-tool.log', "ERROR",
+            logger.error(
                 "Invalid number of user count declared in 'invoke_scenario.yaml'. Expected {} user combinations. Found {} or more.".format(existing_no_of_user_combinations, total_no_of_user_combinations))
             raise ArithmeticError(
                 "Invalid number of user count declared in 'invoke_scenario.yaml'. Expected {} user combinations. Found {} or more.".format(existing_no_of_user_combinations, total_no_of_user_combinations))
@@ -274,5 +270,4 @@ if __name__ == "__main__":
     # saving scenario pool to a pickle file
     pickle.dump(scenario_pool, open(abs_path + "/../../data/runtime_data/scenario_pool.sav", "wb"))
 
-    util_methods.log('traffic-tool.log', "INFO", "User scenario distribution generated successfully")
-    print('[INFO] User scenario distribution generated successfully')
+    logger.info("User scenario distribution generated successfully")

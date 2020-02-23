@@ -24,9 +24,11 @@ import numpy as np
 import yaml
 from datetime import datetime
 from multiprocessing import Process, Value
-from utils import util_methods
+from utils import log
 
 # variables
+logger = log.setLogger('gen_invoke_data')
+
 no_of_data_points = None
 heavy_traffic = None
 time_patterns = None
@@ -176,12 +178,10 @@ if __name__ == "__main__":
     try:
         loadConfig()
     except FileNotFoundError as e:
-        util_methods.log('traffic-tool.log', 'ERROR', str(e))
-        print('[ERROR] {}'.format(str(e)))
+        logger.exception(str(e))
         sys.exit()
     except Exception as e:
-        util_methods.log('traffic-tool.log', 'ERROR', str(e))
-        print('[ERROR] {}'.format(str(e)))
+        logger.exception(str(e))
         sys.exit()
 
     with open(abs_path + '/../../../../dataset/generated-traffic/{}'.format(filename), 'w') as file:
@@ -191,8 +191,7 @@ if __name__ == "__main__":
         # load and set the scenario pool
         scenario_pool = pickle.load(open(abs_path + "/../../data/runtime_data/scenario_pool.sav", "rb"))
     except FileNotFoundError as e:
-        util_methods.log('traffic-tool.log', 'ERROR', str(e))
-        print('[ERROR] {}'.format(str(e)))
+        logger.exception(str(e))
         sys.exit()
 
     # record script start_time
@@ -210,8 +209,7 @@ if __name__ == "__main__":
         with open(abs_path + '/../../data/runtime_data/traffic_processes.pid', 'a+') as file:
             file.write(str(process.pid) + '\n')
 
-    print("[INFO] Scenario loaded successfully. Wait until data generation complete!")
-    util_methods.log("traffic-tool.log", "INFO", "Scenario loaded successfully. Wait until data generation complete!")
+    logger.info("Scenario loaded successfully. Wait until data generation complete!")
 
     while True:
         if current_data_points.value >= no_of_data_points:
@@ -221,8 +219,7 @@ if __name__ == "__main__":
                 file.write('')
 
             time_elapsed = datetime.now() - script_start_time
-            print("[INFO] Data generated successfully. Time elapsed: {} seconds".format(time_elapsed.seconds))
-            util_methods.log("traffic-tool.log", "INFO", "Data generated successfully. Time elapsed: {} seconds".format(time_elapsed.seconds))
+            logger.info("Data generated successfully. Time elapsed: {} seconds".format(time_elapsed.seconds))
             break
         else:
             pass

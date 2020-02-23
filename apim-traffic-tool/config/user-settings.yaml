@@ -10,3 +10,6 @@ resources:
     ip_to: 2
     country_code: 3
     country_name: 4
+
+# logging level of the tool (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+log_level: INFO

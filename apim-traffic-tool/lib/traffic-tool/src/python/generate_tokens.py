@@ -17,10 +17,11 @@
 import os
 import yaml
 import csv
-from utils import util_methods, request_methods
+from utils import request_methods, log
 
 
 # variables
+logger = log.setLogger('generate_tokens')
 abs_path = ""
 gateway_protocol = ""
 gateway_host = ""
@@ -64,7 +65,7 @@ def loadUserAppPattern():
         for app in apps:
             user_app.append([username, app.strip()])
 
-    util_methods.log("traffic-tool.log", "INFO", "User app pattern loaded successfully")
+    logger.info("User app pattern loaded successfully")
 
 
 def loadKeySecrets():
@@ -78,7 +79,7 @@ def loadKeySecrets():
         reader = csv.reader(f)
         app_key_secret = {rows[0]:rows[1] for rows in reader}
 
-    util_methods.log("traffic-tool.log", "INFO", "Consumer key, secret loaded successfully")
+    logger.info("Consumer key, secret loaded successfully")
 
 
 def generateTokenList():
@@ -97,18 +98,17 @@ def generateTokenList():
         access_token = request_methods.generateInvokeToken(gateway_protocol, gateway_host, nio_pt_transport_port, token_endpoint, app_key_secret.get(uapp[1]), uapp[0], uapp[0], 'apim:api_view')[0]
 
         if access_token == None:
-            util_methods.log("traffic-tool.log", "ERROR", "API Invoke token generation Failed!. Username: {}. Application: {}. Retrying...".format(uapp[0], uapp[1]))
+            logger.error("API Invoke token generation Failed!. Username: {}. Application: {}. Retrying...".format(uapp[0], uapp[1]))
             access_token = request_methods.generateInvokeToken(gateway_protocol, gateway_host, nio_pt_transport_port, token_endpoint, app_key_secret.get(uapp[1]), uapp[0], uapp[0], 'apim:api_view')[0]
             if access_token == None:
-                util_methods.log("traffic-tool.log", "ERROR", "API Invoke token generation Failed!. Username: {}. Application: {}".format(uapp[0], uapp[1]))
+                logger.error("API Invoke token generation Failed!. Username: {}. Application: {}".format(uapp[0], uapp[1]))
             else:
-                util_methods.log("traffic-tool.log", "INFO", "API Invoke token generation successful!. Username: {}. Application: {}. Retrying...".format(uapp[0], uapp[1]))
+                logger.info("API Invoke token generation successful!. Username: {}. Application: {}. Retrying...".format(uapp[0], uapp[1]))
 
         with open(abs_path + '/../../data/scenario/api_invoke_tokens.csv', 'a+') as f:
             f.write(uapp[0] + ',' + uapp[1] + ',' + access_token + '\n')
         
-    util_methods.log("traffic-tool.log", "INFO", "API Invoke token generation completed")
-    print("[INFO] API Invoke token generation completed")
+    logger.info("API Invoke token generation completed")
 
 
 # execute the functions

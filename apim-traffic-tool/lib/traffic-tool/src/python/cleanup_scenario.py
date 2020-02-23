@@ -18,10 +18,11 @@ import os
 import yaml
 import base64
 import csv
-from utils import request_methods, util_methods
+from utils import request_methods, log
 
 
 # variables
+logger = log.setLogger('cleanup_scenario')
 abs_path = ""
 token_registration_endpoint = ""
 token_endpoint = ""
@@ -72,10 +73,9 @@ def removeApplications():
     client_id, client_secret = request_methods.getIDSecret(gateway_protocol, gateway_host, gateway_servelet_port_https, token_registration_endpoint)
     
     if client_id == None or client_secret == None:
-        util_methods.log("traffic-tool.log", "ERROR", "Fetching client id, client secret unsuccessful!. Aborting task...")
-        print('[ERROR] Fetching client id, client secret unsuccessful!. Aborting task...')
+        logger.error("Fetching client id, client secret unsuccessful!. Aborting task...")
         return
-    util_methods.log("traffic-tool.log", "INFO", "Successfully fetched client id, client secret")
+    logger.info("Successfully fetched client id, client secret")
 
     concat_value = client_id + ":" + client_secret
     b64_encoded = base64.b64encode(concat_value.encode('utf-8')).decode('utf-8')
@@ -84,10 +84,9 @@ def removeApplications():
     access_token = request_methods.getAccessToken(gateway_protocol, gateway_host, nio_pt_transport_port, token_endpoint, b64_encoded, 'apim:subscribe apim:api_view')[0]
 
     if access_token == None:
-        util_methods.log("traffic-tool.log", "ERROR", "Getting access token failed!. Aborting task...")
-        print('[ERROR] Getting access token failed!. Aborting task...')
+        logger.error("Getting access token failed!. Aborting task...")
         return
-    util_methods.log("traffic-tool.log", "INFO", "Successfully received access token")
+    logger.info("Successfully received access token")
 
     # iterate for each application
     with open(abs_path + '/../../data/runtime_data/app_ids.csv', 'r') as f:
@@ -97,19 +96,18 @@ def removeApplications():
             deleted = request_methods.deleteAppAPI(gateway_protocol, gateway_host, gateway_servelet_port_https, store_application_endpoint, access_token,app_id[0])
 
             if not deleted:
-                util_methods.log("traffic-tool.log", "ERROR", "Application removing Failed!. App id: {}. Retrying...".format(app_id[0]))
+                logger.error("Application removing Failed!. App id: {}. Retrying...".format(app_id[0]))
                 deleted = request_methods.deleteAppAPI(gateway_protocol, gateway_host, gateway_servelet_port_https, store_application_endpoint, access_token,app_id[0])
                 if not deleted:
-                    util_methods.log("traffic-tool.log", "ERROR", "Application removing Failed!. App id: {}".format(app_id[0]))
+                    logger.error("Application removing Failed!. App id: {}".format(app_id[0]))
                 else:
-                    util_methods.log("traffic-tool.log", "INFO", "Application removed successfully!. App id: {}".format(app_id[0]))
+                    logger.info("Application removed successfully!. App id: {}".format(app_id[0]))
                     remove_count += 1
             else:
-                util_methods.log("traffic-tool.log", "INFO", "Application removed successfully!. App id: {}".format(app_id[0]))
+                logger.info("Application removed successfully!. App id: {}".format(app_id[0]))
                 remove_count += 1
             
-        util_methods.log("traffic-tool.log", "INFO", "Application deletion process completed. Total {} applications removed".format(str(remove_count)))
-        print("[INFO] Application deletion process completed. Total {} applications removed".format(str(remove_count)))
+        logger.info("Application deletion process completed. Total {} applications removed".format(str(remove_count)))
 
 
 def removeAPIs():
@@ -124,10 +122,9 @@ def removeAPIs():
     client_id, client_secret = request_methods.getIDSecret(gateway_protocol, gateway_host, gateway_servelet_port_https, token_registration_endpoint)
     
     if client_id == None or client_secret == None:
-        util_methods.log("traffic-tool.log", "ERROR", "Fetching client id, client secret unsuccessful!. Aborting task...")
-        print('[ERROR] Fetching client id, client secret unsuccessful!. Aborting task...')
+        logger.error("Fetching client id, client secret unsuccessful!. Aborting task...")
         return
-    util_methods.log("traffic-tool.log", "INFO", "Successfully fetched client id, client secret")
+    logger.info("Successfully fetched client id, client secret")
 
     concat_value = client_id + ":" + client_secret
     b64_encoded = base64.b64encode(concat_value.encode('utf-8')).decode('utf-8')
@@ -136,10 +133,9 @@ def removeAPIs():
     access_token = request_methods.getAccessToken(gateway_protocol, gateway_host, nio_pt_transport_port, token_endpoint, b64_encoded, 'apim:api_create apim:api_view')[0]
 
     if access_token == None:
-        util_methods.log("traffic-tool.log", "ERROR", "Getting access token failed!. Aborting task...")
-        print('[ERROR] Getting access token failed!. Aborting task...')
+        logger.error("Getting access token failed!. Aborting task...")
         return
-    util_methods.log("traffic-tool.log", "INFO", "Successfully received access token")
+    logger.info("Successfully received access token")
 
     # iterate for each API
     with open(abs_path + '/../../data/runtime_data/api_ids.csv', 'r') as f:
@@ -149,19 +145,18 @@ def removeAPIs():
             deleted = request_methods.deleteAppAPI(gateway_protocol, gateway_host, gateway_servelet_port_https, publisher_api_endpoint, access_token,api_id[0])
 
             if not deleted:
-                util_methods.log("traffic-tool.log", "ERROR", "API removing Failed!. API id: {}. Retrying...".format(api_id[0]))
+                logger.error("API removing Failed!. API id: {}. Retrying...".format(api_id[0]))
                 deleted = request_methods.deleteAppAPI(gateway_protocol, gateway_host, gateway_servelet_port_https, publisher_api_endpoint, access_token,api_id[0])
                 if not deleted:
-                    util_methods.log("traffic-tool.log", "ERROR", "API removing Failed!. API id: {}".format(api_id[0]))
+                    logger.error("API removing Failed!. API id: {}".format(api_id[0]))
                 else:
-                    util_methods.log("traffic-tool.log", "INFO", "API removed successfully!. API id: {}".format(api_id[0]))
+                    logger.info("API removed successfully!. API id: {}".format(api_id[0]))
                     remove_count += 1
             else:
-                util_methods.log("traffic-tool.log", "INFO", "API removed successfully!. API id: {}".format(api_id[0]))
+                logger.info("API removed successfully!. API id: {}".format(api_id[0]))
                 remove_count += 1
             
-        util_methods.log("traffic-tool.log", "INFO", "API deletion process completed. Total {} APIs removed".format(str(remove_count)))
-        print("[INFO] API deletion process completed. Total {} APIs removed".format(str(remove_count)))
+        logger.info("API deletion process completed. Total {} APIs removed".format(str(remove_count)))
 
 
 def removeUsers():
@@ -179,18 +174,17 @@ def removeUsers():
         removed = request_methods.removeUserSOAP(gateway_protocol, gateway_host, gateway_servelet_port_https, delete_user_soap_endpoint, user['username'])
 
         if not removed:
-            util_methods.log("traffic-tool.log", "ERROR", "User deletion Failed!. username: {}. Retrying...".format(user['username']))
+            logger.error("User deletion Failed!. username: {}. Retrying...".format(user['username']))
             removed = request_methods.removeUserSOAP(gateway_protocol, gateway_host, gateway_servelet_port_https, delete_user_soap_endpoint, user['username'])
             if not removed:
-                util_methods.log("traffic-tool.log", "ERROR", "User deletion Failed!. username: {}".format(user['username']))
+                logger.error("User deletion Failed!. username: {}".format(user['username']))
             else:
-                util_methods.log("traffic-tool.log", "INFO", "User removed successfully!. username: {}".format(user['username']))
+                logger.info("User removed successfully!. username: {}".format(user['username']))
                 remove_count += 1
         else:
             remove_count += 1
-    
-    util_methods.log("traffic-tool.log", "INFO", "User deletion process completed. Total {} user accounts removed".format(str(remove_count)))
-    print("[INFO] User deletion process completed. Total {} user accounts removed".format(str(remove_count)))
+
+    logger.info("User deletion process completed. Total {} user accounts removed".format(str(remove_count)))
 
 
 if __name__ == "__main__":

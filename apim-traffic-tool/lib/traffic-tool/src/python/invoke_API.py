@@ -28,12 +28,14 @@ import yaml
 from collections import defaultdict
 from datetime import datetime
 from multiprocessing import Process, Value
-from utils import util_methods
+from utils import util_methods, log
 
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # variables
+logger = log.setLogger('invoke_API')
+
 max_connection_refuse_count = None
 host_protocol = None
 host_ip = None
@@ -273,10 +275,10 @@ if __name__ == "__main__":
     try:
         loadConfig()
     except FileNotFoundError as e:
-        util_methods.log('traffic-tool.log', 'ERROR', str(e))
+        logger.exception(str(e))
         sys.exit()
     except Exception as e:
-        util_methods.log('traffic-tool.log', 'ERROR', str(e))
+        logger.exception(str(e))
         sys.exit()
 
     with open(abs_path + '/../../../../dataset/traffic/{}'.format(filename), 'w') as file:
@@ -286,7 +288,7 @@ if __name__ == "__main__":
         # load and set the scenario pool
         scenario_pool = pickle.load(open(abs_path + "/../../data/runtime_data/scenario_pool.sav", "rb"))
     except FileNotFoundError as e:
-        util_methods.log('traffic-tool.log', 'ERROR', str(e))
+        logger.exception(str(e))
         sys.exit()
 
     # record script start_time
@@ -304,8 +306,7 @@ if __name__ == "__main__":
         with open(abs_path + '/../../data/runtime_data/traffic_processes.pid', 'a+') as file:
             file.write(str(process.pid) + '\n')
 
-    print("[INFO] Scenario loaded successfully. Wait {} minutes to complete the script!".format(str(script_runtime / 60)))
-    util_methods.log("traffic-tool.log", "INFO", "Scenario loaded successfully. Wait {} minutes to complete the script!".format(str(script_runtime / 60)))
+    logger.info("Scenario loaded successfully. Wait {} minutes to complete the script!".format(str(script_runtime / 60)))
 
     while True:
         time_elapsed = datetime.now() - script_start_time
@@ -316,8 +317,7 @@ if __name__ == "__main__":
             with open(abs_path + '/../../data/runtime_data/traffic_processes.pid', 'w') as file:
                 file.write('')
 
-            print("[INFO] Script terminated successfully. Time elapsed: {} minutes".format(time_elapsed.seconds / 60.0))
-            util_methods.log("traffic-tool.log", "INFO", "Script terminated successfully. Time elapsed: {} minutes".format(time_elapsed.seconds / 60.0))
+            logger.info("Script terminated successfully. Time elapsed: {} minutes".format(time_elapsed.seconds / 60.0))
             break
 
         elif connection_refuse_count.value > max_connection_refuse_count:
@@ -325,8 +325,7 @@ if __name__ == "__main__":
                 process.terminate()
             with open(abs_path + '/../../data/runtime_data/traffic_processes.pid', 'w') as file:
                 file.write('')
-            print("[ERROR] Terminating the program due to maximum no of connection refuses!")
-            util_methods.log("traffic-tool.log", "ERROR", "Terminating the program due to maximum no of connection refuses!")
+            logger.error("Terminating the program due to maximum no of connection refuses!")
             break
 
         else:

@@ -19,10 +19,10 @@ import yaml
 import math
 import random
 from scipy.stats import truncnorm
-from utils import util_methods
-
+from utils import log
 
 # variables
+logger = log.setLogger('gen_scenario_yaml')
 abs_path = None
 no_of_users = 0
 frequency_limits = None
@@ -78,7 +78,7 @@ def genUserApps():
     with open(abs_path + '/../../data/scenario/user_details.yaml', 'w') as f:
         yaml.dump(user_data, f, sort_keys=False)
 
-    util_methods.log('traffic-tool.log', 'INFO', 'Users distributed among apps')
+    logger.info('Users distributed among apps')
 
 
 def genScenarioDistribution():
@@ -194,7 +194,7 @@ def genScenarioDistribution():
     with open(abs_path + '/../../data/scenario/invoke_scenario.yaml', 'w') as f:
         yaml.dump({'invoke_scenario': scenario_list}, f, sort_keys=False)
 
-    util_methods.log('traffic-tool.log', 'INFO', 'Invoke scenario generated successfully')
+    logger.info('Invoke scenario generated successfully')
 
 
 if __name__ == "__main__":
@@ -233,5 +233,4 @@ if __name__ == "__main__":
     genScenarioDistribution()
 
     out_txt = 'Invoke scenario generated successfully. Output written to \'user_details.yaml\' and \'invoke_scenario.yaml\' files'
-    util_methods.log('traffic-tool.log', 'INFO', out_txt)
-    print('[INFO] {}'.format(out_txt))
+    logger.info(out_txt)

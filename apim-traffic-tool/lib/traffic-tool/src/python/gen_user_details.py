@@ -22,9 +22,10 @@ import os
 import yaml
 from datetime import datetime
 import sys
-from utils import util_methods
+from utils import log
 
 # global variables
+logger = log.setLogger('gen_user_details')
 faker = Faker()
 scenario_name = None
 no_of_users = 0
@@ -37,13 +38,11 @@ try:
     no_of_users = int(traffic_config['tool_config']['no_of_users'])
 
     if no_of_users <= 0:
-        util_methods.log('traffic-tool.log', 'ERROR', 'User creation Failed!. Invalid user count: {}'.format(str(no_of_users)))
-        print('[ERROR] User creation Failed!. Invalid user count: {}'.format(str(no_of_users)))
+        logger.error('User creation Failed!. Invalid user count: {}'.format(str(no_of_users)))
         sys.exit()
 
 except FileNotFoundError as e:
-    util_methods.log('traffic-tool.log', 'ERROR', 'User creation Failed!. errLog: {}. Filename: {}'.format(e.strerror, e.filename))
-    print('[ERROR] User creation Failed!. errLog: {}. Filename: {}'.format(e.strerror, e.filename))
+    logger.exception('User creation Failed!. errLog: {}. Filename: {}'.format(e.strerror, e.filename))
     sys.exit()
 
 
@@ -138,8 +137,7 @@ def appUserScenario():
     with open(abs_path + '/../../data/scenario/user_details.yaml', 'w') as file:
         yaml.dump({'users': user_list}, file, sort_keys=False)
 
-    util_methods.log('traffic-tool.log', 'INFO', 'User details generated. Users divided among applications according to the example scenario. No of users: {}'.format(str(no_of_users)))
-    print('[INFO] User details generated. Users divided among applications according to the example scenario. No of users: {}'.format(str(no_of_users)))
+    logger.info('User details generated. Users divided among applications according to the example scenario. No of users: {}'.format(str(no_of_users)))
 
 
 def genUsers():
@@ -155,8 +153,7 @@ def genUsers():
     with open(abs_path + '/../../data/scenario/user_details.yaml', 'w') as file:
         yaml.dump({'users': user_list}, file, sort_keys=False)
 
-    util_methods.log('traffic-tool.log', 'INFO', 'User details generated successfully. No of users: {}'.format(str(no_of_users)))
-    print('[INFO] User details generated successfully. No of users: {}'.format(str(no_of_users)))
+    logger.info('User details generated successfully. No of users: {}'.format(str(no_of_users)))
 
 
 if __name__ == "__main__":
@@ -170,4 +167,4 @@ if __name__ == "__main__":
     elif args.option == 1:
         appUserScenario()
     else:
-        print("[INFO] Invalid argument {}!".format(args.option))
+        logger.error("Invalid argument {}!".format(args.option))

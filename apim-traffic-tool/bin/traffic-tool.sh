@@ -231,7 +231,7 @@ case "$1" in
   setup)
     echo "Enter '0' to setup for custom scenario. Any other key to generate a random scenario"
     read KEY
-    if [ $KEY == "0" ]
+    if [ "$KEY" = "0" ]
     then
       func_gen_example_scenario 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log
       func_create_scenario 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log
