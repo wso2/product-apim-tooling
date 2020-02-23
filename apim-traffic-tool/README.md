@@ -34,23 +34,23 @@ The attack tool will attack WSO2 API Manager throughout a user specified time. A
 5. Install required python packages by running the following command in the project home directory.
    - `$ pip install -r requirement.txt`
 
-6. Download and install Apache jmeter version 5.1.1 or higher (http://jmeter.apache.org/download_jmeter.cgi).
+6. Download and install Apache jmeter version 5.1.1 or higher. Jmeter will only be used by the attack tool. If you're only using the traffic-tool script, no need to install jmeter. (http://jmeter.apache.org/download_jmeter.cgi).
 
 7. Add following two packages to the `<JMETER_HOME>/lib` folder.
    - Download and add apache ivy jar file (https://ant.apache.org/ivy/download.cgi)
    - Add attack tool helper package (can be found from `<TOOL_HOME>/resources/add-on/attack-tool-helpers.jar`)
 
-8. Download a IP Geolocation Database from https://www.ipinfodb.com/free-database and add it to `<TOOL_HOME>/resources/libraries/` directory. Include name of the added file in `<TOOL_HOME>/config/user-settings.yaml` file in front of `ip_database` under `resources` (include name with the csv file extension). Make sure the column order of the database schema matches with the column order in `user-settings.yaml` file.  
+8. Download a IP Geolocation Database from https://www.ipinfodb.com/free-database and add it to `<TOOL_HOME>/resources/libraries/` directory. Include name of the added file in `<TOOL_HOME>/config/user-settings.yaml` file in front of `ip_database` under `resources` (include name with the csv file extension). Make sure the column order of the database schema matches with the column order in `user-settings.yaml` file.
 > Above link contains two types of datasets "Free IP Geolocation Databases" and "Free IP Proxy Databases". Please download a IP Geolocation dataset.
 
-9. By default, access tokens get expired after 60 minutes time interval. So if you are planning to simulate a traffic for more than 1 hour duration, please configure WSO2 API Manager and APIM Traffic Tool as below.
+9. By default, access tokens get expired after 60 minutes time interval. If you are planning to simulate a traffic for more than 1 hour duration, please configure WSO2 API Manager and APIM Traffic Tool as below.
    - Set the value of `<UserAccessTokenDefaultValidityPeriod>` element in the `<APIM_HOME>/repository/conf/identity/identity.xml` file as appropriate. It is recommended to set user access token validity period to at least `36000` for testing environments ([more on access tokens](https://docs.wso2.com/display/AM260/Working+with+Access+Tokens)).
    - Set the value of `token_validity_period` as appropriate in the `<TOOL_HOME>/config/traffic-tool.yaml` file. It is recommended to set `token_validity_period` to `-1` for testing environments.
 
 10. Verify that all configurations are set for the traffic and attack scripts as mentioned below.
 
 ## Configuring the Tool
-Default configurations for WSO2 API Manager and default scenario are given in all the config files. If you are running WSO2 API Manager on different configurations or using the tool for a custom scenario, you can change the tool configurations as stated below. All configuration files are in the `<TOOL_HOME>/config` folder.
+Some of the default configurations for WSO2 API Manager and default scenario are given in all the config files. If you are running WSO2 API Manager on different configurations or using the tool for a custom scenario, you can change the tool configurations as stated below. All configuration files are in the `<TOOL_HOME>/config` folder. Advanced configuration options are listed in a later section of the document.
 
 1. Add your jmeter path in the `<TOOL_HOME>/config/user-settings.yaml` file under `path_variables`.
 
@@ -76,56 +76,59 @@ Default configurations for WSO2 API Manager and default scenario are given in al
    store_subscription: /api/am/store/v0.15/subscriptions
    user_signup: /api/identity/user/v1.0/me
    delete_user: /services/RemoteUserStoreManagerService.RemoteUserStoreManagerServiceHttpsSoap11Endpoint
+
+3. Add details of each Application (name, description and api subscriptions) under apps section in `<TOOL_HOME>/config/apim.yaml` file. Provide `api_subscriptions` as comma (,) seperated values.
+
+   ```
+   Example Usage
+   
+   apps:
+    - name: Online Shopping
+      description: This is an online shopping app
+      api_subscriptions: News,Places,Payment
+
+    - name: Taxi
+      description: This is a taxi app
+      api_subscriptions: Map,Places,Weather,Payment
    ```
 
-3. Add details of each API (name, context, version, resources) under apis section in `<TOOL_HOME>/config/apim.yaml` file.
+4. Add details of each API (name, description, tags (specify in a list), context, version, resources) under apis section in `<TOOL_HOME>/config/api_details.yaml` file.
 
    ```
    Example Usage
 
    apis:
-    - name: news
+    - name: News
+      description: This is an API which users can query by keywords topics publications
+      tags: [news, info]
       context: news
       version: 1
       resources:
        - method: GET
          path: menu
 
-    - name: places
+    - name: Places
+      description: Users can find popular places like food shops banks etc using this API
+      tags: [places]
       context: places
       version: 1
       resources:
-        - method: GET
-          path: menu
+       - method: GET
+         path: menu
    ```
 
-4. Configure the `<TOOL_HOME>/config/traffic-tool.yaml` file as stated below (Configurations for the traffic script).
-   - Enter throttling tier, api visibility, production and sandbox endpoints for the APIs under api section (APIs are created using these configurations).
-   - Enter throttling tier and token validity period for the applications under application section (Applications are created using these configurations).
-   - Enter correct subscription tier for the app api subscriptions.
-   - Enter scenario name in front of scenario_name section. If you are using the default scenario, scenario_name is `scenario_example`.
-   - Enter protocol type, ip address and port of an hosted API under api_host section.
-   - Configure tool_config section as to the following definitions.
-      - `no_of_users`: No of users to be created in wso2 carbon. Traffic will be simulated for these users.
-      - `max_connection_refuse_count`: Maximum number of connection refuse count allowed. Traffic tool will stop after the given number of connection refuses.
-      - `no_of_data_points`: No of data points or requests to be generated when generating the traffic data without invoking.
-      - `heavy_traffic`: If you want to simulate a heavy traffic, set this value as `true`. Otherwise set it to `false`.
+5. Configure the `<TOOL_HOME>/config/traffic-tool.yaml` file as stated below (Configurations for the traffic script).
+   - Modify **protocol**, **ip address** and **port** of the host under `api_host` section.
+   - Specify number of users to be created in `no_of_users` field under `tool_config` section.
 
-        > It is recommended to set `heavy_traffic` to `false` in model training and testing environments to have a better training for attacks.
-        
-   - List payloads under `payloads` section to send with POST and DELETE requests when simulating a normal traffic. A random payload will be sent with each POST or DELETE request. If your DELETE endpoint operates with path parameters, leave payloads empty under `delete` section.
-   - List user agents under `user_agents` section. These user agents are sent randomly when simulating a normal traffic.
-
-5. Configure the `<TOOL_HOME>/config/attack-tool.yaml` file as stated below (Configurations for the attack script).
-   - Modify **protocol**,**ip address** and **port** of the host using `api_host` section.
-   - Append, modify or remove user agents from the list under `user_agents` section.
+6. Configure the `<TOOL_HOME>/config/attack-tool.yaml` file as stated below (Configurations for the attack script).
+   - Modify **protocol**,**ip address** and **port** of the host under `api_host` section.
    - Set the attack duration in seconds using `attack_duration`. (Note: For DOS and DDOS attacks, attack duration is defined per API)
-   - Configure the concurrency using `number_of_processes`.
-   - Enter the name of the scenario for `scenario`.
-   - Append, modify or remove payloads from the list under `payloads` section. These payloads are used in the bodies of **POST**,**PUT** and **PATCH** requests.
-   - Set minimum and maximum request scalars under `abnormal_token_usage`. These will be used to scale the normal traffic inorder to generate attack traffic for simulating abnormal token usage attack.
 
- > It is recommended to add `setenv.sh` script in the `<TOOL_HOME>/resources/add-on` directory to the `<JMETER_HOME>/bin` directory in order to increase the heap size in JMeter if you are simulating DOS or DDOS attacks with heavy concurrency.   
+ > It is recommended to add `setenv.sh` script in the `<TOOL_HOME>/resources/add-on` directory to the `<JMETER_HOME>/bin` directory in order to increase the heap size in JMeter if you are simulating DOS or DDOS attacks with heavy concurrency.
+ 
+7. Add swagger definitions for all APIs as seperate json files in the `<TOOL_HOME>/data/swagger/` directory. Filename should be equal to `<api_name>.json` in lower case letters.
+
 ## Using the Traffic Tool
 To use the traffic tool run the following command with the desired argument in a command line inside the `<TOOL_HOME>/bin` folder. To list down available options and their command line arguments, just run the command with the flag `-h`.
 
@@ -134,91 +137,100 @@ To use the traffic tool run the following command with the desired argument in a
 ```
 $ ./traffic-tool.sh -h
 Traffic Tool Options
-1: Generate data for example scenario
-2: Create scenario in APIM
-3: Generate access tokens
-4: Generate traffic data (without invoking)
-5: Simulate traffic
-all: Setup scenario and simulate traffic
-stop: Stop traffic tool
+setup: Setup scenario
+start: Simulate traffic
+stop : Stop traffic tool
+gen  : Generate traffic data (without invoking)
 clean: Cleanup scenario data in API Manager
+adv  : View advanced options
 ```
 
-#### 1. Generate Random User Details with Example Scenario Distribution
-Traffic tool allows you to generate a set of random user details and distribute them among applications according to the example scenario in just a single step. Simply run the shell script with the argument 1.
-
-`$ ./traffic-tool.sh 1`
-
-#### 2. Create Example Scenario in WSO2 API Manager
-Traffic tool is capable of creating APIs, applications, subscribe them and signup a set of users in WSO2 API Manager according to the given scenario. Simply run the shell script with the argument 2.
+#### 1. Setup the Tool and WSO2 API Manager
+Running the shell script with argument `setup` will generate random user details, user-application invoke scenario, and then create APIs, applications, users in WSO2 API Manager and generate invoke tokens to consume resources. You will be prompted to continue with custom scenario or random scenario. Enter '0' to continue with the example scenario, or any other key to generate a random scenario.
 
 ```
-$ ./traffic-tool.sh 2
+$ ./traffic-tool.sh setup
+Enter '0' to setup for custom scenario. Any other key to generate a random scenario
+0
 ```
+> If you're continuing with a custom scenario, you need to provide `invoke_scenario.yaml` file in the `<TOOL_HOME>/lib/traffic-tool/data/scenario/` directory. File for the example scenario is provided as `ex_invoke_scenario.yaml` in the scenario folder. Rename this file to 'invoke_scenario.yaml' to continue with the example scenario (Generating random scenario will overwrite this file after renaming).
 
-Please make sure you don't have any errors in the shell (Error count should be zero). If you encountered with errors, it is recommended to run the `clean` command and rerun the above command.
-```
-Waiting for possible Shutdown/StopTestNow/HeapDump/ThreadDump message on port 4445
-summary +      5 in 00:00:04 =    1.2/s Avg:   620 Min:    31 Max:  1150 Err:     0 (0.00%) Active: 1 Started: 2 Finished: 1
-summary +     32 in 00:00:31 =    1.0/s Avg:   142 Min:    11 Max:   671 Err:     0 (0.00%) Active: 1 Started: 4 Finished: 3
-summary =     37 in 00:00:35 =    1.1/s Avg:   207 Min:    11 Max:  1150 Err:     0 (0.00%)
-summary +     15 in 00:00:30 =    0.5/s Avg:    19 Min:     7 Max:    29 Err:     0 (0.00%) Active: 1 Started: 4 Finished: 3
-summary =     52 in 00:01:05 =    0.8/s Avg:   153 Min:     7 Max:  1150 Err:     0 (0.00%)
-summary +    112 in 00:00:21 =    5.4/s Avg:   147 Min:     4 Max:   593 Err:     0 (0.00%) Active: 0 Started: 6 Finished: 6
-summary =    164 in 00:01:26 =    1.9/s Avg:   149 Min:     4 Max:  1150 Err:     0 (0.00%)
-Tidying up ...    @ Wed Nov 06 11:04:22 IST 2019 (1573018462316)
-... end of run
-```
-
-#### 3. Generate Access Tokens
-API consumers require access tokens in order to access resources. Run the shell script with the argument 3 to generate a set of access tokens for all user-application combinations. Tokens will be saved in scenario/<scenario_name>/api_invoke_tokens.csv file with ‘,’ as the delimiter.
+#### 2. Simulate a Traffic on API Manager
+To simulate an API invoking traffic on WSO2 API Manager, run the shell script with the argument `start`. You will be prompted for a filename and the script run time. Enter the filename without a file extension(without .txt, .csv, etc) and the output/ dataset will be saved in dataset/traffic/filename.csv directory. Traffic will be executed throughout the given time (Enter the time in minutes when prompted).
 
 ```
-$ ./traffic-tool.sh 3
-```
-
-#### 4. Generate the Traffic Dataset without Invoking
-Traffic tool will allow you to generate an API invoking traffic without actually invoking the APIs. Run the shell script with the argument 4. You will be prompted for a filename. Enter the filename without a file extension(without .txt, .csv, etc) and the output or the dataset will be saved in dataset/generated-traffic/filename.csv directory.
-
-```
-$ ./traffic-tool.sh 4
-Enter filename (without file extension):
-gen_traffic_data
-```
-
-#### 5. Simulate a Traffic on API Manager
-To simulate an API invoking traffic on WSO2 API Manager, run the shell script with the argument 5. You will be prompted for a filename and the script run time. Enter the filename without a file extension(without .txt, .csv, etc) and the output or the dataset will be saved in dataset/traffic/filename.csv directory. Traffic will be executed throughout the given time (Enter the time in minutes when prompted).
-
-```
-$ ./traffic-tool.sh 5
+$ ./traffic-tool.sh start
 Enter filename (without file extension):
 output
 Enter script execution time in minutes:
 15
 ```
 
-#### 6. Setup Scenario and Simulate a Traffic
-APIM Traffic Tool allows you to simply run the steps 1,2,3 and 5 from a single command. Just run the shell script with the argument 'all'.
-
-```
-$ ./traffic-tool.sh all
-Enter filename (without file extension):
-output
-Enter script execution time in minutes:
-15
-```
-
-#### 7. Stop the Traffic Tool
+#### 3. Stop the Traffic Tool
 To stop the API invoking or data generation while the script is running, run the shell script with the argument 'stop'.
 
 `$ ./traffic-tool.sh stop`
 
-#### 8. Remove Scenario from API Manager
-After simulating a traffic you may want to remove all the created APIs, applications and users from the API Manager. Run the shell script with the argument 'clean'.
+#### 4. Generate the Traffic Dataset without Invoking
+To generate an API invoking traffic without actually invoking APIs, run the shell script with argument `gen`. You will be prompted for a filename. Enter the filename without a file extension(without .txt, .csv, etc) and the output/ dataset will be saved in dataset/generated-traffic/filename.csv directory.
+
+```
+$ ./traffic-tool.sh gen
+Enter filename (without file extension):
+gen_traffic_data
+```
+
+#### 5. Remove Scenario from API Manager
+After simulating a traffic you may want to remove all the created APIs, applications and users from WSO2 API Manager. Run the shell script with argument `clean`.
 
 `$ ./traffic-tool.sh clean`
 
-You have to run the steps 1,2,3 and 5 inorder to simulate an API invoking traffic according to the example scenario. If you are simulating for a custom scenario, only run steps 2,3 and 5 after following the given steps under the heading “Adding Custom APIM Scenario”. You can also generate the traffic dataset without actually invoking the API Manager using the step 4 instead of step 5.
+#### 6. Advanced Options
+Traffic tool will provide some advanced options to allow more flexibility for the process. Run the shell script with argument `adv` to list down available advanced options.
+
+```
+$ ./traffic-tool.sh adv
+Advanced Options
+1: Generate random user details
+2: Generate data for example scenario
+3: Generate invoke scenario
+4: Create scenario in APIM
+5: Generate access tokens
+```
+
+##### 6.1 Generate Random User Details (Without Application Distibution)
+To generate a set of random user details, run the shell script with the argument `1`. User data will be written to `<TOOL_HOME>/lib/traffic-tool/data/scenario/user_details.yaml` file (`applications` section of each user will be null).
+
+`$ ./traffic-tool.sh 1`
+
+##### 6.2 Generate Random User Details with Example Scenario Distribution
+To generate a set of random user details and distribute them among applications according to the example scenario, run the shell script with the argument `2`. User data will be written to `<TOOL_HOME>/lib/traffic-tool/data/scenario/user_details.yaml` file.
+
+`$ ./traffic-tool.sh 2`
+
+##### 6.3 Generate a Random Invoke Scenario
+To randomly distribute users among applications and generate a random invoke scenario, run the shell script with the argument `3`. Make sure you have executed above step 6.1 before running this command. Invoke scenario will be written to `<TOOL_HOME>/lib/traffic-tool/data/scenario/invoke_scenario.yaml` file.
+
+`$ ./traffic-tool.sh 3`
+> Scenario will be generated according to listed APIs and applications in the config files.
+
+##### 6.4 Create Scenario in WSO2 API Manager
+Traffic tool allows to create APIs & applications, subscribe them and signup a set of users in WSO2 API Manager according to a given scenario. Run the shell script with the argument `4`.
+
+`$ ./traffic-tool.sh 4`
+> Listed APIs and applications in the config files will be created in API Manager. Swagger definitions for all listed APIs should be provided in `<TOOL_HOME>/data/swagger/` directory as seperate json files. Filename should be equal to `<api_name>.json` in lower case letters.
+
+##### 6.5. Generate Access Tokens
+Run the shell script with the argument `5` to generate a set of access tokens for all user-application combinations. You may have to run this command, if the generated tokens are expired.
+
+```
+$ ./traffic-tool.sh 5
+```
+
+#### Note
+* Run the steps 6.3, 6.4, 6.5 and 2 respectively to simulate an API invoking traffic according to the example scenario. Note that you have to provide `invoke_scenario.yaml` file.
+* Run the steps 6.1, 6.4, 6.5 and 2 respectively to simulate an API invoking traffic according to a custom scenario. Note that you have to provide `invoke_scenario.yaml` file and list applications in `user_details.yaml` file after running the step 6.1 (Refer "Adding Custom APIM Scenario" section for more details).
+* Run the steps 6.1, 6.3, 6.4, 6.5 and 2 respectively to simulate an API invoking traffic according to a random scenario.
 
 ## Using the Attack Tool
 To use the attack tool run the following command with the desired argument in a command line inside the `<TOOL_HOME>/bin` folder. To list down available options and their command line arguments, just run the command with the flag `-h`.
@@ -283,23 +295,52 @@ In extreme delete attacks, an unusual number of **DELETE** requests are sent to 
 
 In stolen token attacks, the attackers invoke APIs with access tokens that are stolen or hijacked. The attack tool simulates the stolen token attacks by sending API requests with valid access tokens but using IP addresses,user cookies and user agents which are different from the normal invoke pattern.
 
+## Advanced Configurations
+By default, the tool will be running on default configurations and settings. However, you can further configure the tool as below.
+
+1. Advanced Configurations for the traffic script (`<TOOL_HOME>/config/traffic-tool.yaml`)
+   - Change throttling tier, visibility, production and sandbox endpoints of the APIs under `api` section (APIs are created for these configurations).
+   - Change throttling tier and token validity period of the applications under `application` section (Applications are created for these configurations).
+   - Change subscription tier of the app api subscriptions.
+   - Configure `tool_config` section as to the following definitions.
+      - `max_connection_refuse_count`: Maximum number of connection refuse count allowed. Traffic tool will stop after the given number of connection refuses.
+      - `no_of_data_points`: No of data points or requests to be generated when generating the traffic data without invoking.
+      - `heavy_traffic`: If you want to simulate a heavy traffic, set this value as `true`. Otherwise set it to `false`.
+      - 'frequency_limits': This section lists request frequency limits for low, medium and high frequent time patterns. These lower and upper bounds will be used when generating a random invoke scenario. This section doesn't apply if you are using the tool for the example scenario.
+
+        > It is recommended to set `heavy_traffic` to `false` in model training and testing environments to have a better training for attacks.
+        
+   - Append, modify or remove payloads under `payloads` section to send with POST and DELETE requests when simulating a normal traffic. A random payload will be sent with each POST or DELETE request. If your DELETE endpoint operates with path parameters, leave payloads empty under `delete` section.
+   - Append, modify or remove user agents under `user_agents` section. These user agents are sent randomly when simulating a normal traffic.
+
+2. Advanced Configurations for the attack script (`<TOOL_HOME>/config/attack-tool.yaml`)
+   - Append, modify or remove user agents from the list under `user_agents` section.
+   - Configure the concurrency using `number_of_processes`.
+   - Append, modify or remove payloads from the list under `payloads` section. These payloads are used in the bodies of **POST**,**PUT** and **PATCH** requests.
+   - Set minimum and maximum request scalars under `abnormal_token_usage`. These will be used to scale the normal traffic inorder to generate attack traffic for simulating abnormal token usage attack.
+
 ## Adding Custom APIM Scenario
-Adding a custom API Manager scenario is little bit tricky task. As for the current version of the APIM Traffic Tool, you have to configure a set of files in order to invoke for a custom scenario. First you have to think and design a real world API access pattern which is similar to the example scenario given. Then follow below steps to change scenario data files. Default scenario files are at `<TOOL_HOME>/lib/traffic-tool/data/scenario/scenario_example/data/` directory. You can add a new folder named as your scenario_name to the `/scenario` folder and add a `/data` folder containing following files. Line seperator for all csv files is the new line character ('\n').
+You can make the tool invoking happen to a custom scenario in a few simple steps. First you have to think and design a real world API access pattern which is similar to the example scenario given. Then follow below steps to change scenario data files.
 
-1. `api_creation.csv` :
-Enter details of APIs (API name, description, context and a tag). Delimiter for csv is the comma(',').
+1. Define APIs and applications
+Add APIs & applications, and define their subscription patterns as mentioned in "Configuring the Tool" section. Make sure to provide swagger defnitions for all mentioned APIs.
 
-2. `api_creation_swagger.csv` :
-Provide swagger definitions of all the APIs seperated by new line character ('\n').
+2. Provide a set of applications for each user
+Generate a set of random user details by running the step 6.1 under "Using the Traffic Tool" section. Applications for generated users will be `null` in the `<TOOL_HOME>/lib/traffic-tool/data/scenario/user_details.yaml` file. Specify application/s for each user as comma (,) seperated values.
 
-3. `app_creation.csv` :
-Enter details of applications (Application name and description). Delimiter for csv is the dollar sign and a space('$<space>').
+   ```
+   Example Usage:
 
-4. `app_api_subscription_admin.csv` :
-Enter all application-api combinations which the subscriptions should happen. Give application name and API name seperated by a comma (',').
+   users:
+     - username: jamie1
+       password: jamie1
+       firstname: Jamie
+       ...
+       applications: Online Shopping,Taxi
+   ```
 
-5. `invoke_scenario.yaml` :
-This file should be prepared according to your invoke scenario. Each record under `invoke_scenario` is for a different user type in the scenario table.
+3. Define the invoke scenario
+Define the invoke scenario in `<TOOL_HOME>/lib/traffic-tool/data/scenario/invoke_scenario.yaml` file. Each record under `invoke_scenario` is for a different user type in the scenario table.
    - `app_name`: Name of the application to be invoked
    - `no_of_users`: No of users for the considered scenario
    - `time_pattern`: Invoke pattern for the user type. Time patterns can be added to `<TOOL_HOME>/lib/traffic-tool/data/access_pattern/invoke_patterns.yaml` file as a comma seperated list.
@@ -322,20 +363,10 @@ This file should be prepared according to your invoke scenario. Each record unde
            no_of_requests: 2
    ```
 
-6. `user_generation.csv` :
-This file contains the user details in the following format. Delimiter for csv is two dollar signs and a space ($$<space>).
-
-   `<username>, <password>, <first_name>, <last_name>, <organization>, <country>, <email>, <no(land)>, <no(mobile)>, <IM>, <url>`
-
-   This file can be generated for given number of random users by running the following command.
-
-   `$ ./traffic-tool.sh user_details`
-
-7. `user_app_pattern.csv` :
-Above generated users should be distributed among applications inorder to generate access tokens. This file contains all username-application_name combinations seperated by a new line character ('\n'). Csv delimiter is the comma (',').
-
 ## Changing API Invoke Pattern
-In this tool users are simulated through python processes. Those processes invoke and sleep according to a given time pattern. These patterns are listed in `<TOOL_HOME>/lib/traffic-tool/data/access_pattern/invoke_patterns.yaml` file. You can add more invoke patterns under `time_patterns` as comma separated integers.
+In the tool users are simulated through python processes. Those processes invoke and sleep according to a given time patterns. These patterns are listed in `<TOOL_HOME>/lib/traffic-tool/data/access_pattern/invoke_patterns.yaml` file. You can add, modify or remove invoke patterns under `time_patterns` section (time intervals as comma separated integers). After adding/ removing a time pattern, please mention/ remove it in the `frequency` section.
+
+Time patterns are categorized into three frequency groups; low, medium and high based on their access frequencies.
 
 ```
 Example Usage
@@ -344,6 +375,12 @@ time_patterns:
   pattern1: 0,100,0,2,300,500,1,2,100,400,700,1,0,0,900,30,600,1800,1800,2,400,6,100,0,0,200,100,0,100
   pattern2: 0,1,0,0,2,0,5,0,1,0,10,0,15,0,20,15,1800,0,1,0,0,0,2,1,0,1,0,0,15,0,10,0,20
   pattern3: 0,1,0,0,2,0,5,0,1,0,10,0,15,0,20,15,600,0,1,0,0,0,2,1,600,0,1,0,0,15,0,10,0,20
+  ...
+  
+frequency:
+  low: pattern1
+  medium: pattern2, pattern3
+  high: pattern8
 ```
 > You can simulate a more realistic real world access pattern by adding time patterns from real world datasets.
 
