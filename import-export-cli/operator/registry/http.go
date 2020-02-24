@@ -30,9 +30,10 @@ var httpRepo = new(string)
 var httpValues = struct {
 	repository string
 	username   string
-	password   string // TODO: renuka: password should be byte[], strings can be exploited from memory
+	password   string
 }{}
 
+// HttpRegistry represents private HTTP registry
 var HttpRegistry = &Registry{
 	Name:       "HTTP",
 	Caption:    "HTTP Private Registry",
@@ -78,8 +79,7 @@ func readHttpRepInputs() (string, string, string) {
 			utils.HandleErrorAndExit("Error reading password from user", err)
 		}
 
-		fmt.Println("")
-		fmt.Println("Repository: " + repository)
+		fmt.Println("\nRepository: " + repository)
 		fmt.Println("Username  : " + username)
 
 		isConfirmStr, err := utils.ReadInputString("Confirm configurations", utils.Default{Value: "Y", IsDefault: true}, "", false)

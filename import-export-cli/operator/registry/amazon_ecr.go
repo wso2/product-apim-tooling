@@ -16,6 +16,7 @@ var amazonEcrValues = struct {
 	credFile   string
 }{}
 
+// AmazonEcrRegistry represents Amazon ECR registry
 var AmazonEcrRegistry = &Registry{
 	Name:       "AMAZON_ECR",
 	Caption:    "Amazon ECR",
@@ -40,10 +41,11 @@ func readAmazonEcrInputs() (string, string) {
 	credFile := ""
 	var err error
 
-	amazonRepositoryRegex := `\.amazonaws\.com\/.*$` //TODO: renuka make this regex more specif with finding repo syntax
+	// validation regex for repository URI validation
+	amazonRepositoryRegex := `\.amazonaws\.com\/.*$`
 
 	for !isConfirm {
-		repository, err = utils.ReadInputString("Enter repository name (<aws_account_id.dkr.ecr.region.amazonaws.com>/repository)", utils.Default{IsDefault: false}, amazonRepositoryRegex, true)
+		repository, err = utils.ReadInputString("Enter Repository URI (<aws_account_id.dkr.ecr.region.amazonaws.com>/repository)", utils.Default{IsDefault: false}, amazonRepositoryRegex, true)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading DockerHub repository name from user", err)
 		}
@@ -58,8 +60,7 @@ func readAmazonEcrInputs() (string, string) {
 			utils.HandleErrorAndExit("Error reading amazon credential file from user", err)
 		}
 
-		fmt.Println("")
-		fmt.Println("Repository     : " + repository)
+		fmt.Println("\nRepository     : " + repository)
 		fmt.Println("Credential File: " + credFile)
 
 		isConfirmStr, err := utils.ReadInputString("Confirm configurations", utils.Default{Value: "Y", IsDefault: true}, "", false)

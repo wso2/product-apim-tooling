@@ -37,12 +37,13 @@ var dockerHubValues = struct {
 	repository    string
 	repositoryUrl string
 	username      string
-	password      string // TODO: renuka: password should be byte[], strings can be exploited from memory
+	password      string
 }{}
 
+// DockerHubRegistry represents Docker Hub registry
 var DockerHubRegistry = &Registry{
 	Name:       "DOCKER_HUB",
-	Caption:    "Docker Hub (Or others, quay.io)",
+	Caption:    "Docker Hub (Or others, quay.io, HTTPS registry)",
 	Repository: dockerHubRepo,
 	Option:     1,
 	Read: func() {
@@ -73,6 +74,7 @@ func readDockerHubInputs() (string, string, string) {
 	password := ""
 	var err error
 
+	// repository name validation regex
 	const repositoryValidRegex = `^[\w\d\-\.\:]*\/?[\w\d\-]+$`
 
 	for !isConfirm {
@@ -103,8 +105,7 @@ func readDockerHubInputs() (string, string, string) {
 			}
 		}
 
-		fmt.Println("")
-		fmt.Println("Repository: " + repository)
+		fmt.Println("\nRepository: " + repository)
 		fmt.Println("Username  : " + username)
 
 		isConfirmStr, err := utils.ReadInputString("Confirm configurations", utils.Default{Value: "Y", IsDefault: true}, "", false)
@@ -153,7 +154,7 @@ func validateDockerHubCredentials(repository string, username string, password s
 		return false, err
 	}
 	_ = resp.Body.Close()
-	return resp.StatusCode == 200, nil //TODO: renuka: use repository as well to validate
+	return resp.StatusCode == 200, nil //TODO: use repository as well to validate
 }
 
 func init() {

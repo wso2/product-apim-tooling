@@ -27,22 +27,27 @@ import (
 	"sort"
 )
 
+// Registry represents Docker Registry
 type Registry struct {
-	Name       string
-	Caption    string
-	Repository *string
-	Option     int
-	Read       func()
-	Run        func()
+	Name       string  // Unique Name
+	Caption    string  // Text to display in the CLI about registry details
+	Repository *string // Repository name
+	Option     int     // Option to be choose the CLI registry list
+	Read       func()  // Function to be called when getting inputs
+	Run        func()  // Function to be called when updating k8s secrets
 }
 
+// registries represents a map of registries
 var registries = make(map[int]*Registry)
+
+// optionToExec represents the choice use selected
 var optionToExec int
 
 func ReadInputs() {
 	registries[optionToExec].Read()
 }
 
+// UpdateConfigsSecrets updates controller config with registry type and creates secrets with credentials
 func UpdateConfigsSecrets() {
 	// set registry first since this can throw error if api operator not installed. If error occur no need to rollback secret.
 	updateCtrlConfig(registries[optionToExec].Name, *registries[optionToExec].Repository)
@@ -50,6 +55,7 @@ func UpdateConfigsSecrets() {
 	registries[optionToExec].Run()
 }
 
+// ChooseRegistry lists registries in the CLI and reads a choice from user
 func ChooseRegistry() {
 	keys := make([]int, 0, len(registries))
 	for key := range registries {
@@ -104,6 +110,7 @@ func updateCtrlConfig(registryType string, repository string) {
 	}
 }
 
+// add adds a registry to the registries maps
 func add(registry *Registry) {
 	if registry.Option < 1 {
 		utils.HandleErrorAndExit("Error adding registry: "+registry.Name, errors.New("'option' should be positive"))

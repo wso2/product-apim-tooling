@@ -45,14 +45,45 @@ var installApiOperatorCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + installApiOperatorCmdLiteral + " called")
 
+		// is -f or --from-file flag specified
+		isLocalInstallation := flagApiOperatorFile != ""
+		configFile := flagApiOperatorFile
+		var olmVersion string
+
+		if !isLocalInstallation {
+			// getting API Operator version
+			operatorVersion, err := k8sUtils.GetVersion(
+				"API Operator",
+				k8sUtils.ApiOperatorVersionEnvVariable,
+				k8sUtils.DefaultApiOperatorVersion,
+				k8sUtils.ApiOperatorVersionValidationUrlTemplate,
+				k8sUtils.ApiOperatorFindVersionUrl,
+			)
+			if err != nil {
+				utils.HandleErrorAndExit("Error in API Operator version", err)
+			}
+			configFile = fmt.Sprintf(k8sUtils.ApiOperatorConfigsUrlTemplate, operatorVersion)
+
+			// getting OLM version
+			olmVersion, err = k8sUtils.GetVersion(
+				"OLM",
+				olm.VersionEnvVariable,
+				olm.DefaultVersion,
+				olm.OlmVersionValidationUrlTemplate,
+				olm.OlmVersionFindVersionUrl,
+			)
+			if err != nil {
+				utils.HandleErrorAndExit("Error in OLM version", err)
+			}
+		}
+
 		// read inputs for docker registry
 		registry.ChooseRegistry()
 		registry.ReadInputs()
 
-		isLocalInstallation := flagApiOperatorFile != ""
 		if !isLocalInstallation {
 			fmt.Println("[Installing OLM]")
-			olm.InstallOLM(olm.Version)
+			olm.InstallOLM(olmVersion)
 
 			fmt.Println("[Installing API Operator]")
 			olm.InstallApiOperator()
@@ -60,7 +91,7 @@ var installApiOperatorCmd = &cobra.Command{
 
 		// installing operator and configs if -f flag given
 		// otherwise settings configs only
-		createControllerConfigs(isLocalInstallation)
+		createControllerConfigs(configFile)
 		registry.UpdateConfigsSecrets()
 
 		fmt.Println("[Setting to K8s Mode]")
@@ -69,16 +100,8 @@ var installApiOperatorCmd = &cobra.Command{
 }
 
 // createControllerConfigs creates configs
-func createControllerConfigs(isLocalInstallation bool) {
+func createControllerConfigs(configFile string) {
 	utils.Logln(utils.LogPrefixInfo + "Installing controller configs")
-	configFile := flagApiOperatorFile
-
-	if isLocalInstallation {
-		fmt.Println("[Installing API Operator]")
-	} else {
-		fmt.Println("[Setting configs]")
-		configFile = k8sUtils.OperatorConfigFileUrl
-	}
 
 	// apply all files without printing errors
 	if err := k8sUtils.ExecuteCommandWithoutPrintingErrors(k8sUtils.Kubectl, k8sUtils.K8sApply, "-f", configFile); err != nil {

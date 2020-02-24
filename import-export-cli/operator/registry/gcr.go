@@ -34,6 +34,7 @@ var gcrValues = struct {
 	svcAccKeyFile string
 }{}
 
+// GcrRegistry represents Google Container Registry
 var GcrRegistry = &Registry{
 	Name:       "GCR",
 	Caption:    "GCR",
@@ -68,8 +69,7 @@ func readGcrInputs() string {
 			utils.HandleErrorAndExit("Error reading GCR service account key json file from user", err)
 		}
 
-		fmt.Println("")
-		fmt.Println("GCR service account key json file: " + svcAccKeyFile)
+		fmt.Println("\nGCR service account key json file: " + svcAccKeyFile)
 
 		isConfirmStr, err := utils.ReadInputString("Confirm configurations", utils.Default{Value: "Y", IsDefault: true}, "", false)
 		if err != nil {

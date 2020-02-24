@@ -21,7 +21,10 @@ package olm
 // Operator Hub Constants
 const CrdUrlTemplate = "https://github.com/operator-framework/operator-lifecycle-manager/releases/download/%s/crds.yaml"
 const OlmUrlTemplate = "https://github.com/operator-framework/operator-lifecycle-manager/releases/download/%s/olm.yaml"
+const OlmVersionValidationUrlTemplate = "https://github.com/operator-framework/operator-lifecycle-manager/tree/%s"
+const OlmVersionFindVersionUrl = "https://github.com/operator-framework/operator-lifecycle-manager/releases"
 const OperatorCsv = "csv"
-const Version = "0.13.0" //TODO: renuka export default to env variable and read from it
+const DefaultVersion = "0.13.0"
+const VersionEnvVariable = "WSO2_OLM_VERSION"
 
 const ApiOperatorYamlUrl = "https://operatorhub.io/install/api-operator.yaml"
