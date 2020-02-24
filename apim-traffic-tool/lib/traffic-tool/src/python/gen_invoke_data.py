@@ -24,6 +24,7 @@ import numpy as np
 import yaml
 from datetime import datetime
 from multiprocessing import Process, Value
+from collections import defaultdict
 from utils import log
 
 # variables
@@ -57,7 +58,23 @@ def loadConfig():
     with open(abs_path + '/../../data/access_pattern/invoke_patterns.yaml') as pattern_file:
         invoke_patterns = yaml.load(pattern_file, Loader=yaml.FullLoader)
 
-    time_patterns = invoke_patterns['time_patterns']
+    time_patterns = process_time_patterns(invoke_patterns['time_patterns'])
+
+
+def process_time_patterns(patterns: dict) -> defaultdict:
+    """
+    Process time patterns to obtain mean and standard deviation to be used with distributions.
+    :param patterns: Patterns dictionary.
+    :return: Dictionary with mean and std for each pattern.
+    """
+    processed_patterns = defaultdict()
+
+    for key, pattern in patterns.items():
+        pattern = list(map(int, pattern.split(',')))
+        mean = np.mean(pattern)
+        std = np.std(pattern)
+        processed_patterns[key] = {'mean': mean, 'std': std}
+    return processed_patterns
 
 
 def writeInvokeData(timestamp, path, access_token, method, user_ip, cookie, user_agent):
@@ -90,7 +107,7 @@ def runInvoker(user_scenario, current_data_points):
     Supposed to be executed from a process.
     :param user_scenario: User scenario as a list
     :param current_data_points: Current data point count
-    :return:
+    :return: None
     """
     global no_of_data_points
 
@@ -139,19 +156,17 @@ def runInvoker(user_scenario, current_data_points):
             cookie = scenario[6]
             user_agent = scenario[7]
 
+            # set time pattern if not set
             if time_pattern is None:
                 time_pattern = scenario[8]
                 time_pattern = time_patterns.get(time_pattern)
-                if type(time_pattern) is str:
-                    time_pattern = [int(t) for t in time_pattern.split(',')]
-                else:
-                    time_pattern = [time_pattern]
 
             writeInvokeData(timestamp, path, access_token, method, user_ip, cookie, user_agent)
             current_data_points.value += 1
 
             if heavy_traffic != 'true':
-                timestamp += dt.timedelta(seconds=it % len(time_pattern))
+                sleep_time = np.absolute(np.random.normal(time_pattern['mean'], time_pattern['std']))
+                timestamp += dt.timedelta(seconds=sleep_time)
             else:
                 timestamp += dt.timedelta(seconds=abs(int(np.random.normal())))
             it += 1
