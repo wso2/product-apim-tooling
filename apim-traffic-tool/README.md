@@ -146,14 +146,14 @@ adv  : View advanced options
 ```
 
 #### 1. Setup the Tool and WSO2 API Manager
-Running the shell script with argument `setup` will generate random user details, user-application invoke scenario, and then create APIs, applications, users in WSO2 API Manager and generate invoke tokens to consume resources. You will be prompted to continue with custom scenario or random scenario. Enter '0' to continue with the example scenario, or any other key to generate a random scenario.
+Running the shell script with argument `setup` will generate random user details, user-application invoke scenario, and then create APIs, applications, users in WSO2 API Manager and generate invoke tokens to consume resources. You will be prompted to continue with example scenario or random scenario. Enter '0' to continue with the example scenario, or any other key to generate a random scenario.
 
 ```
 $ ./traffic-tool.sh setup
-Enter '0' to setup for custom scenario. Any other key to generate a random scenario
+Enter '0' to setup for example scenario. Any other key to generate a random scenario
 0
 ```
-> If you're continuing with a custom scenario, you need to provide `invoke_scenario.yaml` file in the `<TOOL_HOME>/lib/traffic-tool/data/scenario/` directory. File for the example scenario is provided as `ex_invoke_scenario.yaml` in the scenario folder. Rename this file to 'invoke_scenario.yaml' to continue with the example scenario (Generating random scenario will overwrite this file after renaming).
+> If you're continuing with the example scenario, you need to provide `invoke_scenario.yaml` file in the `<TOOL_HOME>/lib/traffic-tool/data/scenario/` directory. File for the example scenario is provided as `ex_invoke_scenario.yaml` in the scenario folder. Rename this file to 'invoke_scenario.yaml' to continue with the example scenario (However, generating random scenario will overwrite this file after renaming).
 
 #### 2. Simulate a Traffic on API Manager
 To simulate an API invoking traffic on WSO2 API Manager, run the shell script with the argument `start`. You will be prompted for a filename and the script run time. Enter the filename without a file extension(without .txt, .csv, etc) and the output/ dataset will be saved in dataset/traffic/filename.csv directory. Traffic will be executed throughout the given time (Enter the time in minutes when prompted).
