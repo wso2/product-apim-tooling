@@ -73,7 +73,7 @@ def loadConfig():
     store_application_endpoint = str(apim_config['apim_endpoints']['store_application'])
     store_subs_endpoint = str(apim_config['apim_endpoints']['store_subscription'])
     user_signup_endpoint = str(apim_config['apim_endpoints']['user_signup'])
-    
+
     gateway_protocol = str(apim_config['management_console']['protocol'])
     gateway_host = str(apim_config['management_console']['host'])
     gateway_servelet_port_https = str(apim_config['management_console']['servlet_transport_port_https'])
@@ -134,13 +134,13 @@ def swaggerCheck():
 
     # check swagger files exists for all APIs
     apis = api_config['apis']
-    
+
     for api in apis:
         api_name = api['name'].lower()
 
         if api_name not in swagger_names:
             swagger_not_found.append(api_name)
-    
+
     # generate the final result
     if len(swagger_not_found) >= 1:
         res_txt = "Swagger files not found for following APIs: {}".format(swagger_not_found)
@@ -161,7 +161,7 @@ def createAndPublishAPIs():
 
     # get id and secret
     client_id, client_secret = request_methods.getIDSecret(gateway_protocol, gateway_host, gateway_servelet_port_https, token_registration_endpoint)
-    
+
     if client_id == None or client_secret == None:
         logger.error("Fetching client id, client secret unsuccessful!. Aborting task...")
         return
@@ -199,7 +199,7 @@ def createAndPublishAPIs():
     # iterate the procedure for each API in the config file
     for api in apis:
         api_name = api['name']
-        
+
         # create new API
         api_id = request_methods.createAPI(gateway_protocol, gateway_host, gateway_servelet_port_https, publisher_api_endpoint, access_token_create, api_name, api['description'], api['context'], api['version'], swagger_definitions.get(api_name.lower()), api['tags'], api_throttling_tier, api_visibility, production_endpoint, sandbox_endpoint)
 
@@ -243,10 +243,10 @@ def createApplicationsAndSubscribe():
     """
     created_count = 0
     app_api_sub = ""
-    
+
     # get id and secret
     client_id, client_secret = request_methods.getIDSecret(gateway_protocol, gateway_host, gateway_servelet_port_https, token_registration_endpoint)
-    
+
     if client_id == None or client_secret == None:
         logger.error("Fetching client id, client secret unsuccessful!. Aborting task...")
         return
@@ -298,7 +298,7 @@ def createApplicationsAndSubscribe():
         else:
             logger.info("Application created Successfully. App name: {}, App ID: {}".format(app_name, app_id))
             created_count += 1
-        
+
         #subscribe for each API
         sub_count = 0
         for api in api_subs:
@@ -326,13 +326,13 @@ def createApplicationsAndSubscribe():
             key, secret = request_methods.genProductionKey(gateway_protocol, gateway_host, gateway_servelet_port_https, keygen_endpoint, access_token_subs, token_validity_period)
             if key == None:
                 logger.error("App key generation Failed!. App name: {}".format(app_name))
-                app_api_sub += "false, "
+                app_api_sub += "(key: false), "
             else:
                 logger.info("App key generation successful. App name: {}".format(app_name))
-                app_api_sub += "true, "
+                app_api_sub += "(key: true), "
         else:
             logger.info("App key generation successful. App name: {}".format(app_name))
-            app_api_sub += "true, "
+            app_api_sub += "(key: true), "
 
         # write key secret to api_invoke_key_secret.csv file
         concat_value = key + ":" + secret
@@ -341,7 +341,7 @@ def createApplicationsAndSubscribe():
         with open(abs_path + '/../../data/scenario/api_invoke_key_secret.csv', 'a+') as file:
             file.write(app_name + ',' + b64_encoded + '\n')
 
-    out_txt = "Application creation process completed. Total {} Apps created. Following subscriptions happen\n{}".format(str(created_count), app_api_sub)
+    out_txt = "Application creation process completed. Total {} Apps created. Following subscriptions happen:\n{}".format(str(created_count), app_api_sub)
     logger.info(out_txt)
 
 
@@ -351,7 +351,7 @@ def createUsers():
     :return: None
     """
     signup_count = 0
-    
+
     with open(abs_path + '/../../data/scenario/user_details.yaml', 'r') as user_file:
         user_data = yaml.load(user_file, Loader=yaml.FullLoader)
 

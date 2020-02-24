@@ -70,7 +70,7 @@ def genUserApps():
     for i in range(len(users)):
         user_apps = random.sample(app_list.keys(), app_usage.pop(0))
         users[i]['applications'] = ','.join(user_apps)
-        
+
         for app in user_apps:
             app_list.get(app).append(users[i]['username'])
 
@@ -97,7 +97,7 @@ def genScenarioDistribution():
     for app in app_list:
         # get user count for the app
         app_user_count = len(app_list.get(app))
-        
+
         # distribute users for each type based on request frequency
         mn = int(math.floor((high_freq_upper-low_freq_lower)/2))
 
@@ -105,8 +105,8 @@ def genScenarioDistribution():
         user_frequencies = distribution.rvs(app_user_count)
         user_frequencies = [int(round(num, 0)) for num in user_frequencies]
 
-        no_of_users_low_freq = len(list(fq for fq in user_frequencies if low_freq_lower <= fq <= low_freq_upper))
-        no_of_users_medium_freq = len(list(fq for fq in user_frequencies if medium_freq_lower <= fq <= medium_freq_upper))
+        no_of_users_low_freq = len(list(fq for fq in user_frequencies if low_freq_lower <= fq < low_freq_upper))
+        no_of_users_medium_freq = len(list(fq for fq in user_frequencies if medium_freq_lower <= fq < medium_freq_upper))
         no_of_users_high_freq = len(list(fq for fq in user_frequencies if high_freq_lower <= fq <= high_freq_upper))
 
         # generate scenario for low frequent category
@@ -132,7 +132,7 @@ def genScenarioDistribution():
 
                     temp_2['no_of_requests'] = no_of_reqs
                     api_calls.append(temp_2)
-            
+
             temp['api_calls'] = api_calls
             scenario_list.append(temp)
 
@@ -159,10 +159,10 @@ def genScenarioDistribution():
 
                     temp_2['no_of_requests'] = no_of_reqs
                     api_calls.append(temp_2)
-            
+
             temp['api_calls'] = api_calls
             scenario_list.append(temp)
-        
+
         # generate scenario for high frequent category
         if(no_of_users_high_freq != 0):
             temp = {}
@@ -186,7 +186,7 @@ def genScenarioDistribution():
 
                     temp_2['no_of_requests'] = no_of_reqs
                     api_calls.append(temp_2)
-            
+
             temp['api_calls'] = api_calls
             scenario_list.append(temp)
 
