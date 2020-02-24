@@ -19,12 +19,12 @@ scenario_name: scenario_example
 # details for all hosted APIs. Traffic tool will invoke according to these configurations
 api_host:
   protocol: https
-  ip: 192.168.8.101
+  ip:
   port: 8243
 
 # configurations for the traffic tool processes
 tool_config:
-  no_of_users: 50
+  no_of_users: 100
   max_connection_refuse_count: 50
   no_of_data_points: 100000
   heavy_traffic: false

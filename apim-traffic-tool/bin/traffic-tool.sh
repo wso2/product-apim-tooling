@@ -32,7 +32,7 @@ func_advance_help() {
   echo "Advanced Options"
   echo "1: Generate random user details"
   echo "2: Generate random invoke scenario"
-  echo "3: Create scenario in APIM"
+  echo "3: Create scenario in API Manager"
   echo "4: Generate access tokens"
 }
 
@@ -214,26 +214,10 @@ case "$1" in
     exit 0
   ;;
   setup)
-    echo "Enter '0' to setup for custom scenario. Any other key to generate a random scenario"
-    read KEY
-    if [ "$KEY" = "0" ]
-    then
-      if [ -e "$(pwd)"/../lib/traffic-tool/data/scenario/invoke_scenario.yaml ]
-      then
-        func_gen_user_details 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log
-        func_create_scenario 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log
-        func_gen_tokens 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log
-        exit 0
-      else
-        echo "'invoke_scenario.yaml' file is not provided. Cannot setup for custom scenario!"
-        exit 1
-      fi
-    else
-      func_gen_user_details 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log
-      func_gen_scenario_distribution 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log
-      func_create_scenario 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log
-      func_gen_tokens 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log
-    fi
+    func_gen_user_details 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log
+    func_gen_scenario_distribution 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log
+    func_create_scenario 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log
+    func_gen_tokens 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log
     exit 0
   ;;
   start)
@@ -261,8 +245,14 @@ case "$1" in
     exit 0
   ;;
   2)
-    func_gen_scenario_distribution 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log
-    exit 0
+    if [ -e "$(pwd)"/../lib/traffic-tool/data/scenario/user_details.yaml ]
+    then
+      func_gen_scenario_distribution 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log
+      exit 0
+    else
+      echo "'user_details.yaml' is not found!. Please run the shell with argument '1' before running this command"
+      exit 1
+    fi
   ;;
   3)
     func_create_scenario 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log

@@ -14,7 +14,7 @@ apim_endpoints:
 # api manager management console ports and configurations
 management_console:
   protocol: https
-  host: 192.168.8.101
+  host:
   servlet_transport_port_https: 9443
   servlet_transport_port_http: 9763
 
