@@ -228,7 +228,7 @@ $ ./traffic-tool.sh 5
 ```
 
 #### Note
-* Run the steps 6.3, 6.4, 6.5 and 2 respectively to simulate an API invoking traffic according to the example scenario. Note that you have to provide `invoke_scenario.yaml` file.
+* Run the steps 6.2, 6.4, 6.5 and 2 respectively to simulate an API invoking traffic according to the example scenario. Note that you have to provide `invoke_scenario.yaml` file.
 * Run the steps 6.1, 6.4, 6.5 and 2 respectively to simulate an API invoking traffic according to a custom scenario. Note that you have to provide `invoke_scenario.yaml` file and list applications in `user_details.yaml` file after running the step 6.1 (Refer "Adding Custom APIM Scenario" section for more details).
 * Run the steps 6.1, 6.3, 6.4, 6.5 and 2 respectively to simulate an API invoking traffic according to a random scenario.
 

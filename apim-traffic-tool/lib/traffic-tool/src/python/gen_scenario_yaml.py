@@ -87,19 +87,18 @@ def genScenarioDistribution():
     :return: None
     """
     scenario_list = []
+    low_freq_lower = frequency_limits['low']['lower']
+    low_freq_upper = frequency_limits['low']['upper']
+    medium_freq_lower = frequency_limits['medium']['lower']
+    medium_freq_upper = frequency_limits['medium']['upper']
+    high_freq_lower = frequency_limits['high']['lower']
+    high_freq_upper = frequency_limits['high']['upper']
 
     for app in app_list:
         # get user count for the app
         app_user_count = len(app_list.get(app))
         
         # distribute users for each type based on request frequency
-        low_freq_lower = frequency_limits['low']['lower']
-        low_freq_upper = frequency_limits['low']['upper']
-        medium_freq_lower = frequency_limits['medium']['lower']
-        medium_freq_upper = frequency_limits['medium']['upper']
-        high_freq_lower = frequency_limits['high']['lower']
-        high_freq_upper = frequency_limits['high']['upper']
-
         mn = int(math.floor((high_freq_upper-low_freq_lower)/2))
 
         distribution = getNormal(mn, mn, low_freq_lower, high_freq_upper)

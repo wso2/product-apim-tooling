@@ -31,10 +31,9 @@ func_help() {
 func_advance_help() {
   echo "Advanced Options"
   echo "1: Generate random user details"
-  echo "2: Generate data for example scenario"
-  echo "3: Generate invoke scenario"
-  echo "4: Create scenario in APIM"
-  echo "5: Generate access tokens"
+  echo "2: Generate random invoke scenario"
+  echo "3: Create scenario in APIM"
+  echo "4: Generate access tokens"
 }
 
 # function to generate a set of random user details
@@ -43,18 +42,6 @@ func_gen_user_details() {
     python3 "$(pwd)"/../lib/traffic-tool/src/python/gen_user_details.py 0
   elif command -v python &>/dev/null; then
     python "$(pwd)"/../lib/traffic-tool/src/python/gen_user_details.py 0
-  else
-    echo "Python 3 is required for the command!"
-    exit 1
-  fi
-}
-
-# function to generate random user details and distribute them according to the example scenario
-func_gen_example_scenario() {
-  if command -v python3 &>/dev/null; then
-    python3 "$(pwd)"/../lib/traffic-tool/src/python/gen_user_details.py 1
-  elif command -v python &>/dev/null; then
-    python "$(pwd)"/../lib/traffic-tool/src/python/gen_user_details.py 1
   else
     echo "Python 3 is required for the command!"
     exit 1
@@ -213,8 +200,6 @@ func_cleanup() {
       echo "Python 3 is required for the command!"
       exit 1
     fi
-    > "$(pwd)"/../lib/traffic-tool/data/runtime_data/api_ids.csv
-    > "$(pwd)"/../lib/traffic-tool/data/runtime_data/app_ids.csv
     echo "Script execution completed"
   else
     echo "Missing required data files"
@@ -233,9 +218,16 @@ case "$1" in
     read KEY
     if [ "$KEY" = "0" ]
     then
-      func_gen_example_scenario 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log
-      func_create_scenario 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log
-      func_gen_tokens 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log
+      if [ -e "$(pwd)"/../lib/traffic-tool/data/scenario/invoke_scenario.yaml ]
+      then
+        func_gen_user_details 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log
+        func_create_scenario 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log
+        func_gen_tokens 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log
+        exit 0
+      else
+        echo "'invoke_scenario.yaml' file is not provided. Cannot setup for custom scenario!"
+        exit 1
+      fi
     else
       func_gen_user_details 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log
       func_gen_scenario_distribution 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log
@@ -269,18 +261,14 @@ case "$1" in
     exit 0
   ;;
   2)
-    func_gen_example_scenario 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log
-    exit 0
-  ;;
-  3)
     func_gen_scenario_distribution 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log
     exit 0
   ;;
-  4)
+  3)
     func_create_scenario 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log
     exit 0
   ;;
-  5)
+  4)
     func_gen_tokens 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log
     exit 0
   ;;

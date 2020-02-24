@@ -118,7 +118,7 @@ def ipGen(country):
         random.seed()
         temp_ip = ipaddress.IPv4Address._string_from_ip_int(random.randint(int(ip_decs[0]), int(ip_decs[1])))
         while temp_ip in used_ips:
-            temp_ip = ipaddress.IPv4Address._string_from_ip_int(random.randint(ip_decs[0], ip_decs[1]))
+            temp_ip = ipaddress.IPv4Address._string_from_ip_int(random.randint(int(ip_decs[0]), int(ip_decs[1])))
 
         used_ips.append(temp_ip)
 
@@ -224,20 +224,24 @@ if __name__ == "__main__":
         logger.exception(out_txt)
         sys.exit()
 
+    # check whether the user count is valid (not more than the created number of users)
+    for item in scenario_data:
+        user_count = int(item.get('no_of_users'))
+        total_no_of_user_combinations += user_count
+    
+        if total_no_of_user_combinations > existing_no_of_user_combinations:
+            # invalid no of users (cannot execute the scenario)
+            logger.error(
+                "Invalid number of user count declared in 'invoke_scenario.yaml'. Expected {} user combinations. Found {}.".format(existing_no_of_user_combinations, total_no_of_user_combinations))
+            logger.critical("Cannot run the tool!")
+            sys.exit()
+
+    # generate the scenario pool
     for item in scenario_data:
         app_name = item.get('app_name')
         user_count = int(item.get('no_of_users'))
         time_pattern = item.get('time_pattern')
         invokes = item.get('api_calls')
-
-        # check whether the user count is valid (not more than the created number of users)
-        total_no_of_user_combinations += user_count
-        if total_no_of_user_combinations > existing_no_of_user_combinations:
-            # invalid no of users (cannot execute the scenario)
-            logger.error(
-                "Invalid number of user count declared in 'invoke_scenario.yaml'. Expected {} user combinations. Found {} or more.".format(existing_no_of_user_combinations, total_no_of_user_combinations))
-            raise ArithmeticError(
-                "Invalid number of user count declared in 'invoke_scenario.yaml'. Expected {} user combinations. Found {} or more.".format(existing_no_of_user_combinations, total_no_of_user_combinations))
 
         users = []
         for i in range(user_count):

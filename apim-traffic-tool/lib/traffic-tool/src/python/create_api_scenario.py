@@ -192,6 +192,10 @@ def createAndPublishAPIs():
     apis = api_config['apis']
     logger.info("API data read from api_details.yaml")
 
+    # clear previous stored api id's
+    with open(abs_path + '/../../data/runtime_data/api_ids.csv', 'w') as f:
+        f.write('')
+
     # iterate the procedure for each API in the config file
     for api in apis:
         api_name = api['name']
@@ -269,6 +273,10 @@ def createApplicationsAndSubscribe():
     # clear application key, secret file
     with open(abs_path + '/../../data/scenario/api_invoke_key_secret.csv', 'w') as file:
         file.write('')
+
+    # clear previous stored app id's
+    with open(abs_path + '/../../data/runtime_data/app_ids.csv', 'w') as f:
+        f.write('')
 
     # iterate the procedure for each application in the config file
     for app in apps:

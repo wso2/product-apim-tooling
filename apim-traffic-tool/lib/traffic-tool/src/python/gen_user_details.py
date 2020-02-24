@@ -84,62 +84,6 @@ def generateUser(num: int):
     return user
 
 
-def appUserScenario():
-    """
-    This function will generate all users and divide them among applications according to the example scenario
-    :return: None
-    """
-    user_list = []
-    for i in range(no_of_users):
-        user = generateUser(i + 1)
-        user_list.append(user)
-
-    individual_app_users = int(no_of_users * 3 / 5)
-    only_onlineShopping = int(individual_app_users * 1 / 4)
-    only_cricScore = int(individual_app_users * 1 / 6)
-    only_taxi = individual_app_users - (only_onlineShopping + only_cricScore)
-
-    all_app = int((no_of_users - individual_app_users) * 1 / 4)
-    shopping_taxi = int((no_of_users - individual_app_users) * 1 / 4)
-    shopping_cricScore = int((no_of_users - individual_app_users) * 1 / 8)
-    taxi_cricScore = no_of_users - individual_app_users - (all_app + shopping_taxi + shopping_cricScore)
-
-    # only online shopping app users
-    for i in range(0, only_onlineShopping):
-        user_list[i]['applications'] = 'Online Shopping'
-    # only cricscore app users
-    for i in range(only_onlineShopping, only_onlineShopping + only_cricScore):
-        user_list[i]['applications'] = 'CricScore'
-    # only taxi app users
-    for i in range(only_onlineShopping + only_cricScore, only_onlineShopping + only_cricScore + only_taxi):
-        user_list[i]['applications'] = 'Taxi'
-
-    # both shopping and taxi app users
-    v1 = individual_app_users + shopping_taxi
-    for i in range(individual_app_users, v1):
-        user_list[i]['applications'] = 'Online Shopping, Taxi'
-
-    # both shopping and cricscore app users
-    v2 = v1 + shopping_cricScore
-    for i in range(v1, v2):
-        user_list[i]['applications'] = 'Online Shopping, CricScore'
-
-    # both taxi and cricscore app users
-    v3 = v2 + taxi_cricScore
-    for i in range(v2, v3):
-        user_list[i]['applications'] = 'Taxi, CricScore'
-    
-    # all 3 app users
-    v4 = v3 + all_app
-    for i in range(v3, v4):
-        user_list[i]['applications'] = 'Online Shopping, Taxi, CricScore'
-
-    with open(abs_path + '/../../data/scenario/user_details.yaml', 'w') as file:
-        yaml.dump({'users': user_list}, file, sort_keys=False)
-
-    logger.info('User details generated. Users divided among applications according to the example scenario. No of users: {}'.format(str(no_of_users)))
-
-
 def genUsers():
     """
     This function will generate given number of users and write data to the user_details.yaml file
@@ -158,13 +102,4 @@ def genUsers():
 
 if __name__ == "__main__":
     # execute
-    parser = argparse.ArgumentParser("generate user details")
-    parser.add_argument("option", help="Pass 0 to generate only user details. Pass 1 to generate user details and the scenario distribution", type=int)
-    args = parser.parse_args()
-
-    if args.option == 0:
-        genUsers()
-    elif args.option == 1:
-        appUserScenario()
-    else:
-        logger.error("Invalid argument {}!".format(args.option))
+    genUsers()
