@@ -4,7 +4,6 @@ Set configuration
 
 ### Synopsis
 
-
 Set configuration parameters. Use at least one of the following flags
 * --http-request-timeout <time-in-milli-seconds>
 * --export-directory <path-to-directory-where-apis-should-be-saved>
@@ -29,7 +28,7 @@ apictl set --mode default
 ### Options
 
 ```
-      --export-directory string    Path to directory where APIs should be saved (default "/home/dinusha/.wso2apictl/exported")
+      --export-directory string    Path to directory where APIs should be saved (default "/Users/renuka/.wso2apictl/exported")
   -h, --help                       help for set
       --http-request-timeout int   Timeout for HTTP Client (default 10000)
   -m, --mode string                mode of apictl
@@ -44,5 +43,6 @@ apictl set --mode default
 ```
 
 ### SEE ALSO
+
 * [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
 

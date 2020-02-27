@@ -4,7 +4,6 @@ Add an API to the kubernetes cluster
 
 ### Synopsis
 
-
 Add an API from a Swagger file to the kubernetes cluster. JSON and YAML formats are accepted.
 To execute kubernetes commands set mode to Kubernetes
 
@@ -30,6 +29,7 @@ apictl add api -n petstore --from-file=./product-apim-tooling/import-export-cli/
 ```
 
 ### SEE ALSO
+
 * [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
 * [apictl add api](apictl_add_api.md)	 - handle APIs in kubernetes cluster 
 

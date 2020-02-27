@@ -4,7 +4,6 @@ Display a list of Applications in an environment specific to an owner
 
 ### Synopsis
 
-
 Display a list of Applications of the user in the environment specified by the flag --environment, -e
 
 ```
@@ -37,5 +36,6 @@ apictl list apps -e staging -o sampleUser
 ```
 
 ### SEE ALSO
+
 * [apictl list](apictl_list.md)	 - List APIs/Applications in an environment or List the environments
 

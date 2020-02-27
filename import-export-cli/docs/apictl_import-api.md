@@ -4,7 +4,6 @@ Import API
 
 ### Synopsis
 
-
 Import an API to an environment
 
 ```
@@ -40,5 +39,6 @@ apictl import-api -f ~/myapi -e production --update --inject
 ```
 
 ### SEE ALSO
+
 * [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
 

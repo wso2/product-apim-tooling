@@ -4,7 +4,6 @@ Export APIs for migration
 
 ### Synopsis
 
-
 Export all the APIs of a tenant from an APIM 2.6.0 environment environment, to be imported into 3.0.0 environment
 
 ```
@@ -37,5 +36,6 @@ apictl export-apis -e production-2.6.0 -u wso2admin@wso2.org -p 12345 -t wso2.or
 ```
 
 ### SEE ALSO
+
 * [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
 

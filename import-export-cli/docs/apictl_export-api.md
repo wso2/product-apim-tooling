@@ -4,7 +4,6 @@ Export API
 
 ### Synopsis
 
-
 Export APIs from an environment
 
 ```
@@ -39,5 +38,6 @@ NOTE: all three flags (--name (-n), --version (-v), --provider (-r)) are mandato
 ```
 
 ### SEE ALSO
+
 * [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
 

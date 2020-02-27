@@ -4,7 +4,6 @@ Import App
 
 ### Synopsis
 
-
 Import an Application to an environment
 
 ```
@@ -40,5 +39,6 @@ apictl import-app -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -
 ```
 
 ### SEE ALSO
+
 * [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
 

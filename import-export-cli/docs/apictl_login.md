@@ -4,7 +4,6 @@ Login to an API Manager
 
 ### Synopsis
 
-
 Login to an API Manager using credentials
 
 ```
@@ -36,5 +35,6 @@ cat ~/.mypassword | apictl login dev -u admin
 ```
 
 ### SEE ALSO
+
 * [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
 

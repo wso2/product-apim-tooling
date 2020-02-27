@@ -4,7 +4,6 @@ Remove Environment from Config file
 
 ### Synopsis
 
-
 Remove Environment and its related endpoints from the config file
 
 ```
@@ -32,5 +31,6 @@ apictl remove-env -e production
 ```
 
 ### SEE ALSO
+
 * [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
 

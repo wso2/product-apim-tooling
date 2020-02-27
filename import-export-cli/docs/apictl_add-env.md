@@ -4,7 +4,6 @@ Add Environment to Config file
 
 ### Synopsis
 
-
 Add new environment and its related endpoints to the config file
 
 ```
@@ -51,5 +50,6 @@ apictl add-env -e dev --apim https://localhost:9443 \
 ```
 
 ### SEE ALSO
+
 * [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
 

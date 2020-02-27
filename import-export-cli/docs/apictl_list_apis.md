@@ -4,7 +4,6 @@ Display a list of APIs in an environment
 
 ### Synopsis
 
-
 Display a list of APIs in the environment specified by the flag --environment, -e
 
 ```
@@ -37,5 +36,6 @@ apictl apis list -e staging
 ```
 
 ### SEE ALSO
+
 * [apictl list](apictl_list.md)	 - List APIs/Applications in an environment or List the environments
 
