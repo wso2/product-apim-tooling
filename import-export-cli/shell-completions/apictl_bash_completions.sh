@@ -379,55 +379,6 @@ _apictl_change()
     noun_aliases=()
 }
 
-_apictl_clean_api-operator()
-{
-    last_command="apictl_clean_api-operator"
-    commands=()
-
-    flags=()
-    two_word_flags=()
-    local_nonpersistent_flags=()
-    flags_with_completion=()
-    flags_completion=()
-
-    flags+=("--force")
-    local_nonpersistent_flags+=("--force")
-    flags+=("--help")
-    flags+=("-h")
-    local_nonpersistent_flags+=("--help")
-    flags+=("--insecure")
-    flags+=("-k")
-    flags+=("--verbose")
-
-    must_have_one_flag=()
-    must_have_one_noun=()
-    noun_aliases=()
-}
-
-_apictl_clean()
-{
-    last_command="apictl_clean"
-    commands=()
-    commands+=("api-operator")
-
-    flags=()
-    two_word_flags=()
-    local_nonpersistent_flags=()
-    flags_with_completion=()
-    flags_completion=()
-
-    flags+=("--help")
-    flags+=("-h")
-    local_nonpersistent_flags+=("--help")
-    flags+=("--insecure")
-    flags+=("-k")
-    flags+=("--verbose")
-
-    must_have_one_flag=()
-    must_have_one_noun=()
-    noun_aliases=()
-}
-
 _apictl_export-api()
 {
     last_command="apictl_export-api"
@@ -973,6 +924,55 @@ _apictl_set()
     noun_aliases=()
 }
 
+_apictl_uninstall_api-operator()
+{
+    last_command="apictl_uninstall_api-operator"
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--force")
+    local_nonpersistent_flags+=("--force")
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_apictl_uninstall()
+{
+    last_command="apictl_uninstall"
+    commands=()
+    commands+=("api-operator")
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
 _apictl_update_api()
 {
     last_command="apictl_update_api"
@@ -1060,7 +1060,6 @@ _apictl_root_command()
     commands+=("add")
     commands+=("add-env")
     commands+=("change")
-    commands+=("clean")
     commands+=("export-api")
     commands+=("export-apis")
     commands+=("export-app")
@@ -1074,6 +1073,7 @@ _apictl_root_command()
     commands+=("logout")
     commands+=("remove-env")
     commands+=("set")
+    commands+=("uninstall")
     commands+=("update")
     commands+=("version")
 

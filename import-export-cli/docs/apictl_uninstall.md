@@ -1,21 +1,21 @@
-## apictl install
+## apictl uninstall
 
-Install an operator
+Uninstall an operator
 
 ### Synopsis
 
-Install an operator in the configured K8s cluster
+Uninstall an operator in the configured K8s cluster
 
 ### Examples
 
 ```
-apictl install api-operator
+apictl uninstall api-operator
 ```
 
 ### Options
 
 ```
-  -h, --help   help for install
+  -h, --help   help for uninstall
 ```
 
 ### Options inherited from parent commands
@@ -28,5 +28,5 @@ apictl install api-operator
 ### SEE ALSO
 
 * [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
-* [apictl install api-operator](apictl_install_api-operator.md)	 - Install API Operator
+* [apictl uninstall api-operator](apictl_uninstall_api-operator.md)	 - Uninstall API Operator
 

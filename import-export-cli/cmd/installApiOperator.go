@@ -30,7 +30,7 @@ import (
 const installApiOperatorCmdLiteral = "api-operator"
 const installApiOperatorCmdShortDesc = "Install API Operator"
 const installApiOperatorCmdLongDesc = "Install API Operator in the configured K8s cluster"
-const installApiOperatorCmdExamples = utils.ProjectName + ` ` + installApiOperatorCmdLiteral + `
+const installApiOperatorCmdExamples = utils.ProjectName + ` ` + installCmdLiteral + ` ` + installApiOperatorCmdLiteral + `
 ` + utils.ProjectName + ` ` + installApiOperatorCmdLiteral + ` -f path/to/operator/configs
 ` + utils.ProjectName + ` ` + installApiOperatorCmdLiteral + ` -f path/to/operator/config/file.yaml`
 

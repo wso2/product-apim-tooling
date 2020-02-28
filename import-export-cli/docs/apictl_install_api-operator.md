@@ -13,7 +13,7 @@ apictl install api-operator [flags]
 ### Examples
 
 ```
-apictl api-operator
+apictl install api-operator
 apictl api-operator -f path/to/operator/configs
 apictl api-operator -f path/to/operator/config/file.yaml
 ```

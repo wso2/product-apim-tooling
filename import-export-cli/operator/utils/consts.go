@@ -32,8 +32,14 @@ const K8sSecretDockerRegType = "docker-registry"
 // WSO2 API Operator constats
 const DefaultKubernetesMode = false
 const ApiOpControllerConfigMap = "controller-config"
+const ApiOperator = "api-operator"
 const ApiOpWso2Namespace = "wso2-system"
+
+// CRDs
+const ApiOpCrdApi = "apis.wso2.com"
+const ApiOpCrdRateLimiting = "ratelimitings.wso2.com"
 const ApiOpCrdSecurity = "securities.wso2.com"
+const ApiOpCrdTargetEndpoint = "targetendpoints.wso2.com"
 
 const ApiOperatorConfigsUrlTemplate = "https://github.com/wso2/K8s-api-operator/releases/download/%s/api-operator-configs.yaml"
 const ApiOperatorVersionValidationUrlTemplate = "https://github.com/wso2/K8s-api-operator/tree/%s"
