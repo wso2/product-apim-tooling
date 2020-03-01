@@ -84,6 +84,8 @@ def loadConfig():
 
 def setupTenantKeys():
     """
+    This function will get and set API creation and subscribe tokens for each tenant
+    :return: True if successful. False otherwise
     """
     global tenant_config_details
 

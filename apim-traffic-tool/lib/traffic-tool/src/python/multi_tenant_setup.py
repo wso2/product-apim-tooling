@@ -47,6 +47,8 @@ def loadConfig():
 
 def genMultiTenantPattern():
     """
+    This function will divide each app and relavant APIs among tenants, and write to tenant_details.yaml file
+    :return: None
     """
     global tenant_list, app_tenant
     tenant_app = {}
@@ -81,6 +83,8 @@ def genMultiTenantPattern():
 
 def genUserTenant():
     """
+    This function will generate tenant list for each user and, write to tenant_details.yaml file
+    :return: None
     """
     global app_tenant
     user_tenant = {}
