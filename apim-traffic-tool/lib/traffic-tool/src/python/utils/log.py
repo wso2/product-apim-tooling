@@ -28,7 +28,7 @@ log_file = abs_path + '/../../../../../logs/traffic-tool.log'
 def setLogLevel():
     global log_level
 
-    with open(abs_path + '../../../../../config/user-settings.yaml', 'r') as f:
+    with open(abs_path + '/../../../../../config/user-settings.yaml', 'r') as f:
         user_settings = yaml.load(f, Loader=yaml.FullLoader)
     user_log_level = user_settings['log_level']
 
