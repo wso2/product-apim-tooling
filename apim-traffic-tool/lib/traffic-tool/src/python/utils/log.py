@@ -65,4 +65,4 @@ def setLogger(logger_name):
     return logger
 
 
-# setLogLevel()
+setLogLevel()
