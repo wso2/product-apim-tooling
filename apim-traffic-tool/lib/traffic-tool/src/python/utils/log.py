@@ -22,7 +22,8 @@ import os
 # variables
 log_level = logging.INFO
 abs_path = os.path.abspath(os.path.dirname(__file__))
-log_file = '../logs/traffic-tool.log'
+log_file = abs_path + '/../../../../../logs/traffic-tool.log'
+
 
 def setLogLevel():
     global log_level

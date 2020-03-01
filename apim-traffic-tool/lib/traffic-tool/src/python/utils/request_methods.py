@@ -24,25 +24,27 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 abs_path = os.path.abspath(os.path.dirname(__file__))
 
 
-def getIDSecret(gateway_protocol, gateway_host, gateway_port, endpoint):
+def getIDSecret(gateway_protocol, gateway_host, gateway_port, endpoint, admin_username, admin_b64):
     """
     This function will send http request to obtain client id, client secret.
     :param gateway_protocol: Running protocol of the gateway
     :param gateway_host: Host IP address of the gateway
     :param gateway_port: Port to obtain key, secret
     :param endpoint: Endpoint to obtain key, secret
+    :param admin_username: Username of the tenant admin
+    :param admin_b64: Base64 encrypted username:password of the tenant admin
     :return: Client ID and client secret
     """
     
     url = "{}://{}:{}{}".format(gateway_protocol, gateway_host, gateway_port, endpoint)
     headers = {
-        "Authorization": "Basic YWRtaW46YWRtaW4=",
+        "Authorization": "Basic {}".format(admin_b64),
         "Content-Type": "application/json"
     }
     data = {
         "callbackUrl": "www.google.lk",
         "clientName": "rest_api_publisher",
-        "owner": "admin",
+        "owner": admin_username,
         "grantType": "password refresh_token",
         "saasApp": "true"
     }
@@ -71,7 +73,7 @@ def getIDSecret(gateway_protocol, gateway_host, gateway_port, endpoint):
         return None, None
 
 
-def getAccessToken(gateway_protocol, gateway_host, gateway_port, endpoint, b64_encoded_value, scope):
+def getAccessToken(gateway_protocol, gateway_host, gateway_port, endpoint, b64_encoded_value, scope, admin_username, admin_password):
     """
     This function will obtain an access token for a given scope.
     :param gateway_protocol: Running protocol of the gateway
@@ -80,6 +82,8 @@ def getAccessToken(gateway_protocol, gateway_host, gateway_port, endpoint, b64_e
     :param endpoint: Endpoint to obtain access token
     :param b64_encoded_value: Base64 encrypted value of client_id:client_secret
     :param scope: Scope of the token
+    :param admin_username: Username of the tenant admin
+    :param admin_password: Password of the tenant admin
     :return: Access token and refresh token
     """
     
@@ -90,8 +94,8 @@ def getAccessToken(gateway_protocol, gateway_host, gateway_port, endpoint, b64_e
     }
     data = {
         'grant_type': 'password',
-        'username': 'admin',
-        'password': 'admin',
+        'username': admin_username,
+        'password': admin_password,
         'scope': scope
     }
 
@@ -118,7 +122,7 @@ def getAccessToken(gateway_protocol, gateway_host, gateway_port, endpoint, b64_e
         return None, None
 
 
-def createAPI(gateway_protocol, gateway_host, gateway_port, endpoint, create_token, name, desc, path, version, swagger, tags, throttling_tier, visibility, production_endpoint, sandbox_endpoint):
+def createAPI(gateway_protocol, gateway_host, gateway_port, endpoint, create_token, name, desc, path, version, swagger, tags, throttling_tier, visibility, production_endpoint, sandbox_endpoint, admin_username):
     """
     This function will create a given API in WSO2 API Manager
     :param gateway_protocol: Running protocol of the gateway
@@ -136,6 +140,7 @@ def createAPI(gateway_protocol, gateway_host, gateway_port, endpoint, create_tok
     :param visibility: Visibility of the API
     :param production_endpoint: Production endpoint
     :param sandbox_endpoint: Sandbox endpoint
+    :param admin_username: Username of the tenant admin
     :return: ID of the create API
     """
 
@@ -149,7 +154,7 @@ def createAPI(gateway_protocol, gateway_host, gateway_port, endpoint, create_tok
         "description": desc,
         "context": path,
         "version": version,
-        "provider": "admin",
+        "provider": admin_username,
         "apiDefinition": str(swagger),
         "wsdlUri": None,
         "responseCaching": "Disabled",
@@ -424,13 +429,14 @@ def selfSignupStoreAPI(gateway_protocol, gateway_host, gateway_port, endpoint, u
         return False
 
 
-def selfSignupIS(gateway_protocol, gateway_host, gateway_port, endpoint, username, password, firstname, lastname, email, country, organization, land_no, mobile_no, IM, user_url):
+def selfSignupIS(gateway_protocol, gateway_host, gateway_port, endpoint, admin_b64, username, password, firstname, lastname, email, country, organization, land_no, mobile_no, IM, user_url):
     """
     This function will self signup users through WSO2 Identity server
     :param gateway_protocol: Running protocol of the gateway
     :param gateway_host: Host IP address of the gateway
     :param gateway_port: Port
     :param endpoint: Endpoint
+    :param admin_b64: Base64 encrypted username:password of the tenant admin
     :param username: Username
     :param password: Password
     :param firstname: First name of the user
@@ -447,7 +453,7 @@ def selfSignupIS(gateway_protocol, gateway_host, gateway_port, endpoint, usernam
 
     url = "{}://{}:{}{}".format(gateway_protocol, gateway_host, gateway_port, endpoint)
     headers = {
-        "Authorization": "Basic YWRtaW46YWRtaW4=",
+        "Authorization": "Basic {}".format(admin_b64),
         "Content-Type": "application/json",
     }
     data = {
@@ -631,7 +637,7 @@ def deleteAppAPI(gateway_protocol, gateway_host, gateway_port, endpoint, access_
         return False
 
 
-def removeUserSOAP(gateway_protocol, gateway_host, gateway_port, soap_endpoint, username):
+def removeUserSOAP(gateway_protocol, gateway_host, gateway_port, soap_endpoint, username, admin_b64):
     """
     This function will remove a given user account from carbon (Uses SOAP endpoint)
     :param gateway_protocol: Running protocol of the gateway
@@ -639,12 +645,13 @@ def removeUserSOAP(gateway_protocol, gateway_host, gateway_port, soap_endpoint, 
     :param gateway_port: Port
     :param soap_endpoint: SOAP Endpoint
     :param username: Username of the user/ account
+    :param admin_b64: Base64 encrypted username:password of the tenant admin
     :return: True if the user account removed. False otherwise
     """
 
     url = "{}://{}:{}{}".format(gateway_protocol, gateway_host, gateway_port, soap_endpoint)
     headers = {
-        "Authorization": "Basic YWRtaW46YWRtaW4=",
+        "Authorization": "Basic {}".format(admin_b64),
         "Content-Type": "text/xml",
         "SOAPAction": "urn:deleteUser"
     }

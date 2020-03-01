@@ -34,14 +34,15 @@ func_advance_help() {
   echo "2: Generate random invoke scenario"
   echo "3: Create scenario in API Manager"
   echo "4: Generate access tokens"
+  echo "5: Randomize invoke pattern and data"
 }
 
 # function to generate a set of random user details
 func_gen_user_details() {
   if command -v python3 &>/dev/null; then
-    python3 "$(pwd)"/../lib/traffic-tool/src/python/gen_user_details.py 0
+    python3 "$(pwd)"/../lib/traffic-tool/src/python/gen_user_details.py
   elif command -v python &>/dev/null; then
-    python "$(pwd)"/../lib/traffic-tool/src/python/gen_user_details.py 0
+    python "$(pwd)"/../lib/traffic-tool/src/python/gen_user_details.py
   else
     echo "Python 3 is required for the command!"
     exit 1
@@ -65,15 +66,30 @@ func_create_scenario() {
   if [ -e "$(pwd)"/../lib/traffic-tool/data/scenario/user_details.yaml -a -e "$(pwd)"/../lib/traffic-tool/data/scenario/invoke_scenario.yaml ];
   then
     rm -f "$(pwd)"/../lib/traffic-tool/data/scenario/api_invoke_key_secret.csv
+    MULTITENANT=$(cat "$(pwd)"/../config/apim.yaml | shyaml get-value multi_tenancy.enabled)
 
-    if command -v python3 &>/dev/null; then
-      python3 "$(pwd)"/../lib/traffic-tool/src/python/create_api_scenario.py
-    elif command -v python &>/dev/null; then
-      python "$(pwd)"/../lib/traffic-tool/src/python/create_api_scenario.py
+    if [ "$MULTITENANT" = "True" ]; then
+      if command -v python3 &>/dev/null; then
+        python3 "$(pwd)"/../lib/traffic-tool/src/python/multi_tenant_setup.py
+        python3 "$(pwd)"/../lib/traffic-tool/src/python/multi_tenant_create_scenario.py
+      elif command -v python &>/dev/null; then
+        python "$(pwd)"/../lib/traffic-tool/src/python/multi_tenant_setup.py
+        python "$(pwd)"/../lib/traffic-tool/src/python/multi_tenant_create_scenario.py
+      else
+        echo "Python 3 is required for the command!"
+        exit 1
+      fi
     else
-      echo "Python 3 is required for the command!"
-      exit 1
+      if command -v python3 &>/dev/null; then
+        python3 "$(pwd)"/../lib/traffic-tool/src/python/create_api_scenario.py
+      elif command -v python &>/dev/null; then
+        python "$(pwd)"/../lib/traffic-tool/src/python/create_api_scenario.py
+      else
+        echo "Python 3 is required for the command!"
+        exit 1
+      fi
     fi
+
   else
     echo "Missing one or more required files in the 'scenario/' directory"
     exit 1
@@ -85,19 +101,45 @@ func_gen_tokens() {
   if [ -e "$(pwd)"/../lib/traffic-tool/data/scenario/user_details.yaml -a -e "$(pwd)"/../lib/traffic-tool/data/scenario/invoke_scenario.yaml -a -e "$(pwd)"/../lib/traffic-tool/data/scenario/api_invoke_key_secret.csv ];
   then
     rm -f "$(pwd)"/../lib/traffic-tool/data/scenario/api_invoke_tokens.csv
+    MULTITENANT=$(cat "$(pwd)"/../config/apim.yaml | shyaml get-value multi_tenancy.enabled)
 
-    if command -v python3 &>/dev/null; then
-      python3 "$(pwd)"/../lib/traffic-tool/src/python/generate_tokens.py
-      python3 "$(pwd)"/../lib/traffic-tool/src/python/gen_invoke_scenario.py
-    elif command -v python &>/dev/null; then
-      python "$(pwd)"/../lib/traffic-tool/src/python/generate_tokens.py
-      python "$(pwd)"/../lib/traffic-tool/src/python/gen_invoke_scenario.py
+    if [ "$MULTITENANT" = "True" ]; then
+      if command -v python3 &>/dev/null; then
+        python3 "$(pwd)"/../lib/traffic-tool/src/python/multi_tenant_generate_tokens.py
+        python3 "$(pwd)"/../lib/traffic-tool/src/python/gen_invoke_scenario.py
+      elif command -v python &>/dev/null; then
+        python "$(pwd)"/../lib/traffic-tool/src/python/multi_tenant_generate_tokens.py
+        python "$(pwd)"/../lib/traffic-tool/src/python/gen_invoke_scenario.py
+      else
+        echo "Python 3 is required for the command!"
+        exit 1
+      fi
     else
-      echo "Python 3 is required for the command!"
-      exit 1
+      if command -v python3 &>/dev/null; then
+        python3 "$(pwd)"/../lib/traffic-tool/src/python/generate_tokens.py
+        python3 "$(pwd)"/../lib/traffic-tool/src/python/gen_invoke_scenario.py
+      elif command -v python &>/dev/null; then
+        python "$(pwd)"/../lib/traffic-tool/src/python/generate_tokens.py
+        python "$(pwd)"/../lib/traffic-tool/src/python/gen_invoke_scenario.py
+      else
+        echo "Python 3 is required for the command!"
+        exit 1
+      fi
     fi
   else
     echo "Missing one or more required files in the 'scenario/' directory"
+    exit 1
+  fi
+}
+
+# function to generate random user scenario pool
+func_gen_scenario_pool() {
+  if command -v python3 &>/dev/null; then
+    python3 "$(pwd)"/../lib/traffic-tool/src/python/gen_invoke_scenario.py
+  elif command -v python &>/dev/null; then
+    python "$(pwd)"/../lib/traffic-tool/src/python/gen_invoke_scenario.py
+  else
+    echo "Python 3 is required for the command!"
     exit 1
   fi
 }
@@ -190,20 +232,40 @@ func_stop_traffic() {
 
 # function to remove created APIs, applications and users from the API Manager
 func_cleanup() {
-  if [ -e "$(pwd)"/../lib/traffic-tool/data/runtime_data/api_ids.csv -a -e "$(pwd)"/../lib/traffic-tool/data/runtime_data/app_ids.csv ];
-  then
-    if command -v python3 &>/dev/null; then
-      python3 "$(pwd)"/../lib/traffic-tool/src/python/cleanup_scenario.py
-    elif command -v python &>/dev/null; then
-      python "$(pwd)"/../lib/traffic-tool/src/python/cleanup_scenario.py
+  MULTITENANT=$(cat "$(pwd)"/../config/apim.yaml | shyaml get-value multi_tenancy.enabled)
+
+  if [ "$MULTITENANT" = "True" ]; then
+    if [ -e "$(pwd)"/../lib/traffic-tool/data/runtime_data/api_ids_multi_tenant.csv -a -e "$(pwd)"/../lib/traffic-tool/data/runtime_data/app_ids_multi_tenant.csv ];
+    then
+      if command -v python3 &>/dev/null; then
+        python3 "$(pwd)"/../lib/traffic-tool/src/python/multi_tenant_cleanup_scenario.py
+      elif command -v python &>/dev/null; then
+        python "$(pwd)"/../lib/traffic-tool/src/python/multi_tenant_cleanup_scenario.py
+      else
+        echo "Python 3 is required for the command!"
+        exit 1
+      fi
+      echo "Script execution completed"
     else
-      echo "Python 3 is required for the command!"
+      echo "Missing required data files"
       exit 1
     fi
-    echo "Script execution completed"
   else
-    echo "Missing required data files"
-    exit 1
+    if [ -e "$(pwd)"/../lib/traffic-tool/data/runtime_data/api_ids.csv -a -e "$(pwd)"/../lib/traffic-tool/data/runtime_data/app_ids.csv ];
+    then
+      if command -v python3 &>/dev/null; then
+        python3 "$(pwd)"/../lib/traffic-tool/src/python/cleanup_scenario.py
+      elif command -v python &>/dev/null; then
+        python "$(pwd)"/../lib/traffic-tool/src/python/cleanup_scenario.py
+      else
+        echo "Python 3 is required for the command!"
+        exit 1
+      fi
+      echo "Script execution completed"
+    else
+      echo "Missing required data files"
+      exit 1
+    fi
   fi
 }
 
@@ -260,6 +322,10 @@ case "$1" in
   ;;
   4)
     func_gen_tokens 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log
+    exit 0
+  ;;
+  5)
+    func_gen_scenario_pool 2>&1 | tee -a "$(pwd)"/../logs/traffic-shell.log
     exit 0
   ;;
   *)

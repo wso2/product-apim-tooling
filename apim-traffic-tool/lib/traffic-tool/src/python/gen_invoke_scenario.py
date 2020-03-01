@@ -30,6 +30,7 @@ from scipy.stats import norm
 # variables
 logger = log.setLogger('gen_invoke_scenario')
 
+tenant_name = ''
 ip_dataset_name = None
 apis = None
 invoke_scenario = None
@@ -43,6 +44,8 @@ existing_no_of_user_combinations = 0  # to validate the user count
 total_no_of_user_combinations = 0
 used_ips = []
 ip_dataset = None
+multi_tenancy_enabled = 'false'
+app_tenant = {}
 
 fake_generator = Factory.create()
 
@@ -50,6 +53,20 @@ fake_generator = Factory.create()
 abs_path = os.path.abspath(os.path.dirname(__file__))
 
 try:
+    with open(abs_path + '/../../../../config/apim.yaml', 'r') as config_file:
+        apim_config = yaml.load(config_file, Loader=yaml.FullLoader)
+    multi_tenancy = apim_config['multi_tenancy']['enabled']
+
+    if str(multi_tenancy).lower() == 'false':
+        tenant_name = apim_config['main_tenant']['tenant_name']
+    else:       # read and set tenant names for each app
+        with open(abs_path + '/../../data/scenario/tenant_details.yaml', 'r') as f:
+            tenant_apps = yaml.load(f, Loader=yaml.FullLoader)['tenant_apps']
+
+        for tenant in tenant_apps:
+            for app in tenant_apps.get(tenant):
+                app_tenant[app] = tenant
+
     with open(abs_path + '/../../../../config/traffic-tool.yaml', 'r') as file:
         traffic_config = yaml.load(file, Loader=yaml.FullLoader)
     user_agents = traffic_config['user_agents']
@@ -71,7 +88,7 @@ except FileNotFoundError as e:
 
 def getPath(api_name, method):
     """
-    This function will return the invoke path for a given api and http method
+    This function will return the invoke path for a given api and http method (for a single tenant environment)
     :param api_name: Name of the API
     :param method: Method of the API
     :return: Invoke path
@@ -85,7 +102,31 @@ def getPath(api_name, method):
             resources = api.get('resources')
             for resource in resources:
                 if resource.get('method') == method:
-                    return context + '/' + version + '/' + str(resource.get('path'))
+                    if tenant_name.lower() == 'super' or tenant_name.lower() == "carbon.super":
+                        return context + '/' + version + '/' + str(resource.get('path'))
+                    else:
+                        return 't/' + tenant_name + '/' + context + '/' + version + '/' + str(resource.get('path'))
+
+
+def getMultiTenantPath(api_name, method, app_name):
+    """
+    This function will return the invoke path for a given api and http method (for a multi tenant setup)
+    :param api_name: Name of the API
+    :param method: Method of the API
+    :param app_name: Name of the application
+    :return: Invoke path
+    """
+    global apis, app_tenant
+
+    for api in apis:
+        if api.get('name') == api_name:
+            context = str(api.get('context'))
+            version = str(api.get('version'))
+            resources = api.get('resources')
+            tenant_name = app_tenant.get(app_name)
+            for resource in resources:
+                if resource.get('method') == method:
+                    return 't/' + tenant_name + '/' + context + '/' + version + '/' + str(resource.get('path'))
 
 
 def varySlightly(median):
@@ -251,7 +292,11 @@ if __name__ == "__main__":
             api_name = invoke.get('api')
             method = invoke.get('method')
             call_median = int(invoke.get('no_of_requests'))
-            full_path = getPath(api_name, method)
+
+            if str(multi_tenancy).lower() == 'false':
+                full_path = getPath(api_name, method)
+            else:
+                full_path = getMultiTenantPath(api_name, method, app_name)
 
             for user in users:  # user[username,token,ip,cookie,user_agent]
                 no_of_requests = varySlightly(call_median)

@@ -2,7 +2,7 @@
 apis:
   - name: News
     description: This is an API which users can query by keywords topics publications
-    tags: [news]
+    tags: [news,info]
     context: news
     version: 1
     resources:

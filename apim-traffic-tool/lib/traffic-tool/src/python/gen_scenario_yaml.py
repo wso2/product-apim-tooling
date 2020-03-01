@@ -213,7 +213,7 @@ if __name__ == "__main__":
         api_config = yaml.load(file, Loader=yaml.FullLoader)
     apis = api_config['apis']
 
-    with open(abs_path + '/../../data/access_pattern/invoke_patterns.yaml', 'r') as file:
+    with open(abs_path + '/../../data/tool_data/invoke_patterns.yaml', 'r') as file:
         pattern_config = yaml.load(file, Loader=yaml.FullLoader)
     time_patterns = pattern_config['frequency']
 

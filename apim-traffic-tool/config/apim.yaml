@@ -21,6 +21,21 @@ management_console:
 api_manager:
   nio_pt_transport_port: 8243
 
+# details of main tenant (default: super)
+main_tenant:
+  tenant_name: super
+  admin_username: admin
+  admin_password: admin
+  admin_b64: YWRtaW46YWRtaW4=
+
+# details of multi tenancy
+multi_tenancy:
+  enabled: false
+  tenant_list:
+    - name: 
+      admin_username: 
+      admin_password: 
+
 # details of Applications
 apps:
   - name: Online Shopping

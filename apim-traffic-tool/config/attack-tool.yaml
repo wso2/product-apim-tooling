@@ -3,7 +3,7 @@ general_config:
   # details for all hosted APIs. Attack tool will invoke according to these configurations
   api_host:
     protocol: https
-    ip:
+    ip: 
     port: 8243
 
   # Attack tool will randomly append one of the following user agents to the request header
@@ -26,9 +26,6 @@ general_config:
 
   # Number of processes or threads used to achieve concurrency
   number_of_processes: 100
-
-  # Scenario name
-  scenario: scenario_example
 
   # Payloads for the request body. Attack tool will randomly select one of the following payloads when sending POST and PUT requests
   payloads:

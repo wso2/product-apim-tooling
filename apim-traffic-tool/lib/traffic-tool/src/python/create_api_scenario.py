@@ -18,9 +18,9 @@ import os
 import yaml
 import base64
 import glob
-from base64 import b64encode
+import json
+import copy
 from utils import request_methods, log
-
 
 # variables
 logger = log.setLogger('create_api_scenario')
@@ -49,8 +49,14 @@ token_validity_period = ""
 subscription_tier = ""
 
 swagger_definitions = {}
+swagger_template = None
+template_components = None
 api_ids = {}
 
+tenant_name = "super"
+admin_username = "admin"
+admin_password = "admin"
+admin_b64 = "YWRtaW46YWRtaW4="
 
 def loadConfig():
     """
@@ -60,6 +66,7 @@ def loadConfig():
     global abs_path, apim_version, token_registration_endpoint, token_endpoint, publisher_api_endpoint, store_application_endpoint, store_subs_endpoint
     global user_signup_endpoint, gateway_protocol, gateway_host, gateway_servelet_port_https, gateway_servelet_port_http, nio_pt_transport_port
     global production_endpoint, sandbox_endpoint, api_throttling_tier, api_visibility, app_throttling_tier, token_validity_period, subscription_tier
+    global tenant_name, admin_username, admin_password, admin_b64
 
     abs_path = os.path.abspath(os.path.dirname(__file__))
 
@@ -80,6 +87,11 @@ def loadConfig():
     gateway_servelet_port_http = str(apim_config['management_console']['servlet_transport_port_http'])
     nio_pt_transport_port = str(apim_config['api_manager']['nio_pt_transport_port'])
 
+    tenant_name = apim_config['main_tenant']['tenant_name']
+    admin_username = apim_config['main_tenant']['admin_username']
+    admin_password = apim_config['main_tenant']['admin_password']
+    admin_b64 = apim_config['main_tenant']['admin_b64']
+
     with open(abs_path + '/../../../../config/traffic-tool.yaml', 'r') as traffic_config_file:
         traffic_config = yaml.load(traffic_config_file, Loader=yaml.FullLoader)
 
@@ -90,6 +102,48 @@ def loadConfig():
     app_throttling_tier = str(traffic_config['application']['throttling_tier'])
     token_validity_period = str(traffic_config['application']['token_validity_period'])
     subscription_tier = str(traffic_config['subscription_tier'])
+
+
+def genSwagger(filename, api_object):
+    """
+    This function will generate the swagger definition for a given api object
+    :param filename: name of the swagger file to be created
+    :param api_object: dictionary containing api details
+    :return: True if successful. False otherwise
+    """
+    global swagger_template, template_components
+    
+    try:
+        template = copy.deepcopy(swagger_template)
+
+        template['info']['title'] = api_object['name']
+        template['info']['version'] = str(api_object['version'])
+        template['info']['description'] = api_object['description']
+
+        for resource in api_object['resources']:
+            resource_template = template_components.get(resource['method'].upper())
+            
+            path = ""
+            if resource['path'][0] != "/":
+                path = '/' + resource['path']
+            else:
+                path = resource['path']
+            
+            if resource['method'].upper() == "DELETE":
+                path += r"/{itemId}"
+            elif resource['method'].upper() == "PUT":
+                path += r"/{itemId}"
+            
+            template['paths'][path] = resource_template
+            
+        with open(abs_path + '/../../../../data/swagger/{}.json'.format(filename), 'w') as f:
+            json.dump(template, f)
+
+        return True
+    
+    except Exception as err:
+        logger.exception("Swagger creation failed for API: {}. Error: {}".format(filename, err))
+        return False
 
 
 def loadSwagger():
@@ -123,6 +177,8 @@ def swaggerCheck():
     This function will check if the swagger definitions exist for all APIs
     :return: True if exists. False otherwise
     """
+    global swagger_template, template_components
+    swagger_generated = []
     swagger_not_found = []
 
     # check swagger exists for all APIs
@@ -139,15 +195,27 @@ def swaggerCheck():
         api_name = api['name'].lower()
 
         if api_name not in swagger_names:
-            swagger_not_found.append(api_name)
+            if swagger_template == None:
+                with open(abs_path + '/../../data/tool_data/swagger_template.json', 'r') as f:
+                    swagger_template = json.load(f)
+                with open(abs_path + '/../../data/tool_data/template_components.json', 'r') as f:
+                    template_components = json.load(f)
+
+            if genSwagger(api_name, api):
+                swagger_generated.append(api_name)
+            else:
+                swagger_not_found.append(api_name)
 
     # generate the final result
     if len(swagger_not_found) >= 1:
         res_txt = "Swagger files not found for following APIs: {}".format(swagger_not_found)
         logger.error(res_txt)
         return False
+    elif len(swagger_generated) >= 1:
+        res_txt = "Swagger files not found and generated for following APIs. {}".format(swagger_generated)
+        logger.info(res_txt)
 
-    logger.info("Swagger files found for all APIs. Total API definitions found: {}".format(str(len(apis)-len(swagger_not_found))))
+    logger.info("Swagger check successful. Total API definitions found: {}".format(str(len(apis)-len(swagger_not_found))))
     return True
 
 
@@ -156,11 +224,12 @@ def createAndPublishAPIs():
     This function will create and publish all APIs
     :return: None
     """
+    global api_ids
     created_count = 0
     published_count = 0
 
     # get id and secret
-    client_id, client_secret = request_methods.getIDSecret(gateway_protocol, gateway_host, gateway_servelet_port_https, token_registration_endpoint)
+    client_id, client_secret = request_methods.getIDSecret(gateway_protocol, gateway_host, gateway_servelet_port_https, token_registration_endpoint, admin_username, admin_b64)
 
     if client_id == None or client_secret == None:
         logger.error("Fetching client id, client secret unsuccessful!. Aborting task...")
@@ -171,7 +240,7 @@ def createAndPublishAPIs():
     b64_encoded = base64.b64encode(concat_value.encode('utf-8')).decode('utf-8')
 
     # get access token to create APIs
-    access_token_create = request_methods.getAccessToken(gateway_protocol, gateway_host, nio_pt_transport_port, token_endpoint, b64_encoded, 'apim:api_create apim:api_view')[0]
+    access_token_create = request_methods.getAccessToken(gateway_protocol, gateway_host, nio_pt_transport_port, token_endpoint, b64_encoded, 'apim:api_create apim:api_view', admin_username, admin_password)[0]
 
     if access_token_create == None:
         logger.error("Getting API creation access token failed!. Aborting task...")
@@ -179,7 +248,7 @@ def createAndPublishAPIs():
     logger.info("Successfully received API creation access token")
 
     # get access token to publish
-    access_token_publish = request_methods.getAccessToken(gateway_protocol, gateway_host, nio_pt_transport_port, token_endpoint, b64_encoded, 'apim:api_publish')[0]
+    access_token_publish = request_methods.getAccessToken(gateway_protocol, gateway_host, nio_pt_transport_port, token_endpoint, b64_encoded, 'apim:api_publish', admin_username, admin_password)[0]
     if access_token_publish == None:
         logger.error("Getting API publishing access token failed!. Aborting task...")
         return
@@ -201,11 +270,11 @@ def createAndPublishAPIs():
         api_name = api['name']
 
         # create new API
-        api_id = request_methods.createAPI(gateway_protocol, gateway_host, gateway_servelet_port_https, publisher_api_endpoint, access_token_create, api_name, api['description'], api['context'], api['version'], swagger_definitions.get(api_name.lower()), api['tags'], api_throttling_tier, api_visibility, production_endpoint, sandbox_endpoint)
+        api_id = request_methods.createAPI(gateway_protocol, gateway_host, gateway_servelet_port_https, publisher_api_endpoint, access_token_create, api_name, api['description'], api['context'], api['version'], swagger_definitions.get(api_name.lower()), api['tags'], api_throttling_tier, api_visibility, production_endpoint, sandbox_endpoint, admin_username)
 
         if not api_id:
             logger.error("API creation Failed!. API name: {}. Retrying...".format(api_name))
-            api_id = request_methods.createAPI(gateway_protocol, gateway_host, gateway_servelet_port_https, publisher_api_endpoint, access_token_create, api_name, api['description'], api['context'], api['version'], swagger_definitions.get(api_name.lower()), api['tags'], api_throttling_tier, api_visibility, production_endpoint, sandbox_endpoint)
+            api_id = request_methods.createAPI(gateway_protocol, gateway_host, gateway_servelet_port_https, publisher_api_endpoint, access_token_create, api_name, api['description'], api['context'], api['version'], swagger_definitions.get(api_name.lower()), api['tags'], api_throttling_tier, api_visibility, production_endpoint, sandbox_endpoint, admin_username)
             if not api_id:
                 logger.error("API creation Failed!. API name: {}".format(api_name))
             else:
@@ -245,7 +314,7 @@ def createApplicationsAndSubscribe():
     app_api_sub = ""
 
     # get id and secret
-    client_id, client_secret = request_methods.getIDSecret(gateway_protocol, gateway_host, gateway_servelet_port_https, token_registration_endpoint)
+    client_id, client_secret = request_methods.getIDSecret(gateway_protocol, gateway_host, gateway_servelet_port_https, token_registration_endpoint, admin_username, admin_b64)
 
     if client_id == None or client_secret == None:
         logger.error("Fetching client id, client secret unsuccessful!. Aborting task...")
@@ -256,7 +325,7 @@ def createApplicationsAndSubscribe():
     b64_encoded = base64.b64encode(concat_value.encode('utf-8')).decode('utf-8')
 
     # get subscriber access token
-    access_token_subs = request_methods.getAccessToken(gateway_protocol, gateway_host, nio_pt_transport_port, token_endpoint, b64_encoded, 'apim:subscribe apim:api_view')[0]
+    access_token_subs = request_methods.getAccessToken(gateway_protocol, gateway_host, nio_pt_transport_port, token_endpoint, b64_encoded, 'apim:subscribe apim:api_view', admin_username, admin_password)[0]
 
     if access_token_subs == None:
         logger.error("Getting subscription access token failed!. Aborting task...")
@@ -355,14 +424,21 @@ def createUsers():
     with open(abs_path + '/../../data/scenario/user_details.yaml', 'r') as user_file:
         user_data = yaml.load(user_file, Loader=yaml.FullLoader)
 
+    uname_suffix = ''
+    if tenant_name.lower() == "super" or tenant_name.lower() == "carbon.super":
+        uname_suffix = ''
+    else:
+        uname_suffix = '@' + tenant_name
+
     if '2.' in apim_version:
         for user in user_data['users']:
+            username = user['username'] + uname_suffix
             all_fields_values = user['firstname'] +'|' + user['lastname'] + '|' + user['organization'] + '|' + user['country'] + '|' + user['email'] + '|' + user['no_land'] + '|' + user['no_mobile'] + '|' + user['IM'] + '|' + user['url']
-            ret_val = request_methods.selfSignupStoreAPI('http', gateway_host, gateway_servelet_port_http, user_signup_endpoint, user['username'], user['password'], all_fields_values)
+            ret_val = request_methods.selfSignupStoreAPI('http', gateway_host, gateway_servelet_port_http, user_signup_endpoint, username, user['password'], all_fields_values)
 
             if not ret_val:
                 logger.error("User creation Failed!. username: {}. Retrying...".format(user['username']))
-                ret_val = request_methods.selfSignupStoreAPI('http', gateway_host, gateway_servelet_port_http, user_signup_endpoint, user['username'], user['password'], all_fields_values)
+                ret_val = request_methods.selfSignupStoreAPI('http', gateway_host, gateway_servelet_port_http, user_signup_endpoint, username, user['password'], all_fields_values)
                 if not ret_val:
                     logger.error("User creation Failed!. username: {}".format(user['username']))
                 else:
@@ -373,11 +449,11 @@ def createUsers():
 
     else:
         for user in user_data['users']:
-            ret_val = request_methods.selfSignupIS(gateway_protocol, gateway_host, gateway_servelet_port_https, user_signup_endpoint, user['username'], user['password'], user['firstname'], user['lastname'], user['email'], user['country'], user['organization'], user['no_land'], user['no_mobile'], user['IM'], user['url'])
+            ret_val = request_methods.selfSignupIS(gateway_protocol, gateway_host, gateway_servelet_port_https, user_signup_endpoint, admin_b64, user['username'], user['password'], user['firstname'], user['lastname'], user['email'], user['country'], user['organization'], user['no_land'], user['no_mobile'], user['IM'], user['url'])
 
             if not ret_val:
                 logger.error("User creation Failed!. username: {}. Retrying...".format(user['username']))
-                ret_val = request_methods.selfSignupIS(gateway_protocol, gateway_host, gateway_servelet_port_https, user_signup_endpoint, user['username'], user['password'], user['firstname'], user['lastname'], user['email'], user['country'], user['organization'], user['no_land'], user['no_mobile'], user['IM'], user['url'])
+                ret_val = request_methods.selfSignupIS(gateway_protocol, gateway_host, gateway_servelet_port_https, user_signup_endpoint, admin_b64, user['username'], user['password'], user['firstname'], user['lastname'], user['email'], user['country'], user['organization'], user['no_land'], user['no_mobile'], user['IM'], user['url'])
                 if not ret_val:
                     logger.error("User creation Failed!. username: {}".format(user['username']))
                 else:

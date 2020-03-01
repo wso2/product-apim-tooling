@@ -20,7 +20,6 @@ import base64
 import csv
 from utils import request_methods, log
 
-
 # variables
 logger = log.setLogger('cleanup_scenario')
 abs_path = ""
@@ -35,6 +34,10 @@ gateway_host = ""
 gateway_servelet_port_https = ""
 nio_pt_transport_port = ""
 
+admin_username = ""
+admin_password = ""
+admin_b64 = ""
+
 
 def loadConfig():
     """
@@ -43,6 +46,7 @@ def loadConfig():
     """
     global abs_path, token_registration_endpoint, token_endpoint, publisher_api_endpoint, store_application_endpoint, delete_user_soap_endpoint
     global gateway_protocol, gateway_host, gateway_servelet_port_https, nio_pt_transport_port
+    global admin_username, admin_password, admin_b64
     
     abs_path = os.path.abspath(os.path.dirname(__file__))
 
@@ -60,6 +64,10 @@ def loadConfig():
     gateway_servelet_port_https = str(apim_config['management_console']['servlet_transport_port_https'])
     nio_pt_transport_port = str(apim_config['api_manager']['nio_pt_transport_port'])
 
+    admin_username = apim_config['main_tenant']['admin_username']
+    admin_password = apim_config['main_tenant']['admin_password']
+    admin_b64 = apim_config['main_tenant']['admin_b64']
+
 
 def removeApplications():
     """
@@ -70,7 +78,7 @@ def removeApplications():
     remove_count = 0
     
     # get id and secret
-    client_id, client_secret = request_methods.getIDSecret(gateway_protocol, gateway_host, gateway_servelet_port_https, token_registration_endpoint)
+    client_id, client_secret = request_methods.getIDSecret(gateway_protocol, gateway_host, gateway_servelet_port_https, token_registration_endpoint, admin_username, admin_b64)
     
     if client_id == None or client_secret == None:
         logger.error("Fetching client id, client secret unsuccessful!. Aborting task...")
@@ -81,7 +89,7 @@ def removeApplications():
     b64_encoded = base64.b64encode(concat_value.encode('utf-8')).decode('utf-8')
 
     # get access token
-    access_token = request_methods.getAccessToken(gateway_protocol, gateway_host, nio_pt_transport_port, token_endpoint, b64_encoded, 'apim:subscribe apim:api_view')[0]
+    access_token = request_methods.getAccessToken(gateway_protocol, gateway_host, nio_pt_transport_port, token_endpoint, b64_encoded, 'apim:subscribe apim:api_view', admin_username, admin_password)[0]
 
     if access_token == None:
         logger.error("Getting access token failed!. Aborting task...")
@@ -119,7 +127,7 @@ def removeAPIs():
     remove_count = 0
     
     # get id and secret
-    client_id, client_secret = request_methods.getIDSecret(gateway_protocol, gateway_host, gateway_servelet_port_https, token_registration_endpoint)
+    client_id, client_secret = request_methods.getIDSecret(gateway_protocol, gateway_host, gateway_servelet_port_https, token_registration_endpoint, admin_username, admin_b64)
     
     if client_id == None or client_secret == None:
         logger.error("Fetching client id, client secret unsuccessful!. Aborting task...")
@@ -130,7 +138,7 @@ def removeAPIs():
     b64_encoded = base64.b64encode(concat_value.encode('utf-8')).decode('utf-8')
 
     # get access token
-    access_token = request_methods.getAccessToken(gateway_protocol, gateway_host, nio_pt_transport_port, token_endpoint, b64_encoded, 'apim:api_create apim:api_view')[0]
+    access_token = request_methods.getAccessToken(gateway_protocol, gateway_host, nio_pt_transport_port, token_endpoint, b64_encoded, 'apim:api_create apim:api_view', admin_username, admin_password)[0]
 
     if access_token == None:
         logger.error("Getting access token failed!. Aborting task...")
@@ -171,11 +179,11 @@ def removeUsers():
         user_data = yaml.load(user_file, Loader=yaml.FullLoader)
 
     for user in user_data['users']:
-        removed = request_methods.removeUserSOAP(gateway_protocol, gateway_host, gateway_servelet_port_https, delete_user_soap_endpoint, user['username'])
+        removed = request_methods.removeUserSOAP(gateway_protocol, gateway_host, gateway_servelet_port_https, delete_user_soap_endpoint, user['username'], admin_b64)
 
         if not removed:
             logger.error("User deletion Failed!. username: {}. Retrying...".format(user['username']))
-            removed = request_methods.removeUserSOAP(gateway_protocol, gateway_host, gateway_servelet_port_https, delete_user_soap_endpoint, user['username'])
+            removed = request_methods.removeUserSOAP(gateway_protocol, gateway_host, gateway_servelet_port_https, delete_user_soap_endpoint, user['username'], admin_b64)
             if not removed:
                 logger.error("User deletion Failed!. username: {}".format(user['username']))
             else:

@@ -55,7 +55,7 @@ def loadConfig():
     no_of_data_points = int(traffic_config['tool_config']['no_of_data_points'])
     heavy_traffic = str(traffic_config['tool_config']['heavy_traffic']).lower()
 
-    with open(abs_path + '/../../data/access_pattern/invoke_patterns.yaml') as pattern_file:
+    with open(abs_path + '/../../data/tool_data/invoke_patterns.yaml') as pattern_file:
         invoke_patterns = yaml.load(pattern_file, Loader=yaml.FullLoader)
 
     time_patterns = process_time_patterns(invoke_patterns['time_patterns'])

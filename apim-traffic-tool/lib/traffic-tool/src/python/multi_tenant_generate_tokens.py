@@ -21,7 +21,7 @@ from utils import request_methods, log
 
 
 # variables
-logger = log.setLogger('generate_tokens')
+logger = log.setLogger('multi_tenant_generate_tokens')
 abs_path = ""
 gateway_protocol = ""
 gateway_host = ""
@@ -29,7 +29,7 @@ nio_pt_transport_port = ""
 token_endpoint = ""
 user_app = []
 app_key_secret = {}
-tenant_name = "super"
+app_tenant = {}
 
 
 def loadConfig():
@@ -37,7 +37,7 @@ def loadConfig():
     This function will load and set the configuration data
     :return: None
     """
-    global abs_path, gateway_protocol, gateway_host, nio_pt_transport_port, token_endpoint, tenant_name
+    global abs_path, gateway_protocol, gateway_host, nio_pt_transport_port, token_endpoint, app_tenant
 
     abs_path = os.path.abspath(os.path.dirname(__file__))
 
@@ -48,7 +48,13 @@ def loadConfig():
     gateway_host = str(apim_config['management_console']['host'])
     nio_pt_transport_port = str(apim_config['api_manager']['nio_pt_transport_port'])
     token_endpoint = str(apim_config['apim_endpoints']['token_endpoint'])
-    tenant_name = apim_config['main_tenant']['tenant_name']
+
+    with open(abs_path + '/../../data/scenario/tenant_details.yaml', 'r') as f:
+        tenant_apps = yaml.load(f, Loader=yaml.FullLoader)['tenant_apps']
+
+    for tenant in tenant_apps:
+        for app in tenant_apps.get(tenant):
+            app_tenant[app] = tenant
 
 
 def loadUserAppPattern():
@@ -89,30 +95,32 @@ def generateTokenList():
     This function will generate access tokens for all user-app combinations and write to api_invoke_tokens.csv file
     :return: None
     """
-    global user_app, app_key_secret
+    global user_app, app_key_secret, app_tenant
 
     # clear api_invoke_token.csv file
     with open(abs_path + '/../../data/scenario/api_invoke_tokens.csv', 'w') as f:
         f.write('username,app_name,access_token\n')
 
-    uname_suffix = ''
-    if tenant_name.lower() == "super" or tenant_name.lower() == "carbon.super":
-        uname_suffix = ''
-    else:
-        uname_suffix = '@' + tenant_name
-
     # iterate for each user-app combination
     for uapp in user_app:
-        username = uapp[0] + uname_suffix
-        access_token = request_methods.generateInvokeToken(gateway_protocol, gateway_host, nio_pt_transport_port, token_endpoint, app_key_secret.get(uapp[1]), username, uapp[0], 'apim:api_view')[0]
+        tenant = app_tenant.get(uapp[1])
+        username = uapp[0] + '@' + tenant
+        
+        access_token = request_methods.generateInvokeToken(
+            gateway_protocol, gateway_host, nio_pt_transport_port, token_endpoint, 
+            app_key_secret.get(uapp[1]), username, uapp[0], 'apim:api_view')[0]
 
         if access_token == None:
-            logger.error("API Invoke token generation Failed!. Username: {}. Application: {}. Retrying...".format(uapp[0], uapp[1]))
-            access_token = request_methods.generateInvokeToken(gateway_protocol, gateway_host, nio_pt_transport_port, token_endpoint, app_key_secret.get(uapp[1]), username, uapp[0], 'apim:api_view')[0]
+            logger.error("API Invoke token generation Failed!. Username: {}. Application: {}. Retrying...".format(username, uapp[1]))
+            
+            access_token = request_methods.generateInvokeToken(
+                gateway_protocol, gateway_host, nio_pt_transport_port, token_endpoint, 
+                app_key_secret.get(uapp[1]), username, uapp[0], 'apim:api_view')[0]
+
             if access_token == None:
-                logger.error("API Invoke token generation Failed!. Username: {}. Application: {}".format(uapp[0], uapp[1]))
+                logger.error("API Invoke token generation Failed!. Username: {}. Application: {}".format(username, uapp[1]))
             else:
-                logger.info("API Invoke token generation successful!. Username: {}. Application: {}. Retrying...".format(uapp[0], uapp[1]))
+                logger.info("API Invoke token generation successful!. Username: {}. Application: {}. Retrying...".format(username, uapp[1]))
 
         with open(abs_path + '/../../data/scenario/api_invoke_tokens.csv', 'a+') as f:
             f.write(uapp[0] + ',' + uapp[1] + ',' + access_token + '\n')
