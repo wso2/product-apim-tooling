@@ -14,7 +14,7 @@ apim_endpoints:
 # api manager management console ports and configurations
 management_console:
   protocol: https
-  host: 
+  host: localhost
   servlet_transport_port_https: 9443
   servlet_transport_port_http: 9763
 
@@ -32,9 +32,9 @@ main_tenant:
 multi_tenancy:
   enabled: false
   tenant_list:
-    - name: 
-      admin_username: 
-      admin_password: 
+    - name:
+      admin_username:
+      admin_password:
 
 # details of Applications
 apps:

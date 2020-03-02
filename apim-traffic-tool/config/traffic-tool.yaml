@@ -16,7 +16,7 @@ subscription_tier: Unlimited
 # details for all hosted APIs. Traffic tool will invoke according to these configurations
 api_host:
   protocol: https
-  ip: 
+  ip: localhost
   port: 8243
 
 # configurations for the traffic tool processes

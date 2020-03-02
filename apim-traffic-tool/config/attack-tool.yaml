@@ -3,7 +3,7 @@ general_config:
   # details for all hosted APIs. Attack tool will invoke according to these configurations
   api_host:
     protocol: https
-    ip: 
+    ip: localhost
     port: 8243
 
   # Attack tool will randomly append one of the following user agents to the request header

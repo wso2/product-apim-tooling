@@ -3,7 +3,7 @@ path_variables:
   jmeter: /home/user123/Applications/apache-jmeter-5.1.1/bin
 
 resources:
-  ip_database: 
+  ip_database: IP2LOCATION-LITE-DB5.CSV
   # use 1 to 4 to indicate the column orders
   column_order:
     ip_from: 1
