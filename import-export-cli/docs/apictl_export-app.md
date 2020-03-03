@@ -4,7 +4,6 @@ Export App
 
 ### Synopsis
 
-
 Export an Application from a specified  environment
 
 ```
@@ -37,5 +36,6 @@ NOTE: Flag --name (-n) and --owner (-o) are mandatory
 ```
 
 ### SEE ALSO
+
 * [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
 

@@ -20,6 +20,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"os"
 	"path/filepath"
@@ -38,7 +39,7 @@ const updateCmdShortDesc = "Update an API to the kubernetes cluster"
 const updateCmdLongDesc = `Update an existing API with  Swagger file in the kubernetes cluster. JSON and YAML formats are accepted.`
 const updateCmdExamples = utils.ProjectName + " " + updateCmdLiteral + " " + apiCmdLiteral + " " + `-n petstore --from-file=./Swagger.json --replicas=1 --namespace=wso2
 
-`  + utils.ProjectName + " " + updateCmdLiteral + " "+ apiCmdLiteral + " " + `-n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi --replicas=1 --namespace=wso2`
+` + utils.ProjectName + " " + updateCmdLiteral + " " + apiCmdLiteral + " " + `-n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi --replicas=1 --namespace=wso2`
 
 var updatedInterceptorConfName string
 
@@ -80,7 +81,7 @@ var updateApiCmd = &cobra.Command{
 					swaggerPath := filepath.Join(updateflagSwaggerFilePath, filepath.FromSlash("Meta-information/swagger.yaml"))
 					//creating kubernetes configmap with swagger definition
 					fmt.Println("creating configmap with swagger definition")
-					errConf := createConfigMapWithNamespace(updateConfigMapName, swaggerPath, updateflagNamespace, utils.Create)
+					errConf := createConfigMapWithNamespace(updateConfigMapName, swaggerPath, updateflagNamespace, k8sUtils.K8sCreate)
 					if errConf != nil {
 						utils.HandleErrorAndExit("Error creating configmap", err)
 					}
@@ -91,7 +92,7 @@ var updateApiCmd = &cobra.Command{
 				case mode.IsRegular():
 					//creating kubernetes configmap with swagger definition
 					fmt.Println("creating configmap with swagger definition")
-					err := createConfigMapWithNamespace(updateConfigMapName, updateflagSwaggerFilePath, updateflagNamespace, utils.Create)
+					err := createConfigMapWithNamespace(updateConfigMapName, updateflagSwaggerFilePath, updateflagNamespace, k8sUtils.K8sCreate)
 					if err != nil {
 						utils.HandleErrorAndExit("Error creating configmap", err)
 					}
@@ -101,7 +102,7 @@ var updateApiCmd = &cobra.Command{
 				createAPI(updateflagApiName, updateflagNamespace, updateConfigMapName, updateflagReplicas, timestamp, updatedInterceptorConfName, false)
 			}
 		} else {
-			utils.HandleErrorAndExit("set mode to kubernetes with command - apictl set-mode kubernetes ",
+			utils.HandleErrorAndExit("set mode to kubernetes with command: apictl set --mode kubernetes",
 				errors.New("mode should be set to kubernetes"))
 		}
 

@@ -4,7 +4,6 @@ Initialize a new project in given path
 
 ### Synopsis
 
-
 Initialize a new project in given path. If a OpenAPI specification provided API will be populated with details from it
 
 ```
@@ -36,5 +35,6 @@ apictl init MyAwesomeAPI --oas ./swagger.yaml -d definition.yaml
 ```
 
 ### SEE ALSO
+
 * [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
 

@@ -1,25 +1,21 @@
-## apictl version
+## apictl install
 
-Display Version on current apictl
+Install an operator
 
 ### Synopsis
 
-Display the current version of this command line tool
-
-```
-apictl version [flags]
-```
+Install an operator in the configured K8s cluster
 
 ### Examples
 
 ```
-apictl version
+apictl install api-operator
 ```
 
 ### Options
 
 ```
-  -h, --help   help for version
+  -h, --help   help for install
 ```
 
 ### Options inherited from parent commands
@@ -32,4 +28,5 @@ apictl version
 ### SEE ALSO
 
 * [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
+* [apictl install api-operator](apictl_install_api-operator.md)	 - Install API Operator
 

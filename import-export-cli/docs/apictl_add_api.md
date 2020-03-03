@@ -4,7 +4,6 @@ handle APIs in kubernetes cluster
 
 ### Synopsis
 
-
 Add, Update and Delete APIs in kubernetes cluster. JSON and YAML formats are accepted.
 available modes are as follows
 * kubernetes
@@ -38,5 +37,6 @@ apictl add/update api -n petstore --from-file=./Swagger.json --replicas=3 --name
 ```
 
 ### SEE ALSO
+
 * [apictl add](apictl_add.md)	 - Add an API to the kubernetes cluster
 

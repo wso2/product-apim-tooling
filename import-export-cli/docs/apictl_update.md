@@ -4,7 +4,6 @@ Update an API to the kubernetes cluster
 
 ### Synopsis
 
-
 Update an existing API with  Swagger file in the kubernetes cluster. JSON and YAML formats are accepted.
 
 ### Examples
@@ -29,6 +28,7 @@ apictl update api -n petstore --from-file=./product-apim-tooling/import-export-c
 ```
 
 ### SEE ALSO
+
 * [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
 * [apictl update api](apictl_update_api.md)	 - handle APIs in kubernetes cluster 
 

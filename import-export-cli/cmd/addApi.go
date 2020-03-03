@@ -25,6 +25,7 @@ import (
 	"github.com/spf13/cobra"
 	wso2v1alpha1 "github.com/wso2/k8s-apim-operator/apim-operator/pkg/apis/wso2/v1alpha1"
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
+	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"io"
 	"io/ioutil"
@@ -50,9 +51,9 @@ const addCmdLiteral = "add"
 const addCmdShortDesc = "Add an API to the kubernetes cluster"
 const addCmdLongDesc = `Add an API from a Swagger file to the kubernetes cluster. JSON and YAML formats are accepted.
 To execute kubernetes commands set mode to Kubernetes`
-const addCmdExamples = utils.ProjectName + " " + addCmdLiteral + " "+ apiCmdLiteral + " " + `-n petstore --from-file=./Swagger.json --replicas=1 --namespace=wso2
+const addCmdExamples = utils.ProjectName + " " + addCmdLiteral + " " + apiCmdLiteral + " " + `-n petstore --from-file=./Swagger.json --replicas=1 --namespace=wso2
 
-` + utils.ProjectName + " " + addCmdLiteral + " "+ apiCmdLiteral + " " + `-n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi --replicas=1 --namespace=wso2 --override=true`
+` + utils.ProjectName + " " + addCmdLiteral + " " + apiCmdLiteral + " " + `-n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi --replicas=1 --namespace=wso2 --override=true`
 
 var interceptorsConfName string
 
@@ -74,7 +75,7 @@ var addApiCmd = &cobra.Command{
 		utils.Logln(utils.LogPrefixInfo + apiCmdLiteral + " called")
 		configVars := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
 		if configVars.Config.KubernetesMode {
-			if flagApiName == "" && flagSwaggerFilePath == "" {
+			if flagApiName == "" || flagSwaggerFilePath == "" {
 				utils.HandleErrorAndExit("Required flags are missing. API name and swagger file paths are required",
 					errors.New("required flags missing"))
 			} else {
@@ -91,7 +92,7 @@ var addApiCmd = &cobra.Command{
 					swaggerPath := filepath.Join(flagSwaggerFilePath, filepath.FromSlash("Meta-information/swagger.yaml"))
 					//creating kubernetes configmap with swagger definition
 					fmt.Println("creating configmap with swagger definition")
-					errConf := createConfigMapWithNamespace(configMapName, swaggerPath, flagNamespace, utils.Create)
+					errConf := createConfigMapWithNamespace(configMapName, swaggerPath, flagNamespace, k8sUtils.K8sCreate)
 					if errConf != nil {
 						utils.HandleErrorAndExit("Error creating configmap", err)
 					}
@@ -102,7 +103,7 @@ var addApiCmd = &cobra.Command{
 				case mode.IsRegular():
 					//creating kubernetes configmap with swagger definition
 					fmt.Println("creating configmap with swagger definition")
-					errConf := createConfigMapWithNamespace(configMapName, flagSwaggerFilePath, flagNamespace, utils.Create)
+					errConf := createConfigMapWithNamespace(configMapName, flagSwaggerFilePath, flagNamespace, k8sUtils.K8sCreate)
 					if errConf != nil {
 						utils.HandleErrorAndExit("Error creating configmap", err)
 					}
@@ -111,7 +112,7 @@ var addApiCmd = &cobra.Command{
 				createAPI(flagApiName, flagNamespace, configMapName, flagReplicas, "", interceptorsConfName, flagOverride)
 			}
 		} else {
-			utils.HandleErrorAndExit("set mode to kubernetes with command - apictl set-mode kubernetes ",
+			utils.HandleErrorAndExit("set mode to kubernetes with command: apictl set --mode kubernetes",
 				errors.New("mode should be set to kubernetes"))
 		}
 
@@ -121,7 +122,7 @@ var addApiCmd = &cobra.Command{
 //create configmap with swagger definition
 func createConfigMapWithNamespace(configMapName string, filePath string, namespace string, operation string) error {
 	cmd := exec.Command(
-		utils.Kubectl,
+		k8sUtils.Kubectl,
 		operation,
 		"configmap",
 		configMapName,
@@ -180,7 +181,7 @@ func createAPI(name string, namespace string, configMapName string, replicas int
 	}
 	//execute kubernetes command to create or update api from file
 	cmd := exec.Command(
-		utils.Kubectl,
+		k8sUtils.Kubectl,
 		"apply",
 		"-f",
 		tmpFile.Name(),
@@ -223,5 +224,5 @@ func init() {
 	addApiCmd.Flags().StringVarP(&flagSwaggerFilePath, "from-file", "f", "", "Path to swagger file")
 	addApiCmd.Flags().IntVar(&flagReplicas, "replicas", 1, "replica set")
 	addApiCmd.Flags().StringVar(&flagNamespace, "namespace", "", "namespace of API")
-	addApiCmd.Flags().BoolVarP(&flagOverride, "override", "", false,"Property to override the existing docker image with same name and version")
+	addApiCmd.Flags().BoolVarP(&flagOverride, "override", "", false, "Property to override the existing docker image with same name and version")
 }

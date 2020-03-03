@@ -1,25 +1,21 @@
-## apictl version
+## apictl uninstall
 
-Display Version on current apictl
+Uninstall an operator
 
 ### Synopsis
 
-Display the current version of this command line tool
-
-```
-apictl version [flags]
-```
+Uninstall an operator in the configured K8s cluster
 
 ### Examples
 
 ```
-apictl version
+apictl uninstall api-operator
 ```
 
 ### Options
 
 ```
-  -h, --help   help for version
+  -h, --help   help for uninstall
 ```
 
 ### Options inherited from parent commands
@@ -32,4 +28,5 @@ apictl version
 ### SEE ALSO
 
 * [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
+* [apictl uninstall api-operator](apictl_uninstall_api-operator.md)	 - Uninstall API Operator
 

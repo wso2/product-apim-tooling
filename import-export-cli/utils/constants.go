@@ -86,14 +86,16 @@ const LogPrefixError = "[ERROR]: "
 // String Constants
 const SearchAndTag = "&"
 
+// Regex Validation
+const UsernameValidRegex = `^[\w\d\-]*$`
+const PositiveNoValidRegex = `^[1-9]\d*$`
+const UrlValidRegex = `^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$`
+
 // Other
 const DefaultTokenValidityPeriod = 3600
 const DefaultHttpRequestTimeout = 10000
-const DefaultKubernetesMode = false
-const Kubectl = "kubectl"
-const Create = "create"
 
-//migration export
+// Migration export
 const MaxAPIsToExportOnce = 20
 const MigrationAPIsExportMetadataFileName = "migration-apis-export-metadata.yaml"
 const LastSucceededApiFileName = "last-succeeded-api.log"

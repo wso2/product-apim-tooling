@@ -4,7 +4,6 @@ List APIs/Applications in an environment or List the environments
 
 ### Synopsis
 
-
 Display a list containing all the APIs available in the environment specified by flag (--environment, -e)/
 Display a list of Applications of a specific user in the environment specified by flag (--environment, -e)
 OR
@@ -35,6 +34,7 @@ apictl list apis -e dev
 ```
 
 ### SEE ALSO
+
 * [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
 * [apictl list apis](apictl_list_apis.md)	 - Display a list of APIs in an environment
 * [apictl list apps](apictl_list_apps.md)	 - Display a list of Applications in an environment specific to an owner

@@ -1,25 +1,21 @@
-## apictl version
+## apictl change
 
-Display Version on current apictl
+Change a configuration
 
 ### Synopsis
 
-Display the current version of this command line tool
-
-```
-apictl version [flags]
-```
+Change a configuration in k8s cluster resource
 
 ### Examples
 
 ```
-apictl version
+apictl change registry
 ```
 
 ### Options
 
 ```
-  -h, --help   help for version
+  -h, --help   help for change
 ```
 
 ### Options inherited from parent commands
@@ -32,4 +28,5 @@ apictl version
 ### SEE ALSO
 
 * [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
+* [apictl change registry](apictl_change_registry.md)	 - Change the registry
 

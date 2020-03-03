@@ -4,7 +4,6 @@ Generate access token to invoke the API
 
 ### Synopsis
 
-
 Generate JWT token to invoke the API by subscribing to a default application for testing purposes
 
 ```
@@ -35,5 +34,6 @@ apictl get-keys -n TwitterAPI -v 1.0.0 -e dev --provider admin
 ```
 
 ### SEE ALSO
+
 * [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
 

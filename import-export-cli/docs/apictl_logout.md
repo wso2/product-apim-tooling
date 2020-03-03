@@ -4,7 +4,6 @@ Logout to from an API Manager
 
 ### Synopsis
 
-
 Logout from an API Manager environment
 
 ```
@@ -31,5 +30,6 @@ apictl logout dev
 ```
 
 ### SEE ALSO
+
 * [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
 
