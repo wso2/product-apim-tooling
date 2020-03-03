@@ -46,6 +46,7 @@ var (
 	initCmdOutputDir         string
 	initCmdSwaggerPath       string
 	initCmdApiDefinitionPath string
+	initCmdInitialState      string
 	initCmdForced            bool
 )
 
@@ -160,6 +161,11 @@ func executeInitCmd() error {
 	def, err := loadDefaultSpecFromDisk()
 	if err != nil {
 		return err
+	}
+
+	// initCmdInitialState has already validated before creating the 'dir'
+	if initCmdInitialState != "" {
+		def.Status = initCmdInitialState
 	}
 
 	err = createDirectories(initCmdOutputDir)
@@ -314,6 +320,24 @@ var InitCommand = &cobra.Command{
 			fmt.Println("Running command in forced mode")
 		}
 
+		// check the validity of initial-state before initializing
+		if initCmdInitialState != "" {
+			validState := false
+			for _, state := range utils.ValidInitialStates {
+				if initCmdInitialState == state {
+					validState = true
+					break
+				}
+			}
+
+			if !validState {
+				utils.HandleErrorAndExit(fmt.Sprintf(
+					"Invalid initial API state: %s\nValid initial states: %v",
+					initCmdInitialState, utils.ValidInitialStates,
+				), nil)
+			}
+		}
+
 		err := executeInitCmd()
 		if err != nil {
 			utils.HandleErrorAndExit("Error initializing project", err)
@@ -327,5 +351,7 @@ func init() {
 		"YAML definition of API")
 	InitCommand.Flags().StringVarP(&initCmdSwaggerPath, "oas", "", "", "Provide an OpenAPI "+
 		"specification file for the API")
+	InitCommand.Flags().StringVar(&initCmdInitialState, "initial-state", "", "Provide the initial state "+
+		"of the API")
 	InitCommand.Flags().BoolVarP(&initCmdForced, "force", "f", false, "Force create project")
 }
