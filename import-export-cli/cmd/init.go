@@ -52,6 +52,7 @@ var (
 
 const initCmdExample = `apictl init myapi --oas petstore.yaml
 apictl init Petstore --oas https://petstore.swagger.io/v2/swagger.json
+apictl init Petstore --oas https://petstore.swagger.io/v2/swagger.json --initial-state=PUBLISHED
 apictl init MyAwesomeAPI --oas ./swagger.yaml -d definition.yaml`
 
 // directories to be created
@@ -329,7 +330,6 @@ var InitCommand = &cobra.Command{
 					break
 				}
 			}
-
 			if !validState {
 				utils.HandleErrorAndExit(fmt.Sprintf(
 					"Invalid initial API state: %s\nValid initial states: %v",
@@ -351,7 +351,7 @@ func init() {
 		"YAML definition of API")
 	InitCommand.Flags().StringVarP(&initCmdSwaggerPath, "oas", "", "", "Provide an OpenAPI "+
 		"specification file for the API")
-	InitCommand.Flags().StringVar(&initCmdInitialState, "initial-state", "", "Provide the initial state "+
-		"of the API")
+	InitCommand.Flags().StringVar(&initCmdInitialState, "initial-state", "", fmt.Sprintf("Provide the initial state "+
+		"of the API; Valid states: %v", utils.ValidInitialStates))
 	InitCommand.Flags().BoolVarP(&initCmdForced, "force", "f", false, "Force create project")
 }

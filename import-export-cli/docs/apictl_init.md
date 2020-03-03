@@ -15,16 +15,18 @@ apictl init [project path] [flags]
 ```
 apictl init myapi --oas petstore.yaml
 apictl init Petstore --oas https://petstore.swagger.io/v2/swagger.json
+apictl init Petstore --oas https://petstore.swagger.io/v2/swagger.json --initial-state=PUBLISHED
 apictl init MyAwesomeAPI --oas ./swagger.yaml -d definition.yaml
 ```
 
 ### Options
 
 ```
-  -d, --definition string   Provide a YAML definition of API
-  -f, --force               Force create project
-  -h, --help                help for init
-      --oas string          Provide an OpenAPI specification file for the API
+  -d, --definition string      Provide a YAML definition of API
+  -f, --force                  Force create project
+  -h, --help                   help for init
+      --initial-state string   Provide the initial state of the API; Valid states: [PUBLISHED]
+      --oas string             Provide an OpenAPI specification file for the API
 ```
 
 ### Options inherited from parent commands
