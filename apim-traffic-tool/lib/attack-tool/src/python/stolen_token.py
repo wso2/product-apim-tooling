@@ -31,8 +31,10 @@ import yaml
 
 from constants import *
 from utils import util_methods
+from utils import log
 
 
+# noinspection PyProtectedMember
 def generate_unique_ip():
     """
     Returns a unique ip address
@@ -57,7 +59,7 @@ def generate_cookie():
     """
     letters_and_digits = string.ascii_lowercase + string.digits
     cookie = 'JSESSIONID='
-    cookie += ''.join(random.choice(letters_and_digits) for ch in range(31))
+    cookie += ''.join(random.choice(letters_and_digits) for _ in range(31))
     return cookie
 
 
@@ -87,10 +89,10 @@ def simulate_user(user_data):
                 time.sleep(sleep_time)
 
                 scenario = app[i]
-                path = scenario[2]
+                invoke_path = scenario[2]
                 token = scenario[3]
-                method = scenario[4]
-                request_path = "{}://{}:{}/{}".format(protocol, host, port, path)
+                http_method = scenario[4]
+                request_path = "{}://{}:{}/{}".format(protocol, host, port, invoke_path)
                 random_user_agent = random.choice(user_agents)
                 random_ip = generate_unique_ip()
                 random_cookie = generate_cookie()
@@ -98,22 +100,28 @@ def simulate_user(user_data):
                 accept = content_type = "application/json"
 
                 try:
-                    response = util_methods.send_simple_request(request_path, method, token, random_ip, random_cookie, accept, content_type, random_user_agent, payload=random_payload)
-                    request_info = "{},{},{},{},{},{},{},{},{},\"{}\",{}".format(datetime.now(), random_ip, token, method, request_path, random_cookie, accept, content_type, random_ip,
+                    response = util_methods.send_simple_request(request_path, http_method, token, random_ip, random_cookie, accept, content_type, random_user_agent, payload=random_payload)
+                    request_info = "{},{},{},{},{},{},{},{},{},\"{}\",{}".format(datetime.now(), random_ip, token, http_method, request_path, random_cookie, accept, content_type, random_ip,
                                                                                  random_user_agent,
                                                                                  response.status_code,
                                                                                  )
-                    util_methods.log(dataset_path, request_info, "a")
+                    util_methods.write_to_file(dataset_path, request_info, "a")
+                except requests.exceptions.ConnectionError as e:
+                    error_code = 521
+                    request_info = "{},{},{},{},{},{},{},{},{},\"{}\",{}".format(datetime.now(), random_ip, token, http_method, request_path, random_cookie, accept, content_type, random_ip,
+                                                                                 random_user_agent,
+                                                                                 error_code,
+                                                                                 )
+                    util_methods.write_to_file(dataset_path, request_info, "a")
+                    logger.error("Connection Error: {}".format(e))
                 except requests.exceptions.RequestException:
-                    msg_string = "[Error] {} - Request Failure\n\t {}".format(datetime.now(), str(ex))
-                    print(msg_string)
-                    util_methods.log(attack_tool_log_path, msg_string, "a")
+                    logger.exception("Request Failure")
 
 
 # Program Execution
 if __name__ == '__main__':
 
-    attack_tool_log_path = "../../../../../../logs/attack-tool.log"
+    logger = log.set_logger("Stolen_TOKEN")
 
     # Constants
     STOLEN_TOKEN = 'stolen_token'
@@ -126,9 +134,7 @@ if __name__ == '__main__':
             attack_config = yaml.load(attack_config_file, Loader=yaml.FullLoader)
 
     except FileNotFoundError as ex:
-        error_string = "[ERROR] {} - {}: \'{}\'".format(datetime.now(), ex.strerror, ex.filename)
-        print(error_string)
-        util_methods.log(attack_tool_log_path, error_string, "a")
+        logger.error("{}: \'{}\'".format(ex.strerror, ex.filename))
         sys.exit()
 
     # Reading configurations from attack-tool.yaml
@@ -144,19 +150,15 @@ if __name__ == '__main__':
 
     # Recording column names in the dataset csv file
     dataset_path = "../../../../../../dataset/attack/stolen_token.csv"
-    util_methods.log(dataset_path, "timestamp,ip_address,access_token,http_method,invoke_path,cookie,accept,content_type,x_forwarded_for,user_agent,response_code", "w")
+    util_methods.write_to_file(dataset_path, "timestamp,ip_address,access_token,http_method,invoke_path,cookie,accept,content_type,x_forwarded_for,user_agent,response_code", "w")
 
     used_ips = []
     start_time = datetime.now()
 
-    log_string = "[INFO] {} - Stolen token attack started ".format(start_time)
-    print(log_string)
-    util_methods.log(attack_tool_log_path, log_string, "a")
+    logger.info("Stolen token attack started")
 
     if compromised_user_count > len(scenario_pool):
-        error_string = "[ERROR] {} - More compromised users than the total users".format(datetime.now())
-        print(error_string)
-        util_methods.log(attack_tool_log_path, error_string, "a")
+        logger.error("More compromised users than the total users")
         sys.exit()
 
     compromised_users = np.random.choice(list(scenario_pool.values()), size=compromised_user_count, replace=False)
@@ -173,9 +175,7 @@ if __name__ == '__main__':
         if time_elapsed.seconds >= attack_duration:
             for process in process_list:
                 process.terminate()
-            log_string = "[INFO] {} - Attack terminated successfully. Time elapsed: {} minutes".format(datetime.now(), time_elapsed.seconds / 60.0)
-            print(log_string)
-            util_methods.log(attack_tool_log_path, log_string, "a")
+            logger.info("Attack terminated successfully. Time elapsed: {} minutes".format(time_elapsed.seconds / 60.0))
             break
 
     # cleaning up the processes at exit
