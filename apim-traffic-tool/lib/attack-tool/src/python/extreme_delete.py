@@ -29,6 +29,7 @@ from utils import util_methods
 from utils.entity_classes import API
 from utils.util_methods import generate_random_string
 from constants import *
+from utils import log
 
 
 def request_handler(i):
@@ -60,19 +61,25 @@ def request_handler(i):
         try:
             response = util_methods.send_simple_request(request_path, resource_method, token, ip, cookie, accept, content_type, random_user_agent, path_params=path_param)
             request_info = "{},{},{},{},{}/{},{},{},{},{},\"{}\",{}".format(datetime.now(), ip, token, resource_method, request_path, path_param, cookie, accept, content_type, ip, random_user_agent,
-                                                                            response.status_code,
+                                                                            response.status_code
                                                                             )
             util_methods.log(dataset_path, request_info, "a")
+        except requests.exceptions.ConnectionError as e:
+            error_code = 521
+            request_info = "{},{},{},{},{}/{},{},{},{},{},\"{}\",{}".format(datetime.now(), ip, token, resource_method, request_path, path_param, cookie, accept, content_type, ip, random_user_agent,
+                                                                            error_code
+                                                                            )
+            util_methods.log(dataset_path, request_info, "a")
+            logger.error("Connection Error: {}".format(e))
         except requests.exceptions.RequestException:
-            msg_string = "[Error] {} - Request Failure\n\t {}".format(datetime.now(), str(ex))
-            print(msg_string)
-            util_methods.log(attack_tool_log_path, msg_string, "a")
+            logger.exception("Request Failure")
 
 
 # Program Execution
 if __name__ == '__main__':
 
     attack_tool_log_path = "../../../../../../logs/attack-tool.log"
+    logger = log.setLogger('Extreme_Delete')
     try:
         with open(os.path.abspath(os.path.join(__file__, "../../../../../config/api_details.yaml")), "r") as config_file:
             config = yaml.load(config_file, Loader=yaml.FullLoader)
@@ -80,9 +87,7 @@ if __name__ == '__main__':
         with open(os.path.abspath(os.path.join(__file__, "../../../../../config/attack-tool.yaml")), "r") as attack_config_file:
             attack_config = yaml.load(attack_config_file, Loader=yaml.FullLoader)
     except FileNotFoundError as ex:
-        error_string = "[ERROR] {} - {}: \'{}\'".format(datetime.now(), ex.strerror, ex.filename)
-        print(error_string)
-        util_methods.log(attack_tool_log_path, error_string, "a")
+        logger.error("{}: \'{}\'".format(ex.strerror, ex.filename))
         sys.exit()
 
     # reading configurations from attack-tool.yaml
@@ -119,14 +124,10 @@ if __name__ == '__main__':
     util_methods.log(dataset_path, "Timestamp, Request path, Method,Access Token, IP Address, Cookie, Response Code", "w")
 
     if len(api_list) == 0:
-        error_string = "[ERROR] {} - There are no APIs with DELETE endpoints".format(datetime.now())
-        print(error_string)
-        util_methods.log(attack_tool_log_path, error_string, "a")
+        logger.error("There are no APIs with DELETE endpoints")
         sys.exit()
 
-    log_string = "[INFO] {} - Extreme delete attack started ".format(start_time)
-    print(log_string)
-    util_methods.log(attack_tool_log_path, log_string, "a")
+    logger.info("Extreme delete attack started")
     util_methods.log(dataset_path, "timestamp,ip_address,access_token,http_method,invoke_path,cookie,accept,content_type,x_forwarded_for,user_agent,response_code", "w")
 
     process_pool = Pool(processes=process_count)
@@ -135,9 +136,7 @@ if __name__ == '__main__':
     while True:
         time_elapsed = datetime.now() - start_time
         if time_elapsed.seconds >= attack_duration:
-            log_string = "[INFO] {} - Attack terminated successfully. Time elapsed: {} minutes".format(datetime.now(), time_elapsed.seconds / 60.0)
-            print(log_string)
-            util_methods.log(attack_tool_log_path, log_string, "a")
+            logger.info("Attack terminated successfully. Time elapsed: {} minutes".format(time_elapsed.seconds / 60.0))
             break
         else:
             process_pool.map(request_handler, range(1000))
