@@ -77,14 +77,14 @@ def simulate_user(user_data):
                                                                                  random_user_agent,
                                                                                  response.status_code,
                                                                                  )
-                    util_methods.log(dataset_path, request_info, "a")
+                    util_methods.write_to_file(dataset_path, request_info, "a")
                 except requests.exceptions.ConnectionError as e:
                     error_code = 521
                     request_info = "{},{},{},{},{},{},{},{},{},\"{}\",{}".format(datetime.now(), ip, token, http_method, request_path, cookie, accept, content_type, ip,
                                                                                  random_user_agent,
                                                                                  error_code,
                                                                                  )
-                    util_methods.log(dataset_path, request_info, "a")
+                    util_methods.write_to_file(dataset_path, request_info, "a")
                     logger.error("Connection Error: {}".format(e))
                 except requests.exceptions.RequestException:
                     logger.exception("Request Failure")
@@ -127,7 +127,7 @@ if __name__ == '__main__':
 
     # Recording column names in the dataset csv file
     dataset_path = "../../../../../../dataset/attack/abnormal_token.csv"
-    util_methods.log(dataset_path, "timestamp,ip_address,access_token,http_method,invoke_path,cookie,accept,content_type,x_forwarded_for,user_agent,response_code", "w")
+    util_methods.write_to_file(dataset_path, "timestamp,ip_address,access_token,http_method,invoke_path,cookie,accept,content_type,x_forwarded_for,user_agent,response_code", "w")
 
     logger.info("Abnormal token usage attack started")
 

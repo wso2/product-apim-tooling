@@ -54,7 +54,7 @@ def generate_random_string(size):
     return out_str
 
 
-def log(path, data, mode):
+def write_to_file(path, data, mode):
     """
     writes the data to a file in the given path
     :param path: file path

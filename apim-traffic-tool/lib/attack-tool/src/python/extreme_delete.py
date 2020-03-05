@@ -63,13 +63,13 @@ def request_handler(i):
             request_info = "{},{},{},{},{}/{},{},{},{},{},\"{}\",{}".format(datetime.now(), ip, token, resource_method, request_path, path_param, cookie, accept, content_type, ip, random_user_agent,
                                                                             response.status_code
                                                                             )
-            util_methods.log(dataset_path, request_info, "a")
+            util_methods.write_to_file(dataset_path, request_info, "a")
         except requests.exceptions.ConnectionError as e:
             error_code = 521
             request_info = "{},{},{},{},{}/{},{},{},{},{},\"{}\",{}".format(datetime.now(), ip, token, resource_method, request_path, path_param, cookie, accept, content_type, ip, random_user_agent,
                                                                             error_code
                                                                             )
-            util_methods.log(dataset_path, request_info, "a")
+            util_methods.write_to_file(dataset_path, request_info, "a")
             logger.error("Connection Error: {}".format(e))
         except requests.exceptions.RequestException:
             logger.exception("Request Failure")
@@ -120,14 +120,14 @@ if __name__ == '__main__':
 
     # Recording column names in the dataset csv file
     dataset_path = "../../../../../../dataset/attack/extreme_delete.csv"
-    util_methods.log(dataset_path, "Timestamp, Request path, Method,Access Token, IP Address, Cookie, Response Code", "w")
+    util_methods.write_to_file(dataset_path, "Timestamp, Request path, Method,Access Token, IP Address, Cookie, Response Code", "w")
 
     if len(api_list) == 0:
         logger.error("There are no APIs with DELETE endpoints")
         sys.exit()
 
     logger.info("Extreme delete attack started")
-    util_methods.log(dataset_path, "timestamp,ip_address,access_token,http_method,invoke_path,cookie,accept,content_type,x_forwarded_for,user_agent,response_code", "w")
+    util_methods.write_to_file(dataset_path, "timestamp,ip_address,access_token,http_method,invoke_path,cookie,accept,content_type,x_forwarded_for,user_agent,response_code", "w")
 
     process_pool = Pool(processes=process_count)
 
