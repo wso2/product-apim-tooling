@@ -59,9 +59,9 @@ def request_handler(i):
         path_param = generate_random_string(10)
         try:
             response = util_methods.send_simple_request(request_path, method, token, ip, cookie, accept, content_type, random_user_agent, path_params=path_param)
-            request_info = "{},{},{},{},{}/{},{},{},{},{},\"{}\",{}".format(datetime.now(), ip, token, method, request_path,path_param, cookie, accept, content_type, ip, random_user_agent,
-                                                                         response.status_code,
-                                                                         )
+            request_info = "{},{},{},{},{}/{},{},{},{},{},\"{}\",{}".format(datetime.now(), ip, token, method, request_path, path_param, cookie, accept, content_type, ip, random_user_agent,
+                                                                            response.status_code,
+                                                                            )
             util_methods.log(dataset_path, request_info, "a")
         except requests.exceptions.RequestException:
             msg_string = "[Error] {} - Request Failure\n\t {}".format(datetime.now(), str(ex))
@@ -74,7 +74,7 @@ if __name__ == '__main__':
 
     attack_tool_log_path = "../../../../../../logs/attack-tool.log"
     try:
-        with open(os.path.abspath(os.path.join(__file__, "../../../../../config/apim.yaml")), "r") as config_file:
+        with open(os.path.abspath(os.path.join(__file__, "../../../../../config/api_details.yaml")), "r") as config_file:
             config = yaml.load(config_file, Loader=yaml.FullLoader)
 
         with open(os.path.abspath(os.path.join(__file__, "../../../../../config/attack-tool.yaml")), "r") as attack_config_file:
@@ -90,7 +90,6 @@ if __name__ == '__main__':
     host = attack_config['general_config']['api_host']['ip']
     port = attack_config['general_config']['api_host']['port']
     attack_duration = attack_config['general_config']['attack_duration']
-    scenario_name = attack_config['general_config']['scenario']
     payloads = attack_config['general_config']['payloads']
     user_agents = attack_config['general_config']['user_agents']
     process_count = attack_config['general_config']['number_of_processes']
@@ -99,7 +98,7 @@ if __name__ == '__main__':
     apis = config['apis']
 
     # reading user data (access token, api name,user ip, and cookie)
-    user_details = pd.read_csv(os.path.abspath(os.path.join(__file__, "../../../../traffic-tool/data/scenario/{}/token_ip_cookie.csv".format(scenario_name))))
+    user_details = pd.read_csv(os.path.abspath(os.path.join(__file__, "../../../../traffic-tool/data/scenario/token_ip_cookie.csv")))
     user_details_groups = user_details.groupby('api_name')
 
     # Instantiating API objects which has delete methods and appending them to api_list
