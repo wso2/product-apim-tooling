@@ -78,7 +78,7 @@ def request_handler(i):
 # Program Execution
 if __name__ == '__main__':
 
-    logger = log.setLogger('Extreme_Delete')
+    logger = log.set_logger('Extreme_Delete')
     try:
         with open(os.path.abspath(os.path.join(__file__, "../../../../../config/api_details.yaml")), "r") as config_file:
             config = yaml.load(config_file, Loader=yaml.FullLoader)

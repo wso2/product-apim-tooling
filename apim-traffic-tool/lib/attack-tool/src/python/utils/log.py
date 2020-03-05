@@ -25,7 +25,7 @@ abs_path = os.path.abspath(os.path.dirname(__file__))
 log_file = abs_path + '/../../../../../logs/attack-tool.log'
 
 
-def setLogLevel():
+def set_log_level():
     global log_level
 
     with open(abs_path + '/../../../../../config/user-settings.yaml', 'r') as f:
@@ -44,7 +44,7 @@ def setLogLevel():
         log_level = logging.CRITICAL
 
 
-def setLogger(logger_name):
+def set_logger(logger_name):
     global log_level, log_file
 
     logger = logging.getLogger(logger_name)
@@ -65,4 +65,4 @@ def setLogger(logger_name):
     return logger
 
 
-setLogLevel()
+set_log_level()
