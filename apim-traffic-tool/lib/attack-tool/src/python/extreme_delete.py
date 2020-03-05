@@ -32,6 +32,7 @@ from constants import *
 from utils import log
 
 
+# noinspection PyUnusedLocal
 def request_handler(i):
     """
     Handle the requests
