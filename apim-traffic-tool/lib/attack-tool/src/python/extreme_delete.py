@@ -78,7 +78,6 @@ def request_handler(i):
 # Program Execution
 if __name__ == '__main__':
 
-    attack_tool_log_path = "../../../../../../logs/attack-tool.log"
     logger = log.setLogger('Extreme_Delete')
     try:
         with open(os.path.abspath(os.path.join(__file__, "../../../../../config/api_details.yaml")), "r") as config_file:

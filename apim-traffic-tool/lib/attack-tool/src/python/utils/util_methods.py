@@ -19,7 +19,6 @@ import math
 import os
 from collections import defaultdict
 import random
-from datetime import datetime
 import requests
 import numpy as np
 # disabling warnings
@@ -111,7 +110,6 @@ def send_simple_request(request_path, method, token, ip, cookie, accept, content
     r = requests.Response()
     r.status_code = 405
 
-    attack_tool_log_path = "../../../../../../logs/attack-tool.log"
     try:
         if method == 'GET':
             r = requests.get(url=request_path, headers=header_data, timeout=(15, 30), verify=False)
