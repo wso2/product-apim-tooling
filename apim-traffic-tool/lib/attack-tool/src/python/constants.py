@@ -14,7 +14,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# Constants
+# config headers on attack tool.yaml
 
 GENERAL_CONFIG = 'general_config'
 API_HOST = 'api_host'
@@ -29,3 +29,15 @@ COMPROMISED_USER_COUNT = 'compromised_user_count'
 STOLEN_TOKEN = 'stolen_token'
 ATTACKS = 'attacks'
 TIME_PATTERNS = 'time_patterns'
+
+# token_ip_cookie csv headers
+API_NAME = 'api_name'
+
+# configs headers on api_details.yaml
+APIS = 'apis'
+CONTEXT = 'context'
+VERSION = 'version'
+NAME = 'name'
+method = 'method'
+path = 'path'
+resources = 'resources'
