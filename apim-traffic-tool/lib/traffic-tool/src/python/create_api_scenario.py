@@ -139,11 +139,11 @@ def genSwagger(filename, api_object):
         with open(abs_path + '/../../../../data/swagger/{}.json'.format(filename), 'w') as f:
             json.dump(template, f)
 
-        return True
+        return True, json.dumps(template)
     
     except Exception as err:
         logger.exception("Swagger creation failed for API: {}. Error: {}".format(filename, err))
-        return False
+        return False, None
 
 
 def loadSwagger():
@@ -177,7 +177,7 @@ def swaggerCheck():
     This function will check if the swagger definitions exist for all APIs
     :return: True if exists. False otherwise
     """
-    global swagger_template, template_components
+    global swagger_template, template_components, swagger_definitions
     swagger_generated = []
     swagger_not_found = []
 
@@ -201,8 +201,14 @@ def swaggerCheck():
                 with open(abs_path + '/../../data/tool_data/template_components.json', 'r') as f:
                     template_components = json.load(f)
 
-            if genSwagger(api_name, api):
+            generated, swagger_def = genSwagger(api_name, api)
+
+            if generated:
                 swagger_generated.append(api_name)
+
+                swagger_def = swagger_def.replace('\b', '\\b').replace('\f', '\\f').replace('\n', '\\n').replace('\r', '\\r').replace('\t', '\\t').replace('"', '\\"')
+                swagger_def = swagger_def.replace('    ', '')
+                swagger_definitions[api_name] = swagger_def
             else:
                 swagger_not_found.append(api_name)
 
@@ -224,7 +230,7 @@ def createAndPublishAPIs():
     This function will create and publish all APIs
     :return: None
     """
-    global api_ids
+    global api_ids, swagger_definitions
     created_count = 0
     published_count = 0
 

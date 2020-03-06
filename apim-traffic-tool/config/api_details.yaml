@@ -19,8 +19,8 @@ apis:
         path: menu
 
   - name: Payment
-    description: 
-    tags: []
+    description: This is an API to securely perform online and mobile payments
+    tags: [payment]
     context: payment
     version: 1
     resources:
