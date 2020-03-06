@@ -19,7 +19,6 @@ import math
 import os
 from collections import defaultdict
 import random
-from datetime import datetime
 import requests
 import numpy as np
 # disabling warnings
@@ -55,7 +54,7 @@ def generate_random_string(size):
     return out_str
 
 
-def log(path, data, mode):
+def write_to_file(path, data, mode):
     """
     writes the data to a file in the given path
     :param path: file path
@@ -111,7 +110,6 @@ def send_simple_request(request_path, method, token, ip, cookie, accept, content
     r = requests.Response()
     r.status_code = 405
 
-    attack_tool_log_path = "../../../../../../logs/attack-tool.log"
     try:
         if method == 'GET':
             r = requests.get(url=request_path, headers=header_data, timeout=(15, 30), verify=False)
@@ -125,13 +123,7 @@ def send_simple_request(request_path, method, token, ip, cookie, accept, content
             r = requests.patch(url=request_path, headers=header_data, data=request_body, timeout=(15, 30), verify=False)
 
         return r
-    except requests.exceptions.ConnectionError as ex:
-        msg_string = "[Error] {} - Request Failure\n{}".format(datetime.now(), str(ex))
-        print(msg_string)
-        log(attack_tool_log_path, msg_string, "a")
-        r.status_code = 521
-        return r
-    except requests.exceptions.RequestException:
+    except Exception:
         raise
 
 
@@ -203,4 +195,3 @@ def process_time_patterns(patterns: dict) -> defaultdict:
         std = np.std(pattern)
         processed_patterns[key] = {'mean': mean, 'std': std}
     return processed_patterns
-
