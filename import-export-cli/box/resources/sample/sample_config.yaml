@@ -3,10 +3,10 @@ config:
   http_request_timeout: 10000
 environments:
   sample-env1:
-    admin_endpoint: "https://localhost:9443/api/am/admin/v0.15"
+    admin_endpoint: "https://localhost:9443/api/am/admin/v0.16"
     api_list_endpoint: "https://localhost/publisher/apis"
     api_manager_endpoint: "https://localhost/apim"
-    application_list_endpoint: "https://localhost:9443/api/am/admin/v0.15/applications"
+    application_list_endpoint: "https://localhost:9443/api/am/admin/v0.16/applications"
     registration_endpoint: "https://localhost/register"
     token_endpoint: "https://localhost/token"
   sample-env2:

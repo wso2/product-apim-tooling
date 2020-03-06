@@ -39,19 +39,19 @@ const addEnvCmdLiteral = "add-env"
 const addEnvCmdShortDesc = "Add Environment to Config file"
 const addEnvCmdLongDesc = "Add new environment and its related endpoints to the config file"
 const addEnvCmdExamples = utils.ProjectName + ` ` + addEnvCmdLiteral + ` -e production \
---registration https://localhost:9443/client-registration/v0.15/register \
+--registration https://localhost:9443/client-registration/v0.16/register \
 --apim  https://localhost:9443 \
 --token https://localhost:8243/token
 
 ` + utils.ProjectName + ` ` + addEnvCmdLiteral + ` -e test \
---registration https://localhost:9443/client-registration/v0.15/register \
---api_list https://localhsot:9443/api/am/publisher/v0.15/apis \
+--registration https://localhost:9443/client-registration/v0.16/register \
+--api_list https://localhsot:9443/api/am/publisher/v1/apis \
 --apim  https://localhost:9443 \
 --token https://localhost:8243/token
 
 ` + utils.ProjectName + ` ` + addEnvCmdLiteral + ` -e dev --apim https://localhost:9443 \
 --token	https://localhost:8243/token \
---registration http://localhost:9763/client-registration/v0.15/register`
+--registration http://localhost:9763/client-registration/v0.16/register`
 
 // addEnvCmd represents the addEnv command
 var addEnvCmd = &cobra.Command{
