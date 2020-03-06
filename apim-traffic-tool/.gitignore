@@ -5,6 +5,6 @@
 /lib/traffic-tool/data/scenario/scenario_example/data/user_generation.csv
 /venv
 /lib/attack-tool/src/python/utils/__pycache__/
+/lib/attack-tool/src/python/__pycache__/
 /lib/traffic-tool/src/python/utils/__pycache__/
 /.idea
-

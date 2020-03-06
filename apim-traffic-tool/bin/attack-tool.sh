@@ -32,7 +32,7 @@ func_DOS() {
   JMPATH=$(cat "$(pwd)"/../config/user-settings.yaml | shyaml get-value path_variables.jmeter)
   PROCESSES=$(cat "$(pwd)"/../config/attack-tool.yaml | shyaml get-value general_config.number_of_processes)
   $JMPATH/jmeter -n -t "$(pwd)"'/../lib/attack-tool/src/jmeter/DOS_Attack.jmx' -JThreads=$PROCESSES -l "$(pwd)"/../logs/jmeter-results-attack_tool.log -j "$(pwd)"/../logs/jmeter-attack_tool.log
-  echo "DOS attack finished. See 'logs/attack-shell.log' for details"
+  echo "DOS attack finished. See 'logs/jmeter-attack_tool.log' for details"
 }
 
 # function to start a ddos attack
@@ -40,19 +40,21 @@ func_DDOS() {
   JMPATH=$(cat "$(pwd)"/../config/user-settings.yaml | shyaml get-value path_variables.jmeter)
   PROCESSES=$(cat "$(pwd)"/../config/attack-tool.yaml | shyaml get-value general_config.number_of_processes)
   $JMPATH/jmeter -n -t "$(pwd)"'/../lib/attack-tool/src/jmeter/DDOS_Attack.jmx' -JThreads=$PROCESSES -l "$(pwd)"/../logs/jmeter-results-attack_tool.log -j "$(pwd)"/../logs/jmeter-attack_tool.log
-  echo "DDOS attack finished. See 'logs/attack-shell.log' for details"
+  echo "DDOS attack finished. See 'logs/jmeter-attack_tool.log.log' for details"
 }
 
 # function to start an abnormal token usage attack
 func_abnormal_token_usage() {
   if command -v python3 &>/dev/null; then
+    rm -f "$(pwd)"/../lib/attack-tool/data/runtime_data/attack_processes.pid
     nohup python3 "$(pwd)"/../lib/attack-tool/src/python/abnormal_token_usage.py >> "$(pwd)"/../logs/attack-shell.log 2>&1 &
     echo $! > "$(pwd)"/../data/attack_tool.pid
-    echo "Abnormal token usage attack started. See 'logs/attack-shell.log' for details"
+    echo "Abnormal token usage attack started. See 'logs/attack-tool.log' for details"
   elif command -v python &>/dev/null; then
+    rm -f "$(pwd)"/../lib/attack-tool/data/runtime_data/attack_processes.pid
     nohup python "$(pwd)"/../lib/attack-tool/src/python/abnormal_token_usage.py >> "$(pwd)"/../logs/attack-shell.log 2>&1 &
     echo $! > "$(pwd)"/../data/attack_tool.pid
-    echo "Abnormal token usage attack started. See 'logs/attack-shell.log' for details"
+    echo "Abnormal token usage attack started. See 'logs/attack-tool.log' for details"
   else
     echo "Python 3 is required for the command!"
     exit 1
@@ -64,11 +66,11 @@ func_extreme_delete() {
   if command -v python3 &>/dev/null; then
     nohup python3 "$(pwd)"/../lib/attack-tool/src/python/extreme_delete.py >> "$(pwd)"/../logs/attack-shell.log 2>&1 &
     echo $! > "$(pwd)"/../data/attack_tool.pid
-    echo "Extreme delete attack started. See 'logs/attack-shell.log' for details"
+    echo "Extreme delete attack started. See 'logs/attack-tool.log' for details"
   elif command -v python &>/dev/null; then
     nohup python "$(pwd)"/../lib/attack-tool/src/python/extreme_delete.py >> "$(pwd)"/../logs/attack-shell.log 2>&1 &
     echo $! > "$(pwd)"/../data/attack_tool.pid
-    echo "Extreme delete attack started. See 'logs/attack-shell.log' for details"
+    echo "Extreme delete attack started. See 'logs/attack-tool.log' for details"
   else
     echo "Python 3 is required for the command!"
     exit 1
@@ -78,13 +80,15 @@ func_extreme_delete() {
 # function to start a stolen token attack
 func_stolen_token() {
   if command -v python3 &>/dev/null; then
+    rm -f "$(pwd)"/../lib/attack-tool/data/runtime_data/attack_processes.pid
     nohup python3 "$(pwd)"/../lib/attack-tool/src/python/stolen_token.py >> "$(pwd)"/../logs/attack-shell.log 2>&1 &
     echo $! > "$(pwd)"/../data/attack_tool.pid
-    echo "Stolen token attack started. See 'logs/attack-shell.log' for details"
+    echo "Stolen token attack started. See 'logs/attack-tool.log' for details"
   elif command -v python &>/dev/null; then
+    rm -f "$(pwd)"/../lib/attack-tool/data/runtime_data/attack_processes.pid
     nohup python "$(pwd)"/../lib/attack-tool/src/python/stolen_token.py >> "$(pwd)"/../logs/attack-shell.log 2>&1 &
     echo $! > "$(pwd)"/../data/attack_tool.pid
-    echo "Stolen token attack started. See 'logs/attack-shell.log' for details"
+    echo "Stolen token attack started. See 'logs/attack-tool.log' for details"
   else
     echo "Python 3 is required for the command!"
     exit 1
@@ -102,6 +106,14 @@ func_stop_attack() {
     if [ $? -eq 0 ];
     then
       kill -9 $PID
+
+      if [ -e "$(pwd)"/../lib/attack-tool/data/runtime_data/attack_processes.pid ];
+      then
+        while IFS= read -r subPID; do
+          kill -9 $subPID
+        done < "$(pwd)"/../lib/attack-tool/data/runtime_data/attack_processes.pid
+      fi
+      
       if [ $? -eq 0 ];
       then
           echo "Attack Tool Stopped Successfully"
@@ -111,6 +123,7 @@ func_stop_attack() {
     fi
   fi
   > "$(pwd)"/../data/attack_tool.pid
+  rm -f "$(pwd)"/../lib/attack-tool/data/runtime_data/attack_processes.pid
 }
 
 

@@ -170,11 +170,18 @@ if __name__ == '__main__':
         process_list.append(process)
         process.start()
 
+        with open(os.path.abspath(os.path.join(__file__, "../../../data/runtime_data/attack_processes.pid")), "a+") as f:
+            f.write(str(process.pid) + '\n')
+
     while True:
         time_elapsed = datetime.now() - start_time
         if time_elapsed.seconds >= attack_duration:
             for process in process_list:
                 process.terminate()
+            
+            with open(os.path.abspath(os.path.join(__file__, "../../../data/runtime_data/attack_processes.pid")), "w") as f:
+                f.write('')
+
             logger.info("Attack terminated successfully. Time elapsed: {} minutes".format(time_elapsed.seconds / 60.0))
             break
 
