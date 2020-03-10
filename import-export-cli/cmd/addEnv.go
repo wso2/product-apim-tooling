@@ -45,7 +45,7 @@ const addEnvCmdExamples = utils.ProjectName + ` ` + addEnvCmdLiteral + ` -e prod
 
 ` + utils.ProjectName + ` ` + addEnvCmdLiteral + ` -e test \
 --registration https://localhost:9443/client-registration/v0.16/register \
---api_list https://localhsot:9443/api/am/publisher/v1/apis \
+--api_list https://localhost:9443/api/am/publisher/v1/apis \
 --apim  https://localhost:9443 \
 --token https://localhost:8243/token
 

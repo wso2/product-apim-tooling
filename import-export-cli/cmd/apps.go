@@ -122,7 +122,7 @@ func executeAppsCmd(credential credentials.Credential, appOwner string) {
 		utils.HandleErrorAndExit("Error calling '"+appsCmdLiteral+"'", err)
 	}
 
-	applicationListEndpoint := utils.GetApplicationListEndpointOfEnv(listAppsCmdEnvironment, utils.MainConfigFilePath)
+	applicationListEndpoint := utils.GetAdminApplicationListEndpointOfEnv(listAppsCmdEnvironment, utils.MainConfigFilePath)
 	_, apps, err := GetApplicationList(appOwner, accessToken, applicationListEndpoint)
 
 	if err == nil {
