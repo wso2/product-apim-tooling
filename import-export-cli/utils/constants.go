@@ -105,3 +105,5 @@ const ApplicationId = "applicationId"
 const ApiId = "apiId"
 const DefaultCliApp = "default-apictl-app"
 const DefaultTokenType = "JWT"
+
+var ValidInitialStates = []string{"CREATED", "PUBLISHED"}
