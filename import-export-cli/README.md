@@ -1,12 +1,12 @@
 # CLI for Importing and Exporting APIs and Applications
-## For WSO2 API Manager 2.6.0
+## For WSO2 API Manager 3.1.0
 
-Command Line tool for importing and exporting APIs/Applications between different API Environemnts
+Command Line tool for importing and exporting APIs/Applications between different API Environments
 
 ## Getting Started
 
 - ### Setting up the development environment
-    1. Install [Go 1.12.x](https://golang.org/dl)
+    1. Install [Go 1.14](https://golang.org/dl)
     2. Fork the [repository](https://github.com/wso2/product-apim-tooling)
     3. Clone your fork into any directory
     5. `cd` into cloned directory and then cd into `product-apim-tooling/import-export-cli`
@@ -17,7 +17,7 @@ Command Line tool for importing and exporting APIs/Applications between differen
 - ### Building
     `cd` into `product-apim-tooling/import-export-cli`
     
-    Execute `./build.sh -t apictl.go -v 1.0.0 -f` to build for all platforms.
+    Execute `./build.sh -t apictl.go -v 3.1.0 -f` to build for all platforms.
     
     Created packages will be available at `build/target` directory
 
