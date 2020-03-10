@@ -184,14 +184,26 @@ func GetApiListEndpointOfEnv(env, filePath string) string {
 }
 
 // Get ApplicationListEndpoint of a given environment
-func GetApplicationListEndpointOfEnv(env, filePath string) string {
+func GetAdminApplicationListEndpointOfEnv(env, filePath string) string {
 	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
 	if !(envEndpoints.AppListEndpoint == "" || envEndpoints == nil) {
 		return envEndpoints.AppListEndpoint
 	} else {
 		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
 		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
-		return apiManagerEndpoint + defaultApplicationListEndpointSuffix
+		return apiManagerEndpoint + defaultAdminApplicationListEndpointSuffix
+	}
+}
+
+// Get ApplicationListEndpoint of a given environment
+func GetDevPortalApplicationListEndpointOfEnv(env, filePath string) string {
+	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
+	if !(envEndpoints.AppListEndpoint == "" || envEndpoints == nil) {
+		return envEndpoints.AppListEndpoint
+	} else {
+		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
+		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
+		return apiManagerEndpoint + defaultDevPortalApplicationListEndpointSuffix
 	}
 }
 

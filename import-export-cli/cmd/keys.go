@@ -311,7 +311,7 @@ func generateAccessToken(credential credentials.Credential) (string, error) {
 // @return KeygenResponse, error
 func regenerateConsumerSecret(appId string, keyType string, accessToken string) (*utils.ConsumerSecretRegenResponse,
 		error) {
-	applicationEndpoint := utils.GetApplicationListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
+	applicationEndpoint := utils.GetDevPortalApplicationListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
 	url := applicationEndpoint + "/" + appId + "/keys/" + keyType + "/regenerate-secret"
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
@@ -344,7 +344,7 @@ func regenerateConsumerSecret(appId string, keyType string, accessToken string) 
 // @return appId, error
 func searchApplication(appName string, accessToken string) (string, error) {
 	//Application rest API endpoint of the environment from the config file
-	applicationEndpoint := utils.GetApplicationListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
+	applicationEndpoint := utils.GetDevPortalApplicationListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
 	//Prepping headers
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
@@ -378,8 +378,7 @@ func searchApplication(appName string, accessToken string) (string, error) {
 // @return apiId, error
 func searchApi(accessToken string) (string, error) {
 	//API endpoint of the environment from the config file
-	apiEndpoint := utils.GetApplicationListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
-	apiEndpoint = strings.Replace(apiEndpoint, "applications", "apis", -1)
+	apiEndpoint := utils.GetApiListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
 
 	//Prepping headers
 	headers := make(map[string]string)
@@ -472,7 +471,7 @@ func getApi(apiId string, accessToken string) (*utils.APIData, error) {
 // @return subscriptionId, error
 func subscribeApi(apiId string, appId string, accessToken string) (string, error) {
 	//todo: subscription endpoint to be included in conf
-	subEndpoint := utils.GetApplicationListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
+	subEndpoint := utils.GetDevPortalApplicationListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
 	subEndpoint = strings.Replace(subEndpoint, "applications", "subscriptions", -1)
 	//prepping the headers
 	headers := make(map[string]string)
@@ -540,7 +539,7 @@ func subscribeApi(apiId string, appId string, accessToken string) (string, error
 // @return AppDetails, error
 func getApplicationDetails(appId string, accessToken string) (*utils.AppDetails, error) {
 
-	applicationEndpoint := utils.GetApplicationListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath) + "/" + appId
+	applicationEndpoint := utils.GetDevPortalApplicationListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath) + "/" + appId
 	//Prepping headers
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
@@ -570,7 +569,7 @@ func getApplicationDetails(appId string, accessToken string) (*utils.AppDetails,
 // @return AppDetails, error
 func getApplicationKeys(appId string, accessToken string) (*utils.AppKeyList, error) {
 
-	applicationEndpoint := utils.GetApplicationListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath) +
+	applicationEndpoint := utils.GetDevPortalApplicationListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath) +
 		"/" + appId + "/keys"
 	//Prepping headers
 	headers := make(map[string]string)
@@ -601,7 +600,7 @@ func getApplicationKeys(appId string, accessToken string) (*utils.AppKeyList, er
 // @return AppDetails, error
 func updateApplicationDetails(appId string, body string, accessToken string) (*utils.AppDetails, error) {
 
-	applicationEndpoint := utils.GetApplicationListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath) + "/" + appId
+	applicationEndpoint := utils.GetDevPortalApplicationListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath) + "/" + appId
 	//Prepping headers
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
@@ -631,7 +630,7 @@ func updateApplicationDetails(appId string, body string, accessToken string) (*u
 // @return client_id, client_secret, error
 func createApplication(accessToken string) (string, string, error) {
 
-	applicationEndpoint := utils.GetApplicationListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
+	applicationEndpoint := utils.GetDevPortalApplicationListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
@@ -734,7 +733,7 @@ func getScopes(appId string, accessToken string) ([]string, error) {
 // @return client_id, client_secret, error
 func generateApplicationKeys(appId string, token string) (*utils.KeygenResponse, error) {
 
-	applicationEndpoint := utils.GetApplicationListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath) +
+	applicationEndpoint := utils.GetDevPortalApplicationListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath) +
 		"/" + appId + "/generate-keys"
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + token
