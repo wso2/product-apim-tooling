@@ -34,8 +34,6 @@ const uninstallApiOperatorCmdExamples = utils.ProjectName + ` ` + uninstallCmdLi
 
 var flagForceCleanApiOperator bool
 
-//var flagCleanOlmOperator bool
-
 // uninstallApiOperatorCmd represents the uninstall api-operator command
 var uninstallApiOperatorCmd = &cobra.Command{
 	Use:     uninstallApiOperatorCmdLiteral,
@@ -45,9 +43,24 @@ var uninstallApiOperatorCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		isConfirm := flagForceCleanApiOperator
 
+		// getting API Operator version
+		operatorVersion, err := k8sUtils.GetVersion(
+			"API Operator",
+			k8sUtils.ApiOperatorVersionEnvVariable,
+			k8sUtils.DefaultApiOperatorVersion,
+			k8sUtils.ApiOperatorVersionValidationUrlTemplate,
+			k8sUtils.ApiOperatorFindVersionUrl,
+		)
+		if err != nil {
+			utils.HandleErrorAndExit("Error in API Operator version", err)
+		}
+
 		if !flagForceCleanApiOperator {
 			isConfirmStr, err := utils.ReadInputString(
-				"\nUninstall API Operator and all related resources: APIs, Securities, Rate Limitings and Target Endpoints\nAre you sure",
+				fmt.Sprintf("\nUninstall \"%s-%s\" and all related resources: APIs, Securities, Rate Limitings and Target Endpoints\n"+
+					"[WARNING] Remove the namespace: %s\n"+
+					"Are you sure",
+					k8sUtils.ApiOperator, operatorVersion, k8sUtils.ApiOpWso2Namespace),
 				utils.Default{Value: "N", IsDefault: true},
 				"",
 				false,
@@ -63,27 +76,17 @@ var uninstallApiOperatorCmd = &cobra.Command{
 		if isConfirm {
 			fmt.Println("Deleting kubernetes resources for API Operator")
 
-			// getting API Operator version
-			operatorVersion, err := k8sUtils.GetVersion(
-				"API Operator",
-				k8sUtils.ApiOperatorVersionEnvVariable,
-				k8sUtils.DefaultApiOperatorVersion,
-				k8sUtils.ApiOperatorVersionValidationUrlTemplate,
-				k8sUtils.ApiOperatorFindVersionUrl,
-			)
-			if err != nil {
-				utils.HandleErrorAndExit("Error in API Operator version", err)
-			}
-
 			// delete the OLM subscription
 			fmt.Println("Removing OLM subscription")
 			_ = k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, "subscriptions.operators.coreos.com", "my-api-operator", "-n", "operators")
 
-			// delete namespace wso2-system
-			//fmt.Printf("Removing namespace: %s\nThis operation will take some minutes...\n", k8sUtils.ApiOpWso2Namespace)
+			// delete the namespace "wso2-system"
+			// namespace, "wso2-system" contains all the artifacts and configs
+			// deleting the namespace: "wso2-system", will remove all the artifacts and configs
+			fmt.Printf("Removing namespace: %s\nThis operation will take some minutes...\n", k8sUtils.ApiOpWso2Namespace)
 
 			deleteErrors := []error{
-				//k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, "namespace", k8sUtils.ApiOpWso2Namespace),
+				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, "namespace", k8sUtils.ApiOpWso2Namespace),
 				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, "crd", k8sUtils.ApiOpCrdApi),
 				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, "crd", k8sUtils.ApiOpCrdSecurity),
 				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, "crd", k8sUtils.ApiOpCrdRateLimiting),
@@ -97,7 +100,7 @@ var uninstallApiOperatorCmd = &cobra.Command{
 				}
 			}
 		} else {
-			fmt.Println("Cancelled operation: uninstalling API Operator")
+			fmt.Println("Cancelled")
 		}
 
 	},
@@ -106,5 +109,4 @@ var uninstallApiOperatorCmd = &cobra.Command{
 func init() {
 	uninstallCmd.AddCommand(uninstallApiOperatorCmd)
 	uninstallApiOperatorCmd.Flags().BoolVar(&flagForceCleanApiOperator, "force", false, "Force uninstall API Operator")
-	//uninstallApiOperatorCmd.Flags().BoolVar(&flagCleanOlmOperator, "remove-olm", false, "Clean kubernetes resources for OLM Operator as well")
 }
