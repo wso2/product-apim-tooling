@@ -34,7 +34,15 @@ const installApiOperatorCmdExamples = utils.ProjectName + ` ` + installCmdLitera
 ` + utils.ProjectName + ` ` + installApiOperatorCmdLiteral + ` -f path/to/operator/configs
 ` + utils.ProjectName + ` ` + installApiOperatorCmdLiteral + ` -f path/to/operator/config/file.yaml`
 
+// flags
 var flagApiOperatorFile string
+
+// flags for installing api-operator in batch mode
+var flagBmRegistryType string
+var flagBmRepository string
+var flagBmUsername string
+var flagBmPassword string
+var flagBmKeyFile string
 
 // installApiOperatorCmd represents the install api-operator command
 var installApiOperatorCmd = &cobra.Command{
@@ -77,9 +85,20 @@ var installApiOperatorCmd = &cobra.Command{
 			}
 		}
 
-		// read inputs for docker registry
-		registry.ChooseRegistry()
-		registry.ReadInputs()
+		// check for installation mode: interactive or batch mode
+		if flagBmRegistryType == "" {
+			// run api-operator installation in interactive mode
+			// read inputs for docker registry
+			registry.ChooseRegistryInteractive()
+			registry.ReadInputs()
+		} else {
+			// run api-operator installation in batch mode
+			registry.SetRegistry(flagBmRegistryType)
+
+			// validate flags
+			flagsGiven := getGivenFlagsNames()
+			registry.ValidateFlags(flagsGiven)
+		}
 
 		if !isLocalInstallation {
 			fmt.Println("[Installing OLM]")
@@ -97,6 +116,26 @@ var installApiOperatorCmd = &cobra.Command{
 		fmt.Println("[Setting to K8s Mode]")
 		setToK8sMode()
 	},
+}
+
+// getGivenFlagsNames returns flags that user given in the batch mode except the "registry type"
+func getGivenFlagsNames() *[]string {
+	var flags []string
+
+	if flagBmRepository != "" {
+		flags = append(flags, k8sUtils.FlagBmRepository)
+	}
+	if flagBmUsername != "" {
+		flags = append(flags, k8sUtils.FlagBmUsername)
+	}
+	if flagBmPassword != "" {
+		flags = append(flags, k8sUtils.FlagBmPassword)
+	}
+	if flagBmKeyFile != "" {
+		flags = append(flags, k8sUtils.FlagBmKeyFile)
+	}
+
+	return &flags
 }
 
 // createControllerConfigs creates configs
@@ -129,4 +168,12 @@ func setToK8sMode() {
 func init() {
 	installCmd.AddCommand(installApiOperatorCmd)
 	installApiOperatorCmd.Flags().StringVarP(&flagApiOperatorFile, "from-file", "f", "", "Path to API Operator directory")
+
+	// flags for installing api-operator in batch mode
+	// only the flag "registry-type" is required and others are registry specific flags
+	installApiOperatorCmd.Flags().StringVarP(&flagBmRegistryType, "registry-type", "R", "", "Registry type: DOCKER_HUB | AMAZON_ECR |GCR | HTTP")
+	installApiOperatorCmd.Flags().StringVarP(&flagBmRepository, k8sUtils.FlagBmRepository, "r", "", "Repository name or URI")
+	installApiOperatorCmd.Flags().StringVarP(&flagBmUsername, k8sUtils.FlagBmUsername, "u", "", "Username of the repository")
+	installApiOperatorCmd.Flags().StringVarP(&flagBmPassword, k8sUtils.FlagBmPassword, "p", "", "Password of the given user")
+	installApiOperatorCmd.Flags().StringVarP(&flagBmKeyFile, k8sUtils.FlagBmKeyFile, "c", "", "Credentials file")
 }

@@ -64,6 +64,10 @@ var DockerHubRegistry = &Registry{
 		k8sUtils.K8sCreateSecretFromInputs(k8sUtils.ConfigJsonVolume, dockerHubValues.repositoryUrl, dockerHubValues.username, dockerHubValues.password)
 		dockerHubValues.password = "" // clear password
 	},
+	Flags: Flags{
+		RequiredFlags: &[]string{k8sUtils.FlagBmRepository, k8sUtils.FlagBmUsername},
+		OptionalFlags: &[]string{k8sUtils.FlagBmPassword},
+	},
 }
 
 // readDockerHubInputs reads docker-registry URL, username and password from the user

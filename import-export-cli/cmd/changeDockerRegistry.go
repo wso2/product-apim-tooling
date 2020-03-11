@@ -59,7 +59,7 @@ var changeDockerRegistryCmd = &cobra.Command{
 		}
 
 		// read inputs for docker registry
-		registry.ChooseRegistry()
+		registry.ChooseRegistryInteractive()
 		registry.ReadInputs()
 		registry.UpdateConfigsSecrets()
 	},

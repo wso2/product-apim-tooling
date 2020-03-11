@@ -35,6 +35,12 @@ type Registry struct {
 	Option     int     // Option to be choose the CLI registry list
 	Read       func()  // Function to be called when getting inputs
 	Run        func()  // Function to be called when updating k8s secrets
+	Flags      Flags
+}
+
+type Flags struct {
+	RequiredFlags *[]string
+	OptionalFlags *[]string
 }
 
 // registries represents a map of registries
@@ -55,8 +61,8 @@ func UpdateConfigsSecrets() {
 	registries[optionToExec].Run()
 }
 
-// ChooseRegistry lists registries in the CLI and reads a choice from user
-func ChooseRegistry() {
+// ChooseRegistryInteractive lists registries in the CLI and reads a choice from user
+func ChooseRegistryInteractive() {
 	keys := make([]int, 0, len(registries))
 	for key := range registries {
 		keys = append(keys, key)
@@ -75,6 +81,44 @@ func ChooseRegistry() {
 	}
 
 	optionToExec = option
+}
+
+// SetRegistry set the private value 'optionToExec' that match with 'registryType' un-interactively
+func SetRegistry(registryType string) {
+	for opt, reg := range registries {
+		if reg.Name == registryType {
+			optionToExec = opt
+			return
+		}
+	}
+
+	// if not found throw error: invalid registry type
+	utils.HandleErrorAndExit("Invalid registry type: "+registryType, nil)
+}
+
+// ValidateFlags validates if any additional flag is given or any required flag is missing
+// throw error if invalid
+func ValidateFlags(flags *[]string) {
+	// check for required flags
+	for _, flag := range *registries[optionToExec].Flags.RequiredFlags {
+		if !k8sUtils.StringArrayContains(*flags, flag) {
+			// required flag is missing
+			utils.HandleErrorAndExit("Required flag is missing in un-interactive mode. Flag: "+flag, nil)
+		}
+	}
+
+	// check for additional flags
+	for _, flag := range *flags {
+		if !k8sUtils.StringArrayContains(append(
+			*registries[optionToExec].Flags.RequiredFlags,
+			*registries[optionToExec].Flags.OptionalFlags...,
+		), flag) {
+			// additional, not supported flag
+			utils.HandleErrorAndExit("Additional not supported flag found in un-interactive mode. Flag: "+flag, nil)
+		}
+	}
+
+	// flag validation success and continue the flow
 }
 
 // updateCtrlConfig sets the repository type value and the repository in the config: `controller-config`
