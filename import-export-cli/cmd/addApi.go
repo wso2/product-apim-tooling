@@ -41,38 +41,30 @@ var flagReplicas int
 var flagNamespace string
 var flagOverride bool
 
-const apiCmdLiteral = "api"
-const apiCmdShortDesc = "handle APIs in kubernetes cluster "
-const apiLongDesc = `Add, Update and Delete APIs in kubernetes cluster. JSON and YAML formats are accepted.
+const addApiCmdLiteral = "api"
+const addApiCmdShortDesc = "handle APIs in kubernetes cluster "
+const addApiLongDesc = `Add, Update and Delete APIs in kubernetes cluster. JSON and YAML formats are accepted.
 available modes are as follows
 * kubernetes`
-const apiExamples = utils.ProjectName + " add/update " + apiCmdLiteral + ` -n petstore --from-file=./Swagger.json --replicas=3 --namespace=wso2`
+const addApiExamples = utils.ProjectName + " add/update " + addApiCmdLiteral + ` -n petstore --from-file=./Swagger.json --replicas=3 --namespace=wso2`
 const addCmdLiteral = "add"
 const addCmdShortDesc = "Add an API to the kubernetes cluster"
 const addCmdLongDesc = `Add an API from a Swagger file to the kubernetes cluster. JSON and YAML formats are accepted.
 To execute kubernetes commands set mode to Kubernetes`
-const addCmdExamples = utils.ProjectName + " " + addCmdLiteral + " " + apiCmdLiteral + " " + `-n petstore --from-file=./Swagger.json --replicas=1 --namespace=wso2
+const addCmdExamples = utils.ProjectName + " " + addCmdLiteral + " " + addApiCmdLiteral + " " + `-n petstore --from-file=./Swagger.json --replicas=1 --namespace=wso2
 
-` + utils.ProjectName + " " + addCmdLiteral + " " + apiCmdLiteral + " " + `-n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi --replicas=1 --namespace=wso2 --override=true`
+` + utils.ProjectName + " " + addCmdLiteral + " " + addApiCmdLiteral + " " + `-n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi --replicas=1 --namespace=wso2 --override=true`
 
 var interceptorsConfName string
 
-// addCmd represents the add command
-var addCmd = &cobra.Command{
-	Use:     addCmdLiteral,
-	Short:   addCmdShortDesc,
-	Long:    addCmdLongDesc,
-	Example: addCmdExamples,
-}
-
 // addApiCmd represents the api command
 var addApiCmd = &cobra.Command{
-	Use:     apiCmdLiteral,
-	Short:   apiCmdShortDesc,
-	Long:    apiLongDesc,
-	Example: apiExamples,
+	Use:     addApiCmdLiteral,
+	Short:   addApiCmdShortDesc,
+	Long:    addApiLongDesc,
+	Example: addApiExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + apiCmdLiteral + " called")
+		utils.Logln(utils.LogPrefixInfo + addApiCmdLiteral + " called")
 		configVars := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
 		if configVars.Config.KubernetesMode {
 			if flagApiName == "" || flagSwaggerFilePath == "" {
