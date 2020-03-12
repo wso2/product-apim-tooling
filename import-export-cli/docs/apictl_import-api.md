@@ -16,7 +16,7 @@ apictl import-api --file <PATH_TO_API> --environment <ENVIRONMENT> [flags]
 apictl import-api -f qa/TwitterAPI.zip -e dev
 apictl import-api -f staging/FacebookAPI.zip -e production
 apictl import-api -f ~/myapi -e production --update
-apictl import-api -f ~/myapi -e production --update --inject
+apictl import-api -f ~/myapi -e production --update
 ```
 
 ### Options

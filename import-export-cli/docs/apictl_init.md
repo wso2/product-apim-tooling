@@ -25,7 +25,7 @@ apictl init MyAwesomeAPI --oas ./swagger.yaml -d definition.yaml
   -d, --definition string      Provide a YAML definition of API
   -f, --force                  Force create project
   -h, --help                   help for init
-      --initial-state string   Provide the initial state of the API; Valid states: [PUBLISHED]
+      --initial-state string   Provide the initial state of the API; Valid states: [CREATED PUBLISHED]
       --oas string             Provide an OpenAPI specification file for the API
 ```
 
