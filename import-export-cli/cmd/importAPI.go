@@ -788,16 +788,22 @@ func ImportAPI(credential credentials.Credential, importPath, apiImportExportEnd
 		apiFilePath = tmp.Name()
 	}
 
-	apiID := ""
 	updateAPI := false
+	apiID := ""
 	if importAPIUpdate {
 		accessOAuthToken, err := credentials.GetOAuthAccessToken(credential, importEnvironment)
 		if err != nil {
 			return err
 		}
 
+		providerName := apiInfo.ID.ProviderName
+
+		if !importAPICmdPreserveProvider {
+			providerName = credential.Username
+		}
+
 		// check for API existence
-		id, err := getApiID(apiInfo.ID.APIName, apiInfo.ID.Version, apiInfo.ID.ProviderName, importEnvironment, accessOAuthToken)
+		id, err := getApiID(apiInfo.ID.APIName, apiInfo.ID.Version, providerName , importEnvironment, accessOAuthToken)
 		if err != nil {
 			return err
 		}
