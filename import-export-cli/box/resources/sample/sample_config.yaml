@@ -1,18 +1,20 @@
 config:
   export_directory: /home/wso2user/.wso2apictl/exported
   http_request_timeout: 10000
+  kubernetes_mode: false
+  token_type: JWT
 environments:
   sample-env1:
-    admin_endpoint: "https://localhost:9443/api/am/admin/v0.16"
-    api_list_endpoint: "https://localhost/publisher/apis"
-    api_manager_endpoint: "https://localhost/apim"
-    application_list_endpoint: "https://localhost:9443/api/am/admin/v0.16/applications"
-    registration_endpoint: "https://localhost/register"
-    token_endpoint: "https://localhost/token"
+    admin_endpoint: https://localhost:9443/api/am/admin/v0.16
+    api_list_endpoint: https://localhost:9443/api/am/publisher/v0.16/apis
+    api_manager_endpoint: https://localhost:9443
+    application_list_endpoint: https://localhost:9443/api/am/store/v0.16/applications
+    registration_endpoint: https://localhost:9443/client-registration/v0.16/register
+    token_endpoint: https://localhost:8243/token
   sample-env2:
-    admin_endpoint: ""
-    api_list_endpoint: ""
-    api_manager_endpoint: "https://localhost/apim"
-    application_list_endpoint: ""
-    registration_endpoint: "https://localhost/register"
-    token_endpoint: "https://localhost/token"
+    admin_endpoint:
+    api_list_endpoint:
+    api_manager_endpoint: https://wso2am:9443
+    application_list_endpoint:
+    registration_endpoint: https://wso2am:9443/client-registration/v0.16/register
+    token_endpoint: https://wso2am:8243/token
