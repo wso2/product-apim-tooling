@@ -75,7 +75,7 @@ func getKeys() {
 	if err != nil {
 		utils.HandleErrorAndExit("Internal error occurred", err)
 	}
-	utils.Logln(utils.LogPrefixInfo + "Generated accesstoken to call the store rest APIs.")
+	utils.Logln(utils.LogPrefixInfo + "Generated a token to access the DevPortal REST APIs.")
 	//retrieving subscription tiers
 	tiers, err := getAvailableAPITiers(accessToken)
 
@@ -84,7 +84,7 @@ func getKeys() {
 		//Needs an available subscription tier when creating application
 		throttlingTier = tiers[0]
 	} else {
-		utils.HandleErrorAndExit("Please check the API details and try again.", err)
+		utils.HandleErrorAndExit("Internal error occurred", err)
 	}
 	//search if the default cli application already exists
 	appId, err := searchApplication(utils.DefaultCliApp, accessToken)
@@ -94,7 +94,7 @@ func getKeys() {
 	utils.Logln(utils.LogPrefixInfo + "Searched if application exists.")
 	//if the application exists
 	if appId != "" {
-		utils.Logln(utils.LogPrefixInfo + "Application already exists")
+		utils.Logln(utils.LogPrefixInfo + "CLI application already exists")
 		//Search the if the given API is present
 		subId, err := subscribe(appId, accessToken)
 		//If subscrition fails
@@ -126,44 +126,47 @@ func getKeys() {
 				updatedApp, updateError := updateApplicationDetails(appId, string(body), accessToken)
 
 				if updatedApp != nil && updateError == nil {
-					utils.Logln(utils.LogPrefixInfo + "Updated application successfully")
+					utils.Logln(utils.LogPrefixInfo + "Updated CLI application successfully")
 				} else if updateError != nil {
-					fmt.Println("Error while updating the application. : ", updateError)
+					utils.HandleErrorAndExit("Error while updating the CLI application. : ", updateError)
 				}
 			}
 			//retrieve keys of application to see if there are already generated keys
 			appKeys, keysErr := getApplicationKeys(appId, accessToken)
 			if keysErr != nil {
-				utils.HandleErrorAndExit("Error occurred while getting application keys.", keysErr)
+				utils.HandleErrorAndExit("Error occurred while getting CLI application keys.", keysErr)
 			}
 
 			//if keys have been already generated before, then update the consumer key and secret
 			if appKeys.Count != 0 {
 				keygenResponse, keyGenErr := regenerateConsumerSecret(appId, "PRODUCTION", accessToken)
 				if keyGenErr != nil {
-					fmt.Println("Error occurred while regenerating the keys for the app ", appId)
+					utils.HandleErrorAndExit("Error occurred while regenerating keys for the CLI app: " + appId,
+						keyGenErr)
 				} else {
 					appKeys.List[0].ConsumerSecret = keygenResponse.ConsumerSecret
-					utils.Logln(utils.LogPrefixInfo + "Regenerated application keys successfully")
+					utils.Logln(utils.LogPrefixInfo + "Regenerated CLI application keys successfully")
 				}
 
 				//If the keys have not been generated and the application is updated
 				token, err := getNewToken(&appKeys.List[0], scopes)
 				if accessToken != "" {
-					fmt.Println("Access Token: ", token)
+					// Access Token generated successfully.
+					fmt.Println(token)
 				} else {
-					fmt.Println("Error while generating token: ", err)
+					utils.HandleErrorAndExit("Error while generating token: ", err)
 				}
 			} else {
 				//If the application is already created but the keys have not generated in the first time
 				keygenResponse, err := generateApplicationKeys(appId, accessToken)
 				if keygenResponse == nil && err != nil {
-					utils.HandleErrorAndExit("Error occurred while generating application keys.", err)
+					utils.HandleErrorAndExit("Error occurred while generating CLI application keys.", err)
 				}
-				fmt.Println("Access Token: ", keygenResponse.Token.AccessToken)
+				// Access Token generated successfully.
+				fmt.Println(keygenResponse.Token.AccessToken)
 			}
 		} else {
-			fmt.Println("Error while retrieving the application:", err)
+			utils.HandleErrorAndExit("Error while retrieving the CLI application:", err)
 		}
 	} else {
 		//If the default cli appId does not exist in the environment
@@ -171,10 +174,10 @@ func getKeys() {
 		createdAppId, appName, err := createApplication(accessToken)
 		appId = createdAppId
 		if createdAppId != "" || appName != "" {
-			utils.Logln(utils.LogPrefixInfo + "Created application: ", appName)
+			utils.Logln(utils.LogPrefixInfo + "Created CLI application: ", appName)
 		} else {
 			//if error occurred while creating the application, then
-			utils.HandleErrorAndExit("Error while creating the application:", err)
+			utils.HandleErrorAndExit("Error while creating the CLI application:", err)
 		}
 		//Search the if the given API is present
 		subId, err := subscribe(appId, accessToken)
@@ -190,16 +193,17 @@ func getKeys() {
 		//Generate the tokens
 		keygenResponse, err:= generateApplicationKeys(appId, accessToken)
 		if err != nil {
-			utils.HandleErrorAndExit("Error while generating application keys", err)
+			utils.HandleErrorAndExit("Error while generating CLI application keys", err)
 		}
 		appKey := &utils.ApplicationKey{}
 		appKey.ConsumerKey = keygenResponse.ConsumerKey;
 		appKey.ConsumerSecret = keygenResponse.ConsumerSecret;
 		token, err := getNewToken(appKey, scopes)
 		if token != ""  {
-			fmt.Println("Access Token: ", token)
+			// Access Token generated successfully.
+			fmt.Println(token)
 		} else {
-			fmt.Println("Error while generating token: ", err)
+			utils.HandleErrorAndExit("Error while generating token: ", err)
 		}
 	}
 }
@@ -259,7 +263,7 @@ func callDCREndpoint(credential credentials.Credential) (string, string, error) 
 		utils.Logf("Body: %s\n", resp.Body())
 		if resp.StatusCode() == http.StatusUnauthorized {
 			// 401 Unauthorized
-			return "", "", fmt.Errorf("invalid username/password combination")
+			return "", "", fmt.Errorf("authorization failed during CLI client registration process")
 		}
 		return "", "", errors.New("Request didn't respond 200 OK for DCR request. Status: " + resp.Status())
 	}
@@ -288,7 +292,7 @@ func generateAccessToken(credential credentials.Credential) (string, error) {
 	resp, err := utils.InvokePOSTRequest(tokenEndpoint, headers, body)
 	//If the response is erroneous
 	if err != nil {
-		utils.HandleErrorAndExit("Unable to connect to "+tokenEndpoint, err)
+		utils.HandleErrorAndExit("Unable to connect to " + tokenEndpoint, err)
 	}
 	//Logging the response
 	utils.Logln(utils.LogPrefixInfo+"Response:", resp.Status())
@@ -297,7 +301,7 @@ func generateAccessToken(credential credentials.Credential) (string, error) {
 		keygenResponse := &utils.TokenResponse{}
 		unmarshalError := json.Unmarshal([]byte(resp.Body()), &keygenResponse)
 		if unmarshalError != nil {
-			utils.HandleErrorAndExit(utils.LogPrefixError+"invalid JSON response", unmarshalError)
+			utils.HandleErrorAndExit(utils.LogPrefixError + "invalid JSON response", unmarshalError)
 		}
 		return keygenResponse.AccessToken, err
 	} else {
@@ -331,7 +335,8 @@ func regenerateConsumerSecret(appId string, keyType string, accessToken string) 
 		utils.Logf("Body: %s\n", resp.Body())
 		if resp.StatusCode() == http.StatusUnauthorized {
 			// 401 Unauthorized
-			return nil, fmt.Errorf("invalid username/password combination")
+			return nil, fmt.Errorf("authorization failed during consumer key regeneration of " +
+				"CLI application: " + appId)
 		}
 		return nil, errors.New("Request didn't respond 200 OK for regenerating the consumer secret. " +
 			"Status: " + resp.Status())
@@ -366,7 +371,7 @@ func searchApplication(appName string, accessToken string) (string, error) {
 		utils.Logf("Body: %s\n", resp.Body())
 		if resp.StatusCode() == http.StatusUnauthorized {
 			// 401 Unauthorized
-			return "", fmt.Errorf("invalid username/password combination")
+			return "", fmt.Errorf("authorization failed while seaching CLI application: " + appName)
 		}
 		return "", errors.New("Request didn't respond 200 OK for searching existing applications. " +
 			"Status: " + resp.Status())
@@ -411,7 +416,7 @@ func searchApi(accessToken string) (string, error) {
 		utils.Logf("Body: %s\n", resp.Body())
 		if resp.StatusCode() == http.StatusUnauthorized {
 			// 401 Unauthorized
-			return "", fmt.Errorf("invalid username/password combination")
+			return "", fmt.Errorf("authorization failed while searching API: " + apiName)
 		}
 		return "", errors.New("Request didn't respond 200 OK for searching APIs. Status: " + resp.Status())
 	}
@@ -425,12 +430,12 @@ func subscribe(appId string, accessToken string) (string, error) {
 	apiId, err := searchApi(accessToken)
 	if apiId != "" && err == nil {
 		//If the API is present, subscribe that API to the application
-		fmt.Println("API name: ", apiName, "& version: ", apiVersion, "exists")
+		utils.Logln(utils.LogPrefixInfo + "API name: ", apiName, "& version: ", apiVersion, "exists")
 		subId, err := subscribeApi(apiId, appId, accessToken)
 		if subId != "" {
-			fmt.Println("API ", apiName, ":", apiVersion, "subscribed successfully.")
+			utils.Logln(utils.LogPrefixInfo +"API ", apiName, ":", apiVersion, "subscribed successfully.")
 		} else {
-			fmt.Println("Error while subscribing to the application:", err)
+			utils.HandleErrorAndExit("Error while subscribing the CLI application to the API: " + appId, err)
 		}
 		return subId, err
 	} else {
@@ -458,7 +463,7 @@ func getApi(apiId string, accessToken string) (*utils.APIData, error) {
 		utils.Logf("Body: %s\n", resp.Body())
 		if resp.StatusCode() == http.StatusUnauthorized {
 			// 401 Unauthorized
-			return nil, fmt.Errorf("invalid username/password combination")
+			return nil, fmt.Errorf("authorization failed while trying to retrieve the details of API: " + apiId)
 		}
 		return nil, errors.New("Request didn't respond 200 OK for retrieving API details. Status: " + resp.Status())
 	}
@@ -519,7 +524,7 @@ func subscribeApi(apiId string, appId string, accessToken string) (string, error
 			utils.Logf("Body: %s\n", resp.Body())
 			if resp.StatusCode() == http.StatusUnauthorized {
 				// 401 Unauthorized
-				return "", fmt.Errorf("invalid username/password combination")
+				return "", fmt.Errorf("authorization failed while trying to subscribe to the API: " + apiId)
 			}
 			return "", errors.New("Request didn't respond 200 OK for subscribing to the API. Status: " + resp.Status())
 		}
@@ -527,7 +532,8 @@ func subscribeApi(apiId string, appId string, accessToken string) (string, error
 		utils.Logf("Error: %s\n", subResp.Error())
 		utils.Logf("Body: %s\n", subResp.Body())
 		if subResp.StatusCode() == http.StatusUnauthorized {
-			return "", fmt.Errorf("invalid username/password combination")
+			return "", fmt.Errorf("authorization failed while trying to check existing subscriptions of API: " +
+				apiId)
 		}
 		return "", errors.New("Request didn't respond 200 OK: " + subResp.Status())
 	}
@@ -556,7 +562,8 @@ func getApplicationDetails(appId string, accessToken string) (*utils.AppDetails,
 		utils.Logf("Body: %s\n", resp.Body())
 		if resp.StatusCode() == http.StatusUnauthorized {
 			// 401 Unauthorized
-			return nil, fmt.Errorf("invalid username/password combination")
+			return nil, fmt.Errorf("authorization failed while trying to retrieve the details of application: " +
+				appId)
 		}
 		return nil, errors.New("Request didn't respond 200 OK for retrieving application details. " +
 			"Status: " + resp.Status())
@@ -587,7 +594,8 @@ func getApplicationKeys(appId string, accessToken string) (*utils.AppKeyList, er
 		utils.Logf("Body: %s\n", resp.Body())
 		if resp.StatusCode() == http.StatusUnauthorized {
 			// 401 Unauthorized
-			return nil, fmt.Errorf("invalid username/password combination")
+			return nil, fmt.Errorf("authorization failed while trying to retrieve the existing keys of application: " +
+				appId)
 		}
 		return nil, errors.New("Request didn't respond 200 OK for retrieving App key information. " +
 			"Status: " + resp.Status())
@@ -619,9 +627,9 @@ func updateApplicationDetails(appId string, body string, accessToken string) (*u
 		utils.Logf("Body: %s\n", resp.Body())
 		if resp.StatusCode() == http.StatusUnauthorized {
 			// 401 Unauthorized
-			return nil, fmt.Errorf("invalid username/password combination")
+			return nil, fmt.Errorf("authorization failed while trying to update the CLI application: " + appId)
 		}
-		return nil, errors.New("Request didn't respond 200 OK for updating application. Status: " + resp.Status())
+		return nil, errors.New("Request didn't respond 200 OK for updating CLI application. Status: " + resp.Status())
 	}
 }
 
@@ -660,7 +668,7 @@ func createApplication(accessToken string) (string, string, error) {
 		utils.Logf("Body: %s\n", resp.Body())
 		if resp.StatusCode() == http.StatusUnauthorized {
 			// 401 Unauthorized
-			return "", "", fmt.Errorf("invalid username/password combination")
+			return "", "", fmt.Errorf("authorization failed while trying to create the CLI application")
 		}
 		return "", "", errors.New("Request didn't respond 200 OK for application creation. Status: " + resp.Status())
 	}
@@ -698,7 +706,7 @@ func getNewToken(key *utils.ApplicationKey, scopes []string) (string, error) {
 		utils.Logf("Body: %s\n", resp.Body())
 		if resp.StatusCode() == http.StatusUnauthorized {
 			// 401 Unauthorized
-			return "", fmt.Errorf("invalid username/password combination")
+			return "", fmt.Errorf("authorization failed while generating a token for the CLI application")
 		}
 		return "", errors.New("Request didn't respond 200 OK for generating a new token. Status: " + resp.Status())
 	}
@@ -760,7 +768,7 @@ func generateApplicationKeys(appId string, token string) (*utils.KeygenResponse,
 		utils.Logf("Body: %s\n", resp.Body())
 		if resp.StatusCode() == http.StatusUnauthorized {
 			// 401 Unauthorized
-			return nil, fmt.Errorf("invalid username/password combination")
+			return nil, fmt.Errorf("authorization failed while generating keys of the CLI application: " + appId)
 		}
 		return nil, errors.New("Request didn't respond 200 OK for application key generation. Status: " + resp.Status())
 	}

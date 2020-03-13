@@ -105,7 +105,7 @@ func exportAPIs() {
 	} else {
 		var counterSuceededAPIs = 0
 		for count > 0 {
-			utils.Logln("Found ", count, "of APIs to be exported in the iteration beginning with the offset #"+
+			utils.Logln(utils.LogPrefixInfo + "Found ", count, "of APIs to be exported in the iteration beginning with the offset #"+
 				strconv.Itoa(apiListOffset)+". Maximum limit of APIs exported in single iteration is "+
 				strconv.Itoa(utils.MaxAPIsToExportOnce))
 			accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, cmdExportEnvironment)
@@ -146,7 +146,7 @@ func exportAPIs() {
 					exportRelatedFilesPath, apiListOffset)
 			}
 		}
-		fmt.Println("\nTotal number of APIs exported : " + cast.ToString(counterSuceededAPIs))
+		fmt.Println("\nTotal number of APIs exported: " + cast.ToString(counterSuceededAPIs))
 		fmt.Println("API export path: " + apiExportDir)
 		fmt.Println("\nCommand: export-apis execution completed !")
 	}
