@@ -65,8 +65,8 @@ var DockerHubRegistry = &Registry{
 		dockerHubValues.password = "" // clear password
 	},
 	Flags: Flags{
-		RequiredFlags: &[]string{k8sUtils.FlagBmRepository, k8sUtils.FlagBmUsername},
-		OptionalFlags: &[]string{k8sUtils.FlagBmPassword},
+		RequiredFlags: &map[string]bool{k8sUtils.FlagBmRepository: true, k8sUtils.FlagBmUsername: true},
+		OptionalFlags: &map[string]bool{k8sUtils.FlagBmPassword: true},
 	},
 }
 

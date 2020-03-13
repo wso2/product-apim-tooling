@@ -39,8 +39,8 @@ type Registry struct {
 }
 
 type Flags struct {
-	RequiredFlags *[]string
-	OptionalFlags *[]string
+	RequiredFlags *map[string]bool
+	OptionalFlags *map[string]bool
 }
 
 // registries represents a map of registries
@@ -98,21 +98,18 @@ func SetRegistry(registryType string) {
 
 // ValidateFlags validates if any additional flag is given or any required flag is missing
 // throw error if invalid
-func ValidateFlags(flags *[]string) {
+func ValidateFlags(flags *map[string]bool) {
 	// check for required flags
-	for _, flag := range *registries[optionToExec].Flags.RequiredFlags {
-		if !k8sUtils.StringArrayContains(*flags, flag) {
+	for flag, flagPresent := range *registries[optionToExec].Flags.RequiredFlags {
+		if flagPresent && !(*flags)[flag] {
 			// required flag is missing
 			utils.HandleErrorAndExit("Required flag is missing in un-interactive mode. Flag: "+flag, nil)
 		}
 	}
 
 	// check for additional flags
-	for _, flag := range *flags {
-		if !k8sUtils.StringArrayContains(append(
-			*registries[optionToExec].Flags.RequiredFlags,
-			*registries[optionToExec].Flags.OptionalFlags...,
-		), flag) {
+	for flag, flagPresent := range *flags {
+		if flagPresent && !(*registries[optionToExec].Flags.RequiredFlags)[flag] && !(*registries[optionToExec].Flags.OptionalFlags)[flag] {
 			// additional, not supported flag
 			utils.HandleErrorAndExit("Additional not supported flag found in un-interactive mode. Flag: "+flag, nil)
 		}

@@ -119,21 +119,13 @@ var installApiOperatorCmd = &cobra.Command{
 }
 
 // getGivenFlagsNames returns flags that user given in the batch mode except the "registry type"
-func getGivenFlagsNames() *[]string {
-	var flags []string
+func getGivenFlagsNames() *map[string]bool {
+	flags := make(map[string]bool)
 
-	if flagBmRepository != "" {
-		flags = append(flags, k8sUtils.FlagBmRepository)
-	}
-	if flagBmUsername != "" {
-		flags = append(flags, k8sUtils.FlagBmUsername)
-	}
-	if flagBmPassword != "" {
-		flags = append(flags, k8sUtils.FlagBmPassword)
-	}
-	if flagBmKeyFile != "" {
-		flags = append(flags, k8sUtils.FlagBmKeyFile)
-	}
+	flags[k8sUtils.FlagBmRepository] = flagBmRepository != ""
+	flags[k8sUtils.FlagBmUsername] = flagBmUsername != ""
+	flags[k8sUtils.FlagBmPassword] = flagBmPassword != ""
+	flags[k8sUtils.FlagBmKeyFile] = flagBmKeyFile != ""
 
 	return &flags
 }
