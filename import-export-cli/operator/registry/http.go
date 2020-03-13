@@ -51,6 +51,10 @@ var HttpRegistry = &Registry{
 		k8sUtils.K8sCreateSecretFromInputs(k8sUtils.ConfigJsonVolume, getRegistryUrl(httpValues.repository), httpValues.username, httpValues.password)
 		httpValues.password = "" // clear password
 	},
+	Flags: Flags{
+		RequiredFlags: &map[string]bool{k8sUtils.FlagBmRepository: true, k8sUtils.FlagBmUsername: true},
+		OptionalFlags: &map[string]bool{k8sUtils.FlagBmPassword: true},
+	},
 }
 
 // readHttpRepInputs reads http private registry URL, username and password from the user

@@ -152,6 +152,7 @@ func updateCtrlConfig(registryType string, repository string) {
 }
 
 // add adds a registry to the registries maps
+// using pointers for memory optimization
 func add(registry *Registry) {
 	if registry.Option < 1 {
 		utils.HandleErrorAndExit("Error adding registry: "+registry.Name, errors.New("'option' should be positive"))

@@ -32,6 +32,10 @@ var AmazonEcrRegistry = &Registry{
 		createAmazonEcrConfig()
 		k8sUtils.K8sCreateSecretFromFile(k8sUtils.AwsCredentialsVolume, amazonEcrValues.credFile, "credentials")
 	},
+	Flags: Flags{
+		RequiredFlags: &map[string]bool{k8sUtils.FlagBmRepository: true, k8sUtils.FlagBmKeyFile: true},
+		OptionalFlags: &map[string]bool{},
+	},
 }
 
 // readAmazonEcrInputs reads file path for amazon credential file

@@ -55,6 +55,10 @@ var GcrRegistry = &Registry{
 		k8sUtils.K8sCreateSecretFromFile(k8sUtils.GcrSvcAccKeyVolume, gcrValues.svcAccKeyFile, k8sUtils.GcrSvcAccKeyFile)
 		k8sUtils.K8sCreateSecretFromInputs(k8sUtils.ConfigJsonVolume, "gcr.io", "_json_key", string(data))
 	},
+	Flags: Flags{
+		RequiredFlags: &map[string]bool{k8sUtils.FlagBmKeyFile: true},
+		OptionalFlags: &map[string]bool{},
+	},
 }
 
 // readGcrInputs reads the GCR service account key json file from user
