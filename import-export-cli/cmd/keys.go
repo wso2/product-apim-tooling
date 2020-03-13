@@ -371,7 +371,7 @@ func searchApplication(appName string, accessToken string) (string, error) {
 		utils.Logf("Body: %s\n", resp.Body())
 		if resp.StatusCode() == http.StatusUnauthorized {
 			// 401 Unauthorized
-			return "", fmt.Errorf("authorization failed while seaching CLI application: " + appName)
+			return "", fmt.Errorf("authorization failed while searching CLI application: " + appName)
 		}
 		return "", errors.New("Request didn't respond 200 OK for searching existing applications. " +
 			"Status: " + resp.Status())
