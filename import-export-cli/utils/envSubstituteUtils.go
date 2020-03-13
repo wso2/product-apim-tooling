@@ -30,7 +30,7 @@ func EnvSubstitute(content string) (string, error) {
 	matches := re.FindAllStringSubmatch(content, -1) // matches is [][]string
 
 	for _, match := range matches {
-		Logln("Looking for:", match[0])
+		Logln(LogPrefixInfo + "Looking for:", match[0])
 		if os.Getenv(match[1]) == "" {
 			missingEnvKeys = true
 			errorResults = multierror.Append(errorResults, &ErrRequiredEnvKeyMissing{Key: match[0]})

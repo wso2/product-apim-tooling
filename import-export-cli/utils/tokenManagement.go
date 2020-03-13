@@ -215,7 +215,7 @@ func ExecutePreCommandWithOAuth(environment, flagUsername, flagPassword, mainCon
 			clientID, clientSecret, err = GetClientIDSecret(username, password, registrationEndpoint)
 
 			if err != nil {
-				fmt.Println("Error:", err)
+				HandleErrorAndExit("Error:", err)
 			}
 
 			// Persist clientID, clientSecret, Username in file
@@ -228,8 +228,6 @@ func ExecutePreCommandWithOAuth(environment, flagUsername, flagPassword, mainCon
 		responseDataMap, _ := GetOAuthTokens(username, password,
 			GetBase64EncodedCredentials(clientID, clientSecret), tokenEndpoint)
 		accessToken := responseDataMap["access_token"]
-
-		//Logln(LogPrefixInfo+"[Remove in Production] AccessToken:", accessToken) // TODO:: Remove in production
 
 		return accessToken, nil
 	} else {
@@ -289,7 +287,8 @@ func GetClientIDSecret(username, password, url string) (clientID string, clientS
 		Logf("Body: %s\n", resp.Body())
 		if resp.StatusCode() == http.StatusUnauthorized {
 			// 401 Unauthorized
-			return "", "", fmt.Errorf("invalid username/password combination")
+			return "", "",
+				fmt.Errorf("authorization failed during CLI client registration process")
 		}
 		return "", "", errors.New("Request didn't respond 200 OK: " + resp.Status())
 	}
