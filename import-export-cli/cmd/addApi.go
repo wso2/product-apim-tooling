@@ -24,7 +24,6 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
 	wso2v1alpha1 "github.com/wso2/k8s-apim-operator/apim-operator/pkg/apis/wso2/v1alpha1"
-	//wso2v1alpha1 "github.com/Shehanir/k8s-apim-operator/apim-operator/pkg/apis/wso2/v1alpha1"
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
 	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
