@@ -54,7 +54,7 @@ Some of the default configurations for WSO2 API Manager and default scenario are
 
 1. Add your jmeter path in the `<TOOL_HOME>/config/user-settings.yaml` file under `path_variables`.
 
-2. Enter correct API Manager version (please state as `2.6` or `3.0`), endpoints, protocol type, host ip and ports of WSO2 API Manager in the `<TOOL_HOME>/config/apim.yaml` file (Default ports and details can be found at https://docs.wso2.com/display/AM260/Default+Product+Ports).
+2. Enter correct API Manager version (please state as `2.6`, `3.0`, etc), endpoints, protocol type, host ip and ports of WSO2 API Manager in the `<TOOL_HOME>/config/apim.yaml` file (Default ports and details can be found at https://docs.wso2.com/display/AM260/Default+Product+Ports).
 
    ```
    Default Endpoints for WSO2 API Manager 2.6.0
@@ -74,6 +74,16 @@ Some of the default configurations for WSO2 API Manager and default scenario are
    publisher_api: /api/am/publisher/v0.15/apis
    store_application: /api/am/store/v0.15/applications
    store_subscription: /api/am/store/v0.15/subscriptions
+   user_signup: /api/identity/user/v1.0/me
+   delete_user: /services/RemoteUserStoreManagerService.RemoteUserStoreManagerServiceHttpsSoap11Endpoint
+   
+   Default Endpoints for WSO2 API Manager 3.1.0
+   
+   token_registration_endpoint: /client-registration/v0.16/register
+   token_endpoint: /token
+   publisher_api: /api/am/publisher/v0.16/apis
+   store_application: /api/am/store/v0.16/applications
+   store_subscription: /api/am/store/v0.16/subscriptions
    user_signup: /api/identity/user/v1.0/me
    delete_user: /services/RemoteUserStoreManagerService.RemoteUserStoreManagerServiceHttpsSoap11Endpoint
 
