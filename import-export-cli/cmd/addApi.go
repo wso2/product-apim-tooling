@@ -56,8 +56,8 @@ const addCmdExamples = utils.ProjectName + " " + addCmdLiteral + " " + apiCmdLit
 ` + utils.ProjectName + " " + addCmdLiteral + " " + apiCmdLiteral + " " + `-n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi --replicas=1 --namespace=wso2 --override=true`
 
 var balInterceptorsConfName string
-var javainterceptors []string
-var balinterceptors string
+var javaInterceptors []string
+var balInterceptors string
 
 // addCmd represents the add command
 var addCmd = &cobra.Command{
@@ -100,8 +100,8 @@ var addApiCmd = &cobra.Command{
 					}
 					//handle interceptors
 					balInterceptorsConfName = flagApiName + "-interceptors"
-					balinterceptors = handleBalInterceptors(balInterceptorsConfName, flagSwaggerFilePath, "create", flagNamespace)
-					javainterceptors = handleJavaInterceptors(flagSwaggerFilePath, "create", flagNamespace, flagApiName)
+					balInterceptors = handleBalInterceptors(balInterceptorsConfName, flagSwaggerFilePath, "create", flagNamespace)
+					javaInterceptors = handleJavaInterceptors(flagSwaggerFilePath, "create", flagNamespace, flagApiName)
 				//check if the swagger path is a file
 				case mode.IsRegular():
 					//creating kubernetes configmap with swagger definition
@@ -112,7 +112,7 @@ var addApiCmd = &cobra.Command{
 					}
 				}
 				//create API
-				createAPI(flagApiName, flagNamespace, configMapName, flagReplicas, "", balinterceptors, flagOverride, javainterceptors)
+				createAPI(flagApiName, flagNamespace, configMapName, flagReplicas, "", balInterceptors, flagOverride, javaInterceptors)
 			}
 		} else {
 			utils.HandleErrorAndExit("set mode to kubernetes with command: apictl set --mode kubernetes",
@@ -144,7 +144,7 @@ func createConfigMapWithNamespace(configMapName string, filePath string, namespa
 	return nil
 }
 
-func createAPI(name string, namespace string, configMapName string, replicas int, timestamp string, balInterceptors string, override bool, javainterceptors []string) {
+func createAPI(name string, namespace string, configMapName string, replicas int, timestamp string, balInterceptors string, override bool, javaInterceptors []string) {
 	//get API definition from file
 	apiConfigMapData, _ := box.Get("/kubernetes_resources/api_cr.yaml")
 	apiConfigMap := &wso2v1alpha1.API{}
@@ -166,9 +166,9 @@ func createAPI(name string, namespace string, configMapName string, replicas int
 		// set bal interceptors configmap name in API cr
 		apiConfigMap.Spec.Definition.Interceptors.Ballerina = balInterceptors
 	}
-	if len(javainterceptors) > 0 {
+	if len(javaInterceptors) > 0 {
 		//set java interceptors configmaps names in API cr
-		apiConfigMap.Spec.Definition.Interceptors.Java = javainterceptors
+		apiConfigMap.Spec.Definition.Interceptors.Java = javaInterceptors
 	}
 	byteVal, errMarshal := yaml.Marshal(apiConfigMap)
 	if errMarshal != nil {
