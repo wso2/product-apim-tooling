@@ -90,14 +90,15 @@ var installApiOperatorCmd = &cobra.Command{
 			// run api-operator installation in interactive mode
 			// read inputs for docker registry
 			registry.ChooseRegistryInteractive()
-			registry.ReadInputs()
+			registry.ReadInputsInteractive()
 		} else {
 			// run api-operator installation in batch mode
+			// set registry type
 			registry.SetRegistry(flagBmRegistryType)
 
-			// validate flags
-			flagsGiven := getGivenFlagsNames()
-			registry.ValidateFlags(flagsGiven)
+			flagsValues := getGivenFlagsValues()
+			registry.ValidateFlags(flagsValues)       // validate flags with respect to registry type
+			registry.ReadInputsFromFlags(flagsValues) // read values from flags with respect to registry type
 		}
 
 		if !isLocalInstallation {
@@ -118,14 +119,13 @@ var installApiOperatorCmd = &cobra.Command{
 	},
 }
 
-// getGivenFlagsNames returns flags that user given in the batch mode except the "registry type"
-func getGivenFlagsNames() *map[string]bool {
-	flags := make(map[string]bool)
-
-	flags[k8sUtils.FlagBmRepository] = flagBmRepository != ""
-	flags[k8sUtils.FlagBmUsername] = flagBmUsername != ""
-	flags[k8sUtils.FlagBmPassword] = flagBmPassword != ""
-	flags[k8sUtils.FlagBmKeyFile] = flagBmKeyFile != ""
+// getGivenFlagsValues returns flags that user given in the batch mode except the "registry type"
+func getGivenFlagsValues() *map[string]registry.FlagValue {
+	flags := make(map[string]registry.FlagValue)
+	flags[k8sUtils.FlagBmRepository] = registry.FlagValue{Value: flagBmRepository, IsProvided: flagBmRepository != ""}
+	flags[k8sUtils.FlagBmUsername] = registry.FlagValue{Value: flagBmUsername, IsProvided: flagBmUsername != ""}
+	flags[k8sUtils.FlagBmPassword] = registry.FlagValue{Value: flagBmPassword, IsProvided: flagBmPassword != ""}
+	flags[k8sUtils.FlagBmKeyFile] = registry.FlagValue{Value: flagBmKeyFile, IsProvided: flagBmKeyFile != ""}
 
 	return &flags
 }
