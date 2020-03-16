@@ -42,6 +42,8 @@ const updateCmdExamples = utils.ProjectName + " " + updateCmdLiteral + " " + add
 ` + utils.ProjectName + " " + updateCmdLiteral + " " + addApiCmdLiteral + " " + `-n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi --replicas=1 --namespace=wso2`
 
 var updatedInterceptorConfName string
+var updatedJavaInterceptors []string
+var updatedBalInterceptors string
 
 // updateCmd represents the update command
 var updateCmd = &cobra.Command{
@@ -87,7 +89,8 @@ var updateApiCmd = &cobra.Command{
 					}
 					//handle interceptors
 					updatedInterceptorConfName = updateflagApiName + "-interceptors-up-" + timestamp
-					handleInterceptors(updatedInterceptorConfName, updateflagSwaggerFilePath, "create", updateflagNamespace)
+					updatedBalInterceptors = handleBalInterceptors(updatedInterceptorConfName, updateflagSwaggerFilePath, "create", updateflagNamespace)
+					updatedJavaInterceptors = handleJavaInterceptors(updateflagSwaggerFilePath, "create", updateflagNamespace, updateflagApiName)
 
 				case mode.IsRegular():
 					//creating kubernetes configmap with swagger definition
@@ -99,7 +102,7 @@ var updateApiCmd = &cobra.Command{
 				}
 				//update the API
 				fmt.Println("updating the API Kind")
-				createAPI(updateflagApiName, updateflagNamespace, updateConfigMapName, updateflagReplicas, timestamp, updatedInterceptorConfName, false)
+				createAPI(updateflagApiName, updateflagNamespace, updateConfigMapName, updateflagReplicas, timestamp, updatedBalInterceptors, false, updatedJavaInterceptors)
 			}
 		} else {
 			utils.HandleErrorAndExit("set mode to kubernetes with command: apictl set --mode kubernetes",

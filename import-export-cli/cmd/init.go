@@ -66,6 +66,7 @@ var dirs = []string{
 	"Sequences/in-sequence",
 	"Sequences/out-sequence",
 	"Interceptors",
+	"libs",
 }
 
 // createDirectories will create dirs in current working directory

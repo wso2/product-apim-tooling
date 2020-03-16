@@ -48,7 +48,9 @@ available modes are as follows
 * kubernetes`
 const addApiExamples = utils.ProjectName + " add/update " + addApiCmdLiteral + ` -n petstore --from-file=./Swagger.json --replicas=3 --namespace=wso2`
 
-var interceptorsConfName string
+var balInterceptorsConfName string
+var javaInterceptors []string
+var balInterceptors string
 
 // addApiCmd represents the api command
 var addApiCmd = &cobra.Command{
@@ -82,8 +84,9 @@ var addApiCmd = &cobra.Command{
 						utils.HandleErrorAndExit("Error creating configmap", err)
 					}
 					//handle interceptors
-					interceptorsConfName = flagApiName + "-interceptors"
-					handleInterceptors(interceptorsConfName, flagSwaggerFilePath, "create", flagNamespace)
+					balInterceptorsConfName = flagApiName + "-interceptors"
+					balInterceptors = handleBalInterceptors(balInterceptorsConfName, flagSwaggerFilePath, "create", flagNamespace)
+					javaInterceptors = handleJavaInterceptors(flagSwaggerFilePath, "create", flagNamespace, flagApiName)
 				//check if the swagger path is a file
 				case mode.IsRegular():
 					//creating kubernetes configmap with swagger definition
@@ -94,7 +97,7 @@ var addApiCmd = &cobra.Command{
 					}
 				}
 				//create API
-				createAPI(flagApiName, flagNamespace, configMapName, flagReplicas, "", interceptorsConfName, flagOverride)
+				createAPI(flagApiName, flagNamespace, configMapName, flagReplicas, "", balInterceptors, flagOverride, javaInterceptors)
 			}
 		} else {
 			utils.HandleErrorAndExit("set mode to kubernetes with command: apictl set --mode kubernetes",
@@ -126,7 +129,7 @@ func createConfigMapWithNamespace(configMapName string, filePath string, namespa
 	return nil
 }
 
-func createAPI(name string, namespace string, configMapName string, replicas int, timestamp string, interceptorConfName string, override bool) {
+func createAPI(name string, namespace string, configMapName string, replicas int, timestamp string, balInterceptors string, override bool, javaInterceptors []string) {
 	//get API definition from file
 	apiConfigMapData, _ := box.Get("/kubernetes_resources/api_cr.yaml")
 	apiConfigMap := &wso2v1alpha1.API{}
@@ -137,15 +140,20 @@ func createAPI(name string, namespace string, configMapName string, replicas int
 	//assigning values to API cr
 	apiConfigMap.Name = name
 	apiConfigMap.Namespace = namespace
-	apiConfigMap.Spec.Definition.ConfigmapName = configMapName
+	apiConfigMap.Spec.Definition.SwaggerConfigmapName = configMapName
 	apiConfigMap.Spec.Replicas = replicas
 	apiConfigMap.Spec.Override = override
 	if timestamp != "" {
 		//set update timestamp
 		apiConfigMap.Spec.UpdateTimeStamp = timestamp
 	}
-	if interceptorConfName != "" {
-		apiConfigMap.Spec.InterceptorConfName = interceptorConfName
+	if balInterceptors != "" {
+		// set bal interceptors configmap name in API cr
+		apiConfigMap.Spec.Definition.Interceptors.Ballerina = balInterceptors
+	}
+	if len(javaInterceptors) > 0 {
+		//set java interceptors configmaps names in API cr
+		apiConfigMap.Spec.Definition.Interceptors.Java = javaInterceptors
 	}
 	byteVal, errMarshal := yaml.Marshal(apiConfigMap)
 	if errMarshal != nil {
@@ -181,7 +189,7 @@ func createAPI(name string, namespace string, configMapName string, replicas int
 	}
 }
 
-func handleInterceptors(configMapName string, path string, operation string, namespace string) {
+func handleBalInterceptors(configMapName string, path string, operation string, namespace string) string {
 
 	//get interceptors if available
 	interceptorsPath := filepath.Join(path, filepath.FromSlash("Interceptors"))
@@ -189,17 +197,55 @@ func handleInterceptors(configMapName string, path string, operation string, nam
 	file, err := os.Open(interceptorsPath)
 	if err != nil {
 		utils.HandleErrorAndExit("cannot open interceptors Dir", err)
+		return ""
 	}
 	defer file.Close()
 	_, err = file.Readdir(1)
 	if err == nil {
 		//creating kubernetes configmap with interceptors
-		fmt.Println("creating configmap with interceptors")
+		fmt.Println("creating configmap with ballerina interceptors")
 		errConfInt := createConfigMapWithNamespace(configMapName, interceptorsPath, namespace, operation)
 		if errConfInt != nil {
 			utils.HandleErrorAndExit("Error creating configmap for interceptors", err)
 		}
+		return configMapName
 	}
+	return ""
+}
+
+func handleJavaInterceptors(path string, operation string, namespace string, flagApiName string) []string {
+	var interceptors []string
+	var javaInterceptorsConfNames []string
+	//get interceptors if available
+	interceptorsPath := filepath.Join(path, filepath.FromSlash("libs"))
+	//check interceptors dir is not empty
+	file, err := os.Open(interceptorsPath)
+	if err != nil {
+		utils.HandleErrorAndExit("cannot open interceptors Dir", err)
+	}
+	defer file.Close()
+
+	//get all jars in libs dir
+	errReadInterceptors := filepath.Walk(interceptorsPath, func(path string, info os.FileInfo, err error) error {
+		interceptors = append(interceptors, path)
+		return nil
+	})
+	if errReadInterceptors != nil {
+		utils.HandleErrorAndExit("cannot read interceptors in the libs", err)
+	}
+	for _, filePath := range interceptors {
+		if filepath.Ext(filePath) == ".jar" {
+			//creating kubernetes configmap for each java interceptor
+			javaInterceptorsConfNames = append(javaInterceptorsConfNames, flagApiName + "-" + filepath.Base(filePath))
+			fmt.Println("creating configmap with java interceptor " + flagApiName + "-" + filepath.Base(filePath))
+			errConfInt := createConfigMapWithNamespace(flagApiName + "-" + filepath.Base(filePath), filePath, namespace, operation)
+			if errConfInt != nil {
+				utils.HandleErrorAndExit("Error creating configmap for java-interceptor" + flagApiName + "-" + filepath.Base(filePath), err)
+			}
+		}
+
+	}
+	return javaInterceptorsConfNames
 }
 
 func init() {

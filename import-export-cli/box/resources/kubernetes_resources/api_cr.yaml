@@ -4,7 +4,10 @@ metadata:
   name:
 spec:
   definition:
-    configmapName:
+    swaggerconfigmapName:
+    interceptors:
+      ballerina:
+      java:
     type: swagger
   replicas:
   mode: privateJet
