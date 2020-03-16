@@ -19,7 +19,16 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
+
+const addCmdLiteral = "add"
+const addCmdShortDesc = "Add an API to the kubernetes cluster"
+const addCmdLongDesc = `Add an API from a Swagger file to the kubernetes cluster. JSON and YAML formats are accepted.
+To execute kubernetes commands set mode to Kubernetes`
+const addCmdExamples = utils.ProjectName + " " + addCmdLiteral + " " + addApiCmdLiteral + " " + `-n petstore --from-file=./Swagger.json --replicas=1 --namespace=wso2
+
+` + utils.ProjectName + " " + addCmdLiteral + " " + addApiCmdLiteral + " " + `-n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi --replicas=1 --namespace=wso2 --override=true`
 
 // addCmd represents the add command
 var addCmd = &cobra.Command{
@@ -31,14 +40,4 @@ var addCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(addCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// addCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// addCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

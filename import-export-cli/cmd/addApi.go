@@ -47,13 +47,6 @@ const addApiLongDesc = `Add, Update and Delete APIs in kubernetes cluster. JSON 
 available modes are as follows
 * kubernetes`
 const addApiExamples = utils.ProjectName + " add/update " + addApiCmdLiteral + ` -n petstore --from-file=./Swagger.json --replicas=3 --namespace=wso2`
-const addCmdLiteral = "add"
-const addCmdShortDesc = "Add an API to the kubernetes cluster"
-const addCmdLongDesc = `Add an API from a Swagger file to the kubernetes cluster. JSON and YAML formats are accepted.
-To execute kubernetes commands set mode to Kubernetes`
-const addCmdExamples = utils.ProjectName + " " + addCmdLiteral + " " + addApiCmdLiteral + " " + `-n petstore --from-file=./Swagger.json --replicas=1 --namespace=wso2
-
-` + utils.ProjectName + " " + addCmdLiteral + " " + addApiCmdLiteral + " " + `-n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi --replicas=1 --namespace=wso2 --override=true`
 
 var interceptorsConfName string
 
@@ -210,7 +203,6 @@ func handleInterceptors(configMapName string, path string, operation string, nam
 }
 
 func init() {
-	RootCmd.AddCommand(addCmd)
 	addCmd.AddCommand(addApiCmd)
 	addApiCmd.Flags().StringVarP(&flagApiName, "name", "n", "", "Name of the API")
 	addApiCmd.Flags().StringVarP(&flagSwaggerFilePath, "from-file", "f", "", "Path to swagger file")
