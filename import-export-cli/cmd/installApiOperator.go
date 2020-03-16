@@ -42,6 +42,7 @@ var flagBmRegistryType string
 var flagBmRepository string
 var flagBmUsername string
 var flagBmPassword string
+var flagBmPasswordStdin bool
 var flagBmKeyFile string
 
 // installApiOperatorCmd represents the install api-operator command
@@ -125,6 +126,7 @@ func getGivenFlagsValues() *map[string]registry.FlagValue {
 	flags[k8sUtils.FlagBmRepository] = registry.FlagValue{Value: flagBmRepository, IsProvided: flagBmRepository != ""}
 	flags[k8sUtils.FlagBmUsername] = registry.FlagValue{Value: flagBmUsername, IsProvided: flagBmUsername != ""}
 	flags[k8sUtils.FlagBmPassword] = registry.FlagValue{Value: flagBmPassword, IsProvided: flagBmPassword != ""}
+	flags[k8sUtils.FlagBmPasswordStdin] = registry.FlagValue{Value: flagBmPasswordStdin, IsProvided: flagBmPasswordStdin}
 	flags[k8sUtils.FlagBmKeyFile] = registry.FlagValue{Value: flagBmKeyFile, IsProvided: flagBmKeyFile != ""}
 
 	return &flags
@@ -167,5 +169,6 @@ func init() {
 	installApiOperatorCmd.Flags().StringVarP(&flagBmRepository, k8sUtils.FlagBmRepository, "r", "", "Repository name or URI")
 	installApiOperatorCmd.Flags().StringVarP(&flagBmUsername, k8sUtils.FlagBmUsername, "u", "", "Username of the repository")
 	installApiOperatorCmd.Flags().StringVarP(&flagBmPassword, k8sUtils.FlagBmPassword, "p", "", "Password of the given user")
+	installApiOperatorCmd.Flags().BoolVar(&flagBmPasswordStdin, k8sUtils.FlagBmPasswordStdin, false, "Prompt for password of the given user in the stdin")
 	installApiOperatorCmd.Flags().StringVarP(&flagBmKeyFile, k8sUtils.FlagBmKeyFile, "c", "", "Credentials file")
 }

@@ -65,6 +65,15 @@ var HttpRegistry = &Registry{
 			if username != "" && !utils.ValidateValue(username, httpRepoUsernameRegex) {
 				utils.HandleErrorAndExit("Invalid username : "+username, nil)
 			}
+
+			// if "--password-stdin" is supplied get password from stdin
+			if (*flagValues)[k8sUtils.FlagBmPasswordStdin].Value.(bool) {
+				pwStdin, err := utils.ReadPassword("Enter password")
+				if err != nil {
+					utils.HandleErrorAndExit("Error reading password from user", err)
+				}
+				password = pwStdin
+			}
 		}
 
 		*httpRepo = repository
@@ -78,7 +87,7 @@ var HttpRegistry = &Registry{
 	},
 	Flags: Flags{
 		RequiredFlags: &map[string]bool{k8sUtils.FlagBmRepository: true},
-		OptionalFlags: &map[string]bool{k8sUtils.FlagBmUsername: true, k8sUtils.FlagBmPassword: true},
+		OptionalFlags: &map[string]bool{k8sUtils.FlagBmUsername: true, k8sUtils.FlagBmPassword: true, k8sUtils.FlagBmPasswordStdin: true},
 	},
 }
 
