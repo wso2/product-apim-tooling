@@ -25,6 +25,10 @@ import (
 	"strings"
 )
 
+// validation regex
+const httpRepoValidRegex = `^[\w\d\-\.\:]*\/?[\w\d\-]+$`
+const httpRepoUsernameRegex = utils.UsernameValidRegex
+
 var httpRepo = new(string)
 
 var httpValues = struct {
@@ -39,8 +43,38 @@ var HttpRegistry = &Registry{
 	Caption:    "HTTP Private Registry",
 	Repository: httpRepo,
 	Option:     4,
-	Read: func() {
-		repository, username, password := readHttpRepInputs()
+	Read: func(flagValues *map[string]FlagValue) {
+		var repository, username, password string
+
+		// check input mode: interactive or batch
+		if flagValues == nil {
+			// get inputs in interactive mode
+			repository, username, password = readHttpRepInputs()
+		} else {
+			// get inputs in batch mode
+			repository = (*flagValues)[k8sUtils.FlagBmRepository].Value.(string)
+			username = (*flagValues)[k8sUtils.FlagBmUsername].Value.(string)
+			password = (*flagValues)[k8sUtils.FlagBmPassword].Value.(string)
+
+			// validate required inputs
+			if !utils.ValidateValue(repository, httpRepoValidRegex) {
+				utils.HandleErrorAndExit("Invalid repository name: "+repository, nil)
+			}
+
+			// validate optional inputs
+			if username != "" && !utils.ValidateValue(username, httpRepoUsernameRegex) {
+				utils.HandleErrorAndExit("Invalid username : "+username, nil)
+			}
+
+			// if "--password-stdin" is supplied get password from stdin
+			if (*flagValues)[k8sUtils.FlagBmPasswordStdin].Value.(bool) {
+				pwStdin, err := utils.ReadPassword("Enter password")
+				if err != nil {
+					utils.HandleErrorAndExit("Error reading password from user", err)
+				}
+				password = pwStdin
+			}
+		}
 
 		*httpRepo = repository
 		httpValues.repository = repository
@@ -50,6 +84,10 @@ var HttpRegistry = &Registry{
 	Run: func() {
 		k8sUtils.K8sCreateSecretFromInputs(k8sUtils.ConfigJsonVolume, getRegistryUrl(httpValues.repository), httpValues.username, httpValues.password)
 		httpValues.password = "" // clear password
+	},
+	Flags: Flags{
+		RequiredFlags: &map[string]bool{k8sUtils.FlagBmRepository: true},
+		OptionalFlags: &map[string]bool{k8sUtils.FlagBmUsername: true, k8sUtils.FlagBmPassword: true, k8sUtils.FlagBmPasswordStdin: true},
 	},
 }
 
@@ -61,10 +99,8 @@ func readHttpRepInputs() (string, string, string) {
 	password := ""
 	var err error
 
-	const repositoryValidRegex = `^[\w\d\-\.\:]*\/?[\w\d\-]+$`
-
 	for !isConfirm {
-		repository, err = utils.ReadInputString("Enter private registry (10.100.5.225:5000/jennifer)", utils.Default{Value: "", IsDefault: false}, repositoryValidRegex, true)
+		repository, err = utils.ReadInputString("Enter private registry (10.100.5.225:5000/jennifer)", utils.Default{Value: "", IsDefault: false}, httpRepoValidRegex, true)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading DockerHub repository name from user", err)
 		}

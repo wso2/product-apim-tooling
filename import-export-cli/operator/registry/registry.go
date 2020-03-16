@@ -29,12 +29,25 @@ import (
 
 // Registry represents Docker Registry
 type Registry struct {
-	Name       string  // Unique Name
-	Caption    string  // Text to display in the CLI about registry details
-	Repository *string // Repository name
-	Option     int     // Option to be choose the CLI registry list
-	Read       func()  // Function to be called when getting inputs
-	Run        func()  // Function to be called when updating k8s secrets
+	Name       string                                 // Unique Name
+	Caption    string                                 // Text to display in the CLI about registry details
+	Repository *string                                // Repository name
+	Option     int                                    // Option to be choose the CLI registry list
+	Read       func(flagValues *map[string]FlagValue) // Function to be called when getting inputs, if flagValues is nil get inputs interactively
+	Run        func()                                 // Function to be called when updating k8s secrets
+	Flags      Flags                                  // Required and Optional flags
+}
+
+// Flags represents Required and Optional flags that supports the specified registry type
+type Flags struct {
+	RequiredFlags *map[string]bool // Map of flag name and bool value of the flag is required (true) or not (false)
+	OptionalFlags *map[string]bool // Map of flag name and bool value of the flag is optional (true) or not (false)
+}
+
+// FlagValue represents a value of a flag and its value supplied by user
+type FlagValue struct {
+	Value      interface{} // Value of the flag
+	IsProvided bool        // Is the value provided by the user
 }
 
 // registries represents a map of registries
@@ -43,8 +56,14 @@ var registries = make(map[int]*Registry)
 // optionToExec represents the choice use selected
 var optionToExec int
 
-func ReadInputs() {
-	registries[optionToExec].Read()
+// ReadInputsInteractive reads inputs with respect to the selected registry type interactively
+func ReadInputsInteractive() {
+	registries[optionToExec].Read(nil)
+}
+
+// ReadInputsFromFlags reads inputs from flags with respect to the selected registry type
+func ReadInputsFromFlags(flagValues *map[string]FlagValue) {
+	registries[optionToExec].Read(flagValues)
 }
 
 // UpdateConfigsSecrets updates controller config with registry type and creates secrets with credentials
@@ -55,8 +74,8 @@ func UpdateConfigsSecrets() {
 	registries[optionToExec].Run()
 }
 
-// ChooseRegistry lists registries in the CLI and reads a choice from user
-func ChooseRegistry() {
+// ChooseRegistryInteractive lists registries in the CLI and reads a choice from user
+func ChooseRegistryInteractive() {
 	keys := make([]int, 0, len(registries))
 	for key := range registries {
 		keys = append(keys, key)
@@ -75,6 +94,41 @@ func ChooseRegistry() {
 	}
 
 	optionToExec = option
+}
+
+// SetRegistry set the private value 'optionToExec' that match with 'registryType' un-interactively
+func SetRegistry(registryType string) {
+	for opt, reg := range registries {
+		if reg.Name == registryType {
+			optionToExec = opt
+			return
+		}
+	}
+
+	// if not found throw error: invalid registry type
+	utils.HandleErrorAndExit("Invalid registry type: "+registryType, nil)
+}
+
+// ValidateFlags validates if any additional flag is given or any required flag is missing
+// throw error if invalid
+func ValidateFlags(flagsValues *map[string]FlagValue) {
+	// check for required flags
+	for flg, flgRequired := range *registries[optionToExec].Flags.RequiredFlags {
+		if flgRequired && !(*flagsValues)[flg].IsProvided {
+			// required flag is missing
+			utils.HandleErrorAndExit("Required flag is missing in batch mode. Flag: "+flg, nil)
+		}
+	}
+
+	// check for additional flags
+	for flg, flgVal := range *flagsValues {
+		if flgVal.IsProvided && !(*registries[optionToExec].Flags.RequiredFlags)[flg] && !(*registries[optionToExec].Flags.OptionalFlags)[flg] {
+			// additional, not supported flag
+			utils.HandleErrorAndExit("Invalid, not supported flag found in batch mode. Flag: "+flg, nil)
+		}
+	}
+
+	// flag validation success and continue the flow
 }
 
 // updateCtrlConfig sets the repository type value and the repository in the config: `controller-config`
@@ -111,6 +165,7 @@ func updateCtrlConfig(registryType string, repository string) {
 }
 
 // add adds a registry to the registries maps
+// using pointers for memory optimization
 func add(registry *Registry) {
 	if registry.Option < 1 {
 		utils.HandleErrorAndExit("Error adding registry: "+registry.Name, errors.New("'option' should be positive"))

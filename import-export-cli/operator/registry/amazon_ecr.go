@@ -9,7 +9,10 @@ import (
 	"strings"
 )
 
-var amazoneEcrRepo = new(string)
+// validation regex for repository URI validation
+const amazonRepoRegex = `\.amazonaws\.com\/.*$`
+
+var amazonEcrRepo = new(string)
 
 var amazonEcrValues = struct {
 	repository string
@@ -20,17 +23,40 @@ var amazonEcrValues = struct {
 var AmazonEcrRegistry = &Registry{
 	Name:       "AMAZON_ECR",
 	Caption:    "Amazon ECR",
-	Repository: amazoneEcrRepo,
+	Repository: amazonEcrRepo,
 	Option:     2,
-	Read: func() {
-		repository, credFile := readAmazonEcrInputs()
+	Read: func(flagValues *map[string]FlagValue) {
+		var repository, credFile string
+
+		// check input mode: interactive or batch
+		if flagValues == nil {
+			// get inputs in interactive mode
+			repository, credFile = readAmazonEcrInputs()
+		} else {
+			// get inputs in batch mode
+			repository = (*flagValues)[k8sUtils.FlagBmRepository].Value.(string)
+			credFile = (*flagValues)[k8sUtils.FlagBmKeyFile].Value.(string)
+
+			// validate required inputs
+			if !utils.ValidateValue(repository, amazonRepoRegex) {
+				utils.HandleErrorAndExit("Invalid repository uri: "+repository, nil)
+			}
+			if !utils.IsFileExist(credFile) {
+				utils.HandleErrorAndExit("Invalid credential file: "+credFile, nil)
+			}
+		}
+
 		amazonEcrValues.repository = repository
 		amazonEcrValues.credFile = credFile
-		*amazoneEcrRepo = repository
+		*amazonEcrRepo = repository
 	},
 	Run: func() {
 		createAmazonEcrConfig()
 		k8sUtils.K8sCreateSecretFromFile(k8sUtils.AwsCredentialsVolume, amazonEcrValues.credFile, "credentials")
+	},
+	Flags: Flags{
+		RequiredFlags: &map[string]bool{k8sUtils.FlagBmRepository: true, k8sUtils.FlagBmKeyFile: true},
+		OptionalFlags: &map[string]bool{},
 	},
 }
 
@@ -41,11 +67,8 @@ func readAmazonEcrInputs() (string, string) {
 	credFile := ""
 	var err error
 
-	// validation regex for repository URI validation
-	amazonRepositoryRegex := `\.amazonaws\.com\/.*$`
-
 	for !isConfirm {
-		repository, err = utils.ReadInputString("Enter Repository URI (<aws_account_id.dkr.ecr.region.amazonaws.com>/repository)", utils.Default{IsDefault: false}, amazonRepositoryRegex, true)
+		repository, err = utils.ReadInputString("Enter Repository URI (<aws_account_id.dkr.ecr.region.amazonaws.com>/repository)", utils.Default{IsDefault: false}, amazonRepoRegex, true)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading DockerHub repository name from user", err)
 		}

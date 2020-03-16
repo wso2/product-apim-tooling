@@ -38,8 +38,7 @@ type Default struct {
 // ReadInputString reads input from user with prompting printText and validating against regex: validRegex
 func ReadInputString(printText string, defaultVal Default, validRegex string, retryOnInvalid bool) (string, error) {
 	validate := func(value string) bool {
-		reg := regexp.MustCompile(validRegex)
-		return reg.MatchString(value)
+		return ValidateValue(value, validRegex)
 	}
 
 	return ReadInput(printText, defaultVal, validate, "Please try again. Invalid input.", retryOnInvalid)
@@ -111,4 +110,10 @@ func ReadPassword(printText string) (string, error) {
 		return "", err
 	}
 	return string(password), nil
+}
+
+// ValidateValue validates the value against validRegex and if match return true otherwise false
+func ValidateValue(value string, validRegex string) bool {
+	reg := regexp.MustCompile(validRegex)
+	return reg.MatchString(value)
 }

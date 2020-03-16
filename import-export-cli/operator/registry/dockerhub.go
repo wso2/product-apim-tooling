@@ -31,6 +31,10 @@ import (
 const DockerHubRegistryUrl = "https://index.docker.io/v1/"
 const DockerHubInputPrefix = "docker.io"
 
+// validation regex
+const dockerhubRepoValidRegex = `^[\w\d\-\.\:]*\/?[\w\d\-]+$`
+const dockerhubUsernameRegex = utils.UsernameValidRegex
+
 var dockerHubRepo = new(string)
 
 var dockerHubValues = struct {
@@ -46,8 +50,36 @@ var DockerHubRegistry = &Registry{
 	Caption:    "Docker Hub (Or others, quay.io, HTTPS registry)",
 	Repository: dockerHubRepo,
 	Option:     1,
-	Read: func() {
-		repository, username, password := readDockerHubInputs()
+	Read: func(flagValues *map[string]FlagValue) {
+		var repository, username, password string
+
+		// check input mode: interactive or batch
+		if flagValues == nil {
+			// get inputs in interactive mode
+			repository, username, password = readDockerHubInputs()
+		} else {
+			// get inputs in batch mode
+			repository = (*flagValues)[k8sUtils.FlagBmRepository].Value.(string)
+			username = (*flagValues)[k8sUtils.FlagBmUsername].Value.(string)
+			password = (*flagValues)[k8sUtils.FlagBmPassword].Value.(string)
+
+			// validate required inputs
+			if !utils.ValidateValue(repository, dockerhubRepoValidRegex) {
+				utils.HandleErrorAndExit("Invalid repository name: "+repository, nil)
+			}
+			if !utils.ValidateValue(username, dockerhubUsernameRegex) {
+				utils.HandleErrorAndExit("Invalid username : "+username, nil)
+			}
+
+			// if "--password-stdin" is supplied get password from stdin
+			if (*flagValues)[k8sUtils.FlagBmPasswordStdin].Value.(bool) {
+				pwStdin, err := utils.ReadPassword("Enter password")
+				if err != nil {
+					utils.HandleErrorAndExit("Error reading password from user", err)
+				}
+				password = pwStdin
+			}
+		}
 
 		dockerHubValues.repositoryUrl = getRegistryUrl(repository)
 		dockerHubValues.username = username
@@ -64,6 +96,10 @@ var DockerHubRegistry = &Registry{
 		k8sUtils.K8sCreateSecretFromInputs(k8sUtils.ConfigJsonVolume, dockerHubValues.repositoryUrl, dockerHubValues.username, dockerHubValues.password)
 		dockerHubValues.password = "" // clear password
 	},
+	Flags: Flags{
+		RequiredFlags: &map[string]bool{k8sUtils.FlagBmRepository: true, k8sUtils.FlagBmUsername: true},
+		OptionalFlags: &map[string]bool{k8sUtils.FlagBmPassword: true, k8sUtils.FlagBmPasswordStdin: true},
+	},
 }
 
 // readDockerHubInputs reads docker-registry URL, username and password from the user
@@ -74,16 +110,13 @@ func readDockerHubInputs() (string, string, string) {
 	password := ""
 	var err error
 
-	// repository name validation regex
-	const repositoryValidRegex = `^[\w\d\-\.\:]*\/?[\w\d\-]+$`
-
 	for !isConfirm {
-		repository, err = utils.ReadInputString(fmt.Sprintf("Enter repository name (%s/john | quay.io/mark | 10.100.5.225:5000/jennifer)", DockerHubInputPrefix), utils.Default{Value: "", IsDefault: false}, repositoryValidRegex, true)
+		repository, err = utils.ReadInputString(fmt.Sprintf("Enter repository name (%s/john | quay.io/mark | 10.100.5.225:5000/jennifer)", DockerHubInputPrefix), utils.Default{Value: "", IsDefault: false}, dockerhubRepoValidRegex, true)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading DockerHub repository name from user", err)
 		}
 
-		username, err = utils.ReadInputString("Enter username", utils.Default{Value: "", IsDefault: false}, utils.UsernameValidRegex, true)
+		username, err = utils.ReadInputString("Enter username", utils.Default{Value: "", IsDefault: false}, dockerhubUsernameRegex, true)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading username from user", err)
 		}
