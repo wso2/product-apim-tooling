@@ -124,7 +124,7 @@ func ValidateFlags(flagsValues *map[string]FlagValue) {
 	for flg, flgVal := range *flagsValues {
 		if flgVal.IsProvided && !(*registries[optionToExec].Flags.RequiredFlags)[flg] && !(*registries[optionToExec].Flags.OptionalFlags)[flg] {
 			// additional, not supported flag
-			utils.HandleErrorAndExit("Additional not supported flag found in batch mode. Flag: "+flg, nil)
+			utils.HandleErrorAndExit("Invalid, not supported flag found in batch mode. Flag: "+flg, nil)
 		}
 	}
 

@@ -40,8 +40,23 @@ var GcrRegistry = &Registry{
 	Caption:    "GCR",
 	Repository: gcrRepo,
 	Option:     3,
-	Read: func() {
-		svcAccKeyFile := readGcrInputs()
+	Read: func(flagValues *map[string]FlagValue) {
+		var svcAccKeyFile string
+
+		// check input mode: interactive or batch
+		if flagValues == nil {
+			// get inputs in interactive mode
+			svcAccKeyFile = readGcrInputs()
+		} else {
+			// get inputs in batch mode
+			svcAccKeyFile = (*flagValues)[k8sUtils.FlagBmKeyFile].Value.(string)
+
+			// validate required inputs
+			if !utils.IsFileExist(svcAccKeyFile) {
+				utils.HandleErrorAndExit("Invalid service account key file: "+svcAccKeyFile, nil)
+			}
+		}
+
 		gcrValues.project = getGcrProjectName(svcAccKeyFile)
 		gcrValues.svcAccKeyFile = svcAccKeyFile
 		*gcrRepo = gcrValues.project
