@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/operator/registry"
+	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
@@ -58,9 +59,22 @@ var changeDockerRegistryCmd = &cobra.Command{
 				errors.New("mode should be set to kubernetes"))
 		}
 
-		// read inputs for docker registry
-		registry.ChooseRegistryInteractive()
-		registry.ReadInputsInteractive()
+		// check for installation mode: interactive or batch mode
+		if flagBmRegistryType == "" {
+			// run in interactive mode
+			// read inputs for docker registry
+			registry.ChooseRegistryInteractive()
+			registry.ReadInputsInteractive()
+		} else {
+			// run in batch mode
+			// set registry type
+			registry.SetRegistry(flagBmRegistryType)
+
+			flagsValues := getGivenFlagsValues()
+			registry.ValidateFlags(flagsValues)       // validate flags with respect to registry type
+			registry.ReadInputsFromFlags(flagsValues) // read values from flags with respect to registry type
+		}
+
 		registry.UpdateConfigsSecrets()
 	},
 }
@@ -68,4 +82,13 @@ var changeDockerRegistryCmd = &cobra.Command{
 func init() {
 	RootCmd.AddCommand(changeCmd)
 	changeCmd.AddCommand(changeDockerRegistryCmd)
+
+	// flags for installing api-operator in batch mode
+	// only the flag "registry-type" is required and others are registry specific flags
+	// same flags defined in 'installApiOperator'
+	changeDockerRegistryCmd.Flags().StringVarP(&flagBmRegistryType, "registry-type", "R", "", "Registry type: DOCKER_HUB | AMAZON_ECR |GCR | HTTP")
+	changeDockerRegistryCmd.Flags().StringVarP(&flagBmRepository, k8sUtils.FlagBmRepository, "r", "", "Repository name or URI")
+	changeDockerRegistryCmd.Flags().StringVarP(&flagBmUsername, k8sUtils.FlagBmUsername, "u", "", "Username of the repository")
+	changeDockerRegistryCmd.Flags().StringVarP(&flagBmPassword, k8sUtils.FlagBmPassword, "p", "", "Password of the given user")
+	changeDockerRegistryCmd.Flags().StringVarP(&flagBmKeyFile, k8sUtils.FlagBmKeyFile, "c", "", "Credentials file")
 }
