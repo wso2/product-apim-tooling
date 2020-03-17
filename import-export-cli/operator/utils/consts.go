@@ -44,7 +44,7 @@ const ApiOpCrdTargetEndpoint = "targetendpoints.wso2.com"
 const ApiOperatorConfigsUrlTemplate = "https://github.com/wso2/K8s-api-operator/releases/download/%s/api-operator-configs.yaml"
 const ApiOperatorVersionValidationUrlTemplate = "https://github.com/wso2/K8s-api-operator/tree/%s"
 const ApiOperatorFindVersionUrl = "https://github.com/wso2/K8s-api-operator/releases"
-const DefaultApiOperatorVersion = "v1.0.1" //change this back to "v1.1.0" this is for testing purpose
+const DefaultApiOperatorVersion = "v1.1.0"
 const ApiOperatorVersionEnvVariable = "WSO2_API_OPERATOR_VERSION"
 
 // constants of K8s ConfigMap: controller-config
