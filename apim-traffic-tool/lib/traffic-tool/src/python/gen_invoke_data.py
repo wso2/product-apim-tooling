@@ -20,13 +20,16 @@ import os
 import pickle
 import random
 import sys
-from datetime import datetime
-from multiprocessing import Process, Value
-
 import numpy as np
 import yaml
+from datetime import datetime
+from multiprocessing import Process, Value
+from collections import defaultdict
+from utils import log
 
 # variables
+logger = log.setLogger('gen_invoke_data')
+
 no_of_data_points = None
 heavy_traffic = None
 time_patterns = None
@@ -52,21 +55,26 @@ def loadConfig():
     no_of_data_points = int(traffic_config['tool_config']['no_of_data_points'])
     heavy_traffic = str(traffic_config['tool_config']['heavy_traffic']).lower()
 
-    with open(abs_path + '/../../data/access_pattern/invoke_patterns.yaml') as pattern_file:
+    with open(abs_path + '/../../data/tool_data/invoke_patterns.yaml') as pattern_file:
         invoke_patterns = yaml.load(pattern_file, Loader=yaml.FullLoader)
 
-    time_patterns = invoke_patterns['time_patterns']
+    time_patterns = process_time_patterns(invoke_patterns['time_patterns'])
 
 
-def log(tag, write_string):
+def process_time_patterns(patterns: dict) -> defaultdict:
     """
-    This function will write the given log output to the log.txt file
-    :param tag: Log tag
-    :param write_string: Message to be written
-    :return: None
+    Process time patterns to obtain mean and standard deviation to be used with distributions.
+    :param patterns: Patterns dictionary.
+    :return: Dictionary with mean and std for each pattern.
     """
-    with open(abs_path + '/../../../../logs/traffic-tool.log', 'a+') as log_file:
-        log_file.write("[{}] ".format(tag) + str(datetime.now()) + ": " + write_string + "\n")
+    processed_patterns = defaultdict()
+
+    for key, pattern in patterns.items():
+        pattern = list(map(int, pattern.split(',')))
+        mean = np.mean(pattern)
+        std = np.std(pattern)
+        processed_patterns[key] = {'mean': mean, 'std': std}
+    return processed_patterns
 
 
 def writeInvokeData(timestamp, path, access_token, method, user_ip, cookie, user_agent):
@@ -99,7 +107,7 @@ def runInvoker(user_scenario, current_data_points):
     Supposed to be executed from a process.
     :param user_scenario: User scenario as a list
     :param current_data_points: Current data point count
-    :return:
+    :return: None
     """
     global no_of_data_points
 
@@ -148,19 +156,17 @@ def runInvoker(user_scenario, current_data_points):
             cookie = scenario[6]
             user_agent = scenario[7]
 
+            # set time pattern if not set
             if time_pattern is None:
                 time_pattern = scenario[8]
                 time_pattern = time_patterns.get(time_pattern)
-                if type(time_pattern) is str:
-                    time_pattern = [int(t) for t in time_pattern.split(',')]
-                else:
-                    time_pattern = [time_pattern]
 
             writeInvokeData(timestamp, path, access_token, method, user_ip, cookie, user_agent)
             current_data_points.value += 1
 
             if heavy_traffic != 'true':
-                timestamp += dt.timedelta(seconds=it % len(time_pattern))
+                sleep_time = np.absolute(np.random.normal(time_pattern['mean'], time_pattern['std']))
+                timestamp += dt.timedelta(seconds=sleep_time)
             else:
                 timestamp += dt.timedelta(seconds=abs(int(np.random.normal())))
             it += 1
@@ -172,7 +178,6 @@ def runInvoker(user_scenario, current_data_points):
 
 
 if __name__ == "__main__":
-
     '''
         Generate the dataset according to the scenario
         Usage: python3 gen_invoke_data.py filename
@@ -180,7 +185,7 @@ if __name__ == "__main__":
     '''
 
     parser = argparse.ArgumentParser("generate traffic data")
-    parser.add_argument("filename", help="Enter a filename to write final output", type=str)
+    parser.add_argument("filename", help="Enter a filename to write final output (without extension)", type=str)
     args = parser.parse_args()
     filename = args.filename + ".csv"
 
@@ -188,10 +193,10 @@ if __name__ == "__main__":
     try:
         loadConfig()
     except FileNotFoundError as e:
-        log('ERROR', '{}: {}'.format(e.strerror, e.filename))
+        logger.exception(str(e))
         sys.exit()
     except Exception as e:
-        log('ERROR', '{}'.format(str(e)))
+        logger.exception(str(e))
         sys.exit()
 
     with open(abs_path + '/../../../../dataset/generated-traffic/{}'.format(filename), 'w') as file:
@@ -201,7 +206,7 @@ if __name__ == "__main__":
         # load and set the scenario pool
         scenario_pool = pickle.load(open(abs_path + "/../../data/runtime_data/scenario_pool.sav", "rb"))
     except FileNotFoundError as e:
-        log('ERROR', '{}: {}'.format(e.strerror, e.filename))
+        logger.exception(str(e))
         sys.exit()
 
     # record script start_time
@@ -211,7 +216,7 @@ if __name__ == "__main__":
 
     # create and start a process for each user
     for key_uname, val_scenario in scenario_pool.items():
-        process = Process(target=runInvoker, args=(key_uname, val_scenario, current_data_points))
+        process = Process(target=runInvoker, args=(val_scenario, current_data_points))
         process.daemon = False
         processes_list.append(process)
         process.start()
@@ -219,8 +224,7 @@ if __name__ == "__main__":
         with open(abs_path + '/../../data/runtime_data/traffic_processes.pid', 'a+') as file:
             file.write(str(process.pid) + '\n')
 
-    print("[INFO] Scenario loaded successfully. Wait until data generation complete!")
-    log("INFO", "Scenario loaded successfully. Wait until data generation complete!")
+    logger.info("Scenario loaded successfully. Wait until data generation complete!")
 
     while True:
         if current_data_points.value >= no_of_data_points:
@@ -230,8 +234,7 @@ if __name__ == "__main__":
                 file.write('')
 
             time_elapsed = datetime.now() - script_start_time
-            print("[INFO] Data generated successfully. Time elapsed: {} seconds".format(time_elapsed.seconds))
-            log("INFO", "Data generated successfully. Time elapsed: {} seconds".format(time_elapsed.seconds))
+            logger.info("Data generated successfully. Time elapsed: {} seconds".format(time_elapsed.seconds))
             break
         else:
             pass

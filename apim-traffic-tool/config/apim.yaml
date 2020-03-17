@@ -1,79 +1,51 @@
-# version of the wso2 api manager (state as either 2.6 or 3.0)
-apim_version: 2.6
+# version of the wso2 api manager (state as either 2.* or 3.*; eg: 2.6)
+apim_version: 3.1
 
 # endpoints of the wso2 api manager
 apim_endpoints:
-  token_registration_endpoint: /client-registration/v0.14/register
+  token_registration_endpoint: /client-registration/v0.16/register
   token_endpoint: /token
-  publisher_api: /api/am/publisher/v0.14/apis
-  store_application: /api/am/store/v0.14/applications
-  store_subscription: /api/am/store/v0.14/subscriptions
-  user_signup: /store/site/blocks/user/sign-up/ajax/user-add.jag
+  publisher_api: /api/am/publisher/v0.16/apis
+  store_application: /api/am/store/v0.16/applications
+  store_subscription: /api/am/store/v0.16/subscriptions
+  user_signup: /api/identity/user/v1.0/me
   delete_user: /services/RemoteUserStoreManagerService.RemoteUserStoreManagerServiceHttpsSoap11Endpoint
 
 # api manager management console ports and configurations
 management_console:
   protocol: https
-  host: 10.100.8.34
+  host: localhost
   servlet_transport_port_https: 9443
   servlet_transport_port_http: 9763
 
 api_manager:
   nio_pt_transport_port: 8243
 
-# details of APIs in the scenario
-apis:
-  - name: news
-    context: news
-    version: 1
-    resources:
-     - method: GET
-       path: menu
+# details of main tenant (default: super)
+main_tenant:
+  tenant_name: super
+  admin_username: admin
+  admin_password: admin
+  admin_b64: YWRtaW46YWRtaW4=
 
+# details of multi tenancy
+multi_tenancy:
+  enabled: false
+  tenant_list:
+    - name:
+      admin_username:
+      admin_password:
 
-  - name: places
-    context: places
-    version: 1
-    resources:
-      - method: GET
-        path: menu
+# details of Applications
+apps:
+  - name: Online Shopping
+    description: This is an app allowing users to find places to buy their items, food or anything. A User can search for an item, find places, available quantities and their prices and order items through the app. Users can also do the payment when ordering. Also this app notifies users about recently released items and other recent news updates
+    api_subscriptions: News,Places,Payment
 
-  - name: payment
-    context: payment
-    version: 1
-    resources:
-      - method: GET
-        path: menu
-      - method: POST
-        path: order
-      - method: DELETE
-        path: order
+  - name: Taxi
+    description: This is a taxi app like Uber or Pickme where users can book cabs. App allows users to find rides for given destinations, book a ride, track ride info and do payments using credit/ debit cards
+    api_subscriptions: Map,Places,Weather,Payment
 
-  - name: map
-    context: map
-    version: 1
-    resources:
-      - method: GET
-        path: menu
-      - method: DELETE
-        path: order
-
-  - name: weather
-    context: weather
-    version: 1
-    resources:
-      - method: GET
-        path: menu
-#      - method: DELETE
-#        path: order
-
-
-  - name: cricket
-    context: cricket
-    version: 1
-    resources:
-      - method: GET
-        path: menu
-#      - method: DELETE
-#        path: order
-
+  - name: CricScore
+    description: This is a cricket app like Cricbuzz or Espn cric info where users can get updates about cricket matches, teams and players. App provides users with latest cric news updates. Also users can get live notification for ongoing matches
+    api_subscriptions: News,Cricket

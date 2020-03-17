@@ -1,0 +1,1 @@
+{"swagger": "2.0", "paths": {"/menu": {"get": {"responses": {"200": {"description": "Ok"}}, "x-auth-type": "Application & Application User", "x-throttling-tier": "Unlimited"}}}, "produces": ["application/json"], "info": {"title": "News", "version": "1", "description": "This is an API which users can query by keywords topics publications"}}

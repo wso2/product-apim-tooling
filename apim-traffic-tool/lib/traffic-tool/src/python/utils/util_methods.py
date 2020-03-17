@@ -14,30 +14,22 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# config headers on attack tool.yaml
+from datetime import datetime
+import os
+import requests
+import json
 
-GENERAL_CONFIG = 'general_config'
-API_HOST = 'api_host'
-NUMBER_OF_PROCESSES = 'number_of_processes'
-USER_AGENTS = 'user_agents'
-PAYLOADS = 'payloads'
-ATTACK_DURATION = 'attack_duration'
-PORT = 'port'
-IP = 'ip'
-PROTOCOL = 'protocol'
-COMPROMISED_USER_COUNT = 'compromised_user_count'
-STOLEN_TOKEN = 'stolen_token'
-ATTACKS = 'attacks'
-TIME_PATTERNS = 'time_patterns'
+abs_path = os.path.abspath(os.path.dirname(__file__))
 
-# token_ip_cookie csv headers
-API_NAME = 'api_name'
+def log(filename, tag, write_string):
+    """
+    This function will write the given log output to the given log file
+    :param filename: filename to write the output
+    :param tag: Log tag
+    :param write_string: Message to be written
+    :return: None
+    """
+    
+    with open('{}/../../../../../logs/{}'.format(abs_path, filename), 'a+') as log_file:
+        log_file.write("[{}] ".format(tag) + str(datetime.now()) + ": " + write_string + "\n")
 
-# configs headers on api_details.yaml
-APIS = 'apis'
-CONTEXT = 'context'
-VERSION = 'version'
-NAME = 'name'
-method = 'method'
-path = 'path'
-resources = 'resources'

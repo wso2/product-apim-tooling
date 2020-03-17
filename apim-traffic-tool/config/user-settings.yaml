@@ -1,11 +1,15 @@
 # define user path variables here
 path_variables:
-  jmeter: /home/user123/Applications/apache-jmeter-5.1.1/bin
+  jmeter: /home/user123/Downloads/apache-jmeter-5.1.1/bin
+
 resources:
-  ip_database: IP2LOCATION-LITE-DB1.CSV
+  ip_database: IP2LOCATION-LITE-DB5.CSV
   # use 1 to 4 to indicate the column orders
   column_order:
     ip_from: 1
     ip_to: 2
     country_code: 3
     country_name: 4
+
+# logging level of the tool (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+log_level: INFO

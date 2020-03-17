@@ -1,6 +1,0 @@
-News,This is an API which users can query by keywords topics publications,news,news
-Places,Users can find popular places like food shops banks etc using this API,places,places
-Map,This is an API providing location data traffic info real-time updates etc,map,maps
-Weather,Users can query about whether info in a particular location country or city,weather,weather
-Payment,This is an API to securely perform online and mobile payments,payment,payment
-Cricket,This is a cricket API providing live scores teams player details etc,cricket,cricket

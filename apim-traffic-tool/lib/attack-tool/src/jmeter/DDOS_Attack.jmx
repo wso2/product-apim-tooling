@@ -60,14 +60,14 @@ under the License. -->
 import org.yaml.snakeyaml.Yaml;
 import org.apache.jmeter.services.FileServer;
 import tools.User;
-import tools.API
+import tools.API;
 
-String baseDir = FileServer.getFileServer().getBaseDir()
+String baseDir = FileServer.getFileServer().getBaseDir();
 
-Yaml ymlparser = new Yaml()
+Yaml ymlparser = new Yaml();
 
 //Main config data
-Map config = ymlparser.load((baseDir + &quot;/../../../../config/apim.yaml&quot; as File).text);
+Map config = ymlparser.load((baseDir + &quot;/../../../../config/api_details.yaml&quot; as File).text);
 List apis = config.find{it.key==&quot;apis&quot;}?.value;
 
 //attack tool configurations
@@ -84,17 +84,22 @@ List postData = generalConfig.find{it.key==&quot;payloads&quot;}?.value
 
 
 //Parsing user ips,tokens and cookies
-File csvfile = new File(baseDir + &quot;/../../../traffic-tool/data/scenario/&quot; + scenarioName + &quot;/token_ip_cookie.csv&quot; )
-List lines = csvfile.readLines()
-ArrayList userList = new ArrayList()
+File csvfile = new File(baseDir + &quot;/../../../traffic-tool/data/scenario/token_ip_cookie.csv&quot; );
+List lines = csvfile.readLines();
+ArrayList userList = new ArrayList();
+int i = 0;
 for(line in lines)
 {
-	String[] userData = line.split(&quot;,&quot;);
-
-	//ip,cookie,token,apiname
-	User tempUser = new User(userData[2],userData[3],userData[0],userData[1]);
-	userList.add(tempUser);
-	
+	if(i != 0)
+	{
+		String[] userData = line.split(&quot;,&quot;);
+		
+		//ip,cookie,token,apiname
+		User tempUser = new User(userData[2],userData[3],userData[0],userData[1]);
+		userList.add(tempUser);
+	}
+	i = i + 1;
+		
 }
 
 //Creating API instances
@@ -107,6 +112,7 @@ for(api in apis)
 	temp.buildUserList(userList);
 	apiList.add(temp);
 }
+
 
 
 // Creating properties to be used in the threads
@@ -246,6 +252,7 @@ vars.put(&quot;currentAPIContext&quot;,currentAPI.getContext());
 vars.put(&quot;currentAPIVersion&quot;,currentAPI.getVersion());
 vars.putObject(&quot;currentAPIUsers&quot;,currentAPI.getUserList())
 vars.putObject(&quot;currentAPIResources&quot;,currentAPI.getResources())
+
 
 </stringProp>
           </JSR223Sampler>

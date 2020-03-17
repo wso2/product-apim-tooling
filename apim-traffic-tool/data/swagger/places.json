@@ -1,0 +1,1 @@
+{"swagger": "2.0", "paths": {"/menu": {"get": {"responses": {"200": {"description": "Ok"}}, "x-auth-type": "Application & Application User", "x-throttling-tier": "Unlimited"}}}, "produces": ["application/json"], "info": {"title": "Places", "version": "1", "description": "Users can find popular places like food shops banks etc using this API"}}

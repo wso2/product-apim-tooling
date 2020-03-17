@@ -20,15 +20,17 @@ import pickle
 import random
 import string
 import sys
-from datetime import datetime
-
 import pandas as pd
 import yaml
+from datetime import datetime
+from utils import log
 from faker import Factory
 from scipy.stats import norm
 
 # variables
-scenario_name = None
+logger = log.setLogger('gen_invoke_scenario')
+
+tenant_name = ''
 ip_dataset_name = None
 apis = None
 invoke_scenario = None
@@ -42,6 +44,8 @@ existing_no_of_user_combinations = 0  # to validate the user count
 total_no_of_user_combinations = 0
 used_ips = []
 ip_dataset = None
+multi_tenancy_enabled = 'false'
+app_tenant = {}
 
 fake_generator = Factory.create()
 
@@ -49,14 +53,27 @@ fake_generator = Factory.create()
 abs_path = os.path.abspath(os.path.dirname(__file__))
 
 try:
+    with open(abs_path + '/../../../../config/apim.yaml', 'r') as config_file:
+        apim_config = yaml.load(config_file, Loader=yaml.FullLoader)
+    multi_tenancy = apim_config['multi_tenancy']['enabled']
+
+    if str(multi_tenancy).lower() == 'false':
+        tenant_name = apim_config['main_tenant']['tenant_name']
+    else:       # read and set tenant names for each app
+        with open(abs_path + '/../../data/scenario/tenant_details.yaml', 'r') as f:
+            tenant_apps = yaml.load(f, Loader=yaml.FullLoader)['tenant_apps']
+
+        for tenant in tenant_apps:
+            for app in tenant_apps.get(tenant):
+                app_tenant[app] = tenant
+
     with open(abs_path + '/../../../../config/traffic-tool.yaml', 'r') as file:
         traffic_config = yaml.load(file, Loader=yaml.FullLoader)
-    scenario_name = traffic_config['scenario_name']
     user_agents = traffic_config['user_agents']
 
-    with open(abs_path + '/../../../../config/apim.yaml', 'r') as file:
-        apim_config = yaml.load(file, Loader=yaml.FullLoader)
-    apis = apim_config['apis']
+    with open(abs_path + '/../../../../config/api_details.yaml', 'r') as file:
+        api_config = yaml.load(file, Loader=yaml.FullLoader)
+    apis = api_config['apis']
 
     with open(abs_path + '/../../../../config/user-settings.yaml', 'r') as file:
         user_settings = yaml.load(file, Loader=yaml.FullLoader)
@@ -64,24 +81,14 @@ try:
     dataset_column_order = user_settings['resources']['column_order']
 
 except FileNotFoundError as e:
-    print('[ERROR] {} gen_invoke_scenario.py: {}: {}'.format(str(datetime.now()), e.strerror, e.filename))
+    out_txt = 'FileNotFoundError in gen_invoke_scenario.py: {}: {}'.format(e.strerror, e.filename)
+    logger.exception(out_txt)
     sys.exit()
-
-
-def log(tag, write_string):
-    """
-    This function will write the given log output to the log.txt file
-    :param tag: Log tag
-    :param write_string: Message to be written
-    :return: None
-    """
-    with open(abs_path + '/../../../../logs/traffic-tool.log', 'a+') as log_file:
-        log_file.write("[{}] ".format(tag) + str(datetime.now()) + ": " + write_string + "\n")
 
 
 def getPath(api_name, method):
     """
-    This function will return the invoke path for a given api and http method
+    This function will return the invoke path for a given api and http method (for a single tenant environment)
     :param api_name: Name of the API
     :param method: Method of the API
     :return: Invoke path
@@ -95,7 +102,31 @@ def getPath(api_name, method):
             resources = api.get('resources')
             for resource in resources:
                 if resource.get('method') == method:
-                    return context + '/' + version + '/' + str(resource.get('path'))
+                    if tenant_name.lower() == 'super' or tenant_name.lower() == "carbon.super":
+                        return context + '/' + version + '/' + str(resource.get('path'))
+                    else:
+                        return 't/' + tenant_name + '/' + context + '/' + version + '/' + str(resource.get('path'))
+
+
+def getMultiTenantPath(api_name, method, app_name):
+    """
+    This function will return the invoke path for a given api and http method (for a multi tenant setup)
+    :param api_name: Name of the API
+    :param method: Method of the API
+    :param app_name: Name of the application
+    :return: Invoke path
+    """
+    global apis, app_tenant
+
+    for api in apis:
+        if api.get('name') == api_name:
+            context = str(api.get('context'))
+            version = str(api.get('version'))
+            resources = api.get('resources')
+            tenant_name = app_tenant.get(app_name)
+            for resource in resources:
+                if resource.get('method') == method:
+                    return 't/' + tenant_name + '/' + context + '/' + version + '/' + str(resource.get('path'))
 
 
 def varySlightly(median):
@@ -126,9 +157,9 @@ def ipGen(country):
         ip_decs = ip_range.sample(n=1).values[0]
 
         random.seed()
-        temp_ip = ipaddress.IPv4Address._string_from_ip_int(random.randint(ip_decs[0], ip_decs[1]))
+        temp_ip = ipaddress.IPv4Address._string_from_ip_int(random.randint(int(ip_decs[0]), int(ip_decs[1])))
         while temp_ip in used_ips:
-            temp_ip = ipaddress.IPv4Address._string_from_ip_int(random.randint(ip_decs[0], ip_decs[1]))
+            temp_ip = ipaddress.IPv4Address._string_from_ip_int(random.randint(int(ip_decs[0]), int(ip_decs[1])))
 
         used_ips.append(temp_ip)
 
@@ -164,9 +195,9 @@ def genUniqueCookieList(count: int):
 
 if __name__ == "__main__":
     '''
-        Execute the script and generate the user scenario distribution
-        Usage: python3 gen_invoke_scenario.py
-        output folders: lib/traffic-tool/data/scenario/ and lib/traffic-tool/data/runtime_data/
+    Execute the script and generate the user scenario distribution
+    Usage: python3 gen_invoke_scenario.py
+    output folders: lib/traffic-tool/data/scenario/ and lib/traffic-tool/data/runtime_data/
     '''
 
     try:
@@ -174,32 +205,32 @@ if __name__ == "__main__":
         ip_dataset = pd.read_csv(abs_path + '/../../../../resources/libraries/{}'.format(ip_dataset_name), header=None)
 
         # generate a set of ips and cookies for each user
-        with open(abs_path + '/../../data/scenario/{}/data/user_generation.csv'.format(scenario_name)) as file:
-            userlist = file.readlines()
+        with open(abs_path + '/../../data/scenario/user_details.yaml', 'r') as user_file:
+            userlist = yaml.load(user_file, Loader=yaml.FullLoader)
 
-            cookie_list = genUniqueCookieList(len(userlist))
+        cookie_list = genUniqueCookieList(len(userlist['users']))
 
-            for user in userlist:
-                username = user.split('$$ ')[0]
-                country = user.split('$$ ')[5]
-                user_country.update({username: country})
-                user_ip.update({username: ipGen(country)})
-                user_cookie.update({username: cookie_list.pop()})
+        for user in userlist['users']:
+            username = user['username']
+            country = user['country']
+            user_country.update({username: country})
+            user_ip.update({username: ipGen(country)})
+            user_cookie.update({username: cookie_list.pop()})
 
         # read user token csv file
-        user_token = pd.read_csv(abs_path + '/../../data/scenario/{}/api_invoke_tokens.csv'.format(scenario_name))
+        user_token = pd.read_csv(abs_path + '/../../data/scenario/api_invoke_tokens.csv')
 
     except FileNotFoundError as e:
-        print('[ERROR] {} gen_invoke_scenario.py: {}: {}'.format(str(datetime.now()), e.strerror, e.filename))
-        log('ERROR', '{}: {}'.format(e.strerror, e.filename))
+        out_txt = 'FileNotFoundError in gen_invoke_scenario.py: {}: {}'.format(e.strerror, e.filename)
+        logger.exception(out_txt)
         sys.exit()
     except pd.errors.EmptyDataError as e:
-        print('[ERROR] {} gen_invoke_scenario.py: {}'.format(str(datetime.now()), e))
-        log('ERROR', '{}'.format(str(e)))
+        out_txt = 'EmptyDataError in gen_invoke_scenario.py: {}'.format(str(e))
+        logger.exception(out_txt)
         sys.exit()
     except Exception as e:
-        print('[ERROR] {} gen_invoke_scenario.py: {}'.format(str(datetime.now()), e))
-        log('ERROR', '{}'.format(str(e)))
+        out_txt = 'Exception in gen_invoke_scenario.py: {}'.format(e)
+        logger.exception(out_txt)
         sys.exit()
 
     # filter out unique app names and prepare dictionary
@@ -225,29 +256,33 @@ if __name__ == "__main__":
 
     try:
         # generate scenario data according to the script and append to the pool
-        with open(abs_path + '/../../data/scenario/{}/data/invoke_scenario.yaml'.format(scenario_name)) as file:
+        with open(abs_path + '/../../data/scenario/invoke_scenario.yaml') as file:
             invoke_scenario = yaml.load(file, Loader=yaml.FullLoader)
         scenario_data = invoke_scenario['invoke_scenario']
 
     except FileNotFoundError as e:
-        print('[ERROR] {} gen_invoke_scenario.py: {}: {}'.format(str(datetime.now()), e.strerror, e.filename))
-        log('ERROR', '{}: {}'.format(e.strerror, e.filename))
+        out_txt = 'FileNotFoundError in gen_invoke_scenario.py: {}: {}'.format(e.strerror, e.filename)
+        logger.exception(out_txt)
         sys.exit()
 
+    # check whether the user count is valid (not more than the created number of users)
+    for item in scenario_data:
+        user_count = int(item.get('no_of_users'))
+        total_no_of_user_combinations += user_count
+    
+        if total_no_of_user_combinations > existing_no_of_user_combinations:
+            # invalid no of users (cannot execute the scenario)
+            logger.error(
+                "Invalid number of user count declared in 'invoke_scenario.yaml'. Expected {} user combinations. Found {}.".format(existing_no_of_user_combinations, total_no_of_user_combinations))
+            logger.critical("Cannot run the tool!")
+            sys.exit()
+
+    # generate the scenario pool
     for item in scenario_data:
         app_name = item.get('app_name')
         user_count = int(item.get('no_of_users'))
         time_pattern = item.get('time_pattern')
         invokes = item.get('api_calls')
-
-        # check whether the user count is valid (not more than the created number of users)
-        total_no_of_user_combinations += user_count
-        if total_no_of_user_combinations > existing_no_of_user_combinations:
-            # invalid no of users (cannot execute the scenario)
-            log("ERROR",
-                "Invalid number of user count declared in 'invoke_scenario.yaml'. Expected {} user combinations. Found {} or more.".format(existing_no_of_user_combinations, total_no_of_user_combinations))
-            raise ArithmeticError(
-                "Invalid number of user count declared in 'invoke_scenario.yaml'. Expected {} user combinations. Found {} or more.".format(existing_no_of_user_combinations, total_no_of_user_combinations))
 
         users = []
         for i in range(user_count):
@@ -257,7 +292,11 @@ if __name__ == "__main__":
             api_name = invoke.get('api')
             method = invoke.get('method')
             call_median = int(invoke.get('no_of_requests'))
-            full_path = getPath(api_name, method)
+
+            if str(multi_tenancy).lower() == 'false':
+                full_path = getPath(api_name, method)
+            else:
+                full_path = getMultiTenantPath(api_name, method, app_name)
 
             for user in users:  # user[username,token,ip,cookie,user_agent]
                 no_of_requests = varySlightly(call_median)
@@ -274,11 +313,10 @@ if __name__ == "__main__":
         user_cookie = row[3]
         write_str += access_token + ',' + api_name + ',' + ip_address + ',' + user_cookie + "\n"
 
-    with open(abs_path + '/../../data/scenario/{}/token_ip_cookie.csv'.format(scenario_name), 'w') as file:
+    with open(abs_path + '/../../data/scenario/token_ip_cookie.csv', 'w') as file:
         file.write(write_str)
 
     # saving scenario pool to a pickle file
     pickle.dump(scenario_pool, open(abs_path + "/../../data/runtime_data/scenario_pool.sav", "wb"))
 
-    log("INFO", "User scenario distribution generated successfully")
-    print('[INFO] {}: User scenario distribution generated successfully'.format(str(datetime.now())))
+    logger.info("User scenario distribution generated successfully")

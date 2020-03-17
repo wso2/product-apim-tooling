@@ -1,21 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<!-- Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-
-WSO2 Inc. licenses this file to you under the Apache License,
-Version 2.0 (the "License"); you may not use this file except
-in compliance with the License.
-
-You may obtain a copy of the License at
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing,
-software distributed under the License is distributed on an
-"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-KIND, either express or implied. See the License for the
-specific language governing permissions and limitations
-under the License. -->
-
 <jmeterTestPlan version="1.2" properties="5.0" jmeter="5.1.1 r1855137">
   <hashTree>
     <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="DOS Attack" enabled="true">
@@ -67,7 +50,7 @@ String baseDir = FileServer.getFileServer().getBaseDir();
 Yaml ymlparser = new Yaml();
 
 //Main config data
-Map config = ymlparser.load((baseDir + &quot;/../../../../config/apim.yaml&quot; as File).text);
+Map config = ymlparser.load((baseDir + &quot;/../../../../config/api_details.yaml&quot; as File).text);
 List apis = config.find{it.key==&quot;apis&quot;}?.value;
 
 //attack tool configurations
@@ -84,16 +67,22 @@ List postData = generalConfig.find{it.key==&quot;payloads&quot;}?.value;
 
 
 //Parsing user ips,tokens and cookies
-File csvfile = new File(baseDir + &quot;/../../../traffic-tool/data/scenario/&quot; + scenarioName + &quot;/token_ip_cookie.csv&quot; );
-List lines =csvfile.readLines();
+File csvfile = new File(baseDir + &quot;/../../../traffic-tool/data/scenario/token_ip_cookie.csv&quot; );
+List lines = csvfile.readLines();
+log.info(lines[0].toString())
 ArrayList userList = new ArrayList();
+int i = 0;
 for(line in lines)
 {
-	String[] userData = line.split(&quot;,&quot;);
-
-	//ip,cookie,token,apiname
-	User tempUser = new User(userData[2],userData[3],userData[0],userData[1]);
-	userList.add(tempUser);
+	if(i != 0)
+	{
+		String[] userData = line.split(&quot;,&quot;);
+		
+		//ip,cookie,token,apiname
+		User tempUser = new User(userData[2],userData[3],userData[0],userData[1]);
+		userList.add(tempUser);
+	}
+	i = i + 1;
 	
 }
 

@@ -28,6 +28,7 @@ import yaml
 
 from utils import util_methods
 from constants import *
+from utils import log
 
 
 def simulate_user(user_data):
@@ -60,10 +61,10 @@ def simulate_user(user_data):
                 time.sleep(sleep_time)
 
                 scenario = app[i]
-                path = scenario[2]
+                invoke_path = scenario[2]
                 token = scenario[3]
-                method = scenario[4]
-                request_path = "{}://{}:{}/{}".format(protocol, host, port, path)
+                http_method = scenario[4]
+                request_path = "{}://{}:{}/{}".format(protocol, host, port, invoke_path)
                 random_user_agent = scenario[7]
                 ip = scenario[5]
                 cookie = scenario[6]
@@ -71,22 +72,28 @@ def simulate_user(user_data):
                 accept = content_type = "application/json"
 
                 try:
-                    response = util_methods.send_simple_request(request_path, method, token, ip, cookie, accept, content_type, random_user_agent, payload=random_payload)
-                    request_info = "{},{},{},{},{},{},{},{},{},\"{}\",{}".format(datetime.now(), ip, token, method, request_path, cookie, accept, content_type, ip,
+                    response = util_methods.send_simple_request(request_path, http_method, token, ip, cookie, accept, content_type, random_user_agent, payload=random_payload)
+                    request_info = "{},{},{},{},{},{},{},{},{},\"{}\",{}".format(datetime.now(), ip, token, http_method, request_path, cookie, accept, content_type, ip,
                                                                                  random_user_agent,
                                                                                  response.status_code,
                                                                                  )
-                    util_methods.log(dataset_path, request_info, "a")
+                    util_methods.write_to_file(dataset_path, request_info, "a")
+                except requests.exceptions.ConnectionError as e:
+                    error_code = 521
+                    request_info = "{},{},{},{},{},{},{},{},{},\"{}\",{}".format(datetime.now(), ip, token, http_method, request_path, cookie, accept, content_type, ip,
+                                                                                 random_user_agent,
+                                                                                 error_code,
+                                                                                 )
+                    util_methods.write_to_file(dataset_path, request_info, "a")
+                    logger.error("Connection Error: {}".format(e))
                 except requests.exceptions.RequestException:
-                    msg_string = "[Error] {} - Request Failure\n\t {}".format(datetime.now(), str(ex))
-                    print(msg_string)
-                    util_methods.log(attack_tool_log_path, msg_string, "a")
+                    logger.exception("Request Failure")
 
 
 # Program Execution
 if __name__ == '__main__':
 
-    attack_tool_log_path = "../../../../../../logs/attack-tool.log"
+    logger = log.set_logger('Abnormal_Token_Usage')
 
     # constants
     MIN_REQUEST_SCALAR = 'min_request_scalar'
@@ -100,9 +107,7 @@ if __name__ == '__main__':
         with open(os.path.abspath(os.path.join(__file__, "../../../../../config/attack-tool.yaml")), "r") as attack_config_file:
             attack_config = yaml.load(attack_config_file, Loader=yaml.FullLoader)
     except FileNotFoundError as ex:
-        error_string = "[ERROR] {} - {}: \'{}\'".format(datetime.now(), ex.strerror, ex.filename)
-        print(error_string)
-        util_methods.log(attack_tool_log_path, error_string, "a")
+        logger.error("{}: \'{}\'".format(ex.strerror, ex.filename))
         sys.exit()
 
     # Reading configurations from attack-tool.yaml
@@ -122,16 +127,12 @@ if __name__ == '__main__':
 
     # Recording column names in the dataset csv file
     dataset_path = "../../../../../../dataset/attack/abnormal_token.csv"
-    util_methods.log(dataset_path, "timestamp,ip_address,access_token,http_method,invoke_path,cookie,accept,content_type,x_forwarded_for,user_agent,response_code", "w")
+    util_methods.write_to_file(dataset_path, "timestamp,ip_address,access_token,http_method,invoke_path,cookie,accept,content_type,x_forwarded_for,user_agent,response_code", "w")
 
-    log_string = "[INFO] {} - Abnormal token usage attack started ".format(start_time)
-    print(log_string)
-    util_methods.log(attack_tool_log_path, log_string, "a")
+    logger.info("Abnormal token usage attack started")
 
     if compromised_user_count > len(scenario_pool):
-        error_string = "[ERROR] {} - More compromised users than the total users".format(datetime.now())
-        print(error_string)
-        util_methods.log(attack_tool_log_path, error_string, "a")
+        logger.error("More compromised users than the total users")
         sys.exit()
 
     compromised_users = np.random.choice(list(scenario_pool.values()), size=compromised_user_count, replace=False)
@@ -143,14 +144,19 @@ if __name__ == '__main__':
         process_list.append(process)
         process.start()
 
+        with open(os.path.abspath(os.path.join(__file__, "../../../data/runtime_data/attack_processes.pid")), "a+") as f:
+            f.write(str(process.pid) + '\n')
+
     while True:
         time_elapsed = datetime.now() - start_time
         if time_elapsed.seconds >= attack_duration:
             for process in process_list:
                 process.terminate()
-            log_string = "[INFO] {} - Attack terminated successfully. Time elapsed: {} minutes".format(datetime.now(), time_elapsed.seconds / 60.0)
-            print(log_string)
-            util_methods.log(attack_tool_log_path, log_string, "a")
+            
+            with open(os.path.abspath(os.path.join(__file__, "../../../data/runtime_data/attack_processes.pid")), "w") as f:
+                f.write('')
+            
+            logger.info("Attack terminated successfully. Time elapsed: {} minutes".format(time_elapsed.seconds / 60.0))
             break
 
     atexit.register(util_methods.cleanup, process_list=process_list)

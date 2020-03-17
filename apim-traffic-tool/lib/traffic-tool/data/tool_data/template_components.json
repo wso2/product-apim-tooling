@@ -1,0 +1,129 @@
+{
+    "GET": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": "Ok"
+                }
+            },
+            "x-auth-type": "Application & Application User",
+            "x-throttling-tier": "Unlimited"
+        }
+    },
+    "POST": {
+        "post": {
+            "parameters": [
+                {
+                    "name": "Payload",
+                    "description": "Request Body",
+                    "required": false,
+                    "in": "body",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "payload": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Ok"
+                }
+            },
+            "x-auth-type": "Application & Application User",
+            "x-throttling-tier": "Unlimited"
+        }
+    },
+    "DELETE": {
+        "delete": {
+            "x-auth-type": "Application & Application User",
+            "x-throttling-tier": "Unlimited",
+            "description": "Delete an item",
+            "parameters": [
+                {
+                    "name": "itemId",
+                    "in": "path",
+                    "required": true,
+                    "type": "string",
+                    "description": "Item Id"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK. Resource successfully deleted."
+                },
+                "404": {
+                    "description": "Not Found. Resource to be deleted does not exist."
+                },
+                "412": {
+                    "description": "Precondition Failed. The request has not been performed because one of the preconditions is not met."
+                }
+            }
+        }
+    },
+    "PUT": {
+        "put": {
+            "x-auth-type": "Application & Application User",
+            "x-throttling-tier": "Unlimited",
+            "description": "Update an existing Item",
+            "parameters": [
+                {
+                    "description": "Item Id",
+                    "name": "itemId",
+                    "format": "string",
+                    "type": "string",
+                    "required": true,
+                    "in": "path"
+                },
+                {
+                    "schema": {
+                        "$ref": "#/definitions/Item"
+                    },
+                    "description": "Item object that needs to be added",
+                    "name": "body",
+                    "required": true,
+                    "in": "body"
+                }
+            ],
+            "responses": {
+                "200": {
+                    "headers": {
+                        "Location": {
+                            "description": "The URL of the newly created resource.",
+                            "type": "string"
+                        },
+                        "Content-Type": {
+                            "description": "The content type of the body.",
+                            "type": "string"
+                        }
+                    },
+                    "schema": {
+                        "$ref": "#/definitions/Item"
+                    },
+                    "description": "OK. Successful response with updated Item"
+                },
+                "400": {
+                    "schema": {
+                        "$ref": "#/definitions/Error"
+                    },
+                    "description": "Bad Request. Invalid request or validation error"
+                },
+                "404": {
+                    "schema": {
+                        "$ref": "#/definitions/Error"
+                    },
+                    "description": "Not Found. The resource to be updated does not exist."
+                },
+                "412": {
+                    "schema": {
+                        "$ref": "#/definitions/Error"
+                    },
+                    "description": "Precondition Failed. The request has not been performed because one of the preconditions is not met."
+                }
+            }
+        }
+    }
+}
