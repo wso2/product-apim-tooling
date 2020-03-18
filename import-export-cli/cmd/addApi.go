@@ -154,6 +154,8 @@ func createAPI(name string, namespace string, configMapName string, replicas int
 	if len(javaInterceptors) > 0 {
 		//set java interceptors configmaps names in API cr
 		apiConfigMap.Spec.Definition.Interceptors.Java = javaInterceptors
+	} else {
+		apiConfigMap.Spec.Definition.Interceptors.Java = []string{}
 	}
 	byteVal, errMarshal := yaml.Marshal(apiConfigMap)
 	if errMarshal != nil {
