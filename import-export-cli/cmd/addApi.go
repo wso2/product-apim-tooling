@@ -72,8 +72,6 @@ var addApiCmd = &cobra.Command{
 					fmt.Println(err)
 					return
 				}
-				//var javaInterceptors = []string{}
-				fmt.Println("java interceptors	", javaInterceptors)
 				switch mode := fi.Mode(); {
 				//check if the swagger path is a Dir
 				case mode.IsDir():
@@ -159,8 +157,6 @@ func createAPI(name string, namespace string, configMapName string, replicas int
 	} else {
 		apiConfigMap.Spec.Definition.Interceptors.Java = []string{}
 	}
-	fmt.Println("api spec after adding  values ")
-	fmt.Println(apiConfigMap.Spec.Definition.Interceptors.Java)
 	byteVal, errMarshal := yaml.Marshal(apiConfigMap)
 	if errMarshal != nil {
 		utils.HandleErrorAndExit("Error marshal api configmap ", errMarshal)
