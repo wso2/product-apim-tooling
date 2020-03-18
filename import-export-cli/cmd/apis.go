@@ -55,10 +55,10 @@ const apisCmdShortDesc = "Display a list of APIs in an environment"
 
 const apisCmdLongDesc = `Display a list of APIs in the environment specified by the flag --environment, -e`
 
-var apisCmdExamples = utils.ProjectName + ` ` + apisCmdLiteral + ` ` + listCmdLiteral + ` -e dev
-` + utils.ProjectName + ` ` + apisCmdLiteral + ` ` + listCmdLiteral + ` -e dev -q version:1.0.0
-` + utils.ProjectName + ` ` + apisCmdLiteral + ` ` + listCmdLiteral + ` -e prod -q provider:admin
-` + utils.ProjectName + ` ` + apisCmdLiteral + ` ` + listCmdLiteral + ` -e staging`
+var apisCmdExamples = utils.ProjectName + ` ` + listCmdLiteral + ` ` + apisCmdLiteral + ` -e dev
+` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + apisCmdLiteral + ` -e dev -q version:1.0.0
+` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + apisCmdLiteral + ` -e prod -q provider:admin
+` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + apisCmdLiteral + ` -e staging`
 
 // apisCmd represents the apis command
 var apisCmd = &cobra.Command{
