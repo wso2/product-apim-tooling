@@ -95,9 +95,9 @@ func (a app) GroupId() string {
 const appsCmdLongDesc = "Display a list of Applications of the user in the environment specified by the flag --environment, -e"
 
 const appsCmdExamples = utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e dev
-` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e dev -o sampleUser
-` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e prod -o sampleUser
-` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e staging -o sampleUser`
+` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e dev
+` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e prod
+` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e staging`
 
 // appsCmd represents the apps command
 var appsCmd = &cobra.Command{
@@ -212,8 +212,6 @@ func init() {
 
 	appsCmd.Flags().StringVarP(&listAppsCmdEnvironment, "environment", "e",
 		"", "Environment to be searched")
-	appsCmd.Flags().StringVarP(&listAppsCmdAppOwner, "owner", "o", "",
-		"Owner of the Application")
 	appsCmd.Flags().StringVarP(&listAppsCmdFormat, "format", "", "", "Pretty-print output"+
 		"using Go templates. Use {{jsonPretty .}} to list all fields")
 	_ = appsCmd.MarkFlagRequired("environment")

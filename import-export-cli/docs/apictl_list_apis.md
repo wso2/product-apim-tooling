@@ -13,10 +13,10 @@ apictl list apis [flags]
 ### Examples
 
 ```
-apictl apis list -e dev
-apictl apis list -e dev -q version:1.0.0
-apictl apis list -e prod -q provider:admin
-apictl apis list -e staging
+apictl list apis -e dev
+apictl list apis -e dev -q version:1.0.0
+apictl list apis -e prod -q provider:admin
+apictl list apis -e staging
 ```
 
 ### Options

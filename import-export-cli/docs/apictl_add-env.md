@@ -26,7 +26,7 @@ apictl add-env -e test \
 
 apictl add-env -e dev --apim https://localhost:9443 \
 --token	https://localhost:8243/token \
---registration http://localhost:9763/client-registration/v0.16/register
+--registration https://localhost:9443/client-registration/v0.16/register
 ```
 
 ### Options
