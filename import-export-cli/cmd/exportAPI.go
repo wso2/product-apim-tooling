@@ -47,13 +47,13 @@ const exportAPICmdShortDesc = "Export API"
 
 const exportAPICmdLongDesc = "Export APIs from an environment"
 
-const exportAPICmdExamples = utils.ProjectName + ` ` + exportAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -e dev --provider admin
-` + utils.ProjectName + ` ` + exportAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 -e production --provider admin
-NOTE: all three flags (--name (-n), --version (-v), --provider (-r)) are mandatory`
+const exportAPICmdExamples = utils.ProjectName + ` ` + exportAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin -e dev
+` + utils.ProjectName + ` ` + exportAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 -r admin -e production
+NOTE: Both the flags (--name (-n), --version (-v)) are mandatory`
 
 // ExportAPICmd represents the exportAPI command
 var ExportAPICmd = &cobra.Command{
-	Use: exportAPICmdLiteral + " (--name <name-of-the-api> --version <version-of-the-api> --environment " +
+	Use: exportAPICmdLiteral + " (--name <name-of-the-api> --version <version-of-the-api> --provider <provider-of-the-api> --environment " +
 		"<environment-from-which-the-api-should-be-exported>)",
 	Short:   exportAPICmdShortDesc,
 	Long:    exportAPICmdLongDesc,
@@ -131,6 +131,7 @@ func WriteToZip(exportAPIName, exportAPIVersion, zipLocationPath string, resp *r
 // ExportAPI
 // @param name : Name of the API to be exported
 // @param version : Version of the API to be exported
+// @param provider : Provider of the API 
 // @param adminEndpoint : API Manager Admin Endpoint for the environment
 // @param accessToken : Access Token for the resource
 // @return response Response in the form of *resty.Response
@@ -153,7 +154,7 @@ func getExportApiResponse(name, version, provider, format, adminEndpoint, access
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return resp, nil
 }
 
