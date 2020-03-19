@@ -106,12 +106,13 @@ var addApiCmd = &cobra.Command{
 					utils.HandleErrorAndExit("Error creating configmap", errConf)
 				}
 			}
-
-			//handle interceptors
-			handleBalInterceptors(balInterceptorsCmName, balInterceptorsTempDir, "create", flagNamespace)
-			//create API
-			createAPI(flagApiName, flagNamespace, swaggerCmNames, flagReplicas, "", balInterceptorsCmName, flagOverride, javaInterceptorsCmNames, flagApiMode, flagApiVersion)
 		}
+		//handle interceptors
+		fmt.Println("creating configmap with ballerina interceptors")
+		handleBalInterceptors(balInterceptorsCmName, balInterceptorsTempDir, "create", flagNamespace)
+		//create API
+		fmt.Println("creating API definition")
+		createAPI(flagApiName, flagNamespace, swaggerCmNames, flagReplicas, "", balInterceptorsCmName, flagOverride, javaInterceptorsCmNames, flagApiMode, flagApiVersion)
 	},
 }
 
