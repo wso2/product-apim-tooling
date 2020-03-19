@@ -89,7 +89,7 @@ var updateApiCmd = &cobra.Command{
 					}
 					//handle interceptors
 					updatedInterceptorConfName = updateflagApiName + "-interceptors-up-" + timestamp
-					updatedBalInterceptors = handleBalInterceptors(updatedInterceptorConfName, updateflagSwaggerFilePath, "create", updateflagNamespace)
+					//updatedBalInterceptors = handleBalInterceptors(updatedInterceptorConfName, updateflagSwaggerFilePath, "create", updateflagNamespace)
 					updatedJavaInterceptors = handleJavaInterceptors(updateflagSwaggerFilePath, "create", updateflagNamespace, updateflagApiName)
 
 				case mode.IsRegular():
