@@ -62,9 +62,10 @@ var addApiCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + addApiCmdLiteral + " called")
 		validateAddApiCommand()
+
 		swaggerCmNames := make([]string, len(flagSwaggerFilePaths))
 		balInterceptorsCmName := flagApiName + "-bal-interceptors"
-		//javaInterceptorsCmNames := flagApiName + "-java-interceptor"
+		var javaInterceptorsCmNames []string
 
 		// temp dir for all bal interceptors
 		balInterceptorsTempDir, err := ioutil.TempDir("", "prefix")
@@ -92,7 +93,10 @@ var addApiCmd = &cobra.Command{
 
 				// copy all bal interceptors to the temp dir
 				copyBalInterceptors(flagSwaggerFilePath, balInterceptorsTempDir)
-				//javaInterceptors = handleJavaInterceptors(flagSwaggerFilePath, "create", flagNamespace, flagApiName)
+
+				// handle java interceptors
+				javaInterceptorsCmName := handleJavaInterceptors(flagSwaggerFilePath, "create", flagNamespace, fmt.Sprintf("%v-%v", flagApiName, i+1))
+				javaInterceptorsCmNames = append(javaInterceptorsCmNames, javaInterceptorsCmName...)
 			//check if the swagger path is a file
 			case mode.IsRegular():
 				//creating kubernetes configmap with swagger definition
@@ -106,7 +110,7 @@ var addApiCmd = &cobra.Command{
 			//handle interceptors
 			handleBalInterceptors(balInterceptorsCmName, balInterceptorsTempDir, "create", flagNamespace)
 			//create API
-			//createAPI(flagApiName, flagNamespace, swaggerCmNames, flagReplicas, "", balInterceptors, flagOverride, javaInterceptors)
+			createAPI(flagApiName, flagNamespace, swaggerCmNames, flagReplicas, "", balInterceptorsCmName, flagOverride, javaInterceptorsCmNames)
 		}
 	},
 }
@@ -126,6 +130,7 @@ func copyBalInterceptors(projectPath string, tempDir string) {
 			return nil
 		}
 		if filepath.Ext(path) == ".bal" {
+			// add random value to eliminate same file name
 			rand.Seed(time.Now().UnixNano())
 			fileSplits := strings.SplitN(info.Name(), ".", 2)
 			fileName := fmt.Sprintf("%v-%v.%v", fileSplits[0], rand.Intn(1000), fileSplits[1])
@@ -258,11 +263,11 @@ func handleBalInterceptors(configMapName string, path string, operation string, 
 	}
 }
 
-func handleJavaInterceptors(path string, operation string, namespace string, flagApiName string) []string {
+func handleJavaInterceptors(path string, operation string, namespace string, cmPrefixName string) []string {
 	var interceptors []string
 	var javaInterceptorsConfNames []string
 	//get interceptors if available
-	interceptorsPath := filepath.Join(path, filepath.FromSlash("libs"))
+	interceptorsPath := filepath.Join(path, "libs")
 	//check interceptors dir is not empty
 	file, err := os.Open(interceptorsPath)
 	if err != nil {
@@ -281,14 +286,14 @@ func handleJavaInterceptors(path string, operation string, namespace string, fla
 	for _, filePath := range interceptors {
 		if filepath.Ext(filePath) == ".jar" {
 			//creating kubernetes configmap for each java interceptor
-			javaInterceptorsConfNames = append(javaInterceptorsConfNames, flagApiName+"-"+filepath.Base(filePath))
-			fmt.Println("creating configmap with java interceptor " + flagApiName + "-" + filepath.Base(filePath))
-			errConfInt := createConfigMapWithNamespace(flagApiName+"-"+filepath.Base(filePath), filePath, namespace, operation)
+			cmName := cmPrefixName + "-" + filepath.Base(filePath)
+			javaInterceptorsConfNames = append(javaInterceptorsConfNames, cmName)
+			fmt.Println("creating configmap with java interceptor " + cmName)
+			errConfInt := createConfigMapWithNamespace(cmPrefixName+"-"+filepath.Base(filePath), filePath, namespace, operation)
 			if errConfInt != nil {
-				utils.HandleErrorAndExit("Error creating configmap for java-interceptor"+flagApiName+"-"+filepath.Base(filePath), err)
+				utils.HandleErrorAndExit("Error creating configmap for java-interceptor "+cmName, err)
 			}
 		}
-
 	}
 	return javaInterceptorsConfNames
 }
