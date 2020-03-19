@@ -1,5 +1,8 @@
 go 1.12
 
+// remove this; for testing purpose
+replace github.com/wso2/k8s-apim-operator/apim-operator => /Users/renuka/go/src/github.com/wso2/k8s-apim-operator/apim-operator
+
 require (
 	github.com/Jeffail/gabs v1.2.0
 	github.com/getkin/kin-openapi v0.2.0

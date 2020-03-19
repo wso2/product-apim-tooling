@@ -36,10 +36,12 @@ import (
 )
 
 var flagApiName string
-var flagSwaggerFilePath string
+var flagSwaggerFilePaths []string
 var flagReplicas int
 var flagNamespace string
 var flagOverride bool
+var flagApiVersion string
+var flagApiMode string
 
 const addApiCmdLiteral = "api"
 const addApiCmdShortDesc = "handle APIs in kubernetes cluster "
@@ -60,53 +62,65 @@ var addApiCmd = &cobra.Command{
 	Example: addApiExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + addApiCmdLiteral + " called")
-		configMapName := flagApiName + "-swagger"
-		fi, err := os.Stat(flagSwaggerFilePath)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		switch mode := fi.Mode(); {
-		//check if the swagger path is a Dir
-		case mode.IsDir():
-			//get swagger definition
-			swaggerPath := filepath.Join(flagSwaggerFilePath, filepath.FromSlash("Meta-information/swagger.yaml"))
-			//creating kubernetes configmap with swagger definition
-			fmt.Println("creating configmap with swagger definition")
-			errConf := createConfigMapWithNamespace(configMapName, swaggerPath, flagNamespace, k8sUtils.K8sCreate)
-			if errConf != nil {
-				utils.HandleErrorAndExit("Error creating configmap", err)
+		validateAddApiCommand()
+		swaggerCmNames := make([]string, len(flagSwaggerFilePaths))
+
+		for i, flagSwaggerFilePath := range flagSwaggerFilePaths {
+			fmt.Println(fmt.Sprintf("Processing swagger %v: %v", i+1, flagSwaggerFilePath))
+			swaggerCmNames[i] = fmt.Sprintf("%v-swagger-%v", flagApiName, i+1)
+
+			fi, _ := os.Stat(flagSwaggerFilePath) // error already handled and ignore error
+			switch mode := fi.Mode(); {
+			//check if the swagger path is a Dir
+			case mode.IsDir():
+				//get swagger definition
+				swaggerPath := filepath.Join(flagSwaggerFilePath, filepath.FromSlash("Meta-information/swagger.yaml"))
+				//creating kubernetes configmap with swagger definition
+				fmt.Println("creating configmap with swagger definition")
+				errConf := createConfigMapWithNamespace(swaggerCmNames[i], swaggerPath, flagNamespace, k8sUtils.K8sCreate)
+				if errConf != nil {
+					utils.HandleErrorAndExit("Error creating configmap", nil)
+				}
+				//handle interceptors
+				balInterceptorsConfName = flagApiName + "-interceptors"
+				balInterceptors = handleBalInterceptors(balInterceptorsConfName, flagSwaggerFilePath, "create", flagNamespace)
+				javaInterceptors = handleJavaInterceptors(flagSwaggerFilePath, "create", flagNamespace, flagApiName)
+			//check if the swagger path is a file
+			case mode.IsRegular():
+				//creating kubernetes configmap with swagger definition
+				fmt.Println("creating configmap with swagger definition")
+				errConf := createConfigMapWithNamespace(swaggerCmNames[i], flagSwaggerFilePath, flagNamespace, k8sUtils.K8sCreate)
+				if errConf != nil {
+					utils.HandleErrorAndExit("Error creating configmap", nil)
+				}
 			}
-			//handle interceptors
-			balInterceptorsConfName = flagApiName + "-interceptors"
-			balInterceptors = handleBalInterceptors(balInterceptorsConfName, flagSwaggerFilePath, "create", flagNamespace)
-			javaInterceptors = handleJavaInterceptors(flagSwaggerFilePath, "create", flagNamespace, flagApiName)
-		//check if the swagger path is a file
-		case mode.IsRegular():
-			//creating kubernetes configmap with swagger definition
-			fmt.Println("creating configmap with swagger definition")
-			errConf := createConfigMapWithNamespace(configMapName, flagSwaggerFilePath, flagNamespace, k8sUtils.K8sCreate)
-			if errConf != nil {
-				utils.HandleErrorAndExit("Error creating configmap", err)
-			}
+			//create API
+			createAPI(flagApiName, flagNamespace, swaggerCmNames, flagReplicas, "", balInterceptors, flagOverride, javaInterceptors)
 		}
-		//create API
-		createAPI(flagApiName, flagNamespace, configMapName, flagReplicas, "", balInterceptors, flagOverride, javaInterceptors)
 	},
 }
 
-// validateAddApiRequiredFlagsAndK8sMode validates for required flags and if invalid print error and exit
+// validateAddApiCommand validates for required flags and if invalid print error and exit
 // mode should be k8s
-func validateAddApiRequiredFlagsAndK8sMode() {
+func validateAddApiCommand() {
+	// validate mode
 	configVars := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
 	if !configVars.Config.KubernetesMode {
 		utils.HandleErrorAndExit("set mode to kubernetes with command: apictl set --mode kubernetes",
 			errors.New("mode should be set to kubernetes"))
 	}
 
-	if flagApiName == "" || flagSwaggerFilePath == "" {
+	// validate required flags
+	if flagApiName == "" || len(flagSwaggerFilePaths) == 0 {
 		utils.HandleErrorAndExit("Required flags are missing. API name and swagger file paths are required",
 			errors.New("required flags missing"))
+	}
+
+	// validate --from-file flag values
+	for _, swaggerFilePath := range flagSwaggerFilePaths {
+		if _, err := os.Stat(swaggerFilePath); err != nil {
+			utils.HandleErrorAndExit("", err)
+		}
 	}
 }
 
@@ -132,7 +146,7 @@ func createConfigMapWithNamespace(configMapName string, filePath string, namespa
 	return nil
 }
 
-func createAPI(name string, namespace string, configMapName string, replicas int, timestamp string, balInterceptors string, override bool, javaInterceptors []string) {
+func createAPI(name string, namespace string, configMapNames []string, replicas int, timestamp string, balInterceptors string, override bool, javaInterceptors []string) {
 	//get API definition from file
 	apiConfigMapData, _ := box.Get("/kubernetes_resources/api_cr.yaml")
 	apiConfigMap := &wso2v1alpha1.API{}
@@ -143,7 +157,7 @@ func createAPI(name string, namespace string, configMapName string, replicas int
 	//assigning values to API cr
 	apiConfigMap.Name = name
 	apiConfigMap.Namespace = namespace
-	apiConfigMap.Spec.Definition.SwaggerConfigmapName = configMapName
+	apiConfigMap.Spec.Definition.SwaggerConfigmapNames = configMapNames
 	apiConfigMap.Spec.Replicas = replicas
 	apiConfigMap.Spec.Override = override
 	if timestamp != "" {
@@ -256,8 +270,11 @@ func handleJavaInterceptors(path string, operation string, namespace string, fla
 func init() {
 	addCmd.AddCommand(addApiCmd)
 	addApiCmd.Flags().StringVarP(&flagApiName, "name", "n", "", "Name of the API")
-	addApiCmd.Flags().StringVarP(&flagSwaggerFilePath, "from-file", "f", "", "Path to swagger file")
+	addApiCmd.Flags().StringArrayVarP(&flagSwaggerFilePaths, "from-file", "f", []string{}, "Path to swagger file")
 	addApiCmd.Flags().IntVar(&flagReplicas, "replicas", 1, "replica set")
 	addApiCmd.Flags().StringVar(&flagNamespace, "namespace", "", "namespace of API")
 	addApiCmd.Flags().BoolVarP(&flagOverride, "override", "", false, "Property to override the existing docker image with same name and version")
+	addApisCmd.Flags().StringVarP(&flagApiVersion, "version", "v", utils.DefaultApiVersion, "Property to override the existing docker image with same name and version")
+	addApisCmd.Flags().StringVarP(&flagApiMode, "mode", "m", utils.PrivateJetModeConst,
+		fmt.Sprintf("Property to override the deploying mode. Available modes: %v, %v", utils.PrivateJetModeConst, utils.SidecarModeConst))
 }
