@@ -70,7 +70,8 @@ const (
 const importAPICmdExamples = utils.ProjectName + ` ` + importAPICmdLiteral + ` -f qa/TwitterAPI.zip -e dev
 ` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f staging/FacebookAPI.zip -e production
 ` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f ~/myapi -e production --update
-` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f ~/myapi -e production --update`
+` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f ~/myapi -e production --update
+NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory`
 
 // ImportAPICmd represents the importAPI command
 var ImportAPICmd = &cobra.Command{

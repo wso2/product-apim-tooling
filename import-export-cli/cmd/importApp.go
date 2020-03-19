@@ -51,7 +51,8 @@ const importAppCmdLongDesc = "Import an Application to an environment"
 
 const importAppCmdExamples = utils.ProjectName + ` ` + importAppCmdLiteral + ` -f qa/apps/sampleApp.zip -e dev
 ` + utils.ProjectName + ` ` + importAppCmdLiteral + ` -f staging/apps/sampleApp.zip -e prod -o testUser
-` + utils.ProjectName + ` ` + importAppCmdLiteral + ` -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -e prod`
+` + utils.ProjectName + ` ` + importAppCmdLiteral + ` -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -e prod
+NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory`
 
 // importAppCmd represents the importApp command
 var ImportAppCmd = &cobra.Command{
@@ -221,6 +222,6 @@ func init() {
 		"Skip importing keys of application")
 	ImportAppCmd.Flags().BoolVarP(&importAppUpdateApplication, "update", "", false,
 		"Update application or create new")
-
-	_ = ImportAPICmd.MarkFlagRequired("environment")
+	_ = ImportAppCmd.MarkFlagRequired("file")
+	_ = ImportAppCmd.MarkFlagRequired("environment")
 }

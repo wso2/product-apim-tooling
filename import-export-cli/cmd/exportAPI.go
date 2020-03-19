@@ -49,7 +49,7 @@ const exportAPICmdLongDesc = "Export APIs from an environment"
 
 const exportAPICmdExamples = utils.ProjectName + ` ` + exportAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin -e dev
 ` + utils.ProjectName + ` ` + exportAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 -r admin -e production
-NOTE: Both the flags (--name (-n), --version (-v)) are mandatory`
+NOTE: All the 3 flags (--name (-n), --version (-v) and --environment (-e)) are mandatory`
 
 // ExportAPICmd represents the exportAPI command
 var ExportAPICmd = &cobra.Command{
@@ -172,5 +172,7 @@ func init() {
 	ExportAPICmd.Flags().BoolVarP(&exportAPIPreserveStatus, "preserveStatus", "", true,
 		"Preserve API status when exporting. Otherwise API will be exported in CREATED status")
 	ExportAPICmd.Flags().StringVarP(&exportAPIFormat, "format", "", "", "File format of exported archive(json or yaml)")
+	_ = ExportAPICmd.MarkFlagRequired("name")
+	_ = ExportAPICmd.MarkFlagRequired("version")
 	_ = ExportAPICmd.MarkFlagRequired("environment")
 }

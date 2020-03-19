@@ -43,7 +43,7 @@ const exportAppCmdLongDesc = "Export an Application from a specified  environmen
 
 const exportAppCmdExamples = utils.ProjectName + ` ` + exportAppCmdLiteral + ` -n SampleApp -o admin -e dev
 ` + utils.ProjectName + ` ` + exportAppCmdLiteral + ` -n SampleApp -o admin -e prod
-NOTE: Flag --name (-n) and --owner (-o) are mandatory`
+NOTE: All the 3 flags (--name (-n), --owner (-o) and --environment (-e)) are mandatory`
 
 // exportAppCmd represents the exportApp command
 var ExportAppCmd = &cobra.Command{
@@ -150,4 +150,6 @@ func init() {
 	ExportAppCmd.Flags().BoolVarP(&exportAppWithKeys, "withKeys", "",
 		false, "Export keys for the application")
 	_ = ExportAppCmd.MarkFlagRequired("environment")
+	_ = ExportAppCmd.MarkFlagRequired("owner")
+	_ = ExportAppCmd.MarkFlagRequired("name")
 }
