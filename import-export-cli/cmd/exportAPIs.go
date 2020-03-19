@@ -37,7 +37,8 @@ const exportAPIsCmdShortDesc = "Export APIs for migration"
 const exportAPIsCmdLongDesc = "Export all the APIs of a tenant from an APIM 2.6.0 environment environment, to be imported " +
 	"into 3.0.0 environment"
 const exportAPIsCmdExamples = utils.ProjectName + ` ` + exportAPIsCmdLiteral + ` -e production-2.6.0 -u wso2admin@wso2.org -p 12345 -t wso2.org -k --force
-		` + utils.ProjectName + ` ` + exportAPIsCmdLiteral + ` -e production-2.6.0 -u admin -p admin -k`
+` + utils.ProjectName + ` ` + exportAPIsCmdLiteral + ` -e production-2.6.0 -u admin -p admin -k
+NOTE: The flag (--environment (-e)) is mandatory`
 
 var apiExportDir string
 var apiListOffset int //from which index of API, the APIs will be fetched from APIM server

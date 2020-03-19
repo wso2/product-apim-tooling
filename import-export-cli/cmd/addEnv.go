@@ -51,7 +51,9 @@ const addEnvCmdExamples = utils.ProjectName + ` ` + addEnvCmdLiteral + ` -e prod
 
 ` + utils.ProjectName + ` ` + addEnvCmdLiteral + ` -e dev --apim https://localhost:9443 \
 --token	https://localhost:8243/token \
---registration https://localhost:9443/client-registration/v0.16/register`
+--registration https://localhost:9443/client-registration/v0.16/register
+
+NOTE: All the 4 flags (--registration, --apim, --token and --environment (-e)) are mandatory`
 
 // addEnvCmd represents the addEnv command
 var addEnvCmd = &cobra.Command{
@@ -142,4 +144,8 @@ func init() {
 	addEnvCmd.Flags().StringVar(&flagRegistrationEndpoint, "registration", "",
 		"Registration endpoint for the environment")
 	addEnvCmd.Flags().StringVar(&flagAdminEndpoint, "admin", "", "Admin endpoint for the environment")
+	_ = addEnvCmd.MarkFlagRequired("environment")
+	_ = addEnvCmd.MarkFlagRequired("registration")
+	_ = addEnvCmd.MarkFlagRequired("token")
+	_ = addEnvCmd.MarkFlagRequired("apim")
 }

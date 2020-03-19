@@ -97,7 +97,8 @@ const appsCmdLongDesc = "Display a list of Applications of the user in the envir
 const appsCmdExamples = utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e dev
 ` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e dev
 ` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e prod
-` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e staging`
+` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e staging
+NOTE: The flag (--environment (-e)) is mandatory`
 
 // appsCmd represents the apps command
 var appsCmd = &cobra.Command{
