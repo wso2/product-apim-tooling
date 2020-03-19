@@ -89,7 +89,7 @@ var updateApiCmd = &cobra.Command{
 					}
 					//handle interceptors
 					updatedInterceptorConfName = updateflagApiName + "-interceptors-up-" + timestamp
-					//updatedBalInterceptors = handleBalInterceptors(updatedInterceptorConfName, updateflagSwaggerFilePath, "create", updateflagNamespace)
+					handleBalInterceptors(updatedInterceptorConfName, updateflagSwaggerFilePath, "create", updateflagNamespace)
 					updatedJavaInterceptors = handleJavaInterceptors(updateflagSwaggerFilePath, "create", updateflagNamespace, updateflagApiName)
 
 				case mode.IsRegular():
@@ -102,7 +102,7 @@ var updateApiCmd = &cobra.Command{
 				}
 				//update the API
 				fmt.Println("updating the API Kind")
-				createAPI(updateflagApiName, updateflagNamespace, []string{updateConfigMapName}, updateflagReplicas, timestamp, updatedBalInterceptors, false, updatedJavaInterceptors)
+				createAPI(updateflagApiName, updateflagNamespace, []string{updateConfigMapName}, updateflagReplicas, timestamp, updatedBalInterceptors, false, updatedJavaInterceptors, flagApiMode, flagApiMode)
 			}
 		} else {
 			utils.HandleErrorAndExit("set mode to kubernetes with command: apictl set --mode kubernetes",
@@ -119,4 +119,7 @@ func init() {
 	updateApiCmd.Flags().StringVarP(&updateflagSwaggerFilePath, "from-file", "f", "", "Path to swagger file")
 	updateApiCmd.Flags().IntVar(&updateflagReplicas, "replicas", 1, "replica set")
 	updateApiCmd.Flags().StringVar(&updateflagNamespace, "namespace", "", "namespace of API")
+	updateApiCmd.Flags().StringVarP(&flagApiVersion, "version", "v", utils.DefaultApiVersion, "Property to override the existing docker image with same name and version")
+	updateApiCmd.Flags().StringVarP(&flagApiMode, "mode", "m", utils.PrivateJetModeConst,
+		fmt.Sprintf("Property to override the deploying mode. Available modes: %v, %v", utils.PrivateJetModeConst, utils.SidecarModeConst))
 }

@@ -110,7 +110,7 @@ var addApiCmd = &cobra.Command{
 			//handle interceptors
 			handleBalInterceptors(balInterceptorsCmName, balInterceptorsTempDir, "create", flagNamespace)
 			//create API
-			createAPI(flagApiName, flagNamespace, swaggerCmNames, flagReplicas, "", balInterceptorsCmName, flagOverride, javaInterceptorsCmNames)
+			createAPI(flagApiName, flagNamespace, swaggerCmNames, flagReplicas, "", balInterceptorsCmName, flagOverride, javaInterceptorsCmNames, flagApiMode, flagApiVersion)
 		}
 	},
 }
@@ -192,7 +192,7 @@ func createConfigMapWithNamespace(configMapName string, filePath string, namespa
 	return nil
 }
 
-func createAPI(name string, namespace string, configMapNames []string, replicas int, timestamp string, balInterceptors string, override bool, javaInterceptors []string) {
+func createAPI(name string, namespace string, configMapNames []string, replicas int, timestamp string, balInterceptors string, override bool, javaInterceptors []string, apiMode string, apiVersion string) {
 	//get API definition from file
 	apiConfigMapData, _ := box.Get("/kubernetes_resources/api_cr.yaml")
 	apiConfigMap := &wso2v1alpha1.API{}
@@ -220,6 +220,13 @@ func createAPI(name string, namespace string, configMapNames []string, replicas 
 	} else {
 		apiConfigMap.Spec.Definition.Interceptors.Java = []string{}
 	}
+	if apiMode != "" {
+		apiConfigMap.Spec.Mode = wso2v1alpha1.Mode(apiMode)
+	}
+	if apiVersion != "" {
+		apiConfigMap.Spec.Version = apiVersion
+	}
+
 	byteVal, errMarshal := yaml.Marshal(apiConfigMap)
 	if errMarshal != nil {
 		utils.HandleErrorAndExit("Error marshal api configmap ", errMarshal)
