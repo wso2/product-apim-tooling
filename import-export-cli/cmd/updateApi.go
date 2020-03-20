@@ -43,7 +43,7 @@ const updateCmdExamples = utils.ProjectName + " " + updateCmdLiteral + " " + add
 
 var updatedInterceptorConfName string
 var updatedJavaInterceptors []string
-var updatedBalInterceptors string
+var updatedBalInterceptors []string
 
 // updateCmd represents the update command
 var updateCmd = &cobra.Command{
@@ -119,7 +119,7 @@ func init() {
 	updateApiCmd.Flags().StringVarP(&updateflagSwaggerFilePath, "from-file", "f", "", "Path to swagger file")
 	updateApiCmd.Flags().IntVar(&updateflagReplicas, "replicas", 1, "replica set")
 	updateApiCmd.Flags().StringVar(&updateflagNamespace, "namespace", "", "namespace of API")
-	updateApiCmd.Flags().StringVarP(&flagApiVersion, "version", "v", utils.DefaultApiVersion, "Property to override the existing docker image with same name and version")
-	updateApiCmd.Flags().StringVarP(&flagApiMode, "mode", "m", utils.PrivateJetModeConst,
+	updateApiCmd.Flags().StringVarP(&flagApiVersion, "version", "v", "", "Property to override the existing docker image with same name and version")
+	updateApiCmd.Flags().StringVarP(&flagApiMode, "mode", "m", "",
 		fmt.Sprintf("Property to override the deploying mode. Available modes: %v, %v", utils.PrivateJetModeConst, utils.SidecarModeConst))
 }

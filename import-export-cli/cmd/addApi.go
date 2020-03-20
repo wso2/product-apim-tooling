@@ -35,7 +35,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
-	"time"
 )
 
 var flagApiName string
@@ -64,19 +63,12 @@ var addApiCmd = &cobra.Command{
 		validateAddApiCommand()
 
 		swaggerCmNames := make([]string, len(flagSwaggerFilePaths))
-		balInterceptorsCmName := flagApiName + "-bal-interceptors"
+		var balInterceptorsCmNames []string
 		var javaInterceptorsCmNames []string
-
-		// temp dir for all bal interceptors
-		balInterceptorsTempDir, err := ioutil.TempDir("", "prefix")
-		if err != nil {
-			utils.HandleErrorAndExit("Error creating temporary directory", err)
-		}
-		defer os.RemoveAll(balInterceptorsTempDir)
 
 		for i, flagSwaggerFilePath := range flagSwaggerFilePaths {
 			fmt.Println(fmt.Sprintf("Processing swagger %v: %v", i+1, flagSwaggerFilePath))
-			swaggerCmNames[i] = fmt.Sprintf("%v-swagger-%v", flagApiName, i+1)
+			swaggerCmNames[i] = fmt.Sprintf("%v-%v-swagger", flagApiName, i+1)
 
 			fi, _ := os.Stat(flagSwaggerFilePath) // error already handled and ignore error
 			switch mode := fi.Mode(); {
@@ -92,11 +84,13 @@ var addApiCmd = &cobra.Command{
 				}
 
 				// copy all bal interceptors to the temp dir
-				copyBalInterceptors(flagSwaggerFilePath, balInterceptorsTempDir)
+				balInterceptorsCmName := fmt.Sprintf("%v-%v-bal-interceptors", flagApiName, i+1)
+				balInterceptorsCmNames = append(balInterceptorsCmNames, balInterceptorsCmName)
+				handleBalInterceptors(balInterceptorsCmName, flagSwaggerFilePath, "create", flagNamespace)
 
 				// handle java interceptors
-				javaInterceptorsCmName := handleJavaInterceptors(flagSwaggerFilePath, "create", flagNamespace, fmt.Sprintf("%v-%v", flagApiName, i+1))
-				javaInterceptorsCmNames = append(javaInterceptorsCmNames, javaInterceptorsCmName...)
+				tempJavaIntCms := handleJavaInterceptors(flagSwaggerFilePath, "create", flagNamespace, fmt.Sprintf("%v-%v", flagApiName, i+1))
+				javaInterceptorsCmNames = append(javaInterceptorsCmNames, tempJavaIntCms...)
 			//check if the swagger path is a file
 			case mode.IsRegular():
 				//creating kubernetes configmap with swagger definition
@@ -107,16 +101,15 @@ var addApiCmd = &cobra.Command{
 				}
 			}
 		}
-		//handle interceptors
-		fmt.Println("creating configmap with ballerina interceptors")
-		handleBalInterceptors(balInterceptorsCmName, balInterceptorsTempDir, "create", flagNamespace)
+
 		//create API
 		fmt.Println("creating API definition")
-		createAPI(flagApiName, flagNamespace, swaggerCmNames, flagReplicas, "", balInterceptorsCmName, flagOverride, javaInterceptorsCmNames, flagApiMode, flagApiVersion)
+		createAPI(flagApiName, flagNamespace, swaggerCmNames, flagReplicas, "", balInterceptorsCmNames, flagOverride, javaInterceptorsCmNames, flagApiMode, flagApiVersion)
 	},
 }
 
-func copyBalInterceptors(projectPath string, tempDir string) {
+func copyBalInterceptors(projectPath string, tempDir string) bool {
+	found := false
 	// get interceptors if available
 	interceptorsPath := filepath.Join(projectPath, "Interceptors")
 	// check interceptors dir is not empty
@@ -131,10 +124,10 @@ func copyBalInterceptors(projectPath string, tempDir string) {
 			return nil
 		}
 		if filepath.Ext(path) == ".bal" {
+			found = true
 			// add random value to eliminate same file name
-			rand.Seed(time.Now().UnixNano())
 			fileSplits := strings.SplitN(info.Name(), ".", 2)
-			fileName := fmt.Sprintf("%v-%v.%v", fileSplits[0], rand.Intn(1000), fileSplits[1])
+			fileName := fmt.Sprintf("%v-%v.%v", fileSplits[0], rand.Intn(10000), fileSplits[1])
 			err := utils.CopyFile(path, filepath.Join(tempDir, fileName))
 			if err != nil {
 				utils.HandleErrorAndExit("cannot read bal interceptors in the Interceptors directory", err)
@@ -145,6 +138,8 @@ func copyBalInterceptors(projectPath string, tempDir string) {
 	if err != nil {
 		utils.HandleErrorAndExit("cannot read bal interceptors in the Interceptors directory", err)
 	}
+
+	return found
 }
 
 // validateAddApiCommand validates for required flags and if invalid print error and exit
@@ -193,7 +188,7 @@ func createConfigMapWithNamespace(configMapName string, filePath string, namespa
 	return nil
 }
 
-func createAPI(name string, namespace string, configMapNames []string, replicas int, timestamp string, balInterceptors string, override bool, javaInterceptors []string, apiMode string, apiVersion string) {
+func createAPI(name string, namespace string, configMapNames []string, replicas int, timestamp string, balInterceptors []string, override bool, javaInterceptors []string, apiMode string, apiVersion string) {
 	//get API definition from file
 	apiConfigMapData, _ := box.Get("/kubernetes_resources/api_cr.yaml")
 	apiConfigMap := &wso2v1alpha1.API{}
@@ -211,7 +206,7 @@ func createAPI(name string, namespace string, configMapNames []string, replicas 
 		//set update timestamp
 		apiConfigMap.Spec.UpdateTimeStamp = timestamp
 	}
-	if balInterceptors != "" {
+	if len(balInterceptors) > 0 {
 		// set bal interceptors configmap name in API cr
 		apiConfigMap.Spec.Definition.Interceptors.Ballerina = balInterceptors
 	}
@@ -263,10 +258,21 @@ func createAPI(name string, namespace string, configMapNames []string, replicas 
 }
 
 func handleBalInterceptors(configMapName string, path string, operation string, namespace string) {
+	//get interceptors if available
+	interceptorsPath := filepath.Join(path, "Interceptors")
+	//check interceptors dir is not empty
+	file, err := os.Open(interceptorsPath)
+	if err != nil {
+		utils.HandleErrorAndExit("cannot open interceptors Dir", err)
+	}
+	defer file.Close()
+	if _, err = file.Readdir(1); err != nil {
+		return
+	}
+
 	//creating kubernetes configmap with interceptors
 	fmt.Println("creating configmap with ballerina interceptors")
-	err := createConfigMapWithNamespace(configMapName, path, namespace, operation)
-	if err != nil {
+	if err := createConfigMapWithNamespace(configMapName, interceptorsPath, namespace, operation); err != nil {
 		utils.HandleErrorAndExit("Error creating configmap for interceptors", err)
 	}
 }
@@ -277,11 +283,9 @@ func handleJavaInterceptors(path string, operation string, namespace string, cmP
 	//get interceptors if available
 	interceptorsPath := filepath.Join(path, "libs")
 	//check interceptors dir is not empty
-	file, err := os.Open(interceptorsPath)
-	if err != nil {
-		utils.HandleErrorAndExit("cannot open interceptors Dir", err)
+	if exists, err := utils.IsDirExists(interceptorsPath); !exists {
+		utils.HandleErrorAndExit("cannot open java interceptors Dir", err)
 	}
-	defer file.Close()
 
 	//get all jars in libs dir
 	errReadInterceptors := filepath.Walk(interceptorsPath, func(path string, info os.FileInfo, err error) error {
@@ -289,7 +293,7 @@ func handleJavaInterceptors(path string, operation string, namespace string, cmP
 		return nil
 	})
 	if errReadInterceptors != nil {
-		utils.HandleErrorAndExit("cannot read interceptors in the libs", err)
+		utils.HandleErrorAndExit("cannot read interceptors in the libs", errReadInterceptors)
 	}
 	for _, filePath := range interceptors {
 		if filepath.Ext(filePath) == ".jar" {
@@ -299,7 +303,7 @@ func handleJavaInterceptors(path string, operation string, namespace string, cmP
 			fmt.Println("creating configmap with java interceptor " + cmName)
 			errConfInt := createConfigMapWithNamespace(cmPrefixName+"-"+filepath.Base(filePath), filePath, namespace, operation)
 			if errConfInt != nil {
-				utils.HandleErrorAndExit("Error creating configmap for java-interceptor "+cmName, err)
+				utils.HandleErrorAndExit("Error creating configmap for java-interceptor "+cmName, errConfInt)
 			}
 		}
 	}
@@ -313,7 +317,7 @@ func init() {
 	addApiCmd.Flags().IntVar(&flagReplicas, "replicas", 1, "replica set")
 	addApiCmd.Flags().StringVar(&flagNamespace, "namespace", "", "namespace of API")
 	addApiCmd.Flags().BoolVarP(&flagOverride, "override", "", false, "Property to override the existing docker image with same name and version")
-	addApisCmd.Flags().StringVarP(&flagApiVersion, "version", "v", utils.DefaultApiVersion, "Property to override the existing docker image with same name and version")
-	addApisCmd.Flags().StringVarP(&flagApiMode, "mode", "m", utils.PrivateJetModeConst,
+	addApiCmd.Flags().StringVarP(&flagApiVersion, "version", "v", "", "Property to override the existing docker image with same name and version")
+	addApiCmd.Flags().StringVarP(&flagApiMode, "mode", "m", "",
 		fmt.Sprintf("Property to override the deploying mode. Available modes: %v, %v", utils.PrivateJetModeConst, utils.SidecarModeConst))
 }
