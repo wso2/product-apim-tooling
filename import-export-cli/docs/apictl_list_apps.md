@@ -14,7 +14,7 @@ apictl list apps [flags]
 
 ```
 apictl list apps -e dev
-apictl list apps -e dev
+apictl list apps -e dev -o sampleUser
 apictl list apps -e prod
 apictl list apps -e staging
 ```
@@ -25,6 +25,7 @@ apictl list apps -e staging
   -e, --environment string   Environment to be searched
       --format string        Pretty-print outputusing Go templates. Use {{jsonPretty .}} to list all fields
   -h, --help                 help for apps
+  -o, --owner string         Owner of the Application
 ```
 
 ### Options inherited from parent commands
