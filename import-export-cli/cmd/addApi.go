@@ -30,11 +30,9 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"math/rand"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 )
 
 var flagApiName string
@@ -108,40 +106,6 @@ var addApiCmd = &cobra.Command{
 	},
 }
 
-func copyBalInterceptors(projectPath string, tempDir string) bool {
-	found := false
-	// get interceptors if available
-	interceptorsPath := filepath.Join(projectPath, "Interceptors")
-	// check interceptors dir is not empty
-	if exist, err := utils.IsDirExists(interceptorsPath); !exist {
-		utils.HandleErrorAndExit("cannot open interceptors Dir", err)
-	}
-
-	// copy bal interceptors
-	err := filepath.Walk(interceptorsPath, func(path string, info os.FileInfo, err error) error {
-		info.Name()
-		if info.IsDir() {
-			return nil
-		}
-		if filepath.Ext(path) == ".bal" {
-			found = true
-			// add random value to eliminate same file name
-			fileSplits := strings.SplitN(info.Name(), ".", 2)
-			fileName := fmt.Sprintf("%v-%v.%v", fileSplits[0], rand.Intn(10000), fileSplits[1])
-			err := utils.CopyFile(path, filepath.Join(tempDir, fileName))
-			if err != nil {
-				utils.HandleErrorAndExit("cannot read bal interceptors in the Interceptors directory", err)
-			}
-		}
-		return nil
-	})
-	if err != nil {
-		utils.HandleErrorAndExit("cannot read bal interceptors in the Interceptors directory", err)
-	}
-
-	return found
-}
-
 // validateAddApiCommand validates for required flags and if invalid print error and exit
 // mode should be k8s
 func validateAddApiCommand() {
@@ -154,15 +118,20 @@ func validateAddApiCommand() {
 
 	// validate required flags
 	if flagApiName == "" || len(flagSwaggerFilePaths) == 0 {
-		utils.HandleErrorAndExit("Required flags are missing. API name and swagger file paths are required",
+		utils.HandleErrorAndExit("required flags are missing. API name and swagger file paths are required",
 			errors.New("required flags missing"))
 	}
 
 	// validate --from-file flag values
 	for _, swaggerFilePath := range flagSwaggerFilePaths {
 		if _, err := os.Stat(swaggerFilePath); err != nil {
-			utils.HandleErrorAndExit("", err)
+			utils.HandleErrorAndExit("swagger file path or project not found", err)
 		}
+	}
+
+	// validate --mode flag
+	if flagApiMode != "" && flagApiMode != utils.PrivateJetModeConst && flagApiMode != utils.SidecarModeConst {
+		utils.HandleErrorAndExit(fmt.Sprintf("invalid api mode. available modes: %v, %v", utils.PrivateJetModeConst, utils.SidecarModeConst), nil)
 	}
 }
 
