@@ -21,6 +21,7 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
 	"os"
 )
@@ -53,4 +54,24 @@ func GetVersion(name string, envVar string, defaultVersion string, versionValida
 	}
 
 	return version, nil
+}
+
+// CreateControllerConfigs creates configs
+func CreateControllerConfigs(configFile string, maxTimeSec int, resourceTypes ...string) {
+	utils.Logln(utils.LogPrefixInfo + "Installing controller configs")
+
+	// apply all files without printing errors
+	if err := ExecuteCommandWithoutPrintingErrors(Kubectl, K8sApply, "-f", configFile); err != nil {
+		fmt.Println("Waiting for resource creation...")
+
+		// if error then wait for namespace and the resource type security
+		if len(resourceTypes) > 0 {
+			_ = K8sWaitForResourceType(maxTimeSec, resourceTypes...)
+		}
+
+		// apply again with printing errors
+		if err := K8sApplyFromFile(configFile); err != nil {
+			utils.HandleErrorAndExit("Error creating configurations", err)
+		}
+	}
 }

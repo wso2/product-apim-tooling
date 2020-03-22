@@ -187,3 +187,11 @@ func WriteToFileSystem(exportAPIName, exportAPIVersion, exportEnvironment, expor
 	fmt.Println("Find the exported API at " + pFile)
 
 }
+
+// SetToK8sMode sets the "api-ctl" mode to kubernetes
+func SetToK8sMode() {
+	// read the existing config vars
+	configVars := GetMainConfigFromFile(MainConfigFilePath)
+	configVars.Config.KubernetesMode = true
+	WriteConfigFile(configVars, MainConfigFilePath)
+}

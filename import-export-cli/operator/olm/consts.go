@@ -28,3 +28,4 @@ const DefaultVersion = "0.13.0"
 const VersionEnvVariable = "WSO2_OLM_VERSION"
 
 const ApiOperatorYamlUrl = "https://operatorhub.io/install/api-operator.yaml"
+const Wso2ApimOperatorYamlUrl = "https://operatorhub.io/install/wso2apim-operator.yaml"

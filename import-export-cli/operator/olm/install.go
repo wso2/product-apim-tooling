@@ -80,11 +80,9 @@ func InstallOLM(version string) {
 	}
 }
 
-// InstallApiOperator installs WSO2 api-operator from Operator-Hub
-func InstallApiOperator() {
-	utils.Logln(utils.LogPrefixInfo + "Installing API Operator from Operator-Hub")
-
-	err := k8sUtils.K8sApplyFromFile(ApiOperatorYamlUrl)
+// InstallOperator installs an operator from Operator-Hub
+func InstallOperator(operatorYaml string) {
+	err := k8sUtils.K8sApplyFromFile(operatorYaml)
 	if err != nil {
 		utils.HandleErrorAndExit("Error installing API Operator from Operator-Hub", err)
 	}
