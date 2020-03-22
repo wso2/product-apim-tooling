@@ -108,3 +108,6 @@ const DefaultCliApp = "default-apictl-app"
 const DefaultTokenType = "JWT"
 
 var ValidInitialStates = []string{"CREATED", "PUBLISHED"}
+
+const PrivateJetModeConst = "privateJet"
+const SidecarModeConst = "sidecar"
