@@ -55,7 +55,7 @@ func K8sWaitForResourceType(maxTimeSec int, resourceTypes ...string) error {
 }
 
 // K8sCreateSecretFromInputs creates K8S secret with credentials
-func K8sCreateSecretFromInputs(secretName string, server string, username string, password string) {
+func K8sCreateSecretFromInputs(secretName string, namespace string, server string, username string, password string) {
 	if username == "" {
 		username = "N/A"
 		password = "N/A"
@@ -65,6 +65,7 @@ func K8sCreateSecretFromInputs(secretName string, server string, username string
 		"--docker-server", server,
 		"--docker-username", username,
 		"--docker-password", password,
+		"-n", namespace,
 		"--dry-run", "-o", "yaml",
 	)
 
@@ -78,7 +79,7 @@ func K8sCreateSecretFromInputs(secretName string, server string, username string
 	}
 }
 
-func K8sCreateSecretFromFile(secretName string, filePath string, renamedFile string) {
+func K8sCreateSecretFromFile(secretName string, namespace string, filePath string, renamedFile string) {
 	var fromFile string
 	if renamedFile == "" {
 		fromFile = fmt.Sprintf("--from-file=%s", filePath)
@@ -90,6 +91,7 @@ func K8sCreateSecretFromFile(secretName string, filePath string, renamedFile str
 	secret, err := GetCommandOutput(
 		Kubectl, K8sCreate, K8sSecret, "generic",
 		secretName, fromFile,
+		"-n", namespace,
 		"--dry-run", "-o", "yaml",
 	)
 	if err != nil {
