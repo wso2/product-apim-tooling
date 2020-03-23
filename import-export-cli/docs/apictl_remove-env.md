@@ -14,6 +14,7 @@ apictl remove-env [flags]
 
 ```
 apictl remove-env -e production
+NOTE: The flag (--environment (-e)) is mandatory
 ```
 
 ### Options

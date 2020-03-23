@@ -14,7 +14,8 @@ apictl export-apis [--environment <environment-from-which-artifacts-should-be-ex
 
 ```
 apictl export-apis -e production-2.6.0 -u wso2admin@wso2.org -p 12345 -t wso2.org -k --force
-		apictl export-apis -e production-2.6.0 -u admin -p admin -k
+apictl export-apis -e production-2.6.0 -u admin -p admin -k
+NOTE: The flag (--environment (-e)) is mandatory
 ```
 
 ### Options

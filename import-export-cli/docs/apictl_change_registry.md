@@ -19,7 +19,13 @@ apictl change registry
 ### Options
 
 ```
-  -h, --help   help for registry
+  -h, --help                   help for registry
+  -c, --key-file string        Credentials file
+  -p, --password string        Password of the given user
+      --password-stdin         Prompt for password of the given user in the stdin
+  -R, --registry-type string   Registry type: DOCKER_HUB | AMAZON_ECR |GCR | HTTP
+  -r, --repository string      Repository name or URI
+  -u, --username string        Username of the repository
 ```
 
 ### Options inherited from parent commands

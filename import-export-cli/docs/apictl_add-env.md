@@ -27,6 +27,8 @@ apictl add-env -e test \
 apictl add-env -e dev --apim https://localhost:9443 \
 --token	https://localhost:8243/token \
 --registration https://localhost:9443/client-registration/v0.16/register
+
+NOTE: All the 4 flags (--registration, --apim, --token and --environment (-e)) are mandatory
 ```
 
 ### Options

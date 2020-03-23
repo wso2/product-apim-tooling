@@ -94,10 +94,10 @@ func (a app) GroupId() string {
 
 const appsCmdLongDesc = "Display a list of Applications of the user in the environment specified by the flag --environment, -e"
 
-const appsCmdExamples = utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e dev
-` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e dev
-` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e prod
-` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e staging
+const appsCmdExamples = utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e dev 
+` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e dev -o sampleUser
+` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e prod -o sampleUser
+` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e staging -o sampleUser
 NOTE: The flag (--environment (-e)) is mandatory`
 
 // appsCmd represents the apps command
@@ -210,7 +210,9 @@ func printApps(apps []utils.Application, format string) {
 
 func init() {
 	ListCmd.AddCommand(appsCmd)
-
+	
+	appsCmd.Flags().StringVarP(&listAppsCmdAppOwner, "owner", "o", "",
+		"Owner of the Application")
 	appsCmd.Flags().StringVarP(&listAppsCmdEnvironment, "environment", "e",
 		"", "Environment to be searched")
 	appsCmd.Flags().StringVarP(&listAppsCmdFormat, "format", "", "", "Pretty-print output"+

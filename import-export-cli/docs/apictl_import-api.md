@@ -17,6 +17,7 @@ apictl import-api -f qa/TwitterAPI.zip -e dev
 apictl import-api -f staging/FacebookAPI.zip -e production
 apictl import-api -f ~/myapi -e production --update
 apictl import-api -f ~/myapi -e production --update
+NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory
 ```
 
 ### Options

@@ -15,7 +15,7 @@ apictl export-app (--name <name-of-the-application> --owner <owner-of-the-applic
 ```
 apictl export-app -n SampleApp -o admin -e dev
 apictl export-app -n SampleApp -o admin -e prod
-NOTE: Flag --name (-n) and --owner (-o) are mandatory
+NOTE: All the 3 flags (--name (-n), --owner (-o) and --environment (-e)) are mandatory
 ```
 
 ### Options

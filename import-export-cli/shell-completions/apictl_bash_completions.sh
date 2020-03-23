@@ -229,6 +229,14 @@ __apictl_handle_word()
         __apictl_handle_command
     elif [[ $c -eq 0 ]]; then
         __apictl_handle_command
+    elif __apictl_contains_word "${words[c]}" "${command_aliases[@]}"; then
+        # aliashash variable is an associative array which is only supported in bash > 3.
+        if [[ -z "${BASH_VERSION}" || "${BASH_VERSINFO[0]}" -gt 3 ]]; then
+            words[c]=${aliashash[${words[c]}]}
+            __apictl_handle_command
+        else
+            __apictl_handle_noun
+        fi
     else
         __apictl_handle_noun
     fi
@@ -238,6 +246,9 @@ __apictl_handle_word()
 _apictl_add_api()
 {
     last_command="apictl_add_api"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -273,6 +284,9 @@ _apictl_add_api()
 _apictl_add()
 {
     last_command="apictl_add"
+
+    command_aliases=()
+
     commands=()
     commands+=("api")
 
@@ -297,6 +311,9 @@ _apictl_add()
 _apictl_add-env()
 {
     last_command="apictl_add-env"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -328,6 +345,11 @@ _apictl_add-env()
     flags+=("--verbose")
 
     must_have_one_flag=()
+    must_have_one_flag+=("--apim=")
+    must_have_one_flag+=("--environment=")
+    must_have_one_flag+=("-e")
+    must_have_one_flag+=("--registration=")
+    must_have_one_flag+=("--token=")
     must_have_one_noun=()
     noun_aliases=()
 }
@@ -335,6 +357,9 @@ _apictl_add-env()
 _apictl_change_registry()
 {
     last_command="apictl_change_registry"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -346,6 +371,23 @@ _apictl_change_registry()
     flags+=("--help")
     flags+=("-h")
     local_nonpersistent_flags+=("--help")
+    flags+=("--key-file=")
+    two_word_flags+=("-c")
+    local_nonpersistent_flags+=("--key-file=")
+    flags+=("--password=")
+    two_word_flags+=("-p")
+    local_nonpersistent_flags+=("--password=")
+    flags+=("--password-stdin")
+    local_nonpersistent_flags+=("--password-stdin")
+    flags+=("--registry-type=")
+    two_word_flags+=("-R")
+    local_nonpersistent_flags+=("--registry-type=")
+    flags+=("--repository=")
+    two_word_flags+=("-r")
+    local_nonpersistent_flags+=("--repository=")
+    flags+=("--username=")
+    two_word_flags+=("-u")
+    local_nonpersistent_flags+=("--username=")
     flags+=("--insecure")
     flags+=("-k")
     flags+=("--verbose")
@@ -358,6 +400,9 @@ _apictl_change_registry()
 _apictl_change()
 {
     last_command="apictl_change"
+
+    command_aliases=()
+
     commands=()
     commands+=("registry")
 
@@ -382,6 +427,9 @@ _apictl_change()
 _apictl_export-api()
 {
     last_command="apictl_export-api"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -416,6 +464,10 @@ _apictl_export-api()
     must_have_one_flag=()
     must_have_one_flag+=("--environment=")
     must_have_one_flag+=("-e")
+    must_have_one_flag+=("--name=")
+    must_have_one_flag+=("-n")
+    must_have_one_flag+=("--version=")
+    must_have_one_flag+=("-v")
     must_have_one_noun=()
     noun_aliases=()
 }
@@ -423,6 +475,9 @@ _apictl_export-api()
 _apictl_export-apis()
 {
     last_command="apictl_export-apis"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -459,6 +514,9 @@ _apictl_export-apis()
 _apictl_export-app()
 {
     last_command="apictl_export-app"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -488,6 +546,10 @@ _apictl_export-app()
     must_have_one_flag=()
     must_have_one_flag+=("--environment=")
     must_have_one_flag+=("-e")
+    must_have_one_flag+=("--name=")
+    must_have_one_flag+=("-n")
+    must_have_one_flag+=("--owner=")
+    must_have_one_flag+=("-o")
     must_have_one_noun=()
     noun_aliases=()
 }
@@ -495,6 +557,9 @@ _apictl_export-app()
 _apictl_get-keys()
 {
     last_command="apictl_get-keys"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -525,6 +590,12 @@ _apictl_get-keys()
     must_have_one_flag=()
     must_have_one_flag+=("--environment=")
     must_have_one_flag+=("-e")
+    must_have_one_flag+=("--name=")
+    must_have_one_flag+=("-n")
+    must_have_one_flag+=("--provider=")
+    must_have_one_flag+=("-r")
+    must_have_one_flag+=("--version=")
+    must_have_one_flag+=("-v")
     must_have_one_noun=()
     noun_aliases=()
 }
@@ -532,6 +603,9 @@ _apictl_get-keys()
 _apictl_import-api()
 {
     last_command="apictl_import-api"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -573,6 +647,9 @@ _apictl_import-api()
 _apictl_import-app()
 {
     last_command="apictl_import-app"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -607,6 +684,10 @@ _apictl_import-app()
     flags+=("--verbose")
 
     must_have_one_flag=()
+    must_have_one_flag+=("--environment=")
+    must_have_one_flag+=("-e")
+    must_have_one_flag+=("--file=")
+    must_have_one_flag+=("-f")
     must_have_one_noun=()
     noun_aliases=()
 }
@@ -614,6 +695,9 @@ _apictl_import-app()
 _apictl_init()
 {
     last_command="apictl_init"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -647,6 +731,9 @@ _apictl_init()
 _apictl_install_api-operator()
 {
     last_command="apictl_install_api-operator"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -661,6 +748,23 @@ _apictl_install_api-operator()
     flags+=("--help")
     flags+=("-h")
     local_nonpersistent_flags+=("--help")
+    flags+=("--key-file=")
+    two_word_flags+=("-c")
+    local_nonpersistent_flags+=("--key-file=")
+    flags+=("--password=")
+    two_word_flags+=("-p")
+    local_nonpersistent_flags+=("--password=")
+    flags+=("--password-stdin")
+    local_nonpersistent_flags+=("--password-stdin")
+    flags+=("--registry-type=")
+    two_word_flags+=("-R")
+    local_nonpersistent_flags+=("--registry-type=")
+    flags+=("--repository=")
+    two_word_flags+=("-r")
+    local_nonpersistent_flags+=("--repository=")
+    flags+=("--username=")
+    two_word_flags+=("-u")
+    local_nonpersistent_flags+=("--username=")
     flags+=("--insecure")
     flags+=("-k")
     flags+=("--verbose")
@@ -673,6 +777,9 @@ _apictl_install_api-operator()
 _apictl_install()
 {
     last_command="apictl_install"
+
+    command_aliases=()
+
     commands=()
     commands+=("api-operator")
 
@@ -697,6 +804,9 @@ _apictl_install()
 _apictl_list_apis()
 {
     last_command="apictl_list_apis"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -730,6 +840,9 @@ _apictl_list_apis()
 _apictl_list_apps()
 {
     last_command="apictl_list_apps"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -746,6 +859,9 @@ _apictl_list_apps()
     flags+=("--help")
     flags+=("-h")
     local_nonpersistent_flags+=("--help")
+    flags+=("--owner=")
+    two_word_flags+=("-o")
+    local_nonpersistent_flags+=("--owner=")
     flags+=("--insecure")
     flags+=("-k")
     flags+=("--verbose")
@@ -760,6 +876,9 @@ _apictl_list_apps()
 _apictl_list_envs()
 {
     last_command="apictl_list_envs"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -785,6 +904,9 @@ _apictl_list_envs()
 _apictl_list()
 {
     last_command="apictl_list"
+
+    command_aliases=()
+
     commands=()
     commands+=("apis")
     commands+=("apps")
@@ -811,6 +933,9 @@ _apictl_list()
 _apictl_login()
 {
     last_command="apictl_login"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -842,6 +967,9 @@ _apictl_login()
 _apictl_logout()
 {
     last_command="apictl_logout"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -865,6 +993,9 @@ _apictl_logout()
 _apictl_remove-env()
 {
     last_command="apictl_remove-env"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -893,6 +1024,9 @@ _apictl_remove-env()
 _apictl_set()
 {
     last_command="apictl_set"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -926,6 +1060,9 @@ _apictl_set()
 _apictl_uninstall_api-operator()
 {
     last_command="apictl_uninstall_api-operator"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -951,6 +1088,9 @@ _apictl_uninstall_api-operator()
 _apictl_uninstall()
 {
     last_command="apictl_uninstall"
+
+    command_aliases=()
+
     commands=()
     commands+=("api-operator")
 
@@ -975,6 +1115,9 @@ _apictl_uninstall()
 _apictl_update_api()
 {
     last_command="apictl_update_api"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1008,6 +1151,9 @@ _apictl_update_api()
 _apictl_update()
 {
     last_command="apictl_update"
+
+    command_aliases=()
+
     commands=()
     commands+=("api")
 
@@ -1032,6 +1178,9 @@ _apictl_update()
 _apictl_version()
 {
     last_command="apictl_version"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1055,6 +1204,9 @@ _apictl_version()
 _apictl_root_command()
 {
     last_command="apictl"
+
+    command_aliases=()
+
     commands=()
     commands+=("add")
     commands+=("add-env")
@@ -1098,6 +1250,7 @@ __start_apictl()
 {
     local cur prev words cword
     declare -A flaghash 2>/dev/null || :
+    declare -A aliashash 2>/dev/null || :
     if declare -F _init_completion >/dev/null 2>&1; then
         _init_completion -s || return
     else

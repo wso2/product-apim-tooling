@@ -17,12 +17,6 @@ case $state in
   ;;
   level2)
     case $words[2] in
-      add)
-        _arguments '2: :(api help)'
-      ;;
-      change)
-        _arguments '2: :(help registry)'
-      ;;
       install)
         _arguments '2: :(api-operator help)'
       ;;
@@ -34,6 +28,12 @@ case $state in
       ;;
       update)
         _arguments '2: :(api help)'
+      ;;
+      add)
+        _arguments '2: :(api help)'
+      ;;
+      change)
+        _arguments '2: :(help registry)'
       ;;
       *)
         _arguments '*: :_files'
