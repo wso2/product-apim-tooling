@@ -31,8 +31,8 @@ const installApiOperatorCmdLiteral = "api-operator"
 const installApiOperatorCmdShortDesc = "Install API Operator"
 const installApiOperatorCmdLongDesc = "Install API Operator in the configured K8s cluster"
 const installApiOperatorCmdExamples = utils.ProjectName + ` ` + installCmdLiteral + ` ` + installApiOperatorCmdLiteral + `
-` + utils.ProjectName + ` ` + installApiOperatorCmdLiteral + ` -f path/to/operator/configs
-` + utils.ProjectName + ` ` + installApiOperatorCmdLiteral + ` -f path/to/operator/config/file.yaml`
+` + utils.ProjectName + ` ` + installCmdLiteral + ` ` + installApiOperatorCmdLiteral + ` -f path/to/operator/configs
+` + utils.ProjectName + ` ` + installCmdLiteral + ` ` + installApiOperatorCmdLiteral + ` -f path/to/operator/config/file.yaml`
 
 // flags
 var flagApiOperatorFile string
@@ -52,7 +52,7 @@ var installApiOperatorCmd = &cobra.Command{
 	Long:    installApiOperatorCmdLongDesc,
 	Example: installApiOperatorCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + installApiOperatorCmdLiteral + " called")
+		utils.Logln(fmt.Sprintf("%s%s %s called", utils.LogPrefixInfo, installCmdLiteral, installApiOperatorCmdLiteral))
 
 		// is -f or --from-file flag specified
 		isLocalInstallation := flagApiOperatorFile != ""
@@ -72,18 +72,8 @@ var installApiOperatorCmd = &cobra.Command{
 				utils.HandleErrorAndExit("Error in API Operator version", err)
 			}
 			configFile = fmt.Sprintf(k8sUtils.ApiOperatorConfigsUrlTemplate, operatorVersion)
-
 			// getting OLM version
-			olmVersion, err = k8sUtils.GetVersion(
-				"OLM",
-				olm.VersionEnvVariable,
-				olm.DefaultVersion,
-				olm.OlmVersionValidationUrlTemplate,
-				olm.OlmVersionFindVersionUrl,
-			)
-			if err != nil {
-				utils.HandleErrorAndExit("Error in OLM version", err)
-			}
+			olmVersion = olm.GetVersion()
 		}
 
 		// check for installation mode: interactive or batch mode
@@ -107,16 +97,16 @@ var installApiOperatorCmd = &cobra.Command{
 			olm.InstallOLM(olmVersion)
 
 			fmt.Println("[Installing API Operator]")
-			olm.InstallApiOperator()
+			olm.InstallOperator(olm.ApiOperatorYamlUrl)
 		}
 
 		// installing operator and configs if -f flag given
 		// otherwise settings configs only
-		createControllerConfigs(configFile)
+		k8sUtils.CreateControllerConfigs(configFile, 20, k8sUtils.ApiOpCrdSecurity)
 		registry.UpdateConfigsSecrets()
 
 		fmt.Println("[Setting to K8s Mode]")
-		setToK8sMode()
+		utils.SetToK8sMode()
 	},
 }
 
@@ -132,33 +122,6 @@ func getGivenFlagsValues() *map[string]registry.FlagValue {
 	return &flags
 }
 
-// createControllerConfigs creates configs
-func createControllerConfigs(configFile string) {
-	utils.Logln(utils.LogPrefixInfo + "Installing controller configs")
-
-	// apply all files without printing errors
-	if err := k8sUtils.ExecuteCommandWithoutPrintingErrors(k8sUtils.Kubectl, k8sUtils.K8sApply, "-f", configFile); err != nil {
-		fmt.Println("Waiting for resource creation...")
-
-		// if error then wait for namespace and the resource type security
-		_ = k8sUtils.K8sWaitForResourceType(20, k8sUtils.ApiOpCrdSecurity)
-
-		// apply again with printing errors
-		if err := k8sUtils.K8sApplyFromFile(configFile); err != nil {
-			utils.HandleErrorAndExit("Error creating configurations", err)
-		}
-	}
-}
-
-// setToK8sMode sets the "api-ctl" mode to kubernetes
-func setToK8sMode() {
-	// read the existing config vars
-	configVars := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
-	configVars.Config.KubernetesMode = true
-	utils.WriteConfigFile(configVars, utils.MainConfigFilePath)
-}
-
-// init using Cobra
 func init() {
 	installCmd.AddCommand(installApiOperatorCmd)
 	installApiOperatorCmd.Flags().StringVarP(&flagApiOperatorFile, "from-file", "f", "", "Path to API Operator directory")

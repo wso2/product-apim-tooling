@@ -29,4 +29,5 @@ apictl install api-operator
 
 * [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
 * [apictl install api-operator](apictl_install_api-operator.md)	 - Install API Operator
+* [apictl install wso2am-operator](apictl_install_wso2am-operator.md)	 - Install WSO2AM Operator
 

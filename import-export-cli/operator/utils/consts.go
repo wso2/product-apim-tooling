@@ -29,23 +29,31 @@ const K8sConfigMap = "configmap"
 const K8sSecret = "secret"
 const K8sSecretDockerRegType = "docker-registry"
 
-// WSO2 API Operator constats
+// API Operator constats
 const DefaultKubernetesMode = false
 const ApiOpControllerConfigMap = "controller-config"
 const ApiOperator = "api-operator"
 const ApiOpWso2Namespace = "wso2-system"
 
-// CRDs
+// API Operator CRDs
 const ApiOpCrdApi = "apis.wso2.com"
 const ApiOpCrdRateLimiting = "ratelimitings.wso2.com"
 const ApiOpCrdSecurity = "securities.wso2.com"
 const ApiOpCrdTargetEndpoint = "targetendpoints.wso2.com"
 
+// API Operator version
 const ApiOperatorConfigsUrlTemplate = "https://github.com/wso2/K8s-api-operator/releases/download/%s/api-operator-configs.yaml"
 const ApiOperatorVersionValidationUrlTemplate = "https://github.com/wso2/K8s-api-operator/tree/%s"
 const ApiOperatorFindVersionUrl = "https://github.com/wso2/K8s-api-operator/releases"
 const DefaultApiOperatorVersion = "v1.1.0"
 const ApiOperatorVersionEnvVariable = "WSO2_API_OPERATOR_VERSION"
+
+// WSO2 AM Operator version
+const Wso2AmOperatorConfigsUrlTemplate = "https://github.com/wso2/K8s-wso2am-operator/releases/download/%s/wso2am-operator-configs.yaml"
+const Wso2AmOperatorVersionValidationUrlTemplate = "https://github.com/wso2/K8s-wso2am-operator/tree/%s"
+const Wso2AmOperatorFindVersionUrl = "https://github.com/wso2/K8s-wso2am-operator/releases"
+const DefaultWso2AmOperatorVersion = "v1.0.0"
+const Wso2AmOperatorVersionEnvVariable = "WSO2_AM_OPERATOR_VERSION"
 
 // constants of K8s ConfigMap: controller-config
 const CtrlConfigRegType = "registryType"

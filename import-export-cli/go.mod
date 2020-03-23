@@ -2,6 +2,7 @@ go 1.12
 
 require (
 	github.com/Jeffail/gabs v1.2.0
+	github.com/cpuguy83/go-md2man v1.0.10 // indirect
 	github.com/getkin/kin-openapi v0.2.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-openapi/loads v0.19.2
