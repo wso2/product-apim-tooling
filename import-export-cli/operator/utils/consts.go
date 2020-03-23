@@ -48,6 +48,12 @@ const ApiOperatorFindVersionUrl = "https://github.com/wso2/K8s-api-operator/rele
 const DefaultApiOperatorVersion = "v1.1.0"
 const ApiOperatorVersionEnvVariable = "WSO2_API_OPERATOR_VERSION"
 
+// WSO2AM Operator constats
+const Wso2amOperator = "wso2am-operator"
+
+// API Operator CRDs
+const Wso2amOpCrdApimanager = "apimanagers.apim.wso2.com"
+
 // WSO2 AM Operator version
 const Wso2AmOperatorConfigsUrlTemplate = "https://github.com/wso2/K8s-wso2am-operator/releases/download/%s/wso2am-operator-configs.yaml"
 const Wso2AmOperatorVersionValidationUrlTemplate = "https://github.com/wso2/K8s-wso2am-operator/tree/%s"
