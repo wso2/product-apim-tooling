@@ -72,18 +72,8 @@ var installApiOperatorCmd = &cobra.Command{
 				utils.HandleErrorAndExit("Error in API Operator version", err)
 			}
 			configFile = fmt.Sprintf(k8sUtils.ApiOperatorConfigsUrlTemplate, operatorVersion)
-
 			// getting OLM version
-			olmVersion, err = k8sUtils.GetVersion(
-				"OLM",
-				olm.VersionEnvVariable,
-				olm.DefaultVersion,
-				olm.OlmVersionValidationUrlTemplate,
-				olm.OlmVersionFindVersionUrl,
-			)
-			if err != nil {
-				utils.HandleErrorAndExit("Error in OLM version", err)
-			}
+			olmVersion = olm.GetVersion()
 		}
 
 		// check for installation mode: interactive or batch mode
@@ -132,7 +122,6 @@ func getGivenFlagsValues() *map[string]registry.FlagValue {
 	return &flags
 }
 
-// init using Cobra
 func init() {
 	installCmd.AddCommand(installApiOperatorCmd)
 	installApiOperatorCmd.Flags().StringVarP(&flagApiOperatorFile, "from-file", "f", "", "Path to API Operator directory")

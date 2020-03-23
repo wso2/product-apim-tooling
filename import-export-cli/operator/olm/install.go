@@ -87,3 +87,18 @@ func InstallOperator(operatorYaml string) {
 		utils.HandleErrorAndExit("Error installing API Operator from Operator-Hub", err)
 	}
 }
+
+func GetVersion() string {
+	olmVersion, err := k8sUtils.GetVersion(
+		"OLM",
+		VersionEnvVariable,
+		DefaultVersion,
+		OlmVersionValidationUrlTemplate,
+		OlmVersionFindVersionUrl,
+	)
+	if err != nil {
+		utils.HandleErrorAndExit("Error in OLM version", err)
+	}
+
+	return olmVersion
+}
