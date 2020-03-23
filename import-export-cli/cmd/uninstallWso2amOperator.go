@@ -20,42 +20,43 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"strings"
+
+	"github.com/spf13/cobra"
 )
 
-const uninstallApiOperatorCmdLiteral = "api-operator"
-const uninstallApiOperatorCmdShortDesc = "Uninstall API Operator"
-const uninstallApiOperatorCmdLongDesc = "Uninstall API Operator in the configured K8s cluster"
-const uninstallApiOperatorCmdExamples = utils.ProjectName + ` ` + uninstallCmdLiteral + ` ` + uninstallApiOperatorCmdLiteral + `
-` + utils.ProjectName + ` ` + uninstallCmdLiteral + ` ` + uninstallApiOperatorCmdLiteral + ` --force`
+const uninstallWso2amOperatorCmdLiteral = "wso2am-operator"
+const uninstallWso2amOperatorCmdShortDesc = "Uninstall API Operator"
+const uninstallWso2amOperatorCmdLongDesc = "Uninstall API Operator in the configured K8s cluster"
+const uninstallWso2amOperatorCmdExamples = utils.ProjectName + ` ` + uninstallCmdLiteral + ` ` + uninstallWso2amOperatorCmdLiteral + `
+` + utils.ProjectName + ` ` + uninstallCmdLiteral + ` ` + uninstallWso2amOperatorCmdLiteral + ` --force`
 
-var flagForceUninstallApiOperator bool
+var flagForceUninstallWso2amOperator bool
 
-// uninstallApiOperatorCmd represents the uninstall api-operator command
-var uninstallApiOperatorCmd = &cobra.Command{
-	Use:     uninstallApiOperatorCmdLiteral,
-	Short:   uninstallApiOperatorCmdShortDesc,
-	Long:    uninstallApiOperatorCmdLongDesc,
-	Example: uninstallApiOperatorCmdExamples,
+// uninstallWso2amOperatorCmd represents the uninstallWso2amOperator command
+var uninstallWso2amOperatorCmd = &cobra.Command{
+	Use:     uninstallWso2amOperatorCmdLiteral,
+	Short:   uninstallWso2amOperatorCmdShortDesc,
+	Long:    uninstallWso2amOperatorCmdLongDesc,
+	Example: uninstallWso2amOperatorCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		isConfirm := flagForceUninstallApiOperator
+		isConfirm := flagForceUninstallWso2amOperator
 
 		// getting API Operator version
 		operatorVersion, err := k8sUtils.GetVersion(
-			"API Operator",
-			k8sUtils.ApiOperatorVersionEnvVariable,
-			k8sUtils.DefaultApiOperatorVersion,
-			k8sUtils.ApiOperatorVersionValidationUrlTemplate,
-			k8sUtils.ApiOperatorFindVersionUrl,
+			"WSO2AM Operator",
+			k8sUtils.Wso2AmOperatorVersionEnvVariable,
+			k8sUtils.DefaultWso2AmOperatorVersion,
+			k8sUtils.Wso2AmOperatorVersionValidationUrlTemplate,
+			k8sUtils.Wso2AmOperatorFindVersionUrl,
 		)
 		if err != nil {
-			utils.HandleErrorAndExit("Error in API Operator version", err)
+			utils.HandleErrorAndExit("Error in WSO2AM Operator version", err)
 		}
 
-		if !flagForceUninstallApiOperator {
+		if !flagForceUninstallWso2amOperator {
 			isConfirmStr, err := utils.ReadInputString(
 				fmt.Sprintf("\nUninstall \"%s-%s\" and all related resources: APIs, Securities, Rate Limitings and Target Endpoints\n"+
 					"[WARNING] Remove the namespace: %s\n"+
@@ -107,6 +108,6 @@ var uninstallApiOperatorCmd = &cobra.Command{
 }
 
 func init() {
-	uninstallCmd.AddCommand(uninstallApiOperatorCmd)
-	uninstallApiOperatorCmd.Flags().BoolVar(&flagForceUninstallApiOperator, "force", false, "Force uninstall API Operator")
+	uninstallCmd.AddCommand(uninstallWso2amOperatorCmd)
+	uninstallWso2amOperatorCmd.Flags().BoolVar(&flagForceUninstallWso2amOperator, "force", false, "Force uninstall WSO2AM Operator")
 }
