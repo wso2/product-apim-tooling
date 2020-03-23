@@ -21,7 +21,6 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	"github.com/wso2/product-apim-tooling/import-export-cli/operator/olm"
 	"github.com/wso2/product-apim-tooling/import-export-cli/operator/registry"
 	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -57,7 +56,6 @@ var installApiOperatorCmd = &cobra.Command{
 		// is -f or --from-file flag specified
 		isLocalInstallation := flagApiOperatorFile != ""
 		configFile := flagApiOperatorFile
-		var olmVersion string
 
 		if !isLocalInstallation {
 			// getting API Operator version
@@ -72,8 +70,6 @@ var installApiOperatorCmd = &cobra.Command{
 				utils.HandleErrorAndExit("Error in API Operator version", err)
 			}
 			configFile = fmt.Sprintf(k8sUtils.ApiOperatorConfigsUrlTemplate, operatorVersion)
-			// getting OLM version
-			olmVersion = olm.GetVersion()
 		}
 
 		// check for installation mode: interactive or batch mode
@@ -90,14 +86,6 @@ var installApiOperatorCmd = &cobra.Command{
 			flagsValues := getGivenFlagsValues()
 			registry.ValidateFlags(flagsValues)       // validate flags with respect to registry type
 			registry.ReadInputsFromFlags(flagsValues) // read values from flags with respect to registry type
-		}
-
-		if !isLocalInstallation {
-			fmt.Println("[Installing OLM]")
-			olm.InstallOLM(olmVersion)
-
-			fmt.Println("[Installing API Operator]")
-			olm.InstallOperator(olm.ApiOperatorYamlUrl)
 		}
 
 		// installing operator and configs if -f flag given

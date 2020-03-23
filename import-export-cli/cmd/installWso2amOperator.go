@@ -20,7 +20,6 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/wso2/product-apim-tooling/import-export-cli/operator/olm"
 	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 
@@ -63,14 +62,6 @@ var installWso2amOperatorCmd = &cobra.Command{
 				utils.HandleErrorAndExit("Error in WSO2AM Operator version", err)
 			}
 			configFile = fmt.Sprintf(k8sUtils.Wso2AmOperatorConfigsUrlTemplate, operatorVersion)
-			// getting OLM version
-			olmVersion := olm.GetVersion()
-
-			fmt.Println("[Installing OLM]")
-			olm.InstallOLM(olmVersion)
-
-			fmt.Println("[Installing API Operator]")
-			olm.InstallOperator(olm.Wso2AmOperatorYamlUrl)
 		}
 
 		// installing operator and configs if -f flag given

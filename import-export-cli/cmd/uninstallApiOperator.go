@@ -76,10 +76,6 @@ var uninstallApiOperatorCmd = &cobra.Command{
 		if isConfirm {
 			fmt.Println("Deleting kubernetes resources for API Operator")
 
-			// delete the OLM subscription
-			fmt.Println("Removing OLM subscription")
-			_ = k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, "subscriptions.operators.coreos.com", "my-api-operator", "-n", "operators")
-
 			// delete the namespace "wso2-system"
 			// namespace, "wso2-system" contains all the artifacts and configs
 			// deleting the namespace: "wso2-system", will remove all the artifacts and configs
@@ -92,8 +88,6 @@ var uninstallApiOperatorCmd = &cobra.Command{
 				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, "crd", k8sUtils.ApiOpCrdRateLimiting),
 				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, "crd", k8sUtils.ApiOpCrdTargetEndpoint),
 			}
-			// ignore csv deletion
-			_ = k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, "csv", fmt.Sprintf("%s.%s", k8sUtils.ApiOperator, operatorVersion), "-n", "operators")
 
 			for _, err := range deleteErrors {
 				if err != nil {
