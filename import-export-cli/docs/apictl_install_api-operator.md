@@ -14,15 +14,21 @@ apictl install api-operator [flags]
 
 ```
 apictl install api-operator
-apictl api-operator -f path/to/operator/configs
-apictl api-operator -f path/to/operator/config/file.yaml
+apictl install api-operator -f path/to/operator/configs
+apictl install api-operator -f path/to/operator/config/file.yaml
 ```
 
 ### Options
 
 ```
-  -f, --from-file string   Path to API Operator directory
-  -h, --help               help for api-operator
+  -f, --from-file string       Path to API Operator directory
+  -h, --help                   help for api-operator
+  -c, --key-file string        Credentials file
+  -p, --password string        Password of the given user
+      --password-stdin         Prompt for password of the given user in the stdin
+  -R, --registry-type string   Registry type: DOCKER_HUB | AMAZON_ECR |GCR | HTTP
+  -r, --repository string      Repository name or URI
+  -u, --username string        Username of the repository
 ```
 
 ### Options inherited from parent commands
