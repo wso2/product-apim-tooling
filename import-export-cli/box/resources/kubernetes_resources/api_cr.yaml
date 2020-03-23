@@ -4,7 +4,7 @@ metadata:
   name:
 spec:
   definition:
-    swaggerconfigmapName:
+    swaggerconfigmapNames:
     type: swagger
   replicas:
   mode: privateJet

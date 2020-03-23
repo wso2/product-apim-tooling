@@ -82,7 +82,7 @@ var HttpRegistry = &Registry{
 		httpValues.password = password
 	},
 	Run: func() {
-		k8sUtils.K8sCreateSecretFromInputs(k8sUtils.ConfigJsonVolume, getRegistryUrl(httpValues.repository), httpValues.username, httpValues.password)
+		k8sUtils.K8sCreateSecretFromInputs(k8sUtils.ConfigJsonVolume, k8sUtils.ApiOpWso2Namespace, getRegistryUrl(httpValues.repository), httpValues.username, httpValues.password)
 		httpValues.password = "" // clear password
 	},
 	Flags: Flags{
