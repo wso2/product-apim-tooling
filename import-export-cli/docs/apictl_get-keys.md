@@ -14,6 +14,7 @@ apictl get-keys [flags]
 
 ```
 apictl get-keys -n TwitterAPI -v 1.0.0 -e dev --provider admin
+NOTE: All the 4 flags (--name (-n), --version (-v), --provider (-r) and --environment (-e)) are mandatory
 ```
 
 ### Options

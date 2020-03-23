@@ -13,10 +13,11 @@ apictl list apps [flags]
 ### Examples
 
 ```
-apictl list apps -e dev
+apictl list apps -e dev 
 apictl list apps -e dev -o sampleUser
-apictl list apps -e prod
-apictl list apps -e staging
+apictl list apps -e prod -o sampleUser
+apictl list apps -e staging -o sampleUser
+NOTE: The flag (--environment (-e)) is mandatory
 ```
 
 ### Options

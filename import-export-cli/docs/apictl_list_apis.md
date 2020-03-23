@@ -17,6 +17,7 @@ apictl list apis -e dev
 apictl list apis -e dev -q version:1.0.0
 apictl list apis -e prod -q provider:admin
 apictl list apis -e staging
+NOTE: The flag (--environment (-e)) is mandatory
 ```
 
 ### Options
