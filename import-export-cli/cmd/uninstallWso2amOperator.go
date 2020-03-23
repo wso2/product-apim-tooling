@@ -28,8 +28,8 @@ import (
 )
 
 const uninstallWso2amOperatorCmdLiteral = "wso2am-operator"
-const uninstallWso2amOperatorCmdShortDesc = "Uninstall API Operator"
-const uninstallWso2amOperatorCmdLongDesc = "Uninstall API Operator in the configured K8s cluster"
+const uninstallWso2amOperatorCmdShortDesc = "Uninstall WSO2AM Operator"
+const uninstallWso2amOperatorCmdLongDesc = "Uninstall WSO2AM Operator in the configured K8s cluster"
 const uninstallWso2amOperatorCmdExamples = utils.ProjectName + ` ` + uninstallCmdLiteral + ` ` + uninstallWso2amOperatorCmdLiteral + `
 ` + utils.ProjectName + ` ` + uninstallCmdLiteral + ` ` + uninstallWso2amOperatorCmdLiteral + ` --force`
 
@@ -58,10 +58,10 @@ var uninstallWso2amOperatorCmd = &cobra.Command{
 
 		if !flagForceUninstallWso2amOperator {
 			isConfirmStr, err := utils.ReadInputString(
-				fmt.Sprintf("\nUninstall \"%s-%s\" and all related resources: APIs, Securities, Rate Limitings and Target Endpoints\n"+
+				fmt.Sprintf("\nUninstall \"%s-%s\" and all related resources: Apimanagers\n"+
 					"[WARNING] Remove the namespace: %s\n"+
 					"Are you sure",
-					k8sUtils.ApiOperator, operatorVersion, k8sUtils.ApiOpWso2Namespace),
+					k8sUtils.Wso2amOperator, operatorVersion, k8sUtils.ApiOpWso2Namespace),
 				utils.Default{Value: "N", IsDefault: true},
 				"",
 				false,
@@ -79,7 +79,7 @@ var uninstallWso2amOperatorCmd = &cobra.Command{
 
 			// delete the OLM subscription
 			fmt.Println("Removing OLM subscription")
-			_ = k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, "subscriptions.operators.coreos.com", "my-api-operator", "-n", "operators")
+			_ = k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, "subscriptions.operators.coreos.com", "my-wso2am-operator", "-n", "operators")
 
 			// delete the namespace "wso2-system"
 			// namespace, "wso2-system" contains all the artifacts and configs
@@ -88,13 +88,10 @@ var uninstallWso2amOperatorCmd = &cobra.Command{
 
 			deleteErrors := []error{
 				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, "namespace", k8sUtils.ApiOpWso2Namespace),
-				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, "crd", k8sUtils.ApiOpCrdApi),
-				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, "crd", k8sUtils.ApiOpCrdSecurity),
-				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, "crd", k8sUtils.ApiOpCrdRateLimiting),
-				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, "crd", k8sUtils.ApiOpCrdTargetEndpoint),
+				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, "crd", k8sUtils.Wso2amOpCrdApimanager),
 			}
 			// ignore csv deletion
-			_ = k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, "csv", fmt.Sprintf("%s.%s", k8sUtils.ApiOperator, operatorVersion), "-n", "operators")
+			_ = k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, "csv", fmt.Sprintf("%s.%s", k8sUtils.Wso2amOperator, operatorVersion), "-n", "operators")
 
 			for _, err := range deleteErrors {
 				if err != nil {
