@@ -77,10 +77,6 @@ var uninstallWso2amOperatorCmd = &cobra.Command{
 		if isConfirm {
 			fmt.Println("Deleting kubernetes resources for API Operator")
 
-			// delete the OLM subscription
-			fmt.Println("Removing OLM subscription")
-			_ = k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, "subscriptions.operators.coreos.com", "my-wso2am-operator", "-n", "operators")
-
 			// delete the namespace "wso2-system"
 			// namespace, "wso2-system" contains all the artifacts and configs
 			// deleting the namespace: "wso2-system", will remove all the artifacts and configs
@@ -90,8 +86,6 @@ var uninstallWso2amOperatorCmd = &cobra.Command{
 				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, "namespace", k8sUtils.ApiOpWso2Namespace),
 				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, "crd", k8sUtils.Wso2amOpCrdApimanager),
 			}
-			// ignore csv deletion
-			_ = k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, "csv", fmt.Sprintf("%s.%s", k8sUtils.Wso2amOperator, operatorVersion), "-n", "operators")
 
 			for _, err := range deleteErrors {
 				if err != nil {
