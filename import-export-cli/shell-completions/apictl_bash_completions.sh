@@ -263,6 +263,9 @@ _apictl_add_api()
     flags+=("--help")
     flags+=("-h")
     local_nonpersistent_flags+=("--help")
+    flags+=("--mode=")
+    two_word_flags+=("-m")
+    local_nonpersistent_flags+=("--mode=")
     flags+=("--name=")
     two_word_flags+=("-n")
     local_nonpersistent_flags+=("--name=")
@@ -272,6 +275,9 @@ _apictl_add_api()
     local_nonpersistent_flags+=("--override")
     flags+=("--replicas=")
     local_nonpersistent_flags+=("--replicas=")
+    flags+=("--version=")
+    two_word_flags+=("-v")
+    local_nonpersistent_flags+=("--version=")
     flags+=("--insecure")
     flags+=("-k")
     flags+=("--verbose")
@@ -774,6 +780,35 @@ _apictl_install_api-operator()
     noun_aliases=()
 }
 
+_apictl_install_wso2am-operator()
+{
+    last_command="apictl_install_wso2am-operator"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--from-file=")
+    two_word_flags+=("-f")
+    local_nonpersistent_flags+=("--from-file=")
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
 _apictl_install()
 {
     last_command="apictl_install"
@@ -782,6 +817,7 @@ _apictl_install()
 
     commands=()
     commands+=("api-operator")
+    commands+=("wso2am-operator")
 
     flags=()
     two_word_flags=()
@@ -1085,6 +1121,34 @@ _apictl_uninstall_api-operator()
     noun_aliases=()
 }
 
+_apictl_uninstall_wso2am-operator()
+{
+    last_command="apictl_uninstall_wso2am-operator"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--force")
+    local_nonpersistent_flags+=("--force")
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
 _apictl_uninstall()
 {
     last_command="apictl_uninstall"
@@ -1093,6 +1157,7 @@ _apictl_uninstall()
 
     commands=()
     commands+=("api-operator")
+    commands+=("wso2am-operator")
 
     flags=()
     two_word_flags=()
@@ -1132,6 +1197,9 @@ _apictl_update_api()
     flags+=("--help")
     flags+=("-h")
     local_nonpersistent_flags+=("--help")
+    flags+=("--mode=")
+    two_word_flags+=("-m")
+    local_nonpersistent_flags+=("--mode=")
     flags+=("--name=")
     two_word_flags+=("-n")
     local_nonpersistent_flags+=("--name=")
@@ -1139,6 +1207,9 @@ _apictl_update_api()
     local_nonpersistent_flags+=("--namespace=")
     flags+=("--replicas=")
     local_nonpersistent_flags+=("--replicas=")
+    flags+=("--version=")
+    two_word_flags+=("-v")
+    local_nonpersistent_flags+=("--version=")
     flags+=("--insecure")
     flags+=("-k")
     flags+=("--verbose")

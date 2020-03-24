@@ -21,12 +21,14 @@ apictl add/update api -n petstore --from-file=./Swagger.json --replicas=3 --name
 ### Options
 
 ```
-  -f, --from-file string   Path to swagger file
-  -h, --help               help for api
-  -n, --name string        Name of the API
-      --namespace string   namespace of API
-      --override           Property to override the existing docker image with same name and version
-      --replicas int       replica set (default 1)
+  -f, --from-file stringArray   Path to swagger file
+  -h, --help                    help for api
+  -m, --mode string             Property to override the deploying mode. Available modes: privateJet, sidecar
+  -n, --name string             Name of the API
+      --namespace string        namespace of API
+      --override                Property to override the existing docker image with same name and version
+      --replicas int            replica set (default 1)
+  -v, --version string          Property to override the existing docker image with same name and version
 ```
 
 ### Options inherited from parent commands

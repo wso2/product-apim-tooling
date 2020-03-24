@@ -14,7 +14,7 @@ apictl uninstall api-operator [flags]
 
 ```
 apictl uninstall api-operator
-apictl api-operator --force
+apictl uninstall api-operator --force
 ```
 
 ### Options

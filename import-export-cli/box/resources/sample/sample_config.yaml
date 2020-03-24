@@ -8,7 +8,7 @@ environments:
     admin_endpoint: https://localhost:9443/api/am/admin/v0.16
     api_list_endpoint: https://localhost:9443/api/am/publisher/v1/apis
     api_manager_endpoint: https://localhost:9443
-    application_list_endpoint: https://localhost:9443/api/am/admin/v0.16/applications
+    application_list_endpoint: https://localhost:9443/api/am/store/v1/applications
     registration_endpoint: https://localhost:9443/client-registration/v0.16/register
     token_endpoint: https://localhost:8243/token
   sample-env2:
