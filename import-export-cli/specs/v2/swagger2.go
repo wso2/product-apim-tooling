@@ -21,6 +21,7 @@ package v2
 import (
 	"fmt"
 	"path"
+	"strings"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/specs/params"
 
@@ -216,6 +217,14 @@ func Swagger2Populate(def *APIDefinition, document *loads.Document) error {
 	if basepath, ok := swagger2XWO2BasePath(document); ok {
 		def.Context = path.Clean(basepath)
 		def.ContextTemplate = path.Clean(basepath)
+		if !strings.Contains(basepath, "{version}") {
+			def.Context = path.Clean(basepath + "/" + def.ID.Version)
+			def.ContextTemplate = path.Clean(basepath + "/{version}")
+			def.IsDefaultVersion = true
+		} else {
+			def.ContextTemplate = path.Clean(basepath)
+			def.Context = path.Clean(strings.ReplaceAll(basepath, "{version}", def.ID.Version))
+		}
 	}
 
 	cors, ok, err := swagger2XWSO2Cors(document)
