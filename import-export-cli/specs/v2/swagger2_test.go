@@ -67,6 +67,30 @@ func TestSwagger2Populate(t *testing.T) {
 	err = Swagger2Populate(&def, doc)
 	assert.Nil(t, err, "err should be nil")
 
-	assert.Equal(t, "SwaggerPetstore", def.ID.APIName, "Should return correct api name")
+	assert.Equal(t, "Swagger Petstore", def.ID.APIName, "Should return correct api name")
 	assert.Equal(t, "/petstore/v1/1.0.0", def.Context)
+}
+
+func TestSwagger2PopulateWithBasePath(t *testing.T) {
+	var def1,def2 APIDefinition
+
+	// Basepath without {version}
+	doc1, err1 := loads.Spec("testdata/petstore_with_basepath1.yaml")
+	assert.Nil(t, err1, "err should be nil")
+	err1 = Swagger2Populate(&def1, doc1)
+	assert.Nil(t, err1, "err should be nil")
+
+	assert.Equal(t, "/petstore/v1/1.0.0", def1.Context)
+	assert.Equal(t, "/petstore/v1/{version}", def1.ContextTemplate)
+	assert.Equal(t, true, def1.IsDefaultVersion)
+
+	// Basepath with {version}
+	doc2, err2 := loads.Spec("testdata/petstore_with_basepath2.yaml")
+	assert.Nil(t, err2, "err should be nil")
+	err1 = Swagger2Populate(&def2, doc2)
+	assert.Nil(t, err2, "err should be nil")
+
+	assert.Equal(t, "/petstore/v1/1.0.0", def2.Context)
+	assert.Equal(t, "/petstore/v1/{version}", def2.ContextTemplate)
+	assert.Equal(t, false, def2.IsDefaultVersion)
 }
