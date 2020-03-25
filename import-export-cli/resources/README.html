@@ -47,6 +47,28 @@
 </code></pre>
 <h3 id="commands">Commands</h3>
 <ul>
+    <li><h4 id="login">login [environment]</h4>
+        <pre><code class="lang-bash">   Flags:
+       Optional:
+           --username, -u
+           --password, -p
+           NOTE: user will be prompted to enter credentials if they are not provided with these flags
+   Examples:
+       apictl login dev -u admin -p admin
+       apictl login dev -u admin
+       apictl login dev
+       cat ~/.mypassword | apictl login dev -u admin
+</code></pre>
+    </li>
+</ul>
+<ul>
+    <li><h4 id="logout">logout [environment]</h4>
+        <pre><code class="lang-bash">   Examples:
+       apictl logout dev
+</code></pre>
+    </li>
+</ul>
+<ul>
     <li><h4 id="export-api">export-api</h4>
         <pre><code class="lang-bash">   Flags:
        Required:
