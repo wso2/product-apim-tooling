@@ -158,8 +158,6 @@
           apictl list apis -e prod -q version:1.0.0
           apictl list apis -e prod -q provider:admin
           apictl list apis -e staging
-          apictl list apis -e staging -u admin -p 123456
-          apictl list apis -e staging -p 123456
 </code></pre>
     </li>
     <li><h4 id="list-apps">list apps</h4>
@@ -172,7 +170,7 @@
                   --password, -p
         Examples:
             apictl list apps -e dev -o admin
-            apictl list apps -e staging -o sampleUser -u admin -p 123456
+            apictl list apps -e staging -o sampleUser
 </code></pre>
     </li>
     <li><h4 id="list-envs">list envs</h4>
