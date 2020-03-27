@@ -21,7 +21,6 @@ package cmd
 import (
 	"fmt"
 	"net/http"
-	"os"
 	"path/filepath"
 	"strconv"
 
@@ -178,7 +177,6 @@ func prepareResumption() {
 				exportRelatedFilesPath, apiListOffset)
 		} else {
 			fmt.Println("Command: export-apis execution completed !")
-			os.Exit(1)
 		}
 	}
 }
