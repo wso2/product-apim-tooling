@@ -639,7 +639,9 @@ func importAPI(endpoint, httpMethod, filePath, accessToken string, extraParams m
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		}
 	} else {
-		tr = &http.Transport{}
+		tr = &http.Transport{
+			TLSClientConfig: utils.GetTlsConfigWithCertificate(),
+		}
 	}
 
 	client := &http.Client{

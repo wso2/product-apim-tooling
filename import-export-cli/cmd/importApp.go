@@ -137,7 +137,9 @@ func ImportApplication(filename, appOwner, adminEndpiont, accessToken, exportDir
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		}
 	} else {
-		tr = &http.Transport{}
+		tr = &http.Transport{
+			TLSClientConfig: utils.GetTlsConfigWithCertificate(),
+		}
 	}
 
 	client := &http.Client{

@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"io/ioutil"
 	"net/http"
@@ -22,4 +24,15 @@ func ReadFromUrl(url string) ([]byte, error) {
 		return nil, errors.New(response.Status)
 	}
 	return body, nil
+}
+
+func GetTlsConfigWithCertificate() *tls.Config {
+	certs := x509.NewCertPool()
+
+	certs.AppendCertsFromPEM(WSO2PublicCertificate)
+
+	return &tls.Config{
+		InsecureSkipVerify: false,
+		RootCAs:            certs,
+	}
 }
