@@ -52,7 +52,7 @@ var AmazonEcrRegistry = &Registry{
 	},
 	Run: func() {
 		createAmazonEcrConfig()
-		k8sUtils.K8sCreateSecretFromFile(k8sUtils.AwsCredentialsVolume, k8sUtils.ApiOpWso2Namespace, amazonEcrValues.credFile, "credentials")
+		k8sUtils.K8sCreateSecretFromFile(k8sUtils.AwsCredentialsSecret, k8sUtils.ApiOpWso2Namespace, amazonEcrValues.credFile, k8sUtils.AwsCredentialsFile)
 	},
 	Flags: Flags{
 		RequiredFlags: &map[string]bool{k8sUtils.FlagBmRepository: true, k8sUtils.FlagBmKeyFile: true},
@@ -111,7 +111,7 @@ func createAmazonEcrConfig() {
 	// render config map
 	configMap, err := k8sUtils.GetCommandOutput(
 		k8sUtils.Kubectl, k8sUtils.K8sCreate, k8sUtils.K8sConfigMap,
-		k8sUtils.ConfigJsonVolume, "--from-file=config.json="+tempFile,
+		k8sUtils.AmazonCredHelperConfMap, "--from-file=config.json="+tempFile,
 		"-n", k8sUtils.ApiOpWso2Namespace,
 		"--dry-run", "-o", "yaml",
 	)

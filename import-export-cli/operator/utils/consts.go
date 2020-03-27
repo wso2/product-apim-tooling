@@ -66,10 +66,13 @@ const CtrlConfigRegType = "registryType"
 const CtrlConfigReg = "repositoryName"
 
 // Registry specific config maps and secrets names
-const ConfigJsonVolume = "config-json"
-const AwsCredentialsVolume = "aws-cred"
-const GcrSvcAccKeyVolume = "gcr-key"
+const DockerRegCredSecret = "docker-registry-credentials"
+const AmazonCredHelperConfMap = "amazon-credential-helper"
+const AwsCredentialsSecret = "aws-credentials"
+const AwsCredentialsFile = "credentials"
+const GcrSvcAccKeySecret = "google-application-credentials"
 const GcrSvcAccKeyFile = "gcr_key.json"
+const GcrPullSecret = "gcr-pull-secret"
 
 // Registry specific flags for batch mode
 const FlagBmRepository = "repository"

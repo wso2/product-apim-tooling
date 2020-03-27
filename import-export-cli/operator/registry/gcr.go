@@ -67,8 +67,8 @@ var GcrRegistry = &Registry{
 			utils.HandleErrorAndExit("Error reading GCR service account key json file", err)
 		}
 
-		k8sUtils.K8sCreateSecretFromFile(k8sUtils.GcrSvcAccKeyVolume, k8sUtils.ApiOpWso2Namespace, gcrValues.svcAccKeyFile, k8sUtils.GcrSvcAccKeyFile)
-		k8sUtils.K8sCreateSecretFromInputs(k8sUtils.ConfigJsonVolume, k8sUtils.ApiOpWso2Namespace, "gcr.io", "_json_key", string(data))
+		k8sUtils.K8sCreateSecretFromFile(k8sUtils.GcrSvcAccKeySecret, k8sUtils.ApiOpWso2Namespace, gcrValues.svcAccKeyFile, k8sUtils.GcrSvcAccKeyFile)
+		k8sUtils.K8sCreateSecretFromInputs(k8sUtils.GcrPullSecret, k8sUtils.ApiOpWso2Namespace, "gcr.io", "_json_key", string(data))
 	},
 	Flags: Flags{
 		RequiredFlags: &map[string]bool{k8sUtils.FlagBmKeyFile: true},
