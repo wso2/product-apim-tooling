@@ -37,6 +37,8 @@ import (
 func InvokePOSTRequest(url string, headers map[string]string, body string) (*resty.Response, error) {
 	if Insecure {
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+	} else {
+		resty.SetTLSClientConfig(GetTlsConfigWithCertificate())
 	}
 	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
 	resp, err := resty.R().SetHeaders(headers).SetBody(body).Post(url)
@@ -48,6 +50,8 @@ func InvokePOSTRequest(url string, headers map[string]string, body string) (*res
 func InvokePOSTRequestWithoutBody(url string, headers map[string]string) (*resty.Response, error) {
 	if Insecure {
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+	} else {
+		resty.SetTLSClientConfig(GetTlsConfigWithCertificate())
 	}
 	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
 	resp, err := resty.R().SetHeaders(headers).Post(url)
@@ -59,6 +63,8 @@ func InvokePOSTRequestWithoutBody(url string, headers map[string]string) (*resty
 func InvokeGETRequest(url string, headers map[string]string) (*resty.Response, error) {
 	if Insecure {
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+	} else {
+		resty.SetTLSClientConfig(GetTlsConfigWithCertificate())
 	}
 	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
 	resp, err := resty.R().SetHeaders(headers).Get(url)
@@ -71,6 +77,8 @@ func InvokeGETRequestWithQueryParam(queryParam string, paramValue string, url st
 	*resty.Response, error) {
 	if Insecure {
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+	} else {
+		resty.SetTLSClientConfig(GetTlsConfigWithCertificate())
 	}
 	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
 	resp, err := resty.R().SetHeaders(headers).SetQueryParam(queryParam, paramValue).Get(url)
@@ -83,6 +91,8 @@ func InvokeGETRequestWithMultipleQueryParams(queryParam map[string]string, url s
 	*resty.Response, error) {
 	if Insecure {
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+	} else {
+		resty.SetTLSClientConfig(GetTlsConfigWithCertificate())
 	}
 	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
 	resp, err := resty.R().SetHeaders(headers).SetQueryParams(queryParam).Get(url)
@@ -95,6 +105,8 @@ func InvokePutRequest(queryParam map[string]string, url string, headers map[stri
 	*resty.Response, error) {
 	if Insecure {
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+	} else {
+		resty.SetTLSClientConfig(GetTlsConfigWithCertificate())
 	}
 	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
 	resp, err := resty.R().SetHeaders(headers).SetQueryParams(queryParam).SetBody(body).Put(url)
@@ -107,6 +119,8 @@ func InvokePostRequestWithQueryParam(queryParam map[string]string, url string, h
 	*resty.Response, error) {
 	if Insecure {
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+	} else {
+		resty.SetTLSClientConfig(GetTlsConfigWithCertificate())
 	}
 	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
 	resp, err := resty.R().SetHeaders(headers).SetQueryParams(queryParam).SetBody(body).Post(url)
