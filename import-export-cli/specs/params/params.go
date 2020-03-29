@@ -34,6 +34,11 @@ type EndpointData struct {
 	Production *Endpoint `yaml:"production" json:"production_endpoints,omitempty"`
 	// Sandbox endpoint
 	Sandbox *Endpoint `yaml:"sandbox" json:"sandbox_endpoints,omitempty"`
+	// Endpoint security
+	EndpointSecured string `yaml:"endpointSecured" json:"endpointSecured,omitempty"`
+	EndpointAuthDigest string `yaml:"endpointAuthDigest" json:"endpointAuthDigest,omitempty"`
+	EndpointUTUsername string `yaml:"endpointUTUsername" json:"endpointUTUsername,omitempty"`
+	EndpointUTPassword string `yaml:"endpointUTPassword" json:"endpointUTPassword,omitempty"`
 }
 
 // Cert stores certificate details
