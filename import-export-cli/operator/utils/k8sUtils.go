@@ -54,7 +54,7 @@ func K8sWaitForResourceType(maxTimeSec int, resourceTypes ...string) error {
 	return nil
 }
 
-// K8sCreateSecretFromInputs creates K8S secret with credentials
+// K8sCreateSecretFromInputs creates K8S a docker-registry secret with given inputs
 func K8sCreateSecretFromInputs(secretName string, namespace string, server string, username string, password string) {
 	if username == "" {
 		username = "N/A"
@@ -79,6 +79,7 @@ func K8sCreateSecretFromInputs(secretName string, namespace string, server strin
 	}
 }
 
+// K8sCreateSecretFromFile creates K8S a generic secret with give file
 func K8sCreateSecretFromFile(secretName string, namespace string, filePath string, renamedFile string) {
 	var fromFile string
 	if renamedFile == "" {
