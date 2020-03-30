@@ -33,6 +33,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 var flagApiName string
@@ -58,52 +59,58 @@ var addApiCmd = &cobra.Command{
 	Example: addApiExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + addApiCmdLiteral + " called")
-		validateAddApiCommand()
+		handleAddApi("")
+	},
+}
 
-		swaggerCmNames := make([]string, len(flagSwaggerFilePaths))
-		var balInterceptorsCmNames []string
-		var javaInterceptorsCmNames []string
+func handleAddApi(nameSuffix string) {
+	validateAddApiCommand()
 
-		for i, flagSwaggerFilePath := range flagSwaggerFilePaths {
-			fmt.Println(fmt.Sprintf("Processing swagger %v: %v", i+1, flagSwaggerFilePath))
-			swaggerCmNames[i] = fmt.Sprintf("%v-%v-swagger", flagApiName, i+1)
+	swaggerCmNames := make([]string, len(flagSwaggerFilePaths))
+	balInterceptorsCmNames := make([]string, 0, len(flagSwaggerFilePaths))
+	var javaInterceptorsCmNames []string
 
-			fi, _ := os.Stat(flagSwaggerFilePath) // error already handled and ignore error
-			switch mode := fi.Mode(); {
-			//check if the swagger path is a Dir
-			case mode.IsDir():
-				//get swagger definition
-				swaggerPath := filepath.Join(flagSwaggerFilePath, filepath.FromSlash("Meta-information/swagger.yaml"))
-				//creating kubernetes configmap with swagger definition
-				fmt.Println("creating configmap with swagger definition")
-				errConf := createConfigMapWithNamespace(swaggerCmNames[i], swaggerPath, flagNamespace, k8sUtils.K8sCreate)
-				if errConf != nil {
-					utils.HandleErrorAndExit("Error creating configmap", errConf)
-				}
+	for i, flagSwaggerFilePath := range flagSwaggerFilePaths {
+		fmt.Println(fmt.Sprintf("Processing swagger %v: %v", i+1, flagSwaggerFilePath))
+		swaggerCmNames[i] = fmt.Sprintf("%v-%v-swagger%s", flagApiName, i+1, nameSuffix)
 
-				// copy all bal interceptors to the temp dir
-				balInterceptorsCmName := fmt.Sprintf("%v-%v-bal-interceptors", flagApiName, i+1)
+		fi, _ := os.Stat(flagSwaggerFilePath) // error already handled and ignore error
+		switch mode := fi.Mode(); {
+		//check if the swagger path is a Dir
+		case mode.IsDir():
+			//get swagger definition
+			swaggerPath := filepath.Join(flagSwaggerFilePath, filepath.FromSlash("Meta-information/swagger.yaml"))
+			//creating kubernetes configmap with swagger definition
+			fmt.Println("creating configmap with swagger definition")
+			errConf := createConfigMapWithNamespace(swaggerCmNames[i], swaggerPath, flagNamespace, k8sUtils.K8sCreate)
+			if errConf != nil {
+				utils.HandleErrorAndExit("Error creating configmap", errConf)
+			}
+
+			// copy all bal interceptors to the temp dir
+			balInterceptorsCmName := fmt.Sprintf("%v-%v-bal-interceptors%s", flagApiName, i+1, nameSuffix)
+			intceptFound := handleBalInterceptors(balInterceptorsCmName, flagSwaggerFilePath, "create", flagNamespace)
+			if intceptFound {
 				balInterceptorsCmNames = append(balInterceptorsCmNames, balInterceptorsCmName)
-				handleBalInterceptors(balInterceptorsCmName, flagSwaggerFilePath, "create", flagNamespace)
+			}
 
-				// handle java interceptors
-				tempJavaIntCms := handleJavaInterceptors(flagSwaggerFilePath, "create", flagNamespace, fmt.Sprintf("%v-%v", flagApiName, i+1))
-				javaInterceptorsCmNames = append(javaInterceptorsCmNames, tempJavaIntCms...)
-			//check if the swagger path is a file
-			case mode.IsRegular():
-				//creating kubernetes configmap with swagger definition
-				fmt.Println("creating configmap with swagger definition")
-				errConf := createConfigMapWithNamespace(swaggerCmNames[i], flagSwaggerFilePath, flagNamespace, k8sUtils.K8sCreate)
-				if errConf != nil {
-					utils.HandleErrorAndExit("Error creating configmap", errConf)
-				}
+			// handle java interceptors
+			tempJavaIntCms := handleJavaInterceptors(nameSuffix, flagSwaggerFilePath, "create", flagNamespace, fmt.Sprintf("%v-%v", flagApiName, i+1))
+			javaInterceptorsCmNames = append(javaInterceptorsCmNames, tempJavaIntCms...)
+		//check if the swagger path is a file
+		case mode.IsRegular():
+			//creating kubernetes configmap with swagger definition
+			fmt.Println("creating configmap with swagger definition")
+			errConf := createConfigMapWithNamespace(swaggerCmNames[i], flagSwaggerFilePath, flagNamespace, k8sUtils.K8sCreate)
+			if errConf != nil {
+				utils.HandleErrorAndExit("Error creating configmap", errConf)
 			}
 		}
+	}
 
-		//create API
-		fmt.Println("creating API definition")
-		createAPI(flagApiName, flagNamespace, swaggerCmNames, flagReplicas, "", balInterceptorsCmNames, flagOverride, javaInterceptorsCmNames, flagApiMode, flagApiVersion)
-	},
+	//create API
+	fmt.Println("creating API definition")
+	createAPI(flagApiName, flagNamespace, swaggerCmNames, flagReplicas, nameSuffix, balInterceptorsCmNames, flagOverride, javaInterceptorsCmNames, flagApiMode, flagApiVersion)
 }
 
 // validateAddApiCommand validates for required flags and if invalid print error and exit
@@ -118,7 +125,8 @@ func validateAddApiCommand() {
 
 	// validate required flags
 	if flagApiName == "" || len(flagSwaggerFilePaths) == 0 {
-		utils.HandleErrorAndExit("required flags are missing. API name and swagger file paths are required",
+		utils.HandleErrorAndExit("required flags are missing. API name and swagger file paths are requiredn"+
+			"required flags: --name <name>, --from-file <swagger-file>",
 			errors.New("required flags missing"))
 	}
 
@@ -226,7 +234,7 @@ func createAPI(name string, namespace string, configMapNames []string, replicas 
 	}
 }
 
-func handleBalInterceptors(configMapName string, path string, operation string, namespace string) {
+func handleBalInterceptors(configMapName string, path string, operation string, namespace string) bool {
 	//get interceptors if available
 	interceptorsPath := filepath.Join(path, "Interceptors")
 	//check interceptors dir is not empty
@@ -236,7 +244,7 @@ func handleBalInterceptors(configMapName string, path string, operation string, 
 	}
 	defer file.Close()
 	if _, err = file.Readdir(1); err != nil {
-		return
+		return false
 	}
 
 	//creating kubernetes configmap with interceptors
@@ -244,9 +252,11 @@ func handleBalInterceptors(configMapName string, path string, operation string, 
 	if err := createConfigMapWithNamespace(configMapName, interceptorsPath, namespace, operation); err != nil {
 		utils.HandleErrorAndExit("Error creating configmap for interceptors", err)
 	}
+
+	return true
 }
 
-func handleJavaInterceptors(path string, operation string, namespace string, cmPrefixName string) []string {
+func handleJavaInterceptors(nameSuffix string, path string, operation string, namespace string, cmPrefixName string) []string {
 	var interceptors []string
 	var javaInterceptorsConfNames []string
 	//get interceptors if available
@@ -264,13 +274,17 @@ func handleJavaInterceptors(path string, operation string, namespace string, cmP
 	if errReadInterceptors != nil {
 		utils.HandleErrorAndExit("cannot read interceptors in the libs", errReadInterceptors)
 	}
+
+	const jarExt = ".jar"
 	for _, filePath := range interceptors {
-		if filepath.Ext(filePath) == ".jar" {
+		if filepath.Ext(filePath) == jarExt {
 			//creating kubernetes configmap for each java interceptor
-			cmName := cmPrefixName + "-" + filepath.Base(filePath)
+			fileName := strings.Replace(filepath.Base(filePath), jarExt, "", 1)
+			cmName := fmt.Sprintf("%s-%s%s", cmPrefixName, fileName, nameSuffix)
 			javaInterceptorsConfNames = append(javaInterceptorsConfNames, cmName)
+
 			fmt.Println("creating configmap with java interceptor " + cmName)
-			errConfInt := createConfigMapWithNamespace(cmPrefixName+"-"+filepath.Base(filePath), filePath, namespace, operation)
+			errConfInt := createConfigMapWithNamespace(cmName, filePath, namespace, operation)
 			if errConfInt != nil {
 				utils.HandleErrorAndExit("Error creating configmap for java-interceptor "+cmName, errConfInt)
 			}
