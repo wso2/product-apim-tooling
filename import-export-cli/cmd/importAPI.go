@@ -178,8 +178,8 @@ func mergeAPI(apiDirectory string, environmentParams *params.Environment) error 
 		return err
 	}
 
-	// Set security parameters
-	err = setSecurityEndpointsParams(environmentParams.Endpoints, api)
+	// Handle security parameters in api_params.yaml
+	err = handleSecurityEndpointsParams(environmentParams.Security, api)
 	if (err != nil) {
 		return err
 	}
@@ -198,50 +198,31 @@ func mergeAPI(apiDirectory string, environmentParams *params.Environment) error 
 	return nil
 }
 
-// Set security parameters 
-// @param environmentParamsEndpoints : Environment endpoint parameters from api_params.yaml
+// Handle security parameters in api_params.yaml
+// @param envSecurityEndpointParams : Environment security endpoint parameters from api_params.yaml
 // @param api : Parameters from api.yaml
 // @return error 
-func setSecurityEndpointsParams(environmentParamsEndpoints *params.EndpointData, api *gabs.Container) error {
-	// If the user has set (either true or false) the endpointSecured field in api_params.yaml the 
+func handleSecurityEndpointsParams(envSecurityEndpointParams *params.SecurityData, api *gabs.Container) error {
+	// If the user has set (either true or false) the enabled field under security in api_params.yaml, the 
 	// following code should be executed. (if not set, the security endpoint settings will be made 
 	// according to the api.yaml file as usually)
 	// In Go, irrespective of whether a boolean value is "" or false, it will contain false by default.
 	// That is why, here a string comparison was  made since strings can have both "" and "false"
-	if environmentParamsEndpoints.EndpointSecured != "" {
-		// Convert the string endpointSecured to boolean
-		boolEndpointSecured, err := strconv.ParseBool(environmentParamsEndpoints.EndpointSecured)
+	if envSecurityEndpointParams.Enabled != "" {
+		// Convert the string enabled to boolean
+		boolEnabled, err := strconv.ParseBool(envSecurityEndpointParams.Enabled)
 		if err != nil {
 			return err
 		}
-		if _, err := api.SetP(boolEndpointSecured, "endpointSecured"); err != nil {
+		if _, err := api.SetP(boolEnabled, "endpointSecured"); err != nil {
 			return err
 		}
-		if boolEndpointSecured {
-			// If endpoint security is enabled, check whether the username and password has set in api_params.yaml
-			if environmentParamsEndpoints.EndpointUTUsername == "" {
-				return errors.New("You have enabled endpoint security but the username is not found in the api_params.yaml")
-			} else if environmentParamsEndpoints.EndpointUTPassword == "" {
-				return errors.New("You have enabled endpoint security but the password is not found in the api_params.yaml")
-			} else {
-				if _, err := api.SetP(environmentParamsEndpoints.EndpointUTUsername, "endpointUTUsername"); err != nil {
-					return err
-				}
-				if _, err := api.SetP(environmentParamsEndpoints.EndpointUTPassword, "endpointUTPassword"); err != nil {
-					return err
-				}
-			}
-			// If endpointAuthDigest is set in api_params.yaml, 
-			// override the corresponding fields in api.yaml with those values
-			if environmentParamsEndpoints.EndpointAuthDigest != "" {
-				// Convert the string endpointAuthDigest to boolean
-				boolEndpointAuthDigest, err := strconv.ParseBool(environmentParamsEndpoints.EndpointAuthDigest)
-				if err != nil {
-					return err
-				}
-				if _, err := api.SetP(boolEndpointAuthDigest, "endpointAuthDigest"); err != nil {
-					return err
-				}
+		// If endpoint security is enabled
+		if boolEnabled {
+			// Set the security endpoint parameters when the enabled field is set to true
+			err := setSecurityEndpointsParams(envSecurityEndpointParams, api)
+			if (err != nil) {
+				return err
 			}
 		} else {
 			// If endpoint security is not enabled, the username and password should be empty.
@@ -254,6 +235,57 @@ func setSecurityEndpointsParams(environmentParamsEndpoints *params.EndpointData,
 				return err
 			}
 		}
+	}
+	return nil
+}
+
+// Set the security endpoint parameters when the enabled field is set to true
+// @param envSecurityEndpointParams : Environment security endpoint parameters from api_params.yaml
+// @param api : Parameters from api.yaml
+// @return error 
+func setSecurityEndpointsParams(envSecurityEndpointParams *params.SecurityData, api *gabs.Container) error {
+	// Check whether the username, password and type fields have set in api_params.yaml
+	if envSecurityEndpointParams.Username == "" {
+		return errors.New("You have enabled endpoint security but the username is not found in the api_params.yaml")
+	} else if envSecurityEndpointParams.Password == "" {
+		return errors.New("You have enabled endpoint security but the password is not found in the api_params.yaml")
+	} else if envSecurityEndpointParams.Type == "" {
+		return errors.New("You have enabled endpoint security but the type is not found in the api_params.yaml")
+	} else {
+		// Override the username in api.yaml with the value in api_params.yaml
+		if _, err := api.SetP(envSecurityEndpointParams.Username, "endpointUTUsername"); err != nil {
+			return err
+		}
+		// Override the password in api.yaml with the value in api_params.yaml
+		if _, err := api.SetP(envSecurityEndpointParams.Password, "endpointUTPassword"); err != nil {
+			return err
+		}
+		// Set the fields in api.yaml according to the type field in api_params.yaml
+		err := setEndpointSecurityType(envSecurityEndpointParams, api)
+		if (err != nil) {
+			return err
+		}
+	}
+	return nil
+}
+
+// Set the fields in api.yaml according to the type field in api_params.yaml
+// @param envSecurityEndpointParams : Environment security endpoint parameters from api_params.yaml
+// @param api : Parameters from api.yaml
+// @return error 
+func setEndpointSecurityType(envSecurityEndpointParams *params.SecurityData, api *gabs.Container) error {
+	// Check whether the type is either basic or digest
+	if envSecurityEndpointParams.Type == "digest" {
+		if _, err := api.SetP(true, "endpointAuthDigest"); err != nil {
+			return err
+		}
+	} else if envSecurityEndpointParams.Type == "basic" {
+		if _, err := api.SetP(false, "endpointAuthDigest"); err != nil {
+			return err
+		}
+	} else {
+		// If the type is not either basic or digest, return an error
+		return errors.New("Invalid endpoint security type found in the api_params.yaml. Should be either basic or digest")
 	}
 	return nil
 }
