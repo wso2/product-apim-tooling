@@ -24,6 +24,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+	"syscall"
 
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
@@ -104,7 +105,7 @@ func runLogin(store credentials.Store, environment, username, password string) e
 
 	if password == "" {
 		fmt.Print("Password:")
-		pass, err := terminal.ReadPassword(0)
+		pass, err := terminal.ReadPassword(int(syscall.Stdin))
 		if err != nil {
 			return err
 		}
