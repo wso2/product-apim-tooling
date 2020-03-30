@@ -36,6 +36,18 @@ type EndpointData struct {
 	Sandbox *Endpoint `yaml:"sandbox" json:"sandbox_endpoints,omitempty"`
 }
 
+// SecurityData contains the details about endpoint security from api_params.yaml
+type SecurityData struct {
+	// Decides whether the endpoint security is enabled
+	Enabled string `yaml:"enabled" json:"enabled,omitempty"`
+	// Type of the endpoint security (can be Basic or Digest)
+	Type string `yaml:"type" json:"type,omitempty"`
+	// Username for the endpoint
+	Username string `yaml:"username" json:"username,omitempty"`
+	// Password for the endpoint
+	Password string `yaml:"password" json:"password,omitempty"`
+}
+
 // Cert stores certificate details
 type Cert struct {
 	// Host of the certificate
@@ -54,6 +66,8 @@ type Environment struct {
 	Name string `yaml:"name"`
 	// Endpoints contain details about endpoints in a configuration
 	Endpoints *EndpointData `yaml:"endpoints"`
+	// Security contains the details about endpoint security
+	Security *SecurityData `yaml:"security"`
 	// GatewayEnvironments contains environments that used to deploy API
 	GatewayEnvironments []string `yaml:"gatewayEnvironments"`
 	// Certs for environment
