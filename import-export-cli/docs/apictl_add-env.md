@@ -14,32 +14,37 @@ apictl add-env [flags]
 
 ```
 apictl add-env -e production \
---registration https://localhost:9443/client-registration/v0.16/register \
 --apim  https://localhost:9443 \
 --token https://localhost:8243/token
 
 apictl add-env -e test \
 --registration https://localhost:9443/client-registration/v0.16/register \
---api_list https://localhost:9443/api/am/publisher/v1/apis \
---apim  https://localhost:9443 \
+--publisher https://localhost:9443/api/am/publisher/v1/apis \
+--devportal  https://localhost:9443 \
+--admin  https://localhost:9443 \
 --token https://localhost:8243/token
 
-apictl add-env -e dev --apim https://localhost:9443 \
---token	https://localhost:8243/token \
---registration https://localhost:9443/client-registration/v0.16/register
+apictl add-env -e dev \
+--apim https://localhost:9443 \
+--registration https://localhost:9443/client-registration/v0.16/register \
+--publisher https://localhost:9443/api/am/publisher/v1/apis \
+--devportal  https://localhost:9443 \
+--admin  https://localhost:9443 \
+--token https://localhost:8243/token
 
-NOTE: All the 4 flags (--registration, --apim, --token and --environment (-e)) are mandatory
+NOTE: The flag --environment (-e) is mandatory
+You can either provide only the 2 tags --apim and --token, or all the other 5 tags (--registration --publisher --devportal --admin --token) without providing --apim tag, or all the 6 tags to add an environment.
 ```
 
 ### Options
 
 ```
       --admin string          Admin endpoint for the environment
-      --api_list string       API List endpoint for the environment
       --apim string           API Manager endpoint for the environment
-      --app_list string       Application List endpoint for the environment
+      --devportal string      DevPortal endpoint for the environment
   -e, --environment string    Name of the environment to be added
   -h, --help                  help for add-env
+      --publisher string      Publisher endpoint for the environment
       --registration string   Registration endpoint for the environment
       --token string          Token endpoint for the environment
 ```

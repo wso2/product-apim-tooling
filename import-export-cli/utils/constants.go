@@ -57,6 +57,7 @@ const defaultApiApplicationImportExportSuffix = "api/am/admin/v0.16"
 const defaultApiListEndpointSuffix = "api/am/publisher/v1/apis"
 const defaultAdminApplicationListEndpointSuffix = "api/am/admin/v0.16/applications"
 const defaultDevPortalApplicationListEndpointSuffix = "api/am/store/v1/applications"
+const defaultClientRegistrationEndpointSuffix = "client-registration/v0.16/register"
 
 const DefaultEnvironmentName = "default"
 

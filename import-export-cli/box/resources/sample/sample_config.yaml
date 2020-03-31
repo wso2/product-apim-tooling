@@ -5,16 +5,23 @@ config:
   token_type: JWT
 environments:
   sample-env1:
-    admin_endpoint: https://localhost:9443/api/am/admin/v0.16
-    api_list_endpoint: https://localhost:9443/api/am/publisher/v1/apis
-    api_manager_endpoint: https://localhost:9443
-    application_list_endpoint: https://localhost:9443/api/am/store/v1/applications
-    registration_endpoint: https://localhost:9443/client-registration/v0.16/register
-    token_endpoint: https://localhost:8243/token
+    admin: https://localhost:9443
+    publisher: https://localhost:9443
+    apim: https://localhost:9443
+    devportal: https://localhost:9443
+    registration: https://localhost:9443
+    token: https://localhost:8243/token
   sample-env2:
-    admin_endpoint:
-    api_list_endpoint:
-    api_manager_endpoint: https://wso2am:9443
-    application_list_endpoint:
-    registration_endpoint: https://wso2am:9443/client-registration/v0.16/register
-    token_endpoint: https://wso2am:8243/token
+    admin:
+    publisher:
+    apim: https://wso2am:9443
+    devportal:
+    registration:
+    token: https://wso2am:8243/token
+  sample-env3:
+    admin: https://localhost:9443
+    publisher: https://localhost:9443
+    apim:
+    devportal: https://localhost:9443
+    registration: https://localhost:9443
+    token: https://localhost:8243/token

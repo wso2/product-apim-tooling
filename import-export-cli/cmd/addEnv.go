@@ -28,8 +28,8 @@ import (
 
 var flagAddEnvName string           // name of the environment to be added
 var flagTokenEndpoint string        // token endpoint of the environment to be added
-var flagApiListEndpoint string      // ApiListEnvironment of the environment to be added
-var flagAppListEndpoint string      // ApplicationListEndpoint of the environment to be added
+var flagPublisherEndpoint string      // Publisher endpoint of the environment to be added
+var flagDevPortalEndpoint string      // DevPortal endpoint of the environment to be added
 var flagRegistrationEndpoint string // registration endpoint of the environment to be added
 var flagApiManagerEndpoint string   // api manager endpoint of the environment to be added
 var flagAdminEndpoint string        // admin endpoint of the environment to be added
@@ -39,21 +39,26 @@ const addEnvCmdLiteral = "add-env"
 const addEnvCmdShortDesc = "Add Environment to Config file"
 const addEnvCmdLongDesc = "Add new environment and its related endpoints to the config file"
 const addEnvCmdExamples = utils.ProjectName + ` ` + addEnvCmdLiteral + ` -e production \
---registration https://localhost:9443/client-registration/v0.16/register \
 --apim  https://localhost:9443 \
 --token https://localhost:8243/token
 
 ` + utils.ProjectName + ` ` + addEnvCmdLiteral + ` -e test \
 --registration https://localhost:9443/client-registration/v0.16/register \
---api_list https://localhost:9443/api/am/publisher/v1/apis \
---apim  https://localhost:9443 \
+--publisher https://localhost:9443/api/am/publisher/v1/apis \
+--devportal  https://localhost:9443 \
+--admin  https://localhost:9443 \
 --token https://localhost:8243/token
 
-` + utils.ProjectName + ` ` + addEnvCmdLiteral + ` -e dev --apim https://localhost:9443 \
---token	https://localhost:8243/token \
---registration https://localhost:9443/client-registration/v0.16/register
+` + utils.ProjectName + ` ` + addEnvCmdLiteral + ` -e dev \
+--apim https://localhost:9443 \
+--registration https://localhost:9443/client-registration/v0.16/register \
+--publisher https://localhost:9443/api/am/publisher/v1/apis \
+--devportal  https://localhost:9443 \
+--admin  https://localhost:9443 \
+--token https://localhost:8243/token
 
-NOTE: All the 4 flags (--registration, --apim, --token and --environment (-e)) are mandatory`
+NOTE: The flag --environment (-e) is mandatory
+You can either provide only the 2 tags --apim and --token, or all the other 5 tags (--registration --publisher --devportal --admin --token) without providing --apim tag, or all the 6 tags to add an environment.`
 
 // addEnvCmd represents the addEnv command
 var addEnvCmd = &cobra.Command{
@@ -72,8 +77,8 @@ func executeAddEnvCmd(mainConfigFilePath string) {
 	envEndpoints.ApiManagerEndpoint = flagApiManagerEndpoint
 	envEndpoints.RegistrationEndpoint = flagRegistrationEndpoint
 
-	envEndpoints.ApiListEndpoint = flagApiListEndpoint
-	envEndpoints.AppListEndpoint = flagAppListEndpoint
+	envEndpoints.PublisherEndpoint = flagPublisherEndpoint
+	envEndpoints.DevPortalEndpoint = flagDevPortalEndpoint
 	envEndpoints.AdminEndpoint = flagAdminEndpoint
 	envEndpoints.TokenEndpoint = flagTokenEndpoint
 	err := addEnv(flagAddEnvName, envEndpoints, mainConfigFilePath)
@@ -92,32 +97,49 @@ func executeAddEnvCmd(mainConfigFilePath string) {
 func addEnv(envName string, envEndpoints *utils.EnvEndpoints, mainConfigFilePath string) error {
 	if envName == "" {
 		// name of the environment is blank
-		return errors.New("name of the environment cannot be blank")
+		return errors.New("Name of the environment cannot be blank")
 	}
-	if envEndpoints.ApiManagerEndpoint == "" || envEndpoints.RegistrationEndpoint == "" || envEndpoints.TokenEndpoint == "" {
-		// at least one of the 3 mandatory endpoints is blank
+	
+	if envEndpoints.TokenEndpoint == "" {
+		// if mandatory token endpoint is blank
 		utils.ShowHelpCommandTip(addEnvCmdLiteral)
-		return errors.New("endpoints cannot be blank")
+		return errors.New("Token endpoint cannot be blank")
 	}
+
+	if envEndpoints.ApiManagerEndpoint == "" {
+		if envEndpoints.AdminEndpoint == "" || envEndpoints.DevPortalEndpoint == "" ||
+			envEndpoints.PublisherEndpoint == "" || envEndpoints.RegistrationEndpoint == "" ||
+			envEndpoints.TokenEndpoint == "" {
+			utils.ShowHelpCommandTip(addEnvCmdLiteral)
+			return errors.New("Endpoint(s) cannot be blank")
+		}
+	}
+
 	if utils.EnvExistsInMainConfigFile(envName, mainConfigFilePath) {
 		// environment already exists
-		return errors.New("environment '" + envName + "' already exists in " + mainConfigFilePath)
+		return errors.New("Environment '" + envName + "' already exists in " + mainConfigFilePath)
 	}
 
 	mainConfig := utils.GetMainConfigFromFile(mainConfigFilePath)
 
 	var validatedEnvEndpoints = utils.EnvEndpoints{
-		ApiManagerEndpoint:   envEndpoints.ApiManagerEndpoint,
 		TokenEndpoint:        envEndpoints.TokenEndpoint,
-		RegistrationEndpoint: envEndpoints.RegistrationEndpoint,
 	}
 
-	if envEndpoints.ApiListEndpoint != "" {
-		validatedEnvEndpoints.ApiListEndpoint = envEndpoints.ApiListEndpoint
+	if envEndpoints.ApiManagerEndpoint != "" {
+		validatedEnvEndpoints.ApiManagerEndpoint = envEndpoints.ApiManagerEndpoint
 	}
 
-	if envEndpoints.AppListEndpoint != "" {
-		validatedEnvEndpoints.AppListEndpoint = envEndpoints.AppListEndpoint
+	if envEndpoints.RegistrationEndpoint != "" {
+		validatedEnvEndpoints.RegistrationEndpoint = envEndpoints.RegistrationEndpoint
+	}
+
+	if envEndpoints.PublisherEndpoint != "" {
+		validatedEnvEndpoints.PublisherEndpoint = envEndpoints.PublisherEndpoint
+	}
+
+	if envEndpoints.DevPortalEndpoint != "" {
+		validatedEnvEndpoints.DevPortalEndpoint = envEndpoints.DevPortalEndpoint
 	}
 
 	if envEndpoints.AdminEndpoint != "" {
@@ -138,14 +160,12 @@ func init() {
 
 	addEnvCmd.Flags().StringVarP(&flagAddEnvName, "environment", "e", "", "Name of the environment to be added")
 	addEnvCmd.Flags().StringVar(&flagApiManagerEndpoint, "apim", "", "API Manager endpoint for the environment")
-	addEnvCmd.Flags().StringVar(&flagApiListEndpoint, "api_list", "", "API List endpoint for the environment")
-	addEnvCmd.Flags().StringVar(&flagAppListEndpoint, "app_list", "", "Application List endpoint for the environment")
+	addEnvCmd.Flags().StringVar(&flagPublisherEndpoint, "publisher", "", "Publisher endpoint for the environment")
+	addEnvCmd.Flags().StringVar(&flagDevPortalEndpoint, "devportal", "", "DevPortal endpoint for the environment")
 	addEnvCmd.Flags().StringVar(&flagTokenEndpoint, "token", "", "Token endpoint for the environment")
 	addEnvCmd.Flags().StringVar(&flagRegistrationEndpoint, "registration", "",
 		"Registration endpoint for the environment")
 	addEnvCmd.Flags().StringVar(&flagAdminEndpoint, "admin", "", "Admin endpoint for the environment")
 	_ = addEnvCmd.MarkFlagRequired("environment")
-	_ = addEnvCmd.MarkFlagRequired("registration")
 	_ = addEnvCmd.MarkFlagRequired("token")
-	_ = addEnvCmd.MarkFlagRequired("apim")
 }
