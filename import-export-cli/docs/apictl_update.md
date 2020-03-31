@@ -4,7 +4,7 @@ Update an API to the kubernetes cluster
 
 ### Synopsis
 
-Update an existing API with  Swagger file in the kubernetes cluster. JSON and YAML formats are accepted.
+Update an existing API with Swagger file in the kubernetes cluster. JSON and YAML formats are accepted.
 
 ### Examples
 
