@@ -47,12 +47,12 @@ type EnvKeys struct {
 }
 
 type EnvEndpoints struct {
-	ApiManagerEndpoint   string `yaml:"api_manager_endpoint"`
-	ApiListEndpoint      string `yaml:"api_list_endpoint"`
-	AppListEndpoint      string `yaml:"application_list_endpoint"`
-	RegistrationEndpoint string `yaml:"registration_endpoint"`
-	AdminEndpoint        string `yaml:"admin_endpoint"`
-	TokenEndpoint        string `yaml:"token_endpoint"`
+	ApiManagerEndpoint   string `yaml:"apim"`
+	PublisherEndpoint      string `yaml:"publisher"`
+	DevPortalEndpoint      string `yaml:"devportal"`
+	RegistrationEndpoint string `yaml:"registration"`
+	AdminEndpoint        string `yaml:"admin"`
+	TokenEndpoint        string `yaml:"token"`
 }
 
 // ---------------- End of Structs for YAML Config Files ---------------------------------

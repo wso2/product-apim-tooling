@@ -36,9 +36,9 @@ const (
 	envsTokenEndpointHeader        = "TOKEN ENDPOINT"
 	envsAdminEndpointHeader        = "ADMIN ENDPOINT"
 	envsApiManagerEndpoint         = "API MANAGER ENDPOINT"
-	envsApplicationEndpoint        = "APPLICATION ENDPOINT"
+	envsApplicationEndpoint        = "DEVPORTAL ENDPOINT"
 
-	defaulEnvsTableFormat = "table {{.Name}}\t{{.ApiManagerEndpoint}}\t{{.RegistrationEndpoint}}\t{{.TokenEndpoint}}"
+	defaulEnvsTableFormat = "table {{.Name}}\t{{.ApiManagerEndpoint}}\t{{.RegistrationEndpoint}}\t{{.TokenEndpoint}}\t{{.PublisherEndpoint}}\t{{.ApplicationEndpoint}}\t{{.AdminEndpoint}}"
 )
 
 var envsCmdFormat string
@@ -67,8 +67,8 @@ func newEndpointFromEnvEndpoints(name string, e utils.EnvEndpoints) *endpoints {
 		name:                 name,
 		adminEndpoint:        e.AdminEndpoint,
 		apiManagerEndpoint:   e.ApiManagerEndpoint,
-		applicationEndpoint:  e.AppListEndpoint,
-		publisherEndpoint:    e.ApiListEndpoint,
+		applicationEndpoint:  e.DevPortalEndpoint,
+		publisherEndpoint:    e.PublisherEndpoint,
 		registrationEndpoint: e.RegistrationEndpoint,
 		tokenEndpoint:        e.TokenEndpoint,
 	}

@@ -43,7 +43,7 @@ func TestAddEnv2(t *testing.T) {
 	mainConfigFilePath := ""
 
 	envEndpoints := new(utils.EnvEndpoints)
-	envEndpoints.ApiListEndpoint = "test-api-list-endpoint"
+	envEndpoints.PublisherEndpoint = "test-api-list-endpoint"
 	envEndpoints.ApiManagerEndpoint = ""
 	envEndpoints.RegistrationEndpoint = "test-reg-endpoint"
 

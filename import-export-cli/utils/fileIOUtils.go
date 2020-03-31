@@ -97,10 +97,13 @@ func (mainConfig *MainConfig) ParseMainConfigFromFile(data []byte) error {
 	}
 	for name, endpoints := range mainConfig.Environments {
 		if endpoints.ApiManagerEndpoint == "" {
-			return errors.New("Blank API Manager Endpoint for " + name)
-		}
-		if endpoints.RegistrationEndpoint == "" {
-			return errors.New("Blank Registration Endpoint for " + name)
+			if endpoints.AdminEndpoint != "" && endpoints.DevPortalEndpoint != "" &&
+				endpoints.PublisherEndpoint != "" && endpoints.RegistrationEndpoint != "" &&
+				endpoints.TokenEndpoint != "" {
+				return nil
+			} else {
+				return errors.New("Blank API Manager Endpoint for " + name)
+			}
 		}
 		if endpoints.TokenEndpoint == "" {
 			return errors.New("Blank Token Endpoint for " + name)

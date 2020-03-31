@@ -88,16 +88,16 @@ func initSampleMainConfig() {
 	mainConfig.Environments = make(map[string]EnvEndpoints)
 	mainConfig.Environments[devName] = EnvEndpoints{
 		"dev_apim_endpoint",
-		"dev_api_list_endpoint",
-		"dev_application_list_endpoint",
+		"dev_publisher_endpoint",
+		"dev_devportal_endpoint",
 		"dev_reg_endpoint",
 		"dev_admin_endpoint",
 		"dev_token_endpoint",
 	}
 	mainConfig.Environments[qaName] = EnvEndpoints{
 		"qa_apim_endpoint",
-		"qa_api_list_endpoint",
-		"qa_application_list_endpoint",
+		"qa_publisher_endpoint",
+		"qa_devportal_endpoint",
 		"qa_reg_endpoint",
 		"qa_admin_endpoint",
 		"dev_token_endpoint",
