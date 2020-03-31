@@ -20,14 +20,16 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/go-resty/resty"
-	"github.com/spf13/cobra"
-	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
+
+	"github.com/go-resty/resty"
+	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 var exportAppName string
@@ -101,7 +103,8 @@ func WriteApplicationToZip(exportAppName, exportAppOwner, zipLocationPath string
 		os.Mkdir(zipLocationPath, 0777)
 		// permission 777 : Everyone can read, write, and execute
 	}
-	zipFilename := exportAppOwner + "_" + exportAppName + ".zip" // admin_testApp.zip
+
+	zipFilename := replaceUserStoreDomainDelimiter(exportAppOwner) + "_" + exportAppName + ".zip" // admin_testApp.zip
 	pFile := filepath.Join(zipLocationPath, zipFilename)
 	err := ioutil.WriteFile(pFile, resp.Body(), 0644)
 	// permission 644 : Only the owner can read and write.. Everyone else can only read.
@@ -110,6 +113,15 @@ func WriteApplicationToZip(exportAppName, exportAppOwner, zipLocationPath string
 	}
 	fmt.Println("Successfully exported Application!")
 	fmt.Println("Find the exported Application at " + pFile)
+}
+
+// The Application owner name is used to construct a unique name for the app export zip.
+// When an app belonging to a user from a secondary user store is exported, the owner name will have
+// the format '<Userstore_domain>/<Username>'. The '/' character will be mistakenly considerd as a
+// file separator character, resulting in an invalid path being constructed.
+// Therefore this function overcomes this issue by replacing the '/' character.
+func replaceUserStoreDomainDelimiter(username string) string {
+	return strings.ReplaceAll(username, "/", "#")
 }
 
 // ExportApp
