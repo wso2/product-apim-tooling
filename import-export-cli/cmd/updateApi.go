@@ -19,6 +19,7 @@ package cmd
 
 import (
 	"fmt"
+	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"strings"
 	"time"
@@ -50,6 +51,12 @@ var updateApiCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + updateCmdLiteral + " called")
 		validateAddApiCommand()
+
+		// check the existence of the API
+		getApiErr := k8sUtils.ExecuteCommandWithoutPrintingErrors(k8sUtils.Kubectl, k8sUtils.K8sGet, k8sUtils.ApiOpCrdApi, flagApiName)
+		if getApiErr == nil {
+			utils.HandleErrorAndExit(fmt.Sprintf("An API with the name \"%s\" already exists", flagApiName), nil)
+		}
 
 		//get current timestamp
 		timestampSuffix := time.Now().Format("2Jan2006150405")

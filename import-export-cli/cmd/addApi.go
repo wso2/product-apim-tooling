@@ -179,9 +179,12 @@ func createAPI(name string, namespace string, configMapNames []string, replicas 
 	apiConfigMap.Spec.Definition.SwaggerConfigmapNames = configMapNames
 	apiConfigMap.Spec.Replicas = replicas
 	apiConfigMap.Spec.Override = override
+	k8sOperation := k8sUtils.K8sCreate
+
 	if timestamp != "" {
 		//set update timestamp
 		apiConfigMap.Spec.UpdateTimeStamp = timestamp
+		k8sOperation = k8sUtils.K8sApply
 	}
 	if len(balInterceptors) > 0 {
 		// set bal interceptors configmap name in API cr
@@ -217,20 +220,13 @@ func createAPI(name string, namespace string, configMapNames []string, replicas 
 	if err := tmpFile.Close(); err != nil {
 		log.Fatal(err)
 	}
+
 	//execute kubernetes command to create or update api from file
-	cmd := exec.Command(
-		k8sUtils.Kubectl,
-		"apply",
-		"-f",
-		tmpFile.Name(),
-		"-n", namespace,
-	)
-	var errBuf, outBuf bytes.Buffer
-	cmd.Stderr = io.MultiWriter(os.Stderr, &errBuf)
-	cmd.Stdout = io.MultiWriter(os.Stdout, &outBuf)
-	errAddApi := cmd.Run()
+	errAddApi := k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sOperation, "-f", tmpFile.Name(), "-n", namespace)
 	if errAddApi != nil {
-		fmt.Println(errAddApi)
+		fmt.Println("error configuring API")
+		// delete all configs if any error
+		rollbackConfigs(apiConfigMap)
 	}
 }
 
@@ -291,6 +287,32 @@ func handleJavaInterceptors(nameSuffix string, path string, operation string, na
 		}
 	}
 	return javaInterceptorsConfNames
+}
+
+// rollbackConfigs deletes configs defined in the API CR given
+func rollbackConfigs(apiCr *wso2v1alpha1.API) {
+	var rollbackConfMaps []string // configmap names to be deleted
+
+	// swagger configmaps
+	rollbackConfMaps = append(rollbackConfMaps, apiCr.Spec.Definition.SwaggerConfigmapNames...)
+	// ballerina interceptor configmaps
+	rollbackConfMaps = append(rollbackConfMaps, apiCr.Spec.Definition.Interceptors.Ballerina...)
+	// java interceptor configmaps
+	rollbackConfMaps = append(rollbackConfMaps, apiCr.Spec.Definition.Interceptors.Java...)
+
+	if len(rollbackConfMaps) == 0 {
+		return
+	}
+
+	// execute kubernetes command to delete
+	fmt.Println("Deleting created configs")
+	k8sArgs := []string{k8sUtils.K8sDelete, "cm"}
+	k8sArgs = append(k8sArgs, rollbackConfMaps...)
+
+	delConfErr := k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sArgs...)
+	if delConfErr != nil {
+		utils.HandleErrorAndExit("error deleting configmaps of the API: "+apiCr.Name, delConfErr)
+	}
 }
 
 func init() {
