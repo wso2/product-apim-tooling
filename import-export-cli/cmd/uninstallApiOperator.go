@@ -43,24 +43,12 @@ var uninstallApiOperatorCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		isConfirm := flagForceUninstallApiOperator
 
-		// getting API Operator version
-		operatorVersion, err := k8sUtils.GetVersion(
-			"API Operator",
-			k8sUtils.ApiOperatorVersionEnvVariable,
-			k8sUtils.DefaultApiOperatorVersion,
-			k8sUtils.ApiOperatorVersionValidationUrlTemplate,
-			k8sUtils.ApiOperatorFindVersionUrl,
-		)
-		if err != nil {
-			utils.HandleErrorAndExit("Error in API Operator version", err)
-		}
-
 		if !flagForceUninstallApiOperator {
 			isConfirmStr, err := utils.ReadInputString(
-				fmt.Sprintf("\nUninstall \"%s-%s\" and all related resources: APIs, Securities, Rate Limitings and Target Endpoints\n"+
+				fmt.Sprintf("\nUninstall \"%s\" and all related resources: APIs, Securities, Rate Limitings and Target Endpoints\n"+
 					"[WARNING] Remove the namespace: %s\n"+
 					"Are you sure",
-					k8sUtils.ApiOperator, operatorVersion, k8sUtils.ApiOpWso2Namespace),
+					k8sUtils.ApiOperator, k8sUtils.ApiOpWso2Namespace),
 				utils.Default{Value: "N", IsDefault: true},
 				"",
 				false,
