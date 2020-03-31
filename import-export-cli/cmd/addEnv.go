@@ -58,7 +58,8 @@ const addEnvCmdExamples = utils.ProjectName + ` ` + addEnvCmdLiteral + ` -e prod
 --token https://localhost:8243/token
 
 NOTE: The flag --environment (-e) is mandatory
-You can either provide only the 2 tags --apim and --token, or all the other 5 tags (--registration --publisher --devportal --admin --token) without providing --apim tag, or all the 6 tags to add an environment.`
+You can either provide only the 2 tags --apim and --token, or all the other 5 tags (--registration --publisher --devportal --admin --token) without providing --apim tag,
+or all the 6 tags to add an environment.`
 
 // addEnvCmd represents the addEnv command
 var addEnvCmd = &cobra.Command{
@@ -99,7 +100,7 @@ func addEnv(envName string, envEndpoints *utils.EnvEndpoints, mainConfigFilePath
 		// name of the environment is blank
 		return errors.New("Name of the environment cannot be blank")
 	}
-	
+
 	if envEndpoints.TokenEndpoint == "" {
 		// if mandatory token endpoint is blank
 		utils.ShowHelpCommandTip(addEnvCmdLiteral)

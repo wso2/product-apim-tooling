@@ -33,7 +33,8 @@ apictl add-env -e dev \
 --token https://localhost:8243/token
 
 NOTE: The flag --environment (-e) is mandatory
-You can either provide only the 2 tags --apim and --token, or all the other 5 tags (--registration --publisher --devportal --admin --token) without providing --apim tag, or all the 6 tags to add an environment.
+You can either provide only the 2 tags --apim and --token, or all the other 5 tags (--registration --publisher --devportal --admin --token) without providing --apim tag,
+or all the 6 tags to add an environment.
 ```
 
 ### Options
