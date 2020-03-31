@@ -23,13 +23,13 @@ NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory
 
 ```
   -e, --environment string   Environment from the which the Application should be imported
-  -f, --file string          Name of the Application to be imported
+  -f, --file string          Name of the ZIP file of the Application to be imported
   -h, --help                 help for import-app
   -o, --owner string         Name of the target owner of the Application as desired by the Importer
       --preserveOwner        Preserves app owner
-      --skipKeys             Skip importing keys of application
+      --skipKeys             Skip importing keys of the Application
   -s, --skipSubscriptions    Skip subscriptions of the Application
-      --update               Update application or create new
+      --update               Update the Application if it is already imported
 ```
 
 ### Options inherited from parent commands
