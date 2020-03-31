@@ -208,7 +208,7 @@ func handleSecurityEndpointsParams(envSecurityEndpointParams *params.SecurityDat
 	// according to the api.yaml file as usually)
 	// In Go, irrespective of whether a boolean value is "" or false, it will contain false by default.
 	// That is why, here a string comparison was  made since strings can have both "" and "false"
-	if envSecurityEndpointParams.Enabled != "" {
+	if envSecurityEndpointParams != nil && envSecurityEndpointParams.Enabled != "" {
 		// Convert the string enabled to boolean
 		boolEnabled, err := strconv.ParseBool(envSecurityEndpointParams.Enabled)
 		if err != nil {
@@ -262,7 +262,7 @@ func setSecurityEndpointsParams(envSecurityEndpointParams *params.SecurityData, 
 		}
 		// Set the fields in api.yaml according to the type field in api_params.yaml
 		err := setEndpointSecurityType(envSecurityEndpointParams, api)
-		if (err != nil) {
+		if err != nil {
 			return err
 		}
 	}
@@ -327,7 +327,7 @@ func extractArchive(src, dest string) (string, error) {
 }
 
 // resolveAPIParamsPath resolves api_params.yaml path
-// First it will look at BasePath f the import path (the last directory)
+// First it will look at BasePath of the import path (the last directory)
 // If not found it will look at current working directory
 // If a path is provided search ends looking up at that path
 func resolveAPIParamsPath(importPath, paramPath string) (string, error) {
@@ -631,6 +631,32 @@ func preProcessAPI(apiDirectory string) error {
 	return nil
 }
 
+// Substitutes environment variables in the project files.
+func replaceEnvVariables(apiFilePath string) error {
+	for _, replacePath := range utils.EnvReplaceFilePaths {
+		absFile := filepath.Join(apiFilePath, replacePath)
+		// check if the path exists. If exists, proceed with processing. Otherwise, continue with the next items
+		if fi, err := os.Stat(absFile); err != nil {
+			if !os.IsNotExist(err) {
+				return err
+			}
+		} else {
+			switch mode := fi.Mode(); {
+			case mode.IsDir():
+				utils.Logln(utils.LogPrefixInfo+"Substituting env variables of files in folder path: ", absFile)
+				err = utils.EnvSubstituteInFolder(absFile)
+			case mode.IsRegular():
+				utils.Logln(utils.LogPrefixInfo+"Substituting env of file: ", absFile)
+				err = utils.EnvSubstituteInFile(absFile)
+			}
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 func populateApiWithDefaults(def *v2.APIDefinition) (dirty bool) {
 	dirty = false
 	if def.ContextTemplate == "" {
@@ -803,13 +829,19 @@ func ImportAPI(credential credentials.Credential, importPath, adminEndpoint, exp
 	}()
 	apiFilePath := tmpPath
 
+	utils.Logln(utils.LogPrefixInfo + "Substituting environment variables in API files...")
+	err = replaceEnvVariables(apiFilePath)
+	if err != nil {
+		return err
+	}
+
 	utils.Logln(utils.LogPrefixInfo + "Pre Processing API...")
 	err = preProcessAPI(apiFilePath)
 	if err != nil {
 		return err
 	}
 
-	utils.Logln(utils.LogPrefixInfo + "Attempting to inject parameters to the API")
+	utils.Logln(utils.LogPrefixInfo + "Attempting to inject parameters to the API from api_params.yaml (if exists)")
 	paramsPath, err := resolveAPIParamsPath(resolvedApiFilePath, apiParamsPath)
 	if err != nil && apiParamsPath != DefaultAPIMParamsFileName && apiParamsPath != "" {
 		return err
