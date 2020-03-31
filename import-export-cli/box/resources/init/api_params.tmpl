@@ -2,10 +2,7 @@ environments:{{- range $name, $elem := . }}
   - name: {{ $name }}
     endpoints:
       production:
+        url:
       sandbox:
-    security:
-      enabled: 
-      type: 
-      username: 
-      password: 
+        url:
 {{- end }}

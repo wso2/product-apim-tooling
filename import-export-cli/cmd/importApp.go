@@ -211,7 +211,7 @@ func NewAppFileUploadRequest(uri string, params map[string]string, paramName, pa
 func init() {
 	RootCmd.AddCommand(ImportAppCmd)
 	ImportAppCmd.Flags().StringVarP(&importAppFile, "file", "f", "",
-		"Name of the Application to be imported")
+		"Name of the ZIP file of the Application to be imported")
 	ImportAppCmd.Flags().StringVarP(&importAppOwner, "owner", "o", "",
 		"Name of the target owner of the Application as desired by the Importer")
 	ImportAppCmd.Flags().StringVarP(&importAppEnvironment, "environment", "e",
@@ -221,9 +221,9 @@ func init() {
 	ImportAppCmd.Flags().BoolVarP(&skipSubscriptions, "skipSubscriptions", "s", false,
 		"Skip subscriptions of the Application")
 	ImportAppCmd.Flags().BoolVarP(&importAppSkipKeys, "skipKeys", "", false,
-		"Skip importing keys of application")
+		"Skip importing keys of the Application")
 	ImportAppCmd.Flags().BoolVarP(&importAppUpdateApplication, "update", "", false,
-		"Update application or create new")
+		"Update the Application if it is already imported")
 	_ = ImportAppCmd.MarkFlagRequired("file")
 	_ = ImportAppCmd.MarkFlagRequired("environment")
 }
