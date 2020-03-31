@@ -44,24 +44,12 @@ var uninstallWso2amOperatorCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		isConfirm := flagForceUninstallWso2amOperator
 
-		// getting API Operator version
-		operatorVersion, err := k8sUtils.GetVersion(
-			"WSO2AM Operator",
-			k8sUtils.Wso2AmOperatorVersionEnvVariable,
-			k8sUtils.DefaultWso2AmOperatorVersion,
-			k8sUtils.Wso2AmOperatorVersionValidationUrlTemplate,
-			k8sUtils.Wso2AmOperatorFindVersionUrl,
-		)
-		if err != nil {
-			utils.HandleErrorAndExit("Error in WSO2AM Operator version", err)
-		}
-
 		if !flagForceUninstallWso2amOperator {
 			isConfirmStr, err := utils.ReadInputString(
-				fmt.Sprintf("\nUninstall \"%s-%s\" and all related resources: Apimanagers\n"+
+				fmt.Sprintf("\nUninstall \"%s\" and all related resources: Apimanagers\n"+
 					"[WARNING] Remove the namespace: %s\n"+
 					"Are you sure",
-					k8sUtils.Wso2amOperator, operatorVersion, k8sUtils.ApiOpWso2Namespace),
+					k8sUtils.Wso2amOperator, k8sUtils.ApiOpWso2Namespace),
 				utils.Default{Value: "N", IsDefault: true},
 				"",
 				false,
