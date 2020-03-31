@@ -201,15 +201,8 @@ func executeInitCmd() error {
 			return err
 		}
 
-		// substitute all env variables with ${var} format only
-		utils.Logln(utils.LogPrefixInfo + "Substituting environment variables")
-		yamlSwaggerString, err := utils.EnvSubstituteForCurlyBraces(string(yamlSwagger))
-		if err != nil {
-			return err
-		}
-
 		// write to file
-		err = ioutil.WriteFile(swaggerSavePath, []byte (yamlSwaggerString), os.ModePerm)
+		err = ioutil.WriteFile(swaggerSavePath, yamlSwagger, os.ModePerm)
 		if err != nil {
 			return err
 		}
