@@ -23,8 +23,9 @@
         </blockquote>
         <p> Execute <code>apictl add-env --help</code> for detailed instructions</p>
         <blockquote>
-            <p>Under environment, <code>api_manager_endpoint</code>, <code>registration_endpoint</code>, <code>token_endpoint</code>
-                fields are mandatory. Others are optional</p>
+            <p>The flag <code>--environment</code> (-e) is mandatory
+                You can either provide only the 2 tags <code>--apim</code> and <code>--token</code>, or all the other 5 tags (<code>--registration</code>, <code>--publisher</code>, <code>--devportal</code>, <code>--admin</code>, <code>--token</code>) without providing <code>--apim</code> tag,
+                or all the 6 tags to add an environment.</p>
         </blockquote>
     </li>
     <li><h3 id="command-autocompletion-for-bash-only-">Command Autocompletion (For Bash Only)</h3>
@@ -184,23 +185,35 @@
         <pre><code class="lang-bash">      Flags:
         Required:
             --environment, -e (Name of the environment)
-            --apim (API Manager endpoint)
-            --registration (Registration Endpoint)
             --token (Token Endpoint)
+            AND
+            --apim (API Manager endpoint)
+            OR (the following 4)
+            --registration https://localhost:9443 \
+            --publisher https://localhost:9443 \
+            --devportal https://localhost:9443 \
+            --admin https://localhost:9443
         Optional:
             --list (API List endpoint for environment)
 
         Examples:
         apictl add-env -e dev \
-            --apim https://localhost:9443 \ 
-            --registration https://localhost:9443/client-registration/v0.16/register \
+            --apim https://localhost:9443 \
+            --token https://localhost:9443/oauth2/token
+
+        apictl add-env -e staging \
+            --registration https://localhost:9443 \
+            --publisher https://localhost:9443 \
+            --devportal https://localhost:9443 \
+            --admin https://localhost:9443 \
             --token https://localhost:9443/oauth2/token
             
         apictl add-env -e prod \
             --apim https://localhost:9443 \ 
-            --registration https://localhost:9443/client-registration/v0.16/register \
-            --api_list https://localhost:9443/api/am/publisher/v1/apis \
-            --app_list https://localhost:9443/api/am/admin/v0.16/applications \
+            --registration https://localhost:9443 \
+            --publisher https://localhost:9443 \
+            --devportal https://localhost:9443 \
+            --admin https://localhost:9443 \
             --token https://localhost:9443/oauth2/token
 </code></pre>
     </li>

@@ -49,7 +49,6 @@ func EnvExistsInMainConfigFile(env, filePath string) bool {
 			return true
 		}
 	}
-
 	return false
 }
 
@@ -163,7 +162,8 @@ func GetApiManagerEndpointOfEnv(env, filePath string) string {
 func GetAdminEndpointOfEnv(env, filePath string) string {
 	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
 	if !(envEndpoints.AdminEndpoint == "" || envEndpoints == nil) {
-		return envEndpoints.AdminEndpoint
+		envEndpoints.AdminEndpoint = AppendSlashToString(envEndpoints.AdminEndpoint)
+		return envEndpoints.AdminEndpoint + defaultApiApplicationImportExportSuffix
 	} else {
 		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
 		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
@@ -174,8 +174,9 @@ func GetAdminEndpointOfEnv(env, filePath string) string {
 // Get ApiListEndpoint of a given environment
 func GetApiListEndpointOfEnv(env, filePath string) string {
 	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
-	if !(envEndpoints.ApiListEndpoint == "" || envEndpoints == nil) {
-		return envEndpoints.ApiListEndpoint
+	if !(envEndpoints.PublisherEndpoint == "" || envEndpoints == nil) {
+		envEndpoints.PublisherEndpoint = AppendSlashToString(envEndpoints.PublisherEndpoint)
+		return envEndpoints.PublisherEndpoint + defaultApiListEndpointSuffix
 	} else {
 		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
 		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
@@ -186,8 +187,9 @@ func GetApiListEndpointOfEnv(env, filePath string) string {
 // Get ApplicationListEndpoint of a given environment
 func GetAdminApplicationListEndpointOfEnv(env, filePath string) string {
 	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
-	if !(envEndpoints.AppListEndpoint == "" || envEndpoints == nil) {
-		return envEndpoints.AppListEndpoint
+	if !(envEndpoints.DevPortalEndpoint == "" || envEndpoints == nil) {
+		envEndpoints.DevPortalEndpoint = AppendSlashToString(envEndpoints.DevPortalEndpoint)
+		return envEndpoints.DevPortalEndpoint + defaultDevPortalApplicationListEndpointSuffix
 	} else {
 		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
 		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
@@ -198,8 +200,9 @@ func GetAdminApplicationListEndpointOfEnv(env, filePath string) string {
 // Get ApplicationListEndpoint of a given environment
 func GetDevPortalApplicationListEndpointOfEnv(env, filePath string) string {
 	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
-	if !(envEndpoints.AppListEndpoint == "" || envEndpoints == nil) {
-		return envEndpoints.AppListEndpoint
+	if !(envEndpoints.DevPortalEndpoint == "" || envEndpoints == nil) {
+		envEndpoints.DevPortalEndpoint = AppendSlashToString(envEndpoints.DevPortalEndpoint)
+		return envEndpoints.DevPortalEndpoint + defaultDevPortalApplicationListEndpointSuffix
 	} else {
 		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
 		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
@@ -216,7 +219,14 @@ func GetTokenEndpointOfEnv(env, filePath string) string {
 // Get RegistrationEndpoint of a given environment
 func GetRegistrationEndpointOfEnv(env, filePath string) string {
 	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
-	return envEndpoints.RegistrationEndpoint
+	if !(envEndpoints.RegistrationEndpoint == "" || envEndpoints == nil) {
+		envEndpoints.RegistrationEndpoint = AppendSlashToString(envEndpoints.RegistrationEndpoint)
+		return envEndpoints.RegistrationEndpoint + defaultClientRegistrationEndpointSuffix
+	} else {
+		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
+		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
+		return apiManagerEndpoint + defaultClientRegistrationEndpointSuffix
+	}
 }
 
 // Get username of an environment given the environment
