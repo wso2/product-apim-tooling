@@ -42,9 +42,9 @@ const ApiOpCrdSecurity = "securities.wso2.com"
 const ApiOpCrdTargetEndpoint = "targetendpoints.wso2.com"
 
 // API Operator version
-const ApiOperatorConfigsUrlTemplate = "https://github.com/wso2/K8s-api-operator/releases/download/%s/api-operator-configs.yaml"
-const ApiOperatorVersionValidationUrlTemplate = "https://github.com/wso2/K8s-api-operator/tree/%s"
-const ApiOperatorFindVersionUrl = "https://github.com/wso2/K8s-api-operator/releases"
+const ApiOperatorConfigsUrlTemplate = "https://github.com/wso2/k8s-api-operator/releases/download/%s/api-operator-configs.yaml"
+const ApiOperatorVersionValidationUrlTemplate = "https://github.com/wso2/k8s-api-operator/tree/%s"
+const ApiOperatorFindVersionUrl = "https://github.com/wso2/k8s-api-operator/releases"
 const DefaultApiOperatorVersion = "v1.1.0"
 const ApiOperatorVersionEnvVariable = "WSO2_API_OPERATOR_VERSION"
 
@@ -55,9 +55,9 @@ const Wso2amOperator = "wso2am-operator"
 const Wso2amOpCrdApimanager = "apimanagers.apim.wso2.com"
 
 // WSO2 AM Operator version
-const Wso2AmOperatorConfigsUrlTemplate = "https://github.com/wso2/K8s-wso2am-operator/releases/download/%s/wso2am-operator-configs.yaml"
-const Wso2AmOperatorVersionValidationUrlTemplate = "https://github.com/wso2/K8s-wso2am-operator/tree/%s"
-const Wso2AmOperatorFindVersionUrl = "https://github.com/wso2/K8s-wso2am-operator/releases"
+const Wso2AmOperatorConfigsUrlTemplate = "https://github.com/wso2/k8s-wso2am-operator/releases/download/%s/wso2am-operator-configs.yaml"
+const Wso2AmOperatorVersionValidationUrlTemplate = "https://github.com/wso2/k8s-wso2am-operator/tree/%s"
+const Wso2AmOperatorFindVersionUrl = "https://github.com/wso2/k8s-wso2am-operator/releases"
 const DefaultWso2AmOperatorVersion = "v1.0.0"
 const Wso2AmOperatorVersionEnvVariable = "WSO2_AM_OPERATOR_VERSION"
 

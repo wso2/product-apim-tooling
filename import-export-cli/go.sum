@@ -404,6 +404,9 @@ github.com/valyala/bytebufferpool v1.0.0/go.mod h1:6bBcMArwyJ5K/AmCkWv1jt77kVWyC
 github.com/valyala/fasthttp v1.2.0/go.mod h1:4vX61m6KN+xDduDNwXrhIAVZaZaZiQ1luJk8LWSxF3s=
 github.com/valyala/quicktemplate v1.1.1/go.mod h1:EH+4AkTd43SvgIbQHYu59/cJyxDoOVRUAfrukLPuGJ4=
 github.com/valyala/tcplisten v0.0.0-20161114210144-ceec8f93295a/go.mod h1:v3UYOV9WzVtRmSR+PDvWpU/qWl4Wa5LApYYX4ZtKbio=
+github.com/wso2/k8s-api-operator v1.0.1 h1:na2r7LoyLDj+lO8558Aq+9fqG6LykhwttAmQWB+gS3k=
+github.com/wso2/k8s-api-operator/api-operator v0.0.0-20200401060926-f007c2f3cfb3 h1:7pwJIGWTqvJRgbGzqy+DalE2qmWrSeSAGEqH3N75yUI=
+github.com/wso2/k8s-api-operator/api-operator v0.0.0-20200401060926-f007c2f3cfb3/go.mod h1:yOoFabyChZn8ueA5QZt0XqVUox41XfmPt8tCJ060+cc=
 github.com/wso2/k8s-apim-operator v0.0.0-20190906090738-fc77c27673ce h1:ADEoGtxq7K/7loRxqF9EchoMIoZFL8kUt7nJ7z1Gwvs=
 github.com/wso2/k8s-apim-operator v0.0.0-20190906090738-fc77c27673ce/go.mod h1:bzltphF0ElBW6n+4Ti6AHxKezZdv9yUslZtdZKq4dSA=
 github.com/wso2/k8s-apim-operator v1.0.0-beta h1:k950oMxmsoN9VIJrsDQ59vpsOVQeLLiqkKuGyo7lB+o=
