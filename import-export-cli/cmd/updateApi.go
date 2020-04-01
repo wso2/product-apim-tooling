@@ -54,8 +54,8 @@ var updateApiCmd = &cobra.Command{
 
 		// check the existence of the API
 		getApiErr := k8sUtils.ExecuteCommandWithoutPrintingErrors(k8sUtils.Kubectl, k8sUtils.K8sGet, k8sUtils.ApiOpCrdApi, flagApiName)
-		if getApiErr == nil {
-			utils.HandleErrorAndExit(fmt.Sprintf("An API with the name \"%s\" already exists", flagApiName), nil)
+		if getApiErr != nil {
+			utils.HandleErrorAndExit(fmt.Sprintf("Could not find the API with the name \"%s\"", flagApiName), nil)
 		}
 
 		//get current timestamp

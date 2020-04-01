@@ -179,12 +179,14 @@ func createAPI(name string, namespace string, configMapNames []string, replicas 
 	apiConfigMap.Spec.Definition.SwaggerConfigmapNames = configMapNames
 	apiConfigMap.Spec.Replicas = replicas
 	apiConfigMap.Spec.Override = override
-	k8sOperation := k8sUtils.K8sCreate
 
+	k8sOperation := k8sUtils.K8sCreate
+	k8sSaveConfig := true
 	if timestamp != "" {
 		//set update timestamp
 		apiConfigMap.Spec.UpdateTimeStamp = timestamp
 		k8sOperation = k8sUtils.K8sApply
+		k8sSaveConfig = false
 	}
 	if len(balInterceptors) > 0 {
 		// set bal interceptors configmap name in API cr
@@ -221,8 +223,13 @@ func createAPI(name string, namespace string, configMapNames []string, replicas 
 		log.Fatal(err)
 	}
 
+	k8sArgs := []string{k8sOperation, "-f", tmpFile.Name(), "-n", namespace}
+	if k8sSaveConfig {
+		k8sArgs = append(k8sArgs, "--save-config")
+	}
+
 	//execute kubernetes command to create or update api from file
-	errAddApi := k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sOperation, "-f", tmpFile.Name(), "-n", namespace)
+	errAddApi := k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sArgs...)
 	if errAddApi != nil {
 		fmt.Println("error configuring API")
 		// delete all configs if any error
