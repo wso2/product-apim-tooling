@@ -11,7 +11,7 @@ import (
 )
 
 // Match for $VAR or ${VAR} and capture VAR inside a group
-var re = regexp.MustCompile(`\$?{(\w+)?}`)
+var re = regexp.MustCompile(`\${?(\w+)}?`)
 
 // Match for ${VAR} and capture VAR inside a group
 var recb = regexp.MustCompile(`\${(\w+)}`)
