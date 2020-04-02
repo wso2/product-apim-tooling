@@ -86,8 +86,8 @@ type APIEndpointConfig struct {
 	EPConfig string `json:"endpointConfig"`
 }
 
-// LoadApiParams loads an configuration from a reader. It returns an error or a valid ApiParams
-func LoadApiParams(r io.Reader) (*ApiParams, error) {
+// loadApiParams loads an configuration from a reader. It returns an error or a valid ApiParams
+func loadApiParams(r io.Reader) (*ApiParams, error) {
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
 		return nil, err
@@ -104,7 +104,23 @@ func LoadApiParams(r io.Reader) (*ApiParams, error) {
 		return nil, err
 	}
 
+	// Cleanup empty URLs
+	cleanEmptyEnvironmentURLs(apiParams.Environments)
 	return apiParams, nil
+}
+
+// Remove whole production/sandbox endpoint sections of each environment when corresponding urls are empty
+func cleanEmptyEnvironmentURLs (envs []Environment)  {
+	for _, env := range envs {
+		if env.Endpoints != nil {
+			if env.Endpoints.Production != nil && env.Endpoints.Production.Url == nil {
+				env.Endpoints.Production = nil
+			}
+			if env.Endpoints.Sandbox != nil && env.Endpoints.Sandbox.Url == nil {
+				env.Endpoints.Sandbox = nil
+			}
+		}
+	}
 }
 
 // LoadApiParamsFromFile loads a configuration YAML file located in path. It returns an error or a valid ApiParams
@@ -113,7 +129,7 @@ func LoadApiParamsFromFile(path string) (*ApiParams, error) {
 	if err != nil {
 		return nil, err
 	}
-	apiConfig, err := LoadApiParams(r)
+	apiConfig, err := loadApiParams(r)
 	_ = r.Close()
 
 	return apiConfig, err
