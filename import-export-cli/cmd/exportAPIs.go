@@ -33,10 +33,10 @@ import (
 const exportAPIsCmdLiteral = "export-apis"
 const exportAPIsCmdShortDesc = "Export APIs for migration"
 
-const exportAPIsCmdLongDesc = "Export all the APIs of a tenant from an APIM 2.6.0 environment environment, to be imported " +
-	"into 3.0.0 environment"
-const exportAPIsCmdExamples = utils.ProjectName + ` ` + exportAPIsCmdLiteral + ` -e production-2.6.0 -u wso2admin@wso2.org -p 12345 -t wso2.org -k --force
-` + utils.ProjectName + ` ` + exportAPIsCmdLiteral + ` -e production-2.6.0 -u admin -p admin -k
+const exportAPIsCmdLongDesc = "Export all the APIs of a tenant from one environment, to be imported " +
+"into another environment"
+const exportAPIsCmdExamples = utils.ProjectName + ` ` + exportAPIsCmdLiteral + ` -e production -t wso2.org --force
+` + utils.ProjectName + ` ` + exportAPIsCmdLiteral + ` -e production
 NOTE: The flag (--environment (-e)) is mandatory`
 
 var apiExportDir string
@@ -54,8 +54,8 @@ var mainConfigFilePath string
 var credential credentials.Credential
 
 var ExportAPIsCmd = &cobra.Command{
-	Use: exportAPIsCmdLiteral + " [--environment " +
-		"<environment-from-which-artifacts-should-be-exported>] -u <user_name> -p <password> [-t <Tenant-domain-of-the-resources-to-be-exported>] [--force]",
+	Use: exportAPIsCmdLiteral + " (--environment " +
+		"<environment-from-which-artifacts-should-be-exported> -t <Tenant-domain-of-the-resources-to-be-exported> --force)",
 	Short:   exportAPIsCmdShortDesc,
 	Long:    exportAPIsCmdLongDesc,
 	Example: exportAPIsCmdExamples,
