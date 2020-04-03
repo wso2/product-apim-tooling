@@ -43,23 +43,20 @@ const addEnvCmdExamples = utils.ProjectName + ` ` + addEnvCmdLiteral + ` -e prod
 --token https://localhost:8243/token
 
 ` + utils.ProjectName + ` ` + addEnvCmdLiteral + ` -e test \
---registration https://localhost:9443/client-registration/v0.16/register \
---publisher https://localhost:9443/api/am/publisher/v1/apis \
---devportal  https://localhost:9443 \
---admin  https://localhost:9443 \
---token https://localhost:8243/token
+--registration https://idp.com:9443 \
+--publisher https://apim.com:9443 \
+--devportal  https://apps.com:9443 \
+--admin  https://apim.com:9443 \
+--token https://gw.com:8243/token
 
 ` + utils.ProjectName + ` ` + addEnvCmdLiteral + ` -e dev \
---apim https://localhost:9443 \
---registration https://localhost:9443/client-registration/v0.16/register \
---publisher https://localhost:9443/api/am/publisher/v1/apis \
---devportal  https://localhost:9443 \
---admin  https://localhost:9443 \
---token https://localhost:8243/token
+--apim https://apim.com:9443 \
+--registration https://idp.com:9443 \
+--token https://gw.com:8243/token
 
-NOTE: The flag --environment (-e) is mandatory
-You can either provide only the 2 tags --apim and --token, or all the other 5 tags (--registration --publisher --devportal --admin --token) without providing --apim tag,
-or all the 6 tags to add an environment.`
+NOTE: The flags --environment (-e) and --token are mandatory
+You can either provide only the 2 flags --apim and --token, or all the other 5 flags (--registration --publisher --devportal --admin --token) without providing --apim flag.
+If you are omitting any of --registration --publisher --devportal --admin flags, you need to specify --apim flag with the API Manager endpoint.`
 
 // addEnvCmd represents the addEnv command
 var addEnvCmd = &cobra.Command{

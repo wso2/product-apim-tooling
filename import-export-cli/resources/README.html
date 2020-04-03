@@ -23,9 +23,9 @@
         </blockquote>
         <p> Execute <code>apictl add-env --help</code> for detailed instructions</p>
         <blockquote>
-            <p>The flag <code>--environment</code> (-e) is mandatory
-                You can either provide only the 2 tags <code>--apim</code> and <code>--token</code>, or all the other 5 tags (<code>--registration</code>, <code>--publisher</code>, <code>--devportal</code>, <code>--admin</code>, <code>--token</code>) without providing <code>--apim</code> tag,
-                or all the 6 tags to add an environment.</p>
+            <p>The flags <code>--environment (-e)</code> and <code>--token</code> are mandatory.
+                You can either provide only the 2 flags <code>--apim</code> and <code>--token</code>, or all the other 5 flags (<code>--registration</code>, <code>--publisher</code>, <code>--devportal</code>, <code>--admin</code>, <code>--token</code>) without providing <code>--apim</code> flag.
+                If you are omitting any of --registration --publisher --devportal --admin flags, you need to specify --apim flag with the API Manager endpoint.</p>
         </blockquote>
     </li>
     <li><h3 id="command-autocompletion-for-bash-only-">Command Autocompletion (For Bash Only)</h3>
@@ -199,22 +199,19 @@
         Examples:
         apictl add-env -e dev \
             --apim https://localhost:9443 \
-            --token https://localhost:9443/oauth2/token
+            --token https://localhost:8243/token
 
         apictl add-env -e staging \
-            --registration https://localhost:9443 \
-            --publisher https://localhost:9443 \
-            --devportal https://localhost:9443 \
-            --admin https://localhost:9443 \
-            --token https://localhost:9443/oauth2/token
+            --registration https://idp.com:9443 \
+            --publisher https://apim.com:9443 \
+            --devportal https://apps.com:9443 \
+            --admin https://apim.com:9443 \
+            --token https://gw.com:8243/token
             
         apictl add-env -e prod \
-            --apim https://localhost:9443 \ 
-            --registration https://localhost:9443 \
-            --publisher https://localhost:9443 \
-            --devportal https://localhost:9443 \
-            --admin https://localhost:9443 \
-            --token https://localhost:9443/oauth2/token
+            --apim https://apim.com:9443 \
+            --registration https://idp.com:9443 \
+            --token https://gw.com:8243/token
 </code></pre>
     </li>
     <li><h4 id="remove-env">remove-env</h4>
