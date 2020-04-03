@@ -7,13 +7,13 @@ Export APIs for migration
 Export all the APIs of a tenant from one environment, to be imported into another environment
 
 ```
-apictl export-apis (--environment <environment-from-which-artifacts-should-be-exported> -t <Tenant-domain-of-the-resources-to-be-exported> --force) [flags]
+apictl export-apis (--environment <environment-from-which-artifacts-should-be-exported> --format <export-format> --preserveStatus --force) [flags]
 ```
 
 ### Examples
 
 ```
-apictl export-apis -e production -t wso2.org --force
+apictl export-apis -e production --force
 apictl export-apis -e production
 NOTE: The flag (--environment (-e)) is mandatory
 ```
@@ -21,12 +21,11 @@ NOTE: The flag (--environment (-e)) is mandatory
 ### Options
 
 ```
-  -e, --environment string   Environment to which the API should be exported
+  -e, --environment string   Environment from which the APIs should be exported
       --force                Clean all the previously exported APIs of the given target tenant, in the given environment if any, and to export APIs from beginning
       --format string        File format of exported archives(json or yaml)
   -h, --help                 help for export-apis
       --preserveStatus       Preserve API status when exporting. Otherwise API will be exported in CREATED status (default true)
-  -t, --tenant string        Tenant domain of the resources to be exported
 ```
 
 ### Options inherited from parent commands

@@ -35,7 +35,7 @@ const exportAPIsCmdShortDesc = "Export APIs for migration"
 
 const exportAPIsCmdLongDesc = "Export all the APIs of a tenant from one environment, to be imported " +
 "into another environment"
-const exportAPIsCmdExamples = utils.ProjectName + ` ` + exportAPIsCmdLiteral + ` -e production -t wso2.org --force
+const exportAPIsCmdExamples = utils.ProjectName + ` ` + exportAPIsCmdLiteral + ` -e production --force
 ` + utils.ProjectName + ` ` + exportAPIsCmdLiteral + ` -e production
 NOTE: The flag (--environment (-e)) is mandatory`
 
@@ -55,7 +55,7 @@ var credential credentials.Credential
 
 var ExportAPIsCmd = &cobra.Command{
 	Use: exportAPIsCmdLiteral + " (--environment " +
-		"<environment-from-which-artifacts-should-be-exported> -t <Tenant-domain-of-the-resources-to-be-exported> --force)",
+		"<environment-from-which-artifacts-should-be-exported> --format <export-format> --preserveStatus --force)",
 	Short:   exportAPIsCmdShortDesc,
 	Long:    exportAPIsCmdLongDesc,
 	Example: exportAPIsCmdExamples,
@@ -280,9 +280,7 @@ func getAPIList() (count int32, apis []utils.API) {
 func init() {
 	RootCmd.AddCommand(ExportAPIsCmd)
 	ExportAPIsCmd.Flags().StringVarP(&cmdExportEnvironment, "environment", "e",
-		"", "Environment to which the API should be exported")
-	ExportAPIsCmd.Flags().StringVarP(&cmdResourceTenantDomain, "tenant", "t", "",
-		"Tenant domain of the resources to be exported")
+		"", "Environment from which the APIs should be exported")
 	ExportAPIsCmd.PersistentFlags().BoolVarP(&cmdForceStartFromBegin, "force", "", false,
 		"Clean all the previously exported APIs of the given target tenant, in the given environment if "+
 			"any, and to export APIs from beginning")
