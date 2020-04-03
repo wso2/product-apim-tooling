@@ -52,9 +52,9 @@ Command Line tool for importing and exporting APIs/Applications between differen
     > NOTE: Directory structure for configuration files (`$HOME/.wso2apictl`) will be created upon execution of `apictl`
     
     Execute `apictl add-env --help` for detailed instructions
-    > The flag `--environment` (-e) is mandatory
-      You can either provide only the 2 tags `--apim` and `--token`, or all the other 5 tags (`--registration` `--publisher` `--devportal` `--admin` `--token`) without providing `--apim` tag, 
-      or all the 6 tags to add an environment.
+    > The flags `--environment` (-e) and --token are mandatory
+      You can either provide only the 2 flags `--apim` and `--token`, or all the other 5 flags (`--registration` `--publisher` `--devportal` `--admin` `--token`) without providing `--apim` flag.
+      If you are omitting any of --registration --publisher --devportal --admin flags, you need to specify --apim flag with the API Manager endpoint.
     
 - ### Command Autocomplete
     Copy the file `shell-completions/apictl_bash_completion.sh` to `/etc/bash_completion.d/` and source it with
