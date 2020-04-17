@@ -73,9 +73,7 @@ func handleAddApi(nameSuffix string) {
 
 	for i, flagSwaggerFilePath := range flagSwaggerFilePaths {
 		// log processing only if there are more projects
-		if len(flagSwaggerFilePaths) > 1 {
-			fmt.Println(fmt.Sprintf("Processing swagger %v: %v", i+1, flagSwaggerFilePath))
-		}
+		utils.Logln(fmt.Sprintf("%sProcessing swagger %v: %v", utils.LogPrefixInfo, i+1, flagSwaggerFilePath))
 
 		flagApiName = strings.ToLower(flagApiName)
 		swaggerCmNames[i] = fmt.Sprintf("%v-%v-swagger%s", flagApiName, i+1, nameSuffix)
@@ -287,7 +285,8 @@ func handleJavaInterceptors(nameSuffix string, path string, operation string, na
 	const jarExt = ".jar"
 	for _, filePath := range interceptors {
 		if filepath.Ext(filePath) == jarExt {
-			//creating kubernetes configmap for each java interceptor
+			// creating kubernetes configmap for each java interceptor
+			// added the random number instead of file name to omit lengthy names and k8s resource name constraints
 			cmName := fmt.Sprintf("%s-%v-jar-interceptors%s", cmPrefixName, rand.Intn(10000), nameSuffix)
 			javaInterceptorsConfNames = append(javaInterceptorsConfNames, cmName)
 
