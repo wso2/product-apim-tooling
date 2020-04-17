@@ -30,6 +30,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -71,7 +72,12 @@ func handleAddApi(nameSuffix string) {
 	var javaInterceptorsCmNames []string
 
 	for i, flagSwaggerFilePath := range flagSwaggerFilePaths {
-		fmt.Println(fmt.Sprintf("Processing swagger %v: %v", i+1, flagSwaggerFilePath))
+		// log processing only if there are more projects
+		if len(flagSwaggerFilePaths) > 1 {
+			fmt.Println(fmt.Sprintf("Processing swagger %v: %v", i+1, flagSwaggerFilePath))
+		}
+
+		flagApiName = strings.ToLower(flagApiName)
 		swaggerCmNames[i] = fmt.Sprintf("%v-%v-swagger%s", flagApiName, i+1, nameSuffix)
 
 		fi, _ := os.Stat(flagSwaggerFilePath) // error already handled and ignore error
@@ -282,8 +288,7 @@ func handleJavaInterceptors(nameSuffix string, path string, operation string, na
 	for _, filePath := range interceptors {
 		if filepath.Ext(filePath) == jarExt {
 			//creating kubernetes configmap for each java interceptor
-			fileName := strings.Replace(filepath.Base(filePath), jarExt, "", 1)
-			cmName := fmt.Sprintf("%s-%s%s", cmPrefixName, fileName, nameSuffix)
+			cmName := fmt.Sprintf("%s-%v-jar-interceptors%s", cmPrefixName, rand.Intn(10000), nameSuffix)
 			javaInterceptorsConfNames = append(javaInterceptorsConfNames, cmName)
 
 			fmt.Println("creating configmap with java interceptor " + cmName)
