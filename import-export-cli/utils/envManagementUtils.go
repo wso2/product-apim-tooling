@@ -210,6 +210,19 @@ func GetDevPortalApplicationListEndpointOfEnv(env, filePath string) string {
 	}
 }
 
+// Get ThrottlingPoliciesEndpoint of a given environment
+func GetDevPortalThrottlingPoliciesEndpointOfEnv(env, filePath string) string {
+	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
+	if !(envEndpoints.DevPortalEndpoint == "" || envEndpoints == nil) {
+		envEndpoints.DevPortalEndpoint = AppendSlashToString(envEndpoints.DevPortalEndpoint)
+		return envEndpoints.DevPortalEndpoint + defaultDevPortalThrottlingPoliciesEndpointSuffix
+	} else {
+		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
+		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
+		return apiManagerEndpoint + defaultDevPortalThrottlingPoliciesEndpointSuffix
+	}
+}
+
 // Get TokenEndpoint of a given environment
 func GetTokenEndpointOfEnv(env, filePath string) string {
 	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)

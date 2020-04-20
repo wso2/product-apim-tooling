@@ -48,8 +48,8 @@ type EnvKeys struct {
 
 type EnvEndpoints struct {
 	ApiManagerEndpoint   string `yaml:"apim"`
-	PublisherEndpoint      string `yaml:"publisher"`
-	DevPortalEndpoint      string `yaml:"devportal"`
+	PublisherEndpoint    string `yaml:"publisher"`
+	DevPortalEndpoint    string `yaml:"devportal"`
 	RegistrationEndpoint string `yaml:"registration"`
 	AdminEndpoint        string `yaml:"admin"`
 	TokenEndpoint        string `yaml:"token"`
@@ -58,11 +58,11 @@ type EnvEndpoints struct {
 // ---------------- End of Structs for YAML Config Files ---------------------------------
 
 type API struct {
-	ID       		string `json:"id"`
-	Name     		string `json:"name"`
-	Context  		string `json:"context"`
-	Version  		string `json:"version"`
-	Provider 		string `json:"provider"`
+	ID              string `json:"id"`
+	Name            string `json:"name"`
+	Context         string `json:"context"`
+	Version         string `json:"version"`
+	Provider        string `json:"provider"`
 	LifeCycleStatus string `json:"lifeCycleStatus"`
 }
 
@@ -139,7 +139,7 @@ type KeygenResponse struct {
 
 //Application Keys
 type AppKeyList struct {
-	Count int `json:"count"`
+	Count int              `json:"count"`
 	List  []ApplicationKey `json:"list"`
 }
 
@@ -246,25 +246,46 @@ type Subscription struct {
 	RedirectionParams interface{} `json:"redirectionParams"`
 }
 
+//Throttling Policies List response struct
+type ThrottlingPoliciesList struct {
+	Count      int                `json:"count"`
+	List       []ThrottlingPolicy `json:"list"`
+	Pagination interface{}        `json:"pagination"`
+}
+
+//ThrottlingPolicy
+type ThrottlingPolicy struct {
+	Name                        string      `json:"name"`
+	Description                 string      `json:"description"`
+	PolicyLevel                 string      `json:"policyLevel"`
+	Attributes                  interface{} `json:"attributes"`
+	RequestCount                int         `json:"requestCount"`
+	UnitTime                    int         `json:"unitTime"`
+	TierPlan                    string      `json:"tierPlan"`
+	StopOnQuotaReach            bool        `json:"stopOnQuotaReach"`
+	MonetizationAttributes      interface{}
+	throttlingPolicyPermissions interface{}
+}
+
 //Subscription creation request
 type SubscriptionCreateRequest struct {
-	ApplicationID  string `json:"applicationId"`
-	APIID          string `json:"apiId"`
-	ThrottlingPolicy  string      `json:"throttlingPolicy"`
+	ApplicationID    string `json:"applicationId"`
+	APIID            string `json:"apiId"`
+	ThrottlingPolicy string `json:"throttlingPolicy"`
 }
 
 //API Search response struct. This includes common attributes for both store and publisher REST API search
 type ApiSearch struct {
 	Count int `json:"count"`
 	List  []struct {
-		ID                 string        `json:"id"`
-		Name               string        `json:"name"`
-		Description        interface{}   `json:"description"`
-		Context            string        `json:"context"`
-		Version            string        `json:"version"`
-		Provider           string        `json:"provider"`
-		Type               string        `json:"type"`
-		LifeCycleStatus    string        `json:"lifeCycleStatus"`
+		ID              string      `json:"id"`
+		Name            string      `json:"name"`
+		Description     interface{} `json:"description"`
+		Context         string      `json:"context"`
+		Version         string      `json:"version"`
+		Provider        string      `json:"provider"`
+		Type            string      `json:"type"`
+		LifeCycleStatus string      `json:"lifeCycleStatus"`
 	} `json:"list"`
 	Pagination struct {
 		Offset   int    `json:"offset"`
@@ -277,25 +298,25 @@ type ApiSearch struct {
 
 //get detailed API response
 type APIData struct {
-	ID                      string        `json:"id"`
-	Name                    string        `json:"name"`
-	Description             string        `json:"description"`
-	Context                 string        `json:"context"`
-	Version                 string        `json:"version"`
-	Provider                string        `json:"provider"`
-	LifeCycleStatus         string        `json:"lifeCycleStatus"`
-	HasThumbnail            interface{}   `json:"hasThumbnail"`
-	Policies                []string      `json:"policies"`
+	ID                  string      `json:"id"`
+	Name                string      `json:"name"`
+	Description         string      `json:"description"`
+	Context             string      `json:"context"`
+	Version             string      `json:"version"`
+	Provider            string      `json:"provider"`
+	LifeCycleStatus     string      `json:"lifeCycleStatus"`
+	HasThumbnail        interface{} `json:"hasThumbnail"`
+	Policies            []string    `json:"policies"`
 	BusinessInformation struct {
 		BusinessOwner       string `json:"businessOwner"`
 		BusinessOwnerEmail  string `json:"businessOwnerEmail"`
 		TechnicalOwner      string `json:"technicalOwner"`
 		TechnicalOwnerEmail string `json:"technicalOwnerEmail"`
 	} `json:"businessInformation"`
-	WsdlInfo                interface{}   `json:"wsdlInfo"`
-	WsdlURL                 interface{}   `json:"wsdlUrl"`
-	IsDefaultVersion        bool          `json:"isDefaultVersion"`
-	EndpointConfig  struct {
+	WsdlInfo         interface{} `json:"wsdlInfo"`
+	WsdlURL          interface{} `json:"wsdlUrl"`
+	IsDefaultVersion bool        `json:"isDefaultVersion"`
+	EndpointConfig   struct {
 		EndpointType     string `json:"endpoint_type"`
 		SandboxEndpoints struct {
 			URL string `json:"url"`
@@ -304,6 +325,6 @@ type APIData struct {
 			URL string `json:"url"`
 		} `json:"production_endpoints"`
 	} `json:"endpointConfig"`
-	Transport               []string      `json:"transport"`
-	Tags                    []string      `json:"tags"`
+	Transport []string `json:"transport"`
+	Tags      []string `json:"tags"`
 }
