@@ -22,13 +22,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+	encodeURL "net/url"
+	"strings"
+
 	"github.com/renstrom/dedent"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"net/http"
-	encodeURL "net/url"
-	"strings"
 )
 
 // keys command related Info
@@ -82,7 +83,7 @@ func getKeys() {
 	tiers, err := getAvailableAPITiers(accessToken)
 
 	if tiers != nil && err == nil {
-		utils.Logln(utils.LogPrefixInfo + "Retrieved available subscription tiers of the API: ", tiers)
+		utils.Logln(utils.LogPrefixInfo+"Retrieved available subscription tiers of the API: ", tiers)
 		// Needs an available subscription tier when subscribing to the particular API using the application
 		subscriptionThrottlingTier = tiers[0]
 	} else {
@@ -94,7 +95,7 @@ func getKeys() {
 	if err != nil {
 		utils.HandleErrorAndExit("Internal error occurred", err)
 	}
-	utils.Logln(utils.LogPrefixInfo + "Retrieved application throttling policy successfully: ", applicationThrottlingPolicy)
+	utils.Logln(utils.LogPrefixInfo+"Retrieved application throttling policy successfully: ", applicationThrottlingPolicy)
 	//search if the default cli application already exists
 	appId, err := searchApplication(utils.DefaultCliApp, accessToken)
 	if err != nil {
@@ -127,7 +128,7 @@ func getKeys() {
 					Description:      "Default CLI Application",
 					TokenType:        configVars.Config.TokenType,
 				}
-				body, err := json.Marshal(appUpdateReq);
+				body, err := json.Marshal(appUpdateReq)
 				if body == nil && err != nil {
 					utils.HandleErrorAndExit("Error occurred while creating CLI application update request.", err)
 				}
@@ -150,7 +151,7 @@ func getKeys() {
 			if appKeys.Count != 0 {
 				keygenResponse, keyGenErr := regenerateConsumerSecret(appId, "PRODUCTION", accessToken)
 				if keyGenErr != nil {
-					utils.HandleErrorAndExit("Error occurred while regenerating keys for the CLI app: " + appId,
+					utils.HandleErrorAndExit("Error occurred while regenerating keys for the CLI app: "+appId,
 						keyGenErr)
 				} else {
 					appKeys.List[0].ConsumerSecret = keygenResponse.ConsumerSecret
@@ -183,7 +184,7 @@ func getKeys() {
 		createdAppId, appName, err := createApplication(accessToken, applicationThrottlingPolicy)
 		appId = createdAppId
 		if createdAppId != "" || appName != "" {
-			utils.Logln(utils.LogPrefixInfo + "Created CLI application: ", appName)
+			utils.Logln(utils.LogPrefixInfo+"Created CLI application: ", appName)
 		} else {
 			//if error occurred while creating the application, then
 			utils.HandleErrorAndExit("Error while creating the CLI application:", err)
@@ -200,15 +201,15 @@ func getKeys() {
 			utils.HandleErrorAndExit("Error while retrieving scopes ", err)
 		}
 		//Generate the tokens
-		keygenResponse, err:= generateApplicationKeys(appId, accessToken)
+		keygenResponse, err := generateApplicationKeys(appId, accessToken)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while generating CLI application keys", err)
 		}
 		appKey := &utils.ApplicationKey{}
-		appKey.ConsumerKey = keygenResponse.ConsumerKey;
-		appKey.ConsumerSecret = keygenResponse.ConsumerSecret;
+		appKey.ConsumerKey = keygenResponse.ConsumerKey
+		appKey.ConsumerSecret = keygenResponse.ConsumerSecret
 		token, err := getNewToken(appKey, scopes)
-		if token != ""  {
+		if token != "" {
 			// Access Token generated successfully.
 			fmt.Println(token)
 		} else {
@@ -334,7 +335,7 @@ func generateAccessToken(credential credentials.Credential) (string, error) {
 	resp, err := utils.InvokePOSTRequest(tokenEndpoint, headers, body)
 	//If the response is erroneous
 	if err != nil {
-		utils.HandleErrorAndExit("Unable to connect to " + tokenEndpoint, err)
+		utils.HandleErrorAndExit("Unable to connect to "+tokenEndpoint, err)
 	}
 	//Logging the response
 	utils.Logln(utils.LogPrefixInfo+"Response:", resp.Status())
@@ -343,7 +344,7 @@ func generateAccessToken(credential credentials.Credential) (string, error) {
 		keygenResponse := &utils.TokenResponse{}
 		unmarshalError := json.Unmarshal([]byte(resp.Body()), &keygenResponse)
 		if unmarshalError != nil {
-			utils.HandleErrorAndExit(utils.LogPrefixError + "invalid JSON response", unmarshalError)
+			utils.HandleErrorAndExit(utils.LogPrefixError+"invalid JSON response", unmarshalError)
 		}
 		return keygenResponse.AccessToken, err
 	} else {
@@ -356,7 +357,7 @@ func generateAccessToken(credential credentials.Credential) (string, error) {
 // @param keyType : key Type of the application. Allowed values: PRODUCTION, SANDBOX
 // @return KeygenResponse, error
 func regenerateConsumerSecret(appId string, keyType string, accessToken string) (*utils.ConsumerSecretRegenResponse,
-		error) {
+	error) {
 	applicationEndpoint := utils.GetDevPortalApplicationListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
 	url := applicationEndpoint + "/" + appId + "/keys/" + keyType + "/regenerate-secret"
 	headers := make(map[string]string)
@@ -452,7 +453,7 @@ func searchApi(accessToken string) (string, error) {
 			return apiId, err
 		}
 		return "", errors.New("Requested API is not available in the store. API: " + apiName +
-										" Version: " + apiVersion + " Provider: " + apiProvider)
+			" Version: " + apiVersion + " Provider: " + apiProvider)
 	} else {
 		utils.Logf("Error: %s\n", resp.Error())
 		utils.Logf("Body: %s\n", resp.Body())
@@ -472,12 +473,12 @@ func subscribe(appId string, accessToken string) (string, error) {
 	apiId, err := searchApi(accessToken)
 	if apiId != "" && err == nil {
 		//If the API is present, subscribe that API to the application
-		utils.Logln(utils.LogPrefixInfo + "API name: ", apiName, "& version: ", apiVersion, "exists")
+		utils.Logln(utils.LogPrefixInfo+"API name: ", apiName, "& version: ", apiVersion, "exists")
 		subId, err := subscribeApi(apiId, appId, accessToken)
 		if subId != "" {
-			utils.Logln(utils.LogPrefixInfo +"API ", apiName, ":", apiVersion, "subscribed successfully.")
+			utils.Logln(utils.LogPrefixInfo+"API ", apiName, ":", apiVersion, "subscribed successfully.")
 		} else {
-			utils.HandleErrorAndExit("Error while subscribing the CLI application to the API: " + appId, err)
+			utils.HandleErrorAndExit("Error while subscribing the CLI application to the API: "+appId, err)
 		}
 		return subId, err
 	} else {
@@ -550,7 +551,7 @@ func subscribeApi(apiId string, appId string, accessToken string) (string, error
 			ThrottlingPolicy: subscriptionThrottlingTier,
 		}
 		//If there is no subscription, make a subscription
-		body, err := json.Marshal(subscriptionReq);
+		body, err := json.Marshal(subscriptionReq)
 		if body == nil && err != nil {
 			utils.HandleErrorAndExit("Error occurred while creating CLI application subscription request.", err)
 		}
@@ -692,7 +693,7 @@ func createApplication(accessToken string, throttlingPolicy string) (string, str
 		Description:      "Default application for apictl testing purposes",
 		TokenType:        conf.Config.TokenType,
 	}
-	body, err := json.Marshal(appUpdateReq);
+	body, err := json.Marshal(appUpdateReq)
 	if body == nil && err != nil {
 		utils.HandleErrorAndExit("Error occurred while creating CLI application update request.", err)
 	}
@@ -762,7 +763,7 @@ func getNewToken(key *utils.ApplicationKey, scopes []string) (string, error) {
 func getScopes(appId string, accessToken string) ([]string, error) {
 	appDetails, err := getApplicationDetails(appId, accessToken)
 	if err != nil || appDetails == nil {
-		utils.HandleErrorAndContinue("Error occurred while retrieving subscribed scopes. " +
+		utils.HandleErrorAndContinue("Error occurred while retrieving subscribed scopes. "+
 			"Scopes may not be included in the access token", err)
 	}
 	if len(appDetails.SubscriptionScopes) > 0 {
@@ -793,7 +794,7 @@ func generateApplicationKeys(appId string, token string) (*utils.KeygenResponse,
 		GrantTypesToBeSupported: []string{"refresh_token", "password", "client_credentials"},
 		ValidityTime:            utils.DefaultTokenValidityPeriod,
 	}
-	body, err := json.Marshal(generateKeyReq);
+	body, err := json.Marshal(generateKeyReq)
 	if body == nil && err != nil {
 		utils.HandleErrorAndExit("Error occurred while creating CLI application key generation request.", err)
 	}
