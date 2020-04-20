@@ -43,7 +43,8 @@ var apiName string
 var apiVersion string
 var apiProvider string
 var tokenType string
-var throttlingTier string
+var subscriptionThrottlingTier string
+var applicationThrottlingPolicy string
 
 var genKeyCmd = &cobra.Command{
 	Use:     genKeyCmdLiteral,
@@ -82,11 +83,18 @@ func getKeys() {
 
 	if tiers != nil && err == nil {
 		utils.Logln(utils.LogPrefixInfo + "Retrieved available subscription tiers of the API: ", tiers)
-		//Needs an available subscription tier when creating application
-		throttlingTier = tiers[0]
+		// Needs an available subscription tier when subscribing to the particular API using the application
+		subscriptionThrottlingTier = tiers[0]
 	} else {
 		utils.HandleErrorAndExit("Internal error occurred", err)
 	}
+	// Retrieving application throttling policy
+	applicationThrottlingPolicy, err := getApplicationThrottlingPolicy(accessToken)
+	// If the application throttling policy call fails, exit with the error
+	if err != nil {
+		utils.HandleErrorAndExit("Internal error occurred", err)
+	}
+	utils.Logln(utils.LogPrefixInfo + "Retrieved application throttling policy successfully: ", applicationThrottlingPolicy)
 	//search if the default cli application already exists
 	appId, err := searchApplication(utils.DefaultCliApp, accessToken)
 	if err != nil {
@@ -98,7 +106,7 @@ func getKeys() {
 		utils.Logln(utils.LogPrefixInfo + "CLI application already exists")
 		//Search the if the given API is present
 		subId, err := subscribe(appId, accessToken)
-		//If subscrition fails
+		//If subscription fails
 		if subId == "" && err != nil {
 			utils.HandleErrorAndExit("Error occurred while subscribing.", err)
 		}
@@ -115,7 +123,7 @@ func getKeys() {
 				//Request body for the store rest api
 				appUpdateReq := utils.AppCreateRequest{
 					Name:             utils.DefaultCliApp,
-					ThrottlingPolicy: throttlingTier,
+					ThrottlingPolicy: applicationThrottlingPolicy,
 					Description:      "Default CLI Application",
 					TokenType:        configVars.Config.TokenType,
 				}
@@ -172,7 +180,7 @@ func getKeys() {
 	} else {
 		//If the default cli appId does not exist in the environment
 		//Create the application
-		createdAppId, appName, err := createApplication(accessToken)
+		createdAppId, appName, err := createApplication(accessToken, applicationThrottlingPolicy)
 		appId = createdAppId
 		if createdAppId != "" || appName != "" {
 			utils.Logln(utils.LogPrefixInfo + "Created CLI application: ", appName)
@@ -209,6 +217,9 @@ func getKeys() {
 	}
 }
 
+// Retrieve an available API throttling tiers
+// @param accessToken : Access token to authenticate the store REST API
+// @return tiers, error
 func getAvailableAPITiers(accessToken string) ([]string, error) {
 	apiId, err := searchApi(accessToken)
 	if apiId == "" && err != nil {
@@ -219,6 +230,36 @@ func getAvailableAPITiers(accessToken string) ([]string, error) {
 		return api.Policies, err
 	} else {
 		return nil, err
+	}
+}
+
+// Retrieve an available application throttling policy
+// @param accessToken : Access token to authenticate the store REST API
+// @return throttlingPolicy, error
+func getApplicationThrottlingPolicy(accessToken string) (string, error) {
+	applicationThrottlingPoliciesEndpoint := utils.GetDevPortalThrottlingPoliciesEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath) + "/application"
+	headers := make(map[string]string)
+	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
+	resp, err := utils.InvokeGETRequest(applicationThrottlingPoliciesEndpoint, headers)
+	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
+		// 200 OK or 201 Created
+		applicationThrottlingData := &utils.ThrottlingPoliciesList{}
+		data := []byte(resp.Body())
+		err = json.Unmarshal(data, &applicationThrottlingData)
+		if applicationThrottlingData.Count != 0 {
+			// Needs an available throttling policy when creating/updating an application
+			throttlingPolicy := applicationThrottlingData.List[0].Name
+			return throttlingPolicy, err
+		}
+		return "", err
+	} else {
+		utils.Logf("Error: %s\n", resp.Error())
+		utils.Logf("Body: %s\n", resp.Body())
+		if resp.StatusCode() == http.StatusUnauthorized {
+			// 401 Unauthorized
+			return "", fmt.Errorf("authorization failed while trying to retrieve the details of application throttling policies.")
+		}
+		return "", errors.New("Request didn't respond 200 OK for retrieving application throttling policies. Status: " + resp.Status())
 	}
 }
 
@@ -424,7 +465,7 @@ func searchApi(accessToken string) (string, error) {
 }
 
 // Subscribe API to a given application
-// @param appId : Appplication ID to subscribe the API
+// @param appId : Application ID to subscribe the API
 // @param accessToken : Token to call rest API
 // @return subscriptionId, error
 func subscribe(appId string, accessToken string) (string, error) {
@@ -506,7 +547,7 @@ func subscribeApi(apiId string, appId string, accessToken string) (string, error
 		subscriptionReq := &utils.SubscriptionCreateRequest{
 			APIID:            apiId,
 			ApplicationID:    appId,
-			ThrottlingPolicy: throttlingTier,
+			ThrottlingPolicy: subscriptionThrottlingTier,
 		}
 		//If there is no subscription, make a subscription
 		body, err := json.Marshal(subscriptionReq);
@@ -636,8 +677,9 @@ func updateApplicationDetails(appId string, body string, accessToken string) (*u
 
 // Create application with a default name in a given environment
 // @param accessToken : access token to call the store rest API
+// @param throttlingPolicy : throttling policy to create the application
 // @return client_id, client_secret, error
-func createApplication(accessToken string) (string, string, error) {
+func createApplication(accessToken string, throttlingPolicy string) (string, string, error) {
 
 	applicationEndpoint := utils.GetDevPortalApplicationListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
 	headers := make(map[string]string)
@@ -646,7 +688,7 @@ func createApplication(accessToken string) (string, string, error) {
 	conf := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
 	appUpdateReq := utils.AppCreateRequest{
 		Name:             utils.DefaultCliApp,
-		ThrottlingPolicy: throttlingTier,
+		ThrottlingPolicy: throttlingPolicy,
 		Description:      "Default application for apictl testing purposes",
 		TokenType:        conf.Config.TokenType,
 	}
@@ -663,7 +705,6 @@ func createApplication(accessToken string) (string, string, error) {
 		appId := applicationResponse.ID
 		appName := applicationResponse.Name
 		return appId, appName, err
-
 	} else {
 		utils.Logf("Error: %s\n", resp.Error())
 		utils.Logf("Body: %s\n", resp.Body())
