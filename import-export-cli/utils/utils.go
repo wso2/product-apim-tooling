@@ -100,7 +100,7 @@ func InvokeGETRequestWithMultipleQueryParams(queryParam map[string]string, url s
 	return resp, err
 }
 
-// Invoke http-get request
+// Invoke http-put request
 func InvokePutRequest(queryParam map[string]string, url string, headers map[string]string, body string) (
 	*resty.Response, error) {
 	if Insecure {
@@ -124,6 +124,19 @@ func InvokePostRequestWithQueryParam(queryParam map[string]string, url string, h
 	}
 	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
 	resp, err := resty.R().SetHeaders(headers).SetQueryParams(queryParam).SetBody(body).Post(url)
+
+	return resp, err
+}
+
+// Invoke http-delete request using go-resty
+func InvokeDELETERequest(url string, headers map[string]string) (*resty.Response, error) {
+	if Insecure {
+		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+	} else {
+		resty.SetTLSClientConfig(GetTlsConfigWithCertificate())
+	}
+	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
+	resp, err := resty.R().SetHeaders(headers).Delete(url)
 
 	return resp, err
 }

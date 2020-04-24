@@ -312,7 +312,7 @@ func GetBase64EncodedCredentials(key, secret string) (encodedValue string) {
 // @return error
 func GetOAuthTokens(username, password, b64EncodedClientIDClientSecret, url string) (map[string]string, error) {
 	body := "grant_type=password&username=" + username + "&password=" + encodeURL.QueryEscape(password) +
-		"&scope=apim:api_view+apim:app_import_export+apim:app_owner_change+apim:subscribe+apim:api_publish" +
+		"&scope=apim:api_delete+apim:api_view+apim:app_import_export+apim:app_owner_change+apim:subscribe+apim:api_publish" +
 		"+apim:api_import_export"
 
 	// set headers

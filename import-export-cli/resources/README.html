@@ -263,4 +263,18 @@
 </code></pre>
     </li>
 </ul>
-
+<ul>
+    <li><h4 id="delete-api">delete-api</h4>
+        <pre><code class="lang-bash">   Flags:
+       Required:
+           --name, -n
+           --version, -v
+           --provider, -r
+           --environment, -e
+           NOTE: User will be prompted to enter credentials if the user is not logged in to the environment
+   Examples:
+       apictl delete-api -n TestAPI -v 1.0.0 -r admin -e staging
+       apictl delete-api -n TestAPI -v 1.0.0 -r admin -e production
+</code></pre>
+    </li>
+</ul>
