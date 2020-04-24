@@ -55,6 +55,7 @@ var DefaultExportDirPath = filepath.Join(ConfigDirPath, DefaultExportDirName)
 
 const defaultApiApplicationImportExportSuffix = "api/am/admin/v0.16"
 const defaultApiListEndpointSuffix = "api/am/publisher/v1/apis"
+const defaultUnifiedSearchEndpointSuffix = "api/am/publisher/v1/search"
 const defaultAdminApplicationListEndpointSuffix = "api/am/admin/v0.16/applications"
 const defaultDevPortalApplicationListEndpointSuffix = "api/am/store/v1/applications"
 const defaultDevPortalThrottlingPoliciesEndpointSuffix = "api/am/store/v1/throttling-policies"
@@ -114,7 +115,7 @@ const DefaultTokenType = "JWT"
 
 var ValidInitialStates = []string{"CREATED", "PUBLISHED"}
 
-var EnvReplaceFilePaths  = []string{
+var EnvReplaceFilePaths = []string{
 	"Docs" + string(os.PathSeparator) + "docs.yaml",
 	"Docs" + string(os.PathSeparator) + "InlineContents",
 	"Meta-information",

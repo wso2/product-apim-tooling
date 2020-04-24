@@ -171,6 +171,19 @@ func GetAdminEndpointOfEnv(env, filePath string) string {
 	}
 }
 
+// Get UnifiedSearchEndpoint of a given environment
+func GetUnifiedSearchEndpointOfEnv(env, filePath string) string {
+	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
+	if !(envEndpoints.PublisherEndpoint == "" || envEndpoints == nil) {
+		envEndpoints.PublisherEndpoint = AppendSlashToString(envEndpoints.PublisherEndpoint)
+		return envEndpoints.PublisherEndpoint + defaultUnifiedSearchEndpointSuffix
+	} else {
+		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
+		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
+		return apiManagerEndpoint + defaultUnifiedSearchEndpointSuffix
+	}
+}
+
 // Get ApiListEndpoint of a given environment
 func GetApiListEndpointOfEnv(env, filePath string) string {
 	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
