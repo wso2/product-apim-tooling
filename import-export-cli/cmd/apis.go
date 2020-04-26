@@ -76,6 +76,12 @@ var apisCmd = &cobra.Command{
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
+		//Since other flags does not use args[], query flag will own this
+		if len(args) != 0 && listApisCmdQuery != "" {
+			for _, argument := range args {
+				listApisCmdQuery +=  " " + argument
+			}
+		}
 		executeApisCmd(cred)
 	},
 }
