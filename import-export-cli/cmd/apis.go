@@ -248,6 +248,6 @@ func init() {
 	apisCmd.Flags().StringVarP(&listApisCmdLimit, "limit", "l",
 		"", "Maximum number of apis to return")
 	apisCmd.Flags().StringVarP(&listApisCmdFormat, "format", "", "", "Pretty-print apis "+
-		"using Go Templates. Use {{ jsonPretty . }} to list all fields")
+		"using Go Templates. Use \"{{ jsonPretty . }}\" to list all fields")
 	_ = apisCmd.MarkFlagRequired("environment")
 }

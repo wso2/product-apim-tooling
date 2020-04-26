@@ -93,6 +93,11 @@ func (a app) GroupId() string {
 	return a.groupId
 }
 
+// MarshalJSON marshals api using custom marshaller which uses methods instead of fields
+func (a *app) MarshalJSON() ([]byte, error) {
+	return formatter.MarshalJSON(a)
+}
+
 const appsCmdLongDesc = "Display a list of Applications of the user in the environment specified by the flag --environment, -e"
 
 const appsCmdExamples = utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e dev 
@@ -216,7 +221,7 @@ func printApps(apps []utils.Application, format string) {
 
 func init() {
 	ListCmd.AddCommand(appsCmd)
-	
+
 	appsCmd.Flags().StringVarP(&listAppsCmdAppOwner, "owner", "o", "",
 		"Owner of the Application")
 	appsCmd.Flags().StringVarP(&listAppsCmdEnvironment, "environment", "e",
@@ -224,6 +229,6 @@ func init() {
 	appsCmd.Flags().StringVarP(&listAppsCmdLimit, "limit", "l",
 		"", "Maximum number of applications to return")
 	appsCmd.Flags().StringVarP(&listAppsCmdFormat, "format", "", "", "Pretty-print output"+
-		"using Go templates. Use {{jsonPretty .}} to list all fields")
+		"using Go templates. Use \"{{jsonPretty .}}\" to list all fields")
 	_ = appsCmd.MarkFlagRequired("environment")
 }
