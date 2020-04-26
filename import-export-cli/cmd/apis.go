@@ -48,6 +48,8 @@ const (
 var listApisCmdEnvironment string
 var listApisCmdFormat string
 var listApisCmdQuery string
+var listApisCmdLimit string
+var queryParamAdded bool = false
 
 // apisCmd related info
 const apisCmdLiteral = "apis"
@@ -58,6 +60,7 @@ const apisCmdLongDesc = `Display a list of APIs in the environment specified by 
 var apisCmdExamples = utils.ProjectName + ` ` + listCmdLiteral + ` ` + apisCmdLiteral + ` -e dev
 ` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + apisCmdLiteral + ` -e dev -q version:1.0.0
 ` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + apisCmdLiteral + ` -e prod -q provider:admin
+` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + apisCmdLiteral + ` -e prod -l 100
 ` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + apisCmdLiteral + ` -e staging
 NOTE: The flag (--environment (-e)) is mandatory`
 
@@ -136,7 +139,7 @@ func executeApisCmd(credential credentials.Credential) {
 	}
 
 	apiListEndpoint := utils.GetApiListEndpointOfEnv(listApisCmdEnvironment, utils.MainConfigFilePath)
-	_, apis, err := GetAPIList(listApisCmdQuery, accessToken, apiListEndpoint)
+	_, apis, err := GetAPIList(listApisCmdQuery, listApisCmdLimit, accessToken, apiListEndpoint)
 	if err == nil {
 		printAPIs(apis, listApisCmdFormat)
 	} else {
@@ -151,12 +154,15 @@ func executeApisCmd(credential credentials.Credential) {
 // @return count (no. of APIs)
 // @return array of API objects
 // @return error
-func GetAPIList(query, accessToken, apiListEndpoint string) (count int32, apis []utils.API, err error) {
+func GetAPIList(query, limit, accessToken, apiListEndpoint string) (count int32, apis []utils.API, err error) {
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 
 	if query != "" {
-		apiListEndpoint += "?query=" + query
+		apiListEndpoint += getQueryParamConnector() + "query=" + query
+	}
+	if limit != "" {
+		apiListEndpoint += getQueryParamConnector() + "limit=" + limit
 	}
 	utils.Logln(utils.LogPrefixInfo+"URL:", apiListEndpoint)
 	resp, err := utils.InvokeGETRequest(apiListEndpoint, headers)
@@ -180,6 +186,15 @@ func GetAPIList(query, accessToken, apiListEndpoint string) (count int32, apis [
 		return 0, nil, errors.New(string(resp.Body()))
 	}
 
+}
+
+func getQueryParamConnector () (connector string) {
+	if queryParamAdded {
+		return  "&"
+	} else {
+		queryParamAdded	= true
+		return "?"
+	}
 }
 
 // printAPIs
@@ -224,6 +239,8 @@ func init() {
 		"", "Environment to be searched")
 	apisCmd.Flags().StringVarP(&listApisCmdQuery, "query", "q",
 		"", "Query pattern")
+	apisCmd.Flags().StringVarP(&listApisCmdLimit, "limit", "l",
+		"", "Maximum number of apis to return")
 	apisCmd.Flags().StringVarP(&listApisCmdFormat, "format", "", "", "Pretty-print apis "+
 		"using Go Templates. Use {{ jsonPretty . }} to list all fields")
 	_ = apisCmd.MarkFlagRequired("environment")
