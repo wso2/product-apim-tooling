@@ -14,8 +14,9 @@ apictl delete-api (--name <name-of-the-api> --version <version-of-the-api> --pro
 
 ```
 apictl delete-api -n TwitterAPI -v 1.0.0 -r admin -e dev
-apictl delete-api -n FacebookAPI -v 2.1.0 -r admin -e production
-NOTE: All the 4 flags (--name (-n), --version (-v), --provider (-r) and --environment (-e)) are mandatory
+apictl delete-api -n FacebookAPI -v 2.1.0 -e production
+NOTE: All the 3 flags (--name (-n), --version (-v), and --environment (-e)) are mandatory.
+If the --provider (-r) is not specified, the logged-in user will be considered as the provider.
 ```
 
 ### Options

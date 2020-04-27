@@ -42,8 +42,9 @@ const deleteAPICmdShortDesc = "Delete API"
 const deleteAPICmdLongDesc = "Delete an API from an environment"
 
 const deleteAPICmdExamples = utils.ProjectName + ` ` + deleteAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin -e dev
-` + utils.ProjectName + ` ` + deleteAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 -r admin -e production
-NOTE: All the 4 flags (--name (-n), --version (-v), --provider (-r) and --environment (-e)) are mandatory`
+` + utils.ProjectName + ` ` + deleteAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 -e production
+NOTE: All the 3 flags (--name (-n), --version (-v), and --environment (-e)) are mandatory.
+If the --provider (-r) is not specified, the logged-in user will be considered as the provider.`
 
 // DeleteAPICmd represents the delete-api command
 var DeleteAPICmd = &cobra.Command{
@@ -67,7 +68,7 @@ func executeDeleteAPICmd(credential credentials.Credential)  {
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, deleteAPIEnvironment)
 	if preCommandErr == nil {
 		deleteAPIEndpoint := utils.GetApiListEndpointOfEnv(deleteAPIEnvironment, utils.MainConfigFilePath)
-		resp, err := getDeleteAPIResponse(deleteAPIEndpoint, accessToken)
+		resp, err := getDeleteAPIResponse(deleteAPIEndpoint, accessToken, credential)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while deleting API ", err)
 		}
@@ -96,9 +97,9 @@ func executeDeleteAPICmd(credential credentials.Credential)  {
 // @param deleteEndpoint : API Manager Publisher REST API Endpoint for the environment
 // @param accessToken : Access Token for the resource
 // @return response Response in the form of *resty.Response
-func getDeleteAPIResponse(deleteEndpoint, accessToken string) (*resty.Response, error) {
+func getDeleteAPIResponse(deleteEndpoint, accessToken string, credential credentials.Credential) (*resty.Response, error) {
 	deleteEndpoint = utils.AppendSlashToString(deleteEndpoint)
-	apiId, err := getAPIId(accessToken)
+	apiId, err := getAPIId(accessToken, credential)
 	if err != nil {
 		utils.HandleErrorAndExit("Error while getting API Id for deletion ", err)
 	}
@@ -118,7 +119,7 @@ func getDeleteAPIResponse(deleteEndpoint, accessToken string) (*resty.Response, 
 // Get the ID of an API if available
 // @param accessToken : Token to call the Publisher Rest API
 // @return apiId, error
-func getAPIId(accessToken string) (string, error) {
+func getAPIId(accessToken string, credential credentials.Credential) (string, error) {
 	// API endpoint of the environment from the config file
 	apiEndpoint := utils.GetApiListEndpointOfEnv(deleteAPIEnvironment, utils.MainConfigFilePath)
 
@@ -126,6 +127,9 @@ func getAPIId(accessToken string) (string, error) {
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 	var queryVal string
+	if deleteAPIProvider == "" {
+		deleteAPIProvider = credential.Username
+	}
 	queryVal = "name:\"" + deleteAPIName + "\" version:\"" + deleteAPIVersion + "\" provider:\"" + deleteAPIProvider + "\""
 	resp, err := utils.InvokeGETRequestWithQueryParam("query", queryVal, apiEndpoint, headers)
 	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
@@ -164,6 +168,5 @@ func init() {
 	// Mark required flags
 	_ = DeleteAPICmd.MarkFlagRequired("name")
 	_ = DeleteAPICmd.MarkFlagRequired("version")
-	_ = DeleteAPICmd.MarkFlagRequired("provider")
 	_ = DeleteAPICmd.MarkFlagRequired("environment")
 }
