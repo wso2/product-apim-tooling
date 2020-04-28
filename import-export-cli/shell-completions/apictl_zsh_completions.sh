@@ -8,7 +8,7 @@ case $state in
   level1)
     case $words[1] in
       apictl)
-        _arguments '1: :(add add-env change export-api export-apis export-app get-keys help import-api import-app init install list login logout remove-env set uninstall update version)'
+        _arguments '1: :(add add-env change delete-api export-api export-apis export-app get-keys help import-api import-app init install list login logout remove-env set uninstall update version)'
       ;;
       *)
         _arguments '*: :_files'
