@@ -19,10 +19,12 @@
 package cmd
 
 import (
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"os"
 	"path/filepath"
 	"testing"
+
+	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 // TestAddEnv1 - Blank Env Name
@@ -61,7 +63,8 @@ func TestAddEnv3(t *testing.T) {
 	sampleMainConfigFilePath := filepath.Join(utils.ConfigDirPath, sampleMainConfigFileName)
 
 	var sampleMainConnfig = new(utils.MainConfig)
-	sampleMainConnfig.Config = utils.Config{10000, ""}
+	sampleMainConnfig.Config = utils.Config{utils.DefaultHttpRequestTimeout,
+		utils.DefaultExportDirPath, k8sUtils.DefaultKubernetesMode, utils.DefaultTokenType}
 	sampleMainConnfig.Environments = make(map[string]utils.EnvEndpoints)
 	sampleMainConnfig.Environments["dev"] = utils.EnvEndpoints{
 		"sample-publisher-endpoint",
@@ -90,7 +93,8 @@ func TestAddEnv4(t *testing.T) {
 	sampleMainConfigFilePath := filepath.Join(utils.ConfigDirPath, sampleMainConfigFileName)
 
 	var sampleMainConnfig = new(utils.MainConfig)
-	sampleMainConnfig.Config = utils.Config{10000, ""}
+	sampleMainConnfig.Config = utils.Config{utils.DefaultHttpRequestTimeout,
+		utils.DefaultExportDirPath, k8sUtils.DefaultKubernetesMode, utils.DefaultTokenType}
 	sampleMainConnfig.Environments = make(map[string]utils.EnvEndpoints)
 	sampleMainConnfig.Environments["dev"] = utils.EnvEndpoints{
 		"sample-publisher-endpoint",
