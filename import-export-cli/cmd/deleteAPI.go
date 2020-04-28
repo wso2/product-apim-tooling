@@ -90,7 +90,7 @@ func executeDeleteAPICmd(credential credentials.Credential)  {
 	}
 }
 
-// DeleteAPI
+// getDeleteAPIResponse
 // @param deleteEndpoint : API Manager Publisher REST API Endpoint for the environment
 // @param accessToken : Access Token for the resource
 // @param credential : Credentials of the logged-in user

@@ -24,6 +24,7 @@ apictl [flags]
 * [apictl add](apictl_add.md)	 - Add an API to the kubernetes cluster
 * [apictl add-env](apictl_add-env.md)	 - Add Environment to Config file
 * [apictl change](apictl_change.md)	 - Change a configuration
+* [apictl change-api-status](apictl_change-api-status.md)	 - Change API Status
 * [apictl delete-api](apictl_delete-api.md)	 - Delete API
 * [apictl delete-api-product](apictl_delete-api-product.md)	 - Delete API Product
 * [apictl export-api](apictl_export-api.md)	 - Export API
