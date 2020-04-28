@@ -472,6 +472,45 @@ _apictl_delete-api()
     noun_aliases=()
 }
 
+_apictl_delete-api-product()
+{
+    last_command="apictl_delete-api-product"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--environment=")
+    two_word_flags+=("-e")
+    local_nonpersistent_flags+=("--environment=")
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    flags+=("--name=")
+    two_word_flags+=("-n")
+    local_nonpersistent_flags+=("--name=")
+    flags+=("--provider=")
+    two_word_flags+=("-r")
+    local_nonpersistent_flags+=("--provider=")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_flag+=("--environment=")
+    must_have_one_flag+=("-e")
+    must_have_one_flag+=("--name=")
+    must_have_one_flag+=("-n")
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
 _apictl_export-api()
 {
     last_command="apictl_export-api"
@@ -637,10 +676,6 @@ _apictl_get-keys()
     must_have_one_flag+=("-e")
     must_have_one_flag+=("--name=")
     must_have_one_flag+=("-n")
-    must_have_one_flag+=("--provider=")
-    must_have_one_flag+=("-r")
-    must_have_one_flag+=("--version=")
-    must_have_one_flag+=("-v")
     must_have_one_noun=()
     noun_aliases=()
 }
@@ -876,6 +911,45 @@ _apictl_install()
     noun_aliases=()
 }
 
+_apictl_list_api-products()
+{
+    last_command="apictl_list_api-products"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--environment=")
+    two_word_flags+=("-e")
+    local_nonpersistent_flags+=("--environment=")
+    flags+=("--format=")
+    local_nonpersistent_flags+=("--format=")
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    flags+=("--limit=")
+    two_word_flags+=("-l")
+    local_nonpersistent_flags+=("--limit=")
+    flags+=("--query=")
+    two_word_flags+=("-q")
+    local_nonpersistent_flags+=("--query=")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_flag+=("--environment=")
+    must_have_one_flag+=("-e")
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
 _apictl_list_apis()
 {
     last_command="apictl_list_apis"
@@ -898,6 +972,9 @@ _apictl_list_apis()
     flags+=("--help")
     flags+=("-h")
     local_nonpersistent_flags+=("--help")
+    flags+=("--limit=")
+    two_word_flags+=("-l")
+    local_nonpersistent_flags+=("--limit=")
     flags+=("--query=")
     two_word_flags+=("-q")
     local_nonpersistent_flags+=("--query=")
@@ -934,6 +1011,9 @@ _apictl_list_apps()
     flags+=("--help")
     flags+=("-h")
     local_nonpersistent_flags+=("--help")
+    flags+=("--limit=")
+    two_word_flags+=("-l")
+    local_nonpersistent_flags+=("--limit=")
     flags+=("--owner=")
     two_word_flags+=("-o")
     local_nonpersistent_flags+=("--owner=")
@@ -983,6 +1063,7 @@ _apictl_list()
     command_aliases=()
 
     commands=()
+    commands+=("api-products")
     commands+=("apis")
     commands+=("apps")
     commands+=("envs")
@@ -1322,6 +1403,7 @@ _apictl_root_command()
     commands+=("add-env")
     commands+=("change")
     commands+=("delete-api")
+    commands+=("delete-api-product")
     commands+=("export-api")
     commands+=("export-apis")
     commands+=("export-app")

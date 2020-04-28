@@ -17,6 +17,7 @@ apictl list apps -e dev
 apictl list apps -e dev -o sampleUser
 apictl list apps -e prod -o sampleUser
 apictl list apps -e staging -o sampleUser
+apictl list apps -e dev -l 40
 NOTE: The flag (--environment (-e)) is mandatory
 ```
 
@@ -24,8 +25,9 @@ NOTE: The flag (--environment (-e)) is mandatory
 
 ```
   -e, --environment string   Environment to be searched
-      --format string        Pretty-print outputusing Go templates. Use {{jsonPretty .}} to list all fields
+      --format string        Pretty-print outputusing Go templates. Use "{{jsonPretty .}}" to list all fields
   -h, --help                 help for apps
+  -l, --limit string         Maximum number of applications to return
   -o, --owner string         Owner of the Application
 ```
 
@@ -38,5 +40,5 @@ NOTE: The flag (--environment (-e)) is mandatory
 
 ### SEE ALSO
 
-* [apictl list](apictl_list.md)	 - List APIs/Applications in an environment or List the environments
+* [apictl list](apictl_list.md)	 - List APIs/APIProducts/Applications in an environment or List the environments
 

@@ -1,10 +1,10 @@
 ## apictl get-keys
 
-Generate access token to invoke the API
+Generate access token to invoke the API or API Product
 
 ### Synopsis
 
-Generate JWT token to invoke the API by subscribing to a default application for testing purposes
+Generate JWT token to invoke the API or API Product by subscribing to a default application for testing purposes
 
 ```
 apictl get-keys [flags]
@@ -14,7 +14,7 @@ apictl get-keys [flags]
 
 ```
 apictl get-keys -n TwitterAPI -v 1.0.0 -e dev --provider admin
-NOTE: All the 4 flags (--name (-n), --version (-v), --provider (-r) and --environment (-e)) are mandatory
+NOTE: Both the flags (--name (-n) and --environment (-e)) are mandatory
 ```
 
 ### Options
@@ -22,9 +22,9 @@ NOTE: All the 4 flags (--name (-n), --version (-v), --provider (-r) and --enviro
 ```
   -e, --environment string   Key generation environment
   -h, --help                 help for get-keys
-  -n, --name string          API to be generated keys
-  -r, --provider string      Provider of the API
-  -v, --version string       Version of the API
+  -n, --name string          API or API Product to generate keys
+  -r, --provider string      Provider of the API or API Product
+  -v, --version string       Version of the API or API Product
 ```
 
 ### Options inherited from parent commands

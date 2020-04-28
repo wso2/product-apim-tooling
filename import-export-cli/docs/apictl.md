@@ -25,15 +25,16 @@ apictl [flags]
 * [apictl add-env](apictl_add-env.md)	 - Add Environment to Config file
 * [apictl change](apictl_change.md)	 - Change a configuration
 * [apictl delete-api](apictl_delete-api.md)	 - Delete API
+* [apictl delete-api-product](apictl_delete-api-product.md)	 - Delete API Product
 * [apictl export-api](apictl_export-api.md)	 - Export API
 * [apictl export-apis](apictl_export-apis.md)	 - Export APIs for migration
 * [apictl export-app](apictl_export-app.md)	 - Export App
-* [apictl get-keys](apictl_get-keys.md)	 - Generate access token to invoke the API
+* [apictl get-keys](apictl_get-keys.md)	 - Generate access token to invoke the API or API Product
 * [apictl import-api](apictl_import-api.md)	 - Import API
 * [apictl import-app](apictl_import-app.md)	 - Import App
 * [apictl init](apictl_init.md)	 - Initialize a new project in given path
 * [apictl install](apictl_install.md)	 - Install an operator
-* [apictl list](apictl_list.md)	 - List APIs/Applications in an environment or List the environments
+* [apictl list](apictl_list.md)	 - List APIs/APIProducts/Applications in an environment or List the environments
 * [apictl login](apictl_login.md)	 - Login to an API Manager
 * [apictl logout](apictl_logout.md)	 - Logout to from an API Manager
 * [apictl remove-env](apictl_remove-env.md)	 - Remove Environment from Config file

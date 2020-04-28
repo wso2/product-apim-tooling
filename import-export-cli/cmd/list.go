@@ -25,15 +25,17 @@ import (
 
 // List command related usage Info
 const listCmdLiteral = "list"
-const listCmdShortDesc = "List APIs/Applications in an environment or List the environments"
+const listCmdShortDesc = "List APIs/APIProducts/Applications in an environment or List the environments"
 
 const listCmdLongDesc = `Display a list containing all the APIs available in the environment specified by flag (--environment, -e)/
+Display a list containing all the API Products available in the environment specified by flag (--environment, -e)/
 Display a list of Applications of a specific user in the environment specified by flag (--environment, -e)
 OR
 List all the environments`
 
 const listCmdExamples = utils.ProjectName + ` ` + listCmdLiteral + ` ` + EnvsCmdLiteral + `
-` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + apisCmdLiteral + ` -e dev`
+` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + apisCmdLiteral + ` -e dev 
+` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + apiProductsCmdLiteral + ` -e dev`
 
 // ListCmd represents the list command
 var ListCmd = &cobra.Command{

@@ -16,6 +16,7 @@ apictl list apis [flags]
 apictl list apis -e dev
 apictl list apis -e dev -q version:1.0.0
 apictl list apis -e prod -q provider:admin
+apictl list apis -e prod -l 100
 apictl list apis -e staging
 NOTE: The flag (--environment (-e)) is mandatory
 ```
@@ -24,8 +25,9 @@ NOTE: The flag (--environment (-e)) is mandatory
 
 ```
   -e, --environment string   Environment to be searched
-      --format string        Pretty-print apis using Go Templates. Use {{ jsonPretty . }} to list all fields
+      --format string        Pretty-print apis using Go Templates. Use "{{ jsonPretty . }}" to list all fields
   -h, --help                 help for apis
+  -l, --limit string         Maximum number of apis to return
   -q, --query string         Query pattern
 ```
 
@@ -38,5 +40,5 @@ NOTE: The flag (--environment (-e)) is mandatory
 
 ### SEE ALSO
 
-* [apictl list](apictl_list.md)	 - List APIs/Applications in an environment or List the environments
+* [apictl list](apictl_list.md)	 - List APIs/APIProducts/Applications in an environment or List the environments
 
