@@ -1,10 +1,11 @@
 ## apictl list
 
-List APIs/Applications in an environment or List the environments
+List APIs/APIProducts/Applications in an environment or List the environments
 
 ### Synopsis
 
 Display a list containing all the APIs available in the environment specified by flag (--environment, -e)/
+Display a list containing all the API Products available in the environment specified by flag (--environment, -e)/
 Display a list of Applications of a specific user in the environment specified by flag (--environment, -e)
 OR
 List all the environments
@@ -17,7 +18,8 @@ apictl list [flags]
 
 ```
 apictl list envs
-apictl list apis -e dev
+apictl list apis -e dev 
+apictl list api-products -e dev
 ```
 
 ### Options
@@ -36,6 +38,7 @@ apictl list apis -e dev
 ### SEE ALSO
 
 * [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
+* [apictl list api-products](apictl_list_api-products.md)	 - Display a list of API Products in an environment
 * [apictl list apis](apictl_list_apis.md)	 - Display a list of APIs in an environment
 * [apictl list apps](apictl_list_apps.md)	 - Display a list of Applications in an environment specific to an owner
 * [apictl list envs](apictl_list_envs.md)	 - Display the list of environments

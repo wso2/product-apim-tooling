@@ -17,15 +17,6 @@ case $state in
   ;;
   level2)
     case $words[2] in
-      change)
-        _arguments '2: :(help registry)'
-      ;;
-      install)
-        _arguments '2: :(api-operator help wso2am-operator)'
-      ;;
-      list)
-        _arguments '2: :(apis apps envs help)'
-      ;;
       uninstall)
         _arguments '2: :(api-operator help wso2am-operator)'
       ;;
@@ -34,6 +25,15 @@ case $state in
       ;;
       add)
         _arguments '2: :(api help)'
+      ;;
+      change)
+        _arguments '2: :(help registry)'
+      ;;
+      install)
+        _arguments '2: :(api-operator help wso2am-operator)'
+      ;;
+      list)
+        _arguments '2: :(api-products apis apps envs help)'
       ;;
       *)
         _arguments '*: :_files'

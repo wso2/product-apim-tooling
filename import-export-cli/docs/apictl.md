@@ -33,7 +33,7 @@ apictl [flags]
 * [apictl import-app](apictl_import-app.md)	 - Import App
 * [apictl init](apictl_init.md)	 - Initialize a new project in given path
 * [apictl install](apictl_install.md)	 - Install an operator
-* [apictl list](apictl_list.md)	 - List APIs/Applications in an environment or List the environments
+* [apictl list](apictl_list.md)	 - List APIs/APIProducts/Applications in an environment or List the environments
 * [apictl login](apictl_login.md)	 - Login to an API Manager
 * [apictl logout](apictl_logout.md)	 - Logout to from an API Manager
 * [apictl remove-env](apictl_remove-env.md)	 - Remove Environment from Config file
