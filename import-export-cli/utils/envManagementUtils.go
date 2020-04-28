@@ -197,6 +197,19 @@ func GetApiListEndpointOfEnv(env, filePath string) string {
 	}
 }
 
+// Get ApiProductListEndpoint of a given environment
+func GetApiProductListEndpointOfEnv(env, filePath string) string {
+	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
+	if !(envEndpoints.PublisherEndpoint == "" || envEndpoints == nil) {
+		envEndpoints.PublisherEndpoint = AppendSlashToString(envEndpoints.PublisherEndpoint)
+		return envEndpoints.PublisherEndpoint + defaultApiProductListEndpointSuffix
+	} else {
+		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
+		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
+		return apiManagerEndpoint + defaultApiProductListEndpointSuffix
+	}
+}
+
 // Get ApplicationListEndpoint of a given environment
 func GetAdminApplicationListEndpointOfEnv(env, filePath string) string {
 	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
