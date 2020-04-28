@@ -129,7 +129,7 @@ func getAPIProductId(accessToken string, credential credentials.Credential) (str
 		deleteAPIProductProvider = credential.Username
 	}
 	// TODO Search by version as well when the versioning support has been implemented for API Products
-	queryVal = "type:\"APIProduct\" name:\"" + deleteAPIProductName + "\" provider:\"" + deleteAPIProductProvider + "\""
+	queryVal = "type:\"" + utils.DefaultApiProductType + "\" name:\"" + deleteAPIProductName + "\" provider:\"" + deleteAPIProductProvider + "\""
 	resp, err := utils.InvokeGETRequestWithQueryParam("query", queryVal, unifiedSearchEndpoint, headers)
 	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
 		// 200 OK or 201 Created

@@ -437,7 +437,7 @@ func searchApiOrProduct(accessToken string) (string, error) {
 		queryVal = "name:\"" + apiName + "\""
 		if apiVersion == "" {
 			// If the user has not specified the version, use the version as 1.0.0
-			apiVersion = "1.0.0"
+			apiVersion = utils.DefaultApiProductVersion
 		}
 		queryVal = queryVal + " version:\"" + apiVersion + "\""
 		if apiProvider != "" {
