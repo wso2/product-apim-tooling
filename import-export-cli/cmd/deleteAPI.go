@@ -91,11 +91,9 @@ func executeDeleteAPICmd(credential credentials.Credential)  {
 }
 
 // DeleteAPI
-// @param name : Name of the API to be deleted
-// @param version : Version of the API to be deleted
-// @param provider : Provider of the API to be deleted
 // @param deleteEndpoint : API Manager Publisher REST API Endpoint for the environment
 // @param accessToken : Access Token for the resource
+// @param credential : Credentials of the logged-in user
 // @return response Response in the form of *resty.Response
 func getDeleteAPIResponse(deleteEndpoint, accessToken string, credential credentials.Credential) (*resty.Response, error) {
 	deleteEndpoint = utils.AppendSlashToString(deleteEndpoint)
@@ -148,7 +146,7 @@ func getAPIId(accessToken string, credential credentials.Credential) (string, er
 		utils.Logf("Body: %s\n", resp.Body())
 		if resp.StatusCode() == http.StatusUnauthorized {
 			// 401 Unauthorized
-			return "", fmt.Errorf("Authorization failed while searching API: " + apiName)
+			return "", fmt.Errorf("Authorization failed while searching API: " + deleteAPIName)
 		}
 		return "", errors.New("Request didn't respond 200 OK for searching APIs. Status: " + resp.Status())
 	}
