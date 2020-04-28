@@ -548,7 +548,7 @@ func getApiID(name, version, provider, environment, accessOAuthToken string) (st
 	if provider != "" {
 		apiQuery += " provider:" + provider
 	}
-	count, apis, err := GetAPIList(url.QueryEscape(apiQuery), accessOAuthToken,
+	count, apis, err := GetAPIList(url.QueryEscape(apiQuery), "", accessOAuthToken,
 		utils.GetApiListEndpointOfEnv(environment, utils.MainConfigFilePath))
 	if err != nil {
 		return "", err

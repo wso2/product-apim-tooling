@@ -48,6 +48,7 @@ const (
 var listAppsCmdEnvironment string
 var listAppsCmdAppOwner string
 var listAppsCmdFormat string
+var listAppsCmdLimit string
 
 // appsCmd related info
 const appsCmdLiteral = "apps"
@@ -92,12 +93,18 @@ func (a app) GroupId() string {
 	return a.groupId
 }
 
+// MarshalJSON marshals api using custom marshaller which uses methods instead of fields
+func (a *app) MarshalJSON() ([]byte, error) {
+	return formatter.MarshalJSON(a)
+}
+
 const appsCmdLongDesc = "Display a list of Applications of the user in the environment specified by the flag --environment, -e"
 
 const appsCmdExamples = utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e dev 
 ` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e dev -o sampleUser
 ` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e prod -o sampleUser
 ` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e staging -o sampleUser
+` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e dev -l 40
 NOTE: The flag (--environment (-e)) is mandatory`
 
 // appsCmd represents the apps command
@@ -124,7 +131,7 @@ func executeAppsCmd(credential credentials.Credential, appOwner string) {
 	}
 
 	applicationListEndpoint := utils.GetAdminApplicationListEndpointOfEnv(listAppsCmdEnvironment, utils.MainConfigFilePath)
-	_, apps, err := GetApplicationList(appOwner, accessToken, applicationListEndpoint)
+	_, apps, err := GetApplicationList(appOwner, accessToken, applicationListEndpoint, listAppsCmdLimit)
 
 	if err == nil {
 		// Printing the list of available Applications
@@ -141,11 +148,15 @@ func executeAppsCmd(credential credentials.Credential, appOwner string) {
 // @return array of Application objects
 // @return error
 
-func GetApplicationList(appOwner, accessToken, applicationListEndpoint string) (count int32, apps []utils.Application,
+func GetApplicationList(appOwner, accessToken, applicationListEndpoint, limit string) (count int32, apps []utils.Application,
 	err error) {
 
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
+
+	if limit != "" {
+		applicationListEndpoint += "?limit=" + limit
+	}
 
 	var resp *resty.Response
 	if appOwner == "" {
@@ -210,12 +221,14 @@ func printApps(apps []utils.Application, format string) {
 
 func init() {
 	ListCmd.AddCommand(appsCmd)
-	
+
 	appsCmd.Flags().StringVarP(&listAppsCmdAppOwner, "owner", "o", "",
 		"Owner of the Application")
 	appsCmd.Flags().StringVarP(&listAppsCmdEnvironment, "environment", "e",
 		"", "Environment to be searched")
+	appsCmd.Flags().StringVarP(&listAppsCmdLimit, "limit", "l",
+		"", "Maximum number of applications to return")
 	appsCmd.Flags().StringVarP(&listAppsCmdFormat, "format", "", "", "Pretty-print output"+
-		"using Go templates. Use {{jsonPretty .}} to list all fields")
+		"using Go templates. Use \"{{jsonPretty .}}\" to list all fields")
 	_ = appsCmd.MarkFlagRequired("environment")
 }
