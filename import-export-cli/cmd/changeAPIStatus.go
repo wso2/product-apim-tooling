@@ -43,8 +43,7 @@ const changeAPIStatusCmdLongDesc = "Change the lifecycle status of an API in an 
 
 const changeAPIStatusCmdExamples = utils.ProjectName + ` ` + changeAPIStatusCmdLiteral + ` -a Publish -n TwitterAPI -v 1.0.0 -r admin -e dev
 ` + utils.ProjectName + ` ` + changeAPIStatusCmdLiteral + ` -a Publish -n FacebookAPI -v 2.1.0 -e production
-NOTE: All the 4 flags (--action (-a), --name (-n), --version (-v), and --environment (-e)) are mandatory.
-If the --provider (-r) is not specified, the logged-in user will be considered as the provider.`
+NOTE: All the 4 flags (--action (-a), --name (-n), --version (-v), and --environment (-e)) are mandatory.`
 
 // changeAPIStatusCmd represents the change-api-status command
 var changeAPIStatusCmd = &cobra.Command{
@@ -119,18 +118,18 @@ func getChangeAPIStatusResponse(changeAPIStatusEndpoint, accessToken string, cre
 // @param accessToken : Token to call the Publisher Rest API
 // @return apiId, error
 func getAPIIdForStateChange(accessToken string, credential credentials.Credential) (string, error) {
-	// API endpoint of the environment from the config file
-	apiEndpoint := utils.GetApiListEndpointOfEnv(apiStateChangeEnvironment, utils.MainConfigFilePath)
+	// Unified Search endpoint from the config file to search APIs
+	unifiedSearchEndpoint := utils.GetUnifiedSearchEndpointOfEnv(apiStateChangeEnvironment, utils.MainConfigFilePath)
 
 	// Prepping headers
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 	var queryVal string
-	if apiProviderForStateChange == "" {
-		apiProviderForStateChange = credential.Username
+	queryVal = "name:\"" + apiNameForStateChange + "\" version:\"" + apiVersionForStateChange + "\""
+	if apiProviderForStateChange != "" {
+		queryVal = queryVal + " provider:\"" + apiProviderForStateChange + "\""
 	}
-	queryVal = "name:\"" + apiNameForStateChange + "\" version:\"" + apiVersionForStateChange + "\" provider:\"" + apiProviderForStateChange + "\""
-	resp, err := utils.InvokeGETRequestWithQueryParam("query", queryVal, apiEndpoint, headers)
+	resp, err := utils.InvokeGETRequestWithQueryParam("query", queryVal, unifiedSearchEndpoint, headers)
 	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
 		// 200 OK or 201 Created
 		apiData := &utils.ApiSearch{}
@@ -140,8 +139,12 @@ func getAPIIdForStateChange(accessToken string, credential credentials.Credentia
 			apiId := apiData.List[0].ID
 			return apiId, err
 		}
+		if apiProviderForStateChange != "" {
+			return "", errors.New("Requested API is not available in the Publisher. API: " + apiNameForStateChange +
+				" Version: " + apiVersionForStateChange + " Provider: " + apiProviderForStateChange)
+		}
 		return "", errors.New("Requested API is not available in the Publisher. API: " + apiNameForStateChange +
-			" Version: " + apiVersionForStateChange + " Provider: " + apiProviderForStateChange)
+			" Version: " + apiVersionForStateChange)
 	} else {
 		utils.Logf("Error: %s\n", resp.Error())
 		utils.Logf("Body: %s\n", resp.Body())
@@ -156,7 +159,7 @@ func getAPIIdForStateChange(accessToken string, credential credentials.Credentia
 func init() {
 	RootCmd.AddCommand(changeAPIStatusCmd)
 	changeAPIStatusCmd.Flags().StringVarP(&apiStateChangeAction, "action", "a", "",
-		"Name of the API to be state changed")
+		"Action to be taken to change the status of the API")
 	changeAPIStatusCmd.Flags().StringVarP(&apiNameForStateChange, "name", "n", "",
 		"Name of the API to be state changed")
 	changeAPIStatusCmd.Flags().StringVarP(&apiVersionForStateChange, "version", "v", "",

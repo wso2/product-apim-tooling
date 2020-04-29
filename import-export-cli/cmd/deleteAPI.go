@@ -43,8 +43,7 @@ const deleteAPICmdLongDesc = "Delete an API from an environment"
 
 const deleteAPICmdExamples = utils.ProjectName + ` ` + deleteAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin -e dev
 ` + utils.ProjectName + ` ` + deleteAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 -e production
-NOTE: All the 3 flags (--name (-n), --version (-v), and --environment (-e)) are mandatory.
-If the --provider (-r) is not specified, the logged-in user will be considered as the provider.`
+NOTE: All the 3 flags (--name (-n), --version (-v), and --environment (-e)) are mandatory.`
 
 // DeleteAPICmd represents the delete-api command
 var DeleteAPICmd = &cobra.Command{
@@ -118,18 +117,18 @@ func getDeleteAPIResponse(deleteEndpoint, accessToken string, credential credent
 // @param accessToken : Token to call the Publisher Rest API
 // @return apiId, error
 func getAPIId(accessToken string, credential credentials.Credential) (string, error) {
-	// API endpoint of the environment from the config file
-	apiEndpoint := utils.GetApiListEndpointOfEnv(deleteAPIEnvironment, utils.MainConfigFilePath)
+	// Unified Search endpoint from the config file to search APIs
+	unifiedSearchEndpoint := utils.GetUnifiedSearchEndpointOfEnv(deleteAPIEnvironment, utils.MainConfigFilePath)
 
 	// Prepping headers
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 	var queryVal string
-	if deleteAPIProvider == "" {
-		deleteAPIProvider = credential.Username
+	queryVal = "name:\"" + deleteAPIName + "\" version:\"" + deleteAPIVersion + "\""
+	if deleteAPIProvider != "" {
+		queryVal = queryVal + " provider:\"" + deleteAPIProvider + "\""
 	}
-	queryVal = "name:\"" + deleteAPIName + "\" version:\"" + deleteAPIVersion + "\" provider:\"" + deleteAPIProvider + "\""
-	resp, err := utils.InvokeGETRequestWithQueryParam("query", queryVal, apiEndpoint, headers)
+	resp, err := utils.InvokeGETRequestWithQueryParam("query", queryVal, unifiedSearchEndpoint, headers)
 	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
 		// 200 OK or 201 Created
 		apiData := &utils.ApiSearch{}
@@ -139,8 +138,12 @@ func getAPIId(accessToken string, credential credentials.Credential) (string, er
 			apiId := apiData.List[0].ID
 			return apiId, err
 		}
+		if deleteAPIProvider != "" {
+			return "", errors.New("Requested API is not available in the Publisher. API: " + deleteAPIName +
+				" Version: " + deleteAPIVersion + " Provider: " + deleteAPIProvider)
+		}
 		return "", errors.New("Requested API is not available in the Publisher. API: " + deleteAPIName +
-			" Version: " + deleteAPIVersion + " Provider: " + deleteAPIProvider)
+			" Version: " + deleteAPIVersion)
 	} else {
 		utils.Logf("Error: %s\n", resp.Error())
 		utils.Logf("Body: %s\n", resp.Body())
@@ -160,7 +163,7 @@ func init() {
 	DeleteAPICmd.Flags().StringVarP(&deleteAPIVersion, "version", "v", "",
 		"Version of the API to be deleted")
 	DeleteAPICmd.Flags().StringVarP(&deleteAPIProvider, "provider", "r", "",
-		"Provider of the API")
+		"Provider of the API to be deleted")
 	DeleteAPICmd.Flags().StringVarP(&deleteAPIEnvironment, "environment", "e",
 		"", "Environment from which the API should be deleted")
 	// Mark required flags

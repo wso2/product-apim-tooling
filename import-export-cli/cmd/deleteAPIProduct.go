@@ -42,8 +42,7 @@ const deleteAPIProductCmdLongDesc = "Delete an API Product from an environment"
 
 const deleteAPIProductCmdExamples = utils.ProjectName + ` ` + deleteAPIProductCmdLiteral + ` -n TwitterAPI -r admin -e dev
 ` + utils.ProjectName + ` ` + deleteAPIProductCmdLiteral + ` -n FacebookAPI -v 2.1.0 -e production
-NOTE: Both the flags (--name (-n) and --environment (-e)) are mandatory.
-If the --provider (-r) is not specified, the logged-in user will be considered as the provider.`
+NOTE: Both the flags (--name (-n) and --environment (-e)) are mandatory.`
 
 // TODO Introduce a version flag and mandate it when the versioning support has been implemented for API Products
 
@@ -125,11 +124,11 @@ func getAPIProductId(accessToken string, credential credentials.Credential) (str
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 	var queryVal string
-	if deleteAPIProductProvider == "" {
-		deleteAPIProductProvider = credential.Username
-	}
 	// TODO Search by version as well when the versioning support has been implemented for API Products
-	queryVal = "type:\"" + utils.DefaultApiProductType + "\" name:\"" + deleteAPIProductName + "\" provider:\"" + deleteAPIProductProvider + "\""
+	queryVal = "type:\"" + utils.DefaultApiProductType + "\" name:\"" + deleteAPIProductName + "\""
+	if deleteAPIProductProvider != "" {
+		queryVal = queryVal + " provider:\"" + deleteAPIProductProvider + "\""
+	}
 	resp, err := utils.InvokeGETRequestWithQueryParam("query", queryVal, unifiedSearchEndpoint, headers)
 	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
 		// 200 OK or 201 Created
@@ -141,8 +140,11 @@ func getAPIProductId(accessToken string, credential credentials.Credential) (str
 			return apiProductId, err
 		}
 		// TODO Print the version as well when the versioning support has been implemented for API Products
-		return "", errors.New("Requested API Product is not available in the Publisher. API Product: " + deleteAPIProductName +
-			" Provider: " + deleteAPIProductProvider)
+		if deleteAPIProductProvider != "" {
+			return "", errors.New("Requested API Product is not available in the Publisher. API Product: " + deleteAPIProductName +
+				" Provider: " + deleteAPIProductProvider)
+		}
+		return "", errors.New("Requested API Product is not available in the Publisher. API Product: " + deleteAPIProductName)
 	} else {
 		utils.Logf("Error: %s\n", resp.Error())
 		utils.Logf("Body: %s\n", resp.Body())
@@ -160,7 +162,7 @@ func init() {
 	DeleteAPIProductCmd.Flags().StringVarP(&deleteAPIProductName, "name", "n", "",
 		"Name of the API to be deleted")
 	DeleteAPIProductCmd.Flags().StringVarP(&deleteAPIProductProvider, "provider", "r", "",
-		"Provider of the API")
+		"Provider of the API to be deleted")
 	DeleteAPIProductCmd.Flags().StringVarP(&deleteAPIProductEnvironment, "environment", "e",
 		"", "Environment from which the API should be deleted")
 	// Mark required flags
