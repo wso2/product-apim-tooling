@@ -17,6 +17,9 @@ case $state in
   ;;
   level2)
     case $words[2] in
+      update)
+        _arguments '2: :(api help)'
+      ;;
       add)
         _arguments '2: :(api help)'
       ;;

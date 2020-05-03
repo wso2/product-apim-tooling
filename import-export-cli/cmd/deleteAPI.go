@@ -43,7 +43,7 @@ const deleteAPICmdLongDesc = "Delete an API from an environment"
 
 const deleteAPICmdExamples = utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin -e dev
 ` + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 -e production
-NOTE: All the 3 flags (--name (-n), --version (-v), and --environment (-e)) are mandatory.`
+NOTE: The 3 flags (--name (-n), --version (-v), and --environment (-e)) are mandatory.`
 
 // DeleteAPICmd represents the delete api command
 var DeleteAPICmd = &cobra.Command{

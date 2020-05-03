@@ -15,7 +15,7 @@ apictl change-api-status (--action <action-of-the-api-state-change> --name <name
 ```
 apictl change-api-status -a Publish -n TwitterAPI -v 1.0.0 -r admin -e dev
 apictl change-api-status -a Publish -n FacebookAPI -v 2.1.0 -e production
-NOTE: All the 4 flags (--action (-a), --name (-n), --version (-v), and --environment (-e)) are mandatory.
+NOTE: The 4 flags (--action (-a), --name (-n), --version (-v), and --environment (-e)) are mandatory.
 ```
 
 ### Options
