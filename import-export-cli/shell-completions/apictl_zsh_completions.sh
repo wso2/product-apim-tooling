@@ -17,7 +17,9 @@ case $state in
   ;;
   level2)
     case $words[2] in
-      change)
+      add)
+        _arguments '2: :(api help)'
+      ;;
         _arguments '2: :(help registry)'
       ;;
       delete)
