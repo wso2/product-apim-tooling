@@ -477,9 +477,9 @@ _apictl_change-api-status()
     noun_aliases=()
 }
 
-_apictl_delete-api()
+_apictl_delete_api()
 {
-    last_command="apictl_delete-api"
+    last_command="apictl_delete_api"
 
     command_aliases=()
 
@@ -521,9 +521,9 @@ _apictl_delete-api()
     noun_aliases=()
 }
 
-_apictl_delete-api-product()
+_apictl_delete_api-product()
 {
-    last_command="apictl_delete-api-product"
+    last_command="apictl_delete_api-product"
 
     command_aliases=()
 
@@ -556,6 +556,74 @@ _apictl_delete-api-product()
     must_have_one_flag+=("-e")
     must_have_one_flag+=("--name=")
     must_have_one_flag+=("-n")
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_apictl_delete_app()
+{
+    last_command="apictl_delete_app"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--environment=")
+    two_word_flags+=("-e")
+    local_nonpersistent_flags+=("--environment=")
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    flags+=("--name=")
+    two_word_flags+=("-n")
+    local_nonpersistent_flags+=("--name=")
+    flags+=("--owner=")
+    two_word_flags+=("-o")
+    local_nonpersistent_flags+=("--owner=")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_flag+=("--environment=")
+    must_have_one_flag+=("-e")
+    must_have_one_flag+=("--name=")
+    must_have_one_flag+=("-n")
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_apictl_delete()
+{
+    last_command="apictl_delete"
+
+    command_aliases=()
+
+    commands=()
+    commands+=("api")
+    commands+=("api-product")
+    commands+=("app")
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
     must_have_one_noun=()
     noun_aliases=()
 }
@@ -1474,8 +1542,7 @@ _apictl_root_command()
     commands+=("add-env")
     commands+=("change")
     commands+=("change-api-status")
-    commands+=("delete-api")
-    commands+=("delete-api-product")
+    commands+=("delete")
     commands+=("export-api")
     commands+=("export-apis")
     commands+=("export-app")

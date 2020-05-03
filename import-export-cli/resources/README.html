@@ -264,7 +264,7 @@
     </li>
 </ul>
 <ul>
-    <li><h4 id="delete-api">delete-api</h4>
+    <li><h4 id="delete-api">delete api</h4>
         <pre><code class="lang-bash">   Flags:
        Required:
            --name, -n
@@ -274,8 +274,39 @@
            --provider, -r
            NOTE: User will be prompted to enter credentials if the user is not logged in to the environment.
    Examples:
-       apictl delete-api -n TestAPI -v 1.0.0 -r admin -e staging
-       apictl delete-api -n TestAPI -v 1.0.0 -e production
+       apictl delete api -n TestAPI -v 1.0.0 -r admin -e staging
+       apictl delete api -n TestAPI -v 1.0.0 -e production
+</code></pre>
+    </li>
+</ul>
+<ul>
+    <li><h4 id="delete-api-product">delete api-product</h4>
+        <pre><code class="lang-bash">   Flags:
+       Required:
+           --name, -n
+           --environment, -e
+       Optional:
+           --provider, -r
+           --version, -v
+           NOTE: User will be prompted to enter credentials if the user is not logged in to the environment.
+   Examples:
+       apictl delete api-product -n TwitterAPI -r admin -e dev
+       apictl delete api-product -n FacebookAPI -v 1.0.0 -e production
+</code></pre>
+    </li>
+</ul>
+<ul>
+    <li><h4 id="delete-app">delete app</h4>
+        <pre><code class="lang-bash">   Flags:
+       Required:
+           --name, -n
+           --environment, -e
+       Optional:
+           --owner, -o
+           NOTE: User will be prompted to enter credentials if the user is not logged in to the environment.
+   Examples:
+       apictl delete app -n TestAPI -o admin -e staging
+       apictl delete app -n TestAPI -e production
 </code></pre>
     </li>
 </ul>

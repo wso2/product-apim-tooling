@@ -14,7 +14,7 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
- */
+*/
 
 package cmd
 
@@ -36,17 +36,17 @@ var deleteAPIProductName string
 var deleteAPIProductProvider string
 
 // DeleteAPIProduct command related usage info
-const deleteAPIProductCmdLiteral = "delete-api-product"
+const deleteAPIProductCmdLiteral = "api-product"
 const deleteAPIProductCmdShortDesc = "Delete API Product"
 const deleteAPIProductCmdLongDesc = "Delete an API Product from an environment"
 
-const deleteAPIProductCmdExamples = utils.ProjectName + ` ` + deleteAPIProductCmdLiteral + ` -n TwitterAPI -r admin -e dev
-` + utils.ProjectName + ` ` + deleteAPIProductCmdLiteral + ` -n FacebookAPI -v 2.1.0 -e production
+const deleteAPIProductCmdExamples = utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPIProductCmdLiteral + ` -n TwitterAPI -r admin -e dev
+` + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPIProductCmdLiteral + ` -n FacebookAPI -v 1.0.0 -e production
 NOTE: Both the flags (--name (-n) and --environment (-e)) are mandatory.`
 
 // TODO Introduce a version flag and mandate it when the versioning support has been implemented for API Products
 
-// DeleteAPIProductCmd represents the delete-api-product command
+// DeleteAPIProductCmd represents the delete api-product command
 var DeleteAPIProductCmd = &cobra.Command{
 	Use: deleteAPIProductCmdLiteral + " (--name <name-of-the-api-product> --provider <provider-of-the-api-product> --environment " +
 		"<environment-from-which-the-api-product-should-be-deleted>)",
@@ -68,7 +68,7 @@ func executeDeleteAPIProductCmd(credential credentials.Credential) {
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, deleteAPIProductEnvironment)
 	if preCommandErr == nil {
 		deleteAPIProductEndpoint := utils.GetApiProductListEndpointOfEnv(deleteAPIProductEnvironment, utils.MainConfigFilePath)
-		resp, err := getDeleteAPIProductResponse(deleteAPIProductEndpoint, accessToken, credential)
+		resp, err := getDeleteAPIProductResponse(deleteAPIProductEndpoint, accessToken)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while deleting API Product ", err)
 		}
@@ -94,9 +94,9 @@ func executeDeleteAPIProductCmd(credential credentials.Credential) {
 // @param deleteEndpoint : API Manager Publisher REST API Endpoint for the environment
 // @param accessToken : Access Token for the resource
 // @return response Response in the form of *resty.Response
-func getDeleteAPIProductResponse(deleteEndpoint, accessToken string, credential credentials.Credential) (*resty.Response, error) {
+func getDeleteAPIProductResponse(deleteEndpoint, accessToken string) (*resty.Response, error) {
 	deleteEndpoint = utils.AppendSlashToString(deleteEndpoint)
-	apiProductId, err := getAPIProductId(accessToken, credential)
+	apiProductId, err := getAPIProductId(accessToken)
 	if err != nil {
 		utils.HandleErrorAndExit("Error while getting API Product Id for deletion ", err)
 	}
@@ -116,7 +116,7 @@ func getDeleteAPIProductResponse(deleteEndpoint, accessToken string, credential 
 // Get the ID of an API Product if available
 // @param accessToken : Access token to call the Publisher Rest API
 // @return apiId, error
-func getAPIProductId(accessToken string, credential credentials.Credential) (string, error) {
+func getAPIProductId(accessToken string) (string, error) {
 	// Unified Search endpoint from the config file to search API Products
 	unifiedSearchEndpoint := utils.GetUnifiedSearchEndpointOfEnv(deleteAPIProductEnvironment, utils.MainConfigFilePath)
 
@@ -158,7 +158,7 @@ func getAPIProductId(accessToken string, credential credentials.Credential) (str
 
 // Init using Cobra
 func init() {
-	RootCmd.AddCommand(DeleteAPIProductCmd)
+	DeleteCmd.AddCommand(DeleteAPIProductCmd)
 	DeleteAPIProductCmd.Flags().StringVarP(&deleteAPIProductName, "name", "n", "",
 		"Name of the API Product to be deleted")
 	DeleteAPIProductCmd.Flags().StringVarP(&deleteAPIProductProvider, "provider", "r", "",

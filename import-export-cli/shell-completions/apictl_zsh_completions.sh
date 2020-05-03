@@ -8,7 +8,7 @@ case $state in
   level1)
     case $words[1] in
       apictl)
-        _arguments '1: :(add add-env change change-api-status delete-api delete-api-product export-api export-apis export-app get-keys help import-api import-app init install list login logout remove set uninstall update version)'
+        _arguments '1: :(add add-env change change-api-status delete export-api export-apis export-app get-keys help import-api import-app init install list login logout remove set uninstall update version)'
       ;;
       *)
         _arguments '*: :_files'
@@ -19,6 +19,9 @@ case $state in
     case $words[2] in
       change)
         _arguments '2: :(help registry)'
+      ;;
+      delete)
+        _arguments '2: :(api api-product app help)'
       ;;
       install)
         _arguments '2: :(api-operator help wso2am-operator)'

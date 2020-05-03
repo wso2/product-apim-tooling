@@ -18,8 +18,9 @@ apictl list [flags]
 
 ```
 apictl list envs
-apictl list apis -e dev 
+apictl list apis -e dev
 apictl list api-products -e dev
+apictl list apps -e dev
 ```
 
 ### Options
