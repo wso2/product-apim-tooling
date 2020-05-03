@@ -8,7 +8,7 @@ case $state in
   level1)
     case $words[1] in
       apictl)
-        _arguments '1: :(add add-env change delete-api delete-api-product export-api export-apis export-app get-keys help import-api import-app init install list login logout remove-env set uninstall update version)'
+        _arguments '1: :(add add-env change change-api-status delete-api delete-api-product export-api export-apis export-app get-keys help import-api import-app init install list login logout remove-env set uninstall update version)'
       ;;
       *)
         _arguments '*: :_files'
@@ -17,12 +17,6 @@ case $state in
   ;;
   level2)
     case $words[2] in
-      uninstall)
-        _arguments '2: :(api-operator help wso2am-operator)'
-      ;;
-      update)
-        _arguments '2: :(api help)'
-      ;;
       add)
         _arguments '2: :(api help)'
       ;;
@@ -34,6 +28,12 @@ case $state in
       ;;
       list)
         _arguments '2: :(api-products apis apps envs help)'
+      ;;
+      uninstall)
+        _arguments '2: :(api-operator help wso2am-operator)'
+      ;;
+      update)
+        _arguments '2: :(api help)'
       ;;
       *)
         _arguments '*: :_files'
