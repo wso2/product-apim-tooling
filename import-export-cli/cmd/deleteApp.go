@@ -39,8 +39,8 @@ const deleteAppCmdLiteral = "app"
 const deleteAppCmdShortDesc = "Delete App"
 const deleteAppCmdLongDesc = "Delete an Application from an environment"
 
-const deleteAppCmdExamples = utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAppCmdLiteral + ` -n TwitterAPI -o admin -e dev
-` + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAppCmdLiteral + ` -n FacebookAPI -e production
+const deleteAppCmdExamples = utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAppCmdLiteral + ` -n TestApplication -o admin -e dev
+` + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAppCmdLiteral + ` -n SampleApplication -e production
 NOTE: Both the flags (--name (-n), and --environment (-e)) are mandatory and the flag --owner (-o) is optional.`
 
 // DeleteAppCmd represents the delete app command
@@ -111,7 +111,7 @@ func getDeleteAppResponse(deleteEndpoint, accessToken string) (*resty.Response, 
 }
 
 // Get the ID of an Application if available
-// @param accessToken : Token to call the Publisher Rest API
+// @param accessToken : Token to call the Developer Portal Rest API
 // @return appId, error
 func getAppId(accessToken string) (string, error) {
 	// Application REST API endpoint of the environment from the config file

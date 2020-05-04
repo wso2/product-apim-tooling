@@ -13,8 +13,8 @@ apictl delete app (--name <name-of-the-application> --owner <owner-of-the-applic
 ### Examples
 
 ```
-apictl delete app -n TwitterAPI -o admin -e dev
-apictl delete app -n FacebookAPI -e production
+apictl delete app -n TestApplication -o admin -e dev
+apictl delete app -n SampleApplication -e production
 NOTE: Both the flags (--name (-n), and --environment (-e)) are mandatory and the flag --owner (-o) is optional.
 ```
 
