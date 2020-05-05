@@ -1195,9 +1195,9 @@ _apictl_logout()
     noun_aliases=()
 }
 
-_apictl_remove-env()
+_apictl_remove_env()
 {
-    last_command="apictl_remove-env"
+    last_command="apictl_remove_env"
 
     command_aliases=()
 
@@ -1209,9 +1209,6 @@ _apictl_remove-env()
     flags_with_completion=()
     flags_completion=()
 
-    flags+=("--environment=")
-    two_word_flags+=("-e")
-    local_nonpersistent_flags+=("--environment=")
     flags+=("--help")
     flags+=("-h")
     local_nonpersistent_flags+=("--help")
@@ -1220,8 +1217,33 @@ _apictl_remove-env()
     flags+=("--verbose")
 
     must_have_one_flag=()
-    must_have_one_flag+=("--environment=")
-    must_have_one_flag+=("-e")
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_apictl_remove()
+{
+    last_command="apictl_remove"
+
+    command_aliases=()
+
+    commands=()
+    commands+=("env")
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
     must_have_one_noun=()
     noun_aliases=()
 }
@@ -1465,7 +1487,7 @@ _apictl_root_command()
     commands+=("list")
     commands+=("login")
     commands+=("logout")
-    commands+=("remove-env")
+    commands+=("remove")
     commands+=("set")
     commands+=("uninstall")
     commands+=("update")
