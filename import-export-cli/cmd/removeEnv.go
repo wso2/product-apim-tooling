@@ -26,7 +26,7 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-var environment string // name of the environment to be removed
+var envToBeRemoved string // name of the environment to be removed
 
 // RemoveEnv command related Info
 const removeEnvCmdLiteral = "env"
@@ -44,10 +44,10 @@ var removeEnvCmd = &cobra.Command{
 	Example: removeEnvCmdExamples,
 	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		environment := args[0];
+		envToBeRemoved := args[0];
 
 		utils.Logln(utils.LogPrefixInfo + removeEnvCmdLiteral + " called")
-		executeRemoveEnvCmd(environment , utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
+		executeRemoveEnvCmd(envToBeRemoved , utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
 	},
 }
 
