@@ -30,10 +30,10 @@ const removeCmdExamples = utils.ProjectName + ` ` + removeCmdLiteral + ` ` + rem
 
 // removeCmd represents the remove command
 var removeCmd = &cobra.Command{
-	Use:     removeCmdLiteral,
-    Short:   removeCmdShortDesc,
-    Long:    removeCmdLongDesc,
-    Example: removeCmdExamples,
+	Use:   removeCmdLiteral,
+	Short: removeCmdShortDesc,
+	Long: removeCmdLongDesc,
+	Example: removeCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + removeCmdLiteral + " called")
 	},
