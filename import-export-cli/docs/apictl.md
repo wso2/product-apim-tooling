@@ -38,7 +38,7 @@ apictl [flags]
 * [apictl list](apictl_list.md)	 - List APIs/APIProducts/Applications in an environment or List the environments
 * [apictl login](apictl_login.md)	 - Login to an API Manager
 * [apictl logout](apictl_logout.md)	 - Logout to from an API Manager
-* [apictl remove-env](apictl_remove-env.md)	 - Remove Environment from Config file
+* [apictl remove](apictl_remove.md)	 - Remove an environmnet
 * [apictl set](apictl_set.md)	 - Set configuration
 * [apictl uninstall](apictl_uninstall.md)	 - Uninstall an operator
 * [apictl update](apictl_update.md)	 - Update an API to the kubernetes cluster

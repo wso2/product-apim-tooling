@@ -26,16 +26,15 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-var flagNameOfEnvToBeRemoved string // name of the environment to be removed
+var environment string // name of the environment to be removed
 
 // RemoveEnv command related Info
-const removeEnvCmdLiteral = "remove-env"
+const removeEnvCmdLiteral = "env"
 const removeEnvCmdShortDesc = "Remove Environment from Config file"
 
 const removeEnvCmdLongDesc = `Remove Environment and its related endpoints from the config file`
 
-const removeEnvCmdExamples = utils.ProjectName + ` ` + removeEnvCmdLiteral + ` -e production
-NOTE: The flag (--environment (-e)) is mandatory`
+const removeEnvCmdExamples = utils.ProjectName + ` ` + removeCmdLiteral + ` ` + removeEnvCmdLiteral + `  production`
 
 // removeEnvCmd represents the removeEnv command
 var removeEnvCmd = &cobra.Command{
@@ -43,14 +42,17 @@ var removeEnvCmd = &cobra.Command{
 	Short:   removeEnvCmdShortDesc,
 	Long:    removeEnvCmdLongDesc,
 	Example: removeEnvCmdExamples,
+	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		environment := args[0];
+
 		utils.Logln(utils.LogPrefixInfo + removeEnvCmdLiteral + " called")
-		executeRemoveEnvCmd(utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
+		executeRemoveEnvCmd(environment , utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
 	},
 }
 
-func executeRemoveEnvCmd(mainConfigFilePath, envKeysAllFilePath string) {
-	err := removeEnv(flagNameOfEnvToBeRemoved, mainConfigFilePath, envKeysAllFilePath)
+func executeRemoveEnvCmd(environment, mainConfigFilePath, envKeysAllFilePath string) {
+	err := removeEnv(environment, mainConfigFilePath, envKeysAllFilePath)
 	if err != nil {
 		utils.HandleErrorAndExit("Error removing environment", err)
 	}
@@ -102,8 +104,5 @@ func removeEnv(envName, mainConfigFilePath, envKeysFilePath string) error {
 
 // init using Cobra
 func init() {
-	RootCmd.AddCommand(removeEnvCmd)
-	removeEnvCmd.Flags().StringVarP(&flagNameOfEnvToBeRemoved, "environment", "e",
-		"", "Name of the environment to be removed")
-	_ = removeEnvCmd.MarkFlagRequired("environment")
+	removeCmd.AddCommand(removeEnvCmd)
 }
