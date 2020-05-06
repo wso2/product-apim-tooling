@@ -28,6 +28,7 @@ const K8sGet = "get"
 const K8sConfigMap = "configmap"
 const K8sSecret = "secret"
 const K8sSecretDockerRegType = "docker-registry"
+const K8sApi = "api"
 
 // API Operator constats
 const DefaultKubernetesMode = false

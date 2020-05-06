@@ -19,6 +19,7 @@
 package cmd
 
 import (
+	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 
 	"github.com/spf13/cobra"
@@ -27,13 +28,16 @@ import (
 // Delete command related usage Info
 const deleteCmdLiteral = "delete"
 const deleteCmdShortDesc = "Delete an API/APIProduct/Application in an environment"
-const deleteCmdLongDesc = `Delete an API available in the environment specified by flag (--environment, -e)/
-Delete an API Product available in the environment specified by flag (--environment, -e)/
-Delete an Application of a specific user in the environment specified by flag (--environment, -e)`
+const deleteCmdLongDesc = `Delete an API available in the environment specified by flag (--environment, -e) in default mode/
+Delete an API Product available in the environment specified by flag (--environment, -e) in default mode/
+Delete an Application of a specific user in the environment specified by flag (--environment, -e) in default mode/
+Delete resources by filenames, stdin, resources and names, or by resources and label selector in kubernetes mode`
 
 const deleteCmdExamples = utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPICmdLiteral  + ` -n TwitterAPI -v 1.0.0 -r admin -e dev
 ` + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPIProductCmdLiteral + ` -n TwitterAPI -r admin -e dev 
-` + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAppCmdLiteral + ` -n TestApplication -o admin -e dev`
+` + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAppCmdLiteral + ` -n TestApplication -o admin -e dev
+` + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPICmdLiteral + ` petstore
+` + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPICmdLiteral + ` -l name=myLabel`
 
 // deleteCmd represents the delete command
 var DeleteCmd = &cobra.Command{
@@ -43,6 +47,12 @@ var DeleteCmd = &cobra.Command{
 	Example: deleteCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + deleteCmdLiteral + " called")
+		configVars := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
+		if configVars.Config.KubernetesMode {
+			k8sArgs := []string{k8sUtils.Kubectl, k8sUtils.K8sDelete}
+			k8sArgs = append(k8sArgs, args...)
+			executeKubernetes(k8sArgs...)
+		}
 	},
 }
 

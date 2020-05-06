@@ -511,12 +511,6 @@ _apictl_delete_api()
     flags+=("--verbose")
 
     must_have_one_flag=()
-    must_have_one_flag+=("--environment=")
-    must_have_one_flag+=("-e")
-    must_have_one_flag+=("--name=")
-    must_have_one_flag+=("-n")
-    must_have_one_flag+=("--version=")
-    must_have_one_flag+=("-v")
     must_have_one_noun=()
     noun_aliases=()
 }
