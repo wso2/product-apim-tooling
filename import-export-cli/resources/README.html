@@ -311,7 +311,7 @@
     </li>
 </ul>
 <ul>
-    <li><h4 id="change-api-status">change-api-status</h4>
+    <li><h4 id="change-status-api">change-status api</h4>
         <pre><code class="lang-bash">   Flags:
        Required:
            --action, -a
@@ -322,8 +322,8 @@
            --provider, -r
            NOTE: User will be prompted to enter credentials if the user is not logged in to the environment.
    Examples:
-       apictl change-api-status -a Publish -n TestAPI -v 1.0.0 -r admin -e staging
-       apictl change-api-status -a Publish -n TestAPI -v 1.0.0 -e production
+       apictl change-status api -a Publish -n TestAPI -v 1.0.0 -r admin -e staging
+       apictl change-status api -a Publish -n TestAPI -v 1.0.0 -e production
 </code></pre>
     </li>
 </ul>
