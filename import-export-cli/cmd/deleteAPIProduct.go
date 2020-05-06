@@ -160,11 +160,11 @@ func getAPIProductId(accessToken string, credential credentials.Credential) (str
 func init() {
 	RootCmd.AddCommand(DeleteAPIProductCmd)
 	DeleteAPIProductCmd.Flags().StringVarP(&deleteAPIProductName, "name", "n", "",
-		"Name of the API to be deleted")
+		"Name of the API Product to be deleted")
 	DeleteAPIProductCmd.Flags().StringVarP(&deleteAPIProductProvider, "provider", "r", "",
-		"Provider of the API to be deleted")
+		"Provider of the API Product to be deleted")
 	DeleteAPIProductCmd.Flags().StringVarP(&deleteAPIProductEnvironment, "environment", "e",
-		"", "Environment from which the API should be deleted")
+		"", "Environment from which the API Product should be deleted")
 	// Mark required flags
 	_ = DeleteAPIProductCmd.MarkFlagRequired("name")
 	_ = DeleteAPIProductCmd.MarkFlagRequired("environment")
