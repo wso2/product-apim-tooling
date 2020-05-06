@@ -21,10 +21,10 @@ NOTE: Both the flags (--name (-n) and --environment (-e)) are mandatory.
 ### Options
 
 ```
-  -e, --environment string   Environment from which the API should be deleted
+  -e, --environment string   Environment from which the API Product should be deleted
   -h, --help                 help for api-product
-  -n, --name string          Name of the API to be deleted
-  -r, --provider string      Provider of the API to be deleted
+  -n, --name string          Name of the API Product to be deleted
+  -r, --provider string      Provider of the API Product to be deleted
 ```
 
 ### Options inherited from parent commands

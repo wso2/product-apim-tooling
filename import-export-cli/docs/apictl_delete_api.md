@@ -9,7 +9,7 @@ Delete an API from an environment in default mode and delete API resources by AP
 ```
 apictl delete api (--name <name-of-the-api> --version <version-of-the-api> --provider <provider-of-the-api> --environment <environment-from-which-the-api-should-be-deleted>) [Flags]
 Kubernetes Mode:
-apictl delete api (<name-of-the-api> or -l name=<name-of-the-label>) [flags]
+  apictl delete api (<name-of-the-api> or -l name=<name-of-the-label>) [flags]
 ```
 
 ### Examples
