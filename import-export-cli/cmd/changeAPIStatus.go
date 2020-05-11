@@ -37,16 +37,16 @@ var apiProviderForStateChange string
 var apiStateChangeAction string
 
 // ChangeAPIStatus command related usage info
-const changeAPIStatusCmdLiteral = "change-api-status"
-const changeAPIStatusCmdShortDesc = "Change API Status"
+const changeAPIStatusCmdLiteral = "api"
+const changeAPIStatusCmdShortDesc = "Change Status of an API"
 const changeAPIStatusCmdLongDesc = "Change the lifecycle status of an API in an environment"
 
-const changeAPIStatusCmdExamples = utils.ProjectName + ` ` + changeAPIStatusCmdLiteral + ` -a Publish -n TwitterAPI -v 1.0.0 -r admin -e dev
-` + utils.ProjectName + ` ` + changeAPIStatusCmdLiteral + ` -a Publish -n FacebookAPI -v 2.1.0 -e production
+const changeAPIStatusCmdExamples = utils.ProjectName + ` ` + changeStatusCmdLiteral + ` ` + changeAPIStatusCmdLiteral + ` -a Publish -n TwitterAPI -v 1.0.0 -r admin -e dev
+` + utils.ProjectName + ` ` + changeStatusCmdLiteral + ` ` + changeAPIStatusCmdLiteral + ` -a Publish -n FacebookAPI -v 2.1.0 -e production
 NOTE: The 4 flags (--action (-a), --name (-n), --version (-v), and --environment (-e)) are mandatory.`
 
-// changeAPIStatusCmd represents the change-api-status command
-var changeAPIStatusCmd = &cobra.Command{
+// changeAPIStatusCmd represents change-status api command
+var ChangeAPIStatusCmd = &cobra.Command{
 	Use:   changeAPIStatusCmdLiteral + " (--action <action-of-the-api-state-change> --name <name-of-the-api> --version <version-of-the-api> --provider " +
 		"<provider-of-the-api> --environment <environment-from-which-the-api-state-should-be-changed>)",
 	Short: changeAPIStatusCmdShortDesc,
@@ -157,20 +157,20 @@ func getAPIIdForStateChange(accessToken string, credential credentials.Credentia
 }
 
 func init() {
-	RootCmd.AddCommand(changeAPIStatusCmd)
-	changeAPIStatusCmd.Flags().StringVarP(&apiStateChangeAction, "action", "a", "",
+	ChangeStatusCmd.AddCommand(ChangeAPIStatusCmd)
+	ChangeAPIStatusCmd.Flags().StringVarP(&apiStateChangeAction, "action", "a", "",
 		"Action to be taken to change the status of the API")
-	changeAPIStatusCmd.Flags().StringVarP(&apiNameForStateChange, "name", "n", "",
+	ChangeAPIStatusCmd.Flags().StringVarP(&apiNameForStateChange, "name", "n", "",
 		"Name of the API to be state changed")
-	changeAPIStatusCmd.Flags().StringVarP(&apiVersionForStateChange, "version", "v", "",
+	ChangeAPIStatusCmd.Flags().StringVarP(&apiVersionForStateChange, "version", "v", "",
 		"Version of the API to be state changed")
-	changeAPIStatusCmd.Flags().StringVarP(&apiProviderForStateChange, "provider", "r", "",
+	ChangeAPIStatusCmd.Flags().StringVarP(&apiProviderForStateChange, "provider", "r", "",
 		"Provider of the API")
-	changeAPIStatusCmd.Flags().StringVarP(&apiStateChangeEnvironment, "environment", "e",
+	ChangeAPIStatusCmd.Flags().StringVarP(&apiStateChangeEnvironment, "environment", "e",
 		"", "Environment of which the API state should be changed")
 	// Mark required flags
-	_ = changeAPIStatusCmd.MarkFlagRequired("action")
-	_ = changeAPIStatusCmd.MarkFlagRequired("name")
-	_ = changeAPIStatusCmd.MarkFlagRequired("version")
-	_ = changeAPIStatusCmd.MarkFlagRequired("environment")
+	_ = ChangeAPIStatusCmd.MarkFlagRequired("action")
+	_ = ChangeAPIStatusCmd.MarkFlagRequired("name")
+	_ = ChangeAPIStatusCmd.MarkFlagRequired("version")
+	_ = ChangeAPIStatusCmd.MarkFlagRequired("environment")
 }
