@@ -39,7 +39,7 @@ const deleteCmdExamples = utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + del
 ` + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPICmdLiteral + ` petstore
 ` + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPICmdLiteral + ` -l name=myLabel`
 
-// deleteCmd represents the delete command
+// DeleteCmd represents the delete command
 var DeleteCmd = &cobra.Command{
 	Use:     deleteCmdLiteral,
 	Short:   deleteCmdShortDesc,
