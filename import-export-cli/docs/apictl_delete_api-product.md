@@ -1,4 +1,4 @@
-## apictl delete-api-product
+## apictl delete api-product
 
 Delete API Product
 
@@ -7,14 +7,14 @@ Delete API Product
 Delete an API Product from an environment
 
 ```
-apictl delete-api-product (--name <name-of-the-api-product> --provider <provider-of-the-api-product> --environment <environment-from-which-the-api-product-should-be-deleted>) [flags]
+apictl delete api-product (--name <name-of-the-api-product> --provider <provider-of-the-api-product> --environment <environment-from-which-the-api-product-should-be-deleted>) [flags]
 ```
 
 ### Examples
 
 ```
-apictl delete-api-product -n TwitterAPI -r admin -e dev
-apictl delete-api-product -n FacebookAPI -v 2.1.0 -e production
+apictl delete api-product -n TwitterAPI -r admin -e dev
+apictl delete api-product -n FacebookAPI -v 1.0.0 -e production
 NOTE: Both the flags (--name (-n) and --environment (-e)) are mandatory.
 ```
 
@@ -22,7 +22,7 @@ NOTE: Both the flags (--name (-n) and --environment (-e)) are mandatory.
 
 ```
   -e, --environment string   Environment from which the API Product should be deleted
-  -h, --help                 help for delete-api-product
+  -h, --help                 help for api-product
   -n, --name string          Name of the API Product to be deleted
   -r, --provider string      Provider of the API Product to be deleted
 ```
@@ -36,5 +36,5 @@ NOTE: Both the flags (--name (-n) and --environment (-e)) are mandatory.
 
 ### SEE ALSO
 
-* [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
+* [apictl delete](apictl_delete.md)	 - Delete an API/APIProduct/Application in an environment
 
