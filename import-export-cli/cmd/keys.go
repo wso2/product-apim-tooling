@@ -14,7 +14,7 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
- */
+*/
 
 package cmd
 
@@ -34,8 +34,8 @@ import (
 
 // keys command related Info
 const genKeyCmdLiteral = "get-keys"
-const genKeyCmdShortDesc = "Generate access token to invoke the API or API Product"
-const genKeyCmdLongDesc = `Generate JWT token to invoke the API or API Product by subscribing to a default application for testing purposes`
+const genKeyCmdShortDesc = "Generate access token to invoke the API"
+const genKeyCmdLongDesc = `Generate JWT token to invoke the API by subscribing to a default application for testing purposes`
 const genKeyCmdExamples = utils.ProjectName + " " + genKeyCmdLiteral + ` -n TwitterAPI -v 1.0.0 -e dev --provider admin
 NOTE: Both the flags (--name (-n) and --environment (-e)) are mandatory`
 
@@ -83,7 +83,7 @@ func getKeys() {
 	tiers, err := getAvailableAPITiers(accessToken)
 
 	if tiers != nil && err == nil {
-		utils.Logln(utils.LogPrefixInfo+"Retrieved available subscription tiers of the API or API Product: ", tiers)
+		utils.Logln(utils.LogPrefixInfo+"Retrieved available subscription tiers of the API: ", tiers)
 		// Needs an available subscription tier when subscribing to the particular API or API Product using the application
 		subscriptionThrottlingTier = tiers[0]
 	} else {
@@ -465,9 +465,9 @@ func searchApiOrProduct(accessToken string) (string, error) {
 		utils.Logf("Body: %s\n", resp.Body())
 		if resp.StatusCode() == http.StatusUnauthorized {
 			// 401 Unauthorized
-			return "", fmt.Errorf("authorization failed while searching API or API Product: " + apiName)
+			return "", fmt.Errorf("authorization failed while searching API: " + apiName)
 		}
-		return "", errors.New("Request didn't respond 200 OK for searching APIs and API Products. Status: " + resp.Status())
+		return "", errors.New("Request didn't respond 200 OK for searching APIs. Status: " + resp.Status())
 	}
 }
 
@@ -479,16 +479,16 @@ func subscribe(appId string, accessToken string) (string, error) {
 	apiId, err := searchApiOrProduct(accessToken)
 	if apiId != "" && err == nil {
 		//If the API or API Product is present, subscribe that API or API Product to the application
-		utils.Logln(utils.LogPrefixInfo+"API or API Product name: ", apiName, "& version: ", apiVersion, "exists")
+		utils.Logln(utils.LogPrefixInfo+"API name: ", apiName, "& version: ", apiVersion, "exists")
 		subId, err := subscribeApiOrProduct(apiId, appId, accessToken)
 		if subId != "" {
-			utils.Logln(utils.LogPrefixInfo+"API or API Product", apiName, ":", apiVersion, "subscribed successfully.")
+			utils.Logln(utils.LogPrefixInfo+"API ", apiName, ":", apiVersion, "subscribed successfully.")
 		} else {
 			utils.HandleErrorAndExit("Error while subscribing the CLI application to the API: "+appId, err)
 		}
 		return subId, err
 	} else {
-		return "", errors.New("API or API Product is not found. Name: " + apiName + " version: " + apiVersion)
+		return "", errors.New("API is not found. Name: " + apiName + " version: " + apiVersion)
 	}
 }
 
@@ -513,9 +513,9 @@ func getApiOrProduct(apiId string, accessToken string) (*utils.APIData, error) {
 		utils.Logf("Body: %s\n", resp.Body())
 		if resp.StatusCode() == http.StatusUnauthorized {
 			// 401 Unauthorized
-			return nil, fmt.Errorf("authorization failed while trying to retrieve the details of API or API Prodcut: " + apiId)
+			return nil, fmt.Errorf("authorization failed while trying to retrieve the details of API: " + apiId)
 		}
-		return nil, errors.New("Request didn't respond 200 OK for retrieving API or API Product details. Status: " + resp.Status())
+		return nil, errors.New("Request didn't respond 200 OK for retrieving API details. Status: " + resp.Status())
 	}
 }
 
@@ -574,15 +574,15 @@ func subscribeApiOrProduct(apiId string, appId string, accessToken string) (stri
 			utils.Logf("Body: %s\n", resp.Body())
 			if resp.StatusCode() == http.StatusUnauthorized {
 				// 401 Unauthorized
-				return "", fmt.Errorf("authorization failed while trying to subscribe to the API or API Product: " + apiId)
+				return "", fmt.Errorf("authorization failed while trying to subscribe to the API: " + apiId)
 			}
-			return "", errors.New("Request didn't respond 200 OK for subscribing to the API or API Product. Status: " + resp.Status())
+			return "", errors.New("Request didn't respond 200 OK for subscribing to the API. Status: " + resp.Status())
 		}
 	} else {
 		utils.Logf("Error: %s\n", subResp.Error())
 		utils.Logf("Body: %s\n", subResp.Body())
 		if subResp.StatusCode() == http.StatusUnauthorized {
-			return "", fmt.Errorf("authorization failed while trying to check existing subscriptions of API or API Product: " +
+			return "", fmt.Errorf("authorization failed while trying to check existing subscriptions of API: " +
 				apiId)
 		}
 		return "", errors.New("Request didn't respond 200 OK: " + subResp.Status())
@@ -845,9 +845,9 @@ func prepScopeValues(scope []string) string {
 func init() {
 	RootCmd.AddCommand(genKeyCmd)
 	genKeyCmd.Flags().StringVarP(&keyGenEnv, "environment", "e", "", "Key generation environment")
-	genKeyCmd.Flags().StringVarP(&apiName, "name", "n", "", "API or API Product to generate keys")
-	genKeyCmd.Flags().StringVarP(&apiVersion, "version", "v", "", "Version of the API or API Product")
-	genKeyCmd.Flags().StringVarP(&apiProvider, "provider", "r", "", "Provider of the API or API Product")
+	genKeyCmd.Flags().StringVarP(&apiName, "name", "n", "", "API to generate keys")
+	genKeyCmd.Flags().StringVarP(&apiVersion, "version", "v", "", "Version of the API")
+	genKeyCmd.Flags().StringVarP(&apiProvider, "provider", "r", "", "Provider of the API")
 	_ = genKeyCmd.MarkFlagRequired("name")
 	_ = genKeyCmd.MarkFlagRequired("environment")
 }
