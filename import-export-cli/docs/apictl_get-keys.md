@@ -1,10 +1,10 @@
 ## apictl get-keys
 
-Generate access token to invoke the API or API Product
+Generate access token to invoke the API
 
 ### Synopsis
 
-Generate JWT token to invoke the API or API Product by subscribing to a default application for testing purposes
+Generate JWT token to invoke the API by subscribing to a default application for testing purposes
 
 ```
 apictl get-keys [flags]
@@ -22,9 +22,9 @@ NOTE: Both the flags (--name (-n) and --environment (-e)) are mandatory
 ```
   -e, --environment string   Key generation environment
   -h, --help                 help for get-keys
-  -n, --name string          API or API Product to generate keys
-  -r, --provider string      Provider of the API or API Product
-  -v, --version string       Version of the API or API Product
+  -n, --name string          API to generate keys
+  -r, --provider string      Provider of the API
+  -v, --version string       Version of the API
 ```
 
 ### Options inherited from parent commands

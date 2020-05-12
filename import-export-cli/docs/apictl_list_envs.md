@@ -32,5 +32,5 @@ apictl list envs
 
 ### SEE ALSO
 
-* [apictl list](apictl_list.md)	 - List APIs/APIProducts/Applications in an environment or List the environments
+* [apictl list](apictl_list.md)	 - List APIs/Applications in an environment or List the environments
 

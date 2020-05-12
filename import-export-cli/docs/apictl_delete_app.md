@@ -36,5 +36,5 @@ NOTE: Both the flags (--name (-n), and --environment (-e)) are mandatory and the
 
 ### SEE ALSO
 
-* [apictl delete](apictl_delete.md)	 - Delete an API/APIProduct/Application in an environment
+* [apictl delete](apictl_delete.md)	 - Delete an API/Application in an environment
 
