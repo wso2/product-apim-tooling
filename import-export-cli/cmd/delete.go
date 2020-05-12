@@ -27,14 +27,12 @@ import (
 
 // Delete command related usage Info
 const deleteCmdLiteral = "delete"
-const deleteCmdShortDesc = "Delete an API/APIProduct/Application in an environment"
+const deleteCmdShortDesc = "Delete an API/Application in an environment"
 const deleteCmdLongDesc = `Delete an API available in the environment specified by flag (--environment, -e) in default mode/
-Delete an API Product available in the environment specified by flag (--environment, -e) in default mode/
 Delete an Application of a specific user in the environment specified by flag (--environment, -e) in default mode/
 Delete resources by filenames, stdin, resources and names, or by resources and label selector in kubernetes mode`
 
-const deleteCmdExamples = utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPICmdLiteral  + ` -n TwitterAPI -v 1.0.0 -r admin -e dev
-` + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPIProductCmdLiteral + ` -n TwitterAPI -r admin -e dev 
+const deleteCmdExamples = utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPICmdLiteral  + ` -n TwitterAPI -v 1.0.0 -r admin -e dev 
 ` + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAppCmdLiteral + ` -n TestApplication -o admin -e dev
 ` + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPICmdLiteral + ` petstore
 ` + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPICmdLiteral + ` -l name=myLabel`
