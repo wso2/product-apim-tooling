@@ -1,11 +1,10 @@
 ## apictl list
 
-List APIs/APIProducts/Applications in an environment or List the environments
+List APIs/Applications in an environment or List the environments
 
 ### Synopsis
 
 Display a list containing all the APIs available in the environment specified by flag (--environment, -e)/
-Display a list containing all the API Products available in the environment specified by flag (--environment, -e)/
 Display a list of Applications of a specific user in the environment specified by flag (--environment, -e)
 OR
 List all the environments
@@ -19,7 +18,6 @@ apictl list [flags]
 ```
 apictl list envs
 apictl list apis -e dev
-apictl list api-products -e dev
 apictl list apps -e dev
 ```
 
