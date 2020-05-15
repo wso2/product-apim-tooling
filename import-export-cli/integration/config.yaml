@@ -1,0 +1,14 @@
+---
+# name - apictl environment name
+# host - host name of APIM instance  
+# offset - port offset of APIM instance
+environments:
+- name: development
+  host: localhost
+  offset: 0
+- name: production
+  host: localhost
+  offset: 1
+dcr-version: v0.16
+rest-api-version: v1
+apictl-version: 3.1.0
