@@ -34,6 +34,7 @@ type YamlConfig struct {
 	Environments   []Environment `yaml:"environments"`
 	DCRVersion     string        `yaml:"dcr-version"`
 	RESTAPIVersion string        `yaml:"rest-api-version"`
+	APICTLVersion  string        `yaml:"apictl-version"`
 }
 
 type Environment struct {
@@ -59,10 +60,9 @@ var (
 		"subscriber": {{UserName: "subscriber", Password: "password", Roles: []string{"Internal/subscriber"}}},
 	}
 
-	envs = map[string]Environment{}
+	yamlConfig YamlConfig
 
-	dcrVersion     string
-	restAPIVersion string
+	envs = map[string]Environment{}
 
 	tenants = []adminservices.Tenant{
 		{AdminUserName: "admin", AdminPassword: "admin", Domain: TENANT1},
@@ -84,7 +84,7 @@ func TestMain(m *testing.M) {
 
 	for _, env := range envs {
 		client := apim.Client{}
-		client.Setup(env.Name, env.Host, env.Offset, dcrVersion, restAPIVersion)
+		client.Setup(env.Name, env.Host, env.Offset, yamlConfig.DCRVersion, yamlConfig.RESTAPIVersion)
 		apimClients = append(apimClients, &client)
 	}
 
@@ -105,19 +105,17 @@ func readConfigs() {
 	}
 	defer reader.Close()
 
-	yamlConfig := YamlConfig{}
+	yamlConfig = YamlConfig{}
 	yaml.NewDecoder(reader).Decode(&yamlConfig)
-
-	dcrVersion = yamlConfig.DCRVersion
-	restAPIVersion = yamlConfig.RESTAPIVersion
 
 	for _, env := range yamlConfig.Environments {
 		envs[env.Name] = env
 	}
 
 	base.Log("envs:", envs)
-	base.Log("dcrVersion:", dcrVersion)
-	base.Log("restAPIVersion:", restAPIVersion)
+	base.Log("dcr version:", yamlConfig.DCRVersion)
+	base.Log("rest api Version:", yamlConfig.RESTAPIVersion)
+	base.Log("apictl version:", yamlConfig.APICTLVersion)
 
 	if len(envs) != 2 {
 		base.Fatal("Expected number of Envs have not been configured for intergration tests")

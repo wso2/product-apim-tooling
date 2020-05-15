@@ -11,3 +11,4 @@ environments:
   offset: 1
 dcr-version: v0.16
 rest-api-version: v1
+apictl-version: 3.1.0

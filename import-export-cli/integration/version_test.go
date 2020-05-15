@@ -29,5 +29,5 @@ import (
 func TestVersion(t *testing.T) {
 	output, _ := base.Execute(t, "version")
 
-	assert.True(t, strings.Contains(output, "3.1.0"), "Expected version is 3.1.0, actual version is "+output)
+	assert.True(t, strings.Contains(output, yamlConfig.APICTLVersion), "Expected version is "+yamlConfig.APICTLVersion+", actual version is "+output)
 }
