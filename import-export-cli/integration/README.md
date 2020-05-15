@@ -37,6 +37,14 @@ dcr-version: v0.16
 rest-api-version: v1
 ```
 
+- *apictl version*
+
+   The version of the apictl that is being integration tested.
+
+```
+apictl-version: 3.1.0
+```   
+
 
 3. Build the apictl source to create the archive distribution of your choice.
 
