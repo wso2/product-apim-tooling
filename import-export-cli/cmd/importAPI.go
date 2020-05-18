@@ -184,10 +184,10 @@ func mergeAPI(apiDirectory string, environmentParams *params.Environment) error 
 
 	// Handle security parameters in api_params.yaml
 	err = handleSecurityEndpointsParams(environmentParams.Security, api)
-	if (err != nil) {
+	if err != nil {
 		return err
 	}
-	
+
 	apiPath = filepath.Join(apiDirectory, "Meta-information", "api.yaml")
 	utils.Logln(utils.LogPrefixInfo+"Writing merged API to:", apiPath)
 	// write this to disk
@@ -205,10 +205,10 @@ func mergeAPI(apiDirectory string, environmentParams *params.Environment) error 
 // Handle security parameters in api_params.yaml
 // @param envSecurityEndpointParams : Environment security endpoint parameters from api_params.yaml
 // @param api : Parameters from api.yaml
-// @return error 
+// @return error
 func handleSecurityEndpointsParams(envSecurityEndpointParams *params.SecurityData, api *gabs.Container) error {
-	// If the user has set (either true or false) the enabled field under security in api_params.yaml, the 
-	// following code should be executed. (if not set, the security endpoint settings will be made 
+	// If the user has set (either true or false) the enabled field under security in api_params.yaml, the
+	// following code should be executed. (if not set, the security endpoint settings will be made
 	// according to the api.yaml file as usually)
 	// In Go, irrespective of whether a boolean value is "" or false, it will contain false by default.
 	// That is why, here a string comparison was  made since strings can have both "" and "false"
@@ -225,7 +225,7 @@ func handleSecurityEndpointsParams(envSecurityEndpointParams *params.SecurityDat
 		if boolEnabled {
 			// Set the security endpoint parameters when the enabled field is set to true
 			err := setSecurityEndpointsParams(envSecurityEndpointParams, api)
-			if (err != nil) {
+			if err != nil {
 				return err
 			}
 		} else {
@@ -246,7 +246,7 @@ func handleSecurityEndpointsParams(envSecurityEndpointParams *params.SecurityDat
 // Set the security endpoint parameters when the enabled field is set to true
 // @param envSecurityEndpointParams : Environment security endpoint parameters from api_params.yaml
 // @param api : Parameters from api.yaml
-// @return error 
+// @return error
 func setSecurityEndpointsParams(envSecurityEndpointParams *params.SecurityData, api *gabs.Container) error {
 	// Check whether the username, password and type fields have set in api_params.yaml
 	if envSecurityEndpointParams.Username == "" {
@@ -276,7 +276,7 @@ func setSecurityEndpointsParams(envSecurityEndpointParams *params.SecurityData, 
 // Set the fields in api.yaml according to the type field in api_params.yaml
 // @param envSecurityEndpointParams : Environment security endpoint parameters from api_params.yaml
 // @param api : Parameters from api.yaml
-// @return error 
+// @return error
 func setEndpointSecurityType(envSecurityEndpointParams *params.SecurityData, api *gabs.Container) error {
 	// Check whether the type is either basic or digest
 	if envSecurityEndpointParams.Type == "digest" {
@@ -546,12 +546,9 @@ func injectParamsToAPI(importPath, paramsPath, importEnvironment string) error {
 	return nil
 }
 
-// getApiID returns id of the API by using apiInfo which contains name, version and provider as info
-func getApiID(name, version, provider, environment, accessOAuthToken string) (string, error) {
+// getApiID returns id of the API by using apiInfo which contains name and version as info
+func getApiID(name, version, environment, accessOAuthToken string) (string, error) {
 	apiQuery := fmt.Sprintf("name:%s version:%s", name, version)
-	if provider != "" {
-		apiQuery += " provider:" + provider
-	}
 	count, apis, err := GetAPIList(url.QueryEscape(apiQuery), "", accessOAuthToken,
 		utils.GetApiListEndpointOfEnv(environment, utils.MainConfigFilePath))
 	if err != nil {
@@ -934,13 +931,8 @@ func ImportAPI(credential credentials.Credential, importPath, adminEndpoint, exp
 			return err
 		}
 
-		providerName := apiInfo.ID.ProviderName
-
-		if !importAPICmdPreserveProvider {
-			providerName = credential.Username
-		}
 		// check for API existence
-		id, err := getApiID(apiInfo.ID.APIName, apiInfo.ID.Version, providerName, importEnvironment, accessOAuthToken)
+		id, err := getApiID(apiInfo.ID.APIName, apiInfo.ID.Version, importEnvironment, accessOAuthToken)
 		if err != nil {
 			return err
 		}
