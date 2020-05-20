@@ -1,0 +1,263 @@
+id:
+  providerName: admin
+  apiProductName: MyProduct
+  version: 1.0.0
+  productId: 0
+uuid: 6c1a1d06-d719-4098-89cc-d297d4272d03
+type: APIProduct
+productId: 2
+context: /myproduct
+availableTiers:
+ -
+  name: Gold
+  displayName: Gold
+  description: Allows 5000 requests per minute
+  requestsPerMin: 5000
+  requestCount: 5000
+  unitTime: 1
+  timeUnit: min
+  tierPlan: FREE
+  stopOnQuotaReached: true
+ -
+  name: Silver
+  displayName: Silver
+  description: Allows 2000 requests per minute
+  requestsPerMin: 2000
+  requestCount: 2000
+  unitTime: 1
+  timeUnit: min
+  tierPlan: FREE
+  stopOnQuotaReached: true
+tags: []
+contextTemplate: /myproduct/{version}
+visibility: public
+subscriptionAvailability: all_tenants
+state: PUBLISHED
+tenantDomain: carbon.super
+rating: "0.0"
+productResources:
+ -
+  apiName: PizzaShackAPI
+  apiId: 84cf3db1-b4dc-4aa9-a927-1d4e7d19576c
+  apiIdentifier:
+    providerName: admin
+    apiName: PizzaShackAPI
+    version: 1.0.0
+  productIdentifier:
+    providerName: admin
+    apiProductName: MyProduct
+    version: 1.0.0
+    productId: 0
+  uriTemplate:
+    uriTemplate: /order
+    resourceURI: /order
+    httpVerb: POST
+    authType: Application & Application User
+    httpVerbs: []
+    authTypes: []
+    throttlingConditions: []
+    throttlingTier: Unlimited
+    throttlingTiers: []
+    scopes: []
+    mediationScripts: {}
+    id: 16
+    usedByProducts: []
+    amznResourceTimeout: 0
+  endpointConfig: '{"endpoint_type":"http","sandbox_endpoints":{"url":"https:\/\/localhost:9443\/am\/sample\/pizzashack\/v1\/api\/"},"production_endpoints":{"url":"https:\/\/localhost:9443\/am\/sample\/pizzashack\/v1\/api\/"}}'
+  endpointSecurityMap:
+    production:
+      enabled: false
+      additionalProperties: {}
+    sandbox:
+      enabled: false
+      additionalProperties: {}
+  inSequenceName: ""
+  outSequenceName: ""
+  faultSequenceName: ""
+ -
+  apiName: PizzaShackAPI
+  apiId: 84cf3db1-b4dc-4aa9-a927-1d4e7d19576c
+  apiIdentifier:
+    providerName: admin
+    apiName: PizzaShackAPI
+    version: 1.0.0
+  productIdentifier:
+    providerName: admin
+    apiProductName: MyProduct
+    version: 1.0.0
+    productId: 0
+  uriTemplate:
+    uriTemplate: /menu
+    resourceURI: /menu
+    httpVerb: GET
+    authType: Application & Application User
+    httpVerbs: []
+    authTypes: []
+    throttlingConditions: []
+    throttlingTier: Unlimited
+    throttlingTiers: []
+    scopes: []
+    mediationScripts: {}
+    id: 17
+    usedByProducts: []
+    amznResourceTimeout: 0
+  endpointConfig: '{"endpoint_type":"http","sandbox_endpoints":{"url":"https:\/\/localhost:9443\/am\/sample\/pizzashack\/v1\/api\/"},"production_endpoints":{"url":"https:\/\/localhost:9443\/am\/sample\/pizzashack\/v1\/api\/"}}'
+  endpointSecurityMap:
+    production:
+      enabled: false
+      additionalProperties: {}
+    sandbox:
+      enabled: false
+      additionalProperties: {}
+  inSequenceName: ""
+  outSequenceName: ""
+  faultSequenceName: ""
+ -
+  apiName: SwaggerPetstore
+  apiId: c7e4ca4e-e9d6-4525-80fe-3fcfda4cee32
+  apiIdentifier:
+    providerName: admin
+    apiName: SwaggerPetstore
+    version: 1.0.5
+  productIdentifier:
+    providerName: admin
+    apiProductName: MyProduct
+    version: 1.0.0
+    productId: 0
+  uriTemplate:
+    uriTemplate: /pet/{petId}/uploadImage
+    resourceURI: /pet/{petId}/uploadImage
+    httpVerb: POST
+    authType: Any
+    httpVerbs: []
+    authTypes: []
+    throttlingConditions: []
+    throttlingTier: Unlimited
+    throttlingTiers: []
+    scopes: []
+    mediationScripts: {}
+    id: 21
+    usedByProducts: []
+    amznResourceTimeout: 0
+  endpointConfig: '{"endpoint_type":"http","sandbox_endpoints":{"config":"null","url":"http:\/\/localhost:8081"},"production_endpoints":{"config":"null","url":"http:\/\/localhost:8080"}}'
+  endpointSecurityMap:
+    production:
+      enabled: false
+      additionalProperties: {}
+    sandbox:
+      enabled: false
+      additionalProperties: {}
+  inSequenceName: ""
+  outSequenceName: ""
+  faultSequenceName: ""
+ -
+  apiName: SwaggerPetstore
+  apiId: c7e4ca4e-e9d6-4525-80fe-3fcfda4cee32
+  apiIdentifier:
+    providerName: admin
+    apiName: SwaggerPetstore
+    version: 1.0.5
+  productIdentifier:
+    providerName: admin
+    apiProductName: MyProduct
+    version: 1.0.0
+    productId: 0
+  uriTemplate:
+    uriTemplate: /pet/findByStatus
+    resourceURI: /pet/findByStatus
+    httpVerb: GET
+    authType: Any
+    httpVerbs: []
+    authTypes: []
+    throttlingConditions: []
+    throttlingTier: Unlimited
+    throttlingTiers: []
+    scopes: []
+    mediationScripts: {}
+    id: 24
+    usedByProducts: []
+    amznResourceTimeout: 0
+  endpointConfig: '{"endpoint_type":"http","sandbox_endpoints":{"config":"null","url":"http:\/\/localhost:8081"},"production_endpoints":{"config":"null","url":"http:\/\/localhost:8080"}}'
+  endpointSecurityMap:
+    production:
+      enabled: false
+      additionalProperties: {}
+    sandbox:
+      enabled: false
+      additionalProperties: {}
+  inSequenceName: ""
+  outSequenceName: ""
+  faultSequenceName: ""
+ -
+  apiName: SwaggerPetstore
+  apiId: c7e4ca4e-e9d6-4525-80fe-3fcfda4cee32
+  apiIdentifier:
+    providerName: admin
+    apiName: SwaggerPetstore
+    version: 1.0.5
+  productIdentifier:
+    providerName: admin
+    apiProductName: MyProduct
+    version: 1.0.0
+    productId: 0
+  uriTemplate:
+    uriTemplate: /pet/findByTags
+    resourceURI: /pet/findByTags
+    httpVerb: GET
+    authType: Any
+    httpVerbs: []
+    authTypes: []
+    throttlingConditions: []
+    throttlingTier: Unlimited
+    throttlingTiers: []
+    scopes: []
+    mediationScripts: {}
+    id: 25
+    usedByProducts: []
+    amznResourceTimeout: 0
+  endpointConfig: '{"endpoint_type":"http","sandbox_endpoints":{"config":"null","url":"http:\/\/localhost:8081"},"production_endpoints":{"config":"null","url":"http:\/\/localhost:8080"}}'
+  endpointSecurityMap:
+    production:
+      enabled: false
+      additionalProperties: {}
+    sandbox:
+      enabled: false
+      additionalProperties: {}
+  inSequenceName: ""
+  outSequenceName: ""
+  faultSequenceName: ""
+additionalProperties: {}
+environments:
+ - Production and Sandbox
+gatewayLabels: []
+enableSchemaValidation: false
+scopes: []
+monetizationProperties: {}
+isMonetizationEnabled: false
+apiSecurity: oauth2,oauth_basic_auth_api_key_mandatory
+transports: http,https
+responseCache: Disabled
+cacheTimeout: 300
+authorizationHeader: Authorization
+corsConfiguration:
+  corsConfigurationEnabled: false
+  accessControlAllowOrigins:
+   - '*'
+  accessControlAllowCredentials: false
+  accessControlAllowHeaders:
+   - authorization
+   - Access-Control-Allow-Origin
+   - Content-Type
+   - SOAPAction
+   - apikey
+  accessControlAllowMethods:
+   - GET
+   - PUT
+   - POST
+   - DELETE
+   - PATCH
+   - OPTIONS
+accessControl: all
+apiCategories: []
+lastUpdated: May 13, 2020 11:43:14 AM
+createdTime: May 13, 2020 9:59:40 AM
