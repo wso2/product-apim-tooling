@@ -53,11 +53,11 @@ const ExportedMigrationArtifactsDirName = "migration"
 
 var DefaultExportDirPath = filepath.Join(ConfigDirPath, DefaultExportDirName)
 
-const defaultApiApplicationImportExportSuffix = "api/am/admin/v0.16"
+const defaultApiApplicationImportExportSuffix = "api/am/admin/v1"
 const defaultApiListEndpointSuffix = "api/am/publisher/v1/apis"
 const defaultApiProductListEndpointSuffix = "api/am/publisher/v1/api-products"
 const defaultUnifiedSearchEndpointSuffix = "api/am/publisher/v1/search"
-const defaultAdminApplicationListEndpointSuffix = "api/am/admin/v0.16/applications"
+const defaultAdminApplicationListEndpointSuffix = "api/am/admin/v1/applications"
 const defaultDevPortalApplicationListEndpointSuffix = "api/am/store/v1/applications"
 const defaultDevPortalThrottlingPoliciesEndpointSuffix = "api/am/store/v1/throttling-policies"
 const defaultClientRegistrationEndpointSuffix = "client-registration/v0.16/register"
