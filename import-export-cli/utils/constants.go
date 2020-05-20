@@ -48,6 +48,7 @@ var DefaultAPISpecFilePath = filepath.Join(ConfigDirPath, DefaultAPISpecFileName
 
 const DefaultExportDirName = "exported"
 const ExportedApisDirName = "apis"
+const ExportedApiProductsDirName = "api-products"
 const ExportedAppsDirName = "apps"
 const ExportedMigrationArtifactsDirName = "migration"
 
