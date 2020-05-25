@@ -121,5 +121,7 @@ func init() {
 		"Path to directory where APIs should be saved")
 	SetCmd.Flags().StringVarP(&flagTokenType, "token-type", "t", "",
 		"Type of the token to be generated")
-	SetCmd.Flags().StringVarP(&flagKubernetesMode, "mode", "m", "", "mode of apictl")
+	SetCmd.Flags().StringVarP(&flagKubernetesMode, "mode", "m", "", "If mode is set to \"k8s\", apictl " +
+		"is capable of executing Kubectl commands. For example \"apictl get pods\" -> \"kubectl get pods\". To go back " +
+		"to the default mode, set the mode to \"default\"")
 }
