@@ -175,8 +175,11 @@ func init() {
 		"Provider of the API to be deleted")
 	DeleteAPICmd.Flags().StringVarP(&deleteAPIEnvironment, "environment", "e",
 		"", "Environment from which the API should be deleted")
-	configVars := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
-	if !configVars.Config.KubernetesMode {
+
+	// fetches the main-config.yaml file silently; i.e. if it's not created, ignore the error and assume that
+	//	this is the default mode.
+	configVars := utils.GetMainConfigFromFileSilently(utils.MainConfigFilePath)
+	if configVars == nil || !configVars.Config.KubernetesMode {
 		// Mark required flags
 		_ = DeleteAPICmd.MarkFlagRequired("name")
 		_ = DeleteAPICmd.MarkFlagRequired("version")
