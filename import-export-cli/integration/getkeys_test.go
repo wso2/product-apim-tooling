@@ -20,6 +20,8 @@ package integration
 
 import (
 	"testing"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 )
 
 func TestGetKeysNonAdminSuperTenantUser(t *testing.T) {
@@ -164,4 +166,150 @@ func TestGetKeysNonPublishedAPI(t *testing.T) {
 	}
 
 	validateGetKeysFailure(t, args)
+}
+
+func TestGetKeysForAPIProductNonAdminSuperTenantUser(t *testing.T) {
+	apiPublisher := publisher.UserName
+	apiPublisherPassword := publisher.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+
+	// Add the first dependent API to env1
+	dependentAPI1 := addAPI(t, dev, apiCreator, apiCreatorPassword)
+	publishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI1.ID)
+
+	// Add the second dependent API to env1
+	dependentAPI2 := addAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
+	publishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
+
+	// Map the real name of the API with the API
+	apisList := map[string]*apim.API{
+		"PizzaShackAPI":   dependentAPI1,
+		"SwaggerPetstore": dependentAPI2,
+	}
+
+	// Add the API Product to env1
+	apiProduct := addAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
+
+	args := &apiGetKeyTestArgs{
+		ctlUser:    credentials{username: apiPublisher, password: apiPublisherPassword},
+		apiProduct: apiProduct,
+		apim:       dev,
+	}
+
+	validateGetKeysFailure(t, args)
+}
+
+func TestGetKeysForAPIProductNonAdminTenantUser(t *testing.T) {
+	apiPublisher := publisher.UserName + "@" + TENANT1
+	apiPublisherPassword := publisher.Password
+
+	apiCreator := creator.UserName + "@" + TENANT1
+	apiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+
+	// Add the first dependent API to env1
+	dependentAPI1 := addAPI(t, dev, apiCreator, apiCreatorPassword)
+	publishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI1.ID)
+
+	// Add the second dependent API to env1
+	dependentAPI2 := addAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
+	publishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
+
+	// Map the real name of the API with the API
+	apisList := map[string]*apim.API{
+		"PizzaShackAPI":   dependentAPI1,
+		"SwaggerPetstore": dependentAPI2,
+	}
+
+	// Add the API Product to env1
+	apiProduct := addAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
+
+	args := &apiGetKeyTestArgs{
+		ctlUser:    credentials{username: apiPublisher, password: apiPublisherPassword},
+		apiProduct: apiProduct,
+		apim:       dev,
+	}
+
+	validateGetKeysFailure(t, args)
+}
+
+func TestGetKeysForAPIProductAdminSuperTenantUser(t *testing.T) {
+	adminUser := superAdminUser
+	adminPassword := superAdminPassword
+
+	apiPublisher := publisher.UserName
+	apiPublisherPassword := publisher.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+
+	// Add the first dependent API to env1
+	dependentAPI1 := addAPI(t, dev, apiCreator, apiCreatorPassword)
+	publishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI1.ID)
+
+	// Add the second dependent API to env1
+	dependentAPI2 := addAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
+	publishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
+
+	// Map the real name of the API with the API
+	apisList := map[string]*apim.API{
+		"PizzaShackAPI":   dependentAPI1,
+		"SwaggerPetstore": dependentAPI2,
+	}
+
+	// Add the API Product to env1
+	apiProduct := addAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
+
+	args := &apiGetKeyTestArgs{
+		ctlUser:    credentials{username: adminUser, password: adminPassword},
+		apiProduct: apiProduct,
+		apim:       dev,
+	}
+
+	validateGetKeys(t, args)
+}
+
+func TestGetKeysForAPIProductAdminTenantUser(t *testing.T) {
+	adminUser := superAdminUser + "@" + TENANT1
+	adminPassword := superAdminPassword
+
+	apiPublisher := publisher.UserName + "@" + TENANT1
+	apiPublisherPassword := publisher.Password
+
+	apiCreator := creator.UserName + "@" + TENANT1
+	apiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+
+	// Add the first dependent API to env1
+	dependentAPI1 := addAPI(t, dev, apiCreator, apiCreatorPassword)
+	publishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI1.ID)
+
+	// Add the second dependent API to env1
+	dependentAPI2 := addAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
+	publishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
+
+	// Map the real name of the API with the API
+	apisList := map[string]*apim.API{
+		"PizzaShackAPI":   dependentAPI1,
+		"SwaggerPetstore": dependentAPI2,
+	}
+
+	// Add the API Product to env1
+	apiProduct := addAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
+
+	args := &apiGetKeyTestArgs{
+		ctlUser:    credentials{username: adminUser, password: adminPassword},
+		apiProduct: apiProduct,
+		apim:       dev,
+	}
+
+	validateGetKeys(t, args)
 }

@@ -23,7 +23,12 @@ import (
 	"crypto/rand"
 	"encoding/base32"
 	"encoding/json"
+	"io"
+	"io/ioutil"
+	"mime/multipart"
 	"net/url"
+	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -167,6 +172,30 @@ func getContext(provider string) string {
 	return "/" + context
 }
 
+// GenerateAdditionalProperties : Generate additional properties to create an API from swagger
+func (instance *Client) GenerateAdditionalProperties(provider string) string {
+	additionalProperties := `{"name":"` + generateRandomString() + `",
+	"version":"1.0.5",
+	"context":"` + getContext(provider) + `",
+	"policies":[
+	   "Bronze"
+	],
+	"endpointConfig":
+		{   "endpoint_type":"http",
+			"sandbox_endpoints":{
+					"url":"petstore.swagger.io"
+		
+			},
+			"production_endpoints":{
+					"url":"petstore.swagger.io"
+			}
+		},
+	"gatewayEnvironments":[
+	   "Production and Sandbox"
+	]}`
+	return additionalProperties
+}
+
 // CopyAPI : Create a deep copy of an API object
 func CopyAPI(apiToCopy *API) API {
 	apiCopy := *apiToCopy
@@ -227,6 +256,58 @@ func CopyAPI(apiToCopy *API) API {
 	return apiCopy
 }
 
+// CopyAPIProduct : Create a deep copy of an API Product object
+func CopyAPIProduct(apiProductToCopy *APIProduct) APIProduct {
+	apiProductCopy := *apiProductToCopy
+
+	// Copy Transport slice
+	apiProductCopy.Transport = make([]string, len(apiProductToCopy.Transport))
+	copy(apiProductCopy.Transport, apiProductToCopy.Transport)
+
+	// Copy Tags slice
+	apiProductCopy.Tags = make([]string, len(apiProductToCopy.Tags))
+	copy(apiProductCopy.Tags, apiProductToCopy.Tags)
+
+	// Copy Policies slice
+	apiProductCopy.Policies = make([]string, len(apiProductToCopy.Policies))
+	copy(apiProductCopy.Policies, apiProductToCopy.Policies)
+
+	// Copy SecurityScheme slice
+	apiProductCopy.SecurityScheme = make([]string, len(apiProductToCopy.SecurityScheme))
+	copy(apiProductCopy.SecurityScheme, apiProductToCopy.SecurityScheme)
+
+	// Copy VisibleRoles slice
+	apiProductCopy.VisibleRoles = make([]string, len(apiProductToCopy.VisibleRoles))
+	copy(apiProductCopy.VisibleRoles, apiProductToCopy.VisibleRoles)
+
+	// Copy VisibleTenants slice
+	apiProductCopy.VisibleTenants = make([]string, len(apiProductToCopy.VisibleTenants))
+	copy(apiProductCopy.VisibleTenants, apiProductToCopy.VisibleTenants)
+
+	// Copy GatewayEnvironments slice
+	apiProductCopy.GatewayEnvironments = make([]string, len(apiProductToCopy.GatewayEnvironments))
+	copy(apiProductCopy.GatewayEnvironments, apiProductToCopy.GatewayEnvironments)
+
+	// Copy SubscriptionAvailableTenants slice
+	apiProductCopy.SubscriptionAvailableTenants = make([]string, len(apiProductToCopy.SubscriptionAvailableTenants))
+	copy(apiProductCopy.SubscriptionAvailableTenants, apiProductToCopy.SubscriptionAvailableTenants)
+
+	// Copy AdditionalProperties
+	for key, value := range apiProductToCopy.AdditionalProperties {
+		apiProductCopy.AdditionalProperties[key] = value
+	}
+
+	// Copy AccessControlRoles slice
+	apiProductCopy.AccessControlRoles = make([]string, len(apiProductToCopy.AccessControlRoles))
+	copy(apiProductCopy.AccessControlRoles, apiProductToCopy.AccessControlRoles)
+
+	// Copy APIs slice
+	apiProductCopy.APIs = make([]interface{}, len(apiProductToCopy.APIs))
+	copy(apiProductCopy.APIs, apiProductToCopy.APIs)
+
+	return apiProductCopy
+}
+
 // SortAPIMembers : Sort API object members such as slices
 func SortAPIMembers(api *API) {
 	// Sort Transport slice
@@ -260,7 +341,7 @@ func SortAPIMembers(api *API) {
 	sort.Strings(api.SubscriptionAvailableTenants)
 
 	// Sort AdditionalProperties map
-	sortAdditionalProperties(api)
+	sortAdditionalPropertiesOfAPI(api)
 
 	// Sort AccessControlRoles slice
 	sort.Strings(api.AccessControlRoles)
@@ -269,7 +350,7 @@ func SortAPIMembers(api *API) {
 	sort.Sort(ByTargetVerb(api.Operations))
 }
 
-func sortAdditionalProperties(api *API) {
+func sortAdditionalPropertiesOfAPI(api *API) {
 	keys := make([]string, 0, len(api.AdditionalProperties))
 
 	for key := range api.AdditionalProperties {
@@ -285,6 +366,60 @@ func sortAdditionalProperties(api *API) {
 	}
 
 	api.AdditionalProperties = sortedMap
+}
+
+// SortAPIProductMembers : Sort API Product object members such as slices
+func SortAPIProductMembers(apiProduct *APIProduct) {
+	// Sort Transport slice
+	sort.Strings(apiProduct.Transport)
+
+	// Sort Tags slice
+	sort.Strings(apiProduct.Tags)
+
+	// Sort Policies slice
+	sort.Strings(apiProduct.Policies)
+
+	// Sort SecurityScheme slice
+	sort.Strings(apiProduct.SecurityScheme)
+
+	// Sort VisibleRoles slice
+	sort.Strings(apiProduct.VisibleRoles)
+
+	// Sort VisibleTenants slice
+	sort.Strings(apiProduct.VisibleTenants)
+
+	// Sort GatewayEnvironments slice
+	sort.Strings(apiProduct.GatewayEnvironments)
+
+	// Sort SubscriptionAvailableTenants slice
+	sort.Strings(apiProduct.SubscriptionAvailableTenants)
+
+	// Sort AdditionalProperties map
+	sortAdditionalPropertiesOfAPIProduct(apiProduct)
+
+	// Sort AccessControlRoles slice
+	sort.Strings(apiProduct.AccessControlRoles)
+
+	// Sort APIs slice
+	// sort.Sort(ByTargetVerb(apiProduct.APIs))
+}
+
+func sortAdditionalPropertiesOfAPIProduct(apiProduct *APIProduct) {
+	keys := make([]string, 0, len(apiProduct.AdditionalProperties))
+
+	for key := range apiProduct.AdditionalProperties {
+		keys = append(keys, key)
+	}
+
+	sort.Strings(keys)
+
+	sortedMap := make(map[string]string, len(apiProduct.AdditionalProperties))
+
+	for _, key := range keys {
+		sortedMap[key] = apiProduct.AdditionalProperties[key]
+	}
+
+	apiProduct.AdditionalProperties = sortedMap
 }
 
 // GenerateSampleAppData : Generate sample Application object
@@ -350,6 +485,125 @@ func (instance *Client) AddAPI(t *testing.T, api *API, username string, password
 	return apiResponse.ID
 }
 
+// AddAPIFromOpenAPIDefinition : Add Petstore API using an OpenAPI Definition to APIM
+func (instance *Client) AddAPIFromOpenAPIDefinition(t *testing.T, path string, additionalProperties string, username string, password string) string {
+	apisURL := instance.publisherRestURL + "/apis/import-openapi"
+
+	file, err := os.Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer file.Close()
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, err := writer.CreateFormFile("file", filepath.Base(file.Name()))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = io.Copy(part, file)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	part, err = writer.CreateFormField("additionalProperties")
+	if err != nil {
+		t.Fatal(err)
+	}
+	part.Write([]byte(additionalProperties))
+
+	err = writer.Close()
+
+	request := base.CreatePost(apisURL, body)
+
+	base.SetDefaultRestAPIHeadersToConsumeFormData(instance.accessToken, request)
+
+	base.LogRequest("apim.AddAPIFromOpenAPIDefinition()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.AddAPIFromOpenAPIDefinition()", response, 201)
+
+	var apiResponse API
+	json.NewDecoder(response.Body).Decode(&apiResponse)
+
+	t.Cleanup(func() {
+		instance.Login(username, password)
+		instance.DeleteAPI(apiResponse.ID)
+	})
+
+	return apiResponse.ID
+}
+
+// AddAPIProductFromYaml : Add SampleAPIProduct using using a yaml file
+func (instance *Client) AddAPIProductFromJSON(t *testing.T, path string, username string, password string, apisList map[string]*API, doClean bool) string {
+	apiProductsURL := instance.publisherRestURL + "/api-products"
+
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var apiProductData interface{}
+	err = json.Unmarshal([]byte(data), &apiProductData)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Generate a random string as the API Product name and context
+	apiProductData.(map[string]interface{})["name"] = generateRandomString()
+	apiProductData.(map[string]interface{})["context"] = getContext(username)
+
+	// Retrieve the APIs in the json file of the API Product
+	apisInAPIProduct := apiProductData.(map[string]interface{})["apis"]
+
+	// Iterate through the APIs in the apis array
+	for _, apiFromJSONFile := range apisInAPIProduct.([]interface{}) {
+		// Iterate through the realAPIName:API map
+		for apiNameKey, dependentAPI := range apisList {
+			// If the name of the apiFromJSONFile matches with the real API name in the map
+			if apiFromJSONFile.(map[string]interface{})["name"] == apiNameKey {
+				// Replace the real API name with the random string name generated when importing the API
+				apiFromJSONFile.(map[string]interface{})["name"] = dependentAPI.Name
+				// Replace the apiId witht the ID in the APIM for that particular API
+				apiFromJSONFile.(map[string]interface{})["apiId"] = dependentAPI.ID
+			}
+		}
+	}
+
+	data, err = json.Marshal(apiProductData)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	request := base.CreatePost(apiProductsURL, bytes.NewBuffer(data))
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.AddAPIProductFromYaml()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.AddAPIProductFromYaml()", response, 201)
+
+	var apiProductResponse APIProduct
+	json.NewDecoder(response.Body).Decode(&apiProductResponse)
+
+	t.Cleanup(func() {
+		if doClean {
+			instance.Login(username, password)
+			instance.DeleteAPIProduct(apiProductResponse.ID)
+		}
+	})
+
+	return apiProductResponse.ID
+}
+
 // DeleteAPI : Delete API from APIM
 func (instance *Client) DeleteAPI(apiID string) {
 	apisURL := instance.publisherRestURL + "/apis/" + apiID
@@ -367,10 +621,33 @@ func (instance *Client) DeleteAPI(apiID string) {
 	base.ValidateAndLogResponse("apim.DeleteAPI()", response, 200)
 }
 
+// DeleteAPIProduct : Delete API Product from APIM
+func (instance *Client) DeleteAPIProduct(apiProductID string) {
+	apiProductsURL := instance.publisherRestURL + "/api-products/" + apiProductID
+
+	request := base.CreateDelete(apiProductsURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.DeleteAPIProduct()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.DeleteAPIProduct()", response, 200)
+}
+
 // DeleteAPIByName : Delete API from APIM by name
 func (instance *Client) DeleteAPIByName(name string) {
 	apiInfo := instance.GetAPIByName(name)
 	instance.DeleteAPI(apiInfo.ID)
+}
+
+// DeleteAPIProductByName : Delete API from APIM by name
+func (instance *Client) DeleteAPIProductByName(name string) {
+	apiProductInfo := instance.GetAPIProductByName(name)
+	instance.DeleteAPIProduct(apiProductInfo.ID)
 }
 
 // GetAPI : Get API from APIM
@@ -392,6 +669,69 @@ func (instance *Client) GetAPI(apiID string) *API {
 	var apiResponse API
 	json.NewDecoder(response.Body).Decode(&apiResponse)
 	return &apiResponse
+}
+
+// GetAPIs : Get APIs from APIM
+func (instance *Client) GetAPIs() *APIList {
+	apisURL := instance.publisherRestURL + "/apis"
+
+	request := base.CreateGet(apisURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.GetAPI()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.GetAPIs()", response, 200)
+
+	var apisResponse APIList
+	json.NewDecoder(response.Body).Decode(&apisResponse)
+	return &apisResponse
+}
+
+// GetAPIProduct : Get API Product from APIM
+func (instance *Client) GetAPIProduct(apiProductID string) *APIProduct {
+	apisURL := instance.publisherRestURL + "/api-products/" + apiProductID
+
+	request := base.CreateGet(apisURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.GetAPIProduct()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.GetAPIProduct()", response, 200)
+
+	var apiProductResponse APIProduct
+	json.NewDecoder(response.Body).Decode(&apiProductResponse)
+	return &apiProductResponse
+}
+
+// GetAPIProducts : Get API Products from APIM
+func (instance *Client) GetAPIProducts() *APIProductList {
+	apisURL := instance.publisherRestURL + "/api-products"
+
+	request := base.CreateGet(apisURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.GetAPIProducts()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.GetAPIProducts()", response, 200)
+
+	var apiProductsResponse APIProductList
+	json.NewDecoder(response.Body).Decode(&apiProductsResponse)
+	return &apiProductsResponse
 }
 
 // GetAPIByName : Get API by name from APIM
@@ -418,6 +758,32 @@ func (instance *Client) GetAPIByName(name string) *APIInfo {
 	var apiResponse APIList
 	json.NewDecoder(response.Body).Decode(&apiResponse)
 	return &apiResponse.List[0]
+}
+
+// GetAPIProductByName : Get API Product by name from APIM
+func (instance *Client) GetAPIProductByName(name string) *APIProductInfo {
+	apiProductsURL := instance.publisherRestURL + "/api-products"
+
+	request := base.CreateGet(apiProductsURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	values := url.Values{}
+	values.Add("query", name)
+
+	request.URL.RawQuery = values.Encode()
+
+	base.LogRequest("apim.GetAPIProductByName()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.GetAPIProductByName()", response, 200)
+
+	var apiProductResponse APIProductList
+	json.NewDecoder(response.Body).Decode(&apiProductResponse)
+	return &apiProductResponse.List[0]
 }
 
 // PublishAPI : Publish API from APIM
@@ -717,6 +1083,42 @@ func (instance *Client) DeleteAllAPIs() {
 		defer response.Body.Close()
 
 		base.ValidateAndLogResponse("apim.DeleteAllAPIs() deleting APIs", response, 200)
+	}
+}
+
+// DeleteAllAPIProducts : Delete All API Products from APIM
+func (instance *Client) DeleteAllAPIProducts() {
+	apiProductsGetURL := instance.publisherRestURL + "/api-products"
+
+	request := base.CreateGet(apiProductsGetURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.DeleteAllAPIProducts() getting API Products", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.DeleteAllAPIProducts() getting API Products", response, 200)
+
+	var apiProductsResponse APIProductList
+	json.NewDecoder(response.Body).Decode(&apiProductsResponse)
+
+	for _, apiProduct := range apiProductsResponse.List {
+		apiProductsDeleteURL := instance.publisherRestURL + "/api-products/" + apiProduct.ID
+
+		request = base.CreateDelete(apiProductsDeleteURL)
+
+		base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+		base.LogRequest("apim.DeleteAllAPIProducts() deleting API Products", request)
+
+		response = base.SendHTTPRequest(request)
+
+		defer response.Body.Close()
+
+		base.ValidateAndLogResponse("apim.DeleteAllAPIProducts() deleting API Products", response, 200)
 	}
 }
 

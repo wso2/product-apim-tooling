@@ -140,6 +140,7 @@ func addUsersAndTenants() {
 
 func cleanupAPIM() {
 	deleteApps()
+	deleteApiProducts()
 	deleteApis()
 }
 
@@ -254,6 +255,35 @@ func deleteApis() {
 		for _, client := range apimClients {
 			client.Login(tenant.AdminUserName+"@"+tenant.Domain, tenant.AdminPassword)
 			client.DeleteAllAPIs()
+		}
+	}
+}
+
+func deleteApiProducts() {
+	publishers := Users["publisher"]
+	for _, publisher := range publishers {
+		for _, client := range apimClients {
+			client.Login(creator.UserName, publisher.Password)
+			client.DeleteAllAPIProducts()
+		}
+
+		for _, tenant := range tenants {
+			for _, client := range apimClients {
+				client.Login(creator.UserName+"@"+tenant.Domain, publisher.Password)
+				client.DeleteAllAPIProducts()
+			}
+		}
+	}
+
+	for _, client := range apimClients {
+		client.Login(superAdminUser, superAdminPassword)
+		client.DeleteAllAPIProducts()
+	}
+
+	for _, tenant := range tenants {
+		for _, client := range apimClients {
+			client.Login(tenant.AdminUserName+"@"+tenant.Domain, tenant.AdminPassword)
+			client.DeleteAllAPIProducts()
 		}
 	}
 }
