@@ -28,8 +28,8 @@ import (
 // Delete command related usage Info
 const deleteCmdLiteral = "delete"
 const deleteCmdShortDesc = "Delete an API/Application in an environment"
-const deleteCmdLongDesc = `Delete an API available in the environment specified by flag (--environment, -e) in default mode/
-Delete an Application of a specific user in the environment specified by flag (--environment, -e) in default mode/
+const deleteCmdLongDesc = `Delete an API available in the environment specified by flag (--environment, -e) in default mode
+Delete an Application of a specific user in the environment specified by flag (--environment, -e) in default mode
 Delete resources by filenames, stdin, resources and names, or by resources and label selector in kubernetes mode`
 
 const deleteCmdExamples = utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPICmdLiteral  + ` -n TwitterAPI -v 1.0.0 -r admin -e dev 
