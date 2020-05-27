@@ -48,8 +48,12 @@ type EndpointsListData struct {
 	Sandbox []Endpoint `yaml:"sandbox" json:"sandbox_endpoints,omitempty"`
 	// Production failover endpoints list for failover endpoint types
 	SandboxFailovers []Endpoint `yaml:"sandboxFailovers" json:"sandbox_failovers,omitempty"`
-	// To enabble failover endpoints
-	Failover bool `yaml:"faiOver" json:"failOver,omitempty"`
+	// To enable failover endpoints
+	Failover bool `yaml:"failOver" json:"failOver,omitempty"`
+	// Session management method from the load balancing group. Values can be "none", "transport" (by default), "soap", "simpleClientSession" (Client ID)
+	SessionManagement string `yaml:"sessionManagement" json:"sessionManagement,omitempty"`
+	// Session timeout means the number of milliseconds after which the session would time out
+	SessionTimeout int `yaml:"sessionTimeOut" json:"sessionTimeOut,omitempty"`
 }
 
 // Cert stores certificate details

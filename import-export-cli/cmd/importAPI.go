@@ -174,7 +174,7 @@ func mergeAPI(apiDirectory string, environmentParams *params.Environment) error 
 		if environmentParams.EndpointsList.EndpointType == "failover" {
 			environmentParams.EndpointsList.Failover = true
 		} else {
-			// If the endpoint type is load_balance make Failover false and
+			// If the endpoint type is load_balance, make Failover false and
 			// make ProductionFailovers and SandboxFailovers nil if the user has mistakenly specify those
 			environmentParams.EndpointsList.Failover = false
 			environmentParams.EndpointsList.ProductionFailovers = nil
