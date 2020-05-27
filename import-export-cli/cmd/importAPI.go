@@ -158,9 +158,32 @@ func mergeAPI(apiDirectory string, environmentParams *params.Environment) error 
 		return err
 	}
 
+	if environmentParams.Endpoints != nil && environmentParams.EndpointsList != nil {
+		return errors.New("Both endpoints and endpointsList fields are specified in the api_params.yaml file for " +
+			environmentParams.Name + ". Please remove one field and continue...")
+	}
+
 	configData, err := json.Marshal(environmentParams.Endpoints)
 	if err != nil {
 		return err
+	}
+
+	// If the user wants to have load balancing or failover endpoints, environmentParams.EndpointsList will not be null
+	if environmentParams.EndpointsList != nil {
+		// Check whether the endpoint type is failover
+		if environmentParams.EndpointsList.EndpointType == "failover" {
+			environmentParams.EndpointsList.Failover = true
+		} else {
+			// If the endpoint type is load_balance make Failover false and
+			// make ProductionFailovers and SandboxFailovers nil if the user has mistakenly specify those
+			environmentParams.EndpointsList.Failover = false
+			environmentParams.EndpointsList.ProductionFailovers = nil
+			environmentParams.EndpointsList.SandboxFailovers = nil
+		}
+		configData, err = json.Marshal(environmentParams.EndpointsList)
+		if err != nil {
+			return err
+		}
 	}
 
 	mergedAPIEndpoints, err := utils.MergeJSON([]byte(apiEndpointData), configData)
@@ -803,7 +826,7 @@ func ImportAPI(credential credentials.Credential, importPath, apiImportExportEnd
 		}
 
 		// check for API existence
-		id, err := getApiID(apiInfo.ID.APIName, apiInfo.ID.Version, providerName , importEnvironment, accessOAuthToken)
+		id, err := getApiID(apiInfo.ID.APIName, apiInfo.ID.Version, providerName, importEnvironment, accessOAuthToken)
 		if err != nil {
 			return err
 		}

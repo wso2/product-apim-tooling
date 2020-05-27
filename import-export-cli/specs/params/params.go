@@ -36,6 +36,22 @@ type EndpointData struct {
 	Sandbox *Endpoint `yaml:"sandbox" json:"sandbox_endpoints,omitempty"`
 }
 
+// EndpointsListData contains details about endpoints mainly to be used in load balancing (or failover)
+type EndpointsListData struct {
+	// Endpoint type (can be "load_balance" or "failover")
+	EndpointType string `yaml:"endpointType" json:"endpoint_type,omitempty"`
+	// Production endpoints list for load balancing and failover endpoint types
+	Production []Endpoint `yaml:"production" json:"production_endpoints,omitempty"`
+	// Production failover endpoints list for failover endpoint types
+	ProductionFailovers []Endpoint `yaml:"productionFailovers" json:"production_failovers,omitempty"`
+	// Sandbox endpoints list for load balancing and failover endpoint types
+	Sandbox []Endpoint `yaml:"sandbox" json:"sandbox_endpoints,omitempty"`
+	// Production failover endpoints list for failover endpoint types
+	SandboxFailovers []Endpoint `yaml:"sandboxFailovers" json:"sandbox_failovers,omitempty"`
+	// To enabble failover endpoints
+	Failover bool `yaml:"faiOver" json:"failOver,omitempty"`
+}
+
 // Cert stores certificate details
 type Cert struct {
 	// Host of the certificate
@@ -54,6 +70,8 @@ type Environment struct {
 	Name string `yaml:"name"`
 	// Endpoints contain details about endpoints in a configuration
 	Endpoints *EndpointData `yaml:"endpoints"`
+	// EndpointsList contain details about endpoints in a configuration for load balancing or failover scenarios
+	EndpointsList *EndpointsListData `yaml:"endpointsList"`
 	// GatewayEnvironments contains environments that used to deploy API
 	GatewayEnvironments []string `yaml:"gatewayEnvironments"`
 	// Certs for environment
@@ -116,7 +134,6 @@ func ExtractAPIEndpointConfig(b []byte) (string, error) {
 	return apiConfig.EPConfig, err
 }
 
-
 // GetEnv returns the EndpointData associated for key in the ApiParams, if not found returns nil
 func (config ApiParams) GetEnv(key string) *Environment {
 	for index, env := range config.Environments {
@@ -126,4 +143,3 @@ func (config ApiParams) GetEnv(key string) *Environment {
 	}
 	return nil
 }
-
