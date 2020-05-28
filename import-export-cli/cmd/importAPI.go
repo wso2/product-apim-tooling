@@ -179,6 +179,8 @@ func mergeAPI(apiDirectory string, environmentParams *params.Environment) error 
 			environmentParams.EndpointsList.Failover = false
 			environmentParams.EndpointsList.ProductionFailovers = nil
 			environmentParams.EndpointsList.SandboxFailovers = nil
+			// The default class of the algorithm to be used should be set to RoundRobin
+			environmentParams.EndpointsList.AlgorithmClassName = "org.apache.synapse.endpoints.algorithms.RoundRobin"
 		}
 		configData, err = json.Marshal(environmentParams.EndpointsList)
 		if err != nil {

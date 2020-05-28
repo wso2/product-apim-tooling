@@ -54,6 +54,8 @@ type EndpointsListData struct {
 	SessionManagement string `yaml:"sessionManagement" json:"sessionManagement,omitempty"`
 	// Session timeout means the number of milliseconds after which the session would time out
 	SessionTimeout int `yaml:"sessionTimeOut" json:"sessionTimeOut,omitempty"`
+	// Class name for algorithm to be used if load balancing should be done
+	AlgorithmClassName string `yaml:"algoClassName" json:"algoClassName,omitempty"`
 }
 
 // Cert stores certificate details
