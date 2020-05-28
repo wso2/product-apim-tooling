@@ -158,9 +158,9 @@ func mergeAPI(apiDirectory string, environmentParams *params.Environment) error 
 		return err
 	}
 
-	if environmentParams.Endpoints != nil && environmentParams.EndpointsList != nil {
-		return errors.New("Both endpoints and endpointsList fields are specified in the api_params.yaml file for " +
-			environmentParams.Name + ". Please remove one field and continue...")
+	if !isEndpointsFieldsValid(environmentParams.Endpoints, environmentParams.LoadBalanceEndpoints, environmentParams.FailoverEndpoints) {
+		return errors.New("Please specify only one field from endpoints, loadBalanceEndpoints or failOverEndpoints in the api_params.yaml file for " +
+			environmentParams.Name + " and continue...")
 	}
 
 	configData, err := json.Marshal(environmentParams.Endpoints)
@@ -168,21 +168,22 @@ func mergeAPI(apiDirectory string, environmentParams *params.Environment) error 
 		return err
 	}
 
-	// If the user wants to have load balancing or failover endpoints, environmentParams.EndpointsList will not be null
-	if environmentParams.EndpointsList != nil {
-		// Check whether the endpoint type is failover
-		if environmentParams.EndpointsList.EndpointType == "failover" {
-			environmentParams.EndpointsList.Failover = true
-		} else {
-			// If the endpoint type is load_balance, make Failover false and
-			// make ProductionFailovers and SandboxFailovers nil if the user has mistakenly specify those
-			environmentParams.EndpointsList.Failover = false
-			environmentParams.EndpointsList.ProductionFailovers = nil
-			environmentParams.EndpointsList.SandboxFailovers = nil
-			// The default class of the algorithm to be used should be set to RoundRobin
-			environmentParams.EndpointsList.AlgorithmClassName = "org.apache.synapse.endpoints.algorithms.RoundRobin"
+	// If the user wants to have load balancing, environmentParams.LoadBalanceEndpoints will not be null
+	if environmentParams.LoadBalanceEndpoints != nil {
+		environmentParams.LoadBalanceEndpoints.EndpointType = "load_balance"
+		// The default class of the algorithm to be used should be set to RoundRobin
+		environmentParams.LoadBalanceEndpoints.AlgorithmClassName = "org.apache.synapse.endpoints.algorithms.RoundRobin"
+		configData, err = json.Marshal(environmentParams.LoadBalanceEndpoints)
+		if err != nil {
+			return err
 		}
-		configData, err = json.Marshal(environmentParams.EndpointsList)
+	}
+
+	// If the user wants to have failover, environmentParams.FailoverEndpoints will not be null
+	if environmentParams.FailoverEndpoints != nil {
+		environmentParams.FailoverEndpoints.EndpointType = "failover"
+		environmentParams.FailoverEndpoints.Failover = true
+		configData, err = json.Marshal(environmentParams.FailoverEndpoints)
 		if err != nil {
 			return err
 		}
@@ -214,6 +215,16 @@ func mergeAPI(apiDirectory string, environmentParams *params.Environment) error 
 		return err
 	}
 	return nil
+}
+
+// isEndpointsFieldsValid returns false if either of the two fields: endpoints, loadBalanceEndpoints and failOverEndpoints are defined
+// in api_params.yaml file by the user mistakenly. This will return true , if only one of them is defined.
+func isEndpointsFieldsValid(endpoints *params.EndpointData, loadBalanceEndpoints *params.LoadBalanceEndpointsData, failoverEndpoints *params.FailoverEndpointsData) bool {
+	if endpoints != nil {
+		return loadBalanceEndpoints == nil && failoverEndpoints == nil
+	} else {
+		return (loadBalanceEndpoints != nil && failoverEndpoints == nil) || (loadBalanceEndpoints == nil && failoverEndpoints != nil)
+	}
 }
 
 // resolveImportFilePath resolves the archive/directory for import

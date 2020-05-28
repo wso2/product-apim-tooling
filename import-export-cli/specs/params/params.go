@@ -36,26 +36,34 @@ type EndpointData struct {
 	Sandbox *Endpoint `yaml:"sandbox" json:"sandbox_endpoints,omitempty"`
 }
 
-// EndpointsListData contains details about endpoints mainly to be used in load balancing (or failover)
-type EndpointsListData struct {
-	// Endpoint type (can be "load_balance" or "failover")
-	EndpointType string `yaml:"endpointType" json:"endpoint_type,omitempty"`
-	// Production endpoints list for load balancing and failover endpoint types
+// LoadBalanceEndpointsData contains details about endpoints mainly to be used in load balancing
+type LoadBalanceEndpointsData struct {
+	EndpointType string `yaml:"endpoint_type" json:"endpoint_type"`
+	// Production endpoints list for load balancing
 	Production []Endpoint `yaml:"production" json:"production_endpoints,omitempty"`
-	// Production failover endpoints list for failover endpoint types
-	ProductionFailovers []Endpoint `yaml:"productionFailovers" json:"production_failovers,omitempty"`
-	// Sandbox endpoints list for load balancing and failover endpoint types
+	// Sandbox endpoints list for load balancing
 	Sandbox []Endpoint `yaml:"sandbox" json:"sandbox_endpoints,omitempty"`
-	// Production failover endpoints list for failover endpoint types
-	SandboxFailovers []Endpoint `yaml:"sandboxFailovers" json:"sandbox_failovers,omitempty"`
-	// To enable failover endpoints
-	Failover bool `yaml:"failOver" json:"failOver,omitempty"`
 	// Session management method from the load balancing group. Values can be "none", "transport" (by default), "soap", "simpleClientSession" (Client ID)
 	SessionManagement string `yaml:"sessionManagement" json:"sessionManagement,omitempty"`
 	// Session timeout means the number of milliseconds after which the session would time out
 	SessionTimeout int `yaml:"sessionTimeOut" json:"sessionTimeOut,omitempty"`
 	// Class name for algorithm to be used if load balancing should be done
 	AlgorithmClassName string `yaml:"algoClassName" json:"algoClassName,omitempty"`
+}
+
+// FailoverEndpointsData contains details about endpoints mainly to be used in load balancing
+type FailoverEndpointsData struct {
+	EndpointType string `yaml:"endpoint_type" json:"endpoint_type"`
+	// Primary production endpoint for failover
+	Production *Endpoint `yaml:"production" json:"production_endpoints,omitempty"`
+	// Production failover endpoints list for failover
+	ProductionFailovers []Endpoint `yaml:"productionFailovers" json:"production_failovers,omitempty"`
+	// Primary sandbox endpoint for failover
+	Sandbox *Endpoint `yaml:"sandbox" json:"sandbox_endpoints,omitempty"`
+	// Production failover endpoints list for failover endpoint types
+	SandboxFailovers []Endpoint `yaml:"sandboxFailovers" json:"sandbox_failovers,omitempty"`
+	// To enable failover endpoints
+	Failover bool `yaml:"failOver" json:"failOver,omitempty"`
 }
 
 // Cert stores certificate details
@@ -76,8 +84,10 @@ type Environment struct {
 	Name string `yaml:"name"`
 	// Endpoints contain details about endpoints in a configuration
 	Endpoints *EndpointData `yaml:"endpoints"`
-	// EndpointsList contain details about endpoints in a configuration for load balancing or failover scenarios
-	EndpointsList *EndpointsListData `yaml:"endpointsList"`
+	// LoadBalanceEndpoints contain details about endpoints in a configuration for load balancing scenarios
+	LoadBalanceEndpoints *LoadBalanceEndpointsData `yaml:"loadBalanceEndpoints"`
+	// FailoverEndpoints contain details about endpoints in a configuration for failover scenarios
+	FailoverEndpoints *FailoverEndpointsData `yaml:"failoverEndpoints"`
 	// GatewayEnvironments contains environments that used to deploy API
 	GatewayEnvironments []string `yaml:"gatewayEnvironments"`
 	// Certs for environment
