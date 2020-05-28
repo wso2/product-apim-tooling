@@ -356,7 +356,7 @@ func importAPIProductPreserveProvider(t *testing.T, args *apiProductImportExport
 	return output, err
 }
 
-func importAPIProductPreserveProviderWithoutCleaning(t *testing.T, args *apiProductImportExportTestArgs) (string, error) {
+func importUpdateAPIProductPreserveProvider(t *testing.T, args *apiProductImportExportTestArgs) (string, error) {
 	var output string
 	var err error
 
@@ -394,7 +394,7 @@ func importAPIProduct(t *testing.T, args *apiProductImportExportTestArgs) (strin
 	return output, err
 }
 
-func importAPIProductWithoutCleaning(t *testing.T, args *apiProductImportExportTestArgs) (string, error) {
+func importUpdateAPIProduct(t *testing.T, args *apiProductImportExportTestArgs) (string, error) {
 	var output string
 	var err error
 
@@ -597,7 +597,7 @@ func validateAPIProductExportImportPreserveProvider(t *testing.T, args *apiProdu
 	validateAPIProductsEqual(t, args.apiProduct, importedAPIProduct)
 }
 
-func validateAPIProductImportPreserveProviderWithoutCleaningImportedAPIProduct(t *testing.T, args *apiProductImportExportTestArgs) {
+func validateAPIProductImportUpdatePreserveProvider(t *testing.T, args *apiProductImportExportTestArgs) {
 	t.Helper()
 
 	// Setup apictl envs
@@ -606,9 +606,9 @@ func validateAPIProductImportPreserveProviderWithoutCleaningImportedAPIProduct(t
 	// Import api to env 2
 	base.Login(t, args.destAPIM.GetEnvName(), args.ctlUser.username, args.ctlUser.password)
 
-	// This is used when you have previously imported an API Product and validated it.
-	// So when the cleaning you do not need to clean twice. For that, importAPIProductWithoutCleaning will not do cleaning again.
-	importAPIProductPreserveProviderWithoutCleaning(t, args)
+	// This is used when you have previously imported an API Product (with preserving the provider) and validated it.
+	// So when doing the cleaning you do not need to clean twice. For that, importUpdateAPIProductPreserveProvider will not be doing cleaning again.
+	importUpdateAPIProductPreserveProvider(t, args)
 
 	// Give time for newly imported API Product to get indexed, or else getAPIProduct by name will fail
 	time.Sleep(1 * time.Second)
@@ -656,7 +656,7 @@ func validateAPIProductImport(t *testing.T, args *apiProductImportExportTestArgs
 	validateAPIProductsEqualCrossTenant(t, args.apiProduct, importedAPIProduct)
 }
 
-func validateAPIProductImportWithoutCleaningImportedApiProduct(t *testing.T, args *apiProductImportExportTestArgs) {
+func validateAPIProductImportUpdate(t *testing.T, args *apiProductImportExportTestArgs) {
 	t.Helper()
 
 	// Setup apictl envs
@@ -665,7 +665,9 @@ func validateAPIProductImportWithoutCleaningImportedApiProduct(t *testing.T, arg
 	// Import API Product to env 2
 	base.Login(t, args.destAPIM.GetEnvName(), args.ctlUser.username, args.ctlUser.password)
 
-	importAPIProductWithoutCleaning(t, args)
+	// This is used when you have previously imported an API Product and validated it.
+	// So when doing the cleaning you do not need to clean twice. For that, importUpdateAPIProduct will not be doing cleaning again.
+	importUpdateAPIProduct(t, args)
 
 	// Give time for newly imported API Product to get indexed, or else getAPIProduct by name will fail
 	time.Sleep(1 * time.Second)

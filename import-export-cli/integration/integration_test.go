@@ -263,13 +263,13 @@ func deleteApiProducts() {
 	publishers := Users["publisher"]
 	for _, publisher := range publishers {
 		for _, client := range apimClients {
-			client.Login(creator.UserName, publisher.Password)
+			client.Login(publisher.UserName, publisher.Password)
 			client.DeleteAllAPIProducts()
 		}
 
 		for _, tenant := range tenants {
 			for _, client := range apimClients {
-				client.Login(creator.UserName+"@"+tenant.Domain, publisher.Password)
+				client.Login(publisher.UserName+"@"+tenant.Domain, publisher.Password)
 				client.DeleteAllAPIProducts()
 			}
 		}

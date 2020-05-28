@@ -104,13 +104,6 @@ func TestExportImportApiProductAdminSuperTenantUserWithImportApis(t *testing.T) 
 		updateApiProductFlag: false,
 	}
 
-	t.Cleanup(func() {
-		apiList := getAPIs(prod, apiCreator, apiCreatorPassword)
-		for _, api := range apiList.List {
-			deleteAPI(t, prod, api.ID, apiCreator, apiCreatorPassword)
-		}
-	})
-
 	// Import the API Product with the dependent APIs to env2
 	validateAPIProductExportImportPreserveProvider(t, args)
 }
@@ -256,13 +249,6 @@ func TestExportImportApiProductAdminSuperTenantUserWithUpdateApiProduct(t *testi
 		updateApiProductFlag: false,
 	}
 
-	t.Cleanup(func() {
-		apiList := getAPIs(prod, apiCreator, apiCreatorPassword)
-		for _, api := range apiList.List {
-			deleteAPI(t, prod, api.ID, apiCreator, apiCreatorPassword)
-		}
-	})
-
 	// Export the API Product from env 1 and import it to env 2
 	validateAPIProductExportImportPreserveProvider(t, args)
 
@@ -272,7 +258,7 @@ func TestExportImportApiProductAdminSuperTenantUserWithUpdateApiProduct(t *testi
 	args.updateApiProductFlag = true
 
 	// Re-import the API Product to env 1 while updating it
-	validateAPIProductImportPreserveProviderWithoutCleaningImportedAPIProduct(t, args)
+	validateAPIProductImportUpdatePreserveProvider(t, args)
 }
 
 // Export an API Product with its dependent APIs from one environment and import to another environment freshly as super tenant admin
@@ -319,13 +305,6 @@ func TestExportImportApiProductAdminSuperTenantUserWithUpdateApisAndApiProduct(t
 		updateApiProductFlag: false,
 	}
 
-	t.Cleanup(func() {
-		apiList := getAPIs(prod, apiCreator, apiCreatorPassword)
-		for _, api := range apiList.List {
-			deleteAPI(t, prod, api.ID, apiCreator, apiCreatorPassword)
-		}
-	})
-
 	// Export the API Product from env 1 and import it to env 2
 	validateAPIProductExportImportPreserveProvider(t, args)
 
@@ -336,7 +315,7 @@ func TestExportImportApiProductAdminSuperTenantUserWithUpdateApisAndApiProduct(t
 	// You can make updateApiProductFlag true too - The same behaviour will happen
 
 	// Re-import the API Product to env 1 while updating the API Product and APIs
-	validateAPIProductImportPreserveProviderWithoutCleaningImportedAPIProduct(t, args)
+	validateAPIProductImportUpdatePreserveProvider(t, args)
 }
 
 // Export an API Product with its dependent APIs from one environment and import to another environment freshly as cross tenant admin
@@ -386,13 +365,6 @@ func TestExportImportApiProductCrossTenantUserWithImportApis(t *testing.T) {
 
 	// Export the API Product as super tenant admin
 	validateAPIProductExport(t, args)
-
-	t.Cleanup(func() {
-		apiList := getAPIs(prod, tenantAdminUsername, tenantAdminPassword)
-		for _, api := range apiList.List {
-			deleteAPI(t, prod, api.ID, tenantAdminUsername, tenantAdminPassword)
-		}
-	})
 
 	// Since --preserve-provider=false both the apiProductProvider and the ctlUser is tenant admin
 	args.apiProductProvider = credentials{username: tenantAdminUsername, password: tenantAdminPassword}
@@ -451,13 +423,6 @@ func TestExportImportApiProductCrossTenantUserWithUpdateApiProduct(t *testing.T)
 	// Export the API Product as super tenant admin
 	validateAPIProductExport(t, args)
 
-	t.Cleanup(func() {
-		apiList := getAPIs(prod, apiCreator, apiCreatorPassword)
-		for _, api := range apiList.List {
-			deleteAPI(t, prod, api.ID, apiCreator, apiCreatorPassword)
-		}
-	})
-
 	// Since --preserve-provider=false both the apiProductProvider and the ctlUser is tenant admin
 	args.apiProductProvider = credentials{username: tenantAdminUsername, password: tenantAdminPassword}
 	args.ctlUser = credentials{username: tenantAdminUsername, password: tenantAdminPassword}
@@ -471,7 +436,7 @@ func TestExportImportApiProductCrossTenantUserWithUpdateApiProduct(t *testing.T)
 	args.updateApiProductFlag = true
 
 	// Re-import the API Product to env 1 while updating it
-	validateAPIProductImportWithoutCleaningImportedApiProduct(t, args)
+	validateAPIProductImportUpdate(t, args)
 }
 
 // Export an API Product with its dependent APIs from one environment as super admin and import to another environment freshly as tenant admin
@@ -524,13 +489,6 @@ func TestExportImportApiProductCrossTenantUserWithUpdateApisAndApiProduct(t *tes
 	// Export the API Product as super tenant admin
 	validateAPIProductExport(t, args)
 
-	t.Cleanup(func() {
-		apiList := getAPIs(prod, apiCreator, apiCreatorPassword)
-		for _, api := range apiList.List {
-			deleteAPI(t, prod, api.ID, apiCreator, apiCreatorPassword)
-		}
-	})
-
 	// Since --preserve-provider=false both the apiProductProvider and the ctlUser is tenant admin
 	args.apiProductProvider = credentials{username: tenantAdminUsername, password: tenantAdminPassword}
 	args.ctlUser = credentials{username: tenantAdminUsername, password: tenantAdminPassword}
@@ -544,7 +502,7 @@ func TestExportImportApiProductCrossTenantUserWithUpdateApisAndApiProduct(t *tes
 	args.updateApisFlag = true
 
 	// Re-import the API Product to env 1 while updating the API Product and APIs
-	validateAPIProductImportWithoutCleaningImportedApiProduct(t, args)
+	validateAPIProductImportUpdate(t, args)
 }
 
 func TestListApiProductsAdminSuperTenantUser(t *testing.T) {
