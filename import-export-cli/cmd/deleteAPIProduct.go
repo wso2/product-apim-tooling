@@ -14,7 +14,7 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package cmd
 
@@ -40,8 +40,8 @@ const deleteAPIProductCmdLiteral = "api-product"
 const deleteAPIProductCmdShortDesc = "Delete API Product"
 const deleteAPIProductCmdLongDesc = "Delete an API Product from an environment"
 
-const deleteAPIProductCmdExamples = utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPIProductCmdLiteral + ` -n TwitterAPI -r admin -e dev
-` + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPIProductCmdLiteral + ` -n FacebookAPI -v 1.0.0 -e production
+const deleteAPIProductCmdExamples = utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPIProductCmdLiteral + ` -n LeasingAPIProduct -r admin -e dev
+` + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPIProductCmdLiteral + ` -n CreditAPIProduct -v 1.0.0 -e production
 NOTE: Both the flags (--name (-n) and --environment (-e)) are mandatory.`
 
 // TODO Introduce a version flag and mandate it when the versioning support has been implemented for API Products
