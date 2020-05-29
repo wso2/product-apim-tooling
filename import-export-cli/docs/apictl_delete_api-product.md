@@ -13,8 +13,8 @@ apictl delete api-product (--name <name-of-the-api-product> --provider <provider
 ### Examples
 
 ```
-apictl delete api-product -n TwitterAPI -r admin -e dev
-apictl delete api-product -n FacebookAPI -v 1.0.0 -e production
+apictl delete api-product -n LeasingAPIProduct -r admin -e dev
+apictl delete api-product -n CreditAPIProduct -v 1.0.0 -e production
 NOTE: Both the flags (--name (-n) and --environment (-e)) are mandatory.
 ```
 

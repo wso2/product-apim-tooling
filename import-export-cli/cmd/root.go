@@ -21,12 +21,13 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"github.com/wso2/product-apim-tooling/import-export-cli/box"
-	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/box"
+	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 
 	"path/filepath"
 	"time"
@@ -122,6 +123,7 @@ func createConfigFiles() {
 	}
 
 	utils.CreateDirIfNotExist(filepath.Join(utils.DefaultExportDirPath, utils.ExportedApisDirName))
+	utils.CreateDirIfNotExist(filepath.Join(utils.DefaultExportDirPath, utils.ExportedApiProductsDirName))
 	utils.CreateDirIfNotExist(filepath.Join(utils.DefaultExportDirPath, utils.ExportedAppsDirName))
 	utils.CreateDirIfNotExist(filepath.Join(utils.DefaultExportDirPath, utils.ExportedMigrationArtifactsDirName))
 

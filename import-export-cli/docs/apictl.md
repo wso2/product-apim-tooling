@@ -26,10 +26,12 @@ apictl [flags]
 * [apictl change](apictl_change.md)	 - Change a configuration
 * [apictl change-status](apictl_change-status.md)	 - Change Status of an API
 * [apictl delete](apictl_delete.md)	 - Delete an API/APIProduct/Application in an environment
+* [apictl export](apictl_export.md)	 - Export an API Product in an environment
 * [apictl export-api](apictl_export-api.md)	 - Export API
 * [apictl export-apis](apictl_export-apis.md)	 - Export APIs for migration
 * [apictl export-app](apictl_export-app.md)	 - Export App
 * [apictl get-keys](apictl_get-keys.md)	 - Generate access token to invoke the API or API Product
+* [apictl import](apictl_import.md)	 - Import an API Product to an environment
 * [apictl import-api](apictl_import-api.md)	 - Import API
 * [apictl import-app](apictl_import-app.md)	 - Import App
 * [apictl init](apictl_init.md)	 - Initialize a new project in given path

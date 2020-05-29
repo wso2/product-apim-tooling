@@ -649,6 +649,77 @@ _apictl_delete()
     noun_aliases=()
 }
 
+_apictl_export_api-product()
+{
+    last_command="apictl_export_api-product"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--environment=")
+    two_word_flags+=("-e")
+    local_nonpersistent_flags+=("--environment=")
+    flags+=("--format=")
+    local_nonpersistent_flags+=("--format=")
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    flags+=("--name=")
+    two_word_flags+=("-n")
+    local_nonpersistent_flags+=("--name=")
+    flags+=("--provider=")
+    two_word_flags+=("-r")
+    local_nonpersistent_flags+=("--provider=")
+    flags+=("--version=")
+    two_word_flags+=("-v")
+    local_nonpersistent_flags+=("--version=")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_flag+=("--environment=")
+    must_have_one_flag+=("-e")
+    must_have_one_flag+=("--name=")
+    must_have_one_flag+=("-n")
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_apictl_export()
+{
+    last_command="apictl_export"
+
+    command_aliases=()
+
+    commands=()
+    commands+=("api-product")
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
 _apictl_export-api()
 {
     last_command="apictl_export-api"
@@ -814,6 +885,79 @@ _apictl_get-keys()
     must_have_one_flag+=("-e")
     must_have_one_flag+=("--name=")
     must_have_one_flag+=("-n")
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_apictl_import_api-product()
+{
+    last_command="apictl_import_api-product"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--environment=")
+    two_word_flags+=("-e")
+    local_nonpersistent_flags+=("--environment=")
+    flags+=("--file=")
+    two_word_flags+=("-f")
+    local_nonpersistent_flags+=("--file=")
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    flags+=("--import-apis")
+    local_nonpersistent_flags+=("--import-apis")
+    flags+=("--preserve-provider")
+    local_nonpersistent_flags+=("--preserve-provider")
+    flags+=("--skipCleanup")
+    local_nonpersistent_flags+=("--skipCleanup")
+    flags+=("--update-api-product")
+    local_nonpersistent_flags+=("--update-api-product")
+    flags+=("--update-apis")
+    local_nonpersistent_flags+=("--update-apis")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_flag+=("--environment=")
+    must_have_one_flag+=("-e")
+    must_have_one_flag+=("--file=")
+    must_have_one_flag+=("-f")
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_apictl_import()
+{
+    last_command="apictl_import"
+
+    command_aliases=()
+
+    commands=()
+    commands+=("api-product")
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
     must_have_one_noun=()
     noun_aliases=()
 }
@@ -1564,10 +1708,12 @@ _apictl_root_command()
     commands+=("change")
     commands+=("change-status")
     commands+=("delete")
+    commands+=("export")
     commands+=("export-api")
     commands+=("export-apis")
     commands+=("export-app")
     commands+=("get-keys")
+    commands+=("import")
     commands+=("import-api")
     commands+=("import-app")
     commands+=("init")
