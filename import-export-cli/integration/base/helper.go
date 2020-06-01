@@ -74,7 +74,7 @@ func SetupEnv(t *testing.T, env string, apim string, tokenEp string) {
 	Execute(t, "add-env", "-e", env, "--apim", apim, "--token", tokenEp)
 
 	t.Cleanup(func() {
-		Execute(t, "remove-env", "-e", env)
+		Execute(t, "remove", "env", env)
 	})
 }
 

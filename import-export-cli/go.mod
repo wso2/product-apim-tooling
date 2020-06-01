@@ -7,6 +7,7 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-openapi/loads v0.19.2
 	github.com/go-resty/resty v0.0.0-20171018191538-8b5e3f91fbea
+	github.com/google/go-cmp v0.3.0
 	github.com/hashicorp/go-multierror v1.0.0
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/magiconair/properties v1.7.6
@@ -21,6 +22,7 @@ require (
 	gopkg.in/yaml.v2 v2.2.8
 	k8s.io/apimachinery v0.0.0-20190913075813-344bcc0201c9 // indirect
 	sigs.k8s.io/controller-runtime v0.2.1 // indirect
+	sigs.k8s.io/yaml v1.1.0
 )
 
 module github.com/wso2/product-apim-tooling/import-export-cli

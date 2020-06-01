@@ -83,6 +83,12 @@ func SetDefaultRestAPIHeaders(token string, request *http.Request) {
 	request.Header.Set("Content-Type", "application/json")
 }
 
+// SetDefaultRestAPIHeadersToConsumeFormData : Set HTTP headers required for APIM REST calls to consume form data
+func SetDefaultRestAPIHeadersToConsumeFormData(token string, request *http.Request) {
+	request.Header.Set("Authorization", "Bearer "+token)
+	request.Header.Set("Content-Type", "multipart/form-data")
+}
+
 // SetTokenAPIHeaders : Set HTTP headers for token API invocation
 func SetTokenAPIHeaders(clientID string, clientSecret string, request *http.Request) {
 	authHeader := clientID + ":" + clientSecret
