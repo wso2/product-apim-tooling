@@ -82,25 +82,12 @@ var ImportAPICmd = &cobra.Command{
 	Example: importAPICmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + importAPICmdLiteral + " called")
-		var apisExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedApisDirName)
-
-		cred, err := getCredentials(importEnvironment)
+		err := ImportAPI(importEnvironment, importAPIFile, importAPIParamsFile, importAPIUpdate, importAPICmdPreserveProvider)
 		if err != nil {
-			utils.HandleErrorAndExit("Error getting credentials", err)
+			utils.HandleErrorAndExit("Error importing API", err)
+			return
 		}
-
-		executeImportAPICmd(cred, apisExportDirectory)
 	},
-}
-
-// executeImportAPICmd executes the import api command
-func executeImportAPICmd(credential credentials.Credential, exportDirectory string) {
-	adminEndpoint := utils.GetAdminEndpointOfEnv(importEnvironment, utils.MainConfigFilePath)
-	err := ImportAPI(credential, importAPIFile, adminEndpoint, exportDirectory, importAPIParamsFile)
-	if err != nil {
-		utils.HandleErrorAndExit("Error importing API", err)
-		return
-	}
 }
 
 // extractAPIDefinition extracts API information from jsonContent
@@ -805,7 +792,14 @@ func importAPI(endpoint, httpMethod, filePath, accessToken string, extraParams m
 }
 
 // ImportAPI function is used with import-api command
-func ImportAPI(credential credentials.Credential, importPath, adminEndpoint, exportDirectory, apiParamsPath string) error {
+func ImportAPI(importEnvironment, importPath, apiParamsPath string, importAPIUpdate, preserveProvider bool) error {
+	credential, err := getCredentials(importEnvironment)
+	if err != nil {
+		utils.HandleErrorAndExit("Error getting credentials", err)
+	}
+
+	exportDirectory := filepath.Join(utils.ExportDirectory, utils.ExportedApisDirName)
+	adminEndpoint := utils.GetAdminEndpointOfEnv(importEnvironment, utils.MainConfigFilePath)
 	resolvedApiFilePath, err := resolveImportFilePath(importPath, exportDirectory)
 	if err != nil {
 		return err
@@ -956,9 +950,9 @@ func ImportAPI(credential credentials.Credential, importPath, adminEndpoint, exp
 	adminEndpoint += "/import/api"
 	if updateAPI {
 		adminEndpoint += "?overwrite=" + strconv.FormatBool(true) + "&preserveProvider=" +
-			strconv.FormatBool(importAPICmdPreserveProvider)
+			strconv.FormatBool(preserveProvider)
 	} else {
-		adminEndpoint += "?preserveProvider=" + strconv.FormatBool(importAPICmdPreserveProvider)
+		adminEndpoint += "?preserveProvider=" + strconv.FormatBool(preserveProvider)
 	}
 	utils.Logln(utils.LogPrefixInfo + "Import URL: " + adminEndpoint)
 

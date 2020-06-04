@@ -27,6 +27,8 @@ var loglnFunc = doNothinglnFunc
 
 var logfFunc = doNothingfFunc
 
+var verboseModeEnabled = false
+
 func verbosePrintlnFunc(a ...interface{}) {
 	fmt.Fprintln(os.Stderr, a...)
 }
@@ -52,4 +54,9 @@ func Logf(format string, a ...interface{}) {
 func EnableVerboseMode() {
 	loglnFunc = verbosePrintlnFunc
 	logfFunc = verbosePrintfFunc
+	verboseModeEnabled = true
+}
+
+func VerboseModeEnabled() bool {
+	return verboseModeEnabled
 }

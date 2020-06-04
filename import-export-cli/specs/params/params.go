@@ -2,7 +2,6 @@ package params
 
 import (
 	"encoding/json"
-	"io"
 	"io/ioutil"
 	"os"
 
@@ -77,46 +76,93 @@ type Environment struct {
 // ApiParams represents environments defined in configuration file
 type ApiParams struct {
 	// Environments contains all environments in a configuration
-	Environments []Environment `yaml:"environments"`
+	Environments []Environment   `yaml:"environments"`
+	Import       APIImportParams `yaml:"import"`
 }
+
+type ApiProductParams struct {
+	Import APIProductImportParams `yaml:"import"`
+}
+
+// ------------------- Structs for Import Params ----------------------------------
+type APIImportParams struct {
+	Update           bool `yaml:"update"`
+	PreserveProvider bool `yaml:"preserveProvider"`
+}
+
+type APIProductImportParams struct {
+}
+
+type ProjectParams struct {
+	Type             string
+	BasePath		 string
+	Name 			 string
+	ApiParams        *ApiParams
+	ApiProductParams *ApiProductParams
+}
+// ---------------- End of Structs for Project Details ---------------------------------
 
 // APIEndpointConfig contains details about endpoints in an API
 type APIEndpointConfig struct {
-	// EPConfig is representing endpoint configuration
+    // EPConfig is representing endpoint configuration
 	EPConfig string `json:"endpointConfig"`
 }
 
-// loadApiParams loads an configuration from a reader. It returns an error or a valid ApiParams
-func loadApiParams(r io.Reader) (*ApiParams, error) {
+// loads the given file in path and substitutes environment variables that are defined as ${var} or $var in the file.
+//	returns the file as string.
+func getEnvSubstitutedFileContent(path string) (string, error) {
+	r, err := os.Open(path)
+	defer func() {
+		_ = r.Close()
+	}()
+	if err != nil {
+		return "", err
+	}
+
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	str, err := utils.EnvSubstitute(string(data))
+	if err != nil {
+		return "", err
+	}
+	return str, nil
+}
+
+// LoadApiParamsFromFile loads an API Project configuration YAML file located in path.
+//	It returns an error or a valid ApiParams
+func LoadApiParamsFromFile(path string) (*ApiParams, error) {
+	fileContent, err := getEnvSubstitutedFileContent(path)
 	if err != nil {
 		return nil, err
 	}
 
 	apiParams := &ApiParams{}
-	err = yaml.Unmarshal([]byte(str), &apiParams)
+	err = yaml.Unmarshal([]byte(fileContent), &apiParams)
 	if err != nil {
 		return nil, err
 	}
 
-	return apiParams, nil
+	return apiParams, err
 }
 
-// LoadApiParamsFromFile loads a configuration YAML file located in path. It returns an error or a valid ApiParams
-func LoadApiParamsFromFile(path string) (*ApiParams, error) {
-	r, err := os.Open(path)
+// LoadApiProductParamsFromFile loads an API Product project configuration YAML file located in path.
+//	It returns an error or a valid ApiProductParams
+func LoadApiProductParamsFromFile(path string) (*ApiProductParams, error) {
+	fileContent, err := getEnvSubstitutedFileContent(path)
 	if err != nil {
 		return nil, err
 	}
-	apiConfig, err := loadApiParams(r)
-	_ = r.Close()
 
-	return apiConfig, err
+	apiParams := &ApiProductParams{}
+	err = yaml.Unmarshal([]byte(fileContent), &apiParams)
+	if err != nil {
+		return nil, err
+	}
+
+	return apiParams, err
 }
 
 // ExtractAPIEndpointConfig extracts API endpoint information from a slice of byte b
