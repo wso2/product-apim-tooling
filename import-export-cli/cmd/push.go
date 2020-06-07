@@ -19,6 +19,7 @@
 package cmd
 
 import (
+	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/git"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 
@@ -47,7 +48,16 @@ var PushCmd = &cobra.Command{
 	Example: pushCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + pushCmdLiteral + " called")
-		git.GetChangedFiles();
+		environment := "dev"
+		credential, err := getCredentials(environment)
+		if err != nil {
+			utils.HandleErrorAndExit("Error getting credentials", err)
+		}
+		accessOAuthToken, err := credentials.GetOAuthAccessToken(credential, environment)
+		if err != nil {
+			utils.HandleErrorAndExit("Error while getting an access token for importing API", err)
+		}
+		git.GetChangedFiles(accessOAuthToken, environment);
 	},
 }
 

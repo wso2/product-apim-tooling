@@ -16,7 +16,7 @@
 * under the License.
  */
 
-package cmd
+package impl
 
 import (
 	"net/http"
@@ -88,7 +88,7 @@ func TestNewFileUploadRequest(t *testing.T) {
 	extraParams := map[string]string{}
 	filePath := filepath.FromSlash("testdata/sampleapi.zip")
 	accessToken := "access-token"
-	_, err := NewFileUploadRequest(server.URL, http.MethodPost, extraParams, "file", filePath, accessToken)
+	_, err := newFileUploadRequest(server.URL, http.MethodPost, extraParams, "file", filePath, accessToken)
 	if err != nil {
 		t.Errorf("Error: %s\n", err.Error())
 	}

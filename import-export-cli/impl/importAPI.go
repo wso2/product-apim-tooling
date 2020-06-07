@@ -16,7 +16,7 @@
 * under the License.
  */
 
-package cmd
+package impl
 
 import (
 	"bytes"
@@ -45,50 +45,12 @@ import (
 	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 
 	"github.com/Jeffail/gabs"
-	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 var (
-	importAPIFile                string
-	importEnvironment            string
-	importAPICmdPreserveProvider bool
-	importAPIUpdate              bool
-	importAPIParamsFile          string
-	importAPISkipCleanup         bool
 	reApiName                    = regexp.MustCompile(`[~!@#;:%^*()+={}|\\<>"',&/$]`)
 )
-
-const (
-	// ImportAPI command related usage info
-	DefaultAPIMParamsFileName = "api_params.yaml"
-	importAPICmdLiteral       = "import-api"
-	importAPICmdShortDesc     = "Import API"
-	importAPICmdLongDesc      = "Import an API to an environment"
-)
-
-const importAPICmdExamples = utils.ProjectName + ` ` + importAPICmdLiteral + ` -f qa/TwitterAPI.zip -e dev
-` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f staging/FacebookAPI.zip -e production
-` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f ~/myapi -e production --update
-` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f ~/myapi -e production --update
-NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory`
-
-// ImportAPICmd represents the importAPI command
-var ImportAPICmd = &cobra.Command{
-	Use: importAPICmdLiteral + " --file <PATH_TO_API> --environment " +
-		"<ENVIRONMENT>",
-	Short:   importAPICmdShortDesc,
-	Long:    importAPICmdLongDesc,
-	Example: importAPICmdExamples,
-	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + importAPICmdLiteral + " called")
-		err := ImportAPI(importEnvironment, importAPIFile, importAPIParamsFile, importAPIUpdate, importAPICmdPreserveProvider)
-		if err != nil {
-			utils.HandleErrorAndExit("Error importing API", err)
-			return
-		}
-	},
-}
 
 // extractAPIDefinition extracts API information from jsonContent
 func extractAPIDefinition(jsonContent []byte) (*v2.APIDefinition, error) {
@@ -323,10 +285,10 @@ func extractArchive(src, dest string) (string, error) {
 // If a path is provided search ends looking up at that path
 func resolveAPIParamsPath(importPath, paramPath string) (string, error) {
 	utils.Logln(utils.LogPrefixInfo + "Scanning for parameters file")
-	if paramPath == DefaultAPIMParamsFileName {
+	if paramPath == utils.ParamFileAPI {
 		// look in importpath
 		if stat, err := os.Stat(importPath); err == nil && stat.IsDir() {
-			loc := filepath.Join(importPath, DefaultAPIMParamsFileName)
+			loc := filepath.Join(importPath, utils.ParamFileAPI)
 			utils.Logln(utils.LogPrefixInfo+"Scanning for", loc)
 			if info, err := os.Stat(loc); err == nil && !info.IsDir() {
 				// found api_params.yml in the importpath
@@ -336,7 +298,7 @@ func resolveAPIParamsPath(importPath, paramPath string) (string, error) {
 
 		// look in the basepath of importPath
 		base := filepath.Dir(importPath)
-		fp := filepath.Join(base, DefaultAPIMParamsFileName)
+		fp := filepath.Join(base, utils.ParamFileAPI)
 		utils.Logln(utils.LogPrefixInfo+"Scanning for", fp)
 		if info, err := os.Stat(fp); err == nil && !info.IsDir() {
 			// found api_params.yml in the base path
@@ -349,7 +311,7 @@ func resolveAPIParamsPath(importPath, paramPath string) (string, error) {
 			return "", err
 		}
 		utils.Logln(utils.LogPrefixInfo+"Scanning for", wd)
-		fp = filepath.Join(wd, DefaultAPIMParamsFileName)
+		fp = filepath.Join(wd, utils.ParamFileAPI)
 		if info, err := os.Stat(fp); err == nil && !info.IsDir() {
 			// found api_params.yml in the cwd
 			return fp, nil
@@ -357,7 +319,7 @@ func resolveAPIParamsPath(importPath, paramPath string) (string, error) {
 
 		// no luck, it means paramPath is missing
 		return "", fmt.Errorf("could not find %s. Please check %s exists in basepath of "+
-			"import location or current working directory", DefaultAPIMParamsFileName, DefaultAPIMParamsFileName)
+			"import location or current working directory", utils.ParamFileAPI, utils.ParamFileAPI)
 	} else {
 		if info, err := os.Stat(paramPath); err == nil && !info.IsDir() {
 			return paramPath, nil
@@ -534,10 +496,9 @@ func injectParamsToAPI(importPath, paramsPath, importEnvironment string) error {
 }
 
 // getApiID returns id of the API by using apiInfo which contains name and version as info
-func getApiID(name, version, environment, accessOAuthToken string) (string, error) {
+func getApiID(accessOAuthToken, environment, name, version string) (string, error) {
 	apiQuery := fmt.Sprintf("name:%s version:%s", name, version)
-	count, apis, err := GetAPIList(url.QueryEscape(apiQuery), "", accessOAuthToken,
-		utils.GetApiListEndpointOfEnv(environment, utils.MainConfigFilePath))
+	count, apis, err := GetAPIList(accessOAuthToken, environment, url.QueryEscape(apiQuery), "")
 	if err != nil {
 		return "", err
 	}
@@ -701,16 +662,18 @@ func validateApiDefinition(def *v2.APIDefinition) error {
 	return nil
 }
 
-// NewFileUploadRequest forms an HTTP request
+// newFileUploadRequest forms an HTTP request
 // Helper function for forming multi-part form data
 // Returns the formed http request and errors
-func NewFileUploadRequest(uri string, method string, params map[string]string, paramName, path,
+func newFileUploadRequest(uri string, method string, params map[string]string, paramName, path,
 	accessToken string) (*http.Request, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
@@ -729,6 +692,9 @@ func NewFileUploadRequest(uri string, method string, params map[string]string, p
 	}
 
 	request, err := http.NewRequest(method, uri, body)
+	if err != nil {
+		return nil, err
+	}
 	request.Header.Add(utils.HeaderAuthorization, utils.HeaderValueAuthBearerPrefix+" "+accessToken)
 	request.Header.Add(utils.HeaderContentType, writer.FormDataContentType())
 	request.Header.Add(utils.HeaderAccept, "*/*")
@@ -739,7 +705,7 @@ func NewFileUploadRequest(uri string, method string, params map[string]string, p
 
 // importAPI imports an API to the API manager
 func importAPI(endpoint, httpMethod, filePath, accessToken string, extraParams map[string]string) error {
-	req, err := NewFileUploadRequest(endpoint, httpMethod, extraParams, "file",
+	req, err := newFileUploadRequest(endpoint, httpMethod, extraParams, "file",
 		filePath, accessToken)
 	if err != nil {
 		return err
@@ -792,12 +758,8 @@ func importAPI(endpoint, httpMethod, filePath, accessToken string, extraParams m
 }
 
 // ImportAPI function is used with import-api command
-func ImportAPI(importEnvironment, importPath, apiParamsPath string, importAPIUpdate, preserveProvider bool) error {
-	credential, err := getCredentials(importEnvironment)
-	if err != nil {
-		utils.HandleErrorAndExit("Error getting credentials", err)
-	}
-
+func ImportAPI(accessOAuthToken, importEnvironment, importPath, apiParamsPath string, importAPIUpdate, preserveProvider,
+		importAPISkipCleanup bool) error {
 	exportDirectory := filepath.Join(utils.ExportDirectory, utils.ExportedApisDirName)
 	adminEndpoint := utils.GetAdminEndpointOfEnv(importEnvironment, utils.MainConfigFilePath)
 	resolvedApiFilePath, err := resolveImportFilePath(importPath, exportDirectory)
@@ -838,7 +800,7 @@ func ImportAPI(importEnvironment, importPath, apiParamsPath string, importAPIUpd
 
 	utils.Logln(utils.LogPrefixInfo + "Attempting to inject parameters to the API from api_params.yaml (if exists)")
 	paramsPath, err := resolveAPIParamsPath(resolvedApiFilePath, apiParamsPath)
-	if err != nil && apiParamsPath != DefaultAPIMParamsFileName && apiParamsPath != "" {
+	if err != nil && apiParamsPath != utils.ParamFileAPI && apiParamsPath != "" {
 		return err
 	}
 	if paramsPath != "" {
@@ -920,30 +882,20 @@ func ImportAPI(importEnvironment, importPath, apiParamsPath string, importAPIUpd
 
 	updateAPI := false
 	if importAPIUpdate {
-		accessOAuthToken, err := credentials.GetOAuthAccessToken(credential, importEnvironment)
-		if err != nil {
-			return err
-		}
-
 		// check for API existence
-		id, err := getApiID(apiInfo.ID.APIName, apiInfo.ID.Version, importEnvironment, accessOAuthToken)
+		id, err := getApiID(accessOAuthToken, importEnvironment, apiInfo.ID.APIName, apiInfo.ID.Version)
 		if err != nil {
 			return err
 		}
 
 		if id == "" {
-			fmt.Println("The specified API was not found.")
-			fmt.Printf("Creating: %s %s\n", apiInfo.ID.APIName, apiInfo.ID.Version)
+			utils.Logln("The specified API was not found.")
+			utils.Logln("Creating: %s %s\n", apiInfo.ID.APIName, apiInfo.ID.Version)
 		} else {
-			fmt.Println("Existing API found, attempting to update it...")
-			fmt.Println("API ID:", id)
+			utils.Logln("Existing API found, attempting to update it...")
+			utils.Logln("API ID:", id)
 			updateAPI = true
 		}
-	}
-
-	accessOAuthToken, err := credentials.GetOAuthAccessToken(credential, importEnvironment)
-	if err != nil {
-		utils.HandleErrorAndExit("Error getting OAuth Tokens", err)
 	}
 	extraParams := map[string]string{}
 	httpMethod := http.MethodPost
@@ -958,24 +910,4 @@ func ImportAPI(importEnvironment, importPath, apiParamsPath string, importAPIUpd
 
 	err = importAPI(adminEndpoint, httpMethod, apiFilePath, accessOAuthToken, extraParams)
 	return err
-}
-
-// init using Cobra
-func init() {
-	RootCmd.AddCommand(ImportAPICmd)
-	ImportAPICmd.Flags().StringVarP(&importAPIFile, "file", "f", "",
-		"Name of the API to be imported")
-	ImportAPICmd.Flags().StringVarP(&importEnvironment, "environment", "e",
-		"", "Environment from the which the API should be imported")
-	ImportAPICmd.Flags().BoolVar(&importAPICmdPreserveProvider, "preserve-provider", true,
-		"Preserve existing provider of API after importing")
-	ImportAPICmd.Flags().BoolVarP(&importAPIUpdate, "update", "", false, "Update an "+
-		"existing API or create a new API")
-	ImportAPICmd.Flags().StringVarP(&importAPIParamsFile, "params", "", DefaultAPIMParamsFileName,
-		"Provide a API Manager params file")
-	ImportAPICmd.Flags().BoolVarP(&importAPISkipCleanup, "skipCleanup", "", false, "Leave "+
-		"all temporary files created during import process")
-	// Mark required flags
-	_ = ImportAPICmd.MarkFlagRequired("environment")
-	_ = ImportAPICmd.MarkFlagRequired("file")
 }

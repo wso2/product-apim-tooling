@@ -21,7 +21,7 @@ package git
 import (
     "bytes"
     "fmt"
-    "github.com/wso2/product-apim-tooling/import-export-cli/cmd"
+    "github.com/wso2/product-apim-tooling/import-export-cli/impl"
     "github.com/wso2/product-apim-tooling/import-export-cli/specs/params"
     "github.com/wso2/product-apim-tooling/import-export-cli/utils"
     "io"
@@ -33,7 +33,7 @@ import (
     "strings"
 )
 
-func GetChangedFiles() {
+func GetChangedFiles(accessToken, environment string) {
     changedFiles, _ := executeGitCommand("diff", "--name-only")
     changedFileList := strings.Split(changedFiles,"\n")
 
@@ -46,19 +46,23 @@ func GetChangedFiles() {
         logChangedFiles(changedFileList)
     }
 
-    pathInfoMap := make(map[string]*params.ProjectParams)
-    updatedProjects := make(map[string][]*params.ProjectParams)
+    changedPathInfoMap := make(map[string]*params.ProjectParams)
+    updatedProjectsPerType := make(map[string][]*params.ProjectParams)
+    updatedProjectsPerProjectPath := make(map[string]*params.ProjectParams)
 
     var totalProjectsToUpdate = 0
     for _, changedFile := range changedFileList {
         projectParam := getProjectInfoFromProjectFile("/home/malintha/wso2apim/cur/apictl/gitint/repo2",
-            changedFile, pathInfoMap)
+            changedFile, changedPathInfoMap)
         if projectParam.Type != utils.ProjectTypeNone {
-            if updatedProjects[projectParam.Type] == nil {
-                updatedProjects[projectParam.Type] = []*params.ProjectParams{}
+            if updatedProjectsPerType[projectParam.Type] == nil {
+                updatedProjectsPerType[projectParam.Type] = []*params.ProjectParams{}
             }
-            updatedProjects[projectParam.Type] = append(updatedProjects[projectParam.Type], projectParam)
-            totalProjectsToUpdate++
+            if updatedProjectsPerProjectPath[projectParam.BasePath] == nil {
+                updatedProjectsPerProjectPath[projectParam.BasePath] = projectParam
+                updatedProjectsPerType[projectParam.Type] = append(updatedProjectsPerType[projectParam.Type], projectParam)
+                totalProjectsToUpdate++
+            }
         }
     }
 
@@ -67,26 +71,22 @@ func GetChangedFiles() {
         return
     }
 
-    fmt.Println("Updating Projects: " + strconv.Itoa(totalProjectsToUpdate))
-    for projectType, projectParams := range updatedProjects {
+    fmt.Println("Updating Projects (" + strconv.Itoa(totalProjectsToUpdate) + ")..." )
+    for projectType, projectParams := range updatedProjectsPerType {
         if projectParams != nil && len(projectParams) > 0 {
-            fmt.Println(" - " + projectType + "(s) : " + strconv.Itoa(len(projectParams)))
             if projectType == utils.ProjectTypeApi {
-                for _, projectParam := range projectParams {
+                for i, projectParam := range projectParams {
                     importParams := projectParam.ApiParams.Import
-                    fmt.Print("\t" + projectParam.Name)
-                    err := cmd.ImportAPI("dev", projectParam.BasePath, "",
-                        importParams.Update, importParams.PreserveProvider)
+                    fmt.Println("\n" + strconv.Itoa(i + 1) + ": " + projectParam.Name + ": \t")
+                    err := impl.ImportAPI(accessToken, environment, projectParam.BasePath, "",
+                        importParams.Update, importParams.PreserveProvider, false)
                     if err != nil {
-                        fmt.Println("\terror... ", err)
+                        utils.Logln("\terror... ", err)
                     }
-                    fmt.Println("\tsuccess...")
                 }
             }
         }
     }
-
-
 }
 
 func logChangedFiles(changedFileList []string) {
