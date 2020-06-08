@@ -34,54 +34,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 
 	"github.com/Jeffail/gabs"
-	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 var (
-	importAPIProductFile                string
-	importAPIProductEnvironment         string
-	importAPIProductCmdPreserveProvider bool
-	importAPIs                          bool
-	importAPIProductUpdate              bool
-	importAPIsUpdate                    bool
-	importAPIProductSkipCleanup         bool
 	reApiProductName                    = regexp.MustCompile(`[~!@#;:%^*()+={}|\\<>"',&/$]`)
 )
-
-const (
-	// ImportAPIProduct command related usage info
-	importAPIProductCmdLiteral   = "api-product"
-	importAPIProductCmdShortDesc = "Import API Product"
-	importAPIProductCmdLongDesc  = "Import an API Product to an environment"
-)
-
-// ImportAPIProductCmd represents the importAPIProduct command
-var ImportAPIProductCmd = &cobra.Command{
-	Use: importAPIProductCmdLiteral + " (--file <path-to-api-product> --environment " +
-		"<environment-to-which-the-api-product-should-be-imported>)",
-	Short:   importAPIProductCmdShortDesc,
-	Long:    importAPIProductCmdLongDesc,
-	Example: importAPIProductCmdExamples,
-	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + importAPIProductCmdLiteral + " called")
-
-		cred, err := getCredentials(importAPIProductEnvironment)
-		if err != nil {
-			utils.HandleErrorAndExit("Error getting credentials", err)
-		}
-
-		err = ImportAPIProduct(cred, importAPIProductFile)
-		if err != nil {
-			utils.HandleErrorAndExit("Error importing API Product", err)
-			return
-		}
-	},
-}
 
 // extractAPIProductDefinition extracts API Product information from jsonContent
 func extractAPIProductDefinition(jsonContent []byte) (*v2.APIProductDefinition, error) {
@@ -143,9 +104,7 @@ func resolveImportAPIProductFilePath(file, defaultExportDirectory string) (strin
 func getApiProductID(name, version, environment, accessOAuthToken string) (string, error) {
 	apiProductQuery := fmt.Sprintf("name:%s version:%s", name, version)
 	apiProductQuery += " type:\"" + utils.DefaultApiProductType + "\""
-	// Unified Search endpoint from the config file to search API Products
-	unifiedSearchEndpoint := utils.GetUnifiedSearchEndpointOfEnv(importAPIProductEnvironment, utils.MainConfigFilePath)
-	count, apiProducts, err := GetAPIProductList(url.QueryEscape(apiProductQuery), "", accessOAuthToken, unifiedSearchEndpoint)
+	count, apiProducts, err := GetAPIProductList(accessOAuthToken, environment, url.QueryEscape(apiProductQuery), "")
 	if err != nil {
 		return "", err
 	}
@@ -256,7 +215,7 @@ func importAPIProduct(endpoint, httpMethod, filePath, accessToken string, extraP
 }
 
 // preProcessDependentAPIs pre processes dependent APIs
-func preProcessDependentAPIs(apiProductFilePath string) error {
+func preProcessDependentAPIs(apiProductFilePath, importEnvironment string) error {
 	// Check whether the APIs directory exists
 	apisDirectoryPath := apiProductFilePath + string(os.PathSeparator) + "APIs"
 	_, err := os.Stat(apisDirectoryPath)
@@ -282,7 +241,7 @@ func preProcessDependentAPIs(apiProductFilePath string) error {
 		// Check whether api_params.yaml file is available inside the particular API directory
 		if utils.IsFileExist(paramsPath) {
 			// Reading API params file and populate api.yaml
-			err := injectParamsToAPI(apiDirectoryPath, paramsPath, importAPIProductEnvironment)
+			err := injectParamsToAPI(apiDirectoryPath, paramsPath, importEnvironment)
 			if err != nil {
 				return err
 			}
@@ -292,9 +251,10 @@ func preProcessDependentAPIs(apiProductFilePath string) error {
 }
 
 // ImportAPIProduct function is used with import-api-product command
-func ImportAPIProduct(credential credentials.Credential, importPath string) error {
+func ImportAPIProduct(accessOAuthToken, importEnvironment, importPath string, importAPIs, importAPIsUpdate,
+		importAPIProductUpdate, importAPIProductPreserveProvider, importAPIProductSkipCleanup bool) error {
 	var exportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedApiProductsDirName)
-	adminEndpoint := utils.GetAdminEndpointOfEnv(importAPIProductEnvironment, utils.MainConfigFilePath)
+	adminEndpoint := utils.GetAdminEndpointOfEnv(importEnvironment, utils.MainConfigFilePath)
 	resolvedApiProductFilePath, err := resolveImportAPIProductFilePath(importPath, exportDirectory)
 	if err != nil {
 		return err
@@ -320,7 +280,7 @@ func ImportAPIProduct(credential credentials.Credential, importPath string) erro
 	apiProductFilePath := tmpPath
 
 	// Pre Process dependent APIs
-	err = preProcessDependentAPIs(apiProductFilePath)
+	err = preProcessDependentAPIs(apiProductFilePath, importEnvironment)
 	if err != nil {
 		return err
 	}
@@ -402,13 +362,8 @@ func ImportAPIProduct(credential credentials.Credential, importPath string) erro
 
 	updateAPIProduct := false
 	if importAPIsUpdate || importAPIProductUpdate {
-		accessOAuthToken, err := credentials.GetOAuthAccessToken(credential, importAPIProductEnvironment)
-		if err != nil {
-			return err
-		}
-
 		// Check for API Product existence
-		id, err := getApiProductID(apiProductInfo.ID.APIProductName, apiProductInfo.ID.Version, importAPIProductEnvironment, accessOAuthToken)
+		id, err := getApiProductID(apiProductInfo.ID.APIProductName, apiProductInfo.ID.Version, importEnvironment, accessOAuthToken)
 		if err != nil {
 			return err
 		}
@@ -424,13 +379,12 @@ func ImportAPIProduct(credential credentials.Credential, importPath string) erro
 		}
 	}
 
-	accessOAuthToken, err := credentials.GetOAuthAccessToken(credential, importAPIProductEnvironment)
 	if err != nil {
 		utils.HandleErrorAndExit("Error getting OAuth Tokens", err)
 	}
 	extraParams := map[string]string{}
 	httpMethod := http.MethodPost
-	adminEndpoint += "/import/api-product" + "?preserveProvider=" + strconv.FormatBool(importAPIProductCmdPreserveProvider)
+	adminEndpoint += "/import/api-product" + "?preserveProvider=" + strconv.FormatBool(importAPIProductPreserveProvider)
 
 	// If the user has specified import-apis flag or update-apis flag, importAPIs parameter should be passed as true
 	// because update is also an import task
