@@ -16,10 +16,10 @@
 * under the License.
  */
 
-package tmp
+package cmd
 
 import (
-    "fmt"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"

@@ -16,15 +16,15 @@
 * under the License.
  */
 
-package tmp
+package cmd
 
 import (
-    "crypto/tls"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
-    "github.com/wso2/product-apim-tooling/import-export-cli/cmd"
-    "io/ioutil"
+	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -61,10 +61,10 @@ const (
 	importAPIProductCmdLongDesc  = "Import an API Product to an environment"
 )
 
-const importAPIProductCmdExamples = utils.ProjectName + ` ` + cmd.importCmdLiteral + ` ` + importAPIProductCmdLiteral + ` -f qa/LeasingAPIProduct.zip -e dev
-` + utils.ProjectName + ` ` + cmd.importCmdLiteral + ` ` + importAPIProductCmdLiteral + ` -f staging/CreditAPIProduct.zip -e production --update-api-product
-` + utils.ProjectName + ` ` + cmd.importCmdLiteral + ` ` + importAPIProductCmdLiteral + ` -f ~/myapiproduct -e production
-` + utils.ProjectName + ` ` + cmd.importCmdLiteral + ` ` + importAPIProductCmdLiteral + ` -f ~/myapiproduct -e production --update-api-product --update-apis
+const importAPIProductCmdExamples = utils.ProjectName + ` ` + importCmdLiteral + ` ` + importAPIProductCmdLiteral + ` -f qa/LeasingAPIProduct.zip -e dev
+` + utils.ProjectName + ` ` + importCmdLiteral + ` ` + importAPIProductCmdLiteral + ` -f staging/CreditAPIProduct.zip -e production --update-api-product
+` + utils.ProjectName + ` ` + importCmdLiteral + ` ` + importAPIProductCmdLiteral + ` -f ~/myapiproduct -e production
+` + utils.ProjectName + ` ` + importCmdLiteral + ` ` + importAPIProductCmdLiteral + ` -f ~/myapiproduct -e production --update-api-product --update-apis
 NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory`
 
 // ImportAPIProductCmd represents the importAPIProduct command
@@ -78,7 +78,7 @@ var ImportAPIProductCmd = &cobra.Command{
 		utils.Logln(utils.LogPrefixInfo + importAPIProductCmdLiteral + " called")
 		var apiProductsExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedApiProductsDirName)
 
-		cred, err := cmd.getCredentials(importAPIProductEnvironment)
+		cred, err := getCredentials(importAPIProductEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
@@ -117,7 +117,7 @@ func getAPIProductDefinition(filePath string) (*v2.APIProductDefinition, []byte,
 
 	var buffer []byte
 	if info.IsDir() {
-		_, content, err := cmd.resolveYamlOrJson(path.Join(filePath, "Meta-information", "api"))
+		_, content, err := resolveYamlOrJson(path.Join(filePath, "Meta-information", "api"))
 		if err != nil {
 			return nil, nil, err
 		}
@@ -159,7 +159,7 @@ func getApiProductID(name, version, environment, accessOAuthToken string) (strin
 	apiProductQuery += " type:\"" + utils.DefaultApiProductType + "\""
 	// Unified Search endpoint from the config file to search API Products
 	unifiedSearchEndpoint := utils.GetUnifiedSearchEndpointOfEnv(importAPIProductEnvironment, utils.MainConfigFilePath)
-	count, apiProducts, err := cmd.GetAPIProductList(url.QueryEscape(apiProductQuery), "", accessOAuthToken, unifiedSearchEndpoint)
+	count, apiProducts, err := GetAPIProductList(url.QueryEscape(apiProductQuery), "", accessOAuthToken, unifiedSearchEndpoint)
 	if err != nil {
 		return "", err
 	}
@@ -192,19 +192,19 @@ func populateApiProductWithDefaults(def *v2.APIProductDefinition) (dirty bool) {
 // validateApiProductDefinition validates an API Product against basic rules
 func validateApiProductDefinition(def *v2.APIProductDefinition) error {
 	utils.Logln(utils.LogPrefixInfo + "Validating API Product")
-	if cmd.isEmpty(def.ID.APIProductName) {
+	if isEmpty(def.ID.APIProductName) {
 		return errors.New("apiProductName is required")
 	}
 	if reApiProductName.MatchString(def.ID.APIProductName) {
 		return errors.New(`apiProductName contains one or more illegal characters (~!@#;:%^*()+={}|\\<>"',&\/$)`)
 	}
-	if cmd.isEmpty(def.ID.Version) {
+	if isEmpty(def.ID.Version) {
 		return errors.New("version is required")
 	}
-	if cmd.isEmpty(def.Context) {
+	if isEmpty(def.Context) {
 		return errors.New("context is required")
 	}
-	if cmd.isEmpty(def.ContextTemplate) {
+	if isEmpty(def.ContextTemplate) {
 		return errors.New("contextTemplate is required")
 	}
 	if !strings.HasPrefix(def.Context, "/") {
@@ -218,7 +218,7 @@ func validateApiProductDefinition(def *v2.APIProductDefinition) error {
 
 // importAPIProduct imports an API Product to the API manager
 func importAPIProduct(endpoint, httpMethod, filePath, accessToken string, extraParams map[string]string) error {
-	req, err := cmd.NewFileUploadRequest(endpoint, httpMethod, extraParams, "file",
+	req, err := impl.NewFileUploadRequest(endpoint, httpMethod, extraParams, "file",
 		filePath, accessToken)
 	if err != nil {
 		return err
@@ -286,17 +286,17 @@ func preProcessDependentAPIs(apiProductFilePath string) error {
 		apiDirectoryPath := apisDirectoryPath + string(os.PathSeparator) + item.Name()
 
 		// Substitutes environment variables in the project files
-		err = cmd.replaceEnvVariables(apiDirectoryPath)
+		err = replaceEnvVariables(apiDirectoryPath)
 		if err != nil {
 			return err
 		}
 
 		utils.Logln(utils.LogPrefixInfo + "Attempting to inject parameters to the API from api_params.yaml (if exists)")
-		paramsPath := apiDirectoryPath + string(os.PathSeparator) + cmd.DefaultAPIMParamsFileName
+		paramsPath := apiDirectoryPath + string(os.PathSeparator) + DefaultAPIMParamsFileName
 		// Check whether api_params.yaml file is available inside the particular API directory
 		if utils.IsFileExist(paramsPath) {
 			// Reading API params file and populate api.yaml
-			err := cmd.injectParamsToAPI(apiDirectoryPath, paramsPath, importAPIProductEnvironment)
+			err := injectParamsToAPI(apiDirectoryPath, paramsPath, importAPIProductEnvironment)
 			if err != nil {
 				return err
 			}
@@ -314,7 +314,7 @@ func ImportAPIProduct(credential credentials.Credential, importPath, adminEndpoi
 	utils.Logln(utils.LogPrefixInfo+"API Product Location:", resolvedApiProductFilePath)
 
 	utils.Logln(utils.LogPrefixInfo + "Creating workspace")
-	tmpPath, err := cmd.getTempApiDirectory(resolvedApiProductFilePath)
+	tmpPath, err := getTempApiDirectory(resolvedApiProductFilePath)
 	if err != nil {
 		return err
 	}
@@ -338,7 +338,7 @@ func ImportAPIProduct(credential credentials.Credential, importPath, adminEndpoi
 	}
 
 	utils.Logln(utils.LogPrefixInfo + "Substituting environment variables in API Product files...")
-	err = cmd.replaceEnvVariables(apiProductFilePath)
+	err = replaceEnvVariables(apiProductFilePath)
 	if err != nil {
 		return err
 	}
@@ -467,7 +467,7 @@ func ImportAPIProduct(credential credentials.Credential, importPath, adminEndpoi
 
 // init using Cobra
 func init() {
-	cmd.ImportCmd.AddCommand(ImportAPIProductCmd)
+	ImportCmd.AddCommand(ImportAPIProductCmd)
 	ImportAPIProductCmd.Flags().StringVarP(&importAPIProductFile, "file", "f", "",
 		"Name of the API Product to be imported")
 	ImportAPIProductCmd.Flags().StringVarP(&importAPIProductEnvironment, "environment", "e",

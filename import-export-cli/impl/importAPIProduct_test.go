@@ -16,7 +16,7 @@
 * under the License.
  */
 
-package cmd
+package impl
 
 import (
 	"fmt"

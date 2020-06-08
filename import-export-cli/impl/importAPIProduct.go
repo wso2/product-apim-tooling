@@ -16,7 +16,7 @@
 * under the License.
  */
 
-package cmd
+package impl
 
 import (
 	"crypto/tls"
@@ -60,12 +60,6 @@ const (
 	importAPIProductCmdLongDesc  = "Import an API Product to an environment"
 )
 
-const importAPIProductCmdExamples = utils.ProjectName + ` ` + importCmdLiteral + ` ` + importAPIProductCmdLiteral + ` -f qa/LeasingAPIProduct.zip -e dev
-` + utils.ProjectName + ` ` + importCmdLiteral + ` ` + importAPIProductCmdLiteral + ` -f staging/CreditAPIProduct.zip -e production --update-api-product
-` + utils.ProjectName + ` ` + importCmdLiteral + ` ` + importAPIProductCmdLiteral + ` -f ~/myapiproduct -e production
-` + utils.ProjectName + ` ` + importCmdLiteral + ` ` + importAPIProductCmdLiteral + ` -f ~/myapiproduct -e production --update-api-product --update-apis
-NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory`
-
 // ImportAPIProductCmd represents the importAPIProduct command
 var ImportAPIProductCmd = &cobra.Command{
 	Use: importAPIProductCmdLiteral + " (--file <path-to-api-product> --environment " +
@@ -75,25 +69,18 @@ var ImportAPIProductCmd = &cobra.Command{
 	Example: importAPIProductCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + importAPIProductCmdLiteral + " called")
-		var apiProductsExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedApiProductsDirName)
 
 		cred, err := getCredentials(importAPIProductEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
 
-		executeImportAPIProductCmd(cred, apiProductsExportDirectory)
+		err = ImportAPIProduct(cred, importAPIProductFile)
+		if err != nil {
+			utils.HandleErrorAndExit("Error importing API Product", err)
+			return
+		}
 	},
-}
-
-// executeImportAPIProductCmd executes the import api product command
-func executeImportAPIProductCmd(credential credentials.Credential, exportDirectory string) {
-	adminEndpoint := utils.GetAdminEndpointOfEnv(importAPIProductEnvironment, utils.MainConfigFilePath)
-	err := ImportAPIProduct(credential, importAPIProductFile, adminEndpoint, exportDirectory)
-	if err != nil {
-		utils.HandleErrorAndExit("Error importing API Product", err)
-		return
-	}
 }
 
 // extractAPIProductDefinition extracts API Product information from jsonContent
@@ -291,7 +278,7 @@ func preProcessDependentAPIs(apiProductFilePath string) error {
 		}
 
 		utils.Logln(utils.LogPrefixInfo + "Attempting to inject parameters to the API from api_params.yaml (if exists)")
-		paramsPath := apiDirectoryPath + string(os.PathSeparator) + DefaultAPIMParamsFileName
+		paramsPath := apiDirectoryPath + string(os.PathSeparator) + utils.ParamFileAPI
 		// Check whether api_params.yaml file is available inside the particular API directory
 		if utils.IsFileExist(paramsPath) {
 			// Reading API params file and populate api.yaml
@@ -305,7 +292,9 @@ func preProcessDependentAPIs(apiProductFilePath string) error {
 }
 
 // ImportAPIProduct function is used with import-api-product command
-func ImportAPIProduct(credential credentials.Credential, importPath, adminEndpoint, exportDirectory string) error {
+func ImportAPIProduct(credential credentials.Credential, importPath string) error {
+	var exportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedApiProductsDirName)
+	adminEndpoint := utils.GetAdminEndpointOfEnv(importAPIProductEnvironment, utils.MainConfigFilePath)
 	resolvedApiProductFilePath, err := resolveImportAPIProductFilePath(importPath, exportDirectory)
 	if err != nil {
 		return err
@@ -464,24 +453,3 @@ func ImportAPIProduct(credential credentials.Credential, importPath, adminEndpoi
 	return err
 }
 
-// init using Cobra
-func init() {
-	ImportCmd.AddCommand(ImportAPIProductCmd)
-	ImportAPIProductCmd.Flags().StringVarP(&importAPIProductFile, "file", "f", "",
-		"Name of the API Product to be imported")
-	ImportAPIProductCmd.Flags().StringVarP(&importAPIProductEnvironment, "environment", "e",
-		"", "Environment from the which the API Product should be imported")
-	ImportAPIProductCmd.Flags().BoolVar(&importAPIProductCmdPreserveProvider, "preserve-provider", true,
-		"Preserve existing provider of API Product after importing")
-	ImportAPIProductCmd.Flags().BoolVarP(&importAPIs, "import-apis", "", false, "Import "+
-		"dependent APIs associated with the API Product")
-	ImportAPIProductCmd.Flags().BoolVarP(&importAPIProductUpdate, "update-api-product", "", false, "Update an "+
-		"existing API Product or create a new API Product")
-	ImportAPIProductCmd.Flags().BoolVarP(&importAPIsUpdate, "update-apis", "", false, "Update existing dependent APIs "+
-		"associated with the API Product")
-	ImportAPIProductCmd.Flags().BoolVarP(&importAPIProductSkipCleanup, "skipCleanup", "", false, "Leave "+
-		"all temporary files created during import process")
-	// Mark required flags
-	_ = ImportAPIProductCmd.MarkFlagRequired("environment")
-	_ = ImportAPIProductCmd.MarkFlagRequired("file")
-}
