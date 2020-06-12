@@ -4,9 +4,9 @@ Delete an API/APIProduct/Application in an environment
 
 ### Synopsis
 
-Delete an API available in the environment specified by flag (--environment, -e) in default mode/
-Delete an API Product available in the environment specified by flag (--environment, -e) in default mode/
-Delete an Application of a specific user in the environment specified by flag (--environment, -e) in default mode/
+Delete an API available in the environment specified by flag (--environment, -e) in default mode
+Delete an API Product available in the environment specified by flag (--environment, -e) in default mode
+Delete an Application of a specific user in the environment specified by flag (--environment, -e) in default mode
 Delete resources by filenames, stdin, resources and names, or by resources and label selector in kubernetes mode
 
 ```
