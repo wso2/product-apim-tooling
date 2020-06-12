@@ -91,14 +91,21 @@ type APIImportParams struct {
 }
 
 type APIProductImportParams struct {
+	ImportAPIs       bool `yaml:"importApis"`
+	UpdateAPIs       bool `yaml:"updateApis"`
+	UpdateAPIProduct bool `yaml:"updateApiProduct"`
+	PreserveProvider bool `yaml:"preserveProvider"`
 }
 
 type ProjectParams struct {
-	Type             string
-	BasePath		 string
-	Name 			 string
-	ApiParams        *ApiParams
-	ApiProductParams *ApiProductParams
+	Type                     string
+	AbsolutePath             string
+	RelativePath             string
+	Name                     string
+	FailedDuringPreviousPush bool
+	Deleted                  bool
+	ApiParams                *ApiParams
+	ApiProductParams         *ApiProductParams
 }
 // ---------------- End of Structs for Project Details ---------------------------------
 

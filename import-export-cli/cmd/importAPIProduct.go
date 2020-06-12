@@ -62,11 +62,11 @@ var ImportAPIProductCmd = &cobra.Command{
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
-		accessOAuthToken, err := credentials.GetOAuthAccessToken(cred, importEnvironment)
+		accessOAuthToken, err := credentials.GetOAuthAccessToken(cred, importAPIProductEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while getting an access token for importing API Product", err)
 		}
-		err = impl.ImportAPIProduct(accessOAuthToken, importEnvironment, importAPIProductFile, importAPIs, importAPIUpdate,
+		err = impl.ImportAPIProduct(accessOAuthToken, importAPIProductEnvironment, importAPIProductFile, importAPIs, importAPIsUpdate,
 				importAPIProductUpdate, importAPIProductCmdPreserveProvider, importAPIProductSkipCleanup)
 		if err != nil {
 			utils.HandleErrorAndExit("Error importing API Product", err)

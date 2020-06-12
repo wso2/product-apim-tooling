@@ -370,11 +370,11 @@ func ImportAPIProduct(accessOAuthToken, importEnvironment, importPath string, im
 
 		if id == "" {
 			updateAPIProduct = false
-			fmt.Println("The specified API Product was not found.")
-			fmt.Printf("Creating: %s %s\n", apiProductInfo.ID.APIProductName, apiProductInfo.ID.Version)
+			utils.Logln("The specified API Product was not found.")
+			utils.Logln("Creating: %s %s\n", apiProductInfo.ID.APIProductName, apiProductInfo.ID.Version)
 		} else {
-			fmt.Println("Existing API Product found, attempting to update it...")
-			fmt.Println("API Product ID:", id)
+			utils.Logln("Existing API Product found, attempting to update it...")
+			utils.Logln("API Product ID:", id)
 			updateAPIProduct = true
 		}
 	}

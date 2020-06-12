@@ -280,7 +280,7 @@ func extractArchive(src, dest string) (string, error) {
 }
 
 // resolveAPIParamsPath resolves api_params.yaml path
-// First it will look at BasePath of the import path (the last directory)
+// First it will look at AbsolutePath of the import path (the last directory)
 // If not found it will look at current working directory
 // If a path is provided search ends looking up at that path
 func resolveAPIParamsPath(importPath, paramPath string) (string, error) {

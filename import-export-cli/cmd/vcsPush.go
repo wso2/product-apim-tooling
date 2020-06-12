@@ -19,12 +19,13 @@
 package cmd
 
 import (
+	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/git"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-
-	"github.com/spf13/cobra"
 )
+
+var flagVCSPushEnvName string           // name of the environment to be added
 
 // push command related usage Info
 const pushCmdLiteral = "push"
@@ -34,11 +35,7 @@ push an API Product available in the environment specified by flag (--environmen
 push an Application of a specific user in the environment specified by flag (--environment, -e) in default mode
 push resources by filenames, stdin, resources and names, or by resources and label selector in kubernetes mode`
 
-const pushCmdExamples = utils.ProjectName + ` ` + pushCmdLiteral + ` `  + ` -n TwitterAPI -v 1.0.0 -r admin -e dev
-` + utils.ProjectName + ` ` + pushCmdLiteral + ` ` + ` -n TwitterAPI -r admin -e dev 
-` + utils.ProjectName + ` ` + pushCmdLiteral + ` ` + ` -n TestApplication -o admin -e dev
-` + utils.ProjectName + ` ` + pushCmdLiteral + ` ` + ` petstore
-` + utils.ProjectName + ` ` + pushCmdLiteral + ` ` + ` -l name=myLabel`
+const pushCmdExamples = utils.ProjectName + ` ` + pushCmdLiteral + ` `  + ` -e dev`
 
 // pushCmd represents the push command
 var PushCmd = &cobra.Command{
@@ -48,19 +45,23 @@ var PushCmd = &cobra.Command{
 	Example: pushCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + pushCmdLiteral + " called")
-		environment := "dev"
-		credential, err := getCredentials(environment)
+		credential, err := getCredentials(flagVCSPushEnvName)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
-		accessOAuthToken, err := credentials.GetOAuthAccessToken(credential, environment)
+		accessOAuthToken, err := credentials.GetOAuthAccessToken(credential, flagVCSPushEnvName)
 		if err != nil {
-			utils.HandleErrorAndExit("Error while getting an access token for importing API", err)
+			utils.HandleErrorAndExit("Error while getting an access token for pushing the project(s)", err)
 		}
-		git.GetChangedFiles(accessOAuthToken, environment);
+		git.PushChangedFiles(accessOAuthToken, flagVCSPushEnvName);
 	},
 }
 
 func init() {
-	RootCmd.AddCommand(PushCmd)
+	VCSCmd.AddCommand(PushCmd)
+
+	PushCmd.Flags().StringVarP(&flagVCSPushEnvName, "environment", "e", "", "Name of the " +
+		"environment to push the project(s)")
+
+	_ = PushCmd.MarkFlagRequired("environment")
 }

@@ -18,5 +18,16 @@
 
 package git
 
+import (
+    "github.com/wso2/product-apim-tooling/import-export-cli/utils"
+    "path/filepath"
+)
+
 // Git Constants
 const Git = "git"
+const VCSConfigFileName = "vcs_config.yaml"
+
+const FromRevTypeLastAttempted = "last_attempted"
+const FromRevTypeLastSuccessful = "last_successful"
+
+var VCSConfigFilePath = filepath.Join(utils.ConfigDirPath, VCSConfigFileName)
