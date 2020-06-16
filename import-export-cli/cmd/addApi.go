@@ -44,6 +44,7 @@ var flagNamespace string
 var flagOverride bool
 var flagApiVersion string
 var flagApiMode string
+var flagApiEndPoint string
 
 const addApiCmdLiteral = "api"
 const addApiCmdShortDesc = "handle APIs in kubernetes cluster "
@@ -114,7 +115,7 @@ func handleAddApi(nameSuffix string) {
 
 	//create API
 	fmt.Println("creating API definition")
-	createAPI(flagApiName, flagNamespace, swaggerCmNames, flagReplicas, nameSuffix, balInterceptorsCmNames, flagOverride, javaInterceptorsCmNames, flagApiMode, flagApiVersion)
+	createAPI(flagApiName, flagNamespace, swaggerCmNames, flagReplicas, nameSuffix, balInterceptorsCmNames, flagOverride, javaInterceptorsCmNames, flagApiMode, flagApiVersion, flagApiEndPoint)
 }
 
 // validateAddApiCommand validates for required flags and if invalid print error and exit
@@ -169,7 +170,8 @@ func createConfigMapWithNamespace(configMapName string, filePath string, namespa
 	return nil
 }
 
-func createAPI(name string, namespace string, configMapNames []string, replicas int, timestamp string, balInterceptors []string, override bool, javaInterceptors []string, apiMode string, apiVersion string) {
+func createAPI(name string, namespace string, configMapNames []string, replicas int, timestamp string, balInterceptors []string, override bool, javaInterceptors []string, apiMode string, apiVersion string,
+	apiEndPoint string) {
 	//get API definition from file
 	apiConfigMapData, _ := box.Get("/kubernetes_resources/api_cr.yaml")
 	apiConfigMap := &wso2v1alpha1.API{}
@@ -183,6 +185,7 @@ func createAPI(name string, namespace string, configMapNames []string, replicas 
 	apiConfigMap.Spec.Definition.SwaggerConfigmapNames = configMapNames
 	apiConfigMap.Spec.Replicas = replicas
 	apiConfigMap.Spec.Override = override
+	apiConfigMap.Spec.ApiEndPoint = apiEndPoint
 
 	k8sOperation := k8sUtils.K8sCreate
 	k8sSaveConfig := true
@@ -207,6 +210,12 @@ func createAPI(name string, namespace string, configMapNames []string, replicas 
 	}
 	if apiVersion != "" {
 		apiConfigMap.Spec.Version = apiVersion
+	}
+	if apiEndPoint != "" {
+		apiConfigMap.Spec.ApiEndPoint = apiEndPoint
+	}
+	if replicas != 0 {
+		apiConfigMap.Status.Replicas = replicas
 	}
 
 	byteVal, errMarshal := yaml.Marshal(apiConfigMap)
@@ -334,6 +343,7 @@ func init() {
 	addApiCmd.Flags().StringVar(&flagNamespace, "namespace", "", "namespace of API")
 	addApiCmd.Flags().BoolVarP(&flagOverride, "override", "", false, "Property to override the existing docker image with same name and version")
 	addApiCmd.Flags().StringVarP(&flagApiVersion, "version", "v", "", "Property to override the existing docker image with same name and version")
+	addApiCmd.Flags().StringVarP(&flagApiEndPoint, "apiEndPoint", "a", "","")
 	addApiCmd.Flags().StringVarP(&flagApiMode, "mode", "m", "",
 		fmt.Sprintf("Property to override the deploying mode. Available modes: %v, %v", utils.PrivateJetModeConst, utils.SidecarModeConst))
 }
