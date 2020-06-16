@@ -422,6 +422,8 @@ github.com/wso2/k8s-apim-operator/apim-operator v0.0.0-20200316103033-a89a8f35bc
 github.com/wso2/k8s-apim-operator/apim-operator v0.0.0-20200316103033-a89a8f35bcf2/go.mod h1:8Ee65tUOf1I/qYkqsvgTPGWbIjpibmdOLoLsiKo3lN8=
 github.com/wso2/k8s-apim-operator/apim-operator v0.0.0-20200321092350-0205cf84c08c h1:91SLTYTcAke4WiXYM1akWCZiAOlhCISKBnJGQ/BovsQ=
 github.com/wso2/k8s-apim-operator/apim-operator v0.0.0-20200321092350-0205cf84c08c/go.mod h1:htsQYwyeclFmxPvIE/tpQRf6rGJ0ywR3A3jiEvRIdBc=
+github.com/wso2/product-apim-tooling v1.2.0 h1:HhH+8Hbn+7QKedoTcwa7wRWK8/jzZRil9XM0t5lc+K0=
+github.com/wso2/product-apim-tooling v3.1.3+incompatible h1:r7IODHoRuNZeKWvJ0KbuvmrdK7vDUy0xE/KYEELB5MU=
 go.opencensus.io v0.20.1/go.mod h1:6WKK9ahsWS3RSO+PY9ZHZUfv2irvY6gN279GOPZjmmk=
 go.opencensus.io v0.20.2/go.mod h1:6WKK9ahsWS3RSO+PY9ZHZUfv2irvY6gN279GOPZjmmk=
 go.opencensus.io v0.21.0/go.mod h1:mSImk1erAIZhrmZN+AvHh14ztQfjbGwt4TtuofqLduU=

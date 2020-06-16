@@ -19,13 +19,10 @@
 package cmd
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
-
-	"github.com/go-resty/resty"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
+	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
@@ -76,8 +73,7 @@ var DeleteAPICmd = &cobra.Command{
 func executeDeleteAPICmd(credential credentials.Credential) {
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, deleteAPIEnvironment)
 	if preCommandErr == nil {
-		deleteAPIEndpoint := utils.GetApiListEndpointOfEnv(deleteAPIEnvironment, utils.MainConfigFilePath)
-		resp, err := getDeleteAPIResponse(deleteAPIEndpoint, accessToken)
+		resp, err := impl.DeleteAPI(accessToken, deleteAPIEnvironment, deleteAPIName, deleteAPIVersion, deleteAPIProvider)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while deleting API ", err)
 		}
@@ -96,71 +92,6 @@ func executeDeleteAPICmd(credential credentials.Credential) {
 	} else {
 		// Error deleting API
 		fmt.Println("Error getting OAuth tokens while deleting API:" + preCommandErr.Error())
-	}
-}
-
-// getDeleteAPIResponse
-// @param deleteEndpoint : API Manager Publisher REST API Endpoint for the environment
-// @param accessToken : Access Token for the resource
-// @return response Response in the form of *resty.Response
-func getDeleteAPIResponse(deleteEndpoint, accessToken string) (*resty.Response, error) {
-	deleteEndpoint = utils.AppendSlashToString(deleteEndpoint)
-	apiId, err := getAPIId(accessToken)
-	if err != nil {
-		utils.HandleErrorAndExit("Error while getting API Id for deletion ", err)
-	}
-	url := deleteEndpoint + apiId
-	utils.Logln(utils.LogPrefixInfo+"DeleteAPI: URL:", url)
-	headers := make(map[string]string)
-	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
-
-	resp, err := utils.InvokeDELETERequest(url, headers)
-
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
-// Get the ID of an API if available
-// @param accessToken : Token to call the Publisher Rest API
-// @return apiId, error
-func getAPIId(accessToken string) (string, error) {
-	// Unified Search endpoint from the config file to search APIs
-	unifiedSearchEndpoint := utils.GetUnifiedSearchEndpointOfEnv(deleteAPIEnvironment, utils.MainConfigFilePath)
-
-	// Prepping headers
-	headers := make(map[string]string)
-	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
-	var queryVal string
-	queryVal = "name:\"" + deleteAPIName + "\" version:\"" + deleteAPIVersion + "\""
-	if deleteAPIProvider != "" {
-		queryVal = queryVal + " provider:\"" + deleteAPIProvider + "\""
-	}
-	resp, err := utils.InvokeGETRequestWithQueryParam("query", queryVal, unifiedSearchEndpoint, headers)
-	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
-		// 200 OK or 201 Created
-		apiData := &utils.ApiSearch{}
-		data := []byte(resp.Body())
-		err = json.Unmarshal(data, &apiData)
-		if apiData.Count != 0 {
-			apiId := apiData.List[0].ID
-			return apiId, err
-		}
-		if deleteAPIProvider != "" {
-			return "", errors.New("Requested API is not available in the Publisher. API: " + deleteAPIName +
-				" Version: " + deleteAPIVersion + " Provider: " + deleteAPIProvider)
-		}
-		return "", errors.New("Requested API is not available in the Publisher. API: " + deleteAPIName +
-			" Version: " + deleteAPIVersion)
-	} else {
-		utils.Logf("Error: %s\n", resp.Error())
-		utils.Logf("Body: %s\n", resp.Body())
-		if resp.StatusCode() == http.StatusUnauthorized {
-			// 401 Unauthorized
-			return "", fmt.Errorf("Authorization failed while searching API: " + deleteAPIName)
-		}
-		return "", errors.New("Request didn't respond 200 OK for searching APIs. Status: " + resp.Status())
 	}
 }
 

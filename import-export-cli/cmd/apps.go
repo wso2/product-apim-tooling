@@ -19,17 +19,14 @@
 package cmd
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
+	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 	"io"
-	"net/http"
 	"os"
 	"text/template"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 
-	"github.com/go-resty/resty"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/formatter"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -130,58 +127,13 @@ func executeAppsCmd(credential credentials.Credential, appOwner string) {
 		utils.HandleErrorAndExit("Error calling '"+appsCmdLiteral+"'", err)
 	}
 
-	applicationListEndpoint := utils.GetAdminApplicationListEndpointOfEnv(listAppsCmdEnvironment, utils.MainConfigFilePath)
-	_, apps, err := GetApplicationList(appOwner, accessToken, applicationListEndpoint, listAppsCmdLimit)
+	_, apps, err := impl.GetApplicationListFromEnv(accessToken, listAppsCmdEnvironment, appOwner, listAppsCmdLimit)
 
 	if err == nil {
 		// Printing the list of available Applications
 		printApps(apps, listAppsCmdFormat)
 	} else {
 		utils.Logln(utils.LogPrefixError+"Getting List of Applications", err)
-	}
-}
-
-//Get Application List
-// @param accessToken : Access Token for the environment
-// @param apiManagerEndpoint : API Manager Endpoint for the environment
-// @return count (no. of Applications)
-// @return array of Application objects
-// @return error
-
-func GetApplicationList(appOwner, accessToken, applicationListEndpoint, limit string) (count int32, apps []utils.Application,
-	err error) {
-
-	headers := make(map[string]string)
-	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
-
-	if limit != "" {
-		applicationListEndpoint += "?limit=" + limit
-	}
-
-	var resp *resty.Response
-	if appOwner == "" {
-		resp, err = utils.InvokeGETRequest(applicationListEndpoint, headers)
-	} else {
-		resp, err = utils.InvokeGETRequestWithQueryParam("user", appOwner, applicationListEndpoint, headers)
-	}
-	if err != nil {
-		utils.HandleErrorAndExit("Unable to connect to "+applicationListEndpoint, err)
-	}
-
-	utils.Logln(utils.LogPrefixInfo+"Response:", resp.Status())
-
-	if resp.StatusCode() == http.StatusOK {
-		appListResponse := &utils.ApplicationListResponse{}
-		unmarshalError := json.Unmarshal([]byte(resp.Body()), &appListResponse)
-
-		if unmarshalError != nil {
-			utils.HandleErrorAndExit(utils.LogPrefixError+"invalid JSON response", unmarshalError)
-		}
-
-		return appListResponse.Count, appListResponse.List, nil
-
-	} else {
-		return 0, nil, errors.New(resp.Status())
 	}
 }
 

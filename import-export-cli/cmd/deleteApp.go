@@ -19,11 +19,9 @@
 package cmd
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
-	"github.com/go-resty/resty"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
+	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
 
@@ -60,12 +58,12 @@ var DeleteAppCmd = &cobra.Command{
 	},
 }
 
+
 // executeDeleteAppCmd executes the delete app command
 func executeDeleteAppCmd(credential credentials.Credential)  {
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, deleteAppEnvironment)
 	if preCommandErr == nil {
-		deleteAppEndpoint := utils.GetDevPortalApplicationListEndpointOfEnv(deleteAppEnvironment, utils.MainConfigFilePath)
-		resp, err := getDeleteAppResponse(deleteAppEndpoint, accessToken)
+		resp, err := impl.DeleteApplication(accessToken, deleteAppEnvironment, deleteAppName)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while deleting Application ", err)
 		}
@@ -84,64 +82,6 @@ func executeDeleteAppCmd(credential credentials.Credential)  {
 	} else {
 		// Error deleting Application
 		fmt.Println("Error getting OAuth tokens while deleting Application:" + preCommandErr.Error())
-	}
-}
-
-// getDeleteAppResponse
-// @param deleteEndpoint : API Manager Developer Portal REST API Endpoint for the environment
-// @param accessToken : Access Token for the resource
-// @return response Response in the form of *resty.Response
-func getDeleteAppResponse(deleteEndpoint, accessToken string) (*resty.Response, error) {
-	deleteEndpoint = utils.AppendSlashToString(deleteEndpoint)
-	appId, err := getAppId(accessToken)
-	if err != nil {
-		utils.HandleErrorAndExit("Error while getting App Id for deletion ", err)
-	}
-	url := deleteEndpoint + appId
-	utils.Logln(utils.LogPrefixInfo+"DeleteApplication: URL:", url)
-	headers := make(map[string]string)
-	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
-
-	resp, err := utils.InvokeDELETERequest(url, headers)
-
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
-// Get the ID of an Application if available
-// @param accessToken : Token to call the Developer Portal Rest API
-// @return appId, error
-func getAppId(accessToken string) (string, error) {
-	// Application REST API endpoint of the environment from the config file
-	applicationEndpoint := utils.GetDevPortalApplicationListEndpointOfEnv(deleteAppEnvironment, utils.MainConfigFilePath)
-
-	// Prepping headers
-	headers := make(map[string]string)
-	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
-	resp, err := utils.InvokeGETRequestWithQueryParam("query", deleteAppName, applicationEndpoint, headers)
-
-	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
-		// 200 OK or 201 Created
-		appData := &utils.AppList{}
-		data := []byte(resp.Body())
-		err = json.Unmarshal(data, &appData)
-		if appData.Count != 0 {
-			appId := appData.List[0].ApplicationID
-			return appId, err
-		}
-		return "", nil
-
-	} else {
-		utils.Logf("Error: %s\n", resp.Error())
-		utils.Logf("Body: %s\n", resp.Body())
-		if resp.StatusCode() == http.StatusUnauthorized {
-			// 401 Unauthorized
-			return "", fmt.Errorf("Authorization failed while searching CLI application: " + deleteAppName)
-		}
-		return "", errors.New("Request didn't respond 200 OK for searching existing applications. " +
-			"Status: " + resp.Status())
 	}
 }
 

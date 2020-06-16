@@ -130,5 +130,10 @@ var EnvReplaceFilePaths = []string{
 	"SoapToRest",
 }
 
+// project param files
+const (
+	ParamFileAPI         = "api_params.yaml"
+)
+
 const PrivateJetModeConst = "privateJet"
 const SidecarModeConst = "sidecar"

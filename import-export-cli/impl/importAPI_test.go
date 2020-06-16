@@ -16,7 +16,7 @@
 * under the License.
  */
 
-package cmd
+package impl
 
 import (
 	"net/http"
@@ -26,7 +26,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 
 	"github.com/renstrom/dedent"
@@ -52,13 +51,15 @@ func TestImportAPI1(t *testing.T) {
 	}))
 	defer server.Close()
 
-	name := "PizzaShackAPI-1.0.0"
+	name := utils.GetRelativeTestDataPathFromImpl() + "PizzaShackAPI-1.0.0"
 
-	err := ImportAPI(credentials.Credential{}, name, server.URL, "testdata", "")
+	err := ImportAPI("access_token", server.URL, "testEnv", name, "", false,
+		false, true)
 	assert.Nil(t, err, "Error should be nil")
 
 	utils.Insecure = true
-	err = ImportAPI(credentials.Credential{}, name, server.URL, "testdata", "")
+	err = ImportAPI("access_token", server.URL, "testEnv", name, "", false,
+		false, true)
 	assert.Nil(t, err, "Error should be nil")
 }
 
@@ -86,9 +87,9 @@ func TestNewFileUploadRequest(t *testing.T) {
 	defer server.Close()
 
 	extraParams := map[string]string{}
-	filePath := filepath.FromSlash("testdata/sampleapi.zip")
+	filePath := filepath.FromSlash(utils.GetRelativeTestDataPathFromImpl() + "sampleapi.zip")
 	accessToken := "access-token"
-	_, err := NewFileUploadRequest(server.URL, http.MethodPost, extraParams, "file", filePath, accessToken)
+	_, err := newFileUploadRequest(server.URL, http.MethodPost, extraParams, "file", filePath, accessToken)
 	if err != nil {
 		t.Errorf("Error: %s\n", err.Error())
 	}

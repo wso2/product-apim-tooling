@@ -16,7 +16,7 @@
 * under the License.
  */
 
-package cmd
+package impl
 
 import (
 	"github.com/renstrom/dedent"
@@ -46,16 +46,16 @@ func TestImportApplication1(t *testing.T) {
 	}))
 	defer server.Close()
 
-	name := "sampleApp.zip"
+	name := utils.GetRelativeTestDataPathFromImpl() + "sampleApp.zip"
 	owner := "admin"
 	accessToken := "access-token"
 
-	_, err := ImportApplication(name, owner, server.URL, accessToken, "testdata")
+	_, err := ImportApplication(accessToken, server.URL, name, owner, false,true, true, true)
 	if err != nil {
 		t.Errorf("Error: %s\n", err.Error())
 	}
 	utils.Insecure = true
-	_, err = ImportApplication(name, owner, server.URL, accessToken, "testdata")
+	_, err = ImportApplication(accessToken, server.URL, name, owner, false,true, true, true)
 	if err != nil {
 		t.Errorf("Error: %s\n", err.Error())
 	}
@@ -85,7 +85,7 @@ func TestNewAppFileUploadRequest(t *testing.T) {
 	defer server.Close()
 
 	extraParams := map[string]string{}
-	filePath := filepath.FromSlash("testdata/sampleApp.zip")
+	filePath := filepath.FromSlash(utils.GetRelativeTestDataPathFromImpl() + "sampleApp.zip")
 	accessToken := "access-token"
 	_, err := NewAppFileUploadRequest(server.URL, extraParams, "file", filePath, accessToken)
 	if err != nil {

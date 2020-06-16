@@ -16,16 +16,16 @@
 * under the License.
  */
 
-package cmd
+package impl
 
 import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"reflect"
 	"testing"
 
-	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 
 	"github.com/renstrom/dedent"
@@ -51,13 +51,15 @@ func TestImportAPIProduct1(t *testing.T) {
 	}))
 	defer server.Close()
 
-	name := "MyProduct-1.0.0"
+	name := utils.GetRelativeTestDataPathFromImpl() + string(os.PathSeparator) + "MyProduct-1.0.0"
 
-	err := ImportAPIProduct(credentials.Credential{}, name, server.URL, "testdata")
+	err := ImportAPIProduct("access_token", server.URL, "test_env", name, false,
+		false, false, true,false)
 	assert.Nil(t, err, "Error should be nil")
 
 	utils.Insecure = true
-	err = ImportAPIProduct(credentials.Credential{}, name, server.URL, "testdata")
+	err = ImportAPIProduct("access_token", server.URL, "test_env", name, false,
+		false, false, true,false)
 	assert.Nil(t, err, "Error should be nil")
 }
 
@@ -121,14 +123,14 @@ func TestExtractAPIProductInfoWithMalformedJSON(t *testing.T) {
 }
 
 func TestGetAPIProductInfoCorrectDirectoryStructure(t *testing.T) {
-	apiProduct, _, err := getAPIProductDefinition("testdata/MyProduct-1.0.0")
+	apiProduct, _, err := getAPIProductDefinition(utils.GetRelativeTestDataPathFromImpl() + "MyProduct-1.0.0")
 	assert.Nil(t, err, "Should return nil error on reading correct directories")
 	assert.Equal(t, v2.ProductID{APIProductName: "MyProduct", Version: "1.0.0", ProviderName: "admin"}, apiProduct.ID,
 		"Should return correct values for ID info")
 }
 
 func TestGetAPIProductInfoMalformedDirectory(t *testing.T) {
-	apiProduct, _, err := getAPIProductDefinition("testdata/MyProduct-1.0.0-malformed")
+	apiProduct, _, err := getAPIProductDefinition(utils.GetRelativeTestDataPathFromImpl() + "MyProduct-1.0.0-malformed")
 	fmt.Println(reflect.TypeOf(err))
 	assert.Error(t, err, "Should return error on reading malformed directories")
 	assert.Contains(t, err.Error(), "was not found as a YAML or JSON", "Should contain this message")
