@@ -105,8 +105,6 @@ func ImportApplication(accessToken, adminEndpoint, filename, appOwner string, up
 	if err != nil {
 		utils.Logln(utils.LogPrefixError, err)
 	} else {
-		//var bodyContent []byte
-
 		if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK ||
 			resp.StatusCode == http.StatusMultiStatus {
 			// 207 Multi Status or 201 Created or 200 OK
@@ -115,11 +113,6 @@ func ImportApplication(accessToken, adminEndpoint, filename, appOwner string, up
 			fmt.Printf("\nUnable to import the Application\n")
 			fmt.Println("Status: " + resp.Status)
 		}
-
-		//fmt.Println(resp.Header)
-		//resp.Body.Read(bodyContent)
-		//resp.Body.Close()
-		//fmt.Println(bodyContent)
 	}
 
 	return resp, err

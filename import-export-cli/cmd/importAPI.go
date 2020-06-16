@@ -70,11 +70,11 @@ var ImportAPICmd = &cobra.Command{
 	Example: importAPICmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + importAPICmdLiteral + " called")
-		credential, err := getCredentials(importEnvironment)
+		cred, err := getCredentials(importEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
-		accessOAuthToken, err := credentials.GetOAuthAccessToken(credential, importEnvironment)
+		accessOAuthToken, err := credentials.GetOAuthAccessToken(cred, importEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while getting an access token for importing API", err)
 		}

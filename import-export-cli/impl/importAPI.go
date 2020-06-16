@@ -733,7 +733,6 @@ func importAPI(endpoint, httpMethod, filePath, accessToken string, extraParams m
 		return err
 	}
 
-	//var bodyContent []byte
 	if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
 		// 201 Created or 200 OK
 		_ = resp.Body.Close()
