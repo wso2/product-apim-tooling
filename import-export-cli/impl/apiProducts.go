@@ -25,15 +25,23 @@ import (
 	"net/http"
 )
 
+// GetAPIProductListFromEnv
+// @param accessToken : Access Token for the environment
+// @param environment : Environment where API Product should be imported to
+// @param query : String to be matched against the API Product names
+// @param limit : Total number of API Products to return
+// @return count (no. of API Products)
+// @return array of API Product objects
+// @return error
 func GetAPIProductListFromEnv(accessToken, environment, query, limit string) (count int32, apiProducts []utils.APIProduct, err error) {
 	unifiedSearchEndpoint := utils.GetUnifiedSearchEndpointOfEnv(environment, utils.MainConfigFilePath)
 	return GetAPIProductList(accessToken, unifiedSearchEndpoint, query, limit)
 }
 
 // GetAPIProductList
-// @param query : String to be matched against the API Product names
 // @param accessToken : Access Token for the environment
 // @param unifiedSearchEndpoint : Unified Search Endpoint for the environment to retreive API Product list
+// @param query : String to be matched against the API Product names
 // @return count (no. of API Products)
 // @return array of API Product objects
 // @return error

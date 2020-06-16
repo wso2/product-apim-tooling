@@ -33,15 +33,25 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
+// ImportApplicationToEnv function is used with import-app command
+// @param accessToken: OAuth2.0 access token for the resource being accessed
+// @param environment: Environment to import the application
+// @param filename: name of the application (zipped file) to be imported
+// @param appOwner: Owner of the application
+// @param updateApplication: Update the application if it already exists
+// @param preserveOwner: Preserve the owner after importing the application
+// @param skipSubscriptions: Skip importing subscriptions
+// @param skipKeys: skip importing keys of application
 func ImportApplicationToEnv(accessToken, environment, filename, appOwner string, updateApplication, preserveOwner,
 	skipSubscriptions, skipKeys bool) (*http.Response, error) {
 	adminEndpoint := utils.GetAdminEndpointOfEnv(environment, utils.MainConfigFilePath)
 	return ImportApplication(accessToken, adminEndpoint, filename, appOwner, updateApplication, preserveOwner,
 		skipSubscriptions, skipKeys)
 }
+
 // ImportApplication function is used with import-app command
 // @param accessToken: OAuth2.0 access token for the resource being accessed
-// @param environment: Environment to import the application
+// @param adminEndpoint: Admin REST API endpoint to use for importing the application
 // @param filename: name of the application (zipped file) to be imported
 // @param appOwner: Owner of the application
 // @param updateApplication: Update the application if it already exists

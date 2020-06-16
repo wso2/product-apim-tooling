@@ -27,6 +27,14 @@ import (
 )
 
 
+//GetApplicationListFromEnv
+// @param accessToken : Access Token for the environment
+// @param environment : Environment to get the list of applications
+// @param appOwner : Owner of the applications
+// @param limit : Max number of results to return
+// @return count (no. of Applications)
+// @return array of Application objects
+// @return error
 func GetApplicationListFromEnv(accessToken, environment, appOwner, limit string) (count int32, apps []utils.Application, err error) {
 	applicationListEndpoint := utils.GetAdminApplicationListEndpointOfEnv(environment, utils.MainConfigFilePath)
 	return GetApplicationList(accessToken, applicationListEndpoint, appOwner, limit)
@@ -34,7 +42,7 @@ func GetApplicationListFromEnv(accessToken, environment, appOwner, limit string)
 
 //Get Application List
 // @param accessToken : Access Token for the environment
-// @param environment : Environment to get the list of applications
+// @param applicationListEndpoint : Endpoint to use for listing applications
 // @param appOwner : Owner of the applications
 // @param limit : Max number of results to return
 // @return count (no. of Applications)
