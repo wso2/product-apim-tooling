@@ -77,37 +77,7 @@ type Environment struct {
 type ApiParams struct {
 	// Environments contains all environments in a configuration
 	Environments []Environment   `yaml:"environments"`
-	Import       APIImportParams `yaml:"import"`
 }
-
-type ApiProductParams struct {
-	Import APIProductImportParams `yaml:"import"`
-}
-
-// ------------------- Structs for Import Params ----------------------------------
-type APIImportParams struct {
-	Update           bool `yaml:"update"`
-	PreserveProvider bool `yaml:"preserveProvider"`
-}
-
-type APIProductImportParams struct {
-	ImportAPIs       bool `yaml:"importApis"`
-	UpdateAPIs       bool `yaml:"updateApis"`
-	UpdateAPIProduct bool `yaml:"updateApiProduct"`
-	PreserveProvider bool `yaml:"preserveProvider"`
-}
-
-type ProjectParams struct {
-	Type                     string
-	AbsolutePath             string
-	RelativePath             string
-	Name                     string
-	FailedDuringPreviousPush bool
-	Deleted                  bool
-	ApiParams                *ApiParams
-	ApiProductParams         *ApiProductParams
-}
-// ---------------- End of Structs for Project Details ---------------------------------
 
 // APIEndpointConfig contains details about endpoints in an API
 type APIEndpointConfig struct {
@@ -147,23 +117,6 @@ func LoadApiParamsFromFile(path string) (*ApiParams, error) {
 	}
 
 	apiParams := &ApiParams{}
-	err = yaml.Unmarshal([]byte(fileContent), &apiParams)
-	if err != nil {
-		return nil, err
-	}
-
-	return apiParams, err
-}
-
-// LoadApiProductParamsFromFile loads an API Product project configuration YAML file located in path.
-//	It returns an error or a valid ApiProductParams
-func LoadApiProductParamsFromFile(path string) (*ApiProductParams, error) {
-	fileContent, err := getEnvSubstitutedFileContent(path)
-	if err != nil {
-		return nil, err
-	}
-
-	apiParams := &ApiProductParams{}
 	err = yaml.Unmarshal([]byte(fileContent), &apiParams)
 	if err != nil {
 		return nil, err
