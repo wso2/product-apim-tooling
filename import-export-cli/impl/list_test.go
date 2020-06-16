@@ -16,7 +16,7 @@
 * under the License.
  */
 
-package cmd
+package impl
 
 import (
 	"fmt"
@@ -75,7 +75,7 @@ func TestGetAPIListOK(t *testing.T) {
 	}))
 	defer server.Close()
 
-	count, apiList, err := GetAPIList("", "", "access_token", server.URL)
+	count, apiList, err := GetAPIList("access_token", server.URL, "", "")
 	fmt.Println("Count:", count)
 	fmt.Println("List:", apiList)
 
@@ -100,7 +100,7 @@ func TestGetAPIListUnreachable(t *testing.T) {
 	}))
 	defer server.Close()
 
-	count, list, err := GetAPIList("", "", "access_token", server.URL)
+	count, list, err := GetAPIList("access_token", server.URL, "", "")
 	if count != 0 {
 		t.Errorf("Incorrect Count. Expected %d, got %d\n", 0, count)
 	}
@@ -151,7 +151,7 @@ func TestGetApplicationListOK(t *testing.T) {
 	}))
 	defer server.Close()
 
-	count, appList, err := GetApplicationList("admin", "access_token", server.URL, "")
+	count, appList, err := GetApplicationList("access_token", server.URL, "admin","")
 	fmt.Println("Count:", count)
 	fmt.Println("List:", appList)
 
@@ -173,7 +173,7 @@ func TestGetApplicationListUnreachable(t *testing.T) {
 	}))
 	defer server.Close()
 
-	count, list, err := GetAPIList("", "", "access_token", server.URL)
+	count, list, err := GetApplicationList("access_token", server.URL, "admin","")
 	if count != 0 {
 		t.Errorf("Incorrect Count. Expected %d, got %d\n", 0, count)
 	}
@@ -232,7 +232,7 @@ func TestGetAPIProductListOK(t *testing.T) {
 	}))
 	defer server.Close()
 
-	count, apiList, err := GetAPIProductList("", " ", "access_token", server.URL)
+	count, apiList, err := GetAPIProductList("access_token",server.URL,"", " ")
 	fmt.Println("Count:", count)
 	fmt.Println("List:", apiList)
 
@@ -257,7 +257,7 @@ func TestGetAPIProductListUnreachable(t *testing.T) {
 	}))
 	defer server.Close()
 
-	count, list, err := GetAPIProductList("", " ", "access_token", server.URL)
+	count, list, err := GetAPIProductList("access_token",server.URL,"", " ")
 	if count != 0 {
 		t.Errorf("Incorrect Count. Expected %d, got %d\n", 0, count)
 	}

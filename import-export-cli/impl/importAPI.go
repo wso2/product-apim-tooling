@@ -498,7 +498,7 @@ func injectParamsToAPI(importPath, paramsPath, importEnvironment string) error {
 // getApiID returns id of the API by using apiInfo which contains name and version as info
 func getApiID(accessOAuthToken, environment, name, version string) (string, error) {
 	apiQuery := fmt.Sprintf("name:%s version:%s", name, version)
-	count, apis, err := GetAPIList(accessOAuthToken, environment, url.QueryEscape(apiQuery), "")
+	count, apis, err := GetAPIListFromEnv(accessOAuthToken, environment, url.QueryEscape(apiQuery), "")
 	if err != nil {
 		return "", err
 	}
@@ -757,11 +757,18 @@ func importAPI(endpoint, httpMethod, filePath, accessToken string, extraParams m
 	}
 }
 
+// ImportAPIToEnv function is used with import-api command
+func ImportAPIToEnv(accessOAuthToken, importEnvironment, importPath, apiParamsPath string, importAPIUpdate, preserveProvider,
+	importAPISkipCleanup bool) error {
+	adminEndpoint := utils.GetAdminEndpointOfEnv(importEnvironment, utils.MainConfigFilePath)
+	return ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, apiParamsPath, importAPIUpdate,
+		preserveProvider, importAPISkipCleanup)
+}
+
 // ImportAPI function is used with import-api command
-func ImportAPI(accessOAuthToken, importEnvironment, importPath, apiParamsPath string, importAPIUpdate, preserveProvider,
+func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, apiParamsPath string, importAPIUpdate, preserveProvider,
 		importAPISkipCleanup bool) error {
 	exportDirectory := filepath.Join(utils.ExportDirectory, utils.ExportedApisDirName)
-	adminEndpoint := utils.GetAdminEndpointOfEnv(importEnvironment, utils.MainConfigFilePath)
 	resolvedApiFilePath, err := resolveImportFilePath(importPath, exportDirectory)
 	if err != nil {
 		return err

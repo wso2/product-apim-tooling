@@ -25,6 +25,11 @@ import (
 	"net/http"
 )
 
+func GetAPIProductListFromEnv(accessToken, environment, query, limit string) (count int32, apiProducts []utils.APIProduct, err error) {
+	unifiedSearchEndpoint := utils.GetUnifiedSearchEndpointOfEnv(environment, utils.MainConfigFilePath)
+	return GetAPIProductList(accessToken, unifiedSearchEndpoint, query, limit)
+}
+
 // GetAPIProductList
 // @param query : String to be matched against the API Product names
 // @param accessToken : Access Token for the environment
@@ -32,9 +37,8 @@ import (
 // @return count (no. of API Products)
 // @return array of API Product objects
 // @return error
-func GetAPIProductList(accessToken, environment, query, limit string) (count int32, apiProducts []utils.APIProduct, err error) {
+func GetAPIProductList(accessToken, unifiedSearchEndpoint, query, limit string) (count int32, apiProducts []utils.APIProduct, err error) {
 	// Unified Search endpoint from the config file to search API Products
-	unifiedSearchEndpoint := utils.GetUnifiedSearchEndpointOfEnv(environment, utils.MainConfigFilePath)
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 

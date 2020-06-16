@@ -19,20 +19,12 @@
 package cmd
 
 import (
-	"bytes"
-	"crypto/tls"
 	"fmt"
-	"io"
-	"mime/multipart"
-	"net/http"
-	"os"
-	"path/filepath"
-	"strconv"
-	"time"
-
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
+	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"net/http"
 )
 
 var importAppFile string
@@ -63,23 +55,21 @@ var ImportAppCmd = &cobra.Command{
 	Example: importAppCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + importAppCmdLiteral + " called")
-		var appsExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedAppsDirName)
 		cred, err := getCredentials(importAppEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
-		executeImportAppCmd(cred, importAppOwner, appsExportDirectory)
+		executeImportAppCmd(cred)
 	},
 }
 
-func executeImportAppCmd(credential credentials.Credential, importAppOwner, exportDirectory string) {
+func executeImportAppCmd(credential credentials.Credential) {
 	accessToken, err := credentials.GetOAuthAccessToken(credential, importAppEnvironment)
 	if err != nil {
 		utils.HandleErrorAndExit("Error getting OAuth Tokens", err)
 	}
-
-	adminEndpoint := utils.GetAdminEndpointOfEnv(importAppEnvironment, utils.MainConfigFilePath)
-	resp, err := ImportApplication(importAppFile, importAppOwner, adminEndpoint, accessToken, exportDirectory)
+	resp, err := impl.ImportApplicationToEnv(accessToken, importAppEnvironment, importAppFile, importAppOwner,
+		importAppUpdateApplication, preserveOwner, skipSubscriptions, importAppSkipKeys)
 	if err != nil {
 		utils.HandleErrorAndExit("Error importing Application", err)
 	}
@@ -102,110 +92,6 @@ func executeImportAppCmd(credential credentials.Credential, importAppOwner, expo
 		fmt.Println("Error importing Application")
 		utils.Logln(utils.LogPrefixError + resp.Status)
 	}
-}
-
-// ImportApplication function is used with import-app command
-// @param name: name of the Application (zipped file) to be imported
-// @param apiManagerEndpoint: API Manager endpoint for the environment
-// @param accessToken: OAuth2.0 access token for the resource being accessed
-func ImportApplication(filename, appOwner, adminEndpiont, accessToken, exportDirectory string) (*http.Response, error) {
-	adminEndpiont = utils.AppendSlashToString(adminEndpiont)
-
-	applicationImportEndpoint := adminEndpiont + "import/applications"
-	url := applicationImportEndpoint + "?appOwner=" + appOwner + utils.SearchAndTag + "preserveOwner=" +
-		strconv.FormatBool(preserveOwner) + utils.SearchAndTag + "skipSubscriptions=" +
-		strconv.FormatBool(skipSubscriptions) + utils.SearchAndTag + "skipApplicationKeys=" + strconv.FormatBool(importAppSkipKeys) +
-		utils.SearchAndTag + "update=" + strconv.FormatBool(importAppUpdateApplication)
-	utils.Logln(utils.LogPrefixInfo + "Import URL: " + applicationImportEndpoint)
-
-	zipFilePath, err := resolveImportFilePath(filename, exportDirectory)
-	if err != nil {
-		utils.HandleErrorAndExit("Error creating request.", err)
-	}
-	fmt.Println("ZipFilePath:", zipFilePath)
-
-	extraParams := map[string]string{}
-
-	req, err := NewAppFileUploadRequest(url, extraParams, "file", zipFilePath, accessToken)
-	if err != nil {
-		utils.HandleErrorAndExit("Error creating request.", err)
-	}
-
-	var tr *http.Transport
-	if utils.Insecure {
-		tr = &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}
-	} else {
-		tr = &http.Transport{
-			TLSClientConfig: utils.GetTlsConfigWithCertificate(),
-		}
-	}
-
-	client := &http.Client{
-		Transport: tr,
-		Timeout:   time.Duration(utils.HttpRequestTimeout) * time.Second,
-	}
-
-	resp, err := client.Do(req)
-
-	if err != nil {
-		utils.Logln(utils.LogPrefixError, err)
-	} else {
-		//var bodyContent []byte
-
-		if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK ||
-			resp.StatusCode == http.StatusMultiStatus {
-			// 207 Multi Status or 201 Created or 200 OK
-			fmt.Printf("\nCompleted importing the Application '" + filename + "'\n")
-		} else {
-			fmt.Printf("\nUnable to import the Application\n")
-			fmt.Println("Status: " + resp.Status)
-		}
-
-		//fmt.Println(resp.Header)
-		//resp.Body.Read(bodyContent)
-		//resp.Body.Close()
-		//fmt.Println(bodyContent)
-	}
-
-	return resp, err
-}
-
-// NewFileUploadRequest form an HTTP Put request
-// Helper function for forming multi-part form data
-// Returns the formed http request and errors
-func NewAppFileUploadRequest(uri string, params map[string]string, paramName, path,
-	accessToken string) (*http.Request, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	part, err := writer.CreateFormFile(paramName, filepath.Base(path))
-	if err != nil {
-		return nil, err
-	}
-	_, err = io.Copy(part, file)
-
-	for key, val := range params {
-		_ = writer.WriteField(key, val)
-	}
-	err = writer.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	request, err := http.NewRequest(http.MethodPost, uri, body)
-	request.Header.Add(utils.HeaderAuthorization, utils.HeaderValueAuthBearerPrefix+" "+accessToken)
-	request.Header.Add(utils.HeaderContentType, writer.FormDataContentType())
-	request.Header.Add(utils.HeaderAccept, "*/*")
-	request.Header.Add(utils.HeaderConnection, utils.HeaderValueKeepAlive)
-
-	return request, err
 }
 
 func init() {

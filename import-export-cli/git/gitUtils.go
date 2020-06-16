@@ -190,7 +190,7 @@ func pushChangedFiles(accessToken, environment string, totalProjectsToUpdate int
         for i, projectParam := range apiProjects {
             importParams := projectParam.ApiParams.Import
             fmt.Println(strconv.Itoa(i + 1) + ": " + projectParam.Name + ": (" + projectParam.RelativePath + ")")
-            err := impl.ImportAPI(accessToken, environment, projectParam.AbsolutePath, "",
+            err := impl.ImportAPIToEnv(accessToken, environment, projectParam.AbsolutePath, "",
                 importParams.Update, importParams.PreserveProvider, false)
             if err != nil {
                 fmt.Println("Error... ", err)
@@ -206,7 +206,7 @@ func pushChangedFiles(accessToken, environment string, totalProjectsToUpdate int
         for i, projectParam := range apiProductProjects {
             importParams := projectParam.ApiProductParams.Import
             fmt.Println(strconv.Itoa(i + 1) + ": " + projectParam.Name + ": (" + projectParam.RelativePath + ")")
-            err := impl.ImportAPIProduct(accessToken, environment, projectParam.AbsolutePath,
+            err := impl.ImportAPIProductToEnv(accessToken, environment, projectParam.AbsolutePath,
                 importParams.ImportAPIs, importParams.UpdateAPIs, importParams.UpdateAPIProduct,
                 importParams.PreserveProvider, false)
             if err != nil {

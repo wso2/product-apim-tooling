@@ -78,7 +78,7 @@ var ImportAPICmd = &cobra.Command{
 		if err != nil {
 			utils.HandleErrorAndExit("Error while getting an access token for importing API", err)
 		}
-		err = impl.ImportAPI(accessOAuthToken, importEnvironment, importAPIFile, importAPIParamsFile, importAPIUpdate,
+		err = impl.ImportAPIToEnv(accessOAuthToken, importEnvironment, importAPIFile, importAPIParamsFile, importAPIUpdate,
 			importAPICmdPreserveProvider, importAPISkipCleanup)
 		if err != nil {
 			utils.HandleErrorAndExit("Error importing API", err)

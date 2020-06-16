@@ -16,7 +16,7 @@
 * under the License.
  */
 
-package cmd
+package impl
 
 import (
 	"bytes"
@@ -30,92 +30,35 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/spf13/cobra"
-	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-var importAppFile string
-var importAppEnvironment string
-var importAppOwner string
-var preserveOwner bool
-var skipSubscriptions bool
-var importAppSkipKeys bool
-var importAppUpdateApplication bool
-
-// ImportApp command related usage info
-const importAppCmdLiteral = "import-app"
-const importAppCmdShortDesc = "Import App"
-
-const importAppCmdLongDesc = "Import an Application to an environment"
-
-const importAppCmdExamples = utils.ProjectName + ` ` + importAppCmdLiteral + ` -f qa/apps/sampleApp.zip -e dev
-` + utils.ProjectName + ` ` + importAppCmdLiteral + ` -f staging/apps/sampleApp.zip -e prod -o testUser
-` + utils.ProjectName + ` ` + importAppCmdLiteral + ` -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -e prod
-NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory`
-
-// importAppCmd represents the importApp command
-var ImportAppCmd = &cobra.Command{
-	Use: importAppCmdLiteral + " (--file <app-zip-file> --environment " +
-		"<environment-to-which-the-app-should-be-imported>)",
-	Short:   importAppCmdShortDesc,
-	Long:    importAppCmdLongDesc,
-	Example: importAppCmdExamples,
-	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + importAppCmdLiteral + " called")
-		var appsExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedAppsDirName)
-		cred, err := getCredentials(importAppEnvironment)
-		if err != nil {
-			utils.HandleErrorAndExit("Error getting credentials", err)
-		}
-		executeImportAppCmd(cred, importAppOwner, appsExportDirectory)
-	},
+func ImportApplicationToEnv(accessToken, environment, filename, appOwner string, updateApplication, preserveOwner,
+	skipSubscriptions, skipKeys bool) (*http.Response, error) {
+	adminEndpoint := utils.GetAdminEndpointOfEnv(environment, utils.MainConfigFilePath)
+	return ImportApplication(accessToken, adminEndpoint, filename, appOwner, updateApplication, preserveOwner,
+		skipSubscriptions, skipKeys)
 }
-
-func executeImportAppCmd(credential credentials.Credential, importAppOwner, exportDirectory string) {
-	accessToken, err := credentials.GetOAuthAccessToken(credential, importAppEnvironment)
-	if err != nil {
-		utils.HandleErrorAndExit("Error getting OAuth Tokens", err)
-	}
-
-	adminEndpoint := utils.GetAdminEndpointOfEnv(importAppEnvironment, utils.MainConfigFilePath)
-	resp, err := ImportApplication(importAppFile, importAppOwner, adminEndpoint, accessToken, exportDirectory)
-	if err != nil {
-		utils.HandleErrorAndExit("Error importing Application", err)
-	}
-
-	if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusCreated {
-		// 200 OK or 201 Created
-		utils.Logln(utils.LogPrefixInfo+"Header:", resp.Header)
-		fmt.Println("Successfully imported Application!")
-	} else if resp.StatusCode == http.StatusMultiStatus {
-		// 207 Multi Status
-		fmt.Printf("\nPartially imported Application" +
-			"\nNOTE: One or more subscriptions were not imported due to unavailability of APIs/Tiers\n")
-	} else if resp.StatusCode == http.StatusUnauthorized {
-		// 401 Unauthorized
-		fmt.Println("Invalid Credentials or You may not have enough permission!")
-	} else if resp.StatusCode == http.StatusForbidden {
-		// 401 Unauthorized
-		fmt.Printf("Invalid Owner!" + "\nNOTE: Cross Tenant Imports are not allowed!\n")
-	} else {
-		fmt.Println("Error importing Application")
-		utils.Logln(utils.LogPrefixError + resp.Status)
-	}
-}
-
 // ImportApplication function is used with import-app command
-// @param name: name of the Application (zipped file) to be imported
-// @param apiManagerEndpoint: API Manager endpoint for the environment
 // @param accessToken: OAuth2.0 access token for the resource being accessed
-func ImportApplication(filename, appOwner, adminEndpiont, accessToken, exportDirectory string) (*http.Response, error) {
-	adminEndpiont = utils.AppendSlashToString(adminEndpiont)
+// @param environment: Environment to import the application
+// @param filename: name of the application (zipped file) to be imported
+// @param appOwner: Owner of the application
+// @param updateApplication: Update the application if it already exists
+// @param preserveOwner: Preserve the owner after importing the application
+// @param skipSubscriptions: Skip importing subscriptions
+// @param skipKeys: skip importing keys of application
+func ImportApplication(accessToken, adminEndpoint, filename, appOwner string, updateApplication, preserveOwner,
+	skipSubscriptions, skipKeys bool) (*http.Response, error) {
 
-	applicationImportEndpoint := adminEndpiont + "import/applications"
+	exportDirectory := filepath.Join(utils.ExportDirectory, utils.ExportedAppsDirName)
+	adminEndpoint = utils.AppendSlashToString(adminEndpoint)
+
+	applicationImportEndpoint := adminEndpoint + "import/applications"
 	url := applicationImportEndpoint + "?appOwner=" + appOwner + utils.SearchAndTag + "preserveOwner=" +
 		strconv.FormatBool(preserveOwner) + utils.SearchAndTag + "skipSubscriptions=" +
-		strconv.FormatBool(skipSubscriptions) + utils.SearchAndTag + "skipApplicationKeys=" + strconv.FormatBool(importAppSkipKeys) +
-		utils.SearchAndTag + "update=" + strconv.FormatBool(importAppUpdateApplication)
+		strconv.FormatBool(skipSubscriptions) + utils.SearchAndTag + "skipApplicationKeys=" + strconv.FormatBool(skipKeys) +
+		utils.SearchAndTag + "update=" + strconv.FormatBool(updateApplication)
 	utils.Logln(utils.LogPrefixInfo + "Import URL: " + applicationImportEndpoint)
 
 	zipFilePath, err := resolveImportFilePath(filename, exportDirectory)
@@ -206,24 +149,4 @@ func NewAppFileUploadRequest(uri string, params map[string]string, paramName, pa
 	request.Header.Add(utils.HeaderConnection, utils.HeaderValueKeepAlive)
 
 	return request, err
-}
-
-func init() {
-	RootCmd.AddCommand(ImportAppCmd)
-	ImportAppCmd.Flags().StringVarP(&importAppFile, "file", "f", "",
-		"Name of the ZIP file of the Application to be imported")
-	ImportAppCmd.Flags().StringVarP(&importAppOwner, "owner", "o", "",
-		"Name of the target owner of the Application as desired by the Importer")
-	ImportAppCmd.Flags().StringVarP(&importAppEnvironment, "environment", "e",
-		"", "Environment from the which the Application should be imported")
-	ImportAppCmd.Flags().BoolVarP(&preserveOwner, "preserveOwner", "", false,
-		"Preserves app owner")
-	ImportAppCmd.Flags().BoolVarP(&skipSubscriptions, "skipSubscriptions", "s", false,
-		"Skip subscriptions of the Application")
-	ImportAppCmd.Flags().BoolVarP(&importAppSkipKeys, "skipKeys", "", false,
-		"Skip importing keys of the Application")
-	ImportAppCmd.Flags().BoolVarP(&importAppUpdateApplication, "update", "", false,
-		"Update the Application if it is already imported")
-	_ = ImportAppCmd.MarkFlagRequired("file")
-	_ = ImportAppCmd.MarkFlagRequired("environment")
 }

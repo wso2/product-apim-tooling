@@ -25,14 +25,28 @@ import (
 	"net/http"
 )
 
-// GetAPIList
-// @param query : string to be matched against the API names
+// GetAPIListFromEnv
 // @param accessToken : Access Token for the environment
-// @param apiManagerEndpoint : API Manager Endpoint for the environment
+// @param environment : Environment name to use when getting the API List
+// @param query : string to be matched against the API names
+// @param limit : total # of results to return
 // @return count (no. of APIs)
 // @return array of API objects
 // @return error
-func GetAPIList(accessToken, environment, query, limit string) (count int32, apis []utils.API, err error) {
+func GetAPIListFromEnv(accessToken, environment, query, limit string) (count int32, apis []utils.API, err error) {
+	apiListEndpoint := utils.GetApiListEndpointOfEnv(environment, utils.MainConfigFilePath)
+	return GetAPIList(accessToken, apiListEndpoint, query, limit)
+}
+
+// GetAPIList
+// @param accessToken : Access Token for the environment
+// @param apiListEndpoint : API List endpoint
+// @param query : string to be matched against the API names
+// @param limit : total # of results to return
+// @return count (no. of APIs)
+// @return array of API objects
+// @return error
+func GetAPIList(accessToken, apiListEndpoint, query, limit string) (count int32, apis []utils.API, err error) {
 	queryParamAdded := false
 	getQueryParamConnector := func() (connector string) {
 		if queryParamAdded {
@@ -43,7 +57,6 @@ func GetAPIList(accessToken, environment, query, limit string) (count int32, api
 		}
 	}
 
-	apiListEndpoint := utils.GetApiListEndpointOfEnv(environment, utils.MainConfigFilePath)
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 

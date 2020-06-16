@@ -104,7 +104,7 @@ func resolveImportAPIProductFilePath(file, defaultExportDirectory string) (strin
 func getApiProductID(name, version, environment, accessOAuthToken string) (string, error) {
 	apiProductQuery := fmt.Sprintf("name:%s version:%s", name, version)
 	apiProductQuery += " type:\"" + utils.DefaultApiProductType + "\""
-	count, apiProducts, err := GetAPIProductList(accessOAuthToken, environment, url.QueryEscape(apiProductQuery), "")
+	count, apiProducts, err := GetAPIProductListFromEnv(accessOAuthToken, environment, url.QueryEscape(apiProductQuery), "")
 	if err != nil {
 		return "", err
 	}
@@ -250,11 +250,19 @@ func preProcessDependentAPIs(apiProductFilePath, importEnvironment string) error
 	return nil
 }
 
+// ImportAPIProductToEnv function is used with import-api-product command
+func ImportAPIProductToEnv(accessOAuthToken, importEnvironment, importPath string, importAPIs, importAPIsUpdate,
+	importAPIProductUpdate, importAPIProductPreserveProvider, importAPIProductSkipCleanup bool) error {
+	adminEndpoint := utils.GetAdminEndpointOfEnv(importEnvironment, utils.MainConfigFilePath)
+	return ImportAPIProduct(accessOAuthToken, adminEndpoint, importEnvironment, importPath, importAPIs, importAPIsUpdate,
+		importAPIProductUpdate, importAPIProductPreserveProvider, importAPIProductSkipCleanup)
+}
+
 // ImportAPIProduct function is used with import-api-product command
-func ImportAPIProduct(accessOAuthToken, importEnvironment, importPath string, importAPIs, importAPIsUpdate,
+func ImportAPIProduct(accessOAuthToken, adminEndpoint, importEnvironment, importPath string, importAPIs, importAPIsUpdate,
 		importAPIProductUpdate, importAPIProductPreserveProvider, importAPIProductSkipCleanup bool) error {
 	var exportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedApiProductsDirName)
-	adminEndpoint := utils.GetAdminEndpointOfEnv(importEnvironment, utils.MainConfigFilePath)
+
 	resolvedApiProductFilePath, err := resolveImportAPIProductFilePath(importPath, exportDirectory)
 	if err != nil {
 		return err
