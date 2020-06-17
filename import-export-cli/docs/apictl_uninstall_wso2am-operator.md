@@ -20,7 +20,7 @@ apictl uninstall wso2am-operator --force
 ### Options
 
 ```
-      --force   Force uninstall WSO2AM Operator
+      --force   Force uninstall WSO2AM Operator (default false)
   -h, --help    help for wso2am-operator
 ```
 

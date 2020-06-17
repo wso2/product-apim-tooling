@@ -26,10 +26,10 @@ NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory
   -f, --file string          Name of the ZIP file of the Application to be imported
   -h, --help                 help for import-app
   -o, --owner string         Name of the target owner of the Application as desired by the Importer
-      --preserveOwner        Preserves app owner
-      --skipKeys             Skip importing keys of the Application
-  -s, --skipSubscriptions    Skip subscriptions of the Application
-      --update               Update the Application if it is already imported
+      --preserveOwner        Preserves app owner (default false)
+      --skipKeys             Skip importing keys of the Application (default false)
+  -s, --skipSubscriptions    Skip subscriptions of the Application (default false)
+      --update               Update the Application if it is already imported (default false)
 ```
 
 ### Options inherited from parent commands

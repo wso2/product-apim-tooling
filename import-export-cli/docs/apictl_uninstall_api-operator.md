@@ -20,7 +20,7 @@ apictl uninstall api-operator --force
 ### Options
 
 ```
-      --force   Force uninstall API Operator
+      --force   Force uninstall API Operator (default false)
   -h, --help    help for api-operator
 ```
 
