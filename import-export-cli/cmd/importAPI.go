@@ -975,12 +975,12 @@ func init() {
 		"", "Environment from the which the API should be imported")
 	ImportAPICmd.Flags().BoolVar(&importAPICmdPreserveProvider, "preserve-provider", true,
 		"Preserve existing provider of API after importing")
-	ImportAPICmd.Flags().BoolVarP(&importAPIUpdate, "update", "", false, "Update an "+
-		"existing API or create a new API")
+	ImportAPICmd.Flags().BoolVar(&importAPIUpdate, "update",  false, "Update an "+
+		"existing API or create a new API (default false)")
 	ImportAPICmd.Flags().StringVarP(&importAPIParamsFile, "params", "", DefaultAPIMParamsFileName,
 		"Provide a API Manager params file")
 	ImportAPICmd.Flags().BoolVarP(&importAPISkipCleanup, "skipCleanup", "", false, "Leave "+
-		"all temporary files created during import process")
+		"all temporary files created during import process (default false)")
 	// Mark required flags
 	_ = ImportAPICmd.MarkFlagRequired("environment")
 	_ = ImportAPICmd.MarkFlagRequired("file")

@@ -88,5 +88,5 @@ var uninstallWso2amOperatorCmd = &cobra.Command{
 
 func init() {
 	uninstallCmd.AddCommand(uninstallWso2amOperatorCmd)
-	uninstallWso2amOperatorCmd.Flags().BoolVar(&flagForceUninstallWso2amOperator, "force", false, "Force uninstall WSO2AM Operator")
+	uninstallWso2amOperatorCmd.Flags().BoolVar(&flagForceUninstallWso2amOperator, "force", false, "Force uninstall WSO2AM Operator (default false)")
 }

@@ -90,5 +90,5 @@ var uninstallApiOperatorCmd = &cobra.Command{
 
 func init() {
 	uninstallCmd.AddCommand(uninstallApiOperatorCmd)
-	uninstallApiOperatorCmd.Flags().BoolVar(&flagForceUninstallApiOperator, "force", false, "Force uninstall API Operator")
+	uninstallApiOperatorCmd.Flags().BoolVar(&flagForceUninstallApiOperator, "force", false, "Force uninstall API Operator (default false)")
 }

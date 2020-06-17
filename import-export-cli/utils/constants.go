@@ -132,3 +132,9 @@ var EnvReplaceFilePaths = []string{
 
 const PrivateJetModeConst = "privateJet"
 const SidecarModeConst = "sidecar"
+
+//Default values for Help commands
+const DefaultApisDisplayLimit = 25
+const DefaultApiProductsDisplayLimit = 25
+const DefaultAppsDisplayLimit = 25
+const DefaultExportFormat = "YAML"

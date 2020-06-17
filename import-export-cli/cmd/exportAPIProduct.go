@@ -168,7 +168,7 @@ func init() {
 		"Provider of the API Product")
 	ExportAPIProductCmd.Flags().StringVarP(&cmdExportEnvironment, "environment", "e",
 		"", "Environment to which the API Product should be exported")
-	ExportAPIProductCmd.Flags().StringVarP(&exportAPIProductFormat, "format", "", "", "File format of exported archive (json or yaml)")
+	ExportAPIProductCmd.Flags().StringVarP(&exportAPIProductFormat, "format", "", utils.DefaultExportFormat, "File format of exported archive (json or yaml)")
 	_ = ExportAPIProductCmd.MarkFlagRequired("name")
 	_ = ExportAPIProductCmd.MarkFlagRequired("environment")
 }

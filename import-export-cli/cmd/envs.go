@@ -165,6 +165,6 @@ func printEnvs(envData map[string]utils.EnvEndpoints, format string) {
 
 func init() {
 	ListCmd.AddCommand(envsCmd)
-	envsCmd.Flags().StringVarP(&envsCmdFormat, "format", "", "", "Pretty-print "+
+	envsCmd.Flags().StringVarP(&envsCmdFormat, "format", "", defaulEnvsTableFormat, "Pretty-print "+
 		"environments using go templates")
 }
