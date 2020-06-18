@@ -474,13 +474,13 @@ func init() {
 	ImportAPIProductCmd.Flags().BoolVar(&importAPIProductCmdPreserveProvider, "preserve-provider", true,
 		"Preserve existing provider of API Product after importing")
 	ImportAPIProductCmd.Flags().BoolVarP(&importAPIs, "import-apis", "", false, "Import "+
-		"dependent APIs associated with the API Product (default false)")
+		"dependent APIs associated with the API Product")
 	ImportAPIProductCmd.Flags().BoolVarP(&importAPIProductUpdate, "update-api-product", "", false, "Update an "+
-		"existing API Product or create a new API Product (default false)")
+		"existing API Product or create a new API Product")
 	ImportAPIProductCmd.Flags().BoolVarP(&importAPIsUpdate, "update-apis", "", false, "Update existing dependent APIs "+
-		"associated with the API Product (default false)")
+		"associated with the API Product")
 	ImportAPIProductCmd.Flags().BoolVarP(&importAPIProductSkipCleanup, "skipCleanup", "", false, "Leave "+
-		"all temporary files created during import process (default false)")
+		"all temporary files created during import process")
 	// Mark required flags
 	_ = ImportAPIProductCmd.MarkFlagRequired("environment")
 	_ = ImportAPIProductCmd.MarkFlagRequired("file")

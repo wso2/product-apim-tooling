@@ -156,5 +156,5 @@ func init() {
 
 	loginCmd.Flags().StringVarP(&loginUsername, "username", "u", "", "Username for login")
 	loginCmd.Flags().StringVarP(&loginPassword, "password", "p", "", "Password for login")
-	loginCmd.Flags().BoolVarP(&loginPasswordStdin, "password-stdin", "", false, "Get password from stdin (default false)")
+	loginCmd.Flags().BoolVarP(&loginPasswordStdin, "password-stdin", "", false, "Get password from stdin")
 }

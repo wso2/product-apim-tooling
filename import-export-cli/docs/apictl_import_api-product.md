@@ -26,11 +26,11 @@ NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory
   -e, --environment string   Environment from the which the API Product should be imported
   -f, --file string          Name of the API Product to be imported
   -h, --help                 help for api-product
-      --import-apis          Import dependent APIs associated with the API Product (default false)
+      --import-apis          Import dependent APIs associated with the API Product
       --preserve-provider    Preserve existing provider of API Product after importing (default true)
-      --skipCleanup          Leave all temporary files created during import process (default false)
-      --update-api-product   Update an existing API Product or create a new API Product (default false)
-      --update-apis          Update existing dependent APIs associated with the API Product (default false)
+      --skipCleanup          Leave all temporary files created during import process
+      --update-api-product   Update an existing API Product or create a new API Product
+      --update-apis          Update existing dependent APIs associated with the API Product
 ```
 
 ### Options inherited from parent commands

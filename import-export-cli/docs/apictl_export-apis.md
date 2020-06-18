@@ -22,7 +22,7 @@ NOTE: The flag (--environment (-e)) is mandatory
 
 ```
   -e, --environment string   Environment from which the APIs should be exported
-      --force                Clean all the previously exported APIs of the given target tenant, in the given environment if any, and to export APIs from beginning (default false)
+      --force                Clean all the previously exported APIs of the given target tenant, in the given environment if any, and to export APIs from beginning
       --format string        File format of exported archives(json or yaml) (default "YAML")
   -h, --help                 help for export-apis
       --preserveStatus       Preserve API status when exporting. Otherwise API will be exported in CREATED status (default true)

@@ -120,7 +120,6 @@ func init() {
 		defaultTokenType = mainConfig.Config.TokenType
 	}
 
-
 	SetCmd.Flags().IntVar(&flagHttpRequestTimeout, "http-request-timeout", defaultHttpRequestTimeout,
 		"Timeout for HTTP Client")
 	SetCmd.Flags().StringVar(&flagExportDirectory, "export-directory", defaultExportDirectory,

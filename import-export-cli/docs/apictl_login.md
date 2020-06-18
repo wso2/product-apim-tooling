@@ -23,7 +23,7 @@ cat ~/.mypassword | apictl login dev -u admin
 ```
   -h, --help              help for login
   -p, --password string   Password for login
-      --password-stdin    Get password from stdin (default false)
+      --password-stdin    Get password from stdin
   -u, --username string   Username for login
 ```
 

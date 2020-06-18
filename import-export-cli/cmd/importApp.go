@@ -217,13 +217,13 @@ func init() {
 	ImportAppCmd.Flags().StringVarP(&importAppEnvironment, "environment", "e",
 		"", "Environment from the which the Application should be imported")
 	ImportAppCmd.Flags().BoolVarP(&preserveOwner, "preserveOwner", "", false,
-		"Preserves app owner (default false)")
+		"Preserves app owner")
 	ImportAppCmd.Flags().BoolVarP(&skipSubscriptions, "skipSubscriptions", "s", false,
-		"Skip subscriptions of the Application (default false)")
+		"Skip subscriptions of the Application")
 	ImportAppCmd.Flags().BoolVarP(&importAppSkipKeys, "skipKeys", "", false,
-		"Skip importing keys of the Application (default false)")
+		"Skip importing keys of the Application")
 	ImportAppCmd.Flags().BoolVarP(&importAppUpdateApplication, "update", "", false,
-		"Update the Application if it is already imported (default false)")
+		"Update the Application if it is already imported")
 	_ = ImportAppCmd.MarkFlagRequired("file")
 	_ = ImportAppCmd.MarkFlagRequired("environment")
 }

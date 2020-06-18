@@ -160,7 +160,7 @@ func init() {
 	ExportAppCmd.Flags().StringVarP(&cmdExportEnvironment, "environment", "e",
 		"", "Environment to which the Application should be exported")
 	ExportAppCmd.Flags().BoolVarP(&exportAppWithKeys, "withKeys", "",
-		false, "Export keys for the application (default false)")
+		false, "Export keys for the application ")
 	_ = ExportAppCmd.MarkFlagRequired("environment")
 	_ = ExportAppCmd.MarkFlagRequired("owner")
 	_ = ExportAppCmd.MarkFlagRequired("name")

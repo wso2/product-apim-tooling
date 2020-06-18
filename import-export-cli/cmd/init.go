@@ -354,5 +354,5 @@ func init() {
 		"specification file for the API")
 	InitCommand.Flags().StringVar(&initCmdInitialState, "initial-state", "", fmt.Sprintf("Provide the initial state "+
 		"of the API; Valid states: %v", utils.ValidInitialStates))
-	InitCommand.Flags().BoolVarP(&initCmdForced, "force", "f", false, "Force create project (default false)")
+	InitCommand.Flags().BoolVarP(&initCmdForced, "force", "f", false, "Force create project")
 }

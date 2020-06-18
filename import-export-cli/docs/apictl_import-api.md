@@ -28,8 +28,8 @@ NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory
   -h, --help                 help for import-api
       --params string        Provide a API Manager params file (default "api_params.yaml")
       --preserve-provider    Preserve existing provider of API after importing (default true)
-      --skipCleanup          Leave all temporary files created during import process (default false)
-      --update               Update an existing API or create a new API (default false)
+      --skipCleanup          Leave all temporary files created during import process
+      --update               Update an existing API or create a new API
 ```
 
 ### Options inherited from parent commands
