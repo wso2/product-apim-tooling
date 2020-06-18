@@ -84,6 +84,10 @@ type ApiProductParams struct {
 	Import APIProductImportParams `yaml:"import"`
 }
 
+type ApplicationParams struct {
+	Import ApplicationImportParams `yaml:"import"`
+}
+
 // ------------------- Structs for Import Params ----------------------------------
 type APIImportParams struct {
 	Update           bool `yaml:"update"`
@@ -97,6 +101,14 @@ type APIProductImportParams struct {
 	PreserveProvider bool `yaml:"preserveProvider"`
 }
 
+type ApplicationImportParams struct {
+	Update            bool   `yaml:"update"`
+	TargetOwner       string `yaml:"targetOwner"`
+	PreserveOwner     bool   `yaml:"preserveOwner"`
+	SkipKeys          bool   `yaml:"skipKeys"`
+	SkipSubscriptions bool   `yaml:"skipSubscriptions"`
+}
+
 type ProjectParams struct {
 	Type                     string
 	AbsolutePath             string
@@ -106,6 +118,7 @@ type ProjectParams struct {
 	Deleted                  bool
 	ApiParams                *ApiParams
 	ApiProductParams         *ApiProductParams
+	ApplicationParams         *ApplicationParams
 }
 // ---------------- End of Structs for Project Details ---------------------------------
 
@@ -171,6 +184,24 @@ func LoadApiProductParamsFromFile(path string) (*ApiProductParams, error) {
 
 	return apiParams, err
 }
+
+// LoadApplicationParamsFromFile loads an Application project configuration YAML file located in path.
+//	It returns an error or a valid ApplicationParams
+func LoadApplicationParamsFromFile(path string) (*ApplicationParams, error) {
+	fileContent, err := getEnvSubstitutedFileContent(path)
+	if err != nil {
+		return nil, err
+	}
+
+	apiParams := &ApplicationParams{}
+	err = yaml.Unmarshal([]byte(fileContent), &apiParams)
+	if err != nil {
+		return nil, err
+	}
+
+	return apiParams, err
+}
+
 
 // ExtractAPIEndpointConfig extracts API endpoint information from a slice of byte b
 func ExtractAPIEndpointConfig(b []byte) (string, error) {

@@ -19,12 +19,10 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"net/http"
 )
 
 var importAppFile string
@@ -68,29 +66,10 @@ func executeImportAppCmd(credential credentials.Credential) {
 	if err != nil {
 		utils.HandleErrorAndExit("Error getting OAuth Tokens", err)
 	}
-	resp, err := impl.ImportApplicationToEnv(accessToken, importAppEnvironment, importAppFile, importAppOwner,
+	err = impl.ImportApplicationToEnv(accessToken, importAppEnvironment, importAppFile, importAppOwner,
 		importAppUpdateApplication, preserveOwner, skipSubscriptions, importAppSkipKeys)
 	if err != nil {
 		utils.HandleErrorAndExit("Error importing Application", err)
-	}
-
-	if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusCreated {
-		// 200 OK or 201 Created
-		utils.Logln(utils.LogPrefixInfo+"Header:", resp.Header)
-		fmt.Println("Successfully imported Application!")
-	} else if resp.StatusCode == http.StatusMultiStatus {
-		// 207 Multi Status
-		fmt.Printf("\nPartially imported Application" +
-			"\nNOTE: One or more subscriptions were not imported due to unavailability of APIs/Tiers\n")
-	} else if resp.StatusCode == http.StatusUnauthorized {
-		// 401 Unauthorized
-		fmt.Println("Invalid Credentials or You may not have enough permission!")
-	} else if resp.StatusCode == http.StatusForbidden {
-		// 401 Unauthorized
-		fmt.Printf("Invalid Owner!" + "\nNOTE: Cross Tenant Imports are not allowed!\n")
-	} else {
-		fmt.Println("Error importing Application")
-		utils.Logln(utils.LogPrefixError + resp.Status)
 	}
 }
 

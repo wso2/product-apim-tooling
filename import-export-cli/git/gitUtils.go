@@ -215,6 +215,21 @@ func pushChangedFiles(accessToken, environment string, totalProjectsToUpdate int
         }
     }
 
+    // pushing Application projects
+    applicationProjects := updatedProjectsPerType[utils.ProjectTypeApplication]
+    if len(applicationProjects) != 0 {
+        fmt.Println("\nApplications (" + strconv.Itoa(len(applicationProjects)) + ") ...")
+        for i, projectParam := range applicationProjects {
+            importParams := projectParam.ApplicationParams.Import
+            fmt.Println(strconv.Itoa(i + 1) + ": " + projectParam.Name + ": (" + projectParam.RelativePath + ")")
+            err := impl.ImportApplicationToEnv(accessToken, environment, projectParam.AbsolutePath,
+                importParams.TargetOwner, importParams.Update, importParams.PreserveOwner,
+                importParams.SkipSubscriptions, importParams.SkipKeys)
+            if err != nil {
+                fmt.Println("\terror... ", err)
+            }
+        }
+    }
     vcsConfig, envVCSConfig, _ := getVCSEnvironmentDetails(environment)
 
     var err error
@@ -306,11 +321,17 @@ func checkProjectTypeOfSpecificPath(repoBasePath, fullPath string, pathInfoMap m
             projectParams.Type = utils.ProjectTypeApiProduct;
             apiProductParams, err := params.LoadApiProductParamsFromFile(fullPathWithFileName)
             if err != nil {
-                utils.HandleErrorAndExit("Error while parsing " + utils.ParamFileAPI + " file:" +fullPathWithFileName, err)
+                utils.HandleErrorAndExit("Error while parsing " + utils.ParamFileAPIProduct + " file:" +fullPathWithFileName, err)
             }
             projectParams.ApiProductParams = apiProductParams
             break
         case utils.ParamFileApplication:
+            projectParams.Type = utils.ProjectTypeApplication;
+            applicationParams, err := params.LoadApplicationParamsFromFile(fullPathWithFileName)
+            if err != nil {
+                utils.HandleErrorAndExit("Error while parsing " + utils.ParamFileApplication + " file:" +fullPathWithFileName, err)
+            }
+            projectParams.ApplicationParams = applicationParams
             break
         }
         if projectParams.Type != utils.ProjectTypeNone {

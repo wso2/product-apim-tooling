@@ -43,7 +43,7 @@ import (
 // @param skipSubscriptions: Skip importing subscriptions
 // @param skipKeys: skip importing keys of application
 func ImportApplicationToEnv(accessToken, environment, filename, appOwner string, updateApplication, preserveOwner,
-	skipSubscriptions, skipKeys bool) (*http.Response, error) {
+	skipSubscriptions, skipKeys bool) error {
 	adminEndpoint := utils.GetAdminEndpointOfEnv(environment, utils.MainConfigFilePath)
 	return ImportApplication(accessToken, adminEndpoint, filename, appOwner, updateApplication, preserveOwner,
 		skipSubscriptions, skipKeys)
@@ -59,7 +59,7 @@ func ImportApplicationToEnv(accessToken, environment, filename, appOwner string,
 // @param skipSubscriptions: Skip importing subscriptions
 // @param skipKeys: skip importing keys of application
 func ImportApplication(accessToken, adminEndpoint, filename, appOwner string, updateApplication, preserveOwner,
-	skipSubscriptions, skipKeys bool) (*http.Response, error) {
+	skipSubscriptions, skipKeys bool) error {
 
 	exportDirectory := filepath.Join(utils.ExportDirectory, utils.ExportedAppsDirName)
 	adminEndpoint = utils.AppendSlashToString(adminEndpoint)
@@ -115,7 +115,26 @@ func ImportApplication(accessToken, adminEndpoint, filename, appOwner string, up
 		}
 	}
 
-	return resp, err
+	if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusCreated {
+		// 200 OK or 201 Created
+		utils.Logln(utils.LogPrefixInfo+"Header:", resp.Header)
+		fmt.Println("Successfully imported Application!")
+	} else if resp.StatusCode == http.StatusMultiStatus {
+		// 207 Multi Status
+		fmt.Printf("\nPartially imported Application" +
+			"\nNOTE: One or more subscriptions were not imported due to unavailability of APIs/Tiers\n")
+	} else if resp.StatusCode == http.StatusUnauthorized {
+		// 401 Unauthorized
+		fmt.Println("Invalid Credentials or You may not have enough permission!")
+	} else if resp.StatusCode == http.StatusForbidden {
+		// 401 Unauthorized
+		fmt.Printf("Invalid Owner!" + "\nNOTE: Cross Tenant Imports are not allowed!\n")
+	} else {
+		fmt.Println("Error importing Application")
+		utils.Logln(utils.LogPrefixError + resp.Status)
+	}
+
+	return err
 }
 
 // NewFileUploadRequest form an HTTP Put request
