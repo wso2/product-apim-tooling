@@ -31,7 +31,7 @@ import (
 	"log"
 )
 
-// logTransport : Flag which determinse if http transport level requests and responses are logged
+// logTransport : Flag which determines if http transport level requests and responses are logged
 var logTransport = false
 
 func init() {
@@ -51,7 +51,7 @@ func Execute(t *testing.T, args ...string) (string, error) {
 	return string(output), err
 }
 
-// GetRowsFromTableResponse : Parse tabular apictl output to retreive an array of rows.
+// GetRowsFromTableResponse : Parse tabular apictl output to retrieve an array of rows.
 // This friendly format aids in asserting results during testing via simple string comparison.
 //
 func GetRowsFromTableResponse(response string) []string {
@@ -68,7 +68,7 @@ func GetValueOfUniformResponse(response string) string {
 	return strings.TrimSpace(strings.Split(response, "output: ")[0])
 }
 
-// SetupEnv : Adds a new environment and automitcally removes it when the calling test function execution ends
+// SetupEnv : Adds a new environment and automatically removes it when the calling test function execution ends
 //
 func SetupEnv(t *testing.T, env string, apim string, tokenEp string) {
 	Execute(t, "add-env", "-e", env, "--apim", apim, "--token", tokenEp)
@@ -78,7 +78,7 @@ func SetupEnv(t *testing.T, env string, apim string, tokenEp string) {
 	})
 }
 
-// Login : Logs into an environment and automitcally logs out when the calling test function execution ends
+// Login : Logs into an environment and automatically logs out when the calling test function execution ends
 //
 func Login(t *testing.T, env string, username string, password string) {
 	Execute(t, "login", env, "-u", username, "-p", password, "-k", "--verbose")
@@ -174,7 +174,7 @@ func constructAppFilePath(path string, name string, owner string) string {
 	return filepath.Join(path, strings.ReplaceAll(owner, "/", "#")+"_"+name+".zip")
 }
 
-// Fatal : Log and Fail execution now. This is not equivalant to testing.T.Fatal(),
+// Fatal : Log and Fail execution now. This is not equivalent to testing.T.Fatal(),
 // which will exit the calling go routine. This function will result in the process exiting.
 // It should be used in scenarios where the testing context testing.T is not available
 // in order to call Fatal(), such as code that is executed from TestMain(m *testing.M)
@@ -182,7 +182,7 @@ func Fatal(v ...interface{}) {
 	log.Fatalln(v...)
 }
 
-// Log : This is equivalant to testing.T.Log() and is dependent on test -v(verbose) flag.
+// Log : This is equivalent to testing.T.Log() and is dependent on test -v(verbose) flag.
 // It should be used in scenarios where the testing context testing.T is not available
 // in order to call Log(), such as code that is executed from TestMain(m *testing.M)
 func Log(v ...interface{}) {
@@ -207,7 +207,7 @@ func LogRequest(logString string, resquest *http.Request) {
 	}
 }
 
-// ValidateAndLogResponse : Validate reposne against expected status code and optionally log the response
+// ValidateAndLogResponse : Validate response against expected status code and optionally log the response
 func ValidateAndLogResponse(logString string, response *http.Response, expectedStatusCode int) {
 	if response.StatusCode != expectedStatusCode {
 		FatalStatusCodeResponse(logString, response)
@@ -216,7 +216,7 @@ func ValidateAndLogResponse(logString string, response *http.Response, expectedS
 	LogResponse(logString, response)
 }
 
-// FatalStatusCodeResponse : Handle response with Status Code that is considerd fatal.
+// FatalStatusCodeResponse : Handle response with Status Code that is considered fatal.
 // Log response and exit the process
 func FatalStatusCodeResponse(logString string, response *http.Response) {
 	logString += " - Unexpected Status Code in response:"
@@ -224,7 +224,7 @@ func FatalStatusCodeResponse(logString string, response *http.Response) {
 	os.Exit(1)
 }
 
-// FatalContentTypeResponse : Handle response with Content-Type that is considerd fatal.
+// FatalContentTypeResponse : Handle response with Content-Type that is considered fatal.
 // Log response and exit the process
 func FatalContentTypeResponse(logString string, response *http.Response) {
 	logString += " - Unexpected Content-Type in response:"

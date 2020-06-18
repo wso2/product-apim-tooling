@@ -23,6 +23,7 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 	"io"
 	"os"
+	"strconv"
 	"text/template"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
@@ -46,6 +47,7 @@ var listAppsCmdEnvironment string
 var listAppsCmdAppOwner string
 var listAppsCmdFormat string
 var listAppsCmdLimit string
+var defaultAppsOwner string
 
 // appsCmd related info
 const appsCmdLiteral = "apps"
@@ -113,6 +115,7 @@ var appsCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + appsCmdLiteral + " called")
 		cred, err := getCredentials(listAppsCmdEnvironment)
+		defaultAppsOwner = cred.Username
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
@@ -174,12 +177,12 @@ func printApps(apps []utils.Application, format string) {
 func init() {
 	ListCmd.AddCommand(appsCmd)
 
-	appsCmd.Flags().StringVarP(&listAppsCmdAppOwner, "owner", "o", "",
+	appsCmd.Flags().StringVarP(&listAppsCmdAppOwner, "owner", "o", defaultAppsOwner,
 		"Owner of the Application")
 	appsCmd.Flags().StringVarP(&listAppsCmdEnvironment, "environment", "e",
 		"", "Environment to be searched")
 	appsCmd.Flags().StringVarP(&listAppsCmdLimit, "limit", "l",
-		"", "Maximum number of applications to return")
+		strconv.Itoa(utils.DefaultAppsDisplayLimit), "Maximum number of applications to return")
 	appsCmd.Flags().StringVarP(&listAppsCmdFormat, "format", "", "", "Pretty-print output"+
 		"using Go templates. Use \"{{jsonPretty .}}\" to list all fields")
 	_ = appsCmd.MarkFlagRequired("environment")

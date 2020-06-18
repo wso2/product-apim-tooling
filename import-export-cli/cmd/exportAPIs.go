@@ -34,7 +34,7 @@ const exportAPIsCmdLiteral = "export-apis"
 const exportAPIsCmdShortDesc = "Export APIs for migration"
 
 const exportAPIsCmdLongDesc = "Export all the APIs of a tenant from one environment, to be imported " +
-"into another environment"
+	"into another environment"
 const exportAPIsCmdExamples = utils.ProjectName + ` ` + exportAPIsCmdLiteral + ` -e production --force
 ` + utils.ProjectName + ` ` + exportAPIsCmdLiteral + ` -e production
 NOTE: The flag (--environment (-e)) is mandatory`
@@ -286,6 +286,6 @@ func init() {
 			"any, and to export APIs from beginning")
 	ExportAPIsCmd.Flags().BoolVarP(&exportAPIPreserveStatus, "preserveStatus", "", true,
 		"Preserve API status when exporting. Otherwise API will be exported in CREATED status")
-	ExportAPIsCmd.Flags().StringVarP(&exportAPIsFormat, "format", "", "", "File format of exported archives(json or yaml)")
+	ExportAPIsCmd.Flags().StringVarP(&exportAPIsFormat, "format", "", utils.DefaultExportFormat, "File format of exported archives(json or yaml)")
 	_ = ExportAPIsCmd.MarkFlagRequired("environment")
 }
