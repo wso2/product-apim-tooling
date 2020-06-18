@@ -224,7 +224,7 @@ func pushChangedFiles(accessToken, environment string, totalProjectsToUpdate int
             fmt.Println(strconv.Itoa(i + 1) + ": " + projectParam.Name + ": (" + projectParam.RelativePath + ")")
             err := impl.ImportApplicationToEnv(accessToken, environment, projectParam.AbsolutePath,
                 importParams.TargetOwner, importParams.Update, importParams.PreserveOwner,
-                importParams.SkipSubscriptions, importParams.SkipKeys)
+                importParams.SkipSubscriptions, importParams.SkipKeys, false)
             if err != nil {
                 fmt.Println("\terror... ", err)
             }

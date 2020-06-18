@@ -861,29 +861,15 @@ func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, a
 		return err
 	}
 
-	// if apiFilePath contains a directory, zip it
-	if info, err := os.Stat(apiFilePath); err == nil && info.IsDir() {
-		tmp, err := ioutil.TempFile("", "api-artifact*.zip")
-		if err != nil {
-			return err
-		}
-		utils.Logln(utils.LogPrefixInfo+"Creating API artifact", tmp.Name())
-		err = utils.Zip(apiFilePath, tmp.Name())
-		if err != nil {
-			return err
-		}
-		defer func() {
-			if importAPISkipCleanup {
-				utils.Logln(utils.LogPrefixInfo+"Leaving", tmp.Name())
-				return
-			}
-			utils.Logln(utils.LogPrefixInfo+"Deleting", tmp.Name())
-			err := os.Remove(tmp.Name())
-			if err != nil {
-				utils.Logln(utils.LogPrefixError + err.Error())
-			}
-		}()
-		apiFilePath = tmp.Name()
+	// if apiFilePath contains a directory, zip it. Otherwise, leave it as it is.
+	apiFilePath, err, cleanupFunc := utils.CreateZipFileFromProject(apiFilePath, importAPISkipCleanup)
+	if err != nil {
+		return err
+	}
+
+	//cleanup the temporary artifacts once consuming the zip file
+	if cleanupFunc != nil {
+		defer cleanupFunc()
 	}
 
 	updateAPI := false

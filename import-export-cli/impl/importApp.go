@@ -42,11 +42,12 @@ import (
 // @param preserveOwner: Preserve the owner after importing the application
 // @param skipSubscriptions: Skip importing subscriptions
 // @param skipKeys: skip importing keys of application
+// @param skipCleanup: skip cleaning up temporary files created during the operation
 func ImportApplicationToEnv(accessToken, environment, filename, appOwner string, updateApplication, preserveOwner,
-	skipSubscriptions, skipKeys bool) error {
+	skipSubscriptions, skipKeys, skipCleanup bool) error {
 	adminEndpoint := utils.GetAdminEndpointOfEnv(environment, utils.MainConfigFilePath)
 	return ImportApplication(accessToken, adminEndpoint, filename, appOwner, updateApplication, preserveOwner,
-		skipSubscriptions, skipKeys)
+		skipSubscriptions, skipKeys, skipCleanup)
 }
 
 // ImportApplication function is used with import-app command
@@ -58,8 +59,9 @@ func ImportApplicationToEnv(accessToken, environment, filename, appOwner string,
 // @param preserveOwner: Preserve the owner after importing the application
 // @param skipSubscriptions: Skip importing subscriptions
 // @param skipKeys: skip importing keys of application
+// @param skipCleanup: skip cleaning up temporary files created during the operation
 func ImportApplication(accessToken, adminEndpoint, filename, appOwner string, updateApplication, preserveOwner,
-	skipSubscriptions, skipKeys bool) error {
+	skipSubscriptions, skipKeys, skipCleanup bool) error {
 
 	exportDirectory := filepath.Join(utils.ExportDirectory, utils.ExportedAppsDirName)
 	adminEndpoint = utils.AppendSlashToString(adminEndpoint)
@@ -71,15 +73,25 @@ func ImportApplication(accessToken, adminEndpoint, filename, appOwner string, up
 		utils.SearchAndTag + "update=" + strconv.FormatBool(updateApplication)
 	utils.Logln(utils.LogPrefixInfo + "Import URL: " + applicationImportEndpoint)
 
-	zipFilePath, err := resolveImportFilePath(filename, exportDirectory)
+	applicationFilePath, err := resolveImportFilePath(filename, exportDirectory)
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating request.", err)
 	}
-	fmt.Println("ZipFilePath:", zipFilePath)
+
+	// If applicationFilePath contains a directory, zip it. Otherwise, leave it as it is.
+	applicationFilePath, err, cleanupFunc := utils.CreateZipFileFromProject(applicationFilePath, skipCleanup)
+	if err != nil {
+		return err
+	}
+
+	//cleanup the temporary artifacts once consuming the zip file
+	if cleanupFunc != nil {
+		defer cleanupFunc()
+	}
 
 	extraParams := map[string]string{}
 
-	req, err := NewAppFileUploadRequest(url, extraParams, "file", zipFilePath, accessToken)
+	req, err := NewAppFileUploadRequest(url, extraParams, "file", applicationFilePath, accessToken)
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating request.", err)
 	}
@@ -104,15 +116,6 @@ func ImportApplication(accessToken, adminEndpoint, filename, appOwner string, up
 
 	if err != nil {
 		utils.Logln(utils.LogPrefixError, err)
-	} else {
-		if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK ||
-			resp.StatusCode == http.StatusMultiStatus {
-			// 207 Multi Status or 201 Created or 200 OK
-			fmt.Printf("\nCompleted importing the Application '" + filename + "'\n")
-		} else {
-			fmt.Printf("\nUnable to import the Application\n")
-			fmt.Println("Status: " + resp.Status)
-		}
 	}
 
 	if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusCreated {
@@ -121,7 +124,7 @@ func ImportApplication(accessToken, adminEndpoint, filename, appOwner string, up
 		fmt.Println("Successfully imported Application!")
 	} else if resp.StatusCode == http.StatusMultiStatus {
 		// 207 Multi Status
-		fmt.Printf("\nPartially imported Application" +
+		fmt.Printf("Partially imported Application" +
 			"\nNOTE: One or more subscriptions were not imported due to unavailability of APIs/Tiers\n")
 	} else if resp.StatusCode == http.StatusUnauthorized {
 		// 401 Unauthorized

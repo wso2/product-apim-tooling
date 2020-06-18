@@ -27,6 +27,7 @@ NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory
   -h, --help                 help for import-app
   -o, --owner string         Name of the target owner of the Application as desired by the Importer
       --preserveOwner        Preserves app owner
+      --skipCleanup          Leave all temporary files created during import process
       --skipKeys             Skip importing keys of the Application
   -s, --skipSubscriptions    Skip subscriptions of the Application
       --update               Update the Application if it is already imported

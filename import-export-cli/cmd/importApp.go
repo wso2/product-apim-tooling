@@ -32,6 +32,7 @@ var preserveOwner bool
 var skipSubscriptions bool
 var importAppSkipKeys bool
 var importAppUpdateApplication bool
+var importAppSkipCleanup bool
 
 // ImportApp command related usage info
 const importAppCmdLiteral = "import-app"
@@ -67,7 +68,7 @@ func executeImportAppCmd(credential credentials.Credential) {
 		utils.HandleErrorAndExit("Error getting OAuth Tokens", err)
 	}
 	err = impl.ImportApplicationToEnv(accessToken, importAppEnvironment, importAppFile, importAppOwner,
-		importAppUpdateApplication, preserveOwner, skipSubscriptions, importAppSkipKeys)
+		importAppUpdateApplication, preserveOwner, skipSubscriptions, importAppSkipKeys, importAppSkipCleanup)
 	if err != nil {
 		utils.HandleErrorAndExit("Error importing Application", err)
 	}
@@ -89,6 +90,8 @@ func init() {
 		"Skip importing keys of the Application")
 	ImportAppCmd.Flags().BoolVarP(&importAppUpdateApplication, "update", "", false,
 		"Update the Application if it is already imported")
+	ImportAppCmd.Flags().BoolVarP(&importAppSkipCleanup, "skipCleanup", "", false, "Leave "+
+		"all temporary files created during import process")
 	_ = ImportAppCmd.MarkFlagRequired("file")
 	_ = ImportAppCmd.MarkFlagRequired("environment")
 }
