@@ -33,6 +33,17 @@ type apiImportExportTestArgs struct {
 	destAPIM    *apim.Client
 }
 
+type apiProductImportExportTestArgs struct {
+	apiProductProvider   credentials
+	ctlUser              credentials
+	apiProduct           *apim.APIProduct
+	srcAPIM              *apim.Client
+	destAPIM             *apim.Client
+	importApisFlag       bool
+	updateApisFlag       bool
+	updateApiProductFlag bool
+}
+
 type appImportExportTestArgs struct {
 	appOwner    credentials
 	ctlUser     credentials
@@ -42,7 +53,8 @@ type appImportExportTestArgs struct {
 }
 
 type apiGetKeyTestArgs struct {
-	ctlUser credentials
-	api     *apim.API
-	apim    *apim.Client
+	ctlUser    credentials
+	api        *apim.API
+	apiProduct *apim.APIProduct
+	apim       *apim.Client
 }
