@@ -130,9 +130,19 @@ var EnvReplaceFilePaths = []string{
 	"SoapToRest",
 }
 
+// project types
+const (
+	ProjectTypeNone         = "None"
+	ProjectTypeApi         = "API"
+	ProjectTypeApiProduct  = "API Product"
+	ProjectTypeApplication = "Application"
+)
+
 // project param files
 const (
 	ParamFileAPI         = "api_params.yaml"
+	ParamFileAPIProduct  = "api_product_params.yaml"
+	ParamFileApplication = "application_params.yaml"
 )
 
 const PrivateJetModeConst = "privateJet"
