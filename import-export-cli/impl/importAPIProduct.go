@@ -343,29 +343,15 @@ func ImportAPIProduct(accessOAuthToken, adminEndpoint, importEnvironment, import
 		return err
 	}
 
-	// If apiProductFilePath contains a directory, zip it
-	if info, err := os.Stat(apiProductFilePath); err == nil && info.IsDir() {
-		tmp, err := ioutil.TempFile("", "api-artifact*.zip")
-		if err != nil {
-			return err
-		}
-		utils.Logln(utils.LogPrefixInfo+"Creating API Product artifact", tmp.Name())
-		err = utils.Zip(apiProductFilePath, tmp.Name())
-		if err != nil {
-			return err
-		}
-		defer func() {
-			if importAPIProductSkipCleanup {
-				utils.Logln(utils.LogPrefixInfo+"Leaving", tmp.Name())
-				return
-			}
-			utils.Logln(utils.LogPrefixInfo+"Deleting", tmp.Name())
-			err := os.Remove(tmp.Name())
-			if err != nil {
-				utils.Logln(utils.LogPrefixError + err.Error())
-			}
-		}()
-		apiProductFilePath = tmp.Name()
+	// If apiProductFilePath contains a directory, zip it. Otherwise, leave it as it is.
+	apiProductFilePath, err, cleanupFunc := utils.CreateZipFileFromProject(apiProductFilePath, importAPIProductSkipCleanup)
+	if err != nil {
+		return err
+	}
+
+	//cleanup the temporary artifacts once consuming the zip file
+	if cleanupFunc != nil {
+		defer cleanupFunc()
 	}
 
 	updateAPIProduct := false
