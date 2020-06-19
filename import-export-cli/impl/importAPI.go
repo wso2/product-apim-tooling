@@ -497,7 +497,7 @@ func injectParamsToAPI(importPath, paramsPath, importEnvironment string) error {
 
 // getApiID returns id of the API by using apiInfo which contains name and version as info
 func getApiID(accessOAuthToken, environment, name, version string) (string, error) {
-	apiQuery := fmt.Sprintf("name:\"%s\" version:%s", name, version)
+	apiQuery := fmt.Sprintf("name:\"%s\" version:\"%s\"", name, version)
 	count, apis, err := GetAPIListFromEnv(accessOAuthToken, environment, url.QueryEscape(apiQuery), "")
 	if err != nil {
 		return "", err
