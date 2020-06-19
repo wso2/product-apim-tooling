@@ -108,7 +108,12 @@ func mergeAPI(apiDirectory string, environmentParams *params.Environment) error 
 		return err
 	}
 
-	configData, err := json.Marshal(environmentParams.Endpoints)
+	// if endpointType field is not specified in the api_params.yaml, it will be considered as HTTP/REST
+	if isEmpty(environmentParams.EndpointType) {
+		environmentParams.EndpointType = utils.HttpRESTEndpointType
+	}
+
+	configData, err := setupMultipleEndpoints(environmentParams)
 	if err != nil {
 		return err
 	}
@@ -149,6 +154,111 @@ func mergeAPI(apiDirectory string, environmentParams *params.Environment) error 
 		return err
 	}
 	return nil
+}
+
+// setupMultipleEndpoints will set up the endpoints accordingly, for the applicable type
+// @param environmentParams : Environment parameters from api_params.yaml
+// @return configData as a byte array
+// @return error
+func setupMultipleEndpoints(environmentParams *params.Environment) ([]byte, error) {
+	var configData []byte
+	var err error
+
+	// if the endpoint routing policy or the endpoints field is not specified
+	if environmentParams.EndpointRoutingPolicy == "" && environmentParams.Endpoints == nil {
+		// if endpoint type is Dynamic
+		if environmentParams.EndpointType == utils.DynamicEndpointType {
+			configData = []byte(utils.DynamicEndpointConfig)
+		} else if environmentParams.EndpointType == utils.AwsLambdaEndpointType { // if endpoint type is AWS Lambda
+			if environmentParams.AWSLambdaEndpoints == nil {
+				return nil, errors.New("Please specify awsLambdaEndpoints field for " + environmentParams.Name + " and continue...")
+			}
+			if environmentParams.AWSLambdaEndpoints.AccessMethod == utils.AwsLambdaRoleSuppliedAccessMethod {
+				environmentParams.AWSLambdaEndpoints.AccessMethod = utils.AwsLambdaRoleSuppliedAccessMethodForJSON
+			}
+			environmentParams.AWSLambdaEndpoints.EndpointType = utils.AwsLambdaEndpointTypeForJSON
+			configData, err = json.Marshal(environmentParams.AWSLambdaEndpoints)
+		} else {
+			return nil, errors.New("Please specify the endpoint routing policy or the endpoints field for " + environmentParams.Name + " and continue...")
+		}
+	}
+
+	// if endpoint type is HTTP/REST
+	if environmentParams.EndpointType == utils.HttpRESTEndpointType || environmentParams.EndpointType == utils.HttpRESTEndpointTypeForJSON {
+		environmentParams.EndpointType = utils.HttpRESTEndpointTypeForJSON
+
+		// if the endpoint routing policy is not specified, but the endpoints field is specified, this is the usual scenario
+		if environmentParams.EndpointRoutingPolicy == "" && environmentParams.Endpoints != nil {
+			configData, err = json.Marshal(environmentParams.Endpoints)
+		}
+
+		// if the endpoint routing policy is specified as load balanced
+		if environmentParams.EndpointRoutingPolicy == utils.LoadBalanceEndpointRoutingPolicy {
+			if environmentParams.LoadBalanceEndpoints == nil {
+				return nil, errors.New("Please specify loadBalanceEndpoints field for " + environmentParams.Name + " and continue...")
+			}
+			// The default class of the algorithm to be used should be set to RoundRobin
+			environmentParams.LoadBalanceEndpoints.AlgorithmClassName = utils.LoadBalanceAlgorithmClass
+			environmentParams.LoadBalanceEndpoints.EndpointType = utils.LoadBalanceEndpointTypeForJSON
+			configData, err = json.Marshal(environmentParams.LoadBalanceEndpoints)
+		}
+
+		// if the endpoint routing policy is specified as failover
+		if environmentParams.EndpointRoutingPolicy == utils.FailoverRoutingPolicy {
+			if environmentParams.FailoverEndpoints == nil {
+				return nil, errors.New("Please specify failoverEndpoints field for " + environmentParams.Name + " and continue...")
+			}
+			environmentParams.FailoverEndpoints.EndpointType = utils.FailoverRoutingPolicy
+			environmentParams.FailoverEndpoints.Failover = true
+			configData, err = json.Marshal(environmentParams.FailoverEndpoints)
+		}
+	}
+
+	// if endpoint type is HTTP/SOAP
+	if environmentParams.EndpointType == utils.HttpSOAPEndpointType {
+
+		// if the endpoint routing policy is not specified, but the endpoints field is specified
+		if environmentParams.EndpointRoutingPolicy == "" && environmentParams.Endpoints != nil {
+			environmentParams.Endpoints.EndpointType = utils.HttpSOAPEndpointTypeForJSON
+			configData, err = json.Marshal(environmentParams.Endpoints)
+		}
+
+		// if the endpoint routing policy is specified as load balanced
+		if environmentParams.EndpointRoutingPolicy == utils.LoadBalanceEndpointRoutingPolicy {
+			if environmentParams.LoadBalanceEndpoints == nil {
+				return nil, errors.New("Please specify loadBalanceEndpoints field for " + environmentParams.Name + " and continue...")
+			}
+			// The default class of the algorithm to be used should be set to RoundRobin
+			environmentParams.LoadBalanceEndpoints.AlgorithmClassName = utils.LoadBalanceAlgorithmClass
+			environmentParams.LoadBalanceEndpoints.EndpointType = utils.LoadBalanceEndpointTypeForJSON
+			for index, _ := range environmentParams.LoadBalanceEndpoints.Production {
+				environmentParams.LoadBalanceEndpoints.Production[index].EndpointType = utils.HttpSOAPEndpointTypeForJSON
+			}
+			for index, _ := range environmentParams.LoadBalanceEndpoints.Sandbox {
+				environmentParams.LoadBalanceEndpoints.Sandbox[index].EndpointType = utils.HttpSOAPEndpointTypeForJSON
+			}
+			configData, err = json.Marshal(environmentParams.LoadBalanceEndpoints)
+		}
+
+		// if the endpoint routing policy is specified as failover
+		if environmentParams.EndpointRoutingPolicy == utils.FailoverRoutingPolicy {
+			if environmentParams.FailoverEndpoints == nil {
+				return nil, errors.New("Please specify failoverEndpoints field for " + environmentParams.Name + " and continue...")
+			}
+			environmentParams.FailoverEndpoints.Production.EndpointType = utils.HttpSOAPEndpointTypeForJSON
+			environmentParams.FailoverEndpoints.Sandbox.EndpointType = utils.HttpSOAPEndpointTypeForJSON
+			for index, _ := range environmentParams.FailoverEndpoints.ProductionFailovers {
+				environmentParams.FailoverEndpoints.ProductionFailovers[index].EndpointType = utils.HttpSOAPEndpointTypeForJSON
+			}
+			for index, _ := range environmentParams.FailoverEndpoints.SandboxFailovers {
+				environmentParams.FailoverEndpoints.SandboxFailovers[index].EndpointType = utils.HttpSOAPEndpointTypeForJSON
+			}
+			environmentParams.FailoverEndpoints.EndpointType = utils.FailoverRoutingPolicy
+			environmentParams.FailoverEndpoints.Failover = true
+			configData, err = json.Marshal(environmentParams.FailoverEndpoints)
+		}
+	}
+	return configData, err
 }
 
 // Handle security parameters in api_params.yaml
