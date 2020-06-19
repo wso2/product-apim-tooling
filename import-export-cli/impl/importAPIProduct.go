@@ -102,7 +102,7 @@ func resolveImportAPIProductFilePath(file, defaultExportDirectory string) (strin
 
 // getApiProductID returns id of the API Product by using apiProductInfo which contains name, version and provider as info
 func getApiProductID(name, version, environment, accessOAuthToken string) (string, error) {
-	apiProductQuery := fmt.Sprintf("name:\"%s\" version:%s", name, version)
+	apiProductQuery := fmt.Sprintf("name:\"%s\" version:\"%s\"", name, version)
 	apiProductQuery += " type:\"" + utils.DefaultApiProductType + "\""
 	count, apiProducts, err := GetAPIProductListFromEnv(accessOAuthToken, environment, url.QueryEscape(apiProductQuery), "")
 	if err != nil {
