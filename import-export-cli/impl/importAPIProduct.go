@@ -41,7 +41,7 @@ import (
 )
 
 var (
-	reApiProductName                    = regexp.MustCompile(`[~!@#;:%^*()+={}|\\<>"',&/$]`)
+	reApiProductName = regexp.MustCompile(`[~!@#;:%^*()+={}|\\<>"',&/$]`)
 )
 
 // extractAPIProductDefinition extracts API Product information from jsonContent
@@ -102,7 +102,7 @@ func resolveImportAPIProductFilePath(file, defaultExportDirectory string) (strin
 
 // getApiProductID returns id of the API Product by using apiProductInfo which contains name, version and provider as info
 func getApiProductID(name, version, environment, accessOAuthToken string) (string, error) {
-	apiProductQuery := fmt.Sprintf("name:%s version:%s", name, version)
+	apiProductQuery := fmt.Sprintf("name:\"%s\" version:%s", name, version)
 	apiProductQuery += " type:\"" + utils.DefaultApiProductType + "\""
 	count, apiProducts, err := GetAPIProductListFromEnv(accessOAuthToken, environment, url.QueryEscape(apiProductQuery), "")
 	if err != nil {
@@ -260,7 +260,7 @@ func ImportAPIProductToEnv(accessOAuthToken, importEnvironment, importPath strin
 
 // ImportAPIProduct function is used with import-api-product command
 func ImportAPIProduct(accessOAuthToken, adminEndpoint, importEnvironment, importPath string, importAPIs, importAPIsUpdate,
-		importAPIProductUpdate, importAPIProductPreserveProvider, importAPIProductSkipCleanup bool) error {
+	importAPIProductUpdate, importAPIProductPreserveProvider, importAPIProductSkipCleanup bool) error {
 	var exportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedApiProductsDirName)
 
 	resolvedApiProductFilePath, err := resolveImportAPIProductFilePath(importPath, exportDirectory)
@@ -414,4 +414,3 @@ func ImportAPIProduct(accessOAuthToken, adminEndpoint, importEnvironment, import
 	err = importAPIProduct(adminEndpoint, httpMethod, apiProductFilePath, accessOAuthToken, extraParams)
 	return err
 }
-

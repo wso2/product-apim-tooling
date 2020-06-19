@@ -49,7 +49,7 @@ import (
 )
 
 var (
-	reApiName                    = regexp.MustCompile(`[~!@#;:%^*()+={}|\\<>"',&/$]`)
+	reApiName = regexp.MustCompile(`[~!@#;:%^*()+={}|\\<>"',&/$]`)
 )
 
 // extractAPIDefinition extracts API information from jsonContent
@@ -497,7 +497,7 @@ func injectParamsToAPI(importPath, paramsPath, importEnvironment string) error {
 
 // getApiID returns id of the API by using apiInfo which contains name and version as info
 func getApiID(accessOAuthToken, environment, name, version string) (string, error) {
-	apiQuery := fmt.Sprintf("name:%s version:%s", name, version)
+	apiQuery := fmt.Sprintf("name:\"%s\" version:%s", name, version)
 	count, apis, err := GetAPIListFromEnv(accessOAuthToken, environment, url.QueryEscape(apiQuery), "")
 	if err != nil {
 		return "", err
@@ -766,7 +766,7 @@ func ImportAPIToEnv(accessOAuthToken, importEnvironment, importPath, apiParamsPa
 
 // ImportAPI function is used with import-api command
 func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, apiParamsPath string, importAPIUpdate, preserveProvider,
-		importAPISkipCleanup bool) error {
+	importAPISkipCleanup bool) error {
 	exportDirectory := filepath.Join(utils.ExportDirectory, utils.ExportedApisDirName)
 	resolvedApiFilePath, err := resolveImportFilePath(importPath, exportDirectory)
 	if err != nil {
