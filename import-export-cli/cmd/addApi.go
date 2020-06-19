@@ -337,13 +337,13 @@ func rollbackConfigs(apiCr *wso2v1alpha1.API) {
 
 func init() {
 	addCmd.AddCommand(addApiCmd)
+	addApiCmd.Flags().StringVarP(&flagApiEndPoint, "apiEndPoint", "a", "","")
 	addApiCmd.Flags().StringVarP(&flagApiName, "name", "n", "", "Name of the API")
 	addApiCmd.Flags().StringArrayVarP(&flagSwaggerFilePaths, "from-file", "f", []string{}, "Path to swagger file")
 	addApiCmd.Flags().IntVar(&flagReplicas, "replicas", 1, "replica set")
 	addApiCmd.Flags().StringVar(&flagNamespace, "namespace", "", "namespace of API")
 	addApiCmd.Flags().BoolVarP(&flagOverride, "override", "", false, "Property to override the existing docker image with same name and version")
 	addApiCmd.Flags().StringVarP(&flagApiVersion, "version", "v", "", "Property to override the existing docker image with same name and version")
-	addApiCmd.Flags().StringVarP(&flagApiEndPoint, "apiEndPoint", "a", "","")
 	addApiCmd.Flags().StringVarP(&flagApiMode, "mode", "m", "",
 		fmt.Sprintf("Property to override the deploying mode. Available modes: %v, %v", utils.PrivateJetModeConst, utils.SidecarModeConst))
 }
