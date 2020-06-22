@@ -28,7 +28,7 @@ apictl add/update api -n petstore --from-file=./Swagger.json --replicas=3 --name
       --namespace string        namespace of API
       --override                Property to override the existing docker image with same name and version
       --replicas int            replica set (default 1)
-  -v, --version string          Property to override the existing docker image with same name and version
+  -v, --version string          Version of the API
 ```
 
 ### Options inherited from parent commands

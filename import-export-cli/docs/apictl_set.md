@@ -28,11 +28,11 @@ apictl set --mode default
 ### Options
 
 ```
-      --export-directory string    Path to directory where APIs should be saved (default "/home/naduni/.wso2apictl/exported")
+      --export-directory string    Path to directory where APIs should be saved (default "/home/chamindu/.wso2apictl/exported")
   -h, --help                       help for set
       --http-request-timeout int   Timeout for HTTP Client (default 10000)
-  -m, --mode string                mode of apictl
-  -t, --token-type string          Type of the token to be generated
+  -m, --mode string                mode of apictl (default "default")
+  -t, --token-type string          Type of the token to be generated (default "JWT")
 ```
 
 ### Options inherited from parent commands

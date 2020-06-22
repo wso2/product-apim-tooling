@@ -171,7 +171,7 @@ func init() {
 		"", "Environment to which the API should be exported")
 	ExportAPICmd.Flags().BoolVarP(&exportAPIPreserveStatus, "preserveStatus", "", true,
 		"Preserve API status when exporting. Otherwise API will be exported in CREATED status")
-	ExportAPICmd.Flags().StringVarP(&exportAPIFormat, "format", "", "", "File format of exported archive(json or yaml)")
+	ExportAPICmd.Flags().StringVarP(&exportAPIFormat, "format", "", utils.DefaultExportFormat, "File format of exported archive(json or yaml)")
 	_ = ExportAPICmd.MarkFlagRequired("name")
 	_ = ExportAPICmd.MarkFlagRequired("version")
 	_ = ExportAPICmd.MarkFlagRequired("environment")

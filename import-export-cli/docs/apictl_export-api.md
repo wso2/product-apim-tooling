@@ -22,7 +22,7 @@ NOTE: All the 3 flags (--name (-n), --version (-v) and --environment (-e)) are m
 
 ```
   -e, --environment string   Environment to which the API should be exported
-      --format string        File format of exported archive(json or yaml)
+      --format string        File format of exported archive(json or yaml) (default "YAML")
   -h, --help                 help for export-api
   -n, --name string          Name of the API to be exported
       --preserveStatus       Preserve API status when exporting. Otherwise API will be exported in CREATED status (default true)
