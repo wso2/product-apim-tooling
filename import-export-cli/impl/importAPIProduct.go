@@ -41,7 +41,7 @@ import (
 )
 
 var (
-	reApiProductName = regexp.MustCompile(`[~!@#;:%^*()+={}|\\<>"',&/$]`)
+	reAPIProductName = regexp.MustCompile(`[~!@#;:%^*()+={}|\\<>"',&/$]`)
 )
 
 // extractAPIProductDefinition extracts API Product information from jsonContent
@@ -64,7 +64,7 @@ func getAPIProductDefinition(filePath string) (*v2.APIProductDefinition, []byte,
 
 	var buffer []byte
 	if info.IsDir() {
-		_, content, err := resolveYamlOrJson(path.Join(filePath, "Meta-information", "api"))
+		_, content, err := resolveYamlOrJSON(path.Join(filePath, "Meta-information", "api"))
 		if err != nil {
 			return nil, nil, err
 		}
@@ -100,9 +100,9 @@ func resolveImportAPIProductFilePath(file, defaultExportDirectory string) (strin
 	return absPath, nil
 }
 
-// getApiProductID returns id of the API Product by using apiProductInfo which contains name, version and provider as info
-func getApiProductID(name, version, environment, accessOAuthToken string) (string, error) {
-	apiProductQuery := fmt.Sprintf("name:\"%s\" version:\"%s\"", name, version)
+// getAPIProductID returns id of the API Product by using apiProductInfo which contains name, version and provider as info
+func getAPIProductID(name, version, environment, accessOAuthToken string) (string, error) {
+	apiProductQuery := fmt.Sprintf("name:%s version:%s", name, version)
 	apiProductQuery += " type:\"" + utils.DefaultApiProductType + "\""
 	count, apiProducts, err := GetAPIProductListFromEnv(accessOAuthToken, environment, url.QueryEscape(apiProductQuery), "")
 	if err != nil {
@@ -114,7 +114,7 @@ func getApiProductID(name, version, environment, accessOAuthToken string) (strin
 	return apiProducts[0].ID, nil
 }
 
-func populateApiProductWithDefaults(def *v2.APIProductDefinition) (dirty bool) {
+func populateAPIProductWithDefaults(def *v2.APIProductDefinition) (dirty bool) {
 	dirty = false
 	if def.ContextTemplate == "" {
 		if !strings.Contains(def.Context, "{version}") {
@@ -135,12 +135,12 @@ func populateApiProductWithDefaults(def *v2.APIProductDefinition) (dirty bool) {
 }
 
 // validateApiProductDefinition validates an API Product against basic rules
-func validateApiProductDefinition(def *v2.APIProductDefinition) error {
+func validateAPIProductDefinition(def *v2.APIProductDefinition) error {
 	utils.Logln(utils.LogPrefixInfo + "Validating API Product")
 	if isEmpty(def.ID.APIProductName) {
 		return errors.New("apiProductName is required")
 	}
-	if reApiProductName.MatchString(def.ID.APIProductName) {
+	if reAPIProductName.MatchString(def.ID.APIProductName) {
 		return errors.New(`apiProductName contains one or more illegal characters (~!@#;:%^*()+={}|\\<>"',&\/$)`)
 	}
 	if isEmpty(def.ID.Version) {
@@ -263,14 +263,14 @@ func ImportAPIProduct(accessOAuthToken, adminEndpoint, importEnvironment, import
 	importAPIProductUpdate, importAPIProductPreserveProvider, importAPIProductSkipCleanup bool) error {
 	var exportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedApiProductsDirName)
 
-	resolvedApiProductFilePath, err := resolveImportAPIProductFilePath(importPath, exportDirectory)
+	resolvedAPIProductFilePath, err := resolveImportAPIProductFilePath(importPath, exportDirectory)
 	if err != nil {
 		return err
 	}
-	utils.Logln(utils.LogPrefixInfo+"API Product Location:", resolvedApiProductFilePath)
+	utils.Logln(utils.LogPrefixInfo+"API Product Location:", resolvedAPIProductFilePath)
 
 	utils.Logln(utils.LogPrefixInfo + "Creating workspace")
-	tmpPath, err := getTempApiDirectory(resolvedApiProductFilePath)
+	tmpPath, err := getTempAPIDirectory(resolvedAPIProductFilePath)
 	if err != nil {
 		return err
 	}
@@ -305,7 +305,7 @@ func ImportAPIProduct(accessOAuthToken, adminEndpoint, importEnvironment, import
 		return err
 	}
 	// Fill with defaults
-	if populateApiProductWithDefaults(apiProductInfo) {
+	if populateAPIProductWithDefaults(apiProductInfo) {
 		utils.Logln(utils.LogPrefixInfo + "API Product is populated with defaults")
 		// API Product is dirty, write it to disk
 		buf, err := json.Marshal(apiProductInfo)
@@ -339,7 +339,7 @@ func ImportAPIProduct(accessOAuthToken, adminEndpoint, importEnvironment, import
 		}
 	}
 	// Validate definition
-	if err = validateApiProductDefinition(apiProductInfo); err != nil {
+	if err = validateAPIProductDefinition(apiProductInfo); err != nil {
 		return err
 	}
 
@@ -371,7 +371,7 @@ func ImportAPIProduct(accessOAuthToken, adminEndpoint, importEnvironment, import
 	updateAPIProduct := false
 	if importAPIsUpdate || importAPIProductUpdate {
 		// Check for API Product existence
-		id, err := getApiProductID(apiProductInfo.ID.APIProductName, apiProductInfo.ID.Version, importEnvironment, accessOAuthToken)
+		id, err := getAPIProductID(apiProductInfo.ID.APIProductName, apiProductInfo.ID.Version, importEnvironment, accessOAuthToken)
 		if err != nil {
 			return err
 		}
