@@ -631,6 +631,10 @@ func populateApiWithDefaults(def *v2.APIDefinition) (dirty bool) {
 		def.Implementation = "ENDPOINT"
 		dirty = true
 	}
+	if def.KeyManagers == nil || len(def.KeyManagers) == 0 {
+		def.KeyManagers = []string{"all"}
+		dirty = true
+	}
 	return
 }
 
