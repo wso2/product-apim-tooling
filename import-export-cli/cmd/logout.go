@@ -49,6 +49,14 @@ var logoutCmd = &cobra.Command{
 }
 
 func runLogout(environment string) error {
+	cred, err := getCredentials(environment)
+	//Get current access token for
+	accessToken, err := credentials.GetOAuthAccessToken(cred, environment)
+	fmt.Println("Point 3")
+	error := credentials.RevokeAccessToken(cred, environment, accessToken)
+	if error != nil {
+		return err
+	}
 	store, err := credentials.GetDefaultCredentialStore()
 	if err != nil {
 		return err

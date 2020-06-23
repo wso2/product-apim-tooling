@@ -91,6 +91,7 @@ const HeaderValueXWWWFormUrlEncoded = "application/x-www-form-urlencoded"
 const HeaderValueAuthBearerPrefix = "Bearer"
 const HeaderValueAuthBasicPrefix = "Basic"
 const HeaderValueMultiPartFormData = "multipart/form-data"
+const HeaderToken = "token"
 
 // Logging Prefixes
 const LogPrefixInfo = "[INFO]: "
