@@ -143,3 +143,23 @@ const DefaultApisDisplayLimit = 25
 const DefaultApiProductsDisplayLimit = 25
 const DefaultAppsDisplayLimit = 25
 const DefaultExportFormat = "YAML"
+
+// Multiple endpoints related constants
+const HttpRESTEndpointType = "rest"              // To denote "endpointType: rest" in api_params.yaml
+const HttpRESTEndpointTypeForJSON = "http"       // To denote "endpointType: http" in api_params.yaml and to denote the "endpointType : http" in api.json
+const HttpSOAPEndpointType = "soap"              // To denote "endpointType: soap" in api_params.yaml
+const HttpSOAPEndpointTypeForJSON = "address"    // To denote the "endpointType : address" in api.json
+const AwsLambdaEndpointType = "aws"              // To denote "endpointType: aws" in api_params.yaml
+const AwsLambdaEndpointTypeForJSON = "awslambda" // To denote "endpointType: awslambda" in api.json
+const DynamicEndpointType = "dynamic"            // To denote "endpointType: dynamic" in api_params.yaml
+
+const LoadBalanceEndpointRoutingPolicy = "load_balanced" // To denote "endpointRoutingPolicy: load_balanced" in api_params.yaml
+const LoadBalanceEndpointTypeForJSON = "load_balance"    // To denote the "endpointType : load_balance" in api.json
+const LoadBalanceAlgorithmClass = "org.apache.synapse.endpoints.algorithms.RoundRobin"
+const FailoverRoutingPolicy = "failover" // To denote "endpointRoutingPolicy: failover" in api_params.yaml and to denote the "endpointType : failover" in api.json
+
+const DynamicEndpointConfig = `{"endpoint_type":"default","sandbox_endpoints":{"url":"default"},"failOver":"False","production_endpoints":{"url":"default"}}`
+
+const AwsLambdaRoleSuppliedAccessMethod = "role_supplied"        // To denote "accessMethod: role_supplied" in api_params.yaml
+const AwsLambdaRoleSuppliedAccessMethodForJSON = "role-supplied" // To denote the "accessMethod : role-supplied" in api.json
+const AwsLambdaStoredAccessMethod = "stored"                     // To denote "accessMethod: stored" in api_params.yaml and to denote the "accessMethod : stored" in api.json

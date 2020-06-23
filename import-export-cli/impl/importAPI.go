@@ -49,7 +49,7 @@ import (
 )
 
 var (
-	reApiName = regexp.MustCompile(`[~!@#;:%^*()+={}|\\<>"',&/$]`)
+	reAPIName = regexp.MustCompile(`[~!@#;:%^*()+={}|\\<>"',&/$]`)
 )
 
 // extractAPIDefinition extracts API information from jsonContent
@@ -72,7 +72,7 @@ func getAPIDefinition(filePath string) (*v2.APIDefinition, []byte, error) {
 
 	var buffer []byte
 	if info.IsDir() {
-		_, content, err := resolveYamlOrJson(path.Join(filePath, "Meta-information", "api"))
+		_, content, err := resolveYamlOrJSON(path.Join(filePath, "Meta-information", "api"))
 		if err != nil {
 			return nil, nil, err
 		}
@@ -93,7 +93,7 @@ func mergeAPI(apiDirectory string, environmentParams *params.Environment) error 
 	// read api from Meta-information
 	apiPath := filepath.Join(apiDirectory, "Meta-information", "api")
 	utils.Logln(utils.LogPrefixInfo + "Reading API definition: ")
-	fp, jsonContent, err := resolveYamlOrJson(apiPath)
+	fp, jsonContent, err := resolveYamlOrJSON(apiPath)
 	if err != nil {
 		return err
 	}
@@ -108,7 +108,12 @@ func mergeAPI(apiDirectory string, environmentParams *params.Environment) error 
 		return err
 	}
 
-	configData, err := json.Marshal(environmentParams.Endpoints)
+	// if endpointType field is not specified in the api_params.yaml, it will be considered as HTTP/REST
+	if isEmpty(environmentParams.EndpointType) {
+		environmentParams.EndpointType = utils.HttpRESTEndpointType
+	}
+
+	configData, err := setupMultipleEndpoints(environmentParams)
 	if err != nil {
 		return err
 	}
@@ -149,6 +154,111 @@ func mergeAPI(apiDirectory string, environmentParams *params.Environment) error 
 		return err
 	}
 	return nil
+}
+
+// setupMultipleEndpoints will set up the endpoints accordingly, for the applicable type
+// @param environmentParams : Environment parameters from api_params.yaml
+// @return configData as a byte array
+// @return error
+func setupMultipleEndpoints(environmentParams *params.Environment) ([]byte, error) {
+	var configData []byte
+	var err error
+
+	// if the endpoint routing policy or the endpoints field is not specified
+	if environmentParams.EndpointRoutingPolicy == "" && environmentParams.Endpoints == nil {
+		// if endpoint type is Dynamic
+		if environmentParams.EndpointType == utils.DynamicEndpointType {
+			configData = []byte(utils.DynamicEndpointConfig)
+		} else if environmentParams.EndpointType == utils.AwsLambdaEndpointType { // if endpoint type is AWS Lambda
+			if environmentParams.AWSLambdaEndpoints == nil {
+				return nil, errors.New("Please specify awsLambdaEndpoints field for " + environmentParams.Name + " and continue...")
+			}
+			if environmentParams.AWSLambdaEndpoints.AccessMethod == utils.AwsLambdaRoleSuppliedAccessMethod {
+				environmentParams.AWSLambdaEndpoints.AccessMethod = utils.AwsLambdaRoleSuppliedAccessMethodForJSON
+			}
+			environmentParams.AWSLambdaEndpoints.EndpointType = utils.AwsLambdaEndpointTypeForJSON
+			configData, err = json.Marshal(environmentParams.AWSLambdaEndpoints)
+		} else {
+			return nil, errors.New("Please specify the endpoint routing policy or the endpoints field for " + environmentParams.Name + " and continue...")
+		}
+	}
+
+	// if endpoint type is HTTP/REST
+	if environmentParams.EndpointType == utils.HttpRESTEndpointType || environmentParams.EndpointType == utils.HttpRESTEndpointTypeForJSON {
+		environmentParams.EndpointType = utils.HttpRESTEndpointTypeForJSON
+
+		// if the endpoint routing policy is not specified, but the endpoints field is specified, this is the usual scenario
+		if environmentParams.EndpointRoutingPolicy == "" && environmentParams.Endpoints != nil {
+			configData, err = json.Marshal(environmentParams.Endpoints)
+		}
+
+		// if the endpoint routing policy is specified as load balanced
+		if environmentParams.EndpointRoutingPolicy == utils.LoadBalanceEndpointRoutingPolicy {
+			if environmentParams.LoadBalanceEndpoints == nil {
+				return nil, errors.New("Please specify loadBalanceEndpoints field for " + environmentParams.Name + " and continue...")
+			}
+			// The default class of the algorithm to be used should be set to RoundRobin
+			environmentParams.LoadBalanceEndpoints.AlgorithmClassName = utils.LoadBalanceAlgorithmClass
+			environmentParams.LoadBalanceEndpoints.EndpointType = utils.LoadBalanceEndpointTypeForJSON
+			configData, err = json.Marshal(environmentParams.LoadBalanceEndpoints)
+		}
+
+		// if the endpoint routing policy is specified as failover
+		if environmentParams.EndpointRoutingPolicy == utils.FailoverRoutingPolicy {
+			if environmentParams.FailoverEndpoints == nil {
+				return nil, errors.New("Please specify failoverEndpoints field for " + environmentParams.Name + " and continue...")
+			}
+			environmentParams.FailoverEndpoints.EndpointType = utils.FailoverRoutingPolicy
+			environmentParams.FailoverEndpoints.Failover = true
+			configData, err = json.Marshal(environmentParams.FailoverEndpoints)
+		}
+	}
+
+	// if endpoint type is HTTP/SOAP
+	if environmentParams.EndpointType == utils.HttpSOAPEndpointType {
+
+		// if the endpoint routing policy is not specified, but the endpoints field is specified
+		if environmentParams.EndpointRoutingPolicy == "" && environmentParams.Endpoints != nil {
+			environmentParams.Endpoints.EndpointType = utils.HttpSOAPEndpointTypeForJSON
+			configData, err = json.Marshal(environmentParams.Endpoints)
+		}
+
+		// if the endpoint routing policy is specified as load balanced
+		if environmentParams.EndpointRoutingPolicy == utils.LoadBalanceEndpointRoutingPolicy {
+			if environmentParams.LoadBalanceEndpoints == nil {
+				return nil, errors.New("Please specify loadBalanceEndpoints field for " + environmentParams.Name + " and continue...")
+			}
+			// The default class of the algorithm to be used should be set to RoundRobin
+			environmentParams.LoadBalanceEndpoints.AlgorithmClassName = utils.LoadBalanceAlgorithmClass
+			environmentParams.LoadBalanceEndpoints.EndpointType = utils.LoadBalanceEndpointTypeForJSON
+			for index := range environmentParams.LoadBalanceEndpoints.Production {
+				environmentParams.LoadBalanceEndpoints.Production[index].EndpointType = utils.HttpSOAPEndpointTypeForJSON
+			}
+			for index := range environmentParams.LoadBalanceEndpoints.Sandbox {
+				environmentParams.LoadBalanceEndpoints.Sandbox[index].EndpointType = utils.HttpSOAPEndpointTypeForJSON
+			}
+			configData, err = json.Marshal(environmentParams.LoadBalanceEndpoints)
+		}
+
+		// if the endpoint routing policy is specified as failover
+		if environmentParams.EndpointRoutingPolicy == utils.FailoverRoutingPolicy {
+			if environmentParams.FailoverEndpoints == nil {
+				return nil, errors.New("Please specify failoverEndpoints field for " + environmentParams.Name + " and continue...")
+			}
+			environmentParams.FailoverEndpoints.Production.EndpointType = utils.HttpSOAPEndpointTypeForJSON
+			environmentParams.FailoverEndpoints.Sandbox.EndpointType = utils.HttpSOAPEndpointTypeForJSON
+			for index := range environmentParams.FailoverEndpoints.ProductionFailovers {
+				environmentParams.FailoverEndpoints.ProductionFailovers[index].EndpointType = utils.HttpSOAPEndpointTypeForJSON
+			}
+			for index := range environmentParams.FailoverEndpoints.SandboxFailovers {
+				environmentParams.FailoverEndpoints.SandboxFailovers[index].EndpointType = utils.HttpSOAPEndpointTypeForJSON
+			}
+			environmentParams.FailoverEndpoints.EndpointType = utils.FailoverRoutingPolicy
+			environmentParams.FailoverEndpoints.Failover = true
+			configData, err = json.Marshal(environmentParams.FailoverEndpoints)
+		}
+	}
+	return configData, err
 }
 
 // Handle security parameters in api_params.yaml
@@ -328,7 +438,7 @@ func resolveAPIParamsPath(importPath, paramPath string) (string, error) {
 	}
 }
 
-func getTempApiDirectory(file string) (string, error) {
+func getTempAPIDirectory(file string) (string, error) {
 	fileIsDir := false
 	// create a temp directory
 	tmpDir, err := ioutil.TempDir("", "apim")
@@ -362,11 +472,11 @@ func getTempApiDirectory(file string) (string, error) {
 	}
 }
 
-// resolveYamlOrJson for a given filepath.
+// resolveYamlOrJSON for a given filepath.
 // first it will look for the yaml file, if not will fallback for json
 // give filename without extension so resolver will resolve for file
 // fn is resolved filename, jsonContent is file as a json object, error if anything wrong happen(or both files does not exists)
-func resolveYamlOrJson(filename string) (string, []byte, error) {
+func resolveYamlOrJSON(filename string) (string, []byte, error) {
 	// lookup for yaml
 	yamlFp := filename + ".yaml"
 	if info, err := os.Stat(yamlFp); err == nil && !info.IsDir() {
@@ -495,9 +605,9 @@ func injectParamsToAPI(importPath, paramsPath, importEnvironment string) error {
 	return nil
 }
 
-// getApiID returns id of the API by using apiInfo which contains name and version as info
-func getApiID(accessOAuthToken, environment, name, version string) (string, error) {
-	apiQuery := fmt.Sprintf("name:\"%s\" version:\"%s\"", name, version)
+// getAPIID returns id of the API by using apiInfo which contains name and version as info
+func getAPIID(accessOAuthToken, environment, name, version string) (string, error) {
+	apiQuery := fmt.Sprintf("name:%s version:%s", name, version)
 	count, apis, err := GetAPIListFromEnv(accessOAuthToken, environment, url.QueryEscape(apiQuery), "")
 	if err != nil {
 		return "", err
@@ -515,7 +625,7 @@ func isEmpty(s string) bool {
 
 func preProcessAPI(apiDirectory string) error {
 	dirty := false
-	apiPath, jsonData, err := resolveYamlOrJson(filepath.Join(apiDirectory, "Meta-information", "api"))
+	apiPath, jsonData, err := resolveYamlOrJSON(filepath.Join(apiDirectory, "Meta-information", "api"))
 	if err != nil {
 		return err
 	}
@@ -564,14 +674,14 @@ func preProcessAPI(apiDirectory string) error {
 	}
 
 	if dirty {
-		yamlApiPath := filepath.Join(apiDirectory, "Meta-information", "api.yaml")
-		utils.Logln(utils.LogPrefixInfo+"Writing preprocessed API to:", yamlApiPath)
+		yamlAPIPath := filepath.Join(apiDirectory, "Meta-information", "api.yaml")
+		utils.Logln(utils.LogPrefixInfo+"Writing preprocessed API to:", yamlAPIPath)
 		content, err := utils.JsonToYaml(api.Bytes())
 		if err != nil {
 			return err
 		}
 		// write this to disk
-		err = ioutil.WriteFile(yamlApiPath, content, 0644)
+		err = ioutil.WriteFile(yamlAPIPath, content, 0644)
 		if err != nil {
 			return err
 		}
@@ -606,7 +716,7 @@ func replaceEnvVariables(apiFilePath string) error {
 	return nil
 }
 
-func populateApiWithDefaults(def *v2.APIDefinition) (dirty bool) {
+func populateAPIWithDefaults(def *v2.APIDefinition) (dirty bool) {
 	dirty = false
 	if def.ContextTemplate == "" {
 		if !strings.Contains(def.Context, "{version}") {
@@ -638,13 +748,13 @@ func populateApiWithDefaults(def *v2.APIDefinition) (dirty bool) {
 	return
 }
 
-// validateApiDefinition validates an API against basic rules
-func validateApiDefinition(def *v2.APIDefinition) error {
+// validateAPIDefinition validates an API against basic rules
+func validateAPIDefinition(def *v2.APIDefinition) error {
 	utils.Logln(utils.LogPrefixInfo + "Validating API")
 	if isEmpty(def.ID.APIName) {
 		return errors.New("apiName is required")
 	}
-	if reApiName.MatchString(def.ID.APIName) {
+	if reAPIName.MatchString(def.ID.APIName) {
 		return errors.New(`apiName contains one or more illegal characters (~!@#;:%^*()+={}|\\<>"',&\/$)`)
 	}
 
@@ -772,14 +882,14 @@ func ImportAPIToEnv(accessOAuthToken, importEnvironment, importPath, apiParamsPa
 func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, apiParamsPath string, importAPIUpdate, preserveProvider,
 	importAPISkipCleanup bool) error {
 	exportDirectory := filepath.Join(utils.ExportDirectory, utils.ExportedApisDirName)
-	resolvedApiFilePath, err := resolveImportFilePath(importPath, exportDirectory)
+	resolvedAPIFilePath, err := resolveImportFilePath(importPath, exportDirectory)
 	if err != nil {
 		return err
 	}
-	utils.Logln(utils.LogPrefixInfo+"API Location:", resolvedApiFilePath)
+	utils.Logln(utils.LogPrefixInfo+"API Location:", resolvedAPIFilePath)
 
 	utils.Logln(utils.LogPrefixInfo + "Creating workspace")
-	tmpPath, err := getTempApiDirectory(resolvedApiFilePath)
+	tmpPath, err := getTempAPIDirectory(resolvedAPIFilePath)
 	if err != nil {
 		return err
 	}
@@ -809,7 +919,7 @@ func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, a
 	}
 
 	utils.Logln(utils.LogPrefixInfo + "Attempting to inject parameters to the API from api_params.yaml (if exists)")
-	paramsPath, err := resolveAPIParamsPath(resolvedApiFilePath, apiParamsPath)
+	paramsPath, err := resolveAPIParamsPath(resolvedAPIFilePath, apiParamsPath)
 	if err != nil && apiParamsPath != utils.ParamFileAPI && apiParamsPath != "" {
 		return err
 	}
@@ -827,7 +937,7 @@ func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, a
 		return err
 	}
 	// Fill with defaults
-	if populateApiWithDefaults(apiInfo) {
+	if populateAPIWithDefaults(apiInfo) {
 		utils.Logln(utils.LogPrefixInfo + "API is populated with defaults")
 		// api is dirty, write it to disk
 		buf, err := json.Marshal(apiInfo)
@@ -861,7 +971,7 @@ func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, a
 		}
 	}
 	// validate definition
-	if err = validateApiDefinition(apiInfo); err != nil {
+	if err = validateAPIDefinition(apiInfo); err != nil {
 		return err
 	}
 
@@ -893,7 +1003,7 @@ func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, a
 	updateAPI := false
 	if importAPIUpdate {
 		// check for API existence
-		id, err := getApiID(accessOAuthToken, importEnvironment, apiInfo.ID.APIName, apiInfo.ID.Version)
+		id, err := getAPIID(accessOAuthToken, importEnvironment, apiInfo.ID.APIName, apiInfo.ID.Version)
 		if err != nil {
 			return err
 		}

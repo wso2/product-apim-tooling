@@ -23,13 +23,14 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
-	"github.com/wso2/product-apim-tooling/import-export-cli/specs/params"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
+	"github.com/wso2/product-apim-tooling/import-export-cli/specs/params"
 
 	"github.com/Jeffail/gabs"
 	"github.com/mitchellh/go-homedir"
@@ -279,7 +280,6 @@ func extractArchive(src, dest string) (string, error) {
 	return filepath.Join(dest, strings.Split(filepath.Clean(r), string(os.PathSeparator))[0]), nil
 }
 
-
 func getTempApiDirectory(file string) (string, error) {
 	fileIsDir := false
 	// create a temp directory
@@ -452,7 +452,6 @@ func isEmpty(s string) bool {
 	return len(strings.TrimSpace(s)) == 0
 }
 
-
 // Substitutes environment variables in the project files.
 func replaceEnvVariables(apiFilePath string) error {
 	for _, replacePath := range utils.EnvReplaceFilePaths {
@@ -488,7 +487,7 @@ func init() {
 		"", "Environment from the which the API should be imported")
 	ImportAPICmd.Flags().BoolVar(&importAPICmdPreserveProvider, "preserve-provider", true,
 		"Preserve existing provider of API after importing")
-	ImportAPICmd.Flags().BoolVar(&importAPIUpdate, "update",  false, "Update an "+
+	ImportAPICmd.Flags().BoolVar(&importAPIUpdate, "update", false, "Update an "+
 		"existing API or create a new API")
 	ImportAPICmd.Flags().StringVarP(&importAPIParamsFile, "params", "", DefaultAPIMParamsFileName,
 		"Provide a API Manager params file")
