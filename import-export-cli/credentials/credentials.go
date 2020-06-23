@@ -88,9 +88,12 @@ func GetOAuthAccessToken(credential Credential, env string) (string, error) {
 func GetBasicAuth(credential Credential) string {
 	return Base64Encode(fmt.Sprintf("%s:%s", credential.Username, credential.Password))
 }
+
+//Revoke access Token when user is logging out from environment
 func RevokeAccessToken(credential Credential, env string, token string)  error {
 
 	//get revoke endpoint
+	//TODO : When --token fix PR is merged use GetInternalTokenEndpoint method and use that as revoke endpoint
 	var tokenRevokeEndpoint string = "https://localhost:8243/revoke"
 	url := tokenRevokeEndpoint
 	//Encoding client secret and client Id
@@ -101,7 +104,7 @@ func RevokeAccessToken(credential Credential, env string, token string)  error {
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + b64EncodedClientIDClientSecret
 
 	//Create body for the request
-	body := "token=" + token
+	body := utils.HeaderToken + token + utils.TokenTypeForRevocation
 	fmt.Println(body)
 
 	resp, err := utils.InvokePOSTRequest(url, headers, body)

@@ -91,7 +91,8 @@ const HeaderValueXWWWFormUrlEncoded = "application/x-www-form-urlencoded"
 const HeaderValueAuthBearerPrefix = "Bearer"
 const HeaderValueAuthBasicPrefix = "Basic"
 const HeaderValueMultiPartFormData = "multipart/form-data"
-const HeaderToken = "token"
+const HeaderToken = "token="
+const TokenTypeForRevocation = "&token_type_hint=access_token"
 
 // Logging Prefixes
 const LogPrefixInfo = "[INFO]: "
