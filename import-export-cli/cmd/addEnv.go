@@ -39,8 +39,7 @@ const addEnvCmdLiteral = "add-env"
 const addEnvCmdShortDesc = "Add Environment to Config file"
 const addEnvCmdLongDesc = "Add new environment and its related endpoints to the config file"
 const addEnvCmdExamples = utils.ProjectName + ` ` + addEnvCmdLiteral + ` -e production \
---apim  https://localhost:9443 \
---token https://localhost:8243/token
+--apim  https://localhost:9443 
 
 ` + utils.ProjectName + ` ` + addEnvCmdLiteral + ` -e test \
 --registration https://idp.com:9443 \
@@ -54,10 +53,10 @@ const addEnvCmdExamples = utils.ProjectName + ` ` + addEnvCmdLiteral + ` -e prod
 --registration https://idp.com:9443 \
 --token https://gw.com:8243/token
 
-NOTE: The flags --environment (-e) and --token are mandatory
-You can either provide only the 2 flags --apim and --token, or all the other 5 flags (--registration --publisher --devportal --admin --token) without providing --apim flag.
-If you are omitting any of --registration --publisher --devportal --admin flags, you need to specify --apim flag with the API Manager endpoint.`
-
+NOTE: The flag --environment (-e) is mandatory.
+You can either provide only the flag --apim , or all the other 4 flags (--registration --publisher --devportal --admin --token) without providing --apim flag.
+If you are omitting any of --registration --publisher --devportal --admin flags, you need to specify --apim flag with the API Manager endpoint. In both of the
+cases --token flag is optional and use it to specify the gateway token endpoint. This will be used for "apictl get-keys" operation.`
 // addEnvCmd represents the addEnv command
 var addEnvCmd = &cobra.Command{
 	Use:     addEnvCmdLiteral,
@@ -92,16 +91,24 @@ func executeAddEnvCmd(mainConfigFilePath string) {
 // @param tokenEndpoint : Token Endpoint for the environment
 // @param mainConfigFilePath : Path to file where env endpoints are stored
 // @return error
+var isDefaultTokenEndpointSet bool = false
 func addEnv(envName string, envEndpoints *utils.EnvEndpoints, mainConfigFilePath string) error {
+
 	if envName == "" {
 		// name of the environment is blank
 		return errors.New("Name of the environment cannot be blank")
 	}
 
 	if envEndpoints.TokenEndpoint == "" {
-		// if mandatory token endpoint is blank
-		utils.ShowHelpCommandTip(addEnvCmdLiteral)
-		return errors.New("Token endpoint cannot be blank")
+		// If token endpoint string is empty,then assign the default value
+		if envEndpoints.ApiManagerEndpoint != "" && !isDefaultTokenEndpointSet {
+			isDefaultTokenEndpointSet = true
+			envEndpoints.TokenEndpoint = utils.GetTokenEndPointFromAPIMEndpoint(envEndpoints.ApiManagerEndpoint)
+		}
+		if envEndpoints.PublisherEndpoint != "" && !isDefaultTokenEndpointSet {
+			envEndpoints.TokenEndpoint = utils.GetTokenEndPointFromPublisherEndpoint(envEndpoints.PublisherEndpoint)
+		}
+		fmt.Printf("Default token endpoint '%s' is added as the token endpoint \n", envEndpoints.TokenEndpoint)
 	}
 
 	if envEndpoints.ApiManagerEndpoint == "" {
@@ -165,5 +172,4 @@ func init() {
 		"Registration endpoint for the environment")
 	addEnvCmd.Flags().StringVar(&flagAdminEndpoint, "admin", "", "Admin endpoint for the environment")
 	_ = addEnvCmd.MarkFlagRequired("environment")
-	_ = addEnvCmd.MarkFlagRequired("token")
 }

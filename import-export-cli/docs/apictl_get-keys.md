@@ -14,7 +14,8 @@ apictl get-keys [flags]
 
 ```
 apictl get-keys -n TwitterAPI -v 1.0.0 -e dev --provider admin
-NOTE: Both the flags (--name (-n) and --environment (-e)) are mandatory
+NOTE: Both the flags (--name (-n) and --environment (-e)) are mandatory.
+You can override the default token endpoint using --token (-t) optional flag providing a new token endpoint
 ```
 
 ### Options
@@ -24,6 +25,7 @@ NOTE: Both the flags (--name (-n) and --environment (-e)) are mandatory
   -h, --help                 help for get-keys
   -n, --name string          API or API Product to generate keys
   -r, --provider string      Provider of the API or API Product
+  -t, --token string         Token endpoint URL of Environment
   -v, --version string       Version of the API or API Product
 ```
 

@@ -136,7 +136,7 @@ func ExecutePreCommandWithOAuth(environment, flagUsername, flagPassword, mainCon
 	envKeysAllFilePath string) (accessToken string, err error) {
 	if EnvExistsInMainConfigFile(environment, mainConfigFilePath) {
 		registrationEndpoint := GetRegistrationEndpointOfEnv(environment, mainConfigFilePath)
-		tokenEndpoint := GetTokenEndpointOfEnv(environment, mainConfigFilePath)
+		tokenEndpoint := GetInternalTokenEndpointOfEnv(environment, mainConfigFilePath)
 
 		Logln(LogPrefixInfo + "Environment: '" + environment + "'")
 		Logln(LogPrefixInfo+"Reg Endpoint read:", registrationEndpoint)

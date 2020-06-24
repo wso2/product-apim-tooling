@@ -68,7 +68,7 @@ func GetDefaultCredentialStore() (Store, error) {
 
 // GetOAuthAccessToken generates an accesstoken for CLI
 func GetOAuthAccessToken(credential Credential, env string) (string, error) {
-	tokenEndpoint := utils.GetTokenEndpointOfEnv(env, utils.MainConfigFilePath)
+	tokenEndpoint := utils.GetInternalTokenEndpointOfEnv(env, utils.MainConfigFilePath)
 	data, err := utils.GetOAuthTokens(credential.Username, credential.Password,
 		Base64Encode(credential.ClientId+":"+credential.ClientSecret),
 		tokenEndpoint)

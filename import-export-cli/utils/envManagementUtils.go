@@ -20,6 +20,7 @@ package utils
 
 import (
 	"errors"
+	"strings"
 )
 
 // EnvExistsInKeysFile
@@ -156,6 +157,12 @@ func GetEndpointsOfEnvironment(env string, filePath string) (*EnvEndpoints, erro
 func GetApiManagerEndpointOfEnv(env, filePath string) string {
 	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
 	return envEndpoints.ApiManagerEndpoint
+}
+
+// Get PublisherEndpoint of a given environment
+func GetPublisherEndpointOfEnv(env, filePath string) string {
+	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
+	return envEndpoints.PublisherEndpoint
 }
 
 // Get AdminEndpoint of a given environment
@@ -308,4 +315,42 @@ func GetDefaultEnvironment(mainConfigFilePath string) string {
 		return DefaultEnvironmentName
 	}
 	return ""
+}
+
+//get default token endpoint given from an apim endpoint
+func GetTokenEndPointFromAPIMEndpoint(apimEndpoint string) string {
+	if strings.HasSuffix(apimEndpoint,"/"){
+		return apimEndpoint + defaultTokenEndPoint
+	} else {
+		return apimEndpoint + "/" + defaultTokenEndPoint
+	}
+}
+
+//get default token endpoint given from a publisher endpoint
+func GetTokenEndPointFromPublisherEndpoint (publisherEndpoint string) string {
+	if strings.Contains(publisherEndpoint,"publisher"){
+		trimmedString := strings.Split(publisherEndpoint,"publisher")
+		publisherEndpoint = trimmedString[0]
+	}
+
+	if strings.HasSuffix(publisherEndpoint,"/"){
+		return publisherEndpoint + defaultTokenEndPoint
+	} else {
+		return publisherEndpoint + "/" + defaultTokenEndPoint
+	}
+}
+
+// Get internalTokenEndpoint for REST api operations
+// @return endpoint url derived from publisher or apim endpoint
+func GetInternalTokenEndpointOfEnv(env, filePath string ) string {
+	var internalTokenEndpoint string
+	apiManagerEndpointOfEnv := GetApiManagerEndpointOfEnv(env, filePath)
+	if apiManagerEndpointOfEnv != "" {
+		internalTokenEndpoint = GetTokenEndPointFromAPIMEndpoint(apiManagerEndpointOfEnv)
+
+	} else {
+		publisherEndpointOfEnv := GetPublisherEndpointOfEnv(env,filePath)
+		internalTokenEndpoint = GetTokenEndPointFromPublisherEndpoint(publisherEndpointOfEnv)
+	}
+	return internalTokenEndpoint
 }
