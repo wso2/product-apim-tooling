@@ -21,6 +21,7 @@ apictl add/update api -n petstore --from-file=./Swagger.json --replicas=3 --name
 ### Options
 
 ```
+  -a, --apiEndPoint string      
   -f, --from-file stringArray   Path to swagger file
   -h, --help                    help for api
   -m, --mode string             Property to override the deploying mode. Available modes: privateJet, sidecar
