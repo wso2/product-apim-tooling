@@ -63,6 +63,7 @@ const defaultDevPortalApplicationListEndpointSuffix = "api/am/store/v1/applicati
 const defaultDevPortalThrottlingPoliciesEndpointSuffix = "api/am/store/v1/throttling-policies"
 const defaultClientRegistrationEndpointSuffix = "client-registration/v0.16/register"
 const defaultTokenEndPoint = "oauth2/token"
+const defaultRevokeEndpointSuffix = "oauth2/revoke"
 
 const DefaultEnvironmentName = "default"
 

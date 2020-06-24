@@ -354,3 +354,14 @@ func GetInternalTokenEndpointOfEnv(env, filePath string ) string {
 	}
 	return internalTokenEndpoint
 }
+
+//Get token endpoint for Token revocation
+//@return endpoint URL of token revocation endpoint
+func GetTokenRevokeEndpoint (env, filePath string) string {
+	//Get Internal token endpoint for the environment
+	internalTokenEndpoint := GetInternalTokenEndpointOfEnv(env,filePath)
+	slittedString := strings.Split(internalTokenEndpoint,defaultTokenEndPoint)
+	//Get Apim endpoint or publisher endpoint
+	extractedTokenEndpoint := slittedString[0]
+	return extractedTokenEndpoint + defaultRevokeEndpointSuffix
+}

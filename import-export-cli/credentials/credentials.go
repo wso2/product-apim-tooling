@@ -78,7 +78,6 @@ func GetOAuthAccessToken(credential Credential, env string) (string, error) {
 		return "", err
 	}
 	if accessToken, ok := data["access_token"]; ok {
-		fmt.Println("AccessToken :" + accessToken)
 		return accessToken, nil
 	}
 	return "", errors.New("access_token not found")
@@ -93,9 +92,7 @@ func GetBasicAuth(credential Credential) string {
 func RevokeAccessToken(credential Credential, env string, token string)  error {
 
 	//get revoke endpoint
-	//TODO : When --token fix PR is merged use GetInternalTokenEndpoint method and use that as revoke endpoint
-	var tokenRevokeEndpoint string = "https://localhost:8243/revoke"
-	url := tokenRevokeEndpoint
+	tokenRevokeEndpoint := utils.GetTokenRevokeEndpoint(env,utils.MainConfigFilePath)
 	//Encoding client secret and client Id
 	var b64EncodedClientIDClientSecret = utils.GetBase64EncodedCredentials(credential.ClientId,credential.ClientSecret)
 	// set headers to request
@@ -105,16 +102,13 @@ func RevokeAccessToken(credential Credential, env string, token string)  error {
 
 	//Create body for the request
 	body := utils.HeaderToken + token + utils.TokenTypeForRevocation
-	fmt.Println(body)
 
-	resp, err := utils.InvokePOSTRequest(url, headers, body)
-	fmt.Println(resp)
-	utils.Logln(utils.LogPrefixInfo + "connecting to " + url)
+	resp, err := utils.InvokePOSTRequest(tokenRevokeEndpoint, headers, body)
+	utils.Logln(utils.LogPrefixInfo + "connecting to " + tokenRevokeEndpoint)
 
 	if err != nil {
 		utils.HandleErrorAndExit("Unable to Connect.", err)
 	}
-	fmt.Println(resp.StatusCode())
 
 	//Check status code
 	if resp.StatusCode() != http.StatusOK {

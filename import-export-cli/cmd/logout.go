@@ -52,7 +52,6 @@ func runLogout(environment string) error {
 	cred, err := getCredentials(environment)
 	//Get current access token for
 	accessToken, err := credentials.GetOAuthAccessToken(cred, environment)
-	fmt.Println("Point 3")
 	error := credentials.RevokeAccessToken(cred, environment, accessToken)
 	if error != nil {
 		return err
@@ -61,6 +60,7 @@ func runLogout(environment string) error {
 	if err != nil {
 		return err
 	}
+	fmt.Println("Logged out from", environment, "environment")
 	return store.Erase(environment)
 }
 
