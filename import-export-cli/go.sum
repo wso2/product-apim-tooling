@@ -314,6 +314,7 @@ github.com/onsi/gomega v1.5.0/go.mod h1:ex+gbHU/CVuBBDIJjb2X0qEXbFg53c61hWP/1Cpa
 github.com/opencontainers/go-digest v1.0.0-rc1 h1:WzifXhOVOEOuFYOJAW6aQqW0TooG2iki3E3Ii+WN7gQ=
 github.com/opencontainers/go-digest v1.0.0-rc1/go.mod h1:cMLVZDEM3+U2I4VmLI6N8jQYUd2OVphdqWwCJHrFt2s=
 github.com/opencontainers/image-spec v1.0.1/go.mod h1:BtxoFyWECRxE4U/7sNtV5W15zMzWCbyJoFRP3s7yZA0=
+github.com/openshift/api v3.9.0+incompatible/go.mod h1:dh9o4Fs58gpFXGSYfnVxGR9PnV53I8TW84pQaJDdGiY=
 github.com/openzipkin/zipkin-go v0.1.6/go.mod h1:QgAqvLzwWbR/WpD4A3cGpPtJrZXNIiJc5AZX7/PBEpw=
 github.com/operator-framework/operator-sdk v0.7.1-0.20190503181110-6aac3b6efddd/go.mod h1:iVyukRkam5JZa8AnjYf+/G3rk7JI1+M6GsU0sq0B9NA=
 github.com/pborman/uuid v0.0.0-20170612153648-e790cca94e6c/go.mod h1:VyrYX9gd7irzKovcSS6BIIEwPRkP2Wm2m9ufcdFSJ34=
@@ -409,6 +410,8 @@ github.com/valyala/tcplisten v0.0.0-20161114210144-ceec8f93295a/go.mod h1:v3UYOV
 github.com/wso2/k8s-api-operator v1.0.1 h1:na2r7LoyLDj+lO8558Aq+9fqG6LykhwttAmQWB+gS3k=
 github.com/wso2/k8s-api-operator/api-operator v0.0.0-20200401060926-f007c2f3cfb3 h1:7pwJIGWTqvJRgbGzqy+DalE2qmWrSeSAGEqH3N75yUI=
 github.com/wso2/k8s-api-operator/api-operator v0.0.0-20200401060926-f007c2f3cfb3/go.mod h1:yOoFabyChZn8ueA5QZt0XqVUox41XfmPt8tCJ060+cc=
+github.com/wso2/k8s-api-operator/api-operator v0.0.0-20200624054120-bbad656881c2 h1:i+wa7IOE0TL3bwOeJnjCH4CShS6CdZI+/xJlxFqfYKU=
+github.com/wso2/k8s-api-operator/api-operator v0.0.0-20200624054120-bbad656881c2/go.mod h1:Ta2JJAX8yucKOfHWPcNJdwzhxz2f546ldNfrfcef62g=
 github.com/wso2/k8s-apim-operator v0.0.0-20190906090738-fc77c27673ce h1:ADEoGtxq7K/7loRxqF9EchoMIoZFL8kUt7nJ7z1Gwvs=
 github.com/wso2/k8s-apim-operator v0.0.0-20190906090738-fc77c27673ce/go.mod h1:bzltphF0ElBW6n+4Ti6AHxKezZdv9yUslZtdZKq4dSA=
 github.com/wso2/k8s-apim-operator v1.0.0-beta h1:k950oMxmsoN9VIJrsDQ59vpsOVQeLLiqkKuGyo7lB+o=
