@@ -61,6 +61,8 @@ const defaultAdminApplicationListEndpointSuffix = "api/am/admin/v0.16/applicatio
 const defaultDevPortalApplicationListEndpointSuffix = "api/am/store/v1/applications"
 const defaultDevPortalThrottlingPoliciesEndpointSuffix = "api/am/store/v1/throttling-policies"
 const defaultClientRegistrationEndpointSuffix = "client-registration/v0.16/register"
+const defaultRevokeEndpointSuffix = "revoke"
+const defaultTokenEndPoint = "token"
 
 const DefaultEnvironmentName = "default"
 
@@ -97,6 +99,8 @@ const LogPrefixError = "[ERROR]: "
 
 // String Constants
 const SearchAndTag = "&"
+const HeaderToken = "token="
+const TokenTypeForRevocation = "&token_type_hint=access_token"
 
 // Regex Validation
 const UsernameValidRegex = `^[\w\d\-]*$`

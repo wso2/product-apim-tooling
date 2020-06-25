@@ -20,6 +20,7 @@ package utils
 
 import (
 	"errors"
+	"strings"
 )
 
 // EnvExistsInKeysFile
@@ -308,4 +309,15 @@ func GetDefaultEnvironment(mainConfigFilePath string) string {
 		return DefaultEnvironmentName
 	}
 	return ""
+}
+
+//Get token endpoint for Token revocation
+//@return endpoint URL of token revocation endpoint
+func GetTokenRevokeEndpoint (env, filePath string) string {
+	//Get Internal token endpoint for the environment
+	internalTokenEndpoint := GetTokenEndpointOfEnv(env,filePath)
+	slittedString := strings.Split(internalTokenEndpoint,defaultTokenEndPoint)
+	//Get Apim endpoint or publisher endpoint
+	extractedTokenEndpoint := slittedString[0]
+	return extractedTokenEndpoint + defaultRevokeEndpointSuffix
 }
