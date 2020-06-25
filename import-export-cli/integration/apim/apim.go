@@ -477,12 +477,12 @@ func (instance *Client) AddAPI(t *testing.T, api *API, username string, password
 	var apiResponse API
 	json.NewDecoder(response.Body).Decode(&apiResponse)
 
-	t.Cleanup(func() {
-		if doClean {
+	if doClean {
+		t.Cleanup(func() {
 			instance.Login(username, password)
 			instance.DeleteAPI(apiResponse.ID)
-		}
-	})
+		})
+	}
 
 	return apiResponse.ID
 }
@@ -596,12 +596,12 @@ func (instance *Client) AddAPIProductFromJSON(t *testing.T, path string, usernam
 	var apiProductResponse APIProduct
 	json.NewDecoder(response.Body).Decode(&apiProductResponse)
 
-	t.Cleanup(func() {
-		if doClean {
+	if doClean {
+		t.Cleanup(func() {
 			instance.Login(username, password)
 			instance.DeleteAPIProduct(apiProductResponse.ID)
-		}
-	})
+		})
+	}
 
 	return apiProductResponse.ID
 }

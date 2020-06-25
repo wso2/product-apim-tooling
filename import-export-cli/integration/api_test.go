@@ -19,11 +19,12 @@
 package integration
 
 import (
-	"math/rand"
 	"testing"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 )
+
+const numberOfAPIs = 5 // Number of APIs to be added in a loop
 
 // Export an API from one environment as a super tenant non admin user (who has API Create and API Publish permissions)
 // by specifying the provider name
@@ -290,9 +291,7 @@ func TestListApisAdminSuperTenantUser(t *testing.T) {
 
 	dev := apimClients[0]
 
-	// Add a random number (< 10) of API (same copy)
-	randomNumber := rand.Intn(10)
-	for apiCount := 0; apiCount <= randomNumber; apiCount++ {
+	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
 		// Add the API to env1
 		addAPI(t, dev, apiCreator, apiCreatorPassword)
 	}
@@ -314,9 +313,7 @@ func TestListApisAdminTenantUser(t *testing.T) {
 
 	dev := apimClients[0]
 
-	// Add a random number (< 10) of API (same copy)
-	randomNumber := rand.Intn(10)
-	for apiCount := 0; apiCount <= randomNumber; apiCount++ {
+	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
 		// Add the API to env1
 		addAPI(t, dev, apiCreator, apiCreatorPassword)
 	}
@@ -338,28 +335,19 @@ func TestDeleteApiAdminSuperTenantUser(t *testing.T) {
 
 	dev := apimClients[0]
 
-	// Add a random number (< 10) of APIs (same copy)
-	randomNumber := rand.Intn(10)
-
 	var api *apim.API
-	for apiCount := 0; apiCount <= randomNumber; apiCount++ {
-		// Add the API to env1 (Since we are deleting an API later, if the auto clean is enabled an error may occur when
-		// trying to delete the already deleted API. So the auto cleaning will be disabled.)
-		api = addAPIWithoutCleaning(t, dev, apiCreator, apiCreatorPassword)
+	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
+		api = addAPI(t, dev, apiCreator, apiCreatorPassword)
 	}
+
+	// This will be the API that will be deleted by apictl, so no need to do cleaning
+	api = addAPIWithoutCleaning(t, dev, apiCreator, apiCreatorPassword)
 
 	args := &apiImportExportTestArgs{
 		ctlUser: credentials{username: adminUsername, password: adminPassword},
-		api:     api, // Choose the last API from the loop to delete it
+		api:     api,
 		srcAPIM: dev,
 	}
-
-	t.Cleanup(func() {
-		apiList := getAPIs(dev, adminUsername, adminPassword)
-		for _, api := range apiList.List {
-			deleteAPI(t, dev, api.ID, adminUsername, adminPassword)
-		}
-	})
 
 	validateAPIDelete(t, args)
 }
@@ -373,28 +361,19 @@ func TestDeleteApiAdminTenantUser(t *testing.T) {
 
 	dev := apimClients[0]
 
-	// Add a random number (< 10) of APIs (same copy)
-	randomNumber := rand.Intn(10)
-
 	var api *apim.API
-	for apiCount := 0; apiCount <= randomNumber; apiCount++ {
-		// Add the API to env1 (Since we are deleting an API later, if the auto clean is enabled an error may occur when
-		// trying to delete the already deleted API. So the auto cleaning will be disabled.)
-		api = addAPIWithoutCleaning(t, dev, tenantApiCreator, tenantApiCreatorPassword)
+	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
+		api = addAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword)
 	}
+
+	// This will be the API that will be deleted by apictl, so no need to do cleaning
+	api = addAPIWithoutCleaning(t, dev, tenantApiCreator, tenantApiCreatorPassword)
 
 	args := &apiImportExportTestArgs{
 		ctlUser: credentials{username: tenantAdminUsername, password: tenantAdminPassword},
-		api:     api, // Choose the last API from the loop to delete it
+		api:     api,
 		srcAPIM: dev,
 	}
-
-	t.Cleanup(func() {
-		apiList := getAPIs(dev, tenantAdminUsername, tenantAdminPassword)
-		for _, api := range apiList.List {
-			deleteAPI(t, dev, api.ID, tenantAdminUsername, tenantAdminPassword)
-		}
-	})
 
 	validateAPIDelete(t, args)
 }
@@ -405,28 +384,19 @@ func TestDeleteApiSuperTenantUser(t *testing.T) {
 
 	dev := apimClients[0]
 
-	// Add a random number (< 10) of APIs (same copy)
-	randomNumber := rand.Intn(10)
-
 	var api *apim.API
-	for apiCount := 0; apiCount <= randomNumber; apiCount++ {
-		// Add the API to env1 (Since we are deleting an API later, if the auto clean is enabled an error may occur when
-		// trying to delete the already deleted API. So the auto cleaning will be disabled.)
-		api = addAPIWithoutCleaning(t, dev, apiCreator, apiCreatorPassword)
+	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
+		api = addAPI(t, dev, apiCreator, apiCreatorPassword)
 	}
+
+	// This will be the API that will be deleted by apictl, so no need to do cleaning
+	api = addAPIWithoutCleaning(t, dev, apiCreator, apiCreatorPassword)
 
 	args := &apiImportExportTestArgs{
 		ctlUser: credentials{username: apiCreator, password: apiCreatorPassword},
-		api:     api, // Choose the last API from the loop to delete it
+		api:     api,
 		srcAPIM: dev,
 	}
-
-	t.Cleanup(func() {
-		apiList := getAPIs(dev, apiCreator, apiCreatorPassword)
-		for _, api := range apiList.List {
-			deleteAPI(t, dev, api.ID, apiCreator, apiCreatorPassword)
-		}
-	})
 
 	validateAPIDelete(t, args)
 }

@@ -21,7 +21,6 @@ package integration
 import (
 	"crypto/tls"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"path/filepath"
@@ -719,17 +718,17 @@ func validateAPIDelete(t *testing.T, args *apiImportExportTestArgs) {
 	base.Login(t, args.srcAPIM.GetEnvName(), args.ctlUser.username, args.ctlUser.password)
 
 	time.Sleep(1 * time.Second)
-	apisListBeforeDelete := args.srcAPIM.GetAPIs()
-
 	deleteAPIByCtl(t, args)
 
 	apisListAfterDelete := args.srcAPIM.GetAPIs()
-	time.Sleep(1 * time.Second)
 
-	fmt.Println(apisListBeforeDelete.Count)
-	fmt.Println(apisListAfterDelete.Count)
+	validateAPIIsDeleted(t, args.api, apisListAfterDelete)
+}
 
-	assert.Equal(t, apisListBeforeDelete.Count, apisListAfterDelete.Count+1, "API delete is not successful")
+func validateAPIIsDeleted(t *testing.T, api *apim.API, apisListAfterDelete *apim.APIList) {
+	for _, existingAPI := range apisListAfterDelete.List {
+		assert.NotEqual(t, existingAPI.ID, api.ID, "API delete is not successful")
+	}
 }
 
 func validateAPIProductExportFailure(t *testing.T, args *apiProductImportExportTestArgs) {
@@ -1026,13 +1025,18 @@ func validateAPIProductDelete(t *testing.T, args *apiProductImportExportTestArgs
 	// Delete an API Product of env 1
 	base.Login(t, args.srcAPIM.GetEnvName(), args.ctlUser.username, args.ctlUser.password)
 
-	apiProductsListBeforeDelete := args.srcAPIM.GetAPIProducts()
-
+	time.Sleep(1 * time.Second)
 	deleteAPIProductByCtl(t, args)
 
 	apiProductsListAfterDelete := args.srcAPIM.GetAPIProducts()
 
-	assert.Equal(t, apiProductsListBeforeDelete.Count, apiProductsListAfterDelete.Count+1, "API Product delete is not successful")
+	validateAPIProductIsDeleted(t, args.apiProduct, apiProductsListAfterDelete)
+}
+
+func validateAPIProductIsDeleted(t *testing.T, apiProduct *apim.APIProduct, apiProductsListAfterDelete *apim.APIProductList) {
+	for _, existingAPIProduct := range apiProductsListAfterDelete.List {
+		assert.NotEqual(t, existingAPIProduct.ID, apiProduct.ID, "API Product delete is not successful")
+	}
 }
 
 func validateAPIProductDeleteFailure(t *testing.T, args *apiProductImportExportTestArgs) {
@@ -1044,10 +1048,12 @@ func validateAPIProductDeleteFailure(t *testing.T, args *apiProductImportExportT
 	// Delete an API Product of env 1
 	base.Login(t, args.srcAPIM.GetEnvName(), args.ctlUser.username, args.ctlUser.password)
 
+	time.Sleep(1 * time.Second)
 	apiProductsListBeforeDelete := args.srcAPIM.GetAPIProducts()
 
 	deleteAPIProductByCtl(t, args)
 
+	time.Sleep(1 * time.Second)
 	apiProductsListAfterDelete := args.srcAPIM.GetAPIProducts()
 
 	assert.Equal(t, apiProductsListBeforeDelete.Count, apiProductsListAfterDelete.Count, "API Product delete is successful")

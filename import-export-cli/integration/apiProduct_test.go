@@ -19,11 +19,12 @@
 package integration
 
 import (
-	"math/rand"
 	"testing"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 )
+
+const numberOfAPIProducts = 5 // Number of API Products to be added in a loop
 
 // Export an API Product with its dependent APIs from one environment as a super tenant non admin user
 func TestExportApiProductNonAdminSuperTenantUser(t *testing.T) {
@@ -531,9 +532,7 @@ func TestListApiProductsAdminSuperTenantUser(t *testing.T) {
 		"SwaggerPetstore": dependentAPI2,
 	}
 
-	// Add a random number (< 10) of API Products (same copy)
-	randomNumber := rand.Intn(10)
-	for apiProductCount := 0; apiProductCount <= randomNumber; apiProductCount++ {
+	for apiProductCount := 0; apiProductCount <= numberOfAPIProducts; apiProductCount++ {
 		// Add the API Product to env1
 		addAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
 	}
@@ -572,9 +571,7 @@ func TestListApiProductsAdminTenantUser(t *testing.T) {
 		"SwaggerPetstore": dependentAPI2,
 	}
 
-	// Add a random number (< 10) of API Products (same copy)
-	randomNumber := rand.Intn(10)
-	for apiProductCount := 0; apiProductCount <= randomNumber; apiProductCount++ {
+	for apiProductCount := 0; apiProductCount <= numberOfAPIProducts; apiProductCount++ {
 		// Add the API Product to env1
 		addAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
 	}
@@ -613,28 +610,19 @@ func TestDeleteApiProductAdminSuperTenantUser(t *testing.T) {
 		"SwaggerPetstore": dependentAPI2,
 	}
 
-	// Add a random number (< 10) of API Products (same copy)
-	randomNumber := rand.Intn(10)
-
 	var apiProduct *apim.APIProduct
-	for apiProductCount := 0; apiProductCount <= randomNumber; apiProductCount++ {
-		// Add the API Product to env1 (Since we are deleting an API Product later, if the auto clean is enabled an error may occur when
-		// trying to delete the already deleted API. So the auto cleaning will be disabled.)
-		apiProduct = addAPIProductFromJSONWithoutCleaning(t, dev, apiPublisher, apiPublisherPassword, apisList)
+	for apiProductCount := 0; apiProductCount <= numberOfAPIProducts; apiProductCount++ {
+		apiProduct = addAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
 	}
+
+	// This will be the API Product that will be deleted by apictl, so no need to do cleaning
+	apiProduct = addAPIProductFromJSONWithoutCleaning(t, dev, apiPublisher, apiPublisherPassword, apisList)
 
 	args := &apiProductImportExportTestArgs{
 		ctlUser:    credentials{username: adminUsername, password: adminPassword},
-		apiProduct: apiProduct, // Choose the last API Product from the loop to delete it
+		apiProduct: apiProduct,
 		srcAPIM:    dev,
 	}
-
-	t.Cleanup(func() {
-		apiProductList := getAPIProducts(dev, adminUsername, adminPassword)
-		for _, apiProduct := range apiProductList.List {
-			deleteAPIProduct(t, dev, apiProduct.ID, adminUsername, adminPassword)
-		}
-	})
 
 	validateAPIProductDelete(t, args)
 }
@@ -665,28 +653,19 @@ func TestDeleteApiProductAdminTenantUser(t *testing.T) {
 		"SwaggerPetstore": dependentAPI2,
 	}
 
-	// Add a random number (< 10) of API Products (same copy)
-	randomNumber := rand.Intn(10)
-
 	var apiProduct *apim.APIProduct
-	for apiProductCount := 0; apiProductCount <= randomNumber; apiProductCount++ {
-		// Add the API Product to env1 (Since we are deleting an API Product later, if the auto clean is enabled an error may occur when
-		// trying to delete the already deleted API. So the auto cleaning will be disabled.)
-		apiProduct = addAPIProductFromJSONWithoutCleaning(t, dev, apiPublisher, apiPublisherPassword, apisList)
+	for apiProductCount := 0; apiProductCount <= numberOfAPIProducts; apiProductCount++ {
+		apiProduct = addAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
 	}
+
+	// This will be the API Product that will be deleted by apictl, so no need to do cleaning
+	apiProduct = addAPIProductFromJSONWithoutCleaning(t, dev, apiPublisher, apiPublisherPassword, apisList)
 
 	args := &apiProductImportExportTestArgs{
 		ctlUser:    credentials{username: tenantAdminUsername, password: tenantAdminPassword},
-		apiProduct: apiProduct, // Choose the last API Product from the loop to delete it
+		apiProduct: apiProduct,
 		srcAPIM:    dev,
 	}
-
-	t.Cleanup(func() {
-		apiProductList := getAPIProducts(dev, tenantAdminUsername, tenantAdminPassword)
-		for _, apiProduct := range apiProductList.List {
-			deleteAPIProduct(t, dev, apiProduct.ID, tenantAdminUsername, tenantAdminPassword)
-		}
-	})
 
 	validateAPIProductDelete(t, args)
 }
@@ -714,11 +693,8 @@ func TestDeleteApiProductSuperTenantUser(t *testing.T) {
 		"SwaggerPetstore": dependentAPI2,
 	}
 
-	// Add a random number (< 10) of API Products (same copy)
-	randomNumber := rand.Intn(10)
-
 	var apiProduct *apim.APIProduct
-	for apiProductCount := 0; apiProductCount <= randomNumber; apiProductCount++ {
+	for apiProductCount := 0; apiProductCount <= numberOfAPIProducts; apiProductCount++ {
 		apiProduct = addAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
 	}
 
