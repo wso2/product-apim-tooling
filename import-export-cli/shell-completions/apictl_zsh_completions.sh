@@ -20,6 +20,18 @@ case $state in
       change)
         _arguments '2: :(help registry)'
       ;;
+      install)
+        _arguments '2: :(api-operator help wso2am-operator)'
+      ;;
+      uninstall)
+        _arguments '2: :(api-operator help wso2am-operator)'
+      ;;
+      update)
+        _arguments '2: :(api help)'
+      ;;
+      add)
+        _arguments '2: :(api help)'
+      ;;
       change-status)
         _arguments '2: :(api help)'
       ;;
@@ -31,18 +43,6 @@ case $state in
       ;;
       remove)
         _arguments '2: :(env help)'
-      ;;
-      update)
-        _arguments '2: :(api help)'
-      ;;
-      add)
-        _arguments '2: :(api help)'
-      ;;
-      uninstall)
-        _arguments '2: :(api-operator help wso2am-operator)'
-      ;;
-      install)
-        _arguments '2: :(api-operator help wso2am-operator)'
       ;;
       *)
         _arguments '*: :_files'

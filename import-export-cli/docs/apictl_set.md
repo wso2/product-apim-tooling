@@ -28,9 +28,9 @@ apictl set --mode default
 ### Options
 
 ```
-      --export-directory string    Path to directory where APIs should be saved (default "/home/chamindu/.wso2apictl/exported")
+      --export-directory string    Path to directory where APIs should be saved (default "/home/chamindu/Desktop/Testing")
   -h, --help                       help for set
-      --http-request-timeout int   Timeout for HTTP Client (default 10000)
+      --http-request-timeout int   Timeout for HTTP Client (default 27823)
   -m, --mode string                mode of apictl (default "default")
   -t, --token-type string          Type of the token to be generated (default "JWT")
 ```
