@@ -26,23 +26,23 @@ case $state in
       delete)
         _arguments '2: :(api api-product app help)'
       ;;
+      install)
+        _arguments '2: :(api-operator help wso2am-operator)'
+      ;;
       list)
         _arguments '2: :(api-products apis apps envs help)'
       ;;
       remove)
         _arguments '2: :(env help)'
       ;;
-      update)
-        _arguments '2: :(api help)'
+      uninstall)
+        _arguments '2: :(api-operator help wso2am-operator)'
       ;;
       add)
         _arguments '2: :(api help)'
       ;;
-      uninstall)
-        _arguments '2: :(api-operator help wso2am-operator)'
-      ;;
-      install)
-        _arguments '2: :(api-operator help wso2am-operator)'
+      update)
+        _arguments '2: :(api help)'
       ;;
       *)
         _arguments '*: :_files'
