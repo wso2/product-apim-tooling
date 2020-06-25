@@ -93,8 +93,6 @@ func RevokeAccessToken(credential Credential, env string, token string)  error {
 
 	//get revoke endpoint
 	tokenRevokeEndpoint := utils.GetTokenRevokeEndpoint(env,utils.MainConfigFilePath)
-	fmt.Println(tokenRevokeEndpoint)
-	fmt.Println(token)
 	//Encoding client secret and client Id
 	var b64EncodedClientIDClientSecret = utils.GetBase64EncodedCredentials(credential.ClientId,credential.ClientSecret)
 	// set headers to request
