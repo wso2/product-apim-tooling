@@ -34,7 +34,8 @@ var (
 	deletedAPIName              string
 )
 
-const deleteSwaggerMgwCmdExample = `apictl mgw-delete-api --host http://localhost:9095 --labels mgw_lbl --api swagger.json`
+const deleteSwaggerMgwCmdExample = `apictl mgw-delete-api --host http://localhost:9095 --labels label1,label2 
+									--api swagger.json`
 
 var deleteAPIMgwCmd = &cobra.Command{
 	Use:     "mgw-delete-api --host [control plane url] --labels [microgateway labels] --api [api name]",
@@ -44,7 +45,6 @@ var deleteAPIMgwCmd = &cobra.Command{
 	Args:    cobra.MinimumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + "mgw-delete-api called")
-
 		err := executeDeleteSwaggerMgw()
 		if err != nil {
 			utils.HandleErrorAndExit("Error deleting API from microgateway", err)
@@ -53,6 +53,7 @@ var deleteAPIMgwCmd = &cobra.Command{
 }
 
 func executeDeleteSwaggerMgw() error {
+	// TODO: add control plane url to env
 	if mgwControlPlaneHostDeleting == "" {
 		mgwControlPlaneHostDeleting = "http://localhost:9095"
 	}
@@ -70,7 +71,7 @@ func deleteAPIMgw(label string, apiName string) string {
 	fileDataBuffer := bytes.Buffer{}
 	multipartWriter := multipart.NewWriter(&fileDataBuffer)
 	// add label as a field to the body
-	_ = multipartWriter.WriteField("label", label)
+	_ = multipartWriter.WriteField("labels", label)
 	// add api name as a field to the body
 	_ = multipartWriter.WriteField("apiName", apiName)
 	// close the file writer. This lets it know we're done copying in data
@@ -100,9 +101,12 @@ func deleteAPIMgw(label string, apiName string) string {
 
 func init() {
 	RootCmd.AddCommand(deleteAPIMgwCmd)
-	deleteAPIMgwCmd.Flags().StringVarP(&mgwControlPlaneHostDeleting, "host", "", "", "Provide the host url "+
-		"for the control plane with port")
-	deleteAPIMgwCmd.Flags().StringVarP(&mgwLabelDeleting, "labels", "", "", "Provide label for the "+
-		"microgateway instances you want to add the API")
-	deleteAPIMgwCmd.Flags().StringVarP(&deletedAPIName, "api", "", "", "Provide the API name")
+	deleteAPIMgwCmd.Flags().StringVarP(&mgwControlPlaneHostDeleting, "host", "", "",
+		"Provide the host url for the control plane with port")
+	deleteAPIMgwCmd.Flags().StringVarP(&mgwLabelDeleting, "labels", "", "",
+		"Provide label for the microgateway instances you want to add the API")
+	deleteAPIMgwCmd.Flags().StringVarP(&deletedAPIName, "api", "", "",
+		"Provide the API name")
+
+	_ = deleteAPIMgwCmd.MarkFlagRequired("api")
 }

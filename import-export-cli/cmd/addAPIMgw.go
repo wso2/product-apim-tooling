@@ -33,7 +33,7 @@ import (
 
 var (
 	mgwControlPlaneHostAdding string
-	mgwLabelAdding            string
+	mgwLabelsAdding           string
 	addedAPIName              string
 	addedSwaggerPath          string
 )
@@ -43,15 +43,17 @@ type MgwResponse struct {
 }
 
 const (
-	defaultMgwHostUrl = "http://localhost:9095"
-	defaultMgwLabel   = "default"
-	defaultAPIName    = "api_v1"
+	defaultAddedMgwHostUrl = "http://localhost:9095"
+	defaultAddedMgwLabel   = "default"
+	defaultAddedAPIName    = "api_v1"
+	defaultAddedAPIDest    = "./mgw-api-definitions/"
+	addAPIMgwCmdExample    = `apictl mgw-add-api --host http://localhost:9095 --labels label1,label2 --api api_v1 
+								--oas https://petstore.swagger.io/v2/swagger.json`
 )
 
-const addAPIMgwCmdExample = `apictl mgw-add-api --host http://localhost:9095 --labels mgw_lbl --api api_v1 --oas https://petstore.swagger.io/v2/swagger.json`
-
 var addAPIMgwCmd = &cobra.Command{
-	Use:     "mgw-add-api --host [control plane url] --labels [microgateway labels] --api [api name] --oas [swagger path]",
+	Use: "mgw-add-api --host [control plane url] --labels [microgateway labels] --api [api name] " +
+		"--oas [swagger path]",
 	Short:   "Add a swagger file to Microgateway.",
 	Long:    "Add a swagger file to Microgateway. You can provide either a file on the disk or a link.",
 	Example: addAPIMgwCmdExample,
@@ -66,88 +68,96 @@ var addAPIMgwCmd = &cobra.Command{
 }
 
 func executeAddAPIMgw() error {
+	// TODO: add control plane url to env
 	if mgwControlPlaneHostAdding == "" {
-		mgwControlPlaneHostAdding = defaultMgwHostUrl
+		mgwControlPlaneHostAdding = defaultAddedMgwHostUrl
 	}
-	if mgwLabelAdding == "" {
-		mgwLabelAdding = defaultMgwLabel
+	if mgwLabelsAdding == "" {
+		mgwLabelsAdding = defaultAddedMgwLabel
 	}
 	if addedAPIName == "" {
-		addedAPIName = defaultAPIName
+		addedAPIName = defaultAddedAPIName
 	}
 	if addedSwaggerPath != "" {
-		addAPIMgw(mgwLabelAdding, addedAPIName, addedSwaggerPath)
+		addAPIMgw(mgwLabelsAdding, addedAPIName, addedSwaggerPath)
 	}
 	return nil
 }
 
-func addAPIMgw(label string, apiName string, apiDefinition string) {
+func addAPIMgw(labels string, apiName string, apiDefinition string) {
 	var file *os.File
-	//err := os.Mkdir(importedApiDefinitionsPath, os.ModePerm)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
 	if isUrl(apiDefinition) {
 		// Get the data
 		resp, err := http.Get(apiDefinition)
 		if err != nil {
-			log.Fatal(err)
+			utils.HandleErrorAndExit("Error downloading the file from the link", err)
 		}
 		defer resp.Body.Close()
+		if _, err := os.Stat(defaultAddedAPIDest); os.IsNotExist(err) {
+			err = os.Mkdir(defaultAddedAPIDest, os.ModePerm)
+			if err != nil {
+				utils.HandleErrorAndExit("Error creating the destination directory", err)
+			}
+		}
 		// reading the file name from the link
 		fileName := apiDefinition[strings.LastIndex(apiDefinition, "/")+1:]
+		//TODO: add dest folder location to env
+		filePath := defaultAddedAPIDest + fileName
 		// Create the file
-		out, err := os.Create(fileName)
+		out, err := os.Create(filePath)
 		if err != nil {
-			log.Fatal(err)
+			utils.HandleErrorAndExit("Error creating the API definition file", err)
 		}
 		defer out.Close()
 		// Write the body to file
 		_, err = io.Copy(out, resp.Body)
-		file, err = os.Open(fileName)
+		file, err = os.Open(filePath)
+		if err != nil {
+			utils.HandleErrorAndExit("Error opening the file", err)
+		}
 	} else {
 		// open the local file we want to upload
 		var err error
 		file, err = os.Open(apiDefinition)
 		if err != nil {
-			log.Fatal(err)
+			utils.HandleErrorAndExit("Error opening the file", err)
 		}
 	}
 
 	// create a buffer we can write the file to
 	fileDataBuffer := bytes.Buffer{}
-	multipartWritter := multipart.NewWriter(&fileDataBuffer)
+	multipartWriter := multipart.NewWriter(&fileDataBuffer)
 
 	// create an http formfile. This wraps our local file in a format that can be sent to the server
-	formFile, err := multipartWritter.CreateFormFile("swaggerFile", file.Name())
+	formFile, err := multipartWriter.CreateFormFile("swaggerFile", file.Name())
 	if err != nil {
-		log.Fatal(err)
+		utils.HandleErrorAndExit("Error adding file to the request", err)
 	}
 	// copy the file we want to upload into the form file wrapper
 	_, err = io.Copy(formFile, file)
 	if err != nil {
-		log.Fatal(err)
+		utils.HandleErrorAndExit("Error adding file to the request", err)
 	}
 
 	// add label as a field to the body
-	_ = multipartWritter.WriteField("label", label)
+	_ = multipartWriter.WriteField("labels", labels)
 	// add api name as a field to the body
-	_ = multipartWritter.WriteField("apiName", apiName)
+	_ = multipartWriter.WriteField("apiName", apiName)
 
 	// close the file writer. This lets it know we're done copying in data
-	multipartWritter.Close()
+	multipartWriter.Close()
 	// create the POST request to send the file data to the server
 	url := mgwControlPlaneHostAdding + "/api/add"
 	req, err := http.NewRequest("POST", url, &fileDataBuffer)
 	if err != nil {
-		log.Fatal(err)
+		utils.HandleErrorAndExit("Error creating the request", err)
 	}
 	// we set the header so the server knows about the files content
-	req.Header.Set("Content-Type", multipartWritter.FormDataContentType())
+	req.Header.Set("Content-Type", multipartWriter.FormDataContentType())
 	// send the POST request and receive the response data
 	response, err := http.DefaultClient.Do(req)
 	if err != nil {
-		log.Fatal(err)
+		utils.HandleErrorAndExit("Error sending the request to the control plane", err)
 	}
 	// get data from the response body
 	defer response.Body.Close()
@@ -159,20 +169,21 @@ func addAPIMgw(label string, apiName string, apiDefinition string) {
 	var responseBody MgwResponse
 	err = json.NewDecoder(response.Body).Decode(&responseBody)
 	if err != nil {
-		log.Fatal(err)
+		utils.HandleErrorAndExit("Error reading the response", err)
 	}
 	log.Println(responseBody.Message)
 }
 
 func init() {
 	RootCmd.AddCommand(addAPIMgwCmd)
-	addAPIMgwCmd.Flags().StringVarP(&mgwControlPlaneHostAdding, "host", "", "", "Provide the host url "+
-		"for the control plane with port")
-	addAPIMgwCmd.Flags().StringVarP(&mgwLabelAdding, "labels", "", "", "Provide label for the "+
-		"microgateway instances you want to add the API")
+	addAPIMgwCmd.Flags().StringVarP(&mgwControlPlaneHostAdding, "host", "", "",
+		"Provide the host url for the control plane with port")
+	addAPIMgwCmd.Flags().StringVarP(&mgwLabelsAdding, "labels", "", "",
+		"Provide label for the microgateway instances you want to add the API")
 	addAPIMgwCmd.Flags().StringVarP(&addedAPIName, "api", "", "", "Provide the API name")
-	addAPIMgwCmd.Flags().StringVarP(&addedSwaggerPath, "oas", "", "", "Provide an OpenAPI "+
-		"specification file for the API")
+	addAPIMgwCmd.Flags().StringVarP(&addedSwaggerPath, "oas", "", "",
+		"Provide an OpenAPI specification file for the API")
 
 	_ = addAPIMgwCmd.MarkFlagRequired("oas")
+	_ = addAPIMgwCmd.MarkFlagRequired("api")
 }
