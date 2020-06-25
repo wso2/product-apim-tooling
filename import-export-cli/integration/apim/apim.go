@@ -453,7 +453,7 @@ func CopyApp(appToCopy *Application) Application {
 }
 
 // AddAPI : Add new API to APIM
-func (instance *Client) AddAPI(t *testing.T, api *API, username string, password string) string {
+func (instance *Client) AddAPI(t *testing.T, api *API, username string, password string, doClean bool) string {
 	apisURL := instance.publisherRestURL + "/apis"
 
 	data, err := json.Marshal(api)
@@ -478,8 +478,10 @@ func (instance *Client) AddAPI(t *testing.T, api *API, username string, password
 	json.NewDecoder(response.Body).Decode(&apiResponse)
 
 	t.Cleanup(func() {
-		instance.Login(username, password)
-		instance.DeleteAPI(apiResponse.ID)
+		if doClean {
+			instance.Login(username, password)
+			instance.DeleteAPI(apiResponse.ID)
+		}
 	})
 
 	return apiResponse.ID

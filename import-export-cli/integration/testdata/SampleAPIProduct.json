@@ -136,27 +136,6 @@
        ]
      }
    ],
-   "scopes": [
-     {
-       "scope": {
-         "id": null,
-         "name": "read:pets",
-         "displayName": "read:pets",
-         "description": "read your pets",
-         "bindings": []
-       },
-       "shared": false
-     },
-     {
-       "scope": {
-         "id": null,
-         "name": "write:pets",
-         "displayName": "write:pets",
-         "description": "modify pets in your account",
-         "bindings": []
-       },
-       "shared": false
-     }
-   ],
+   "scopes": [],
    "categories": []
  }
