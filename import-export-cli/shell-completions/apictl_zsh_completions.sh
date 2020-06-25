@@ -23,26 +23,26 @@ case $state in
       change-status)
         _arguments '2: :(api help)'
       ;;
-      list)
-        _arguments '2: :(api-products apis apps envs help)'
-      ;;
-      uninstall)
-        _arguments '2: :(api-operator help wso2am-operator)'
-      ;;
-      update)
-        _arguments '2: :(api help)'
-      ;;
-      add)
-        _arguments '2: :(api help)'
-      ;;
       delete)
         _arguments '2: :(api api-product app help)'
       ;;
       install)
         _arguments '2: :(api-operator help wso2am-operator)'
       ;;
+      list)
+        _arguments '2: :(api-products apis apps envs help)'
+      ;;
       remove)
         _arguments '2: :(env help)'
+      ;;
+      uninstall)
+        _arguments '2: :(api-operator help wso2am-operator)'
+      ;;
+      add)
+        _arguments '2: :(api help)'
+      ;;
+      update)
+        _arguments '2: :(api help)'
       ;;
       *)
         _arguments '*: :_files'
