@@ -136,7 +136,7 @@ var EnvReplaceFilePaths = []string{
 
 // project param files
 const (
-	ParamFileAPI         = "api_params.yaml"
+	ParamFileAPI = "api_params.yaml"
 )
 
 const PrivateJetModeConst = "privateJet"
@@ -160,7 +160,8 @@ const DynamicEndpointType = "dynamic"            // To denote "endpointType: dyn
 const LoadBalanceEndpointRoutingPolicy = "load_balanced" // To denote "endpointRoutingPolicy: load_balanced" in api_params.yaml
 const LoadBalanceEndpointTypeForJSON = "load_balance"    // To denote the "endpointType : load_balance" in api.json
 const LoadBalanceAlgorithmClass = "org.apache.synapse.endpoints.algorithms.RoundRobin"
-const FailoverRoutingPolicy = "failover" // To denote "endpointRoutingPolicy: failover" in api_params.yaml and to denote the "endpointType : failover" in api.json
+const FailoverRoutingPolicy = "failover"                  // To denote "endpointRoutingPolicy: failover" in api_params.yaml and to denote the "endpointType : failover" in api.json
+const LoadBalanceSessionManagementTransport = "transport" // To represent the "sessionManagement: transport" in api_params.yaml
 
 const DynamicEndpointConfig = `{"endpoint_type":"default","sandbox_endpoints":{"url":"default"},"failOver":"False","production_endpoints":{"url":"default"}}`
 

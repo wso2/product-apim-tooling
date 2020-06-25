@@ -200,6 +200,11 @@ func setupMultipleEndpoints(environmentParams *params.Environment) ([]byte, erro
 			// The default class of the algorithm to be used should be set to RoundRobin
 			environmentParams.LoadBalanceEndpoints.AlgorithmClassName = utils.LoadBalanceAlgorithmClass
 			environmentParams.LoadBalanceEndpoints.EndpointType = utils.LoadBalanceEndpointTypeForJSON
+			if environmentParams.LoadBalanceEndpoints.SessionManagement == utils.LoadBalanceSessionManagementTransport {
+				// If the user has specified this as "transport", this should be converted to an empty string.
+				// Otherwise APIM won't recognize this as "transport".
+				environmentParams.LoadBalanceEndpoints.SessionManagement = ""
+			}
 			configData, err = json.Marshal(environmentParams.LoadBalanceEndpoints)
 		}
 
@@ -236,6 +241,11 @@ func setupMultipleEndpoints(environmentParams *params.Environment) ([]byte, erro
 			}
 			for index := range environmentParams.LoadBalanceEndpoints.Sandbox {
 				environmentParams.LoadBalanceEndpoints.Sandbox[index].EndpointType = utils.HttpSOAPEndpointTypeForJSON
+			}
+			if environmentParams.LoadBalanceEndpoints.SessionManagement == utils.LoadBalanceSessionManagementTransport {
+				// If the user has specified this as "transport", this should be converted to an empty string.
+				// Otherwise APIM won't recognize this as "transport".
+				environmentParams.LoadBalanceEndpoints.SessionManagement = ""
 			}
 			configData, err = json.Marshal(environmentParams.LoadBalanceEndpoints)
 		}
