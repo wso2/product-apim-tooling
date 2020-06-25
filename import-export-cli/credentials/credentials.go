@@ -19,8 +19,10 @@
 package credentials
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"path/filepath"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -84,4 +86,38 @@ func GetOAuthAccessToken(credential Credential, env string) (string, error) {
 // GetBasicAuth returns basic auth username:password encoded in base64
 func GetBasicAuth(credential Credential) string {
 	return Base64Encode(fmt.Sprintf("%s:%s", credential.Username, credential.Password))
+}
+
+//Revoke access Token when user is logging out from environment
+func RevokeAccessToken(credential Credential, env string, token string)  error {
+
+	//get revoke endpoint
+	tokenRevokeEndpoint := utils.GetTokenRevokeEndpoint(env,utils.MainConfigFilePath)
+	//Encoding client secret and client Id
+	var b64EncodedClientIDClientSecret = utils.GetBase64EncodedCredentials(credential.ClientId,credential.ClientSecret)
+	// set headers to request
+	headers := make(map[string]string)
+	headers[utils.HeaderContentType] = utils.HeaderValueXWWWFormUrlEncoded
+	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + b64EncodedClientIDClientSecret
+
+	//Create body for the request
+	body := utils.HeaderToken + token + utils.TokenTypeForRevocation
+
+	resp, err := utils.InvokePOSTRequest(tokenRevokeEndpoint, headers, body)
+	utils.Logln(utils.LogPrefixInfo + "connecting to " + tokenRevokeEndpoint)
+
+	if err != nil {
+		utils.HandleErrorAndExit("Unable to Connect.", err)
+	}
+
+	//Check status code
+	if resp.StatusCode() != http.StatusOK {
+		utils.HandleErrorAndExit("Unable to connect.", errors.New("Status: "+resp.Status()))
+		return nil
+	}
+
+	responseDataMap := make(map[string]string) // a map to hold response data
+	data := []byte(resp.Body())
+	json.Unmarshal(data, &responseDataMap) // add response data to the map
+	return  nil
 }

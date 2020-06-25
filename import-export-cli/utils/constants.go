@@ -63,6 +63,7 @@ const defaultDevPortalApplicationListEndpointSuffix = "api/am/store/v1/applicati
 const defaultDevPortalThrottlingPoliciesEndpointSuffix = "api/am/store/v1/throttling-policies"
 const defaultClientRegistrationEndpointSuffix = "client-registration/v0.16/register"
 const defaultTokenEndPoint = "oauth2/token"
+const defaultRevokeEndpointSuffix = "oauth2/revoke"
 
 const DefaultEnvironmentName = "default"
 
@@ -91,6 +92,8 @@ const HeaderValueXWWWFormUrlEncoded = "application/x-www-form-urlencoded"
 const HeaderValueAuthBearerPrefix = "Bearer"
 const HeaderValueAuthBasicPrefix = "Basic"
 const HeaderValueMultiPartFormData = "multipart/form-data"
+const HeaderToken = "token="
+const TokenTypeForRevocation = "&token_type_hint=access_token"
 
 // Logging Prefixes
 const LogPrefixInfo = "[INFO]: "
