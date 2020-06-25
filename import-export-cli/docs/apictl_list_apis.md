@@ -27,7 +27,7 @@ NOTE: The flag (--environment (-e)) is mandatory
   -e, --environment string   Environment to be searched
       --format string        Pretty-print apis using Go Templates. Use "{{ jsonPretty . }}" to list all fields
   -h, --help                 help for apis
-  -l, --limit string         Maximum number of apis to return
+  -l, --limit string         Maximum number of apis to return (default "25")
   -q, --query string         Query pattern
 ```
 

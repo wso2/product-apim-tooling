@@ -103,6 +103,7 @@ func init() {
 
 	var defaultHttpRequestTimeout int
 	var defaultExportDirectory string
+	var defaultTokenType string
 
 	// read current values in file to be passed into default values for flags below
 	mainConfig := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
@@ -115,11 +116,15 @@ func init() {
 		defaultExportDirectory = mainConfig.Config.ExportDirectory
 	}
 
+	if mainConfig.Config.TokenType != "" {
+		defaultTokenType = mainConfig.Config.TokenType
+	}
+
 	SetCmd.Flags().IntVar(&flagHttpRequestTimeout, "http-request-timeout", defaultHttpRequestTimeout,
 		"Timeout for HTTP Client")
 	SetCmd.Flags().StringVar(&flagExportDirectory, "export-directory", defaultExportDirectory,
 		"Path to directory where APIs should be saved")
-	SetCmd.Flags().StringVarP(&flagTokenType, "token-type", "t", "",
+	SetCmd.Flags().StringVarP(&flagTokenType, "token-type", "t", defaultTokenType,
 		"Type of the token to be generated")
-	SetCmd.Flags().StringVarP(&flagKubernetesMode, "mode", "m", "", "mode of apictl")
+	SetCmd.Flags().StringVarP(&flagKubernetesMode, "mode", "m", utils.DefaultEnvironmentName, "mode of apictl")
 }

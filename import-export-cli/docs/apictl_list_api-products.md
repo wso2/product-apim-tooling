@@ -25,7 +25,7 @@ NOTE: The flag (--environment (-e)) is mandatory
 
 ```
   -e, --environment string   Environment to be searched
-      --format string        Pretty-print API Products using Go Templates. Use "{{ jsonPretty . }}" to list all fields
+      --format string        Pretty-print API Products using Go Templates. Use "{{ jsonPretty . }}" to list all fields (default "25")
   -h, --help                 help for api-products
   -l, --limit string         Maximum number of API Products to return
   -q, --query string         Query pattern

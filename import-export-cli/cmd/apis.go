@@ -25,6 +25,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 	"text/template"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
@@ -246,7 +247,7 @@ func init() {
 	apisCmd.Flags().StringVarP(&listApisCmdQuery, "query", "q",
 		"", "Query pattern")
 	apisCmd.Flags().StringVarP(&listApisCmdLimit, "limit", "l",
-		"", "Maximum number of apis to return")
+		strconv.Itoa(utils.DefaultApisDisplayLimit), "Maximum number of apis to return")
 	apisCmd.Flags().StringVarP(&listApisCmdFormat, "format", "", "", "Pretty-print apis "+
 		"using Go Templates. Use \"{{ jsonPretty . }}\" to list all fields")
 	_ = apisCmd.MarkFlagRequired("environment")
