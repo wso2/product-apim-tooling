@@ -77,11 +77,6 @@ func removeEnv(envName, mainConfigFilePath, envKeysFilePath string) error {
 				return err
 			}
 		}
-		// remove env from mainConfig file (endpoints file)
-		err = utils.RemoveEnvFromMainConfigFile(envName, mainConfigFilePath)
-		if err != nil {
-			return err
-		}
 
 		// remove keys also if user has already logged into this environment
 		store, err := credentials.GetDefaultCredentialStore()
@@ -91,6 +86,13 @@ func removeEnv(envName, mainConfigFilePath, envKeysFilePath string) error {
 				return err
 			}
 		}
+
+		// remove env from mainConfig file (endpoints file)
+		err = utils.RemoveEnvFromMainConfigFile(envName, mainConfigFilePath)
+		if err != nil {
+			return err
+		}
+
 	} else {
 		// environment does not exist in mainConfig file (endpoints file). Nothing to remove
 		return errors.New("environment '" + envName + "' not found in " + mainConfigFilePath)
