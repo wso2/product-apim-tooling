@@ -101,7 +101,9 @@ func handleAddApi(nameSuffix string) {
 
 			// handle java interceptors
 			tempJavaIntCms := handleJavaInterceptors(nameSuffix, flagSwaggerFilePath, "create", flagNamespace, fmt.Sprintf("%v-%v", flagApiName, i+1))
-			javaInterceptorsCmNames = append(javaInterceptorsCmNames, tempJavaIntCms...)
+			if tempJavaIntCms != nil {
+				javaInterceptorsCmNames = append(javaInterceptorsCmNames, tempJavaIntCms...)
+			}
 		//check if the swagger path is a file
 		case mode.IsRegular():
 			//creating kubernetes configmap with swagger definition
@@ -256,20 +258,23 @@ func handleBalInterceptors(configMapName string, path string, operation string, 
 	//check interceptors dir is not empty
 	file, err := os.Open(interceptorsPath)
 	if err != nil {
-		utils.HandleErrorAndExit("cannot open interceptors Dir", err)
-	}
-	defer file.Close()
-	if _, err = file.Readdir(1); err != nil {
-		return false
+		utils.HandleErrorAndContinue("cannot open Interceptors directory", err)
+	} else {
+		defer file.Close()
+		if _, err = file.Readdir(1); err != nil {
+			return false
+		}
+
+		//creating kubernetes configmap with interceptors
+		fmt.Println("creating configmap with ballerina interceptors")
+		if err := createConfigMapWithNamespace(configMapName, interceptorsPath, namespace, operation); err != nil {
+			utils.HandleErrorAndExit("Error creating configmap for interceptors", err)
+		}
+
+		return true
 	}
 
-	//creating kubernetes configmap with interceptors
-	fmt.Println("creating configmap with ballerina interceptors")
-	if err := createConfigMapWithNamespace(configMapName, interceptorsPath, namespace, operation); err != nil {
-		utils.HandleErrorAndExit("Error creating configmap for interceptors", err)
-	}
-
-	return true
+	return false
 }
 
 func handleJavaInterceptors(nameSuffix string, path string, operation string, namespace string, cmPrefixName string) []string {
@@ -278,17 +283,18 @@ func handleJavaInterceptors(nameSuffix string, path string, operation string, na
 	//get interceptors if available
 	interceptorsPath := filepath.Join(path, "libs")
 	//check interceptors dir is not empty
-	if exists, err := utils.IsDirExists(interceptorsPath); !exists {
-		utils.HandleErrorAndExit("cannot open java interceptors Dir", err)
-	}
-
-	//get all jars in libs dir
-	errReadInterceptors := filepath.Walk(interceptorsPath, func(path string, info os.FileInfo, err error) error {
-		interceptors = append(interceptors, path)
-		return nil
-	})
-	if errReadInterceptors != nil {
-		utils.HandleErrorAndExit("cannot read interceptors in the libs", errReadInterceptors)
+	exists, err := utils.IsDirExists(interceptorsPath)
+	if !exists {
+		utils.HandleErrorAndContinue("cannot open java interceptors directory", err)
+	} else {
+		//get all jars in libs dir
+		errReadInterceptors := filepath.Walk(interceptorsPath, func(path string, info os.FileInfo, err error) error {
+			interceptors = append(interceptors, path)
+			return nil
+		})
+		if errReadInterceptors != nil {
+			utils.HandleErrorAndExit("cannot read interceptors in the libs", errReadInterceptors)
+		}
 	}
 
 	const jarExt = ".jar"
