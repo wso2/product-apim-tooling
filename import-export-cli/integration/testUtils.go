@@ -718,10 +718,17 @@ func validateAPIDelete(t *testing.T, args *apiImportExportTestArgs) {
 	base.Login(t, args.srcAPIM.GetEnvName(), args.ctlUser.username, args.ctlUser.password)
 
 	time.Sleep(1 * time.Second)
+	apisListBeforeDelete := args.srcAPIM.GetAPIs()
+
 	deleteAPIByCtl(t, args)
 
 	apisListAfterDelete := args.srcAPIM.GetAPIs()
+	time.Sleep(1 * time.Second)
 
+	// Validate whether the expected number of API count is there
+	assert.Equal(t, apisListBeforeDelete.Count, apisListAfterDelete.Count+1, "Expected number of APIs not deleted")
+
+	// Validate that the delete is a success
 	validateAPIIsDeleted(t, args.api, apisListAfterDelete)
 }
 
@@ -1026,10 +1033,17 @@ func validateAPIProductDelete(t *testing.T, args *apiProductImportExportTestArgs
 	base.Login(t, args.srcAPIM.GetEnvName(), args.ctlUser.username, args.ctlUser.password)
 
 	time.Sleep(1 * time.Second)
+	apiProductsListBeforeDelete := args.srcAPIM.GetAPIProducts()
+
 	deleteAPIProductByCtl(t, args)
 
 	apiProductsListAfterDelete := args.srcAPIM.GetAPIProducts()
+	time.Sleep(1 * time.Second)
 
+	// Validate whether the expected number of API Product count is there
+	assert.Equal(t, apiProductsListBeforeDelete.Count, apiProductsListAfterDelete.Count+1, "Expected number of API Products not deleted")
+
+	// Validate that the delete is a success
 	validateAPIProductIsDeleted(t, args.apiProduct, apiProductsListAfterDelete)
 }
 
