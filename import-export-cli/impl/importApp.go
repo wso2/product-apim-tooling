@@ -21,8 +21,10 @@ package impl
 import (
 	"bytes"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -44,7 +46,7 @@ import (
 // @param skipKeys: skip importing keys of application
 // @param skipCleanup: skip cleaning up temporary files created during the operation
 func ImportApplicationToEnv(accessToken, environment, filename, appOwner string, updateApplication, preserveOwner,
-	skipSubscriptions, skipKeys, skipCleanup bool) error {
+	skipSubscriptions, skipKeys, skipCleanup bool) (*http.Response, error) {
 	adminEndpoint := utils.GetAdminEndpointOfEnv(environment, utils.MainConfigFilePath)
 	return ImportApplication(accessToken, adminEndpoint, filename, appOwner, updateApplication, preserveOwner,
 		skipSubscriptions, skipKeys, skipCleanup)
@@ -61,7 +63,7 @@ func ImportApplicationToEnv(accessToken, environment, filename, appOwner string,
 // @param skipKeys: skip importing keys of application
 // @param skipCleanup: skip cleaning up temporary files created during the operation
 func ImportApplication(accessToken, adminEndpoint, filename, appOwner string, updateApplication, preserveOwner,
-	skipSubscriptions, skipKeys, skipCleanup bool) error {
+	skipSubscriptions, skipKeys, skipCleanup bool) (*http.Response, error) {
 
 	exportDirectory := filepath.Join(utils.ExportDirectory, utils.ExportedAppsDirName)
 	adminEndpoint = utils.AppendSlashToString(adminEndpoint)
@@ -81,7 +83,7 @@ func ImportApplication(accessToken, adminEndpoint, filename, appOwner string, up
 	// If applicationFilePath contains a directory, zip it. Otherwise, leave it as it is.
 	applicationFilePath, err, cleanupFunc := utils.CreateZipFileFromProject(applicationFilePath, skipCleanup)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	//cleanup the temporary artifacts once consuming the zip file
@@ -113,11 +115,33 @@ func ImportApplication(accessToken, adminEndpoint, filename, appOwner string, up
 	}
 
 	resp, err := client.Do(req)
-
 	if err != nil {
-		utils.Logln(utils.LogPrefixError, err)
+		return nil, err
 	}
+	if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
+		// 201 Created or 200 OK
+		_ = resp.Body.Close()
+		fmt.Println("Successfully imported Application")
+		return resp, nil
+	} else {
+		// We have an HTTP error
+		fmt.Println("Error importing Application.")
+		fmt.Println("Status: " + resp.Status)
 
+		bodyBuf, err := ioutil.ReadAll(resp.Body)
+		_ = resp.Body.Close()
+		if err != nil {
+			return nil, err
+		}
+
+		strBody := string(bodyBuf)
+		fmt.Println("Response:", strBody)
+
+		return nil, errors.New(resp.Status)
+	}
+}
+
+func PrintImportAppResponse(resp *http.Response) {
 	if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusCreated {
 		// 200 OK or 201 Created
 		utils.Logln(utils.LogPrefixInfo+"Header:", resp.Header)
@@ -136,8 +160,6 @@ func ImportApplication(accessToken, adminEndpoint, filename, appOwner string, up
 		fmt.Println("Error importing Application")
 		utils.Logln(utils.LogPrefixError + resp.Status)
 	}
-
-	return err
 }
 
 // NewFileUploadRequest form an HTTP Put request

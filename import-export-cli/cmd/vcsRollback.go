@@ -29,11 +29,8 @@ var flagVCSRollbackEnvName string           // name of the environment to be add
 
 // push command related usage Info
 const vcsRollbackCmdLiteral = "rollback"
-const vcsRollbackCmdShortDesc = "push an API/APIProduct/Application in an environment"
-const vcsRollbackCmdLongDesc = `push an API available in the environment specified by flag (--environment, -e) in default mode
-push an API Product available in the environment specified by flag (--environment, -e) in default mode
-push an Application of a specific user in the environment specified by flag (--environment, -e) in default mode
-push resources by filenames, stdin, resources and names, or by resources and label selector in kubernetes mode`
+const vcsRollbackCmdShortDesc = "Rollback the environment to the last working state in case of an error"
+const vcsRollbackCmdLongDesc = ``
 
 const vcsRollbackCmdCmdExamples = utils.ProjectName + ` ` + vcsRollbackCmdLiteral + ` `  + ` -e dev`
 

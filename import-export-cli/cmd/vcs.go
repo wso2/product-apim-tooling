@@ -19,24 +19,15 @@
 package cmd
 
 import (
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-
 	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 // vcs command related usage Info
 const vcsCmdLiteral = "vcs"
-const vcsCmdShortDesc = "vcs an API/APIProduct/Application in an environment"
-const vcsCmdLongDesc = `vcs an API available in the environment specified by flag (--environment, -e) in default mode
-vcs an API Product available in the environment specified by flag (--environment, -e) in default mode
-vcs an Application of a specific user in the environment specified by flag (--environment, -e) in default mode
-vcs resources by filenames, stdin, resources and names, or by resources and label selector in kubernetes mode`
-
-const vcsCmdExamples = utils.ProjectName + ` ` + vcsCmdLiteral + ` `  + ` -n TwitterAPI -v 1.0.0 -r admin -e dev
-` + utils.ProjectName + ` ` + vcsCmdLiteral + ` ` + ` -n TwitterAPI -r admin -e dev 
-` + utils.ProjectName + ` ` + vcsCmdLiteral + ` ` + ` -n TestApplication -o admin -e dev
-` + utils.ProjectName + ` ` + vcsCmdLiteral + ` ` + ` petstore
-` + utils.ProjectName + ` ` + vcsCmdLiteral + ` ` + ` -l name=myLabel`
+const vcsCmdShortDesc = "Update an projects in an environment by calling the version control system (git)"
+const vcsCmdLongDesc = ``
+const vcsCmdExamples = ``
 
 // vcsCmd represents the vcs command
 var VCSCmd = &cobra.Command{

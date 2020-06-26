@@ -155,14 +155,14 @@ func TestExtractAPIInfoWithMalformedJSON(t *testing.T) {
 }
 
 func TestGetAPIInfoCorrectDirectoryStructure(t *testing.T) {
-	api, _, err := getAPIDefinition("testdata/PizzaShackAPI-1.0.0")
+	api, _, err := GetAPIDefinition("testdata/PizzaShackAPI-1.0.0")
 	assert.Nil(t, err, "Should return nil error on reading correct directories")
 	assert.Equal(t, v2.ID{APIName: "PizzaShackAPI", Version: "1.0.0", ProviderName: "admin"}, api.ID,
 		"Should return correct values for ID info")
 }
 
 func TestGetAPIInfoMalformedDirectory(t *testing.T) {
-	api, _, err := getAPIDefinition("testdata/PizzaShackAPI_1.0.0-malformed")
+	api, _, err := GetAPIDefinition("testdata/PizzaShackAPI_1.0.0-malformed")
 	assert.Error(t, err, "Should return error on reading malformed directories")
 	assert.True(t, os.IsNotExist(err), "File not found error must be thrown")
 	assert.Nil(t, api,

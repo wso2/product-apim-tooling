@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/go-resty/resty"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -52,8 +53,20 @@ func DeleteAPIProduct(accessToken, environment, apiProductName, apiProductProvid
 	if err != nil {
 		return nil, err
 	}
+	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNoContent {
+		return nil, errors.New(strconv.Itoa(resp.StatusCode()) + ":<" + string(resp.Body()) + ">")
+	}
 	return resp, nil
 }
+
+func PrintDeleteAPIProductResponse(resp *resty.Response, err error) {
+	if err != nil {
+		fmt.Println("Error deleting API Product:", err)
+	} else {
+		fmt.Println("API Product deleted successfully!. Status: " + strconv.Itoa(resp.StatusCode()))
+	}
+}
+
 
 // Get the ID of an API Product if available
 // @param accessToken : Access token to call the Publisher Rest API

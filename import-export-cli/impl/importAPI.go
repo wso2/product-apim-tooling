@@ -63,8 +63,8 @@ func extractAPIDefinition(jsonContent []byte) (*v2.APIDefinition, error) {
 	return api, nil
 }
 
-// getAPIDefinition scans filePath and returns APIDefinition or an error
-func getAPIDefinition(filePath string) (*v2.APIDefinition, []byte, error) {
+// GetAPIDefinition scans filePath and returns APIDefinition or an error
+func GetAPIDefinition(filePath string) (*v2.APIDefinition, []byte, error) {
 	info, err := os.Stat(filePath)
 	if err != nil {
 		return nil, nil, err
@@ -818,7 +818,7 @@ func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, a
 	}
 
 	// Get API info
-	apiInfo, originalContent, err := getAPIDefinition(apiFilePath)
+	apiInfo, originalContent, err := GetAPIDefinition(apiFilePath)
 	if err != nil {
 		return err
 	}

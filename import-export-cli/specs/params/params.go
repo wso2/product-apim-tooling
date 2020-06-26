@@ -110,16 +110,24 @@ type ApplicationImportParams struct {
 }
 
 type ProjectParams struct {
-	Type                     string
-	AbsolutePath             string
-	RelativePath             string
-	Name                     string
-	FailedDuringPreviousPush bool
-	Deleted                  bool
-	ApiParams                *ApiParams
-	ApiProductParams         *ApiProductParams
-	ApplicationParams         *ApplicationParams
+	Type                     string             `yaml:"type"`
+	AbsolutePath             string             `yaml:"absolutePath,omitempty"`
+	RelativePath             string             `yaml:"relativePath,omitempty"`
+	NickName                 string             `yaml:"nickName,omitempty"`
+	FailedDuringPreviousPush bool               `yaml:"failedDuringPreviousPush,omitempty"`
+	Deleted                  bool               `yaml:"deleted,omitempty"`
+	ProjectInfo              ProjectInfo        `yaml:"projectInfo,omitempty"`
+	ApiParams                *ApiParams         `yaml:"apiParams,omitempty"`
+	ApiProductParams         *ApiProductParams  `yaml:"apiProductParams,omitempty"`
+	ApplicationParams        *ApplicationParams `yaml:"applicationParams,omitempty"`
 }
+
+type ProjectInfo struct {
+	Owner   string `yaml:"owner,omitempty"`
+	Name    string `yaml:"name,omitempty"`
+	Version string `yaml:"version,omitempty"`
+}
+
 // ---------------- End of Structs for Project Details ---------------------------------
 
 // APIEndpointConfig contains details about endpoints in an API

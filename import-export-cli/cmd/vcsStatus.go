@@ -31,11 +31,8 @@ var flagVCSStatusEnvName string           // name of the environment to be added
 
 // push command related usage Info
 const vcsStatusCmdLiteral = "status"
-const vcsStatusCmdShortDesc = "push an API/APIProduct/Application in an environment"
-const vcsStatusCmdLongDesc = `push an API available in the environment specified by flag (--environment, -e) in default mode
-push an API Product available in the environment specified by flag (--environment, -e) in default mode
-push an Application of a specific user in the environment specified by flag (--environment, -e) in default mode
-push resources by filenames, stdin, resources and names, or by resources and label selector in kubernetes mode`
+const vcsStatusCmdShortDesc = "Gets the status report of project changes of the specified environment"
+const vcsStatusCmdLongDesc = ``
 
 const vcsStatusCmdCmdExamples = utils.ProjectName + ` ` + vcsStatusCmdLiteral + ` `  + ` -e dev`
 
@@ -65,15 +62,18 @@ func printProjectsToUpdate(projectType string, projects []*params.ProjectParams)
 	if len(projects) != 0 {
 		fmt.Println("\n" + projectType + "s (" + strconv.Itoa(len(projects)) + ") ...")
 		for i, projectParam := range projects {
-			var status string
-			if projectParam.FailedDuringPreviousPush {
-				status = "failed"
-			} else if projectParam.Deleted {
-				status = "delete"
+			var operation string
+			var failed string
+			if projectParam.Deleted {
+				operation = "[delete]"
 			} else {
-				status = "save"
+				operation = "[save]"
 			}
-			fmt.Println(strconv.Itoa(i+1) + ": [" + status + "]\t" + projectParam.Name + ": (" + projectParam.RelativePath + ")")
+			if projectParam.FailedDuringPreviousPush {
+				failed = "[failed]"
+			}
+			fmt.Println(strconv.Itoa(i+1) + ": " + operation + "\t" + failed + "\t" + projectParam.NickName +
+				": (" + projectParam.RelativePath + ")")
 		}
 	}
 }

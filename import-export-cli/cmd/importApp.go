@@ -67,7 +67,7 @@ func executeImportAppCmd(credential credentials.Credential) {
 	if err != nil {
 		utils.HandleErrorAndExit("Error getting OAuth Tokens", err)
 	}
-	err = impl.ImportApplicationToEnv(accessToken, importAppEnvironment, importAppFile, importAppOwner,
+	_, err = impl.ImportApplicationToEnv(accessToken, importAppEnvironment, importAppFile, importAppOwner,
 		importAppUpdateApplication, preserveOwner, skipSubscriptions, importAppSkipKeys, importAppSkipCleanup)
 	if err != nil {
 		utils.HandleErrorAndExit("Error importing Application", err)

@@ -29,11 +29,8 @@ var flagVCSPushEnvName string           // name of the environment to be added
 
 // push command related usage Info
 const pushCmdLiteral = "push"
-const pushCmdShortDesc = "push an API/APIProduct/Application in an environment"
-const pushCmdLongDesc = `push an API available in the environment specified by flag (--environment, -e) in default mode
-push an API Product available in the environment specified by flag (--environment, -e) in default mode
-push an Application of a specific user in the environment specified by flag (--environment, -e) in default mode
-push resources by filenames, stdin, resources and names, or by resources and label selector in kubernetes mode`
+const pushCmdShortDesc = "Pushes project changes to the specified environment"
+const pushCmdLongDesc = ``
 
 const pushCmdExamples = utils.ProjectName + ` ` + pushCmdLiteral + ` `  + ` -e dev`
 
