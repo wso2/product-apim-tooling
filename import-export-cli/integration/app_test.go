@@ -19,10 +19,14 @@
 package integration
 
 import (
-	"testing"
-
+	"github.com/magiconair/properties/assert"
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
+	"testing"
+	"time"
 )
+
+const numberOfApps = 5 // Number of Applications to be added in a loop
 
 func TestListApp(t *testing.T) {
 	username := superAdminUser
@@ -92,7 +96,27 @@ func TestExportImportOwnAppAdminSuperTenant(t *testing.T) {
 		destAPIM:    prod,
 	}
 
-	validateAppExportImport(t, args)
+	validateAppExportImportWithPreserveOwner(t, args)
+}
+
+func TestExportImportOwnAppAdminSuperTenantWithUpdate(t *testing.T) {
+	adminUsername := superAdminUser
+	adminPassword := superAdminPassword
+
+	dev := apimClients[0]
+	prod := apimClients[1]
+
+	app := addApp(t, dev, adminUsername, adminPassword)
+
+	args := &appImportExportTestArgs{
+		appOwner:    credentials{username: adminUsername, password: adminPassword},
+		ctlUser:     credentials{username: adminUsername, password: adminPassword},
+		application: app,
+		srcAPIM:     dev,
+		destAPIM:    prod,
+	}
+
+	validateAppExportImportWithUpdate(t, args)
 }
 
 func TestExportImportOtherAppAdminSuperTenant(t *testing.T) {
@@ -114,7 +138,7 @@ func TestExportImportOtherAppAdminSuperTenant(t *testing.T) {
 		destAPIM:    prod,
 	}
 
-	validateAppExportImport(t, args)
+	validateAppExportImportWithPreserveOwner(t, args)
 }
 
 func TestExportImportOwnAppAdminTenant(t *testing.T) {
@@ -134,7 +158,7 @@ func TestExportImportOwnAppAdminTenant(t *testing.T) {
 		destAPIM:    prod,
 	}
 
-	validateAppExportImport(t, args)
+	validateAppExportImportWithPreserveOwner(t, args)
 }
 
 func TestExportOtherAppAdminTenant(t *testing.T) {
@@ -156,7 +180,7 @@ func TestExportOtherAppAdminTenant(t *testing.T) {
 		destAPIM:    prod,
 	}
 
-	validateAppExportImport(t, args)
+	validateAppExportImportWithPreserveOwner(t, args)
 }
 
 func TestExportCrossTenantAppAdminTenant(t *testing.T) {
@@ -190,7 +214,7 @@ func TestExportAppSecondaryUserStoreAdminSuperTenant(t *testing.T) {
 
 	base.SetupEnv(t, devEnv, devApim, devTokenEP)
 	base.Login(t, devEnv, username, password)
-validateAppExportImport
+validateAppExportImportWithPreserveOwner
 	exportApp(t, name, owner, devEnv)
 
 	assert.True(t, base.IsApplicationArchiveExists(devAppExportPath, name, owner))
@@ -211,3 +235,50 @@ func TestExportAppSecondaryUserStoreAdminSuperTenantLowerCase(t *testing.T) {
 	assert.True(t, base.IsApplicationArchiveExists(devAppExportPath, name, owner))
 }
 */
+
+func validateAppDelete(t *testing.T, args *appImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnvWithoutTokenFlag(t, args.srcAPIM.GetEnvName(), args.srcAPIM.GetApimURL())
+
+	// Delete an API of env 1
+	base.Login(t, args.srcAPIM.GetEnvName(), args.ctlUser.username, args.ctlUser.password)
+
+	time.Sleep(1 * time.Second)
+	appsListBeforeDelete := args.srcAPIM.GetApplications()
+
+	deleteAppByCtl(t, args)
+
+	appsListAfterDelete := args.srcAPIM.GetApplications()
+	time.Sleep(1 * time.Second)
+
+	// Validate whether the expected number of API count is there
+	assert.Equal(t, appsListBeforeDelete.Count, appsListAfterDelete.Count+1, "Expected number of Applications not deleted")
+
+	// Validate that the delete is a success
+	validateApplicationIsDeleted(t, args.application, appsListAfterDelete)
+}
+
+func TestDeleteAppSuperTenantUser(t *testing.T) {
+	applicationCreator := creator.UserName
+	applicationCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+
+	var application *apim.Application
+	for apiCount := 0; apiCount <= numberOfApps; apiCount++ {
+		application = addApp(t, dev, applicationCreator, applicationCreatorPassword)
+	}
+
+	// This will be the Application that will be deleted by apictl, so no need to do cleaning
+	application = addApplicationWithoutCleaning(t, dev, applicationCreator, applicationCreatorPassword)
+
+	args := &appImportExportTestArgs{
+		ctlUser: credentials{username: applicationCreator, password: applicationCreatorPassword},
+		application:     application,
+		srcAPIM: dev,
+	}
+
+	validateAppDelete(t, args)
+}

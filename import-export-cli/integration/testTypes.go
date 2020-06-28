@@ -58,3 +58,18 @@ type apiGetKeyTestArgs struct {
 	apiProduct *apim.APIProduct
 	apim       *apim.Client
 }
+
+type loginTestArgs struct {
+	ctlUser     credentials
+	srcAPIM     *apim.Client
+}
+
+//TODO init args
+type initTestArgs struct {
+	ctlUser credentials
+	srcAPIM     *apim.Client
+	initFlag        string
+	definitionFlag  string
+	forceFlag       bool
+	oasFlag         string
+}

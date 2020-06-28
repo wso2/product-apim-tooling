@@ -78,6 +78,16 @@ func SetupEnv(t *testing.T, env string, apim string, tokenEp string) {
 	})
 }
 
+// SetupEnv : Adds a new environment just with apim endpoint and automatically removes it when the
+// calling test function execution ends
+func SetupEnvWithoutTokenFlag(t *testing.T, env string, apim string) {
+	Execute(t, "add-env", "-e", env, "--apim", apim)
+
+	t.Cleanup(func() {
+		Execute(t, "remove", "env", env)
+	})
+}
+
 // Login : Logs into an environment and automatically logs out when the calling test function execution ends
 //
 func Login(t *testing.T, env string, username string, password string) {

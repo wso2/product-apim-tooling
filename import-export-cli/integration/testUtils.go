@@ -101,6 +101,14 @@ func addAPIWithoutCleaning(t *testing.T, client *apim.Client, username string, p
 	return api
 }
 
+func addApplicationWithoutCleaning(t *testing.T, client *apim.Client, username string, password string) *apim.Application {
+	client.Login(username, password)
+	application := client.GenerateSampleAppData()
+	app := client.AddApplication(t, application, username, password)
+	application = client.GetApplication(app.ApplicationID)
+	return application
+}
+
 func addAPIToTwoEnvs(t *testing.T, client1 *apim.Client, client2 *apim.Client, username string, password string) (*apim.API, *apim.API) {
 	client1.Login(username, password)
 	api := client1.GenerateSampleAPIData(username)
@@ -320,6 +328,17 @@ func importAppPreserveOwner(t *testing.T, sourceEnv string, app *apim.Applicatio
 	return output, err
 }
 
+func importAppPreserveOwnerAndUpdate(t *testing.T, sourceEnv string, app *apim.Application, client *apim.Client) (string, error) {
+	fileName := base.GetApplicationArchiveFilePath(t, sourceEnv, app.Name, app.Owner)
+	output, err := base.Execute(t, "import-app","--preserveOwner=true", "--update=true", "-f", fileName, "-e", client.EnvName, "-k", "--verbose")
+
+	t.Cleanup(func() {
+		client.DeleteApplicationByName(app.Name)
+	})
+
+	return output, err
+}
+
 func exportAPI(t *testing.T, name string, version string, provider string, env string) (string, error) {
 	var output string
 	var err error
@@ -482,7 +501,7 @@ func validateAppExportFailure(t *testing.T, args *appImportExportTestArgs) {
 		args.application.Name, args.appOwner.username))
 }
 
-func validateAppExportImport(t *testing.T, args *appImportExportTestArgs) {
+func validateAppExportImportWithPreserveOwner(t *testing.T, args *appImportExportTestArgs) {
 	t.Helper()
 
 	// Setup apictl envs
@@ -509,6 +528,33 @@ func validateAppExportImport(t *testing.T, args *appImportExportTestArgs) {
 	validateAppsEqual(t, args.application, importedApp)
 }
 
+func validateAppExportImportWithUpdate(t *testing.T, args *appImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.srcAPIM.GetEnvName(), args.srcAPIM.GetApimURL(), args.srcAPIM.GetTokenURL())
+	base.SetupEnv(t, args.destAPIM.GetEnvName(), args.destAPIM.GetApimURL(), args.destAPIM.GetTokenURL())
+
+	// Export app from env 1
+	base.Login(t, args.srcAPIM.GetEnvName(), args.ctlUser.username, args.ctlUser.password)
+
+	exportApp(t, args.application.Name, args.appOwner.username, args.srcAPIM.GetEnvName())
+
+	assert.True(t, base.IsApplicationArchiveExists(t, getEnvAppExportPath(args.srcAPIM.GetEnvName()),
+		args.application.Name, args.appOwner.username))
+
+	// Import app to env 2
+	base.Login(t, args.destAPIM.GetEnvName(), args.ctlUser.username, args.ctlUser.password)
+
+	importAppPreserveOwnerAndUpdate(t, args.srcAPIM.GetEnvName(), args.application, args.destAPIM)
+
+	// Get App from env 2
+	importedApp := getApp(t, args.destAPIM, args.application.Name, args.appOwner.username, args.appOwner.password)
+
+	// Validate env 1 and env 2 App is equal
+	validateAppsEqual(t, args.application, importedApp)
+}
+
 func validateAppsEqual(t *testing.T, app1 *apim.Application, app2 *apim.Application) {
 	t.Helper()
 
@@ -516,7 +562,7 @@ func validateAppsEqual(t *testing.T, app1 *apim.Application, app2 *apim.Applicat
 	app2Copy := apim.CopyApp(app2)
 
 	// Since the Applications are from too different envs, their respective ApplicationID will defer.
-	// Therefore this will be overriden to the same value to ensure that the equality check will pass.
+	// Therefore this will be overridden to the same value to ensure that the equality check will pass.
 	app1Copy.ApplicationID = "override_with_same_value"
 	app2Copy.ApplicationID = app1Copy.ApplicationID
 
@@ -679,7 +725,7 @@ func validateAPIsEqualCrossTenant(t *testing.T, api1 *apim.API, api2 *apim.API) 
 
 	same := "override_with_same_value"
 	// Since the APIs are from too different envs, their respective ID will defer.
-	// Therefore this will be overriden to the same value to ensure that the equality check will pass.
+	// Therefore this will be overridden to the same value to ensure that the equality check will pass.
 	api1Copy.ID = same
 	api2Copy.ID = same
 
@@ -690,14 +736,14 @@ func validateAPIsEqualCrossTenant(t *testing.T, api1 *apim.API, api2 *apim.API) 
 	api2Copy.LastUpdatedTime = same
 
 	// The contexts and providers will differ since this is a cross tenant import
-	// Therefore this will be overriden to the same value to ensure that the equality check will pass.
+	// Therefore this will be overridden to the same value to ensure that the equality check will pass.
 	api1Copy.Context = same
 	api2Copy.Context = same
 
 	api1Copy.Provider = same
 	api2Copy.Provider = same
 
-	// Sort member collections to make equality chack possible
+	// Sort member collections to make equality check possible
 	apim.SortAPIMembers(&api1Copy)
 	apim.SortAPIMembers(&api2Copy)
 
@@ -1067,4 +1113,42 @@ func validateAPIProductDeleteFailure(t *testing.T, args *apiProductImportExportT
 	apiProductsListAfterDelete := args.srcAPIM.GetAPIProducts()
 
 	assert.Equal(t, apiProductsListBeforeDelete.Count, apiProductsListAfterDelete.Count, "API Product delete is successful")
+}
+
+func deleteAppByCtl(t *testing.T, args *appImportExportTestArgs) (string, error) {
+	output, err := base.Execute(t, "delete", "app", "-n", args.application.Name,  "-e", args.srcAPIM.EnvName, "-k", "--verbose")
+	return output, err
+}
+
+func validateApplicationIsDeleted(t *testing.T, application *apim.Application, appsListAfterDelete *apim.ApplicationList) {
+	for _, existingApplication := range appsListAfterDelete.List {
+		assert.NotEqual(t, existingApplication.ApplicationID, application.ApplicationID, "API delete is not successful")
+	}
+}
+
+func initProject (t *testing.T,args *initTestArgs)(string, error) {
+	//Setup Environment and login to it.
+	base.SetupEnvWithoutTokenFlag(t, args.srcAPIM.GetEnvName(), args.srcAPIM.GetApimURL())
+	base.Login(t, args.srcAPIM.GetEnvName(), args.ctlUser.username, args.ctlUser.password)
+
+	output,err:=base.Execute(t,"init", args.initFlag ,)
+	return output,err
+}
+
+func initProjectWithDefinitionFlag (t *testing.T,args *initTestArgs)(string, error) {
+	//Setup Environment and login to it.
+	base.SetupEnvWithoutTokenFlag(t, args.srcAPIM.GetEnvName(), args.srcAPIM.GetApimURL())
+	base.Login(t, args.srcAPIM.GetEnvName(), args.ctlUser.username, args.ctlUser.password)
+
+	output,err:=base.Execute(t,"init", args.initFlag ,"--definition",args.definitionFlag,"--force",args.forceFlag)
+	return output,err
+}
+
+func initProjectWithOasFlag (t *testing.T,args *initTestArgs)(string, error) {
+	//Setup Environment and login to it.
+	base.SetupEnvWithoutTokenFlag(t, args.srcAPIM.GetEnvName(), args.srcAPIM.GetApimURL())
+	base.Login(t, args.srcAPIM.GetEnvName(), args.ctlUser.username, args.ctlUser.password)
+
+	output,err:=base.Execute(t,"init", args.initFlag ,"--oas",args.oasFlag)
+	return output,err
 }

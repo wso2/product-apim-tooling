@@ -930,6 +930,27 @@ func (instance *Client) GetApplication(appID string) *Application {
 	return &appResponse
 }
 
+// GetApplications : Get Applications list from APIM
+func (instance *Client) GetApplications() *ApplicationList {
+	appsURL := instance.devPortalRestURL + "/applications"
+
+	request := base.CreateGet(appsURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.GetApplications()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.GetApplications()", response, 200)
+
+	var appResponse ApplicationList
+	json.NewDecoder(response.Body).Decode(&appResponse)
+	return &appResponse
+}
+
 // GetApplicationByName : Get Application from APIM by name
 func (instance *Client) GetApplicationByName(name string) *ApplicationInfo {
 	appsURL := instance.devPortalRestURL + "/applications"
