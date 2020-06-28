@@ -84,7 +84,7 @@ func TestInitializeAPIFromSwagger2Definition(t *testing.T) {
 	password := superAdminPassword
 	apim := apimClients[0]
 	var projectName = "SampleTestAPI2"
-	var swaggerDefinitionFilePath = ""
+	var swaggerDefinitionFilePath = "testdata/swagger2Definition.yaml"
 
 	args := &initTestArgs{
 		ctlUser:   credentials{username: username, password: password},
@@ -112,7 +112,7 @@ func TestInitializeAPIFromOpenAPI3Definition(t *testing.T) {
 	password := superAdminPassword
 	apim := apimClients[0]
 	var projectName = "OpenAPI3"
-	var openAPISpecificationFilePath = ""
+	var openAPISpecificationFilePath = "testdata/openAPI3Definition.yaml"
 
 	args := &initTestArgs{
 		ctlUser:   credentials{username: username, password: password},

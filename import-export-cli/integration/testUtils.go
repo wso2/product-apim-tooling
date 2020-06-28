@@ -1140,7 +1140,7 @@ func initProjectWithDefinitionFlag (t *testing.T,args *initTestArgs)(string, err
 	base.SetupEnvWithoutTokenFlag(t, args.srcAPIM.GetEnvName(), args.srcAPIM.GetApimURL())
 	base.Login(t, args.srcAPIM.GetEnvName(), args.ctlUser.username, args.ctlUser.password)
 
-	output,err:=base.Execute(t,"init", args.initFlag ,"--definition",args.definitionFlag,"--force",args.forceFlag)
+	output,err:=base.Execute(t,"init", args.initFlag ,"--definition",args.definitionFlag,"--force",strconv.FormatBool(args.forceFlag))
 	return output,err
 }
 
