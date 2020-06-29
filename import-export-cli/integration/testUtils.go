@@ -1172,7 +1172,7 @@ func environmentSetHttpRequestTimeout(t *testing.T,args *setTestArgs) (string, e
 func environmentSetTokenType(t *testing.T,args *setTestArgs) (string, error) {
 	apim := args.srcAPIM
 	base.SetupEnvWithoutTokenFlag(t, apim.GetEnvName(), apim.GetApimURL())
-	output, error := base.Execute(t, "set","--token-type", strconv.Itoa(args.httpRequestTimeout), "-k")
+	output, error := base.Execute(t, "set","--token-type", args.tokenTypeFlag, "-k")
 	return output,error
 }
 

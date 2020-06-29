@@ -55,7 +55,7 @@ func TestChangeExportDirectory(t *testing.T) {
 		exportDirectoryFlag: defaultExportPath,
 	}
 	environmentSetExportDirectory(t, argsDefault)
-	assert.Contains(t, output, "Token type set to:  JWT", "Export Directory change is not successful")
+	assert.Contains(t, output, "Export Directory is set to", "Export Directory change is not successful")
 }
 
 //Change HTTP request Timeout using apictl and assert the change
@@ -76,22 +76,22 @@ func TestChangeHttpRequestTimout(t *testing.T) {
 		httpRequestTimeout: defaultHttpRequestTimeOut,
 	}
 	environmentSetHttpRequestTimeout(t, argsDefault)
-	assert.Contains(t, output, "Token type set to:  JWT", "HTTP Request TimeOut change is not successful")
+	assert.Contains(t, output, "Http Request Timout is set to", "HTTP Request TimeOut change is not successful")
 }
 
 //Change Token type using apictl and assert the change (for both "jwt" and "oauth" token types)
 func TestChangeTokenType(t *testing.T) {
 	apim := apimClients[0]
 
-	tokenType1 := "Oauth"
+	tokenType1 := "oauth"
 	args := &setTestArgs{
 		srcAPIM:       apim,
 		tokenTypeFlag: tokenType1,
 	}
 	output, _ := environmentSetTokenType(t, args)
 	base.Log(output)
-	assert.Contains(t, output, "Token type set to:  JWT", "1st attempt of Token Type change is not successful")
-	tokenType2 := "JWT"
+	assert.Contains(t, output, "Token type is set to", "1st attempt of Token Type change is not successful")
+	tokenType2 := "jwt"
 
 	//Change value back to default value with a test
 	argsDefault := &setTestArgs{
@@ -100,7 +100,7 @@ func TestChangeTokenType(t *testing.T) {
 	}
 	output2, _ := environmentSetTokenType(t, argsDefault)
 	base.Log(output2)
-	assert.Contains(t, output2, "Token type set to:  JWT", "1st attempt of Token Type change is not successful")
+	assert.Contains(t, output2, "Token type is set to", "1st attempt of Token Type change is not successful")
 }
 
 //Login to the environment using email and logout
