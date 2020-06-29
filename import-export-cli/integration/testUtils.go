@@ -1175,3 +1175,13 @@ func environmentSetTokenType(t *testing.T,args *setTestArgs) (string, error) {
 	output, error := base.Execute(t, "set","--token-type", strconv.Itoa(args.httpRequestTimeout), "-k")
 	return output,error
 }
+
+func importApiFromProject(t *testing.T, projectName string, envName string) (string, error) {
+	projectPath, _ :=filepath.Abs(projectName)
+	return base.Execute(t,"import-api", "-f",projectPath,"-e",envName,"-k")
+}
+
+func importApiFromProjectWithUpdate(t *testing.T, projectName string, envName string) (string, error) {
+	projectPath, _ :=filepath.Abs(projectName)
+	return base.Execute(t,"import-api", "-f",projectPath,"-e",envName,"-k","--update")
+}

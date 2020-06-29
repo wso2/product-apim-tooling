@@ -277,9 +277,9 @@ func TestDeleteAppSuperTenantUser(t *testing.T) {
 	application = addApplicationWithoutCleaning(t, dev, adminUsername, adminPassword)
 
 	args := &appImportExportTestArgs{
-		ctlUser: credentials{username: superAdminUser, password: superAdminPassword},
-		application:     application,
-		srcAPIM: dev,
+		ctlUser:     credentials{username: superAdminUser, password: superAdminPassword},
+		application: application,
+		srcAPIM:     dev,
 	}
 
 	validateAppDelete(t, args)
