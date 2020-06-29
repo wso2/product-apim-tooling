@@ -41,10 +41,11 @@ const deleteCmdExamples = utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + del
 
 // DeleteCmd represents the delete command
 var DeleteCmd = &cobra.Command{
-	Use:     deleteCmdLiteral,
-	Short:   deleteCmdShortDesc,
-	Long:    deleteCmdLongDesc,
-	Example: deleteCmdExamples,
+	Use:                deleteCmdLiteral,
+	Short:              deleteCmdShortDesc,
+	Long:               deleteCmdLongDesc,
+	Example:            deleteCmdExamples,
+	DisableFlagParsing: isK8sEnabled(),
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + deleteCmdLiteral + " called")
 		configVars := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
