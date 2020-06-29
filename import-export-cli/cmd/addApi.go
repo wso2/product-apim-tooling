@@ -93,7 +93,7 @@ func handleAddApi(nameSuffix string) {
 			}
 
 			// copy all bal interceptors to the temp dir
-			balInterceptorsCmName := fmt.Sprintf("%v-%v-bal-interceptors%s", flagApiName, i+1, nameSuffix)
+			balInterceptorsCmName := fmt.Sprintf("%v-%v-bal-intcpt%s", flagApiName, i+1, nameSuffix)
 			intceptFound := handleBalInterceptors(balInterceptorsCmName, flagSwaggerFilePath, "create", flagNamespace)
 			if intceptFound {
 				balInterceptorsCmNames = append(balInterceptorsCmNames, balInterceptorsCmName)
@@ -302,7 +302,7 @@ func handleJavaInterceptors(nameSuffix string, path string, operation string, na
 		if filepath.Ext(filePath) == jarExt {
 			// creating kubernetes configmap for each java interceptor
 			// added the random number instead of file name to omit lengthy names and k8s resource name constraints
-			cmName := fmt.Sprintf("%s-%v-jar-interceptors%s", cmPrefixName, rand.Intn(10000), nameSuffix)
+			cmName := fmt.Sprintf("%s-%v-jar-intcpt%s", cmPrefixName, rand.Intn(10000), nameSuffix)
 			javaInterceptorsConfNames = append(javaInterceptorsConfNames, cmName)
 
 			fmt.Println("creating configmap with java interceptor " + cmName)
