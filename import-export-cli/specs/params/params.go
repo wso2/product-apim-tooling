@@ -51,7 +51,7 @@ type SecurityData struct {
 // Cert stores certificate details
 type Cert struct {
 	// Host of the certificate
-	Host string `yaml:"host" json:"hostName"`
+	Host string `yaml:"hostName" json:"hostName"`
 	// Alias for certificate
 	Alias string `yaml:"alias" json:"alias"`
 	// Path for certificate file
@@ -130,7 +130,6 @@ func ExtractAPIEndpointConfig(b []byte) (string, error) {
 	return apiConfig.EPConfig, err
 }
 
-
 // GetEnv returns the EndpointData associated for key in the ApiParams, if not found returns nil
 func (config ApiParams) GetEnv(key string) *Environment {
 	for index, env := range config.Environments {
@@ -140,4 +139,3 @@ func (config ApiParams) GetEnv(key string) *Environment {
 	}
 	return nil
 }
-
