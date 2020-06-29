@@ -32,43 +32,75 @@ func TestListEnvironments (t *testing.T){
 	base.SetupEnvWithoutTokenFlag(t, apim.GetEnvName(), apim.GetApimURL())
 	response, _ := base.Execute(t, "list", "envs")
 	base.GetRowsFromTableResponse(response)
+	base.Log(response)
 	assert.Contains(t,response,apim.GetEnvName(),"TestListEnvironments Failed")
 }
 
 //Change Export directory using apictl and assert the change
 func TestChangeExportDirectory(t *testing.T) {
 	apim := apimClients[0]
-	base.SetupEnvWithoutTokenFlag(t, apim.GetEnvName(), apim.GetApimURL())
-	var changedExportDirectory = "/testingPath/" + utils.DefaultExportDirName
-	output, _ := base.Execute(t, "set",  "---export-directory ", changedExportDirectory, "-k", "--verbose")
+	changedExportDirectory := utils.MockTestExportDirectory + utils.DefaultExportDirName
+	defaultExportPath := utils.DefaultExportDirPath
+
+	args := &setTestArgs{
+		srcAPIM: apim,
+		exportDirectoryFlag: changedExportDirectory,
+	}
+	output, _ := environmentSetExportDirectory(t, args)
 	base.Log(output)
-	assert.Equal(t,changedExportDirectory,utils.DefaultExportDirPath,"Export Directory change is not successful")
+
+	//Change value back to default value
+	argsDefault := &setTestArgs{
+		srcAPIM: apim,
+		exportDirectoryFlag: defaultExportPath,
+	}
+	environmentSetExportDirectory(t, argsDefault)
+	assert.Contains(t,output,"Token type set to:  JWT","Export Directory change is not successful")
 }
 
 //Change HTTP request Timeout using apictl and assert the change
 func TestChangeHttpRequestTimout(t *testing.T) {
 	apim := apimClients[0]
-	base.SetupEnvWithoutTokenFlag(t, apim.GetEnvName(), apim.GetApimURL())
-	configVars := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
-	var newHttpRequestTimeOut = 20000
-	output, _ := base.Execute(t, "set",  "--http-request-timeout ", string(newHttpRequestTimeOut), "-k", "--verbose")
+	defaultHttpRequestTimeOut:=utils.DefaultHttpRequestTimeout
+	newHttpRequestTimeOut := 20000
+	args := &setTestArgs{
+		srcAPIM: apim,
+		httpRequestTimeout: newHttpRequestTimeOut,
+	}
+	output, _ := environmentSetHttpRequestTimeout(t, args)
 	base.Log(output)
-	assert.Equal(t,newHttpRequestTimeOut,configVars.Config.HttpRequestTimeout,"HTTP Request TimeOut change is not successful")
+
+	//Change value back to default value
+	argsDefault := &setTestArgs{
+		srcAPIM: apim,
+		httpRequestTimeout: defaultHttpRequestTimeOut,
+	}
+	environmentSetHttpRequestTimeout(t, argsDefault)
+	assert.Contains(t,output,"Token type set to:  JWT","HTTP Request TimeOut change is not successful")
 }
 
 //Change Token type using apictl and assert the change (for both "jwt" and "oauth" token types)
 func TestChangeTokenType(t *testing.T) {
 	apim := apimClients[0]
-	base.SetupEnvWithoutTokenFlag(t, apim.GetEnvName(), apim.GetApimURL())
-	configVars := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
-	var tokenType1 = "Oauth"
-	output1, _ := base.Execute(t, "set",  "--token-type",tokenType1 , "-k", "--verbose")
-	base.Log(output1)
-	assert.Equal(t,tokenType1,configVars.Config.TokenType,"1st attempt of Token Type change is not successful")
-	var tokenType2 = "JWT"
-	output2, _ := base.Execute(t, "set",  "--token-type",tokenType2 , "-k", "--verbose")
+
+	tokenType1 := "Oauth"
+	args := &setTestArgs{
+		srcAPIM: apim,
+		tokenTypeFlag: tokenType1,
+	}
+	output, _ := environmentSetHttpRequestTimeout(t, args)
+	base.Log(output)
+	assert.Contains(t,output,"Token type set to:  JWT","1st attempt of Token Type change is not successful")
+	tokenType2 := "JWT"
+
+	//Change value back to default value with a test
+	argsDefault := &setTestArgs{
+		srcAPIM: apim,
+		tokenTypeFlag: tokenType2,
+	}
+	output2, _ := environmentSetHttpRequestTimeout(t, argsDefault)
 	base.Log(output2)
-	assert.Equal(t,tokenType2,configVars.Config.TokenType,"2nd attempt of Token Type change is not successful")
+	assert.Contains(t,output2,"Token type set to:  JWT","1st attempt of Token Type change is not successful")
 }
 
 //Login to the environment using email and logout

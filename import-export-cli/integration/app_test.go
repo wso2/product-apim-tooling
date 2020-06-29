@@ -99,6 +99,7 @@ func TestExportImportOwnAppAdminSuperTenant(t *testing.T) {
 	validateAppExportImportWithPreserveOwner(t, args)
 }
 
+//Import an already export App with already generated Keys with --update flag
 func TestExportImportOwnAppAdminSuperTenantWithUpdate(t *testing.T) {
 	adminUsername := superAdminUser
 	adminPassword := superAdminPassword
@@ -260,22 +261,23 @@ func validateAppDelete(t *testing.T, args *appImportExportTestArgs) {
 	validateApplicationIsDeleted(t, args.application, appsListAfterDelete)
 }
 
+//Delete an Application as a super tenant admin
 func TestDeleteAppSuperTenantUser(t *testing.T) {
-	applicationCreator := creator.UserName
-	applicationCreatorPassword := creator.Password
+	adminUsername := superAdminUser
+	adminPassword := superAdminPassword
 
 	dev := apimClients[0]
 
 	var application *apim.Application
-	for apiCount := 0; apiCount <= numberOfApps; apiCount++ {
-		application = addApp(t, dev, applicationCreator, applicationCreatorPassword)
+	for appCount := 0; appCount <= numberOfApps; appCount++ {
+		application = addApp(t, dev, adminUsername, adminPassword)
 	}
 
 	// This will be the Application that will be deleted by apictl, so no need to do cleaning
-	application = addApplicationWithoutCleaning(t, dev, applicationCreator, applicationCreatorPassword)
+	application = addApplicationWithoutCleaning(t, dev, adminUsername, adminPassword)
 
 	args := &appImportExportTestArgs{
-		ctlUser: credentials{username: applicationCreator, password: applicationCreatorPassword},
+		ctlUser: credentials{username: superAdminUser, password: superAdminPassword},
 		application:     application,
 		srcAPIM: dev,
 	}

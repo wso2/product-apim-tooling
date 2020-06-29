@@ -265,3 +265,10 @@ func logResponse(logString string, response *http.Response) {
 	log.Println(string(dump))
 	log.Println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 }
+
+func RemoveDir(projectName string){
+	error := os.RemoveAll(projectName)
+	if error != nil {
+		log.Fatal(error)
+	}
+}

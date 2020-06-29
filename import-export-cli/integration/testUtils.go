@@ -101,14 +101,6 @@ func addAPIWithoutCleaning(t *testing.T, client *apim.Client, username string, p
 	return api
 }
 
-func addApplicationWithoutCleaning(t *testing.T, client *apim.Client, username string, password string) *apim.Application {
-	client.Login(username, password)
-	application := client.GenerateSampleAppData()
-	app := client.AddApplication(t, application, username, password)
-	application = client.GetApplication(app.ApplicationID)
-	return application
-}
-
 func addAPIToTwoEnvs(t *testing.T, client1 *apim.Client, client2 *apim.Client, username string, password string) (*apim.API, *apim.API) {
 	client1.Login(username, password)
 	api := client1.GenerateSampleAPIData(username)
@@ -280,7 +272,17 @@ func validateGetKeys(t *testing.T, args *apiGetKeyTestArgs) {
 func addApp(t *testing.T, client *apim.Client, username string, password string) *apim.Application {
 	client.Login(username, password)
 	app := client.GenerateSampleAppData()
-	return client.AddApplication(t, app, username, password)
+	doClean := true
+	return client.AddApplication(t, app, username, password,doClean)
+}
+
+func addApplicationWithoutCleaning(t *testing.T, client *apim.Client, username string, password string) *apim.Application {
+	client.Login(username, password)
+	application := client.GenerateSampleAppData()
+	doClean := false
+	app := client.AddApplication(t, application, username, password,doClean)
+	application = client.GetApplication(app.ApplicationID)
+	return application
 }
 
 func getApp(t *testing.T, client *apim.Client, name string, username string, password string) *apim.Application {
@@ -1151,4 +1153,25 @@ func initProjectWithOasFlag (t *testing.T,args *initTestArgs)(string, error) {
 
 	output,err:=base.Execute(t,"init", args.initFlag ,"--oas",args.oasFlag)
 	return output,err
+}
+
+func environmentSetExportDirectory (t *testing.T,args *setTestArgs) (string, error) {
+	apim := args.srcAPIM
+	base.SetupEnvWithoutTokenFlag(t, apim.GetEnvName(), apim.GetApimURL())
+	output, error := base.Execute(t, "set","--export-directory", args.exportDirectoryFlag, "-k")
+	return output,error
+}
+
+func environmentSetHttpRequestTimeout(t *testing.T,args *setTestArgs) (string, error) {
+	apim := args.srcAPIM
+	base.SetupEnvWithoutTokenFlag(t, apim.GetEnvName(), apim.GetApimURL())
+	output, error := base.Execute(t, "set","--http-request-timeout", strconv.Itoa(args.httpRequestTimeout), "-k")
+	return output,error
+}
+
+func environmentSetTokenType(t *testing.T,args *setTestArgs) (string, error) {
+	apim := args.srcAPIM
+	base.SetupEnvWithoutTokenFlag(t, apim.GetEnvName(), apim.GetApimURL())
+	output, error := base.Execute(t, "set","--token-type", strconv.Itoa(args.httpRequestTimeout), "-k")
+	return output,error
 }

@@ -20,6 +20,7 @@ package integration
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"log"
 	"testing"
 )
@@ -29,7 +30,7 @@ func TestInitializeProject(t *testing.T) {
 	username := superAdminUser
 	password := superAdminPassword
 	apim := apimClients[0]
-	var projectName = "SampleTestAPI"
+	projectName := "SampleTestAPI"
 
 	args := &initTestArgs{
 		ctlUser:  credentials{username: username, password: password},
@@ -43,8 +44,10 @@ func TestInitializeProject(t *testing.T) {
 	}
 
 	assert.Nil(t, err, "Error while generating Project")
-	assert.Containsf(t, output, "Project initialized", "TestInitializeProject Failed")
+	assert.Contains(t, output, "Project initialized", "TestInitializeProject Failed")
 
+	//Remove Created project and logout
+	base.RemoveDir(projectName)
 	t.Cleanup(func() {
 		base.Execute(t, "logout", apim.GetEnvName())
 	})
@@ -55,14 +58,13 @@ func TestInitializeProjectWithDefinitionFlag(t *testing.T) {
 	username := superAdminUser
 	password := superAdminPassword
 	apim := apimClients[0]
-	var projectName = "SampleTestAPI2"
-	var definitionFilePath = ""
+	projectName := "SampleTestAPIWithDefinition"
 
 	args := &initTestArgs{
 		ctlUser:        credentials{username: username, password: password},
 		srcAPIM:        apim,
 		initFlag:       projectName,
-		definitionFlag: definitionFilePath,
+		definitionFlag: utils.DefinitionYamlPath,
 		forceFlag:      true,
 	}
 
@@ -72,7 +74,10 @@ func TestInitializeProjectWithDefinitionFlag(t *testing.T) {
 	}
 
 	assert.Nil(t, err, "Error while generating Project")
-	assert.Containsf(t, output, "Project initialized", "Test InitializeProjectWithDefinitionFlag Failed")
+	assert.Contains(t, output, "Project initialized", "Test InitializeProjectWithDefinitionFlag Failed")
+
+	//Remove Created project and logout
+	base.RemoveDir(projectName)
 	t.Cleanup(func() {
 		base.Execute(t, "logout", apim.GetEnvName())
 	})
@@ -83,14 +88,13 @@ func TestInitializeAPIFromSwagger2Definition(t *testing.T) {
 	username := superAdminUser
 	password := superAdminPassword
 	apim := apimClients[0]
-	var projectName = "SampleTestAPI2"
-	var swaggerDefinitionFilePath = "testdata/swagger2Definition.yaml"
+	projectName := "Swagger2APIProject"
 
 	args := &initTestArgs{
 		ctlUser:   credentials{username: username, password: password},
 		srcAPIM:   apim,
 		initFlag:  projectName,
-		oasFlag:   swaggerDefinitionFilePath,
+		oasFlag:   utils.TestSwagger2DefinitionPath,
 		forceFlag: false,
 	}
 
@@ -101,6 +105,9 @@ func TestInitializeAPIFromSwagger2Definition(t *testing.T) {
 
 	assert.Nil(t, err, "Error while generating Project")
 	assert.Containsf(t, output, "Project initialized", "Test InitializeProjectWithDefinitionFlag Failed")
+
+	//Remove Created project and logout
+	base.RemoveDir(projectName)
 	t.Cleanup(func() {
 		base.Execute(t, "logout", apim.GetEnvName())
 	})
@@ -111,14 +118,13 @@ func TestInitializeAPIFromOpenAPI3Definition(t *testing.T) {
 	username := superAdminUser
 	password := superAdminPassword
 	apim := apimClients[0]
-	var projectName = "OpenAPI3"
-	var openAPISpecificationFilePath = "testdata/openAPI3Definition.yaml"
+	var projectName = "OpenAPI3Project"
 
 	args := &initTestArgs{
 		ctlUser:   credentials{username: username, password: password},
 		srcAPIM:   apim,
 		initFlag:  projectName,
-		oasFlag:   openAPISpecificationFilePath,
+		oasFlag:   utils.TestOpenAPI3DefinitionPath,
 		forceFlag: false,
 	}
 
@@ -128,7 +134,10 @@ func TestInitializeAPIFromOpenAPI3Definition(t *testing.T) {
 	}
 
 	assert.Nil(t, err, "Error while generating Project")
-	assert.Containsf(t, output, "Project initialized", "Test InitializeProjectWithDefinitionFlag Failed")
+	assert.Contains(t, output, "Project initialized", "Test InitializeProjectWithDefinitionFlag Failed")
+
+	//Remove Created project and logout
+	base.RemoveDir(projectName)
 	t.Cleanup(func() {
 		base.Execute(t, "logout", apim.GetEnvName())
 	})
@@ -139,14 +148,13 @@ func TestInitializeAPIFromAPIDefinitionURL(t *testing.T) {
 	username := superAdminUser
 	password := superAdminPassword
 	apim := apimClients[0]
-	var projectName = "PetStore"
-	var openAPISpecificationURL = "https://petstore.swagger.io/v2/swagger.json"
+	var projectName = "ProjectInitWithURL"
 
 	args := &initTestArgs{
 		ctlUser:   credentials{username: username, password: password},
 		srcAPIM:   apim,
 		initFlag:  projectName,
-		oasFlag:   openAPISpecificationURL,
+		oasFlag:   utils.TestOpenAPISpecificationURL,
 		forceFlag: false,
 	}
 
@@ -156,8 +164,12 @@ func TestInitializeAPIFromAPIDefinitionURL(t *testing.T) {
 	}
 
 	assert.Nil(t, err, "Error while generating Project")
-	assert.Containsf(t, output, "Project initialized", "Test InitializeProjectWithDefinitionFlag Failed")
+	assert.Contains(t, output, "Project initialized", "Test InitializeProjectWithDefinitionFlag Failed")
+
+	//Remove Created project and logout
+	base.RemoveDir(projectName)
 	t.Cleanup(func() {
 		base.Execute(t, "logout", apim.GetEnvName())
 	})
 }
+

@@ -168,3 +168,9 @@ const DynamicEndpointConfig = `{"endpoint_type":"default","sandbox_endpoints":{"
 const AwsLambdaRoleSuppliedAccessMethod = "role_supplied"        // To denote "accessMethod: role_supplied" in api_params.yaml
 const AwsLambdaRoleSuppliedAccessMethodForJSON = "role-supplied" // To denote the "accessMethod : role-supplied" in api.json
 const AwsLambdaStoredAccessMethod = "stored"                     // To denote "accessMethod: stored" in api_params.yaml and to denote the "accessMethod : stored" in api.json
+
+const MockTestExportDirectory ="testdata/MockExportDirectory"
+const TestSwagger2DefinitionPath = "testdata/swagger2Definition.yaml"
+const TestOpenAPI3DefinitionPath = "testdata/openAPI3Definition.yaml"
+const DefinitionYamlPath = ""
+const TestOpenAPISpecificationURL = "https://petstore.swagger.io/v2/swagger.json"

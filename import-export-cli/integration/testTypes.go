@@ -64,7 +64,14 @@ type loginTestArgs struct {
 	srcAPIM     *apim.Client
 }
 
-//TODO init args
+type setTestArgs struct {
+	srcAPIM     *apim.Client
+	exportDirectoryFlag  string
+	modeFlag             string
+	tokenTypeFlag        string
+	httpRequestTimeout   int
+}
+
 type initTestArgs struct {
 	ctlUser credentials
 	srcAPIM     *apim.Client
