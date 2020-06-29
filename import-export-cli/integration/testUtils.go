@@ -252,9 +252,7 @@ func validateGetKeys(t *testing.T, args *apiGetKeyTestArgs) {
 
 		assert.Nil(t, err, "Error while getting key")
 
-		// Remove the string "'https://localhost:8243/token' is used as the token endpoint" from the result
-		stringWithToken := result[strings.Index(result, "\n")+1:]
-		invokeAPI(t, getResourceURL(args.apim, args.api), base.GetValueOfUniformResponse(stringWithToken), 200)
+		invokeAPI(t, getResourceURL(args.apim, args.api), base.GetValueOfUniformResponse(result), 200)
 		unsubscribeAPI(args.apim, args.ctlUser.username, args.ctlUser.password, args.api.ID)
 	}
 
@@ -266,9 +264,7 @@ func validateGetKeys(t *testing.T, args *apiGetKeyTestArgs) {
 
 		assert.Nil(t, err, "Error while getting key")
 
-		// Remove the string "'https://localhost:8243/token' is used as the token endpoint" from the result
-		stringWithToken := result[strings.Index(result, "\n")+1:]
-		invokeAPIProduct(t, getResourceURLForAPIProduct(args.apim, args.apiProduct), base.GetValueOfUniformResponse(stringWithToken), 200)
+		invokeAPIProduct(t, getResourceURLForAPIProduct(args.apim, args.apiProduct), base.GetValueOfUniformResponse(result), 200)
 		unsubscribeAPI(args.apim, args.ctlUser.username, args.ctlUser.password, args.apiProduct.ID)
 	}
 }
