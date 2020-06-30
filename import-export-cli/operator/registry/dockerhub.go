@@ -84,7 +84,8 @@ var DockerHubRegistry = &Registry{
 		dockerHubValues.repository = repository
 	},
 	Run: func() {
-		k8sUtils.K8sCreateSecretFromInputs(k8sUtils.DockerRegCredSecret, k8sUtils.ApiOpWso2Namespace, dockerHubValues.repositoryUrl, dockerHubValues.username, dockerHubValues.password)
+		k8sUtils.K8sCreateSecretFromInputs(k8sUtils.DockerRegCredSecret, k8sUtils.ApiOpWso2Namespace,
+			dockerHubValues.repositoryUrl, dockerHubValues.username, dockerHubValues.password)
 		dockerHubValues.password = "" // clear password
 	},
 	Flags: Flags{
@@ -132,7 +133,8 @@ func readDockerHubInputs() (string, string, string) {
 		fmt.Println("\nRepository: " + repository)
 		fmt.Println("Username  : " + username)
 
-		isConfirmStr, err := utils.ReadInputString("Confirm configurations", utils.Default{Value: "Y", IsDefault: true}, "", false)
+		isConfirmStr, err := utils.ReadInputString("Confirm configurations",
+			utils.Default{Value: "Y", IsDefault: true}, "", false)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading user input Confirmation", err)
 		}
