@@ -18,8 +18,6 @@
 
 package registry
 
-import k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
-
 // HttpRegistry represents private HTTPS registry
 // copy of HttpsRegistry
 var QuayRegistry = *HttpsRegistry
@@ -28,11 +26,7 @@ func init() {
 	QuayRegistry.Name = "QUAY"
 	QuayRegistry.Caption = "Quay.io"
 	QuayRegistry.Option = 6
-	QuayRegistry.Run = func() {
-		k8sUtils.K8sCreateSecretFromInputs(k8sUtils.DockerRegCredSecret, k8sUtils.ApiOpWso2Namespace,
-			"quay.io", httpsValues.username, httpsValues.password)
-		httpsValues.password = "" // clear password
-	}
+	QuayRegistry.Repository.ServerUrl = "quay.io/"
 
 	add(&QuayRegistry)
 }

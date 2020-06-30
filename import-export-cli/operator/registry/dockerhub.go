@@ -28,24 +28,13 @@ import (
 	"strings"
 )
 
-const DockerHubRegistryUrl = "https://index.docker.io/v1/"
-
-var dockerHubRepo = new(string)
-
-var dockerHubValues = struct {
-	repository    string
-	repositoryUrl string
-	username      string
-	password      string
-}{}
-
 // DockerHubRegistry represents Docker Hub registry
 var DockerHubRegistry = &Registry{
 	Name:       "DOCKER_HUB",
 	Caption:    "Docker Hub",
-	Repository: dockerHubRepo,
+	Repository: Repository{ServerUrl: "https://index.docker.io/v1/"},
 	Option:     1,
-	Read: func(flagValues *map[string]FlagValue) {
+	Read: func(reg *Registry, flagValues *map[string]FlagValue) {
 		var repository, username, password string
 
 		// check input mode: interactive or batch
@@ -76,17 +65,14 @@ var DockerHubRegistry = &Registry{
 			}
 		}
 
-		dockerHubValues.repositoryUrl = DockerHubRegistryUrl
-		dockerHubValues.username = username
-		dockerHubValues.password = password
-
-		*dockerHubRepo = repository
-		dockerHubValues.repository = repository
+		reg.Repository.Name = repository
+		reg.Repository.Username = username
+		reg.Repository.Password = password
 	},
-	Run: func() {
+	Run: func(reg *Registry) {
 		k8sUtils.K8sCreateSecretFromInputs(k8sUtils.DockerRegCredSecret, k8sUtils.ApiOpWso2Namespace,
-			dockerHubValues.repositoryUrl, dockerHubValues.username, dockerHubValues.password)
-		dockerHubValues.password = "" // clear password
+			reg.Repository.ServerUrl, reg.Repository.Username, reg.Repository.Password)
+		reg.Repository.Password = "" // clear password
 	},
 	Flags: Flags{
 		RequiredFlags: &map[string]bool{k8sUtils.FlagBmRepository: true, k8sUtils.FlagBmUsername: true},

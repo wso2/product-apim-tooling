@@ -25,19 +25,13 @@ import (
 	"strings"
 )
 
-var httpsValues = struct {
-	repository *string
-	username   string
-	password   string
-}{repository: new(string)}
-
 // HttpsRegistry represents private HTTPS registry
 var HttpsRegistry = &Registry{
 	Name:       "HTTPS",
 	Caption:    "HTTPS Private Registry",
-	Repository: httpsValues.repository,
+	Repository: Repository{},
 	Option:     5,
-	Read: func(flagValues *map[string]FlagValue) {
+	Read: func(reg *Registry, flagValues *map[string]FlagValue) {
 		var repository, username, password string
 
 		// check input mode: interactive or batch
@@ -70,14 +64,20 @@ var HttpsRegistry = &Registry{
 			}
 		}
 
-		*httpsValues.repository = repository
-		httpsValues.username = username
-		httpsValues.password = password
+		reg.Repository.Name = repository
+		reg.Repository.Username = username
+		reg.Repository.Password = password
 	},
-	Run: func() {
-		k8sUtils.K8sCreateSecretFromInputs(k8sUtils.DockerRegCredSecret, k8sUtils.ApiOpWso2Namespace,
-			getRegistryUrl(*httpsValues.repository), httpsValues.username, httpsValues.password)
-		httpsValues.password = "" // clear password
+	Run: func(reg *Registry) {
+		if reg.Repository.ServerUrl == "" {
+			reg.Repository.ServerUrl = getRegistryUrl(reg.Repository.Name)
+		}
+
+		k8sUtils.K8sCreateSecretFromInputs(
+			k8sUtils.DockerRegCredSecret, k8sUtils.ApiOpWso2Namespace,
+			reg.Repository.ServerUrl, reg.Repository.Username, reg.Repository.Password,
+		)
+		reg.Repository.Password = "" // clear password
 	},
 	Flags: Flags{
 		RequiredFlags: &map[string]bool{k8sUtils.FlagBmRepository: true},
