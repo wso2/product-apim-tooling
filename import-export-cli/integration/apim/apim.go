@@ -853,7 +853,7 @@ func (instance *Client) DeleteSubscriptions(apiID string) {
 }
 
 // AddApplication : Add new Application to APIM
-func (instance *Client) AddApplication(t *testing.T, application *Application, username string, password string,doClean bool) *Application {
+func (instance *Client) AddApplication(t *testing.T, application *Application, username string, password string, doClean bool) *Application {
 	appsURL := instance.devPortalRestURL + "/applications"
 
 	data, err := json.Marshal(application)

@@ -60,23 +60,23 @@ type apiGetKeyTestArgs struct {
 }
 
 type loginTestArgs struct {
-	ctlUser     credentials
-	srcAPIM     *apim.Client
+	ctlUser credentials
+	srcAPIM *apim.Client
 }
 
 type setTestArgs struct {
-	srcAPIM     *apim.Client
-	exportDirectoryFlag  string
-	modeFlag             string
-	tokenTypeFlag        string
-	httpRequestTimeout   int
+	srcAPIM             *apim.Client
+	exportDirectoryFlag string
+	modeFlag            string
+	tokenTypeFlag       string
+	httpRequestTimeout  int
 }
 
 type initTestArgs struct {
-	ctlUser credentials
-	srcAPIM     *apim.Client
-	initFlag        string
-	definitionFlag  string
-	forceFlag       bool
-	oasFlag         string
+	ctlUser        credentials
+	srcAPIM        *apim.Client
+	initFlag       string
+	definitionFlag string
+	forceFlag      bool
+	oasFlag        string
 }

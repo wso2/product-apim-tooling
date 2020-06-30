@@ -273,14 +273,14 @@ func addApp(t *testing.T, client *apim.Client, username string, password string)
 	client.Login(username, password)
 	app := client.GenerateSampleAppData()
 	doClean := true
-	return client.AddApplication(t, app, username, password,doClean)
+	return client.AddApplication(t, app, username, password, doClean)
 }
 
 func addApplicationWithoutCleaning(t *testing.T, client *apim.Client, username string, password string) *apim.Application {
 	client.Login(username, password)
 	application := client.GenerateSampleAppData()
 	doClean := false
-	app := client.AddApplication(t, application, username, password,doClean)
+	app := client.AddApplication(t, application, username, password, doClean)
 	application = client.GetApplication(app.ApplicationID)
 	return application
 }
@@ -332,7 +332,7 @@ func importAppPreserveOwner(t *testing.T, sourceEnv string, app *apim.Applicatio
 
 func importAppPreserveOwnerAndUpdate(t *testing.T, sourceEnv string, app *apim.Application, client *apim.Client) (string, error) {
 	fileName := base.GetApplicationArchiveFilePath(t, sourceEnv, app.Name, app.Owner)
-	output, err := base.Execute(t, "import-app","--preserveOwner=true", "--update=true", "-f", fileName, "-e", client.EnvName, "-k", "--verbose")
+	output, err := base.Execute(t, "import-app", "--preserveOwner=true", "--update=true", "-f", fileName, "-e", client.EnvName, "-k", "--verbose")
 
 	t.Cleanup(func() {
 		client.DeleteApplicationByName(app.Name)
@@ -1118,7 +1118,7 @@ func validateAPIProductDeleteFailure(t *testing.T, args *apiProductImportExportT
 }
 
 func deleteAppByCtl(t *testing.T, args *appImportExportTestArgs) (string, error) {
-	output, err := base.Execute(t, "delete", "app", "-n", args.application.Name,  "-e", args.srcAPIM.EnvName, "-k", "--verbose")
+	output, err := base.Execute(t, "delete", "app", "-n", args.application.Name, "-e", args.srcAPIM.EnvName, "-k", "--verbose")
 	return output, err
 }
 
@@ -1128,60 +1128,60 @@ func validateApplicationIsDeleted(t *testing.T, application *apim.Application, a
 	}
 }
 
-func initProject (t *testing.T,args *initTestArgs)(string, error) {
+func initProject(t *testing.T, args *initTestArgs) (string, error) {
 	//Setup Environment and login to it.
 	base.SetupEnvWithoutTokenFlag(t, args.srcAPIM.GetEnvName(), args.srcAPIM.GetApimURL())
 	base.Login(t, args.srcAPIM.GetEnvName(), args.ctlUser.username, args.ctlUser.password)
 
-	output,err:=base.Execute(t,"init", args.initFlag ,)
-	return output,err
+	output, err := base.Execute(t, "init", args.initFlag)
+	return output, err
 }
 
-func initProjectWithDefinitionFlag (t *testing.T,args *initTestArgs)(string, error) {
+func initProjectWithDefinitionFlag(t *testing.T, args *initTestArgs) (string, error) {
 	//Setup Environment and login to it.
 	base.SetupEnvWithoutTokenFlag(t, args.srcAPIM.GetEnvName(), args.srcAPIM.GetApimURL())
 	base.Login(t, args.srcAPIM.GetEnvName(), args.ctlUser.username, args.ctlUser.password)
 
-	output,err:=base.Execute(t,"init", args.initFlag ,"--definition",args.definitionFlag,"--force",strconv.FormatBool(args.forceFlag))
-	return output,err
+	output, err := base.Execute(t, "init", args.initFlag, "--definition", args.definitionFlag, "--force", strconv.FormatBool(args.forceFlag))
+	return output, err
 }
 
-func initProjectWithOasFlag (t *testing.T,args *initTestArgs)(string, error) {
+func initProjectWithOasFlag(t *testing.T, args *initTestArgs) (string, error) {
 	//Setup Environment and login to it.
 	base.SetupEnvWithoutTokenFlag(t, args.srcAPIM.GetEnvName(), args.srcAPIM.GetApimURL())
 	base.Login(t, args.srcAPIM.GetEnvName(), args.ctlUser.username, args.ctlUser.password)
 
-	output,err:=base.Execute(t,"init", args.initFlag ,"--oas",args.oasFlag)
-	return output,err
+	output, err := base.Execute(t, "init", args.initFlag, "--oas", args.oasFlag)
+	return output, err
 }
 
-func environmentSetExportDirectory (t *testing.T,args *setTestArgs) (string, error) {
+func environmentSetExportDirectory(t *testing.T, args *setTestArgs) (string, error) {
 	apim := args.srcAPIM
 	base.SetupEnvWithoutTokenFlag(t, apim.GetEnvName(), apim.GetApimURL())
-	output, error := base.Execute(t, "set","--export-directory", args.exportDirectoryFlag, "-k")
-	return output,error
+	output, error := base.Execute(t, "set", "--export-directory", args.exportDirectoryFlag, "-k")
+	return output, error
 }
 
-func environmentSetHttpRequestTimeout(t *testing.T,args *setTestArgs) (string, error) {
+func environmentSetHttpRequestTimeout(t *testing.T, args *setTestArgs) (string, error) {
 	apim := args.srcAPIM
 	base.SetupEnvWithoutTokenFlag(t, apim.GetEnvName(), apim.GetApimURL())
-	output, error := base.Execute(t, "set","--http-request-timeout", strconv.Itoa(args.httpRequestTimeout), "-k")
-	return output,error
+	output, error := base.Execute(t, "set", "--http-request-timeout", strconv.Itoa(args.httpRequestTimeout), "-k")
+	return output, error
 }
 
-func environmentSetTokenType(t *testing.T,args *setTestArgs) (string, error) {
+func environmentSetTokenType(t *testing.T, args *setTestArgs) (string, error) {
 	apim := args.srcAPIM
 	base.SetupEnvWithoutTokenFlag(t, apim.GetEnvName(), apim.GetApimURL())
-	output, error := base.Execute(t, "set","--token-type", args.tokenTypeFlag, "-k")
-	return output,error
+	output, error := base.Execute(t, "set", "--token-type", args.tokenTypeFlag, "-k")
+	return output, error
 }
 
 func importApiFromProject(t *testing.T, projectName string, envName string) (string, error) {
-	projectPath, _ :=filepath.Abs(projectName)
-	return base.Execute(t,"import-api", "-f",projectPath,"-e",envName,"-k")
+	projectPath, _ := filepath.Abs(projectName)
+	return base.Execute(t, "import-api", "-f", projectPath, "-e", envName, "-k")
 }
 
 func importApiFromProjectWithUpdate(t *testing.T, projectName string, envName string) (string, error) {
-	projectPath, _ :=filepath.Abs(projectName)
-	return base.Execute(t,"import-api", "-f",projectPath,"-e",envName,"-k","--update")
+	projectPath, _ := filepath.Abs(projectName)
+	return base.Execute(t, "import-api", "-f", projectPath, "-e", envName, "-k", "--update")
 }
