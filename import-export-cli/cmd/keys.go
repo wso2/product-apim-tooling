@@ -39,6 +39,7 @@ const genKeyCmdLongDesc = `Generate JWT token to invoke the API or API Product b
 const genKeyCmdExamples = utils.ProjectName + " " + genKeyCmdLiteral + ` -n TwitterAPI -v 1.0.0 -e dev --provider admin
 NOTE: Both the flags (--name (-n) and --environment (-e)) are mandatory.
 You can override the default token endpoint using --token (-t) optional flag providing a new token endpoint`
+
 var keyGenEnv string
 var apiName string
 var apiVersion string
@@ -337,7 +338,8 @@ func generateAccessToken(credential credentials.Credential) (string, error) {
 	//Prepping query params
 	body := "grant_type=password&username=" + credential.Username + "&password=" +
 		encodeURL.QueryEscape(credential.Password) + "&validity_period=" + string(utils.DefaultTokenValidityPeriod) +
-		"&scope=apim:api_view+apim:subscribe+apim:api_publish"
+		"&scope=apim:api_view+apim:subscribe+apim:api_publish+apim:app_manage+apim:sub_manage+apim:api_product_import_export+" +
+		"apim:api_import_export+apim:api_view"
 
 	//Call to the token endpoint with the necessary payload
 	resp, err := utils.InvokePOSTRequest(tokenEndpoint, headers, body)
