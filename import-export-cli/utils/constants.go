@@ -61,7 +61,7 @@ const defaultUnifiedSearchEndpointSuffix = "api/am/publisher/v1/search"
 const defaultAdminApplicationListEndpointSuffix = "api/am/admin/v1/applications"
 const defaultDevPortalApplicationListEndpointSuffix = "api/am/store/v1/applications"
 const defaultDevPortalThrottlingPoliciesEndpointSuffix = "api/am/store/v1/throttling-policies"
-const defaultClientRegistrationEndpointSuffix = "client-registration/v0.16/register"
+const defaultClientRegistrationEndpointSuffix = "client-registration/v0.17/register"
 const defaultTokenEndPoint = "oauth2/token"
 const defaultRevokeEndpointSuffix = "oauth2/revoke"
 

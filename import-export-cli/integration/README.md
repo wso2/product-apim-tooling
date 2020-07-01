@@ -42,7 +42,7 @@ rest-api-version: v1
    The version of the apictl that is being integration tested.
 
 ```
-apictl-version: 3.1.0
+apictl-version: 3.2.0
 ```   
 
 

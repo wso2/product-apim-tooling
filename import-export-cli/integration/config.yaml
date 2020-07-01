@@ -9,6 +9,6 @@ environments:
 - name: production
   host: localhost
   offset: 1
-dcr-version: v0.16
+dcr-version: v0.17
 rest-api-version: v1
-apictl-version: 3.1.0
+apictl-version: 3.2.0
