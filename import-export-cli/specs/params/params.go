@@ -110,16 +110,16 @@ type ApplicationImportParams struct {
 }
 
 type ProjectParams struct {
-	Type                     string             `yaml:"type"`
-	AbsolutePath             string             `yaml:"absolutePath,omitempty"`
-	RelativePath             string             `yaml:"relativePath,omitempty"`
-	NickName                 string             `yaml:"nickName,omitempty"`
-	FailedDuringPreviousPush bool               `yaml:"failedDuringPreviousPush,omitempty"`
-	Deleted                  bool               `yaml:"deleted,omitempty"`
-	ProjectInfo              ProjectInfo        `yaml:"projectInfo,omitempty"`
-	ApiParams                *ApiParams         `yaml:"apiParams,omitempty"`
-	ApiProductParams         *ApiProductParams  `yaml:"apiProductParams,omitempty"`
-	ApplicationParams        *ApplicationParams `yaml:"applicationParams,omitempty"`
+	Type                       string             `yaml:"type"`
+	AbsolutePath               string             `yaml:"absolutePath,omitempty"`
+	RelativePath               string             `yaml:"relativePath,omitempty"`
+	NickName                   string             `yaml:"nickName,omitempty"`
+	FailedDuringPreviousDeploy bool               `yaml:"failedDuringPreviousDeploy,omitempty"`
+	Deleted                    bool               `yaml:"deleted,omitempty"`
+	ProjectInfo                ProjectInfo        `yaml:"projectInfo,omitempty"`
+	ApiParams                  *ApiParams         `yaml:"apiParams,omitempty"`
+	ApiProductParams           *ApiProductParams  `yaml:"apiProductParams,omitempty"`
+	ApplicationParams          *ApplicationParams `yaml:"applicationParams,omitempty"`
 }
 
 type ProjectInfo struct {

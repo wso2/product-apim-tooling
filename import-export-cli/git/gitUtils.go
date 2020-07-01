@@ -113,7 +113,7 @@ func GetStatus(environment, fromRevType string) (int, map[string][]*params.Proje
                 updatedProjectsPerProjectPath[failedProjectInEachType.AbsolutePath] = failedProjectInEachType
                 updatedProjectsPerType[failedProjectInEachType.Type] =
                     append(updatedProjectsPerType[failedProjectInEachType.Type], failedProjectInEachType)
-                failedProjectInEachType.FailedDuringPreviousPush = true
+                failedProjectInEachType.FailedDuringPreviousDeploy = true
                 totalProjectsToUpdate++
             }
         }
@@ -122,7 +122,7 @@ func GetStatus(environment, fromRevType string) (int, map[string][]*params.Proje
     return totalProjectsToUpdate, updatedProjectsPerType
 }
 
-func failedDuringEarlierPush(vcsEnvConfig Environment, projectParams *params.ProjectParams) bool {
+func failedDuringEarlierDeploy(vcsEnvConfig Environment, projectParams *params.ProjectParams) bool {
     failedProjectsForType := vcsEnvConfig.FailedProjects[projectParams.Type]
     for _, failedProject := range failedProjectsForType {
         if failedProject.RelativePath == projectParams.RelativePath {
@@ -143,7 +143,7 @@ func Rollback(accessToken, environment string) {
     currentBranch := getCurrentBranch()
     tmpBranchName := "tmp-" + envVCSConfig.LastSuccessfulRev[0:8]
     checkoutNewBranchFromRevision(tmpBranchName, envVCSConfig.LastSuccessfulRev)
-    pushUpdatedProjects(accessToken, environment, totalProjectsToUpdate, updatedProjectsPerType)
+    deployUpdatedProjects(accessToken, environment, totalProjectsToUpdate, updatedProjectsPerType)
     checkoutBranch(currentBranch)
     deleteTmpBranch(tmpBranchName)
 }
@@ -182,7 +182,7 @@ func deleteTmpBranch(tmpBranch string) {
     }
 }
 
-func pushDeletedProjects(accessToken, environment string, deletedProjectsPerType map[string][]*params.ProjectParams,
+func deployProjectDeletions(accessToken, environment string, deletedProjectsPerType map[string][]*params.ProjectParams,
     failedProjects map[string][]*params.ProjectParams) map[string][]*params.ProjectParams {
     // Deleting Application projects
     applicationProjectsToDelete := deletedProjectsPerType[utils.ProjectTypeApplication]
@@ -257,7 +257,7 @@ func handleIfError(err error, failedProjects map[string][]*params.ProjectParams,
     return err != nil
 }
 
-func pushUpdatedProjects(accessToken, environment string, totalProjectsToUpdate int,
+func deployUpdatedProjects(accessToken, environment string, totalProjectsToUpdate int,
         updatedProjectsPerType map[string][]*params.ProjectParams) (bool, map[string][]*params.ProjectParams,
         map[string][]*params.ProjectParams) {
     if totalProjectsToUpdate == 0 {
@@ -271,7 +271,7 @@ func pushUpdatedProjects(accessToken, environment string, totalProjectsToUpdate 
     var hasDeletedProjects bool
     var deletedProjectsPerType =make(map[string][]*params.ProjectParams)
 
-    // pushing API projects
+    // deploying API projects
     apiProjects := updatedProjectsPerType[utils.ProjectTypeApi]
     if len(apiProjects) != 0 {
         fmt.Println("\nAPIs (" + strconv.Itoa(len(apiProjects)) + ") ...")
@@ -293,7 +293,7 @@ func pushUpdatedProjects(accessToken, environment string, totalProjectsToUpdate 
         }
     }
 
-    // pushing API product projects
+    // deploying API product projects
     apiProductProjects := updatedProjectsPerType[utils.ProjectTypeApiProduct]
     if len(apiProductProjects) != 0 {
         fmt.Println("\nAPI Products (" + strconv.Itoa(len(apiProductProjects)) + ") ...")
@@ -316,7 +316,7 @@ func pushUpdatedProjects(accessToken, environment string, totalProjectsToUpdate 
         }
     }
 
-    // pushing Application projects
+    // deploying Application projects
     applicationProjects := updatedProjectsPerType[utils.ProjectTypeApplication]
     if len(applicationProjects) != 0 {
         fmt.Println("\nApplications (" + strconv.Itoa(len(applicationProjects)) + ") ...")
@@ -374,10 +374,10 @@ func handleProjectDeletion(i int, projectParam *params.ProjectParams, deletedPro
     deletedProjectsPerType[projectParam.Type] = append(deletedProjectsPerType[projectParam.Type], projectParam)
 }
 
-func PushChangedFiles(accessToken, environment string) {
+func DeployChangedFiles(accessToken, environment string) {
     totalProjectsToUpdate, updatedProjectsPerType := GetStatus(environment, FromRevTypeLastAttempted)
     hasDeletedProjects, deletedProjectsPerType, failedProjects :=
-        pushUpdatedProjects(accessToken, environment, totalProjectsToUpdate, updatedProjectsPerType)
+        deployUpdatedProjects(accessToken, environment, totalProjectsToUpdate, updatedProjectsPerType)
 
     if hasDeletedProjects {
         // work on deleted files
@@ -392,7 +392,7 @@ func PushChangedFiles(accessToken, environment string) {
 
         fmt.Println("\nDeleting projects ..")
         checkoutNewBranchFromRevision(tmpBranchName, envVCSConfig.LastSuccessfulRev)
-        failedProjects = pushDeletedProjects(accessToken, environment, deletedProjectsPerType, failedProjects)
+        failedProjects = deployProjectDeletions(accessToken, environment, deletedProjectsPerType, failedProjects)
         checkoutBranch(currentBranch)
         deleteTmpBranch(tmpBranchName)
 
@@ -432,7 +432,7 @@ func getProjectInfoFromProjectFile(envVCSConfig Environment, repoBasePath string
         if projectParams.Type != utils.ProjectTypeNone {
             // once we identified the project type, check whether the project is failed previously. If so, mark it as
             //  failed. This is used to show failed projects by the "status" command.
-            projectParams.FailedDuringPreviousPush = failedDuringEarlierPush(envVCSConfig, projectParams)
+            projectParams.FailedDuringPreviousDeploy = failedDuringEarlierDeploy(envVCSConfig, projectParams)
             return projectParams
         }
     }

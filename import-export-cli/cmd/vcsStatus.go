@@ -69,7 +69,7 @@ func printProjectsToUpdate(projectType string, projects []*params.ProjectParams)
 			} else {
 				operation = "[save]"
 			}
-			if projectParam.FailedDuringPreviousPush {
+			if projectParam.FailedDuringPreviousDeploy {
 				failed = "[failed]"
 			}
 			fmt.Println(strconv.Itoa(i+1) + ": " + operation + "\t" + failed + "\t" + projectParam.NickName +
