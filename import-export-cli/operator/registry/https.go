@@ -64,7 +64,13 @@ var HttpsRegistry = &Registry{
 			}
 		}
 
-		reg.Repository.Name = repository
+		// support prefixed repository with registry url to be compatible with older version of API-CTL
+		// if it is not prefixed add it
+		if strings.HasPrefix(repository, reg.Repository.ServerUrl) {
+			reg.Repository.Name = repository
+		} else {
+			reg.Repository.Name = reg.Repository.ServerUrl + repository
+		}
 		reg.Repository.Username = username
 		reg.Repository.Password = password
 	},

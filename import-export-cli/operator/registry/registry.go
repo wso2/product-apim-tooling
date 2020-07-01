@@ -145,7 +145,6 @@ func ValidateFlags(flagsValues *map[string]FlagValue) {
 
 // updateDockerRegistryConfig sets the repository type value and the repository in the config: `controller-config`
 func updateDockerRegistryConfig(registryType string, repository string) {
-	// get controller config config map
 	registryConfigMapYaml, _ := box.Get("/kubernetes_resources/docker_registry_conf.yaml")
 
 	registryConfigMap := make(map[interface{}]interface{})

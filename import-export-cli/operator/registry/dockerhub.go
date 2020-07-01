@@ -65,7 +65,9 @@ var DockerHubRegistry = &Registry{
 			}
 		}
 
-		reg.Repository.Name = repository
+		// support prefix "docker.io/" to be compatible with older version of API-CTL
+		// trim it if found
+		reg.Repository.Name = strings.TrimPrefix(repository, "docker.io/")
 		reg.Repository.Username = username
 		reg.Repository.Password = password
 	},
