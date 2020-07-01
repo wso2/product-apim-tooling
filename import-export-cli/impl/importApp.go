@@ -42,11 +42,12 @@ import (
 // @param preserveOwner: Preserve the owner after importing the application
 // @param skipSubscriptions: Skip importing subscriptions
 // @param skipKeys: skip importing keys of application
+// @param skipCleanup: skip cleaning up temporary files created during the operation
 func ImportApplicationToEnv(accessToken, environment, filename, appOwner string, updateApplication, preserveOwner,
-	skipSubscriptions, skipKeys bool) (*http.Response, error) {
+	skipSubscriptions, skipKeys, skipCleanup bool) (*http.Response, error) {
 	adminEndpoint := utils.GetAdminEndpointOfEnv(environment, utils.MainConfigFilePath)
 	return ImportApplication(accessToken, adminEndpoint, filename, appOwner, updateApplication, preserveOwner,
-		skipSubscriptions, skipKeys)
+		skipSubscriptions, skipKeys, skipCleanup)
 }
 
 // ImportApplication function is used with import-app command
@@ -58,8 +59,9 @@ func ImportApplicationToEnv(accessToken, environment, filename, appOwner string,
 // @param preserveOwner: Preserve the owner after importing the application
 // @param skipSubscriptions: Skip importing subscriptions
 // @param skipKeys: skip importing keys of application
+// @param skipCleanup: skip cleaning up temporary files created during the operation
 func ImportApplication(accessToken, adminEndpoint, filename, appOwner string, updateApplication, preserveOwner,
-	skipSubscriptions, skipKeys bool) (*http.Response, error) {
+	skipSubscriptions, skipKeys, skipCleanup bool) (*http.Response, error) {
 
 	exportDirectory := filepath.Join(utils.ExportDirectory, utils.ExportedAppsDirName)
 	adminEndpoint = utils.AppendSlashToString(adminEndpoint)
@@ -71,15 +73,25 @@ func ImportApplication(accessToken, adminEndpoint, filename, appOwner string, up
 		utils.SearchAndTag + "update=" + strconv.FormatBool(updateApplication)
 	utils.Logln(utils.LogPrefixInfo + "Import URL: " + applicationImportEndpoint)
 
-	zipFilePath, err := resolveImportFilePath(filename, exportDirectory)
+	applicationFilePath, err := resolveImportFilePath(filename, exportDirectory)
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating request.", err)
 	}
-	fmt.Println("ZipFilePath:", zipFilePath)
+
+	// If applicationFilePath contains a directory, zip it. Otherwise, leave it as it is.
+	applicationFilePath, err, cleanupFunc := utils.CreateZipFileFromProject(applicationFilePath, skipCleanup)
+	if err != nil {
+		return nil, err
+	}
+
+	//cleanup the temporary artifacts once consuming the zip file
+	if cleanupFunc != nil {
+		defer cleanupFunc()
+	}
 
 	extraParams := map[string]string{}
 
-	req, err := NewAppFileUploadRequest(url, extraParams, "file", zipFilePath, accessToken)
+	req, err := NewAppFileUploadRequest(url, extraParams, "file", applicationFilePath, accessToken)
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating request.", err)
 	}
