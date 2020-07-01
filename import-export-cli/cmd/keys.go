@@ -152,15 +152,6 @@ func getKeys() {
 
 			//if keys have been already generated before, then update the consumer key and secret
 			if appKeys.Count != 0 {
-				keygenResponse, keyGenErr := regenerateConsumerSecret(appId, "PRODUCTION", accessToken)
-				if keyGenErr != nil {
-					utils.HandleErrorAndExit("Error occurred while regenerating keys for the CLI app: "+appId,
-						keyGenErr)
-				} else {
-					appKeys.List[0].ConsumerSecret = keygenResponse.ConsumerSecret
-					utils.Logln(utils.LogPrefixInfo + "Regenerated CLI application keys successfully")
-				}
-
 				//If the keys have not been generated and the application is updated
 				token, err := getNewToken(&appKeys.List[0], scopes)
 				if accessToken != "" {
@@ -359,40 +350,6 @@ func generateAccessToken(credential credentials.Credential) (string, error) {
 		return keygenResponse.AccessToken, err
 	} else {
 		return "", errors.New("Request didn't respond 200 OK for generating an access token. Status: " + resp.Status())
-	}
-}
-
-// Regenerate consumer secret of the application
-// @param appId : ID of the application
-// @param keyType : Key Type of the application. Allowed values: PRODUCTION, SANDBOX
-// @return KeygenResponse, error
-func regenerateConsumerSecret(appId string, keyType string, accessToken string) (*utils.ConsumerSecretRegenResponse,
-	error) {
-	applicationEndpoint := utils.GetDevPortalApplicationListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
-	url := applicationEndpoint + "/" + appId + "/keys/" + keyType + "/regenerate-secret"
-	headers := make(map[string]string)
-	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
-	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
-
-	resp, err := utils.InvokePOSTRequestWithoutBody(url, headers)
-	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
-		// 200 OK or 201 Created
-		keygenResp := &utils.ConsumerSecretRegenResponse{}
-		data := []byte(resp.Body())
-		err = json.Unmarshal(data, &keygenResp)
-
-		return keygenResp, err
-
-	} else {
-		utils.Logf("Error: %s\n", resp.Error())
-		utils.Logf("Body: %s\n", resp.Body())
-		if resp.StatusCode() == http.StatusUnauthorized {
-			// 401 Unauthorized
-			return nil, fmt.Errorf("authorization failed during consumer key regeneration of " +
-				"CLI application: " + appId)
-		}
-		return nil, errors.New("Request didn't respond 200 OK for regenerating the consumer secret. " +
-			"Status: " + resp.Status())
 	}
 }
 
