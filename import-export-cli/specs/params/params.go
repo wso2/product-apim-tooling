@@ -100,7 +100,7 @@ type SecurityData struct {
 // Cert stores certificate details
 type Cert struct {
 	// Host of the certificate
-	Host string `yaml:"host" json:"hostName"`
+	Host string `yaml:"hostName" json:"hostName"`
 	// Alias for certificate
 	Alias string `yaml:"alias" json:"alias"`
 	// Path for certificate file
@@ -137,12 +137,12 @@ type Environment struct {
 // ApiParams represents environments defined in configuration file
 type ApiParams struct {
 	// Environments contains all environments in a configuration
-	Environments []Environment   `yaml:"environments"`
+	Environments []Environment `yaml:"environments"`
 }
 
 // APIEndpointConfig contains details about endpoints in an API
 type APIEndpointConfig struct {
-    // EPConfig is representing endpoint configuration
+	// EPConfig is representing endpoint configuration
 	EPConfig string `json:"endpointConfig"`
 }
 

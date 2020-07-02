@@ -63,13 +63,6 @@ var genKeyCmd = &cobra.Command{
 //Subscribe the given API or API Product to the default application and generate an access token
 func getKeys() {
 
-	//Override the value of token endpoint if it is provided with get-keys command
-	if keyGenTokenEndpoint != "" {
-		fmt.Printf("New token endpoint '%s' is used as the token endpoint \n", keyGenTokenEndpoint)
-	} else {
-		var defaultTokenEndpoint = utils.GetTokenEndpointOfEnv(keyGenEnv,utils.MainConfigFilePath)
-		fmt.Printf("'%s' is used as the token endpoint \n", defaultTokenEndpoint)
-	}
 	cred, err := getCredentials(keyGenEnv)
 	if err != nil {
 		utils.HandleErrorAndExit("Error getting credentials", err)

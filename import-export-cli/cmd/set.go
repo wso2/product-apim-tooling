@@ -63,36 +63,64 @@ var SetCmd = &cobra.Command{
 func executeSetCmd(mainConfigFilePath, exportDirectory string) {
 	// read the existing config vars
 	configVars := utils.GetMainConfigFromFile(mainConfigFilePath)
+	//Change Http Request timeout
 	if flagHttpRequestTimeout > 0 {
+		//Check whether the provided Http time out value is not equal to default value
+		if flagHttpRequestTimeout != configVars.Config.HttpRequestTimeout {
+			fmt.Println("Http Request Timout is set to : ", flagHttpRequestTimeout)
+		}
 		configVars.Config.HttpRequestTimeout = flagHttpRequestTimeout
 	} else {
 		fmt.Println("Invalid input for flag --http-request-timeout")
 	}
+
+	//Change Export Directory path
 	if flagExportDirectory != "" && utils.IsValid(flagExportDirectory) {
+		//Check whether the provided export directory is not equal to default value
+		if flagExportDirectory != configVars.Config.ExportDirectory {
+			fmt.Println("Export Directory is set to  : ",flagExportDirectory)
+		}
 		configVars.Config.ExportDirectory = flagExportDirectory
 	} else {
 		fmt.Println("Invalid input for flag --export-directory")
 	}
+
+	//Change Mode
 	if flagKubernetesMode != "" {
 		if strings.EqualFold(flagKubernetesMode, "kubernetes") || strings.EqualFold(flagKubernetesMode, "k8s") {
+			//Check whether the provided mode value is not equal to default value
+			if true != configVars.Config.KubernetesMode {
+				fmt.Println("Mode is set to : ", flagKubernetesMode)
+			}
 			configVars.Config.KubernetesMode = true
 		} else if strings.EqualFold(flagKubernetesMode, "default") {
+			if false != configVars.Config.KubernetesMode {
+				fmt.Println("Mode is set to : ", flagKubernetesMode)
+			}
 			configVars.Config.KubernetesMode = false
 		} else {
 			utils.HandleErrorAndExit("Error changing mode ",
 				errors.New("mode should be set to either kubernetes or none"))
 		}
 	}
+
+	//Change TokenType
 	if flagTokenType != "" {
 		if strings.EqualFold(flagTokenType, "jwt") {
+			//Check whether the provided token type value is not equal to default value
+			if flagTokenType != configVars.Config.TokenType {
+				fmt.Println("Token type is set to : ", flagTokenType)
+			}
 			configVars.Config.TokenType = "JWT"
 		} else if strings.EqualFold(flagTokenType, "oauth") {
+			if flagTokenType != configVars.Config.TokenType {
+				fmt.Println("Token type is set to : ", flagTokenType)
+			}
 			configVars.Config.TokenType = "OAUTH"
 		} else {
 			utils.HandleErrorAndExit("Error setting token type ",
 				errors.New("Token type should be either JWT or OAuth"))
 		}
-		fmt.Println("Token type set to: ", flagTokenType)
 	}
 	utils.WriteConfigFile(configVars, mainConfigFilePath)
 }
