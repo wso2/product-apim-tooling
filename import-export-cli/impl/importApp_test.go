@@ -50,12 +50,12 @@ func TestImportApplication1(t *testing.T) {
 	owner := "admin"
 	accessToken := "access-token"
 
-	_, err := ImportApplication(accessToken, server.URL, name, owner, false,true, true, true)
+	_, err := ImportApplication(accessToken, server.URL, name, owner, false,true, true, true, false)
 	if err != nil {
 		t.Errorf("Error: %s\n", err.Error())
 	}
 	utils.Insecure = true
-	_, err = ImportApplication(accessToken, server.URL, name, owner, false,true, true, true)
+	_, err = ImportApplication(accessToken, server.URL, name, owner, false,true, true, true, false)
 	if err != nil {
 		t.Errorf("Error: %s\n", err.Error())
 	}

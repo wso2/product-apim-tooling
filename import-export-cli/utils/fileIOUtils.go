@@ -319,3 +319,41 @@ func CreateTempFile(pattern string, content []byte) (string, error) {
 
 	return tmpFile.Name(), nil
 }
+
+// CreateZipFileFromProject if the given projectPath contains a directory, zip it and return the zip file path.
+//	Otherwise, leave it as it is.
+// @param projectPath Project path
+// @param skipCleanup Whether to clean the temporary files after the program exists
+// @return string Path to the zip file
+// @return error
+// @return func() can be called to cleanup the temporary items created during this function execution. Needs to call
+//	this once the zip file is consumed
+func CreateZipFileFromProject(projectPath string, skipCleanup bool) (string, error, func()){
+	// If the projectPath contains a directory, zip it
+	if info, err := os.Stat(projectPath); err == nil && info.IsDir() {
+		tmp, err := ioutil.TempFile("", "project-artifact*.zip")
+		if err != nil {
+			return "", err, nil
+		}
+		Logln(LogPrefixInfo+"Creating the project artifact", tmp.Name())
+		err = Zip(projectPath, tmp.Name())
+		if err != nil {
+			return "", err, nil
+		}
+		//creates a function to cleanup the temporary folders
+		cleanup := func() {
+			if skipCleanup {
+				Logln(LogPrefixInfo+"Leaving", tmp.Name())
+				return
+			}
+			Logln(LogPrefixInfo+"Deleting", tmp.Name())
+			err := os.Remove(tmp.Name())
+			if err != nil {
+				Logln(LogPrefixError + err.Error())
+			}
+		}
+		projectPath = tmp.Name()
+		return projectPath, nil, cleanup
+	}
+	return projectPath, nil, nil
+}
