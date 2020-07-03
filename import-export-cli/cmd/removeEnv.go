@@ -83,7 +83,7 @@ func removeEnv(envName, mainConfigFilePath, envKeysFilePath string) error {
 		if store.Has(envName) {
 			err = runLogout(envName)
 			if err != nil {
-				utils.Logln("Log out is unsuccessful. ",err)
+				utils.Logln("Log out is unsuccessful. ", err)
 			}
 		}
 

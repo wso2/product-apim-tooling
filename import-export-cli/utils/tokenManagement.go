@@ -25,8 +25,8 @@ import (
 	"fmt"
 	"github.com/renstrom/dedent"
 	"net/http"
-	"strings"
 	encodeURL "net/url"
+	"strings"
 )
 
 // ExecutePreCommandWithBasicAuth deals with generating tokens needed for executing a particular command
