@@ -103,22 +103,3 @@ func TestChangeTokenType(t *testing.T) {
 	assert.Contains(t, output2, "Token type is set to", "1st attempt of Token Type change is not successful")
 }
 
-//Login to the environment using email and logout
-func TestLoginWithEmail(t *testing.T) {
-
-	tenantAdminUsername := superAdminUser + "@" + TENANT1
-	tenantAdminPassword := superAdminPassword
-	dev := apimClients[0]
-
-	args := &loginTestArgs{
-		ctlUser: credentials{username: tenantAdminUsername, password: tenantAdminPassword},
-		srcAPIM: dev,
-	}
-	// Setup apictl envs
-	base.SetupEnvWithoutTokenFlag(t, args.srcAPIM.GetEnvName(), args.srcAPIM.GetApimURL())
-	base.Execute(t, "login", args.srcAPIM.GetEnvName(), "-u", tenantAdminUsername, "-p", tenantAdminPassword, "-k", "--verbose")
-
-	t.Cleanup(func() {
-		base.Execute(t, "logout", args.srcAPIM.GetEnvName())
-	})
-}
