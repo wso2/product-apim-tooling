@@ -30,13 +30,22 @@ import (
 
 // Registry represents Docker Registry
 type Registry struct {
-	Name       string                                 // Unique Name
-	Caption    string                                 // Text to display in the CLI about registry details
-	Repository *string                                // Repository name
-	Option     int                                    // Option to be choose the CLI registry list
-	Read       func(flagValues *map[string]FlagValue) // Function to be called when getting inputs, if flagValues is nil get inputs interactively
-	Run        func()                                 // Function to be called when updating k8s secrets
-	Flags      Flags                                  // Required and Optional flags
+	Name       string                                                // Unique Name
+	Caption    string                                                // Text to display in the CLI about registry details
+	Repository Repository                                            // Repository name
+	Option     int                                                   // Option to be choose the CLI registry list
+	Read       func(reg *Registry, flagValues *map[string]FlagValue) // Function to be called when getting inputs, if flagValues is nil get inputs interactively
+	Run        func(reg *Registry)                                   // Function to be called when updating k8s secrets
+	Flags      Flags                                                 // Required and Optional flags
+}
+
+// Repository represents a Docker repository of a Docker registry
+type Repository struct {
+	Name      string
+	ServerUrl string
+	Username  string
+	Password  string
+	KeyFile   string
 }
 
 // Flags represents Required and Optional flags that supports the specified registry type
@@ -59,20 +68,22 @@ var optionToExec int
 
 // ReadInputsInteractive reads inputs with respect to the selected registry type interactively
 func ReadInputsInteractive() {
-	registries[optionToExec].Read(nil)
+	reg := registries[optionToExec]
+	reg.Read(reg, nil)
 }
 
 // ReadInputsFromFlags reads inputs from flags with respect to the selected registry type
 func ReadInputsFromFlags(flagValues *map[string]FlagValue) {
-	registries[optionToExec].Read(flagValues)
+	reg := registries[optionToExec]
+	reg.Read(reg, flagValues)
 }
 
 // UpdateConfigsSecrets updates controller config with registry type and creates secrets with credentials
 func UpdateConfigsSecrets() {
 	// set registry first since this can throw error if api operator not installed. If error occur no need to rollback secret.
-	updateDockerRegistryConfig(registries[optionToExec].Name, *registries[optionToExec].Repository)
+	updateDockerRegistryConfig(registries[optionToExec].Name, registries[optionToExec].Repository.Name)
 	// create secret
-	registries[optionToExec].Run()
+	registries[optionToExec].Run(registries[optionToExec])
 }
 
 // ChooseRegistryInteractive lists registries in the CLI and reads a choice from user
@@ -134,7 +145,6 @@ func ValidateFlags(flagsValues *map[string]FlagValue) {
 
 // updateDockerRegistryConfig sets the repository type value and the repository in the config: `controller-config`
 func updateDockerRegistryConfig(registryType string, repository string) {
-	// get controller config config map
 	registryConfigMapYaml, _ := box.Get("/kubernetes_resources/docker_registry_conf.yaml")
 
 	registryConfigMap := make(map[interface{}]interface{})

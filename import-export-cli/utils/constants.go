@@ -104,8 +104,8 @@ const LogPrefixError = "[ERROR]: "
 const SearchAndTag = "&"
 
 // Regex Validation
+const RepoValidRegex = `^[\w\d\-\.\:]*\/?[\w\d\-]+$`
 const UsernameValidRegex = `^[\w\d\-]*$`
-const PositiveNoValidRegex = `^[1-9]\d*$`
 const UrlValidRegex = `^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$`
 
 // Other
