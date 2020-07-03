@@ -45,13 +45,16 @@ var flagOverride bool
 var flagApiVersion string
 var flagApiMode string
 var flagApiEndPoint string
+var flagEnvs []string
+var flagImage string
 
 const addApiCmdLiteral = "api"
 const addApiCmdShortDesc = "handle APIs in kubernetes cluster "
 const addApiLongDesc = `Add, Update and Delete APIs in kubernetes cluster. JSON and YAML formats are accepted.
 available modes are as follows
 * kubernetes`
-const addApiExamples = utils.ProjectName + " add/update " + addApiCmdLiteral + ` -n petstore --from-file=./Swagger.json --replicas=3 --namespace=wso2`
+const addApiExamples = utils.ProjectName + " add/update " + addApiCmdLiteral +
+	` -n petstore --from-file=./Swagger.json --replicas=3 --namespace=wso2`
 
 // addApiCmd represents the api command
 var addApiCmd = &cobra.Command{
@@ -100,7 +103,8 @@ func handleAddApi(nameSuffix string) {
 			}
 
 			// handle java interceptors
-			tempJavaIntCms := handleJavaInterceptors(nameSuffix, flagSwaggerFilePath, "create", flagNamespace, fmt.Sprintf("%v-%v", flagApiName, i+1))
+			tempJavaIntCms := handleJavaInterceptors(nameSuffix, flagSwaggerFilePath, "create", flagNamespace,
+				fmt.Sprintf("%v-%v", flagApiName, i+1))
 			if tempJavaIntCms != nil {
 				javaInterceptorsCmNames = append(javaInterceptorsCmNames, tempJavaIntCms...)
 			}
@@ -108,7 +112,8 @@ func handleAddApi(nameSuffix string) {
 		case mode.IsRegular():
 			//creating kubernetes configmap with swagger definition
 			fmt.Println("creating configmap with swagger definition")
-			errConf := createConfigMapWithNamespace(swaggerCmNames[i], flagSwaggerFilePath, flagNamespace, k8sUtils.K8sCreate)
+			errConf := createConfigMapWithNamespace(swaggerCmNames[i], flagSwaggerFilePath, flagNamespace,
+				k8sUtils.K8sCreate)
 			if errConf != nil {
 				utils.HandleErrorAndExit("Error creating configmap", errConf)
 			}
@@ -117,7 +122,7 @@ func handleAddApi(nameSuffix string) {
 
 	//create API
 	fmt.Println("creating API definition")
-	createAPI(flagApiName, flagNamespace, swaggerCmNames, flagReplicas, nameSuffix, balInterceptorsCmNames, flagOverride, javaInterceptorsCmNames, flagApiMode, flagApiVersion, flagApiEndPoint)
+	createAPI(swaggerCmNames, nameSuffix, balInterceptorsCmNames, javaInterceptorsCmNames)
 }
 
 // validateAddApiCommand validates for required flags and if invalid print error and exit
@@ -146,7 +151,8 @@ func validateAddApiCommand() {
 
 	// validate --mode flag
 	if flagApiMode != "" && flagApiMode != utils.PrivateJetModeConst && flagApiMode != utils.SidecarModeConst {
-		utils.HandleErrorAndExit(fmt.Sprintf("invalid api mode. available modes: %v, %v", utils.PrivateJetModeConst, utils.SidecarModeConst), nil)
+		utils.HandleErrorAndExit(fmt.Sprintf("invalid api mode. available modes: %v, %v",
+			utils.PrivateJetModeConst, utils.SidecarModeConst), nil)
 	}
 }
 
@@ -172,55 +178,54 @@ func createConfigMapWithNamespace(configMapName string, filePath string, namespa
 	return nil
 }
 
-func createAPI(name string, namespace string, configMapNames []string, replicas int, timestamp string, balInterceptors []string, override bool, javaInterceptors []string, apiMode string, apiVersion string,
-	apiEndPoint string) {
+func createAPI(configMapNames []string, timestamp string, balInterceptors []string, javaInterceptors []string) {
 	//get API definition from file
 	apiConfigMapData, _ := box.Get("/kubernetes_resources/api_cr.yaml")
-	apiConfigMap := &wso2v1alpha1.API{}
-	errUnmarshal := yaml.Unmarshal(apiConfigMapData, apiConfigMap)
+	apiCrd := &wso2v1alpha1.API{}
+	errUnmarshal := yaml.Unmarshal(apiConfigMapData, apiCrd)
 	if errUnmarshal != nil {
 		utils.HandleErrorAndExit("Error unmarshal api configmap into struct ", errUnmarshal)
 	}
 	//assigning values to API cr
-	apiConfigMap.Name = name
-	apiConfigMap.Namespace = namespace
-	apiConfigMap.Spec.Definition.SwaggerConfigmapNames = configMapNames
-	apiConfigMap.Spec.Replicas = replicas
-	apiConfigMap.Spec.Override = override
-	apiConfigMap.Spec.ApiEndPoint = apiEndPoint
+	apiCrd.Name = flagApiName
+	apiCrd.Namespace = flagNamespace
+	apiCrd.Spec.Definition.SwaggerConfigmapNames = configMapNames
+	apiCrd.Spec.Replicas = flagReplicas
+	apiCrd.Spec.Override = flagOverride
+	apiCrd.Spec.ApiEndPoint = flagApiEndPoint
 
 	k8sOperation := k8sUtils.K8sCreate
 	k8sSaveConfig := true
 	if timestamp != "" {
 		//set update timestamp
-		apiConfigMap.Spec.UpdateTimeStamp = timestamp
+		apiCrd.Spec.UpdateTimeStamp = timestamp
 		k8sOperation = k8sUtils.K8sApply
 		k8sSaveConfig = false
 	}
 	if len(balInterceptors) > 0 {
 		// set bal interceptors configmap name in API cr
-		apiConfigMap.Spec.Definition.Interceptors.Ballerina = balInterceptors
+		apiCrd.Spec.Definition.Interceptors.Ballerina = balInterceptors
 	}
 	if len(javaInterceptors) > 0 {
 		//set java interceptors configmaps names in API cr
-		apiConfigMap.Spec.Definition.Interceptors.Java = javaInterceptors
+		apiCrd.Spec.Definition.Interceptors.Java = javaInterceptors
 	} else {
-		apiConfigMap.Spec.Definition.Interceptors.Java = []string{}
+		apiCrd.Spec.Definition.Interceptors.Java = []string{}
 	}
-	if apiMode != "" {
-		apiConfigMap.Spec.Mode = wso2v1alpha1.Mode(apiMode)
+	if flagApiMode != "" {
+		apiCrd.Spec.Mode = wso2v1alpha1.Mode(flagApiMode)
 	}
-	if apiVersion != "" {
-		apiConfigMap.Spec.Version = apiVersion
+	if flagApiVersion != "" {
+		apiCrd.Spec.Version = flagApiVersion
 	}
-	if apiEndPoint != "" {
-		apiConfigMap.Spec.ApiEndPoint = apiEndPoint
+	if flagApiEndPoint != "" {
+		apiCrd.Spec.ApiEndPoint = flagApiEndPoint
 	}
-	if replicas != 0 {
-		apiConfigMap.Status.Replicas = replicas
+	if flagReplicas != 0 {
+		apiCrd.Status.Replicas = flagReplicas
 	}
 
-	byteVal, errMarshal := yaml.Marshal(apiConfigMap)
+	byteVal, errMarshal := yaml.Marshal(apiCrd)
 	if errMarshal != nil {
 		utils.HandleErrorAndExit("Error marshal api configmap ", errMarshal)
 	}
@@ -238,7 +243,7 @@ func createAPI(name string, namespace string, configMapNames []string, replicas 
 		log.Fatal(err)
 	}
 
-	k8sArgs := []string{k8sOperation, "-f", tmpFile.Name(), "-n", namespace}
+	k8sArgs := []string{k8sOperation, "-f", tmpFile.Name(), "-n", flagNamespace}
 	if k8sSaveConfig {
 		k8sArgs = append(k8sArgs, "--save-config")
 	}
@@ -248,7 +253,7 @@ func createAPI(name string, namespace string, configMapNames []string, replicas 
 	if errAddApi != nil {
 		fmt.Println("error configuring API")
 		// delete all configs if any error
-		rollbackConfigs(apiConfigMap)
+		rollbackConfigs(apiCrd)
 	}
 }
 
@@ -343,13 +348,21 @@ func rollbackConfigs(apiCr *wso2v1alpha1.API) {
 
 func init() {
 	addCmd.AddCommand(addApiCmd)
-	addApiCmd.Flags().StringVarP(&flagApiEndPoint, "apiEndPoint", "a", "","")
+	addApiCmd.Flags().StringVarP(&flagApiEndPoint, "apiEndPoint", "a", "", "")
 	addApiCmd.Flags().StringVarP(&flagApiName, "name", "n", "", "Name of the API")
-	addApiCmd.Flags().StringArrayVarP(&flagSwaggerFilePaths, "from-file", "f", []string{}, "Path to swagger file")
+	addApiCmd.Flags().StringArrayVarP(&flagSwaggerFilePaths, "from-file", "f", []string{},
+		"Path to swagger file")
 	addApiCmd.Flags().IntVar(&flagReplicas, "replicas", 1, "replica set")
 	addApiCmd.Flags().StringVar(&flagNamespace, "namespace", "", "namespace of API")
-	addApiCmd.Flags().BoolVarP(&flagOverride, "override", "", false, "Property to override the existing docker image with same name and version")
-	addApiCmd.Flags().StringVarP(&flagApiVersion, "version", "v", "", "Version of the API")
+	addApiCmd.Flags().BoolVarP(&flagOverride, "override", "", false,
+		"Property to override the existing docker image with the given name and version")
+	addApiCmd.Flags().StringVarP(&flagApiVersion, "version", "v", "",
+		"Property to override the API version")
 	addApiCmd.Flags().StringVarP(&flagApiMode, "mode", "m", "",
-		fmt.Sprintf("Property to override the deploying mode. Available modes: %v, %v", utils.PrivateJetModeConst, utils.SidecarModeConst))
+		fmt.Sprintf("Property to override the deploying mode. Available modes: %v, %v",
+			utils.PrivateJetModeConst, utils.SidecarModeConst))
+	addApiCmd.Flags().StringArrayVarP(&flagEnvs, "env", "e", []string{},
+		"Environment variables to be passed to deployment")
+	addApiCmd.Flags().StringVarP(&flagImage, "image", "i", "",
+		"Image of the API. If specified, ignores the value of --override")
 }
