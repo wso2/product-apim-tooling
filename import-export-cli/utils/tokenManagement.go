@@ -325,7 +325,7 @@ func GetOAuthTokens(username, password, b64EncodedClientIDClientSecret, url stri
 	resp, err := InvokePOSTRequest(url, headers, body)
 
 	if err != nil {
-		HandleErrorAndExit("Unable to Connect.", err)
+		return nil, err
 	}
 
 	if resp.StatusCode() != http.StatusOK {

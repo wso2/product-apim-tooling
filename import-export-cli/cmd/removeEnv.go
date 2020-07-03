@@ -42,12 +42,12 @@ var removeEnvCmd = &cobra.Command{
 	Short:   removeEnvCmdShortDesc,
 	Long:    removeEnvCmdLongDesc,
 	Example: removeEnvCmdExamples,
-	Args: cobra.MinimumNArgs(1),
+	Args:    cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		envToBeRemoved := args[0];
+		envToBeRemoved := args[0]
 
 		utils.Logln(utils.LogPrefixInfo + removeEnvCmdLiteral + " called")
-		executeRemoveEnvCmd(envToBeRemoved , utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
+		executeRemoveEnvCmd(envToBeRemoved, utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
 	},
 }
 
@@ -83,7 +83,7 @@ func removeEnv(envName, mainConfigFilePath, envKeysFilePath string) error {
 		if store.Has(envName) {
 			err = runLogout(envName)
 			if err != nil {
-				return err
+				utils.Logln("Log out is unsuccessful. ",err)
 			}
 		}
 
