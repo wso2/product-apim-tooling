@@ -48,9 +48,10 @@ const deleteAPICmdExamplesKubernetes = "\nKubernetes Mode:\n" + "  " +  utils.Pr
 var DeleteAPICmd = &cobra.Command{
 	Use: deleteAPICmdLiteral + " (--name <name-of-the-api> --version <version-of-the-api> --provider <provider-of-the-api> --environment " +
 		"<environment-from-which-the-api-should-be-deleted>)" + " [Flags]" + "\nKubernetes Mode:\n" + "  " + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPICmdLiteral + " (<name-of-the-api> or -l name=<name-of-the-label>)",
-	Short:   deleteAPICmdShortDesc,
-	Long:    deleteAPICmdLongDesc,
-	Example: deleteAPICmdExamplesDefault + deleteAPICmdExamplesKubernetes,
+	Short:              deleteAPICmdShortDesc,
+	Long:               deleteAPICmdLongDesc,
+	Example:            deleteAPICmdExamplesDefault + deleteAPICmdExamplesKubernetes,
+	DisableFlagParsing: isK8sEnabled(),
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + deleteAPICmdLiteral + " called")
 		configVars := utils.GetMainConfigFromFile(utils.MainConfigFilePath)

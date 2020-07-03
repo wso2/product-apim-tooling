@@ -73,6 +73,7 @@ type APIDefinition struct {
 	AccessControl                      string             `json:"accessControl,omitempty" yaml:"accessControl,omitempty"`
 	Rating                             float64            `json:"rating,omitempty" yaml:"rating,omitempty"`
 	IsLatest                           bool               `json:"isLatest,omitempty" yaml:"isLatest,omitempty"`
+	KeyManagers                        []string           `json:"keyManagers,omitempty" yaml:"keyManagers,omitempty"`
 }
 type ID struct {
 	ProviderName string `json:"providerName" yaml:"providerName"`

@@ -86,7 +86,17 @@ func invokeAPIProduct(t *testing.T, url string, key string, expectedCode int) {
 func addAPI(t *testing.T, client *apim.Client, username string, password string) *apim.API {
 	client.Login(username, password)
 	api := client.GenerateSampleAPIData(username)
-	id := client.AddAPI(t, api, username, password)
+	doClean := true
+	id := client.AddAPI(t, api, username, password, doClean)
+	api = client.GetAPI(id)
+	return api
+}
+
+func addAPIWithoutCleaning(t *testing.T, client *apim.Client, username string, password string) *apim.API {
+	client.Login(username, password)
+	api := client.GenerateSampleAPIData(username)
+	doClean := false
+	id := client.AddAPI(t, api, username, password, doClean)
 	api = client.GetAPI(id)
 	return api
 }
@@ -94,11 +104,12 @@ func addAPI(t *testing.T, client *apim.Client, username string, password string)
 func addAPIToTwoEnvs(t *testing.T, client1 *apim.Client, client2 *apim.Client, username string, password string) (*apim.API, *apim.API) {
 	client1.Login(username, password)
 	api := client1.GenerateSampleAPIData(username)
-	id1 := client1.AddAPI(t, api, username, password)
+	doClean := true
+	id1 := client1.AddAPI(t, api, username, password, doClean)
 	api1 := client1.GetAPI(id1)
 
 	client2.Login(username, password)
-	id2 := client2.AddAPI(t, api, username, password)
+	id2 := client2.AddAPI(t, api, username, password, doClean)
 	api2 := client2.GetAPI(id2)
 
 	return api1, api2
@@ -162,6 +173,11 @@ func deleteAPI(t *testing.T, client *apim.Client, apiID string, username string,
 	client.DeleteAPI(apiID)
 }
 
+func deleteAPIByCtl(t *testing.T, args *apiImportExportTestArgs) (string, error) {
+	output, err := base.Execute(t, "delete", "api", "-n", args.api.Name, "-v", args.api.Version, "-e", args.srcAPIM.EnvName, "-k", "--verbose")
+	return output, err
+}
+
 func getAPIProduct(t *testing.T, client *apim.Client, name string, username string, password string) *apim.APIProduct {
 	client.Login(username, password)
 	apiProductInfo := client.GetAPIProductByName(name)
@@ -217,7 +233,7 @@ func validateGetKeysFailure(t *testing.T, args *apiGetKeyTestArgs) {
 	}
 
 	assert.NotNil(t, err, "Expected error was not returned")
-	assert.Equal(t, "Exit status 1", base.GetValueOfUniformResponse(result))
+	assert.Contains(t, base.GetValueOfUniformResponse(result), "Exit status 1")
 }
 
 func validateGetKeys(t *testing.T, args *apiGetKeyTestArgs) {
@@ -305,7 +321,14 @@ func importAppPreserveOwner(t *testing.T, sourceEnv string, app *apim.Applicatio
 }
 
 func exportAPI(t *testing.T, name string, version string, provider string, env string) (string, error) {
-	output, err := base.Execute(t, "export-api", "-n", name, "-v", version, "-r", provider, "-e", env, "-k", "--verbose")
+	var output string
+	var err error
+
+	if provider == "" {
+		output, err = base.Execute(t, "export-api", "-n", name, "-v", version, "-e", env, "-k", "--verbose")
+	} else {
+		output, err = base.Execute(t, "export-api", "-n", name, "-v", version, "-r", provider, "-e", env, "-k", "--verbose")
+	}
 
 	t.Cleanup(func() {
 		base.RemoveAPIArchive(t, getEnvAPIExportPath(env), name, version)
@@ -324,6 +347,17 @@ func exportAPIProduct(t *testing.T, name string, version string, env string) (st
 	return output, err
 }
 
+func importAPI(t *testing.T, sourceEnv string, api *apim.API, client *apim.Client) (string, error) {
+	fileName := base.GetAPIArchiveFilePath(t, sourceEnv, api.Name, api.Version)
+	output, err := base.Execute(t, "import-api", "-f", fileName, "-e", client.EnvName, "-k", "--verbose", "--preserve-provider=false")
+
+	t.Cleanup(func() {
+		client.DeleteAPIByName(api.Name)
+	})
+
+	return output, err
+}
+
 func importAPIPreserveProvider(t *testing.T, sourceEnv string, api *apim.API, client *apim.Client) (string, error) {
 	fileName := base.GetAPIArchiveFilePath(t, sourceEnv, api.Name, api.Version)
 	output, err := base.Execute(t, "import-api", "-f", fileName, "-e", client.EnvName, "-k", "--verbose")
@@ -332,6 +366,17 @@ func importAPIPreserveProvider(t *testing.T, sourceEnv string, api *apim.API, cl
 		client.DeleteAPIByName(api.Name)
 	})
 
+	return output, err
+}
+
+func importAPIPreserveProviderFailure(t *testing.T, sourceEnv string, api *apim.API, client *apim.Client) (string, error) {
+	fileName := base.GetAPIArchiveFilePath(t, sourceEnv, api.Name, api.Version)
+	output, err := base.Execute(t, "import-api", "-f", fileName, "-e", client.EnvName, "-k", "--verbose")
+	return output, err
+}
+
+func listAPIs(t *testing.T, args *apiImportExportTestArgs) (string, error) {
+	output, err := base.Execute(t, "list", "apis", "-e", args.srcAPIM.EnvName, "-k", "--verbose")
 	return output, err
 }
 
@@ -488,7 +533,7 @@ func validateAPIExportFailure(t *testing.T, args *apiImportExportTestArgs) {
 	// Attempt exporting api from env
 	base.Login(t, args.srcAPIM.GetEnvName(), args.ctlUser.username, args.ctlUser.password)
 
-	exportAPI(t, args.api.Name, args.api.Version, args.api.Provider, args.srcAPIM.GetEnvName())
+	exportAPI(t, args.api.Name, args.api.Version, args.apiProvider.username, args.srcAPIM.GetEnvName())
 
 	// Validate that export failed
 	assert.False(t, base.IsAPIArchiveExists(t, getEnvAPIExportPath(args.srcAPIM.GetEnvName()),
@@ -525,6 +570,53 @@ func validateAPIExportImport(t *testing.T, args *apiImportExportTestArgs) {
 	validateAPIsEqual(t, args.api, importedAPI)
 }
 
+func validateAPIExport(t *testing.T, args *apiImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.srcAPIM.GetEnvName(), args.srcAPIM.GetApimURL(), args.srcAPIM.GetTokenURL())
+	base.SetupEnv(t, args.destAPIM.GetEnvName(), args.destAPIM.GetApimURL(), args.destAPIM.GetTokenURL())
+
+	// Export api from env 1
+	base.Login(t, args.srcAPIM.GetEnvName(), args.ctlUser.username, args.ctlUser.password)
+
+	exportAPI(t, args.api.Name, args.api.Version, args.apiProvider.username, args.srcAPIM.GetEnvName())
+
+	assert.True(t, base.IsAPIArchiveExists(t, getEnvAPIExportPath(args.srcAPIM.GetEnvName()),
+		args.api.Name, args.api.Version))
+}
+
+func validateAPIImport(t *testing.T, args *apiImportExportTestArgs) {
+	t.Helper()
+
+	// Import api to env 2
+	base.Login(t, args.destAPIM.GetEnvName(), args.ctlUser.username, args.ctlUser.password)
+
+	importAPI(t, args.srcAPIM.GetEnvName(), args.api, args.destAPIM)
+
+	// Give time for newly imported API to get indexed, or else getAPI by name will fail
+	time.Sleep(1 * time.Second)
+
+	// Get App from env 2
+	importedAPI := getAPI(t, args.destAPIM, args.api.Name, args.apiProvider.username, args.apiProvider.password)
+
+	// Validate env 1 and env 2 API is equal
+	validateAPIsEqualCrossTenant(t, args.api, importedAPI)
+}
+
+func validateAPIImportFailure(t *testing.T, args *apiImportExportTestArgs) {
+	t.Helper()
+
+	// Import api to env 2
+	base.Login(t, args.destAPIM.GetEnvName(), args.ctlUser.username, args.ctlUser.password)
+
+	// importAPIPreserveProviderFailure is used to eleminate cleaning the API after importing
+	result, err := importAPIPreserveProviderFailure(t, args.srcAPIM.GetEnvName(), args.api, args.destAPIM)
+
+	assert.NotNil(t, err, "Expected error was not returned")
+	assert.Contains(t, base.GetValueOfUniformResponse(result), "Exit status 1")
+}
+
 func validateAPIsEqual(t *testing.T, api1 *apim.API, api2 *apim.API) {
 	t.Helper()
 
@@ -548,7 +640,98 @@ func validateAPIsEqual(t *testing.T, api1 *apim.API, api2 *apim.API) {
 	apim.SortAPIMembers(&api2Copy)
 
 	assert.Equal(t, api1Copy, api2Copy, "API obejcts are not equal")
+}
 
+func validateAPIsList(t *testing.T, args *apiImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.srcAPIM.GetEnvName(), args.srcAPIM.GetApimURL(), args.srcAPIM.GetTokenURL())
+
+	// List APIs of env 1
+	base.Login(t, args.srcAPIM.GetEnvName(), args.ctlUser.username, args.ctlUser.password)
+
+	output, _ := listAPIs(t, args)
+
+	apisList := args.srcAPIM.GetAPIs()
+
+	validateListAPIsEqual(t, output, apisList)
+}
+
+func validateListAPIsEqual(t *testing.T, apisListFromCtl string, apisList *apim.APIList) {
+
+	for _, api := range apisList.List {
+		// If the output string contains the same API ID, then decrement the count
+		if strings.Contains(apisListFromCtl, api.ID) {
+			apisList.Count = apisList.Count - 1
+		}
+	}
+
+	// Count == 0 means that all the APIs from apisList were in apisListFromCtl
+	assert.Equal(t, apisList.Count, 0, "API lists are not equal")
+}
+
+func validateAPIsEqualCrossTenant(t *testing.T, api1 *apim.API, api2 *apim.API) {
+	t.Helper()
+
+	api1Copy := apim.CopyAPI(api1)
+	api2Copy := apim.CopyAPI(api2)
+
+	same := "override_with_same_value"
+	// Since the APIs are from too different envs, their respective ID will defer.
+	// Therefore this will be overriden to the same value to ensure that the equality check will pass.
+	api1Copy.ID = same
+	api2Copy.ID = same
+
+	api1Copy.CreatedTime = same
+	api2Copy.CreatedTime = same
+
+	api1Copy.LastUpdatedTime = same
+	api2Copy.LastUpdatedTime = same
+
+	// The contexts and providers will differ since this is a cross tenant import
+	// Therefore this will be overriden to the same value to ensure that the equality check will pass.
+	api1Copy.Context = same
+	api2Copy.Context = same
+
+	api1Copy.Provider = same
+	api2Copy.Provider = same
+
+	// Sort member collections to make equality chack possible
+	apim.SortAPIMembers(&api1Copy)
+	apim.SortAPIMembers(&api2Copy)
+
+	assert.Equal(t, api1Copy, api2Copy, "API obejcts are not equal")
+}
+
+func validateAPIDelete(t *testing.T, args *apiImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.srcAPIM.GetEnvName(), args.srcAPIM.GetApimURL(), args.srcAPIM.GetTokenURL())
+
+	// Delete an API of env 1
+	base.Login(t, args.srcAPIM.GetEnvName(), args.ctlUser.username, args.ctlUser.password)
+
+	time.Sleep(1 * time.Second)
+	apisListBeforeDelete := args.srcAPIM.GetAPIs()
+
+	deleteAPIByCtl(t, args)
+
+	apisListAfterDelete := args.srcAPIM.GetAPIs()
+	time.Sleep(1 * time.Second)
+
+	// Validate whether the expected number of API count is there
+	assert.Equal(t, apisListBeforeDelete.Count, apisListAfterDelete.Count+1, "Expected number of APIs not deleted")
+
+	// Validate that the delete is a success
+	validateAPIIsDeleted(t, args.api, apisListAfterDelete)
+}
+
+func validateAPIIsDeleted(t *testing.T, api *apim.API, apisListAfterDelete *apim.APIList) {
+	for _, existingAPI := range apisListAfterDelete.List {
+		assert.NotEqual(t, existingAPI.ID, api.ID, "API delete is not successful")
+	}
 }
 
 func validateAPIProductExportFailure(t *testing.T, args *apiProductImportExportTestArgs) {
@@ -845,13 +1028,25 @@ func validateAPIProductDelete(t *testing.T, args *apiProductImportExportTestArgs
 	// Delete an API Product of env 1
 	base.Login(t, args.srcAPIM.GetEnvName(), args.ctlUser.username, args.ctlUser.password)
 
+	time.Sleep(1 * time.Second)
 	apiProductsListBeforeDelete := args.srcAPIM.GetAPIProducts()
 
 	deleteAPIProductByCtl(t, args)
 
 	apiProductsListAfterDelete := args.srcAPIM.GetAPIProducts()
+	time.Sleep(1 * time.Second)
 
-	assert.Equal(t, apiProductsListBeforeDelete.Count, apiProductsListAfterDelete.Count+1, "API Product delete is not successful")
+	// Validate whether the expected number of API Product count is there
+	assert.Equal(t, apiProductsListBeforeDelete.Count, apiProductsListAfterDelete.Count+1, "Expected number of API Products not deleted")
+
+	// Validate that the delete is a success
+	validateAPIProductIsDeleted(t, args.apiProduct, apiProductsListAfterDelete)
+}
+
+func validateAPIProductIsDeleted(t *testing.T, apiProduct *apim.APIProduct, apiProductsListAfterDelete *apim.APIProductList) {
+	for _, existingAPIProduct := range apiProductsListAfterDelete.List {
+		assert.NotEqual(t, existingAPIProduct.ID, apiProduct.ID, "API Product delete is not successful")
+	}
 }
 
 func validateAPIProductDeleteFailure(t *testing.T, args *apiProductImportExportTestArgs) {
@@ -863,10 +1058,12 @@ func validateAPIProductDeleteFailure(t *testing.T, args *apiProductImportExportT
 	// Delete an API Product of env 1
 	base.Login(t, args.srcAPIM.GetEnvName(), args.ctlUser.username, args.ctlUser.password)
 
+	time.Sleep(1 * time.Second)
 	apiProductsListBeforeDelete := args.srcAPIM.GetAPIProducts()
 
 	deleteAPIProductByCtl(t, args)
 
+	time.Sleep(1 * time.Second)
 	apiProductsListAfterDelete := args.srcAPIM.GetAPIProducts()
 
 	assert.Equal(t, apiProductsListBeforeDelete.Count, apiProductsListAfterDelete.Count, "API Product delete is successful")

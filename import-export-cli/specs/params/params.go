@@ -21,6 +21,8 @@ type Configuration struct {
 
 // Endpoint details
 type Endpoint struct {
+	// Type of the endpoints
+	EndpointType string `json:"endpoint_type,omitempty"`
 	// Url of the endpoint
 	Url *string `yaml:"url" json:"url"`
 	// Config of endpoint
@@ -29,10 +31,58 @@ type Endpoint struct {
 
 // EndpointData contains details about endpoints
 type EndpointData struct {
+	// Type of the endpoints
+	EndpointType string `json:"endpoint_type"`
 	// Production endpoint
 	Production *Endpoint `yaml:"production" json:"production_endpoints,omitempty"`
 	// Sandbox endpoint
 	Sandbox *Endpoint `yaml:"sandbox" json:"sandbox_endpoints,omitempty"`
+}
+
+// LoadBalanceEndpointsData contains details about endpoints mainly to be used in load balancing
+type LoadBalanceEndpointsData struct {
+	// Type of the endpoints
+	EndpointType string `json:"endpoint_type"`
+	// Production endpoints list for load balancing
+	Production []Endpoint `yaml:"production" json:"production_endpoints,omitempty"`
+	// Sandbox endpoints list for load balancing
+	Sandbox []Endpoint `yaml:"sandbox" json:"sandbox_endpoints,omitempty"`
+	// Session management method from the load balancing group. Values can be "none", "transport" (by default), "soap", "simpleClientSession" (Client ID)
+	SessionManagement string `yaml:"sessionManagement" json:"sessionManagement,omitempty"`
+	// Session timeout means the number of milliseconds after which the session would time out
+	SessionTimeout int `yaml:"sessionTimeOut" json:"sessionTimeOut,omitempty"`
+	// Class name for algorithm to be used if load balancing should be done
+	AlgorithmClassName string `yaml:"algoClassName" json:"algoClassName,omitempty"`
+}
+
+// FailoverEndpointsData contains details about endpoints mainly to be used in failover scenario
+type FailoverEndpointsData struct {
+	// Type of the endpoints
+	EndpointType string `json:"endpoint_type"`
+	// Primary production endpoint for failover
+	Production *Endpoint `yaml:"production" json:"production_endpoints,omitempty"`
+	// Production failover endpoints list for failover
+	ProductionFailovers []Endpoint `yaml:"productionFailovers" json:"production_failovers,omitempty"`
+	// Primary sandbox endpoint for failover
+	Sandbox *Endpoint `yaml:"sandbox" json:"sandbox_endpoints,omitempty"`
+	// Production failover endpoints list for failover endpoint types
+	SandboxFailovers []Endpoint `yaml:"sandboxFailovers" json:"sandbox_failovers,omitempty"`
+	// To enable failover endpoints
+	Failover bool `json:"failOver,omitempty"`
+}
+
+// AWSLambdaEndpointsData contains details about endpoints to be used with AWS Lambda endpoints
+type AWSLambdaEndpointsData struct {
+	// Type of the endpoints
+	EndpointType string `json:"endpoint_type"`
+	// Access method for endpoint. Values can be "role-supplied" (Using IAM role-supplied temporary AWS credentials) and "stored" (Using stored AWS credentials)
+	AccessMethod string `yaml:"accessMethod" json:"access_method,omitempty"`
+	// Region where endpoint located (Regions list https://docs.aws.amazon.com/general/latest/gr/rande.html)
+	AmznRegion string `yaml:"amznRegion" json:"amznRegion,omitempty"`
+	// Access Key for endpoint
+	AmznAccessKey string `yaml:"amznAccessKey" json:"amznAccessKey,omitempty"`
+	// Access Secret for endpoint
+	AmznSecretKey string `yaml:"amznSecretKey" json:"amznSecretKey,omitempty"`
 }
 
 // SecurityData contains the details about endpoint security from api_params.yaml
@@ -50,7 +100,7 @@ type SecurityData struct {
 // Cert stores certificate details
 type Cert struct {
 	// Host of the certificate
-	Host string `yaml:"host" json:"hostName"`
+	Host string `yaml:"hostName" json:"hostName"`
 	// Alias for certificate
 	Alias string `yaml:"alias" json:"alias"`
 	// Path for certificate file
@@ -63,8 +113,19 @@ type Cert struct {
 type Environment struct {
 	// Name of the environment
 	Name string `yaml:"name"`
+	// Type of the endpoints. Values can be "rest", "soap", "dynamic" or "aws"
+	EndpointType string `yaml:"endpointType"`
+	// EndpointRoutingPolicy contains the routing policy related to the endpoint. Values can be "load_balanced" or "failover".
+	// (Only available for the endpointTypes "rest" or "soap")
+	EndpointRoutingPolicy string `yaml:"endpointRoutingPolicy"`
 	// Endpoints contain details about endpoints in a configuration
 	Endpoints *EndpointData `yaml:"endpoints"`
+	// LoadBalanceEndpoints contain details about endpoints in a configuration for load balancing scenarios
+	LoadBalanceEndpoints *LoadBalanceEndpointsData `yaml:"loadBalanceEndpoints"`
+	// FailoverEndpoints contain details about endpoints in a configuration for failover scenarios
+	FailoverEndpoints *FailoverEndpointsData `yaml:"failoverEndpoints"`
+	// AWSLambdaEndpoints contain details about endpoints in a configuration with AWD Lambda configuration
+	AWSLambdaEndpoints *AWSLambdaEndpointsData `yaml:"awsLambdaEndpoints"`
 	// Security contains the details about endpoint security
 	Security *SecurityData `yaml:"security"`
 	// GatewayEnvironments contains environments that used to deploy API
@@ -132,7 +193,7 @@ type ProjectInfo struct {
 
 // APIEndpointConfig contains details about endpoints in an API
 type APIEndpointConfig struct {
-    // EPConfig is representing endpoint configuration
+	// EPConfig is representing endpoint configuration
 	EPConfig string `json:"endpointConfig"`
 }
 
@@ -222,7 +283,6 @@ func ExtractAPIEndpointConfig(b []byte) (string, error) {
 	return apiConfig.EPConfig, err
 }
 
-
 // GetEnv returns the EndpointData associated for key in the ApiParams, if not found returns nil
 func (config ApiParams) GetEnv(key string) *Environment {
 	for index, env := range config.Environments {
@@ -232,4 +292,3 @@ func (config ApiParams) GetEnv(key string) *Environment {
 	}
 	return nil
 }
-

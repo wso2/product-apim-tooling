@@ -44,6 +44,7 @@ var flagNamespace string
 var flagOverride bool
 var flagApiVersion string
 var flagApiMode string
+var flagApiEndPoint string
 
 const addApiCmdLiteral = "api"
 const addApiCmdShortDesc = "handle APIs in kubernetes cluster "
@@ -92,7 +93,7 @@ func handleAddApi(nameSuffix string) {
 			}
 
 			// copy all bal interceptors to the temp dir
-			balInterceptorsCmName := fmt.Sprintf("%v-%v-bal-interceptors%s", flagApiName, i+1, nameSuffix)
+			balInterceptorsCmName := fmt.Sprintf("%v-%v-bal-intcpt%s", flagApiName, i+1, nameSuffix)
 			intceptFound := handleBalInterceptors(balInterceptorsCmName, flagSwaggerFilePath, "create", flagNamespace)
 			if intceptFound {
 				balInterceptorsCmNames = append(balInterceptorsCmNames, balInterceptorsCmName)
@@ -100,7 +101,9 @@ func handleAddApi(nameSuffix string) {
 
 			// handle java interceptors
 			tempJavaIntCms := handleJavaInterceptors(nameSuffix, flagSwaggerFilePath, "create", flagNamespace, fmt.Sprintf("%v-%v", flagApiName, i+1))
-			javaInterceptorsCmNames = append(javaInterceptorsCmNames, tempJavaIntCms...)
+			if tempJavaIntCms != nil {
+				javaInterceptorsCmNames = append(javaInterceptorsCmNames, tempJavaIntCms...)
+			}
 		//check if the swagger path is a file
 		case mode.IsRegular():
 			//creating kubernetes configmap with swagger definition
@@ -114,7 +117,7 @@ func handleAddApi(nameSuffix string) {
 
 	//create API
 	fmt.Println("creating API definition")
-	createAPI(flagApiName, flagNamespace, swaggerCmNames, flagReplicas, nameSuffix, balInterceptorsCmNames, flagOverride, javaInterceptorsCmNames, flagApiMode, flagApiVersion)
+	createAPI(flagApiName, flagNamespace, swaggerCmNames, flagReplicas, nameSuffix, balInterceptorsCmNames, flagOverride, javaInterceptorsCmNames, flagApiMode, flagApiVersion, flagApiEndPoint)
 }
 
 // validateAddApiCommand validates for required flags and if invalid print error and exit
@@ -169,7 +172,8 @@ func createConfigMapWithNamespace(configMapName string, filePath string, namespa
 	return nil
 }
 
-func createAPI(name string, namespace string, configMapNames []string, replicas int, timestamp string, balInterceptors []string, override bool, javaInterceptors []string, apiMode string, apiVersion string) {
+func createAPI(name string, namespace string, configMapNames []string, replicas int, timestamp string, balInterceptors []string, override bool, javaInterceptors []string, apiMode string, apiVersion string,
+	apiEndPoint string) {
 	//get API definition from file
 	apiConfigMapData, _ := box.Get("/kubernetes_resources/api_cr.yaml")
 	apiConfigMap := &wso2v1alpha1.API{}
@@ -183,6 +187,7 @@ func createAPI(name string, namespace string, configMapNames []string, replicas 
 	apiConfigMap.Spec.Definition.SwaggerConfigmapNames = configMapNames
 	apiConfigMap.Spec.Replicas = replicas
 	apiConfigMap.Spec.Override = override
+	apiConfigMap.Spec.ApiEndPoint = apiEndPoint
 
 	k8sOperation := k8sUtils.K8sCreate
 	k8sSaveConfig := true
@@ -207,6 +212,12 @@ func createAPI(name string, namespace string, configMapNames []string, replicas 
 	}
 	if apiVersion != "" {
 		apiConfigMap.Spec.Version = apiVersion
+	}
+	if apiEndPoint != "" {
+		apiConfigMap.Spec.ApiEndPoint = apiEndPoint
+	}
+	if replicas != 0 {
+		apiConfigMap.Status.Replicas = replicas
 	}
 
 	byteVal, errMarshal := yaml.Marshal(apiConfigMap)
@@ -247,20 +258,23 @@ func handleBalInterceptors(configMapName string, path string, operation string, 
 	//check interceptors dir is not empty
 	file, err := os.Open(interceptorsPath)
 	if err != nil {
-		utils.HandleErrorAndExit("cannot open interceptors Dir", err)
-	}
-	defer file.Close()
-	if _, err = file.Readdir(1); err != nil {
-		return false
+		utils.HandleErrorAndContinue("cannot open Interceptors directory", err)
+	} else {
+		defer file.Close()
+		if _, err = file.Readdir(1); err != nil {
+			return false
+		}
+
+		//creating kubernetes configmap with interceptors
+		fmt.Println("creating configmap with ballerina interceptors")
+		if err := createConfigMapWithNamespace(configMapName, interceptorsPath, namespace, operation); err != nil {
+			utils.HandleErrorAndExit("Error creating configmap for interceptors", err)
+		}
+
+		return true
 	}
 
-	//creating kubernetes configmap with interceptors
-	fmt.Println("creating configmap with ballerina interceptors")
-	if err := createConfigMapWithNamespace(configMapName, interceptorsPath, namespace, operation); err != nil {
-		utils.HandleErrorAndExit("Error creating configmap for interceptors", err)
-	}
-
-	return true
+	return false
 }
 
 func handleJavaInterceptors(nameSuffix string, path string, operation string, namespace string, cmPrefixName string) []string {
@@ -269,17 +283,18 @@ func handleJavaInterceptors(nameSuffix string, path string, operation string, na
 	//get interceptors if available
 	interceptorsPath := filepath.Join(path, "libs")
 	//check interceptors dir is not empty
-	if exists, err := utils.IsDirExists(interceptorsPath); !exists {
-		utils.HandleErrorAndExit("cannot open java interceptors Dir", err)
-	}
-
-	//get all jars in libs dir
-	errReadInterceptors := filepath.Walk(interceptorsPath, func(path string, info os.FileInfo, err error) error {
-		interceptors = append(interceptors, path)
-		return nil
-	})
-	if errReadInterceptors != nil {
-		utils.HandleErrorAndExit("cannot read interceptors in the libs", errReadInterceptors)
+	exists, err := utils.IsDirExists(interceptorsPath)
+	if !exists {
+		utils.HandleErrorAndContinue("cannot open java interceptors directory", err)
+	} else {
+		//get all jars in libs dir
+		errReadInterceptors := filepath.Walk(interceptorsPath, func(path string, info os.FileInfo, err error) error {
+			interceptors = append(interceptors, path)
+			return nil
+		})
+		if errReadInterceptors != nil {
+			utils.HandleErrorAndExit("cannot read interceptors in the libs", errReadInterceptors)
+		}
 	}
 
 	const jarExt = ".jar"
@@ -287,7 +302,7 @@ func handleJavaInterceptors(nameSuffix string, path string, operation string, na
 		if filepath.Ext(filePath) == jarExt {
 			// creating kubernetes configmap for each java interceptor
 			// added the random number instead of file name to omit lengthy names and k8s resource name constraints
-			cmName := fmt.Sprintf("%s-%v-jar-interceptors%s", cmPrefixName, rand.Intn(10000), nameSuffix)
+			cmName := fmt.Sprintf("%s-%v-jar-intcpt%s", cmPrefixName, rand.Intn(10000), nameSuffix)
 			javaInterceptorsConfNames = append(javaInterceptorsConfNames, cmName)
 
 			fmt.Println("creating configmap with java interceptor " + cmName)
@@ -328,12 +343,13 @@ func rollbackConfigs(apiCr *wso2v1alpha1.API) {
 
 func init() {
 	addCmd.AddCommand(addApiCmd)
+	addApiCmd.Flags().StringVarP(&flagApiEndPoint, "apiEndPoint", "a", "","")
 	addApiCmd.Flags().StringVarP(&flagApiName, "name", "n", "", "Name of the API")
 	addApiCmd.Flags().StringArrayVarP(&flagSwaggerFilePaths, "from-file", "f", []string{}, "Path to swagger file")
 	addApiCmd.Flags().IntVar(&flagReplicas, "replicas", 1, "replica set")
 	addApiCmd.Flags().StringVar(&flagNamespace, "namespace", "", "namespace of API")
 	addApiCmd.Flags().BoolVarP(&flagOverride, "override", "", false, "Property to override the existing docker image with same name and version")
-	addApiCmd.Flags().StringVarP(&flagApiVersion, "version", "v", "", "Property to override the existing docker image with same name and version")
+	addApiCmd.Flags().StringVarP(&flagApiVersion, "version", "v", "", "Version of the API")
 	addApiCmd.Flags().StringVarP(&flagApiMode, "mode", "m", "",
 		fmt.Sprintf("Property to override the deploying mode. Available modes: %v, %v", utils.PrivateJetModeConst, utils.SidecarModeConst))
 }

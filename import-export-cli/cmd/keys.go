@@ -37,8 +37,8 @@ const genKeyCmdLiteral = "get-keys"
 const genKeyCmdShortDesc = "Generate access token to invoke the API or API Product"
 const genKeyCmdLongDesc = `Generate JWT token to invoke the API or API Product by subscribing to a default application for testing purposes`
 const genKeyCmdExamples = utils.ProjectName + " " + genKeyCmdLiteral + ` -n TwitterAPI -v 1.0.0 -e dev --provider admin
-NOTE: Both the flags (--name (-n) and --environment (-e)) are mandatory`
-
+NOTE: Both the flags (--name (-n) and --environment (-e)) are mandatory.
+You can override the default token endpoint using --token (-t) optional flag providing a new token endpoint`
 var keyGenEnv string
 var apiName string
 var apiVersion string
@@ -46,6 +46,7 @@ var apiProvider string
 var tokenType string
 var subscriptionThrottlingTier string
 var applicationThrottlingPolicy string
+var keyGenTokenEndpoint string
 
 var genKeyCmd = &cobra.Command{
 	Use:     genKeyCmdLiteral,
@@ -61,6 +62,7 @@ var genKeyCmd = &cobra.Command{
 
 //Subscribe the given API or API Product to the default application and generate an access token
 func getKeys() {
+
 	cred, err := getCredentials(keyGenEnv)
 	if err != nil {
 		utils.HandleErrorAndExit("Error getting credentials", err)
@@ -324,8 +326,14 @@ func generateAccessToken(credential credentials.Credential) (string, error) {
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + b64encodedCredentials
 	headers[utils.HeaderAccept] = utils.HeaderValueApplicationJSON
 
-	//Retrieving the token endpoint of the relevant environment
-	tokenEndpoint := utils.GetTokenEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
+	var tokenEndpoint string
+	//Retrieving the token endpoint of the relevant environment if new token endpoint is not given
+	//If new token endpoint is given replace token endpoint of the relevant environment into new token endpoint for the instance
+	if keyGenTokenEndpoint == "" {
+		tokenEndpoint = utils.GetTokenEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
+	} else {
+		tokenEndpoint = keyGenTokenEndpoint
+	}
 	//Prepping query params
 	body := "grant_type=password&username=" + credential.Username + "&password=" +
 		encodeURL.QueryEscape(credential.Password) + "&validity_period=" + string(utils.DefaultTokenValidityPeriod) +
@@ -729,8 +737,12 @@ func createApplication(accessToken string, throttlingPolicy string) (string, str
 // @param scopes[] : Scopes to generate the token
 // @return accessToken, error
 func getNewToken(key *utils.ApplicationKey, scopes []string) (string, error) {
-	tokenEndpoint := utils.GetTokenEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
-
+	var tokenEndpoint string
+	if keyGenTokenEndpoint == "" {
+		tokenEndpoint = utils.GetTokenEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
+	} else {
+		tokenEndpoint = keyGenTokenEndpoint
+	}
 	body := "grant_type=client_credentials&scope=" + strings.Join(scopes, " ")
 
 	headers := make(map[string]string)
@@ -848,6 +860,7 @@ func init() {
 	genKeyCmd.Flags().StringVarP(&apiName, "name", "n", "", "API or API Product to generate keys")
 	genKeyCmd.Flags().StringVarP(&apiVersion, "version", "v", "", "Version of the API or API Product")
 	genKeyCmd.Flags().StringVarP(&apiProvider, "provider", "r", "", "Provider of the API or API Product")
+	genKeyCmd.Flags().StringVarP(&keyGenTokenEndpoint, "token", "t", "", "Token endpoint URL of Environment")
 	_ = genKeyCmd.MarkFlagRequired("name")
 	_ = genKeyCmd.MarkFlagRequired("environment")
 }

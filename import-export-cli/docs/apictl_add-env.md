@@ -14,8 +14,7 @@ apictl add-env [flags]
 
 ```
 apictl add-env -e production \
---apim  https://localhost:9443 \
---token https://localhost:8243/token
+--apim  https://localhost:9443 
 
 apictl add-env -e test \
 --registration https://idp.com:9443 \
@@ -29,9 +28,10 @@ apictl add-env -e dev \
 --registration https://idp.com:9443 \
 --token https://gw.com:8243/token
 
-NOTE: The flags --environment (-e) and --token are mandatory
-You can either provide only the 2 flags --apim and --token, or all the other 5 flags (--registration --publisher --devportal --admin --token) without providing --apim flag.
-If you are omitting any of --registration --publisher --devportal --admin flags, you need to specify --apim flag with the API Manager endpoint.
+NOTE: The flag --environment (-e) is mandatory.
+You can either provide only the flag --apim , or all the other 4 flags (--registration --publisher --devportal --admin --token) without providing --apim flag.
+If you are omitting any of --registration --publisher --devportal --admin flags, you need to specify --apim flag with the API Manager endpoint. In both of the
+cases --token flag is optional and use it to specify the gateway token endpoint. This will be used for "apictl get-keys" operation.
 ```
 
 ### Options
