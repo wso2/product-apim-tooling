@@ -23,7 +23,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	encodeURL "net/url"
 	"strings"
 
 	"github.com/renstrom/dedent"
@@ -39,6 +38,7 @@ const genKeyCmdLongDesc = `Generate JWT token to invoke the API or API Product b
 const genKeyCmdExamples = utils.ProjectName + " " + genKeyCmdLiteral + ` -n TwitterAPI -v 1.0.0 -e dev --provider admin
 NOTE: Both the flags (--name (-n) and --environment (-e)) are mandatory.
 You can override the default token endpoint using --token (-t) optional flag providing a new token endpoint`
+
 var keyGenEnv string
 var apiName string
 var apiVersion string
@@ -76,7 +76,7 @@ func getKeys() {
 	}
 	utils.Logln(utils.LogPrefixInfo + "Called DCR endpoint successfully")
 	//generating access token for the env based on the credentials
-	accessToken, err := generateAccessToken(cred)
+	accessToken, err := credentials.GetOAuthAccessToken(cred, keyGenEnv)
 	if err != nil {
 		utils.HandleErrorAndExit("Internal error occurred", err)
 	}
@@ -151,15 +151,6 @@ func getKeys() {
 
 			//if keys have been already generated before, then update the consumer key and secret
 			if appKeys.Count != 0 {
-				keygenResponse, keyGenErr := regenerateConsumerSecret(appId, "PRODUCTION", accessToken)
-				if keyGenErr != nil {
-					utils.HandleErrorAndExit("Error occurred while regenerating keys for the CLI app: "+appId,
-						keyGenErr)
-				} else {
-					appKeys.List[0].ConsumerSecret = keygenResponse.ConsumerSecret
-					utils.Logln(utils.LogPrefixInfo + "Regenerated CLI application keys successfully")
-				}
-
 				//If the keys have not been generated and the application is updated
 				token, err := getNewToken(&appKeys.List[0], scopes)
 				if accessToken != "" {
@@ -311,86 +302,6 @@ func callDCREndpoint(credential credentials.Credential) (string, string, error) 
 			return "", "", fmt.Errorf("authorization failed during CLI client registration process")
 		}
 		return "", "", errors.New("Request didn't respond 200 OK for DCR request. Status: " + resp.Status())
-	}
-}
-
-// Get a token to access the REST APIs
-// @param credential : ClientID and ClientSecret
-// @return accessToken, error
-func generateAccessToken(credential credentials.Credential) (string, error) {
-	//Base64 encoding the credentials
-	b64encodedCredentials := credentials.Base64Encode(fmt.Sprintf("%s:%s", credential.ClientId, credential.ClientSecret))
-	//Prepping the headers
-	headers := make(map[string]string)
-	headers[utils.HeaderContentType] = utils.HeaderValueXWWWFormUrlEncoded
-	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + b64encodedCredentials
-	headers[utils.HeaderAccept] = utils.HeaderValueApplicationJSON
-
-	var tokenEndpoint string
-	//Retrieving the token endpoint of the relevant environment if new token endpoint is not given
-	//If new token endpoint is given replace token endpoint of the relevant environment into new token endpoint for the instance
-	if keyGenTokenEndpoint == "" {
-		tokenEndpoint = utils.GetTokenEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
-	} else {
-		tokenEndpoint = keyGenTokenEndpoint
-	}
-	//Prepping query params
-	body := "grant_type=password&username=" + credential.Username + "&password=" +
-		encodeURL.QueryEscape(credential.Password) + "&validity_period=" + string(utils.DefaultTokenValidityPeriod) +
-		"&scope=apim:api_view+apim:subscribe+apim:api_publish"
-
-	//Call to the token endpoint with the necessary payload
-	resp, err := utils.InvokePOSTRequest(tokenEndpoint, headers, body)
-	//If the response is erroneous
-	if err != nil {
-		utils.HandleErrorAndExit("Unable to connect to "+tokenEndpoint, err)
-	}
-	//Logging the response
-	utils.Logln(utils.LogPrefixInfo+"Response:", resp.Status())
-	//If the token generation response is success
-	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
-		keygenResponse := &utils.TokenResponse{}
-		unmarshalError := json.Unmarshal([]byte(resp.Body()), &keygenResponse)
-		if unmarshalError != nil {
-			utils.HandleErrorAndExit(utils.LogPrefixError+"invalid JSON response", unmarshalError)
-		}
-		return keygenResponse.AccessToken, err
-	} else {
-		return "", errors.New("Request didn't respond 200 OK for generating an access token. Status: " + resp.Status())
-	}
-}
-
-// Regenerate consumer secret of the application
-// @param appId : ID of the application
-// @param keyType : Key Type of the application. Allowed values: PRODUCTION, SANDBOX
-// @return KeygenResponse, error
-func regenerateConsumerSecret(appId string, keyType string, accessToken string) (*utils.ConsumerSecretRegenResponse,
-	error) {
-	applicationEndpoint := utils.GetDevPortalApplicationListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
-	url := applicationEndpoint + "/" + appId + "/keys/" + keyType + "/regenerate-secret"
-	headers := make(map[string]string)
-	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
-	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
-
-	resp, err := utils.InvokePOSTRequestWithoutBody(url, headers)
-	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
-		// 200 OK or 201 Created
-		keygenResp := &utils.ConsumerSecretRegenResponse{}
-		data := []byte(resp.Body())
-		err = json.Unmarshal(data, &keygenResp)
-
-		return keygenResp, err
-
-	} else {
-		utils.Logf("Error: %s\n", resp.Error())
-		utils.Logf("Body: %s\n", resp.Body())
-		if resp.StatusCode() == http.StatusUnauthorized {
-			// 401 Unauthorized
-			return nil, fmt.Errorf("authorization failed during consumer key regeneration of " +
-				"CLI application: " + appId)
-		}
-		return nil, errors.New("Request didn't respond 200 OK for regenerating the consumer secret. " +
-			"Status: " + resp.Status())
 	}
 }
 
