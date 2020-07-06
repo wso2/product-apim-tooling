@@ -330,8 +330,8 @@ func GetOAuthTokens(username, password, b64EncodedClientIDClientSecret, url stri
 	}
 
 	if resp.StatusCode() != http.StatusOK {
-		HandleErrorAndExit("Unable to connect.", errors.New("Status: "+resp.Status()))
-		return nil, nil
+		return nil, errors.New("Unable to connect. " +
+			"Status: " + resp.Status())
 	}
 
 	responseDataMap := make(map[string]string) // a map to hold response data
