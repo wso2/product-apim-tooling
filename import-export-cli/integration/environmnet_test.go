@@ -21,7 +21,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"log"
+	"path/filepath"
+	"strings"
 	"testing"
+	"time"
 )
 
 const defaultExportPath = utils.DefaultExportDirName
@@ -36,47 +40,97 @@ func TestListEnvironments(t *testing.T) {
 	assert.Contains(t, response, apim.GetEnvName(), "TestListEnvironments Failed")
 }
 
-//Change Export directory using apictl and assert the change
-func TestChangeExportDirectory(t *testing.T) {
-	apim := apimClients[0]
-	changedExportDirectory := utils.MockTestExportDirectory + utils.DefaultExportDirName
-	defaultExportPath := utils.DefaultExportDirPath
-
-	args := &setTestArgs{
-		srcAPIM:             apim,
-		exportDirectoryFlag: changedExportDirectory,
-	}
+func validateExportDirectoryIsChanged(t *testing.T, args *setTestArgs) {
+	t.Helper()
 	output, _ := environmentSetExportDirectory(t, args)
 	base.Log(output)
-
-	//Change value back to default value
-	argsDefault := &setTestArgs{
-		srcAPIM:             apim,
-		exportDirectoryFlag: defaultExportPath,
-	}
-	environmentSetExportDirectory(t, argsDefault)
 	assert.Contains(t, output, "Export Directory is set to", "Export Directory change is not successful")
 }
 
-//Change HTTP request Timeout using apictl and assert the change
-func TestChangeHttpRequestTimout(t *testing.T) {
-	apim := apimClients[0]
-	defaultHttpRequestTimeOut := utils.DefaultHttpRequestTimeout
-	newHttpRequestTimeOut := 20000
-	args := &setTestArgs{
-		srcAPIM:            apim,
-		httpRequestTimeout: newHttpRequestTimeOut,
-	}
-	output, _ := environmentSetHttpRequestTimeout(t, args)
-	base.Log(output)
+func validateExportApisPassed(t *testing.T, args *initTestArgs) {
+	t.Helper()
+	output, error := exportApisWithOneCommand(t, args)
+	assert.Nil(t, error, "Error while Exporting APIs")
+	assert.Contains(t, output, "export-apis execution completed", "Error while Exporting APIs")
 
-	//Change value back to default value
-	argsDefault := &setTestArgs{
-		srcAPIM:            apim,
-		httpRequestTimeout: defaultHttpRequestTimeOut,
+	//Derive exported path from output
+	exportedPath := base.GetExportedPathFromOutput(strings.ReplaceAll(output, "Command: export-apis execution completed !", ""))
+	count, _ := base.CountFiles(exportedPath)
+	assert.Equal(t, 1, count, "Error while Exporting APIs")
+}
+
+//Change Export directory using apictl and assert the change
+func TestChangeExportDirectory(t *testing.T) {
+	dev := apimClients[0]
+	changedExportDirectory, _ := filepath.Abs(utils.CustomTestExportDirectory + utils.DefaultExportDirName)
+	defaultExportPath := utils.DefaultExportDirPath
+
+	args := &setTestArgs{
+		srcAPIM:             dev,
+		exportDirectoryFlag: changedExportDirectory,
 	}
-	environmentSetHttpRequestTimeout(t, argsDefault)
-	assert.Contains(t, output, "Http Request Timout is set to", "HTTP Request TimeOut change is not successful")
+	validateExportDirectoryIsChanged(t, args)
+
+	apim := apimClients[0]
+	projectName := "OpenAPI3Project"
+	username := superAdminUser
+	password := superAdminPassword
+
+	apiArgs := &initTestArgs{
+		ctlUser:   credentials{username: username, password: password},
+		srcAPIM:   apim,
+		initFlag:  projectName,
+		oasFlag:   utils.TestOpenAPI3DefinitionPath,
+		forceFlag: false,
+	}
+
+	//Assert that project import to publisher portal is successful
+	validateImportInitializedProject(t, apiArgs)
+
+	base.RemoveDir(projectName)
+	time.Sleep(5 * time.Second)
+
+	//Assert that Export directory change is successful by exporting and asserting that
+	validateExportApisPassed(t, apiArgs)
+
+	//Remove Exported apis
+	base.RemoveDir(changedExportDirectory + utils.TestMigrationDirectorySuffix)
+
+	argsDefault := &setTestArgs{
+		srcAPIM:             dev,
+		exportDirectoryFlag: defaultExportPath,
+	}
+	validateExportDirectoryIsChanged(t, argsDefault)
+
+}
+
+//TODO  - Need to come up with  a process to make sure that http timeout is actually changed using another fake server
+//Change HTTP request Timeout using apictl and assert the change
+//func TestChangeHttpRequestTimout(t *testing.T) {
+//	apim := apimClients[0]
+//	defaultHttpRequestTimeOut := utils.DefaultHttpRequestTimeout
+//	newHttpRequestTimeOut := 20000
+//	args := &setTestArgs{
+//		srcAPIM:            apim,
+//		httpRequestTimeout: newHttpRequestTimeOut,
+//	}
+//	output, _ := environmentSetHttpRequestTimeout(t, args)
+//	base.Log(output)
+//
+//	//Change value back to default value
+//	argsDefault := &setTestArgs{
+//		srcAPIM:            apim,
+//		httpRequestTimeout: defaultHttpRequestTimeOut,
+//	}
+//	environmentSetHttpRequestTimeout(t, argsDefault)
+//	assert.Contains(t, output, "Http Request Timout is set to", "HTTP Request TimeOut change is not successful")
+//}
+
+func validateETokenTypeIsChanged(t *testing.T, args *setTestArgs) {
+	t.Helper()
+	output, _ := environmentSetTokenType(t, args)
+	base.Log(output)
+	assert.Contains(t, output, "Token type is set to", "1st attempt of Token Type change is not successful")
 }
 
 //Change Token type using apictl and assert the change (for both "jwt" and "oauth" token types)
@@ -88,18 +142,54 @@ func TestChangeTokenType(t *testing.T) {
 		srcAPIM:       apim,
 		tokenTypeFlag: tokenType1,
 	}
-	output, _ := environmentSetTokenType(t, args)
-	base.Log(output)
-	assert.Contains(t, output, "Token type is set to", "1st attempt of Token Type change is not successful")
+
+	validateETokenTypeIsChanged(t, args)
+
+	//Create API and get keys for that API
+	adminUser := superAdminUser
+	adminPassword := superAdminPassword
+
+	dev := apimClients[0]
+
+	api := addAPI(t, dev, adminUser, adminPassword)
+
+	publishAPI(dev, adminUser, adminPassword, api.ID)
+
+	apiArgs := &apiGetKeyTestArgs{
+		ctlUser: credentials{username: adminUser, password: adminPassword},
+		api:     api,
+		apim:    dev,
+	}
+
+	validateThatRecievingTokenTypeIsChanged(t, apiArgs, tokenType1)
+
 	tokenType2 := "jwt"
 
-	//Change value back to default value with a test
+	//Change value back to default value
 	argsDefault := &setTestArgs{
 		srcAPIM:       apim,
 		tokenTypeFlag: tokenType2,
 	}
-	output2, _ := environmentSetTokenType(t, argsDefault)
-	base.Log(output2)
-	assert.Contains(t, output2, "Token type is set to", "1st attempt of Token Type change is not successful")
+
+	validateETokenTypeIsChanged(t, argsDefault)
 }
 
+func validateThatRecievingTokenTypeIsChanged(t *testing.T, args *apiGetKeyTestArgs, expectedTokenType string) {
+	t.Helper()
+
+	base.SetupEnv(t, args.apim.GetEnvName(), args.apim.GetApimURL(), args.apim.GetTokenURL())
+	base.Login(t, args.apim.GetEnvName(), args.ctlUser.username, args.ctlUser.password)
+
+	var err error
+	_, err = getKeys(t, args.api.Provider, args.api.Name, args.api.Version, args.apim.GetEnvName())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	assert.Nil(t, err, "Error while getting key")
+
+	tokenType := args.apim.GetApplication(args.apim.GetApplicationByName(utils.DefaultApictlTestAppName).ApplicationID).TokenType
+	assert.Equal(t, strings.ToUpper(expectedTokenType), tokenType, "Error getting token type of application.")
+
+	unsubscribeAPI(args.apim, args.ctlUser.username, args.ctlUser.password, args.api.ID)
+}

@@ -243,7 +243,7 @@ func validateAppDelete(t *testing.T, args *appImportExportTestArgs) {
 	// Setup apictl envs
 	base.SetupEnvWithoutTokenFlag(t, args.srcAPIM.GetEnvName(), args.srcAPIM.GetApimURL())
 
-	// Delete an API of env 1
+	// Delete an App of env 1
 	base.Login(t, args.srcAPIM.GetEnvName(), args.ctlUser.username, args.ctlUser.password)
 
 	time.Sleep(1 * time.Second)
@@ -254,7 +254,7 @@ func validateAppDelete(t *testing.T, args *appImportExportTestArgs) {
 	appsListAfterDelete := args.srcAPIM.GetApplications()
 	time.Sleep(1 * time.Second)
 
-	// Validate whether the expected number of API count is there
+	// Validate whether the expected number of App count is there
 	assert.Equal(t, appsListBeforeDelete.Count, appsListAfterDelete.Count+1, "Expected number of Applications not deleted")
 
 	// Validate that the delete is a success

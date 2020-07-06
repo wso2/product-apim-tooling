@@ -20,6 +20,7 @@ package base
 
 import (
 	"flag"
+	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"os"
@@ -271,4 +272,23 @@ func RemoveDir(projectName string) {
 	if error != nil {
 		log.Fatal(error)
 	}
+}
+
+func GetExportedPathFromOutput(output string) string {
+	return strings.ReplaceAll(strings.ReplaceAll(output[strings.Index(output, "/"):], "\n", ""), " ", "")
+}
+
+//Count number of files in a directory
+func CountFiles(path string) (int, error) {
+	i := 0
+	files, err := ioutil.ReadDir(path)
+	if err != nil {
+		return 0, err
+	}
+	for _, file := range files {
+		if !file.IsDir() {
+			i++
+		}
+	}
+	return i, nil
 }

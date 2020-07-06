@@ -23,6 +23,7 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"log"
 	"testing"
+	"time"
 )
 
 //Initialize a project Initialize an API without any flag
@@ -38,73 +39,76 @@ func TestInitializeProject(t *testing.T) {
 		initFlag: projectName,
 	}
 
+	validateInitializeProject(t, args)
+	//Remove Created project and logout
+	base.RemoveDir(projectName)
+}
+
+func validateInitializeProject(t *testing.T, args *initTestArgs) {
+	t.Helper()
+
 	output, err := initProject(t, args)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	assert.Nil(t, err, "Error while generating Project")
-	assert.Contains(t, output, "Project initialized", "TestInitializeProject Failed")
-
-	//Remove Created project and logout
-	base.RemoveDir(projectName)
-	t.Cleanup(func() {
-		base.Execute(t, "logout", apim.GetEnvName())
-	})
+	assert.Contains(t, output, "Project initialized", "Project initialization Failed")
 }
 
 //Function to initialize a project using API definition
-func InitializeAPIFromDefinition(t *testing.T, projectName string, definitionFileName string) (string, error) {
-	username := superAdminUser
-	password := superAdminPassword
-	apim := apimClients[0]
-
-	args := &initTestArgs{
-		ctlUser:   credentials{username: username, password: password},
-		srcAPIM:   apim,
-		initFlag:  projectName,
-		oasFlag:   definitionFileName,
-		forceFlag: false,
-	}
+func validateInitializeProjectWithOASFlag(t *testing.T, args *initTestArgs) {
+	t.Helper()
 
 	output, err := initProjectWithOasFlag(t, args)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return output, err
+	assert.Nil(t, err, "Error while generating Project")
+	assert.Containsf(t, output, "Project initialized", "Test initialization Failed with --oas flag")
 }
 
 //Initialize an API from Swagger 2 Specification
 func TestInitializeAPIFromSwagger2Definition(t *testing.T) {
 	apim := apimClients[0]
 	projectName := "Swagger2APIProject"
+	username := superAdminUser
+	password := superAdminPassword
 
-	output, err := InitializeAPIFromDefinition(t, projectName, utils.TestSwagger2DefinitionPath)
-	assert.Nil(t, err, "Error while generating Project")
-	assert.Containsf(t, output, "Project initialized", "Test InitializeProjectWithDefinitionFlag Failed")
+	args := &initTestArgs{
+		ctlUser:   credentials{username: username, password: password},
+		srcAPIM:   apim,
+		initFlag:  projectName,
+		oasFlag:   utils.TestSwagger2DefinitionPath,
+		forceFlag: false,
+	}
+
+	validateInitializeProjectWithOASFlag(t, args)
 
 	//Remove Created project and logout
 	base.RemoveDir(projectName)
-	t.Cleanup(func() {
-		base.Execute(t, "logout", apim.GetEnvName())
-	})
 }
 
 //Initialize an API from OpenAPI 3 Specification
 func TestInitializeAPIFromOpenAPI3Definition(t *testing.T) {
 	apim := apimClients[0]
 	var projectName = "OpenAPI3Project"
-	output, err := InitializeAPIFromDefinition(t, projectName, utils.TestOpenAPI3DefinitionPath)
+	username := superAdminUser
+	password := superAdminPassword
 
-	assert.Nil(t, err, "Error while generating Project")
-	assert.Contains(t, output, "Project initialized", "Test InitializeProjectWithDefinitionFlag Failed")
+	args := &initTestArgs{
+		ctlUser:   credentials{username: username, password: password},
+		srcAPIM:   apim,
+		initFlag:  projectName,
+		oasFlag:   utils.TestOpenAPI3DefinitionPath,
+		forceFlag: false,
+	}
+
+	validateInitializeProjectWithOASFlag(t, args)
 
 	//Remove Created project and logout
 	base.RemoveDir(projectName)
-	t.Cleanup(func() {
-		base.Execute(t, "logout", apim.GetEnvName())
-	})
 }
 
 //Initialize an API from API Specification URL
@@ -122,100 +126,131 @@ func TestInitializeAPIFromAPIDefinitionURL(t *testing.T) {
 		forceFlag: false,
 	}
 
-	output, err := initProjectWithOasFlag(t, args)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	assert.Nil(t, err, "Error while generating Project")
-	assert.Contains(t, output, "Project initialized", "Test InitializeProjectWithDefinitionFlag Failed")
+	validateInitializeProjectWithOASFlag(t, args)
 
 	//Remove Created project and logout
 	base.RemoveDir(projectName)
-	t.Cleanup(func() {
-		base.Execute(t, "logout", apim.GetEnvName())
-	})
+}
+
+func validateImportInitializedProject(t *testing.T, args *initTestArgs) {
+	t.Helper()
+	//Initialize a project with API definition
+	validateInitializeProjectWithOASFlag(t, args)
+
+	time.Sleep(1 * time.Second)
+
+	result, error := importApiFromProject(t, args.initFlag, args.srcAPIM.GetEnvName())
+	assert.Nil(t, error, "Error while importing Project")
+	assert.Contains(t, result, "Successfully imported API", "Error while importing Project")
+}
+
+func validateImportFailedWithInitializedProject(t *testing.T, args *initTestArgs) {
+	t.Helper()
+
+	result, _ := importApiFromProject(t, args.initFlag, args.srcAPIM.GetEnvName())
+	assert.Contains(t, result, "Resource Already Exists", "Test failed because API is imported successfully")
+}
+
+func validateImportUpdatePassedWithInitializedProject(t *testing.T, args *initTestArgs) {
+	t.Helper()
+
+	result, error := importApiFromProjectWithUpdate(t, args.initFlag, args.srcAPIM.GetEnvName())
+	assert.Nil(t, error, "Error while generating Project")
+	assert.Contains(t, result, "Successfully imported API", "Test InitializeProjectWithDefinitionFlag Failed")
 }
 
 //Import API from initialized project with swagger 2 definition
 func TestImportProjectCreatedFromSwagger2Definition(t *testing.T) {
 	apim := apimClients[0]
-	projectName := "OpenAPI3Project"
+	projectName := "Swagger2Project"
+	username := superAdminUser
+	password := superAdminPassword
 
-	output, err := InitializeAPIFromDefinition(t, projectName, utils.TestSwagger2DefinitionPath)
-	assert.Contains(t, output, "Project initialized", "Test InitializeProjectWithDefinitionFlag Failed")
-	assert.Nil(t, err, "Error while generating Project")
+	args := &initTestArgs{
+		ctlUser:   credentials{username: username, password: password},
+		srcAPIM:   apim,
+		initFlag:  projectName,
+		oasFlag:   utils.TestSwagger2DefinitionPath,
+		forceFlag: false,
+	}
 
-	result, error := importApiFromProject(t, projectName, apim.GetEnvName())
-	assert.Nil(t, error, "Error while generating Project")
-	assert.Contains(t, result, "Successfully imported API", "Test InitializeProjectWithDefinitionFlag Failed")
+	//Assert that project import to publisher portal is successful
+	validateImportInitializedProject(t, args)
 
 	//Remove Created project and logout
 	base.RemoveDir(projectName)
-	t.Cleanup(func() {
-		base.Execute(t, "logout", apim.GetEnvName())
-	})
 }
 
 //Import API from initialized project with openAPI 3 definition
 func TestImportProjectCreatedFromOpenAPI3Definition(t *testing.T) {
 	apim := apimClients[0]
 	projectName := "OpenAPI3Project"
+	username := superAdminUser
+	password := superAdminPassword
 
-	output, err := InitializeAPIFromDefinition(t, projectName, utils.TestOpenAPI3DefinitionPath)
-	assert.Contains(t, output, "Project initialized", "Test InitializeProjectWithDefinitionFlag Failed")
-	assert.Nil(t, err, "Error while generating Project")
+	args := &initTestArgs{
+		ctlUser:   credentials{username: username, password: password},
+		srcAPIM:   apim,
+		initFlag:  projectName,
+		oasFlag:   utils.TestOpenAPI3DefinitionPath,
+		forceFlag: false,
+	}
 
-	result, error := importApiFromProject(t, projectName, apim.GetEnvName())
-	assert.Nil(t, error, "Error while generating Project")
-	assert.Contains(t, result, "Successfully imported API", "Test InitializeProjectWithDefinitionFlag Failed")
+	//Assert that project import to publisher portal is successful
+	validateImportInitializedProject(t, args)
 
 	//Remove Created project and logout
 	base.RemoveDir(projectName)
-	t.Cleanup(func() {
-		base.Execute(t, "logout", apim.GetEnvName())
-	})
 }
 
 //Import API from initialized project from API definition which is already in publisher without --update flag
 func TestImportProjectCreatedFailWhenAPIIsExisted(t *testing.T) {
 	apim := apimClients[0]
 	projectName := "OpenAPI3Project"
+	username := superAdminUser
+	password := superAdminPassword
 
-	InitializeAPIFromDefinition(t, projectName, utils.TestOpenAPI3DefinitionPath)
+	args := &initTestArgs{
+		ctlUser:   credentials{username: username, password: password},
+		srcAPIM:   apim,
+		initFlag:  projectName,
+		oasFlag:   utils.TestOpenAPI3DefinitionPath,
+		forceFlag: false,
+	}
 
 	//Import API for the First time
-	importApiFromProject(t, projectName, apim.GetEnvName())
+	validateImportInitializedProject(t, args)
 
+	time.Sleep(1 * time.Second)
 	//Import API for the second time
-	result, _ := importApiFromProject(t, projectName, apim.GetEnvName())
-	assert.Contains(t, result, "Resource Already Exists", "Test InitializeProjectWithDefinitionFlag Failed")
+	validateImportFailedWithInitializedProject(t, args)
 
 	//Remove Created project and logout
 	base.RemoveDir(projectName)
-	t.Cleanup(func() {
-		base.Execute(t, "logout", apim.GetEnvName())
-	})
 }
 
 //Import API from initialized project from API definition which is already in publisher with --update flag
 func TestImportProjectCreatedPassWhenAPIIsExisted(t *testing.T) {
 	apim := apimClients[0]
 	projectName := "OpenAPI3Project"
+	username := superAdminUser
+	password := superAdminPassword
 
-	InitializeAPIFromDefinition(t, projectName, utils.TestOpenAPI3DefinitionPath)
+	args := &initTestArgs{
+		ctlUser:   credentials{username: username, password: password},
+		srcAPIM:   apim,
+		initFlag:  projectName,
+		oasFlag:   utils.TestOpenAPI3DefinitionPath,
+		forceFlag: false,
+	}
 
 	//Import API for the First time
-	importApiFromProject(t, projectName, apim.GetEnvName())
+	validateImportInitializedProject(t, args)
 
+	time.Sleep(1 * time.Second)
 	//Import API for the second time
-	result, error := importApiFromProjectWithUpdate(t, projectName, apim.GetEnvName())
-	assert.Nil(t, error, "Error while generating Project")
-	assert.Contains(t, result, "Successfully imported API", "Test InitializeProjectWithDefinitionFlag Failed")
+	validateImportUpdatePassedWithInitializedProject(t, args)
 
 	//Remove Created project and logout
 	base.RemoveDir(projectName)
-	t.Cleanup(func() {
-		base.Execute(t, "logout", apim.GetEnvName())
-	})
 }

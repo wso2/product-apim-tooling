@@ -334,10 +334,6 @@ func importAppPreserveOwnerAndUpdate(t *testing.T, sourceEnv string, app *apim.A
 	fileName := base.GetApplicationArchiveFilePath(t, sourceEnv, app.Name, app.Owner)
 	output, err := base.Execute(t, "import-app", "--preserveOwner=true", "--update=true", "-f", fileName, "-e", client.EnvName, "-k", "--verbose")
 
-	t.Cleanup(func() {
-		client.DeleteApplicationByName(app.Name)
-	})
-
 	return output, err
 }
 
@@ -1184,4 +1180,9 @@ func importApiFromProject(t *testing.T, projectName string, envName string) (str
 func importApiFromProjectWithUpdate(t *testing.T, projectName string, envName string) (string, error) {
 	projectPath, _ := filepath.Abs(projectName)
 	return base.Execute(t, "import-api", "-f", projectPath, "-e", envName, "-k", "--update")
+}
+
+func exportApisWithOneCommand(t *testing.T, args *initTestArgs) (string, error) {
+	output, error := base.Execute(t, "export-apis", "-e", args.srcAPIM.GetEnvName(), "-k")
+	return output, error
 }
