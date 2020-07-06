@@ -34,6 +34,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -45,7 +46,7 @@ var flagOverride bool
 var flagApiVersion string
 var flagApiMode string
 var flagApiEndPoint string
-var flagEnvs []string
+var flagEnv []string
 var flagImage string
 
 const addApiCmdLiteral = "api"
@@ -97,8 +98,8 @@ func handleAddApi(nameSuffix string) {
 
 			// copy all bal interceptors to the temp dir
 			balInterceptorsCmName := fmt.Sprintf("%v-%v-bal-intcpt%s", flagApiName, i+1, nameSuffix)
-			intceptFound := handleBalInterceptors(balInterceptorsCmName, flagSwaggerFilePath, "create", flagNamespace)
-			if intceptFound {
+			balFound := handleBalInterceptors(balInterceptorsCmName, flagSwaggerFilePath, "create", flagNamespace)
+			if balFound {
 				balInterceptorsCmNames = append(balInterceptorsCmNames, balInterceptorsCmName)
 			}
 
@@ -135,13 +136,6 @@ func validateAddApiCommand() {
 			errors.New("mode should be set to kubernetes"))
 	}
 
-	// validate required flags
-	if flagApiName == "" || len(flagSwaggerFilePaths) == 0 {
-		utils.HandleErrorAndExit("required flags are missing. API name and swagger file paths are requiredn"+
-			"required flags: --name <name>, --from-file <swagger-file>",
-			errors.New("required flags missing"))
-	}
-
 	// validate --from-file flag values
 	for _, swaggerFilePath := range flagSwaggerFilePaths {
 		if _, err := os.Stat(swaggerFilePath); err != nil {
@@ -153,6 +147,20 @@ func validateAddApiCommand() {
 	if flagApiMode != "" && flagApiMode != utils.PrivateJetModeConst && flagApiMode != utils.SidecarModeConst {
 		utils.HandleErrorAndExit(fmt.Sprintf("invalid api mode. available modes: %v, %v",
 			utils.PrivateJetModeConst, utils.SidecarModeConst), nil)
+	}
+
+	// validate --env flag
+	const envValidRegex = "^[-._a-zA-Z][-._a-zA-Z0-9]*$"
+	reg, err := regexp.Compile(envValidRegex)
+	if err != nil {
+		utils.HandleErrorAndExit("error in regex string", err)
+	}
+	for _, env := range flagEnv {
+		keyVal := strings.SplitN(env, "=", 2)
+		if keyVal[0] == "" || !reg.MatchString(keyVal[0]) {
+			utils.HandleErrorAndExit(fmt.Sprintf("invalid environment variable(s). "+
+				"key should follow the regex \"%s\"", envValidRegex), nil)
+		}
 	}
 }
 
@@ -193,6 +201,8 @@ func createAPI(configMapNames []string, timestamp string, balInterceptors []stri
 	apiCrd.Spec.Replicas = flagReplicas
 	apiCrd.Spec.Override = flagOverride
 	apiCrd.Spec.ApiEndPoint = flagApiEndPoint
+	apiCrd.Spec.EnvironmentVariables = flagEnv
+	apiCrd.Spec.Image = flagImage
 
 	k8sOperation := k8sUtils.K8sCreate
 	k8sSaveConfig := true
@@ -361,8 +371,11 @@ func init() {
 	addApiCmd.Flags().StringVarP(&flagApiMode, "mode", "m", "",
 		fmt.Sprintf("Property to override the deploying mode. Available modes: %v, %v",
 			utils.PrivateJetModeConst, utils.SidecarModeConst))
-	addApiCmd.Flags().StringArrayVarP(&flagEnvs, "env", "e", []string{},
+	addApiCmd.Flags().StringArrayVarP(&flagEnv, "env", "e", []string{},
 		"Environment variables to be passed to deployment")
 	addApiCmd.Flags().StringVarP(&flagImage, "image", "i", "",
 		"Image of the API. If specified, ignores the value of --override")
+
+	addApiCmd.MarkFlagRequired("name")
+	addApiCmd.MarkFlagRequired("from-file")
 }
