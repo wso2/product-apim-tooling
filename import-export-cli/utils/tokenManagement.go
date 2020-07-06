@@ -25,8 +25,8 @@ import (
 	"fmt"
 	"github.com/renstrom/dedent"
 	"net/http"
-	"strings"
 	encodeURL "net/url"
+	"strings"
 )
 
 // ExecutePreCommandWithBasicAuth deals with generating tokens needed for executing a particular command
@@ -325,12 +325,12 @@ func GetOAuthTokens(username, password, b64EncodedClientIDClientSecret, url stri
 	resp, err := InvokePOSTRequest(url, headers, body)
 
 	if err != nil {
-		HandleErrorAndExit("Unable to Connect.", err)
+		return nil, err
 	}
 
 	if resp.StatusCode() != http.StatusOK {
-		HandleErrorAndExit("Unable to connect.", errors.New("Status: "+resp.Status()))
-		return nil, nil
+		return nil, errors.New("Unable to connect. " +
+			"Status: " + resp.Status())
 	}
 
 	responseDataMap := make(map[string]string) // a map to hold response data
