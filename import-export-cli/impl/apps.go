@@ -109,7 +109,7 @@ func GetApplicationDefinition(filePath string) (*v2.ApplicationDefinition, []byt
 
 	var buffer []byte
 	if info.IsDir() {
-		_, content, err := resolveYamlOrJson(path.Join(filePath, filepath.Base(filePath)))
+		_, content, err := resolveYamlOrJSON(path.Join(filePath, filepath.Base(filePath)))
 		if err != nil {
 			return nil, nil, err
 		}

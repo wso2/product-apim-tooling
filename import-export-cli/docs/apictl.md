@@ -43,5 +43,6 @@ apictl [flags]
 * [apictl set](apictl_set.md)	 - Set configuration
 * [apictl uninstall](apictl_uninstall.md)	 - Uninstall an operator
 * [apictl update](apictl_update.md)	 - Update an API to the kubernetes cluster
+* [apictl vcs](apictl_vcs.md)	 - Update an projects in an environment by calling the version control system (git)
 * [apictl version](apictl_version.md)	 - Display Version on current apictl
 
