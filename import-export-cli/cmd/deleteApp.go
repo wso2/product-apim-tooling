@@ -20,10 +20,13 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
+	"net/http"
+
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+
+	"github.com/spf13/cobra"
 )
 
 var deleteAppEnvironment string
@@ -41,10 +44,10 @@ NOTE: Both the flags (--name (-n), and --environment (-e)) are mandatory and the
 
 // DeleteAppCmd represents the delete app command
 var DeleteAppCmd = &cobra.Command{
-	Use:   deleteAppCmdLiteral + " (--name <name-of-the-application> --owner <owner-of-the-application> --environment " +
+	Use: deleteAppCmdLiteral + " (--name <name-of-the-application> --owner <owner-of-the-application> --environment " +
 		"<environment-from-which-the-application-should-be-deleted>)",
-	Short: deleteAppCmdShortDesc,
-	Long: deleteAppCmdLongDesc,
+	Short:   deleteAppCmdShortDesc,
+	Long:    deleteAppCmdLongDesc,
 	Example: deleteAppCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + deleteAppCmdLiteral + " called")
@@ -58,10 +61,10 @@ var DeleteAppCmd = &cobra.Command{
 
 
 // executeDeleteAppCmd executes the delete app command
-func executeDeleteAppCmd(credential credentials.Credential)  {
+func executeDeleteAppCmd(credential credentials.Credential) {
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, deleteAppEnvironment)
 	if preCommandErr == nil {
-		resp, err := impl.DeleteApplication(accessToken, deleteAppEnvironment, deleteAppName)
+		resp, err := impl.DeleteApplication(accessToken, deleteAppEnvironment, deleteAppName, deleteAppOwner)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while deleting Application ", err)
 		}
@@ -83,5 +86,6 @@ func init() {
 		"", "Environment from which the Application should be deleted")
 	// Mark required flags
 	_ = DeleteAppCmd.MarkFlagRequired("name")
+	_ = DeleteAppCmd.MarkFlagRequired("owner")
 	_ = DeleteAppCmd.MarkFlagRequired("environment")
 }
