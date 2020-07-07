@@ -853,7 +853,7 @@ func (instance *Client) DeleteSubscriptions(apiID string) {
 }
 
 // AddApplication : Add new Application to APIM
-func (instance *Client) AddApplication(t *testing.T, application *Application, username string, password string) *Application {
+func (instance *Client) AddApplication(t *testing.T, application *Application, username string, password string, doClean bool) *Application {
 	appsURL := instance.devPortalRestURL + "/applications"
 
 	data, err := json.Marshal(application)
@@ -877,10 +877,12 @@ func (instance *Client) AddApplication(t *testing.T, application *Application, u
 	var appResponse Application
 	json.NewDecoder(response.Body).Decode(&appResponse)
 
-	t.Cleanup(func() {
-		instance.Login(username, password)
-		instance.DeleteApplication(appResponse.ApplicationID)
-	})
+	if doClean {
+		t.Cleanup(func() {
+			instance.Login(username, password)
+			instance.DeleteApplication(appResponse.ApplicationID)
+		})
+	}
 
 	return &appResponse
 }
@@ -926,6 +928,27 @@ func (instance *Client) GetApplication(appID string) *Application {
 	base.ValidateAndLogResponse("apim.GetApplication()", response, 200)
 
 	var appResponse Application
+	json.NewDecoder(response.Body).Decode(&appResponse)
+	return &appResponse
+}
+
+// GetApplications : Get Applications list from APIM
+func (instance *Client) GetApplications() *ApplicationList {
+	appsURL := instance.devPortalRestURL + "/applications"
+
+	request := base.CreateGet(appsURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.GetApplications()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.GetApplications()", response, 200)
+
+	var appResponse ApplicationList
 	json.NewDecoder(response.Body).Decode(&appResponse)
 	return &appResponse
 }
