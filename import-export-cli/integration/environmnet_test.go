@@ -47,8 +47,10 @@ func validateExportDirectoryIsChanged(t *testing.T, args *setTestArgs) {
 	assert.Contains(t, output, "Export Directory is set to", "Export Directory change is not successful")
 }
 
-func validateExportApisPassed(t *testing.T, args *initTestArgs) {
+func validateExportApisPassed(t *testing.T, args *initTestArgs, directoryName string) {
 	t.Helper()
+	time.Sleep(5 * time.Second)
+
 	output, error := exportApisWithOneCommand(t, args)
 	assert.Nil(t, error, "Error while Exporting APIs")
 	assert.Contains(t, output, "export-apis execution completed", "Error while Exporting APIs")
@@ -57,13 +59,22 @@ func validateExportApisPassed(t *testing.T, args *initTestArgs) {
 	exportedPath := base.GetExportedPathFromOutput(strings.ReplaceAll(output, "Command: export-apis execution completed !", ""))
 	count, _ := base.CountFiles(exportedPath)
 	assert.Equal(t, 1, count, "Error while Exporting APIs")
+
+	t.Cleanup(func() {
+		argsDefault := &setTestArgs{
+			srcAPIM:             args.srcAPIM,
+			exportDirectoryFlag: utils.DefaultExportDirPath,
+		}
+		validateExportDirectoryIsChanged(t, argsDefault)
+		//Remove Exported apis
+		base.RemoveDir(directoryName + utils.TestMigrationDirectorySuffix)
+	})
 }
 
 //Change Export directory using apictl and assert the change
 func TestChangeExportDirectory(t *testing.T) {
 	dev := apimClients[0]
 	changedExportDirectory, _ := filepath.Abs(utils.CustomTestExportDirectory + utils.DefaultExportDirName)
-	defaultExportPath := utils.DefaultExportDirPath
 
 	args := &setTestArgs{
 		srcAPIM:             dev,
@@ -87,20 +98,8 @@ func TestChangeExportDirectory(t *testing.T) {
 	//Assert that project import to publisher portal is successful
 	validateImportInitializedProject(t, apiArgs)
 
-	base.RemoveDir(projectName)
-	time.Sleep(5 * time.Second)
-
 	//Assert that Export directory change is successful by exporting and asserting that
-	validateExportApisPassed(t, apiArgs)
-
-	//Remove Exported apis
-	base.RemoveDir(changedExportDirectory + utils.TestMigrationDirectorySuffix)
-
-	argsDefault := &setTestArgs{
-		srcAPIM:             dev,
-		exportDirectoryFlag: defaultExportPath,
-	}
-	validateExportDirectoryIsChanged(t, argsDefault)
+	validateExportApisPassed(t, apiArgs, changedExportDirectory)
 
 }
 
