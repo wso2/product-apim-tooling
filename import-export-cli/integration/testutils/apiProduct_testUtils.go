@@ -32,7 +32,7 @@ import (
 	"time"
 )
 
-func addAPIProductFromJSONWithoutCleaning(t *testing.T, client *apim.Client, username string, password string, apisList map[string]*apim.API) *apim.APIProduct {
+func AddAPIProductFromJSONWithoutCleaning(t *testing.T, client *apim.Client, username string, password string, apisList map[string]*apim.API) *apim.APIProduct {
 	client.Login(username, password)
 	path := "testdata/SampleAPIProduct.json"
 	doClean := false
@@ -419,7 +419,7 @@ func validateOperations(apiProduct1Copy, apiProduct2Copy *apim.APIProduct) error
 	return nil
 }
 
-func validateAPIProductsList(t *testing.T, args *ApiProductImportExportTestArgs) {
+func ValidateAPIProductsList(t *testing.T, args *ApiProductImportExportTestArgs) {
 	t.Helper()
 
 	// Setup apictl envs
@@ -448,7 +448,7 @@ func validateListAPIProductsEqual(t *testing.T, apiProductsListFromCtl string, a
 	assert.Equal(t, apiProductsList.Count, 0, "API Product lists are not equal")
 }
 
-func validateAPIProductDelete(t *testing.T, args *ApiProductImportExportTestArgs) {
+func ValidateAPIProductDelete(t *testing.T, args *ApiProductImportExportTestArgs) {
 	t.Helper()
 
 	// Setup apictl envs

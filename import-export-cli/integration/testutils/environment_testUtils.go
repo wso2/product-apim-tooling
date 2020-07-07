@@ -24,50 +24,50 @@ import (
 	"testing"
 )
 
-func initProject(t *testing.T, args *initTestArgs) (string, error) {
+func InitProject(t *testing.T, args *InitTestArgs) (string, error) {
 	//Setup Environment and login to it.
-	base.SetupEnvWithoutTokenFlag(t, args.srcAPIM.GetEnvName(), args.srcAPIM.GetApimURL())
-	base.Login(t, args.srcAPIM.GetEnvName(), args.ctlUser.Username, args.ctlUser.Password)
+	base.SetupEnvWithoutTokenFlag(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL())
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	output, err := base.Execute(t, "init", args.initFlag)
+	output, err := base.Execute(t, "init", args.InitFlag)
 	return output, err
 }
 
-func initProjectWithDefinitionFlag(t *testing.T, args *initTestArgs) (string, error) {
+func initProjectWithDefinitionFlag(t *testing.T, args *InitTestArgs) (string, error) {
 	//Setup Environment and login to it.
-	base.SetupEnvWithoutTokenFlag(t, args.srcAPIM.GetEnvName(), args.srcAPIM.GetApimURL())
-	base.Login(t, args.srcAPIM.GetEnvName(), args.ctlUser.Username, args.ctlUser.Password)
+	base.SetupEnvWithoutTokenFlag(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL())
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	output, err := base.Execute(t, "init", args.initFlag, "--definition", args.definitionFlag, "--force", strconv.FormatBool(args.forceFlag))
+	output, err := base.Execute(t, "init", args.InitFlag, "--definition", args.definitionFlag, "--force", strconv.FormatBool(args.ForceFlag))
 	return output, err
 }
 
-func initProjectWithOasFlag(t *testing.T, args *initTestArgs) (string, error) {
+func InitProjectWithOasFlag(t *testing.T, args *InitTestArgs) (string, error) {
 	//Setup Environment and login to it.
-	base.SetupEnvWithoutTokenFlag(t, args.srcAPIM.GetEnvName(), args.srcAPIM.GetApimURL())
-	base.Login(t, args.srcAPIM.GetEnvName(), args.ctlUser.Username, args.ctlUser.Password)
+	base.SetupEnvWithoutTokenFlag(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL())
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	output, err := base.Execute(t, "init", args.initFlag, "--oas", args.oasFlag)
+	output, err := base.Execute(t, "init", args.InitFlag, "--oas", args.OasFlag)
 	return output, err
 }
 
-func environmentSetExportDirectory(t *testing.T, args *setTestArgs) (string, error) {
-	apim := args.srcAPIM
+func EnvironmentSetExportDirectory(t *testing.T, args *SetTestArgs) (string, error) {
+	apim := args.SrcAPIM
 	base.SetupEnvWithoutTokenFlag(t, apim.GetEnvName(), apim.GetApimURL())
-	output, error := base.Execute(t, "set", "--export-directory", args.exportDirectoryFlag, "-k")
+	output, error := base.Execute(t, "set", "--export-directory", args.ExportDirectoryFlag, "-k")
 	return output, error
 }
 
-func environmentSetHttpRequestTimeout(t *testing.T, args *setTestArgs) (string, error) {
-	apim := args.srcAPIM
+func environmentSetHttpRequestTimeout(t *testing.T, args *SetTestArgs) (string, error) {
+	apim := args.SrcAPIM
 	base.SetupEnvWithoutTokenFlag(t, apim.GetEnvName(), apim.GetApimURL())
 	output, error := base.Execute(t, "set", "--http-request-timeout", strconv.Itoa(args.httpRequestTimeout), "-k")
 	return output, error
 }
 
-func environmentSetTokenType(t *testing.T, args *setTestArgs) (string, error) {
-	apim := args.srcAPIM
+func EnvironmentSetTokenType(t *testing.T, args *SetTestArgs) (string, error) {
+	apim := args.SrcAPIM
 	base.SetupEnvWithoutTokenFlag(t, apim.GetEnvName(), apim.GetApimURL())
-	output, error := base.Execute(t, "set", "--token-type", args.tokenTypeFlag, "-k")
+	output, error := base.Execute(t, "set", "--token-type", args.TokenTypeFlag, "-k")
 	return output, error
 }

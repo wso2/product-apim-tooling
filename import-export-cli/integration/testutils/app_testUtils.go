@@ -27,14 +27,14 @@ import (
 	"testing"
 )
 
-func addApp(t *testing.T, client *apim.Client, username string, password string) *apim.Application {
+func AddApp(t *testing.T, client *apim.Client, username string, password string) *apim.Application {
 	client.Login(username, password)
 	app := client.GenerateSampleAppData()
 	doClean := true
 	return client.AddApplication(t, app, username, password, doClean)
 }
 
-func addApplicationWithoutCleaning(t *testing.T, client *apim.Client, username string, password string) *apim.Application {
+func AddApplicationWithoutCleaning(t *testing.T, client *apim.Client, username string, password string) *apim.Application {
 	client.Login(username, password)
 	application := client.GenerateSampleAppData()
 	doClean := false
@@ -49,7 +49,7 @@ func getApp(t *testing.T, client *apim.Client, name string, username string, pas
 	return client.GetApplication(appInfo.ApplicationID)
 }
 
-func listApps(t *testing.T, env string) []string {
+func ListApps(t *testing.T, env string) []string {
 	response, _ := base.Execute(t, "list", "apps", "-e", env, "-k")
 
 	return base.GetRowsFromTableResponse(response)
@@ -87,74 +87,74 @@ func importAppPreserveOwnerAndUpdate(t *testing.T, sourceEnv string, app *apim.A
 	return output, err
 }
 
-func validateAppExportFailure(t *testing.T, args *appImportExportTestArgs) {
+func ValidateAppExportFailure(t *testing.T, args *AppImportExportTestArgs) {
 	t.Helper()
 
 	// Setup apictl env
-	base.SetupEnv(t, args.srcAPIM.GetEnvName(), args.srcAPIM.GetApimURL(), args.srcAPIM.GetTokenURL())
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
 
 	// Attempt exporting app from env
-	base.Login(t, args.srcAPIM.GetEnvName(), args.ctlUser.Username, args.ctlUser.Password)
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	exportApp(t, args.application.Name, args.appOwner.Username, args.srcAPIM.GetEnvName())
+	exportApp(t, args.Application.Name, args.AppOwner.Username, args.SrcAPIM.GetEnvName())
 
 	// Validate that export failed
-	assert.False(t, base.IsApplicationArchiveExists(t, getEnvAppExportPath(args.srcAPIM.GetEnvName()),
-		args.application.Name, args.appOwner.Username))
+	assert.False(t, base.IsApplicationArchiveExists(t, getEnvAppExportPath(args.SrcAPIM.GetEnvName()),
+		args.Application.Name, args.AppOwner.Username))
 }
 
-func validateAppExportImportWithPreserveOwner(t *testing.T, args *appImportExportTestArgs) {
+func ValidateAppExportImportWithPreserveOwner(t *testing.T, args *AppImportExportTestArgs) {
 	t.Helper()
 
 	// Setup apictl envs
-	base.SetupEnv(t, args.srcAPIM.GetEnvName(), args.srcAPIM.GetApimURL(), args.srcAPIM.GetTokenURL())
-	base.SetupEnv(t, args.destAPIM.GetEnvName(), args.destAPIM.GetApimURL(), args.destAPIM.GetTokenURL())
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+	base.SetupEnv(t, args.DestAPIM.GetEnvName(), args.DestAPIM.GetApimURL(), args.DestAPIM.GetTokenURL())
 
 	// Export app from env 1
-	base.Login(t, args.srcAPIM.GetEnvName(), args.ctlUser.Username, args.ctlUser.Password)
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	exportApp(t, args.application.Name, args.appOwner.Username, args.srcAPIM.GetEnvName())
+	exportApp(t, args.Application.Name, args.AppOwner.Username, args.SrcAPIM.GetEnvName())
 
-	assert.True(t, base.IsApplicationArchiveExists(t, getEnvAppExportPath(args.srcAPIM.GetEnvName()),
-		args.application.Name, args.appOwner.Username))
+	assert.True(t, base.IsApplicationArchiveExists(t, getEnvAppExportPath(args.SrcAPIM.GetEnvName()),
+		args.Application.Name, args.AppOwner.Username))
 
 	// Import app to env 2
-	base.Login(t, args.destAPIM.GetEnvName(), args.ctlUser.Username, args.ctlUser.Password)
+	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	importAppPreserveOwner(t, args.srcAPIM.GetEnvName(), args.application, args.destAPIM)
+	importAppPreserveOwner(t, args.SrcAPIM.GetEnvName(), args.Application, args.DestAPIM)
 
 	// Get App from env 2
-	importedApp := getApp(t, args.destAPIM, args.application.Name, args.appOwner.Username, args.appOwner.Password)
+	importedApp := getApp(t, args.DestAPIM, args.Application.Name, args.AppOwner.Username, args.AppOwner.Password)
 
 	// Validate env 1 and env 2 App is equal
-	validateAppsEqual(t, args.application, importedApp)
+	validateAppsEqual(t, args.Application, importedApp)
 }
 
-func validateAppExportImportWithUpdate(t *testing.T, args *appImportExportTestArgs) {
+func ValidateAppExportImportWithUpdate(t *testing.T, args *AppImportExportTestArgs) {
 	t.Helper()
 
 	// Setup apictl envs
-	base.SetupEnv(t, args.srcAPIM.GetEnvName(), args.srcAPIM.GetApimURL(), args.srcAPIM.GetTokenURL())
-	base.SetupEnv(t, args.destAPIM.GetEnvName(), args.destAPIM.GetApimURL(), args.destAPIM.GetTokenURL())
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+	base.SetupEnv(t, args.DestAPIM.GetEnvName(), args.DestAPIM.GetApimURL(), args.DestAPIM.GetTokenURL())
 
 	// Export app from env 1
-	base.Login(t, args.srcAPIM.GetEnvName(), args.ctlUser.Username, args.ctlUser.Password)
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	exportApp(t, args.application.Name, args.appOwner.Username, args.srcAPIM.GetEnvName())
+	exportApp(t, args.Application.Name, args.AppOwner.Username, args.SrcAPIM.GetEnvName())
 
-	assert.True(t, base.IsApplicationArchiveExists(t, getEnvAppExportPath(args.srcAPIM.GetEnvName()),
-		args.application.Name, args.appOwner.Username))
+	assert.True(t, base.IsApplicationArchiveExists(t, getEnvAppExportPath(args.SrcAPIM.GetEnvName()),
+		args.Application.Name, args.AppOwner.Username))
 
 	// Import app to env 2
-	base.Login(t, args.destAPIM.GetEnvName(), args.ctlUser.Username, args.ctlUser.Password)
+	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	importAppPreserveOwnerAndUpdate(t, args.srcAPIM.GetEnvName(), args.application, args.destAPIM)
+	importAppPreserveOwnerAndUpdate(t, args.SrcAPIM.GetEnvName(), args.Application, args.DestAPIM)
 
 	// Get App from env 2
-	importedApp := getApp(t, args.destAPIM, args.application.Name, args.appOwner.Username, args.appOwner.Password)
+	importedApp := getApp(t, args.DestAPIM, args.Application.Name, args.AppOwner.Username, args.AppOwner.Password)
 
 	// Validate env 1 and env 2 App is equal
-	validateAppsEqual(t, args.application, importedApp)
+	validateAppsEqual(t, args.Application, importedApp)
 }
 
 func validateAppsEqual(t *testing.T, app1 *apim.Application, app2 *apim.Application) {
@@ -172,12 +172,12 @@ func validateAppsEqual(t *testing.T, app1 *apim.Application, app2 *apim.Applicat
 
 }
 
-func deleteAppByCtl(t *testing.T, args *appImportExportTestArgs) (string, error) {
-	output, err := base.Execute(t, "delete", "app", "-n", args.application.Name, "-e", args.srcAPIM.EnvName, "-k", "--verbose")
+func DeleteAppByCtl(t *testing.T, args *AppImportExportTestArgs) (string, error) {
+	output, err := base.Execute(t, "delete", "app", "-n", args.Application.Name, "-e", args.SrcAPIM.EnvName, "-k", "--verbose")
 	return output, err
 }
 
-func validateApplicationIsDeleted(t *testing.T, application *apim.Application, appsListAfterDelete *apim.ApplicationList) {
+func ValidateApplicationIsDeleted(t *testing.T, application *apim.Application, appsListAfterDelete *apim.ApplicationList) {
 	for _, existingApplication := range appsListAfterDelete.List {
 		assert.NotEqual(t, existingApplication.ApplicationID, application.ApplicationID, "API delete is not successful")
 	}

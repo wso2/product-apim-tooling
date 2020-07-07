@@ -122,7 +122,7 @@ func PublishAPI(client *apim.Client, username string, password string, apiID str
 	client.PublishAPI(apiID)
 }
 
-func unsubscribeAPI(client *apim.Client, username string, password string, apiID string) {
+func UnsubscribeAPI(client *apim.Client, username string, password string, apiID string) {
 	client.Login(username, password)
 	client.DeleteSubscriptions(apiID)
 }
@@ -396,17 +396,17 @@ func validateAPIIsDeleted(t *testing.T, api *apim.API, apisListAfterDelete *apim
 	}
 }
 
-func importApiFromProject(t *testing.T, projectName string, envName string) (string, error) {
+func ImportApiFromProject(t *testing.T, projectName string, envName string) (string, error) {
 	projectPath, _ := filepath.Abs(projectName)
 	return base.Execute(t, "import-api", "-f", projectPath, "-e", envName, "-k")
 }
 
-func importApiFromProjectWithUpdate(t *testing.T, projectName string, envName string) (string, error) {
+func ImportApiFromProjectWithUpdate(t *testing.T, projectName string, envName string) (string, error) {
 	projectPath, _ := filepath.Abs(projectName)
 	return base.Execute(t, "import-api", "-f", projectPath, "-e", envName, "-k", "--update")
 }
 
-func exportApisWithOneCommand(t *testing.T, args *initTestArgs) (string, error) {
-	output, error := base.Execute(t, "export-apis", "-e", args.srcAPIM.GetEnvName(), "-k")
+func ExportApisWithOneCommand(t *testing.T, args *InitTestArgs) (string, error) {
+	output, error := base.Execute(t, "export-apis", "-e", args.SrcAPIM.GetEnvName(), "-k")
 	return output, error
 }

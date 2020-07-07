@@ -28,7 +28,7 @@ import (
 	"testing"
 )
 
-func getKeys(t *testing.T, provider string, name string, version string, env string) (string, error) {
+func GetKeys(t *testing.T, provider string, name string, version string, env string) (string, error) {
 	return base.Execute(t, "get-keys", "-n", name, "-v", version, "-r", provider, "-e", env, "-k")
 }
 
@@ -74,55 +74,55 @@ func invokeAPIProduct(t *testing.T, url string, key string, expectedCode int) {
 	assert.Equal(t, expectedCode, response.StatusCode, "API Product Invocation failed")
 }
 
-func validateGetKeysFailure(t *testing.T, args *apiGetKeyTestArgs) {
+func ValidateGetKeysFailure(t *testing.T, args *ApiGetKeyTestArgs) {
 	t.Helper()
 
-	base.SetupEnv(t, args.apim.GetEnvName(), args.apim.GetApimURL(), args.apim.GetTokenURL())
-	base.Login(t, args.apim.GetEnvName(), args.ctlUser.Username, args.ctlUser.Password)
+	base.SetupEnv(t, args.Apim.GetEnvName(), args.Apim.GetApimURL(), args.Apim.GetTokenURL())
+	base.Login(t, args.Apim.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
 	var err error
 	var result string
-	if args.api != nil {
-		result, err = getKeys(t, args.api.Provider, args.api.Name, args.api.Version, args.apim.GetEnvName())
+	if args.Api != nil {
+		result, err = GetKeys(t, args.Api.Provider, args.Api.Name, args.Api.Version, args.Apim.GetEnvName())
 	}
 
-	if args.apiProduct != nil {
-		result, err = getKeys(t, args.apiProduct.Provider, args.apiProduct.Name, utils.DefaultApiProductVersion, args.apim.GetEnvName())
+	if args.ApiProduct != nil {
+		result, err = GetKeys(t, args.ApiProduct.Provider, args.ApiProduct.Name, utils.DefaultApiProductVersion, args.Apim.GetEnvName())
 	}
 
 	assert.NotNil(t, err, "Expected error was not returned")
 	assert.Contains(t, base.GetValueOfUniformResponse(result), "Exit status 1")
 }
 
-func validateGetKeys(t *testing.T, args *apiGetKeyTestArgs) {
+func ValidateGetKeys(t *testing.T, args *ApiGetKeyTestArgs) {
 	t.Helper()
 
-	base.SetupEnv(t, args.apim.GetEnvName(), args.apim.GetApimURL(), args.apim.GetTokenURL())
-	base.Login(t, args.apim.GetEnvName(), args.ctlUser.Username, args.ctlUser.Password)
+	base.SetupEnv(t, args.Apim.GetEnvName(), args.Apim.GetApimURL(), args.Apim.GetTokenURL())
+	base.Login(t, args.Apim.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
 	var err error
 	var result string
-	if args.api != nil {
-		result, err = getKeys(t, args.api.Provider, args.api.Name, args.api.Version, args.apim.GetEnvName())
+	if args.Api != nil {
+		result, err = GetKeys(t, args.Api.Provider, args.Api.Name, args.Api.Version, args.Apim.GetEnvName())
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		assert.Nil(t, err, "Error while getting key")
 
-		invokeAPI(t, getResourceURL(args.apim, args.api), base.GetValueOfUniformResponse(result), 200)
-		unsubscribeAPI(args.apim, args.ctlUser.Username, args.ctlUser.Password, args.api.ID)
+		invokeAPI(t, getResourceURL(args.Apim, args.Api), base.GetValueOfUniformResponse(result), 200)
+		UnsubscribeAPI(args.Apim, args.CtlUser.Username, args.CtlUser.Password, args.Api.ID)
 	}
 
-	if args.apiProduct != nil {
-		result, err = getKeys(t, args.apiProduct.Provider, args.apiProduct.Name, utils.DefaultApiProductVersion, args.apim.GetEnvName())
+	if args.ApiProduct != nil {
+		result, err = GetKeys(t, args.ApiProduct.Provider, args.ApiProduct.Name, utils.DefaultApiProductVersion, args.Apim.GetEnvName())
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		assert.Nil(t, err, "Error while getting key")
 
-		invokeAPIProduct(t, getResourceURLForAPIProduct(args.apim, args.apiProduct), base.GetValueOfUniformResponse(result), 200)
-		unsubscribeAPI(args.apim, args.ctlUser.Username, args.ctlUser.Password, args.apiProduct.ID)
+		invokeAPIProduct(t, getResourceURLForAPIProduct(args.Apim, args.ApiProduct), base.GetValueOfUniformResponse(result), 200)
+		UnsubscribeAPI(args.Apim, args.CtlUser.Username, args.CtlUser.Password, args.ApiProduct.ID)
 	}
 }

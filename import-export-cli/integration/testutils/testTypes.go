@@ -44,19 +44,19 @@ type ApiProductImportExportTestArgs struct {
 	UpdateApiProductFlag bool
 }
 
-type appImportExportTestArgs struct {
-	appOwner    Credentials
-	ctlUser     Credentials
-	application *apim.Application
-	srcAPIM     *apim.Client
-	destAPIM    *apim.Client
+type AppImportExportTestArgs struct {
+	AppOwner    Credentials
+	CtlUser     Credentials
+	Application *apim.Application
+	SrcAPIM     *apim.Client
+	DestAPIM    *apim.Client
 }
 
-type apiGetKeyTestArgs struct {
-	ctlUser    Credentials
-	api        *apim.API
-	apiProduct *apim.APIProduct
-	apim       *apim.Client
+type ApiGetKeyTestArgs struct {
+	CtlUser    Credentials
+	Api        *apim.API
+	ApiProduct *apim.APIProduct
+	Apim       *apim.Client
 }
 
 type loginTestArgs struct {
@@ -64,19 +64,20 @@ type loginTestArgs struct {
 	srcAPIM *apim.Client
 }
 
-type setTestArgs struct {
-	srcAPIM             *apim.Client
-	exportDirectoryFlag string
+type SetTestArgs struct {
+	SrcAPIM             *apim.Client
+	ExportDirectoryFlag string
 	modeFlag            string
-	tokenTypeFlag       string
+	TokenTypeFlag       string
 	httpRequestTimeout  int
 }
 
-type initTestArgs struct {
-	ctlUser        Credentials
-	srcAPIM        *apim.Client
-	initFlag       string
+type InitTestArgs struct {
+	CtlUser        Credentials
+	SrcAPIM        *apim.Client
+	InitFlag       string
 	definitionFlag string
-	forceFlag      bool
-	oasFlag        string
+	ForceFlag      bool
+	OasFlag        string
+	srcAPIM        *apim.Client
 }
