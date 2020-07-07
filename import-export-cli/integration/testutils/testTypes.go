@@ -16,51 +16,51 @@
 * under the License.
  */
 
-package integration
+package testutils
 
 import "github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 
-type credentials struct {
-	username string
-	password string
+type Credentials struct {
+	Username string
+	Password string
 }
 
-type apiImportExportTestArgs struct {
-	apiProvider credentials
-	ctlUser     credentials
-	api         *apim.API
-	srcAPIM     *apim.Client
-	destAPIM    *apim.Client
+type ApiImportExportTestArgs struct {
+	ApiProvider Credentials
+	CtlUser     Credentials
+	Api         *apim.API
+	SrcAPIM     *apim.Client
+	DestAPIM    *apim.Client
 }
 
-type apiProductImportExportTestArgs struct {
-	apiProductProvider   credentials
-	ctlUser              credentials
-	apiProduct           *apim.APIProduct
-	srcAPIM              *apim.Client
-	destAPIM             *apim.Client
-	importApisFlag       bool
-	updateApisFlag       bool
-	updateApiProductFlag bool
+type ApiProductImportExportTestArgs struct {
+	ApiProductProvider   Credentials
+	CtlUser              Credentials
+	ApiProduct           *apim.APIProduct
+	SrcAPIM              *apim.Client
+	DestAPIM             *apim.Client
+	ImportApisFlag       bool
+	UpdateApisFlag       bool
+	UpdateApiProductFlag bool
 }
 
 type appImportExportTestArgs struct {
-	appOwner    credentials
-	ctlUser     credentials
+	appOwner    Credentials
+	ctlUser     Credentials
 	application *apim.Application
 	srcAPIM     *apim.Client
 	destAPIM    *apim.Client
 }
 
 type apiGetKeyTestArgs struct {
-	ctlUser    credentials
+	ctlUser    Credentials
 	api        *apim.API
 	apiProduct *apim.APIProduct
 	apim       *apim.Client
 }
 
 type loginTestArgs struct {
-	ctlUser credentials
+	ctlUser Credentials
 	srcAPIM *apim.Client
 }
 
@@ -73,7 +73,7 @@ type setTestArgs struct {
 }
 
 type initTestArgs struct {
-	ctlUser        credentials
+	ctlUser        Credentials
 	srcAPIM        *apim.Client
 	initFlag       string
 	definitionFlag string
