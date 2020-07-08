@@ -26,6 +26,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -116,8 +117,8 @@ func K8sApplyFromFile(fileList ...string) error {
 }
 
 // K8sApplyFromStdin applies resources from standard input
-func K8sApplyFromStdin(stdInput string) error {
-	return ExecuteCommandFromStdin(stdInput, Kubectl, K8sApply, "-f", "-")
+func K8sApplyFromStdin(stdInputs ...string) error {
+	return ExecuteCommandFromStdin(strings.Join(stdInputs, "\n---\n"), Kubectl, K8sApply, "-f", "-")
 }
 
 // ExecuteCommand executes the command with args and prints output, errors in standard output, error

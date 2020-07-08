@@ -36,7 +36,12 @@ const ApiOpControllerConfigMap = "controller-config"
 const ApiOperator = "api-operator"
 const ApiOpWso2Namespace = "wso2-system"
 
+// K8s Kinds
+const kindKey = "kind"
+const namespaceKey = "namespace"
+
 // API Operator CRDs
+const CrdKind = "CustomResourceDefinition"
 const ApiOpCrdApi = "apis.wso2.com"
 const ApiOpCrdRateLimiting = "ratelimitings.wso2.com"
 const ApiOpCrdSecurity = "securities.wso2.com"

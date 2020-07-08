@@ -57,6 +57,7 @@ var installApiOperatorCmd = &cobra.Command{
 		isLocalInstallation := flagApiOperatorFile != ""
 		configFile := flagApiOperatorFile
 
+		// check version before getting inputs (in interactive mode)
 		if !isLocalInstallation {
 			// getting API Operator version
 			operatorVersion, err := k8sUtils.GetVersion(
@@ -73,6 +74,7 @@ var installApiOperatorCmd = &cobra.Command{
 		}
 
 		// check for installation mode: interactive or batch mode
+		// and get inputs
 		if flagBmRegistryType == "" {
 			// run api-operator installation in interactive mode
 			// read inputs for docker registry
