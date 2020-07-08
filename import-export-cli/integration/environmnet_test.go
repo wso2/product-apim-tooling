@@ -20,12 +20,10 @@ package integration
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"log"
 	"path/filepath"
-	"strings"
 	"testing"
-	"time"
 )
 
 const defaultExportPath = utils.DefaultExportDirName
@@ -40,67 +38,35 @@ func TestListEnvironments(t *testing.T) {
 	assert.Contains(t, response, apim.GetEnvName(), "TestListEnvironments Failed")
 }
 
-func validateExportDirectoryIsChanged(t *testing.T, args *setTestArgs) {
-	t.Helper()
-	output, _ := environmentSetExportDirectory(t, args)
-	base.Log(output)
-	assert.Contains(t, output, "Export Directory is set to", "Export Directory change is not successful")
-}
-
-func validateExportApisPassed(t *testing.T, args *initTestArgs, directoryName string) {
-	t.Helper()
-	time.Sleep(5 * time.Second)
-
-	output, error := exportApisWithOneCommand(t, args)
-	assert.Nil(t, error, "Error while Exporting APIs")
-	assert.Contains(t, output, "export-apis execution completed", "Error while Exporting APIs")
-
-	//Derive exported path from output
-	exportedPath := base.GetExportedPathFromOutput(strings.ReplaceAll(output, "Command: export-apis execution completed !", ""))
-	count, _ := base.CountFiles(exportedPath)
-	assert.Equal(t, 1, count, "Error while Exporting APIs")
-
-	t.Cleanup(func() {
-		argsDefault := &setTestArgs{
-			srcAPIM:             args.srcAPIM,
-			exportDirectoryFlag: utils.DefaultExportDirPath,
-		}
-		validateExportDirectoryIsChanged(t, argsDefault)
-		//Remove Exported apis
-		base.RemoveDir(directoryName + utils.TestMigrationDirectorySuffix)
-	})
-}
-
 //Change Export directory using apictl and assert the change
 func TestChangeExportDirectory(t *testing.T) {
 	dev := apimClients[0]
 	changedExportDirectory, _ := filepath.Abs(utils.CustomTestExportDirectory + utils.DefaultExportDirName)
 
-	args := &setTestArgs{
-		srcAPIM:             dev,
-		exportDirectoryFlag: changedExportDirectory,
+	args := &testutils.SetTestArgs{
+		SrcAPIM:             dev,
+		ExportDirectoryFlag: changedExportDirectory,
 	}
-	validateExportDirectoryIsChanged(t, args)
+	testutils.ValidateExportDirectoryIsChanged(t, args)
 
 	apim := apimClients[0]
 	projectName := "OpenAPI3Project"
 	username := superAdminUser
 	password := superAdminPassword
 
-	apiArgs := &initTestArgs{
-		ctlUser:   credentials{username: username, password: password},
-		srcAPIM:   apim,
-		initFlag:  projectName,
-		oasFlag:   utils.TestOpenAPI3DefinitionPath,
-		forceFlag: false,
+	apiArgs := &testutils.InitTestArgs{
+		CtlUser:   testutils.Credentials{Username: username, Password: password},
+		SrcAPIM:   apim,
+		InitFlag:  projectName,
+		OasFlag:   utils.TestOpenAPI3DefinitionPath,
+		ForceFlag: false,
 	}
 
 	//Assert that project import to publisher portal is successful
-	validateImportInitializedProject(t, apiArgs)
+	testutils.ValidateImportInitializedProject(t, apiArgs)
 
 	//Assert that Export directory change is successful by exporting and asserting that
-	validateExportApisPassed(t, apiArgs, changedExportDirectory)
-
+	testutils.ValidateExportApisPassed(t, apiArgs, changedExportDirectory)
 }
 
 //TODO  - Need to come up with  a process to make sure that http timeout is actually changed using another fake server
@@ -125,24 +91,17 @@ func TestChangeExportDirectory(t *testing.T) {
 //	assert.Contains(t, output, "Http Request Timout is set to", "HTTP Request TimeOut change is not successful")
 //}
 
-func validateETokenTypeIsChanged(t *testing.T, args *setTestArgs) {
-	t.Helper()
-	output, _ := environmentSetTokenType(t, args)
-	base.Log(output)
-	assert.Contains(t, output, "Token type is set to", "1st attempt of Token Type change is not successful")
-}
-
 //Change Token type using apictl and assert the change (for both "jwt" and "oauth" token types)
 func TestChangeTokenType(t *testing.T) {
 	apim := apimClients[0]
 
 	tokenType1 := "oauth"
-	args := &setTestArgs{
-		srcAPIM:       apim,
-		tokenTypeFlag: tokenType1,
+	args := &testutils.SetTestArgs{
+		SrcAPIM:       apim,
+		TokenTypeFlag: tokenType1,
 	}
 
-	validateETokenTypeIsChanged(t, args)
+	testutils.ValidateETokenTypeIsChanged(t, args)
 
 	//Create API and get keys for that API
 	adminUser := superAdminUser
@@ -150,45 +109,25 @@ func TestChangeTokenType(t *testing.T) {
 
 	dev := apimClients[0]
 
-	api := addAPI(t, dev, adminUser, adminPassword)
+	api := testutils.AddAPI(t, dev, adminUser, adminPassword)
 
-	publishAPI(dev, adminUser, adminPassword, api.ID)
+	testutils.PublishAPI(dev, adminUser, adminPassword, api.ID)
 
-	apiArgs := &apiGetKeyTestArgs{
-		ctlUser: credentials{username: adminUser, password: adminPassword},
-		api:     api,
-		apim:    dev,
+	apiArgs := &testutils.ApiGetKeyTestArgs{
+		CtlUser: testutils.Credentials{Username: adminUser, Password: adminPassword},
+		Api:     api,
+		Apim:    dev,
 	}
 
-	validateThatRecievingTokenTypeIsChanged(t, apiArgs, tokenType1)
+	testutils.ValidateThatRecievingTokenTypeIsChanged(t, apiArgs, tokenType1)
 
 	tokenType2 := "jwt"
 
 	//Change value back to default value
-	argsDefault := &setTestArgs{
-		srcAPIM:       apim,
-		tokenTypeFlag: tokenType2,
+	argsDefault := &testutils.SetTestArgs{
+		SrcAPIM:       apim,
+		TokenTypeFlag: tokenType2,
 	}
 
-	validateETokenTypeIsChanged(t, argsDefault)
-}
-
-func validateThatRecievingTokenTypeIsChanged(t *testing.T, args *apiGetKeyTestArgs, expectedTokenType string) {
-	t.Helper()
-
-	base.SetupEnv(t, args.apim.GetEnvName(), args.apim.GetApimURL(), args.apim.GetTokenURL())
-	base.Login(t, args.apim.GetEnvName(), args.ctlUser.username, args.ctlUser.password)
-
-	var err error
-	_, err = getKeys(t, args.api.Provider, args.api.Name, args.api.Version, args.apim.GetEnvName())
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	assert.Nil(t, err, "Error while getting key")
-
-	tokenType := args.apim.GetApplication(args.apim.GetApplicationByName(utils.DefaultApictlTestAppName).ApplicationID).TokenType
-	assert.Equal(t, strings.ToUpper(expectedTokenType), tokenType, "Error getting token type of application.")
-
-	unsubscribeAPI(args.apim, args.ctlUser.username, args.ctlUser.password, args.api.ID)
+	testutils.ValidateETokenTypeIsChanged(t, argsDefault)
 }

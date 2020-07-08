@@ -19,6 +19,7 @@
 package integration
 
 import (
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 	"testing"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
@@ -33,16 +34,16 @@ func TestGetKeysNonAdminSuperTenantUser(t *testing.T) {
 
 	dev := apimClients[0]
 
-	api := addAPI(t, dev, apiCreator, apiCreatorPassword)
-	publishAPI(dev, apiPublisher, apiPublisherPassword, api.ID)
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, api.ID)
 
-	args := &apiGetKeyTestArgs{
-		ctlUser: credentials{username: apiPublisher, password: apiPublisherPassword},
-		api:     api,
-		apim:    dev,
+	args := &testutils.ApiGetKeyTestArgs{
+		CtlUser: testutils.Credentials{Username: apiPublisher, Password: apiPublisherPassword},
+		Api:     api,
+		Apim:    dev,
 	}
 
-	validateGetKeysFailure(t, args)
+	testutils.ValidateGetKeysFailure(t, args)
 }
 
 func TestGetKeysNonAdminTenantUser(t *testing.T) {
@@ -54,16 +55,16 @@ func TestGetKeysNonAdminTenantUser(t *testing.T) {
 
 	dev := apimClients[0]
 
-	api := addAPI(t, dev, apiCreator, apiCreatorPassword)
-	publishAPI(dev, apiPublisher, apiPublisherPassword, api.ID)
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, api.ID)
 
-	args := &apiGetKeyTestArgs{
-		ctlUser: credentials{username: apiPublisher, password: apiPublisherPassword},
-		api:     api,
-		apim:    dev,
+	args := &testutils.ApiGetKeyTestArgs{
+		CtlUser: testutils.Credentials{Username: apiPublisher, Password: apiPublisherPassword},
+		Api:     api,
+		Apim:    dev,
 	}
 
-	validateGetKeysFailure(t, args)
+	testutils.ValidateGetKeysFailure(t, args)
 }
 
 func TestGetKeysAdminSuperTenantUser(t *testing.T) {
@@ -78,17 +79,17 @@ func TestGetKeysAdminSuperTenantUser(t *testing.T) {
 
 	dev := apimClients[0]
 
-	api := addAPI(t, dev, apiCreator, apiCreatorPassword)
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
-	publishAPI(dev, apiPublisher, apiPublisherPassword, api.ID)
+	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, api.ID)
 
-	args := &apiGetKeyTestArgs{
-		ctlUser: credentials{username: adminUser, password: adminPassword},
-		api:     api,
-		apim:    dev,
+	args := &testutils.ApiGetKeyTestArgs{
+		CtlUser: testutils.Credentials{Username: adminUser, Password: adminPassword},
+		Api:     api,
+		Apim:    dev,
 	}
 
-	validateGetKeys(t, args)
+	testutils.ValidateGetKeys(t, args)
 }
 
 func TestGetKeysAdminTenantUser(t *testing.T) {
@@ -103,17 +104,17 @@ func TestGetKeysAdminTenantUser(t *testing.T) {
 
 	dev := apimClients[0]
 
-	api := addAPI(t, dev, apiCreator, apiCreatorPassword)
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
-	publishAPI(dev, apiPublisher, apiPublisherPassword, api.ID)
+	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, api.ID)
 
-	args := &apiGetKeyTestArgs{
-		ctlUser: credentials{username: adminUser, password: adminPassword},
-		api:     api,
-		apim:    dev,
+	args := &testutils.ApiGetKeyTestArgs{
+		CtlUser: testutils.Credentials{Username: adminUser, Password: adminPassword},
+		Api:     api,
+		Apim:    dev,
 	}
 
-	validateGetKeys(t, args)
+	testutils.ValidateGetKeys(t, args)
 }
 
 /*
@@ -157,15 +158,15 @@ func TestGetKeysNonPublishedAPI(t *testing.T) {
 
 	dev := apimClients[0]
 
-	api := addAPI(t, dev, apiCreator, apiCreatorPassword)
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
-	args := &apiGetKeyTestArgs{
-		ctlUser: credentials{username: adminUser, password: adminPassword},
-		api:     api,
-		apim:    dev,
+	args := &testutils.ApiGetKeyTestArgs{
+		CtlUser: testutils.Credentials{Username: adminUser, Password: adminPassword},
+		Api:     api,
+		Apim:    dev,
 	}
 
-	validateGetKeysFailure(t, args)
+	testutils.ValidateGetKeysFailure(t, args)
 }
 
 func TestGetKeysForAPIProductNonAdminSuperTenantUser(t *testing.T) {
@@ -178,12 +179,12 @@ func TestGetKeysForAPIProductNonAdminSuperTenantUser(t *testing.T) {
 	dev := apimClients[0]
 
 	// Add the first dependent API to env1
-	dependentAPI1 := addAPI(t, dev, apiCreator, apiCreatorPassword)
-	publishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI1.ID)
+	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI1.ID)
 
 	// Add the second dependent API to env1
-	dependentAPI2 := addAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
-	publishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
+	dependentAPI2 := testutils.AddAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
+	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
 
 	// Map the real name of the API with the API
 	apisList := map[string]*apim.API{
@@ -192,15 +193,15 @@ func TestGetKeysForAPIProductNonAdminSuperTenantUser(t *testing.T) {
 	}
 
 	// Add the API Product to env1
-	apiProduct := addAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
+	apiProduct := testutils.AddAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
 
-	args := &apiGetKeyTestArgs{
-		ctlUser:    credentials{username: apiPublisher, password: apiPublisherPassword},
-		apiProduct: apiProduct,
-		apim:       dev,
+	args := &testutils.ApiGetKeyTestArgs{
+		CtlUser:    testutils.Credentials{Username: apiPublisher, Password: apiPublisherPassword},
+		ApiProduct: apiProduct,
+		Apim:       dev,
 	}
 
-	validateGetKeysFailure(t, args)
+	testutils.ValidateGetKeysFailure(t, args)
 }
 
 func TestGetKeysForAPIProductNonAdminTenantUser(t *testing.T) {
@@ -213,12 +214,12 @@ func TestGetKeysForAPIProductNonAdminTenantUser(t *testing.T) {
 	dev := apimClients[0]
 
 	// Add the first dependent API to env1
-	dependentAPI1 := addAPI(t, dev, apiCreator, apiCreatorPassword)
-	publishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI1.ID)
+	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI1.ID)
 
 	// Add the second dependent API to env1
-	dependentAPI2 := addAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
-	publishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
+	dependentAPI2 := testutils.AddAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
+	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
 
 	// Map the real name of the API with the API
 	apisList := map[string]*apim.API{
@@ -227,15 +228,15 @@ func TestGetKeysForAPIProductNonAdminTenantUser(t *testing.T) {
 	}
 
 	// Add the API Product to env1
-	apiProduct := addAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
+	apiProduct := testutils.AddAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
 
-	args := &apiGetKeyTestArgs{
-		ctlUser:    credentials{username: apiPublisher, password: apiPublisherPassword},
-		apiProduct: apiProduct,
-		apim:       dev,
+	args := &testutils.ApiGetKeyTestArgs{
+		CtlUser:    testutils.Credentials{Username: apiPublisher, Password: apiPublisherPassword},
+		ApiProduct: apiProduct,
+		Apim:       dev,
 	}
 
-	validateGetKeysFailure(t, args)
+	testutils.ValidateGetKeysFailure(t, args)
 }
 
 func TestGetKeysForAPIProductAdminSuperTenantUser(t *testing.T) {
@@ -251,12 +252,12 @@ func TestGetKeysForAPIProductAdminSuperTenantUser(t *testing.T) {
 	dev := apimClients[0]
 
 	// Add the first dependent API to env1
-	dependentAPI1 := addAPI(t, dev, apiCreator, apiCreatorPassword)
-	publishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI1.ID)
+	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI1.ID)
 
 	// Add the second dependent API to env1
-	dependentAPI2 := addAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
-	publishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
+	dependentAPI2 := testutils.AddAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
+	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
 
 	// Map the real name of the API with the API
 	apisList := map[string]*apim.API{
@@ -265,15 +266,15 @@ func TestGetKeysForAPIProductAdminSuperTenantUser(t *testing.T) {
 	}
 
 	// Add the API Product to env1
-	apiProduct := addAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
+	apiProduct := testutils.AddAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
 
-	args := &apiGetKeyTestArgs{
-		ctlUser:    credentials{username: adminUser, password: adminPassword},
-		apiProduct: apiProduct,
-		apim:       dev,
+	args := &testutils.ApiGetKeyTestArgs{
+		CtlUser:    testutils.Credentials{Username: adminUser, Password: adminPassword},
+		ApiProduct: apiProduct,
+		Apim:       dev,
 	}
 
-	validateGetKeys(t, args)
+	testutils.ValidateGetKeys(t, args)
 }
 
 func TestGetKeysForAPIProductAdminTenantUser(t *testing.T) {
@@ -289,12 +290,12 @@ func TestGetKeysForAPIProductAdminTenantUser(t *testing.T) {
 	dev := apimClients[0]
 
 	// Add the first dependent API to env1
-	dependentAPI1 := addAPI(t, dev, apiCreator, apiCreatorPassword)
-	publishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI1.ID)
+	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI1.ID)
 
 	// Add the second dependent API to env1
-	dependentAPI2 := addAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
-	publishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
+	dependentAPI2 := testutils.AddAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
+	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
 
 	// Map the real name of the API with the API
 	apisList := map[string]*apim.API{
@@ -303,13 +304,13 @@ func TestGetKeysForAPIProductAdminTenantUser(t *testing.T) {
 	}
 
 	// Add the API Product to env1
-	apiProduct := addAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
+	apiProduct := testutils.AddAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
 
-	args := &apiGetKeyTestArgs{
-		ctlUser:    credentials{username: adminUser, password: adminPassword},
-		apiProduct: apiProduct,
-		apim:       dev,
+	args := &testutils.ApiGetKeyTestArgs{
+		CtlUser:    testutils.Credentials{Username: adminUser, Password: adminPassword},
+		ApiProduct: apiProduct,
+		Apim:       dev,
 	}
 
-	validateGetKeys(t, args)
+	testutils.ValidateGetKeys(t, args)
 }

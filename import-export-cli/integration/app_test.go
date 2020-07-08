@@ -19,11 +19,10 @@
 package integration
 
 import (
-	"github.com/magiconair/properties/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 	"testing"
-	"time"
 )
 
 const numberOfApps = 5 // Number of Applications to be added in a loop
@@ -35,12 +34,12 @@ func TestListApp(t *testing.T) {
 	otherPassword := subscriber.Password
 
 	apim := apimClients[0]
-	addApp(t, apim, username, password)
-	addApp(t, apim, otherUsername, otherPassword)
+	testutils.AddApp(t, apim, username, password)
+	testutils.AddApp(t, apim, otherUsername, otherPassword)
 
 	base.SetupEnv(t, apim.GetEnvName(), apim.GetApimURL(), apim.GetTokenURL())
 	base.Login(t, apim.GetEnvName(), username, password)
-	listApps(t, apim.GetEnvName())
+	testutils.ListApps(t, apim.GetEnvName())
 }
 
 func TestExportAppNonAdminSuperTenant(t *testing.T) {
@@ -49,16 +48,16 @@ func TestExportAppNonAdminSuperTenant(t *testing.T) {
 
 	dev := apimClients[0]
 
-	app := addApp(t, dev, subscriberUserName, subscriberPassword)
+	app := testutils.AddApp(t, dev, subscriberUserName, subscriberPassword)
 
-	args := &appImportExportTestArgs{
-		appOwner:    credentials{username: subscriberUserName, password: subscriberPassword},
-		ctlUser:     credentials{username: subscriberUserName, password: subscriberPassword},
-		application: app,
-		srcAPIM:     dev,
+	args := &testutils.AppImportExportTestArgs{
+		AppOwner:    testutils.Credentials{Username: subscriberUserName, Password: subscriberPassword},
+		CtlUser:     testutils.Credentials{Username: subscriberUserName, Password: subscriberPassword},
+		Application: app,
+		SrcAPIM:     dev,
 	}
 
-	validateAppExportFailure(t, args)
+	testutils.ValidateAppExportFailure(t, args)
 }
 
 func TestExportAppNonAdminTenant(t *testing.T) {
@@ -67,16 +66,16 @@ func TestExportAppNonAdminTenant(t *testing.T) {
 
 	dev := apimClients[0]
 
-	app := addApp(t, dev, subscriberUserName, subscriberPassword)
+	app := testutils.AddApp(t, dev, subscriberUserName, subscriberPassword)
 
-	args := &appImportExportTestArgs{
-		appOwner:    credentials{username: subscriberUserName, password: subscriberPassword},
-		ctlUser:     credentials{username: subscriberUserName, password: subscriberPassword},
-		application: app,
-		srcAPIM:     dev,
+	args := &testutils.AppImportExportTestArgs{
+		AppOwner:    testutils.Credentials{Username: subscriberUserName, Password: subscriberPassword},
+		CtlUser:     testutils.Credentials{Username: subscriberUserName, Password: subscriberPassword},
+		Application: app,
+		SrcAPIM:     dev,
 	}
 
-	validateAppExportFailure(t, args)
+	testutils.ValidateAppExportFailure(t, args)
 }
 
 func TestExportImportOwnAppAdminSuperTenant(t *testing.T) {
@@ -86,17 +85,17 @@ func TestExportImportOwnAppAdminSuperTenant(t *testing.T) {
 	dev := apimClients[0]
 	prod := apimClients[1]
 
-	app := addApp(t, dev, adminUsername, adminPassword)
+	app := testutils.AddApp(t, dev, adminUsername, adminPassword)
 
-	args := &appImportExportTestArgs{
-		appOwner:    credentials{username: adminUsername, password: adminPassword},
-		ctlUser:     credentials{username: adminUsername, password: adminPassword},
-		application: app,
-		srcAPIM:     dev,
-		destAPIM:    prod,
+	args := &testutils.AppImportExportTestArgs{
+		AppOwner:    testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		CtlUser:     testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		Application: app,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
 	}
 
-	validateAppExportImportWithPreserveOwner(t, args)
+	testutils.ValidateAppExportImportWithPreserveOwner(t, args)
 }
 
 //Import an already export App with already generated Keys with --update flag
@@ -107,17 +106,17 @@ func TestExportImportOwnAppAdminSuperTenantWithUpdate(t *testing.T) {
 	dev := apimClients[0]
 	prod := apimClients[1]
 
-	app := addApp(t, dev, adminUsername, adminPassword)
+	app := testutils.AddApp(t, dev, adminUsername, adminPassword)
 
-	args := &appImportExportTestArgs{
-		appOwner:    credentials{username: adminUsername, password: adminPassword},
-		ctlUser:     credentials{username: adminUsername, password: adminPassword},
-		application: app,
-		srcAPIM:     dev,
-		destAPIM:    prod,
+	args := &testutils.AppImportExportTestArgs{
+		AppOwner:    testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		CtlUser:     testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		Application: app,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
 	}
 
-	validateAppExportImportWithUpdate(t, args)
+	testutils.ValidateAppExportImportWithUpdate(t, args)
 }
 
 func TestExportImportOtherAppAdminSuperTenant(t *testing.T) {
@@ -129,17 +128,17 @@ func TestExportImportOtherAppAdminSuperTenant(t *testing.T) {
 	dev := apimClients[0]
 	prod := apimClients[1]
 
-	app := addApp(t, dev, otherUsername, otherPassword)
+	app := testutils.AddApp(t, dev, otherUsername, otherPassword)
 
-	args := &appImportExportTestArgs{
-		appOwner:    credentials{username: otherUsername, password: otherPassword},
-		ctlUser:     credentials{username: adminUsername, password: adminPassword},
-		application: app,
-		srcAPIM:     dev,
-		destAPIM:    prod,
+	args := &testutils.AppImportExportTestArgs{
+		AppOwner:    testutils.Credentials{Username: otherUsername, Password: otherPassword},
+		CtlUser:     testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		Application: app,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
 	}
 
-	validateAppExportImportWithPreserveOwner(t, args)
+	testutils.ValidateAppExportImportWithPreserveOwner(t, args)
 }
 
 func TestExportImportOwnAppAdminTenant(t *testing.T) {
@@ -149,17 +148,17 @@ func TestExportImportOwnAppAdminTenant(t *testing.T) {
 	dev := apimClients[0]
 	prod := apimClients[1]
 
-	app := addApp(t, dev, adminUsername, adminPassword)
+	app := testutils.AddApp(t, dev, adminUsername, adminPassword)
 
-	args := &appImportExportTestArgs{
-		appOwner:    credentials{username: adminUsername, password: adminPassword},
-		ctlUser:     credentials{username: adminUsername, password: adminPassword},
-		application: app,
-		srcAPIM:     dev,
-		destAPIM:    prod,
+	args := &testutils.AppImportExportTestArgs{
+		AppOwner:    testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		CtlUser:     testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		Application: app,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
 	}
 
-	validateAppExportImportWithPreserveOwner(t, args)
+	testutils.ValidateAppExportImportWithPreserveOwner(t, args)
 }
 
 func TestExportOtherAppAdminTenant(t *testing.T) {
@@ -171,17 +170,17 @@ func TestExportOtherAppAdminTenant(t *testing.T) {
 	dev := apimClients[0]
 	prod := apimClients[1]
 
-	app := addApp(t, dev, otherUsername, otherPassword)
+	app := testutils.AddApp(t, dev, otherUsername, otherPassword)
 
-	args := &appImportExportTestArgs{
-		appOwner:    credentials{username: otherUsername, password: otherPassword},
-		ctlUser:     credentials{username: adminUsername, password: adminPassword},
-		application: app,
-		srcAPIM:     dev,
-		destAPIM:    prod,
+	args := &testutils.AppImportExportTestArgs{
+		AppOwner:    testutils.Credentials{Username: otherUsername, Password: otherPassword},
+		CtlUser:     testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		Application: app,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
 	}
 
-	validateAppExportImportWithPreserveOwner(t, args)
+	testutils.ValidateAppExportImportWithPreserveOwner(t, args)
 }
 
 func TestExportCrossTenantAppAdminTenant(t *testing.T) {
@@ -192,16 +191,16 @@ func TestExportCrossTenantAppAdminTenant(t *testing.T) {
 
 	dev := apimClients[0]
 
-	app := addApp(t, dev, adminUsername, adminPassword)
+	app := testutils.AddApp(t, dev, adminUsername, adminPassword)
 
-	args := &appImportExportTestArgs{
-		appOwner:    credentials{username: adminUsername, password: adminPassword},
-		ctlUser:     credentials{username: tenantAdminUsername, password: tenantAdminPassword},
-		application: app,
-		srcAPIM:     dev,
+	args := &testutils.AppImportExportTestArgs{
+		AppOwner:    testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		CtlUser:     testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
+		Application: app,
+		SrcAPIM:     dev,
 	}
 
-	validateAppExportFailure(t, args)
+	testutils.ValidateAppExportFailure(t, args)
 }
 
 // TODO: Secondary user store test cases, need to enabled when later on when secondary user store creation is automated
@@ -237,30 +236,6 @@ func TestExportAppSecondaryUserStoreAdminSuperTenantLowerCase(t *testing.T) {
 }
 */
 
-func validateAppDelete(t *testing.T, args *appImportExportTestArgs) {
-	t.Helper()
-
-	// Setup apictl envs
-	base.SetupEnvWithoutTokenFlag(t, args.srcAPIM.GetEnvName(), args.srcAPIM.GetApimURL())
-
-	// Delete an App of env 1
-	base.Login(t, args.srcAPIM.GetEnvName(), args.ctlUser.username, args.ctlUser.password)
-
-	time.Sleep(1 * time.Second)
-	appsListBeforeDelete := args.srcAPIM.GetApplications()
-
-	deleteAppByCtl(t, args)
-
-	appsListAfterDelete := args.srcAPIM.GetApplications()
-	time.Sleep(1 * time.Second)
-
-	// Validate whether the expected number of App count is there
-	assert.Equal(t, appsListBeforeDelete.Count, appsListAfterDelete.Count+1, "Expected number of Applications not deleted")
-
-	// Validate that the delete is a success
-	validateApplicationIsDeleted(t, args.application, appsListAfterDelete)
-}
-
 //Delete an Application as a super tenant admin
 func TestDeleteAppSuperTenantUser(t *testing.T) {
 	adminUsername := superAdminUser
@@ -270,17 +245,17 @@ func TestDeleteAppSuperTenantUser(t *testing.T) {
 
 	var application *apim.Application
 	for appCount := 0; appCount <= numberOfApps; appCount++ {
-		application = addApp(t, dev, adminUsername, adminPassword)
+		application = testutils.AddApp(t, dev, adminUsername, adminPassword)
 	}
 
 	// This will be the Application that will be deleted by apictl, so no need to do cleaning
-	application = addApplicationWithoutCleaning(t, dev, adminUsername, adminPassword)
+	application = testutils.AddApplicationWithoutCleaning(t, dev, adminUsername, adminPassword)
 
-	args := &appImportExportTestArgs{
-		ctlUser:     credentials{username: superAdminUser, password: superAdminPassword},
-		application: application,
-		srcAPIM:     dev,
+	args := &testutils.AppImportExportTestArgs{
+		CtlUser:     testutils.Credentials{Username: superAdminUser, Password: superAdminPassword},
+		Application: application,
+		SrcAPIM:     dev,
 	}
 
-	validateAppDelete(t, args)
+	testutils.ValidateAppDelete(t, args)
 }

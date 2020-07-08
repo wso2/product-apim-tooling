@@ -18,12 +18,9 @@
 package integration
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"log"
 	"testing"
-	"time"
 )
 
 //Initialize a project Initialize an API without any flag
@@ -33,50 +30,13 @@ func TestInitializeProject(t *testing.T) {
 	apim := apimClients[0]
 	projectName := "SampleTestAPI"
 
-	args := &initTestArgs{
-		ctlUser:  credentials{username: username, password: password},
-		srcAPIM:  apim,
-		initFlag: projectName,
+	args := &testutils.InitTestArgs{
+		CtlUser:  testutils.Credentials{Username: username, Password: password},
+		SrcAPIM:  apim,
+		InitFlag: projectName,
 	}
 
-	validateInitializeProject(t, args)
-
-}
-
-func validateInitializeProject(t *testing.T, args *initTestArgs) {
-	t.Helper()
-
-	output, err := initProject(t, args)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	assert.Nil(t, err, "Error while generating Project")
-	assert.Contains(t, output, "Project initialized", "Project initialization Failed")
-
-	//Remove Created project and logout
-	t.Cleanup(func() {
-		base.RemoveDir(args.initFlag)
-	})
-}
-
-//Function to initialize a project using API definition
-func validateInitializeProjectWithOASFlag(t *testing.T, args *initTestArgs) {
-	t.Helper()
-
-	output, err := initProjectWithOasFlag(t, args)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	assert.Nil(t, err, "Error while generating Project")
-	assert.Containsf(t, output, "Project initialized", "Test initialization Failed with --oas flag")
-
-	//Remove Created project and logout
-
-	t.Cleanup(func() {
-		base.RemoveDir(args.initFlag)
-	})
+	testutils.ValidateInitializeProject(t, args)
 
 }
 
@@ -87,15 +47,15 @@ func TestInitializeAPIFromSwagger2Definition(t *testing.T) {
 	username := superAdminUser
 	password := superAdminPassword
 
-	args := &initTestArgs{
-		ctlUser:   credentials{username: username, password: password},
-		srcAPIM:   apim,
-		initFlag:  projectName,
-		oasFlag:   utils.TestSwagger2DefinitionPath,
-		forceFlag: false,
+	args := &testutils.InitTestArgs{
+		CtlUser:   testutils.Credentials{Username: username, Password: password},
+		SrcAPIM:   apim,
+		InitFlag:  projectName,
+		OasFlag:   utils.TestSwagger2DefinitionPath,
+		ForceFlag: false,
 	}
 
-	validateInitializeProjectWithOASFlag(t, args)
+	testutils.ValidateInitializeProjectWithOASFlag(t, args)
 
 }
 
@@ -106,15 +66,15 @@ func TestInitializeAPIFromOpenAPI3Definition(t *testing.T) {
 	username := superAdminUser
 	password := superAdminPassword
 
-	args := &initTestArgs{
-		ctlUser:   credentials{username: username, password: password},
-		srcAPIM:   apim,
-		initFlag:  projectName,
-		oasFlag:   utils.TestOpenAPI3DefinitionPath,
-		forceFlag: false,
+	args := &testutils.InitTestArgs{
+		CtlUser:   testutils.Credentials{Username: username, Password: password},
+		SrcAPIM:   apim,
+		InitFlag:  projectName,
+		OasFlag:   utils.TestOpenAPI3DefinitionPath,
+		ForceFlag: false,
 	}
 
-	validateInitializeProjectWithOASFlag(t, args)
+	testutils.ValidateInitializeProjectWithOASFlag(t, args)
 
 }
 
@@ -125,62 +85,16 @@ func TestInitializeAPIFromAPIDefinitionURL(t *testing.T) {
 	apim := apimClients[0]
 	var projectName = "ProjectInitWithURL"
 
-	args := &initTestArgs{
-		ctlUser:   credentials{username: username, password: password},
-		srcAPIM:   apim,
-		initFlag:  projectName,
-		oasFlag:   utils.TestOpenAPISpecificationURL,
-		forceFlag: false,
+	args := &testutils.InitTestArgs{
+		CtlUser:   testutils.Credentials{Username: username, Password: password},
+		SrcAPIM:   apim,
+		InitFlag:  projectName,
+		OasFlag:   utils.TestOpenAPISpecificationURL,
+		ForceFlag: false,
 	}
 
-	validateInitializeProjectWithOASFlag(t, args)
+	testutils.ValidateInitializeProjectWithOASFlag(t, args)
 
-}
-
-func validateImportInitializedProject(t *testing.T, args *initTestArgs) {
-	t.Helper()
-	//Initialize a project with API definition
-	validateInitializeProjectWithOASFlag(t, args)
-
-	time.Sleep(1 * time.Second)
-
-	result, error := importApiFromProject(t, args.initFlag, args.srcAPIM.GetEnvName())
-	assert.Nil(t, error, "Error while importing Project")
-	assert.Contains(t, result, "Successfully imported API", "Error while importing Project")
-
-	//Remove Created project and logout
-	t.Cleanup(func() {
-		base.RemoveDir(args.initFlag)
-	})
-}
-
-func validateImportFailedWithInitializedProject(t *testing.T, args *initTestArgs) {
-	t.Helper()
-
-	time.Sleep(1 * time.Second)
-
-	result, _ := importApiFromProject(t, args.initFlag, args.srcAPIM.GetEnvName())
-	assert.Contains(t, result, "Resource Already Exists", "Test failed because API is imported successfully")
-
-	//Remove Created project and logout
-	t.Cleanup(func() {
-		base.RemoveDir(args.initFlag)
-	})
-}
-
-func validateImportUpdatePassedWithInitializedProject(t *testing.T, args *initTestArgs) {
-	t.Helper()
-
-	time.Sleep(1 * time.Second)
-
-	result, error := importApiFromProjectWithUpdate(t, args.initFlag, args.srcAPIM.GetEnvName())
-	assert.Nil(t, error, "Error while generating Project")
-	assert.Contains(t, result, "Successfully imported API", "Test InitializeProjectWithDefinitionFlag Failed")
-
-	//Remove Created project and logout
-	t.Cleanup(func() {
-		base.RemoveDir(args.initFlag)
-	})
 }
 
 //Import API from initialized project with swagger 2 definition
@@ -190,16 +104,16 @@ func TestImportProjectCreatedFromSwagger2Definition(t *testing.T) {
 	username := superAdminUser
 	password := superAdminPassword
 
-	args := &initTestArgs{
-		ctlUser:   credentials{username: username, password: password},
-		srcAPIM:   apim,
-		initFlag:  projectName,
-		oasFlag:   utils.TestSwagger2DefinitionPath,
-		forceFlag: false,
+	args := &testutils.InitTestArgs{
+		CtlUser:   testutils.Credentials{Username: username, Password: password},
+		SrcAPIM:   apim,
+		InitFlag:  projectName,
+		OasFlag:   utils.TestSwagger2DefinitionPath,
+		ForceFlag: false,
 	}
 
 	//Assert that project import to publisher portal is successful
-	validateImportInitializedProject(t, args)
+	testutils.ValidateImportInitializedProject(t, args)
 
 }
 
@@ -210,16 +124,16 @@ func TestImportProjectCreatedFromOpenAPI3Definition(t *testing.T) {
 	username := superAdminUser
 	password := superAdminPassword
 
-	args := &initTestArgs{
-		ctlUser:   credentials{username: username, password: password},
-		srcAPIM:   apim,
-		initFlag:  projectName,
-		oasFlag:   utils.TestOpenAPI3DefinitionPath,
-		forceFlag: false,
+	args := &testutils.InitTestArgs{
+		CtlUser:   testutils.Credentials{Username: username, Password: password},
+		SrcAPIM:   apim,
+		InitFlag:  projectName,
+		OasFlag:   utils.TestOpenAPI3DefinitionPath,
+		ForceFlag: false,
 	}
 
 	//Assert that project import to publisher portal is successful
-	validateImportInitializedProject(t, args)
+	testutils.ValidateImportInitializedProject(t, args)
 
 }
 
@@ -230,19 +144,19 @@ func TestImportProjectCreatedFailWhenAPIIsExisted(t *testing.T) {
 	username := superAdminUser
 	password := superAdminPassword
 
-	args := &initTestArgs{
-		ctlUser:   credentials{username: username, password: password},
-		srcAPIM:   apim,
-		initFlag:  projectName,
-		oasFlag:   utils.TestOpenAPI3DefinitionPath,
-		forceFlag: false,
+	args := &testutils.InitTestArgs{
+		CtlUser:   testutils.Credentials{Username: username, Password: password},
+		SrcAPIM:   apim,
+		InitFlag:  projectName,
+		OasFlag:   utils.TestOpenAPI3DefinitionPath,
+		ForceFlag: false,
 	}
 
 	//Import API for the First time
-	validateImportInitializedProject(t, args)
+	testutils.ValidateImportInitializedProject(t, args)
 
 	//Import API for the second time
-	validateImportFailedWithInitializedProject(t, args)
+	testutils.ValidateImportFailedWithInitializedProject(t, args)
 
 }
 
@@ -253,18 +167,18 @@ func TestImportProjectCreatedPassWhenAPIIsExisted(t *testing.T) {
 	username := superAdminUser
 	password := superAdminPassword
 
-	args := &initTestArgs{
-		ctlUser:   credentials{username: username, password: password},
-		srcAPIM:   apim,
-		initFlag:  projectName,
-		oasFlag:   utils.TestOpenAPI3DefinitionPath,
-		forceFlag: false,
+	args := &testutils.InitTestArgs{
+		CtlUser:   testutils.Credentials{Username: username, Password: password},
+		SrcAPIM:   apim,
+		InitFlag:  projectName,
+		OasFlag:   utils.TestOpenAPI3DefinitionPath,
+		ForceFlag: false,
 	}
 
 	//Import API for the First time
-	validateImportInitializedProject(t, args)
+	testutils.ValidateImportInitializedProject(t, args)
 
 	//Import API for the second time
-	validateImportUpdatePassedWithInitializedProject(t, args)
+	testutils.ValidateImportUpdatePassedWithInitializedProject(t, args)
 
 }
