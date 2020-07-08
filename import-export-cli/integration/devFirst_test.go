@@ -18,13 +18,9 @@
 package integration
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"log"
 	"testing"
-	"time"
 )
 
 //Initialize a project Initialize an API without any flag
@@ -40,44 +36,7 @@ func TestInitializeProject(t *testing.T) {
 		InitFlag: projectName,
 	}
 
-	validateInitializeProject(t, args)
-
-}
-
-func validateInitializeProject(t *testing.T, args *testutils.InitTestArgs) {
-	t.Helper()
-
-	output, err := testutils.InitProject(t, args)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	assert.Nil(t, err, "Error while generating Project")
-	assert.Contains(t, output, "Project initialized", "Project initialization Failed")
-
-	//Remove Created project and logout
-	t.Cleanup(func() {
-		base.RemoveDir(args.InitFlag)
-	})
-}
-
-//Function to initialize a project using API definition
-func validateInitializeProjectWithOASFlag(t *testing.T, args *testutils.InitTestArgs) {
-	t.Helper()
-
-	output, err := testutils.InitProjectWithOasFlag(t, args)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	assert.Nil(t, err, "Error while generating Project")
-	assert.Containsf(t, output, "Project initialized", "Test initialization Failed with --oas flag")
-
-	//Remove Created project and logout
-
-	t.Cleanup(func() {
-		base.RemoveDir(args.InitFlag)
-	})
+	testutils.ValidateInitializeProject(t, args)
 
 }
 
@@ -96,7 +55,7 @@ func TestInitializeAPIFromSwagger2Definition(t *testing.T) {
 		ForceFlag: false,
 	}
 
-	validateInitializeProjectWithOASFlag(t, args)
+	testutils.ValidateInitializeProjectWithOASFlag(t, args)
 
 }
 
@@ -115,7 +74,7 @@ func TestInitializeAPIFromOpenAPI3Definition(t *testing.T) {
 		ForceFlag: false,
 	}
 
-	validateInitializeProjectWithOASFlag(t, args)
+	testutils.ValidateInitializeProjectWithOASFlag(t, args)
 
 }
 
@@ -134,54 +93,8 @@ func TestInitializeAPIFromAPIDefinitionURL(t *testing.T) {
 		ForceFlag: false,
 	}
 
-	validateInitializeProjectWithOASFlag(t, args)
+	testutils.ValidateInitializeProjectWithOASFlag(t, args)
 
-}
-
-func validateImportInitializedProject(t *testing.T, args *testutils.InitTestArgs) {
-	t.Helper()
-	//Initialize a project with API definition
-	validateInitializeProjectWithOASFlag(t, args)
-
-	time.Sleep(1 * time.Second)
-
-	result, error := testutils.ImportApiFromProject(t, args.InitFlag, args.SrcAPIM.GetEnvName())
-	assert.Nil(t, error, "Error while importing Project")
-	assert.Contains(t, result, "Successfully imported API", "Error while importing Project")
-
-	//Remove Created project and logout
-	t.Cleanup(func() {
-		base.RemoveDir(args.InitFlag)
-	})
-}
-
-func validateImportFailedWithInitializedProject(t *testing.T, args *testutils.InitTestArgs) {
-	t.Helper()
-
-	time.Sleep(1 * time.Second)
-
-	result, _ := testutils.ImportApiFromProject(t, args.InitFlag, args.SrcAPIM.GetEnvName())
-	assert.Contains(t, result, "Resource Already Exists", "Test failed because API is imported successfully")
-
-	//Remove Created project and logout
-	t.Cleanup(func() {
-		base.RemoveDir(args.InitFlag)
-	})
-}
-
-func validateImportUpdatePassedWithInitializedProject(t *testing.T, args *testutils.InitTestArgs) {
-	t.Helper()
-
-	time.Sleep(1 * time.Second)
-
-	result, error := testutils.ImportApiFromProjectWithUpdate(t, args.InitFlag, args.SrcAPIM.GetEnvName())
-	assert.Nil(t, error, "Error while generating Project")
-	assert.Contains(t, result, "Successfully imported API", "Test InitializeProjectWithDefinitionFlag Failed")
-
-	//Remove Created project and logout
-	t.Cleanup(func() {
-		base.RemoveDir(args.InitFlag)
-	})
 }
 
 //Import API from initialized project with swagger 2 definition
@@ -200,7 +113,7 @@ func TestImportProjectCreatedFromSwagger2Definition(t *testing.T) {
 	}
 
 	//Assert that project import to publisher portal is successful
-	validateImportInitializedProject(t, args)
+	testutils.ValidateImportInitializedProject(t, args)
 
 }
 
@@ -220,7 +133,7 @@ func TestImportProjectCreatedFromOpenAPI3Definition(t *testing.T) {
 	}
 
 	//Assert that project import to publisher portal is successful
-	validateImportInitializedProject(t, args)
+	testutils.ValidateImportInitializedProject(t, args)
 
 }
 
@@ -240,10 +153,10 @@ func TestImportProjectCreatedFailWhenAPIIsExisted(t *testing.T) {
 	}
 
 	//Import API for the First time
-	validateImportInitializedProject(t, args)
+	testutils.ValidateImportInitializedProject(t, args)
 
 	//Import API for the second time
-	validateImportFailedWithInitializedProject(t, args)
+	testutils.ValidateImportFailedWithInitializedProject(t, args)
 
 }
 
@@ -263,9 +176,9 @@ func TestImportProjectCreatedPassWhenAPIIsExisted(t *testing.T) {
 	}
 
 	//Import API for the First time
-	validateImportInitializedProject(t, args)
+	testutils.ValidateImportInitializedProject(t, args)
 
 	//Import API for the second time
-	validateImportUpdatePassedWithInitializedProject(t, args)
+	testutils.ValidateImportUpdatePassedWithInitializedProject(t, args)
 
 }

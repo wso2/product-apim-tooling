@@ -25,6 +25,7 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"path/filepath"
 	"testing"
+	"time"
 )
 
 func AddApp(t *testing.T, client *apim.Client, username string, password string) *apim.Application {
@@ -181,4 +182,28 @@ func ValidateApplicationIsDeleted(t *testing.T, application *apim.Application, a
 	for _, existingApplication := range appsListAfterDelete.List {
 		assert.NotEqual(t, existingApplication.ApplicationID, application.ApplicationID, "API delete is not successful")
 	}
+}
+
+func ValidateAppDelete(t *testing.T, args *AppImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnvWithoutTokenFlag(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL())
+
+	// Delete an App of env 1
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	time.Sleep(1 * time.Second)
+	appsListBeforeDelete := args.SrcAPIM.GetApplications()
+
+	DeleteAppByCtl(t, args)
+
+	appsListAfterDelete := args.SrcAPIM.GetApplications()
+	time.Sleep(1 * time.Second)
+
+	// Validate whether the expected number of App count is there
+	assert.Equal(t, appsListBeforeDelete.Count, appsListAfterDelete.Count+1, "Expected number of Applications not deleted")
+
+	// Validate that the delete is a success
+	ValidateApplicationIsDeleted(t, args.Application, appsListAfterDelete)
 }

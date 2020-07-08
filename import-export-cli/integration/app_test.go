@@ -19,12 +19,10 @@
 package integration
 
 import (
-	"github.com/magiconair/properties/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 	"testing"
-	"time"
 )
 
 const numberOfApps = 5 // Number of Applications to be added in a loop
@@ -238,30 +236,6 @@ func TestExportAppSecondaryUserStoreAdminSuperTenantLowerCase(t *testing.T) {
 }
 */
 
-func validateAppDelete(t *testing.T, args *testutils.AppImportExportTestArgs) {
-	t.Helper()
-
-	// Setup apictl envs
-	base.SetupEnvWithoutTokenFlag(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL())
-
-	// Delete an App of env 1
-	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
-
-	time.Sleep(1 * time.Second)
-	appsListBeforeDelete := args.SrcAPIM.GetApplications()
-
-	testutils.DeleteAppByCtl(t, args)
-
-	appsListAfterDelete := args.SrcAPIM.GetApplications()
-	time.Sleep(1 * time.Second)
-
-	// Validate whether the expected number of App count is there
-	assert.Equal(t, appsListBeforeDelete.Count, appsListAfterDelete.Count+1, "Expected number of Applications not deleted")
-
-	// Validate that the delete is a success
-	testutils.ValidateApplicationIsDeleted(t, args.Application, appsListAfterDelete)
-}
-
 //Delete an Application as a super tenant admin
 func TestDeleteAppSuperTenantUser(t *testing.T) {
 	adminUsername := superAdminUser
@@ -283,5 +257,5 @@ func TestDeleteAppSuperTenantUser(t *testing.T) {
 		SrcAPIM:     dev,
 	}
 
-	validateAppDelete(t, args)
+	testutils.ValidateAppDelete(t, args)
 }
