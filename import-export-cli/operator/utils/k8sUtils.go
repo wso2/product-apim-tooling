@@ -24,8 +24,10 @@ import (
 	"fmt"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"time"
 )
 
@@ -115,9 +117,25 @@ func K8sApplyFromFile(fileList ...string) error {
 	return ExecuteCommand(Kubectl, kubectlArgs...)
 }
 
+// K8sApplyFromBytes applies resources by content
+func K8sApplyFromBytes(data [][]byte) error {
+	dir, _ := ioutil.TempDir("", "example")
+	defer os.RemoveAll(dir) // clean up
+
+	for i, d := range data {
+		tmpFile := filepath.Join(dir, fmt.Sprintf("config-file-%v.yml", i))
+		err := ioutil.WriteFile(tmpFile, d, 0666) // permission -rw-rw-rw
+		if err != nil {
+			return err
+		}
+	}
+
+	return ExecuteCommand(Kubectl, K8sApply, "-f", dir)
+}
+
 // K8sApplyFromStdin applies resources from standard input
-func K8sApplyFromStdin(stdInput string) error {
-	return ExecuteCommandFromStdin(stdInput, Kubectl, K8sApply, "-f", "-")
+func K8sApplyFromStdin(stdInputs string) error {
+	return ExecuteCommandFromStdin(stdInputs, Kubectl, K8sApply, "-f", "-")
 }
 
 // ExecuteCommand executes the command with args and prints output, errors in standard output, error

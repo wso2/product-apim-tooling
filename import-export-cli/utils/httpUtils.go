@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 )
 
 func ReadFromUrl(url string) ([]byte, error) {
@@ -35,4 +36,19 @@ func GetTlsConfigWithCertificate() *tls.Config {
 		InsecureSkipVerify: false,
 		RootCAs:            certs,
 	}
+}
+
+// IsValidUrl tests a string to determine if it is a well-structured url or not.
+func IsValidUrl(urlStr string) bool {
+	_, err := url.ParseRequestURI(urlStr)
+	if err != nil {
+		return false
+	}
+
+	u, err := url.Parse(urlStr)
+	if err != nil || u.Scheme == "" || u.Host == "" {
+		return false
+	}
+
+	return true
 }
