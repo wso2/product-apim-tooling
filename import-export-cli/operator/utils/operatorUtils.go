@@ -82,30 +82,30 @@ func CreateControllerConfigs(configFile string, maxTimeSec int, resourceTypes ..
 	}
 
 	// applying CRDs and namespaces
-	crdsData := make([]string, 0, 5) // make capacity as CRD count for high performance
+	crdsData := make([][]byte, 0, 5) // make capacity as CRD count for high performance
 	for _, crd := range crds {
 		data, err := yaml.Marshal(crd)
 		if err != nil {
 			utils.HandleErrorAndExit("Error parsing yaml content", err)
 		}
-		crdsData = append(crdsData, string(data))
+		crdsData = append(crdsData, data)
 	}
 	if len(crdsData) > 0 {
 		// apply all crds once to lower request count to k8s cluster
-		err := K8sApplyFromStdin(crdsData...)
+		err := K8sApplyFromBytes(crdsData)
 		if err != nil {
 			utils.HandleErrorAndExit("Error applying CRDs to k8s cluster", err)
 		}
 	}
 
 	// applying non CRD configs
-	nonCrdsData := make([]string, 0, 16) // make capacity for high performance
+	nonCrdsData := make([][]byte, 0, 16) // make capacity for high performance
 	for _, nonCrd := range nonCrds {
 		data, err := yaml.Marshal(nonCrd)
 		if err != nil {
 			utils.HandleErrorAndExit("Error parsing yaml content", err)
 		}
-		nonCrdsData = append(nonCrdsData, string(data))
+		nonCrdsData = append(nonCrdsData, data)
 	}
 	if len(nonCrdsData) > 0 {
 		// waiting for resource creation if CRDs are applied
@@ -118,7 +118,7 @@ func CreateControllerConfigs(configFile string, maxTimeSec int, resourceTypes ..
 		}
 
 		// apply all configs once to lower request count to k8s cluster
-		err := K8sApplyFromStdin(nonCrdsData...)
+		err := K8sApplyFromBytes(nonCrdsData)
 		if err != nil {
 			utils.HandleErrorAndExit("Error applying configs to k8s cluster", err)
 		}
