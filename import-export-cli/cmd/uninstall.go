@@ -24,7 +24,7 @@ import (
 )
 
 const uninstallCmdLiteral = "uninstall"
-const uninstallCmdShortDesc = "Uninstall an operator"
+const uninstallCmdShortDesc = "Uninstall an operator in the configured K8s cluster"
 const uninstallCmdLongDesc = "Uninstall an operator in the configured K8s cluster"
 const uninstallCmdExamples = utils.ProjectName + ` ` + uninstallCmdLiteral + ` ` + uninstallApiOperatorCmdLiteral
 

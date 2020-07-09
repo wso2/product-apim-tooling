@@ -94,7 +94,7 @@ func CreateControllerConfigs(configFile string, maxTimeSec int, resourceTypes ..
 		// apply all crds once to lower request count to k8s cluster
 		err := K8sApplyFromBytes(crdsData)
 		if err != nil {
-			utils.HandleErrorAndExit("Error applying CRDs to k8s cluster", err)
+			utils.HandleErrorAndExit("Error applying CRDs to K8s cluster", err)
 		}
 	}
 

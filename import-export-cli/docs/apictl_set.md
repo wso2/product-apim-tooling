@@ -1,6 +1,6 @@
 ## apictl set
 
-Set configuration
+Set configuration parameters
 
 ### Synopsis
 

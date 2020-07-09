@@ -24,7 +24,7 @@ import (
 )
 
 const installCmdLiteral = "install"
-const installCmdShortDesc = "Install an operator"
+const installCmdShortDesc = "Install an operator in the configured K8s cluster"
 const installCmdLongDesc = "Install an operator in the configured K8s cluster"
 const installCmdExamples = utils.ProjectName + ` ` + installCmdLiteral + ` ` + installApiOperatorCmdLiteral
 
