@@ -31,8 +31,9 @@ var flagVCSStatusEnvName string           // name of the environment to be added
 
 // push command related usage Info
 const vcsStatusCmdLiteral = "status"
-const vcsStatusCmdShortDesc = "Gets the status report of project changes of the specified environment"
-const vcsStatusCmdLongDesc = ``
+const vcsStatusCmdShortDesc = "Shows the list of projects that are ready to deploy"
+const vcsStatusCmdLongDesc = `Shows the list of projects that are ready to deploy to the specified environment by --environment(-e)
+NOTE: --environment (-e) flag is mandatory`
 
 const vcsStatusCmdCmdExamples = utils.ProjectName + ` ` + vcsStatusCmdLiteral + ` `  + ` -e dev`
 

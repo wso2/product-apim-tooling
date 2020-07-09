@@ -1703,37 +1703,8 @@ _apictl_vcs_deploy()
     flags+=("--help")
     flags+=("-h")
     local_nonpersistent_flags+=("--help")
-    flags+=("--insecure")
-    flags+=("-k")
-    flags+=("--verbose")
-
-    must_have_one_flag=()
-    must_have_one_flag+=("--environment=")
-    must_have_one_flag+=("-e")
-    must_have_one_noun=()
-    noun_aliases=()
-}
-
-_apictl_vcs_rollback()
-{
-    last_command="apictl_vcs_rollback"
-
-    command_aliases=()
-
-    commands=()
-
-    flags=()
-    two_word_flags=()
-    local_nonpersistent_flags=()
-    flags_with_completion=()
-    flags_completion=()
-
-    flags+=("--environment=")
-    two_word_flags+=("-e")
-    local_nonpersistent_flags+=("--environment=")
-    flags+=("--help")
-    flags+=("-h")
-    local_nonpersistent_flags+=("--help")
+    flags+=("--skipRollback")
+    local_nonpersistent_flags+=("--skipRollback")
     flags+=("--insecure")
     flags+=("-k")
     flags+=("--verbose")
@@ -1784,7 +1755,6 @@ _apictl_vcs()
 
     commands=()
     commands+=("deploy")
-    commands+=("rollback")
     commands+=("status")
 
     flags=()

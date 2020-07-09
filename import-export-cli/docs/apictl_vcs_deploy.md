@@ -1,10 +1,13 @@
 ## apictl vcs deploy
 
-Deploys project changes to the specified environment
+Deploys projects to the specified environment
 
 ### Synopsis
 
-Deploys project changes to the specified environment
+Deploys projects to the specified environment specified by --environment(-e). 
+Only the changed projects compared to the revision at the last successful deployment will be deployed. 
+If any project(s) got failed during the deployment, by default, the operation will rollback the environment to the last successful state. If this needs to be avoided, use --skipRollback=true
+NOTE: --environment (-e) flag is mandatory
 
 ```
 apictl vcs deploy [flags]
@@ -13,7 +16,8 @@ apictl vcs deploy [flags]
 ### Examples
 
 ```
-apictl deploy  -e dev
+apictl deploy -e dev
+apictl deploy -e dev --skipRollback=true
 ```
 
 ### Options
@@ -21,6 +25,7 @@ apictl deploy  -e dev
 ```
   -e, --environment string   Name of the environment to deploy the project(s)
   -h, --help                 help for deploy
+      --skipRollback         Specifies whether rolling back to the last successful revision during an error situation should be skipped
 ```
 
 ### Options inherited from parent commands
@@ -32,5 +37,5 @@ apictl deploy  -e dev
 
 ### SEE ALSO
 
-* [apictl vcs](apictl_vcs.md)	 - Update an projects in an environment by calling the version control system (git)
+* [apictl vcs](apictl_vcs.md)	 - Checks status and deploys projects
 

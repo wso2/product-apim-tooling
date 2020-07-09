@@ -34,8 +34,10 @@ import (
     "strings"
 )
 
-// Read and return MainConfig. Silently catch the error  when config file is not found
-func GetVCSConfigFromFileSilently(filePath string) *VCSConfig {
+// Reads the vcs configuration file and returns. Silently catch the error when config file is not found
+// filePath is the path to look for the VCS configuration file
+// returns *VCSConfig VCS configuration
+func getVCSConfigFromFileSilently(filePath string) *VCSConfig {
     var vcsConfig VCSConfig
     data, err := ioutil.ReadFile(filePath)
     if err == nil {
@@ -46,8 +48,13 @@ func GetVCSConfigFromFileSilently(filePath string) *VCSConfig {
     return &vcsConfig
 }
 
+// Reads and returns the environment specific information from the VCS config along with the full VCS config
+// environment is the name of the environment
+// Returns VCSConfig, the full VCS configuration
+// Returns Environment, the environment specific VCS configuration
+// Returns bool, whether the environment is available in the VCS configuration or not
 func getVCSEnvironmentDetails(environment string) (VCSConfig, Environment, bool)  {
-    vcsConfig := GetVCSConfigFromFileSilently(VCSConfigFilePath)
+    vcsConfig := getVCSConfigFromFileSilently(VCSConfigFilePath)
     if vcsConfig.Environments == nil {
         vcsConfig.Environments = make(map[string]Environment)
     }
@@ -55,6 +62,11 @@ func getVCSEnvironmentDetails(environment string) (VCSConfig, Environment, bool)
     return *vcsConfig, envVCSConfig, hasEnv
 }
 
+// Returns the status of the projects indicating the projects to deploy (need to save, delete or failed previously).
+// Environment is the environment name
+// fromRevType is the type of the revision the status should be taken by comparing with the current revision. The allowed values are "last_attempted", "last_successful"
+// Returns int, the total number of projects to deploy
+// Returns map[string][]*params.ProjectParams, the details of the projects that needs to deploy
 func GetStatus(environment, fromRevType string) (int, map[string][]*params.ProjectParams){
     var envRevision string
     _, envVCSConfig, hasEnv := getVCSEnvironmentDetails(environment)
@@ -122,6 +134,9 @@ func GetStatus(environment, fromRevType string) (int, map[string][]*params.Proje
     return totalProjectsToUpdate, updatedProjectsPerType
 }
 
+// Returns whether the given project was failed to deploy previously
+// environment is the environment name
+// Returns bool indicating whether the given project was failed previously
 func failedDuringEarlierDeploy(vcsEnvConfig Environment, projectParams *params.ProjectParams) bool {
     failedProjectsForType := vcsEnvConfig.FailedProjects[projectParams.Type]
     for _, failedProject := range failedProjectsForType {
@@ -132,14 +147,23 @@ func failedDuringEarlierDeploy(vcsEnvConfig Environment, projectParams *params.P
     return false
 }
 
+// Rollbacks the projects to the initial state when any of the projects were failed during deployment
+// accesstoken is the access token to access the APIM product REST APIs
+// environment is the environment name
 func Rollback(accessToken, environment string) {
     totalProjectsToUpdate, updatedProjectsPerType := GetStatus(environment, FromRevTypeLastSuccessful)
     _, envVCSConfig, hasEnv := getVCSEnvironmentDetails(environment)
 
-    if !hasEnv || envVCSConfig.LastSuccessfulRev == "" || len(envVCSConfig.FailedProjects) == 0{
+    if !hasEnv || len(envVCSConfig.FailedProjects) == 0 {
         fmt.Println("Nothing to rollback")
         return
     }
+
+    if envVCSConfig.LastSuccessfulRev == "" {
+        fmt.Println("Failed to rollback as there are no previous successful revisions")
+        return
+    }
+
     currentBranch := getCurrentBranch()
     tmpBranchName := "tmp-" + envVCSConfig.LastSuccessfulRev[0:8]
     checkoutNewBranchFromRevision(tmpBranchName, envVCSConfig.LastSuccessfulRev)
@@ -148,6 +172,9 @@ func Rollback(accessToken, environment string) {
     deleteTmpBranch(tmpBranchName)
 }
 
+// Creates a new branch from the given revision
+// tmpBranchName is the new branch that is checkout from the revision
+// revision is the git commit id
 func checkoutNewBranchFromRevision(tmpBranchName, revision string) {
     _, err := executeGitCommand("checkout", "-b", tmpBranchName, revision)
     if err != nil {
@@ -156,6 +183,8 @@ func checkoutNewBranchFromRevision(tmpBranchName, revision string) {
     }
 }
 
+// Switches to the given branch name
+// branchName is the name of the branch that should switch into
 func checkoutBranch(branchName string) {
     _, err := executeGitCommand("checkout", branchName)
     if err != nil {
@@ -163,6 +192,7 @@ func checkoutBranch(branchName string) {
     }
 }
 
+// Returns the name of the current branch of the repository where the user is executing apictl commands
 func getCurrentBranch() string {
     branch, err := executeGitCommand("rev-parse", "--abbrev-ref", "HEAD")
     if err != nil {
@@ -171,6 +201,7 @@ func getCurrentBranch() string {
     return strings.TrimSpace(branch)
 }
 
+// Deletes the given branch. The branch name must start with "tmp-"
 func deleteTmpBranch(tmpBranch string) {
     //done as a security check
     if !strings.HasPrefix(tmpBranch, "tmp-") {
@@ -182,6 +213,11 @@ func deleteTmpBranch(tmpBranch string) {
     }
 }
 
+// Deletes the projects from the environment that are identified as deleted.
+// accesstoken is the access token to access the APIM product REST APIs
+// environment is the environment name
+// deletedProjectsPerType A map that has keys as Apps/APIs or API Products and values as deleted projects of each type
+// This will return the failed projects with the same structure at the end if such projects exist during deletion.
 func deployProjectDeletions(accessToken, environment string, deletedProjectsPerType map[string][]*params.ProjectParams,
     failedProjects map[string][]*params.ProjectParams) map[string][]*params.ProjectParams {
     // Deleting Application projects
@@ -249,6 +285,7 @@ func deployProjectDeletions(accessToken, environment string, deletedProjectsPerT
     return failedProjects
 }
 
+// Logs the error and appends the failed project given from projectParam into the failedProjects map.
 func handleIfError(err error, failedProjects map[string][]*params.ProjectParams, projectParam *params.ProjectParams) bool {
     if err != nil {
         fmt.Println("Error... ", err)
@@ -257,6 +294,17 @@ func handleIfError(err error, failedProjects map[string][]*params.ProjectParams,
     return err != nil
 }
 
+// Deploys the updated projects. It will only handle new or updated projects and deleted projects will be tracked and
+// skipped. Those deleted projects will be returned from the 2nd return argument.
+// accesstoken is the access token to access the APIM product REST APIs
+// environment is the environment name
+// totalProjectsToUpdate is the number of total projects that needs to be deployed.
+// updatedProjectsPerType is a map of string -> ProjectParams which consists of updated projects per each type (API, App..)
+// Returns bool, true if any deleted projects exists so the process should continue with project deletion path
+// Returns map[string][]*params.ProjectParams, a map of project type (API, App.. ) to each project detail which are
+//  deleted projects
+// Returns map[string][]*params.ProjectParams, a map of project type (API, App.. ) to each project detail which are
+//  failed during the deployment
 func deployUpdatedProjects(accessToken, environment string, totalProjectsToUpdate int,
         updatedProjectsPerType map[string][]*params.ProjectParams) (bool, map[string][]*params.ProjectParams,
         map[string][]*params.ProjectParams) {
@@ -348,6 +396,9 @@ func deployUpdatedProjects(accessToken, environment string, totalProjectsToUpdat
     return hasDeletedProjects, deletedProjectsPerType, failedProjects
 }
 
+// This method is responsible for updating the vcs configuration file at the end of the deployment
+// environment is the environment name
+// failedProjects are a map of project type to failed projects during the previous deployment
 func updateVCSConfig(environment string, failedProjects map[string][]*params.ProjectParams) {
     vcsConfig, envVCSConfig, _ := getVCSEnvironmentDetails(environment)
 
@@ -366,6 +417,10 @@ func updateVCSConfig(environment string, failedProjects map[string][]*params.Pro
     utils.WriteConfigFile(vcsConfig, VCSConfigFilePath)
 }
 
+// Logs the deletion project info message and appends the project to delete (projectParam) into deletedProjectsPerType map.
+// i is the index of the project
+// projectParam is the project to be deleted
+// deletedProjectsPerType is the map of project type -> projects which are keeping the projects to delete
 func handleProjectDeletion(i int, projectParam *params.ProjectParams, deletedProjectsPerType map[string][]*params.ProjectParams) {
     fmt.Println(strconv.Itoa(i+1) + ": " + projectParam.NickName + ": (" + projectParam.RelativePath + ") awaiting deletion..")
     if deletedProjectsPerType[projectParam.Type] == nil {
@@ -374,7 +429,11 @@ func handleProjectDeletion(i int, projectParam *params.ProjectParams, deletedPro
     deletedProjectsPerType[projectParam.Type] = append(deletedProjectsPerType[projectParam.Type], projectParam)
 }
 
-func DeployChangedFiles(accessToken, environment string) {
+// Scan and detects all the changes in projects by comparing the current revision with the last successful revision.
+// Deploy all the changes to the specified environment.
+// accesstoken is the access token to access the APIM product REST APIs
+// environment is the environment name
+func DeployChangedFiles(accessToken, environment string) map[string][]*params.ProjectParams {
     totalProjectsToUpdate, updatedProjectsPerType := GetStatus(environment, FromRevTypeLastAttempted)
     hasDeletedProjects, deletedProjectsPerType, failedProjects :=
         deployUpdatedProjects(accessToken, environment, totalProjectsToUpdate, updatedProjectsPerType)
@@ -383,9 +442,9 @@ func DeployChangedFiles(accessToken, environment string) {
         // work on deleted files
         _, envVCSConfig, hasEnv := getVCSEnvironmentDetails(environment)
         if !hasEnv || envVCSConfig.LastSuccessfulRev == "" {
-            utils.HandleErrorAndExit("Error: there are projects to delete by no last successful "+
+            utils.HandleErrorAndExit("Error: there are projects to delete but no last successful "+
                 "revision available in vcs config (vcs_config.yaml)", nil)
-            return
+            return nil
         }
         currentBranch := getCurrentBranch()
         tmpBranchName := "tmp-" + envVCSConfig.LastSuccessfulRev[0:8]
@@ -399,8 +458,10 @@ func DeployChangedFiles(accessToken, environment string) {
         // Update the VCS config with failed projects, last attempted and last successful revisions
         updateVCSConfig(environment, failedProjects)
     }
+    return failedProjects
 }
 
+// Retrieves the base location of the git repository
 func getRepoBaseDir() (string, error) {
     baseDir, err := executeGitCommand("rev-parse", "--show-toplevel")
     if err != nil {
@@ -409,6 +470,7 @@ func getRepoBaseDir() (string, error) {
     return strings.TrimSpace(baseDir), nil
 }
 
+// Retrieves the latest commit of the git repository
 func getLatestCommitId() (string, error) {
     latestCommit, err := executeGitCommand("rev-parse", "HEAD")
     if err != nil {
@@ -417,6 +479,7 @@ func getLatestCommitId() (string, error) {
     return strings.TrimSpace(latestCommit), nil
 }
 
+// Prints the changed files in the terminal
 func logChangedFiles(changedFileList []string) {
     utils.Logln("Total changed files: " + strconv.Itoa(len(changedFileList)))
     for i, changedFile := range changedFileList {
@@ -425,7 +488,14 @@ func logChangedFiles(changedFileList []string) {
     utils.Logln()
 }
 
-func getProjectInfoFromProjectFile(envVCSConfig Environment, repoBasePath string, subPath string, pathInfoMap map[string]*params.ProjectParams) *params.ProjectParams {
+// subPath denotes a single changed file retrieved from "git diff" command. This path is scanned and then identifies the
+//  project type (API, App,.. ) from this method.
+// envVCSConfig is the environment related VCS configuration
+// repoBasePath is the basepath of the git repository
+// pathInfoMap is a map of path (string) to project info. This is used for caching and avoid repetitive checking
+// Returns the identified project details. If it is not related to a project, a NONE project info item will be returned
+func getProjectInfoFromProjectFile(envVCSConfig Environment, repoBasePath string, subPath string,
+    pathInfoMap map[string]*params.ProjectParams) *params.ProjectParams {
     subPaths := getSubPaths(repoBasePath, subPath)
     for _, s := range subPaths {
         projectParams := checkProjectTypeOfSpecificPath(repoBasePath, s, pathInfoMap)
@@ -441,7 +511,12 @@ func getProjectInfoFromProjectFile(envVCSConfig Environment, repoBasePath string
     }
 }
 
-func checkProjectTypeOfSpecificPath(repoBasePath, fullPath string, pathInfoMap map[string]*params.ProjectParams) *params.ProjectParams {
+// The files in the path "fullPath" is scanned and identifies the project type (API, App,.. ) from this method.
+// repoBasePath is the basepath of the git repository
+// pathInfoMap is a map of path (string) to project info. This is used for caching and avoid repetitive checking
+// Returns the identified project details. If it is not related to a project, a NONE project info item will be returned
+func checkProjectTypeOfSpecificPath(repoBasePath, fullPath string,
+    pathInfoMap map[string]*params.ProjectParams) *params.ProjectParams {
     if pathInfoMap[fullPath] != nil {
         return pathInfoMap[fullPath]
     }
@@ -525,6 +600,7 @@ func checkProjectTypeOfSpecificPath(repoBasePath, fullPath string, pathInfoMap m
     return projectParams
 }
 
+// Returns all the subpaths as an array from a given path
 func getSubPaths(parent string, path string) (paths []string) {
     var subPaths []string
     folders := strings.Split(path, string(os.PathSeparator))
@@ -536,7 +612,7 @@ func getSubPaths(parent string, path string) (paths []string) {
     return subPaths
 }
 
-// ExecuteCommand executes the command with args and prints output, errors in standard output, error
+// Executes the give git command as args list and returns the output
 func executeGitCommand(args ...string) (string, error) {
     cmd := exec.Command(Git, args...)
     var errBuf bytes.Buffer
@@ -544,22 +620,4 @@ func executeGitCommand(args ...string) (string, error) {
 
     output, err := cmd.Output()
     return string(output), err
-}
-
-
-// GetCommandOutput executes a command and returns the output
-func GetCommandOutput(command string, args ...string) (string, error) {
-    cmd := exec.Command(command, args...)
-    var errBuf bytes.Buffer
-    cmd.Stderr = io.MultiWriter(os.Stderr, &errBuf)
-
-    output, err := cmd.Output()
-    return string(output), err
-}
-
-// setCommandOutAndError sets the output and error of the command cmd to the standard output and error
-func setCommandOutAndError(cmd *exec.Cmd) {
-    var errBuf, outBuf bytes.Buffer
-    cmd.Stderr = io.MultiWriter(os.Stderr, &errBuf)
-    cmd.Stdout = io.MultiWriter(os.Stdout, &outBuf)
 }

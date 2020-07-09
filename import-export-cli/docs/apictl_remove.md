@@ -1,6 +1,6 @@
 ## apictl remove
 
-Remove an environmnet
+Remove an environment
 
 ### Synopsis
 

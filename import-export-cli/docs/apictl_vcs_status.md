@@ -1,10 +1,11 @@
 ## apictl vcs status
 
-Gets the status report of project changes of the specified environment
+Shows the list of projects that are ready to deploy
 
 ### Synopsis
 
-Gets the status report of project changes of the specified environment
+Shows the list of projects that are ready to deploy to the specified environment by --environment(-e)
+NOTE: --environment (-e) flag is mandatory
 
 ```
 apictl vcs status [flags]
@@ -32,5 +33,5 @@ apictl status  -e dev
 
 ### SEE ALSO
 
-* [apictl vcs](apictl_vcs.md)	 - Update an projects in an environment by calling the version control system (git)
+* [apictl vcs](apictl_vcs.md)	 - Checks status and deploys projects
 

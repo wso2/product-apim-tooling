@@ -19,20 +19,26 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/git"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-var flagVCSDeployEnvName string           // name of the environment to be added
+var flagVCSDeployEnvName string    // name of the environment the project changes need to be deployed
+var flagVCSDeploySkipRollback bool // specifies whether rolling back on error needs to be avoided
 
 // deploy command related usage Info
 const deployCmdLiteral = "deploy"
-const deployCmdShortDesc = "Deploys project changes to the specified environment"
-const deployCmdLongDesc = ``
+const deployCmdShortDesc = "Deploys projects to the specified environment"
+const deployCmdLongDesc = `Deploys projects to the specified environment specified by --environment(-e). 
+Only the changed projects compared to the revision at the last successful deployment will be deployed. 
+If any project(s) got failed during the deployment, by default, the operation will rollback the environment to the last successful state. If this needs to be avoided, use --skipRollback=true
+NOTE: --environment (-e) flag is mandatory`
 
-const deployCmdExamples = utils.ProjectName + ` ` + deployCmdLiteral + ` `  + ` -e dev`
+const deployCmdExamples = utils.ProjectName + ` ` + deployCmdLiteral + ` -e dev
+` + utils.ProjectName + ` ` + deployCmdLiteral + ` -e dev --skipRollback=true`
 
 // deployCmd represents the deploy command
 var DeployCmd = &cobra.Command{
@@ -50,7 +56,12 @@ var DeployCmd = &cobra.Command{
 		if err != nil {
 			utils.HandleErrorAndExit("Error while getting an access token for deploying the project(s)", err)
 		}
-		git.DeployChangedFiles(accessOAuthToken, flagVCSDeployEnvName);
+		failedProjects := git.DeployChangedFiles(accessOAuthToken, flagVCSDeployEnvName)
+		if failedProjects != nil && len(failedProjects) > 0 && flagVCSDeploySkipRollback == false {
+			fmt.Println("\nRolling back to the last successful revision as there are failures..")
+			git.Rollback(accessOAuthToken, flagVCSDeployEnvName)
+			utils.HandleErrorAndExit("There are project deployment failures. Rolled back to the last successful revision.", err)
+		}
 	},
 }
 
@@ -59,6 +70,8 @@ func init() {
 
 	DeployCmd.Flags().StringVarP(&flagVCSDeployEnvName, "environment", "e", "", "Name of the " +
 		"environment to deploy the project(s)")
+	DeployCmd.Flags().BoolVarP(&flagVCSDeploySkipRollback, "skipRollback", "", false,
+		"Specifies whether rolling back to the last successful revision during an error situation should be skipped")
 
 	_ = DeployCmd.MarkFlagRequired("environment")
 }

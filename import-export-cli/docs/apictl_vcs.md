@@ -1,13 +1,21 @@
 ## apictl vcs
 
-Update an projects in an environment by calling the version control system (git)
+Checks status and deploys projects
 
 ### Synopsis
 
-Update an projects in an environment by calling the version control system (git)
+Checks status and deploys projects to the specified environment. In order to 
+use this command, 'git' must be installed in the system.'
 
 ```
 apictl vcs [flags]
+```
+
+### Examples
+
+```
+apictl status  -e dev
+apictl deploy -e dev
 ```
 
 ### Options
@@ -26,7 +34,6 @@ apictl vcs [flags]
 ### SEE ALSO
 
 * [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
-* [apictl vcs deploy](apictl_vcs_deploy.md)	 - Deploys project changes to the specified environment
-* [apictl vcs rollback](apictl_vcs_rollback.md)	 - Rollback the environment to the last working state in case of an error
-* [apictl vcs status](apictl_vcs_status.md)	 - Gets the status report of project changes of the specified environment
+* [apictl vcs deploy](apictl_vcs_deploy.md)	 - Deploys projects to the specified environment
+* [apictl vcs status](apictl_vcs_status.md)	 - Shows the list of projects that are ready to deploy
 

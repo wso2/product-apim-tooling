@@ -32,5 +32,5 @@ apictl rollback  -e dev
 
 ### SEE ALSO
 
-* [apictl vcs](apictl_vcs.md)	 - Update an projects in an environment by calling the version control system (git)
+* [apictl vcs](apictl_vcs.md)	 - Checks status and deploys projects
 
