@@ -271,7 +271,6 @@ func LoadApplicationParamsFromFile(path string) (*ApplicationParams, error) {
 	return apiParams, err
 }
 
-
 // ExtractAPIEndpointConfig extracts API endpoint information from a slice of byte b
 func ExtractAPIEndpointConfig(b []byte) (string, error) {
 	apiConfig := &APIEndpointConfig{}

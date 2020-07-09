@@ -141,27 +141,6 @@ func ImportApplication(accessToken, adminEndpoint, filename, appOwner string, up
 	}
 }
 
-func PrintImportAppResponse(resp *http.Response) {
-	if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusCreated {
-		// 200 OK or 201 Created
-		utils.Logln(utils.LogPrefixInfo+"Header:", resp.Header)
-		fmt.Println("Successfully imported Application!")
-	} else if resp.StatusCode == http.StatusMultiStatus {
-		// 207 Multi Status
-		fmt.Printf("Partially imported Application" +
-			"\nNOTE: One or more subscriptions were not imported due to unavailability of APIs/Tiers\n")
-	} else if resp.StatusCode == http.StatusUnauthorized {
-		// 401 Unauthorized
-		fmt.Println("Invalid Credentials or You may not have enough permission!")
-	} else if resp.StatusCode == http.StatusForbidden {
-		// 401 Unauthorized
-		fmt.Printf("Invalid Owner!" + "\nNOTE: Cross Tenant Imports are not allowed!\n")
-	} else {
-		fmt.Println("Error importing Application")
-		utils.Logln(utils.LogPrefixError + resp.Status)
-	}
-}
-
 // NewFileUploadRequest form an HTTP Put request
 // Helper function for forming multi-part form data
 // Returns the formed http request and errors

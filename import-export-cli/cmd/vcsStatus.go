@@ -87,15 +87,3 @@ func init() {
 
 	_ = VCSStatusCmd.MarkFlagRequired("environment")
 }
-
-/*
-Projects to Update (5)...
-
-APIs (3) ...
-1: [+/-]	PizzaShackAPI-1.0.0:	(apis/PizzaShackAPI-1.0.0)
-2: [+/-]	Sample-1.0.3:	(	apis/Sample-1.0.3)
-3: [failed]	SwaggerPetstoreYAML-1.0.0:	(apis/SwaggerPetstoreYAML-1.0.0)
-
-
-
- */
