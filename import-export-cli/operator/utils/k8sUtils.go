@@ -118,7 +118,8 @@ func K8sApplyFromFile(fileList ...string) error {
 
 // K8sApplyFromStdin applies resources from standard input
 func K8sApplyFromStdin(stdInputs ...string) error {
-	return ExecuteCommandFromStdin(strings.Join(stdInputs, "\n---\n"), Kubectl, K8sApply, "-f", "-")
+	stdin := strings.Join(stdInputs, "\n---\n")
+	return ExecuteCommandFromStdin(stdin, Kubectl, K8sApply, "-f", "-")
 }
 
 // ExecuteCommand executes the command with args and prints output, errors in standard output, error

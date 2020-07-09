@@ -61,55 +61,15 @@ func GetVersion(name string, envVar string, defaultVersion string, versionValida
 	return version, nil
 }
 
-// CreateControllerConfigs creates configs
+// CreateControllerConfigs apply (kubectl apply) configs to the k8s cluster
 func CreateControllerConfigs(configFile string, maxTimeSec int, resourceTypes ...string) {
-	var yamlsData [][]byte // slice of config yaml content
-
-	// read content of configFile based on type: URL, local file or dir
-	if utils.IsValidUrl(configFile) {
-		utils.Logln(utils.LogPrefixInfo + "Installing controller configs using URL")
-
-		data, err := utils.ReadFromUrl(configFile)
-		if err != nil {
-			utils.HandleErrorAndExit("Error reading configs from URL: "+configFile, err)
-		}
-		yamlsData = [][]byte{data}
-	} else if stat, err := os.Stat(configFile); !os.IsNotExist(err) {
-		if !stat.IsDir() {
-			utils.Logln(utils.LogPrefixInfo + "Installing controller configs using local file")
-
-			data, err := ioutil.ReadFile(configFile)
-			if err != nil {
-				utils.HandleErrorAndExit("Error reading configs from local file: "+configFile, err)
-			}
-			yamlsData = [][]byte{data}
-		} else {
-			utils.Logln(utils.LogPrefixInfo + "Installing controller configs using local dir")
-
-			configDir, err := ioutil.ReadDir(configFile)
-			if err != nil {
-				utils.HandleErrorAndExit("Error reading configs from local dir: "+configFile, err)
-			}
-			for _, file := range configDir {
-				if strings.HasSuffix(file.Name(), ".yaml") || strings.HasSuffix(file.Name(), ".yml") {
-					f := filepath.Join(configFile, file.Name())
-					data, err := ioutil.ReadFile(f)
-					if err != nil {
-						utils.HandleErrorAndExit("Error reading configs from local file: "+f, err)
-					}
-					yamlsData = append(yamlsData, data)
-				}
-			}
-		}
-	} else {
-		utils.HandleErrorAndExit("Error reading configs", errors.New("config file does not exists"))
-	}
+	configData := *readConfigData(configFile)
 
 	// filter CRDs and other configs
 	type YAML map[string]interface{}
 	var crds []YAML
 	var nonCrds []YAML
-	for _, data := range yamlsData {
+	for _, data := range configData {
 		dec := yaml.NewDecoder(bytes.NewReader(data))
 		for yml := make(YAML); dec.Decode(&yml) == nil; yml = make(YAML) {
 			if strings.EqualFold(fmt.Sprint(yml[kindKey]), CrdKind) ||
@@ -162,5 +122,56 @@ func CreateControllerConfigs(configFile string, maxTimeSec int, resourceTypes ..
 		if err != nil {
 			utils.HandleErrorAndExit("Error applying configs to k8s cluster", err)
 		}
+	}
+}
+
+// readConfigData reads content of configFile from configFile of type: URL, local file or dir
+func readConfigData(configFile string) *[][]byte {
+	// read from URL
+	if utils.IsValidUrl(configFile) {
+		utils.Logln(utils.LogPrefixInfo + "Installing controller configs using URL")
+
+		data, err := utils.ReadFromUrl(configFile)
+		if err != nil {
+			utils.HandleErrorAndExit("Error reading configs from URL: "+configFile, err)
+		}
+		return &[][]byte{data}
+	}
+
+	// read from local file or dir
+	if stat, err := os.Stat(configFile); !os.IsNotExist(err) {
+		// local file
+		if !stat.IsDir() {
+			utils.Logln(utils.LogPrefixInfo + "Installing controller configs using local file")
+
+			data, err := ioutil.ReadFile(configFile)
+			if err != nil {
+				utils.HandleErrorAndExit("Error reading configs from local file: "+configFile, err)
+			}
+			return &[][]byte{data}
+		}
+
+		// local dir
+		utils.Logln(utils.LogPrefixInfo + "Installing controller configs using local dir")
+
+		configDir, err := ioutil.ReadDir(configFile)
+		if err != nil {
+			utils.HandleErrorAndExit("Error reading configs from local dir: "+configFile, err)
+		}
+		var configData [][]byte
+		for _, file := range configDir {
+			if strings.HasSuffix(file.Name(), ".yaml") || strings.HasSuffix(file.Name(), ".yml") {
+				f := filepath.Join(configFile, file.Name())
+				data, err := ioutil.ReadFile(f)
+				if err != nil {
+					utils.HandleErrorAndExit("Error reading configs from local file: "+f, err)
+				}
+				configData = append(configData, data)
+			}
+		}
+		return &configData
+	} else {
+		utils.HandleErrorAndExit("Error reading configs", errors.New("config file does not exists"))
+		return nil
 	}
 }
