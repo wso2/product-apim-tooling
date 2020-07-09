@@ -28,8 +28,8 @@ import (
 )
 
 const changeCmdLiteral = "change"
-const changeCmdShortDesc = "Change a configuration in k8s cluster resource"
-const changeCmdLongDesc = "Change a configuration in k8s cluster resource"
+const changeCmdShortDesc = "Change a configuration in K8s cluster resource"
+const changeCmdLongDesc = "Change a configuration in K8s cluster resource"
 const changeCmdExamples = utils.ProjectName + ` ` + changeCmdLiteral + ` ` + changeDockerRegistryCmdLiteral
 
 // changeCmd represents the change command

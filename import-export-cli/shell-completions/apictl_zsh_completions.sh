@@ -16,7 +16,7 @@ function _apictl {
     commands=(
       "add:Add an API to the kubernetes cluster"
       "add-env:Add Environment to Config file"
-      "change:Change a configuration in k8s cluster resource"
+      "change:Change a configuration in K8s cluster resource"
       "change-status:Change Status of an API"
       "delete:Delete an API/APIProduct/Application in an environment"
       "export:Export an API Product in an environment"
