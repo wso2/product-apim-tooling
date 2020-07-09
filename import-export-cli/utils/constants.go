@@ -30,7 +30,7 @@ var CurrentDir, _ = os.Getwd()
 
 const ConfigDirName = ".wso2apictl"
 
-var HomeDirectory = getEnv("APICTL_DIR", "HOME")
+var HomeDirectory = getEnv("APICTL_CONFIG_DIR", "HOME")
 
 func getEnv(key, defaultValue string) string {
 	value := os.Getenv(key)
