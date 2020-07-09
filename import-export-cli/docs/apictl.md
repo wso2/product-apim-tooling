@@ -39,9 +39,10 @@ apictl [flags]
 * [apictl list](apictl_list.md)	 - List APIs/APIProducts/Applications in an environment or List the environments
 * [apictl login](apictl_login.md)	 - Login to an API Manager
 * [apictl logout](apictl_logout.md)	 - Logout to from an API Manager
-* [apictl remove](apictl_remove.md)	 - Remove an environmnet
+* [apictl remove](apictl_remove.md)	 - Remove an environment
 * [apictl set](apictl_set.md)	 - Set configuration parameters
 * [apictl uninstall](apictl_uninstall.md)	 - Uninstall an operator in the configured K8s cluster
 * [apictl update](apictl_update.md)	 - Update an API to the kubernetes cluster
+* [apictl vcs](apictl_vcs.md)	 - Checks status and deploys projects
 * [apictl version](apictl_version.md)	 - Display Version on current apictl
 

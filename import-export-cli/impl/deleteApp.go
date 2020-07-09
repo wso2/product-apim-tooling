@@ -25,6 +25,7 @@ import (
 	"github.com/go-resty/resty"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
+	"strconv"
 )
 
 // deleteApplication
@@ -48,7 +49,20 @@ func DeleteApplication(accessToken, environment, deleteAppName string) (*resty.R
 	if err != nil {
 		return nil, err
 	}
+
+	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNoContent {
+		return nil, errors.New(strconv.Itoa(resp.StatusCode()) + ":<" + string(resp.Body()) + ">")
+	}
+
 	return resp, nil
+}
+
+func PrintDeleteAppResponse(resp *resty.Response, err error) {
+	if err != nil {
+		fmt.Println("Error deleting Application:", err)
+	} else {
+		fmt.Println("Application deleted successfully!. Status: " + strconv.Itoa(resp.StatusCode()))
+	}
 }
 
 // Get the ID of an Application if available

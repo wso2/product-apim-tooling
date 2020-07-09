@@ -20,12 +20,10 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"net/http"
-
-	"github.com/spf13/cobra"
 )
 
 var deleteAppEnvironment string
@@ -67,18 +65,7 @@ func executeDeleteAppCmd(credential credentials.Credential)  {
 		if err != nil {
 			utils.HandleErrorAndExit("Error while deleting Application ", err)
 		}
-		// Print info on response
-		utils.Logf(utils.LogPrefixInfo + "ResponseStatus: %v\n", resp.Status())
-		if resp.StatusCode() == http.StatusOK {
-			// 200 OK
-			fmt.Println(deleteAppName + " Application deleted successfully!")
-		} else if resp.StatusCode() == http.StatusInternalServerError {
-			// 500 Internal Server Error
-			fmt.Println(string(resp.Body()))
-		} else {
-			// Neither 200 nor 500
-			fmt.Println("Error deleting Application:", resp.Status(), "\n", string(resp.Body()))
-		}
+		impl.PrintDeleteAppResponse(resp, err)
 	} else {
 		// Error deleting Application
 		fmt.Println("Error getting OAuth tokens while deleting Application:" + preCommandErr.Error())

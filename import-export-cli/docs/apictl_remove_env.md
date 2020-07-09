@@ -31,5 +31,5 @@ apictl remove env  production
 
 ### SEE ALSO
 
-* [apictl remove](apictl_remove.md)	 - Remove an environmnet
+* [apictl remove](apictl_remove.md)	 - Remove an environment
 

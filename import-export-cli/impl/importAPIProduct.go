@@ -55,8 +55,8 @@ func extractAPIProductDefinition(jsonContent []byte) (*v2.APIProductDefinition, 
 	return apiProduct, nil
 }
 
-// getAPIProductDefinition scans filePath and returns APIProductDefinition or an error
-func getAPIProductDefinition(filePath string) (*v2.APIProductDefinition, []byte, error) {
+// GetAPIProductDefinition scans filePath and returns APIProductDefinition or an error
+func GetAPIProductDefinition(filePath string) (*v2.APIProductDefinition, []byte, error) {
 	info, err := os.Stat(filePath)
 	if err != nil {
 		return nil, nil, err
@@ -300,7 +300,7 @@ func ImportAPIProduct(accessOAuthToken, adminEndpoint, importEnvironment, import
 	}
 
 	// Get API Product info
-	apiProductInfo, originalContent, err := getAPIProductDefinition(apiProductFilePath)
+	apiProductInfo, originalContent, err := GetAPIProductDefinition(apiProductFilePath)
 	if err != nil {
 		return err
 	}

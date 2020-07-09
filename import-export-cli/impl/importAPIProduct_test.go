@@ -123,14 +123,14 @@ func TestExtractAPIProductInfoWithMalformedJSON(t *testing.T) {
 }
 
 func TestGetAPIProductInfoCorrectDirectoryStructure(t *testing.T) {
-	apiProduct, _, err := getAPIProductDefinition(utils.GetRelativeTestDataPathFromImpl() + "MyProduct-1.0.0")
+	apiProduct, _, err := GetAPIProductDefinition(utils.GetRelativeTestDataPathFromImpl() + "MyProduct-1.0.0")
 	assert.Nil(t, err, "Should return nil error on reading correct directories")
 	assert.Equal(t, v2.ProductID{APIProductName: "MyProduct", Version: "1.0.0", ProviderName: "admin"}, apiProduct.ID,
 		"Should return correct values for ID info")
 }
 
 func TestGetAPIProductInfoMalformedDirectory(t *testing.T) {
-	apiProduct, _, err := getAPIProductDefinition(utils.GetRelativeTestDataPathFromImpl() + "MyProduct-1.0.0-malformed")
+	apiProduct, _, err := GetAPIProductDefinition(utils.GetRelativeTestDataPathFromImpl() + "MyProduct-1.0.0-malformed")
 	fmt.Println(reflect.TypeOf(err))
 	assert.Error(t, err, "Should return error on reading malformed directories")
 	assert.Contains(t, err.Error(), "was not found as a YAML or JSON", "Should contain this message")

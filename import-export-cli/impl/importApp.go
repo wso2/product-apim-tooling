@@ -21,8 +21,10 @@ package impl
 import (
 	"bytes"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -113,21 +115,30 @@ func ImportApplication(accessToken, adminEndpoint, filename, appOwner string, up
 	}
 
 	resp, err := client.Do(req)
-
 	if err != nil {
-		utils.Logln(utils.LogPrefixError, err)
-	} else {
-		if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK ||
-			resp.StatusCode == http.StatusMultiStatus {
-			// 207 Multi Status or 201 Created or 200 OK
-			fmt.Printf("\nCompleted importing the Application '" + filename + "'\n")
-		} else {
-			fmt.Printf("\nUnable to import the Application\n")
-			fmt.Println("Status: " + resp.Status)
-		}
+		return nil, err
 	}
+	if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
+		// 201 Created or 200 OK
+		_ = resp.Body.Close()
+		fmt.Println("Successfully imported Application")
+		return resp, nil
+	} else {
+		// We have an HTTP error
+		fmt.Println("Error importing Application.")
+		fmt.Println("Status: " + resp.Status)
 
-	return resp, err
+		bodyBuf, err := ioutil.ReadAll(resp.Body)
+		_ = resp.Body.Close()
+		if err != nil {
+			return nil, err
+		}
+
+		strBody := string(bodyBuf)
+		fmt.Println("Response:", strBody)
+
+		return nil, errors.New(resp.Status)
+	}
 }
 
 // NewFileUploadRequest form an HTTP Put request

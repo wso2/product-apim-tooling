@@ -137,8 +137,59 @@ type Environment struct {
 // ApiParams represents environments defined in configuration file
 type ApiParams struct {
 	// Environments contains all environments in a configuration
-	Environments []Environment `yaml:"environments"`
+	Environments []Environment   `yaml:"environments"`
+	Import       APIImportParams `yaml:"import"`
 }
+
+type ApiProductParams struct {
+	Import APIProductImportParams `yaml:"import"`
+}
+
+type ApplicationParams struct {
+	Import ApplicationImportParams `yaml:"import"`
+}
+
+// ------------------- Structs for Import Params ----------------------------------
+type APIImportParams struct {
+	Update           bool `yaml:"update"`
+	PreserveProvider bool `yaml:"preserveProvider"`
+}
+
+type APIProductImportParams struct {
+	ImportAPIs       bool `yaml:"importApis"`
+	UpdateAPIs       bool `yaml:"updateApis"`
+	UpdateAPIProduct bool `yaml:"updateApiProduct"`
+	PreserveProvider bool `yaml:"preserveProvider"`
+}
+
+type ApplicationImportParams struct {
+	Update            bool   `yaml:"update"`
+	TargetOwner       string `yaml:"targetOwner"`
+	PreserveOwner     bool   `yaml:"preserveOwner"`
+	SkipKeys          bool   `yaml:"skipKeys"`
+	SkipSubscriptions bool   `yaml:"skipSubscriptions"`
+}
+
+type ProjectParams struct {
+	Type                       string             `yaml:"type"`
+	AbsolutePath               string             `yaml:"absolutePath,omitempty"`
+	RelativePath               string             `yaml:"relativePath,omitempty"`
+	NickName                   string             `yaml:"nickName,omitempty"`
+	FailedDuringPreviousDeploy bool               `yaml:"failedDuringPreviousDeploy,omitempty"`
+	Deleted                    bool               `yaml:"deleted,omitempty"`
+	ProjectInfo                ProjectInfo        `yaml:"projectInfo,omitempty"`
+	ApiParams                  *ApiParams         `yaml:"apiParams,omitempty"`
+	ApiProductParams           *ApiProductParams  `yaml:"apiProductParams,omitempty"`
+	ApplicationParams          *ApplicationParams `yaml:"applicationParams,omitempty"`
+}
+
+type ProjectInfo struct {
+	Owner   string `yaml:"owner,omitempty"`
+	Name    string `yaml:"name,omitempty"`
+	Version string `yaml:"version,omitempty"`
+}
+
+// ---------------- End of Structs for Project Details ---------------------------------
 
 // APIEndpointConfig contains details about endpoints in an API
 type APIEndpointConfig struct {
@@ -178,6 +229,40 @@ func LoadApiParamsFromFile(path string) (*ApiParams, error) {
 	}
 
 	apiParams := &ApiParams{}
+	err = yaml.Unmarshal([]byte(fileContent), &apiParams)
+	if err != nil {
+		return nil, err
+	}
+
+	return apiParams, err
+}
+
+// LoadApiProductParamsFromFile loads an API Product project configuration YAML file located in path.
+//	It returns an error or a valid ApiProductParams
+func LoadApiProductParamsFromFile(path string) (*ApiProductParams, error) {
+	fileContent, err := getEnvSubstitutedFileContent(path)
+	if err != nil {
+		return nil, err
+	}
+
+	apiParams := &ApiProductParams{}
+	err = yaml.Unmarshal([]byte(fileContent), &apiParams)
+	if err != nil {
+		return nil, err
+	}
+
+	return apiParams, err
+}
+
+// LoadApplicationParamsFromFile loads an Application project configuration YAML file located in path.
+//	It returns an error or a valid ApplicationParams
+func LoadApplicationParamsFromFile(path string) (*ApplicationParams, error) {
+	fileContent, err := getEnvSubstitutedFileContent(path)
+	if err != nil {
+		return nil, err
+	}
+
+	apiParams := &ApplicationParams{}
 	err = yaml.Unmarshal([]byte(fileContent), &apiParams)
 	if err != nil {
 		return nil, err

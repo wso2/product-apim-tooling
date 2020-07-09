@@ -22,10 +22,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-
 	"github.com/go-resty/resty"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
+	"strconv"
 )
 
 // DeleteAPI
@@ -52,7 +52,18 @@ func DeleteAPI(accessToken, environment, deleteAPIName, deleteAPIVersion, delete
 	if err != nil {
 		return nil, err
 	}
+	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNoContent {
+		return nil, errors.New(strconv.Itoa(resp.StatusCode()) + ":<" + string(resp.Body()) + ">")
+	}
 	return resp, nil
+}
+
+func PrintDeleteAPIResponse(resp *resty.Response, err error) {
+	if err != nil {
+		fmt.Println("Error deleting API:", err)
+	} else {
+		fmt.Println("API deleted successfully!. Status: " + strconv.Itoa(resp.StatusCode()))
+	}
 }
 
 // Get the ID of an API if available

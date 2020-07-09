@@ -33,10 +33,11 @@ function _apictl {
       "list:List APIs/APIProducts/Applications in an environment or List the environments"
       "login:Login to an API Manager"
       "logout:Logout to from an API Manager"
-      "remove:Remove an environmnet"
+      "remove:Remove an environment"
       "set:Set configuration parameters"
       "uninstall:Uninstall an operator in the configured K8s cluster"
       "update:Update an API to the kubernetes cluster"
+      "vcs:Checks status and deploys projects"
       "version:Display Version on current apictl"
     )
     _describe "command" commands
@@ -112,6 +113,9 @@ function _apictl {
     ;;
   update)
     _apictl_update
+    ;;
+  vcs)
+    _apictl_vcs
     ;;
   version)
     _apictl_version
@@ -882,6 +886,64 @@ function _apictl_update_api {
 
 function _apictl_update_help {
   _arguments \
+    '(-k --insecure)'{-k,--insecure}'[Allow connections to SSL endpoints without certs]' \
+    '--verbose[Enable verbose mode]'
+}
+
+
+function _apictl_vcs {
+  local -a commands
+
+  _arguments -C \
+    '(-h --help)'{-h,--help}'[help for vcs]' \
+    '(-k --insecure)'{-k,--insecure}'[Allow connections to SSL endpoints without certs]' \
+    '--verbose[Enable verbose mode]' \
+    "1: :->cmnds" \
+    "*::arg:->args"
+
+  case $state in
+  cmnds)
+    commands=(
+      "deploy:Deploys projects to the specified environment"
+      "help:Help about any command"
+      "status:Shows the list of projects that are ready to deploy"
+    )
+    _describe "command" commands
+    ;;
+  esac
+
+  case "$words[1]" in
+  deploy)
+    _apictl_vcs_deploy
+    ;;
+  help)
+    _apictl_vcs_help
+    ;;
+  status)
+    _apictl_vcs_status
+    ;;
+  esac
+}
+
+function _apictl_vcs_deploy {
+  _arguments \
+    '(-e --environment)'{-e,--environment}'[Name of the environment to deploy the project(s)]:' \
+    '(-h --help)'{-h,--help}'[help for deploy]' \
+    '--skipRollback[Specifies whether rolling back to the last successful revision during an error situation should be skipped]' \
+    '(-k --insecure)'{-k,--insecure}'[Allow connections to SSL endpoints without certs]' \
+    '--verbose[Enable verbose mode]'
+}
+
+function _apictl_vcs_help {
+  _arguments \
+    '(-k --insecure)'{-k,--insecure}'[Allow connections to SSL endpoints without certs]' \
+    '--verbose[Enable verbose mode]'
+}
+
+function _apictl_vcs_status {
+  _arguments \
+    '(-e --environment)'{-e,--environment}'[Name of the environment to check the project(s) status]:' \
+    '(-h --help)'{-h,--help}'[help for status]' \
     '(-k --insecure)'{-k,--insecure}'[Allow connections to SSL endpoints without certs]' \
     '--verbose[Enable verbose mode]'
 }

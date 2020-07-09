@@ -15,6 +15,7 @@
 * specific language governing permissions and limitations
 * under the License.
 */
+
 package cmd
 
 import (
@@ -22,23 +23,25 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-const removeCmdLiteral = "remove"
-const removeCmdShortDesc = "Remove an environment"
-const removeCmdLongDesc = `Remove Environment and its related endpoints from the config file`
- 
-const removeCmdExamples = utils.ProjectName + ` ` + removeCmdLiteral + ` ` + removeEnvCmdLiteral + `  production`
+// vcs command related usage Info
+const vcsCmdLiteral = "vcs"
+const vcsCmdShortDesc = "Checks status and deploys projects"
+const vcsCmdLongDesc = `Checks status and deploys projects to the specified environment. In order to 
+use this command, 'git' must be installed in the system.'`
+const vcsCmdExamples = utils.ProjectName + ` ` + vcsStatusCmdLiteral + ` `  + ` -e dev
+` + utils.ProjectName + ` ` + deployCmdLiteral + ` -e dev`
 
-// removeCmd represents the remove command
-var removeCmd = &cobra.Command{
-	Use:   removeCmdLiteral,
-	Short: removeCmdShortDesc,
-	Long: removeCmdLongDesc,
-	Example: removeCmdExamples,
+// vcsCmd represents the vcs command
+var VCSCmd = &cobra.Command{
+	Use:     vcsCmdLiteral,
+	Short:   vcsCmdShortDesc,
+	Long:    vcsCmdLongDesc,
+	Example: vcsCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + removeCmdLiteral + " called")
+		utils.Logln(utils.LogPrefixInfo + vcsCmdLiteral + " called")
 	},
 }
 
 func init() {
-	RootCmd.AddCommand(removeCmd)
+	RootCmd.AddCommand(VCSCmd)
 }

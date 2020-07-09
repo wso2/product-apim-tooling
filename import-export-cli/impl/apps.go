@@ -21,9 +21,14 @@ package impl
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/go-resty/resty"
+	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
+	"os"
+	"path"
+	"path/filepath"
 )
 
 
@@ -82,4 +87,39 @@ func GetApplicationList(accessToken, applicationListEndpoint, appOwner, limit st
 	} else {
 		return 0, nil, errors.New(resp.Status())
 	}
+}
+
+// extractAppDefinition extracts ApplicationDefinition from jsonContent
+func extractAppDefinition(jsonContent []byte) (*v2.ApplicationDefinition, error) {
+	application := &v2.ApplicationDefinition{}
+	err := json.Unmarshal(jsonContent, &application)
+	if err != nil {
+		return nil, err
+	}
+
+	return application, nil
+}
+
+// GetApplicationDefinition scans filePath and returns ApplicationDefinition or an error
+func GetApplicationDefinition(filePath string) (*v2.ApplicationDefinition, []byte, error) {
+	info, err := os.Stat(filePath)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var buffer []byte
+	if info.IsDir() {
+		_, content, err := resolveYamlOrJSON(path.Join(filePath, filepath.Base(filePath)))
+		if err != nil {
+			return nil, nil, err
+		}
+		buffer = content
+	} else {
+		return nil, nil, fmt.Errorf("looking for directory, found %s", info.Name())
+	}
+	api, err := extractAppDefinition(buffer)
+	if err != nil {
+		return nil, nil, err
+	}
+	return api, buffer, nil
 }
