@@ -1,6 +1,6 @@
 ## apictl change
 
-Change a configuration
+Change a configuration in k8s cluster resource
 
 ### Synopsis
 

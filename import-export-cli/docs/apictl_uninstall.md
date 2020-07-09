@@ -1,6 +1,6 @@
 ## apictl uninstall
 
-Uninstall an operator
+Uninstall an operator in the configured K8s cluster
 
 ### Synopsis
 

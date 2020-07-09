@@ -40,5 +40,5 @@ apictl install api-operator -f path/to/operator/config/file.yaml
 
 ### SEE ALSO
 
-* [apictl install](apictl_install.md)	 - Install an operator
+* [apictl install](apictl_install.md)	 - Install an operator in the configured K8s cluster
 

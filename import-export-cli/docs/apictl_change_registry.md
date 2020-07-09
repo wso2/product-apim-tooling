@@ -37,5 +37,5 @@ apictl change registry
 
 ### SEE ALSO
 
-* [apictl change](apictl_change.md)	 - Change a configuration
+* [apictl change](apictl_change.md)	 - Change a configuration in k8s cluster resource
 
