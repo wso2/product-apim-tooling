@@ -36,7 +36,12 @@ const ApiOpControllerConfigMap = "controller-config"
 const ApiOperator = "api-operator"
 const ApiOpWso2Namespace = "wso2-system"
 
+// K8s Kinds
+const kindKey = "kind"
+const namespaceKey = "namespace"
+
 // API Operator CRDs
+const CrdKind = "CustomResourceDefinition"
 const ApiOpCrdApi = "apis.wso2.com"
 const ApiOpCrdRateLimiting = "ratelimitings.wso2.com"
 const ApiOpCrdSecurity = "securities.wso2.com"
@@ -46,7 +51,7 @@ const ApiOpCrdTargetEndpoint = "targetendpoints.wso2.com"
 const ApiOperatorConfigsUrlTemplate = "https://github.com/wso2/k8s-api-operator/releases/download/%s/api-operator-configs.yaml"
 const ApiOperatorVersionValidationUrlTemplate = "https://github.com/wso2/k8s-api-operator/tree/%s"
 const ApiOperatorFindVersionUrl = "https://github.com/wso2/k8s-api-operator/releases"
-const DefaultApiOperatorVersion = "v1.1.0"
+const DefaultApiOperatorVersion = "v1.2.0"
 const ApiOperatorVersionEnvVariable = "WSO2_API_OPERATOR_VERSION"
 
 // WSO2AM Operator constats
@@ -59,7 +64,7 @@ const Wso2amOpCrdApimanager = "apimanagers.apim.wso2.com"
 const Wso2AmOperatorConfigsUrlTemplate = "https://github.com/wso2/k8s-wso2am-operator/releases/download/%s/wso2am-operator-configs.yaml"
 const Wso2AmOperatorVersionValidationUrlTemplate = "https://github.com/wso2/k8s-wso2am-operator/tree/%s"
 const Wso2AmOperatorFindVersionUrl = "https://github.com/wso2/k8s-wso2am-operator/releases"
-const DefaultWso2AmOperatorVersion = "v1.0.0"
+const DefaultWso2AmOperatorVersion = "v1.1.0"
 const Wso2AmOperatorVersionEnvVariable = "WSO2_AM_OPERATOR_VERSION"
 
 // constants of K8s ConfigMap: controller-config

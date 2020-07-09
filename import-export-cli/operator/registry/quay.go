@@ -20,12 +20,13 @@ package registry
 
 // HttpRegistry represents private HTTPS registry
 // copy of HttpsRegistry
-var HttpRegistry = *HttpsRegistry
+var QuayRegistry = *HttpsRegistry
 
 func init() {
-	HttpRegistry.Name = "HTTP"
-	HttpRegistry.Caption = "HTTP Private Registry"
-	HttpRegistry.Option = 4
+	QuayRegistry.Name = "QUAY"
+	QuayRegistry.Caption = "Quay.io"
+	QuayRegistry.Option = 6
+	QuayRegistry.Repository.ServerUrl = "quay.io/"
 
-	add(&HttpRegistry)
+	add(&QuayRegistry)
 }

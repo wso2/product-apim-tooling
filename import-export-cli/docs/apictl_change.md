@@ -1,10 +1,10 @@
 ## apictl change
 
-Change a configuration
+Change a configuration in K8s cluster resource
 
 ### Synopsis
 
-Change a configuration in k8s cluster resource
+Change a configuration in K8s cluster resource
 
 ### Examples
 

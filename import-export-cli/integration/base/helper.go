@@ -20,6 +20,7 @@ package base
 
 import (
 	"flag"
+	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"os"
@@ -72,6 +73,16 @@ func GetValueOfUniformResponse(response string) string {
 //
 func SetupEnv(t *testing.T, env string, apim string, tokenEp string) {
 	Execute(t, "add-env", "-e", env, "--apim", apim, "--token", tokenEp)
+
+	t.Cleanup(func() {
+		Execute(t, "remove", "env", env)
+	})
+}
+
+// SetupEnv : Adds a new environment just with apim endpoint and automatically removes it when the
+// calling test function execution ends
+func SetupEnvWithoutTokenFlag(t *testing.T, env string, apim string) {
+	Execute(t, "add-env", "-e", env, "--apim", apim)
 
 	t.Cleanup(func() {
 		Execute(t, "remove", "env", env)
@@ -254,4 +265,30 @@ func logResponse(logString string, response *http.Response) {
 	log.Println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<", logString, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 	log.Println(string(dump))
 	log.Println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+}
+
+func RemoveDir(projectName string) {
+	error := os.RemoveAll(projectName)
+	if error != nil {
+		log.Fatal(error)
+	}
+}
+
+func GetExportedPathFromOutput(output string) string {
+	return strings.ReplaceAll(strings.ReplaceAll(output[strings.Index(output, "/"):], "\n", ""), " ", "")
+}
+
+//Count number of files in a directory
+func CountFiles(path string) (int, error) {
+	i := 0
+	files, err := ioutil.ReadDir(path)
+	if err != nil {
+		return 0, err
+	}
+	for _, file := range files {
+		if !file.IsDir() {
+			i++
+		}
+	}
+	return i, nil
 }

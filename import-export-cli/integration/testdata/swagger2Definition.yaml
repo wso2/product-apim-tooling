@@ -1,0 +1,770 @@
+swagger: "2.0"
+info:
+  description: |
+    This is a RESTFul API for Pizza Shack online pizza delivery store.
+  version: 1.0.0
+  title: PizzaShackAPI
+  contact:
+    name: John Doe
+    url: http://www.pizzashack.com
+    email: architecture@pizzashack.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+security:
+- default: []
+paths:
+  /order:
+    post:
+      description: Create a new Order
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Order object that needs to be added
+        required: true
+        schema:
+          required:
+          - orderId
+          properties:
+            customerName:
+              type: string
+            delivered:
+              type: boolean
+            address:
+              type: string
+            pizzaType:
+              type: string
+            creditCardNumber:
+              type: string
+            quantity:
+              type: number
+            orderId:
+              type: string
+          title: Pizza Order
+      responses:
+        "201":
+          description: Created. Successful response with the newly created object
+            as entity inthe body. Location header contains URL of newly created entity.
+          headers:
+            Location:
+              type: string
+              description: The URL of the newly created resource.
+            Content-Type:
+              type: string
+              description: The content type of the body.
+          schema:
+            required:
+            - orderId
+            properties:
+              customerName:
+                type: string
+              delivered:
+                type: boolean
+              address:
+                type: string
+              pizzaType:
+                type: string
+              creditCardNumber:
+                type: string
+              quantity:
+                type: number
+              orderId:
+                type: string
+            title: Pizza Order
+        "400":
+          description: Bad Request. Invalid request or validation error.
+          schema:
+            required:
+            - code
+            - message
+            properties:
+              message:
+                type: string
+                description: Error message.
+              error:
+                type: array
+                description: If there are more than one error list them out. Ex. list
+                  out validation errors by each field.
+                items:
+                  type: object
+                  title: Description of individual errors that may have occored during
+                    a request.
+                  properties:
+                    message:
+                      type: string
+                      description: Description about individual errors occored
+                    code:
+                      type: integer
+                      format: int64
+                  required:
+                  - code
+                  - message
+              description:
+                type: string
+                description: A detail description about the error message.
+              code:
+                type: integer
+                format: int64
+              moreInfo:
+                type: string
+                description: Preferably an url with more details about the error.
+            title: Error object returned with 4XX HTTP status
+        "415":
+          description: Unsupported Media Type. The entity of the request was in a
+            not supported format.
+          schema:
+            required:
+            - code
+            - message
+            properties:
+              message:
+                type: string
+                description: Error message.
+              error:
+                type: array
+                description: If there are more than one error list them out. Ex. list
+                  out validation errors by each field.
+                items:
+                  type: object
+                  title: Description of individual errors that may have occored during
+                    a request.
+                  properties:
+                    message:
+                      type: string
+                      description: Description about individual errors occored
+                    code:
+                      type: integer
+                      format: int64
+                  required:
+                  - code
+                  - message
+              description:
+                type: string
+                description: A detail description about the error message.
+              code:
+                type: integer
+                format: int64
+              moreInfo:
+                type: string
+                description: Preferably an url with more details about the error.
+            title: Error object returned with 4XX HTTP status
+      security:
+      - foo:
+        - fooTest1
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+  /menu:
+    get:
+      description: Return a list of available menu items
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters: []
+      responses:
+        "200":
+          description: OK. List of APIs is returned.
+          headers: {}
+          schema:
+            type: array
+            items:
+              type: object
+              title: Pizza menu Item
+              properties:
+                price:
+                  type: string
+                description:
+                  type: string
+                name:
+                  type: string
+                image:
+                  type: string
+              required:
+              - name
+        "304":
+          description: Not Modified. Empty body because the client has already the
+            latest version of the requested resource.
+        "406":
+          description: Not Acceptable. The requested media type is not supported
+          schema:
+            required:
+            - code
+            - message
+            properties:
+              message:
+                type: string
+                description: Error message.
+              error:
+                type: array
+                description: If there are more than one error list them out. Ex. list
+                  out validation errors by each field.
+                items:
+                  type: object
+                  title: Description of individual errors that may have occored during
+                    a request.
+                  properties:
+                    message:
+                      type: string
+                      description: Description about individual errors occored
+                    code:
+                      type: integer
+                      format: int64
+                  required:
+                  - code
+                  - message
+              description:
+                type: string
+                description: A detail description about the error message.
+              code:
+                type: integer
+                format: int64
+              moreInfo:
+                type: string
+                description: Preferably an url with more details about the error.
+            title: Error object returned with 4XX HTTP status
+      security:
+      - bar:
+        - barTest1
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+  /order/{orderId}:
+    get:
+      description: Get details of an Order
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: orderId
+        in: path
+        description: Order Id
+        required: true
+        type: string
+        format: string
+      responses:
+        "200":
+          description: OK Requested Order will be returned
+          headers: {}
+          schema:
+            required:
+            - orderId
+            properties:
+              customerName:
+                type: string
+              delivered:
+                type: boolean
+              address:
+                type: string
+              pizzaType:
+                type: string
+              creditCardNumber:
+                type: string
+              quantity:
+                type: number
+              orderId:
+                type: string
+            title: Pizza Order
+        "304":
+          description: Not Modified. Empty body because the client has already the
+            latest version of the requested resource.
+        "404":
+          description: Not Found. Requested API does not exist.
+          schema:
+            required:
+            - code
+            - message
+            properties:
+              message:
+                type: string
+                description: Error message.
+              error:
+                type: array
+                description: If there are more than one error list them out. Ex. list
+                  out validation errors by each field.
+                items:
+                  type: object
+                  title: Description of individual errors that may have occored during
+                    a request.
+                  properties:
+                    message:
+                      type: string
+                      description: Description about individual errors occored
+                    code:
+                      type: integer
+                      format: int64
+                  required:
+                  - code
+                  - message
+              description:
+                type: string
+                description: A detail description about the error message.
+              code:
+                type: integer
+                format: int64
+              moreInfo:
+                type: string
+                description: Preferably an url with more details about the error.
+            title: Error object returned with 4XX HTTP status
+        "406":
+          description: Not Acceptable. The requested media type is not supported
+          schema:
+            required:
+            - code
+            - message
+            properties:
+              message:
+                type: string
+                description: Error message.
+              error:
+                type: array
+                description: If there are more than one error list them out. Ex. list
+                  out validation errors by each field.
+                items:
+                  type: object
+                  title: Description of individual errors that may have occored during
+                    a request.
+                  properties:
+                    message:
+                      type: string
+                      description: Description about individual errors occored
+                    code:
+                      type: integer
+                      format: int64
+                  required:
+                  - code
+                  - message
+              description:
+                type: string
+                description: A detail description about the error message.
+              code:
+                type: integer
+                format: int64
+              moreInfo:
+                type: string
+                description: Preferably an url with more details about the error.
+            title: Error object returned with 4XX HTTP status
+      security:
+      - default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+    put:
+      description: Update an existing Order
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: orderId
+        in: path
+        description: Order Id
+        required: true
+        type: string
+        format: string
+      - in: body
+        name: body
+        description: Order object that needs to be added
+        required: true
+        schema:
+          required:
+          - orderId
+          properties:
+            customerName:
+              type: string
+            delivered:
+              type: boolean
+            address:
+              type: string
+            pizzaType:
+              type: string
+            creditCardNumber:
+              type: string
+            quantity:
+              type: number
+            orderId:
+              type: string
+          title: Pizza Order
+      responses:
+        "200":
+          description: OK. Successful response with updated Order
+          headers:
+            Location:
+              type: string
+              description: The URL of the newly created resource.
+            Content-Type:
+              type: string
+              description: The content type of the body.
+          schema:
+            required:
+            - orderId
+            properties:
+              customerName:
+                type: string
+              delivered:
+                type: boolean
+              address:
+                type: string
+              pizzaType:
+                type: string
+              creditCardNumber:
+                type: string
+              quantity:
+                type: number
+              orderId:
+                type: string
+            title: Pizza Order
+        "400":
+          description: Bad Request. Invalid request or validation error
+          schema:
+            required:
+            - code
+            - message
+            properties:
+              message:
+                type: string
+                description: Error message.
+              error:
+                type: array
+                description: If there are more than one error list them out. Ex. list
+                  out validation errors by each field.
+                items:
+                  type: object
+                  title: Description of individual errors that may have occored during
+                    a request.
+                  properties:
+                    message:
+                      type: string
+                      description: Description about individual errors occored
+                    code:
+                      type: integer
+                      format: int64
+                  required:
+                  - code
+                  - message
+              description:
+                type: string
+                description: A detail description about the error message.
+              code:
+                type: integer
+                format: int64
+              moreInfo:
+                type: string
+                description: Preferably an url with more details about the error.
+            title: Error object returned with 4XX HTTP status
+        "404":
+          description: Not Found. The resource to be updated does not exist.
+          schema:
+            required:
+            - code
+            - message
+            properties:
+              message:
+                type: string
+                description: Error message.
+              error:
+                type: array
+                description: If there are more than one error list them out. Ex. list
+                  out validation errors by each field.
+                items:
+                  type: object
+                  title: Description of individual errors that may have occored during
+                    a request.
+                  properties:
+                    message:
+                      type: string
+                      description: Description about individual errors occored
+                    code:
+                      type: integer
+                      format: int64
+                  required:
+                  - code
+                  - message
+              description:
+                type: string
+                description: A detail description about the error message.
+              code:
+                type: integer
+                format: int64
+              moreInfo:
+                type: string
+                description: Preferably an url with more details about the error.
+            title: Error object returned with 4XX HTTP status
+        "412":
+          description: Precondition Failed. The request has not been performed because
+            one of the preconditions is not met.
+          schema:
+            required:
+            - code
+            - message
+            properties:
+              message:
+                type: string
+                description: Error message.
+              error:
+                type: array
+                description: If there are more than one error list them out. Ex. list
+                  out validation errors by each field.
+                items:
+                  type: object
+                  title: Description of individual errors that may have occored during
+                    a request.
+                  properties:
+                    message:
+                      type: string
+                      description: Description about individual errors occored
+                    code:
+                      type: integer
+                      format: int64
+                  required:
+                  - code
+                  - message
+              description:
+                type: string
+                description: A detail description about the error message.
+              code:
+                type: integer
+                format: int64
+              moreInfo:
+                type: string
+                description: Preferably an url with more details about the error.
+            title: Error object returned with 4XX HTTP status
+      security:
+      - default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+    delete:
+      description: Delete an existing Order
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: orderId
+        in: path
+        description: Order Id
+        required: true
+        type: string
+        format: string
+      responses:
+        "200":
+          description: OK. Resource successfully deleted.
+        "404":
+          description: Not Found. Resource to be deleted does not exist.
+          schema:
+            required:
+            - code
+            - message
+            properties:
+              message:
+                type: string
+                description: Error message.
+              error:
+                type: array
+                description: If there are more than one error list them out. Ex. list
+                  out validation errors by each field.
+                items:
+                  type: object
+                  title: Description of individual errors that may have occored during
+                    a request.
+                  properties:
+                    message:
+                      type: string
+                      description: Description about individual errors occored
+                    code:
+                      type: integer
+                      format: int64
+                  required:
+                  - code
+                  - message
+              description:
+                type: string
+                description: A detail description about the error message.
+              code:
+                type: integer
+                format: int64
+              moreInfo:
+                type: string
+                description: Preferably an url with more details about the error.
+            title: Error object returned with 4XX HTTP status
+        "412":
+          description: Precondition Failed. The request has not been performed because
+            one of the preconditions is not met.
+          schema:
+            required:
+            - code
+            - message
+            properties:
+              message:
+                type: string
+                description: Error message.
+              error:
+                type: array
+                description: If there are more than one error list them out. Ex. list
+                  out validation errors by each field.
+                items:
+                  type: object
+                  title: Description of individual errors that may have occored during
+                    a request.
+                  properties:
+                    message:
+                      type: string
+                      description: Description about individual errors occored
+                    code:
+                      type: integer
+                      format: int64
+                  required:
+                  - code
+                  - message
+              description:
+                type: string
+                description: A detail description about the error message.
+              code:
+                type: integer
+                format: int64
+              moreInfo:
+                type: string
+                description: Preferably an url with more details about the error.
+            title: Error object returned with 4XX HTTP status
+      security:
+      - default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+securityDefinitions:
+  foo:
+    type: oauth2
+    authorizationUrl: https://test1.com
+    flow: implicit
+    scopes:
+      fooTest1: TestingSopes2121
+      fooTest3: TestingSopes33333
+    x-scopes-bindings:
+      fooTest1: admin
+      fooTest3: admin
+  bar:
+    type: oauth2
+    authorizationUrl: https://test2.com
+    flow: implicit
+    scopes:
+      barTest1: TestingSopes
+    x-scopes-bindings:
+      barTest1: admin
+definitions:
+  ErrorListItem:
+    required:
+    - code
+    - message
+    properties:
+      message:
+        type: string
+        description: Description about individual errors occored
+      code:
+        type: integer
+        format: int64
+    title: Description of individual errors that may have occored during a request.
+  MenuItem:
+    required:
+    - name
+    properties:
+      price:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      image:
+        type: string
+    title: Pizza menu Item
+  Order:
+    required:
+    - orderId
+    properties:
+      customerName:
+        type: string
+      delivered:
+        type: boolean
+      address:
+        type: string
+      pizzaType:
+        type: string
+      creditCardNumber:
+        type: string
+      quantity:
+        type: number
+      orderId:
+        type: string
+    title: Pizza Order
+  Error:
+    required:
+    - code
+    - message
+    properties:
+      message:
+        type: string
+        description: Error message.
+      error:
+        type: array
+        description: If there are more than one error list them out. Ex. list out
+          validation errors by each field.
+        items:
+          type: object
+          title: Description of individual errors that may have occored during a request.
+          properties:
+            message:
+              type: string
+              description: Description about individual errors occored
+            code:
+              type: integer
+              format: int64
+          required:
+          - code
+          - message
+      description:
+        type: string
+        description: A detail description about the error message.
+      code:
+        type: integer
+        format: int64
+      moreInfo:
+        type: string
+        description: Preferably an url with more details about the error.
+    title: Error object returned with 4XX HTTP status
+x-wso2-auth-header: Authorization
+x-throttling-tier: Unlimited
+x-wso2-cors:
+  corsConfigurationEnabled: false
+  accessControlAllowOrigins:
+  - '*'
+  accessControlAllowCredentials: false
+  accessControlAllowHeaders:
+  - authorization
+  - Access-Control-Allow-Origin
+  - Content-Type
+  - SOAPAction
+  accessControlAllowMethods:
+  - GET
+  - PUT
+  - POST
+  - DELETE
+  - PATCH
+  - OPTIONS
+x-wso2-production-endpoints:
+  urls:
+  - https://localhost:9443/am/sample/pizzashack/v1/api/
+  type: http
+x-wso2-sandbox-endpoints:
+  urls:
+  - https://localhost:9443/am/sample/pizzashack/v1/api/
+  type: http
+x-wso2-basePath: /pizzashack/1.0.0/Chamindu
+x-wso2-transports:
+- http
+- https

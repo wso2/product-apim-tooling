@@ -33,7 +33,7 @@ var flagTokenType string
 
 // Set command related Info
 const setCmdLiteral = "set"
-const setCmdShortDesc = "Set configuration"
+const setCmdShortDesc = "Set configuration parameters"
 
 const setCmdLongDesc = `Set configuration parameters. Use at least one of the following flags
 * --http-request-timeout <time-in-milli-seconds>

@@ -15,17 +15,16 @@
 * specific language governing permissions and limitations
 * under the License.
  */
+package utils
 
-package registry
+const CustomTestExportDirectory = "testdata/CustomExportDirectory/"
+const TestSwagger2DefinitionPath = "testdata/swagger2Definition.yaml"
+const TestOpenAPI3DefinitionPath = "testdata/openAPI3Definition.yaml"
+const TestOpenAPISpecificationURL = "https://petstore.swagger.io/v2/swagger.json"
+const TestMigrationDirectorySuffix = "/migration"
 
-// HttpRegistry represents private HTTPS registry
-// copy of HttpsRegistry
-var HttpRegistry = *HttpsRegistry
+const DefaultApictlTestAppName = "default-apictl-app"
 
-func init() {
-	HttpRegistry.Name = "HTTP"
-	HttpRegistry.Caption = "HTTP Private Registry"
-	HttpRegistry.Option = 4
-
-	add(&HttpRegistry)
-}
+//Export test cases
+const DevFirstDefaultAPIName = "SwaggerPetstoreNew"
+const DevFirstDefaultAPIVersion = "1.0.0"

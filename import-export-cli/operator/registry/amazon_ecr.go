@@ -12,20 +12,13 @@ import (
 // validation regex for repository URI validation
 const amazonRepoRegex = `\.amazonaws\.com\/.*$`
 
-var amazonEcrRepo = new(string)
-
-var amazonEcrValues = struct {
-	repository string
-	credFile   string
-}{}
-
 // AmazonEcrRegistry represents Amazon ECR registry
 var AmazonEcrRegistry = &Registry{
 	Name:       "AMAZON_ECR",
 	Caption:    "Amazon ECR",
-	Repository: amazonEcrRepo,
+	Repository: Repository{},
 	Option:     2,
-	Read: func(flagValues *map[string]FlagValue) {
+	Read: func(reg *Registry, flagValues *map[string]FlagValue) {
 		var repository, credFile string
 
 		// check input mode: interactive or batch
@@ -46,13 +39,15 @@ var AmazonEcrRegistry = &Registry{
 			}
 		}
 
-		amazonEcrValues.repository = repository
-		amazonEcrValues.credFile = credFile
-		*amazonEcrRepo = repository
+		reg.Repository.Name = repository
+		reg.Repository.KeyFile = credFile
 	},
-	Run: func() {
+	Run: func(reg *Registry) {
 		createAmazonEcrConfig()
-		k8sUtils.K8sCreateSecretFromFile(k8sUtils.AwsCredentialsSecret, k8sUtils.ApiOpWso2Namespace, amazonEcrValues.credFile, k8sUtils.AwsCredentialsFile)
+		k8sUtils.K8sCreateSecretFromFile(
+			k8sUtils.AwsCredentialsSecret, k8sUtils.ApiOpWso2Namespace,
+			reg.Repository.KeyFile, k8sUtils.AwsCredentialsFile,
+		)
 	},
 	Flags: Flags{
 		RequiredFlags: &map[string]bool{k8sUtils.FlagBmRepository: true, k8sUtils.FlagBmKeyFile: true},
@@ -68,7 +63,10 @@ func readAmazonEcrInputs() (string, string) {
 	var err error
 
 	for !isConfirm {
-		repository, err = utils.ReadInputString("Enter Repository URI (<aws_account_id.dkr.ecr.region.amazonaws.com>/repository)", utils.Default{IsDefault: false}, amazonRepoRegex, true)
+		repository, err = utils.ReadInputString(
+			"Enter Repository URI (<aws_account_id.dkr.ecr.region.amazonaws.com>/repository)",
+			utils.Default{IsDefault: false}, amazonRepoRegex, true,
+		)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading DockerHub repository name from user", err)
 		}
@@ -78,7 +76,8 @@ func readAmazonEcrInputs() (string, string) {
 			defaultLocation = filepath.Join(defaultLocation, ".aws", "credentials")
 		} // else ignore and make defaultLocation = ""
 
-		credFile, err = utils.ReadInput("Amazon credential file", utils.Default{Value: defaultLocation, IsDefault: true}, utils.IsFileExist, "Invalid file", true)
+		credFile, err = utils.ReadInput("Amazon credential file", utils.Default{Value: defaultLocation, IsDefault: true},
+			utils.IsFileExist, "Invalid file", true)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading amazon credential file from user", err)
 		}
@@ -86,13 +85,13 @@ func readAmazonEcrInputs() (string, string) {
 		fmt.Println("\nRepository     : " + repository)
 		fmt.Println("Credential File: " + credFile)
 
-		isConfirmStr, err := utils.ReadInputString("Confirm configurations", utils.Default{Value: "Y", IsDefault: true}, "", false)
+		isConfirmStr, err := utils.ReadInputString("Confirm configurations",
+			utils.Default{Value: "Y", IsDefault: true}, "", false)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading user input Confirmation", err)
 		}
 
-		isConfirmStr = strings.ToUpper(isConfirmStr)
-		isConfirm = isConfirmStr == "Y" || isConfirmStr == "YES"
+		isConfirm = strings.EqualFold(isConfirmStr, "y") || strings.EqualFold(isConfirmStr, "yes")
 	}
 
 	return repository, credFile

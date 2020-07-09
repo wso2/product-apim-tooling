@@ -185,7 +185,6 @@
         <pre><code class="lang-bash">      Flags:
         Required:
             --environment, -e (Name of the environment)
-            --token (Token Endpoint)
             AND
             --apim (API Manager endpoint)
             OR (the following 4)
@@ -194,12 +193,11 @@
             --devportal https://localhost:9443 \
             --admin https://localhost:9443
         Optional:
-            --list (API List endpoint for environment)
+            --token (Token Endpoint)
 
         Examples:
         apictl add-env -e dev \
-            --apim https://localhost:9443 \
-            --token https://localhost:8243/token
+            --apim https://localhost:9443
 
         apictl add-env -e staging \
             --registration https://idp.com:9443 \
@@ -214,7 +212,7 @@
             --token https://gw.com:8243/token
 </code></pre>
     </li>
-    <li><h4 id="remove-env">remove-env</h4>
+    <li><h4 id="remove-env">remove env</h4>
     </li>
 </ul>
 <pre><code class="lang-bash">        Flags:

@@ -66,7 +66,7 @@ var installWso2amOperatorCmd = &cobra.Command{
 
 		// installing operator and configs if -f flag given
 		// otherwise settings configs only
-		k8sUtils.CreateControllerConfigs(configFile, 20, k8sUtils.ApiOpCrdSecurity)
+		k8sUtils.CreateControllerConfigs(configFile, 20, k8sUtils.Wso2amOpCrdApimanager)
 
 		fmt.Println("[Setting to K8s Mode]")
 		utils.SetToK8sMode()
