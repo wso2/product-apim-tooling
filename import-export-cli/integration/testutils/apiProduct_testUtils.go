@@ -20,16 +20,18 @@ package testutils
 
 import (
 	"encoding/json"
-	"github.com/google/go-cmp/cmp"
-	"github.com/stretchr/testify/assert"
-	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
-	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/assert"
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/adminservices"
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 func AddAPIProductFromJSONWithoutCleaning(t *testing.T, client *apim.Client, username string, password string, apisList map[string]*apim.API) *apim.APIProduct {
@@ -42,7 +44,13 @@ func AddAPIProductFromJSONWithoutCleaning(t *testing.T, client *apim.Client, use
 }
 
 func getAPIProduct(t *testing.T, client *apim.Client, name string, username string, password string) *apim.APIProduct {
-	client.Login(username, password)
+	if username == adminservices.DevopsUsername {
+		client.Login(adminservices.AdminUsername, adminservices.AdminPassword)
+	} else if username == adminservices.DevopsUsername+"@"+adminservices.Tenant1 {
+		client.Login(adminservices.AdminUsername+"@"+adminservices.Tenant1, adminservices.AdminPassword)
+	} else {
+		client.Login(username, password)
+	}
 	apiProductInfo := client.GetAPIProductByName(name)
 	return client.GetAPIProduct(apiProductInfo.ID)
 }
