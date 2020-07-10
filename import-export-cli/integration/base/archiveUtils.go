@@ -60,7 +60,7 @@ func ExtractArchiveFile() {
 
 	var err error
 	if strings.Contains(archiveFileName, ".zip") {
-		err = unzip(destPath, srcPath)
+		err = Unzip(destPath, srcPath)
 		BinaryName = "apictl.exe" // Windows binaries are archived using zip
 	} else { // tar.gz
 		err = untar(destPath, srcPath)
@@ -140,7 +140,7 @@ func untar(dstPath string, srcPath string) error {
 	}
 }
 
-func unzip(destPath string, srcPath string) error {
+func Unzip(destPath string, srcPath string) error {
 	reader, err := zip.OpenReader(srcPath)
 	if err != nil {
 		return err
