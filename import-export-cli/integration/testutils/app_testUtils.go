@@ -19,13 +19,14 @@
 package testutils
 
 import (
+	"path/filepath"
+	"testing"
+	"time"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"path/filepath"
-	"testing"
-	"time"
 )
 
 func AddApp(t *testing.T, client *apim.Client, username string, password string) *apim.Application {
