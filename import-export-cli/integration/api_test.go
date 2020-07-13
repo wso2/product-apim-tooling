@@ -19,8 +19,9 @@
 package integration
 
 import (
-	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 	"testing"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 )
@@ -66,6 +67,31 @@ func TestExportImportApiAdminSuperTenantUser(t *testing.T) {
 	args := &testutils.ApiImportExportTestArgs{
 		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
 		CtlUser:     testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+	}
+
+	testutils.ValidateAPIExportImport(t, args)
+}
+
+// Export an API from one environment and import to another environment as super tenant user with
+// Internal/devops role by specifying the provider name
+func TestExportImportApiDevopsSuperTenantUser(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+	prod := apimClients[1]
+
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
 		Api:         api,
 		SrcAPIM:     dev,
 		DestAPIM:    prod,
@@ -121,6 +147,31 @@ func TestExportImportApiAdminTenantUser(t *testing.T) {
 	testutils.ValidateAPIExportImport(t, args)
 }
 
+// Export an API from one environment and import to another environment as tenant user with
+// Internal/devops role by specifying the provider name
+func TestExportImportApiDevopsTenantUser(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	tenantApiCreator := creator.UserName + "@" + TENANT1
+	tenantApiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+	prod := apimClients[1]
+
+	api := testutils.AddAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: tenantApiCreator, Password: tenantApiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+	}
+
+	testutils.ValidateAPIExportImport(t, args)
+}
+
 // Export an API as super tenant admin without specifying the provider
 func TestExportApiAdminSuperTenantUserWithoutProvider(t *testing.T) {
 	adminUsername := superAdminUser
@@ -144,6 +195,29 @@ func TestExportApiAdminSuperTenantUserWithoutProvider(t *testing.T) {
 	testutils.ValidateAPIExport(t, args)
 }
 
+// Export an API as super tenant user with Internal/devops role without specifying the provider
+func TestExportApiDevopsSuperTenantUserWithoutProvider(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+	prod := apimClients[1]
+
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		CtlUser:  testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Api:      api,
+		SrcAPIM:  dev,
+		DestAPIM: prod,
+	}
+
+	testutils.ValidateAPIExport(t, args)
+}
+
 // Export an API as tenant admin without specifying the provider
 func TestExportApiAdminTenantUserWithoutProvider(t *testing.T) {
 	tenantAdminUsername := superAdminUser + "@" + TENANT1
@@ -159,6 +233,29 @@ func TestExportApiAdminTenantUserWithoutProvider(t *testing.T) {
 
 	args := &testutils.ApiImportExportTestArgs{
 		CtlUser:  testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
+		Api:      api,
+		SrcAPIM:  dev,
+		DestAPIM: prod,
+	}
+
+	testutils.ValidateAPIExport(t, args)
+}
+
+// Export an API as tenant user with Internal/devops role without specifying the provider
+func TestExportApiDevopsTenantUserWithoutProvider(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	tenantApiCreator := creator.UserName + "@" + TENANT1
+	tenantApiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+	prod := apimClients[1]
+
+	api := testutils.AddAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		CtlUser:  testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
 		Api:      api,
 		SrcAPIM:  dev,
 		DestAPIM: prod,
@@ -191,6 +288,30 @@ func TestExportApiAdminTenantUserFromAnotherTenant(t *testing.T) {
 	testutils.ValidateAPIExportFailure(t, args)
 }
 
+// Export an API using a tenant user with Internal/devops role by specifying the provider name - API is in a different tenant
+func TestExportApiDevopsTenantUserFromAnotherTenant(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	superTenantApiCreator := creator.UserName
+	superTenantApiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+	prod := apimClients[1]
+
+	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+	}
+
+	testutils.ValidateAPIExportFailure(t, args)
+}
+
 // Export an API using a tenant user without specifying the provider name - API is in a different tenant
 func TestExportApiAdminTenantUserFromAnotherTenantWithoutProvider(t *testing.T) {
 	tenantAdminUsername := superAdminUser + "@" + TENANT1
@@ -206,6 +327,29 @@ func TestExportApiAdminTenantUserFromAnotherTenantWithoutProvider(t *testing.T) 
 
 	args := &testutils.ApiImportExportTestArgs{
 		CtlUser:  testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
+		Api:      api,
+		SrcAPIM:  dev,
+		DestAPIM: prod,
+	}
+
+	testutils.ValidateAPIExportFailure(t, args)
+}
+
+// Export an API using a tenant user with Internal/devops role without specifying the provider name - API is in a different tenant
+func TestExportApiDevopsTenantUserFromAnotherTenantWithoutProvider(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	superTenantApiCreator := creator.UserName
+	superTenantApiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+	prod := apimClients[1]
+
+	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		CtlUser:  testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
 		Api:      api,
 		SrcAPIM:  dev,
 		DestAPIM: prod,
@@ -249,6 +393,41 @@ func TestExportImportApiCrossTenantUserWithoutPreserveProvider(t *testing.T) {
 	testutils.ValidateAPIImport(t, args)
 }
 
+// Export an API from one environment as super tenant user with Internal/devops role
+// and import to another environment as cross tenant user with Internal/devops role (with preserve-provider=false)
+func TestExportImportApiCrossTenantDevopsUserWithoutPreserveProvider(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	superTenantApiCreator := creator.UserName
+	superTenantApiCreatorPassword := creator.Password
+
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	dev := apimClients[0]
+	prod := apimClients[1]
+
+	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+	}
+
+	testutils.ValidateAPIExport(t, args)
+
+	// Since --preserve-provider=false both the apiProvider and the ctlUser is tenant user with Internal/devops role
+	args.ApiProvider = testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword}
+	args.CtlUser = testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword}
+
+	// Import the API to env2 as tenant user with Internal/devops role across domains
+	testutils.ValidateAPIImport(t, args)
+}
+
 // Export an API from one environment as super tenant admin and import to another environment as cross tenant admin
 // (without preserve-provider=false)
 func TestExportImportApiCrossTenantUser(t *testing.T) {
@@ -283,6 +462,41 @@ func TestExportImportApiCrossTenantUser(t *testing.T) {
 	testutils.ValidateAPIImportFailure(t, args)
 }
 
+// Export an API from one environment as super tenant user with Internal/devops role
+// and import to another environment as cross tenant user with Internal/devops role (without preserve-provider=false)
+func TestExportImportApiCrossTenantDevopsUser(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	superTenantApiCreator := creator.UserName
+	superTenantApiCreatorPassword := creator.Password
+
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	dev := apimClients[0]
+	prod := apimClients[1]
+
+	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+	}
+
+	testutils.ValidateAPIExport(t, args)
+
+	// Since --preserve-provider=false is not specified, the apiProvider remain as it is and the ctlUser is tenant user
+	// with Internal/devops role
+	args.CtlUser = testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword}
+
+	// Import the API to env2 as tenant admin across domains
+	testutils.ValidateAPIImportFailure(t, args)
+}
+
 func TestListApisAdminSuperTenantUser(t *testing.T) {
 	adminUsername := superAdminUser
 	adminPassword := superAdminPassword
@@ -305,6 +519,28 @@ func TestListApisAdminSuperTenantUser(t *testing.T) {
 	testutils.ValidateAPIsList(t, args)
 }
 
+func TestListApisDevopsSuperTenantUser(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+
+	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
+		// Add the API to env1
+		testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+	}
+
+	args := &testutils.ApiImportExportTestArgs{
+		CtlUser: testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		SrcAPIM: dev,
+	}
+
+	testutils.ValidateAPIsList(t, args)
+}
+
 func TestListApisAdminTenantUser(t *testing.T) {
 	tenantAdminUsername := superAdminUser + "@" + TENANT1
 	tenantAdminPassword := superAdminPassword
@@ -321,6 +557,28 @@ func TestListApisAdminTenantUser(t *testing.T) {
 
 	args := &testutils.ApiImportExportTestArgs{
 		CtlUser: testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
+		SrcAPIM: dev,
+	}
+
+	testutils.ValidateAPIsList(t, args)
+}
+
+func TestListApisDevopsTenantUser(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	apiCreator := creator.UserName + "@" + TENANT1
+	apiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+
+	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
+		// Add the API to env1
+		testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+	}
+
+	args := &testutils.ApiImportExportTestArgs{
+		CtlUser: testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
 		SrcAPIM: dev,
 	}
 
@@ -353,6 +611,32 @@ func TestDeleteApiAdminSuperTenantUser(t *testing.T) {
 	testutils.ValidateAPIDelete(t, args)
 }
 
+func TestDeleteApiDevopsSuperTenantUser(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+
+	var api *apim.API
+	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
+		api = testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+	}
+
+	// This will be the API that will be deleted by apictl, so no need to do cleaning
+	api = testutils.AddAPIWithoutCleaning(t, dev, apiCreator, apiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		CtlUser: testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Api:     api,
+		SrcAPIM: dev,
+	}
+
+	testutils.ValidateAPIDelete(t, args)
+}
+
 func TestDeleteApiAdminTenantUser(t *testing.T) {
 	tenantAdminUsername := superAdminUser + "@" + TENANT1
 	tenantAdminPassword := superAdminPassword
@@ -372,6 +656,32 @@ func TestDeleteApiAdminTenantUser(t *testing.T) {
 
 	args := &testutils.ApiImportExportTestArgs{
 		CtlUser: testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
+		Api:     api,
+		SrcAPIM: dev,
+	}
+
+	testutils.ValidateAPIDelete(t, args)
+}
+
+func TestDeleteApiDevopsTenantUser(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	tenantApiCreator := creator.UserName + "@" + TENANT1
+	tenantApiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+
+	var api *apim.API
+	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
+		api = testutils.AddAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword)
+	}
+
+	// This will be the API that will be deleted by apictl, so no need to do cleaning
+	api = testutils.AddAPIWithoutCleaning(t, dev, tenantApiCreator, tenantApiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		CtlUser: testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
 		Api:     api,
 		SrcAPIM: dev,
 	}
