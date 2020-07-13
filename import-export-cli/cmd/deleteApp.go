@@ -14,13 +14,12 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package cmd
 
 import (
 	"fmt"
-	"net/http"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
@@ -59,11 +58,13 @@ var DeleteAppCmd = &cobra.Command{
 	},
 }
 
-
 // executeDeleteAppCmd executes the delete app command
 func executeDeleteAppCmd(credential credentials.Credential) {
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, deleteAppEnvironment)
 	if preCommandErr == nil {
+		if deleteAppOwner == "" {
+			deleteAppOwner = credential.Username
+		}
 		resp, err := impl.DeleteApplication(accessToken, deleteAppEnvironment, deleteAppName, deleteAppOwner)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while deleting Application ", err)
@@ -86,6 +87,5 @@ func init() {
 		"", "Environment from which the Application should be deleted")
 	// Mark required flags
 	_ = DeleteAppCmd.MarkFlagRequired("name")
-	_ = DeleteAppCmd.MarkFlagRequired("owner")
 	_ = DeleteAppCmd.MarkFlagRequired("environment")
 }

@@ -14,7 +14,7 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package impl
 
@@ -85,8 +85,13 @@ func getAppId(accessToken, environment, appName, appOwner string) (string, error
 		appData := &utils.AppList{}
 		data := []byte(resp.Body())
 		err = json.Unmarshal(data, &appData)
+		appId := ""
 		if appData.Count != 0 {
-			appId := appData.List[0].ApplicationID
+			for _, app := range appData.List {
+				if app.Name == appName {
+					appId = app.ApplicationID
+				}
+			}
 			return appId, err
 		}
 		return "", errors.New("Cannot find the application: " + appName + " for owner: " + appOwner)
