@@ -18,12 +18,10 @@
 package integration
 
 import (
-	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"path/filepath"
-	"strings"
 	"testing"
 	"time"
 )
@@ -42,6 +40,25 @@ func TestInitializeProject(t *testing.T) {
 	}
 
 	testutils.ValidateInitializeProject(t, args)
+
+}
+
+//Initialize an API with --definition flag and import that project
+func TestInitializeAPIWithDefinitionFlag(t *testing.T) {
+	apim := apimClients[0]
+	projectName := "test"
+	username := superAdminUser
+	password := superAdminPassword
+
+	args := &testutils.InitTestArgs{
+		CtlUser:   testutils.Credentials{Username: username, Password: password},
+		SrcAPIM:   apim,
+		InitFlag:  projectName,
+		OasFlag:   utils.TestApiDefinitionPath,
+		ForceFlag: false,
+	}
+
+	testutils.ValidateInitializeProjectWithDefinitionFlag(t, args)
 
 }
 
@@ -193,7 +210,7 @@ func TestImportAndExportAPIWithDocument(t *testing.T) {
 	username := superAdminUser
 	password := superAdminPassword
 	apim := apimClients[0]
-	var projectName = "APIWithADoc"
+	projectName := "OpenAPI3ProjectWithDoc"
 
 	args := &testutils.InitTestArgs{
 		CtlUser:   testutils.Credentials{Username: username, Password: password},
@@ -209,12 +226,12 @@ func TestImportAndExportAPIWithDocument(t *testing.T) {
 	//Move doc file to created project
 	srcPathForDoc, _ := filepath.Abs(utils.TestCase1DocPath)
 	destPathForDoc := projectPath + utils.TestCase1DestPathSuffix
-	Copy(srcPathForDoc, destPathForDoc)
+	base.Copy(srcPathForDoc, destPathForDoc)
 
 	//Move docMetaData file to created project
 	srcPathForDocMetadata, _ := filepath.Abs(utils.TestCase1DocMetaDataPath)
 	destPathForDocMetaData := projectPath + utils.TestCase1DestMetaDataPathSuffix
-	Copy(srcPathForDocMetadata, destPathForDocMetaData)
+	base.Copy(srcPathForDocMetadata, destPathForDocMetaData)
 
 	//Import the project with Document
 	testutils.ValidateImportUpdatePassedWithInitializedProject(t, args)
@@ -281,10 +298,10 @@ func TestImportAndExportAPIWithJpegImage(t *testing.T) {
 	testutils.ValidateAPIWithImageIsExported(t, args, utils.DevFirstDefaultAPIName, utils.DevFirstDefaultAPIVersion)
 }
 
-//Import and export API with updated thumbnail and document
-func TestImportAndExportAPIWithDocumentAndThumbnailUpdate(t *testing.T) {
-	apim := apimClients[0]
-	projectName := "OpenAPI3ProjectWithUpdate"
+//Import and export API with updated thumbnail and document and assert that
+func TestUpdateDocAndImageOfAPIOfExistingAPI(t *testing.T) {
+	apim := apimClients[1]
+	projectName := "Test"
 	username := superAdminUser
 	password := superAdminPassword
 
@@ -293,8 +310,10 @@ func TestImportAndExportAPIWithDocumentAndThumbnailUpdate(t *testing.T) {
 		SrcAPIM:   apim,
 		InitFlag:  projectName,
 		OasFlag:   utils.TestOpenAPI3DefinitionPath,
-		ForceFlag: false,
+		ForceFlag: true,
 	}
+	//Initialize the project
+	testutils.ValidateInitializeProjectWithOASFlag(t, args)
 
 	//Move doc file to created project
 	projectPath, _ := filepath.Abs(projectName)
@@ -330,33 +349,9 @@ func TestImportAndExportAPIWithDocumentAndThumbnailUpdate(t *testing.T) {
 	testutils.ValidateImportUpdatePassedWithInitializedProject(t, args)
 
 	//Validate that image is been updated
-	testutils.ValidateAPIWithImageIsExported(t, args, utils.DevFirstDefaultAPIName, utils.DevFirstDefaultAPIVersion)
+	testutils.ValidateAPIWithDocIsExported(t, args, utils.DevFirstDefaultAPIName, utils.DevFirstDefaultAPIVersion)
 
 	//Validate that document is been updated
 	testutils.ValidateAPIWithIconIsExported(t, args, utils.DevFirstDefaultAPIName, utils.DevFirstDefaultAPIVersion)
 
-
-	//expOutput, expError := exportApiImportedFromProject(t, DevFirstDefaultAPIName, DevFirstDefaultAPIVersion, apim.GetEnvName())
-	////Check whether api is exported or not
-	//assert.Nil(t, expError, "Error while Exporting API")
-	//assert.Contains(t, expOutput, "Successfully exported API!", "Error while Exporting API")
-	//
-	////Unzip exported API and check for the imported doc in there
-	//exportedPath := getExportedPathFromOutput(expOutput)
-	//relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
-	//base.Unzip(relativePath, exportedPath)
-	//docPathOfExportedApi := relativePath + TestDefaultExtractedFileName + TestCase1DestPathSuffix
-	//iconPathOfExportedApi := relativePath + TestDefaultExtractedFileName + TestCase2DestPngPathSuffix
-	//isImageExported := IsFileAvailable(iconPathOfExportedApi)
-	//isDocExported := IsFileAvailable(docPathOfExportedApi)
-	//assert.Equal(t, true, isDocExported, "Error while Updating API with document")
-	//assert.Equal(t, true, isImageExported, "Error while Updating API with Image")
-	//
-	////Remove Created project and logout
-	//base.RemoveDir(projectName)
-	//base.RemoveDir(exportedPath)
-	//base.RemoveDir(relativePath)
-	//t.Cleanup(func() {
-	//	base.Execute(t, "logout", apim.GetEnvName())
-	//})
 }

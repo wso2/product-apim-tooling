@@ -163,6 +163,7 @@ func exportAPI(t *testing.T, name string, version string, provider string, env s
 
 func ValidateAllApisOfATenantIsExported(t *testing.T, args *ApiImportExportTestArgs, apisAdded int) {
 	time.Sleep(5 * time.Second)
+
 	output, error := ExportAllApisOfATenant(t, args)
 	assert.Nil(t, error, "Error while Exporting APIs")
 	assert.Contains(t, output, "export-apis execution completed", "Error while Exporting APIs")
@@ -170,7 +171,7 @@ func ValidateAllApisOfATenantIsExported(t *testing.T, args *ApiImportExportTestA
 	//Derive exported path from output
 	exportedPath := base.GetExportedPathFromOutput(strings.ReplaceAll(output, "Command: export-apis execution completed !", ""))
 	count, _ := base.CountFiles(exportedPath)
-	assert.GreaterOrEqual(t, apisAdded, count, "Error while Exporting APIs")
+	assert.GreaterOrEqual(t, count, apisAdded, "Error while Exporting APIs")
 
 	t.Cleanup(func() {
 		//Remove Exported apis and logout
@@ -416,10 +417,15 @@ func ValidateAPIDelete(t *testing.T, args *ApiImportExportTestArgs) {
 	validateAPIIsDeleted(t, args.Api, apisListAfterDelete)
 }
 func exportApiImportedFromProject(t *testing.T, APIName string, APIVersion string, EnvName string) (string, error) {
-	return base.Execute(t, "export-api", "-n", APIName, "-v", APIVersion, "-e", EnvName, "--force")
+	return base.Execute(t, "export-api", "-n", APIName, "-v", APIVersion, "-e", EnvName)
 }
 
 func ExportAllApisOfATenant(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
+	//Setup environment
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+	//Login to the environment
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
 	output, error := base.Execute(t, "export-apis", "-e", args.SrcAPIM.GetEnvName(), "-k", "--force")
 	return output, error
 }

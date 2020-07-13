@@ -720,10 +720,10 @@ func TestExportApisWithExportApisCommand(t *testing.T) {
 	dev := apimClients[0]
 
 	var api *apim.API
-	var apisAdded = 1
+	var apisAdded = 0
 	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
 		api = testutils.AddAPI(t, dev, tenantAdminUsername, tenantAdminPassword)
-		apisAdded ++
+		apisAdded++
 		time.Sleep(5 * time.Second)
 	}
 
@@ -736,5 +736,5 @@ func TestExportApisWithExportApisCommand(t *testing.T) {
 		SrcAPIM: dev,
 	}
 
-	testutils.ValidateAllApisOfATenantIsExported(t,args,apisAdded)
+	testutils.ValidateAllApisOfATenantIsExported(t, args, apisAdded)
 }
