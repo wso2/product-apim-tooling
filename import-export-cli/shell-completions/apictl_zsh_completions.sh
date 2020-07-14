@@ -404,7 +404,6 @@ function _apictl_export_api-product {
     '(-h --help)'{-h,--help}'[help for api-product]' \
     '(-n --name)'{-n,--name}'[Name of the API Product to be exported]:' \
     '(-r --provider)'{-r,--provider}'[Provider of the API Product]:' \
-    '(-v --version)'{-v,--version}'[Version of the API Product to be exported]:' \
     '(-k --insecure)'{-k,--insecure}'[Allow connections to SSL endpoints without certs]' \
     '--verbose[Enable verbose mode]'
 }
