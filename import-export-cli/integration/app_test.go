@@ -94,8 +94,8 @@ func TestListAppWithOwner(t *testing.T) {
 
 	base.SetupEnv(t, apim.GetEnvName(), apim.GetApimURL(), apim.GetTokenURL())
 	base.Login(t, apim.GetEnvName(), username, password)
-	testutils.ValidateListAppsWithOwner(t, apim.GetEnvName())
 
+	testutils.ValidateListAppsWithOwner(t, apim.GetEnvName())
 }
 
 func TestExportAppNonAdminSuperTenant(t *testing.T) {

@@ -46,7 +46,7 @@ func TestInitializeProject(t *testing.T) {
 //Initialize an API with --definition flag and import that project
 func TestInitializeAPIWithDefinitionFlag(t *testing.T) {
 	apim := apimClients[0]
-	projectName := "test"
+	projectName := "APIProjectWithDefinitionFlag"
 	username := superAdminUser
 	password := superAdminPassword
 
@@ -240,7 +240,7 @@ func TestImportAndExportAPIWithDocument(t *testing.T) {
 
 }
 
-//Import Api with a Image and Export that Api with a image (.png Type)
+//Import Api with an Image and Export that Api with an image (.png Type)
 func TestImportAndExportAPIWithPngIcon(t *testing.T) {
 	username := superAdminUser
 	password := superAdminPassword
@@ -269,7 +269,7 @@ func TestImportAndExportAPIWithPngIcon(t *testing.T) {
 	testutils.ValidateAPIWithIconIsExported(t, args, utils.DevFirstDefaultAPIName, utils.DevFirstDefaultAPIVersion)
 }
 
-//Import Api with a Image and Export that Api with a image (.jpeg Type)
+//Import Api with an Image and Export that Api with an image (.jpeg Type)
 func TestImportAndExportAPIWithJpegImage(t *testing.T) {
 	apim := apimClients[0]
 	projectName := "OpenAPI3ProjectWithImage"
@@ -301,7 +301,7 @@ func TestImportAndExportAPIWithJpegImage(t *testing.T) {
 //Import and export API with updated thumbnail and document and assert that
 func TestUpdateDocAndImageOfAPIOfExistingAPI(t *testing.T) {
 	apim := apimClients[1]
-	projectName := "Test"
+	projectName := "UpdateAPIWithDocAndImage"
 	username := superAdminUser
 	password := superAdminPassword
 
@@ -348,10 +348,10 @@ func TestUpdateDocAndImageOfAPIOfExistingAPI(t *testing.T) {
 	//Import the project with updated Document and updated image thumbnail
 	testutils.ValidateImportUpdatePassedWithInitializedProject(t, args)
 
-	//Validate that image is been updated
+	//Validate that image has been updated
 	testutils.ValidateAPIWithDocIsExported(t, args, utils.DevFirstDefaultAPIName, utils.DevFirstDefaultAPIVersion)
 
-	//Validate that document is been updated
+	//Validate that document has been updated
 	testutils.ValidateAPIWithIconIsExported(t, args, utils.DevFirstDefaultAPIName, utils.DevFirstDefaultAPIVersion)
 
 }

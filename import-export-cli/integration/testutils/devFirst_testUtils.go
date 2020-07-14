@@ -178,7 +178,7 @@ func ValidateExportImportedAPI(t *testing.T, args *InitTestArgs, DevFirstDefault
 func ValidateAPIWithDocIsExported(t *testing.T, args *InitTestArgs, DevFirstDefaultAPIName string, DevFirstDefaultAPIVersion string) {
 	expOutput := ValidateExportImportedAPI(t, args, DevFirstDefaultAPIName, DevFirstDefaultAPIVersion)
 
-	//Unzip exported API and check for the imported doc in there
+	//Unzip exported API and check whether the imported doc is in there
 	exportedPath := base.GetExportedPathFromOutput(expOutput)
 	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
 	base.Unzip(relativePath, exportedPath)
@@ -201,7 +201,7 @@ func ValidateAPIWithDocIsExported(t *testing.T, args *InitTestArgs, DevFirstDefa
 func ValidateAPIWithIconIsExported(t *testing.T, args *InitTestArgs, DevFirstDefaultAPIName string, DevFirstDefaultAPIVersion string) {
 	expOutput := ValidateExportImportedAPI(t, args, DevFirstDefaultAPIName, DevFirstDefaultAPIVersion)
 
-	//Unzip exported API and check for the imported image(.png) in there
+	//Unzip exported API and check whether the imported image(.png) is in there
 	exportedPath := base.GetExportedPathFromOutput(expOutput)
 	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
 	base.Unzip(relativePath, exportedPath)
@@ -223,7 +223,7 @@ func ValidateAPIWithIconIsExported(t *testing.T, args *InitTestArgs, DevFirstDef
 func ValidateAPIWithImageIsExported(t *testing.T, args *InitTestArgs, DevFirstDefaultAPIName string, DevFirstDefaultAPIVersion string) {
 	expOutput := ValidateExportImportedAPI(t, args, DevFirstDefaultAPIName, DevFirstDefaultAPIVersion)
 
-	//Unzip exported API and check for the imported image(.png) in there
+	//Unzip exported API and check whethers the imported image(.png) is in there
 	exportedPath := base.GetExportedPathFromOutput(expOutput)
 	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
 	base.Unzip(relativePath, exportedPath)
