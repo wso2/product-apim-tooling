@@ -769,7 +769,7 @@ func init() {
 	RootCmd.AddCommand(genKeyCmd)
 	genKeyCmd.Flags().StringVarP(&keyGenEnv, "environment", "e", "", "Key generation environment")
 	genKeyCmd.Flags().StringVarP(&apiName, "name", "n", "", "API or API Product to generate keys")
-	genKeyCmd.Flags().StringVarP(&apiVersion, "version", "v", "", "Version of the API or API Product")
+	genKeyCmd.Flags().StringVarP(&apiVersion, "version", "v", "", "Version of the API")
 	genKeyCmd.Flags().StringVarP(&apiProvider, "provider", "r", "", "Provider of the API or API Product")
 	genKeyCmd.Flags().StringVarP(&keyGenTokenEndpoint, "token", "t", "", "Token endpoint URL of Environment")
 	_ = genKeyCmd.MarkFlagRequired("name")

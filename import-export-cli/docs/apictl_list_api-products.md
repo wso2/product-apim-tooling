@@ -14,7 +14,7 @@ apictl list api-products [flags]
 
 ```
 apictl list api-products -e dev
-apictl list api-products -e dev -q version:1.0.0
+apictl list api-products -e dev -q provider:devops
 apictl list api-products -e prod -q provider:admin context:/myproduct
 apictl list apis -e prod -l 25
 apictl list api-products -e staging

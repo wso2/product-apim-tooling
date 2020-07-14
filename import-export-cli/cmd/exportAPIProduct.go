@@ -162,8 +162,6 @@ func init() {
 	ExportCmd.AddCommand(ExportAPIProductCmd)
 	ExportAPIProductCmd.Flags().StringVarP(&exportAPIProductName, "name", "n", "",
 		"Name of the API Product to be exported")
-	ExportAPIProductCmd.Flags().StringVarP(&exportAPIProductVersion, "version", "v", "",
-		"Version of the API Product to be exported")
 	ExportAPIProductCmd.Flags().StringVarP(&exportAPIProductProvider, "provider", "r", "",
 		"Provider of the API Product")
 	ExportAPIProductCmd.Flags().StringVarP(&cmdExportEnvironment, "environment", "e",
