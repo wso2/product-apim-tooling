@@ -456,7 +456,7 @@ function _apictl_get-keys {
     '(-n --name)'{-n,--name}'[API or API Product to generate keys]:' \
     '(-r --provider)'{-r,--provider}'[Provider of the API or API Product]:' \
     '(-t --token)'{-t,--token}'[Token endpoint URL of Environment]:' \
-    '(-v --version)'{-v,--version}'[Version of the API or API Product]:' \
+    '(-v --version)'{-v,--version}'[Version of the API]:' \
     '(-k --insecure)'{-k,--insecure}'[Allow connections to SSL endpoints without certs]' \
     '--verbose[Enable verbose mode]'
 }
