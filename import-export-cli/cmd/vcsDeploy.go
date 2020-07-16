@@ -59,8 +59,12 @@ var DeployCmd = &cobra.Command{
 		failedProjects := git.DeployChangedFiles(accessOAuthToken, flagVCSDeployEnvName)
 		if failedProjects != nil && len(failedProjects) > 0 && flagVCSDeploySkipRollback == false {
 			fmt.Println("\nRolling back to the last successful revision as there are failures..")
-			git.Rollback(accessOAuthToken, flagVCSDeployEnvName)
-			utils.HandleErrorAndExit("There are project deployment failures. Rolled back to the last successful revision.", err)
+			err = git.Rollback(accessOAuthToken, flagVCSDeployEnvName)
+			if err != nil {
+				utils.HandleErrorAndExit("There are project deployment failures. Failed to rollback.", err)
+			} else {
+				utils.HandleErrorAndExit("There are project deployment failures. Rolled back to the last successful revision.", err)
+			}
 		}
 	},
 }
