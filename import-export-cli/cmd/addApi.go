@@ -273,7 +273,7 @@ func handleBalInterceptors(configMapName string, path string, operation string, 
 	//check interceptors dir is not empty
 	file, err := os.Open(interceptorsPath)
 	if err != nil {
-		utils.HandleErrorAndContinue("cannot open Interceptors directory", err)
+		//Do nothing. This is to remove showing unnecessary errors.
 	} else {
 		defer file.Close()
 		if _, err = file.Readdir(1); err != nil {
@@ -300,7 +300,9 @@ func handleJavaInterceptors(nameSuffix string, path string, operation string, na
 	//check interceptors dir is not empty
 	exists, err := utils.IsDirExists(interceptorsPath)
 	if !exists {
-		utils.HandleErrorAndContinue("cannot open java interceptors directory", err)
+		if err != nil {
+			fmt.Sprintf("Error: %s", err)
+		}
 	} else {
 		//get all jars in libs dir
 		errReadInterceptors := filepath.Walk(interceptorsPath, func(path string, info os.FileInfo, err error) error {
