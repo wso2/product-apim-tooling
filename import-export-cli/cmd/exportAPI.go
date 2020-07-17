@@ -20,6 +20,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 	"io/ioutil"
 	"os"
 	"strconv"
@@ -106,8 +107,8 @@ func executeExportAPICmd(credential credentials.Credential, exportDirectory stri
 // Exported API will be written to a zip file
 func WriteToZip(exportAPIName, exportAPIVersion, zipLocationPath string, resp *resty.Response) {
 	// Write to file
-	//directory := filepath.Join(exportDirectory, cmdcmdExportEnvironment)
-	// create directory if it doesn't exist
+	//	directory := filepath.Join(exportDirectory, cmdcmdExportEnvironment)
+	// 	create directory if it doesn't exist
 	if _, err := os.Stat(zipLocationPath); os.IsNotExist(err) {
 		err = os.Mkdir(zipLocationPath, 0777)
 		if err != nil {
@@ -115,16 +116,38 @@ func WriteToZip(exportAPIName, exportAPIVersion, zipLocationPath string, resp *r
 		}
 		// permission 777 : Everyone can read, write, and execute
 	}
+
+	// Create a temp directory to save the original zip from the REST API
+	tmpDir, err := ioutil.TempDir("", "apim")
+	if err != nil {
+		_ = os.RemoveAll(tmpDir)
+		utils.HandleErrorAndExit("Error creating a temp folder to keep the original exported zip.", err)
+	}
+
 	zipFilename := exportAPIName + "_" + exportAPIVersion + ".zip" // MyAPI_1.0.0.zip
-	pFile := filepath.Join(zipLocationPath, zipFilename)
-	err := ioutil.WriteFile(pFile, resp.Body(), 0644)
-	// permission 644 : Only the owner can read and write.. Everyone else can only read.
+	tempZipFile := filepath.Join(tmpDir, zipFilename)
+	// Save the zip file in the temp directory.
+	//	Permission 644 : Only the owner can read and write.. Everyone else can only read.
+	err = ioutil.WriteFile(tempZipFile, resp.Body(), 0644)
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating zip archive", err)
 	}
+
+	// Now, we need to extract the zip, copy api_params.yaml file inside and then create the zip again
+	//	First, create a temp directory (tmpClonedLoc) by extracting the original zip file.
+	tmpClonedLoc, err := utils.GetTempCloneFromDirOrZip(tempZipFile)
+	// Create the api_params.yaml file inside the cloned directory.
+	tmpLocationForAPIParamsFile := filepath.Join(tmpClonedLoc, DefaultAPIMParamsFileName)
+	err = impl.ScaffoldAPIParams(tmpLocationForAPIParamsFile)
+
+	// Finally, zip the full content.
+	exportedFinalZip := filepath.Join(zipLocationPath, zipFilename)
+	err = utils.Zip(tmpClonedLoc, exportedFinalZip)
+
+	// Output the final zip file location.
 	if runnigExportApiCommand {
 		fmt.Println("Successfully exported API!")
-		fmt.Println("Find the exported API at " + pFile)
+		fmt.Println("Find the exported API at " + exportedFinalZip)
 	}
 }
 

@@ -270,7 +270,7 @@ func ImportAPIProduct(accessOAuthToken, adminEndpoint, importEnvironment, import
 	utils.Logln(utils.LogPrefixInfo+"API Product Location:", resolvedAPIProductFilePath)
 
 	utils.Logln(utils.LogPrefixInfo + "Creating workspace")
-	tmpPath, err := getTempAPIDirectory(resolvedAPIProductFilePath)
+	tmpPath, err := utils.GetTempCloneFromDirOrZip(resolvedAPIProductFilePath)
 	if err != nil {
 		return err
 	}

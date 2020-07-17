@@ -22,10 +22,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"text/template"
 	"unicode"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
@@ -113,27 +113,6 @@ func hasJSONPrefix(buf []byte) bool {
 func hasPrefix(buf []byte, prefix []byte) bool {
 	trim := bytes.TrimLeftFunc(buf, unicode.IsSpace)
 	return bytes.HasPrefix(trim, prefix)
-}
-
-func scaffoldParams(file string) error {
-	envs := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
-	tmpl, _ := box.Get("/init/api_params.tmpl")
-	t, err := template.New("").Parse(string(tmpl))
-	if err != nil {
-		return err
-	}
-
-	f, err := os.Create(file)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	err = t.Execute(f, envs.Environments)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 // executeInitCmd will run init command
@@ -280,7 +259,7 @@ func executeInitCmd() error {
 
 	apimProjParamsFilePath := filepath.Join(initCmdOutputDir, DefaultAPIMParamsFileName)
 	utils.Logln(utils.LogPrefixInfo + "Writing " + apimProjParamsFilePath)
-	err = scaffoldParams(apimProjParamsFilePath)
+	err = impl.ScaffoldAPIParams(apimProjParamsFilePath)
 	if err != nil {
 		return err
 	}
