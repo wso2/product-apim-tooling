@@ -29,7 +29,7 @@ import (
 )
 
 // DefaultConfigFile name
-var DefaultConfigFile = "keys.json"
+var DefaultConfigFile = ".wso2apictl.local/keys.json"
 
 // Credential for storing user details
 type Credential struct {

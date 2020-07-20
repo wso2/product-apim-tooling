@@ -42,9 +42,11 @@ func getEnv(key, defaultValue string) string {
 
 var ConfigDirPath = filepath.Join(HomeDirectory, ConfigDirName)
 
-const EnvKeysAllFileName = "env_keys_all.yaml"
+const LocalCredentialsDirectoryName = ".wso2apictl.local"
+var LocalCredentialsDirectoryPath = filepath.Join(ConfigDirPath, LocalCredentialsDirectoryName)
 
-var EnvKeysAllFilePath = filepath.Join(ConfigDirPath, EnvKeysAllFileName)
+const EnvKeysAllFileName = "env_keys_all.yaml"
+var EnvKeysAllFilePath = filepath.Join(LocalCredentialsDirectoryPath, EnvKeysAllFileName)
 
 const MainConfigFileName = "main_config.yaml"
 const SampleMainConfigFileName = "main_config.yaml.sample"

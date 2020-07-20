@@ -142,6 +142,11 @@ func createConfigFiles() {
 		}
 	}
 
+	err = utils.CreateDirIfNotExist(utils.LocalCredentialsDirectoryPath)
+	if err != nil {
+		utils.HandleErrorAndExit("Error creating local directory: "+utils.LocalCredentialsDirectoryName, err)
+	}
+
 	if !utils.IsFileExist(utils.EnvKeysAllFilePath) {
 		os.Create(utils.EnvKeysAllFilePath)
 	}
