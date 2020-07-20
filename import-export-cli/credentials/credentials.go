@@ -29,7 +29,7 @@ import (
 )
 
 // DefaultConfigFile name
-var DefaultConfigFile = ".wso2apictl.local/keys.json"
+var DefaultConfigFile = "keys.json"
 
 // Credential for storing user details
 type Credential struct {
@@ -65,7 +65,7 @@ func GetCredentialStore(f string) (Store, error) {
 
 // GetDefaultCredentialStore returns store from default path
 func GetDefaultCredentialStore() (Store, error) {
-	return GetCredentialStore(filepath.Join(utils.ConfigDirPath, DefaultConfigFile))
+	return GetCredentialStore(filepath.Join(utils.LocalCredentialsDirectoryPath, DefaultConfigFile))
 }
 
 // GetOAuthAccessToken generates an accesstoken for CLI
