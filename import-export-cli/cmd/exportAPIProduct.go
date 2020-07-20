@@ -20,6 +20,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 	"io/ioutil"
 	"os"
 
@@ -116,15 +117,33 @@ func WriteAPIProductToZip(exportAPIProductName, exportAPIProductVersion, zipLoca
 		// permission 777 : Everyone can read, write, and execute
 	}
 	zipFilename := exportAPIProductName + "_" + exportAPIProductVersion + ".zip" // MyAPIProduct_1.0.0.zip
-	pFile := filepath.Join(zipLocationPath, zipFilename)
-	err := ioutil.WriteFile(pFile, resp.Body(), 0644)
+	tempZipFile := filepath.Join(zipLocationPath, zipFilename)
+	err := ioutil.WriteFile(tempZipFile, resp.Body(), 0644)
 	// permission 644 : Only the owner can read and write.. Everyone else can only read.
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating zip archive", err)
 	}
+
+	// Now, we need to extract the zip, copy api_product_params.yaml file inside and then create the zip again
+	//	First, create a temp directory (tmpClonedLoc) by extracting the original zip file.
+	tmpClonedLoc, err := utils.GetTempCloneFromDirOrZip(tempZipFile)
+	// Create the api_product_params.yaml file inside the cloned directory.
+	tmpLocationForAPIProdParamsFile := filepath.Join(tmpClonedLoc, utils.ParamFileAPIProduct)
+	err = impl.ScaffoldAPIProductParams(tmpLocationForAPIProdParamsFile)
+	if err != nil {
+		utils.HandleErrorAndExit("Error creating api_product_params.yaml inside the exported zip archive", err)
+	}
+
+	// Finally, zip the full content.
+	exportedFinalZip := filepath.Join(zipLocationPath, zipFilename)
+	err = utils.Zip(tmpClonedLoc, exportedFinalZip)
+	if err != nil {
+		utils.HandleErrorAndExit("Error creating the final zip archive", err)
+	}
+
 	if runningExportAPIProductCommand {
 		fmt.Println("Successfully exported API Product!")
-		fmt.Println("Find the exported API Product at " + pFile)
+		fmt.Println("Find the exported API Product at " + exportedFinalZip)
 	}
 }
 
