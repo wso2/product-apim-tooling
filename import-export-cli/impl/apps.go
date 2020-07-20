@@ -23,12 +23,14 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-resty/resty"
+	"github.com/wso2/product-apim-tooling/import-export-cli/box"
 	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
 	"os"
 	"path"
 	"path/filepath"
+	"text/template"
 )
 
 
@@ -122,4 +124,26 @@ func GetApplicationDefinition(filePath string) (*v2.ApplicationDefinition, []byt
 		return nil, nil, err
 	}
 	return api, buffer, nil
+}
+// Creates the initial application_params.yaml in the given file path
+//	The file will be populated with default import parameters for "vcs deploy".
+func ScaffoldApplicationParams(file string) error {
+	envs := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
+	tmpl, _ := box.Get("/init/application_params.tmpl")
+	t, err := template.New("").Parse(string(tmpl))
+	if err != nil {
+		return err
+	}
+
+	f, err := os.Create(file)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	err = t.Execute(f, envs.Environments)
+	if err != nil {
+		return err
+	}
+	return nil
 }

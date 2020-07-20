@@ -313,7 +313,7 @@ func deployUpdatedProjects(accessToken, environment string, totalProjectsToUpdat
         return false, nil, nil
     }
 
-    fmt.Println("Updating Projects (" + strconv.Itoa(totalProjectsToUpdate) + ")..." )
+    fmt.Println("Deploying Projects (" + strconv.Itoa(totalProjectsToUpdate) + ")..." )
 
     var failedProjects = make(map[string][]*params.ProjectParams)
     var hasDeletedProjects bool

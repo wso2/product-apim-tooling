@@ -20,6 +20,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -105,14 +106,40 @@ func WriteApplicationToZip(exportAppName, exportAppOwner, zipLocationPath string
 	}
 
 	zipFilename := replaceUserStoreDomainDelimiter(exportAppOwner) + "_" + exportAppName + ".zip" // admin_testApp.zip
-	pFile := filepath.Join(zipLocationPath, zipFilename)
-	err := ioutil.WriteFile(pFile, resp.Body(), 0644)
+	// Create a temp directory to save the original zip from the REST API
+	tmpDir, err := ioutil.TempDir("", "apim")
+	if err != nil {
+		_ = os.RemoveAll(tmpDir)
+		utils.HandleErrorAndExit("Error creating a temp folder to keep the original exported zip.", err)
+	}
+
+	tempZipFile := filepath.Join(tmpDir, zipFilename)
+	// Save the zip file in the temp directory.
+	//	Permission 644 : Only the owner can read and write.. Everyone else can only read.
+	err = ioutil.WriteFile(tempZipFile, resp.Body(), 0644)
+	if err != nil {
+		utils.HandleErrorAndExit("Error creating the original zip archive from the REST API response", err)
+	}
+
+	// Now, we need to extract the zip, copy application_params.yaml file inside and then create the zip again
+	//	First, create a temp directory (tmpClonedLoc) by extracting the original zip file.
+	tmpClonedLoc, err := utils.GetTempCloneFromDirOrZip(tempZipFile)
+	// Create the application_params.yaml file inside the cloned directory.
+	tmpLocationForAppParamsFile := filepath.Join(tmpClonedLoc, utils.ParamFileApplication)
+	err = impl.ScaffoldApplicationParams(tmpLocationForAppParamsFile)
+	if err != nil {
+		utils.HandleErrorAndExit("Error creating application_params.yaml inside the exported zip archive", err)
+	}
+
+	// Finally, zip the full content.
+	exportedFinalZip := filepath.Join(zipLocationPath, zipFilename)
+	err = utils.Zip(tmpClonedLoc, exportedFinalZip)
 	// permission 644 : Only the owner can read and write.. Everyone else can only read.
 	if err != nil {
-		utils.HandleErrorAndExit("Error creating zip archive", err)
+		utils.HandleErrorAndExit("Error creating the final zip archive", err)
 	}
 	fmt.Println("Successfully exported Application!")
-	fmt.Println("Find the exported Application at " + pFile)
+	fmt.Println("Find the exported Application at " + exportedFinalZip)
 }
 
 // The Application owner name is used to construct a unique name for the app export zip.

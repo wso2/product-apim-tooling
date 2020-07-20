@@ -36,7 +36,6 @@ var (
 
 const (
 	// ImportAPI command related usage info
-	DefaultAPIMParamsFileName = "api_params.yaml"
 	importAPICmdLiteral       = "import-api"
 	importAPICmdShortDesc     = "Import API"
 	importAPICmdLongDesc      = "Import an API to an environment"
@@ -85,7 +84,7 @@ func init() {
 		"Preserve existing provider of API after importing")
 	ImportAPICmd.Flags().BoolVar(&importAPIUpdate, "update", false, "Update an "+
 		"existing API or create a new API")
-	ImportAPICmd.Flags().StringVarP(&importAPIParamsFile, "params", "", DefaultAPIMParamsFileName,
+	ImportAPICmd.Flags().StringVarP(&importAPIParamsFile, "params", "", utils.ParamFileAPI,
 		"Provide a API Manager params file")
 	ImportAPICmd.Flags().BoolVarP(&importAPISkipCleanup, "skipCleanup", "", false, "Leave "+
 		"all temporary files created during import process")

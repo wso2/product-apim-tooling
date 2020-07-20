@@ -257,7 +257,7 @@ func executeInitCmd() error {
 		return err
 	}
 
-	apimProjParamsFilePath := filepath.Join(initCmdOutputDir, DefaultAPIMParamsFileName)
+	apimProjParamsFilePath := filepath.Join(initCmdOutputDir, utils.ParamFileAPI)
 	utils.Logln(utils.LogPrefixInfo + "Writing " + apimProjParamsFilePath)
 	err = impl.ScaffoldAPIParams(apimProjParamsFilePath)
 	if err != nil {
