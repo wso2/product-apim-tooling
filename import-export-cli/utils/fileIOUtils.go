@@ -359,7 +359,9 @@ func CreateZipFileFromProject(projectPath string, skipCleanup bool) (string, err
 	return projectPath, nil, nil
 }
 
-func GetTempCloneFromDirOrZip(file string) (string, error) {
+// Get a cloned copy of a given folder or a ZIP file path. If a zip file path is given, it will be extracted to the
+//	tmp folder. The returned string will be the path to the extracted temp folder.
+func GetTempCloneFromDirOrZip(path string) (string, error) {
 	fileIsDir := false
 	// create a temp directory
 	tmpDir, err := ioutil.TempDir("", "apim")
@@ -368,24 +370,24 @@ func GetTempCloneFromDirOrZip(file string) (string, error) {
 		return "", err
 	}
 
-	if info, err := os.Stat(file); err == nil {
+	if info, err := os.Stat(path); err == nil {
 		fileIsDir = info.IsDir()
 	} else {
 		return "", err
 	}
 	if fileIsDir {
 		// copy dir to a temp location
-		Logln(LogPrefixInfo+"Copying from", file, "to", tmpDir)
-		dest := filepath.Join(tmpDir, filepath.Base(file))
-		err = CopyDir(file, dest)
+		Logln(LogPrefixInfo+"Copying from", path, "to", tmpDir)
+		dest := filepath.Join(tmpDir, filepath.Base(path))
+		err = CopyDir(path, dest)
 		if err != nil {
 			return "", err
 		}
 		return dest, nil
 	} else {
 		// try to extract archive
-		Logln(LogPrefixInfo+"Extracting", file, "to", tmpDir)
-		finalPath, err := extractArchive(file, tmpDir)
+		Logln(LogPrefixInfo+"Extracting", path, "to", tmpDir)
+		finalPath, err := extractArchive(path, tmpDir)
 		if err != nil {
 			return "", err
 		}
