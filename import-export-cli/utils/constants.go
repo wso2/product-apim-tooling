@@ -42,14 +42,14 @@ func getEnv(key, defaultValue string) string {
 
 var ConfigDirPath = filepath.Join(HomeDirectory, ConfigDirName)
 
+const LocalCredentialsDirectoryName = ".wso2apictl.local"
 const EnvKeysAllFileName = "env_keys_all.yaml"
-
-var EnvKeysAllFilePath = filepath.Join(ConfigDirPath, EnvKeysAllFileName)
-
 const MainConfigFileName = "main_config.yaml"
 const SampleMainConfigFileName = "main_config.yaml.sample"
 const DefaultAPISpecFileName = "default_api.yaml"
 
+var LocalCredentialsDirectoryPath = filepath.Join(HomeDirectory, LocalCredentialsDirectoryName)
+var EnvKeysAllFilePath = filepath.Join(LocalCredentialsDirectoryPath, EnvKeysAllFileName)
 var MainConfigFilePath = filepath.Join(ConfigDirPath, MainConfigFileName)
 var SampleMainConfigFilePath = filepath.Join(ConfigDirPath, SampleMainConfigFileName)
 var DefaultAPISpecFilePath = filepath.Join(ConfigDirPath, DefaultAPISpecFileName)
@@ -144,7 +144,7 @@ var EnvReplaceFilePaths = []string{
 
 // project types
 const (
-	ProjectTypeNone         = "None"
+	ProjectTypeNone        = "None"
 	ProjectTypeApi         = "API"
 	ProjectTypeApiProduct  = "API Product"
 	ProjectTypeApplication = "Application"
