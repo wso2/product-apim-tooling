@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"path/filepath"
 )
 
 func ReadFromUrl(url string) ([]byte, error) {
@@ -28,8 +29,8 @@ func ReadFromUrl(url string) ([]byte, error) {
 }
 
 func GetTlsConfigWithCertificate() *tls.Config {
-	certs := x509.NewCertPool()
 
+	certs := ReadCertsFromDir()
 	certs.AppendCertsFromPEM(WSO2PublicCertificate)
 
 	return &tls.Config{
@@ -51,4 +52,26 @@ func IsValidUrl(urlStr string) bool {
 	}
 
 	return true
+}
+
+func ReadCertsFromDir() *x509.CertPool {
+	certs, err := x509.SystemCertPool()
+	if err != nil {
+		certs = x509.NewCertPool()
+	}
+
+	certificates, err := ioutil.ReadDir(DefaultCertDirPath)
+	if err == nil {
+		for _, certificate := range certificates {
+			extension := filepath.Ext(certificate.Name())
+			if extension == ".pem" || extension == ".crt" {
+				certFilePath := filepath.Join(DefaultCertDirPath, certificate.Name())
+				filedata, err := ioutil.ReadFile(certFilePath)
+				if err == nil {
+					certs.AppendCertsFromPEM(filedata)
+				}
+			}
+		}
+	}
+	return certs
 }
