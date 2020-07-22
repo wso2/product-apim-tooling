@@ -17,7 +17,7 @@ require (
 	github.com/spf13/cast v1.3.0
 	github.com/spf13/cobra v0.0.5
 	github.com/stretchr/testify v1.4.0
-	github.com/wso2/k8s-api-operator/api-operator v0.0.0-20200706125839-43e3233b9485
+	github.com/wso2/k8s-api-operator/api-operator v0.0.0-20200722085006-f178a61e4fde
 	golang.org/x/crypto v0.0.0-20200220183623-bac4c82f6975
 	gopkg.in/yaml.v2 v2.2.8
 	sigs.k8s.io/testing_frameworks v0.1.1 // indirect
