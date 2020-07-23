@@ -60,6 +60,8 @@ func IsValidUrl(urlStr string) bool {
 func ReadCertsFromDir() *x509.CertPool {
 	certs, err := x509.SystemCertPool()
 	if err != nil || certs == nil {
+		//if the OS is windows, systemCertPool will return an error. For windows, CA certificates has to be added
+		//to the .wso2apictl/certs directory.
 		certs = x509.NewCertPool()
 	}
 
@@ -72,8 +74,10 @@ func ReadCertsFromDir() *x509.CertPool {
 				fileData, err := ioutil.ReadFile(certFilePath)
 				if fileData != nil && err == nil {
 					if c, err := x509.ParseCertificate(fileData); err == nil {
+						//if the certificate is DER encoded, add it directly to the cert pool.
 						certs.AddCert(c)
 					} else {
+						//if the certificate is PEM encoded.
 						certs.AppendCertsFromPEM(fileData)
 					}
 				} else {
