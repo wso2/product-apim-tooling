@@ -21,9 +21,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
-	"io/ioutil"
 	"net/http"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -97,28 +95,16 @@ func executeExportAppCmd(credential credentials.Credential, appsExportDirectoryP
 // Exported Application will be written to a zip file
 func WriteApplicationToZip(exportAppName, exportAppOwner, zipLocationPath string,
 	resp *resty.Response) {
-	// Write to file
-	//directory := filepath.Join(exportDirectory, exportEnvironment)
-	// create directory if it doesn't exist
-	if _, err := os.Stat(zipLocationPath); os.IsNotExist(err) {
-		os.Mkdir(zipLocationPath, 0777)
-		// permission 777 : Everyone can read, write, and execute
-	}
-
 	zipFilename := replaceUserStoreDomainDelimiter(exportAppOwner) + "_" + exportAppName + ".zip" // admin_testApp.zip
-	// Create a temp directory to save the original zip from the REST API
-	tmpDir, err := ioutil.TempDir("", "apim")
+	// Writes the REST API response to a temporary zip file
+	tempZipFile, err := utils.WriteResponseToTempZip(zipFilename, resp)
 	if err != nil {
-		_ = os.RemoveAll(tmpDir)
-		utils.HandleErrorAndExit("Error creating a temp folder to keep the original exported zip.", err)
+		utils.HandleErrorAndExit("Error creating the temporary zip file to store the exported application" , err)
 	}
 
-	tempZipFile := filepath.Join(tmpDir, zipFilename)
-	// Save the zip file in the temp directory.
-	//	Permission 644 : Only the owner can read and write.. Everyone else can only read.
-	err = ioutil.WriteFile(tempZipFile, resp.Body(), 0644)
+	err = utils.CreateDirIfNotExist(zipLocationPath)
 	if err != nil {
-		utils.HandleErrorAndExit("Error creating the original zip archive from the REST API response", err)
+		utils.HandleErrorAndExit("Error creating dir to store zip archive: " + zipLocationPath, err)
 	}
 
 	exportedFinalZip := filepath.Join(zipLocationPath, zipFilename)

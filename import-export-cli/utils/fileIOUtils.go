@@ -21,6 +21,7 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"github.com/go-resty/resty"
 	"io"
 	"io/ioutil"
 	"os"
@@ -408,4 +409,25 @@ func extractArchive(src, dest string) (string, error) {
 	}
 	r := strings.TrimPrefix(files[0], src)
 	return filepath.Join(dest, strings.Split(filepath.Clean(r), string(os.PathSeparator))[0]), nil
+}
+
+// Creates a temporary folder and creates a zip file with a given name (zipFileName) from the given REST API response.
+//	Returns the location of the created zip file.
+func WriteResponseToTempZip(zipFileName string,resp *resty.Response) (string, error) {
+	// Create a temp directory to save the original zip from the REST API
+	tmpDir, err := ioutil.TempDir("", "apim")
+	if err != nil {
+		_ = os.RemoveAll(tmpDir)
+		return "", err
+	}
+
+	tempZipFile := filepath.Join(tmpDir, zipFileName)
+
+	// Save the zip file in the temp directory.
+	// permission 644 : Only the owner can read and write.. Everyone else can only read.
+	err = ioutil.WriteFile(tempZipFile, resp.Body(), 0644)
+	if err != nil {
+		return "", err
+	}
+	return tempZipFile, err
 }
