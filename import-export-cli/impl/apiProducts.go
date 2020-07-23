@@ -80,5 +80,4 @@ func GetAPIProductList(accessToken, unifiedSearchEndpoint, query, limit string) 
 	} else {
 		return 0, nil, errors.New(string(resp.Body()))
 	}
-
 }

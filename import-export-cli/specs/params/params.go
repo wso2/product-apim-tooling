@@ -132,24 +132,39 @@ type Environment struct {
 	GatewayEnvironments []string `yaml:"gatewayEnvironments"`
 	// Certs for environment
 	Certs []Cert `yaml:"certs"`
+	// VCS params for the environment
+	VCS APIVCSParams `yaml:"vcs"`
 }
 
 // ApiParams represents environments defined in configuration file
 type ApiParams struct {
 	// Environments contains all environments in a configuration
-	Environments []Environment   `yaml:"environments"`
-	Import       APIImportParams `yaml:"import"`
+	Environments []Environment `yaml:"environments"`
+	VCS          APIVCSParams  `yaml:"vcs"`
 }
 
 type ApiProductParams struct {
-	Import APIProductImportParams `yaml:"import"`
+	VCS ApiProductVCSParams `yaml:"vcs"`
 }
 
 type ApplicationParams struct {
+	VCS ApplicationVCSParams `yaml:"vcs"`
+}
+
+// ------------------- Structs for VCS Import Params ----------------------------------
+
+type ApplicationVCSParams struct {
 	Import ApplicationImportParams `yaml:"import"`
 }
 
-// ------------------- Structs for Import Params ----------------------------------
+type APIVCSParams struct {
+	Import APIImportParams `yaml:"import"`
+}
+
+type ApiProductVCSParams struct {
+	Import APIProductImportParams `yaml:"import"`
+}
+
 type APIImportParams struct {
 	Update           bool `yaml:"update"`
 	PreserveProvider bool `yaml:"preserveProvider"`

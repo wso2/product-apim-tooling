@@ -21,10 +21,12 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"github.com/go-resty/resty"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"gopkg.in/yaml.v2"
 )
@@ -356,4 +358,76 @@ func CreateZipFileFromProject(projectPath string, skipCleanup bool) (string, err
 		return projectPath, nil, cleanup
 	}
 	return projectPath, nil, nil
+}
+
+// Get a cloned copy of a given folder or a ZIP file path. If a zip file path is given, it will be extracted to the
+//	tmp folder. The returned string will be the path to the extracted temp folder.
+func GetTempCloneFromDirOrZip(path string) (string, error) {
+	fileIsDir := false
+	// create a temp directory
+	tmpDir, err := ioutil.TempDir("", "apim")
+	if err != nil {
+		_ = os.RemoveAll(tmpDir)
+		return "", err
+	}
+
+	if info, err := os.Stat(path); err == nil {
+		fileIsDir = info.IsDir()
+	} else {
+		return "", err
+	}
+	if fileIsDir {
+		// copy dir to a temp location
+		Logln(LogPrefixInfo+"Copying from", path, "to", tmpDir)
+		dest := filepath.Join(tmpDir, filepath.Base(path))
+		err = CopyDir(path, dest)
+		if err != nil {
+			return "", err
+		}
+		return dest, nil
+	} else {
+		// try to extract archive
+		Logln(LogPrefixInfo+"Extracting", path, "to", tmpDir)
+		finalPath, err := extractArchive(path, tmpDir)
+		if err != nil {
+			return "", err
+		}
+		return finalPath, nil
+	}
+}
+
+// extractArchive extracts the API and give the path.
+// In API Manager archive there is a directory in the root which contains the API
+// this function returns it appended to the destination path
+func extractArchive(src, dest string) (string, error) {
+	files, err := Unzip(src, dest)
+	if err != nil {
+		return "", err
+	}
+	if len(files) == 0 {
+		return "", fmt.Errorf("invalid API archive")
+	}
+	r := strings.TrimPrefix(files[0], src)
+	return filepath.Join(dest, strings.Split(filepath.Clean(r), string(os.PathSeparator))[0]), nil
+}
+
+// Creates a temporary folder and creates a zip file with a given name (zipFileName) from the given REST API response.
+//	Returns the location of the created zip file.
+func WriteResponseToTempZip(zipFileName string,resp *resty.Response) (string, error) {
+	// Create a temp directory to save the original zip from the REST API
+	tmpDir, err := ioutil.TempDir("", "apim")
+	if err != nil {
+		_ = os.RemoveAll(tmpDir)
+		return "", err
+	}
+
+	tempZipFile := filepath.Join(tmpDir, zipFileName)
+
+	// Save the zip file in the temp directory.
+	// permission 644 : Only the owner can read and write.. Everyone else can only read.
+	err = ioutil.WriteFile(tempZipFile, resp.Body(), 0644)
+	if err != nil {
+		return "", err
+	}
+	return tempZipFile, err
 }

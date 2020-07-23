@@ -20,6 +20,7 @@ package git
 
 import (
     "bytes"
+    "errors"
     "fmt"
     "github.com/wso2/product-apim-tooling/import-export-cli/impl"
     "github.com/wso2/product-apim-tooling/import-export-cli/specs/params"
@@ -150,18 +151,16 @@ func failedDuringEarlierDeploy(vcsEnvConfig Environment, projectParams *params.P
 // Rollbacks the projects to the initial state when any of the projects were failed during deployment
 // accesstoken is the access token to access the APIM product REST APIs
 // environment is the environment name
-func Rollback(accessToken, environment string) {
+func Rollback(accessToken, environment string) error {
     totalProjectsToUpdate, updatedProjectsPerType := GetStatus(environment, FromRevTypeLastSuccessful)
     _, envVCSConfig, hasEnv := getVCSEnvironmentDetails(environment)
 
     if !hasEnv || len(envVCSConfig.FailedProjects) == 0 {
-        fmt.Println("Nothing to rollback")
-        return
+        return errors.New("Nothing to rollback")
     }
 
     if envVCSConfig.LastSuccessfulRev == "" {
-        fmt.Println("Failed to rollback as there are no previous successful revisions")
-        return
+        return errors.New("Failed to rollback as there are no previous successful revisions")
     }
 
     currentBranch := getCurrentBranch()
@@ -170,6 +169,7 @@ func Rollback(accessToken, environment string) {
     deployUpdatedProjects(accessToken, environment, totalProjectsToUpdate, updatedProjectsPerType)
     checkoutBranch(currentBranch)
     deleteTmpBranch(tmpBranchName)
+    return nil
 }
 
 // Creates a new branch from the given revision
@@ -313,7 +313,7 @@ func deployUpdatedProjects(accessToken, environment string, totalProjectsToUpdat
         return false, nil, nil
     }
 
-    fmt.Println("Updating Projects (" + strconv.Itoa(totalProjectsToUpdate) + ")..." )
+    fmt.Println("Deploying Projects (" + strconv.Itoa(totalProjectsToUpdate) + ")..." )
 
     var failedProjects = make(map[string][]*params.ProjectParams)
     var hasDeletedProjects bool
@@ -330,7 +330,7 @@ func deployUpdatedProjects(accessToken, environment string, totalProjectsToUpdat
                 hasDeletedProjects = true
                 continue
             }
-            importParams := projectParam.ApiParams.Import
+            importParams := projectParam.ApiParams.VCS.Import
             fmt.Println(strconv.Itoa(i+1) + ": " + projectParam.NickName + ": (" + projectParam.RelativePath + ")")
             err := impl.ImportAPIToEnv(accessToken, environment, projectParam.AbsolutePath, "",
                 importParams.Update, importParams.PreserveProvider, false)
@@ -352,7 +352,7 @@ func deployUpdatedProjects(accessToken, environment string, totalProjectsToUpdat
                 hasDeletedProjects = true
                 continue
             }
-            importParams := projectParam.ApiProductParams.Import
+            importParams := projectParam.ApiProductParams.VCS.Import
             fmt.Println(strconv.Itoa(i+1) + ": " + projectParam.NickName + ": (" + projectParam.RelativePath + ")")
             err := impl.ImportAPIProductToEnv(accessToken, environment, projectParam.AbsolutePath,
                 importParams.ImportAPIs, importParams.UpdateAPIs, importParams.UpdateAPIProduct,
@@ -375,7 +375,7 @@ func deployUpdatedProjects(accessToken, environment string, totalProjectsToUpdat
                 hasDeletedProjects = true
                 continue
             }
-            importParams := projectParam.ApplicationParams.Import
+            importParams := projectParam.ApplicationParams.VCS.Import
             fmt.Println(strconv.Itoa(i+1) + ": " + projectParam.NickName + ": (" + projectParam.RelativePath + ")")
             _, err := impl.ImportApplicationToEnv(accessToken, environment, projectParam.AbsolutePath,
                 importParams.TargetOwner, importParams.Update, importParams.PreserveOwner,

@@ -20,10 +20,8 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
-	"os"
-
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
+	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 
 	"github.com/go-resty/resty"
 	"github.com/spf13/cobra"
@@ -107,24 +105,27 @@ func executeExportAPIProductCmd(credential credentials.Credential, exportDirecto
 // @param resp : Response returned from making the HTTP request (only pass a 200 OK)
 // Exported API Product will be written to a zip file
 func WriteAPIProductToZip(exportAPIProductName, exportAPIProductVersion, zipLocationPath string, resp *resty.Response) {
-
-	if _, err := os.Stat(zipLocationPath); os.IsNotExist(err) {
-		err = os.Mkdir(zipLocationPath, 0777)
-		if err != nil {
-			utils.HandleErrorAndExit("Error creating zip archive", err)
-		}
-		// permission 777 : Everyone can read, write, and execute
-	}
 	zipFilename := exportAPIProductName + "_" + exportAPIProductVersion + ".zip" // MyAPIProduct_1.0.0.zip
-	pFile := filepath.Join(zipLocationPath, zipFilename)
-	err := ioutil.WriteFile(pFile, resp.Body(), 0644)
-	// permission 644 : Only the owner can read and write.. Everyone else can only read.
+	// Writes the REST API response to a temporary zip file
+	tempZipFile, err := utils.WriteResponseToTempZip(zipFilename, resp)
 	if err != nil {
-		utils.HandleErrorAndExit("Error creating zip archive", err)
+		utils.HandleErrorAndExit("Error creating the temporary zip file to store the exported API Product" , err)
 	}
+
+	err = utils.CreateDirIfNotExist(zipLocationPath)
+	if err != nil {
+		utils.HandleErrorAndExit("Error creating dir to store zip archive: " + zipLocationPath, err)
+	}
+	exportedFinalZip := filepath.Join(zipLocationPath, zipFilename)
+	// Add api_product_params.yaml file inside the zip and create a new zip file in exportedFinalZip location
+	err = impl.IncludeParamsFileToZip(tempZipFile, exportedFinalZip, utils.ParamFileAPIProduct)
+	if err != nil {
+		utils.HandleErrorAndExit("Error creating the final zip archive", err)
+	}
+
 	if runningExportAPIProductCommand {
 		fmt.Println("Successfully exported API Product!")
-		fmt.Println("Find the exported API Product at " + pFile)
+		fmt.Println("Find the exported API Product at " + exportedFinalZip)
 	}
 }
 

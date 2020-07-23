@@ -384,21 +384,6 @@ func resolveImportFilePath(file, defaultExportDirectory string) (string, error) 
 	return absPath, nil
 }
 
-// extractArchive extracts the API and give the path.
-// In API Manager archive there is a directory in the root which contains the API
-// this function returns it appended to the destination path
-func extractArchive(src, dest string) (string, error) {
-	files, err := utils.Unzip(src, dest)
-	if err != nil {
-		return "", err
-	}
-	if len(files) == 0 {
-		return "", fmt.Errorf("invalid API archive")
-	}
-	r := strings.TrimPrefix(files[0], src)
-	return filepath.Join(dest, strings.Split(filepath.Clean(r), string(os.PathSeparator))[0]), nil
-}
-
 // resolveAPIParamsPath resolves api_params.yaml path
 // First it will look at AbsolutePath of the import path (the last directory)
 // If not found it will look at current working directory
@@ -445,40 +430,6 @@ func resolveAPIParamsPath(importPath, paramPath string) (string, error) {
 			return paramPath, nil
 		}
 		return "", fmt.Errorf("could not find %s", paramPath)
-	}
-}
-
-func getTempAPIDirectory(file string) (string, error) {
-	fileIsDir := false
-	// create a temp directory
-	tmpDir, err := ioutil.TempDir("", "apim")
-	if err != nil {
-		_ = os.RemoveAll(tmpDir)
-		return "", err
-	}
-
-	if info, err := os.Stat(file); err == nil {
-		fileIsDir = info.IsDir()
-	} else {
-		return "", err
-	}
-	if fileIsDir {
-		// copy dir to a temp location
-		utils.Logln(utils.LogPrefixInfo+"Copying from", file, "to", tmpDir)
-		dest := filepath.Join(tmpDir, filepath.Base(file))
-		err = utils.CopyDir(file, dest)
-		if err != nil {
-			return "", err
-		}
-		return dest, nil
-	} else {
-		// try to extract archive
-		utils.Logln(utils.LogPrefixInfo+"Extracting", file, "to", tmpDir)
-		finalPath, err := extractArchive(file, tmpDir)
-		if err != nil {
-			return "", err
-		}
-		return finalPath, nil
 	}
 }
 
@@ -899,7 +850,7 @@ func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, a
 	utils.Logln(utils.LogPrefixInfo+"API Location:", resolvedAPIFilePath)
 
 	utils.Logln(utils.LogPrefixInfo + "Creating workspace")
-	tmpPath, err := getTempAPIDirectory(resolvedAPIFilePath)
+	tmpPath, err := utils.GetTempCloneFromDirOrZip(resolvedAPIFilePath)
 	if err != nil {
 		return err
 	}

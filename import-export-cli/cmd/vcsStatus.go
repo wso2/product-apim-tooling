@@ -52,7 +52,7 @@ var VCSStatusCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Println("Projects to Update (" + strconv.Itoa(totalProjectsToUpdate) + ")");
+		fmt.Println("Projects to Deploy (" + strconv.Itoa(totalProjectsToUpdate) + ")");
 		printProjectsToUpdate(utils.ProjectTypeApi, updatedProjectsPerType[utils.ProjectTypeApi])
 		printProjectsToUpdate(utils.ProjectTypeApiProduct, updatedProjectsPerType[utils.ProjectTypeApiProduct])
 		printProjectsToUpdate(utils.ProjectTypeApplication, updatedProjectsPerType[utils.ProjectTypeApplication])
