@@ -127,6 +127,8 @@ func createConfigFiles() {
 	utils.CreateDirIfNotExist(filepath.Join(utils.DefaultExportDirPath, utils.ExportedAppsDirName))
 	utils.CreateDirIfNotExist(filepath.Join(utils.DefaultExportDirPath, utils.ExportedMigrationArtifactsDirName))
 
+	utils.CreateDirIfNotExist(utils.DefaultCertDirPath)
+
 	if !utils.IsFileExist(utils.MainConfigFilePath) {
 		var mainConfig = new(utils.MainConfig)
 		mainConfig.Config = utils.Config{utils.DefaultHttpRequestTimeout,
