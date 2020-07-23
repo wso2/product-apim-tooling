@@ -4,11 +4,14 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"path/filepath"
 )
+
+const PlainTextWarnMessage = "WARNING: Error importing the certificate %s\n"
 
 func ReadFromUrl(url string) ([]byte, error) {
 	response, err := http.Get(url)
@@ -56,7 +59,7 @@ func IsValidUrl(urlStr string) bool {
 
 func ReadCertsFromDir() *x509.CertPool {
 	certs, err := x509.SystemCertPool()
-	if err != nil {
+	if err != nil || certs == nil {
 		certs = x509.NewCertPool()
 	}
 
@@ -64,11 +67,19 @@ func ReadCertsFromDir() *x509.CertPool {
 	if err == nil {
 		for _, certificate := range certificates {
 			extension := filepath.Ext(certificate.Name())
-			if extension == ".pem" || extension == ".crt" {
+			if extension == ".pem" || extension == ".crt" || extension == ".cer" {
 				certFilePath := filepath.Join(DefaultCertDirPath, certificate.Name())
-				filedata, err := ioutil.ReadFile(certFilePath)
-				if err == nil {
-					certs.AppendCertsFromPEM(filedata)
+				fileData, err := ioutil.ReadFile(certFilePath)
+				if fileData != nil && err == nil {
+					pub, parseErr := x509.ParseCertificate(fileData)
+					// if cert is PEM encoded, pub == nil and DER encoded, pub != nil
+ 					if pub == nil {
+						certs.AppendCertsFromPEM(fileData)
+					} else if parseErr == nil {
+						certs.AddCert(pub)
+					}
+				} else {
+					fmt.Printf(PlainTextWarnMessage, certificate.Name())
 				}
 			}
 		}
