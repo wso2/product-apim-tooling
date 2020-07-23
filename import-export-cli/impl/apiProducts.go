@@ -21,11 +21,8 @@ package impl
 import (
 	"encoding/json"
 	"errors"
-	"github.com/wso2/product-apim-tooling/import-export-cli/box"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
-	"os"
-	"text/template"
 )
 
 // GetAPIProductListFromEnv
@@ -83,27 +80,4 @@ func GetAPIProductList(accessToken, unifiedSearchEndpoint, query, limit string) 
 	} else {
 		return 0, nil, errors.New(string(resp.Body()))
 	}
-}
-
-// Creates the initial api_product_param.yaml in the given file path
-//	The file will be populated with environments and default import parameters for "vcs deploy".
-func ScaffoldAPIProductParams(file string) error {
-	envs := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
-	tmpl, _ := box.Get("/init/api_product_params.tmpl")
-	t, err := template.New("").Parse(string(tmpl))
-	if err != nil {
-		return err
-	}
-
-	f, err := os.Create(file)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	err = t.Execute(f, envs.Environments)
-	if err != nil {
-		return err
-	}
-	return nil
 }

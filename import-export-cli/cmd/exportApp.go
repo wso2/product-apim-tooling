@@ -121,20 +121,9 @@ func WriteApplicationToZip(exportAppName, exportAppOwner, zipLocationPath string
 		utils.HandleErrorAndExit("Error creating the original zip archive from the REST API response", err)
 	}
 
-	// Now, we need to extract the zip, copy application_params.yaml file inside and then create the zip again
-	//	First, create a temp directory (tmpClonedLoc) by extracting the original zip file.
-	tmpClonedLoc, err := utils.GetTempCloneFromDirOrZip(tempZipFile)
-	// Create the application_params.yaml file inside the cloned directory.
-	tmpLocationForAppParamsFile := filepath.Join(tmpClonedLoc, utils.ParamFileApplication)
-	err = impl.ScaffoldApplicationParams(tmpLocationForAppParamsFile)
-	if err != nil {
-		utils.HandleErrorAndExit("Error creating application_params.yaml inside the exported zip archive", err)
-	}
-
-	// Finally, zip the full content.
 	exportedFinalZip := filepath.Join(zipLocationPath, zipFilename)
-	err = utils.Zip(tmpClonedLoc, exportedFinalZip)
-	// permission 644 : Only the owner can read and write.. Everyone else can only read.
+	// Add application_params.yaml file inside the zip and create a new zip file in exportedFinalZip location
+	err = impl.IncludeParamsFileToZip(tempZipFile, exportedFinalZip, utils.ParamFileApplication)
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating the final zip archive", err)
 	}

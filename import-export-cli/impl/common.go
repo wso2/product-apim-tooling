@@ -20,12 +20,16 @@ package impl
 
 import (
     "bytes"
+    "errors"
+    "github.com/wso2/product-apim-tooling/import-export-cli/box"
     "github.com/wso2/product-apim-tooling/import-export-cli/utils"
     "io"
     "mime/multipart"
     "net/http"
     "os"
     "path/filepath"
+    "strings"
+    "text/template"
 )
 
 // newFileUploadRequest forms an HTTP request
@@ -62,4 +66,62 @@ func NewFileUploadRequest(uri string, method string, params map[string]string, p
     request.Header.Add(utils.HeaderConnection, utils.HeaderValueKeepAlive)
 
     return request, err
+}
+
+// Include x_params.yaml (api_params.yaml, application_params.yaml, .. ) into the sourceZipFile and create a new
+//  new Zip file in the provided targetZipFile location. paramsFile needs to be one of the supported x_params.yaml.
+//  Eg.: api_params.yaml, application_params.yaml, api_product_params.yaml
+func IncludeParamsFileToZip(sourceZipFile, targetZipFile, paramsFile string) error {
+    // Now, we need to extract the zip, copy x_params.yaml file inside and then create the zip again
+    //	First, create a temp directory (tmpClonedLoc) by extracting the original zip file.
+    tmpClonedLoc, err := utils.GetTempCloneFromDirOrZip(sourceZipFile)
+    // Create the api_params.yaml file inside the cloned directory.
+    tmpLocationForAPIParamsFile := filepath.Join(tmpClonedLoc, paramsFile)
+    err = ScaffoldParams(tmpLocationForAPIParamsFile)
+    if err != nil {
+        utils.HandleErrorAndExit("Error creating api_params.yaml inside the exported zip archive", err)
+    }
+
+    err = utils.Zip(tmpClonedLoc, targetZipFile)
+    if err != nil {
+        utils.HandleErrorAndExit("Error creating the final zip archive", err)
+    }
+    return nil
+}
+
+// Creates the initial api_params.yaml/api_product_params.yaml/application_params.yaml in the given file path
+//	The targetFile will be populated with environments and default import parameters for "vcs deploy".
+func ScaffoldParams(targetFile string) error {
+    envs := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
+    var tmpl []byte
+    if strings.HasSuffix(targetFile, utils.ParamFileAPI) {
+        tmpl, _ = box.Get("/init/api_params.tmpl")
+    } else if strings.HasSuffix(targetFile, utils.ParamFileAPIProduct) {
+        tmpl, _ = box.Get("/init/api_product_params.tmpl")
+    } else if strings.HasSuffix(targetFile, utils.ParamFileApplication) {
+        tmpl, _ = box.Get("/init/application_params.tmpl")
+    } else {
+        return errors.New("Unsupported target file: " + targetFile)
+    }
+    return WriteTargetFileFromTemplate(targetFile, tmpl, envs)
+}
+
+// From the template data (tmpl) writes the target file using the provided mainConfig
+func WriteTargetFileFromTemplate(targetFile string, tmpl []byte, envs *utils.MainConfig) error {
+    t, err := template.New("").Parse(string(tmpl))
+    if err != nil {
+        return err
+    }
+
+    f, err := os.Create(targetFile)
+    if err != nil {
+        return err
+    }
+    defer f.Close()
+
+    err = t.Execute(f, envs.Environments)
+    if err != nil {
+        return err
+    }
+    return nil
 }

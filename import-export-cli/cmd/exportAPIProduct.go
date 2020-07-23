@@ -116,27 +116,26 @@ func WriteAPIProductToZip(exportAPIProductName, exportAPIProductVersion, zipLoca
 		}
 		// permission 777 : Everyone can read, write, and execute
 	}
+	// Create a temp directory to save the original zip from the REST API
+	tmpDir, err := ioutil.TempDir("", "apim")
+	if err != nil {
+		_ = os.RemoveAll(tmpDir)
+		utils.HandleErrorAndExit("Error creating a temp folder to keep the original exported zip.", err)
+	}
+
 	zipFilename := exportAPIProductName + "_" + exportAPIProductVersion + ".zip" // MyAPIProduct_1.0.0.zip
-	tempZipFile := filepath.Join(zipLocationPath, zipFilename)
-	err := ioutil.WriteFile(tempZipFile, resp.Body(), 0644)
+	tempZipFile := filepath.Join(tmpDir, zipFilename)
+
+	// Save the zip file in the temp directory.
 	// permission 644 : Only the owner can read and write.. Everyone else can only read.
+	err = ioutil.WriteFile(tempZipFile, resp.Body(), 0644)
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating zip archive", err)
 	}
 
-	// Now, we need to extract the zip, copy api_product_params.yaml file inside and then create the zip again
-	//	First, create a temp directory (tmpClonedLoc) by extracting the original zip file.
-	tmpClonedLoc, err := utils.GetTempCloneFromDirOrZip(tempZipFile)
-	// Create the api_product_params.yaml file inside the cloned directory.
-	tmpLocationForAPIProdParamsFile := filepath.Join(tmpClonedLoc, utils.ParamFileAPIProduct)
-	err = impl.ScaffoldAPIProductParams(tmpLocationForAPIProdParamsFile)
-	if err != nil {
-		utils.HandleErrorAndExit("Error creating api_product_params.yaml inside the exported zip archive", err)
-	}
-
-	// Finally, zip the full content.
 	exportedFinalZip := filepath.Join(zipLocationPath, zipFilename)
-	err = utils.Zip(tmpClonedLoc, exportedFinalZip)
+	// Add api_product_params.yaml file inside the zip and create a new zip file in exportedFinalZip location
+	err = impl.IncludeParamsFileToZip(tempZipFile, exportedFinalZip, utils.ParamFileAPIProduct)
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating the final zip archive", err)
 	}

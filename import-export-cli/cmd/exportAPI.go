@@ -126,6 +126,7 @@ func WriteToZip(exportAPIName, exportAPIVersion, zipLocationPath string, resp *r
 
 	zipFilename := exportAPIName + "_" + exportAPIVersion + ".zip" // MyAPI_1.0.0.zip
 	tempZipFile := filepath.Join(tmpDir, zipFilename)
+
 	// Save the zip file in the temp directory.
 	//	Permission 644 : Only the owner can read and write.. Everyone else can only read.
 	err = ioutil.WriteFile(tempZipFile, resp.Body(), 0644)
@@ -133,19 +134,9 @@ func WriteToZip(exportAPIName, exportAPIVersion, zipLocationPath string, resp *r
 		utils.HandleErrorAndExit("Error creating the original zip archive from the REST API response", err)
 	}
 
-	// Now, we need to extract the zip, copy api_params.yaml file inside and then create the zip again
-	//	First, create a temp directory (tmpClonedLoc) by extracting the original zip file.
-	tmpClonedLoc, err := utils.GetTempCloneFromDirOrZip(tempZipFile)
-	// Create the api_params.yaml file inside the cloned directory.
-	tmpLocationForAPIParamsFile := filepath.Join(tmpClonedLoc, utils.ParamFileAPI)
-	err = impl.ScaffoldAPIParams(tmpLocationForAPIParamsFile)
-	if err != nil {
-		utils.HandleErrorAndExit("Error creating api_params.yaml inside the exported zip archive", err)
-	}
-
-	// Finally, zip the full content.
 	exportedFinalZip := filepath.Join(zipLocationPath, zipFilename)
-	err = utils.Zip(tmpClonedLoc, exportedFinalZip)
+	// Add api_params.yaml file inside the zip and create a new zip file in exportedFinalZip location
+	err = impl.IncludeParamsFileToZip(tempZipFile, exportedFinalZip, utils.ParamFileAPI)
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating the final zip archive", err)
 	}
