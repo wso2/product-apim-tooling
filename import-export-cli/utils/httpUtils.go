@@ -71,12 +71,10 @@ func ReadCertsFromDir() *x509.CertPool {
 				certFilePath := filepath.Join(DefaultCertDirPath, certificate.Name())
 				fileData, err := ioutil.ReadFile(certFilePath)
 				if fileData != nil && err == nil {
-					pub, parseErr := x509.ParseCertificate(fileData)
-					// if cert is PEM encoded, pub == nil and DER encoded, pub != nil
- 					if pub == nil {
+					if c, err := x509.ParseCertificate(fileData); err == nil {
+						certs.AddCert(c)
+					} else {
 						certs.AppendCertsFromPEM(fileData)
-					} else if parseErr == nil {
-						certs.AddCert(pub)
 					}
 				} else {
 					fmt.Printf(PlainTextWarnMessage, certificate.Name())
