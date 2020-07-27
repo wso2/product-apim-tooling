@@ -14,7 +14,8 @@ apictl vcs [flags]
 ### Examples
 
 ```
-apictl status  -e dev
+apictl init
+apictl status -e dev
 apictl deploy -e dev
 ```
 
@@ -35,5 +36,6 @@ apictl deploy -e dev
 
 * [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
 * [apictl vcs deploy](apictl_vcs_deploy.md)	 - Deploys projects to the specified environment
+* [apictl vcs init](apictl_vcs_init.md)	 - Initializes a GIT repository with API Controller
 * [apictl vcs status](apictl_vcs_status.md)	 - Shows the list of projects that are ready to deploy
 

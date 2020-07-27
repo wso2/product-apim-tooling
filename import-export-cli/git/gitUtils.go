@@ -22,6 +22,7 @@ import (
     "bytes"
     "errors"
     "fmt"
+    "github.com/google/uuid"
     "github.com/wso2/product-apim-tooling/import-export-cli/impl"
     "github.com/wso2/product-apim-tooling/import-export-cli/specs/params"
     "github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -50,27 +51,37 @@ func getVCSConfigFromFileSilently(filePath string) *VCSConfig {
 }
 
 // Reads and returns the environment specific information from the VCS config along with the full VCS config
+// repoId is the id of the git repository (located in vcs.yaml)
 // environment is the name of the environment
 // Returns VCSConfig, the full VCS configuration
 // Returns Environment, the environment specific VCS configuration
 // Returns bool, whether the environment is available in the VCS configuration or not
-func getVCSEnvironmentDetails(environment string) (VCSConfig, Environment, bool)  {
+func getVCSEnvironmentDetails(repoId, environment string) (VCSConfig, Environment, bool)  {
     vcsConfig := getVCSConfigFromFileSilently(VCSConfigFilePath)
-    if vcsConfig.Environments == nil {
-        vcsConfig.Environments = make(map[string]Environment)
+    if vcsConfig.Repos == nil {
+        vcsConfig.Repos = make(map[string]Repo)
     }
-    envVCSConfig, hasEnv := vcsConfig.Environments[environment]
+    envVCSConfig, hasEnv := vcsConfig.Repos[repoId].Environments[environment]
     return *vcsConfig, envVCSConfig, hasEnv
 }
 
 // Returns the status of the projects indicating the projects to deploy (need to save, delete or failed previously).
 // Environment is the environment name
 // fromRevType is the type of the revision the status should be taken by comparing with the current revision. The allowed values are "last_attempted", "last_successful"
+// Returns string, id of the git repository (located in vcs.yaml)
 // Returns int, the total number of projects to deploy
 // Returns map[string][]*params.ProjectParams, the details of the projects that needs to deploy
-func GetStatus(environment, fromRevType string) (int, map[string][]*params.ProjectParams){
+func GetStatus(environment, fromRevType string) (string, int, map[string][]*params.ProjectParams){
     var envRevision string
-    _, envVCSConfig, hasEnv := getVCSEnvironmentDetails(environment)
+    repoId, err := getRepoId()
+    if err != nil {
+        utils.HandleErrorAndExit("Error while retrieving repository id", err)
+    }
+    if repoId == "" {
+        utils.HandleErrorAndExit("Repository is not initialized with apictl. " +
+            "Please initialize it with 'vcs init'", nil)
+    }
+    _, envVCSConfig, hasEnv := getVCSEnvironmentDetails(repoId, environment)
     if hasEnv {
         if fromRevType == FromRevTypeLastAttempted {
             envRevision = envVCSConfig.LastAttemptedRev
@@ -132,7 +143,7 @@ func GetStatus(environment, fromRevType string) (int, map[string][]*params.Proje
         }
     }
 
-    return totalProjectsToUpdate, updatedProjectsPerType
+    return repoId, totalProjectsToUpdate, updatedProjectsPerType
 }
 
 // Returns whether the given project was failed to deploy previously
@@ -152,8 +163,8 @@ func failedDuringEarlierDeploy(vcsEnvConfig Environment, projectParams *params.P
 // accesstoken is the access token to access the APIM product REST APIs
 // environment is the environment name
 func Rollback(accessToken, environment string) error {
-    totalProjectsToUpdate, updatedProjectsPerType := GetStatus(environment, FromRevTypeLastSuccessful)
-    _, envVCSConfig, hasEnv := getVCSEnvironmentDetails(environment)
+    repoId, totalProjectsToUpdate, updatedProjectsPerType := GetStatus(environment, FromRevTypeLastSuccessful)
+    _, envVCSConfig, hasEnv := getVCSEnvironmentDetails(repoId, environment)
 
     if !hasEnv || len(envVCSConfig.FailedProjects) == 0 {
         return errors.New("Nothing to rollback")
@@ -166,7 +177,7 @@ func Rollback(accessToken, environment string) error {
     currentBranch := getCurrentBranch()
     tmpBranchName := "tmp-" + envVCSConfig.LastSuccessfulRev[0:8]
     checkoutNewBranchFromRevision(tmpBranchName, envVCSConfig.LastSuccessfulRev)
-    deployUpdatedProjects(accessToken, environment, totalProjectsToUpdate, updatedProjectsPerType)
+    deployUpdatedProjects(accessToken, repoId, environment, totalProjectsToUpdate, updatedProjectsPerType)
     checkoutBranch(currentBranch)
     deleteTmpBranch(tmpBranchName)
     return nil
@@ -297,6 +308,7 @@ func handleIfError(err error, failedProjects map[string][]*params.ProjectParams,
 // Deploys the updated projects. It will only handle new or updated projects and deleted projects will be tracked and
 // skipped. Those deleted projects will be returned from the 2nd return argument.
 // accesstoken is the access token to access the APIM product REST APIs
+// repoId is the id of the git repository (located in vcs.yaml)
 // environment is the environment name
 // totalProjectsToUpdate is the number of total projects that needs to be deployed.
 // updatedProjectsPerType is a map of string -> ProjectParams which consists of updated projects per each type (API, App..)
@@ -305,7 +317,7 @@ func handleIfError(err error, failedProjects map[string][]*params.ProjectParams,
 //  deleted projects
 // Returns map[string][]*params.ProjectParams, a map of project type (API, App.. ) to each project detail which are
 //  failed during the deployment
-func deployUpdatedProjects(accessToken, environment string, totalProjectsToUpdate int,
+func deployUpdatedProjects(accessToken, repoId, environment string, totalProjectsToUpdate int,
         updatedProjectsPerType map[string][]*params.ProjectParams) (bool, map[string][]*params.ProjectParams,
         map[string][]*params.ProjectParams) {
     if totalProjectsToUpdate == 0 {
@@ -390,18 +402,18 @@ func deployUpdatedProjects(accessToken, environment string, totalProjectsToUpdat
     // If there are no deleted projects, update the VCS config file as there is nothing remaining to do.
     //  If there are deleted projects, this needs to handle after deleting those.
     if !hasDeletedProjects {
-        updateVCSConfig(environment, failedProjects)
+        updateVCSConfig(repoId, environment, failedProjects)
     }
 
     return hasDeletedProjects, deletedProjectsPerType, failedProjects
 }
 
 // This method is responsible for updating the vcs configuration file at the end of the deployment
+// repoId is the id of the git repository (located in vcs.yaml)
 // environment is the environment name
 // failedProjects are a map of project type to failed projects during the previous deployment
-func updateVCSConfig(environment string, failedProjects map[string][]*params.ProjectParams) {
-    vcsConfig, envVCSConfig, _ := getVCSEnvironmentDetails(environment)
-
+func updateVCSConfig(repoId, environment string, failedProjects map[string][]*params.ProjectParams) {
+    vcsConfig, envVCSConfig, _ := getVCSEnvironmentDetails(repoId, environment)
     var err error
     envVCSConfig.LastAttemptedRev, err = getLatestCommitId()
     if err != nil {
@@ -412,8 +424,13 @@ func updateVCSConfig(environment string, failedProjects map[string][]*params.Pro
     if len(failedProjects) == 0 {
         envVCSConfig.LastSuccessfulRev = envVCSConfig.LastAttemptedRev
     }
-
-    vcsConfig.Environments[environment] = envVCSConfig
+    _, hasRepo := vcsConfig.Repos[repoId]
+    if !hasRepo {
+        vcsConfig.Repos[repoId] = Repo{
+            Environments: map[string]Environment{},
+        }
+    }
+    vcsConfig.Repos[repoId].Environments[environment] = envVCSConfig
     utils.WriteConfigFile(vcsConfig, VCSConfigFilePath)
 }
 
@@ -434,13 +451,13 @@ func handleProjectDeletion(i int, projectParam *params.ProjectParams, deletedPro
 // accesstoken is the access token to access the APIM product REST APIs
 // environment is the environment name
 func DeployChangedFiles(accessToken, environment string) map[string][]*params.ProjectParams {
-    totalProjectsToUpdate, updatedProjectsPerType := GetStatus(environment, FromRevTypeLastAttempted)
+    repoId, totalProjectsToUpdate, updatedProjectsPerType := GetStatus(environment, FromRevTypeLastAttempted)
     hasDeletedProjects, deletedProjectsPerType, failedProjects :=
-        deployUpdatedProjects(accessToken, environment, totalProjectsToUpdate, updatedProjectsPerType)
+        deployUpdatedProjects(accessToken, repoId, environment, totalProjectsToUpdate, updatedProjectsPerType)
 
     if hasDeletedProjects {
         // work on deleted files
-        _, envVCSConfig, hasEnv := getVCSEnvironmentDetails(environment)
+        _, envVCSConfig, hasEnv := getVCSEnvironmentDetails(repoId, environment)
         if !hasEnv || envVCSConfig.LastSuccessfulRev == "" {
             utils.HandleErrorAndExit("Error: there are projects to delete but no last successful "+
                 "revision available in vcs config (vcs_config.yaml)", nil)
@@ -456,9 +473,49 @@ func DeployChangedFiles(accessToken, environment string) map[string][]*params.Pr
         deleteTmpBranch(tmpBranchName)
 
         // Update the VCS config with failed projects, last attempted and last successful revisions
-        updateVCSConfig(environment, failedProjects)
+        updateVCSConfig(repoId, environment, failedProjects)
     }
     return failedProjects
+}
+
+func CreateRepoInfo() error {
+    vcsInfoPath, err := getVcsYamlPath()
+    if err != nil {
+        return err
+    }
+    if utils.IsFileExist(vcsInfoPath) {
+        return errors.New("the repository is already initialized. If you want to reinitialize, remove " +
+            "vcs.yaml in the repository root folder")
+    }
+    repoInfo := RepoInfo{
+        Id: uuid.New().String(),
+    }
+    utils.WriteConfigFile(repoInfo, vcsInfoPath)
+    return nil
+}
+
+func getVcsYamlPath() (string, error) {
+    baseDir, err := getRepoBaseDir()
+    if err != nil {
+        return "", err
+    }
+    vcsInfoPath := filepath.Join(baseDir, VCSRepoInfoFileName)
+    return vcsInfoPath, nil
+}
+
+func getRepoId() (string, error) {
+    vcsInfoPath, err := getVcsYamlPath()
+    if err != nil {
+        return "", err
+    }
+    var repoInfo RepoInfo
+    data, err := ioutil.ReadFile(vcsInfoPath)
+    if err == nil {
+        if err := yaml.Unmarshal(data, &repoInfo); err != nil {
+            utils.HandleErrorAndExit("Error parsing "+vcsInfoPath, err)
+        }
+    }
+    return repoInfo.Id, nil
 }
 
 // Retrieves the base location of the git repository
