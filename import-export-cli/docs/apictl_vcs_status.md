@@ -14,7 +14,7 @@ apictl vcs status [flags]
 ### Examples
 
 ```
-apictl status  -e dev
+apictl vcs status -e dev
 ```
 
 ### Options

@@ -78,8 +78,8 @@ func GetStatus(environment, fromRevType string) (string, int, map[string][]*para
         utils.HandleErrorAndExit("Error while retrieving repository id", err)
     }
     if repoId == "" {
-        utils.HandleErrorAndExit("Repository is not initialized with apictl. " +
-            "Please initialize it with 'vcs init'", nil)
+        utils.HandleErrorAndExit("The repository info: vcs.yaml is not found in the repository root. " +
+            "If this is the first time you are using this repo, please initialize it with 'vcs init'.", nil)
     }
     _, envVCSConfig, hasEnv := getVCSEnvironmentDetails(repoId, environment)
     if hasEnv {
@@ -478,14 +478,16 @@ func DeployChangedFiles(accessToken, environment string) map[string][]*params.Pr
     return failedProjects
 }
 
-func CreateRepoInfo() error {
+// Create 'vcs.yaml' in the repository root folder with a unique id (uuid) for the repository.
+//  If the value of force is false, and the file is already created, gives an error.
+//  If the value of force is true, It will reinitialize the file even if it already exists.
+func InitializeRepo(force bool) error {
     vcsInfoPath, err := getVcsYamlPath()
     if err != nil {
         return err
     }
-    if utils.IsFileExist(vcsInfoPath) {
-        return errors.New("the repository is already initialized. If you want to reinitialize, remove " +
-            "vcs.yaml in the repository root folder")
+    if !force && utils.IsFileExist(vcsInfoPath) {
+        return errors.New("the repository is already initialized")
     }
     repoInfo := RepoInfo{
         Id: uuid.New().String(),
@@ -494,6 +496,7 @@ func CreateRepoInfo() error {
     return nil
 }
 
+// Returns the absolute path of the vcs.yaml in the current working repository
 func getVcsYamlPath() (string, error) {
     baseDir, err := getRepoBaseDir()
     if err != nil {
@@ -503,6 +506,7 @@ func getVcsYamlPath() (string, error) {
     return vcsInfoPath, nil
 }
 
+// Returns the id of the current working repository by reading vcs.yaml
 func getRepoId() (string, error) {
     vcsInfoPath, err := getVcsYamlPath()
     if err != nil {

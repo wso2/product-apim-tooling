@@ -35,7 +35,7 @@ const vcsStatusCmdShortDesc = "Shows the list of projects that are ready to depl
 const vcsStatusCmdLongDesc = `Shows the list of projects that are ready to deploy to the specified environment by --environment(-e)
 NOTE: --environment (-e) flag is mandatory`
 
-const vcsStatusCmdCmdExamples = utils.ProjectName + ` ` + vcsStatusCmdLiteral + ` `  + ` -e dev`
+const vcsStatusCmdCmdExamples = utils.ProjectName + ` ` + vcsCmdLiteral + ` ` + vcsStatusCmdLiteral  + ` -e dev`
 
 // pushCmd represents the push command
 var VCSStatusCmd = &cobra.Command{

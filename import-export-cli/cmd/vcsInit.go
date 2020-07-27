@@ -25,6 +25,8 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
+var flagVCSInitForce bool    // Forcefully create and replace the existing vcs.yaml file if exists
+
 // "vcs init" command related usage Info
 const vcsInitCmdLiteral = "init"
 const vcsInitCmdShortDesc = "Initializes a GIT repository with API Controller"
@@ -33,7 +35,7 @@ for 'vcs' commands, the GIT repository should be initialized once via 'vcs init'
 in the root location of the GIT repository, which is used by API Controller  to uniquely identify the GIT repository. 
 'vcs.yaml' should be committed to the GIT repository.`
 
-const vcsInitCmdExamples = utils.ProjectName + ` ` + vcsInitCmdLiteral
+const vcsInitCmdExamples = utils.ProjectName + ` ` + vcsCmdLiteral + ` ` + vcsInitCmdLiteral
 
 // deployCmd represents the deploy command
 var VcsInitCmd = &cobra.Command{
@@ -42,8 +44,8 @@ var VcsInitCmd = &cobra.Command{
 	Long:    vcsInitCmdLongDesc,
 	Example: vcsInitCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + deployCmdLiteral + " called")
-		err := git.CreateRepoInfo()
+		utils.Logln(utils.LogPrefixInfo + vcsInitCmdLiteral + " called")
+		err := git.InitializeRepo(flagVCSInitForce)
 		if err != nil {
 			utils.HandleErrorAndExit("Error initializing repository", err)
 		}
@@ -53,4 +55,7 @@ var VcsInitCmd = &cobra.Command{
 
 func init() {
 	VCSCmd.AddCommand(VcsInitCmd)
+
+	VcsInitCmd.Flags().BoolVarP(&flagVCSInitForce, "force", "f", false,
+		"Forcefully reinitialize and replace vcs.yaml if already exists in the repository root.")
 }

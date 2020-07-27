@@ -946,6 +946,7 @@ function _apictl_vcs_help {
 
 function _apictl_vcs_init {
   _arguments \
+    '(-f --force)'{-f,--force}'[Forcefully reinitialize and replace vcs.yaml if already exists in the repository root.]' \
     '(-h --help)'{-h,--help}'[help for init]' \
     '(-k --insecure)'{-k,--insecure}'[Allow connections to SSL endpoints without certs]' \
     '--verbose[Enable verbose mode]'
