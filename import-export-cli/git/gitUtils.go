@@ -243,7 +243,7 @@ func deployProjectDeletions(accessToken, environment string, deletedProjectsPerT
             }
             projectParam.ProjectInfo.Name = appInfo.Name
             projectParam.ProjectInfo.Owner = appInfo.Subscriber.Name
-            resp, err := impl.DeleteApplication(accessToken, environment, appInfo.Name)
+            resp, err := impl.DeleteApplication(accessToken, environment, appInfo.Name, appInfo.Subscriber.Name)
             if handleIfError(err, failedProjects, projectParam) {
                 continue
             }

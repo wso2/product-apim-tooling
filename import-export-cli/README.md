@@ -1,5 +1,5 @@
 # CLI for Importing and Exporting APIs and Applications
-## For WSO2 API Manager 3.1.0
+## For WSO2 API Manager 3.2.0
 
 Command Line tool for importing and exporting APIs/Applications between different API Environments
 
@@ -17,7 +17,7 @@ Command Line tool for importing and exporting APIs/Applications between differen
 - ### Building
     `cd` into `product-apim-tooling/import-export-cli`
     
-    Execute `./build.sh -t apictl.go -v 3.1.0 -f` to build for all platforms.
+    Execute `./build.sh -t apictl.go -v 3.2.0 -f` to build for all platforms.
     
     Created packages will be available at `build/target` directory
 
@@ -52,8 +52,8 @@ Command Line tool for importing and exporting APIs/Applications between differen
     > NOTE: Directory structure for configuration files (`$HOME/.wso2apictl`) will be created upon execution of `apictl`
     
     Execute `apictl add-env --help` for detailed instructions
-    > The flags `--environment` (-e) and --token are mandatory
-      You can either provide only the 2 flags `--apim` and `--token`, or all the other 5 flags (`--registration` `--publisher` `--devportal` `--admin` `--token`) without providing `--apim` flag.
+    > The flag `--environment` (-e) is mandatory
+      You can either provide only the `--apim` flag, or all the other 5 flags (`--registration` `--publisher` `--devportal` `--admin` `--token`) without providing `--apim` flag.
       If you are omitting any of --registration --publisher --devportal --admin flags, you need to specify --apim flag with the API Manager endpoint.
     
 - ### Command Autocomplete

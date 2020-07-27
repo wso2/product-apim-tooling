@@ -127,6 +127,8 @@ func createConfigFiles() {
 	utils.CreateDirIfNotExist(filepath.Join(utils.DefaultExportDirPath, utils.ExportedAppsDirName))
 	utils.CreateDirIfNotExist(filepath.Join(utils.DefaultExportDirPath, utils.ExportedMigrationArtifactsDirName))
 
+	utils.CreateDirIfNotExist(utils.DefaultCertDirPath)
+
 	if !utils.IsFileExist(utils.MainConfigFilePath) {
 		var mainConfig = new(utils.MainConfig)
 		mainConfig.Config = utils.Config{utils.DefaultHttpRequestTimeout,
@@ -140,6 +142,11 @@ func createConfigFiles() {
 		if err != nil {
 			utils.HandleErrorAndExit("Error creating default api spec file", err)
 		}
+	}
+
+	err = utils.CreateDirIfNotExist(utils.LocalCredentialsDirectoryPath)
+	if err != nil {
+		utils.HandleErrorAndExit("Error creating local directory: "+utils.LocalCredentialsDirectoryName, err)
 	}
 
 	if !utils.IsFileExist(utils.EnvKeysAllFilePath) {

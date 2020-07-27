@@ -26,7 +26,6 @@ NOTE: Both the flags (--name (-n) and --environment (-e)) are mandatory
   -h, --help                 help for api-product
   -n, --name string          Name of the API Product to be exported
   -r, --provider string      Provider of the API Product
-  -v, --version string       Version of the API Product to be exported
 ```
 
 ### Options inherited from parent commands

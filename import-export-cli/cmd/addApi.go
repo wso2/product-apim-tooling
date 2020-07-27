@@ -48,6 +48,7 @@ var flagApiMode string
 var flagApiEndPoint string
 var flagEnv []string
 var flagImage string
+var flagHostname string
 
 const addApiCmdLiteral = "api"
 const addApiCmdShortDesc = "handle APIs in kubernetes cluster "
@@ -203,6 +204,7 @@ func createAPI(configMapNames []string, timestamp string, balInterceptors []stri
 	apiCrd.Spec.ApiEndPoint = flagApiEndPoint
 	apiCrd.Spec.EnvironmentVariables = flagEnv
 	apiCrd.Spec.Image = flagImage
+	apiCrd.Spec.IngressHostname = flagHostname
 
 	k8sOperation := k8sUtils.K8sCreate
 	k8sSaveConfig := true
@@ -233,6 +235,9 @@ func createAPI(configMapNames []string, timestamp string, balInterceptors []stri
 	}
 	if flagReplicas != 0 {
 		apiCrd.Status.Replicas = flagReplicas
+	}
+	if flagHostname != "" {
+		apiCrd.Spec.IngressHostname = flagHostname
 	}
 
 	byteVal, errMarshal := yaml.Marshal(apiCrd)
@@ -375,6 +380,8 @@ func init() {
 		"Environment variables to be passed to deployment")
 	addApiCmd.Flags().StringVarP(&flagImage, "image", "i", "",
 		"Image of the API. If specified, ignores the value of --override")
+	addApiCmd.Flags().StringVarP(&flagHostname, "hostname", "", "",
+		"Ingress hostname that the API is being exposed")
 
 	addApiCmd.MarkFlagRequired("name")
 	addApiCmd.MarkFlagRequired("from-file")

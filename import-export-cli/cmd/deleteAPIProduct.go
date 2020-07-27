@@ -20,6 +20,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 
 	"github.com/spf13/cobra"
@@ -37,7 +38,7 @@ const deleteAPIProductCmdShortDesc = "Delete API Product"
 const deleteAPIProductCmdLongDesc = "Delete an API Product from an environment"
 
 const deleteAPIProductCmdExamples = utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPIProductCmdLiteral + ` -n LeasingAPIProduct -r admin -e dev
-` + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPIProductCmdLiteral + ` -n CreditAPIProduct -v 1.0.0 -e production
+` + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPIProductCmdLiteral + ` -n CreditAPIProduct -e production
 NOTE: Both the flags (--name (-n) and --environment (-e)) are mandatory.`
 
 // TODO Introduce a version flag and mandate it when the versioning support has been implemented for API Products

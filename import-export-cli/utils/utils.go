@@ -210,7 +210,7 @@ func WriteToFileSystem(exportAPIName, exportAPIVersion, exportEnvironment, expor
 	if err != nil {
 		HandleErrorAndExit("Error creating zip archive", err)
 	}
-	fmt.Println("Succesfully exported API!")
+	fmt.Println("Successfully exported API!")
 	fmt.Println("Find the exported API at " + pFile)
 
 }

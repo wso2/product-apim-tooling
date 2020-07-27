@@ -20,11 +20,12 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 	"io"
 	"os"
 	"strconv"
 	"text/template"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 
@@ -55,7 +56,7 @@ const apiProductsCmdShortDesc = "Display a list of API Products in an environmen
 const apiProductsCmdLongDesc = `Display a list of API Products in the environment specified by the flag --environment, -e`
 
 var apiProductsCmdExamples = utils.ProjectName + ` ` + listCmdLiteral + ` ` + apiProductsCmdLiteral + ` -e dev
-` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + apiProductsCmdLiteral + ` -e dev -q version:1.0.0
+` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + apiProductsCmdLiteral + ` -e dev -q provider:devops
 ` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + apiProductsCmdLiteral + ` -e prod -q provider:admin context:/myproduct
 ` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + apisCmdLiteral + ` -e prod -l 25
 ` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + apiProductsCmdLiteral + ` -e staging

@@ -404,7 +404,6 @@ function _apictl_export_api-product {
     '(-h --help)'{-h,--help}'[help for api-product]' \
     '(-n --name)'{-n,--name}'[Name of the API Product to be exported]:' \
     '(-r --provider)'{-r,--provider}'[Provider of the API Product]:' \
-    '(-v --version)'{-v,--version}'[Version of the API Product to be exported]:' \
     '(-k --insecure)'{-k,--insecure}'[Allow connections to SSL endpoints without certs]' \
     '--verbose[Enable verbose mode]'
 }
@@ -457,7 +456,7 @@ function _apictl_get-keys {
     '(-n --name)'{-n,--name}'[API or API Product to generate keys]:' \
     '(-r --provider)'{-r,--provider}'[Provider of the API or API Product]:' \
     '(-t --token)'{-t,--token}'[Token endpoint URL of Environment]:' \
-    '(-v --version)'{-v,--version}'[Version of the API or API Product]:' \
+    '(-v --version)'{-v,--version}'[Version of the API]:' \
     '(-k --insecure)'{-k,--insecure}'[Allow connections to SSL endpoints without certs]' \
     '--verbose[Enable verbose mode]'
 }

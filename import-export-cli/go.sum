@@ -962,6 +962,8 @@ github.com/wso2/k8s-api-operator/api-operator v0.0.0-20200624054120-bbad656881c2
 github.com/wso2/k8s-api-operator/api-operator v0.0.0-20200624054120-bbad656881c2/go.mod h1:Ta2JJAX8yucKOfHWPcNJdwzhxz2f546ldNfrfcef62g=
 github.com/wso2/k8s-api-operator/api-operator v0.0.0-20200706125839-43e3233b9485 h1:jP7KJG74oI+OTBFRyGB4xzfDcT9Qakj2I4OxwmyLC3o=
 github.com/wso2/k8s-api-operator/api-operator v0.0.0-20200706125839-43e3233b9485/go.mod h1:1Wby2fHEg6krnMD3F7wUfFnbSVk6/vEHMikRgYV4Ldk=
+github.com/wso2/k8s-api-operator/api-operator v0.0.0-20200722085006-f178a61e4fde h1:TdBj8/sjArWQM+ZW9J0C38P4LF3EvLHP9ltztZVum+s=
+github.com/wso2/k8s-api-operator/api-operator v0.0.0-20200722085006-f178a61e4fde/go.mod h1:1Wby2fHEg6krnMD3F7wUfFnbSVk6/vEHMikRgYV4Ldk=
 github.com/wso2/k8s-apim-operator v0.0.0-20190906090738-fc77c27673ce h1:ADEoGtxq7K/7loRxqF9EchoMIoZFL8kUt7nJ7z1Gwvs=
 github.com/wso2/k8s-apim-operator v0.0.0-20190906090738-fc77c27673ce/go.mod h1:bzltphF0ElBW6n+4Ti6AHxKezZdv9yUslZtdZKq4dSA=
 github.com/wso2/k8s-apim-operator v1.0.0-beta h1:k950oMxmsoN9VIJrsDQ59vpsOVQeLLiqkKuGyo7lB+o=

@@ -25,10 +25,12 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -78,6 +80,12 @@ func ImportApplication(accessToken, adminEndpoint, filename, appOwner string, up
 	applicationFilePath, err := resolveImportFilePath(filename, exportDirectory)
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating request.", err)
+	}
+
+	utils.Logln(utils.LogPrefixInfo + "Pre Processing Application...")
+	error := preProcessApplication(applicationFilePath)
+	if error != nil {
+		utils.HandleErrorAndExit("Error importing Application", error)
 	}
 
 	// If applicationFilePath contains a directory, zip it. Otherwise, leave it as it is.
@@ -139,6 +147,50 @@ func ImportApplication(accessToken, adminEndpoint, filename, appOwner string, up
 
 		return nil, errors.New(resp.Status)
 	}
+}
+
+//This function will check whether the .json file is included in the directory or not
+//True is included false otherwise
+func checkDirForJson(appDirectory string) bool {
+	file, err := os.Open(appDirectory)
+
+	if err != nil {
+		log.Fatalf("failed opening directory: %s", err)
+	}
+	defer file.Close()
+
+	list, _ := file.Readdirnames(0) // 0 to read all files and folders
+	//list all files and check for supported type file
+	for _, name := range list {
+		match, _ := regexp.MatchString(".*\\.json", name)
+		if match {
+			return true
+		}
+	}
+	return false
+}
+
+func preProcessApplication(appDirectory string) error {
+	utils.Logln(utils.LogPrefixInfo+"Loading Application definition from: ", appDirectory)
+	file, err := os.Open(appDirectory)
+	if err != nil {
+		log.Fatalf("failed opening directory: %s", err)
+	}
+	fileStat, error := file.Stat()
+	if error != nil {
+		log.Fatalf("failed checking directory: %s", err)
+	}
+	defer file.Close()
+
+	if fileStat.IsDir() {
+		isJsonFileExisted := checkDirForJson(appDirectory)
+		if isJsonFileExisted {
+			return nil
+		} else {
+			return fmt.Errorf("Supported file type is not found in the %s directory", appDirectory)
+		}
+	}
+	return nil
 }
 
 // NewFileUploadRequest form an HTTP Put request

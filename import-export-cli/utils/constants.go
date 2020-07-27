@@ -42,14 +42,14 @@ func getEnv(key, defaultValue string) string {
 
 var ConfigDirPath = filepath.Join(HomeDirectory, ConfigDirName)
 
+const LocalCredentialsDirectoryName = ".wso2apictl.local"
 const EnvKeysAllFileName = "env_keys_all.yaml"
-
-var EnvKeysAllFilePath = filepath.Join(ConfigDirPath, EnvKeysAllFileName)
-
 const MainConfigFileName = "main_config.yaml"
 const SampleMainConfigFileName = "main_config.yaml.sample"
 const DefaultAPISpecFileName = "default_api.yaml"
 
+var LocalCredentialsDirectoryPath = filepath.Join(HomeDirectory, LocalCredentialsDirectoryName)
+var EnvKeysAllFilePath = filepath.Join(LocalCredentialsDirectoryPath, EnvKeysAllFileName)
 var MainConfigFilePath = filepath.Join(ConfigDirPath, MainConfigFileName)
 var SampleMainConfigFilePath = filepath.Join(ConfigDirPath, SampleMainConfigFileName)
 var DefaultAPISpecFilePath = filepath.Join(ConfigDirPath, DefaultAPISpecFileName)
@@ -59,8 +59,10 @@ const ExportedApisDirName = "apis"
 const ExportedApiProductsDirName = "api-products"
 const ExportedAppsDirName = "apps"
 const ExportedMigrationArtifactsDirName = "migration"
+const CertificatesDirName = "certs"
 
 var DefaultExportDirPath = filepath.Join(ConfigDirPath, DefaultExportDirName)
+var DefaultCertDirPath = filepath.Join(ConfigDirPath, CertificatesDirName)
 
 const defaultApiApplicationImportExportSuffix = "api/am/admin/v1"
 const defaultApiListEndpointSuffix = "api/am/publisher/v1/apis"
@@ -144,7 +146,7 @@ var EnvReplaceFilePaths = []string{
 
 // project types
 const (
-	ProjectTypeNone         = "None"
+	ProjectTypeNone        = "None"
 	ProjectTypeApi         = "API"
 	ProjectTypeApiProduct  = "API Product"
 	ProjectTypeApplication = "Application"
