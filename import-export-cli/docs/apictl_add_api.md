@@ -25,6 +25,7 @@ apictl add/update api -n petstore --from-file=./Swagger.json --replicas=3 --name
   -e, --env stringArray         Environment variables to be passed to deployment
   -f, --from-file stringArray   Path to swagger file
   -h, --help                    help for api
+      --hostname string         Ingress hostname that the API is being exposed
   -i, --image string            Image of the API. If specified, ignores the value of --override
   -m, --mode string             Property to override the deploying mode. Available modes: privateJet, sidecar
   -n, --name string             Name of the API

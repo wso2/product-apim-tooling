@@ -279,6 +279,9 @@ _apictl_add_api()
     flags+=("--help")
     flags+=("-h")
     local_nonpersistent_flags+=("--help")
+    flags+=("--hostname=")
+    two_word_flags+=("--hostname")
+    local_nonpersistent_flags+=("--hostname=")
     flags+=("--image=")
     two_word_flags+=("--image")
     two_word_flags+=("-i")
@@ -1829,6 +1832,32 @@ _apictl_vcs_deploy()
     noun_aliases=()
 }
 
+_apictl_vcs_init()
+{
+    last_command="apictl_vcs_init"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
 _apictl_vcs_status()
 {
     last_command="apictl_vcs_status"
@@ -1869,6 +1898,7 @@ _apictl_vcs()
 
     commands=()
     commands+=("deploy")
+    commands+=("init")
     commands+=("status")
 
     flags=()

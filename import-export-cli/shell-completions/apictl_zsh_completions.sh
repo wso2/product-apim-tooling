@@ -160,6 +160,7 @@ function _apictl_add_api {
     '(*-e *--env)'{\*-e,\*--env}'[Environment variables to be passed to deployment]:' \
     '(*-f *--from-file)'{\*-f,\*--from-file}'[Path to swagger file]:' \
     '(-h --help)'{-h,--help}'[help for api]' \
+    '--hostname[Ingress hostname that the API is being exposed]:' \
     '(-i --image)'{-i,--image}'[Image of the API. If specified, ignores the value of --override]:' \
     '(-m --mode)'{-m,--mode}'[Property to override the deploying mode. Available modes: privateJet, sidecar]:' \
     '(-n --name)'{-n,--name}'[Name of the API]:' \
@@ -905,6 +906,7 @@ function _apictl_vcs {
     commands=(
       "deploy:Deploys projects to the specified environment"
       "help:Help about any command"
+      "init:Initializes a GIT repository with API Controller"
       "status:Shows the list of projects that are ready to deploy"
     )
     _describe "command" commands
@@ -917,6 +919,9 @@ function _apictl_vcs {
     ;;
   help)
     _apictl_vcs_help
+    ;;
+  init)
+    _apictl_vcs_init
     ;;
   status)
     _apictl_vcs_status
@@ -935,6 +940,13 @@ function _apictl_vcs_deploy {
 
 function _apictl_vcs_help {
   _arguments \
+    '(-k --insecure)'{-k,--insecure}'[Allow connections to SSL endpoints without certs]' \
+    '--verbose[Enable verbose mode]'
+}
+
+function _apictl_vcs_init {
+  _arguments \
+    '(-h --help)'{-h,--help}'[help for init]' \
     '(-k --insecure)'{-k,--insecure}'[Allow connections to SSL endpoints without certs]' \
     '--verbose[Enable verbose mode]'
 }
