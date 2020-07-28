@@ -50,8 +50,10 @@ const DefaultExportDirName = "exported"
 const ExportedApisDirName = "apis"
 const ExportedAppsDirName = "apps"
 const ExportedMigrationArtifactsDirName = "migration"
+const CertificatesDirName = "certs"
 
 var DefaultExportDirPath = filepath.Join(ConfigDirPath, DefaultExportDirName)
+var DefaultCertDirPath = filepath.Join(ConfigDirPath, CertificatesDirName)
 
 const defaultApiApplicationImportExportSuffix = "api/am/admin/v0.16"
 const defaultApiListEndpointSuffix = "api/am/publisher/v1/apis"
