@@ -14,7 +14,7 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package cmd
 
@@ -59,7 +59,7 @@ var genKeyCmd = &cobra.Command{
 	},
 }
 
-//Subscribe the given API or API Product to the default application and generate an access token
+//Subscribe the given API to the default application and generate an access token
 func getKeys() {
 	cred, err := getCredentials(keyGenEnv)
 	if err != nil {
@@ -84,7 +84,7 @@ func getKeys() {
 
 	if tiers != nil && err == nil {
 		utils.Logln(utils.LogPrefixInfo+"Retrieved available subscription tiers of the API: ", tiers)
-		// Needs an available subscription tier when subscribing to the particular API or API Product using the application
+		// Needs an available subscription tier when subscribing to the particular API using the application
 		subscriptionThrottlingTier = tiers[0]
 	} else {
 		utils.HandleErrorAndExit("Internal error occurred", err)
@@ -105,7 +105,7 @@ func getKeys() {
 	//if the application exists
 	if appId != "" {
 		utils.Logln(utils.LogPrefixInfo + "CLI application already exists")
-		// Subscribe API or API Product to a given application
+		// Subscribe API to a given application
 		subId, err := subscribe(appId, accessToken)
 		// If subscription fails
 		if subId == "" && err != nil {
@@ -189,7 +189,7 @@ func getKeys() {
 			//if error occurred while creating the application, then
 			utils.HandleErrorAndExit("Error while creating the CLI application:", err)
 		}
-		//Search the if the given API or API Product is present to subscribe
+		//Search the if the given API is present to subscribe
 		subId, err := subscribe(appId, accessToken)
 		//If subscription failed
 		if subId == "" && err != nil {
@@ -218,15 +218,15 @@ func getKeys() {
 	}
 }
 
-// Retrieve an available throttling tiers of the API or API Product
+// Retrieve an available throttling tiers of the API
 // @param accessToken : Access token to authenticate the store REST API
 // @return tiers, error
 func getAvailableAPITiers(accessToken string) ([]string, error) {
-	apiId, err := searchApiOrProduct(accessToken)
+	apiId, err := searchApi(accessToken)
 	if apiId == "" && err != nil {
 		return nil, err
 	}
-	api, err := getApiOrProduct(apiId, accessToken)
+	api, err := getApi(apiId, accessToken)
 	if err == nil && api != nil {
 		return api.Policies, err
 	} else {
@@ -421,12 +421,12 @@ func searchApplication(appName string, accessToken string) (string, error) {
 	}
 }
 
-// Searching if the API or API Product is available
+// Searching if the API is available
 // @param accessToken : Access token to call the store REST API
 // @return apiId, error
-func searchApiOrProduct(accessToken string) (string, error) {
-	// Unified Search endpoint from the config file to search APIs or API Products
-	unifiedSearchEndpoint := utils.GetUnifiedSearchEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
+func searchApi(accessToken string) (string, error) {
+	//API endpoint of the environment from the config file
+	apiEndpoint := utils.GetApiListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
 
 	//Prepping headers
 	headers := make(map[string]string)
@@ -444,7 +444,7 @@ func searchApiOrProduct(accessToken string) (string, error) {
 			queryVal = queryVal + " provider:\"" + apiProvider + "\""
 		}
 	}
-	resp, err := utils.InvokeGETRequestWithQueryParam("query", queryVal, unifiedSearchEndpoint, headers)
+	resp, err := utils.InvokeGETRequestWithQueryParam("query", queryVal, apiEndpoint, headers)
 	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
 		// 200 OK or 201 Created
 		apiData := &utils.ApiSearch{}
@@ -471,16 +471,16 @@ func searchApiOrProduct(accessToken string) (string, error) {
 	}
 }
 
-// Subscribe API or API Product to a given application
-// @param appId : Application ID to subscribe the API or API Product
+// Subscribe API to a given application
+// @param appId : Application ID to subscribe the API
 // @param accessToken : Token to call REST API
 // @return subscriptionId, error
 func subscribe(appId string, accessToken string) (string, error) {
-	apiId, err := searchApiOrProduct(accessToken)
+	apiId, err := searchApi(accessToken)
 	if apiId != "" && err == nil {
-		//If the API or API Product is present, subscribe that API or API Product to the application
+		//If the API is present, subscribe that API to the application
 		utils.Logln(utils.LogPrefixInfo+"API name: ", apiName, "& version: ", apiVersion, "exists")
-		subId, err := subscribeApiOrProduct(apiId, appId, accessToken)
+		subId, err := subscribeApi(apiId, appId, accessToken)
 		if subId != "" {
 			utils.Logln(utils.LogPrefixInfo+"API ", apiName, ":", apiVersion, "subscribed successfully.")
 		} else {
@@ -492,12 +492,11 @@ func subscribe(appId string, accessToken string) (string, error) {
 	}
 }
 
-// Get API or API Product specific details of a given API or API Product
+// Get API specific details of a given API
 // @param apiId : API ID to retrieve the information
 // @param accessToken : Access token to call the REST API
 // @return API, error
-func getApiOrProduct(apiId string, accessToken string) (*utils.APIData, error) {
-	// Since apis/{api-id} supports retrieving details of both APIs and API Products, we can use it here.
+func getApi(apiId string, accessToken string) (*utils.APIData, error) {
 	apiEndpoint := utils.GetApiListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath) + "/" + apiId
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
@@ -519,12 +518,12 @@ func getApiOrProduct(apiId string, accessToken string) (*utils.APIData, error) {
 	}
 }
 
-// Subscribe the API or API Product to a given Application
-// @param apiId : API or API Product ID to be subscribed
+// Subscribe the API to a given Application
+// @param apiId : API ID to be subscribed
 // @param appId : Application ID to be subscribed
 // @param accessToken : Access token to call the REST API
 // @return subscriptionId, error
-func subscribeApiOrProduct(apiId string, appId string, accessToken string) (string, error) {
+func subscribeApi(apiId string, appId string, accessToken string) (string, error) {
 	//todo: subscription endpoint to be included in conf
 	subEndpoint := utils.GetDevPortalApplicationListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
 	subEndpoint = strings.Replace(subEndpoint, "applications", "subscriptions", -1)
@@ -763,8 +762,8 @@ func getNewToken(key *utils.ApplicationKey, scopes []string) (string, error) {
 
 }
 
-// Get all the scopes of the APIs and API Products subscribed to a particular application
-// @param appId : Application ID to get the scopes of subscribed APIs and API Products
+// Get all the scopes of the APIs	 subscribed to a particular application
+// @param appId : Application ID to get the scopes of subscribed APIs
 // @param accessToken : Access token to call the store REST API
 // @return scope[], error
 func getScopes(appId string, accessToken string) ([]string, error) {
@@ -825,7 +824,7 @@ func generateApplicationKeys(appId string, token string) (*utils.KeygenResponse,
 }
 
 // Preparing scope values to compatible with request payload
-// @param scopes []string : Scopes of the APIs and API Products subscribed to an application
+// @param scopes []string : Scopes of the APIs subscribed to an application
 // @param password : Password for application server account
 // @param url : Registration Endpoint for the environment
 // @return string with formatted scope

@@ -198,19 +198,6 @@ func GetApiListEndpointOfEnv(env, filePath string) string {
 	}
 }
 
-// Get ApiProductListEndpoint of a given environment
-func GetApiProductListEndpointOfEnv(env, filePath string) string {
-	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
-	if !(envEndpoints.PublisherEndpoint == "" || envEndpoints == nil) {
-		envEndpoints.PublisherEndpoint = AppendSlashToString(envEndpoints.PublisherEndpoint)
-		return envEndpoints.PublisherEndpoint + defaultApiProductListEndpointSuffix
-	} else {
-		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
-		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
-		return apiManagerEndpoint + defaultApiProductListEndpointSuffix
-	}
-}
-
 // Get ApplicationListEndpoint of a given environment
 func GetAdminApplicationListEndpointOfEnv(env, filePath string) string {
 	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
@@ -313,10 +300,10 @@ func GetDefaultEnvironment(mainConfigFilePath string) string {
 
 //Get token endpoint for Token revocation
 //@return endpoint URL of token revocation endpoint
-func GetTokenRevokeEndpoint (env, filePath string) string {
+func GetTokenRevokeEndpoint(env, filePath string) string {
 	//Get Internal token endpoint for the environment
-	internalTokenEndpoint := GetTokenEndpointOfEnv(env,filePath)
-	slittedString := strings.Split(internalTokenEndpoint,defaultTokenEndPoint)
+	internalTokenEndpoint := GetTokenEndpointOfEnv(env, filePath)
+	slittedString := strings.Split(internalTokenEndpoint, defaultTokenEndPoint)
 	//Get Apim endpoint or publisher endpoint
 	extractedTokenEndpoint := slittedString[0]
 	return extractedTokenEndpoint + defaultRevokeEndpointSuffix

@@ -38,6 +38,5 @@ apictl delete api -l name=myLabel
 
 * [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
 * [apictl delete api](apictl_delete_api.md)	 - Delete API
-* [apictl delete api-product](apictl_delete_api-product.md)	 - Delete API Product
 * [apictl delete app](apictl_delete_app.md)	 - Delete App
 

@@ -548,45 +548,6 @@ _apictl_delete_api()
     noun_aliases=()
 }
 
-_apictl_delete_api-product()
-{
-    last_command="apictl_delete_api-product"
-
-    command_aliases=()
-
-    commands=()
-
-    flags=()
-    two_word_flags=()
-    local_nonpersistent_flags=()
-    flags_with_completion=()
-    flags_completion=()
-
-    flags+=("--environment=")
-    two_word_flags+=("-e")
-    local_nonpersistent_flags+=("--environment=")
-    flags+=("--help")
-    flags+=("-h")
-    local_nonpersistent_flags+=("--help")
-    flags+=("--name=")
-    two_word_flags+=("-n")
-    local_nonpersistent_flags+=("--name=")
-    flags+=("--provider=")
-    two_word_flags+=("-r")
-    local_nonpersistent_flags+=("--provider=")
-    flags+=("--insecure")
-    flags+=("-k")
-    flags+=("--verbose")
-
-    must_have_one_flag=()
-    must_have_one_flag+=("--environment=")
-    must_have_one_flag+=("-e")
-    must_have_one_flag+=("--name=")
-    must_have_one_flag+=("-n")
-    must_have_one_noun=()
-    noun_aliases=()
-}
-
 _apictl_delete_app()
 {
     last_command="apictl_delete_app"
@@ -634,7 +595,6 @@ _apictl_delete()
 
     commands=()
     commands+=("api")
-    commands+=("api-product")
     commands+=("app")
 
     flags=()
@@ -1055,45 +1015,6 @@ _apictl_install()
     noun_aliases=()
 }
 
-_apictl_list_api-products()
-{
-    last_command="apictl_list_api-products"
-
-    command_aliases=()
-
-    commands=()
-
-    flags=()
-    two_word_flags=()
-    local_nonpersistent_flags=()
-    flags_with_completion=()
-    flags_completion=()
-
-    flags+=("--environment=")
-    two_word_flags+=("-e")
-    local_nonpersistent_flags+=("--environment=")
-    flags+=("--format=")
-    local_nonpersistent_flags+=("--format=")
-    flags+=("--help")
-    flags+=("-h")
-    local_nonpersistent_flags+=("--help")
-    flags+=("--limit=")
-    two_word_flags+=("-l")
-    local_nonpersistent_flags+=("--limit=")
-    flags+=("--query=")
-    two_word_flags+=("-q")
-    local_nonpersistent_flags+=("--query=")
-    flags+=("--insecure")
-    flags+=("-k")
-    flags+=("--verbose")
-
-    must_have_one_flag=()
-    must_have_one_flag+=("--environment=")
-    must_have_one_flag+=("-e")
-    must_have_one_noun=()
-    noun_aliases=()
-}
-
 _apictl_list_apis()
 {
     last_command="apictl_list_apis"
@@ -1207,7 +1128,6 @@ _apictl_list()
     command_aliases=()
 
     commands=()
-    commands+=("api-products")
     commands+=("apis")
     commands+=("apps")
     commands+=("envs")
