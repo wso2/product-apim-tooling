@@ -230,8 +230,8 @@ func init() {
 	appsCmd.Flags().StringVarP(&listAppsCmdEnvironment, "environment", "e",
 		"", "Environment to be searched")
 	appsCmd.Flags().StringVarP(&listAppsCmdLimit, "limit", "l",
-		"", "Maximum number of applications to return")
-	appsCmd.Flags().StringVarP(&listAppsCmdFormat, "format", "", strconv.Itoa(utils.DefaultAppsDisplayLimit), "Pretty-print output"+
+		strconv.Itoa(utils.DefaultApisDisplayLimit), "Maximum number of applications to return")
+	appsCmd.Flags().StringVarP(&listAppsCmdFormat, "format", "", "", "Pretty-print output"+
 		"using Go templates. Use \"{{jsonPretty .}}\" to list all fields")
 	_ = appsCmd.MarkFlagRequired("environment")
 }

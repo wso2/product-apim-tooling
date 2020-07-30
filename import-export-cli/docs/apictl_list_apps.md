@@ -25,9 +25,9 @@ NOTE: The flag (--environment (-e)) is mandatory
 
 ```
   -e, --environment string   Environment to be searched
-      --format string        Pretty-print outputusing Go templates. Use "{{jsonPretty .}}" to list all fields (default "25")
+      --format string        Pretty-print outputusing Go templates. Use "{{jsonPretty .}}" to list all fields
   -h, --help                 help for apps
-  -l, --limit string         Maximum number of applications to return
+  -l, --limit string         Maximum number of applications to return (default "25")
   -o, --owner string         Owner of the Application
 ```
 
