@@ -66,14 +66,6 @@ type API struct {
 	LifeCycleStatus string `json:"lifeCycleStatus"`
 }
 
-type APIProduct struct {
-	ID              string `json:"id"`
-	Name            string `json:"name"`
-	Context         string `json:"context"`
-	Provider        string `json:"provider"`
-	LifeCycleStatus string `json:"status"`
-}
-
 type Application struct {
 	ID      string `json:"applicationId"`
 	Name    string `json:"name"`
@@ -100,11 +92,6 @@ type TokenResponse struct {
 type APIListResponse struct {
 	Count int32 `json:"count"`
 	List  []API `json:"list"`
-}
-
-type APIProductListResponse struct {
-	Count int32        `json:"count"`
-	List  []APIProduct `json:"list"`
 }
 
 type ApplicationListResponse struct {
