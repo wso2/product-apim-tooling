@@ -26,6 +26,7 @@ import (
 // Git Constants
 const Git = "git"
 const VCSConfigFileName = "vcs_config.yaml"
+const VCSRepoInfoFileName = "vcs.yaml"
 
 const FromRevTypeLastAttempted = "last_attempted"
 const FromRevTypeLastSuccessful = "last_successful"

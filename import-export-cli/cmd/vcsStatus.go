@@ -35,7 +35,7 @@ const vcsStatusCmdShortDesc = "Shows the list of projects that are ready to depl
 const vcsStatusCmdLongDesc = `Shows the list of projects that are ready to deploy to the specified environment by --environment(-e)
 NOTE: --environment (-e) flag is mandatory`
 
-const vcsStatusCmdCmdExamples = utils.ProjectName + ` ` + vcsStatusCmdLiteral + ` `  + ` -e dev`
+const vcsStatusCmdCmdExamples = utils.ProjectName + ` ` + vcsCmdLiteral + ` ` + vcsStatusCmdLiteral  + ` -e dev`
 
 // pushCmd represents the push command
 var VCSStatusCmd = &cobra.Command{
@@ -45,8 +45,7 @@ var VCSStatusCmd = &cobra.Command{
 	Example: vcsStatusCmdCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + vcsStatusCmdLiteral + " called")
-		totalProjectsToUpdate, updatedProjectsPerType := git.GetStatus(flagVCSStatusEnvName, git.FromRevTypeLastAttempted)
-
+		_, totalProjectsToUpdate, updatedProjectsPerType := git.GetStatus(flagVCSStatusEnvName, git.FromRevTypeLastAttempted)
 		if totalProjectsToUpdate == 0 {
 			fmt.Println("Everything is up-to-date")
 			return

@@ -8,6 +8,7 @@ require (
 	github.com/go-openapi/loads v0.19.4
 	github.com/go-resty/resty v0.0.0-20171018191538-8b5e3f91fbea
 	github.com/google/go-cmp v0.4.0
+	github.com/google/uuid v1.1.1
 	github.com/hashicorp/go-multierror v1.0.0
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.0

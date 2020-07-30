@@ -37,7 +37,7 @@ Only the changed projects compared to the revision at the last successful deploy
 If any project(s) got failed during the deployment, by default, the operation will rollback the environment to the last successful state. If this needs to be avoided, use --skipRollback=true
 NOTE: --environment (-e) flag is mandatory`
 
-const deployCmdExamples = utils.ProjectName + ` ` + deployCmdLiteral + ` -e dev
+const deployCmdExamples = utils.ProjectName + ` ` + vcsCmdLiteral + ` ` + deployCmdLiteral + ` -e dev
 ` + utils.ProjectName + ` ` + deployCmdLiteral + ` -e dev --skipRollback=true`
 
 // deployCmd represents the deploy command
