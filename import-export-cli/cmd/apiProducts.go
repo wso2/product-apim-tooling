@@ -232,8 +232,8 @@ func init() {
 	apiProductsCmd.Flags().StringVarP(&listApiProductsCmdQuery, "query", "q",
 		"", "Query pattern")
 	apiProductsCmd.Flags().StringVarP(&listApiProductsCmdLimit, "limit", "l",
-		"", "Maximum number of API Products to return")
-	apiProductsCmd.Flags().StringVarP(&listApiProductsCmdFormat, "format", "", strconv.Itoa(utils.DefaultApiProductsDisplayLimit), "Pretty-print API Products "+
+		strconv.Itoa(utils.DefaultApiProductsDisplayLimit), "Maximum number of API Products to return")
+	apiProductsCmd.Flags().StringVarP(&listApiProductsCmdFormat, "format", "", "", "Pretty-print API Products "+
 		"using Go Templates. Use \"{{ jsonPretty . }}\" to list all fields")
 	_ = apiProductsCmd.MarkFlagRequired("environment")
 }
