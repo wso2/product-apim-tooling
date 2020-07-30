@@ -159,7 +159,7 @@ func ValidateImportUpdatePassedWithInitializedProject(t *testing.T, args *InitTe
 
 	result, error := ImportApiFromProjectWithUpdate(t, args.InitFlag, args.SrcAPIM.GetEnvName())
 	assert.Nil(t, error, "Error while generating Project")
-	assert.Contains(t, result, "Successfully imported API", "Test InitializeProjectWithDefinitionFlag Failed")
+	assert.Contains(t, result, "Successfully imported API", "Error while importing Project")
 
 	//Remove Created project and logout
 	t.Cleanup(func() {
@@ -171,7 +171,7 @@ func ValidateExportImportedAPI(t *testing.T, args *InitTestArgs, DevFirstDefault
 	expOutput, expError := exportApiImportedFromProject(t, DevFirstDefaultAPIName, DevFirstDefaultAPIVersion, args.SrcAPIM.GetEnvName())
 	//Check whether api is exported or not
 	assert.Nil(t, expError, "Error while Exporting API")
-	assert.Contains(t, expOutput, "Successfully exported API!", "Error while Exporting API")
+	assert.Contains(t, expOutput, "Successfully exported API!", "Error while exporting API")
 	return expOutput
 }
 
@@ -188,7 +188,7 @@ func ValidateAPIWithDocIsExported(t *testing.T, args *InitTestArgs, DevFirstDefa
 	//Check whether the file is available
 	isDocExported := base.IsFileAvailable(docPathOfExportedApi)
 	base.Log("Doc is Exported", isDocExported)
-	assert.Equal(t, true, isDocExported, "Error while Exporting API with document")
+	assert.Equal(t, true, isDocExported, "Error while exporting API with document")
 
 	t.Cleanup(func() {
 		//Remove Created project and logout
@@ -210,7 +210,7 @@ func ValidateAPIWithIconIsExported(t *testing.T, args *InitTestArgs, DevFirstDef
 
 	isIconExported := base.IsFileAvailable(iconPathOfExportedApi)
 	base.Log("Icon is Exported", isIconExported)
-	assert.Equal(t, true, isIconExported, "Error while Exporting API with Icon")
+	assert.Equal(t, true, isIconExported, "Error while exporting API with icon")
 
 	t.Cleanup(func() {
 		//Remove Created project and logout
@@ -231,7 +231,7 @@ func ValidateAPIWithImageIsExported(t *testing.T, args *InitTestArgs, DevFirstDe
 	imagePathOfExportedApi := relativePath + utils.TestDefaultExtractedFileName + utils.TestCase2DestJpegPathSuffix
 	isIconExported := base.IsFileAvailable(imagePathOfExportedApi)
 	base.Log("Image is Exported", isIconExported)
-	assert.Equal(t, true, isIconExported, "Error while Exporting API with Icon")
+	assert.Equal(t, true, isIconExported, "Error while exporting API with icon")
 
 	t.Cleanup(func() {
 		//Remove Created project and logout

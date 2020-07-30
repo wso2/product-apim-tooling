@@ -40,10 +40,9 @@ func TestInitializeProject(t *testing.T) {
 	}
 
 	testutils.ValidateInitializeProject(t, args)
-
 }
 
-//Initialize an API with --definition flag and import that project
+//Initialize an API with --definition flag
 func TestInitializeAPIWithDefinitionFlag(t *testing.T) {
 	apim := apimClients[0]
 	projectName := "APIProjectWithDefinitionFlag"
@@ -59,7 +58,6 @@ func TestInitializeAPIWithDefinitionFlag(t *testing.T) {
 	}
 
 	testutils.ValidateInitializeProjectWithDefinitionFlag(t, args)
-
 }
 
 //Initialize an API from Swagger 2 Specification
@@ -78,7 +76,6 @@ func TestInitializeAPIFromSwagger2Definition(t *testing.T) {
 	}
 
 	testutils.ValidateInitializeProjectWithOASFlag(t, args)
-
 }
 
 //Initialize an API from OpenAPI 3 Specification
@@ -97,7 +94,6 @@ func TestInitializeAPIFromOpenAPI3Definition(t *testing.T) {
 	}
 
 	testutils.ValidateInitializeProjectWithOASFlag(t, args)
-
 }
 
 //Initialize an API from API Specification URL
@@ -116,7 +112,6 @@ func TestInitializeAPIFromAPIDefinitionURL(t *testing.T) {
 	}
 
 	testutils.ValidateInitializeProjectWithOASFlag(t, args)
-
 }
 
 //Import API from initialized project with swagger 2 definition
@@ -136,7 +131,6 @@ func TestImportProjectCreatedFromSwagger2Definition(t *testing.T) {
 
 	//Assert that project import to publisher portal is successful
 	testutils.ValidateImportInitializedProject(t, args)
-
 }
 
 //Import API from initialized project with openAPI 3 definition
@@ -156,7 +150,6 @@ func TestImportProjectCreatedFromOpenAPI3Definition(t *testing.T) {
 
 	//Assert that project import to publisher portal is successful
 	testutils.ValidateImportInitializedProject(t, args)
-
 }
 
 //Import API from initialized project from API definition which is already in publisher without --update flag
@@ -179,7 +172,6 @@ func TestImportProjectCreatedFailWhenAPIIsExisted(t *testing.T) {
 
 	//Import API for the second time
 	testutils.ValidateImportFailedWithInitializedProject(t, args)
-
 }
 
 //Import API from initialized project from API definition which is already in publisher with --update flag
@@ -202,7 +194,6 @@ func TestImportProjectCreatedPassWhenAPIIsExisted(t *testing.T) {
 
 	//Import API for the second time
 	testutils.ValidateImportUpdatePassedWithInitializedProject(t, args)
-
 }
 
 //Import Api with a Document and Export that Api with a Document
@@ -237,7 +228,6 @@ func TestImportAndExportAPIWithDocument(t *testing.T) {
 	testutils.ValidateImportUpdatePassedWithInitializedProject(t, args)
 
 	testutils.ValidateAPIWithDocIsExported(t, args, utils.DevFirstDefaultAPIName, utils.DevFirstDefaultAPIVersion)
-
 }
 
 //Import Api with an Image and Export that Api with an image (.png Type)
@@ -353,5 +343,4 @@ func TestUpdateDocAndImageOfAPIOfExistingAPI(t *testing.T) {
 
 	//Validate that document has been updated
 	testutils.ValidateAPIWithIconIsExported(t, args, utils.DevFirstDefaultAPIName, utils.DevFirstDefaultAPIVersion)
-
 }

@@ -165,13 +165,13 @@ func ValidateAllApisOfATenantIsExported(t *testing.T, args *ApiImportExportTestA
 	time.Sleep(5 * time.Second)
 
 	output, error := ExportAllApisOfATenant(t, args)
-	assert.Nil(t, error, "Error while Exporting APIs")
-	assert.Contains(t, output, "export-apis execution completed", "Error while Exporting APIs")
+	assert.Nil(t, error, "Error while exporting APIs")
+	assert.Contains(t, output, "export-apis execution completed", "Error while exporting APIs")
 
 	//Derive exported path from output
 	exportedPath := base.GetExportedPathFromOutput(strings.ReplaceAll(output, "Command: export-apis execution completed !", ""))
 	count, _ := base.CountFiles(exportedPath)
-	assert.GreaterOrEqual(t, count, apisAdded, "Error while Exporting APIs")
+	assert.GreaterOrEqual(t, count, apisAdded, "Error while exporting APIs")
 
 	t.Cleanup(func() {
 		//Remove Exported apis and logout
