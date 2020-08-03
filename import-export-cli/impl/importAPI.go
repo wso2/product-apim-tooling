@@ -679,6 +679,7 @@ func replaceEnvVariables(apiFilePath string) error {
 
 func populateAPIWithDefaults(def *v2.APIDefinition) (dirty bool) {
 	dirty = false
+	def.Context = strings.ReplaceAll(def.Context, " ", "")
 	if def.ContextTemplate == "" {
 		if !strings.Contains(def.Context, "{version}") {
 			def.ContextTemplate = path.Clean(def.Context + "/{version}")

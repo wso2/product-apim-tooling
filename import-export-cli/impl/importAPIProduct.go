@@ -116,6 +116,7 @@ func getAPIProductID(name, version, environment, accessOAuthToken string) (strin
 
 func populateAPIProductWithDefaults(def *v2.APIProductDefinition) (dirty bool) {
 	dirty = false
+	def.Context = strings.ReplaceAll(def.Context, " ", "")
 	if def.ContextTemplate == "" {
 		if !strings.Contains(def.Context, "{version}") {
 			def.ContextTemplate = path.Clean(def.Context + "/{version}")
