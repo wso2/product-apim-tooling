@@ -28,7 +28,6 @@ import (
 	"github.com/Jeffail/gabs"
 	"github.com/go-openapi/loads"
 	"github.com/mitchellh/mapstructure"
-
 )
 
 func swagger2XWO2BasePath(document *loads.Document) (string, bool) {
@@ -226,6 +225,9 @@ func Swagger2Populate(def *APIDefinition, document *loads.Document) error {
 			def.Context = path.Clean(strings.ReplaceAll(basepath, "{version}", def.ID.Version))
 		}
 	}
+
+	def.Context = strings.ReplaceAll(def.Context, " ", "")
+	def.ContextTemplate = strings.ReplaceAll(def.ContextTemplate, " ", "")
 
 	cors, ok, err := swagger2XWSO2Cors(document)
 	if err != nil && ok {
