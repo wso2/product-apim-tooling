@@ -97,7 +97,7 @@ func GetStatus(environment, fromRevType string) (string, int, map[string][]*para
 
     var changedFiles string
     if envRevision == "" {
-        changedFiles, _ = executeGitCommand("ls-tree", "-r", "HEAD", "--name-only")
+        changedFiles, _ = executeGitCommand("ls-tree", "-r", "HEAD", "--name-only", "--full-tree")
     } else {
         changedFiles, _ = executeGitCommand("diff", "--name-only", envRevision)
     }
@@ -342,7 +342,7 @@ func deployUpdatedProjects(accessToken, repoId, environment string, totalProject
                 hasDeletedProjects = true
                 continue
             }
-            importParams := projectParam.ApiParams.VCS.Import
+            importParams := projectParam.ApiParams.Deploy.Import
             fmt.Println(strconv.Itoa(i+1) + ": " + projectParam.NickName + ": (" + projectParam.RelativePath + ")")
             err := impl.ImportAPIToEnv(accessToken, environment, projectParam.AbsolutePath, "",
                 importParams.Update, importParams.PreserveProvider, false)
@@ -364,7 +364,7 @@ func deployUpdatedProjects(accessToken, repoId, environment string, totalProject
                 hasDeletedProjects = true
                 continue
             }
-            importParams := projectParam.ApiProductParams.VCS.Import
+            importParams := projectParam.ApiProductParams.Deploy.Import
             fmt.Println(strconv.Itoa(i+1) + ": " + projectParam.NickName + ": (" + projectParam.RelativePath + ")")
             err := impl.ImportAPIProductToEnv(accessToken, environment, projectParam.AbsolutePath,
                 importParams.ImportAPIs, importParams.UpdateAPIs, importParams.UpdateAPIProduct,
@@ -387,7 +387,7 @@ func deployUpdatedProjects(accessToken, repoId, environment string, totalProject
                 hasDeletedProjects = true
                 continue
             }
-            importParams := projectParam.ApplicationParams.VCS.Import
+            importParams := projectParam.ApplicationParams.Deploy.Import
             fmt.Println(strconv.Itoa(i+1) + ": " + projectParam.NickName + ": (" + projectParam.RelativePath + ")")
             _, err := impl.ImportApplicationToEnv(accessToken, environment, projectParam.AbsolutePath,
                 importParams.TargetOwner, importParams.Update, importParams.PreserveOwner,
