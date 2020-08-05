@@ -97,7 +97,7 @@ func GetStatus(environment, fromRevType string) (string, int, map[string][]*para
 
     var changedFiles string
     if envRevision == "" {
-        changedFiles, _ = executeGitCommand("ls-tree", "-r", "HEAD", "--name-only")
+        changedFiles, _ = executeGitCommand("ls-tree", "-r", "HEAD", "--name-only", "--full-tree")
     } else {
         changedFiles, _ = executeGitCommand("diff", "--name-only", envRevision)
     }
