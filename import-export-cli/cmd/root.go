@@ -163,11 +163,11 @@ func createConfigFiles() {
 	} else {
 		data, err := ioutil.ReadFile(utils.DefaultAPISpecFilePath)
 		if err != nil {
-			utils.HandleErrorAndExit("Error creating default api spec file", err)
+			utils.HandleErrorAndExit("Error reading default_api.yaml spec file", err)
 		}
 		defaultApiFile := make(map[string]interface{})
 		if err := yaml.Unmarshal(data, &defaultApiFile); err != nil {
-			utils.HandleErrorAndExit("Error reading controller-config", err)
+			utils.HandleErrorAndExit("Error reading default_api.yaml", err)
 		}
 
 		//Check whether the EnableStore is provided, if provided keep the given value
