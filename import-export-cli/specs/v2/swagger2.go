@@ -226,6 +226,9 @@ func Swagger2Populate(def *APIDefinition, document *loads.Document) error {
 		}
 	}
 
+	// trim spaces if available
+	def.ID.APIName = strings.ReplaceAll(def.ID.APIName, " ", "")
+	def.ID.Version = strings.ReplaceAll(def.ID.Version, " ", "")
 	def.Context = strings.ReplaceAll(def.Context, " ", "")
 	def.ContextTemplate = strings.ReplaceAll(def.ContextTemplate, " ", "")
 
