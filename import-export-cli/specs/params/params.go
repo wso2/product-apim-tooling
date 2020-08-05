@@ -140,15 +140,15 @@ type Environment struct {
 type ApiParams struct {
 	// Environments contains all environments in a configuration
 	Environments []Environment `yaml:"environments"`
-	VCS          APIVCSParams  `yaml:"vcs"`
+	Deploy       APIVCSParams  `yaml:"deploy"`
 }
 
 type ApiProductParams struct {
-	VCS ApiProductVCSParams `yaml:"vcs"`
+	Deploy ApiProductVCSParams `yaml:"deploy"`
 }
 
 type ApplicationParams struct {
-	VCS ApplicationVCSParams `yaml:"vcs"`
+	Deploy ApplicationVCSParams `yaml:"deploy"`
 }
 
 // ------------------- Structs for VCS Import Params ----------------------------------
