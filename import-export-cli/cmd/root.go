@@ -21,6 +21,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"github.com/ghodss/yaml"
 	"io"
 	"io/ioutil"
 	"os"
@@ -159,6 +160,23 @@ func createConfigFiles() {
 		if err != nil {
 			utils.HandleErrorAndExit("Error creating default api spec file", err)
 		}
+	} else {
+		data, err := ioutil.ReadFile(utils.DefaultAPISpecFilePath)
+		if err != nil {
+			utils.HandleErrorAndExit("Error creating default api spec file", err)
+		}
+		defaultApiFile := make(map[string]interface{})
+		if err := yaml.Unmarshal(data, &defaultApiFile); err != nil {
+			utils.HandleErrorAndExit("Error reading controller-config", err)
+		}
+
+		//Check whether the EnableStore is provided, if provided keep the given value
+		//otherwise inject default value for the property.
+		_, isEnableStoreProvided := defaultApiFile["enableStore"]
+		if !isEnableStoreProvided {
+			defaultApiFile["enableStore"] = true
+		}
+		utils.WriteConfigFile(defaultApiFile, utils.DefaultAPISpecFilePath)
 	}
 }
 
