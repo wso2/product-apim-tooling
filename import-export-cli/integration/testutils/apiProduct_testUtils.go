@@ -24,7 +24,6 @@ import (
 	"strconv"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
@@ -61,7 +60,7 @@ func getAPIProducts(client *apim.Client, username string, password string) *apim
 }
 
 func deleteAPIProduct(t *testing.T, client *apim.Client, apiProductID string, username string, password string) {
-	time.Sleep(2000 * time.Millisecond)
+	base.WaitForIndexing()
 	client.Login(username, password)
 	client.DeleteAPIProduct(apiProductID)
 }
@@ -256,7 +255,7 @@ func ValidateAPIProductExportImportPreserveProvider(t *testing.T, args *ApiProdu
 	importAPIProductPreserveProvider(t, args)
 
 	// Give time for newly imported API Product to get indexed, or else getAPIProduct by name will fail
-	time.Sleep(1 * time.Second)
+	base.WaitForIndexing()
 
 	// Get API Product from env 2
 	importedAPIProduct := getAPIProduct(t, args.DestAPIM, args.ApiProduct.Name, args.ApiProductProvider.Username, args.ApiProductProvider.Password)
@@ -279,7 +278,7 @@ func ValidateAPIProductImportUpdatePreserveProvider(t *testing.T, args *ApiProdu
 	importUpdateAPIProductPreserveProvider(t, args)
 
 	// Give time for newly imported API Product to get indexed, or else getAPIProduct by name will fail
-	time.Sleep(1 * time.Second)
+	base.WaitForIndexing()
 
 	// Get API Product from env 2
 	importedAPIProduct := getAPIProduct(t, args.DestAPIM, args.ApiProduct.Name, args.ApiProductProvider.Username, args.ApiProductProvider.Password)
@@ -326,7 +325,7 @@ func ValidateAPIProductImport(t *testing.T, args *ApiProductImportExportTestArgs
 	importAPIProduct(t, args)
 
 	// Give time for newly imported API Product to get indexed, or else getAPIProduct by name will fail
-	time.Sleep(1 * time.Second)
+	base.WaitForIndexing()
 
 	// Get API Product from env 2
 	importedAPIProduct := getAPIProduct(t, args.DestAPIM, args.ApiProduct.Name, args.ApiProductProvider.Username, args.ApiProductProvider.Password)
@@ -349,7 +348,7 @@ func ValidateAPIProductImportUpdate(t *testing.T, args *ApiProductImportExportTe
 	importUpdateAPIProduct(t, args)
 
 	// Give time for newly imported API Product to get indexed, or else getAPIProduct by name will fail
-	time.Sleep(1 * time.Second)
+	base.WaitForIndexing()
 
 	// Get API Product from env 2
 	importedAPIProduct := getAPIProduct(t, args.DestAPIM, args.ApiProduct.Name, args.ApiProductProvider.Username, args.ApiProductProvider.Password)
@@ -495,7 +494,7 @@ func ValidateAPIProductsList(t *testing.T, args *ApiProductImportExportTestArgs)
 	// List API Products of env 1
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	time.Sleep(1 * time.Second)
+	base.WaitForIndexing()
 
 	output, _ := listAPIProducts(t, args)
 
@@ -526,13 +525,13 @@ func ValidateAPIProductDelete(t *testing.T, args *ApiProductImportExportTestArgs
 	// Delete an API Product of env 1
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	time.Sleep(1 * time.Second)
+	base.WaitForIndexing()
 	apiProductsListBeforeDelete := args.SrcAPIM.GetAPIProducts()
 
 	deleteAPIProductByCtl(t, args)
 
 	apiProductsListAfterDelete := args.SrcAPIM.GetAPIProducts()
-	time.Sleep(1 * time.Second)
+	base.WaitForIndexing()
 
 	// Validate whether the expected number of API Product count is there
 	assert.Equal(t, apiProductsListBeforeDelete.Count, apiProductsListAfterDelete.Count+1, "Expected number of API Products not deleted")
@@ -556,12 +555,12 @@ func ValidateAPIProductDeleteFailure(t *testing.T, args *ApiProductImportExportT
 	// Delete an API Product of env 1
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	time.Sleep(1 * time.Second)
+	base.WaitForIndexing()
 	apiProductsListBeforeDelete := args.SrcAPIM.GetAPIProducts()
 
 	deleteAPIProductByCtl(t, args)
 
-	time.Sleep(1 * time.Second)
+	base.WaitForIndexing()
 	apiProductsListAfterDelete := args.SrcAPIM.GetAPIProducts()
 
 	assert.Equal(t, apiProductsListBeforeDelete.Count, apiProductsListAfterDelete.Count, "API Product delete is successful")

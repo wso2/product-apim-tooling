@@ -23,7 +23,6 @@ import (
 	"strconv"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/adminservices"
@@ -93,7 +92,7 @@ func AddAPIProductFromJSON(t *testing.T, client *apim.Client, username string, p
 	doClean := true
 	id := client.AddAPIProductFromJSON(t, path, username, password, apisList, doClean)
 
-	time.Sleep(1 * time.Second)
+	base.WaitForIndexing()
 
 	apiProduct := client.GetAPIProduct(id)
 	return apiProduct
@@ -116,19 +115,13 @@ func getAPIs(client *apim.Client, username string, password string) *apim.APILis
 	return client.GetAPIs()
 }
 
-func deleteAPI(t *testing.T, client *apim.Client, apiID string, username string, password string) {
-	time.Sleep(2000 * time.Millisecond)
-	client.Login(username, password)
-	client.DeleteAPI(apiID)
-}
-
 func deleteAPIByCtl(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
 	output, err := base.Execute(t, "delete", "api", "-n", args.Api.Name, "-v", args.Api.Version, "-e", args.SrcAPIM.EnvName, "-k", "--verbose")
 	return output, err
 }
 
 func PublishAPI(client *apim.Client, username string, password string, apiID string) {
-	time.Sleep(2000 * time.Millisecond)
+	base.WaitForIndexing()
 	client.Login(username, password)
 	client.PublishAPI(apiID)
 }
@@ -234,7 +227,7 @@ func ValidateAPIExportImport(t *testing.T, args *ApiImportExportTestArgs) {
 	importAPIPreserveProvider(t, args.SrcAPIM.GetEnvName(), args.Api, args.DestAPIM)
 
 	// Give time for newly imported API to get indexed, or else getAPI by name will fail
-	time.Sleep(1 * time.Second)
+	base.WaitForIndexing()
 
 	// Get App from env 2
 	importedAPI := getAPI(t, args.DestAPIM, args.Api.Name, args.ApiProvider.Username, args.ApiProvider.Password)
@@ -268,7 +261,7 @@ func ValidateAPIImport(t *testing.T, args *ApiImportExportTestArgs) {
 	importAPI(t, args.SrcAPIM.GetEnvName(), args.Api, args.DestAPIM)
 
 	// Give time for newly imported API to get indexed, or else getAPI by name will fail
-	time.Sleep(1 * time.Second)
+	base.WaitForIndexing()
 
 	// Get App from env 2
 	importedAPI := getAPI(t, args.DestAPIM, args.Api.Name, args.ApiProvider.Username, args.ApiProvider.Password)
@@ -324,7 +317,7 @@ func ValidateAPIsList(t *testing.T, args *ApiImportExportTestArgs) {
 	// List APIs of env 1
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	time.Sleep(1 * time.Second)
+	base.WaitForIndexing()
 
 	output, _ := listAPIs(t, args)
 
@@ -388,13 +381,13 @@ func ValidateAPIDelete(t *testing.T, args *ApiImportExportTestArgs) {
 	// Delete an API of env 1
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	time.Sleep(1 * time.Second)
+	base.WaitForIndexing()
 	apisListBeforeDelete := args.SrcAPIM.GetAPIs()
 
 	deleteAPIByCtl(t, args)
 
 	apisListAfterDelete := args.SrcAPIM.GetAPIs()
-	time.Sleep(1 * time.Second)
+	base.WaitForIndexing()
 
 	// Validate whether the expected number of API count is there
 	assert.Equal(t, apisListBeforeDelete.Count, apisListAfterDelete.Count+1, "Expected number of APIs not deleted")

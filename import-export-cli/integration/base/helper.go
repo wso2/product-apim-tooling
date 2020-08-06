@@ -28,12 +28,16 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"log"
 )
 
 // logTransport : Flag which determines if http transport level requests and responses are logged
 var logTransport = false
+
+// indexingDelay : Time in milliseconds that tests need to wait for to allow APIM solr indexing to take place
+var indexingDelay = 1000
 
 func init() {
 	flag.BoolVar(&logTransport, "logtransport", false, "Log http transport level requests and responses")
@@ -265,6 +269,16 @@ func logResponse(logString string, response *http.Response) {
 	log.Println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<", logString, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 	log.Println(string(dump))
 	log.Println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+}
+
+// SetIndexingDelay : Set time in milliseconds that tests need to wait for to allow APIM solr indexing to take place
+func SetIndexingDelay(delay int) {
+	indexingDelay = delay
+}
+
+// WaitForIndexing : Wait for specified interval to allow APIM solr indexes to be updated
+func WaitForIndexing() {
+	time.Sleep(time.Duration(indexingDelay) * time.Millisecond)
 }
 
 func RemoveDir(projectName string) {

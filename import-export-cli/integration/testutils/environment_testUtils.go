@@ -22,7 +22,6 @@ import (
 	"strconv"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
@@ -68,7 +67,6 @@ func ValidateExportDirectoryIsChanged(t *testing.T, args *SetTestArgs) {
 
 func ValidateExportApisPassed(t *testing.T, args *InitTestArgs, directoryName string) {
 	t.Helper()
-	time.Sleep(5 * time.Second)
 
 	output, error := ExportApisWithOneCommand(t, args)
 	assert.Nil(t, error, "Error while Exporting APIs")

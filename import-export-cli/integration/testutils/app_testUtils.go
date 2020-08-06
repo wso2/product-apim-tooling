@@ -21,7 +21,6 @@ package testutils
 import (
 	"path/filepath"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
@@ -194,13 +193,13 @@ func ValidateAppDelete(t *testing.T, args *AppImportExportTestArgs) {
 	// Delete an App of env 1
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	time.Sleep(1 * time.Second)
+	base.WaitForIndexing()
 	appsListBeforeDelete := args.SrcAPIM.GetApplications()
 
 	DeleteAppByCtl(t, args)
 
 	appsListAfterDelete := args.SrcAPIM.GetApplications()
-	time.Sleep(1 * time.Second)
+	base.WaitForIndexing()
 
 	// Validate whether the expected number of App count is there
 	assert.Equal(t, appsListBeforeDelete.Count, appsListAfterDelete.Count+1, "Expected number of Applications not deleted")

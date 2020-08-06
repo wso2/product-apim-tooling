@@ -22,7 +22,6 @@ import (
 	"log"
 	"strconv"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
@@ -89,7 +88,7 @@ func ValidateImportInitializedProject(t *testing.T, args *InitTestArgs) {
 
 	result, error := ImportApiFromProject(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, true)
 
-	time.Sleep(1 * time.Second)
+	base.WaitForIndexing()
 
 	assert.Nil(t, error, "Error while importing Project")
 	assert.Contains(t, result, "Successfully imported API", "Error while importing Project")
@@ -105,7 +104,7 @@ func ValidateImportFailedWithInitializedProject(t *testing.T, args *InitTestArgs
 
 	result, _ := ImportApiFromProject(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, false)
 
-	time.Sleep(1 * time.Second)
+	base.WaitForIndexing()
 
 	assert.Contains(t, result, "Resource Already Exists", "Test failed because API is imported successfully")
 
@@ -120,7 +119,7 @@ func ValidateImportUpdatePassedWithInitializedProject(t *testing.T, args *InitTe
 
 	result, error := ImportApiFromProjectWithUpdate(t, args.InitFlag, args.SrcAPIM.GetEnvName())
 
-	time.Sleep(1 * time.Second)
+	base.WaitForIndexing()
 
 	assert.Nil(t, error, "Error while generating Project")
 	assert.Contains(t, result, "Successfully imported API", "Test InitializeProjectWithDefinitionFlag Failed")
