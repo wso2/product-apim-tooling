@@ -108,13 +108,6 @@ func ValidateInitializeProjectWithDefinitionFlag(t *testing.T, args *InitTestArg
 	assert.Nil(t, err, "Error while generating Project")
 	assert.Containsf(t, output, "Project initialized", "Test initialization Failed with --oas flag")
 
-	time.Sleep(1 * time.Second)
-
-	//Import created project
-	result, error := ImportApiFromProject(t, args.InitFlag, args.SrcAPIM.GetEnvName())
-	assert.Nil(t, error, "Error while importing Project")
-	assert.Contains(t, result, "Successfully imported API", "Error while importing Project")
-
 	//Remove created project
 	t.Cleanup(func() {
 		base.RemoveDir(args.InitFlag)
