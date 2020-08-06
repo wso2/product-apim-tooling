@@ -92,6 +92,9 @@ func AddAPIProductFromJSON(t *testing.T, client *apim.Client, username string, p
 	path := "testdata/SampleAPIProduct.json"
 	doClean := true
 	id := client.AddAPIProductFromJSON(t, path, username, password, apisList, doClean)
+
+	time.Sleep(1 * time.Second)
+
 	apiProduct := client.GetAPIProduct(id)
 	return apiProduct
 }
@@ -321,6 +324,8 @@ func ValidateAPIsList(t *testing.T, args *ApiImportExportTestArgs) {
 	// List APIs of env 1
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
+	time.Sleep(1 * time.Second)
+
 	output, _ := listAPIs(t, args)
 
 	apisList := args.SrcAPIM.GetAPIs()
@@ -329,16 +334,16 @@ func ValidateAPIsList(t *testing.T, args *ApiImportExportTestArgs) {
 }
 
 func validateListAPIsEqual(t *testing.T, apisListFromCtl string, apisList *apim.APIList) {
-
+	unmatchedCount := apisList.Count
 	for _, api := range apisList.List {
 		// If the output string contains the same API ID, then decrement the count
-		if strings.Contains(apisListFromCtl, api.ID) {
-			apisList.Count = apisList.Count - 1
-		}
+		assert.Truef(t, strings.Contains(apisListFromCtl, api.ID), "apisListFromCtl: "+apisListFromCtl+
+			" , does not contain api.ID: "+api.ID)
+		unmatchedCount--
 	}
 
 	// Count == 0 means that all the APIs from apisList were in apisListFromCtl
-	assert.Equal(t, apisList.Count, 0, "API lists are not equal")
+	assert.Equal(t, 0, unmatchedCount, "API lists are not equal")
 }
 
 func validateAPIsEqualCrossTenant(t *testing.T, api1 *apim.API, api2 *apim.API) {
@@ -404,17 +409,26 @@ func validateAPIIsDeleted(t *testing.T, api *apim.API, apisListAfterDelete *apim
 	}
 }
 
-func ImportApiFromProject(t *testing.T, projectName string, envName string) (string, error) {
+func ImportApiFromProject(t *testing.T, projectName string, client *apim.Client, apiName string, credentials *Credentials, isCleanup bool) (string, error) {
 	projectPath, _ := filepath.Abs(projectName)
-	return base.Execute(t, "import-api", "-f", projectPath, "-e", envName, "-k")
+	output, err := base.Execute(t, "import-api", "-f", projectPath, "-e", client.GetEnvName(), "-k", "--verbose")
+
+	if isCleanup {
+		t.Cleanup(func() {
+			client.Login(credentials.Username, credentials.Password)
+			client.DeleteAPIByName(apiName)
+		})
+	}
+
+	return output, err
 }
 
 func ImportApiFromProjectWithUpdate(t *testing.T, projectName string, envName string) (string, error) {
 	projectPath, _ := filepath.Abs(projectName)
-	return base.Execute(t, "import-api", "-f", projectPath, "-e", envName, "-k", "--update")
+	return base.Execute(t, "import-api", "-f", projectPath, "-e", envName, "-k", "--update", "--verbose")
 }
 
 func ExportApisWithOneCommand(t *testing.T, args *InitTestArgs) (string, error) {
-	output, error := base.Execute(t, "export-apis", "-e", args.SrcAPIM.GetEnvName(), "-k")
+	output, error := base.Execute(t, "export-apis", "-e", args.SrcAPIM.GetEnvName(), "-k", "--verbose")
 	return output, error
 }

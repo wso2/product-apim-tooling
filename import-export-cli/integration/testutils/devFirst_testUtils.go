@@ -19,12 +19,13 @@
 package testutils
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"log"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 )
 
 func InitProject(t *testing.T, args *InitTestArgs) (string, error) {
@@ -86,9 +87,10 @@ func ValidateImportInitializedProject(t *testing.T, args *InitTestArgs) {
 	//Initialize a project with API definition
 	ValidateInitializeProjectWithOASFlag(t, args)
 
+	result, error := ImportApiFromProject(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, true)
+
 	time.Sleep(1 * time.Second)
 
-	result, error := ImportApiFromProject(t, args.InitFlag, args.SrcAPIM.GetEnvName())
 	assert.Nil(t, error, "Error while importing Project")
 	assert.Contains(t, result, "Successfully imported API", "Error while importing Project")
 
@@ -101,9 +103,10 @@ func ValidateImportInitializedProject(t *testing.T, args *InitTestArgs) {
 func ValidateImportFailedWithInitializedProject(t *testing.T, args *InitTestArgs) {
 	t.Helper()
 
+	result, _ := ImportApiFromProject(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, false)
+
 	time.Sleep(1 * time.Second)
 
-	result, _ := ImportApiFromProject(t, args.InitFlag, args.SrcAPIM.GetEnvName())
 	assert.Contains(t, result, "Resource Already Exists", "Test failed because API is imported successfully")
 
 	//Remove Created project and logout
@@ -115,9 +118,10 @@ func ValidateImportFailedWithInitializedProject(t *testing.T, args *InitTestArgs
 func ValidateImportUpdatePassedWithInitializedProject(t *testing.T, args *InitTestArgs) {
 	t.Helper()
 
+	result, error := ImportApiFromProjectWithUpdate(t, args.InitFlag, args.SrcAPIM.GetEnvName())
+
 	time.Sleep(1 * time.Second)
 
-	result, error := ImportApiFromProjectWithUpdate(t, args.InitFlag, args.SrcAPIM.GetEnvName())
 	assert.Nil(t, error, "Error while generating Project")
 	assert.Contains(t, result, "Successfully imported API", "Test InitializeProjectWithDefinitionFlag Failed")
 

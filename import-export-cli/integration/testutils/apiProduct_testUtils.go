@@ -75,6 +75,17 @@ func getEnvAPIProductExportPath(envName string) string {
 	return filepath.Join(utils.DefaultExportDirPath, utils.ExportedApiProductsDirName, envName)
 }
 
+func flagAPIsAddedViaProductImportForRemoval(t *testing.T, client *apim.Client, apiProviders *map[string]Credentials) {
+	if len(*apiProviders) > 0 {
+		t.Cleanup(func() {
+			for name, credentials := range *apiProviders {
+				client.Login(credentials.Username, credentials.Password)
+				client.DeleteAPIByName(name)
+			}
+		})
+	}
+}
+
 func exportAPIProduct(t *testing.T, name string, version string, env string) (string, error) {
 	output, err := base.Execute(t, "export", "api-product", "-n", name, "-e", env, "-k", "--verbose")
 
@@ -171,6 +182,40 @@ func deleteAPIProductByCtl(t *testing.T, args *ApiProductImportExportTestArgs) (
 	return output, err
 }
 
+// AddAPIProductWithTwoDependentAPIs : Helper function for adding and API Product along with two dependent APIs to an env
+//
+func AddAPIProductWithTwoDependentAPIs(t *testing.T, client *apim.Client, apiCreator *Credentials, apiPublisher *Credentials) *ApiProductImportExportTestArgs {
+	t.Helper()
+
+	// Add the first dependent API to env1
+	dependentAPI1 := AddAPI(t, client, apiCreator.Username, apiCreator.Password)
+	PublishAPI(client, apiPublisher.Username, apiPublisher.Password, dependentAPI1.ID)
+
+	// Add the second dependent API to env1
+	dependentAPI2 := AddAPIFromOpenAPIDefinition(t, client, apiCreator.Username, apiCreator.Password)
+	PublishAPI(client, apiPublisher.Username, apiPublisher.Password, dependentAPI2.ID)
+
+	// Map the real name of the API with the API
+	apisList := map[string]*apim.API{
+		"PizzaShackAPI":   dependentAPI1,
+		"SwaggerPetstore": dependentAPI2,
+	}
+
+	// Add the API Product to env1
+	apiProduct := AddAPIProductFromJSON(t, client, apiPublisher.Username, apiPublisher.Password, apisList)
+
+	apiProviders := map[string]Credentials{}
+	apiProviders[dependentAPI1.Name] = *apiCreator
+	apiProviders[dependentAPI2.Name] = *apiCreator
+
+	return &ApiProductImportExportTestArgs{
+		ApiProviders:       apiProviders,
+		ApiProductProvider: *apiPublisher,
+		ApiProduct:         apiProduct,
+		SrcAPIM:            client,
+	}
+}
+
 func ValidateAPIProductExportFailure(t *testing.T, args *ApiProductImportExportTestArgs) {
 	t.Helper()
 
@@ -204,6 +249,9 @@ func ValidateAPIProductExportImportPreserveProvider(t *testing.T, args *ApiProdu
 
 	// Import API Product to env 2
 	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	// If any APIs were added via the API Product import, flag them for removal during cleanup
+	flagAPIsAddedViaProductImportForRemoval(t, args.DestAPIM, &args.ApiProviders)
 
 	importAPIProductPreserveProvider(t, args)
 
@@ -263,6 +311,17 @@ func ValidateAPIProductImport(t *testing.T, args *ApiProductImportExportTestArgs
 
 	// Import API Product to env 2
 	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	// Since --preserve-provider=false, the API Provider of the APIs and API Products that will be created
+	// will be considered to be the apictl user.
+	for key := range args.ApiProviders {
+		args.ApiProviders[key] = args.CtlUser
+	}
+
+	args.ApiProductProvider = args.CtlUser
+
+	// If any APIs were added via the API Product import, flag them for removal during cleanup
+	flagAPIsAddedViaProductImportForRemoval(t, args.DestAPIM, &args.ApiProviders)
 
 	importAPIProduct(t, args)
 
@@ -436,6 +495,8 @@ func ValidateAPIProductsList(t *testing.T, args *ApiProductImportExportTestArgs)
 	// List API Products of env 1
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
+	time.Sleep(1 * time.Second)
+
 	output, _ := listAPIProducts(t, args)
 
 	apiProductsList := args.SrcAPIM.GetAPIProducts()
@@ -444,16 +505,16 @@ func ValidateAPIProductsList(t *testing.T, args *ApiProductImportExportTestArgs)
 }
 
 func validateListAPIProductsEqual(t *testing.T, apiProductsListFromCtl string, apiProductsList *apim.APIProductList) {
-
+	unmatchedCount := apiProductsList.Count
 	for _, apiProduct := range apiProductsList.List {
 		// If the output string contains the same API Product ID, then decrement the count
-		if strings.Contains(apiProductsListFromCtl, apiProduct.ID) {
-			apiProductsList.Count = apiProductsList.Count - 1
-		}
+		assert.Truef(t, strings.Contains(apiProductsListFromCtl, apiProduct.ID), "apiProductsListFromCtl: "+apiProductsListFromCtl+
+			" , does not contain apiProduct.ID: "+apiProduct.ID)
+		unmatchedCount--
 	}
 
 	// Count == 0 means that all the API Products from apiProductsList were in apiProductsListFromCtl
-	assert.Equal(t, apiProductsList.Count, 0, "API Product lists are not equal")
+	assert.Equal(t, 0, unmatchedCount, "API Product lists are not equal")
 }
 
 func ValidateAPIProductDelete(t *testing.T, args *ApiProductImportExportTestArgs) {

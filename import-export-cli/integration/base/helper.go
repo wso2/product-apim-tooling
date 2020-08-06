@@ -274,6 +274,22 @@ func RemoveDir(projectName string) {
 	}
 }
 
+// CreateTempDir : Create temp directory at the specified root path.
+// The directory will be removed when the calling test exists.
+func CreateTempDir(t *testing.T, path string) {
+	t.Log("base.CreateTempDir() - path:", path)
+
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		if err := os.MkdirAll(path, 0755); err != nil {
+			t.Fatal(err)
+		}
+
+		t.Cleanup(func() {
+			os.RemoveAll(path)
+		})
+	}
+}
+
 func GetExportedPathFromOutput(output string) string {
 	return strings.ReplaceAll(strings.ReplaceAll(output[strings.Index(output, "/"):], "\n", ""), " ", "")
 }

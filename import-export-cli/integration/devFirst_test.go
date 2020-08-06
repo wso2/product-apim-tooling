@@ -18,9 +18,10 @@
 package integration
 
 import (
+	"testing"
+
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"testing"
 )
 
 //Initialize a project Initialize an API without any flag
@@ -109,6 +110,7 @@ func TestImportProjectCreatedFromSwagger2Definition(t *testing.T) {
 		SrcAPIM:   apim,
 		InitFlag:  projectName,
 		OasFlag:   utils.TestSwagger2DefinitionPath,
+		APIName:   utils.DevFirstSwagger2APIName,
 		ForceFlag: false,
 	}
 
@@ -129,6 +131,7 @@ func TestImportProjectCreatedFromOpenAPI3Definition(t *testing.T) {
 		SrcAPIM:   apim,
 		InitFlag:  projectName,
 		OasFlag:   utils.TestOpenAPI3DefinitionPath,
+		APIName:   utils.DevFirstOpenAPI3APIName,
 		ForceFlag: false,
 	}
 
@@ -149,6 +152,7 @@ func TestImportProjectCreatedFailWhenAPIIsExisted(t *testing.T) {
 		SrcAPIM:   apim,
 		InitFlag:  projectName,
 		OasFlag:   utils.TestOpenAPI3DefinitionPath,
+		APIName:   utils.DevFirstOpenAPI3APIName,
 		ForceFlag: false,
 	}
 
@@ -172,6 +176,7 @@ func TestImportProjectCreatedPassWhenAPIIsExisted(t *testing.T) {
 		SrcAPIM:   apim,
 		InitFlag:  projectName,
 		OasFlag:   utils.TestOpenAPI3DefinitionPath,
+		APIName:   utils.DevFirstOpenAPI3APIName,
 		ForceFlag: false,
 	}
 

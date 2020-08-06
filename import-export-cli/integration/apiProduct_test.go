@@ -96,7 +96,12 @@ func TestExportImportApiProductAdminSuperTenantUserWithImportApis(t *testing.T) 
 	// Add the API Product to env1
 	apiProduct := testutils.AddAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
 
+	apiProviders := map[string]testutils.Credentials{}
+	apiProviders[dependentAPI1.Name] = testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword}
+	apiProviders[dependentAPI2.Name] = testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword}
+
 	args := &testutils.ApiProductImportExportTestArgs{
+		ApiProviders:         apiProviders,
 		ApiProductProvider:   testutils.Credentials{Username: apiPublisher, Password: apiPublisherPassword},
 		CtlUser:              testutils.Credentials{Username: adminUsername, Password: adminPassword},
 		ApiProduct:           apiProduct,
@@ -143,7 +148,12 @@ func TestExportImportApiProductDevopsSuperTenantUserWithImportApis(t *testing.T)
 	// Add the API Product to env1
 	apiProduct := testutils.AddAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
 
+	apiProviders := map[string]testutils.Credentials{}
+	apiProviders[dependentAPI1.Name] = testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword}
+	apiProviders[dependentAPI2.Name] = testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword}
+
 	args := &testutils.ApiProductImportExportTestArgs{
+		ApiProviders:         apiProviders,
 		ApiProductProvider:   testutils.Credentials{Username: apiPublisher, Password: apiPublisherPassword},
 		CtlUser:              testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
 		ApiProduct:           apiProduct,
@@ -357,45 +367,22 @@ func TestExportImportApiProductDevopsSuperTenantUserWithUpdateApis(t *testing.T)
 // Export an API Product with its dependent APIs from one environment and import to another environment freshly as super tenant admin
 // and try to update that API Product (without updating dependent APIs)
 func TestExportImportApiProductAdminSuperTenantUserWithUpdateApiProduct(t *testing.T) {
-	adminUsername := superAdminUser
-	adminPassword := superAdminPassword
+	adminUser := testutils.Credentials{Username: superAdminUser, Password: superAdminPassword}
 
-	apiCreator := creator.UserName
-	apiCreatorPassword := creator.Password
+	apiCreator := testutils.Credentials{Username: creator.UserName, Password: creator.Password}
 
-	apiPublisher := publisher.UserName
-	apiPublisherPassword := publisher.Password
+	apiPublisher := testutils.Credentials{Username: publisher.UserName, Password: publisher.Password}
 
 	dev := apimClients[0]
 	prod := apimClients[1]
 
-	// Add the first dependent API to env1
-	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
-	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI1.ID)
+	args := testutils.AddAPIProductWithTwoDependentAPIs(t, dev, &apiCreator, &apiPublisher)
 
-	// Add the second dependent API to env1
-	dependentAPI2 := testutils.AddAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
-	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
-
-	// Map the real name of the API with the API
-	apisList := map[string]*apim.API{
-		"PizzaShackAPI":   dependentAPI1,
-		"SwaggerPetstore": dependentAPI2,
-	}
-
-	// Add the API Product to env1
-	apiProduct := testutils.AddAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
-
-	args := &testutils.ApiProductImportExportTestArgs{
-		ApiProductProvider:   testutils.Credentials{Username: apiPublisher, Password: apiPublisherPassword},
-		CtlUser:              testutils.Credentials{Username: adminUsername, Password: adminPassword},
-		ApiProduct:           apiProduct,
-		SrcAPIM:              dev,
-		DestAPIM:             prod,
-		ImportApisFlag:       true,
-		UpdateApisFlag:       false,
-		UpdateApiProductFlag: false,
-	}
+	args.CtlUser = adminUser
+	args.DestAPIM = prod
+	args.ImportApisFlag = true
+	args.UpdateApisFlag = false
+	args.UpdateApiProductFlag = false
 
 	// Export the API Product from env 1 and import it to env 2
 	testutils.ValidateAPIProductExportImportPreserveProvider(t, args)
@@ -412,45 +399,22 @@ func TestExportImportApiProductAdminSuperTenantUserWithUpdateApiProduct(t *testi
 // Export an API Product with its dependent APIs from one environment and import to another environment freshly as super tenant user with
 // Internal/devops role and try to update that API Product (without updating dependent APIs)
 func TestExportImportApiProductDevopsSuperTenantUserWithUpdateApiProduct(t *testing.T) {
-	devopsUsername := devops.UserName
-	devopsPassword := devops.Password
+	devopsUser := testutils.Credentials{Username: devops.UserName, Password: devops.Password}
 
-	apiCreator := creator.UserName
-	apiCreatorPassword := creator.Password
+	apiCreator := testutils.Credentials{Username: creator.UserName, Password: creator.Password}
 
-	apiPublisher := publisher.UserName
-	apiPublisherPassword := publisher.Password
+	apiPublisher := testutils.Credentials{Username: publisher.UserName, Password: publisher.Password}
 
 	dev := apimClients[0]
 	prod := apimClients[1]
 
-	// Add the first dependent API to env1
-	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
-	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI1.ID)
+	args := testutils.AddAPIProductWithTwoDependentAPIs(t, dev, &apiCreator, &apiPublisher)
 
-	// Add the second dependent API to env1
-	dependentAPI2 := testutils.AddAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
-	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
-
-	// Map the real name of the API with the API
-	apisList := map[string]*apim.API{
-		"PizzaShackAPI":   dependentAPI1,
-		"SwaggerPetstore": dependentAPI2,
-	}
-
-	// Add the API Product to env1
-	apiProduct := testutils.AddAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
-
-	args := &testutils.ApiProductImportExportTestArgs{
-		ApiProductProvider:   testutils.Credentials{Username: apiPublisher, Password: apiPublisherPassword},
-		CtlUser:              testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
-		ApiProduct:           apiProduct,
-		SrcAPIM:              dev,
-		DestAPIM:             prod,
-		ImportApisFlag:       true,
-		UpdateApisFlag:       false,
-		UpdateApiProductFlag: false,
-	}
+	args.CtlUser = devopsUser
+	args.DestAPIM = prod
+	args.ImportApisFlag = true
+	args.UpdateApisFlag = false
+	args.UpdateApiProductFlag = false
 
 	// Export the API Product from env 1 and import it to env 2
 	testutils.ValidateAPIProductExportImportPreserveProvider(t, args)
@@ -468,45 +432,22 @@ func TestExportImportApiProductDevopsSuperTenantUserWithUpdateApiProduct(t *test
 // and try to update that API Product and dependent APIs.
 // This same command can be used to update only the dependent APIs as well.
 func TestExportImportApiProductAdminSuperTenantUserWithUpdateApisAndApiProduct(t *testing.T) {
-	adminUsername := superAdminUser
-	adminPassword := superAdminPassword
+	adminUser := testutils.Credentials{Username: superAdminUser, Password: superAdminPassword}
 
-	apiCreator := creator.UserName
-	apiCreatorPassword := creator.Password
+	apiCreator := testutils.Credentials{Username: creator.UserName, Password: creator.Password}
 
-	apiPublisher := publisher.UserName
-	apiPublisherPassword := publisher.Password
+	apiPublisher := testutils.Credentials{Username: publisher.UserName, Password: publisher.Password}
 
 	dev := apimClients[0]
 	prod := apimClients[1]
 
-	// Add the first dependent API to env1
-	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
-	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI1.ID)
+	args := testutils.AddAPIProductWithTwoDependentAPIs(t, dev, &apiCreator, &apiPublisher)
 
-	// Add the second dependent API to env1
-	dependentAPI2 := testutils.AddAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
-	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
-
-	// Map the real name of the API with the API
-	apisList := map[string]*apim.API{
-		"PizzaShackAPI":   dependentAPI1,
-		"SwaggerPetstore": dependentAPI2,
-	}
-
-	// Add the API Product to env1
-	apiProduct := testutils.AddAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
-
-	args := &testutils.ApiProductImportExportTestArgs{
-		ApiProductProvider:   testutils.Credentials{Username: apiPublisher, Password: apiPublisherPassword},
-		CtlUser:              testutils.Credentials{Username: adminUsername, Password: adminPassword},
-		ApiProduct:           apiProduct,
-		SrcAPIM:              dev,
-		DestAPIM:             prod,
-		ImportApisFlag:       true,
-		UpdateApisFlag:       false,
-		UpdateApiProductFlag: false,
-	}
+	args.CtlUser = adminUser
+	args.DestAPIM = prod
+	args.ImportApisFlag = true
+	args.UpdateApisFlag = false
+	args.UpdateApiProductFlag = false
 
 	// Export the API Product from env 1 and import it to env 2
 	testutils.ValidateAPIProductExportImportPreserveProvider(t, args)
@@ -525,45 +466,22 @@ func TestExportImportApiProductAdminSuperTenantUserWithUpdateApisAndApiProduct(t
 // role and try to update that API Product and dependent APIs.
 // This same command can be used to update only the dependent APIs as well.
 func TestExportImportApiProductDevopsSuperTenantUserWithUpdateApisAndApiProduct(t *testing.T) {
-	devopsUsername := devops.UserName
-	devopsPassword := devops.Password
+	devopsUser := testutils.Credentials{Username: devops.UserName, Password: devops.Password}
 
-	apiCreator := creator.UserName
-	apiCreatorPassword := creator.Password
+	apiCreator := testutils.Credentials{Username: creator.UserName, Password: creator.Password}
 
-	apiPublisher := publisher.UserName
-	apiPublisherPassword := publisher.Password
+	apiPublisher := testutils.Credentials{Username: publisher.UserName, Password: publisher.Password}
 
 	dev := apimClients[0]
 	prod := apimClients[1]
 
-	// Add the first dependent API to env1
-	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
-	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI1.ID)
+	args := testutils.AddAPIProductWithTwoDependentAPIs(t, dev, &apiCreator, &apiPublisher)
 
-	// Add the second dependent API to env1
-	dependentAPI2 := testutils.AddAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
-	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
-
-	// Map the real name of the API with the API
-	apisList := map[string]*apim.API{
-		"PizzaShackAPI":   dependentAPI1,
-		"SwaggerPetstore": dependentAPI2,
-	}
-
-	// Add the API Product to env1
-	apiProduct := testutils.AddAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
-
-	args := &testutils.ApiProductImportExportTestArgs{
-		ApiProductProvider:   testutils.Credentials{Username: apiPublisher, Password: apiPublisherPassword},
-		CtlUser:              testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
-		ApiProduct:           apiProduct,
-		SrcAPIM:              dev,
-		DestAPIM:             prod,
-		ImportApisFlag:       true,
-		UpdateApisFlag:       false,
-		UpdateApiProductFlag: false,
-	}
+	args.CtlUser = devopsUser
+	args.DestAPIM = prod
+	args.ImportApisFlag = true
+	args.UpdateApisFlag = false
+	args.UpdateApiProductFlag = false
 
 	// Export the API Product from env 1 and import it to env 2
 	testutils.ValidateAPIProductExportImportPreserveProvider(t, args)
@@ -580,171 +498,90 @@ func TestExportImportApiProductDevopsSuperTenantUserWithUpdateApisAndApiProduct(
 
 // Export an API Product with its dependent APIs from one environment and import to another environment freshly as cross tenant admin
 func TestExportImportApiProductCrossTenantUserWithImportApis(t *testing.T) {
-	adminUsername := superAdminUser
-	adminPassword := superAdminPassword
+	adminUser := testutils.Credentials{Username: superAdminUser, Password: superAdminPassword}
 
-	tenantAdminUsername := superAdminUser + "@" + TENANT1
-	tenantAdminPassword := superAdminPassword
+	tenantAdminUser := testutils.Credentials{Username: superAdminUser + "@" + TENANT1, Password: superAdminPassword}
 
-	apiCreator := creator.UserName
-	apiCreatorPassword := creator.Password
+	apiCreator := testutils.Credentials{Username: creator.UserName, Password: creator.Password}
 
-	apiPublisher := publisher.UserName
-	apiPublisherPassword := publisher.Password
+	apiPublisher := testutils.Credentials{Username: publisher.UserName, Password: publisher.Password}
 
 	dev := apimClients[0]
 	prod := apimClients[1]
 
-	// Add the first dependent API to env1
-	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
-	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI1.ID)
+	args := testutils.AddAPIProductWithTwoDependentAPIs(t, dev, &apiCreator, &apiPublisher)
 
-	// Add the second dependent API to env1
-	dependentAPI2 := testutils.AddAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
-	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
-
-	// Map the real name of the API with the API
-	apisList := map[string]*apim.API{
-		"PizzaShackAPI":   dependentAPI1,
-		"SwaggerPetstore": dependentAPI2,
-	}
-
-	// Add the API Product to env1
-	apiProduct := testutils.AddAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
-
-	args := &testutils.ApiProductImportExportTestArgs{
-		ApiProductProvider:   testutils.Credentials{Username: apiPublisher, Password: apiPublisherPassword},
-		CtlUser:              testutils.Credentials{Username: adminUsername, Password: adminPassword},
-		ApiProduct:           apiProduct,
-		SrcAPIM:              dev,
-		DestAPIM:             prod,
-		ImportApisFlag:       true,
-		UpdateApisFlag:       false,
-		UpdateApiProductFlag: false,
-	}
+	args.CtlUser = adminUser
+	args.DestAPIM = prod
+	args.ImportApisFlag = true
+	args.UpdateApisFlag = false
+	args.UpdateApiProductFlag = false
 
 	// Export the API Product as super tenant admin
 	testutils.ValidateAPIProductExport(t, args)
 
-	// Since --preserve-provider=false both the apiProductProvider and the ctlUser is tenant admin
-	args.ApiProductProvider = testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword}
-	args.CtlUser = testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword}
-
 	// Import the API Product with the dependent APIs to env2 as tenant admin across domains
+	args.CtlUser = tenantAdminUser
 	testutils.ValidateAPIProductImport(t, args)
 }
 
 // Export an API Product with its dependent APIs from one environment and import to another environment freshly as cross tenant user
 // with Internal/devops role
 func TestExportImportApiProductCrossTenantDevopsWithImportApis(t *testing.T) {
-	devopsUsername := devops.UserName
-	devopsPassword := devops.Password
+	devopsUser := testutils.Credentials{Username: devops.UserName, Password: devops.Password}
 
-	tenantDevopsUsername := devops.UserName + "@" + TENANT1
-	tenantDevopsPassword := devops.Password
+	tenantDevopsUser := testutils.Credentials{Username: devops.UserName + "@" + TENANT1, Password: devops.Password}
 
-	apiCreator := creator.UserName
-	apiCreatorPassword := creator.Password
+	apiCreator := testutils.Credentials{Username: creator.UserName, Password: creator.Password}
 
-	apiPublisher := publisher.UserName
-	apiPublisherPassword := publisher.Password
+	apiPublisher := testutils.Credentials{Username: publisher.UserName, Password: publisher.Password}
 
 	dev := apimClients[0]
 	prod := apimClients[1]
 
-	// Add the first dependent API to env1
-	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
-	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI1.ID)
+	args := testutils.AddAPIProductWithTwoDependentAPIs(t, dev, &apiCreator, &apiPublisher)
 
-	// Add the second dependent API to env1
-	dependentAPI2 := testutils.AddAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
-	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
-
-	// Map the real name of the API with the API
-	apisList := map[string]*apim.API{
-		"PizzaShackAPI":   dependentAPI1,
-		"SwaggerPetstore": dependentAPI2,
-	}
-
-	// Add the API Product to env1
-	apiProduct := testutils.AddAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
-
-	args := &testutils.ApiProductImportExportTestArgs{
-		ApiProductProvider:   testutils.Credentials{Username: apiPublisher, Password: apiPublisherPassword},
-		CtlUser:              testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
-		ApiProduct:           apiProduct,
-		SrcAPIM:              dev,
-		DestAPIM:             prod,
-		ImportApisFlag:       true,
-		UpdateApisFlag:       false,
-		UpdateApiProductFlag: false,
-	}
+	args.CtlUser = devopsUser
+	args.DestAPIM = prod
+	args.ImportApisFlag = true
+	args.UpdateApisFlag = false
+	args.UpdateApiProductFlag = false
 
 	// Export the API Product as super tenant user with Internal/devops role
 	testutils.ValidateAPIProductExport(t, args)
 
-	// Since --preserve-provider=false both the apiProductProvider and the ctlUser is tenant user with Internal/devops role
-	args.ApiProductProvider = testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword}
-	args.CtlUser = testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword}
-
 	// Import the API Product with the dependent APIs to env2 as tenant user with Internal/devops role across domains
+	args.CtlUser = tenantDevopsUser
 	testutils.ValidateAPIProductImport(t, args)
 }
 
 // Export an API Product with its dependent APIs from one environment as super tenant admin and import to another environment freshly
 // as cross tenant admin and try to update that API Product (without updating dependent APIs)
 func TestExportImportApiProductCrossTenantUserWithUpdateApiProduct(t *testing.T) {
-	adminUsername := superAdminUser
-	adminPassword := superAdminPassword
+	adminUser := testutils.Credentials{Username: superAdminUser, Password: superAdminPassword}
 
-	tenantAdminUsername := superAdminUser + "@" + TENANT1
-	tenantAdminPassword := superAdminPassword
+	tenantAdminUser := testutils.Credentials{Username: superAdminUser + "@" + TENANT1, Password: superAdminPassword}
 
-	apiCreator := creator.UserName
-	apiCreatorPassword := creator.Password
+	apiCreator := testutils.Credentials{Username: creator.UserName, Password: creator.Password}
 
-	apiPublisher := publisher.UserName
-	apiPublisherPassword := publisher.Password
+	apiPublisher := testutils.Credentials{Username: publisher.UserName, Password: publisher.Password}
 
 	dev := apimClients[0]
 	prod := apimClients[1]
 
-	// Add the first dependent API to env1
-	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
-	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI1.ID)
+	args := testutils.AddAPIProductWithTwoDependentAPIs(t, dev, &apiCreator, &apiPublisher)
 
-	// Add the second dependent API to env1
-	dependentAPI2 := testutils.AddAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
-	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
-
-	// Map the real name of the API with the API
-	apisList := map[string]*apim.API{
-		"PizzaShackAPI":   dependentAPI1,
-		"SwaggerPetstore": dependentAPI2,
-	}
-
-	// Add the API Product to env1
-	apiProduct := testutils.AddAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
-
-	args := &testutils.ApiProductImportExportTestArgs{
-		ApiProductProvider:   testutils.Credentials{Username: apiPublisher, Password: apiPublisherPassword},
-		CtlUser:              testutils.Credentials{Username: adminUsername, Password: adminPassword},
-		ApiProduct:           apiProduct,
-		SrcAPIM:              dev,
-		DestAPIM:             prod,
-		ImportApisFlag:       true,
-		UpdateApisFlag:       false,
-		UpdateApiProductFlag: false,
-	}
+	args.CtlUser = adminUser
+	args.DestAPIM = prod
+	args.ImportApisFlag = true
+	args.UpdateApisFlag = false
+	args.UpdateApiProductFlag = false
 
 	// Export the API Product as super tenant admin
 	testutils.ValidateAPIProductExport(t, args)
 
-	// Since --preserve-provider=false both the apiProductProvider and the ctlUser is tenant admin
-	args.ApiProductProvider = testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword}
-	args.CtlUser = testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword}
-
 	// Import the API Product with the dependent APIs to env2 as tenant admin across domains
+	args.CtlUser = tenantAdminUser
 	testutils.ValidateAPIProductImport(t, args)
 
 	// Set the --update-api-product flag to update the existing API Product while importing
@@ -759,57 +596,30 @@ func TestExportImportApiProductCrossTenantUserWithUpdateApiProduct(t *testing.T)
 // Export an API Product with its dependent APIs from one environment as super tenant user with Internal/devops role
 // and import to another environment freshly as cross tenant admin and try to update that API Product (without updating dependent APIs)
 func TestExportImportApiProductCrossTenantDevopsWithUpdateApiProduct(t *testing.T) {
-	devopsUsername := devops.UserName
-	devopsPassword := devops.Password
+	devopsUser := testutils.Credentials{Username: devops.UserName, Password: devops.Password}
 
-	tenantDevopsUsername := devops.UserName + "@" + TENANT1
-	tenantDevopsPassword := devops.Password
+	tenantDevopsUser := testutils.Credentials{Username: devops.UserName + "@" + TENANT1, Password: devops.Password}
 
-	apiCreator := creator.UserName
-	apiCreatorPassword := creator.Password
+	apiCreator := testutils.Credentials{Username: creator.UserName, Password: creator.Password}
 
-	apiPublisher := publisher.UserName
-	apiPublisherPassword := publisher.Password
+	apiPublisher := testutils.Credentials{Username: publisher.UserName, Password: publisher.Password}
 
 	dev := apimClients[0]
 	prod := apimClients[1]
 
-	// Add the first dependent API to env1
-	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
-	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI1.ID)
+	args := testutils.AddAPIProductWithTwoDependentAPIs(t, dev, &apiCreator, &apiPublisher)
 
-	// Add the second dependent API to env1
-	dependentAPI2 := testutils.AddAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
-	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
-
-	// Map the real name of the API with the API
-	apisList := map[string]*apim.API{
-		"PizzaShackAPI":   dependentAPI1,
-		"SwaggerPetstore": dependentAPI2,
-	}
-
-	// Add the API Product to env1
-	apiProduct := testutils.AddAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
-
-	args := &testutils.ApiProductImportExportTestArgs{
-		ApiProductProvider:   testutils.Credentials{Username: apiPublisher, Password: apiPublisherPassword},
-		CtlUser:              testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
-		ApiProduct:           apiProduct,
-		SrcAPIM:              dev,
-		DestAPIM:             prod,
-		ImportApisFlag:       true,
-		UpdateApisFlag:       false,
-		UpdateApiProductFlag: false,
-	}
+	args.CtlUser = devopsUser
+	args.DestAPIM = prod
+	args.ImportApisFlag = true
+	args.UpdateApisFlag = false
+	args.UpdateApiProductFlag = false
 
 	// Export the API Product as super tenant user with Internal/devops role
 	testutils.ValidateAPIProductExport(t, args)
 
-	// Since --preserve-provider=false both the apiProductProvider and the ctlUser is tenant user with Internal/devops role
-	args.ApiProductProvider = testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword}
-	args.CtlUser = testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword}
-
 	// Import the API Product with the dependent APIs to env2 as tenant user with Internal/devops role across domains
+	args.CtlUser = tenantDevopsUser
 	testutils.ValidateAPIProductImport(t, args)
 
 	// Set the --update-api-product flag to update the existing API Product while importing
@@ -825,57 +635,30 @@ func TestExportImportApiProductCrossTenantDevopsWithUpdateApiProduct(t *testing.
 // and try to update that API Product and dependent APIs.
 // This same command can be used to update only the dependent APIs as well.
 func TestExportImportApiProductCrossTenantUserWithUpdateApisAndApiProduct(t *testing.T) {
-	adminUsername := superAdminUser
-	adminPassword := superAdminPassword
+	adminUser := testutils.Credentials{Username: superAdminUser, Password: superAdminPassword}
 
-	tenantAdminUsername := superAdminUser + "@" + TENANT1
-	tenantAdminPassword := superAdminPassword
+	tenantAdminUser := testutils.Credentials{Username: superAdminUser + "@" + TENANT1, Password: superAdminPassword}
 
-	apiCreator := creator.UserName
-	apiCreatorPassword := creator.Password
+	apiCreator := testutils.Credentials{Username: creator.UserName, Password: creator.Password}
 
-	apiPublisher := publisher.UserName
-	apiPublisherPassword := publisher.Password
+	apiPublisher := testutils.Credentials{Username: publisher.UserName, Password: publisher.Password}
 
 	dev := apimClients[0]
 	prod := apimClients[1]
 
-	// Add the first dependent API to env1
-	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
-	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI1.ID)
+	args := testutils.AddAPIProductWithTwoDependentAPIs(t, dev, &apiCreator, &apiPublisher)
 
-	// Add the second dependent API to env1
-	dependentAPI2 := testutils.AddAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
-	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
-
-	// Map the real name of the API with the API
-	apisList := map[string]*apim.API{
-		"PizzaShackAPI":   dependentAPI1,
-		"SwaggerPetstore": dependentAPI2,
-	}
-
-	// Add the API Product to env1
-	apiProduct := testutils.AddAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
-
-	args := &testutils.ApiProductImportExportTestArgs{
-		ApiProductProvider:   testutils.Credentials{Username: apiPublisher, Password: apiPublisherPassword},
-		CtlUser:              testutils.Credentials{Username: adminUsername, Password: adminPassword},
-		ApiProduct:           apiProduct,
-		SrcAPIM:              dev,
-		DestAPIM:             prod,
-		ImportApisFlag:       true,
-		UpdateApisFlag:       false,
-		UpdateApiProductFlag: false,
-	}
+	args.CtlUser = adminUser
+	args.DestAPIM = prod
+	args.ImportApisFlag = true
+	args.UpdateApisFlag = false
+	args.UpdateApiProductFlag = false
 
 	// Export the API Product as super tenant admin
 	testutils.ValidateAPIProductExport(t, args)
 
-	// Since --preserve-provider=false both the apiProductProvider and the ctlUser is tenant admin
-	args.ApiProductProvider = testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword}
-	args.CtlUser = testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword}
-
 	// Import the API Product with the dependent APIs to env2 as tenant admin across domains
+	args.CtlUser = tenantAdminUser
 	testutils.ValidateAPIProductImport(t, args)
 
 	// Set the --update-api-product flag to update the existing API Product while importing
@@ -891,57 +674,30 @@ func TestExportImportApiProductCrossTenantUserWithUpdateApisAndApiProduct(t *tes
 //  and import to another environment freshly as tenant admin and try to update that API Product and dependent APIs.
 // This same command can be used to update only the dependent APIs as well.
 func TestExportImportApiProductCrossTenantDevopsWithUpdateApisAndApiProduct(t *testing.T) {
-	devopsUsername := devops.UserName
-	devopsPassword := devops.Password
+	devopsUser := testutils.Credentials{Username: devops.UserName, Password: devops.Password}
 
-	tenantDevopsUsername := devops.UserName + "@" + TENANT1
-	tenantDevopsPassword := devops.Password
+	tenantDevopsUser := testutils.Credentials{Username: devops.UserName + "@" + TENANT1, Password: devops.Password}
 
-	apiCreator := creator.UserName
-	apiCreatorPassword := creator.Password
+	apiCreator := testutils.Credentials{Username: creator.UserName, Password: creator.Password}
 
-	apiPublisher := publisher.UserName
-	apiPublisherPassword := publisher.Password
+	apiPublisher := testutils.Credentials{Username: publisher.UserName, Password: publisher.Password}
 
 	dev := apimClients[0]
 	prod := apimClients[1]
 
-	// Add the first dependent API to env1
-	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
-	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI1.ID)
+	args := testutils.AddAPIProductWithTwoDependentAPIs(t, dev, &apiCreator, &apiPublisher)
 
-	// Add the second dependent API to env1
-	dependentAPI2 := testutils.AddAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
-	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
-
-	// Map the real name of the API with the API
-	apisList := map[string]*apim.API{
-		"PizzaShackAPI":   dependentAPI1,
-		"SwaggerPetstore": dependentAPI2,
-	}
-
-	// Add the API Product to env1
-	apiProduct := testutils.AddAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
-
-	args := &testutils.ApiProductImportExportTestArgs{
-		ApiProductProvider:   testutils.Credentials{Username: apiPublisher, Password: apiPublisherPassword},
-		CtlUser:              testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
-		ApiProduct:           apiProduct,
-		SrcAPIM:              dev,
-		DestAPIM:             prod,
-		ImportApisFlag:       true,
-		UpdateApisFlag:       false,
-		UpdateApiProductFlag: false,
-	}
+	args.CtlUser = devopsUser
+	args.DestAPIM = prod
+	args.ImportApisFlag = true
+	args.UpdateApisFlag = false
+	args.UpdateApiProductFlag = false
 
 	// Export the API Product as super tenant admin
 	testutils.ValidateAPIProductExport(t, args)
 
-	// Since --preserve-provider=false both the apiProductProvider and the ctlUser is tenant user with Internal/devops role
-	args.ApiProductProvider = testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword}
-	args.CtlUser = testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword}
-
 	// Import the API Product with the dependent APIs to env2 as tenant user with Internal/devops role across domains
+	args.CtlUser = tenantDevopsUser
 	testutils.ValidateAPIProductImport(t, args)
 
 	// Set the --update-api-product flag to update the existing API Product while importing

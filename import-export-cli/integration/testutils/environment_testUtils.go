@@ -19,14 +19,14 @@
 package testutils
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"log"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 func InitProjectWithOasFlag(t *testing.T, args *InitTestArgs) (string, error) {
@@ -34,49 +34,29 @@ func InitProjectWithOasFlag(t *testing.T, args *InitTestArgs) (string, error) {
 	base.SetupEnvWithoutTokenFlag(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL())
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	output, err := base.Execute(t, "init", args.InitFlag, "--oas", args.OasFlag)
+	output, err := base.Execute(t, "init", args.InitFlag, "--oas", args.OasFlag, "--verbose")
 	return output, err
 }
 
 func EnvironmentSetExportDirectory(t *testing.T, args *SetTestArgs) (string, error) {
 	apim := args.SrcAPIM
 	base.SetupEnvWithoutTokenFlag(t, apim.GetEnvName(), apim.GetApimURL())
-	output, error := base.Execute(t, "set", "--export-directory", args.ExportDirectoryFlag, "-k")
+	output, error := base.Execute(t, "set", "--export-directory", args.ExportDirectoryFlag, "-k", "--verbose")
 	return output, error
 }
 
 func EnvironmentSetHttpRequestTimeout(t *testing.T, args *SetTestArgs) (string, error) {
 	apim := args.SrcAPIM
 	base.SetupEnvWithoutTokenFlag(t, apim.GetEnvName(), apim.GetApimURL())
-	output, error := base.Execute(t, "set", "--http-request-timeout", strconv.Itoa(args.httpRequestTimeout), "-k")
+	output, error := base.Execute(t, "set", "--http-request-timeout", strconv.Itoa(args.httpRequestTimeout), "-k", "--verbose")
 	return output, error
 }
 
 func EnvironmentSetTokenType(t *testing.T, args *SetTestArgs) (string, error) {
 	apim := args.SrcAPIM
 	base.SetupEnvWithoutTokenFlag(t, apim.GetEnvName(), apim.GetApimURL())
-	output, error := base.Execute(t, "set", "--token-type", args.TokenTypeFlag, "-k")
+	output, error := base.Execute(t, "set", "--token-type", args.TokenTypeFlag, "-k", "--verbose")
 	return output, error
-}
-
-func ValidateThatRecievingTokenTypeIsChanged(t *testing.T, args *ApiGetKeyTestArgs, expectedTokenType string) {
-	t.Helper()
-
-	base.SetupEnv(t, args.Apim.GetEnvName(), args.Apim.GetApimURL(), args.Apim.GetTokenURL())
-	base.Login(t, args.Apim.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
-
-	var err error
-	_, err = GetKeys(t, args.Api.Provider, args.Api.Name, args.Api.Version, args.Apim.GetEnvName())
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	assert.Nil(t, err, "Error while getting key")
-
-	tokenType := args.Apim.GetApplication(args.Apim.GetApplicationByName(utils.DefaultApictlTestAppName).ApplicationID).TokenType
-	assert.Equal(t, strings.ToUpper(expectedTokenType), tokenType, "Error getting token type of application.")
-
-	UnsubscribeAPI(args.Apim, args.CtlUser.Username, args.CtlUser.Password, args.Api.ID)
 }
 
 func ValidateExportDirectoryIsChanged(t *testing.T, args *SetTestArgs) {
@@ -108,10 +88,4 @@ func ValidateExportApisPassed(t *testing.T, args *InitTestArgs, directoryName st
 		//Remove Exported apis
 		base.RemoveDir(directoryName + utils.TestMigrationDirectorySuffix)
 	})
-}
-func ValidateETokenTypeIsChanged(t *testing.T, args *SetTestArgs) {
-	t.Helper()
-	output, _ := EnvironmentSetTokenType(t, args)
-	base.Log(output)
-	assert.Contains(t, output, "Token type is set to", "1st attempt of Token Type change is not successful")
 }
