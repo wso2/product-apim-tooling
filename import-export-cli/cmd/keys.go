@@ -121,28 +121,7 @@ func getKeys() {
 			//Reading configuration to check if the application needs to be updated
 			configVars := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
 			tokenType = configVars.Config.TokenType
-			//Check if the token type of the application has been updated
-			if tokenType != appDetails.TokenType && tokenType != "" {
-				//Request body for the store REST API
-				appUpdateReq := utils.AppCreateRequest{
-					Name:             utils.DefaultCliApp,
-					ThrottlingPolicy: applicationThrottlingPolicy,
-					Description:      "Default CLI Application",
-					TokenType:        configVars.Config.TokenType,
-				}
-				body, err := json.Marshal(appUpdateReq)
-				if body == nil && err != nil {
-					utils.HandleErrorAndExit("Error occurred while creating CLI application update request.", err)
-				}
-				utils.Logln(utils.LogPrefixInfo + "Updating application as token type is changed to: " + tokenType)
-				updatedApp, updateError := updateApplicationDetails(appId, string(body), accessToken)
 
-				if updatedApp != nil && updateError == nil {
-					utils.Logln(utils.LogPrefixInfo + "Updated CLI application successfully")
-				} else if updateError != nil {
-					utils.HandleErrorAndExit("Error while updating the CLI application. : ", updateError)
-				}
-			}
 			//retrieve keys of application to see if there are already generated keys
 			appKeys, keysErr := getApplicationKeys(appId, accessToken)
 			if keysErr != nil {

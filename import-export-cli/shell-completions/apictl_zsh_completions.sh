@@ -778,7 +778,6 @@ function _apictl_set {
     '(-h --help)'{-h,--help}'[help for set]' \
     '--http-request-timeout[Timeout for HTTP Client]:' \
     '(-m --mode)'{-m,--mode}'[If mode is set to "k8s", apictl is capable of executing Kubectl commands. For example "apictl get pods" -> "kubectl get pods". To go back to the default mode, set the mode to "default"]:' \
-    '(-t --token-type)'{-t,--token-type}'[Type of the token to be generated]:' \
     '(-k --insecure)'{-k,--insecure}'[Allow connections to SSL endpoints without certs]' \
     '--verbose[Enable verbose mode]'
 }

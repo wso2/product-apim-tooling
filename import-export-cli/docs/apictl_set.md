@@ -19,8 +19,6 @@ apictl set [flags]
 apictl set --http-request-timeout 3600 --export-directory /home/user/exported-apis
 apictl set --http-request-timeout 5000 --export-directory C:\Documents\exported
 apictl set --http-request-timeout 5000
-apictl set --token-type JWT
-apictl set --token-type OAUTH
 apictl set --mode kubernetes
 apictl set --mode default
 ```
@@ -32,7 +30,6 @@ apictl set --mode default
   -h, --help                       help for set
       --http-request-timeout int   Timeout for HTTP Client (default 10000)
   -m, --mode string                If mode is set to "k8s", apictl is capable of executing Kubectl commands. For example "apictl get pods" -> "kubectl get pods". To go back to the default mode, set the mode to "default" (default "default")
-  -t, --token-type string          Type of the token to be generated (default "JWT")
 ```
 
 ### Options inherited from parent commands
