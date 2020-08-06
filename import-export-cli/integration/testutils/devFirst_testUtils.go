@@ -21,8 +21,9 @@ package testutils
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"log"
-	"strconv"
+	"strings"
 	"testing"
 	"time"
 )
@@ -41,7 +42,7 @@ func InitProjectWithDefinitionFlag(t *testing.T, args *InitTestArgs) (string, er
 	base.SetupEnvWithoutTokenFlag(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL())
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	output, err := base.Execute(t, "init", args.InitFlag, "--definition", args.definitionFlag, "--force", strconv.FormatBool(args.ForceFlag))
+	output, err := base.Execute(t, "init", args.InitFlag, "--definition", args.definitionFlag)
 	return output, err
 }
 
@@ -76,6 +77,38 @@ func ValidateInitializeProjectWithOASFlag(t *testing.T, args *InitTestArgs) {
 
 	//Remove Created project and logout
 
+	t.Cleanup(func() {
+		base.RemoveDir(args.InitFlag)
+	})
+}
+
+//Function to initialize a project using API definition
+func ValidateInitializeProjectWithOASFlagWithoutCleaning(t *testing.T, args *InitTestArgs) {
+	t.Helper()
+
+	output, err := InitProjectWithOasFlag(t, args)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	assert.Nil(t, err, "Error while generating Project")
+	assert.Containsf(t, output, "Project initialized", "Test initialization Failed with --oas flag")
+
+}
+
+//Function to initialize a project using API definition using --definition flag
+func ValidateInitializeProjectWithDefinitionFlag(t *testing.T, args *InitTestArgs) {
+	t.Helper()
+
+	output, err := InitProjectWithDefinitionFlag(t, args)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	assert.Nil(t, err, "Error while generating Project")
+	assert.Containsf(t, output, "Project initialized", "Test initialization Failed with --oas flag")
+
+	//Remove created project
 	t.Cleanup(func() {
 		base.RemoveDir(args.InitFlag)
 	})
@@ -119,10 +152,84 @@ func ValidateImportUpdatePassedWithInitializedProject(t *testing.T, args *InitTe
 
 	result, error := ImportApiFromProjectWithUpdate(t, args.InitFlag, args.SrcAPIM.GetEnvName())
 	assert.Nil(t, error, "Error while generating Project")
-	assert.Contains(t, result, "Successfully imported API", "Test InitializeProjectWithDefinitionFlag Failed")
+	assert.Contains(t, result, "Successfully imported API", "Error while importing Project")
 
 	//Remove Created project and logout
 	t.Cleanup(func() {
 		base.RemoveDir(args.InitFlag)
+	})
+}
+
+func ValidateExportImportedAPI(t *testing.T, args *InitTestArgs, DevFirstDefaultAPIName string, DevFirstDefaultAPIVersion string) string {
+	expOutput, expError := exportApiImportedFromProject(t, DevFirstDefaultAPIName, DevFirstDefaultAPIVersion, args.SrcAPIM.GetEnvName())
+	//Check whether api is exported or not
+	assert.Nil(t, expError, "Error while Exporting API")
+	assert.Contains(t, expOutput, "Successfully exported API!", "Error while exporting API")
+	return expOutput
+}
+
+func ValidateAPIWithDocIsExported(t *testing.T, args *InitTestArgs, DevFirstDefaultAPIName string, DevFirstDefaultAPIVersion string) {
+	expOutput := ValidateExportImportedAPI(t, args, DevFirstDefaultAPIName, DevFirstDefaultAPIVersion)
+
+	//Unzip exported API and check whether the imported doc is in there
+	exportedPath := base.GetExportedPathFromOutput(expOutput)
+	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
+	base.Unzip(relativePath, exportedPath)
+
+	docPathOfExportedApi := relativePath + utils.TestDefaultExtractedFileName + utils.TestCase1DestPathSuffix
+
+	//Check whether the file is available
+	isDocExported := base.IsFileAvailable(docPathOfExportedApi)
+	base.Log("Doc is Exported", isDocExported)
+	assert.Equal(t, true, isDocExported, "Error while exporting API with document")
+
+	t.Cleanup(func() {
+		//Remove Created project and logout
+		base.RemoveDir(args.InitFlag)
+		base.RemoveDir(exportedPath)
+		base.RemoveDir(relativePath)
+	})
+}
+
+func ValidateAPIWithIconIsExported(t *testing.T, args *InitTestArgs, DevFirstDefaultAPIName string, DevFirstDefaultAPIVersion string) {
+	expOutput := ValidateExportImportedAPI(t, args, DevFirstDefaultAPIName, DevFirstDefaultAPIVersion)
+
+	//Unzip exported API and check whether the imported image(.png) is in there
+	exportedPath := base.GetExportedPathFromOutput(expOutput)
+	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
+	base.Unzip(relativePath, exportedPath)
+
+	iconPathOfExportedApi := relativePath + utils.TestDefaultExtractedFileName + utils.TestCase2DestPngPathSuffix
+
+	isIconExported := base.IsFileAvailable(iconPathOfExportedApi)
+	base.Log("Icon is Exported", isIconExported)
+	assert.Equal(t, true, isIconExported, "Error while exporting API with icon")
+
+	t.Cleanup(func() {
+		//Remove Created project and logout
+		base.RemoveDir(args.InitFlag)
+		base.RemoveDir(exportedPath)
+		base.RemoveDir(relativePath)
+	})
+}
+
+func ValidateAPIWithImageIsExported(t *testing.T, args *InitTestArgs, DevFirstDefaultAPIName string, DevFirstDefaultAPIVersion string) {
+	expOutput := ValidateExportImportedAPI(t, args, DevFirstDefaultAPIName, DevFirstDefaultAPIVersion)
+
+	//Unzip exported API and check whethers the imported image(.png) is in there
+	exportedPath := base.GetExportedPathFromOutput(expOutput)
+	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
+	base.Unzip(relativePath, exportedPath)
+
+	imagePathOfExportedApi := relativePath + utils.TestDefaultExtractedFileName + utils.TestCase2DestJpegPathSuffix
+	isIconExported := base.IsFileAvailable(imagePathOfExportedApi)
+	base.Log("Image is Exported", isIconExported)
+	assert.Equal(t, true, isIconExported, "Error while exporting API with icon")
+
+	t.Cleanup(func() {
+		//Remove Created project and logout
+		base.RemoveDir(args.InitFlag)
+		base.RemoveDir(exportedPath)
+		base.RemoveDir(relativePath)
 	})
 }

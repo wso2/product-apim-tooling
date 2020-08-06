@@ -109,6 +109,7 @@ func ValidateExportApisPassed(t *testing.T, args *InitTestArgs, directoryName st
 		base.RemoveDir(directoryName + utils.TestMigrationDirectorySuffix)
 	})
 }
+
 func ValidateETokenTypeIsChanged(t *testing.T, args *SetTestArgs) {
 	t.Helper()
 	output, _ := EnvironmentSetTokenType(t, args)

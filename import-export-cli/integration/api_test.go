@@ -20,6 +20,7 @@ package integration
 
 import (
 	"testing"
+	"time"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 
@@ -710,4 +711,30 @@ func TestDeleteApiSuperTenantUser(t *testing.T) {
 	}
 
 	testutils.ValidateAPIDelete(t, args)
+}
+
+func TestExportApisWithExportApisCommand(t *testing.T) {
+	tenantAdminUsername := superAdminUser + "@" + TENANT1
+	tenantAdminPassword := superAdminPassword
+
+	dev := apimClients[0]
+
+	var api *apim.API
+	var apisAdded = 0
+	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
+		api = testutils.AddAPI(t, dev, tenantAdminUsername, tenantAdminPassword)
+		apisAdded++
+		time.Sleep(5 * time.Second)
+	}
+
+	// This will be the API that will be deleted by apictl, so no need to do cleaning
+	api = testutils.AddAPIWithoutCleaning(t, dev, tenantAdminUsername, tenantAdminPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		CtlUser: testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
+		Api:     api,
+		SrcAPIM: dev,
+	}
+
+	testutils.ValidateAllApisOfATenantIsExported(t, args, apisAdded)
 }
