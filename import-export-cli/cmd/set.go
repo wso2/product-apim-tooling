@@ -29,7 +29,6 @@ import (
 var flagHttpRequestTimeout int
 var flagExportDirectory string
 var flagKubernetesMode string
-var flagTokenType string
 
 // Set command related Info
 const setCmdLiteral = "set"
@@ -43,8 +42,6 @@ const setCmdLongDesc = `Set configuration parameters. Use at least one of the fo
 const setCmdExamples = utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 3600 --export-directory /home/user/exported-apis
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000 --export-directory C:\Documents\exported
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000
-` + utils.ProjectName + ` ` + setCmdLiteral + ` --token-type JWT
-` + utils.ProjectName + ` ` + setCmdLiteral + ` --token-type OAUTH
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --mode kubernetes
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --mode default`
 
@@ -78,7 +75,7 @@ func executeSetCmd(mainConfigFilePath, exportDirectory string) {
 	if flagExportDirectory != "" && utils.IsValid(flagExportDirectory) {
 		//Check whether the provided export directory is not equal to default value
 		if flagExportDirectory != configVars.Config.ExportDirectory {
-			fmt.Println("Export Directory is set to  : ",flagExportDirectory)
+			fmt.Println("Export Directory is set to  : ", flagExportDirectory)
 		}
 		configVars.Config.ExportDirectory = flagExportDirectory
 	} else {
@@ -104,24 +101,6 @@ func executeSetCmd(mainConfigFilePath, exportDirectory string) {
 		}
 	}
 
-	//Change TokenType
-	if flagTokenType != "" {
-		if strings.EqualFold(flagTokenType, "jwt") {
-			//Check whether the provided token type value is not equal to default value
-			if flagTokenType != configVars.Config.TokenType {
-				fmt.Println("Token type is set to : ", flagTokenType)
-			}
-			configVars.Config.TokenType = "JWT"
-		} else if strings.EqualFold(flagTokenType, "oauth") {
-			if flagTokenType != configVars.Config.TokenType {
-				fmt.Println("Token type is set to : ", flagTokenType)
-			}
-			configVars.Config.TokenType = "OAUTH"
-		} else {
-			utils.HandleErrorAndExit("Error setting token type ",
-				errors.New("Token type should be either JWT or OAuth"))
-		}
-	}
 	utils.WriteConfigFile(configVars, mainConfigFilePath)
 }
 
@@ -131,7 +110,6 @@ func init() {
 
 	var defaultHttpRequestTimeout int
 	var defaultExportDirectory string
-	var defaultTokenType string
 
 	// read current values in file to be passed into default values for flags below
 	mainConfig := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
@@ -144,17 +122,11 @@ func init() {
 		defaultExportDirectory = mainConfig.Config.ExportDirectory
 	}
 
-	if mainConfig.Config.TokenType != "" {
-		defaultTokenType = mainConfig.Config.TokenType
-	}
-
 	SetCmd.Flags().IntVar(&flagHttpRequestTimeout, "http-request-timeout", defaultHttpRequestTimeout,
 		"Timeout for HTTP Client")
 	SetCmd.Flags().StringVar(&flagExportDirectory, "export-directory", defaultExportDirectory,
 		"Path to directory where APIs should be saved")
-	SetCmd.Flags().StringVarP(&flagTokenType, "token-type", "t", defaultTokenType,
-		"Type of the token to be generated")
-	SetCmd.Flags().StringVarP(&flagKubernetesMode, "mode", "m", utils.DefaultEnvironmentName, "If mode is set to \"k8s\", apictl " +
-		"is capable of executing Kubectl commands. For example \"apictl get pods\" -> \"kubectl get pods\". To go back " +
+	SetCmd.Flags().StringVarP(&flagKubernetesMode, "mode", "m", utils.DefaultEnvironmentName, "If mode is set to \"k8s\", apictl "+
+		"is capable of executing Kubectl commands. For example \"apictl get pods\" -> \"kubectl get pods\". To go back "+
 		"to the default mode, set the mode to \"default\"")
 }
