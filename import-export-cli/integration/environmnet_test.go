@@ -18,12 +18,13 @@
 package integration
 
 import (
+	"path/filepath"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"path/filepath"
-	"testing"
 )
 
 const defaultExportPath = utils.DefaultExportDirName
@@ -41,7 +42,10 @@ func TestListEnvironments(t *testing.T) {
 //Change Export directory using apictl and assert the change
 func TestChangeExportDirectory(t *testing.T) {
 	dev := apimClients[0]
-	changedExportDirectory, _ := filepath.Abs(utils.CustomTestExportDirectory + utils.DefaultExportDirName)
+	changedExportDirectory, _ := filepath.Abs(utils.CustomTestExportDirectory)
+
+	// Create directory to act as custom export directory
+	base.CreateTempDir(t, changedExportDirectory)
 
 	args := &testutils.SetTestArgs{
 		SrcAPIM:             dev,
@@ -63,7 +67,7 @@ func TestChangeExportDirectory(t *testing.T) {
 	}
 
 	//Assert that project import to publisher portal is successful
-	testutils.ValidateImportInitializedProject(t, apiArgs)
+	testutils.ValidateImportProject(t, apiArgs)
 
 	//Assert that Export directory change is successful by exporting and asserting that
 	testutils.ValidateExportApisPassed(t, apiArgs, changedExportDirectory)
@@ -90,44 +94,3 @@ func TestChangeExportDirectory(t *testing.T) {
 //	environmentSetHttpRequestTimeout(t, argsDefault)
 //	assert.Contains(t, output, "Http Request Timout is set to", "HTTP Request TimeOut change is not successful")
 //}
-
-//Change Token type using apictl and assert the change (for both "jwt" and "oauth" token types)
-func TestChangeTokenType(t *testing.T) {
-	apim := apimClients[0]
-
-	tokenType1 := "oauth"
-	args := &testutils.SetTestArgs{
-		SrcAPIM:       apim,
-		TokenTypeFlag: tokenType1,
-	}
-
-	testutils.ValidateETokenTypeIsChanged(t, args)
-
-	//Create API and get keys for that API
-	adminUser := superAdminUser
-	adminPassword := superAdminPassword
-
-	dev := apimClients[0]
-
-	api := testutils.AddAPI(t, dev, adminUser, adminPassword)
-
-	testutils.PublishAPI(dev, adminUser, adminPassword, api.ID)
-
-	apiArgs := &testutils.ApiGetKeyTestArgs{
-		CtlUser: testutils.Credentials{Username: adminUser, Password: adminPassword},
-		Api:     api,
-		Apim:    dev,
-	}
-
-	testutils.ValidateThatRecievingTokenTypeIsChanged(t, apiArgs, tokenType1)
-
-	tokenType2 := "jwt"
-
-	//Change value back to default value
-	argsDefault := &testutils.SetTestArgs{
-		SrcAPIM:       apim,
-		TokenTypeFlag: tokenType2,
-	}
-
-	testutils.ValidateETokenTypeIsChanged(t, argsDefault)
-}

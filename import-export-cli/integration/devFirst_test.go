@@ -18,12 +18,12 @@
 package integration
 
 import (
+	"path/filepath"
+	"testing"
+
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"path/filepath"
-	"testing"
-	"time"
 )
 
 //Initialize a project Initialize an API without any flag
@@ -126,11 +126,12 @@ func TestImportProjectCreatedFromSwagger2Definition(t *testing.T) {
 		SrcAPIM:   apim,
 		InitFlag:  projectName,
 		OasFlag:   utils.TestSwagger2DefinitionPath,
+		APIName:   utils.DevFirstSwagger2APIName,
 		ForceFlag: false,
 	}
 
 	//Assert that project import to publisher portal is successful
-	testutils.ValidateImportInitializedProject(t, args)
+	testutils.ValidateImportProject(t, args)
 }
 
 //Import API from initialized project with openAPI 3 definition
@@ -145,11 +146,12 @@ func TestImportProjectCreatedFromOpenAPI3Definition(t *testing.T) {
 		SrcAPIM:   apim,
 		InitFlag:  projectName,
 		OasFlag:   utils.TestOpenAPI3DefinitionPath,
+		APIName:   utils.DevFirstDefaultAPIName,
 		ForceFlag: false,
 	}
 
 	//Assert that project import to publisher portal is successful
-	testutils.ValidateImportInitializedProject(t, args)
+	testutils.ValidateImportProject(t, args)
 }
 
 //Import API from initialized project from API definition which is already in publisher without --update flag
@@ -164,14 +166,15 @@ func TestImportProjectCreatedFailWhenAPIIsExisted(t *testing.T) {
 		SrcAPIM:   apim,
 		InitFlag:  projectName,
 		OasFlag:   utils.TestOpenAPI3DefinitionPath,
+		APIName:   utils.DevFirstDefaultAPIName,
 		ForceFlag: false,
 	}
 
 	//Import API for the First time
-	testutils.ValidateImportInitializedProject(t, args)
+	testutils.ValidateImportProject(t, args)
 
 	//Import API for the second time
-	testutils.ValidateImportFailedWithInitializedProject(t, args)
+	testutils.ValidateImportProjectFailed(t, args)
 }
 
 //Import API from initialized project from API definition which is already in publisher with --update flag
@@ -186,14 +189,15 @@ func TestImportProjectCreatedPassWhenAPIIsExisted(t *testing.T) {
 		SrcAPIM:   apim,
 		InitFlag:  projectName,
 		OasFlag:   utils.TestOpenAPI3DefinitionPath,
+		APIName:   utils.DevFirstDefaultAPIName,
 		ForceFlag: false,
 	}
 
 	//Import API for the First time
-	testutils.ValidateImportInitializedProject(t, args)
+	testutils.ValidateImportProject(t, args)
 
 	//Import API for the second time
-	testutils.ValidateImportUpdatePassedWithInitializedProject(t, args)
+	testutils.ValidateImportUpdateProject(t, args)
 }
 
 //Import Api with a Document and Export that Api with a Document
@@ -208,6 +212,7 @@ func TestImportAndExportAPIWithDocument(t *testing.T) {
 		SrcAPIM:   apim,
 		InitFlag:  projectName,
 		OasFlag:   utils.TestOpenAPI3DefinitionPath,
+		APIName:   utils.DevFirstDefaultAPIName,
 		ForceFlag: false,
 	}
 
@@ -225,7 +230,7 @@ func TestImportAndExportAPIWithDocument(t *testing.T) {
 	base.Copy(srcPathForDocMetadata, destPathForDocMetaData)
 
 	//Import the project with Document
-	testutils.ValidateImportUpdatePassedWithInitializedProject(t, args)
+	testutils.ValidateImportUpdateProjectNotAlreadyImported(t, args)
 
 	testutils.ValidateAPIWithDocIsExported(t, args, utils.DevFirstDefaultAPIName, utils.DevFirstDefaultAPIVersion)
 }
@@ -242,6 +247,7 @@ func TestImportAndExportAPIWithPngIcon(t *testing.T) {
 		SrcAPIM:   apim,
 		InitFlag:  projectName,
 		OasFlag:   utils.TestOpenAPI3DefinitionPath,
+		APIName:   utils.DevFirstDefaultAPIName,
 		ForceFlag: false,
 	}
 
@@ -254,7 +260,7 @@ func TestImportAndExportAPIWithPngIcon(t *testing.T) {
 	base.Copy(srcPathForIcon, destPathForIcon)
 
 	//Import the project with icon image(.png)
-	testutils.ValidateImportUpdatePassedWithInitializedProject(t, args)
+	testutils.ValidateImportUpdateProjectNotAlreadyImported(t, args)
 
 	testutils.ValidateAPIWithIconIsExported(t, args, utils.DevFirstDefaultAPIName, utils.DevFirstDefaultAPIVersion)
 }
@@ -271,6 +277,7 @@ func TestImportAndExportAPIWithJpegImage(t *testing.T) {
 		SrcAPIM:   apim,
 		InitFlag:  projectName,
 		OasFlag:   utils.TestOpenAPI3DefinitionPath,
+		APIName:   utils.DevFirstDefaultAPIName,
 		ForceFlag: false,
 	}
 
@@ -283,7 +290,7 @@ func TestImportAndExportAPIWithJpegImage(t *testing.T) {
 	base.Copy(srcPathForImage, destPathForImage)
 
 	//Import the project with icon image(.jpeg) provided
-	testutils.ValidateImportUpdatePassedWithInitializedProject(t, args)
+	testutils.ValidateImportUpdateProjectNotAlreadyImported(t, args)
 
 	testutils.ValidateAPIWithImageIsExported(t, args, utils.DevFirstDefaultAPIName, utils.DevFirstDefaultAPIVersion)
 }
@@ -300,6 +307,7 @@ func TestUpdateDocAndImageOfAPIOfExistingAPI(t *testing.T) {
 		SrcAPIM:   apim,
 		InitFlag:  projectName,
 		OasFlag:   utils.TestOpenAPI3DefinitionPath,
+		APIName:   utils.DevFirstDefaultAPIName,
 		ForceFlag: true,
 	}
 	//Initialize the project
@@ -317,7 +325,7 @@ func TestUpdateDocAndImageOfAPIOfExistingAPI(t *testing.T) {
 	base.Copy(srcPathForImage, destPathForImage)
 
 	//Import the project with Document and image thumbnail
-	testutils.ValidateImportUpdatePassedWithInitializedProject(t, args)
+	testutils.ValidateImportUpdateProjectNotAlreadyImported(t, args)
 
 	//Update doc file to created project
 	srcPathForDocUpdate, _ := filepath.Abs(utils.TestCase1DocPath)
@@ -334,9 +342,9 @@ func TestUpdateDocAndImageOfAPIOfExistingAPI(t *testing.T) {
 	destPathForIcon := projectPath + utils.TestCase2DestPngPathSuffix
 	base.Copy(srcPathForIcon, destPathForIcon)
 
-	time.Sleep(1 * time.Second)
+	base.WaitForIndexing()
 	//Import the project with updated Document and updated image thumbnail
-	testutils.ValidateImportUpdatePassedWithInitializedProject(t, args)
+	testutils.ValidateImportUpdateProject(t, args)
 
 	//Validate that image has been updated
 	testutils.ValidateAPIWithDocIsExported(t, args, utils.DevFirstDefaultAPIName, utils.DevFirstDefaultAPIVersion)

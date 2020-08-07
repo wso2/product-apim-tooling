@@ -20,16 +20,17 @@ package testutils
 
 import (
 	"crypto/tls"
-	"github.com/stretchr/testify/assert"
-	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"log"
 	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 func GetKeys(t *testing.T, provider string, name string, version string, env string) (string, error) {
-	return base.Execute(t, "get-keys", "-n", name, "-v", version, "-r", provider, "-e", env, "-k")
+	return base.Execute(t, "get-keys", "-n", name, "-v", version, "-r", provider, "-e", env, "-k", "--verbose")
 }
 
 func invokeAPI(t *testing.T, url string, key string, expectedCode int) {

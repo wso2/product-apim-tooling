@@ -31,12 +31,16 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"log"
 )
 
 // logTransport : Flag which determines if http transport level requests and responses are logged
 var logTransport = false
+
+// indexingDelay : Time in milliseconds that tests need to wait for to allow APIM solr indexing to take place
+var indexingDelay = 1000
 
 func init() {
 	flag.BoolVar(&logTransport, "logtransport", false, "Log http transport level requests and responses")
@@ -270,10 +274,36 @@ func logResponse(logString string, response *http.Response) {
 	log.Println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 }
 
+// SetIndexingDelay : Set time in milliseconds that tests need to wait for to allow APIM solr indexing to take place
+func SetIndexingDelay(delay int) {
+	indexingDelay = delay
+}
+
+// WaitForIndexing : Wait for specified interval to allow APIM solr indexes to be updated
+func WaitForIndexing() {
+	time.Sleep(time.Duration(indexingDelay) * time.Millisecond)
+}
+
 func RemoveDir(projectName string) {
 	error := os.RemoveAll(projectName)
 	if error != nil {
 		log.Fatal(error)
+	}
+}
+
+// CreateTempDir : Create temp directory at the specified root path.
+// The directory will be removed when the calling test exits.
+func CreateTempDir(t *testing.T, path string) {
+	t.Log("base.CreateTempDir() - path:", path)
+
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		if err := os.MkdirAll(path, 0755); err != nil {
+			t.Fatal(err)
+		}
+
+		t.Cleanup(func() {
+			os.RemoveAll(path)
+		})
 	}
 }
 

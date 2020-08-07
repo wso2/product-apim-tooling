@@ -17,7 +17,7 @@
  */
 package utils
 
-const CustomTestExportDirectory = "testdata/CustomExportDirectory/"
+const CustomTestExportDirectory = "CustomExportDirectory"
 const TestSwagger2DefinitionPath = "testdata/swagger2Definition.yaml"
 const TestOpenAPI3DefinitionPath = "testdata/openAPI3Definition.yaml"
 const TestOpenAPISpecificationURL = "https://petstore.swagger.io/v2/swagger.json"
@@ -28,6 +28,7 @@ const DefaultApictlTestAppName = "default-apictl-app"
 
 //Export test cases
 const DevFirstDefaultAPIName = "SwaggerPetstoreNew"
+const DevFirstSwagger2APIName = "PizzaShackAPI"
 const DevFirstDefaultAPIVersion = "1.0.0"
 const TestCase1DocPath = "testdata/TestArtifactDirectory/ArtifactSet1/testDoc.pdf"
 const TestCase1DestPathSuffix = "/Docs/FileContents/testDoc.pdf"

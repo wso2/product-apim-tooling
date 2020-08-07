@@ -19,13 +19,13 @@
 package testutils
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"log"
 	"strings"
 	"testing"
-	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 func InitProject(t *testing.T, args *InitTestArgs) (string, error) {
@@ -114,45 +114,60 @@ func ValidateInitializeProjectWithDefinitionFlag(t *testing.T, args *InitTestArg
 	})
 }
 
-func ValidateImportInitializedProject(t *testing.T, args *InitTestArgs) {
+func ValidateImportProject(t *testing.T, args *InitTestArgs) {
 	t.Helper()
 	//Initialize a project with API definition
 	ValidateInitializeProjectWithOASFlag(t, args)
 
-	time.Sleep(1 * time.Second)
+	result, error := ImportApiFromProject(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, true)
 
-	result, error := ImportApiFromProject(t, args.InitFlag, args.SrcAPIM.GetEnvName())
 	assert.Nil(t, error, "Error while importing Project")
 	assert.Contains(t, result, "Successfully imported API", "Error while importing Project")
 
+	base.WaitForIndexing()
+
 	//Remove Created project and logout
 	t.Cleanup(func() {
 		base.RemoveDir(args.InitFlag)
 	})
 }
 
-func ValidateImportFailedWithInitializedProject(t *testing.T, args *InitTestArgs) {
+func ValidateImportProjectFailed(t *testing.T, args *InitTestArgs) {
 	t.Helper()
 
-	time.Sleep(1 * time.Second)
+	result, _ := ImportApiFromProject(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, false)
 
-	result, _ := ImportApiFromProject(t, args.InitFlag, args.SrcAPIM.GetEnvName())
 	assert.Contains(t, result, "Resource Already Exists", "Test failed because API is imported successfully")
 
+	base.WaitForIndexing()
+
 	//Remove Created project and logout
 	t.Cleanup(func() {
 		base.RemoveDir(args.InitFlag)
 	})
 }
 
-func ValidateImportUpdatePassedWithInitializedProject(t *testing.T, args *InitTestArgs) {
+func ValidateImportUpdateProject(t *testing.T, args *InitTestArgs) {
 	t.Helper()
 
-	time.Sleep(1 * time.Second)
+	result, error := ImportApiFromProjectWithUpdate(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, false)
 
-	result, error := ImportApiFromProjectWithUpdate(t, args.InitFlag, args.SrcAPIM.GetEnvName())
 	assert.Nil(t, error, "Error while generating Project")
-	assert.Contains(t, result, "Successfully imported API", "Error while importing Project")
+	assert.Contains(t, result, "Successfully imported API", "Test InitializeProjectWithDefinitionFlag Failed")
+
+	//Remove Created project and logout
+	t.Cleanup(func() {
+		base.RemoveDir(args.InitFlag)
+	})
+}
+
+func ValidateImportUpdateProjectNotAlreadyImported(t *testing.T, args *InitTestArgs) {
+	t.Helper()
+
+	result, error := ImportApiFromProjectWithUpdate(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, true)
+
+	assert.Nil(t, error, "Error while generating Project")
+	assert.Contains(t, result, "Successfully imported API", "Test InitializeProjectWithDefinitionFlag Failed")
 
 	//Remove Created project and logout
 	t.Cleanup(func() {

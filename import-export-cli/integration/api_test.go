@@ -20,7 +20,6 @@ package integration
 
 import (
 	"testing"
-	"time"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 
@@ -724,7 +723,6 @@ func TestExportApisWithExportApisCommand(t *testing.T) {
 	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
 		api = testutils.AddAPI(t, dev, tenantAdminUsername, tenantAdminPassword)
 		apisAdded++
-		time.Sleep(5 * time.Second)
 	}
 
 	// This will be the API that will be deleted by apictl, so no need to do cleaning

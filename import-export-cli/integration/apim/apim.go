@@ -1203,7 +1203,9 @@ func (instance *Client) getToken(username string, password string) string {
 	values.Add("grant_type", "password")
 	values.Add("username", username)
 	values.Add("password", password)
-	values.Add("scope", "apim:api_view apim:api_create apim:api_publish apim:subscribe apim:api_delete")
+	values.Add("scope",
+		"apim:api_view apim:api_create apim:api_publish apim:subscribe apim:api_delete "+
+			"apim:app_import_export apim:api_import_export apim:api_product_import_export apim:app_manage apim:sub_manage")
 
 	request.URL.RawQuery = values.Encode()
 

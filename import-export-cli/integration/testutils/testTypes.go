@@ -34,6 +34,7 @@ type ApiImportExportTestArgs struct {
 }
 
 type ApiProductImportExportTestArgs struct {
+	ApiProviders         map[string]Credentials
 	ApiProductProvider   Credentials
 	CtlUser              Credentials
 	ApiProduct           *apim.APIProduct
@@ -79,5 +80,6 @@ type InitTestArgs struct {
 	definitionFlag string
 	ForceFlag      bool
 	OasFlag        string
+	APIName        string
 	srcAPIM        *apim.Client
 }
