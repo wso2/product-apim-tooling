@@ -23,6 +23,7 @@ import (
 	"crypto/rand"
 	"encoding/base32"
 	"encoding/json"
+	"errors"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -641,9 +642,14 @@ func (instance *Client) DeleteAPIProduct(apiProductID string) {
 }
 
 // DeleteAPIByName : Delete API from APIM by name
-func (instance *Client) DeleteAPIByName(name string) {
-	apiInfo := instance.GetAPIByName(name)
-	instance.DeleteAPI(apiInfo.ID)
+func (instance *Client) DeleteAPIByName(name string) error {
+	apiInfo, err := instance.GetAPIByName(name)
+
+	if err == nil {
+		instance.DeleteAPI(apiInfo.ID)
+	}
+
+	return err
 }
 
 // DeleteAPIProductByName : Delete API from APIM by name
@@ -737,7 +743,7 @@ func (instance *Client) GetAPIProducts() *APIProductList {
 }
 
 // GetAPIByName : Get API by name from APIM
-func (instance *Client) GetAPIByName(name string) *APIInfo {
+func (instance *Client) GetAPIByName(name string) (*APIInfo, error) {
 	apisURL := instance.publisherRestURL + "/apis"
 
 	request := base.CreateGet(apisURL)
@@ -759,7 +765,15 @@ func (instance *Client) GetAPIByName(name string) *APIInfo {
 
 	var apiResponse APIList
 	json.NewDecoder(response.Body).Decode(&apiResponse)
-	return &apiResponse.List[0]
+
+	if len(apiResponse.List) == 0 {
+		return nil, errors.New("apim.GetAPIByName() did not return result for: " + name +
+			", it is possible that sufficient time is not allwed for solr indexing." +
+			"Consider the user of base.WaitForIndexing() in the execution flow where appropriate or " +
+			"increasing the `indexing-delay` value in the integration test config.yaml")
+	}
+
+	return &apiResponse.List[0], nil
 }
 
 // GetAPIProductByName : Get API Product by name from APIM

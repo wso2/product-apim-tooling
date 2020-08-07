@@ -106,7 +106,12 @@ func getAPI(t *testing.T, client *apim.Client, name string, username string, pas
 	} else {
 		client.Login(username, password)
 	}
-	apiInfo := client.GetAPIByName(name)
+	apiInfo, err := client.GetAPIByName(name)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	return client.GetAPI(apiInfo.ID)
 }
 
@@ -179,7 +184,11 @@ func importAPI(t *testing.T, sourceEnv string, api *apim.API, client *apim.Clien
 	output, err := base.Execute(t, "import-api", "-f", fileName, "-e", client.EnvName, "-k", "--verbose", "--preserve-provider=false")
 
 	t.Cleanup(func() {
-		client.DeleteAPIByName(api.Name)
+		err := client.DeleteAPIByName(api.Name)
+
+		if err != nil {
+			t.Fatal(err)
+		}
 	})
 
 	return output, err
@@ -190,7 +199,11 @@ func importAPIPreserveProvider(t *testing.T, sourceEnv string, api *apim.API, cl
 	output, err := base.Execute(t, "import-api", "-f", fileName, "-e", client.EnvName, "-k", "--verbose")
 
 	t.Cleanup(func() {
-		client.DeleteAPIByName(api.Name)
+		err := client.DeleteAPIByName(api.Name)
+
+		if err != nil {
+			t.Fatal(err)
+		}
 	})
 
 	return output, err
@@ -419,7 +432,7 @@ func exportApiImportedFromProject(t *testing.T, APIName string, APIVersion strin
 func ExportAllApisOfATenant(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
 	//Setup environment
 	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
-	//Login to the environment
+	//Login to the environmeTestImportAndExportAPIWithJpegImagent
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
 	base.WaitForIndexing()
@@ -438,10 +451,16 @@ func ImportApiFromProject(t *testing.T, projectName string, client *apim.Client,
 	projectPath, _ := filepath.Abs(projectName)
 	output, err := base.Execute(t, "import-api", "-f", projectPath, "-e", client.GetEnvName(), "-k", "--verbose")
 
+	base.WaitForIndexing()
+
 	if isCleanup {
 		t.Cleanup(func() {
 			client.Login(credentials.Username, credentials.Password)
-			client.DeleteAPIByName(apiName)
+			err := client.DeleteAPIByName(apiName)
+
+			if err != nil {
+				t.Fatal(err)
+			}
 		})
 	}
 
@@ -452,10 +471,16 @@ func ImportApiFromProjectWithUpdate(t *testing.T, projectName string, client *ap
 	projectPath, _ := filepath.Abs(projectName)
 	output, err := base.Execute(t, "import-api", "-f", projectPath, "-e", client.GetEnvName(), "-k", "--update", "--verbose")
 
+	base.WaitForIndexing()
+
 	if isCleanup {
 		t.Cleanup(func() {
 			client.Login(credentials.Username, credentials.Password)
-			client.DeleteAPIByName(apiName)
+			err := client.DeleteAPIByName(apiName)
+
+			if err != nil {
+				t.Fatal(err)
+			}
 		})
 	}
 
