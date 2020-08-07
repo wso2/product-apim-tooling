@@ -79,7 +79,11 @@ func flagAPIsAddedViaProductImportForRemoval(t *testing.T, client *apim.Client, 
 		t.Cleanup(func() {
 			for name, credentials := range *apiProviders {
 				client.Login(credentials.Username, credentials.Password)
-				client.DeleteAPIByName(name)
+				err := client.DeleteAPIByName(name)
+
+				if err != nil {
+					t.Fatal(err)
+				}
 			}
 		})
 	}
