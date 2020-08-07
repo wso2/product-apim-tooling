@@ -56,6 +56,12 @@ func ListApps(t *testing.T, env string) []string {
 	return base.GetRowsFromTableResponse(response)
 }
 
+func ListAppsWithOwner(t *testing.T, env string, owner string) []string {
+	response, _ := base.Execute(t, "list", "apps", "-e", env, "-k", "--owner", owner)
+
+	return base.GetRowsFromTableResponse(response)
+}
+
 func getEnvAppExportPath(envName string) string {
 	return filepath.Join(utils.DefaultExportDirPath, utils.ExportedAppsDirName, envName)
 }
@@ -206,4 +212,12 @@ func ValidateAppDelete(t *testing.T, args *AppImportExportTestArgs) {
 
 	// Validate that the delete is a success
 	ValidateApplicationIsDeleted(t, args.Application, appsListAfterDelete)
+}
+
+func ValidateListAppsWithOwner(t *testing.T, envName string) {
+	response := ListAppsWithOwner(t, envName, "admin")
+	assert.Equal(t, 5, len(response), "Failed when listing Applications with owner as Admin")
+
+	emptyResponse := ListAppsWithOwner(t, envName, "user1")
+	assert.Equal(t, 0, len(emptyResponse), "Failed when listing Applications with owner as User1")
 }

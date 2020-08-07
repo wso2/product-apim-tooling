@@ -20,7 +20,10 @@ package base
 
 import (
 	"flag"
+	"fmt"
+	"io"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"net/http/httputil"
 	"os"
@@ -289,7 +292,7 @@ func RemoveDir(projectName string) {
 }
 
 // CreateTempDir : Create temp directory at the specified root path.
-// The directory will be removed when the calling test exists.
+// The directory will be removed when the calling test exits.
 func CreateTempDir(t *testing.T, path string) {
 	t.Log("base.CreateTempDir() - path:", path)
 
@@ -321,4 +324,47 @@ func CountFiles(path string) (int, error) {
 		}
 	}
 	return i, nil
+}
+
+// IsFileAvailable checks if a file exists and is not a directory before we
+// try using it to prevent further errors.
+func IsFileAvailable(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
+}
+
+// Copy the src file to dst. Any existing file will be overwritten
+func Copy(src, dst string) error {
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+
+	out, err := os.Create(dst)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, in)
+	if err != nil {
+		return err
+	}
+	return out.Close()
+}
+
+//Generate random strings with given length
+func GenerateRandomName(n int) string {
+	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+
+	s := make([]rune, n)
+	for i := range s {
+		s[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(s)
 }

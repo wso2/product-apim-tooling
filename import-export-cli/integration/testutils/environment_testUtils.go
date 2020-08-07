@@ -19,6 +19,7 @@
 package testutils
 
 import (
+	"log"
 	"strconv"
 	"strings"
 	"testing"
@@ -56,6 +57,26 @@ func EnvironmentSetTokenType(t *testing.T, args *SetTestArgs) (string, error) {
 	base.SetupEnvWithoutTokenFlag(t, apim.GetEnvName(), apim.GetApimURL())
 	output, error := base.Execute(t, "set", "--token-type", args.TokenTypeFlag, "-k", "--verbose")
 	return output, error
+}
+
+func ValidateThatRecievingTokenTypeIsChanged(t *testing.T, args *ApiGetKeyTestArgs, expectedTokenType string) {
+	t.Helper()
+
+	base.SetupEnv(t, args.Apim.GetEnvName(), args.Apim.GetApimURL(), args.Apim.GetTokenURL())
+	base.Login(t, args.Apim.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	var err error
+	_, err = GetKeys(t, args.Api.Provider, args.Api.Name, args.Api.Version, args.Apim.GetEnvName())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	assert.Nil(t, err, "Error while getting key")
+
+	tokenType := args.Apim.GetApplication(args.Apim.GetApplicationByName(utils.DefaultApictlTestAppName).ApplicationID).TokenType
+	assert.Equal(t, strings.ToUpper(expectedTokenType), tokenType, "Error getting token type of application.")
+
+	UnsubscribeAPI(args.Apim, args.CtlUser.Username, args.CtlUser.Password, args.Api.ID)
 }
 
 func ValidateExportDirectoryIsChanged(t *testing.T, args *SetTestArgs) {

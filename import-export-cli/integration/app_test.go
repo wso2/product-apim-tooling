@@ -81,6 +81,23 @@ func TestListAppsDevopsTenantUser(t *testing.T) {
 	testutils.ListApps(t, apim.GetEnvName())
 }
 
+//List all the applications in an environment (by specifying the owner)
+func TestListAppWithOwner(t *testing.T) {
+	username := superAdminUser
+	password := superAdminPassword
+
+	apim := apimClients[0]
+
+	for appCount := 0; appCount < 5; appCount++ {
+		testutils.AddApp(t, apim, username, password)
+	}
+
+	base.SetupEnv(t, apim.GetEnvName(), apim.GetApimURL(), apim.GetTokenURL())
+	base.Login(t, apim.GetEnvName(), username, password)
+
+	testutils.ValidateListAppsWithOwner(t, apim.GetEnvName())
+}
+
 func TestExportAppNonAdminSuperTenant(t *testing.T) {
 	subscriberUserName := subscriber.UserName
 	subscriberPassword := subscriber.Password

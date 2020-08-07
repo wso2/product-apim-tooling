@@ -67,7 +67,7 @@ func TestChangeExportDirectory(t *testing.T) {
 	}
 
 	//Assert that project import to publisher portal is successful
-	testutils.ValidateImportInitializedProject(t, apiArgs)
+	testutils.ValidateImportProject(t, apiArgs)
 
 	//Assert that Export directory change is successful by exporting and asserting that
 	testutils.ValidateExportApisPassed(t, apiArgs, changedExportDirectory)
