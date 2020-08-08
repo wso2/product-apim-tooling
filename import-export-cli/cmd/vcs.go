@@ -28,9 +28,9 @@ const vcsCmdLiteral = "vcs"
 const vcsCmdShortDesc = "Checks status and deploys projects"
 const vcsCmdLongDesc = `Checks status and deploys projects to the specified environment. In order to 
 use this command, 'git' must be installed in the system.'`
-const vcsCmdExamples = utils.ProjectName + ` ` + vcsInitCmdLiteral + `
-` + utils.ProjectName + ` ` + vcsStatusCmdLiteral + ` -e dev
-` + utils.ProjectName + ` ` + deployCmdLiteral + ` -e dev`
+const vcsCmdExamples = utils.ProjectName + ` ` + vcsCmdLiteral + ` ` + vcsInitCmdLiteral + `
+` + utils.ProjectName + ` ` + vcsCmdLiteral + ` ` + vcsStatusCmdLiteral + ` -e dev
+` + utils.ProjectName + ` ` + vcsCmdLiteral + ` ` + deployCmdLiteral + ` -e dev`
 
 // vcsCmd represents the vcs command
 var VCSCmd = &cobra.Command{

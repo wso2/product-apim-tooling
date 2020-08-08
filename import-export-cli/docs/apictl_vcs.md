@@ -14,9 +14,9 @@ apictl vcs [flags]
 ### Examples
 
 ```
-apictl init
-apictl status -e dev
-apictl deploy -e dev
+apictl vcs init
+apictl vcs status -e dev
+apictl vcs deploy -e dev
 ```
 
 ### Options
