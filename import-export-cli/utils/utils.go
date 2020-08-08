@@ -222,3 +222,11 @@ func SetToK8sMode() {
 	configVars.Config.KubernetesMode = true
 	WriteConfigFile(configVars, MainConfigFilePath)
 }
+
+// returns min of two ints
+func Min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}

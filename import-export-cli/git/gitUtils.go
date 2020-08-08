@@ -87,7 +87,11 @@ func GetStatus(environment, fromRevType string) (string, int, map[string][]*para
         if fromRevType == FromRevTypeLastAttempted {
             envRevision = envVCSConfig.LastAttemptedRev
         } else if fromRevType == FromRevTypeLastSuccessful {
-            envRevision = envVCSConfig.LastSuccessfulRev
+            if len(envVCSConfig.LastSuccessfulRev) > 0 {
+                envRevision = envVCSConfig.LastSuccessfulRev[0]
+            } else {
+                envRevision = ""
+            }
         }
     }
 
@@ -174,13 +178,14 @@ func Rollback(accessToken, environment string) error {
         return errors.New("Nothing to rollback")
     }
 
-    if envVCSConfig.LastSuccessfulRev == "" {
+    if len(envVCSConfig.LastSuccessfulRev) == 0 {
         return errors.New("Failed to rollback as there are no previous successful revisions")
     }
+    lastSuccessfulRevision := envVCSConfig.LastSuccessfulRev[0]
 
     currentBranch := getCurrentBranch()
-    tmpBranchName := "tmp-" + envVCSConfig.LastSuccessfulRev[0:8]
-    checkoutNewBranchFromRevision(tmpBranchName, envVCSConfig.LastSuccessfulRev)
+    tmpBranchName := "tmp-" + lastSuccessfulRevision[0:8]
+    checkoutNewBranchFromRevision(tmpBranchName, lastSuccessfulRevision)
     deployUpdatedProjects(accessToken, repoId, environment, totalProjectsToUpdate, updatedProjectsPerType)
     checkoutBranch(currentBranch)
     deleteTmpBranch(tmpBranchName)
@@ -426,7 +431,11 @@ func updateVCSConfig(repoId, environment string, failedProjects map[string][]*pa
     envVCSConfig.FailedProjects = failedProjects
 
     if len(failedProjects) == 0 {
-        envVCSConfig.LastSuccessfulRev = envVCSConfig.LastAttemptedRev
+        if len(envVCSConfig.LastSuccessfulRev) == 0 || len(envVCSConfig.LastSuccessfulRev) > 0 &&
+            envVCSConfig.LastSuccessfulRev[0] != envVCSConfig.LastAttemptedRev {
+            persistedLast := envVCSConfig.LastSuccessfulRev[0:utils.Min(lastSuccessfulCommitsToKeep-1, len(envVCSConfig.LastSuccessfulRev))]
+            envVCSConfig.LastSuccessfulRev = append([]string{envVCSConfig.LastAttemptedRev}, persistedLast...)
+        }
     }
     _, hasRepo := vcsConfig.Repos[repoId]
     if !hasRepo {
@@ -462,16 +471,17 @@ func DeployChangedFiles(accessToken, environment string) map[string][]*params.Pr
     if hasDeletedProjects {
         // work on deleted files
         _, envVCSConfig, hasEnv := getVCSEnvironmentDetails(repoId, environment)
-        if !hasEnv || envVCSConfig.LastSuccessfulRev == "" {
+        if !hasEnv || len(envVCSConfig.LastSuccessfulRev) == 0 {
             utils.HandleErrorAndExit("Error: there are projects to delete but no last successful "+
                 "revision available in vcs config (vcs_config.yaml)", nil)
             return nil
         }
         currentBranch := getCurrentBranch()
-        tmpBranchName := "tmp-" + envVCSConfig.LastSuccessfulRev[0:8]
+        lastSuccessfulRev := envVCSConfig.LastSuccessfulRev[0]
+        tmpBranchName := "tmp-" + lastSuccessfulRev[0:8]
 
         fmt.Println("\nDeleting projects ..")
-        checkoutNewBranchFromRevision(tmpBranchName, envVCSConfig.LastSuccessfulRev)
+        checkoutNewBranchFromRevision(tmpBranchName, lastSuccessfulRev)
         failedProjects = deployProjectDeletions(accessToken, environment, deletedProjectsPerType, failedProjects)
         checkoutBranch(currentBranch)
         deleteTmpBranch(tmpBranchName)
