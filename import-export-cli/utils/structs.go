@@ -38,6 +38,7 @@ type Config struct {
 	ExportDirectory    string `yaml:"export_directory"`
 	KubernetesMode     bool   `yaml:"kubernetes_mode"`
 	TokenType          string `yaml:"token_type"`
+	VCSDeletionEnabled bool   `yaml:"vcs_deletion_enabled"`
 }
 
 type EnvKeys struct {

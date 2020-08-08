@@ -778,6 +778,7 @@ function _apictl_set {
     '(-h --help)'{-h,--help}'[help for set]' \
     '--http-request-timeout[Timeout for HTTP Client]:' \
     '(-m --mode)'{-m,--mode}'[If mode is set to "k8s", apictl is capable of executing Kubectl commands. For example "apictl get pods" -> "kubectl get pods". To go back to the default mode, set the mode to "default"]:' \
+    '--vcs-deletion-enabled[Specifies whether project deletion is allowed during deployment.]' \
     '(-k --insecure)'{-k,--insecure}'[Allow connections to SSL endpoints without certs]' \
     '--verbose[Enable verbose mode]'
 }

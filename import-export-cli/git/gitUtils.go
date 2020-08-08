@@ -71,21 +71,22 @@ func getVCSEnvironmentDetails(repoId, environment string) (VCSConfig, Environmen
 // Returns string, id of the git repository (located in vcs.yaml)
 // Returns int, the total number of projects to deploy
 // Returns map[string][]*params.ProjectParams, the details of the projects that needs to deploy
-func GetStatus(environment, fromRevType string) (string, int, map[string][]*params.ProjectParams){
+func GetStatus(environment, fromRevType string) (string, int, map[string][]*params.ProjectParams) {
     var envRevision string
+    mainConfig := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
     repoId, err := getRepoId()
     if err != nil {
         utils.HandleErrorAndExit("Error while retrieving repository id", err)
     }
     if repoId == "" {
-        utils.HandleErrorAndExit("The repository info: vcs.yaml is not found in the repository root. " +
+        utils.HandleErrorAndExit("The repository info: vcs.yaml is not found in the repository root. "+
             "If this is the first time you are using this repo, please initialize it with 'vcs init'.", nil)
     }
     _, envVCSConfig, hasEnv := getVCSEnvironmentDetails(repoId, environment)
     if hasEnv {
         if fromRevType == FromRevTypeLastAttempted {
             envRevision = envVCSConfig.LastAttemptedRev
-        } else if fromRevType == FromRevTypeLastSuccessful{
+        } else if fromRevType == FromRevTypeLastSuccessful {
             envRevision = envVCSConfig.LastSuccessfulRev
         }
     }
@@ -98,9 +99,12 @@ func GetStatus(environment, fromRevType string) (string, int, map[string][]*para
     var changedFiles string
     if envRevision == "" {
         changedFiles, _ = executeGitCommand("ls-tree", "-r", "HEAD", "--name-only", "--full-tree")
-    } else {
+    } else if mainConfig.Config.VCSDeletionEnabled {
         changedFiles, _ = executeGitCommand("diff", "--name-only", envRevision)
+    } else {
+        changedFiles, _ = executeGitCommand("diff", "--diff-filter=d", "--name-only", envRevision)
     }
+
     changedFileList := strings.Split(changedFiles,"\n")
     // remove the last empty element
     if len(changedFileList) > 0 {
@@ -676,9 +680,22 @@ func getSubPaths(parent string, path string) (paths []string) {
 // Executes the give git command as args list and returns the output
 func executeGitCommand(args ...string) (string, error) {
     cmd := exec.Command(Git, args...)
+
+    if utils.VerboseModeEnabled() {
+        utils.Logln("Executing command: " + Git + " " + strings.Join(args, " "))
+    }
+
     var errBuf bytes.Buffer
     cmd.Stderr = io.MultiWriter(os.Stderr, &errBuf)
 
     output, err := cmd.Output()
+
+    if utils.VerboseModeEnabled() {
+        if err != nil {
+            utils.HandleErrorAndContinue("Error occurred while executing command: ", err)
+        } else {
+            utils.Logln("Output : " + string(output))
+        }
+    }
     return string(output), err
 }
