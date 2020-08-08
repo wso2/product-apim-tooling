@@ -24,6 +24,7 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/git"
 	"github.com/wso2/product-apim-tooling/import-export-cli/specs/params"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"os"
 	"strconv"
 )
 
@@ -45,6 +46,11 @@ var VCSStatusCmd = &cobra.Command{
 	Example: vcsStatusCmdCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + vcsStatusCmdLiteral + " called")
+
+		if !utils.EnvExistsInMainConfigFile(flagVCSStatusEnvName, utils.MainConfigFilePath) {
+			fmt.Println(flagVCSStatusEnvName, "does not exists. Add it using add-env")
+			os.Exit(1)
+		}
 		_, totalProjectsToUpdate, updatedProjectsPerType := git.GetStatus(flagVCSStatusEnvName, git.FromRevTypeLastAttempted)
 		if totalProjectsToUpdate == 0 {
 			fmt.Println("Everything is up-to-date")

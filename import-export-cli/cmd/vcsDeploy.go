@@ -24,6 +24,7 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/git"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"os"
 )
 
 var flagVCSDeployEnvName string    // name of the environment the project changes need to be deployed
@@ -48,6 +49,11 @@ var DeployCmd = &cobra.Command{
 	Example: deployCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + deployCmdLiteral + " called")
+		if !utils.EnvExistsInMainConfigFile(flagVCSDeployEnvName, utils.MainConfigFilePath) {
+			fmt.Println(flagVCSDeployEnvName, "does not exists. Add it using add-env")
+			os.Exit(1)
+		}
+
 		credential, err := getCredentials(flagVCSDeployEnvName)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
