@@ -17,7 +17,7 @@ apictl vcs deploy [flags]
 
 ```
 apictl vcs deploy -e dev
-apictl deploy -e dev --skipRollback=true
+apictl vcs deploy -e dev --skipRollback=true
 ```
 
 ### Options
