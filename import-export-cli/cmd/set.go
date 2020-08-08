@@ -31,6 +31,9 @@ var flagExportDirectory string
 var flagKubernetesMode string
 
 var flagVCSDeletionEnabled bool
+var flagVCSConfigPath string
+
+const flagVCSConfigPathName = "vcs-config-path"
 
 // Set command related Info
 const setCmdLiteral = "set"
@@ -40,14 +43,16 @@ const setCmdLongDesc = `Set configuration parameters. Use at least one of the fo
 * --http-request-timeout <time-in-milli-seconds>
 * --export-directory <path-to-directory-where-apis-should-be-saved>
 * --mode <mode-of-apictl>
-* --vcs-deletion-enabled <enable-or-disable-project-deletion-via-vcs>`
+* --vcs-deletion-enabled <enable-or-disable-project-deletion-via-vcs>
+* --vcs-config-path <path-to-custom-vcs-config-file>`
 
 const setCmdExamples = utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 3600 --export-directory /home/user/exported-apis
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000 --export-directory C:\Documents\exported
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --mode kubernetes
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --mode default
-` + utils.ProjectName + ` ` + setCmdLiteral + ` --vcs-deletion-enabled=true`
+` + utils.ProjectName + ` ` + setCmdLiteral + ` --vcs-deletion-enabled=true
+` + utils.ProjectName + ` ` + setCmdLiteral + ` --vcs-config-path /home/user/custom/vcs-config.yaml`
 
 // SetCmd represents the 'set' command
 var SetCmd = &cobra.Command{
@@ -57,11 +62,11 @@ var SetCmd = &cobra.Command{
 	Example: setCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + setCmdLiteral + " called")
-		executeSetCmd(utils.MainConfigFilePath, utils.ExportDirectory)
+		executeSetCmd(utils.MainConfigFilePath, cmd)
 	},
 }
 
-func executeSetCmd(mainConfigFilePath, exportDirectory string) {
+func executeSetCmd(mainConfigFilePath string, cmd *cobra.Command) {
 	// read the existing config vars
 	configVars := utils.GetMainConfigFromFile(mainConfigFilePath)
 	//Change Http Request timeout
@@ -114,6 +119,10 @@ func executeSetCmd(mainConfigFilePath, exportDirectory string) {
 		}
 		configVars.Config.VCSDeletionEnabled = flagVCSDeletionEnabled
 	}
+	if cmd.Flags().Changed(flagVCSConfigPathName) {
+		configVars.Config.VCSConfigFilePath = flagVCSConfigPath
+		fmt.Println("VCS config file path is set to : " + flagVCSConfigPath)
+	}
 
 	utils.WriteConfigFile(configVars, mainConfigFilePath)
 }
@@ -145,4 +154,6 @@ func init() {
 		"to the default mode, set the mode to \"default\"")
 	SetCmd.Flags().BoolVar(&flagVCSDeletionEnabled, "vcs-deletion-enabled", false,
 		"Specifies whether project deletion is allowed during deployment.")
+	SetCmd.Flags().StringVar(&flagVCSConfigPath, flagVCSConfigPathName, "",
+		"Path to the VCS Configuration yaml file which keeps the VCS meta data")
 }

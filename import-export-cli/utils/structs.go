@@ -39,6 +39,7 @@ type Config struct {
 	KubernetesMode     bool   `yaml:"kubernetes_mode"`
 	TokenType          string `yaml:"token_type"`
 	VCSDeletionEnabled bool   `yaml:"vcs_deletion_enabled"`
+	VCSConfigFilePath  string `yaml:"vcs_config_file_path"`
 }
 
 type EnvKeys struct {

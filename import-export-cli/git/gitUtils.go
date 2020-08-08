@@ -57,6 +57,10 @@ func getVCSConfigFromFileSilently(filePath string) *VCSConfig {
 // Returns Environment, the environment specific VCS configuration
 // Returns bool, whether the environment is available in the VCS configuration or not
 func getVCSEnvironmentDetails(repoId, environment string) (VCSConfig, Environment, bool)  {
+    mainConfig := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
+    if mainConfig.Config.VCSConfigFilePath != "" {
+        VCSConfigFilePath = mainConfig.Config.VCSConfigFilePath
+    }
     vcsConfig := getVCSConfigFromFileSilently(VCSConfigFilePath)
     if vcsConfig.Repos == nil {
         vcsConfig.Repos = make(map[string]Repo)

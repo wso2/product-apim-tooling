@@ -134,7 +134,7 @@ func createConfigFiles() {
 		var mainConfig = new(utils.MainConfig)
 		mainConfig.Config = utils.Config{utils.DefaultHttpRequestTimeout,
 			utils.DefaultExportDirPath, k8sUtils.DefaultKubernetesMode, utils.DefaultTokenType,
-			false}
+			false, ""}
 		utils.WriteConfigFile(mainConfig, utils.MainConfigFilePath)
 	}
 
