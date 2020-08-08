@@ -38,7 +38,7 @@ If any project(s) got failed during the deployment, by default, the operation wi
 NOTE: --environment (-e) flag is mandatory`
 
 const deployCmdExamples = utils.ProjectName + ` ` + vcsCmdLiteral + ` ` + deployCmdLiteral + ` -e dev
-` + utils.ProjectName + ` ` + deployCmdLiteral + ` -e dev --skipRollback=true`
+` + utils.ProjectName + ` ` + vcsCmdLiteral + ` ` + deployCmdLiteral + ` -e dev --skipRollback=true`
 
 // deployCmd represents the deploy command
 var DeployCmd = &cobra.Command{

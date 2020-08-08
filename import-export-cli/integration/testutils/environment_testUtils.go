@@ -20,6 +20,7 @@ package testutils
 
 import (
 	"log"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
@@ -99,12 +100,29 @@ func ValidateExportApisPassed(t *testing.T, args *InitTestArgs, directoryName st
 	assert.Equal(t, 1, count, "Error while Exporting APIs")
 
 	t.Cleanup(func() {
-		argsDefault := &SetTestArgs{
-			SrcAPIM:             args.SrcAPIM,
-			ExportDirectoryFlag: utils.DefaultExportDirPath,
-		}
-		ValidateExportDirectoryIsChanged(t, argsDefault)
 		//Remove Exported apis
 		base.RemoveDir(directoryName + utils.TestMigrationDirectorySuffix)
+	})
+}
+
+func ValidateExportApiPassed(t *testing.T, args *ApiImportExportTestArgs, directoryName string) {
+	t.Helper()
+
+	output, error := exportAPI(t, args.Api.Name, args.Api.Version, args.Api.Provider, args.SrcAPIM.EnvName)
+	assert.Nil(t, error, "Error while Exporting APIs")
+	assert.Contains(t, output, "Successfully exported API!", "Error while Exporting API")
+
+	//Derive exported path from output
+	exportedPath := filepath.Dir(base.GetExportedPathFromOutput(output));
+
+	assert.True(t, strings.HasPrefix(exportedPath, directoryName), "API doesn't seem to exported to the " +
+		"changed exported location. Expected in " + directoryName + " but it is exported in " + exportedPath)
+
+	assert.True(t, base.IsAPIArchiveExists(t, exportedPath,  args.Api.Name, args.Api.Version), "API archive" +
+		" is not correctly exported to " + directoryName)
+
+	t.Cleanup(func() {
+		//Remove Exported api
+		base.RemoveDir(directoryName)
 	})
 }

@@ -18,6 +18,7 @@
 package integration
 
 import (
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 	"path/filepath"
 	"testing"
 
@@ -53,14 +54,25 @@ func TestChangeExportDirectory(t *testing.T) {
 	}
 	testutils.ValidateExportDirectoryIsChanged(t, args)
 
-	apim := apimClients[0]
+	// reset the export directory change after the test is finished
+	t.Cleanup(func() {
+		argsDefault := &testutils.SetTestArgs{
+			SrcAPIM:             args.SrcAPIM,
+			ExportDirectoryFlag: utils.DefaultExportDirPath,
+		}
+		testutils.ValidateExportDirectoryIsChanged(t, argsDefault)
+	})
+
+	apimClient := apimClients[0]
 	projectName := "OpenAPI3Project"
+	apiName := "SwaggerPetstoreNew"
+	apiVersion := "1.0.0"
 	username := superAdminUser
 	password := superAdminPassword
 
 	apiArgs := &testutils.InitTestArgs{
 		CtlUser:   testutils.Credentials{Username: username, Password: password},
-		SrcAPIM:   apim,
+		SrcAPIM:   apimClient,
 		InitFlag:  projectName,
 		OasFlag:   utils.TestOpenAPI3DefinitionPath,
 		ForceFlag: false,
@@ -71,6 +83,16 @@ func TestChangeExportDirectory(t *testing.T) {
 
 	//Assert that Export directory change is successful by exporting and asserting that
 	testutils.ValidateExportApisPassed(t, apiArgs, changedExportDirectory)
+
+	//Check exporting as a single API
+	exportArgs := &testutils.ApiImportExportTestArgs{
+		Api: &apim.API{
+			Name:    apiName,
+			Version: apiVersion,
+		},
+		SrcAPIM: apimClient,
+	}
+	testutils.ValidateExportApiPassed(t, exportArgs, changedExportDirectory)
 }
 
 //TODO  - Need to come up with  a process to make sure that http timeout is actually changed using another fake server
