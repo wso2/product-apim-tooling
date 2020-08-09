@@ -20,6 +20,7 @@ package utils
 
 import (
 	"os"
+	"os/user"
 	"path/filepath"
 )
 
@@ -30,12 +31,20 @@ var CurrentDir, _ = os.Getwd()
 
 const ConfigDirName = ".wso2apictl"
 
-var HomeDirectory = getEnv("APICTL_CONFIG_DIR", "HOME")
-
-func getEnv(key, defaultValue string) string {
-	value := os.Getenv(key)
+var HomeDirectory = getConfigHomeDir()
+func getConfigHomeDir() string {
+	value := os.Getenv("APICTL_CONFIG_DIR")
 	if len(value) == 0 {
-		return os.Getenv(defaultValue)
+		value, err := os.UserHomeDir()
+		if len(value) == 0 || err != nil  {
+			current, err := user.Current()
+			if err != nil || current == nil {
+				HandleErrorAndExit("User's HOME folder location couldn't be identified", nil)
+				return ""
+			}
+			return current.HomeDir
+		}
+		return value
 	}
 	return value
 }
