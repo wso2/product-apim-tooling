@@ -113,6 +113,9 @@ func GetStatus(environment, fromRevType string) (string, int, map[string][]*para
         changedFiles, _ = executeGitCommand("diff", "--diff-filter=d", "--name-only", envRevision)
     }
 
+    //remove slashes (/) unix-format path separators with OS specific path separator
+    changedFiles = strings.ReplaceAll(changedFiles,"/", string(filepath.Separator))
+
     changedFileList := strings.Split(changedFiles,"\n")
     // remove the last empty element
     if len(changedFileList) > 0 {
