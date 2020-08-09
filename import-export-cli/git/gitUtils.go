@@ -473,6 +473,13 @@ func DeployChangedFiles(accessToken, environment string) map[string][]*params.Pr
         deployUpdatedProjects(accessToken, repoId, environment, totalProjectsToUpdate, updatedProjectsPerType)
 
     if hasDeletedProjects {
+        //check whether project deletion is disabled
+        mainConfig := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
+        if !mainConfig.Config.VCSDeletionEnabled {
+            utils.HandleErrorAndExit("Error: there are projects to delete while project " +
+                "deletion is disabled via VCS", nil)
+        }
+
         // work on deleted files
         _, envVCSConfig, hasEnv := getVCSEnvironmentDetails(repoId, environment)
         if !hasEnv || len(envVCSConfig.LastSuccessfulRev) == 0 {
