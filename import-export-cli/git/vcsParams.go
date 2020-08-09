@@ -8,7 +8,7 @@ type VCSConfig struct {
 
 type Environment struct {
     LastAttemptedRev  string                             `yaml:"lastAttemptedRev"`
-    LastSuccessfulRev string                             `yaml:"lastSuccessfulRev"`
+    LastSuccessfulRev []string                           `yaml:"lastSuccessfulRev"`
     FailedProjects    map[string][]*params.ProjectParams `yaml:"failedProjects"`
 }
 

@@ -31,4 +31,6 @@ const VCSRepoInfoFileName = "vcs.yaml"
 const FromRevTypeLastAttempted = "last_attempted"
 const FromRevTypeLastSuccessful = "last_successful"
 
+const lastSuccessfulCommitsToKeep = 15
+
 var VCSConfigFilePath = filepath.Join(utils.ConfigDirPath, VCSConfigFileName)
