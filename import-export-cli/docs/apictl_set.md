@@ -32,7 +32,7 @@ apictl set --vcs-config-path /home/user/custom/vcs-config.yaml
 ```
       --export-directory string    Path to directory where APIs should be saved (default "/home/wso2user/.wso2apictl/exported")
   -h, --help                       help for set
-      --http-request-timeout int   Timeout for HTTP Client (default 5000)
+      --http-request-timeout int   Timeout for HTTP Client (default 10000)
   -m, --mode string                If mode is set to "k8s", apictl is capable of executing Kubectl commands. For example "apictl get pods" -> "kubectl get pods". To go back to the default mode, set the mode to "default" (default "default")
       --vcs-config-path string     Path to the VCS Configuration yaml file which keeps the VCS meta data
       --vcs-deletion-enabled       Specifies whether project deletion is allowed during deployment.
