@@ -28,7 +28,7 @@ sp_name_regex = "^[@\\sa-zA-Z0-9._-]*$"
 
 - *solr indexing delay*
 
-When artifacts such as APIs and AP Products are created in APIM, solr indexes are updated to make these new artifacts searchable. A time delay needs to be allowed for this process to take place so that these artifacts will be successfully retrieved. This delay can be specified in _milliseconds_. Not providing a sufficient delay interval will lead to test failure because created artifact will not be returned when listed using the APIM REST API.
+When artifacts such as APIs and API Products are created in APIM, solr indexes are updated to make these new artifacts searchable. A time delay needs to be allowed for this process to take place so that these artifacts will be successfully retrieved. This delay can be specified in _milliseconds_. Not providing a sufficient delay interval will lead to test failure because created artifact will not be returned when listed using the APIM REST API.
 
 ```
 indexing-delay: 1000   
