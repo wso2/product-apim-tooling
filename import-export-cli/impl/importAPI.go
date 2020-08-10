@@ -549,7 +549,7 @@ func injectParamsToAPI(importPath, paramsPath, importEnvironment string) error {
 	// check whether import environment is included in api configuration
 	envParams := apiParams.GetEnv(importEnvironment)
 	if envParams == nil {
-		fmt.Println("Using default values as the environment is not present in api_param.yaml file")
+		utils.Logln(utils.LogPrefixInfo + "Using default values as the environment is not present in api_param.yaml file")
 	} else {
 		//If environment parameters are present in parameter file
 		err = mergeAPI(importPath, envParams)
@@ -568,7 +568,7 @@ func injectParamsToAPI(importPath, paramsPath, importEnvironment string) error {
 
 // getAPIID returns id of the API by using apiInfo which contains name and version as info
 func getAPIID(accessOAuthToken, environment, name, version string) (string, error) {
-	apiQuery := fmt.Sprintf("name:%s version:%s", name, version)
+	apiQuery := fmt.Sprintf("name:\"%s\" version:\"%s\"", name, version)
 	count, apis, err := GetAPIListFromEnv(accessOAuthToken, environment, url.QueryEscape(apiQuery), "")
 	if err != nil {
 		return "", err
