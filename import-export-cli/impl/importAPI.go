@@ -549,7 +549,7 @@ func injectParamsToAPI(importPath, paramsPath, importEnvironment string) error {
 	// check whether import environment is included in api configuration
 	envParams := apiParams.GetEnv(importEnvironment)
 	if envParams == nil {
-		fmt.Println("Using default values as the environment is not present in api_param.yaml file")
+		utils.Logln(utils.LogPrefixInfo + "Using default values as the environment is not present in api_param.yaml file")
 	} else {
 		//If environment parameters are present in parameter file
 		err = mergeAPI(importPath, envParams)
