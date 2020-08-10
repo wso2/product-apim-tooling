@@ -26,7 +26,7 @@ type Endpoint struct {
 	// Url of the endpoint
 	Url *string `yaml:"url" json:"url"`
 	// Config of endpoint
-	Config *Configuration `yaml:"config" json:"config"`
+	Config *Configuration `yaml:"config,omitempty" json:"config,omitempty"`
 }
 
 // EndpointData contains details about endpoints
