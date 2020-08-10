@@ -25,15 +25,22 @@ sp_name_regex = "^[@\\sa-zA-Z0-9._-]*$"
   host: localhost
   offset: 1
 ```
-   
-   
+
+- *solr indexing delay*
+
+When artifacts such as APIs and API Products are created in APIM, solr indexes are updated to make these new artifacts searchable. A time delay needs to be allowed for this process to take place so that these artifacts will be successfully retrieved. This delay can be specified in _milliseconds_. Not providing a sufficient delay interval will lead to test failure because created artifact will not be returned when listed using the APIM REST API.
+
+```
+indexing-delay: 1000   
+```
+
 
 - *APIM DCR/REST API versions*
 
    The DCR and REST API version of the APIM instances mentioned previously.
 
 ```
-dcr-version: v0.16
+dcr-version: v0.17
 rest-api-version: v1
 ```
 
@@ -74,32 +81,32 @@ apictl-version: 3.2.0
 - Basic command
 
 ```
-go test -archive <apictl archive name>
+go test -p 1 -archive <apictl archive name>
 
-example: go test -archive apictl-3.1.0-linux-x64.tar.gz
+example: go test -p 1 -archive apictl-3.2.0-linux-x64.tar.gz
 
 ```
 
 - Run a specific test function only
 
 ```
-go test -archive <apictl archive name> -run <Test function name>
+go test -p 1 -archive <apictl archive name> -run <Test function name>
 
-example: go test -archive apictl-3.1.0-linux-x64.tar.gz -run TestVersion
+example: go test -p 1 -archive apictl-3.2.0-linux-x64.tar.gz -run TestVersion
 ```
 
 - Print verbose output
 
 ```
-go test -archive <apictl archive name> -v
+go test -p 1 -archive <apictl archive name> -v
 
-example: go test -archive apictl-3.1.0-linux-x64.tar.gz -v
+example: go test -p 1 -archive apictl-3.2.0-linux-x64.tar.gz -v
 ```
 
 - Print http transport request/responses
 
 ```
-go test -archive <apictl archive name> -logtransport
+go test -p 1 -archive <apictl archive name> -logtransport
 
-example: go test -archive apictl-3.1.0-linux-x64.tar.gz -logtransport
+example: go test -p 1 -archive apictl-3.2.0-linux-x64.tar.gz -logtransport
 ```
