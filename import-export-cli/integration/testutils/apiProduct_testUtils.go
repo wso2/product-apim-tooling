@@ -84,6 +84,7 @@ func flagAPIsAddedViaProductImportForRemoval(t *testing.T, client *apim.Client, 
 				if err != nil {
 					t.Fatal(err)
 				}
+				base.WaitForIndexing()
 			}
 		})
 	}
@@ -115,6 +116,7 @@ func importAPIProductPreserveProvider(t *testing.T, args *ApiProductImportExport
 
 	t.Cleanup(func() {
 		args.DestAPIM.DeleteAPIProductByName(args.ApiProduct.Name)
+		base.WaitForIndexing()
 	})
 
 	return output, err
@@ -153,6 +155,7 @@ func importAPIProduct(t *testing.T, args *ApiProductImportExportTestArgs) (strin
 
 	t.Cleanup(func() {
 		args.DestAPIM.DeleteAPIProductByName(args.ApiProduct.Name)
+		base.WaitForIndexing()
 	})
 
 	return output, err
