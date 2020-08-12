@@ -95,7 +95,6 @@ func exportAPIProduct(t *testing.T, name string, version string, env string) (st
 
 	t.Cleanup(func() {
 		base.RemoveAPIArchive(t, getEnvAPIProductExportPath(env), name, version)
-		base.WaitForIndexing()
 	})
 
 	return output, err

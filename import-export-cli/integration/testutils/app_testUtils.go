@@ -71,7 +71,6 @@ func exportApp(t *testing.T, name string, owner string, env string) (string, err
 
 	t.Cleanup(func() {
 		base.RemoveApplicationArchive(t, getEnvAppExportPath(env), name, owner)
-		base.WaitForIndexing()
 	})
 
 	return output, err
@@ -83,7 +82,6 @@ func importAppPreserveOwner(t *testing.T, sourceEnv string, app *apim.Applicatio
 
 	t.Cleanup(func() {
 		client.DeleteApplicationByName(app.Name)
-		base.WaitForIndexing()
 	})
 
 	return output, err

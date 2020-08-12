@@ -102,7 +102,6 @@ func ValidateExportApisPassed(t *testing.T, args *InitTestArgs, directoryName st
 	t.Cleanup(func() {
 		//Remove Exported apis
 		base.RemoveDir(directoryName + utils.TestMigrationDirectorySuffix)
-		base.WaitForIndexing()
 	})
 }
 
@@ -125,6 +124,5 @@ func ValidateExportApiPassed(t *testing.T, args *ApiImportExportTestArgs, direct
 	t.Cleanup(func() {
 		//Remove Exported api
 		base.RemoveDir(directoryName)
-		base.WaitForIndexing()
 	})
 }

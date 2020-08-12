@@ -157,7 +157,6 @@ func exportAPI(t *testing.T, name string, version string, provider string, env s
 
 	t.Cleanup(func() {
 		base.RemoveAPIArchive(t, getEnvAPIExportPath(env), name, version)
-		base.WaitForIndexing()
 	})
 
 	return output, err
@@ -177,7 +176,6 @@ func ValidateAllApisOfATenantIsExported(t *testing.T, args *ApiImportExportTestA
 		//Remove Exported apis and logout
 		pathToCleanUp := utils.DefaultExportDirPath + utils.TestMigrationDirectorySuffix
 		base.RemoveDir(pathToCleanUp)
-		base.WaitForIndexing()
 	})
 }
 
