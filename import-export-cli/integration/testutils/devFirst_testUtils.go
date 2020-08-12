@@ -60,6 +60,7 @@ func ValidateInitializeProject(t *testing.T, args *InitTestArgs) {
 	//Remove Created project and logout
 	t.Cleanup(func() {
 		base.RemoveDir(args.InitFlag)
+		base.WaitForIndexing()
 	})
 }
 
@@ -79,6 +80,7 @@ func ValidateInitializeProjectWithOASFlag(t *testing.T, args *InitTestArgs) {
 
 	t.Cleanup(func() {
 		base.RemoveDir(args.InitFlag)
+		base.WaitForIndexing()
 	})
 }
 
@@ -111,6 +113,7 @@ func ValidateInitializeProjectWithDefinitionFlag(t *testing.T, args *InitTestArg
 	//Remove created project
 	t.Cleanup(func() {
 		base.RemoveDir(args.InitFlag)
+		base.WaitForIndexing()
 	})
 }
 
@@ -129,6 +132,7 @@ func ValidateImportProject(t *testing.T, args *InitTestArgs) {
 	//Remove Created project and logout
 	t.Cleanup(func() {
 		base.RemoveDir(args.InitFlag)
+		base.WaitForIndexing()
 	})
 }
 
@@ -144,6 +148,7 @@ func ValidateImportProjectFailed(t *testing.T, args *InitTestArgs) {
 	//Remove Created project and logout
 	t.Cleanup(func() {
 		base.RemoveDir(args.InitFlag)
+		base.WaitForIndexing()
 	})
 }
 
@@ -158,6 +163,7 @@ func ValidateImportUpdateProject(t *testing.T, args *InitTestArgs) {
 	//Remove Created project and logout
 	t.Cleanup(func() {
 		base.RemoveDir(args.InitFlag)
+		base.WaitForIndexing()
 	})
 }
 
@@ -172,6 +178,7 @@ func ValidateImportUpdateProjectNotAlreadyImported(t *testing.T, args *InitTestA
 	//Remove Created project and logout
 	t.Cleanup(func() {
 		base.RemoveDir(args.InitFlag)
+		base.WaitForIndexing()
 	})
 }
 
@@ -203,6 +210,7 @@ func ValidateAPIWithDocIsExported(t *testing.T, args *InitTestArgs, DevFirstDefa
 		base.RemoveDir(args.InitFlag)
 		base.RemoveDir(exportedPath)
 		base.RemoveDir(relativePath)
+		base.WaitForIndexing()
 	})
 }
 
@@ -225,6 +233,7 @@ func ValidateAPIWithIconIsExported(t *testing.T, args *InitTestArgs, DevFirstDef
 		base.RemoveDir(args.InitFlag)
 		base.RemoveDir(exportedPath)
 		base.RemoveDir(relativePath)
+		base.WaitForIndexing()
 	})
 }
 
@@ -246,5 +255,6 @@ func ValidateAPIWithImageIsExported(t *testing.T, args *InitTestArgs, DevFirstDe
 		base.RemoveDir(args.InitFlag)
 		base.RemoveDir(exportedPath)
 		base.RemoveDir(relativePath)
+		base.WaitForIndexing()
 	})
 }

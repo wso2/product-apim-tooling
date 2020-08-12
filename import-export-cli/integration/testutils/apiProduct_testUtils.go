@@ -84,6 +84,7 @@ func flagAPIsAddedViaProductImportForRemoval(t *testing.T, client *apim.Client, 
 				if err != nil {
 					t.Fatal(err)
 				}
+				base.WaitForIndexing()
 			}
 		})
 	}
@@ -94,6 +95,7 @@ func exportAPIProduct(t *testing.T, name string, version string, env string) (st
 
 	t.Cleanup(func() {
 		base.RemoveAPIArchive(t, getEnvAPIProductExportPath(env), name, version)
+		base.WaitForIndexing()
 	})
 
 	return output, err
@@ -115,6 +117,7 @@ func importAPIProductPreserveProvider(t *testing.T, args *ApiProductImportExport
 
 	t.Cleanup(func() {
 		args.DestAPIM.DeleteAPIProductByName(args.ApiProduct.Name)
+		base.WaitForIndexing()
 	})
 
 	return output, err
@@ -153,6 +156,7 @@ func importAPIProduct(t *testing.T, args *ApiProductImportExportTestArgs) (strin
 
 	t.Cleanup(func() {
 		args.DestAPIM.DeleteAPIProductByName(args.ApiProduct.Name)
+		base.WaitForIndexing()
 	})
 
 	return output, err

@@ -157,6 +157,7 @@ func exportAPI(t *testing.T, name string, version string, provider string, env s
 
 	t.Cleanup(func() {
 		base.RemoveAPIArchive(t, getEnvAPIExportPath(env), name, version)
+		base.WaitForIndexing()
 	})
 
 	return output, err
@@ -176,6 +177,7 @@ func ValidateAllApisOfATenantIsExported(t *testing.T, args *ApiImportExportTestA
 		//Remove Exported apis and logout
 		pathToCleanUp := utils.DefaultExportDirPath + utils.TestMigrationDirectorySuffix
 		base.RemoveDir(pathToCleanUp)
+		base.WaitForIndexing()
 	})
 }
 
@@ -189,6 +191,7 @@ func importAPI(t *testing.T, sourceEnv string, api *apim.API, client *apim.Clien
 		if err != nil {
 			t.Fatal(err)
 		}
+		base.WaitForIndexing()
 	})
 
 	return output, err
@@ -204,6 +207,7 @@ func importAPIPreserveProvider(t *testing.T, sourceEnv string, api *apim.API, cl
 		if err != nil {
 			t.Fatal(err)
 		}
+		base.WaitForIndexing()
 	})
 
 	return output, err
@@ -425,6 +429,7 @@ func ValidateAPIDelete(t *testing.T, args *ApiImportExportTestArgs) {
 	// Validate that the delete is a success
 	validateAPIIsDeleted(t, args.Api, apisListAfterDelete)
 }
+
 func exportApiImportedFromProject(t *testing.T, APIName string, APIVersion string, EnvName string) (string, error) {
 	return base.Execute(t, "export-api", "-n", APIName, "-v", APIVersion, "-e", EnvName)
 }
@@ -461,6 +466,7 @@ func ImportApiFromProject(t *testing.T, projectName string, client *apim.Client,
 			if err != nil {
 				t.Fatal(err)
 			}
+			base.WaitForIndexing()
 		})
 	}
 
@@ -481,6 +487,7 @@ func ImportApiFromProjectWithUpdate(t *testing.T, projectName string, client *ap
 			if err != nil {
 				t.Fatal(err)
 			}
+			base.WaitForIndexing()
 		})
 	}
 
