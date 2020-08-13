@@ -308,7 +308,14 @@ func CreateTempDir(t *testing.T, path string) {
 }
 
 func GetExportedPathFromOutput(output string) string {
-	return strings.ReplaceAll(strings.ReplaceAll(output[strings.Index(output, string(os.PathSeparator)):], "\n", ""), " ", "")
+	//Check directory path to omit changes due to OS differences
+	if strings.Contains(output, ":\\") {
+		arrayOutput := []rune (output)
+		extractedPath := string(arrayOutput[strings.Index(output, ":\\")-1:])
+		return strings.ReplaceAll(strings.ReplaceAll(extractedPath, "\n", ""), " ", "")
+	} else {
+		return strings.ReplaceAll(strings.ReplaceAll(output[strings.Index(output, string(os.PathSeparator)):], "\n", ""), " ", "")
+	}
 }
 
 //Count number of files in a directory
