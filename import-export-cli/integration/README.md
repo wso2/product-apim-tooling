@@ -81,32 +81,32 @@ apictl-version: 3.2.0
 - Basic command
 
 ```
-go test -p 1 -archive <apictl archive name>
+go test -p 1 -timeout 0 -archive <apictl archive name>
 
-example: go test -p 1 -archive apictl-3.2.0-linux-x64.tar.gz
+example: go test -p 1 -timeout 0 -archive apictl-3.2.0-linux-x64.tar.gz
 
 ```
 
 - Run a specific test function only
 
 ```
-go test -p 1 -archive <apictl archive name> -run <Test function name>
+go test -p 1 -timeout 0 -archive <apictl archive name> -run <Test function name or partial name regex>
 
-example: go test -p 1 -archive apictl-3.2.0-linux-x64.tar.gz -run TestVersion
+example: go test -p 1 -timeout 0 -archive apictl-3.2.0-linux-x64.tar.gz -run TestVersion
 ```
 
 - Print verbose output
 
 ```
-go test -p 1 -archive <apictl archive name> -v
+go test -p 1 -timeout 0 -archive <apictl archive name> -v
 
-example: go test -p 1 -archive apictl-3.2.0-linux-x64.tar.gz -v
+example: go test -p 1 -timeout 0 -archive apictl-3.2.0-linux-x64.tar.gz -v
 ```
 
 - Print http transport request/responses
 
 ```
-go test -p 1 -archive <apictl archive name> -logtransport
+go test -p 1 -timeout 0 -archive <apictl archive name> -logtransport
 
-example: go test -p 1 -archive apictl-3.2.0-linux-x64.tar.gz -logtransport
+example: go test -p 1 -timeout 0 -archive apictl-3.2.0-linux-x64.tar.gz -logtransport
 ```
