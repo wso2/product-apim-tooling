@@ -114,9 +114,8 @@ func ValidateExportApiPassed(t *testing.T, args *ApiImportExportTestArgs, direct
 	//Derive exported path from output
 	exportedPath := filepath.Dir(base.GetExportedPathFromOutput(output))
 
-	assert.True(t, strings.HasPrefix(exportedPath, directoryName), "API doesn't seem to exported to the "+
-		"changed exported location. Expected the actual exported location ["+exportedPath+"] prefixed with ["+
-		directoryName+"], but it is not.")
+	assert.True(t, strings.HasPrefix(exportedPath, directoryName), "API export path "+exportedPath+" is"+
+		" not within the expected export location "+directoryName)
 
 	assert.True(t, base.IsAPIArchiveExists(t, exportedPath, args.Api.Name, args.Api.Version), "API archive"+
 		" is not correctly exported to "+directoryName)
