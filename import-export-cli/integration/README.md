@@ -4,7 +4,7 @@
 1. In order to run the integration tests, two instances of API Manager need to be started. By default integration tests are configured to run against local instances with port offset 0 and 1. If you need to configure the instances differently, it can be done as explained later on in the document. These two instances will act as the APIM environments that will be used for testing exporting and importing scenarios respectively. The integration tests will execute apictl commands, DCR calls, REST API calls and admin service calls against these instances.
 
 2. Before starting the APIM instances update the APIM *deployment.toml* to allow the `@` character as part of the service provider name. This is to support DCR for tenant users since the `@` is part of the username. The updated config should look as follows,
-
+(**If this test suite is running on a Windows machine, make sure to disable security scans and security guards of that machine prior to the test suite starts.)
 ```
 [service_provider]
 sp_name_regex = "^[@\\sa-zA-Z0-9._-]*$"
