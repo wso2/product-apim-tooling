@@ -12,11 +12,11 @@ import (
 // Configuration represents endpoint config
 type Configuration struct {
 	// RetryTimeOut for endpoint
-	RetryTimeOut *int `yaml:"retryTimeOut" json:"retryTimeOut,string"`
+	RetryTimeOut *int `yaml:"retryTimeOut,omitempty" json:"retryTimeOut,omitempty"`
 	// RetryDelay for endpoint
-	RetryDelay *int `yaml:"retryDelay" json:"retryDelay,string"`
+	RetryDelay *int `yaml:"retryDelay,omitempty" json:"retryDelay,omitempty"`
 	// Factor used for config
-	Factor *int `yaml:"factor" json:"factor,string"`
+	Factor *int `yaml:"factor,omitempty" json:"factor,omitempty"`
 }
 
 // Endpoint details
