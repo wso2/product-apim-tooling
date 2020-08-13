@@ -376,11 +376,12 @@ func TestExportImportApiCrossTenantUserWithoutPreserveProvider(t *testing.T) {
 	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
 
 	args := &testutils.ApiImportExportTestArgs{
-		ApiProvider: testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: superTenantAdminUsername, Password: superTenantAdminPassword},
-		Api:         api,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
+		ApiProvider:      testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
+		CtlUser:          testutils.Credentials{Username: superTenantAdminUsername, Password: superTenantAdminPassword},
+		Api:              api,
+		OverrideProvider: true,
+		SrcAPIM:          dev,
+		DestAPIM:         prod,
 	}
 
 	testutils.ValidateAPIExport(t, args)
@@ -411,11 +412,12 @@ func TestExportImportApiCrossTenantDevopsUserWithoutPreserveProvider(t *testing.
 	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
 
 	args := &testutils.ApiImportExportTestArgs{
-		ApiProvider: testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
-		Api:         api,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
+		ApiProvider:      testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
+		CtlUser:          testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Api:              api,
+		OverrideProvider: true,
+		SrcAPIM:          dev,
+		DestAPIM:         prod,
 	}
 
 	testutils.ValidateAPIExport(t, args)
