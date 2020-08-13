@@ -65,9 +65,9 @@ func TestChangeExportDirectory(t *testing.T) {
 	})
 
 	apimClient := apimClients[0]
-	projectName := "OpenAPI3Project"
-	apiName := "SwaggerPetstoreNew"
-	apiVersion := "1.0.0"
+	projectName := base.GenerateRandomName(16)
+	apiName := testutils.DevFirstDefaultAPIName
+	apiVersion := testutils.DevFirstDefaultAPIVersion
 	username := superAdminUser
 	password := superAdminPassword
 
