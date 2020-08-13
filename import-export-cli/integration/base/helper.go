@@ -308,7 +308,7 @@ func CreateTempDir(t *testing.T, path string) {
 }
 
 func GetExportedPathFromOutput(output string) string {
-	return strings.ReplaceAll(strings.ReplaceAll(output[strings.Index(output, "/"):], "\n", ""), " ", "")
+	return strings.ReplaceAll(strings.ReplaceAll(output[strings.Index(output, string(os.PathSeparator)):], "\n", ""), " ", "")
 }
 
 //Count number of files in a directory
