@@ -66,6 +66,54 @@ type API struct {
 	ThreatProtectionPolicies     interface{}          `json:"threatProtectionPolicies"`
 }
 
+// GetProductionURL : Get APIs production URL
+func (instance *API) GetProductionURL() string {
+	endpoint := instance.EndpointConfig.(map[string]interface{})["production_endpoints"]
+	return endpoint.(map[string]interface{})["url"].(string)
+}
+
+// GetSandboxURL : Get APIs sandbox URL
+func (instance *API) GetSandboxURL() string {
+	endpoint := instance.EndpointConfig.(map[string]interface{})["sandbox_endpoints"]
+	return endpoint.(map[string]interface{})["url"].(string)
+}
+
+// SetProductionURL : Set APIs production URL
+func (instance *API) SetProductionURL(url string) {
+	endpoint := instance.EndpointConfig.(map[string]interface{})["production_endpoints"]
+	endpoint.(map[string]interface{})["url"] = url
+}
+
+// SetSandboxURL : Set APIs sandbox URL
+func (instance *API) SetSandboxURL(url string) {
+	endpoint := instance.EndpointConfig.(map[string]interface{})["sandbox_endpoints"]
+	endpoint.(map[string]interface{})["url"] = url
+}
+
+// GetProductionConfig : Get APIs production Config
+func (instance *API) GetProductionConfig() map[string]interface{} {
+	endpoint := instance.EndpointConfig.(map[string]interface{})["production_endpoints"]
+	return endpoint.(map[string]interface{})["config"].(map[string]interface{})
+}
+
+// GetSandboxConfig : Get APIs sandbox Config
+func (instance *API) GetSandboxConfig() map[string]interface{} {
+	endpoint := instance.EndpointConfig.(map[string]interface{})["sandbox_endpoints"]
+	return endpoint.(map[string]interface{})["config"].(map[string]interface{})
+}
+
+// SetProductionConfig : Set APIs production Config
+func (instance *API) SetProductionConfig(config map[interface{}]interface{}) {
+	endpoint := instance.EndpointConfig.(map[string]interface{})["production_endpoints"]
+	endpoint.(map[string]interface{})["config"] = config
+}
+
+// SetSandboxConfig : Set APIs sandbox Config
+func (instance *API) SetSandboxConfig(config map[interface{}]interface{}) {
+	endpoint := instance.EndpointConfig.(map[string]interface{})["sandbox_endpoints"]
+	endpoint.(map[string]interface{})["config"] = config
+}
+
 // APIMaxTps : Defines Max TPS of backends
 type APIMaxTps struct {
 	Production int64 `json:"production,omitempty"`

@@ -26,11 +26,13 @@ type Credentials struct {
 }
 
 type ApiImportExportTestArgs struct {
-	ApiProvider Credentials
-	CtlUser     Credentials
-	Api         *apim.API
-	SrcAPIM     *apim.Client
-	DestAPIM    *apim.Client
+	ApiProvider      Credentials
+	CtlUser          Credentials
+	Api              *apim.API
+	SrcAPIM          *apim.Client
+	DestAPIM         *apim.Client
+	OverrideProvider bool
+	ParamsFile       string
 }
 
 type ApiProductImportExportTestArgs struct {

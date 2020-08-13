@@ -18,9 +18,10 @@
 package integration
 
 import (
-	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 	"path/filepath"
 	"testing"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
@@ -43,7 +44,7 @@ func TestListEnvironments(t *testing.T) {
 //Change Export directory using apictl and assert the change
 func TestChangeExportDirectory(t *testing.T) {
 	dev := apimClients[0]
-	changedExportDirectory, _ := filepath.Abs(utils.CustomTestExportDirectory)
+	changedExportDirectory, _ := filepath.Abs(testutils.CustomTestExportDirectory)
 
 	// Create directory to act as custom export directory
 	base.CreateTempDir(t, changedExportDirectory)
@@ -74,7 +75,7 @@ func TestChangeExportDirectory(t *testing.T) {
 		CtlUser:   testutils.Credentials{Username: username, Password: password},
 		SrcAPIM:   apimClient,
 		InitFlag:  projectName,
-		OasFlag:   utils.TestOpenAPI3DefinitionPath,
+		OasFlag:   testutils.TestOpenAPI3DefinitionPath,
 		ForceFlag: false,
 	}
 

@@ -23,7 +23,6 @@ import (
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 //Initialize a project Initialize an API without any flag
@@ -53,7 +52,7 @@ func TestInitializeAPIWithDefinitionFlag(t *testing.T) {
 		CtlUser:   testutils.Credentials{Username: username, Password: password},
 		SrcAPIM:   apim,
 		InitFlag:  projectName,
-		OasFlag:   utils.TestApiDefinitionPath,
+		OasFlag:   testutils.TestApiDefinitionPath,
 		ForceFlag: false,
 	}
 
@@ -71,7 +70,7 @@ func TestInitializeAPIFromSwagger2Definition(t *testing.T) {
 		CtlUser:   testutils.Credentials{Username: username, Password: password},
 		SrcAPIM:   apim,
 		InitFlag:  projectName,
-		OasFlag:   utils.TestSwagger2DefinitionPath,
+		OasFlag:   testutils.TestSwagger2DefinitionPath,
 		ForceFlag: false,
 	}
 
@@ -89,7 +88,7 @@ func TestInitializeAPIFromOpenAPI3Definition(t *testing.T) {
 		CtlUser:   testutils.Credentials{Username: username, Password: password},
 		SrcAPIM:   apim,
 		InitFlag:  projectName,
-		OasFlag:   utils.TestOpenAPI3DefinitionPath,
+		OasFlag:   testutils.TestOpenAPI3DefinitionPath,
 		ForceFlag: false,
 	}
 
@@ -107,7 +106,7 @@ func TestInitializeAPIFromAPIDefinitionURL(t *testing.T) {
 		CtlUser:   testutils.Credentials{Username: username, Password: password},
 		SrcAPIM:   apim,
 		InitFlag:  projectName,
-		OasFlag:   utils.TestOpenAPISpecificationURL,
+		OasFlag:   testutils.TestOpenAPISpecificationURL,
 		ForceFlag: false,
 	}
 
@@ -125,8 +124,8 @@ func TestImportProjectCreatedFromSwagger2Definition(t *testing.T) {
 		CtlUser:   testutils.Credentials{Username: username, Password: password},
 		SrcAPIM:   apim,
 		InitFlag:  projectName,
-		OasFlag:   utils.TestSwagger2DefinitionPath,
-		APIName:   utils.DevFirstSwagger2APIName,
+		OasFlag:   testutils.TestSwagger2DefinitionPath,
+		APIName:   testutils.DevFirstSwagger2APIName,
 		ForceFlag: false,
 	}
 
@@ -145,8 +144,8 @@ func TestImportProjectCreatedFromOpenAPI3Definition(t *testing.T) {
 		CtlUser:   testutils.Credentials{Username: username, Password: password},
 		SrcAPIM:   apim,
 		InitFlag:  projectName,
-		OasFlag:   utils.TestOpenAPI3DefinitionPath,
-		APIName:   utils.DevFirstDefaultAPIName,
+		OasFlag:   testutils.TestOpenAPI3DefinitionPath,
+		APIName:   testutils.DevFirstDefaultAPIName,
 		ForceFlag: false,
 	}
 
@@ -165,8 +164,8 @@ func TestImportProjectCreatedFailWhenAPIIsExisted(t *testing.T) {
 		CtlUser:   testutils.Credentials{Username: username, Password: password},
 		SrcAPIM:   apim,
 		InitFlag:  projectName,
-		OasFlag:   utils.TestOpenAPI3DefinitionPath,
-		APIName:   utils.DevFirstDefaultAPIName,
+		OasFlag:   testutils.TestOpenAPI3DefinitionPath,
+		APIName:   testutils.DevFirstDefaultAPIName,
 		ForceFlag: false,
 	}
 
@@ -188,8 +187,8 @@ func TestImportProjectCreatedPassWhenAPIIsExisted(t *testing.T) {
 		CtlUser:   testutils.Credentials{Username: username, Password: password},
 		SrcAPIM:   apim,
 		InitFlag:  projectName,
-		OasFlag:   utils.TestOpenAPI3DefinitionPath,
-		APIName:   utils.DevFirstDefaultAPIName,
+		OasFlag:   testutils.TestOpenAPI3DefinitionPath,
+		APIName:   testutils.DevFirstDefaultAPIName,
 		ForceFlag: false,
 	}
 
@@ -211,8 +210,8 @@ func TestImportAndExportAPIWithDocument(t *testing.T) {
 		CtlUser:   testutils.Credentials{Username: username, Password: password},
 		SrcAPIM:   apim,
 		InitFlag:  projectName,
-		OasFlag:   utils.TestOpenAPI3DefinitionPath,
-		APIName:   utils.DevFirstDefaultAPIName,
+		OasFlag:   testutils.TestOpenAPI3DefinitionPath,
+		APIName:   testutils.DevFirstDefaultAPIName,
 		ForceFlag: false,
 	}
 
@@ -220,19 +219,19 @@ func TestImportAndExportAPIWithDocument(t *testing.T) {
 
 	projectPath, _ := filepath.Abs(projectName)
 	//Move doc file to created project
-	srcPathForDoc, _ := filepath.Abs(utils.TestCase1DocPath)
-	destPathForDoc := projectPath + utils.TestCase1DestPathSuffix
+	srcPathForDoc, _ := filepath.Abs(testutils.TestCase1DocPath)
+	destPathForDoc := projectPath + testutils.TestCase1DestPathSuffix
 	base.Copy(srcPathForDoc, destPathForDoc)
 
 	//Move docMetaData file to created project
-	srcPathForDocMetadata, _ := filepath.Abs(utils.TestCase1DocMetaDataPath)
-	destPathForDocMetaData := projectPath + utils.TestCase1DestMetaDataPathSuffix
+	srcPathForDocMetadata, _ := filepath.Abs(testutils.TestCase1DocMetaDataPath)
+	destPathForDocMetaData := projectPath + testutils.TestCase1DestMetaDataPathSuffix
 	base.Copy(srcPathForDocMetadata, destPathForDocMetaData)
 
 	//Import the project with Document
 	testutils.ValidateImportUpdateProjectNotAlreadyImported(t, args)
 
-	testutils.ValidateAPIWithDocIsExported(t, args, utils.DevFirstDefaultAPIName, utils.DevFirstDefaultAPIVersion)
+	testutils.ValidateAPIWithDocIsExported(t, args, testutils.DevFirstDefaultAPIName, testutils.DevFirstDefaultAPIVersion)
 }
 
 //Import Api with an Image and Export that Api with an image (.png Type)
@@ -246,8 +245,8 @@ func TestImportAndExportAPIWithPngIcon(t *testing.T) {
 		CtlUser:   testutils.Credentials{Username: username, Password: password},
 		SrcAPIM:   apim,
 		InitFlag:  projectName,
-		OasFlag:   utils.TestOpenAPI3DefinitionPath,
-		APIName:   utils.DevFirstDefaultAPIName,
+		OasFlag:   testutils.TestOpenAPI3DefinitionPath,
+		APIName:   testutils.DevFirstDefaultAPIName,
 		ForceFlag: false,
 	}
 
@@ -255,14 +254,14 @@ func TestImportAndExportAPIWithPngIcon(t *testing.T) {
 
 	//Move icon file to created project
 	projectPath, _ := filepath.Abs(projectName)
-	srcPathForIcon, _ := filepath.Abs(utils.TestCase2PngPath)
-	destPathForIcon := projectPath + utils.TestCase2DestPngPathSuffix
+	srcPathForIcon, _ := filepath.Abs(testutils.TestCase2PngPath)
+	destPathForIcon := projectPath + testutils.TestCase2DestPngPathSuffix
 	base.Copy(srcPathForIcon, destPathForIcon)
 
 	//Import the project with icon image(.png)
 	testutils.ValidateImportUpdateProjectNotAlreadyImported(t, args)
 
-	testutils.ValidateAPIWithIconIsExported(t, args, utils.DevFirstDefaultAPIName, utils.DevFirstDefaultAPIVersion)
+	testutils.ValidateAPIWithIconIsExported(t, args, testutils.DevFirstDefaultAPIName, testutils.DevFirstDefaultAPIVersion)
 }
 
 //Import Api with an Image and Export that Api with an image (.jpeg Type)
@@ -276,8 +275,8 @@ func TestImportAndExportAPIWithJpegImage(t *testing.T) {
 		CtlUser:   testutils.Credentials{Username: username, Password: password},
 		SrcAPIM:   apim,
 		InitFlag:  projectName,
-		OasFlag:   utils.TestOpenAPI3DefinitionPath,
-		APIName:   utils.DevFirstDefaultAPIName,
+		OasFlag:   testutils.TestOpenAPI3DefinitionPath,
+		APIName:   testutils.DevFirstDefaultAPIName,
 		ForceFlag: false,
 	}
 
@@ -285,14 +284,14 @@ func TestImportAndExportAPIWithJpegImage(t *testing.T) {
 
 	//Move Image file to created project
 	projectPath, _ := filepath.Abs(projectName)
-	srcPathForImage, _ := filepath.Abs(utils.TestCase2JpegPath)
-	destPathForImage := projectPath + utils.TestCase2DestJpegPathSuffix
+	srcPathForImage, _ := filepath.Abs(testutils.TestCase2JpegPath)
+	destPathForImage := projectPath + testutils.TestCase2DestJpegPathSuffix
 	base.Copy(srcPathForImage, destPathForImage)
 
 	//Import the project with icon image(.jpeg) provided
 	testutils.ValidateImportUpdateProjectNotAlreadyImported(t, args)
 
-	testutils.ValidateAPIWithImageIsExported(t, args, utils.DevFirstDefaultAPIName, utils.DevFirstDefaultAPIVersion)
+	testutils.ValidateAPIWithImageIsExported(t, args, testutils.DevFirstDefaultAPIName, testutils.DevFirstDefaultAPIVersion)
 }
 
 //Import and export API with updated thumbnail and document and assert that
@@ -306,8 +305,8 @@ func TestUpdateDocAndImageOfAPIOfExistingAPI(t *testing.T) {
 		CtlUser:   testutils.Credentials{Username: username, Password: password},
 		SrcAPIM:   apim,
 		InitFlag:  projectName,
-		OasFlag:   utils.TestOpenAPI3DefinitionPath,
-		APIName:   utils.DevFirstDefaultAPIName,
+		OasFlag:   testutils.TestOpenAPI3DefinitionPath,
+		APIName:   testutils.DevFirstDefaultAPIName,
 		ForceFlag: true,
 	}
 	//Initialize the project
@@ -315,31 +314,31 @@ func TestUpdateDocAndImageOfAPIOfExistingAPI(t *testing.T) {
 
 	//Move doc file to created project
 	projectPath, _ := filepath.Abs(projectName)
-	srcPathForDoc, _ := filepath.Abs(utils.TestCase2DocPath)
-	destPathForDoc := projectPath + utils.TestCase2DestPathSuffix
+	srcPathForDoc, _ := filepath.Abs(testutils.TestCase2DocPath)
+	destPathForDoc := projectPath + testutils.TestCase2DestPathSuffix
 	base.Copy(srcPathForDoc, destPathForDoc)
 
 	//Move Image file to created project
-	srcPathForImage, _ := filepath.Abs(utils.TestCase2JpegPath)
-	destPathForImage := projectPath + utils.TestCase2DestJpegPathSuffix
+	srcPathForImage, _ := filepath.Abs(testutils.TestCase2JpegPath)
+	destPathForImage := projectPath + testutils.TestCase2DestJpegPathSuffix
 	base.Copy(srcPathForImage, destPathForImage)
 
 	//Import the project with Document and image thumbnail
 	testutils.ValidateImportUpdateProjectNotAlreadyImported(t, args)
 
 	//Update doc file to created project
-	srcPathForDocUpdate, _ := filepath.Abs(utils.TestCase1DocPath)
-	destPathForDocUpdate := projectPath + utils.TestCase1DestPathSuffix
+	srcPathForDocUpdate, _ := filepath.Abs(testutils.TestCase1DocPath)
+	destPathForDocUpdate := projectPath + testutils.TestCase1DestPathSuffix
 	base.Copy(srcPathForDocUpdate, destPathForDocUpdate)
 
 	//Update docMetaData file to created project
-	srcPathForDocMetadataUpdate, _ := filepath.Abs(utils.TestCase1DocMetaDataPath)
-	destPathForDocMetaDataUpdate := projectPath + utils.TestCase1DestMetaDataPathSuffix
+	srcPathForDocMetadataUpdate, _ := filepath.Abs(testutils.TestCase1DocMetaDataPath)
+	destPathForDocMetaDataUpdate := projectPath + testutils.TestCase1DestMetaDataPathSuffix
 	base.Copy(srcPathForDocMetadataUpdate, destPathForDocMetaDataUpdate)
 
 	//Update icon file to created project
-	srcPathForIcon, _ := filepath.Abs(utils.TestCase2PngPath)
-	destPathForIcon := projectPath + utils.TestCase2DestPngPathSuffix
+	srcPathForIcon, _ := filepath.Abs(testutils.TestCase2PngPath)
+	destPathForIcon := projectPath + testutils.TestCase2DestPngPathSuffix
 	base.Copy(srcPathForIcon, destPathForIcon)
 
 	base.WaitForIndexing()
@@ -347,8 +346,8 @@ func TestUpdateDocAndImageOfAPIOfExistingAPI(t *testing.T) {
 	testutils.ValidateImportUpdateProject(t, args)
 
 	//Validate that image has been updated
-	testutils.ValidateAPIWithDocIsExported(t, args, utils.DevFirstDefaultAPIName, utils.DevFirstDefaultAPIVersion)
+	testutils.ValidateAPIWithDocIsExported(t, args, testutils.DevFirstDefaultAPIName, testutils.DevFirstDefaultAPIVersion)
 
 	//Validate that document has been updated
-	testutils.ValidateAPIWithIconIsExported(t, args, utils.DevFirstDefaultAPIName, utils.DevFirstDefaultAPIVersion)
+	testutils.ValidateAPIWithIconIsExported(t, args, testutils.DevFirstDefaultAPIName, testutils.DevFirstDefaultAPIVersion)
 }

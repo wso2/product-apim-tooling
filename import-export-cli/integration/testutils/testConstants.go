@@ -15,7 +15,8 @@
 * specific language governing permissions and limitations
 * under the License.
  */
-package utils
+
+package testutils
 
 const CustomTestExportDirectory = "CustomExportDirectory"
 const TestSwagger2DefinitionPath = "testdata/swagger2Definition.yaml"
@@ -41,3 +42,18 @@ const TestCase2DestPngPathSuffix = "/Image/icon.png"
 const TestCase2JpegPath = "testdata/TestArtifactDirectory/ArtifactSet2/icon.jpeg"
 const TestCase2DestJpegPathSuffix = "/Image/icon.jpeg"
 const TestDefaultExtractedFileName = "/SwaggerPetstoreNew-1.0.0"
+
+// APIEndpointParamsFile : Endpoint URL api_params.yaml
+const APIEndpointParamsFile = "testdata/api_params_endpoint.yaml"
+
+// APIEndpointRetryTimeoutParamsFile : Endpoint URL and Retry Timeout api_params.yaml
+const APIEndpointRetryTimeoutParamsFile = "testdata/api_params_endpoint_retrytimeout.yaml"
+
+// APISecurityFalseParamsFile : Security false api_params.yaml
+const APISecurityFalseParamsFile = "testdata/api_params_security_false.yaml"
+
+// APISecurityDigestParamsFile : Security Digest api_params.yaml
+const APISecurityDigestParamsFile = "testdata/api_params_security_digest.yaml"
+
+// APISecurityBasicParamsFile : Security Basic api_params.yaml
+const APISecurityBasicParamsFile = "testdata/api_params_security_basic.yaml"
