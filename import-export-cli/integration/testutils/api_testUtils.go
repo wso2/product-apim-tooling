@@ -176,7 +176,7 @@ func ValidateAllApisOfATenantIsExported(t *testing.T, args *ApiImportExportTestA
 
 	t.Cleanup(func() {
 		//Remove Exported apis and logout
-		pathToCleanUp := utils.DefaultExportDirPath + utils.TestMigrationDirectorySuffix
+		pathToCleanUp := utils.DefaultExportDirPath + TestMigrationDirectorySuffix
 		base.RemoveDir(pathToCleanUp)
 	})
 }

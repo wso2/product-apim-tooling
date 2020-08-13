@@ -25,7 +25,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 func InitProject(t *testing.T, args *InitTestArgs) (string, error) {
@@ -191,7 +190,7 @@ func ValidateAPIWithDocIsExported(t *testing.T, args *InitTestArgs, DevFirstDefa
 	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
 	base.Unzip(relativePath, exportedPath)
 
-	docPathOfExportedApi := relativePath + utils.TestDefaultExtractedFileName + utils.TestCase1DestPathSuffix
+	docPathOfExportedApi := relativePath + TestDefaultExtractedFileName + TestCase1DestPathSuffix
 
 	//Check whether the file is available
 	isDocExported := base.IsFileAvailable(docPathOfExportedApi)
@@ -214,7 +213,7 @@ func ValidateAPIWithIconIsExported(t *testing.T, args *InitTestArgs, DevFirstDef
 	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
 	base.Unzip(relativePath, exportedPath)
 
-	iconPathOfExportedApi := relativePath + utils.TestDefaultExtractedFileName + utils.TestCase2DestPngPathSuffix
+	iconPathOfExportedApi := relativePath + TestDefaultExtractedFileName + TestCase2DestPngPathSuffix
 
 	isIconExported := base.IsFileAvailable(iconPathOfExportedApi)
 	base.Log("Icon is Exported", isIconExported)
@@ -236,7 +235,7 @@ func ValidateAPIWithImageIsExported(t *testing.T, args *InitTestArgs, DevFirstDe
 	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
 	base.Unzip(relativePath, exportedPath)
 
-	imagePathOfExportedApi := relativePath + utils.TestDefaultExtractedFileName + utils.TestCase2DestJpegPathSuffix
+	imagePathOfExportedApi := relativePath + TestDefaultExtractedFileName + TestCase2DestJpegPathSuffix
 	isIconExported := base.IsFileAvailable(imagePathOfExportedApi)
 	base.Log("Image is Exported", isIconExported)
 	assert.Equal(t, true, isIconExported, "Error while exporting API with icon")

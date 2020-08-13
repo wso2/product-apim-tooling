@@ -27,7 +27,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 func InitProjectWithOasFlag(t *testing.T, args *InitTestArgs) (string, error) {
@@ -74,7 +73,7 @@ func ValidateThatRecievingTokenTypeIsChanged(t *testing.T, args *ApiGetKeyTestAr
 
 	assert.Nil(t, err, "Error while getting key")
 
-	tokenType := args.Apim.GetApplication(args.Apim.GetApplicationByName(utils.DefaultApictlTestAppName).ApplicationID).TokenType
+	tokenType := args.Apim.GetApplication(args.Apim.GetApplicationByName(DefaultApictlTestAppName).ApplicationID).TokenType
 	assert.Equal(t, strings.ToUpper(expectedTokenType), tokenType, "Error getting token type of application.")
 
 	UnsubscribeAPI(args.Apim, args.CtlUser.Username, args.CtlUser.Password, args.Api.ID)
@@ -101,7 +100,7 @@ func ValidateExportApisPassed(t *testing.T, args *InitTestArgs, directoryName st
 
 	t.Cleanup(func() {
 		//Remove Exported apis
-		base.RemoveDir(directoryName + utils.TestMigrationDirectorySuffix)
+		base.RemoveDir(directoryName + TestMigrationDirectorySuffix)
 	})
 }
 
@@ -113,13 +112,13 @@ func ValidateExportApiPassed(t *testing.T, args *ApiImportExportTestArgs, direct
 	assert.Contains(t, output, "Successfully exported API!", "Error while Exporting API")
 
 	//Derive exported path from output
-	exportedPath := filepath.Dir(base.GetExportedPathFromOutput(output));
+	exportedPath := filepath.Dir(base.GetExportedPathFromOutput(output))
 
-	assert.True(t, strings.HasPrefix(exportedPath, directoryName), "API doesn't seem to exported to the " +
-		"changed exported location. Expected in " + directoryName + " but it is exported in " + exportedPath)
+	assert.True(t, strings.HasPrefix(exportedPath, directoryName), "API doesn't seem to exported to the "+
+		"changed exported location. Expected in "+directoryName+" but it is exported in "+exportedPath)
 
-	assert.True(t, base.IsAPIArchiveExists(t, exportedPath,  args.Api.Name, args.Api.Version), "API archive" +
-		" is not correctly exported to " + directoryName)
+	assert.True(t, base.IsAPIArchiveExists(t, exportedPath, args.Api.Name, args.Api.Version), "API archive"+
+		" is not correctly exported to "+directoryName)
 
 	t.Cleanup(func() {
 		//Remove Exported api
