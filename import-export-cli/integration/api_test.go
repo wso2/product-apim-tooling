@@ -934,7 +934,7 @@ func TestChangeLifeCycleStatusOfApiFailWithAUserWithoutPermissions(t *testing.T)
 	testutils.ValidateChangeLifeCycleStatusOfAPIFailure(t, args)
 }
 
-func TestChangeLifeCycleStatusOfApiWithActiveSubscription(t *testing.T) {
+func TestChangeLifeCycleStatusOfApiWithActiveSubscriptionWithAdminSuperTenantUser(t *testing.T) {
 	adminUsername := superAdminUser
 	adminPassword := superAdminPassword
 
@@ -961,6 +961,43 @@ func TestChangeLifeCycleStatusOfApiWithActiveSubscription(t *testing.T) {
 	//Change life cycle state of Api from PUBLISHED to CREATED
 	argsToLifeCycleStateChange := &testutils.ApiChangeLifeCycleStatusTestArgs{
 		CtlUser:       testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		APIM:          dev,
+		Api:           api,
+		Action:        "Demote to Created",
+		ExpectedState: "CREATED",
+	}
+
+	testutils.ValidateChangeLifeCycleStatusOfAPI(t, argsToLifeCycleStateChange)
+	testutils.UnsubscribeAPI(dev, args.CtlUser.Username, args.CtlUser.Password, args.Api.ID)
+}
+
+func TestChangeLifeCycleStatusOfApiWithActiveSubscriptionDevopsSuperTenantUser(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+	// Add the API to env
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	testutils.PublishAPI(dev, devopsUsername, devopsPassword, api.ID)
+
+	args := &testutils.ApiGetKeyTestArgs{
+		CtlUser: testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Api:     api,
+		Apim:    dev,
+	}
+
+	//Create an active subscription for Api
+	testutils.ValidateGetKeysWithoutCleanup(t, args)
+
+	base.WaitForIndexing()
+
+	//Change life cycle state of Api from PUBLISHED to CREATED
+	argsToLifeCycleStateChange := &testutils.ApiChangeLifeCycleStatusTestArgs{
+		CtlUser:       testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
 		APIM:          dev,
 		Api:           api,
 		Action:        "Demote to Created",
