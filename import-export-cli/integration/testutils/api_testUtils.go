@@ -480,6 +480,10 @@ func ValidateAPIDeleteFailure(t *testing.T, args *ApiImportExportTestArgs) {
 	// Validate whether the expected number of API count is there
 	assert.NotContains(t, output, " API deleted successfully!. Status: 200", "Api delete is success with active subscriptions")
 	assert.NotEqual(t, apisListBeforeDelete.Count, apisListAfterDelete.Count+1, "Expected number of APIs not deleted")
+
+	t.Cleanup(func() {
+		UnsubscribeAPI(args.SrcAPIM, args.CtlUser.Username, args.CtlUser.Password, args.Api.ID)
+	})
 }
 
 func exportApiImportedFromProject(t *testing.T, APIName string, APIVersion string, EnvName string) (string, error) {
@@ -588,4 +592,5 @@ func ValidateChangeLifeCycleStatusOfAPIFailure(t *testing.T, args *ApiChangeLife
 	output, _ := changeLifeCycleOfAPI(t, args)
 	//Assert apictl output
 	assert.NotContains(t, output, "state changed successfully!", "Error while changing life cycle of API")
+	assert.NotEqual(t, args.Api.LifeCycleStatus, args.ExpectedState, "Life Cycle State changed successfully")
 }

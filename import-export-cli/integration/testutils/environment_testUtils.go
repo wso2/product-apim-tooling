@@ -34,7 +34,7 @@ func InitProjectWithOasFlag(t *testing.T, args *InitTestArgs) (string, error) {
 	base.SetupEnvWithoutTokenFlag(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL())
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	output, err := base.Execute(t, "init", args.InitFlag, "--oas", args.OasFlag, "--verbose")
+	output, err := base.Execute(t, "init", args.InitFlag, "--oas", args.OasFlag, "--verbose", "-f")
 	return output, err
 }
 
