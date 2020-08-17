@@ -738,3 +738,165 @@ func TestExportApisWithExportApisCommand(t *testing.T) {
 
 	testutils.ValidateAllApisOfATenantIsExported(t, args, apisAdded)
 }
+
+func TestChangeLifeCycleStatusOfApiAdminSuperTenantUser(t *testing.T) {
+	adminUsername := superAdminUser
+	adminPassword := superAdminPassword
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+
+	// Add the API to env
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	//Change life cycle state of Api from CREATED to PUBLISHED
+	args := &testutils.ApiChangeLifeCycleStatusTestArgs{
+		CtlUser:       testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		APIM:          dev,
+		Api:           api,
+		Action:        "Publish",
+		ExpectedState: "PUBLISHED",
+	}
+
+	testutils.ValidateChangeLifeCycleStatusOfAPI(t, args)
+
+	//Change life cycle state of Api from PUBLISHED to CREATED
+	argsToNextChange := &testutils.ApiChangeLifeCycleStatusTestArgs{
+		CtlUser:       testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		APIM:          dev,
+		Api:           api,
+		Action:        "Demote to Created",
+		ExpectedState: "CREATED",
+	}
+
+	testutils.ValidateChangeLifeCycleStatusOfAPI(t, argsToNextChange)
+}
+
+func TestChangeLifeCycleStatusOfApiDevopsSuperTenantUser(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+
+	// Add the API to env
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	//Change life cycle state of Api from CREATED to PUBLISHED
+	args := &testutils.ApiChangeLifeCycleStatusTestArgs{
+		CtlUser:       testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		APIM:          dev,
+		Api:           api,
+		Action:        "Publish",
+		ExpectedState: "PUBLISHED",
+	}
+
+	testutils.ValidateChangeLifeCycleStatusOfAPI(t, args)
+
+	//Change life cycle state of Api from PUBLISHED to CREATED
+	argsToNextChange := &testutils.ApiChangeLifeCycleStatusTestArgs{
+		CtlUser:       testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		APIM:          dev,
+		Api:           api,
+		Action:        "Demote to Created",
+		ExpectedState: "CREATED",
+	}
+
+	testutils.ValidateChangeLifeCycleStatusOfAPI(t, argsToNextChange)
+}
+
+func TestChangeLifeCycleStatusOfApiAdminTenantUser(t *testing.T) {
+	tenantAdminUsername := superAdminUser + "@" + TENANT1
+	tenantAdminPassword := superAdminPassword
+
+	apiCreator := creator.UserName + "@" + TENANT1
+	apiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+
+	// Add the API to env
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	//Change life cycle state of Api from CREATED to PUBLISHED
+	args := &testutils.ApiChangeLifeCycleStatusTestArgs{
+		CtlUser:       testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
+		APIM:          dev,
+		Api:           api,
+		Action:        "Publish",
+		ExpectedState: "PUBLISHED",
+	}
+
+	testutils.ValidateChangeLifeCycleStatusOfAPI(t, args)
+
+	//Change life cycle state of Api from PUBLISHED to CREATED
+	argsToNextChange := &testutils.ApiChangeLifeCycleStatusTestArgs{
+		CtlUser:       testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
+		APIM:          dev,
+		Api:           api,
+		Action:        "Demote to Created",
+		ExpectedState: "CREATED",
+	}
+
+	testutils.ValidateChangeLifeCycleStatusOfAPI(t, argsToNextChange)
+}
+
+func TestChangeLifeCycleStatusOfApiDevopsTenantUser(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	apiCreator := creator.UserName + "@" + TENANT1
+	apiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+	// Add the API to env
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	//Change life cycle state of Api from CREATED to PUBLISHED
+	args := &testutils.ApiChangeLifeCycleStatusTestArgs{
+		CtlUser:       testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		APIM:          dev,
+		Api:           api,
+		Action:        "Publish",
+		ExpectedState: "PUBLISHED",
+	}
+
+	testutils.ValidateChangeLifeCycleStatusOfAPI(t, args)
+
+	//Change life cycle state of Api from PUBLISHED to CREATED
+	argsToNextChange := &testutils.ApiChangeLifeCycleStatusTestArgs{
+		CtlUser:       testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		APIM:          dev,
+		Api:           api,
+		Action:        "Demote to Created",
+		ExpectedState: "CREATED",
+	}
+
+	testutils.ValidateChangeLifeCycleStatusOfAPI(t, argsToNextChange)
+}
+
+func TestChangeLifeCycleStatusOfApiFailWithAUserWithoutPermissions(t *testing.T) {
+	subscriberUsername := subscriber.UserName
+	subscriberDevopsPassword := subscriber.Password
+
+	apiCreator := creator.UserName + "@" + TENANT1
+	apiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+	// Add the API to env
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	//Change life cycle state of Api from CREATED to PUBLISHED
+	args := &testutils.ApiChangeLifeCycleStatusTestArgs{
+		CtlUser:       testutils.Credentials{Username: subscriberUsername, Password: subscriberDevopsPassword},
+		APIM:          dev,
+		Api:           api,
+		Action:        "Publish",
+		ExpectedState: "PUBLISHED",
+	}
+
+	testutils.ValidateChangeLifeCycleStatusOfAPIFailure(t, args)
+}

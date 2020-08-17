@@ -85,3 +85,13 @@ type InitTestArgs struct {
 	APIName        string
 	srcAPIM        *apim.Client
 }
+
+type ApiChangeLifeCycleStatusTestArgs struct {
+	ApiProvider   Credentials
+	CtlUser       Credentials
+	Api           *apim.API
+	APIM          *apim.Client
+	Action        string
+	Provider      string
+	ExpectedState string
+}
