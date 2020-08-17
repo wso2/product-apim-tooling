@@ -572,3 +572,21 @@ func ValidateAPIProductDeleteFailure(t *testing.T, args *ApiProductImportExportT
 
 	assert.Equal(t, apiProductsListBeforeDelete.Count, apiProductsListAfterDelete.Count, "API Product delete is successful")
 }
+
+func ValidateAPIProductDeleteFailureWithExistingEnv(t *testing.T, args *ApiProductImportExportTestArgs) {
+
+	apiProductsListBeforeDelete := args.SrcAPIM.GetAPIProducts()
+
+	deleteAPIProductByCtl(t, args)
+
+	base.WaitForIndexing()
+	apiProductsListAfterDelete := args.SrcAPIM.GetAPIProducts()
+
+	assert.Equal(t, apiProductsListBeforeDelete.Count, apiProductsListAfterDelete.Count, "API Product delete is successful")
+
+	//Remove subscription and remove Api-Product for cleanup
+	t.Cleanup(func() {
+		UnsubscribeAPI(args.SrcAPIM, args.CtlUser.Username, args.CtlUser.Password, args.ApiProduct.ID)
+		deleteAPIProductByCtl(t, args)
+	})
+}

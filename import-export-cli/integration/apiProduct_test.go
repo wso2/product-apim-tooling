@@ -19,6 +19,7 @@
 package integration
 
 import (
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"testing"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
@@ -1072,4 +1073,55 @@ func TestDeleteApiProductSuperTenantUser(t *testing.T) {
 	}
 
 	testutils.ValidateAPIProductDeleteFailure(t, args)
+}
+
+func TestDeleteApiProductWithActiveSubscriptionsSuperTenantUser(t *testing.T) {
+	adminUsername := superAdminUser
+	adminPassword := superAdminPassword
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	apiPublisher := publisher.UserName
+	apiPublisherPassword := publisher.Password
+
+	dev := apimClients[0]
+
+	// Add the first dependent API to env1
+	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI1.ID)
+
+	// Add the second dependent API to env1
+	dependentAPI2 := testutils.AddAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
+	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
+
+	// Map the real name of the API with the API
+	apisList := map[string]*apim.API{
+		"PizzaShackAPI":   dependentAPI1,
+		"SwaggerPetstore": dependentAPI2,
+	}
+
+	var apiProduct *apim.APIProduct
+	apiProduct = testutils.AddAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
+
+	// This will be the API Product that will be deleted by apictl, so no need to do cleaning
+	apiProduct = testutils.AddAPIProductFromJSONWithoutCleaning(t, dev, apiPublisher, apiPublisherPassword, apisList)
+
+	args := &testutils.ApiGetKeyTestArgs{
+		CtlUser:    testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		ApiProduct: apiProduct,
+		Apim:       dev,
+	}
+	base.WaitForIndexing()
+
+	//Get keys for ApiProduct and keep subscription active
+	testutils.ValidateGetKeysWithoutCleanup(t, args)
+
+	argsToDelete := &testutils.ApiProductImportExportTestArgs{
+		CtlUser:    testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		ApiProduct: apiProduct,
+		SrcAPIM:    dev,
+	}
+
+	testutils.ValidateAPIProductDeleteFailureWithExistingEnv(t, argsToDelete)
 }
