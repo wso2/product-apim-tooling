@@ -467,6 +467,21 @@ func ValidateAPIDelete(t *testing.T, args *ApiImportExportTestArgs) {
 	validateAPIIsDeleted(t, args.Api, apisListAfterDelete)
 }
 
+func ValidateAPIDeleteFailure(t *testing.T, args *ApiImportExportTestArgs) {
+	t.Helper()
+
+	apisListBeforeDelete := args.SrcAPIM.GetAPIs()
+
+	output, _ := deleteAPIByCtl(t, args)
+
+	apisListAfterDelete := args.SrcAPIM.GetAPIs()
+	base.WaitForIndexing()
+
+	// Validate whether the expected number of API count is there
+	assert.NotContains(t, output, " API deleted successfully!. Status: 200", "Api delete is success with active subscriptions")
+	assert.NotEqual(t, apisListBeforeDelete.Count, apisListAfterDelete.Count+1, "Expected number of APIs not deleted")
+}
+
 func exportApiImportedFromProject(t *testing.T, APIName string, APIVersion string, EnvName string) (string, error) {
 	return base.Execute(t, "export-api", "-n", APIName, "-v", APIVersion, "-e", EnvName)
 }

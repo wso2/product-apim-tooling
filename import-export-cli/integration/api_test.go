@@ -19,6 +19,7 @@
 package integration
 
 import (
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"testing"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
@@ -712,6 +713,38 @@ func TestDeleteApiSuperTenantUser(t *testing.T) {
 	}
 
 	testutils.ValidateAPIDelete(t, args)
+}
+
+func TestDeleteApiWithActiveSubscriptionsSuperTenantUser(t *testing.T) {
+	adminUser := superAdminUser
+	adminPassword := superAdminPassword
+
+	dev := apimClients[0]
+
+	var api *apim.API
+
+	// This will be the API that will be deleted by apictl, so no need to do cleaning
+	api = testutils.AddAPIWithoutCleaning(t, dev, adminUser, adminPassword)
+
+	args := &testutils.ApiGetKeyTestArgs{
+		CtlUser: testutils.Credentials{Username: adminUser, Password: adminPassword},
+		Api:     api,
+		Apim:    dev,
+	}
+	//Publish created API
+	testutils.PublishAPI(dev, adminUser, adminPassword, api.ID)
+
+	testutils.ValidateGetKeysWithoutCleanup(t, args)
+	//args to delete API
+	argsToDelete := &testutils.ApiImportExportTestArgs{
+		CtlUser: testutils.Credentials{Username: adminUser, Password: adminPassword},
+		Api:     api,
+		SrcAPIM: dev,
+	}
+	base.WaitForIndexing()
+
+	//validate Api with active subscriptions delete failure
+	testutils.ValidateAPIDeleteFailure(t, argsToDelete)
 }
 
 func TestExportApisWithExportApisCommand(t *testing.T) {
