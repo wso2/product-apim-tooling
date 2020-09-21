@@ -78,6 +78,30 @@ type Cert struct {
 	Certificate string `json:"certificate"`
 }
 
+// MutualSslCert stores mutualssl certificate details
+type MutualSslCert struct {
+	// TierName of the certificate (eg:- Unlimited, Gold, Silver, Bronze)
+	TierName string `yaml:"tierName" json:"tierName"`
+	// Alias for certificate
+	Alias string `yaml:"alias" json:"alias"`
+	// Path for certificate file
+	Path string `yaml:"path" json:"-"`
+	// Certificate is used for internal purposes, it contains secret in base64
+	Certificate string `json:"certificate"`
+	// ApiIdentifier is used for internal purposes, it contains details of the API to be stored in client_certificates file
+	APIIdentifier APIIdentifier `json:"apiIdentifier"`
+}
+
+// ApiIdentifier stores API Identifier details
+type APIIdentifier struct {
+	// Name of the provider of the API
+	ProviderName string `json:"providerName"`
+	// Name of the API
+	APIName string `json:"apiName"`
+	// Version of the API
+	Version string `json:"version"`
+}
+
 // Environment represents an api environment
 type Environment struct {
 	// Name of the environment
@@ -91,7 +115,8 @@ type Environment struct {
 	// GatewayEnvironments contains environments that used to deploy API
 	GatewayEnvironments []string `yaml:"gatewayEnvironments"`
 	// Certs for environment
-	Certs []Cert `yaml:"certs"`
+	Certs          []Cert          `yaml:"certs"`
+	MutualSslCerts []MutualSslCert `yaml:"mutualSslCerts"`
 }
 
 // ApiParams represents environments defined in configuration file
