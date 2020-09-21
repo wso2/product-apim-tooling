@@ -215,6 +215,8 @@ func ValidateAppDelete(t *testing.T, args *AppImportExportTestArgs) {
 }
 
 func ValidateListAppsWithOwner(t *testing.T, envName string) {
+	//Clean up existing default apictl app
+	base.Execute(t, "delete", "app", "-n", "default-apictl-app", "-e", envName, "-k", "--verbose")
 	response := ListAppsWithOwner(t, envName, "admin")
 	assert.Equal(t, 5, len(response), "Failed when listing Applications with owner as Admin")
 

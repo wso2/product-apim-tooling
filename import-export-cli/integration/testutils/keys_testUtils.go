@@ -127,3 +127,34 @@ func ValidateGetKeys(t *testing.T, args *ApiGetKeyTestArgs) {
 		UnsubscribeAPI(args.Apim, args.CtlUser.Username, args.CtlUser.Password, args.ApiProduct.ID)
 	}
 }
+
+func ValidateGetKeysWithoutCleanup(t *testing.T, args *ApiGetKeyTestArgs) {
+	t.Helper()
+
+	base.SetupEnv(t, args.Apim.GetEnvName(), args.Apim.GetApimURL(), args.Apim.GetTokenURL())
+	base.Login(t, args.Apim.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	var err error
+	var result string
+	if args.Api != nil {
+		result, err = GetKeys(t, args.Api.Provider, args.Api.Name, args.Api.Version, args.Apim.GetEnvName())
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		assert.Nil(t, err, "Error while getting key")
+
+		invokeAPI(t, getResourceURL(args.Apim, args.Api), base.GetValueOfUniformResponse(result), 200)
+	}
+
+	if args.ApiProduct != nil {
+		result, err = GetKeys(t, args.ApiProduct.Provider, args.ApiProduct.Name, utils.DefaultApiProductVersion, args.Apim.GetEnvName())
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		assert.Nil(t, err, "Error while getting key")
+
+		invokeAPIProduct(t, getResourceURLForAPIProduct(args.Apim, args.ApiProduct), base.GetValueOfUniformResponse(result), 200)
+	}
+}

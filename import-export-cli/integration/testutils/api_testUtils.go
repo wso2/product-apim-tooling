@@ -219,6 +219,12 @@ func listAPIs(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
 	return output, err
 }
 
+func changeLifeCycleOfAPI(t *testing.T, args *ApiChangeLifeCycleStatusTestArgs) (string, error) {
+	output, err := base.Execute(t, "change-status", "api", "-a", args.Action, "-n", args.Api.Name,
+		"-v", args.Api.Version, "-e", args.APIM.EnvName, "-k", "--verbose")
+	return output, err
+}
+
 func ValidateAPIExportFailure(t *testing.T, args *ApiImportExportTestArgs) {
 	t.Helper()
 
@@ -461,6 +467,25 @@ func ValidateAPIDelete(t *testing.T, args *ApiImportExportTestArgs) {
 	validateAPIIsDeleted(t, args.Api, apisListAfterDelete)
 }
 
+func ValidateAPIDeleteFailure(t *testing.T, args *ApiImportExportTestArgs) {
+	t.Helper()
+
+	apisListBeforeDelete := args.SrcAPIM.GetAPIs()
+
+	output, _ := deleteAPIByCtl(t, args)
+
+	apisListAfterDelete := args.SrcAPIM.GetAPIs()
+	base.WaitForIndexing()
+
+	// Validate whether the expected number of API count is there
+	assert.NotContains(t, output, " API deleted successfully!. Status: 200", "Api delete is success with active subscriptions")
+	assert.NotEqual(t, apisListBeforeDelete.Count, apisListAfterDelete.Count+1, "Expected number of APIs not deleted")
+
+	t.Cleanup(func() {
+		UnsubscribeAPI(args.SrcAPIM, args.CtlUser.Username, args.CtlUser.Password, args.Api.ID)
+	})
+}
+
 func exportApiImportedFromProject(t *testing.T, APIName string, APIVersion string, EnvName string) (string, error) {
 	return base.Execute(t, "export-api", "-n", APIName, "-v", APIVersion, "-e", EnvName)
 }
@@ -528,4 +553,44 @@ func ImportApiFromProjectWithUpdate(t *testing.T, projectName string, client *ap
 func ExportApisWithOneCommand(t *testing.T, args *InitTestArgs) (string, error) {
 	output, error := base.Execute(t, "export-apis", "-e", args.SrcAPIM.GetEnvName(), "-k", "--force", "--verbose")
 	return output, error
+}
+
+func ValidateChangeLifeCycleStatusOfAPI(t *testing.T, args *ApiChangeLifeCycleStatusTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.APIM.GetEnvName(), args.APIM.GetApimURL(), args.APIM.GetTokenURL())
+
+	// Login to apictl
+	base.Login(t, args.APIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	base.WaitForIndexing()
+
+	//Execute apictl command to change life cycle of an Api
+	output, _ := changeLifeCycleOfAPI(t, args)
+	//Assert apictl output
+	assert.Contains(t, output, "state changed successfully!", "Error while changing life cycle of API")
+
+	base.WaitForIndexing()
+	//Assert life cycle state after change
+	api := getAPI(t, args.APIM, args.Api.Name, args.CtlUser.Username, args.CtlUser.Password)
+	assert.Equal(t, args.ExpectedState, api.LifeCycleStatus, "Expected Life cycle state change is not equals to actual status")
+}
+
+func ValidateChangeLifeCycleStatusOfAPIFailure(t *testing.T, args *ApiChangeLifeCycleStatusTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.APIM.GetEnvName(), args.APIM.GetApimURL(), args.APIM.GetTokenURL())
+
+	// Login to apictl
+	base.Login(t, args.APIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	base.WaitForIndexing()
+
+	//Execute apictl command to change life cycle of an Api
+	output, _ := changeLifeCycleOfAPI(t, args)
+	//Assert apictl output
+	assert.NotContains(t, output, "state changed successfully!", "Error while changing life cycle of API")
+	assert.NotEqual(t, args.Api.LifeCycleStatus, args.ExpectedState, "Life Cycle State changed successfully")
 }
