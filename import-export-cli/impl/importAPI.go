@@ -136,6 +136,26 @@ func mergeAPI(apiDirectory string, environmentParams *params.Environment) error 
 		}
 	}
 
+	// if the mutualSslCert field is defined in the api_params.yaml, the apiSecurity type should contain mutualssl
+	if environmentParams.MutualSslCerts != nil {
+		apiSecurity := api.Path("apiSecurity").Data()
+
+		// if the apiSecurity field already exists in the api.yaml file
+		if apiSecurity != nil {
+			// if the apiSecurity field does not have mutualssl type, append it
+			if !strings.Contains(apiSecurity.(string), utils.APISecurityMutualSsl) {
+				apiSecurity = apiSecurity.(string) + "," + utils.APISecurityMutualSsl
+			}
+		} else {
+			// if the apiSecurity field does not exist in the api.yaml file, assign the value as mutualssl
+			apiSecurity = utils.APISecurityMutualSsl
+		}
+		// assign the apiSecurity field with the correct modified value to enable mutualssl
+		if _, err := api.SetP(apiSecurity, "apiSecurity"); err != nil {
+			return err
+		}
+	}
+
 	// Handle security parameters in api_params.yaml
 	err = handleSecurityEndpointsParams(environmentParams.Security, api)
 	if err != nil {
@@ -495,8 +515,8 @@ func resolveCertPath(importPath, p string) (string, error) {
 	return "", fmt.Errorf("%s not found", p)
 }
 
-// generateCertificates for the API
-func generateCertificates(importPath string, environment *params.Environment) error {
+// generateEndpointCertificates for the API
+func generateEndpointCertificates(importPath string, environment *params.Environment) error {
 	var certs []params.Cert
 
 	if len(environment.Certs) == 0 {
@@ -538,9 +558,69 @@ func generateCertificates(importPath string, environment *params.Environment) er
 	return err
 }
 
+// generateMutualSslCertificates for the API
+func generateMutualSslCertificates(importPath string, environment *params.Environment, importAPICmdPreserveProvider bool) error {
+	// reading the definition to get API Name and the version
+	apiInfo, _, err := GetAPIDefinition(importPath)
+	if err != nil {
+		return err
+	}
+
+	var mutualSslCerts []params.MutualSslCert
+
+	if len(environment.MutualSslCerts) == 0 {
+		return nil
+	}
+
+	for _, mutualSslCert := range environment.MutualSslCerts {
+		// read cert
+		p, err := resolveCertPath(importPath, mutualSslCert.Path)
+		if err != nil {
+			return err
+		}
+		pubPEMData, err := ioutil.ReadFile(p)
+		if err != nil {
+			return err
+		}
+		// get cert
+		block, _ := pem.Decode(pubPEMData)
+		enc := credentials.Base64Encode(string(block.Bytes))
+		mutualSslCert.Certificate = enc
+		mutualSslCert.APIIdentifier.APIName = apiInfo.ID.APIName
+		mutualSslCert.APIIdentifier.Version = apiInfo.ID.Version
+		if !importAPICmdPreserveProvider {
+			// if the preserve-provider flag is set to false
+			// the currently logged in user's username should be assigned as the provider name
+			mutualSslCert.APIIdentifier.ProviderName = utils.GetUsernameOfEnv(environment.Name, utils.EnvKeysAllFilePath)
+		} else {
+			// if the preserve-provider flag is set to true (the default behaviour)
+			// the original provider should be taken from api.yaml and should be assigned as the provider name
+			mutualSslCert.APIIdentifier.ProviderName = apiInfo.ID.ProviderName
+		}
+		mutualSslCerts = append(mutualSslCerts, mutualSslCert)
+	}
+
+	data, err := json.Marshal(mutualSslCerts)
+	if err != nil {
+		return err
+	}
+
+	yamlContent, err := utils.JsonToYaml(data)
+	if err != nil {
+		return err
+	}
+
+	// filepath to save mutualssl certs
+	fp := filepath.Join(importPath, "Meta-information", "client_certificates.yaml")
+	utils.Logln(utils.LogPrefixInfo+"Writing", fp)
+	err = ioutil.WriteFile(fp, yamlContent, os.ModePerm)
+
+	return err
+}
+
 // injectParamsToAPI injects ApiParams to API located in importPath using importEnvironment and returns the path to
 // injected API location
-func injectParamsToAPI(importPath, paramsPath, importEnvironment string) error {
+func injectParamsToAPI(importPath, paramsPath, importEnvironment string, preserveProvider bool) error {
 	utils.Logln(utils.LogPrefixInfo+"Loading parameters from", paramsPath)
 	apiParams, err := params.LoadApiParamsFromFile(paramsPath)
 	if err != nil {
@@ -557,7 +637,15 @@ func injectParamsToAPI(importPath, paramsPath, importEnvironment string) error {
 			return err
 		}
 
-		err = generateCertificates(importPath, envParams)
+		err = generateEndpointCertificates(importPath, envParams)
+		if err != nil {
+			return err
+		}
+	}
+
+	// generate certificates for mutualssl, only if the field is specified
+	if envParams.MutualSslCerts != nil {
+		err = generateMutualSslCertificates(importPath, envParams, preserveProvider)
 		if err != nil {
 			return err
 		}
@@ -887,7 +975,7 @@ func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, a
 	}
 	if paramsPath != "" {
 		//Reading API params file and populate api.yaml
-		err := injectParamsToAPI(apiFilePath, paramsPath, importEnvironment)
+		err := injectParamsToAPI(apiFilePath, paramsPath, importEnvironment, preserveProvider)
 		if err != nil {
 			return err
 		}
