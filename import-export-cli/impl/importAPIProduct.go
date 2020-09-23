@@ -216,7 +216,7 @@ func importAPIProduct(endpoint, httpMethod, filePath, accessToken string, extraP
 }
 
 // preProcessDependentAPIs pre processes dependent APIs
-func preProcessDependentAPIs(apiProductFilePath, importEnvironment string) error {
+func preProcessDependentAPIs(apiProductFilePath, importEnvironment string, importAPIProductPreserveProvider bool) error {
 	// Check whether the APIs directory exists
 	apisDirectoryPath := apiProductFilePath + string(os.PathSeparator) + "APIs"
 	_, err := os.Stat(apisDirectoryPath)
@@ -242,7 +242,7 @@ func preProcessDependentAPIs(apiProductFilePath, importEnvironment string) error
 		// Check whether api_params.yaml file is available inside the particular API directory
 		if utils.IsFileExist(paramsPath) {
 			// Reading API params file and populate api.yaml
-			err := injectParamsToAPI(apiDirectoryPath, paramsPath, importEnvironment)
+			err := injectParamsToAPI(apiDirectoryPath, paramsPath, importEnvironment, importAPIProductPreserveProvider)
 			if err != nil {
 				return err
 			}
@@ -289,7 +289,7 @@ func ImportAPIProduct(accessOAuthToken, adminEndpoint, importEnvironment, import
 	apiProductFilePath := tmpPath
 
 	// Pre Process dependent APIs
-	err = preProcessDependentAPIs(apiProductFilePath, importEnvironment)
+	err = preProcessDependentAPIs(apiProductFilePath, importEnvironment, importAPIProductPreserveProvider)
 	if err != nil {
 		return err
 	}
