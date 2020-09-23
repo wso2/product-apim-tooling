@@ -132,6 +132,11 @@ func getKeys() {
 			if appKeys.Count != 0 {
 				//If the keys have not been generated and the application is updated
 				token, err := getNewToken(&appKeys.List[0], scopes)
+				//Assert token endpoint related fails and errors
+				if err != nil {
+					utils.HandleErrorAndExit("Error while generating token. ", err)
+				}
+
 				if accessToken != "" {
 					// Access Token generated successfully.
 					fmt.Println(token)
@@ -643,6 +648,10 @@ func getNewToken(key *utils.ApplicationKey, scopes []string) (string, error) {
 	headers[utils.HeaderAccept] = utils.HeaderValueApplicationJSON
 
 	resp, err := utils.InvokePOSTRequest(tokenEndpoint, headers, body)
+
+	if err != nil {
+		return "", errors.New("Token Endpoint is not valid. " + err.Error())
+	}
 
 	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
 		// 200 OK or 201 Created
