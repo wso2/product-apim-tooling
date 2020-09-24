@@ -51,9 +51,6 @@ var DockerHubRegistry = &Registry{
 			if !utils.ValidateValue(repository, utils.RepoValidRegex) {
 				utils.HandleErrorAndExit("Invalid repository name: "+repository, nil)
 			}
-			if !utils.ValidateValue(username, utils.UsernameValidRegex) {
-				utils.HandleErrorAndExit("Invalid username : "+username, nil)
-			}
 
 			// if "--password-stdin" is supplied get password from stdin
 			if (*flagValues)[k8sUtils.FlagBmPasswordStdin].Value.(bool) {
@@ -98,7 +95,7 @@ func readDockerHubInputs() (string, string, string) {
 		}
 
 		username, err = utils.ReadInputString("Enter username", utils.Default{Value: "", IsDefault: false},
-			utils.UsernameValidRegex, true)
+			"", true)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading username from user", err)
 		}

@@ -125,7 +125,6 @@ const SearchAndTag = "&"
 
 // Regex Validation
 const RepoValidRegex = `^[\w\d\-\.\:]*\/?[\w\d\-]+$`
-const UsernameValidRegex = `^[\w\d\-]*$`
 const UrlValidRegex = `^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$`
 
 // Other
