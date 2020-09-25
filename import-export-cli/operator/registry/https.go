@@ -44,16 +44,6 @@ var HttpsRegistry = &Registry{
 			username = (*flagValues)[k8sUtils.FlagBmUsername].Value.(string)
 			password = (*flagValues)[k8sUtils.FlagBmPassword].Value.(string)
 
-			// validate required inputs
-			if !utils.ValidateValue(repository, utils.RepoValidRegex) {
-				utils.HandleErrorAndExit("Invalid repository name: "+repository, nil)
-			}
-
-			// validate optional inputs
-			if username != "" && !utils.ValidateValue(username, utils.UsernameValidRegex) {
-				utils.HandleErrorAndExit("Invalid username : "+username, nil)
-			}
-
 			// if "--password-stdin" is supplied get password from stdin
 			if (*flagValues)[k8sUtils.FlagBmPasswordStdin].Value.(bool) {
 				pwStdin, err := utils.ReadPassword("Enter password")
@@ -102,13 +92,13 @@ func readHttpsRepInputs() (string, string, string) {
 
 	for !isConfirm {
 		repository, err = utils.ReadInputString("Enter repository",
-			utils.Default{Value: "", IsDefault: false}, utils.RepoValidRegex, true)
+			utils.Default{Value: "", IsDefault: false}, "", true)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading registry repository name from user", err)
 		}
 
 		username, err = utils.ReadInputString("Enter username", utils.Default{Value: "", IsDefault: false},
-			utils.UsernameValidRegex, true)
+			"", true)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading username from user", err)
 		}
