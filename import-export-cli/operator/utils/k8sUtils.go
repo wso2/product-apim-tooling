@@ -152,6 +152,12 @@ func ExecuteCommandWithoutPrintingErrors(command string, args ...string) error {
 	return cmd.Run()
 }
 
+// ExecuteCommandWithoutOutputs executes the command with args without printing outputs and errors
+func ExecuteCommandWithoutOutputs(command string, args ...string) error {
+	cmd := exec.Command(command, args...)
+	return cmd.Run()
+}
+
 // ExecuteCommandFromStdin executes the command with args and prints output the standard output
 func ExecuteCommandFromStdin(stdInput string, command string, args ...string) error {
 	cmd := exec.Command(command, args...)
