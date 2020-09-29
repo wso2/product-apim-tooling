@@ -53,9 +53,17 @@ var updateApiCmd = &cobra.Command{
 		validateAddApiCommand()
 
 		// check the existence of the API
-		getApiErr := k8sUtils.ExecuteCommandWithoutPrintingErrors(k8sUtils.Kubectl, k8sUtils.K8sGet, k8sUtils.ApiOpCrdApi, flagApiName)
+		getApiErr := k8sUtils.ExecuteCommandWithoutOutputs(
+			k8sUtils.Kubectl, k8sUtils.K8sGet, k8sUtils.ApiOpCrdApi, flagApiName, "-n", flagNamespace)
 		if getApiErr != nil {
-			utils.HandleErrorAndExit(fmt.Sprintf("Could not find the API with the name \"%s\"", flagApiName), nil)
+			var errMsg string
+			if flagNamespace != "" {
+				errMsg = fmt.Sprintf("Could not find the API \"%s\" in the namespace \"%s\"",
+					flagApiName, flagNamespace)
+			} else {
+				errMsg = fmt.Sprintf("Could not find the API \"%s\"", flagApiName)
+			}
+			utils.HandleErrorAndExit(errMsg, nil)
 		}
 
 		//get current timestamp
