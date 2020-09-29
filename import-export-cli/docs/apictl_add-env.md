@@ -29,7 +29,7 @@ apictl add-env -e dev \
 --token https://gw.com:8243/token
 
 NOTE: The flag --environment (-e) is mandatory.
-You can either provide only the flag --apim , or all the other 4 flags (--registration --publisher --devportal --admin --token) without providing --apim flag.
+You can either provide only the flag --apim , or all the other 4 flags (--registration --publisher --devportal --admin) without providing --apim flag.
 If you are omitting any of --registration --publisher --devportal --admin flags, you need to specify --apim flag with the API Manager endpoint. In both of the
 cases --token flag is optional and use it to specify the gateway token endpoint. This will be used for "apictl get-keys" operation.
 ```
