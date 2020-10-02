@@ -20,9 +20,13 @@ package utils
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/wso2/product-apim-tooling/import-export-cli/box"
+	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
 	"os"
@@ -62,48 +66,55 @@ func K8sCreateSecretFromInputs(secretName string, namespace string, server strin
 		username = "N/A"
 		password = "N/A"
 	}
-	dockerSecret, err := GetCommandOutput(
-		Kubectl, K8sCreate, K8sSecret, K8sSecretDockerRegType, secretName,
-		"--docker-server", server,
-		"--docker-username", username,
-		"--docker-password", password,
-		"-n", namespace,
-		"--dry-run", "-o", "yaml",
-	)
 
+	// render secret
+	dockerCredentialsMap := RenderSecretTemplate(secretName, namespace, K8sSecret)
+	dockerAuth := credentials.Base64Encode(username + ":" + password)
+
+	type JSON map[string]interface{}
+	authJson := JSON{"auths":JSON{server:JSON{"username":username,"password":password,"auth":dockerAuth}}}
+	out, err := json.Marshal(authJson)
 	if err != nil {
-		utils.HandleErrorAndExit("Error rendering kubernetes secret for Docker Hub", err)
+		utils.HandleErrorAndExit("Error rendering JSON configurations for .dockerconfigjson", err)
+	}
+	dockerConfEncoded := credentials.Base64Encode(string(out))
+
+	dockerCredentialsMap["data"] = make(map[interface{}]interface{})
+	dockerCredentialsMap["data"].(map[interface{}]interface{})[DockerConfigJson] = dockerConfEncoded
+	dockerCredentialsMap["type"] = "kubernetes.io/dockerconfigjson"
+
+	configuredCredentials, err := yaml.Marshal(dockerCredentialsMap)
+	if err != nil {
+		utils.HandleErrorAndExit("Error rendering docker credentials file", err)
 	}
 
-	// apply created secret yaml file
-	if err := K8sApplyFromStdin(dockerSecret); err != nil {
-		utils.HandleErrorAndExit("Error creating docker secret credentials", err)
+	if err := K8sApplyFromStdin(string(configuredCredentials)); err != nil {
+		utils.HandleErrorAndExit("Error creating docker credentials", err)
 	}
 }
 
 // K8sCreateSecretFromFile creates K8S a generic secret with give file
 func K8sCreateSecretFromFile(secretName string, namespace string, filePath string, renamedFile string) {
-	var fromFile string
-	if renamedFile == "" {
-		fromFile = fmt.Sprintf("--from-file=%s", filePath)
-	} else {
-		fromFile = fmt.Sprintf("--from-file=%s=%s", renamedFile, filePath)
-	}
 
 	// render secret
-	secret, err := GetCommandOutput(
-		Kubectl, K8sCreate, K8sSecret, "generic",
-		secretName, fromFile,
-		"-n", namespace,
-		"--dry-run", "-o", "yaml",
-	)
+	secretsMap := RenderSecretTemplate(secretName, namespace, K8sSecret)
+
+	fileData, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		utils.HandleErrorAndExit("Error creating secret from file", err)
+		utils.HandleErrorAndExit("Error reading the specified credentials file", err)
+	}
+	encodedData := credentials.Base64Encode(string(fileData))
+
+	secretsMap["data"] = make(map[interface{}]interface{})
+	secretsMap["data"].(map[interface{}]interface{})[renamedFile] = encodedData
+
+	configuredSecret, err := yaml.Marshal(secretsMap)
+	if err != nil {
+		utils.HandleErrorAndExit("Error rendering registry credentials from file", err)
 	}
 
-	// apply secret
-	if err = K8sApplyFromStdin(secret); err != nil {
-		utils.HandleErrorAndExit("Error creating secret from file", err)
+	if err := K8sApplyFromStdin(string(configuredSecret)); err != nil {
+		utils.HandleErrorAndExit("Error creating registry credentials from file", err)
 	}
 }
 
@@ -198,4 +209,19 @@ func setCommandOutAndError(cmd *exec.Cmd) {
 func setCommandOutOnly(cmd *exec.Cmd) {
 	var outBuf bytes.Buffer
 	cmd.Stdout = io.MultiWriter(os.Stdout, &outBuf)
+}
+
+// RenderSecretTemplate renders the registry related configmaps/secrets using docker_credentials.yaml
+func RenderSecretTemplate(secretName string, namespace string, kind string) (map[interface{}]interface{}){
+	secretConfigsYaml, _ := box.Get("/kubernetes_resources/docker_credentials.yaml")
+	secretConfigsMap := make(map[interface{}]interface{})
+	if err := yaml.Unmarshal([]byte(secretConfigsYaml), &secretConfigsMap); err != nil {
+		utils.HandleErrorAndExit("Error reading registry config template", err)
+	}
+
+	secretConfigsMap[kindKey] = kind
+	secretConfigsMap["metadata"].(map[interface{}]interface{})["name"] = secretName
+	secretConfigsMap["metadata"].(map[interface{}]interface{})["namespace"] = namespace
+
+	return secretConfigsMap
 }

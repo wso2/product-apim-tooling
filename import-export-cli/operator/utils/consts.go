@@ -25,8 +25,8 @@ const K8sApply = "apply"
 const K8sDelete = "delete"
 const K8sRollOut = "rollout"
 const K8sGet = "get"
-const K8sConfigMap = "configmap"
-const K8sSecret = "secret"
+const K8sConfigMap = "ConfigMap"
+const K8sSecret = "Secret"
 const K8sSecretDockerRegType = "docker-registry"
 const K8sApi = "api"
 
@@ -79,6 +79,7 @@ const AwsCredentialsFile = "credentials"
 const GcrSvcAccKeySecret = "google-application-credentials"
 const GcrSvcAccKeyFile = "gcr_key.json"
 const GcrPullSecret = "gcr-pull-secret"
+const DockerConfigJson = ".dockerconfigjson"
 
 // Registry specific flags for batch mode
 const FlagBmRepository = "repository"

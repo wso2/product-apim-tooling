@@ -4,6 +4,7 @@ import (
 	"fmt"
 	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"gopkg.in/yaml.v2"
 	"os"
 	"path/filepath"
 	"strings"
@@ -107,19 +108,18 @@ func createAmazonEcrConfig() {
 	}
 	defer os.Remove(tempFile)
 
-	// render config map
-	configMap, err := k8sUtils.GetCommandOutput(
-		k8sUtils.Kubectl, k8sUtils.K8sCreate, k8sUtils.K8sConfigMap,
-		k8sUtils.AmazonCredHelperConfMap, "--from-file=config.json="+tempFile,
-		"-n", k8sUtils.ApiOpWso2Namespace,
-		"--dry-run", "-o", "yaml",
-	)
+	// render configmap
+	ecrConfimapMap := k8sUtils.RenderSecretTemplate(k8sUtils.AmazonCredHelperConfMap, k8sUtils.ApiOpWso2Namespace, k8sUtils.K8sConfigMap)
+	ecrConfimapMap["data"] = make(map[interface{}]interface{})
+	ecrConfimapMap["data"].(map[interface{}]interface{})["config.json"] = configJson
+
+	configMap, err := yaml.Marshal(ecrConfimapMap)
 	if err != nil {
-		utils.HandleErrorAndExit("Error creating docker config for Amazon ECR", err)
+		utils.HandleErrorAndExit("Error rendering ECR configmap", err)
 	}
 
 	// apply config map
-	if err = k8sUtils.K8sApplyFromStdin(configMap); err != nil {
+	if err = k8sUtils.K8sApplyFromStdin(string(configMap)); err != nil {
 		utils.HandleErrorAndExit("Error creating docker config for Amazon ECR", err)
 	}
 }

@@ -22,7 +22,7 @@ require (
 	golang.org/x/crypto v0.0.0-20200220183623-bac4c82f6975
 	gopkg.in/yaml.v2 v2.2.8
 	sigs.k8s.io/testing_frameworks v0.1.1 // indirect
-	sigs.k8s.io/yaml v1.2.0
+	sigs.k8s.io/yaml v1.2.0 // indirect
 )
 
 replace k8s.io/client-go => k8s.io/client-go v0.18.2
