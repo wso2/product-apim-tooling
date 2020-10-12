@@ -49,6 +49,8 @@ type LoadBalanceEndpointsData struct {
 	SessionTimeout int `yaml:"sessionTimeOut" json:"sessionTimeOut,omitempty"`
 	// Class name for algorithm to be used if load balancing should be done
 	AlgorithmClassName string `yaml:"algoClassName" json:"algoClassName,omitempty"`
+	// Combo for algorithm to be used if load balancing should be done
+	AlgorithmCombName string `yaml:"algoCombo" json:"algoCombo,omitempty"`
 }
 
 // FailoverEndpointsData contains details about endpoints mainly to be used in load balancing

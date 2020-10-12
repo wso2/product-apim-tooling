@@ -172,7 +172,8 @@ func mergeAPI(apiDirectory string, environmentParams *params.Environment) error 
 	if environmentParams.LoadBalanceEndpoints != nil {
 		environmentParams.LoadBalanceEndpoints.EndpointType = "load_balance"
 		// The default class of the algorithm to be used should be set to RoundRobin
-		environmentParams.LoadBalanceEndpoints.AlgorithmClassName = "org.apache.synapse.endpoints.algorithms.RoundRobin"
+		environmentParams.LoadBalanceEndpoints.AlgorithmClassName = utils.LoadBalanceAlgorithmClass
+		environmentParams.LoadBalanceEndpoints.AlgorithmCombName = utils.LoadBalanceAlgorithmClass
 		configData, err = json.Marshal(environmentParams.LoadBalanceEndpoints)
 		if err != nil {
 			return err
