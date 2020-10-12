@@ -98,3 +98,5 @@ const MigrationAPIsExportMetadataFileName = "migration-apis-export-metadata.yaml
 const LastSucceededApiFileName = "last-succeeded-api.log"
 const LastSuceededContentDelimiter = " " // space
 const DefaultResourceTenantDomain = "tenant-default"
+
+const LoadBalanceAlgorithmClass = "org.apache.synapse.endpoints.algorithms.RoundRobin"
