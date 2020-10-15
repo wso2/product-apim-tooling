@@ -20,11 +20,10 @@ package impl
 
 import (
 	"bytes"
-	"crypto/tls"
 	"errors"
 	"fmt"
+	"github.com/go-resty/resty"
 	"io"
-	"io/ioutil"
 	"log"
 	"mime/multipart"
 	"net/http"
@@ -32,7 +31,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"strconv"
-	"time"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
@@ -71,7 +69,7 @@ func ImportApplication(accessToken, adminEndpoint, filename, appOwner string, up
 	adminEndpoint = utils.AppendSlashToString(adminEndpoint)
 
 	applicationImportEndpoint := adminEndpoint + "import/applications"
-	url := applicationImportEndpoint + "?appOwner=" + appOwner + utils.SearchAndTag + "preserveOwner=" +
+	applicationImportUrl := applicationImportEndpoint + "?appOwner=" + appOwner + utils.SearchAndTag + "preserveOwner=" +
 		strconv.FormatBool(preserveOwner) + utils.SearchAndTag + "skipSubscriptions=" +
 		strconv.FormatBool(skipSubscriptions) + utils.SearchAndTag + "skipApplicationKeys=" + strconv.FormatBool(skipKeys) +
 		utils.SearchAndTag + "update=" + strconv.FormatBool(updateApplication)
@@ -101,51 +99,20 @@ func ImportApplication(accessToken, adminEndpoint, filename, appOwner string, up
 
 	extraParams := map[string]string{}
 
-	req, err := NewAppFileUploadRequest(url, extraParams, "file", applicationFilePath, accessToken)
+	resp, err := NewAppFileUploadRequest(applicationImportUrl, extraParams, "file", applicationFilePath, accessToken)
 	if err != nil {
-		utils.HandleErrorAndExit("Error creating request.", err)
+		utils.HandleErrorAndExit("Error executing request.", err)
 	}
 
-	var tr *http.Transport
-	if utils.Insecure {
-		tr = &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}
-	} else {
-		tr = &http.Transport{
-			TLSClientConfig: utils.GetTlsConfigWithCertificate(),
-		}
-	}
-
-	client := &http.Client{
-		Transport: tr,
-		Timeout:   time.Duration(utils.HttpRequestTimeout) * time.Second,
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
+	if resp.StatusCode() == http.StatusCreated || resp.StatusCode() == http.StatusOK {
 		// 201 Created or 200 OK
-		_ = resp.Body.Close()
-		fmt.Println("Successfully imported Application")
-		return resp, nil
+		fmt.Println("Successfully imported Application.")
+		return nil, nil
 	} else {
 		// We have an HTTP error
 		fmt.Println("Error importing Application.")
-		fmt.Println("Status: " + resp.Status)
-
-		bodyBuf, err := ioutil.ReadAll(resp.Body)
-		_ = resp.Body.Close()
-		if err != nil {
-			return nil, err
-		}
-
-		strBody := string(bodyBuf)
-		fmt.Println("Response:", strBody)
-
-		return nil, errors.New(resp.Status)
+		fmt.Println("Status: " + resp.Status())
+		return nil, errors.New(resp.Status())
 	}
 }
 
@@ -197,7 +164,7 @@ func preProcessApplication(appDirectory string) error {
 // Helper function for forming multi-part form data
 // Returns the formed http request and errors
 func NewAppFileUploadRequest(uri string, params map[string]string, paramName, path,
-	accessToken string) (*http.Request, error) {
+	accessToken string) (*resty.Response, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -220,11 +187,14 @@ func NewAppFileUploadRequest(uri string, params map[string]string, paramName, pa
 		return nil, err
 	}
 
-	request, err := http.NewRequest(http.MethodPost, uri, body)
-	request.Header.Add(utils.HeaderAuthorization, utils.HeaderValueAuthBearerPrefix+" "+accessToken)
-	request.Header.Add(utils.HeaderContentType, writer.FormDataContentType())
-	request.Header.Add(utils.HeaderAccept, "*/*")
-	request.Header.Add(utils.HeaderConnection, utils.HeaderValueKeepAlive)
+	// set headers
+	headers := make(map[string]string)
+	headers[utils.HeaderContentType] = writer.FormDataContentType()
+	headers[utils.HeaderAuthorization] =  utils.HeaderValueAuthBearerPrefix+" "+accessToken
+	headers[utils.HeaderAccept] = "*/*"
+	headers[utils.HeaderConnection] = utils.HeaderValueKeepAlive
 
-	return request, err
+	resp, err := utils.InvokePOSTRequestWithBytes(uri, headers, body.Bytes())
+
+	return resp, err
 }
