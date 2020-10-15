@@ -200,8 +200,12 @@ func mergeAPI(apiDirectory string, environmentParams *params.Environment) error 
 	if _, err := api.SetP(string(mergedAPIEndpoints), "endpointConfig"); err != nil {
 		return err
 	}
-	if _, err := api.SetP(environmentParams.GatewayEnvironments, "environments"); err != nil {
-		return err
+
+	// replace original GatewayEnvironments only if they are present in api-params file
+	if environmentParams.GatewayEnvironments != nil {
+		if _, err := api.SetP(environmentParams.GatewayEnvironments, "environments"); err != nil {
+			return err
+		}
 	}
 
 	// if the mutualSslCert field is defined in the api_params.yaml, the apiSecurity type should contain mutualssl
