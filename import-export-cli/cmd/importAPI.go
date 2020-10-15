@@ -20,7 +20,6 @@ package cmd
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"encoding/pem"
 	"errors"
@@ -36,8 +35,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
+	"github.com/go-resty/resty"
 	"github.com/wso2/product-apim-tooling/import-export-cli/specs/params"
 
 	"github.com/mitchellh/go-homedir"
@@ -720,7 +719,7 @@ func validateApiDefinition(def *v2.APIDefinition) error {
 // Helper function for forming multi-part form data
 // Returns the formed http request and errors
 func NewFileUploadRequest(uri string, method string, params map[string]string, paramName, path,
-	b64encodedCredentials string) (*http.Request, error) {
+	b64encodedCredentials string) (*resty.Response, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -743,64 +742,40 @@ func NewFileUploadRequest(uri string, method string, params map[string]string, p
 		return nil, err
 	}
 
-	request, err := http.NewRequest(method, uri, body)
-	request.Header.Add(utils.HeaderAuthorization, utils.HeaderValueAuthBasicPrefix+" "+b64encodedCredentials)
-	request.Header.Add(utils.HeaderContentType, writer.FormDataContentType())
-	request.Header.Add(utils.HeaderAccept, "*/*")
-	request.Header.Add(utils.HeaderConnection, utils.HeaderValueKeepAlive)
+	// Set headers
+	headers := make(map[string]string)
+	headers[utils.HeaderContentType] = writer.FormDataContentType()
+	headers[utils.HeaderAuthorization] =  utils.HeaderValueAuthBasicPrefix+" "+b64encodedCredentials
+	headers[utils.HeaderAccept] = "*/*"
+	headers[utils.HeaderConnection] = utils.HeaderValueKeepAlive
 
-	return request, err
+	if method == http.MethodPost {
+		resp, err := utils.InvokePOSTRequestWithBytes(uri, headers, body.Bytes())
+		return resp, err
+	} else {
+		resp, err := utils.InvokePUTRequestWithBytes(uri, headers, body.Bytes())
+		return resp, err
+	}
 }
 
 // importAPI imports an API to the API manager
 func importAPI(endpoint, httpMethod, filePath, accessToken string, extraParams map[string]string) error {
-	req, err := NewFileUploadRequest(endpoint, httpMethod, extraParams, "file",
+	resp, err := NewFileUploadRequest(endpoint, httpMethod, extraParams, "file",
 		filePath, accessToken)
 	if err != nil {
 		return err
 	}
 
-	var tr *http.Transport
-	if utils.Insecure {
-		tr = &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}
-	} else {
-		tr = &http.Transport{}
-	}
-
-	client := &http.Client{
-		Transport: tr,
-		Timeout:   time.Duration(utils.HttpRequestTimeout) * time.Second,
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		utils.Logln(utils.LogPrefixError, err)
-		return err
-	}
-
 	//var bodyContent []byte
-	if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
+	if resp.StatusCode() == http.StatusCreated || resp.StatusCode() == http.StatusOK {
 		// 201 Created or 200 OK
-		_ = resp.Body.Close()
-		fmt.Println("Successfully imported API")
+		fmt.Println("Successfully imported API.")
 		return nil
 	} else {
 		// We have an HTTP error
 		fmt.Println("Error importing API.")
-		fmt.Println("Status: " + resp.Status)
-
-		bodyBuf, err := ioutil.ReadAll(resp.Body)
-		_ = resp.Body.Close()
-		if err != nil {
-			return err
-		}
-
-		strBody := string(bodyBuf)
-		fmt.Println("Response:", strBody)
-
-		return errors.New(resp.Status)
+		fmt.Println("Status: " + resp.Status())
+		return errors.New(resp.Status())
 	}
 }
 

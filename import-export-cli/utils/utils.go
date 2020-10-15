@@ -37,8 +37,57 @@ func InvokePOSTRequest(url string, headers map[string]string, body string) (*res
 	if Insecure {
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
 	}
+	if os.Getenv("HTTP_PROXY") != "" {
+		resty.SetProxy(os.Getenv("HTTP_PROXY"))
+	} else if os.Getenv("HTTPS_PROXY") != "" {
+		resty.SetProxy(os.Getenv("HTTPS_PROXY"))
+	} else if os.Getenv("http_proxy") != "" {
+		resty.SetProxy(os.Getenv("http_proxy"))
+	} else if os.Getenv("https_proxy") != "" {
+		resty.SetProxy(os.Getenv("https_proxy"))
+	}
 	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
 	resp, err := resty.R().SetHeaders(headers).SetBody(body).Post(url)
+
+	return resp, err
+}
+
+// Invoke http-post request using go-resty with byte[] body
+func InvokePOSTRequestWithBytes(url string, headers map[string]string, body []byte) (*resty.Response, error) {
+	if Insecure {
+		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+	}
+	if os.Getenv("HTTP_PROXY") != "" {
+		resty.SetProxy(os.Getenv("HTTP_PROXY"))
+	} else if os.Getenv("HTTPS_PROXY") != "" {
+		resty.SetProxy(os.Getenv("HTTPS_PROXY"))
+	} else if os.Getenv("http_proxy") != "" {
+		resty.SetProxy(os.Getenv("http_proxy"))
+	} else if os.Getenv("https_proxy") != "" {
+		resty.SetProxy(os.Getenv("https_proxy"))
+	}
+	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
+	resp, err := resty.R().SetHeaders(headers).SetBody(body).Post(url)
+
+	return resp, err
+}
+
+// Invoke http-post request using go-resty with byte[] body
+func InvokePUTRequestWithBytes(url string, headers map[string]string, body []byte) (*resty.Response, error) {
+	if Insecure {
+		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+	}
+	if os.Getenv("HTTP_PROXY") != "" {
+		resty.SetProxy(os.Getenv("HTTP_PROXY"))
+	} else if os.Getenv("HTTPS_PROXY") != "" {
+		resty.SetProxy(os.Getenv("HTTPS_PROXY"))
+	} else if os.Getenv("http_proxy") != "" {
+		resty.SetProxy(os.Getenv("http_proxy"))
+	} else if os.Getenv("https_proxy") != "" {
+		resty.SetProxy(os.Getenv("https_proxy"))
+	}
+	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
+	resp, err := resty.R().SetHeaders(headers).SetBody(body).Put(url)
 
 	return resp, err
 }
@@ -47,6 +96,15 @@ func InvokePOSTRequest(url string, headers map[string]string, body string) (*res
 func InvokeGETRequest(url string, headers map[string]string) (*resty.Response, error) {
 	if Insecure {
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+	}
+	if os.Getenv("HTTP_PROXY") != "" {
+		resty.SetProxy(os.Getenv("HTTP_PROXY"))
+	} else if os.Getenv("HTTPS_PROXY") != "" {
+		resty.SetProxy(os.Getenv("HTTPS_PROXY"))
+	} else if os.Getenv("http_proxy") != "" {
+		resty.SetProxy(os.Getenv("http_proxy"))
+	} else if os.Getenv("https_proxy") != "" {
+		resty.SetProxy(os.Getenv("https_proxy"))
 	}
 	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
 	resp, err := resty.R().SetHeaders(headers).Get(url)
@@ -59,6 +117,15 @@ func InvokeGETRequestWithQueryParam(queryParam string, paramValue string, url st
 	*resty.Response, error) {
 	if Insecure {
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+	}
+	if os.Getenv("HTTP_PROXY") != "" {
+		resty.SetProxy(os.Getenv("HTTP_PROXY"))
+	} else if os.Getenv("HTTPS_PROXY") != "" {
+		resty.SetProxy(os.Getenv("HTTPS_PROXY"))
+	} else if os.Getenv("http_proxy") != "" {
+		resty.SetProxy(os.Getenv("http_proxy"))
+	} else if os.Getenv("https_proxy") != "" {
+		resty.SetProxy(os.Getenv("https_proxy"))
 	}
 	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
 	resp, err := resty.R().SetHeaders(headers).SetQueryParam(queryParam, paramValue).Get(url)
@@ -137,5 +204,4 @@ func WriteToFileSystem(exportAPIName, exportAPIVersion, exportEnvironment, expor
 	}
 	fmt.Println("Succesfully exported API!")
 	fmt.Println("Find the exported API at " + pFile)
-
 }
