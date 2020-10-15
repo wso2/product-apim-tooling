@@ -40,6 +40,37 @@ func InvokePOSTRequest(url string, headers map[string]string, body string) (*res
 	} else {
 		resty.SetTLSClientConfig(GetTlsConfigWithCertificate())
 	}
+	if os.Getenv("HTTP_PROXY") != "" {
+		resty.SetProxy(os.Getenv("HTTP_PROXY"))
+	} else if os.Getenv("HTTPS_PROXY") != "" {
+		resty.SetProxy(os.Getenv("HTTPS_PROXY"))
+	} else if os.Getenv("http_proxy") != "" {
+		resty.SetProxy(os.Getenv("http_proxy"))
+	} else if os.Getenv("https_proxy") != "" {
+		resty.SetProxy(os.Getenv("https_proxy"))
+	}
+	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
+	resp, err := resty.R().SetHeaders(headers).SetBody(body).Post(url)
+
+	return resp, err
+}
+
+// Invoke http-post request using go-resty with byte[] body
+func InvokePOSTRequestWithBytes(url string, headers map[string]string, body []byte) (*resty.Response, error) {
+	if Insecure {
+		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+	} else {
+		resty.SetTLSClientConfig(GetTlsConfigWithCertificate())
+	}
+	if os.Getenv("HTTP_PROXY") != "" {
+		resty.SetProxy(os.Getenv("HTTP_PROXY"))
+	} else if os.Getenv("HTTPS_PROXY") != "" {
+		resty.SetProxy(os.Getenv("HTTPS_PROXY"))
+	} else if os.Getenv("http_proxy") != "" {
+		resty.SetProxy(os.Getenv("http_proxy"))
+	} else if os.Getenv("https_proxy") != "" {
+		resty.SetProxy(os.Getenv("https_proxy"))
+	}
 	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
 	resp, err := resty.R().SetHeaders(headers).SetBody(body).Post(url)
 
@@ -53,6 +84,15 @@ func InvokePOSTRequestWithoutBody(url string, headers map[string]string) (*resty
 	} else {
 		resty.SetTLSClientConfig(GetTlsConfigWithCertificate())
 	}
+	if os.Getenv("HTTP_PROXY") != "" {
+		resty.SetProxy(os.Getenv("HTTP_PROXY"))
+	} else if os.Getenv("HTTPS_PROXY") != "" {
+		resty.SetProxy(os.Getenv("HTTPS_PROXY"))
+	} else if os.Getenv("http_proxy") != "" {
+		resty.SetProxy(os.Getenv("http_proxy"))
+	} else if os.Getenv("https_proxy") != "" {
+		resty.SetProxy(os.Getenv("https_proxy"))
+	}
 	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
 	resp, err := resty.R().SetHeaders(headers).Post(url)
 
@@ -65,6 +105,15 @@ func InvokeGETRequest(url string, headers map[string]string) (*resty.Response, e
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
 	} else {
 		resty.SetTLSClientConfig(GetTlsConfigWithCertificate())
+	}
+	if os.Getenv("HTTP_PROXY") != "" {
+		resty.SetProxy(os.Getenv("HTTP_PROXY"))
+	} else if os.Getenv("HTTPS_PROXY") != "" {
+		resty.SetProxy(os.Getenv("HTTPS_PROXY"))
+	} else if os.Getenv("http_proxy") != "" {
+		resty.SetProxy(os.Getenv("http_proxy"))
+	} else if os.Getenv("https_proxy") != "" {
+		resty.SetProxy(os.Getenv("https_proxy"))
 	}
 	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
 	resp, err := resty.R().SetHeaders(headers).Get(url)
@@ -80,6 +129,15 @@ func InvokeGETRequestWithQueryParam(queryParam string, paramValue string, url st
 	} else {
 		resty.SetTLSClientConfig(GetTlsConfigWithCertificate())
 	}
+	if os.Getenv("HTTP_PROXY") != "" {
+		resty.SetProxy(os.Getenv("HTTP_PROXY"))
+	} else if os.Getenv("HTTPS_PROXY") != "" {
+		resty.SetProxy(os.Getenv("HTTPS_PROXY"))
+	} else if os.Getenv("http_proxy") != "" {
+		resty.SetProxy(os.Getenv("http_proxy"))
+	} else if os.Getenv("https_proxy") != "" {
+		resty.SetProxy(os.Getenv("https_proxy"))
+	}
 	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
 	resp, err := resty.R().SetHeaders(headers).SetQueryParam(queryParam, paramValue).Get(url)
 
@@ -93,6 +151,15 @@ func InvokeGETRequestWithMultipleQueryParams(queryParam map[string]string, url s
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
 	} else {
 		resty.SetTLSClientConfig(GetTlsConfigWithCertificate())
+	}
+	if os.Getenv("HTTP_PROXY") != "" {
+		resty.SetProxy(os.Getenv("HTTP_PROXY"))
+	} else if os.Getenv("HTTPS_PROXY") != "" {
+		resty.SetProxy(os.Getenv("HTTPS_PROXY"))
+	} else if os.Getenv("http_proxy") != "" {
+		resty.SetProxy(os.Getenv("http_proxy"))
+	} else if os.Getenv("https_proxy") != "" {
+		resty.SetProxy(os.Getenv("https_proxy"))
 	}
 	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
 	resp, err := resty.R().SetHeaders(headers).SetQueryParams(queryParam).Get(url)
@@ -108,6 +175,15 @@ func InvokePutRequest(queryParam map[string]string, url string, headers map[stri
 	} else {
 		resty.SetTLSClientConfig(GetTlsConfigWithCertificate())
 	}
+	if os.Getenv("HTTP_PROXY") != "" {
+		resty.SetProxy(os.Getenv("HTTP_PROXY"))
+	} else if os.Getenv("HTTPS_PROXY") != "" {
+		resty.SetProxy(os.Getenv("HTTPS_PROXY"))
+	} else if os.Getenv("http_proxy") != "" {
+		resty.SetProxy(os.Getenv("http_proxy"))
+	} else if os.Getenv("https_proxy") != "" {
+		resty.SetProxy(os.Getenv("https_proxy"))
+	}
 	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
 	resp, err := resty.R().SetHeaders(headers).SetQueryParams(queryParam).SetBody(body).Put(url)
 
@@ -122,6 +198,15 @@ func InvokePostRequestWithQueryParam(queryParam map[string]string, url string, h
 	} else {
 		resty.SetTLSClientConfig(GetTlsConfigWithCertificate())
 	}
+	if os.Getenv("HTTP_PROXY") != "" {
+		resty.SetProxy(os.Getenv("HTTP_PROXY"))
+	} else if os.Getenv("HTTPS_PROXY") != "" {
+		resty.SetProxy(os.Getenv("HTTPS_PROXY"))
+	} else if os.Getenv("http_proxy") != "" {
+		resty.SetProxy(os.Getenv("http_proxy"))
+	} else if os.Getenv("https_proxy") != "" {
+		resty.SetProxy(os.Getenv("https_proxy"))
+	}
 	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
 	resp, err := resty.R().SetHeaders(headers).SetQueryParams(queryParam).SetBody(body).Post(url)
 
@@ -134,6 +219,15 @@ func InvokeDELETERequest(url string, headers map[string]string) (*resty.Response
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
 	} else {
 		resty.SetTLSClientConfig(GetTlsConfigWithCertificate())
+	}
+	if os.Getenv("HTTP_PROXY") != "" {
+		resty.SetProxy(os.Getenv("HTTP_PROXY"))
+	} else if os.Getenv("HTTPS_PROXY") != "" {
+		resty.SetProxy(os.Getenv("HTTPS_PROXY"))
+	} else if os.Getenv("http_proxy") != "" {
+		resty.SetProxy(os.Getenv("http_proxy"))
+	} else if os.Getenv("https_proxy") != "" {
+		resty.SetProxy(os.Getenv("https_proxy"))
 	}
 	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
 	resp, err := resty.R().SetHeaders(headers).Delete(url)

@@ -19,10 +19,10 @@
 package impl
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
+	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -32,9 +32,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
-
-	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 
 	"github.com/Jeffail/gabs"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -163,55 +160,22 @@ func validateAPIProductDefinition(def *v2.APIProductDefinition) error {
 }
 
 // importAPIProduct imports an API Product to the API manager
-func importAPIProduct(endpoint, httpMethod, filePath, accessToken string, extraParams map[string]string) error {
-	req, err := NewFileUploadRequest(endpoint, httpMethod, extraParams, "file",
+func importAPIProduct(endpoint, filePath, accessToken string, extraParams map[string]string) error {
+	resp, err := ExecuteNewFileUploadRequest(endpoint, extraParams, "file",
 		filePath, accessToken)
 	if err != nil {
 		return err
 	}
 
-	var tr *http.Transport
-	if utils.Insecure {
-		tr = &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}
-	} else {
-		tr = &http.Transport{
-			TLSClientConfig: utils.GetTlsConfigWithCertificate(),
-		}
-	}
-
-	client := &http.Client{
-		Transport: tr,
-		Timeout:   time.Duration(utils.HttpRequestTimeout) * time.Second,
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		utils.Logln(utils.LogPrefixError, err)
-		return err
-	}
-
-	if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
+	if resp.StatusCode() == http.StatusCreated || resp.StatusCode() == http.StatusOK {
 		// 201 Created or 200 OK
-		_ = resp.Body.Close()
-		fmt.Println("Successfully imported API Product")
+		fmt.Println("Successfully imported API Product.")
 		return nil
 	} else {
 		// We have an HTTP error
 		fmt.Println("Error importing API Product.")
-		fmt.Println("Status: " + resp.Status)
-
-		bodyBuf, err := ioutil.ReadAll(resp.Body)
-		_ = resp.Body.Close()
-		if err != nil {
-			return err
-		}
-
-		strBody := string(bodyBuf)
-		fmt.Println("Response:", strBody)
-
-		return errors.New(resp.Status)
+		fmt.Println("Status: " + resp.Status())
+		return errors.New(resp.Status())
 	}
 }
 
@@ -378,7 +342,6 @@ func ImportAPIProduct(accessOAuthToken, adminEndpoint, importEnvironment, import
 		utils.HandleErrorAndExit("Error getting OAuth Tokens", err)
 	}
 	extraParams := map[string]string{}
-	httpMethod := http.MethodPost
 	adminEndpoint += "/import/api-product" + "?preserveProvider=" + strconv.FormatBool(importAPIProductPreserveProvider)
 
 	// If the user has specified import-apis flag or update-apis flag, importAPIs parameter should be passed as true
@@ -398,6 +361,6 @@ func ImportAPIProduct(accessOAuthToken, adminEndpoint, importEnvironment, import
 	}
 
 	utils.Logln(utils.LogPrefixInfo + "Import URL: " + adminEndpoint)
-	err = importAPIProduct(adminEndpoint, httpMethod, apiProductFilePath, accessOAuthToken, extraParams)
+	err = importAPIProduct(adminEndpoint, apiProductFilePath, accessOAuthToken, extraParams)
 	return err
 }
