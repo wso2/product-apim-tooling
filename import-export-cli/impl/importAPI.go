@@ -19,15 +19,11 @@
 package impl
 
 import (
-	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
-	"mime/multipart"
 	"net/http"
 	"net/url"
 	"os"
@@ -36,7 +32,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/specs/params"
 
@@ -641,16 +636,15 @@ func injectParamsToAPI(importPath, paramsPath, importEnvironment string, preserv
 		if err != nil {
 			return err
 		}
-	}
 
-	// generate certificates for mutualssl, only if the field is specified
-	if envParams.MutualSslCerts != nil {
-		err = generateMutualSslCertificates(importPath, envParams, preserveProvider)
-		if err != nil {
-			return err
+		// generate certificates for mutualssl, only if the field is specified
+		if envParams.MutualSslCerts != nil {
+			err = generateMutualSslCertificates(importPath, envParams, preserveProvider)
+			if err != nil {
+				return err
+			}
 		}
 	}
-
 	return nil
 }
 
@@ -826,97 +820,23 @@ func validateAPIDefinition(def *v2.APIDefinition) error {
 	return nil
 }
 
-// newFileUploadRequest forms an HTTP request
-// Helper function for forming multi-part form data
-// Returns the formed http request and errors
-func newFileUploadRequest(uri string, method string, params map[string]string, paramName, path,
-	accessToken string) (*http.Request, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		_ = file.Close()
-	}()
-
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	part, err := writer.CreateFormFile(paramName, filepath.Base(path))
-	if err != nil {
-		return nil, err
-	}
-	_, err = io.Copy(part, file)
-
-	for key, val := range params {
-		_ = writer.WriteField(key, val)
-	}
-	err = writer.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	request, err := http.NewRequest(method, uri, body)
-	if err != nil {
-		return nil, err
-	}
-	request.Header.Add(utils.HeaderAuthorization, utils.HeaderValueAuthBearerPrefix+" "+accessToken)
-	request.Header.Add(utils.HeaderContentType, writer.FormDataContentType())
-	request.Header.Add(utils.HeaderAccept, "*/*")
-	request.Header.Add(utils.HeaderConnection, utils.HeaderValueKeepAlive)
-
-	return request, err
-}
-
 // importAPI imports an API to the API manager
-func importAPI(endpoint, httpMethod, filePath, accessToken string, extraParams map[string]string) error {
-	req, err := newFileUploadRequest(endpoint, httpMethod, extraParams, "file",
+func importAPI(endpoint, filePath, accessToken string, extraParams map[string]string) error {
+	resp, err := ExecuteNewFileUploadRequest(endpoint, extraParams, "file",
 		filePath, accessToken)
-	if err != nil {
-		return err
-	}
-
-	var tr *http.Transport
-	if utils.Insecure {
-		tr = &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}
-	} else {
-		tr = &http.Transport{
-			TLSClientConfig: utils.GetTlsConfigWithCertificate(),
-		}
-	}
-
-	client := &http.Client{
-		Transport: tr,
-		Timeout:   time.Duration(utils.HttpRequestTimeout) * time.Second,
-	}
-
-	resp, err := client.Do(req)
 	if err != nil {
 		utils.Logln(utils.LogPrefixError, err)
 		return err
 	}
-
-	if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
+	if resp.StatusCode() == http.StatusCreated || resp.StatusCode() == http.StatusOK {
 		// 201 Created or 200 OK
-		_ = resp.Body.Close()
-		fmt.Println("Successfully imported API")
+		fmt.Println("Successfully imported API.")
 		return nil
 	} else {
 		// We have an HTTP error
 		fmt.Println("Error importing API.")
-		fmt.Println("Status: " + resp.Status)
-
-		bodyBuf, err := ioutil.ReadAll(resp.Body)
-		_ = resp.Body.Close()
-		if err != nil {
-			return err
-		}
-
-		strBody := string(bodyBuf)
-		fmt.Println("Response:", strBody)
-
-		return errors.New(resp.Status)
+		fmt.Println("Status: " + resp.Status())
+		return errors.New(resp.Status())
 	}
 }
 
@@ -1054,7 +974,6 @@ func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, a
 		}
 	}
 	extraParams := map[string]string{}
-	httpMethod := http.MethodPost
 	adminEndpoint += "/import/api"
 	if updateAPI {
 		adminEndpoint += "?overwrite=" + strconv.FormatBool(true) + "&preserveProvider=" +
@@ -1064,6 +983,6 @@ func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, a
 	}
 	utils.Logln(utils.LogPrefixInfo + "Import URL: " + adminEndpoint)
 
-	err = importAPI(adminEndpoint, httpMethod, apiFilePath, accessOAuthToken, extraParams)
+	err = importAPI(adminEndpoint, apiFilePath, accessOAuthToken, extraParams)
 	return err
 }
