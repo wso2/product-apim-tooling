@@ -821,9 +821,10 @@ func validateAPIDefinition(def *v2.APIDefinition) error {
 }
 
 // importAPI imports an API to the API manager
-func importAPI(endpoint, filePath, accessToken string, extraParams map[string]string) error {
+func importAPI(endpoint, filePath, accessToken string, extraParams map[string]string, isOauth bool) error {
 	resp, err := ExecuteNewFileUploadRequest(endpoint, extraParams, "file",
-		filePath, accessToken)
+		filePath, accessToken, isOauth)
+	utils.Logf("Response : %v", resp)
 	if err != nil {
 		utils.Logln(utils.LogPrefixError, err)
 		return err
@@ -838,6 +839,10 @@ func importAPI(endpoint, filePath, accessToken string, extraParams map[string]st
 		fmt.Println("Status: " + resp.Status())
 		return errors.New(resp.Status())
 	}
+}
+
+func ImportAPIToMGW(endpoint, filePath, accessToken string, extraParams map[string]string) error {
+	return importAPI(endpoint, filePath, accessToken, extraParams, false)
 }
 
 // ImportAPIToEnv function is used with import-api command
@@ -983,6 +988,6 @@ func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, a
 	}
 	utils.Logln(utils.LogPrefixInfo + "Import URL: " + adminEndpoint)
 
-	err = importAPI(adminEndpoint, apiFilePath, accessOAuthToken, extraParams)
+	err = importAPI(adminEndpoint, apiFilePath, accessOAuthToken, extraParams, true)
 	return err
 }

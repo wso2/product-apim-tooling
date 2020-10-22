@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -32,6 +31,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 
 	"github.com/Jeffail/gabs"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -162,7 +163,7 @@ func validateAPIProductDefinition(def *v2.APIProductDefinition) error {
 // importAPIProduct imports an API Product to the API manager
 func importAPIProduct(endpoint, filePath, accessToken string, extraParams map[string]string) error {
 	resp, err := ExecuteNewFileUploadRequest(endpoint, extraParams, "file",
-		filePath, accessToken)
+		filePath, accessToken, true)
 	if err != nil {
 		return err
 	}
