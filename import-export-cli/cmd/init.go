@@ -22,11 +22,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"unicode"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
 
@@ -320,7 +321,17 @@ var InitCommand = &cobra.Command{
 
 		err := executeInitCmd()
 		if err != nil {
-			utils.HandleErrorAndExit("Error initializing project", err)
+			utils.HandleErrorAndContinue("Error initializing project", err)
+			// Remove the already created project with its content since it is partially created and wrong
+			dir, err := filepath.Abs(initCmdOutputDir)
+			if err != nil {
+				utils.HandleErrorAndExit("Error retrieving file path of the project", err)
+			}
+			fmt.Println("Removing the project directory " + dir + " with its content")
+			err = os.RemoveAll(dir)
+			if err != nil {
+				utils.HandleErrorAndExit("Error removing project directory", err)
+			}
 		}
 	},
 }
