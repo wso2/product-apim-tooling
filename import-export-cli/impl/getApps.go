@@ -22,15 +22,72 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/go-resty/resty"
-	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"io"
 	"net/http"
 	"os"
 	"path"
 	"path/filepath"
+	"text/template"
+
+	"github.com/go-resty/resty"
+	"github.com/wso2/product-apim-tooling/import-export-cli/formatter"
+	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
+const (
+	appIdHeader      = "ID"
+	appNameHeader    = "NAME"
+	appOwnerHeader   = "OWNER"
+	appStatusHeader  = "STATUS"
+	appGroupIdHeader = "GROUP ID"
+
+	defaultAppTableFormat = "table {{.Id}}\t{{.Name}}\t{{.Owner}}\t{{.Status}}\t{{.GroupId}}"
+)
+
+// app contains information about util.Application
+type app struct {
+	id      string
+	name    string
+	owner   string
+	status  string
+	groupId string
+}
+
+// creates a new app definition from utils.Application
+func newAppDefinitionFromApplication(a utils.Application) *app {
+	return &app{a.ID, a.Name, a.Owner, a.Status, a.GroupID}
+}
+
+// Id of application
+func (a app) Id() string {
+	return a.id
+}
+
+// Name of application
+func (a app) Name() string {
+	return a.name
+}
+
+// Owner of application
+func (a app) Owner() string {
+	return a.owner
+}
+
+// Status of application
+func (a app) Status() string {
+	return a.status
+}
+
+// GroupId of application
+func (a app) GroupId() string {
+	return a.groupId
+}
+
+// MarshalJSON marshals api using custom marshaller which uses methods instead of fields
+func (a *app) MarshalJSON() ([]byte, error) {
+	return formatter.MarshalJSON(a)
+}
 
 //GetApplicationListFromEnv
 // @param accessToken : Access Token for the environment
@@ -122,4 +179,39 @@ func GetApplicationDefinition(filePath string) (*v2.ApplicationDefinition, []byt
 		return nil, nil, err
 	}
 	return api, buffer, nil
+}
+
+// PrintApps
+func PrintApps(apps []utils.Application, format string) {
+	if format == "" {
+		format = defaultAppTableFormat
+	}
+	// create new app context with standard output
+	appContext := formatter.NewContext(os.Stdout, format)
+
+	// create a new renderer function which iterate collection of apps
+	renderer := func(w io.Writer, t *template.Template) error {
+		for _, a := range apps {
+			if err := t.Execute(w, newAppDefinitionFromApplication(a)); err != nil {
+				return err
+			}
+			// write a new line after executing template
+			_, _ = w.Write([]byte{'\n'})
+		}
+		return nil
+	}
+
+	// headers for table
+	appTableHeaders := map[string]string{
+		"Id":      appIdHeader,
+		"Name":    appNameHeader,
+		"Status":  appStatusHeader,
+		"Owner":   appOwnerHeader,
+		"GroupId": appGroupIdHeader,
+	}
+
+	// execute context
+	if err := appContext.Write(renderer, appTableHeaders); err != nil {
+		fmt.Println("Error executing template:", err.Error())
+	}
 }

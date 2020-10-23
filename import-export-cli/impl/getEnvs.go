@@ -16,7 +16,7 @@
 * under the License.
  */
 
-package cmd
+package impl
 
 import (
 	"fmt"
@@ -24,7 +24,6 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/formatter"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
@@ -37,19 +36,7 @@ const (
 	envsAdminEndpointHeader        = "ADMIN ENDPOINT"
 	envsApiManagerEndpoint         = "API MANAGER ENDPOINT"
 	envsApplicationEndpoint        = "DEVPORTAL ENDPOINT"
-
-	defaulEnvsTableFormat = "table {{.Name}}\t{{.ApiManagerEndpoint}}\t{{.RegistrationEndpoint}}\t{{.TokenEndpoint}}\t{{.PublisherEndpoint}}\t{{.ApplicationEndpoint}}\t{{.AdminEndpoint}}"
 )
-
-var envsCmdFormat string
-
-// envsCmd related info
-const EnvsCmdLiteral = "envs"
-const EnvsCmdShortDesc = "Display the list of environments"
-
-const EnvsCmdLongDesc = `Display a list of environments defined in '` + utils.MainConfigFileName + `' file`
-
-const EnvsCmdExamples = utils.ProjectName + " list envs"
 
 // endpoint contains information about endpoint of API Manager
 type endpoints struct {
@@ -114,20 +101,8 @@ func (e *endpoints) MarshalJSON() ([]byte, error) {
 	return formatter.MarshalJSON(e)
 }
 
-// envsCmd represents the envs command
-var envsCmd = &cobra.Command{
-	Use:     EnvsCmdLiteral,
-	Short:   EnvsCmdShortDesc,
-	Long:    EnvsCmdLongDesc,
-	Example: EnvsCmdExamples,
-	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + EnvsCmdLiteral + " called")
-		envs := utils.GetMainConfigFromFile(utils.MainConfigFilePath).Environments
-		printEnvs(envs, envsCmdFormat)
-	},
-}
-
-func printEnvs(envData map[string]utils.EnvEndpoints, format string) {
+// PrintEnvs
+func PrintEnvs(envData map[string]utils.EnvEndpoints, format, defaulEnvsTableFormat string) {
 	if format == "" {
 		format = defaulEnvsTableFormat
 	}
@@ -161,10 +136,4 @@ func printEnvs(envData map[string]utils.EnvEndpoints, format string) {
 	if err := envsContext.Write(renderer, envsTableHeaders); err != nil {
 		fmt.Println("Error executing template:", err.Error())
 	}
-}
-
-func init() {
-	ListCmd.AddCommand(envsCmd)
-	envsCmd.Flags().StringVarP(&envsCmdFormat, "format", "", defaulEnvsTableFormat, "Pretty-print "+
-		"environments using go templates")
 }
