@@ -54,7 +54,7 @@ var ImportAppCmd = &cobra.Command{
 	Example: importAppCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + importAppCmdLiteral + " called")
-		cred, err := getCredentials(importAppEnvironment)
+		cred, err := GetCredentials(importAppEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}

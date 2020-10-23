@@ -14,12 +14,13 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package cmd
 
 import (
 	"fmt"
+
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
@@ -37,12 +38,12 @@ const deleteAPICmdLiteral = "api"
 const deleteAPICmdShortDesc = "Delete API"
 const deleteAPICmdLongDesc = "Delete an API from an environment in default mode and delete API resources by API name or label selector in kubernetes mode"
 
-const deleteAPICmdExamplesDefault = "Default Mode:\n" + "  " +  utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin -e dev
-` + "  " +  utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 -e production
+const deleteAPICmdExamplesDefault = "Default Mode:\n" + "  " + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin -e dev
+` + "  " + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 -e production
 NOTE: The 3 flags (--name (-n), --version (-v), and --environment (-e)) are mandatory.`
 
-const deleteAPICmdExamplesKubernetes = "\nKubernetes Mode:\n" + "  " +  utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPICmdLiteral + ` petstore
-` + "  " +  utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPICmdLiteral + ` -l name=myLabel`
+const deleteAPICmdExamplesKubernetes = "\nKubernetes Mode:\n" + "  " + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPICmdLiteral + ` petstore
+` + "  " + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPICmdLiteral + ` -l name=myLabel`
 
 // DeleteAPICmd represents the delete api command
 var DeleteAPICmd = &cobra.Command{
@@ -60,7 +61,7 @@ var DeleteAPICmd = &cobra.Command{
 			k8sArgs = append(k8sArgs, args...)
 			executeKubernetes(k8sArgs...)
 		} else {
-			cred, err := getCredentials(deleteAPIEnvironment)
+			cred, err := GetCredentials(deleteAPIEnvironment)
 			if err != nil {
 				utils.HandleErrorAndExit("Error getting credentials ", err)
 			}

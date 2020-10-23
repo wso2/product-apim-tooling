@@ -36,9 +36,9 @@ var (
 
 const (
 	// ImportAPI command related usage info
-	importAPICmdLiteral       = "import-api"
-	importAPICmdShortDesc     = "Import API"
-	importAPICmdLongDesc      = "Import an API to an environment"
+	importAPICmdLiteral   = "import-api"
+	importAPICmdShortDesc = "Import API"
+	importAPICmdLongDesc  = "Import an API to an environment"
 )
 
 const importAPICmdExamples = utils.ProjectName + ` ` + importAPICmdLiteral + ` -f qa/TwitterAPI.zip -e dev
@@ -56,7 +56,7 @@ var ImportAPICmd = &cobra.Command{
 	Example: importAPICmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + importAPICmdLiteral + " called")
-		cred, err := getCredentials(importEnvironment)
+		cred, err := GetCredentials(importEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}

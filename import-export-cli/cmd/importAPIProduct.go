@@ -58,7 +58,7 @@ var ImportAPIProductCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + importAPIProductCmdLiteral + " called")
 
-		cred, err := getCredentials(importAPIProductEnvironment)
+		cred, err := GetCredentials(importAPIProductEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
@@ -67,7 +67,7 @@ var ImportAPIProductCmd = &cobra.Command{
 			utils.HandleErrorAndExit("Error while getting an access token for importing API Product", err)
 		}
 		err = impl.ImportAPIProductToEnv(accessOAuthToken, importAPIProductEnvironment, importAPIProductFile, importAPIs, importAPIsUpdate,
-				importAPIProductUpdate, importAPIProductCmdPreserveProvider, importAPIProductSkipCleanup)
+			importAPIProductUpdate, importAPIProductCmdPreserveProvider, importAPIProductSkipCleanup)
 		if err != nil {
 			utils.HandleErrorAndExit("Error importing API Product", err)
 			return

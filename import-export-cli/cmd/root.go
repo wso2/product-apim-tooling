@@ -21,11 +21,12 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"github.com/ghodss/yaml"
 	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
+
+	"github.com/ghodss/yaml"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
 	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
@@ -42,9 +43,9 @@ var cfgFile string
 var insecure bool
 var cmdPassword string
 var cmdUsername string
-var cmdExportEnvironment string
+var CmdExportEnvironment string
 var cmdResourceTenantDomain string
-var cmdForceStartFromBegin bool
+var CmdForceStartFromBegin bool
 
 // RootCmd related info
 const RootCmdShortDesc = "CLI for Importing and Exporting APIs and Applications"

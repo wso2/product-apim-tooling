@@ -70,7 +70,7 @@ var apiProductsCmd = &cobra.Command{
 	Example: apiProductsCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + apiProductsCmdLiteral + " called")
-		cred, err := getCredentials(listApiProductsCmdEnvironment)
+		cred, err := GetCredentials(listApiProductsCmdEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}

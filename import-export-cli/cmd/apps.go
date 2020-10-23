@@ -20,11 +20,12 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 	"io"
 	"os"
 	"strconv"
 	"text/template"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 
@@ -114,7 +115,7 @@ var appsCmd = &cobra.Command{
 	Example: appsCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + appsCmdLiteral + " called")
-		cred, err := getCredentials(listAppsCmdEnvironment)
+		cred, err := GetCredentials(listAppsCmdEnvironment)
 		defaultAppsOwner = cred.Username
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)

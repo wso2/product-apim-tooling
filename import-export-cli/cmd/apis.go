@@ -73,14 +73,14 @@ var apisCmd = &cobra.Command{
 	Example: apisCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + apisCmdLiteral + " called")
-		cred, err := getCredentials(listApisCmdEnvironment)
+		cred, err := GetCredentials(listApisCmdEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
 		//Since other flags does not use args[], query flag will own this
 		if len(args) != 0 && listApisCmdQuery != "" {
 			for _, argument := range args {
-				listApisCmdQuery +=  " " + argument
+				listApisCmdQuery += " " + argument
 			}
 		}
 		executeApisCmd(cred)
@@ -89,12 +89,12 @@ var apisCmd = &cobra.Command{
 
 // api holds information about an API for outputting
 type api struct {
-	id       		string
-	name     		string
-	context  		string
-	version  		string
-	provider 		string
-	lifeCycleStatus	string
+	id              string
+	name            string
+	context         string
+	version         string
+	provider        string
+	lifeCycleStatus string
 }
 
 // creates a new api from utils.API
@@ -195,11 +195,11 @@ func GetAPIList(query, limit, accessToken, apiListEndpoint string) (count int32,
 
 }
 
-func getQueryParamConnector () (connector string) {
+func getQueryParamConnector() (connector string) {
 	if queryParamAdded {
-		return  "&"
+		return "&"
 	} else {
-		queryParamAdded	= true
+		queryParamAdded = true
 		return "?"
 	}
 }
@@ -225,12 +225,12 @@ func printAPIs(apis []utils.API, format string) {
 
 	// headers for table
 	apiTableHeaders := map[string]string{
-		"Id"				: apiIdHeader,
-		"Name"				: apiNameHeader,
-		"Context"			: apiContextHeader,
-		"Version"			: apiVersionHeader,
-		"LifeCycleStatus"	: apiStatusHeader,
-		"Provider"			: apiProviderHeader,
+		"Id":              apiIdHeader,
+		"Name":            apiNameHeader,
+		"Context":         apiContextHeader,
+		"Version":         apiVersionHeader,
+		"LifeCycleStatus": apiStatusHeader,
+		"Provider":        apiProviderHeader,
 	}
 
 	// execute context

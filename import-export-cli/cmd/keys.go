@@ -63,7 +63,7 @@ var genKeyCmd = &cobra.Command{
 //Subscribe the given API or API Product to the default application and generate an access token
 func getKeys() {
 
-	cred, err := getCredentials(keyGenEnv)
+	cred, err := GetCredentials(keyGenEnv)
 	if err != nil {
 		utils.HandleErrorAndExit("Error getting credentials", err)
 	}

@@ -16,12 +16,20 @@
 * under the License.
  */
 
-package main
+package deprecated
 
 import (
-	"github.com/wso2/product-apim-tooling/import-export-cli/cmd/deprecated"
+	"fmt"
+	"os"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd"
 )
 
-func main() {
-	deprecated.Execute()
+// Executes all deprecated child commands.
+// This is called by main.main(). It only needs to happen once.
+func Execute() {
+	if err := cmd.RootCmd.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(-1)
+	}
 }

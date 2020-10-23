@@ -27,16 +27,17 @@ import (
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
+	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-const exportAPIsCmdLiteral = "export-apis"
+const ExportAPIsCmdLiteral = "apis"
 const exportAPIsCmdShortDesc = "Export APIs for migration"
 
 const exportAPIsCmdLongDesc = "Export all the APIs of a tenant from one environment, to be imported " +
 	"into another environment"
-const exportAPIsCmdExamples = utils.ProjectName + ` ` + exportAPIsCmdLiteral + ` -e production --force
-` + utils.ProjectName + ` ` + exportAPIsCmdLiteral + ` -e production
+const exportAPIsCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPIsCmdLiteral + ` -e production --force
+` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPIsCmdLiteral + ` -e production
 NOTE: The flag (--environment (-e)) is mandatory`
 
 var apiExportDir string
@@ -54,16 +55,16 @@ var mainConfigFilePath string
 var credential credentials.Credential
 
 var ExportAPIsCmd = &cobra.Command{
-	Use: exportAPIsCmdLiteral + " (--environment " +
+	Use: ExportAPIsCmdLiteral + " (--environment " +
 		"<environment-from-which-artifacts-should-be-exported> --format <export-format> --preserveStatus --force)",
 	Short:   exportAPIsCmdShortDesc,
 	Long:    exportAPIsCmdLongDesc,
 	Example: exportAPIsCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + exportAPIsCmdLiteral + " called")
+		utils.Logln(utils.LogPrefixInfo + ExportAPIsCmdLiteral + " called")
 		var artifactExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedMigrationArtifactsDirName)
 
-		cred, err := getCredentials(cmdExportEnvironment)
+		cred, err := GetCredentials(CmdExportEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
@@ -78,14 +79,14 @@ var ExportAPIsCmd = &cobra.Command{
 func executeExportAPIsCmd(exportDirectory string) {
 	//create dir structure
 	apiExportDir = createExportAPIsDirStructure(exportDirectory)
-	exportRelatedFilesPath = filepath.Join(exportDirectory, cmdExportEnvironment,
+	exportRelatedFilesPath = filepath.Join(exportDirectory, CmdExportEnvironment,
 		utils.GetMigrationExportTenantDirName(cmdResourceTenantDomain))
 	//e.g. /home/samithac/.wso2apictl/exported/migration/production-2.5/wso2-dot-org
 	startFromBeginning = false
 	isProcessCompleted = false
 
 	fmt.Println("\nExporting APIs for the migration...")
-	if cmdForceStartFromBegin {
+	if CmdForceStartFromBegin {
 		startFromBeginning = true
 	}
 
@@ -98,6 +99,13 @@ func executeExportAPIsCmd(exportDirectory string) {
 	exportAPIs()
 }
 
+func ExecuteExportAPIsCmdByDeprecatedCommand(exportDirectory string, data map[interface{}]interface{}) {
+	credential = data["credential"].(credentials.Credential)
+	exportAPIsFormat = data["exportAPIsFormat"].(string)
+	exportAPIPreserveStatus = data["exportAPIPreserveStatus"].(bool)
+	executeExportAPIsCmd(exportDirectory)
+}
+
 // Do the API exportation
 func exportAPIs() {
 	if count == 0 {
@@ -105,25 +113,23 @@ func exportAPIs() {
 	} else {
 		var counterSuceededAPIs = 0
 		for count > 0 {
-			utils.Logln(utils.LogPrefixInfo + "Found ", count, "of APIs to be exported in the iteration beginning with the offset #"+
+			utils.Logln(utils.LogPrefixInfo+"Found ", count, "of APIs to be exported in the iteration beginning with the offset #"+
 				strconv.Itoa(apiListOffset)+". Maximum limit of APIs exported in single iteration is "+
 				strconv.Itoa(utils.MaxAPIsToExportOnce))
-			accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, cmdExportEnvironment)
+			accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, CmdExportEnvironment)
 			if preCommandErr == nil {
 				for i := startingApiIndexFromList; i < len(apis); i++ {
 					exportAPIName := apis[i].Name
 					exportAPIVersion := apis[i].Version
 					exportApiProvider := apis[i].Provider
-					adminEndpoint := utils.GetAdminEndpointOfEnv(cmdExportEnvironment, utils.MainConfigFilePath)
-					resp, err := getExportApiResponse(exportAPIName, exportAPIVersion, exportApiProvider, exportAPIsFormat,
-						adminEndpoint, accessToken, exportAPIPreserveStatus)
+					resp, err := impl.ExportAPIFromEnv(accessToken, exportAPIName, exportAPIVersion, exportApiProvider, exportAPIsFormat, CmdExportEnvironment, exportAPIPreserveStatus)
 					if err != nil {
 						utils.HandleErrorAndExit("Error exporting", err)
 					}
 
 					if resp.StatusCode() == http.StatusOK {
 						utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
-						WriteToZip(exportAPIName, exportAPIVersion, apiExportDir, resp)
+						impl.WriteToZip(exportAPIName, exportAPIVersion, apiExportDir, runningExportApiCommand, resp)
 						//write on last-succeeded-api.log
 						counterSuceededAPIs++
 						utils.WriteLastSuceededAPIFileData(exportRelatedFilesPath, apis[i])
@@ -232,7 +238,7 @@ func createExportAPIsDirStructure(artifactExportDirectory string) string {
 	var createDirError error
 	createDirError = utils.CreateDirIfNotExist(artifactExportDirectory)
 
-	migrationsArtifactsEnvPath := filepath.Join(artifactExportDirectory, cmdExportEnvironment)
+	migrationsArtifactsEnvPath := filepath.Join(artifactExportDirectory, CmdExportEnvironment)
 	migrationsArtifactsEnvTenantPath := filepath.Join(migrationsArtifactsEnvPath, resourceTenantDirName)
 	migrationsArtifactsEnvTenantApisPath := filepath.Join(migrationsArtifactsEnvTenantPath, utils.ExportedApisDirName)
 
@@ -240,7 +246,7 @@ func createExportAPIsDirStructure(artifactExportDirectory string) string {
 	createDirError = utils.CreateDirIfNotExist(migrationsArtifactsEnvTenantPath)
 
 	if dirExists, _ := utils.IsDirExists(migrationsArtifactsEnvTenantApisPath); dirExists {
-		if cmdForceStartFromBegin {
+		if CmdForceStartFromBegin {
 			utils.RemoveDirectory(migrationsArtifactsEnvTenantApisPath)
 			createDirError = utils.CreateDir(migrationsArtifactsEnvTenantApisPath)
 		}
@@ -257,9 +263,9 @@ func createExportAPIsDirStructure(artifactExportDirectory string) string {
 
 // Get the list of APIs from the defined offset index, upto the limit of constant value utils.MaxAPIsToExportOnce
 func getAPIList() (count int32, apis []utils.API) {
-	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, cmdExportEnvironment)
+	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, CmdExportEnvironment)
 	if preCommandErr == nil {
-		apiListEndpoint := utils.GetApiListEndpointOfEnv(cmdExportEnvironment, utils.MainConfigFilePath)
+		apiListEndpoint := utils.GetApiListEndpointOfEnv(CmdExportEnvironment, utils.MainConfigFilePath)
 		apiListEndpoint += "?limit=" + strconv.Itoa(utils.MaxAPIsToExportOnce) + "&offset=" + strconv.Itoa(apiListOffset)
 		if cmdResourceTenantDomain != "" {
 			apiListEndpoint += "&tenantDomain=" + cmdResourceTenantDomain
@@ -278,10 +284,10 @@ func getAPIList() (count int32, apis []utils.API) {
 }
 
 func init() {
-	RootCmd.AddCommand(ExportAPIsCmd)
-	ExportAPIsCmd.Flags().StringVarP(&cmdExportEnvironment, "environment", "e",
+	ExportCmd.AddCommand(ExportAPIsCmd)
+	ExportAPIsCmd.Flags().StringVarP(&CmdExportEnvironment, "environment", "e",
 		"", "Environment from which the APIs should be exported")
-	ExportAPIsCmd.PersistentFlags().BoolVarP(&cmdForceStartFromBegin, "force", "", false,
+	ExportAPIsCmd.PersistentFlags().BoolVarP(&CmdForceStartFromBegin, "force", "", false,
 		"Clean all the previously exported APIs of the given target tenant, in the given environment if "+
 			"any, and to export APIs from beginning")
 	ExportAPIsCmd.Flags().BoolVarP(&exportAPIPreserveStatus, "preserveStatus", "", true,

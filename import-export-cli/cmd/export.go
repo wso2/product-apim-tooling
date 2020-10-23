@@ -24,21 +24,27 @@ import (
 )
 
 // Export command related usage Info
-const exportCmdLiteral = "export"
-const exportCmdShortDesc = "Export an API Product in an environment"
+const ExportCmdLiteral = "export"
+const exportCmdShortDesc = "Export an API/API Product/Application in an environment"
 
-const exportCmdLongDesc = `Export an API Product available in the environment specified by flag (--environment, -e)`
+const exportCmdLongDesc = `Export an API available in the environment specified by flag (--environment, -e) in default mode
+Export APIs available in the environment specified by flag (--environment, -e) in default mode
+Export an API Product available in the environment specified by flag (--environment, -e) in default mode
+Export an Application of a specific user (--owner, -o) in the environment specified by flag (--environment, -e) in default mode`
 
-const exportCmdExamples = utils.ProjectName + ` ` + exportCmdLiteral + ` ` + exportAPIProductCmdLiteral + ` -n LeasingAPIProduct -e dev`
+const exportCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin -e dev
+` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPIsCmdLiteral + ` -e dev
+` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPIProductCmdLiteral + ` -n LeasingAPIProduct -e dev
+` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAppCmdLiteral + ` -n SampleApp -o admin -e dev`
 
 // ExportCmd represents the export command
 var ExportCmd = &cobra.Command{
-	Use:     exportCmdLiteral,
+	Use:     ExportCmdLiteral,
 	Short:   exportCmdShortDesc,
 	Long:    exportCmdLongDesc,
 	Example: exportCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + exportCmdLiteral + " called")
+		utils.Logln(utils.LogPrefixInfo + ExportCmdLiteral + " called")
 
 	},
 }

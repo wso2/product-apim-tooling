@@ -128,7 +128,8 @@ func runLogin(store credentials.Store, environment, username, password string) e
 	return nil
 }
 
-func getCredentials(env string) (credentials.Credential, error) {
+// GetCredentials functions get the credentials for the specified environment
+func GetCredentials(env string) (credentials.Credential, error) {
 	// get tokens or login
 	store, err := credentials.GetDefaultCredentialStore()
 	if err != nil {

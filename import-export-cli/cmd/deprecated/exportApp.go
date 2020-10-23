@@ -16,17 +16,18 @@
 * under the License.
  */
 
-package cmd
+package deprecated
 
 import (
 	"fmt"
 	"net/http"
 	"path/filepath"
 
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd"
+	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 
 	"github.com/spf13/cobra"
-	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
@@ -36,27 +37,28 @@ var exportAppWithKeys bool
 
 //var flagExportAPICmdToken string
 // ExportApp command related usage info
-const ExportAppCmdLiteral = "app"
+const exportAppCmdLiteral = "export-app"
 const exportAppCmdShortDesc = "Export App"
 
 const exportAppCmdLongDesc = "Export an Application from a specified  environment"
 
-const exportAppCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAppCmdLiteral + ` -n SampleApp -o admin -e dev
-` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAppCmdLiteral + ` -n SampleApp -o admin -e prod
+const exportAppCmdExamples = utils.ProjectName + ` ` + exportAppCmdLiteral + ` -n SampleApp -o admin -e dev
+` + utils.ProjectName + ` ` + exportAppCmdLiteral + ` -n SampleApp -o admin -e prod
 NOTE: All the 3 flags (--name (-n), --owner (-o) and --environment (-e)) are mandatory`
 
 // exportAppCmd represents the exportApp command
-var ExportAppCmd = &cobra.Command{
-	Use: ExportAppCmdLiteral + " (--name <name-of-the-application> --owner <owner-of-the-application> --environment " +
+var ExportAppCmdDeprecated = &cobra.Command{
+	Use: exportAppCmdLiteral + " (--name <name-of-the-application> --owner <owner-of-the-application> --environment " +
 		"<environment-from-which-the-app-should-be-exported>)",
-	Short:   exportAppCmdShortDesc,
-	Long:    exportAppCmdLongDesc,
-	Example: exportAppCmdExamples,
-	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + ExportAppCmdLiteral + " called")
-		var appsExportDirectoryPath = filepath.Join(utils.ExportDirectory, utils.ExportedAppsDirName, CmdExportEnvironment)
+	Short:      exportAppCmdShortDesc,
+	Long:       exportAppCmdLongDesc,
+	Example:    exportAppCmdExamples,
+	Deprecated: "instead use \"" + cmd.ExportCmdLiteral + " " + cmd.ExportAppCmdLiteral + "\".",
+	Run: func(deprecatedCmd *cobra.Command, args []string) {
+		utils.Logln(utils.LogPrefixInfo + exportAppCmdLiteral + " called")
+		var appsExportDirectoryPath = filepath.Join(utils.ExportDirectory, utils.ExportedAppsDirName, cmd.CmdExportEnvironment)
 
-		cred, err := GetCredentials(CmdExportEnvironment)
+		cred, err := cmd.GetCredentials(cmd.CmdExportEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
@@ -65,10 +67,10 @@ var ExportAppCmd = &cobra.Command{
 }
 
 func executeExportAppCmd(credential credentials.Credential, appsExportDirectoryPath string) {
-	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, CmdExportEnvironment)
+	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, cmd.CmdExportEnvironment)
 
 	if preCommandErr == nil {
-		resp, err := impl.ExportAppFromEnv(accessToken, exportAppName, exportAppOwner, CmdExportEnvironment, exportAppWithKeys)
+		resp, err := impl.ExportAppFromEnv(accessToken, exportAppName, exportAppOwner, cmd.CmdExportEnvironment, exportAppWithKeys)
 		if err != nil {
 			utils.HandleErrorAndExit("Error exporting Application: "+exportAppName, err)
 		}
@@ -88,16 +90,16 @@ func executeExportAppCmd(credential credentials.Credential, appsExportDirectoryP
 
 //init using Cobra
 func init() {
-	ExportCmd.AddCommand(ExportAppCmd)
-	ExportAppCmd.Flags().StringVarP(&exportAppName, "name", "n", "",
+	cmd.RootCmd.AddCommand(ExportAppCmdDeprecated)
+	ExportAppCmdDeprecated.Flags().StringVarP(&exportAppName, "name", "n", "",
 		"Name of the Application to be exported")
-	ExportAppCmd.Flags().StringVarP(&exportAppOwner, "owner", "o", "",
+	ExportAppCmdDeprecated.Flags().StringVarP(&exportAppOwner, "owner", "o", "",
 		"Owner of the Application to be exported")
-	ExportAppCmd.Flags().StringVarP(&CmdExportEnvironment, "environment", "e",
+	ExportAppCmdDeprecated.Flags().StringVarP(&cmd.CmdExportEnvironment, "environment", "e",
 		"", "Environment to which the Application should be exported")
-	ExportAppCmd.Flags().BoolVarP(&exportAppWithKeys, "withKeys", "",
+	ExportAppCmdDeprecated.Flags().BoolVarP(&exportAppWithKeys, "withKeys", "",
 		false, "Export keys for the application ")
-	_ = ExportAppCmd.MarkFlagRequired("environment")
-	_ = ExportAppCmd.MarkFlagRequired("owner")
-	_ = ExportAppCmd.MarkFlagRequired("name")
+	_ = ExportAppCmdDeprecated.MarkFlagRequired("environment")
+	_ = ExportAppCmdDeprecated.MarkFlagRequired("owner")
+	_ = ExportAppCmdDeprecated.MarkFlagRequired("name")
 }
