@@ -42,10 +42,10 @@ const (
 	importAPIProductCmdLongDesc  = "Import an API Product to an environment"
 )
 
-const importAPIProductCmdExamples = utils.ProjectName + ` ` + importCmdLiteral + ` ` + importAPIProductCmdLiteral + ` -f qa/LeasingAPIProduct.zip -e dev
-` + utils.ProjectName + ` ` + importCmdLiteral + ` ` + importAPIProductCmdLiteral + ` -f staging/CreditAPIProduct.zip -e production --update-api-product
-` + utils.ProjectName + ` ` + importCmdLiteral + ` ` + importAPIProductCmdLiteral + ` -f ~/myapiproduct -e production
-` + utils.ProjectName + ` ` + importCmdLiteral + ` ` + importAPIProductCmdLiteral + ` -f ~/myapiproduct -e production --update-api-product --update-apis
+const importAPIProductCmdExamples = utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + importAPIProductCmdLiteral + ` -f qa/LeasingAPIProduct.zip -e dev
+` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + importAPIProductCmdLiteral + ` -f staging/CreditAPIProduct.zip -e production --update-api-product
+` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + importAPIProductCmdLiteral + ` -f ~/myapiproduct -e production
+` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + importAPIProductCmdLiteral + ` -f ~/myapiproduct -e production --update-api-product --update-apis
 NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory`
 
 // ImportAPIProductCmd represents the importAPIProduct command

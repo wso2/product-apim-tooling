@@ -24,21 +24,25 @@ import (
 )
 
 // Import command related usage Info
-const importCmdLiteral = "import"
-const importCmdShortDesc = "Import an API Product to an environment"
+const ImportCmdLiteral = "import"
+const importCmdShortDesc = "Import an API/API Product/Application to an environment"
 
-const importCmdLongDesc = `Import an API Product to the environment specified by flag (--environment, -e)`
+const importCmdLongDesc = `Import an API to the environment specified by flag (--environment, -e)
+Import an API Product to the environment specified by flag (--environment, -e)
+Import an Application to the environment specified by flag (--environment, -e)`
 
-const importCmdExamples = utils.ProjectName + ` ` + importCmdLiteral + ` ` + importAPIProductCmdLiteral + ` -f qa/LeasingAPIProduct.zip -e dev`
+const importCmdExamples = utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAPICmdLiteral + ` -f qa/TwitterAPI.zip -e dev
+` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + importAPIProductCmdLiteral + ` -f qa/LeasingAPIProduct.zip -e dev
+` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAppCmdLiteral + ` -f qa/apps/sampleApp.zip -e dev`
 
 // ImportCmd represents the import command
 var ImportCmd = &cobra.Command{
-	Use:     importCmdLiteral,
+	Use:     ImportCmdLiteral,
 	Short:   importCmdShortDesc,
 	Long:    importCmdLongDesc,
 	Example: importCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + importCmdLiteral + " called")
+		utils.Logln(utils.LogPrefixInfo + ImportCmdLiteral + " called")
 
 	},
 }

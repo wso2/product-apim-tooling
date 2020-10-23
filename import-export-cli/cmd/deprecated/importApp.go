@@ -16,10 +16,11 @@
 * under the License.
  */
 
-package cmd
+package deprecated
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -35,26 +36,27 @@ var importAppUpdateApplication bool
 var importAppSkipCleanup bool
 
 // ImportApp command related usage info
-const ImportAppCmdLiteral = "app"
+const importAppCmdLiteral = "import-app"
 const importAppCmdShortDesc = "Import App"
 
 const importAppCmdLongDesc = "Import an Application to an environment"
 
-const importAppCmdExamples = utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAppCmdLiteral + ` -f qa/apps/sampleApp.zip -e dev
-` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAppCmdLiteral + ` -f staging/apps/sampleApp.zip -e prod -o testUser
-` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAppCmdLiteral + ` -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -e prod
+const importAppCmdExamples = utils.ProjectName + ` ` + importAppCmdLiteral + ` -f qa/apps/sampleApp.zip -e dev
+` + utils.ProjectName + ` ` + importAppCmdLiteral + ` -f staging/apps/sampleApp.zip -e prod -o testUser
+` + utils.ProjectName + ` ` + importAppCmdLiteral + ` -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -e prod
 NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory`
 
 // importAppCmd represents the importApp command
-var ImportAppCmd = &cobra.Command{
-	Use: ImportAppCmdLiteral + " (--file <app-zip-file> --environment " +
+var ImportAppCmdDeprecated = &cobra.Command{
+	Use: importAppCmdLiteral + " (--file <app-zip-file> --environment " +
 		"<environment-to-which-the-app-should-be-imported>)",
-	Short:   importAppCmdShortDesc,
-	Long:    importAppCmdLongDesc,
-	Example: importAppCmdExamples,
-	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + ImportAppCmdLiteral + " called")
-		cred, err := GetCredentials(importAppEnvironment)
+	Short:      importAppCmdShortDesc,
+	Long:       importAppCmdLongDesc,
+	Example:    importAppCmdExamples,
+	Deprecated: "instead use \"" + cmd.ImportCmdLiteral + " " + cmd.ImportAppCmdLiteral + "\".",
+	Run: func(deprecatedCmd *cobra.Command, args []string) {
+		utils.Logln(utils.LogPrefixInfo + importAppCmdLiteral + " called")
+		cred, err := cmd.GetCredentials(importAppEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
@@ -75,23 +77,23 @@ func executeImportAppCmd(credential credentials.Credential) {
 }
 
 func init() {
-	ImportCmd.AddCommand(ImportAppCmd)
-	ImportAppCmd.Flags().StringVarP(&importAppFile, "file", "f", "",
+	cmd.RootCmd.AddCommand(ImportAppCmdDeprecated)
+	ImportAppCmdDeprecated.Flags().StringVarP(&importAppFile, "file", "f", "",
 		"Name of the ZIP file of the Application to be imported")
-	ImportAppCmd.Flags().StringVarP(&importAppOwner, "owner", "o", "",
+	ImportAppCmdDeprecated.Flags().StringVarP(&importAppOwner, "owner", "o", "",
 		"Name of the target owner of the Application as desired by the Importer")
-	ImportAppCmd.Flags().StringVarP(&importAppEnvironment, "environment", "e",
+	ImportAppCmdDeprecated.Flags().StringVarP(&importAppEnvironment, "environment", "e",
 		"", "Environment from the which the Application should be imported")
-	ImportAppCmd.Flags().BoolVarP(&preserveOwner, "preserveOwner", "", false,
+	ImportAppCmdDeprecated.Flags().BoolVarP(&preserveOwner, "preserveOwner", "", false,
 		"Preserves app owner")
-	ImportAppCmd.Flags().BoolVarP(&skipSubscriptions, "skipSubscriptions", "s", false,
+	ImportAppCmdDeprecated.Flags().BoolVarP(&skipSubscriptions, "skipSubscriptions", "s", false,
 		"Skip subscriptions of the Application")
-	ImportAppCmd.Flags().BoolVarP(&importAppSkipKeys, "skipKeys", "", false,
+	ImportAppCmdDeprecated.Flags().BoolVarP(&importAppSkipKeys, "skipKeys", "", false,
 		"Skip importing keys of the Application")
-	ImportAppCmd.Flags().BoolVarP(&importAppUpdateApplication, "update", "", false,
+	ImportAppCmdDeprecated.Flags().BoolVarP(&importAppUpdateApplication, "update", "", false,
 		"Update the Application if it is already imported")
-	ImportAppCmd.Flags().BoolVarP(&importAppSkipCleanup, "skipCleanup", "", false, "Leave "+
+	ImportAppCmdDeprecated.Flags().BoolVarP(&importAppSkipCleanup, "skipCleanup", "", false, "Leave "+
 		"all temporary files created during import process")
-	_ = ImportAppCmd.MarkFlagRequired("file")
-	_ = ImportAppCmd.MarkFlagRequired("environment")
+	_ = ImportAppCmdDeprecated.MarkFlagRequired("file")
+	_ = ImportAppCmdDeprecated.MarkFlagRequired("environment")
 }
