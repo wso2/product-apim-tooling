@@ -73,7 +73,7 @@ func CreateControllerConfigs(configFile string, maxTimeSec int, resourceTypes ..
 		dec := yaml.NewDecoder(bytes.NewReader(data))
 		for yml := make(YAML); dec.Decode(&yml) == nil; yml = make(YAML) {
 			if strings.EqualFold(fmt.Sprint(yml[kindKey]), CrdKind) ||
-				strings.EqualFold(fmt.Sprint(yml[kindKey]), namespaceKey) {
+				strings.EqualFold(fmt.Sprint(yml[kindKey]), Namespace) {
 				crds = append(crds, yml)
 			} else {
 				nonCrds = append(nonCrds, yml)
