@@ -23,19 +23,19 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-const installCmdLiteral = "install"
-const installCmdShortDesc = "Install an operator in the configured K8s cluster"
-const installCmdLongDesc = "Install an operator in the configured K8s cluster"
-const installCmdExamples = utils.ProjectName + ` ` + installCmdLiteral + ` ` + installApiOperatorCmdLiteral
+const K8sInstallCmdLiteral = "install"
+const k8sInstallCmdShortDesc = "Install an operator in the configured K8s cluster"
+const k8sInstallCmdLongDesc = "Install an operator in the configured K8s cluster"
+const k8sInstallCmdExamples = utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sInstallCmdLiteral + ` ` + K8sInstallApiOperatorCmdLiteral
 
 // installCmd represents the install command
 var installCmd = &cobra.Command{
-	Use:     installCmdLiteral,
-	Short:   installCmdShortDesc,
-	Long:    installCmdLongDesc,
-	Example: installCmdExamples,
+	Use:     K8sInstallCmdLiteral,
+	Short:   k8sInstallCmdShortDesc,
+	Long:    k8sInstallCmdLongDesc,
+	Example: k8sInstallCmdExamples,
 }
 
 func init() {
-	RootCmd.AddCommand(installCmd)
+	K8sCmd.AddCommand(installCmd)
 }

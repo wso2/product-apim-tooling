@@ -20,30 +20,31 @@ package cmd
 
 import (
 	"fmt"
+
 	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 
 	"github.com/spf13/cobra"
 )
 
-const installWso2amOperatorCmdLiteral = "wso2am-operator"
-const installWso2amOperatorCmdShortDesc = "Install WSO2AM Operator"
-const installWso2amOperatorCmdLongDesc = "Install WSO2AM Operator in the configured K8s cluster"
-const installWso2amOperatorCmdExamples = utils.ProjectName + ` ` + installCmdLiteral + ` ` + installWso2amOperatorCmdLiteral + `
-` + utils.ProjectName + ` ` + installCmdLiteral + ` ` + installWso2amOperatorCmdLiteral + ` -f path/to/operator/configs
-` + utils.ProjectName + ` ` + installCmdLiteral + ` ` + installWso2amOperatorCmdLiteral + ` -f path/to/operator/config/file.yaml`
+const K8sInstallWso2amOperatorCmdLiteral = "wso2am-operator"
+const k8sInstallWso2amOperatorCmdShortDesc = "Install WSO2AM Operator"
+const k8sInstallWso2amOperatorCmdLongDesc = "Install WSO2AM Operator in the configured K8s cluster"
+const k8sInstallWso2amOperatorCmdExamples = utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sInstallCmdLiteral + ` ` + K8sInstallWso2amOperatorCmdLiteral + `
+` + utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sInstallCmdLiteral + ` ` + K8sInstallWso2amOperatorCmdLiteral + ` -f path/to/operator/configs
+` + utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sInstallCmdLiteral + ` ` + K8sInstallWso2amOperatorCmdLiteral + ` -f path/to/operator/config/file.yaml`
 
 // flags
 var flagWso2AmOperatorFile string
 
 // installWso2amOperatorCmd represents the 'install wso2am-operator' command
 var installWso2amOperatorCmd = &cobra.Command{
-	Use:     installWso2amOperatorCmdLiteral,
-	Short:   installWso2amOperatorCmdShortDesc,
-	Long:    installWso2amOperatorCmdLongDesc,
-	Example: installWso2amOperatorCmdExamples,
+	Use:     K8sInstallWso2amOperatorCmdLiteral,
+	Short:   k8sInstallWso2amOperatorCmdShortDesc,
+	Long:    k8sInstallWso2amOperatorCmdLongDesc,
+	Example: k8sInstallWso2amOperatorCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(fmt.Sprintf("%s%s %s called", utils.LogPrefixInfo, installCmdLiteral, installWso2amOperatorCmdLiteral))
+		utils.Logln(fmt.Sprintf("%s%s %s called", utils.LogPrefixInfo, K8sInstallCmdLiteral, K8sInstallWso2amOperatorCmdLiteral))
 
 		// is -f or --from-file flag specified
 		isLocalInstallation := flagWso2AmOperatorFile != ""
