@@ -11,12 +11,12 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/hashicorp/go-multierror v1.0.0
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
-	github.com/magiconair/properties v1.8.0
+	github.com/magiconair/properties v1.8.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/renstrom/dedent v1.0.0
 	github.com/spf13/cast v1.3.0
-	github.com/spf13/cobra v0.0.5
+	github.com/spf13/cobra v1.1.1
 	github.com/stretchr/testify v1.4.0
 	github.com/wso2/k8s-api-operator/api-operator v0.0.0-20200722085006-f178a61e4fde
 	golang.org/x/crypto v0.0.0-20200220183623-bac4c82f6975
