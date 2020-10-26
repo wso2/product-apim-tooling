@@ -16,12 +16,14 @@
 * under the License.
  */
 
-package cmd
+package deprecated
 
 import (
 	"errors"
 	"fmt"
+
 	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd"
 	"github.com/wso2/product-apim-tooling/import-export-cli/operator/registry"
 	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -32,12 +34,13 @@ const changeCmdShortDesc = "Change a configuration in K8s cluster resource"
 const changeCmdLongDesc = "Change a configuration in K8s cluster resource"
 const changeCmdExamples = utils.ProjectName + ` ` + changeCmdLiteral + ` ` + changeDockerRegistryCmdLiteral
 
-// changeCmd represents the change command
-var changeCmd = &cobra.Command{
-	Use:     changeCmdLiteral,
-	Short:   changeCmdShortDesc,
-	Long:    changeCmdLongDesc,
-	Example: changeCmdExamples,
+// changeCmdDeprecated represents the change command
+var changeCmdDeprecated = &cobra.Command{
+	Use:        changeCmdLiteral,
+	Short:      changeCmdShortDesc,
+	Long:       changeCmdLongDesc,
+	Example:    changeCmdExamples,
+	Deprecated: "instead use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sChangeCmdLiteral + "\".",
 }
 
 const changeDockerRegistryCmdLiteral = "registry"
@@ -45,12 +48,13 @@ const changeDockerRegistryCmdShortDesc = "Change the registry"
 const changeDockerRegistryCmdLongDesc = "Change the registry to be pushed the built micro-gateway image"
 const changeDockerRegistryCmdExamples = utils.ProjectName + ` ` + changeCmdLiteral + ` ` + changeDockerRegistryCmdLiteral
 
-// changeDockerRegistryCmd represents the change registry command
-var changeDockerRegistryCmd = &cobra.Command{
-	Use:     changeDockerRegistryCmdLiteral,
-	Short:   changeDockerRegistryCmdShortDesc,
-	Long:    changeDockerRegistryCmdLongDesc,
-	Example: changeDockerRegistryCmdExamples,
+// changeDockerRegistryCmdDeprecated represents the change registry command
+var changeDockerRegistryCmdDeprecated = &cobra.Command{
+	Use:        changeDockerRegistryCmdLiteral,
+	Short:      changeDockerRegistryCmdShortDesc,
+	Long:       changeDockerRegistryCmdLongDesc,
+	Example:    changeDockerRegistryCmdExamples,
+	Deprecated: "instead use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sChangeCmdLiteral + " " + cmd.K8sChangeDockerRegistryCmdLiteral + "\".",
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(fmt.Sprintf("%s%s %s called", utils.LogPrefixInfo, changeCmdLiteral, changeDockerRegistryCmdLiteral))
 		configVars := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
@@ -80,16 +84,16 @@ var changeDockerRegistryCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.AddCommand(changeCmd)
-	changeCmd.AddCommand(changeDockerRegistryCmd)
+	cmd.RootCmd.AddCommand(changeCmdDeprecated)
+	changeCmdDeprecated.AddCommand(changeDockerRegistryCmdDeprecated)
 
 	// flags for installing api-operator in batch mode
 	// only the flag "registry-type" is required and others are registry specific flags
 	// same flags defined in 'installApiOperator'
-	changeDockerRegistryCmd.Flags().StringVarP(&flagBmRegistryType, "registry-type", "R", "", "Registry type: DOCKER_HUB | AMAZON_ECR |GCR | HTTP")
-	changeDockerRegistryCmd.Flags().StringVarP(&flagBmRepository, k8sUtils.FlagBmRepository, "r", "", "Repository name or URI")
-	changeDockerRegistryCmd.Flags().StringVarP(&flagBmUsername, k8sUtils.FlagBmUsername, "u", "", "Username of the repository")
-	changeDockerRegistryCmd.Flags().StringVarP(&flagBmPassword, k8sUtils.FlagBmPassword, "p", "", "Password of the given user")
-	changeDockerRegistryCmd.Flags().BoolVar(&flagBmPasswordStdin, k8sUtils.FlagBmPasswordStdin, false, "Prompt for password of the given user in the stdin")
-	changeDockerRegistryCmd.Flags().StringVarP(&flagBmKeyFile, k8sUtils.FlagBmKeyFile, "c", "", "Credentials file")
+	changeDockerRegistryCmdDeprecated.Flags().StringVarP(&flagBmRegistryType, "registry-type", "R", "", "Registry type: DOCKER_HUB | AMAZON_ECR |GCR | HTTP")
+	changeDockerRegistryCmdDeprecated.Flags().StringVarP(&flagBmRepository, k8sUtils.FlagBmRepository, "r", "", "Repository name or URI")
+	changeDockerRegistryCmdDeprecated.Flags().StringVarP(&flagBmUsername, k8sUtils.FlagBmUsername, "u", "", "Username of the repository")
+	changeDockerRegistryCmdDeprecated.Flags().StringVarP(&flagBmPassword, k8sUtils.FlagBmPassword, "p", "", "Password of the given user")
+	changeDockerRegistryCmdDeprecated.Flags().BoolVar(&flagBmPasswordStdin, k8sUtils.FlagBmPasswordStdin, false, "Prompt for password of the given user in the stdin")
+	changeDockerRegistryCmdDeprecated.Flags().StringVarP(&flagBmKeyFile, k8sUtils.FlagBmKeyFile, "c", "", "Credentials file")
 }

@@ -33,7 +33,7 @@ const k8sCmdExamples = utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sInstal
 ` + utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sUninstallCmdLiteral + ` ` + K8sUninstallApiOperatorCmdLiteral + `
 ` + utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sAddCmdLiteral + ` ` + AddApiCmdLiteral + ` ` + `-n petstore --from-file=./Swagger.json --replicas=1 --namespace=wso2
 ` + utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sUpdateCmdLiteral + ` ` + AddApiCmdLiteral + ` ` + `-n petstore --from-file=./Swagger.json --replicas=1 --namespace=wso2
-`
+` + utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sChangeCmdLiteral + ` ` + K8sChangeDockerRegistryCmdLiteral
 
 // K8sCmd represents the import command
 var K8sCmd = &cobra.Command{
