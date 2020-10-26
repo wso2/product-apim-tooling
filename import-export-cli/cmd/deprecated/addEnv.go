@@ -16,16 +16,16 @@
 * under the License.
  */
 
-package cmd
+package deprecated
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd"
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-var envToBeAdded string // Name of the environment to be added
-
+var flagAddEnvName string           // name of the environment to be added
 var flagTokenEndpoint string        // token endpoint of the environment to be added
 var flagPublisherEndpoint string    // Publisher endpoint of the environment to be added
 var flagDevPortalEndpoint string    // DevPortal endpoint of the environment to be added
@@ -34,39 +34,38 @@ var flagApiManagerEndpoint string   // api manager endpoint of the environment t
 var flagAdminEndpoint string        // admin endpoint of the environment to be added
 
 // AddEnv command related Info
-const AddEnvCmdLiteral = "env [environment]"
-const AddEnvCmdLiteralTrimmed = "env"
+const addEnvCmdLiteral = "add-env"
 const addEnvCmdShortDesc = "Add Environment to Config file"
 const addEnvCmdLongDesc = "Add new environment and its related endpoints to the config file"
-const addEnvCmdExamples = utils.ProjectName + ` ` + AddCmdLiteral + ` ` + AddEnvCmdLiteralTrimmed + ` production \
+const addEnvCmdExamples = utils.ProjectName + ` ` + addEnvCmdLiteral + ` -e production \
 --apim  https://localhost:9443 
 
-` + utils.ProjectName + ` ` + AddCmdLiteral + ` ` + AddEnvCmdLiteralTrimmed + ` test \
+` + utils.ProjectName + ` ` + addEnvCmdLiteral + ` -e test \
 --registration https://idp.com:9443 \
 --publisher https://apim.com:9443 \
 --devportal  https://apps.com:9443 \
 --admin  https://apim.com:9443 \
 --token https://gw.com:8243/token
 
-` + utils.ProjectName + ` ` + AddCmdLiteral + ` ` + AddEnvCmdLiteralTrimmed + ` dev \
+` + utils.ProjectName + ` ` + addEnvCmdLiteral + ` -e dev \
 --apim https://apim.com:9443 \
 --registration https://idp.com:9443 \
 --token https://gw.com:8243/token
 
+NOTE: The flag --environment (-e) is mandatory.
 You can either provide only the flag --apim , or all the other 4 flags (--registration --publisher --devportal --admin) without providing --apim flag.
 If you are omitting any of --registration --publisher --devportal --admin flags, you need to specify --apim flag with the API Manager endpoint. In both of the
 cases --token flag is optional and use it to specify the gateway token endpoint. This will be used for "apictl get-keys" operation.`
 
-// addEnvCmd represents the addEnv command
-var addEnvCmd = &cobra.Command{
-	Use:     AddEnvCmdLiteral,
-	Short:   addEnvCmdShortDesc,
-	Long:    addEnvCmdLongDesc,
-	Example: addEnvCmdExamples,
+// addEnvCmdDeprecated represents the addEnv command
+var addEnvCmdDeprecated = &cobra.Command{
+	Use:        addEnvCmdLiteral,
+	Short:      addEnvCmdShortDesc,
+	Long:       addEnvCmdLongDesc,
+	Example:    addEnvCmdExamples,
+	Deprecated: "instead use \"" + cmd.AddCmdLiteral + " " + cmd.AddEnvCmdLiteral + "\".",
 	Run: func(cmd *cobra.Command, args []string) {
-		envToBeAdded = args[0]
-
-		utils.Logln(utils.LogPrefixInfo + AddEnvCmdLiteral + " called")
+		utils.Logln(utils.LogPrefixInfo + addEnvCmdLiteral + " called")
 		executeAddEnvCmd(utils.MainConfigFilePath)
 	},
 }
@@ -80,7 +79,7 @@ func executeAddEnvCmd(mainConfigFilePath string) {
 	envEndpoints.DevPortalEndpoint = flagDevPortalEndpoint
 	envEndpoints.AdminEndpoint = flagAdminEndpoint
 	envEndpoints.TokenEndpoint = flagTokenEndpoint
-	err := impl.AddEnv(envToBeAdded, envEndpoints, mainConfigFilePath, AddEnvCmdLiteral)
+	err := impl.AddEnv(flagAddEnvName, envEndpoints, mainConfigFilePath, addEnvCmdLiteral)
 	if err != nil {
 		utils.HandleErrorAndExit("Error adding environment", err)
 	}
@@ -88,14 +87,15 @@ func executeAddEnvCmd(mainConfigFilePath string) {
 
 // init using Cobra
 func init() {
-	AddCmd.AddCommand(addEnvCmd)
+	cmd.RootCmd.AddCommand(addEnvCmdDeprecated)
 
-	addEnvCmd.Flags().StringVar(&flagApiManagerEndpoint, "apim", "", "API Manager endpoint for the environment")
-	addEnvCmd.Flags().StringVar(&flagPublisherEndpoint, "publisher", "", "Publisher endpoint for the environment")
-	addEnvCmd.Flags().StringVar(&flagDevPortalEndpoint, "devportal", "", "DevPortal endpoint for the environment")
-	addEnvCmd.Flags().StringVar(&flagTokenEndpoint, "token", "", "Token endpoint for the environment")
-	addEnvCmd.Flags().StringVar(&flagRegistrationEndpoint, "registration", "",
+	addEnvCmdDeprecated.Flags().StringVarP(&flagAddEnvName, "environment", "e", "", "Name of the environment to be added")
+	addEnvCmdDeprecated.Flags().StringVar(&flagApiManagerEndpoint, "apim", "", "API Manager endpoint for the environment")
+	addEnvCmdDeprecated.Flags().StringVar(&flagPublisherEndpoint, "publisher", "", "Publisher endpoint for the environment")
+	addEnvCmdDeprecated.Flags().StringVar(&flagDevPortalEndpoint, "devportal", "", "DevPortal endpoint for the environment")
+	addEnvCmdDeprecated.Flags().StringVar(&flagTokenEndpoint, "token", "", "Token endpoint for the environment")
+	addEnvCmdDeprecated.Flags().StringVar(&flagRegistrationEndpoint, "registration", "",
 		"Registration endpoint for the environment")
-	addEnvCmd.Flags().StringVar(&flagAdminEndpoint, "admin", "", "Admin endpoint for the environment")
-	_ = addEnvCmd.MarkFlagRequired("environment")
+	addEnvCmdDeprecated.Flags().StringVar(&flagAdminEndpoint, "admin", "", "Admin endpoint for the environment")
+	_ = addEnvCmdDeprecated.MarkFlagRequired("environment")
 }

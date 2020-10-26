@@ -15,14 +15,16 @@
 * specific language governing permissions and limitations
 * under the License.
  */
-package cmd
+package deprecated
 
 import (
 	"fmt"
-	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"strings"
 	"time"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd"
+	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 
 	"github.com/spf13/cobra"
 )
@@ -35,19 +37,22 @@ const updateCmdExamples = utils.ProjectName + " " + updateCmdLiteral + " " + add
 ` + utils.ProjectName + " " + updateCmdLiteral + " " + addApiCmdLiteral + " " + `-n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi --replicas=1 --namespace=wso2`
 
 // updateCmd represents the update command
-var updateCmd = &cobra.Command{
-	Use:     updateCmdLiteral,
-	Short:   updateCmdShortDesc,
-	Long:    updateCmdLongDesc,
-	Example: updateCmdExamples,
+var updateCmdDeprecated = &cobra.Command{
+	Use:        updateCmdLiteral,
+	Short:      updateCmdShortDesc,
+	Long:       updateCmdLongDesc,
+	Example:    updateCmdExamples,
+	Deprecated: "instead use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sUpdateCmdLiteral + "\".",
 }
 
 // updateApiCmd represents the updateApi command
-var updateApiCmd = &cobra.Command{
-	Use:     addApiCmdLiteral,
-	Short:   addApiCmdShortDesc,
-	Long:    addApiLongDesc,
-	Example: addApiExamples,
+var updateApiCmdDeprecated = &cobra.Command{
+	Use:        addApiCmdLiteral,
+	Short:      addApiCmdShortDesc,
+	Long:       addApiLongDesc,
+	Example:    addApiExamples,
+	Deprecated: "instead use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sUpdateCmdLiteral + " " + cmd.AddApiCmdLiteral + "\".",
+
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + updateCmdLiteral + " called")
 		validateAddApiCommand()
@@ -73,13 +78,13 @@ var updateApiCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.AddCommand(updateCmd)
-	updateCmd.AddCommand(updateApiCmd)
-	updateApiCmd.Flags().StringVarP(&flagApiName, "name", "n", "", "Name of the API")
-	updateApiCmd.Flags().StringArrayVarP(&flagSwaggerFilePaths, "from-file", "f", []string{}, "Path to swagger file")
-	updateApiCmd.Flags().IntVar(&flagReplicas, "replicas", 1, "replica set")
-	updateApiCmd.Flags().StringVar(&flagNamespace, "namespace", "", "namespace of API")
-	updateApiCmd.Flags().StringVarP(&flagApiVersion, "version", "v", "", "Property to override the existing docker image with same name and version")
-	updateApiCmd.Flags().StringVarP(&flagApiMode, "mode", "m", "",
+	cmd.RootCmd.AddCommand(updateCmdDeprecated)
+	updateCmdDeprecated.AddCommand(updateApiCmdDeprecated)
+	updateApiCmdDeprecated.Flags().StringVarP(&flagApiName, "name", "n", "", "Name of the API")
+	updateApiCmdDeprecated.Flags().StringArrayVarP(&flagSwaggerFilePaths, "from-file", "f", []string{}, "Path to swagger file")
+	updateApiCmdDeprecated.Flags().IntVar(&flagReplicas, "replicas", 1, "replica set")
+	updateApiCmdDeprecated.Flags().StringVar(&flagNamespace, "namespace", "", "namespace of API")
+	updateApiCmdDeprecated.Flags().StringVarP(&flagApiVersion, "version", "v", "", "Property to override the existing docker image with same name and version")
+	updateApiCmdDeprecated.Flags().StringVarP(&flagApiMode, "mode", "m", "",
 		fmt.Sprintf("Property to override the deploying mode. Available modes: %v, %v", utils.PrivateJetModeConst, utils.SidecarModeConst))
 }

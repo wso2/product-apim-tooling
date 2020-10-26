@@ -15,18 +15,12 @@
 * specific language governing permissions and limitations
 * under the License.
  */
-package cmd
+package deprecated
 
 import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/ghodss/yaml"
-	"github.com/spf13/cobra"
-	wso2v1alpha1 "github.com/wso2/k8s-api-operator/api-operator/pkg/apis/wso2/v1alpha1"
-	"github.com/wso2/product-apim-tooling/import-export-cli/box"
-	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"io"
 	"io/ioutil"
 	"log"
@@ -36,6 +30,14 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/ghodss/yaml"
+	"github.com/spf13/cobra"
+	wso2v1alpha1 "github.com/wso2/k8s-api-operator/api-operator/pkg/apis/wso2/v1alpha1"
+	"github.com/wso2/product-apim-tooling/import-export-cli/box"
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd"
+	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 var flagApiName string
@@ -51,19 +53,20 @@ var flagImage string
 var flagHostname string
 
 const addApiCmdLiteral = "api"
-const addApiCmdShortDesc = "handle APIs in kubernetes cluster "
+const addApiCmdShortDesc = "Handle APIs in kubernetes cluster "
 const addApiLongDesc = `Add, Update and Delete APIs in kubernetes cluster. JSON and YAML formats are accepted.
 available modes are as follows
 * kubernetes`
 const addApiExamples = utils.ProjectName + " add/update " + addApiCmdLiteral +
 	` -n petstore --from-file=./Swagger.json --replicas=3 --namespace=wso2`
 
-// addApiCmd represents the api command
-var addApiCmd = &cobra.Command{
-	Use:     addApiCmdLiteral,
-	Short:   addApiCmdShortDesc,
-	Long:    addApiLongDesc,
-	Example: addApiExamples,
+// addApiCmdDeprecated represents the api command
+var addApiCmdDeprecated = &cobra.Command{
+	Use:        addApiCmdLiteral,
+	Short:      addApiCmdShortDesc,
+	Long:       addApiLongDesc,
+	Example:    addApiExamples,
+	Deprecated: "instead use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sAddCmdLiteral + " " + cmd.AddApiCmdLiteral + "\".",
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + addApiCmdLiteral + " called")
 		handleAddApi("")
@@ -364,27 +367,27 @@ func rollbackConfigs(apiCr *wso2v1alpha1.API) {
 }
 
 func init() {
-	addCmd.AddCommand(addApiCmd)
-	addApiCmd.Flags().StringVarP(&flagApiEndPoint, "apiEndPoint", "a", "", "")
-	addApiCmd.Flags().StringVarP(&flagApiName, "name", "n", "", "Name of the API")
-	addApiCmd.Flags().StringArrayVarP(&flagSwaggerFilePaths, "from-file", "f", []string{},
+	cmd.AddCmd.AddCommand(addApiCmdDeprecated)
+	addApiCmdDeprecated.Flags().StringVarP(&flagApiEndPoint, "apiEndPoint", "a", "", "")
+	addApiCmdDeprecated.Flags().StringVarP(&flagApiName, "name", "n", "", "Name of the API")
+	addApiCmdDeprecated.Flags().StringArrayVarP(&flagSwaggerFilePaths, "from-file", "f", []string{},
 		"Path to swagger file")
-	addApiCmd.Flags().IntVar(&flagReplicas, "replicas", 1, "replica set")
-	addApiCmd.Flags().StringVar(&flagNamespace, "namespace", "", "namespace of API")
-	addApiCmd.Flags().BoolVarP(&flagOverride, "override", "", false,
+	addApiCmdDeprecated.Flags().IntVar(&flagReplicas, "replicas", 1, "replica set")
+	addApiCmdDeprecated.Flags().StringVar(&flagNamespace, "namespace", "", "namespace of API")
+	addApiCmdDeprecated.Flags().BoolVarP(&flagOverride, "override", "", false,
 		"Property to override the existing docker image with the given name and version")
-	addApiCmd.Flags().StringVarP(&flagApiVersion, "version", "v", "",
+	addApiCmdDeprecated.Flags().StringVarP(&flagApiVersion, "version", "v", "",
 		"Property to override the API version")
-	addApiCmd.Flags().StringVarP(&flagApiMode, "mode", "m", "",
+	addApiCmdDeprecated.Flags().StringVarP(&flagApiMode, "mode", "m", "",
 		fmt.Sprintf("Property to override the deploying mode. Available modes: %v, %v",
 			utils.PrivateJetModeConst, utils.SidecarModeConst))
-	addApiCmd.Flags().StringArrayVarP(&flagEnv, "env", "e", []string{},
+	addApiCmdDeprecated.Flags().StringArrayVarP(&flagEnv, "env", "e", []string{},
 		"Environment variables to be passed to deployment")
-	addApiCmd.Flags().StringVarP(&flagImage, "image", "i", "",
+	addApiCmdDeprecated.Flags().StringVarP(&flagImage, "image", "i", "",
 		"Image of the API. If specified, ignores the value of --override")
-	addApiCmd.Flags().StringVarP(&flagHostname, "hostname", "", "",
+	addApiCmdDeprecated.Flags().StringVarP(&flagHostname, "hostname", "", "",
 		"Ingress hostname that the API is being exposed")
 
-	addApiCmd.MarkFlagRequired("name")
-	addApiCmd.MarkFlagRequired("from-file")
+	addApiCmdDeprecated.MarkFlagRequired("name")
+	addApiCmdDeprecated.MarkFlagRequired("from-file")
 }
