@@ -23,19 +23,19 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-const uninstallCmdLiteral = "uninstall"
-const uninstallCmdShortDesc = "Uninstall an operator in the configured K8s cluster"
-const uninstallCmdLongDesc = "Uninstall an operator in the configured K8s cluster"
-const uninstallCmdExamples = utils.ProjectName + ` ` + uninstallCmdLiteral + ` ` + uninstallApiOperatorCmdLiteral
+const K8sUninstallCmdLiteral = "uninstall"
+const k8sUninstallCmdShortDesc = "Uninstall an operator in the configured K8s cluster"
+const k8sUninstallCmdLongDesc = "Uninstall an operator in the configured K8s cluster"
+const k8sUninstallCmdExamples = utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sUninstallCmdLiteral + ` ` + K8sUninstallApiOperatorCmdLiteral
 
 // uninstallCmd represents the uninstall command
 var uninstallCmd = &cobra.Command{
-	Use:     uninstallCmdLiteral,
-	Short:   uninstallCmdShortDesc,
-	Long:    uninstallCmdLongDesc,
-	Example: uninstallCmdExamples,
+	Use:     K8sUninstallCmdLiteral,
+	Short:   k8sUninstallCmdShortDesc,
+	Long:    k8sUninstallCmdLongDesc,
+	Example: k8sUninstallCmdExamples,
 }
 
 func init() {
-	RootCmd.AddCommand(uninstallCmd)
+	K8sCmd.AddCommand(uninstallCmd)
 }

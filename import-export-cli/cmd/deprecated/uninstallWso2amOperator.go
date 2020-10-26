@@ -16,13 +16,15 @@
 * under the License.
  */
 
-package cmd
+package deprecated
 
 import (
 	"fmt"
+	"strings"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd"
 	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -35,12 +37,13 @@ const uninstallWso2amOperatorCmdExamples = utils.ProjectName + ` ` + uninstallCm
 
 var flagForceUninstallWso2amOperator bool
 
-// uninstallWso2amOperatorCmd represents the uninstallWso2amOperator command
-var uninstallWso2amOperatorCmd = &cobra.Command{
-	Use:     uninstallWso2amOperatorCmdLiteral,
-	Short:   uninstallWso2amOperatorCmdShortDesc,
-	Long:    uninstallWso2amOperatorCmdLongDesc,
-	Example: uninstallWso2amOperatorCmdExamples,
+// uninstallWso2amOperatorCmdDeprecated represents the uninstallWso2amOperator command
+var uninstallWso2amOperatorCmdDeprecated = &cobra.Command{
+	Use:        uninstallWso2amOperatorCmdLiteral,
+	Short:      uninstallWso2amOperatorCmdShortDesc,
+	Long:       uninstallWso2amOperatorCmdLongDesc,
+	Example:    uninstallWso2amOperatorCmdExamples,
+	Deprecated: "instead use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sUninstallCmdLiteral + " " + cmd.K8sUninstallWso2amOperatorCmdLiteral + "\".",
 	Run: func(cmd *cobra.Command, args []string) {
 		isConfirm := flagForceUninstallWso2amOperator
 
@@ -71,10 +74,8 @@ var uninstallWso2amOperatorCmd = &cobra.Command{
 			fmt.Printf("Removing namespace: %s\nThis operation will take some minutes...\n", k8sUtils.ApiOpWso2Namespace)
 
 			deleteErrors := []error{
-				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, k8sUtils.Namespace, k8sUtils.ApiOpWso2Namespace),
-				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, k8sUtils.ClusterRole, k8sUtils.Wso2amRole),
-				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, k8sUtils.ClusterRoleBinding, k8sUtils.Wso2amRoleBinding),
-				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, k8sUtils.CrdKind, k8sUtils.Wso2amOpCrdApimanager),
+				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, "namespace", k8sUtils.ApiOpWso2Namespace),
+				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, "crd", k8sUtils.Wso2amOpCrdApimanager),
 			}
 
 			for _, err := range deleteErrors {
@@ -89,6 +90,6 @@ var uninstallWso2amOperatorCmd = &cobra.Command{
 }
 
 func init() {
-	uninstallCmd.AddCommand(uninstallWso2amOperatorCmd)
-	uninstallWso2amOperatorCmd.Flags().BoolVar(&flagForceUninstallWso2amOperator, "force", false, "Force uninstall WSO2AM Operator")
+	uninstallCmdDeprecated.AddCommand(uninstallWso2amOperatorCmdDeprecated)
+	uninstallWso2amOperatorCmdDeprecated.Flags().BoolVar(&flagForceUninstallWso2amOperator, "force", false, "Force uninstall WSO2AM Operator")
 }
