@@ -73,11 +73,14 @@ var uninstallApiOperatorCmdDeprecated = &cobra.Command{
 			fmt.Printf("Removing namespace: %s\nThis operation will take some minutes...\n", k8sUtils.ApiOpWso2Namespace)
 
 			deleteErrors := []error{
-				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, "namespace", k8sUtils.ApiOpWso2Namespace),
-				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, "crd", k8sUtils.ApiOpCrdApi),
-				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, "crd", k8sUtils.ApiOpCrdSecurity),
-				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, "crd", k8sUtils.ApiOpCrdRateLimiting),
-				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, "crd", k8sUtils.ApiOpCrdTargetEndpoint),
+				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, k8sUtils.Namespace, k8sUtils.ApiOpWso2Namespace),
+				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, k8sUtils.ClusterRole, k8sUtils.ApiOperator),
+				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, k8sUtils.ClusterRoleBinding, k8sUtils.ApiOperator),
+
+				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, k8sUtils.CrdKind, k8sUtils.ApiOpCrdApi),
+				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, k8sUtils.CrdKind, k8sUtils.ApiOpCrdSecurity),
+				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, k8sUtils.CrdKind, k8sUtils.ApiOpCrdRateLimiting),
+				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, k8sUtils.CrdKind, k8sUtils.ApiOpCrdTargetEndpoint),
 			}
 
 			for _, err := range deleteErrors {

@@ -41,7 +41,7 @@ var k8sDeleteAPICmd = &cobra.Command{
 	DisableFlagParsing: true,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + deleteAPICmdLiteral + " called")
-		k8sArgs := []string{k8sUtils.K8sDelete, k8sUtils.K8sApi}
+		k8sArgs := []string{k8sUtils.K8sDelete, k8sUtils.ApiOpCrdApi}
 		k8sArgs = append(k8sArgs, args...)
 		executeKubernetes(k8sArgs...)
 	},
