@@ -30,22 +30,22 @@ const defaulEnvsTableFormat = "table {{.Name}}\t{{.ApiManagerEndpoint}}\t{{.Regi
 var envsCmdFormat string
 
 // envsCmd related info
-const EnvsCmdLiteral = "envs"
-const EnvsCmdShortDesc = "Display the list of environments"
+const envsCmdLiteral = "envs"
+const envsCmdShortDesc = "Display the list of environments"
 
-const EnvsCmdLongDesc = `Display a list of environments defined in '` + utils.MainConfigFileName + `' file`
+const envsCmdLongDesc = `Display a list of environments defined in '` + utils.MainConfigFileName + `' file`
 
-const EnvsCmdExamples = utils.ProjectName + " list envs"
+const envsCmdExamples = utils.ProjectName + " list envs"
 
 // envsCmd represents the envs command
 var envsCmdDeprecated = &cobra.Command{
-	Use:        EnvsCmdLiteral,
-	Short:      EnvsCmdShortDesc,
-	Long:       EnvsCmdLongDesc,
-	Example:    EnvsCmdExamples,
-	Deprecated: "instead use \"" + cmd.GetCmdLiteral + " " + cmd.GetEnvsCmdLiteral + "\".",
+	Use:        envsCmdLiteral,
+	Short:      envsCmdShortDesc,
+	Long:       envsCmdLongDesc,
+	Example:    envsCmdExamples,
+	Deprecated: "use \"" + cmd.GetCmdLiteral + " " + cmd.GetEnvsCmdLiteral + "\" " + "instead of \"" + listCmdLiteral + " " + envsCmdLiteral + "\".",
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + EnvsCmdLiteral + " called")
+		utils.Logln(utils.LogPrefixInfo + envsCmdLiteral + " called")
 		envs := utils.GetMainConfigFromFile(utils.MainConfigFilePath).Environments
 		impl.PrintEnvs(envs, envsCmdFormat, defaulEnvsTableFormat)
 	},

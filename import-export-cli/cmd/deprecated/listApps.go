@@ -55,7 +55,7 @@ var appsCmdDeprected = &cobra.Command{
 	Short:      appsCmdShortDesc,
 	Long:       appsCmdLongDesc,
 	Example:    appsCmdExamples,
-	Deprecated: "instead use \"" + cmd.GetCmdLiteral + " " + cmd.GetAppsCmdLiteral + "\".",
+	Deprecated: "use \"" + cmd.GetCmdLiteral + " " + cmd.GetAppsCmdLiteral + "\" " + "instead of \"" + listCmdLiteral + " " + appsCmdLiteral + "\".",
 	Run: func(depcrecatedCmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + appsCmdLiteral + " called")
 		cred, err := cmd.GetCredentials(listAppsCmdEnvironment)

@@ -54,7 +54,7 @@ var apisCmdDeprecated = &cobra.Command{
 	Short:      apisCmdShortDesc,
 	Long:       apisCmdLongDesc,
 	Example:    apisCmdExamples,
-	Deprecated: "instead use \"" + cmd.GetCmdLiteral + " " + cmd.GetApisCmdLiteral + "\".",
+	Deprecated: "use \"" + cmd.GetCmdLiteral + " " + cmd.GetApisCmdLiteral + "\" " + "instead of \"" + listCmdLiteral + " " + apisCmdLiteral + "\".",
 	Run: func(deprecatedCmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + apisCmdLiteral + " called")
 		cred, err := cmd.GetCredentials(listApisCmdEnvironment)

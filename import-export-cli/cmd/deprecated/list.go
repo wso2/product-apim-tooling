@@ -34,7 +34,7 @@ Display a list of Applications of a specific user in the environment specified b
 OR
 List all the environments`
 
-const listCmdExamples = utils.ProjectName + ` ` + listCmdLiteral + ` ` + EnvsCmdLiteral + `
+const listCmdExamples = utils.ProjectName + ` ` + listCmdLiteral + ` ` + envsCmdLiteral + `
 ` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + apisCmdLiteral + ` -e dev
 ` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + apiProductsCmdLiteral + ` -e dev
 ` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e dev`
