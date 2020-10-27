@@ -29,17 +29,6 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-const (
-	apiIdHeader       = "ID"
-	apiNameHeader     = "NAME"
-	apiContextHeader  = "CONTEXT"
-	apiVersionHeader  = "VERSION"
-	apiProviderHeader = "PROVIDER"
-	apiStatusHeader   = "STATUS"
-
-	defaultApiTableFormat = "table {{.Id}}\t{{.Name}}\t{{.Version}}\t{{.Context}}\t{{.LifeCycleStatus}}\t{{.Provider}}"
-)
-
 var listApisCmdEnvironment string
 var listApisCmdFormat string
 var listApisCmdQuery string
