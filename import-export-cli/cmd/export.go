@@ -27,10 +27,10 @@ import (
 const ExportCmdLiteral = "export"
 const exportCmdShortDesc = "Export an API/API Product/Application in an environment"
 
-const exportCmdLongDesc = `Export an API available in the environment specified by flag (--environment, -e) in default mode
-Export APIs available in the environment specified by flag (--environment, -e) in default mode
-Export an API Product available in the environment specified by flag (--environment, -e) in default mode
-Export an Application of a specific user (--owner, -o) in the environment specified by flag (--environment, -e) in default mode`
+const exportCmdLongDesc = `Export an API available in the environment specified by flag (--environment, -e)
+Export APIs available in the environment specified by flag (--environment, -e)
+Export an API Product available in the environment specified by flag (--environment, -e)
+Export an Application of a specific user (--owner, -o) in the environment specified by flag (--environment, -e)`
 
 const exportCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin -e dev
 ` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPIsCmdLiteral + ` -e dev
