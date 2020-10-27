@@ -42,9 +42,9 @@ var verbose bool
 var cfgFile string
 var insecure bool
 var cmdPassword string
-var cmdUsername string
+var CmdUsername string
 var CmdExportEnvironment string
-var cmdResourceTenantDomain string
+var CmdResourceTenantDomain string
 var CmdForceStartFromBegin bool
 
 // RootCmd related info

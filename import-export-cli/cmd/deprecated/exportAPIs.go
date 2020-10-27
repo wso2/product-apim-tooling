@@ -19,10 +19,13 @@
 package deprecated
 
 import (
+	"fmt"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/cmd"
+	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
+	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
@@ -36,6 +39,10 @@ const exportAPIsCmdExamples = utils.ProjectName + ` ` + exportAPIsCmdLiteral + `
 NOTE: The flag (--environment (-e)) is mandatory`
 
 var exportAPIsFormat string
+
+//e.g. /home/samithac/.wso2apictl/exported/migration/production-2.5/wso2-dot-org
+var startFromBeginning bool
+var isProcessCompleted bool
 
 var ExportAPIsCmdDeprecated = &cobra.Command{
 	Use: exportAPIsCmdLiteral + " (--environment " +
@@ -52,13 +59,35 @@ var ExportAPIsCmdDeprecated = &cobra.Command{
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
-		data := map[interface{}]interface{}{
-			"credential":              cred,
-			"exportAPIsFormat":        exportAPIsFormat,
-			"exportAPIPreserveStatus": exportAPIPreserveStatus,
-		}
-		cmd.ExecuteExportAPIsCmdByDeprecatedCommand(artifactExportDirectory, data)
+		executeExportAPIsCmd(cred, artifactExportDirectory)
 	},
+}
+
+// Do operations to export APIs for the migration into the directory passed as exportDirectory
+// <export_directory> is the patch defined in main_config.yaml
+// exportDirectory = <export_directory>/migration/
+func executeExportAPIsCmd(credential credentials.Credential, exportDirectory string) {
+	//create dir structure
+	apiExportDir := impl.CreateExportAPIsDirStructure(exportDirectory, cmd.CmdResourceTenantDomain, cmd.CmdExportEnvironment, cmd.CmdForceStartFromBegin)
+	exportRelatedFilesPath := filepath.Join(exportDirectory, cmd.CmdExportEnvironment,
+		utils.GetMigrationExportTenantDirName(cmd.CmdResourceTenantDomain))
+	//e.g. /home/samithac/.wso2apictl/exported/migration/production-2.5/wso2-dot-org
+	startFromBeginning = false
+	isProcessCompleted = false
+
+	fmt.Println("\nExporting APIs for the migration...")
+	if cmd.CmdForceStartFromBegin {
+		startFromBeginning = true
+	}
+
+	if (utils.IsFileExist(filepath.Join(exportRelatedFilesPath, utils.LastSucceededApiFileName))) && !startFromBeginning {
+		impl.PrepareResumption(credential, exportRelatedFilesPath, cmd.CmdResourceTenantDomain, cmd.CmdUsername, cmd.CmdExportEnvironment)
+	} else {
+		impl.PrepareStartFromBeginning(credential, exportRelatedFilesPath, cmd.CmdResourceTenantDomain, cmd.CmdUsername, cmd.CmdExportEnvironment)
+	}
+
+	impl.ExportAPIs(credential, exportRelatedFilesPath, cmd.CmdExportEnvironment, cmd.CmdResourceTenantDomain, exportAPIsFormat, cmd.CmdUsername,
+		apiExportDir, exportAPIPreserveStatus, runningExportApiCommand)
 }
 
 func init() {
