@@ -21,9 +21,64 @@ package impl
 import (
 	"encoding/json"
 	"errors"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"fmt"
+	"io"
 	"net/http"
+	"os"
+	"text/template"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/formatter"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
+
+const (
+	apiProductIdHeader       = "ID"
+	apiProductNameHeader     = "NAME"
+	apiProductContextHeader  = "CONTEXT"
+	apiProductProviderHeader = "PROVIDER"
+	apiProductStatusHeader   = "STATUS"
+
+	defaultApiProductTableFormat = "table {{.Id}}\t{{.Name}}\t{{.Context}}\t{{.LifeCycleStatus}}\t{{.Provider}}"
+)
+
+// apiProduct holds information about an API Product for outputting
+type apiProduct struct {
+	id              string
+	name            string
+	context         string
+	provider        string
+	lifeCycleStatus string
+}
+
+// Id of API Product
+func (a apiProduct) Id() string {
+	return a.id
+}
+
+// Name of API Product
+func (a apiProduct) Name() string {
+	return a.name
+}
+
+// Context of API Product
+func (a apiProduct) Context() string {
+	return a.context
+}
+
+// Lifecycle Status of API Product
+func (a apiProduct) LifeCycleStatus() string {
+	return a.lifeCycleStatus
+}
+
+// Provider of API Product
+func (a apiProduct) Provider() string {
+	return a.provider
+}
+
+// MarshalJSON marshals apiProduct using custom marshaller which uses methods instead of fields
+func (a *apiProduct) MarshalJSON() ([]byte, error) {
+	return formatter.MarshalJSON(a)
+}
 
 // GetAPIProductListFromEnv
 // @param accessToken : Access Token for the environment
@@ -80,4 +135,43 @@ func GetAPIProductList(accessToken, unifiedSearchEndpoint, query, limit string) 
 	} else {
 		return 0, nil, errors.New(string(resp.Body()))
 	}
+}
+
+// PrintAPIProducts
+func PrintAPIProducts(apiProducts []utils.APIProduct, format string) {
+	if format == "" {
+		format = defaultApiProductTableFormat
+	}
+	// create API Product context with standard output
+	apiProductContext := formatter.NewContext(os.Stdout, format)
+
+	// create a new renderer function which iterate collection
+	renderer := func(w io.Writer, t *template.Template) error {
+		for _, a := range apiProducts {
+			if err := t.Execute(w, newApiProductDefinitionFromAPI(a)); err != nil {
+				return err
+			}
+			_, _ = w.Write([]byte{'\n'})
+		}
+		return nil
+	}
+
+	// headers for table
+	apiProductTableHeaders := map[string]string{
+		"Id":              apiProductIdHeader,
+		"Name":            apiProductNameHeader,
+		"Context":         apiProductContextHeader,
+		"LifeCycleStatus": apiProductStatusHeader,
+		"Provider":        apiProductProviderHeader,
+	}
+
+	// execute context
+	if err := apiProductContext.Write(renderer, apiProductTableHeaders); err != nil {
+		fmt.Println("Error executing template:", err.Error())
+	}
+}
+
+// creates a new API Product from utils.API
+func newApiProductDefinitionFromAPI(a utils.APIProduct) *apiProduct {
+	return &apiProduct{a.ID, a.Name, a.Context, a.Provider, a.LifeCycleStatus}
 }

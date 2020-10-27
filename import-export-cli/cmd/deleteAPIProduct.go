@@ -52,7 +52,7 @@ var DeleteAPIProductCmd = &cobra.Command{
 	Example: deleteAPIProductCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + deleteAPIProductCmdLiteral + " called")
-		cred, err := getCredentials(deleteAPIProductEnvironment)
+		cred, err := GetCredentials(deleteAPIProductEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials ", err)
 		}

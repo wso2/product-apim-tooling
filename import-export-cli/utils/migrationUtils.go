@@ -19,10 +19,11 @@
 package utils
 
 import (
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
+
+	"gopkg.in/yaml.v2"
 )
 
 // Compose the name of the tenant specific directory to save migration artifacts

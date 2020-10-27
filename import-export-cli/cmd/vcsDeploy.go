@@ -14,17 +14,18 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package cmd
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/git"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"os"
 )
 
 var flagVCSDeployEnvName string    // name of the environment the project changes need to be deployed
@@ -54,7 +55,7 @@ var DeployCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		credential, err := getCredentials(flagVCSDeployEnvName)
+		credential, err := GetCredentials(flagVCSDeployEnvName)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
@@ -78,7 +79,7 @@ var DeployCmd = &cobra.Command{
 func init() {
 	VCSCmd.AddCommand(DeployCmd)
 
-	DeployCmd.Flags().StringVarP(&flagVCSDeployEnvName, "environment", "e", "", "Name of the " +
+	DeployCmd.Flags().StringVarP(&flagVCSDeployEnvName, "environment", "e", "", "Name of the "+
 		"environment to deploy the project(s)")
 	DeployCmd.Flags().BoolVarP(&flagVCSDeploySkipRollback, "skipRollback", "", false,
 		"Specifies whether rolling back to the last successful revision during an error situation should be skipped")

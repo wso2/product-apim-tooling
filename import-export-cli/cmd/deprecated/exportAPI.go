@@ -16,19 +16,19 @@
 * under the License.
  */
 
-package cmd
+package deprecated
 
 import (
 	"fmt"
+	"net/http"
 
-	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
-
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
+	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 
-	"net/http"
 	"path/filepath"
 )
 
@@ -40,27 +40,28 @@ var exportAPIFormat string
 var runningExportApiCommand bool
 
 // ExportAPI command related usage info
-const ExportAPICmdLiteral = "api"
+const exportAPICmdLiteral = "export-api"
 const exportAPICmdShortDesc = "Export API"
 
 const exportAPICmdLongDesc = "Export an API from an environment"
 
-const exportAPICmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin -e dev
-` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 -r admin -e production
+const exportAPICmdExamples = utils.ProjectName + ` ` + exportAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin -e dev
+` + utils.ProjectName + ` ` + exportAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 -r admin -e production
 NOTE: All the 3 flags (--name (-n), --version (-v) and --environment (-e)) are mandatory`
 
 // ExportAPICmd represents the exportAPI command
-var ExportAPICmd = &cobra.Command{
-	Use: ExportAPICmdLiteral + " (--name <name-of-the-api> --version <version-of-the-api> --provider <provider-of-the-api> --environment " +
+var ExportAPICmdDeprecated = &cobra.Command{
+	Use: exportAPICmdLiteral + " (--name <name-of-the-api> --version <version-of-the-api> --provider <provider-of-the-api> --environment " +
 		"<environment-from-which-the-api-should-be-exported>)",
-	Short:   exportAPICmdShortDesc,
-	Long:    exportAPICmdLongDesc,
-	Example: exportAPICmdExamples,
-	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + ExportAPICmdLiteral + " called")
+	Short:      exportAPICmdShortDesc,
+	Long:       exportAPICmdLongDesc,
+	Example:    exportAPICmdExamples,
+	Deprecated: "instead use \"" + cmd.ExportCmdLiteral + " " + cmd.ExportAPICmdLiteral + "\".",
+	Run: func(deprecatedCmd *cobra.Command, args []string) {
+		utils.Logln(utils.LogPrefixInfo + exportAPICmdLiteral + " called")
 		var apisExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedApisDirName)
 
-		cred, err := GetCredentials(CmdExportEnvironment)
+		cred, err := cmd.GetCredentials(cmd.CmdExportEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
@@ -71,16 +72,16 @@ var ExportAPICmd = &cobra.Command{
 
 func executeExportAPICmd(credential credentials.Credential, exportDirectory string) {
 	runningExportApiCommand = true
-	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, CmdExportEnvironment)
+	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, cmd.CmdExportEnvironment)
 
 	if preCommandErr == nil {
-		resp, err := impl.ExportAPIFromEnv(accessToken, exportAPIName, exportAPIVersion, exportProvider, exportAPIFormat, CmdExportEnvironment, exportAPIPreserveStatus)
+		resp, err := impl.ExportAPIFromEnv(accessToken, exportAPIName, exportAPIVersion, exportProvider, exportAPIFormat, cmd.CmdExportEnvironment, exportAPIPreserveStatus)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while exporting", err)
 		}
 		// Print info on response
 		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
-		apiZipLocationPath := filepath.Join(exportDirectory, CmdExportEnvironment)
+		apiZipLocationPath := filepath.Join(exportDirectory, cmd.CmdExportEnvironment)
 		if resp.StatusCode() == http.StatusOK {
 			impl.WriteToZip(exportAPIName, exportAPIVersion, apiZipLocationPath, runningExportApiCommand, resp)
 		} else if resp.StatusCode() == http.StatusInternalServerError {
@@ -98,19 +99,19 @@ func executeExportAPICmd(credential credentials.Credential, exportDirectory stri
 
 // init using Cobra
 func init() {
-	ExportCmd.AddCommand(ExportAPICmd)
-	ExportAPICmd.Flags().StringVarP(&exportAPIName, "name", "n", "",
+	cmd.RootCmd.AddCommand(ExportAPICmdDeprecated)
+	ExportAPICmdDeprecated.Flags().StringVarP(&exportAPIName, "name", "n", "",
 		"Name of the API to be exported")
-	ExportAPICmd.Flags().StringVarP(&exportAPIVersion, "version", "v", "",
+	ExportAPICmdDeprecated.Flags().StringVarP(&exportAPIVersion, "version", "v", "",
 		"Version of the API to be exported")
-	ExportAPICmd.Flags().StringVarP(&exportProvider, "provider", "r", "",
+	ExportAPICmdDeprecated.Flags().StringVarP(&exportProvider, "provider", "r", "",
 		"Provider of the API")
-	ExportAPICmd.Flags().StringVarP(&CmdExportEnvironment, "environment", "e",
+	ExportAPICmdDeprecated.Flags().StringVarP(&cmd.CmdExportEnvironment, "environment", "e",
 		"", "Environment to which the API should be exported")
-	ExportAPICmd.Flags().BoolVarP(&exportAPIPreserveStatus, "preserveStatus", "", true,
+	ExportAPICmdDeprecated.Flags().BoolVarP(&exportAPIPreserveStatus, "preserveStatus", "", true,
 		"Preserve API status when exporting. Otherwise API will be exported in CREATED status")
-	ExportAPICmd.Flags().StringVarP(&exportAPIFormat, "format", "", utils.DefaultExportFormat, "File format of exported archive(json or yaml)")
-	_ = ExportAPICmd.MarkFlagRequired("name")
-	_ = ExportAPICmd.MarkFlagRequired("version")
-	_ = ExportAPICmd.MarkFlagRequired("environment")
+	ExportAPICmdDeprecated.Flags().StringVarP(&exportAPIFormat, "format", "", utils.DefaultExportFormat, "File format of exported archive(json or yaml)")
+	_ = ExportAPICmdDeprecated.MarkFlagRequired("name")
+	_ = ExportAPICmdDeprecated.MarkFlagRequired("version")
+	_ = ExportAPICmdDeprecated.MarkFlagRequired("environment")
 }

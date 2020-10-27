@@ -16,10 +16,11 @@
 * under the License.
  */
 
-package cmd
+package deprecated
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
@@ -33,17 +34,18 @@ Display a list of Applications of a specific user in the environment specified b
 OR
 List all the environments`
 
-const listCmdExamples = utils.ProjectName + ` ` + listCmdLiteral + ` ` + EnvsCmdLiteral + `
+const listCmdExamples = utils.ProjectName + ` ` + listCmdLiteral + ` ` + envsCmdLiteral + `
 ` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + apisCmdLiteral + ` -e dev
 ` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + apiProductsCmdLiteral + ` -e dev
 ` + utils.ProjectName + ` ` + listCmdLiteral + ` ` + appsCmdLiteral + ` -e dev`
 
 // ListCmd represents the list command
-var ListCmd = &cobra.Command{
-	Use:     listCmdLiteral,
-	Short:   listCmdShortDesc,
-	Long:    listCmdLongDesc,
-	Example: listCmdExamples,
+var ListCmdDeprecated = &cobra.Command{
+	Use:        listCmdLiteral,
+	Short:      listCmdShortDesc,
+	Long:       listCmdLongDesc,
+	Example:    listCmdExamples,
+	Deprecated: "instead use \"" + cmd.GetCmdLiteral + "\".",
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + listCmdLiteral + " called")
 
@@ -52,5 +54,5 @@ var ListCmd = &cobra.Command{
 
 // init using Cobra
 func init() {
-	RootCmd.AddCommand(ListCmd)
+	cmd.RootCmd.AddCommand(ListCmdDeprecated)
 }

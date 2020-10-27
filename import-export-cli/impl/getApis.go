@@ -21,9 +21,79 @@ package impl
 import (
 	"encoding/json"
 	"errors"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"fmt"
+	"io"
 	"net/http"
+	"os"
+	"text/template"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/formatter"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
+
+const (
+	apiIdHeader       = "ID"
+	apiNameHeader     = "NAME"
+	apiContextHeader  = "CONTEXT"
+	apiVersionHeader  = "VERSION"
+	apiProviderHeader = "PROVIDER"
+	apiStatusHeader   = "STATUS"
+
+	defaultApiTableFormat = "table {{.Id}}\t{{.Name}}\t{{.Version}}\t{{.Context}}\t{{.LifeCycleStatus}}\t{{.Provider}}"
+)
+
+var queryParamAdded bool = false
+
+// api holds information about an API for outputting
+type api struct {
+	id              string
+	name            string
+	context         string
+	version         string
+	provider        string
+	lifeCycleStatus string
+}
+
+// creates a new api from utils.API
+func newApiDefinitionFromAPI(a utils.API) *api {
+	return &api{a.ID, a.Name, a.Context, a.Version, a.Provider,
+		a.LifeCycleStatus}
+}
+
+// Id of api
+func (a api) Id() string {
+	return a.id
+}
+
+// Name of api
+func (a api) Name() string {
+	return a.name
+}
+
+// Context of api
+func (a api) Context() string {
+	return a.context
+}
+
+// Version of api
+func (a api) Version() string {
+	return a.version
+}
+
+// Lifecycle Status of api
+func (a api) LifeCycleStatus() string {
+	return a.lifeCycleStatus
+}
+
+// Provider of api
+func (a api) Provider() string {
+	return a.provider
+}
+
+// MarshalJSON marshals api using custom marshaller which uses methods instead of fields
+func (a *api) MarshalJSON() ([]byte, error) {
+	return formatter.MarshalJSON(a)
+}
 
 // GetAPIListFromEnv
 // @param accessToken : Access Token for the environment
@@ -86,5 +156,49 @@ func GetAPIList(accessToken, apiListEndpoint, query, limit string) (count int32,
 		return apiListResponse.Count, apiListResponse.List, nil
 	} else {
 		return 0, nil, errors.New(string(resp.Body()))
+	}
+}
+
+func getQueryParamConnector() (connector string) {
+	if queryParamAdded {
+		return "&"
+	} else {
+		queryParamAdded = true
+		return "?"
+	}
+}
+
+// PrintAPIs
+func PrintAPIs(apis []utils.API, format string) {
+	if format == "" {
+		format = defaultApiTableFormat
+	}
+	// create api context with standard output
+	apiContext := formatter.NewContext(os.Stdout, format)
+
+	// create a new renderer function which iterate collection
+	renderer := func(w io.Writer, t *template.Template) error {
+		for _, a := range apis {
+			if err := t.Execute(w, newApiDefinitionFromAPI(a)); err != nil {
+				return err
+			}
+			_, _ = w.Write([]byte{'\n'})
+		}
+		return nil
+	}
+
+	// headers for table
+	apiTableHeaders := map[string]string{
+		"Id":              apiIdHeader,
+		"Name":            apiNameHeader,
+		"Context":         apiContextHeader,
+		"Version":         apiVersionHeader,
+		"LifeCycleStatus": apiStatusHeader,
+		"Provider":        apiProviderHeader,
+	}
+
+	// execute context
+	if err := apiContext.Write(renderer, apiTableHeaders); err != nil {
+		fmt.Println("Error executing template:", err.Error())
 	}
 }

@@ -16,25 +16,26 @@
 * under the License.
  */
 
-package cmd
+package deprecated
 
 import (
 	"fmt"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-const ExportAPIsCmdLiteral = "apis"
+const exportAPIsCmdLiteral = "export-apis"
 const exportAPIsCmdShortDesc = "Export APIs for migration"
 
 const exportAPIsCmdLongDesc = "Export all the APIs of a tenant from one environment, to be imported " +
 	"into another environment"
-const exportAPIsCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPIsCmdLiteral + ` -e production --force
-` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPIsCmdLiteral + ` -e production
+const exportAPIsCmdExamples = utils.ProjectName + ` ` + exportAPIsCmdLiteral + ` -e production --force
+` + utils.ProjectName + ` ` + exportAPIsCmdLiteral + ` -e production
 NOTE: The flag (--environment (-e)) is mandatory`
 
 var exportAPIsFormat string
@@ -43,17 +44,18 @@ var exportAPIsFormat string
 var startFromBeginning bool
 var isProcessCompleted bool
 
-var ExportAPIsCmd = &cobra.Command{
-	Use: ExportAPIsCmdLiteral + " (--environment " +
+var ExportAPIsCmdDeprecated = &cobra.Command{
+	Use: exportAPIsCmdLiteral + " (--environment " +
 		"<environment-from-which-artifacts-should-be-exported> --format <export-format> --preserveStatus --force)",
-	Short:   exportAPIsCmdShortDesc,
-	Long:    exportAPIsCmdLongDesc,
-	Example: exportAPIsCmdExamples,
-	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + ExportAPIsCmdLiteral + " called")
+	Short:      exportAPIsCmdShortDesc,
+	Long:       exportAPIsCmdLongDesc,
+	Example:    exportAPIsCmdExamples,
+	Deprecated: "instead use \"" + cmd.ExportCmdLiteral + " " + cmd.ExportAPIsCmdLiteral + "\".",
+	Run: func(deprecatedCmd *cobra.Command, args []string) {
+		utils.Logln(utils.LogPrefixInfo + exportAPIsCmdLiteral + " called")
 		var artifactExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedMigrationArtifactsDirName)
 
-		cred, err := GetCredentials(CmdExportEnvironment)
+		cred, err := cmd.GetCredentials(cmd.CmdExportEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
@@ -66,37 +68,37 @@ var ExportAPIsCmd = &cobra.Command{
 // exportDirectory = <export_directory>/migration/
 func executeExportAPIsCmd(credential credentials.Credential, exportDirectory string) {
 	//create dir structure
-	apiExportDir := impl.CreateExportAPIsDirStructure(exportDirectory, CmdResourceTenantDomain, CmdExportEnvironment, CmdForceStartFromBegin)
-	exportRelatedFilesPath := filepath.Join(exportDirectory, CmdExportEnvironment,
-		utils.GetMigrationExportTenantDirName(CmdResourceTenantDomain))
+	apiExportDir := impl.CreateExportAPIsDirStructure(exportDirectory, cmd.CmdResourceTenantDomain, cmd.CmdExportEnvironment, cmd.CmdForceStartFromBegin)
+	exportRelatedFilesPath := filepath.Join(exportDirectory, cmd.CmdExportEnvironment,
+		utils.GetMigrationExportTenantDirName(cmd.CmdResourceTenantDomain))
 	//e.g. /home/samithac/.wso2apictl/exported/migration/production-2.5/wso2-dot-org
 	startFromBeginning = false
 	isProcessCompleted = false
 
 	fmt.Println("\nExporting APIs for the migration...")
-	if CmdForceStartFromBegin {
+	if cmd.CmdForceStartFromBegin {
 		startFromBeginning = true
 	}
 
 	if (utils.IsFileExist(filepath.Join(exportRelatedFilesPath, utils.LastSucceededApiFileName))) && !startFromBeginning {
-		impl.PrepareResumption(credential, exportRelatedFilesPath, CmdResourceTenantDomain, CmdUsername, CmdExportEnvironment)
+		impl.PrepareResumption(credential, exportRelatedFilesPath, cmd.CmdResourceTenantDomain, cmd.CmdUsername, cmd.CmdExportEnvironment)
 	} else {
-		impl.PrepareStartFromBeginning(credential, exportRelatedFilesPath, CmdResourceTenantDomain, CmdUsername, CmdExportEnvironment)
+		impl.PrepareStartFromBeginning(credential, exportRelatedFilesPath, cmd.CmdResourceTenantDomain, cmd.CmdUsername, cmd.CmdExportEnvironment)
 	}
 
-	impl.ExportAPIs(credential, exportRelatedFilesPath, CmdExportEnvironment, CmdResourceTenantDomain, exportAPIsFormat, CmdUsername,
+	impl.ExportAPIs(credential, exportRelatedFilesPath, cmd.CmdExportEnvironment, cmd.CmdResourceTenantDomain, exportAPIsFormat, cmd.CmdUsername,
 		apiExportDir, exportAPIPreserveStatus, runningExportApiCommand)
 }
 
 func init() {
-	ExportCmd.AddCommand(ExportAPIsCmd)
-	ExportAPIsCmd.Flags().StringVarP(&CmdExportEnvironment, "environment", "e",
+	cmd.RootCmd.AddCommand(ExportAPIsCmdDeprecated)
+	ExportAPIsCmdDeprecated.Flags().StringVarP(&cmd.CmdExportEnvironment, "environment", "e",
 		"", "Environment from which the APIs should be exported")
-	ExportAPIsCmd.PersistentFlags().BoolVarP(&CmdForceStartFromBegin, "force", "", false,
+	ExportAPIsCmdDeprecated.PersistentFlags().BoolVarP(&cmd.CmdForceStartFromBegin, "force", "", false,
 		"Clean all the previously exported APIs of the given target tenant, in the given environment if "+
 			"any, and to export APIs from beginning")
-	ExportAPIsCmd.Flags().BoolVarP(&exportAPIPreserveStatus, "preserveStatus", "", true,
+	ExportAPIsCmdDeprecated.Flags().BoolVarP(&exportAPIPreserveStatus, "preserveStatus", "", true,
 		"Preserve API status when exporting. Otherwise API will be exported in CREATED status")
-	ExportAPIsCmd.Flags().StringVarP(&exportAPIsFormat, "format", "", utils.DefaultExportFormat, "File format of exported archives(json or yaml)")
-	_ = ExportAPIsCmd.MarkFlagRequired("environment")
+	ExportAPIsCmdDeprecated.Flags().StringVarP(&exportAPIsFormat, "format", "", utils.DefaultExportFormat, "File format of exported archives(json or yaml)")
+	_ = ExportAPIsCmdDeprecated.MarkFlagRequired("environment")
 }

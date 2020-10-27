@@ -16,7 +16,7 @@
 * under the License.
  */
 
-package cmd
+package impl
 
 import (
 	"encoding/json"
@@ -26,55 +26,27 @@ import (
 	"strings"
 
 	"github.com/renstrom/dedent"
-	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-// keys command related Info
-const genKeyCmdLiteral = "get-keys"
-const genKeyCmdShortDesc = "Generate access token to invoke the API or API Product"
-const genKeyCmdLongDesc = `Generate JWT token to invoke the API or API Product by subscribing to a default application for testing purposes`
-const genKeyCmdExamples = utils.ProjectName + " " + genKeyCmdLiteral + ` -n TwitterAPI -v 1.0.0 -e dev --provider admin
-NOTE: Both the flags (--name (-n) and --environment (-e)) are mandatory.
-You can override the default token endpoint using --token (-t) optional flag providing a new token endpoint`
-
-var keyGenEnv string
-var apiName string
-var apiVersion string
-var apiProvider string
 var tokenType string
 var subscriptionThrottlingTier string
 var applicationThrottlingPolicy string
+var apiName string
+var apiVersion string
+var apiProvider string
+var keyGenEnv string
 var keyGenTokenEndpoint string
 
-var genKeyCmd = &cobra.Command{
-	Use:     genKeyCmdLiteral,
-	Short:   genKeyCmdShortDesc,
-	Long:    genKeyCmdLongDesc,
-	Example: genKeyCmdExamples,
-	Run: func(cmd *cobra.Command, args []string) {
-
-		utils.Logln(utils.LogPrefixInfo + genKeyCmdLiteral + " called")
-		getKeys()
-	},
-}
-
 //Subscribe the given API or API Product to the default application and generate an access token
-func getKeys() {
+func GetKeys(cred credentials.Credential, envName, name, version, provider, tokenEndpoint string) {
+	keyGenEnv = envName
+	apiName = name
+	apiVersion = version
+	apiProvider = provider
+	keyGenTokenEndpoint = tokenEndpoint
 
-	cred, err := getCredentials(keyGenEnv)
-	if err != nil {
-		utils.HandleErrorAndExit("Error getting credentials", err)
-	}
-	utils.Logln(utils.LogPrefixInfo + "Retrieved credentials of the environment successfully")
-	//Calling the DCR endpoint to get the credentials of the env
-	cred.ClientId, cred.ClientSecret, err = callDCREndpoint(cred)
-	//If the DCR call fails exit with the error
-	if err != nil {
-		utils.HandleErrorAndExit("Internal error occurred", err)
-	}
-	utils.Logln(utils.LogPrefixInfo + "Called DCR endpoint successfully")
 	//generating access token for the env based on the credentials
 	accessToken, err := credentials.GetOAuthAccessToken(cred, keyGenEnv)
 	if err != nil {
@@ -244,7 +216,7 @@ func getApplicationThrottlingPolicy(accessToken string) (string, error) {
 // Calling DCR endpoint
 // @param credential : Username and Password
 // @return client_id, client_secret, error
-func callDCREndpoint(credential credentials.Credential) (string, string, error) {
+func CallDCREndpoint(credential credentials.Credential, keyGenEnv string) (string, string, error) {
 	//Base64 encoding the credentials
 	b64encodedCredentials := credentials.GetBasicAuth(credential)
 	//Prepping the headers
@@ -750,16 +722,4 @@ func prepScopeValues(scope []string) string {
 		}
 	}
 	return scopeParam
-}
-
-//init function to add the cli command to the root command
-func init() {
-	RootCmd.AddCommand(genKeyCmd)
-	genKeyCmd.Flags().StringVarP(&keyGenEnv, "environment", "e", "", "Key generation environment")
-	genKeyCmd.Flags().StringVarP(&apiName, "name", "n", "", "API or API Product to generate keys")
-	genKeyCmd.Flags().StringVarP(&apiVersion, "version", "v", "", "Version of the API")
-	genKeyCmd.Flags().StringVarP(&apiProvider, "provider", "r", "", "Provider of the API or API Product")
-	genKeyCmd.Flags().StringVarP(&keyGenTokenEndpoint, "token", "t", "", "Token endpoint URL of Environment")
-	_ = genKeyCmd.MarkFlagRequired("name")
-	_ = genKeyCmd.MarkFlagRequired("environment")
 }

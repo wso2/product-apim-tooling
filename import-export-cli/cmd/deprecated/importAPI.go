@@ -16,10 +16,11 @@
 * under the License.
  */
 
-package cmd
+package deprecated
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -36,27 +37,28 @@ var (
 
 const (
 	// ImportAPI command related usage info
-	ImportAPICmdLiteral   = "api"
+	importAPICmdLiteral   = "import-api"
 	importAPICmdShortDesc = "Import API"
 	importAPICmdLongDesc  = "Import an API to an environment"
 )
 
-const importAPICmdExamples = utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAPICmdLiteral + ` -f qa/TwitterAPI.zip -e dev
-` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAPICmdLiteral + ` -f staging/FacebookAPI.zip -e production
-` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAPICmdLiteral + ` -f ~/myapi -e production --update
-` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAPICmdLiteral + ` -f ~/myapi -e production --update
+const importAPICmdExamples = utils.ProjectName + ` ` + importAPICmdLiteral + ` -f qa/TwitterAPI.zip -e dev
+` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f staging/FacebookAPI.zip -e production
+` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f ~/myapi -e production --update
+` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f ~/myapi -e production --update
 NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory`
 
 // ImportAPICmd represents the importAPI command
-var ImportAPICmd = &cobra.Command{
-	Use: ImportAPICmdLiteral + " --file <path-to-api> --environment " +
+var ImportAPICmdDeprecated = &cobra.Command{
+	Use: importAPICmdLiteral + " --file <path-to-api> --environment " +
 		"<environment>",
-	Short:   importAPICmdShortDesc,
-	Long:    importAPICmdLongDesc,
-	Example: importAPICmdExamples,
-	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + ImportAPICmdLiteral + " called")
-		cred, err := GetCredentials(importEnvironment)
+	Short:      importAPICmdShortDesc,
+	Long:       importAPICmdLongDesc,
+	Example:    importAPICmdExamples,
+	Deprecated: "instead use \"" + cmd.ImportCmdLiteral + " " + cmd.ImportAPICmdLiteral + "\".",
+	Run: func(deprecatedCmd *cobra.Command, args []string) {
+		utils.Logln(utils.LogPrefixInfo + importAPICmdLiteral + " called")
+		cred, err := cmd.GetCredentials(importEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
@@ -75,20 +77,20 @@ var ImportAPICmd = &cobra.Command{
 
 // init using Cobra
 func init() {
-	ImportCmd.AddCommand(ImportAPICmd)
-	ImportAPICmd.Flags().StringVarP(&importAPIFile, "file", "f", "",
+	cmd.RootCmd.AddCommand(ImportAPICmdDeprecated)
+	ImportAPICmdDeprecated.Flags().StringVarP(&importAPIFile, "file", "f", "",
 		"Name of the API to be imported")
-	ImportAPICmd.Flags().StringVarP(&importEnvironment, "environment", "e",
+	ImportAPICmdDeprecated.Flags().StringVarP(&importEnvironment, "environment", "e",
 		"", "Environment from the which the API should be imported")
-	ImportAPICmd.Flags().BoolVar(&importAPICmdPreserveProvider, "preserve-provider", true,
+	ImportAPICmdDeprecated.Flags().BoolVar(&importAPICmdPreserveProvider, "preserve-provider", true,
 		"Preserve existing provider of API after importing")
-	ImportAPICmd.Flags().BoolVar(&importAPIUpdate, "update", false, "Update an "+
+	ImportAPICmdDeprecated.Flags().BoolVar(&importAPIUpdate, "update", false, "Update an "+
 		"existing API or create a new API")
-	ImportAPICmd.Flags().StringVarP(&importAPIParamsFile, "params", "", utils.ParamFileAPI,
+	ImportAPICmdDeprecated.Flags().StringVarP(&importAPIParamsFile, "params", "", utils.ParamFileAPI,
 		"Provide a API Manager params file")
-	ImportAPICmd.Flags().BoolVarP(&importAPISkipCleanup, "skipCleanup", "", false, "Leave "+
+	ImportAPICmdDeprecated.Flags().BoolVarP(&importAPISkipCleanup, "skipCleanup", "", false, "Leave "+
 		"all temporary files created during import process")
 	// Mark required flags
-	_ = ImportAPICmd.MarkFlagRequired("environment")
-	_ = ImportAPICmd.MarkFlagRequired("file")
+	_ = ImportAPICmdDeprecated.MarkFlagRequired("environment")
+	_ = ImportAPICmdDeprecated.MarkFlagRequired("file")
 }

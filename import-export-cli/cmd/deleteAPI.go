@@ -20,6 +20,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
@@ -60,7 +61,7 @@ var DeleteAPICmd = &cobra.Command{
 			k8sArgs = append(k8sArgs, args...)
 			executeKubernetes(k8sArgs...)
 		} else {
-			cred, err := getCredentials(deleteAPIEnvironment)
+			cred, err := GetCredentials(deleteAPIEnvironment)
 			if err != nil {
 				utils.HandleErrorAndExit("Error getting credentials ", err)
 			}
