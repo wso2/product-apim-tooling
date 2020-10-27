@@ -39,11 +39,12 @@ var flagForceUninstallWso2amOperator bool
 
 // uninstallWso2amOperatorCmdDeprecated represents the uninstallWso2amOperator command
 var uninstallWso2amOperatorCmdDeprecated = &cobra.Command{
-	Use:        uninstallWso2amOperatorCmdLiteral,
-	Short:      uninstallWso2amOperatorCmdShortDesc,
-	Long:       uninstallWso2amOperatorCmdLongDesc,
-	Example:    uninstallWso2amOperatorCmdExamples,
-	Deprecated: "instead use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sUninstallCmdLiteral + " " + cmd.K8sUninstallWso2amOperatorCmdLiteral + "\".",
+	Use:     uninstallWso2amOperatorCmdLiteral,
+	Short:   uninstallWso2amOperatorCmdShortDesc,
+	Long:    uninstallWso2amOperatorCmdLongDesc,
+	Example: uninstallWso2amOperatorCmdExamples,
+	Deprecated: "use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sUninstallCmdLiteral + " " + cmd.K8sUninstallWso2amOperatorCmdLiteral +
+		"\" " + "instead of \"" + uninstallCmdLiteral + " " + uninstallWso2amOperatorCmdLiteral + "\".",
 	Run: func(cmd *cobra.Command, args []string) {
 		isConfirm := flagForceUninstallWso2amOperator
 

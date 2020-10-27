@@ -40,11 +40,12 @@ var flagWso2AmOperatorFile string
 
 // installWso2amOperatorCmdDeprecated represents the 'install wso2am-operator' command
 var installWso2amOperatorCmdDeprecated = &cobra.Command{
-	Use:        installWso2amOperatorCmdLiteral,
-	Short:      installWso2amOperatorCmdShortDesc,
-	Long:       installWso2amOperatorCmdLongDesc,
-	Example:    installWso2amOperatorCmdExamples,
-	Deprecated: "instead use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sInstallCmdLiteral + " " + cmd.K8sInstallWso2amOperatorCmdLiteral + "\".",
+	Use:     installWso2amOperatorCmdLiteral,
+	Short:   installWso2amOperatorCmdShortDesc,
+	Long:    installWso2amOperatorCmdLongDesc,
+	Example: installWso2amOperatorCmdExamples,
+	Deprecated: "use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sInstallCmdLiteral + " " + cmd.K8sInstallWso2amOperatorCmdLiteral +
+		"\" " + "instead of \"" + installCmdLiteral + " " + installWso2amOperatorCmdLiteral + "\".",
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(fmt.Sprintf("%s%s %s called", utils.LogPrefixInfo, installCmdLiteral, installWso2amOperatorCmdLiteral))
 

@@ -47,12 +47,12 @@ var updateCmdDeprecated = &cobra.Command{
 
 // updateApiCmd represents the updateApi command
 var updateApiCmdDeprecated = &cobra.Command{
-	Use:        addApiCmdLiteral,
-	Short:      addApiCmdShortDesc,
-	Long:       addApiLongDesc,
-	Example:    addApiExamples,
-	Deprecated: "instead use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sUpdateCmdLiteral + " " + cmd.AddApiCmdLiteral + "\".",
-
+	Use:     addApiCmdLiteral,
+	Short:   addApiCmdShortDesc,
+	Long:    addApiLongDesc,
+	Example: addApiExamples,
+	Deprecated: "use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sUpdateCmdLiteral + " " + cmd.AddApiCmdLiteral +
+		"\" " + "instead of \"" + updateCmdLiteral + " " + addApiCmdLiteral + "\".",
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + updateCmdLiteral + " called")
 		validateAddApiCommand()

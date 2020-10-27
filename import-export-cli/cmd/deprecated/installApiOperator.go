@@ -48,11 +48,12 @@ var flagBmKeyFile string
 
 // installApiOperatorCmdDeprecated represents the install api-operator command
 var installApiOperatorCmdDeprecated = &cobra.Command{
-	Use:        installApiOperatorCmdLiteral,
-	Short:      installApiOperatorCmdShortDesc,
-	Long:       installApiOperatorCmdLongDesc,
-	Example:    installApiOperatorCmdExamples,
-	Deprecated: "instead use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sInstallCmdLiteral + " " + cmd.K8sInstallApiOperatorCmdLiteral + "\".",
+	Use:     installApiOperatorCmdLiteral,
+	Short:   installApiOperatorCmdShortDesc,
+	Long:    installApiOperatorCmdLongDesc,
+	Example: installApiOperatorCmdExamples,
+	Deprecated: "use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sInstallCmdLiteral + " " + cmd.K8sInstallApiOperatorCmdLiteral +
+		"\" " + "instead of \"" + installCmdLiteral + " " + installApiOperatorCmdLiteral + "\".",
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(fmt.Sprintf("%s%s %s called", utils.LogPrefixInfo, installCmdLiteral, installApiOperatorCmdLiteral))
 

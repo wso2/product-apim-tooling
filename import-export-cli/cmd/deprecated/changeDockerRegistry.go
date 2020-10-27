@@ -50,11 +50,12 @@ const changeDockerRegistryCmdExamples = utils.ProjectName + ` ` + changeCmdLiter
 
 // changeDockerRegistryCmdDeprecated represents the change registry command
 var changeDockerRegistryCmdDeprecated = &cobra.Command{
-	Use:        changeDockerRegistryCmdLiteral,
-	Short:      changeDockerRegistryCmdShortDesc,
-	Long:       changeDockerRegistryCmdLongDesc,
-	Example:    changeDockerRegistryCmdExamples,
-	Deprecated: "instead use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sChangeCmdLiteral + " " + cmd.K8sChangeDockerRegistryCmdLiteral + "\".",
+	Use:     changeDockerRegistryCmdLiteral,
+	Short:   changeDockerRegistryCmdShortDesc,
+	Long:    changeDockerRegistryCmdLongDesc,
+	Example: changeDockerRegistryCmdExamples,
+	Deprecated: "use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sChangeCmdLiteral + " " + cmd.K8sChangeDockerRegistryCmdLiteral +
+		"\" " + "instead of \"" + changeCmdLiteral + " " + changeDockerRegistryCmdLiteral + "\".",
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(fmt.Sprintf("%s%s %s called", utils.LogPrefixInfo, changeCmdLiteral, changeDockerRegistryCmdLiteral))
 		configVars := utils.GetMainConfigFromFile(utils.MainConfigFilePath)

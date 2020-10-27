@@ -38,11 +38,12 @@ var flagForceUninstallApiOperator bool
 
 // uninstallApiOperatorCmdDeprecated represents the uninstall api-operator command
 var uninstallApiOperatorCmdDeprecated = &cobra.Command{
-	Use:        uninstallApiOperatorCmdLiteral,
-	Short:      uninstallApiOperatorCmdShortDesc,
-	Long:       uninstallApiOperatorCmdLongDesc,
-	Example:    uninstallApiOperatorCmdExamples,
-	Deprecated: "instead use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sUninstallCmdLiteral + " " + cmd.K8sUninstallApiOperatorCmdLiteral + "\".",
+	Use:     uninstallApiOperatorCmdLiteral,
+	Short:   uninstallApiOperatorCmdShortDesc,
+	Long:    uninstallApiOperatorCmdLongDesc,
+	Example: uninstallApiOperatorCmdExamples,
+	Deprecated: "use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sUninstallCmdLiteral + " " + cmd.K8sUninstallApiOperatorCmdLiteral +
+		"\" " + "instead of \"" + uninstallCmdLiteral + " " + uninstallApiOperatorCmdLiteral + "\".",
 	Run: func(cmd *cobra.Command, args []string) {
 		isConfirm := flagForceUninstallApiOperator
 

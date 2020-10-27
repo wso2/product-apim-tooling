@@ -62,11 +62,12 @@ const addApiExamples = utils.ProjectName + " add/update " + addApiCmdLiteral +
 
 // addApiCmdDeprecated represents the api command
 var addApiCmdDeprecated = &cobra.Command{
-	Use:        addApiCmdLiteral,
-	Short:      addApiCmdShortDesc,
-	Long:       addApiLongDesc,
-	Example:    addApiExamples,
-	Deprecated: "instead use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sAddCmdLiteral + " " + cmd.AddApiCmdLiteral + "\".",
+	Use:     addApiCmdLiteral,
+	Short:   addApiCmdShortDesc,
+	Long:    addApiLongDesc,
+	Example: addApiExamples,
+	Deprecated: "use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sAddCmdLiteral + " " + cmd.AddApiCmdLiteral +
+		"\" " + "instead of \"" + cmd.AddCmdLiteral + " " + addApiCmdLiteral + "\".",
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + addApiCmdLiteral + " called")
 		handleAddApi("")
