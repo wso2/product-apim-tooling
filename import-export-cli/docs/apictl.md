@@ -21,28 +21,18 @@ apictl [flags]
 
 ### SEE ALSO
 
-* [apictl add](apictl_add.md)	 - Add an API to the kubernetes cluster
-* [apictl add-env](apictl_add-env.md)	 - Add Environment to Config file
-* [apictl change](apictl_change.md)	 - Change a configuration in K8s cluster resource
+* [apictl add](apictl_add.md)	 - Add Environment to Config file
 * [apictl change-status](apictl_change-status.md)	 - Change Status of an API
 * [apictl delete](apictl_delete.md)	 - Delete an API/APIProduct/Application in an environment
-* [apictl export](apictl_export.md)	 - Export an API Product in an environment
-* [apictl export-api](apictl_export-api.md)	 - Export API
-* [apictl export-apis](apictl_export-apis.md)	 - Export APIs for migration
-* [apictl export-app](apictl_export-app.md)	 - Export App
-* [apictl get-keys](apictl_get-keys.md)	 - Generate access token to invoke the API or API Product
-* [apictl import](apictl_import.md)	 - Import an API Product to an environment
-* [apictl import-api](apictl_import-api.md)	 - Import API
-* [apictl import-app](apictl_import-app.md)	 - Import App
+* [apictl export](apictl_export.md)	 - Export an API/API Product/Application in an environment
+* [apictl get](apictl_get.md)	 - Get APIs/APIProducts/Applications in an environment or Get the environments
+* [apictl import](apictl_import.md)	 - Import an API/API Product/Application to an environment
 * [apictl init](apictl_init.md)	 - Initialize a new project in given path
-* [apictl install](apictl_install.md)	 - Install an operator in the configured K8s cluster
-* [apictl list](apictl_list.md)	 - List APIs/APIProducts/Applications in an environment or List the environments
+* [apictl k8s](apictl_k8s.md)	 - Kubernetes mode based commands
 * [apictl login](apictl_login.md)	 - Login to an API Manager
 * [apictl logout](apictl_logout.md)	 - Logout to from an API Manager
 * [apictl remove](apictl_remove.md)	 - Remove an environment
 * [apictl set](apictl_set.md)	 - Set configuration parameters
-* [apictl uninstall](apictl_uninstall.md)	 - Uninstall an operator in the configured K8s cluster
-* [apictl update](apictl_update.md)	 - Update an API to the kubernetes cluster
 * [apictl vcs](apictl_vcs.md)	 - Checks status and deploys projects
 * [apictl version](apictl_version.md)	 - Display Version on current apictl
 
