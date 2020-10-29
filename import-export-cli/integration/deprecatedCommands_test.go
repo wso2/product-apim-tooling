@@ -169,3 +169,63 @@ func TestListApiProductsDevopsTenantUserDeprecated(t *testing.T) {
 
 	validateAPIProductsList(t, args)
 }
+
+func TestExportAppNonAdminSuperTenantDeprecated(t *testing.T) {
+	subscriberUserName := subscriber.UserName
+	subscriberPassword := subscriber.Password
+
+	dev := apimClients[0]
+
+	app := testutils.AddApp(t, dev, subscriberUserName, subscriberPassword)
+
+	args := &testutils.AppImportExportTestArgs{
+		AppOwner:    testutils.Credentials{Username: subscriberUserName, Password: subscriberPassword},
+		CtlUser:     testutils.Credentials{Username: subscriberUserName, Password: subscriberPassword},
+		Application: app,
+		SrcAPIM:     dev,
+	}
+
+	validateAppExportFailure(t, args)
+}
+
+func TestExportImportAppDevopsTenantDeprecated(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	tenantAdminUsername := superAdminUser + "@" + TENANT1
+	tenantAdminPassword := superAdminPassword
+
+	dev := apimClients[0]
+	prod := apimClients[1]
+
+	app := testutils.AddApp(t, dev, tenantAdminUsername, tenantAdminPassword)
+
+	args := &testutils.AppImportExportTestArgs{
+		AppOwner:    testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
+		CtlUser:     testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		Application: app,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+	}
+
+	validateAppExportImportWithPreserveOwner(t, args)
+}
+
+func TestListAppsDevopsTenantUserDeprecated(t *testing.T) {
+	tenantAdminUsername := superAdminUser + "@" + TENANT1
+	tenantAdminPassword := superAdminPassword
+
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	otherUsername := subscriber.UserName + "@" + TENANT1
+	otherPassword := subscriber.Password
+
+	apim := apimClients[0]
+	testutils.AddApp(t, apim, tenantAdminUsername, tenantAdminPassword)
+	testutils.AddApp(t, apim, otherUsername, otherPassword)
+
+	base.SetupEnv(t, apim.GetEnvName(), apim.GetApimURL(), apim.GetTokenURL())
+	base.Login(t, apim.GetEnvName(), tenantDevopsUsername, tenantDevopsPassword)
+	listApps(t, apim.GetEnvName())
+}

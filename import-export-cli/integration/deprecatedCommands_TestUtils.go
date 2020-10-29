@@ -19,10 +19,12 @@
 package integration
 
 import (
+	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -92,6 +94,37 @@ func exportAllApisOfATenant(t *testing.T, args *testutils.ApiImportExportTestArg
 
 	output, error := base.Execute(t, "export-apis", "-e", args.SrcAPIM.GetEnvName(), "-k", "--force")
 	return output, error
+}
+
+func getEnvAppExportPath(envName string) string {
+	return filepath.Join(utils.DefaultExportDirPath, utils.ExportedAppsDirName, envName)
+}
+
+func exportApp(t *testing.T, name string, owner string, env string) (string, error) {
+	output, err := base.Execute(t, "export-app", "-n", name, "-o", owner, "-e", env, "-k", "--verbose")
+
+	t.Cleanup(func() {
+		base.RemoveApplicationArchive(t, getEnvAppExportPath(env), name, owner)
+	})
+
+	return output, err
+}
+
+func importAppPreserveOwner(t *testing.T, sourceEnv string, app *apim.Application, client *apim.Client) (string, error) {
+	fileName := base.GetApplicationArchiveFilePath(t, sourceEnv, app.Name, app.Owner)
+	output, err := base.Execute(t, "import-app", "--preserveOwner=true", "-f", fileName, "-e", client.EnvName, "-k", "--verbose")
+
+	t.Cleanup(func() {
+		client.DeleteApplicationByName(app.Name)
+	})
+
+	return output, err
+}
+
+func listApps(t *testing.T, env string) []string {
+	response, _ := base.Execute(t, "list", "apps", "-e", env, "-k")
+
+	return base.GetRowsFromTableResponse(response)
 }
 
 func validateAPIExportFailureDeprecated(t *testing.T, args *testutils.ApiImportExportTestArgs) {
@@ -191,4 +224,47 @@ func validateAPIProductsList(t *testing.T, args *testutils.ApiProductImportExpor
 	apiProductsList := args.SrcAPIM.GetAPIProducts()
 
 	testutils.ValidateListAPIProductsEqual(t, output, apiProductsList)
+}
+
+func validateAppExportFailure(t *testing.T, args *testutils.AppImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl env
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	// Attempt exporting app from env
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	exportApp(t, args.Application.Name, args.AppOwner.Username, args.SrcAPIM.GetEnvName())
+
+	// Validate that export failed
+	assert.False(t, base.IsApplicationArchiveExists(t, getEnvAppExportPath(args.SrcAPIM.GetEnvName()),
+		args.Application.Name, args.AppOwner.Username))
+}
+
+func validateAppExportImportWithPreserveOwner(t *testing.T, args *testutils.AppImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+	base.SetupEnv(t, args.DestAPIM.GetEnvName(), args.DestAPIM.GetApimURL(), args.DestAPIM.GetTokenURL())
+
+	// Export app from env 1
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	exportApp(t, args.Application.Name, args.AppOwner.Username, args.SrcAPIM.GetEnvName())
+
+	assert.True(t, base.IsApplicationArchiveExists(t, getEnvAppExportPath(args.SrcAPIM.GetEnvName()),
+		args.Application.Name, args.AppOwner.Username))
+
+	// Import app to env 2
+	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	importAppPreserveOwner(t, args.SrcAPIM.GetEnvName(), args.Application, args.DestAPIM)
+
+	// Get App from env 2
+	importedApp := testutils.GetApp(t, args.DestAPIM, args.Application.Name, args.AppOwner.Username, args.AppOwner.Password)
+
+	// Validate env 1 and env 2 App is equal
+	testutils.ValidateAppsEqual(t, args.Application, importedApp)
 }
