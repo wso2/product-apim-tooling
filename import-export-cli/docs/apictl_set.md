@@ -27,7 +27,7 @@ apictl set --vcs-config-path /home/user/custom/vcs-config.yaml
 ### Options
 
 ```
-      --export-directory string    Path to directory where APIs should be saved (default "/home/wasura/.wso2apictl/exported")
+      --export-directory string    Path to directory where APIs should be saved (default "/home/wso2user/.wso2apictl/exported")
   -h, --help                       help for set
       --http-request-timeout int   Timeout for HTTP Client (default 10000)
       --vcs-config-path string     Path to the VCS Configuration yaml file which keeps the VCS meta data
