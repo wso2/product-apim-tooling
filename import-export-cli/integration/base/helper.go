@@ -79,7 +79,7 @@ func GetValueOfUniformResponse(response string) string {
 // SetupEnv : Adds a new environment and automatically removes it when the calling test function execution ends
 //
 func SetupEnv(t *testing.T, env string, apim string, tokenEp string) {
-	Execute(t, "add-env", "-e", env, "--apim", apim, "--token", tokenEp)
+	Execute(t, "add", "env", env, "--apim", apim, "--token", tokenEp)
 
 	t.Cleanup(func() {
 		Execute(t, "remove", "env", env)
@@ -89,7 +89,7 @@ func SetupEnv(t *testing.T, env string, apim string, tokenEp string) {
 // SetupEnv : Adds a new environment just with apim endpoint and automatically removes it when the
 // calling test function execution ends
 func SetupEnvWithoutTokenFlag(t *testing.T, env string, apim string) {
-	Execute(t, "add-env", "-e", env, "--apim", apim)
+	Execute(t, "add", "env", env, "--apim", apim)
 
 	t.Cleanup(func() {
 		Execute(t, "remove", "env", env)
@@ -310,7 +310,7 @@ func CreateTempDir(t *testing.T, path string) {
 func GetExportedPathFromOutput(output string) string {
 	//Check directory path to omit changes due to OS differences
 	if strings.Contains(output, ":\\") {
-		arrayOutput := []rune (output)
+		arrayOutput := []rune(output)
 		extractedPath := string(arrayOutput[strings.Index(output, ":\\")-1:])
 		return strings.ReplaceAll(strings.ReplaceAll(extractedPath, "\n", ""), " ", "")
 	} else {
