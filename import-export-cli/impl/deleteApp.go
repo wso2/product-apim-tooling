@@ -19,7 +19,6 @@
 package impl
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -36,7 +35,7 @@ import (
 func DeleteApplication(accessToken, environment, deleteAppName, deleteAppOwner string) (*resty.Response, error) {
 	deleteEndpoint := utils.GetAdminApplicationListEndpointOfEnv(environment, utils.MainConfigFilePath)
 	deleteEndpoint = utils.AppendSlashToString(deleteEndpoint)
-	appId, err := getAppId(accessToken, environment, deleteAppName, deleteAppOwner)
+	appId, err := GetAppId(accessToken, environment, deleteAppName, deleteAppOwner)
 	if err != nil {
 		utils.HandleErrorAndExit("Error while getting App Id for deletion ", err)
 	}
@@ -64,46 +63,5 @@ func PrintDeleteAppResponse(resp *resty.Response, err error) {
 		fmt.Println("Error deleting Application:", err)
 	} else {
 		fmt.Println("Application deleted successfully!. Status: " + strconv.Itoa(resp.StatusCode()))
-	}
-}
-
-// Get the ID of an Application if available
-// @param accessToken : Token to call the Developer Portal Rest API
-// @return appId, error
-func getAppId(accessToken, environment, appName, appOwner string) (string, error) {
-	// Application REST API endpoint of the environment from the config file
-	applicationEndpoint := utils.GetAdminApplicationListEndpointOfEnv(environment, utils.MainConfigFilePath) +
-		"?user=" + appOwner + "&name=" + appName
-
-	// Prepping headers
-	headers := make(map[string]string)
-	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
-	resp, err := utils.InvokeGETRequest(applicationEndpoint, headers)
-
-	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
-		// 200 OK or 201 Created
-		appData := &utils.AppList{}
-		data := []byte(resp.Body())
-		err = json.Unmarshal(data, &appData)
-		appId := ""
-		if appData.Count != 0 {
-			for _, app := range appData.List {
-				if app.Name == appName {
-					appId = app.ApplicationID
-				}
-			}
-			return appId, err
-		}
-		return "", errors.New("Cannot find the application: " + appName + " for owner: " + appOwner)
-
-	} else {
-		utils.Logf("Error: %s\n", resp.Error())
-		utils.Logf("Body: %s\n", resp.Body())
-		if resp.StatusCode() == http.StatusUnauthorized {
-			// 401 Unauthorized
-			return "", fmt.Errorf("Authorization failed while searching CLI application: " + appName)
-		}
-		return "", errors.New("Request didn't respond 200 OK for searching existing applications. " +
-			"Status: " + resp.Status())
 	}
 }

@@ -30,7 +30,7 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-// Get the ID of an API Product if available
+// GetAPIProductId Get the ID of an API Product if available
 // @param accessToken : Access token to call the Publisher Rest API
 // @param environment : Environment where API Product needs to be located
 // @param apiProductName : Name of the API Product
@@ -103,7 +103,7 @@ func GetAPIProductDefinition(filePath string) (*v2.APIProductDefinition, []byte,
 	return apiProduct, buffer, nil
 }
 
-// GetAPIProductList
+// GetAPIProductList Get the list of API Products available in a particular environment
 // @param accessToken : Access Token for the environment
 // @param unifiedSearchEndpoint : Unified Search Endpoint for the environment to retreive API Product list
 // @param query : String to be matched against the API Product names
