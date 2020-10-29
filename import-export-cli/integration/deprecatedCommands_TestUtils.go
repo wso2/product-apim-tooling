@@ -77,6 +77,11 @@ func listAPIs(t *testing.T, args *testutils.ApiImportExportTestArgs) (string, er
 	return output, err
 }
 
+func listAPIProducts(t *testing.T, args *testutils.ApiProductImportExportTestArgs) (string, error) {
+	output, err := base.Execute(t, "list", "api-products", "-e", args.SrcAPIM.EnvName, "-k", "--verbose")
+	return output, err
+}
+
 func exportAllApisOfATenant(t *testing.T, args *testutils.ApiImportExportTestArgs) (string, error) {
 	//Setup environment
 	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
@@ -168,4 +173,22 @@ func validateAllApisOfATenantIsExported(t *testing.T, args *testutils.ApiImportE
 		pathToCleanUp := utils.DefaultExportDirPath + testutils.TestMigrationDirectorySuffix
 		base.RemoveDir(pathToCleanUp)
 	})
+}
+
+func validateAPIProductsList(t *testing.T, args *testutils.ApiProductImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	// List API Products of env 1
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	base.WaitForIndexing()
+
+	output, _ := listAPIProducts(t, args)
+
+	apiProductsList := args.SrcAPIM.GetAPIProducts()
+
+	testutils.ValidateListAPIProductsEqual(t, output, apiProductsList)
 }

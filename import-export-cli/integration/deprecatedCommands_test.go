@@ -130,3 +130,42 @@ func TestExportApisWithExportApisCommandDeprecated(t *testing.T) {
 
 	validateAllApisOfATenantIsExported(t, args, apisAdded)
 }
+
+func TestListApiProductsDevopsTenantUserDeprecated(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	apiCreator := creator.UserName + "@" + TENANT1
+	apiCreatorPassword := creator.Password
+
+	apiPublisher := publisher.UserName + "@" + TENANT1
+	apiPublisherPassword := publisher.Password
+
+	dev := apimClients[0]
+
+	// Add the first dependent API to env1
+	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI1.ID)
+
+	// Add the second dependent API to env1
+	dependentAPI2 := testutils.AddAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
+	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
+
+	// Map the real name of the API with the API
+	apisList := map[string]*apim.API{
+		"PizzaShackAPI":   dependentAPI1,
+		"SwaggerPetstore": dependentAPI2,
+	}
+
+	for apiProductCount := 0; apiProductCount <= numberOfAPIProducts; apiProductCount++ {
+		// Add the API Product to env1
+		testutils.AddAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
+	}
+
+	args := &testutils.ApiProductImportExportTestArgs{
+		CtlUser: testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		SrcAPIM: dev,
+	}
+
+	validateAPIProductsList(t, args)
+}

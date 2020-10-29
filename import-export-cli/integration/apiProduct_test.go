@@ -19,8 +19,9 @@
 package integration
 
 import (
-	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"testing"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 
