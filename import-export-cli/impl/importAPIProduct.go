@@ -22,16 +22,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"os"
 	"path"
 	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
+
+	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 
 	"github.com/Jeffail/gabs"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -50,30 +50,6 @@ func extractAPIProductDefinition(jsonContent []byte) (*v2.APIProductDefinition, 
 	}
 
 	return apiProduct, nil
-}
-
-// GetAPIProductDefinition scans filePath and returns APIProductDefinition or an error
-func GetAPIProductDefinition(filePath string) (*v2.APIProductDefinition, []byte, error) {
-	info, err := os.Stat(filePath)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	var buffer []byte
-	if info.IsDir() {
-		_, content, err := resolveYamlOrJSON(path.Join(filePath, "Meta-information", "api"))
-		if err != nil {
-			return nil, nil, err
-		}
-		buffer = content
-	} else {
-		return nil, nil, fmt.Errorf("looking for directory, found %s", info.Name())
-	}
-	apiProduct, err := extractAPIProductDefinition(buffer)
-	if err != nil {
-		return nil, nil, err
-	}
-	return apiProduct, buffer, nil
 }
 
 // resolveImportAPIProductFilePath resolves the archive/directory for import
@@ -95,20 +71,6 @@ func resolveImportAPIProductFilePath(file, defaultExportDirectory string) (strin
 	}
 
 	return absPath, nil
-}
-
-// getAPIProductID returns id of the API Product by using apiProductInfo which contains name, version and provider as info
-func getAPIProductID(name, version, environment, accessOAuthToken string) (string, error) {
-	apiProductQuery := fmt.Sprintf("name:%s version:%s", name, version)
-	apiProductQuery += " type:\"" + utils.DefaultApiProductType + "\""
-	count, apiProducts, err := GetAPIProductListFromEnv(accessOAuthToken, environment, url.QueryEscape(apiProductQuery), "")
-	if err != nil {
-		return "", err
-	}
-	if count == 0 {
-		return "", nil
-	}
-	return apiProducts[0].ID, nil
 }
 
 func populateAPIProductWithDefaults(def *v2.APIProductDefinition) (dirty bool) {
@@ -322,7 +284,8 @@ func ImportAPIProduct(accessOAuthToken, adminEndpoint, importEnvironment, import
 	updateAPIProduct := false
 	if importAPIsUpdate || importAPIProductUpdate {
 		// Check for API Product existence
-		id, err := getAPIProductID(apiProductInfo.ID.APIProductName, apiProductInfo.ID.Version, importEnvironment, accessOAuthToken)
+		id, err := GetAPIProductId(accessOAuthToken, importEnvironment, apiProductInfo.ID.APIProductName,
+			apiProductInfo.ID.ProviderName)
 		if err != nil {
 			return err
 		}
