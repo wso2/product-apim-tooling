@@ -65,7 +65,7 @@ var ChangeAPIStatusCmd = &cobra.Command{
 func executeChangeAPIStatusCmd(credential credentials.Credential) {
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, apiStateChangeEnvironment)
 	if preCommandErr == nil {
-		resp, err := impl.ChangeAPIStatusInEnv(credential, accessToken, apiStateChangeEnvironment, apiStateChangeAction,
+		resp, err := impl.ChangeAPIStatusInEnv(accessToken, apiStateChangeEnvironment, apiStateChangeAction,
 			apiNameForStateChange, apiVersionForStateChange, apiProviderForStateChange)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while changing the API status", err)

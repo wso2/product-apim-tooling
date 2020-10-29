@@ -19,20 +19,14 @@
 package impl
 
 import (
-	"encoding/json"
-	"errors"
-	"fmt"
-	"net/http"
-
 	"github.com/go-resty/resty"
-	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 // ChangeAPIStatusInEnv function is used with change-status api command
-func ChangeAPIStatusInEnv(credential credentials.Credential, accessToken, environment, stateChangeAction, name, version, provider string) (*resty.Response, error) {
+func ChangeAPIStatusInEnv(accessToken, environment, stateChangeAction, name, version, provider string) (*resty.Response, error) {
 	changeAPIStatusEndpoint := utils.GetApiListEndpointOfEnv(environment, utils.MainConfigFilePath)
-	return changeAPIStatus(changeAPIStatusEndpoint, stateChangeAction, name, version, provider, environment, accessToken, credential)
+	return changeAPIStatus(changeAPIStatusEndpoint, stateChangeAction, name, version, provider, environment, accessToken)
 }
 
 // changeAPIStatus
@@ -43,11 +37,10 @@ func ChangeAPIStatusInEnv(credential credentials.Credential, accessToken, enviro
 // @param provider : Provider of the API
 // @param environment : Environment where the API resides
 // @param accessToken : Access Token for the resource
-// @param credential : Credentials of the logged-in user
 // @return response Response in the form of *resty.Response
-func changeAPIStatus(changeAPIStatusEndpoint, stateChangeAction, name, version, provider, environment, accessToken string, credential credentials.Credential) (*resty.Response, error) {
+func changeAPIStatus(changeAPIStatusEndpoint, stateChangeAction, name, version, provider, environment, accessToken string) (*resty.Response, error) {
 	changeAPIStatusEndpoint = utils.AppendSlashToString(changeAPIStatusEndpoint)
-	apiId, err := getAPIIdForStateChange(accessToken, name, version, provider, environment, credential)
+	apiId, err := GetAPIId(accessToken, environment, name, version, provider)
 	if err != nil {
 		utils.HandleErrorAndExit("Error while getting API Id for state change ", err)
 	}
@@ -63,50 +56,4 @@ func changeAPIStatus(changeAPIStatusEndpoint, stateChangeAction, name, version, 
 		return nil, err
 	}
 	return resp, nil
-}
-
-// Get the ID of an API if available
-// @param accessToken : Token to call the Publisher Rest API
-// @param name : Name of the API
-// @param version : Version of the API
-// @param provider : Provider of the API
-// @param environment : Environment where the API resides
-// @return apiId, error
-func getAPIIdForStateChange(accessToken, name, version, provider, environment string, credential credentials.Credential) (string, error) {
-	// Unified Search endpoint from the config file to search APIs
-	unifiedSearchEndpoint := utils.GetUnifiedSearchEndpointOfEnv(environment, utils.MainConfigFilePath)
-
-	// Prepping headers
-	headers := make(map[string]string)
-	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
-	var queryVal string
-	queryVal = "name:\"" + name + "\" version:\"" + version + "\""
-	if provider != "" {
-		queryVal = queryVal + " provider:\"" + provider + "\""
-	}
-	resp, err := utils.InvokeGETRequestWithQueryParam("query", queryVal, unifiedSearchEndpoint, headers)
-	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
-		// 200 OK or 201 Created
-		apiData := &utils.ApiSearch{}
-		data := []byte(resp.Body())
-		err = json.Unmarshal(data, &apiData)
-		if apiData.Count != 0 {
-			apiId := apiData.List[0].ID
-			return apiId, err
-		}
-		if provider != "" {
-			return "", errors.New("Requested API is not available in the Publisher. API: " + name +
-				" Version: " + version + " Provider: " + provider)
-		}
-		return "", errors.New("Requested API is not available in the Publisher. API: " + name +
-			" Version: " + version)
-	} else {
-		utils.Logf("Error: %s\n", resp.Error())
-		utils.Logf("Body: %s\n", resp.Body())
-		if resp.StatusCode() == http.StatusUnauthorized {
-			// 401 Unauthorized
-			return "", fmt.Errorf("Authorization failed while searching API: " + name)
-		}
-		return "", errors.New("Request didn't respond 200 OK for searching APIs. Status: " + resp.Status())
-	}
 }
