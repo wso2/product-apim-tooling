@@ -19,6 +19,7 @@
 package integration
 
 import (
+	"log"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -125,6 +126,10 @@ func listApps(t *testing.T, env string) []string {
 	response, _ := base.Execute(t, "list", "apps", "-e", env, "-k")
 
 	return base.GetRowsFromTableResponse(response)
+}
+
+func getKeys(t *testing.T, provider string, name string, version string, env string) (string, error) {
+	return base.Execute(t, "get-keys", "-n", name, "-v", version, "-r", provider, "-e", env, "-k", "--verbose")
 }
 
 func validateAPIExportFailureDeprecated(t *testing.T, args *testutils.ApiImportExportTestArgs) {
@@ -267,4 +272,37 @@ func validateAppExportImportWithPreserveOwner(t *testing.T, args *testutils.AppI
 
 	// Validate env 1 and env 2 App is equal
 	testutils.ValidateAppsEqual(t, args.Application, importedApp)
+}
+
+func validateGetKeysFailure(t *testing.T, args *testutils.ApiGetKeyTestArgs) {
+	t.Helper()
+
+	base.SetupEnv(t, args.Apim.GetEnvName(), args.Apim.GetApimURL(), args.Apim.GetTokenURL())
+	base.Login(t, args.Apim.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	var err error
+	var result string
+
+	result, err = getKeys(t, args.Api.Provider, args.Api.Name, args.Api.Version, args.Apim.GetEnvName())
+
+	assert.NotNil(t, err, "Expected error was not returned")
+	assert.Contains(t, base.GetValueOfUniformResponse(result), "Exit status 1")
+}
+
+func validateGetKeys(t *testing.T, args *testutils.ApiGetKeyTestArgs) {
+	t.Helper()
+
+	base.SetupEnv(t, args.Apim.GetEnvName(), args.Apim.GetApimURL(), args.Apim.GetTokenURL())
+	base.Login(t, args.Apim.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	result, err := getKeys(t, args.Api.Provider, args.Api.Name, args.Api.Version, args.Apim.GetEnvName())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	assert.Nil(t, err, "Error while getting key")
+
+	testutils.InvokeAPI(t, testutils.GetResourceURL(args.Apim, args.Api), base.GetValueOfUniformResponse(result), 200)
+	testutils.UnsubscribeAPI(args.Apim, args.CtlUser.Username, args.CtlUser.Password, args.Api.ID)
+
 }

@@ -138,7 +138,7 @@ func UnsubscribeAPI(client *apim.Client, username string, password string, apiID
 	client.DeleteSubscriptions(apiID)
 }
 
-func getResourceURL(apim *apim.Client, api *apim.API) string {
+func GetResourceURL(apim *apim.Client, api *apim.API) string {
 	port := 8280 + apim.GetPortOffset()
 	return "http://" + apim.GetHost() + ":" + strconv.Itoa(port) + api.Context + "/" + api.Version + "/menu"
 }

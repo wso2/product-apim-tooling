@@ -30,10 +30,10 @@ import (
 )
 
 func GetKeys(t *testing.T, provider string, name string, version string, env string) (string, error) {
-	return base.Execute(t, "get-keys", "-n", name, "-v", version, "-r", provider, "-e", env, "-k", "--verbose")
+	return base.Execute(t, "get", "keys", "-n", name, "-v", version, "-r", provider, "-e", env, "-k", "--verbose")
 }
 
-func invokeAPI(t *testing.T, url string, key string, expectedCode int) {
+func InvokeAPI(t *testing.T, url string, key string, expectedCode int) {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
@@ -46,7 +46,7 @@ func invokeAPI(t *testing.T, url string, key string, expectedCode int) {
 	authHeader := "Bearer " + key
 	req.Header.Set("Authorization", authHeader)
 
-	t.Log("invokeAPI() url", url)
+	t.Log("InvokeAPI() url", url)
 
 	response, err := client.Do(req)
 
@@ -111,7 +111,7 @@ func ValidateGetKeys(t *testing.T, args *ApiGetKeyTestArgs) {
 
 		assert.Nil(t, err, "Error while getting key")
 
-		invokeAPI(t, getResourceURL(args.Apim, args.Api), base.GetValueOfUniformResponse(result), 200)
+		InvokeAPI(t, GetResourceURL(args.Apim, args.Api), base.GetValueOfUniformResponse(result), 200)
 		UnsubscribeAPI(args.Apim, args.CtlUser.Username, args.CtlUser.Password, args.Api.ID)
 	}
 
@@ -144,7 +144,7 @@ func ValidateGetKeysWithoutCleanup(t *testing.T, args *ApiGetKeyTestArgs) {
 
 		assert.Nil(t, err, "Error while getting key")
 
-		invokeAPI(t, getResourceURL(args.Apim, args.Api), base.GetValueOfUniformResponse(result), 200)
+		InvokeAPI(t, GetResourceURL(args.Apim, args.Api), base.GetValueOfUniformResponse(result), 200)
 	}
 
 	if args.ApiProduct != nil {

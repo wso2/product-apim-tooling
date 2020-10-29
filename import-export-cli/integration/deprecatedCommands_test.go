@@ -229,3 +229,49 @@ func TestListAppsDevopsTenantUserDeprecated(t *testing.T) {
 	base.Login(t, apim.GetEnvName(), tenantDevopsUsername, tenantDevopsPassword)
 	listApps(t, apim.GetEnvName())
 }
+
+func TestGetKeysNonAdminSuperTenantUserDeprecated(t *testing.T) {
+	apiPublisher := publisher.UserName
+	apiPublisherPassword := publisher.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, api.ID)
+
+	args := &testutils.ApiGetKeyTestArgs{
+		CtlUser: testutils.Credentials{Username: apiPublisher, Password: apiPublisherPassword},
+		Api:     api,
+		Apim:    dev,
+	}
+
+	validateGetKeysFailure(t, args)
+}
+
+func TestGetKeysAdminSuperTenantUserDeprecated(t *testing.T) {
+	adminUser := superAdminUser
+	adminPassword := superAdminPassword
+
+	apiPublisher := publisher.UserName
+	apiPublisherPassword := publisher.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, api.ID)
+
+	args := &testutils.ApiGetKeyTestArgs{
+		CtlUser: testutils.Credentials{Username: adminUser, Password: adminPassword},
+		Api:     api,
+		Apim:    dev,
+	}
+
+	validateGetKeys(t, args)
+}
