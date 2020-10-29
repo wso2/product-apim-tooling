@@ -14,21 +14,22 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package cmd
 
 import (
 	"fmt"
+	"os"
+	"strconv"
+
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/git"
 	"github.com/wso2/product-apim-tooling/import-export-cli/specs/params"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"os"
-	"strconv"
 )
 
-var flagVCSStatusEnvName string           // name of the environment to be added
+var flagVCSStatusEnvName string // name of the environment to be added
 
 // push command related usage Info
 const vcsStatusCmdLiteral = "status"
@@ -36,7 +37,7 @@ const vcsStatusCmdShortDesc = "Shows the list of projects that are ready to depl
 const vcsStatusCmdLongDesc = `Shows the list of projects that are ready to deploy to the specified environment by --environment(-e)
 NOTE: --environment (-e) flag is mandatory`
 
-const vcsStatusCmdCmdExamples = utils.ProjectName + ` ` + vcsCmdLiteral + ` ` + vcsStatusCmdLiteral  + ` -e dev`
+const vcsStatusCmdCmdExamples = utils.ProjectName + ` ` + vcsCmdLiteral + ` ` + vcsStatusCmdLiteral + ` -e dev`
 
 // pushCmd represents the push command
 var VCSStatusCmd = &cobra.Command{
@@ -47,7 +48,7 @@ var VCSStatusCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + vcsStatusCmdLiteral + " called")
 		if !utils.EnvExistsInMainConfigFile(flagVCSStatusEnvName, utils.MainConfigFilePath) {
-			fmt.Println(flagVCSStatusEnvName, "does not exists. Add it using add-env")
+			fmt.Println(flagVCSStatusEnvName, "does not exists. Add it using add env")
 			os.Exit(1)
 		}
 
@@ -57,7 +58,7 @@ var VCSStatusCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Println("Projects to Deploy (" + strconv.Itoa(totalProjectsToUpdate) + ")");
+		fmt.Println("Projects to Deploy (" + strconv.Itoa(totalProjectsToUpdate) + ")")
 		printProjectsToUpdate(utils.ProjectTypeApi, updatedProjectsPerType[utils.ProjectTypeApi])
 		printProjectsToUpdate(utils.ProjectTypeApiProduct, updatedProjectsPerType[utils.ProjectTypeApiProduct])
 		printProjectsToUpdate(utils.ProjectTypeApplication, updatedProjectsPerType[utils.ProjectTypeApplication])
@@ -87,7 +88,7 @@ func printProjectsToUpdate(projectType string, projects []*params.ProjectParams)
 func init() {
 	VCSCmd.AddCommand(VCSStatusCmd)
 
-	VCSStatusCmd.Flags().StringVarP(&flagVCSStatusEnvName, "environment", "e", "", "Name of the " +
+	VCSStatusCmd.Flags().StringVarP(&flagVCSStatusEnvName, "environment", "e", "", "Name of the "+
 		"environment to check the project(s) status")
 
 	_ = VCSStatusCmd.MarkFlagRequired("environment")

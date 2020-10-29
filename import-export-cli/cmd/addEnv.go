@@ -63,10 +63,11 @@ var addEnvCmd = &cobra.Command{
 	Short:   addEnvCmdShortDesc,
 	Long:    addEnvCmdLongDesc,
 	Example: addEnvCmdExamples,
+	Args:    cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		envToBeAdded = args[0]
 
-		utils.Logln(utils.LogPrefixInfo + AddEnvCmdLiteral + " called")
+		utils.Logln(utils.LogPrefixInfo + AddCmdLiteral + " " + AddEnvCmdLiteralTrimmed + " called")
 		executeAddEnvCmd(utils.MainConfigFilePath)
 	},
 }
