@@ -16,10 +16,11 @@
 * under the License.
  */
 
-package cmd
+package deprecated
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
@@ -28,14 +29,15 @@ const installCmdShortDesc = "Install an operator in the configured K8s cluster"
 const installCmdLongDesc = "Install an operator in the configured K8s cluster"
 const installCmdExamples = utils.ProjectName + ` ` + installCmdLiteral + ` ` + installApiOperatorCmdLiteral
 
-// installCmd represents the install command
-var installCmd = &cobra.Command{
-	Use:     installCmdLiteral,
-	Short:   installCmdShortDesc,
-	Long:    installCmdLongDesc,
-	Example: installCmdExamples,
+// installCmdDeprecated represents the install command
+var installCmdDeprecated = &cobra.Command{
+	Use:        installCmdLiteral,
+	Short:      installCmdShortDesc,
+	Long:       installCmdLongDesc,
+	Example:    installCmdExamples,
+	Deprecated: "instead use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sInstallCmdLiteral + "\".",
 }
 
 func init() {
-	RootCmd.AddCommand(installCmd)
+	cmd.RootCmd.AddCommand(installCmdDeprecated)
 }

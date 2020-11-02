@@ -20,18 +20,19 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/operator/registry"
 	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-const installApiOperatorCmdLiteral = "api-operator"
-const installApiOperatorCmdShortDesc = "Install API Operator"
-const installApiOperatorCmdLongDesc = "Install API Operator in the configured K8s cluster"
-const installApiOperatorCmdExamples = utils.ProjectName + ` ` + installCmdLiteral + ` ` + installApiOperatorCmdLiteral + `
-` + utils.ProjectName + ` ` + installCmdLiteral + ` ` + installApiOperatorCmdLiteral + ` -f path/to/operator/configs
-` + utils.ProjectName + ` ` + installCmdLiteral + ` ` + installApiOperatorCmdLiteral + ` -f path/to/operator/config/file.yaml`
+const K8sInstallApiOperatorCmdLiteral = "api-operator"
+const k8sInstallApiOperatorCmdShortDesc = "Install API Operator"
+const k8sInstallApiOperatorCmdLongDesc = "Install API Operator in the configured K8s cluster"
+const k8sInstallApiOperatorCmdExamples = utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sInstallCmdLiteral + ` ` + K8sInstallApiOperatorCmdLiteral + `
+` + utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sInstallCmdLiteral + ` ` + K8sInstallApiOperatorCmdLiteral + ` -f path/to/operator/configs
+` + utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sInstallCmdLiteral + ` ` + K8sInstallApiOperatorCmdLiteral + ` -f path/to/operator/config/file.yaml`
 
 // flags
 var flagApiOperatorFile string
@@ -46,12 +47,12 @@ var flagBmKeyFile string
 
 // installApiOperatorCmd represents the install api-operator command
 var installApiOperatorCmd = &cobra.Command{
-	Use:     installApiOperatorCmdLiteral,
-	Short:   installApiOperatorCmdShortDesc,
-	Long:    installApiOperatorCmdLongDesc,
-	Example: installApiOperatorCmdExamples,
+	Use:     K8sInstallApiOperatorCmdLiteral,
+	Short:   k8sInstallApiOperatorCmdShortDesc,
+	Long:    k8sInstallApiOperatorCmdLongDesc,
+	Example: k8sInstallApiOperatorCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(fmt.Sprintf("%s%s %s called", utils.LogPrefixInfo, installCmdLiteral, installApiOperatorCmdLiteral))
+		utils.Logln(fmt.Sprintf("%s%s %s called", utils.LogPrefixInfo, K8sInstallCmdLiteral, K8sInstallApiOperatorCmdLiteral))
 
 		// is -f or --from-file flag specified
 		isLocalInstallation := flagApiOperatorFile != ""

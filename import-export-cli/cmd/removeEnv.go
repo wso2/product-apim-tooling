@@ -21,6 +21,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -29,12 +30,13 @@ import (
 var envToBeRemoved string // name of the environment to be removed
 
 // RemoveEnv command related Info
-const removeEnvCmdLiteral = "env"
+const removeEnvCmdLiteral = "env [environment]"
+const removeEnvCmdLiteralTrimmed = "env"
 const removeEnvCmdShortDesc = "Remove Environment from Config file"
 
 const removeEnvCmdLongDesc = `Remove Environment and its related endpoints from the config file`
 
-const removeEnvCmdExamples = utils.ProjectName + ` ` + removeCmdLiteral + ` ` + removeEnvCmdLiteral + `  production`
+const removeEnvCmdExamples = utils.ProjectName + ` ` + removeCmdLiteral + ` ` + removeEnvCmdLiteralTrimmed + ` production`
 
 // removeEnvCmd represents the removeEnv command
 var removeEnvCmd = &cobra.Command{
@@ -99,7 +101,7 @@ func removeEnv(envName, mainConfigFilePath, envKeysFilePath string) error {
 	}
 
 	fmt.Println("Successfully removed environment '" + envName + "'")
-	fmt.Println("Execute '" + utils.ProjectName + " add-env" + " --help' to see how to add a new environment")
+	fmt.Println("Execute '" + utils.ProjectName + " " + AddCmdLiteral + " " + AddEnvCmdLiteralTrimmed + " --help' to see how to add a new environment")
 
 	return nil
 }

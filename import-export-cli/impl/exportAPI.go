@@ -30,17 +30,17 @@ import (
 // ExportAPIFromEnv function is used with export api command
 func ExportAPIFromEnv(accessToken, name, version, provider, format, exportEnvironment string, preserveStatus bool) (*resty.Response, error) {
 	adminEndpoint := utils.GetAdminEndpointOfEnv(exportEnvironment, utils.MainConfigFilePath)
-	return ExportAPI(name, version, provider, format, adminEndpoint, accessToken, preserveStatus)
+	return exportAPI(name, version, provider, format, adminEndpoint, accessToken, preserveStatus)
 }
 
-// ExportAPI function is used with export api command
+// exportAPI function is used with export api command
 // @param name : Name of the API to be exported
 // @param version : Version of the API to be exported
 // @param provider : Provider of the API
 // @param adminEndpoint : API Manager Admin Endpoint for the environment
 // @param accessToken : Access Token for the resource
 // @return response Response in the form of *resty.Response
-func ExportAPI(name, version, provider, format, adminEndpoint, accessToken string, preserveStatus bool) (*resty.Response, error) {
+func exportAPI(name, version, provider, format, adminEndpoint, accessToken string, preserveStatus bool) (*resty.Response, error) {
 	adminEndpoint = utils.AppendSlashToString(adminEndpoint)
 	query := "export/api?name=" + name + "&version=" + version + "&providerName=" + provider +
 		"&preserveStatus=" + strconv.FormatBool(preserveStatus)

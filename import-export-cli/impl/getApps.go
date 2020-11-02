@@ -20,16 +20,11 @@ package impl
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
-	"net/http"
 	"os"
-	"path"
-	"path/filepath"
 	"text/template"
 
-	"github.com/go-resty/resty"
 	"github.com/wso2/product-apim-tooling/import-export-cli/formatter"
 	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -102,50 +97,6 @@ func GetApplicationListFromEnv(accessToken, environment, appOwner, limit string)
 	return GetApplicationList(accessToken, applicationListEndpoint, appOwner, limit)
 }
 
-//Get Application List
-// @param accessToken : Access Token for the environment
-// @param applicationListEndpoint : Endpoint to use for listing applications
-// @param appOwner : Owner of the applications
-// @param limit : Max number of results to return
-// @return count (no. of Applications)
-// @return array of Application objects
-// @return error
-func GetApplicationList(accessToken, applicationListEndpoint, appOwner, limit string) (count int32, apps []utils.Application,
-	err error) {
-
-	headers := make(map[string]string)
-	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
-	if limit != "" {
-		applicationListEndpoint += "?limit=" + limit
-	}
-
-	var resp *resty.Response
-	if appOwner == "" {
-		resp, err = utils.InvokeGETRequest(applicationListEndpoint, headers)
-	} else {
-		resp, err = utils.InvokeGETRequestWithQueryParam("user", appOwner, applicationListEndpoint, headers)
-	}
-	if err != nil {
-		utils.HandleErrorAndExit("Unable to connect to "+applicationListEndpoint, err)
-	}
-
-	utils.Logln(utils.LogPrefixInfo+"Response:", resp.Status())
-
-	if resp.StatusCode() == http.StatusOK {
-		appListResponse := &utils.ApplicationListResponse{}
-		unmarshalError := json.Unmarshal([]byte(resp.Body()), &appListResponse)
-
-		if unmarshalError != nil {
-			utils.HandleErrorAndExit(utils.LogPrefixError+"invalid JSON response", unmarshalError)
-		}
-
-		return appListResponse.Count, appListResponse.List, nil
-
-	} else {
-		return 0, nil, errors.New(resp.Status())
-	}
-}
-
 // extractAppDefinition extracts ApplicationDefinition from jsonContent
 func extractAppDefinition(jsonContent []byte) (*v2.ApplicationDefinition, error) {
 	application := &v2.ApplicationDefinition{}
@@ -155,30 +106,6 @@ func extractAppDefinition(jsonContent []byte) (*v2.ApplicationDefinition, error)
 	}
 
 	return application, nil
-}
-
-// GetApplicationDefinition scans filePath and returns ApplicationDefinition or an error
-func GetApplicationDefinition(filePath string) (*v2.ApplicationDefinition, []byte, error) {
-	info, err := os.Stat(filePath)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	var buffer []byte
-	if info.IsDir() {
-		_, content, err := resolveYamlOrJSON(path.Join(filePath, filepath.Base(filePath)))
-		if err != nil {
-			return nil, nil, err
-		}
-		buffer = content
-	} else {
-		return nil, nil, fmt.Errorf("looking for directory, found %s", info.Name())
-	}
-	api, err := extractAppDefinition(buffer)
-	if err != nil {
-		return nil, nil, err
-	}
-	return api, buffer, nil
 }
 
 // PrintApps

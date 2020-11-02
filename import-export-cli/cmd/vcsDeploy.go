@@ -51,7 +51,7 @@ var DeployCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + deployCmdLiteral + " called")
 		if !utils.EnvExistsInMainConfigFile(flagVCSDeployEnvName, utils.MainConfigFilePath) {
-			fmt.Println(flagVCSDeployEnvName, "does not exists. Add it using add-env")
+			fmt.Println(flagVCSDeployEnvName, "does not exists. Add it using add env")
 			os.Exit(1)
 		}
 

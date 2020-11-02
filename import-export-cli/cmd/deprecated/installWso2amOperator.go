@@ -16,10 +16,12 @@
 * under the License.
  */
 
-package cmd
+package deprecated
 
 import (
 	"fmt"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd"
 	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 
@@ -36,12 +38,14 @@ const installWso2amOperatorCmdExamples = utils.ProjectName + ` ` + installCmdLit
 // flags
 var flagWso2AmOperatorFile string
 
-// installWso2amOperatorCmd represents the 'install wso2am-operator' command
-var installWso2amOperatorCmd = &cobra.Command{
+// installWso2amOperatorCmdDeprecated represents the 'install wso2am-operator' command
+var installWso2amOperatorCmdDeprecated = &cobra.Command{
 	Use:     installWso2amOperatorCmdLiteral,
 	Short:   installWso2amOperatorCmdShortDesc,
 	Long:    installWso2amOperatorCmdLongDesc,
 	Example: installWso2amOperatorCmdExamples,
+	Deprecated: "use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sInstallCmdLiteral + " " + cmd.K8sInstallWso2amOperatorCmdLiteral +
+		"\" " + "instead of \"" + installCmdLiteral + " " + installWso2amOperatorCmdLiteral + "\".",
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(fmt.Sprintf("%s%s %s called", utils.LogPrefixInfo, installCmdLiteral, installWso2amOperatorCmdLiteral))
 
@@ -74,6 +78,6 @@ var installWso2amOperatorCmd = &cobra.Command{
 }
 
 func init() {
-	installCmd.AddCommand(installWso2amOperatorCmd)
-	installWso2amOperatorCmd.Flags().StringVarP(&flagWso2AmOperatorFile, "from-file", "f", "", "Path to wso2am-operator directory")
+	installCmdDeprecated.AddCommand(installWso2amOperatorCmdDeprecated)
+	installWso2amOperatorCmdDeprecated.Flags().StringVarP(&flagWso2AmOperatorFile, "from-file", "f", "", "Path to wso2am-operator directory")
 }

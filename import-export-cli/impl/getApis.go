@@ -19,11 +19,8 @@
 package impl
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
-	"net/http"
 	"os"
 	"text/template"
 
@@ -106,66 +103,6 @@ func (a *api) MarshalJSON() ([]byte, error) {
 func GetAPIListFromEnv(accessToken, environment, query, limit string) (count int32, apis []utils.API, err error) {
 	apiListEndpoint := utils.GetApiListEndpointOfEnv(environment, utils.MainConfigFilePath)
 	return GetAPIList(accessToken, apiListEndpoint, query, limit)
-}
-
-// GetAPIList
-// @param accessToken : Access Token for the environment
-// @param apiListEndpoint : API List endpoint
-// @param query : string to be matched against the API names
-// @param limit : total # of results to return
-// @return count (no. of APIs)
-// @return array of API objects
-// @return error
-func GetAPIList(accessToken, apiListEndpoint, query, limit string) (count int32, apis []utils.API, err error) {
-	queryParamAdded := false
-	getQueryParamConnector := func() (connector string) {
-		if queryParamAdded {
-			return "&"
-		} else {
-			queryParamAdded = true
-			return "?"
-		}
-	}
-
-	headers := make(map[string]string)
-	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
-
-	if query != "" {
-		apiListEndpoint += getQueryParamConnector() + "query=" + query
-	}
-	if limit != "" {
-		apiListEndpoint += getQueryParamConnector() + "limit=" + limit
-	}
-	utils.Logln(utils.LogPrefixInfo+"URL:", apiListEndpoint)
-	resp, err := utils.InvokeGETRequest(apiListEndpoint, headers)
-
-	if err != nil {
-		utils.HandleErrorAndExit("Unable to connect to "+apiListEndpoint, err)
-	}
-
-	utils.Logln(utils.LogPrefixInfo+"Response:", resp.Status())
-
-	if resp.StatusCode() == http.StatusOK {
-		apiListResponse := &utils.APIListResponse{}
-		unmarshalError := json.Unmarshal([]byte(resp.Body()), &apiListResponse)
-
-		if unmarshalError != nil {
-			utils.HandleErrorAndExit(utils.LogPrefixError+"invalid JSON response", unmarshalError)
-		}
-
-		return apiListResponse.Count, apiListResponse.List, nil
-	} else {
-		return 0, nil, errors.New(string(resp.Body()))
-	}
-}
-
-func getQueryParamConnector() (connector string) {
-	if queryParamAdded {
-		return "&"
-	} else {
-		queryParamAdded = true
-		return "?"
-	}
 }
 
 // PrintAPIs

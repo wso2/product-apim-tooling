@@ -24,7 +24,6 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 
-	"github.com/go-resty/resty"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 
@@ -73,13 +72,11 @@ func executeExportAPIProductCmd(credential credentials.Credential, exportDirecto
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, CmdExportEnvironment)
 
 	if preCommandErr == nil {
-		adminEndpoint := utils.GetAdminEndpointOfEnv(CmdExportEnvironment, utils.MainConfigFilePath)
 		if exportAPIProductVersion == "" {
 			// If the user has not specified the version, use the version as 1.0.0
 			exportAPIProductVersion = utils.DefaultApiProductVersion
 		}
-		resp, err := getExportApiProductResponse(exportAPIProductName, exportAPIProductVersion, exportAPIProductProvider, exportAPIProductFormat, adminEndpoint,
-			accessToken)
+		resp, err := impl.ExportAPIProductFromEnv(accessToken, exportAPIProductName, exportAPIProductVersion, exportAPIProductProvider, exportAPIProductFormat, CmdExportEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while exporting", err)
 		}
@@ -87,7 +84,7 @@ func executeExportAPIProductCmd(credential credentials.Credential, exportDirecto
 		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
 		apiProductZipLocationPath := filepath.Join(exportDirectory, CmdExportEnvironment)
 		if resp.StatusCode() == http.StatusOK {
-			WriteAPIProductToZip(exportAPIProductName, exportAPIProductVersion, apiProductZipLocationPath, resp)
+			impl.WriteAPIProductToZip(exportAPIProductName, exportAPIProductVersion, apiProductZipLocationPath, runningExportAPIProductCommand, resp)
 		} else if resp.StatusCode() == http.StatusInternalServerError {
 			// 500 Internal Server Error
 			fmt.Println(string(resp.Body()))
@@ -99,64 +96,6 @@ func executeExportAPIProductCmd(credential credentials.Credential, exportDirecto
 		// error exporting API Product
 		fmt.Println("Error getting OAuth tokens while exporting API Product:" + preCommandErr.Error())
 	}
-}
-
-// WriteAPIProductToZip
-// @param exportAPIProductName : Name of the API Product to be exported
-// @param resp : Response returned from making the HTTP request (only pass a 200 OK)
-// Exported API Product will be written to a zip file
-func WriteAPIProductToZip(exportAPIProductName, exportAPIProductVersion, zipLocationPath string, resp *resty.Response) {
-	zipFilename := exportAPIProductName + "_" + exportAPIProductVersion + ".zip" // MyAPIProduct_1.0.0.zip
-	// Writes the REST API response to a temporary zip file
-	tempZipFile, err := utils.WriteResponseToTempZip(zipFilename, resp)
-	if err != nil {
-		utils.HandleErrorAndExit("Error creating the temporary zip file to store the exported API Product", err)
-	}
-
-	err = utils.CreateDirIfNotExist(zipLocationPath)
-	if err != nil {
-		utils.HandleErrorAndExit("Error creating dir to store zip archive: "+zipLocationPath, err)
-	}
-	exportedFinalZip := filepath.Join(zipLocationPath, zipFilename)
-	// Add api_product_params.yaml file inside the zip and create a new zip file in exportedFinalZip location
-	err = impl.IncludeParamsFileToZip(tempZipFile, exportedFinalZip, utils.ParamFileAPIProduct)
-	if err != nil {
-		utils.HandleErrorAndExit("Error creating the final zip archive", err)
-	}
-
-	if runningExportAPIProductCommand {
-		fmt.Println("Successfully exported API Product!")
-		fmt.Println("Find the exported API Product at " + exportedFinalZip)
-	}
-}
-
-// ExportAPIProduct
-// @param name : Name of the API Product to be exported
-// @param version : Version of the API Product to be exported
-// @param provider : Provider of the API Product
-// @param adminEndpoint : API Manager Admin Endpoint for the environment
-// @param accessToken : Access Token for the resource
-// @return response Response in the form of *resty.Response
-func getExportApiProductResponse(name, version, provider, format, adminEndpoint, accessToken string) (*resty.Response, error) {
-	adminEndpoint = utils.AppendSlashToString(adminEndpoint)
-	query := "export/api-product?name=" + name + "&version=" + version + "&providerName=" + provider
-	if format != "" {
-		query += "&format=" + format
-	}
-
-	url := adminEndpoint + query
-	utils.Logln(utils.LogPrefixInfo+"ExportAPIProduct: URL:", url)
-	headers := make(map[string]string)
-	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
-	headers[utils.HeaderAccept] = utils.HeaderValueApplicationZip
-
-	resp, err := utils.InvokeGETRequest(url, headers)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return resp, nil
 }
 
 // init using Cobra

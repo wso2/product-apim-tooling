@@ -16,13 +16,15 @@
 * under the License.
  */
 
-package cmd
+package deprecated
 
 import (
 	"fmt"
+	"strings"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd"
 	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -35,12 +37,14 @@ const uninstallWso2amOperatorCmdExamples = utils.ProjectName + ` ` + uninstallCm
 
 var flagForceUninstallWso2amOperator bool
 
-// uninstallWso2amOperatorCmd represents the uninstallWso2amOperator command
-var uninstallWso2amOperatorCmd = &cobra.Command{
+// uninstallWso2amOperatorCmdDeprecated represents the uninstallWso2amOperator command
+var uninstallWso2amOperatorCmdDeprecated = &cobra.Command{
 	Use:     uninstallWso2amOperatorCmdLiteral,
 	Short:   uninstallWso2amOperatorCmdShortDesc,
 	Long:    uninstallWso2amOperatorCmdLongDesc,
 	Example: uninstallWso2amOperatorCmdExamples,
+	Deprecated: "use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sUninstallCmdLiteral + " " + cmd.K8sUninstallWso2amOperatorCmdLiteral +
+		"\" " + "instead of \"" + uninstallCmdLiteral + " " + uninstallWso2amOperatorCmdLiteral + "\".",
 	Run: func(cmd *cobra.Command, args []string) {
 		isConfirm := flagForceUninstallWso2amOperator
 
@@ -89,6 +93,6 @@ var uninstallWso2amOperatorCmd = &cobra.Command{
 }
 
 func init() {
-	uninstallCmd.AddCommand(uninstallWso2amOperatorCmd)
-	uninstallWso2amOperatorCmd.Flags().BoolVar(&flagForceUninstallWso2amOperator, "force", false, "Force uninstall WSO2AM Operator")
+	uninstallCmdDeprecated.AddCommand(uninstallWso2amOperatorCmdDeprecated)
+	uninstallWso2amOperatorCmdDeprecated.Flags().BoolVar(&flagForceUninstallWso2amOperator, "force", false, "Force uninstall WSO2AM Operator")
 }

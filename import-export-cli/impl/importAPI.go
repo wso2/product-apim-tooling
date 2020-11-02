@@ -25,7 +25,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -56,30 +55,6 @@ func extractAPIDefinition(jsonContent []byte) (*v2.APIDefinition, error) {
 	}
 
 	return api, nil
-}
-
-// GetAPIDefinition scans filePath and returns APIDefinition or an error
-func GetAPIDefinition(filePath string) (*v2.APIDefinition, []byte, error) {
-	info, err := os.Stat(filePath)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	var buffer []byte
-	if info.IsDir() {
-		_, content, err := resolveYamlOrJSON(path.Join(filePath, "Meta-information", "api"))
-		if err != nil {
-			return nil, nil, err
-		}
-		buffer = content
-	} else {
-		return nil, nil, fmt.Errorf("looking for directory, found %s", info.Name())
-	}
-	api, err := extractAPIDefinition(buffer)
-	if err != nil {
-		return nil, nil, err
-	}
-	return api, buffer, nil
 }
 
 // mergeAPI merges environmentParams to the API given in apiDirectory
@@ -648,19 +623,6 @@ func injectParamsToAPI(importPath, paramsPath, importEnvironment string, preserv
 	return nil
 }
 
-// getAPIID returns id of the API by using apiInfo which contains name and version as info
-func getAPIID(accessOAuthToken, environment, name, version string) (string, error) {
-	apiQuery := fmt.Sprintf("name:\"%s\" version:\"%s\"", name, version)
-	count, apis, err := GetAPIListFromEnv(accessOAuthToken, environment, url.QueryEscape(apiQuery), "")
-	if err != nil {
-		return "", err
-	}
-	if count == 0 {
-		return "", nil
-	}
-	return apis[0].ID, nil
-}
-
 // isEmpty returns true when a given string is empty
 func isEmpty(s string) bool {
 	return len(strings.TrimSpace(s)) == 0
@@ -836,6 +798,7 @@ func importAPI(endpoint, filePath, accessToken string, extraParams map[string]st
 		// We have an HTTP error
 		fmt.Println("Error importing API.")
 		fmt.Println("Status: " + resp.Status())
+		fmt.Println("Response:", resp)
 		return errors.New(resp.Status())
 	}
 }
@@ -959,7 +922,8 @@ func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, a
 	updateAPI := false
 	if importAPIUpdate {
 		// check for API existence
-		id, err := getAPIID(accessOAuthToken, importEnvironment, apiInfo.ID.APIName, apiInfo.ID.Version)
+		id, err := GetAPIId(accessOAuthToken, importEnvironment, apiInfo.ID.APIName, apiInfo.ID.Version,
+			apiInfo.ID.ProviderName)
 		if err != nil {
 			return err
 		}
