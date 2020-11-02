@@ -100,7 +100,7 @@ func AddAPIProductFromJSON(t *testing.T, client *apim.Client, username string, p
 	return apiProduct
 }
 
-func getAPI(t *testing.T, client *apim.Client, name string, username string, password string) *apim.API {
+func GetAPI(t *testing.T, client *apim.Client, name string, username string, password string) *apim.API {
 	if username == adminservices.DevopsUsername {
 		client.Login(adminservices.AdminUsername, adminservices.AdminPassword)
 	} else if username == adminservices.DevopsUsername+"@"+adminservices.Tenant1 {
@@ -138,12 +138,12 @@ func UnsubscribeAPI(client *apim.Client, username string, password string, apiID
 	client.DeleteSubscriptions(apiID)
 }
 
-func getResourceURL(apim *apim.Client, api *apim.API) string {
+func GetResourceURL(apim *apim.Client, api *apim.API) string {
 	port := 8280 + apim.GetPortOffset()
 	return "http://" + apim.GetHost() + ":" + strconv.Itoa(port) + api.Context + "/" + api.Version + "/menu"
 }
 
-func getEnvAPIExportPath(envName string) string {
+func GetEnvAPIExportPath(envName string) string {
 	return filepath.Join(utils.DefaultExportDirPath, utils.ExportedApisDirName, envName)
 }
 
@@ -152,20 +152,20 @@ func exportAPI(t *testing.T, name string, version string, provider string, env s
 	var err error
 
 	if provider == "" {
-		output, err = base.Execute(t, "export-api", "-n", name, "-v", version, "-e", env, "-k", "--verbose")
+		output, err = base.Execute(t, "export", "api", "-n", name, "-v", version, "-e", env, "-k", "--verbose")
 	} else {
-		output, err = base.Execute(t, "export-api", "-n", name, "-v", version, "-r", provider, "-e", env, "-k", "--verbose")
+		output, err = base.Execute(t, "export", "api", "-n", name, "-v", version, "-r", provider, "-e", env, "-k", "--verbose")
 	}
 
 	t.Cleanup(func() {
-		base.RemoveAPIArchive(t, getEnvAPIExportPath(env), name, version)
+		base.RemoveAPIArchive(t, GetEnvAPIExportPath(env), name, version)
 	})
 
 	return output, err
 }
 
 func ValidateAllApisOfATenantIsExported(t *testing.T, args *ApiImportExportTestArgs, apisAdded int) {
-	output, error := ExportAllApisOfATenant(t, args)
+	output, error := exportAllApisOfATenant(t, args)
 	assert.Nil(t, error, "Error while exporting APIs")
 	assert.Contains(t, output, "export-apis execution completed", "Error while exporting APIs")
 
@@ -184,7 +184,7 @@ func ValidateAllApisOfATenantIsExported(t *testing.T, args *ApiImportExportTestA
 func importAPI(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
 	fileName := base.GetAPIArchiveFilePath(t, args.SrcAPIM.GetEnvName(), args.Api.Name, args.Api.Version)
 
-	params := []string{"import-api", "-f", fileName, "-e", args.DestAPIM.EnvName, "-k", "--verbose"}
+	params := []string{"import", "api", "-f", fileName, "-e", args.DestAPIM.EnvName, "-k", "--verbose"}
 
 	if args.OverrideProvider {
 		params = append(params, "--preserve-provider=false")
@@ -210,12 +210,12 @@ func importAPI(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
 
 func importAPIPreserveProviderFailure(t *testing.T, sourceEnv string, api *apim.API, client *apim.Client) (string, error) {
 	fileName := base.GetAPIArchiveFilePath(t, sourceEnv, api.Name, api.Version)
-	output, err := base.Execute(t, "import-api", "-f", fileName, "-e", client.EnvName, "-k", "--verbose")
+	output, err := base.Execute(t, "import", "api", "-f", fileName, "-e", client.EnvName, "-k", "--verbose")
 	return output, err
 }
 
 func listAPIs(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
-	output, err := base.Execute(t, "list", "apis", "-e", args.SrcAPIM.EnvName, "-k", "--verbose")
+	output, err := base.Execute(t, "get", "apis", "-e", args.SrcAPIM.EnvName, "-k", "--verbose")
 	return output, err
 }
 
@@ -237,7 +237,7 @@ func ValidateAPIExportFailure(t *testing.T, args *ApiImportExportTestArgs) {
 	exportAPI(t, args.Api.Name, args.Api.Version, args.ApiProvider.Username, args.SrcAPIM.GetEnvName())
 
 	// Validate that export failed
-	assert.False(t, base.IsAPIArchiveExists(t, getEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
+	assert.False(t, base.IsAPIArchiveExists(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
 		args.Api.Name, args.Api.Version))
 }
 
@@ -253,7 +253,7 @@ func ValidateAPIExportImport(t *testing.T, args *ApiImportExportTestArgs) {
 
 	exportAPI(t, args.Api.Name, args.Api.Version, args.Api.Provider, args.SrcAPIM.GetEnvName())
 
-	assert.True(t, base.IsAPIArchiveExists(t, getEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
+	assert.True(t, base.IsAPIArchiveExists(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
 		args.Api.Name, args.Api.Version))
 
 	// Import api to env 2
@@ -261,11 +261,11 @@ func ValidateAPIExportImport(t *testing.T, args *ApiImportExportTestArgs) {
 
 	importAPI(t, args)
 
-	// Give time for newly imported API to get indexed, or else getAPI by name will fail
+	// Give time for newly imported API to get indexed, or else GetAPI by name will fail
 	base.WaitForIndexing()
 
 	// Get App from env 2
-	importedAPI := getAPI(t, args.DestAPIM, args.Api.Name, args.ApiProvider.Username, args.ApiProvider.Password)
+	importedAPI := GetAPI(t, args.DestAPIM, args.Api.Name, args.ApiProvider.Username, args.ApiProvider.Password)
 
 	// Validate env 1 and env 2 API is equal
 	ValidateAPIsEqual(t, args.Api, importedAPI)
@@ -283,7 +283,7 @@ func ValidateAPIExport(t *testing.T, args *ApiImportExportTestArgs) {
 
 	exportAPI(t, args.Api.Name, args.Api.Version, args.ApiProvider.Username, args.SrcAPIM.GetEnvName())
 
-	assert.True(t, base.IsAPIArchiveExists(t, getEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
+	assert.True(t, base.IsAPIArchiveExists(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
 		args.Api.Name, args.Api.Version))
 }
 
@@ -299,11 +299,11 @@ func GetImportedAPI(t *testing.T, args *ApiImportExportTestArgs) *apim.API {
 		t.Fatal(err)
 	}
 
-	// Give time for newly imported API to get indexed, or else getAPI by name will fail
+	// Give time for newly imported API to get indexed, or else GetAPI by name will fail
 	base.WaitForIndexing()
 
 	// Get App from env 2
-	importedAPI := getAPI(t, args.DestAPIM, args.Api.Name, args.ApiProvider.Username, args.ApiProvider.Password)
+	importedAPI := GetAPI(t, args.DestAPIM, args.Api.Name, args.ApiProvider.Username, args.ApiProvider.Password)
 
 	return importedAPI
 }
@@ -330,11 +330,11 @@ func ValidateAPIImport(t *testing.T, args *ApiImportExportTestArgs) {
 
 	importAPI(t, args)
 
-	// Give time for newly imported API to get indexed, or else getAPI by name will fail
+	// Give time for newly imported API to get indexed, or else GetAPI by name will fail
 	base.WaitForIndexing()
 
 	// Get App from env 2
-	importedAPI := getAPI(t, args.DestAPIM, args.Api.Name, args.ApiProvider.Username, args.ApiProvider.Password)
+	importedAPI := GetAPI(t, args.DestAPIM, args.Api.Name, args.ApiProvider.Username, args.ApiProvider.Password)
 
 	// Validate env 1 and env 2 API is equal
 	validateAPIsEqualCrossTenant(t, args.Api, importedAPI)
@@ -394,10 +394,10 @@ func ValidateAPIsList(t *testing.T, args *ApiImportExportTestArgs) {
 
 	apisList := args.SrcAPIM.GetAPIs()
 
-	validateListAPIsEqual(t, output, apisList)
+	ValidateListAPIsEqual(t, output, apisList)
 }
 
-func validateListAPIsEqual(t *testing.T, apisListFromCtl string, apisList *apim.APIList) {
+func ValidateListAPIsEqual(t *testing.T, apisListFromCtl string, apisList *apim.APIList) {
 	unmatchedCount := apisList.Count
 	for _, api := range apisList.List {
 		// If the output string contains the same API ID, then decrement the count
@@ -487,10 +487,10 @@ func ValidateAPIDeleteFailure(t *testing.T, args *ApiImportExportTestArgs) {
 }
 
 func exportApiImportedFromProject(t *testing.T, APIName string, APIVersion string, EnvName string) (string, error) {
-	return base.Execute(t, "export-api", "-n", APIName, "-v", APIVersion, "-e", EnvName)
+	return base.Execute(t, "export", "apis", "-n", APIName, "-v", APIVersion, "-e", EnvName)
 }
 
-func ExportAllApisOfATenant(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
+func exportAllApisOfATenant(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
 	//Setup environment
 	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
 	//Login to the environmeTestImportAndExportAPIWithJpegImagent
@@ -498,7 +498,7 @@ func ExportAllApisOfATenant(t *testing.T, args *ApiImportExportTestArgs) (string
 
 	base.WaitForIndexing()
 
-	output, error := base.Execute(t, "export-apis", "-e", args.SrcAPIM.GetEnvName(), "-k", "--force")
+	output, error := base.Execute(t, "export", "apis", "-e", args.SrcAPIM.GetEnvName(), "-k", "--force")
 	return output, error
 }
 
@@ -510,7 +510,7 @@ func validateAPIIsDeleted(t *testing.T, api *apim.API, apisListAfterDelete *apim
 
 func ImportApiFromProject(t *testing.T, projectName string, client *apim.Client, apiName string, credentials *Credentials, isCleanup bool) (string, error) {
 	projectPath, _ := filepath.Abs(projectName)
-	output, err := base.Execute(t, "import-api", "-f", projectPath, "-e", client.GetEnvName(), "-k", "--verbose")
+	output, err := base.Execute(t, "import", "api", "-f", projectPath, "-e", client.GetEnvName(), "-k", "--verbose")
 
 	base.WaitForIndexing()
 
@@ -531,7 +531,7 @@ func ImportApiFromProject(t *testing.T, projectName string, client *apim.Client,
 
 func ImportApiFromProjectWithUpdate(t *testing.T, projectName string, client *apim.Client, apiName string, credentials *Credentials, isCleanup bool) (string, error) {
 	projectPath, _ := filepath.Abs(projectName)
-	output, err := base.Execute(t, "import-api", "-f", projectPath, "-e", client.GetEnvName(), "-k", "--update", "--verbose")
+	output, err := base.Execute(t, "import", "api", "-f", projectPath, "-e", client.GetEnvName(), "-k", "--update", "--verbose")
 
 	base.WaitForIndexing()
 
@@ -551,7 +551,7 @@ func ImportApiFromProjectWithUpdate(t *testing.T, projectName string, client *ap
 }
 
 func ExportApisWithOneCommand(t *testing.T, args *InitTestArgs) (string, error) {
-	output, error := base.Execute(t, "export-apis", "-e", args.SrcAPIM.GetEnvName(), "-k", "--force", "--verbose")
+	output, error := base.Execute(t, "export", "apis", "-e", args.SrcAPIM.GetEnvName(), "-k", "--force", "--verbose")
 	return output, error
 }
 
@@ -573,7 +573,7 @@ func ValidateChangeLifeCycleStatusOfAPI(t *testing.T, args *ApiChangeLifeCycleSt
 
 	base.WaitForIndexing()
 	//Assert life cycle state after change
-	api := getAPI(t, args.APIM, args.Api.Name, args.CtlUser.Username, args.CtlUser.Password)
+	api := GetAPI(t, args.APIM, args.Api.Name, args.CtlUser.Username, args.CtlUser.Password)
 	assert.Equal(t, args.ExpectedState, api.LifeCycleStatus, "Expected Life cycle state change is not equals to actual status")
 }
 

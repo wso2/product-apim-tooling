@@ -44,20 +44,20 @@ func AddApplicationWithoutCleaning(t *testing.T, client *apim.Client, username s
 	return application
 }
 
-func getApp(t *testing.T, client *apim.Client, name string, username string, password string) *apim.Application {
+func GetApp(t *testing.T, client *apim.Client, name string, username string, password string) *apim.Application {
 	client.Login(username, password)
 	appInfo := client.GetApplicationByName(name)
 	return client.GetApplication(appInfo.ApplicationID)
 }
 
 func ListApps(t *testing.T, env string) []string {
-	response, _ := base.Execute(t, "list", "apps", "-e", env, "-k")
+	response, _ := base.Execute(t, "get", "apps", "-e", env, "-k")
 
 	return base.GetRowsFromTableResponse(response)
 }
 
 func ListAppsWithOwner(t *testing.T, env string, owner string) []string {
-	response, _ := base.Execute(t, "list", "apps", "-e", env, "-k", "--owner", owner)
+	response, _ := base.Execute(t, "gets", "apps", "-e", env, "-k", "--owner", owner)
 
 	return base.GetRowsFromTableResponse(response)
 }
@@ -67,7 +67,7 @@ func getEnvAppExportPath(envName string) string {
 }
 
 func exportApp(t *testing.T, name string, owner string, env string) (string, error) {
-	output, err := base.Execute(t, "export-app", "-n", name, "-o", owner, "-e", env, "-k", "--verbose")
+	output, err := base.Execute(t, "export", "app", "-n", name, "-o", owner, "-e", env, "-k", "--verbose")
 
 	t.Cleanup(func() {
 		base.RemoveApplicationArchive(t, getEnvAppExportPath(env), name, owner)
@@ -78,7 +78,7 @@ func exportApp(t *testing.T, name string, owner string, env string) (string, err
 
 func importAppPreserveOwner(t *testing.T, sourceEnv string, app *apim.Application, client *apim.Client) (string, error) {
 	fileName := base.GetApplicationArchiveFilePath(t, sourceEnv, app.Name, app.Owner)
-	output, err := base.Execute(t, "import-app", "--preserveOwner=true", "-f", fileName, "-e", client.EnvName, "-k", "--verbose")
+	output, err := base.Execute(t, "import", "app", "--preserveOwner=true", "-f", fileName, "-e", client.EnvName, "-k", "--verbose")
 
 	t.Cleanup(func() {
 		client.DeleteApplicationByName(app.Name)
@@ -89,7 +89,7 @@ func importAppPreserveOwner(t *testing.T, sourceEnv string, app *apim.Applicatio
 
 func importAppPreserveOwnerAndUpdate(t *testing.T, sourceEnv string, app *apim.Application, client *apim.Client) (string, error) {
 	fileName := base.GetApplicationArchiveFilePath(t, sourceEnv, app.Name, app.Owner)
-	output, err := base.Execute(t, "import-app", "--preserveOwner=true", "--update=true", "-f", fileName, "-e", client.EnvName, "-k", "--verbose")
+	output, err := base.Execute(t, "import", "app", "--preserveOwner=true", "--update=true", "-f", fileName, "-e", client.EnvName, "-k", "--verbose")
 
 	return output, err
 }
@@ -131,10 +131,10 @@ func ValidateAppExportImportWithPreserveOwner(t *testing.T, args *AppImportExpor
 	importAppPreserveOwner(t, args.SrcAPIM.GetEnvName(), args.Application, args.DestAPIM)
 
 	// Get App from env 2
-	importedApp := getApp(t, args.DestAPIM, args.Application.Name, args.AppOwner.Username, args.AppOwner.Password)
+	importedApp := GetApp(t, args.DestAPIM, args.Application.Name, args.AppOwner.Username, args.AppOwner.Password)
 
 	// Validate env 1 and env 2 App is equal
-	validateAppsEqual(t, args.Application, importedApp)
+	ValidateAppsEqual(t, args.Application, importedApp)
 }
 
 func ValidateAppExportImportWithUpdate(t *testing.T, args *AppImportExportTestArgs) {
@@ -158,13 +158,13 @@ func ValidateAppExportImportWithUpdate(t *testing.T, args *AppImportExportTestAr
 	importAppPreserveOwnerAndUpdate(t, args.SrcAPIM.GetEnvName(), args.Application, args.DestAPIM)
 
 	// Get App from env 2
-	importedApp := getApp(t, args.DestAPIM, args.Application.Name, args.AppOwner.Username, args.AppOwner.Password)
+	importedApp := GetApp(t, args.DestAPIM, args.Application.Name, args.AppOwner.Username, args.AppOwner.Password)
 
 	// Validate env 1 and env 2 App is equal
-	validateAppsEqual(t, args.Application, importedApp)
+	ValidateAppsEqual(t, args.Application, importedApp)
 }
 
-func validateAppsEqual(t *testing.T, app1 *apim.Application, app2 *apim.Application) {
+func ValidateAppsEqual(t *testing.T, app1 *apim.Application, app2 *apim.Application) {
 	t.Helper()
 
 	app1Copy := apim.CopyApp(app1)

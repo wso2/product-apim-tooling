@@ -31,14 +31,14 @@ import (
 
 const defaultExportPath = utils.DefaultExportDirName
 
-//List Environments using apictl
-func TestListEnvironments(t *testing.T) {
+//Get Environments using apictl
+func TestGetEnvironments(t *testing.T) {
 	apim := apimClients[0]
 	base.SetupEnvWithoutTokenFlag(t, apim.GetEnvName(), apim.GetApimURL())
-	response, _ := base.Execute(t, "list", "envs")
+	response, _ := base.Execute(t, "get", "envs")
 	base.GetRowsFromTableResponse(response)
 	base.Log(response)
-	assert.Contains(t, response, apim.GetEnvName(), "TestListEnvironments Failed")
+	assert.Contains(t, response, apim.GetEnvName(), "TestGetEnvironments Failed")
 }
 
 //Change Export directory using apictl and assert the change
