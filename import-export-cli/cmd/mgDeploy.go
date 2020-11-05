@@ -35,6 +35,7 @@ var (
 	mgwImportAPIFile    string
 	username            string
 	password            string
+	mgDeploySkipCleanup bool
 )
 
 const (
@@ -75,7 +76,7 @@ var MgDeployCmd = &cobra.Command{
 			password = strings.TrimRight(strings.TrimSuffix(string(data), "\n"), "\r")
 		}
 		authToken := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
-		err := impl.ImportAPIToMGW(mgwControlPlaneHost+resourcePath, mgwImportAPIFile, authToken, tempMap)
+		err := impl.ImportAPIToMGW(mgwControlPlaneHost+resourcePath, mgwImportAPIFile, authToken, tempMap, mgDeploySkipCleanup)
 		if err != nil {
 			utils.HandleErrorAndExit("Error adding swagger to microgateway", err)
 		}
@@ -93,6 +94,8 @@ func init() {
 		"Provide the username")
 	MgDeployCmd.Flags().StringVarP(&password, "password", "p", "",
 		"Provide the password")
+	MgDeployCmd.Flags().BoolVarP(&mgDeploySkipCleanup, "skipCleanup", "", false, "Leave "+
+		"all temporary files created during import process")
 
 	_ = MgDeployCmd.MarkFlagRequired("host")
 	_ = MgDeployCmd.MarkFlagRequired("file")
