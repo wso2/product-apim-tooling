@@ -21,24 +21,89 @@ package impl
 import (
 	"encoding/json"
 	"errors"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"fmt"
 	"net/http"
+	"os"
+	"path"
+
+	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-// GetAPIListFromEnv
-// @param accessToken : Access Token for the environment
-// @param environment : Environment name to use when getting the API List
-// @param query : string to be matched against the API names
-// @param limit : total # of results to return
-// @return count (no. of APIs)
-// @return array of API objects
-// @return error
-func GetAPIListFromEnv(accessToken, environment, query, limit string) (count int32, apis []utils.API, err error) {
-	apiListEndpoint := utils.GetApiListEndpointOfEnv(environment, utils.MainConfigFilePath)
-	return GetAPIList(accessToken, apiListEndpoint, query, limit)
+// GetAPIId Get the ID of an API if available
+// @param accessToken : Token to call the Publisher Rest API
+// @param environment : Environment where API needs to be located
+// @param apiName : Name of the API
+// @param apiVersion : Version of the API
+// @param apiProvider : Provider of API
+// @return apiId, error
+func GetAPIId(accessToken, environment, apiName, apiVersion, apiProvider string) (string, error) {
+	// Unified Search endpoint from the config file to search APIs
+	unifiedSearchEndpoint := utils.GetUnifiedSearchEndpointOfEnv(environment, utils.MainConfigFilePath)
+
+	// Prepping headers
+	headers := make(map[string]string)
+	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
+	var queryVal string
+	queryVal = "name:\"" + apiName + "\" version:\"" + apiVersion + "\""
+	if apiProvider != "" {
+		queryVal = queryVal + " provider:\"" + apiProvider + "\""
+	}
+	resp, err := utils.InvokeGETRequestWithQueryParam("query", queryVal, unifiedSearchEndpoint, headers)
+	if err != nil {
+		return "", err
+	}
+	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
+		// 200 OK or 201 Created
+		apiData := &utils.ApiSearch{}
+		data := []byte(resp.Body())
+		err = json.Unmarshal(data, &apiData)
+		if apiData.Count != 0 {
+			apiId := apiData.List[0].ID
+			return apiId, err
+		}
+		if apiProvider != "" {
+			return "", errors.New("Requested API is not available in the Publisher. API: " + apiName +
+				" Version: " + apiVersion + " Provider: " + apiProvider)
+		}
+		return "", errors.New("Requested API is not available in the Publisher. API: " + apiName +
+			" Version: " + apiVersion)
+	} else {
+		utils.Logf("Error: %s\n", resp.Error())
+		utils.Logf("Body: %s\n", resp.Body())
+		if resp.StatusCode() == http.StatusUnauthorized {
+			// 401 Unauthorized
+			return "", fmt.Errorf("Authorization failed while searching API: " + apiName)
+		}
+		return "", errors.New("Request didn't respond 200 OK for searching APIs. Status: " + resp.Status())
+	}
 }
 
-// GetAPIList
+// GetAPIDefinition scans filePath and returns APIDefinition or an error
+func GetAPIDefinition(filePath string) (*v2.APIDefinition, []byte, error) {
+	info, err := os.Stat(filePath)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var buffer []byte
+	if info.IsDir() {
+		_, content, err := resolveYamlOrJSON(path.Join(filePath, "Meta-information", "api"))
+		if err != nil {
+			return nil, nil, err
+		}
+		buffer = content
+	} else {
+		return nil, nil, fmt.Errorf("looking for directory, found %s", info.Name())
+	}
+	api, err := extractAPIDefinition(buffer)
+	if err != nil {
+		return nil, nil, err
+	}
+	return api, buffer, nil
+}
+
+// GetAPIList Get the list of APIs available in a particular environment
 // @param accessToken : Access Token for the environment
 // @param apiListEndpoint : API List endpoint
 // @param query : string to be matched against the API names
@@ -86,5 +151,14 @@ func GetAPIList(accessToken, apiListEndpoint, query, limit string) (count int32,
 		return apiListResponse.Count, apiListResponse.List, nil
 	} else {
 		return 0, nil, errors.New(string(resp.Body()))
+	}
+}
+
+func getQueryParamConnector() (connector string) {
+	if queryParamAdded {
+		return "&"
+	} else {
+		queryParamAdded = true
+		return "?"
 	}
 }

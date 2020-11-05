@@ -179,7 +179,7 @@ func importUpdateAPIProduct(t *testing.T, args *ApiProductImportExportTestArgs) 
 }
 
 func listAPIProducts(t *testing.T, args *ApiProductImportExportTestArgs) (string, error) {
-	output, err := base.Execute(t, "list", "api-products", "-e", args.SrcAPIM.EnvName, "-k", "--verbose")
+	output, err := base.Execute(t, "get", "api-products", "-e", args.SrcAPIM.EnvName, "-k", "--verbose")
 	return output, err
 }
 
@@ -507,10 +507,10 @@ func ValidateAPIProductsList(t *testing.T, args *ApiProductImportExportTestArgs)
 
 	apiProductsList := args.SrcAPIM.GetAPIProducts()
 
-	validateListAPIProductsEqual(t, output, apiProductsList)
+	ValidateListAPIProductsEqual(t, output, apiProductsList)
 }
 
-func validateListAPIProductsEqual(t *testing.T, apiProductsListFromCtl string, apiProductsList *apim.APIProductList) {
+func ValidateListAPIProductsEqual(t *testing.T, apiProductsListFromCtl string, apiProductsList *apim.APIProductList) {
 	unmatchedCount := apiProductsList.Count
 	for _, apiProduct := range apiProductsList.List {
 		// If the output string contains the same API Product ID, then decrement the count

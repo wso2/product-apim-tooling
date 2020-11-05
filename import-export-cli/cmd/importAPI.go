@@ -36,27 +36,27 @@ var (
 
 const (
 	// ImportAPI command related usage info
-	importAPICmdLiteral       = "import-api"
-	importAPICmdShortDesc     = "Import API"
-	importAPICmdLongDesc      = "Import an API to an environment"
+	ImportAPICmdLiteral   = "api"
+	importAPICmdShortDesc = "Import API"
+	importAPICmdLongDesc  = "Import an API to an environment"
 )
 
-const importAPICmdExamples = utils.ProjectName + ` ` + importAPICmdLiteral + ` -f qa/TwitterAPI.zip -e dev
-` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f staging/FacebookAPI.zip -e production
-` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f ~/myapi -e production --update
-` + utils.ProjectName + ` ` + importAPICmdLiteral + ` -f ~/myapi -e production --update
+const importAPICmdExamples = utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAPICmdLiteral + ` -f qa/TwitterAPI.zip -e dev
+` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAPICmdLiteral + ` -f staging/FacebookAPI.zip -e production
+` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAPICmdLiteral + ` -f ~/myapi -e production --update
+` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAPICmdLiteral + ` -f ~/myapi -e production --update
 NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory`
 
 // ImportAPICmd represents the importAPI command
 var ImportAPICmd = &cobra.Command{
-	Use: importAPICmdLiteral + " --file <PATH_TO_API> --environment " +
-		"<ENVIRONMENT>",
+	Use: ImportAPICmdLiteral + " --file <path-to-api> --environment " +
+		"<environment>",
 	Short:   importAPICmdShortDesc,
 	Long:    importAPICmdLongDesc,
 	Example: importAPICmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + importAPICmdLiteral + " called")
-		cred, err := getCredentials(importEnvironment)
+		utils.Logln(utils.LogPrefixInfo + ImportAPICmdLiteral + " called")
+		cred, err := GetCredentials(importEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
@@ -75,7 +75,7 @@ var ImportAPICmd = &cobra.Command{
 
 // init using Cobra
 func init() {
-	RootCmd.AddCommand(ImportAPICmd)
+	ImportCmd.AddCommand(ImportAPICmd)
 	ImportAPICmd.Flags().StringVarP(&importAPIFile, "file", "f", "",
 		"Name of the API to be imported")
 	ImportAPICmd.Flags().StringVarP(&importEnvironment, "environment", "e",

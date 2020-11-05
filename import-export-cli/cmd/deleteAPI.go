@@ -14,12 +14,13 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package cmd
 
 import (
 	"fmt"
+
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
@@ -35,32 +36,29 @@ var deleteAPIProvider string
 // DeleteAPI command related usage info
 const deleteAPICmdLiteral = "api"
 const deleteAPICmdShortDesc = "Delete API"
-const deleteAPICmdLongDesc = "Delete an API from an environment in default mode and delete API resources by API name or label selector in kubernetes mode"
+const deleteAPICmdLongDesc = "Delete an API from an environment"
 
-const deleteAPICmdExamplesDefault = "Default Mode:\n" + "  " +  utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin -e dev
-` + "  " +  utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 -e production
+const deleteAPICmdExamplesDefault = utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin -e dev
+` + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 -e production
 NOTE: The 3 flags (--name (-n), --version (-v), and --environment (-e)) are mandatory.`
-
-const deleteAPICmdExamplesKubernetes = "\nKubernetes Mode:\n" + "  " +  utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPICmdLiteral + ` petstore
-` + "  " +  utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPICmdLiteral + ` -l name=myLabel`
 
 // DeleteAPICmd represents the delete api command
 var DeleteAPICmd = &cobra.Command{
 	Use: deleteAPICmdLiteral + " (--name <name-of-the-api> --version <version-of-the-api> --provider <provider-of-the-api> --environment " +
-		"<environment-from-which-the-api-should-be-deleted>)" + " [Flags]" + "\nKubernetes Mode:\n" + "  " + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPICmdLiteral + " (<name-of-the-api> or -l name=<name-of-the-label>)",
+		"<environment-from-which-the-api-should-be-deleted>)",
 	Short:              deleteAPICmdShortDesc,
 	Long:               deleteAPICmdLongDesc,
-	Example:            deleteAPICmdExamplesDefault + deleteAPICmdExamplesKubernetes,
+	Example:            deleteAPICmdExamplesDefault,
 	DisableFlagParsing: isK8sEnabled(),
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + deleteAPICmdLiteral + " called")
 		configVars := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
 		if configVars.Config.KubernetesMode {
-			k8sArgs := []string{k8sUtils.K8sDelete, k8sUtils.K8sApi}
+			k8sArgs := []string{k8sUtils.K8sDelete, k8sUtils.ApiOpCrdApi}
 			k8sArgs = append(k8sArgs, args...)
 			executeKubernetes(k8sArgs...)
 		} else {
-			cred, err := getCredentials(deleteAPIEnvironment)
+			cred, err := GetCredentials(deleteAPIEnvironment)
 			if err != nil {
 				utils.HandleErrorAndExit("Error getting credentials ", err)
 			}

@@ -50,7 +50,7 @@ var DeleteAppCmd = &cobra.Command{
 	Example: deleteAppCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + deleteAppCmdLiteral + " called")
-		cred, err := getCredentials(deleteAppEnvironment)
+		cred, err := GetCredentials(deleteAppEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials ", err)
 		}

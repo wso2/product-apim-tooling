@@ -19,10 +19,11 @@
 package cmd
 
 import (
-	"github.com/stretchr/testify/assert"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/go-resty/resty"
 
@@ -30,6 +31,7 @@ import (
 	"net/http/httptest"
 
 	"github.com/renstrom/dedent"
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd/deprecated"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
@@ -56,7 +58,7 @@ func TestExportAPI(t *testing.T) {
 	}))
 	defer server.Close()
 
-	resp, err := getExportApiResponse("test", "1.0", "admin", "json", server.URL, "", false)
+	resp, err := deprecated.GetExportApiResponse("test", "1.0", "admin", "json", server.URL, "", false)
 	assert.Nil(t, err, "Error should be nil")
 	assert.Equal(t, 200, resp.StatusCode())
 }

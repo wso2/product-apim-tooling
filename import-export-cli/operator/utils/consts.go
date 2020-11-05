@@ -25,23 +25,24 @@ const K8sApply = "apply"
 const K8sDelete = "delete"
 const K8sRollOut = "rollout"
 const K8sGet = "get"
-const K8sConfigMap = "configmap"
-const K8sSecret = "secret"
-const K8sSecretDockerRegType = "docker-registry"
-const K8sApi = "api"
 
-// API Operator constats
+// Kubernetes resources
+const kindKey = "kind"
+const CrdKind = "CustomResourceDefinition"
+const Namespace = "Namespace"
+const ConfigMap = "configmap"
+const Secret = "secret"
+const ClusterRole = "ClusterRole"
+const ClusterRoleBinding = "ClusterRoleBinding"
+
+// API Operator constants
 const DefaultKubernetesMode = false
+const K8sSecretDockerRegType = "docker-registry"
 const ApiOpControllerConfigMap = "controller-config"
 const ApiOperator = "api-operator"
 const ApiOpWso2Namespace = "wso2-system"
 
-// K8s Kinds
-const kindKey = "kind"
-const namespaceKey = "namespace"
-
 // API Operator CRDs
-const CrdKind = "CustomResourceDefinition"
 const ApiOpCrdApi = "apis.wso2.com"
 const ApiOpCrdRateLimiting = "ratelimitings.wso2.com"
 const ApiOpCrdSecurity = "securities.wso2.com"
@@ -54,10 +55,12 @@ const ApiOperatorFindVersionUrl = "https://github.com/wso2/k8s-api-operator/rele
 const DefaultApiOperatorVersion = "v1.2.0"
 const ApiOperatorVersionEnvVariable = "WSO2_API_OPERATOR_VERSION"
 
-// WSO2AM Operator constats
+// WSO2AM Operator constants
 const Wso2amOperator = "wso2am-operator"
+const Wso2amRole = "wso2am-controller-role" // mention in operator that rename could change this also
+const Wso2amRoleBinding = "wso2am-controller-role-binding"
 
-// API Operator CRDs
+// WSO2AM Operator CRDs
 const Wso2amOpCrdApimanager = "apimanagers.apim.wso2.com"
 
 // WSO2 AM Operator version

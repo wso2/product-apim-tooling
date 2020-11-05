@@ -109,7 +109,7 @@ func createAmazonEcrConfig() {
 
 	// render config map
 	configMap, err := k8sUtils.GetCommandOutput(
-		k8sUtils.Kubectl, k8sUtils.K8sCreate, k8sUtils.K8sConfigMap,
+		k8sUtils.Kubectl, k8sUtils.K8sCreate, k8sUtils.ConfigMap,
 		k8sUtils.AmazonCredHelperConfMap, "--from-file=config.json="+tempFile,
 		"-n", k8sUtils.ApiOpWso2Namespace,
 		"--dry-run", "-o", "yaml",

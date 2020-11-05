@@ -18,8 +18,10 @@
 
 package main
 
-import "github.com/wso2/product-apim-tooling/import-export-cli/cmd"
+import (
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd/deprecated"
+)
 
 func main() {
-	cmd.Execute()
+	deprecated.Execute()
 }

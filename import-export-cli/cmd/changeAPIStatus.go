@@ -14,20 +14,19 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package cmd
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
 
-	"github.com/go-resty/resty"
+	"net/http"
+
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
+	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"net/http"
 )
 
 var apiStateChangeEnvironment string
@@ -47,14 +46,14 @@ NOTE: The 4 flags (--action (-a), --name (-n), --version (-v), and --environment
 
 // changeAPIStatusCmd represents change-status api command
 var ChangeAPIStatusCmd = &cobra.Command{
-	Use:   changeAPIStatusCmdLiteral + " (--action <action-of-the-api-state-change> --name <name-of-the-api> --version <version-of-the-api> --provider " +
+	Use: changeAPIStatusCmdLiteral + " (--action <action-of-the-api-state-change> --name <name-of-the-api> --version <version-of-the-api> --provider " +
 		"<provider-of-the-api> --environment <environment-from-which-the-api-state-should-be-changed>)",
-	Short: changeAPIStatusCmdShortDesc,
-	Long: changeAPIStatusCmdLongDesc,
+	Short:   changeAPIStatusCmdShortDesc,
+	Long:    changeAPIStatusCmdLongDesc,
 	Example: changeAPIStatusCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + changeAPIStatusCmdLiteral + " called")
-		cred, err := getCredentials(apiStateChangeEnvironment)
+		cred, err := GetCredentials(apiStateChangeEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials ", err)
 		}
@@ -63,16 +62,16 @@ var ChangeAPIStatusCmd = &cobra.Command{
 }
 
 // executeChangeAPIStatusCmd executes the change api status command
-func executeChangeAPIStatusCmd(credential credentials.Credential)  {
+func executeChangeAPIStatusCmd(credential credentials.Credential) {
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, apiStateChangeEnvironment)
 	if preCommandErr == nil {
-		changeAPIStatusEndpoint := utils.GetApiListEndpointOfEnv(apiStateChangeEnvironment, utils.MainConfigFilePath)
-		resp, err := getChangeAPIStatusResponse(changeAPIStatusEndpoint, accessToken, credential)
+		resp, err := impl.ChangeAPIStatusInEnv(accessToken, apiStateChangeEnvironment, apiStateChangeAction,
+			apiNameForStateChange, apiVersionForStateChange, apiProviderForStateChange)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while changing the API status", err)
 		}
 		// Print info on response
-		utils.Logf(utils.LogPrefixInfo + "ResponseStatus: %v\n", resp.Status())
+		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
 		if resp.StatusCode() == http.StatusOK {
 			// 200 OK
 			fmt.Println(apiNameForStateChange + " API state changed successfully!")
@@ -86,73 +85,6 @@ func executeChangeAPIStatusCmd(credential credentials.Credential)  {
 	} else {
 		// Error changing the API status
 		fmt.Println("Error getting OAuth tokens while changing status of the API:" + preCommandErr.Error())
-	}
-}
-
-// getChangeAPIStatusResponse
-// @param changeAPIStatusEndpoint : API Manager Publisher REST API Endpoint for the environment
-// @param accessToken : Access Token for the resource
-// @param credential : Credentials of the logged-in user
-// @return response Response in the form of *resty.Response
-func getChangeAPIStatusResponse(changeAPIStatusEndpoint, accessToken string, credential credentials.Credential) (*resty.Response, error) {
-	changeAPIStatusEndpoint = utils.AppendSlashToString(changeAPIStatusEndpoint)
-	apiId, err := getAPIIdForStateChange(accessToken, credential)
-	if err != nil {
-		utils.HandleErrorAndExit("Error while getting API Id for state change ", err)
-	}
-	url := changeAPIStatusEndpoint + "change-lifecycle?action=" + apiStateChangeAction + "&apiId=" + apiId
-	utils.Logln(utils.LogPrefixInfo+"APIStateChange: URL:", url)
-	headers := make(map[string]string)
-	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
-	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
-
-	resp, err := utils.InvokePOSTRequest(url, headers, "")
-
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
-// Get the ID of an API if available
-// @param accessToken : Token to call the Publisher Rest API
-// @return apiId, error
-func getAPIIdForStateChange(accessToken string, credential credentials.Credential) (string, error) {
-	// Unified Search endpoint from the config file to search APIs
-	unifiedSearchEndpoint := utils.GetUnifiedSearchEndpointOfEnv(apiStateChangeEnvironment, utils.MainConfigFilePath)
-
-	// Prepping headers
-	headers := make(map[string]string)
-	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
-	var queryVal string
-	queryVal = "name:\"" + apiNameForStateChange + "\" version:\"" + apiVersionForStateChange + "\""
-	if apiProviderForStateChange != "" {
-		queryVal = queryVal + " provider:\"" + apiProviderForStateChange + "\""
-	}
-	resp, err := utils.InvokeGETRequestWithQueryParam("query", queryVal, unifiedSearchEndpoint, headers)
-	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
-		// 200 OK or 201 Created
-		apiData := &utils.ApiSearch{}
-		data := []byte(resp.Body())
-		err = json.Unmarshal(data, &apiData)
-		if apiData.Count != 0 {
-			apiId := apiData.List[0].ID
-			return apiId, err
-		}
-		if apiProviderForStateChange != "" {
-			return "", errors.New("Requested API is not available in the Publisher. API: " + apiNameForStateChange +
-				" Version: " + apiVersionForStateChange + " Provider: " + apiProviderForStateChange)
-		}
-		return "", errors.New("Requested API is not available in the Publisher. API: " + apiNameForStateChange +
-			" Version: " + apiVersionForStateChange)
-	} else {
-		utils.Logf("Error: %s\n", resp.Error())
-		utils.Logf("Body: %s\n", resp.Body())
-		if resp.StatusCode() == http.StatusUnauthorized {
-			// 401 Unauthorized
-			return "", fmt.Errorf("Authorization failed while searching API: " + apiNameForStateChange)
-		}
-		return "", errors.New("Request didn't respond 200 OK for searching APIs. Status: " + resp.Status())
 	}
 }
 

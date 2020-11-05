@@ -4,10 +4,9 @@ Delete an API/APIProduct/Application in an environment
 
 ### Synopsis
 
-Delete an API available in the environment specified by flag (--environment, -e) in default mode
-Delete an API Product available in the environment specified by flag (--environment, -e) in default mode
-Delete an Application of a specific user in the environment specified by flag (--environment, -e) in default mode
-Delete resources by filenames, stdin, resources and names, or by resources and label selector in kubernetes mode
+Delete an API available in the environment specified by flag (--environment, -e)
+Delete an API Product available in the environment specified by flag (--environment, -e)
+Delete an Application of a specific user in the environment specified by flag (--environment, -e)
 
 ```
 apictl delete [flags]
@@ -19,8 +18,6 @@ apictl delete [flags]
 apictl delete api -n TwitterAPI -v 1.0.0 -r admin -e dev
 apictl delete api-product -n TwitterAPI -r admin -e dev 
 apictl delete app -n TestApplication -o admin -e dev
-apictl delete api petstore
-apictl delete api -l name=myLabel
 ```
 
 ### Options

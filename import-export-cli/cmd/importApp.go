@@ -35,26 +35,26 @@ var importAppUpdateApplication bool
 var importAppSkipCleanup bool
 
 // ImportApp command related usage info
-const importAppCmdLiteral = "import-app"
+const ImportAppCmdLiteral = "app"
 const importAppCmdShortDesc = "Import App"
 
 const importAppCmdLongDesc = "Import an Application to an environment"
 
-const importAppCmdExamples = utils.ProjectName + ` ` + importAppCmdLiteral + ` -f qa/apps/sampleApp.zip -e dev
-` + utils.ProjectName + ` ` + importAppCmdLiteral + ` -f staging/apps/sampleApp.zip -e prod -o testUser
-` + utils.ProjectName + ` ` + importAppCmdLiteral + ` -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -e prod
+const importAppCmdExamples = utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAppCmdLiteral + ` -f qa/apps/sampleApp.zip -e dev
+` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAppCmdLiteral + ` -f staging/apps/sampleApp.zip -e prod -o testUser
+` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAppCmdLiteral + ` -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -e prod
 NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory`
 
 // importAppCmd represents the importApp command
 var ImportAppCmd = &cobra.Command{
-	Use: importAppCmdLiteral + " (--file <app-zip-file> --environment " +
+	Use: ImportAppCmdLiteral + " (--file <app-zip-file> --environment " +
 		"<environment-to-which-the-app-should-be-imported>)",
 	Short:   importAppCmdShortDesc,
 	Long:    importAppCmdLongDesc,
 	Example: importAppCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + importAppCmdLiteral + " called")
-		cred, err := getCredentials(importAppEnvironment)
+		utils.Logln(utils.LogPrefixInfo + ImportAppCmdLiteral + " called")
+		cred, err := GetCredentials(importAppEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
@@ -75,7 +75,7 @@ func executeImportAppCmd(credential credentials.Credential) {
 }
 
 func init() {
-	RootCmd.AddCommand(ImportAppCmd)
+	ImportCmd.AddCommand(ImportAppCmd)
 	ImportAppCmd.Flags().StringVarP(&importAppFile, "file", "f", "",
 		"Name of the ZIP file of the Application to be imported")
 	ImportAppCmd.Flags().StringVarP(&importAppOwner, "owner", "o", "",

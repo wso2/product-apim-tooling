@@ -21,9 +21,10 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"strings"
 )
 
 var flagHttpRequestTimeout int
@@ -42,15 +43,12 @@ const setCmdShortDesc = "Set configuration parameters"
 const setCmdLongDesc = `Set configuration parameters. Use at least one of the following flags
 * --http-request-timeout <time-in-milli-seconds>
 * --export-directory <path-to-directory-where-apis-should-be-saved>
-* --mode <mode-of-apictl>
 * --vcs-deletion-enabled <enable-or-disable-project-deletion-via-vcs>
 * --vcs-config-path <path-to-custom-vcs-config-file>`
 
 const setCmdExamples = utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 3600 --export-directory /home/user/exported-apis
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000 --export-directory C:\Documents\exported
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000
-` + utils.ProjectName + ` ` + setCmdLiteral + ` --mode kubernetes
-` + utils.ProjectName + ` ` + setCmdLiteral + ` --mode default
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --vcs-deletion-enabled=true
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --vcs-config-path /home/user/custom/vcs-config.yaml`
 
@@ -152,6 +150,7 @@ func init() {
 	SetCmd.Flags().StringVarP(&flagKubernetesMode, "mode", "m", utils.DefaultEnvironmentName, "If mode is set to \"k8s\", apictl "+
 		"is capable of executing Kubectl commands. For example \"apictl get pods\" -> \"kubectl get pods\". To go back "+
 		"to the default mode, set the mode to \"default\"")
+	SetCmd.Flags().MarkDeprecated("mode", "if you want to run the commands in kubernetes mode use 'k8s' after 'apictl' (eg: apictl k8s add)")
 	SetCmd.Flags().BoolVar(&flagVCSDeletionEnabled, "vcs-deletion-enabled", false,
 		"Specifies whether project deletion is allowed during deployment.")
 	SetCmd.Flags().StringVar(&flagVCSConfigPath, flagVCSConfigPathName, "",

@@ -63,7 +63,7 @@ func K8sCreateSecretFromInputs(secretName string, namespace string, server strin
 		password = "N/A"
 	}
 	dockerSecret, err := GetCommandOutput(
-		Kubectl, K8sCreate, K8sSecret, K8sSecretDockerRegType, secretName,
+		Kubectl, K8sCreate, Secret, K8sSecretDockerRegType, secretName,
 		"--docker-server", server,
 		"--docker-username", username,
 		"--docker-password", password,
@@ -92,7 +92,7 @@ func K8sCreateSecretFromFile(secretName string, namespace string, filePath strin
 
 	// render secret
 	secret, err := GetCommandOutput(
-		Kubectl, K8sCreate, K8sSecret, "generic",
+		Kubectl, K8sCreate, Secret, "generic",
 		secretName, fromFile,
 		"-n", namespace,
 		"--dry-run", "-o", "yaml",
