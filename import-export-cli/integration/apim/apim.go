@@ -23,6 +23,7 @@ import (
 	"crypto/rand"
 	"encoding/base32"
 	"encoding/json"
+	"errors"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -453,7 +454,7 @@ func CopyApp(appToCopy *Application) Application {
 }
 
 // AddAPI : Add new API to APIM
-func (instance *Client) AddAPI(t *testing.T, api *API, username string, password string) string {
+func (instance *Client) AddAPI(t *testing.T, api *API, username string, password string, doClean bool) string {
 	apisURL := instance.publisherRestURL + "/apis"
 
 	data, err := json.Marshal(api)
@@ -477,10 +478,12 @@ func (instance *Client) AddAPI(t *testing.T, api *API, username string, password
 	var apiResponse API
 	json.NewDecoder(response.Body).Decode(&apiResponse)
 
-	t.Cleanup(func() {
-		instance.Login(username, password)
-		instance.DeleteAPI(apiResponse.ID)
-	})
+	if doClean {
+		t.Cleanup(func() {
+			instance.Login(username, password)
+			instance.DeleteAPI(apiResponse.ID)
+		})
+	}
 
 	return apiResponse.ID
 }
@@ -594,12 +597,12 @@ func (instance *Client) AddAPIProductFromJSON(t *testing.T, path string, usernam
 	var apiProductResponse APIProduct
 	json.NewDecoder(response.Body).Decode(&apiProductResponse)
 
-	t.Cleanup(func() {
-		if doClean {
+	if doClean {
+		t.Cleanup(func() {
 			instance.Login(username, password)
 			instance.DeleteAPIProduct(apiProductResponse.ID)
-		}
-	})
+		})
+	}
 
 	return apiProductResponse.ID
 }
@@ -639,9 +642,14 @@ func (instance *Client) DeleteAPIProduct(apiProductID string) {
 }
 
 // DeleteAPIByName : Delete API from APIM by name
-func (instance *Client) DeleteAPIByName(name string) {
-	apiInfo := instance.GetAPIByName(name)
-	instance.DeleteAPI(apiInfo.ID)
+func (instance *Client) DeleteAPIByName(name string) error {
+	apiInfo, err := instance.GetAPIByName(name)
+
+	if err == nil {
+		instance.DeleteAPI(apiInfo.ID)
+	}
+
+	return err
 }
 
 // DeleteAPIProductByName : Delete API from APIM by name
@@ -735,7 +743,7 @@ func (instance *Client) GetAPIProducts() *APIProductList {
 }
 
 // GetAPIByName : Get API by name from APIM
-func (instance *Client) GetAPIByName(name string) *APIInfo {
+func (instance *Client) GetAPIByName(name string) (*APIInfo, error) {
 	apisURL := instance.publisherRestURL + "/apis"
 
 	request := base.CreateGet(apisURL)
@@ -757,7 +765,15 @@ func (instance *Client) GetAPIByName(name string) *APIInfo {
 
 	var apiResponse APIList
 	json.NewDecoder(response.Body).Decode(&apiResponse)
-	return &apiResponse.List[0]
+
+	if len(apiResponse.List) == 0 {
+		return nil, errors.New("apim.GetAPIByName() did not return result for: " + name +
+			", it is possible that sufficient time is not allwed for solr indexing." +
+			"Consider the user of base.WaitForIndexing() in the execution flow where appropriate or " +
+			"increasing the `indexing-delay` value in the integration test config.yaml")
+	}
+
+	return &apiResponse.List[0], nil
 }
 
 // GetAPIProductByName : Get API Product by name from APIM
@@ -851,7 +867,7 @@ func (instance *Client) DeleteSubscriptions(apiID string) {
 }
 
 // AddApplication : Add new Application to APIM
-func (instance *Client) AddApplication(t *testing.T, application *Application, username string, password string) *Application {
+func (instance *Client) AddApplication(t *testing.T, application *Application, username string, password string, doClean bool) *Application {
 	appsURL := instance.devPortalRestURL + "/applications"
 
 	data, err := json.Marshal(application)
@@ -875,10 +891,12 @@ func (instance *Client) AddApplication(t *testing.T, application *Application, u
 	var appResponse Application
 	json.NewDecoder(response.Body).Decode(&appResponse)
 
-	t.Cleanup(func() {
-		instance.Login(username, password)
-		instance.DeleteApplication(appResponse.ApplicationID)
-	})
+	if doClean {
+		t.Cleanup(func() {
+			instance.Login(username, password)
+			instance.DeleteApplication(appResponse.ApplicationID)
+		})
+	}
 
 	return &appResponse
 }
@@ -924,6 +942,27 @@ func (instance *Client) GetApplication(appID string) *Application {
 	base.ValidateAndLogResponse("apim.GetApplication()", response, 200)
 
 	var appResponse Application
+	json.NewDecoder(response.Body).Decode(&appResponse)
+	return &appResponse
+}
+
+// GetApplications : Get Applications list from APIM
+func (instance *Client) GetApplications() *ApplicationList {
+	appsURL := instance.devPortalRestURL + "/applications"
+
+	request := base.CreateGet(appsURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.GetApplications()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.GetApplications()", response, 200)
+
+	var appResponse ApplicationList
 	json.NewDecoder(response.Body).Decode(&appResponse)
 	return &appResponse
 }
@@ -1178,7 +1217,9 @@ func (instance *Client) getToken(username string, password string) string {
 	values.Add("grant_type", "password")
 	values.Add("username", username)
 	values.Add("password", password)
-	values.Add("scope", "apim:api_view apim:api_create apim:api_publish apim:subscribe apim:api_delete")
+	values.Add("scope",
+		"apim:api_view apim:api_create apim:api_publish apim:subscribe apim:api_delete "+
+			"apim:app_import_export apim:api_import_export apim:api_product_import_export apim:app_manage apim:sub_manage")
 
 	request.URL.RawQuery = values.Encode()
 

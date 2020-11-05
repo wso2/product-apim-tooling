@@ -21,32 +21,36 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"strings"
 )
 
 var flagHttpRequestTimeout int
 var flagExportDirectory string
 var flagKubernetesMode string
-var flagTokenType string
+
+var flagVCSDeletionEnabled bool
+var flagVCSConfigPath string
+
+const flagVCSConfigPathName = "vcs-config-path"
 
 // Set command related Info
 const setCmdLiteral = "set"
-const setCmdShortDesc = "Set configuration"
+const setCmdShortDesc = "Set configuration parameters"
 
 const setCmdLongDesc = `Set configuration parameters. Use at least one of the following flags
 * --http-request-timeout <time-in-milli-seconds>
 * --export-directory <path-to-directory-where-apis-should-be-saved>
-* --mode <mode-of-apictl>`
+* --vcs-deletion-enabled <enable-or-disable-project-deletion-via-vcs>
+* --vcs-config-path <path-to-custom-vcs-config-file>`
 
 const setCmdExamples = utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 3600 --export-directory /home/user/exported-apis
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000 --export-directory C:\Documents\exported
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000
-` + utils.ProjectName + ` ` + setCmdLiteral + ` --token-type JWT
-` + utils.ProjectName + ` ` + setCmdLiteral + ` --token-type OAUTH
-` + utils.ProjectName + ` ` + setCmdLiteral + ` --mode kubernetes
-` + utils.ProjectName + ` ` + setCmdLiteral + ` --mode default`
+` + utils.ProjectName + ` ` + setCmdLiteral + ` --vcs-deletion-enabled=true
+` + utils.ProjectName + ` ` + setCmdLiteral + ` --vcs-config-path /home/user/custom/vcs-config.yaml`
 
 // SetCmd represents the 'set' command
 var SetCmd = &cobra.Command{
@@ -56,44 +60,68 @@ var SetCmd = &cobra.Command{
 	Example: setCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + setCmdLiteral + " called")
-		executeSetCmd(utils.MainConfigFilePath, utils.ExportDirectory)
+		executeSetCmd(utils.MainConfigFilePath, cmd)
 	},
 }
 
-func executeSetCmd(mainConfigFilePath, exportDirectory string) {
+func executeSetCmd(mainConfigFilePath string, cmd *cobra.Command) {
 	// read the existing config vars
 	configVars := utils.GetMainConfigFromFile(mainConfigFilePath)
+	//Change Http Request timeout
 	if flagHttpRequestTimeout > 0 {
+		//Check whether the provided Http time out value is not equal to default value
+		if flagHttpRequestTimeout != configVars.Config.HttpRequestTimeout {
+			fmt.Println("Http Request Timout is set to : ", flagHttpRequestTimeout)
+		}
 		configVars.Config.HttpRequestTimeout = flagHttpRequestTimeout
 	} else {
 		fmt.Println("Invalid input for flag --http-request-timeout")
 	}
+
+	//Change Export Directory path
 	if flagExportDirectory != "" && utils.IsValid(flagExportDirectory) {
+		//Check whether the provided export directory is not equal to default value
+		if flagExportDirectory != configVars.Config.ExportDirectory {
+			fmt.Println("Export Directory is set to  : ", flagExportDirectory)
+		}
 		configVars.Config.ExportDirectory = flagExportDirectory
 	} else {
 		fmt.Println("Invalid input for flag --export-directory")
 	}
+
+	//Change Mode
 	if flagKubernetesMode != "" {
 		if strings.EqualFold(flagKubernetesMode, "kubernetes") || strings.EqualFold(flagKubernetesMode, "k8s") {
+			//Check whether the provided mode value is not equal to default value
+			if true != configVars.Config.KubernetesMode {
+				fmt.Println("Mode is set to : ", flagKubernetesMode)
+			}
 			configVars.Config.KubernetesMode = true
 		} else if strings.EqualFold(flagKubernetesMode, "default") {
+			if false != configVars.Config.KubernetesMode {
+				fmt.Println("Mode is set to : ", flagKubernetesMode)
+			}
 			configVars.Config.KubernetesMode = false
 		} else {
 			utils.HandleErrorAndExit("Error changing mode ",
 				errors.New("mode should be set to either kubernetes or none"))
 		}
 	}
-	if flagTokenType != "" {
-		if strings.EqualFold(flagTokenType, "jwt") {
-			configVars.Config.TokenType = "JWT"
-		} else if strings.EqualFold(flagTokenType, "oauth") {
-			configVars.Config.TokenType = "OAUTH"
+
+	//VCS configs
+	if configVars.Config.VCSDeletionEnabled != flagVCSDeletionEnabled {
+		if flagVCSDeletionEnabled {
+			fmt.Println("Project deletion is enabled in VCS")
 		} else {
-			utils.HandleErrorAndExit("Error setting token type ",
-				errors.New("Token type should be either JWT or OAuth"))
+			fmt.Println("Project deletion is disabled in VCS")
 		}
-		fmt.Println("Token type set to: ", flagTokenType)
+		configVars.Config.VCSDeletionEnabled = flagVCSDeletionEnabled
 	}
+	if cmd.Flags().Changed(flagVCSConfigPathName) {
+		configVars.Config.VCSConfigFilePath = flagVCSConfigPath
+		fmt.Println("VCS config file path is set to : " + flagVCSConfigPath)
+	}
+
 	utils.WriteConfigFile(configVars, mainConfigFilePath)
 }
 
@@ -103,7 +131,6 @@ func init() {
 
 	var defaultHttpRequestTimeout int
 	var defaultExportDirectory string
-	var defaultTokenType string
 
 	// read current values in file to be passed into default values for flags below
 	mainConfig := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
@@ -116,17 +143,16 @@ func init() {
 		defaultExportDirectory = mainConfig.Config.ExportDirectory
 	}
 
-	if mainConfig.Config.TokenType != "" {
-		defaultTokenType = mainConfig.Config.TokenType
-	}
-
 	SetCmd.Flags().IntVar(&flagHttpRequestTimeout, "http-request-timeout", defaultHttpRequestTimeout,
 		"Timeout for HTTP Client")
 	SetCmd.Flags().StringVar(&flagExportDirectory, "export-directory", defaultExportDirectory,
 		"Path to directory where APIs should be saved")
-	SetCmd.Flags().StringVarP(&flagTokenType, "token-type", "t", defaultTokenType,
-		"Type of the token to be generated")
-	SetCmd.Flags().StringVarP(&flagKubernetesMode, "mode", "m", utils.DefaultEnvironmentName, "If mode is set to \"k8s\", apictl " +
-		"is capable of executing Kubectl commands. For example \"apictl get pods\" -> \"kubectl get pods\". To go back " +
+	SetCmd.Flags().StringVarP(&flagKubernetesMode, "mode", "m", utils.DefaultEnvironmentName, "If mode is set to \"k8s\", apictl "+
+		"is capable of executing Kubectl commands. For example \"apictl get pods\" -> \"kubectl get pods\". To go back "+
 		"to the default mode, set the mode to \"default\"")
+	SetCmd.Flags().MarkDeprecated("mode", "if you want to run the commands in kubernetes mode use 'k8s' after 'apictl' (eg: apictl k8s add)")
+	SetCmd.Flags().BoolVar(&flagVCSDeletionEnabled, "vcs-deletion-enabled", false,
+		"Specifies whether project deletion is allowed during deployment.")
+	SetCmd.Flags().StringVar(&flagVCSConfigPath, flagVCSConfigPathName, "",
+		"Path to the VCS Configuration yaml file which keeps the VCS meta data")
 }

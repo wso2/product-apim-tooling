@@ -20,13 +20,11 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
-	"os"
-	"strconv"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 
-	"github.com/go-resty/resty"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 
@@ -39,30 +37,30 @@ var exportAPIVersion string
 var exportProvider string
 var exportAPIPreserveStatus bool
 var exportAPIFormat string
-var runnigExportApiCommand bool
+var runningExportApiCommand bool
 
 // ExportAPI command related usage info
-const exportAPICmdLiteral = "export-api"
+const ExportAPICmdLiteral = "api"
 const exportAPICmdShortDesc = "Export API"
 
-const exportAPICmdLongDesc = "Export APIs from an environment"
+const exportAPICmdLongDesc = "Export an API from an environment"
 
-const exportAPICmdExamples = utils.ProjectName + ` ` + exportAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin -e dev
-` + utils.ProjectName + ` ` + exportAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 -r admin -e production
+const exportAPICmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin -e dev
+` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 -r admin -e production
 NOTE: All the 3 flags (--name (-n), --version (-v) and --environment (-e)) are mandatory`
 
 // ExportAPICmd represents the exportAPI command
 var ExportAPICmd = &cobra.Command{
-	Use: exportAPICmdLiteral + " (--name <name-of-the-api> --version <version-of-the-api> --provider <provider-of-the-api> --environment " +
+	Use: ExportAPICmdLiteral + " (--name <name-of-the-api> --version <version-of-the-api> --provider <provider-of-the-api> --environment " +
 		"<environment-from-which-the-api-should-be-exported>)",
 	Short:   exportAPICmdShortDesc,
 	Long:    exportAPICmdLongDesc,
 	Example: exportAPICmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + exportAPICmdLiteral + " called")
+		utils.Logln(utils.LogPrefixInfo + ExportAPICmdLiteral + " called")
 		var apisExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedApisDirName)
 
-		cred, err := getCredentials(cmdExportEnvironment)
+		cred, err := GetCredentials(CmdExportEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
@@ -72,21 +70,19 @@ var ExportAPICmd = &cobra.Command{
 }
 
 func executeExportAPICmd(credential credentials.Credential, exportDirectory string) {
-	runnigExportApiCommand = true
-	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, cmdExportEnvironment)
+	runningExportApiCommand = true
+	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, CmdExportEnvironment)
 
 	if preCommandErr == nil {
-		adminEndpoint := utils.GetAdminEndpointOfEnv(cmdExportEnvironment, utils.MainConfigFilePath)
-		resp, err := getExportApiResponse(exportAPIName, exportAPIVersion, exportProvider, exportAPIFormat, adminEndpoint,
-			accessToken, exportAPIPreserveStatus)
+		resp, err := impl.ExportAPIFromEnv(accessToken, exportAPIName, exportAPIVersion, exportProvider, exportAPIFormat, CmdExportEnvironment, exportAPIPreserveStatus)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while exporting", err)
 		}
 		// Print info on response
-		utils.Logf(utils.LogPrefixInfo + "ResponseStatus: %v\n", resp.Status())
-		apiZipLocationPath := filepath.Join(exportDirectory, cmdExportEnvironment)
+		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
+		apiZipLocationPath := filepath.Join(exportDirectory, CmdExportEnvironment)
 		if resp.StatusCode() == http.StatusOK {
-			WriteToZip(exportAPIName, exportAPIVersion, apiZipLocationPath, resp)
+			impl.WriteToZip(exportAPIName, exportAPIVersion, apiZipLocationPath, runningExportApiCommand, resp)
 		} else if resp.StatusCode() == http.StatusInternalServerError {
 			// 500 Internal Server Error
 			fmt.Println(string(resp.Body()))
@@ -100,74 +96,16 @@ func executeExportAPICmd(credential credentials.Credential, exportDirectory stri
 	}
 }
 
-// WriteToZip
-// @param exportAPIName : Name of the API to be exported
-// @param resp : Response returned from making the HTTP request (only pass a 200 OK)
-// Exported API will be written to a zip file
-func WriteToZip(exportAPIName, exportAPIVersion, zipLocationPath string, resp *resty.Response) {
-	// Write to file
-	//directory := filepath.Join(exportDirectory, cmdcmdExportEnvironment)
-	// create directory if it doesn't exist
-	if _, err := os.Stat(zipLocationPath); os.IsNotExist(err) {
-		err = os.Mkdir(zipLocationPath, 0777)
-		if err != nil {
-			utils.HandleErrorAndExit("Error creating zip archive", err)
-		}
-		// permission 777 : Everyone can read, write, and execute
-	}
-	zipFilename := exportAPIName + "_" + exportAPIVersion + ".zip" // MyAPI_1.0.0.zip
-	pFile := filepath.Join(zipLocationPath, zipFilename)
-	err := ioutil.WriteFile(pFile, resp.Body(), 0644)
-	// permission 644 : Only the owner can read and write.. Everyone else can only read.
-	if err != nil {
-		utils.HandleErrorAndExit("Error creating zip archive", err)
-	}
-	if runnigExportApiCommand {
-		fmt.Println("Successfully exported API!")
-		fmt.Println("Find the exported API at " + pFile)
-	}
-}
-
-// ExportAPI
-// @param name : Name of the API to be exported
-// @param version : Version of the API to be exported
-// @param provider : Provider of the API 
-// @param adminEndpoint : API Manager Admin Endpoint for the environment
-// @param accessToken : Access Token for the resource
-// @return response Response in the form of *resty.Response
-func getExportApiResponse(name, version, provider, format, adminEndpoint, accessToken string, preserveStatus bool) (*resty.Response, error) {
-	adminEndpoint = utils.AppendSlashToString(adminEndpoint)
-	query := "export/api?name=" + name + "&version=" + version + "&providerName=" + provider +
-		"&preserveStatus=" + strconv.FormatBool(preserveStatus)
-	if format != "" {
-		query += "&format=" + format
-	}
-
-	url := adminEndpoint + query
-	utils.Logln(utils.LogPrefixInfo+"ExportAPI: URL:", url)
-	headers := make(map[string]string)
-	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
-	headers[utils.HeaderAccept] = utils.HeaderValueApplicationZip
-
-	resp, err := utils.InvokeGETRequest(url, headers)
-
-	if err != nil {
-		return nil, err
-	}
-	
-	return resp, nil
-}
-
 // init using Cobra
 func init() {
-	RootCmd.AddCommand(ExportAPICmd)
+	ExportCmd.AddCommand(ExportAPICmd)
 	ExportAPICmd.Flags().StringVarP(&exportAPIName, "name", "n", "",
 		"Name of the API to be exported")
 	ExportAPICmd.Flags().StringVarP(&exportAPIVersion, "version", "v", "",
 		"Version of the API to be exported")
 	ExportAPICmd.Flags().StringVarP(&exportProvider, "provider", "r", "",
 		"Provider of the API")
-	ExportAPICmd.Flags().StringVarP(&cmdExportEnvironment, "environment", "e",
+	ExportAPICmd.Flags().StringVarP(&CmdExportEnvironment, "environment", "e",
 		"", "Environment to which the API should be exported")
 	ExportAPICmd.Flags().BoolVarP(&exportAPIPreserveStatus, "preserveStatus", "", true,
 		"Preserve API status when exporting. Otherwise API will be exported in CREATED status")

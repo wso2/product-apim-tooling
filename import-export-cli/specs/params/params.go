@@ -12,11 +12,11 @@ import (
 // Configuration represents endpoint config
 type Configuration struct {
 	// RetryTimeOut for endpoint
-	RetryTimeOut *int `yaml:"retryTimeOut" json:"retryTimeOut,string"`
+	RetryTimeOut *int `yaml:"retryTimeOut,omitempty" json:"retryTimeOut,omitempty"`
 	// RetryDelay for endpoint
-	RetryDelay *int `yaml:"retryDelay" json:"retryDelay,string"`
+	RetryDelay *int `yaml:"retryDelay,omitempty" json:"retryDelay,omitempty"`
 	// Factor used for config
-	Factor *int `yaml:"factor" json:"factor,string"`
+	Factor *int `yaml:"factor,omitempty" json:"factor,omitempty"`
 }
 
 // Endpoint details
@@ -26,7 +26,7 @@ type Endpoint struct {
 	// Url of the endpoint
 	Url *string `yaml:"url" json:"url"`
 	// Config of endpoint
-	Config *Configuration `yaml:"config" json:"config"`
+	Config *Configuration `yaml:"config,omitempty" json:"config,omitempty"`
 }
 
 // EndpointData contains details about endpoints
@@ -100,13 +100,37 @@ type SecurityData struct {
 // Cert stores certificate details
 type Cert struct {
 	// Host of the certificate
-	Host string `yaml:"host" json:"hostName"`
+	Host string `yaml:"hostName" json:"hostName"`
 	// Alias for certificate
 	Alias string `yaml:"alias" json:"alias"`
 	// Path for certificate file
 	Path string `yaml:"path" json:"-"`
 	// Certificate is used for internal purposes, it contains secret in base64
 	Certificate string `json:"certificate"`
+}
+
+// MutualSslCert stores mutualssl certificate details
+type MutualSslCert struct {
+	// TierName of the certificate (eg:- Unlimited, Gold, Silver, Bronze)
+	TierName string `yaml:"tierName" json:"tierName"`
+	// Alias for certificate
+	Alias string `yaml:"alias" json:"alias"`
+	// Path for certificate file
+	Path string `yaml:"path" json:"-"`
+	// Certificate is used for internal purposes, it contains secret in base64
+	Certificate string `json:"certificate"`
+	// ApiIdentifier is used for internal purposes, it contains details of the API to be stored in client_certificates file
+	APIIdentifier APIIdentifier `json:"apiIdentifier"`
+}
+
+// ApiIdentifier stores API Identifier details
+type APIIdentifier struct {
+	// Name of the provider of the API
+	ProviderName string `json:"providerName"`
+	// Name of the API
+	APIName string `json:"apiName"`
+	// Version of the API
+	Version string `json:"version"`
 }
 
 // Environment represents an api environment
@@ -131,18 +155,85 @@ type Environment struct {
 	// GatewayEnvironments contains environments that used to deploy API
 	GatewayEnvironments []string `yaml:"gatewayEnvironments"`
 	// Certs for environment
-	Certs []Cert `yaml:"certs"`
+	Certs          []Cert          `yaml:"certs"`
+	MutualSslCerts []MutualSslCert `yaml:"mutualSslCerts"`
+	// VCS params for the environment
+	VCS APIVCSParams `yaml:"vcs"`
 }
 
 // ApiParams represents environments defined in configuration file
 type ApiParams struct {
 	// Environments contains all environments in a configuration
-	Environments []Environment   `yaml:"environments"`
+	Environments []Environment `yaml:"environments"`
+	Deploy       APIVCSParams  `yaml:"deploy"`
 }
+
+type ApiProductParams struct {
+	Deploy ApiProductVCSParams `yaml:"deploy"`
+}
+
+type ApplicationParams struct {
+	Deploy ApplicationVCSParams `yaml:"deploy"`
+}
+
+// ------------------- Structs for VCS Import Params ----------------------------------
+
+type ApplicationVCSParams struct {
+	Import ApplicationImportParams `yaml:"import"`
+}
+
+type APIVCSParams struct {
+	Import APIImportParams `yaml:"import"`
+}
+
+type ApiProductVCSParams struct {
+	Import APIProductImportParams `yaml:"import"`
+}
+
+type APIImportParams struct {
+	Update           bool `yaml:"update"`
+	PreserveProvider bool `yaml:"preserveProvider"`
+}
+
+type APIProductImportParams struct {
+	ImportAPIs       bool `yaml:"importApis"`
+	UpdateAPIs       bool `yaml:"updateApis"`
+	UpdateAPIProduct bool `yaml:"updateApiProduct"`
+	PreserveProvider bool `yaml:"preserveProvider"`
+}
+
+type ApplicationImportParams struct {
+	Update            bool   `yaml:"update"`
+	TargetOwner       string `yaml:"targetOwner"`
+	PreserveOwner     bool   `yaml:"preserveOwner"`
+	SkipKeys          bool   `yaml:"skipKeys"`
+	SkipSubscriptions bool   `yaml:"skipSubscriptions"`
+}
+
+type ProjectParams struct {
+	Type                       string             `yaml:"type"`
+	AbsolutePath               string             `yaml:"absolutePath,omitempty"`
+	RelativePath               string             `yaml:"relativePath,omitempty"`
+	NickName                   string             `yaml:"nickName,omitempty"`
+	FailedDuringPreviousDeploy bool               `yaml:"failedDuringPreviousDeploy,omitempty"`
+	Deleted                    bool               `yaml:"deleted,omitempty"`
+	ProjectInfo                ProjectInfo        `yaml:"projectInfo,omitempty"`
+	ApiParams                  *ApiParams         `yaml:"apiParams,omitempty"`
+	ApiProductParams           *ApiProductParams  `yaml:"apiProductParams,omitempty"`
+	ApplicationParams          *ApplicationParams `yaml:"applicationParams,omitempty"`
+}
+
+type ProjectInfo struct {
+	Owner   string `yaml:"owner,omitempty"`
+	Name    string `yaml:"name,omitempty"`
+	Version string `yaml:"version,omitempty"`
+}
+
+// ---------------- End of Structs for Project Details ---------------------------------
 
 // APIEndpointConfig contains details about endpoints in an API
 type APIEndpointConfig struct {
-    // EPConfig is representing endpoint configuration
+	// EPConfig is representing endpoint configuration
 	EPConfig string `json:"endpointConfig"`
 }
 
@@ -178,6 +269,40 @@ func LoadApiParamsFromFile(path string) (*ApiParams, error) {
 	}
 
 	apiParams := &ApiParams{}
+	err = yaml.Unmarshal([]byte(fileContent), &apiParams)
+	if err != nil {
+		return nil, err
+	}
+
+	return apiParams, err
+}
+
+// LoadApiProductParamsFromFile loads an API Product project configuration YAML file located in path.
+//	It returns an error or a valid ApiProductParams
+func LoadApiProductParamsFromFile(path string) (*ApiProductParams, error) {
+	fileContent, err := getEnvSubstitutedFileContent(path)
+	if err != nil {
+		return nil, err
+	}
+
+	apiParams := &ApiProductParams{}
+	err = yaml.Unmarshal([]byte(fileContent), &apiParams)
+	if err != nil {
+		return nil, err
+	}
+
+	return apiParams, err
+}
+
+// LoadApplicationParamsFromFile loads an Application project configuration YAML file located in path.
+//	It returns an error or a valid ApplicationParams
+func LoadApplicationParamsFromFile(path string) (*ApplicationParams, error) {
+	fileContent, err := getEnvSubstitutedFileContent(path)
+	if err != nil {
+		return nil, err
+	}
+
+	apiParams := &ApplicationParams{}
 	err = yaml.Unmarshal([]byte(fileContent), &apiParams)
 	if err != nil {
 		return nil, err

@@ -1,0 +1,5 @@
+environments:
+    - name: production
+      endpoints:
+          production:
+              url: 'https://prod.wso2.com'

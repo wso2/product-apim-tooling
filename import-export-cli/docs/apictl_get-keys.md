@@ -26,7 +26,7 @@ You can override the default token endpoint using --token (-t) optional flag pro
   -n, --name string          API or API Product to generate keys
   -r, --provider string      Provider of the API or API Product
   -t, --token string         Token endpoint URL of Environment
-  -v, --version string       Version of the API or API Product
+  -v, --version string       Version of the API
 ```
 
 ### Options inherited from parent commands

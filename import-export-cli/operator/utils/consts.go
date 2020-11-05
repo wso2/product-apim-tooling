@@ -25,13 +25,19 @@ const K8sApply = "apply"
 const K8sDelete = "delete"
 const K8sRollOut = "rollout"
 const K8sGet = "get"
-const K8sConfigMap = "configmap"
-const K8sSecret = "secret"
-const K8sSecretDockerRegType = "docker-registry"
-const K8sApi = "api"
 
-// API Operator constats
+// Kubernetes resources
+const kindKey = "kind"
+const CrdKind = "CustomResourceDefinition"
+const Namespace = "Namespace"
+const ConfigMap = "configmap"
+const Secret = "secret"
+const ClusterRole = "ClusterRole"
+const ClusterRoleBinding = "ClusterRoleBinding"
+
+// API Operator constants
 const DefaultKubernetesMode = false
+const K8sSecretDockerRegType = "docker-registry"
 const ApiOpControllerConfigMap = "controller-config"
 const ApiOperator = "api-operator"
 const ApiOpWso2Namespace = "wso2-system"
@@ -46,20 +52,22 @@ const ApiOpCrdTargetEndpoint = "targetendpoints.wso2.com"
 const ApiOperatorConfigsUrlTemplate = "https://github.com/wso2/k8s-api-operator/releases/download/%s/api-operator-configs.yaml"
 const ApiOperatorVersionValidationUrlTemplate = "https://github.com/wso2/k8s-api-operator/tree/%s"
 const ApiOperatorFindVersionUrl = "https://github.com/wso2/k8s-api-operator/releases"
-const DefaultApiOperatorVersion = "v1.1.0"
+const DefaultApiOperatorVersion = "v1.2.0"
 const ApiOperatorVersionEnvVariable = "WSO2_API_OPERATOR_VERSION"
 
-// WSO2AM Operator constats
+// WSO2AM Operator constants
 const Wso2amOperator = "wso2am-operator"
+const Wso2amRole = "wso2am-controller-role" // mention in operator that rename could change this also
+const Wso2amRoleBinding = "wso2am-controller-role-binding"
 
-// API Operator CRDs
+// WSO2AM Operator CRDs
 const Wso2amOpCrdApimanager = "apimanagers.apim.wso2.com"
 
 // WSO2 AM Operator version
 const Wso2AmOperatorConfigsUrlTemplate = "https://github.com/wso2/k8s-wso2am-operator/releases/download/%s/wso2am-operator-configs.yaml"
 const Wso2AmOperatorVersionValidationUrlTemplate = "https://github.com/wso2/k8s-wso2am-operator/tree/%s"
 const Wso2AmOperatorFindVersionUrl = "https://github.com/wso2/k8s-wso2am-operator/releases"
-const DefaultWso2AmOperatorVersion = "v1.0.0"
+const DefaultWso2AmOperatorVersion = "v1.1.0"
 const Wso2AmOperatorVersionEnvVariable = "WSO2_AM_OPERATOR_VERSION"
 
 // constants of K8s ConfigMap: controller-config

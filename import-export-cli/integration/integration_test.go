@@ -32,6 +32,7 @@ import (
 
 type YamlConfig struct {
 	Environments   []Environment `yaml:"environments"`
+	IndexingDelay  int           `yaml:"indexing-delay"`
 	DCRVersion     string        `yaml:"dcr-version"`
 	RESTAPIVersion string        `yaml:"rest-api-version"`
 	APICTLVersion  string        `yaml:"apictl-version"`
@@ -44,20 +45,21 @@ type Environment struct {
 }
 
 const (
-	superAdminUser     = "admin"
-	superAdminPassword = "admin"
+	superAdminUser     = adminservices.AdminUsername
+	superAdminPassword = adminservices.AdminPassword
 
 	userMgtService   = "RemoteUserStoreManagerService"
 	tenantMgtService = "TenantMgtAdminService"
 
-	TENANT1 = "test.com"
+	TENANT1 = adminservices.Tenant1
 )
 
 var (
 	Users = map[string][]adminservices.User{
-		"creator":    {{UserName: "creator", Password: "password", Roles: []string{"Internal/creator"}}},
-		"publisher":  {{UserName: "publisher", Password: "password", Roles: []string{"Internal/publisher"}}},
-		"subscriber": {{UserName: "subscriber", Password: "password", Roles: []string{"Internal/subscriber"}}},
+		"creator":    {{UserName: adminservices.CreatorUsername, Password: adminservices.Password, Roles: []string{"Internal/creator"}}},
+		"publisher":  {{UserName: adminservices.PublisherUsername, Password: adminservices.Password, Roles: []string{"Internal/publisher"}}},
+		"subscriber": {{UserName: adminservices.SubscriberUsername, Password: adminservices.Password, Roles: []string{"Internal/subscriber"}}},
+		"devops":     {{UserName: adminservices.DevopsUsername, Password: adminservices.Password, Roles: []string{"Internal/devops"}}},
 	}
 
 	yamlConfig YamlConfig
@@ -65,12 +67,13 @@ var (
 	envs = map[string]Environment{}
 
 	tenants = []adminservices.Tenant{
-		{AdminUserName: "admin", AdminPassword: "admin", Domain: TENANT1},
+		{AdminUserName: adminservices.AdminUsername, AdminPassword: adminservices.AdminPassword, Domain: adminservices.Tenant1},
 	}
 
 	creator    = Users["creator"][0]
 	subscriber = Users["subscriber"][0]
 	publisher  = Users["publisher"][0]
+	devops     = Users["devops"][0]
 
 	apimClients []*apim.Client
 )
@@ -112,7 +115,10 @@ func readConfigs() {
 		envs[env.Name] = env
 	}
 
+	base.SetIndexingDelay(yamlConfig.IndexingDelay)
+
 	base.Log("envs:", envs)
+	base.Log("indexing delay:", yamlConfig.IndexingDelay)
 	base.Log("dcr version:", yamlConfig.DCRVersion)
 	base.Log("rest api Version:", yamlConfig.RESTAPIVersion)
 	base.Log("apictl version:", yamlConfig.APICTLVersion)

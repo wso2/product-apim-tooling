@@ -21,10 +21,12 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"github.com/go-resty/resty"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"gopkg.in/yaml.v2"
 )
@@ -157,7 +159,7 @@ func IsDirExists(path string) (bool, error) {
 
 func CreateDirIfNotExist(path string) (err error) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		os.Mkdir(path, os.ModePerm)
+		os.MkdirAll(path, os.ModePerm)
 	}
 	return err
 }
@@ -318,4 +320,114 @@ func CreateTempFile(pattern string, content []byte) (string, error) {
 	}
 
 	return tmpFile.Name(), nil
+}
+
+// CreateZipFileFromProject if the given projectPath contains a directory, zip it and return the zip file path.
+//	Otherwise, leave it as it is.
+// @param projectPath Project path
+// @param skipCleanup Whether to clean the temporary files after the program exists
+// @return string Path to the zip file
+// @return error
+// @return func() can be called to cleanup the temporary items created during this function execution. Needs to call
+//	this once the zip file is consumed
+func CreateZipFileFromProject(projectPath string, skipCleanup bool) (string, error, func()){
+	// If the projectPath contains a directory, zip it
+	if info, err := os.Stat(projectPath); err == nil && info.IsDir() {
+		tmp, err := ioutil.TempFile("", "project-artifact*.zip")
+		if err != nil {
+			return "", err, nil
+		}
+		Logln(LogPrefixInfo+"Creating the project artifact", tmp.Name())
+		err = Zip(projectPath, tmp.Name())
+		if err != nil {
+			return "", err, nil
+		}
+		//creates a function to cleanup the temporary folders
+		cleanup := func() {
+			if skipCleanup {
+				Logln(LogPrefixInfo+"Leaving", tmp.Name())
+				return
+			}
+			Logln(LogPrefixInfo+"Deleting", tmp.Name())
+			err := os.Remove(tmp.Name())
+			if err != nil {
+				Logln(LogPrefixError + err.Error())
+			}
+		}
+		projectPath = tmp.Name()
+		return projectPath, nil, cleanup
+	}
+	return projectPath, nil, nil
+}
+
+// Get a cloned copy of a given folder or a ZIP file path. If a zip file path is given, it will be extracted to the
+//	tmp folder. The returned string will be the path to the extracted temp folder.
+func GetTempCloneFromDirOrZip(path string) (string, error) {
+	fileIsDir := false
+	// create a temp directory
+	tmpDir, err := ioutil.TempDir("", "apim")
+	if err != nil {
+		_ = os.RemoveAll(tmpDir)
+		return "", err
+	}
+
+	if info, err := os.Stat(path); err == nil {
+		fileIsDir = info.IsDir()
+	} else {
+		return "", err
+	}
+	if fileIsDir {
+		// copy dir to a temp location
+		Logln(LogPrefixInfo+"Copying from", path, "to", tmpDir)
+		dest := filepath.Join(tmpDir, filepath.Base(path))
+		err = CopyDir(path, dest)
+		if err != nil {
+			return "", err
+		}
+		return dest, nil
+	} else {
+		// try to extract archive
+		Logln(LogPrefixInfo+"Extracting", path, "to", tmpDir)
+		finalPath, err := extractArchive(path, tmpDir)
+		if err != nil {
+			return "", err
+		}
+		return finalPath, nil
+	}
+}
+
+// extractArchive extracts the API and give the path.
+// In API Manager archive there is a directory in the root which contains the API
+// this function returns it appended to the destination path
+func extractArchive(src, dest string) (string, error) {
+	files, err := Unzip(src, dest)
+	if err != nil {
+		return "", err
+	}
+	if len(files) == 0 {
+		return "", fmt.Errorf("invalid API archive")
+	}
+	r := strings.TrimPrefix(files[0], src)
+	return filepath.Join(dest, strings.Split(filepath.Clean(r), string(os.PathSeparator))[0]), nil
+}
+
+// Creates a temporary folder and creates a zip file with a given name (zipFileName) from the given REST API response.
+//	Returns the location of the created zip file.
+func WriteResponseToTempZip(zipFileName string,resp *resty.Response) (string, error) {
+	// Create a temp directory to save the original zip from the REST API
+	tmpDir, err := ioutil.TempDir("", "apim")
+	if err != nil {
+		_ = os.RemoveAll(tmpDir)
+		return "", err
+	}
+
+	tempZipFile := filepath.Join(tmpDir, zipFileName)
+
+	// Save the zip file in the temp directory.
+	// permission 644 : Only the owner can read and write.. Everyone else can only read.
+	err = ioutil.WriteFile(tempZipFile, resp.Body(), 0644)
+	if err != nil {
+		return "", err
+	}
+	return tempZipFile, err
 }

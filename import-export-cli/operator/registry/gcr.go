@@ -27,20 +27,13 @@ import (
 	"strings"
 )
 
-var gcrRepo = new(string)
-
-var gcrValues = struct {
-	project       string
-	svcAccKeyFile string
-}{}
-
 // GcrRegistry represents Google Container Registry
 var GcrRegistry = &Registry{
 	Name:       "GCR",
 	Caption:    "GCR",
-	Repository: gcrRepo,
+	Repository: Repository{},
 	Option:     3,
-	Read: func(flagValues *map[string]FlagValue) {
+	Read: func(reg *Registry, flagValues *map[string]FlagValue) {
 		var svcAccKeyFile string
 
 		// check input mode: interactive or batch
@@ -57,18 +50,19 @@ var GcrRegistry = &Registry{
 			}
 		}
 
-		gcrValues.project = getGcrProjectName(svcAccKeyFile)
-		gcrValues.svcAccKeyFile = svcAccKeyFile
-		*gcrRepo = gcrValues.project
+		reg.Repository.Name = getGcrProjectName(svcAccKeyFile)
+		reg.Repository.KeyFile = svcAccKeyFile
 	},
-	Run: func() {
-		data, err := ioutil.ReadFile(gcrValues.svcAccKeyFile)
+	Run: func(reg *Registry) {
+		data, err := ioutil.ReadFile(reg.Repository.KeyFile)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading GCR service account key json file", err)
 		}
 
-		k8sUtils.K8sCreateSecretFromFile(k8sUtils.GcrSvcAccKeySecret, k8sUtils.ApiOpWso2Namespace, gcrValues.svcAccKeyFile, k8sUtils.GcrSvcAccKeyFile)
-		k8sUtils.K8sCreateSecretFromInputs(k8sUtils.GcrPullSecret, k8sUtils.ApiOpWso2Namespace, "gcr.io", "_json_key", string(data))
+		k8sUtils.K8sCreateSecretFromFile(k8sUtils.GcrSvcAccKeySecret, k8sUtils.ApiOpWso2Namespace,
+			reg.Repository.KeyFile, k8sUtils.GcrSvcAccKeyFile)
+		k8sUtils.K8sCreateSecretFromInputs(k8sUtils.GcrPullSecret, k8sUtils.ApiOpWso2Namespace,
+			"gcr.io", "_json_key", string(data))
 	},
 	Flags: Flags{
 		RequiredFlags: &map[string]bool{k8sUtils.FlagBmKeyFile: true},
@@ -83,20 +77,21 @@ func readGcrInputs() string {
 	var err error
 
 	for !isConfirm {
-		svcAccKeyFile, err = utils.ReadInput("GCR service account key json file", utils.Default{IsDefault: false}, utils.IsFileExist, "Invalid file", true)
+		svcAccKeyFile, err = utils.ReadInput("GCR service account key json file", utils.Default{IsDefault: false},
+			utils.IsFileExist, "Invalid file", true)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading GCR service account key json file from user", err)
 		}
 
 		fmt.Println("\nGCR service account key json file: " + svcAccKeyFile)
 
-		isConfirmStr, err := utils.ReadInputString("Confirm configurations", utils.Default{Value: "Y", IsDefault: true}, "", false)
+		isConfirmStr, err := utils.ReadInputString("Confirm configurations", utils.Default{Value: "Y", IsDefault: true},
+			"", false)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading user input Confirmation", err)
 		}
 
-		isConfirmStr = strings.ToUpper(isConfirmStr)
-		isConfirm = isConfirmStr == "Y" || isConfirmStr == "YES"
+		isConfirm = strings.EqualFold(isConfirmStr, "y") || strings.EqualFold(isConfirmStr, "yes")
 	}
 
 	return svcAccKeyFile

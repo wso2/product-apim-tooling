@@ -14,18 +14,18 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package impl
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+	"strconv"
 
 	"github.com/go-resty/resty"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"net/http"
 )
 
 // DeleteAPI
@@ -38,7 +38,7 @@ import (
 func DeleteAPI(accessToken, environment, deleteAPIName, deleteAPIVersion, deleteAPIProvider string) (*resty.Response, error) {
 	deleteEndpoint := utils.GetApiListEndpointOfEnv(environment, utils.MainConfigFilePath)
 	deleteEndpoint = utils.AppendSlashToString(deleteEndpoint)
-	apiId, err := getAPIId(accessToken, environment, deleteAPIName, deleteAPIVersion, deleteAPIProvider)
+	apiId, err := GetAPIId(accessToken, environment, deleteAPIName, deleteAPIVersion, deleteAPIProvider)
 	if err != nil {
 		utils.HandleErrorAndExit("Error while getting API Id for deletion ", err)
 	}
@@ -52,54 +52,16 @@ func DeleteAPI(accessToken, environment, deleteAPIName, deleteAPIVersion, delete
 	if err != nil {
 		return nil, err
 	}
+	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNoContent {
+		return nil, errors.New(strconv.Itoa(resp.StatusCode()) + ":<" + string(resp.Body()) + ">")
+	}
 	return resp, nil
 }
 
-// Get the ID of an API if available
-// @param accessToken : Token to call the Publisher Rest API
-// @param environment : Environment where API needs to be located
-// @param apiName : Name of the API
-// @param apiVersion : Version of the API
-// @param apiProvider : Provider of API
-// @return apiId, error
-func getAPIId(accessToken, environment, apiName, apiVersion, apiProvider string) (string, error) {
-	// Unified Search endpoint from the config file to search APIs
-	unifiedSearchEndpoint := utils.GetUnifiedSearchEndpointOfEnv(environment, utils.MainConfigFilePath)
-
-	// Prepping headers
-	headers := make(map[string]string)
-	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
-	var queryVal string
-	queryVal = "name:\"" + apiName + "\" version:\"" + apiVersion + "\""
-	if apiProvider != "" {
-		queryVal = queryVal + " provider:\"" + apiProvider + "\""
-	}
-	resp, err := utils.InvokeGETRequestWithQueryParam("query", queryVal, unifiedSearchEndpoint, headers)
+func PrintDeleteAPIResponse(resp *resty.Response, err error) {
 	if err != nil {
-		return "", err
-	}
-	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
-		// 200 OK or 201 Created
-		apiData := &utils.ApiSearch{}
-		data := []byte(resp.Body())
-		err = json.Unmarshal(data, &apiData)
-		if apiData.Count != 0 {
-			apiId := apiData.List[0].ID
-			return apiId, err
-		}
-		if apiProvider != "" {
-			return "", errors.New("Requested API is not available in the Publisher. API: " + apiName +
-				" Version: " + apiVersion + " Provider: " + apiProvider)
-		}
-		return "", errors.New("Requested API is not available in the Publisher. API: " + apiName +
-			" Version: " + apiVersion)
+		fmt.Println("Error deleting API:", err)
 	} else {
-		utils.Logf("Error: %s\n", resp.Error())
-		utils.Logf("Body: %s\n", resp.Body())
-		if resp.StatusCode() == http.StatusUnauthorized {
-			// 401 Unauthorized
-			return "", fmt.Errorf("Authorization failed while searching API: " + apiName)
-		}
-		return "", errors.New("Request didn't respond 200 OK for searching APIs. Status: " + resp.Status())
+		fmt.Println("API deleted successfully!. Status: " + strconv.Itoa(resp.StatusCode()))
 	}
 }

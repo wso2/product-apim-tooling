@@ -14,16 +14,16 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package cmd
 
 import (
 	"fmt"
+
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"net/http"
 
 	"github.com/spf13/cobra"
 )
@@ -43,14 +43,14 @@ NOTE: Both the flags (--name (-n), and --environment (-e)) are mandatory and the
 
 // DeleteAppCmd represents the delete app command
 var DeleteAppCmd = &cobra.Command{
-	Use:   deleteAppCmdLiteral + " (--name <name-of-the-application> --owner <owner-of-the-application> --environment " +
+	Use: deleteAppCmdLiteral + " (--name <name-of-the-application> --owner <owner-of-the-application> --environment " +
 		"<environment-from-which-the-application-should-be-deleted>)",
-	Short: deleteAppCmdShortDesc,
-	Long: deleteAppCmdLongDesc,
+	Short:   deleteAppCmdShortDesc,
+	Long:    deleteAppCmdLongDesc,
 	Example: deleteAppCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + deleteAppCmdLiteral + " called")
-		cred, err := getCredentials(deleteAppEnvironment)
+		cred, err := GetCredentials(deleteAppEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials ", err)
 		}
@@ -58,27 +58,18 @@ var DeleteAppCmd = &cobra.Command{
 	},
 }
 
-
 // executeDeleteAppCmd executes the delete app command
-func executeDeleteAppCmd(credential credentials.Credential)  {
+func executeDeleteAppCmd(credential credentials.Credential) {
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, deleteAppEnvironment)
 	if preCommandErr == nil {
-		resp, err := impl.DeleteApplication(accessToken, deleteAppEnvironment, deleteAppName)
+		if deleteAppOwner == "" {
+			deleteAppOwner = credential.Username
+		}
+		resp, err := impl.DeleteApplication(accessToken, deleteAppEnvironment, deleteAppName, deleteAppOwner)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while deleting Application ", err)
 		}
-		// Print info on response
-		utils.Logf(utils.LogPrefixInfo + "ResponseStatus: %v\n", resp.Status())
-		if resp.StatusCode() == http.StatusOK {
-			// 200 OK
-			fmt.Println(deleteAppName + " Application deleted successfully!")
-		} else if resp.StatusCode() == http.StatusInternalServerError {
-			// 500 Internal Server Error
-			fmt.Println(string(resp.Body()))
-		} else {
-			// Neither 200 nor 500
-			fmt.Println("Error deleting Application:", resp.Status(), "\n", string(resp.Body()))
-		}
+		impl.PrintDeleteAppResponse(resp, err)
 	} else {
 		// Error deleting Application
 		fmt.Println("Error getting OAuth tokens while deleting Application:" + preCommandErr.Error())

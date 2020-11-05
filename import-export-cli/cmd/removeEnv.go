@@ -21,6 +21,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -29,12 +30,13 @@ import (
 var envToBeRemoved string // name of the environment to be removed
 
 // RemoveEnv command related Info
-const removeEnvCmdLiteral = "env"
+const removeEnvCmdLiteral = "env [environment]"
+const removeEnvCmdLiteralTrimmed = "env"
 const removeEnvCmdShortDesc = "Remove Environment from Config file"
 
 const removeEnvCmdLongDesc = `Remove Environment and its related endpoints from the config file`
 
-const removeEnvCmdExamples = utils.ProjectName + ` ` + removeCmdLiteral + ` ` + removeEnvCmdLiteral + `  production`
+const removeEnvCmdExamples = utils.ProjectName + ` ` + removeCmdLiteral + ` ` + removeEnvCmdLiteralTrimmed + ` production`
 
 // removeEnvCmd represents the removeEnv command
 var removeEnvCmd = &cobra.Command{
@@ -42,12 +44,12 @@ var removeEnvCmd = &cobra.Command{
 	Short:   removeEnvCmdShortDesc,
 	Long:    removeEnvCmdLongDesc,
 	Example: removeEnvCmdExamples,
-	Args: cobra.MinimumNArgs(1),
+	Args:    cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		envToBeRemoved := args[0];
+		envToBeRemoved := args[0]
 
 		utils.Logln(utils.LogPrefixInfo + removeEnvCmdLiteral + " called")
-		executeRemoveEnvCmd(envToBeRemoved , utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
+		executeRemoveEnvCmd(envToBeRemoved, utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
 	},
 }
 
@@ -77,27 +79,29 @@ func removeEnv(envName, mainConfigFilePath, envKeysFilePath string) error {
 				return err
 			}
 		}
-		// remove env from mainConfig file (endpoints file)
-		err = utils.RemoveEnvFromMainConfigFile(envName, mainConfigFilePath)
-		if err != nil {
-			return err
-		}
 
 		// remove keys also if user has already logged into this environment
 		store, err := credentials.GetDefaultCredentialStore()
 		if store.Has(envName) {
 			err = runLogout(envName)
 			if err != nil {
-				return err
+				utils.Logln("Log out is unsuccessful. ", err)
 			}
 		}
+
+		// remove env from mainConfig file (endpoints file)
+		err = utils.RemoveEnvFromMainConfigFile(envName, mainConfigFilePath)
+		if err != nil {
+			return err
+		}
+
 	} else {
 		// environment does not exist in mainConfig file (endpoints file). Nothing to remove
 		return errors.New("environment '" + envName + "' not found in " + mainConfigFilePath)
 	}
 
 	fmt.Println("Successfully removed environment '" + envName + "'")
-	fmt.Println("Execute '" + utils.ProjectName + " add-env" + " --help' to see how to add a new environment")
+	fmt.Println("Execute '" + utils.ProjectName + " " + AddCmdLiteral + " " + AddEnvCmdLiteralTrimmed + " --help' to see how to add a new environment")
 
 	return nil
 }

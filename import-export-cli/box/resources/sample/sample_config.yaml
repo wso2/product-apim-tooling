@@ -17,7 +17,7 @@ environments:
     apim: https://wso2am:9443
     devportal:
     registration:
-    token: https://wso2am:8243/token
+    token:
   sample-env3:
     admin: https://localhost:9443
     publisher: https://localhost:9443

@@ -7,13 +7,13 @@ Remove Environment from Config file
 Remove Environment and its related endpoints from the config file
 
 ```
-apictl remove env [flags]
+apictl remove env [environment] [flags]
 ```
 
 ### Examples
 
 ```
-apictl remove env  production
+apictl remove env production
 ```
 
 ### Options
@@ -31,5 +31,5 @@ apictl remove env  production
 
 ### SEE ALSO
 
-* [apictl remove](apictl_remove.md)	 - Remove an environmnet
+* [apictl remove](apictl_remove.md)	 - Remove an environment
 

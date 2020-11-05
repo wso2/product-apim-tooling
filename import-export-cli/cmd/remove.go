@@ -23,7 +23,7 @@ import (
 )
 
 const removeCmdLiteral = "remove"
-const removeCmdShortDesc = "Remove an environmnet"
+const removeCmdShortDesc = "Remove an environment"
 const removeCmdLongDesc = `Remove Environment and its related endpoints from the config file`
  
 const removeCmdExamples = utils.ProjectName + ` ` + removeCmdLiteral + ` ` + removeEnvCmdLiteral + `  production`

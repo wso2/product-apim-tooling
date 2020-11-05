@@ -21,24 +21,89 @@ package impl
 import (
 	"encoding/json"
 	"errors"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"fmt"
 	"net/http"
+	"os"
+	"path"
+
+	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-// GetAPIProductListFromEnv
-// @param accessToken : Access Token for the environment
-// @param environment : Environment where API Product should be imported to
-// @param query : String to be matched against the API Product names
-// @param limit : Total number of API Products to return
-// @return count (no. of API Products)
-// @return array of API Product objects
-// @return error
-func GetAPIProductListFromEnv(accessToken, environment, query, limit string) (count int32, apiProducts []utils.APIProduct, err error) {
+// GetAPIProductId Get the ID of an API Product if available
+// @param accessToken : Access token to call the Publisher Rest API
+// @param environment : Environment where API Product needs to be located
+// @param apiProductName : Name of the API Product
+// @param apiProductProvider : Provider of the API Product
+// @return apiId, error
+func GetAPIProductId(accessToken, environment, apiProductName, apiProductProvider string) (string, error) {
+	// Unified Search endpoint from the config file to search API Products
 	unifiedSearchEndpoint := utils.GetUnifiedSearchEndpointOfEnv(environment, utils.MainConfigFilePath)
-	return GetAPIProductList(accessToken, unifiedSearchEndpoint, query, limit)
+
+	// Prepping headers
+	headers := make(map[string]string)
+	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
+	var queryVal string
+	// TODO Search by version as well when the versioning support has been implemented for API Products
+	queryVal = "type:\"" + utils.DefaultApiProductType + "\" name:\"" + apiProductName + "\""
+	if apiProductProvider != "" {
+		queryVal = queryVal + " provider:\"" + apiProductProvider + "\""
+	}
+	resp, err := utils.InvokeGETRequestWithQueryParam("query", queryVal, unifiedSearchEndpoint, headers)
+	if err != nil {
+		return "", err
+	}
+	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
+		// 200 OK or 201 Created
+		apiData := &utils.ApiSearch{}
+		data := []byte(resp.Body())
+		err = json.Unmarshal(data, &apiData)
+		if apiData.Count != 0 {
+			apiProductId := apiData.List[0].ID
+			return apiProductId, err
+		}
+		// TODO Print the version as well when the versioning support has been implemented for API Products
+		if apiProductProvider != "" {
+			return "", errors.New("Requested API Product is not available in the Publisher. API Product: " + apiProductName +
+				" Provider: " + apiProductProvider)
+		}
+		return "", errors.New("Requested API Product is not available in the Publisher. API Product: " + apiProductName)
+	} else {
+		utils.Logf("Error: %s\n", resp.Error())
+		utils.Logf("Body: %s\n", resp.Body())
+		if resp.StatusCode() == http.StatusUnauthorized {
+			// 401 Unauthorized
+			return "", fmt.Errorf("Authorization failed while searching API Product: " + apiProductName)
+		}
+		return "", errors.New("Request didn't respond 200 OK for searching API Products. Status: " + resp.Status())
+	}
 }
 
-// GetAPIProductList
+// GetAPIProductDefinition scans filePath and returns APIProductDefinition or an error
+func GetAPIProductDefinition(filePath string) (*v2.APIProductDefinition, []byte, error) {
+	info, err := os.Stat(filePath)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var buffer []byte
+	if info.IsDir() {
+		_, content, err := resolveYamlOrJSON(path.Join(filePath, "Meta-information", "api"))
+		if err != nil {
+			return nil, nil, err
+		}
+		buffer = content
+	} else {
+		return nil, nil, fmt.Errorf("looking for directory, found %s", info.Name())
+	}
+	apiProduct, err := extractAPIProductDefinition(buffer)
+	if err != nil {
+		return nil, nil, err
+	}
+	return apiProduct, buffer, nil
+}
+
+// GetAPIProductList Get the list of API Products available in a particular environment
 // @param accessToken : Access Token for the environment
 // @param unifiedSearchEndpoint : Unified Search Endpoint for the environment to retreive API Product list
 // @param query : String to be matched against the API Product names
@@ -80,5 +145,4 @@ func GetAPIProductList(accessToken, unifiedSearchEndpoint, query, limit string) 
 	} else {
 		return 0, nil, errors.New(string(resp.Body()))
 	}
-
 }

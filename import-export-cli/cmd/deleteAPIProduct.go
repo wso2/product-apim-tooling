@@ -20,13 +20,12 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-
-	"net/http"
 )
 
 var deleteAPIProductEnvironment string
@@ -39,7 +38,7 @@ const deleteAPIProductCmdShortDesc = "Delete API Product"
 const deleteAPIProductCmdLongDesc = "Delete an API Product from an environment"
 
 const deleteAPIProductCmdExamples = utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPIProductCmdLiteral + ` -n LeasingAPIProduct -r admin -e dev
-` + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPIProductCmdLiteral + ` -n CreditAPIProduct -v 1.0.0 -e production
+` + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPIProductCmdLiteral + ` -n CreditAPIProduct -e production
 NOTE: Both the flags (--name (-n) and --environment (-e)) are mandatory.`
 
 // TODO Introduce a version flag and mandate it when the versioning support has been implemented for API Products
@@ -53,7 +52,7 @@ var DeleteAPIProductCmd = &cobra.Command{
 	Example: deleteAPIProductCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + deleteAPIProductCmdLiteral + " called")
-		cred, err := getCredentials(deleteAPIProductEnvironment)
+		cred, err := GetCredentials(deleteAPIProductEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials ", err)
 		}
@@ -67,20 +66,9 @@ func executeDeleteAPIProductCmd(credential credentials.Credential) {
 	if preCommandErr == nil {
 		resp, err := impl.DeleteAPIProduct(accessToken, deleteAPIProductEnvironment, deleteAPIProductName, deleteAPIProductProvider)
 		if err != nil {
-			utils.HandleErrorAndExit("Error while deleting API Product ", err)
+			utils.HandleErrorAndExit("Error while deleting API Product", err)
 		}
-		// Print info on response
-		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
-		if resp.StatusCode() == http.StatusOK {
-			// 200 OK
-			fmt.Println(deleteAPIProductName + " API Product deleted successfully!")
-		} else if resp.StatusCode() == http.StatusInternalServerError {
-			// 500 Internal Server Error
-			fmt.Println(string(resp.Body()))
-		} else {
-			// Neither 200 nor 500
-			fmt.Println("Error deleting API Product:", resp.Status(), "\n", string(resp.Body()))
-		}
+		impl.PrintDeleteAPIProductResponse(resp, err)
 	} else {
 		// Error deleting API Product
 		fmt.Println("Error getting OAuth tokens while deleting API Product:" + preCommandErr.Error())

@@ -1,6 +1,6 @@
 ## apictl remove
 
-Remove an environmnet
+Remove an environment
 
 ### Synopsis
 
@@ -13,7 +13,7 @@ apictl remove [flags]
 ### Examples
 
 ```
-apictl remove env  production
+apictl remove env [environment]  production
 ```
 
 ### Options

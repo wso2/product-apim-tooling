@@ -65,7 +65,7 @@ func GetCredentialStore(f string) (Store, error) {
 
 // GetDefaultCredentialStore returns store from default path
 func GetDefaultCredentialStore() (Store, error) {
-	return GetCredentialStore(filepath.Join(utils.ConfigDirPath, DefaultConfigFile))
+	return GetCredentialStore(filepath.Join(utils.LocalCredentialsDirectoryPath, DefaultConfigFile))
 }
 
 // GetOAuthAccessToken generates an accesstoken for CLI
@@ -89,12 +89,12 @@ func GetBasicAuth(credential Credential) string {
 }
 
 //Revoke access Token when user is logging out from environment
-func RevokeAccessToken(credential Credential, env string, token string)  error {
+func RevokeAccessToken(credential Credential, env string, token string) error {
 
 	//get revoke endpoint
-	tokenRevokeEndpoint := utils.GetTokenRevokeEndpoint(env,utils.MainConfigFilePath)
+	tokenRevokeEndpoint := utils.GetTokenRevokeEndpoint(env, utils.MainConfigFilePath)
 	//Encoding client secret and client Id
-	var b64EncodedClientIDClientSecret = utils.GetBase64EncodedCredentials(credential.ClientId,credential.ClientSecret)
+	var b64EncodedClientIDClientSecret = utils.GetBase64EncodedCredentials(credential.ClientId, credential.ClientSecret)
 	// set headers to request
 	headers := make(map[string]string)
 	headers[utils.HeaderContentType] = utils.HeaderValueXWWWFormUrlEncoded
@@ -107,17 +107,16 @@ func RevokeAccessToken(credential Credential, env string, token string)  error {
 	utils.Logln(utils.LogPrefixInfo + "connecting to " + tokenRevokeEndpoint)
 
 	if err != nil {
-		utils.HandleErrorAndExit("Unable to Connect.", err)
+		return err
 	}
 
 	//Check status code
 	if resp.StatusCode() != http.StatusOK {
-		utils.HandleErrorAndExit("Unable to connect.", errors.New("Status: "+resp.Status()))
-		return nil
+		return errors.New("Request didn't respond 200 OK for searching token revocation " +
+			"Status: " + resp.Status())
 	}
-
 	responseDataMap := make(map[string]string) // a map to hold response data
 	data := []byte(resp.Body())
 	json.Unmarshal(data, &responseDataMap) // add response data to the map
-	return  nil
+	return nil
 }

@@ -20,6 +20,10 @@ package base
 
 import (
 	"flag"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"net/http/httputil"
 	"os"
@@ -27,12 +31,16 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"log"
 )
 
 // logTransport : Flag which determines if http transport level requests and responses are logged
 var logTransport = false
+
+// indexingDelay : Time in milliseconds that tests need to wait for to allow APIM solr indexing to take place
+var indexingDelay = 1000
 
 func init() {
 	flag.BoolVar(&logTransport, "logtransport", false, "Log http transport level requests and responses")
@@ -71,7 +79,17 @@ func GetValueOfUniformResponse(response string) string {
 // SetupEnv : Adds a new environment and automatically removes it when the calling test function execution ends
 //
 func SetupEnv(t *testing.T, env string, apim string, tokenEp string) {
-	Execute(t, "add-env", "-e", env, "--apim", apim, "--token", tokenEp)
+	Execute(t, "add", "env", env, "--apim", apim, "--token", tokenEp)
+
+	t.Cleanup(func() {
+		Execute(t, "remove", "env", env)
+	})
+}
+
+// SetupEnv : Adds a new environment just with apim endpoint and automatically removes it when the
+// calling test function execution ends
+func SetupEnvWithoutTokenFlag(t *testing.T, env string, apim string) {
+	Execute(t, "add", "env", env, "--apim", apim)
 
 	t.Cleanup(func() {
 		Execute(t, "remove", "env", env)
@@ -254,4 +272,106 @@ func logResponse(logString string, response *http.Response) {
 	log.Println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<", logString, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 	log.Println(string(dump))
 	log.Println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+}
+
+// SetIndexingDelay : Set time in milliseconds that tests need to wait for to allow APIM solr indexing to take place
+func SetIndexingDelay(delay int) {
+	indexingDelay = delay
+}
+
+// WaitForIndexing : Wait for specified interval to allow APIM solr indexes to be updated
+func WaitForIndexing() {
+	time.Sleep(time.Duration(indexingDelay) * time.Millisecond)
+}
+
+func RemoveDir(projectName string) {
+	error := os.RemoveAll(projectName)
+	if error != nil {
+		log.Fatal(error)
+	}
+}
+
+// CreateTempDir : Create temp directory at the specified root path.
+// The directory will be removed when the calling test exits.
+func CreateTempDir(t *testing.T, path string) {
+	t.Log("base.CreateTempDir() - path:", path)
+
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		if err := os.MkdirAll(path, 0755); err != nil {
+			t.Fatal(err)
+		}
+
+		t.Cleanup(func() {
+			os.RemoveAll(path)
+		})
+	}
+}
+
+func GetExportedPathFromOutput(output string) string {
+	//Check directory path to omit changes due to OS differences
+	if strings.Contains(output, ":\\") {
+		arrayOutput := []rune(output)
+		extractedPath := string(arrayOutput[strings.Index(output, ":\\")-1:])
+		return strings.ReplaceAll(strings.ReplaceAll(extractedPath, "\n", ""), " ", "")
+	} else {
+		return strings.ReplaceAll(strings.ReplaceAll(output[strings.Index(output, string(os.PathSeparator)):], "\n", ""), " ", "")
+	}
+}
+
+//Count number of files in a directory
+func CountFiles(path string) (int, error) {
+	i := 0
+	files, err := ioutil.ReadDir(path)
+	if err != nil {
+		return 0, err
+	}
+	for _, file := range files {
+		if !file.IsDir() {
+			i++
+		}
+	}
+	return i, nil
+}
+
+// IsFileAvailable checks if a file exists and is not a directory before we
+// try using it to prevent further errors.
+func IsFileAvailable(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
+}
+
+// Copy the src file to dst. Any existing file will be overwritten
+func Copy(src, dst string) error {
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+
+	out, err := os.Create(dst)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, in)
+	if err != nil {
+		return err
+	}
+	return out.Close()
+}
+
+//Generate random strings with given length
+func GenerateRandomName(n int) string {
+	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+
+	s := make([]rune, n)
+	for i := range s {
+		s[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(s)
 }

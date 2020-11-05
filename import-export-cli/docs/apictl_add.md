@@ -1,18 +1,33 @@
 ## apictl add
 
-Add an API to the kubernetes cluster
+Add Environment to Config file
 
 ### Synopsis
 
-Add an API from a Swagger file to the kubernetes cluster. JSON and YAML formats are accepted.
-To execute kubernetes commands set mode to Kubernetes
+Add new environment and its related endpoints to the config file
 
 ### Examples
 
 ```
-apictl add api -n petstore --from-file=./Swagger.json --replicas=1 --namespace=wso2
+apictl add env production \
+--apim  https://localhost:9443 
 
-apictl add api -n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi --replicas=1 --namespace=wso2 --override=true
+apictl add env test \
+--registration https://idp.com:9443 \
+--publisher https://apim.com:9443 \
+--devportal  https://apps.com:9443 \
+--admin  https://apim.com:9443 \
+--token https://gw.com:8243/token
+
+apictl add env dev \
+--apim https://apim.com:9443 \
+--registration https://idp.com:9443 \
+--token https://gw.com:8243/token
+
+NOTE: The flag --environment (-e) is mandatory.
+You can either provide only the flag --apim , or all the other 4 flags (--registration --publisher --devportal --admin) without providing --apim flag.
+If you are omitting any of --registration --publisher --devportal --admin flags, you need to specify --apim flag with the API Manager endpoint. In both of the
+cases --token flag is optional and use it to specify the gateway token endpoint. This will be used for "apictl get-keys" operation.
 ```
 
 ### Options
@@ -31,5 +46,5 @@ apictl add api -n petstore --from-file=./product-apim-tooling/import-export-cli/
 ### SEE ALSO
 
 * [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
-* [apictl add api](apictl_add_api.md)	 - handle APIs in kubernetes cluster 
+* [apictl add env](apictl_add_env.md)	 - Add Environment to Config file
 

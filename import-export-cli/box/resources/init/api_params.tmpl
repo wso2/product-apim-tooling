@@ -4,3 +4,8 @@ environments:{{- range $name, $elem := . }}
       production:
       sandbox:
 {{- end }}
+
+deploy:
+  import:
+    update: true
+    preserveProvider: true

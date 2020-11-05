@@ -22,22 +22,37 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-const addCmdLiteral = "add"
-const addCmdShortDesc = "Add an API to the kubernetes cluster"
-const addCmdLongDesc = `Add an API from a Swagger file to the kubernetes cluster. JSON and YAML formats are accepted.
-To execute kubernetes commands set mode to Kubernetes`
-const addCmdExamples = utils.ProjectName + " " + addCmdLiteral + " " + addApiCmdLiteral + " " + `-n petstore --from-file=./Swagger.json --replicas=1 --namespace=wso2
+const AddCmdLiteral = "add"
+const AddCmdShortDesc = "Add Environment to Config file"
+const AddCmdLongDesc = `Add new environment and its related endpoints to the config file`
+const addCmdExamples = utils.ProjectName + ` ` + AddCmdLiteral + ` ` + AddEnvCmdLiteralTrimmed + ` production \
+--apim  https://localhost:9443 
 
-` + utils.ProjectName + " " + addCmdLiteral + " " + addApiCmdLiteral + " " + `-n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi --replicas=1 --namespace=wso2 --override=true`
+` + utils.ProjectName + ` ` + AddCmdLiteral + ` ` + AddEnvCmdLiteralTrimmed + ` test \
+--registration https://idp.com:9443 \
+--publisher https://apim.com:9443 \
+--devportal  https://apps.com:9443 \
+--admin  https://apim.com:9443 \
+--token https://gw.com:8243/token
 
-// addCmd represents the add command
-var addCmd = &cobra.Command{
-	Use:     addCmdLiteral,
-	Short:   addCmdShortDesc,
-	Long:    addCmdLongDesc,
+` + utils.ProjectName + ` ` + AddCmdLiteral + ` ` + AddEnvCmdLiteralTrimmed + ` dev \
+--apim https://apim.com:9443 \
+--registration https://idp.com:9443 \
+--token https://gw.com:8243/token
+
+NOTE: The flag --environment (-e) is mandatory.
+You can either provide only the flag --apim , or all the other 4 flags (--registration --publisher --devportal --admin) without providing --apim flag.
+If you are omitting any of --registration --publisher --devportal --admin flags, you need to specify --apim flag with the API Manager endpoint. In both of the
+cases --token flag is optional and use it to specify the gateway token endpoint. This will be used for "apictl get-keys" operation.`
+
+// AddCmd represents the add command
+var AddCmd = &cobra.Command{
+	Use:     AddCmdLiteral,
+	Short:   AddCmdShortDesc,
+	Long:    AddCmdLongDesc,
 	Example: addCmdExamples,
 }
 
 func init() {
-	RootCmd.AddCommand(addCmd)
+	RootCmd.AddCommand(AddCmd)
 }

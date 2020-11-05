@@ -42,10 +42,10 @@ const (
 	importAPIProductCmdLongDesc  = "Import an API Product to an environment"
 )
 
-const importAPIProductCmdExamples = utils.ProjectName + ` ` + importCmdLiteral + ` ` + importAPIProductCmdLiteral + ` -f qa/LeasingAPIProduct.zip -e dev
-` + utils.ProjectName + ` ` + importCmdLiteral + ` ` + importAPIProductCmdLiteral + ` -f staging/CreditAPIProduct.zip -e production --update-api-product
-` + utils.ProjectName + ` ` + importCmdLiteral + ` ` + importAPIProductCmdLiteral + ` -f ~/myapiproduct -e production
-` + utils.ProjectName + ` ` + importCmdLiteral + ` ` + importAPIProductCmdLiteral + ` -f ~/myapiproduct -e production --update-api-product --update-apis
+const importAPIProductCmdExamples = utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + importAPIProductCmdLiteral + ` -f qa/LeasingAPIProduct.zip -e dev
+` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + importAPIProductCmdLiteral + ` -f staging/CreditAPIProduct.zip -e production --update-api-product
+` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + importAPIProductCmdLiteral + ` -f ~/myapiproduct -e production
+` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + importAPIProductCmdLiteral + ` -f ~/myapiproduct -e production --update-api-product --update-apis
 NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory`
 
 // ImportAPIProductCmd represents the importAPIProduct command
@@ -58,7 +58,7 @@ var ImportAPIProductCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + importAPIProductCmdLiteral + " called")
 
-		cred, err := getCredentials(importAPIProductEnvironment)
+		cred, err := GetCredentials(importAPIProductEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
@@ -67,7 +67,7 @@ var ImportAPIProductCmd = &cobra.Command{
 			utils.HandleErrorAndExit("Error while getting an access token for importing API Product", err)
 		}
 		err = impl.ImportAPIProductToEnv(accessOAuthToken, importAPIProductEnvironment, importAPIProductFile, importAPIs, importAPIsUpdate,
-				importAPIProductUpdate, importAPIProductCmdPreserveProvider, importAPIProductSkipCleanup)
+			importAPIProductUpdate, importAPIProductCmdPreserveProvider, importAPIProductSkipCleanup)
 		if err != nil {
 			utils.HandleErrorAndExit("Error importing API Product", err)
 			return

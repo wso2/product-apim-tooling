@@ -19,24 +19,18 @@
 package impl
 
 import (
-	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
-	"mime/multipart"
 	"net/http"
-	"net/url"
 	"os"
 	"path"
 	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/specs/params"
 
@@ -61,30 +55,6 @@ func extractAPIDefinition(jsonContent []byte) (*v2.APIDefinition, error) {
 	}
 
 	return api, nil
-}
-
-// getAPIDefinition scans filePath and returns APIDefinition or an error
-func getAPIDefinition(filePath string) (*v2.APIDefinition, []byte, error) {
-	info, err := os.Stat(filePath)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	var buffer []byte
-	if info.IsDir() {
-		_, content, err := resolveYamlOrJSON(path.Join(filePath, "Meta-information", "api"))
-		if err != nil {
-			return nil, nil, err
-		}
-		buffer = content
-	} else {
-		return nil, nil, fmt.Errorf("looking for directory, found %s", info.Name())
-	}
-	api, err := extractAPIDefinition(buffer)
-	if err != nil {
-		return nil, nil, err
-	}
-	return api, buffer, nil
 }
 
 // mergeAPI merges environmentParams to the API given in apiDirectory
@@ -132,6 +102,26 @@ func mergeAPI(apiDirectory string, environmentParams *params.Environment) error 
 	// replace original GatewayEnvironments only if they are present in api-params file
 	if environmentParams.GatewayEnvironments != nil {
 		if _, err := api.SetP(environmentParams.GatewayEnvironments, "environments"); err != nil {
+			return err
+		}
+	}
+
+	// if the mutualSslCert field is defined in the api_params.yaml, the apiSecurity type should contain mutualssl
+	if environmentParams.MutualSslCerts != nil {
+		apiSecurity := api.Path("apiSecurity").Data()
+
+		// if the apiSecurity field already exists in the api.yaml file
+		if apiSecurity != nil {
+			// if the apiSecurity field does not have mutualssl type, append it
+			if !strings.Contains(apiSecurity.(string), utils.APISecurityMutualSsl) {
+				apiSecurity = apiSecurity.(string) + "," + utils.APISecurityMutualSsl
+			}
+		} else {
+			// if the apiSecurity field does not exist in the api.yaml file, assign the value as mutualssl
+			apiSecurity = utils.APISecurityMutualSsl
+		}
+		// assign the apiSecurity field with the correct modified value to enable mutualssl
+		if _, err := api.SetP(apiSecurity, "apiSecurity"); err != nil {
 			return err
 		}
 	}
@@ -200,6 +190,11 @@ func setupMultipleEndpoints(environmentParams *params.Environment) ([]byte, erro
 			// The default class of the algorithm to be used should be set to RoundRobin
 			environmentParams.LoadBalanceEndpoints.AlgorithmClassName = utils.LoadBalanceAlgorithmClass
 			environmentParams.LoadBalanceEndpoints.EndpointType = utils.LoadBalanceEndpointTypeForJSON
+			if environmentParams.LoadBalanceEndpoints.SessionManagement == utils.LoadBalanceSessionManagementTransport {
+				// If the user has specified this as "transport", this should be converted to an empty string.
+				// Otherwise APIM won't recognize this as "transport".
+				environmentParams.LoadBalanceEndpoints.SessionManagement = ""
+			}
 			configData, err = json.Marshal(environmentParams.LoadBalanceEndpoints)
 		}
 
@@ -236,6 +231,11 @@ func setupMultipleEndpoints(environmentParams *params.Environment) ([]byte, erro
 			}
 			for index := range environmentParams.LoadBalanceEndpoints.Sandbox {
 				environmentParams.LoadBalanceEndpoints.Sandbox[index].EndpointType = utils.HttpSOAPEndpointTypeForJSON
+			}
+			if environmentParams.LoadBalanceEndpoints.SessionManagement == utils.LoadBalanceSessionManagementTransport {
+				// If the user has specified this as "transport", this should be converted to an empty string.
+				// Otherwise APIM won't recognize this as "transport".
+				environmentParams.LoadBalanceEndpoints.SessionManagement = ""
 			}
 			configData, err = json.Marshal(environmentParams.LoadBalanceEndpoints)
 		}
@@ -374,21 +374,6 @@ func resolveImportFilePath(file, defaultExportDirectory string) (string, error) 
 	return absPath, nil
 }
 
-// extractArchive extracts the API and give the path.
-// In API Manager archive there is a directory in the root which contains the API
-// this function returns it appended to the destination path
-func extractArchive(src, dest string) (string, error) {
-	files, err := utils.Unzip(src, dest)
-	if err != nil {
-		return "", err
-	}
-	if len(files) == 0 {
-		return "", fmt.Errorf("invalid API archive")
-	}
-	r := strings.TrimPrefix(files[0], src)
-	return filepath.Join(dest, strings.Split(filepath.Clean(r), string(os.PathSeparator))[0]), nil
-}
-
 // resolveAPIParamsPath resolves api_params.yaml path
 // First it will look at AbsolutePath of the import path (the last directory)
 // If not found it will look at current working directory
@@ -435,40 +420,6 @@ func resolveAPIParamsPath(importPath, paramPath string) (string, error) {
 			return paramPath, nil
 		}
 		return "", fmt.Errorf("could not find %s", paramPath)
-	}
-}
-
-func getTempAPIDirectory(file string) (string, error) {
-	fileIsDir := false
-	// create a temp directory
-	tmpDir, err := ioutil.TempDir("", "apim")
-	if err != nil {
-		_ = os.RemoveAll(tmpDir)
-		return "", err
-	}
-
-	if info, err := os.Stat(file); err == nil {
-		fileIsDir = info.IsDir()
-	} else {
-		return "", err
-	}
-	if fileIsDir {
-		// copy dir to a temp location
-		utils.Logln(utils.LogPrefixInfo+"Copying from", file, "to", tmpDir)
-		dest := filepath.Join(tmpDir, filepath.Base(file))
-		err = utils.CopyDir(file, dest)
-		if err != nil {
-			return "", err
-		}
-		return dest, nil
-	} else {
-		// try to extract archive
-		utils.Logln(utils.LogPrefixInfo+"Extracting", file, "to", tmpDir)
-		finalPath, err := extractArchive(file, tmpDir)
-		if err != nil {
-			return "", err
-		}
-		return finalPath, nil
 	}
 }
 
@@ -534,8 +485,8 @@ func resolveCertPath(importPath, p string) (string, error) {
 	return "", fmt.Errorf("%s not found", p)
 }
 
-// generateCertificates for the API
-func generateCertificates(importPath string, environment *params.Environment) error {
+// generateEndpointCertificates for the API
+func generateEndpointCertificates(importPath string, environment *params.Environment) error {
 	var certs []params.Cert
 
 	if len(environment.Certs) == 0 {
@@ -577,9 +528,69 @@ func generateCertificates(importPath string, environment *params.Environment) er
 	return err
 }
 
+// generateMutualSslCertificates for the API
+func generateMutualSslCertificates(importPath string, environment *params.Environment, importAPICmdPreserveProvider bool) error {
+	// reading the definition to get API Name and the version
+	apiInfo, _, err := GetAPIDefinition(importPath)
+	if err != nil {
+		return err
+	}
+
+	var mutualSslCerts []params.MutualSslCert
+
+	if len(environment.MutualSslCerts) == 0 {
+		return nil
+	}
+
+	for _, mutualSslCert := range environment.MutualSslCerts {
+		// read cert
+		p, err := resolveCertPath(importPath, mutualSslCert.Path)
+		if err != nil {
+			return err
+		}
+		pubPEMData, err := ioutil.ReadFile(p)
+		if err != nil {
+			return err
+		}
+		// get cert
+		block, _ := pem.Decode(pubPEMData)
+		enc := credentials.Base64Encode(string(block.Bytes))
+		mutualSslCert.Certificate = enc
+		mutualSslCert.APIIdentifier.APIName = apiInfo.ID.APIName
+		mutualSslCert.APIIdentifier.Version = apiInfo.ID.Version
+		if !importAPICmdPreserveProvider {
+			// if the preserve-provider flag is set to false
+			// the currently logged in user's username should be assigned as the provider name
+			mutualSslCert.APIIdentifier.ProviderName = utils.GetUsernameOfEnv(environment.Name, utils.EnvKeysAllFilePath)
+		} else {
+			// if the preserve-provider flag is set to true (the default behaviour)
+			// the original provider should be taken from api.yaml and should be assigned as the provider name
+			mutualSslCert.APIIdentifier.ProviderName = apiInfo.ID.ProviderName
+		}
+		mutualSslCerts = append(mutualSslCerts, mutualSslCert)
+	}
+
+	data, err := json.Marshal(mutualSslCerts)
+	if err != nil {
+		return err
+	}
+
+	yamlContent, err := utils.JsonToYaml(data)
+	if err != nil {
+		return err
+	}
+
+	// filepath to save mutualssl certs
+	fp := filepath.Join(importPath, "Meta-information", "client_certificates.yaml")
+	utils.Logln(utils.LogPrefixInfo+"Writing", fp)
+	err = ioutil.WriteFile(fp, yamlContent, os.ModePerm)
+
+	return err
+}
+
 // injectParamsToAPI injects ApiParams to API located in importPath using importEnvironment and returns the path to
 // injected API location
-func injectParamsToAPI(importPath, paramsPath, importEnvironment string) error {
+func injectParamsToAPI(importPath, paramsPath, importEnvironment string, preserveProvider bool) error {
 	utils.Logln(utils.LogPrefixInfo+"Loading parameters from", paramsPath)
 	apiParams, err := params.LoadApiParamsFromFile(paramsPath)
 	if err != nil {
@@ -588,7 +599,7 @@ func injectParamsToAPI(importPath, paramsPath, importEnvironment string) error {
 	// check whether import environment is included in api configuration
 	envParams := apiParams.GetEnv(importEnvironment)
 	if envParams == nil {
-		fmt.Println("Using default values as the environment is not present in api_param.yaml file")
+		utils.Logln(utils.LogPrefixInfo + "Using default values as the environment is not present in api_param.yaml file")
 	} else {
 		//If environment parameters are present in parameter file
 		err = mergeAPI(importPath, envParams)
@@ -596,26 +607,20 @@ func injectParamsToAPI(importPath, paramsPath, importEnvironment string) error {
 			return err
 		}
 
-		err = generateCertificates(importPath, envParams)
+		err = generateEndpointCertificates(importPath, envParams)
 		if err != nil {
 			return err
 		}
-	}
 
+		// generate certificates for mutualssl, only if the field is specified
+		if envParams.MutualSslCerts != nil {
+			err = generateMutualSslCertificates(importPath, envParams, preserveProvider)
+			if err != nil {
+				return err
+			}
+		}
+	}
 	return nil
-}
-
-// getAPIID returns id of the API by using apiInfo which contains name and version as info
-func getAPIID(accessOAuthToken, environment, name, version string) (string, error) {
-	apiQuery := fmt.Sprintf("name:%s version:%s", name, version)
-	count, apis, err := GetAPIListFromEnv(accessOAuthToken, environment, url.QueryEscape(apiQuery), "")
-	if err != nil {
-		return "", err
-	}
-	if count == 0 {
-		return "", nil
-	}
-	return apis[0].ID, nil
 }
 
 // isEmpty returns true when a given string is empty
@@ -718,6 +723,7 @@ func replaceEnvVariables(apiFilePath string) error {
 
 func populateAPIWithDefaults(def *v2.APIDefinition) (dirty bool) {
 	dirty = false
+	def.Context = strings.ReplaceAll(def.Context, " ", "")
 	if def.ContextTemplate == "" {
 		if !strings.Contains(def.Context, "{version}") {
 			def.ContextTemplate = path.Clean(def.Context + "/{version}")
@@ -776,97 +782,24 @@ func validateAPIDefinition(def *v2.APIDefinition) error {
 	return nil
 }
 
-// newFileUploadRequest forms an HTTP request
-// Helper function for forming multi-part form data
-// Returns the formed http request and errors
-func newFileUploadRequest(uri string, method string, params map[string]string, paramName, path,
-	accessToken string) (*http.Request, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		_ = file.Close()
-	}()
-
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	part, err := writer.CreateFormFile(paramName, filepath.Base(path))
-	if err != nil {
-		return nil, err
-	}
-	_, err = io.Copy(part, file)
-
-	for key, val := range params {
-		_ = writer.WriteField(key, val)
-	}
-	err = writer.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	request, err := http.NewRequest(method, uri, body)
-	if err != nil {
-		return nil, err
-	}
-	request.Header.Add(utils.HeaderAuthorization, utils.HeaderValueAuthBearerPrefix+" "+accessToken)
-	request.Header.Add(utils.HeaderContentType, writer.FormDataContentType())
-	request.Header.Add(utils.HeaderAccept, "*/*")
-	request.Header.Add(utils.HeaderConnection, utils.HeaderValueKeepAlive)
-
-	return request, err
-}
-
 // importAPI imports an API to the API manager
-func importAPI(endpoint, httpMethod, filePath, accessToken string, extraParams map[string]string) error {
-	req, err := newFileUploadRequest(endpoint, httpMethod, extraParams, "file",
+func importAPI(endpoint, filePath, accessToken string, extraParams map[string]string) error {
+	resp, err := ExecuteNewFileUploadRequest(endpoint, extraParams, "file",
 		filePath, accessToken)
-	if err != nil {
-		return err
-	}
-
-	var tr *http.Transport
-	if utils.Insecure {
-		tr = &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}
-	} else {
-		tr = &http.Transport{
-			TLSClientConfig: utils.GetTlsConfigWithCertificate(),
-		}
-	}
-
-	client := &http.Client{
-		Transport: tr,
-		Timeout:   time.Duration(utils.HttpRequestTimeout) * time.Second,
-	}
-
-	resp, err := client.Do(req)
 	if err != nil {
 		utils.Logln(utils.LogPrefixError, err)
 		return err
 	}
-
-	if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
+	if resp.StatusCode() == http.StatusCreated || resp.StatusCode() == http.StatusOK {
 		// 201 Created or 200 OK
-		_ = resp.Body.Close()
-		fmt.Println("Successfully imported API")
+		fmt.Println("Successfully imported API.")
 		return nil
 	} else {
 		// We have an HTTP error
 		fmt.Println("Error importing API.")
-		fmt.Println("Status: " + resp.Status)
-
-		bodyBuf, err := ioutil.ReadAll(resp.Body)
-		_ = resp.Body.Close()
-		if err != nil {
-			return err
-		}
-
-		strBody := string(bodyBuf)
-		fmt.Println("Response:", strBody)
-
-		return errors.New(resp.Status)
+		fmt.Println("Status: " + resp.Status())
+		fmt.Println("Response:", resp)
+		return errors.New(resp.Status())
 	}
 }
 
@@ -889,7 +822,7 @@ func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, a
 	utils.Logln(utils.LogPrefixInfo+"API Location:", resolvedAPIFilePath)
 
 	utils.Logln(utils.LogPrefixInfo + "Creating workspace")
-	tmpPath, err := getTempAPIDirectory(resolvedAPIFilePath)
+	tmpPath, err := utils.GetTempCloneFromDirOrZip(resolvedAPIFilePath)
 	if err != nil {
 		return err
 	}
@@ -925,14 +858,14 @@ func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, a
 	}
 	if paramsPath != "" {
 		//Reading API params file and populate api.yaml
-		err := injectParamsToAPI(apiFilePath, paramsPath, importEnvironment)
+		err := injectParamsToAPI(apiFilePath, paramsPath, importEnvironment, preserveProvider)
 		if err != nil {
 			return err
 		}
 	}
 
 	// Get API info
-	apiInfo, originalContent, err := getAPIDefinition(apiFilePath)
+	apiInfo, originalContent, err := GetAPIDefinition(apiFilePath)
 	if err != nil {
 		return err
 	}
@@ -975,35 +908,22 @@ func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, a
 		return err
 	}
 
-	// if apiFilePath contains a directory, zip it
-	if info, err := os.Stat(apiFilePath); err == nil && info.IsDir() {
-		tmp, err := ioutil.TempFile("", "api-artifact*.zip")
-		if err != nil {
-			return err
-		}
-		utils.Logln(utils.LogPrefixInfo+"Creating API artifact", tmp.Name())
-		err = utils.Zip(apiFilePath, tmp.Name())
-		if err != nil {
-			return err
-		}
-		defer func() {
-			if importAPISkipCleanup {
-				utils.Logln(utils.LogPrefixInfo+"Leaving", tmp.Name())
-				return
-			}
-			utils.Logln(utils.LogPrefixInfo+"Deleting", tmp.Name())
-			err := os.Remove(tmp.Name())
-			if err != nil {
-				utils.Logln(utils.LogPrefixError + err.Error())
-			}
-		}()
-		apiFilePath = tmp.Name()
+	// if apiFilePath contains a directory, zip it. Otherwise, leave it as it is.
+	apiFilePath, err, cleanupFunc := utils.CreateZipFileFromProject(apiFilePath, importAPISkipCleanup)
+	if err != nil {
+		return err
+	}
+
+	//cleanup the temporary artifacts once consuming the zip file
+	if cleanupFunc != nil {
+		defer cleanupFunc()
 	}
 
 	updateAPI := false
 	if importAPIUpdate {
 		// check for API existence
-		id, err := getAPIID(accessOAuthToken, importEnvironment, apiInfo.ID.APIName, apiInfo.ID.Version)
+		id, err := GetAPIId(accessOAuthToken, importEnvironment, apiInfo.ID.APIName, apiInfo.ID.Version,
+			apiInfo.ID.ProviderName)
 		if err != nil {
 			return err
 		}
@@ -1018,7 +938,6 @@ func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, a
 		}
 	}
 	extraParams := map[string]string{}
-	httpMethod := http.MethodPost
 	adminEndpoint += "/import/api"
 	if updateAPI {
 		adminEndpoint += "?overwrite=" + strconv.FormatBool(true) + "&preserveProvider=" +
@@ -1028,6 +947,6 @@ func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, a
 	}
 	utils.Logln(utils.LogPrefixInfo + "Import URL: " + adminEndpoint)
 
-	err = importAPI(adminEndpoint, httpMethod, apiFilePath, accessOAuthToken, extraParams)
+	err = importAPI(adminEndpoint, apiFilePath, accessOAuthToken, extraParams)
 	return err
 }

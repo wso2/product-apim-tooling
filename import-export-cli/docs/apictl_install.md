@@ -1,6 +1,6 @@
 ## apictl install
 
-Install an operator
+Install an operator in the configured K8s cluster
 
 ### Synopsis
 

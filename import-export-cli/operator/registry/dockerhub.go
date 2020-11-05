@@ -28,29 +28,13 @@ import (
 	"strings"
 )
 
-const DockerHubRegistryUrl = "https://index.docker.io/v1/"
-const DockerHubInputPrefix = "docker.io"
-
-// validation regex
-const dockerhubRepoValidRegex = `^[\w\d\-\.\:]*\/?[\w\d\-]+$`
-const dockerhubUsernameRegex = utils.UsernameValidRegex
-
-var dockerHubRepo = new(string)
-
-var dockerHubValues = struct {
-	repository    string
-	repositoryUrl string
-	username      string
-	password      string
-}{}
-
 // DockerHubRegistry represents Docker Hub registry
 var DockerHubRegistry = &Registry{
 	Name:       "DOCKER_HUB",
-	Caption:    "Docker Hub (Or others, quay.io, HTTPS registry)",
-	Repository: dockerHubRepo,
+	Caption:    "Docker Hub",
+	Repository: Repository{ServerUrl: "https://index.docker.io/v1/"},
 	Option:     1,
-	Read: func(flagValues *map[string]FlagValue) {
+	Read: func(reg *Registry, flagValues *map[string]FlagValue) {
 		var repository, username, password string
 
 		// check input mode: interactive or batch
@@ -63,14 +47,6 @@ var DockerHubRegistry = &Registry{
 			username = (*flagValues)[k8sUtils.FlagBmUsername].Value.(string)
 			password = (*flagValues)[k8sUtils.FlagBmPassword].Value.(string)
 
-			// validate required inputs
-			if !utils.ValidateValue(repository, dockerhubRepoValidRegex) {
-				utils.HandleErrorAndExit("Invalid repository name: "+repository, nil)
-			}
-			if !utils.ValidateValue(username, dockerhubUsernameRegex) {
-				utils.HandleErrorAndExit("Invalid username : "+username, nil)
-			}
-
 			// if "--password-stdin" is supplied get password from stdin
 			if (*flagValues)[k8sUtils.FlagBmPasswordStdin].Value.(bool) {
 				pwStdin, err := utils.ReadPassword("Enter password")
@@ -81,20 +57,16 @@ var DockerHubRegistry = &Registry{
 			}
 		}
 
-		dockerHubValues.repositoryUrl = getRegistryUrl(repository)
-		dockerHubValues.username = username
-		dockerHubValues.password = password
-
-		// Docker Hub not supports "docker.io/foo" hence make repository as "foo"
-		if isDockerHub(repository) {
-			repository = strings.TrimPrefix(repository, DockerHubInputPrefix+"/")
-		}
-		*dockerHubRepo = repository
-		dockerHubValues.repository = repository
+		// support prefix "docker.io/" to be compatible with older version of API-CTL
+		// trim it if found
+		reg.Repository.Name = strings.TrimPrefix(repository, "docker.io/")
+		reg.Repository.Username = username
+		reg.Repository.Password = password
 	},
-	Run: func() {
-		k8sUtils.K8sCreateSecretFromInputs(k8sUtils.DockerRegCredSecret, k8sUtils.ApiOpWso2Namespace, dockerHubValues.repositoryUrl, dockerHubValues.username, dockerHubValues.password)
-		dockerHubValues.password = "" // clear password
+	Run: func(reg *Registry) {
+		k8sUtils.K8sCreateSecretFromInputs(k8sUtils.DockerRegCredSecret, k8sUtils.ApiOpWso2Namespace,
+			reg.Repository.ServerUrl, reg.Repository.Username, reg.Repository.Password)
+		reg.Repository.Password = "" // clear password
 	},
 	Flags: Flags{
 		RequiredFlags: &map[string]bool{k8sUtils.FlagBmRepository: true, k8sUtils.FlagBmUsername: true},
@@ -111,12 +83,14 @@ func readDockerHubInputs() (string, string, string) {
 	var err error
 
 	for !isConfirm {
-		repository, err = utils.ReadInputString(fmt.Sprintf("Enter repository name (%s/john | quay.io/mark | 10.100.5.225:5000/jennifer)", DockerHubInputPrefix), utils.Default{Value: "", IsDefault: false}, dockerhubRepoValidRegex, true)
+		repository, err = utils.ReadInputString("Enter repository name",
+			utils.Default{Value: "", IsDefault: false}, "", true)
 		if err != nil {
-			utils.HandleErrorAndExit("Error reading DockerHub repository name from user", err)
+			utils.HandleErrorAndExit("Error reading repository name from user", err)
 		}
 
-		username, err = utils.ReadInputString("Enter username", utils.Default{Value: "", IsDefault: false}, dockerhubUsernameRegex, true)
+		username, err = utils.ReadInputString("Enter username", utils.Default{Value: "", IsDefault: false},
+			"", true)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading username from user", err)
 		}
@@ -127,53 +101,28 @@ func readDockerHubInputs() (string, string, string) {
 		}
 
 		// only validate credentials if registry is DockerHub
-		if isDockerHub(repository) {
-			isCredentialsValid, err := validateDockerHubCredentials(repository, username, password)
-			if err != nil {
-				utils.HandleErrorAndExit("Error connecting to Docker Registry repository using credentials", err)
-			}
+		isCredentialsValid, err := validateDockerHubCredentials(repository, username, password)
+		if err != nil {
+			utils.HandleErrorAndExit("Error connecting to Docker Registry repository using credentials", err)
+		}
 
-			if !isCredentialsValid {
-				utils.HandleErrorAndExit("Invalid credentials for Docker Hub", err)
-			}
+		if !isCredentialsValid {
+			utils.HandleErrorAndExit("Invalid credentials for Docker Hub", err)
 		}
 
 		fmt.Println("\nRepository: " + repository)
 		fmt.Println("Username  : " + username)
 
-		isConfirmStr, err := utils.ReadInputString("Confirm configurations", utils.Default{Value: "Y", IsDefault: true}, "", false)
+		isConfirmStr, err := utils.ReadInputString("Confirm configurations",
+			utils.Default{Value: "Y", IsDefault: true}, "", false)
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading user input Confirmation", err)
 		}
 
-		isConfirmStr = strings.ToUpper(isConfirmStr)
-		isConfirm = isConfirmStr == "Y" || isConfirmStr == "YES"
+		isConfirm = strings.EqualFold(isConfirmStr, "y") || strings.EqualFold(isConfirmStr, "yes")
 	}
 
 	return repository, username, password
-}
-
-func isDockerHub(repository string) bool {
-	return strings.HasPrefix(repository, DockerHubInputPrefix)
-}
-
-// getRegistryUrl returns the registry URL for given repository
-func getRegistryUrl(repository string) string {
-	names := strings.SplitN(repository, "/", 2)
-
-	// if "docker.io/foo" return "https://index.docker.io/v1/"
-	// Docker Hub not supports "docker.io" as registry url hence make it as "https://index.docker.io/v1/"
-	if isDockerHub(repository) {
-		return DockerHubRegistryUrl
-	}
-
-	// if "myDomain.com:5000/foo" return "myDomain.com:5000"
-	if len(names) == 2 {
-		return names[0]
-	}
-
-	// if "myDomain.com:5000" return "myDomain.com:5000"
-	return repository
 }
 
 // validateDockerHubCredentials validates the credentials for the repository

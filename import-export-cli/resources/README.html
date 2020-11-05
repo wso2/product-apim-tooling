@@ -1,9 +1,11 @@
-<h1 id="cli-for-importing-and-exporting-apis-and-applications">CLI for Importing and Exporting APIs and Applications</h1>
-<h2 id="for-wso2-api-manager-3-1.0">For WSO2 API Manager 3.1.0</h2>
+<h1 id="cli-for-importing-and-exporting-apis-and-applications">CLI for Importing and Exporting APIs and Applications
+</h1>
+<h2 id="for-wso2-api-manager-3-2.0">For WSO2 API Manager 3.2.0</h2>
 <p>Command Line tool for importing and exporting APIs and Applications between different API Environments</p>
 <h2 id="getting-started">Getting Started</h2>
 <ul>
-    <li><h3 id="running">Running</h3>
+    <li>
+        <h3 id="running">Running</h3>
         <p> Select a generated archive suitable for your platform (Mac, Windows, Linux) and extract it to a desired
             location and <code>cd</code> into it.<br> Then execute <code>apictl</code> to start the application.</p>
         <blockquote>
@@ -14,21 +16,25 @@
         </blockquote>
         <p> Execute <code>apictl --help</code> for further instructions.</p>
     </li>
-    <li><h3 id="adding-environments">Adding Environments</h3>
+    <li>
+        <h3 id="adding-environments">Adding Environments</h3>
         <p> Add environments by either manually editing <code>$HOME/.wso2apictl/main_config.yaml</code> or using the
-            command<br> <code>apictl add-env</code>.</p>
+            command<br> <code>apictl add env</code>.</p>
         <blockquote>
             <p>NOTE: Directory structure for configuration files (<code>$HOME/.wso2apictl</code>) will be created upon
                 execution of <code>apictl</code></p>
         </blockquote>
-        <p> Execute <code>apictl add-env --help</code> for detailed instructions</p>
+        <p> Execute <code>apictl add env --help</code> for detailed instructions</p>
         <blockquote>
-            <p>The flags <code>--environment (-e)</code> and <code>--token</code> are mandatory.
-                You can either provide only the 2 flags <code>--apim</code> and <code>--token</code>, or all the other 5 flags (<code>--registration</code>, <code>--publisher</code>, <code>--devportal</code>, <code>--admin</code>, <code>--token</code>) without providing <code>--apim</code> flag.
-                If you are omitting any of --registration --publisher --devportal --admin flags, you need to specify --apim flag with the API Manager endpoint.</p>
+            <p>You can either provide only the 2 flags <code>--apim</code> and <code>--token</code>, or all the other 5
+                flags (<code>--registration</code>, <code>--publisher</code>, <code>--devportal</code>,
+                <code>--admin</code>, <code>--token</code>) without providing <code>--apim</code> flag.
+                If you are omitting any of --registration --publisher --devportal --admin flags, you need to specify
+                --apim flag with the API Manager endpoint.</p>
         </blockquote>
     </li>
-    <li><h3 id="command-autocompletion-for-bash-only-">Command Autocompletion (For Bash Only)</h3>
+    <li>
+        <h3 id="command-autocompletion-for-bash-only-">Command Autocompletion (For Bash Only)</h3>
         <p> Copy the file <code>apictl_bash_completion.sh</code> to <code>/etc/bash_completion.d/</code> and source it
             with<br> <code>source /etc/bash_completion.d/apictl_bash_completion.sh</code> to enable bash
             auto-completion.</p>
@@ -48,7 +54,8 @@
 </code></pre>
 <h3 id="commands">Commands</h3>
 <ul>
-    <li><h4 id="login">login [environment]</h4>
+    <li>
+        <h4 id="login">login [environment]</h4>
         <pre><code class="lang-bash">   Flags:
        Optional:
            --username, -u
@@ -63,34 +70,34 @@
     </li>
 </ul>
 <ul>
-    <li><h4 id="logout">logout [environment]</h4>
+    <li>
+        <h4 id="logout">logout [environment]</h4>
         <pre><code class="lang-bash">   Examples:
        apictl logout dev
 </code></pre>
     </li>
 </ul>
 <ul>
-    <li><h4 id="export-api">export-api</h4>
+    <li>
+        <h4 id="export-api">export api</h4>
         <pre><code class="lang-bash">   Flags:
        Required:
            --name, -n
            --version, -v
-           --provider, -r
            --environment, -e
        Optional:
-           --username, -u
-           --password, -p
-           NOTE: user will be prompted to enter credentials if they are not provided with these flags
+           --preserveStatus
+           --format
+           --provider, -r
    Examples:
-       apictl export-api -n TestAPI -v 1.0.1 -r admin -e staging
-       apictl export-api -n TestAPI -v 1.0.1 -r admin -e staging -u admin -p 123456
-       apictl export-api -n TestAPI -v 1.0.1 -r admin -e staging -u admin
-       apictl export-api -n TestAPI -v 1.0.1 -r admin -e staging -p 123456
+       apictl export api -n TestAPI -v 1.0.1 -e staging
+       apictl export api -n TestAPI -v 1.0.1 -r admin -e staging
 </code></pre>
     </li>
 </ul>
 <ul>
-    <li><h4 id="import-api">import-api</h4>
+    <li>
+        <h4 id="import-api">import api</h4>
     </li>
 </ul>
 <pre><code class="lang-bash">        Flags:
@@ -98,35 +105,72 @@
                 --file, -f
                 --environment, -e
             Optional:
-                --username, -u 
-                --password, -p 
-                NOTE: user will be prompted to enter credentials if they are not provided with these flags
+                --params
+                --preserve-provider
+                --update
+                --skipCleanup
         Examples:
-            apictl import-api -f dev/TestAPI_1.0.0.zip -e dev
-            apictl import-api -f qa/TestAPI_2.0.0.zip -e dev -u admin -p 123456
-            apictl import-api -f staging/TestAPI_1.1.zip -e dev -u admin
-            apictl import-api -f production/TestAPI_3.0.1.zip -e dev -p 123456
-            apictl import-api -f TestAPI -e dev
+                apictl import api -f qa/TwitterAPI.zip -e dev
+                apictl import api -f staging/FacebookAPI.zip -e production
+                apictl import api -f ~/myapi -e production --update
+                apictl import api -f ~/myapi -e production --update
 </code></pre>
 <ul>
-    <li><h4 id="export-app">export-app</h4>
+    <li>
+        <h4 id="export-api-product">export api-product</h4>
+        <pre><code class="lang-bash">   Flags:
+       Required:
+           --name, -n
+           --environment, -e
+       Optional:
+            --provider, -r
+            --format
+   Examples:
+       apictl export api-product -n LeasingAPIProduct -e dev
+       apictl export api-product -n CreditAPIProduct -v 1.0.0 -r admin -e production
+</code></pre>
+    </li>
+</ul>
+<ul>
+    <li>
+        <h4 id="import-api-product">import api-product</h4>
+        <pre><code class="lang-bash">   Flags:
+       Required:
+           --file, -f
+           --environment, -e
+       Optional:
+           --import-apis
+           --preserve-provider
+           --skipCleanup
+           --update-api-product
+           --update-apis          
+   Examples:
+       apictl import api-product -f qa/LeasingAPIProduct.zip -e dev
+       apictl import api-product -f staging/CreditAPIProduct.zip -e production --update-api-product
+       apictl import api-product -f ~/myapiproduct -e production
+       apictl import api-product -f ~/myapiproduct -e production --update-api-product --update-apis
+</code></pre>
+    </li>
+</ul>
+<ul>
+    <li>
+        <h4 id="export-app">export app</h4>
         <pre><code class="lang-bash">   Flags:
        Required:
             --name, -n
             --owner, -o
             --environment, -e
        Optional:
-            --username, -u
-            --password, -p
-            NOTE: user will be prompted to enter credentials if they are not provided with these flags
+            --withKeys
    Examples:
-            apictl export-app -n SampleApp -o admin -e dev
-            apictl export-app -n SampleApp -o admin -e prod
+            apictl export app -n SampleApp -o admin -e dev
+            apictl export app -n SampleApp -o admin -e prod
 </code></pre>
     </li>
 </ul>
 <ul>
-    <li><h4 id="import-app">import-app</h4>
+    <li>
+        <h4 id="import-app">import app</h4>
     </li>
 </ul>
 <pre><code class="lang-bash">        Flags:
@@ -139,54 +183,80 @@
                   --preserveOwner, -r
                   --file, -f
                   --environment, -e
+                  --skipCleanup
+                  --skipKeys
+                  --update
         Examples:
-            apictl import-app -f qa/apps/sampleApp.zip -e dev
-            apictl Import App -f staging/apps/sampleApp.zip -e prod -o testUser -u admin -p admin
-            apictl import-app -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -e staging
+            apictl import app -f qa/apps/sampleApp.zip -e dev
+            apictl import app -f staging/apps/sampleApp.zip -e prod -o testUser -u admin -p admin
+            apictl import app -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -e staging
 </code></pre>
 <ul>
-    <li><h4 id="list-apis">list apis</h4>
+    <li>
+        <h4 id="get-apis">get apis</h4>
         <pre><code class="lang-bash">      Flags:
           Required:
               --environment, -e
           Optional:
-              --username, -u 
-              --password, -p 
-              NOTE: user will be prompted to enter credentials if they are not provided with these flags
+              --format
+              --limit, -l
               --query, -q
       Examples:
-          apictl list apis -e dev
-          apictl list apis -e prod -q version:1.0.0
-          apictl list apis -e prod -q provider:admin
-          apictl list apis -e staging
+          apictl get apis -e dev
+          apictl get apis -e dev -q version:1.0.0
+          apictl get apis -e prod -q provider:admin
+          apictl get apis -e prod -l 100
+          apictl get apis -e staging
 </code></pre>
     </li>
-    <li><h4 id="list-apps">list apps</h4>
+    <li>
+        <h4 id="get-api-products">get api-products</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+              --limit, -l
+              --query, -q
+      Examples:
+          apictl get api-products -e dev
+          apictl get api-products -e dev -q provider:devops
+          apictl get api-products -e prod -q provider:admin context:/myproduct
+          apictl get api-products -e prod -l 25
+          apictl get api-products -e staging
+</code></pre>
+    </li>
+    <li>
+        <h4 id="get-apps">get apps</h4>
         <pre><code class="lang-bash">      Flags:
           Required
                   --environment, -e
                   --owner, -o
             Optional
-                  --username, -u
-                  --password, -p
+                  --format
+                  --limit, -l
+                  --owner, -o
         Examples:
-            apictl list apps -e dev -o admin
-            apictl list apps -e staging -o sampleUser
+            apictl get apps -e dev 
+            apictl get apps -e dev -o sampleUser
+            apictl get apps -e prod -o sampleUser
+            apictl get apps -e staging -o sampleUser
+            apictl get apps -e dev -l 40        
 </code></pre>
     </li>
-    <li><h4 id="list-envs">list envs</h4>
+    <li>
+        <h4 id="get-envs">get envs</h4>
         <pre><code class="lang-bash">     Flags:
          None
      Example:
-         apictl list envs
+         apictl get envs
 </code></pre>
     </li>
-    <li><h4 id="add-env">add-env</h4>
+    <li>
+        <h4 id="add-env">add env [environment]</h4>
         <pre><code class="lang-bash">      Flags:
         Required:
-            --environment, -e (Name of the environment)
-            --token (Token Endpoint)
-            AND
+            (either)
             --apim (API Manager endpoint)
             OR (the following 4)
             --registration https://localhost:9443 \
@@ -194,37 +264,36 @@
             --devportal https://localhost:9443 \
             --admin https://localhost:9443
         Optional:
-            --list (API List endpoint for environment)
+            --token (Token Endpoint)
 
         Examples:
-        apictl add-env -e dev \
-            --apim https://localhost:9443 \
-            --token https://localhost:8243/token
+        apictl add env dev \
+            --apim https://localhost:9443
 
-        apictl add-env -e staging \
+        apictl add env staging \
             --registration https://idp.com:9443 \
             --publisher https://apim.com:9443 \
             --devportal https://apps.com:9443 \
             --admin https://apim.com:9443 \
             --token https://gw.com:8243/token
             
-        apictl add-env -e prod \
+        apictl add env prod \
             --apim https://apim.com:9443 \
             --registration https://idp.com:9443 \
             --token https://gw.com:8243/token
 </code></pre>
     </li>
-    <li><h4 id="remove-env">remove-env</h4>
+    <li>
+        <h4 id="remove-env">remove env [environment]</h4>
     </li>
 </ul>
-<pre><code class="lang-bash">        Flags:
-            Required:
-                --environment, -e (Name of the environment)
+<pre><code class="lang-bash">      
             Examples:
-                apictl remove-env -e dev
+                apictl remove env dev
 </code></pre>
 <ul>
-    <li><h4 id="reset-user">reset-user</h4>
+    <li>
+        <h4 id="reset-user">reset-user</h4>
     </li>
 </ul>
 <pre><code class="lang-bash">        Flags
@@ -233,38 +302,46 @@
             apictl reset-user -e dev
 </code></pre>
 <ul>
-    <li><h4 id="version">version</h4>
+    <li>
+        <h4 id="version">version</h4>
         <pre><code class="lang-bash">      apictl version
 </code></pre>
     </li>
-    <li><h4 id="set">set</h4>
+    <li>
+        <h4 id="set">set</h4>
         <pre><code class="lang-bash">      Flags
           --http-request-timeout
           --export-directory
+          --vcs-config-path string
+          --vcs-deletion-enabled
       Examples:
-          apictl set --http-request-timeout 10000
-          apictl set --export-directory /home/user/exported
+          apictl set --http-request-timeout 3600 --export-directory /home/user/exported-apis
+          apictl set --http-request-timeout 5000 --export-directory C:\Documents\exported
+          apictl set --http-request-timeout 5000
+          apictl set --vcs-deletion-enabled=true
+          apictl set --vcs-config-path /home/user/custom/vcs-config.yaml
 </code></pre>
     </li>
 </ul>
 <ul>
-    <li><h4 id="get-keys">get-keys</h4>
+    <li>
+        <h4 id="get-keys">get keys</h4>
         <pre><code class="lang-bash">   Flags:
        Required:
             --name, -n
-            --version, -v
             --environment, -e
        Optional:
-            --username, -u
-            --password, -p
-            NOTE: user will be prompted to enter credentials if they are not provided with these flags
+            --version, -v
+            --provider, -r
+            --token, -t
    Examples:
-            apictl get-keys -n PizzaShackAPI --version 1.0.0 -e dev --provider admin
+            apictl get keys -n PizzaShackAPI --version 1.0.0 -e dev --provider admin
 </code></pre>
     </li>
 </ul>
 <ul>
-    <li><h4 id="delete-api">delete api</h4>
+    <li>
+        <h4 id="delete-api">delete api</h4>
         <pre><code class="lang-bash">   Flags:
        Required:
            --name, -n
@@ -280,7 +357,8 @@
     </li>
 </ul>
 <ul>
-    <li><h4 id="delete-api-product">delete api-product</h4>
+    <li>
+        <h4 id="delete-api-product">delete api-product</h4>
         <pre><code class="lang-bash">   Flags:
        Required:
            --name, -n
@@ -296,7 +374,8 @@
     </li>
 </ul>
 <ul>
-    <li><h4 id="delete-app">delete app</h4>
+    <li>
+        <h4 id="delete-app">delete app</h4>
         <pre><code class="lang-bash">   Flags:
        Required:
            --name, -n
@@ -311,7 +390,8 @@
     </li>
 </ul>
 <ul>
-    <li><h4 id="change-status-api">change-status api</h4>
+    <li>
+        <h4 id="change-status-api">change-status api</h4>
         <pre><code class="lang-bash">   Flags:
        Required:
            --action, -a

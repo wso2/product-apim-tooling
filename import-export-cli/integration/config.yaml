@@ -9,6 +9,9 @@ environments:
 - name: production
   host: localhost
   offset: 1
-dcr-version: v0.16
+# duration tests will wait to allow APIM solr indexes to be updated
+indexing-delay: 1000
+
+dcr-version: v0.17
 rest-api-version: v1
-apictl-version: 3.1.0
+apictl-version: 3.2.0

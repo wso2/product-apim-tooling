@@ -23,10 +23,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/renstrom/dedent"
 	"net/http"
-	"strings"
 	encodeURL "net/url"
+	"strings"
+
+	"github.com/renstrom/dedent"
 )
 
 // ExecutePreCommandWithBasicAuth deals with generating tokens needed for executing a particular command
@@ -312,8 +313,8 @@ func GetBase64EncodedCredentials(key, secret string) (encodedValue string) {
 // @return error
 func GetOAuthTokens(username, password, b64EncodedClientIDClientSecret, url string) (map[string]string, error) {
 	body := "grant_type=password&username=" + username + "&password=" + encodeURL.QueryEscape(password) +
-		"&scope=apim:api_delete+apim:api_view+apim:app_import_export+apim:app_owner_change+apim:subscribe+apim:api_publish" +
-		"+apim:api_import_export+apim:api_product_import_export"
+		"&scope=apim:app_import_export+apim:api_import_export+apim:api_product_import_export+apim:app_manage+" +
+		"apim:sub_manage+apim:api_view+apim:api_delete+apim:app_owner_change+apim:subscribe+apim:api_publish"
 
 	// set headers
 	headers := make(map[string]string)
@@ -325,12 +326,12 @@ func GetOAuthTokens(username, password, b64EncodedClientIDClientSecret, url stri
 	resp, err := InvokePOSTRequest(url, headers, body)
 
 	if err != nil {
-		HandleErrorAndExit("Unable to Connect.", err)
+		return nil, err
 	}
 
 	if resp.StatusCode() != http.StatusOK {
-		HandleErrorAndExit("Unable to connect.", errors.New("Status: "+resp.Status()))
-		return nil, nil
+		return nil, errors.New("Unable to connect. " +
+			"Status: " + resp.Status())
 	}
 
 	responseDataMap := make(map[string]string) // a map to hold response data

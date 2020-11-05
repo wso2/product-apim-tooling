@@ -19,20 +19,17 @@
 package impl
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"os"
 	"path"
 	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
 	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 
@@ -53,30 +50,6 @@ func extractAPIProductDefinition(jsonContent []byte) (*v2.APIProductDefinition, 
 	}
 
 	return apiProduct, nil
-}
-
-// getAPIProductDefinition scans filePath and returns APIProductDefinition or an error
-func getAPIProductDefinition(filePath string) (*v2.APIProductDefinition, []byte, error) {
-	info, err := os.Stat(filePath)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	var buffer []byte
-	if info.IsDir() {
-		_, content, err := resolveYamlOrJSON(path.Join(filePath, "Meta-information", "api"))
-		if err != nil {
-			return nil, nil, err
-		}
-		buffer = content
-	} else {
-		return nil, nil, fmt.Errorf("looking for directory, found %s", info.Name())
-	}
-	apiProduct, err := extractAPIProductDefinition(buffer)
-	if err != nil {
-		return nil, nil, err
-	}
-	return apiProduct, buffer, nil
 }
 
 // resolveImportAPIProductFilePath resolves the archive/directory for import
@@ -100,22 +73,9 @@ func resolveImportAPIProductFilePath(file, defaultExportDirectory string) (strin
 	return absPath, nil
 }
 
-// getAPIProductID returns id of the API Product by using apiProductInfo which contains name, version and provider as info
-func getAPIProductID(name, version, environment, accessOAuthToken string) (string, error) {
-	apiProductQuery := fmt.Sprintf("name:%s version:%s", name, version)
-	apiProductQuery += " type:\"" + utils.DefaultApiProductType + "\""
-	count, apiProducts, err := GetAPIProductListFromEnv(accessOAuthToken, environment, url.QueryEscape(apiProductQuery), "")
-	if err != nil {
-		return "", err
-	}
-	if count == 0 {
-		return "", nil
-	}
-	return apiProducts[0].ID, nil
-}
-
 func populateAPIProductWithDefaults(def *v2.APIProductDefinition) (dirty bool) {
 	dirty = false
+	def.Context = strings.ReplaceAll(def.Context, " ", "")
 	if def.ContextTemplate == "" {
 		if !strings.Contains(def.Context, "{version}") {
 			def.ContextTemplate = path.Clean(def.Context + "/{version}")
@@ -162,60 +122,28 @@ func validateAPIProductDefinition(def *v2.APIProductDefinition) error {
 }
 
 // importAPIProduct imports an API Product to the API manager
-func importAPIProduct(endpoint, httpMethod, filePath, accessToken string, extraParams map[string]string) error {
-	req, err := NewFileUploadRequest(endpoint, httpMethod, extraParams, "file",
+func importAPIProduct(endpoint, filePath, accessToken string, extraParams map[string]string) error {
+	resp, err := ExecuteNewFileUploadRequest(endpoint, extraParams, "file",
 		filePath, accessToken)
 	if err != nil {
 		return err
 	}
 
-	var tr *http.Transport
-	if utils.Insecure {
-		tr = &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}
-	} else {
-		tr = &http.Transport{
-			TLSClientConfig: utils.GetTlsConfigWithCertificate(),
-		}
-	}
-
-	client := &http.Client{
-		Transport: tr,
-		Timeout:   time.Duration(utils.HttpRequestTimeout) * time.Second,
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		utils.Logln(utils.LogPrefixError, err)
-		return err
-	}
-
-	if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
+	if resp.StatusCode() == http.StatusCreated || resp.StatusCode() == http.StatusOK {
 		// 201 Created or 200 OK
-		_ = resp.Body.Close()
-		fmt.Println("Successfully imported API Product")
+		fmt.Println("Successfully imported API Product.")
 		return nil
 	} else {
 		// We have an HTTP error
 		fmt.Println("Error importing API Product.")
-		fmt.Println("Status: " + resp.Status)
-
-		bodyBuf, err := ioutil.ReadAll(resp.Body)
-		_ = resp.Body.Close()
-		if err != nil {
-			return err
-		}
-
-		strBody := string(bodyBuf)
-		fmt.Println("Response:", strBody)
-
-		return errors.New(resp.Status)
+		fmt.Println("Status: " + resp.Status())
+		fmt.Println("Response:", resp)
+		return errors.New(resp.Status())
 	}
 }
 
 // preProcessDependentAPIs pre processes dependent APIs
-func preProcessDependentAPIs(apiProductFilePath, importEnvironment string) error {
+func preProcessDependentAPIs(apiProductFilePath, importEnvironment string, importAPIProductPreserveProvider bool) error {
 	// Check whether the APIs directory exists
 	apisDirectoryPath := apiProductFilePath + string(os.PathSeparator) + "APIs"
 	_, err := os.Stat(apisDirectoryPath)
@@ -241,7 +169,7 @@ func preProcessDependentAPIs(apiProductFilePath, importEnvironment string) error
 		// Check whether api_params.yaml file is available inside the particular API directory
 		if utils.IsFileExist(paramsPath) {
 			// Reading API params file and populate api.yaml
-			err := injectParamsToAPI(apiDirectoryPath, paramsPath, importEnvironment)
+			err := injectParamsToAPI(apiDirectoryPath, paramsPath, importEnvironment, importAPIProductPreserveProvider)
 			if err != nil {
 				return err
 			}
@@ -270,7 +198,7 @@ func ImportAPIProduct(accessOAuthToken, adminEndpoint, importEnvironment, import
 	utils.Logln(utils.LogPrefixInfo+"API Product Location:", resolvedAPIProductFilePath)
 
 	utils.Logln(utils.LogPrefixInfo + "Creating workspace")
-	tmpPath, err := getTempAPIDirectory(resolvedAPIProductFilePath)
+	tmpPath, err := utils.GetTempCloneFromDirOrZip(resolvedAPIProductFilePath)
 	if err != nil {
 		return err
 	}
@@ -288,7 +216,7 @@ func ImportAPIProduct(accessOAuthToken, adminEndpoint, importEnvironment, import
 	apiProductFilePath := tmpPath
 
 	// Pre Process dependent APIs
-	err = preProcessDependentAPIs(apiProductFilePath, importEnvironment)
+	err = preProcessDependentAPIs(apiProductFilePath, importEnvironment, importAPIProductPreserveProvider)
 	if err != nil {
 		return err
 	}
@@ -300,7 +228,7 @@ func ImportAPIProduct(accessOAuthToken, adminEndpoint, importEnvironment, import
 	}
 
 	// Get API Product info
-	apiProductInfo, originalContent, err := getAPIProductDefinition(apiProductFilePath)
+	apiProductInfo, originalContent, err := GetAPIProductDefinition(apiProductFilePath)
 	if err != nil {
 		return err
 	}
@@ -343,35 +271,22 @@ func ImportAPIProduct(accessOAuthToken, adminEndpoint, importEnvironment, import
 		return err
 	}
 
-	// If apiProductFilePath contains a directory, zip it
-	if info, err := os.Stat(apiProductFilePath); err == nil && info.IsDir() {
-		tmp, err := ioutil.TempFile("", "api-artifact*.zip")
-		if err != nil {
-			return err
-		}
-		utils.Logln(utils.LogPrefixInfo+"Creating API Product artifact", tmp.Name())
-		err = utils.Zip(apiProductFilePath, tmp.Name())
-		if err != nil {
-			return err
-		}
-		defer func() {
-			if importAPIProductSkipCleanup {
-				utils.Logln(utils.LogPrefixInfo+"Leaving", tmp.Name())
-				return
-			}
-			utils.Logln(utils.LogPrefixInfo+"Deleting", tmp.Name())
-			err := os.Remove(tmp.Name())
-			if err != nil {
-				utils.Logln(utils.LogPrefixError + err.Error())
-			}
-		}()
-		apiProductFilePath = tmp.Name()
+	// If apiProductFilePath contains a directory, zip it. Otherwise, leave it as it is.
+	apiProductFilePath, err, cleanupFunc := utils.CreateZipFileFromProject(apiProductFilePath, importAPIProductSkipCleanup)
+	if err != nil {
+		return err
+	}
+
+	//cleanup the temporary artifacts once consuming the zip file
+	if cleanupFunc != nil {
+		defer cleanupFunc()
 	}
 
 	updateAPIProduct := false
 	if importAPIsUpdate || importAPIProductUpdate {
 		// Check for API Product existence
-		id, err := getAPIProductID(apiProductInfo.ID.APIProductName, apiProductInfo.ID.Version, importEnvironment, accessOAuthToken)
+		id, err := GetAPIProductId(accessOAuthToken, importEnvironment, apiProductInfo.ID.APIProductName,
+			apiProductInfo.ID.ProviderName)
 		if err != nil {
 			return err
 		}
@@ -391,7 +306,6 @@ func ImportAPIProduct(accessOAuthToken, adminEndpoint, importEnvironment, import
 		utils.HandleErrorAndExit("Error getting OAuth Tokens", err)
 	}
 	extraParams := map[string]string{}
-	httpMethod := http.MethodPost
 	adminEndpoint += "/import/api-product" + "?preserveProvider=" + strconv.FormatBool(importAPIProductPreserveProvider)
 
 	// If the user has specified import-apis flag or update-apis flag, importAPIs parameter should be passed as true
@@ -411,6 +325,6 @@ func ImportAPIProduct(accessOAuthToken, adminEndpoint, importEnvironment, import
 	}
 
 	utils.Logln(utils.LogPrefixInfo + "Import URL: " + adminEndpoint)
-	err = importAPIProduct(adminEndpoint, httpMethod, apiProductFilePath, accessOAuthToken, extraParams)
+	err = importAPIProduct(adminEndpoint, apiProductFilePath, accessOAuthToken, extraParams)
 	return err
 }

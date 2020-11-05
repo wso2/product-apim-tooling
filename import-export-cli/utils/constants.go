@@ -20,6 +20,7 @@ package utils
 
 import (
 	"os"
+	"os/user"
 	"path/filepath"
 )
 
@@ -30,18 +31,34 @@ var CurrentDir, _ = os.Getwd()
 
 const ConfigDirName = ".wso2apictl"
 
-var HomeDirectory = os.Getenv("HOME")
+var HomeDirectory = getConfigHomeDir()
+func getConfigHomeDir() string {
+	value := os.Getenv("APICTL_CONFIG_DIR")
+	if len(value) == 0 {
+		value, err := os.UserHomeDir()
+		if len(value) == 0 || err != nil  {
+			current, err := user.Current()
+			if err != nil || current == nil {
+				HandleErrorAndExit("User's HOME folder location couldn't be identified", nil)
+				return ""
+			}
+			return current.HomeDir
+		}
+		return value
+	}
+	return value
+}
 
 var ConfigDirPath = filepath.Join(HomeDirectory, ConfigDirName)
 
+const LocalCredentialsDirectoryName = ".wso2apictl.local"
 const EnvKeysAllFileName = "env_keys_all.yaml"
-
-var EnvKeysAllFilePath = filepath.Join(ConfigDirPath, EnvKeysAllFileName)
-
 const MainConfigFileName = "main_config.yaml"
 const SampleMainConfigFileName = "main_config.yaml.sample"
 const DefaultAPISpecFileName = "default_api.yaml"
 
+var LocalCredentialsDirectoryPath = filepath.Join(HomeDirectory, LocalCredentialsDirectoryName)
+var EnvKeysAllFilePath = filepath.Join(LocalCredentialsDirectoryPath, EnvKeysAllFileName)
 var MainConfigFilePath = filepath.Join(ConfigDirPath, MainConfigFileName)
 var SampleMainConfigFilePath = filepath.Join(ConfigDirPath, SampleMainConfigFileName)
 var DefaultAPISpecFilePath = filepath.Join(ConfigDirPath, DefaultAPISpecFileName)
@@ -51,8 +68,11 @@ const ExportedApisDirName = "apis"
 const ExportedApiProductsDirName = "api-products"
 const ExportedAppsDirName = "apps"
 const ExportedMigrationArtifactsDirName = "migration"
+const CertificatesDirName = "certs"
+const APISecurityMutualSsl = "mutualssl"
 
 var DefaultExportDirPath = filepath.Join(ConfigDirPath, DefaultExportDirName)
+var DefaultCertDirPath = filepath.Join(ConfigDirPath, CertificatesDirName)
 
 const defaultApiApplicationImportExportSuffix = "api/am/admin/v1"
 const defaultApiListEndpointSuffix = "api/am/publisher/v1/apis"
@@ -61,7 +81,7 @@ const defaultUnifiedSearchEndpointSuffix = "api/am/publisher/v1/search"
 const defaultAdminApplicationListEndpointSuffix = "api/am/admin/v1/applications"
 const defaultDevPortalApplicationListEndpointSuffix = "api/am/store/v1/applications"
 const defaultDevPortalThrottlingPoliciesEndpointSuffix = "api/am/store/v1/throttling-policies"
-const defaultClientRegistrationEndpointSuffix = "client-registration/v0.16/register"
+const defaultClientRegistrationEndpointSuffix = "client-registration/v0.17/register"
 const defaultTokenEndPoint = "oauth2/token"
 const defaultRevokeEndpointSuffix = "oauth2/revoke"
 
@@ -103,11 +123,6 @@ const LogPrefixError = "[ERROR]: "
 // String Constants
 const SearchAndTag = "&"
 
-// Regex Validation
-const UsernameValidRegex = `^[\w\d\-]*$`
-const PositiveNoValidRegex = `^[1-9]\d*$`
-const UrlValidRegex = `^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$`
-
 // Other
 const DefaultTokenValidityPeriod = 3600
 const DefaultHttpRequestTimeout = 10000
@@ -134,9 +149,19 @@ var EnvReplaceFilePaths = []string{
 	"SoapToRest",
 }
 
+// project types
+const (
+	ProjectTypeNone        = "None"
+	ProjectTypeApi         = "API"
+	ProjectTypeApiProduct  = "API Product"
+	ProjectTypeApplication = "Application"
+)
+
 // project param files
 const (
 	ParamFileAPI         = "api_params.yaml"
+	ParamFileAPIProduct  = "api_product_params.yaml"
+	ParamFileApplication = "application_params.yaml"
 )
 
 const PrivateJetModeConst = "privateJet"
@@ -160,7 +185,8 @@ const DynamicEndpointType = "dynamic"            // To denote "endpointType: dyn
 const LoadBalanceEndpointRoutingPolicy = "load_balanced" // To denote "endpointRoutingPolicy: load_balanced" in api_params.yaml
 const LoadBalanceEndpointTypeForJSON = "load_balance"    // To denote the "endpointType : load_balance" in api.json
 const LoadBalanceAlgorithmClass = "org.apache.synapse.endpoints.algorithms.RoundRobin"
-const FailoverRoutingPolicy = "failover" // To denote "endpointRoutingPolicy: failover" in api_params.yaml and to denote the "endpointType : failover" in api.json
+const FailoverRoutingPolicy = "failover"                  // To denote "endpointRoutingPolicy: failover" in api_params.yaml and to denote the "endpointType : failover" in api.json
+const LoadBalanceSessionManagementTransport = "transport" // To represent the "sessionManagement: transport" in api_params.yaml
 
 const DynamicEndpointConfig = `{"endpoint_type":"default","sandbox_endpoints":{"url":"default"},"failOver":"False","production_endpoints":{"url":"default"}}`
 

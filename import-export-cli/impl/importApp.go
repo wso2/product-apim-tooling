@@ -20,15 +20,18 @@ package impl
 
 import (
 	"bytes"
-	"crypto/tls"
+	"errors"
 	"fmt"
 	"io"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
-	"time"
+
+	"github.com/go-resty/resty"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
@@ -42,11 +45,12 @@ import (
 // @param preserveOwner: Preserve the owner after importing the application
 // @param skipSubscriptions: Skip importing subscriptions
 // @param skipKeys: skip importing keys of application
+// @param skipCleanup: skip cleaning up temporary files created during the operation
 func ImportApplicationToEnv(accessToken, environment, filename, appOwner string, updateApplication, preserveOwner,
-	skipSubscriptions, skipKeys bool) (*http.Response, error) {
+	skipSubscriptions, skipKeys, skipCleanup bool) (*http.Response, error) {
 	adminEndpoint := utils.GetAdminEndpointOfEnv(environment, utils.MainConfigFilePath)
 	return ImportApplication(accessToken, adminEndpoint, filename, appOwner, updateApplication, preserveOwner,
-		skipSubscriptions, skipKeys)
+		skipSubscriptions, skipKeys, skipCleanup)
 }
 
 // ImportApplication function is used with import-app command
@@ -58,71 +62,111 @@ func ImportApplicationToEnv(accessToken, environment, filename, appOwner string,
 // @param preserveOwner: Preserve the owner after importing the application
 // @param skipSubscriptions: Skip importing subscriptions
 // @param skipKeys: skip importing keys of application
+// @param skipCleanup: skip cleaning up temporary files created during the operation
 func ImportApplication(accessToken, adminEndpoint, filename, appOwner string, updateApplication, preserveOwner,
-	skipSubscriptions, skipKeys bool) (*http.Response, error) {
+	skipSubscriptions, skipKeys, skipCleanup bool) (*http.Response, error) {
 
 	exportDirectory := filepath.Join(utils.ExportDirectory, utils.ExportedAppsDirName)
 	adminEndpoint = utils.AppendSlashToString(adminEndpoint)
 
 	applicationImportEndpoint := adminEndpoint + "import/applications"
-	url := applicationImportEndpoint + "?appOwner=" + appOwner + utils.SearchAndTag + "preserveOwner=" +
+	applicationImportUrl := applicationImportEndpoint + "?appOwner=" + appOwner + utils.SearchAndTag + "preserveOwner=" +
 		strconv.FormatBool(preserveOwner) + utils.SearchAndTag + "skipSubscriptions=" +
 		strconv.FormatBool(skipSubscriptions) + utils.SearchAndTag + "skipApplicationKeys=" + strconv.FormatBool(skipKeys) +
 		utils.SearchAndTag + "update=" + strconv.FormatBool(updateApplication)
 	utils.Logln(utils.LogPrefixInfo + "Import URL: " + applicationImportEndpoint)
 
-	zipFilePath, err := resolveImportFilePath(filename, exportDirectory)
+	applicationFilePath, err := resolveImportFilePath(filename, exportDirectory)
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating request.", err)
 	}
-	fmt.Println("ZipFilePath:", zipFilePath)
+
+	utils.Logln(utils.LogPrefixInfo + "Pre Processing Application...")
+	error := preProcessApplication(applicationFilePath)
+	if error != nil {
+		utils.HandleErrorAndExit("Error importing Application", error)
+	}
+
+	// If applicationFilePath contains a directory, zip it. Otherwise, leave it as it is.
+	applicationFilePath, err, cleanupFunc := utils.CreateZipFileFromProject(applicationFilePath, skipCleanup)
+	if err != nil {
+		return nil, err
+	}
+
+	//cleanup the temporary artifacts once consuming the zip file
+	if cleanupFunc != nil {
+		defer cleanupFunc()
+	}
 
 	extraParams := map[string]string{}
 
-	req, err := NewAppFileUploadRequest(url, extraParams, "file", zipFilePath, accessToken)
+	resp, err := NewAppFileUploadRequest(applicationImportUrl, extraParams, "file", applicationFilePath, accessToken)
 	if err != nil {
-		utils.HandleErrorAndExit("Error creating request.", err)
+		utils.HandleErrorAndExit("Error executing request.", err)
 	}
 
-	var tr *http.Transport
-	if utils.Insecure {
-		tr = &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}
+	if resp.StatusCode() == http.StatusCreated || resp.StatusCode() == http.StatusOK {
+		// 201 Created or 200 OK
+		fmt.Println("Successfully imported Application.")
+		return nil, nil
 	} else {
-		tr = &http.Transport{
-			TLSClientConfig: utils.GetTlsConfigWithCertificate(),
-		}
+		// We have an HTTP error
+		fmt.Println("Error importing Application.")
+		fmt.Println("Status: " + resp.Status())
+		fmt.Println("Response:", resp)
+		return nil, errors.New(resp.Status())
 	}
+}
 
-	client := &http.Client{
-		Transport: tr,
-		Timeout:   time.Duration(utils.HttpRequestTimeout) * time.Second,
-	}
-
-	resp, err := client.Do(req)
+//This function will check whether the .json file is included in the directory or not
+//True is included false otherwise
+func checkDirForJson(appDirectory string) bool {
+	file, err := os.Open(appDirectory)
 
 	if err != nil {
-		utils.Logln(utils.LogPrefixError, err)
-	} else {
-		if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK ||
-			resp.StatusCode == http.StatusMultiStatus {
-			// 207 Multi Status or 201 Created or 200 OK
-			fmt.Printf("\nCompleted importing the Application '" + filename + "'\n")
+		log.Fatalf("failed opening directory: %s", err)
+	}
+	defer file.Close()
+
+	list, _ := file.Readdirnames(0) // 0 to read all files and folders
+	//list all files and check for supported type file
+	for _, name := range list {
+		match, _ := regexp.MatchString(".*\\.json", name)
+		if match {
+			return true
+		}
+	}
+	return false
+}
+
+func preProcessApplication(appDirectory string) error {
+	utils.Logln(utils.LogPrefixInfo+"Loading Application definition from: ", appDirectory)
+	file, err := os.Open(appDirectory)
+	if err != nil {
+		log.Fatalf("failed opening directory: %s", err)
+	}
+	fileStat, error := file.Stat()
+	if error != nil {
+		log.Fatalf("failed checking directory: %s", err)
+	}
+	defer file.Close()
+
+	if fileStat.IsDir() {
+		isJsonFileExisted := checkDirForJson(appDirectory)
+		if isJsonFileExisted {
+			return nil
 		} else {
-			fmt.Printf("\nUnable to import the Application\n")
-			fmt.Println("Status: " + resp.Status)
+			return fmt.Errorf("Supported file type is not found in the %s directory", appDirectory)
 		}
 	}
-
-	return resp, err
+	return nil
 }
 
 // NewFileUploadRequest form an HTTP Put request
 // Helper function for forming multi-part form data
 // Returns the formed http request and errors
 func NewAppFileUploadRequest(uri string, params map[string]string, paramName, path,
-	accessToken string) (*http.Request, error) {
+	accessToken string) (*resty.Response, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -145,11 +189,14 @@ func NewAppFileUploadRequest(uri string, params map[string]string, paramName, pa
 		return nil, err
 	}
 
-	request, err := http.NewRequest(http.MethodPost, uri, body)
-	request.Header.Add(utils.HeaderAuthorization, utils.HeaderValueAuthBearerPrefix+" "+accessToken)
-	request.Header.Add(utils.HeaderContentType, writer.FormDataContentType())
-	request.Header.Add(utils.HeaderAccept, "*/*")
-	request.Header.Add(utils.HeaderConnection, utils.HeaderValueKeepAlive)
+	// set headers
+	headers := make(map[string]string)
+	headers[utils.HeaderContentType] = writer.FormDataContentType()
+	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
+	headers[utils.HeaderAccept] = "*/*"
+	headers[utils.HeaderConnection] = utils.HeaderValueKeepAlive
 
-	return request, err
+	resp, err := utils.InvokePOSTRequestWithBytes(uri, headers, body.Bytes())
+
+	return resp, err
 }

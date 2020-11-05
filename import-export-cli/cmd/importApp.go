@@ -19,12 +19,10 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"net/http"
 )
 
 var importAppFile string
@@ -34,28 +32,29 @@ var preserveOwner bool
 var skipSubscriptions bool
 var importAppSkipKeys bool
 var importAppUpdateApplication bool
+var importAppSkipCleanup bool
 
 // ImportApp command related usage info
-const importAppCmdLiteral = "import-app"
+const ImportAppCmdLiteral = "app"
 const importAppCmdShortDesc = "Import App"
 
 const importAppCmdLongDesc = "Import an Application to an environment"
 
-const importAppCmdExamples = utils.ProjectName + ` ` + importAppCmdLiteral + ` -f qa/apps/sampleApp.zip -e dev
-` + utils.ProjectName + ` ` + importAppCmdLiteral + ` -f staging/apps/sampleApp.zip -e prod -o testUser
-` + utils.ProjectName + ` ` + importAppCmdLiteral + ` -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -e prod
+const importAppCmdExamples = utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAppCmdLiteral + ` -f qa/apps/sampleApp.zip -e dev
+` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAppCmdLiteral + ` -f staging/apps/sampleApp.zip -e prod -o testUser
+` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAppCmdLiteral + ` -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -e prod
 NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory`
 
 // importAppCmd represents the importApp command
 var ImportAppCmd = &cobra.Command{
-	Use: importAppCmdLiteral + " (--file <app-zip-file> --environment " +
+	Use: ImportAppCmdLiteral + " (--file <app-zip-file> --environment " +
 		"<environment-to-which-the-app-should-be-imported>)",
 	Short:   importAppCmdShortDesc,
 	Long:    importAppCmdLongDesc,
 	Example: importAppCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + importAppCmdLiteral + " called")
-		cred, err := getCredentials(importAppEnvironment)
+		utils.Logln(utils.LogPrefixInfo + ImportAppCmdLiteral + " called")
+		cred, err := GetCredentials(importAppEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
@@ -68,34 +67,15 @@ func executeImportAppCmd(credential credentials.Credential) {
 	if err != nil {
 		utils.HandleErrorAndExit("Error getting OAuth Tokens", err)
 	}
-	resp, err := impl.ImportApplicationToEnv(accessToken, importAppEnvironment, importAppFile, importAppOwner,
-		importAppUpdateApplication, preserveOwner, skipSubscriptions, importAppSkipKeys)
+	_, err = impl.ImportApplicationToEnv(accessToken, importAppEnvironment, importAppFile, importAppOwner,
+		importAppUpdateApplication, preserveOwner, skipSubscriptions, importAppSkipKeys, importAppSkipCleanup)
 	if err != nil {
 		utils.HandleErrorAndExit("Error importing Application", err)
-	}
-
-	if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusCreated {
-		// 200 OK or 201 Created
-		utils.Logln(utils.LogPrefixInfo+"Header:", resp.Header)
-		fmt.Println("Successfully imported Application!")
-	} else if resp.StatusCode == http.StatusMultiStatus {
-		// 207 Multi Status
-		fmt.Printf("\nPartially imported Application" +
-			"\nNOTE: One or more subscriptions were not imported due to unavailability of APIs/Tiers\n")
-	} else if resp.StatusCode == http.StatusUnauthorized {
-		// 401 Unauthorized
-		fmt.Println("Invalid Credentials or You may not have enough permission!")
-	} else if resp.StatusCode == http.StatusForbidden {
-		// 401 Unauthorized
-		fmt.Printf("Invalid Owner!" + "\nNOTE: Cross Tenant Imports are not allowed!\n")
-	} else {
-		fmt.Println("Error importing Application")
-		utils.Logln(utils.LogPrefixError + resp.Status)
 	}
 }
 
 func init() {
-	RootCmd.AddCommand(ImportAppCmd)
+	ImportCmd.AddCommand(ImportAppCmd)
 	ImportAppCmd.Flags().StringVarP(&importAppFile, "file", "f", "",
 		"Name of the ZIP file of the Application to be imported")
 	ImportAppCmd.Flags().StringVarP(&importAppOwner, "owner", "o", "",
@@ -110,6 +90,8 @@ func init() {
 		"Skip importing keys of the Application")
 	ImportAppCmd.Flags().BoolVarP(&importAppUpdateApplication, "update", "", false,
 		"Update the Application if it is already imported")
+	ImportAppCmd.Flags().BoolVarP(&importAppSkipCleanup, "skipCleanup", "", false, "Leave "+
+		"all temporary files created during import process")
 	_ = ImportAppCmd.MarkFlagRequired("file")
 	_ = ImportAppCmd.MarkFlagRequired("environment")
 }

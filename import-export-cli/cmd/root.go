@@ -26,6 +26,8 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/ghodss/yaml"
+
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
 	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 
@@ -40,10 +42,10 @@ var verbose bool
 var cfgFile string
 var insecure bool
 var cmdPassword string
-var cmdUsername string
-var cmdExportEnvironment string
-var cmdResourceTenantDomain string
-var cmdForceStartFromBegin bool
+var CmdUsername string
+var CmdExportEnvironment string
+var CmdResourceTenantDomain string
+var CmdForceStartFromBegin bool
 
 // RootCmd related info
 const RootCmdShortDesc = "CLI for Importing and Exporting APIs and Applications"
@@ -127,10 +129,13 @@ func createConfigFiles() {
 	utils.CreateDirIfNotExist(filepath.Join(utils.DefaultExportDirPath, utils.ExportedAppsDirName))
 	utils.CreateDirIfNotExist(filepath.Join(utils.DefaultExportDirPath, utils.ExportedMigrationArtifactsDirName))
 
+	utils.CreateDirIfNotExist(utils.DefaultCertDirPath)
+
 	if !utils.IsFileExist(utils.MainConfigFilePath) {
 		var mainConfig = new(utils.MainConfig)
 		mainConfig.Config = utils.Config{utils.DefaultHttpRequestTimeout,
-			utils.DefaultExportDirPath, k8sUtils.DefaultKubernetesMode, utils.DefaultTokenType}
+			utils.DefaultExportDirPath, k8sUtils.DefaultKubernetesMode, utils.DefaultTokenType,
+			false, ""}
 		utils.WriteConfigFile(mainConfig, utils.MainConfigFilePath)
 	}
 
@@ -140,6 +145,11 @@ func createConfigFiles() {
 		if err != nil {
 			utils.HandleErrorAndExit("Error creating default api spec file", err)
 		}
+	}
+
+	err = utils.CreateDirIfNotExist(utils.LocalCredentialsDirectoryPath)
+	if err != nil {
+		utils.HandleErrorAndExit("Error creating local directory: "+utils.LocalCredentialsDirectoryName, err)
 	}
 
 	if !utils.IsFileExist(utils.EnvKeysAllFilePath) {
@@ -152,6 +162,23 @@ func createConfigFiles() {
 		if err != nil {
 			utils.HandleErrorAndExit("Error creating default api spec file", err)
 		}
+	} else {
+		data, err := ioutil.ReadFile(utils.DefaultAPISpecFilePath)
+		if err != nil {
+			utils.HandleErrorAndExit("Error reading default_api.yaml spec file", err)
+		}
+		defaultApiFile := make(map[string]interface{})
+		if err := yaml.Unmarshal(data, &defaultApiFile); err != nil {
+			utils.HandleErrorAndExit("Error reading default_api.yaml", err)
+		}
+
+		//Check whether the EnableStore is provided, if provided keep the given value
+		//otherwise inject default value for the property.
+		_, isEnableStoreProvided := defaultApiFile["enableStore"]
+		if !isEnableStoreProvided {
+			defaultApiFile["enableStore"] = true
+		}
+		utils.WriteConfigFile(defaultApiFile, utils.DefaultAPISpecFilePath)
 	}
 }
 

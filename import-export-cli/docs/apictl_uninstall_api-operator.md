@@ -33,5 +33,5 @@ apictl uninstall api-operator --force
 
 ### SEE ALSO
 
-* [apictl uninstall](apictl_uninstall.md)	 - Uninstall an operator
+* [apictl uninstall](apictl_uninstall.md)	 - Uninstall an operator in the configured K8s cluster
 
