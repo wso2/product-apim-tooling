@@ -20,7 +20,6 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 // mgw command related usage Info
@@ -31,9 +30,6 @@ const (
 
 	MgBasepath = "/mgw/1.0"
 )
-
-//TODO: (VirajSalaka) Add a valid mgw command example
-const mgwCmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` + exportAPIProductCmdLiteral + ` -n LeasingAPIProduct -e dev`
 
 // MgwCmd represents the export command
 var MgCmd = &cobra.Command{
