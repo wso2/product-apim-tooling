@@ -35,7 +35,7 @@ type APIDefinition struct {
 	Tags                               []string           `json:"tags" yaml:"tags,omitempty"`
 	Documents                          []interface{}      `json:"documents,omitempty" yaml:"documents,omitempty"`
 	LastUpdated                        string             `json:"lastUpdated,omitempty" yaml:"lastUpdated,omitempty"`
-	AvailableTiers                     []AvailableTiers   `json:"availableTiers,omitempty" yaml:"availableTiers,omitempty"`
+	AvailableTiers                     []string           `json:"availableTiers,omitempty" yaml:"availableTiers,omitempty"`
 	AvailableSubscriptionLevelPolicies []interface{}      `json:"availableSubscriptionLevelPolicies,omitempty" yaml:"availableSubscriptionLevelPolicies,omitempty"`
 	URITemplates                       []URITemplates     `json:"uriTemplates" yaml:"uriTemplates,omitempty"`
 	APIHeaderChanged                   bool               `json:"apiHeaderChanged,omitempty" yaml:"apiHeaderChanged,omitempty"`
@@ -80,17 +80,6 @@ type ID struct {
 	ProviderName string `json:"providerName" yaml:"providerName"`
 	APIName      string `json:"apiName" yaml:"apiName"`
 	Version      string `json:"version" yaml:"version"`
-}
-type AvailableTiers struct {
-	Name               string `json:"name,omitempty" yaml:"name,omitempty"`
-	DisplayName        string `json:"displayName,omitempty" yaml:"displayName,omitempty"`
-	Description        string `json:"description,omitempty" yaml:"description,omitempty"`
-	RequestsPerMin     int    `json:"requestsPerMin,omitempty" yaml:"requestsPerMin,omitempty"`
-	RequestCount       int    `json:"requestCount,omitempty" yaml:"requestCount,omitempty"`
-	UnitTime           int    `json:"unitTime,omitempty" yaml:"unitTime,omitempty"`
-	TimeUnit           string `json:"timeUnit,omitempty" yaml:"timeUnit,omitempty"`
-	TierPlan           string `json:"tierPlan,omitempty" yaml:"tierPlan,omitempty"`
-	StopOnQuotaReached bool   `json:"stopOnQuotaReached,omitempty" yaml:"stopOnQuotaReached,omitempty"`
 }
 type Scopes struct {
 	Key         string `json:"key,omitempty" yaml:"key,omitempty"`

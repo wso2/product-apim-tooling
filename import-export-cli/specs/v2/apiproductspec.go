@@ -29,7 +29,7 @@ type APIProductDefinition struct {
 	Tags                               []string             `json:"tags" yaml:"tags,omitempty"`
 	Documents                          []interface{}        `json:"documents,omitempty" yaml:"documents,omitempty"`
 	LastUpdated                        string               `json:"lastUpdated,omitempty" yaml:"lastUpdated,omitempty"`
-	AvailableTiers                     []AvailableTiers     `json:"availableTiers,omitempty" yaml:"availableTiers,omitempty"`
+	AvailableTiers                     []string             `json:"availableTiers,omitempty" yaml:"availableTiers,omitempty"`
 	AvailableSubscriptionLevelPolicies []interface{}        `json:"availableSubscriptionLevelPolicies,omitempty" yaml:"availableSubscriptionLevelPolicies,omitempty"`
 	ProductResources                   []APIProductResource `json:"productResources" yaml:"productResources,omitempty"`
 	State                              string               `json:"state,omitempty" yaml:"state,omitempty"`
