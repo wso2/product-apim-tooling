@@ -48,7 +48,7 @@ const (
 
 const mgDeployCmdExamples = utils.ProjectName + " " + mgCmdLiteral + " " + mgDeployCmdLiteral + " -h https://localhost:9095 " +
 	"-f qa/TwitterAPI.zip -u admin -p admin\n" +
-	"cat ~/.mypassword | " + utils.ProjectName + mgCmdLiteral + " " + " " + mgDeployCmdLiteral + " -h https://localhost:9095 " +
+	"cat ~/.mypassword | " + utils.ProjectName + " " + mgCmdLiteral + " " + " " + mgDeployCmdLiteral + " -h https://localhost:9095 " +
 	"-f qa/TwitterAPI.zip -u admin"
 
 type MgwResponse struct {
