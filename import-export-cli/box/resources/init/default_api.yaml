@@ -5,7 +5,7 @@ id:
 context:
 type: HTTP
 availableTiers:
-  - name: Unlimited
+  - Unlimited
 status: CREATED
 visibility: public
 transports: http,https
