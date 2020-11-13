@@ -112,6 +112,7 @@ func ImportApplication(accessToken, adminEndpoint, filename, appOwner string, up
 		// We have an HTTP error
 		fmt.Println("Error importing Application.")
 		fmt.Println("Status: " + resp.Status())
+		fmt.Println("Response:", resp)
 		return nil, errors.New(resp.Status())
 	}
 }
@@ -190,7 +191,7 @@ func NewAppFileUploadRequest(uri string, params map[string]string, paramName, pa
 	// set headers
 	headers := make(map[string]string)
 	headers[utils.HeaderContentType] = writer.FormDataContentType()
-	headers[utils.HeaderAuthorization] =  utils.HeaderValueAuthBearerPrefix+" "+accessToken
+	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 	headers[utils.HeaderAccept] = "*/*"
 	headers[utils.HeaderConnection] = utils.HeaderValueKeepAlive
 
