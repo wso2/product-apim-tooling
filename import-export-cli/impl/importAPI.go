@@ -836,6 +836,7 @@ func importAPI(endpoint, filePath, accessToken string, extraParams map[string]st
 		// We have an HTTP error
 		fmt.Println("Error importing API.")
 		fmt.Println("Status: " + resp.Status())
+		fmt.Println("Response:", resp)
 		return errors.New(resp.Status())
 	}
 }
