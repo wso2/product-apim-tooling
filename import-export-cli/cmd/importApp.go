@@ -136,6 +136,7 @@ func ImportApplication(filename, appOwner, adminEndpiont, accessToken, exportDir
 		} else {
 			fmt.Printf("\nUnable to import the Application\n")
 			fmt.Println("Status: " + resp.Status())
+		        fmt.Println("Response:", resp)
 		}
 	return resp.RawResponse, err
 }
