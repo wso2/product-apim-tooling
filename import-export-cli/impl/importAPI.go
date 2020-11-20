@@ -950,3 +950,81 @@ func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, a
 	err = importAPI(adminEndpoint, apiFilePath, accessOAuthToken, extraParams)
 	return err
 }
+
+// injectEndpointCertificates details for the API
+func injectEndpointCerts(importPath string, environment *params.Environment, apiParams *gabs.Container) error {
+
+	var certs []params.Cert
+
+	if len(environment.Certs) == 0 {
+		return nil
+	}
+
+	//Read certificate list provided in user api-params file
+	for _, cert := range environment.Certs {
+		// read cert
+		p, err := resolveCertPath(importPath, cert.Path)
+		if err != nil {
+			return err
+		}
+		pubPEMData, err := ioutil.ReadFile(p)
+		if err != nil {
+			return err
+		}
+		// get cert
+		block, _ := pem.Decode(pubPEMData)
+		enc := credentials.Base64Encode(string(block.Bytes))
+		cert.Certificate = enc
+		certs = append(certs, cert)
+	}
+
+	data, err := json.Marshal(certs)
+	if err != nil {
+		return err
+	}
+
+	//Inject cert details to api_params file
+	apiParams.SetP(string(data),"Certs")
+	fmt.Println(apiParams)
+	return nil
+}
+
+// injectMutualSslCertificates details for the API
+func injectClientCertificates(importPath string, environment *params.Environment,apiParams *gabs.Container) error {
+
+	var mutualSslCerts []params.MutualSslCert
+
+	if len(environment.MutualSslCerts) == 0 {
+		return nil
+	}
+
+	for _, mutualSslCert := range environment.MutualSslCerts {
+		// read cert
+		p, err := resolveCertPath(importPath, mutualSslCert.Path)
+		if err != nil {
+			return err
+		}
+		pubPEMData, err := ioutil.ReadFile(p)
+		if err != nil {
+			return err
+		}
+		// get cert
+		block, _ := pem.Decode(pubPEMData)
+		enc := credentials.Base64Encode(string(block.Bytes))
+		mutualSslCert.Certificate = enc
+		mutualSslCert.APIIdentifier.APIName = ""
+		mutualSslCert.APIIdentifier.Version = ""
+		mutualSslCert.APIIdentifier.ProviderName = ""
+
+		mutualSslCerts = append(mutualSslCerts, mutualSslCert)
+	}
+
+	data, err := json.Marshal(mutualSslCerts)
+	if err != nil {
+		return err
+	}
+
+	//Inject mutualSSL cert details to  api_params file
+	apiParams.SetP(string(data),"MutualSslCerts")
+	return nil
+}
