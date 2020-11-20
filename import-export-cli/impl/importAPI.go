@@ -951,6 +951,28 @@ func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, a
 	return err
 }
 
+// injectParamsToAPI injects ApiParams to API located in importPath using importEnvironment and returns the path to
+// injected API location
+func handleCustomizedParameters(importPath, paramsPath, importEnvironment string, preserveProvider bool) error {
+	utils.Logln(utils.LogPrefixInfo+"Loading parameters from", paramsPath)
+	apiParams, err := params.LoadApiParamsFromFile(paramsPath)
+	if err != nil {
+		return err
+	}
+	// check whether import environment is included in api configuration
+	envParams := apiParams.GetEnv(importEnvironment)
+	if envParams == nil {
+		utils.Logln(utils.LogPrefixInfo + "Using default values as the environment is not present in api_param.yaml file")
+	} else {
+		//If environment parameters are present in parameter file
+		err = handleEnvParams(importPath, envParams)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // injectEndpointCertificates details for the API
 func injectEndpointCerts(importPath string, environment *params.Environment, apiParams *gabs.Container) error {
 
@@ -984,13 +1006,13 @@ func injectEndpointCerts(importPath string, environment *params.Environment, api
 	}
 
 	//Inject cert details to api_params file
-	apiParams.SetP(string(data),"Certs")
+	apiParams.SetP(string(data), "Certs")
 	fmt.Println(apiParams)
 	return nil
 }
 
 // injectMutualSslCertificates details for the API
-func injectClientCertificates(importPath string, environment *params.Environment,apiParams *gabs.Container) error {
+func injectClientCertificates(importPath string, environment *params.Environment, apiParams *gabs.Container) error {
 
 	var mutualSslCerts []params.MutualSslCert
 
@@ -1025,7 +1047,7 @@ func injectClientCertificates(importPath string, environment *params.Environment
 	}
 
 	//Inject mutualSSL cert details to  api_params file
-	apiParams.SetP(string(data),"MutualSslCerts")
+	apiParams.SetP(string(data), "MutualSslCerts")
 	return nil
 }
 
@@ -1075,13 +1097,13 @@ func handleEnvParams(apiDirectory string, environmentParams *params.Environment)
 		return err
 	}
 
-	paramsContent,err := utils.JsonToYaml(apiParams.Bytes())
+	paramsContent, err := utils.JsonToYaml(apiParams.Bytes())
 	if err != nil {
 		return err
 	}
 
 	err = ioutil.WriteFile(apiPath, content, 0644)
-	err = ioutil.WriteFile(apiParamsPath,paramsContent,0644)
+	err = ioutil.WriteFile(apiParamsPath, paramsContent, 0644)
 	if err != nil {
 		return err
 	}
