@@ -169,7 +169,7 @@ func preProcessDependentAPIs(apiProductFilePath, importEnvironment string, impor
 		// Check whether api_params.yaml file is available inside the particular API directory
 		if utils.IsFileExist(paramsPath) {
 			// Reading API params file and populate api.yaml
-			err := injectParamsToAPI(apiDirectoryPath, paramsPath, importEnvironment, importAPIProductPreserveProvider)
+			err := handleCustomizedParameters(apiDirectoryPath, paramsPath, importEnvironment, importAPIProductPreserveProvider)
 			if err != nil {
 				return err
 			}
