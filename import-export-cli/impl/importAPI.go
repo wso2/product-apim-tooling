@@ -1028,3 +1028,62 @@ func injectClientCertificates(importPath string, environment *params.Environment
 	apiParams.SetP(string(data),"MutualSslCerts")
 	return nil
 }
+
+//Process env params and create a temp env_parmas.yaml in temp artifact
+func handleEnvParams(apiDirectory string, environmentParams *params.Environment) error {
+	// read api from Meta-information
+	apiPath := filepath.Join(apiDirectory, "Meta-information", "api")
+	utils.Logln(utils.LogPrefixInfo + "Reading API definition: ")
+	fp, jsonContent, err := resolveYamlOrJSON(apiPath)
+	if err != nil {
+		return err
+	}
+	utils.Logln(utils.LogPrefixInfo+"Loaded definition from:", fp)
+	api, err := gabs.ParseJSON(jsonContent)
+	if err != nil {
+		return err
+	}
+
+	envParamsJson, err := json.Marshal(environmentParams)
+
+	if err == nil {
+		s := string(envParamsJson)
+		fmt.Println(s)
+	}
+
+	apiPath = filepath.Join(apiDirectory, "Meta-information", "api.yaml")
+	var apiParamsPath string
+	apiParamsPath = filepath.Join(apiDirectory, "Meta-information", "env_params.yaml")
+	fmt.Println(apiParamsPath)
+	utils.Logln(utils.LogPrefixInfo+"Writing merged API to:", apiPath)
+
+	// write this to disk
+	content, err := utils.JsonToYaml(api.Bytes())
+	if err != nil {
+		return err
+	}
+
+	apiParams, err := gabs.ParseJSON(envParamsJson)
+
+	err = injectEndpointCerts(apiDirectory, environmentParams, apiParams)
+	if err != nil {
+		return err
+	}
+
+	err = injectClientCertificates(apiDirectory, environmentParams, apiParams)
+	if err != nil {
+		return err
+	}
+
+	paramsContent,err := utils.JsonToYaml(apiParams.Bytes())
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(apiPath, content, 0644)
+	err = ioutil.WriteFile(apiParamsPath,paramsContent,0644)
+	if err != nil {
+		return err
+	}
+	return nil
+}
