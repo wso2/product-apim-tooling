@@ -573,7 +573,6 @@ func injectEndpointCerts(importPath string, environment *params.Environment, api
 
 	//Inject cert details to api_params file
 	apiParams.SetP(string(data), "Certs")
-	fmt.Println(apiParams)
 	return nil
 }
 
@@ -642,7 +641,6 @@ func handleEnvParams(apiDirectory string, environmentParams *params.Environment)
 	apiPath = filepath.Join(apiDirectory, "Meta-information", "api.yaml")
 	var apiParamsPath string
 	apiParamsPath = filepath.Join(apiDirectory, "Meta-information", "env_params.yaml")
-	fmt.Println(apiParamsPath)
 	utils.Logln(utils.LogPrefixInfo+"Writing merged API to:", apiPath)
 
 	// write this to disk
