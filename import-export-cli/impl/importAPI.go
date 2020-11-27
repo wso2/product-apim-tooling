@@ -20,9 +20,9 @@ package impl
 
 import (
 	"encoding/json"
-	"encoding/pem"
 	"errors"
 	"fmt"
+	jsoniter "github.com/json-iterator/go"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -35,7 +35,6 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/specs/params"
 
 	"github.com/mitchellh/go-homedir"
-	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 
 	"github.com/Jeffail/gabs"
@@ -397,8 +396,8 @@ func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, a
 			utils.Logln(utils.LogPrefixInfo+"Leaving", tmpPath)
 			return
 		}
-		utils.Logln(utils.LogPrefixInfo+"Deleting", tmpPath)
-		err := os.RemoveAll(tmpPath)
+		//utils.Logln(utils.LogPrefixInfo+"Deleting", tmpPath)
+		//err := os.RemoveAll(tmpPath)
 		if err != nil {
 			utils.Logln(utils.LogPrefixError + err.Error())
 		}
@@ -437,7 +436,6 @@ func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, a
 	}
 	// Fill with defaults
 	if populateAPIWithDefaults(apiInfo) {
-		utils.Logln(utils.LogPrefixInfo + "API is populated with defaults")
 		// api is dirty, write it to disk
 		buf, err := json.Marshal(apiInfo)
 		if err != nil {
@@ -535,86 +533,24 @@ func handleCustomizedParameters(importPath, paramsPath, importEnvironment string
 		if err != nil {
 			return err
 		}
+
+		//Copy certificate directory to zipped artifact
+		rootParamsPath := filepath.Dir(paramsPath)
+		sourceCertsPath := filepath.Join(rootParamsPath,"certificates")
+		destCertsPath := filepath.Join(importPath,"certificates")
+		isCertificateDirProvided,err := utils.IsDirExists(sourceCertsPath)
+		if err != nil {
+			return err
+		}
+		if  isCertificateDirProvided{
+			utils.CopyDir(sourceCertsPath, destCertsPath)
+		} else {
+			utils.CreateDir(destCertsPath)
+		}
 	}
 	return nil
 }
 
-// injectEndpointCertificates details for the API
-func injectEndpointCerts(importPath string, environment *params.Environment, apiParams *gabs.Container) error {
-
-	var certs []params.Cert
-
-	if len(environment.Certs) == 0 {
-		return nil
-	}
-
-	//Read certificate list provided in user api-params file
-	for _, cert := range environment.Certs {
-		// read cert
-		p, err := resolveCertPath(importPath, cert.Path)
-		if err != nil {
-			return err
-		}
-		pubPEMData, err := ioutil.ReadFile(p)
-		if err != nil {
-			return err
-		}
-		// get cert
-		block, _ := pem.Decode(pubPEMData)
-		enc := credentials.Base64Encode(string(block.Bytes))
-		cert.Certificate = enc
-		certs = append(certs, cert)
-	}
-
-	data, err := json.Marshal(certs)
-	if err != nil {
-		return err
-	}
-
-	//Inject cert details to api_params file
-	apiParams.SetP(string(data), "Certs")
-	return nil
-}
-
-// injectMutualSslCertificates details for the API
-func injectClientCertificates(importPath string, environment *params.Environment, apiParams *gabs.Container) error {
-
-	var mutualSslCerts []params.MutualSslCert
-
-	if len(environment.MutualSslCerts) == 0 {
-		return nil
-	}
-
-	for _, mutualSslCert := range environment.MutualSslCerts {
-		// read cert
-		p, err := resolveCertPath(importPath, mutualSslCert.Path)
-		if err != nil {
-			return err
-		}
-		pubPEMData, err := ioutil.ReadFile(p)
-		if err != nil {
-			return err
-		}
-		// get cert
-		block, _ := pem.Decode(pubPEMData)
-		enc := credentials.Base64Encode(string(block.Bytes))
-		mutualSslCert.Certificate = enc
-		mutualSslCert.APIIdentifier.APIName = ""
-		mutualSslCert.APIIdentifier.Version = ""
-		mutualSslCert.APIIdentifier.ProviderName = ""
-
-		mutualSslCerts = append(mutualSslCerts, mutualSslCert)
-	}
-
-	data, err := json.Marshal(mutualSslCerts)
-	if err != nil {
-		return err
-	}
-
-	//Inject mutualSSL cert details to  api_params file
-	apiParams.SetP(string(data), "MutualSslCerts")
-	return nil
-}
 
 //Process env params and create a temp env_parmas.yaml in temp artifact
 func handleEnvParams(apiDirectory string, environmentParams *params.Environment) error {
@@ -631,16 +567,13 @@ func handleEnvParams(apiDirectory string, environmentParams *params.Environment)
 		return err
 	}
 
-	envParamsJson, err := json.Marshal(environmentParams)
-
-	if err == nil {
-		s := string(envParamsJson)
-		fmt.Println(s)
+	envParamsJson, err := jsoniter.Marshal(environmentParams.Config)
+	if err != nil {
+		return err
 	}
 
 	apiPath = filepath.Join(apiDirectory, "Meta-information", "api.yaml")
 	var apiParamsPath string
-	apiParamsPath = filepath.Join(apiDirectory, "Meta-information", "env_params.yaml")
 	utils.Logln(utils.LogPrefixInfo+"Writing merged API to:", apiPath)
 
 	// write this to disk
@@ -650,23 +583,15 @@ func handleEnvParams(apiDirectory string, environmentParams *params.Environment)
 	}
 
 	apiParams, err := gabs.ParseJSON(envParamsJson)
-
-	err = injectEndpointCerts(apiDirectory, environmentParams, apiParams)
-	if err != nil {
-		return err
-	}
-
-	err = injectClientCertificates(apiDirectory, environmentParams, apiParams)
-	if err != nil {
-		return err
-	}
-
 	paramsContent, err := utils.JsonToYaml(apiParams.Bytes())
 	if err != nil {
 		return err
 	}
 
 	err = ioutil.WriteFile(apiPath, content, 0644)
+
+	//over-ride the api_params.file
+	apiParamsPath = filepath.Join(apiDirectory, "api_params.yaml")
 	err = ioutil.WriteFile(apiParamsPath, paramsContent, 0644)
 	if err != nil {
 		return err
