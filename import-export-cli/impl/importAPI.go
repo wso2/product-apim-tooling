@@ -396,8 +396,8 @@ func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, a
 			utils.Logln(utils.LogPrefixInfo+"Leaving", tmpPath)
 			return
 		}
-		//utils.Logln(utils.LogPrefixInfo+"Deleting", tmpPath)
-		//err := os.RemoveAll(tmpPath)
+		utils.Logln(utils.LogPrefixInfo+"Deleting", tmpPath)
+		err := os.RemoveAll(tmpPath)
 		if err != nil {
 			utils.Logln(utils.LogPrefixError + err.Error())
 		}
@@ -590,7 +590,7 @@ func handleEnvParams(apiDirectory string, environmentParams *params.Environment)
 
 	err = ioutil.WriteFile(apiPath, content, 0644)
 
-	//over-ride the api_params.file
+	//over-write the api_params.file with latest configurations
 	apiParamsPath = filepath.Join(apiDirectory, "api_params.yaml")
 	err = ioutil.WriteFile(apiParamsPath, paramsContent, 0644)
 	if err != nil {
