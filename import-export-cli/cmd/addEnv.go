@@ -32,6 +32,7 @@ var flagDevPortalEndpoint string    // DevPortal endpoint of the environment to 
 var flagRegistrationEndpoint string // registration endpoint of the environment to be added
 var flagApiManagerEndpoint string   // api manager endpoint of the environment to be added
 var flagAdminEndpoint string        // admin endpoint of the environment to be added
+var flagMiManagementEndpoint string // mi management endpoint of the environment to be added
 
 // AddEnv command related Info
 const AddEnvCmdLiteral = "env [environment]"
@@ -41,12 +42,16 @@ const addEnvCmdLongDesc = "Add new environment and its related endpoints to the 
 const addEnvCmdExamples = utils.ProjectName + ` ` + AddCmdLiteral + ` ` + AddEnvCmdLiteralTrimmed + ` production \
 --apim  https://localhost:9443 
 
+` + utils.ProjectName + ` ` + AddCmdLiteral + ` ` + AddEnvCmdLiteralTrimmed + ` dev \
+--mi https://localhost:9164
+
 ` + utils.ProjectName + ` ` + AddCmdLiteral + ` ` + AddEnvCmdLiteralTrimmed + ` test \
 --registration https://idp.com:9443 \
 --publisher https://apim.com:9443 \
 --devportal  https://apps.com:9443 \
 --admin  https://apim.com:9443 \
 --token https://gw.com:8243/token
+--mi https://localhost:9164
 
 ` + utils.ProjectName + ` ` + AddCmdLiteral + ` ` + AddEnvCmdLiteralTrimmed + ` dev \
 --apim https://apim.com:9443 \
@@ -55,7 +60,8 @@ const addEnvCmdExamples = utils.ProjectName + ` ` + AddCmdLiteral + ` ` + AddEnv
 
 You can either provide only the flag --apim , or all the other 4 flags (--registration --publisher --devportal --admin) without providing --apim flag.
 If you are omitting any of --registration --publisher --devportal --admin flags, you need to specify --apim flag with the API Manager endpoint. In both of the
-cases --token flag is optional and use it to specify the gateway token endpoint. This will be used for "apictl get-keys" operation.`
+cases --token flag is optional and use it to specify the gateway token endpoint. This will be used for "apictl get-keys" operation.
+To add a micro integrator instance to an environment you can use the --mi flag.`
 
 // addEnvCmd represents the addEnv command
 var addEnvCmd = &cobra.Command{
@@ -81,6 +87,7 @@ func executeAddEnvCmd(mainConfigFilePath string) {
 	envEndpoints.DevPortalEndpoint = flagDevPortalEndpoint
 	envEndpoints.AdminEndpoint = flagAdminEndpoint
 	envEndpoints.TokenEndpoint = flagTokenEndpoint
+	envEndpoints.MiManagementEndpoint = flagMiManagementEndpoint
 	err := impl.AddEnv(envToBeAdded, envEndpoints, mainConfigFilePath, AddEnvCmdLiteral)
 	if err != nil {
 		utils.HandleErrorAndExit("Error adding environment", err)
@@ -98,5 +105,6 @@ func init() {
 	addEnvCmd.Flags().StringVar(&flagRegistrationEndpoint, "registration", "",
 		"Registration endpoint for the environment")
 	addEnvCmd.Flags().StringVar(&flagAdminEndpoint, "admin", "", "Admin endpoint for the environment")
+	addEnvCmd.Flags().StringVar(&flagMiManagementEndpoint, "mi", "", "Micro Integrator Management endpoint for the environment")
 	_ = addEnvCmd.MarkFlagRequired("environment")
 }

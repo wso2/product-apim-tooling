@@ -36,6 +36,7 @@ const (
 	envsAdminEndpointHeader        = "ADMIN ENDPOINT"
 	envsApiManagerEndpoint         = "API MANAGER ENDPOINT"
 	envsApplicationEndpoint        = "DEVPORTAL ENDPOINT"
+	envsMiManagementEndpoint       = "MI MANAGEMENT ENDPOINT"
 )
 
 // endpoint contains information about endpoint of API Manager
@@ -47,6 +48,7 @@ type endpoints struct {
 	adminEndpoint        string
 	apiManagerEndpoint   string
 	applicationEndpoint  string
+	miManagementEndpoint string
 }
 
 func newEndpointFromEnvEndpoints(name string, e utils.EnvEndpoints) *endpoints {
@@ -58,6 +60,7 @@ func newEndpointFromEnvEndpoints(name string, e utils.EnvEndpoints) *endpoints {
 		publisherEndpoint:    e.PublisherEndpoint,
 		registrationEndpoint: e.RegistrationEndpoint,
 		tokenEndpoint:        e.TokenEndpoint,
+		miManagementEndpoint: e.MiManagementEndpoint,
 	}
 }
 
@@ -96,6 +99,11 @@ func (e endpoints) AdminEndpoint() string {
 	return e.adminEndpoint
 }
 
+// AdminEndpoint
+func (e endpoints) MiManagementEndpoint() string {
+	return e.miManagementEndpoint
+}
+
 // MarshalJSON returns marshaled methods
 func (e *endpoints) MarshalJSON() ([]byte, error) {
 	return formatter.MarshalJSON(e)
@@ -130,6 +138,7 @@ func PrintEnvs(envData map[string]utils.EnvEndpoints, format, defaulEnvsTableFor
 		"AdminEndpoint":        envsAdminEndpointHeader,
 		"ApiManagerEndpoint":   envsApiManagerEndpoint,
 		"ApplicationEndpoint":  envsApplicationEndpoint,
+		"MiManagementEndpoint": envsMiManagementEndpoint,
 	}
 
 	// execute context

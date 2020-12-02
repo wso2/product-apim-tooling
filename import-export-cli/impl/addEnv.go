@@ -53,11 +53,11 @@ func AddEnv(envName string, envEndpoints *utils.EnvEndpoints, mainConfigFilePath
 	}
 
 	if envEndpoints.ApiManagerEndpoint == "" {
-		if envEndpoints.AdminEndpoint == "" || envEndpoints.DevPortalEndpoint == "" ||
-			envEndpoints.PublisherEndpoint == "" || envEndpoints.RegistrationEndpoint == "" ||
-			envEndpoints.TokenEndpoint == "" {
-			utils.ShowHelpCommandTip(addEnvCmdLiteral)
-			return errors.New("Endpoint(s) cannot be blank")
+		if !utils.HasOnlyMIEndpoint(envEndpoints) {
+			if !utils.RequiredAPIMEndpointsExists(envEndpoints) {
+				utils.ShowHelpCommandTip(addEnvCmdLiteral)
+				return errors.New("Endpoint(s) cannot be blank")
+			}
 		}
 	}
 
@@ -90,6 +90,10 @@ func AddEnv(envName string, envEndpoints *utils.EnvEndpoints, mainConfigFilePath
 
 	if envEndpoints.AdminEndpoint != "" {
 		validatedEnvEndpoints.AdminEndpoint = envEndpoints.AdminEndpoint
+	}
+
+	if envEndpoints.MiManagementEndpoint != "" {
+		validatedEnvEndpoints.MiManagementEndpoint = envEndpoints.MiManagementEndpoint
 	}
 
 	mainConfig.Environments[envName] = validatedEnvEndpoints

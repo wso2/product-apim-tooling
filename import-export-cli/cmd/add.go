@@ -28,12 +28,16 @@ const AddCmdLongDesc = `Add new environment and its related endpoints to the con
 const addCmdExamples = utils.ProjectName + ` ` + AddCmdLiteral + ` ` + AddEnvCmdLiteralTrimmed + ` production \
 --apim  https://localhost:9443 
 
+` + utils.ProjectName + ` ` + AddCmdLiteral + ` ` + AddEnvCmdLiteralTrimmed + ` dev \
+--mi  https://localhost:9164
+
 ` + utils.ProjectName + ` ` + AddCmdLiteral + ` ` + AddEnvCmdLiteralTrimmed + ` test \
 --registration https://idp.com:9443 \
 --publisher https://apim.com:9443 \
 --devportal  https://apps.com:9443 \
 --admin  https://apim.com:9443 \
 --token https://gw.com:8243/token
+--mi https://localhost:9164
 
 ` + utils.ProjectName + ` ` + AddCmdLiteral + ` ` + AddEnvCmdLiteralTrimmed + ` dev \
 --apim https://apim.com:9443 \
@@ -43,7 +47,8 @@ const addCmdExamples = utils.ProjectName + ` ` + AddCmdLiteral + ` ` + AddEnvCmd
 NOTE: The flag --environment (-e) is mandatory.
 You can either provide only the flag --apim , or all the other 4 flags (--registration --publisher --devportal --admin) without providing --apim flag.
 If you are omitting any of --registration --publisher --devportal --admin flags, you need to specify --apim flag with the API Manager endpoint. In both of the
-cases --token flag is optional and use it to specify the gateway token endpoint. This will be used for "apictl get-keys" operation.`
+cases --token flag is optional and use it to specify the gateway token endpoint. This will be used for "apictl get-keys" operation.
+To add a micro integrator instance to an environment you can use the --mi flag.`
 
 // AddCmd represents the add command
 var AddCmd = &cobra.Command{
