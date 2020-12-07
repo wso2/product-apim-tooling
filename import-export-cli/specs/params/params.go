@@ -18,6 +18,18 @@ type Configuration struct {
 	RetryDelay *int `yaml:"retryDelay" json:"retryDelay,string"`
 	// Factor used for config
 	Factor *int `yaml:"factor" json:"factor,string"`
+	// RetryErroCode used for config
+	RetryErroCode *int `yaml:"retryErroCode" json:"retryErroCode,string"`
+	// SuspendErrorCode used for config
+	SuspendErrorCode *int `yaml:"suspendErrorCode" json:"suspendErrorCode,string"`
+	// SuspendDuration used for config
+	SuspendDuration *int `yaml:"suspendDuration" json:"suspendDuration,string"`
+	// SuspendMaxDuration used for config
+	SuspendMaxDuration *int `yaml:"suspendMaxDuration" json:"suspendMaxDuration,string"`
+	// ActionSelect used for config
+	ActionSelect *string `yaml:"actionSelect" json:"actionSelect"`
+	// ActionDuration used for config
+	ActionDuration *int `yaml:"actionDuration" json:"actionDuration,string"`
 }
 
 // Endpoint details
