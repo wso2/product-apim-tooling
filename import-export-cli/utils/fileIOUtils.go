@@ -304,6 +304,38 @@ func CopyDir(src string, dst string) (err error) {
 	return
 }
 
+// CopyDirectoryContents recursively copies all the content of a directory, attempting to preserve permissions.
+// Source directory must exist,and the destination directory exist.
+func CopyDirectoryContents (src string, dst string) (err error)  {
+	entries, err := ioutil.ReadDir(src)
+	if err != nil {
+		return
+	}
+
+	for _, entry := range entries {
+		srcPath := filepath.Join(src, entry.Name())
+		dstPath := filepath.Join(dst, entry.Name())
+
+		if entry.IsDir() {
+			err = CopyDir(srcPath, dstPath)
+			if err != nil {
+				return
+			}
+		} else {
+			// Skip symlinks.
+			if entry.Mode()&os.ModeSymlink != 0 {
+				continue
+			}
+
+			err = CopyFile(srcPath, dstPath)
+			if err != nil {
+				return
+			}
+		}
+	}
+	return
+}
+
 // CreateTempFile creates a temporary file in the OS' temp directory
 // example pattern "docker-secret-*.yaml"
 func CreateTempFile(pattern string, content []byte) (string, error) {
@@ -348,8 +380,8 @@ func CreateZipFileFromProject(projectPath string, skipCleanup bool) (string, err
 				Logln(LogPrefixInfo+"Leaving", tmp.Name())
 				return
 			}
-			Logln(LogPrefixInfo+"Deleting", tmp.Name())
-			err := os.Remove(tmp.Name())
+			//Logln(LogPrefixInfo+"Deleting", tmp.Name())
+			//err := os.Remove(tmp.Name())
 			if err != nil {
 				Logln(LogPrefixError + err.Error())
 			}

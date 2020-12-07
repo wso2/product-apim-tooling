@@ -238,10 +238,11 @@ func getEnvSubstitutedFileContent(path string) (string, error) {
 	return str, nil
 }
 
-// LoadApiParamsFromDirectory loads an API Project configuration YAML file located in path.
+// LoadApiParamsFromDirectory loads an API Project configuration YAML file located in path when the root
+// directory is provided instead of yaml file.
 //	It returns an error or a valid ApiParams
 func LoadApiParamsFromDirectory(path string) (*ApiParams, error) {
-	paramsFilePath:= filepath.Join(path,"env_params.yaml")
+	paramsFilePath:= filepath.Join(path,utils.ParamFileAPI)
 	fmt.Println(paramsFilePath)
 	fileContent, err := getEnvSubstitutedFileContent(paramsFilePath)
 	if err != nil {
@@ -257,6 +258,43 @@ func LoadApiParamsFromDirectory(path string) (*ApiParams, error) {
 	return apiParams, err
 }
 
+// LoadApiProductParamsFromFile loads an API Product project configuration YAML file located in path when the root
+// directory is provided instead of yaml file.
+//	It returns an error or a valid ApiProductParams
+func LoadApiProductParamsFromDirectory(path string) (*ApiProductParams, error) {
+	paramsFilePath:= filepath.Join(path,utils.ParamFileAPIProduct)
+	fileContent, err := getEnvSubstitutedFileContent(paramsFilePath)
+	if err != nil {
+		return nil, err
+	}
+
+	apiParams := &ApiProductParams{}
+	err = yaml.Unmarshal([]byte(fileContent), &apiParams)
+	if err != nil {
+		return nil, err
+	}
+
+	return apiParams, err
+}
+
+// LoadApplicationParamsFromDirectory loads an Application project configuration YAML file located in path when the root
+// directory is provided instead of yaml file.
+//	It returns an error or a valid ApplicationParams
+func LoadApplicationParamsFromDirectory(path string) (*ApplicationParams, error) {
+	paramsFilePath:= filepath.Join(path,utils.ParamFileApplication)
+	fileContent, err := getEnvSubstitutedFileContent(paramsFilePath)
+	if err != nil {
+		return nil, err
+	}
+
+	apiParams := &ApplicationParams{}
+	err = yaml.Unmarshal([]byte(fileContent), &apiParams)
+	if err != nil {
+		return nil, err
+	}
+
+	return apiParams, err
+}
 // LoadApiParamsFromFile loads an API Project configuration YAML file located in path.
 //	It returns an error or a valid ApiParams
 func LoadApiParamsFromFile(path string) (*ApiParams, error) {

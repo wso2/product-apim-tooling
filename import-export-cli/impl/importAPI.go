@@ -34,7 +34,6 @@ import (
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/specs/params"
 
-	"github.com/mitchellh/go-homedir"
 	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 
 	"github.com/Jeffail/gabs"
@@ -119,7 +118,12 @@ func resolveAPIParamsPath(importPath, paramPath string) (string, error) {
 		return "", fmt.Errorf("could not find %s. Please check %s exists in basepath of "+
 			"import location or current working directory", utils.ParamFileAPI, utils.ParamFileAPI)
 	} else {
+		//If the environment parameters are provided in a file
 		if info, err := os.Stat(paramPath); err == nil && !info.IsDir() {
+			return paramPath, nil
+		}
+		//If the environment parameters are provided in a directory
+		if info, err := os.Stat(paramPath); err == nil && info.IsDir() {
 			return paramPath, nil
 		}
 		return "", fmt.Errorf("could not find %s", paramPath)
@@ -162,30 +166,6 @@ func resolveYamlOrJSON(filename string) (string, []byte, error) {
 	}
 
 	return "", nil, fmt.Errorf("%s was not found as a YAML or JSON", filename)
-}
-
-func resolveCertPath(importPath, p string) (string, error) {
-	// look in importPath
-	utils.Logln(utils.LogPrefixInfo+"Resolving for", p)
-	certfile := filepath.Join(importPath, p)
-	utils.Logln(utils.LogPrefixInfo + "Looking in project directory")
-	if info, err := os.Stat(certfile); err == nil && !info.IsDir() {
-		// found file return it
-		return certfile, nil
-	}
-
-	utils.Logln(utils.LogPrefixInfo + "Looking for absolute path")
-	// try for an absolute path
-	p, err := homedir.Expand(filepath.Clean(p))
-	if err != nil {
-		return "", err
-	}
-
-	if p != "" {
-		return p, nil
-	}
-
-	return "", fmt.Errorf("%s not found", p)
 }
 
 // isEmpty returns true when a given string is empty
@@ -423,7 +403,7 @@ func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, a
 	}
 	if paramsPath != "" {
 		//Reading API params file and populate api.yaml
-		err := handleCustomizedParameters(apiFilePath, paramsPath, importEnvironment, preserveProvider)
+		err := handleCustomizedParameters(apiFilePath, paramsPath, importEnvironment)
 		if err != nil {
 			return err
 		}
@@ -515,10 +495,8 @@ func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, a
 	return err
 }
 
-// injectParamsToAPI injects ApiParams to API located in importPath using importEnvironment and returns the path to
-// injected API location
-func handleCustomizedParameters(importPath, paramsPath, importEnvironment string, preserveProvider bool) error {
-	utils.Logln(utils.LogPrefixInfo+"Loading parameters from", paramsPath)
+// envParamsFileProcess function is used to process the environment parameters when they are provided as a file
+func envParamsFileProcess(importPath, paramsPath, importEnvironment string) error {
 	apiParams, err := params.LoadApiParamsFromFile(paramsPath)
 	if err != nil {
 		return err
@@ -536,13 +514,13 @@ func handleCustomizedParameters(importPath, paramsPath, importEnvironment string
 
 		//Copy certificate directory to zipped artifact
 		rootParamsPath := filepath.Dir(paramsPath)
-		sourceCertsPath := filepath.Join(rootParamsPath,"certificates")
-		destCertsPath := filepath.Join(importPath,"certificates")
-		isCertificateDirProvided,err := utils.IsDirExists(sourceCertsPath)
+		sourceCertsPath := filepath.Join(rootParamsPath, "certificates")
+		destCertsPath := filepath.Join(importPath, "certificates")
+		isCertificateDirProvided, err := utils.IsDirExists(sourceCertsPath)
 		if err != nil {
 			return err
 		}
-		if  isCertificateDirProvided{
+		if isCertificateDirProvided {
 			utils.CopyDir(sourceCertsPath, destCertsPath)
 		} else {
 			utils.CreateDir(destCertsPath)
@@ -551,6 +529,50 @@ func handleCustomizedParameters(importPath, paramsPath, importEnvironment string
 	return nil
 }
 
+// envParamsDirectoryProcess function is used to process the environment parameters when they are provided as a
+//directory
+func envParamsDirectoryProcess(importPath, paramsPath, importEnvironment string) error {
+	apiParams, err := params.LoadApiParamsFromDirectory(paramsPath)
+	if err != nil {
+		return err
+	}
+	// check whether import environment is included in api configuration
+	envParams := apiParams.GetEnv(importEnvironment)
+	if envParams == nil {
+		utils.Logln(utils.LogPrefixInfo + "Using default values as the environment is not present in api_param.yaml file")
+	} else {
+		//If environment parameters are present in parameter file
+		err = handleEnvParams(importPath, envParams)
+		if err != nil {
+			return err
+		}
+
+		//copy all the content in the params directory into the artifact to be imported
+		utils.CopyDirectoryContents(paramsPath, importPath)
+	}
+	return nil
+}
+
+// handleCustomizedParameters handles the configurations provided with apiParams file and the resources that needs to
+// transfer to server side will bundle with the artifact to be imported.
+func handleCustomizedParameters(importPath, paramsPath, importEnvironment string) error {
+	utils.Logln(utils.LogPrefixInfo+"Loading parameters from", paramsPath)
+	if strings.Contains(paramsPath, ".yaml") {
+		utils.Logln(utils.LogPrefixInfo+"Processing Params file", paramsPath)
+		err := envParamsFileProcess(importPath, paramsPath, importEnvironment)
+		if err != nil {
+			return err
+		}
+	} else {
+		utils.Logln(utils.LogPrefixInfo+"Processing Params directory", paramsPath)
+		err := envParamsDirectoryProcess(importPath, paramsPath, importEnvironment)
+		if err != nil {
+			return err
+		}
+
+	}
+	return nil
+}
 
 //Process env params and create a temp env_parmas.yaml in temp artifact
 func handleEnvParams(apiDirectory string, environmentParams *params.Environment) error {
