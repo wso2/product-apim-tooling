@@ -1,141 +1,139 @@
 {
-   "id": "e62c19bf-51b8-4767-b8b8-690085241f26",
-   "name": "SampleAPIProduct",
-   "context": "/sampleapiproduct",
-   "description": null,
-   "provider": "admin",
-   "hasThumbnail": null,
-   "state": "PUBLISHED",
-   "enableSchemaValidation": false,
-   "responseCachingEnabled": false,
-   "cacheTimeout": 300,
-   "visibility": "PUBLIC",
-   "visibleRoles": [],
-   "visibleTenants": [],
-   "accessControl": "NONE",
-   "accessControlRoles": [],
-   "gatewayEnvironments": [
-     "Production and Sandbox"
-   ],
-   "apiType": "APIProduct",
-   "transport": [
-     "http",
-     "https"
-   ],
-   "tags": [],
-   "policies": [
-     "Bronze",
-     "Gold"
-   ],
-   "apiThrottlingPolicy": null,
-   "authorizationHeader": "Authorization",
-   "securityScheme": [
-     "oauth2",
-     "oauth_basic_auth_api_key_mandatory"
-   ],
-   "subscriptionAvailability": "ALL_TENANTS",
-   "subscriptionAvailableTenants": [],
-   "additionalProperties": {},
-   "monetization": null,
-   "businessInformation": {
-     "businessOwner": null,
-     "businessOwnerEmail": null,
-     "technicalOwner": null,
-     "technicalOwnerEmail": null
-   },
-   "corsConfiguration": {
-     "corsConfigurationEnabled": false,
-     "accessControlAllowOrigins": [
-       "*"
-     ],
-     "accessControlAllowCredentials": false,
-     "accessControlAllowHeaders": [
-       "authorization",
-       "Access-Control-Allow-Origin",
-       "Content-Type",
-       "SOAPAction",
-       "apikey"
-     ],
-     "accessControlAllowMethods": [
-       "GET",
-       "PUT",
-       "POST",
-       "DELETE",
-       "PATCH",
-       "OPTIONS"
-     ]
-   },
-   "createdTime": "2020-05-23 20:06:33.931",
-   "lastUpdatedTime": "2020-05-23 20:06:34.097",
-   "apis": [
-     {
-       "name": "PizzaShackAPI",
-       "apiId": "4df14bdd-5934-47ab-9afe-4704d5a1cb2b",
-       "operations": [
-         {
-           "id": "",
-           "target": "/menu",
-           "verb": "GET",
-           "authType": "Application & Application User",
-           "throttlingPolicy": "Unlimited",
-           "scopes": [],
-           "usedProductIds": [],
-           "amznResourceName": null,
-           "amznResourceTimeout": null
-         },
-         {
-           "id": "",
-           "target": "/order/{orderId}",
-           "verb": "PUT",
-           "authType": "Application & Application User",
-           "throttlingPolicy": "Unlimited",
-           "scopes": [],
-           "usedProductIds": [],
-           "amznResourceName": null,
-           "amznResourceTimeout": null
-         }
-       ]
-     },
-     {
-       "name": "SwaggerPetstore",
-       "apiId": "a2479626-453b-4204-b502-9b372a3ef29f",
-       "operations": [
-         {
-           "id": "",
-           "target": "/pet/{petId}/uploadImage",
-           "verb": "POST",
-           "authType": "Application & Application User",
-           "throttlingPolicy": "Unlimited",
-           "scopes": [],
-           "usedProductIds": [],
-           "amznResourceName": null,
-           "amznResourceTimeout": null
-         },
-         {
-           "id": "",
-           "target": "/pet/findByStatus",
-           "verb": "GET",
-           "authType": "Application & Application User",
-           "throttlingPolicy": "Unlimited",
-           "scopes": [],
-           "usedProductIds": [],
-           "amznResourceName": null,
-           "amznResourceTimeout": null
-         },
-         {
-           "id": "",
-           "target": "/pet/findByTags",
-           "verb": "GET",
-           "authType": "Application & Application User",
-           "throttlingPolicy": "Unlimited",
-           "scopes": [],
-           "usedProductIds": [],
-           "amznResourceName": null,
-           "amznResourceTimeout": null
-         }
-       ]
-     }
-   ],
-   "scopes": [],
-   "categories": []
- }
+  "id": "e62c19bf-51b8-4767-b8b8-690085241f26",
+  "name": "SampleAPIProduct",
+  "context": "/sampleapiproduct",
+  "description": null,
+  "provider": "admin",
+  "hasThumbnail": null,
+  "state": "PUBLISHED",
+  "enableSchemaValidation": false,
+  "responseCachingEnabled": false,
+  "cacheTimeout": 300,
+  "visibility": "PUBLIC",
+  "visibleRoles": [],
+  "visibleTenants": [],
+  "accessControl": "NONE",
+  "accessControlRoles": [],
+  "gatewayEnvironments": [
+    "Production and Sandbox"
+  ],
+  "apiType": "APIProduct",
+  "transport": [
+    "http",
+    "https"
+  ],
+  "tags": [],
+  "policies": [
+    "Bronze",
+    "Gold"
+  ],
+  "apiThrottlingPolicy": null,
+  "authorizationHeader": "Authorization",
+  "securityScheme": [
+    "oauth2",
+    "oauth_basic_auth_api_key_mandatory"
+  ],
+  "subscriptionAvailability": "ALL_TENANTS",
+  "subscriptionAvailableTenants": [],
+  "additionalProperties": {},
+  "monetization": null,
+  "businessInformation": {
+    "businessOwner": null,
+    "businessOwnerEmail": null,
+    "technicalOwner": null,
+    "technicalOwnerEmail": null
+  },
+  "corsConfiguration": {
+    "corsConfigurationEnabled": false,
+    "accessControlAllowOrigins": [
+      "*"
+    ],
+    "accessControlAllowCredentials": false,
+    "accessControlAllowHeaders": [
+      "authorization",
+      "Access-Control-Allow-Origin",
+      "Content-Type",
+      "SOAPAction",
+      "apikey"
+    ],
+    "accessControlAllowMethods": [
+      "GET",
+      "PUT",
+      "POST",
+      "DELETE",
+      "PATCH",
+      "OPTIONS"
+    ]
+  },
+  "apis": [
+    {
+      "name": "PizzaShackAPI",
+      "apiId": "4df14bdd-5934-47ab-9afe-4704d5a1cb2b",
+      "operations": [
+        {
+          "id": "",
+          "target": "/menu",
+          "verb": "GET",
+          "authType": "Application & Application User",
+          "throttlingPolicy": "Unlimited",
+          "scopes": [],
+          "usedProductIds": [],
+          "amznResourceName": null,
+          "amznResourceTimeout": null
+        },
+        {
+          "id": "",
+          "target": "/order/{orderId}",
+          "verb": "PUT",
+          "authType": "Application & Application User",
+          "throttlingPolicy": "Unlimited",
+          "scopes": [],
+          "usedProductIds": [],
+          "amznResourceName": null,
+          "amznResourceTimeout": null
+        }
+      ]
+    },
+    {
+      "name": "SwaggerPetstore",
+      "apiId": "a2479626-453b-4204-b502-9b372a3ef29f",
+      "operations": [
+        {
+          "id": "",
+          "target": "/pet/{petId}/uploadImage",
+          "verb": "POST",
+          "authType": "Application & Application User",
+          "throttlingPolicy": "Unlimited",
+          "scopes": [],
+          "usedProductIds": [],
+          "amznResourceName": null,
+          "amznResourceTimeout": null
+        },
+        {
+          "id": "",
+          "target": "/pet/findByStatus",
+          "verb": "GET",
+          "authType": "Application & Application User",
+          "throttlingPolicy": "Unlimited",
+          "scopes": [],
+          "usedProductIds": [],
+          "amznResourceName": null,
+          "amznResourceTimeout": null
+        },
+        {
+          "id": "",
+          "target": "/pet/findByTags",
+          "verb": "GET",
+          "authType": "Application & Application User",
+          "throttlingPolicy": "Unlimited",
+          "scopes": [],
+          "usedProductIds": [],
+          "amznResourceName": null,
+          "amznResourceTimeout": null
+        }
+      ]
+    }
+  ],
+  "scopes": [],
+  "categories": []
+}
