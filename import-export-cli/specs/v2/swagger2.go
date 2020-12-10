@@ -110,14 +110,14 @@ func BuildAPIMEndpoints(production, sandbox *Endpoints) (string, error) {
 		endpoint := buildLoadBalancedEndpoints(production, sandbox)
 		return endpoint, nil
 	case EpFailover:
-		endpoint := buildFailOver(production, sandbox)
+		endpoint := buildFailOverEndpoints(production, sandbox)
 		return endpoint, nil
 	default:
 		return "", fmt.Errorf("unknown endpoint type")
 	}
 }
 
-func buildFailOver(production *Endpoints, sandbox *Endpoints) string {
+func buildFailOverEndpoints(production *Endpoints, sandbox *Endpoints) string {
 	jsonObj, _ := gabs.ParseJSON([]byte(`
 					{
 						"endpoint_type": "failover",
@@ -158,7 +158,8 @@ func buildLoadBalancedEndpoints(production *Endpoints, sandbox *Endpoints) strin
 		    "algoCombo": "org.apache.synapse.endpoints.algorithms.RoundRobin",
 		    "algoClassName": "org.apache.synapse.endpoints.algorithms.RoundRobin",
 		    "sessionManagement": "",
-		    "sessionTimeOut": ""
+			"sessionTimeOut": "",
+			"failover" : "False"
 		}
 	`))
 	prodEps := make([]params.Endpoint, len(production.Urls))
@@ -197,40 +198,34 @@ func buildHttpEndpoint(production *Endpoints, sandbox *Endpoints) string {
 }
 
 // generateFieldsFromSwagger3 using swagger
-func Swagger2Populate(def *APIDefinition, document *loads.Document) error {
-	def.ID.APIName = document.Spec().Info.Title
-	def.ID.Version = document.Spec().Info.Version
-	def.ID.ProviderName = "admin"
+func Swagger2Populate(def *APIDTODefinition, document *loads.Document) error {
+	def.Name = document.Spec().Info.Title
+	def.Version = document.Spec().Info.Version
+	def.Provider = "admin"
 	def.Description = document.Spec().Info.Description
-	def.Context = fmt.Sprintf("/%s/%s", def.ID.APIName, def.ID.Version)
-	def.ContextTemplate = fmt.Sprintf("/%s/{version}", def.ID.APIName)
+	def.Context = fmt.Sprintf("/%s/%s", def.Name, def.Version)
 	def.Tags = swagger2Tags(document)
 
 	// fill basepath from swagger
 	if document.BasePath() != "" {
-		def.Context = path.Clean(fmt.Sprintf("/%s/%s", document.BasePath(), def.ID.Version))
-		def.ContextTemplate = path.Clean(fmt.Sprintf("/%s/{version}", document.BasePath()))
+		def.Context = path.Clean(fmt.Sprintf("/%s/%s", document.BasePath(), def.Version))
 	}
 
 	// override basepath if wso2 extension provided
 	if basepath, ok := swagger2XWO2BasePath(document); ok {
 		def.Context = path.Clean(basepath)
-		def.ContextTemplate = path.Clean(basepath)
 		if !strings.Contains(basepath, "{version}") {
-			def.Context = path.Clean(basepath + "/" + def.ID.Version)
-			def.ContextTemplate = path.Clean(basepath + "/{version}")
+			def.Context = path.Clean(basepath + "/" + def.Version)
 			def.IsDefaultVersion = true
 		} else {
-			def.ContextTemplate = path.Clean(basepath)
-			def.Context = path.Clean(strings.ReplaceAll(basepath, "{version}", def.ID.Version))
+			def.Context = path.Clean(strings.ReplaceAll(basepath, "{version}", def.Version))
 		}
 	}
 
 	// trim spaces if available
-	def.ID.APIName = strings.ReplaceAll(def.ID.APIName, " ", "")
-	def.ID.Version = strings.ReplaceAll(def.ID.Version, " ", "")
+	def.Name = strings.ReplaceAll(def.Name, " ", "")
+	def.Version = strings.ReplaceAll(def.Version, " ", "")
 	def.Context = strings.ReplaceAll(def.Context, " ", "")
-	def.ContextTemplate = strings.ReplaceAll(def.ContextTemplate, " ", "")
 
 	cors, ok, err := swagger2XWSO2Cors(document)
 	if err != nil && ok {
