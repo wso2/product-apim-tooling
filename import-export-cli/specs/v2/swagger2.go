@@ -19,6 +19,7 @@
 package v2
 
 import (
+	"encoding/json"
 	"fmt"
 	"path"
 	"strings"
@@ -249,7 +250,12 @@ func Swagger2Populate(def *APIDTODefinition, document *loads.Document) error {
 		if err != nil {
 			return err
 		}
-		def.EndpointConfig = &ep
+		var endpointConfig map[string]interface{}
+		err = json.Unmarshal([]byte(ep), &endpointConfig)
+		if err != nil {
+			return err
+		}
+		def.EndpointConfig = &endpointConfig
 	}
 	return nil
 }
