@@ -32,16 +32,19 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
-var loginUsername string
-var loginPassword string
+var loginAPIMUsername string
+var loginAPIMPassword string
+var loginMIUsername string
+var loginMIPassword string
 var loginPasswordStdin bool
 
 const loginCmdLiteral = "login [environment] [flags]"
-const loginCmdShortDesc = "Login to an API Manager"
-const loginCmdLongDesc = `Login to an API Manager using credentials`
-const loginCmdExamples = utils.ProjectName + " login dev -u admin -p admin\n" +
-	utils.ProjectName + " login dev -u admin\n" +
-	"cat ~/.mypassword | " + utils.ProjectName + " login dev -u admin"
+const loginCmdShortDesc = "Login to an API Manager or Micro Integrator"
+const loginCmdLongDesc = `Login to an API Manager or Micro Integrator using credentials`
+const loginCmdExamples = utils.ProjectName + " login dev --apim-username admin --apim-password admin\n" +
+	utils.ProjectName + " login dev --apim-username admin\n" +
+	utils.ProjectName + " login test --mi-username admin --mi-password admin\n" +
+	"cat ~/.mypassword | " + utils.ProjectName + " login dev --apim-username admin"
 
 // loginCmd represents the login command
 var loginCmd = &cobra.Command{
@@ -51,21 +54,54 @@ var loginCmd = &cobra.Command{
 	Example: loginCmdExamples,
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+
 		environment := args[0]
 
-		if loginPassword != "" {
-			fmt.Println("Warning: Using --password in CLI is not secure. Use --password-stdin")
-			if loginPasswordStdin {
-				fmt.Println("--password and --password-stdin are mutual exclusive")
+		if !utils.EnvExistsInMainConfigFile(environment, utils.MainConfigFilePath) {
+			fmt.Println(environment, "does not exists. Add it using add env")
+			os.Exit(1)
+		}
+
+		miExists := utils.MIExistsInEnv(environment, utils.MainConfigFilePath)
+		apimExists := utils.APIMExistsInEnv(environment, utils.MainConfigFilePath)
+
+		onlyMi := miExists && !apimExists
+		onlyAPIM := apimExists && !miExists
+
+		if onlyMi {
+			if loginAPIMPassword != "" || loginAPIMUsername != "" {
+				fmt.Println("No APIM found to login using --apim-username and --apim-password")
 				os.Exit(1)
+			}
+			if loginMIPassword != "" {
+				fmt.Println("Warning: Using --mi-password in CLI is not secure. Use --password-stdin")
+				if loginPasswordStdin {
+					fmt.Println("--mi-password and --password-stdin are mutual exclusive")
+					os.Exit(1)
+				}
 			}
 		}
 
-		if loginPasswordStdin {
-			if loginUsername == "" {
-				fmt.Println("An username is required to use password-stdin")
+		if onlyAPIM {
+			if loginMIPassword != "" || loginMIUsername != "" {
+				fmt.Println("No MI found to login using --mi-username and --mi-password")
 				os.Exit(1)
 			}
+			if loginAPIMPassword != "" {
+				fmt.Println("Warning: Using --apim-password in CLI is not secure. Use --password-stdin")
+				if loginPasswordStdin {
+					fmt.Println("--apim-password and --password-stdin are mutual exclusive")
+					os.Exit(1)
+				}
+			}
+		}
+
+		if loginAPIMPassword != "" && loginMIPassword != "" && loginPasswordStdin {
+			fmt.Println("--apim-password, mi-password and --password-stdin are mutual exclusive")
+			os.Exit(1)
+		}
+
+		if loginPasswordStdin {
 
 			data, err := ioutil.ReadAll(os.Stdin)
 			if err != nil {
@@ -73,7 +109,25 @@ var loginCmd = &cobra.Command{
 				os.Exit(1)
 			}
 
-			loginPassword = strings.TrimRight(strings.TrimSuffix(string(data), "\n"), "\r")
+			if apimExists {
+				if loginAPIMUsername == "" {
+					fmt.Println("An username for APIM is required to use password-stdin")
+					os.Exit(1)
+				}
+				if loginAPIMPassword == "" {
+					loginAPIMPassword = strings.TrimRight(strings.TrimSuffix(string(data), "\n"), "\r")
+				}
+			}
+
+			if miExists {
+				if loginMIUsername == "" {
+					fmt.Println("An username for MI is required to use password-stdin")
+					os.Exit(1)
+				}
+				if loginMIPassword == "" {
+					loginMIPassword = strings.TrimRight(strings.TrimSuffix(string(data), "\n"), "\r")
+				}
+			}
 		}
 
 		store, err := credentials.GetDefaultCredentialStore()
@@ -81,7 +135,7 @@ var loginCmd = &cobra.Command{
 			fmt.Println("Error occurred while loading credential store : ", err)
 			os.Exit(1)
 		}
-		err = runLogin(store, environment, loginUsername, loginPassword)
+		err = runLogin(store, environment, loginAPIMUsername, loginAPIMPassword, loginMIUsername, loginMIPassword)
 		if err != nil {
 			fmt.Println("Error occurred while login : ", err)
 			os.Exit(1)
@@ -89,14 +143,28 @@ var loginCmd = &cobra.Command{
 	},
 }
 
-func runLogin(store credentials.Store, environment, username, password string) error {
-	if !utils.EnvExistsInMainConfigFile(environment, utils.MainConfigFilePath) {
-		fmt.Println(environment, "does not exists. Add it using add env")
-		os.Exit(1)
+func runLogin(store credentials.Store, environment, apimUsername, apimPassword, miUsername, miPassword string) error {
+
+	if utils.APIMExistsInEnv(environment, utils.MainConfigFilePath) {
+		err := runAPIMLogin(store, environment, apimUsername, apimPassword)
+		if err != nil {
+			return err
+		}
 	}
 
+	if utils.MIExistsInEnv(environment, utils.MainConfigFilePath) {
+		err := credentials.RunMILogin(store, environment, miUsername, miPassword)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func runAPIMLogin(store credentials.Store, environment, username, password string) error {
+
 	if username == "" {
-		fmt.Print("Username:")
+		fmt.Print("APIM Username:")
 		scanner := bufio.NewScanner(os.Stdin)
 		if scanner.Scan() {
 			username = scanner.Text()
@@ -104,7 +172,7 @@ func runLogin(store credentials.Store, environment, username, password string) e
 	}
 
 	if password == "" {
-		fmt.Print("Password:")
+		fmt.Print("APIM Password:")
 		pass, err := terminal.ReadPassword(int(syscall.Stdin))
 		if err != nil {
 			return err
@@ -114,13 +182,13 @@ func runLogin(store credentials.Store, environment, username, password string) e
 	}
 
 	registrationEndpoint := utils.GetRegistrationEndpointOfEnv(environment, utils.MainConfigFilePath)
-	clientId, clientSecret, err := utils.GetClientIDSecret(username, password, registrationEndpoint)
+	clientID, clientSecret, err := utils.GetClientIDSecret(username, password, registrationEndpoint)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("Logged into", environment, "environment")
-	err = store.Set(environment, username, password, clientId, clientSecret)
+	fmt.Println("Logged into APIM in", environment, "environment")
+	err = store.Set(environment, username, password, clientID, clientSecret)
 	if err != nil {
 		return err
 	}
@@ -135,10 +203,18 @@ func GetCredentials(env string) (credentials.Credential, error) {
 	if err != nil {
 		return credentials.Credential{}, err
 	}
+
+	if !utils.APIMExistsInEnv(env, utils.MainConfigFilePath) {
+		fmt.Println("APIM instance does not exists in", env, "Add it using add env")
+		os.Exit(1)
+	}
+
 	// check for creds
 	if !store.Has(env) {
-		fmt.Println("Login to", env)
-		err = runLogin(store, env, "", "")
+
+		fmt.Println("Login to APIM in", env)
+
+		err = runAPIMLogin(store, env, "", "")
 		if err != nil {
 			return credentials.Credential{}, err
 		}
@@ -155,7 +231,9 @@ func GetCredentials(env string) (credentials.Credential, error) {
 func init() {
 	RootCmd.AddCommand(loginCmd)
 
-	loginCmd.Flags().StringVarP(&loginUsername, "username", "u", "", "Username for login")
-	loginCmd.Flags().StringVarP(&loginPassword, "password", "p", "", "Password for login")
+	loginCmd.Flags().StringVarP(&loginMIUsername, "mi-username", "", "", "Username for MI login")
+	loginCmd.Flags().StringVarP(&loginMIPassword, "mi-password", "", "", "Password for MI login")
+	loginCmd.Flags().StringVarP(&loginAPIMUsername, "apim-username", "", "", "Username for APIM login")
+	loginCmd.Flags().StringVarP(&loginAPIMPassword, "apim-password", "", "", "Password for APIM login")
 	loginCmd.Flags().BoolVarP(&loginPasswordStdin, "password-stdin", "", false, "Get password from stdin")
 }

@@ -381,3 +381,39 @@ func HasOnlyMIEndpoint(envEndpoints *EnvEndpoints) bool {
 		envEndpoints.PublisherEndpoint == "" && envEndpoints.RegistrationEndpoint == "" &&
 		envEndpoints.TokenEndpoint == "" && envEndpoints.MiManagementEndpoint != ""
 }
+
+// GetMIManagementEndpointOfEnv return the Mi Management Endpoint of a given environment
+func GetMIManagementEndpointOfEnv(env, filePath string) (string, error) {
+	envEndpoints, err := GetEndpointsOfEnvironment(env, filePath)
+	if err != nil {
+		return "", err
+	}
+	return envEndpoints.MiManagementEndpoint, nil
+}
+
+// GetMIManagementEndpointOfResource return the full resource url of a resource
+func GetMIManagementEndpointOfResource(resource, env, filePath string) string {
+	miEndpoint, _ := GetMIManagementEndpointOfEnv(env, filePath)
+	if strings.HasSuffix(miEndpoint, "/") {
+		return miEndpoint + MiManagementAPIContext + "/" + resource
+	}
+	return miEndpoint + "/" + MiManagementAPIContext + "/" + resource
+}
+
+// MIExistsInEnv check wether there is a micro integrator in the environment
+func MIExistsInEnv(env, filePath string) bool {
+	miEndpoint, err := GetMIManagementEndpointOfEnv(env, filePath)
+	if err != nil {
+		return false
+	}
+	return miEndpoint != ""
+}
+
+// APIMExistsInEnv check wether there is a apim in the environment
+func APIMExistsInEnv(env, filePath string) bool {
+	envEndpoints, err := GetEndpointsOfEnvironment(env, filePath)
+	if err != nil {
+		return false
+	}
+	return envEndpoints.ApiManagerEndpoint != "" || RequiredAPIMEndpointsExists(envEndpoints)
+}

@@ -62,7 +62,7 @@ func (s *JsonStore) Load() error {
 		return fmt.Errorf("%s is a directory", s.Path)
 	}
 
-	s.credentials = Credentials{Environments: make(map[string]Credential)}
+	s.credentials = Credentials{Environments: make(map[string]Environment)}
 	return nil
 }
 
@@ -81,39 +81,81 @@ func (s *JsonStore) persist() error {
 
 // Get credential for env
 func (s *JsonStore) Get(env string) (Credential, error) {
-	if cred, ok := s.credentials.Environments[env]; ok {
-		username, err := Base64Decode(cred.Username)
+	if environment, ok := s.credentials.Environments[env]; ok {
+		username, err := Base64Decode(environment.APIM.Username)
 		if err != nil {
 			return Credential{}, err
 		}
-		password, err := Base64Decode(cred.Password)
+		password, err := Base64Decode(environment.APIM.Password)
 		if err != nil {
 			return Credential{}, err
 		}
-		clientId, err := Base64Decode(cred.ClientId)
+		clientID, err := Base64Decode(environment.APIM.ClientId)
 		if err != nil {
 			return Credential{}, err
 		}
-		clientSecret, err := Base64Decode(cred.ClientSecret)
+		clientSecret, err := Base64Decode(environment.APIM.ClientSecret)
 		if err != nil {
 			return Credential{}, err
 		}
 		credential := Credential{
-			username, password, clientId, clientSecret,
+			username, password, clientID, clientSecret,
 		}
 		return credential, nil
 	}
-	return Credential{}, fmt.Errorf("credentials not found for %s, use login", env)
+	return Credential{}, fmt.Errorf("credentials not found for APIM in %s, use login", env)
 }
 
 // Set credentials for env using username, password, clientId, clientSecret
 func (s *JsonStore) Set(env, username, password, clientId, clientSecret string) error {
-	s.credentials.Environments[env] = Credential{
+	environment := s.credentials.Environments[env]
+	environment.APIM = Credential{
 		Username:     Base64Encode(username),
 		Password:     Base64Encode(password),
 		ClientId:     Base64Encode(clientId),
 		ClientSecret: Base64Encode(clientSecret),
 	}
+	s.credentials.Environments[env] = environment
+	err := s.persist()
+	if err != nil {
+		return err
+	}
+	fmt.Printf(PlainTextWarnMessage, s.Path)
+	return nil
+}
+
+// GetMICredentials returns credentials for mi
+func (s *JsonStore) GetMICredentials(env string) (MiCredential, error) {
+	if environment, ok := s.credentials.Environments[env]; ok {
+		username, err := Base64Decode(environment.MI.Username)
+		if err != nil {
+			return MiCredential{}, err
+		}
+		password, err := Base64Decode(environment.MI.Password)
+		if err != nil {
+			return MiCredential{}, err
+		}
+		accessToken, err := Base64Decode(environment.MI.AccessToken)
+		if err != nil {
+			return MiCredential{}, err
+		}
+		credential := MiCredential{
+			username, password, accessToken,
+		}
+		return credential, nil
+	}
+	return MiCredential{}, fmt.Errorf("credentials not found for Mi in %s, use login", env)
+}
+
+// SetMICredentials set credentials for mi using username, password, accessToken
+func (s *JsonStore) SetMICredentials(env, username, password, accessToken string) error {
+	environment := s.credentials.Environments[env]
+	environment.MI = MiCredential{
+		Username:    Base64Encode(username),
+		Password:    Base64Encode(password),
+		AccessToken: Base64Encode(accessToken),
+	}
+	s.credentials.Environments[env] = environment
 	err := s.persist()
 	if err != nil {
 		return err
@@ -124,10 +166,23 @@ func (s *JsonStore) Set(env, username, password, clientId, clientSecret string) 
 
 // Erase an env
 func (s *JsonStore) Erase(env string) error {
-	if _, ok := s.credentials.Environments[env]; !ok {
+	environment, ok := s.credentials.Environments[env]
+	if !ok {
 		return fmt.Errorf("%s was not found", env)
 	}
-	delete(s.credentials.Environments, env)
+	environment.APIM = Credential{}
+	s.credentials.Environments[env] = environment
+	return s.persist()
+}
+
+// EraseMI remove mi credentials from the store
+func (s *JsonStore) EraseMI(env string) error {
+	environment, ok := s.credentials.Environments[env]
+	if !ok {
+		return fmt.Errorf("%s was not found", env)
+	}
+	environment.MI = MiCredential{}
+	s.credentials.Environments[env] = environment
 	return s.persist()
 }
 

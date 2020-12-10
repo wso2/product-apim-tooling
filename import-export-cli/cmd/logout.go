@@ -28,8 +28,8 @@ import (
 )
 
 const logoutCmdLiteral = "logout [environment]"
-const logoutCmdShortDesc = "Logout to from an API Manager"
-const logoutCmdLongDesc = `Logout from an API Manager environment`
+const logoutCmdShortDesc = "Logout to from an API Manager or Micro Integrator"
+const logoutCmdLongDesc = `Logout from an API Manager or Micro Integrator environment`
 const logoutCmdExamples = utils.ProjectName + " logout dev"
 
 // logoutCmd represents the logout command
@@ -40,15 +40,32 @@ var logoutCmd = &cobra.Command{
 	Example: logoutCmdExamples,
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		err := runLogout(args[0])
-		if err != nil {
-			fmt.Println(err.Error())
-			os.Exit(1)
-		}
+		runLogout(args[0])
 	},
 }
 
-func runLogout(environment string) error {
+func runLogout(environment string) {
+	if !utils.EnvExistsInMainConfigFile(environment, utils.MainConfigFilePath) {
+		fmt.Println(environment, "does not exists. Add it using add env")
+		os.Exit(1)
+	}
+
+	if utils.APIMExistsInEnv(environment, utils.MainConfigFilePath) {
+		err := runAPIMLogout(environment)
+		if err != nil {
+			fmt.Println("Log out is unsuccessful for APIM in", environment, "environment.", err)
+		}
+	}
+
+	if utils.MIExistsInEnv(environment, utils.MainConfigFilePath) {
+		err := runMILogout(environment)
+		if err != nil {
+			fmt.Println("Log out is unsuccessful for MI in", environment, "environment.", err)
+		}
+	}
+}
+
+func runAPIMLogout(environment string) error {
 	cred, err := GetCredentials(environment)
 	//Get current access token for
 	accessToken, err := credentials.GetOAuthAccessToken(cred, environment)
@@ -60,8 +77,25 @@ func runLogout(environment string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("Logged out from", environment, "environment")
+	fmt.Println("Logged out from APIM in", environment, "environment")
 	return store.Erase(environment)
+}
+
+func runMILogout(environment string) error {
+	cred, err := credentials.GetMICredentials(environment)
+	if err != nil {
+		return err
+	}
+	err = credentials.RevokeAccessTokenForMI(environment, cred.AccessToken)
+	if err != nil {
+		return err
+	}
+	store, err := credentials.GetDefaultCredentialStore()
+	if err != nil {
+		return err
+	}
+	fmt.Println("Logged out from MI in", environment, "environment")
+	return store.EraseMI(environment)
 }
 
 // init using Cobra

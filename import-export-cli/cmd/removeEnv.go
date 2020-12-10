@@ -83,10 +83,7 @@ func removeEnv(envName, mainConfigFilePath, envKeysFilePath string) error {
 		// remove keys also if user has already logged into this environment
 		store, err := credentials.GetDefaultCredentialStore()
 		if store.Has(envName) {
-			err = runLogout(envName)
-			if err != nil {
-				utils.Logln("Log out is unsuccessful. ", err)
-			}
+			runLogout(envName)
 		}
 
 		// remove env from mainConfig file (endpoints file)
