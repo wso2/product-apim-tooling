@@ -55,6 +55,7 @@ type EnvEndpoints struct {
 	RegistrationEndpoint string `yaml:"registration"`
 	AdminEndpoint        string `yaml:"admin"`
 	TokenEndpoint        string `yaml:"token"`
+	MiManagementEndpoint string `yaml:"mi"`
 }
 
 // ---------------- End of Structs for YAML Config Files ---------------------------------

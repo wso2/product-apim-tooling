@@ -21,12 +21,13 @@ package utils
 import (
 	"errors"
 	"fmt"
-	"github.com/go-resty/resty"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/go-resty/resty"
 
 	"gopkg.in/yaml.v2"
 )
@@ -98,17 +99,16 @@ func (mainConfig *MainConfig) ParseMainConfigFromFile(data []byte) error {
 		return err
 	}
 	for name, endpoints := range mainConfig.Environments {
-		if endpoints.ApiManagerEndpoint == "" {
-			if endpoints.AdminEndpoint != "" && endpoints.DevPortalEndpoint != "" &&
-				endpoints.PublisherEndpoint != "" && endpoints.RegistrationEndpoint != "" &&
-				endpoints.TokenEndpoint != "" {
-				return nil
-			} else {
+		if !HasOnlyMIEndpoint(&endpoints) {
+			if endpoints.ApiManagerEndpoint == "" {
+				if RequiredAPIMEndpointsExists(&endpoints) {
+					return nil
+				}
 				return errors.New("Blank API Manager Endpoint for " + name)
 			}
-		}
-		if endpoints.TokenEndpoint == "" {
-			return errors.New("Blank Token Endpoint for " + name)
+			if endpoints.TokenEndpoint == "" {
+				return errors.New("Blank Token Endpoint for " + name)
+			}
 		}
 		// ApiImportExportEndpoint is not mandatory
 		// ApiListEndpoint is not mandatory
@@ -330,7 +330,7 @@ func CreateTempFile(pattern string, content []byte) (string, error) {
 // @return error
 // @return func() can be called to cleanup the temporary items created during this function execution. Needs to call
 //	this once the zip file is consumed
-func CreateZipFileFromProject(projectPath string, skipCleanup bool) (string, error, func()){
+func CreateZipFileFromProject(projectPath string, skipCleanup bool) (string, error, func()) {
 	// If the projectPath contains a directory, zip it
 	if info, err := os.Stat(projectPath); err == nil && info.IsDir() {
 		tmp, err := ioutil.TempFile("", "project-artifact*.zip")
@@ -413,7 +413,7 @@ func extractArchive(src, dest string) (string, error) {
 
 // Creates a temporary folder and creates a zip file with a given name (zipFileName) from the given REST API response.
 //	Returns the location of the created zip file.
-func WriteResponseToTempZip(zipFileName string,resp *resty.Response) (string, error) {
+func WriteResponseToTempZip(zipFileName string, resp *resty.Response) (string, error) {
 	// Create a temp directory to save the original zip from the REST API
 	tmpDir, err := ioutil.TempDir("", "apim")
 	if err != nil {
