@@ -27,8 +27,6 @@ import (
 	"path/filepath"
 	"unicode"
 
-	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
-
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
 
 	yaml2 "gopkg.in/yaml.v2"
@@ -253,13 +251,6 @@ func executeInitCmd() error {
 	apiJSONPath := filepath.Join(initCmdOutputDir, filepath.FromSlash("api.yaml"))
 	utils.Logln(utils.LogPrefixInfo + "Writing " + apiJSONPath)
 	err = ioutil.WriteFile(apiJSONPath, apiData, os.ModePerm)
-	if err != nil {
-		return err
-	}
-
-	apimProjParamsFilePath := filepath.Join(initCmdOutputDir, utils.ParamFileAPI)
-	utils.Logln(utils.LogPrefixInfo + "Writing " + apimProjParamsFilePath)
-	err = impl.ScaffoldParams(apimProjParamsFilePath)
 	if err != nil {
 		return err
 	}
