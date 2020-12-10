@@ -486,7 +486,7 @@ func ValidateAPIDeleteFailure(t *testing.T, args *ApiImportExportTestArgs) {
 }
 
 func exportApiImportedFromProject(t *testing.T, APIName string, APIVersion string, EnvName string) (string, error) {
-	return base.Execute(t, "export", "apis", "-n", APIName, "-v", APIVersion, "-e", EnvName)
+	return base.Execute(t, "export", "api", "-n", APIName, "-v", APIVersion, "-e", EnvName)
 }
 
 func exportAllApisOfATenant(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
