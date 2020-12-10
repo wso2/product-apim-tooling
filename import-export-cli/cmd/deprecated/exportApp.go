@@ -70,7 +70,8 @@ func executeExportAppCmd(credential credentials.Credential, appsExportDirectoryP
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, cmd.CmdExportEnvironment)
 
 	if preCommandErr == nil {
-		resp, err := impl.ExportAppFromEnv(accessToken, exportAppName, exportAppOwner, cmd.CmdExportEnvironment, exportAppWithKeys)
+		// The format flag is not supported from the deprecated command.
+		resp, err := impl.ExportAppFromEnv(accessToken, exportAppName, exportAppOwner, "", cmd.CmdExportEnvironment, exportAppWithKeys)
 		if err != nil {
 			utils.HandleErrorAndExit("Error exporting Application: "+exportAppName, err)
 		}

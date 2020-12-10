@@ -33,6 +33,7 @@ import (
 var exportAppName string
 var exportAppOwner string
 var exportAppWithKeys bool
+var exportAppFormat string
 
 //var flagExportAPICmdToken string
 // ExportApp command related usage info
@@ -68,7 +69,8 @@ func executeExportAppCmd(credential credentials.Credential, appsExportDirectoryP
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, CmdExportEnvironment)
 
 	if preCommandErr == nil {
-		resp, err := impl.ExportAppFromEnv(accessToken, exportAppName, exportAppOwner, CmdExportEnvironment, exportAppWithKeys)
+		resp, err := impl.ExportAppFromEnv(accessToken, exportAppName, exportAppOwner, exportAppFormat,
+			CmdExportEnvironment, exportAppWithKeys)
 		if err != nil {
 			utils.HandleErrorAndExit("Error exporting Application: "+exportAppName, err)
 		}
@@ -97,6 +99,7 @@ func init() {
 		"", "Environment to which the Application should be exported")
 	ExportAppCmd.Flags().BoolVarP(&exportAppWithKeys, "withKeys", "",
 		false, "Export keys for the application ")
+	ExportAppCmd.Flags().StringVarP(&exportAppFormat, "format", "", utils.DefaultExportFormat, "File format of exported archive (json or yaml)")
 	_ = ExportAppCmd.MarkFlagRequired("environment")
 	_ = ExportAppCmd.MarkFlagRequired("owner")
 	_ = ExportAppCmd.MarkFlagRequired("name")
