@@ -11,6 +11,8 @@ data:
   transport:
    - http
    - https
+  policies:
+   - Unlimited
   visibility: PUBLIC
   endpointConfig:
     endpoint_type: http
