@@ -23,6 +23,10 @@ import (
 	"path"
 	"strings"
 
+	"encoding/json"
+	"io/ioutil"
+	"os"
+
 	"github.com/wso2/product-apim-tooling/import-export-cli/specs/params"
 
 	"github.com/Jeffail/gabs"
@@ -256,5 +260,42 @@ func Swagger2Populate(def *APIDefinition, document *loads.Document) error {
 		}
 		def.EndpointConfig = &ep
 	}
+	return nil
+}
+
+func SetAdvertiseOnlyToTrue(def *APIDefinition) {
+	def.AdvertiseOnly = true 
+}
+
+type Servers struct {
+	Servers []struct {
+		Url       string `json:"url"`
+		Variables struct {
+			BasePath struct {
+				Default string `json:"default"`
+			} `json:"basePath"`
+		} `json:"variables"`
+	} `json:"servers"`
+}
+
+func GetServerUrlFromOAS(def *APIDefinition, pathToSwagger string) error {
+	oas3File, err := os.Open(pathToSwagger)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer oas3File.Close()
+
+	byteValue, _ := ioutil.ReadAll(oas3File)
+
+	var servers Servers  
+	json.Unmarshal(byteValue, &servers)
+
+	url  := servers.Servers[0].Url
+	stage := servers.Servers[0].Variables.BasePath.Default
+	def.ProductionUrl = url
+	def.SandboxUrl    = url
+	def.ProductionUrl = strings.ReplaceAll(def.ProductionUrl, "/{basePath}", stage)
+	def.SandboxUrl    = strings.ReplaceAll(def.SandboxUrl, "/{basePath}", stage)
+	def.Tags = append(def.Tags, "aws") //adding the "aws" tag to all APIs imported using the "aws init" command 
 	return nil
 }

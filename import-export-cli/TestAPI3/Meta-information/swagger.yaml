@@ -1,0 +1,24 @@
+components:
+  schemas:
+    Empty:
+      title: Empty Schema
+      type: object
+info:
+  title: TestAPI3
+  version: "2020-11-10T10:54:53Z"
+openapi: 3.0.1
+paths:
+  /:
+    get:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Empty'
+          description: 200 response
+servers:
+- url: https://jog86spn3e.execute-api.us-east-1.amazonaws.com/{basePath}
+  variables:
+    basePath:
+      default: /demo

@@ -1,0 +1,18 @@
+id:
+  providerName: admin
+  apiName: PetStore
+  version: "2020-07-14T08:16:01Z"
+description: Your first API with Amazon API Gateway. This is a sample API that integrates
+  via HTTP with our demo Pet Store endpoints
+type: HTTP
+context: /PetStore/2020-07-14T08:16:01Z
+contextTemplate: /PetStore/{version}
+availableTiers:
+- name: Unlimited
+status: CREATED
+visibility: public
+transports: http,https
+advertiseOnly: true
+productionUrl: https://lg9m4mu9qk.execute-api.us-east-1.amazonaws.com
+sandboxUrl: https://lg9m4mu9qk.execute-api.us-east-1.amazonaws.com
+enableStore: true

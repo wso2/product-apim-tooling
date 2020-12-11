@@ -95,3 +95,10 @@ type ApiChangeLifeCycleStatusTestArgs struct {
 	Provider      string
 	ExpectedState string
 }
+
+type AWSInitTestArgs struct {
+	CtlUser        Credentials
+	SrcAPIM        *apim.Client
+	ApiNameFlag		 string 
+	ApiStageNameFlag string
+}

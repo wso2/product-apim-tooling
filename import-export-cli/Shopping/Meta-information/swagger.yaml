@@ -1,0 +1,33 @@
+components:
+  schemas:
+    Empty:
+      title: Empty Schema
+      type: object
+info:
+  title: Shopping
+  version: "2020-07-16T09:48:47Z"
+openapi: 3.0.1
+paths:
+  /cart:
+    post:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Empty'
+          description: 200 response
+  /item:
+    get:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Empty'
+          description: 200 response
+servers:
+- url: https://ern7ceaofh.execute-api.us-east-1.amazonaws.com/{basePath}
+  variables:
+    basePath:
+      default: /Live

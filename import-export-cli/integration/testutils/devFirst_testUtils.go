@@ -27,6 +27,33 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 )
 
+func AwsInitProject(t *testing.T, args *AWSInitTestArgs) (string, error) {
+	//Setup Environment and login to it.
+	base.SetupEnvWithoutTokenFlag(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL())
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	output, err := base.Execute(t, "aws", "init", "-n", args.ApiNameFlag, "-s", args.ApiStageNameFlag)
+	return output, err 
+}
+
+func ValidateAWSInitProject(t *testing.T, args *AWSInitTestArgs) {
+	t.Helper()
+
+	output, err := AwsInitProject(t, args)
+	if err != nil {
+		log.Fatal(err)
+	}
+	//Project initialized
+	assert.Nil(t, err, "Error testing aws init command")
+	assert.Contains(t, output, "Project initialized", "Error while executing aws init command")
+
+	//Remove Created project and logout
+	t.Cleanup(func() {
+		base.RemoveDir(args.ApiNameFlag)
+	})	
+	return 
+}
+
 func InitProject(t *testing.T, args *InitTestArgs) (string, error) {
 	//Setup Environment and login to it.
 	base.SetupEnvWithoutTokenFlag(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL())
