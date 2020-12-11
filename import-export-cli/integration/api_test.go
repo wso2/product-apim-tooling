@@ -30,6 +30,29 @@ import (
 
 const numberOfAPIs = 5 // Number of APIs to be added in a loop
 
+// Export an API from one environment and check the structure of the DTO whether it is similat to what is being
+// maintained by APICTL
+func TestExportApiCompareStruct(t *testing.T) {
+	apiPublisher := publisher.UserName
+	apiPublisherPassword := publisher.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: apiPublisher, Password: apiPublisherPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+	}
+
+	testutils.ValidateExportedAPIStructure(t, args)
+}
+
 // Export an API from one environment as a super tenant non admin user (who has API Create and API Publish permissions)
 // by specifying the provider name
 func TestExportApiNonAdminSuperTenantUser(t *testing.T) {

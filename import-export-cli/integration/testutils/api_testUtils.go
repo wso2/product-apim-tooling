@@ -19,6 +19,7 @@
 package testutils
 
 import (
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -284,6 +285,81 @@ func ValidateAPIExport(t *testing.T, args *ApiImportExportTestArgs) {
 
 	assert.True(t, base.IsAPIArchiveExists(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
 		args.Api.Name, args.Api.Version))
+}
+
+func ValidateExportedAPIStructure(t *testing.T, args *ApiImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	// Export api from env 1
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	output, _ := exportAPI(t, args.Api.Name, args.Api.Version, args.ApiProvider.Username, args.SrcAPIM.GetEnvName())
+
+	ValidateAPIStructure(t, args.Api, output)
+
+	assert.True(t, base.IsAPIArchiveExists(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
+		args.Api.Name, args.Api.Version))
+}
+
+func ValidateAPIStructure(t *testing.T, api *apim.API, exportedOutput string) {
+	// Unzip exported API
+	exportedPath := base.GetExportedPathFromOutput(exportedOutput)
+	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
+	base.Unzip(relativePath, exportedPath)
+
+	// Read the api.yaml file in the exported directory
+	fileData, err := ioutil.ReadFile(relativePath + "/" + api.Name + "-" + api.Version + APIYamlFilePath)
+	if err != nil {
+		t.Error(err)
+	}
+	// Extract the "data" field to an interface
+	fileContent := make(map[string]interface{})
+	err = yaml.Unmarshal(fileData, &fileContent)
+	if err != nil {
+		t.Error(err)
+	}
+	apiData := fileContent["data"].(map[interface{}]interface{})
+
+	// Read the sample-api.yaml file in the testdata directory
+	sampleData, err := ioutil.ReadFile(SampleAPIYamlFilePath)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Extract the "data" field to an interface
+	sampleDataContent := make(map[string]interface{})
+	err = yaml.Unmarshal(sampleData, &sampleDataContent)
+	if err != nil {
+		t.Error(err)
+	}
+	sampleAPIData := sampleDataContent["data"].(map[interface{}]interface{})
+
+	// Check whether the fields of the API DTO structure in APICTL has all the fields in API DTO structure from APIM
+	base.Log("\n-----------------------------------------------------------------------------------------")
+	base.Log("Checking whether the fields of APICTL API DTO struct has all the fields from APIM API DTO struct")
+	for key, _ := range apiData {
+		keyValue := key.(string)
+		_, ok := sampleAPIData[key]
+		base.Log("\"" + keyValue + "\" is in both the structures")
+		if !ok {
+			t.Error("Missing \"" + keyValue + "\" in the API DTO structure from APICTL")
+		}
+	}
+
+	// Check whether the fields of the API DTO structure in APIM has all the fields in API DTO structure from APICTL
+	base.Log("\n-----------------------------------------------------------------------------------------")
+	base.Log("Checking whether the fields of APIM API DTO struct has all the fields from APICTL API DTO struct")
+	for key, _ := range sampleAPIData {
+		keyValue := key.(string)
+		_, ok := apiData[key]
+		base.Log("\"" + keyValue + "\" is in both the structures")
+		if !ok {
+			t.Error("Missing \"" + keyValue + "\" in the API DTO structure from APIM")
+		}
+	}
 }
 
 func GetImportedAPI(t *testing.T, args *ApiImportExportTestArgs) *apim.API {
