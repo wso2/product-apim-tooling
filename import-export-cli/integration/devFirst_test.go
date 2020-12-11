@@ -25,6 +25,26 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 )
 
+//Initialize a API project by getting the OAS of a AWS API
+//WARN: To test this you need to have AWS CLI installed and configured
+//WARN: Before running this test create an API on AWS with the name "Shopping" and stage name "Live"
+func TestAWSInit(t *testing.T) {
+	username := superAdminUser
+	password := superAdminPassword
+	apim := apimClients[0]
+	apiName := "Shopping"
+	apiStageName := "Live"
+
+	args := &testutils.AWSInitTestArgs{
+		CtlUser:  testutils.Credentials{Username: username, Password: password},
+		SrcAPIM:  apim,
+		ApiNameFlag: apiName,
+		ApiStageNameFlag : apiStageName,
+	}
+
+	testutils.ValidateAWSInitProject(t, args)
+}
+
 //Initialize a project Initialize an API without any flag
 func TestInitializeProject(t *testing.T) {
 	username := superAdminUser
