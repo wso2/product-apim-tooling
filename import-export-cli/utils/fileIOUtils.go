@@ -304,6 +304,33 @@ func CopyDir(src string, dst string) (err error) {
 	return
 }
 
+// CopyDirectoryContents recursively copies all the content of a directory, attempting to preserve permissions.
+// Source directory must exist,and the destination directory exist.
+func CopyDirectoryContents (src string, dst string) (err error)  {
+	entries, err := ioutil.ReadDir(src)
+	if err != nil {
+		return
+	}
+
+	for _, entry := range entries {
+		srcPath := filepath.Join(src, entry.Name())
+		dstPath := filepath.Join(dst, entry.Name())
+
+		if entry.IsDir() {
+			err = CopyDir(srcPath, dstPath)
+			if err != nil {
+				return
+			}
+		} else {
+			err = CopyFile(srcPath, dstPath)
+			if err != nil {
+				return
+			}
+		}
+	}
+	return
+}
+
 // CreateTempFile creates a temporary file in the OS' temp directory
 // example pattern "docker-secret-*.yaml"
 func CreateTempFile(pattern string, content []byte) (string, error) {

@@ -2,11 +2,12 @@ package params
 
 import (
 	"encoding/json"
-	"io/ioutil"
-	"os"
-
+	"fmt"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"gopkg.in/yaml.v2"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 )
 
 // Configuration represents endpoint config
@@ -133,32 +134,9 @@ type APIIdentifier struct {
 	Version string `json:"version"`
 }
 
-// Environment represents an api environment
 type Environment struct {
-	// Name of the environment
 	Name string `yaml:"name"`
-	// Type of the endpoints. Values can be "rest", "soap", "dynamic" or "aws"
-	EndpointType string `yaml:"endpointType"`
-	// EndpointRoutingPolicy contains the routing policy related to the endpoint. Values can be "load_balanced" or "failover".
-	// (Only available for the endpointTypes "rest" or "soap")
-	EndpointRoutingPolicy string `yaml:"endpointRoutingPolicy"`
-	// Endpoints contain details about endpoints in a configuration
-	Endpoints *EndpointData `yaml:"endpoints"`
-	// LoadBalanceEndpoints contain details about endpoints in a configuration for load balancing scenarios
-	LoadBalanceEndpoints *LoadBalanceEndpointsData `yaml:"loadBalanceEndpoints"`
-	// FailoverEndpoints contain details about endpoints in a configuration for failover scenarios
-	FailoverEndpoints *FailoverEndpointsData `yaml:"failoverEndpoints"`
-	// AWSLambdaEndpoints contain details about endpoints in a configuration with AWD Lambda configuration
-	AWSLambdaEndpoints *AWSLambdaEndpointsData `yaml:"awsLambdaEndpoints"`
-	// Security contains the details about endpoint security
-	Security *SecurityData `yaml:"security"`
-	// GatewayEnvironments contains environments that used to deploy API
-	GatewayEnvironments []string `yaml:"gatewayEnvironments"`
-	// Certs for environment
-	Certs          []Cert          `yaml:"certs"`
-	MutualSslCerts []MutualSslCert `yaml:"mutualSslCerts"`
-	// VCS params for the environment
-	VCS APIVCSParams `yaml:"vcs"`
+	Config map[string]interface{} `yaml:"configs"`
 }
 
 // ApiParams represents environments defined in configuration file
@@ -260,6 +238,63 @@ func getEnvSubstitutedFileContent(path string) (string, error) {
 	return str, nil
 }
 
+// LoadApiParamsFromDirectory loads an API Project configuration YAML file located in path when the root
+// directory is provided instead of yaml file.
+//	It returns an error or a valid ApiParams
+func LoadApiParamsFromDirectory(path string) (*ApiParams, error) {
+	paramsFilePath:= filepath.Join(path,utils.ParamFileAPI)
+	fmt.Println(paramsFilePath)
+	fileContent, err := getEnvSubstitutedFileContent(paramsFilePath)
+	if err != nil {
+		return nil, err
+	}
+
+	apiParams := &ApiParams{}
+	err = yaml.Unmarshal([]byte(fileContent), &apiParams)
+	if err != nil {
+		return nil, err
+	}
+
+	return apiParams, err
+}
+
+// LoadApiProductParamsFromFile loads an API Product project configuration YAML file located in path when the root
+// directory is provided instead of yaml file.
+//	It returns an error or a valid ApiProductParams
+func LoadApiProductParamsFromDirectory(path string) (*ApiProductParams, error) {
+	paramsFilePath:= filepath.Join(path,utils.ParamFileAPIProduct)
+	fileContent, err := getEnvSubstitutedFileContent(paramsFilePath)
+	if err != nil {
+		return nil, err
+	}
+
+	apiParams := &ApiProductParams{}
+	err = yaml.Unmarshal([]byte(fileContent), &apiParams)
+	if err != nil {
+		return nil, err
+	}
+
+	return apiParams, err
+}
+
+// LoadApplicationParamsFromDirectory loads an Application project configuration YAML file located in path when the root
+// directory is provided instead of yaml file.
+//	It returns an error or a valid ApplicationParams
+func LoadApplicationParamsFromDirectory(path string) (*ApplicationParams, error) {
+	paramsFilePath:= filepath.Join(path,utils.ParamFileApplication)
+	fileContent, err := getEnvSubstitutedFileContent(paramsFilePath)
+	if err != nil {
+		return nil, err
+	}
+
+	apiParams := &ApplicationParams{}
+	err = yaml.Unmarshal([]byte(fileContent), &apiParams)
+	if err != nil {
+		return nil, err
+	}
+
+	return apiParams, err
+}
 // LoadApiParamsFromFile loads an API Project configuration YAML file located in path.
 //	It returns an error or a valid ApiParams
 func LoadApiParamsFromFile(path string) (*ApiParams, error) {
