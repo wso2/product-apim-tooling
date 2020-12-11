@@ -50,7 +50,7 @@ func TestExportApiNonAdminSuperTenantUser(t *testing.T) {
 		SrcAPIM:     dev,
 	}
 
-	testutils.ValidateAPIExportFailure(t, args)
+	testutils.ValidateAPIExport(t, args)
 }
 
 // Export an API from one environment and import to another environment as super tenant admin by specifying the provider name
@@ -122,7 +122,7 @@ func TestExportApiNonAdminTenantUser(t *testing.T) {
 		SrcAPIM:     dev,
 	}
 
-	testutils.ValidateAPIExportFailure(t, args)
+	testutils.ValidateAPIExport(t, args)
 }
 
 // Export an API from one environment and import to another environment as tenant admin by specifying the provider name
@@ -183,15 +183,13 @@ func TestExportApiAdminSuperTenantUserWithoutProvider(t *testing.T) {
 	apiCreatorPassword := creator.Password
 
 	dev := apimClients[0]
-	prod := apimClients[1]
 
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
 	args := &testutils.ApiImportExportTestArgs{
-		CtlUser:  testutils.Credentials{Username: adminUsername, Password: adminPassword},
-		Api:      api,
-		SrcAPIM:  dev,
-		DestAPIM: prod,
+		CtlUser: testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		Api:     api,
+		SrcAPIM: dev,
 	}
 
 	testutils.ValidateAPIExport(t, args)
@@ -206,15 +204,13 @@ func TestExportApiDevopsSuperTenantUserWithoutProvider(t *testing.T) {
 	apiCreatorPassword := creator.Password
 
 	dev := apimClients[0]
-	prod := apimClients[1]
 
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
 	args := &testutils.ApiImportExportTestArgs{
-		CtlUser:  testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
-		Api:      api,
-		SrcAPIM:  dev,
-		DestAPIM: prod,
+		CtlUser: testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Api:     api,
+		SrcAPIM: dev,
 	}
 
 	testutils.ValidateAPIExport(t, args)
@@ -229,15 +225,13 @@ func TestExportApiAdminTenantUserWithoutProvider(t *testing.T) {
 	tenantApiCreatorPassword := creator.Password
 
 	dev := apimClients[0]
-	prod := apimClients[1]
 
 	api := testutils.AddAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword)
 
 	args := &testutils.ApiImportExportTestArgs{
-		CtlUser:  testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
-		Api:      api,
-		SrcAPIM:  dev,
-		DestAPIM: prod,
+		CtlUser: testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
+		Api:     api,
+		SrcAPIM: dev,
 	}
 
 	testutils.ValidateAPIExport(t, args)
@@ -252,15 +246,13 @@ func TestExportApiDevopsTenantUserWithoutProvider(t *testing.T) {
 	tenantApiCreatorPassword := creator.Password
 
 	dev := apimClients[0]
-	prod := apimClients[1]
 
 	api := testutils.AddAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword)
 
 	args := &testutils.ApiImportExportTestArgs{
-		CtlUser:  testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
-		Api:      api,
-		SrcAPIM:  dev,
-		DestAPIM: prod,
+		CtlUser: testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		Api:     api,
+		SrcAPIM: dev,
 	}
 
 	testutils.ValidateAPIExport(t, args)

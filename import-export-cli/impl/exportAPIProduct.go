@@ -28,25 +28,25 @@ import (
 
 // ExportAPIProductFromEnv function is used with export api command
 func ExportAPIProductFromEnv(accessToken, name, version, provider, format, exportEnvironment string) (*resty.Response, error) {
-	adminEndpoint := utils.GetAdminEndpointOfEnv(exportEnvironment, utils.MainConfigFilePath)
-	return exportAPIProduct(name, version, provider, format, adminEndpoint, accessToken)
+	publisherEndpoint := utils.GetPublisherEndpointOfEnv(exportEnvironment, utils.MainConfigFilePath)
+	return exportAPIProduct(name, version, provider, format, publisherEndpoint, accessToken)
 }
 
 // exportAPIProduct
 // @param name : Name of the API Product to be exported
 // @param version : Version of the API Product to be exported
 // @param provider : Provider of the API Product
-// @param adminEndpoint : API Manager Admin Endpoint for the environment
+// @param publisherEndpoint : API Manager Publisher Endpoint for the environment
 // @param accessToken : Access Token for the resource
 // @return response Response in the form of *resty.Response
-func exportAPIProduct(name, version, provider, format, adminEndpoint, accessToken string) (*resty.Response, error) {
-	adminEndpoint = utils.AppendSlashToString(adminEndpoint)
-	query := "export/api-product?name=" + name + "&version=" + version + "&providerName=" + provider
+func exportAPIProduct(name, version, provider, format, publisherEndpoint, accessToken string) (*resty.Response, error) {
+	publisherEndpoint = utils.AppendSlashToString(publisherEndpoint)
+	query := "api-products/export?name=" + name + "&version=" + version + "&providerName=" + provider
 	if format != "" {
 		query += "&format=" + format
 	}
 
-	url := adminEndpoint + query
+	url := publisherEndpoint + query
 	utils.Logln(utils.LogPrefixInfo+"ExportAPIProduct: URL:", url)
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken

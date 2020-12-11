@@ -25,15 +25,12 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"path"
 	"path/filepath"
 	"regexp"
 	"strconv"
-	"strings"
 
 	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 
-	"github.com/Jeffail/gabs"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
@@ -71,54 +68,6 @@ func resolveImportAPIProductFilePath(file, defaultExportDirectory string) (strin
 	}
 
 	return absPath, nil
-}
-
-func populateAPIProductWithDefaults(def *v2.APIProductDefinition) (dirty bool) {
-	dirty = false
-	def.Context = strings.ReplaceAll(def.Context, " ", "")
-	if def.ContextTemplate == "" {
-		if !strings.Contains(def.Context, "{version}") {
-			def.ContextTemplate = path.Clean(def.Context + "/{version}")
-			def.Context = strings.ReplaceAll(def.ContextTemplate, "{version}", def.ID.Version)
-		} else {
-			def.Context = path.Clean(def.Context)
-			def.ContextTemplate = def.Context
-			def.Context = strings.ReplaceAll(def.Context, "{version}", def.ID.Version)
-		}
-		dirty = true
-	}
-	if def.Tags == nil {
-		def.Tags = []string{}
-		dirty = true
-	}
-	return
-}
-
-// validateApiProductDefinition validates an API Product against basic rules
-func validateAPIProductDefinition(def *v2.APIProductDefinition) error {
-	utils.Logln(utils.LogPrefixInfo + "Validating API Product")
-	if isEmpty(def.ID.APIProductName) {
-		return errors.New("apiProductName is required")
-	}
-	if reAPIProductName.MatchString(def.ID.APIProductName) {
-		return errors.New(`apiProductName contains one or more illegal characters (~!@#;:%^*()+={}|\\<>"',&\/$)`)
-	}
-	if isEmpty(def.ID.Version) {
-		return errors.New("version is required")
-	}
-	if isEmpty(def.Context) {
-		return errors.New("context is required")
-	}
-	if isEmpty(def.ContextTemplate) {
-		return errors.New("contextTemplate is required")
-	}
-	if !strings.HasPrefix(def.Context, "/") {
-		return errors.New("context should begin with a /")
-	}
-	if !strings.HasPrefix(def.ContextTemplate, "/") {
-		return errors.New("contextTemplate should begin with a /")
-	}
-	return nil
 }
 
 // importAPIProduct imports an API Product to the API manager
@@ -181,13 +130,13 @@ func preProcessDependentAPIs(apiProductFilePath, importEnvironment string, impor
 // ImportAPIProductToEnv function is used with import-api-product command
 func ImportAPIProductToEnv(accessOAuthToken, importEnvironment, importPath string, importAPIs, importAPIsUpdate,
 	importAPIProductUpdate, importAPIProductPreserveProvider, importAPIProductSkipCleanup bool) error {
-	adminEndpoint := utils.GetAdminEndpointOfEnv(importEnvironment, utils.MainConfigFilePath)
-	return ImportAPIProduct(accessOAuthToken, adminEndpoint, importEnvironment, importPath, importAPIs, importAPIsUpdate,
+	publisherEndpoint := utils.GetPublisherEndpointOfEnv(importEnvironment, utils.MainConfigFilePath)
+	return ImportAPIProduct(accessOAuthToken, publisherEndpoint, importEnvironment, importPath, importAPIs, importAPIsUpdate,
 		importAPIProductUpdate, importAPIProductPreserveProvider, importAPIProductSkipCleanup)
 }
 
 // ImportAPIProduct function is used with import-api-product command
-func ImportAPIProduct(accessOAuthToken, adminEndpoint, importEnvironment, importPath string, importAPIs, importAPIsUpdate,
+func ImportAPIProduct(accessOAuthToken, publisherEndpoint, importEnvironment, importPath string, importAPIs, importAPIsUpdate,
 	importAPIProductUpdate, importAPIProductPreserveProvider, importAPIProductSkipCleanup bool) error {
 	var exportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedApiProductsDirName)
 
@@ -227,50 +176,6 @@ func ImportAPIProduct(accessOAuthToken, adminEndpoint, importEnvironment, import
 		return err
 	}
 
-	// Get API Product info
-	apiProductInfo, originalContent, err := GetAPIProductDefinition(apiProductFilePath)
-	if err != nil {
-		return err
-	}
-	// Fill with defaults
-	if populateAPIProductWithDefaults(apiProductInfo) {
-		utils.Logln(utils.LogPrefixInfo + "API Product is populated with defaults")
-		// API Product is dirty, write it to disk
-		buf, err := json.Marshal(apiProductInfo)
-		if err != nil {
-			return err
-		}
-
-		newContent, err := gabs.ParseJSON(buf)
-		if err != nil {
-			return err
-		}
-		originalContent, err := gabs.ParseJSON(originalContent)
-		if err != nil {
-			return err
-		}
-		result, err := utils.MergeJSON(originalContent.Bytes(), newContent.Bytes())
-		if err != nil {
-			return err
-		}
-
-		yamlContent, err := utils.JsonToYaml(result)
-		if err != nil {
-			return err
-		}
-		p := filepath.Join(apiProductFilePath, "Meta-information", "api.yaml")
-		utils.Logln(utils.LogPrefixInfo+"Writing", p)
-
-		err = ioutil.WriteFile(p, yamlContent, 0644)
-		if err != nil {
-			return err
-		}
-	}
-	// Validate definition
-	if err = validateAPIProductDefinition(apiProductInfo); err != nil {
-		return err
-	}
-
 	// If apiProductFilePath contains a directory, zip it. Otherwise, leave it as it is.
 	apiProductFilePath, err, cleanupFunc := utils.CreateZipFileFromProject(apiProductFilePath, importAPIProductSkipCleanup)
 	if err != nil {
@@ -282,49 +187,29 @@ func ImportAPIProduct(accessOAuthToken, adminEndpoint, importEnvironment, import
 		defer cleanupFunc()
 	}
 
-	updateAPIProduct := false
-	if importAPIsUpdate || importAPIProductUpdate {
-		// Check for API Product existence
-		id, err := GetAPIProductId(accessOAuthToken, importEnvironment, apiProductInfo.ID.APIProductName,
-			apiProductInfo.ID.ProviderName)
-		if err != nil {
-			return err
-		}
-
-		if id == "" {
-			updateAPIProduct = false
-			utils.Logln("The specified API Product was not found.")
-			utils.Logln("Creating: %s %s\n", apiProductInfo.ID.APIProductName, apiProductInfo.ID.Version)
-		} else {
-			utils.Logln("Existing API Product found, attempting to update it...")
-			utils.Logln("API Product ID:", id)
-			updateAPIProduct = true
-		}
-	}
-
 	if err != nil {
 		utils.HandleErrorAndExit("Error getting OAuth Tokens", err)
 	}
 	extraParams := map[string]string{}
-	adminEndpoint += "/import/api-product" + "?preserveProvider=" + strconv.FormatBool(importAPIProductPreserveProvider)
+	publisherEndpoint += "/api-products/import" + "?preserveProvider=" + strconv.FormatBool(importAPIProductPreserveProvider)
 
 	// If the user has specified import-apis flag or update-apis flag, importAPIs parameter should be passed as true
 	// because update is also an import task
 	if importAPIs || importAPIsUpdate {
-		adminEndpoint += "&importAPIs=" + strconv.FormatBool(true)
+		publisherEndpoint += "&importAPIs=" + strconv.FormatBool(true)
 	}
 
 	// If the user need to update the APIs and the API Product, overwriteAPIs parameter should be passed as true
 	if importAPIsUpdate {
-		adminEndpoint += "&overwriteAPIs=" + strconv.FormatBool(true)
+		publisherEndpoint += "&overwriteAPIs=" + strconv.FormatBool(true)
 	}
 
 	// If the user need only to update the API Product, overwriteAPIProduct parameter should be passed as true
-	if updateAPIProduct {
-		adminEndpoint += "&overwriteAPIProduct=" + strconv.FormatBool(true)
+	if importAPIsUpdate || importAPIProductUpdate {
+		publisherEndpoint += "&overwriteAPIProduct=" + strconv.FormatBool(true)
 	}
 
-	utils.Logln(utils.LogPrefixInfo + "Import URL: " + adminEndpoint)
-	err = importAPIProduct(adminEndpoint, apiProductFilePath, accessOAuthToken, extraParams)
+	utils.Logln(utils.LogPrefixInfo + "Import URL: " + publisherEndpoint)
+	err = importAPIProduct(publisherEndpoint, apiProductFilePath, accessOAuthToken, extraParams)
 	return err
 }

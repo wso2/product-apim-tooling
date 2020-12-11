@@ -32,11 +32,12 @@ var CurrentDir, _ = os.Getwd()
 const ConfigDirName = ".wso2apictl"
 
 var HomeDirectory = getConfigHomeDir()
+
 func getConfigHomeDir() string {
 	value := os.Getenv("APICTL_CONFIG_DIR")
 	if len(value) == 0 {
 		value, err := os.UserHomeDir()
-		if len(value) == 0 || err != nil  {
+		if len(value) == 0 || err != nil {
 			current, err := user.Current()
 			if err != nil || current == nil {
 				HandleErrorAndExit("User's HOME folder location couldn't be identified", nil)
@@ -74,6 +75,7 @@ var DefaultExportDirPath = filepath.Join(ConfigDirPath, DefaultExportDirName)
 var DefaultCertDirPath = filepath.Join(ConfigDirPath, CertificatesDirName)
 
 const defaultApiApplicationImportExportSuffix = "api/am/admin/v1"
+const defaultPublisherApiImportExportSuffix = "api/am/publisher/v1"
 const defaultApiListEndpointSuffix = "api/am/publisher/v1/apis"
 const defaultApiProductListEndpointSuffix = "api/am/publisher/v1/api-products"
 const defaultUnifiedSearchEndpointSuffix = "api/am/publisher/v1/search"

@@ -22,15 +22,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	jsoniter "github.com/json-iterator/go"
 	"io/ioutil"
 	"net/http"
 	"os"
-	"path"
 	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
+
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/specs/params"
 
@@ -168,78 +168,6 @@ func resolveYamlOrJSON(filename string) (string, []byte, error) {
 	return "", nil, fmt.Errorf("%s was not found as a YAML or JSON", filename)
 }
 
-// isEmpty returns true when a given string is empty
-func isEmpty(s string) bool {
-	return len(strings.TrimSpace(s)) == 0
-}
-
-func preProcessAPI(apiDirectory string) error {
-	dirty := false
-	apiPath, jsonData, err := resolveYamlOrJSON(filepath.Join(apiDirectory, "Meta-information", "api"))
-	if err != nil {
-		return err
-	}
-	utils.Logln(utils.LogPrefixInfo+"Loading API definition from: ", apiPath)
-
-	api, err := gabs.ParseJSON(jsonData)
-	if err != nil {
-		return err
-	}
-
-	// preprocess endpoint config
-	if !api.Exists("endpointConfig") {
-		dirty = true
-		conf, err := gabs.ParseJSON([]byte(`{"endpoint_type":"http"}`))
-		if err != nil {
-			return err
-		}
-
-		if api.Exists("productionUrl") {
-			_, err = conf.SetP(api.Path("productionUrl").Data(), "production_endpoints.url")
-			if err != nil {
-				return err
-			}
-			_, err = conf.SetP("null", "production_endpoints.config")
-			if err != nil {
-				return err
-			}
-			_ = api.Delete("productionUrl")
-		}
-		if api.Exists("sandboxUrl") {
-			_, err = conf.SetP(api.Path("sandboxUrl").Data(), "sandbox_endpoints.url")
-			if err != nil {
-				return err
-			}
-			_, err = conf.SetP("null", "sandbox_endpoints.config")
-			if err != nil {
-				return err
-			}
-			_ = api.Delete("sandboxUrl")
-		}
-
-		_, err = api.SetP(conf.String(), "endpointConfig")
-		if err != nil {
-			return err
-		}
-	}
-
-	if dirty {
-		yamlAPIPath := filepath.Join(apiDirectory, "Meta-information", "api.yaml")
-		utils.Logln(utils.LogPrefixInfo+"Writing preprocessed API to:", yamlAPIPath)
-		content, err := utils.JsonToYaml(api.Bytes())
-		if err != nil {
-			return err
-		}
-		// write this to disk
-		err = ioutil.WriteFile(yamlAPIPath, content, 0644)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 // Substitutes environment variables in the project files.
 func replaceEnvVariables(apiFilePath string) error {
 	for _, replacePath := range utils.EnvReplaceFilePaths {
@@ -262,67 +190,6 @@ func replaceEnvVariables(apiFilePath string) error {
 				return err
 			}
 		}
-	}
-	return nil
-}
-
-func populateAPIWithDefaults(def *v2.APIDefinition) (dirty bool) {
-	dirty = false
-	def.Context = strings.ReplaceAll(def.Context, " ", "")
-	if def.ContextTemplate == "" {
-		if !strings.Contains(def.Context, "{version}") {
-			def.ContextTemplate = path.Clean(def.Context + "/{version}")
-			def.Context = strings.ReplaceAll(def.ContextTemplate, "{version}", def.ID.Version)
-		} else {
-			def.Context = path.Clean(def.Context)
-			def.ContextTemplate = def.Context
-			def.Context = strings.ReplaceAll(def.Context, "{version}", def.ID.Version)
-		}
-		dirty = true
-	}
-	if def.Tags == nil {
-		def.Tags = []string{}
-		dirty = true
-	}
-	if def.URITemplates == nil {
-		def.URITemplates = []v2.URITemplates{}
-		dirty = true
-	}
-	if def.Implementation == "" {
-		def.Implementation = "ENDPOINT"
-		dirty = true
-	}
-	if def.KeyManagers == nil || len(def.KeyManagers) == 0 {
-		def.KeyManagers = []string{"all"}
-		dirty = true
-	}
-	return
-}
-
-// validateAPIDefinition validates an API against basic rules
-func validateAPIDefinition(def *v2.APIDefinition) error {
-	utils.Logln(utils.LogPrefixInfo + "Validating API")
-	if isEmpty(def.ID.APIName) {
-		return errors.New("apiName is required")
-	}
-	if reAPIName.MatchString(def.ID.APIName) {
-		return errors.New(`apiName contains one or more illegal characters (~!@#;:%^*()+={}|\\<>"',&\/$)`)
-	}
-
-	if isEmpty(def.ID.Version) {
-		return errors.New("version is required")
-	}
-	if isEmpty(def.Context) {
-		return errors.New("context is required")
-	}
-	if isEmpty(def.ContextTemplate) {
-		return errors.New("contextTemplate is required")
-	}
-	if !strings.HasPrefix(def.Context, "/") {
-		return errors.New("context should begin with a /")
-	}
-	if !strings.HasPrefix(def.ContextTemplate, "/") {
-		return errors.New("contextTemplate should begin with a /")
 	}
 	return nil
 }
@@ -351,13 +218,13 @@ func importAPI(endpoint, filePath, accessToken string, extraParams map[string]st
 // ImportAPIToEnv function is used with import-api command
 func ImportAPIToEnv(accessOAuthToken, importEnvironment, importPath, apiParamsPath string, importAPIUpdate, preserveProvider,
 	importAPISkipCleanup bool) error {
-	adminEndpoint := utils.GetAdminEndpointOfEnv(importEnvironment, utils.MainConfigFilePath)
-	return ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, apiParamsPath, importAPIUpdate,
+	publisherEndpoint := utils.GetPublisherEndpointOfEnv(importEnvironment, utils.MainConfigFilePath)
+	return ImportAPI(accessOAuthToken, publisherEndpoint, importEnvironment, importPath, apiParamsPath, importAPIUpdate,
 		preserveProvider, importAPISkipCleanup)
 }
 
 // ImportAPI function is used with import-api command
-func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, apiParamsPath string, importAPIUpdate, preserveProvider,
+func ImportAPI(accessOAuthToken, publisherEndpoint, importEnvironment, importPath, apiParamsPath string, importAPIUpdate, preserveProvider,
 	importAPISkipCleanup bool) error {
 	exportDirectory := filepath.Join(utils.ExportDirectory, utils.ExportedApisDirName)
 	resolvedAPIFilePath, err := resolveImportFilePath(importPath, exportDirectory)
@@ -390,12 +257,6 @@ func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, a
 		return err
 	}
 
-	utils.Logln(utils.LogPrefixInfo + "Pre Processing API...")
-	err = preProcessAPI(apiFilePath)
-	if err != nil {
-		return err
-	}
-
 	utils.Logln(utils.LogPrefixInfo + "Attempting to inject parameters to the API from api_params.yaml (if exists)")
 	paramsPath, err := resolveAPIParamsPath(resolvedAPIFilePath, apiParamsPath)
 	if err != nil && apiParamsPath != utils.ParamFileAPI && apiParamsPath != "" {
@@ -409,49 +270,6 @@ func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, a
 		}
 	}
 
-	// Get API info
-	apiInfo, originalContent, err := GetAPIDefinition(apiFilePath)
-	if err != nil {
-		return err
-	}
-	// Fill with defaults
-	if populateAPIWithDefaults(apiInfo) {
-		// api is dirty, write it to disk
-		buf, err := json.Marshal(apiInfo)
-		if err != nil {
-			return err
-		}
-
-		newContent, err := gabs.ParseJSON(buf)
-		if err != nil {
-			return err
-		}
-		originalContent, err := gabs.ParseJSON(originalContent)
-		if err != nil {
-			return err
-		}
-		result, err := utils.MergeJSON(originalContent.Bytes(), newContent.Bytes())
-		if err != nil {
-			return err
-		}
-
-		yamlContent, err := utils.JsonToYaml(result)
-		if err != nil {
-			return err
-		}
-		p := filepath.Join(apiFilePath, "Meta-information", "api.yaml")
-		utils.Logln(utils.LogPrefixInfo+"Writing", p)
-
-		err = ioutil.WriteFile(p, yamlContent, 0644)
-		if err != nil {
-			return err
-		}
-	}
-	// validate definition
-	if err = validateAPIDefinition(apiInfo); err != nil {
-		return err
-	}
-
 	// if apiFilePath contains a directory, zip it. Otherwise, leave it as it is.
 	apiFilePath, err, cleanupFunc := utils.CreateZipFileFromProject(apiFilePath, importAPISkipCleanup)
 	if err != nil {
@@ -463,35 +281,17 @@ func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, a
 		defer cleanupFunc()
 	}
 
-	updateAPI := false
-	if importAPIUpdate {
-		// check for API existence
-		id, err := GetAPIId(accessOAuthToken, importEnvironment, apiInfo.ID.APIName, apiInfo.ID.Version,
-			apiInfo.ID.ProviderName)
-		if err != nil {
-			return err
-		}
-
-		if id == "" {
-			utils.Logln("The specified API was not found.")
-			utils.Logln("Creating: %s %s\n", apiInfo.ID.APIName, apiInfo.ID.Version)
-		} else {
-			utils.Logln("Existing API found, attempting to update it...")
-			utils.Logln("API ID:", id)
-			updateAPI = true
-		}
-	}
 	extraParams := map[string]string{}
-	adminEndpoint += "/import/api"
-	if updateAPI {
-		adminEndpoint += "?overwrite=" + strconv.FormatBool(true) + "&preserveProvider=" +
+	publisherEndpoint += "/apis/import"
+	if importAPIUpdate {
+		publisherEndpoint += "?overwrite=" + strconv.FormatBool(true) + "&preserveProvider=" +
 			strconv.FormatBool(preserveProvider)
 	} else {
-		adminEndpoint += "?preserveProvider=" + strconv.FormatBool(preserveProvider)
+		publisherEndpoint += "?preserveProvider=" + strconv.FormatBool(preserveProvider)
 	}
-	utils.Logln(utils.LogPrefixInfo + "Import URL: " + adminEndpoint)
+	utils.Logln(utils.LogPrefixInfo + "Import URL: " + publisherEndpoint)
 
-	err = importAPI(adminEndpoint, apiFilePath, accessOAuthToken, extraParams)
+	err = importAPI(publisherEndpoint, apiFilePath, accessOAuthToken, extraParams)
 	return err
 }
 
