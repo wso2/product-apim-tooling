@@ -1,11 +1,11 @@
 ## apictl
 
-CLI for Importing and Exporting APIs and Applications
+CLI for Importing and Exporting APIs and Applications and Managing WSO2 Micro Integrator
 
 ### Synopsis
 
 apictl is a Command Line Tool for Importing and Exporting APIs and Applications between different environments of WSO2 API Manager
-(Dev, Production, Staging, QA etc.)
+(Dev, Production, Staging, QA etc.) and Managing WSO2 Micro Integrator
 
 ```
 apictl [flags]
@@ -31,6 +31,7 @@ apictl [flags]
 * [apictl k8s](apictl_k8s.md)	 - Kubernetes mode based commands
 * [apictl login](apictl_login.md)	 - Login to an API Manager
 * [apictl logout](apictl_logout.md)	 - Logout to from an API Manager
+* [apictl mi](apictl_mi.md)	 - Micro Integrator related commands
 * [apictl remove](apictl_remove.md)	 - Remove an environment
 * [apictl set](apictl_set.md)	 - Set configuration parameters
 * [apictl vcs](apictl_vcs.md)	 - Checks status and deploys projects

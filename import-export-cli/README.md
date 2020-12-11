@@ -1,7 +1,7 @@
-# CLI for Importing and Exporting APIs and Applications
+# CLI for Importing and Exporting APIs and Applications and Managing WSO2 Micro Integrator
 ## For WSO2 API Manager 3.2.0
 
-Command Line tool for importing and exporting APIs/Applications between different API Environments
+Command Line tool for importing and exporting APIs/Applications between different API Environments of WSO2 API Manager and Managing WSO2 Micro Integrator
 
 ## Getting Started
 
@@ -55,6 +55,7 @@ Command Line tool for importing and exporting APIs/Applications between differen
     > The flag `--environment` (-e) is mandatory
       You can either provide only the `--apim` flag, or all the other 5 flags (`--registration` `--publisher` `--devportal` `--admin` `--token`) without providing `--apim` flag.
       If you are omitting any of --registration --publisher --devportal --admin flags, you need to specify --apim flag with the API Manager endpoint.
+      To add a micro integrator instance to an environment you can use the `--mi` flag.
     
 - ### Command Autocomplete
     Copy the file `shell-completions/apictl_bash_completion.sh` to `/etc/bash_completion.d/` and source it with

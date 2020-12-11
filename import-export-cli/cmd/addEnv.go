@@ -54,7 +54,7 @@ const addEnvCmdExamples = utils.ProjectName + ` ` + AddCmdLiteral + ` ` + AddEnv
 --publisher https://apim.com:9443 \
 --devportal  https://apps.com:9443 \
 --admin  https://apim.com:9443 \
---token https://gw.com:8243/token
+--token https://gw.com:8243/token \
 --mi https://localhost:9164
 
 ` + utils.ProjectName + ` ` + AddCmdLiteral + ` ` + AddEnvCmdLiteralTrimmed + ` dev \

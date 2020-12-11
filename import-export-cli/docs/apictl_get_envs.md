@@ -19,7 +19,7 @@ apictl list envs
 ### Options
 
 ```
-      --format string   Pretty-print environments using go templates (default "table {{.Name}}\t{{.ApiManagerEndpoint}}\t{{.RegistrationEndpoint}}\t{{.TokenEndpoint}}\t{{.PublisherEndpoint}}\t{{.ApplicationEndpoint}}\t{{.AdminEndpoint}}")
+      --format string   Pretty-print environments using go templates (default "table {{.Name}}\t{{.ApiManagerEndpoint}}\t{{.RegistrationEndpoint}}\t{{.TokenEndpoint}}\t{{.PublisherEndpoint}}\t{{.ApplicationEndpoint}}\t{{.AdminEndpoint}}\t{{.MiManagementEndpoint}}")
   -h, --help            help for envs
 ```
 

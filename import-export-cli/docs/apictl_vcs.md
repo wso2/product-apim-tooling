@@ -34,7 +34,7 @@ apictl vcs deploy -e dev
 
 ### SEE ALSO
 
-* [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
+* [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications and Managing WSO2 Micro Integrator
 * [apictl vcs deploy](apictl_vcs_deploy.md)	 - Deploys projects to the specified environment
 * [apictl vcs init](apictl_vcs_init.md)	 - Initializes a GIT repository with API Controller
 * [apictl vcs status](apictl_vcs_status.md)	 - Shows the list of projects that are ready to deploy
