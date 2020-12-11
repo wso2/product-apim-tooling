@@ -29,6 +29,7 @@ import (
 	"github.com/ghodss/yaml"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
+	mi "github.com/wso2/product-apim-tooling/import-export-cli/cmd/mi"
 	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 
 	"path/filepath"
@@ -48,9 +49,9 @@ var CmdResourceTenantDomain string
 var CmdForceStartFromBegin bool
 
 // RootCmd related info
-const RootCmdShortDesc = "CLI for Importing and Exporting APIs and Applications"
-const RootCmdLongDesc = utils.ProjectName + ` is a Command Line Tool for Importing and Exporting APIs and Applications between different environments of WSO2 API Manager
-(Dev, Production, Staging, QA etc.)`
+const rootCmdShortDesc = "CLI for Importing and Exporting APIs and Applications and Managing WSO2 Micro Integrator"
+const rootCmdLongDesc = utils.ProjectName + ` is a Command Line Tool for Importing and Exporting APIs and Applications between different environments of WSO2 API Manager
+(Dev, Production, Staging, QA etc.) and Managing WSO2 Micro Integrator`
 
 // This represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
@@ -63,8 +64,8 @@ var RootCmd = &cobra.Command{
 		}
 	},
 	DisableFlagParsing: isK8sEnabled(),
-	Short:              RootCmdShortDesc,
-	Long:               RootCmdLongDesc,
+	Short:              rootCmdShortDesc,
+	Long:               rootCmdLongDesc,
 	Run: func(cmd *cobra.Command, args []string) {
 		if isK8sEnabled() {
 			executeKubernetes(args...)
@@ -109,7 +110,7 @@ func init() {
 	if err != nil {
 		utils.HandleErrorAndExit("Error reading "+utils.MainConfigFilePath+".", err)
 	}
-
+	RootCmd.AddCommand(mi.MICmd)
 }
 
 // createConfigFiles() creates the ConfigDir and necessary ConfigFiles inside the user's $HOME directory

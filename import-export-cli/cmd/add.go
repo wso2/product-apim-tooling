@@ -31,6 +31,10 @@ const addCmdExamples = utils.ProjectName + ` ` + AddCmdLiteral + ` ` + AddEnvCmd
 ` + utils.ProjectName + ` ` + AddCmdLiteral + ` ` + AddEnvCmdLiteralTrimmed + ` dev \
 --mi  https://localhost:9164
 
+` + utils.ProjectName + ` ` + AddCmdLiteral + ` ` + AddEnvCmdLiteralTrimmed + ` prod \
+--apim  https://apim.com:9443 \
+--mi https://localhost:9164
+
 ` + utils.ProjectName + ` ` + AddCmdLiteral + ` ` + AddEnvCmdLiteralTrimmed + ` test \
 --registration https://idp.com:9443 \
 --publisher https://apim.com:9443 \

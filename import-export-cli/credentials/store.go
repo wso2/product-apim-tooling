@@ -19,14 +19,22 @@
 package credentials
 
 type Store interface {
-	// Has an env in the store
-	Has(env string) bool
-	// Get an env from store returns intended Credential or an error
-	Get(env string) (Credential, error)
-	// Set credentials for env using given username,password,clientId,clientSecret
-	Set(env, username, password, clientId, clientSecret string) error
-	// Erase credentials from given env
-	Erase(env string) error
+	// Has return the existance of apim credentials in the store for a given environment
+	HasAPIM(env string) bool
+	// HasMI return the existance of mi credentials in the store for a given environment
+	HasMI(env string) bool
+	// GetAPIMCredentials returns credentials for apim from the store or an error
+	GetAPIMCredentials(env string) (Credential, error)
+	// GetMICredentials returns credentials for micro integrator from the store or an error
+	GetMICredentials(env string) (MiCredential, error)
+	// SetAPIMCredentials sets credentials for micro integrator using username, password, clientID and client secret
+	SetAPIMCredentials(env, username, password, clientID, clientSecret string) error
+	// SetMICredentials sets credentials for micro integrator using username, password and access token
+	SetMICredentials(env, username, password, accessToken string) error
+	// Erase apim credentials in a given environment
+	EraseAPIM(env string) error
+	// Erase mi credentials in a given environment
+	EraseMI(env string) error
 	// Load store
 	Load() error
 }
