@@ -501,10 +501,10 @@ func envParamsFileProcess(importPath, paramsPath, importEnvironment string) erro
 	if err != nil {
 		return err
 	}
-	// check whether import environment is included in api configuration
+	// check whether import environment is included in api params configuration
 	envParams := apiParams.GetEnv(importEnvironment)
 	if envParams == nil {
-		utils.Logln(utils.LogPrefixInfo + "Using default values as the environment is not present in api_param.yaml file")
+		return errors.New("Environment '" + importEnvironment + "' does not exist in " + paramsPath)
 	} else {
 		//If environment parameters are present in parameter file
 		err = handleEnvParams(importPath, envParams)
@@ -536,19 +536,19 @@ func envParamsDirectoryProcess(importPath, paramsPath, importEnvironment string)
 	if err != nil {
 		return err
 	}
-	// check whether import environment is included in api configuration
+	// check whether import environment is included in api params configuration
 	envParams := apiParams.GetEnv(importEnvironment)
 	if envParams == nil {
-		utils.Logln(utils.LogPrefixInfo + "Using default values as the environment is not present in api_param.yaml file")
+		return errors.New("Environment '" + importEnvironment + "' does not exist in " + paramsPath)
 	} else {
+		//copy all the content in the params directory into the artifact to be imported
+		utils.CopyDirectoryContents(paramsPath, importPath)
+
 		//If environment parameters are present in parameter file
 		err = handleEnvParams(importPath, envParams)
 		if err != nil {
 			return err
 		}
-
-		//copy all the content in the params directory into the artifact to be imported
-		utils.CopyDirectoryContents(paramsPath, importPath)
 	}
 	return nil
 }

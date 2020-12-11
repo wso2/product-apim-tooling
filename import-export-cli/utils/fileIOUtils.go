@@ -322,11 +322,6 @@ func CopyDirectoryContents (src string, dst string) (err error)  {
 				return
 			}
 		} else {
-			// Skip symlinks.
-			if entry.Mode()&os.ModeSymlink != 0 {
-				continue
-			}
-
 			err = CopyFile(srcPath, dstPath)
 			if err != nil {
 				return
@@ -380,8 +375,8 @@ func CreateZipFileFromProject(projectPath string, skipCleanup bool) (string, err
 				Logln(LogPrefixInfo+"Leaving", tmp.Name())
 				return
 			}
-			//Logln(LogPrefixInfo+"Deleting", tmp.Name())
-			//err := os.Remove(tmp.Name())
+			Logln(LogPrefixInfo+"Deleting", tmp.Name())
+			err := os.Remove(tmp.Name())
 			if err != nil {
 				Logln(LogPrefixError + err.Error())
 			}
