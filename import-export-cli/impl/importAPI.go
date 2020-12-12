@@ -257,13 +257,13 @@ func ImportAPI(accessOAuthToken, publisherEndpoint, importEnvironment, importPat
 		return err
 	}
 
-	utils.Logln(utils.LogPrefixInfo + "Attempting to inject parameters to the API from api_params.yaml (if exists)")
+	utils.Logln(utils.LogPrefixInfo + "Attempting to process environment configurations directory or file")
 	paramsPath, err := resolveAPIParamsPath(resolvedAPIFilePath, apiParamsPath)
 	if err != nil && apiParamsPath != utils.ParamFileAPI && apiParamsPath != "" {
 		return err
 	}
 	if paramsPath != "" {
-		//Reading API params file and populate api.yaml
+		//Reading API params file and add configurations into temp artifact
 		err := handleCustomizedParameters(apiFilePath, paramsPath, importEnvironment)
 		if err != nil {
 			return err
@@ -306,24 +306,26 @@ func envParamsFileProcess(importPath, paramsPath, importEnvironment string) erro
 	if envParams == nil {
 		return errors.New("Environment '" + importEnvironment + "' does not exist in " + paramsPath)
 	} else {
-		//If environment parameters are present in parameter file
-		err = handleEnvParams(importPath, envParams)
+		// Create a source directory and add source content to it and then zip it
+		err = utils.MoveDirectoryContentsToNewDirectory(importPath, filepath.Join(importPath, "Source"))
 		if err != nil {
 			return err
 		}
 
-		//Copy certificate directory to zipped artifact
-		rootParamsPath := filepath.Dir(paramsPath)
-		sourceCertsPath := filepath.Join(rootParamsPath, "certificates")
-		destCertsPath := filepath.Join(importPath, "certificates")
-		isCertificateDirProvided, err := utils.IsDirExists(sourceCertsPath)
+		sourceFilePath := filepath.Join(importPath,"SourceArchive")
+		err, cleanupFunc := utils.CreateZipFile(sourceFilePath, false)
 		if err != nil {
 			return err
 		}
-		if isCertificateDirProvided {
-			utils.CopyDir(sourceCertsPath, destCertsPath)
-		} else {
-			utils.CreateDir(destCertsPath)
+		//cleanup the temporary artifacts once consuming the zip file
+		if cleanupFunc != nil {
+			defer cleanupFunc()
+		}
+
+		//If environment parameters are present in parameter file
+		err = handleEnvParams(importPath,importPath, envParams)
+		if err != nil {
+			return err
 		}
 	}
 	return nil
@@ -341,11 +343,37 @@ func envParamsDirectoryProcess(importPath, paramsPath, importEnvironment string)
 	if envParams == nil {
 		return errors.New("Environment '" + importEnvironment + "' does not exist in " + paramsPath)
 	} else {
-		//copy all the content in the params directory into the artifact to be imported
-		utils.CopyDirectoryContents(paramsPath, importPath)
 
-		//If environment parameters are present in parameter file
-		err = handleEnvParams(importPath, envParams)
+		// Create a source directory and add source content to it and then zip it
+		sourceFilePath := filepath.Join(importPath,"SourceArchive")
+		err = utils.MoveDirectoryContentsToNewDirectory(importPath,sourceFilePath)
+		if err != nil {
+			return err
+		}
+
+		err, cleanupFunc := utils.CreateZipFile(sourceFilePath, false)
+		if err != nil {
+			return err
+		}
+		//cleanup the temporary artifacts once consuming the zip file
+		if cleanupFunc != nil {
+			defer cleanupFunc()
+		}
+
+		//create new directory for deployment configurations
+		deploymentDirectoryPath := filepath.Join(importPath,"Deployment")
+		err = utils.CreateDirIfNotExist(deploymentDirectoryPath)
+		if err != nil {
+			return err
+		}
+
+		//copy all the content in the params directory into the artifact to be imported
+		err = utils.CopyDirectoryContents(paramsPath, deploymentDirectoryPath)
+		if err != nil {
+			return err
+		}
+		//If environment parameters are present in parameter file inside the deployment params directory
+		err = handleEnvParams(importPath,deploymentDirectoryPath, envParams)
 		if err != nil {
 			return err
 		}
@@ -374,46 +402,24 @@ func handleCustomizedParameters(importPath, paramsPath, importEnvironment string
 	return nil
 }
 
-//Process env params and create a temp env_parmas.yaml in temp artifact
-func handleEnvParams(apiDirectory string, environmentParams *params.Environment) error {
-	// read api from Meta-information
-	apiPath := filepath.Join(apiDirectory, "Meta-information", "api")
-	utils.Logln(utils.LogPrefixInfo + "Reading API definition: ")
-	fp, jsonContent, err := resolveYamlOrJSON(apiPath)
-	if err != nil {
-		return err
-	}
-	utils.Logln(utils.LogPrefixInfo+"Loaded definition from:", fp)
-	api, err := gabs.ParseJSON(jsonContent)
-	if err != nil {
-		return err
-	}
-
+//Process env params and create a temp env_params.yaml in temp artifact
+func handleEnvParams(tempDirectory string, destDirectory string, environmentParams *params.Environment) error {
+	// read api params from external parameters file
 	envParamsJson, err := jsoniter.Marshal(environmentParams.Config)
 	if err != nil {
 		return err
 	}
 
-	apiPath = filepath.Join(apiDirectory, "Meta-information", "api.yaml")
 	var apiParamsPath string
-	utils.Logln(utils.LogPrefixInfo+"Writing merged API to:", apiPath)
-
-	// write this to disk
-	content, err := utils.JsonToYaml(api.Bytes())
-	if err != nil {
-		return err
-	}
-
 	apiParams, err := gabs.ParseJSON(envParamsJson)
 	paramsContent, err := utils.JsonToYaml(apiParams.Bytes())
 	if err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile(apiPath, content, 0644)
-
 	//over-write the api_params.file with latest configurations
-	apiParamsPath = filepath.Join(apiDirectory, "api_params.yaml")
+	apiParamsPath = filepath.Join(destDirectory, "api_params.yaml")
+	utils.Logln(utils.LogPrefixInfo+"Adding the Params file into", apiParamsPath)
 	err = ioutil.WriteFile(apiParamsPath, paramsContent, 0644)
 	if err != nil {
 		return err
