@@ -35,7 +35,7 @@ apictl delete app -n TestApplication -o admin -e dev
 
 ### SEE ALSO
 
-* [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
+* [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications and Managing WSO2 Micro Integrator
 * [apictl delete api](apictl_delete_api.md)	 - Delete API
 * [apictl delete api-product](apictl_delete_api-product.md)	 - Delete API Product
 * [apictl delete app](apictl_delete_app.md)	 - Delete App

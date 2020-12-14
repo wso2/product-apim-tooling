@@ -31,6 +31,6 @@ apictl remove env [environment]  production
 
 ### SEE ALSO
 
-* [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
+* [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications and Managing WSO2 Micro Integrator
 * [apictl remove env](apictl_remove_env.md)	 - Remove Environment from Config file
 

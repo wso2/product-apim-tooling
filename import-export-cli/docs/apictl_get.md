@@ -38,7 +38,7 @@ apictl get apps -e dev
 
 ### SEE ALSO
 
-* [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
+* [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications and Managing WSO2 Micro Integrator
 * [apictl get api-products](apictl_get_api-products.md)	 - Display a list of API Products in an environment
 * [apictl get apis](apictl_get_apis.md)	 - Display a list of APIs in an environment
 * [apictl get apps](apictl_get_apps.md)	 - Display a list of Applications in an environment specific to an owner

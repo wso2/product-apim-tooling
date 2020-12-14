@@ -35,7 +35,7 @@ apictl k8s change registry
 
 ### SEE ALSO
 
-* [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
+* [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications and Managing WSO2 Micro Integrator
 * [apictl k8s add](apictl_k8s_add.md)	 - Add an API to the kubernetes cluster
 * [apictl k8s change](apictl_k8s_change.md)	 - Change a configuration in K8s cluster resource
 * [apictl k8s delete](apictl_k8s_delete.md)	 - Delete resources related to kubernetes

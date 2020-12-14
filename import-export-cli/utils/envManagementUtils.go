@@ -319,7 +319,7 @@ func GetDefaultEnvironment(mainConfigFilePath string) string {
 
 //get default token endpoint given from an apim endpoint
 func GetTokenEndPointFromAPIMEndpoint(apimEndpoint string) string {
-	if strings.HasSuffix(apimEndpoint,"/"){
+	if strings.HasSuffix(apimEndpoint, "/") {
 		return apimEndpoint + defaultTokenEndPoint
 	} else {
 		return apimEndpoint + "/" + defaultTokenEndPoint
@@ -327,13 +327,13 @@ func GetTokenEndPointFromAPIMEndpoint(apimEndpoint string) string {
 }
 
 //get default token endpoint given from a publisher endpoint
-func GetTokenEndPointFromPublisherEndpoint (publisherEndpoint string) string {
-	if strings.Contains(publisherEndpoint,"publisher"){
-		trimmedString := strings.Split(publisherEndpoint,"publisher")
+func GetTokenEndPointFromPublisherEndpoint(publisherEndpoint string) string {
+	if strings.Contains(publisherEndpoint, "publisher") {
+		trimmedString := strings.Split(publisherEndpoint, "publisher")
 		publisherEndpoint = trimmedString[0]
 	}
 
-	if strings.HasSuffix(publisherEndpoint,"/"){
+	if strings.HasSuffix(publisherEndpoint, "/") {
 		return publisherEndpoint + defaultTokenEndPoint
 	} else {
 		return publisherEndpoint + "/" + defaultTokenEndPoint
@@ -342,14 +342,14 @@ func GetTokenEndPointFromPublisherEndpoint (publisherEndpoint string) string {
 
 // Get internalTokenEndpoint for REST api operations
 // @return endpoint url derived from publisher or apim endpoint
-func GetInternalTokenEndpointOfEnv(env, filePath string ) string {
+func GetInternalTokenEndpointOfEnv(env, filePath string) string {
 	var internalTokenEndpoint string
 	apiManagerEndpointOfEnv := GetApiManagerEndpointOfEnv(env, filePath)
 	if apiManagerEndpointOfEnv != "" {
 		internalTokenEndpoint = GetTokenEndPointFromAPIMEndpoint(apiManagerEndpointOfEnv)
 
 	} else {
-		publisherEndpointOfEnv := GetPublisherEndpointOfEnv(env,filePath)
+		publisherEndpointOfEnv := GetPublisherEndpointOfEnv(env, filePath)
 		internalTokenEndpoint = GetTokenEndPointFromPublisherEndpoint(publisherEndpointOfEnv)
 	}
 	return internalTokenEndpoint
@@ -357,11 +357,63 @@ func GetInternalTokenEndpointOfEnv(env, filePath string ) string {
 
 //Get token endpoint for Token revocation
 //@return endpoint URL of token revocation endpoint
-func GetTokenRevokeEndpoint (env, filePath string) string {
+func GetTokenRevokeEndpoint(env, filePath string) string {
 	//Get Internal token endpoint for the environment
-	internalTokenEndpoint := GetInternalTokenEndpointOfEnv(env,filePath)
-	slittedString := strings.Split(internalTokenEndpoint,defaultTokenEndPoint)
+	internalTokenEndpoint := GetInternalTokenEndpointOfEnv(env, filePath)
+	slittedString := strings.Split(internalTokenEndpoint, defaultTokenEndPoint)
 	//Get Apim endpoint or publisher endpoint
 	extractedTokenEndpoint := slittedString[0]
 	return extractedTokenEndpoint + defaultRevokeEndpointSuffix
+}
+
+// RequiredAPIMEndpointsExists checks for required apim endpoints.
+// It returns true if all the endpoints are present
+func RequiredAPIMEndpointsExists(envEndpoints *EnvEndpoints) bool {
+	return envEndpoints.AdminEndpoint != "" && envEndpoints.DevPortalEndpoint != "" &&
+		envEndpoints.PublisherEndpoint != "" && envEndpoints.RegistrationEndpoint != "" &&
+		envEndpoints.TokenEndpoint != ""
+}
+
+// HasOnlyMIEndpoint checks wether an MI instance is present in a given environment
+// It returns true if the only instance in an environment is MI
+func HasOnlyMIEndpoint(envEndpoints *EnvEndpoints) bool {
+	return envEndpoints.ApiManagerEndpoint == "" && envEndpoints.AdminEndpoint == "" && envEndpoints.DevPortalEndpoint == "" &&
+		envEndpoints.PublisherEndpoint == "" && envEndpoints.RegistrationEndpoint == "" &&
+		envEndpoints.TokenEndpoint == "" && envEndpoints.MiManagementEndpoint != ""
+}
+
+// GetMIManagementEndpointOfEnv return the Mi Management Endpoint of a given environment
+func GetMIManagementEndpointOfEnv(env, filePath string) (string, error) {
+	envEndpoints, err := GetEndpointsOfEnvironment(env, filePath)
+	if err != nil {
+		return "", err
+	}
+	return envEndpoints.MiManagementEndpoint, nil
+}
+
+// GetMIManagementEndpointOfResource return the full resource url of a resource
+func GetMIManagementEndpointOfResource(resource, env, filePath string) string {
+	miEndpoint, _ := GetMIManagementEndpointOfEnv(env, filePath)
+	if strings.HasSuffix(miEndpoint, "/") {
+		return miEndpoint + MiManagementAPIContext + "/" + resource
+	}
+	return miEndpoint + "/" + MiManagementAPIContext + "/" + resource
+}
+
+// MIExistsInEnv check wether there is a micro integrator in the environment
+func MIExistsInEnv(env, filePath string) bool {
+	miEndpoint, err := GetMIManagementEndpointOfEnv(env, filePath)
+	if err != nil {
+		return false
+	}
+	return miEndpoint != ""
+}
+
+// APIMExistsInEnv check wether there is a apim in the environment
+func APIMExistsInEnv(env, filePath string) bool {
+	envEndpoints, err := GetEndpointsOfEnvironment(env, filePath)
+	if err != nil {
+		return false
+	}
+	return envEndpoints.ApiManagerEndpoint != "" || RequiredAPIMEndpointsExists(envEndpoints)
 }

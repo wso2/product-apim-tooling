@@ -32,11 +32,12 @@ var CurrentDir, _ = os.Getwd()
 const ConfigDirName = ".wso2apictl"
 
 var HomeDirectory = getConfigHomeDir()
+
 func getConfigHomeDir() string {
 	value := os.Getenv("APICTL_CONFIG_DIR")
 	if len(value) == 0 {
 		value, err := os.UserHomeDir()
-		if len(value) == 0 || err != nil  {
+		if len(value) == 0 || err != nil {
 			current, err := user.Current()
 			if err != nil || current == nil {
 				HandleErrorAndExit("User's HOME folder location couldn't be identified", nil)
@@ -193,3 +194,32 @@ const DynamicEndpointConfig = `{"endpoint_type":"default","sandbox_endpoints":{"
 const AwsLambdaRoleSuppliedAccessMethod = "role_supplied"        // To denote "accessMethod: role_supplied" in api_params.yaml
 const AwsLambdaRoleSuppliedAccessMethodForJSON = "role-supplied" // To denote the "accessMethod : role-supplied" in api.json
 const AwsLambdaStoredAccessMethod = "stored"                     // To denote "accessMethod: stored" in api_params.yaml and to denote the "accessMethod : stored" in api.json
+
+// MiCmdLiteral denote the alias for micro integrator related commands
+const MiCmdLiteral = "mi"
+
+// MiManagementAPIContext
+const MiManagementAPIContext = "management"
+
+// Mi Management Resource paths
+const MiManagementCarbonAppResource = "applications"
+const MiManagementServiceResource = "services"
+const MiManagementAPIResource = "apis"
+const MiManagementProxyServiceResource = "proxy-services"
+const MiManagementInboundEndpointResource = "inbound-endpoints"
+const MiManagementEndpointResource = "endpoints"
+const MiManagementMessageProcessorResource = "message-processors"
+const MiManagementTemplateResource = "templates"
+const MiManagementConnectorResource = "connectors"
+const MiManagementMessageStoreResource = "message-stores"
+const MiManagementLocalEntrieResource = "local-entries"
+const MiManagementSequenceResource = "sequences"
+const MiManagementTaskResource = "tasks"
+const MiManagementLogResource = "logs"
+const MiManagementLoggingResource = "logging"
+const MiManagementServerResource = "server"
+const MiManagementDataServiceResource = "data-services"
+const MiManagementMiLoginResource = "login"
+const MiManagementMiLogoutResource = "logout"
+const MiManagementUserResource = "users"
+const MiManagementTransactionResource = "transactions"

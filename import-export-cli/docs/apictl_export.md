@@ -37,7 +37,7 @@ apictl export app -n SampleApp -o admin -e dev
 
 ### SEE ALSO
 
-* [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
+* [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications and Managing WSO2 Micro Integrator
 * [apictl export api](apictl_export_api.md)	 - Export API
 * [apictl export api-product](apictl_export_api-product.md)	 - Export API Product
 * [apictl export apis](apictl_export_apis.md)	 - Export APIs for migration

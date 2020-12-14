@@ -1,13 +1,13 @@
-## apictl logout
+## apictl mi logout
 
-Logout to from an API Manager
+Logout from a Micro Integrator
 
 ### Synopsis
 
-Logout from an API Manager environment
+Logout from a Micro Integrator
 
 ```
-apictl logout [environment] [flags]
+apictl mi logout [environment] [flags]
 ```
 
 ### Examples
@@ -31,5 +31,5 @@ apictl logout dev
 
 ### SEE ALSO
 
-* [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications and Managing WSO2 Micro Integrator
+* [apictl mi](apictl_mi.md)	 - Micro Integrator related commands
 
