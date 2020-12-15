@@ -365,6 +365,8 @@ func ValidateAPIStructure(t *testing.T, api *apim.API, exportedOutput string) {
 func GetImportedAPI(t *testing.T, args *ApiImportExportTestArgs) *apim.API {
 	t.Helper()
 
+	// Add env2
+	base.SetupEnv(t, args.DestAPIM.GetEnvName(), args.DestAPIM.GetApimURL(), args.DestAPIM.GetTokenURL())
 	// Import api to env 2
 	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
@@ -437,7 +439,7 @@ func ValidateAPIsEqual(t *testing.T, api1 *apim.API, api2 *apim.API) {
 
 	same := "override_with_same_value"
 	// Since the APIs are from too different envs, their respective ID will defer.
-	// Therefore this will be overriden to the same value to ensure that the equality check will pass.
+	// Therefore this will be overridden to the same value to ensure that the equality check will pass.
 	api1Copy.ID = same
 	api2Copy.ID = same
 
@@ -447,7 +449,7 @@ func ValidateAPIsEqual(t *testing.T, api1 *apim.API, api2 *apim.API) {
 	api1Copy.LastUpdatedTime = same
 	api2Copy.LastUpdatedTime = same
 
-	// Sort member collections to make equality chack possible
+	// Sort member collections to make equality check possible
 	apim.SortAPIMembers(&api1Copy)
 	apim.SortAPIMembers(&api2Copy)
 

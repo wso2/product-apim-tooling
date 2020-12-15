@@ -306,13 +306,14 @@ func envParamsFileProcess(importPath, paramsPath, importEnvironment string) erro
 	if envParams == nil {
 		return errors.New("Environment '" + importEnvironment + "' does not exist in " + paramsPath)
 	} else {
+
 		// Create a source directory and add source content to it and then zip it
-		err = utils.MoveDirectoryContentsToNewDirectory(importPath, filepath.Join(importPath, "Source"))
+		sourceFilePath := filepath.Join(importPath,"SourceArchive")
+		err = utils.MoveDirectoryContentsToNewDirectory(importPath,sourceFilePath)
 		if err != nil {
 			return err
 		}
 
-		sourceFilePath := filepath.Join(importPath,"SourceArchive")
 		err, cleanupFunc := utils.CreateZipFile(sourceFilePath, false)
 		if err != nil {
 			return err
@@ -321,7 +322,6 @@ func envParamsFileProcess(importPath, paramsPath, importEnvironment string) erro
 		if cleanupFunc != nil {
 			defer cleanupFunc()
 		}
-
 		//If environment parameters are present in parameter file
 		err = handleEnvParams(importPath,importPath, envParams)
 		if err != nil {

@@ -56,7 +56,7 @@ func TestEnvironmentSpecificParamsEndpoint(t *testing.T) {
 
 	apiParams := testutils.ReadAPIParams(t, args.ParamsFile)
 
-	assert.Equal(t, apiParams.Environments[0].Endpoints.Production["url"], importedAPI.GetProductionURL())
+	assert.Equal(t, apiParams.Environments[0].Configs.Endpoints.Production["url"], importedAPI.GetProductionURL())
 
 	apiCopy := apim.CopyAPI(api)
 	importedAPICopy := apim.CopyAPI(importedAPI)
@@ -95,8 +95,8 @@ func TestEnvironmentSpecificParamsEndpointRetryTimeout(t *testing.T) {
 
 	apiParams := testutils.ReadAPIParams(t, args.ParamsFile)
 
-	assert.Equal(t, apiParams.Environments[0].Endpoints.Production["url"], importedAPI.GetProductionURL())
-	paramConfig := apiParams.Environments[0].Endpoints.Production["config"].(map[interface{}]interface{})
+	assert.Equal(t, apiParams.Environments[0].Configs.Endpoints.Production["url"], importedAPI.GetProductionURL())
+	paramConfig := apiParams.Environments[0].Configs.Endpoints.Production["config"].(map[interface{}]interface{})
 
 	apiEndpointConfig := importedAPI.GetProductionConfig()
 
@@ -212,8 +212,8 @@ func TestEnvironmentSpecificParamsEndpointSecurityBasic(t *testing.T) {
 func validateEndpointSecurityDefinition(t *testing.T, api *apim.API, apiParams *testutils.APIParams, importedAPI *apim.API) {
 	t.Helper()
 
-	assert.Equal(t, strings.ToUpper(apiParams.Environments[0].Security.Type), importedAPI.EndpointSecurity.Type)
-	assert.Equal(t, apiParams.Environments[0].Security.Username, importedAPI.EndpointSecurity.Username)
+	assert.Equal(t, strings.ToUpper(apiParams.Environments[0].Configs.Security.Type), importedAPI.EndpointSecurity.Type)
+	assert.Equal(t, apiParams.Environments[0].Configs.Security.Username, importedAPI.EndpointSecurity.Username)
 	assert.Equal(t, "", importedAPI.EndpointSecurity.Password)
 
 	apiCopy := apim.CopyAPI(api)
