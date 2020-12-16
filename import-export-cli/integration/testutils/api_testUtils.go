@@ -19,6 +19,7 @@
 package testutils
 
 import (
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -276,7 +277,6 @@ func ValidateAPIExport(t *testing.T, args *ApiImportExportTestArgs) {
 
 	// Setup apictl envs
 	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
-	base.SetupEnv(t, args.DestAPIM.GetEnvName(), args.DestAPIM.GetApimURL(), args.DestAPIM.GetTokenURL())
 
 	// Export api from env 1
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
@@ -287,9 +287,86 @@ func ValidateAPIExport(t *testing.T, args *ApiImportExportTestArgs) {
 		args.Api.Name, args.Api.Version))
 }
 
+func ValidateExportedAPIStructure(t *testing.T, args *ApiImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	// Export api from env 1
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	output, _ := exportAPI(t, args.Api.Name, args.Api.Version, args.ApiProvider.Username, args.SrcAPIM.GetEnvName())
+
+	ValidateAPIStructure(t, args.Api, output)
+
+	assert.True(t, base.IsAPIArchiveExists(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
+		args.Api.Name, args.Api.Version))
+}
+
+func ValidateAPIStructure(t *testing.T, api *apim.API, exportedOutput string) {
+	// Unzip exported API
+	exportedPath := base.GetExportedPathFromOutput(exportedOutput)
+	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
+	base.Unzip(relativePath, exportedPath)
+
+	// Read the api.yaml file in the exported directory
+	fileData, err := ioutil.ReadFile(relativePath + "/" + api.Name + "-" + api.Version + APIYamlFilePath)
+	if err != nil {
+		t.Error(err)
+	}
+	// Extract the "data" field to an interface
+	fileContent := make(map[string]interface{})
+	err = yaml.Unmarshal(fileData, &fileContent)
+	if err != nil {
+		t.Error(err)
+	}
+	apiData := fileContent["data"].(map[interface{}]interface{})
+
+	// Read the sample-api.yaml file in the testdata directory
+	sampleData, err := ioutil.ReadFile(SampleAPIYamlFilePath)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Extract the "data" field to an interface
+	sampleDataContent := make(map[string]interface{})
+	err = yaml.Unmarshal(sampleData, &sampleDataContent)
+	if err != nil {
+		t.Error(err)
+	}
+	sampleAPIData := sampleDataContent["data"].(map[interface{}]interface{})
+
+	// Check whether the fields of the API DTO structure in APICTL has all the fields in API DTO structure from APIM
+	base.Log("\n-----------------------------------------------------------------------------------------")
+	base.Log("Checking whether the fields of APICTL API DTO struct has all the fields from APIM API DTO struct")
+	for key, _ := range apiData {
+		keyValue := key.(string)
+		_, ok := sampleAPIData[key]
+		base.Log("\"" + keyValue + "\" is in both the structures")
+		if !ok {
+			t.Error("Missing \"" + keyValue + "\" in the API DTO structure from APICTL")
+		}
+	}
+
+	// Check whether the fields of the API DTO structure in APIM has all the fields in API DTO structure from APICTL
+	base.Log("\n-----------------------------------------------------------------------------------------")
+	base.Log("Checking whether the fields of APIM API DTO struct has all the fields from APICTL API DTO struct")
+	for key, _ := range sampleAPIData {
+		keyValue := key.(string)
+		_, ok := apiData[key]
+		base.Log("\"" + keyValue + "\" is in both the structures")
+		if !ok {
+			t.Error("Missing \"" + keyValue + "\" in the API DTO structure from APIM")
+		}
+	}
+}
+
 func GetImportedAPI(t *testing.T, args *ApiImportExportTestArgs) *apim.API {
 	t.Helper()
 
+	// Add env2
+	base.SetupEnv(t, args.DestAPIM.GetEnvName(), args.DestAPIM.GetApimURL(), args.DestAPIM.GetTokenURL())
 	// Import api to env 2
 	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
@@ -362,7 +439,7 @@ func ValidateAPIsEqual(t *testing.T, api1 *apim.API, api2 *apim.API) {
 
 	same := "override_with_same_value"
 	// Since the APIs are from too different envs, their respective ID will defer.
-	// Therefore this will be overriden to the same value to ensure that the equality check will pass.
+	// Therefore this will be overridden to the same value to ensure that the equality check will pass.
 	api1Copy.ID = same
 	api2Copy.ID = same
 
@@ -372,7 +449,7 @@ func ValidateAPIsEqual(t *testing.T, api1 *apim.API, api2 *apim.API) {
 	api1Copy.LastUpdatedTime = same
 	api2Copy.LastUpdatedTime = same
 
-	// Sort member collections to make equality chack possible
+	// Sort member collections to make equality check possible
 	apim.SortAPIMembers(&api1Copy)
 	apim.SortAPIMembers(&api2Copy)
 
@@ -487,7 +564,7 @@ func ValidateAPIDeleteFailure(t *testing.T, args *ApiImportExportTestArgs) {
 }
 
 func exportApiImportedFromProject(t *testing.T, APIName string, APIVersion string, EnvName string) (string, error) {
-	return base.Execute(t, "export", "apis", "-n", APIName, "-v", APIVersion, "-e", EnvName)
+	return base.Execute(t, "export", "api", "-n", APIName, "-v", APIVersion, "-e", EnvName)
 }
 
 func exportAllApisOfATenant(t *testing.T, args *ApiImportExportTestArgs) (string, error) {

@@ -30,6 +30,29 @@ import (
 
 const numberOfAPIs = 5 // Number of APIs to be added in a loop
 
+// Export an API from one environment and check the structure of the DTO whether it is similat to what is being
+// maintained by APICTL
+func TestExportApiCompareStruct(t *testing.T) {
+	apiPublisher := publisher.UserName
+	apiPublisherPassword := publisher.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: apiPublisher, Password: apiPublisherPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+	}
+
+	testutils.ValidateExportedAPIStructure(t, args)
+}
+
 // Export an API from one environment as a super tenant non admin user (who has API Create and API Publish permissions)
 // by specifying the provider name
 func TestExportApiNonAdminSuperTenantUser(t *testing.T) {
@@ -50,7 +73,7 @@ func TestExportApiNonAdminSuperTenantUser(t *testing.T) {
 		SrcAPIM:     dev,
 	}
 
-	testutils.ValidateAPIExportFailure(t, args)
+	testutils.ValidateAPIExport(t, args)
 }
 
 // Export an API from one environment and import to another environment as super tenant admin by specifying the provider name
@@ -122,7 +145,7 @@ func TestExportApiNonAdminTenantUser(t *testing.T) {
 		SrcAPIM:     dev,
 	}
 
-	testutils.ValidateAPIExportFailure(t, args)
+	testutils.ValidateAPIExport(t, args)
 }
 
 // Export an API from one environment and import to another environment as tenant admin by specifying the provider name
@@ -183,15 +206,13 @@ func TestExportApiAdminSuperTenantUserWithoutProvider(t *testing.T) {
 	apiCreatorPassword := creator.Password
 
 	dev := apimClients[0]
-	prod := apimClients[1]
 
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
 	args := &testutils.ApiImportExportTestArgs{
-		CtlUser:  testutils.Credentials{Username: adminUsername, Password: adminPassword},
-		Api:      api,
-		SrcAPIM:  dev,
-		DestAPIM: prod,
+		CtlUser: testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		Api:     api,
+		SrcAPIM: dev,
 	}
 
 	testutils.ValidateAPIExport(t, args)
@@ -206,15 +227,13 @@ func TestExportApiDevopsSuperTenantUserWithoutProvider(t *testing.T) {
 	apiCreatorPassword := creator.Password
 
 	dev := apimClients[0]
-	prod := apimClients[1]
 
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
 	args := &testutils.ApiImportExportTestArgs{
-		CtlUser:  testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
-		Api:      api,
-		SrcAPIM:  dev,
-		DestAPIM: prod,
+		CtlUser: testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Api:     api,
+		SrcAPIM: dev,
 	}
 
 	testutils.ValidateAPIExport(t, args)
@@ -229,15 +248,13 @@ func TestExportApiAdminTenantUserWithoutProvider(t *testing.T) {
 	tenantApiCreatorPassword := creator.Password
 
 	dev := apimClients[0]
-	prod := apimClients[1]
 
 	api := testutils.AddAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword)
 
 	args := &testutils.ApiImportExportTestArgs{
-		CtlUser:  testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
-		Api:      api,
-		SrcAPIM:  dev,
-		DestAPIM: prod,
+		CtlUser: testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
+		Api:     api,
+		SrcAPIM: dev,
 	}
 
 	testutils.ValidateAPIExport(t, args)
@@ -252,15 +269,13 @@ func TestExportApiDevopsTenantUserWithoutProvider(t *testing.T) {
 	tenantApiCreatorPassword := creator.Password
 
 	dev := apimClients[0]
-	prod := apimClients[1]
 
 	api := testutils.AddAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword)
 
 	args := &testutils.ApiImportExportTestArgs{
-		CtlUser:  testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
-		Api:      api,
-		SrcAPIM:  dev,
-		DestAPIM: prod,
+		CtlUser: testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		Api:     api,
+		SrcAPIM: dev,
 	}
 
 	testutils.ValidateAPIExport(t, args)

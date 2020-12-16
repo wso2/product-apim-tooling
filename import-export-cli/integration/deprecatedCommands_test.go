@@ -56,7 +56,7 @@ func TestExportApiNonAdminSuperTenantUserDeprecated(t *testing.T) {
 		SrcAPIM:     dev,
 	}
 
-	validateAPIExportFailureDeprecated(t, args)
+	validateAPIExportDeprecated(t, args)
 }
 
 // Export an API from one environment and import to another environment as tenant user with

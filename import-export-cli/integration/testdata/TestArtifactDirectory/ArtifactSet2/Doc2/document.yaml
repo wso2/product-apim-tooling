@@ -1,0 +1,10 @@
+type: document
+version: v4
+data:
+  documentId: 99343207-6374-4518-9ee2-91305feb2b69
+  name: Doc2
+  type: HOWTO
+  summary: doc2
+  sourceType: FILE
+  fileName: mockPdf.pdf
+  visibility: API_LEVEL

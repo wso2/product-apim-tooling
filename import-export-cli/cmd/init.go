@@ -27,8 +27,7 @@ import (
 	"path/filepath"
 	"unicode"
 
-	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
-
+	jsoniter "github.com/json-iterator/go"
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
 
 	yaml2 "gopkg.in/yaml.v2"
@@ -58,14 +57,15 @@ apictl init MyAwesomeAPI --oas ./swagger.yaml -d definition.yaml`
 
 // directories to be created
 var dirs = []string{
-	"Meta-information",
+	"Definitions",
 	"Image",
 	"Docs",
-	"Docs/FileContents",
 	"Sequences",
 	"Sequences/fault-sequence",
 	"Sequences/in-sequence",
 	"Sequences/out-sequence",
+	"Client-certificates",
+	"Endpoint-certificates",
 	"Interceptors",
 	"libs",
 }
@@ -84,12 +84,12 @@ func createDirectories(name string) error {
 }
 
 // loadDefaultSpecFromDisk loads api definition stored in HOME/.wso2apictl/default_api.yaml
-func loadDefaultSpecFromDisk() (*v2.APIDefinition, error) {
+func loadDefaultSpecFromDisk() (*v2.APIDefinitionFile, error) {
 	defaultData, err := ioutil.ReadFile(utils.DefaultAPISpecFilePath)
 	if err != nil {
 		return nil, err
 	}
-	def := &v2.APIDefinition{}
+	def := &v2.APIDefinitionFile{}
 	err = yaml.Unmarshal(defaultData, &def)
 	if err != nil {
 		return nil, err
@@ -119,7 +119,7 @@ func hasPrefix(buf []byte, prefix []byte) bool {
 // executeInitCmd will run init command
 func executeInitCmd() error {
 	var dir string
-	swaggerSavePath := filepath.Join(initCmdOutputDir, filepath.FromSlash("Meta-information/swagger.yaml"))
+	swaggerSavePath := filepath.Join(initCmdOutputDir, filepath.FromSlash("Definitions/swagger.yaml"))
 
 	if initCmdOutputDir != "" {
 		err := os.MkdirAll(initCmdOutputDir, os.ModePerm)
@@ -140,14 +140,17 @@ func executeInitCmd() error {
 	}
 	fmt.Println("Initializing a new WSO2 API Manager project in", dir)
 
-	def, err := loadDefaultSpecFromDisk()
+	definitionFile, err := loadDefaultSpecFromDisk()
+
+	// Get the API DTO specific details to process
+	def := &definitionFile.Data
 	if err != nil {
 		return err
 	}
 
 	// initCmdInitialState has already validated before creating the 'dir'
 	if initCmdInitialState != "" {
-		def.Status = initCmdInitialState
+		def.LifeCycleStatus = initCmdInitialState
 	}
 
 	err = createDirectories(initCmdOutputDir)
@@ -168,11 +171,6 @@ func executeInitCmd() error {
 		err = v2.Swagger2Populate(def, doc)
 		if err != nil {
 			return err
-		}
-
-		if def.EndpointConfig != nil {
-			def.ProductionUrl = ""
-			def.SandboxUrl = ""
 		}
 
 		// convert and save swagger as yaml
@@ -205,7 +203,7 @@ func executeInitCmd() error {
 			return err
 		}
 
-		apiDef := &v2.APIDefinition{}
+		apiDef := &v2.APIDefinitionFile{}
 
 		// substitute env variables
 		utils.Logln(utils.LogPrefixInfo + "Substituting environment variables")
@@ -222,12 +220,12 @@ func executeInitCmd() error {
 		}
 
 		// marshal original def
-		originalDefBytes, err := json.Marshal(def)
+		originalDefBytes, err := jsoniter.Marshal(definitionFile)
 		if err != nil {
 			return err
 		}
 		// marshal new def
-		newDefBytes, err := json.Marshal(apiDef)
+		newDefBytes, err := jsoniter.Marshal(apiDef)
 		if err != nil {
 			return err
 		}
@@ -237,30 +235,23 @@ func executeInitCmd() error {
 		if err != nil {
 			return err
 		}
-		tmpDef := &v2.APIDefinition{}
+		tmpDef := &v2.APIDefinitionFile{}
 		err = json.Unmarshal(finalDefBytes, &tmpDef)
 		if err != nil {
 			return err
 		}
-		def = tmpDef
+		definitionFile.Data = tmpDef.Data
 	}
 
-	apiData, err := yaml2.Marshal(def)
+	apiData, err := yaml2.Marshal(definitionFile)
 	if err != nil {
 		return err
 	}
 
 	// write to the disk
-	apiJSONPath := filepath.Join(initCmdOutputDir, filepath.FromSlash("Meta-information/api.yaml"))
+	apiJSONPath := filepath.Join(initCmdOutputDir, filepath.FromSlash("api.yaml"))
 	utils.Logln(utils.LogPrefixInfo + "Writing " + apiJSONPath)
 	err = ioutil.WriteFile(apiJSONPath, apiData, os.ModePerm)
-	if err != nil {
-		return err
-	}
-
-	apimProjParamsFilePath := filepath.Join(initCmdOutputDir, utils.ParamFileAPI)
-	utils.Logln(utils.LogPrefixInfo + "Writing " + apimProjParamsFilePath)
-	err = impl.ScaffoldParams(apimProjParamsFilePath)
 	if err != nil {
 		return err
 	}

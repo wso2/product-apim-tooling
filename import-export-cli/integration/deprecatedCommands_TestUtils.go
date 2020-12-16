@@ -132,19 +132,18 @@ func getKeys(t *testing.T, provider string, name string, version string, env str
 	return base.Execute(t, "get-keys", "-n", name, "-v", version, "-r", provider, "-e", env, "-k", "--verbose")
 }
 
-func validateAPIExportFailureDeprecated(t *testing.T, args *testutils.ApiImportExportTestArgs) {
+func validateAPIExportDeprecated(t *testing.T, args *testutils.ApiImportExportTestArgs) {
 	t.Helper()
 
-	// Setup apictl env
+	// Setup apictl envs
 	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
 
-	// Attempt exporting api from env
+	// Export api from env 1
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
 	exportAPI(t, args.Api.Name, args.Api.Version, args.ApiProvider.Username, args.SrcAPIM.GetEnvName())
 
-	// Validate that export failed
-	assert.False(t, base.IsAPIArchiveExists(t, testutils.GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
+	assert.True(t, base.IsAPIArchiveExists(t, testutils.GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
 		args.Api.Name, args.Api.Version))
 }
 

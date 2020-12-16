@@ -136,7 +136,7 @@ func ValidateImportProjectFailed(t *testing.T, args *InitTestArgs) {
 
 	result, _ := ImportApiFromProject(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, false)
 
-	assert.Contains(t, result, "Resource Already Exists", "Test failed because API is imported successfully")
+	assert.Contains(t, result, "409", "Test failed because API is imported successfully")
 
 	base.WaitForIndexing()
 
@@ -182,7 +182,7 @@ func ValidateExportImportedAPI(t *testing.T, args *InitTestArgs, DevFirstDefault
 	return expOutput
 }
 
-func ValidateAPIWithDocIsExported(t *testing.T, args *InitTestArgs, DevFirstDefaultAPIName string, DevFirstDefaultAPIVersion string) {
+func ValidateAPIWithDocIsExported(t *testing.T, args *InitTestArgs, DevFirstDefaultAPIName, DevFirstDefaultAPIVersion, TestCaseDestPathSuffix string) {
 	expOutput := ValidateExportImportedAPI(t, args, DevFirstDefaultAPIName, DevFirstDefaultAPIVersion)
 
 	//Unzip exported API and check whether the imported doc is in there
@@ -190,7 +190,7 @@ func ValidateAPIWithDocIsExported(t *testing.T, args *InitTestArgs, DevFirstDefa
 	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
 	base.Unzip(relativePath, exportedPath)
 
-	docPathOfExportedApi := relativePath + TestDefaultExtractedFileName + TestCase1DestPathSuffix
+	docPathOfExportedApi := relativePath + TestDefaultExtractedFileName + TestCaseDestPathSuffix
 
 	//Check whether the file is available
 	isDocExported := base.IsFileAvailable(docPathOfExportedApi)

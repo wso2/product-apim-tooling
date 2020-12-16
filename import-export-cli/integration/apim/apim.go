@@ -152,6 +152,7 @@ func (instance *Client) GenerateSampleAPIData(provider string) *API {
 	api.Type = "HTTP"
 	api.SubscriptionAvailability = "CURRENT_TENANT"
 	api.AccessControl = "NONE"
+	api.AuthorizationHeader = "Authorization"
 	api.EndpointImplementationType = "ENDPOINT"
 	api.GatewayEnvironments = []string{"Production and Sandbox"}
 	api.BusinessInformation = BusinessInfo{"Jane Roe", "marketing@pizzashack.com", "John Doe", "architecture@pizzashack.com"}
@@ -541,7 +542,7 @@ func (instance *Client) AddAPIFromOpenAPIDefinition(t *testing.T, path string, a
 	return apiResponse.ID
 }
 
-// AddAPIProductFromYaml : Add SampleAPIProduct using using a yaml file
+// AddAPIProductFromJSON : Add SampleAPIProduct using using a json file
 func (instance *Client) AddAPIProductFromJSON(t *testing.T, path string, username string, password string, apisList map[string]*API, doClean bool) string {
 	apiProductsURL := instance.publisherRestURL + "/api-products"
 
@@ -586,7 +587,7 @@ func (instance *Client) AddAPIProductFromJSON(t *testing.T, path string, usernam
 
 	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
 
-	base.LogRequest("apim.AddAPIProductFromYaml()", request)
+	base.LogRequest("apim.AddAPIProductFromJSON()", request)
 
 	response := base.SendHTTPRequest(request)
 
