@@ -1,0 +1,106 @@
+type: api
+version: v4
+data:
+  id: 28114236-515c-4f40-82e4-6a016e632008
+  name: 4EBQLNWO5J3DTKXHAPI
+  description: This is a simple API for Pizza Shack online pizza delivery store.
+  context: /RQPELZWRGA6FNYNY
+  version: 1.0.0
+  provider: creator
+  lifeCycleStatus: CREATED
+  responseCachingEnabled: false
+  cacheTimeout: 0
+  isDefaultVersion: false
+  enableSchemaValidation: false
+  enableStore: true
+  type: HTTP
+  transport:
+   - http
+   - https
+  tags:
+   - pizza
+  policies:
+   - Unlimited
+  apiThrottlingPolicy: Unlimited
+  authorizationHeader: Authorization
+  securityScheme:
+   - oauth2
+   - oauth_basic_auth_api_key_mandatory
+  visibility: PUBLIC
+  visibleRoles: []
+  visibleTenants: []
+  gatewayEnvironments:
+   - Production and Sandbox
+  deploymentEnvironments: []
+  labels: []
+  mediationPolicies: []
+  subscriptionAvailability: CURRENT_TENANT
+  subscriptionAvailableTenants: []
+  additionalProperties: {}
+  accessControl: NONE
+  accessControlRoles: []
+  businessInformation:
+    businessOwner: Jane Roe
+    businessOwnerEmail: marketing@pizzashack.com
+    technicalOwner: John Doe
+    technicalOwnerEmail: architecture@pizzashack.com
+  corsConfiguration:
+    corsConfigurationEnabled: false
+    accessControlAllowOrigins: []
+    accessControlAllowCredentials: false
+    accessControlAllowHeaders: []
+    accessControlAllowMethods: []
+  createdTime: Dec 11, 2020 10:50:36 AM
+  lastUpdatedTime: Dec 11, 2020 10:50:36 AM
+  endpointConfig:
+    endpoint_type: http
+    sandbox_endpoints:
+      url: https://localhost:9443/am/sample/pizzashack/v1/api/
+    production_endpoints:
+      url: https://localhost:9443/am/sample/pizzashack/v1/api/
+  endpointImplementationType: ENDPOINT
+  scopes: []
+  operations:
+   -
+    id: ""
+    target: /order/{orderId}
+    verb: GET
+    authType: Application & Application User
+    throttlingPolicy: Unlimited
+    scopes: []
+    usedProductIds: []
+   -
+    id: ""
+    target: /order/{orderId}
+    verb: DELETE
+    authType: Application & Application User
+    throttlingPolicy: Unlimited
+    scopes: []
+    usedProductIds: []
+   -
+    id: ""
+    target: /order/{orderId}
+    verb: PUT
+    authType: Application & Application User
+    throttlingPolicy: Unlimited
+    scopes: []
+    usedProductIds: []
+   -
+    id: ""
+    target: /menu
+    verb: GET
+    authType: Application & Application User
+    throttlingPolicy: Unlimited
+    scopes: []
+    usedProductIds: []
+   -
+    id: ""
+    target: /order
+    verb: POST
+    authType: Application & Application User
+    throttlingPolicy: Unlimited
+    scopes: []
+    usedProductIds: []
+  categories: []
+  keyManagers:
+   - all

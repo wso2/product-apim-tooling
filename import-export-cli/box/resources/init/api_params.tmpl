@@ -1,8 +1,9 @@
 environments:{{- range $name, $elem := . }}
   - name: {{ $name }}
-    endpoints:
-      production:
-      sandbox:
+    configs:
+        endpoints:
+          production:
+          sandbox:
 {{- end }}
 
 deploy:
