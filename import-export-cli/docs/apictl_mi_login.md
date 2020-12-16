@@ -1,21 +1,21 @@
-## apictl login
+## apictl mi login
 
-Login to an API Manager
+Login to a Micro Integrator
 
 ### Synopsis
 
-Login to an API Manager using credentials
+Login to a Micro Integrator using credentials
 
 ```
-apictl login [environment] [flags]
+apictl mi login [environment] [flags]
 ```
 
 ### Examples
 
 ```
-apictl login dev -u admin -p admin
-apictl login dev -u admin
-cat ~/.mypassword | apictl login dev -u admin
+apictl mi login dev -u admin -p admin
+apictl mi login dev -u admin
+cat ~/.mypassword | apictl mi login dev -u admin
 ```
 
 ### Options
@@ -36,5 +36,5 @@ cat ~/.mypassword | apictl login dev -u admin
 
 ### SEE ALSO
 
-* [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications and Managing WSO2 Micro Integrator
+* [apictl mi](apictl_mi.md)	 - Micro Integrator related commands
 

@@ -195,7 +195,7 @@ func TestImportProjectCreatedPassWhenAPIIsExisted(t *testing.T) {
 	//Import API for the First time
 	testutils.ValidateImportProject(t, args)
 
-	//Import API for the second time
+	//Import API for the second time with update flag
 	testutils.ValidateImportUpdateProject(t, args)
 }
 
@@ -218,6 +218,8 @@ func TestImportAndExportAPIWithDocument(t *testing.T) {
 	testutils.ValidateInitializeProjectWithOASFlag(t, args)
 
 	projectPath, _ := filepath.Abs(projectName)
+	base.CreateTempDir(t, projectPath+testutils.TestCase1DocName)
+
 	//Move doc file to created project
 	srcPathForDoc, _ := filepath.Abs(testutils.TestCase1DocPath)
 	destPathForDoc := projectPath + testutils.TestCase1DestPathSuffix
@@ -231,7 +233,8 @@ func TestImportAndExportAPIWithDocument(t *testing.T) {
 	//Import the project with Document
 	testutils.ValidateImportUpdateProjectNotAlreadyImported(t, args)
 
-	testutils.ValidateAPIWithDocIsExported(t, args, testutils.DevFirstDefaultAPIName, testutils.DevFirstDefaultAPIVersion)
+	testutils.ValidateAPIWithDocIsExported(t, args, testutils.DevFirstDefaultAPIName, testutils.DevFirstDefaultAPIVersion,
+		testutils.TestCase1DestPathSuffix)
 }
 
 //Import Api with an Image and Export that Api with an image (.png Type)
@@ -312,15 +315,22 @@ func TestUpdateDocAndImageOfAPIOfExistingAPI(t *testing.T) {
 	//Initialize the project
 	testutils.ValidateInitializeProjectWithOASFlag(t, args)
 
-	//Move doc file to created project
 	projectPath, _ := filepath.Abs(projectName)
+	base.CreateTempDir(t, projectPath+testutils.TestCase2DocName)
+
+	//Move doc file to created project
 	srcPathForDoc, _ := filepath.Abs(testutils.TestCase2DocPath)
 	destPathForDoc := projectPath + testutils.TestCase2DestPathSuffix
 	base.Copy(srcPathForDoc, destPathForDoc)
 
-	//Move Image file to created project
-	srcPathForImage, _ := filepath.Abs(testutils.TestCase2JpegPath)
-	destPathForImage := projectPath + testutils.TestCase2DestJpegPathSuffix
+	//Move docMetaData file to created project
+	srcPathForDocMetadata, _ := filepath.Abs(testutils.TestCase2DocMetaDataPath)
+	destPathForDocMetaData := projectPath + testutils.TestCase2DestMetaDataPathSuffix
+	base.Copy(srcPathForDocMetadata, destPathForDocMetaData)
+
+	//Move icon file to created project
+	srcPathForImage, _ := filepath.Abs(testutils.TestCase2PngPath)
+	destPathForImage := projectPath + testutils.TestCase2DestPngPathSuffix
 	base.Copy(srcPathForImage, destPathForImage)
 
 	//Import the project with Document and image thumbnail
@@ -328,17 +338,12 @@ func TestUpdateDocAndImageOfAPIOfExistingAPI(t *testing.T) {
 
 	//Update doc file to created project
 	srcPathForDocUpdate, _ := filepath.Abs(testutils.TestCase1DocPath)
-	destPathForDocUpdate := projectPath + testutils.TestCase1DestPathSuffix
+	destPathForDocUpdate := projectPath + testutils.TestCase2DestPathSuffix
 	base.Copy(srcPathForDocUpdate, destPathForDocUpdate)
 
-	//Update docMetaData file to created project
-	srcPathForDocMetadataUpdate, _ := filepath.Abs(testutils.TestCase1DocMetaDataPath)
-	destPathForDocMetaDataUpdate := projectPath + testutils.TestCase1DestMetaDataPathSuffix
-	base.Copy(srcPathForDocMetadataUpdate, destPathForDocMetaDataUpdate)
-
-	//Update icon file to created project
-	srcPathForIcon, _ := filepath.Abs(testutils.TestCase2PngPath)
-	destPathForIcon := projectPath + testutils.TestCase2DestPngPathSuffix
+	//Update image file to created project
+	srcPathForIcon, _ := filepath.Abs(testutils.TestCase2JpegPath)
+	destPathForIcon := projectPath + testutils.TestCase2DestJpegPathSuffix
 	base.Copy(srcPathForIcon, destPathForIcon)
 
 	base.WaitForIndexing()
@@ -346,8 +351,9 @@ func TestUpdateDocAndImageOfAPIOfExistingAPI(t *testing.T) {
 	testutils.ValidateImportUpdateProject(t, args)
 
 	//Validate that image has been updated
-	testutils.ValidateAPIWithDocIsExported(t, args, testutils.DevFirstDefaultAPIName, testutils.DevFirstDefaultAPIVersion)
+	testutils.ValidateAPIWithDocIsExported(t, args, testutils.DevFirstDefaultAPIName, testutils.DevFirstDefaultAPIVersion,
+		testutils.TestCase2DestPathSuffix)
 
 	//Validate that document has been updated
-	testutils.ValidateAPIWithIconIsExported(t, args, testutils.DevFirstDefaultAPIName, testutils.DevFirstDefaultAPIVersion)
+	testutils.ValidateAPIWithImageIsExported(t, args, testutils.DevFirstDefaultAPIName, testutils.DevFirstDefaultAPIVersion)
 }

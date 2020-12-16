@@ -21,12 +21,13 @@ package utils
 import (
 	"errors"
 	"fmt"
-	"github.com/go-resty/resty"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/go-resty/resty"
 
 	"gopkg.in/yaml.v2"
 )
@@ -98,17 +99,16 @@ func (mainConfig *MainConfig) ParseMainConfigFromFile(data []byte) error {
 		return err
 	}
 	for name, endpoints := range mainConfig.Environments {
-		if endpoints.ApiManagerEndpoint == "" {
-			if endpoints.AdminEndpoint != "" && endpoints.DevPortalEndpoint != "" &&
-				endpoints.PublisherEndpoint != "" && endpoints.RegistrationEndpoint != "" &&
-				endpoints.TokenEndpoint != "" {
-				return nil
-			} else {
+		if !HasOnlyMIEndpoint(&endpoints) {
+			if endpoints.ApiManagerEndpoint == "" {
+				if RequiredAPIMEndpointsExists(&endpoints) {
+					return nil
+				}
 				return errors.New("Blank API Manager Endpoint for " + name)
 			}
-		}
-		if endpoints.TokenEndpoint == "" {
-			return errors.New("Blank Token Endpoint for " + name)
+			if endpoints.TokenEndpoint == "" {
+				return errors.New("Blank Token Endpoint for " + name)
+			}
 		}
 		// ApiImportExportEndpoint is not mandatory
 		// ApiListEndpoint is not mandatory
@@ -304,6 +304,81 @@ func CopyDir(src string, dst string) (err error) {
 	return
 }
 
+// CopyDirectoryContents recursively copies all the content of a directory, attempting to preserve permissions.
+// Source directory must exist,and the destination directory exist.
+func CopyDirectoryContents (src string, dst string) (err error)  {
+	entries, err := ioutil.ReadDir(src)
+	if err != nil {
+		return
+	}
+
+	for _, entry := range entries {
+		srcPath := filepath.Join(src, entry.Name())
+		dstPath := filepath.Join(dst, entry.Name())
+
+		if entry.IsDir() {
+			err = CopyDir(srcPath, dstPath)
+			if err != nil {
+				return
+			}
+		} else {
+			err = CopyFile(srcPath, dstPath)
+			if err != nil {
+				return
+			}
+		}
+	}
+	return
+}
+
+// MoveDirectoryContentsToNewDirectory recursively moves all the content of a directory to a given directory
+// attempting to preserve permissions.
+// Source directory must exist,and the destination directory exist.
+// @param src source directory path
+// @param dst destiny directory path
+// @return error
+func MoveDirectoryContentsToNewDirectory(src string, dst string) (err error)  {
+	entries, err := ioutil.ReadDir(src)
+	if err != nil {
+		return
+	}
+
+	err = CreateDirIfNotExist(filepath.Join(dst))
+	if err != nil {
+		return
+	}
+
+	for _, entry := range entries {
+		srcPath := filepath.Join(src, entry.Name())
+		dstPath := filepath.Join(dst, entry.Name())
+
+		if entry.IsDir() {
+			//Copy directory from source to destination
+			err = CopyDir(srcPath, dstPath)
+			if err != nil {
+				return
+			}
+			//remove directory from source after copying
+			err = RemoveDirectoryIfExists(srcPath)
+			if err != nil {
+				return
+			}
+		} else {
+			//Copy file from source to destination
+			err = CopyFile(srcPath, dstPath)
+			if err != nil {
+				return
+			}
+			//remove file from source after copying
+			err = RemoveFileIfExists(srcPath)
+			if err != nil {
+				return
+			}
+		}
+	}
+	return
+}
+
 // CreateTempFile creates a temporary file in the OS' temp directory
 // example pattern "docker-secret-*.yaml"
 func CreateTempFile(pattern string, content []byte) (string, error) {
@@ -330,7 +405,7 @@ func CreateTempFile(pattern string, content []byte) (string, error) {
 // @return error
 // @return func() can be called to cleanup the temporary items created during this function execution. Needs to call
 //	this once the zip file is consumed
-func CreateZipFileFromProject(projectPath string, skipCleanup bool) (string, error, func()){
+func CreateZipFileFromProject(projectPath string, skipCleanup bool) (string, error, func()) {
 	// If the projectPath contains a directory, zip it
 	if info, err := os.Stat(projectPath); err == nil && info.IsDir() {
 		tmp, err := ioutil.TempFile("", "project-artifact*.zip")
@@ -413,7 +488,7 @@ func extractArchive(src, dest string) (string, error) {
 
 // Creates a temporary folder and creates a zip file with a given name (zipFileName) from the given REST API response.
 //	Returns the location of the created zip file.
-func WriteResponseToTempZip(zipFileName string,resp *resty.Response) (string, error) {
+func WriteResponseToTempZip(zipFileName string, resp *resty.Response) (string, error) {
 	// Create a temp directory to save the original zip from the REST API
 	tmpDir, err := ioutil.TempDir("", "apim")
 	if err != nil {
@@ -430,4 +505,36 @@ func WriteResponseToTempZip(zipFileName string,resp *resty.Response) (string, er
 		return "", err
 	}
 	return tempZipFile, err
+}
+
+// CreateZipFile if the given filePath contains a directory, zip it
+// @param filePath Project path
+// @param skipCleanup Whether to clean the temporary files after the program exists
+// @return error
+// @return func() can be called to cleanup the temporary items created during this function execution. Needs to call
+//	this once the zip file is consumed
+func CreateZipFile(filePath string, skipCleanup bool) (error, func()) {
+	// If the filePath contains a directory, zip it
+	if info, err := os.Stat(filePath); err == nil && info.IsDir() {
+		if err != nil {
+			return err, nil
+		}
+		sourceZipPath := filePath + ZipFileSuffix
+		Logln(LogPrefixInfo+"Creating the zipDirectory artifact", sourceZipPath)
+		err = Zip(filePath, sourceZipPath)
+		//creates a function to cleanup the temporary folders
+		cleanup := func() {
+			if skipCleanup {
+				Logln(LogPrefixInfo+"Leaving", filePath)
+				return
+			}
+			Logln(LogPrefixInfo+"Deleting", filePath)
+			err := RemoveDirectoryIfExists(filePath)
+			if err != nil {
+				Logln(LogPrefixError + err.Error())
+			}
+		}
+		return nil, cleanup
+	}
+	return nil, nil
 }
