@@ -23,7 +23,11 @@ type APIParams struct {
 }
 
 type Environment struct {
-	Name                string    `yaml:"name"`
+	Name    string  `yaml:"name"`
+	Configs Configs `yaml:"configs"`
+}
+
+type Configs struct {
 	Endpoints           Endpoints `yaml:"endpoints"`
 	Security            Security  `yaml:"security,omitempty"`
 	GatewayEnvironments []string  `yaml:"gatewayEnvironments,omitempty"`
