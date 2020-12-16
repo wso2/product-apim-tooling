@@ -35,7 +35,7 @@ apictl import app -f qa/apps/sampleApp.zip -e dev
 
 ### SEE ALSO
 
-* [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications
+* [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications and Managing WSO2 Micro Integrator
 * [apictl import api](apictl_import_api.md)	 - Import API
 * [apictl import api-product](apictl_import_api-product.md)	 - Import API Product
 * [apictl import app](apictl_import_app.md)	 - Import App

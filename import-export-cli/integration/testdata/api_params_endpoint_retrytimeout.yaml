@@ -1,7 +1,8 @@
 environments:
     - name: production
-      endpoints:
-          production:
-              url: 'https://prod.wso2.com'
-              config:
-                  retryTimeOut: 60
+      configs:
+        endpoints:
+              production:
+                  url: 'https://prod.wso2.com'
+                  config:
+                      retryTimeOut: 60

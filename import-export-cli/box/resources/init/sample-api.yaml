@@ -1,0 +1,146 @@
+# Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+type: api # Type of the exported artifact using APICTL
+version: v4 # API Manager version
+data: # Contains the meta data of the API
+  name: PizzaShackAPI # Name of the API without Spaces [required] 
+  description: This is a simple API for Pizza Shack online pizza delivery store. # Description of the API
+  context: /pizzashack # Context of the API with a leading slash [required]
+  version: 1.0.0 # Version of the API [required]
+  provider: admin # Provider name of the API [required]
+  lifeCycleStatus: PUBLISHED # Life cycle status of the API
+  responseCachingEnabled: false # Is response cache is enabled? true|false
+  cacheTimeout: 300 # Response cache time out
+  isDefaultVersion: false # Is API default? true|false, if set to true APIM will discard version and make the API default
+  enableSchemaValidation: false # Is schema validation enabled? true|false
+  enableStore: true # Is enabled in store? true|false
+  type: HTTP # Type of the API {HTTP|WS|GRAPHQL|SOAPTOREST} [required]
+  transport: # Transport protocols as a list
+   - http
+   - https
+  tags:  # Tags for the API as a list
+   - pizza
+  policies: # Available subscription policies (tiers) as a list
+   - Unlimited
+  authorizationHeader: Authorization # Authorization header for requests when invoking the API
+  securityScheme: # Security schemes of the API as a list
+   - oauth2
+   - oauth_basic_auth_api_key_mandatory
+  visibility: PUBLIC # Visibility level of the API {PUBLIC|PRIVATE|RESTRICTED} [required]
+  visibleRoles: [] # User roles that are able to access the API in Store as a list
+  visibleTenants: [] # Visible tenants of the API
+  gatewayEnvironments: # Gateway environments that the API is available as a list
+   - Production and Sandbox
+  deploymentEnvironments: [] # Selected deployment environments and clusters of the API as a list
+  labels: [] # Labels of micro-gateway environments attached to the API
+  mediationPolicies: # Mediation policies attached to the API that should be executed in the runtime {IN|OUT|FAULT}
+   -
+    id: 3b8cc0a7-6d98-4678-9111-2aba50fa505c
+    name: preserve_accept_header
+    type: IN
+    shared: true
+   -
+    id: 35368bb8-c6dc-4297-9703-8b5087dcad75
+    name: log_out_message
+    type: OUT
+    shared: true
+   -
+    id: 1f3a6f24-482f-4ad0-93c6-62f7c6f63017
+    name: debug_json_fault
+    type: FAULT
+    shared: true 
+  subscriptionAvailability: CURRENT_TENANT # Subscription availability of the API {CURRENT_TENANT|ALL_TENANTS|SPECIFIC_TENANTS}
+  subscriptionAvailableTenants: [] # Subscription available tenants as a list
+  additionalProperties: {} # Map of custom properties of the API
+  accessControl: NONE # Is the API is restricted to certain set of publishers or creators or is it visible to all the publishers and creators? If the accessControl restriction is none, this API can be modified by all the publishers and creators, if not it can only be viewable/modifiable by certain set of publishers and creators, based on the restriction
+  accessControlRoles: [] # The user roles that are able to view/modify as API publisher or creator
+  businessInformation: # Business information of the API
+    businessOwner: Jane Roe # Business Owner
+    businessOwnerEmail: marketing@pizzashack.com # Email of the business owner
+    technicalOwner: John Doe # Technical owner (plea)
+    technicalOwnerEmail: architecture@pizzashack.com # Email of the technical owner
+  corsConfiguration: # CORS settings of the API
+    corsConfigurationEnabled: false # Is CORS enabled? {true|false}
+    accessControlAllowOrigins: # Allowed origins for CORS as a List. * is for any
+     - '*'
+    accessControlAllowCredentials: false # Allow credentials? {true|false}
+    accessControlAllowHeaders: # Allowed headers as a list
+     - authorization
+     - Access-Control-Allow-Origin
+     - Content-Type
+     - SOAPAction
+     - apikey
+     - testKey
+    accessControlAllowMethods:  # Allowed methods as a list
+     - GET
+     - PUT
+     - POST
+     - DELETE
+     - PATCH
+     - OPTIONS
+  createdTime: Dec 14, 2020 3:52:06 PM # Created time of the API
+  lastUpdatedTime: Dec 14, 2020 3:52:28 PM # Last updated time of the API
+  endpointConfig: # Endpoint configuration of the API. This can be used to provide different types of endpoints including Simple REST Endpoints, Loadbalanced and Failover. [required]
+    endpoint_type: http # Endpoint type 
+    sandbox_endpoints: # Sandbox endpoints
+      url: https://localhost:9443/am/sample/pizzashack/v1/api/
+    production_endpoints: # Production endpoints
+      url: https://localhost:9443/am/sample/pizzashack/v1/api/
+  endpointImplementationType: ENDPOINT # Implementation of endpoints {ENDPOINT|INLINE }
+  scopes: [] # Shared Scopes for API
+  operations: # Resources of the API. This is not required since the operations will be anyway updated from the swagger definition of the REST API
+   -
+    id: ""
+    target: /order
+    verb: POST
+    authType: Application & Application User
+    throttlingPolicy: Unlimited
+    scopes: []
+    usedProductIds: []
+   -
+    id: ""
+    target: /menu
+    verb: GET
+    authType: Application & Application User
+    throttlingPolicy: Unlimited
+    scopes: []
+    usedProductIds: []
+   -
+    id: ""
+    target: /order/{orderId}
+    verb: GET
+    authType: Application & Application User
+    throttlingPolicy: Unlimited
+    scopes: []
+    usedProductIds: []
+   -
+    id: ""
+    target: /order/{orderId}
+    verb: PUT
+    authType: Application & Application User
+    throttlingPolicy: Unlimited
+    scopes: []
+    usedProductIds: []
+   -
+    id: ""
+    target: /order/{orderId}
+    verb: DELETE
+    authType: Application & Application User
+    throttlingPolicy: Unlimited
+    scopes: []
+    usedProductIds: []
+  categories: [] # List of API Categories that the API belongs to
+  keyManagers: # List of key manager endpoints
+   - all

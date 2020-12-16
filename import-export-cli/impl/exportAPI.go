@@ -29,26 +29,26 @@ import (
 
 // ExportAPIFromEnv function is used with export api command
 func ExportAPIFromEnv(accessToken, name, version, provider, format, exportEnvironment string, preserveStatus bool) (*resty.Response, error) {
-	adminEndpoint := utils.GetAdminEndpointOfEnv(exportEnvironment, utils.MainConfigFilePath)
-	return exportAPI(name, version, provider, format, adminEndpoint, accessToken, preserveStatus)
+	publisherEndpoint := utils.GetPublisherEndpointOfEnv(exportEnvironment, utils.MainConfigFilePath)
+	return exportAPI(name, version, provider, format, publisherEndpoint, accessToken, preserveStatus)
 }
 
 // exportAPI function is used with export api command
 // @param name : Name of the API to be exported
 // @param version : Version of the API to be exported
 // @param provider : Provider of the API
-// @param adminEndpoint : API Manager Admin Endpoint for the environment
+// @param publisherEndpoint : API Manager Publisher Endpoint for the environment
 // @param accessToken : Access Token for the resource
 // @return response Response in the form of *resty.Response
-func exportAPI(name, version, provider, format, adminEndpoint, accessToken string, preserveStatus bool) (*resty.Response, error) {
-	adminEndpoint = utils.AppendSlashToString(adminEndpoint)
-	query := "export/api?name=" + name + "&version=" + version + "&providerName=" + provider +
+func exportAPI(name, version, provider, format, publisherEndpoint, accessToken string, preserveStatus bool) (*resty.Response, error) {
+	publisherEndpoint = utils.AppendSlashToString(publisherEndpoint)
+	query := "apis/export?name=" + name + "&version=" + version + "&providerName=" + provider +
 		"&preserveStatus=" + strconv.FormatBool(preserveStatus)
 	if format != "" {
 		query += "&format=" + format
 	}
 
-	url := adminEndpoint + query
+	url := publisherEndpoint + query
 	utils.Logln(utils.LogPrefixInfo+"ExportAPI: URL:", url)
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken

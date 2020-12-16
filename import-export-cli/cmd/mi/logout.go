@@ -16,7 +16,7 @@
 * under the License.
  */
 
-package cmd
+package mi
 
 import (
 	"fmt"
@@ -28,8 +28,8 @@ import (
 )
 
 const logoutCmdLiteral = "logout [environment]"
-const logoutCmdShortDesc = "Logout to from an API Manager"
-const logoutCmdLongDesc = `Logout from an API Manager environment`
+const logoutCmdShortDesc = "Logout from a Micro Integrator"
+const logoutCmdLongDesc = `Logout from a Micro Integrator`
 const logoutCmdExamples = utils.ProjectName + " logout dev"
 
 // logoutCmd represents the logout command
@@ -40,7 +40,7 @@ var logoutCmd = &cobra.Command{
 	Example: logoutCmdExamples,
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		err := runLogout(args[0])
+		err := credentials.RunMILogout(args[0])
 		if err != nil {
 			fmt.Println(err.Error())
 			os.Exit(1)
@@ -48,23 +48,7 @@ var logoutCmd = &cobra.Command{
 	},
 }
 
-func runLogout(environment string) error {
-	cred, err := GetCredentials(environment)
-	//Get current access token for
-	accessToken, err := credentials.GetOAuthAccessToken(cred, environment)
-	error := credentials.RevokeAccessToken(cred, environment, accessToken)
-	if error != nil {
-		return err
-	}
-	store, err := credentials.GetDefaultCredentialStore()
-	if err != nil {
-		return err
-	}
-	fmt.Println("Logged out from APIM in", environment, "environment")
-	return store.EraseAPIM(environment)
-}
-
 // init using Cobra
 func init() {
-	RootCmd.AddCommand(logoutCmd)
+	MICmd.AddCommand(logoutCmd)
 }

@@ -1,0 +1,11 @@
+type: document
+version: v4
+data:
+  documentId: 5d79aead-eeb3-43b9-84eb-51a965e383ed
+  name: Doc1
+  type: OTHER
+  summary: doc1
+  sourceType: FILE
+  fileName: testDoc.pdf
+  otherTypeName: Other Type
+  visibility: API_LEVEL

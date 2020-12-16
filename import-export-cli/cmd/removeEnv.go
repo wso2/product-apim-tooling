@@ -82,10 +82,17 @@ func removeEnv(envName, mainConfigFilePath, envKeysFilePath string) error {
 
 		// remove keys also if user has already logged into this environment
 		store, err := credentials.GetDefaultCredentialStore()
-		if store.Has(envName) {
+		if store.HasAPIM(envName) {
 			err = runLogout(envName)
 			if err != nil {
-				utils.Logln("Log out is unsuccessful. ", err)
+				utils.Logln("Log out is unsuccessful for APIM. ", err)
+			}
+		}
+
+		if store.HasMI(envName) {
+			err = credentials.RunMILogout(envName)
+			if err != nil {
+				utils.Logln("Log out is unsuccessful for MI. ", err)
 			}
 		}
 

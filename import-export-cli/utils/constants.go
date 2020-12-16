@@ -32,11 +32,12 @@ var CurrentDir, _ = os.Getwd()
 const ConfigDirName = ".wso2apictl"
 
 var HomeDirectory = getConfigHomeDir()
+
 func getConfigHomeDir() string {
 	value := os.Getenv("APICTL_CONFIG_DIR")
 	if len(value) == 0 {
 		value, err := os.UserHomeDir()
-		if len(value) == 0 || err != nil  {
+		if len(value) == 0 || err != nil {
 			current, err := user.Current()
 			if err != nil || current == nil {
 				HandleErrorAndExit("User's HOME folder location couldn't be identified", nil)
@@ -69,12 +70,12 @@ const ExportedApiProductsDirName = "api-products"
 const ExportedAppsDirName = "apps"
 const ExportedMigrationArtifactsDirName = "migration"
 const CertificatesDirName = "certs"
-const APISecurityMutualSsl = "mutualssl"
 
 var DefaultExportDirPath = filepath.Join(ConfigDirPath, DefaultExportDirName)
 var DefaultCertDirPath = filepath.Join(ConfigDirPath, CertificatesDirName)
 
 const defaultApiApplicationImportExportSuffix = "api/am/admin/v1"
+const defaultPublisherApiImportExportSuffix = "api/am/publisher/v1"
 const defaultApiListEndpointSuffix = "api/am/publisher/v1/apis"
 const defaultApiProductListEndpointSuffix = "api/am/publisher/v1/api-products"
 const defaultUnifiedSearchEndpointSuffix = "api/am/publisher/v1/search"
@@ -173,23 +174,33 @@ const DefaultApiProductsDisplayLimit = 25
 const DefaultAppsDisplayLimit = 25
 const DefaultExportFormat = "YAML"
 
-// Multiple endpoints related constants
-const HttpRESTEndpointType = "rest"              // To denote "endpointType: rest" in api_params.yaml
-const HttpRESTEndpointTypeForJSON = "http"       // To denote "endpointType: http" in api_params.yaml and to denote the "endpointType : http" in api.json
-const HttpSOAPEndpointType = "soap"              // To denote "endpointType: soap" in api_params.yaml
-const HttpSOAPEndpointTypeForJSON = "address"    // To denote the "endpointType : address" in api.json
-const AwsLambdaEndpointType = "aws"              // To denote "endpointType: aws" in api_params.yaml
-const AwsLambdaEndpointTypeForJSON = "awslambda" // To denote "endpointType: awslambda" in api.json
-const DynamicEndpointType = "dynamic"            // To denote "endpointType: dynamic" in api_params.yaml
+// MiCmdLiteral denote the alias for micro integrator related commands
+const MiCmdLiteral = "mi"
 
-const LoadBalanceEndpointRoutingPolicy = "load_balanced" // To denote "endpointRoutingPolicy: load_balanced" in api_params.yaml
-const LoadBalanceEndpointTypeForJSON = "load_balance"    // To denote the "endpointType : load_balance" in api.json
-const LoadBalanceAlgorithmClass = "org.apache.synapse.endpoints.algorithms.RoundRobin"
-const FailoverRoutingPolicy = "failover"                  // To denote "endpointRoutingPolicy: failover" in api_params.yaml and to denote the "endpointType : failover" in api.json
-const LoadBalanceSessionManagementTransport = "transport" // To represent the "sessionManagement: transport" in api_params.yaml
+// MiManagementAPIContext
+const MiManagementAPIContext = "management"
 
-const DynamicEndpointConfig = `{"endpoint_type":"default","sandbox_endpoints":{"url":"default"},"failOver":"False","production_endpoints":{"url":"default"}}`
+// Mi Management Resource paths
+const MiManagementCarbonAppResource = "applications"
+const MiManagementServiceResource = "services"
+const MiManagementAPIResource = "apis"
+const MiManagementProxyServiceResource = "proxy-services"
+const MiManagementInboundEndpointResource = "inbound-endpoints"
+const MiManagementEndpointResource = "endpoints"
+const MiManagementMessageProcessorResource = "message-processors"
+const MiManagementTemplateResource = "templates"
+const MiManagementConnectorResource = "connectors"
+const MiManagementMessageStoreResource = "message-stores"
+const MiManagementLocalEntrieResource = "local-entries"
+const MiManagementSequenceResource = "sequences"
+const MiManagementTaskResource = "tasks"
+const MiManagementLogResource = "logs"
+const MiManagementLoggingResource = "logging"
+const MiManagementServerResource = "server"
+const MiManagementDataServiceResource = "data-services"
+const MiManagementMiLoginResource = "login"
+const MiManagementMiLogoutResource = "logout"
+const MiManagementUserResource = "users"
+const MiManagementTransactionResource = "transactions"
 
-const AwsLambdaRoleSuppliedAccessMethod = "role_supplied"        // To denote "accessMethod: role_supplied" in api_params.yaml
-const AwsLambdaRoleSuppliedAccessMethodForJSON = "role-supplied" // To denote the "accessMethod : role-supplied" in api.json
-const AwsLambdaStoredAccessMethod = "stored"                     // To denote "accessMethod: stored" in api_params.yaml and to denote the "accessMethod : stored" in api.json
+const ZipFileSuffix = ".zip"

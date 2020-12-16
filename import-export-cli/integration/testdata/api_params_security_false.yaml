@@ -1,7 +1,8 @@
 environments:
     - name: production
-      endpoints:
-          production:
-              url: 'https://localhost:9443/am/sample/pizzashack/v1/api/'
-      security:
-          enabled: false
+      configs:
+        endpoints:
+            production:
+                url: 'https://localhost:9443/am/sample/pizzashack/v1/api/'
+        security:
+            enabled: false
