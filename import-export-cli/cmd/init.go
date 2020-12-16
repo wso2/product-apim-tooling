@@ -27,6 +27,7 @@ import (
 	"path/filepath"
 	"unicode"
 
+	jsoniter "github.com/json-iterator/go"
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
 
 	yaml2 "gopkg.in/yaml.v2"
@@ -219,12 +220,12 @@ func executeInitCmd() error {
 		}
 
 		// marshal original def
-		originalDefBytes, err := json.Marshal(def)
+		originalDefBytes, err := jsoniter.Marshal(definitionFile)
 		if err != nil {
 			return err
 		}
 		// marshal new def
-		newDefBytes, err := json.Marshal(apiDef)
+		newDefBytes, err := jsoniter.Marshal(apiDef)
 		if err != nil {
 			return err
 		}
@@ -239,7 +240,7 @@ func executeInitCmd() error {
 		if err != nil {
 			return err
 		}
-		def = &tmpDef.Data
+		definitionFile.Data = tmpDef.Data
 	}
 
 	apiData, err := yaml2.Marshal(definitionFile)
