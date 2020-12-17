@@ -28,7 +28,7 @@ const (
 	mgCmdShortDesc = "Handle Microgateway related operations"
 	mgCmdLongDesc  = `Initialize, Add, Update an apictl project to the microgateway`
 
-	MgBasepath = "/mgw/1.0"
+	MgBasepath = "/api/mgw/adapter/0.1"
 )
 
 // MgwCmd represents the export command

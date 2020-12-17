@@ -43,7 +43,7 @@ const (
 	mgDeployCmdShortDesc = "Deploy API"
 	mgDeployCmdLongDesc  = "Deploy the API (apictl project) in Microgateway"
 
-	mgDeployResourcePath = "/import/api"
+	mgDeployResourcePath = "/apis"
 )
 
 const mgDeployCmdExamples = utils.ProjectName + " " + mgCmdLiteral + " " + mgDeployCmdLiteral + " -h https://localhost:9095 " +
