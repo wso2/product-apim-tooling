@@ -195,9 +195,10 @@ func replaceEnvVariables(apiFilePath string) error {
 }
 
 // importAPI imports an API to the API manager
-func importAPI(endpoint, filePath, accessToken string, extraParams map[string]string) error {
+func importAPI(endpoint, filePath, accessToken string, extraParams map[string]string, isOauth bool) error {
 	resp, err := ExecuteNewFileUploadRequest(endpoint, extraParams, "file",
-		filePath, accessToken)
+		filePath, accessToken, isOauth)
+	utils.Logf("Response : %v", resp)
 	if err != nil {
 		utils.Logln(utils.LogPrefixError, err)
 		return err
@@ -213,6 +214,21 @@ func importAPI(endpoint, filePath, accessToken string, extraParams map[string]st
 		fmt.Println("Response:", resp)
 		return errors.New(resp.Status())
 	}
+}
+
+func ImportAPIToMGW(endpoint, filePath, accessToken string, extraParams map[string]string, importAPISkipCleanup bool) error {
+	//TODO: (VirajSalaka) support substituting parameters with params file. At the moment it is in hold on state, as the decision to use environments is
+	//not finalized yet.
+	// if apiFilePath contains a directory, zip it. Otherwise, leave it as it is.
+	filePath, err, cleanupFunc := utils.CreateZipFileFromProject(filePath, importAPISkipCleanup)
+	if err != nil {
+		return err
+	}
+	//cleanup the temporary artifacts once consuming the zip file
+	if cleanupFunc != nil {
+		defer cleanupFunc()
+	}
+	return importAPI(endpoint, filePath, accessToken, extraParams, false)
 }
 
 // ImportAPIToEnv function is used with import-api command
@@ -291,7 +307,7 @@ func ImportAPI(accessOAuthToken, publisherEndpoint, importEnvironment, importPat
 	}
 	utils.Logln(utils.LogPrefixInfo + "Import URL: " + publisherEndpoint)
 
-	err = importAPI(publisherEndpoint, apiFilePath, accessOAuthToken, extraParams)
+	err = importAPI(publisherEndpoint, apiFilePath, accessOAuthToken, extraParams, true)
 	return err
 }
 
@@ -308,8 +324,8 @@ func envParamsFileProcess(importPath, paramsPath, importEnvironment string) erro
 	} else {
 
 		// Create a source directory and add source content to it and then zip it
-		sourceFilePath := filepath.Join(importPath,"SourceArchive")
-		err = utils.MoveDirectoryContentsToNewDirectory(importPath,sourceFilePath)
+		sourceFilePath := filepath.Join(importPath, "SourceArchive")
+		err = utils.MoveDirectoryContentsToNewDirectory(importPath, sourceFilePath)
 		if err != nil {
 			return err
 		}
@@ -323,7 +339,7 @@ func envParamsFileProcess(importPath, paramsPath, importEnvironment string) erro
 			defer cleanupFunc()
 		}
 		//If environment parameters are present in parameter file
-		err = handleEnvParams(importPath,importPath, envParams)
+		err = handleEnvParams(importPath, importPath, envParams)
 		if err != nil {
 			return err
 		}
@@ -345,8 +361,8 @@ func envParamsDirectoryProcess(importPath, paramsPath, importEnvironment string)
 	} else {
 
 		// Create a source directory and add source content to it and then zip it
-		sourceFilePath := filepath.Join(importPath,"SourceArchive")
-		err = utils.MoveDirectoryContentsToNewDirectory(importPath,sourceFilePath)
+		sourceFilePath := filepath.Join(importPath, "SourceArchive")
+		err = utils.MoveDirectoryContentsToNewDirectory(importPath, sourceFilePath)
 		if err != nil {
 			return err
 		}
@@ -361,7 +377,7 @@ func envParamsDirectoryProcess(importPath, paramsPath, importEnvironment string)
 		}
 
 		//create new directory for deployment configurations
-		deploymentDirectoryPath := filepath.Join(importPath,"Deployment")
+		deploymentDirectoryPath := filepath.Join(importPath, "Deployment")
 		err = utils.CreateDirIfNotExist(deploymentDirectoryPath)
 		if err != nil {
 			return err
@@ -373,7 +389,7 @@ func envParamsDirectoryProcess(importPath, paramsPath, importEnvironment string)
 			return err
 		}
 		//If environment parameters are present in parameter file inside the deployment params directory
-		err = handleEnvParams(importPath,deploymentDirectoryPath, envParams)
+		err = handleEnvParams(importPath, deploymentDirectoryPath, envParams)
 		if err != nil {
 			return err
 		}

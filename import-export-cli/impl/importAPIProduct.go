@@ -73,7 +73,7 @@ func resolveImportAPIProductFilePath(file, defaultExportDirectory string) (strin
 // importAPIProduct imports an API Product to the API manager
 func importAPIProduct(endpoint, filePath, accessToken string, extraParams map[string]string) error {
 	resp, err := ExecuteNewFileUploadRequest(endpoint, extraParams, "file",
-		filePath, accessToken)
+		filePath, accessToken, true)
 	if err != nil {
 		return err
 	}
