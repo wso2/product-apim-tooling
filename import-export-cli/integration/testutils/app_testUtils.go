@@ -110,6 +110,22 @@ func ValidateAppExportFailure(t *testing.T, args *AppImportExportTestArgs) {
 		args.Application.Name, args.AppOwner.Username))
 }
 
+func ValidateAppExport(t *testing.T, args *AppImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl env
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	// Attempt exporting app from env
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	exportApp(t, args.Application.Name, args.AppOwner.Username, args.SrcAPIM.GetEnvName())
+
+	// Validate that export passed
+	assert.True(t, base.IsApplicationArchiveExists(t, getEnvAppExportPath(args.SrcAPIM.GetEnvName()),
+		args.Application.Name, args.AppOwner.Username))
+}
+
 func ValidateAppExportImportWithPreserveOwner(t *testing.T, args *AppImportExportTestArgs) {
 	t.Helper()
 

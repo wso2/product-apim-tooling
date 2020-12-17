@@ -113,7 +113,7 @@ func TestExportAppNonAdminSuperTenant(t *testing.T) {
 		SrcAPIM:     dev,
 	}
 
-	testutils.ValidateAppExportFailure(t, args)
+	testutils.ValidateAppExport(t, args)
 }
 
 func TestExportAppNonAdminTenant(t *testing.T) {
@@ -131,7 +131,7 @@ func TestExportAppNonAdminTenant(t *testing.T) {
 		SrcAPIM:     dev,
 	}
 
-	testutils.ValidateAppExportFailure(t, args)
+	testutils.ValidateAppExport(t, args)
 }
 
 func TestExportImportOwnAppAdminSuperTenant(t *testing.T) {

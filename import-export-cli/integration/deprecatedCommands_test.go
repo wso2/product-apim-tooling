@@ -185,7 +185,7 @@ func TestExportAppNonAdminSuperTenantDeprecated(t *testing.T) {
 		SrcAPIM:     dev,
 	}
 
-	validateAppExportFailure(t, args)
+	validateAppExport(t, args)
 }
 
 func TestExportImportAppDevopsTenantDeprecated(t *testing.T) {
