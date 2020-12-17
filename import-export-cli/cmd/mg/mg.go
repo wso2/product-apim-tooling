@@ -40,7 +40,3 @@ var MgCmd = &cobra.Command{
 		cmd.Help()
 	},
 }
-
-func init() {
-	// cmd.RootCmd.AddCommand(MgCmd)
-}
