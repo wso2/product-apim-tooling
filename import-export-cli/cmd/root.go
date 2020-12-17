@@ -29,6 +29,7 @@ import (
 	"github.com/ghodss/yaml"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd/mg"
 	mi "github.com/wso2/product-apim-tooling/import-export-cli/cmd/mi"
 	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 
@@ -111,6 +112,7 @@ func init() {
 		utils.HandleErrorAndExit("Error reading "+utils.MainConfigFilePath+".", err)
 	}
 	RootCmd.AddCommand(mi.MICmd)
+	RootCmd.AddCommand(mg.MgCmd)
 }
 
 // createConfigFiles() creates the ConfigDir and necessary ConfigFiles inside the user's $HOME directory

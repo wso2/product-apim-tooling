@@ -16,7 +16,7 @@
 * under the License.
  */
 
-package cmd
+package mg
 
 import (
 	"github.com/spf13/cobra"
@@ -42,5 +42,5 @@ var MgCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.AddCommand(MgCmd)
+	// cmd.RootCmd.AddCommand(MgCmd)
 }
