@@ -48,14 +48,14 @@ import (
 // @param skipCleanup: skip cleaning up temporary files created during the operation
 func ImportApplicationToEnv(accessToken, environment, filename, appOwner string, updateApplication, preserveOwner,
 	skipSubscriptions, skipKeys, skipCleanup bool) (*http.Response, error) {
-	adminEndpoint := utils.GetAdminEndpointOfEnv(environment, utils.MainConfigFilePath)
-	return ImportApplication(accessToken, adminEndpoint, filename, appOwner, updateApplication, preserveOwner,
+	devportalApplicationsEndpoint := utils.GetDevPortalApplicationListEndpointOfEnv(environment, utils.MainConfigFilePath)
+	return ImportApplication(accessToken, devportalApplicationsEndpoint, filename, appOwner, updateApplication, preserveOwner,
 		skipSubscriptions, skipKeys, skipCleanup)
 }
 
 // ImportApplication function is used with import-app command
 // @param accessToken: OAuth2.0 access token for the resource being accessed
-// @param adminEndpoint: Admin REST API endpoint to use for importing the application
+// @param devportalApplicationsEndpoint: Dev Portal Applications Endpoint for the environment
 // @param filename: name of the application (zipped file) to be imported
 // @param appOwner: Owner of the application
 // @param updateApplication: Update the application if it already exists
@@ -63,13 +63,13 @@ func ImportApplicationToEnv(accessToken, environment, filename, appOwner string,
 // @param skipSubscriptions: Skip importing subscriptions
 // @param skipKeys: skip importing keys of application
 // @param skipCleanup: skip cleaning up temporary files created during the operation
-func ImportApplication(accessToken, adminEndpoint, filename, appOwner string, updateApplication, preserveOwner,
+func ImportApplication(accessToken, devportalApplicationsEndpoint, filename, appOwner string, updateApplication, preserveOwner,
 	skipSubscriptions, skipKeys, skipCleanup bool) (*http.Response, error) {
 
 	exportDirectory := filepath.Join(utils.ExportDirectory, utils.ExportedAppsDirName)
-	adminEndpoint = utils.AppendSlashToString(adminEndpoint)
+	devportalApplicationsEndpoint = utils.AppendSlashToString(devportalApplicationsEndpoint)
 
-	applicationImportEndpoint := adminEndpoint + "import/applications"
+	applicationImportEndpoint := devportalApplicationsEndpoint + "import"
 	applicationImportUrl := applicationImportEndpoint + "?appOwner=" + appOwner + utils.SearchAndTag + "preserveOwner=" +
 		strconv.FormatBool(preserveOwner) + utils.SearchAndTag + "skipSubscriptions=" +
 		strconv.FormatBool(skipSubscriptions) + utils.SearchAndTag + "skipApplicationKeys=" + strconv.FormatBool(skipKeys) +
