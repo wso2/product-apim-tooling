@@ -85,6 +85,17 @@ func WriteApplicationToZip(exportAppName, exportAppOwner, zipLocationPath string
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating the final zip archive", err)
 	}
+
+	// Add application_meta.yaml file inside the zip and create a new zup file in exportedFinalZip location
+	metaData := utils.MetaData{
+		Name: exportAppName,
+		Owner: exportAppOwner,
+	}
+	err = IncludeMetaFileToZip(tempZipFile, exportedFinalZip, utils.MetaFileApplication, metaData)
+	if err != nil {
+		utils.HandleErrorAndExit("Error creating the final zip archive with application_meta.yaml file", err)
+	}
+
 	fmt.Println("Successfully exported Application!")
 	fmt.Println("Find the exported Application at " + exportedFinalZip)
 }
