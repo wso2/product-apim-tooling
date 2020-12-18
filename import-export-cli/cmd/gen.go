@@ -25,10 +25,10 @@ import (
 
 // Get command related usage Info
 const GenCmdLiteral = "gen"
-const GenCmdShortDesc = "Generate deployment directory for VM and for K8S operator"
+const GenCmdShortDesc = "Generate deployment directory for VM and K8S operator"
 
 const GenCmdLongDesc = `Generate sample directory with all the contents to use as the deployment directory` +
-	`  when performing CI/CD pipeline `
+	`  when performing CI/CD pipeline tasks `
 
 const GenCmdExamples = utils.ProjectName + ` ` + GenCmdLiteral + ` ` + GenDeploymentDirCmdLiteral
 

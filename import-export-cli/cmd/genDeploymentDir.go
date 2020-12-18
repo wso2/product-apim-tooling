@@ -34,9 +34,9 @@ var genDeploymentDirSource string
 
 // GetEnvsCmd related info
 const GenDeploymentDirCmdLiteral = "deployment-dir"
-const GenDeploymentDirCmdShortDesc = "Generate sample deployment directory"
+const GenDeploymentDirCmdShortDesc = "Generate a sample deployment directory"
 
-const GenDeploymentDirCmdLongDesc = `Generate sample deployment directory based on the provided source artifact`
+const GenDeploymentDirCmdLongDesc = `Generate a sample deployment directory based on the provided source artifact`
 
 const GenDeploymentDirCmdExamples = utils.ProjectName + ` ` + GenCmdLiteral + ` ` + GenDeploymentDirCmdLiteral + ` ` +
 	`-s  ~/PizzaShackAPI_1.0.0.zip
@@ -86,7 +86,7 @@ func executeGenDeploymentDirCmd() error {
 
 	// Check whether the source is existed in the given location
 	if _, err := os.Stat(genDeploymentDirSource); os.IsNotExist(err) {
-		utils.HandleErrorAndContinue("Error retrieving the source file from the given path ", err)
+		utils.HandleErrorAndContinue("Error retrieving the source file from the given path " + sourceDirectoryPath + " ", err)
 	}
 	// Get the source artifact name
 	deploymentDirName = filepath.Base(genDeploymentDirSource)
@@ -197,7 +197,7 @@ var genDeploymentDirCmd = &cobra.Command{
 
 		err := executeGenDeploymentDirCmd()
 		if err != nil {
-			utils.HandleErrorAndContinue("Error initializing Deployment directory", err)
+			utils.HandleErrorAndContinue("Error initializing the Deployment directory", err)
 		}
 	},
 }
@@ -207,6 +207,6 @@ func init() {
 	genDeploymentDirCmd.Flags().StringVarP(&genDeploymentDirDestination, "destination", "d", "", "Path of "+
 		"the directory where the directory should be generated")
 	genDeploymentDirCmd.Flags().StringVarP(&genDeploymentDirSource, "source", "s", "", "Path of "+
-		"the source directory to use when generating the directory should be generated")
+		"the source directory to be used when generating the directory")
 	_ = genDeploymentDirCmd.MarkFlagRequired("source")
 }
