@@ -165,6 +165,13 @@ const (
 	ParamFileApplication = "application_params.yaml"
 )
 
+// project meta files
+const (
+	MetaFileAPI         = "api_meta.yaml"
+	MetaFileAPIProduct  = "api_product_meta.yaml"
+	MetaFileApplication = "application_meta.yaml"
+)
+
 const PrivateJetModeConst = "privateJet"
 const SidecarModeConst = "sidecar"
 

@@ -344,3 +344,11 @@ type APIData struct {
 	Transport []string `json:"transport"`
 	Tags      []string `json:"tags"`
 }
+
+// Project MetaData struct
+type MetaData struct {
+	Name    string `json:"name"`
+	Version string `json:"version,omitempty"`
+	Revision string `json:"revision"`
+	Owner string `json:"owner,omitempty"`
+}
