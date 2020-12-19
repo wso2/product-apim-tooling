@@ -25,6 +25,7 @@ apictl [flags]
 * [apictl change-status](apictl_change-status.md)	 - Change Status of an API
 * [apictl delete](apictl_delete.md)	 - Delete an API/APIProduct/Application in an environment
 * [apictl export](apictl_export.md)	 - Export an API/API Product/Application in an environment
+* [apictl gen](apictl_gen.md)	 - Generate deployment directory for VM and K8S operator
 * [apictl get](apictl_get.md)	 - Get APIs/APIProducts/Applications in an environment or Get the environments
 * [apictl import](apictl_import.md)	 - Import an API/API Product/Application to an environment
 * [apictl init](apictl_init.md)	 - Initialize a new project in given path

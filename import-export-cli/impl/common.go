@@ -21,7 +21,10 @@ package impl
 import (
 	"bytes"
 	"errors"
+	"github.com/Jeffail/gabs"
+	jsoniter "github.com/json-iterator/go"
 	"io"
+	"io/ioutil"
 	"mime/multipart"
 	"os"
 	"path/filepath"
@@ -131,6 +134,38 @@ func WriteTargetFileFromTemplate(targetFile string, tmpl []byte, envs *utils.Mai
 	err = t.Execute(f, envs.Environments)
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+// Include x_meta.yaml (api_meta.yaml, application_meta.yaml,api_product_params.yaml ) into the sourceZipFile and create
+// a new Zip file in the provided targetZipFile location. metaFile needs to be one of the supported x_meta.yaml.
+//  api_meta.yaml, application_meta.yaml,api_product_params.yaml
+func IncludeMetaFileToZip(sourceZipFile, targetZipFile, metaFile string, metaData utils.MetaData) error {
+	//	Create a temp directory (tmpClonedLoc) by extracting the original zip file.
+	tmpClonedLoc, err := utils.GetTempCloneFromDirOrZip(sourceZipFile)
+	// Create the *_meta.yaml file inside the cloned directory.
+	tmpLocationForAPIMetaFile := filepath.Join(tmpClonedLoc, metaFile)
+	marshaledData, err := jsoniter.Marshal(metaData)
+	if err != nil {
+		return err
+	}
+
+	jsonMetaData, err := gabs.ParseJSON(marshaledData)
+	metaContent, err := utils.JsonToYaml(jsonMetaData.Bytes())
+	if err != nil {
+		return err
+	}
+
+	//write the meta content into *_meta.yaml files
+	err = ioutil.WriteFile(tmpLocationForAPIMetaFile, metaContent, 0644)
+	if err != nil {
+		utils.HandleErrorAndExit("Error creating api_meta.yaml inside the exported zip archive", err)
+	}
+
+	err = utils.Zip(tmpClonedLoc, targetZipFile)
+	if err != nil {
+		utils.HandleErrorAndExit("Error creating the final zip archive", err)
 	}
 	return nil
 }

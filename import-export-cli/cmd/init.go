@@ -22,6 +22,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/Jeffail/gabs"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -260,6 +261,30 @@ func executeInitCmd() error {
 	utils.Logln(utils.LogPrefixInfo + "Writing " + apimProjReadmeFilePath)
 	readme, _ := box.Get("/init/README.md")
 	err = ioutil.WriteFile(apimProjReadmeFilePath, readme, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	// Create metaData struct using details from definition
+	metaData := utils.MetaData{
+		Name:    definitionFile.Data.Name,
+		Version: definitionFile.Data.Version,
+	}
+	marshaledData, err := jsoniter.Marshal(metaData)
+	if err != nil {
+		return err
+	}
+
+	jsonMetaData, err := gabs.ParseJSON(marshaledData)
+	metaDataContent, err := utils.JsonToYaml(jsonMetaData.Bytes())
+	if err != nil {
+		return err
+	}
+
+	// write api_meta.yaml file to the project directory
+	apiMetaDataPath := filepath.Join(initCmdOutputDir, filepath.FromSlash(utils.MetaFileAPI))
+	utils.Logln(utils.LogPrefixInfo + "Writing " + apiMetaDataPath)
+	err = ioutil.WriteFile(apiMetaDataPath, metaDataContent, os.ModePerm)
 	if err != nil {
 		return err
 	}

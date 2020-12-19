@@ -89,6 +89,16 @@ func WriteToZip(exportAPIName, exportAPIVersion, zipLocationPath string, running
 		utils.HandleErrorAndExit("Error creating the final zip archive", err)
 	}
 
+	// Add api_meta.yaml file inside the zip and create a new zup file in exportedFinalZip location
+	metaData := utils.MetaData{
+		Name:    exportAPIName,
+		Version: exportAPIVersion,
+	}
+	err = IncludeMetaFileToZip(tempZipFile, exportedFinalZip, utils.MetaFileAPI, metaData)
+	if err != nil {
+		utils.HandleErrorAndExit("Error creating the final zip archive with api_meta.yaml file", err)
+	}
+
 	// Output the final zip file location.
 	if runningExportApiCommand {
 		fmt.Println("Successfully exported API!")

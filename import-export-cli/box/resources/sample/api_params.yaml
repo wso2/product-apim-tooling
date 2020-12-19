@@ -1,0 +1,20 @@
+environments:
+    - name:
+      configs:
+        endpoints:
+          production:
+          sandbox:
+        certs:
+          - hostName:
+            alias:
+            path:
+          - hostName:
+            alias:
+            path:
+        mutualSslCerts:
+          - tierName:
+            alias:
+            path:
+          - tierName:
+            alias:
+            path:
