@@ -22,6 +22,7 @@ NOTE: All the 3 flags (--name (-n), --owner (-o) and --environment (-e)) are man
 
 ```
   -e, --environment string   Environment to which the Application should be exported
+      --format string        File format of exported archive (json or yaml) (default "YAML")
   -h, --help                 help for app
   -n, --name string          Name of the Application to be exported
   -o, --owner string         Owner of the Application to be exported
