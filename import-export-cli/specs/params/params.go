@@ -145,6 +145,8 @@ type Environment struct {
 	// Certs for environment
 	Certs          []Cert          `yaml:"certs"`
 	MutualSslCerts []MutualSslCert `yaml:"mutualSslCerts"`
+	// Policies contains the available subscription policies in an environment that can be enforced to an API
+	Policies []string `yaml:"policies"`
 }
 
 // ApiParams represents environments defined in configuration file
