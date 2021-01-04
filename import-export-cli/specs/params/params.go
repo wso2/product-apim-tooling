@@ -80,6 +80,18 @@ type FailoverEndpointsData struct {
 	Failover bool `yaml:"failOver" json:"failOver,omitempty"`
 }
 
+// SecurityData contains the details about endpoint security from api_params.yaml
+type SecurityData struct {
+	// Decides whether the endpoint security is enabled
+	Enabled string `yaml:"enabled" json:"enabled,omitempty"`
+	// Type of the endpoint security (can be Basic or Digest)
+	Type string `yaml:"type" json:"type,omitempty"`
+	// Username for the endpoint
+	Username string `yaml:"username" json:"username,omitempty"`
+	// Password for the endpoint
+	Password string `yaml:"password" json:"password,omitempty"`
+}
+
 // Cert stores certificate details
 type Cert struct {
 	// Host of the certificate
@@ -126,11 +138,15 @@ type Environment struct {
 	LoadBalanceEndpoints *LoadBalanceEndpointsData `yaml:"loadBalanceEndpoints"`
 	// FailoverEndpoints contain details about endpoints in a configuration for failover scenarios
 	FailoverEndpoints *FailoverEndpointsData `yaml:"failoverEndpoints"`
+	// Security contains the details about endpoint security
+	Security *SecurityData `yaml:"security"`
 	// GatewayEnvironments contains environments that used to deploy API
 	GatewayEnvironments []string `yaml:"gatewayEnvironments"`
 	// Certs for environment
 	Certs          []Cert          `yaml:"certs"`
 	MutualSslCerts []MutualSslCert `yaml:"mutualSslCerts"`
+	// Policies contains the available subscription policies in an environment that can be enforced to an API
+	Policies []string `yaml:"policies"`
 }
 
 // ApiParams represents environments defined in configuration file
