@@ -253,11 +253,10 @@ func mergeAPI(apiDirectory string, environmentParams *params.Environment) error 
 // @return error
 func handleSecurityEndpointsParams(envSecurityEndpointParams *params.SecurityData, api *gabs.Container) error {
 	// If the user has set (either true or false) the enabled field under security in api_params.yaml, the
-	// following code should be executed. (if not set, the security endpoint settings will be made
 	// according to the api.yaml file as usually)
 	// In Go, irrespective of whether a boolean value is "" or false, it will contain false by default.
 	// That is why, here a string comparison was  made since strings can have both "" and "false"
-	if envSecurityEndpointParams.Enabled != "" {
+	if envSecurityEndpointParams != nil && envSecurityEndpointParams.Enabled != "" {
 		// Convert the string enabled to boolean
 		boolEnabled, err := strconv.ParseBool(envSecurityEndpointParams.Enabled)
 		if err != nil {
