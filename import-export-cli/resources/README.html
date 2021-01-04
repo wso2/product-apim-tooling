@@ -436,3 +436,249 @@
 </code></pre>
     </li>
 </ul>
+<ul>
+    <li>
+        <h4 id="login">mi login [environment]</h4>
+        <pre><code class="lang-bash">   Flags:
+       Optional:
+           --username, -u
+           --password, -p
+           NOTE: user will be prompted to enter credentials if they are not provided with these flags
+   Examples:
+       apictl mi login dev -u admin -p admin
+       apictl mi login dev -u admin
+       apictl mi login dev
+       cat ~/.mypassword | apictl mi login dev -u admin
+</code></pre>
+    </li>
+</ul>
+<ul>
+    <li>
+        <h4 id="logout">mi logout [environment]</h4>
+        <pre><code class="lang-bash">   Examples:
+       apictl mi logout dev
+</code></pre>
+    </li>
+</ul>
+<ul>
+    <li>
+        <h4 id="get-apis">mi get apis [api-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+      Examples:
+          apictl mi get apis -e dev
+          apictl mi get apis SampleAPI -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="get-composite-apps">mi get composite-apps [app-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+      Examples:
+          apictl mi get composite-apps -e dev
+          apictl mi get composite-apps SampleApp -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="get-connectors">mi get connectors</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+      Examples:
+          apictl mi get connectors -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="get-data-services">mi get data-services [dataservice-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+      Examples:
+          apictl mi get data-services -e dev
+          apictl mi get data-services SampleDataService -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="get-endpoints">mi get endpoints [endpoint-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+      Examples:
+          apictl mi get endpoints -e dev
+          apictl mi get endpoints SampleEndpoint -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="get-inbound-endpoints">mi get inbound-endpoints [inbound-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+      Examples:
+          apictl mi get inbound-endpoints -e dev
+          apictl mi get inbound-endpoints SampleInboundEndpoint -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="get-local-entries">mi get local-entries [localentry-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+      Examples:
+          apictl mi get local-entries -e dev
+          apictl mi get local-entries SampleLocalEntry -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="get-log-levels">mi get log-levels [logger-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+      Examples:
+          apictl mi get log-levels org-apache-coyote -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="get-logs">mi get logs [file-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+              --path, -p
+      Examples:
+          apictl mi get logs -e dev
+          apictl mi get logs wso2error.log -p ./logs -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="get-message-processors">mi get message-processors [messageprocessor-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+      Examples:
+          apictl mi get message-processors -e dev
+          apictl mi get message-processors TestMessageProcessor -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="get-message-stores">mi get message-stores [messagestore-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+      Examples:
+          apictl mi get message-stores -e dev
+          apictl mi get message-stores TestMessageStore -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="get-proxy-services">mi get proxy-services [proxy-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+      Examples:
+          apictl mi get proxy-services -e dev
+          apictl mi get proxy-services SampleProxy -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="get-sequences">mi get sequences [sequence-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+      Examples:
+          apictl mi get sequences -e dev
+          apictl mi get sequences SampleSequence -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="get-tasks">mi get tasks [task-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+      Examples:
+          apictl mi get tasks -e dev
+          apictl mi get tasks SampleTask -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="get-templates">mi get templates [template-type] [template-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+      Examples:
+          apictl mi get templates -e dev
+          apictl mi get templates endpoint -e dev
+          apictl mi get templates endpoint SampleEPTemplate -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="get-transaction-counts">mi get transaction-counts [year] [month]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+      Examples:
+          apictl mi get transaction-counts -e dev
+          apictl mi get transaction-counts 2020 06 -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="get-transaction-reports">mi get transaction-reports [start] [end]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+              --path, -p
+      Examples:
+          apictl mi get transaction-reports 2020-01 2020-05 -e dev
+          apictl mi get transaction-reports 2020-05 2020-06 --path ./reports -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="get-users">mi get users [user-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+              --role, -r
+              --pattern, -p
+      Examples:
+          apictl mi get users -e dev
+          apictl mi get users -r admin -e dev
+          apictl mi get users -p mi -e dev
+</code></pre>
+    </li>
+</ul>
