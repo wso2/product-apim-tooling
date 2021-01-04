@@ -21,6 +21,7 @@ package deprecated
 import (
 	"errors"
 	"fmt"
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd/k8s"
 
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/cmd"
@@ -40,7 +41,7 @@ var changeCmdDeprecated = &cobra.Command{
 	Short:      changeCmdShortDesc,
 	Long:       changeCmdLongDesc,
 	Example:    changeCmdExamples,
-	Deprecated: "instead use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sChangeCmdLiteral + "\".",
+	Deprecated: "instead use \"" + k8s.K8sCmdLiteral + " " + k8s.K8sChangeCmdLiteral + "\".",
 }
 
 const changeDockerRegistryCmdLiteral = "registry"
@@ -54,7 +55,7 @@ var changeDockerRegistryCmdDeprecated = &cobra.Command{
 	Short:   changeDockerRegistryCmdShortDesc,
 	Long:    changeDockerRegistryCmdLongDesc,
 	Example: changeDockerRegistryCmdExamples,
-	Deprecated: "use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sChangeCmdLiteral + " " + cmd.K8sChangeDockerRegistryCmdLiteral +
+	Deprecated: "use \"" + k8s.K8sCmdLiteral + " " + k8s.K8sChangeCmdLiteral + " " + k8s.K8sChangeDockerRegistryCmdLiteral +
 		"\" " + "instead of \"" + changeCmdLiteral + " " + changeDockerRegistryCmdLiteral + "\".",
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(fmt.Sprintf("%s%s %s called", utils.LogPrefixInfo, changeCmdLiteral, changeDockerRegistryCmdLiteral))

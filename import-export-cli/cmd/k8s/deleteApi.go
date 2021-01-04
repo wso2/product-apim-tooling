@@ -1,25 +1,8 @@
-/*
-*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
- */
-
-package cmd
+package k8s
 
 import (
 	"github.com/spf13/cobra"
+	cmd2 "github.com/wso2/product-apim-tooling/import-export-cli/cmd"
 	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
@@ -40,10 +23,10 @@ var k8sDeleteAPICmd = &cobra.Command{
 	Example:            k8sDeleteAPICmdExamples,
 	DisableFlagParsing: true,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + deleteAPICmdLiteral + " called")
+		utils.Logln(utils.LogPrefixInfo + k8sDeleteAPICmdLiteral + " called")
 		k8sArgs := []string{k8sUtils.K8sDelete, k8sUtils.ApiOpCrdApi}
 		k8sArgs = append(k8sArgs, args...)
-		executeKubernetes(k8sArgs...)
+		cmd2.ExecuteKubernetes(k8sArgs...)
 	},
 }
 
@@ -51,3 +34,4 @@ var k8sDeleteAPICmd = &cobra.Command{
 func init() {
 	k8sDeleteCmd.AddCommand(k8sDeleteAPICmd)
 }
+

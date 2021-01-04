@@ -21,6 +21,7 @@ package deprecated
 import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/cmd"
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd/k8s"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
@@ -35,7 +36,7 @@ var installCmdDeprecated = &cobra.Command{
 	Short:      installCmdShortDesc,
 	Long:       installCmdLongDesc,
 	Example:    installCmdExamples,
-	Deprecated: "instead use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sInstallCmdLiteral + "\".",
+	Deprecated: "instead use \"" + k8s.K8sCmdLiteral + " " + k8s.K8sInstallCmdLiteral + "\".",
 }
 
 func init() {

@@ -19,6 +19,7 @@ package deprecated
 
 import (
 	"fmt"
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd/k8s"
 	"strings"
 	"time"
 
@@ -42,7 +43,7 @@ var updateCmdDeprecated = &cobra.Command{
 	Short:      updateCmdShortDesc,
 	Long:       updateCmdLongDesc,
 	Example:    updateCmdExamples,
-	Deprecated: "instead use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sUpdateCmdLiteral + "\".",
+	Deprecated: "instead use \"" + k8s.K8sCmdLiteral + " " + k8s.K8sUpdateCmdLiteral + "\".",
 }
 
 // updateApiCmd represents the updateApi command
@@ -51,7 +52,7 @@ var updateApiCmdDeprecated = &cobra.Command{
 	Short:   addApiCmdShortDesc,
 	Long:    addApiLongDesc,
 	Example: addApiExamples,
-	Deprecated: "use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sUpdateCmdLiteral + " " + cmd.AddApiCmdLiteral +
+	Deprecated: "use \"" + k8s.K8sCmdLiteral + " " + k8s.K8sUpdateCmdLiteral + " " + k8s.AddApiCmdLiteral +
 		"\" " + "instead of \"" + updateCmdLiteral + " " + addApiCmdLiteral + "\".",
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + updateCmdLiteral + " called")

@@ -70,7 +70,7 @@ var RootCmd = &cobra.Command{
 	Long:               rootCmdLongDesc,
 	Run: func(cmd *cobra.Command, args []string) {
 		if isK8sEnabled() {
-			executeKubernetes(args...)
+			ExecuteKubernetes(args...)
 		} else {
 			cmd.Help()
 		}
@@ -228,7 +228,7 @@ func isK8sEnabled() bool {
 }
 
 //execute kubernetes commands
-func executeKubernetes(arg ...string) {
+func ExecuteKubernetes(arg ...string) {
 	cmd := exec.Command(
 		k8sUtils.Kubectl,
 		arg...,

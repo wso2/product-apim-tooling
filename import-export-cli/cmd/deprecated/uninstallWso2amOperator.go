@@ -20,9 +20,9 @@ package deprecated
 
 import (
 	"fmt"
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd/k8s"
 	"strings"
 
-	"github.com/wso2/product-apim-tooling/import-export-cli/cmd"
 	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 
@@ -43,7 +43,7 @@ var uninstallWso2amOperatorCmdDeprecated = &cobra.Command{
 	Short:   uninstallWso2amOperatorCmdShortDesc,
 	Long:    uninstallWso2amOperatorCmdLongDesc,
 	Example: uninstallWso2amOperatorCmdExamples,
-	Deprecated: "use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sUninstallCmdLiteral + " " + cmd.K8sUninstallWso2amOperatorCmdLiteral +
+	Deprecated: "use \"" + k8s.K8sCmdLiteral + " " + k8s.K8sUninstallCmdLiteral + " " + k8s.K8sUninstallWso2amOperatorCmdLiteral +
 		"\" " + "instead of \"" + uninstallCmdLiteral + " " + uninstallWso2amOperatorCmdLiteral + "\".",
 	Run: func(cmd *cobra.Command, args []string) {
 		isConfirm := flagForceUninstallWso2amOperator

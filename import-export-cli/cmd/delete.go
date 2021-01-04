@@ -49,7 +49,7 @@ var DeleteCmd = &cobra.Command{
 		if configVars.Config.KubernetesMode {
 			k8sArgs := []string{k8sUtils.K8sDelete}
 			k8sArgs = append(k8sArgs, args...)
-			executeKubernetes(k8sArgs...)
+			ExecuteKubernetes(k8sArgs...)
 		}
 	},
 }
