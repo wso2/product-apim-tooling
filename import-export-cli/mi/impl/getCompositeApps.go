@@ -41,7 +41,6 @@ const (
 
 // GetCompositeAppList returns a list of composite apps deployed in the micro integrator in a given environment
 func GetCompositeAppList(env string) (*artifactutils.CompositeAppList, error) {
-
 	resp, err := getArtifactList(utils.MiManagementCarbonAppResource, env, &artifactutils.CompositeAppList{})
 	if err != nil {
 		return nil, err
@@ -51,11 +50,8 @@ func GetCompositeAppList(env string) (*artifactutils.CompositeAppList, error) {
 
 // PrintCompositeAppList print a list of composite apps according to the given format
 func PrintCompositeAppList(appList *artifactutils.CompositeAppList, format string) {
-
 	if appList.Count > 0 {
-
 		apps := appList.CompositeApps
-
 		appListContext := getContextWithFormat(format, defaultCompositeAppListTableFormat)
 
 		renderer := func(w io.Writer, t *template.Template) error {
@@ -67,12 +63,10 @@ func PrintCompositeAppList(appList *artifactutils.CompositeAppList, format strin
 			}
 			return nil
 		}
-
 		appListTableHeaders := map[string]string{
 			"Name":    nameHeader,
 			"Version": versionHeader,
 		}
-
 		if err := appListContext.Write(renderer, appListTableHeaders); err != nil {
 			fmt.Println("Error executing template:", err.Error())
 		}
@@ -83,7 +77,6 @@ func PrintCompositeAppList(appList *artifactutils.CompositeAppList, format strin
 
 // GetCompositeApp returns a information about a specific composite app deployed in the micro integrator in a given environment
 func GetCompositeApp(env, appname string) (*artifactutils.CompositeApp, error) {
-
 	resp, err := getArtifactInfo(utils.MiManagementCarbonAppResource, "carbonAppName", appname, env, &artifactutils.CompositeApp{})
 	if err != nil {
 		return nil, err
@@ -93,7 +86,6 @@ func GetCompositeApp(env, appname string) (*artifactutils.CompositeApp, error) {
 
 // PrintCompositeAppDetails prints details about a composite app according to the given format
 func PrintCompositeAppDetails(app *artifactutils.CompositeApp, format string) {
-
 	if format == "" || strings.HasPrefix(format, formatter.TableFormatKey) {
 		format = defaultCompositeAppDetailedFormat
 	}

@@ -31,7 +31,6 @@ const (
 
 // GetLoggerInfo returns information about a specific logger
 func GetLoggerInfo(env, loggerName string) (*artifactutils.Logger, error) {
-
 	resp, err := getArtifactInfo(utils.MiManagementLoggingResource, "loggerName", loggerName, env, &artifactutils.Logger{})
 	if err != nil {
 		return nil, err
@@ -41,9 +40,7 @@ func GetLoggerInfo(env, loggerName string) (*artifactutils.Logger, error) {
 
 // PrintLoggerInfo prints details about a logger
 func PrintLoggerInfo(logger *artifactutils.Logger, format string) {
-
 	loggerContext := getContextWithFormat(format, defaultLoggerTableFormat)
-
 	renderer := getItemRendererEndsWithNewLine(logger)
 
 	loggerInfoTableHeaders := map[string]string{
@@ -51,7 +48,6 @@ func PrintLoggerInfo(logger *artifactutils.Logger, format string) {
 		"LogLevel":      loglevelHeader,
 		"ComponentName": componentHeader,
 	}
-
 	if err := loggerContext.Write(renderer, loggerInfoTableHeaders); err != nil {
 		fmt.Println("Error executing template:", err.Error())
 	}

@@ -29,7 +29,6 @@ import (
 )
 
 var getTransactionReportCmdEnvironment string
-var getTransactionReportCmdFormat string
 var transactionReportPath string
 
 const getTransactionReportCmdLiteral = "transaction-reports [start] [end]"
@@ -61,10 +60,8 @@ var getTransactionReportCmd = &cobra.Command{
 
 func init() {
 	GetCmd.AddCommand(getTransactionReportCmd)
-	getTransactionReportCmd.Flags().StringVarP(&getTransactionReportCmdEnvironment, "environment", "e",
-		"", "Environment to be searched")
+	setEnvFlag(getTransactionReportCmd, &getTransactionReportCmdEnvironment)
 	getTransactionReportCmd.Flags().StringVarP(&transactionReportPath, "path", "p", "", "destination file location")
-	getTransactionReportCmd.MarkFlagRequired("environment")
 }
 
 func handleGetTransactionReportCmdArguments(args []string) {

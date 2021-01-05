@@ -31,7 +31,6 @@ const (
 
 // GetTransactionCount returns inbound transactions received by the micro integrator in a given environment
 func GetTransactionCount(env string, period []string) (*artifactutils.TransactionCount, error) {
-
 	var params map[string]string
 
 	if len(period) == 2 {
@@ -41,7 +40,6 @@ func GetTransactionCount(env string, period []string) (*artifactutils.Transactio
 	}
 
 	var transactionCountResource = utils.MiManagementTransactionResource + "/" + utils.MiManagementTransactionCountResource
-
 	resp, err := callMIManagementEndpointOfResource(transactionCountResource, params, env, &artifactutils.TransactionCount{})
 	if err != nil {
 		return nil, err
@@ -51,9 +49,7 @@ func GetTransactionCount(env string, period []string) (*artifactutils.Transactio
 
 // PrintTransactionCount prints the transaction count according to the given format
 func PrintTransactionCount(transactionCount *artifactutils.TransactionCount, format string) {
-
 	transactionContext := getContextWithFormat(format, defaultTransactionCountTableFormat)
-
 	renderer := getItemRendererEndsWithNewLine(transactionCount)
 
 	transactionCountTableHeaders := map[string]string{
@@ -61,7 +57,6 @@ func PrintTransactionCount(transactionCount *artifactutils.TransactionCount, for
 		"Month":            monthHeader,
 		"TransactionCount": transactionCountHeader,
 	}
-
 	if err := transactionContext.Write(renderer, transactionCountTableHeaders); err != nil {
 		fmt.Println("Error executing template:", err.Error())
 	}

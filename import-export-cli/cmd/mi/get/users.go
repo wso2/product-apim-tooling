@@ -74,12 +74,10 @@ var getUserCmd = &cobra.Command{
 
 func init() {
 	GetCmd.AddCommand(getUserCmd)
-	getUserCmd.Flags().StringVarP(&getUserCmdEnvironment, "environment", "e",
-		"", "Environment to be searched")
-	getUserCmd.Flags().StringVarP(&getUserCmdFormat, "format", "", "", generateFormatFlagUsage(getTrimmedCmdLiteral(getUserCmdLiteral)))
+	setEnvFlag(getUserCmd, &getUserCmdEnvironment)
+	setFormatFlag(getUserCmd, &getUserCmdFormat)
 	getUserCmd.Flags().StringVarP(&getUserCmdRole, "role", "r", "", "Filter users by role")
 	getUserCmd.Flags().StringVarP(&getUserCmdPattern, "pattern", "p", "", "Filter users by regex")
-	getUserCmd.MarkFlagRequired("environment")
 }
 
 func handleGetUserCmdArguments(args []string) {

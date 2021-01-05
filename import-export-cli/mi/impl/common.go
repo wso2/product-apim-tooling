@@ -44,7 +44,6 @@ const miHTTPRetryCount = 2
 // @return struct object
 // @return error
 func unmarshalData(url string, params map[string]string, env string, model interface{}) (interface{}, error) {
-
 	resp, err := invokeGETRequestWithRetry(url, params, env)
 
 	if err != nil {
@@ -74,7 +73,6 @@ func unmarshalData(url string, params map[string]string, env string, model inter
 }
 
 func downloadLogFileData(url string, params map[string]string, env string) ([]byte, error) {
-
 	resp, err := invokeGETRequestWithRetry(url, params, env)
 
 	if err != nil {
@@ -110,7 +108,6 @@ func retryHTTPCall(attempts int, env string, f func(string) (*resty.Response, er
 }
 
 func invokeGETRequestWithRetry(url string, params map[string]string, env string) (*resty.Response, error) {
-
 	return retryHTTPCall(miHTTPRetryCount, env, func(accessToken string) (*resty.Response, error) {
 		headers := make(map[string]string)
 		headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
@@ -148,7 +145,6 @@ func getRenderer(data interface{}, newLine bool) func(w io.Writer, t *template.T
 }
 
 func getArtifactInfo(resource, artifactKey, artifactName, env string, model interface{}) (interface{}, error) {
-
 	params := make(map[string]string)
 	params[artifactKey] = artifactName
 
@@ -156,12 +152,10 @@ func getArtifactInfo(resource, artifactKey, artifactName, env string, model inte
 }
 
 func getArtifactList(resource, env string, model interface{}) (interface{}, error) {
-
 	return callMIManagementEndpointOfResource(resource, nil, env, model)
 }
 
 func callMIManagementEndpointOfResource(resource string, params map[string]string, env string, model interface{}) (interface{}, error) {
-
 	url := utils.GetMIManagementEndpointOfResource(resource, env, utils.MainConfigFilePath)
 
 	resp, err := unmarshalData(url, params, env, model)
@@ -178,7 +172,6 @@ func callMIManagementEndpointOfResource(resource string, params map[string]strin
 }
 
 func getContextWithFormat(format, defaultformat string) *formatter.Context {
-
 	if format == "" {
 		format = defaultformat
 	}

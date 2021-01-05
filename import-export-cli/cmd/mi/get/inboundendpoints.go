@@ -43,10 +43,8 @@ var getInboundEndpointCmd = &cobra.Command{
 
 func init() {
 	GetCmd.AddCommand(getInboundEndpointCmd)
-	getInboundEndpointCmd.Flags().StringVarP(&getInboundEndpointCmdEnvironment, "environment", "e",
-		"", "Environment to be searched")
-	getInboundEndpointCmd.Flags().StringVarP(&getInboundEndpointCmdFormat, "format", "", "", generateFormatFlagUsage(artifactInboundEndpoints))
-	getInboundEndpointCmd.MarkFlagRequired("environment")
+	setEnvFlag(getInboundEndpointCmd, &getInboundEndpointCmdEnvironment)
+	setFormatFlag(getInboundEndpointCmd, &getInboundEndpointCmdFormat)
 }
 
 func handleGetInboundEndpointCmdArguments(args []string) {
@@ -61,7 +59,6 @@ func handleGetInboundEndpointCmdArguments(args []string) {
 }
 
 func executeListInboundEndpoints() {
-
 	inboundEpList, err := impl.GetInboundEndpointList(getInboundEndpointCmdEnvironment)
 	if err == nil {
 		impl.PrintInboundEndpointList(inboundEpList, getInboundEndpointCmdFormat)

@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
@@ -46,10 +47,6 @@ func getTrimmedCmdLiteral(cmd string) string {
 	return cmdParts[0]
 }
 
-func generateFormatFlagUsage(resource string) string {
-	return "Pretty-print " + resource + " using Go Templates. Use \"{{ jsonPretty . }}\" to list all fields"
-}
-
 func printErrorForArtifact(artifactType, artifactName string, err error) {
 	fmt.Println(utils.LogPrefixError+"Getting Information of "+artifactType+" [ "+artifactName+" ] ", err)
 }
@@ -64,4 +61,14 @@ func printGetCmdVerboseLogForArtifact(artifactType string) {
 
 func isEmptyOrCurrentDir(path string) bool {
 	return path == "" || path == "."
+}
+
+func setEnvFlag(cmd *cobra.Command, param *string) {
+	cmd.Flags().StringVarP(param, "environment", "e", "", "Environment to be searched")
+	cmd.MarkFlagRequired("environment")
+}
+
+func setFormatFlag(cmd *cobra.Command, param *string) {
+	cmd.Flags().StringVarP(param, "format", "", "",
+		"Pretty-print using Go Templates. Use \"{{ jsonPretty . }}\" to list all fields")
 }

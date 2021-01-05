@@ -57,11 +57,9 @@ var getLogCmd = &cobra.Command{
 
 func init() {
 	GetCmd.AddCommand(getLogCmd)
-	getLogCmd.Flags().StringVarP(&getLogCmdEnvironment, "environment", "e",
-		"", "Environment to be searched")
-	getLogCmd.Flags().StringVarP(&getLogCmdFormat, "format", "", "", generateFormatFlagUsage(getTrimmedCmdLiteral(getLogCmdLiteral)))
+	setEnvFlag(getLogCmd, &getLogCmdEnvironment)
+	setFormatFlag(getLogCmd, &getLogCmdFormat)
 	getLogCmd.Flags().StringVarP(&logFileDownloadPath, "path", "p", "", "Path the file should be downloaded")
-	getLogCmd.MarkFlagRequired("environment")
 }
 
 func handleGetLogCmdArguments(args []string) {

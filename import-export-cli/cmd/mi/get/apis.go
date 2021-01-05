@@ -43,10 +43,8 @@ var getIntegrationAPICmd = &cobra.Command{
 
 func init() {
 	GetCmd.AddCommand(getIntegrationAPICmd)
-	getIntegrationAPICmd.Flags().StringVarP(&getIntegrationAPICmdEnvironment, "environment", "e",
-		"", "Environment to be searched")
-	getIntegrationAPICmd.Flags().StringVarP(&getIntegrationAPICmdFormat, "format", "", "", generateFormatFlagUsage(artifactAPIs))
-	getIntegrationAPICmd.MarkFlagRequired("environment")
+	setEnvFlag(getIntegrationAPICmd, &getIntegrationAPICmdEnvironment)
+	setFormatFlag(getIntegrationAPICmd, &getIntegrationAPICmdFormat)
 }
 
 func handleGetIntegrationAPICmdArguments(args []string) {
@@ -61,7 +59,6 @@ func handleGetIntegrationAPICmdArguments(args []string) {
 }
 
 func executeListIntegrationAPIs() {
-
 	apiList, err := impl.GetIntegrationAPIList(getIntegrationAPICmdEnvironment)
 	if err == nil {
 		impl.PrintIntegrationAPIList(apiList, getIntegrationAPICmdFormat)

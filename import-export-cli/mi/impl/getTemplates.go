@@ -81,7 +81,6 @@ func (a *templateArtifact) MarshalJSON() ([]byte, error) {
 
 // GetTemplateList returns a list of Templates deployed in the micro integrator in a given environment
 func GetTemplateList(env string) (*artifactutils.TemplateList, error) {
-
 	resp, err := getArtifactList(utils.MiManagementTemplateResource, env, &artifactutils.TemplateList{})
 	if err != nil {
 		return nil, err
@@ -91,12 +90,10 @@ func GetTemplateList(env string) (*artifactutils.TemplateList, error) {
 
 // PrintTemplateList print a list of Templates according to the given format
 func PrintTemplateList(templateList *artifactutils.TemplateList, format string) {
-
 	var sequenceTemplatesCount = len(templateList.SequenceTemplates)
 	var endpointTemplatesCount = len(templateList.EndpointTemplates)
 
 	if sequenceTemplatesCount+endpointTemplatesCount > 0 {
-
 		templates := make([]templateArtifact, 0, sequenceTemplatesCount+endpointTemplatesCount)
 
 		for _, template := range templateList.SequenceTemplates {
@@ -107,7 +104,6 @@ func PrintTemplateList(templateList *artifactutils.TemplateList, format string) 
 			templateArtifact := templateArtifact{template.Name, "Endpoint"}
 			templates = append(templates, templateArtifact)
 		}
-
 		templateListContext := getContextWithFormat(format, defaultTemplateListTableFormat)
 
 		renderer := func(w io.Writer, t *template.Template) error {
@@ -119,16 +115,13 @@ func PrintTemplateList(templateList *artifactutils.TemplateList, format string) 
 			}
 			return nil
 		}
-
 		templateListTableHeaders := map[string]string{
 			"TemplateName": nameHeader,
 			"TemplateType": typeHeader,
 		}
-
 		if err := templateListContext.Write(renderer, templateListTableHeaders); err != nil {
 			fmt.Println("Error executing template:", err.Error())
 		}
-
 	} else {
 		fmt.Println("No Templates found")
 	}
@@ -136,7 +129,6 @@ func PrintTemplateList(templateList *artifactutils.TemplateList, format string) 
 
 // GetTemplatesByType returns a list of Templates of specified type deployed in the micro integrator in a given environment
 func GetTemplatesByType(env, templateType string) (*artifactutils.TemplateListByType, error) {
-
 	resp, err := getArtifactInfo(utils.MiManagementTemplateResource, "type", templateType, env, &artifactutils.TemplateListByType{})
 	if err != nil {
 		return nil, err
@@ -146,11 +138,8 @@ func GetTemplatesByType(env, templateType string) (*artifactutils.TemplateListBy
 
 // PrintTemplatesByType print a list of Templates of specified type according to the given format
 func PrintTemplatesByType(templateList *artifactutils.TemplateListByType, format string) {
-
 	if templateList.Count > 0 {
-
 		templates := templateList.Templates
-
 		templateListByTypeContext := getContextWithFormat(format, defaultTemplateListByTypeTableFormat)
 
 		renderer := func(w io.Writer, t *template.Template) error {
@@ -162,11 +151,9 @@ func PrintTemplatesByType(templateList *artifactutils.TemplateListByType, format
 			}
 			return nil
 		}
-
 		templateListByTypeTableHeaders := map[string]string{
 			"Name": nameHeader,
 		}
-
 		if err := templateListByTypeContext.Write(renderer, templateListByTypeTableHeaders); err != nil {
 			fmt.Println("Error executing template:", err.Error())
 		}
@@ -177,7 +164,6 @@ func PrintTemplatesByType(templateList *artifactutils.TemplateListByType, format
 
 // GetEndpointTemplate returns a information about a specific endpoint template deployed in the micro integrator in a given environment
 func GetEndpointTemplate(env, templateName string) (*artifactutils.TemplateEndpointListByName, error) {
-
 	resp, err := getTemplate(env, "endpoint", templateName, &artifactutils.TemplateEndpointListByName{})
 	if err != nil {
 		return nil, err
@@ -187,7 +173,6 @@ func GetEndpointTemplate(env, templateName string) (*artifactutils.TemplateEndpo
 
 // GetSequenceTemplate returns a information about a specific sequence template deployed in the micro integrator in a given environment
 func GetSequenceTemplate(env, templateName string) (*artifactutils.TemplateSequenceListByName, error) {
-
 	resp, err := getTemplate(env, "sequence", templateName, &artifactutils.TemplateSequenceListByName{})
 	if err != nil {
 		return nil, err
@@ -209,7 +194,6 @@ func getTemplate(env, templateType, templateName string, model interface{}) (int
 
 // PrintSequenceTemplateDetails prints details about a sequence template according to the given format
 func PrintSequenceTemplateDetails(sequenceTemplate *artifactutils.TemplateSequenceListByName, format string) {
-
 	if format == "" || strings.HasPrefix(format, formatter.TableFormatKey) {
 		format = defaultSequenceTemplateDetailedFormat
 	}
@@ -224,7 +208,6 @@ func PrintSequenceTemplateDetails(sequenceTemplate *artifactutils.TemplateSequen
 
 // PrintEndpointTemplateDetails prints details about a endpoint template according to the given format
 func PrintEndpointTemplateDetails(endpointTemplate *artifactutils.TemplateEndpointListByName, format string) {
-
 	if format == "" || strings.HasPrefix(format, formatter.TableFormatKey) {
 		format = defaultEndpointTemplateDetailedFormat
 	}

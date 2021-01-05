@@ -50,10 +50,8 @@ var getLogLevelCmd = &cobra.Command{
 
 func init() {
 	GetCmd.AddCommand(getLogLevelCmd)
-	getLogLevelCmd.Flags().StringVarP(&getLogLevelCmdEnvironment, "environment", "e",
-		"", "Environment to be searched")
-	getLogLevelCmd.Flags().StringVarP(&getLogLevelCmdFormat, "format", "", "", generateFormatFlagUsage(getTrimmedCmdLiteral(getLogLevelCmdLiteral)))
-	getLogLevelCmd.MarkFlagRequired("environment")
+	setEnvFlag(getLogLevelCmd, &getLogLevelCmdEnvironment)
+	setFormatFlag(getLogLevelCmd, &getLogLevelCmdFormat)
 }
 
 func handleGetLogLevelCmdArguments(args []string) {
@@ -64,7 +62,6 @@ func handleGetLogLevelCmdArguments(args []string) {
 }
 
 func executeShowLogLevel(loggerName string) {
-
 	LogLevelList, err := impl.GetLoggerInfo(getLogLevelCmdEnvironment, loggerName)
 	if err == nil {
 		impl.PrintLoggerInfo(LogLevelList, getLogLevelCmdFormat)

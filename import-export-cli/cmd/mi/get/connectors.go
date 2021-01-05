@@ -50,10 +50,8 @@ var getConnectorCmd = &cobra.Command{
 
 func init() {
 	GetCmd.AddCommand(getConnectorCmd)
-	getConnectorCmd.Flags().StringVarP(&getConnectorCmdEnvironment, "environment", "e",
-		"", "Environment to be searched")
-	getConnectorCmd.Flags().StringVarP(&getConnectorCmdFormat, "format", "", "", generateFormatFlagUsage(getConnectorCmdLiteral))
-	getConnectorCmd.MarkFlagRequired("environment")
+	setEnvFlag(getConnectorCmd, &getConnectorCmdEnvironment)
+	setFormatFlag(getConnectorCmd, &getConnectorCmdFormat)
 }
 
 func handleGetConnectorCmdArguments(args []string) {
@@ -63,7 +61,6 @@ func handleGetConnectorCmdArguments(args []string) {
 }
 
 func executeListConnectors() {
-
 	connectorList, err := impl.GetConnectorList(getConnectorCmdEnvironment)
 	if err == nil {
 		impl.PrintConnectorList(connectorList, getConnectorCmdFormat)

@@ -43,10 +43,8 @@ var getApplicationCmd = &cobra.Command{
 
 func init() {
 	GetCmd.AddCommand(getApplicationCmd)
-	getApplicationCmd.Flags().StringVarP(&getApplicationCmdEnvironment, "environment", "e",
-		"", "Environment to be searched")
-	getApplicationCmd.Flags().StringVarP(&getApplicationCmdFormat, "format", "", "", generateFormatFlagUsage(artifactCompositeApps))
-	getApplicationCmd.MarkFlagRequired("environment")
+	setEnvFlag(getApplicationCmd, &getApplicationCmdEnvironment)
+	setFormatFlag(getApplicationCmd, &getApplicationCmdFormat)
 }
 
 func handleGetApplicationCmdArguments(args []string) {
@@ -61,7 +59,6 @@ func handleGetApplicationCmdArguments(args []string) {
 }
 
 func executeListCarbonApps() {
-
 	appList, err := impl.GetCompositeAppList(getApplicationCmdEnvironment)
 	if err == nil {
 		impl.PrintCompositeAppList(appList, getApplicationCmdFormat)

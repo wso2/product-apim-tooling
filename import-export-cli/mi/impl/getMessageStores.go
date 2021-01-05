@@ -50,7 +50,6 @@ const (
 
 // GetMessageStoreList returns a list of message stores deployed in the micro integrator in a given environment
 func GetMessageStoreList(env string) (*artifactutils.MessageStoreList, error) {
-
 	resp, err := getArtifactList(utils.MiManagementMessageStoreResource, env, &artifactutils.MessageStoreList{})
 	if err != nil {
 		return nil, err
@@ -60,11 +59,8 @@ func GetMessageStoreList(env string) (*artifactutils.MessageStoreList, error) {
 
 // PrintMessageStoreList print a list of message stores according to the given format
 func PrintMessageStoreList(messageStoreList *artifactutils.MessageStoreList, format string) {
-
 	if messageStoreList.Count > 0 {
-
 		messageStores := messageStoreList.MessageStores
-
 		messageStoreListContext := getContextWithFormat(format, defaultMessageStoreListTableFormat)
 
 		renderer := func(w io.Writer, t *template.Template) error {
@@ -76,13 +72,11 @@ func PrintMessageStoreList(messageStoreList *artifactutils.MessageStoreList, for
 			}
 			return nil
 		}
-
 		messageStoreListTableHeaders := map[string]string{
 			"Name": nameHeader,
 			"Type": typeHeader,
 			"Size": sizeHeader,
 		}
-
 		if err := messageStoreListContext.Write(renderer, messageStoreListTableHeaders); err != nil {
 			fmt.Println("Error executing template:", err.Error())
 		}
@@ -93,7 +87,6 @@ func PrintMessageStoreList(messageStoreList *artifactutils.MessageStoreList, for
 
 // GetMessageStore returns a information about a specific message store deployed in the micro integrator in a given environment
 func GetMessageStore(env, messageStoreName string) (*artifactutils.MessageStoreData, error) {
-
 	resp, err := getArtifactInfo(utils.MiManagementMessageStoreResource, "name", messageStoreName, env, &artifactutils.MessageStoreData{})
 	if err != nil {
 		return nil, err
@@ -103,7 +96,6 @@ func GetMessageStore(env, messageStoreName string) (*artifactutils.MessageStoreD
 
 // PrintMessageStoreDetails prints details about a message store according to the given format
 func PrintMessageStoreDetails(messageStore *artifactutils.MessageStoreData, format string) {
-
 	if format == "" || strings.HasPrefix(format, formatter.TableFormatKey) {
 		format = defaultMessageStoreDetailedFormat
 	}

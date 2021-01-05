@@ -44,7 +44,6 @@ const (
 
 // GetEndpointList returns a list of endpoints
 func GetEndpointList(env string) (*artifactutils.EndpointList, error) {
-
 	resp, err := getArtifactList(utils.MiManagementEndpointResource, env, &artifactutils.EndpointList{})
 	if err != nil {
 		return nil, err
@@ -54,11 +53,8 @@ func GetEndpointList(env string) (*artifactutils.EndpointList, error) {
 
 // PrintEndpointList print a list of endpoints
 func PrintEndpointList(endpointList *artifactutils.EndpointList, format string) {
-
 	if endpointList.Count > 0 {
-
 		endpoints := endpointList.Endpoints
-
 		endpointListContext := getContextWithFormat(format, defaultEndpointListTableFormat)
 
 		renderer := func(w io.Writer, t *template.Template) error {
@@ -70,14 +66,11 @@ func PrintEndpointList(endpointList *artifactutils.EndpointList, format string) 
 			}
 			return nil
 		}
-
 		endpointListTableHeaders := map[string]string{
 			"Name":   nameHeader,
 			"Type":   typeHeader,
 			"Active": activeHeader,
 		}
-
-		// execute context
 		if err := endpointListContext.Write(renderer, endpointListTableHeaders); err != nil {
 			fmt.Println("Error executing template:", err.Error())
 		}
@@ -88,7 +81,6 @@ func PrintEndpointList(endpointList *artifactutils.EndpointList, format string) 
 
 // GetEndpoint returns information about a specific endpoint
 func GetEndpoint(env, endpointName string) (*artifactutils.Endpoint, error) {
-
 	resp, err := getArtifactInfo(utils.MiManagementEndpointResource, "endpointName", endpointName, env, &artifactutils.Endpoint{})
 	if err != nil {
 		return nil, err
@@ -98,13 +90,11 @@ func GetEndpoint(env, endpointName string) (*artifactutils.Endpoint, error) {
 
 // PrintEndpointDetails prints details about an endpoint
 func PrintEndpointDetails(endpoint *artifactutils.Endpoint, format string) {
-
 	if format == "" {
 		format = defaultEndpointDetailedFormat
 	}
 
 	endpointContext := formatter.NewContext(os.Stdout, format)
-
 	renderer := getItemRenderer(endpoint)
 
 	if err := endpointContext.Write(renderer, nil); err != nil {

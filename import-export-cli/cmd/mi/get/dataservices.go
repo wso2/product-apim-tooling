@@ -43,10 +43,8 @@ var getDataServiceCmd = &cobra.Command{
 
 func init() {
 	GetCmd.AddCommand(getDataServiceCmd)
-	getDataServiceCmd.Flags().StringVarP(&getDataServiceCmdEnvironment, "environment", "e",
-		"", "Environment to be searched")
-	getDataServiceCmd.Flags().StringVarP(&getDataServiceCmdFormat, "format", "", "", generateFormatFlagUsage(artifactDataServices))
-	getDataServiceCmd.MarkFlagRequired("environment")
+	setEnvFlag(getDataServiceCmd, &getDataServiceCmdEnvironment)
+	setFormatFlag(getDataServiceCmd, &getDataServiceCmdFormat)
 }
 
 func handleGetDataServiceCmdArguments(args []string) {
@@ -61,7 +59,6 @@ func handleGetDataServiceCmdArguments(args []string) {
 }
 
 func executeListDataServices() {
-
 	dataServiceList, err := impl.GetDataServiceList(getDataServiceCmdEnvironment)
 	if err == nil {
 		impl.PrintDataServiceList(dataServiceList, getDataServiceCmdFormat)

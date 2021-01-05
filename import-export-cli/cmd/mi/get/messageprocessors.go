@@ -43,10 +43,8 @@ var getMessageProcessorCmd = &cobra.Command{
 
 func init() {
 	GetCmd.AddCommand(getMessageProcessorCmd)
-	getMessageProcessorCmd.Flags().StringVarP(&getMessageProcessorCmdEnvironment, "environment", "e",
-		"", "Environment to be searched")
-	getMessageProcessorCmd.Flags().StringVarP(&getMessageProcessorCmdFormat, "format", "", "", generateFormatFlagUsage(artifactMessageProcessors))
-	getMessageProcessorCmd.MarkFlagRequired("environment")
+	setEnvFlag(getMessageProcessorCmd, &getMessageProcessorCmdEnvironment)
+	setFormatFlag(getMessageProcessorCmd, &getMessageProcessorCmdFormat)
 }
 
 func handleGetMessageProcessorCmdArguments(args []string) {
@@ -61,7 +59,6 @@ func handleGetMessageProcessorCmdArguments(args []string) {
 }
 
 func executeListMessageProcessors() {
-
 	msgProcessorList, err := impl.GetMessageProcessorList(getMessageProcessorCmdEnvironment)
 	if err == nil {
 		impl.PrintMessageProcessorList(msgProcessorList, getMessageProcessorCmdFormat)

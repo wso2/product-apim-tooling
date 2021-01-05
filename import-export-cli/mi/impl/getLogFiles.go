@@ -44,11 +44,8 @@ func GetLogFileList(env string) (*artifactutils.LogFileList, error) {
 
 // PrintLogFileList print a list of log file names and sizes according to the given format
 func PrintLogFileList(logFileList *artifactutils.LogFileList, format string) {
-
 	if logFileList.Count > 0 {
-
 		logFiles := logFileList.LogFiles
-
 		logFileListContext := getContextWithFormat(format, defaultLogFileListTableFormat)
 
 		renderer := func(w io.Writer, t *template.Template) error {
@@ -60,12 +57,10 @@ func PrintLogFileList(logFileList *artifactutils.LogFileList, format string) {
 			}
 			return nil
 		}
-
 		logFileListTableHeaders := map[string]string{
 			"FileName": nameHeader,
 			"Size":     sizeHeader,
 		}
-
 		if err := logFileListContext.Write(renderer, logFileListTableHeaders); err != nil {
 			fmt.Println("Error executing template:", err.Error())
 		}
@@ -88,12 +83,10 @@ func FilterOnlyLogFiles(logFileList *artifactutils.LogFileList) *artifactutils.L
 
 // GetLogFile downloads the specified log file created by the micro integrator in a given environment as a byte stream
 func GetLogFile(env, logFileName string) ([]byte, error) {
-
 	params := make(map[string]string)
 	params["file"] = logFileName
 
 	url := utils.GetMIManagementEndpointOfResource(utils.MiManagementLogResource, env, utils.MainConfigFilePath)
-
 	resp, err := downloadLogFileData(url, params, env)
 
 	if err != nil {

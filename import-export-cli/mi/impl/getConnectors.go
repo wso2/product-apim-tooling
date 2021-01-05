@@ -31,7 +31,6 @@ const defaultConnectorListTableFormat = "table {{.Name}}\t{{.Status}}\t{{.Packag
 
 // GetConnectorList returns a list of connector artifacts deployed in the micro integrator in a given environment
 func GetConnectorList(env string) (*artifactutils.ConnectorList, error) {
-
 	resp, err := getArtifactList(utils.MiManagementConnectorResource, env, &artifactutils.ConnectorList{})
 	if err != nil {
 		return nil, err
@@ -41,11 +40,8 @@ func GetConnectorList(env string) (*artifactutils.ConnectorList, error) {
 
 // PrintConnectorList print a list of connectors according to the given format
 func PrintConnectorList(connectorList *artifactutils.ConnectorList, format string) {
-
 	if connectorList.Count > 0 {
-
 		connectors := connectorList.Connectors
-
 		connectorListContext := getContextWithFormat(format, defaultConnectorListTableFormat)
 
 		renderer := func(w io.Writer, t *template.Template) error {
@@ -57,14 +53,12 @@ func PrintConnectorList(connectorList *artifactutils.ConnectorList, format strin
 			}
 			return nil
 		}
-
 		connectorListTableHeaders := map[string]string{
 			"Name":        nameHeader,
 			"Status":      statsHeader,
 			"Package":     packageHeader,
 			"Description": descriptionHeader,
 		}
-
 		if err := connectorListContext.Write(renderer, connectorListTableHeaders); err != nil {
 			fmt.Println("Error executing template:", err.Error())
 		}

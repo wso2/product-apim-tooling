@@ -50,7 +50,6 @@ const (
 
 // GetMessageProcessorList returns a list of message processors deployed in the micro integrator in a given environment
 func GetMessageProcessorList(env string) (*artifactutils.MessageProcessorList, error) {
-
 	resp, err := getArtifactList(utils.MiManagementMessageProcessorResource, env, &artifactutils.MessageProcessorList{})
 	if err != nil {
 		return nil, err
@@ -60,11 +59,8 @@ func GetMessageProcessorList(env string) (*artifactutils.MessageProcessorList, e
 
 // PrintMessageProcessorList print a list of message processors according to the given format
 func PrintMessageProcessorList(messageProcessorList *artifactutils.MessageProcessorList, format string) {
-
 	if messageProcessorList.Count > 0 {
-
 		messageProcessors := messageProcessorList.MessageProcessors
-
 		messageProcessorListContext := getContextWithFormat(format, defaultMessageProcessorListTableFormat)
 
 		renderer := func(w io.Writer, t *template.Template) error {
@@ -76,13 +72,11 @@ func PrintMessageProcessorList(messageProcessorList *artifactutils.MessageProces
 			}
 			return nil
 		}
-
 		messageProcessorListTableHeaders := map[string]string{
 			"Name":   nameHeader,
 			"Type":   typeHeader,
 			"Status": statusHeader,
 		}
-
 		if err := messageProcessorListContext.Write(renderer, messageProcessorListTableHeaders); err != nil {
 			fmt.Println("Error executing template:", err.Error())
 		}
@@ -93,7 +87,6 @@ func PrintMessageProcessorList(messageProcessorList *artifactutils.MessageProces
 
 // GetMessageProcessor returns a information about a specific message processor deployed in the micro integrator in a given environment
 func GetMessageProcessor(env, messageProcessorName string) (*artifactutils.MessageProcessorData, error) {
-
 	resp, err := getArtifactInfo(utils.MiManagementMessageProcessorResource, "name", messageProcessorName, env, &artifactutils.MessageProcessorData{})
 	if err != nil {
 		return nil, err
@@ -103,7 +96,6 @@ func GetMessageProcessor(env, messageProcessorName string) (*artifactutils.Messa
 
 // PrintMessageProcessorDetails prints details about a message processor according to the given format
 func PrintMessageProcessorDetails(messageProcessor *artifactutils.MessageProcessorData, format string) {
-
 	if format == "" || strings.HasPrefix(format, formatter.TableFormatKey) {
 		format = defaultMessageProcessorDetailedFormat
 	}

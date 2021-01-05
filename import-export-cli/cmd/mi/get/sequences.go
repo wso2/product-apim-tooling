@@ -43,10 +43,8 @@ var getSequenceCmd = &cobra.Command{
 
 func init() {
 	GetCmd.AddCommand(getSequenceCmd)
-	getSequenceCmd.Flags().StringVarP(&getSequenceCmdEnvironment, "environment", "e",
-		"", "Environment to be searched")
-	getSequenceCmd.Flags().StringVarP(&getSequenceCmdFormat, "format", "", "", generateFormatFlagUsage(artifactSequences))
-	getSequenceCmd.MarkFlagRequired("environment")
+	setEnvFlag(getSequenceCmd, &getSequenceCmdEnvironment)
+	setFormatFlag(getSequenceCmd, &getSequenceCmdFormat)
 }
 
 func handleGetSequenceCmdArguments(args []string) {
@@ -61,7 +59,6 @@ func handleGetSequenceCmdArguments(args []string) {
 }
 
 func executeListSequences() {
-
 	sequenceList, err := impl.GetSequenceList(getSequenceCmdEnvironment)
 	if err == nil {
 		impl.PrintSequenceList(sequenceList, getSequenceCmdFormat)

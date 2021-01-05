@@ -43,7 +43,6 @@ const (
 
 // GetTaskList returns a list of Tasks deployed in the micro integrator in a given environment
 func GetTaskList(env string) (*artifactutils.TaskList, error) {
-
 	resp, err := getArtifactList(utils.MiManagementTaskResource, env, &artifactutils.TaskList{})
 	if err != nil {
 		return nil, err
@@ -53,11 +52,8 @@ func GetTaskList(env string) (*artifactutils.TaskList, error) {
 
 // PrintTaskList print a list of Tasks according to the given format
 func PrintTaskList(taskList *artifactutils.TaskList, format string) {
-
 	if taskList.Count > 0 {
-
 		tasks := taskList.Tasks
-
 		taskListContext := getContextWithFormat(format, defaultTaskListTableFormat)
 
 		renderer := func(w io.Writer, t *template.Template) error {
@@ -69,11 +65,9 @@ func PrintTaskList(taskList *artifactutils.TaskList, format string) {
 			}
 			return nil
 		}
-
 		taskListTableHeaders := map[string]string{
 			"Name": nameHeader,
 		}
-
 		if err := taskListContext.Write(renderer, taskListTableHeaders); err != nil {
 			fmt.Println("Error executing template:", err.Error())
 		}
@@ -84,7 +78,6 @@ func PrintTaskList(taskList *artifactutils.TaskList, format string) {
 
 // GetTask returns a information about a specific Task deployed in the micro integrator in a given environment
 func GetTask(env, taskName string) (*artifactutils.Task, error) {
-
 	resp, err := getArtifactInfo(utils.MiManagementTaskResource, "taskName", taskName, env, &artifactutils.Task{})
 	if err != nil {
 		return nil, err
@@ -94,7 +87,6 @@ func GetTask(env, taskName string) (*artifactutils.Task, error) {
 
 // PrintTaskDetails prints details about a Task according to the given format
 func PrintTaskDetails(task *artifactutils.Task, format string) {
-
 	if format == "" || strings.HasPrefix(format, formatter.TableFormatKey) {
 		format = defaultTaskDetailedFormat
 	}

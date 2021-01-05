@@ -43,10 +43,8 @@ var getMessageStoreCmd = &cobra.Command{
 
 func init() {
 	GetCmd.AddCommand(getMessageStoreCmd)
-	getMessageStoreCmd.Flags().StringVarP(&getMessageStoreCmdEnvironment, "environment", "e",
-		"", "Environment to be searched")
-	getMessageStoreCmd.Flags().StringVarP(&getMessageStoreCmdFormat, "format", "", "", generateFormatFlagUsage(artifactMessageStores))
-	getMessageStoreCmd.MarkFlagRequired("environment")
+	setEnvFlag(getMessageStoreCmd, &getMessageStoreCmdEnvironment)
+	setFormatFlag(getMessageStoreCmd, &getMessageStoreCmdFormat)
 }
 
 func handleGetMessageStoreCmdArguments(args []string) {
@@ -61,7 +59,6 @@ func handleGetMessageStoreCmdArguments(args []string) {
 }
 
 func executeListMessageStores() {
-
 	messageStoreList, err := impl.GetMessageStoreList(getMessageStoreCmdEnvironment)
 	if err == nil {
 		impl.PrintMessageStoreList(messageStoreList, getMessageStoreCmdFormat)

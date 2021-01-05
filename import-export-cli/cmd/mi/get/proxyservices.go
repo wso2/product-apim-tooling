@@ -43,10 +43,8 @@ var getProxyServiceCmd = &cobra.Command{
 
 func init() {
 	GetCmd.AddCommand(getProxyServiceCmd)
-	getProxyServiceCmd.Flags().StringVarP(&getProxyServiceCmdEnvironment, "environment", "e",
-		"", "Environment to be searched")
-	getProxyServiceCmd.Flags().StringVarP(&getProxyServiceCmdFormat, "format", "", "", generateFormatFlagUsage(artifactProxyServices))
-	getProxyServiceCmd.MarkFlagRequired("environment")
+	setEnvFlag(getProxyServiceCmd, &getProxyServiceCmdEnvironment)
+	setFormatFlag(getProxyServiceCmd, &getProxyServiceCmdFormat)
 }
 
 func handleGetProxyServiceCmdArguments(args []string) {
@@ -61,7 +59,6 @@ func handleGetProxyServiceCmdArguments(args []string) {
 }
 
 func executeListProxyServices() {
-
 	proxyList, err := impl.GetProxyServiceList(getProxyServiceCmdEnvironment)
 	if err == nil {
 		impl.PrintProxyServiceList(proxyList, getProxyServiceCmdFormat)

@@ -40,7 +40,6 @@ const (
 
 // GetProxyServiceList returns a list of proxy serives deployed in the micro integrator in a given environment
 func GetProxyServiceList(env string) (*artifactutils.ProxyServiceList, error) {
-
 	resp, err := getArtifactList(utils.MiManagementProxyServiceResource, env, &artifactutils.ProxyServiceList{})
 	if err != nil {
 		return nil, err
@@ -50,11 +49,8 @@ func GetProxyServiceList(env string) (*artifactutils.ProxyServiceList, error) {
 
 // PrintProxyServiceList print a list of proxy serives according to the given format
 func PrintProxyServiceList(proxyList *artifactutils.ProxyServiceList, format string) {
-
 	if proxyList.Count > 0 {
-
 		proxies := proxyList.Proxies
-
 		proxyListContext := getContextWithFormat(format, defaultProxyServiceListTableFormat)
 
 		renderer := func(w io.Writer, t *template.Template) error {
@@ -66,13 +62,11 @@ func PrintProxyServiceList(proxyList *artifactutils.ProxyServiceList, format str
 			}
 			return nil
 		}
-
 		proxyListTableHeaders := map[string]string{
 			"Name":   nameHeader,
 			"Wsdl11": wsdl11Header,
 			"Wsdl20": wsdl20Header,
 		}
-
 		if err := proxyListContext.Write(renderer, proxyListTableHeaders); err != nil {
 			fmt.Println("Error executing template:", err.Error())
 		}
@@ -83,7 +77,6 @@ func PrintProxyServiceList(proxyList *artifactutils.ProxyServiceList, format str
 
 // GetProxyService returns a information about a specific proxy deployed in the micro integrator in a given environment
 func GetProxyService(env, proxyName string) (*artifactutils.Proxy, error) {
-
 	resp, err := getArtifactInfo(utils.MiManagementProxyServiceResource, "proxyServiceName", proxyName, env, &artifactutils.Proxy{})
 	if err != nil {
 		return nil, err
@@ -93,7 +86,6 @@ func GetProxyService(env, proxyName string) (*artifactutils.Proxy, error) {
 
 // PrintProxyServiceDetails prints details about a proxy according to the given format
 func PrintProxyServiceDetails(proxy *artifactutils.Proxy, format string) {
-
 	if format == "" {
 		format = defaultProxyServiceDetailedFormat
 	}

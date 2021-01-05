@@ -62,10 +62,8 @@ var getTransactionCountCmd = &cobra.Command{
 
 func init() {
 	GetCmd.AddCommand(getTransactionCountCmd)
-	getTransactionCountCmd.Flags().StringVarP(&getTransactionCountCmdEnvironment, "environment", "e",
-		"", "Environment to be searched")
-	getTransactionCountCmd.Flags().StringVarP(&getTransactionCountCmdFormat, "format", "", "", generateFormatFlagUsage(getTrimmedCmdLiteral(getTransactionCountCmdLiteral)))
-	getTransactionCountCmd.MarkFlagRequired("environment")
+	setEnvFlag(getTransactionCountCmd, &getTransactionCountCmdEnvironment)
+	setFormatFlag(getTransactionCountCmd, &getTransactionCountCmdFormat)
 }
 
 func handleGetTransactionCountCmdArguments(args []string) {
@@ -81,7 +79,6 @@ func handleGetTransactionCountCmdArguments(args []string) {
 }
 
 func executeGetTransactionCountForMonth(period ...string) {
-
 	transactionCount, err := impl.GetTransactionCount(getTransactionCountCmdEnvironment, period)
 	if err == nil {
 		impl.PrintTransactionCount(transactionCount, getTransactionCountCmdFormat)

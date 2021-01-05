@@ -44,7 +44,6 @@ const (
 
 // GetDataServiceList returns a list of data services deployed in the micro integrator in a given environment
 func GetDataServiceList(env string) (*artifactutils.DataServicesList, error) {
-
 	resp, err := getArtifactList(utils.MiManagementDataServiceResource, env, &artifactutils.DataServicesList{})
 	if err != nil {
 		return nil, err
@@ -54,14 +53,10 @@ func GetDataServiceList(env string) (*artifactutils.DataServicesList, error) {
 
 // PrintDataServiceList print a list of data services according to the given format
 func PrintDataServiceList(dataServiceList *artifactutils.DataServicesList, format string) {
-
 	if dataServiceList.Count > 0 {
-
 		dataServices := dataServiceList.List
-
 		dataserviceListContext := getContextWithFormat(format, defaultdataServiceListTableFormat)
 
-		// create a new renderer function which iterate collection
 		renderer := func(w io.Writer, t *template.Template) error {
 			for _, dataservice := range dataServices {
 				if err := t.Execute(w, dataservice); err != nil {
@@ -71,15 +66,11 @@ func PrintDataServiceList(dataServiceList *artifactutils.DataServicesList, forma
 			}
 			return nil
 		}
-
-		// headers for table
 		dataserviceListTableHeaders := map[string]string{
 			"Name":   nameHeader,
 			"Wsdl11": wsdl11Header,
 			"Wsdl20": wsdl20Header,
 		}
-
-		// execute context
 		if err := dataserviceListContext.Write(renderer, dataserviceListTableHeaders); err != nil {
 			fmt.Println("Error executing template:", err.Error())
 		}
@@ -90,7 +81,6 @@ func PrintDataServiceList(dataServiceList *artifactutils.DataServicesList, forma
 
 // GetDataService returns information about a specific data service deployed in the micro integrator in a given environment
 func GetDataService(env, dataserviceName string) (*artifactutils.DataServiceInfo, error) {
-
 	resp, err := getArtifactInfo(utils.MiManagementDataServiceResource, "dataServiceName", dataserviceName, env, &artifactutils.DataServiceInfo{})
 	if err != nil {
 		return nil, err
@@ -100,13 +90,11 @@ func GetDataService(env, dataserviceName string) (*artifactutils.DataServiceInfo
 
 // PrintDataServiceDetails prints details about a data service according to the given format
 func PrintDataServiceDetails(ds *artifactutils.DataServiceInfo, format string) {
-
 	if format == "" || strings.HasPrefix(format, formatter.TableFormatKey) {
 		format = defaultdataServiceDetailedFormat
 	}
 
 	dataserviceContext := formatter.NewContext(os.Stdout, format)
-
 	renderer := getItemRenderer(ds)
 
 	if err := dataserviceContext.Write(renderer, nil); err != nil {

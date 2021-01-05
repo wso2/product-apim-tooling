@@ -36,7 +36,6 @@ const (
 
 // GetLocalEntryList returns a list of local entries deployed in the micro integrator in a given environment
 func GetLocalEntryList(env string) (*artifactutils.LocalEntryList, error) {
-
 	resp, err := getArtifactList(utils.MiManagementLocalEntrieResource, env, &artifactutils.LocalEntryList{})
 	if err != nil {
 		return nil, err
@@ -46,11 +45,8 @@ func GetLocalEntryList(env string) (*artifactutils.LocalEntryList, error) {
 
 // PrintLocalEntryList print a list of local entries according to the given format
 func PrintLocalEntryList(localEntryList *artifactutils.LocalEntryList, format string) {
-
 	if localEntryList.Count > 0 {
-
 		localEntrys := localEntryList.LocalEntries
-
 		localEntryListContext := getContextWithFormat(format, defaultLocalEntryListTableFormat)
 
 		renderer := func(w io.Writer, t *template.Template) error {
@@ -62,12 +58,10 @@ func PrintLocalEntryList(localEntryList *artifactutils.LocalEntryList, format st
 			}
 			return nil
 		}
-
 		localEntryListTableHeaders := map[string]string{
 			"Name": nameHeader,
 			"Type": typeHeader,
 		}
-
 		if err := localEntryListContext.Write(renderer, localEntryListTableHeaders); err != nil {
 			fmt.Println("Error executing template:", err.Error())
 		}
@@ -78,7 +72,6 @@ func PrintLocalEntryList(localEntryList *artifactutils.LocalEntryList, format st
 
 // GetLocalEntry returns a information about a specific local entry deployed in the micro integrator in a given environment
 func GetLocalEntry(env, localEntryName string) (*artifactutils.LocalEntryData, error) {
-
 	resp, err := getArtifactInfo(utils.MiManagementLocalEntrieResource, "name", localEntryName, env, &artifactutils.LocalEntryData{})
 	if err != nil {
 		return nil, err
@@ -88,7 +81,6 @@ func GetLocalEntry(env, localEntryName string) (*artifactutils.LocalEntryData, e
 
 // PrintLocalEntryDetails prints details about a local entry according to the given format
 func PrintLocalEntryDetails(localEntry *artifactutils.LocalEntryData, format string) {
-
 	localEntryContext := getContextWithFormat(format, defaultLocalEntryDetailedFormat)
 	renderer := getItemRendererEndsWithNewLine(localEntry)
 

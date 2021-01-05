@@ -43,10 +43,8 @@ var getTasksCmd = &cobra.Command{
 
 func init() {
 	GetCmd.AddCommand(getTasksCmd)
-	getTasksCmd.Flags().StringVarP(&getTaskCmdEnvironment, "environment", "e",
-		"", "Environment to be searched")
-	getTasksCmd.Flags().StringVarP(&getTaskCmdFormat, "format", "", "", generateFormatFlagUsage(artifactTasks))
-	getTasksCmd.MarkFlagRequired("environment")
+	setEnvFlag(getTasksCmd, &getTaskCmdEnvironment)
+	setFormatFlag(getTasksCmd, &getTaskCmdFormat)
 }
 
 func handleGetTaskCmdArguments(args []string) {
@@ -61,7 +59,6 @@ func handleGetTaskCmdArguments(args []string) {
 }
 
 func executeListTasks() {
-
 	taskList, err := impl.GetTaskList(getTaskCmdEnvironment)
 	if err == nil {
 		impl.PrintTaskList(taskList, getTaskCmdFormat)

@@ -44,7 +44,6 @@ const (
 
 // GetIntegrationAPIList returns a list of apis deployed in the micro integrator in a given environment
 func GetIntegrationAPIList(env string) (*artifactutils.IntegrationAPIList, error) {
-
 	resp, err := getArtifactList(utils.MiManagementAPIResource, env, &artifactutils.IntegrationAPIList{})
 	if err != nil {
 		return nil, err
@@ -54,11 +53,8 @@ func GetIntegrationAPIList(env string) (*artifactutils.IntegrationAPIList, error
 
 // PrintIntegrationAPIList print a list of apis according to the given format
 func PrintIntegrationAPIList(apiList *artifactutils.IntegrationAPIList, format string) {
-
 	if apiList.Count > 0 {
-
 		apis := apiList.Apis
-
 		apiListContext := getContextWithFormat(format, defaultIntegrationAPIListTableFormat)
 
 		renderer := func(w io.Writer, t *template.Template) error {
@@ -70,12 +66,10 @@ func PrintIntegrationAPIList(apiList *artifactutils.IntegrationAPIList, format s
 			}
 			return nil
 		}
-
 		apiListTableHeaders := map[string]string{
 			"Name": nameHeader,
 			"Url":  urlHeader,
 		}
-
 		if err := apiListContext.Write(renderer, apiListTableHeaders); err != nil {
 			fmt.Println("Error executing template:", err.Error())
 		}
@@ -86,7 +80,6 @@ func PrintIntegrationAPIList(apiList *artifactutils.IntegrationAPIList, format s
 
 // GetIntegrationAPI returns a information about a specific api deployed in the micro integrator in a given environment
 func GetIntegrationAPI(env, apiName string) (*artifactutils.IntegrationAPI, error) {
-
 	resp, err := getArtifactInfo(utils.MiManagementAPIResource, "apiName", apiName, env, &artifactutils.IntegrationAPI{})
 	if err != nil {
 		return nil, err
@@ -96,7 +89,6 @@ func GetIntegrationAPI(env, apiName string) (*artifactutils.IntegrationAPI, erro
 
 // PrintIntegrationAPIDetails prints details about an api according to the given format
 func PrintIntegrationAPIDetails(api *artifactutils.IntegrationAPI, format string) {
-
 	if format == "" || strings.HasPrefix(format, formatter.TableFormatKey) {
 		format = defaultIntegrationAPIDetailedFormat
 	}

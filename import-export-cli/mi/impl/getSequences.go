@@ -45,7 +45,6 @@ const (
 
 // GetSequenceList returns a list of sequences deployed in the micro integrator in a given environment
 func GetSequenceList(env string) (*artifactutils.SequenceList, error) {
-
 	resp, err := getArtifactList(utils.MiManagementSequenceResource, env, &artifactutils.SequenceList{})
 	if err != nil {
 		return nil, err
@@ -55,11 +54,8 @@ func GetSequenceList(env string) (*artifactutils.SequenceList, error) {
 
 // PrintSequenceList print a list of sequences according to the given format
 func PrintSequenceList(sequenceList *artifactutils.SequenceList, format string) {
-
 	if sequenceList.Count > 0 {
-
 		sequences := sequenceList.Sequences
-
 		sequenceListContext := getContextWithFormat(format, defaultSequenceListTableFormat)
 
 		renderer := func(w io.Writer, t *template.Template) error {
@@ -71,13 +67,11 @@ func PrintSequenceList(sequenceList *artifactutils.SequenceList, format string) 
 			}
 			return nil
 		}
-
 		sequenceListTableHeaders := map[string]string{
 			"Name":    nameHeader,
 			"Stats":   statsHeader,
 			"Tracing": tracingHeader,
 		}
-
 		if err := sequenceListContext.Write(renderer, sequenceListTableHeaders); err != nil {
 			fmt.Println("Error executing template:", err.Error())
 		}
@@ -88,7 +82,6 @@ func PrintSequenceList(sequenceList *artifactutils.SequenceList, format string) 
 
 // GetSequence returns a information about a specific sequence deployed in the micro integrator in a given environment
 func GetSequence(env, sequenceName string) (*artifactutils.Sequence, error) {
-
 	resp, err := getArtifactInfo(utils.MiManagementSequenceResource, "sequenceName", sequenceName, env, &artifactutils.Sequence{})
 	if err != nil {
 		return nil, err
@@ -98,7 +91,6 @@ func GetSequence(env, sequenceName string) (*artifactutils.Sequence, error) {
 
 // PrintSequenceDetails prints details about a sequence according to the given format
 func PrintSequenceDetails(sequence *artifactutils.Sequence, format string) {
-
 	if format == "" || strings.HasPrefix(format, formatter.TableFormatKey) {
 		format = defaultSequenceDetailedFormat
 	}

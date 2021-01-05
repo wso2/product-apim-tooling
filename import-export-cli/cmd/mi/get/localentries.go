@@ -43,10 +43,8 @@ var getLocalEntryCmd = &cobra.Command{
 
 func init() {
 	GetCmd.AddCommand(getLocalEntryCmd)
-	getLocalEntryCmd.Flags().StringVarP(&getLocalEntryCmdEnvironment, "environment", "e",
-		"", "Environment to be searched")
-	getLocalEntryCmd.Flags().StringVarP(&getLocalEntryCmdFormat, "format", "", "", generateFormatFlagUsage(artifactLocalEntries))
-	getLocalEntryCmd.MarkFlagRequired("environment")
+	setEnvFlag(getLocalEntryCmd, &getLocalEntryCmdEnvironment)
+	setFormatFlag(getLocalEntryCmd, &getLocalEntryCmdFormat)
 }
 
 func handleGetLocalEntryCmdArguments(args []string) {
@@ -61,7 +59,6 @@ func handleGetLocalEntryCmdArguments(args []string) {
 }
 
 func executeListLocalEntrys() {
-
 	localEntryList, err := impl.GetLocalEntryList(getLocalEntryCmdEnvironment)
 	if err == nil {
 		impl.PrintLocalEntryList(localEntryList, getLocalEntryCmdFormat)

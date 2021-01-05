@@ -43,13 +43,11 @@ const (
 
 // GetUserList returns a list of users in the micro integrator in a given environment
 func GetUserList(env, role, pattern string) (*artifactutils.UserList, error) {
-
 	params := make(map[string]string)
 	putNonEmptyValueToMap(params, "role", role)
 	putNonEmptyValueToMap(params, "pattern", pattern)
 
 	resp, err := callMIManagementEndpointOfResource(utils.MiManagementUserResource, params, env, &artifactutils.UserList{})
-
 	if err != nil {
 		return nil, err
 	}
@@ -58,11 +56,8 @@ func GetUserList(env, role, pattern string) (*artifactutils.UserList, error) {
 
 // PrintUserList print a list of mi users according to the given format
 func PrintUserList(userList *artifactutils.UserList, format string) {
-
 	if userList.Count > 0 {
-
 		users := userList.Users
-
 		userListContext := getContextWithFormat(format, defaultUserListTableFormat)
 
 		renderer := func(w io.Writer, t *template.Template) error {
@@ -74,11 +69,9 @@ func PrintUserList(userList *artifactutils.UserList, format string) {
 			}
 			return nil
 		}
-
 		userListTableHeaders := map[string]string{
 			"UserId": userIDHeader,
 		}
-
 		if err := userListContext.Write(renderer, userListTableHeaders); err != nil {
 			fmt.Println("Error executing template:", err.Error())
 		}
@@ -89,7 +82,6 @@ func PrintUserList(userList *artifactutils.UserList, format string) {
 
 // GetUserInfo returns a information about a specific user in the micro integrator in a given environment
 func GetUserInfo(env, userID string) (*artifactutils.UserSummary, error) {
-
 	var userInfoResource = utils.MiManagementUserResource + "/" + userID
 
 	resp, err := callMIManagementEndpointOfResource(userInfoResource, nil, env, &artifactutils.UserSummary{})
@@ -101,7 +93,6 @@ func GetUserInfo(env, userID string) (*artifactutils.UserSummary, error) {
 
 // PrintUserDetails prints details about a mi user according to the given format
 func PrintUserDetails(userInfo *artifactutils.UserSummary, format string) {
-
 	if format == "" || strings.HasPrefix(format, formatter.TableFormatKey) {
 		format = defaultUserDetailedFormat
 	}

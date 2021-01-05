@@ -32,13 +32,11 @@ const transactionReportFilePrefix = "transaction-count-summary-"
 
 // GetTransactionReport returns inbound transactions received by the micro integrator in a given environment as a report
 func GetTransactionReport(env string, period []string) (*artifactutils.TransactionCountInfo, error) {
-
 	params := make(map[string]string)
 	params["start"] = period[0]
 	params["end"] = period[1]
 
 	var transactionReportResource = utils.MiManagementTransactionResource + "/" + utils.MiManagementTransactionReportResource
-
 	resp, err := callMIManagementEndpointOfResource(transactionReportResource, params, env, &artifactutils.TransactionCountInfo{})
 	if err != nil {
 		return nil, err

@@ -75,10 +75,8 @@ var getTemplateCmd = &cobra.Command{
 
 func init() {
 	GetCmd.AddCommand(getTemplateCmd)
-	getTemplateCmd.Flags().StringVarP(&getTemplateCmdEnvironment, "environment", "e",
-		"", "Environment to be searched")
-	getTemplateCmd.Flags().StringVarP(&getTemplateCmdFormat, "format", "", "", generateFormatFlagUsage(artifactTemplates))
-	getTemplateCmd.MarkFlagRequired("environment")
+	setEnvFlag(getTemplateCmd, &getTemplateCmdEnvironment)
+	setFormatFlag(getTemplateCmd, &getTemplateCmdFormat)
 }
 
 func handleGetTemplateCmdArguments(args []string) {
@@ -97,7 +95,6 @@ func handleGetTemplateCmdArguments(args []string) {
 }
 
 func executeListTemplates() {
-
 	templateList, err := impl.GetTemplateList(getTemplateCmdEnvironment)
 	if err == nil {
 		impl.PrintTemplateList(templateList, getTemplateCmdFormat)
@@ -107,7 +104,6 @@ func executeListTemplates() {
 }
 
 func executeGetTemplateByTypeCmd(templateType string) {
-
 	templateList, err := impl.GetTemplatesByType(getTemplateCmdEnvironment, templateType)
 	if err == nil {
 		impl.PrintTemplatesByType(templateList, getTemplateCmdFormat)
@@ -117,7 +113,6 @@ func executeGetTemplateByTypeCmd(templateType string) {
 }
 
 func executeGetTemplateByNameCmd(templateType, templateName string) {
-
 	if templateType == sequenceKey {
 		sequenceTemplate, err := impl.GetSequenceTemplate(getTemplateCmdEnvironment, templateName)
 		if err == nil {
@@ -126,7 +121,6 @@ func executeGetTemplateByNameCmd(templateType, templateName string) {
 			printErrorForArtifact(artifactTemplates, templateName, err)
 		}
 	}
-
 	if templateType == endpointKey {
 		endpointTemplate, err := impl.GetEndpointTemplate(getTemplateCmdEnvironment, templateName)
 		if err == nil {

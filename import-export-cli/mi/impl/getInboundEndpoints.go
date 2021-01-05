@@ -43,7 +43,6 @@ const (
 
 // GetInboundEndpointList returns a list of inbound endpoints deployed in the micro integrator in a given environment
 func GetInboundEndpointList(env string) (*artifactutils.InboundEndpointList, error) {
-
 	resp, err := getArtifactList(utils.MiManagementInboundEndpointResource, env, &artifactutils.InboundEndpointList{})
 	if err != nil {
 		return nil, err
@@ -53,11 +52,8 @@ func GetInboundEndpointList(env string) (*artifactutils.InboundEndpointList, err
 
 // PrintInboundEndpointList print a list of inbound endpoints according to the given format
 func PrintInboundEndpointList(inboundEPList *artifactutils.InboundEndpointList, format string) {
-
 	if inboundEPList.Count > 0 {
-
 		inboundEPs := inboundEPList.InboundEndpoints
-
 		inboundEPListContext := getContextWithFormat(format, defaultInboundEndpointListTableFormat)
 
 		renderer := func(w io.Writer, t *template.Template) error {
@@ -69,12 +65,10 @@ func PrintInboundEndpointList(inboundEPList *artifactutils.InboundEndpointList, 
 			}
 			return nil
 		}
-
 		inboundEPListTableHeaders := map[string]string{
 			"Name": nameHeader,
 			"Type": typeHeader,
 		}
-
 		if err := inboundEPListContext.Write(renderer, inboundEPListTableHeaders); err != nil {
 			fmt.Println("Error executing template:", err.Error())
 		}
@@ -85,7 +79,6 @@ func PrintInboundEndpointList(inboundEPList *artifactutils.InboundEndpointList, 
 
 // GetInboundEndpoint returns a information about a specific inbound endpoint deployed in the micro integrator in a given environment
 func GetInboundEndpoint(env, inboundEPName string) (*artifactutils.InboundEndpoint, error) {
-
 	resp, err := getArtifactInfo(utils.MiManagementInboundEndpointResource, "inboundEndpointName", inboundEPName, env,
 		&artifactutils.InboundEndpoint{})
 	if err != nil {
@@ -96,7 +89,6 @@ func GetInboundEndpoint(env, inboundEPName string) (*artifactutils.InboundEndpoi
 
 // PrintInboundEndpointDetails prints details about an inbound endpoint according to the given format
 func PrintInboundEndpointDetails(inboundEP *artifactutils.InboundEndpoint, format string) {
-
 	if format == "" || strings.HasPrefix(format, formatter.TableFormatKey) {
 		format = defaultInboundEndpointDetailedFormat
 	}
