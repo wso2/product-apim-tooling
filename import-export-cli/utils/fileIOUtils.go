@@ -19,6 +19,7 @@
 package utils
 
 import (
+	"encoding/csv"
 	"errors"
 	"fmt"
 	"io"
@@ -306,7 +307,7 @@ func CopyDir(src string, dst string) (err error) {
 
 // CopyDirectoryContents recursively copies all the content of a directory, attempting to preserve permissions.
 // Source directory must exist,and the destination directory exist.
-func CopyDirectoryContents (src string, dst string) (err error)  {
+func CopyDirectoryContents(src string, dst string) (err error) {
 	entries, err := ioutil.ReadDir(src)
 	if err != nil {
 		return
@@ -337,7 +338,7 @@ func CopyDirectoryContents (src string, dst string) (err error)  {
 // @param src source directory path
 // @param dst destiny directory path
 // @return error
-func MoveDirectoryContentsToNewDirectory(src string, dst string) (err error)  {
+func MoveDirectoryContentsToNewDirectory(src string, dst string) (err error) {
 	entries, err := ioutil.ReadDir(src)
 	if err != nil {
 		return
@@ -537,4 +538,34 @@ func CreateZipFile(filePath string, skipCleanup bool) (error, func()) {
 		return nil, cleanup
 	}
 	return nil, nil
+}
+
+// WriteLinesToCSVFile write the content of a 2D array as csv values to a file at the target path.
+func WriteLinesToCSVFile(lines [][]string, targetPath string) error {
+	if _, err := os.Stat(filepath.Dir(targetPath)); os.IsNotExist(err) {
+		return err
+	}
+
+	file, err := os.Create(targetPath)
+	if err != nil {
+		return errors.New("Could not create the file " + targetPath + ". " + err.Error())
+	}
+
+	defer func() error {
+		if e := file.Close(); e != nil {
+			return e
+		}
+		return nil
+	}()
+
+	csvWriter := csv.NewWriter(file)
+	defer csvWriter.Flush()
+
+	for _, line := range lines {
+		err := csvWriter.Write(line)
+		if err != nil {
+			return errors.New("Could not write to file " + targetPath + ". " + err.Error())
+		}
+	}
+	return nil
 }

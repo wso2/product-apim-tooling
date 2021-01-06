@@ -32,12 +32,20 @@ import (
 // TableFormatKey is the identifier used for table
 const TableFormatKey = "table"
 
+// DetailedFormatKey is the identifier used for detail view
+const DetailedFormatKey = "detail"
+
 // Format is an alias for a string used for formatting
 type Format string
 
 // IsTable returns true if format string is prefixed with table
 func (f Format) IsTable() bool {
 	return strings.HasPrefix(string(f), TableFormatKey)
+}
+
+// IsDetailedFormat returns true if format string is prefixed with detail
+func (f Format) IsDetailedFormat() bool {
+	return strings.HasPrefix(string(f), DetailedFormatKey)
 }
 
 // Context keeps data about a format operation
@@ -66,6 +74,11 @@ func (ctx *Context) preFormat() {
 		format = format[len(TableFormatKey):]
 	}
 
+	if ctx.Format.IsDetailedFormat() {
+		// if detail is found skip it and take the rest
+		format = format[len(DetailedFormatKey):]
+	}
+
 	format = strings.TrimSpace(format)
 	// this is done to avoid treating \t \n as template strings. This replaces them as special characters
 	replacer := strings.NewReplacer(`\t`, "\t", `\n`, "\n")
@@ -90,6 +103,15 @@ func (ctx *Context) postFormat(template *template.Template, headers interface{})
 		// print headers
 		_ = template.Funcs(templates.HeaderFuncs).Execute(w, headers)
 		_, _ = w.Write([]byte{'\n'})
+		// write buffer to the w
+		// in this case anything in buffer will be rendered by tabwiter to the Output
+		// buffer contains data to be written
+		_, _ = ctx.buffer.WriteTo(w)
+		// flush will perform actual write to the writer
+		_ = w.Flush()
+	} else if ctx.Format.IsDetailedFormat() {
+		// create a tab writer using Output
+		w := tabwriter.NewWriter(ctx.Output, 20, 1, 3, ' ', 0)
 		// write buffer to the w
 		// in this case anything in buffer will be rendered by tabwiter to the Output
 		// buffer contains data to be written

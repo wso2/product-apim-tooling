@@ -209,5 +209,7 @@ const MiManagementMiLoginResource = "login"
 const MiManagementMiLogoutResource = "logout"
 const MiManagementUserResource = "users"
 const MiManagementTransactionResource = "transactions"
+const MiManagementTransactionCountResource = "count"
+const MiManagementTransactionReportResource = "report"
 
 const ZipFileSuffix = ".zip"

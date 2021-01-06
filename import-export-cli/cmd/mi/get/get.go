@@ -16,30 +16,30 @@
 * under the License.
  */
 
-package mi
+package get
 
 import (
 	"github.com/spf13/cobra"
-	miGetCmd "github.com/wso2/product-apim-tooling/import-export-cli/cmd/mi/get"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-const miCmdShortDesc = "Micro Integrator related commands"
+// GetCmdLiteral Get command related usage Info
+const GetCmdLiteral = "get"
+const getCmdShortDesc = "Get information about artifacts deployed in a Micro Integrator instance"
 
-const miCmdLongDesc = `Micro Integrator related commands such as login, logout, get, add, update, delete, activate, deactivate.`
+const getCmdLongDesc = `Get information about artifacts deployed in a Micro Integrator instance in the environment specified by the flag (--environment, -e)`
 
-// MICmd represents the mi command
-var MICmd = &cobra.Command{
-	Use:   utils.MiCmdLiteral,
-	Short: miCmdShortDesc,
-	Long:  miCmdLongDesc,
-	// Example: miCmdExamples,
+const getCmdExamples = utils.ProjectName + ` ` + utils.MiCmdLiteral + ` ` + GetCmdLiteral + ` ` + `apis` + ` -e dev
+` + utils.ProjectName + ` ` + utils.MiCmdLiteral + ` ` + GetCmdLiteral + ` ` + `endpoints` + ` -e dev`
+
+// GetCmd represents the get command
+var GetCmd = &cobra.Command{
+	Use:     GetCmdLiteral,
+	Short:   getCmdShortDesc,
+	Long:    getCmdLongDesc,
+	Example: getCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + utils.MiCmdLiteral + " called")
+		utils.Logln(utils.LogPrefixInfo + GetCmdLiteral + " called")
 		cmd.Help()
 	},
-}
-
-func init() {
-	MICmd.AddCommand(miGetCmd.GetCmd)
 }

@@ -190,3 +190,11 @@ func RunMILogout(environment string) error {
 	fmt.Println("Logged out from MI in", environment, "environment")
 	return store.EraseMI(environment)
 }
+
+// HandleMissingCredentials check for missing credentials and prompt to enter credentials or print error and exit
+func HandleMissingCredentials(env string) {
+	_, err := GetMICredentials(env)
+	if err != nil {
+		utils.HandleErrorAndExit("Error getting credentials", err)
+	}
+}
