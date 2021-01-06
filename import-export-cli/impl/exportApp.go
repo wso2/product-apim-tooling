@@ -28,26 +28,31 @@ import (
 )
 
 // ExportAppFromEnv function is used with export app command
-func ExportAppFromEnv(accessToken, name, owner, exportEnvironment string, exportAppWithKeys bool) (*resty.Response, error) {
-	adminEndpiont := utils.GetAdminEndpointOfEnv(exportEnvironment, utils.MainConfigFilePath)
-	return ExportApp(name, owner, adminEndpiont, accessToken, exportAppWithKeys)
+func ExportAppFromEnv(accessToken, name, owner, format, exportEnvironment string, exportAppWithKeys bool) (*resty.Response, error) {
+	devportalApplicationsEndpoint := utils.GetDevPortalApplicationListEndpointOfEnv(exportEnvironment, utils.MainConfigFilePath)
+	return ExportApp(name, owner, format, devportalApplicationsEndpoint, accessToken, exportAppWithKeys)
 }
 
 // ExportApp
 // @param name : Name of the Application to be exported
 // @param owner : Owner of the Application to be exported
-// @param adminEndpoint : Admin Endpoint for the environment
+// @param format : Format of the Application to be exported
+// @param devportalApplicationsEndpoint : Dev Portal Applications Endpoint for the environment
 // @param accessToken : Access Token for the resource
 // @return response Response in the form of *resty.Response
-func ExportApp(name, owner, adminEndpoint, accessToken string, exportAppWithKeys bool) (*resty.Response, error) {
-	adminEndpoint = utils.AppendSlashToString(adminEndpoint)
-	query := "export/applications?appName=" + name + utils.SearchAndTag + "appOwner=" + owner
+func ExportApp(name, owner, format, devportalApplicationsEndpoint, accessToken string, exportAppWithKeys bool) (*resty.Response, error) {
+	devportalApplicationsEndpoint = utils.AppendSlashToString(devportalApplicationsEndpoint)
+	query := "export?appName=" + name + utils.SearchAndTag + "appOwner=" + owner
 
 	if exportAppWithKeys {
 		query += "&withKeys=true"
 	}
 
-	url := adminEndpoint + query
+	if format != "" {
+		query += "&format=" + format
+	}
+
+	url := devportalApplicationsEndpoint + query
 	utils.Logln(utils.LogPrefixInfo+"ExportApp: URL:", url)
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
