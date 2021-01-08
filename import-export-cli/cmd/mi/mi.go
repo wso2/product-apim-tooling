@@ -20,7 +20,10 @@ package mi
 
 import (
 	"github.com/spf13/cobra"
+	miAddCmd "github.com/wso2/product-apim-tooling/import-export-cli/cmd/mi/add"
+	miDeleteCmd "github.com/wso2/product-apim-tooling/import-export-cli/cmd/mi/delete"
 	miGetCmd "github.com/wso2/product-apim-tooling/import-export-cli/cmd/mi/get"
+	miUpdateCmd "github.com/wso2/product-apim-tooling/import-export-cli/cmd/mi/update"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
@@ -42,4 +45,7 @@ var MICmd = &cobra.Command{
 
 func init() {
 	MICmd.AddCommand(miGetCmd.GetCmd)
+	MICmd.AddCommand(miAddCmd.AddCmd)
+	MICmd.AddCommand(miDeleteCmd.DeleteCmd)
+	MICmd.AddCommand(miUpdateCmd.UpdateCmd)
 }

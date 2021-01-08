@@ -27,7 +27,7 @@ NOTE: The flag (--environment (-e)) is mandatory
 
 ```
   -e, --environment string   Environment to be searched
-      --format string        Pretty-print templates using Go Templates. Use "{{ jsonPretty . }}" to list all fields
+      --format string        Pretty-print using Go Templates. Use "{{ jsonPretty . }}" to list all fields
   -h, --help                 help for templates
 ```
 

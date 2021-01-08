@@ -235,6 +235,28 @@ func InvokeDELETERequest(url string, headers map[string]string) (*resty.Response
 	return resp, err
 }
 
+// Invoke http-patch request using go-resty
+func InvokePATCHRequest(url string, headers map[string]string, body map[string]string) (*resty.Response, error) {
+	if Insecure {
+		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+	} else {
+		resty.SetTLSClientConfig(GetTlsConfigWithCertificate())
+	}
+	if os.Getenv("HTTP_PROXY") != "" {
+		resty.SetProxy(os.Getenv("HTTP_PROXY"))
+	} else if os.Getenv("HTTPS_PROXY") != "" {
+		resty.SetProxy(os.Getenv("HTTPS_PROXY"))
+	} else if os.Getenv("http_proxy") != "" {
+		resty.SetProxy(os.Getenv("http_proxy"))
+	} else if os.Getenv("https_proxy") != "" {
+		resty.SetProxy(os.Getenv("https_proxy"))
+	}
+	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
+	resp, err := resty.R().SetHeaders(headers).SetBody(body).Patch(url)
+
+	return resp, err
+}
+
 func PromptForUsername() string {
 	reader := bufio.NewReader(os.Stdin)
 

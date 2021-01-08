@@ -91,6 +91,26 @@ func downloadLogFileData(url string, params map[string]string, env string) ([]by
 	return nil, errors.New(resp.Status())
 }
 
+func handleResponse(resp *resty.Response, err error, url, messageTag, errorTag string) (string, error) {
+	if err != nil {
+		utils.HandleErrorAndExit("Unable to connect to "+url, err)
+	}
+	utils.Logln(utils.LogPrefixInfo+"Response:", resp.Status())
+
+	if resp.StatusCode() == http.StatusUnauthorized {
+		fmt.Println("Invalid credentials. Please login to the current Micro Integrator instance")
+		utils.HandleErrorAndExit("Execute 'apictl mi login --help' for more information", nil)
+	}
+	if len(resp.Body()) == 0 {
+		return "", errors.New(resp.Status())
+	}
+	data := unmarshalJSONToStringMap(resp.Body())
+	if resp.StatusCode() == http.StatusOK {
+		return data[messageTag], nil
+	}
+	return data[errorTag], errors.New(resp.Status())
+}
+
 func retryHTTPCall(attempts int, env string, f func(string) (*resty.Response, error)) (*resty.Response, error) {
 	cred, err := credentials.GetMICredentials(env)
 	resp, err := f(cred.AccessToken)
@@ -112,6 +132,31 @@ func invokeGETRequestWithRetry(url string, params map[string]string, env string)
 		headers := make(map[string]string)
 		headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 		return utils.InvokeGETRequestWithMultipleQueryParams(params, url, headers)
+	})
+}
+
+func invokePATCHRequestWithRetry(url string, body map[string]string, env string) (*resty.Response, error) {
+	return retryHTTPCall(miHTTPRetryCount, env, func(accessToken string) (*resty.Response, error) {
+		headers := make(map[string]string)
+		headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
+		return utils.InvokePATCHRequest(url, headers, body)
+	})
+}
+
+func invokePOSTRequestWithRetry(url, body, env string) (*resty.Response, error) {
+	return retryHTTPCall(miHTTPRetryCount, env, func(accessToken string) (*resty.Response, error) {
+		headers := make(map[string]string)
+		headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
+		headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
+		return utils.InvokePOSTRequest(url, headers, body)
+	})
+}
+
+func invokeDELETERequestWithRetry(url string, env string) (*resty.Response, error) {
+	return retryHTTPCall(miHTTPRetryCount, env, func(accessToken string) (*resty.Response, error) {
+		headers := make(map[string]string)
+		headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
+		return utils.InvokeDELETERequest(url, headers)
 	})
 }
 
@@ -182,4 +227,13 @@ func putNonEmptyValueToMap(dataMap map[string]string, key, value string) {
 	if value != "" {
 		dataMap[key] = value
 	}
+}
+
+func createErrorWithResponseBody(resp string, err error) error {
+	if resp != "" {
+		if len(resp) > 0 {
+			return errors.New(resp)
+		}
+	}
+	return err
 }
