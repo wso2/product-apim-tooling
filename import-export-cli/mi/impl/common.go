@@ -28,6 +28,7 @@ import (
 	"text/template"
 
 	"github.com/go-resty/resty"
+	"github.com/renstrom/dedent"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/formatter"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -236,4 +237,13 @@ func createErrorWithResponseBody(resp string, err error) error {
 		}
 	}
 	return err
+}
+
+func updateArtifactState(url, artifactName, state, env string) (string, error) {
+	body := dedent.Dedent(`{
+		"name": "` + artifactName + `",
+		"status": "` + state + `"
+	}`)
+	resp, err := invokePOSTRequestWithRetry(url, body, env)
+	return handleResponse(resp, err, url, "Message", "Error")
 }

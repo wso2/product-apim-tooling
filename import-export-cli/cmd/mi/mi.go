@@ -20,7 +20,9 @@ package mi
 
 import (
 	"github.com/spf13/cobra"
+	miActivateCmd "github.com/wso2/product-apim-tooling/import-export-cli/cmd/mi/activate"
 	miAddCmd "github.com/wso2/product-apim-tooling/import-export-cli/cmd/mi/add"
+	miDeactivateCmd "github.com/wso2/product-apim-tooling/import-export-cli/cmd/mi/deactivate"
 	miDeleteCmd "github.com/wso2/product-apim-tooling/import-export-cli/cmd/mi/delete"
 	miGetCmd "github.com/wso2/product-apim-tooling/import-export-cli/cmd/mi/get"
 	miUpdateCmd "github.com/wso2/product-apim-tooling/import-export-cli/cmd/mi/update"
@@ -48,4 +50,6 @@ func init() {
 	MICmd.AddCommand(miAddCmd.AddCmd)
 	MICmd.AddCommand(miDeleteCmd.DeleteCmd)
 	MICmd.AddCommand(miUpdateCmd.UpdateCmd)
+	MICmd.AddCommand(miActivateCmd.ActivateCmd)
+	MICmd.AddCommand(miDeactivateCmd.DeactivateCmd)
 }
