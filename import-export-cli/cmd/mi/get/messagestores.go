@@ -22,6 +22,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	impl "github.com/wso2/product-apim-tooling/import-export-cli/mi/impl"
+	miUtils "github.com/wso2/product-apim-tooling/import-export-cli/mi/utils"
 )
 
 var getMessageStoreCmdEnvironment string
@@ -34,7 +35,7 @@ var getMessageStoreCmd = &cobra.Command{
 	Use:     getMessageStoreCmdLiteral,
 	Short:   generateGetCmdShortDescForArtifact(artifactMessageStores),
 	Long:    generateGetCmdLongDescForArtifact(artifactMessageStores, "messagestore-name"),
-	Example: generateGetCmdExamplesForArtifact(artifactMessageStores, getTrimmedCmdLiteral(getMessageStoreCmdLiteral), "TestMessageStore"),
+	Example: generateGetCmdExamplesForArtifact(artifactMessageStores, miUtils.GetTrimmedCmdLiteral(getMessageStoreCmdLiteral), "TestMessageStore"),
 	Args:    cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		handleGetMessageStoreCmdArguments(args)
@@ -48,7 +49,7 @@ func init() {
 }
 
 func handleGetMessageStoreCmdArguments(args []string) {
-	printGetCmdVerboseLogForArtifact(getTrimmedCmdLiteral(getMessageStoreCmdLiteral))
+	printGetCmdVerboseLogForArtifact(miUtils.GetTrimmedCmdLiteral(getMessageStoreCmdLiteral))
 	credentials.HandleMissingCredentials(getMessageStoreCmdEnvironment)
 	if len(args) == 1 {
 		var messageStoreName = args[0]

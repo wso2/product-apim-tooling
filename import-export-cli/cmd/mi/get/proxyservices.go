@@ -22,6 +22,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	impl "github.com/wso2/product-apim-tooling/import-export-cli/mi/impl"
+	miUtils "github.com/wso2/product-apim-tooling/import-export-cli/mi/utils"
 )
 
 var getProxyServiceCmdEnvironment string
@@ -34,7 +35,7 @@ var getProxyServiceCmd = &cobra.Command{
 	Use:     getProxyServiceCmdLiteral,
 	Short:   generateGetCmdShortDescForArtifact(artifactProxyServices),
 	Long:    generateGetCmdLongDescForArtifact(artifactProxyServices, "proxy-name"),
-	Example: generateGetCmdExamplesForArtifact(artifactProxyServices, getTrimmedCmdLiteral(getProxyServiceCmdLiteral), "SampleProxy"),
+	Example: generateGetCmdExamplesForArtifact(artifactProxyServices, miUtils.GetTrimmedCmdLiteral(getProxyServiceCmdLiteral), "SampleProxy"),
 	Args:    cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		handleGetProxyServiceCmdArguments(args)
@@ -48,7 +49,7 @@ func init() {
 }
 
 func handleGetProxyServiceCmdArguments(args []string) {
-	printGetCmdVerboseLogForArtifact(getTrimmedCmdLiteral(getProxyServiceCmdLiteral))
+	printGetCmdVerboseLogForArtifact(miUtils.GetTrimmedCmdLiteral(getProxyServiceCmdLiteral))
 	credentials.HandleMissingCredentials(getProxyServiceCmdEnvironment)
 	if len(args) == 1 {
 		var proxyServiceName = args[0]

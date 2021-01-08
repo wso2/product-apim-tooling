@@ -25,6 +25,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	impl "github.com/wso2/product-apim-tooling/import-export-cli/mi/impl"
+	miUtils "github.com/wso2/product-apim-tooling/import-export-cli/mi/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
@@ -38,9 +39,9 @@ const getTransactionCountCmdLongDesc = "Retrieve transaction count based on the 
 	"If year and month not provided, retrieve the count for the current year and month of Micro Integrator in the environment specified by the flag --environment, -e"
 
 var getTransactionCountCmdExamples = "To get the transaction count for the current month\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + getTrimmedCmdLiteral(getTransactionCountCmdLiteral) + " -e dev\n" +
+	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getTransactionCountCmdLiteral) + " -e dev\n" +
 	"To get the transaction count for a specific month\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + getTrimmedCmdLiteral(getTransactionCountCmdLiteral) + " 2020 06 -e dev\n" +
+	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getTransactionCountCmdLiteral) + " 2020 06 -e dev\n" +
 	"NOTE: The flag (--environment (-e)) is mandatory"
 
 var getTransactionCountCmd = &cobra.Command{
@@ -67,7 +68,7 @@ func init() {
 }
 
 func handleGetTransactionCountCmdArguments(args []string) {
-	printGetCmdVerboseLogForArtifact(getTrimmedCmdLiteral(getTransactionCountCmdLiteral))
+	printGetCmdVerboseLogForArtifact(miUtils.GetTrimmedCmdLiteral(getTransactionCountCmdLiteral))
 	credentials.HandleMissingCredentials(getTransactionCountCmdEnvironment)
 	if len(args) == 2 {
 		var year = args[0]

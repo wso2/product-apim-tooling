@@ -22,6 +22,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	impl "github.com/wso2/product-apim-tooling/import-export-cli/mi/impl"
+	miUtils "github.com/wso2/product-apim-tooling/import-export-cli/mi/utils"
 )
 
 var getEndpointCmdEnvironment string
@@ -34,7 +35,7 @@ var getEndpointCmd = &cobra.Command{
 	Use:     getEndpointCmdLiteral,
 	Short:   generateGetCmdShortDescForArtifact(artifactEndpoints),
 	Long:    generateGetCmdLongDescForArtifact(artifactEndpoints, "endpoint-name"),
-	Example: generateGetCmdExamplesForArtifact(artifactEndpoints, getTrimmedCmdLiteral(getEndpointCmdLiteral), "SampleEndpoint"),
+	Example: generateGetCmdExamplesForArtifact(artifactEndpoints, miUtils.GetTrimmedCmdLiteral(getEndpointCmdLiteral), "SampleEndpoint"),
 	Args:    cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		handleGetEndpointCmdArguments(args)
@@ -48,7 +49,7 @@ func init() {
 }
 
 func handleGetEndpointCmdArguments(args []string) {
-	printGetCmdVerboseLogForArtifact(getTrimmedCmdLiteral(getEndpointCmdLiteral))
+	printGetCmdVerboseLogForArtifact(miUtils.GetTrimmedCmdLiteral(getEndpointCmdLiteral))
 	credentials.HandleMissingCredentials(getEndpointCmdEnvironment)
 	if len(args) == 1 {
 		var EndpointName = args[0]

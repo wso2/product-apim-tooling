@@ -24,6 +24,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/mi/impl"
+	miUtils "github.com/wso2/product-apim-tooling/import-export-cli/mi/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
@@ -35,7 +36,7 @@ const deleteUserCmdShortDesc = "Delete a user from the Micro Integrator"
 const deleteUserCmdLongDesc = "Delete a user with the name specified by the command line argument [user-name] from a Micro Integrator in the environment specified by the flag --environment, -e"
 
 var deleteUserCmdExamples = "To delete a user\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + deleteCmdLiteral + " user capp-tester -e dev\n" +
+	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + deleteCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(deleteUserCmdLiteral) + " capp-tester -e dev\n" +
 	"NOTE: The flag (--environment (-e)) is mandatory"
 
 var deleteUserCmd = &cobra.Command{
@@ -56,7 +57,7 @@ func init() {
 }
 
 func handledeleteUserCmdArguments(args []string) {
-	printDeleteCmdVerboseLog(deleteUserCmdLiteral)
+	printDeleteCmdVerboseLog(miUtils.GetTrimmedCmdLiteral(deleteUserCmdLiteral))
 	credentials.HandleMissingCredentials(deleteUserCmdEnvironment)
 	executeDeleteUser(args[0])
 }

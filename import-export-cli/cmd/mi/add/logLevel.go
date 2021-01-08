@@ -24,6 +24,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	impl "github.com/wso2/product-apim-tooling/import-export-cli/mi/impl"
+	miUtils "github.com/wso2/product-apim-tooling/import-export-cli/mi/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
@@ -35,7 +36,7 @@ const addLogLevelCmdShortDesc = "Add new Logger to a Micro Integrator"
 const addLogLevelCmdLongDesc = "Add new Logger named [logger-name] to the [class-name] with log level [log-level] specified by the command line arguments to a Micro Integrator in the environment specified by the flag --environment, -e"
 
 var addLogLevelCmdExamples = "To add a new logger\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + addCmdLiteral + " log-level synapse-api org.apache.synapse.rest.API DEBUG -e dev\n" +
+	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + addCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(addLogLevelCmdLiteral) + " synapse-api org.apache.synapse.rest.API DEBUG -e dev\n" +
 	"NOTE: The flag (--environment (-e)) is mandatory"
 
 var addLogLevelCmd = &cobra.Command{
@@ -56,7 +57,7 @@ func init() {
 }
 
 func handleAddLogLevelCmdArguments(args []string) {
-	printAddCmdVerboseLog("log-level")
+	printAddCmdVerboseLog(miUtils.GetTrimmedCmdLiteral(addLogLevelCmdLiteral))
 	credentials.HandleMissingCredentials(addLogLevelCmdEnvironment)
 	executeAddNewLogger(args[0], args[1], args[2])
 }

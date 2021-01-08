@@ -22,6 +22,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	impl "github.com/wso2/product-apim-tooling/import-export-cli/mi/impl"
+	miUtils "github.com/wso2/product-apim-tooling/import-export-cli/mi/utils"
 )
 
 var getSequenceCmdEnvironment string
@@ -34,7 +35,7 @@ var getSequenceCmd = &cobra.Command{
 	Use:     getSequenceCmdLiteral,
 	Short:   generateGetCmdShortDescForArtifact(artifactSequences),
 	Long:    generateGetCmdLongDescForArtifact(artifactSequences, "sequence-name"),
-	Example: generateGetCmdExamplesForArtifact(artifactSequences, getTrimmedCmdLiteral(getSequenceCmdLiteral), "SampleSequence"),
+	Example: generateGetCmdExamplesForArtifact(artifactSequences, miUtils.GetTrimmedCmdLiteral(getSequenceCmdLiteral), "SampleSequence"),
 	Args:    cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		handleGetSequenceCmdArguments(args)
@@ -48,7 +49,7 @@ func init() {
 }
 
 func handleGetSequenceCmdArguments(args []string) {
-	printGetCmdVerboseLogForArtifact(getTrimmedCmdLiteral(getSequenceCmdLiteral))
+	printGetCmdVerboseLogForArtifact(miUtils.GetTrimmedCmdLiteral(getSequenceCmdLiteral))
 	credentials.HandleMissingCredentials(getSequenceCmdEnvironment)
 	if len(args) == 1 {
 		var sequenceName = args[0]
