@@ -56,7 +56,7 @@ var addUserCmd = &cobra.Command{
 
 func init() {
 	AddCmd.AddCommand(addUserCmd)
-	addUserCmd.Flags().StringVarP(&addUserCmdEnvironment, "environment", "e", "", "Environment to be searched")
+	addUserCmd.Flags().StringVarP(&addUserCmdEnvironment, "environment", "e", "", "Environment of the micro integrator to which a new user should be added")
 	addUserCmd.MarkFlagRequired("environment")
 }
 

@@ -21,7 +21,7 @@ NOTE: The flag (--environment (-e)) is mandatory
 ### Options
 
 ```
-  -e, --environment string   Environment to be searched
+  -e, --environment string   Environment of the micro integrator from which a user should be deleted
   -h, --help                 help for user
 ```
 

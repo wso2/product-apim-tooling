@@ -52,7 +52,7 @@ var deleteUserCmd = &cobra.Command{
 
 func init() {
 	DeleteCmd.AddCommand(deleteUserCmd)
-	deleteUserCmd.Flags().StringVarP(&deleteUserCmdEnvironment, "environment", "e", "", "Environment to be searched")
+	deleteUserCmd.Flags().StringVarP(&deleteUserCmdEnvironment, "environment", "e", "", "Environment of the micro integrator from which a user should be deleted")
 	deleteUserCmd.MarkFlagRequired("environment")
 }
 

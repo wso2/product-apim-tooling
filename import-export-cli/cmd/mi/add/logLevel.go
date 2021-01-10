@@ -52,7 +52,7 @@ var addLogLevelCmd = &cobra.Command{
 
 func init() {
 	AddCmd.AddCommand(addLogLevelCmd)
-	addLogLevelCmd.Flags().StringVarP(&addLogLevelCmdEnvironment, "environment", "e", "", "Environment to be searched")
+	addLogLevelCmd.Flags().StringVarP(&addLogLevelCmdEnvironment, "environment", "e", "", "Environment of the micro integrator to which a new logger should be added")
 	addLogLevelCmd.MarkFlagRequired("environment")
 }
 

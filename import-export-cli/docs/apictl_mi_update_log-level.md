@@ -21,7 +21,7 @@ NOTE: The flag (--environment (-e)) is mandatory
 ### Options
 
 ```
-  -e, --environment string   Environment to be searched
+  -e, --environment string   Environment of the micro integrator of which the logger should be updated
   -h, --help                 help for log-level
 ```
 
