@@ -196,7 +196,7 @@ func NewAppFileUploadRequest(uri string, params map[string]string, paramName, pa
 	headers[utils.HeaderAccept] = "*/*"
 	headers[utils.HeaderConnection] = utils.HeaderValueKeepAlive
 
-	resp, err := utils.InvokePOSTRequestWithBytes(uri, headers, body.Bytes())
+	resp, err := utils.InvokePOSTRequest(uri, headers, body.Bytes())
 
 	return resp, err
 }

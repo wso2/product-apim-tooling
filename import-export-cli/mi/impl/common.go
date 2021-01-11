@@ -28,7 +28,6 @@ import (
 	"text/template"
 
 	"github.com/go-resty/resty"
-	"github.com/renstrom/dedent"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/formatter"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -36,6 +35,11 @@ import (
 
 // miHTTPRetryCount default retry count for HTTP calls
 const miHTTPRetryCount = 2
+
+type updateArtifactRequestBody struct {
+	Name   string `json:"name"`
+	Status string `json:"status"`
+}
 
 // unmarshalData unmarshal data from the response to the respective struct
 // @param url: url of rest api
@@ -144,7 +148,7 @@ func invokePATCHRequestWithRetry(url string, body map[string]string, env string)
 	})
 }
 
-func invokePOSTRequestWithRetry(url, body, env string) (*resty.Response, error) {
+func invokePOSTRequestWithRetry(env, url string, body interface{}) (*resty.Response, error) {
 	return retryHTTPCall(miHTTPRetryCount, env, func(accessToken string) (*resty.Response, error) {
 		headers := make(map[string]string)
 		headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
@@ -240,10 +244,10 @@ func createErrorWithResponseBody(resp string, err error) error {
 }
 
 func updateArtifactState(url, artifactName, state, env string) (string, error) {
-	body := dedent.Dedent(`{
-		"name": "` + artifactName + `",
-		"status": "` + state + `"
-	}`)
-	resp, err := invokePOSTRequestWithRetry(url, body, env)
+	body := updateArtifactRequestBody{
+		Name:   artifactName,
+		Status: state,
+	}
+	resp, err := invokePOSTRequestWithRetry(env, url, body)
 	return handleResponse(resp, err, url, "Message", "Error")
 }

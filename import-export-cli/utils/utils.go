@@ -33,30 +33,7 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
-// Invoke http-post request using go-resty
-func InvokePOSTRequest(url string, headers map[string]string, body string) (*resty.Response, error) {
-	if Insecure {
-		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
-	} else {
-		resty.SetTLSClientConfig(GetTlsConfigWithCertificate())
-	}
-	if os.Getenv("HTTP_PROXY") != "" {
-		resty.SetProxy(os.Getenv("HTTP_PROXY"))
-	} else if os.Getenv("HTTPS_PROXY") != "" {
-		resty.SetProxy(os.Getenv("HTTPS_PROXY"))
-	} else if os.Getenv("http_proxy") != "" {
-		resty.SetProxy(os.Getenv("http_proxy"))
-	} else if os.Getenv("https_proxy") != "" {
-		resty.SetProxy(os.Getenv("https_proxy"))
-	}
-	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
-	resp, err := resty.R().SetHeaders(headers).SetBody(body).Post(url)
-
-	return resp, err
-}
-
-// Invoke http-post request using go-resty with byte[] body
-func InvokePOSTRequestWithBytes(url string, headers map[string]string, body []byte) (*resty.Response, error) {
+func InvokePOSTRequest(url string, headers map[string]string, body interface{}) (*resty.Response, error) {
 	if Insecure {
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
 	} else {
