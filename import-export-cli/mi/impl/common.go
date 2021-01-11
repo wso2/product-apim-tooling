@@ -110,10 +110,10 @@ func handleResponse(resp *resty.Response, err error, url, messageTag, errorTag s
 		return "", errors.New(resp.Status())
 	}
 	data := unmarshalJSONToStringMap(resp.Body())
-	if resp.StatusCode() == http.StatusOK {
+	if data[messageTag] != "" {
 		return data[messageTag], nil
 	}
-	return data[errorTag], errors.New(resp.Status())
+	return "", errors.New(data[errorTag])
 }
 
 func retryHTTPCall(attempts int, env string, f func(string) (*resty.Response, error)) (*resty.Response, error) {

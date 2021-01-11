@@ -22,17 +22,15 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-// ActivateProxy activates a proxy service deployed in the micro integrator in a given environment
-func ActivateProxy(env, proxyName string) (interface{}, error) {
-	return updateProxySerivceState(env, proxyName, "active")
+// UpdateHashiCorpSecretID updates the secretID of the HashiCorp vault configuration in the micro integrator in a given environment
+func UpdateHashiCorpSecretID(env, secretID string) (interface{}, error) {
+	body := `{"secretId":"` + secretID + `"}`
+	url := utils.GetMIManagementEndpointOfResource(utils.MiManagementExternalVaultsResource, env, utils.MainConfigFilePath) + "/" +
+		utils.MiManagementExternalVaultHashiCorpResource
+	return updateHarshiCorpSecret(env, url, body)
 }
 
-// DeactivateProxy deactivates a proxy service deployed in the micro integrator in a given environment
-func DeactivateProxy(env, proxyName string) (interface{}, error) {
-	return updateProxySerivceState(env, proxyName, "inactive")
-}
-
-func updateProxySerivceState(env, proxyName, state string) (interface{}, error) {
-	url := utils.GetMIManagementEndpointOfResource(utils.MiManagementProxyServiceResource, env, utils.MainConfigFilePath)
-	return updateArtifactState(url, proxyName, state, env)
+func updateHarshiCorpSecret(env, url, body string) (string, error) {
+	resp, err := invokePOSTRequestWithRetry(env, url, body)
+	return handleResponse(resp, err, url, "Message", "Error")
 }

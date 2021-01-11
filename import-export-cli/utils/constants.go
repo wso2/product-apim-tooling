@@ -211,5 +211,7 @@ const MiManagementUserResource = "users"
 const MiManagementTransactionResource = "transactions"
 const MiManagementTransactionCountResource = "count"
 const MiManagementTransactionReportResource = "report"
+const MiManagementExternalVaultsResource = "external-vaults"
+const MiManagementExternalVaultHashiCorpResource = "hashicorp"
 
 const ZipFileSuffix = ".zip"

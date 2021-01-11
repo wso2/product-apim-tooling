@@ -34,9 +34,5 @@ func DeactivateMessageProcessor(env, messageProcessorName string) (interface{}, 
 
 func updateMessageProcessorSerivceState(env, messageProcessorName, state string) (interface{}, error) {
 	url := utils.GetMIManagementEndpointOfResource(utils.MiManagementMessageProcessorResource, env, utils.MainConfigFilePath)
-	resp, err := updateArtifactState(url, messageProcessorName, state, env)
-	if err != nil {
-		return nil, createErrorWithResponseBody(resp, err)
-	}
-	return resp, nil
+	return updateArtifactState(url, messageProcessorName, state, env)
 }

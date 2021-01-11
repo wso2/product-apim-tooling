@@ -41,3 +41,7 @@ var UpdateCmd = &cobra.Command{
 		cmd.Help()
 	},
 }
+
+func printUpdateCmdVerboseLog(cmd string) {
+	utils.Logln(utils.LogPrefixInfo + updateCmdLiteral + " " + cmd + " called")
+}
