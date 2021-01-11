@@ -96,6 +96,16 @@ func SetupEnvWithoutTokenFlag(t *testing.T, env string, apim string) {
 	})
 }
 
+// SetupMIEnv : Adds a new mi environment and automatically removes it when the calling test function execution ends
+//
+func SetupMIEnv(t *testing.T, env, mi string) {
+	Execute(t, "add", "env", env, "--mi", mi)
+
+	t.Cleanup(func() {
+		Execute(t, "remove", "env", env)
+	})
+}
+
 // Login : Logs into an environment and automatically logs out when the calling test function execution ends
 //
 func Login(t *testing.T, env string, username string, password string) {
@@ -103,6 +113,16 @@ func Login(t *testing.T, env string, username string, password string) {
 
 	t.Cleanup(func() {
 		Execute(t, "logout", env)
+	})
+}
+
+// MILogin : Logs into an mi environment and automatically logs out when the calling test function execution ends
+//
+func MILogin(t *testing.T, env string, username string, password string) {
+	Execute(t, "mi", "login", env, "-u", username, "-p", password, "-k", "--verbose")
+
+	t.Cleanup(func() {
+		Execute(t, "mi", "logout", env)
 	})
 }
 

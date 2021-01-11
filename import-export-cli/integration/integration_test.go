@@ -83,7 +83,7 @@ func TestMain(m *testing.M) {
 
 	readConfigs()
 
-	base.ExtractArchiveFile()
+	base.ExtractArchiveFile("../build/target/")
 
 	for _, env := range envs {
 		client := apim.Client{}

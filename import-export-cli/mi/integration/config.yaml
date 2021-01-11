@@ -1,0 +1,7 @@
+---
+# name - apictl environment name
+# host - host name of MI instance  
+# offset - port offset of MI instance
+name: testing
+host: localhost
+offset: 0
