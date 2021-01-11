@@ -20,7 +20,6 @@ package get
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -40,11 +39,6 @@ func generateGetCmdExamplesForArtifact(resourceType, cmdLiteral, sampleResourceN
 		"To get details about a specific " + resourceType + "\n" +
 		"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + cmdLiteral + " " + sampleResourceName + " -e dev\n" +
 		"NOTE: The flag (--environment (-e)) is mandatory"
-}
-
-func getTrimmedCmdLiteral(cmd string) string {
-	cmdParts := strings.Fields(cmd)
-	return cmdParts[0]
 }
 
 func printErrorForArtifact(artifactType, artifactName string, err error) {

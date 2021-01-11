@@ -22,6 +22,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	impl "github.com/wso2/product-apim-tooling/import-export-cli/mi/impl"
+	miUtils "github.com/wso2/product-apim-tooling/import-export-cli/mi/utils"
 )
 
 var getMessageProcessorCmdEnvironment string
@@ -34,7 +35,7 @@ var getMessageProcessorCmd = &cobra.Command{
 	Use:     getMessageProcessorCmdLiteral,
 	Short:   generateGetCmdShortDescForArtifact(artifactMessageProcessors),
 	Long:    generateGetCmdLongDescForArtifact(artifactMessageProcessors, "messageprocessor-name"),
-	Example: generateGetCmdExamplesForArtifact(artifactMessageProcessors, getTrimmedCmdLiteral(getMessageProcessorCmdLiteral), "TestMessageProcessor"),
+	Example: generateGetCmdExamplesForArtifact(artifactMessageProcessors, miUtils.GetTrimmedCmdLiteral(getMessageProcessorCmdLiteral), "TestMessageProcessor"),
 	Args:    cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		handleGetMessageProcessorCmdArguments(args)
@@ -48,7 +49,7 @@ func init() {
 }
 
 func handleGetMessageProcessorCmdArguments(args []string) {
-	printGetCmdVerboseLogForArtifact(getTrimmedCmdLiteral(getMessageProcessorCmdLiteral))
+	printGetCmdVerboseLogForArtifact(miUtils.GetTrimmedCmdLiteral(getMessageProcessorCmdLiteral))
 	credentials.HandleMissingCredentials(getMessageProcessorCmdEnvironment)
 	if len(args) == 1 {
 		var messageProcessorName = args[0]

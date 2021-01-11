@@ -21,7 +21,7 @@ NOTE: The flag (--environment (-e)) is mandatory
 ### Options
 
 ```
-  -e, --environment string   Environment to be searched
+  -e, --environment string   Environment of the micro integrator to which a new user should be added
   -h, --help                 help for user
 ```
 

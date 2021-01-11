@@ -22,6 +22,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	impl "github.com/wso2/product-apim-tooling/import-export-cli/mi/impl"
+	miUtils "github.com/wso2/product-apim-tooling/import-export-cli/mi/utils"
 )
 
 var getIntegrationAPICmdEnvironment string
@@ -34,7 +35,7 @@ var getIntegrationAPICmd = &cobra.Command{
 	Use:     getIntegrationAPICmdLiteral,
 	Short:   generateGetCmdShortDescForArtifact(artifactAPIs),
 	Long:    generateGetCmdLongDescForArtifact(artifactAPIs, "api-name"),
-	Example: generateGetCmdExamplesForArtifact(artifactAPIs, getTrimmedCmdLiteral(getIntegrationAPICmdLiteral), "SampleIntegrationAPI"),
+	Example: generateGetCmdExamplesForArtifact(artifactAPIs, miUtils.GetTrimmedCmdLiteral(getIntegrationAPICmdLiteral), "SampleIntegrationAPI"),
 	Args:    cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		handleGetIntegrationAPICmdArguments(args)
@@ -48,7 +49,7 @@ func init() {
 }
 
 func handleGetIntegrationAPICmdArguments(args []string) {
-	printGetCmdVerboseLogForArtifact(getTrimmedCmdLiteral(getIntegrationAPICmdLiteral))
+	printGetCmdVerboseLogForArtifact(miUtils.GetTrimmedCmdLiteral(getIntegrationAPICmdLiteral))
 	credentials.HandleMissingCredentials(getIntegrationAPICmdEnvironment)
 	if len(args) == 1 {
 		var IntegrationAPIName = args[0]

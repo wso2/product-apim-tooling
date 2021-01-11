@@ -24,6 +24,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	impl "github.com/wso2/product-apim-tooling/import-export-cli/mi/impl"
+	miUtils "github.com/wso2/product-apim-tooling/import-export-cli/mi/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
@@ -35,7 +36,7 @@ const updateLogLevelCmdShortDesc = "Update log level of a Logger in a Micro Inte
 const updateLogLevelCmdLongDesc = "Update the log level of a Logger named [logger-name] to [log-level] specified by the command line arguments in a Micro Integrator in the environment specified by the flag --environment, -e"
 
 var updateLogLevelCmdExamples = "To update the log level\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + updateCmdLiteral + " log-level org-apache-coyote DEBUG -e dev\n" +
+	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + updateCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(updateLogLevelCmdLiteral) + " org-apache-coyote DEBUG -e dev\n" +
 	"NOTE: The flag (--environment (-e)) is mandatory"
 
 var updateLogLevelCmd = &cobra.Command{
@@ -51,12 +52,12 @@ var updateLogLevelCmd = &cobra.Command{
 
 func init() {
 	UpdateCmd.AddCommand(updateLogLevelCmd)
-	updateLogLevelCmd.Flags().StringVarP(&updateLogLevelCmdEnvironment, "environment", "e", "", "Environment to be searched")
+	updateLogLevelCmd.Flags().StringVarP(&updateLogLevelCmdEnvironment, "environment", "e", "", "Environment of the micro integrator of which the logger should be updated")
 	updateLogLevelCmd.MarkFlagRequired("environment")
 }
 
 func handleupdateLogLevelCmdArguments(args []string) {
-	printUpdateCmdVerboseLog("log-level")
+	printUpdateCmdVerboseLog(miUtils.GetTrimmedCmdLiteral(updateLogLevelCmdLiteral))
 	credentials.HandleMissingCredentials(updateLogLevelCmdEnvironment)
 	executeUpdateLogger(args[0], args[1])
 }

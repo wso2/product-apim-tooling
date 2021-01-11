@@ -24,6 +24,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	impl "github.com/wso2/product-apim-tooling/import-export-cli/mi/impl"
+	miUtils "github.com/wso2/product-apim-tooling/import-export-cli/mi/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
@@ -39,9 +40,9 @@ const getLogCmdLongDesc = "Download a log file by providing the file name and do
 
 var getLogCmdExamples = "Example:\n" +
 	"To list all the log files\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + getTrimmedCmdLiteral(getLogCmdLiteral) + " -e dev\n" +
+	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getLogCmdLiteral) + " -e dev\n" +
 	"To download a selected log file\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + getTrimmedCmdLiteral(getLogCmdLiteral) + " [file-name] -p [download-location] -e dev\n" +
+	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getLogCmdLiteral) + " [file-name] -p [download-location] -e dev\n" +
 	"NOTE: The flag (--environment (-e)) is mandatory"
 
 var getLogCmd = &cobra.Command{
@@ -63,7 +64,7 @@ func init() {
 }
 
 func handleGetLogCmdArguments(args []string) {
-	printGetCmdVerboseLogForArtifact(getTrimmedCmdLiteral(getLogCmdLiteral))
+	printGetCmdVerboseLogForArtifact(miUtils.GetTrimmedCmdLiteral(getLogCmdLiteral))
 	credentials.HandleMissingCredentials(getLogCmdEnvironment)
 	if len(args) == 1 {
 		var logFileName = args[0]

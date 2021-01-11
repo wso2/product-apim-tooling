@@ -22,6 +22,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	impl "github.com/wso2/product-apim-tooling/import-export-cli/mi/impl"
+	miUtils "github.com/wso2/product-apim-tooling/import-export-cli/mi/utils"
 )
 
 var getDataServiceCmdEnvironment string
@@ -34,7 +35,7 @@ var getDataServiceCmd = &cobra.Command{
 	Use:     getDataServiceCmdLiteral,
 	Short:   generateGetCmdShortDescForArtifact(artifactDataServices),
 	Long:    generateGetCmdLongDescForArtifact(artifactDataServices, "dataservice-name"),
-	Example: generateGetCmdExamplesForArtifact(artifactDataServices, getTrimmedCmdLiteral(getDataServiceCmdLiteral), "SampleDataService"),
+	Example: generateGetCmdExamplesForArtifact(artifactDataServices, miUtils.GetTrimmedCmdLiteral(getDataServiceCmdLiteral), "SampleDataService"),
 	Args:    cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		handleGetDataServiceCmdArguments(args)
@@ -48,7 +49,7 @@ func init() {
 }
 
 func handleGetDataServiceCmdArguments(args []string) {
-	printGetCmdVerboseLogForArtifact(getTrimmedCmdLiteral(getDataServiceCmdLiteral))
+	printGetCmdVerboseLogForArtifact(miUtils.GetTrimmedCmdLiteral(getDataServiceCmdLiteral))
 	credentials.HandleMissingCredentials(getDataServiceCmdEnvironment)
 	if len(args) == 1 {
 		var dataServiceName = args[0]

@@ -22,6 +22,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	impl "github.com/wso2/product-apim-tooling/import-export-cli/mi/impl"
+	miUtils "github.com/wso2/product-apim-tooling/import-export-cli/mi/utils"
 )
 
 var getApplicationCmdEnvironment string
@@ -34,7 +35,7 @@ var getApplicationCmd = &cobra.Command{
 	Use:     getApplicationCmdLiteral,
 	Short:   generateGetCmdShortDescForArtifact(artifactCompositeApps),
 	Long:    generateGetCmdLongDescForArtifact(artifactCompositeApps, "app-name"),
-	Example: generateGetCmdExamplesForArtifact(artifactCompositeApps, getTrimmedCmdLiteral(getApplicationCmdLiteral), "SampleApp"),
+	Example: generateGetCmdExamplesForArtifact(artifactCompositeApps, miUtils.GetTrimmedCmdLiteral(getApplicationCmdLiteral), "SampleApp"),
 	Args:    cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		handleGetApplicationCmdArguments(args)
@@ -48,7 +49,7 @@ func init() {
 }
 
 func handleGetApplicationCmdArguments(args []string) {
-	printGetCmdVerboseLogForArtifact(getTrimmedCmdLiteral(getApplicationCmdLiteral))
+	printGetCmdVerboseLogForArtifact(miUtils.GetTrimmedCmdLiteral(getApplicationCmdLiteral))
 	credentials.HandleMissingCredentials(getApplicationCmdEnvironment)
 	if len(args) == 1 {
 		var appName = args[0]

@@ -27,6 +27,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	impl "github.com/wso2/product-apim-tooling/import-export-cli/mi/impl"
+	miUtils "github.com/wso2/product-apim-tooling/import-export-cli/mi/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"golang.org/x/crypto/ssh/terminal"
 )
@@ -39,7 +40,7 @@ const addUserCmdShortDesc = "Add new user to a Micro Integrator"
 const addUserCmdLongDesc = "Add a new user with the name specified by the command line argument [user-name] to a Micro Integrator in the environment specified by the flag --environment, -e"
 
 var addUserCmdExamples = "To add a new user\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + addCmdLiteral + " user capp-tester -e dev\n" +
+	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + addCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(addUserCmdLiteral) + " capp-tester -e dev\n" +
 	"NOTE: The flag (--environment (-e)) is mandatory"
 
 var addUserCmd = &cobra.Command{
@@ -55,12 +56,12 @@ var addUserCmd = &cobra.Command{
 
 func init() {
 	AddCmd.AddCommand(addUserCmd)
-	addUserCmd.Flags().StringVarP(&addUserCmdEnvironment, "environment", "e", "", "Environment to be searched")
+	addUserCmd.Flags().StringVarP(&addUserCmdEnvironment, "environment", "e", "", "Environment of the micro integrator to which a new user should be added")
 	addUserCmd.MarkFlagRequired("environment")
 }
 
 func handleAddUserCmdArguments(args []string) {
-	printAddCmdVerboseLog("user")
+	printAddCmdVerboseLog(miUtils.GetTrimmedCmdLiteral(addUserCmdLiteral))
 	credentials.HandleMissingCredentials(addUserCmdEnvironment)
 	startConsoleToAddUser(args[0])
 }

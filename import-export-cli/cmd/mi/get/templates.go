@@ -26,6 +26,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	impl "github.com/wso2/product-apim-tooling/import-export-cli/mi/impl"
+	miUtils "github.com/wso2/product-apim-tooling/import-export-cli/mi/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
@@ -41,11 +42,11 @@ const getTemplateCmdLongDesc = "Get information about the template specified by 
 	"If not specified, list all the templates in the environment specified by the flag --environment, -e"
 
 var getTemplateCmdExamples = "To list all the " + artifactTemplates + "\n" +
-	utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + getTrimmedCmdLiteral(getTemplateCmdLiteral) + " -e dev\n" +
+	utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getTemplateCmdLiteral) + " -e dev\n" +
 	"To get details about a specific template type\n" +
-	utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + getTrimmedCmdLiteral(getTemplateCmdLiteral) + " TemplateType\n" +
+	utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getTemplateCmdLiteral) + " TemplateType\n" +
 	"To get details about a specific template\n" +
-	utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + getTrimmedCmdLiteral(getTemplateCmdLiteral) + " TemplateType TemplateName -e dev\n" +
+	utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getTemplateCmdLiteral) + " TemplateType TemplateName -e dev\n" +
 	"NOTE: The flag (--environment (-e)) is mandatory"
 
 const endpointKey string = "endpoint"
@@ -80,7 +81,7 @@ func init() {
 }
 
 func handleGetTemplateCmdArguments(args []string) {
-	printGetCmdVerboseLogForArtifact(getTrimmedCmdLiteral(getTemplateCmdLiteral))
+	printGetCmdVerboseLogForArtifact(miUtils.GetTrimmedCmdLiteral(getTemplateCmdLiteral))
 	credentials.HandleMissingCredentials(getTemplateCmdEnvironment)
 	if len(args) == 2 {
 		var templateType = args[0]

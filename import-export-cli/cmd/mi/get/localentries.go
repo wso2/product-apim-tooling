@@ -22,6 +22,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	impl "github.com/wso2/product-apim-tooling/import-export-cli/mi/impl"
+	miUtils "github.com/wso2/product-apim-tooling/import-export-cli/mi/utils"
 )
 
 var getLocalEntryCmdEnvironment string
@@ -34,7 +35,7 @@ var getLocalEntryCmd = &cobra.Command{
 	Use:     getLocalEntryCmdLiteral,
 	Short:   generateGetCmdShortDescForArtifact(artifactLocalEntries),
 	Long:    generateGetCmdLongDescForArtifact(artifactLocalEntries, "localentry-name"),
-	Example: generateGetCmdExamplesForArtifact(artifactLocalEntries, getTrimmedCmdLiteral(getLocalEntryCmdLiteral), "SampleLocalEntry"),
+	Example: generateGetCmdExamplesForArtifact(artifactLocalEntries, miUtils.GetTrimmedCmdLiteral(getLocalEntryCmdLiteral), "SampleLocalEntry"),
 	Args:    cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		handleGetLocalEntryCmdArguments(args)
@@ -48,7 +49,7 @@ func init() {
 }
 
 func handleGetLocalEntryCmdArguments(args []string) {
-	printGetCmdVerboseLogForArtifact(getTrimmedCmdLiteral(getLocalEntryCmdLiteral))
+	printGetCmdVerboseLogForArtifact(miUtils.GetTrimmedCmdLiteral(getLocalEntryCmdLiteral))
 	credentials.HandleMissingCredentials(getLocalEntryCmdEnvironment)
 	if len(args) == 1 {
 		var LocalEntryName = args[0]

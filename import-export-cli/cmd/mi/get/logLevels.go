@@ -22,6 +22,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	impl "github.com/wso2/product-apim-tooling/import-export-cli/mi/impl"
+	miUtils "github.com/wso2/product-apim-tooling/import-export-cli/mi/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
@@ -34,7 +35,7 @@ const getLogLevelCmdShortDesc = "Get information about a Logger configured in a 
 const getLogLevelCmdLongDesc = "Get information about the Logger specified by command line argument [logger-name]\nconfigured in a Micro Integrator in the environment specified by the flag --environment, -e"
 
 var getLogLevelCmdExamples = "To get details about a specific logger\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + getTrimmedCmdLiteral(getLogLevelCmdLiteral) + " org-apache-coyote -e dev\n" +
+	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getLogLevelCmdLiteral) + " org-apache-coyote -e dev\n" +
 	"NOTE: The flag (--environment (-e)) is mandatory"
 
 var getLogLevelCmd = &cobra.Command{
@@ -55,7 +56,7 @@ func init() {
 }
 
 func handleGetLogLevelCmdArguments(args []string) {
-	printGetCmdVerboseLogForArtifact(getTrimmedCmdLiteral(getLogLevelCmdLiteral))
+	printGetCmdVerboseLogForArtifact(miUtils.GetTrimmedCmdLiteral(getLogLevelCmdLiteral))
 	credentials.HandleMissingCredentials(getLogLevelCmdEnvironment)
 	var loggerName = args[0]
 	executeShowLogLevel(loggerName)

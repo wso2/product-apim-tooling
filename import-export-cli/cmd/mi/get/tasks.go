@@ -22,6 +22,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	impl "github.com/wso2/product-apim-tooling/import-export-cli/mi/impl"
+	miUtils "github.com/wso2/product-apim-tooling/import-export-cli/mi/utils"
 )
 
 var getTaskCmdEnvironment string
@@ -34,7 +35,7 @@ var getTasksCmd = &cobra.Command{
 	Use:     getTaskCmdLiteral,
 	Short:   generateGetCmdShortDescForArtifact(artifactTasks),
 	Long:    generateGetCmdLongDescForArtifact(artifactTasks, "task-name"),
-	Example: generateGetCmdExamplesForArtifact(artifactTasks, getTrimmedCmdLiteral(getTaskCmdLiteral), "SampleTask"),
+	Example: generateGetCmdExamplesForArtifact(artifactTasks, miUtils.GetTrimmedCmdLiteral(getTaskCmdLiteral), "SampleTask"),
 	Args:    cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		handleGetTaskCmdArguments(args)
@@ -48,7 +49,7 @@ func init() {
 }
 
 func handleGetTaskCmdArguments(args []string) {
-	printGetCmdVerboseLogForArtifact(getTrimmedCmdLiteral(getTaskCmdLiteral))
+	printGetCmdVerboseLogForArtifact(miUtils.GetTrimmedCmdLiteral(getTaskCmdLiteral))
 	credentials.HandleMissingCredentials(getTaskCmdEnvironment)
 	if len(args) == 1 {
 		var taskName = args[0]

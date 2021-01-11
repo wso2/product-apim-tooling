@@ -25,6 +25,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	impl "github.com/wso2/product-apim-tooling/import-export-cli/mi/impl"
+	miUtils "github.com/wso2/product-apim-tooling/import-export-cli/mi/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
@@ -41,13 +42,13 @@ const getUserCmdLongDesc = "Get information about the users filtered by username
 
 var getUserCmdExamples = "Example:\n" +
 	"To list all the users\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + getTrimmedCmdLiteral(getUserCmdLiteral) + " -e dev\n" +
+	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getUserCmdLiteral) + " -e dev\n" +
 	"To get the list of users with specific role\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + getTrimmedCmdLiteral(getUserCmdLiteral) + " -r [role-name] -e dev\n" +
+	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getUserCmdLiteral) + " -r [role-name] -e dev\n" +
 	"To get the list of users with a username matching with the wild card Ex: \"*mi*\" matches with \"admin\"\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + getTrimmedCmdLiteral(getUserCmdLiteral) + " -p [pattern] -e dev\n" +
+	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getUserCmdLiteral) + " -p [pattern] -e dev\n" +
 	"To get details about a user by providing the user-id\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + getTrimmedCmdLiteral(getUserCmdLiteral) + " [user-id] -e dev\n" +
+	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getUserCmdLiteral) + " [user-id] -e dev\n" +
 	"NOTE: The flag (--environment (-e)) is mandatory"
 
 var getUserCmd = &cobra.Command{
@@ -81,7 +82,7 @@ func init() {
 }
 
 func handleGetUserCmdArguments(args []string) {
-	printGetCmdVerboseLogForArtifact(getTrimmedCmdLiteral(getUserCmdLiteral))
+	printGetCmdVerboseLogForArtifact(miUtils.GetTrimmedCmdLiteral(getUserCmdLiteral))
 	credentials.HandleMissingCredentials(getUserCmdEnvironment)
 	if len(args) == 1 {
 		var userID = args[0]
