@@ -36,6 +36,11 @@ import (
 // miHTTPRetryCount default retry count for HTTP calls
 const miHTTPRetryCount = 2
 
+type updateArtifactRequestBody struct {
+	Name   string `json:"name"`
+	Status string `json:"status"`
+}
+
 // unmarshalData unmarshal data from the response to the respective struct
 // @param url: url of rest api
 // @param params: parameters for the HTTP call
@@ -143,7 +148,7 @@ func invokePATCHRequestWithRetry(url string, body map[string]string, env string)
 	})
 }
 
-func invokePOSTRequestWithRetry(url, body, env string) (*resty.Response, error) {
+func invokePOSTRequestWithRetry(env, url string, body interface{}) (*resty.Response, error) {
 	return retryHTTPCall(miHTTPRetryCount, env, func(accessToken string) (*resty.Response, error) {
 		headers := make(map[string]string)
 		headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
@@ -236,4 +241,13 @@ func createErrorWithResponseBody(resp string, err error) error {
 		}
 	}
 	return err
+}
+
+func updateArtifactState(url, artifactName, state, env string) (string, error) {
+	body := updateArtifactRequestBody{
+		Name:   artifactName,
+		Status: state,
+	}
+	resp, err := invokePOSTRequestWithRetry(env, url, body)
+	return handleResponse(resp, err, url, "Message", "Error")
 }

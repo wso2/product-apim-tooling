@@ -21,8 +21,6 @@ package impl
 import (
 	"bytes"
 	"errors"
-	"github.com/Jeffail/gabs"
-	jsoniter "github.com/json-iterator/go"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -30,6 +28,9 @@ import (
 	"path/filepath"
 	"strings"
 	"text/template"
+
+	"github.com/Jeffail/gabs"
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/go-resty/resty"
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
@@ -75,7 +76,7 @@ func ExecuteNewFileUploadRequest(uri string, params map[string]string, paramName
 	headers[utils.HeaderAccept] = "application/json"
 	headers[utils.HeaderConnection] = utils.HeaderValueKeepAlive
 
-	resp, err := utils.InvokePOSTRequestWithBytes(uri, headers, body.Bytes())
+	resp, err := utils.InvokePOSTRequest(uri, headers, body.Bytes())
 
 	return resp, err
 }

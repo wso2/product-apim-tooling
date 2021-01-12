@@ -21,21 +21,25 @@ package impl
 import (
 	"strings"
 
-	"github.com/renstrom/dedent"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
+
+type newUserRequestBody struct {
+	UserID   string `json:"userID"`
+	Password string `json:"password"`
+	IsAdmin  string `json:"isAdmin"`
+}
 
 // AddMIUser adds a new user to the micro integrator in a given environment
 func AddMIUser(env, userName, password, isAdmin string) (interface{}, error) {
 	isAdmin = resolveIsAdmin(isAdmin)
-	body := dedent.Dedent(`{
-		   "userId": "` + userName + `",
-		   "password": "` + password + `",
-		   "isAdmin": "` + isAdmin + `"
-	}`)
-
+	body := newUserRequestBody{
+		UserID:   userName,
+		Password: password,
+		IsAdmin:  isAdmin,
+	}
 	url := utils.GetMIManagementEndpointOfResource(utils.MiManagementUserResource, env, utils.MainConfigFilePath)
-	resp, err := addNewMIUser(url, body, env)
+	resp, err := addNewMIUser(env, url, body)
 	if err != nil {
 		return nil, createErrorWithResponseBody(resp, err)
 	}
@@ -52,8 +56,8 @@ func DeleteMIUser(env, userName string) (interface{}, error) {
 	return resp, nil
 }
 
-func addNewMIUser(url, body, env string) (string, error) {
-	resp, err := invokePOSTRequestWithRetry(url, body, env)
+func addNewMIUser(env, url string, body interface{}) (string, error) {
+	resp, err := invokePOSTRequestWithRetry(env, url, body)
 	return handleResponse(resp, err, url, "status", "Error")
 }
 
