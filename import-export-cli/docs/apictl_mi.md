@@ -33,5 +33,6 @@ apictl mi [flags]
 * [apictl mi get](apictl_mi_get.md)	 - Get information about artifacts deployed in a Micro Integrator instance
 * [apictl mi login](apictl_mi_login.md)	 - Login to a Micro Integrator
 * [apictl mi logout](apictl_mi_logout.md)	 - Logout from a Micro Integrator
+* [apictl mi secret](apictl_mi_secret.md)	 - Manage sensitive information
 * [apictl mi update](apictl_mi_update.md)	 - Update log level of Loggers in a Micro Integrator instance
 
