@@ -67,9 +67,9 @@ func PrintDataServiceList(dataServiceList *artifactutils.DataServicesList, forma
 			return nil
 		}
 		dataserviceListTableHeaders := map[string]string{
-			"Name":   nameHeader,
-			"Wsdl11": wsdl11Header,
-			"Wsdl20": wsdl20Header,
+			"ServiceName": nameHeader,
+			"Wsdl11":      wsdl11Header,
+			"Wsdl20":      wsdl20Header,
 		}
 		if err := dataserviceListContext.Write(renderer, dataserviceListTableHeaders); err != nil {
 			fmt.Println("Error executing template:", err.Error())
