@@ -25,7 +25,7 @@ import (
 )
 
 type newUserRequestBody struct {
-	UserID   string `json:"userID"`
+	UserID   string `json:"userId"`
 	Password string `json:"password"`
 	IsAdmin  string `json:"isAdmin"`
 }
