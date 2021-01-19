@@ -172,22 +172,21 @@ func IncludeMetaFileToZip(sourceZipFile, targetZipFile, metaFile string, metaDat
 	return nil
 }
 
+//Load the x_meta.yaml file in the provided path and return
 func LoadMetaInfoFromFile(path string) (*utils.MetaData, error) {
-
 	fileContent, err := GetFileContent(path)
 	if err != nil {
 		return nil, err
 	}
-
 	metaInfo := &utils.MetaData{}
 	err = yaml.Unmarshal([]byte(fileContent), &metaInfo)
 	if err != nil {
 		return nil, err
 	}
-
 	return metaInfo, err
 }
 
+//Read the file content from the provided path
 func GetFileContent(path string) (string, error) {
 	r, err := os.Open(path)
 	defer func() {
@@ -196,15 +195,15 @@ func GetFileContent(path string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
 		return "", err
 	}
-
 	return string(data), nil
 }
 
+//Find the path for a file matching the provided patter. If that file is not found in the root directory, an empty string
+//will be returned
 func GetFileLocationFromPattern(root, pattern string) (match string, err error) {
 	err = filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
