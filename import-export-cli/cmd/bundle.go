@@ -40,8 +40,7 @@ const BundleCmdLongDesc = "Archive API, Application or API Product projects to a
 
 const BundleCmdExamples = utils.ProjectName + ` ` + BundleCmdLiteral + ` -s /home/prod/APIs/API1-1.0.0 -d /home/prod/Projects/
 ` + utils.ProjectName + ` ` + BundleCmdLiteral + ` -s /home/prod/APIs/API1-1.0.0 
-NOTE: The flag (--source (-s) is mandatory.`
-
+NOTE: The flag (--source (-s)) is mandatory.`
 
 // BundleCmd represents the bundle command
 var BundleCmd = &cobra.Command{
@@ -63,7 +62,6 @@ var BundleCmd = &cobra.Command{
 		if err != nil {
 			utils.HandleErrorAndContinue("Error archiving the " + bundleSource, err)
 		}
-
 	},
 }
 
@@ -94,14 +92,13 @@ func executeBundleCmd() error {
 		return err
 	}
 
-	name := filepath.Join(bundleDirParent, bundleName + utils.ZipFileSuffix)
-
-	err = utils.Zip(bundleSource, name)
+	bundleLocation := filepath.Join(bundleDirParent, bundleName + utils.ZipFileSuffix)
+	err = utils.Zip(bundleSource, bundleLocation)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("The bundle for the " + bundleName + " is generated at " + bundleDirParent)
+	fmt.Println("The bundle for the " + bundleName + " is generated at " + bundleLocation)
 	return nil
 }
 
@@ -122,14 +119,11 @@ func generateBundleName(SourceDir string) (string, error) {
 			bundleName += "_" + metaData.Revision
 		}
 	} else {
-		fmt.Println( "Source directory name will be used for the bundle name.")
+		fmt.Println( "Meta information for the Project is not found. Source directory name will be used as the bundle name.")
 	}
 
 	return bundleName, nil
 }
-
-
-
 
 // init using Cobra
 func init() {
