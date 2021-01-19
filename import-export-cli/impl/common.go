@@ -21,6 +21,7 @@ package impl
 import (
 	"bytes"
 	"errors"
+	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -28,7 +29,6 @@ import (
 	"path/filepath"
 	"strings"
 	"text/template"
-	"gopkg.in/yaml.v2"
 
 	"github.com/Jeffail/gabs"
 	jsoniter "github.com/json-iterator/go"
