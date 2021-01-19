@@ -28,6 +28,7 @@ import (
 	"path/filepath"
 	"strings"
 	"text/template"
+	"gopkg.in/yaml.v2"
 
 	"github.com/Jeffail/gabs"
 	jsoniter "github.com/json-iterator/go"
@@ -169,4 +170,59 @@ func IncludeMetaFileToZip(sourceZipFile, targetZipFile, metaFile string, metaDat
 		utils.HandleErrorAndExit("Error creating the final zip archive", err)
 	}
 	return nil
+}
+
+func LoadMetaInfoFromFile(path string) (*utils.MetaData, error) {
+
+	fileContent, err := GetFileContent(path)
+	if err != nil {
+		return nil, err
+	}
+
+	metaInfo := &utils.MetaData{}
+	err = yaml.Unmarshal([]byte(fileContent), &metaInfo)
+	if err != nil {
+		return nil, err
+	}
+
+	return metaInfo, err
+}
+
+func GetFileContent(path string) (string, error) {
+	r, err := os.Open(path)
+	defer func() {
+		_ = r.Close()
+	}()
+	if err != nil {
+		return "", err
+	}
+
+	data, err := ioutil.ReadAll(r)
+	if err != nil {
+		return "", err
+	}
+
+	return string(data), nil
+}
+
+func GetFileLocationFromPattern(root, pattern string) (match string, err error) {
+	err = filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+		if matched, err := filepath.Match(pattern, filepath.Base(path)); err != nil {
+			return err
+		} else if matched {
+			match, err= filepath.Abs(path);
+			if err != nil {
+				return err
+			}
+			return io.EOF
+		}
+		return nil
+	})
+	return
 }
