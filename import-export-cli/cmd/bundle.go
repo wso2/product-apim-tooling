@@ -60,7 +60,7 @@ var BundleCmd = &cobra.Command{
 
 		err := executeBundleCmd()
 		if err != nil {
-			utils.HandleErrorAndContinue("Error archiving the " + bundleSource, err)
+			utils.HandleErrorAndContinue("Error archiving the "+bundleSource, err)
 		}
 	},
 }
@@ -92,7 +92,7 @@ func executeBundleCmd() error {
 		return err
 	}
 
-	bundleLocation := filepath.Join(bundleDirParent, bundleName + utils.ZipFileSuffix)
+	bundleLocation := filepath.Join(bundleDirParent, bundleName+utils.ZipFileSuffix)
 	err = utils.Zip(bundleSource, bundleLocation)
 	if err != nil {
 		return err
@@ -119,7 +119,7 @@ func generateBundleName(SourceDir string) (string, error) {
 			bundleName += "_" + metaData.Revision
 		}
 	} else {
-		fmt.Println( "Meta information for the Project is not found. Source directory name will be used as the bundle name.")
+		fmt.Println("Meta information for the Project is not found. Source directory name will be used as the bundle name.")
 	}
 
 	return bundleName, nil

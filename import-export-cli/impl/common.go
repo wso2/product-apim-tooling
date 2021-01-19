@@ -216,7 +216,7 @@ func GetFileLocationFromPattern(root, pattern string) (match string, err error) 
 		if matched, err := filepath.Match(pattern, filepath.Base(path)); err != nil {
 			return err
 		} else if matched {
-			match, err= filepath.Abs(path);
+			match, err = filepath.Abs(path)
 			if err != nil {
 				return err
 			}
