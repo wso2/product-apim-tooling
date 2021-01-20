@@ -25,6 +25,7 @@ import (
 	miDeactivateCmd "github.com/wso2/product-apim-tooling/import-export-cli/cmd/mi/deactivate"
 	miDeleteCmd "github.com/wso2/product-apim-tooling/import-export-cli/cmd/mi/delete"
 	miGetCmd "github.com/wso2/product-apim-tooling/import-export-cli/cmd/mi/get"
+	miSecretCmd "github.com/wso2/product-apim-tooling/import-export-cli/cmd/mi/secret"
 	miUpdateCmd "github.com/wso2/product-apim-tooling/import-export-cli/cmd/mi/update"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
@@ -52,4 +53,5 @@ func init() {
 	MICmd.AddCommand(miUpdateCmd.UpdateCmd)
 	MICmd.AddCommand(miActivateCmd.ActivateCmd)
 	MICmd.AddCommand(miDeactivateCmd.DeactivateCmd)
+	MICmd.AddCommand(miSecretCmd.SecretCmd)
 }
