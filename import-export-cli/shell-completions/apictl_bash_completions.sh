@@ -461,6 +461,47 @@ _apictl_add()
     noun_aliases=()
 }
 
+_apictl_bundle()
+{
+    last_command="apictl_bundle"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--destination=")
+    two_word_flags+=("--destination")
+    two_word_flags+=("-d")
+    local_nonpersistent_flags+=("--destination")
+    local_nonpersistent_flags+=("--destination=")
+    local_nonpersistent_flags+=("-d")
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    local_nonpersistent_flags+=("-h")
+    flags+=("--source=")
+    two_word_flags+=("--source")
+    two_word_flags+=("-s")
+    local_nonpersistent_flags+=("--source")
+    local_nonpersistent_flags+=("--source=")
+    local_nonpersistent_flags+=("-s")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_flag+=("--source=")
+    must_have_one_flag+=("-s")
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
 _apictl_change-status_api()
 {
     last_command="apictl_change-status_api"
@@ -4547,6 +4588,7 @@ _apictl_root_command()
 
     commands=()
     commands+=("add")
+    commands+=("bundle")
     commands+=("change-status")
     commands+=("delete")
     commands+=("export")
