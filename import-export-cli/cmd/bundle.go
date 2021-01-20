@@ -33,7 +33,7 @@ var bundleSource string
 
 // Get command related usage Info
 const BundleCmdLiteral = "bundle"
-const BundleCmdShortDesc = "Archive any project to zip format"
+const BundleCmdShortDesc = "Archive any source project artifact to zip format"
 
 const BundleCmdLongDesc = "Archive API, Application or API Product projects to a zip format. Bundle name will have " +
 	"project name, version and revision number (if there is any)"

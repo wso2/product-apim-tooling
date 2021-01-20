@@ -202,10 +202,11 @@ func GetFileContent(path string) (string, error) {
 	return string(data), nil
 }
 
-//Find the path for a file matching the provided patter. If that file is not found in the root directory, an empty string
+//Find the path for a file matching the provided pattern. If that file is not found in the root directory, an empty string
 //will be returned
-func GetFileLocationFromPattern(root, pattern string) (match string, err error) {
-	err = filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+func GetFileLocationFromPattern(root, pattern string) (string, error) {
+	var match string
+	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -223,5 +224,5 @@ func GetFileLocationFromPattern(root, pattern string) (match string, err error) 
 		}
 		return nil
 	})
-	return
+	return match, err
 }

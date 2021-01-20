@@ -22,7 +22,7 @@ apictl [flags]
 ### SEE ALSO
 
 * [apictl add](apictl_add.md)	 - Add Environment to Config file
-* [apictl bundle](apictl_bundle.md)	 - Archive any project to zip format
+* [apictl bundle](apictl_bundle.md)	 - Archive any source project artifact to zip format
 * [apictl change-status](apictl_change-status.md)	 - Change Status of an API
 * [apictl delete](apictl_delete.md)	 - Delete an API/APIProduct/Application in an environment
 * [apictl export](apictl_export.md)	 - Export an API/API Product/Application in an environment
