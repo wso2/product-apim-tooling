@@ -39,6 +39,7 @@ func GetTlsConfigWithCertificate() *tls.Config {
 	return &tls.Config{
 		InsecureSkipVerify: false,
 		RootCAs:            certs,
+		Renegotiation:      TLSRenegotiationMode,
 	}
 }
 

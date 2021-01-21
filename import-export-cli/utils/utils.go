@@ -35,7 +35,9 @@ import (
 
 func InvokePOSTRequest(url string, headers map[string]string, body interface{}) (*resty.Response, error) {
 	if Insecure {
-		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+		resty.SetTLSClientConfig(
+			&tls.Config{InsecureSkipVerify: true, // To bypass errors in SSL certificates
+				Renegotiation: TLSRenegotiationMode})
 	} else {
 		resty.SetTLSClientConfig(GetTlsConfigWithCertificate())
 	}
@@ -57,7 +59,9 @@ func InvokePOSTRequest(url string, headers map[string]string, body interface{}) 
 // Invoke http-post request without body using go-resty
 func InvokePOSTRequestWithoutBody(url string, headers map[string]string) (*resty.Response, error) {
 	if Insecure {
-		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+		resty.SetTLSClientConfig(
+			&tls.Config{InsecureSkipVerify: true, // To bypass errors in SSL certificates
+				Renegotiation: TLSRenegotiationMode})
 	} else {
 		resty.SetTLSClientConfig(GetTlsConfigWithCertificate())
 	}
@@ -79,7 +83,9 @@ func InvokePOSTRequestWithoutBody(url string, headers map[string]string) (*resty
 // Invoke http-get request using go-resty
 func InvokeGETRequest(url string, headers map[string]string) (*resty.Response, error) {
 	if Insecure {
-		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+		resty.SetTLSClientConfig(
+			&tls.Config{InsecureSkipVerify: true, // To bypass errors in SSL certificates
+				Renegotiation: TLSRenegotiationMode})
 	} else {
 		resty.SetTLSClientConfig(GetTlsConfigWithCertificate())
 	}
@@ -102,7 +108,9 @@ func InvokeGETRequest(url string, headers map[string]string) (*resty.Response, e
 func InvokeGETRequestWithQueryParam(queryParam string, paramValue string, url string, headers map[string]string) (
 	*resty.Response, error) {
 	if Insecure {
-		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+		resty.SetTLSClientConfig(
+			&tls.Config{InsecureSkipVerify: true, // To bypass errors in SSL certificates
+				Renegotiation: TLSRenegotiationMode})
 	} else {
 		resty.SetTLSClientConfig(GetTlsConfigWithCertificate())
 	}
@@ -125,7 +133,9 @@ func InvokeGETRequestWithQueryParam(queryParam string, paramValue string, url st
 func InvokeGETRequestWithMultipleQueryParams(queryParam map[string]string, url string, headers map[string]string) (
 	*resty.Response, error) {
 	if Insecure {
-		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+		resty.SetTLSClientConfig(
+			&tls.Config{InsecureSkipVerify: true, // To bypass errors in SSL certificates
+				Renegotiation: TLSRenegotiationMode})
 	} else {
 		resty.SetTLSClientConfig(GetTlsConfigWithCertificate())
 	}
@@ -148,7 +158,9 @@ func InvokeGETRequestWithMultipleQueryParams(queryParam map[string]string, url s
 func InvokePutRequest(queryParam map[string]string, url string, headers map[string]string, body string) (
 	*resty.Response, error) {
 	if Insecure {
-		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+		resty.SetTLSClientConfig(
+			&tls.Config{InsecureSkipVerify: true, // To bypass errors in SSL certificates
+				Renegotiation: TLSRenegotiationMode})
 	} else {
 		resty.SetTLSClientConfig(GetTlsConfigWithCertificate())
 	}
@@ -171,7 +183,9 @@ func InvokePutRequest(queryParam map[string]string, url string, headers map[stri
 func InvokePostRequestWithQueryParam(queryParam map[string]string, url string, headers map[string]string, body string) (
 	*resty.Response, error) {
 	if Insecure {
-		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+		resty.SetTLSClientConfig(
+			&tls.Config{InsecureSkipVerify: true, // To bypass errors in SSL certificates
+				Renegotiation: TLSRenegotiationMode})
 	} else {
 		resty.SetTLSClientConfig(GetTlsConfigWithCertificate())
 	}
@@ -193,7 +207,9 @@ func InvokePostRequestWithQueryParam(queryParam map[string]string, url string, h
 // Invoke http-delete request using go-resty
 func InvokeDELETERequest(url string, headers map[string]string) (*resty.Response, error) {
 	if Insecure {
-		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+		resty.SetTLSClientConfig(
+			&tls.Config{InsecureSkipVerify: true, // To bypass errors in SSL certificates
+				Renegotiation: TLSRenegotiationMode})
 	} else {
 		resty.SetTLSClientConfig(GetTlsConfigWithCertificate())
 	}
@@ -215,7 +231,9 @@ func InvokeDELETERequest(url string, headers map[string]string) (*resty.Response
 // Invoke http-patch request using go-resty
 func InvokePATCHRequest(url string, headers map[string]string, body map[string]string) (*resty.Response, error) {
 	if Insecure {
-		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+		resty.SetTLSClientConfig(
+			&tls.Config{InsecureSkipVerify: true, // To bypass errors in SSL certificates
+				Renegotiation: TLSRenegotiationMode})
 	} else {
 		resty.SetTLSClientConfig(GetTlsConfigWithCertificate())
 	}

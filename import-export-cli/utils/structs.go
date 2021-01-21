@@ -34,12 +34,13 @@ type MainConfig struct {
 }
 
 type Config struct {
-	HttpRequestTimeout int    `yaml:"http_request_timeout"`
-	ExportDirectory    string `yaml:"export_directory"`
-	KubernetesMode     bool   `yaml:"kubernetes_mode"`
-	TokenType          string `yaml:"token_type"`
-	VCSDeletionEnabled bool   `yaml:"vcs_deletion_enabled"`
-	VCSConfigFilePath  string `yaml:"vcs_config_file_path"`
+	HttpRequestTimeout   int    `yaml:"http_request_timeout"`
+	ExportDirectory      string `yaml:"export_directory"`
+	KubernetesMode       bool   `yaml:"kubernetes_mode"`
+	TokenType            string `yaml:"token_type"`
+	VCSDeletionEnabled   bool   `yaml:"vcs_deletion_enabled"`
+	VCSConfigFilePath    string `yaml:"vcs_config_file_path"`
+	TLSRenegotiationMode string `yaml:"tls_renegotiation_mode"`
 }
 
 type EnvKeys struct {
@@ -347,8 +348,8 @@ type APIData struct {
 
 // Project MetaData struct
 type MetaData struct {
-	Name    string `json:"name"`
-	Version string `json:"version,omitempty"`
+	Name     string `json:"name"`
+	Version  string `json:"version,omitempty"`
 	Revision string `json:"revision"`
-	Owner string `json:"owner,omitempty"`
+	Owner    string `json:"owner,omitempty"`
 }

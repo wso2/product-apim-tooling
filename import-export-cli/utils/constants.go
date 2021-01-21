@@ -128,6 +128,15 @@ const SearchAndTag = "&"
 const DefaultTokenValidityPeriod = 3600
 const DefaultHttpRequestTimeout = 10000
 
+// TLSRenegotiationNever : never negotiate
+const TLSRenegotiationNever = "never"
+
+// TLSRenegotiationOnce : negotiate once
+const TLSRenegotiationOnce = "once"
+
+// TLSRenegotiationFreely : negotiate freely
+const TLSRenegotiationFreely = "freely"
+
 // Migration export
 const MaxAPIsToExportOnce = 20
 const MigrationAPIsExportMetadataFileName = "migration-apis-export-metadata.yaml"

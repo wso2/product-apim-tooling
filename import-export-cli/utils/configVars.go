@@ -19,6 +19,7 @@
 package utils
 
 import (
+	"crypto/tls"
 	"errors"
 	"io/ioutil"
 	"os"
@@ -28,6 +29,9 @@ import (
 var HttpRequestTimeout = DefaultHttpRequestTimeout
 var Insecure bool
 var ExportDirectory string
+
+// TLSRenegotiationMode : Defines TLS Renegotiation support mode, default is never
+var TLSRenegotiationMode = tls.RenegotiateNever
 
 // SetConfigVars
 // @param mainConfigFilePath : Path to file where Configuration details are stored
@@ -55,6 +59,8 @@ func SetConfigVars(mainConfigFilePath string) error {
 	ExportDirectory = mainConfig.Config.ExportDirectory
 	Logln(LogPrefixInfo + "Setting ExportDirectory " + mainConfig.Config.ExportDirectory)
 
+	setTLSRenegotiationMode(mainConfig)
+
 	return nil
 }
 
@@ -75,4 +81,21 @@ func IsValid(fp string) bool {
 	}
 
 	return false
+}
+
+func setTLSRenegotiationMode(mainConfig *MainConfig) {
+	modeMap := map[string]tls.RenegotiationSupport{
+		TLSRenegotiationOnce:   tls.RenegotiateOnceAsClient,
+		TLSRenegotiationFreely: tls.RenegotiateFreelyAsClient,
+		TLSRenegotiationNever:  tls.RenegotiateNever,
+	}
+
+	if val, ok := modeMap[mainConfig.Config.TLSRenegotiationMode]; ok {
+		if ok {
+			TLSRenegotiationMode = val
+			Logln(LogPrefixInfo + "Setting TLSRenegotiationMode : " + mainConfig.Config.TLSRenegotiationMode)
+		} else {
+			Logln(LogPrefixInfo + "Setting TLSRenegotiationMode : never")
+		}
+	}
 }
