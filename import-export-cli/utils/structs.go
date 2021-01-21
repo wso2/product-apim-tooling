@@ -34,8 +34,9 @@ type MainConfig struct {
 }
 
 type Config struct {
-	HttpRequestTimeout int    `yaml:"http_request_timeout"`
-	ExportDirectory    string `yaml:"export_directory"`
+	HttpRequestTimeout   int    `yaml:"http_request_timeout"`
+	ExportDirectory      string `yaml:"export_directory"`
+	TLSRenegotiationMode string `yaml:"tls_renegotiation_mode,omitempty"`
 }
 
 type EnvKeys struct {
