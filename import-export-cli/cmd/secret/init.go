@@ -28,7 +28,6 @@ import (
 	"syscall"
 
 	"github.com/spf13/cobra"
-	miUtils "github.com/wso2/product-apim-tooling/import-export-cli/mi/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"golang.org/x/crypto/ssh/terminal"
 )
@@ -59,35 +58,35 @@ func init() {
 
 func startConsoleForKeyStore() {
 	reader := bufio.NewReader(os.Stdin)
-	var keyStoreConfigMap = make(map[string]string)
+	keyStoreConfig := &utils.KeyStoreConfig{}
 
 	fmt.Printf("Enter Key Store location: ")
 	path, _ := reader.ReadString('\n')
 	if !isJKSKeyStore(path) {
 		utils.HandleErrorAndExit("Invalid Key Store Type. Supports only JKS Key Stores", nil)
 	}
-	updateMap(keyStoreConfigMap, "secret.keystore.location", path)
+	keyStoreConfig.KeyStorePath = strings.TrimSpace(path)
 
 	fmt.Printf("Enter Key Store password: ")
 	byteStorePassword, _ := terminal.ReadPassword(int(syscall.Stdin))
 	keyStorePassword := string(byteStorePassword)
 	fmt.Println()
-	keyStoreConfigMap["secret.keystore.password"] = base64.StdEncoding.EncodeToString([]byte(strings.TrimSpace(keyStorePassword)))
+	keyStoreConfig.KeyStorePassword = base64.StdEncoding.EncodeToString([]byte(strings.TrimSpace(keyStorePassword)))
 
 	fmt.Printf("Enter Key alias: ")
 	alias, _ := reader.ReadString('\n')
-	updateMap(keyStoreConfigMap, "secret.keystore.key.alias", alias)
+	keyStoreConfig.KeyAlias = strings.TrimSpace(alias)
 
 	fmt.Printf("Enter Key password: ")
 	bytePassword, _ := terminal.ReadPassword(int(syscall.Stdin))
 	keyPassword := string(bytePassword)
 	fmt.Println()
-	keyStoreConfigMap["secret.keystore.key.password"] = base64.StdEncoding.EncodeToString([]byte(strings.TrimSpace(keyPassword)))
+	keyStoreConfig.KeyPassword = base64.StdEncoding.EncodeToString([]byte(strings.TrimSpace(keyPassword)))
 
-	if miUtils.IsMapWithNonEmptyValues(keyStoreConfigMap) {
-		utils.CreateDirIfNotExist(miUtils.GetSecurityDirectoryPath())
-		keystorePropertiesPath := miUtils.GetkeyStorePropertiesFilePath()
-		miUtils.WritePropertiesToFile(keyStoreConfigMap, keystorePropertiesPath)
+	if utils.IsValidKeyStoreConfig(keyStoreConfig) {
+		utils.CreateDirIfNotExist(utils.GetKeyStoreDirectoryPath())
+		keyStoreConfigFilePath := utils.GetKeyStoreConfigFilePath()
+		utils.WriteConfigFile(keyStoreConfig, keyStoreConfigFilePath)
 		fmt.Println("Key Store initialization completed.")
 	} else {
 		fmt.Println("Key Store initialization failed.")

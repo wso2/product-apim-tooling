@@ -27,12 +27,10 @@ import (
 	"syscall"
 
 	"github.com/spf13/cobra"
-	miUtils "github.com/wso2/product-apim-tooling/import-export-cli/mi/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
-var keyStorePropertiesFile = miUtils.GetkeyStorePropertiesFilePath()
 var inputPropertiesfile string
 var encryptionAlgorithm string
 var outputType string
@@ -60,26 +58,27 @@ var secretCreateCmd = &cobra.Command{
 	Example: secretCreateCmdExamples,
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		if !utils.IsFileExist(keyStorePropertiesFile) {
-			utils.HandleErrorAndExit("Key Store has not been initialized.\nExecute 'apictl mi secret init --help' for more information", nil)
+		keyStoreConfig, err := utils.GetKeyStoreConfigFromFile(utils.GetKeyStoreConfigFilePath())
+		if err != nil {
+			utils.HandleErrorAndExit("Key Store has not been initialized.", err)
 		}
-		err := validateFlags()
+		err = validateFlags()
 		if err != nil {
 			utils.HandleErrorAndExit("Invalid flag", err)
 		}
-		initSecretInformation()
+		initSecretInformation(keyStoreConfig)
 	},
 }
 
 func init() {
 	SecretCmd.AddCommand(secretCreateCmd)
-	secretCreateCmd.Flags().StringVarP(&inputPropertiesfile, "from-file", "f", "", "Path to the properties file which contain secrets to be encrypted")
-	secretCreateCmd.Flags().StringVarP(&outputType, "output", "o", "console", "Get the output in yaml(k8) or properties(file) format. By default the output is printed to the console")
+	secretCreateCmd.Flags().StringVarP(&inputPropertiesfile, "from-file", "f", "", "Path to the properties file which contains secrets to be encrypted")
+	secretCreateCmd.Flags().StringVarP(&outputType, "output", "o", "console", "Get the output in yaml (k8) or properties (file) format. By default the output is printed to the console")
 	secretCreateCmd.Flags().StringVarP(&encryptionAlgorithm, "cipher", "c", "RSA/ECB/OAEPWithSHA1AndMGF1Padding", "Encryption algorithm")
 }
 
-func initSecretInformation() {
-	secretConfig := miUtils.SecretConfig{
+func initSecretInformation(keyStoreConfig *utils.KeyStoreConfig) {
+	secretConfig := utils.SecretConfig{
 		OutputType: outputType,
 		Algorithm:  encryptionAlgorithm,
 	}
@@ -90,13 +89,13 @@ func initSecretInformation() {
 		secretConfig.InputType = "console"
 		startConsoleForSecretInfo(&secretConfig)
 	}
-	err := miUtils.EncryptSecrets(keyStorePropertiesFile, secretConfig)
+	err := utils.EncryptSecrets(keyStoreConfig, secretConfig)
 	if err != nil {
 		utils.HandleErrorAndExit("Error encrypting secrets.", err)
 	}
 }
 
-func startConsoleForSecretInfo(secretConfig *miUtils.SecretConfig) {
+func startConsoleForSecretInfo(secretConfig *utils.SecretConfig) {
 	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Printf("Enter plain alias for secret:")
@@ -122,10 +121,10 @@ func startConsoleForSecretInfo(secretConfig *miUtils.SecretConfig) {
 }
 
 func validateFlags() error {
-	if !(miUtils.IsOAEPEncryption(encryptionAlgorithm) || miUtils.IsPKCS1Encryption(encryptionAlgorithm)) {
+	if !(utils.IsOAEPEncryption(encryptionAlgorithm) || utils.IsPKCS1Encryption(encryptionAlgorithm)) {
 		return errors.New("Accepts RSA/ECB/OAEPWithSHA1AndMGF1Padding or RSA/ECB/PKCS1Padding as encryption algorithms (-c)")
 	}
-	if !(miUtils.IsConsole(outputType) || miUtils.IsFile(outputType) || miUtils.IsK8(outputType)) {
+	if !(utils.IsConsole(outputType) || utils.IsFile(outputType) || utils.IsK8(outputType)) {
 		return errors.New("Accepts k8, file or console as output formats (-o)")
 	}
 	return nil
