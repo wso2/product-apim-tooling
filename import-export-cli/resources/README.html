@@ -439,6 +439,29 @@
 </ul>
 <ul>
     <li>
+        <h4 id="secret-init">secret init</h4>
+        <pre><code class="lang-bash">
+      Examples:
+          apictl secret init
+</code></pre>
+    </li>
+    <li>
+        <h4 id="secret-create">secret create</h4>
+        <pre><code class="lang-bash">      Flags:
+          Optional:
+              --cipher, -c
+              --from-file, -f
+              --output, -o
+      Examples:
+          apictl secret create
+          apictl secret create -o file
+          apictl secret create -o k8
+          apictl secret create -f keys.properties -o k8
+</code></pre>
+    </li>
+</ul>
+<ul>
+    <li>
         <h4 id="mi-login">mi login [environment]</h4>
         <pre><code class="lang-bash">   Flags:
        Optional:
@@ -776,29 +799,6 @@
               --environment, -e
       Examples:
           apictl mi deactivate message-processor TestMessageProcessor -e dev
-</code></pre>
-    </li>
-</ul>
-<ul>
-    <li>
-        <h4 id="mi-secret-init">mi secret init</h4>
-        <pre><code class="lang-bash">
-      Examples:
-          apictl mi secret init
-</code></pre>
-    </li>
-    <li>
-        <h4 id="mi-secret-create">mi secret create</h4>
-        <pre><code class="lang-bash">      Flags:
-          Optional:
-              --cipher, -c
-              --from-file, -f
-              --output, -o
-      Examples:
-          apictl mi secret create
-          apictl mi secret create -o file
-          apictl mi secret create -o k8
-          apictl mi secret create -f keys.properties -o k8
 </code></pre>
     </li>
 </ul>
