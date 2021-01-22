@@ -34,22 +34,17 @@ var config *testutils.MiConfig
 
 func TestMain(m *testing.M) {
 	flag.Parse()
-
 	readConfigs()
-
 	base.ExtractArchiveFile("../../build/target/")
 
 	miClient = testutils.MiRESTClient{}
 	miClient.SetupMI(testutils.AdminUserName, testutils.AdminPassword, environment.Name, environment.Host, environment.Offset)
-
 	config = &testutils.MiConfig{
 		Username: testutils.AdminUserName,
 		Password: testutils.AdminPassword,
 		MIClient: miClient,
 	}
-
 	exitVal := m.Run()
-
 	os.Exit(exitVal)
 }
 

@@ -26,10 +26,13 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
+// AdminUserName default admin username
 const AdminUserName = "admin"
+
+// AdminPassword default admin password
 const AdminPassword = "admin"
 
-// MiRESTClient : Enables interacting with the Management API of MI
+// MiRESTClient Enables interacting with the Management API of MI
 type MiRESTClient struct {
 	portOffset  int
 	host        string
@@ -38,12 +41,14 @@ type MiRESTClient struct {
 	accessToken string
 }
 
+// Environment store environment details of the MI
 type Environment struct {
 	Name   string `yaml:"name"`
 	Host   string `yaml:"host"`
 	Offset int    `yaml:"offset"`
 }
 
+// MiConfig store credentials and REST Client of the MI
 type MiConfig struct {
 	Username string
 	Password string
