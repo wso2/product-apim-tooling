@@ -109,8 +109,8 @@ func ExecGetCommandWithoutEnvFlag(t *testing.T, artifactType string, config *MiC
 	assert.Contains(t, response, `required flag(s) "environment" not set`)
 }
 
-// ExecGetCommandWithInvalidArgs run get artifactType with invalid number of args
-func ExecGetCommandWithInvalidArgs(t *testing.T, config *MiConfig, required, passed int, args ...string) {
+// ExecGetCommandWithInvalidArgCount run get artifactType with invalid number of args
+func ExecGetCommandWithInvalidArgCount(t *testing.T, config *MiConfig, required, passed int, fixedArgCout bool, args ...string) {
 	t.Helper()
 	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
 	base.MILogin(t, "testing", AdminUserName, AdminPassword)
@@ -120,5 +120,8 @@ func ExecGetCommandWithInvalidArgs(t *testing.T, config *MiConfig, required, pas
 	base.GetRowsFromTableResponse(response)
 	base.Log(response)
 	expected := fmt.Sprintf("accepts at most %v arg(s), received %v", required, passed)
+	if fixedArgCout {
+		expected = fmt.Sprintf("accepts %v arg(s), received %v", required, passed)
+	}
 	assert.Contains(t, response, expected)
 }

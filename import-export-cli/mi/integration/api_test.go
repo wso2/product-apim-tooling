@@ -57,5 +57,5 @@ func TestGetAPIsWithoutEnvFlag(t *testing.T) {
 }
 
 func TestGetAPIsWithInvalidArgs(t *testing.T) {
-	testutils.ExecGetCommandWithInvalidArgs(t, config, 1, 2, apisCmd, validAPIName, invalidAPIName)
+	testutils.ExecGetCommandWithInvalidArgCount(t, config, 1, 2, false, apisCmd, validAPIName, invalidAPIName)
 }

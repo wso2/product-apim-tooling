@@ -57,5 +57,5 @@ func TestGetCAppsWithoutEnvFlag(t *testing.T) {
 }
 
 func TestGetCAppsWithInvalidArgs(t *testing.T) {
-	testutils.ExecGetCommandWithInvalidArgs(t, config, 1, 2, cAppCmd, validCAppName, invalidCAppName)
+	testutils.ExecGetCommandWithInvalidArgCount(t, config, 1, 2, false, cAppCmd, validCAppName, invalidCAppName)
 }
