@@ -7,6 +7,7 @@ Set configuration
 
 Set configuration parameters. Use at least one of the following flags
 * --http-request-timeout <time-in-milli-seconds>
+* --tls_renegotiation_mode <never|once|freely>
 * --export-directory <path-to-directory-where-apis-should-be-saved>
 
 ```
@@ -19,6 +20,7 @@ apimcli set [flags]
 apimcli set --http-request-timeout 3600 --export-directory /home/user/exported-apis
 apimcli set --http-request-timeout 5000 --export-directory C:\Documents\exported
 apimcli set --http-request-timeout 5000
+apimcli set --tls_renegotiation_mode freely
 ```
 
 ### Options
