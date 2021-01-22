@@ -22,21 +22,26 @@ import (
 	"bufio"
 	"crypto/tls"
 	"fmt"
-	"github.com/go-resty/resty"
-	"golang.org/x/crypto/ssh/terminal"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/go-resty/resty"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 // Invoke http-post request using go-resty
 func InvokePOSTRequest(url string, headers map[string]string, body string) (*resty.Response, error) {
+	tlsConfig := &tls.Config{Renegotiation: TLSRenegotiationMode}
 	if Insecure {
-		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+		tlsConfig.InsecureSkipVerify = true // To bypass errors in SSL certificates
 	}
+
+	resty.SetTLSClientConfig(tlsConfig)
+
 	if os.Getenv("HTTP_PROXY") != "" {
 		resty.SetProxy(os.Getenv("HTTP_PROXY"))
 	} else if os.Getenv("HTTPS_PROXY") != "" {
@@ -54,9 +59,13 @@ func InvokePOSTRequest(url string, headers map[string]string, body string) (*res
 
 // Invoke http-post request using go-resty with byte[] body
 func InvokePOSTRequestWithBytes(url string, headers map[string]string, body []byte) (*resty.Response, error) {
+	tlsConfig := &tls.Config{Renegotiation: TLSRenegotiationMode}
 	if Insecure {
-		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+		tlsConfig.InsecureSkipVerify = true // To bypass errors in SSL certificates
 	}
+
+	resty.SetTLSClientConfig(tlsConfig)
+
 	if os.Getenv("HTTP_PROXY") != "" {
 		resty.SetProxy(os.Getenv("HTTP_PROXY"))
 	} else if os.Getenv("HTTPS_PROXY") != "" {
@@ -74,9 +83,13 @@ func InvokePOSTRequestWithBytes(url string, headers map[string]string, body []by
 
 // Invoke http-post request using go-resty with byte[] body
 func InvokePUTRequestWithBytes(url string, headers map[string]string, body []byte) (*resty.Response, error) {
+	tlsConfig := &tls.Config{Renegotiation: TLSRenegotiationMode}
 	if Insecure {
-		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+		tlsConfig.InsecureSkipVerify = true // To bypass errors in SSL certificates
 	}
+
+	resty.SetTLSClientConfig(tlsConfig)
+
 	if os.Getenv("HTTP_PROXY") != "" {
 		resty.SetProxy(os.Getenv("HTTP_PROXY"))
 	} else if os.Getenv("HTTPS_PROXY") != "" {
@@ -94,9 +107,13 @@ func InvokePUTRequestWithBytes(url string, headers map[string]string, body []byt
 
 // Invoke http-get request using go-resty
 func InvokeGETRequest(url string, headers map[string]string) (*resty.Response, error) {
+	tlsConfig := &tls.Config{Renegotiation: TLSRenegotiationMode}
 	if Insecure {
-		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+		tlsConfig.InsecureSkipVerify = true // To bypass errors in SSL certificates
 	}
+
+	resty.SetTLSClientConfig(tlsConfig)
+
 	if os.Getenv("HTTP_PROXY") != "" {
 		resty.SetProxy(os.Getenv("HTTP_PROXY"))
 	} else if os.Getenv("HTTPS_PROXY") != "" {
@@ -115,9 +132,13 @@ func InvokeGETRequest(url string, headers map[string]string) (*resty.Response, e
 // Invoke http-get request with query param
 func InvokeGETRequestWithQueryParam(queryParam string, paramValue string, url string, headers map[string]string) (
 	*resty.Response, error) {
+	tlsConfig := &tls.Config{Renegotiation: TLSRenegotiationMode}
 	if Insecure {
-		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
+		tlsConfig.InsecureSkipVerify = true // To bypass errors in SSL certificates
 	}
+
+	resty.SetTLSClientConfig(tlsConfig)
+
 	if os.Getenv("HTTP_PROXY") != "" {
 		resty.SetProxy(os.Getenv("HTTP_PROXY"))
 	} else if os.Getenv("HTTPS_PROXY") != "" {

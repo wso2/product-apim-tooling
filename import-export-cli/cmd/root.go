@@ -114,7 +114,7 @@ func createConfigFiles() {
 
 	if !utils.IsFileExist(utils.MainConfigFilePath) {
 		var mainConfig = new(utils.MainConfig)
-		mainConfig.Config = utils.Config{utils.DefaultHttpRequestTimeout, utils.DefaultExportDirPath}
+		mainConfig.Config = utils.Config{utils.DefaultHttpRequestTimeout, utils.DefaultExportDirPath, utils.TLSRenegotiationNever}
 		utils.WriteConfigFile(mainConfig, utils.MainConfigFilePath)
 	}
 

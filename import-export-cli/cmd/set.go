@@ -20,12 +20,14 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 var flagHttpRequestTimeout int
 var flagExportDirectory string
+var flagTLSRenegotiationMode string
 
 // Set command related Info
 const setCmdLiteral = "set"
@@ -33,11 +35,13 @@ const setCmdShortDesc = "Set configuration"
 
 const setCmdLongDesc = `Set configuration parameters. Use at least one of the following flags
 * --http-request-timeout <time-in-milli-seconds>
-* --export-directory <path-to-directory-where-apis-should-be-saved>`
+* --export-directory <path-to-directory-where-apis-should-be-saved>
+* --tls_renegotiation_mode <never|once|freely>`
 
 const setCmdExamples = utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 3600 --export-directory /home/user/exported-apis
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000 --export-directory C:\Documents\exported
-` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000`
+` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000
+` + utils.ProjectName + ` ` + setCmdLiteral + ` --tls_renegotiation_mode freely`
 
 // SetCmd represents the 'set' command
 var SetCmd = &cobra.Command{
@@ -64,6 +68,13 @@ func executeSetCmd(mainConfigFilePath, exportDirectory string) {
 	} else {
 		fmt.Println("Invalid input for flag --export-directory")
 	}
+	if flagTLSRenegotiationMode == utils.TLSRenegotiationNever ||
+		flagTLSRenegotiationMode == utils.TLSRenegotiationOnce ||
+		flagTLSRenegotiationMode == utils.TLSRenegotiationFreely {
+		configVars.Config.TLSRenegotiationMode = flagTLSRenegotiationMode
+	} else {
+		fmt.Println("Invalid input for flag --tls_renegotiation_mode")
+	}
 	utils.WriteConfigFile(configVars, mainConfigFilePath)
 }
 
@@ -89,4 +100,6 @@ func init() {
 		"Timeout for HTTP Client")
 	SetCmd.Flags().StringVar(&flagExportDirectory, "export-directory", defaultExportDirectory,
 		"Path to directory where APIs should be saved")
+	SetCmd.Flags().StringVar(&flagTLSRenegotiationMode, "tls_renegotiation_mode", utils.TLSRenegotiationNever,
+		"Supported TLS renegotiation mode")
 }
