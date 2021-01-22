@@ -25,7 +25,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 // ListArtifacts return ctl out from the command get artifactType
@@ -47,8 +46,8 @@ func GetArtifact(t *testing.T, artifactType, artifactName string, config *MiConf
 }
 
 // GetArtifactListFromAPI : Get Artifact Lists from MI Management API
-func (instance *MiRESTClient) GetArtifactListFromAPI(artifactListType interface{}) interface{} {
-	apisURL := getResourceURL(instance.GetMiURL(), utils.MiManagementAPIResource)
+func (instance *MiRESTClient) GetArtifactListFromAPI(resource string, artifactListType interface{}) interface{} {
+	apisURL := getResourceURL(instance.GetMiURL(), resource)
 
 	request := base.CreateGet(apisURL)
 	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
@@ -64,8 +63,8 @@ func (instance *MiRESTClient) GetArtifactListFromAPI(artifactListType interface{
 }
 
 // GetArtifactFromAPI : Get Artifacts from MI Management API
-func (instance *MiRESTClient) GetArtifactFromAPI(artifactKey, artifactName string, artifactType interface{}) interface{} {
-	apisURL := getResourceURLWithQueryParam(instance.GetMiURL(), utils.MiManagementAPIResource, artifactKey, artifactName)
+func (instance *MiRESTClient) GetArtifactFromAPI(resource, artifactKey, artifactName string, artifactType interface{}) interface{} {
+	apisURL := getResourceURLWithQueryParam(instance.GetMiURL(), resource, artifactKey, artifactName)
 
 	request := base.CreateGet(apisURL)
 	base.SetDefaultRestAPIHeaders(instance.accessToken, request)

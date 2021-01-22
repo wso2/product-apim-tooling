@@ -24,13 +24,14 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/mi/utils/artifactutils"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 // ValidateAPIsList validate ctl output with list of apis from the Management API
 func ValidateAPIsList(t *testing.T, apisCmd string, config *MiConfig) {
 	t.Helper()
 	output, _ := ListArtifacts(t, apisCmd, config)
-	artifactList := config.MIClient.GetArtifactListFromAPI(&artifactutils.IntegrationAPIList{})
+	artifactList := config.MIClient.GetArtifactListFromAPI(utils.MiManagementAPIResource, &artifactutils.IntegrationAPIList{})
 	validateAPIListEqual(t, output, (artifactList.(*artifactutils.IntegrationAPIList)))
 }
 
@@ -48,7 +49,7 @@ func validateAPIListEqual(t *testing.T, apisListFromCtl string, apisList *artifa
 func ValidateAPI(t *testing.T, apisCmd string, config *MiConfig, apiName string) {
 	t.Helper()
 	output, _ := GetArtifact(t, apisCmd, apiName, config)
-	artifactList := config.MIClient.GetArtifactFromAPI("apiName", apiName, &artifactutils.IntegrationAPI{})
+	artifactList := config.MIClient.GetArtifactFromAPI(utils.MiManagementAPIResource, "apiName", apiName, &artifactutils.IntegrationAPI{})
 	validateAPIEqual(t, output, (artifactList.(*artifactutils.IntegrationAPI)))
 }
 
