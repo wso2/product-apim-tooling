@@ -327,6 +327,7 @@
         <h4 id="set">set</h4>
         <pre><code class="lang-bash">      Flags
           --http-request-timeout
+          --tls_renegotiation_mode
           --export-directory
           --vcs-config-path string
           --vcs-deletion-enabled
@@ -334,6 +335,7 @@
           apictl set --http-request-timeout 3600 --export-directory /home/user/exported-apis
           apictl set --http-request-timeout 5000 --export-directory C:\Documents\exported
           apictl set --http-request-timeout 5000
+          apictl set --tls_renegotiation_mode freely
           apictl set --vcs-deletion-enabled=true
           apictl set --vcs-config-path /home/user/custom/vcs-config.yaml
 </code></pre>

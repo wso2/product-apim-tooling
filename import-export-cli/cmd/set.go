@@ -30,6 +30,7 @@ import (
 var flagHttpRequestTimeout int
 var flagExportDirectory string
 var flagKubernetesMode string
+var flagTLSRenegotiationMode string
 
 var flagVCSDeletionEnabled bool
 var flagVCSConfigPath string
@@ -42,6 +43,7 @@ const setCmdShortDesc = "Set configuration parameters"
 
 const setCmdLongDesc = `Set configuration parameters. Use at least one of the following flags
 * --http-request-timeout <time-in-milli-seconds>
+* --tls_renegotiation_mode <never|once|freely>
 * --export-directory <path-to-directory-where-apis-should-be-saved>
 * --vcs-deletion-enabled <enable-or-disable-project-deletion-via-vcs>
 * --vcs-config-path <path-to-custom-vcs-config-file>`
@@ -49,6 +51,7 @@ const setCmdLongDesc = `Set configuration parameters. Use at least one of the fo
 const setCmdExamples = utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 3600 --export-directory /home/user/exported-apis
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000 --export-directory C:\Documents\exported
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000
+` + utils.ProjectName + ` ` + setCmdLiteral + ` --tls_renegotiation_mode freely
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --vcs-deletion-enabled=true
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --vcs-config-path /home/user/custom/vcs-config.yaml`
 
@@ -108,6 +111,15 @@ func executeSetCmd(mainConfigFilePath string, cmd *cobra.Command) {
 		}
 	}
 
+	// TLS renegotiation mode
+	if flagTLSRenegotiationMode == utils.TLSRenegotiationNever ||
+		flagTLSRenegotiationMode == utils.TLSRenegotiationOnce ||
+		flagTLSRenegotiationMode == utils.TLSRenegotiationFreely {
+		configVars.Config.TLSRenegotiationMode = flagTLSRenegotiationMode
+	} else {
+		fmt.Println("Invalid input for flag --tls_renegotiation_mode")
+	}
+
 	//VCS configs
 	if configVars.Config.VCSDeletionEnabled != flagVCSDeletionEnabled {
 		if flagVCSDeletionEnabled {
@@ -147,6 +159,8 @@ func init() {
 		"Timeout for HTTP Client")
 	SetCmd.Flags().StringVar(&flagExportDirectory, "export-directory", defaultExportDirectory,
 		"Path to directory where APIs should be saved")
+	SetCmd.Flags().StringVar(&flagTLSRenegotiationMode, "tls_renegotiation_mode", utils.TLSRenegotiationNever,
+		"Supported TLS renegotiation mode")
 	SetCmd.Flags().StringVarP(&flagKubernetesMode, "mode", "m", utils.DefaultEnvironmentName, "If mode is set to \"k8s\", apictl "+
 		"is capable of executing Kubectl commands. For example \"apictl get pods\" -> \"kubectl get pods\". To go back "+
 		"to the default mode, set the mode to \"default\"")
