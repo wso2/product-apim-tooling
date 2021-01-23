@@ -42,7 +42,7 @@ func validateinboundEndpointListEqual(t *testing.T, inboundEndpointsListFromCtl 
 			" , does not contain inboundEndpoint.Name: "+inboundEndpoint.Name)
 		unmatchedCount--
 	}
-	assert.Equal(t, 0, int(unmatchedCount), "Data Service lists are not equal")
+	assert.Equal(t, 0, int(unmatchedCount), "Inbound enpoint lists are not equal")
 }
 
 // ValidateInboundEndpoint validate ctl output with the data service from the Management API
