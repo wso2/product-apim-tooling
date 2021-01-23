@@ -80,30 +80,37 @@ func (instance *MiRESTClient) GetArtifactFromAPI(resource, artifactKey, artifact
 }
 
 // ExecGetCommandWithoutSettingEnv run get artifactType without setting up an environment
-func ExecGetCommandWithoutSettingEnv(t *testing.T, artifactType string) {
+func ExecGetCommandWithoutSettingEnv(t *testing.T, args ...string) {
 	t.Helper()
-	response, _ := base.Execute(t, "mi", "get", artifactType, "-e", "testing")
+	// response, _ := base.Execute(t, "mi", "get", artifactType, "-e", "testing")
+	getCmdArgs := []string{"mi", "get", "-e", "testing"}
+	getCmdArgs = append(getCmdArgs, args...)
+	response, _ := base.Execute(t, getCmdArgs...)
 	base.GetRowsFromTableResponse(response)
 	base.Log(response)
 	assert.Contains(t, response, "MI does not exists in testing Add it using add env")
 }
 
 // ExecGetCommandWithoutLogin run get artifactType without login to MI
-func ExecGetCommandWithoutLogin(t *testing.T, artifactType string, config *MiConfig) {
+func ExecGetCommandWithoutLogin(t *testing.T, artifactType string, config *MiConfig, args ...string) {
 	t.Helper()
 	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	response, _ := base.Execute(t, "mi", "get", artifactType, "-e", "testing")
+	getCmdArgs := []string{"mi", "get", artifactType, "-e", "testing"}
+	getCmdArgs = append(getCmdArgs, args...)
+	response, _ := base.Execute(t, getCmdArgs...)
 	base.GetRowsFromTableResponse(response)
 	base.Log(response)
 	assert.Contains(t, response, "Login to MI")
 }
 
 // ExecGetCommandWithoutEnvFlag run get artifactType without -e flag
-func ExecGetCommandWithoutEnvFlag(t *testing.T, artifactType string, config *MiConfig) {
+func ExecGetCommandWithoutEnvFlag(t *testing.T, artifactType string, config *MiConfig, args ...string) {
 	t.Helper()
 	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
 	base.MILogin(t, "testing", AdminUserName, AdminPassword)
-	response, _ := base.Execute(t, "mi", "get", artifactType)
+	getCmdArgs := []string{"mi", "get", artifactType}
+	getCmdArgs = append(getCmdArgs, args...)
+	response, _ := base.Execute(t, getCmdArgs...)
 	base.GetRowsFromTableResponse(response)
 	base.Log(response)
 	assert.Contains(t, response, `required flag(s) "environment" not set`)
