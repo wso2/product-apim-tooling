@@ -86,3 +86,29 @@ func TestActivateMessageProcessorWithoutSettingUpEnv(t *testing.T) {
 func TestActivateMessageProcessorWithoutLogin(t *testing.T) {
 	testutils.ExecActivateCommandWithoutLogin(t, config, messageProcessorCmd, validMessageProcessor)
 }
+
+func TestDeactivateMessageProcessor(t *testing.T) {
+	expected := validMessageProcessor + " : is deactivated"
+	testutils.ExecDeactivateCommand(t, config, messageProcessorCmd, validMessageProcessor, expected)
+}
+
+func TestDectivateNonExistingMessageProcessor(t *testing.T) {
+	expected := "[ERROR]: Deactivating message processor [ " + invalidMessageProcessor + " ] Message processor does not exist"
+	testutils.ExecDeactivateCommand(t, config, messageProcessorCmd, invalidMessageProcessor, expected)
+}
+
+func TestDeactivateMessageProcessorWithoutEnvFlag(t *testing.T) {
+	testutils.ExecDeactivateCommandWithoutEnvFlag(t, config, messageProcessorCmd, validMessageProcessor)
+}
+
+func TestDeactivateMessageProcessorWithInvalidArgs(t *testing.T) {
+	testutils.ExecDeactivateCommandWithInvalidArgCount(t, config, 1, 0, messageProcessorCmd)
+}
+
+func TestDeactivateMessageProcessorWithoutSettingUpEnv(t *testing.T) {
+	testutils.ExecDeactivateCommandWithoutSettingEnv(t, messageProcessorCmd, validMessageProcessor)
+}
+
+func TestDeactivateMessageProcessorWithoutLogin(t *testing.T) {
+	testutils.ExecDeactivateCommandWithoutLogin(t, config, messageProcessorCmd, validMessageProcessor)
+}
