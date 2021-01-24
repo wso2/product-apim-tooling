@@ -28,60 +28,87 @@ import (
 
 const validEndpointName = "GrandOakEndpoint"
 const invalidEndpointName = "abcEndpoint"
-const endpointCmd = "endpoints"
+const endpointsCmd = "endpoints"
+const endpointCmd = "endpoint"
 
 func TestGetEndpoints(t *testing.T) {
-	testutils.ValidateEndpointList(t, endpointCmd, config)
+	testutils.ValidateEndpointList(t, endpointsCmd, config)
 }
 
 func TestGetEndpointByName(t *testing.T) {
-	testutils.ValidateEndpoint(t, endpointCmd, config, validEndpointName)
+	testutils.ValidateEndpoint(t, endpointsCmd, config, validEndpointName)
 }
 
 func TestGetNonExistingEndpointByName(t *testing.T) {
-	response, _ := testutils.GetArtifact(t, endpointCmd, invalidEndpointName, config)
+	response, _ := testutils.GetArtifact(t, endpointsCmd, invalidEndpointName, config)
 	base.Log(response)
 	assert.Contains(t, response, "[ERROR]: Getting Information of endpoints [ "+invalidEndpointName+" ]  404 Not Found")
 }
 
 func TestGetEndpointsWithoutSettingUpEnv(t *testing.T) {
-	testutils.ExecGetCommandWithoutSettingEnv(t, endpointCmd)
+	testutils.ExecGetCommandWithoutSettingEnv(t, endpointsCmd)
 }
 
 func TestGetEndpointsWithoutLogin(t *testing.T) {
-	testutils.ExecGetCommandWithoutLogin(t, endpointCmd, config)
+	testutils.ExecGetCommandWithoutLogin(t, endpointsCmd, config)
 }
 
 func TestGetEndpointsWithoutEnvFlag(t *testing.T) {
-	testutils.ExecGetCommandWithoutEnvFlag(t, endpointCmd, config)
+	testutils.ExecGetCommandWithoutEnvFlag(t, endpointsCmd, config)
 }
 
 func TestGetEndpointsWithInvalidArgs(t *testing.T) {
-	testutils.ExecGetCommandWithInvalidArgCount(t, config, 1, 2, false, endpointCmd, validEndpointName, invalidEndpointName)
+	testutils.ExecGetCommandWithInvalidArgCount(t, config, 1, 2, false, endpointsCmd, validEndpointName, invalidEndpointName)
 }
 
 func TestActivateEndpoint(t *testing.T) {
 	expected := validEndpointName + " is switched On"
-	testutils.ExecActivateCommand(t, config, "endpoint", validEndpointName, expected)
+	testutils.ExecActivateCommand(t, config, endpointCmd, validEndpointName, expected)
 }
 
 func TestActivateNonExistingEndpoint(t *testing.T) {
 	expected := "[ERROR]: Activating endpoint [ " + invalidEndpointName + " ] Endpoint does not exist"
-	testutils.ExecActivateCommand(t, config, "endpoint", invalidEndpointName, expected)
+	testutils.ExecActivateCommand(t, config, endpointCmd, invalidEndpointName, expected)
 }
 
 func TestActivateEndpointWithoutEnvFlag(t *testing.T) {
-	testutils.ExecActivateCommandWithoutEnvFlag(t, config, "endpoint", validEndpointName)
+	testutils.ExecActivateCommandWithoutEnvFlag(t, config, endpointCmd, validEndpointName)
 }
 
 func TestActivateEndpointWithInvalidArgs(t *testing.T) {
-	testutils.ExecActivateCommandWithInvalidArgCount(t, config, 1, 0, "endpoint")
+	testutils.ExecActivateCommandWithInvalidArgCount(t, config, 1, 0, endpointCmd)
 }
 
 func TestActivateEndpointWithoutSettingUpEnv(t *testing.T) {
-	testutils.ExecActivateCommandWithoutSettingEnv(t, "endpoint", validEndpointName)
+	testutils.ExecActivateCommandWithoutSettingEnv(t, endpointCmd, validEndpointName)
 }
 
 func TestActivateEndpointWithoutLogin(t *testing.T) {
-	testutils.ExecActivateCommandWithoutLogin(t, config, "endpoint", validEndpointName)
+	testutils.ExecActivateCommandWithoutLogin(t, config, endpointCmd, validEndpointName)
+}
+
+func TestDeactivateEndpoint(t *testing.T) {
+	expected := validEndpointName + " is switched Off"
+	testutils.ExecDeactivateCommand(t, config, endpointCmd, validEndpointName, expected)
+}
+
+func TestDeactivateNonExistingEndpoint(t *testing.T) {
+	expected := "[ERROR]: Deactivating endpoint [ " + invalidEndpointName + " ] Endpoint does not exist"
+	testutils.ExecDeactivateCommand(t, config, endpointCmd, invalidEndpointName, expected)
+}
+
+func TestDeactivateEndpointWithoutEnvFlag(t *testing.T) {
+	testutils.ExecDeactivateCommandWithoutEnvFlag(t, config, endpointCmd, validEndpointName)
+}
+
+func TestDeactivateEndpointWithInvalidArgs(t *testing.T) {
+	testutils.ExecDeactivateCommandWithInvalidArgCount(t, config, 1, 0, endpointCmd)
+}
+
+func TestDeactivateEndpointWithoutSettingUpEnv(t *testing.T) {
+	testutils.ExecDeactivateCommandWithoutSettingEnv(t, endpointCmd, validEndpointName)
+}
+
+func TestDeactivateEndpointWithoutLogin(t *testing.T) {
+	testutils.ExecDeactivateCommandWithoutLogin(t, config, endpointCmd, validEndpointName)
 }
