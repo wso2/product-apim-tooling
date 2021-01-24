@@ -29,6 +29,10 @@ import (
 const validLoggerName = "org-apache-coyote"
 const invalidLoggerName = "abc-logger"
 const logLevelCmd = "log-levels"
+const newLoggerName = "synapse-api"
+const newLoggerClass = "org.apache.synapse.rest.API"
+
+var validAddLoggerCmd = []string{"mi", "add", "log-level", newLoggerName, newLoggerClass, "DEBUG", "-e", "testing"}
 
 func TestGetLoggerByName(t *testing.T) {
 	testutils.ValidateLogger(t, logLevelCmd, config, validLoggerName)
@@ -54,4 +58,64 @@ func TestGetLoggersWithoutEnvFlag(t *testing.T) {
 
 func TestGetLoggersWithInvalidArgs(t *testing.T) {
 	testutils.ExecGetCommandWithInvalidArgCount(t, config, 1, 2, true, logLevelCmd, validLoggerName, invalidLoggerName)
+}
+
+func TestAddNewLoggerWithInvalidLogLevel(t *testing.T) {
+	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
+	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Username)
+	response, _ := base.Execute(t, "mi", "add", "log-level", newLoggerName, newLoggerClass, "ABC", "-e", "testing")
+	base.Log(response)
+	expected := "[ERROR]: Adding new logger [ " + newLoggerName + " ]  Invalid log level ABC"
+	assert.Contains(t, response, expected)
+}
+
+func TestAddNewLoggerWithoutEnvFlag(t *testing.T) {
+	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
+	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Username)
+	response, _ := base.Execute(t, "mi", "add", "log-level", newLoggerName, newLoggerClass, "DEBUG")
+	base.Log(response)
+	expected := `required flag(s) "environment" not set`
+	assert.Contains(t, response, expected)
+}
+
+func TestAddNewLoggerWithInvalidArgs(t *testing.T) {
+	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
+	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Username)
+	response, _ := base.Execute(t, "mi", "add", "log-level", newLoggerName, newLoggerClass, "-e", "testing")
+	base.Log(response)
+	expected := "accepts 3 arg(s), received 2"
+	assert.Contains(t, response, expected)
+}
+
+func TestAddNewLoggerWithoutSettingUpEnv(t *testing.T) {
+	response, _ := base.Execute(t, validAddLoggerCmd...)
+	base.GetRowsFromTableResponse(response)
+	base.Log(response)
+	assert.Contains(t, response, "MI does not exists in testing Add it using add env")
+}
+
+func TestAddLoggerWithoutLogin(t *testing.T) {
+	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
+	response, _ := base.Execute(t, validAddLoggerCmd...)
+	base.GetRowsFromTableResponse(response)
+	base.Log(response)
+	assert.Contains(t, response, "Login to MI")
+}
+
+func TestAddNewLogger(t *testing.T) {
+	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
+	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Username)
+	response, _ := base.Execute(t, validAddLoggerCmd...)
+	base.Log(response)
+	expected := "Successfully added logger"
+	assert.Contains(t, response, expected)
+}
+
+func TestAddExistingLogger(t *testing.T) {
+	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
+	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Username)
+	response, _ := base.Execute(t, validAddLoggerCmd...)
+	base.Log(response)
+	expected := "[ERROR]: Adding new logger [ " + newLoggerName + " ]  Specified logger name ('" + newLoggerName + "') already exists, try updating the level instead"
+	assert.Contains(t, response, expected)
 }
