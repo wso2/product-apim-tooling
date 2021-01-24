@@ -59,3 +59,29 @@ func TestGetEndpointsWithoutEnvFlag(t *testing.T) {
 func TestGetEndpointsWithInvalidArgs(t *testing.T) {
 	testutils.ExecGetCommandWithInvalidArgCount(t, config, 1, 2, false, endpointCmd, validEndpointName, invalidEndpointName)
 }
+
+func TestActivateEndpoint(t *testing.T) {
+	expected := validEndpointName + " is switched On"
+	testutils.ExecActivateCommand(t, config, "endpoint", validEndpointName, expected)
+}
+
+func TestActivateNonExistingEndpoint(t *testing.T) {
+	expected := "[ERROR]: Activating endpoint [ " + invalidEndpointName + " ] Endpoint does not exist"
+	testutils.ExecActivateCommand(t, config, "endpoint", invalidEndpointName, expected)
+}
+
+func TestActivateEndpointWithoutEnvFlag(t *testing.T) {
+	testutils.ExecActivateCommandWithoutEnvFlag(t, config, "endpoint", validEndpointName)
+}
+
+func TestActivateEndpointWithInvalidArgs(t *testing.T) {
+	testutils.ExecActivateCommandWithInvalidArgCount(t, config, 1, 0, "endpoint")
+}
+
+func TestActivateEndpointWithoutSettingUpEnv(t *testing.T) {
+	testutils.ExecActivateCommandWithoutSettingEnv(t, "endpoint", validEndpointName)
+}
+
+func TestActivateEndpointWithoutLogin(t *testing.T) {
+	testutils.ExecActivateCommandWithoutLogin(t, config, "endpoint", validEndpointName)
+}
