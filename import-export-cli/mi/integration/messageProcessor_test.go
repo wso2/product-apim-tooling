@@ -28,34 +28,61 @@ import (
 
 const validMessageProcessor = "scheduled-msg-processor"
 const invalidMessageProcessor = "abc-msg-processor"
-const messageProcessorCmd = "message-processors"
+const messageProcessorsCmd = "message-processors"
+const messageProcessorCmd = "message-processor"
 
 func TestGetMessageProcessors(t *testing.T) {
-	testutils.ValidateMessageProcessorList(t, messageProcessorCmd, config)
+	testutils.ValidateMessageProcessorList(t, messageProcessorsCmd, config)
 }
 
 func TestGetMessageProcessorByName(t *testing.T) {
-	testutils.ValidateMessageProcessor(t, messageProcessorCmd, config, validMessageProcessor)
+	testutils.ValidateMessageProcessor(t, messageProcessorsCmd, config, validMessageProcessor)
 }
 
 func TestGetNonExistingMessageProcessorByName(t *testing.T) {
-	response, _ := testutils.GetArtifact(t, messageProcessorCmd, invalidMessageProcessor, config)
+	response, _ := testutils.GetArtifact(t, messageProcessorsCmd, invalidMessageProcessor, config)
 	base.Log(response)
 	assert.Contains(t, response, "[ERROR]: Getting Information of message processors [ "+invalidMessageProcessor+" ]  Specified message processor ('"+invalidMessageProcessor+"') not found")
 }
 
 func TestGetMessageProcessorsWithoutSettingUpEnv(t *testing.T) {
-	testutils.ExecGetCommandWithoutSettingEnv(t, messageProcessorCmd)
+	testutils.ExecGetCommandWithoutSettingEnv(t, messageProcessorsCmd)
 }
 
 func TestGetMessageProcessorsWithoutLogin(t *testing.T) {
-	testutils.ExecGetCommandWithoutLogin(t, messageProcessorCmd, config)
+	testutils.ExecGetCommandWithoutLogin(t, messageProcessorsCmd, config)
 }
 
 func TestGetMessageProcessorsWithoutEnvFlag(t *testing.T) {
-	testutils.ExecGetCommandWithoutEnvFlag(t, messageProcessorCmd, config)
+	testutils.ExecGetCommandWithoutEnvFlag(t, messageProcessorsCmd, config)
 }
 
 func TestGetMessageProcessorsWithInvalidArgs(t *testing.T) {
-	testutils.ExecGetCommandWithInvalidArgCount(t, config, 1, 2, false, messageProcessorCmd, validMessageProcessor, invalidMessageProcessor)
+	testutils.ExecGetCommandWithInvalidArgCount(t, config, 1, 2, false, messageProcessorsCmd, validMessageProcessor, invalidMessageProcessor)
+}
+
+func TestActivateMessageProcessor(t *testing.T) {
+	expected := validMessageProcessor + " : is activated"
+	testutils.ExecActivateCommand(t, config, messageProcessorCmd, validMessageProcessor, expected)
+}
+
+func TestActivateNonExistingMessageProcessor(t *testing.T) {
+	expected := "[ERROR]: Activating message processor [ " + invalidMessageProcessor + " ] Message processor does not exist"
+	testutils.ExecActivateCommand(t, config, messageProcessorCmd, invalidMessageProcessor, expected)
+}
+
+func TestActivateMessageProcessorWithoutEnvFlag(t *testing.T) {
+	testutils.ExecActivateCommandWithoutEnvFlag(t, config, messageProcessorCmd, validMessageProcessor)
+}
+
+func TestActivateMessageProcessorWithInvalidArgs(t *testing.T) {
+	testutils.ExecActivateCommandWithInvalidArgCount(t, config, 1, 0, messageProcessorCmd)
+}
+
+func TestActivateMessageProcessorWithoutSettingUpEnv(t *testing.T) {
+	testutils.ExecActivateCommandWithoutSettingEnv(t, messageProcessorCmd, validMessageProcessor)
+}
+
+func TestActivateMessageProcessorWithoutLogin(t *testing.T) {
+	testutils.ExecActivateCommandWithoutLogin(t, config, messageProcessorCmd, validMessageProcessor)
 }
