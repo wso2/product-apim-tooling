@@ -86,3 +86,29 @@ func TestActivateProxyServiceWithoutSettingUpEnv(t *testing.T) {
 func TestActivateProxyServiceWithoutLogin(t *testing.T) {
 	testutils.ExecActivateCommandWithoutLogin(t, config, proxyServiceCmd, validProxyServiceName)
 }
+
+func TestDeactivateProxyService(t *testing.T) {
+	expected := validProxyServiceName + " stopped successfully"
+	testutils.ExecDeactivateCommand(t, config, proxyServiceCmd, validProxyServiceName, expected)
+}
+
+func TestDectivateNonExistingProxyService(t *testing.T) {
+	expected := "[ERROR]: Deactivating proxy service [ " + invalidProxyServiceName + " ] Proxy service could not be found"
+	testutils.ExecDeactivateCommand(t, config, proxyServiceCmd, invalidProxyServiceName, expected)
+}
+
+func TestDeactivateProxyServiceWithoutEnvFlag(t *testing.T) {
+	testutils.ExecDeactivateCommandWithoutEnvFlag(t, config, proxyServiceCmd, validProxyServiceName)
+}
+
+func TestDeactivateProxyServiceWithInvalidArgs(t *testing.T) {
+	testutils.ExecDeactivateCommandWithInvalidArgCount(t, config, 1, 0, proxyServiceCmd)
+}
+
+func TestDeactivateProxyServiceWithoutSettingUpEnv(t *testing.T) {
+	testutils.ExecDeactivateCommandWithoutSettingEnv(t, proxyServiceCmd, validProxyServiceName)
+}
+
+func TestDeactivateProxyServiceWithoutLogin(t *testing.T) {
+	testutils.ExecDeactivateCommandWithoutLogin(t, config, proxyServiceCmd, validProxyServiceName)
+}
