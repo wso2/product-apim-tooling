@@ -95,3 +95,56 @@ func TestAddNewUserWithoutLogin(t *testing.T) {
 	base.Log(response)
 	assert.Contains(t, response, "Login to MI")
 }
+
+func TestDeleteUserWithoutEnvFlag(t *testing.T) {
+	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
+	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Username)
+	response, _ := base.Execute(t, "mi", "delete", "user", newUserName)
+	base.Log(response)
+	expected := `required flag(s) "environment" not set`
+	assert.Contains(t, response, expected)
+}
+
+func TestDeleteUserWithInvalidArgs(t *testing.T) {
+	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
+	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Username)
+	response, _ := base.Execute(t, "mi", "delete", "user", "-e", "testing")
+	base.Log(response)
+	expected := "accepts 1 arg(s), received 0"
+	assert.Contains(t, response, expected)
+}
+
+func TestDeleteUserWithoutSettingUpEnv(t *testing.T) {
+	response, _ := base.Execute(t, validAddUserCmd...)
+	base.GetRowsFromTableResponse(response)
+	base.Log(response)
+	assert.Contains(t, response, "MI does not exists in testing Add it using add env")
+}
+
+func TestDeleteUserWithoutLogin(t *testing.T) {
+	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
+	response, _ := base.Execute(t, validAddUserCmd...)
+	base.GetRowsFromTableResponse(response)
+	base.Log(response)
+	assert.Contains(t, response, "Login to MI")
+}
+
+func TestDeleteUserWithInvalidUserName(t *testing.T) {
+	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
+	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Username)
+	response, _ := base.Execute(t, "mi", "delete", "user", invalidUserName, "-e", "testing")
+	base.Log(response)
+	expected := "[ERROR]: deleting user [ " + invalidUserName + " ] Requested resource not found. User: " + invalidUserName + " cannot be found."
+	assert.Contains(t, response, expected)
+}
+
+func TestDeleteUser(t *testing.T) {
+	status := testutils.AddNewUserFromAPI(config, newUserName, "password", "true")
+	assert.Contains(t, status, "Added")
+	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
+	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Username)
+	response, _ := base.Execute(t, "mi", "delete", "user", newUserName, "-e", "testing")
+	base.Log(response)
+	expected := "Deleting user [ " + newUserName + " ] status: Deleted"
+	assert.Contains(t, response, expected)
+}

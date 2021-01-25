@@ -19,14 +19,23 @@
 package testutils
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"github.com/wso2/product-apim-tooling/import-export-cli/mi/utils/artifactutils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
+
+type newUserRequestBody struct {
+	UserID   string `json:"userId"`
+	Password string `json:"password"`
+	IsAdmin  string `json:"isAdmin"`
+}
 
 // ValidateUserList validate ctl output with list of users from the Management API
 func ValidateUserList(t *testing.T, userCmd string, config *MiConfig) {
@@ -60,4 +69,35 @@ func validateUserEqual(t *testing.T, userFromCtl string, user *artifactutils.Use
 	for _, role := range user.Roles {
 		assert.Contains(t, userFromCtl, role)
 	}
+}
+
+// AddNewUserFromAPI : Adds a new user using the MI Management API
+func AddNewUserFromAPI(config *MiConfig, userName, password, isAdmin string) string {
+	body := createAddUserRequestPayload(userName, password, isAdmin)
+	addNewUserURL := getResourceURLWithQueryParam(config.MIClient.GetMiURL(), utils.MiManagementUserResource, "", "")
+
+	request := base.CreatePost(addNewUserURL, body)
+	base.SetDefaultRestAPIHeaders(config.MIClient.accessToken, request)
+	base.LogRequest("mi.AddNewUserFromAPI()", request)
+	response := base.SendHTTPRequest(request)
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("mi.AddNewUserFromAPI()", response, 200)
+
+	var data map[string]string
+	json.NewDecoder(response.Body).Decode(&data)
+	return data["status"]
+}
+
+func createAddUserRequestPayload(userName, password, isAdmin string) *bytes.Buffer {
+	body := newUserRequestBody{
+		UserID:   userName,
+		Password: password,
+		IsAdmin:  isAdmin,
+	}
+	b, err := json.Marshal(body)
+	if err != nil {
+		panic(err)
+	}
+	return bytes.NewBuffer(b)
 }
