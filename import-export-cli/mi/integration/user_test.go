@@ -29,6 +29,9 @@ import (
 const validUserName = "admin"
 const invalidUserName = "abc-user"
 const userCmd = "users"
+const newUserName = "capp-tester"
+
+var validAddUserCmd = []string{"mi", "add", "user", newUserName, "-e", "testing"}
 
 func TestGetUsers(t *testing.T) {
 	testutils.ValidateUserList(t, userCmd, config)
@@ -58,4 +61,37 @@ func TestGetUsersWithoutEnvFlag(t *testing.T) {
 
 func TestGetUsersWithInvalidArgs(t *testing.T) {
 	testutils.ExecGetCommandWithInvalidArgCount(t, config, 1, 2, false, userCmd, validUserName, invalidUserName)
+}
+
+func TestAddNewUserWithoutEnvFlag(t *testing.T) {
+	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
+	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Username)
+	response, _ := base.Execute(t, "mi", "add", "user", newUserName)
+	base.Log(response)
+	expected := `required flag(s) "environment" not set`
+	assert.Contains(t, response, expected)
+}
+
+func TestAddNewUserWithInvalidArgs(t *testing.T) {
+	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
+	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Username)
+	response, _ := base.Execute(t, "mi", "add", "user", "-e", "testing")
+	base.Log(response)
+	expected := "accepts 1 arg(s), received 0"
+	assert.Contains(t, response, expected)
+}
+
+func TestAddNewUserWithoutSettingUpEnv(t *testing.T) {
+	response, _ := base.Execute(t, validAddUserCmd...)
+	base.GetRowsFromTableResponse(response)
+	base.Log(response)
+	assert.Contains(t, response, "MI does not exists in testing Add it using add env")
+}
+
+func TestAddNewUserWithoutLogin(t *testing.T) {
+	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
+	response, _ := base.Execute(t, validAddUserCmd...)
+	base.GetRowsFromTableResponse(response)
+	base.Log(response)
+	assert.Contains(t, response, "Login to MI")
 }
