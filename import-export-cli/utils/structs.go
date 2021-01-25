@@ -40,7 +40,7 @@ type Config struct {
 	TokenType            string `yaml:"token_type"`
 	VCSDeletionEnabled   bool   `yaml:"vcs_deletion_enabled"`
 	VCSConfigFilePath    string `yaml:"vcs_config_file_path"`
-	TLSRenegotiationMode string `yaml:"tls_renegotiation_mode"`
+	TLSRenegotiationMode string `yaml:"tls-renegotiation-mode"`
 }
 
 type EnvKeys struct {
