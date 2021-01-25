@@ -35,7 +35,7 @@ func TestGetUsersFromNonAdminUser(t *testing.T) {
 	testutils.SetupAndLoginToMI(t, nonAdminConfig)
 	response, _ := base.Execute(t, "mi", "get", "users", "-e", "testing")
 	base.Log(response)
-	assert.Contains(t, response, "[ERROR]: Getting List of users 404 Not Found")
+	assert.Contains(t, response, "[ERROR]: Getting List of users 403 Forbidden")
 }
 
 func TestGetUserByNameFromNonAdminUser(t *testing.T) {
@@ -43,7 +43,7 @@ func TestGetUserByNameFromNonAdminUser(t *testing.T) {
 	testutils.SetupAndLoginToMI(t, nonAdminConfig)
 	response, _ := base.Execute(t, "mi", "get", "users", validUserName, "-e", "testing")
 	base.Log(response)
-	assert.Contains(t, response, "[ERROR]: Getting Information of users [ "+validUserName+" ]  404 Not Found")
+	assert.Contains(t, response, "[ERROR]: Getting Information of users [ "+validUserName+" ]  403 Forbidden")
 }
 
 func TestGetNonExistingUserByNameFromNonAdminUser(t *testing.T) {
@@ -51,7 +51,7 @@ func TestGetNonExistingUserByNameFromNonAdminUser(t *testing.T) {
 	testutils.SetupAndLoginToMI(t, nonAdminConfig)
 	response, _ := base.Execute(t, "mi", "get", "users", invalidUserName, "-e", "testing")
 	base.Log(response)
-	assert.Contains(t, response, "[ERROR]: Getting Information of users [ "+invalidUserName+" ]  404 Not Found")
+	assert.Contains(t, response, "[ERROR]: Getting Information of users [ "+invalidUserName+" ]  403 Forbidden")
 }
 
 func TestDeleteUserWithInvalidUserNameFromNonAdminUser(t *testing.T) {
@@ -59,7 +59,7 @@ func TestDeleteUserWithInvalidUserNameFromNonAdminUser(t *testing.T) {
 	testutils.SetupAndLoginToMI(t, nonAdminConfig)
 	response, _ := base.Execute(t, "mi", "delete", "user", invalidUserName, "-e", "testing")
 	base.Log(response)
-	expected := "[ERROR]: deleting user [ " + invalidUserName + " ] 404 Not Found"
+	expected := "[ERROR]: deleting user [ " + invalidUserName + " ] 403 Forbidden"
 	assert.Contains(t, response, expected)
 }
 
@@ -68,7 +68,7 @@ func TestDeleteUserFromNonAdminUser(t *testing.T) {
 	testutils.SetupAndLoginToMI(t, nonAdminConfig)
 	response, _ := base.Execute(t, "mi", "delete", "user", validUserName, "-e", "testing")
 	base.Log(response)
-	expected := "[ERROR]: deleting user [ " + validUserName + " ] 404 Not Found"
+	expected := "[ERROR]: deleting user [ " + validUserName + " ] 403 Forbidden"
 	assert.Contains(t, response, expected)
 }
 
