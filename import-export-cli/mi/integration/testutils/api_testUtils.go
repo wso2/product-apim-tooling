@@ -49,7 +49,7 @@ func validateAPIListEqual(t *testing.T, apisListFromCtl string, apisList *artifa
 func ValidateAPI(t *testing.T, apisCmd string, config *MiConfig, apiName string) {
 	t.Helper()
 	output, _ := GetArtifact(t, apisCmd, apiName, config)
-	artifactList := config.MIClient.GetArtifactFromAPI(utils.MiManagementAPIResource, "apiName", apiName, &artifactutils.IntegrationAPI{})
+	artifactList := config.MIClient.GetArtifactFromAPI(utils.MiManagementAPIResource, getParamMap("apiName", apiName), &artifactutils.IntegrationAPI{})
 	validateAPIEqual(t, output, (artifactList.(*artifactutils.IntegrationAPI)))
 }
 

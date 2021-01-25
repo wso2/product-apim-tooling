@@ -21,6 +21,7 @@ package testutils
 import (
 	"encoding/json"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
@@ -100,12 +101,28 @@ func getResourceURL(miURL, resource string) string {
 	return miURL + "/" + utils.MiManagementAPIContext + "/" + resource
 }
 
-func getResourceURLWithQueryParam(miURL, resource, queryKey, queryValue string) string {
-	return getResourceURL(miURL, resource) + "?" + queryKey + "=" + queryValue
+func getResourceURLWithQueryParam(miURL, resource string, params map[string]string) string {
+	var path strings.Builder
+	path.WriteString(getResourceURL(miURL, resource))
+	if params != nil {
+		path.WriteString("?")
+		for key, value := range params {
+			path.WriteString(key)
+			path.WriteString("=")
+			path.WriteString(value)
+		}
+	}
+	return path.String()
 }
 
 // SetupAndLoginToMI setup Mi instance and login to it
 func SetupAndLoginToMI(t *testing.T, config *MiConfig) {
 	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
 	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Password)
+}
+
+func getParamMap(key, value string) map[string]string {
+	paramMap := make(map[string]string)
+	paramMap[key] = value
+	return paramMap
 }

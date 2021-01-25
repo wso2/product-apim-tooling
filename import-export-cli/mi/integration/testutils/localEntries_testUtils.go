@@ -49,7 +49,7 @@ func validateLocalEntryListEqual(t *testing.T, localEntryListFromCtl string, loc
 func ValidateLocalEntry(t *testing.T, localEntryCmd string, config *MiConfig, localEntryName string) {
 	t.Helper()
 	output, _ := GetArtifact(t, localEntryCmd, localEntryName, config)
-	artifactList := config.MIClient.GetArtifactFromAPI(utils.MiManagementLocalEntrieResource, "localEntryName", localEntryName, &artifactutils.LocalEntryData{})
+	artifactList := config.MIClient.GetArtifactFromAPI(utils.MiManagementLocalEntrieResource, getParamMap("localEntryName", localEntryName), &artifactutils.LocalEntryData{})
 	validateLocalEntryEqual(t, output, (artifactList.(*artifactutils.LocalEntryData)))
 }
 

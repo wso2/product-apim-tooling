@@ -30,7 +30,7 @@ import (
 func ValidateLogger(t *testing.T, logLevelCmd string, config *MiConfig, loggerName string) {
 	t.Helper()
 	output, _ := GetArtifact(t, logLevelCmd, loggerName, config)
-	artifactList := config.MIClient.GetArtifactFromAPI(utils.MiManagementLoggingResource, "loggerName", loggerName, &artifactutils.Logger{})
+	artifactList := config.MIClient.GetArtifactFromAPI(utils.MiManagementLoggingResource, getParamMap("loggerName", loggerName), &artifactutils.Logger{})
 	validateLoggerEqual(t, output, (artifactList.(*artifactutils.Logger)))
 }
 

@@ -49,7 +49,7 @@ func validateProxyServiceListEqual(t *testing.T, proxyServiceListFromCtl string,
 func ValidateProxyService(t *testing.T, proxyServiceCmd string, config *MiConfig, proxyServiceName string) {
 	t.Helper()
 	output, _ := GetArtifact(t, proxyServiceCmd, proxyServiceName, config)
-	artifactList := config.MIClient.GetArtifactFromAPI(utils.MiManagementProxyServiceResource, "proxyServiceName", proxyServiceName, &artifactutils.Proxy{})
+	artifactList := config.MIClient.GetArtifactFromAPI(utils.MiManagementProxyServiceResource, getParamMap("proxyServiceName", proxyServiceName), &artifactutils.Proxy{})
 	validateProxyServiceEqual(t, output, (artifactList.(*artifactutils.Proxy)))
 }
 

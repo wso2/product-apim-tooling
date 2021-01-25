@@ -49,7 +49,7 @@ func validateEndpointListEqual(t *testing.T, endpointsListFromCtl string, endpoi
 func ValidateEndpoint(t *testing.T, endpointCmd string, config *MiConfig, endpointName string) {
 	t.Helper()
 	output, _ := GetArtifact(t, endpointCmd, endpointName, config)
-	artifactList := config.MIClient.GetArtifactFromAPI(utils.MiManagementEndpointResource, "endpointName", endpointName, &artifactutils.Endpoint{})
+	artifactList := config.MIClient.GetArtifactFromAPI(utils.MiManagementEndpointResource, getParamMap("endpointName", endpointName), &artifactutils.Endpoint{})
 	validateEndpointEqual(t, output, (artifactList.(*artifactutils.Endpoint)))
 }
 

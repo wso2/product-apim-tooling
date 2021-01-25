@@ -49,7 +49,7 @@ func validateMessageProcessorListEqual(t *testing.T, messageProcessorListFromCtl
 func ValidateMessageProcessor(t *testing.T, messageProcessorCmd string, config *MiConfig, messageProcessorName string) {
 	t.Helper()
 	output, _ := GetArtifact(t, messageProcessorCmd, messageProcessorName, config)
-	artifactList := config.MIClient.GetArtifactFromAPI(utils.MiManagementMessageProcessorResource, "messageProcessorName", messageProcessorName, &artifactutils.MessageProcessorData{})
+	artifactList := config.MIClient.GetArtifactFromAPI(utils.MiManagementMessageProcessorResource, getParamMap("messageProcessorName", messageProcessorName), &artifactutils.MessageProcessorData{})
 	validateMessageProcessorEqual(t, output, (artifactList.(*artifactutils.MessageProcessorData)))
 }
 

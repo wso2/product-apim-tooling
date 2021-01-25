@@ -50,7 +50,7 @@ func validateMessageStoreListEqual(t *testing.T, messageStoreListFromCtl string,
 func ValidateMessageStore(t *testing.T, messageStoreCmd string, config *MiConfig, messageStoreName string) {
 	t.Helper()
 	output, _ := GetArtifact(t, messageStoreCmd, messageStoreName, config)
-	artifactList := config.MIClient.GetArtifactFromAPI(utils.MiManagementMessageStoreResource, "messageStoreName", messageStoreName, &artifactutils.MessageStoreData{})
+	artifactList := config.MIClient.GetArtifactFromAPI(utils.MiManagementMessageStoreResource, getParamMap("messageStoreName", messageStoreName), &artifactutils.MessageStoreData{})
 	validateMessageStoreEqual(t, output, (artifactList.(*artifactutils.MessageStoreData)))
 }
 

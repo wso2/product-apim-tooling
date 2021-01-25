@@ -59,7 +59,7 @@ func validateUserListEqual(t *testing.T, userListFromCtl string, userList *artif
 func ValidateUser(t *testing.T, userCmd string, config *MiConfig, userName string) {
 	t.Helper()
 	output, _ := GetArtifact(t, userCmd, userName, config)
-	artifactList := config.MIClient.GetArtifactFromAPI(utils.MiManagementUserResource+"/"+userName, "", "", &artifactutils.UserSummary{})
+	artifactList := config.MIClient.GetArtifactFromAPI(utils.MiManagementUserResource+"/"+userName, nil, &artifactutils.UserSummary{})
 	validateUserEqual(t, output, (artifactList.(*artifactutils.UserSummary)))
 }
 
@@ -74,7 +74,7 @@ func validateUserEqual(t *testing.T, userFromCtl string, user *artifactutils.Use
 // AddNewUserFromAPI : Adds a new user using the MI Management API
 func AddNewUserFromAPI(t *testing.T, config *MiConfig, userName, password, isAdmin string, cleanUp bool) {
 	body := createAddUserRequestPayload(userName, password, isAdmin)
-	addNewUserURL := getResourceURLWithQueryParam(config.MIClient.GetMiURL(), utils.MiManagementUserResource, "", "")
+	addNewUserURL := getResourceURLWithQueryParam(config.MIClient.GetMiURL(), utils.MiManagementUserResource, nil)
 
 	request := base.CreatePost(addNewUserURL, body)
 	base.SetDefaultRestAPIHeaders(config.MIClient.accessToken, request)
@@ -104,7 +104,7 @@ func createAddUserRequestPayload(userName, password, isAdmin string) *bytes.Buff
 }
 
 func removeUserFromAPI(config *MiConfig, userName string) {
-	deleteUserURL := getResourceURLWithQueryParam(config.MIClient.GetMiURL(), utils.MiManagementUserResource+"/"+userName, "", "")
+	deleteUserURL := getResourceURLWithQueryParam(config.MIClient.GetMiURL(), utils.MiManagementUserResource+"/"+userName, nil)
 	request := base.CreateDelete(deleteUserURL)
 	base.SetDefaultRestAPIHeaders(config.MIClient.accessToken, request)
 	base.LogRequest("mi.removeUserFromAPI()", request)

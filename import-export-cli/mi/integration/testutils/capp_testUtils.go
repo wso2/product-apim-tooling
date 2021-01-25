@@ -49,7 +49,7 @@ func validateCAppListEqual(t *testing.T, cAppsListFromCtl string, cAppsList *art
 func ValidateCApp(t *testing.T, cAppCmd string, config *MiConfig, cAppName string) {
 	t.Helper()
 	output, _ := GetArtifact(t, cAppCmd, cAppName, config)
-	artifactList := config.MIClient.GetArtifactFromAPI(utils.MiManagementCarbonAppResource, "carbonAppName", cAppName, &artifactutils.CompositeApp{})
+	artifactList := config.MIClient.GetArtifactFromAPI(utils.MiManagementCarbonAppResource, getParamMap("carbonAppName", cAppName), &artifactutils.CompositeApp{})
 	calidateCAppEqual(t, output, (artifactList.(*artifactutils.CompositeApp)))
 }
 

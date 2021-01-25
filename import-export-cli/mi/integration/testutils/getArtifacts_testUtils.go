@@ -63,8 +63,8 @@ func (instance *MiRESTClient) GetArtifactListFromAPI(resource string, artifactLi
 }
 
 // GetArtifactFromAPI : Get Artifacts from MI Management API
-func (instance *MiRESTClient) GetArtifactFromAPI(resource, artifactKey, artifactName string, artifactType interface{}) interface{} {
-	apisURL := getResourceURLWithQueryParam(instance.GetMiURL(), resource, artifactKey, artifactName)
+func (instance *MiRESTClient) GetArtifactFromAPI(resource string, params map[string]string, artifactType interface{}) interface{} {
+	apisURL := getResourceURLWithQueryParam(instance.GetMiURL(), resource, params)
 
 	request := base.CreateGet(apisURL)
 	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
