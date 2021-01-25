@@ -39,7 +39,7 @@ func TestGetLocalEntryByName(t *testing.T) {
 }
 
 func TestGetNonExistingLocalEntryByName(t *testing.T) {
-	response, _ := testutils.GetArtifact(t, localEntryCmd, invalidLocalEntryName, config)
+	response, _ := testutils.GetArtifact(t, config, localEntryCmd, invalidLocalEntryName)
 	base.Log(response)
 	assert.Contains(t, response, "[ERROR]: Getting Information of local entries [ "+invalidLocalEntryName+" ]  Reference for "+invalidLocalEntryName+" could not be resolved")
 }

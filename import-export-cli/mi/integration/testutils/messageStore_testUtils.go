@@ -49,9 +49,9 @@ func validateMessageStoreListEqual(t *testing.T, messageStoreListFromCtl string,
 // ValidateMessageStore validate ctl output with the message store from the Management API
 func ValidateMessageStore(t *testing.T, messageStoreCmd string, config *MiConfig, messageStoreName string) {
 	t.Helper()
-	output, _ := GetArtifact(t, messageStoreCmd, messageStoreName, config)
-	artifactList := config.MIClient.GetArtifactFromAPI(utils.MiManagementMessageStoreResource, getParamMap("messageStoreName", messageStoreName), &artifactutils.MessageStoreData{})
-	validateMessageStoreEqual(t, output, (artifactList.(*artifactutils.MessageStoreData)))
+	output, _ := GetArtifact(t, config, messageStoreCmd, messageStoreName)
+	artifact := config.MIClient.GetArtifactFromAPI(utils.MiManagementMessageStoreResource, getParamMap("messageStoreName", messageStoreName), &artifactutils.MessageStoreData{})
+	validateMessageStoreEqual(t, output, (artifact.(*artifactutils.MessageStoreData)))
 }
 
 func validateMessageStoreEqual(t *testing.T, messageStoreFromCtl string, messageStore *artifactutils.MessageStoreData) {

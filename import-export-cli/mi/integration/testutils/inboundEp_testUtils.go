@@ -48,9 +48,9 @@ func validateinboundEndpointListEqual(t *testing.T, inboundEndpointsListFromCtl 
 // ValidateInboundEndpoint validate ctl output with the data service from the Management API
 func ValidateInboundEndpoint(t *testing.T, inboundEndpointCmd string, config *MiConfig, inboundEndpointName string) {
 	t.Helper()
-	output, _ := GetArtifact(t, inboundEndpointCmd, inboundEndpointName, config)
-	artifactList := config.MIClient.GetArtifactFromAPI(utils.MiManagementInboundEndpointResource, getParamMap("inboundEndpointName", inboundEndpointName), &artifactutils.InboundEndpoint{})
-	validateinboundEndpointEqual(t, output, (artifactList.(*artifactutils.InboundEndpoint)))
+	output, _ := GetArtifact(t, config, inboundEndpointCmd, inboundEndpointName)
+	artifact := config.MIClient.GetArtifactFromAPI(utils.MiManagementInboundEndpointResource, getParamMap("inboundEndpointName", inboundEndpointName), &artifactutils.InboundEndpoint{})
+	validateinboundEndpointEqual(t, output, (artifact.(*artifactutils.InboundEndpoint)))
 }
 
 func validateinboundEndpointEqual(t *testing.T, inboundEndpointsListFromCtl string, inboundEndpoint *artifactutils.InboundEndpoint) {

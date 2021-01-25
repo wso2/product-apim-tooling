@@ -48,9 +48,9 @@ func validateLocalEntryListEqual(t *testing.T, localEntryListFromCtl string, loc
 // ValidateLocalEntry validate ctl output with the local entry from the Management API
 func ValidateLocalEntry(t *testing.T, localEntryCmd string, config *MiConfig, localEntryName string) {
 	t.Helper()
-	output, _ := GetArtifact(t, localEntryCmd, localEntryName, config)
-	artifactList := config.MIClient.GetArtifactFromAPI(utils.MiManagementLocalEntrieResource, getParamMap("localEntryName", localEntryName), &artifactutils.LocalEntryData{})
-	validateLocalEntryEqual(t, output, (artifactList.(*artifactutils.LocalEntryData)))
+	output, _ := GetArtifact(t, config, localEntryCmd, localEntryName)
+	artifact := config.MIClient.GetArtifactFromAPI(utils.MiManagementLocalEntrieResource, getParamMap("localEntryName", localEntryName), &artifactutils.LocalEntryData{})
+	validateLocalEntryEqual(t, output, (artifact.(*artifactutils.LocalEntryData)))
 }
 
 func validateLocalEntryEqual(t *testing.T, localEntryListFromCtl string, localEntry *artifactutils.LocalEntryData) {

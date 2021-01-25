@@ -30,18 +30,18 @@ import (
 // ListArtifacts return ctl out from the command get artifactType
 func ListArtifacts(t *testing.T, artifactType string, config *MiConfig) (string, error) {
 	t.Helper()
-	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Password)
+	SetupAndLoginToMI(t, config)
 	output, err := base.Execute(t, "mi", "get", artifactType, "-e", config.MIClient.GetEnvName())
 	return output, err
 }
 
 // GetArtifact return ctl out from the command get artifactType artifactName
-func GetArtifact(t *testing.T, artifactType, artifactName string, config *MiConfig) (string, error) {
+func GetArtifact(t *testing.T, config *MiConfig, args ...string) (string, error) {
 	t.Helper()
-	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Password)
-	output, err := base.Execute(t, "mi", "get", artifactType, artifactName, "-e", config.MIClient.GetEnvName())
+	SetupAndLoginToMI(t, config)
+	getCmdArgs := []string{"mi", "get", "-e", config.MIClient.GetEnvName()}
+	getCmdArgs = append(getCmdArgs, args...)
+	output, err := base.Execute(t, getCmdArgs...)
 	return output, err
 }
 
@@ -82,11 +82,9 @@ func (instance *MiRESTClient) GetArtifactFromAPI(resource string, params map[str
 // ExecGetCommandWithoutSettingEnv run get artifactType without setting up an environment
 func ExecGetCommandWithoutSettingEnv(t *testing.T, args ...string) {
 	t.Helper()
-	// response, _ := base.Execute(t, "mi", "get", artifactType, "-e", "testing")
 	getCmdArgs := []string{"mi", "get", "-e", "testing"}
 	getCmdArgs = append(getCmdArgs, args...)
 	response, _ := base.Execute(t, getCmdArgs...)
-	base.GetRowsFromTableResponse(response)
 	base.Log(response)
 	assert.Contains(t, response, "MI does not exists in testing Add it using add env")
 }
@@ -95,10 +93,9 @@ func ExecGetCommandWithoutSettingEnv(t *testing.T, args ...string) {
 func ExecGetCommandWithoutLogin(t *testing.T, artifactType string, config *MiConfig, args ...string) {
 	t.Helper()
 	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	getCmdArgs := []string{"mi", "get", artifactType, "-e", "testing"}
+	getCmdArgs := []string{"mi", "get", artifactType, "-e", config.MIClient.GetEnvName()}
 	getCmdArgs = append(getCmdArgs, args...)
 	response, _ := base.Execute(t, getCmdArgs...)
-	base.GetRowsFromTableResponse(response)
 	base.Log(response)
 	assert.Contains(t, response, "Login to MI")
 }
@@ -106,12 +103,10 @@ func ExecGetCommandWithoutLogin(t *testing.T, artifactType string, config *MiCon
 // ExecGetCommandWithoutEnvFlag run get artifactType without -e flag
 func ExecGetCommandWithoutEnvFlag(t *testing.T, artifactType string, config *MiConfig, args ...string) {
 	t.Helper()
-	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, "testing", AdminUserName, AdminPassword)
+	SetupAndLoginToMI(t, config)
 	getCmdArgs := []string{"mi", "get", artifactType}
 	getCmdArgs = append(getCmdArgs, args...)
 	response, _ := base.Execute(t, getCmdArgs...)
-	base.GetRowsFromTableResponse(response)
 	base.Log(response)
 	assert.Contains(t, response, `required flag(s) "environment" not set`)
 }
@@ -119,12 +114,10 @@ func ExecGetCommandWithoutEnvFlag(t *testing.T, artifactType string, config *MiC
 // ExecGetCommandWithInvalidArgCount run get artifactType with invalid number of args
 func ExecGetCommandWithInvalidArgCount(t *testing.T, config *MiConfig, required, passed int, fixedArgCout bool, args ...string) {
 	t.Helper()
-	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, "testing", AdminUserName, AdminPassword)
+	SetupAndLoginToMI(t, config)
 	getCmdArgs := []string{"mi", "get"}
 	getCmdArgs = append(getCmdArgs, args...)
 	response, _ := base.Execute(t, getCmdArgs...)
-	base.GetRowsFromTableResponse(response)
 	base.Log(response)
 	expected := fmt.Sprintf("accepts at most %v arg(s), received %v", required, passed)
 	if fixedArgCout {

@@ -48,9 +48,9 @@ func validateTaskListEqual(t *testing.T, taskListFromCtl string, taskList *artif
 // ValidateTask validate ctl output with the task from the Management API
 func ValidateTask(t *testing.T, taskCmd string, config *MiConfig, taskName string) {
 	t.Helper()
-	output, _ := GetArtifact(t, taskCmd, taskName, config)
-	artifactList := config.MIClient.GetArtifactFromAPI(utils.MiManagementTaskResource, getParamMap("taskName", taskName), &artifactutils.Task{})
-	validateTaskEqual(t, output, (artifactList.(*artifactutils.Task)))
+	output, _ := GetArtifact(t, config, taskCmd, taskName)
+	artifact := config.MIClient.GetArtifactFromAPI(utils.MiManagementTaskResource, getParamMap("taskName", taskName), &artifactutils.Task{})
+	validateTaskEqual(t, output, (artifact.(*artifactutils.Task)))
 }
 
 func validateTaskEqual(t *testing.T, taskFromCtl string, task *artifactutils.Task) {

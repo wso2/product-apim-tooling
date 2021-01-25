@@ -58,9 +58,9 @@ func validateUserListEqual(t *testing.T, userListFromCtl string, userList *artif
 // ValidateUser validate ctl output with the user from the Management API
 func ValidateUser(t *testing.T, userCmd string, config *MiConfig, userName string) {
 	t.Helper()
-	output, _ := GetArtifact(t, userCmd, userName, config)
-	artifactList := config.MIClient.GetArtifactFromAPI(utils.MiManagementUserResource+"/"+userName, nil, &artifactutils.UserSummary{})
-	validateUserEqual(t, output, (artifactList.(*artifactutils.UserSummary)))
+	output, _ := GetArtifact(t, config, userCmd, userName)
+	artifact := config.MIClient.GetArtifactFromAPI(utils.MiManagementUserResource+"/"+userName, nil, &artifactutils.UserSummary{})
+	validateUserEqual(t, output, (artifact.(*artifactutils.UserSummary)))
 }
 
 func validateUserEqual(t *testing.T, userFromCtl string, user *artifactutils.UserSummary) {

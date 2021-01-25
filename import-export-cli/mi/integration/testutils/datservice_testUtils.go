@@ -48,9 +48,9 @@ func validateDataServiceListEqual(t *testing.T, dataServicesListFromCtl string, 
 // ValidateDataService validate ctl output with the data service from the Management API
 func ValidateDataService(t *testing.T, dataServiceCmd string, config *MiConfig, dataServiceName string) {
 	t.Helper()
-	output, _ := GetArtifact(t, dataServiceCmd, dataServiceName, config)
-	artifactList := config.MIClient.GetArtifactFromAPI(utils.MiManagementDataServiceResource, getParamMap("dataServiceName", dataServiceName), &artifactutils.DataServiceInfo{})
-	validateDataServiceEqual(t, output, (artifactList.(*artifactutils.DataServiceInfo)))
+	output, _ := GetArtifact(t, config, dataServiceCmd, dataServiceName)
+	artifact := config.MIClient.GetArtifactFromAPI(utils.MiManagementDataServiceResource, getParamMap("dataServiceName", dataServiceName), &artifactutils.DataServiceInfo{})
+	validateDataServiceEqual(t, output, (artifact.(*artifactutils.DataServiceInfo)))
 }
 
 func validateDataServiceEqual(t *testing.T, dataServicesListFromCtl string, dataService *artifactutils.DataServiceInfo) {

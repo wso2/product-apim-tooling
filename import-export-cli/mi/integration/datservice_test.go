@@ -39,7 +39,7 @@ func TestGetDataServiceByName(t *testing.T) {
 }
 
 func TestGetNonExistingDataServiceByName(t *testing.T) {
-	response, _ := testutils.GetArtifact(t, dataServiceCmd, invalidDataServiceName, config)
+	response, _ := testutils.GetArtifact(t, config, dataServiceCmd, invalidDataServiceName)
 	base.Log(response)
 	assert.Contains(t, response, "[ERROR]: Getting Information of data services [ "+invalidDataServiceName+" ]  404 Not Found")
 }

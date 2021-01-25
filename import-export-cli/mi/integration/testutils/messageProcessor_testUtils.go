@@ -48,9 +48,9 @@ func validateMessageProcessorListEqual(t *testing.T, messageProcessorListFromCtl
 // ValidateMessageProcessor validate ctl output with the message processor from the Management API
 func ValidateMessageProcessor(t *testing.T, messageProcessorCmd string, config *MiConfig, messageProcessorName string) {
 	t.Helper()
-	output, _ := GetArtifact(t, messageProcessorCmd, messageProcessorName, config)
-	artifactList := config.MIClient.GetArtifactFromAPI(utils.MiManagementMessageProcessorResource, getParamMap("messageProcessorName", messageProcessorName), &artifactutils.MessageProcessorData{})
-	validateMessageProcessorEqual(t, output, (artifactList.(*artifactutils.MessageProcessorData)))
+	output, _ := GetArtifact(t, config, messageProcessorCmd, messageProcessorName)
+	artifact := config.MIClient.GetArtifactFromAPI(utils.MiManagementMessageProcessorResource, getParamMap("messageProcessorName", messageProcessorName), &artifactutils.MessageProcessorData{})
+	validateMessageProcessorEqual(t, output, (artifact.(*artifactutils.MessageProcessorData)))
 }
 
 func validateMessageProcessorEqual(t *testing.T, messageProcessorFromCtl string, messageProcessor *artifactutils.MessageProcessorData) {

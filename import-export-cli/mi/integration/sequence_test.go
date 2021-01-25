@@ -39,7 +39,7 @@ func TestGetSequenceByName(t *testing.T) {
 }
 
 func TestGetNonExistingSequenceByName(t *testing.T) {
-	response, _ := testutils.GetArtifact(t, sequenceCmd, invalidSequenceName, config)
+	response, _ := testutils.GetArtifact(t, config, sequenceCmd, invalidSequenceName)
 	base.Log(response)
 	assert.Contains(t, response, "[ERROR]: Getting Information of sequences [ "+invalidSequenceName+" ]  404 Not Found")
 }

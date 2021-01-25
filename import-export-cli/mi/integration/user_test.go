@@ -42,7 +42,7 @@ func TestGetUserByName(t *testing.T) {
 }
 
 func TestGetNonExistingUserByName(t *testing.T) {
-	response, _ := testutils.GetArtifact(t, userCmd, invalidUserName, config)
+	response, _ := testutils.GetArtifact(t, config, userCmd, invalidUserName)
 	base.Log(response)
 	assert.Contains(t, response, "[ERROR]: Getting Information of users [ "+invalidUserName+" ]  Requested resource not found. User: "+invalidUserName+" cannot be found.")
 }
@@ -81,7 +81,6 @@ func TestAddNewUserWithInvalidArgs(t *testing.T) {
 
 func TestAddNewUserWithoutSettingUpEnv(t *testing.T) {
 	response, _ := base.Execute(t, validAddUserCmd...)
-	base.GetRowsFromTableResponse(response)
 	base.Log(response)
 	assert.Contains(t, response, "MI does not exists in testing Add it using add env")
 }
@@ -89,7 +88,6 @@ func TestAddNewUserWithoutSettingUpEnv(t *testing.T) {
 func TestAddNewUserWithoutLogin(t *testing.T) {
 	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
 	response, _ := base.Execute(t, validAddUserCmd...)
-	base.GetRowsFromTableResponse(response)
 	base.Log(response)
 	assert.Contains(t, response, "Login to MI")
 }
@@ -112,7 +110,6 @@ func TestDeleteUserWithInvalidArgs(t *testing.T) {
 
 func TestDeleteUserWithoutSettingUpEnv(t *testing.T) {
 	response, _ := base.Execute(t, validAddUserCmd...)
-	base.GetRowsFromTableResponse(response)
 	base.Log(response)
 	assert.Contains(t, response, "MI does not exists in testing Add it using add env")
 }
@@ -120,7 +117,6 @@ func TestDeleteUserWithoutSettingUpEnv(t *testing.T) {
 func TestDeleteUserWithoutLogin(t *testing.T) {
 	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
 	response, _ := base.Execute(t, validAddUserCmd...)
-	base.GetRowsFromTableResponse(response)
 	base.Log(response)
 	assert.Contains(t, response, "Login to MI")
 }

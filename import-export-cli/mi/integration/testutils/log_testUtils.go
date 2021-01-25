@@ -50,7 +50,7 @@ func validateLogFileListEqual(t *testing.T, logFileListFromCtl string, logFileLi
 
 // ValidateLogFile validate wether the log file is downloaded
 func ValidateLogFile(t *testing.T, config *MiConfig, logCmd, loggerName string) {
-	GetArtifact(t, logCmd, loggerName, config)
+	GetArtifact(t, config, logCmd, loggerName)
 	assert.True(t, base.IsFileAvailable(loggerName))
 	t.Cleanup(func() {
 		os.RemoveAll(loggerName)

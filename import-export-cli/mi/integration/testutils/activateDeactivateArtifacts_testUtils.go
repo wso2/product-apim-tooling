@@ -39,8 +39,7 @@ func ExecDeactivateCommand(t *testing.T, config *MiConfig, artifactType, artifac
 }
 
 func execActivateDeactivateCommand(t *testing.T, config *MiConfig, mode, artifactType, artifactName, expected string) {
-	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Password)
+	SetupAndLoginToMI(t, config)
 	response, _ := base.Execute(t, "mi", mode, artifactType, artifactName, "-e", "testing")
 	base.Log(response)
 	assert.Contains(t, response, expected)
@@ -62,7 +61,6 @@ func execActivateDeactivateCommandWithoutSettingEnv(t *testing.T, mode string, a
 	getCmdArgs := []string{"mi", mode, "-e", "testing"}
 	getCmdArgs = append(getCmdArgs, args...)
 	response, _ := base.Execute(t, getCmdArgs...)
-	base.GetRowsFromTableResponse(response)
 	base.Log(response)
 	assert.Contains(t, response, "MI does not exists in testing Add it using add env")
 }
@@ -84,7 +82,6 @@ func execActivateDeactivateCommandWithoutLogin(t *testing.T, config *MiConfig, m
 	getCmdArgs := []string{"mi", mode, artifactType, artifactName, "-e", "testing"}
 	getCmdArgs = append(getCmdArgs, args...)
 	response, _ := base.Execute(t, getCmdArgs...)
-	base.GetRowsFromTableResponse(response)
 	base.Log(response)
 	assert.Contains(t, response, "Login to MI")
 }
@@ -102,12 +99,10 @@ func ExecDeactivateCommandWithoutEnvFlag(t *testing.T, config *MiConfig, artifac
 }
 
 func execActivateDeactivateCommandWithoutEnvFlag(t *testing.T, config *MiConfig, mode, artifactType, artifactName string, args []string) {
-	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, "testing", AdminUserName, AdminPassword)
+	SetupAndLoginToMI(t, config)
 	getCmdArgs := []string{"mi", mode, artifactType, artifactName}
 	getCmdArgs = append(getCmdArgs, args...)
 	response, _ := base.Execute(t, getCmdArgs...)
-	base.GetRowsFromTableResponse(response)
 	base.Log(response)
 	assert.Contains(t, response, `required flag(s) "environment" not set`)
 }
@@ -125,12 +120,10 @@ func ExecDeactivateCommandWithInvalidArgCount(t *testing.T, config *MiConfig, re
 }
 
 func execActivateDeactivateCommandWithInvalidArgs(t *testing.T, config *MiConfig, mode string, required, passed int, args []string) {
-	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, "testing", AdminUserName, AdminPassword)
+	SetupAndLoginToMI(t, config)
 	getCmdArgs := []string{"mi", mode}
 	getCmdArgs = append(getCmdArgs, args...)
 	response, _ := base.Execute(t, getCmdArgs...)
-	base.GetRowsFromTableResponse(response)
 	base.Log(response)
 	expected := fmt.Sprintf("accepts %v arg(s), received %v", required, passed)
 	assert.Contains(t, response, expected)

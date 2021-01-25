@@ -40,7 +40,7 @@ func TestGetLoggerByName(t *testing.T) {
 }
 
 func TestGetNonExistingLoggerByName(t *testing.T) {
-	response, _ := testutils.GetArtifact(t, logLevelCmd, invalidLoggerName, config)
+	response, _ := testutils.GetArtifact(t, config, logLevelCmd, invalidLoggerName)
 	base.Log(response)
 	assert.Contains(t, response, "[ERROR]: Getting Information of logger [ "+invalidLoggerName+" ]  Logger name ('"+invalidLoggerName+"') not found")
 }
@@ -87,7 +87,6 @@ func TestAddNewLoggerWithInvalidArgs(t *testing.T) {
 
 func TestAddNewLoggerWithoutSettingUpEnv(t *testing.T) {
 	response, _ := base.Execute(t, validAddLoggerCmd...)
-	base.GetRowsFromTableResponse(response)
 	base.Log(response)
 	assert.Contains(t, response, "MI does not exists in testing Add it using add env")
 }
@@ -95,7 +94,6 @@ func TestAddNewLoggerWithoutSettingUpEnv(t *testing.T) {
 func TestAddLoggerWithoutLogin(t *testing.T) {
 	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
 	response, _ := base.Execute(t, validAddLoggerCmd...)
-	base.GetRowsFromTableResponse(response)
 	base.Log(response)
 	assert.Contains(t, response, "Login to MI")
 }
@@ -142,7 +140,6 @@ func TestUpdateLoggerWithInvalidArgs(t *testing.T) {
 
 func TestUpdateLoggerWithoutSettingUpEnv(t *testing.T) {
 	response, _ := base.Execute(t, validUpdateLoggerCmd...)
-	base.GetRowsFromTableResponse(response)
 	base.Log(response)
 	assert.Contains(t, response, "MI does not exists in testing Add it using add env")
 }
@@ -150,7 +147,6 @@ func TestUpdateLoggerWithoutSettingUpEnv(t *testing.T) {
 func TestUpdateLoggerWithoutLogin(t *testing.T) {
 	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
 	response, _ := base.Execute(t, validUpdateLoggerCmd...)
-	base.GetRowsFromTableResponse(response)
 	base.Log(response)
 	assert.Contains(t, response, "Login to MI")
 }

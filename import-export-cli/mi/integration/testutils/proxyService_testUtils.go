@@ -48,9 +48,9 @@ func validateProxyServiceListEqual(t *testing.T, proxyServiceListFromCtl string,
 // ValidateProxyService validate ctl output with the proxy from the Management API
 func ValidateProxyService(t *testing.T, proxyServiceCmd string, config *MiConfig, proxyServiceName string) {
 	t.Helper()
-	output, _ := GetArtifact(t, proxyServiceCmd, proxyServiceName, config)
-	artifactList := config.MIClient.GetArtifactFromAPI(utils.MiManagementProxyServiceResource, getParamMap("proxyServiceName", proxyServiceName), &artifactutils.Proxy{})
-	validateProxyServiceEqual(t, output, (artifactList.(*artifactutils.Proxy)))
+	output, _ := GetArtifact(t, config, proxyServiceCmd, proxyServiceName)
+	artifact := config.MIClient.GetArtifactFromAPI(utils.MiManagementProxyServiceResource, getParamMap("proxyServiceName", proxyServiceName), &artifactutils.Proxy{})
+	validateProxyServiceEqual(t, output, (artifact.(*artifactutils.Proxy)))
 }
 
 func validateProxyServiceEqual(t *testing.T, proxyServiceFromCtl string, proxyService *artifactutils.Proxy) {

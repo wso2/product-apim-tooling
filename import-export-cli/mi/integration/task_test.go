@@ -39,7 +39,7 @@ func TestGetTaskByName(t *testing.T) {
 }
 
 func TestGetNonExistingTaskByName(t *testing.T) {
-	response, _ := testutils.GetArtifact(t, taskCmd, invalidTaskName, config)
+	response, _ := testutils.GetArtifact(t, config, taskCmd, invalidTaskName)
 	base.Log(response)
 	assert.Contains(t, response, "[ERROR]: Getting Information of tasks [ "+invalidTaskName+" ]  Specified task "+invalidTaskName+" not found")
 }

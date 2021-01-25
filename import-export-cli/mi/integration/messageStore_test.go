@@ -39,7 +39,7 @@ func TestGetMessageStoreByName(t *testing.T) {
 }
 
 func TestGetNonExistingMessageStoreByName(t *testing.T) {
-	response, _ := testutils.GetArtifact(t, messageStoreCmd, invalidMessageStore, config)
+	response, _ := testutils.GetArtifact(t, config, messageStoreCmd, invalidMessageStore)
 	base.Log(response)
 	assert.Contains(t, response, "[ERROR]: Getting Information of message stores [ "+invalidMessageStore+" ]  Specified message store ('"+invalidMessageStore+"') not found")
 }

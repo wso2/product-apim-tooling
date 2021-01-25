@@ -29,7 +29,7 @@ import (
 // ValidateLogger validate ctl output with the logger from the Management API
 func ValidateLogger(t *testing.T, logLevelCmd string, config *MiConfig, loggerName string) {
 	t.Helper()
-	output, _ := GetArtifact(t, logLevelCmd, loggerName, config)
+	output, _ := GetArtifact(t, config, logLevelCmd, loggerName)
 	artifactList := config.MIClient.GetArtifactFromAPI(utils.MiManagementLoggingResource, getParamMap("loggerName", loggerName), &artifactutils.Logger{})
 	validateLoggerEqual(t, output, (artifactList.(*artifactutils.Logger)))
 }

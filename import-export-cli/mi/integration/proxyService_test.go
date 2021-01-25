@@ -40,7 +40,7 @@ func TestGetProxyServiceByName(t *testing.T) {
 }
 
 func TestGetNonExistingProxyServiceByName(t *testing.T) {
-	response, _ := testutils.GetArtifact(t, proxyServicesCmd, invalidProxyServiceName, config)
+	response, _ := testutils.GetArtifact(t, config, proxyServicesCmd, invalidProxyServiceName)
 	base.Log(response)
 	assert.Contains(t, response, "[ERROR]: Getting Information of proxy services [ "+invalidProxyServiceName+" ]  404 Not Found")
 }

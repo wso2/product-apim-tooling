@@ -39,7 +39,7 @@ func TestGetCAppByName(t *testing.T) {
 }
 
 func TestGetNonExistingCAppByName(t *testing.T) {
-	response, _ := testutils.GetArtifact(t, cAppCmd, invalidCAppName, config)
+	response, _ := testutils.GetArtifact(t, config, cAppCmd, invalidCAppName)
 	base.Log(response)
 	assert.Contains(t, response, "[ERROR]: Getting Information of composite apps [ "+invalidCAppName+" ]  404 Not Found")
 }

@@ -39,7 +39,7 @@ func TestGetAPIByName(t *testing.T) {
 }
 
 func TestGetNonExistingAPIByName(t *testing.T) {
-	response, _ := testutils.GetArtifact(t, apisCmd, invalidAPIName, config)
+	response, _ := testutils.GetArtifact(t, config, apisCmd, invalidAPIName)
 	base.Log(response)
 	assert.Contains(t, response, "[ERROR]: Getting Information of "+apisCmd+" [ "+invalidAPIName+" ]  404 Not Found")
 }

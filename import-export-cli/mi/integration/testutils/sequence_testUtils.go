@@ -48,9 +48,9 @@ func validateSequenceListEqual(t *testing.T, sequenceListFromCtl string, sequenc
 // ValidateSequence validate ctl output with the sequence from the Management API
 func ValidateSequence(t *testing.T, sequenceCmd string, config *MiConfig, sequenceName string) {
 	t.Helper()
-	output, _ := GetArtifact(t, sequenceCmd, sequenceName, config)
-	artifactList := config.MIClient.GetArtifactFromAPI(utils.MiManagementSequenceResource, getParamMap("sequenceName", sequenceName), &artifactutils.Sequence{})
-	validateSequenceEqual(t, output, (artifactList.(*artifactutils.Sequence)))
+	output, _ := GetArtifact(t, config, sequenceCmd, sequenceName)
+	artifact := config.MIClient.GetArtifactFromAPI(utils.MiManagementSequenceResource, getParamMap("sequenceName", sequenceName), &artifactutils.Sequence{})
+	validateSequenceEqual(t, output, (artifact.(*artifactutils.Sequence)))
 }
 
 func validateSequenceEqual(t *testing.T, sequenceFromCtl string, sequence *artifactutils.Sequence) {

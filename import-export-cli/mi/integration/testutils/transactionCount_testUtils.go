@@ -33,8 +33,8 @@ func ValidateTransaction(t *testing.T, transactionCmd string, config *MiConfig) 
 	t.Helper()
 	output, _ := ListArtifacts(t, transactionCmd, config)
 	var transactionCountResource = utils.MiManagementTransactionResource + "/" + utils.MiManagementTransactionCountResource
-	artifactList := config.MIClient.GetArtifactListFromAPI(transactionCountResource, &artifactutils.TransactionCount{})
-	validateTransactionEqual(t, output, (artifactList.(*artifactutils.TransactionCount)))
+	artifact := config.MIClient.GetArtifactListFromAPI(transactionCountResource, &artifactutils.TransactionCount{})
+	validateTransactionEqual(t, output, (artifact.(*artifactutils.TransactionCount)))
 }
 
 func validateTransactionEqual(t *testing.T, transactionFromCtl string, transaction *artifactutils.TransactionCount) {

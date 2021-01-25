@@ -40,7 +40,7 @@ func TestGetMessageProcessorByName(t *testing.T) {
 }
 
 func TestGetNonExistingMessageProcessorByName(t *testing.T) {
-	response, _ := testutils.GetArtifact(t, messageProcessorsCmd, invalidMessageProcessor, config)
+	response, _ := testutils.GetArtifact(t, config, messageProcessorsCmd, invalidMessageProcessor)
 	base.Log(response)
 	assert.Contains(t, response, "[ERROR]: Getting Information of message processors [ "+invalidMessageProcessor+" ]  Specified message processor ('"+invalidMessageProcessor+"') not found")
 }

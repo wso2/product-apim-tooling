@@ -39,7 +39,7 @@ func TestGetLogByName(t *testing.T) {
 }
 
 func TestGetNonExistingLogFileByName(t *testing.T) {
-	response, _ := testutils.GetArtifact(t, logsCmd, invalidLogFileName, config)
+	response, _ := testutils.GetArtifact(t, config, logsCmd, invalidLogFileName)
 	base.Log(response)
 	assert.Contains(t, response, "[ERROR]: Getting Information of log file [ "+invalidLogFileName+" ]  500 Internal Server Error")
 }

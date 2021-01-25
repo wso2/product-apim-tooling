@@ -39,7 +39,7 @@ func TestGetInboundEndpointByName(t *testing.T) {
 }
 
 func TestGetNonExistingInboundEndpointByName(t *testing.T) {
-	response, _ := testutils.GetArtifact(t, inboundEndpointCmd, invalidInboundEndpointName, config)
+	response, _ := testutils.GetArtifact(t, config, inboundEndpointCmd, invalidInboundEndpointName)
 	base.Log(response)
 	assert.Contains(t, response, "[ERROR]: Getting Information of inbound endpoints [ "+invalidInboundEndpointName+" ]  404 Not Found")
 }
