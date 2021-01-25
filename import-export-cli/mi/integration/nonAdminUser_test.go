@@ -32,8 +32,7 @@ const isAdmin = "false"
 
 func TestGetUsersFromNonAdminUser(t *testing.T) {
 	testutils.AddNewUserFromAPI(t, config, nonAdminUserName, nonAdminUserPassword, isAdmin, true)
-	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, config.MIClient.GetEnvName(), nonAdminUserName, nonAdminUserPassword)
+	testutils.SetupAndLoginToMI(t, nonAdminConfig)
 	response, _ := base.Execute(t, "mi", "get", "users", "-e", "testing")
 	base.Log(response)
 	assert.Contains(t, response, "[ERROR]: Getting List of users 404 Not Found")
@@ -41,8 +40,7 @@ func TestGetUsersFromNonAdminUser(t *testing.T) {
 
 func TestGetUserByNameFromNonAdminUser(t *testing.T) {
 	testutils.AddNewUserFromAPI(t, config, nonAdminUserName, nonAdminUserPassword, isAdmin, true)
-	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, config.MIClient.GetEnvName(), nonAdminUserName, nonAdminUserPassword)
+	testutils.SetupAndLoginToMI(t, nonAdminConfig)
 	response, _ := base.Execute(t, "mi", "get", "users", validUserName, "-e", "testing")
 	base.Log(response)
 	assert.Contains(t, response, "[ERROR]: Getting Information of users [ "+validUserName+" ]  404 Not Found")
@@ -50,8 +48,7 @@ func TestGetUserByNameFromNonAdminUser(t *testing.T) {
 
 func TestGetNonExistingUserByNameFromNonAdminUser(t *testing.T) {
 	testutils.AddNewUserFromAPI(t, config, nonAdminUserName, nonAdminUserPassword, isAdmin, true)
-	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, config.MIClient.GetEnvName(), nonAdminUserName, nonAdminUserPassword)
+	testutils.SetupAndLoginToMI(t, nonAdminConfig)
 	response, _ := base.Execute(t, "mi", "get", "users", invalidUserName, "-e", "testing")
 	base.Log(response)
 	assert.Contains(t, response, "[ERROR]: Getting Information of users [ "+invalidUserName+" ]  404 Not Found")
@@ -59,8 +56,7 @@ func TestGetNonExistingUserByNameFromNonAdminUser(t *testing.T) {
 
 func TestDeleteUserWithInvalidUserNameFromNonAdminUser(t *testing.T) {
 	testutils.AddNewUserFromAPI(t, config, nonAdminUserName, nonAdminUserPassword, isAdmin, true)
-	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, config.MIClient.GetEnvName(), nonAdminUserName, nonAdminUserPassword)
+	testutils.SetupAndLoginToMI(t, nonAdminConfig)
 	response, _ := base.Execute(t, "mi", "delete", "user", invalidUserName, "-e", "testing")
 	base.Log(response)
 	expected := "[ERROR]: deleting user [ " + invalidUserName + " ] 404 Not Found"
@@ -69,8 +65,7 @@ func TestDeleteUserWithInvalidUserNameFromNonAdminUser(t *testing.T) {
 
 func TestDeleteUserFromNonAdminUser(t *testing.T) {
 	testutils.AddNewUserFromAPI(t, config, nonAdminUserName, nonAdminUserPassword, isAdmin, true)
-	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, config.MIClient.GetEnvName(), nonAdminUserName, nonAdminUserPassword)
+	testutils.SetupAndLoginToMI(t, nonAdminConfig)
 	response, _ := base.Execute(t, "mi", "delete", "user", validUserName, "-e", "testing")
 	base.Log(response)
 	expected := "[ERROR]: deleting user [ " + validUserName + " ] 404 Not Found"
@@ -79,20 +74,10 @@ func TestDeleteUserFromNonAdminUser(t *testing.T) {
 
 func TestGetAPIsFromNonAdminUser(t *testing.T) {
 	testutils.AddNewUserFromAPI(t, config, nonAdminUserName, nonAdminUserPassword, isAdmin, true)
-	nonAdminConfig := &testutils.MiConfig{
-		Username: nonAdminUserName,
-		Password: nonAdminUserPassword,
-		MIClient: miClient,
-	}
 	testutils.ValidateAPIsList(t, apisCmd, nonAdminConfig)
 }
 
 func TestGetAPIByNameFromNonAdminUser(t *testing.T) {
 	testutils.AddNewUserFromAPI(t, config, nonAdminUserName, nonAdminUserPassword, isAdmin, true)
-	nonAdminConfig := &testutils.MiConfig{
-		Username: nonAdminUserName,
-		Password: nonAdminUserPassword,
-		MIClient: miClient,
-	}
 	testutils.ValidateAPI(t, apisCmd, nonAdminConfig, validAPIName)
 }

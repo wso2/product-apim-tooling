@@ -31,6 +31,7 @@ import (
 var environment testutils.Environment
 var miClient testutils.MiRESTClient
 var config *testutils.MiConfig
+var nonAdminConfig *testutils.MiConfig
 
 func TestMain(m *testing.M) {
 	flag.Parse()
@@ -42,6 +43,11 @@ func TestMain(m *testing.M) {
 	config = &testutils.MiConfig{
 		Username: testutils.AdminUserName,
 		Password: testutils.AdminPassword,
+		MIClient: miClient,
+	}
+	nonAdminConfig = &testutils.MiConfig{
+		Username: nonAdminUserName,
+		Password: nonAdminUserPassword,
 		MIClient: miClient,
 	}
 	exitVal := m.Run()

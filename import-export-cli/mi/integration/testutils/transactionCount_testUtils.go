@@ -38,9 +38,9 @@ func ValidateTransaction(t *testing.T, transactionCmd string, config *MiConfig) 
 }
 
 func validateTransactionEqual(t *testing.T, transactionFromCtl string, transaction *artifactutils.TransactionCount) {
-	assert.Contains(t, transactionFromCtl, transaction.Year)
-	assert.Contains(t, transactionFromCtl, transaction.Month)
-	assert.Contains(t, transactionFromCtl, transaction.TransactionCount)
+	assert.Contains(t, transactionFromCtl, fmt.Sprint(transaction.Year))
+	assert.Contains(t, transactionFromCtl, fmt.Sprint(transaction.Month))
+	assert.Contains(t, transactionFromCtl, fmt.Sprint(transaction.TransactionCount))
 }
 
 // ExecGetTransactionCountWithInvalidArgCount run get transaction-counts with invalid number of args
