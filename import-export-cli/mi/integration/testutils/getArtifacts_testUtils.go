@@ -31,7 +31,7 @@ import (
 func ListArtifacts(t *testing.T, artifactType string, config *MiConfig) (string, error) {
 	t.Helper()
 	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Username)
+	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Password)
 	output, err := base.Execute(t, "mi", "get", artifactType, "-e", config.MIClient.GetEnvName())
 	return output, err
 }
@@ -40,7 +40,7 @@ func ListArtifacts(t *testing.T, artifactType string, config *MiConfig) (string,
 func GetArtifact(t *testing.T, artifactType, artifactName string, config *MiConfig) (string, error) {
 	t.Helper()
 	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Username)
+	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Password)
 	output, err := base.Execute(t, "mi", "get", artifactType, artifactName, "-e", config.MIClient.GetEnvName())
 	return output, err
 }

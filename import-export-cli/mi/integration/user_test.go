@@ -65,7 +65,7 @@ func TestGetUsersWithInvalidArgs(t *testing.T) {
 
 func TestAddNewUserWithoutEnvFlag(t *testing.T) {
 	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Username)
+	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Password)
 	response, _ := base.Execute(t, "mi", "add", "user", newUserName)
 	base.Log(response)
 	expected := `required flag(s) "environment" not set`
@@ -74,7 +74,7 @@ func TestAddNewUserWithoutEnvFlag(t *testing.T) {
 
 func TestAddNewUserWithInvalidArgs(t *testing.T) {
 	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Username)
+	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Password)
 	response, _ := base.Execute(t, "mi", "add", "user", "-e", "testing")
 	base.Log(response)
 	expected := "accepts 1 arg(s), received 0"
@@ -98,7 +98,7 @@ func TestAddNewUserWithoutLogin(t *testing.T) {
 
 func TestDeleteUserWithoutEnvFlag(t *testing.T) {
 	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Username)
+	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Password)
 	response, _ := base.Execute(t, "mi", "delete", "user", newUserName)
 	base.Log(response)
 	expected := `required flag(s) "environment" not set`
@@ -107,7 +107,7 @@ func TestDeleteUserWithoutEnvFlag(t *testing.T) {
 
 func TestDeleteUserWithInvalidArgs(t *testing.T) {
 	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Username)
+	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Password)
 	response, _ := base.Execute(t, "mi", "delete", "user", "-e", "testing")
 	base.Log(response)
 	expected := "accepts 1 arg(s), received 0"
@@ -131,7 +131,7 @@ func TestDeleteUserWithoutLogin(t *testing.T) {
 
 func TestDeleteUserWithInvalidUserName(t *testing.T) {
 	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Username)
+	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Password)
 	response, _ := base.Execute(t, "mi", "delete", "user", invalidUserName, "-e", "testing")
 	base.Log(response)
 	expected := "[ERROR]: deleting user [ " + invalidUserName + " ] Requested resource not found. User: " + invalidUserName + " cannot be found."
@@ -139,10 +139,9 @@ func TestDeleteUserWithInvalidUserName(t *testing.T) {
 }
 
 func TestDeleteUser(t *testing.T) {
-	status := testutils.AddNewUserFromAPI(config, newUserName, "password", "true")
-	assert.Contains(t, status, "Added")
+	testutils.AddNewUserFromAPI(t, config, newUserName, "password", "true", false)
 	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Username)
+	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Password)
 	response, _ := base.Execute(t, "mi", "delete", "user", newUserName, "-e", "testing")
 	base.Log(response)
 	expected := "Deleting user [ " + newUserName + " ] status: Deleted"

@@ -40,7 +40,7 @@ func ExecDeactivateCommand(t *testing.T, config *MiConfig, artifactType, artifac
 
 func execActivateDeactivateCommand(t *testing.T, config *MiConfig, mode, artifactType, artifactName, expected string) {
 	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Username)
+	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Password)
 	response, _ := base.Execute(t, "mi", mode, artifactType, artifactName, "-e", "testing")
 	base.Log(response)
 	assert.Contains(t, response, expected)

@@ -63,7 +63,7 @@ func TestGetLoggersWithInvalidArgs(t *testing.T) {
 
 func TestAddNewLoggerWithInvalidLogLevel(t *testing.T) {
 	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Username)
+	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Password)
 	response, _ := base.Execute(t, "mi", "add", "log-level", newLoggerName, newLoggerClass, "ABC", "-e", "testing")
 	base.Log(response)
 	expected := "[ERROR]: Adding new logger [ " + newLoggerName + " ]  Invalid log level ABC"
@@ -72,7 +72,7 @@ func TestAddNewLoggerWithInvalidLogLevel(t *testing.T) {
 
 func TestAddNewLoggerWithoutEnvFlag(t *testing.T) {
 	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Username)
+	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Password)
 	response, _ := base.Execute(t, "mi", "add", "log-level", newLoggerName, newLoggerClass, "DEBUG")
 	base.Log(response)
 	expected := `required flag(s) "environment" not set`
@@ -81,7 +81,7 @@ func TestAddNewLoggerWithoutEnvFlag(t *testing.T) {
 
 func TestAddNewLoggerWithInvalidArgs(t *testing.T) {
 	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Username)
+	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Password)
 	response, _ := base.Execute(t, "mi", "add", "log-level", newLoggerName, newLoggerClass, "-e", "testing")
 	base.Log(response)
 	expected := "accepts 3 arg(s), received 2"
@@ -105,7 +105,7 @@ func TestAddLoggerWithoutLogin(t *testing.T) {
 
 func TestAddNewLogger(t *testing.T) {
 	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Username)
+	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Password)
 	response, _ := base.Execute(t, validAddLoggerCmd...)
 	base.Log(response)
 	expected := "Successfully added logger"
@@ -114,7 +114,7 @@ func TestAddNewLogger(t *testing.T) {
 
 func TestAddExistingLogger(t *testing.T) {
 	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Username)
+	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Password)
 	response, _ := base.Execute(t, validAddLoggerCmd...)
 	base.Log(response)
 	expected := "[ERROR]: Adding new logger [ " + newLoggerName + " ]  Specified logger name ('" + newLoggerName + "') already exists, try updating the level instead"
@@ -123,7 +123,7 @@ func TestAddExistingLogger(t *testing.T) {
 
 func TestUpdateLoggerWithInvalidLogLevel(t *testing.T) {
 	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Username)
+	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Password)
 	response, _ := base.Execute(t, "mi", "update", "log-level", newLoggerName, "ABC", "-e", "testing")
 	base.Log(response)
 	expected := "[ERROR]: updating logger [ " + newLoggerName + " ]  Invalid log level ABC"
@@ -132,7 +132,7 @@ func TestUpdateLoggerWithInvalidLogLevel(t *testing.T) {
 
 func TestUpdateLoggerWithoutEnvFlag(t *testing.T) {
 	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Username)
+	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Password)
 	response, _ := base.Execute(t, "mi", "update", "log-level", newLoggerName, "INFO")
 	base.Log(response)
 	expected := `required flag(s) "environment" not set`
@@ -141,7 +141,7 @@ func TestUpdateLoggerWithoutEnvFlag(t *testing.T) {
 
 func TestUpdateLoggerWithInvalidArgs(t *testing.T) {
 	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Username)
+	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Password)
 	response, _ := base.Execute(t, "mi", "update", "log-level", newLoggerName, "-e", "testing")
 	base.Log(response)
 	expected := "accepts 2 arg(s), received 1"
@@ -165,7 +165,7 @@ func TestUpdateLoggerWithoutLogin(t *testing.T) {
 
 func TestUpdateLogger(t *testing.T) {
 	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Username)
+	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Password)
 	response, _ := base.Execute(t, validUpdateLoggerCmd...)
 	base.Log(response)
 	expected := "Successfully added logger for ('" + newLoggerName + "') with level INFO"
@@ -174,7 +174,7 @@ func TestUpdateLogger(t *testing.T) {
 
 func TestUpdateLoggerNonExistingLogger(t *testing.T) {
 	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Username)
+	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Password)
 	response, _ := base.Execute(t, "mi", "update", "log-level", invalidLoggerName, "INFO", "-e", "testing")
 	base.Log(response)
 	expected := "[ERROR]: updating logger [ " + invalidLoggerName + " ]  Specified logger ('" + invalidLoggerName + "') not found"
