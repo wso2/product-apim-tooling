@@ -86,7 +86,7 @@ const LogPrefixError = "[ERROR]: "
 
 // String Constants
 const SearchAndTag = "&"
-const APISecurityMutualSsl = "mutualssl"
+const APISecurityMutualSSL = "mutualssl"
 
 // Other
 const DefaultTokenValidityPeriod = "3600"

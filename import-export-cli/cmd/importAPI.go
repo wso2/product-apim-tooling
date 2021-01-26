@@ -214,12 +214,12 @@ func mergeAPI(apiDirectory string, environmentParams *params.Environment) error 
 		// if the apiSecurity field already exists in the api.yaml file
 		if apiSecurity != nil {
 			// if the apiSecurity field does not have mutualssl type, append it
-			if !strings.Contains(apiSecurity.(string), utils.APISecurityMutualSsl) {
-				apiSecurity = apiSecurity.(string) + "," + utils.APISecurityMutualSsl
+			if !strings.Contains(apiSecurity.(string), utils.APISecurityMutualSSL) {
+				apiSecurity = apiSecurity.(string) + "," + utils.APISecurityMutualSSL
 			}
 		} else {
 			// if the apiSecurity field does not exist in the api.yaml file, assign the value as mutualssl
-			apiSecurity = utils.APISecurityMutualSsl
+			apiSecurity = utils.APISecurityMutualSSL
 		}
 		// assign the apiSecurity field with the correct modified value to enable mutualssl
 		if _, err := api.SetP(apiSecurity, "apiSecurity"); err != nil {
