@@ -114,6 +114,8 @@ func GetApplicationList(accessToken, applicationListEndpoint, appOwner, limit st
 		applicationListEndpoint += "?limit=" + limit
 	}
 
+	utils.Logln(utils.LogPrefixInfo+"URL:", applicationListEndpoint)
+
 	var resp *resty.Response
 	if appOwner == "" {
 		resp, err = utils.InvokeGETRequest(applicationListEndpoint, headers)
