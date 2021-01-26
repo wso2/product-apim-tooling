@@ -41,7 +41,7 @@ indexing-delay: 1000
 
 ```
 dcr-version: v0.17
-rest-api-version: v1
+rest-api-version: v2
 ```
 
 - *apictl version*
