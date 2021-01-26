@@ -1296,7 +1296,7 @@ func getApimURL(host string, offset int) string {
 
 func getDevPortalRestURL(host string, offset int, version string) string {
 	port := 9443 + offset
-	return "https://" + host + ":" + strconv.Itoa(port) + "/api/am/store/" + version
+	return "https://" + host + ":" + strconv.Itoa(port) + "/api/am/devportal/" + version
 }
 
 func getPublisherRestURL(host string, offset int, version string) string {

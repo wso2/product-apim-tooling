@@ -168,7 +168,7 @@ func GetKeys(cred credentials.Credential, envName, name, version, provider, toke
 }
 
 // Retrieve an available throttling tiers of the API or API Product
-// @param accessToken : Access token to authenticate the store REST API
+// @param accessToken : Access token to authenticate the devportal REST API
 // @return tiers, error
 func getAvailableAPITiers(accessToken string) ([]string, error) {
 	apiId, err := searchApiOrProduct(accessToken)
@@ -184,7 +184,7 @@ func getAvailableAPITiers(accessToken string) ([]string, error) {
 }
 
 // Retrieve an available application throttling policy
-// @param accessToken : Access token to authenticate the store REST API
+// @param accessToken : Access token to authenticate the devportal REST API
 // @return throttlingPolicy, error
 func getApplicationThrottlingPolicy(accessToken string) (string, error) {
 	applicationThrottlingPoliciesEndpoint := utils.GetDevPortalThrottlingPoliciesEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath) + "/application"
@@ -223,9 +223,9 @@ func CallDCREndpoint(credential credentials.Credential, keyGenEnv string) (strin
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + b64encodedCredentials
 	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
-	//Request body for the store REST API
+	//Request body for the devportal REST API
 	body := dedent.Dedent(`{
-								"clientName": "rest_api_store",
+								"clientName": "rest_api_devportal",
 							   	"callbackUrl": "www.google.lk",
 							   	"grantType":"password refresh_token",
 							   	"saasApp": true,
@@ -263,7 +263,7 @@ func CallDCREndpoint(credential credentials.Credential, keyGenEnv string) (strin
 
 // Search if the application exists with the name
 // @param appName : Name of the application
-// @param accessToken : Access token to authenticate the store REST API
+// @param accessToken : Access token to authenticate the devportal REST API
 // @return appId, error
 func searchApplication(appName string, accessToken string) (string, error) {
 	//Application REST API endpoint of the environment from the config file
@@ -297,7 +297,7 @@ func searchApplication(appName string, accessToken string) (string, error) {
 }
 
 // Searching if the API or API Product is available
-// @param accessToken : Access token to call the store REST API
+// @param accessToken : Access token to call the devportal REST API
 // @return apiId, error
 func searchApiOrProduct(accessToken string) (string, error) {
 	// Unified Search endpoint from the config file to search APIs or API Products
@@ -330,10 +330,10 @@ func searchApiOrProduct(accessToken string) (string, error) {
 			return apiId, err
 		}
 		if apiProvider != "" {
-			return "", errors.New("Requested API is not available in the store. API: " + apiName +
+			return "", errors.New("Requested API is not available in the devportal. API: " + apiName +
 				" Version: " + apiVersion + " Provider: " + apiProvider)
 		}
-		return "", errors.New("Requested API is not available in the store. API: " + apiName +
+		return "", errors.New("Requested API is not available in the devportal. API: " + apiName +
 			" Version: " + apiVersion)
 	} else {
 		utils.Logf("Error: %s\n", resp.Error())
@@ -466,7 +466,7 @@ func subscribeApiOrProduct(apiId string, appId string, accessToken string) (stri
 
 // Get application details
 // @param appId : Application ID
-// @param accessToken : Access token to call the store REST API
+// @param accessToken : Access token to call the devportl REST API
 // @return AppDetails, error
 func getApplicationDetails(appId string, accessToken string) (*utils.AppDetails, error) {
 
@@ -497,7 +497,7 @@ func getApplicationDetails(appId string, accessToken string) (*utils.AppDetails,
 
 // Get application keys
 // @param appId : Application ID
-// @param accessToken : Access token to call the store REST API
+// @param accessToken : Access token to call the devportal REST API
 // @return AppDetails, error
 func getApplicationKeys(appId string, accessToken string) (*utils.AppKeyList, error) {
 
@@ -529,7 +529,7 @@ func getApplicationKeys(appId string, accessToken string) (*utils.AppKeyList, er
 
 // Update application details
 // @param appId : Application ID
-// @param accessToken : Access token to call the store REST API
+// @param accessToken : Access token to call the devportal REST API
 // @return AppDetails, error
 func updateApplicationDetails(appId string, body string, accessToken string) (*utils.AppDetails, error) {
 
@@ -559,7 +559,7 @@ func updateApplicationDetails(appId string, body string, accessToken string) (*u
 }
 
 // Create application with a default name in a given environment
-// @param accessToken : Access token to call the store REST API
+// @param accessToken : Access token to call the devportal REST API
 // @param throttlingPolicy : Throttling policy to create the application
 // @return client_id, client_secret, error
 func createApplication(accessToken string, throttlingPolicy string) (string, string, error) {
@@ -648,7 +648,7 @@ func getNewToken(key *utils.ApplicationKey, scopes []string) (string, error) {
 
 // Get all the scopes of the APIs and API Products subscribed to a particular application
 // @param appId : Application ID to get the scopes of subscribed APIs and API Products
-// @param accessToken : Access token to call the store REST API
+// @param accessToken : Access token to call the devportal REST API
 // @return scope[], error
 func getScopes(appId string, accessToken string) ([]string, error) {
 	appDetails, err := getApplicationDetails(appId, accessToken)
@@ -670,7 +670,7 @@ func getScopes(appId string, accessToken string) ([]string, error) {
 
 // Generate client credentials for the application first time and generate access token
 // @param appId : Application ID of the app to be generated keys
-// @param token : Token to invoke the store REST API
+// @param token : Token to invoke the devportal REST API
 // @return client_id, client_secret, error
 func generateApplicationKeys(appId string, token string) (*utils.KeygenResponse, error) {
 
