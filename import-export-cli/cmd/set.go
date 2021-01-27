@@ -74,7 +74,7 @@ func executeSetCmd(mainConfigFilePath string, cmd *cobra.Command) {
 	if flagHttpRequestTimeout > 0 {
 		//Check whether the provided Http time out value is not equal to default value
 		if flagHttpRequestTimeout != configVars.Config.HttpRequestTimeout {
-			fmt.Println("Http Request Timout is set to : ", flagHttpRequestTimeout)
+			fmt.Println("Http Request Timeout is set to : ", flagHttpRequestTimeout)
 		}
 		configVars.Config.HttpRequestTimeout = flagHttpRequestTimeout
 	} else {
