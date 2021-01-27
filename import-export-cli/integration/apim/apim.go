@@ -950,7 +950,6 @@ func (instance *Client) GetApplication(appID string) *Application {
 // GetApplications : Get Applications list from APIM
 func (instance *Client) GetApplications() *ApplicationList {
 	appsURL := instance.devPortalRestURL + "/applications"
-
 	request := base.CreateGet(appsURL)
 
 	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
@@ -958,7 +957,6 @@ func (instance *Client) GetApplications() *ApplicationList {
 	base.LogRequest("apim.GetApplications()", request)
 
 	response := base.SendHTTPRequest(request)
-
 	defer response.Body.Close()
 
 	base.ValidateAndLogResponse("apim.GetApplications()", response, 200)
@@ -1111,7 +1109,6 @@ func (instance *Client) DeleteAllAPIs() {
 
 	for _, api := range apisResponse.List {
 		apisDeleteURL := instance.publisherRestURL + "/apis/" + api.ID
-
 		request = base.CreateDelete(apisDeleteURL)
 
 		base.SetDefaultRestAPIHeaders(instance.accessToken, request)
@@ -1119,7 +1116,6 @@ func (instance *Client) DeleteAllAPIs() {
 		base.LogRequest("apim.DeleteAllAPIs() deleting APIs", request)
 
 		response = base.SendHTTPRequest(request)
-
 		defer response.Body.Close()
 
 		base.ValidateAndLogResponse("apim.DeleteAllAPIs() deleting APIs", response, 200)

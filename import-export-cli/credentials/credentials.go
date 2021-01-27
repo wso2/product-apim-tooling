@@ -109,8 +109,8 @@ func RevokeAccessToken(credential Credential, env string, token string) error {
 	//Create body for the request
 	body := utils.HeaderToken + token + utils.TokenTypeForRevocation
 
-	resp, err := utils.InvokePOSTRequest(tokenRevokeEndpoint, headers, body)
 	utils.Logln(utils.LogPrefixInfo + "connecting to " + tokenRevokeEndpoint)
+	resp, err := utils.InvokePOSTRequest(tokenRevokeEndpoint, headers, body)
 
 	if err != nil {
 		return err

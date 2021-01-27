@@ -60,7 +60,7 @@ func runLogout(environment string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("Logged out from APIM in", environment, "environment")
+	fmt.Println("Logged out from APIM in ", environment, " environment")
 	return store.EraseAPIM(environment)
 }
 

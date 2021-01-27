@@ -85,14 +85,14 @@ func removeEnv(envName, mainConfigFilePath, envKeysFilePath string) error {
 		if store.HasAPIM(envName) {
 			err = runLogout(envName)
 			if err != nil {
-				utils.Logln("Log out is unsuccessful for APIM. ", err)
+				utils.Logln("Log out is unsuccessful for APIM.", err)
 			}
 		}
 
 		if store.HasMI(envName) {
 			err = credentials.RunMILogout(envName)
 			if err != nil {
-				utils.Logln("Log out is unsuccessful for MI. ", err)
+				utils.Logln("Log out is unsuccessful for MI.", err)
 			}
 		}
 

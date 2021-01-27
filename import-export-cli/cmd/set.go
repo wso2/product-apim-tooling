@@ -74,7 +74,7 @@ func executeSetCmd(mainConfigFilePath string, cmd *cobra.Command) {
 	if flagHttpRequestTimeout > 0 {
 		//Check whether the provided Http time out value is not equal to default value
 		if flagHttpRequestTimeout != configVars.Config.HttpRequestTimeout {
-			fmt.Println("Http Request Timout is set to : ", flagHttpRequestTimeout)
+			fmt.Println("Http Request Timeout is set to : ", flagHttpRequestTimeout)
 		}
 		configVars.Config.HttpRequestTimeout = flagHttpRequestTimeout
 	} else {
@@ -161,9 +161,9 @@ func init() {
 		"Path to directory where APIs should be saved")
 	SetCmd.Flags().StringVar(&flagTLSRenegotiationMode, "tls-renegotiation-mode", utils.TLSRenegotiationNever,
 		"Supported TLS renegotiation mode")
-	SetCmd.Flags().StringVarP(&flagKubernetesMode, "mode", "m", utils.DefaultEnvironmentName, "If mode is set to \"k8s\", apictl "+
-		"is capable of executing Kubectl commands. For example \"apictl get pods\" -> \"kubectl get pods\". To go back "+
-		"to the default mode, set the mode to \"default\"")
+	SetCmd.Flags().StringVarP(&flagKubernetesMode, "mode", "m", utils.DefaultEnvironmentName,
+		"If mode is set to \"k8s\", apictl is capable of executing Kubectl commands. For example \"apictl get " +
+			"pods\" -> \"kubectl get pods\". To go back to the default mode, set the mode to \"default\"")
 	SetCmd.Flags().MarkDeprecated("mode", "if you want to run the commands in kubernetes mode use 'k8s' after 'apictl' (eg: apictl k8s add)")
 	SetCmd.Flags().BoolVar(&flagVCSDeletionEnabled, "vcs-deletion-enabled", false,
 		"Specifies whether project deletion is allowed during deployment.")
