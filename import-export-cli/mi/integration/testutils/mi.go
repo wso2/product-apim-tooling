@@ -20,9 +20,11 @@ package testutils
 
 import (
 	"encoding/json"
+	"os/exec"
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -33,6 +35,12 @@ const AdminUserName = "admin"
 
 // AdminPassword default admin password
 const AdminPassword = "admin"
+
+const miContainer = "micontainer:/home/wso2carbon/wso2mi/repository/deployment/server/carbonapps"
+const deploymentDelay = 10000
+
+var cappList = []string{"./testdata/capps/HealthCareCompositeExporter_1.0.0.car",
+	"./testdata/capps/RESTDataServiceCompositeExporter_1.0.0.car"}
 
 // MiRESTClient Enables interacting with the Management API of MI
 type MiRESTClient struct {
@@ -125,4 +133,23 @@ func getParamMap(key, value string) map[string]string {
 	paramMap := make(map[string]string)
 	paramMap[key] = value
 	return paramMap
+}
+
+// DeployCApps deploy capps to the micro integrator
+func DeployCApps() {
+	for _, capp := range cappList {
+		args := []string{"cp", capp, miContainer}
+		execDockerCmd(args...)
+	}
+}
+
+func execDockerCmd(args ...string) (string, error) {
+	cmd := exec.Command("docker", args...)
+	output, err := cmd.Output()
+	return string(output), err
+}
+
+// WaitForDeployment wait for specified interval to allow MI to deploy the artifacts
+func WaitForDeployment() {
+	time.Sleep(time.Duration(deploymentDelay) * time.Millisecond)
 }

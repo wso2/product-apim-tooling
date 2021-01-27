@@ -47,8 +47,8 @@ func validateTransactionEqual(t *testing.T, transactionFromCtl string, transacti
 func ExecGetTransactionCountWithInvalidArgCount(t *testing.T, config *MiConfig, passed int, args ...string) {
 	t.Helper()
 	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	base.MILogin(t, "testing", AdminUserName, AdminPassword)
-	getCmdArgs := []string{"mi", "get", "-e", "testing"}
+	base.MILogin(t, config.MIClient.GetEnvName(), config.Username, config.Password)
+	getCmdArgs := []string{"mi", "get", "-e", config.MIClient.GetEnvName(), "-k"}
 	getCmdArgs = append(getCmdArgs, args...)
 	response, _ := base.Execute(t, getCmdArgs...)
 	base.GetRowsFromTableResponse(response)

@@ -30,54 +30,54 @@ import (
 const undefinedEnv = "env-abc"
 
 func TestAddEnvironmentWithMI(t *testing.T) {
-	response, _ := base.Execute(t, "add", "env", miClient.GetEnvName(), "--mi", miClient.GetMiURL())
+	response, _ := base.Execute(t, "add", "env", miClient.GetEnvName(), "--mi", miClient.GetMiURL(), "-k")
 	base.Log(response)
 	expected := fmt.Sprintf("Successfully added environment '%v'", miClient.GetEnvName())
 	assert.Contains(t, response, expected)
 }
 
 func TestLoginToMI(t *testing.T) {
-	response, _ := base.Execute(t, "mi", "login", miClient.GetEnvName(), "-u", testutils.AdminUserName, "-p", testutils.AdminPassword)
+	response, _ := base.Execute(t, "mi", "login", miClient.GetEnvName(), "-u", testutils.AdminUserName, "-p", testutils.AdminPassword, "-k")
 	base.Log(response)
 	expected := fmt.Sprintf("Logged into MI in %v environment", miClient.GetEnvName())
 	assert.Contains(t, response, expected)
 }
 
 func TestLogoutFromMI(t *testing.T) {
-	response, _ := base.Execute(t, "mi", "logout", miClient.GetEnvName())
+	response, _ := base.Execute(t, "mi", "logout", miClient.GetEnvName(), "-k")
 	base.Log(response)
 	expected := fmt.Sprintf("Logged out from MI in %v environment", miClient.GetEnvName())
 	assert.Contains(t, response, expected)
 }
 
 func TestLoginToMIWithInvalidCredentials(t *testing.T) {
-	response, _ := base.Execute(t, "mi", "login", miClient.GetEnvName(), "-u", testutils.AdminUserName, "-p", "abc123")
+	response, _ := base.Execute(t, "mi", "login", miClient.GetEnvName(), "-u", testutils.AdminUserName, "-p", "abc123", "-k")
 	base.Log(response)
 	assert.Contains(t, response, "Error occurred while login :  Unable to connect to MI Token endpoint. Status: 401 Unauthorized")
 }
 
 func TestRemoveEnvironmentWithMI(t *testing.T) {
-	response, _ := base.Execute(t, "remove", "env", miClient.GetEnvName())
+	response, _ := base.Execute(t, "remove", "env", miClient.GetEnvName(), "-k")
 	base.Log(response)
 	expected := fmt.Sprintf("Successfully removed environment '%v'", miClient.GetEnvName())
 	assert.Contains(t, response, expected)
 }
 
 func TestLoginToMIInUndefinedEnv(t *testing.T) {
-	response, _ := base.Execute(t, "mi", "login", undefinedEnv, "-u", testutils.AdminUserName, "-p", testutils.AdminPassword)
+	response, _ := base.Execute(t, "mi", "login", undefinedEnv, "-u", testutils.AdminUserName, "-p", testutils.AdminPassword, "-k")
 	base.Log(response)
 	expected := fmt.Sprintf("MI does not exists in %v Add it using add env", undefinedEnv)
 	assert.Contains(t, response, expected)
 }
 
 func TestLoginToMIWithoutEnv(t *testing.T) {
-	response, _ := base.Execute(t, "mi", "login")
+	response, _ := base.Execute(t, "mi", "login", "-k")
 	base.Log(response)
 	assert.Contains(t, response, "accepts 1 arg(s), received 0")
 }
 
 func TestLoginToMIWithInvalidArgs(t *testing.T) {
-	response, _ := base.Execute(t, "mi", "login", "testing", "dev")
+	response, _ := base.Execute(t, "mi", "login", miClient.GetEnvName(), "dev", "-k")
 	base.Log(response)
 	assert.Contains(t, response, "accepts 1 arg(s), received 2")
 }

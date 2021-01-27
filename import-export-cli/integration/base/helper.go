@@ -122,7 +122,7 @@ func MILogin(t *testing.T, env string, username string, password string) {
 	Execute(t, "mi", "login", env, "-u", username, "-p", password, "-k", "--verbose")
 
 	t.Cleanup(func() {
-		Execute(t, "mi", "logout", env)
+		Execute(t, "mi", "logout", env, "-k")
 	})
 }
 

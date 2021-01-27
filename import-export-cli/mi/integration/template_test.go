@@ -83,7 +83,7 @@ func TestGetTemplatesWithInvalidArgs(t *testing.T) {
 }
 
 func TestGetTemplatesWithInvalidType(t *testing.T) {
-	response, _ := base.Execute(t, "mi", "get", templateCmd, invalidTemplatetype)
+	response, _ := base.Execute(t, "mi", "get", templateCmd, invalidTemplatetype, "-k")
 	base.Log(response)
 	expected := "accepts endpoint or sequence as template-type, invalid template type " + invalidTemplatetype
 	assert.Contains(t, response, expected)

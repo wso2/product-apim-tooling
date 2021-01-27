@@ -31,7 +31,7 @@ import (
 func ListArtifacts(t *testing.T, artifactType string, config *MiConfig) (string, error) {
 	t.Helper()
 	SetupAndLoginToMI(t, config)
-	output, err := base.Execute(t, "mi", "get", artifactType, "-e", config.MIClient.GetEnvName())
+	output, err := base.Execute(t, "mi", "get", artifactType, "-e", config.MIClient.GetEnvName(), "-k")
 	return output, err
 }
 
@@ -39,7 +39,7 @@ func ListArtifacts(t *testing.T, artifactType string, config *MiConfig) (string,
 func GetArtifact(t *testing.T, config *MiConfig, args ...string) (string, error) {
 	t.Helper()
 	SetupAndLoginToMI(t, config)
-	getCmdArgs := []string{"mi", "get", "-e", config.MIClient.GetEnvName()}
+	getCmdArgs := []string{"mi", "get", "-e", config.MIClient.GetEnvName(), "-k"}
 	getCmdArgs = append(getCmdArgs, args...)
 	output, err := base.Execute(t, getCmdArgs...)
 	return output, err
@@ -82,7 +82,7 @@ func (instance *MiRESTClient) GetArtifactFromAPI(resource string, params map[str
 // ExecGetCommandWithoutSettingEnv run get artifactType without setting up an environment
 func ExecGetCommandWithoutSettingEnv(t *testing.T, args ...string) {
 	t.Helper()
-	getCmdArgs := []string{"mi", "get", "-e", "testing"}
+	getCmdArgs := []string{"mi", "get", "-e", "testing", "-k"}
 	getCmdArgs = append(getCmdArgs, args...)
 	response, _ := base.Execute(t, getCmdArgs...)
 	base.Log(response)
@@ -93,7 +93,7 @@ func ExecGetCommandWithoutSettingEnv(t *testing.T, args ...string) {
 func ExecGetCommandWithoutLogin(t *testing.T, artifactType string, config *MiConfig, args ...string) {
 	t.Helper()
 	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
-	getCmdArgs := []string{"mi", "get", artifactType, "-e", config.MIClient.GetEnvName()}
+	getCmdArgs := []string{"mi", "get", artifactType, "-e", config.MIClient.GetEnvName(), "-k"}
 	getCmdArgs = append(getCmdArgs, args...)
 	response, _ := base.Execute(t, getCmdArgs...)
 	base.Log(response)
@@ -104,7 +104,7 @@ func ExecGetCommandWithoutLogin(t *testing.T, artifactType string, config *MiCon
 func ExecGetCommandWithoutEnvFlag(t *testing.T, artifactType string, config *MiConfig, args ...string) {
 	t.Helper()
 	SetupAndLoginToMI(t, config)
-	getCmdArgs := []string{"mi", "get", artifactType}
+	getCmdArgs := []string{"mi", "get", artifactType, "-k"}
 	getCmdArgs = append(getCmdArgs, args...)
 	response, _ := base.Execute(t, getCmdArgs...)
 	base.Log(response)
@@ -115,7 +115,7 @@ func ExecGetCommandWithoutEnvFlag(t *testing.T, artifactType string, config *MiC
 func ExecGetCommandWithInvalidArgCount(t *testing.T, config *MiConfig, required, passed int, fixedArgCout bool, args ...string) {
 	t.Helper()
 	SetupAndLoginToMI(t, config)
-	getCmdArgs := []string{"mi", "get"}
+	getCmdArgs := []string{"mi", "get", "-k"}
 	getCmdArgs = append(getCmdArgs, args...)
 	response, _ := base.Execute(t, getCmdArgs...)
 	base.Log(response)

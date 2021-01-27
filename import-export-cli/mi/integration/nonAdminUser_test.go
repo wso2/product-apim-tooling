@@ -33,7 +33,7 @@ const isAdmin = "false"
 func TestGetUsersFromNonAdminUser(t *testing.T) {
 	testutils.AddNewUserFromAPI(t, config, nonAdminUserName, nonAdminUserPassword, isAdmin, true)
 	testutils.SetupAndLoginToMI(t, nonAdminConfig)
-	response, _ := base.Execute(t, "mi", "get", "users", "-e", "testing")
+	response, _ := base.Execute(t, "mi", "get", "users", "-e", miClient.GetEnvName(), "-k")
 	base.Log(response)
 	assert.Contains(t, response, "[ERROR]: Getting List of users 403 Forbidden")
 }
@@ -41,7 +41,7 @@ func TestGetUsersFromNonAdminUser(t *testing.T) {
 func TestGetUserByNameFromNonAdminUser(t *testing.T) {
 	testutils.AddNewUserFromAPI(t, config, nonAdminUserName, nonAdminUserPassword, isAdmin, true)
 	testutils.SetupAndLoginToMI(t, nonAdminConfig)
-	response, _ := base.Execute(t, "mi", "get", "users", validUserName, "-e", "testing")
+	response, _ := base.Execute(t, "mi", "get", "users", validUserName, "-e", miClient.GetEnvName(), "-k")
 	base.Log(response)
 	assert.Contains(t, response, "[ERROR]: Getting Information of users [ "+validUserName+" ]  403 Forbidden")
 }
@@ -49,7 +49,7 @@ func TestGetUserByNameFromNonAdminUser(t *testing.T) {
 func TestGetNonExistingUserByNameFromNonAdminUser(t *testing.T) {
 	testutils.AddNewUserFromAPI(t, config, nonAdminUserName, nonAdminUserPassword, isAdmin, true)
 	testutils.SetupAndLoginToMI(t, nonAdminConfig)
-	response, _ := base.Execute(t, "mi", "get", "users", invalidUserName, "-e", "testing")
+	response, _ := base.Execute(t, "mi", "get", "users", invalidUserName, "-e", miClient.GetEnvName(), "-k")
 	base.Log(response)
 	assert.Contains(t, response, "[ERROR]: Getting Information of users [ "+invalidUserName+" ]  403 Forbidden")
 }
@@ -57,7 +57,7 @@ func TestGetNonExistingUserByNameFromNonAdminUser(t *testing.T) {
 func TestDeleteUserWithInvalidUserNameFromNonAdminUser(t *testing.T) {
 	testutils.AddNewUserFromAPI(t, config, nonAdminUserName, nonAdminUserPassword, isAdmin, true)
 	testutils.SetupAndLoginToMI(t, nonAdminConfig)
-	response, _ := base.Execute(t, "mi", "delete", "user", invalidUserName, "-e", "testing")
+	response, _ := base.Execute(t, "mi", "delete", "user", invalidUserName, "-e", miClient.GetEnvName(), "-k")
 	base.Log(response)
 	expected := "[ERROR]: deleting user [ " + invalidUserName + " ] 403 Forbidden"
 	assert.Contains(t, response, expected)
@@ -66,7 +66,7 @@ func TestDeleteUserWithInvalidUserNameFromNonAdminUser(t *testing.T) {
 func TestDeleteUserFromNonAdminUser(t *testing.T) {
 	testutils.AddNewUserFromAPI(t, config, nonAdminUserName, nonAdminUserPassword, isAdmin, true)
 	testutils.SetupAndLoginToMI(t, nonAdminConfig)
-	response, _ := base.Execute(t, "mi", "delete", "user", validUserName, "-e", "testing")
+	response, _ := base.Execute(t, "mi", "delete", "user", validUserName, "-e", miClient.GetEnvName(), "-k")
 	base.Log(response)
 	expected := "[ERROR]: deleting user [ " + validUserName + " ] 403 Forbidden"
 	assert.Contains(t, response, expected)

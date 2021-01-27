@@ -50,6 +50,8 @@ func TestMain(m *testing.M) {
 		Password: nonAdminUserPassword,
 		MIClient: miClient,
 	}
+	testutils.DeployCApps()
+	testutils.WaitForDeployment()
 	exitVal := m.Run()
 	os.Exit(exitVal)
 }

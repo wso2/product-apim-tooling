@@ -31,7 +31,7 @@ const invalidUserName = "abc-user"
 const userCmd = "users"
 const newUserName = "capp-tester"
 
-var validAddUserCmd = []string{"mi", "add", "user", newUserName, "-e", "testing"}
+var validAddUserCmd = []string{"mi", "add", "user", newUserName, "-e", "testing", "-k"}
 
 func TestGetUsers(t *testing.T) {
 	testutils.ValidateUserList(t, userCmd, config)
@@ -65,7 +65,7 @@ func TestGetUsersWithInvalidArgs(t *testing.T) {
 
 func TestAddNewUserWithoutEnvFlag(t *testing.T) {
 	testutils.SetupAndLoginToMI(t, config)
-	response, _ := base.Execute(t, "mi", "add", "user", newUserName)
+	response, _ := base.Execute(t, "mi", "add", "user", newUserName, "-k")
 	base.Log(response)
 	expected := `required flag(s) "environment" not set`
 	assert.Contains(t, response, expected)
@@ -73,7 +73,7 @@ func TestAddNewUserWithoutEnvFlag(t *testing.T) {
 
 func TestAddNewUserWithInvalidArgs(t *testing.T) {
 	testutils.SetupAndLoginToMI(t, config)
-	response, _ := base.Execute(t, "mi", "add", "user", "-e", "testing")
+	response, _ := base.Execute(t, "mi", "add", "user", "-e", miClient.GetEnvName(), "-k")
 	base.Log(response)
 	expected := "accepts 1 arg(s), received 0"
 	assert.Contains(t, response, expected)
@@ -94,7 +94,7 @@ func TestAddNewUserWithoutLogin(t *testing.T) {
 
 func TestDeleteUserWithoutEnvFlag(t *testing.T) {
 	testutils.SetupAndLoginToMI(t, config)
-	response, _ := base.Execute(t, "mi", "delete", "user", newUserName)
+	response, _ := base.Execute(t, "mi", "delete", "user", newUserName, "-k")
 	base.Log(response)
 	expected := `required flag(s) "environment" not set`
 	assert.Contains(t, response, expected)
@@ -102,7 +102,7 @@ func TestDeleteUserWithoutEnvFlag(t *testing.T) {
 
 func TestDeleteUserWithInvalidArgs(t *testing.T) {
 	testutils.SetupAndLoginToMI(t, config)
-	response, _ := base.Execute(t, "mi", "delete", "user", "-e", "testing")
+	response, _ := base.Execute(t, "mi", "delete", "user", "-e", miClient.GetEnvName(), "-k")
 	base.Log(response)
 	expected := "accepts 1 arg(s), received 0"
 	assert.Contains(t, response, expected)
@@ -123,7 +123,7 @@ func TestDeleteUserWithoutLogin(t *testing.T) {
 
 func TestDeleteUserWithInvalidUserName(t *testing.T) {
 	testutils.SetupAndLoginToMI(t, config)
-	response, _ := base.Execute(t, "mi", "delete", "user", invalidUserName, "-e", "testing")
+	response, _ := base.Execute(t, "mi", "delete", "user", invalidUserName, "-e", miClient.GetEnvName(), "-k")
 	base.Log(response)
 	expected := "[ERROR]: deleting user [ " + invalidUserName + " ] Requested resource not found. User: " + invalidUserName + " cannot be found."
 	assert.Contains(t, response, expected)
@@ -132,7 +132,7 @@ func TestDeleteUserWithInvalidUserName(t *testing.T) {
 func TestDeleteUser(t *testing.T) {
 	testutils.AddNewUserFromAPI(t, config, newUserName, "password", "true", false)
 	testutils.SetupAndLoginToMI(t, config)
-	response, _ := base.Execute(t, "mi", "delete", "user", newUserName, "-e", "testing")
+	response, _ := base.Execute(t, "mi", "delete", "user", newUserName, "-e", miClient.GetEnvName(), "-k")
 	base.Log(response)
 	expected := "Deleting user [ " + newUserName + " ] status: Deleted"
 	assert.Contains(t, response, expected)

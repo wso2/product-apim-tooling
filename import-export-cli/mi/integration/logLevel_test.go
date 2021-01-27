@@ -32,8 +32,8 @@ const logLevelCmd = "log-levels"
 const newLoggerName = "synapse-api"
 const newLoggerClass = "org.apache.synapse.rest.API"
 
-var validAddLoggerCmd = []string{"mi", "add", "log-level", newLoggerName, newLoggerClass, "DEBUG", "-e", "testing"}
-var validUpdateLoggerCmd = []string{"mi", "update", "log-level", newLoggerName, "INFO", "-e", "testing"}
+var validAddLoggerCmd = []string{"mi", "add", "log-level", newLoggerName, newLoggerClass, "DEBUG", "-e", "testing", "-k"}
+var validUpdateLoggerCmd = []string{"mi", "update", "log-level", newLoggerName, "INFO", "-e", "testing", "-k"}
 
 func TestGetLoggerByName(t *testing.T) {
 	testutils.ValidateLogger(t, logLevelCmd, config, validLoggerName)
@@ -63,7 +63,7 @@ func TestGetLoggersWithInvalidArgs(t *testing.T) {
 
 func TestAddNewLoggerWithInvalidLogLevel(t *testing.T) {
 	testutils.SetupAndLoginToMI(t, config)
-	response, _ := base.Execute(t, "mi", "add", "log-level", newLoggerName, newLoggerClass, "ABC", "-e", "testing")
+	response, _ := base.Execute(t, "mi", "add", "log-level", newLoggerName, newLoggerClass, "ABC", "-e", miClient.GetEnvName(), "-k")
 	base.Log(response)
 	expected := "[ERROR]: Adding new logger [ " + newLoggerName + " ]  Invalid log level ABC"
 	assert.Contains(t, response, expected)
@@ -71,7 +71,7 @@ func TestAddNewLoggerWithInvalidLogLevel(t *testing.T) {
 
 func TestAddNewLoggerWithoutEnvFlag(t *testing.T) {
 	testutils.SetupAndLoginToMI(t, config)
-	response, _ := base.Execute(t, "mi", "add", "log-level", newLoggerName, newLoggerClass, "DEBUG")
+	response, _ := base.Execute(t, "mi", "add", "log-level", newLoggerName, newLoggerClass, "DEBUG", "-k")
 	base.Log(response)
 	expected := `required flag(s) "environment" not set`
 	assert.Contains(t, response, expected)
@@ -79,7 +79,7 @@ func TestAddNewLoggerWithoutEnvFlag(t *testing.T) {
 
 func TestAddNewLoggerWithInvalidArgs(t *testing.T) {
 	testutils.SetupAndLoginToMI(t, config)
-	response, _ := base.Execute(t, "mi", "add", "log-level", newLoggerName, newLoggerClass, "-e", "testing")
+	response, _ := base.Execute(t, "mi", "add", "log-level", newLoggerName, newLoggerClass, "-e", miClient.GetEnvName(), "-k")
 	base.Log(response)
 	expected := "accepts 3 arg(s), received 2"
 	assert.Contains(t, response, expected)
@@ -92,7 +92,7 @@ func TestAddNewLoggerWithoutSettingUpEnv(t *testing.T) {
 }
 
 func TestAddLoggerWithoutLogin(t *testing.T) {
-	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
+	base.SetupMIEnv(t, miClient.GetEnvName(), config.MIClient.GetMiURL())
 	response, _ := base.Execute(t, validAddLoggerCmd...)
 	base.Log(response)
 	assert.Contains(t, response, "Login to MI")
@@ -116,7 +116,7 @@ func TestAddExistingLogger(t *testing.T) {
 
 func TestUpdateLoggerWithInvalidLogLevel(t *testing.T) {
 	testutils.SetupAndLoginToMI(t, config)
-	response, _ := base.Execute(t, "mi", "update", "log-level", newLoggerName, "ABC", "-e", "testing")
+	response, _ := base.Execute(t, "mi", "update", "log-level", newLoggerName, "ABC", "-e", miClient.GetEnvName(), "-k")
 	base.Log(response)
 	expected := "[ERROR]: updating logger [ " + newLoggerName + " ]  Invalid log level ABC"
 	assert.Contains(t, response, expected)
@@ -124,7 +124,7 @@ func TestUpdateLoggerWithInvalidLogLevel(t *testing.T) {
 
 func TestUpdateLoggerWithoutEnvFlag(t *testing.T) {
 	testutils.SetupAndLoginToMI(t, config)
-	response, _ := base.Execute(t, "mi", "update", "log-level", newLoggerName, "INFO")
+	response, _ := base.Execute(t, "mi", "update", "log-level", newLoggerName, "INFO", "-k")
 	base.Log(response)
 	expected := `required flag(s) "environment" not set`
 	assert.Contains(t, response, expected)
@@ -132,7 +132,7 @@ func TestUpdateLoggerWithoutEnvFlag(t *testing.T) {
 
 func TestUpdateLoggerWithInvalidArgs(t *testing.T) {
 	testutils.SetupAndLoginToMI(t, config)
-	response, _ := base.Execute(t, "mi", "update", "log-level", newLoggerName, "-e", "testing")
+	response, _ := base.Execute(t, "mi", "update", "log-level", newLoggerName, "-e", miClient.GetEnvName(), "-k")
 	base.Log(response)
 	expected := "accepts 2 arg(s), received 1"
 	assert.Contains(t, response, expected)
@@ -145,7 +145,7 @@ func TestUpdateLoggerWithoutSettingUpEnv(t *testing.T) {
 }
 
 func TestUpdateLoggerWithoutLogin(t *testing.T) {
-	base.SetupMIEnv(t, config.MIClient.GetEnvName(), config.MIClient.GetMiURL())
+	base.SetupMIEnv(t, miClient.GetEnvName(), config.MIClient.GetMiURL())
 	response, _ := base.Execute(t, validUpdateLoggerCmd...)
 	base.Log(response)
 	assert.Contains(t, response, "Login to MI")
@@ -161,7 +161,7 @@ func TestUpdateLogger(t *testing.T) {
 
 func TestUpdateLoggerNonExistingLogger(t *testing.T) {
 	testutils.SetupAndLoginToMI(t, config)
-	response, _ := base.Execute(t, "mi", "update", "log-level", invalidLoggerName, "INFO", "-e", "testing")
+	response, _ := base.Execute(t, "mi", "update", "log-level", invalidLoggerName, "INFO", "-e", miClient.GetEnvName(), "-k")
 	base.Log(response)
 	expected := "[ERROR]: updating logger [ " + invalidLoggerName + " ]  Specified logger ('" + invalidLoggerName + "') not found"
 	assert.Contains(t, response, expected)
