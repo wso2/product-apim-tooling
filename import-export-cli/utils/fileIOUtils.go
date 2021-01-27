@@ -509,11 +509,11 @@ func WriteResponseToTempZip(zipFileName string, resp *resty.Response) (string, e
 }
 
 // CreateZipFile if the given filePath contains a directory, zip it
-// @param filePath Project path
-// @param skipCleanup Whether to clean the temporary files after the program exists
+// @param filePath : The path of the project
+// @param skipCleanup : Whether to clean the temporary files after the program exists
 // @return error
-// @return func() can be called to cleanup the temporary items created during this function execution. Needs to call
-//	this once the zip file is consumed
+// @return func() can be called to cleanup the temporary items created during this function execution.
+// Needs to call this once the zip file is consumed
 func CreateZipFile(filePath string, skipCleanup bool) (error, func()) {
 	// If the filePath contains a directory, zip it
 	if info, err := os.Stat(filePath); err == nil && info.IsDir() {

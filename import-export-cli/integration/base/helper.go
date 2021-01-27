@@ -362,7 +362,7 @@ func Copy(src, dst string) error {
 	if err != nil {
 		return err
 	}
-	return out.Close()
+	return nil
 }
 
 //Generate random strings with given length

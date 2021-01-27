@@ -139,6 +139,8 @@ func checkDirForJson(appDirectory string) bool {
 	return false
 }
 
+// This function will check the path and check the type of the Application artifact
+// Returns an error when the unsupported file type is provided
 func preProcessApplication(appDirectory string) error {
 	utils.Logln(utils.LogPrefixInfo+"Loading Application definition from: ", appDirectory)
 	file, err := os.Open(appDirectory)
