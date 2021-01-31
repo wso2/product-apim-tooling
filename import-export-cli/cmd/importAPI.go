@@ -157,9 +157,10 @@ func mergeAPI(apiDirectory string, environmentParams *params.Environment) error 
 		return err
 	}
 
-	if !isEndpointsFieldsValid(environmentParams.Endpoints, environmentParams.LoadBalanceEndpoints, environmentParams.FailoverEndpoints) {
-		return errors.New("Please specify only one field from endpoints, loadBalanceEndpoints or failOverEndpoints in the api_params.yaml file for " +
-			environmentParams.Name + " and continue...")
+	if !isEndpointsFieldsValid(environmentParams.Endpoints, environmentParams.LoadBalanceEndpoints,
+	                                                                            environmentParams.FailoverEndpoints) {
+		return errors.New("Please specify only one field from endpoints, loadBalanceEndpoints or failOverEndpoints in" +
+		" the api_params.yaml file for " + environmentParams.Name + " and continue...")
 	}
 
 	configData, err := json.Marshal(environmentParams.Endpoints)
@@ -369,13 +370,16 @@ func setEndpointSecurityType(envSecurityEndpointParams *params.SecurityData, api
 	return nil
 }
 
-// isEndpointsFieldsValid returns false if either of the two fields: endpoints, loadBalanceEndpoints and failOverEndpoints are defined
-// in api_params.yaml file by the user mistakenly. This will return true , if only one of them is defined.
-func isEndpointsFieldsValid(endpoints *params.EndpointData, loadBalanceEndpoints *params.LoadBalanceEndpointsData, failoverEndpoints *params.FailoverEndpointsData) bool {
+// isEndpointsFieldsValid returns false if either of the two fields: endpoints, loadBalanceEndpoints and
+// failOverEndpoints are defined in api_params.yaml file by the user mistakenly. This will return true ,
+// if only one of them is defined.
+func isEndpointsFieldsValid(endpoints *params.EndpointData, loadBalanceEndpoints *params.LoadBalanceEndpointsData,
+	failoverEndpoints *params.FailoverEndpointsData) bool {
 	if endpoints != nil {
 		return loadBalanceEndpoints == nil && failoverEndpoints == nil
 	} else {
-		return (loadBalanceEndpoints != nil && failoverEndpoints == nil) || (loadBalanceEndpoints == nil && failoverEndpoints != nil)
+		return (loadBalanceEndpoints != nil && failoverEndpoints == nil) || (loadBalanceEndpoints == nil &&
+			failoverEndpoints != nil)
 	}
 }
 
