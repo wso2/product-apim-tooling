@@ -141,7 +141,10 @@ func RevokeAccessTokenForMI(env, token string) error {
 
 // RunMILogin prompt user to input MI management API username and password
 func RunMILogin(store Store, environment, username, password string) error {
-
+	if !utils.MIExistsInEnv(environment, utils.MainConfigFilePath) {
+		fmt.Println("MI does not exists in", environment, "Add it using add env")
+		os.Exit(1)
+	}
 	if username == "" {
 		fmt.Print("Username:")
 		scanner := bufio.NewScanner(os.Stdin)
