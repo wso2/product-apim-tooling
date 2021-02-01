@@ -31,6 +31,7 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
 	"github.com/wso2/product-apim-tooling/import-export-cli/cmd/mg"
 	mi "github.com/wso2/product-apim-tooling/import-export-cli/cmd/mi"
+	secret "github.com/wso2/product-apim-tooling/import-export-cli/cmd/secret"
 	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 
 	"path/filepath"
@@ -113,6 +114,7 @@ func init() {
 	}
 	RootCmd.AddCommand(mi.MICmd)
 	RootCmd.AddCommand(mg.MgCmd)
+	RootCmd.AddCommand(secret.SecretCmd)
 }
 
 // createConfigFiles() creates the ConfigDir and necessary ConfigFiles inside the user's $HOME directory

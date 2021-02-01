@@ -24,6 +24,7 @@ require (
 	gopkg.in/yaml.v2 v2.2.8
 	sigs.k8s.io/testing_frameworks v0.1.1 // indirect
 	sigs.k8s.io/yaml v1.2.0 // indirect
+	github.com/pavel-v-chernykh/keystore-go/v4 v4.1.0
 )
 
 replace k8s.io/client-go => k8s.io/client-go v0.18.2

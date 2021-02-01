@@ -36,6 +36,7 @@ apictl [flags]
 * [apictl mg](apictl_mg.md)	 - Handle Microgateway related operations
 * [apictl mi](apictl_mi.md)	 - Micro Integrator related commands
 * [apictl remove](apictl_remove.md)	 - Remove an environment
+* [apictl secret](apictl_secret.md)	 - Manage sensitive information
 * [apictl set](apictl_set.md)	 - Set configuration parameters
 * [apictl vcs](apictl_vcs.md)	 - Checks status and deploys projects
 * [apictl version](apictl_version.md)	 - Display Version on current apictl

@@ -4354,6 +4354,132 @@ _apictl_remove()
     noun_aliases=()
 }
 
+_apictl_secret_create()
+{
+    last_command="apictl_secret_create"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--cipher=")
+    two_word_flags+=("--cipher")
+    two_word_flags+=("-c")
+    local_nonpersistent_flags+=("--cipher")
+    local_nonpersistent_flags+=("--cipher=")
+    local_nonpersistent_flags+=("-c")
+    flags+=("--from-file=")
+    two_word_flags+=("--from-file")
+    two_word_flags+=("-f")
+    local_nonpersistent_flags+=("--from-file")
+    local_nonpersistent_flags+=("--from-file=")
+    local_nonpersistent_flags+=("-f")
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    local_nonpersistent_flags+=("-h")
+    flags+=("--output=")
+    two_word_flags+=("--output")
+    two_word_flags+=("-o")
+    local_nonpersistent_flags+=("--output")
+    local_nonpersistent_flags+=("--output=")
+    local_nonpersistent_flags+=("-o")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_apictl_secret_help()
+{
+    last_command="apictl_secret_help"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    has_completion_function=1
+    noun_aliases=()
+}
+
+_apictl_secret_init()
+{
+    last_command="apictl_secret_init"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    local_nonpersistent_flags+=("-h")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_apictl_secret()
+{
+    last_command="apictl_secret"
+
+    command_aliases=()
+
+    commands=()
+    commands+=("create")
+    commands+=("help")
+    commands+=("init")
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    local_nonpersistent_flags+=("-h")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
 _apictl_set()
 {
     last_command="apictl_set"
@@ -4603,6 +4729,7 @@ _apictl_root_command()
     commands+=("mg")
     commands+=("mi")
     commands+=("remove")
+    commands+=("secret")
     commands+=("set")
     commands+=("vcs")
     commands+=("version")
