@@ -67,10 +67,6 @@ var addApiCmd = &cobra.Command{
 func handleAddApi(nameSuffix string) {
 	validateAddApiCommand()
 
-	//swaggerCmNames := make([]string, len(flagSwaggerFilePaths))
-	//balInterceptorsCmNames := make([]string, 0, len(flagSwaggerFilePaths))
-	//var javaInterceptorsCmNames []string
-
 	// log processing only if there are more projects
 	utils.Logln(fmt.Sprintf("%sProcessing swagger  %v", utils.LogPrefixInfo, flagSwaggerFilePath))
 
@@ -108,13 +104,6 @@ func handleAddApi(nameSuffix string) {
 
 // validateAddApiCommand validates for required flags and if invalid print error and exit
 func validateAddApiCommand() {
-	// validate mode
-	//configVars := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
-	//if !configVars.Config.KubernetesMode {
-	//	utils.HandleErrorAndExit("set mode to kubernetes with command: apictl set --mode kubernetes",
-	//		errors.New("mode should be set to kubernetes"))
-	//}
-
 	// validate --from-file flag values
 	if _, err := os.Stat(flagSwaggerFilePath); err != nil {
 		utils.HandleErrorAndExit("swagger file path or project not found", err)
@@ -222,26 +211,10 @@ func rollbackConfigs(apiCr *wso2v1alpha2.API) {
 
 func init() {
 	K8sAddCmd.AddCommand(addApiCmd)
-	//addApiCmd.Flags().StringVarP(&flagApiEndPoint, "apiEndPoint", "a", "", "")
 	addApiCmd.Flags().StringVarP(&flagApiName, "name", "n", "", "Name of the API")
 	addApiCmd.Flags().StringVarP(&flagSwaggerFilePath, "from-file", "f", "",
 		"Path to swagger file")
-	//addApiCmd.Flags().IntVar(&flagReplicas, "replicas", 1, "replica set")
 	addApiCmd.Flags().StringVar(&flagNamespace, "namespace", "", "namespace of API")
-	//addApiCmd.Flags().BoolVarP(&flagOverride, "override", "", false,
-	//	"Property to override the existing docker image with the given name and version")
-	//addApiCmd.Flags().StringVarP(&flagApiVersion, "version", "v", "",
-	//	"Property to override the API version")
-	//addApiCmd.Flags().StringVarP(&flagApiMode, "mode", "m", "",
-	//	fmt.Sprintf("Property to override the deploying mode. Available modes: %v, %v",
-	//		utils.PrivateJetModeConst, utils.SidecarModeConst))
-	//addApiCmd.Flags().StringArrayVarP(&flagEnv, "env", "e", []string{},
-	//	"Environment variables to be passed to deployment")
-	//addApiCmd.Flags().StringVarP(&flagImage, "image", "i", "",
-	//	"Image of the API. If specified, ignores the value of --override")
-	//addApiCmd.Flags().StringVarP(&flagHostname, "hostname", "", "",
-	//	"Ingress hostname that the API is being exposed")
-
 	_ = addApiCmd.MarkFlagRequired("name")
 	_ = addApiCmd.MarkFlagRequired("from-file")
 }
