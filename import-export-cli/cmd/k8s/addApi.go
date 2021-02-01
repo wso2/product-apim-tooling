@@ -111,7 +111,7 @@ func validateAddApiCommand() {
 }
 
 //create configmap with swagger definition
-func createConfigMapWithNamespace(configMapName string, filePath string, namespace string, operation string) error {
+func createConfigMapWithNamespace(configMapName, filePath, namespace, operation string) error {
 	cmd := exec.Command(
 		k8sUtils.Kubectl,
 		operation,
@@ -132,7 +132,7 @@ func createConfigMapWithNamespace(configMapName string, filePath string, namespa
 	return nil
 }
 
-func createAPI(configMapName string, timestamp string) {
+func createAPI(configMapName, timestamp string) {
 	//get API definition from file
 	apiConfigMapData, _ := box.Get("/kubernetes_resources/api_cr.yaml")
 	apiCrd := &wso2v1alpha2.API{}
