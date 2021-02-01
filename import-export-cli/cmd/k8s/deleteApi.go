@@ -20,7 +20,6 @@ package k8s
 
 import (
 	"github.com/spf13/cobra"
-	cmd2 "github.com/wso2/product-apim-tooling/import-export-cli/cmd"
 	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
@@ -44,7 +43,6 @@ var k8sDeleteAPICmd = &cobra.Command{
 		utils.Logln(utils.LogPrefixInfo + k8sDeleteAPICmdLiteral + " called")
 		k8sArgs := []string{k8sUtils.K8sDelete, k8sUtils.ApiOpCrdApi}
 		k8sArgs = append(k8sArgs, args...)
-		cmd2.ExecuteKubernetes(k8sArgs...)
 	},
 }
 

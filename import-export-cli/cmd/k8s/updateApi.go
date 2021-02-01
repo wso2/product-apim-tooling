@@ -75,7 +75,7 @@ var updateApiCmd = &cobra.Command{
 }
 
 func init() {
-	K8sCmd.AddCommand(updateCmd)
+	Cmd.AddCommand(updateCmd)
 	updateCmd.AddCommand(updateApiCmd)
 	updateApiCmd.Flags().StringVarP(&flagApiName, "name", "n", "", "Name of the API")
 	updateApiCmd.Flags().StringVarP(&flagSwaggerFilePath, "from-file", "f", "", "Path to swagger file")

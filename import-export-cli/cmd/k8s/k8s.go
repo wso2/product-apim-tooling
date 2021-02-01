@@ -20,7 +20,6 @@ package k8s
 
 import (
 	"github.com/spf13/cobra"
-	cmd2 "github.com/wso2/product-apim-tooling/import-export-cli/cmd"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
@@ -37,19 +36,19 @@ const k8sCmdExamples = utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sInstal
 ` + utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sChangeCmdLiteral + ` ` + K8sChangeDockerRegistryCmdLiteral
 
 // K8sCmd represents the import command
-var K8sCmd = &cobra.Command{
+var Cmd = &cobra.Command{
 	Use:     K8sCmdLiteral,
 	Short:   k8sCmdShortDesc,
 	Long:    k8sCmdLongDesc,
 	Example: k8sCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + cmd2.ImportCmdLiteral + " called")
+		utils.Logln(utils.LogPrefixInfo +  K8sCmdLiteral + " called")
 
 	},
 }
 
 // init using Cobra
 func init() {
-	cmd2.RootCmd.AddCommand(K8sCmd)
+	Cmd.AddCommand(AddCmd)
 }
 

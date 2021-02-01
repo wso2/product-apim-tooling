@@ -1,6 +1,6 @@
 ## apictl bundle
 
-Archive any project to zip format
+Archive any source project artifact to zip format
 
 ### Synopsis
 

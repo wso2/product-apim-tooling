@@ -21,6 +21,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd/k8s"
 	"io"
 	"io/ioutil"
 	"os"
@@ -115,6 +116,7 @@ func init() {
 	RootCmd.AddCommand(mi.MICmd)
 	RootCmd.AddCommand(mg.MgCmd)
 	RootCmd.AddCommand(secret.SecretCmd)
+	RootCmd.AddCommand(k8s.Cmd)
 }
 
 // createConfigFiles() creates the ConfigDir and necessary ConfigFiles inside the user's $HOME directory

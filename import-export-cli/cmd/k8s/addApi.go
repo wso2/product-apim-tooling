@@ -210,7 +210,7 @@ func rollbackConfigs(apiCr *wso2v1alpha2.API) {
 }
 
 func init() {
-	K8sAddCmd.AddCommand(addApiCmd)
+	AddCmd.AddCommand(addApiCmd)
 	addApiCmd.Flags().StringVarP(&flagApiName, "name", "n", "", "Name of the API")
 	addApiCmd.Flags().StringVarP(&flagSwaggerFilePath, "from-file", "f", "",
 		"Path to swagger file")
