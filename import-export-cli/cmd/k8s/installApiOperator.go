@@ -16,7 +16,7 @@
 * under the License.
  */
 
-package cmd
+package k8s
 
 import (
 	"fmt"
@@ -126,3 +126,4 @@ func init() {
 	installApiOperatorCmd.Flags().BoolVar(&flagBmPasswordStdin, k8sUtils.FlagBmPasswordStdin, false, "Prompt for password of the given user in the stdin")
 	installApiOperatorCmd.Flags().StringVarP(&flagBmKeyFile, k8sUtils.FlagBmKeyFile, "c", "", "Credentials file")
 }
+

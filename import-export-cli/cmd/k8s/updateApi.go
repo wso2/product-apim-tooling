@@ -15,7 +15,8 @@
 * specific language governing permissions and limitations
 * under the License.
  */
-package cmd
+
+package k8s
 
 import (
 	"fmt"
@@ -74,13 +75,14 @@ var updateApiCmd = &cobra.Command{
 }
 
 func init() {
-	K8sCmd.AddCommand(updateCmd)
+	Cmd.AddCommand(updateCmd)
 	updateCmd.AddCommand(updateApiCmd)
 	updateApiCmd.Flags().StringVarP(&flagApiName, "name", "n", "", "Name of the API")
-	updateApiCmd.Flags().StringArrayVarP(&flagSwaggerFilePaths, "from-file", "f", []string{}, "Path to swagger file")
+	updateApiCmd.Flags().StringVarP(&flagSwaggerFilePath, "from-file", "f", "", "Path to swagger file")
 	updateApiCmd.Flags().IntVar(&flagReplicas, "replicas", 1, "replica set")
 	updateApiCmd.Flags().StringVar(&flagNamespace, "namespace", "", "namespace of API")
 	updateApiCmd.Flags().StringVarP(&flagApiVersion, "version", "v", "", "Property to override the existing docker image with same name and version")
 	updateApiCmd.Flags().StringVarP(&flagApiMode, "mode", "m", "",
 		fmt.Sprintf("Property to override the deploying mode. Available modes: %v, %v", utils.PrivateJetModeConst, utils.SidecarModeConst))
 }
+

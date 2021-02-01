@@ -29,11 +29,12 @@ apictl set --vcs-config-path /home/user/custom/vcs-config.yaml
 ### Options
 
 ```
-      --export-directory string    Path to directory where APIs should be saved (default "/home/wso2user/.wso2apictl/exported")
-  -h, --help                       help for set
-      --http-request-timeout int   Timeout for HTTP Client (default 10000)
-      --vcs-config-path string     Path to the VCS Configuration yaml file which keeps the VCS meta data
-      --vcs-deletion-enabled       Specifies whether project deletion is allowed during deployment.
+      --export-directory string         Path to directory where APIs should be saved (default "/home/jayanie/.wso2apictl/exported")
+  -h, --help                            help for set
+      --http-request-timeout int        Timeout for HTTP Client (default 10000)
+      --tls-renegotiation-mode string   Supported TLS renegotiation mode (default "never")
+      --vcs-config-path string          Path to the VCS Configuration yaml file which keeps the VCS meta data
+      --vcs-deletion-enabled            Specifies whether project deletion is allowed during deployment.
 ```
 
 ### Options inherited from parent commands

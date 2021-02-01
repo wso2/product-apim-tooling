@@ -16,7 +16,7 @@
 * under the License.
  */
 
-package cmd
+package k8s
 
 import (
 	"fmt"
@@ -78,3 +78,4 @@ func init() {
 	installCmd.AddCommand(installWso2amOperatorCmd)
 	installWso2amOperatorCmd.Flags().StringVarP(&flagWso2AmOperatorFile, "from-file", "f", "", "Path to wso2am-operator directory")
 }
+

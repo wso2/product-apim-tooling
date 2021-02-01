@@ -20,10 +20,10 @@ package deprecated
 
 import (
 	"fmt"
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd/k8s"
 	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/wso2/product-apim-tooling/import-export-cli/cmd"
 	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
@@ -42,7 +42,7 @@ var uninstallApiOperatorCmdDeprecated = &cobra.Command{
 	Short:   uninstallApiOperatorCmdShortDesc,
 	Long:    uninstallApiOperatorCmdLongDesc,
 	Example: uninstallApiOperatorCmdExamples,
-	Deprecated: "use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sUninstallCmdLiteral + " " + cmd.K8sUninstallApiOperatorCmdLiteral +
+	Deprecated: "use \"" + k8s.K8sCmdLiteral + " " + k8s.K8sUninstallCmdLiteral + " " + k8s.K8sUninstallApiOperatorCmdLiteral +
 		"\" " + "instead of \"" + uninstallCmdLiteral + " " + uninstallApiOperatorCmdLiteral + "\".",
 	Run: func(cmd *cobra.Command, args []string) {
 		isConfirm := flagForceUninstallApiOperator

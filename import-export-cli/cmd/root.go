@@ -21,6 +21,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd/k8s"
 	"io"
 	"io/ioutil"
 	"os"
@@ -70,7 +71,7 @@ var RootCmd = &cobra.Command{
 	Long:               rootCmdLongDesc,
 	Run: func(cmd *cobra.Command, args []string) {
 		if isK8sEnabled() {
-			executeKubernetes(args...)
+			ExecuteKubernetes(args...)
 		} else {
 			cmd.Help()
 		}
@@ -115,6 +116,7 @@ func init() {
 	RootCmd.AddCommand(mi.MICmd)
 	RootCmd.AddCommand(mg.MgCmd)
 	RootCmd.AddCommand(secret.SecretCmd)
+	RootCmd.AddCommand(k8s.Cmd)
 }
 
 // createConfigFiles() creates the ConfigDir and necessary ConfigFiles inside the user's $HOME directory
@@ -228,7 +230,7 @@ func isK8sEnabled() bool {
 }
 
 //execute kubernetes commands
-func executeKubernetes(arg ...string) {
+func ExecuteKubernetes(arg ...string) {
 	cmd := exec.Command(
 		k8sUtils.Kubectl,
 		arg...,

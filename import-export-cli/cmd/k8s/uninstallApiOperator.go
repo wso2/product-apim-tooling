@@ -16,41 +16,40 @@
 * under the License.
  */
 
-package cmd
+package k8s
 
 import (
 	"fmt"
 	"strings"
 
+	"github.com/spf13/cobra"
 	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-
-	"github.com/spf13/cobra"
 )
 
-const K8sUninstallWso2amOperatorCmdLiteral = "wso2am-operator"
-const k8sUninstallWso2amOperatorCmdShortDesc = "Uninstall WSO2AM Operator"
-const k8sUninstallWso2amOperatorCmdLongDesc = "Uninstall WSO2AM Operator in the configured K8s cluster"
-const k8sUninstallWso2amOperatorCmdExamples = utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sUninstallCmdLiteral + ` ` + K8sUninstallWso2amOperatorCmdLiteral + `
-` + utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sUninstallCmdLiteral + ` ` + K8sUninstallWso2amOperatorCmdLiteral + ` --force`
+const K8sUninstallApiOperatorCmdLiteral = "api-operator"
+const k8sUninstallApiOperatorCmdShortDesc = "Uninstall API Operator"
+const k8sUninstallApiOperatorCmdLongDesc = "Uninstall API Operator in the configured K8s cluster"
+const k8sUninstallApiOperatorCmdExamples = utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sUninstallCmdLiteral + ` ` + K8sUninstallApiOperatorCmdLiteral + `
+` + utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sUninstallCmdLiteral + ` ` + K8sUninstallApiOperatorCmdLiteral + ` --force`
 
-var flagForceUninstallWso2amOperator bool
+var flagForceUninstallApiOperator bool
 
-// uninstallWso2amOperatorCmd represents the uninstallWso2amOperator command
-var uninstallWso2amOperatorCmd = &cobra.Command{
-	Use:     K8sUninstallWso2amOperatorCmdLiteral,
-	Short:   k8sUninstallWso2amOperatorCmdShortDesc,
-	Long:    k8sUninstallWso2amOperatorCmdLongDesc,
-	Example: k8sUninstallWso2amOperatorCmdExamples,
+// uninstallApiOperatorCmd represents the uninstall api-operator command
+var uninstallApiOperatorCmd = &cobra.Command{
+	Use:     K8sUninstallApiOperatorCmdLiteral,
+	Short:   k8sUninstallApiOperatorCmdShortDesc,
+	Long:    k8sUninstallApiOperatorCmdLongDesc,
+	Example: k8sUninstallApiOperatorCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		isConfirm := flagForceUninstallWso2amOperator
+		isConfirm := flagForceUninstallApiOperator
 
-		if !flagForceUninstallWso2amOperator {
+		if !flagForceUninstallApiOperator {
 			isConfirmStr, err := utils.ReadInputString(
-				fmt.Sprintf("\nUninstall \"%s\" and all related resources: Apimanagers\n"+
+				fmt.Sprintf("\nUninstall \"%s\" and all related resources: APIs, Securities, Rate Limitings and Target Endpoints\n"+
 					"[WARNING] Remove the namespace: %s\n"+
 					"Are you sure",
-					k8sUtils.Wso2amOperator, k8sUtils.ApiOpWso2Namespace),
+					k8sUtils.ApiOperator, k8sUtils.ApiOpWso2Namespace),
 				utils.Default{Value: "N", IsDefault: true},
 				"",
 				false,
@@ -73,9 +72,13 @@ var uninstallWso2amOperatorCmd = &cobra.Command{
 
 			deleteErrors := []error{
 				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, k8sUtils.Namespace, k8sUtils.ApiOpWso2Namespace),
-				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, k8sUtils.ClusterRole, k8sUtils.Wso2amRole),
-				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, k8sUtils.ClusterRoleBinding, k8sUtils.Wso2amRoleBinding),
-				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, k8sUtils.CrdKind, k8sUtils.Wso2amOpCrdApimanager),
+				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, k8sUtils.ClusterRole, k8sUtils.ApiOperator),
+				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, k8sUtils.ClusterRoleBinding, k8sUtils.ApiOperator),
+
+				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, k8sUtils.CrdKind, k8sUtils.ApiOpCrdApi),
+				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, k8sUtils.CrdKind, k8sUtils.ApiOpCrdSecurity),
+				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, k8sUtils.CrdKind, k8sUtils.ApiOpCrdRateLimiting),
+				k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sUtils.K8sDelete, k8sUtils.CrdKind, k8sUtils.ApiOpCrdTargetEndpoint),
 			}
 
 			for _, err := range deleteErrors {
@@ -90,6 +93,7 @@ var uninstallWso2amOperatorCmd = &cobra.Command{
 }
 
 func init() {
-	uninstallCmd.AddCommand(uninstallWso2amOperatorCmd)
-	uninstallWso2amOperatorCmd.Flags().BoolVar(&flagForceUninstallWso2amOperator, "force", false, "Force uninstall WSO2AM Operator")
+	uninstallCmd.AddCommand(uninstallApiOperatorCmd)
+	uninstallApiOperatorCmd.Flags().BoolVar(&flagForceUninstallApiOperator, "force", false, "Force uninstall API Operator")
 }
+

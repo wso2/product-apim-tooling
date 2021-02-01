@@ -20,9 +20,9 @@ package deprecated
 
 import (
 	"fmt"
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd/k8s"
 
 	"github.com/spf13/cobra"
-	"github.com/wso2/product-apim-tooling/import-export-cli/cmd"
 	"github.com/wso2/product-apim-tooling/import-export-cli/operator/registry"
 	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -52,7 +52,7 @@ var installApiOperatorCmdDeprecated = &cobra.Command{
 	Short:   installApiOperatorCmdShortDesc,
 	Long:    installApiOperatorCmdLongDesc,
 	Example: installApiOperatorCmdExamples,
-	Deprecated: "use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sInstallCmdLiteral + " " + cmd.K8sInstallApiOperatorCmdLiteral +
+	Deprecated: "use \"" + k8s.K8sCmdLiteral + " " + k8s.K8sInstallCmdLiteral + " " + k8s.K8sInstallApiOperatorCmdLiteral +
 		"\" " + "instead of \"" + installCmdLiteral + " " + installApiOperatorCmdLiteral + "\".",
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(fmt.Sprintf("%s%s %s called", utils.LogPrefixInfo, installCmdLiteral, installApiOperatorCmdLiteral))

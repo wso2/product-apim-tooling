@@ -16,7 +16,7 @@
 * under the License.
  */
 
-package cmd
+package k8s
 
 import (
 	"errors"
@@ -81,7 +81,7 @@ var changeDockerRegistryCmd = &cobra.Command{
 }
 
 func init() {
-	K8sCmd.AddCommand(changeCmd)
+	Cmd.AddCommand(changeCmd)
 	changeCmd.AddCommand(changeDockerRegistryCmd)
 
 	// flags for installing api-operator in batch mode

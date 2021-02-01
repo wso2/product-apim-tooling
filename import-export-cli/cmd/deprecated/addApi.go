@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd/k8s"
 	"io"
 	"io/ioutil"
 	"log"
@@ -33,7 +34,7 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
-	wso2v1alpha1 "github.com/wso2/k8s-api-operator/api-operator/pkg/apis/wso2/v1alpha1"
+	wso2v1alpha1 "github.com/wso2/k8s-api-operator/api-operator/pkg/apis/wso2/v1alpha2"
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
 	"github.com/wso2/product-apim-tooling/import-export-cli/cmd"
 	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
@@ -66,7 +67,7 @@ var addApiCmdDeprecated = &cobra.Command{
 	Short:   addApiCmdShortDesc,
 	Long:    addApiLongDesc,
 	Example: addApiExamples,
-	Deprecated: "use \"" + cmd.K8sCmdLiteral + " " + cmd.K8sAddCmdLiteral + " " + cmd.AddApiCmdLiteral +
+	Deprecated: "use \"" + k8s.K8sCmdLiteral + " " + k8s.K8sAddCmdLiteral + " " + k8s.AddApiCmdLiteral +
 		"\" " + "instead of \"" + cmd.AddCmdLiteral + " " + addApiCmdLiteral + "\".",
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + addApiCmdLiteral + " called")

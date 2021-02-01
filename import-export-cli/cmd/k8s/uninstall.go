@@ -16,26 +16,27 @@
 * under the License.
  */
 
-package cmd
+package k8s
 
 import (
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-const K8sInstallCmdLiteral = "install"
-const k8sInstallCmdShortDesc = "Install an operator in the configured K8s cluster"
-const k8sInstallCmdLongDesc = "Install an operator in the configured K8s cluster"
-const k8sInstallCmdExamples = utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sInstallCmdLiteral + ` ` + K8sInstallApiOperatorCmdLiteral
+const K8sUninstallCmdLiteral = "uninstall"
+const k8sUninstallCmdShortDesc = "Uninstall an operator in the configured K8s cluster"
+const k8sUninstallCmdLongDesc = "Uninstall an operator in the configured K8s cluster"
+const k8sUninstallCmdExamples = utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sUninstallCmdLiteral + ` ` + K8sUninstallApiOperatorCmdLiteral
 
-// installCmd represents the install command
-var installCmd = &cobra.Command{
-	Use:     K8sInstallCmdLiteral,
-	Short:   k8sInstallCmdShortDesc,
-	Long:    k8sInstallCmdLongDesc,
-	Example: k8sInstallCmdExamples,
+// uninstallCmd represents the uninstall command
+var uninstallCmd = &cobra.Command{
+	Use:     K8sUninstallCmdLiteral,
+	Short:   k8sUninstallCmdShortDesc,
+	Long:    k8sUninstallCmdLongDesc,
+	Example: k8sUninstallCmdExamples,
 }
 
 func init() {
-	K8sCmd.AddCommand(installCmd)
+	Cmd.AddCommand(uninstallCmd)
 }
+

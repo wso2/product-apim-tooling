@@ -16,7 +16,7 @@
 * under the License.
  */
 
-package cmd
+package k8s
 
 import (
 	"github.com/spf13/cobra"
@@ -40,10 +40,9 @@ var k8sDeleteAPICmd = &cobra.Command{
 	Example:            k8sDeleteAPICmdExamples,
 	DisableFlagParsing: true,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + deleteAPICmdLiteral + " called")
+		utils.Logln(utils.LogPrefixInfo + k8sDeleteAPICmdLiteral + " called")
 		k8sArgs := []string{k8sUtils.K8sDelete, k8sUtils.ApiOpCrdApi}
 		k8sArgs = append(k8sArgs, args...)
-		executeKubernetes(k8sArgs...)
 	},
 }
 
@@ -51,3 +50,4 @@ var k8sDeleteAPICmd = &cobra.Command{
 func init() {
 	k8sDeleteCmd.AddCommand(k8sDeleteAPICmd)
 }
+
