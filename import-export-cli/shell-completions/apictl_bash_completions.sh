@@ -4150,6 +4150,41 @@ _apictl_mi_logout()
     noun_aliases=()
 }
 
+_apictl_mi_update_hashicorp-secret()
+{
+    last_command="apictl_mi_update_hashicorp-secret"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--environment=")
+    two_word_flags+=("--environment")
+    two_word_flags+=("-e")
+    local_nonpersistent_flags+=("--environment")
+    local_nonpersistent_flags+=("--environment=")
+    local_nonpersistent_flags+=("-e")
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    local_nonpersistent_flags+=("-h")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_flag+=("--environment=")
+    must_have_one_flag+=("-e")
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
 _apictl_mi_update_help()
 {
     last_command="apictl_mi_update_help"
@@ -4216,6 +4251,7 @@ _apictl_mi_update()
     command_aliases=()
 
     commands=()
+    commands+=("hashicorp-secret")
     commands+=("help")
     commands+=("log-level")
 

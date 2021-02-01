@@ -34,9 +34,5 @@ func DeactivateEndpoint(env, endpointName string) (interface{}, error) {
 
 func updateEndpointState(env, endpointName, state string) (interface{}, error) {
 	url := utils.GetMIManagementEndpointOfResource(utils.MiManagementEndpointResource, env, utils.MainConfigFilePath)
-	resp, err := updateArtifactState(url, endpointName, state, env)
-	if err != nil {
-		return nil, createErrorWithResponseBody(resp, err)
-	}
-	return resp, nil
+	return updateArtifactState(url, endpointName, state, env)
 }

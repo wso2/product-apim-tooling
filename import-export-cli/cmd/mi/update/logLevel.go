@@ -70,7 +70,3 @@ func executeUpdateLogger(loggerName, logLevel string) {
 		fmt.Println(resp)
 	}
 }
-
-func printUpdateCmdVerboseLog(cmd string) {
-	utils.Logln(utils.LogPrefixInfo + updateCmdLiteral + " " + cmd + " called")
-}

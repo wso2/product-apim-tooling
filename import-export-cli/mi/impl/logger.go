@@ -30,11 +30,7 @@ func AddMILogger(env, loggerName, logClass, loggingLevel string) (interface{}, e
 	putNonEmptyValueToMap(body, "loggerClass", logClass)
 
 	url := utils.GetMIManagementEndpointOfResource(utils.MiManagementLoggingResource, env, utils.MainConfigFilePath)
-	resp, err := addNewMILogger(url, body, env)
-	if err != nil {
-		return nil, createErrorWithResponseBody(resp, err)
-	}
-	return resp, nil
+	return addNewMILogger(url, body, env)
 }
 
 // UpdateMILogger update the log level to loggingLevel of the logger with name loggerName in the micro integrator in a given environment

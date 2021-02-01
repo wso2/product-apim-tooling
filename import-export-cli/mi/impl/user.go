@@ -39,21 +39,13 @@ func AddMIUser(env, userName, password, isAdmin string) (interface{}, error) {
 		IsAdmin:  isAdmin,
 	}
 	url := utils.GetMIManagementEndpointOfResource(utils.MiManagementUserResource, env, utils.MainConfigFilePath)
-	resp, err := addNewMIUser(env, url, body)
-	if err != nil {
-		return nil, createErrorWithResponseBody(resp, err)
-	}
-	return resp, nil
+	return addNewMIUser(env, url, body)
 }
 
 // DeleteMIUser deletes a user from a micro integrator in a given environment
 func DeleteMIUser(env, userName string) (interface{}, error) {
 	url := utils.GetMIManagementEndpointOfResource(utils.MiManagementUserResource, env, utils.MainConfigFilePath) + "/" + userName
-	resp, err := deleteMIUser(url, env)
-	if err != nil {
-		return nil, createErrorWithResponseBody(resp, err)
-	}
-	return resp, nil
+	return deleteMIUser(url, env)
 }
 
 func addNewMIUser(env, url string, body interface{}) (string, error) {
