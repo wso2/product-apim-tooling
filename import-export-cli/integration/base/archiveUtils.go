@@ -45,12 +45,12 @@ func init() {
 }
 
 // ExtractArchiveFile : Extract apictl distribution archive file
-func ExtractArchiveFile() {
+func ExtractArchiveFile(path string) {
 	if archiveFileName == "" {
 		Fatal("apictl archive not provided as a command line argument '-archive <archive_file_name>'")
 	}
 
-	relativePath := "../build/target/"
+	relativePath := path
 	extractedFolder := "extracted"
 
 	destPath := filepath.FromSlash(relativePath + extractedFolder)
