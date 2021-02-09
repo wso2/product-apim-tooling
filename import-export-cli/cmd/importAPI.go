@@ -19,6 +19,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
@@ -32,6 +33,7 @@ var (
 	importAPIUpdate              bool
 	importAPIParamsFile          string
 	importAPISkipCleanup         bool
+	importAPIRotateRevision      bool
 )
 
 const (
@@ -43,7 +45,7 @@ const (
 
 const importAPICmdExamples = utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAPICmdLiteral + ` -f qa/TwitterAPI.zip -e dev
 ` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAPICmdLiteral + ` -f staging/FacebookAPI.zip -e production
-` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAPICmdLiteral + ` -f ~/myapi -e production --update
+` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAPICmdLiteral + ` -f ~/myapi -e production --update --rotate-revision
 ` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAPICmdLiteral + ` -f ~/myapi -e production --update
 NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory`
 
@@ -56,6 +58,10 @@ var ImportAPICmd = &cobra.Command{
 	Example: importAPICmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + ImportAPICmdLiteral + " called")
+		if importAPIRotateRevision == false {
+			fmt.Println("Rotate revision is set to false. Please note that you can only update and deploy the " +
+				"api 5 times without deleting a revision")
+		}
 		cred, err := GetCredentials(importEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
@@ -65,7 +71,7 @@ var ImportAPICmd = &cobra.Command{
 			utils.HandleErrorAndExit("Error while getting an access token for importing API", err)
 		}
 		err = impl.ImportAPIToEnv(accessOAuthToken, importEnvironment, importAPIFile, importAPIParamsFile, importAPIUpdate,
-			importAPICmdPreserveProvider, importAPISkipCleanup)
+			importAPICmdPreserveProvider, importAPISkipCleanup, importAPIRotateRevision)
 		if err != nil {
 			utils.HandleErrorAndExit("Error importing API", err)
 			return
@@ -84,6 +90,8 @@ func init() {
 		"Preserve existing provider of API after importing")
 	ImportAPICmd.Flags().BoolVar(&importAPIUpdate, "update", false, "Update an "+
 		"existing API or create a new API")
+	ImportAPICmd.Flags().BoolVar(&importAPIRotateRevision, "rotate-revision", false, "Rotate the "+
+		"revisions with each update")
 	ImportAPICmd.Flags().StringVarP(&importAPIParamsFile, "params", "", utils.ParamFileAPI,
 		"Provide a API Manager params file")
 	ImportAPICmd.Flags().BoolVarP(&importAPISkipCleanup, "skipCleanup", "", false, "Leave "+

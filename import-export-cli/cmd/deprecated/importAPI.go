@@ -33,6 +33,7 @@ var (
 	importAPIUpdate              bool
 	importAPIParamsFile          string
 	importAPISkipCleanup         bool
+	importAPIrotateRevision		 bool
 )
 
 const (
@@ -67,7 +68,7 @@ var ImportAPICmdDeprecated = &cobra.Command{
 			utils.HandleErrorAndExit("Error while getting an access token for importing API", err)
 		}
 		err = impl.ImportAPIToEnv(accessOAuthToken, importEnvironment, importAPIFile, importAPIParamsFile, importAPIUpdate,
-			importAPICmdPreserveProvider, importAPISkipCleanup)
+			importAPICmdPreserveProvider, importAPISkipCleanup, importAPIrotateRevision)
 		if err != nil {
 			utils.HandleErrorAndExit("Error importing API", err)
 			return
@@ -84,6 +85,8 @@ func init() {
 		"", "Environment from the which the API should be imported")
 	ImportAPICmdDeprecated.Flags().BoolVar(&importAPICmdPreserveProvider, "preserve-provider", true,
 		"Preserve existing provider of API after importing")
+	ImportAPICmdDeprecated.Flags().BoolVar(&importAPIrotateRevision, "rotate-revision", false, "Rotate the "+
+		"revisions with each update")
 	ImportAPICmdDeprecated.Flags().BoolVar(&importAPIUpdate, "update", false, "Update an "+
 		"existing API or create a new API")
 	ImportAPICmdDeprecated.Flags().StringVarP(&importAPIParamsFile, "params", "", utils.ParamFileAPI,
