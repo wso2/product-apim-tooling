@@ -154,6 +154,39 @@ func GetAPIList(accessToken, apiListEndpoint, query, limit string) (count int32,
 	}
 }
 
+// GetRevisionsList Get the list of Revisions available for the given API
+// @param accessToken 			: Access Token for the environment
+// @param revisionListEndpoint 	: Revision List endpoint
+// @return count (no. of revisions)
+// @return array of revision objects
+// @return error
+func GetRevisionsList(accessToken, revisionListEndpoint string) (count int32, revisions []utils.Revisions, err error) {
+
+	headers := make(map[string]string)
+	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
+
+	utils.Logln(utils.LogPrefixInfo+"URL:", revisionListEndpoint)
+	resp, err := utils.InvokeGETRequest(revisionListEndpoint, headers)
+
+	if err != nil {
+		utils.HandleErrorAndExit("Unable to connect to "+revisionListEndpoint, err)
+	}
+
+	utils.Logln(utils.LogPrefixInfo+"Response:", resp.Status())
+
+	if resp.StatusCode() == http.StatusOK {
+		revisionListResponse := &utils.RevisionListResponse{}
+		unmarshalError := json.Unmarshal([]byte(resp.Body()), &revisionListResponse)
+
+		if unmarshalError != nil {
+			utils.HandleErrorAndExit(utils.LogPrefixError+"invalid JSON response", unmarshalError)
+		}
+		return revisionListResponse.Count, revisionListResponse.List, nil
+	} else {
+		return 0, nil, errors.New(string(resp.Body()))
+	}
+}
+
 func getQueryParamConnector() (connector string) {
 	if queryParamAdded {
 		return "&"
