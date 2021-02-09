@@ -151,7 +151,7 @@ func ExportAPIs(credential credentials.Credential, exportRelatedFilesPath, cmdEx
 					exportAPIName := apis[i].Name
 					exportAPIVersion := apis[i].Version
 					exportApiProvider := apis[i].Provider
-					resp, err := ExportAPIFromEnv(accessToken, exportAPIName, exportAPIVersion, exportApiProvider, exportAPIsFormat,
+					resp, err := ExportAPIFromEnv(accessToken, exportAPIName, exportAPIVersion, "1", exportApiProvider, exportAPIsFormat,
 						cmdExportEnvironment, exportAPIPreserveStatus)
 					if err != nil {
 						utils.HandleErrorAndExit("Error exporting", err)

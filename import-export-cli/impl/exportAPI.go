@@ -28,9 +28,9 @@ import (
 )
 
 // ExportAPIFromEnv function is used with export api command
-func ExportAPIFromEnv(accessToken, name, version, provider, format, exportEnvironment string, preserveStatus bool) (*resty.Response, error) {
+func ExportAPIFromEnv(accessToken, name, version, revisionNum, provider, format, exportEnvironment string, preserveStatus bool) (*resty.Response, error) {
 	publisherEndpoint := utils.GetPublisherEndpointOfEnv(exportEnvironment, utils.MainConfigFilePath)
-	return exportAPI(name, version, provider, format, publisherEndpoint, accessToken, preserveStatus)
+	return exportAPI(name, version, revisionNum, provider, format, publisherEndpoint, accessToken, preserveStatus)
 }
 
 // exportAPI function is used with export api command
@@ -40,12 +40,15 @@ func ExportAPIFromEnv(accessToken, name, version, provider, format, exportEnviro
 // @param publisherEndpoint : API Manager Publisher Endpoint for the environment
 // @param accessToken : Access Token for the resource
 // @return response Response in the form of *resty.Response
-func exportAPI(name, version, provider, format, publisherEndpoint, accessToken string, preserveStatus bool) (*resty.Response, error) {
+func exportAPI(name, version, revisionNum, provider, format, publisherEndpoint, accessToken string, preserveStatus bool) (*resty.Response, error) {
 	publisherEndpoint = utils.AppendSlashToString(publisherEndpoint)
 	query := "apis/export?name=" + name + "&version=" + version + "&providerName=" + provider +
 		"&preserveStatus=" + strconv.FormatBool(preserveStatus)
 	if format != "" {
 		query += "&format=" + format
+	}
+	if revisionNum != "" {
+		query += "&revision=" + revisionNum
 	}
 
 	url := publisherEndpoint + query
