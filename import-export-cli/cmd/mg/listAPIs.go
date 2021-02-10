@@ -21,28 +21,31 @@ package mg
 import (
 	"encoding/base64"
 	"fmt"
+	"os"
 	"strconv"
 
 	"github.com/spf13/cobra"
-	"github.com/wso2/product-apim-tooling/import-export-cli/mg/impl"
+	mgImpl "github.com/wso2/product-apim-tooling/import-export-cli/impl/mg"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
 var (
-	listApisCmdQuery string
-	listApisCmdLimit string
-	mgwAdapterHost   string
-	listApisUsername string
+	listApisCmdAPIType string
+	listApisCmdLimit   string
+	mgwAdapterHost     string
+	listApisUsername   string
 )
 
 const listApisCmdLiteral = "apis"
 const listApisCmdShortDesc = "Display a list of all APIs or a filtered set of APIs"
-const listApisCmdLongDesc = `Display a list of all APIs or filtered by a query specified by the flag --query, -q`
+const listApisCmdLongDesc = `Display a list of all APIs or filtered by apiType using the flag --type, -t`
 
 var listApisCmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` + listApisCmdLiteral + `-h https://localhost:9095 -u admin
- ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + listApisCmdLiteral + ` -q type:http -h https://localhost:9095 -u admin -l 100
- ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + listApisCmdLiteral + ` -q type:ws -h https://localhost:9095 -u admin`
+ ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + listApisCmdLiteral + ` -t http -h https://localhost:9095 -u admin -l 100
+ ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + listApisCmdLiteral + ` -t ws -h https://localhost:9095 -u admin`
+
+var mgListAPIsResourcePath = "/apis"
 
 // ListApisCmd represents the apis command
 var ListApisCmd = &cobra.Command{
@@ -52,34 +55,43 @@ var ListApisCmd = &cobra.Command{
 	Example: listApisCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + listApisCmdLiteral + " called")
+
+		// handle auth
 		fmt.Print("Enter Password: ")
 		password, err := terminal.ReadPassword(0)
+		fmt.Println()
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading password", err)
 		}
 		authToken := base64.StdEncoding.EncodeToString([]byte(listApisUsername + ":" + string(password)))
+
+		//handle parameters
 		if listApisCmdLimit == "" {
 			listApisCmdLimit = strconv.Itoa(utils.DefaultApisDisplayLimit)
-			fmt.Print("Limit flag not set. Maximum APIs to retrieve set to  :" + listApisCmdLimit)
-
+			fmt.Print("Limit flag not set. Set to default: " + listApisCmdLimit + "\n")
 		}
-		count, apis, err := impl.GetAPIList(authToken, mgwAdapterHost, listApisCmdQuery, listApisCmdLimit)
+		queryParams := make(map[string]string)
+		queryParams["limit"] = listApisCmdLimit
+		queryParams["apiType"] = listApisCmdAPIType
+		total, count, apis, err := mgImpl.GetAPIList(authToken,
+			mgwAdapterHost+MgBasepath+mgListAPIsResourcePath,
+			queryParams)
 		if err != nil {
 			utils.HandleErrorAndExit("Error retrieving APIs", err)
 		}
-		fmt.Print("APIs received: " + count)
-		impl.PrintAPIs(apis)
+		fmt.Fprintf(os.Stderr, "APIs total: %v received: %v\n", total, count)
+		mgImpl.PrintAPIs(apis)
 	},
 }
 
 func init() {
 	ListCmd.AddCommand(ListApisCmd)
 
-	ListApisCmd.Flags().StringVarP(&mgwAdapterHost, "host", "h", "", "The adapter host url with port")
-	ListApisCmd.Flags().StringVarP(&listApisCmdQuery, "query", "q", "", "Query to filter the APIs")
+	ListApisCmd.Flags().StringVarP(&mgwAdapterHost, "host", "c", "", "The adapter host url with port")
+	ListApisCmd.Flags().StringVarP(&listApisCmdAPIType, "type", "t", "", "API type to filter the APIs")
 	ListApisCmd.Flags().StringVarP(&listApisCmdLimit, "limit", "l", "", "Maximum number of apis to return")
 	ListApisCmd.Flags().StringVarP(&listApisUsername, "username", "u", "", "The username")
 
-	_ = MgDeployCmd.MarkFlagRequired("host")
-	_ = MgDeployCmd.MarkFlagRequired("username")
+	_ = ListApisCmd.MarkFlagRequired("host")
+	_ = ListApisCmd.MarkFlagRequired("username")
 }

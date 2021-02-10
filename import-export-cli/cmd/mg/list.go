@@ -27,10 +27,8 @@ const listCmdLiteral = "list"
 const listCmdShortDesc = "List APIs"
 const listCmdLongDesc = `Display a list containing all the APIs of type specified by flag (--type, -t)`
 
-const listCmdExamples = utils.ProjectName + " " + mgCmdLiteral + " " + listCmdLiteral + " -h https://localhost:9095 " +
-	"-u admin -p admin\n" +
-	"cat ~/.mypassword | " + utils.ProjectName + " " + mgCmdLiteral + " " + listCmdLiteral + " -h https://localhost:9095 " +
-	"-u admin"
+const listCmdExamples = utils.ProjectName + " " + mgCmdLiteral +
+	" " + listCmdLiteral + " " + listApisCmdLiteral + " -h https://localhost:9095 -u admin \n"
 
 // ListCmd represents the list command
 var ListCmd = &cobra.Command{
