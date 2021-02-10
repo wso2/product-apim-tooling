@@ -73,7 +73,7 @@ var DeleteApisCmd = &cobra.Command{
 			mgwAdapterHost+MgBasepath+mgDeleteAPIsResourcePath,
 			queryParams)
 		if err != nil {
-			utils.HandleErrorAndExit("Error retrieving APIs", err)
+			utils.HandleErrorAndExit("Error deleting API", err)
 		}
 		fmt.Println("API deleted successfully!.")
 	},
