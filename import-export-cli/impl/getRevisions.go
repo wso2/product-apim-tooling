@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"text/template"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/formatter"
@@ -29,26 +30,25 @@ import (
 )
 
 const (
-	revisionIdHeader			= "ID"
-	revisionNameHeader			= "NAME"
-	revisionDescriptionHeader	= "DESCRIPTION"
-	deployedGatewaysHeader		= "GATEWAYS"
+	revisionIdHeader          = "ID"
+	revisionNameHeader        = "REVISION"
+	revisionDescriptionHeader = "DESCRIPTION"
+	deployedGatewaysHeader    = "GATEWAYS"
 
-
-	defaultRevisionTableFormat = "table {{.Id}}\t{{.Name}}\t{{.Description}}\t{{.Gateways}}"
+	defaultRevisionTableFormat = "table {{.Id}}\t{{.RevisionNumber}}\t{{.Description}}\t{{.Gateways}}"
 )
 
 // revisions struct holds information about an revision for outputting
 type revision struct {
-	id              	string
-	name            	string
-	description			string
-	deployedGateways	[]string
+	id               string
+	revisionNumber   string
+	description      string
+	deployedGateways []string
 }
 
 // creates a new revision from utils.Revisions
 func newRevisionDefinitionFromRevisions(r utils.Revisions) *revision {
-	return &revision{r.ID, r.Name, r.Description, r.Gateways}
+	return &revision{r.ID, r.RevisionNumber, r.Description, r.Gateways}
 }
 
 // Id of revision
@@ -57,8 +57,8 @@ func (r revision) Id() string {
 }
 
 // Revision number
-func (r revision) Name() string {
-	return r.name
+func (r revision) RevisionNumber() string {
+	return strings.ReplaceAll(r.revisionNumber, "Revision ", "")
 }
 
 // Revision description
@@ -70,7 +70,6 @@ func (r revision) Description() string {
 func (r revision) Gateways() []string {
 	return r.deployedGateways
 }
-
 
 // MarshalJSON marshals api using custom marshaller which uses methods instead of fields
 func (r *revision) MarshalJSON() ([]byte, error) {
@@ -125,10 +124,10 @@ func PrintRevisions(revisions []utils.Revisions, format string) {
 
 	// headers for table
 	revisionTableHeaders := map[string]string{
-		"Id"				:	revisionIdHeader,
-		"Name"				:	revisionNameHeader,
-		"Description"		:	revisionDescriptionHeader,
-		"Gateways"			:	deployedGatewaysHeader,
+		"Id":             revisionIdHeader,
+		"RevisionNumber": revisionNameHeader,
+		"Description":    revisionDescriptionHeader,
+		"Gateways":       deployedGatewaysHeader,
 	}
 
 	// execute context

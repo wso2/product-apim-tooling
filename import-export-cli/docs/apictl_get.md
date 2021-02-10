@@ -44,4 +44,5 @@ apictl get apps -e dev
 * [apictl get apps](apictl_get_apps.md)	 - Display a list of Applications in an environment specific to an owner
 * [apictl get envs](apictl_get_envs.md)	 - Display the list of environments
 * [apictl get keys](apictl_get_keys.md)	 - Generate access token to invoke the API or API Product
+* [apictl get revisions](apictl_get_revisions.md)	 - Display a list of Revisions for the API
 

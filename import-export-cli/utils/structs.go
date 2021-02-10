@@ -106,11 +106,6 @@ type APIListResponse struct {
 	List  []API `json:"list"`
 }
 
-type RevisionListResponse struct {
-	Count int32 `json:"count"`
-	List  []Revisions `json:"list"`
-}
-
 type APIProductListResponse struct {
 	Count int32        `json:"count"`
 	List  []APIProduct `json:"list"`
@@ -359,14 +354,19 @@ type MetaData struct {
 	Owner    string `json:"owner,omitempty"`
 }
 
+type RevisionListResponse struct {
+	Count int32       `json:"count"`
+	List  []Revisions `json:"list"`
+}
+
 type Revisions struct {
-	ID			string `json:"id"`
-	Name		string `json:"displayName"`
-	Description	string `json:"description"`
-	Deployments	[]Deployment `json:"deploymentInfo"`
-	Gateways	[]string
+	ID             string       `json:"id"`
+	RevisionNumber string       `json:"displayName"`
+	Description    string       `json:"description"`
+	Deployments    []Deployment `json:"deploymentInfo"`
+	Gateways       []string
 }
 
 type Deployment struct {
-	Name		string `json:"name"`
+	Name string `json:"name"`
 }
