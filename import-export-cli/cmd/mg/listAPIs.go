@@ -76,7 +76,7 @@ var ListApisCmd = &cobra.Command{
 			mgwAdapterHost+MgBasepath+mgListAPIsResourcePath,
 			queryParams)
 		if err != nil {
-			utils.HandleErrorAndExit("Error retrieving APIs", err)
+			utils.HandleErrorAndExit("Error while retrieving or processing received APIs", err)
 		}
 		fmt.Fprintf(os.Stderr, "APIs total: %v received: %v\n", total, count)
 		mgImpl.PrintAPIs(apis)
