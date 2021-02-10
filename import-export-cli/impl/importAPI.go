@@ -232,16 +232,16 @@ func ImportAPIToMGW(endpoint, filePath, accessToken string, extraParams map[stri
 }
 
 // ImportAPIToEnv function is used with import-api command
-func ImportAPIToEnv(accessOAuthToken, importEnvironment, importPath, apiParamsPath string, importAPIUpdate, preserveProvider,
-	importAPISkipCleanup bool) error {
+func ImportAPIToEnv(accessOAuthToken, importEnvironment, importPath, apiParamsPath string, importAPIUpdate,
+	preserveProvider, importAPISkipCleanup, importAPIRotateRevision bool) error {
 	publisherEndpoint := utils.GetPublisherEndpointOfEnv(importEnvironment, utils.MainConfigFilePath)
 	return ImportAPI(accessOAuthToken, publisherEndpoint, importEnvironment, importPath, apiParamsPath, importAPIUpdate,
-		preserveProvider, importAPISkipCleanup)
+		preserveProvider, importAPISkipCleanup, importAPIRotateRevision)
 }
 
 // ImportAPI function is used with import-api command
-func ImportAPI(accessOAuthToken, publisherEndpoint, importEnvironment, importPath, apiParamsPath string, importAPIUpdate, preserveProvider,
-	importAPISkipCleanup bool) error {
+func ImportAPI(accessOAuthToken, publisherEndpoint, importEnvironment, importPath, apiParamsPath string, importAPIUpdate,
+	preserveProvider, importAPISkipCleanup, importAPIRotateRevision bool) error {
 	exportDirectory := filepath.Join(utils.ExportDirectory, utils.ExportedApisDirName)
 	resolvedAPIFilePath, err := resolveImportFilePath(importPath, exportDirectory)
 	if err != nil {
@@ -301,9 +301,10 @@ func ImportAPI(accessOAuthToken, publisherEndpoint, importEnvironment, importPat
 	publisherEndpoint += "/apis/import"
 	if importAPIUpdate {
 		publisherEndpoint += "?overwrite=" + strconv.FormatBool(true) + "&preserveProvider=" +
-			strconv.FormatBool(preserveProvider)
+			strconv.FormatBool(preserveProvider) + "&rotateRevision=" + strconv.FormatBool(importAPIRotateRevision)
 	} else {
-		publisherEndpoint += "?preserveProvider=" + strconv.FormatBool(preserveProvider)
+		publisherEndpoint += "?preserveProvider=" + strconv.FormatBool(preserveProvider) + "&rotateRevision=" +
+			strconv.FormatBool(importAPIRotateRevision)
 	}
 	utils.Logln(utils.LogPrefixInfo + "Import URL: " + publisherEndpoint)
 

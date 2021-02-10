@@ -353,3 +353,20 @@ type MetaData struct {
 	Revision string `json:"revision"`
 	Owner    string `json:"owner,omitempty"`
 }
+
+type RevisionListResponse struct {
+	Count int32       `json:"count"`
+	List  []Revisions `json:"list"`
+}
+
+type Revisions struct {
+	ID             string       `json:"id"`
+	RevisionNumber string       `json:"displayName"`
+	Description    string       `json:"description"`
+	Deployments    []Deployment `json:"deploymentInfo"`
+	Gateways       []string
+}
+
+type Deployment struct {
+	Name string `json:"name"`
+}

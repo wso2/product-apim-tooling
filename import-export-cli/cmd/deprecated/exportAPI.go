@@ -47,7 +47,7 @@ const exportAPICmdLongDesc = "Export an API from an environment"
 
 const exportAPICmdExamples = utils.ProjectName + ` ` + exportAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin -e dev
 ` + utils.ProjectName + ` ` + exportAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 -r admin -e production
-NOTE: All the 3 flags (--name (-n), --version (-v) and --environment (-e)) are mandatory`
+NOTE: All the 3 flags (--name (-n), --version (-v) and --environment (-e)) are mandatory.`
 
 // ExportAPICmd represents the exportAPI command
 var ExportAPICmdDeprecated = &cobra.Command{
@@ -75,7 +75,8 @@ func executeExportAPICmd(credential credentials.Credential, exportDirectory stri
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, cmd.CmdExportEnvironment)
 
 	if preCommandErr == nil {
-		resp, err := impl.ExportAPIFromEnv(accessToken, exportAPIName, exportAPIVersion, exportProvider, exportAPIFormat, cmd.CmdExportEnvironment, exportAPIPreserveStatus)
+		resp, err := impl.ExportAPIFromEnv(accessToken, exportAPIName, exportAPIVersion, "",
+			exportProvider, exportAPIFormat, cmd.CmdExportEnvironment, exportAPIPreserveStatus)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while exporting", err)
 		}
