@@ -59,8 +59,8 @@ var ImportAPICmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + ImportAPICmdLiteral + " called")
 		if importAPIRotateRevision == false {
-			fmt.Println("Rotate revision is set to false. Please note that you can only update and deploy the " +
-				"api 5 times without deleting a revision")
+			fmt.Println("The Rotate revision flag is set to false. Please note that you can only update and deploy the " +
+				"API 5 times without deleting a revision")
 		}
 		cred, err := GetCredentials(importEnvironment)
 		if err != nil {

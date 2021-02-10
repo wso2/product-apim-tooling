@@ -35,7 +35,6 @@ import (
 var exportAPIName string
 var exportAPIVersion string
 var exportProvider string
-var exportRevisionNum string
 var exportAPIPreserveStatus bool
 var exportAPIFormat string
 var runningExportApiCommand bool
@@ -47,9 +46,8 @@ const exportAPICmdShortDesc = "Export API"
 const exportAPICmdLongDesc = "Export an API from an environment"
 
 const exportAPICmdExamples = utils.ProjectName + ` ` + exportAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin -e dev
-` + utils.ProjectName + ` ` + exportAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 --rev 2 -r admin -e production
-NOTE: All the 3 flags (--name (-n), --version (-v) and --environment (-e)) are mandatory. If --rev is not provided, working copy of the api
-without deployment environments will be exported.`
+` + utils.ProjectName + ` ` + exportAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 -r admin -e production
+NOTE: All the 3 flags (--name (-n), --version (-v) and --environment (-e)) are mandatory.`
 
 // ExportAPICmd represents the exportAPI command
 var ExportAPICmdDeprecated = &cobra.Command{
@@ -61,9 +59,6 @@ var ExportAPICmdDeprecated = &cobra.Command{
 	Deprecated: "instead use \"" + cmd.ExportCmdLiteral + " " + cmd.ExportAPICmdLiteral + "\".",
 	Run: func(deprecatedCmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + exportAPICmdLiteral + " called")
-		if exportRevisionNum == "" {
-			fmt.Println("Revision number not provided. Only the working copy without deployment environments will be exported")
-		}
 		var apisExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedApisDirName)
 
 		cred, err := cmd.GetCredentials(cmd.CmdExportEnvironment)
@@ -80,7 +75,7 @@ func executeExportAPICmd(credential credentials.Credential, exportDirectory stri
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, cmd.CmdExportEnvironment)
 
 	if preCommandErr == nil {
-		resp, err := impl.ExportAPIFromEnv(accessToken, exportAPIName, exportAPIVersion, exportRevisionNum,
+		resp, err := impl.ExportAPIFromEnv(accessToken, exportAPIName, exportAPIVersion, "",
 			exportProvider, exportAPIFormat, cmd.CmdExportEnvironment, exportAPIPreserveStatus)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while exporting", err)
@@ -112,8 +107,6 @@ func init() {
 		"Version of the API to be exported")
 	ExportAPICmdDeprecated.Flags().StringVarP(&exportProvider, "provider", "r", "",
 		"Provider of the API")
-	ExportAPICmdDeprecated.Flags().StringVarP(&exportRevisionNum, "rev", "", "",
-		"Revision number of the API to be exported")
 	ExportAPICmdDeprecated.Flags().StringVarP(&cmd.CmdExportEnvironment, "environment", "e",
 		"", "Environment to which the API should be exported")
 	ExportAPICmdDeprecated.Flags().BoolVarP(&exportAPIPreserveStatus, "preserveStatus", "", true,

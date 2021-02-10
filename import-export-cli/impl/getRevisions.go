@@ -99,6 +99,8 @@ func GetRevisionListFromEnv(accessToken, environment, apiName, apiVersion, provi
 }
 
 // Print Revisions in the given template
+// @param revisions	Available revisions list for the API
+// @param format	Format type of the output
 func PrintRevisions(revisions []utils.Revisions, format string) {
 	if format == "" {
 		format = defaultRevisionTableFormat

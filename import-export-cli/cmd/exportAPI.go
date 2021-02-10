@@ -49,7 +49,7 @@ const exportAPICmdLongDesc = "Export an API from an environment"
 const exportAPICmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin -e dev
 ` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 --rev 6 -r admin -e production
 ` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 --rev 2 -r admin -e production
-NOTE: All the 3 flags (--name (-n), --version (-v) and --environment (-e)) are mandatory. If --rev is not provided, working copy of the api
+NOTE: All the 3 flags (--name (-n), --version (-v) and --environment (-e)) are mandatory. If --rev is not provided, working copy of the API
 without deployment environments will be exported.`
 
 // ExportAPICmd represents the exportAPI command
@@ -62,7 +62,7 @@ var ExportAPICmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + ExportAPICmdLiteral + " called")
 		if exportRevisionNum == "" {
-			fmt.Println("Revision number not provided. Only the working copy without deployment environments will be exported")
+			fmt.Println("A Revision number is not provided. Only the working copy without deployment environments will be exported.")
 		}
 		var apisExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedApisDirName)
 
