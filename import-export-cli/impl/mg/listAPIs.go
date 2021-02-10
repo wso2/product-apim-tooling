@@ -40,8 +40,6 @@ const (
 	defaultAPITableFormat = "table {{.Name}}\t{{.Version}}\t{{.Type}}\t{{.Labels}}"
 )
 
-var queryParamAdded bool = false
-
 type APIMetaListResponse struct {
 	total int32     `json:"total"`
 	count int32     `json:"count"`

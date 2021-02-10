@@ -33,7 +33,6 @@ import (
 var (
 	listApisCmdAPIType string
 	listApisCmdLimit   string
-	mgwAdapterHost     string
 	listApisUsername   string
 )
 

@@ -31,7 +31,6 @@ import (
 )
 
 var (
-	mgwControlPlaneHost string
 	mgwImportAPIFile    string
 	username            string
 	password            string
@@ -76,7 +75,7 @@ var MgDeployCmd = &cobra.Command{
 			password = strings.TrimRight(strings.TrimSuffix(string(data), "\n"), "\r")
 		}
 		authToken := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
-		err := impl.ImportAPIToMGW(mgwControlPlaneHost+resourcePath, mgwImportAPIFile, authToken, tempMap, mgDeploySkipCleanup)
+		err := impl.ImportAPIToMGW(mgwAdapterHost+resourcePath, mgwImportAPIFile, authToken, tempMap, mgDeploySkipCleanup)
 		if err != nil {
 			utils.HandleErrorAndExit("Error adding swagger to microgateway", err)
 		}
@@ -88,7 +87,7 @@ func init() {
 	//TODO: (VirajSalaka) import using just folder name
 	MgDeployCmd.Flags().StringVarP(&mgwImportAPIFile, "file", "f", "",
 		"Provide the filepath of the apictl project to be imported")
-	MgDeployCmd.Flags().StringVarP(&mgwControlPlaneHost, "host", "c", "",
+	MgDeployCmd.Flags().StringVarP(&mgwAdapterHost, "host", "c", "",
 		"Provide the host url for the control plane with port")
 	MgDeployCmd.Flags().StringVarP(&username, "username", "u", "",
 		"Provide the username")
