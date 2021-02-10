@@ -40,46 +40,46 @@ const (
 	defaultAPITableFormat = "table {{.Name}}\t{{.Version}}\t{{.Type}}\t{{.Labels}}"
 )
 
-type APIMetaListResponse struct {
-	total int32     `json:"total"`
-	count int32     `json:"count"`
-	list  []APIMeta `json:"list"`
-}
 type APIMeta struct {
-	name    string   `json:"apiName"`
-	version string   `json:"version"`
-	apiType string   `json:apiType`
-	labels  []string `json:"labels"`
+	Total int32             `json:"total"`
+	Count int32             `json:"count"`
+	List  []APIMetaListItem `json:"list"`
+}
+type APIMetaListItem struct {
+	APIName      string   `json:"apiName"`
+	VersionParam string   `json:"version"`
+	APIType      string   `json:"apiType"`
+	LabelsParam  []string `json:"labels"`
 }
 
 // Name of api
-func (a APIMeta) Name() string {
-	return a.name
+func (a APIMetaListItem) Name() string {
+	return a.APIName
 }
 
 // Version of api
-func (a APIMeta) Version() string {
-	return a.version
+func (a APIMetaListItem) Version() string {
+	return a.VersionParam
 }
 
 // Lifecycle Status of api
-func (a APIMeta) Type() string {
-	return a.apiType
+func (a APIMetaListItem) Type() string {
+	return a.APIType
 }
 
 // Provider of api
-func (a APIMeta) Labels() []string {
-	return a.labels
+func (a APIMetaListItem) Labels() []string {
+	return a.LabelsParam
 }
 
 // MarshalJSON marshals api using custom marshaller which uses methods instead of fields
-func (a *APIMeta) MarshalJSON() ([]byte, error) {
+func (a *APIMetaListItem) MarshalJSON() ([]byte, error) {
 	return formatter.MarshalJSON(a)
 }
 
 // GetAPIList sends GET request and returns the metadata of APIs
 func GetAPIList(accessToken string, apiListEndpoint string, queryParam map[string]string) (
-	total int32, count int32, apis []APIMeta, err error) {
+	total int32, count int32, apis []APIMetaListItem, err error) {
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + accessToken
 	resp, err := utils.InvokeGETRequestWithMultipleQueryParams(queryParam, apiListEndpoint, headers)
@@ -88,20 +88,18 @@ func GetAPIList(accessToken string, apiListEndpoint string, queryParam map[strin
 		return 0, 0, nil, err
 	}
 	if resp.StatusCode() == http.StatusOK {
-		apiListResponse := &APIMetaListResponse{}
-		err := json.Unmarshal([]byte(resp.Body()), &apiListResponse)
-
+		apiMetaResponse := APIMeta{}
+		err := json.Unmarshal([]byte(string(resp.Body())), &apiMetaResponse)
 		if err != nil {
 			return 0, 0, nil, err
 		}
-
-		return apiListResponse.total, apiListResponse.count, apiListResponse.list, nil
+		return apiMetaResponse.Total, apiMetaResponse.Count, apiMetaResponse.List, nil
 	}
 	return 0, 0, nil, errors.New(string(resp.Body()))
 }
 
 // PrintAPIs will print an array of APIs as a table
-func PrintAPIs(apis []APIMeta) {
+func PrintAPIs(apis []APIMetaListItem) {
 	// create api context with standard output
 	apiContext := formatter.NewContext(os.Stdout, defaultAPITableFormat)
 
