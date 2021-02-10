@@ -20,27 +20,29 @@ package mg
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-var (
-	mgwAdapterHost string
-)
+const deleteCmdLiteral = "delete"
+const deleteCmdShortDesc = "Delete API"
+const deleteCmdLongDesc = `Delete an API by specifying name, version and optionally vhost`
 
-// mgw command related usage Info
-const (
-	mgCmdLiteral   = "mg"
-	mgCmdShortDesc = "Handle Microgateway related operations"
-	mgCmdLongDesc  = `Initialize, Add, Update an apictl project to the microgateway`
+const deleteCmdExamples = utils.ProjectName + " " + mgCmdLiteral +
+	" " + deleteCmdLiteral + " " + deleteApisCmdLiteral + " -h https://localhost:9095 -u admin " +
+	"-n petstore -v version -vhost pets\n"
 
-	MgBasepath = "/api/mgw/adapter/0.1"
-)
-
-// MgwCmd represents the export command
-var MgCmd = &cobra.Command{
-	Use:   mgCmdLiteral,
-	Short: mgCmdShortDesc,
-	Long:  mgCmdLongDesc,
+// DeleteCmd represents the delete command
+var DeleteCmd = &cobra.Command{
+	Use:     deleteCmdLiteral,
+	Short:   deleteCmdShortDesc,
+	Long:    deleteCmdLongDesc,
+	Example: deleteCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
+		utils.Logln(utils.LogPrefixInfo + deleteCmdLiteral + " called")
 	},
+}
+
+// init using Cobra
+func init() {
+	MgCmd.AddCommand(DeleteCmd)
 }

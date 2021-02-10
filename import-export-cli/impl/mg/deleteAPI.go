@@ -19,28 +19,25 @@
 package mg
 
 import (
-	"github.com/spf13/cobra"
+	"errors"
+	"net/http"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-var (
-	mgwAdapterHost string
-)
+// DeleteAPI sends a POST request to delet an API
+func DeleteAPI(accessToken string, apiDeleteEndpoint string, queryParam map[string]string) (
+	err error) {
+	headers := make(map[string]string)
+	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + accessToken
+	resp, err := utils.InvokePostRequestWithQueryParam(queryParam, apiDeleteEndpoint, headers, "")
 
-// mgw command related usage Info
-const (
-	mgCmdLiteral   = "mg"
-	mgCmdShortDesc = "Handle Microgateway related operations"
-	mgCmdLongDesc  = `Initialize, Add, Update an apictl project to the microgateway`
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode() == http.StatusOK {
 
-	MgBasepath = "/api/mgw/adapter/0.1"
-)
-
-// MgwCmd represents the export command
-var MgCmd = &cobra.Command{
-	Use:   mgCmdLiteral,
-	Short: mgCmdShortDesc,
-	Long:  mgCmdLongDesc,
-	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
-	},
+		return nil
+	}
+	return errors.New(string(resp.Body()))
 }
