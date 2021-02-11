@@ -41,8 +41,8 @@ const (
 )
 
 type APIMeta struct {
-	Total int32             `json:"total"`
-	Count int32             `json:"count"`
+	Total int               `json:"total"`
+	Count int               `json:"count"`
 	List  []APIMetaListItem `json:"list"`
 }
 type APIMetaListItem struct {
@@ -78,8 +78,8 @@ func (a *APIMetaListItem) MarshalJSON() ([]byte, error) {
 }
 
 // GetAPIList sends GET request and returns the metadata of APIs
-func GetAPIList(accessToken string, apiListEndpoint string, queryParam map[string]string) (
-	total int32, count int32, apis []APIMetaListItem, err error) {
+func GetAPIList(accessToken, apiListEndpoint string, queryParam map[string]string) (
+	total int, count int, apis []APIMetaListItem, err error) {
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + accessToken
 	resp, err := utils.InvokeGETRequestWithMultipleQueryParams(queryParam, apiListEndpoint, headers)

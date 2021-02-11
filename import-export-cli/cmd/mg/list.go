@@ -24,11 +24,13 @@ import (
 )
 
 const listCmdLiteral = "list"
-const listCmdShortDesc = "List APIs"
-const listCmdLongDesc = `Display a list containing all the APIs of type specified by flag (--type, -t)`
+const listCmdShortDesc = "List APIs in Microgateway"
+const listCmdLongDesc = `Display a list of all the APIs or 
+a set of APIs with a limit or filtered by apiType using the flags --limit (-l), --type (-t). 
+Note: The flags --host (-c), --username (-u) are mandatory`
 
-const listCmdExamples = utils.ProjectName + " " + mgCmdLiteral +
-	" " + listCmdLiteral + " " + listApisCmdLiteral + " -h https://localhost:9095 -u admin \n"
+const listCmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` +
+	listCmdLiteral + ` ` + listApisCmdLiteral + ` -t http --host https://localhost:9095 -u admin -l 100`
 
 // ListCmd represents the list command
 var ListCmd = &cobra.Command{
