@@ -368,5 +368,6 @@ type Revisions struct {
 }
 
 type Deployment struct {
-	Name string `json:"name"`
+	Name               string `json:"name"`
+	DisplayOnDevportal bool   `json:"displayOnDevportal"`
 }
