@@ -29,31 +29,31 @@ import (
 )
 
 var (
-	deleteApisCmdAPIName    string
-	deleteApisCmdAPIVersion string
-	deleteApisCmdAPIVHost   string
-	deleteApisUsername      string
+	deleteAPICmdAPIName    string
+	deleteAPICmdAPIVersion string
+	deleteAPICmdAPIVHost   string
+	deleteAPIUsername      string
 )
 
-const deleteApisCmdLiteral = "apis"
-const deleteApisCmdShortDesc = "Delete API"
-const deleteApisCmdLongDesc = `Delete an API by specifying name, version and optionally vhost
- by specifying the flags (--name (-n), --version (-v), and optionally --vhost (-vh)`
+const deleteAPICmdLiteral = "api"
+const deleteAPICmdShortDesc = "Delete an API in Microgateway"
+const deleteAPICmdLongDesc = `Delete an API by specifying name, version, host, username and optionally vhost
+ by specifying the flags (--name (-n), --version (-v), --host (-c), --username (-u), and optionally --vhost (-t)`
 
-var deleteApisCmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` + deleteApisCmdLiteral + `-h https://localhost:9095 -u admin
-  ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + deleteApisCmdLiteral + ` -n petstore -v 0.0.1 -vh www.pets.com http -h https://localhost:9095 -u admin
-  ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + deleteApisCmdLiteral + ` -n "petstore VIP" -v 0.0.1 -h https://localhost:9095 -u admin`
+var deleteAPICmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` + deleteAPICmdLiteral + `--host https://localhost:9095 -u admin
+  ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + deleteAPICmdLiteral + ` -n petstore -v 0.0.1 -c https://localhost:9095 -u admin -t www.pets.com 
+  ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + deleteAPICmdLiteral + ` -n "petstore VIP" -v 0.0.1 --host https://localhost:9095 -u admin`
 
-var mgDeleteAPIsResourcePath = "/apis/delete"
+var mgDeleteAPIResourcePath = "/apis/delete"
 
-// DeleteApisCmd represents the apis command
-var DeleteApisCmd = &cobra.Command{
-	Use:     deleteApisCmdLiteral,
-	Short:   deleteApisCmdShortDesc,
-	Long:    deleteApisCmdLongDesc,
-	Example: deleteApisCmdExamples,
+// DeleteAPICmd represents the apis command
+var DeleteAPICmd = &cobra.Command{
+	Use:     deleteAPICmdLiteral,
+	Short:   deleteAPICmdShortDesc,
+	Long:    deleteAPICmdLongDesc,
+	Example: deleteAPICmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + deleteApisCmdLiteral + " called")
+		utils.Logln(utils.LogPrefixInfo + deleteAPICmdLiteral + " called")
 
 		// handle auth
 		fmt.Print("Enter Password: ")
@@ -62,34 +62,34 @@ var DeleteApisCmd = &cobra.Command{
 		if err != nil {
 			utils.HandleErrorAndExit("Error reading password", err)
 		}
-		authToken := base64.StdEncoding.EncodeToString([]byte(deleteApisUsername + ":" + string(password)))
+		authToken := base64.StdEncoding.EncodeToString([]byte(deleteAPIUsername + ":" + string(password)))
 
 		//handle parameters
 		queryParams := make(map[string]string)
-		queryParams["apiName"] = deleteApisCmdAPIName
-		queryParams["version"] = deleteApisCmdAPIVersion
-		queryParams["vhost"] = deleteApisCmdAPIVHost
+		queryParams["apiName"] = deleteAPICmdAPIName
+		queryParams["version"] = deleteAPICmdAPIVersion
+		queryParams["vhost"] = deleteAPICmdAPIVHost
 		err = mgImpl.DeleteAPI(authToken,
-			mgwAdapterHost+MgBasepath+mgDeleteAPIsResourcePath,
+			mgwAdapterHost+MgBasepath+mgDeleteAPIResourcePath,
 			queryParams)
 		if err != nil {
 			utils.HandleErrorAndExit("Error deleting API", err)
 		}
-		fmt.Println("API deleted successfully!.")
+		fmt.Println("API deleted successfully!")
 	},
 }
 
 func init() {
-	DeleteCmd.AddCommand(DeleteApisCmd)
+	DeleteCmd.AddCommand(DeleteAPICmd)
 
-	DeleteApisCmd.Flags().StringVarP(&mgwAdapterHost, "host", "c", "", "The adapter host url with port")
-	DeleteApisCmd.Flags().StringVarP(&deleteApisCmdAPIName, "name", "n", "", "API name")
-	DeleteApisCmd.Flags().StringVarP(&deleteApisCmdAPIVersion, "version", "v", "", "API version")
-	DeleteApisCmd.Flags().StringVarP(&deleteApisCmdAPIVHost, "vhost", "t", "", "Virtual host the API needs to be deleted from")
-	DeleteApisCmd.Flags().StringVarP(&deleteApisUsername, "username", "u", "", "Username with delete permissions")
+	DeleteAPICmd.Flags().StringVarP(&mgwAdapterHost, "host", "c", "", "The adapter host url with port")
+	DeleteAPICmd.Flags().StringVarP(&deleteAPICmdAPIName, "name", "n", "", "API name")
+	DeleteAPICmd.Flags().StringVarP(&deleteAPICmdAPIVersion, "version", "v", "", "API version")
+	DeleteAPICmd.Flags().StringVarP(&deleteAPICmdAPIVHost, "vhost", "t", "", "Virtual host the API needs to be deleted from")
+	DeleteAPICmd.Flags().StringVarP(&deleteAPIUsername, "username", "u", "", "Username with delete permissions")
 
-	_ = DeleteApisCmd.MarkFlagRequired("host")
-	_ = DeleteApisCmd.MarkFlagRequired("name")
-	_ = DeleteApisCmd.MarkFlagRequired("version")
-	_ = DeleteApisCmd.MarkFlagRequired("username")
+	_ = DeleteAPICmd.MarkFlagRequired("host")
+	_ = DeleteAPICmd.MarkFlagRequired("name")
+	_ = DeleteAPICmd.MarkFlagRequired("version")
+	_ = DeleteAPICmd.MarkFlagRequired("username")
 }

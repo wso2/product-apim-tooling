@@ -24,12 +24,12 @@ import (
 )
 
 const deleteCmdLiteral = "delete"
-const deleteCmdShortDesc = "Delete API"
-const deleteCmdLongDesc = `Delete an API by specifying name, version and optionally vhost`
+const deleteCmdShortDesc = "Delete an API in Microgateway"
+const deleteCmdLongDesc = `Delete an API by specifying name, version, host, username and optionally vhost
+by specifying the flags (--name (-n), --version (-v), --host (-c), --username (-u), and optionally --vhost (-t)`
 
-const deleteCmdExamples = utils.ProjectName + " " + mgCmdLiteral +
-	" " + deleteCmdLiteral + " " + deleteApisCmdLiteral + " -h https://localhost:9095 -u admin " +
-	"-n petstore -v version -vhost pets\n"
+const deleteCmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` + deleteAPICmdLiteral +
+	` -n petstore -v 0.0.1 --host https://localhost:9095 -u admin -t www.pets.com`
 
 // DeleteCmd represents the delete command
 var DeleteCmd = &cobra.Command{
