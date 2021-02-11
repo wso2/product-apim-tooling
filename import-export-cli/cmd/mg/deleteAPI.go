@@ -33,16 +33,19 @@ var (
 	deleteAPICmdAPIVersion string
 	deleteAPICmdAPIVHost   string
 	deleteAPIUsername      string
+	deleteAPIPassword      string
 )
 
 const deleteAPICmdLiteral = "api"
 const deleteAPICmdShortDesc = "Delete an API in Microgateway"
-const deleteAPICmdLongDesc = `Delete an API by specifying name, version, host, username and optionally vhost
- by specifying the flags (--name (-n), --version (-v), --host (-c), --username (-u), and optionally --vhost (-t)`
+const deleteAPICmdLongDesc = `Delete an API by specifying name, version, host, username 
+and optionally vhost by specifying the flags (--name (-n), --version (-v), --host (-c), 
+--username (-u), and optionally --vhost (-t). Note: The password can be included 
+via the flag --password (-p) or entered at the prompt.`
 
 var deleteAPICmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` + deleteAPICmdLiteral + `--host https://localhost:9095 -u admin
   ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + deleteAPICmdLiteral + ` -n petstore -v 0.0.1 -c https://localhost:9095 -u admin -t www.pets.com 
-  ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + deleteAPICmdLiteral + ` -n "petstore VIP" -v 0.0.1 --host https://localhost:9095 -u admin`
+  ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + deleteAPICmdLiteral + ` -n "petstore VIP" -v 0.0.1 --host https://localhost:9095 -u admin -p admin`
 
 var mgDeleteAPIResourcePath = "/apis/delete"
 
@@ -56,20 +59,24 @@ var DeleteAPICmd = &cobra.Command{
 		utils.Logln(utils.LogPrefixInfo + deleteAPICmdLiteral + " called")
 
 		// handle auth
-		fmt.Print("Enter Password: ")
-		password, err := terminal.ReadPassword(0)
-		fmt.Println()
-		if err != nil {
-			utils.HandleErrorAndExit("Error reading password", err)
+		if deleteAPIPassword == "" {
+			fmt.Print("Enter Password: ")
+			deleteAPIPasswordB, err := terminal.ReadPassword(0)
+			deleteAPIPassword = string(deleteAPIPasswordB)
+			fmt.Println()
+			if err != nil {
+				utils.HandleErrorAndExit("Error reading password", err)
+			}
 		}
-		authToken := base64.StdEncoding.EncodeToString([]byte(deleteAPIUsername + ":" + string(password)))
+		authToken := base64.StdEncoding.EncodeToString(
+			[]byte(deleteAPIUsername + ":" + deleteAPIPassword))
 
 		//handle parameters
 		queryParams := make(map[string]string)
 		queryParams["apiName"] = deleteAPICmdAPIName
 		queryParams["version"] = deleteAPICmdAPIVersion
 		queryParams["vhost"] = deleteAPICmdAPIVHost
-		err = mgImpl.DeleteAPI(authToken,
+		err := mgImpl.DeleteAPI(authToken,
 			mgwAdapterHost+MgBasepath+mgDeleteAPIResourcePath,
 			queryParams)
 		if err != nil {
@@ -87,6 +94,7 @@ func init() {
 	DeleteAPICmd.Flags().StringVarP(&deleteAPICmdAPIVersion, "version", "v", "", "API version")
 	DeleteAPICmd.Flags().StringVarP(&deleteAPICmdAPIVHost, "vhost", "t", "", "Virtual host the API needs to be deleted from")
 	DeleteAPICmd.Flags().StringVarP(&deleteAPIUsername, "username", "u", "", "Username with delete permissions")
+	DeleteAPICmd.Flags().StringVarP(&deleteAPIPassword, "password", "p", "", "Password of the user")
 
 	_ = DeleteAPICmd.MarkFlagRequired("host")
 	_ = DeleteAPICmd.MarkFlagRequired("name")

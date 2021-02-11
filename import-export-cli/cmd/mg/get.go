@@ -27,10 +27,11 @@ const getCmdLiteral = "get"
 const getCmdShortDesc = "List APIs in Microgateway"
 const getCmdLongDesc = `Display a get of all the APIs or 
 a set of APIs with a limit or filtered by apiType using the flags --limit (-l), --type (-t). 
-Note: The flags --host (-c), --username (-u) are mandatory`
+Note: The flags --host (-c), --username (-u) are mandatory. The password can be included 
+via the flag --password (-p) or entered at the prompt.`
 
 const getCmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` +
-	getCmdLiteral + ` ` + getApisCmdLiteral + ` -t http --host https://localhost:9095 -u admin -l 100`
+	getCmdLiteral + ` ` + getAPIsCmdLiteral + ` -t http --host https://localhost:9095 -u admin -l 100`
 
 // GetCmd represents the get command
 var GetCmd = &cobra.Command{

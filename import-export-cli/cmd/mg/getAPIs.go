@@ -31,49 +31,56 @@ import (
 )
 
 var (
-	getApisCmdAPIType string
-	getApisCmdLimit   string
-	getApisUsername   string
+	getAPIsCmdAPIType string
+	getAPIsCmdLimit   string
+	getAPIsUsername   string
+	getAPIsPassword   string
 )
 
-const getApisCmdLiteral = "apis"
-const getApisCmdShortDesc = "List APIs in Microgateway"
-const getApisCmdLongDesc = `Display a list of all the APIs or 
+const getAPIsCmdLiteral = "apis"
+const getAPIsCmdShortDesc = "List APIs in Microgateway"
+const getAPIsCmdLongDesc = `Display a list of all the APIs or 
 a set of APIs with a limit or filtered by apiType using the flags --limit (-l), --type (-t). 
-Note: The flags --host (-c), --username (-u) are mandatory`
+Note: The flags --host (-c), --username (-u) are mandatory. The password can be included 
+via the flag --password (-p) or entered at the prompt.`
 
-var getApisCmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` + getCmdLiteral + ` ` + getApisCmdLiteral + `--host https://localhost:9095 -u admin
- ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + getCmdLiteral + ` ` + getApisCmdLiteral + ` -t http --host https://localhost:9095 -u admin -l 100
- ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + getCmdLiteral + ` ` + getApisCmdLiteral + ` -t ws --host https://localhost:9095 -u admin`
+var getAPIsCmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` + getCmdLiteral + ` ` + getAPIsCmdLiteral + `--host https://localhost:9095 -u admin
+ ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + getCmdLiteral + ` ` + getAPIsCmdLiteral + ` -t http --host https://localhost:9095 -u admin -l 100
+ ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + getCmdLiteral + ` ` + getAPIsCmdLiteral + ` -t ws --host https://localhost:9095 -u admin`
 
 var mgGetAPIsResourcePath = "/apis"
 
-// GetApisCmd represents the apis command
-var GetApisCmd = &cobra.Command{
-	Use:     getApisCmdLiteral,
-	Short:   getApisCmdShortDesc,
-	Long:    getApisCmdLongDesc,
-	Example: getApisCmdExamples,
+// GetAPIsCmd represents the apis command
+var GetAPIsCmd = &cobra.Command{
+	Use:     getAPIsCmdLiteral,
+	Short:   getAPIsCmdShortDesc,
+	Long:    getAPIsCmdLongDesc,
+	Example: getAPIsCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + getApisCmdLiteral + " called")
+		utils.Logln(utils.LogPrefixInfo + getAPIsCmdLiteral + " called")
 
 		// handle auth
-		fmt.Print("Enter Password: ")
-		password, err := terminal.ReadPassword(0)
-		fmt.Println()
-		if err != nil {
-			utils.HandleErrorAndExit("Error reading password", err)
+		if getAPIsPassword == "" {
+			fmt.Print("Enter Password: ")
+			getAPIsPasswordB, err := terminal.ReadPassword(0)
+			getAPIsPassword = string(getAPIsPasswordB)
+			fmt.Println()
+			if err != nil {
+				utils.HandleErrorAndExit("Error reading password", err)
+			}
 		}
-		authToken := base64.StdEncoding.EncodeToString([]byte(getApisUsername + ":" + string(password)))
+
+		authToken := base64.StdEncoding.EncodeToString([]byte(
+			getAPIsUsername + ":" + getAPIsPassword))
 
 		//handle parameters
-		if getApisCmdLimit == "" {
-			getApisCmdLimit = strconv.Itoa(utils.DefaultApisDisplayLimit)
-			fmt.Print("Limit flag not set. Set to default: " + getApisCmdLimit + "\n")
+		if getAPIsCmdLimit == "" {
+			getAPIsCmdLimit = strconv.Itoa(utils.DefaultApisDisplayLimit)
+			fmt.Print("Limit flag not set. Set to default: " + getAPIsCmdLimit + "\n")
 		}
 		queryParams := make(map[string]string)
-		queryParams["limit"] = getApisCmdLimit
-		queryParams["apiType"] = getApisCmdAPIType
+		queryParams["limit"] = getAPIsCmdLimit
+		queryParams["apiType"] = getAPIsCmdAPIType
 		total, count, apis, err := mgImpl.GetAPIsList(authToken,
 			mgwAdapterHost+MgBasepath+mgGetAPIsResourcePath,
 			queryParams)
@@ -86,13 +93,14 @@ var GetApisCmd = &cobra.Command{
 }
 
 func init() {
-	GetCmd.AddCommand(GetApisCmd)
+	GetCmd.AddCommand(GetAPIsCmd)
 
-	GetApisCmd.Flags().StringVarP(&mgwAdapterHost, "host", "c", "", "The adapter host url with port")
-	GetApisCmd.Flags().StringVarP(&getApisCmdAPIType, "type", "t", "", "API type to filter the APIs")
-	GetApisCmd.Flags().StringVarP(&getApisCmdLimit, "limit", "l", "", "Maximum number of APIs to return")
-	GetApisCmd.Flags().StringVarP(&getApisUsername, "username", "u", "", "The username")
+	GetAPIsCmd.Flags().StringVarP(&mgwAdapterHost, "host", "c", "", "The adapter host url with port")
+	GetAPIsCmd.Flags().StringVarP(&getAPIsCmdAPIType, "type", "t", "", "API type to filter the APIs")
+	GetAPIsCmd.Flags().StringVarP(&getAPIsCmdLimit, "limit", "l", "", "Maximum number of APIs to return")
+	GetAPIsCmd.Flags().StringVarP(&getAPIsUsername, "username", "u", "", "The username")
+	GetAPIsCmd.Flags().StringVarP(&getAPIsPassword, "password", "p", "", "Password of the user")
 
-	_ = GetApisCmd.MarkFlagRequired("host")
-	_ = GetApisCmd.MarkFlagRequired("username")
+	_ = GetAPIsCmd.MarkFlagRequired("host")
+	_ = GetAPIsCmd.MarkFlagRequired("username")
 }
