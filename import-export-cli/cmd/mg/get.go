@@ -23,27 +23,27 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-const listCmdLiteral = "list"
-const listCmdShortDesc = "List APIs in Microgateway"
-const listCmdLongDesc = `Display a list of all the APIs or 
+const getCmdLiteral = "get"
+const getCmdShortDesc = "List APIs in Microgateway"
+const getCmdLongDesc = `Display a get of all the APIs or 
 a set of APIs with a limit or filtered by apiType using the flags --limit (-l), --type (-t). 
 Note: The flags --host (-c), --username (-u) are mandatory`
 
-const listCmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` +
-	listCmdLiteral + ` ` + listApisCmdLiteral + ` -t http --host https://localhost:9095 -u admin -l 100`
+const getCmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` +
+	getCmdLiteral + ` ` + getApisCmdLiteral + ` -t http --host https://localhost:9095 -u admin -l 100`
 
-// ListCmd represents the list command
-var ListCmd = &cobra.Command{
-	Use:     listCmdLiteral,
-	Short:   listCmdShortDesc,
-	Long:    listCmdLongDesc,
-	Example: listCmdExamples,
+// GetCmd represents the get command
+var GetCmd = &cobra.Command{
+	Use:     getCmdLiteral,
+	Short:   getCmdShortDesc,
+	Long:    getCmdLongDesc,
+	Example: getCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + listCmdLiteral + " called")
+		utils.Logln(utils.LogPrefixInfo + getCmdLiteral + " called")
 	},
 }
 
 // init using Cobra
 func init() {
-	MgCmd.AddCommand(ListCmd)
+	MgCmd.AddCommand(GetCmd)
 }
