@@ -25,6 +25,7 @@ apictl [flags]
 * [apictl bundle](apictl_bundle.md)	 - Archive any source project artifact to zip format
 * [apictl change-status](apictl_change-status.md)	 - Change Status of an API
 * [apictl delete](apictl_delete.md)	 - Delete an API/APIProduct/Application in an environment
+* [apictl deploy](apictl_deploy.md)	 - Deploy an API/API Product in a gateway environment
 * [apictl export](apictl_export.md)	 - Export an API/API Product/Application in an environment
 * [apictl gen](apictl_gen.md)	 - Generate deployment directory for VM and K8S operator
 * [apictl get](apictl_get.md)	 - Get APIs/APIProducts/Applications in an environment or Get the environments
@@ -38,6 +39,7 @@ apictl [flags]
 * [apictl remove](apictl_remove.md)	 - Remove an environment
 * [apictl secret](apictl_secret.md)	 - Manage sensitive information
 * [apictl set](apictl_set.md)	 - Set configuration parameters
+* [apictl undeploy](apictl_undeploy.md)	 - Undeploy an API/API Product from a gateway environment
 * [apictl vcs](apictl_vcs.md)	 - Checks status and deploys projects
 * [apictl version](apictl_version.md)	 - Display Version on current apictl
 
