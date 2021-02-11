@@ -76,7 +76,7 @@ func executeExportAPICmd(credential credentials.Credential, exportDirectory stri
 
 	if preCommandErr == nil {
 		resp, err := impl.ExportAPIFromEnv(accessToken, exportAPIName, exportAPIVersion, "",
-			exportProvider, exportAPIFormat, cmd.CmdExportEnvironment, exportAPIPreserveStatus)
+			exportProvider, exportAPIFormat, cmd.CmdExportEnvironment, exportAPIPreserveStatus, false)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while exporting", err)
 		}
