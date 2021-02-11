@@ -25,8 +25,10 @@ import (
 
 const deleteCmdLiteral = "delete"
 const deleteCmdShortDesc = "Delete an API in Microgateway"
-const deleteCmdLongDesc = `Delete an API by specifying name, version, host, username and optionally vhost
-by specifying the flags (--name (-n), --version (-v), --host (-c), --username (-u), and optionally --vhost (-t)`
+const deleteCmdLongDesc = `Delete an API by specifying name, version, host, username 
+and optionally vhost by specifying the flags (--name (-n), --version (-v), --host (-c), 
+--username (-u), and optionally --vhost (-t). Note: The password can be included 
+via the flag --password (-p) or entered at the prompt.`
 
 const deleteCmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` + deleteAPICmdLiteral +
 	` -n petstore -v 0.0.1 --host https://localhost:9095 -u admin -t www.pets.com`

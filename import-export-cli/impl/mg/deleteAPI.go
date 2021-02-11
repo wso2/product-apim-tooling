@@ -36,8 +36,9 @@ func DeleteAPI(accessToken, apiDeleteEndpoint string, queryParam map[string]stri
 		return err
 	}
 	if resp.StatusCode() == http.StatusOK {
-
 		return nil
+	} else if resp.StatusCode() == http.StatusNotFound {
+		return errors.New("the API does not exist")
 	}
 	return errors.New(string(resp.Body()))
 }
