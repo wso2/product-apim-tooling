@@ -26,5 +26,7 @@ apictl mg [flags]
 ### SEE ALSO
 
 * [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications and Managing WSO2 Micro Integrator
+* [apictl mg delete](apictl_mg_delete.md)	 - Delete an API in Microgateway
 * [apictl mg deploy](apictl_mg_deploy.md)	 - Deploy apictl project.
+* [apictl mg get](apictl_mg_get.md)	 - List APIs in Microgateway
 
