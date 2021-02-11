@@ -32,24 +32,24 @@ var flagVCSDeployEnvName string    // name of the environment the project change
 var flagVCSDeploySkipRollback bool // specifies whether rolling back on error needs to be avoided
 
 // deploy command related usage Info
-const deployCmdLiteral = "deploy"
-const deployCmdShortDesc = "Deploys projects to the specified environment"
-const deployCmdLongDesc = `Deploys projects to the specified environment specified by --environment(-e). 
+const vcsDeployCmdLiteral = "deploy"
+const vcsDeployCmdShortDesc = "Deploys projects to the specified environment"
+const vcsDeployCmdLongDesc = `Deploys projects to the specified environment specified by --environment(-e). 
 Only the changed projects compared to the revision at the last successful deployment will be deployed. 
 If any project(s) got failed during the deployment, by default, the operation will rollback the environment to the last successful state. If this needs to be avoided, use --skipRollback=true
 NOTE: --environment (-e) flag is mandatory`
 
-const deployCmdExamples = utils.ProjectName + ` ` + vcsCmdLiteral + ` ` + deployCmdLiteral + ` -e dev
-` + utils.ProjectName + ` ` + vcsCmdLiteral + ` ` + deployCmdLiteral + ` -e dev --skipRollback=true`
+const vcsDeployCmdExamples = utils.ProjectName + ` ` + vcsCmdLiteral + ` ` + vcsDeployCmdLiteral + ` -e dev
+` + utils.ProjectName + ` ` + vcsCmdLiteral + ` ` + vcsDeployCmdLiteral + ` -e dev --skipRollback=true`
 
 // deployCmd represents the deploy command
-var DeployCmd = &cobra.Command{
-	Use:     deployCmdLiteral,
-	Short:   deployCmdShortDesc,
-	Long:    deployCmdLongDesc,
-	Example: deployCmdExamples,
+var vcsDeployCmd = &cobra.Command{
+	Use:     vcsDeployCmdLiteral,
+	Short:   vcsDeployCmdShortDesc,
+	Long:    vcsDeployCmdLongDesc,
+	Example: vcsDeployCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + deployCmdLiteral + " called")
+		utils.Logln(utils.LogPrefixInfo + vcsDeployCmdLiteral + " called")
 		if !utils.EnvExistsInMainConfigFile(flagVCSDeployEnvName, utils.MainConfigFilePath) {
 			fmt.Println(flagVCSDeployEnvName, "does not exists. Add it using add env")
 			os.Exit(1)
@@ -77,12 +77,12 @@ var DeployCmd = &cobra.Command{
 }
 
 func init() {
-	VCSCmd.AddCommand(DeployCmd)
+	VCSCmd.AddCommand(vcsDeployCmd)
 
-	DeployCmd.Flags().StringVarP(&flagVCSDeployEnvName, "environment", "e", "", "Name of the "+
+	vcsDeployCmd.Flags().StringVarP(&flagVCSDeployEnvName, "environment", "e", "", "Name of the "+
 		"environment to deploy the project(s)")
-	DeployCmd.Flags().BoolVarP(&flagVCSDeploySkipRollback, "skipRollback", "", false,
+	vcsDeployCmd.Flags().BoolVarP(&flagVCSDeploySkipRollback, "skipRollback", "", false,
 		"Specifies whether rolling back to the last successful revision during an error situation should be skipped")
 
-	_ = DeployCmd.MarkFlagRequired("environment")
+	_ = vcsDeployCmd.MarkFlagRequired("environment")
 }
