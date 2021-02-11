@@ -20,6 +20,8 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
+	"net/http"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 
@@ -27,12 +29,13 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-var deployAPIName string
-var deployAPIVersion string
-var deployRevisionNum string
-var deployProvider string
-var deployAPIEnvironment string
-var deployAPIGateway string
+var deployCmdAPIName string
+var deployCmdAPIVersion string
+var deployCmdRevisionNum string
+var deployCmdProvider string
+var deployCmdEnvironment string
+var deployCmdGateway string
+var deployCmdHideOnDevportal bool
 
 // DeployAPI command related usage info
 const DeployAPICmdLiteral = "api"
@@ -40,55 +43,71 @@ const deployAPICmdShortDesc = "Deploy API"
 
 const deployAPICmdLongDesc = "Deploy an API to the given gateway environment"
 
-const deployAPICmdExamples = utils.ProjectName + ` ` + DeployCmdLiteral + ` ` + DeployAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin -g Label1 -e dev
-` + utils.ProjectName + ` ` + DeployCmdLiteral + ` ` + DeployAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 --rev 6 -r admin -g Label1 -e production
-` + utils.ProjectName + ` ` + DeployCmdLiteral + ` ` + DeployAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 --rev 2 -r admin -g Label1 -e production
-NOTE: All the 3 flags (--name (-n), --version (-v) and --environment (-e) --gateway (-g) ) are mandatory. 
-If --rev is not provided, working copy of the API will create a new revision and deploy to the provided gateway.`
+const deployAPICmdExamples = utils.ProjectName + ` ` + DeployCmdLiteral + ` ` + DeployAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin --rev 1 -g Label1 -e dev
+` + utils.ProjectName + ` ` + DeployCmdLiteral + ` ` + DeployAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 --rev 6 -g Label1 Label2 Label3 -e production
+` + utils.ProjectName + ` ` + DeployCmdLiteral + ` ` + DeployAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 --rev 2 -r admin -g Label1 -e production --hide-on-devportal
+NOTE: All the 5 flags (--name (-n), --version (-v) , --rev and --gateway (-g) --environment (-e)) are mandatory.`
 
 // DeployAPICmd represents the deploy API command
 var DeployAPICmd = &cobra.Command{
 	Use: DeployAPICmdLiteral + " (--name <name-of-the-api> --version <version-of-the-api> --provider <provider-of-the-api> " +
-		"--gateway <gateway-environment> --environment <environment-from-which-the-api-should-be-deployed>)",
+		"--rev <revision_number> --gateway <gateway-environment> " +
+		"--environment <environment-from-which-the-api-should-be-deployed>)",
 	Short:   deployAPICmdShortDesc,
 	Long:    deployAPICmdLongDesc,
 	Example: deployAPICmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + ExportAPICmdLiteral + " called")
-		if exportRevisionNum == "" {
-			fmt.Println("A Revision number is not provided. Working copy will be deployed to the gateway.")
-		}
-
-		cred, err := GetCredentials(CmdExportEnvironment)
+		utils.Logln(utils.LogPrefixInfo + DeployAPICmdLiteral + " called")
+		cred, err := GetCredentials(deployCmdEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
-
-		executeDeployAPICmd(cred)
+		gateways := impl.GenerateGatewayArray(args, deployCmdGateway, deployCmdHideOnDevportal)
+		executeDeployAPICmd(cred, gateways)
 	},
 }
 
-func executeDeployAPICmd(credential credentials.Credential) {
+func executeDeployAPICmd(credential credentials.Credential, deployments []utils.Deployment) {
+	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, deployCmdEnvironment)
+	if preCommandErr == nil {
+		resp, err := impl.ReflectDeploymentChangeInGatewayEnv("deploy-revision", accessToken, deployCmdEnvironment,
+			deployCmdAPIName, deployCmdAPIVersion, deployCmdProvider, deployCmdRevisionNum, deployments, false)
+		if err != nil {
+			utils.HandleErrorAndExit("Error while deploying the API", err)
+		}
+		// Print info on response
+		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
+		if resp.StatusCode() == http.StatusCreated {
+			fmt.Println(apiNameForStateChange + " API state changed successfully!")
+		} else {
+			fmt.Println("Error while deploying the API: ", resp.Status(), "\n", string(resp.Body()))
+		}
+	} else {
+		fmt.Println("Error getting OAuth tokens to deploy the API:" + preCommandErr.Error())
+	}
 
 }
 
 // init using Cobra
 func init() {
 	DeployCmd.AddCommand(DeployAPICmd)
-	DeployAPICmd.Flags().StringVarP(&deployAPIName, "name", "n", "",
-		"Name of the API to be exported")
-	DeployAPICmd.Flags().StringVarP(&deployAPIVersion, "version", "v", "",
-		"Version of the API to be exported")
-	DeployAPICmd.Flags().StringVarP(&deployProvider, "provider", "r", "",
+	DeployAPICmd.Flags().StringVarP(&deployCmdAPIName, "name", "n", "",
+		"Name of the API to be deployed")
+	DeployAPICmd.Flags().StringVarP(&deployCmdAPIVersion, "version", "v", "",
+		"Version of the API to be deployed")
+	DeployAPICmd.Flags().StringVarP(&deployCmdProvider, "provider", "r", "",
 		"Provider of the API")
-	DeployAPICmd.Flags().StringVarP(&deployAPIGateway, "gateway", "g", "",
-		"Gateway which the API has to be deployed")
-	DeployAPICmd.Flags().StringVarP(&deployRevisionNum, "rev", "", "",
-		"Revision number of the API to be exported")
-	DeployAPICmd.Flags().StringVarP(&deployAPIEnvironment, "environment", "e",
+	DeployAPICmd.Flags().StringVarP(&deployCmdGateway, "gateway", "g", "",
+		"Gateways which the revision has to be deployed")
+	DeployAPICmd.Flags().StringVarP(&deployCmdRevisionNum, "rev", "", "",
+		"Revision number of the API to be deployed")
+	DeployAPICmd.Flags().BoolVar(&deployCmdHideOnDevportal, "hide-on-devportal", false,
+		"Hide the gateway environment on devportal")
+	DeployAPICmd.Flags().StringVarP(&deployCmdEnvironment, "environment", "e",
 		"", "Environment to which the API should be deployed")
-	_ = ExportAPICmd.MarkFlagRequired("name")
-	_ = ExportAPICmd.MarkFlagRequired("version")
-	_ = ExportAPICmd.MarkFlagRequired("gateway")
-	_ = ExportAPICmd.MarkFlagRequired("environment")
+	_ = DeployAPICmd.MarkFlagRequired("name")
+	_ = DeployAPICmd.MarkFlagRequired("version")
+	_ = DeployAPICmd.MarkFlagRequired("gateway")
+	_ = DeployAPICmd.MarkFlagRequired("rev")
+	_ = DeployAPICmd.MarkFlagRequired("environment")
 }

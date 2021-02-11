@@ -20,6 +20,7 @@ package impl
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"gopkg.in/yaml.v2"
 	"io"
@@ -225,4 +226,65 @@ func GetFileLocationFromPattern(root, pattern string) (string, error) {
 		return nil
 	})
 	return match, err
+}
+
+// Function is used with both deploy and undeploy api commands to generate the gateways array.
+// @param args : Arguments array of the command
+// @param initialGateway : Value of --gateway (-g) flag
+// @param hideOnDevportal : Value of the --hide-on-devportal flag
+// @return An array consists of the deployment info of all the gateway environments
+func GenerateGatewayArray(args []string, initialGateway string, hideOnDevportal bool) []utils.Deployment {
+	//Since other flags does not use args[], gateways flag will own all the args
+	var deployments = []utils.Deployment{{initialGateway, !hideOnDevportal}}
+	if len(args) != 0 {
+		for _, argument := range args {
+			var deployment utils.Deployment
+			deployment.Name = argument
+			deployment.DisplayOnDevportal = !hideOnDevportal
+			deployments = append(deployments, deployment)
+		}
+	}
+	return deployments
+}
+
+// Function is used with both deploy and undeploy api commands to invoke the resource
+// @param action : deploy-revision or undeploy-revision
+// @param accessToken : Access Token for the resource
+// @param name : Name of the API
+// @param version : Version of the API
+// @param provider : Provider of the API
+// @param revisionNum : Revision number of the API
+// @param gateways : Gateway environments in which the revision has to be deployed
+// @param allGatewayEnvironments : This is only used with undeploy command. Boolean to specify whether to undeploy in all gateways
+// @return response Response in the form of *resty.Response
+func ReflectDeploymentChangeInGatewayEnv(action, accessToken, environment, name, version, provider, revisionNum string,
+	gateways []utils.Deployment, allGatewayEnvironments bool) (*resty.Response, error) {
+	apiId, err := GetAPIId(accessToken, environment, name, version, provider)
+	if err != nil {
+		utils.HandleErrorAndExit("Error while getting API Id for state change ", err)
+	}
+
+	apiRevisionEndpoint := utils.GetApiListEndpointOfEnv(environment, utils.MainConfigFilePath)
+	apiRevisionEndpoint = utils.AppendSlashToString(apiRevisionEndpoint)
+	url := apiRevisionEndpoint + apiId + "/" + action + "?revisionNumber=" + revisionNum
+	if allGatewayEnvironments {
+		//This is only used in undeploy scenario to undeploy all the environments at once for a specific revision
+		url += "&allEnvironments=true"
+	}
+	utils.Logln(utils.LogPrefixInfo+"APIDeploy: URL:", url)
+
+	headers := make(map[string]string)
+	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
+	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
+
+	body, err := json.Marshal(gateways)
+	if err != nil {
+		utils.HandleErrorAndExit("Error while getting API Id for state change ", err)
+	}
+
+	resp, err := utils.InvokePOSTRequest(url, headers, string(body))
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
 }

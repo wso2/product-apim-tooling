@@ -30,9 +30,9 @@ const deployCmdShortDesc = "Deploy an API/API Product in a gateway environment"
 const deployCmdLongDesc = `Deploy an API/API Product available in the environment specified by flag (--environment, -e)
 to the gateway specified by flag (--gateway, -g)`
 
-const deployCmdExamples = utils.ProjectName + ` ` + DeployCmdLiteral + ` ` + DeployAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin -e dev
-` + utils.ProjectName + ` ` + DeployCmdLiteral + ` ` + DeployAPICmdLiteral + ` -e dev
-` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPIProductCmdLiteral + ` -n LeasingAPIProduct -e dev`
+const deployCmdExamples = utils.ProjectName + ` ` + DeployCmdLiteral + ` ` + DeployAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin --rev 1 -g Label1 -e dev
+` + utils.ProjectName + ` ` + DeployCmdLiteral + ` ` + DeployAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 --rev 6 -g Label1 Label2 Label3 -e production
+` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPIProductCmdLiteral + ` -n FacebookAPI -v 2.1.0 --rev 2 -r admin -g Label1 -e production --hide-on-devportal`
 
 // DeployCmd represents the deploy command
 var DeployCmd = &cobra.Command{
