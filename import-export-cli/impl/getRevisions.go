@@ -87,15 +87,17 @@ func (r *revision) MarshalJSON() ([]byte, error) {
 // @return array of revision objects
 // @return error
 func GetRevisionListFromEnv(accessToken, environment, apiName, apiVersion, provider, query string) (count int32, revisions []utils.Revisions, err error) {
+	apiId, err := GetAPIId(accessToken, environment, apiName, apiVersion, provider)
+	if err != nil {
+		utils.HandleErrorAndExit("Error while getting API Id to list revisions ", err)
+	}
 	revisionListEndpoint := utils.GetApiListEndpointOfEnv(environment, utils.MainConfigFilePath)
-	revisionListEndpoint += "/revisions?name=" + apiName + "&version=" + apiVersion
-	if provider != "" {
-		revisionListEndpoint += "&provider=" + provider
-	}
+	revisionListEndpoint = utils.AppendSlashToString(revisionListEndpoint)
+	url := revisionListEndpoint + apiId + "/revisions"
 	if query != "" {
-		revisionListEndpoint += "&query=" + query
+		url += "?query=" + query
 	}
-	return GetRevisionsList(accessToken, revisionListEndpoint)
+	return GetRevisionsList(accessToken, url)
 }
 
 // Print Revisions in the given template
