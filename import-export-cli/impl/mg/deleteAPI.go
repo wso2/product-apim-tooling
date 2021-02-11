@@ -26,7 +26,7 @@ import (
 )
 
 // DeleteAPI sends a POST request to delet an API
-func DeleteAPI(accessToken string, apiDeleteEndpoint string, queryParam map[string]string) (
+func DeleteAPI(accessToken, apiDeleteEndpoint string, queryParam map[string]string) (
 	err error) {
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + accessToken

@@ -37,12 +37,14 @@ var (
 )
 
 const listApisCmdLiteral = "apis"
-const listApisCmdShortDesc = "Display a list of all APIs or a filtered set of APIs"
-const listApisCmdLongDesc = `Display a list of all APIs or filtered by apiType using the flag --type, -t`
+const listApisCmdShortDesc = "List APIs in Microgateway"
+const listApisCmdLongDesc = `Display a list of all the APIs or 
+a set of APIs with a limit or filtered by apiType using the flags --limit (-l), --type (-t). 
+Note: The flags --host (-c), --username (-u) are mandatory`
 
-var listApisCmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` + listApisCmdLiteral + `-h https://localhost:9095 -u admin
- ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + listApisCmdLiteral + ` -t http -h https://localhost:9095 -u admin -l 100
- ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + listApisCmdLiteral + ` -t ws -h https://localhost:9095 -u admin`
+var listApisCmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` + listCmdLiteral + ` ` + listApisCmdLiteral + `--host https://localhost:9095 -u admin
+ ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + listCmdLiteral + ` ` + listApisCmdLiteral + ` -t http --host https://localhost:9095 -u admin -l 100
+ ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + listCmdLiteral + ` ` + listApisCmdLiteral + ` -t ws --host https://localhost:9095 -u admin`
 
 var mgListAPIsResourcePath = "/apis"
 
@@ -88,7 +90,7 @@ func init() {
 
 	ListApisCmd.Flags().StringVarP(&mgwAdapterHost, "host", "c", "", "The adapter host url with port")
 	ListApisCmd.Flags().StringVarP(&listApisCmdAPIType, "type", "t", "", "API type to filter the APIs")
-	ListApisCmd.Flags().StringVarP(&listApisCmdLimit, "limit", "l", "", "Maximum number of apis to return")
+	ListApisCmd.Flags().StringVarP(&listApisCmdLimit, "limit", "l", "", "Maximum number of APIs to return")
 	ListApisCmd.Flags().StringVarP(&listApisUsername, "username", "u", "", "The username")
 
 	_ = ListApisCmd.MarkFlagRequired("host")
