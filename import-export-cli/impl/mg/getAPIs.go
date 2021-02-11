@@ -52,22 +52,22 @@ type APIMetaListItem struct {
 	LabelsParam  []string `json:"labels"`
 }
 
-// Name of api
+// Name of the API
 func (a APIMetaListItem) Name() string {
 	return a.APIName
 }
 
-// Version of api
+// Version of the API
 func (a APIMetaListItem) Version() string {
 	return a.VersionParam
 }
 
-// Lifecycle Status of api
+// Type of the API
 func (a APIMetaListItem) Type() string {
 	return a.APIType
 }
 
-// Provider of api
+// Labels of the API
 func (a APIMetaListItem) Labels() []string {
 	return a.LabelsParam
 }
@@ -78,7 +78,7 @@ func (a *APIMetaListItem) MarshalJSON() ([]byte, error) {
 }
 
 // GetAPIList sends GET request and returns the metadata of APIs
-func GetAPIList(accessToken, apiListEndpoint string, queryParam map[string]string) (
+func GetAPIsList(accessToken, apiListEndpoint string, queryParam map[string]string) (
 	total int, count int, apis []APIMetaListItem, err error) {
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + accessToken
