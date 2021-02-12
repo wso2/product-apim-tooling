@@ -39,6 +39,7 @@ var exportProvider string
 var exportAPIPreserveStatus bool
 var exportAPIFormat string
 var runningExportApiCommand bool
+var exportAPILatestRevision bool
 
 // ExportAPI command related usage info
 const ExportAPICmdLiteral = "api"
@@ -61,8 +62,9 @@ var ExportAPICmd = &cobra.Command{
 	Example: exportAPICmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + ExportAPICmdLiteral + " called")
-		if exportRevisionNum == "" {
-			fmt.Println("A Revision number is not provided. Only the working copy without deployment environments will be exported.")
+		if exportRevisionNum == "" && !exportAPILatestRevision {
+			fmt.Println("A Revision number is not provided. Only the working copy without deployment environments will be exported." +
+				"To export the latest revision, please use --latest flag.")
 		}
 		var apisExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedApisDirName)
 
@@ -81,7 +83,7 @@ func executeExportAPICmd(credential credentials.Credential, exportDirectory stri
 
 	if preCommandErr == nil {
 		resp, err := impl.ExportAPIFromEnv(accessToken, exportAPIName, exportAPIVersion, exportRevisionNum, exportProvider,
-			exportAPIFormat, CmdExportEnvironment, exportAPIPreserveStatus)
+			exportAPIFormat, CmdExportEnvironment, exportAPIPreserveStatus, exportAPILatestRevision)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while exporting", err)
 		}
@@ -118,6 +120,8 @@ func init() {
 		"", "Environment to which the API should be exported")
 	ExportAPICmd.Flags().BoolVarP(&exportAPIPreserveStatus, "preserveStatus", "", true,
 		"Preserve API status when exporting. Otherwise API will be exported in CREATED status")
+	ExportAPICmd.Flags().BoolVarP(&exportAPILatestRevision, "latest", "", false,
+		"Export the latest revision of the API")
 	ExportAPICmd.Flags().StringVarP(&exportAPIFormat, "format", "", utils.DefaultExportFormat, "File format of exported archive(json or yaml)")
 	_ = ExportAPICmd.MarkFlagRequired("name")
 	_ = ExportAPICmd.MarkFlagRequired("version")
