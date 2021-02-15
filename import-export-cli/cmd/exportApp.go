@@ -20,14 +20,15 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/go-resty/resty"
-	"github.com/spf13/cobra"
-	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
+
+	"github.com/go-resty/resty/v2"
+	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 var exportAppName string

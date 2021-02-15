@@ -19,12 +19,13 @@
 package cmd
 
 import (
-	"github.com/stretchr/testify/assert"
 	"os"
 	"path/filepath"
 	"testing"
 
-	"github.com/go-resty/resty"
+	"github.com/stretchr/testify/assert"
+
+	"github.com/go-resty/resty/v2"
 
 	"net/http"
 	"net/http/httptest"

@@ -10,8 +10,8 @@ require (
 	github.com/getkin/kin-openapi v0.2.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-openapi/loads v0.19.2
-	github.com/go-openapi/spec v0.19.2
-	github.com/go-resty/resty v0.0.0-20171018191538-8b5e3f91fbea
+	github.com/go-openapi/spec v0.19.2 // indirect
+	github.com/go-resty/resty/v2 v2.4.0
 	github.com/hashicorp/go-multierror v1.0.0
 	github.com/hashicorp/hcl v0.0.0-20171017181929-23c074d0eceb // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
@@ -25,7 +25,7 @@ require (
 	github.com/spf13/cobra v0.0.1
 	github.com/spf13/jwalterweatherman v0.0.0-20170901151539-12bd96e66386 // indirect
 	github.com/spf13/pflag v0.0.0-20171016164048-1f33b80956cd // indirect
-	github.com/spf13/viper v1.0.0
+	github.com/spf13/viper v1.0.0 // indirect
 	github.com/stretchr/testify v1.3.0
 	golang.org/x/crypto v0.0.0-20190611184440-5c40567a22f8
 	gopkg.in/yaml.v2 v2.2.2

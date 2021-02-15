@@ -29,7 +29,7 @@ import (
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 
-	"github.com/go-resty/resty"
+	"github.com/go-resty/resty/v2"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/formatter"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"

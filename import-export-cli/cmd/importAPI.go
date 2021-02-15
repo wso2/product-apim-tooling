@@ -36,7 +36,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/go-resty/resty"
+	"github.com/go-resty/resty/v2"
 	"github.com/wso2/product-apim-tooling/import-export-cli/specs/params"
 
 	"github.com/mitchellh/go-homedir"
@@ -158,9 +158,9 @@ func mergeAPI(apiDirectory string, environmentParams *params.Environment) error 
 	}
 
 	if !isEndpointsFieldsValid(environmentParams.Endpoints, environmentParams.LoadBalanceEndpoints,
-	                                                                            environmentParams.FailoverEndpoints) {
+		environmentParams.FailoverEndpoints) {
 		return errors.New("Please specify only one field from endpoints, loadBalanceEndpoints or failOverEndpoints in" +
-		" the api_params.yaml file for " + environmentParams.Name + " and continue...")
+			" the api_params.yaml file for " + environmentParams.Name + " and continue...")
 	}
 
 	configData, err := json.Marshal(environmentParams.Endpoints)
@@ -586,6 +586,9 @@ func generateEndpointCertificates(importPath string, environment *params.Environ
 		block, _ := pem.Decode(pubPEMData)
 		enc := credentials.Base64Encode(string(block.Bytes))
 		cert.Certificate = enc
+		utils.Logln(utils.LogPrefixInfo + ">>>>>>>>>>>>>>>>>>>>>>>>> param cert >>>>>>>>>>>>>>>>>>>>>>>>>")
+		utils.Logln(utils.LogPrefixInfo, cert)
+		utils.Logln(utils.LogPrefixInfo + ">>>>>>>>>>>>>>>>>>>>>>>>> param cert >>>>>>>>>>>>>>>>>>>>>>>>>")
 		certs = append(certs, cert)
 	}
 

@@ -28,7 +28,7 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/go-resty/resty"
+	"github.com/go-resty/resty/v2"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -130,14 +130,14 @@ func ImportApplication(filename, appOwner, adminEndpiont, accessToken, exportDir
 	}
 
 	if resp.StatusCode() == http.StatusCreated || resp.StatusCode() == http.StatusOK ||
-			resp.StatusCode() == http.StatusMultiStatus {
-			// 207 Multi Status or 201 Created or 200 OK
-			fmt.Printf("\nCompleted importing the Application '" + filename + "'\n")
-		} else {
-			fmt.Printf("\nUnable to import the Application\n")
-			fmt.Println("Status: " + resp.Status())
-		        fmt.Println("Response:", resp)
-		}
+		resp.StatusCode() == http.StatusMultiStatus {
+		// 207 Multi Status or 201 Created or 200 OK
+		fmt.Printf("\nCompleted importing the Application '" + filename + "'\n")
+	} else {
+		fmt.Printf("\nUnable to import the Application\n")
+		fmt.Println("Status: " + resp.Status())
+		fmt.Println("Response:", resp)
+	}
 	return resp.RawResponse, err
 }
 
@@ -171,7 +171,7 @@ func NewAppFileUploadRequest(uri string, params map[string]string, paramName, pa
 	// set headers
 	headers := make(map[string]string)
 	headers[utils.HeaderContentType] = writer.FormDataContentType()
-	headers[utils.HeaderAuthorization] =  utils.HeaderValueAuthBearerPrefix+" "+accessToken
+	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 	headers[utils.HeaderAccept] = "*/*"
 	headers[utils.HeaderConnection] = utils.HeaderValueKeepAlive
 
