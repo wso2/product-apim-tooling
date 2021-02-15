@@ -34,7 +34,7 @@ const k8sDeleteCmdExamples = utils.ProjectName + ` ` + k8sDeleteCmdLiteral + ` `
 ` + utils.ProjectName + ` ` + k8sDeleteCmdLiteral + ` ` + k8sDeleteAPICmdLiteral + ` -l name=myLabel`
 
 // k8sDeleteCmd represents the delete command
-var k8sDeleteCmd = &cobra.Command{
+var DeleteCmd = &cobra.Command{
 	Use:                k8sDeleteCmdLiteral,
 	Short:              k8sDeleteCmdShortDesc,
 	Long:               k8sDeleteCmdLongDesc,
@@ -47,7 +47,4 @@ var k8sDeleteCmd = &cobra.Command{
 	},
 }
 
-func init() {
-	Cmd.AddCommand(k8sDeleteCmd)
-}
 

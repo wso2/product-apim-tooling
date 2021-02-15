@@ -50,5 +50,7 @@ var Cmd = &cobra.Command{
 // init using Cobra
 func init() {
 	Cmd.AddCommand(AddCmd)
+	Cmd.AddCommand(GenCmd)
+	Cmd.AddCommand(DeleteCmd)
 }
 

@@ -33,7 +33,7 @@ const k8sDeleteAPICmdExamples = utils.ProjectName + ` ` + k8sDeleteCmdLiteral + 
 ` + "  " + utils.ProjectName + ` ` + k8sDeleteCmdLiteral + ` ` + k8sDeleteAPICmdLiteral + ` -l name=myLabel`
 
 // k8sDeleteAPICmd represents the delete api command in kubernetes mode
-var k8sDeleteAPICmd = &cobra.Command{
+var deleteAPICmd = &cobra.Command{
 	Use:                utils.ProjectName + ` ` + k8sDeleteCmdLiteral + ` ` + k8sDeleteAPICmdLiteral + " (<name-of-the-api> or -l name=<name-of-the-label>)",
 	Short:              k8sDeleteAPICmdShortDesc,
 	Long:               k8sDeleteAPICmdLongDesc,
@@ -48,6 +48,6 @@ var k8sDeleteAPICmd = &cobra.Command{
 
 // Init using Cobra
 func init() {
-	k8sDeleteCmd.AddCommand(k8sDeleteAPICmd)
+	DeleteCmd.AddCommand(deleteAPICmd)
 }
 
