@@ -586,6 +586,9 @@ func generateEndpointCertificates(importPath string, environment *params.Environ
 		block, _ := pem.Decode(pubPEMData)
 		enc := credentials.Base64Encode(string(block.Bytes))
 		cert.Certificate = enc
+		utils.Logln(utils.LogPrefixInfo + ">>>>>>>>>>>>>>>>>>>>>>>>> param cert >>>>>>>>>>>>>>>>>>>>>>>>>")
+		utils.Logln(utils.LogPrefixInfo, cert)
+		utils.Logln(utils.LogPrefixInfo + ">>>>>>>>>>>>>>>>>>>>>>>>> param cert >>>>>>>>>>>>>>>>>>>>>>>>>")
 		certs = append(certs, cert)
 	}
 
