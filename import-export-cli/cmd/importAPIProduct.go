@@ -33,6 +33,7 @@ var (
 	importAPIProductUpdate              bool
 	importAPIsUpdate                    bool
 	importAPIProductSkipCleanup         bool
+	importAPIProductRotateRevision		bool
 )
 
 const (
@@ -67,7 +68,7 @@ var ImportAPIProductCmd = &cobra.Command{
 			utils.HandleErrorAndExit("Error while getting an access token for importing API Product", err)
 		}
 		err = impl.ImportAPIProductToEnv(accessOAuthToken, importAPIProductEnvironment, importAPIProductFile, importAPIs, importAPIsUpdate,
-			importAPIProductUpdate, importAPIProductCmdPreserveProvider, importAPIProductSkipCleanup)
+			importAPIProductUpdate, importAPIProductCmdPreserveProvider, importAPIProductSkipCleanup, importAPIProductRotateRevision)
 		if err != nil {
 			utils.HandleErrorAndExit("Error importing API Product", err)
 			return
@@ -82,6 +83,8 @@ func init() {
 		"Name of the API Product to be imported")
 	ImportAPIProductCmd.Flags().StringVarP(&importAPIProductEnvironment, "environment", "e",
 		"", "Environment from the which the API Product should be imported")
+	ImportAPIProductCmd.Flags().BoolVar(&importAPIProductRotateRevision, "rotate-revision", false,
+		"If the maximum revision limit is reached, undeploy and delete the earliest revision")
 	ImportAPIProductCmd.Flags().BoolVar(&importAPIProductCmdPreserveProvider, "preserve-provider", true,
 		"Preserve existing provider of API Product after importing")
 	ImportAPIProductCmd.Flags().BoolVarP(&importAPIs, "import-apis", "", false, "Import "+
