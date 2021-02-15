@@ -26,12 +26,13 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
+	impl "github.com/wso2/product-apim-tooling/import-export-cli/impl/mg"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 var (
 	mgwImportAPIFile    string
+	mgDeployOverwrite   bool
 	username            string
 	password            string
 	mgDeploySkipCleanup bool
@@ -42,13 +43,13 @@ const (
 	mgDeployCmdShortDesc = "Deploy API"
 	mgDeployCmdLongDesc  = "Deploy the API (apictl project) in Microgateway"
 
-	mgDeployResourcePath = "/apis"
+	mgDeployResourcePath = "/api"
 )
 
 const mgDeployCmdExamples = utils.ProjectName + " " + mgCmdLiteral + " " + mgDeployCmdLiteral + " -h https://localhost:9095 " +
-	"-f qa/TwitterAPI.zip -u admin -p admin\n" +
-	"cat ~/.mypassword | " + utils.ProjectName + mgCmdLiteral + " " + " " + mgDeployCmdLiteral + " -h https://localhost:9095 " +
-	"-f qa/TwitterAPI.zip -u admin"
+	"-f petstore -u admin -p admin\n" +
+	"cat ~/.mypassword | " + utils.ProjectName + " " + mgCmdLiteral + " " + " " + mgDeployCmdLiteral + " -h https://localhost:9095 " +
+	"-f petstore -u admin"
 
 type MgwResponse struct {
 	Message string
@@ -63,7 +64,7 @@ var MgDeployCmd = &cobra.Command{
 	Example: mgDeployCmdExamples,
 	Args:    cobra.MinimumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
-		var tempMap map[string]string
+		tempMap := make(map[string]string)
 		resourcePath := MgBasepath + mgDeployResourcePath
 		if password == "" {
 			fmt.Printf("Provide the password for the user: %v \n", username)
@@ -75,26 +76,21 @@ var MgDeployCmd = &cobra.Command{
 			password = strings.TrimRight(strings.TrimSuffix(string(data), "\n"), "\r")
 		}
 		authToken := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
-		err := impl.ImportAPIToMGW(mgwAdapterHost+resourcePath, mgwImportAPIFile, authToken, tempMap, mgDeploySkipCleanup)
-		if err != nil {
-			utils.HandleErrorAndExit("Error adding swagger to microgateway", err)
-		}
+		impl.DeployAPI(mgwAdapterHost+resourcePath, mgwImportAPIFile, authToken, tempMap,
+			mgDeploySkipCleanup, mgDeployOverwrite)
 	},
 }
 
 func init() {
 	MgCmd.AddCommand(MgDeployCmd)
 	//TODO: (VirajSalaka) import using just folder name
-	MgDeployCmd.Flags().StringVarP(&mgwImportAPIFile, "file", "f", "",
-		"Provide the filepath of the apictl project to be imported")
-	MgDeployCmd.Flags().StringVarP(&mgwAdapterHost, "host", "c", "",
-		"Provide the host url for the control plane with port")
-	MgDeployCmd.Flags().StringVarP(&username, "username", "u", "",
-		"Provide the username")
-	MgDeployCmd.Flags().StringVarP(&password, "password", "p", "",
-		"Provide the password")
-	MgDeployCmd.Flags().BoolVarP(&mgDeploySkipCleanup, "skipCleanup", "", false, "Leave "+
-		"all temporary files created during import process")
+	MgDeployCmd.Flags().StringVarP(&mgwImportAPIFile, "file", "f", "", "Filepath of the apictl project to be deployed")
+	MgDeployCmd.Flags().StringVarP(&mgwAdapterHost, "host", "c", "", "Host url for the control plane with port")
+	MgDeployCmd.Flags().BoolVarP(&mgDeployOverwrite, "overwrite", "o", false, "Whether to update an existing API")
+	MgDeployCmd.Flags().StringVarP(&username, "username", "u", "", "Username of the user")
+	MgDeployCmd.Flags().StringVarP(&password, "password", "p", "", "Password of the user (Can be provided at the prompt)")
+	MgDeployCmd.Flags().BoolVarP(&mgDeploySkipCleanup, "skipCleanup", "", false, "Whether to keep "+
+		"all temporary files created during deploy process")
 
 	_ = MgDeployCmd.MarkFlagRequired("host")
 	_ = MgDeployCmd.MarkFlagRequired("file")

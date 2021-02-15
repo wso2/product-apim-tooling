@@ -33,6 +33,7 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
+// Invoke http-post request using go-resty
 func InvokePOSTRequest(url string, headers map[string]string, body interface{}) (*resty.Response, error) {
 	client := resty.New()
 
@@ -45,9 +46,7 @@ func InvokePOSTRequest(url string, headers map[string]string, body interface{}) 
 	}
 
 	client.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
-	resp, err := client.R().SetHeaders(headers).SetBody(body).Post(url)
-
-	return resp, err
+	return client.R().SetHeaders(headers).SetBody(body).Post(url)
 }
 
 // Invoke http-post request without body using go-resty
@@ -63,9 +62,44 @@ func InvokePOSTRequestWithoutBody(url string, headers map[string]string) (*resty
 	}
 
 	client.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
-	resp, err := client.R().SetHeaders(headers).Post(url)
+	return client.R().SetHeaders(headers).Post(url)
+}
 
-	return resp, err
+// Invoke http-post request with query parameters using go-resty
+func InvokePOSTRequestWithQueryParam(queryParam map[string]string, url string, headers map[string]string,
+	body string) (*resty.Response, error) {
+
+	client := resty.New()
+
+	if Insecure {
+		client.SetTLSClientConfig(
+			&tls.Config{InsecureSkipVerify: true, // To bypass errors in SSL certificates
+				Renegotiation: TLSRenegotiationMode})
+	} else {
+		client.SetTLSClientConfig(GetTlsConfigWithCertificate())
+	}
+
+	client.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
+	return resty.R().SetHeaders(headers).SetQueryParams(queryParam).SetBody(body).Post(url)
+}
+
+// Invoke http-post request with file & query parameters using go-resty
+func InvokePOSTRequestWithFileAndQueryParams(queryParam map[string]string, url string, headers map[string]string,
+	fileParamName, filePath string) (*resty.Response, error) {
+
+	client := resty.New()
+
+	if Insecure {
+		client.SetTLSClientConfig(
+			&tls.Config{InsecureSkipVerify: true, // To bypass errors in SSL certificates
+				Renegotiation: TLSRenegotiationMode})
+	} else {
+		client.SetTLSClientConfig(GetTlsConfigWithCertificate())
+	}
+
+	client.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
+	return client.R().SetHeaders(headers).SetQueryParams(queryParam).
+		SetFile(fileParamName, filePath).Post(url)
 }
 
 // Invoke http-get request using go-resty
@@ -81,14 +115,13 @@ func InvokeGETRequest(url string, headers map[string]string) (*resty.Response, e
 	}
 
 	client.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
-	resp, err := client.R().SetHeaders(headers).Get(url)
-
-	return resp, err
+	return client.R().SetHeaders(headers).Get(url)
 }
 
 // Invoke http-get request with query param
 func InvokeGETRequestWithQueryParam(queryParam string, paramValue string, url string, headers map[string]string) (
 	*resty.Response, error) {
+
 	client := resty.New()
 
 	if Insecure {
@@ -100,14 +133,13 @@ func InvokeGETRequestWithQueryParam(queryParam string, paramValue string, url st
 	}
 
 	client.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
-	resp, err := client.R().SetHeaders(headers).SetQueryParam(queryParam, paramValue).Get(url)
-
-	return resp, err
+	return client.R().SetHeaders(headers).SetQueryParam(queryParam, paramValue).Get(url)
 }
 
 // Invoke http-get request with multiple query params
 func InvokeGETRequestWithMultipleQueryParams(queryParam map[string]string, url string, headers map[string]string) (
 	*resty.Response, error) {
+
 	client := resty.New()
 
 	if Insecure {
@@ -119,12 +151,10 @@ func InvokeGETRequestWithMultipleQueryParams(queryParam map[string]string, url s
 	}
 
 	client.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
-	resp, err := client.R().SetHeaders(headers).SetQueryParams(queryParam).Get(url)
-
-	return resp, err
+	return client.R().SetHeaders(headers).SetQueryParams(queryParam).Get(url)
 }
 
-// Invoke http-put request
+// Invoke http-put request with multiple query params
 func InvokePutRequest(queryParam map[string]string, url string, headers map[string]string, body string) (
 	*resty.Response, error) {
 	client := resty.New()
@@ -138,28 +168,7 @@ func InvokePutRequest(queryParam map[string]string, url string, headers map[stri
 	}
 
 	client.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
-	resp, err := client.R().SetHeaders(headers).SetQueryParams(queryParam).SetBody(body).Put(url)
-
-	return resp, err
-}
-
-//Invoke POST request with query parameters
-func InvokePostRequestWithQueryParam(queryParam map[string]string, url string, headers map[string]string, body string) (
-	*resty.Response, error) {
-	client := resty.New()
-
-	if Insecure {
-		client.SetTLSClientConfig(
-			&tls.Config{InsecureSkipVerify: true, // To bypass errors in SSL certificates
-				Renegotiation: TLSRenegotiationMode})
-	} else {
-		client.SetTLSClientConfig(GetTlsConfigWithCertificate())
-	}
-
-	client.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
-	resp, err := client.R().SetHeaders(headers).SetQueryParams(queryParam).SetBody(body).Post(url)
-
-	return resp, err
+	return client.R().SetHeaders(headers).SetQueryParams(queryParam).SetBody(body).Put(url)
 }
 
 // Invoke http-delete request using go-resty
@@ -175,9 +184,25 @@ func InvokeDELETERequest(url string, headers map[string]string) (*resty.Response
 	}
 
 	client.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
-	resp, err := client.R().SetHeaders(headers).Delete(url)
+	return client.R().SetHeaders(headers).Delete(url)
+}
 
-	return resp, err
+// Invoke http-delete request with multiple query params
+func InvokeDELETERequestWithParams(url string, params map[string]string, headers map[string]string) (
+	*resty.Response, error) {
+
+	client := resty.New()
+
+	if Insecure {
+		client.SetTLSClientConfig(
+			&tls.Config{InsecureSkipVerify: true, // To bypass errors in SSL certificates
+				Renegotiation: TLSRenegotiationMode})
+	} else {
+		client.SetTLSClientConfig(GetTlsConfigWithCertificate())
+	}
+
+	client.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
+	return client.R().SetHeaders(headers).SetQueryParams(params).Delete(url)
 }
 
 // Invoke http-patch request using go-resty
@@ -193,9 +218,7 @@ func InvokePATCHRequest(url string, headers map[string]string, body map[string]s
 	}
 
 	client.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
-	resp, err := client.R().SetHeaders(headers).SetBody(body).Patch(url)
-
-	return resp, err
+	return client.R().SetHeaders(headers).SetBody(body).Patch(url)
 }
 
 func PromptForUsername() string {

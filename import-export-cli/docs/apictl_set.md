@@ -29,11 +29,7 @@ apictl set --vcs-config-path /home/user/custom/vcs-config.yaml
 ### Options
 
 ```
-<<<<<<< HEAD
       --export-directory string         Path to directory where APIs should be saved (default "/home/wso2user/.wso2apictl/exported")
-=======
-      --export-directory string         Path to directory where APIs should be saved (default "/home/username/.wso2apictl/exported")
->>>>>>> Add generated docs for mg delete api and mg get apis
   -h, --help                            help for set
       --http-request-timeout int        Timeout for HTTP Client (default 10000)
       --tls-renegotiation-mode string   Supported TLS renegotiation mode (default "never")

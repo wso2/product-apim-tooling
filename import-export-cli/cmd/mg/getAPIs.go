@@ -44,7 +44,7 @@ a set of APIs with a limit or filtered by apiType using the flags --limit (-l), 
 Note: The flags --host (-c), --username (-u) are mandatory. The password can be included 
 via the flag --password (-p) or entered at the prompt.`
 
-var getAPIsCmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` + getCmdLiteral + ` ` + getAPIsCmdLiteral + `--host https://localhost:9095 -u admin
+var getAPIsCmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` + getCmdLiteral + ` ` + getAPIsCmdLiteral + ` --host https://localhost:9095 -u admin
  ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + getCmdLiteral + ` ` + getAPIsCmdLiteral + ` -t http --host https://localhost:9095 -u admin -l 100
  ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + getCmdLiteral + ` ` + getAPIsCmdLiteral + ` -t ws --host https://localhost:9095 -u admin`
 
@@ -99,7 +99,7 @@ func init() {
 	GetAPIsCmd.Flags().StringVarP(&getAPIsCmdAPIType, "type", "t", "", "API type to filter the APIs")
 	GetAPIsCmd.Flags().StringVarP(&getAPIsCmdLimit, "limit", "l", "", "Maximum number of APIs to return")
 	GetAPIsCmd.Flags().StringVarP(&getAPIsUsername, "username", "u", "", "The username")
-	GetAPIsCmd.Flags().StringVarP(&getAPIsPassword, "password", "p", "", "Password of the user")
+	GetAPIsCmd.Flags().StringVarP(&getAPIsPassword, "password", "p", "", "Password of the user (Can be provided at the prompt)")
 
 	_ = GetAPIsCmd.MarkFlagRequired("host")
 	_ = GetAPIsCmd.MarkFlagRequired("username")

@@ -43,11 +43,11 @@ and optionally vhost by specifying the flags (--name (-n), --version (-v), --hos
 --username (-u), and optionally --vhost (-t). Note: The password can be included 
 via the flag --password (-p) or entered at the prompt.`
 
-var deleteAPICmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` + deleteAPICmdLiteral + `--host https://localhost:9095 -u admin
+var deleteAPICmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` + deleteAPICmdLiteral + ` --host https://localhost:9095 -u admin
   ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + deleteAPICmdLiteral + ` -n petstore -v 0.0.1 -c https://localhost:9095 -u admin -t www.pets.com 
-  ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + deleteAPICmdLiteral + ` -n "petstore VIP" -v 0.0.1 --host https://localhost:9095 -u admin -p admin`
+  ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + deleteAPICmdLiteral + ` -n SwaggerPetstore -v 0.0.1 --host https://localhost:9095 -u admin -p admin`
 
-var mgDeleteAPIResourcePath = "/apis/delete"
+var mgDeleteAPIResourcePath = "/api"
 
 // DeleteAPICmd represents the apis command
 var DeleteAPICmd = &cobra.Command{
@@ -94,7 +94,7 @@ func init() {
 	DeleteAPICmd.Flags().StringVarP(&deleteAPICmdAPIVersion, "version", "v", "", "API version")
 	DeleteAPICmd.Flags().StringVarP(&deleteAPICmdAPIVHost, "vhost", "t", "", "Virtual host the API needs to be deleted from")
 	DeleteAPICmd.Flags().StringVarP(&deleteAPIUsername, "username", "u", "", "Username with delete permissions")
-	DeleteAPICmd.Flags().StringVarP(&deleteAPIPassword, "password", "p", "", "Password of the user")
+	DeleteAPICmd.Flags().StringVarP(&deleteAPIPassword, "password", "p", "", "Password of the user (Can be provided at the prompt)")
 
 	_ = DeleteAPICmd.MarkFlagRequired("host")
 	_ = DeleteAPICmd.MarkFlagRequired("name")

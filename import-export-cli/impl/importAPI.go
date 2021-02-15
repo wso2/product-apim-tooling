@@ -216,21 +216,6 @@ func importAPI(endpoint, filePath, accessToken string, extraParams map[string]st
 	}
 }
 
-func ImportAPIToMGW(endpoint, filePath, accessToken string, extraParams map[string]string, importAPISkipCleanup bool) error {
-	//TODO: (VirajSalaka) support substituting parameters with params file. At the moment it is in hold on state, as the decision to use environments is
-	//not finalized yet.
-	// if apiFilePath contains a directory, zip it. Otherwise, leave it as it is.
-	filePath, err, cleanupFunc := utils.CreateZipFileFromProject(filePath, importAPISkipCleanup)
-	if err != nil {
-		return err
-	}
-	//cleanup the temporary artifacts once consuming the zip file
-	if cleanupFunc != nil {
-		defer cleanupFunc()
-	}
-	return importAPI(endpoint, filePath, accessToken, extraParams, false)
-}
-
 // ImportAPIToEnv function is used with import-api command
 func ImportAPIToEnv(accessOAuthToken, importEnvironment, importPath, apiParamsPath string, importAPIUpdate,
 	preserveProvider, importAPISkipCleanup, importAPIRotateRevision bool) error {
