@@ -16,7 +16,7 @@ apictl mg get apis [flags]
 ### Examples
 
 ```
-apictl mg get apis--host https://localhost:9095 -u admin
+apictl mg get apis --host https://localhost:9095 -u admin
  apictl mg get apis -t http --host https://localhost:9095 -u admin -l 100
  apictl mg get apis -t ws --host https://localhost:9095 -u admin
 ```
@@ -27,7 +27,7 @@ apictl mg get apis--host https://localhost:9095 -u admin
   -h, --help              help for apis
   -c, --host string       The adapter host url with port
   -l, --limit string      Maximum number of APIs to return
-  -p, --password string   Password of the user
+  -p, --password string   Password of the user (Can be provided at the prompt)
   -t, --type string       API type to filter the APIs
   -u, --username string   The username
 ```

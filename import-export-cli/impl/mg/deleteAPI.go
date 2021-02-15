@@ -25,12 +25,12 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-// DeleteAPI sends a POST request to delet an API
+// DeleteAPI sends a DELETE request to delete an API
 func DeleteAPI(accessToken, apiDeleteEndpoint string, queryParam map[string]string) (
 	err error) {
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + accessToken
-	resp, err := utils.InvokePostRequestWithQueryParam(queryParam, apiDeleteEndpoint, headers, "")
+	resp, err := utils.InvokeDELETERequestWithParams(apiDeleteEndpoint, queryParam, headers)
 
 	if err != nil {
 		return err
