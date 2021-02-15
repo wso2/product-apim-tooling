@@ -27,13 +27,10 @@ import (
 const UndeployCmdLiteral = "undeploy"
 const undeployCmdShortDesc = "Undeploy an API/API Product revision from a gateway environment"
 
-const undeployCmdLongDesc = `Undeploy an API/API Product revision available in the environment specified by flag (
---environment, -e) from the gateway specified by flag (--gateway, -g)`
+const undeployCmdLongDesc = `Undeploy an API/API Product revision available in the environment specified by flag (--environment, -e) from the gateway specified by flag (--gateway, -g)`
 
-const undeployCmdExamples = utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPICmdLiteral + ` 
--n TwitterAPI -v 1.0.0 -r admin --rev 1 -g Label1 Label2 -e dev
-` + utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPICmdLiteral + ` -n PizzaAPI -v 1.0.0 
---rev 2 --all-gateways -e dev
+const undeployCmdExamples = utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin --rev 1 -g Label1 Label2 -e dev
+` + utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPICmdLiteral + ` -n PizzaAPI -v 1.0.0 --rev 2 --all-gateways -e dev
 ` + utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPICmdLiteral + ` -n LeasingAPIProduct -e dev`
 
 // UndeployCmd represents the undeploy command
