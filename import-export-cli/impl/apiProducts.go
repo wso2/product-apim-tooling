@@ -147,7 +147,7 @@ func GetAPIProductList(accessToken, unifiedSearchEndpoint, query, limit string) 
 	}
 }
 
-// GetRevisionsList Get the list of Revisions available for the given API
+// GetRevisionsList Get the list of Revisions available for the given API Product
 // @param accessToken 			: Access Token for the environment
 // @param revisionListEndpoint 	: Revision List endpoint
 // @return count (no. of revisions)

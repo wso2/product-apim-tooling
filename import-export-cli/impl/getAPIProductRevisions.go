@@ -24,7 +24,7 @@ import (
 
 // Get the API Product Revisions List From the selected Environment
 // @param accessToken	: Access Token for the environment
-// @param environment	: Environment name to use when getting the API List
+// @param environment	: Environment name to use when getting the API Product revision List
 // @param apiProductName: Name of the API Product
 // @param provider		: Provider of the API Product
 // @param query			: Query param for the filtering the revisions based on the deployed status
@@ -45,4 +45,3 @@ func GetAPIProductRevisionListFromEnv(accessToken, environment, apiProductName, 
 	}
 	return GetAPIProductRevisionsList(accessToken, url)
 }
-

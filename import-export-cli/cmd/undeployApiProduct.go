@@ -94,7 +94,6 @@ func executeUndeployAPIProductCmd(credential credentials.Credential, deployments
 	}
 }
 
-
 // init using Cobra
 func init() {
 	UndeployCmd.AddCommand(UndeployAPIProductCmd)
