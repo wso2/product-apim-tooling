@@ -204,6 +204,9 @@ func buildHttpEndpoint(production *Endpoints, sandbox *Endpoints) string {
 func Swagger2Populate(def *APIDefinition, document *loads.Document) error {
 	def.ID.APIName = document.Spec().Info.Title
 	def.ID.Version = document.Spec().Info.Version
+	//remove timestamp from version 
+	//def.ID.Version = def.ID.Version[:10]
+
 	def.ID.ProviderName = "admin"
 	def.Description = document.Spec().Info.Description
 	def.Context = fmt.Sprintf("/%s/%s", def.ID.APIName, def.ID.Version)
