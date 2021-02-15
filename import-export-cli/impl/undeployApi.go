@@ -24,7 +24,7 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-func UndeployRevisionFromGateways(accessToken, environment, name, version, provider, revisionNum  string,
+func UndeployRevisionFromGateways(accessToken, environment, name, version, provider, revisionNum string,
 	gateways []utils.Deployment, allGatewayEnvironments bool) (*resty.Response, error) {
 
 	apiId, err := GetAPIId(accessToken, environment, name, version, provider)
@@ -35,9 +35,6 @@ func UndeployRevisionFromGateways(accessToken, environment, name, version, provi
 	return undeployRevision(accessToken, apiRevisionEndpoint, apiId, revisionNum, gateways,
 		allGatewayEnvironments)
 }
-
-
-
 
 // Function is used with undeploy revision command
 // @param accessToken : Access Token for the resource
