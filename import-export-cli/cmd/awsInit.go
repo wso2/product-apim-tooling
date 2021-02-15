@@ -15,24 +15,19 @@
 * specific language governing permissions and limitations
 * under the License.
 */
-//./build.sh -t apictl.go -v 3.2.0 -f
-/*TODO 
-* 01 : verbose flag support 
-* 02 : Don't duplicate the default api template. The apictl already has a template. Reuse the same template and set advertise only to true.
-*/
 
 package cmd 
 
 import (
 	"os"
 	"fmt"
+	"strconv"
 	"os/exec"
+	"bufio"
 	"encoding/json"
 	"io/ioutil"
 	"path/filepath"
 	"github.com/spf13/cobra"
-
-	//"github.com/ghodss/yaml"
 	
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
@@ -42,7 +37,6 @@ import (
 	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
  
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	//"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 )
 
 var flagApiNameToGet string		//name of the api to get from aws gateway
@@ -50,7 +44,9 @@ var flagStageName string		//api stage to get
 var dir string					//dir where the aws init command is executed from
 var path string					//path of the OAS extracted from AWS
 var tmpDir string				//temporary directory created to store the OAS extracted from aws till the project is initialized
+var cmd2_output string 
 var err error 
+var awsInitCmdForced bool
 
 //common aws cmd flags 
 var awsCmdLiteral string = "aws"
@@ -71,13 +67,12 @@ var getExport string = "get-export"
 var apiIdFlag string = "--rest-api-id"
 var stageNameFlag string = "--stage-name"
 var exportTypeFlag string = "--export-type"
-var exportType string = "oas30"	//openapi 3. Use "swagger" to request for a swagger 2.
-var debugFlag string	//aws cli debug flag for apictl verbose mode 
-
+var exportType string = "oas30"	//default export type is openapi3. Use "swagger" to request for a swagger 2.
+var debugFlag string			//aws cli debug flag for apictl verbose mode 
 
 const awsInitCmdLiteral = "aws init"
-const awsInitCmdShortDesc = "Get the swagger of an API from AWS API Gateway"
-const awsInitCmdLongDesc = `Downloading the swagger definition of an API from the AWS API Gateway`
+const awsInitCmdShortDesc = "Initialize a API project from a AWS API"
+const awsInitCmdLongDesc = `Downloading the OpenAPI specification of an API from the AWS API Gateway to initialize a WSO2 API project`
 const awsInitCmdExamples = utils.ProjectName + ` ` + awsInitCmdLiteral  + ` -n PetStore -s Demo
 
 ` + utils.ProjectName + ` ` +  awsInitCmdLiteral + ` --name PetStore --stage Demo
@@ -105,7 +100,6 @@ var AwsInitCmd = &cobra.Command{
 	Example: 	awsInitCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		getPath()
-		utils.Logln("hello")
 		initCmdOutputDir = dir + "/" + flagApiNameToGet
 
 		if stat, err := os.Stat(initCmdOutputDir); !os.IsNotExist(err) {
@@ -114,21 +108,13 @@ var AwsInitCmd = &cobra.Command{
 				fmt.Printf("%s is not a directory\n", initCmdOutputDir)
 				os.Exit(1)
 			}
-			var confirmation string 
-			fmt.Println("Enter (y) if you wish to continue OR (n) to exit.")
-			fmt.Scanln(&confirmation)
-			 
-			if confirmation == "n" {
+			if !awsInitCmdForced {
+				fmt.Println("Run with -f or --force to overwrite directory and create project")
 				os.Exit(1)
 			}
-			if confirmation == "y" {
-				execute()
-			} else {
-				fmt.Println ("Invalid input")
-			}
-		} else {
-			execute()
+			fmt.Println("Running command in forced mode")
 		}
+		execute()
 	},
 }
 
@@ -136,72 +122,132 @@ type Apis struct {
 	Items []struct {
 		Id                    string `json:"id"`
 		Name                  string `json:"name"`
-		Description 		   string `json:"description"`
-		CreatedDate           int    `json:"createdDate"`
-		APIKeySource          string `json:"apiKeySource"`
-		EndpointConfiguration struct {
-			Types []string `json:"types"`
-		} `json:"endpointConfiguration"`
 	} `json:"items"`
 }
 
 func getOAS() error {
-	if utils.VerboseModeEnabled() {
-		utils.Logln("Executing aws version command")
-	}
+	utils.Logln(utils.LogPrefixInfo + "Executing aws version command")
 	//check whether aws cli is installed
 	cmd_1, err := exec.Command(awsCmdLiteral, awsCLIVersionFlag).Output()
 	if err != nil {
 		fmt.Println("Error getting AWS CLI version. Make sure aws cli is installed and configured.")
 		return err
 	}
+	output := string(cmd_1[:])
+	utils.Logln(utils.LogPrefixInfo + "AWS CLI version :  " + output)
+
 	if utils.VerboseModeEnabled() {
-		fmt.Println("AWS CLI version : ")
-		output := string(cmd_1[:])
-		fmt.Println(output)
+		debugFlag = "--debug"	//activating the aws cli debug flag in apictl verbose mode 
 	}
+	utils.Logln(utils.LogPrefixInfo + "Executing aws get-rest-apis command in debug mode")
+	cmd_2 := exec.Command(awsCmdLiteral, apiGateway, getAPI, outputFlag, outputType, debugFlag)
+	stderr, err := cmd_2.StderrPipe()
+	if err != nil {
+		fmt.Println("Error creating pipe to standard error. (get-rest-apis command)", err)
+	}
+	stdout, err := cmd_2.StdoutPipe()
+	if err != nil {
+		fmt.Println("Error creating pipe to standard output (get-rest-apis command).", err)
+	}
+
+	err = cmd_2.Start()
+	if err != nil {
+		fmt.Println("Error starting get-rest-apis command.", err)
+	}
+
 	if utils.VerboseModeEnabled() {
-		utils.Logln("Executing aws get-rest-apis command")
+		logsScannerCmd2 := bufio.NewScanner(stderr)
+		for logsScannerCmd2.Scan() {
+			fmt.Println(logsScannerCmd2.Text())
+		}
+
+		if err := logsScannerCmd2.Err(); err != nil {
+			fmt.Println("Error reading debug logs from standard error. (get-rest-apis command)", err)
+		}
 	}
-	cmd_2, err := exec.Command(awsCmdLiteral, apiGateway, getAPI, outputFlag, outputType).Output()
-	
+
+	outputScannerCmd2 := bufio.NewScanner(stdout)
+	for outputScannerCmd2.Scan() {
+		cmd2_output = cmd2_output + outputScannerCmd2.Text()
+	}
+
+	if err := outputScannerCmd2.Err(); err != nil {
+		fmt.Println("Error reading output from standard output.", err)
+	}
+	//
+	err = cmd_2.Wait()
+	if err != nil {
+		fmt.Println("Could not complete get-rest-apis command successfully.", err)
+	}
+
 	//Unmarshal from JSON into Apis struct.
 	apis := Apis{}
-	err = json.Unmarshal([]byte(cmd_2), &apis)
+	err = json.Unmarshal([]byte(cmd2_output), &apis)
 	if err != nil {
 		return err
 	}
+	extractedAPIs := strconv.Itoa(len(apis.Items))
+	utils.Logln(utils.LogPrefixInfo + extractedAPIs + " APIs were extracted")
+
 	var found bool
 	apiName := flagApiNameToGet
 	stageName := flagStageName
 	path = tmpDir + "/" + apiName + ".json"
 	// Searching for API ID:
-	if utils.VerboseModeEnabled() {
-		fmt.Println("Searching for API ID...")
-	}
+	utils.Logln(utils.LogPrefixInfo + "Searching for API ID...")
 	for _, item := range apis.Items {
 		if item.Name == apiName {
 			fmt.Println("API ID found : ", item.Id)
 			api_id := item.Id 
-			if utils.VerboseModeEnabled() {
-				utils.Logln("Executing aws get-export command")
-				debugFlag = "--debug"	//activating the aws cli debug flag in apictl verbose mode 
-			}
-			cmd_3, err := exec.Command(awsCmdLiteral, apiGateway, getExport, apiIdFlag, api_id, stageNameFlag, stageName, exportTypeFlag, exportType, path, outputFlag, outputType, debugFlag)
-			
+			found = true
+
+			utils.Logln(utils.LogPrefixInfo + "Executing aws get-export command in debug mode")
+			cmd_3:= exec.Command(awsCmdLiteral, apiGateway, getExport, apiIdFlag, api_id, stageNameFlag, stageName, exportTypeFlag, exportType, path, outputFlag, outputType, debugFlag)
+			stderr, err := cmd_3.StderrPipe()
 			if err != nil {
-				return err
+				fmt.Println("Error creating pipe to standard error. (get-export command)", err)
 			}
+			stdout, err := cmd_3.StdoutPipe()
+			if err != nil {
+				fmt.Println("Error creating pipe to standard output. (get-export command)", err)
+			}
+
+			err = cmd_3.Start()
+			if err != nil {
+				fmt.Println("Error starting get-export command.", err)
+			}
+
 			if utils.VerboseModeEnabled() {
-				output := string(cmd_3[:])
-				fmt.Println(output)
+				logsScannerCmd3 := bufio.NewScanner(stderr)
+				for logsScannerCmd3.Scan() {
+					fmt.Println(logsScannerCmd3.Text())
+				}
+				if err := logsScannerCmd3.Err(); err != nil {
+					fmt.Println("Error reading debug logs from standard error. (get-export command)", err)
+				}
 			}
-			found = true 
+			
+			if utils.VerboseModeEnabled() {
+				outputScannerCmd3 := bufio.NewScanner(stdout)
+				for outputScannerCmd3.Scan() {
+					fmt.Println(outputScannerCmd3.Text())
+				}
+				if err := outputScannerCmd3.Err(); err != nil {
+					fmt.Println("Error reading output from standard output. (get-export command)", err)
+				}
+			}
+
+			err = cmd_3.Wait()
+			if err != nil {
+				fmt.Println("Could not complete get-export command successfully.", err)
+			} 
 			break
 		}
 	}
 	if !found {
-		fmt.Println("Unable to find an API with the name " + apiName)
+		fmt.Println("Unable to find an API with the name", apiName)
+		os.RemoveAll(tmpDir)
+		os.Exit(1)
 		return err
 	}
 	return nil
@@ -232,6 +278,8 @@ func initializeProject() error {
 	// We use swagger2 loader. It works fine for now
 	// Since we don't use 3.0 specific details its ok
 	// otherwise please use v2.openAPI3 loaders
+	doc.Spec().Info.Version = doc.Spec().Info.Version[:10]
+	
 	err = v2.Swagger2Populate(def, doc)
 	if err != nil {
 		return err
@@ -293,24 +341,24 @@ func initializeProject() error {
 func execute() {
 	tmpDir, err = ioutil.TempDir(dir, "OAS")
 		if err != nil {
+			os.RemoveAll(tmpDir)
 			fmt.Println("Error creating temporary directory to store OAS")
 			return
 		}
-	if utils.VerboseModeEnabled() {
-		fmt.Println("Temporary directory created")
-	}
+	utils.Logln(utils.LogPrefixInfo + "Temporary directory created")
+
 	err = getOAS()
 	if err != nil {
-		utils.HandleErrorAndExit("Error getting OAS from AWS. ", err)
+		os.RemoveAll(tmpDir)
+		utils.HandleErrorAndExit("Error getting OAS from AWS.", err)
 	}
 	err = initializeProject()
 	if err != nil {
-		utils.HandleErrorAndExit("Error initializing project. ", err)
+		os.RemoveAll(tmpDir)
+		utils.HandleErrorAndExit("Error initializing project.", err)
 	}
 	defer os.RemoveAll(tmpDir)
-	if utils.VerboseModeEnabled() {
-		fmt.Println("Temporary directory deleted")
-	}
+	utils.Logln(utils.LogPrefixInfo + "Temporary directory deleted")
 }
 
 func init() { 
@@ -318,6 +366,7 @@ func init() {
 		RootCmd.AddCommand(DeleteCmd)
 		AwsInitCmd.Flags().StringVarP(&flagApiNameToGet, "name", "n", "", "Name of the API to get from AWS Api Gateway")
 		AwsInitCmd.Flags().StringVarP(&flagStageName, "stage", "s", "", "Stage name of the API to get from AWS Api Gateway")
+		AwsInitCmd.Flags().BoolVarP(&awsInitCmdForced, "force", "f", false, "Force create project")
 
 		AwsInitCmd.MarkFlagRequired("name")
 		AwsInitCmd.MarkFlagRequired("stage")
