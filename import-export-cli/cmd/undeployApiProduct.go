@@ -50,7 +50,7 @@ NOTE: All the 4 flags (--name (-n), --version (-v), --rev, --environment (-e)) a
 
 // UndeployAPIProductCmd represents the deploy API command
 var UndeployAPIProductCmd = &cobra.Command{
-	Use: UndeployAPICmdLiteral + " (--name <name-of-the-api-product> --version <version-of-the-api-product> " +
+	Use: UndeployAPIProductCmdLiteral + " (--name <name-of-the-api-product> --version <version-of-the-api-product> " +
 		"--rev<revision-number-of-the-api-product> --gateway <gateway-environment> " +
 		"--environment <environment-from-which-the-api-product-should-be-undeployed>)",
 	Short:   undeployAPIProductCmdShortDesc,
