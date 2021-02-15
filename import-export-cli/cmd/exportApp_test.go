@@ -19,14 +19,15 @@
 package cmd
 
 import (
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
 
-	"github.com/go-resty/resty"
+	"github.com/stretchr/testify/assert"
+
+	"github.com/go-resty/resty/v2"
 	"github.com/renstrom/dedent"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )

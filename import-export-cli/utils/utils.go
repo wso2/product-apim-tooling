@@ -29,7 +29,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-resty/resty"
+	"github.com/go-resty/resty/v2"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
@@ -40,19 +40,11 @@ func InvokePOSTRequest(url string, headers map[string]string, body string) (*res
 		tlsConfig.InsecureSkipVerify = true // To bypass errors in SSL certificates
 	}
 
-	resty.SetTLSClientConfig(tlsConfig)
+	client := resty.New()
+	client.SetTLSClientConfig(tlsConfig)
+	client.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
 
-	if os.Getenv("HTTP_PROXY") != "" {
-		resty.SetProxy(os.Getenv("HTTP_PROXY"))
-	} else if os.Getenv("HTTPS_PROXY") != "" {
-		resty.SetProxy(os.Getenv("HTTPS_PROXY"))
-	} else if os.Getenv("http_proxy") != "" {
-		resty.SetProxy(os.Getenv("http_proxy"))
-	} else if os.Getenv("https_proxy") != "" {
-		resty.SetProxy(os.Getenv("https_proxy"))
-	}
-	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
-	resp, err := resty.R().SetHeaders(headers).SetBody(body).Post(url)
+	resp, err := client.R().SetHeaders(headers).SetBody(body).Post(url)
 
 	return resp, err
 }
@@ -64,19 +56,11 @@ func InvokePOSTRequestWithBytes(url string, headers map[string]string, body []by
 		tlsConfig.InsecureSkipVerify = true // To bypass errors in SSL certificates
 	}
 
-	resty.SetTLSClientConfig(tlsConfig)
+	client := resty.New()
+	client.SetTLSClientConfig(tlsConfig)
+	client.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
 
-	if os.Getenv("HTTP_PROXY") != "" {
-		resty.SetProxy(os.Getenv("HTTP_PROXY"))
-	} else if os.Getenv("HTTPS_PROXY") != "" {
-		resty.SetProxy(os.Getenv("HTTPS_PROXY"))
-	} else if os.Getenv("http_proxy") != "" {
-		resty.SetProxy(os.Getenv("http_proxy"))
-	} else if os.Getenv("https_proxy") != "" {
-		resty.SetProxy(os.Getenv("https_proxy"))
-	}
-	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
-	resp, err := resty.R().SetHeaders(headers).SetBody(body).Post(url)
+	resp, err := client.R().SetHeaders(headers).SetBody(body).Post(url)
 
 	return resp, err
 }
@@ -88,19 +72,11 @@ func InvokePUTRequestWithBytes(url string, headers map[string]string, body []byt
 		tlsConfig.InsecureSkipVerify = true // To bypass errors in SSL certificates
 	}
 
-	resty.SetTLSClientConfig(tlsConfig)
+	client := resty.New()
+	client.SetTLSClientConfig(tlsConfig)
+	client.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
 
-	if os.Getenv("HTTP_PROXY") != "" {
-		resty.SetProxy(os.Getenv("HTTP_PROXY"))
-	} else if os.Getenv("HTTPS_PROXY") != "" {
-		resty.SetProxy(os.Getenv("HTTPS_PROXY"))
-	} else if os.Getenv("http_proxy") != "" {
-		resty.SetProxy(os.Getenv("http_proxy"))
-	} else if os.Getenv("https_proxy") != "" {
-		resty.SetProxy(os.Getenv("https_proxy"))
-	}
-	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
-	resp, err := resty.R().SetHeaders(headers).SetBody(body).Put(url)
+	resp, err := client.R().SetHeaders(headers).SetBody(body).Put(url)
 
 	return resp, err
 }
@@ -112,19 +88,11 @@ func InvokeGETRequest(url string, headers map[string]string) (*resty.Response, e
 		tlsConfig.InsecureSkipVerify = true // To bypass errors in SSL certificates
 	}
 
-	resty.SetTLSClientConfig(tlsConfig)
+	client := resty.New()
+	client.SetTLSClientConfig(tlsConfig)
+	client.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
 
-	if os.Getenv("HTTP_PROXY") != "" {
-		resty.SetProxy(os.Getenv("HTTP_PROXY"))
-	} else if os.Getenv("HTTPS_PROXY") != "" {
-		resty.SetProxy(os.Getenv("HTTPS_PROXY"))
-	} else if os.Getenv("http_proxy") != "" {
-		resty.SetProxy(os.Getenv("http_proxy"))
-	} else if os.Getenv("https_proxy") != "" {
-		resty.SetProxy(os.Getenv("https_proxy"))
-	}
-	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
-	resp, err := resty.R().SetHeaders(headers).Get(url)
+	resp, err := client.R().SetHeaders(headers).Get(url)
 
 	return resp, err
 }
@@ -137,19 +105,11 @@ func InvokeGETRequestWithQueryParam(queryParam string, paramValue string, url st
 		tlsConfig.InsecureSkipVerify = true // To bypass errors in SSL certificates
 	}
 
-	resty.SetTLSClientConfig(tlsConfig)
+	client := resty.New()
+	client.SetTLSClientConfig(tlsConfig)
+	client.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
 
-	if os.Getenv("HTTP_PROXY") != "" {
-		resty.SetProxy(os.Getenv("HTTP_PROXY"))
-	} else if os.Getenv("HTTPS_PROXY") != "" {
-		resty.SetProxy(os.Getenv("HTTPS_PROXY"))
-	} else if os.Getenv("http_proxy") != "" {
-		resty.SetProxy(os.Getenv("http_proxy"))
-	} else if os.Getenv("https_proxy") != "" {
-		resty.SetProxy(os.Getenv("https_proxy"))
-	}
-	resty.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
-	resp, err := resty.R().SetHeaders(headers).SetQueryParam(queryParam, paramValue).Get(url)
+	resp, err := client.R().SetHeaders(headers).SetQueryParam(queryParam, paramValue).Get(url)
 
 	return resp, err
 }

@@ -25,8 +25,8 @@ import (
 	"fmt"
 	"github.com/renstrom/dedent"
 	"net/http"
-	"strings"
 	encodeURL "net/url"
+	"strings"
 )
 
 // ExecutePreCommandWithBasicAuth deals with generating tokens needed for executing a particular command
@@ -304,7 +304,7 @@ func GetBase64EncodedCredentials(key, secret string) (encodedValue string) {
 	return encoded
 }
 
-// GetOAuthTokens implemented using go-resty/resty
+// GetOAuthTokens implemented using go-resty/resty/v2
 // @param username
 // @param password
 // @param b64EncodedClientIDClientSecret
