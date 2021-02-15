@@ -33,9 +33,12 @@ import (
 
 var exportAPIProductName string
 var exportAPIProductVersion string
+var exportAPIProductRevisionNum string
 var exportAPIProductProvider string
 var exportAPIProductFormat string
 var runningExportAPIProductCommand bool
+var exportAPIProductLatestRevision bool
+
 
 // ExportAPIProduct command related usage info
 const ExportAPIProductCmdLiteral = "api-product"
@@ -56,6 +59,10 @@ var ExportAPIProductCmd = &cobra.Command{
 	Example: exportAPIProductCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + ExportAPIProductCmdLiteral + " called")
+		if exportAPIProductRevisionNum == "" && !exportAPIProductLatestRevision {
+			fmt.Println("A Revision number is not provided. Only the working copy without deployment environments will be exported." +
+				"To export the latest revision, please use --latest flag.")
+		}
 		var apiProductsExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedApiProductsDirName)
 
 		cred, err := GetCredentials(CmdExportEnvironment)
@@ -76,7 +83,9 @@ func executeExportAPIProductCmd(credential credentials.Credential, exportDirecto
 			// If the user has not specified the version, use the version as 1.0.0
 			exportAPIProductVersion = utils.DefaultApiProductVersion
 		}
-		resp, err := impl.ExportAPIProductFromEnv(accessToken, exportAPIProductName, exportAPIProductVersion, exportAPIProductProvider, exportAPIProductFormat, CmdExportEnvironment)
+		resp, err := impl.ExportAPIProductFromEnv(accessToken, exportAPIProductName, exportAPIProductVersion,
+			exportAPIProductRevisionNum, exportAPIProductProvider, exportAPIProductFormat, CmdExportEnvironment,
+			exportAPIProductLatestRevision)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while exporting", err)
 		}
@@ -103,10 +112,14 @@ func init() {
 	ExportCmd.AddCommand(ExportAPIProductCmd)
 	ExportAPIProductCmd.Flags().StringVarP(&exportAPIProductName, "name", "n", "",
 		"Name of the API Product to be exported")
+	ExportAPIProductCmd.Flags().StringVarP(&exportAPIProductRevisionNum, "rev", "", "",
+		"Revision number of the API product to be exported")
 	ExportAPIProductCmd.Flags().StringVarP(&exportAPIProductProvider, "provider", "r", "",
 		"Provider of the API Product")
 	ExportAPIProductCmd.Flags().StringVarP(&CmdExportEnvironment, "environment", "e",
 		"", "Environment to which the API Product should be exported")
+	ExportAPIProductCmd.Flags().BoolVarP(&exportAPIProductLatestRevision, "latest", "", false,
+		"Export the latest revision of the API")
 	ExportAPIProductCmd.Flags().StringVarP(&exportAPIProductFormat, "format", "", utils.DefaultExportFormat, "File format of exported archive (json or yaml)")
 	_ = ExportAPIProductCmd.MarkFlagRequired("name")
 	_ = ExportAPIProductCmd.MarkFlagRequired("environment")

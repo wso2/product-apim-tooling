@@ -27,9 +27,11 @@ import (
 )
 
 // ExportAPIProductFromEnv function is used with export api command
-func ExportAPIProductFromEnv(accessToken, name, version, provider, format, exportEnvironment string) (*resty.Response, error) {
+func ExportAPIProductFromEnv(accessToken, name, version, revisionNum, provider, format,
+	exportEnvironment string, exportLatestRevision bool) (*resty.Response, error) {
 	publisherEndpoint := utils.GetPublisherEndpointOfEnv(exportEnvironment, utils.MainConfigFilePath)
-	return exportAPIProduct(name, version, provider, format, publisherEndpoint, accessToken)
+	return exportAPIProduct(name, version, revisionNum, provider, format, publisherEndpoint, accessToken,
+		exportLatestRevision)
 }
 
 // exportAPIProduct
@@ -39,9 +41,16 @@ func ExportAPIProductFromEnv(accessToken, name, version, provider, format, expor
 // @param publisherEndpoint : API Manager Publisher Endpoint for the environment
 // @param accessToken : Access Token for the resource
 // @return response Response in the form of *resty.Response
-func exportAPIProduct(name, version, provider, format, publisherEndpoint, accessToken string) (*resty.Response, error) {
+func exportAPIProduct(name, version, revisionNum, provider, format, publisherEndpoint, accessToken string,
+	exportLatestRevision bool) (*resty.Response, error) {
 	publisherEndpoint = utils.AppendSlashToString(publisherEndpoint)
 	query := "api-products/export?name=" + name + "&version=" + version + "&providerName=" + provider
+	if revisionNum != "" {
+		query += "&revisionNumber=" + revisionNum
+	}
+	if exportLatestRevision {
+		query += "&latestRevision=true"
+	}
 	if format != "" {
 		query += "&format=" + format
 	}
