@@ -384,7 +384,7 @@ func deployUpdatedProjects(accessToken, repoId, environment string, totalProject
             fmt.Println(strconv.Itoa(i+1) + ": " + projectParam.NickName + ": (" + projectParam.RelativePath + ")")
             err := impl.ImportAPIProductToEnv(accessToken, environment, projectParam.AbsolutePath,
                 importParams.ImportAPIs, importParams.UpdateAPIs, importParams.UpdateAPIProduct,
-                importParams.PreserveProvider, false)
+                importParams.PreserveProvider, false, false)
             if err != nil {
                 fmt.Println("\terror... ", err)
                 failedProjects[projectParam.Type] = append(failedProjects[projectParam.Type], projectParam)

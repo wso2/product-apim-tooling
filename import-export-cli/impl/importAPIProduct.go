@@ -129,15 +129,15 @@ func preProcessDependentAPIs(apiProductFilePath, importEnvironment string, impor
 
 // ImportAPIProductToEnv function is used with import-api-product command
 func ImportAPIProductToEnv(accessOAuthToken, importEnvironment, importPath string, importAPIs, importAPIsUpdate,
-	importAPIProductUpdate, importAPIProductPreserveProvider, importAPIProductSkipCleanup bool) error {
+	importAPIProductUpdate, importAPIProductPreserveProvider, importAPIProductSkipCleanup, rotateRevision bool) error {
 	publisherEndpoint := utils.GetPublisherEndpointOfEnv(importEnvironment, utils.MainConfigFilePath)
 	return ImportAPIProduct(accessOAuthToken, publisherEndpoint, importEnvironment, importPath, importAPIs, importAPIsUpdate,
-		importAPIProductUpdate, importAPIProductPreserveProvider, importAPIProductSkipCleanup)
+		importAPIProductUpdate, importAPIProductPreserveProvider, importAPIProductSkipCleanup, rotateRevision)
 }
 
 // ImportAPIProduct function is used with import-api-product command
 func ImportAPIProduct(accessOAuthToken, publisherEndpoint, importEnvironment, importPath string, importAPIs, importAPIsUpdate,
-	importAPIProductUpdate, importAPIProductPreserveProvider, importAPIProductSkipCleanup bool) error {
+	importAPIProductUpdate, importAPIProductPreserveProvider, importAPIProductSkipCleanup, rotateRevision bool) error {
 	var exportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedApiProductsDirName)
 
 	resolvedAPIProductFilePath, err := resolveImportAPIProductFilePath(importPath, exportDirectory)
@@ -191,7 +191,8 @@ func ImportAPIProduct(accessOAuthToken, publisherEndpoint, importEnvironment, im
 		utils.HandleErrorAndExit("Error getting OAuth Tokens", err)
 	}
 	extraParams := map[string]string{}
-	publisherEndpoint += "/api-products/import" + "?preserveProvider=" + strconv.FormatBool(importAPIProductPreserveProvider)
+	publisherEndpoint += "/api-products/import" + "?preserveProvider=" +
+		strconv.FormatBool(importAPIProductPreserveProvider)+ "&rotateRevision=" + strconv.FormatBool(rotateRevision)
 
 	// If the user has specified import-apis flag or update-apis flag, importAPIs parameter should be passed as true
 	// because update is also an import task
