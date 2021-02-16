@@ -34,12 +34,12 @@ var getAPIProductRevisionsCmdQuery string
 
 // GetAPIProductRevisionsCmd related info
 const GetAPIProductRevisionsCmdLiteral = "api-product-revisions"
-const GetAPIProductRevisionsCmdShortDesc = "Display a list of Revisions for the API"
+const GetAPIProductRevisionsCmdShortDesc = "Display a list of Revisions for the API Products"
 
-const GetAPIProductRevisionsCmdLongDesc = `Display a list of Revisions available for the API in the environment specified`
+const GetAPIProductRevisionsCmdLongDesc = `Display a list of Revisions available for the API Product in the environment specified`
 
-var getRevisionsCmdExamples = utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetAPIProductRevisionsCmdLiteral + ` -n PizzaAPI -v 1.0.0 -e dev
-` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetAPIProductRevisionsCmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin -e dev
+var getRevisionsCmdExamples = utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetAPIProductRevisionsCmdLiteral + ` -n PizzaProduct -v 1.0.0 -e dev
+` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetAPIProductRevisionsCmdLiteral + ` -n ShopProduct -v 1.0.0 -r admin -e dev
 NOTE: All the 3 flags (--name (-n), --version (-v) and --environment (-e)) are mandatory.`
 
 // getRevisionsCmd represents the revisions command

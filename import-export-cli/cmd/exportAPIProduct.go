@@ -113,13 +113,13 @@ func init() {
 	ExportAPIProductCmd.Flags().StringVarP(&exportAPIProductName, "name", "n", "",
 		"Name of the API Product to be exported")
 	ExportAPIProductCmd.Flags().StringVarP(&exportAPIProductRevisionNum, "rev", "", "",
-		"Revision number of the API product to be exported")
+		"Revision number of the API Product to be exported")
 	ExportAPIProductCmd.Flags().StringVarP(&exportAPIProductProvider, "provider", "r", "",
 		"Provider of the API Product")
 	ExportAPIProductCmd.Flags().StringVarP(&CmdExportEnvironment, "environment", "e",
 		"", "Environment to which the API Product should be exported")
 	ExportAPIProductCmd.Flags().BoolVarP(&exportAPIProductLatestRevision, "latest", "", false,
-		"Export the latest revision of the API")
+		"Export the latest revision of the API Product")
 	ExportAPIProductCmd.Flags().StringVarP(&exportAPIProductFormat, "format", "", utils.DefaultExportFormat, "File format of exported archive (json or yaml)")
 	_ = ExportAPIProductCmd.MarkFlagRequired("name")
 	_ = ExportAPIProductCmd.MarkFlagRequired("environment")
