@@ -30,12 +30,12 @@ var (
 const (
 	mgCmdLiteral   = "mg"
 	mgCmdShortDesc = "Handle Microgateway related operations"
-	mgCmdLongDesc  = `Initialize, Add, Update an apictl project to the microgateway`
+	mgCmdLongDesc  = `Initialize, Add, Update, Delets an apictl project to the microgateway`
 
 	MgBasepath = "/api/mgw/adapter/0.1"
 )
 
-// MgwCmd represents the export command
+// MgCmd represents the export command
 var MgCmd = &cobra.Command{
 	Use:   mgCmdLiteral,
 	Short: mgCmdShortDesc,

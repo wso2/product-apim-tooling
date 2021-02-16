@@ -1,20 +1,21 @@
 ## apictl mg deploy
 
-Deploy apictl project.
+Deploy an API (apictl project) in Microgateway
 
 ### Synopsis
 
-Deploy the apictl project in Microgateway
+Deploy an API (apictl project) in Microgateway by specifying the adapter host url.
 
 ```
-apictl mg deploy --host [control plane url] --file [file name] --username [username] --password [password] [flags]
+apictl mg deploy [flags]
 ```
 
 ### Examples
 
 ```
 apictl mg deploy -h https://localhost:9095 -f petstore -u admin -p admin
-cat ~/.mypassword | apictl mg  deploy -h https://localhost:9095 -f petstore -u admin
+
+Note: The flags --host (-c), and --username (-u) are mandatory. The password can be included via the flag --password (-p) or entered at the prompt.
 ```
 
 ### Options

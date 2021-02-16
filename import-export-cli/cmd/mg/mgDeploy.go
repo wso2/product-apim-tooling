@@ -21,13 +21,11 @@ package mg
 import (
 	"encoding/base64"
 	"fmt"
-	"io/ioutil"
-	"os"
-	"strings"
 
 	"github.com/spf13/cobra"
 	impl "github.com/wso2/product-apim-tooling/import-export-cli/impl/mg"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 var (
@@ -40,42 +38,42 @@ var (
 
 const (
 	mgDeployCmdLiteral   = "deploy"
-	mgDeployCmdShortDesc = "Deploy API"
-	mgDeployCmdLongDesc  = "Deploy the API (apictl project) in Microgateway"
+	mgDeployCmdShortDesc = "Deploy an API (apictl project) in Microgateway"
+	mgDeployCmdLongDesc  = "Deploy an API (apictl project) in Microgateway by " +
+		"specifying the adapter host url."
 
 	mgDeployResourcePath = "/api"
 )
 
 const mgDeployCmdExamples = utils.ProjectName + " " + mgCmdLiteral + " " + mgDeployCmdLiteral + " -h https://localhost:9095 " +
-	"-f petstore -u admin -p admin\n" +
-	"cat ~/.mypassword | " + utils.ProjectName + " " + mgCmdLiteral + " " + " " + mgDeployCmdLiteral + " -h https://localhost:9095 " +
-	"-f petstore -u admin"
+	"-f petstore -u admin -p admin" +
 
-type MgwResponse struct {
-	Message string
-}
+	"\n\nNote: The flags --host (-c), and --username (-u) are mandatory. " +
+	"The password can be included via the flag --password (-p) or entered at the prompt."
 
 //TODO: (VirajSalaka) Introduce Add environment
 var MgDeployCmd = &cobra.Command{
-	Use: mgDeployCmdLiteral + " --host [control plane url] --file [file name] " +
-		"--username [username] --password [password]",
-	Short:   "Deploy apictl project.",
-	Long:    "Deploy the apictl project in Microgateway",
+	Use:     mgDeployCmdLiteral,
+	Short:   mgDeployCmdShortDesc,
+	Long:    mgDeployCmdLongDesc,
 	Example: mgDeployCmdExamples,
 	Args:    cobra.MinimumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		tempMap := make(map[string]string)
 		resourcePath := MgBasepath + mgDeployResourcePath
+
 		if password == "" {
-			fmt.Printf("Provide the password for the user: %v \n", username)
-			data, err := ioutil.ReadAll(os.Stdin)
+			fmt.Print("Enter Password: ")
+			passwordB, err := terminal.ReadPassword(0)
+			password = string(passwordB)
+			fmt.Println()
 			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
+				utils.HandleErrorAndExit("Error reading password", err)
 			}
-			password = strings.TrimRight(strings.TrimSuffix(string(data), "\n"), "\r")
 		}
-		authToken := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
+		authToken := base64.StdEncoding.EncodeToString(
+			[]byte(username + ":" + password))
+
 		impl.DeployAPI(mgwAdapterHost+resourcePath, mgwImportAPIFile, authToken, tempMap,
 			mgDeploySkipCleanup, mgDeployOverwrite)
 	},
