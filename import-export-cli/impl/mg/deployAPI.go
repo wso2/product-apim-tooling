@@ -63,10 +63,10 @@ func AddAPI(endpoint string, extraParams, headers map[string]string,
 	}
 	if resp.StatusCode() == http.StatusOK {
 		fmt.Println("Successfully deployed API.")
+	} else if resp.StatusCode() == http.StatusConflict {
+		fmt.Println("Unable to deploy API. API already exists. Status: " + resp.Status())
 	} else {
-		fmt.Println("Error importing API.")
-		fmt.Println("Status: " + resp.Status())
-		fmt.Println("Response:", resp)
+		fmt.Println("Unable to deploy API. Error Status: " + resp.Status())
 	}
 }
 
@@ -82,9 +82,9 @@ func UpdateAPI(endpoint string, extraParams, headers map[string]string,
 	}
 	if resp.StatusCode() == http.StatusOK {
 		fmt.Println("Successfully updated the API.")
+	} else if resp.StatusCode() == http.StatusNotFound {
+		fmt.Println("Unable to update API. API does not exist. Status: " + resp.Status())
 	} else {
-		fmt.Println("Error updating API.")
-		fmt.Println("Status: " + resp.Status())
-		fmt.Println("Response:", resp)
+		fmt.Println("Unable to update API. Error Status: " + resp.Status())
 	}
 }

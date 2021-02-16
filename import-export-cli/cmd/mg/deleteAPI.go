@@ -38,14 +38,15 @@ var (
 
 const deleteAPICmdLiteral = "api"
 const deleteAPICmdShortDesc = "Delete an API in Microgateway"
-const deleteAPICmdLongDesc = `Delete an API by specifying name, version, host, username 
-and optionally vhost by specifying the flags (--name (-n), --version (-v), --host (-c), 
---username (-u), and optionally --vhost (-t). Note: The password can be included 
-via the flag --password (-p) or entered at the prompt.`
+const deleteAPICmdLongDesc = "Delete an API in Microgateway by specifying name, version, host, username " +
+	"and optionally vhost"
 
 var deleteAPICmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` + deleteAPICmdLiteral + ` --host https://localhost:9095 -u admin
   ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + deleteAPICmdLiteral + ` -n petstore -v 0.0.1 -c https://localhost:9095 -u admin -t www.pets.com 
-  ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + deleteAPICmdLiteral + ` -n SwaggerPetstore -v 0.0.1 --host https://localhost:9095 -u admin -p admin`
+  ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + deleteAPICmdLiteral + ` -n SwaggerPetstore -v 0.0.1 --host https://localhost:9095 -u admin -p admin` +
+
+	"\n\nNote: The flags --name (-n), --version (-v), --host (-c), and --username (-u) are mandatory. " +
+	"The password can be included via the flag --password (-p) or entered at the prompt."
 
 var mgDeleteAPIResourcePath = "/api"
 

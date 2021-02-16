@@ -39,14 +39,14 @@ var (
 
 const getAPIsCmdLiteral = "apis"
 const getAPIsCmdShortDesc = "List APIs in Microgateway"
-const getAPIsCmdLongDesc = `Display a list of all the APIs or 
-a set of APIs with a limit or filtered by apiType using the flags --limit (-l), --type (-t). 
-Note: The flags --host (-c), --username (-u) are mandatory. The password can be included 
-via the flag --password (-p) or entered at the prompt.`
+const getAPIsCmdLongDesc = "Display a list of all the APIs in Microgateway or a set of APIs " +
+	"with a limit set or filtered by apiType"
 
 var getAPIsCmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` + getCmdLiteral + ` ` + getAPIsCmdLiteral + ` --host https://localhost:9095 -u admin
- ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + getCmdLiteral + ` ` + getAPIsCmdLiteral + ` -t http --host https://localhost:9095 -u admin -l 100
- ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + getCmdLiteral + ` ` + getAPIsCmdLiteral + ` -t ws --host https://localhost:9095 -u admin`
+` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + getCmdLiteral + ` ` + getAPIsCmdLiteral + ` -t http --host https://localhost:9095 -u admin -l 100
+` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + getCmdLiteral + ` ` + getAPIsCmdLiteral + ` -t ws --host https://localhost:9095 -u admin
+
+Note: The flags --host (-c), --username (-u) are mandatory. The password can be included via the flag --password (-p) or entered at the prompt.`
 
 var mgGetAPIsResourcePath = "/apis"
 
