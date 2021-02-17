@@ -1,10 +1,10 @@
 ## apictl get api-product-revisions
 
-Display a list of Revisions for the API
+Display a list of Revisions for the API Products
 
 ### Synopsis
 
-Display a list of Revisions available for the API in the environment specified
+Display a list of Revisions available for the API Product in the environment specified
 
 ```
 apictl get api-product-revisions [flags]
@@ -13,8 +13,8 @@ apictl get api-product-revisions [flags]
 ### Examples
 
 ```
-apictl get api-product-revisions -n PizzaAPI -v 1.0.0 -e dev
-apictl get api-product-revisions -n TwitterAPI -v 1.0.0 -r admin -e dev
+apictl get api-product-revisions -n PizzaProduct -v 1.0.0 -e dev
+apictl get api-product-revisions -n ShopProduct -v 1.0.0 -r admin -e dev
 NOTE: All the 3 flags (--name (-n), --version (-v) and --environment (-e)) are mandatory.
 ```
 

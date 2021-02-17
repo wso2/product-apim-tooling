@@ -39,7 +39,7 @@ apictl get apps -e dev
 ### SEE ALSO
 
 * [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications and Managing WSO2 Micro Integrator
-* [apictl get api-product-revisions](apictl_get_api-product-revisions.md)	 - Display a list of Revisions for the API
+* [apictl get api-product-revisions](apictl_get_api-product-revisions.md)	 - Display a list of Revisions for the API Products
 * [apictl get api-products](apictl_get_api-products.md)	 - Display a list of API Products in an environment
 * [apictl get api-revisions](apictl_get_api-revisions.md)	 - Display a list of Revisions for the API
 * [apictl get apis](apictl_get_apis.md)	 - Display a list of APIs in an environment
