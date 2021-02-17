@@ -361,7 +361,7 @@ func deployUpdatedProjects(accessToken, repoId, environment string, totalProject
             importParams := projectParam.ApiParams.Deploy.Import
             fmt.Println(strconv.Itoa(i+1) + ": " + projectParam.NickName + ": (" + projectParam.RelativePath + ")")
             err := impl.ImportAPIToEnv(accessToken, environment, projectParam.AbsolutePath, utils.ParamFileAPI,
-                importParams.Update, importParams.PreserveProvider, false, false)
+                importParams.Update, importParams.PreserveProvider, false, false, false)
             if err != nil {
                 fmt.Println("Error... ", err)
                 failedProjects[projectParam.Type] = append(failedProjects[projectParam.Type], projectParam)

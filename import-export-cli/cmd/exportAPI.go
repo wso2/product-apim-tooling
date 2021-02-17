@@ -91,7 +91,7 @@ func executeExportAPICmd(credential credentials.Credential, exportDirectory stri
 		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
 		apiZipLocationPath := filepath.Join(exportDirectory, CmdExportEnvironment)
 		if resp.StatusCode() == http.StatusOK {
-			impl.WriteToZip(exportAPIName, exportAPIVersion, apiZipLocationPath, runningExportApiCommand, resp)
+			impl.WriteToZip(exportAPIName, exportAPIVersion, "", apiZipLocationPath, runningExportApiCommand, resp)
 		} else if resp.StatusCode() == http.StatusInternalServerError {
 			// 500 Internal Server Error
 			fmt.Println(string(resp.Body()))
