@@ -67,7 +67,7 @@ var ImportAPICmdDeprecated = &cobra.Command{
 			utils.HandleErrorAndExit("Error while getting an access token for importing API", err)
 		}
 		err = impl.ImportAPIToEnv(accessOAuthToken, importEnvironment, importAPIFile, importAPIParamsFile, importAPIUpdate,
-			importAPICmdPreserveProvider, importAPISkipCleanup, false)
+			importAPICmdPreserveProvider, importAPISkipCleanup, false, false)
 		if err != nil {
 			utils.HandleErrorAndExit("Error importing API", err)
 			return

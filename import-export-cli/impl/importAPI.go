@@ -233,15 +233,15 @@ func ImportAPIToMGW(endpoint, filePath, accessToken string, extraParams map[stri
 
 // ImportAPIToEnv function is used with import-api command
 func ImportAPIToEnv(accessOAuthToken, importEnvironment, importPath, apiParamsPath string, importAPIUpdate,
-	preserveProvider, importAPISkipCleanup, importAPIRotateRevision bool) error {
+	preserveProvider, importAPISkipCleanup, importAPIRotateRevision, importAPISkipDeployments bool) error {
 	publisherEndpoint := utils.GetPublisherEndpointOfEnv(importEnvironment, utils.MainConfigFilePath)
 	return ImportAPI(accessOAuthToken, publisherEndpoint, importEnvironment, importPath, apiParamsPath, importAPIUpdate,
-		preserveProvider, importAPISkipCleanup, importAPIRotateRevision)
+		preserveProvider, importAPISkipCleanup, importAPIRotateRevision, importAPISkipDeployments)
 }
 
 // ImportAPI function is used with import-api command
 func ImportAPI(accessOAuthToken, publisherEndpoint, importEnvironment, importPath, apiParamsPath string, importAPIUpdate,
-	preserveProvider, importAPISkipCleanup, importAPIRotateRevision bool) error {
+	preserveProvider, importAPISkipCleanup, importAPIRotateRevision, importAPISkipDeployments bool) error {
 	exportDirectory := filepath.Join(utils.ExportDirectory, utils.ExportedApisDirName)
 	resolvedAPIFilePath, err := resolveImportFilePath(importPath, exportDirectory)
 	if err != nil {
@@ -285,7 +285,15 @@ func ImportAPI(accessOAuthToken, publisherEndpoint, importEnvironment, importPat
 			return err
 		}
 	}
-
+	if importAPISkipDeployments {
+		//If skip deployments flag used, deployment_environments files will be removed from import artifacts
+		loc := filepath.Join(apiFilePath, utils.DeploymentEnvFile)
+		fmt.Println(loc)
+		err := utils.RemoveFileIfExists(loc)
+		if err!= nil {
+			return err
+		}
+	}
 	// if apiFilePath contains a directory, zip it. Otherwise, leave it as it is.
 	apiFilePath, err, cleanupFunc := utils.CreateZipFileFromProject(apiFilePath, importAPISkipCleanup)
 	if err != nil {
