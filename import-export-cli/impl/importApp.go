@@ -22,7 +22,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/go-resty/resty"
+	"github.com/go-resty/resty/v2"
 	"io"
 	"log"
 	"mime/multipart"

@@ -14,7 +14,7 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package impl
 
@@ -22,7 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/go-resty/resty"
+	"github.com/go-resty/resty/v2"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
 	"strconv"
