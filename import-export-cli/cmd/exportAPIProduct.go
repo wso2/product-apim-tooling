@@ -23,7 +23,7 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 
-	"github.com/go-resty/resty"
+	"github.com/go-resty/resty/v2"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 
@@ -109,12 +109,12 @@ func WriteAPIProductToZip(exportAPIProductName, exportAPIProductVersion, zipLoca
 	// Writes the REST API response to a temporary zip file
 	tempZipFile, err := utils.WriteResponseToTempZip(zipFilename, resp)
 	if err != nil {
-		utils.HandleErrorAndExit("Error creating the temporary zip file to store the exported API Product" , err)
+		utils.HandleErrorAndExit("Error creating the temporary zip file to store the exported API Product", err)
 	}
 
 	err = utils.CreateDirIfNotExist(zipLocationPath)
 	if err != nil {
-		utils.HandleErrorAndExit("Error creating dir to store zip archive: " + zipLocationPath, err)
+		utils.HandleErrorAndExit("Error creating dir to store zip archive: "+zipLocationPath, err)
 	}
 	exportedFinalZip := filepath.Join(zipLocationPath, zipFilename)
 	// Add api_product_params.yaml file inside the zip and create a new zip file in exportedFinalZip location

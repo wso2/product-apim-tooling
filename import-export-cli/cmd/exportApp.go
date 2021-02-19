@@ -25,7 +25,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/go-resty/resty"
+	"github.com/go-resty/resty/v2"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -99,12 +99,12 @@ func WriteApplicationToZip(exportAppName, exportAppOwner, zipLocationPath string
 	// Writes the REST API response to a temporary zip file
 	tempZipFile, err := utils.WriteResponseToTempZip(zipFilename, resp)
 	if err != nil {
-		utils.HandleErrorAndExit("Error creating the temporary zip file to store the exported application" , err)
+		utils.HandleErrorAndExit("Error creating the temporary zip file to store the exported application", err)
 	}
 
 	err = utils.CreateDirIfNotExist(zipLocationPath)
 	if err != nil {
-		utils.HandleErrorAndExit("Error creating dir to store zip archive: " + zipLocationPath, err)
+		utils.HandleErrorAndExit("Error creating dir to store zip archive: "+zipLocationPath, err)
 	}
 
 	exportedFinalZip := filepath.Join(zipLocationPath, zipFilename)

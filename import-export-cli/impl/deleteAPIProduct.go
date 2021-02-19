@@ -24,7 +24,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/go-resty/resty"
+	"github.com/go-resty/resty/v2"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 
 	"net/http"
@@ -66,7 +66,6 @@ func PrintDeleteAPIProductResponse(resp *resty.Response, err error) {
 		fmt.Println("API Product deleted successfully!. Status: " + strconv.Itoa(resp.StatusCode()))
 	}
 }
-
 
 // Get the ID of an API Product if available
 // @param accessToken : Access token to call the Publisher Rest API
