@@ -2,11 +2,10 @@ go 1.12
 
 require (
 	github.com/Jeffail/gabs v1.2.0
-	github.com/cpuguy83/go-md2man v1.0.10 // indirect
 	github.com/getkin/kin-openapi v0.2.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-openapi/loads v0.19.2
-	github.com/go-resty/resty v0.0.0-20171018191538-8b5e3f91fbea
+	github.com/go-resty/resty/v2 v2.4.0
 	github.com/hashicorp/go-multierror v1.0.0
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/magiconair/properties v1.7.6

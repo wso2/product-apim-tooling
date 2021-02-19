@@ -14,7 +14,7 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package cmd
 
@@ -22,7 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/go-resty/resty"
+	"github.com/go-resty/resty/v2"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
@@ -45,10 +45,10 @@ NOTE: Both the flags (--name (-n), and --environment (-e)) are mandatory and the
 
 // DeleteAppCmd represents the delete app command
 var DeleteAppCmd = &cobra.Command{
-	Use:   deleteAppCmdLiteral + " (--name <name-of-the-application> --owner <owner-of-the-application> --environment " +
+	Use: deleteAppCmdLiteral + " (--name <name-of-the-application> --owner <owner-of-the-application> --environment " +
 		"<environment-from-which-the-application-should-be-deleted>)",
-	Short: deleteAppCmdShortDesc,
-	Long: deleteAppCmdLongDesc,
+	Short:   deleteAppCmdShortDesc,
+	Long:    deleteAppCmdLongDesc,
 	Example: deleteAppCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + deleteAppCmdLiteral + " called")
@@ -61,7 +61,7 @@ var DeleteAppCmd = &cobra.Command{
 }
 
 // executeDeleteAppCmd executes the delete app command
-func executeDeleteAppCmd(credential credentials.Credential)  {
+func executeDeleteAppCmd(credential credentials.Credential) {
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, deleteAppEnvironment)
 	if preCommandErr == nil {
 		deleteAppEndpoint := utils.GetDevPortalApplicationListEndpointOfEnv(deleteAppEnvironment, utils.MainConfigFilePath)
@@ -70,7 +70,7 @@ func executeDeleteAppCmd(credential credentials.Credential)  {
 			utils.HandleErrorAndExit("Error while deleting Application ", err)
 		}
 		// Print info on response
-		utils.Logf(utils.LogPrefixInfo + "ResponseStatus: %v\n", resp.Status())
+		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
 		if resp.StatusCode() == http.StatusOK {
 			// 200 OK
 			fmt.Println(deleteAppName + " Application deleted successfully!")

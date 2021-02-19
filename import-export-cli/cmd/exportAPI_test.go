@@ -24,7 +24,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/go-resty/resty"
+	"github.com/go-resty/resty/v2"
 
 	"net/http"
 	"net/http/httptest"
