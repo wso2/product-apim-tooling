@@ -30,7 +30,7 @@ import (
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 
-	"github.com/go-resty/resty"
+	"github.com/go-resty/resty/v2"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/formatter"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -118,7 +118,7 @@ var appsCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + appsCmdLiteral + " called")
 		cred, err := getCredentials(listAppsCmdEnvironment)
-		defaultAppsOwner=cred.Username
+		defaultAppsOwner = cred.Username
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
