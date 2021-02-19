@@ -26,9 +26,9 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-//DeployAPI creats or updates an API in the microgateway depending on the overwrite param
+//DeployAPI creats or updates an API in the microgateway depending on the override param
 func DeployAPI(endpoint, filePath, accessToken string, extraParams map[string]string,
-	importAPISkipCleanup bool, overwrite bool) {
+	importAPISkipCleanup bool, override bool) {
 	//TODO: (VirajSalaka) support substituting parameters with params file. At the moment it is in hold on state, as the decision to use environments is
 	//not finalized yet.
 	// if apiFilePath contains a directory, zip it. Otherwise, leave it as it is.
@@ -46,7 +46,7 @@ func DeployAPI(endpoint, filePath, accessToken string, extraParams map[string]st
 	headers[utils.HeaderAccept] = "application/json"
 	headers[utils.HeaderConnection] = utils.HeaderValueKeepAlive
 
-	if overwrite {
+	if override {
 		UpdateAPI(endpoint, extraParams, headers, "file", filePath)
 	} else {
 		AddAPI(endpoint, extraParams, headers, "file", filePath)
@@ -62,7 +62,7 @@ func AddAPI(endpoint string, extraParams, headers map[string]string,
 		utils.HandleErrorAndExit("Error deploying API.", err)
 	}
 	if resp.StatusCode() == http.StatusOK {
-		fmt.Println("Successfully deployed API.")
+		fmt.Println("Successfully deployed API to microgateway.")
 	} else if resp.StatusCode() == http.StatusConflict {
 		fmt.Println("Unable to deploy API. API already exists. Status: " + resp.Status())
 	} else {
@@ -74,16 +74,14 @@ func AddAPI(endpoint string, extraParams, headers map[string]string,
 func UpdateAPI(endpoint string, extraParams, headers map[string]string,
 	fileParamName string, filePath string) {
 
-	endpoint += "?overwrite=" + strconv.FormatBool(true)
+	endpoint += "?override=" + strconv.FormatBool(true)
 	resp, err := utils.InvokePOSTRequestWithFileAndQueryParams(extraParams, endpoint, headers,
 		"file", filePath)
 	if err != nil {
 		utils.HandleErrorAndExit("Error updating API.", err)
 	}
 	if resp.StatusCode() == http.StatusOK {
-		fmt.Println("Successfully updated the API.")
-	} else if resp.StatusCode() == http.StatusNotFound {
-		fmt.Println("Unable to update API. API does not exist. Status: " + resp.Status())
+		fmt.Println("Successfully deployed/updated the API in microgateway.")
 	} else {
 		fmt.Println("Unable to update API. Error Status: " + resp.Status())
 	}

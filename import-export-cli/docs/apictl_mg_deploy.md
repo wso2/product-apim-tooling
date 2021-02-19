@@ -13,7 +13,7 @@ apictl mg deploy [flags]
 ### Examples
 
 ```
-apictl mg deploy -h https://localhost:9095 -f petstore -u admin -p admin
+apictl mg deploy api -c https://localhost:9095 -f petstore -u admin -p admin
 
 Note: The flags --host (-c), and --username (-u) are mandatory. The password can be included via the flag --password (-p) or entered at the prompt.
 ```
@@ -21,13 +21,7 @@ Note: The flags --host (-c), and --username (-u) are mandatory. The password can
 ### Options
 
 ```
-  -f, --file string       Filepath of the apictl project to be deployed
-  -h, --help              help for deploy
-  -c, --host string       Host url for the control plane with port
-  -o, --overwrite         Whether to update an existing API
-  -p, --password string   Password of the user (Can be provided at the prompt)
-      --skipCleanup       Whether to keep all temporary files created during deploy process
-  -u, --username string   Username of the user
+  -h, --help   help for deploy
 ```
 
 ### Options inherited from parent commands
@@ -40,4 +34,5 @@ Note: The flags --host (-c), and --username (-u) are mandatory. The password can
 ### SEE ALSO
 
 * [apictl mg](apictl_mg.md)	 - Handle Microgateway related operations
+* [apictl mg deploy api](apictl_mg_deploy_api.md)	 - Deploy an API (apictl project) in Microgateway
 

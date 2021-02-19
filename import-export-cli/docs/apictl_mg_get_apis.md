@@ -14,8 +14,8 @@ apictl mg get apis [flags]
 
 ```
 apictl mg get apis --host https://localhost:9095 -u admin
-apictl mg get apis -t http --host https://localhost:9095 -u admin -l 100
-apictl mg get apis -t ws --host https://localhost:9095 -u admin
+apictl mg get apis -q type:http --host https://localhost:9095 -u admin -l 100
+apictl mg get apis -q type:ws --host https://localhost:9095 -u admin
 
 Note: The flags --host (-c), --username (-u) are mandatory. The password can be included via the flag --password (-p) or entered at the prompt.
 ```
@@ -27,7 +27,7 @@ Note: The flags --host (-c), --username (-u) are mandatory. The password can be 
   -c, --host string       The adapter host url with port
   -l, --limit string      Maximum number of APIs to return
   -p, --password string   Password of the user (Can be provided at the prompt)
-  -t, --type string       API type to filter the APIs
+  -q, --query string      Query to filter the APIs
   -u, --username string   The username
 ```
 

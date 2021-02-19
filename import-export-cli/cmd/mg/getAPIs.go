@@ -31,20 +31,19 @@ import (
 )
 
 var (
-	getAPIsCmdAPIType string
-	getAPIsCmdLimit   string
-	getAPIsUsername   string
-	getAPIsPassword   string
+	getAPIsQuery    string
+	getAPIsLimit    string
+	getAPIsUsername string
+	getAPIsPassword string
 )
 
-const getAPIsCmdLiteral = "apis"
 const getAPIsCmdShortDesc = "List APIs in Microgateway"
 const getAPIsCmdLongDesc = "Display a list of all the APIs in Microgateway or a set of APIs " +
 	"with a limit set or filtered by apiType"
 
-var getAPIsCmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` + getCmdLiteral + ` ` + getAPIsCmdLiteral + ` --host https://localhost:9095 -u admin
-` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + getCmdLiteral + ` ` + getAPIsCmdLiteral + ` -t http --host https://localhost:9095 -u admin -l 100
-` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + getCmdLiteral + ` ` + getAPIsCmdLiteral + ` -t ws --host https://localhost:9095 -u admin
+var getAPIsCmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` + getCmdLiteral + ` ` + apisCmdLiteral + ` --host https://localhost:9095 -u admin
+` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + getCmdLiteral + ` ` + apisCmdLiteral + ` -q type:http --host https://localhost:9095 -u admin -l 100
+` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + getCmdLiteral + ` ` + apisCmdLiteral + ` -q type:ws --host https://localhost:9095 -u admin
 
 Note: The flags --host (-c), --username (-u) are mandatory. The password can be included via the flag --password (-p) or entered at the prompt.`
 
@@ -52,12 +51,12 @@ var mgGetAPIsResourcePath = "/apis"
 
 // GetAPIsCmd represents the apis command
 var GetAPIsCmd = &cobra.Command{
-	Use:     getAPIsCmdLiteral,
+	Use:     apisCmdLiteral,
 	Short:   getAPIsCmdShortDesc,
 	Long:    getAPIsCmdLongDesc,
 	Example: getAPIsCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + getAPIsCmdLiteral + " called")
+		utils.Logln(utils.LogPrefixInfo + apisCmdLiteral + " called")
 
 		// handle auth
 		if getAPIsPassword == "" {
@@ -74,13 +73,13 @@ var GetAPIsCmd = &cobra.Command{
 			getAPIsUsername + ":" + getAPIsPassword))
 
 		//handle parameters
-		if getAPIsCmdLimit == "" {
-			getAPIsCmdLimit = strconv.Itoa(utils.DefaultApisDisplayLimit)
-			fmt.Print("Limit flag not set. Set to default: " + getAPIsCmdLimit + "\n")
+		if getAPIsLimit == "" {
+			getAPIsLimit = strconv.Itoa(utils.DefaultApisDisplayLimit)
+			fmt.Print("Limit flag not set. Set to default: " + getAPIsLimit + "\n")
 		}
 		queryParams := make(map[string]string)
-		queryParams["limit"] = getAPIsCmdLimit
-		queryParams["apiType"] = getAPIsCmdAPIType
+		queryParams["limit"] = getAPIsLimit
+		queryParams["query"] = getAPIsQuery
 		total, count, apis, err := mgImpl.GetAPIsList(authToken,
 			mgwAdapterHost+MgBasepath+mgGetAPIsResourcePath,
 			queryParams)
@@ -96,8 +95,8 @@ func init() {
 	GetCmd.AddCommand(GetAPIsCmd)
 
 	GetAPIsCmd.Flags().StringVarP(&mgwAdapterHost, "host", "c", "", "The adapter host url with port")
-	GetAPIsCmd.Flags().StringVarP(&getAPIsCmdAPIType, "type", "t", "", "API type to filter the APIs")
-	GetAPIsCmd.Flags().StringVarP(&getAPIsCmdLimit, "limit", "l", "", "Maximum number of APIs to return")
+	GetAPIsCmd.Flags().StringVarP(&getAPIsQuery, "query", "q", "", "Query to filter the APIs")
+	GetAPIsCmd.Flags().StringVarP(&getAPIsLimit, "limit", "l", "", "Maximum number of APIs to return")
 	GetAPIsCmd.Flags().StringVarP(&getAPIsUsername, "username", "u", "", "The username")
 	GetAPIsCmd.Flags().StringVarP(&getAPIsPassword, "password", "p", "", "Password of the user (Can be provided at the prompt)")
 

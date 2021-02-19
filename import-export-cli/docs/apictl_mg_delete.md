@@ -13,7 +13,7 @@ apictl mg delete [flags]
 ### Examples
 
 ```
-apictl mg api -n petstore -v 0.0.1 --host https://localhost:9095 -u admin -t www.pets.com
+apictl mg api -n petstore -v 0.0.1 --vhost www.pets.com --host https://localhost:9095 -u admin
 
 Note: The flags --name (-n), --version (-v), --host (-c), and --username (-u) are mandatory. The password can be included via the flag --password (-p) or entered at the prompt.
 ```
