@@ -23,29 +23,32 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-const deleteCmdLiteral = "delete"
-const deleteCmdShortDesc = "Delete an API in Microgateway"
-const deleteCmdLongDesc = "Delete an API in Microgateway by specifying name, version, host, username " +
-	"and optionally vhost"
+const (
+	deployCmdLiteral   = "deploy"
+	deployCmdShortDesc = "Deploy an API (apictl project) in Microgateway"
+	deployCmdLongDesc  = "Deploy an API (apictl project) in Microgateway by " +
+		"specifying the adapter host url."
+)
 
-const deleteCmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` + deleteAPICmdLiteral +
-	` -n petstore -v 0.0.1 --host https://localhost:9095 -u admin -t www.pets.com` +
+const deployCmdExamples = utils.ProjectName + " " + mgCmdLiteral + " " +
+	deployCmdLiteral + " " + apiCmdLiteral + " -c https://localhost:9095 " +
+	"-f petstore -u admin -p admin" +
 
-	"\n\nNote: The flags --name (-n), --version (-v), --host (-c), and --username (-u) are mandatory. " +
+	"\n\nNote: The flags --host (-c), and --username (-u) are mandatory. " +
 	"The password can be included via the flag --password (-p) or entered at the prompt."
 
-// DeleteCmd represents the delete command
-var DeleteCmd = &cobra.Command{
-	Use:     deleteCmdLiteral,
-	Short:   deleteCmdShortDesc,
-	Long:    deleteCmdLongDesc,
-	Example: deleteCmdExamples,
+// DeployCmd represents the deploy command
+var DeployCmd = &cobra.Command{
+	Use:     deployCmdLiteral,
+	Short:   deployCmdShortDesc,
+	Long:    deployCmdLongDesc,
+	Example: deployCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + deleteCmdLiteral + " called")
+		utils.Logln(utils.LogPrefixInfo + deployCmdLiteral + " called")
 	},
 }
 
 // init using Cobra
 func init() {
-	MgCmd.AddCommand(DeleteCmd)
+	MgCmd.AddCommand(DeployCmd)
 }

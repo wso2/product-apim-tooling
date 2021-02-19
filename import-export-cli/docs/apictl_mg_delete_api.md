@@ -13,9 +13,9 @@ apictl mg delete api [flags]
 ### Examples
 
 ```
-apictl mg api --host https://localhost:9095 -u admin
-  apictl mg api -n petstore -v 0.0.1 -c https://localhost:9095 -u admin -t www.pets.com 
-  apictl mg api -n SwaggerPetstore -v 0.0.1 --host https://localhost:9095 -u admin -p admin
+apictl mg delete api --host https://localhost:9095 -n petstore -v 0.0.1 -u admin
+  apictl mg delete api -n petstore -v 0.0.1 -c https://localhost:9095 -u admin --vhost www.pets.com 
+  apictl mg delete api -n SwaggerPetstore -v 0.0.1 --host https://localhost:9095 -u admin -p admin
 
 Note: The flags --name (-n), --version (-v), --host (-c), and --username (-u) are mandatory. The password can be included via the flag --password (-p) or entered at the prompt.
 ```

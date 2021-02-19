@@ -26,11 +26,17 @@ var (
 	mgwAdapterHost string
 )
 
+// common mgw command literals
+const (
+	apisCmdLiteral = "apis"
+	apiCmdLiteral  = "api"
+)
+
 // mgw command related usage Info
 const (
 	mgCmdLiteral   = "mg"
 	mgCmdShortDesc = "Handle Microgateway related operations"
-	mgCmdLongDesc  = `Initialize, Add, Update, Delets an apictl project to the microgateway`
+	mgCmdLongDesc  = `Deploy, Update, Undepoly an apictl project to/from the microgateway`
 
 	MgBasepath = "/api/mgw/adapter/0.1"
 )

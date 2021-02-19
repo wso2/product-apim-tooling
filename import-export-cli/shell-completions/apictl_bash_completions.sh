@@ -2672,6 +2672,12 @@ _apictl_login()
     flags_with_completion=()
     flags_completion=()
 
+    flags+=("--file=")
+    two_word_flags+=("--file")
+    two_word_flags+=("-f")
+    local_nonpersistent_flags+=("--file")
+    local_nonpersistent_flags+=("--file=")
+    local_nonpersistent_flags+=("-f")
     flags+=("--help")
     flags+=("-h")
     local_nonpersistent_flags+=("--help")
@@ -2726,9 +2732,9 @@ _apictl_logout()
     noun_aliases=()
 }
 
-_apictl_mg_delete_api()
+_apictl_mg_deploy_api()
 {
-    last_command="apictl_mg_delete_api"
+    last_command="apictl_mg_deploy_api"
 
     command_aliases=()
 
@@ -2750,56 +2756,42 @@ _apictl_mg_delete_api()
     local_nonpersistent_flags+=("--host")
     local_nonpersistent_flags+=("--host=")
     local_nonpersistent_flags+=("-c")
-    flags+=("--name=")
-    two_word_flags+=("--name")
-    two_word_flags+=("-n")
-    local_nonpersistent_flags+=("--name")
-    local_nonpersistent_flags+=("--name=")
-    local_nonpersistent_flags+=("-n")
+    flags+=("--override")
+    flags+=("-o")
+    local_nonpersistent_flags+=("--override")
+    local_nonpersistent_flags+=("-o")
     flags+=("--password=")
     two_word_flags+=("--password")
     two_word_flags+=("-p")
     local_nonpersistent_flags+=("--password")
     local_nonpersistent_flags+=("--password=")
     local_nonpersistent_flags+=("-p")
+    flags+=("--skip-cleanup")
+    local_nonpersistent_flags+=("--skip-cleanup")
     flags+=("--username=")
     two_word_flags+=("--username")
     two_word_flags+=("-u")
     local_nonpersistent_flags+=("--username")
     local_nonpersistent_flags+=("--username=")
     local_nonpersistent_flags+=("-u")
-    flags+=("--version=")
-    two_word_flags+=("--version")
-    two_word_flags+=("-v")
-    local_nonpersistent_flags+=("--version")
-    local_nonpersistent_flags+=("--version=")
-    local_nonpersistent_flags+=("-v")
-    flags+=("--vhost=")
-    two_word_flags+=("--vhost")
-    two_word_flags+=("-t")
-    local_nonpersistent_flags+=("--vhost")
-    local_nonpersistent_flags+=("--vhost=")
-    local_nonpersistent_flags+=("-t")
     flags+=("--insecure")
     flags+=("-k")
     flags+=("--verbose")
 
     must_have_one_flag=()
+    must_have_one_flag+=("--file=")
+    must_have_one_flag+=("-f")
     must_have_one_flag+=("--host=")
     must_have_one_flag+=("-c")
-    must_have_one_flag+=("--name=")
-    must_have_one_flag+=("-n")
     must_have_one_flag+=("--username=")
     must_have_one_flag+=("-u")
-    must_have_one_flag+=("--version=")
-    must_have_one_flag+=("-v")
     must_have_one_noun=()
     noun_aliases=()
 }
 
-_apictl_mg_delete_help()
+_apictl_mg_deploy_help()
 {
-    last_command="apictl_mg_delete_help"
+    last_command="apictl_mg_deploy_help"
 
     command_aliases=()
 
@@ -2821,9 +2813,9 @@ _apictl_mg_delete_help()
     noun_aliases=()
 }
 
-_apictl_mg_delete()
+_apictl_mg_deploy()
 {
-    last_command="apictl_mg_delete"
+    last_command="apictl_mg_deploy"
 
     command_aliases=()
 
@@ -2846,69 +2838,6 @@ _apictl_mg_delete()
     flags+=("--verbose")
 
     must_have_one_flag=()
-    must_have_one_noun=()
-    noun_aliases=()
-}
-
-_apictl_mg_deploy()
-{
-    last_command="apictl_mg_deploy"
-
-    command_aliases=()
-
-    commands=()
-
-    flags=()
-    two_word_flags=()
-    local_nonpersistent_flags=()
-    flags_with_completion=()
-    flags_completion=()
-
-    flags+=("--file=")
-    two_word_flags+=("--file")
-    two_word_flags+=("-f")
-    local_nonpersistent_flags+=("--file")
-    local_nonpersistent_flags+=("--file=")
-    local_nonpersistent_flags+=("-f")
-    flags+=("--help")
-    flags+=("-h")
-    local_nonpersistent_flags+=("--help")
-    local_nonpersistent_flags+=("-h")
-    flags+=("--host=")
-    two_word_flags+=("--host")
-    two_word_flags+=("-c")
-    local_nonpersistent_flags+=("--host")
-    local_nonpersistent_flags+=("--host=")
-    local_nonpersistent_flags+=("-c")
-    flags+=("--overwrite")
-    flags+=("-o")
-    local_nonpersistent_flags+=("--overwrite")
-    local_nonpersistent_flags+=("-o")
-    flags+=("--password=")
-    two_word_flags+=("--password")
-    two_word_flags+=("-p")
-    local_nonpersistent_flags+=("--password")
-    local_nonpersistent_flags+=("--password=")
-    local_nonpersistent_flags+=("-p")
-    flags+=("--skipCleanup")
-    local_nonpersistent_flags+=("--skipCleanup")
-    flags+=("--username=")
-    two_word_flags+=("--username")
-    two_word_flags+=("-u")
-    local_nonpersistent_flags+=("--username")
-    local_nonpersistent_flags+=("--username=")
-    local_nonpersistent_flags+=("-u")
-    flags+=("--insecure")
-    flags+=("-k")
-    flags+=("--verbose")
-
-    must_have_one_flag=()
-    must_have_one_flag+=("--file=")
-    must_have_one_flag+=("-f")
-    must_have_one_flag+=("--host=")
-    must_have_one_flag+=("-c")
-    must_have_one_flag+=("--username=")
-    must_have_one_flag+=("-u")
     must_have_one_noun=()
     noun_aliases=()
 }
@@ -2949,12 +2878,12 @@ _apictl_mg_get_apis()
     local_nonpersistent_flags+=("--password")
     local_nonpersistent_flags+=("--password=")
     local_nonpersistent_flags+=("-p")
-    flags+=("--type=")
-    two_word_flags+=("--type")
-    two_word_flags+=("-t")
-    local_nonpersistent_flags+=("--type")
-    local_nonpersistent_flags+=("--type=")
-    local_nonpersistent_flags+=("-t")
+    flags+=("--query=")
+    two_word_flags+=("--query")
+    two_word_flags+=("-q")
+    local_nonpersistent_flags+=("--query")
+    local_nonpersistent_flags+=("--query=")
+    local_nonpersistent_flags+=("-q")
     flags+=("--username=")
     two_word_flags+=("--username")
     two_word_flags+=("-u")
@@ -3051,6 +2980,130 @@ _apictl_mg_help()
     noun_aliases=()
 }
 
+_apictl_mg_undeploy_api()
+{
+    last_command="apictl_mg_undeploy_api"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    local_nonpersistent_flags+=("-h")
+    flags+=("--host=")
+    two_word_flags+=("--host")
+    two_word_flags+=("-c")
+    local_nonpersistent_flags+=("--host")
+    local_nonpersistent_flags+=("--host=")
+    local_nonpersistent_flags+=("-c")
+    flags+=("--name=")
+    two_word_flags+=("--name")
+    two_word_flags+=("-n")
+    local_nonpersistent_flags+=("--name")
+    local_nonpersistent_flags+=("--name=")
+    local_nonpersistent_flags+=("-n")
+    flags+=("--password=")
+    two_word_flags+=("--password")
+    two_word_flags+=("-p")
+    local_nonpersistent_flags+=("--password")
+    local_nonpersistent_flags+=("--password=")
+    local_nonpersistent_flags+=("-p")
+    flags+=("--username=")
+    two_word_flags+=("--username")
+    two_word_flags+=("-u")
+    local_nonpersistent_flags+=("--username")
+    local_nonpersistent_flags+=("--username=")
+    local_nonpersistent_flags+=("-u")
+    flags+=("--version=")
+    two_word_flags+=("--version")
+    two_word_flags+=("-v")
+    local_nonpersistent_flags+=("--version")
+    local_nonpersistent_flags+=("--version=")
+    local_nonpersistent_flags+=("-v")
+    flags+=("--vhost=")
+    two_word_flags+=("--vhost")
+    two_word_flags+=("-t")
+    local_nonpersistent_flags+=("--vhost")
+    local_nonpersistent_flags+=("--vhost=")
+    local_nonpersistent_flags+=("-t")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_flag+=("--host=")
+    must_have_one_flag+=("-c")
+    must_have_one_flag+=("--name=")
+    must_have_one_flag+=("-n")
+    must_have_one_flag+=("--username=")
+    must_have_one_flag+=("-u")
+    must_have_one_flag+=("--version=")
+    must_have_one_flag+=("-v")
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_apictl_mg_undeploy_help()
+{
+    last_command="apictl_mg_undeploy_help"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    has_completion_function=1
+    noun_aliases=()
+}
+
+_apictl_mg_undeploy()
+{
+    last_command="apictl_mg_undeploy"
+
+    command_aliases=()
+
+    commands=()
+    commands+=("api")
+    commands+=("help")
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    local_nonpersistent_flags+=("-h")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
 _apictl_mg()
 {
     last_command="apictl_mg"
@@ -3058,10 +3111,10 @@ _apictl_mg()
     command_aliases=()
 
     commands=()
-    commands+=("delete")
     commands+=("deploy")
     commands+=("get")
     commands+=("help")
+    commands+=("undeploy")
 
     flags=()
     two_word_flags=()

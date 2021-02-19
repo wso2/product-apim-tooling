@@ -32,24 +32,27 @@ import (
 )
 
 const (
-	apiNameHeader    = "NAME"
-	apiVersionHeader = "VERSION"
-	apiTypeHeader    = "TYPE"
-	apiLabelsHeader  = "LABELS"
+	apiNameHeader        = "NAME"
+	apiVersionHeader     = "VERSION"
+	apiTypeHeader        = "TYPE"
+	apiGatewayEnvsHeader = "GATEWAY_ENVS"
 
-	defaultAPITableFormat = "table {{.Name}}\t{{.Version}}\t{{.Type}}\t{{.Labels}}"
+	defaultAPITableFormat = "table {{.Name}}\t{{.Version}}\t{{.Type}}\t{{.GatewayEnvs}}"
 )
 
+// APIMeta holds the response for the GET request
 type APIMeta struct {
 	Total int               `json:"total"`
 	Count int               `json:"count"`
 	List  []APIMetaListItem `json:"list"`
 }
+
+// APIMetaListItem contains info of each API
 type APIMetaListItem struct {
-	APIName      string   `json:"apiName"`
-	VersionParam string   `json:"version"`
-	APIType      string   `json:"apiType"`
-	LabelsParam  []string `json:"labels"`
+	APIName        string   `json:"apiName"`
+	APIVersion     string   `json:"version"`
+	APIType        string   `json:"apiType"`
+	APIGatewayEnvs []string `json:"gateway-envs"`
 }
 
 // Name of the API
@@ -59,7 +62,7 @@ func (a APIMetaListItem) Name() string {
 
 // Version of the API
 func (a APIMetaListItem) Version() string {
-	return a.VersionParam
+	return a.APIVersion
 }
 
 // Type of the API
@@ -67,9 +70,9 @@ func (a APIMetaListItem) Type() string {
 	return a.APIType
 }
 
-// Labels of the API
-func (a APIMetaListItem) Labels() []string {
-	return a.LabelsParam
+// GatewayEnvs of the API
+func (a APIMetaListItem) GatewayEnvs() []string {
+	return a.APIGatewayEnvs
 }
 
 // MarshalJSON marshals api using custom marshaller which uses methods instead of fields
@@ -77,7 +80,7 @@ func (a *APIMetaListItem) MarshalJSON() ([]byte, error) {
 	return formatter.MarshalJSON(a)
 }
 
-// GetAPIList sends GET request and returns the metadata of APIs
+// GetAPIsList sends GET request and returns the metadata of APIs
 func GetAPIsList(accessToken, apiListEndpoint string, queryParam map[string]string) (
 	total int, count int, apis []APIMetaListItem, err error) {
 	headers := make(map[string]string)
@@ -116,10 +119,10 @@ func PrintAPIs(apis []APIMetaListItem) {
 
 	// headers for table
 	apiTableHeaders := map[string]string{
-		"Name":    apiNameHeader,
-		"Version": apiVersionHeader,
-		"Type":    apiTypeHeader,
-		"Labels":  apiLabelsHeader,
+		"Name":        apiNameHeader,
+		"Version":     apiVersionHeader,
+		"Type":        apiTypeHeader,
+		"GatewayEnvs": apiGatewayEnvsHeader,
 	}
 
 	// execute context

@@ -29,7 +29,7 @@ const getCmdLongDesc = "Display a list of all the APIs in Microgateway or a set 
 	"with a limit set or filtered by apiType"
 
 const getCmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` +
-	getCmdLiteral + ` ` + getAPIsCmdLiteral + ` -t http --host https://localhost:9095 -u admin -l 100
+	getCmdLiteral + ` ` + apisCmdLiteral + ` -q type:http --host https://localhost:9095 -u admin -l 100
 
 	Note: The flags --host (-c), --username (-u) are mandatory. The password can be included via the flag --password (-p) or entered at the prompt.`
 
