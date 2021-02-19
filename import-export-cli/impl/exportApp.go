@@ -23,7 +23,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/go-resty/resty"
+	"github.com/go-resty/resty/v2"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
@@ -93,7 +93,7 @@ func WriteApplicationToZip(exportAppName, exportAppOwner, zipLocationPath string
 
 	// Add application_meta.yaml file inside the zip and create a new zup file in exportedFinalZip location
 	metaData := utils.MetaData{
-		Name: exportAppName,
+		Name:  exportAppName,
 		Owner: exportAppOwner,
 	}
 	err = IncludeMetaFileToZip(tempZipFile, exportedFinalZip, utils.MetaFileApplication, metaData)

@@ -33,7 +33,7 @@ import (
 	"github.com/Jeffail/gabs"
 	jsoniter "github.com/json-iterator/go"
 
-	"github.com/go-resty/resty"
+	"github.com/go-resty/resty/v2"
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
