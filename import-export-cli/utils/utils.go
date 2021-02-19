@@ -80,7 +80,7 @@ func InvokePOSTRequestWithQueryParam(queryParam map[string]string, url string, h
 	}
 
 	client.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
-	return resty.R().SetHeaders(headers).SetQueryParams(queryParam).SetBody(body).Post(url)
+	return client.R().SetHeaders(headers).SetQueryParams(queryParam).SetBody(body).Post(url)
 }
 
 // Invoke http-post request with file & query parameters using go-resty
