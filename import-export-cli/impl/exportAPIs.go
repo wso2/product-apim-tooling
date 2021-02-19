@@ -132,6 +132,16 @@ func getAPIList(credential credentials.Credential, cmdExportEnvironment, cmdReso
 	return 0, nil
 }
 
+// Get the revisions associated with the api
+func getRevisionsListForAPI(accessToken, cmdExportEnvironment string, api utils.API,
+	exportAllRevisions bool) (count int32, revisions []utils.Revisions, err error) {
+	var query string
+	if !exportAllRevisions {
+		query = "deployed:true"
+	}
+	return GetRevisionListFromEnv(accessToken, cmdExportEnvironment, api.Name, api.Version, api.Provider, query)
+}
+
 // Do the API exportation
 func ExportAPIs(credential credentials.Credential, exportRelatedFilesPath, cmdExportEnvironment, cmdResourceTenantDomain,
 	exportAPIsFormat, cmdUsername, apiExportDir string, exportAPIPreserveStatus, runningExportApiCommand, exportAllRevisions bool) {
@@ -152,8 +162,8 @@ func ExportAPIs(credential credentials.Credential, exportRelatedFilesPath, cmdEx
 							exportRelatedFilesPath, exportAPIsFormat, exportAPIPreserveStatus, runningExportApiCommand)
 						counterSuceededAPIs++
 					}
-					revisionCount, revisions, err := GetRevisionListFromEnv(accessToken, cmdExportEnvironment,
-						apis[i].Name, apis[i].Version, apis[i].Provider,"")
+					revisionCount, revisions, err := getRevisionsListForAPI(accessToken, cmdExportEnvironment, apis[i],
+						exportAllRevisions)
 					if err != nil {
 						fmt.Println("An error occurred while getting the revisions list for API " + apis[i].Version +
 							"_" + apis[i].Version, err)
