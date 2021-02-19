@@ -27,7 +27,7 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/go-resty/resty"
+	"github.com/go-resty/resty/v2"
 	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
