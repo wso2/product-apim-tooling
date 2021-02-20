@@ -21,6 +21,7 @@ NOTE: The flag (--environment (-e)) is mandatory
 ### Options
 
 ```
+      --all                  Export working copy and all revisions for the APIs in the environments 
   -e, --environment string   Environment from which the APIs should be exported
       --force                Clean all the previously exported APIs of the given target tenant, in the given environment if any, and to export APIs from beginning
       --format string        File format of exported archives(json or yaml) (default "YAML")
