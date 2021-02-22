@@ -13,8 +13,6 @@ require (
 	github.com/magiconair/properties v1.8.1
 	github.com/mitchellh/mapstructure v1.3.2
 	github.com/pavel-v-chernykh/keystore-go/v4 v4.1.0
-	github.com/operator-framework/operator-lifecycle-manager v0.0.0-20200321030439-57b580e57e88 // indirect
-	github.com/pavel-v-chernykh/keystore-go/v4 v4.1.0
 	github.com/renstrom/dedent v1.0.0
 	github.com/spf13/cast v1.3.1
 	github.com/spf13/cobra v1.1.1
@@ -23,7 +21,6 @@ require (
 	golang.org/x/crypto v0.0.0-20200414173820-0848c9571904
 	gopkg.in/yaml.v2 v2.3.0
 	k8s.io/api v0.18.2
-	sigs.k8s.io/testing_frameworks v0.1.1 // indirect
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )
 
