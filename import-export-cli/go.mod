@@ -29,4 +29,6 @@ require (
 
 replace k8s.io/client-go => k8s.io/client-go v0.18.2
 
+replace github.com/wso2/k8s-api-operator/api-operator => /home/jayanie/Documents/apim-4-operator-feature/k8s-api-operator-new-code/k8s-api-operator/api-operator
+
 module github.com/wso2/product-apim-tooling/import-export-cli
