@@ -91,15 +91,18 @@ func executeGenDeploymentDirCmd() error {
 	// Get the source artifact name
 	deploymentDirName = filepath.Base(genDeploymentDirSource)
 	if info, err := os.Stat(genDeploymentDirSource); err == nil && !info.IsDir() {
-		// if artifact is given as zip remove the ".zip" suffix to get the name for deployment directory
-		deploymentDirName = strings.Trim(deploymentDirName, utils.ZipFileSuffix)
+
 		//extract zip to a temp directory
 		tempDirPath := os.TempDir()
 		path, err := utils.Unzip(genDeploymentDirSource, tempDirPath)
 		if err != nil {
 			return err
 		}
-		sourceDirectoryPath = path[0]
+		// if artifact is given as zip the extracted file name will contains "/" character. It should be removed
+		deploymentDirName = strings.Trim(path[0], "/")
+
+		// extract the new source file name after unzipping into the temp directory
+		sourceDirectoryPath = filepath.Join(tempDirPath,path[0])
 	} else {
 		sourceDirectoryPath = genDeploymentDirSource
 	}
@@ -171,7 +174,8 @@ func executeGenDeploymentDirCmd() error {
 		return err
 	}
 
-	fmt.Println("The deployment directory for " + genDeploymentDirSource + " file is generated at " + deploymentDirParent)
+	fmt.Println("The deployment directory for " + genDeploymentDirSource + " file is generated at " +
+		deploymentDirParent + " directory")
 
 	return nil
 }
