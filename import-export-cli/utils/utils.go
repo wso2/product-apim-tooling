@@ -287,3 +287,13 @@ func Min(a, b int) int {
 	}
 	return b
 }
+
+// Remove revision from revision name
+func GetRevisionNumFromRevisionName(input string) string {
+	return strings.ReplaceAll(input, "Revision ", "")
+}
+
+// Add revision to revision number
+func GetRevisionNamFromRevisionNum(input string) string {
+	return "Revision-" + input
+}

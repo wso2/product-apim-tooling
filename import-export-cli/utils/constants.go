@@ -181,6 +181,7 @@ const (
 	MetaFileApplication = "application_meta.yaml"
 )
 
+const DeploymentEnvFile = "deployment_environments.yaml"
 const PrivateJetModeConst = "privateJet"
 const SidecarModeConst = "sidecar"
 

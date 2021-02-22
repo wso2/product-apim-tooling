@@ -34,6 +34,7 @@ var (
 	importAPIParamsFile          string
 	importAPISkipCleanup         bool
 	importAPIRotateRevision      bool
+	importAPISkipDeployments     bool
 )
 
 const (
@@ -71,7 +72,7 @@ var ImportAPICmd = &cobra.Command{
 			utils.HandleErrorAndExit("Error while getting an access token for importing API", err)
 		}
 		err = impl.ImportAPIToEnv(accessOAuthToken, importEnvironment, importAPIFile, importAPIParamsFile, importAPIUpdate,
-			importAPICmdPreserveProvider, importAPISkipCleanup, importAPIRotateRevision)
+			importAPICmdPreserveProvider, importAPISkipCleanup, importAPIRotateRevision, importAPISkipDeployments)
 		if err != nil {
 			utils.HandleErrorAndExit("Error importing API", err)
 			return
@@ -92,6 +93,8 @@ func init() {
 		"existing API or create a new API")
 	ImportAPICmd.Flags().BoolVar(&importAPIRotateRevision, "rotate-revision", false, "Rotate the "+
 		"revisions with each update")
+	ImportAPICmd.Flags().BoolVar(&importAPISkipDeployments, "skip-deployments", false, "Update only " +
+		"the working copy and skip deployment steps in import")
 	ImportAPICmd.Flags().StringVarP(&importAPIParamsFile, "params", "", utils.ParamFileAPI,
 		"Provide a API Manager params file")
 	ImportAPICmd.Flags().BoolVarP(&importAPISkipCleanup, "skipCleanup", "", false, "Leave "+

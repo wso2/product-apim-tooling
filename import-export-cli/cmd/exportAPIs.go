@@ -38,6 +38,7 @@ const exportAPIsCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` +
 NOTE: The flag (--environment (-e)) is mandatory`
 
 var exportAPIsFormat string
+var exportAPIsAllRevisions bool
 
 //e.g. /home/samithac/.wso2apictl/exported/migration/production-2.5/wso2-dot-org
 var startFromBeginning bool
@@ -66,7 +67,8 @@ var ExportAPIsCmd = &cobra.Command{
 // exportDirectory = <export_directory>/migration/
 func executeExportAPIsCmd(credential credentials.Credential, exportDirectory string) {
 	//create dir structure
-	apiExportDir := impl.CreateExportAPIsDirStructure(exportDirectory, CmdResourceTenantDomain, CmdExportEnvironment, CmdForceStartFromBegin)
+	apiExportDir := impl.CreateExportAPIsDirStructure(exportDirectory, CmdResourceTenantDomain, CmdExportEnvironment,
+		CmdForceStartFromBegin)
 	exportRelatedFilesPath := filepath.Join(exportDirectory, CmdExportEnvironment,
 		utils.GetMigrationExportTenantDirName(CmdResourceTenantDomain))
 	//e.g. /home/samithac/.wso2apictl/exported/migration/production-2.5/wso2-dot-org
@@ -84,8 +86,8 @@ func executeExportAPIsCmd(credential credentials.Credential, exportDirectory str
 		impl.PrepareStartFromBeginning(credential, exportRelatedFilesPath, CmdResourceTenantDomain, CmdUsername, CmdExportEnvironment)
 	}
 
-	impl.ExportAPIs(credential, exportRelatedFilesPath, CmdExportEnvironment, CmdResourceTenantDomain, exportAPIsFormat, CmdUsername,
-		apiExportDir, exportAPIPreserveStatus, runningExportApiCommand)
+	impl.ExportAPIs(credential, exportRelatedFilesPath, CmdExportEnvironment, CmdResourceTenantDomain, exportAPIsFormat,
+		CmdUsername, apiExportDir, exportAPIPreserveStatus, runningExportApiCommand, exportAPIsAllRevisions)
 }
 
 func init() {
@@ -97,6 +99,8 @@ func init() {
 			"any, and to export APIs from beginning")
 	ExportAPIsCmd.Flags().BoolVarP(&exportAPIPreserveStatus, "preserveStatus", "", true,
 		"Preserve API status when exporting. Otherwise API will be exported in CREATED status")
+	ExportAPIsCmd.Flags().BoolVarP(&exportAPIsAllRevisions, "all", "", false,
+		"Export working copy and all revisions for the APIs in the environments ")
 	ExportAPIsCmd.Flags().StringVarP(&exportAPIsFormat, "format", "", utils.DefaultExportFormat, "File format of exported archives(json or yaml)")
 	_ = ExportAPIsCmd.MarkFlagRequired("environment")
 }

@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 	"text/template"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/formatter"
@@ -58,7 +57,7 @@ func (r revision) Id() string {
 
 // Revision number
 func (r revision) RevisionNumber() string {
-	return strings.ReplaceAll(r.revisionNumber, "Revision ", "")
+	return utils.GetRevisionNumFromRevisionName(r.revisionNumber)
 }
 
 // Revision description
