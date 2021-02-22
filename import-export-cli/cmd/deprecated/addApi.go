@@ -203,7 +203,7 @@ func createAPI(configMapNames []string, timestamp string, balInterceptors []stri
 	//assigning values to API cr
 	apiCrd.Name = flagApiName
 	apiCrd.Namespace = flagNamespace
-	apiCrd.Spec.Definition.SwaggerConfigmapNames = configMapNames
+	//apiCrd.Spec.Definition.SwaggerConfigmapNames = configMapNames
 	apiCrd.Spec.Replicas = flagReplicas
 	apiCrd.Spec.Override = flagOverride
 	apiCrd.Spec.ApiEndPoint = flagApiEndPoint
@@ -219,16 +219,16 @@ func createAPI(configMapNames []string, timestamp string, balInterceptors []stri
 		k8sOperation = k8sUtils.K8sApply
 		k8sSaveConfig = false
 	}
-	if len(balInterceptors) > 0 {
-		// set bal interceptors configmap name in API cr
-		apiCrd.Spec.Definition.Interceptors.Ballerina = balInterceptors
-	}
-	if len(javaInterceptors) > 0 {
-		//set java interceptors configmaps names in API cr
-		apiCrd.Spec.Definition.Interceptors.Java = javaInterceptors
-	} else {
-		apiCrd.Spec.Definition.Interceptors.Java = []string{}
-	}
+	//if len(balInterceptors) > 0 {
+	//	// set bal interceptors configmap name in API cr
+	//	apiCrd.Spec.Definition.Interceptors.Ballerina = balInterceptors
+	//}
+	//if len(javaInterceptors) > 0 {
+	//	//set java interceptors configmaps names in API cr
+	//	apiCrd.Spec.Definition.Interceptors.Java = javaInterceptors
+	//} else {
+	//	apiCrd.Spec.Definition.Interceptors.Java = []string{}
+	//}
 	if flagApiMode != "" {
 		apiCrd.Spec.Mode = wso2v1alpha1.Mode(flagApiMode)
 	}
@@ -238,9 +238,9 @@ func createAPI(configMapNames []string, timestamp string, balInterceptors []stri
 	if flagApiEndPoint != "" {
 		apiCrd.Spec.ApiEndPoint = flagApiEndPoint
 	}
-	if flagReplicas != 0 {
-		apiCrd.Status.Replicas = flagReplicas
-	}
+	//if flagReplicas != 0 {
+	//	apiCrd.Status.Replicas = flagReplicas
+	//}
 	if flagHostname != "" {
 		apiCrd.Spec.IngressHostname = flagHostname
 	}
@@ -346,16 +346,16 @@ func handleJavaInterceptors(nameSuffix string, path string, operation string, na
 func rollbackConfigs(apiCr *wso2v1alpha1.API) {
 	var rollbackConfMaps []string // configmap names to be deleted
 
-	// swagger configmaps
-	rollbackConfMaps = append(rollbackConfMaps, apiCr.Spec.Definition.SwaggerConfigmapNames...)
-	// ballerina interceptor configmaps
-	rollbackConfMaps = append(rollbackConfMaps, apiCr.Spec.Definition.Interceptors.Ballerina...)
-	// java interceptor configmaps
-	rollbackConfMaps = append(rollbackConfMaps, apiCr.Spec.Definition.Interceptors.Java...)
+	//// swagger configmaps
+	//rollbackConfMaps = append(rollbackConfMaps, apiCr.Spec.Definition.SwaggerConfigmapNames...)
+	//// ballerina interceptor configmaps
+	//rollbackConfMaps = append(rollbackConfMaps, apiCr.Spec.Definition.Interceptors.Ballerina...)
+	//// java interceptor configmaps
+	//rollbackConfMaps = append(rollbackConfMaps, apiCr.Spec.Definition.Interceptors.Java...)
 
-	if len(rollbackConfMaps) == 0 {
-		return
-	}
+	//if len(rollbackConfMaps) == 0 {
+	//	return
+	//}
 
 	// execute kubernetes command to delete
 	fmt.Println("Deleting created configs")

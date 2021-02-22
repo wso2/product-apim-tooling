@@ -6,23 +6,22 @@ import (
 )
 
 // Get command related usage Info
-const GenCmdLiteral = "gen"
-const GenCmdShortDesc = "Generate deployment directory for VM and K8S operator"
+const K8sGenCmdLiteral = "gen"
+const k8sGenCmdShortDesc = "Generate deployment directory for K8S operator"
 
-const GenCmdLongDesc = `Generate sample directory with all the contents to use as the deployment directory` +
+const k8sGenCmdLongDesc = `Generate sample directory with all the contents to use as the deployment directory` +
 	`  when performing CI/CD pipeline tasks `
 
-const GenCmdExamples = utils.ProjectName + ` ` + GenCmdLiteral + ` ` + GenDeploymentDirCmdLiteral
+const k8sGenCmdExamples = utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sGenCmdLiteral + ` ` + GenDeploymentDirCmdLiteral
 
 // ListCmd represents the list command
 var GenCmd = &cobra.Command{
-	Use:     GenCmdLiteral,
-	Short:   GenCmdShortDesc,
-	Long:    GenCmdLongDesc,
-	Example: GenCmdExamples,
+	Use:     K8sGenCmdLiteral,
+	Short:   k8sGenCmdShortDesc,
+	Long:    k8sGenCmdLongDesc,
+	Example: k8sGenCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + GenCmdLiteral + " called")
+		utils.Logln(utils.LogPrefixInfo + K8sGenCmdLiteral + " called")
 
 	},
 }
-

@@ -25,10 +25,14 @@ import (
 
 const K8sAddCmdLiteral = "add"
 const k8sAddCmdShortDesc = "Add an API to the kubernetes cluster"
-const k8sAddCmdLongDesc = `Add an API either from a Swagger file or project zip to the kubernetes cluster. JSON, YAML and zip formats are accepted.`
-const k8sAddCmdExamples = utils.ProjectName + " " + K8sCmdLiteral + " " + K8sAddCmdLiteral + " " + AddApiCmdLiteral + " " + `-n petstore --from-file=./Swagger.json --replicas=1 --namespace=wso2
-
-` + utils.ProjectName + " " + K8sCmdLiteral + " " + K8sAddCmdLiteral + " " + AddApiCmdLiteral + " " + `-n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi.zip --replicas=1 --namespace=wso2 --override=true`
+const k8sAddCmdLongDesc = `Add an API either from a Swagger file, project zip for API project to the kubernetes cluster. 
+JSON, YAML, zip and API project formats are accepted.`
+const k8sAddCmdExamples = utils.ProjectName + " " + K8sCmdLiteral + " " + K8sAddCmdLiteral + " " + AddApiCmdLiteral +
+	" " + `-n petstore --from-file=./Swagger.json --namespace=wso2
+` + utils.ProjectName + " " + K8sCmdLiteral + " " + K8sAddCmdLiteral + " " + AddApiCmdLiteral +
+	" " + `-n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi.zip --namespace=wso2
+` + utils.ProjectName + " " + K8sCmdLiteral + " " + K8sAddCmdLiteral + " " + AddApiCmdLiteral +
+	" " + `-n petstore --from-file=./myapi --namespace=wso2`
 
 // K8sAddCmd represents the add command
 var AddCmd = &cobra.Command{

@@ -19,25 +19,28 @@
 package k8s
 
 import (
+	"encoding/json"
 	"fmt"
-	"strings"
-	"time"
-
 	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 )
 
 const K8sUpdateCmdLiteral = "update"
 const k8sUpdateCmdShortDesc = "Update an API to the kubernetes cluster"
-const k8sUpdateCmdLongDesc = `Update an existing API with Swagger file in the kubernetes cluster. JSON and YAML formats are accepted.`
-const k8sUpdateCmdExamples = utils.ProjectName + " " + K8sCmdLiteral + " " + K8sUpdateCmdLiteral + " " + AddApiCmdLiteral + " " + `-n petstore --from-file=./Swagger.json --replicas=1 --namespace=wso2
+const k8sUpdateCmdLongDesc = `Update an existing API with Swagger file, project zip and API project in the kubernetes cluster. 
+JSON, YAML, zip and API project folder formats are accepted.`
+const k8sUpdateCmdExamples = utils.ProjectName + " " + K8sCmdLiteral + " " + K8sUpdateCmdLiteral + " " + AddApiCmdLiteral +
+	" " + `-n petstore --from-file=./Swagger.json --namespace=wso2
 
-` + utils.ProjectName + " " + K8sCmdLiteral + " " + K8sUpdateCmdLiteral + " " + AddApiCmdLiteral + " " + `-n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi --replicas=1 --namespace=wso2`
+` + utils.ProjectName + " " + K8sCmdLiteral + " " + K8sUpdateCmdLiteral + " " + AddApiCmdLiteral +
+	" " + `-n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi --namespace=wso2`
 
 // updateCmd represents the update command
-var updateCmd = &cobra.Command{
+var UpdateCmd = &cobra.Command{
 	Use:     K8sUpdateCmdLiteral,
 	Short:   k8sUpdateCmdShortDesc,
 	Long:    k8sUpdateCmdLongDesc,
@@ -53,36 +56,50 @@ var updateApiCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + K8sUpdateCmdLiteral + " called")
 		validateAddApiCommand()
-
-		// check the existence of the API
-		getApiErr := k8sUtils.ExecuteCommandWithoutOutputs(
-			k8sUtils.Kubectl, k8sUtils.K8sGet, k8sUtils.ApiOpCrdApi, flagApiName, "-n", flagNamespace)
-		if getApiErr != nil {
-			var errMsg string
-			if flagNamespace != "" {
-				errMsg = fmt.Sprintf("Could not find the API \"%s\" in the namespace \"%s\"",
-					flagApiName, flagNamespace)
-			} else {
-				errMsg = fmt.Sprintf("Could not find the API \"%s\"", flagApiName)
-			}
-			utils.HandleErrorAndExit(errMsg, nil)
-		}
-
-		//get current timestamp
-		timestampSuffix := time.Now().Format("2Jan2006150405")
-		handleAddApi("-" + strings.ToLower(timestampSuffix))
+		handleUpdateApi()
 	},
 }
 
-func init() {
-	Cmd.AddCommand(updateCmd)
-	updateCmd.AddCommand(updateApiCmd)
-	updateApiCmd.Flags().StringVarP(&flagApiName, "name", "n", "", "Name of the API")
-	updateApiCmd.Flags().StringVarP(&flagSwaggerFilePath, "from-file", "f", "", "Path to swagger file")
-	updateApiCmd.Flags().IntVar(&flagReplicas, "replicas", 1, "replica set")
-	updateApiCmd.Flags().StringVar(&flagNamespace, "namespace", "", "namespace of API")
-	updateApiCmd.Flags().StringVarP(&flagApiVersion, "version", "v", "", "Property to override the existing docker image with same name and version")
-	updateApiCmd.Flags().StringVarP(&flagApiMode, "mode", "m", "",
-		fmt.Sprintf("Property to override the deploying mode. Available modes: %v, %v", utils.PrivateJetModeConst, utils.SidecarModeConst))
+func handleUpdateApi() {
+	var errMsg string
+	getApiCr, getApiErr:= k8sUtils.GetCommandOutput(
+		k8sUtils.Kubectl, k8sUtils.K8sGet, k8sUtils.ApiOpCrdApi, flagApiName, "-n", flagNamespace, "-o", "json")
+	if getApiErr != nil {
+
+		if flagNamespace != "" {
+			errMsg = fmt.Sprintf("Could not find the API \"%s\" in the namespace \"%s\"",
+				flagApiName, flagNamespace)
+		} else {
+			errMsg = fmt.Sprintf("Could not find the API \"%s\"", flagApiName)
+		}
+		utils.HandleErrorAndExit(errMsg, nil)
+	}
+	var apiCr map[string]interface{}
+	_ = json.Unmarshal([]byte(getApiCr), &apiCr)
+	swaggerCmName := apiCr["spec"].(map[string]interface{})["swaggerConfigMapName"].(string)
+	fmt.Println(swaggerCmName)
+	timestampSuffix := fmt.Sprint(time.Now().Unix())
+	handleAddApi("-" + strings.ToLower(timestampSuffix))
+	deleteApiErr := k8sUtils.ExecuteCommand(
+		k8sUtils.Kubectl, k8sUtils.K8sDelete, "cm", swaggerCmName, "-n", flagNamespace)
+	if deleteApiErr != nil {
+		if flagNamespace != "" {
+			errMsg = fmt.Sprintf("Could not find the config map \"%s\" in the namespace \"%s\"",
+				flagApiName, flagNamespace)
+		} else {
+			errMsg = fmt.Sprintf("Could not find the config map \"%s\"", flagApiName)
+		}
+		utils.HandleErrorAndExit(errMsg, nil)
+	}
+
 }
 
+func init() {
+	UpdateCmd.AddCommand(updateApiCmd)
+	updateApiCmd.Flags().StringVarP(&flagApiName, "name", "n", "", "Name of the API")
+	updateApiCmd.Flags().StringVarP(&flagSwaggerFilePath, "from-file", "f", "",
+		"Path to swagger file")
+	updateApiCmd.Flags().StringVar(&flagNamespace, "namespace", "", "namespace of API")
+	_ = updateApiCmd.MarkFlagRequired("name")
+	_ = updateApiCmd.MarkFlagRequired("from-file")
+}

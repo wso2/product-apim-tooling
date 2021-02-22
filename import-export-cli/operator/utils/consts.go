@@ -25,6 +25,7 @@ const K8sApply = "apply"
 const K8sDelete = "delete"
 const K8sRollOut = "rollout"
 const K8sGet = "get"
+const K8sDescribe = "describe"
 
 // Kubernetes resources
 const kindKey = "kind"
@@ -34,6 +35,7 @@ const ConfigMap = "configmap"
 const Secret = "secret"
 const ClusterRole = "ClusterRole"
 const ClusterRoleBinding = "ClusterRoleBinding"
+const Api = "api"
 
 // API Operator constants
 const DefaultKubernetesMode = false

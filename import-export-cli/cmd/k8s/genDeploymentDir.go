@@ -16,9 +16,14 @@ import (
 
 var genDeploymentDirDestination string
 var genDeploymentDirSource string
-var flagApiNameGenDeploymentDir string
-var flagApiNamespaceGenDeploymentDir string
 
+type metaData struct {
+	Name     string `yaml:"name"`
+	Revision string `yaml:"revision"`
+	Version  string `yaml:"version"`
+}
+
+var apiMetaData *metaData
 
 // GetEnvsCmd related info
 const GenDeploymentDirCmdLiteral = "deployment-dir"
@@ -26,9 +31,9 @@ const GenDeploymentDirCmdShortDesc = "Generate a sample deployment directory"
 
 const GenDeploymentDirCmdLongDesc = `Generate a sample deployment directory based on the provided source artifact`
 
-const GenDeploymentDirCmdExamples = utils.ProjectName + ` ` + GenCmdLiteral + ` ` + GenDeploymentDirCmdLiteral + ` ` +
+const GenDeploymentDirCmdExamples = utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sGenCmdLiteral + ` ` + GenDeploymentDirCmdLiteral + ` ` +
 	`-s  ~/PizzaShackAPI_1.0.0.zip
-` + utils.ProjectName + ` ` + GenCmdLiteral + ` ` + GenDeploymentDirCmdLiteral + ` ` +
+` + utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sGenCmdLiteral + ` ` + GenDeploymentDirCmdLiteral + ` ` +
 	`-s  ~/PizzaShackAPI_1.0.0.zip` + ` ` + ` -d /home/Deployment_repo/Dev`
 
 // directories to be created
@@ -74,7 +79,7 @@ func executeGenDeploymentDirCmd() error {
 
 	// Check whether the source is existed in the given location
 	if _, err := os.Stat(genDeploymentDirSource); os.IsNotExist(err) {
-		utils.HandleErrorAndContinue("Error retrieving the source file from the given path " + sourceDirectoryPath + " ", err)
+		utils.HandleErrorAndContinue("Error retrieving the source file from the given path "+sourceDirectoryPath+" ", err)
 	}
 	// Get the source artifact name
 	deploymentDirName = filepath.Base(genDeploymentDirSource)
@@ -82,14 +87,16 @@ func executeGenDeploymentDirCmd() error {
 		// if artifact is given as zip remove the ".zip" suffix to get the name for deployment directory
 		deploymentDirName = strings.Trim(deploymentDirName, utils.ZipFileSuffix)
 		//extract zip to a temp directory
+
 		tempDirPath := os.TempDir()
 		path, err := utils.Unzip(genDeploymentDirSource, tempDirPath)
 		if err != nil {
 			return err
 		}
-		sourceDirectoryPath = path[0]
+		sourceDirectoryPath = tempDirPath + "/" + path[0]
 	} else {
 		sourceDirectoryPath = genDeploymentDirSource
+		fmt.Println(sourceDirectoryPath)
 	}
 
 	deploymentDirPath, err := filepath.Abs(filepath.Join(deploymentDirParent, deploymentDirName))
@@ -106,39 +113,10 @@ func executeGenDeploymentDirCmd() error {
 	// Copy *_meta.yaml file from source to deployment directory based on the artifact type
 	files, err := ioutil.ReadDir(sourceDirectoryPath)
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 	var metaDataFileFound bool = false
-	for _, file := range files {
-		fileName := file.Name()
-		// if project artifact is a API project
-		if strings.EqualFold(fileName, utils.MetaFileAPI) {
-			metaDataFileFound = true
-			err := utils.CopyFile(filepath.Join(sourceDirectoryPath, fileName), filepath.Join(deploymentDirPath, utils.MetaFileAPI))
-			if err != nil {
-				utils.HandleErrorAndExit("Cannot copy metadata file from the source directory ", err)
-			}
-			break
-		} else if strings.EqualFold(fileName, utils.MetaFileAPIProduct) { // if project artifact is a APIProduct project
-			metaDataFileFound = true
-			err := utils.CopyFile(filepath.Join(sourceDirectoryPath, fileName), filepath.Join(deploymentDirPath, utils.MetaFileAPIProduct))
-			if err != nil {
-				utils.HandleErrorAndExit("Cannot copy metadata file from the source directory ", err)
-			}
-			break
-		} else if strings.EqualFold(fileName, utils.MetaFileApplication) { // if project artifact is a Application project
-			metaDataFileFound = true
-			err := utils.CopyFile(filepath.Join(sourceDirectoryPath, fileName), filepath.Join(deploymentDirPath, utils.MetaFileApplication))
-			if err != nil {
-				utils.HandleErrorAndExit("Cannot copy metadata file from the source directory ", err)
-			}
-			break
-		}
-	}
-	// if *_meta.yaml is not found inside the source directory
-	if !metaDataFileFound {
-		utils.HandleErrorAndExit("Cannot find metadata file inside the source directory ", err)
-	}
 
 	//add api_crd.yaml file to deployment directory
 	//get API definition from file
@@ -148,13 +126,80 @@ func executeGenDeploymentDirCmd() error {
 	if errUnmarshal != nil {
 		utils.HandleErrorAndExit("Error unmarshal api configmap into struct ", errUnmarshal)
 	}
-	//assigning values to API cr
-	apiCrd.Name = flagApiNameGenDeploymentDir
-	apiCrd.Namespace = flagApiNamespaceGenDeploymentDir
-	apiCrd.Spec.SwaggerConfigMapName = fmt.Sprintf("%v-cm", flagApiNameGenDeploymentDir)
-	apiCrd.Spec.ParamsValues = fmt.Sprintf("%v-params", flagApiNameGenDeploymentDir)
-	apiCrd.Spec.CertsValues = fmt.Sprintf("%v-certs", flagApiNameGenDeploymentDir)
 
+	for _, file := range files {
+		fileName := file.Name()
+		fmt.Println(fileName)
+		// if project artifact is a API project
+		if strings.EqualFold(fileName, utils.MetaFileAPI) {
+			metaDataFileFound = true
+			err := utils.CopyFile(filepath.Join(sourceDirectoryPath, fileName), filepath.Join(deploymentDirPath, utils.MetaFileAPI))
+			if err != nil {
+				utils.HandleErrorAndExit("Cannot copy metadata file from the source directory ", err)
+			}
+			fmt.Println(fileName)
+			metaDataYamlFile, err := ioutil.ReadFile(filepath.Join(sourceDirectoryPath, fileName))
+			if err != nil {
+				utils.HandleErrorAndExit("Cannot read the meta file", err)
+			}
+			errUnmarshal := yaml.Unmarshal(metaDataYamlFile, &apiMetaData)
+			if errUnmarshal != nil {
+				utils.HandleErrorAndExit("Error unmarshal api configmap into struct ", errUnmarshal)
+			}
+			apiCrd.Name = apiMetaData.Name
+			apiCrd.Spec.SwaggerConfigMapName = fmt.Sprintf("%v-cm", apiMetaData.Name)
+			apiCrd.Spec.ParamsValues = fmt.Sprintf("%v-params", apiMetaData.Name)
+			apiCrd.Spec.CertsValues = fmt.Sprintf("%v-certs", apiMetaData.Name)
+			break
+		} else if strings.EqualFold(fileName, utils.MetaFileAPIProduct) { // if project artifact is a APIProduct project
+			metaDataFileFound = true
+			err := utils.CopyFile(filepath.Join(sourceDirectoryPath, fileName), filepath.Join(deploymentDirPath, utils.MetaFileAPIProduct))
+			if err != nil {
+				utils.HandleErrorAndExit("Cannot copy metadata file from the source directory ", err)
+			}
+			fmt.Println(fileName)
+			metaDataYamlFile, err := ioutil.ReadFile(filepath.Join(sourceDirectoryPath, fileName))
+			if err != nil {
+				utils.HandleErrorAndExit("Cannot read the meta file", err)
+			}
+			errUnmarshal := yaml.Unmarshal(metaDataYamlFile, &apiMetaData)
+			if errUnmarshal != nil {
+				utils.HandleErrorAndExit("Error unmarshal api configmap into struct ", errUnmarshal)
+			}
+			apiCrd.Name = apiMetaData.Name
+			apiCrd.Spec.SwaggerConfigMapName = fmt.Sprintf("%v-cm", apiMetaData.Name)
+			apiCrd.Spec.ParamsValues = fmt.Sprintf("%v-params", apiMetaData.Name)
+			apiCrd.Spec.CertsValues = fmt.Sprintf("%v-certs", apiMetaData.Name)
+
+			break
+		} else if strings.EqualFold(fileName, utils.MetaFileApplication) { // if project artifact is a Application project
+			metaDataFileFound = true
+			err := utils.CopyFile(filepath.Join(sourceDirectoryPath, fileName), filepath.Join(deploymentDirPath, utils.MetaFileApplication))
+			if err != nil {
+				utils.HandleErrorAndExit("Cannot copy metadata file from the source directory ", err)
+			}
+			fmt.Println(fileName)
+			metaDataYamlFile, err := ioutil.ReadFile(deploymentDirPath + fileName)
+			if err != nil {
+				utils.HandleErrorAndExit("Cannot read the meta file", err)
+			}
+			errUnmarshal := yaml.Unmarshal(metaDataYamlFile, &apiMetaData)
+			if errUnmarshal != nil {
+				utils.HandleErrorAndExit("Error unmarshal api configmap into struct ", errUnmarshal)
+			}
+			apiCrd.Name = apiMetaData.Name
+			apiCrd.Spec.SwaggerConfigMapName = fmt.Sprintf("%v-cm", apiMetaData.Name)
+			apiCrd.Spec.ParamsValues = fmt.Sprintf("%v-params", apiMetaData.Name)
+			apiCrd.Spec.CertsValues = fmt.Sprintf("%v-certs", apiMetaData.Name)
+			break
+		}
+	}
+	// if *_meta.yaml is not found inside the source directory
+	if !metaDataFileFound {
+		utils.HandleErrorAndExit("Cannot find metadata file inside the source directory ", err)
+	}
+
+	// write to api_crd.yaml file
 	byteVal, errMarshal := yaml.Marshal(apiCrd)
 	if errMarshal != nil {
 		utils.HandleErrorAndExit("Error marshal api configmap ", errMarshal)
@@ -172,13 +217,12 @@ func executeGenDeploymentDirCmd() error {
 		utils.HandleErrorAndExit("Error unmarshal api configmap into struct ", errUnmarshal)
 	}
 	apiParamsCm.Name = apiCrd.Spec.ParamsValues
-	apiParamsCm.Namespace = flagApiNamespaceGenDeploymentDir
 	apiParamsCm.Data = map[string]string{"params.yaml": string(apiParamsData)}
 	byteParamsVal, errParamsMarshal := yaml.Marshal(apiParamsCm)
 	if errParamsMarshal != nil {
 		utils.HandleErrorAndExit("Error marshal api configmap ", errMarshal)
 	}
-	err = ioutil.WriteFile(filepath.Join(deploymentDirPath, fmt.Sprintf("%v-params.yaml", flagApiNameGenDeploymentDir)),
+	err = ioutil.WriteFile(filepath.Join(deploymentDirPath, fmt.Sprintf("%v-params.yaml", apiMetaData.Name)),
 		byteParamsVal, os.ModePerm)
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating sample api_params.yaml file", err)
@@ -233,9 +277,6 @@ func init() {
 		"the directory where the directory should be generated")
 	genDeploymentDirCmd.Flags().StringVarP(&genDeploymentDirSource, "source", "s", "", "Path of "+
 		"the source directory to be used when generating the directory")
-	genDeploymentDirCmd.Flags().StringVarP(&flagApiNameGenDeploymentDir, "name", "n", "", "Name of the API")
-	genDeploymentDirCmd.Flags().StringVar(&flagApiNamespaceGenDeploymentDir, "namespace", "", "namespace of API")
 	_ = genDeploymentDirCmd.MarkFlagRequired("source")
 	_ = genDeploymentDirCmd.MarkFlagRequired("name")
 }
-
