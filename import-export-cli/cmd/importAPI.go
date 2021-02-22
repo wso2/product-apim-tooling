@@ -34,7 +34,7 @@ var (
 	importAPIParamsFile          string
 	importAPISkipCleanup         bool
 	importAPIRotateRevision      bool
-	importAPISkipDeployments      bool
+	importAPISkipDeployments     bool
 )
 
 const (

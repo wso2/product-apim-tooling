@@ -216,8 +216,7 @@ func exportAPIandWriteToZip(api utils.API, revisionNumber, accessToken, cmdExpor
 
 	if resp.StatusCode() == http.StatusOK {
 		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
-		WriteToZip(exportAPIName, exportAPIVersion, exportApiRevision, apiExportDir,
-			runningExportApiCommand, resp)
+		WriteToZip(exportAPIName, exportAPIVersion, exportApiRevision, apiExportDir, runningExportApiCommand, resp)
 		//write on last-succeeded-api.log
 		utils.WriteLastSuceededAPIFileData(exportRelatedFilesPath, api)
 	} else {
