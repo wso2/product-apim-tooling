@@ -15,39 +15,32 @@
 * specific language governing permissions and limitations
 * under the License.
  */
-
 package mg
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-var (
-	mgwAdapterHost string
-)
-
-// common mgw command literals
 const (
-	apisCmdLiteral = "apis"
-	apiCmdLiteral  = "api"
-	envCmdLiteral = "env"
+	addCmdLiteral   = "add"
+	addCmdShortDesc = "Add Environment to Config file"
+	addCmdLongDesc  = `Add new environment and its related endpoints to the config file`
 )
+const addCmdExamples = utils.ProjectName + " " + mgCmdLiteral + " " + addCmdLiteral + " " + envCmdLiteral +
+	" prod --host  https://localhost:9443" +
 
-// mgw command related usage Info
-const (
-	mgCmdLiteral   = "mg"
-	mgCmdShortDesc = "Handle Microgateway related operations"
-	mgCmdLongDesc  = `Deploy, Update, Undepoly an apictl project to/from the microgateway`
+	"\n\nNOTE: The flag --host (-c) is mandatory and it has to specify the microgateway adapter" +
+	" url."
 
-	MgBasepath = "/api/mgw/adapter/0.1"
-)
+// AddCmd represents the add command
+var AddCmd = &cobra.Command{
+	Use:     addCmdLiteral,
+	Short:   addCmdShortDesc,
+	Long:    addCmdLongDesc,
+	Example: addCmdExamples,
+}
 
-// MgCmd represents the export command
-var MgCmd = &cobra.Command{
-	Use:   mgCmdLiteral,
-	Short: mgCmdShortDesc,
-	Long:  mgCmdLongDesc,
-	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
-	},
+func init() {
+	MgCmd.AddCommand(AddCmd)
 }

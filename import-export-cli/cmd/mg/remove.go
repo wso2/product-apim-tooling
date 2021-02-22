@@ -15,39 +15,34 @@
 * specific language governing permissions and limitations
 * under the License.
  */
-
 package mg
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-var (
-	mgwAdapterHost string
-)
-
-// common mgw command literals
 const (
-	apisCmdLiteral = "apis"
-	apiCmdLiteral  = "api"
-	envCmdLiteral = "env"
+	removeCmdLiteral   = "remove"
+	removeCmdShortDesc = "Remove an environment for the Microgateway Adapter(s)"
+	removeCmdLongDesc  = "Remove Environment and its configurations from the config file" +
+		"for the Microgateway Adapter(s)."
 )
 
-// mgw command related usage Info
-const (
-	mgCmdLiteral   = "mg"
-	mgCmdShortDesc = "Handle Microgateway related operations"
-	mgCmdLongDesc  = `Deploy, Update, Undepoly an apictl project to/from the microgateway`
+const removeCmdExamples = utils.ProjectName + " " + removeCmdLiteral + " " +
+	envCmdLiteral + " prod"
 
-	MgBasepath = "/api/mgw/adapter/0.1"
-)
-
-// MgCmd represents the export command
-var MgCmd = &cobra.Command{
-	Use:   mgCmdLiteral,
-	Short: mgCmdShortDesc,
-	Long:  mgCmdLongDesc,
+// RemoveCmd represents the remove command
+var RemoveCmd = &cobra.Command{
+	Use:     removeCmdLiteral,
+	Short:   removeCmdShortDesc,
+	Long:    removeCmdLongDesc,
+	Example: removeCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
+		utils.Logln(utils.LogPrefixInfo + removeCmdLiteral + " called")
 	},
+}
+
+func init() {
+	MgCmd.AddCommand(RemoveCmd)
 }

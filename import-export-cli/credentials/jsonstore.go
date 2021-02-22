@@ -62,7 +62,10 @@ func (s *JsonStore) Load() error {
 		return fmt.Errorf("%s is a directory", s.Path)
 	}
 
-	s.credentials = Credentials{Environments: make(map[string]Environment)}
+	s.credentials = Credentials{
+		Environments:   make(map[string]Environment),
+		MgwAdapterEnvs: make(map[string]MgToken),
+	}
 	return nil
 }
 
@@ -164,6 +167,25 @@ func (s *JsonStore) SetMICredentials(env, username, password, accessToken string
 	return nil
 }
 
+// GetMGToken returns token for microgateway adapter from the store or an error
+func (s *JsonStore) GetMGToken(env string) (MgToken, error) {
+	if mgToken, ok := s.credentials.MgwAdapterEnvs[env]; ok {
+		return mgToken, nil
+	}
+	return MgToken{}, fmt.Errorf("Tokens not found for Mgw in %s, use login", env)
+}
+
+// SetMGToken set token for microgateway adapter
+func (s *JsonStore) SetMGToken(env, accessToken string) error {
+	mgwAdapterEnv := s.credentials.MgwAdapterEnvs[env]
+	mgwAdapterEnv.AccessToken = accessToken
+	err := s.persist()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // EraseAPIM remove apim credentials from the store
 func (s *JsonStore) EraseAPIM(env string) error {
 	environment, ok := s.credentials.Environments[env]
@@ -194,6 +216,18 @@ func (s *JsonStore) EraseMI(env string) error {
 		// remove only mi credentials
 		environment.MI = MiCredential{}
 		s.credentials.Environments[env] = environment
+	}
+	return s.persist()
+}
+
+// EraseMG remove mg tokens from the store
+func (s *JsonStore) EraseMG(env string) error {
+	_, ok := s.credentials.MgwAdapterEnvs[env]
+	if !ok {
+		return fmt.Errorf("%s was not found", env)
+	} else {
+		// remove only mg tokens
+		delete(s.credentials.MgwAdapterEnvs, env)
 	}
 	return s.persist()
 }

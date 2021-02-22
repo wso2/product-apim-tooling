@@ -430,3 +430,31 @@ func APIMExistsInEnv(env, filePath string) bool {
 	}
 	return envEndpoints.ApiManagerEndpoint != "" || RequiredAPIMEndpointsExists(envEndpoints)
 }
+
+// ------ Microgateway Adapter(s) Env Managerment
+
+// MgwAdapterEnvExistsInMainConfigFile
+// @param env : Name of the MgwAdapter Environment
+// @param filePath : Path to file where env endpoints are stored
+// @return bool : true if 'env' exists in the main_config.yaml
+// and false otherwise
+func MgwAdapterEnvExistsInMainConfigFile(env, filePath string) bool {
+	mainConfig := GetMainConfigFromFile(filePath)
+	for _env := range mainConfig.MgwAdapterEnvs {
+		if _env == env {
+			return true
+		}
+	}
+	return false
+}
+
+// Return EnvEndpoints for a given environment
+func GetEndpointsOfMgwAdapterEnv(env string, filePath string) (*MgwEndpoints, error) {
+	mainConfig := GetMainConfigFromFile(filePath)
+	for _env, mgwEndpoints := range mainConfig.MgwAdapterEnvs {
+		if _env == env {
+			return &mgwEndpoints, nil
+		}
+	}
+	return nil, errors.New("error getting endpoints of mgw adapter environment '" + env + "'")
+}

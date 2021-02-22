@@ -27,14 +27,20 @@ type Store interface {
 	GetAPIMCredentials(env string) (Credential, error)
 	// GetMICredentials returns credentials for micro integrator from the store or an error
 	GetMICredentials(env string) (MiCredential, error)
+	// GetMgwAdapterToken returns the Access Token of the Microgateway Adapter
+	GetMGToken(env string) (MgToken, error)
 	// SetAPIMCredentials sets credentials for micro integrator using username, password, clientID and client secret
 	SetAPIMCredentials(env, username, password, clientID, clientSecret string) error
 	// SetMICredentials sets credentials for micro integrator using username, password and access token
 	SetMICredentials(env, username, password, accessToken string) error
+	// SetMGToken sets the Access Token for a Microgateway Adapter env
+	SetMGToken(env, accessToken string) error
 	// Erase apim credentials in a given environment
 	EraseAPIM(env string) error
 	// Erase mi credentials in a given environment
 	EraseMI(env string) error
+	// Erase mg token in a given microgateway Adapter env
+	EraseMG(env string) error
 	// Load store
 	Load() error
 }
