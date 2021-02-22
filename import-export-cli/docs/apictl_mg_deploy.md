@@ -1,31 +1,27 @@
 ## apictl mg deploy
 
-Deploy apictl project.
+Deploy an API (apictl project) in Microgateway
 
 ### Synopsis
 
-Deploy the apictl project in Microgateway
+Deploy an API (apictl project) in Microgateway by specifying the adapter host url.
 
 ```
-apictl mg deploy --host [control plane url] --file [file name] --username [username] --password [password] [flags]
+apictl mg deploy [flags]
 ```
 
 ### Examples
 
 ```
-apictl mg deploy -h https://localhost:9095 -f qa/TwitterAPI.zip -u admin -p admin
-cat ~/.mypassword | apictlmg  deploy -h https://localhost:9095 -f qa/TwitterAPI.zip -u admin
+apictl mg deploy api -c https://localhost:9095 -f petstore -u admin -p admin
+
+Note: The flags --host (-c), and --username (-u) are mandatory. The password can be included via the flag --password (-p) or entered at the prompt.
 ```
 
 ### Options
 
 ```
-  -f, --file string       Provide the filepath of the apictl project to be imported
-  -h, --help              help for deploy
-  -c, --host string       Provide the host url for the control plane with port
-  -p, --password string   Provide the password
-      --skipCleanup       Leave all temporary files created during import process
-  -u, --username string   Provide the username
+  -h, --help   help for deploy
 ```
 
 ### Options inherited from parent commands
@@ -38,4 +34,5 @@ cat ~/.mypassword | apictlmg  deploy -h https://localhost:9095 -f qa/TwitterAPI.
 ### SEE ALSO
 
 * [apictl mg](apictl_mg.md)	 - Handle Microgateway related operations
+* [apictl mg deploy api](apictl_mg_deploy_api.md)	 - Deploy an API (apictl project) in Microgateway
 

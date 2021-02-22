@@ -19,12 +19,9 @@
 package impl
 
 import (
-	"bytes"
 	"errors"
-	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
-	"mime/multipart"
 	"os"
 	"path/filepath"
 	"strings"
@@ -32,6 +29,7 @@ import (
 
 	"github.com/Jeffail/gabs"
 	jsoniter "github.com/json-iterator/go"
+	"gopkg.in/yaml.v2"
 
 	"github.com/go-resty/resty/v2"
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
@@ -43,43 +41,16 @@ import (
 // Returns the formed http request and errors
 func ExecuteNewFileUploadRequest(uri string, params map[string]string, paramName, path,
 	accessToken string, isOAuthToken bool) (*resty.Response, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
 
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	part, err := writer.CreateFormFile(paramName, filepath.Base(path))
-	if err != nil {
-		return nil, err
-	}
-	_, err = io.Copy(part, file)
-
-	for key, val := range params {
-		_ = writer.WriteField(key, val)
-	}
-	err = writer.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	// Set headers
 	headers := make(map[string]string)
-	headers[utils.HeaderContentType] = writer.FormDataContentType()
 	if isOAuthToken {
 		headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 	} else {
 		headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + accessToken
 	}
-
 	headers[utils.HeaderAccept] = "application/json"
 	headers[utils.HeaderConnection] = utils.HeaderValueKeepAlive
-
-	resp, err := utils.InvokePOSTRequest(uri, headers, body.Bytes())
-
-	return resp, err
+	return utils.InvokePOSTRequestWithFileAndQueryParams(params, uri, headers, paramName, path)
 }
 
 // Include x_params.yaml (api_params.yaml, application_params.yaml, .. ) into the sourceZipFile and create a new

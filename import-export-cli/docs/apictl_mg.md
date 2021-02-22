@@ -4,7 +4,7 @@ Handle Microgateway related operations
 
 ### Synopsis
 
-Initialize, Add, Update an apictl project to the microgateway
+Deploy, Update, Undepoly an apictl project to/from the microgateway
 
 ```
 apictl mg [flags]
@@ -26,5 +26,7 @@ apictl mg [flags]
 ### SEE ALSO
 
 * [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications and Managing WSO2 Micro Integrator
-* [apictl mg deploy](apictl_mg_deploy.md)	 - Deploy apictl project.
+* [apictl mg deploy](apictl_mg_deploy.md)	 - Deploy an API (apictl project) in Microgateway
+* [apictl mg get](apictl_mg_get.md)	 - List APIs in Microgateway
+* [apictl mg undeploy](apictl_mg_undeploy.md)	 - Undeploy an API in Microgateway
 
