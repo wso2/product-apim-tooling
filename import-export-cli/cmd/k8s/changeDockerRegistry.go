@@ -81,7 +81,6 @@ var changeDockerRegistryCmd = &cobra.Command{
 }
 
 func init() {
-	Cmd.AddCommand(changeCmd)
 	changeCmd.AddCommand(changeDockerRegistryCmd)
 
 	// flags for installing api-operator in batch mode

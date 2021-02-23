@@ -34,13 +34,12 @@ const k8sCmdShortDesc = "Kubernetes mode based commands"
 
 const k8sCmdLongDesc = `Kubernetes mode based commands such as add, update and delete API`
 
-const k8sCmdExamples = utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sInstallCmdLiteral + ` ` + K8sInstallApiOperatorCmdLiteral + `
-` + utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sUninstallCmdLiteral + ` ` + K8sUninstallApiOperatorCmdLiteral + `
-` + utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sAddCmdLiteral + ` ` + AddApiCmdLiteral + ` 
-` + `-n petstore --from-file=./Swagger.json --namespace=wso2
-` + utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sUpdateCmdLiteral + ` ` + AddApiCmdLiteral + ` 
-` + `-n petstore --from-file=./Swagger.json --namespace=wso2
-` + utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sChangeCmdLiteral + ` ` + K8sChangeDockerRegistryCmdLiteral
+const k8sCmdExamples = utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sAddCmdLiteral + ` ` + AddApiCmdLiteral + ` ` +
+	`-n petstore --file=./Swagger.json --namespace=wso2
+` + utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sUpdateCmdLiteral + ` ` + AddApiCmdLiteral + ` ` +
+	`-n petstore --file=./Swagger.json --namespace=wso2
+` + utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + k8sDeleteCmdLiteral + ` ` + k8sDeleteAPICmdLiteral + ` ` +
+	`-n petstore`
 
 // K8sCmd represents the import command
 var Cmd = &cobra.Command{

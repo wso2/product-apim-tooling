@@ -37,6 +37,6 @@ var installCmd = &cobra.Command{
 }
 
 func init() {
-	Cmd.AddCommand(installCmd)
+
 }
 

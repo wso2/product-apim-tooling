@@ -19,8 +19,6 @@
 package k8s
 
 import (
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-
 	"github.com/spf13/cobra"
 )
 
@@ -29,8 +27,7 @@ const k8sDeleteCmdLiteral = "delete"
 const k8sDeleteCmdShortDesc = "Delete resources related to kubernetes"
 const k8sDeleteCmdLongDesc = `Delete resources by filenames, stdin, resources and names, or by resources and label selector in kubernetes mode`
 
-const k8sDeleteCmdExamples = k8sDeleteCmdLiteral + ` ` + k8sDeleteAPICmdLiteral + ` petstore
-` + utils.ProjectName + ` ` + k8sDeleteCmdLiteral + ` ` + k8sDeleteAPICmdLiteral + ` -l name=myLabel`
+const k8sDeleteCmdExamples = k8sDeleteCmdLiteral + ` ` + k8sDeleteAPICmdLiteral + ` ` + `-n petstore`
 
 // k8sDeleteCmd represents the delete command
 var DeleteCmd = &cobra.Command{

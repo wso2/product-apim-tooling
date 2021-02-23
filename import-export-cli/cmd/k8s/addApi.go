@@ -47,7 +47,7 @@ const addApiLongDesc = `Add, Update and Delete APIs in kubernetes cluster. JSON 
 available modes are as follows
 * kubernetes`
 const addApiExamples = utils.ProjectName + " " + K8sCmdLiteral + " add/update " + AddApiCmdLiteral +
-	` -n petstore --from-file=./Swagger.json --namespace=wso2`
+	` -n petstore --file=./Swagger.json --namespace=wso2`
 
 // addApiCmd represents the api command
 var addApiCmd = &cobra.Command{

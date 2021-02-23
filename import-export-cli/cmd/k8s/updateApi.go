@@ -34,10 +34,10 @@ const k8sUpdateCmdShortDesc = "Update an API to the kubernetes cluster"
 const k8sUpdateCmdLongDesc = `Update an existing API with Swagger file, project zip and API project in the kubernetes cluster. 
 JSON, YAML, zip and API project folder formats are accepted.`
 const k8sUpdateCmdExamples = utils.ProjectName + " " + K8sCmdLiteral + " " + K8sUpdateCmdLiteral + " " + AddApiCmdLiteral +
-	" " + `-n petstore --from-file=./Swagger.json --namespace=wso2
+	" " + `-n petstore --file=./Swagger.json --namespace=wso2
 
 ` + utils.ProjectName + " " + K8sCmdLiteral + " " + K8sUpdateCmdLiteral + " " + AddApiCmdLiteral +
-	" " + `-n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi --namespace=wso2`
+	" " + `-n petstore --file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi --namespace=wso2`
 
 // updateCmd represents the update command
 var UpdateCmd = &cobra.Command{
