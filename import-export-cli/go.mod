@@ -17,7 +17,7 @@ require (
 	github.com/spf13/cast v1.3.1
 	github.com/spf13/cobra v1.1.1
 	github.com/stretchr/testify v1.6.1
-	github.com/wso2/k8s-api-operator/api-operator v0.0.0-20210125090919-4d9482a2f6b8
+	github.com/wso2/k8s-api-operator/api-operator v0.0.0-20210223103109-66ee766c8413
 	golang.org/x/crypto v0.0.0-20200414173820-0848c9571904
 	gopkg.in/yaml.v2 v2.3.0
 	k8s.io/api v0.18.2
@@ -25,7 +25,5 @@ require (
 )
 
 replace k8s.io/client-go => k8s.io/client-go v0.18.2
-
-replace github.com/wso2/k8s-api-operator/api-operator => /home/jayanie/Documents/apim-4-operator-feature/k8s-api-operator-new-code/k8s-api-operator/api-operator
 
 module github.com/wso2/product-apim-tooling/import-export-cli
