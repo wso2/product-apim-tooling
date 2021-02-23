@@ -30,6 +30,7 @@ NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory
       --preserve-provider    Preserve existing provider of API Product after importing (default true)
       --rotate-revision      If the maximum revision limit is reached, undeploy and delete the earliest revision
       --skip-cleanup         Leave all temporary files created during import process
+      --skip-deployments     Update only the working copy and skip deployment steps in import
       --update-api-product   Update an existing API Product or create a new API Product
       --update-apis          Update existing dependent APIs associated with the API Product
 ```

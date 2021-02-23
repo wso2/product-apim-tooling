@@ -273,7 +273,7 @@ func ImportAPI(accessOAuthToken, publisherEndpoint, importEnvironment, importPat
 	if importAPISkipDeployments {
 		//If skip deployments flag used, deployment_environments files will be removed from import artifacts
 		loc := filepath.Join(apiFilePath, utils.DeploymentEnvFile)
-		fmt.Println(loc)
+		utils.Logln(utils.LogPrefixInfo + "Removing the deployment environments file from " + loc)
 		err := utils.RemoveFileIfExists(loc)
 		if err!= nil {
 			return err
