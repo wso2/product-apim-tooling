@@ -1,6 +1,6 @@
 ## apictl mg logout
 
-Logout to from an Microgateway Adapter environment
+Logout from an Microgateway Adapter environment
 
 ### Synopsis
 

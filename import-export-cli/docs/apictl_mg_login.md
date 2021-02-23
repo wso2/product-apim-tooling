@@ -1,10 +1,10 @@
 ## apictl mg login
 
-Login to an Microgateway Adapter environment
+Login to a Microgateway Adapter environment
 
 ### Synopsis
 
-Login to an Microgateway Adapter environment using username and password
+Login to a Microgateway Adapter environment using username and password
 
 ```
 apictl mg login [environment] [flags]
