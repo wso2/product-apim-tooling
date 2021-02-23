@@ -29,7 +29,7 @@ NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory
       --import-apis          Import dependent APIs associated with the API Product
       --preserve-provider    Preserve existing provider of API Product after importing (default true)
       --rotate-revision      If the maximum revision limit is reached, undeploy and delete the earliest revision
-      --skipCleanup          Leave all temporary files created during import process
+      --skip-cleanup         Leave all temporary files created during import process
       --update-api-product   Update an existing API Product or create a new API Product
       --update-apis          Update existing dependent APIs associated with the API Product
 ```

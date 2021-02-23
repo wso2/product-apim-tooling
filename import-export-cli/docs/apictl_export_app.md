@@ -26,7 +26,7 @@ NOTE: All the 3 flags (--name (-n), --owner (-o) and --environment (-e)) are man
   -h, --help                 help for app
   -n, --name string          Name of the Application to be exported
   -o, --owner string         Owner of the Application to be exported
-      --withKeys             Export keys for the application 
+      --with-keys            Export keys for the application 
 ```
 
 ### Options inherited from parent commands

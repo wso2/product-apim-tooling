@@ -7,7 +7,7 @@ Export APIs for migration
 Export all the APIs of a tenant from one environment, to be imported into another environment
 
 ```
-apictl export apis (--environment <environment-from-which-artifacts-should-be-exported> --format <export-format> --preserveStatus --force) [flags]
+apictl export apis (--environment <environment-from-which-artifacts-should-be-exported> --format <export-format> --preserve-status --force) [flags]
 ```
 
 ### Examples
@@ -26,7 +26,7 @@ NOTE: The flag (--environment (-e)) is mandatory
       --force                Clean all the previously exported APIs of the given target tenant, in the given environment if any, and to export APIs from beginning
       --format string        File format of exported archives(json or yaml) (default "YAML")
   -h, --help                 help for apis
-      --preserveStatus       Preserve API status when exporting. Otherwise API will be exported in CREATED status (default true)
+      --preserve-status      Preserve API status when exporting. Otherwise API will be exported in CREATED status (default true)
 ```
 
 ### Options inherited from parent commands

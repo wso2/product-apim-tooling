@@ -78,7 +78,7 @@ func exportApp(t *testing.T, name string, owner string, env string) (string, err
 
 func importAppPreserveOwner(t *testing.T, sourceEnv string, app *apim.Application, client *apim.Client) (string, error) {
 	fileName := base.GetApplicationArchiveFilePath(t, sourceEnv, app.Name, app.Owner)
-	output, err := base.Execute(t, "import", "app", "--preserveOwner=true", "-f", fileName, "-e", client.EnvName, "-k", "--verbose")
+	output, err := base.Execute(t, "import", "app", "--preserve-owner=true", "-f", fileName, "-e", client.EnvName, "-k", "--verbose")
 
 	t.Cleanup(func() {
 		client.DeleteApplicationByName(app.Name)
@@ -89,7 +89,7 @@ func importAppPreserveOwner(t *testing.T, sourceEnv string, app *apim.Applicatio
 
 func importAppPreserveOwnerAndUpdate(t *testing.T, sourceEnv string, app *apim.Application, client *apim.Client) (string, error) {
 	fileName := base.GetApplicationArchiveFilePath(t, sourceEnv, app.Name, app.Owner)
-	output, err := base.Execute(t, "import", "app", "--preserveOwner=true", "--update=true", "-f", fileName, "-e", client.EnvName, "-k", "--verbose")
+	output, err := base.Execute(t, "import", "app", "--preserve-owner=true", "--update=true", "-f", fileName, "-e", client.EnvName, "-k", "--verbose")
 
 	return output, err
 }
