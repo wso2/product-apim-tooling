@@ -4,7 +4,7 @@ Undeploy an API in Microgateway
 
 ### Synopsis
 
-Undeploy an API in Microgateway by specifying name, version, host, username and optionally vhost
+Undeploy an API in Microgateway by specifying name, version, environment, username and optionally vhost
 
 ```
 apictl mg undeploy [flags]
@@ -13,11 +13,11 @@ apictl mg undeploy [flags]
 ### Examples
 
 ```
-apictl mg undeploy api --host https://localhost:9095 -n petstore -v 0.0.1 -u admin
-apictl mg undeploy api -n petstore -v 0.0.1 -c https://localhost:9095 -u admin --vhost www.pets.com 
-apictl mg undeploy api -n SwaggerPetstore -v 0.0.1 --host https://localhost:9095 -u admin -p admin
+apictl mg undeploy api --environment dev -n petstore -v 0.0.1
+   apictl mg undeploy api -n petstore -v 0.0.1 -e dev --vhost www.pets.com 
+   apictl mg undeploy api -n SwaggerPetstore -v 0.0.1 --environment dev
 
-Note: The flags --name (-n), --version (-v), --host (-c), and --username (-u) are mandatory. The password can be included via the flag --password (-p) or entered at the prompt.
+Note: The flags --name (-n), --version (-v), --environment (-e) are mandatory. The user needs to be logged in to use this command.
 ```
 
 ### Options

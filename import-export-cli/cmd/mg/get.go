@@ -25,13 +25,15 @@ import (
 
 const getCmdLiteral = "get"
 const getCmdShortDesc = "List APIs in Microgateway"
-const getCmdLongDesc = "Display a list of all the APIs in Microgateway or a set of APIs " +
+const getCmdLongDesc = "Display a list of all the APIs in a Microgateway Adapter environment or a set of APIs " +
 	"with a limit set or filtered by apiType"
 
-const getCmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` +
-	getCmdLiteral + ` ` + apisCmdLiteral + ` -q type:http --host https://localhost:9095 -u admin -l 100
+var getCmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` + getCmdLiteral + ` ` + apisCmdLiteral + ` --environment dev
+` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + getCmdLiteral + ` ` + apisCmdLiteral + ` -q type:http --environment dev -l 100
+` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + getCmdLiteral + ` ` + apisCmdLiteral + ` -q type:ws --environment dev
 
-	Note: The flags --host (-c), --username (-u) are mandatory. The password can be included via the flag --password (-p) or entered at the prompt.`
+Note: The flags --environment (-e) is mandatory. 
+The user needs to be logged in to use this command.`
 
 // GetCmd represents the get command
 var GetCmd = &cobra.Command{

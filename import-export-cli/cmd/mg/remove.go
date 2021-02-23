@@ -15,7 +15,6 @@
 * specific language governing permissions and limitations
 * under the License.
  */
-
 package mg
 
 import (
@@ -24,31 +23,26 @@ import (
 )
 
 const (
-	deployCmdLiteral   = "deploy"
-	deployCmdShortDesc = "Deploy an API (apictl project) in Microgateway"
-	deployCmdLongDesc  = "Deploy an API (apictl project) in Microgateway by " +
-		"specifying the microgateway adapter environment."
+	removeCmdLiteral   = "remove"
+	removeCmdShortDesc = "Remove an environment for the Microgateway Adapter(s)"
+	removeCmdLongDesc  = "Remove Environment and its configurations from the config file" +
+		"for the Microgateway Adapter(s)."
 )
 
-const deployCmdExamples = utils.ProjectName + " " + mgCmdLiteral + " " +
-	deployCmdLiteral + " " + apiCmdLiteral + " -e dev " +
-	"-f petstore" +
+const removeCmdExamples = utils.ProjectName + " " + removeCmdLiteral + " " +
+	envCmdLiteral + " prod"
 
-	"\n\nNote: The flags --environment (-e), --file (-f) are mandatory. " +
-	"The user needs to be logged in to use this command."
-
-// DeployCmd represents the deploy command
-var DeployCmd = &cobra.Command{
-	Use:     deployCmdLiteral,
-	Short:   deployCmdShortDesc,
-	Long:    deployCmdLongDesc,
-	Example: deployCmdExamples,
+// RemoveCmd represents the remove command
+var RemoveCmd = &cobra.Command{
+	Use:     removeCmdLiteral,
+	Short:   removeCmdShortDesc,
+	Long:    removeCmdLongDesc,
+	Example: removeCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + deployCmdLiteral + " called")
+		utils.Logln(utils.LogPrefixInfo + removeCmdLiteral + " called")
 	},
 }
 
-// init using Cobra
 func init() {
-	MgCmd.AddCommand(DeployCmd)
+	MgCmd.AddCommand(RemoveCmd)
 }

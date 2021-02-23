@@ -19,33 +19,20 @@
 package mg
 
 import (
-	"github.com/spf13/cobra"
+	"fmt"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 )
 
-var (
-	mgwAdapterHost string
-)
-
-// common mgw command literals
-const (
-	apisCmdLiteral = "apis"
-	apiCmdLiteral  = "api"
-	envCmdLiteral  = "env"
-)
-
-// mgw command related usage Info
-const (
-	mgCmdLiteral   = "mg"
-	mgCmdShortDesc = "Handle Microgateway related operations"
-	mgCmdLongDesc  = `Deploy, Update, Undepoly an apictl project to/from the microgateway`
-)
-
-// MgCmd represents the export command
-var MgCmd = &cobra.Command{
-	Use:   mgCmdLiteral,
-	Short: mgCmdShortDesc,
-	Long:  mgCmdLongDesc,
-	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
-	},
+func RunLogout(environment string) error {
+	store, err := credentials.GetDefaultCredentialStore()
+	if err != nil {
+		return err
+	}
+	err = store.EraseMG(environment)
+	if err != nil {
+		return err
+	}
+	fmt.Println("Logged out from Microgateway Adapter in environment: ", environment)
+	return nil
 }

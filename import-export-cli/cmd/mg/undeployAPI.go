@@ -19,37 +19,32 @@
 package mg
 
 import (
-	"encoding/base64"
 	"fmt"
 
 	"github.com/spf13/cobra"
 	mgImpl "github.com/wso2/product-apim-tooling/import-export-cli/impl/mg"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"golang.org/x/crypto/ssh/terminal"
 )
 
 var (
 	undeployAPICmdAPIName    string
 	undeployAPICmdAPIVersion string
 	undeployAPICmdAPIVHost   string
-	undeployAPIUsername      string
-	undeployAPIPassword      string
+	undeployAPIEnv           string
 )
 
 const (
 	undeployAPICmdShortDesc = "Undeploy an API in Microgateway"
-	undeployAPICmdLongDesc  = "Undeploy an API in Microgateway by specifying name, version, host, username " +
+	undeployAPICmdLongDesc  = "Undeploy an API in Microgateway by specifying name, version, environment, username " +
 		"and optionally vhost"
 )
 
-var undeployAPICmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` --host https://localhost:9095 -n petstore -v 0.0.1 -u admin
-   ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` -n petstore -v 0.0.1 -c https://localhost:9095 -u admin --vhost www.pets.com 
-   ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` -n SwaggerPetstore -v 0.0.1 --host https://localhost:9095 -u admin -p admin` +
+var undeployAPICmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` --environment dev -n petstore -v 0.0.1
+   ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` -n petstore -v 0.0.1 -e dev --vhost www.pets.com 
+   ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` -n SwaggerPetstore -v 0.0.1 --environment dev` +
 
-	"\n\nNote: The flags --name (-n), --version (-v), --host (-c), and --username (-u) are mandatory. " +
-	"The password can be included via the flag --password (-p) or entered at the prompt."
-
-var mgUndeployAPIResourcePath = "/apis"
+	"\n\nNote: The flags --name (-n), --version (-v), --environment (-e) are mandatory. " +
+	"The user needs to be logged in to use this command."
 
 // UndeployAPICmd represents the undeploy api command
 var UndeployAPICmd = &cobra.Command{
@@ -60,29 +55,14 @@ var UndeployAPICmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + undeployCmdLiteral + " called")
 
-		// handle auth
-		if undeployAPIPassword == "" {
-			fmt.Print("Enter Password: ")
-			undeployAPIPasswordB, err := terminal.ReadPassword(0)
-			undeployAPIPassword = string(undeployAPIPasswordB)
-			fmt.Println()
-			if err != nil {
-				utils.HandleErrorAndExit("Error reading password", err)
-			}
-		}
-		authToken := base64.StdEncoding.EncodeToString(
-			[]byte(undeployAPIUsername + ":" + undeployAPIPassword))
-
 		//handle parameters
 		queryParams := make(map[string]string)
 		queryParams["apiName"] = undeployAPICmdAPIName
 		queryParams["version"] = undeployAPICmdAPIVersion
 		queryParams["vhost"] = undeployAPICmdAPIVHost
-		err := mgImpl.UndeployAPI(authToken,
-			mgwAdapterHost+MgBasepath+mgUndeployAPIResourcePath,
-			queryParams)
+		err := mgImpl.UndeployAPI(undeployAPIEnv, queryParams)
 		if err != nil {
-			utils.HandleErrorAndExit("Error deleting API", err)
+			utils.HandleErrorAndExit("Error undeploying API", err)
 		}
 		fmt.Println("API undeployed from microgateway successfully!")
 	},
@@ -91,15 +71,12 @@ var UndeployAPICmd = &cobra.Command{
 func init() {
 	UndeployCmd.AddCommand(UndeployAPICmd)
 
-	UndeployAPICmd.Flags().StringVarP(&mgwAdapterHost, "host", "c", "", "The adapter host url with port")
+	UndeployAPICmd.Flags().StringVarP(&undeployAPIEnv, "environment", "e", "", "Microgateway adapter environment to be undeployed from")
 	UndeployAPICmd.Flags().StringVarP(&undeployAPICmdAPIName, "name", "n", "", "API name")
 	UndeployAPICmd.Flags().StringVarP(&undeployAPICmdAPIVersion, "version", "v", "", "API version")
 	UndeployAPICmd.Flags().StringVarP(&undeployAPICmdAPIVHost, "vhost", "t", "", "Virtual host the API needs to be undeployed from")
-	UndeployAPICmd.Flags().StringVarP(&undeployAPIUsername, "username", "u", "", "Username with undeploy permissions")
-	UndeployAPICmd.Flags().StringVarP(&undeployAPIPassword, "password", "p", "", "Password of the user (Can be provided at the prompt)")
 
-	_ = UndeployAPICmd.MarkFlagRequired("host")
+	_ = UndeployAPICmd.MarkFlagRequired("environment")
 	_ = UndeployAPICmd.MarkFlagRequired("name")
 	_ = UndeployAPICmd.MarkFlagRequired("version")
-	_ = UndeployAPICmd.MarkFlagRequired("username")
 }

@@ -35,10 +35,13 @@ const (
 	apiNameHeader        = "NAME"
 	apiVersionHeader     = "VERSION"
 	apiTypeHeader        = "TYPE"
+	apiContextHeader     = "CONTEXT"
 	apiGatewayEnvsHeader = "GATEWAY_ENVS"
 
-	defaultAPITableFormat = "table {{.Name}}\t{{.Version}}\t{{.Type}}\t{{.GatewayEnvs}}"
+	defaultAPITableFormat = "table {{.Name}}\t{{.Version}}\t{{.Type}}\t{{.Context}}\t{{.GatewayEnvs}}"
 )
+
+var mgGetAPIsResourcePath = "/apis"
 
 // APIMeta holds the response for the GET request
 type APIMeta struct {
@@ -52,6 +55,7 @@ type APIMetaListItem struct {
 	APIName        string   `json:"apiName"`
 	APIVersion     string   `json:"version"`
 	APIType        string   `json:"apiType"`
+	APIContext     string   `json:"context"`
 	APIGatewayEnvs []string `json:"gateway-envs"`
 }
 
@@ -70,6 +74,11 @@ func (a APIMetaListItem) Type() string {
 	return a.APIType
 }
 
+// Context of the API
+func (a APIMetaListItem) Context() string {
+	return a.APIContext
+}
+
 // GatewayEnvs of the API
 func (a APIMetaListItem) GatewayEnvs() []string {
 	return a.APIGatewayEnvs
@@ -81,10 +90,17 @@ func (a *APIMetaListItem) MarshalJSON() ([]byte, error) {
 }
 
 // GetAPIsList sends GET request and returns the metadata of APIs
-func GetAPIsList(accessToken, apiListEndpoint string, queryParam map[string]string) (
+func GetAPIsList(env string, queryParam map[string]string) (
 	total int, count int, apis []APIMetaListItem, err error) {
+
+	mgwAdapterInfo, err := GetStoredTokenAndHost(env)
+	if err != nil {
+		return 0, 0, nil, err
+	}
+	apiListEndpoint := mgwAdapterInfo.Host + utils.DefaultMgwAdapterEndpointSuffix + mgDeployResourcePath
+
 	headers := make(map[string]string)
-	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + accessToken
+	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + mgwAdapterInfo.AccessToken
 	resp, err := utils.InvokeGETRequestWithMultipleQueryParams(queryParam, apiListEndpoint, headers)
 
 	if err != nil {
@@ -122,6 +138,7 @@ func PrintAPIs(apis []APIMetaListItem) {
 		"Name":        apiNameHeader,
 		"Version":     apiVersionHeader,
 		"Type":        apiTypeHeader,
+		"Context":     apiContextHeader,
 		"GatewayEnvs": apiGatewayEnvsHeader,
 	}
 

@@ -26,16 +26,16 @@ import (
 const (
 	undeployCmdLiteral   = "undeploy"
 	undeployCmdShortDesc = "Undeploy an API in Microgateway"
-	undeployCmdLongDesc  = "Undeploy an API in Microgateway by specifying name, version, host, username " +
+	undeployCmdLongDesc  = "Undeploy an API in Microgateway by specifying name, version, environment, username " +
 		"and optionally vhost"
 )
 
-const undeployCmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` --host https://localhost:9095 -n petstore -v 0.0.1 -u admin
-` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` -n petstore -v 0.0.1 -c https://localhost:9095 -u admin --vhost www.pets.com 
-` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` -n SwaggerPetstore -v 0.0.1 --host https://localhost:9095 -u admin -p admin` +
+var undeployCmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` --environment dev -n petstore -v 0.0.1
+   ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` -n petstore -v 0.0.1 -e dev --vhost www.pets.com 
+   ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` -n SwaggerPetstore -v 0.0.1 --environment dev` +
 
-	"\n\nNote: The flags --name (-n), --version (-v), --host (-c), and --username (-u) are mandatory. " +
-	"The password can be included via the flag --password (-p) or entered at the prompt."
+	"\n\nNote: The flags --name (-n), --version (-v), --environment (-e) are mandatory. " +
+	"The user needs to be logged in to use this command."
 
 // UndeployCmd represents the undeploy command
 var UndeployCmd = &cobra.Command{

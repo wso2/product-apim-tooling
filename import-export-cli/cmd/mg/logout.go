@@ -20,35 +20,31 @@ package mg
 
 import (
 	"github.com/spf13/cobra"
+	impl "github.com/wso2/product-apim-tooling/import-export-cli/impl/mg"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-const (
-	deployCmdLiteral   = "deploy"
-	deployCmdShortDesc = "Deploy an API (apictl project) in Microgateway"
-	deployCmdLongDesc  = "Deploy an API (apictl project) in Microgateway by " +
-		"specifying the microgateway adapter environment."
-)
+const logoutCmdLiteral = "logout [environment]"
+const logoutCmdShortDesc = "Logout from an Microgateway Adapter environment"
+const logoutCmdLongDesc = `Logout from an Microgateway Adapter environment`
+const logoutCmdExamples = utils.ProjectName + " " + mgCmdLiteral + " logout dev"
 
-const deployCmdExamples = utils.ProjectName + " " + mgCmdLiteral + " " +
-	deployCmdLiteral + " " + apiCmdLiteral + " -e dev " +
-	"-f petstore" +
-
-	"\n\nNote: The flags --environment (-e), --file (-f) are mandatory. " +
-	"The user needs to be logged in to use this command."
-
-// DeployCmd represents the deploy command
-var DeployCmd = &cobra.Command{
-	Use:     deployCmdLiteral,
-	Short:   deployCmdShortDesc,
-	Long:    deployCmdLongDesc,
-	Example: deployCmdExamples,
+// logoutCmd represents the logout command
+var logoutCmd = &cobra.Command{
+	Use:     logoutCmdLiteral,
+	Short:   logoutCmdShortDesc,
+	Long:    logoutCmdLongDesc,
+	Example: logoutCmdExamples,
+	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + deployCmdLiteral + " called")
+		err := impl.RunLogout(args[0])
+		if err != nil {
+			utils.HandleErrorAndExit("Error occurred while logging out : ", err)
+		}
 	},
 }
 
 // init using Cobra
 func init() {
-	MgCmd.AddCommand(DeployCmd)
+	MgCmd.AddCommand(logoutCmd)
 }

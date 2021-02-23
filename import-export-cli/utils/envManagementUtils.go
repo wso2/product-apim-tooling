@@ -430,3 +430,51 @@ func APIMExistsInEnv(env, filePath string) bool {
 	}
 	return envEndpoints.ApiManagerEndpoint != "" || RequiredAPIMEndpointsExists(envEndpoints)
 }
+
+// ------ Microgateway Adapter(s) Env Managerment
+
+// MgwAdapterEnvExistsInMainConfigFile
+// @param env : Name of the MgwAdapter Environment
+// @param filePath : Path to file where env endpoints are stored
+// @return bool : true if 'env' exists in the main_config.yaml
+// and false otherwise
+func MgwAdapterEnvExistsInMainConfigFile(env, filePath string) bool {
+	mainConfig := GetMainConfigFromFile(filePath)
+	for _env := range mainConfig.MgwAdapterEnvs {
+		if _env == env {
+			return true
+		}
+	}
+	return false
+}
+
+// Return EnvEndpoints for a given environment
+func GetEndpointsOfMgwAdapterEnv(env string, filePath string) (*MgwEndpoints, error) {
+	mainConfig := GetMainConfigFromFile(filePath)
+	for _env, mgwEndpoints := range mainConfig.MgwAdapterEnvs {
+		if _env == env {
+			return &mgwEndpoints, nil
+		}
+	}
+	return nil, errors.New("Error getting endpoints of mgw adapter environment '" + env +
+		"'. Try adding it using `apictl mg add env`.")
+}
+
+// @param env : Environment to be removed from file
+// @param endpointsFilePath : Path to file where env endpoints are stored
+func RemoveMgwAdapterEnvFromMainConfigFile(env, endpointsFilePath string) error {
+	if env == "" {
+		return errors.New("Environment cannot be blank")
+	}
+	mainConfig := GetMainConfigFromFile(endpointsFilePath)
+	if MgwAdapterEnvExistsInMainConfigFile(env, endpointsFilePath) {
+		delete(mainConfig.MgwAdapterEnvs, env)
+		WriteConfigFile(mainConfig, endpointsFilePath)
+		Logln(LogPrefixInfo + "MgwAdapter Environment '" + env +
+			"' removed from config file: " + endpointsFilePath)
+		return nil
+	} else {
+		// env doesn't exist in endpoints file
+		return errors.New("MgwAdapter Environment not found in " + endpointsFilePath)
+	}
+}

@@ -29,8 +29,9 @@ type EnvKeysAll struct {
 // For main_config.yaml
 // To be manually edited by the user
 type MainConfig struct {
-	Config       Config                  `yaml:"config"`
-	Environments map[string]EnvEndpoints `yaml:"environments"`
+	Config         Config                  `yaml:"config"`
+	Environments   map[string]EnvEndpoints `yaml:"environments"`
+	MgwAdapterEnvs map[string]MgwEndpoints `yaml:"mgw-adapter-envs"`
 }
 
 type Config struct {
@@ -57,6 +58,10 @@ type EnvEndpoints struct {
 	AdminEndpoint        string `yaml:"admin"`
 	TokenEndpoint        string `yaml:"token"`
 	MiManagementEndpoint string `yaml:"mi"`
+}
+
+type MgwEndpoints struct {
+	AdapterEndpoint string `yaml:"adapter"`
 }
 
 // ---------------- End of Structs for YAML Config Files ---------------------------------
