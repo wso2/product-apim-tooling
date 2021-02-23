@@ -35,19 +35,19 @@ var undeployRevisionNum string
 var undeployProvider string
 var undeployAPIEnvironment string
 var undeployAPIGateway string
-var undeployAllGateways bool
+var undeployAllGateways = true
 
 // UndeployAPICmd command related usage info
 const UndeployAPICmdLiteral = "api"
 const undeployAPICmdShortDesc = "Undeploy API"
 
-const undeployAPICmdLongDesc = "Undeploy an API revision from the given gateway environment"
+const undeployAPICmdLongDesc = "Undeploy an API revision from gateway environments"
 
-const undeployAPICmdExamples = utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin -g Label1 -e dev
-` + utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 --rev 6 --all-gateways -e production
-` + utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 --rev 2 -g Label1 -e production
-NOTE: All the 4 flags (--name (-n), --version (-v), --rev, --environment (-e)) and one from (--gateway (-g) or 
---all-gateways) are mandatory.`
+const undeployAPICmdExamples = utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -rev 2 -e dev
+` + utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 --rev 6 -g Label1 Label2 Label3 -e production
+` + utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 -r alice --rev 2 -g Label1 -e production
+NOTE: All the 4 flags (--name (-n), --version (-v), --rev, --environment (-e)) are mandatory. 
+If the flag (--gateway (-g)) is not provided, revision will be undeployed from all deployed gateway environments.`
 
 // UndeployAPICmd represents the deploy API command
 var UndeployAPICmd = &cobra.Command{
@@ -59,18 +59,16 @@ var UndeployAPICmd = &cobra.Command{
 	Example: undeployAPICmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + UndeployAPICmdLiteral + " called")
-		if undeployAPIGateway != "" || undeployAllGateways {
-			gateways := generateGatewayArray(args, undeployAPIGateway)
-
-			cred, err := GetCredentials(undeployAPIEnvironment)
-			if err != nil {
-				utils.HandleErrorAndExit("Error getting credentials", err)
-			}
-			executeUndeployAPICmd(cred, gateways)
-		} else {
-			fmt.Println("Invalid Arguments. Atleast one gateway environment or --all-gateways " +
-				"flag should be provided to undeploy the revision")
+		if undeployAPIGateway != "" {
+			undeployAllGateways = false
 		}
+		gateways := generateGatewayArray(args, undeployAPIGateway)
+
+		cred, err := GetCredentials(undeployAPIEnvironment)
+		if err != nil {
+			utils.HandleErrorAndExit("Error getting credentials", err)
+		}
+		executeUndeployAPICmd(cred, gateways)
 	},
 }
 
@@ -123,8 +121,6 @@ func init() {
 		"Gateway which the revision has to be undeployed")
 	UndeployAPICmd.Flags().StringVarP(&undeployRevisionNum, "rev", "", "",
 		"Revision number of the API to undeploy")
-	UndeployAPICmd.Flags().BoolVar(&undeployAllGateways, "all-gateways", false,
-		"Undeploy the revision from all the deployed gateways at once")
 	UndeployAPICmd.Flags().StringVarP(&undeployAPIEnvironment, "environment", "e",
 		"", "Environment of which the API should be undeployed")
 	_ = UndeployAPICmd.MarkFlagRequired("name")

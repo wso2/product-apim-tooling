@@ -34,19 +34,20 @@ var undeployAPIProductRevisionNum string
 var undeployAPIProductProvider string
 var undeployAPIProductEnvironment string
 var undeployAPIProductGateway string
-var undeployAPIProductAllGateways bool
+var undeployAPIProductAllGateways = true
 
 // Undeploy API Product command related usage info
 const UndeployAPIProductCmdLiteral = "api-product"
 const undeployAPIProductCmdShortDesc = "Undeploy API Product"
 
-const undeployAPIProductmdLongDesc = "Undeploy an API Product revision from the given gateway environment"
+const undeployAPIProductmdLongDesc = "Undeploy an API Product revision from gateway environments"
 
 const undeployAPIProductCmdExamples = utils.
-	ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPIProductCmdLiteral + ` -n TwitterAPIProduct -v 1.0.0 -r admin -g Label1 -e dev
-` + utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPIProductCmdLiteral + ` -n StoreProduct -v 2.1.0 --rev 6 --all-gateways -e production
-` + utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPIProductCmdLiteral + ` -n FacebookProduct -v 2.1.0 --rev 2 -g Label1 -e production
-NOTE: All the 4 flags (--name (-n), --version (-v), --rev, --environment (-e)) and one from (--gateway (-g) or --all-gateways) are mandatory.`
+	ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPIProductCmdLiteral + ` -n TwitterAPIProduct -v 1.0.0 --rev 2  -e dev
+` + utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPIProductCmdLiteral + ` -n StoreProduct -v 2.1.0 --rev 6 -g Label1 Label2 Label3 -e production
+` + utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPIProductCmdLiteral + ` -n FacebookProduct -v 2.1.0 -r admin --rev 2 -g Label1 -e production
+NOTE: All 4 flags (--name (-n), --version (-v), --rev, --environment (-e)) are mandatory.
+If the flag (--gateway (-g)) is not provided, revision will be undeployed from all deployed gateway environments.`
 
 // UndeployAPIProductCmd represents the deploy API command
 var UndeployAPIProductCmd = &cobra.Command{
@@ -58,18 +59,17 @@ var UndeployAPIProductCmd = &cobra.Command{
 	Example: undeployAPIProductCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + UndeployAPIProductCmdLiteral + " called")
-		if undeployAPIProductGateway != "" || undeployAPIProductAllGateways {
-			gateways := generateGatewayArray(args, undeployAPIProductGateway)
 
-			cred, err := GetCredentials(undeployAPIProductEnvironment)
-			if err != nil {
-				utils.HandleErrorAndExit("Error getting credentials", err)
-			}
-			executeUndeployAPIProductCmd(cred, gateways)
-		} else {
-			fmt.Println("Invalid Arguments. Atleast one gateway environment or --all-gateways " +
-				"flag should be provided to undeploy the revision")
+		if undeployAPIProductGateway != "" {
+			undeployAPIProductAllGateways = false
 		}
+		gateways := generateGatewayArray(args, undeployAPIProductGateway)
+		cred, err := GetCredentials(undeployAPIProductEnvironment)
+		if err != nil {
+			utils.HandleErrorAndExit("Error getting credentials", err)
+		}
+		executeUndeployAPIProductCmd(cred, gateways)
+
 	},
 }
 
@@ -105,8 +105,6 @@ func init() {
 		"Gateway which the revision has to be undeployed")
 	UndeployAPIProductCmd.Flags().StringVarP(&undeployAPIProductRevisionNum, "rev", "", "",
 		"Revision number of the API Product to undeploy")
-	UndeployAPIProductCmd.Flags().BoolVar(&undeployAPIProductAllGateways, "all-gateways", false,
-		"Undeploy the revision from all the deployed gateways at once")
 	UndeployAPIProductCmd.Flags().StringVarP(&undeployAPIProductEnvironment, "environment", "e",
 		"", "Environment of which the API Product should be undeployed")
 	_ = UndeployAPIProductCmd.MarkFlagRequired("name")
