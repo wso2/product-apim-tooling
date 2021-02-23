@@ -33,8 +33,8 @@ var (
 	importAPIProductUpdate              bool
 	importAPIsUpdate                    bool
 	importAPIProductSkipCleanup         bool
-	importAPIProductRotateRevision		bool
-	importAPIProductSkipDeployments		bool
+	importAPIProductRotateRevision      bool
+	importAPIProductSkipDeployments     bool
 )
 
 const (
