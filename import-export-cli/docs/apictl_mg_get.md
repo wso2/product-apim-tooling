@@ -4,7 +4,7 @@ List APIs in Microgateway
 
 ### Synopsis
 
-Display a list of all the APIs in Microgateway or a set of APIs with a limit set or filtered by apiType
+Display a list of all the APIs in a Microgateway Adapter environment or a set of APIs with a limit set or filtered by apiType
 
 ```
 apictl mg get [flags]
@@ -13,9 +13,12 @@ apictl mg get [flags]
 ### Examples
 
 ```
-apictl mg get apis -q type:http --host https://localhost:9095 -u admin -l 100
+apictl mg get apis --environment dev
+apictl mg get apis -q type:http --environment dev -l 100
+apictl mg get apis -q type:ws --environment dev
 
-	Note: The flags --host (-c), --username (-u) are mandatory. The password can be included via the flag --password (-p) or entered at the prompt.
+Note: The flags --environment (-e) is mandatory. 
+The user needs to be logged in to use this command.
 ```
 
 ### Options

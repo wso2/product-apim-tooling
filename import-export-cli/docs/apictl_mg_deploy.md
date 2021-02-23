@@ -4,7 +4,7 @@ Deploy an API (apictl project) in Microgateway
 
 ### Synopsis
 
-Deploy an API (apictl project) in Microgateway by specifying the adapter host url.
+Deploy an API (apictl project) in Microgateway by specifying the microgateway adapter environment.
 
 ```
 apictl mg deploy [flags]
@@ -13,9 +13,9 @@ apictl mg deploy [flags]
 ### Examples
 
 ```
-apictl mg deploy api -c https://localhost:9095 -f petstore -u admin -p admin
+apictl mg deploy api -e dev -f petstore
 
-Note: The flags --host (-c), and --username (-u) are mandatory. The password can be included via the flag --password (-p) or entered at the prompt.
+Note: The flags --environment (-e), --file (-f) are mandatory. The user needs to be logged in to use this command.
 ```
 
 ### Options
