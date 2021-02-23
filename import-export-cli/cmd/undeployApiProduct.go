@@ -33,8 +33,8 @@ var undeployAPIProductName string
 var undeployAPIProductRevisionNum string
 var undeployAPIProductProvider string
 var undeployAPIProductEnvironment string
-var undeployAPIProductGateway string
-var undeployAPIProductAllGateways = true
+var undeployAPIProductGatewayEnv string
+var undeployAPIProductAllGatewayEnvs = true
 
 // Undeploy API Product command related usage info
 const UndeployAPIProductCmdLiteral = "api-product"
@@ -47,12 +47,12 @@ const undeployAPIProductCmdExamples = utils.
 ` + utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPIProductCmdLiteral + ` -n StoreProduct -v 2.1.0 --rev 6 -g Label1 Label2 Label3 -e production
 ` + utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPIProductCmdLiteral + ` -n FacebookProduct -v 2.1.0 -r admin --rev 2 -g Label1 -e production
 NOTE: All 4 flags (--name (-n), --version (-v), --rev, --environment (-e)) are mandatory.
-If the flag (--gateway (-g)) is not provided, revision will be undeployed from all deployed gateway environments.`
+If the flag (--gateway-env (-g)) is not provided, revision will be undeployed from all deployed gateway environments.`
 
 // UndeployAPIProductCmd represents the deploy API command
 var UndeployAPIProductCmd = &cobra.Command{
 	Use: UndeployAPIProductCmdLiteral + " (--name <name-of-the-api-product> --version <version-of-the-api-product> " +
-		"--rev<revision-number-of-the-api-product> --gateway <gateway-environment> " +
+		"--rev<revision-number-of-the-api-product> --gateway-env <gateway-environment> " +
 		"--environment <environment-from-which-the-api-product-should-be-undeployed>)",
 	Short:   undeployAPIProductCmdShortDesc,
 	Long:    undeployAPIProductmdLongDesc,
@@ -60,15 +60,15 @@ var UndeployAPIProductCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + UndeployAPIProductCmdLiteral + " called")
 
-		if undeployAPIProductGateway != "" {
-			undeployAPIProductAllGateways = false
+		if undeployAPIProductGatewayEnv != "" {
+			undeployAPIProductAllGatewayEnvs = false
 		}
-		gateways := generateGatewayArray(args, undeployAPIProductGateway)
+		gatewayEnvs := generateGatewayEnvsArray(args, undeployAPIProductGatewayEnv)
 		cred, err := GetCredentials(undeployAPIProductEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
-		executeUndeployAPIProductCmd(cred, gateways)
+		executeUndeployAPIProductCmd(cred, gatewayEnvs)
 
 	},
 }
@@ -78,7 +78,7 @@ func executeUndeployAPIProductCmd(credential credentials.Credential, deployments
 	if preCommandErr == nil {
 		resp, err := impl.UndeployAPIProductRevisionFromGateways(accessToken,
 			undeployAPIProductEnvironment, undeployAPIProductName, undeployAPIProductProvider,
-			undeployAPIProductRevisionNum, deployments, undeployAPIProductAllGateways)
+			undeployAPIProductRevisionNum, deployments, undeployAPIProductAllGatewayEnvs)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while undeploying the API Product", err)
 		}
@@ -101,8 +101,8 @@ func init() {
 		"Name of the API Product to be exported")
 	UndeployAPIProductCmd.Flags().StringVarP(&undeployAPIProductProvider, "provider", "r", "",
 		"Provider of the API")
-	UndeployAPIProductCmd.Flags().StringVarP(&undeployAPIProductGateway, "gateway", "g", "",
-		"Gateway which the revision has to be undeployed")
+	UndeployAPIProductCmd.Flags().StringVarP(&undeployAPIProductGatewayEnv, "gateway-env", "g", "",
+		"Gateway environment which the revision has to be undeployed")
 	UndeployAPIProductCmd.Flags().StringVarP(&undeployAPIProductRevisionNum, "rev", "", "",
 		"Revision number of the API Product to undeploy")
 	UndeployAPIProductCmd.Flags().StringVarP(&undeployAPIProductEnvironment, "environment", "e",
