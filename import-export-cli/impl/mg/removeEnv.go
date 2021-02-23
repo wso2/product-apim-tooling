@@ -32,7 +32,7 @@ import (
 // @return error
 func RemoveEnv(envName, mainConfigFilePath string) error {
 	if envName == "" {
-		return errors.New("name of the environment cannot be blank")
+		return errors.New("Name of the environment cannot be blank")
 	}
 	if utils.MgwAdapterEnvExistsInMainConfigFile(envName, mainConfigFilePath) {
 		var err error

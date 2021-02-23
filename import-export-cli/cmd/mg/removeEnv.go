@@ -55,7 +55,7 @@ var RemoveEnvCmd = &cobra.Command{
 func executeRemoveEnvCmd(env, mainConfigFilePath string) {
 	err := impl.RemoveEnv(env, mainConfigFilePath)
 	if err != nil {
-		utils.HandleErrorAndExit("Error removing environment", err)
+		utils.HandleErrorAndExit("Error occurred when removing environment", err)
 	}
 	fmt.Println("Successfully removed environment '" + env + "'")
 	fmt.Println("Execute '" + utils.ProjectName + " " + mgCmdLiteral + " " +

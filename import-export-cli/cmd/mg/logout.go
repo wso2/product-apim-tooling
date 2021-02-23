@@ -25,7 +25,7 @@ import (
 )
 
 const logoutCmdLiteral = "logout [environment]"
-const logoutCmdShortDesc = "Logout to from an Microgateway Adapter environment"
+const logoutCmdShortDesc = "Logout from an Microgateway Adapter environment"
 const logoutCmdLongDesc = `Logout from an Microgateway Adapter environment`
 const logoutCmdExamples = utils.ProjectName + " " + mgCmdLiteral + " logout dev"
 

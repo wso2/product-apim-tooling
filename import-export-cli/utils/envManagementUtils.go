@@ -456,15 +456,15 @@ func GetEndpointsOfMgwAdapterEnv(env string, filePath string) (*MgwEndpoints, er
 			return &mgwEndpoints, nil
 		}
 	}
-	return nil, errors.New("error getting endpoints of mgw adapter environment '" + env +
-		"'. Try adding it using `apictl mg add env`")
+	return nil, errors.New("Error getting endpoints of mgw adapter environment '" + env +
+		"'. Try adding it using `apictl mg add env`.")
 }
 
 // @param env : Environment to be removed from file
 // @param endpointsFilePath : Path to file where env endpoints are stored
 func RemoveMgwAdapterEnvFromMainConfigFile(env, endpointsFilePath string) error {
 	if env == "" {
-		return errors.New("environment cannot be blank")
+		return errors.New("Environment cannot be blank")
 	}
 	mainConfig := GetMainConfigFromFile(endpointsFilePath)
 	if MgwAdapterEnvExistsInMainConfigFile(env, endpointsFilePath) {

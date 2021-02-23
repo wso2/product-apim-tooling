@@ -29,8 +29,8 @@ var loginPassword string
 var loginPasswordStdin bool
 
 const loginCmdLiteral = "login [environment]"
-const loginCmdShortDesc = "Login to an Microgateway Adapter environment"
-const loginCmdLongDesc = `Login to an Microgateway Adapter environment using username and password`
+const loginCmdShortDesc = "Login to a Microgateway Adapter environment"
+const loginCmdLongDesc = `Login to a Microgateway Adapter environment using username and password`
 const loginCmdExamples = utils.ProjectName + " " + mgCmdLiteral + " login dev -u admin -p admin\n" +
 	utils.ProjectName + " " + mgCmdLiteral + " login dev -u admin\n" +
 	"cat ~/.mypassword | " + utils.ProjectName + " " + mgCmdLiteral + " login dev -u admin --password-stdin"
