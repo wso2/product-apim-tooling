@@ -28,7 +28,7 @@ without deployment environments will be exported.
   -h, --help                 help for api
       --latest               Export the latest revision of the API
   -n, --name string          Name of the API to be exported
-      --preserveStatus       Preserve API status when exporting. Otherwise API will be exported in CREATED status (default true)
+      --preserve-status      Preserve API status when exporting. Otherwise API will be exported in CREATED status (default true)
   -r, --provider string      Provider of the API
       --rev string           Revision number of the API to be exported
   -v, --version string       Version of the API to be exported

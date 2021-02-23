@@ -97,7 +97,7 @@ func init() {
 		"the working copy and skip deployment steps in import")
 	ImportAPICmd.Flags().StringVarP(&importAPIParamsFile, "params", "", utils.ParamFileAPI,
 		"Provide a API Manager params file")
-	ImportAPICmd.Flags().BoolVarP(&importAPISkipCleanup, "skipCleanup", "", false, "Leave "+
+	ImportAPICmd.Flags().BoolVarP(&importAPISkipCleanup, "skip-cleanup", "", false, "Leave "+
 		"all temporary files created during import process")
 	// Mark required flags
 	_ = ImportAPICmd.MarkFlagRequired("environment")

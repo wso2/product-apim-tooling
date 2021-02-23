@@ -42,7 +42,7 @@ const importAppCmdLongDesc = "Import an Application to an environment"
 
 const importAppCmdExamples = utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAppCmdLiteral + ` -f qa/apps/sampleApp.zip -e dev
 ` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAppCmdLiteral + ` -f staging/apps/sampleApp.zip -e prod -o testUser
-` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAppCmdLiteral + ` -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -e prod
+` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAppCmdLiteral + ` -f qa/apps/sampleApp.zip --preserve-owner --skip-subscriptions -e prod
 NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory`
 
 // importAppCmd represents the importApp command
@@ -82,15 +82,15 @@ func init() {
 		"Name of the target owner of the Application as desired by the Importer")
 	ImportAppCmd.Flags().StringVarP(&importAppEnvironment, "environment", "e",
 		"", "Environment from the which the Application should be imported")
-	ImportAppCmd.Flags().BoolVarP(&preserveOwner, "preserveOwner", "", false,
+	ImportAppCmd.Flags().BoolVarP(&preserveOwner, "preserve-owner", "", false,
 		"Preserves app owner")
-	ImportAppCmd.Flags().BoolVarP(&skipSubscriptions, "skipSubscriptions", "s", false,
+	ImportAppCmd.Flags().BoolVarP(&skipSubscriptions, "skip-subscriptions", "s", false,
 		"Skip subscriptions of the Application")
-	ImportAppCmd.Flags().BoolVarP(&importAppSkipKeys, "skipKeys", "", false,
+	ImportAppCmd.Flags().BoolVarP(&importAppSkipKeys, "skip-keys", "", false,
 		"Skip importing keys of the Application")
 	ImportAppCmd.Flags().BoolVarP(&importAppUpdateApplication, "update", "", false,
 		"Update the Application if it is already imported")
-	ImportAppCmd.Flags().BoolVarP(&importAppSkipCleanup, "skipCleanup", "", false, "Leave "+
+	ImportAppCmd.Flags().BoolVarP(&importAppSkipCleanup, "skip-cleanup", "", false, "Leave "+
 		"all temporary files created during import process")
 	_ = ImportAppCmd.MarkFlagRequired("file")
 	_ = ImportAppCmd.MarkFlagRequired("environment")

@@ -90,7 +90,7 @@
            --version, -v
            --environment, -e
        Optional:
-           --preserveStatus
+           --preserve-status
            --format
            --provider, -r
    Examples:
@@ -112,7 +112,7 @@
                 --params
                 --preserve-provider
                 --update
-                --skipCleanup
+                --skip-cleanup
         Examples:
                 apictl import api -f qa/TwitterAPI.zip -e dev
                 apictl import api -f staging/FacebookAPI.zip -e production
@@ -145,7 +145,7 @@
        Optional:
            --import-apis
            --preserve-provider
-           --skipCleanup
+           --skip-cleanup
            --update-api-product
            --update-apis          
    Examples:
@@ -165,7 +165,7 @@
             --owner, -o
             --environment, -e
        Optional:
-            --withKeys
+            --with-keys
             --format
    Examples:
             apictl export app -n SampleApp -o admin -e dev
@@ -183,18 +183,18 @@
                   --file, -f
                   --environment, -e
             Optional
-                  --skipSubscriptions, -s
+                  --skip-subscriptions, -s
                   --owner, -o
-                  --preserveOwner, -r
+                  --preserve-owner, -r
                   --file, -f
                   --environment, -e
-                  --skipCleanup
-                  --skipKeys
+                  --skip-cleanup
+                  --skip-keys
                   --update
         Examples:
             apictl import app -f qa/apps/sampleApp.zip -e dev
             apictl import app -f staging/apps/sampleApp.zip -e prod -o testUser -u admin -p admin
-            apictl import app -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -e staging
+            apictl import app -f qa/apps/sampleApp.zip --preserve-owner --skip-subscriptions -e staging
 </code></pre>
 <ul>
     <li>

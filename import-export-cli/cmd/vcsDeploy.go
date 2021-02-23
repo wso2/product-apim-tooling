@@ -36,11 +36,12 @@ const deployCmdLiteral = "deploy"
 const deployCmdShortDesc = "Deploys projects to the specified environment"
 const deployCmdLongDesc = `Deploys projects to the specified environment specified by --environment(-e). 
 Only the changed projects compared to the revision at the last successful deployment will be deployed. 
-If any project(s) got failed during the deployment, by default, the operation will rollback the environment to the last successful state. If this needs to be avoided, use --skipRollback=true
+If any project(s) got failed during the deployment, by default, the operation will rollback the environment to the last successful state. 
+If this needs to be avoided, use --skip-rollback=true
 NOTE: --environment (-e) flag is mandatory`
 
 const deployCmdExamples = utils.ProjectName + ` ` + vcsCmdLiteral + ` ` + deployCmdLiteral + ` -e dev
-` + utils.ProjectName + ` ` + vcsCmdLiteral + ` ` + deployCmdLiteral + ` -e dev --skipRollback=true`
+` + utils.ProjectName + ` ` + vcsCmdLiteral + ` ` + deployCmdLiteral + ` -e dev --skip-rollback=true`
 
 // deployCmd represents the deploy command
 var DeployCmd = &cobra.Command{
@@ -81,8 +82,11 @@ func init() {
 
 	DeployCmd.Flags().StringVarP(&flagVCSDeployEnvName, "environment", "e", "", "Name of the "+
 		"environment to deploy the project(s)")
+	DeployCmd.Flags().BoolVarP(&flagVCSDeploySkipRollback, "skip-rollback", "", false,
+		"Specifies whether rolling back to the last successful revision during an error situation should be skipped")
 	DeployCmd.Flags().BoolVarP(&flagVCSDeploySkipRollback, "skipRollback", "", false,
 		"Specifies whether rolling back to the last successful revision during an error situation should be skipped")
+	DeployCmd.Flags().MarkDeprecated("skipRollback", "Use skip-rollback flag")
 
 	_ = DeployCmd.MarkFlagRequired("environment")
 }

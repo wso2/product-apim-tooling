@@ -118,7 +118,7 @@ func init() {
 		"Revision number of the API to be exported")
 	ExportAPICmd.Flags().StringVarP(&CmdExportEnvironment, "environment", "e",
 		"", "Environment to which the API should be exported")
-	ExportAPICmd.Flags().BoolVarP(&exportAPIPreserveStatus, "preserveStatus", "", true,
+	ExportAPICmd.Flags().BoolVarP(&exportAPIPreserveStatus, "preserve-status", "", true,
 		"Preserve API status when exporting. Otherwise API will be exported in CREATED status")
 	ExportAPICmd.Flags().BoolVarP(&exportAPILatestRevision, "latest", "", false,
 		"Export the latest revision of the API")

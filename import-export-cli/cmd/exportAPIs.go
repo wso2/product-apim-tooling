@@ -46,7 +46,7 @@ var isProcessCompleted bool
 
 var ExportAPIsCmd = &cobra.Command{
 	Use: ExportAPIsCmdLiteral + " (--environment " +
-		"<environment-from-which-artifacts-should-be-exported> --format <export-format> --preserveStatus --force)",
+		"<environment-from-which-artifacts-should-be-exported> --format <export-format> --preserve-status --force)",
 	Short:   exportAPIsCmdShortDesc,
 	Long:    exportAPIsCmdLongDesc,
 	Example: exportAPIsCmdExamples,
@@ -97,7 +97,7 @@ func init() {
 	ExportAPIsCmd.PersistentFlags().BoolVarP(&CmdForceStartFromBegin, "force", "", false,
 		"Clean all the previously exported APIs of the given target tenant, in the given environment if "+
 			"any, and to export APIs from beginning")
-	ExportAPIsCmd.Flags().BoolVarP(&exportAPIPreserveStatus, "preserveStatus", "", true,
+	ExportAPIsCmd.Flags().BoolVarP(&exportAPIPreserveStatus, "preserve-status", "", true,
 		"Preserve API status when exporting. Otherwise API will be exported in CREATED status")
 	ExportAPIsCmd.Flags().BoolVarP(&exportAPIsAllRevisions, "all", "", false,
 		"Export working copy and all revisions for the APIs in the environments ")

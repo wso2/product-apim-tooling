@@ -93,7 +93,7 @@ func init() {
 		"existing API Product or create a new API Product")
 	ImportAPIProductCmd.Flags().BoolVarP(&importAPIsUpdate, "update-apis", "", false, "Update existing dependent APIs "+
 		"associated with the API Product")
-	ImportAPIProductCmd.Flags().BoolVarP(&importAPIProductSkipCleanup, "skipCleanup", "", false, "Leave "+
+	ImportAPIProductCmd.Flags().BoolVarP(&importAPIProductSkipCleanup, "skip-cleanup", "", false, "Leave "+
 		"all temporary files created during import process")
 	// Mark required flags
 	_ = ImportAPIProductCmd.MarkFlagRequired("environment")
