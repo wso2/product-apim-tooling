@@ -31,6 +31,11 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
+type MgwAdapterHostAndToken struct {
+	Host        string
+	AccessToken string
+}
+
 func RunLogin(environment, loginUsername, loginPassword string, loginPasswordStdin bool) error {
 	store, err := credentials.GetDefaultCredentialStore()
 	if err != nil {
@@ -83,4 +88,25 @@ func RunLogin(environment, loginUsername, loginPassword string, loginPasswordStd
 	}
 	fmt.Println("Successfully logged into Microgateway Adapter in environment: ", environment)
 	return nil
+}
+
+func GetStoredTokenAndHost(env string) (mgwAdapterHostAndToken MgwAdapterHostAndToken, err error) {
+	store, err := credentials.GetDefaultCredentialStore()
+	if err != nil {
+		return mgwAdapterHostAndToken, err
+	}
+	mgToken, err := store.GetMGToken(env)
+	if err != nil || mgToken.AccessToken == "" {
+		err = errors.New("Error loading access token. " + err.Error())
+		return mgwAdapterHostAndToken, err
+	}
+	mgwAdapterEndpoints, err := utils.GetEndpointsOfMgwAdapterEnv(env, utils.MainConfigFilePath)
+	if err != nil || mgwAdapterEndpoints.AdapterEndpoint == "" {
+		err = errors.New("Error loading Adapter endpoint. " + err.Error())
+		return mgwAdapterHostAndToken, err
+	}
+
+	mgwAdapterHostAndToken.Host = mgwAdapterEndpoints.AdapterEndpoint
+	mgwAdapterHostAndToken.AccessToken = mgToken.AccessToken
+	return mgwAdapterHostAndToken, nil
 }

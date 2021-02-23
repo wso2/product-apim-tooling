@@ -24,8 +24,6 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-var envToBeAdded string // Name of the environment to be added
-
 const (
 	addEnvCmdShortDesc = "Add Environment to Config file"
 	addEnvCmdLongDesc  = `Add new environment and its related endpoints to the config file`
@@ -44,19 +42,17 @@ var AddEnvCmd = &cobra.Command{
 	Example: addEnvCmdExamples,
 	Args:    cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		envToBeAdded = args[0]
+		utils.Logln(utils.LogPrefixInfo + envCmdLiteral + " called")
 
-		utils.Logln(utils.LogPrefixInfo + addCmdLiteral + " " + envCmdLiteral + " called")
-		executeAddEnvCmd(utils.MainConfigFilePath)
+		envToBeAdded := args[0]
+
+		envEndpoints := new(utils.MgwEndpoints)
+		envEndpoints.AdapterEndpoint = mgwAdapterHost
+		err := impl.AddEnv(envToBeAdded, envEndpoints)
+		if err != nil {
+			utils.HandleErrorAndExit("Error adding environment", err)
+		}
 	},
-}
-
-func executeAddEnvCmd(mainConfigFilePath string) {
-	envEndpoints := new(utils.MgwEndpoints)
-	err := impl.AddEnv(envToBeAdded, envEndpoints, mainConfigFilePath, envCmdLiteral)
-	if err != nil {
-		utils.HandleErrorAndExit("Error adding environment", err)
-	}
 }
 
 // init using Cobra

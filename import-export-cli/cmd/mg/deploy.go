@@ -27,15 +27,15 @@ const (
 	deployCmdLiteral   = "deploy"
 	deployCmdShortDesc = "Deploy an API (apictl project) in Microgateway"
 	deployCmdLongDesc  = "Deploy an API (apictl project) in Microgateway by " +
-		"specifying the adapter host url."
+		"specifying the microgateway adapter environment."
 )
 
 const deployCmdExamples = utils.ProjectName + " " + mgCmdLiteral + " " +
-	deployCmdLiteral + " " + apiCmdLiteral + " -c https://localhost:9095 " +
-	"-f petstore -u admin -p admin" +
+	deployCmdLiteral + " " + apiCmdLiteral + " -e dev " +
+	"-f petstore" +
 
-	"\n\nNote: The flags --host (-c), and --username (-u) are mandatory. " +
-	"The password can be included via the flag --password (-p) or entered at the prompt."
+	"\n\nNote: The flags --environment (-e), --file (-f) are mandatory. " +
+	"The user needs to be logged in to use this command."
 
 // DeployCmd represents the deploy command
 var DeployCmd = &cobra.Command{

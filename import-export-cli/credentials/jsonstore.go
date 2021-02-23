@@ -172,7 +172,8 @@ func (s *JsonStore) GetMGToken(env string) (MgToken, error) {
 	if mgToken, ok := s.credentials.MgwAdapterEnvs[env]; ok {
 		return mgToken, nil
 	}
-	return MgToken{}, fmt.Errorf("Tokens not found for Mgw in %s, use login", env)
+	return MgToken{}, fmt.Errorf(
+		"Tokens not found for Mgw in %s. Log in with `apictl mg login [env]`", env)
 }
 
 // SetMGToken set token for microgateway adapter

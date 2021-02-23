@@ -456,7 +456,8 @@ func GetEndpointsOfMgwAdapterEnv(env string, filePath string) (*MgwEndpoints, er
 			return &mgwEndpoints, nil
 		}
 	}
-	return nil, errors.New("error getting endpoints of mgw adapter environment '" + env + "'")
+	return nil, errors.New("error getting endpoints of mgw adapter environment '" + env +
+		"'. Try adding it using `apictl mg add env`")
 }
 
 // @param env : Environment to be removed from file

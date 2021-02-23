@@ -25,11 +25,18 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
+var mgUndeployAPIResourcePath = "/apis"
+
 // UndeployAPI sends a DELETE request to delete an API
-func UndeployAPI(accessToken, apiDeleteEndpoint string, queryParam map[string]string) (
-	err error) {
+func UndeployAPI(env string, queryParam map[string]string) (err error) {
+	mgwAdapterInfo, err := GetStoredTokenAndHost(env)
+	if err != nil {
+		return err
+	}
+	apiDeleteEndpoint := mgwAdapterInfo.Host + utils.DefaultMgwAdapterEndpointSuffix + mgUndeployAPIResourcePath
+
 	headers := make(map[string]string)
-	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + accessToken
+	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + mgwAdapterInfo.AccessToken
 	resp, err := utils.InvokeDELETERequestWithParams(apiDeleteEndpoint, queryParam, headers)
 
 	if err != nil {

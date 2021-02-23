@@ -26,13 +26,13 @@ import (
 )
 
 // AddEnv adds a new environment and its endpoints and writes to config file
-func AddEnv(envName string, mgwEndpoints *utils.MgwEndpoints, mainConfigFilePath, envCmdLiteral string) error {
-
+func AddEnv(envName string, mgwEndpoints *utils.MgwEndpoints) error {
 	if envName == "" {
 		// name of the environment is blank
 		return errors.New("Name of the environment cannot be blank")
 	}
 
+	mainConfigFilePath := utils.MainConfigFilePath
 	if utils.MgwAdapterEnvExistsInMainConfigFile(envName, mainConfigFilePath) {
 		// environment already exists
 		return errors.New("MgwAdapter Environment '" + envName + "' already exists in " + mainConfigFilePath)
@@ -40,11 +40,12 @@ func AddEnv(envName string, mgwEndpoints *utils.MgwEndpoints, mainConfigFilePath
 
 	mainConfig := utils.GetMainConfigFromFile(mainConfigFilePath)
 
+	var validatedMgwEndpoints = utils.MgwEndpoints{}
 	if mgwEndpoints.AdapterEndpoint == "" {
 		return errors.New("Adapter url cannot be blank")
+	} else {
+		validatedMgwEndpoints.AdapterEndpoint = mgwEndpoints.AdapterEndpoint
 	}
-	var validatedMgwEndpoints = utils.MgwEndpoints{}
-	validatedMgwEndpoints.AdapterEndpoint = mgwEndpoints.AdapterEndpoint
 
 	mainConfig.MgwAdapterEnvs[envName] = validatedMgwEndpoints
 	utils.WriteConfigFile(mainConfig, mainConfigFilePath)
