@@ -154,6 +154,24 @@ func InvokeGETRequestWithMultipleQueryParams(queryParam map[string]string, url s
 	return client.R().SetHeaders(headers).SetQueryParams(queryParam).Get(url)
 }
 
+// Invoke http-get request with query params as string
+func InvokeGETRequestWithQueryParamsString(url, queryParams string, headers map[string]string) (
+	*resty.Response, error) {
+
+	client := resty.New()
+
+	if Insecure {
+		client.SetTLSClientConfig(
+			&tls.Config{InsecureSkipVerify: true, // To bypass errors in SSL certificates
+				Renegotiation: TLSRenegotiationMode})
+	} else {
+		client.SetTLSClientConfig(GetTlsConfigWithCertificate())
+	}
+
+	client.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
+	return client.R().SetHeaders(headers).SetQueryString(queryParams).Get(url)
+}
+
 // Invoke http-put request with multiple query params
 func InvokePutRequest(queryParam map[string]string, url string, headers map[string]string, body string) (
 	*resty.Response, error) {

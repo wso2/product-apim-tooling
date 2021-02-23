@@ -368,7 +368,7 @@ type Revisions struct {
 	RevisionNumber string       `json:"displayName"`
 	Description    string       `json:"description"`
 	Deployments    []Deployment `json:"deploymentInfo"`
-	Gateways       []string
+	GatewayEnvs    []string
 }
 
 type Deployment struct {

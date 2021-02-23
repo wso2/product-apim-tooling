@@ -116,17 +116,17 @@ func GetAPIProductList(accessToken, unifiedSearchEndpoint, query, limit string) 
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 
 	// To filter API Products from unified search
-	unifiedSearchEndpoint += "?query=type:\"" + utils.DefaultApiProductType + "\""
+	queryParamString := "query=type:\"" + utils.DefaultApiProductType + "\""
 
 	// Setting up the query parameter and limit parameter
 	if query != "" {
-		unifiedSearchEndpoint += " " + query
+		queryParamString += " " + query
 	}
 	if limit != "" {
-		unifiedSearchEndpoint += "&limit=" + limit
+		queryParamString += "&limit=" + limit
 	}
-	utils.Logln(utils.LogPrefixInfo+"URL:", unifiedSearchEndpoint)
-	resp, err := utils.InvokeGETRequest(unifiedSearchEndpoint, headers)
+	utils.Logln(utils.LogPrefixInfo+"URL:", unifiedSearchEndpoint + "?" + queryParamString)
+	resp, err := utils.InvokeGETRequestWithQueryParamsString(unifiedSearchEndpoint, queryParamString, headers)
 
 	if err != nil {
 		utils.HandleErrorAndExit("Unable to connect to "+unifiedSearchEndpoint, err)

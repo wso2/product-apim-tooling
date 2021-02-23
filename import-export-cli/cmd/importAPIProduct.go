@@ -33,7 +33,8 @@ var (
 	importAPIProductUpdate              bool
 	importAPIsUpdate                    bool
 	importAPIProductSkipCleanup         bool
-	importAPIProductRotateRevision		bool
+	importAPIProductRotateRevision      bool
+	importAPIProductSkipDeployments     bool
 )
 
 const (
@@ -68,7 +69,8 @@ var ImportAPIProductCmd = &cobra.Command{
 			utils.HandleErrorAndExit("Error while getting an access token for importing API Product", err)
 		}
 		err = impl.ImportAPIProductToEnv(accessOAuthToken, importAPIProductEnvironment, importAPIProductFile, importAPIs, importAPIsUpdate,
-			importAPIProductUpdate, importAPIProductCmdPreserveProvider, importAPIProductSkipCleanup, importAPIProductRotateRevision)
+			importAPIProductUpdate, importAPIProductCmdPreserveProvider, importAPIProductSkipCleanup,
+			importAPIProductRotateRevision, importAPIProductSkipDeployments)
 		if err != nil {
 			utils.HandleErrorAndExit("Error importing API Product", err)
 			return
@@ -95,6 +97,8 @@ func init() {
 		"associated with the API Product")
 	ImportAPIProductCmd.Flags().BoolVarP(&importAPIProductSkipCleanup, "skip-cleanup", "", false, "Leave "+
 		"all temporary files created during import process")
+	ImportAPIProductCmd.Flags().BoolVar(&importAPIProductSkipDeployments, "skip-deployments", false, "Update only " +
+		"the working copy and skip deployment steps in import")
 	// Mark required flags
 	_ = ImportAPIProductCmd.MarkFlagRequired("environment")
 	_ = ImportAPIProductCmd.MarkFlagRequired("file")
