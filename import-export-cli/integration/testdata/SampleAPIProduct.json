@@ -17,7 +17,7 @@
   "gatewayEnvironments": [
     "Production and Sandbox"
   ],
-  "apiType": "APIProduct",
+  "apiType": "APIPRODUCT",
   "transport": [
     "http",
     "https"

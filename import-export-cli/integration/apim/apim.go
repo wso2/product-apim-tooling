@@ -1301,6 +1301,6 @@ func getPublisherRestURL(host string, offset int, version string) string {
 }
 
 func getTokenURL(host string, offset int) string {
-	port := 8243 + offset
-	return "https://" + host + ":" + strconv.Itoa(port) + "/token"
+	port := 9443 + offset
+	return "https://" + host + ":" + strconv.Itoa(port) + "/oauth2/token"
 }
