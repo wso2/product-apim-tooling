@@ -47,9 +47,7 @@ var deleteAPICmd = &cobra.Command{
 
 func handleDeleteApi() {
 	flagApiName = strings.ToLower(flagApiName)
-
 	var errMsg string
-
 	deleteApiErr := k8sUtils.ExecuteCommand(
 		k8sUtils.Kubectl, k8sUtils.K8sDelete, k8sUtils.ApiOpCrdApi, flagApiName, "-n", flagNamespace)
 	if deleteApiErr != nil {

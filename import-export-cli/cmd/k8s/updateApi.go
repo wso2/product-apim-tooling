@@ -62,6 +62,7 @@ var updateApiCmd = &cobra.Command{
 
 func handleUpdateApi() {
 	var errMsg string
+	flagApiName = strings.ToLower(flagApiName)
 	getApiCr, getApiErr:= k8sUtils.GetCommandOutput(
 		k8sUtils.Kubectl, k8sUtils.K8sGet, k8sUtils.ApiOpCrdApi, flagApiName, "-n", flagNamespace, "-o", "json")
 	if getApiErr != nil {
@@ -77,7 +78,6 @@ func handleUpdateApi() {
 	var apiCr map[string]interface{}
 	_ = json.Unmarshal([]byte(getApiCr), &apiCr)
 	swaggerCmName := apiCr["spec"].(map[string]interface{})["swaggerConfigMapName"].(string)
-	fmt.Println(swaggerCmName)
 	timestampSuffix := fmt.Sprint(time.Now().Unix())
 	handleAddApi("-" + strings.ToLower(timestampSuffix))
 	deleteApiErr := k8sUtils.ExecuteCommand(
@@ -97,9 +97,9 @@ func handleUpdateApi() {
 func init() {
 	UpdateCmd.AddCommand(updateApiCmd)
 	updateApiCmd.Flags().StringVarP(&flagApiName, "name", "n", "", "Name of the API")
-	updateApiCmd.Flags().StringVarP(&flagSwaggerFilePath, "from-file", "f", "",
-		"Path to swagger file")
+	updateApiCmd.Flags().StringVarP(&flagSwaggerFilePath, "file", "f", "",
+		"Path to swagger, zip file or API project")
 	updateApiCmd.Flags().StringVar(&flagNamespace, "namespace", "", "namespace of API")
 	_ = updateApiCmd.MarkFlagRequired("name")
-	_ = updateApiCmd.MarkFlagRequired("from-file")
+	_ = updateApiCmd.MarkFlagRequired("file")
 }

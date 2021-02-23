@@ -68,11 +68,7 @@ func handleAddApi(nameSuffix string) {
 	utils.Logln(fmt.Sprintf("%sProcessing swagger  %v", utils.LogPrefixInfo, flagSwaggerFilePath))
 
 	flagApiName = strings.ToLower(flagApiName)
-	//if nameSuffix != "" {
-	//	swaggerCmName = cmName + nameSuffix
-	//} else {
-		swaggerCmName := fmt.Sprintf("%v-swagger%v", flagApiName, nameSuffix)
-	//}
+	swaggerCmName := fmt.Sprintf("%v-swagger%v", flagApiName, nameSuffix)
 
 	fi, _ := os.Stat(flagSwaggerFilePath) // error already handled and ignore error
 	switch mode := fi.Mode(); {
@@ -151,7 +147,7 @@ func createAPI(configMapName, timestamp string) {
 	if timestamp != "" {
 		//set update timestamp
 		apiCrd.Spec.UpdateTimeStamp = strings.Split(timestamp, "-")[1]
-		fmt.Println(apiCrd.Spec.UpdateTimeStamp)
+		//fmt.Println(apiCrd.Spec.UpdateTimeStamp)
 		k8sOperation = k8sUtils.K8sApply
 		k8sSaveConfig = false
 	}
@@ -213,9 +209,9 @@ func rollbackConfigs(apiCr *wso2v1alpha2.API) {
 func init() {
 	AddCmd.AddCommand(addApiCmd)
 	addApiCmd.Flags().StringVarP(&flagApiName, "name", "n", "", "Name of the API")
-	addApiCmd.Flags().StringVarP(&flagSwaggerFilePath, "from-file", "f", "",
-		"Path to swagger file")
+	addApiCmd.Flags().StringVarP(&flagSwaggerFilePath, "file", "f", "",
+		"Path to swagger, zip file or API Project")
 	addApiCmd.Flags().StringVar(&flagNamespace, "namespace", "", "namespace of API")
 	_ = addApiCmd.MarkFlagRequired("name")
-	_ = addApiCmd.MarkFlagRequired("from-file")
+	_ = addApiCmd.MarkFlagRequired("file")
 }

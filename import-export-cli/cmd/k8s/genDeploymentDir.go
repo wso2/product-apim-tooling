@@ -96,7 +96,6 @@ func executeGenDeploymentDirCmd() error {
 		sourceDirectoryPath = tempDirPath + "/" + path[0]
 	} else {
 		sourceDirectoryPath = genDeploymentDirSource
-		fmt.Println(sourceDirectoryPath)
 	}
 
 	deploymentDirPath, err := filepath.Abs(filepath.Join(deploymentDirParent, deploymentDirName))
@@ -129,7 +128,6 @@ func executeGenDeploymentDirCmd() error {
 
 	for _, file := range files {
 		fileName := file.Name()
-		fmt.Println(fileName)
 		// if project artifact is a API project
 		if strings.EqualFold(fileName, utils.MetaFileAPI) {
 			metaDataFileFound = true
@@ -137,7 +135,6 @@ func executeGenDeploymentDirCmd() error {
 			if err != nil {
 				utils.HandleErrorAndExit("Cannot copy metadata file from the source directory ", err)
 			}
-			fmt.Println(fileName)
 			metaDataYamlFile, err := ioutil.ReadFile(filepath.Join(sourceDirectoryPath, fileName))
 			if err != nil {
 				utils.HandleErrorAndExit("Cannot read the meta file", err)
@@ -178,7 +175,6 @@ func executeGenDeploymentDirCmd() error {
 			if err != nil {
 				utils.HandleErrorAndExit("Cannot copy metadata file from the source directory ", err)
 			}
-			fmt.Println(fileName)
 			metaDataYamlFile, err := ioutil.ReadFile(deploymentDirPath + fileName)
 			if err != nil {
 				utils.HandleErrorAndExit("Cannot read the meta file", err)
@@ -278,5 +274,4 @@ func init() {
 	genDeploymentDirCmd.Flags().StringVarP(&genDeploymentDirSource, "source", "s", "", "Path of "+
 		"the source directory to be used when generating the directory")
 	_ = genDeploymentDirCmd.MarkFlagRequired("source")
-	_ = genDeploymentDirCmd.MarkFlagRequired("name")
 }
