@@ -350,7 +350,6 @@ type APIData struct {
 type MetaData struct {
 	Name     string `json:"name"`
 	Version  string `json:"version,omitempty"`
-	Revision string `json:"revision"`
 	Owner    string `json:"owner,omitempty"`
 }
 
