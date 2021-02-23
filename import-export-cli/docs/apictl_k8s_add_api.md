@@ -15,7 +15,7 @@ apictl k8s add api [flags]
 ### Examples
 
 ```
-apictl k8s add/update api -n petstore --file=./Swagger.json --namespace=wso2
+apictl k8s add/update api -n petstore -f Swagger.json --namespace=wso2
 ```
 
 ### Options

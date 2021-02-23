@@ -13,8 +13,8 @@ apictl k8s [flags]
 ### Examples
 
 ```
-apictl k8s add api -n petstore --file=./Swagger.json --namespace=wso2
-apictl k8s update api -n petstore --file=./Swagger.json --namespace=wso2
+apictl k8s add api -n petstore -f Swagger.json --namespace=wso2
+apictl k8s update api -n petstore -f Swagger.json --namespace=wso2
 apictl k8s delete api -n petstore
 ```
 

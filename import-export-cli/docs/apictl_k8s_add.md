@@ -10,9 +10,9 @@ JSON, YAML, zip and API project formats are accepted.
 ### Examples
 
 ```
-apictl k8s add api -n petstore --file=./Swagger.json --namespace=wso2
-apictl k8s add api -n petstore --file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi.zip --namespace=wso2
-apictl k8s add api -n petstore --file=./myapi --namespace=wso2
+apictl k8s add api -n petstore -f Swagger.json --namespace=wso2
+apictl k8s add api -n petstore -f product-apim-tooling/import-export-cli/build/target/apictl/myapi.zip --namespace=wso2
+apictl k8s add api -n petstore -f myapi --namespace=wso2
 ```
 
 ### Options
