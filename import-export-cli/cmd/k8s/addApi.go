@@ -47,7 +47,7 @@ const addApiLongDesc = `Add, Update and Delete APIs in kubernetes cluster. JSON 
 available modes are as follows
 * kubernetes`
 const addApiExamples = utils.ProjectName + " " + K8sCmdLiteral + " add/update " + AddApiCmdLiteral +
-	` -n petstore --file=./Swagger.json --namespace=wso2`
+	` -n petstore -f Swagger.json --namespace=wso2`
 
 // addApiCmd represents the api command
 var addApiCmd = &cobra.Command{
@@ -147,7 +147,6 @@ func createAPI(configMapName, timestamp string) {
 	if timestamp != "" {
 		//set update timestamp
 		apiCrd.Spec.UpdateTimeStamp = strings.Split(timestamp, "-")[1]
-		//fmt.Println(apiCrd.Spec.UpdateTimeStamp)
 		k8sOperation = k8sUtils.K8sApply
 		k8sSaveConfig = false
 	}

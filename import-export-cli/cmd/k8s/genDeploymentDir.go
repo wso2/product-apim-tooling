@@ -198,7 +198,7 @@ func executeGenDeploymentDirCmd() error {
 	// write to api_crd.yaml file
 	byteVal, errMarshal := yaml.Marshal(apiCrd)
 	if errMarshal != nil {
-		utils.HandleErrorAndExit("Error marshal api configmap ", errMarshal)
+		utils.HandleErrorAndExit("Error marshal API configmap ", errMarshal)
 	}
 	err = ioutil.WriteFile(filepath.Join(deploymentDirPath, "api_crd.yaml"), byteVal, os.ModePerm)
 	if err != nil {
@@ -216,7 +216,7 @@ func executeGenDeploymentDirCmd() error {
 	apiParamsCm.Data = map[string]string{"params.yaml": string(apiParamsData)}
 	byteParamsVal, errParamsMarshal := yaml.Marshal(apiParamsCm)
 	if errParamsMarshal != nil {
-		utils.HandleErrorAndExit("Error marshal api configmap ", errMarshal)
+		utils.HandleErrorAndExit("Error marshal API configmap ", errMarshal)
 	}
 	err = ioutil.WriteFile(filepath.Join(deploymentDirPath, fmt.Sprintf("%v-params.yaml", apiMetaData.Name)),
 		byteParamsVal, os.ModePerm)

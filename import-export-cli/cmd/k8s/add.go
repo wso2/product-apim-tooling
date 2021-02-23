@@ -28,11 +28,11 @@ const k8sAddCmdShortDesc = "Add an API to the kubernetes cluster"
 const k8sAddCmdLongDesc = `Add an API either from a Swagger file, project zip for API project to the kubernetes cluster. 
 JSON, YAML, zip and API project formats are accepted.`
 const k8sAddCmdExamples = utils.ProjectName + " " + K8sCmdLiteral + " " + K8sAddCmdLiteral + " " + AddApiCmdLiteral +
-	" " + `-n petstore --file=./Swagger.json --namespace=wso2
+	" " + `-n petstore -f Swagger.json --namespace=wso2
 ` + utils.ProjectName + " " + K8sCmdLiteral + " " + K8sAddCmdLiteral + " " + AddApiCmdLiteral +
-	" " + `-n petstore --file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi.zip --namespace=wso2
+	" " + `-n petstore -f product-apim-tooling/import-export-cli/build/target/apictl/myapi.zip --namespace=wso2
 ` + utils.ProjectName + " " + K8sCmdLiteral + " " + K8sAddCmdLiteral + " " + AddApiCmdLiteral +
-	" " + `-n petstore --file=./myapi --namespace=wso2`
+	" " + `-n petstore -f myapi --namespace=wso2`
 
 // K8sAddCmd represents the add command
 var AddCmd = &cobra.Command{

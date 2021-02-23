@@ -35,9 +35,9 @@ const k8sCmdShortDesc = "Kubernetes mode based commands"
 const k8sCmdLongDesc = `Kubernetes mode based commands such as add, update and delete API`
 
 const k8sCmdExamples = utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sAddCmdLiteral + ` ` + AddApiCmdLiteral + ` ` +
-	`-n petstore --file=./Swagger.json --namespace=wso2
+	`-n petstore -f Swagger.json --namespace=wso2
 ` + utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sUpdateCmdLiteral + ` ` + AddApiCmdLiteral + ` ` +
-	`-n petstore --file=./Swagger.json --namespace=wso2
+	`-n petstore -f Swagger.json --namespace=wso2
 ` + utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + k8sDeleteCmdLiteral + ` ` + k8sDeleteAPICmdLiteral + ` ` +
 	`-n petstore`
 
