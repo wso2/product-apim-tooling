@@ -458,3 +458,22 @@ func GetEndpointsOfMgwAdapterEnv(env string, filePath string) (*MgwEndpoints, er
 	}
 	return nil, errors.New("error getting endpoints of mgw adapter environment '" + env + "'")
 }
+
+// @param env : Environment to be removed from file
+// @param endpointsFilePath : Path to file where env endpoints are stored
+func RemoveMgwAdapterEnvFromMainConfigFile(env, endpointsFilePath string) error {
+	if env == "" {
+		return errors.New("environment cannot be blank")
+	}
+	mainConfig := GetMainConfigFromFile(endpointsFilePath)
+	if MgwAdapterEnvExistsInMainConfigFile(env, endpointsFilePath) {
+		delete(mainConfig.MgwAdapterEnvs, env)
+		WriteConfigFile(mainConfig, endpointsFilePath)
+		Logln(LogPrefixInfo + "MgwAdapter Environment '" + env +
+			"' removed from config file: " + endpointsFilePath)
+		return nil
+	} else {
+		// env doesn't exist in endpoints file
+		return errors.New("MgwAdapter Environment not found in " + endpointsFilePath)
+	}
+}

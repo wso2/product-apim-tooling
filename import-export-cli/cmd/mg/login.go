@@ -19,17 +19,9 @@
 package mg
 
 import (
-	"bufio"
-	"errors"
-	"fmt"
-	"io/ioutil"
-	"os"
-	"strings"
-
 	"github.com/spf13/cobra"
-	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
+	impl "github.com/wso2/product-apim-tooling/import-export-cli/impl/mg"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"golang.org/x/crypto/ssh/terminal"
 )
 
 var loginUsername string
@@ -53,68 +45,12 @@ var loginCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		environment := args[0]
 
-		store, err := credentials.GetDefaultCredentialStore()
-		if err != nil {
-			utils.HandleErrorAndExit("Error occurred while loading credential store : ", err)
-		}
-		err = runLogin(store, environment)
+		err := impl.RunLogin(environment, loginUsername, loginPassword,
+			loginPasswordStdin)
 		if err != nil {
 			utils.HandleErrorAndExit("Error occurred while login : ", err)
 		}
 	},
-}
-
-func runLogin(store credentials.Store, environment string) error {
-	mgwAdapterEndpoints, err := utils.GetEndpointsOfMgwAdapterEnv(environment, utils.MainConfigFilePath)
-	if err != nil {
-		return errors.New("Env " + environment + " does not exists. Add it using `apictl mg add env`")
-	}
-
-	if loginUsername == "" {
-		fmt.Print("Username: ")
-		scanner := bufio.NewScanner(os.Stdin)
-		if scanner.Scan() {
-			loginUsername = scanner.Text()
-		}
-	}
-
-	if loginPassword != "" {
-		fmt.Println("Warning: Using --password in CLI is not secure. Use --password-stdin")
-		if loginPasswordStdin {
-			return errors.New("--password and --password-stdin are mutually exclusive")
-		}
-	}
-
-	if loginPasswordStdin {
-		data, err := ioutil.ReadAll(os.Stdin)
-		if err != nil {
-			return errors.New("Error reading password. Cause: " + err.Error())
-		}
-		loginPassword = strings.TrimRight(strings.TrimSuffix(string(data), "\n"), "\r")
-	}
-
-	if loginPassword == "" {
-		fmt.Print("Enter Password: ")
-		loginPasswordB, err := terminal.ReadPassword(0)
-		loginPassword = string(loginPasswordB)
-		fmt.Println()
-		if err != nil {
-			return errors.New("Error reading password. Cause: " + err.Error())
-		}
-	}
-
-	accessToken, err := credentials.GetOAuthAccessTokenForMGAdapter(loginUsername, loginPassword,
-		mgwAdapterEndpoints.AdapterEndpoint)
-	if err != nil {
-		utils.HandleErrorAndExit("Error getting access token from adapter", err)
-	}
-
-	err = store.SetMGToken(environment, accessToken)
-	if err != nil {
-		return err
-	}
-	fmt.Println("Successfully logged into Microgateway Adapter in environment: ", environment)
-	return nil
 }
 
 // init using Cobra

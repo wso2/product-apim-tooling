@@ -19,11 +19,10 @@
 package mg
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
+	impl "github.com/wso2/product-apim-tooling/import-export-cli/impl/mg"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
@@ -38,60 +37,6 @@ const (
 const removeEnvCmdExamples = utils.ProjectName + " " + removeCmdLiteral + " " +
 	envCmdLiteral + " prod"
 
-func executeRemoveEnvCmd(env, mainConfigFilePath, envKeysAllFilePath string) {
-	err := removeEnv(env, mainConfigFilePath, envKeysAllFilePath)
-	if err != nil {
-		utils.HandleErrorAndExit("Error removing environment", err)
-	}
-}
-
-// removeEnv
-// to be used with 'remove env' command
-// @param envName : Name of the environment to be removed from the
-// @param mainConfigFilePath : Path to file where env endpoints are stored
-// @param envKeysFilePath : Path to file where env keys are stored
-// @return error
-func removeEnv(envName, mainConfigFilePath, envKeysFilePath string) error {
-	if envName == "" {
-		return errors.New("name of the environment cannot be blank")
-	}
-	if utils.MgwAdapterEnvExistsInMainConfigFile(envName, mainConfigFilePath) {
-		var err error
-		if utils.EnvExistsInKeysFile(envName, utils.EnvKeysAllFilePath) {
-			// environment exists in keys file, it has to be cleared first
-			err = utils.RemoveEnvFromKeysFile(envName, envKeysFilePath, mainConfigFilePath)
-			if err != nil {
-				return err
-			}
-		}
-
-		// remove keys also if user has already logged into this environment
-		store, err := credentials.GetDefaultCredentialStore()
-		if store.HasAPIM(envName) {
-			err = runLogout(envName)
-			if err != nil {
-				utils.Logln("Log out is unsuccessful for APIM.", err)
-			}
-		}
-
-		// remove env from mainConfig file (endpoints file)
-		err = utils.RemoveEnvFromMainConfigFile(envName, mainConfigFilePath)
-		if err != nil {
-			return err
-		}
-
-	} else {
-		// environment does not exist in mainConfig file (endpoints file). Nothing to remove
-		return errors.New("environment '" + envName + "' not found in " + mainConfigFilePath)
-	}
-
-	fmt.Println("Successfully removed environment '" + envName + "'")
-	fmt.Println("Execute '" + utils.ProjectName + " " + mgCmdLiteral + " " +
-		addCmdLiteral + " " + envCmdLiteral + " --help' to see how to add a new environment")
-
-	return nil
-}
-
 // RemoveEnvCmd represents the removeEnv command
 var RemoveEnvCmd = &cobra.Command{
 	Use:     envCmdLiteral,
@@ -103,8 +48,19 @@ var RemoveEnvCmd = &cobra.Command{
 		envToBeRemoved := args[0]
 
 		utils.Logln(utils.LogPrefixInfo + envCmdLiteral + " called")
-		executeRemoveEnvCmd(envToBeRemoved, utils.MainConfigFilePath, utils.EnvKeysAllFilePath)
+		executeRemoveEnvCmd(envToBeRemoved, utils.MainConfigFilePath)
 	},
+}
+
+func executeRemoveEnvCmd(env, mainConfigFilePath string) {
+	err := impl.RemoveEnv(env, mainConfigFilePath)
+	if err != nil {
+		utils.HandleErrorAndExit("Error removing environment", err)
+	}
+	fmt.Println("Successfully removed environment '" + env + "'")
+	fmt.Println("Execute '" + utils.ProjectName + " " + mgCmdLiteral + " " +
+		addCmdLiteral + " " + envCmdLiteral + " --help' to see how to add a new environment")
+
 }
 
 // init using Cobra

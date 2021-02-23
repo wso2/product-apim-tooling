@@ -23,6 +23,8 @@ type Store interface {
 	HasAPIM(env string) bool
 	// HasMI return the existance of mi credentials in the store for a given environment
 	HasMI(env string) bool
+	// HasMG return the existance of mg tokens in the store for a given mgw adapter environment
+	HasMG(env string) bool
 	// GetAPIMCredentials returns credentials for apim from the store or an error
 	GetAPIMCredentials(env string) (Credential, error)
 	// GetMICredentials returns credentials for micro integrator from the store or an error

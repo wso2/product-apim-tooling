@@ -19,10 +19,8 @@
 package mg
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
-	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
+	impl "github.com/wso2/product-apim-tooling/import-export-cli/impl/mg"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
@@ -39,24 +37,11 @@ var logoutCmd = &cobra.Command{
 	Example: logoutCmdExamples,
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		err := runLogout(args[0])
+		err := impl.RunLogout(args[0])
 		if err != nil {
 			utils.HandleErrorAndExit("Error occurred while logging out : ", err)
 		}
 	},
-}
-
-func runLogout(environment string) error {
-	store, err := credentials.GetDefaultCredentialStore()
-	if err != nil {
-		return err
-	}
-	err = store.EraseMG(environment)
-	if err != nil {
-		return err
-	}
-	fmt.Println("Logged out from APIM in ", environment, " environment")
-	return nil
 }
 
 // init using Cobra

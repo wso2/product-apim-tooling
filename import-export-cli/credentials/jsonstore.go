@@ -253,10 +253,22 @@ func (s *JsonStore) HasMI(env string) bool {
 	return false
 }
 
+// HasMI return the existance of mi credentials in the store for a given environment
+func (s *JsonStore) HasMG(env string) bool {
+	if mgwAdapterEnv, ok := s.credentials.MgwAdapterEnvs[env]; ok {
+		return mgTokenExists(mgwAdapterEnv)
+	}
+	return false
+}
+
 func miCredentialsExists(miCred MiCredential) bool {
 	return miCred.AccessToken != "" && miCred.Username != "" && miCred.Password != ""
 }
 
 func apimCredentialsExists(apimCred Credential) bool {
 	return apimCred.ClientId != "" && apimCred.ClientSecret != "" && apimCred.Username != "" && apimCred.Password != ""
+}
+
+func mgTokenExists(mgwAdapterToken MgToken) bool {
+	return mgwAdapterToken.AccessToken != ""
 }
