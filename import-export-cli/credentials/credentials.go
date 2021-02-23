@@ -48,7 +48,7 @@ type Credentials struct {
 	// Environments specific credentials
 	Environments map[string]Environment `json:"environments"`
 	// Microgateway Adapter Environments specific credentials
-	MgwAdapterEnvs map[string]MgToken `json:"mgw_adapter_envs"`
+	MgwAdapterEnvs map[string]MgToken `json:"mgw-adapter-envs"`
 	// CredStore represent type of store to be used
 	CredStore string `json:"credStore,omitempty"`
 }

@@ -31,7 +31,7 @@ type EnvKeysAll struct {
 type MainConfig struct {
 	Config         Config                  `yaml:"config"`
 	Environments   map[string]EnvEndpoints `yaml:"environments"`
-	MgwAdapterEnvs map[string]MgwEndpoints `yaml:"mgw_adapter_envs"`
+	MgwAdapterEnvs map[string]MgwEndpoints `yaml:"mgw-adapter-envs"`
 }
 
 type Config struct {
