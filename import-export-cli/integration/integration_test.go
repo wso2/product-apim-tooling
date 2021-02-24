@@ -75,8 +75,16 @@ var (
 	publisher  = Users["publisher"][0]
 	devops     = Users["devops"][0]
 
-	apimClients []*apim.Client
+	apimClients = map[string]*apim.Client{}
 )
+
+func GetDevClient() *apim.Client {
+	return apimClients["development"]
+}
+
+func GetProdClient() *apim.Client {
+	return apimClients["production"]
+}
 
 func TestMain(m *testing.M) {
 	flag.Parse()
@@ -88,7 +96,7 @@ func TestMain(m *testing.M) {
 	for _, env := range envs {
 		client := apim.Client{}
 		client.Setup(env.Name, env.Host, env.Offset, yamlConfig.DCRVersion, yamlConfig.RESTAPIVersion)
-		apimClients = append(apimClients, &client)
+		apimClients[env.Name] = &client
 	}
 
 	cleanupUsersAndTenants()

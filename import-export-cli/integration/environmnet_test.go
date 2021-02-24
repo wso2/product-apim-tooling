@@ -33,7 +33,7 @@ const defaultExportPath = utils.DefaultExportDirName
 
 //Get Environments using apictl
 func TestGetEnvironments(t *testing.T) {
-	apim := apimClients[0]
+	apim := GetDevClient()
 	base.SetupEnvWithoutTokenFlag(t, apim.GetEnvName(), apim.GetApimURL())
 	response, _ := base.Execute(t, "get", "envs")
 	base.GetRowsFromTableResponse(response)
@@ -43,7 +43,7 @@ func TestGetEnvironments(t *testing.T) {
 
 //Change Export directory using apictl and assert the change
 func TestChangeExportDirectory(t *testing.T) {
-	dev := apimClients[0]
+	dev := GetDevClient()
 	changedExportDirectory, _ := filepath.Abs(testutils.CustomTestExportDirectory)
 
 	// Create directory to act as custom export directory
@@ -64,7 +64,7 @@ func TestChangeExportDirectory(t *testing.T) {
 		testutils.ValidateExportDirectoryIsChanged(t, argsDefault)
 	})
 
-	apimClient := apimClients[0]
+	apimClient := GetDevClient()
 	projectName := base.GenerateRandomName(16)
 	apiName := testutils.DevFirstDefaultAPIName
 	apiVersion := testutils.DevFirstDefaultAPIVersion
@@ -99,7 +99,7 @@ func TestChangeExportDirectory(t *testing.T) {
 //TODO  - Need to come up with  a process to make sure that http timeout is actually changed using another fake server
 //Change HTTP request Timeout using apictl and assert the change
 //func TestChangeHttpRequestTimout(t *testing.T) {
-//	apim := apimClients[0]
+//	apim := GetDevClient()
 //	defaultHttpRequestTimeOut := utils.DefaultHttpRequestTimeout
 //	newHttpRequestTimeOut := 20000
 //	args := &setTestArgs{

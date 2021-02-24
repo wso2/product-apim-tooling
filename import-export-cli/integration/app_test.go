@@ -34,7 +34,7 @@ func TestListApp(t *testing.T) {
 	otherUsername := subscriber.UserName
 	otherPassword := subscriber.Password
 
-	apim := apimClients[0]
+	apim := GetDevClient()
 	testutils.AddApp(t, apim, username, password)
 	testutils.AddApp(t, apim, otherUsername, otherPassword)
 
@@ -53,7 +53,7 @@ func TestListAppsDevopsSuperTenantUser(t *testing.T) {
 	otherUsername := subscriber.UserName
 	otherPassword := subscriber.Password
 
-	apim := apimClients[0]
+	apim := GetDevClient()
 	testutils.AddApp(t, apim, username, password)
 	testutils.AddApp(t, apim, otherUsername, otherPassword)
 
@@ -72,7 +72,7 @@ func TestListAppsDevopsTenantUser(t *testing.T) {
 	otherUsername := subscriber.UserName + "@" + TENANT1
 	otherPassword := subscriber.Password
 
-	apim := apimClients[0]
+	apim := GetDevClient()
 	testutils.AddApp(t, apim, tenantAdminUsername, tenantAdminPassword)
 	testutils.AddApp(t, apim, otherUsername, otherPassword)
 
@@ -86,7 +86,7 @@ func TestListAppWithOwner(t *testing.T) {
 	username := superAdminUser
 	password := superAdminPassword
 
-	apim := apimClients[0]
+	apim := GetDevClient()
 
 	for appCount := 0; appCount < 5; appCount++ {
 		testutils.AddApp(t, apim, username, password)
@@ -102,7 +102,7 @@ func TestExportAppNonAdminSuperTenant(t *testing.T) {
 	subscriberUserName := subscriber.UserName
 	subscriberPassword := subscriber.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	app := testutils.AddApp(t, dev, subscriberUserName, subscriberPassword)
 
@@ -120,7 +120,7 @@ func TestExportAppNonAdminTenant(t *testing.T) {
 	subscriberUserName := subscriber.UserName + "@" + TENANT1
 	subscriberPassword := subscriber.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	app := testutils.AddApp(t, dev, subscriberUserName, subscriberPassword)
 
@@ -138,8 +138,8 @@ func TestExportImportOwnAppAdminSuperTenant(t *testing.T) {
 	adminUsername := superAdminUser
 	adminPassword := superAdminPassword
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	app := testutils.AddApp(t, dev, adminUsername, adminPassword)
 
@@ -159,8 +159,8 @@ func TestExportImportOwnAppAdminSuperTenantWithUpdate(t *testing.T) {
 	adminUsername := superAdminUser
 	adminPassword := superAdminPassword
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	app := testutils.AddApp(t, dev, adminUsername, adminPassword)
 
@@ -183,8 +183,8 @@ func TestExportImportAppDevopsSuperTenantWithUpdate(t *testing.T) {
 	devopsUsername := devops.UserName
 	devopsPassword := devops.Password
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	app := testutils.AddApp(t, dev, adminUsername, adminPassword)
 
@@ -205,8 +205,8 @@ func TestExportImportOtherAppAdminSuperTenant(t *testing.T) {
 	adminUsername := superAdminUser
 	adminPassword := superAdminPassword
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	app := testutils.AddApp(t, dev, otherUsername, otherPassword)
 
@@ -230,8 +230,8 @@ func TestExportImportAppDevopsSuperTenant(t *testing.T) {
 	adminUsername := superAdminUser
 	adminPassword := superAdminPassword
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	app := testutils.AddApp(t, dev, adminUsername, adminPassword)
 
@@ -250,8 +250,8 @@ func TestExportImportOwnAppAdminTenant(t *testing.T) {
 	adminUsername := superAdminUser + "@" + TENANT1
 	adminPassword := superAdminPassword
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	app := testutils.AddApp(t, dev, adminUsername, adminPassword)
 
@@ -272,8 +272,8 @@ func TestExportOtherAppAdminTenant(t *testing.T) {
 	adminUsername := superAdminUser + "@" + TENANT1
 	adminPassword := superAdminPassword
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	app := testutils.AddApp(t, dev, otherUsername, otherPassword)
 
@@ -297,8 +297,8 @@ func TestExportImportAppDevopsTenant(t *testing.T) {
 	tenantAdminUsername := superAdminUser + "@" + TENANT1
 	tenantAdminPassword := superAdminPassword
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	app := testutils.AddApp(t, dev, tenantAdminUsername, tenantAdminPassword)
 
@@ -319,7 +319,7 @@ func TestExportCrossTenantAppAdminTenant(t *testing.T) {
 	tenantAdminUsername := superAdminUser + "@" + TENANT1
 	tenantAdminPassword := superAdminPassword
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	app := testutils.AddApp(t, dev, adminUsername, adminPassword)
 
@@ -342,7 +342,7 @@ func TestExportCrossTenantAppDevopsTenant(t *testing.T) {
 	tenantDevopsUsername := devops.UserName + "@" + TENANT1
 	tenantDevopsPassword := devops.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	app := testutils.AddApp(t, dev, adminUsername, adminPassword)
 
@@ -394,7 +394,7 @@ func TestDeleteAppSuperTenantUser(t *testing.T) {
 	adminUsername := superAdminUser
 	adminPassword := superAdminPassword
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	var application *apim.Application
 	for appCount := 0; appCount <= numberOfApps; appCount++ {

@@ -19,8 +19,9 @@
 package integration
 
 import (
-	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 	"testing"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 )
@@ -32,7 +33,7 @@ func TestGetKeysNonAdminSuperTenantUser(t *testing.T) {
 	apiCreator := creator.UserName
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, api.ID)
@@ -53,7 +54,7 @@ func TestGetKeysNonAdminTenantUser(t *testing.T) {
 	apiCreator := creator.UserName + "@" + TENANT1
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, api.ID)
@@ -77,7 +78,7 @@ func TestGetKeysAdminSuperTenantUser(t *testing.T) {
 	apiCreator := creator.UserName
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
@@ -102,7 +103,7 @@ func TestGetKeysConsecutivelyAdminSuperTenantUser(t *testing.T) {
 	apiCreator := creator.UserName
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
@@ -130,7 +131,7 @@ func TestGetKeysAdminTenantUser(t *testing.T) {
 	apiCreator := creator.UserName + "@" + TENANT1
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
@@ -184,7 +185,7 @@ func TestGetKeysNonPublishedAPI(t *testing.T) {
 	apiCreator := creator.UserName
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
@@ -204,7 +205,7 @@ func TestGetKeysForAPIProductNonAdminSuperTenantUser(t *testing.T) {
 	apiCreator := creator.UserName
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	// Add the first dependent API to env1
 	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
@@ -239,7 +240,7 @@ func TestGetKeysForAPIProductNonAdminTenantUser(t *testing.T) {
 	apiCreator := creator.UserName + "@" + TENANT1
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	// Add the first dependent API to env1
 	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
@@ -277,7 +278,7 @@ func TestGetKeysForAPIProductAdminSuperTenantUser(t *testing.T) {
 	apiCreator := creator.UserName
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	// Add the first dependent API to env1
 	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
@@ -315,7 +316,7 @@ func TestGetKeysForAPIProductAdminTenantUser(t *testing.T) {
 	apiCreator := creator.UserName + "@" + TENANT1
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	// Add the first dependent API to env1
 	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
@@ -353,7 +354,7 @@ func TestGetKeysConsecutivelyForAPIProductAdminSuperTenantUser(t *testing.T) {
 	apiCreator := creator.UserName
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	// Add the first dependent API to env1
 	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)

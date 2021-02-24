@@ -39,7 +39,7 @@ func TestExportApiCompareStruct(t *testing.T) {
 	apiCreator := creator.UserName
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
@@ -62,7 +62,7 @@ func TestExportApiNonAdminSuperTenantUser(t *testing.T) {
 	apiCreator := creator.UserName
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
@@ -84,8 +84,8 @@ func TestExportImportApiAdminSuperTenantUser(t *testing.T) {
 	apiCreator := creator.UserName
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
@@ -109,8 +109,8 @@ func TestExportImportApiDevopsSuperTenantUser(t *testing.T) {
 	apiCreator := creator.UserName
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
@@ -134,7 +134,7 @@ func TestExportApiNonAdminTenantUser(t *testing.T) {
 	tenantApiCreator := creator.UserName + "@" + TENANT1
 	tenantApiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	api := testutils.AddAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword)
 
@@ -156,8 +156,8 @@ func TestExportImportApiAdminTenantUser(t *testing.T) {
 	tenantApiCreator := creator.UserName + "@" + TENANT1
 	tenantApiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	api := testutils.AddAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword)
 
@@ -181,8 +181,8 @@ func TestExportImportApiDevopsTenantUser(t *testing.T) {
 	tenantApiCreator := creator.UserName + "@" + TENANT1
 	tenantApiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	api := testutils.AddAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword)
 
@@ -205,7 +205,7 @@ func TestExportApiAdminSuperTenantUserWithoutProvider(t *testing.T) {
 	apiCreator := creator.UserName
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
@@ -226,7 +226,7 @@ func TestExportApiDevopsSuperTenantUserWithoutProvider(t *testing.T) {
 	apiCreator := creator.UserName
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
@@ -247,7 +247,7 @@ func TestExportApiAdminTenantUserWithoutProvider(t *testing.T) {
 	tenantApiCreator := creator.UserName + "@" + TENANT1
 	tenantApiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	api := testutils.AddAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword)
 
@@ -268,7 +268,7 @@ func TestExportApiDevopsTenantUserWithoutProvider(t *testing.T) {
 	tenantApiCreator := creator.UserName + "@" + TENANT1
 	tenantApiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	api := testutils.AddAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword)
 
@@ -289,8 +289,8 @@ func TestExportApiAdminTenantUserFromAnotherTenant(t *testing.T) {
 	superTenantApiCreator := creator.UserName
 	superTenantApiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
 
@@ -313,8 +313,8 @@ func TestExportApiDevopsTenantUserFromAnotherTenant(t *testing.T) {
 	superTenantApiCreator := creator.UserName
 	superTenantApiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
 
@@ -337,8 +337,8 @@ func TestExportApiAdminTenantUserFromAnotherTenantWithoutProvider(t *testing.T) 
 	superTenantApiCreator := creator.UserName
 	superTenantApiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
 
@@ -360,8 +360,8 @@ func TestExportApiDevopsTenantUserFromAnotherTenantWithoutProvider(t *testing.T)
 	superTenantApiCreator := creator.UserName
 	superTenantApiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
 
@@ -387,8 +387,8 @@ func TestExportImportApiCrossTenantUserWithoutPreserveProvider(t *testing.T) {
 	tenantAdminUsername := superAdminUser + "@" + TENANT1
 	tenantAdminPassword := superAdminPassword
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
 
@@ -423,8 +423,8 @@ func TestExportImportApiCrossTenantDevopsUserWithoutPreserveProvider(t *testing.
 	tenantDevopsUsername := devops.UserName + "@" + TENANT1
 	tenantDevopsPassword := devops.Password
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
 
@@ -459,8 +459,8 @@ func TestExportImportApiCrossTenantUser(t *testing.T) {
 	tenantAdminUsername := superAdminUser + "@" + TENANT1
 	tenantAdminPassword := superAdminPassword
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
 
@@ -493,8 +493,8 @@ func TestExportImportApiCrossTenantDevopsUser(t *testing.T) {
 	tenantDevopsUsername := devops.UserName + "@" + TENANT1
 	tenantDevopsPassword := devops.Password
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
 
@@ -523,7 +523,7 @@ func TestListApisAdminSuperTenantUser(t *testing.T) {
 	apiCreator := creator.UserName
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
 		// Add the API to env1
@@ -545,7 +545,7 @@ func TestListApisDevopsSuperTenantUser(t *testing.T) {
 	apiCreator := creator.UserName
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
 		// Add the API to env1
@@ -567,7 +567,7 @@ func TestListApisAdminTenantUser(t *testing.T) {
 	apiCreator := creator.UserName + "@" + TENANT1
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
 		// Add the API to env1
@@ -589,7 +589,7 @@ func TestListApisDevopsTenantUser(t *testing.T) {
 	apiCreator := creator.UserName + "@" + TENANT1
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
 		// Add the API to env1
@@ -611,7 +611,7 @@ func TestDeleteApiAdminSuperTenantUser(t *testing.T) {
 	apiCreator := creator.UserName
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	var api *apim.API
 	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
@@ -637,7 +637,7 @@ func TestDeleteApiDevopsSuperTenantUser(t *testing.T) {
 	apiCreator := creator.UserName
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	var api *apim.API
 	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
@@ -663,7 +663,7 @@ func TestDeleteApiAdminTenantUser(t *testing.T) {
 	tenantApiCreator := creator.UserName + "@" + TENANT1
 	tenantApiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	var api *apim.API
 	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
@@ -689,7 +689,7 @@ func TestDeleteApiDevopsTenantUser(t *testing.T) {
 	tenantApiCreator := creator.UserName + "@" + TENANT1
 	tenantApiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	var api *apim.API
 	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
@@ -712,7 +712,7 @@ func TestDeleteApiSuperTenantUser(t *testing.T) {
 	apiCreator := creator.UserName
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	var api *apim.API
 	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
@@ -735,7 +735,7 @@ func TestDeleteApiWithActiveSubscriptionsSuperTenantUser(t *testing.T) {
 	adminUser := superAdminUser
 	adminPassword := superAdminPassword
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	var api *apim.API
 
@@ -767,7 +767,7 @@ func TestExportApisWithExportApisCommand(t *testing.T) {
 	tenantAdminUsername := superAdminUser + "@" + TENANT1
 	tenantAdminPassword := superAdminPassword
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	var api *apim.API
 	var apisAdded = 0
@@ -795,7 +795,7 @@ func TestChangeLifeCycleStatusOfApiAdminSuperTenantUser(t *testing.T) {
 	apiCreator := creator.UserName
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	// Add the API to env
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
@@ -830,7 +830,7 @@ func TestChangeLifeCycleStatusOfApiDevopsSuperTenantUser(t *testing.T) {
 	apiCreator := creator.UserName
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	// Add the API to env
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
@@ -865,7 +865,7 @@ func TestChangeLifeCycleStatusOfApiAdminTenantUser(t *testing.T) {
 	apiCreator := creator.UserName + "@" + TENANT1
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	// Add the API to env
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
@@ -900,7 +900,7 @@ func TestChangeLifeCycleStatusOfApiDevopsTenantUser(t *testing.T) {
 	apiCreator := creator.UserName + "@" + TENANT1
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 	// Add the API to env
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
@@ -934,7 +934,7 @@ func TestChangeLifeCycleStatusOfApiFailWithAUserWithoutPermissions(t *testing.T)
 	apiCreator := creator.UserName + "@" + TENANT1
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 	// Add the API to env
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
@@ -957,7 +957,7 @@ func TestChangeLifeCycleStatusOfApiWithActiveSubscriptionWithAdminSuperTenantUse
 	apiCreator := creator.UserName
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 	// Add the API to env
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
@@ -994,7 +994,7 @@ func TestChangeLifeCycleStatusOfApiWithActiveSubscriptionDevopsSuperTenantUser(t
 	apiCreator := creator.UserName
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 	// Add the API to env
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
