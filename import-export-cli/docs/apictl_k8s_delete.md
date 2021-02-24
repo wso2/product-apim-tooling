@@ -6,15 +6,10 @@ Delete resources related to kubernetes
 
 Delete resources by filenames, stdin, resources and names, or by resources and label selector in kubernetes mode
 
-```
-apictl k8s delete [flags]
-```
-
 ### Examples
 
 ```
-apictl delete api petstore
-apictl delete api -l name=myLabel
+delete api -n petstore
 ```
 
 ### Options
@@ -33,5 +28,5 @@ apictl delete api -l name=myLabel
 ### SEE ALSO
 
 * [apictl k8s](apictl_k8s.md)	 - Kubernetes mode based commands
-* [apictl k8s delete apictl](apictl_k8s_delete_apictl.md)	 - Delete API resources
+* [apictl k8s delete api](apictl_k8s_delete_api.md)	 - Delete API resources
 

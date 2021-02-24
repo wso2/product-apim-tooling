@@ -4,14 +4,15 @@ Update an API to the kubernetes cluster
 
 ### Synopsis
 
-Update an existing API with Swagger file in the kubernetes cluster. JSON and YAML formats are accepted.
+Update an existing API with Swagger file, project zip and API project in the kubernetes cluster. 
+JSON, YAML, zip and API project folder formats are accepted.
 
 ### Examples
 
 ```
-apictl k8s update api -n petstore --from-file=./Swagger.json --replicas=1 --namespace=wso2
+apictl k8s update api -n petstore -f Swagger.json --namespace=wso2
 
-apictl k8s update api -n petstore --from-file=./product-apim-tooling/import-export-cli/build/target/apictl/myapi --replicas=1 --namespace=wso2
+apictl k8s update api -n petstore -f product-apim-tooling/import-export-cli/build/target/apictl/myapi --namespace=wso2
 ```
 
 ### Options

@@ -1952,11 +1952,11 @@ _apictl_k8s_add_api()
     flags_with_completion=()
     flags_completion=()
 
-    flags+=("--from-file=")
-    two_word_flags+=("--from-file")
+    flags+=("--file=")
+    two_word_flags+=("--file")
     two_word_flags+=("-f")
-    local_nonpersistent_flags+=("--from-file")
-    local_nonpersistent_flags+=("--from-file=")
+    local_nonpersistent_flags+=("--file")
+    local_nonpersistent_flags+=("--file=")
     local_nonpersistent_flags+=("-f")
     flags+=("--help")
     flags+=("-h")
@@ -1977,7 +1977,7 @@ _apictl_k8s_add_api()
     flags+=("--verbose")
 
     must_have_one_flag=()
-    must_have_one_flag+=("--from-file=")
+    must_have_one_flag+=("--file=")
     must_have_one_flag+=("-f")
     must_have_one_flag+=("--name=")
     must_have_one_flag+=("-n")
@@ -2038,33 +2038,9 @@ _apictl_k8s_add()
     noun_aliases=()
 }
 
-_apictl_k8s_change_help()
+_apictl_k8s_delete_api()
 {
-    last_command="apictl_k8s_change_help"
-
-    command_aliases=()
-
-    commands=()
-
-    flags=()
-    two_word_flags=()
-    local_nonpersistent_flags=()
-    flags_with_completion=()
-    flags_completion=()
-
-    flags+=("--insecure")
-    flags+=("-k")
-    flags+=("--verbose")
-
-    must_have_one_flag=()
-    must_have_one_noun=()
-    has_completion_function=1
-    noun_aliases=()
-}
-
-_apictl_k8s_change_registry()
-{
-    last_command="apictl_k8s_change_registry"
+    last_command="apictl_k8s_delete_api"
 
     command_aliases=()
 
@@ -2080,99 +2056,19 @@ _apictl_k8s_change_registry()
     flags+=("-h")
     local_nonpersistent_flags+=("--help")
     local_nonpersistent_flags+=("-h")
-    flags+=("--key-file=")
-    two_word_flags+=("--key-file")
-    two_word_flags+=("-c")
-    local_nonpersistent_flags+=("--key-file")
-    local_nonpersistent_flags+=("--key-file=")
-    local_nonpersistent_flags+=("-c")
-    flags+=("--password=")
-    two_word_flags+=("--password")
-    two_word_flags+=("-p")
-    local_nonpersistent_flags+=("--password")
-    local_nonpersistent_flags+=("--password=")
-    local_nonpersistent_flags+=("-p")
-    flags+=("--password-stdin")
-    local_nonpersistent_flags+=("--password-stdin")
-    flags+=("--registry-type=")
-    two_word_flags+=("--registry-type")
-    two_word_flags+=("-R")
-    local_nonpersistent_flags+=("--registry-type")
-    local_nonpersistent_flags+=("--registry-type=")
-    local_nonpersistent_flags+=("-R")
-    flags+=("--repository=")
-    two_word_flags+=("--repository")
-    two_word_flags+=("-r")
-    local_nonpersistent_flags+=("--repository")
-    local_nonpersistent_flags+=("--repository=")
-    local_nonpersistent_flags+=("-r")
-    flags+=("--username=")
-    two_word_flags+=("--username")
-    two_word_flags+=("-u")
-    local_nonpersistent_flags+=("--username")
-    local_nonpersistent_flags+=("--username=")
-    local_nonpersistent_flags+=("-u")
+    flags+=("--name=")
+    two_word_flags+=("--name")
+    two_word_flags+=("-n")
+    local_nonpersistent_flags+=("--name")
+    local_nonpersistent_flags+=("--name=")
+    local_nonpersistent_flags+=("-n")
     flags+=("--insecure")
     flags+=("-k")
     flags+=("--verbose")
 
     must_have_one_flag=()
-    must_have_one_noun=()
-    noun_aliases=()
-}
-
-_apictl_k8s_change()
-{
-    last_command="apictl_k8s_change"
-
-    command_aliases=()
-
-    commands=()
-    commands+=("help")
-    commands+=("registry")
-
-    flags=()
-    two_word_flags=()
-    local_nonpersistent_flags=()
-    flags_with_completion=()
-    flags_completion=()
-
-    flags+=("--help")
-    flags+=("-h")
-    local_nonpersistent_flags+=("--help")
-    local_nonpersistent_flags+=("-h")
-    flags+=("--insecure")
-    flags+=("-k")
-    flags+=("--verbose")
-
-    must_have_one_flag=()
-    must_have_one_noun=()
-    noun_aliases=()
-}
-
-_apictl_k8s_delete_apictl()
-{
-    last_command="apictl_k8s_delete_apictl"
-
-    command_aliases=()
-
-    commands=()
-
-    flags=()
-    two_word_flags=()
-    local_nonpersistent_flags=()
-    flags_with_completion=()
-    flags_completion=()
-
-    flags+=("--help")
-    flags+=("-h")
-    local_nonpersistent_flags+=("--help")
-    local_nonpersistent_flags+=("-h")
-    flags+=("--insecure")
-    flags+=("-k")
-    flags+=("--verbose")
-
-    must_have_one_flag=()
+    must_have_one_flag+=("--name=")
+    must_have_one_flag+=("-n")
     must_have_one_noun=()
     noun_aliases=()
 }
@@ -2208,7 +2104,101 @@ _apictl_k8s_delete()
     command_aliases=()
 
     commands=()
-    commands+=("apictl")
+    commands+=("api")
+    commands+=("help")
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    local_nonpersistent_flags+=("-h")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_apictl_k8s_gen_deployment-dir()
+{
+    last_command="apictl_k8s_gen_deployment-dir"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--destination=")
+    two_word_flags+=("--destination")
+    two_word_flags+=("-d")
+    local_nonpersistent_flags+=("--destination")
+    local_nonpersistent_flags+=("--destination=")
+    local_nonpersistent_flags+=("-d")
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    local_nonpersistent_flags+=("-h")
+    flags+=("--source=")
+    two_word_flags+=("--source")
+    two_word_flags+=("-s")
+    local_nonpersistent_flags+=("--source")
+    local_nonpersistent_flags+=("--source=")
+    local_nonpersistent_flags+=("-s")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_flag+=("--source=")
+    must_have_one_flag+=("-s")
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_apictl_k8s_gen_help()
+{
+    last_command="apictl_k8s_gen_help"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    has_completion_function=1
+    noun_aliases=()
+}
+
+_apictl_k8s_gen()
+{
+    last_command="apictl_k8s_gen"
+
+    command_aliases=()
+
+    commands=()
+    commands+=("deployment-dir")
     commands+=("help")
 
     flags=()
@@ -2254,270 +2244,6 @@ _apictl_k8s_help()
     noun_aliases=()
 }
 
-_apictl_k8s_install_api-operator()
-{
-    last_command="apictl_k8s_install_api-operator"
-
-    command_aliases=()
-
-    commands=()
-
-    flags=()
-    two_word_flags=()
-    local_nonpersistent_flags=()
-    flags_with_completion=()
-    flags_completion=()
-
-    flags+=("--from-file=")
-    two_word_flags+=("--from-file")
-    two_word_flags+=("-f")
-    local_nonpersistent_flags+=("--from-file")
-    local_nonpersistent_flags+=("--from-file=")
-    local_nonpersistent_flags+=("-f")
-    flags+=("--help")
-    flags+=("-h")
-    local_nonpersistent_flags+=("--help")
-    local_nonpersistent_flags+=("-h")
-    flags+=("--key-file=")
-    two_word_flags+=("--key-file")
-    two_word_flags+=("-c")
-    local_nonpersistent_flags+=("--key-file")
-    local_nonpersistent_flags+=("--key-file=")
-    local_nonpersistent_flags+=("-c")
-    flags+=("--password=")
-    two_word_flags+=("--password")
-    two_word_flags+=("-p")
-    local_nonpersistent_flags+=("--password")
-    local_nonpersistent_flags+=("--password=")
-    local_nonpersistent_flags+=("-p")
-    flags+=("--password-stdin")
-    local_nonpersistent_flags+=("--password-stdin")
-    flags+=("--registry-type=")
-    two_word_flags+=("--registry-type")
-    two_word_flags+=("-R")
-    local_nonpersistent_flags+=("--registry-type")
-    local_nonpersistent_flags+=("--registry-type=")
-    local_nonpersistent_flags+=("-R")
-    flags+=("--repository=")
-    two_word_flags+=("--repository")
-    two_word_flags+=("-r")
-    local_nonpersistent_flags+=("--repository")
-    local_nonpersistent_flags+=("--repository=")
-    local_nonpersistent_flags+=("-r")
-    flags+=("--username=")
-    two_word_flags+=("--username")
-    two_word_flags+=("-u")
-    local_nonpersistent_flags+=("--username")
-    local_nonpersistent_flags+=("--username=")
-    local_nonpersistent_flags+=("-u")
-    flags+=("--insecure")
-    flags+=("-k")
-    flags+=("--verbose")
-
-    must_have_one_flag=()
-    must_have_one_noun=()
-    noun_aliases=()
-}
-
-_apictl_k8s_install_help()
-{
-    last_command="apictl_k8s_install_help"
-
-    command_aliases=()
-
-    commands=()
-
-    flags=()
-    two_word_flags=()
-    local_nonpersistent_flags=()
-    flags_with_completion=()
-    flags_completion=()
-
-    flags+=("--insecure")
-    flags+=("-k")
-    flags+=("--verbose")
-
-    must_have_one_flag=()
-    must_have_one_noun=()
-    has_completion_function=1
-    noun_aliases=()
-}
-
-_apictl_k8s_install_wso2am-operator()
-{
-    last_command="apictl_k8s_install_wso2am-operator"
-
-    command_aliases=()
-
-    commands=()
-
-    flags=()
-    two_word_flags=()
-    local_nonpersistent_flags=()
-    flags_with_completion=()
-    flags_completion=()
-
-    flags+=("--from-file=")
-    two_word_flags+=("--from-file")
-    two_word_flags+=("-f")
-    local_nonpersistent_flags+=("--from-file")
-    local_nonpersistent_flags+=("--from-file=")
-    local_nonpersistent_flags+=("-f")
-    flags+=("--help")
-    flags+=("-h")
-    local_nonpersistent_flags+=("--help")
-    local_nonpersistent_flags+=("-h")
-    flags+=("--insecure")
-    flags+=("-k")
-    flags+=("--verbose")
-
-    must_have_one_flag=()
-    must_have_one_noun=()
-    noun_aliases=()
-}
-
-_apictl_k8s_install()
-{
-    last_command="apictl_k8s_install"
-
-    command_aliases=()
-
-    commands=()
-    commands+=("api-operator")
-    commands+=("help")
-    commands+=("wso2am-operator")
-
-    flags=()
-    two_word_flags=()
-    local_nonpersistent_flags=()
-    flags_with_completion=()
-    flags_completion=()
-
-    flags+=("--help")
-    flags+=("-h")
-    local_nonpersistent_flags+=("--help")
-    local_nonpersistent_flags+=("-h")
-    flags+=("--insecure")
-    flags+=("-k")
-    flags+=("--verbose")
-
-    must_have_one_flag=()
-    must_have_one_noun=()
-    noun_aliases=()
-}
-
-_apictl_k8s_uninstall_api-operator()
-{
-    last_command="apictl_k8s_uninstall_api-operator"
-
-    command_aliases=()
-
-    commands=()
-
-    flags=()
-    two_word_flags=()
-    local_nonpersistent_flags=()
-    flags_with_completion=()
-    flags_completion=()
-
-    flags+=("--force")
-    local_nonpersistent_flags+=("--force")
-    flags+=("--help")
-    flags+=("-h")
-    local_nonpersistent_flags+=("--help")
-    local_nonpersistent_flags+=("-h")
-    flags+=("--insecure")
-    flags+=("-k")
-    flags+=("--verbose")
-
-    must_have_one_flag=()
-    must_have_one_noun=()
-    noun_aliases=()
-}
-
-_apictl_k8s_uninstall_help()
-{
-    last_command="apictl_k8s_uninstall_help"
-
-    command_aliases=()
-
-    commands=()
-
-    flags=()
-    two_word_flags=()
-    local_nonpersistent_flags=()
-    flags_with_completion=()
-    flags_completion=()
-
-    flags+=("--insecure")
-    flags+=("-k")
-    flags+=("--verbose")
-
-    must_have_one_flag=()
-    must_have_one_noun=()
-    has_completion_function=1
-    noun_aliases=()
-}
-
-_apictl_k8s_uninstall_wso2am-operator()
-{
-    last_command="apictl_k8s_uninstall_wso2am-operator"
-
-    command_aliases=()
-
-    commands=()
-
-    flags=()
-    two_word_flags=()
-    local_nonpersistent_flags=()
-    flags_with_completion=()
-    flags_completion=()
-
-    flags+=("--force")
-    local_nonpersistent_flags+=("--force")
-    flags+=("--help")
-    flags+=("-h")
-    local_nonpersistent_flags+=("--help")
-    local_nonpersistent_flags+=("-h")
-    flags+=("--insecure")
-    flags+=("-k")
-    flags+=("--verbose")
-
-    must_have_one_flag=()
-    must_have_one_noun=()
-    noun_aliases=()
-}
-
-_apictl_k8s_uninstall()
-{
-    last_command="apictl_k8s_uninstall"
-
-    command_aliases=()
-
-    commands=()
-    commands+=("api-operator")
-    commands+=("help")
-    commands+=("wso2am-operator")
-
-    flags=()
-    two_word_flags=()
-    local_nonpersistent_flags=()
-    flags_with_completion=()
-    flags_completion=()
-
-    flags+=("--help")
-    flags+=("-h")
-    local_nonpersistent_flags+=("--help")
-    local_nonpersistent_flags+=("-h")
-    flags+=("--insecure")
-    flags+=("-k")
-    flags+=("--verbose")
-
-    must_have_one_flag=()
-    must_have_one_noun=()
-    noun_aliases=()
-}
-
 _apictl_k8s_update_api()
 {
     last_command="apictl_k8s_update_api"
@@ -2532,22 +2258,16 @@ _apictl_k8s_update_api()
     flags_with_completion=()
     flags_completion=()
 
-    flags+=("--from-file=")
-    two_word_flags+=("--from-file")
+    flags+=("--file=")
+    two_word_flags+=("--file")
     two_word_flags+=("-f")
-    local_nonpersistent_flags+=("--from-file")
-    local_nonpersistent_flags+=("--from-file=")
+    local_nonpersistent_flags+=("--file")
+    local_nonpersistent_flags+=("--file=")
     local_nonpersistent_flags+=("-f")
     flags+=("--help")
     flags+=("-h")
     local_nonpersistent_flags+=("--help")
     local_nonpersistent_flags+=("-h")
-    flags+=("--mode=")
-    two_word_flags+=("--mode")
-    two_word_flags+=("-m")
-    local_nonpersistent_flags+=("--mode")
-    local_nonpersistent_flags+=("--mode=")
-    local_nonpersistent_flags+=("-m")
     flags+=("--name=")
     two_word_flags+=("--name")
     two_word_flags+=("-n")
@@ -2558,21 +2278,15 @@ _apictl_k8s_update_api()
     two_word_flags+=("--namespace")
     local_nonpersistent_flags+=("--namespace")
     local_nonpersistent_flags+=("--namespace=")
-    flags+=("--replicas=")
-    two_word_flags+=("--replicas")
-    local_nonpersistent_flags+=("--replicas")
-    local_nonpersistent_flags+=("--replicas=")
-    flags+=("--version=")
-    two_word_flags+=("--version")
-    two_word_flags+=("-v")
-    local_nonpersistent_flags+=("--version")
-    local_nonpersistent_flags+=("--version=")
-    local_nonpersistent_flags+=("-v")
     flags+=("--insecure")
     flags+=("-k")
     flags+=("--verbose")
 
     must_have_one_flag=()
+    must_have_one_flag+=("--file=")
+    must_have_one_flag+=("-f")
+    must_have_one_flag+=("--name=")
+    must_have_one_flag+=("-n")
     must_have_one_noun=()
     noun_aliases=()
 }
@@ -2638,11 +2352,9 @@ _apictl_k8s()
 
     commands=()
     commands+=("add")
-    commands+=("change")
     commands+=("delete")
+    commands+=("gen")
     commands+=("help")
-    commands+=("install")
-    commands+=("uninstall")
     commands+=("update")
 
     flags=()

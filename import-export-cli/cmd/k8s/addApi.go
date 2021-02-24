@@ -39,10 +39,7 @@ import (
 
 var flagApiName string
 var flagSwaggerFilePath string
-var flagReplicas int
 var flagNamespace string
-var flagApiVersion string
-var flagApiMode string
 
 const AddApiCmdLiteral = "api"
 const addApiCmdShortDesc = "Handle APIs in kubernetes cluster "
@@ -50,7 +47,7 @@ const addApiLongDesc = `Add, Update and Delete APIs in kubernetes cluster. JSON 
 available modes are as follows
 * kubernetes`
 const addApiExamples = utils.ProjectName + " " + K8sCmdLiteral + " add/update " + AddApiCmdLiteral +
-	` -n petstore --from-file=./Swagger.json --replicas=3 --namespace=wso2`
+	` -n petstore -f Swagger.json --namespace=wso2`
 
 // addApiCmd represents the api command
 var addApiCmd = &cobra.Command{
@@ -71,14 +68,14 @@ func handleAddApi(nameSuffix string) {
 	utils.Logln(fmt.Sprintf("%sProcessing swagger  %v", utils.LogPrefixInfo, flagSwaggerFilePath))
 
 	flagApiName = strings.ToLower(flagApiName)
-	swaggerCmName := fmt.Sprintf("%v-swagger%s", flagApiName, nameSuffix)
+	swaggerCmName := fmt.Sprintf("%v-swagger%v", flagApiName, nameSuffix)
 
 	fi, _ := os.Stat(flagSwaggerFilePath) // error already handled and ignore error
 	switch mode := fi.Mode(); {
 	//check if the swagger path is a Dir
 	case mode.IsDir():
 		//get swagger definition
-		swaggerPath := filepath.Join(flagSwaggerFilePath, filepath.FromSlash("Meta-information/swagger.yaml"))
+		swaggerPath := filepath.Join(flagSwaggerFilePath, filepath.FromSlash("Definitions/swagger.yaml"))
 		//creating kubernetes configmap with swagger definition
 		fmt.Println("creating configmap with swagger definition")
 		errConf := createConfigMapWithNamespace(swaggerCmName, swaggerPath, flagNamespace, k8sUtils.K8sCreate)
@@ -140,7 +137,7 @@ func createAPI(configMapName, timestamp string) {
 	if errUnmarshal != nil {
 		utils.HandleErrorAndExit("Error unmarshal api configmap into struct ", errUnmarshal)
 	}
-	//assigning values to API cr
+
 	apiCrd.Name = flagApiName
 	apiCrd.Namespace = flagNamespace
 	apiCrd.Spec.SwaggerConfigMapName = configMapName
@@ -149,11 +146,10 @@ func createAPI(configMapName, timestamp string) {
 	k8sSaveConfig := true
 	if timestamp != "" {
 		//set update timestamp
-		apiCrd.Spec.UpdateTimeStamp = timestamp
+		apiCrd.Spec.UpdateTimeStamp = strings.Split(timestamp, "-")[1]
 		k8sOperation = k8sUtils.K8sApply
 		k8sSaveConfig = false
 	}
-
 
 	byteVal, errMarshal := yaml.Marshal(apiCrd)
 	if errMarshal != nil {
@@ -212,10 +208,9 @@ func rollbackConfigs(apiCr *wso2v1alpha2.API) {
 func init() {
 	AddCmd.AddCommand(addApiCmd)
 	addApiCmd.Flags().StringVarP(&flagApiName, "name", "n", "", "Name of the API")
-	addApiCmd.Flags().StringVarP(&flagSwaggerFilePath, "from-file", "f", "",
-		"Path to swagger file")
+	addApiCmd.Flags().StringVarP(&flagSwaggerFilePath, "file", "f", "",
+		"Path to swagger, zip file or API Project")
 	addApiCmd.Flags().StringVar(&flagNamespace, "namespace", "", "namespace of API")
 	_ = addApiCmd.MarkFlagRequired("name")
-	_ = addApiCmd.MarkFlagRequired("from-file")
+	_ = addApiCmd.MarkFlagRequired("file")
 }
-

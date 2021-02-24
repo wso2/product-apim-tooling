@@ -19,21 +19,27 @@
 package k8s
 
 import (
+	"bytes"
 	"github.com/spf13/cobra"
+	k8sUtils "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"io"
+	"os"
+	"os/exec"
 )
 
 // K8s command related usage Info
 const K8sCmdLiteral = "k8s"
 const k8sCmdShortDesc = "Kubernetes mode based commands"
 
-const k8sCmdLongDesc = `Kubernetes mode based commands such as install, uninstall, add/update api, change registry.`
+const k8sCmdLongDesc = `Kubernetes mode based commands such as add, update and delete API`
 
-const k8sCmdExamples = utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sInstallCmdLiteral + ` ` + K8sInstallApiOperatorCmdLiteral + `
-` + utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sUninstallCmdLiteral + ` ` + K8sUninstallApiOperatorCmdLiteral + `
-` + utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sAddCmdLiteral + ` ` + AddApiCmdLiteral + ` ` + `-n petstore --from-file=./Swagger.json --replicas=1 --namespace=wso2
-` + utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sUpdateCmdLiteral + ` ` + AddApiCmdLiteral + ` ` + `-n petstore --from-file=./Swagger.json --replicas=1 --namespace=wso2
-` + utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sChangeCmdLiteral + ` ` + K8sChangeDockerRegistryCmdLiteral
+const k8sCmdExamples = utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sAddCmdLiteral + ` ` + AddApiCmdLiteral + ` ` +
+	`-n petstore -f Swagger.json --namespace=wso2
+` + utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + K8sUpdateCmdLiteral + ` ` + AddApiCmdLiteral + ` ` +
+	`-n petstore -f Swagger.json --namespace=wso2
+` + utils.ProjectName + ` ` + K8sCmdLiteral + ` ` + k8sDeleteCmdLiteral + ` ` + k8sDeleteAPICmdLiteral + ` ` +
+	`-n petstore`
 
 // K8sCmd represents the import command
 var Cmd = &cobra.Command{
@@ -42,13 +48,30 @@ var Cmd = &cobra.Command{
 	Long:    k8sCmdLongDesc,
 	Example: k8sCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo +  K8sCmdLiteral + " called")
-
+		utils.Logln(utils.LogPrefixInfo + K8sCmdLiteral + " called")
+		ExecuteKubernetes(args...)
 	},
+}
+
+//execute kubernetes commands
+func ExecuteKubernetes(arg ...string) {
+	cmd := exec.Command(
+		k8sUtils.Kubectl,
+		arg...,
+	)
+	var errBuf, outBuf bytes.Buffer
+	cmd.Stderr = io.MultiWriter(os.Stderr, &errBuf)
+	cmd.Stdout = io.MultiWriter(os.Stdout, &outBuf)
+	err := cmd.Run()
+	if err != nil {
+		utils.HandleErrorAndExit("Error executing kubernetes commands ", err)
+	}
 }
 
 // init using Cobra
 func init() {
 	Cmd.AddCommand(AddCmd)
+	Cmd.AddCommand(GenCmd)
+	Cmd.AddCommand(DeleteCmd)
+	Cmd.AddCommand(UpdateCmd)
 }
-
