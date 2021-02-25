@@ -109,7 +109,6 @@ do
     mkdir -p $zipdir
 
     cp -r "${baseDir}/resources/README.html" $zipdir > /dev/null 2>&1
-    cp -r "${baseDir}/LICENSE" $zipdir > /dev/null 2>&1
     cp -r "${baseDir}/LICENSE.txt" $zipdir > /dev/null 2>&1
 
     # set destination path for binary
