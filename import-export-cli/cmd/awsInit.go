@@ -28,9 +28,10 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"github.com/spf13/cobra"
+	"github.com/Jeffail/gabs"
+	jsoniter "github.com/json-iterator/go"
 	
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
-	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
  
 	yaml2 "gopkg.in/yaml.v2"
 	
@@ -255,10 +256,13 @@ func getOAS() error {
 
 func initializeProject() error {
 	initCmdOutputDir = flagApiNameToGet 
-	swaggerSavePath := filepath.Join(initCmdOutputDir, filepath.FromSlash("Meta-information/swagger.yaml"))
+	swaggerSavePath := filepath.Join(initCmdOutputDir, filepath.FromSlash("Definitions/swagger.yaml"))
 	fmt.Println("Initializing a new WSO2 API Manager project in", dir)
 	
-	def, err := loadDefaultSpecFromDisk()
+	definitionFile, err := loadDefaultSpecFromDisk()
+	
+	// Get the API DTO specific details to process
+	def := &definitionFile.Data
 	if err != nil {
 		return err
 	}
@@ -278,19 +282,19 @@ func initializeProject() error {
 	// We use swagger2 loader. It works fine for now
 	// Since we don't use 3.0 specific details its ok
 	// otherwise please use v2.openAPI3 loaders
-	doc.Spec().Info.Version = doc.Spec().Info.Version[:10]
-	
+	//doc.Spec().Info.Version = doc.Spec().Info.Version[:10]
+
 	err = v2.Swagger2Populate(def, doc)
 	if err != nil {
 		return err
 	}
 
-	err = v2.GetServerUrlFromOAS(def, path)
-	if err != nil {
-		return err
-	}
+	//err = v2.GetServerUrlFromOAS(def, path)
+	//if err != nil {
+	//	return err
+	//}
 
-	v2.SetAdvertiseOnlyToTrue(def)
+	//v2.SetAdvertiseOnlyToTrue(def)
 
 	// convert and save swagger as yaml
 	yamlSwagger, err := utils.JsonToYaml(doc.Raw())
@@ -304,22 +308,61 @@ func initializeProject() error {
 		return err
 	}
 
-	apiData, err := yaml2.Marshal(def)
+	utils.Logln(utils.LogPrefixInfo + "Reading API Definition from " + path)
+	content, err := ioutil.ReadFile(path)
+	if err != nil {
+		return err
+	}
+
+	apiDef := &v2.APIDefinitionFile{}
+	fmt.Println(string(content))
+
+	// substitute env variables
+	utils.Logln(utils.LogPrefixInfo + "Substituting environment variables")
+	data, err := utils.EnvSubstitute(string(content))
+	if err != nil {
+		return err
+	}
+	content = []byte(data)
+
+	// read from yaml definition
+	err = yaml2.Unmarshal(content, &apiDef)
+	if err != nil {
+		return err
+	}
+
+	// marshal original def
+	originalDefBytes, err := jsoniter.Marshal(definitionFile)
+	if err != nil {
+		return err
+	}
+	// marshal new def
+	newDefBytes, err := jsoniter.Marshal(apiDef)
+	if err != nil {
+		return err
+	}
+
+	// merge two definitions
+	finalDefBytes, err := utils.MergeJSON(originalDefBytes, newDefBytes)
+	if err != nil {
+		return err
+	}
+	tmpDef := &v2.APIDefinitionFile{}
+	err = json.Unmarshal(finalDefBytes, &tmpDef)
+	if err != nil {
+		return err
+	}
+	definitionFile.Data = tmpDef.Data
+
+	apiData, err := yaml2.Marshal(definitionFile)
 	if err != nil {
 		return err
 	}
 
 	// write to the disk
-	apiJSONPath := filepath.Join(initCmdOutputDir, filepath.FromSlash("Meta-information/api.yaml"))
+	apiJSONPath := filepath.Join(initCmdOutputDir, filepath.FromSlash("api.yaml"))
 	utils.Logln(utils.LogPrefixInfo + "Writing " + apiJSONPath)
 	err = ioutil.WriteFile(apiJSONPath, apiData, os.ModePerm)
-	if err != nil {
-		return err
-	}
-
-	apimProjParamsFilePath := filepath.Join(initCmdOutputDir, utils.ParamFileAPI)
-	utils.Logln(utils.LogPrefixInfo + "Writing " + apimProjParamsFilePath)
-	err = impl.ScaffoldParams(apimProjParamsFilePath)
 	if err != nil {
 		return err
 	}
@@ -328,6 +371,30 @@ func initializeProject() error {
 	utils.Logln(utils.LogPrefixInfo + "Writing " + apimProjReadmeFilePath)
 	readme, _ := box.Get("/init/README.md")
 	err = ioutil.WriteFile(apimProjReadmeFilePath, readme, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	// Create metaData struct using details from definition
+	metaData := utils.MetaData{
+		Name:    definitionFile.Data.Name,
+		Version: definitionFile.Data.Version,
+	}
+	marshaledData, err := jsoniter.Marshal(metaData)
+	if err != nil {
+		return err
+	}
+
+	jsonMetaData, err := gabs.ParseJSON(marshaledData)
+	metaDataContent, err := utils.JsonToYaml(jsonMetaData.Bytes())
+	if err != nil {
+		return err
+	}
+
+	// write api_meta.yaml file to the project directory
+	apiMetaDataPath := filepath.Join(initCmdOutputDir, filepath.FromSlash(utils.MetaFileAPI))
+	utils.Logln(utils.LogPrefixInfo + "Writing " + apiMetaDataPath)
+	err = ioutil.WriteFile(apiMetaDataPath, metaDataContent, os.ModePerm)
 	if err != nil {
 		return err
 	}

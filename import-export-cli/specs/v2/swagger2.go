@@ -24,7 +24,6 @@ import (
 	"path"
 	"strings"
 
-	"encoding/json"
 	"io/ioutil"
 	"os"
 
