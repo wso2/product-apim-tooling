@@ -31,11 +31,12 @@ import (
 )
 
 type YamlConfig struct {
-	Environments   []Environment `yaml:"environments"`
-	IndexingDelay  int           `yaml:"indexing-delay"`
-	DCRVersion     string        `yaml:"dcr-version"`
-	RESTAPIVersion string        `yaml:"rest-api-version"`
-	APICTLVersion  string        `yaml:"apictl-version"`
+	Environments          []Environment `yaml:"environments"`
+	IndexingDelay         int           `yaml:"indexing-delay"`
+	MaxInvocationAttempts int           `yaml:"max-invocation-attempts"`
+	DCRVersion            string        `yaml:"dcr-version"`
+	RESTAPIVersion        string        `yaml:"rest-api-version"`
+	APICTLVersion         string        `yaml:"apictl-version"`
 }
 
 type Environment struct {
@@ -124,9 +125,11 @@ func readConfigs() {
 	}
 
 	base.SetIndexingDelay(yamlConfig.IndexingDelay)
+	base.SetMaxInvocationAttempts(yamlConfig.MaxInvocationAttempts)
 
 	base.Log("envs:", envs)
 	base.Log("indexing delay:", yamlConfig.IndexingDelay)
+	base.Log("max invocation attempts", yamlConfig.MaxInvocationAttempts)
 	base.Log("dcr version:", yamlConfig.DCRVersion)
 	base.Log("rest api Version:", yamlConfig.RESTAPIVersion)
 	base.Log("apictl version:", yamlConfig.APICTLVersion)

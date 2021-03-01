@@ -608,6 +608,63 @@ func (instance *Client) AddAPIProductFromJSON(t *testing.T, path string, usernam
 	return apiProductResponse.ID
 }
 
+// CreateAPIProductRevision : Create API Product revision
+func (instance *Client) CreateAPIProductRevision(apiProductID string) *APIRevision {
+	apiProductsURL := instance.publisherRestURL + "/api-products/" + apiProductID + "/revisions"
+
+	request := base.CreatePost(apiProductsURL, bytes.NewBuffer([]byte("{ \"description\": \"\" }")))
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.CreateAPIProductRevision()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.CreateAPIProductRevision()", response, 201)
+
+	var revision APIRevision
+	json.NewDecoder(response.Body).Decode(&revision)
+
+	return &revision
+}
+
+// DeployAPIProductRevision : Deploy API Product revision
+func (instance *Client) DeployAPIProductRevision(t *testing.T, apiProductID string, revision *APIRevision) {
+	apiProductsURL := instance.publisherRestURL + "/api-products/" + apiProductID + "/deploy-revision"
+
+	deploymentInfoArray := []APIRevisionDeployment{}
+	deploymentInfo := APIRevisionDeployment{}
+	deploymentInfo.RevisionUUID = revision.ID
+	deploymentInfo.Name = "Production and Sandbox"
+	deploymentInfo.DisplayOnDevportal = true
+	deploymentInfoArray = append(deploymentInfoArray, deploymentInfo)
+
+	data, err := json.Marshal(deploymentInfoArray)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	request := base.CreatePost(apiProductsURL, bytes.NewBuffer(data))
+
+	values := url.Values{}
+	values.Add("revisionId", revision.ID)
+
+	request.URL.RawQuery = values.Encode()
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.DeployAPIProductRevision()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.DeployAPIProductRevision()", response, 201)
+}
+
 // DeleteAPI : Delete API from APIM
 func (instance *Client) DeleteAPI(apiID string) {
 	apisURL := instance.publisherRestURL + "/apis/" + apiID
