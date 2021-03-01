@@ -11,6 +11,8 @@ environments:
   offset: 1
 # duration tests will wait to allow APIM solr indexes to be updated
 indexing-delay: 1000
+# max number of retry attempts made to successfully invoke an API, to compensate for delay in API artifact deployment
+max-invocation-attempts: 10
 
 dcr-version: v0.17
 rest-api-version: v2

@@ -29,7 +29,7 @@ import (
 func TestInitializeProject(t *testing.T) {
 	username := superAdminUser
 	password := superAdminPassword
-	apim := apimClients[0]
+	apim := GetDevClient()
 	projectName := base.GenerateRandomName(16)
 
 	args := &testutils.InitTestArgs{
@@ -43,7 +43,7 @@ func TestInitializeProject(t *testing.T) {
 
 //Initialize an API with --definition flag
 func TestInitializeAPIWithDefinitionFlag(t *testing.T) {
-	apim := apimClients[0]
+	apim := GetDevClient()
 	projectName := base.GenerateRandomName(16)
 	username := superAdminUser
 	password := superAdminPassword
@@ -61,7 +61,7 @@ func TestInitializeAPIWithDefinitionFlag(t *testing.T) {
 
 //Initialize an API from Swagger 2 Specification
 func TestInitializeAPIFromSwagger2Definition(t *testing.T) {
-	apim := apimClients[0]
+	apim := GetDevClient()
 	projectName := base.GenerateRandomName(16)
 	username := superAdminUser
 	password := superAdminPassword
@@ -79,7 +79,7 @@ func TestInitializeAPIFromSwagger2Definition(t *testing.T) {
 
 //Initialize an API from OpenAPI 3 Specification
 func TestInitializeAPIFromOpenAPI3Definition(t *testing.T) {
-	apim := apimClients[0]
+	apim := GetDevClient()
 	projectName := base.GenerateRandomName(16)
 	username := superAdminUser
 	password := superAdminPassword
@@ -99,7 +99,7 @@ func TestInitializeAPIFromOpenAPI3Definition(t *testing.T) {
 func TestInitializeAPIFromAPIDefinitionURL(t *testing.T) {
 	username := superAdminUser
 	password := superAdminPassword
-	apim := apimClients[0]
+	apim := GetDevClient()
 	projectName := base.GenerateRandomName(16)
 
 	args := &testutils.InitTestArgs{
@@ -115,7 +115,7 @@ func TestInitializeAPIFromAPIDefinitionURL(t *testing.T) {
 
 //Import API from initialized project with swagger 2 definition
 func TestImportProjectCreatedFromSwagger2Definition(t *testing.T) {
-	apim := apimClients[0]
+	apim := GetDevClient()
 	projectName := base.GenerateRandomName(16)
 	username := superAdminUser
 	password := superAdminPassword
@@ -135,7 +135,7 @@ func TestImportProjectCreatedFromSwagger2Definition(t *testing.T) {
 
 //Import API from initialized project with openAPI 3 definition
 func TestImportProjectCreatedFromOpenAPI3Definition(t *testing.T) {
-	apim := apimClients[0]
+	apim := GetDevClient()
 	projectName := base.GenerateRandomName(16)
 	username := superAdminUser
 	password := superAdminPassword
@@ -155,7 +155,7 @@ func TestImportProjectCreatedFromOpenAPI3Definition(t *testing.T) {
 
 //Import API from initialized project from API definition which is already in publisher without --update flag
 func TestImportProjectCreatedFailWhenAPIIsExisted(t *testing.T) {
-	apim := apimClients[0]
+	apim := GetDevClient()
 	projectName := base.GenerateRandomName(16)
 	username := superAdminUser
 	password := superAdminPassword
@@ -178,7 +178,7 @@ func TestImportProjectCreatedFailWhenAPIIsExisted(t *testing.T) {
 
 //Import API from initialized project from API definition which is already in publisher with --update flag
 func TestImportProjectCreatedPassWhenAPIIsExisted(t *testing.T) {
-	apim := apimClients[0]
+	apim := GetDevClient()
 	projectName := base.GenerateRandomName(16)
 	username := superAdminUser
 	password := superAdminPassword
@@ -203,7 +203,7 @@ func TestImportProjectCreatedPassWhenAPIIsExisted(t *testing.T) {
 func TestImportAndExportAPIWithDocument(t *testing.T) {
 	username := superAdminUser
 	password := superAdminPassword
-	apim := apimClients[0]
+	apim := GetDevClient()
 	projectName := base.GenerateRandomName(16)
 
 	args := &testutils.InitTestArgs{
@@ -241,7 +241,7 @@ func TestImportAndExportAPIWithDocument(t *testing.T) {
 func TestImportAndExportAPIWithPngIcon(t *testing.T) {
 	username := superAdminUser
 	password := superAdminPassword
-	apim := apimClients[0]
+	apim := GetDevClient()
 	projectName := base.GenerateRandomName(16)
 
 	args := &testutils.InitTestArgs{
@@ -269,7 +269,7 @@ func TestImportAndExportAPIWithPngIcon(t *testing.T) {
 
 //Import Api with an Image and Export that Api with an image (.jpeg Type)
 func TestImportAndExportAPIWithJpegImage(t *testing.T) {
-	apim := apimClients[0]
+	apim := GetDevClient()
 	projectName := base.GenerateRandomName(16)
 	username := superAdminUser
 	password := superAdminPassword
@@ -299,7 +299,7 @@ func TestImportAndExportAPIWithJpegImage(t *testing.T) {
 
 //Import and export API with updated thumbnail and document and assert that
 func TestUpdateDocAndImageOfAPIOfExistingAPI(t *testing.T) {
-	apim := apimClients[1]
+	apim := GetProdClient()
 	projectName := base.GenerateRandomName(16)
 	username := superAdminUser
 	password := superAdminPassword

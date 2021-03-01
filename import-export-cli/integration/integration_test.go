@@ -31,11 +31,12 @@ import (
 )
 
 type YamlConfig struct {
-	Environments   []Environment `yaml:"environments"`
-	IndexingDelay  int           `yaml:"indexing-delay"`
-	DCRVersion     string        `yaml:"dcr-version"`
-	RESTAPIVersion string        `yaml:"rest-api-version"`
-	APICTLVersion  string        `yaml:"apictl-version"`
+	Environments          []Environment `yaml:"environments"`
+	IndexingDelay         int           `yaml:"indexing-delay"`
+	MaxInvocationAttempts int           `yaml:"max-invocation-attempts"`
+	DCRVersion            string        `yaml:"dcr-version"`
+	RESTAPIVersion        string        `yaml:"rest-api-version"`
+	APICTLVersion         string        `yaml:"apictl-version"`
 }
 
 type Environment struct {
@@ -75,8 +76,16 @@ var (
 	publisher  = Users["publisher"][0]
 	devops     = Users["devops"][0]
 
-	apimClients []*apim.Client
+	apimClients = map[string]*apim.Client{}
 )
+
+func GetDevClient() *apim.Client {
+	return apimClients["development"]
+}
+
+func GetProdClient() *apim.Client {
+	return apimClients["production"]
+}
 
 func TestMain(m *testing.M) {
 	flag.Parse()
@@ -88,7 +97,7 @@ func TestMain(m *testing.M) {
 	for _, env := range envs {
 		client := apim.Client{}
 		client.Setup(env.Name, env.Host, env.Offset, yamlConfig.DCRVersion, yamlConfig.RESTAPIVersion)
-		apimClients = append(apimClients, &client)
+		apimClients[env.Name] = &client
 	}
 
 	cleanupUsersAndTenants()
@@ -116,9 +125,11 @@ func readConfigs() {
 	}
 
 	base.SetIndexingDelay(yamlConfig.IndexingDelay)
+	base.SetMaxInvocationAttempts(yamlConfig.MaxInvocationAttempts)
 
 	base.Log("envs:", envs)
 	base.Log("indexing delay:", yamlConfig.IndexingDelay)
+	base.Log("max invocation attempts", yamlConfig.MaxInvocationAttempts)
 	base.Log("dcr version:", yamlConfig.DCRVersion)
 	base.Log("rest api Version:", yamlConfig.RESTAPIVersion)
 	base.Log("apictl version:", yamlConfig.APICTLVersion)

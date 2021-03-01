@@ -38,6 +38,8 @@ func AddAPIProductFromJSONWithoutCleaning(t *testing.T, client *apim.Client, use
 	path := "testdata/SampleAPIProduct.json"
 	doClean := false
 	id := client.AddAPIProductFromJSON(t, path, username, password, apisList, doClean)
+	revision := client.CreateAPIProductRevision(id)
+	client.DeployAPIProductRevision(t, id, revision)
 	apiProduct := client.GetAPIProduct(id)
 	return apiProduct
 }

@@ -23,6 +23,7 @@ import (
 	"log"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
@@ -43,12 +44,11 @@ func InvokeAPI(t *testing.T, url string, key string, expectedCode int) {
 
 	assert.Nil(t, err, "Error while generating GET")
 
-	authHeader := "Bearer " + key
-	req.Header.Set("Authorization", authHeader)
+	base.SetDefaultRestAPIHeaders(key, req)
 
-	t.Log("InvokeAPI() url", url)
+	base.LogRequest("invokeAPI()", req)
 
-	response, err := client.Do(req)
+	response, err := invokeWithRetry(t, client, req)
 
 	assert.Nil(t, err, "Error while invoking API")
 	assert.Equal(t, expectedCode, response.StatusCode, "API Invocation failed")
@@ -64,15 +64,34 @@ func invokeAPIProduct(t *testing.T, url string, key string, expectedCode int) {
 
 	assert.Nil(t, err, "Error while generating GET")
 
-	authHeader := "Bearer " + key
-	req.Header.Set("Authorization", authHeader)
+	base.SetDefaultRestAPIHeaders(key, req)
 
-	t.Log("invokeAPIProduct() url", url)
+	base.LogRequest("invokeAPIProduct()", req)
 
-	response, err := client.Do(req)
+	response, err := invokeWithRetry(t, client, req)
 
 	assert.Nil(t, err, "Error while invoking API Product")
 	assert.Equal(t, expectedCode, response.StatusCode, "API Product Invocation failed")
+}
+
+func invokeWithRetry(t *testing.T, client *http.Client, req *http.Request) (*http.Response, error) {
+	response, err := client.Do(req)
+
+	attempts := 0
+	for response.StatusCode == http.StatusNotFound {
+		time.Sleep(time.Duration(1000) * time.Millisecond)
+		response, err = client.Do(req)
+
+		attempts++
+
+		t.Log("invokeWithRetry() attempts = ", attempts)
+
+		if attempts == base.GetMaxInvocationAttempts() {
+			break
+		}
+	}
+
+	return response, err
 }
 
 func ValidateGetKeysFailure(t *testing.T, args *ApiGetKeyTestArgs) {

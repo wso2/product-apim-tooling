@@ -38,7 +38,7 @@ func TestExportApiProductNonAdminSuperTenantUser(t *testing.T) {
 	apiCreator := creator.UserName
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	// Add the first dependent API to env1
 	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
@@ -78,8 +78,8 @@ func TestExportImportApiProductAdminSuperTenantUserWithImportApis(t *testing.T) 
 	apiPublisher := publisher.UserName
 	apiPublisherPassword := publisher.Password
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	// Add the first dependent API to env1
 	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
@@ -130,8 +130,8 @@ func TestExportImportApiProductDevopsSuperTenantUserWithImportApis(t *testing.T)
 	apiPublisher := publisher.UserName
 	apiPublisherPassword := publisher.Password
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	// Add the first dependent API to env1
 	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
@@ -182,8 +182,8 @@ func TestExportImportApiProductAdminSuperTenantUserWithoutImportApis(t *testing.
 	apiPublisher := publisher.UserName
 	apiPublisherPassword := publisher.Password
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	// Add the first dependent API to env1 and env2
 	dependentAPI1ofEnv1, dependentAPI1ofEnv2 := testutils.AddAPIToTwoEnvs(t, dev, prod, apiCreator, apiCreatorPassword)
@@ -231,8 +231,8 @@ func TestExportImportApiProductDevopsSuperTenantUserWithoutImportApis(t *testing
 	apiPublisher := publisher.UserName
 	apiPublisherPassword := publisher.Password
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	// Add the first dependent API to env1 and env2
 	dependentAPI1ofEnv1, dependentAPI1ofEnv2 := testutils.AddAPIToTwoEnvs(t, dev, prod, apiCreator, apiCreatorPassword)
@@ -280,8 +280,8 @@ func TestExportImportApiProductAdminSuperTenantUserWithUpdateApis(t *testing.T) 
 	apiPublisher := publisher.UserName
 	apiPublisherPassword := publisher.Password
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	// Add the first dependent API to env1 and env2
 	dependentAPI1ofEnv1, dependentAPI1ofEnv2 := testutils.AddAPIToTwoEnvs(t, dev, prod, apiCreator, apiCreatorPassword)
@@ -329,8 +329,8 @@ func TestExportImportApiProductDevopsSuperTenantUserWithUpdateApis(t *testing.T)
 	apiPublisher := publisher.UserName
 	apiPublisherPassword := publisher.Password
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	// Add the first dependent API to env1 and env2
 	dependentAPI1ofEnv1, dependentAPI1ofEnv2 := testutils.AddAPIToTwoEnvs(t, dev, prod, apiCreator, apiCreatorPassword)
@@ -375,8 +375,8 @@ func TestExportImportApiProductAdminSuperTenantUserWithUpdateApiProduct(t *testi
 
 	apiPublisher := testutils.Credentials{Username: publisher.UserName, Password: publisher.Password}
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	args := testutils.AddAPIProductWithTwoDependentAPIs(t, dev, &apiCreator, &apiPublisher)
 
@@ -407,8 +407,8 @@ func TestExportImportApiProductDevopsSuperTenantUserWithUpdateApiProduct(t *test
 
 	apiPublisher := testutils.Credentials{Username: publisher.UserName, Password: publisher.Password}
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	args := testutils.AddAPIProductWithTwoDependentAPIs(t, dev, &apiCreator, &apiPublisher)
 
@@ -440,8 +440,8 @@ func TestExportImportApiProductAdminSuperTenantUserWithUpdateApisAndApiProduct(t
 
 	apiPublisher := testutils.Credentials{Username: publisher.UserName, Password: publisher.Password}
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	args := testutils.AddAPIProductWithTwoDependentAPIs(t, dev, &apiCreator, &apiPublisher)
 
@@ -474,8 +474,8 @@ func TestExportImportApiProductDevopsSuperTenantUserWithUpdateApisAndApiProduct(
 
 	apiPublisher := testutils.Credentials{Username: publisher.UserName, Password: publisher.Password}
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	args := testutils.AddAPIProductWithTwoDependentAPIs(t, dev, &apiCreator, &apiPublisher)
 
@@ -508,8 +508,8 @@ func TestExportImportApiProductCrossTenantUserWithImportApis(t *testing.T) {
 
 	apiPublisher := testutils.Credentials{Username: publisher.UserName, Password: publisher.Password}
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	args := testutils.AddAPIProductWithTwoDependentAPIs(t, dev, &apiCreator, &apiPublisher)
 
@@ -538,8 +538,8 @@ func TestExportImportApiProductCrossTenantDevopsWithImportApis(t *testing.T) {
 
 	apiPublisher := testutils.Credentials{Username: publisher.UserName, Password: publisher.Password}
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	args := testutils.AddAPIProductWithTwoDependentAPIs(t, dev, &apiCreator, &apiPublisher)
 
@@ -568,8 +568,8 @@ func TestExportImportApiProductCrossTenantUserWithUpdateApiProduct(t *testing.T)
 
 	apiPublisher := testutils.Credentials{Username: publisher.UserName, Password: publisher.Password}
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	args := testutils.AddAPIProductWithTwoDependentAPIs(t, dev, &apiCreator, &apiPublisher)
 
@@ -606,8 +606,8 @@ func TestExportImportApiProductCrossTenantDevopsWithUpdateApiProduct(t *testing.
 
 	apiPublisher := testutils.Credentials{Username: publisher.UserName, Password: publisher.Password}
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	args := testutils.AddAPIProductWithTwoDependentAPIs(t, dev, &apiCreator, &apiPublisher)
 
@@ -645,8 +645,8 @@ func TestExportImportApiProductCrossTenantUserWithUpdateApisAndApiProduct(t *tes
 
 	apiPublisher := testutils.Credentials{Username: publisher.UserName, Password: publisher.Password}
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	args := testutils.AddAPIProductWithTwoDependentAPIs(t, dev, &apiCreator, &apiPublisher)
 
@@ -684,8 +684,8 @@ func TestExportImportApiProductCrossTenantDevopsWithUpdateApisAndApiProduct(t *t
 
 	apiPublisher := testutils.Credentials{Username: publisher.UserName, Password: publisher.Password}
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	args := testutils.AddAPIProductWithTwoDependentAPIs(t, dev, &apiCreator, &apiPublisher)
 
@@ -721,7 +721,7 @@ func TestListApiProductsAdminSuperTenantUser(t *testing.T) {
 	apiPublisher := publisher.UserName
 	apiPublisherPassword := publisher.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	// Add the first dependent API to env1
 	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
@@ -760,7 +760,7 @@ func TestListApiProductsDevopsSuperTenantUser(t *testing.T) {
 	apiPublisher := publisher.UserName
 	apiPublisherPassword := publisher.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	// Add the first dependent API to env1
 	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
@@ -799,7 +799,7 @@ func TestListApiProductsAdminTenantUser(t *testing.T) {
 	apiPublisher := publisher.UserName + "@" + TENANT1
 	apiPublisherPassword := publisher.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	// Add the first dependent API to env1
 	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
@@ -838,7 +838,7 @@ func TestListApiProductsDevopsTenantUser(t *testing.T) {
 	apiPublisher := publisher.UserName + "@" + TENANT1
 	apiPublisherPassword := publisher.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	// Add the first dependent API to env1
 	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
@@ -877,7 +877,7 @@ func TestDeleteApiProductAdminSuperTenantUser(t *testing.T) {
 	apiPublisher := publisher.UserName
 	apiPublisherPassword := publisher.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	// Add the first dependent API to env1
 	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
@@ -920,7 +920,7 @@ func TestDeleteApiProductDevopsSuperTenantUser(t *testing.T) {
 	apiPublisher := publisher.UserName
 	apiPublisherPassword := publisher.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	// Add the first dependent API to env1
 	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
@@ -963,7 +963,7 @@ func TestDeleteApiProductAdminTenantUser(t *testing.T) {
 	apiPublisher := publisher.UserName + "@" + TENANT1
 	apiPublisherPassword := publisher.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	// Add the first dependent API to env1
 	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
@@ -1006,7 +1006,7 @@ func TestDeleteApiProductDevopsTenantUser(t *testing.T) {
 	apiPublisher := publisher.UserName + "@" + TENANT1
 	apiPublisherPassword := publisher.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	// Add the first dependent API to env1
 	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
@@ -1046,7 +1046,7 @@ func TestDeleteApiProductSuperTenantUser(t *testing.T) {
 	apiPublisher := publisher.UserName
 	apiPublisherPassword := publisher.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	// Add the first dependent API to env1
 	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
@@ -1086,7 +1086,7 @@ func TestDeleteApiProductWithActiveSubscriptionsSuperTenantUser(t *testing.T) {
 	apiPublisher := publisher.UserName
 	apiPublisherPassword := publisher.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	// Add the first dependent API to env1
 	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
