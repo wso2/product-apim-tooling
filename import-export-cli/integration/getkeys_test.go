@@ -81,6 +81,7 @@ func TestGetKeysAdminSuperTenantUser(t *testing.T) {
 	dev := GetDevClient()
 
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+	testutils.CreateAndDeployRevision(t, dev, apiPublisher, apiPublisherPassword, api.ID)
 
 	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, api.ID)
 
@@ -106,6 +107,7 @@ func TestGetKeysConsecutivelyAdminSuperTenantUser(t *testing.T) {
 	dev := GetDevClient()
 
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+	testutils.CreateAndDeployRevision(t, dev, apiPublisher, apiPublisherPassword, api.ID)
 
 	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, api.ID)
 
@@ -134,6 +136,7 @@ func TestGetKeysAdminTenantUser(t *testing.T) {
 	dev := GetDevClient()
 
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+	testutils.CreateAndDeployRevision(t, dev, apiPublisher, apiPublisherPassword, api.ID)
 
 	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, api.ID)
 
@@ -297,6 +300,9 @@ func TestGetKeysForAPIProductAdminSuperTenantUser(t *testing.T) {
 	// Add the API Product to env1
 	apiProduct := testutils.AddAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
 
+	// Create and Deploy API Product Revision
+	testutils.CreateAndDeployAPIProductRevision(t, dev, apiPublisher, apiPublisherPassword, apiProduct.ID)
+
 	args := &testutils.ApiGetKeyTestArgs{
 		CtlUser:    testutils.Credentials{Username: adminUser, Password: adminPassword},
 		ApiProduct: apiProduct,
@@ -335,6 +341,9 @@ func TestGetKeysForAPIProductAdminTenantUser(t *testing.T) {
 	// Add the API Product to env1
 	apiProduct := testutils.AddAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
 
+	// Create and Deploy API Product Revision
+	testutils.CreateAndDeployAPIProductRevision(t, dev, apiPublisher, apiPublisherPassword, apiProduct.ID)
+
 	args := &testutils.ApiGetKeyTestArgs{
 		CtlUser:    testutils.Credentials{Username: adminUser, Password: adminPassword},
 		ApiProduct: apiProduct,
@@ -372,6 +381,9 @@ func TestGetKeysConsecutivelyForAPIProductAdminSuperTenantUser(t *testing.T) {
 
 	// Add the API Product to env1
 	apiProduct := testutils.AddAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
+
+	// Create and Deploy API Product Revision
+	testutils.CreateAndDeployAPIProductRevision(t, dev, apiPublisher, apiPublisherPassword, apiProduct.ID)
 
 	args := &testutils.ApiGetKeyTestArgs{
 		CtlUser:    testutils.Credentials{Username: adminUser, Password: adminPassword},
