@@ -29,7 +29,7 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 )
 
-func TestXyz(t *testing.T) {
+func TestEnvironmentSpecificParamsEndpoint(t *testing.T) {
 	superTenantAdminUsername := superAdminUser
 	superTenantAdminPassword := superAdminPassword
 
