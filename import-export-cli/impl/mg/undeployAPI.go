@@ -29,11 +29,11 @@ var mgUndeployAPIResourcePath = "/apis"
 
 // UndeployAPI sends a DELETE request to delete an API
 func UndeployAPI(env string, queryParam map[string]string) (err error) {
-	mgwAdapterInfo, err := GetStoredTokenAndHost(env)
+	mgwAdapterInfo, err := GetMgwAdapterInfo(env)
 	if err != nil {
 		return err
 	}
-	apiDeleteEndpoint := mgwAdapterInfo.Host + utils.DefaultMgwAdapterEndpointSuffix + mgUndeployAPIResourcePath
+	apiDeleteEndpoint := mgwAdapterInfo.Endpoint + apisResourcePath
 
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + mgwAdapterInfo.AccessToken

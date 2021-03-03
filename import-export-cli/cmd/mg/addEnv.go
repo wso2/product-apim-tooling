@@ -29,7 +29,7 @@ const (
 	addEnvCmdLongDesc  = `Add new environment and its related endpoints to the config file`
 )
 const addEnvCmdExamples = utils.ProjectName + " " + mgCmdLiteral + " " + addCmdLiteral + " " + envCmdLiteral +
-	" prod --host  https://localhost:9443 " +
+	" prod --host https://localhost:9843 " +
 
 	"\n\nNOTE: The flag --host (-c) is mandatory and it has to specify the microgateway adapter" +
 	" url."
@@ -47,7 +47,7 @@ var AddEnvCmd = &cobra.Command{
 		envToBeAdded := args[0]
 
 		envEndpoints := new(utils.MgwEndpoints)
-		envEndpoints.AdapterEndpoint = mgwAdapterHost
+		envEndpoints.AdapterEndpoint = mgwAdapterHost + impl.DefaultMgwAdapterEndpointSuffix
 		err := impl.AddEnv(envToBeAdded, envEndpoints)
 		if err != nil {
 			utils.HandleErrorAndExit("Error adding environment", err)

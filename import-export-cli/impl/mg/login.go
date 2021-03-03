@@ -20,9 +20,11 @@ package mg
 
 import (
 	"bufio"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"strings"
 
@@ -31,8 +33,8 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
-type MgwAdapterHostAndToken struct {
-	Host        string
+type MgwAdapterInfo struct {
+	Endpoint    string
 	AccessToken string
 }
 
@@ -76,37 +78,53 @@ func RunLogin(environment, loginUsername, loginPassword string, loginPasswordStd
 		}
 	}
 
-	accessToken, err := credentials.GetOAuthAccessTokenForMGAdapter(loginUsername, loginPassword,
-		mgwAdapterEndpoints.AdapterEndpoint)
-	if err != nil {
-		utils.HandleErrorAndExit("Error getting access token from adapter", err)
+	if loginUsername == "" || loginPassword == "" {
+		return errors.New("username or password not entered")
 	}
 
-	err = store.SetMGToken(environment, accessToken)
+	tokenEndpoint := deriveTokenEndpointForMGAdapter(mgwAdapterEndpoints.AdapterEndpoint)
+	accessToken, err := getAccessTokenFromMGAdapter(loginUsername, loginPassword, tokenEndpoint)
 	if err != nil {
+		utils.HandleErrorAndExit("Error getting access token from adapter endpoint: "+
+			tokenEndpoint, err)
+	}
+
+	if err = store.SetMGToken(environment, accessToken); err != nil {
 		return err
 	}
 	fmt.Println("Successfully logged into Microgateway Adapter in environment: ", environment)
 	return nil
 }
 
-func GetStoredTokenAndHost(env string) (mgwAdapterHostAndToken MgwAdapterHostAndToken, err error) {
-	store, err := credentials.GetDefaultCredentialStore()
-	if err != nil {
-		return mgwAdapterHostAndToken, err
-	}
-	mgToken, err := store.GetMGToken(env)
-	if err != nil || mgToken.AccessToken == "" {
-		err = errors.New("Error loading access token. " + err.Error())
-		return mgwAdapterHostAndToken, err
-	}
-	mgwAdapterEndpoints, err := utils.GetEndpointsOfMgwAdapterEnv(env, utils.MainConfigFilePath)
-	if err != nil || mgwAdapterEndpoints.AdapterEndpoint == "" {
-		err = errors.New("Error loading Adapter endpoint. " + err.Error())
-		return mgwAdapterHostAndToken, err
-	}
+func getAccessTokenFromMGAdapter(username, password, tokenEndpoint string) (string, error) {
+	b64encodedCredentials := credentials.Base64Encode(username + ":" + password)
+	headers := make(map[string]string)
+	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + b64encodedCredentials
 
-	mgwAdapterHostAndToken.Host = mgwAdapterEndpoints.AdapterEndpoint
-	mgwAdapterHostAndToken.AccessToken = mgToken.AccessToken
-	return mgwAdapterHostAndToken, nil
+	resp, err := utils.InvokeGETRequest(tokenEndpoint, headers)
+	if err != nil {
+		return "", errors.New("Unable to connect to Microgateway Token endpoint. " + err.Error())
+	}
+	if resp.StatusCode() != http.StatusOK {
+		return "", errors.New("Error response from Microgateway Token endpoint. Status: " + resp.Status())
+	}
+	accessToken, err := getAccessTokenFromResponse(resp.Body())
+	if err != nil {
+		return "", err
+	}
+	return accessToken, err
+}
+
+func getAccessTokenFromResponse(responseBody []byte) (string, error) {
+	responseDataMap := make(map[string]string)
+	data := []byte(responseBody)
+	unmarshalError := json.Unmarshal(data, &responseDataMap)
+	if unmarshalError != nil {
+		return "", unmarshalError
+	}
+	accessToken, exists := responseDataMap["AccessToken"]
+	if !exists {
+		return "", errors.New("accessToken not found in the response")
+	}
+	return accessToken, nil
 }

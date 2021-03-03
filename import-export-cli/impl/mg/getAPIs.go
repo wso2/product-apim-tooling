@@ -41,8 +41,6 @@ const (
 	defaultAPITableFormat = "table {{.Name}}\t{{.Version}}\t{{.Type}}\t{{.Context}}\t{{.GatewayEnvs}}"
 )
 
-var mgGetAPIsResourcePath = "/apis"
-
 // APIMeta holds the response for the GET request
 type APIMeta struct {
 	Total int               `json:"total"`
@@ -93,11 +91,11 @@ func (a *APIMetaListItem) MarshalJSON() ([]byte, error) {
 func GetAPIsList(env string, queryParam map[string]string) (
 	total int, count int, apis []APIMetaListItem, err error) {
 
-	mgwAdapterInfo, err := GetStoredTokenAndHost(env)
+	mgwAdapterInfo, err := GetMgwAdapterInfo(env)
 	if err != nil {
 		return 0, 0, nil, err
 	}
-	apiListEndpoint := mgwAdapterInfo.Host + utils.DefaultMgwAdapterEndpointSuffix + mgDeployResourcePath
+	apiListEndpoint := mgwAdapterInfo.Endpoint + apisResourcePath
 
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + mgwAdapterInfo.AccessToken

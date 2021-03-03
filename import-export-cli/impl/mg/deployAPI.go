@@ -26,8 +26,6 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-var mgDeployResourcePath = "/apis"
-
 //DeployAPI creats or updates an API in the microgateway depending on the override param
 func DeployAPI(env, filePath string, extraParams map[string]string,
 	importAPISkipCleanup bool, override bool) {
@@ -42,11 +40,11 @@ func DeployAPI(env, filePath string, extraParams map[string]string,
 	if cleanupFunc != nil {
 		defer cleanupFunc()
 	}
-	mgwAdapterInfo, err := GetStoredTokenAndHost(env)
+	mgwAdapterInfo, err := GetMgwAdapterInfo(env)
 	if err != nil {
 		utils.HandleErrorAndExit("Error retriving stored url and access token to microgateway", err)
 	}
-	endpoint := mgwAdapterInfo.Host + utils.DefaultMgwAdapterEndpointSuffix + mgDeployResourcePath
+	endpoint := mgwAdapterInfo.Endpoint + apisResourcePath
 
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + mgwAdapterInfo.AccessToken

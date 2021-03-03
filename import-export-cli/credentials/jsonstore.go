@@ -64,7 +64,7 @@ func (s *JsonStore) Load() error {
 
 	s.credentials = Credentials{
 		Environments:   make(map[string]Environment),
-		MgwAdapterEnvs: make(map[string]MgToken),
+		MgwAdapterEnvs: make(map[string]MgAdapterEnv),
 	}
 	return nil
 }
@@ -168,11 +168,11 @@ func (s *JsonStore) SetMICredentials(env, username, password, accessToken string
 }
 
 // GetMGToken returns token for microgateway adapter from the store or an error
-func (s *JsonStore) GetMGToken(env string) (MgToken, error) {
-	if mgToken, ok := s.credentials.MgwAdapterEnvs[env]; ok {
-		return mgToken, nil
+func (s *JsonStore) GetMGToken(env string) (MgAdapterEnv, error) {
+	if mgAdapterEnv, ok := s.credentials.MgwAdapterEnvs[env]; ok {
+		return mgAdapterEnv, nil
 	}
-	return MgToken{}, fmt.Errorf(
+	return MgAdapterEnv{}, fmt.Errorf(
 		"Tokens not found for Mgw in %s. Log in with `apictl mg login [env]`", env)
 }
 
@@ -180,8 +180,8 @@ func (s *JsonStore) GetMGToken(env string) (MgToken, error) {
 func (s *JsonStore) SetMGToken(env, accessToken string) error {
 	mgwAdapterEnv := s.credentials.MgwAdapterEnvs[env]
 	mgwAdapterEnv.AccessToken = accessToken
-	err := s.persist()
-	if err != nil {
+	s.credentials.MgwAdapterEnvs[env] = mgwAdapterEnv
+	if err := s.persist(); err != nil {
 		return err
 	}
 	return nil
@@ -270,6 +270,6 @@ func apimCredentialsExists(apimCred Credential) bool {
 	return apimCred.ClientId != "" && apimCred.ClientSecret != "" && apimCred.Username != "" && apimCred.Password != ""
 }
 
-func mgTokenExists(mgwAdapterToken MgToken) bool {
+func mgTokenExists(mgwAdapterToken MgAdapterEnv) bool {
 	return mgwAdapterToken.AccessToken != ""
 }

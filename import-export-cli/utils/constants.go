@@ -86,8 +86,6 @@ const defaultClientRegistrationEndpointSuffix = "client-registration/v0.17/regis
 const defaultTokenEndPoint = "oauth2/token"
 const defaultRevokeEndpointSuffix = "oauth2/revoke"
 
-const DefaultMgwAdapterEndpointSuffix = "/api/mgw/adapter/0.1"
-
 const DefaultEnvironmentName = "default"
 
 // API Product related constants

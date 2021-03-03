@@ -28,7 +28,7 @@ const (
 	addCmdLongDesc  = `Add new environment and its related endpoints to the config file`
 )
 const addCmdExamples = utils.ProjectName + " " + mgCmdLiteral + " " + addCmdLiteral + " " + envCmdLiteral +
-	" prod --host  https://localhost:9443" +
+	" prod --host https://localhost:9843" +
 
 	"\n\nNOTE: The flag --host (-c) is mandatory and it has to specify the microgateway adapter" +
 	" url."
