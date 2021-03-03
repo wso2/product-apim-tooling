@@ -57,7 +57,7 @@ func ListApps(t *testing.T, env string) []string {
 }
 
 func ListAppsWithOwner(t *testing.T, env string, owner string) []string {
-	response, _ := base.Execute(t, "gets", "apps", "-e", env, "-k", "--owner", owner)
+	response, _ := base.Execute(t, "get", "apps", "-e", env, "-k", "--owner", owner)
 
 	return base.GetRowsFromTableResponse(response)
 }

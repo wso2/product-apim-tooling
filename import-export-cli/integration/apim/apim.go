@@ -608,11 +608,68 @@ func (instance *Client) AddAPIProductFromJSON(t *testing.T, path string, usernam
 	return apiProductResponse.ID
 }
 
+// CreateAPIRevision : Create API revision
+func (instance *Client) CreateAPIRevision(apiID string) *APIRevision {
+	revisioningURL := instance.publisherRestURL + "/apis/" + apiID + "/revisions"
+
+	request := base.CreatePost(revisioningURL, bytes.NewBuffer([]byte("{ \"description\": \"\" }")))
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.CreateAPIRevision()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.CreateAPIRevision()", response, 201)
+
+	var revision APIRevision
+	json.NewDecoder(response.Body).Decode(&revision)
+
+	return &revision
+}
+
+// DeployAPIRevision : Deploy API revision
+func (instance *Client) DeployAPIRevision(t *testing.T, apiID string, revision *APIRevision) {
+	deployURL := instance.publisherRestURL + "/apis/" + apiID + "/deploy-revision"
+
+	deploymentInfoArray := []APIRevisionDeployment{}
+	deploymentInfo := APIRevisionDeployment{}
+	deploymentInfo.RevisionUUID = revision.ID
+	deploymentInfo.Name = "Production and Sandbox"
+	deploymentInfo.DisplayOnDevportal = true
+	deploymentInfoArray = append(deploymentInfoArray, deploymentInfo)
+
+	data, err := json.Marshal(deploymentInfoArray)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	request := base.CreatePost(deployURL, bytes.NewBuffer(data))
+
+	values := url.Values{}
+	values.Add("revisionId", revision.ID)
+
+	request.URL.RawQuery = values.Encode()
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.DeployAPIRevision()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.DeployAPIRevision()", response, 201)
+}
+
 // CreateAPIProductRevision : Create API Product revision
 func (instance *Client) CreateAPIProductRevision(apiProductID string) *APIRevision {
-	apiProductsURL := instance.publisherRestURL + "/api-products/" + apiProductID + "/revisions"
+	revisioningURL := instance.publisherRestURL + "/api-products/" + apiProductID + "/revisions"
 
-	request := base.CreatePost(apiProductsURL, bytes.NewBuffer([]byte("{ \"description\": \"\" }")))
+	request := base.CreatePost(revisioningURL, bytes.NewBuffer([]byte("{ \"description\": \"\" }")))
 
 	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
 
@@ -632,7 +689,7 @@ func (instance *Client) CreateAPIProductRevision(apiProductID string) *APIRevisi
 
 // DeployAPIProductRevision : Deploy API Product revision
 func (instance *Client) DeployAPIProductRevision(t *testing.T, apiProductID string, revision *APIRevision) {
-	apiProductsURL := instance.publisherRestURL + "/api-products/" + apiProductID + "/deploy-revision"
+	deployURL := instance.publisherRestURL + "/api-products/" + apiProductID + "/deploy-revision"
 
 	deploymentInfoArray := []APIRevisionDeployment{}
 	deploymentInfo := APIRevisionDeployment{}
@@ -647,7 +704,7 @@ func (instance *Client) DeployAPIProductRevision(t *testing.T, apiProductID stri
 		t.Fatal(err)
 	}
 
-	request := base.CreatePost(apiProductsURL, bytes.NewBuffer(data))
+	request := base.CreatePost(deployURL, bytes.NewBuffer(data))
 
 	values := url.Values{}
 	values.Add("revisionId", revision.ID)

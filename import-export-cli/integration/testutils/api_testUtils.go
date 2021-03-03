@@ -43,6 +43,12 @@ func AddAPI(t *testing.T, client *apim.Client, username string, password string)
 	return api
 }
 
+func CreateAndDeployAPIRevision(t *testing.T, client *apim.Client, username, password, apiID string) {
+	client.Login(username, password)
+	revision := client.CreateAPIRevision(apiID)
+	client.DeployAPIRevision(t, apiID, revision)
+}
+
 func AddAPIWithoutCleaning(t *testing.T, client *apim.Client, username string, password string) *apim.API {
 	client.Login(username, password)
 	api := client.GenerateSampleAPIData(username)
@@ -87,18 +93,6 @@ func AddAPIFromOpenAPIDefinitionToTwoEnvs(t *testing.T, client1 *apim.Client, cl
 	api2 := client2.GetAPI(id2)
 
 	return api1, api2
-}
-
-func AddAPIProductFromJSON(t *testing.T, client *apim.Client, username string, password string, apisList map[string]*apim.API) *apim.APIProduct {
-	client.Login(username, password)
-	path := "testdata/SampleAPIProduct.json"
-	doClean := true
-	id := client.AddAPIProductFromJSON(t, path, username, password, apisList, doClean)
-
-	base.WaitForIndexing()
-
-	apiProduct := client.GetAPIProduct(id)
-	return apiProduct
 }
 
 func GetAPI(t *testing.T, client *apim.Client, name string, username string, password string) *apim.API {
@@ -402,6 +396,9 @@ func ReadAPIParams(t *testing.T, apiParamsPath string) *APIParams {
 func ValidateAPIImport(t *testing.T, args *ApiImportExportTestArgs) {
 	t.Helper()
 
+	// Add env2
+	base.SetupEnv(t, args.DestAPIM.GetEnvName(), args.DestAPIM.GetApimURL(), args.DestAPIM.GetTokenURL())
+
 	// Import api to env 2
 	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
@@ -419,6 +416,9 @@ func ValidateAPIImport(t *testing.T, args *ApiImportExportTestArgs) {
 
 func ValidateAPIImportFailure(t *testing.T, args *ApiImportExportTestArgs) {
 	t.Helper()
+
+	// Add env2
+	base.SetupEnv(t, args.DestAPIM.GetEnvName(), args.DestAPIM.GetApimURL(), args.DestAPIM.GetTokenURL())
 
 	// Import api to env 2
 	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
@@ -628,7 +628,7 @@ func ImportApiFromProjectWithUpdate(t *testing.T, projectName string, client *ap
 }
 
 func ExportApisWithOneCommand(t *testing.T, args *InitTestArgs) (string, error) {
-	output, error := base.Execute(t, "export", "apis", "-e", args.SrcAPIM.GetEnvName(), "-k", "--force", "--verbose")
+	output, error := base.Execute(t, "export", "apis", "-e", args.SrcAPIM.GetEnvName(), "-k", "--force", "--verbose", "--all")
 	return output, error
 }
 

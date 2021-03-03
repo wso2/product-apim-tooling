@@ -116,11 +116,13 @@ func TestExportApisWithExportApisCommandDeprecated(t *testing.T) {
 	var apisAdded = 0
 	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
 		api = testutils.AddAPI(t, dev, tenantAdminUsername, tenantAdminPassword)
+		testutils.CreateAndDeployAPIRevision(t, dev, tenantAdminUsername, tenantAdminPassword, api.ID)
 		apisAdded++
 	}
 
 	// This will be the API that will be deleted by apictl, so no need to do cleaning
 	api = testutils.AddAPIWithoutCleaning(t, dev, tenantAdminUsername, tenantAdminPassword)
+	testutils.CreateAndDeployAPIRevision(t, dev, tenantAdminUsername, tenantAdminPassword, api.ID)
 
 	args := &testutils.ApiImportExportTestArgs{
 		CtlUser: testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
@@ -264,6 +266,8 @@ func TestGetKeysAdminSuperTenantUserDeprecated(t *testing.T) {
 	dev := GetDevClient()
 
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	testutils.CreateAndDeployAPIRevision(t, dev, apiPublisher, apiPublisherPassword, api.ID)
 
 	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, api.ID)
 
