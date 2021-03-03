@@ -4,3 +4,5 @@ environments:
         endpoints:
             production:
                 url: 'https://prod.wso2.com'
+            sandbox:
+                url: 'https://sand.wso2.com'
