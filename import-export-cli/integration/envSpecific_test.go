@@ -29,7 +29,7 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 )
 
-func TestEnvironmentSpecificParamsEndpoint(t *testing.T) {
+func TestXyz(t *testing.T) {
 	superTenantAdminUsername := superAdminUser
 	superTenantAdminPassword := superAdminPassword
 
@@ -64,6 +64,8 @@ func TestEnvironmentSpecificParamsEndpoint(t *testing.T) {
 	same := "override_with_same_value"
 	apiCopy.SetProductionURL(same)
 	importedAPICopy.SetProductionURL(same)
+	apiCopy.SetSandboxURL(same)
+	importedAPICopy.SetSandboxURL(same)
 
 	testutils.ValidateAPIsEqual(t, &apiCopy, &importedAPICopy)
 }
@@ -113,10 +115,8 @@ func TestEnvironmentSpecificParamsEndpointRetryTimeout(t *testing.T) {
 	importedAPICopy := apim.CopyAPI(importedAPI)
 
 	same := "override_with_same_value"
-	apiCopy.SetProductionURL(same)
-	importedAPICopy.SetProductionURL(same)
-	apiCopy.SetProductionConfig(map[interface{}]interface{}{})
-	importedAPICopy.SetProductionConfig(map[interface{}]interface{}{})
+	apiCopy.EndpointConfig = same
+	importedAPICopy.EndpointConfig = same
 
 	testutils.ValidateAPIsEqual(t, &apiCopy, &importedAPICopy)
 }
