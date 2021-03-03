@@ -43,7 +43,7 @@ func AddAPI(t *testing.T, client *apim.Client, username string, password string)
 	return api
 }
 
-func CreateAndDeployRevision(t *testing.T, client *apim.Client, username, password, apiID string) {
+func CreateAndDeployAPIRevision(t *testing.T, client *apim.Client, username, password, apiID string) {
 	client.Login(username, password)
 	revision := client.CreateAPIRevision(apiID)
 	client.DeployAPIRevision(t, apiID, revision)

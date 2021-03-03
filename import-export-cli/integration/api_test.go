@@ -746,7 +746,7 @@ func TestDeleteApiWithActiveSubscriptionsSuperTenantUser(t *testing.T) {
 	api = testutils.AddAPIWithoutCleaning(t, dev, adminUser, adminPassword)
 
 	// Create and Deploy Revision of the above API
-	testutils.CreateAndDeployRevision(t, dev, apiPublisher, apiPublisherPassword, api.ID)
+	testutils.CreateAndDeployAPIRevision(t, dev, apiPublisher, apiPublisherPassword, api.ID)
 
 	args := &testutils.ApiGetKeyTestArgs{
 		CtlUser: testutils.Credentials{Username: adminUser, Password: adminPassword},
@@ -779,13 +779,13 @@ func TestExportApisWithExportApisCommand(t *testing.T) {
 	var apisAdded = 0
 	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
 		api = testutils.AddAPI(t, dev, tenantAdminUsername, tenantAdminPassword)
-		testutils.CreateAndDeployRevision(t, dev, tenantAdminUsername, tenantAdminPassword, api.ID)
+		testutils.CreateAndDeployAPIRevision(t, dev, tenantAdminUsername, tenantAdminPassword, api.ID)
 		apisAdded++
 	}
 
 	// This will be the API that will be deleted by apictl, so no need to do cleaning
 	api = testutils.AddAPIWithoutCleaning(t, dev, tenantAdminUsername, tenantAdminPassword)
-	testutils.CreateAndDeployRevision(t, dev, tenantAdminUsername, tenantAdminPassword, api.ID)
+	testutils.CreateAndDeployAPIRevision(t, dev, tenantAdminUsername, tenantAdminPassword, api.ID)
 
 	args := &testutils.ApiImportExportTestArgs{
 		CtlUser: testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
@@ -974,7 +974,7 @@ func TestChangeLifeCycleStatusOfApiWithActiveSubscriptionWithAdminSuperTenantUse
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
 	// Create and Deploy Revision of the above API
-	testutils.CreateAndDeployRevision(t, dev, apiPublisher, apiPublisherPassword, api.ID)
+	testutils.CreateAndDeployAPIRevision(t, dev, apiPublisher, apiPublisherPassword, api.ID)
 
 	testutils.PublishAPI(dev, adminUsername, adminPassword, api.ID)
 
@@ -1018,7 +1018,7 @@ func TestChangeLifeCycleStatusOfApiWithActiveSubscriptionDevopsSuperTenantUser(t
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
 	// Create and Deploy Revision of the above API
-	testutils.CreateAndDeployRevision(t, dev, apiPublisher, apiPublisherPassword, api.ID)
+	testutils.CreateAndDeployAPIRevision(t, dev, apiPublisher, apiPublisherPassword, api.ID)
 
 	testutils.PublishAPI(dev, devopsUsername, devopsPassword, api.ID)
 

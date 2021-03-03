@@ -81,7 +81,7 @@ func TestGetKeysAdminSuperTenantUser(t *testing.T) {
 	dev := GetDevClient()
 
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
-	testutils.CreateAndDeployRevision(t, dev, apiPublisher, apiPublisherPassword, api.ID)
+	testutils.CreateAndDeployAPIRevision(t, dev, apiPublisher, apiPublisherPassword, api.ID)
 
 	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, api.ID)
 
@@ -107,7 +107,7 @@ func TestGetKeysConsecutivelyAdminSuperTenantUser(t *testing.T) {
 	dev := GetDevClient()
 
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
-	testutils.CreateAndDeployRevision(t, dev, apiPublisher, apiPublisherPassword, api.ID)
+	testutils.CreateAndDeployAPIRevision(t, dev, apiPublisher, apiPublisherPassword, api.ID)
 
 	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, api.ID)
 
@@ -136,7 +136,7 @@ func TestGetKeysAdminTenantUser(t *testing.T) {
 	dev := GetDevClient()
 
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
-	testutils.CreateAndDeployRevision(t, dev, apiPublisher, apiPublisherPassword, api.ID)
+	testutils.CreateAndDeployAPIRevision(t, dev, apiPublisher, apiPublisherPassword, api.ID)
 
 	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, api.ID)
 
