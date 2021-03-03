@@ -13,7 +13,7 @@ apictl mg add env [flags]
 ### Examples
 
 ```
-apictl mg add env prod --host  https://localhost:9443 
+apictl mg add env prod --host https://localhost:9843 
 
 NOTE: The flag --host (-c) is mandatory and it has to specify the microgateway adapter url.
 ```
