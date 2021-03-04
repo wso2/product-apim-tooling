@@ -29,9 +29,9 @@ const (
 	addEnvCmdLongDesc  = `Add new environment and its related endpoints to the config file`
 )
 const addEnvCmdExamples = utils.ProjectName + " " + mgCmdLiteral + " " + addCmdLiteral + " " + envCmdLiteral +
-	" prod --host https://localhost:9843 " +
+	" prod --adapter https://localhost:9843 " +
 
-	"\n\nNOTE: The flag --host (-c) is mandatory and it has to specify the microgateway adapter" +
+	"\n\nNOTE: The flag --adapter (-a) is mandatory and it has to specify the microgateway adapter" +
 	" url."
 
 // addEnvCmd represents the addEnv command
@@ -59,7 +59,7 @@ var AddEnvCmd = &cobra.Command{
 func init() {
 	AddCmd.AddCommand(AddEnvCmd)
 
-	AddEnvCmd.Flags().StringVarP(&mgwAdapterHost, "host", "c", "", "The adapter host url with port")
+	AddEnvCmd.Flags().StringVarP(&mgwAdapterHost, "adapter", "a", "", "The adapter host url with port")
 
-	_ = AddEnvCmd.MarkFlagRequired("host")
+	_ = AddEnvCmd.MarkFlagRequired("adapter")
 }
