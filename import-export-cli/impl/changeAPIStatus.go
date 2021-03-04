@@ -19,8 +19,6 @@
 package impl
 
 import (
-	"net/url"
-
 	"github.com/go-resty/resty/v2"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
@@ -44,16 +42,20 @@ func changeAPIStatus(changeAPIStatusEndpoint, stateChangeAction, name, version, 
 	changeAPIStatusEndpoint = utils.AppendSlashToString(changeAPIStatusEndpoint)
 	apiId, err := GetAPIId(accessToken, environment, name, version, provider)
 	if err != nil {
-		utils.HandleErrorAndExit("Error while getting API Id for state change ", err)
+		utils.HandleErrorAndExit("Error while gettingurl API Id for state change ", err)
 	}
-	requestURL := changeAPIStatusEndpoint + "change-lifecycle?action=" + url.QueryEscape(stateChangeAction) + "&apiId=" + apiId
-	utils.Logln(utils.LogPrefixInfo+"APIStateChange: URL:", requestURL)
+	url := changeAPIStatusEndpoint + "change-lifecycle"
+	utils.Logln(utils.LogPrefixInfo+"APIStateChange: URL:", url)
+
+	queryParams := make(map[string]string)
+	queryParams[utils.LifeCycleAction] = stateChangeAction
+	queryParams[utils.ApiId] = apiId
+
 	headers := make(map[string]string)
 	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 
-	resp, err := utils.InvokePOSTRequest(requestURL, headers, "")
-
+	resp, err := utils.InvokePOSTRequestWithQueryParam(queryParams, url, headers, "")
 	if err != nil {
 		return nil, err
 	}
