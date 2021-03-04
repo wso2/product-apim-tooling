@@ -150,6 +150,8 @@ const ApiId = "apiId"
 const DefaultCliApp = "default-apictl-app"
 const DefaultTokenType = "JWT"
 
+const LifeCycleAction = "action"
+
 var ValidInitialStates = []string{"CREATED", "PUBLISHED"}
 
 var EnvReplaceFilePaths = []string{
