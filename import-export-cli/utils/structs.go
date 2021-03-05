@@ -31,7 +31,7 @@ type EnvKeysAll struct {
 type MainConfig struct {
 	Config         Config                  `yaml:"config"`
 	Environments   map[string]EnvEndpoints `yaml:"environments"`
-	MgwAdapterEnvs map[string]MgwEndpoints `yaml:"mgw-adapter-envs"`
+	MgwAdapterEnvs map[string]MgwEndpoints `yaml:"mgw-clusters"`
 }
 
 type Config struct {
@@ -353,9 +353,9 @@ type APIData struct {
 
 // Project MetaData struct
 type MetaData struct {
-	Name     string `json:"name"`
-	Version  string `json:"version,omitempty"`
-	Owner    string `json:"owner,omitempty"`
+	Name    string `json:"name"`
+	Version string `json:"version,omitempty"`
+	Owner   string `json:"owner,omitempty"`
 }
 
 type RevisionListResponse struct {
