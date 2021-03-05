@@ -97,11 +97,14 @@ func RunLogin(environment, loginUsername, loginPassword string, loginPasswordStd
 }
 
 func getAccessTokenFromMGAdapter(username, password, tokenEndpoint string) (string, error) {
-	b64encodedCredentials := credentials.Base64Encode(username + ":" + password)
-	headers := make(map[string]string)
-	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + b64encodedCredentials
+	body := make(map[string]string)
+	body["username"] = username
+	body["password"] = password
 
-	resp, err := utils.InvokeGETRequest(tokenEndpoint, headers)
+	headers := make(map[string]string)
+	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
+
+	resp, err := utils.InvokePOSTRequest(tokenEndpoint, headers, body)
 	if err != nil {
 		return "", errors.New("Unable to connect to Microgateway Token endpoint. " + err.Error())
 	}
@@ -122,7 +125,7 @@ func getAccessTokenFromResponse(responseBody []byte) (string, error) {
 	if unmarshalError != nil {
 		return "", unmarshalError
 	}
-	accessToken, exists := responseDataMap["AccessToken"]
+	accessToken, exists := responseDataMap["accessToken"]
 	if !exists {
 		return "", errors.New("accessToken not found in the response")
 	}
