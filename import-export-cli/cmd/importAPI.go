@@ -20,6 +20,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
@@ -93,10 +94,9 @@ func init() {
 		"existing API or create a new API")
 	ImportAPICmd.Flags().BoolVar(&importAPIRotateRevision, "rotate-revision", false, "Rotate the "+
 		"revisions with each update")
-	ImportAPICmd.Flags().BoolVar(&importAPISkipDeployments, "skip-deployments", false, "Update only " +
+	ImportAPICmd.Flags().BoolVar(&importAPISkipDeployments, "skip-deployments", false, "Update only "+
 		"the working copy and skip deployment steps in import")
-	ImportAPICmd.Flags().StringVarP(&importAPIParamsFile, "params", "", utils.ParamFileAPI,
-		"Provide a API Manager params file")
+	ImportAPICmd.Flags().StringVarP(&importAPIParamsFile, "params", "", "", "Provide a API Manager params file")
 	ImportAPICmd.Flags().BoolVarP(&importAPISkipCleanup, "skip-cleanup", "", false, "Leave "+
 		"all temporary files created during import process")
 	// Mark required flags
