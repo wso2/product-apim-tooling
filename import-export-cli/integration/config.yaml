@@ -3,10 +3,10 @@
 # host - host name of APIM instance  
 # offset - port offset of APIM instance
 environments:
-- name: development
+- name: DEVELOPMENT
   host: localhost
   offset: 0
-- name: production
+- name: PRODUCTION
   host: localhost
   offset: 1
 # duration tests will wait to allow APIM solr indexes to be updated
