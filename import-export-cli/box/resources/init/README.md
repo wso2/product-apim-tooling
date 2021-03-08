@@ -4,6 +4,7 @@
 
 ```bash
 ├── api.yaml
+├── api_meta.yaml
 ├── deployment_environments.yaml
 ├── Client-certificates
 ├── Definitions
