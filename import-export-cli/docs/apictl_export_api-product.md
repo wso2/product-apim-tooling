@@ -24,8 +24,10 @@ NOTE: Both the flags (--name (-n) and --environment (-e)) are mandatory
   -e, --environment string   Environment to which the API Product should be exported
       --format string        File format of exported archive (json or yaml) (default "YAML")
   -h, --help                 help for api-product
+      --latest               Export the latest revision of the API Product
   -n, --name string          Name of the API Product to be exported
   -r, --provider string      Provider of the API Product
+      --rev string           Revision number of the API Product to be exported
 ```
 
 ### Options inherited from parent commands

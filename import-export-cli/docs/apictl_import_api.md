@@ -29,7 +29,8 @@ NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory
       --params string        Provide a API Manager params file (default "api_params.yaml")
       --preserve-provider    Preserve existing provider of API after importing (default true)
       --rotate-revision      Rotate the revisions with each update
-      --skipCleanup          Leave all temporary files created during import process
+      --skip-cleanup         Leave all temporary files created during import process
+      --skip-deployments     Update only the working copy and skip deployment steps in import
       --update               Update an existing API or create a new API
 ```
 

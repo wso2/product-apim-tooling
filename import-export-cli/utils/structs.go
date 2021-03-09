@@ -29,8 +29,9 @@ type EnvKeysAll struct {
 // For main_config.yaml
 // To be manually edited by the user
 type MainConfig struct {
-	Config       Config                  `yaml:"config"`
-	Environments map[string]EnvEndpoints `yaml:"environments"`
+	Config         Config                  `yaml:"config"`
+	Environments   map[string]EnvEndpoints `yaml:"environments"`
+	MgwAdapterEnvs map[string]MgwEndpoints `yaml:"mgw-clusters"`
 }
 
 type Config struct {
@@ -57,6 +58,10 @@ type EnvEndpoints struct {
 	AdminEndpoint        string `yaml:"admin"`
 	TokenEndpoint        string `yaml:"token"`
 	MiManagementEndpoint string `yaml:"mi"`
+}
+
+type MgwEndpoints struct {
+	AdapterEndpoint string `yaml:"adapter"`
 }
 
 // ---------------- End of Structs for YAML Config Files ---------------------------------
@@ -348,10 +353,9 @@ type APIData struct {
 
 // Project MetaData struct
 type MetaData struct {
-	Name     string `json:"name"`
-	Version  string `json:"version,omitempty"`
-	Revision string `json:"revision"`
-	Owner    string `json:"owner,omitempty"`
+	Name    string `json:"name"`
+	Version string `json:"version,omitempty"`
+	Owner   string `json:"owner,omitempty"`
 }
 
 type RevisionListResponse struct {
@@ -364,9 +368,10 @@ type Revisions struct {
 	RevisionNumber string       `json:"displayName"`
 	Description    string       `json:"description"`
 	Deployments    []Deployment `json:"deploymentInfo"`
-	Gateways       []string
+	GatewayEnvs    []string
 }
 
 type Deployment struct {
-	Name string `json:"name"`
+	Name               string `json:"name"`
+	DisplayOnDevportal bool   `json:"displayOnDevportal"`
 }

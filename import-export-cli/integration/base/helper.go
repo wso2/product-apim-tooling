@@ -42,6 +42,9 @@ var logTransport = false
 // indexingDelay : Time in milliseconds that tests need to wait for to allow APIM solr indexing to take place
 var indexingDelay = 1000
 
+// maxAttempts : Max number of attempts API invocation will be retried if API artifact deployment is delayed
+var maxAttempts = 10
+
 func init() {
 	flag.BoolVar(&logTransport, "logtransport", false, "Log http transport level requests and responses")
 }
@@ -302,6 +305,16 @@ func SetIndexingDelay(delay int) {
 // WaitForIndexing : Wait for specified interval to allow APIM solr indexes to be updated
 func WaitForIndexing() {
 	time.Sleep(time.Duration(indexingDelay) * time.Millisecond)
+}
+
+// SetMaxInvocationAttempts : Set max number of attempts API invocation will be retried if API artifact deployment is delayed
+func SetMaxInvocationAttempts(attempts int) {
+	maxAttempts = attempts
+}
+
+// GetMaxInvocationAttempts : Get max number of attempts API invocation will be retried if API artifact deployment is delayed
+func GetMaxInvocationAttempts() int {
+	return maxAttempts
 }
 
 func RemoveDir(projectName string) {

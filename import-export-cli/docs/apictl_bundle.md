@@ -4,7 +4,7 @@ Archive any source project artifact to zip format
 
 ### Synopsis
 
-Archive API, Application or API Product projects to a zip format. Bundle name will have project name, version and revision number (if there is any)
+Archive API, Application or API Product projects to a zip format. Bundle name will have project name and version
 
 ```
 apictl bundle [flags]

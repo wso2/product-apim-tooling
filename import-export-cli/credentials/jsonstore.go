@@ -62,7 +62,10 @@ func (s *JsonStore) Load() error {
 		return fmt.Errorf("%s is a directory", s.Path)
 	}
 
-	s.credentials = Credentials{Environments: make(map[string]Environment)}
+	s.credentials = Credentials{
+		Environments:   make(map[string]Environment),
+		MgwAdapterEnvs: make(map[string]MgAdapterEnv),
+	}
 	return nil
 }
 
@@ -164,6 +167,26 @@ func (s *JsonStore) SetMICredentials(env, username, password, accessToken string
 	return nil
 }
 
+// GetMGToken returns token for microgateway adapter from the store or an error
+func (s *JsonStore) GetMGToken(env string) (MgAdapterEnv, error) {
+	if mgAdapterEnv, ok := s.credentials.MgwAdapterEnvs[env]; ok {
+		return mgAdapterEnv, nil
+	}
+	return MgAdapterEnv{}, fmt.Errorf(
+		"Tokens not found for Mgw in %s. Log in with `apictl mg login [env]`", env)
+}
+
+// SetMGToken set token for microgateway adapter
+func (s *JsonStore) SetMGToken(env, accessToken string) error {
+	mgwAdapterEnv := s.credentials.MgwAdapterEnvs[env]
+	mgwAdapterEnv.AccessToken = accessToken
+	s.credentials.MgwAdapterEnvs[env] = mgwAdapterEnv
+	if err := s.persist(); err != nil {
+		return err
+	}
+	return nil
+}
+
 // EraseAPIM remove apim credentials from the store
 func (s *JsonStore) EraseAPIM(env string) error {
 	environment, ok := s.credentials.Environments[env]
@@ -198,6 +221,18 @@ func (s *JsonStore) EraseMI(env string) error {
 	return s.persist()
 }
 
+// EraseMG remove mg tokens from the store
+func (s *JsonStore) EraseMG(env string) error {
+	_, ok := s.credentials.MgwAdapterEnvs[env]
+	if !ok {
+		return fmt.Errorf("%s was not found", env)
+	} else {
+		// remove only mg tokens
+		delete(s.credentials.MgwAdapterEnvs, env)
+	}
+	return s.persist()
+}
+
 // IsKeychainEnabled returns if another store is activated
 func (s *JsonStore) IsKeychainEnabled() bool {
 	return s.credentials.CredStore != ""
@@ -219,10 +254,22 @@ func (s *JsonStore) HasMI(env string) bool {
 	return false
 }
 
+// HasMI return the existance of mi credentials in the store for a given environment
+func (s *JsonStore) HasMG(env string) bool {
+	if mgwAdapterEnv, ok := s.credentials.MgwAdapterEnvs[env]; ok {
+		return mgTokenExists(mgwAdapterEnv)
+	}
+	return false
+}
+
 func miCredentialsExists(miCred MiCredential) bool {
 	return miCred.AccessToken != "" && miCred.Username != "" && miCred.Password != ""
 }
 
 func apimCredentialsExists(apimCred Credential) bool {
 	return apimCred.ClientId != "" && apimCred.ClientSecret != "" && apimCred.Username != "" && apimCred.Password != ""
+}
+
+func mgTokenExists(mgwAdapterToken MgAdapterEnv) bool {
+	return mgwAdapterToken.AccessToken != ""
 }

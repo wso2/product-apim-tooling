@@ -23,7 +23,7 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/go-resty/resty"
+	"github.com/go-resty/resty/v2"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
@@ -42,8 +42,8 @@ func ExportAPIFromEnv(accessToken, name, version, revisionNum, provider, format,
 // @param publisherEndpoint : API Manager Publisher Endpoint for the environment
 // @param accessToken : Access Token for the resource
 // @return response Response in the form of *resty.Response
-func exportAPI(name, version, revisionNum, provider, format, publisherEndpoint, accessToken string, exportLatestRevision,
-	preserveStatus bool) (*resty.Response, error) {
+func exportAPI(name, version, revisionNum, provider, format, publisherEndpoint, accessToken string, preserveStatus,
+	exportLatestRevision bool) (*resty.Response, error) {
 	publisherEndpoint = utils.AppendSlashToString(publisherEndpoint)
 	query := "apis/export?name=" + name + "&version=" + version + "&providerName=" + provider +
 		"&preserveStatus=" + strconv.FormatBool(preserveStatus)
@@ -75,12 +75,18 @@ func exportAPI(name, version, revisionNum, provider, format, publisherEndpoint, 
 // WriteToZip
 // @param exportAPIName : Name of the API to be exported
 // @param exportAPIVersion: Version of the API to be exported
+// @param exportAPIRevisionNumber: Revision number of the api
 // @param zipLocationPath: Path to the export directory
 // @param runningExportApiCommand: Whether the export API command is running
 // @param resp : Response returned from making the HTTP request (only pass a 200 OK)
 // Exported API will be written to a zip file
-func WriteToZip(exportAPIName, exportAPIVersion, zipLocationPath string, runningExportApiCommand bool, resp *resty.Response) {
-	zipFilename := exportAPIName + "_" + exportAPIVersion + ".zip" // MyAPI_1.0.0.zip
+func WriteToZip(exportAPIName, exportAPIVersion, exportAPIRevisionNumber, zipLocationPath string,
+	runningExportApiCommand bool, resp *resty.Response) {
+	zipFilename := exportAPIName + "_" + exportAPIVersion
+	if exportAPIRevisionNumber != "" {
+		zipFilename += "_" + utils.GetRevisionNamFromRevisionNum(exportAPIRevisionNumber)
+	}
+	zipFilename += ".zip" // MyAPI_1.0.0_Revision-1.zip
 	// Writes the REST API response to a temporary zip file
 	tempZipFile, err := utils.WriteResponseToTempZip(zipFilename, resp)
 	if err != nil {

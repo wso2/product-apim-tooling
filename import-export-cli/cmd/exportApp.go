@@ -97,7 +97,7 @@ func init() {
 		"Owner of the Application to be exported")
 	ExportAppCmd.Flags().StringVarP(&CmdExportEnvironment, "environment", "e",
 		"", "Environment to which the Application should be exported")
-	ExportAppCmd.Flags().BoolVarP(&exportAppWithKeys, "withKeys", "",
+	ExportAppCmd.Flags().BoolVarP(&exportAppWithKeys, "with-keys", "",
 		false, "Export keys for the application ")
 	ExportAppCmd.Flags().StringVarP(&exportAppFormat, "format", "", utils.DefaultExportFormat, "File format of exported archive (json or yaml)")
 	_ = ExportAppCmd.MarkFlagRequired("environment")

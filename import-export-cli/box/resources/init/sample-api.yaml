@@ -13,7 +13,7 @@
 # limitations under the License.
 
 type: api # Type of the exported artifact using APICTL
-version: v4 # API Manager version
+version: v4.0.0 # API Manager version
 data: # Contains the meta data of the API
   name: PizzaShackAPI # Name of the API without Spaces [required] 
   description: This is a simple API for Pizza Shack online pizza delivery store. # Description of the API

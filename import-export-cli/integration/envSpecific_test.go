@@ -36,8 +36,8 @@ func TestEnvironmentSpecificParamsEndpoint(t *testing.T) {
 	superTenantApiCreator := creator.UserName
 	superTenantApiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
 
@@ -64,6 +64,8 @@ func TestEnvironmentSpecificParamsEndpoint(t *testing.T) {
 	same := "override_with_same_value"
 	apiCopy.SetProductionURL(same)
 	importedAPICopy.SetProductionURL(same)
+	apiCopy.SetSandboxURL(same)
+	importedAPICopy.SetSandboxURL(same)
 
 	testutils.ValidateAPIsEqual(t, &apiCopy, &importedAPICopy)
 }
@@ -75,8 +77,8 @@ func TestEnvironmentSpecificParamsEndpointRetryTimeout(t *testing.T) {
 	superTenantApiCreator := creator.UserName
 	superTenantApiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
 
@@ -113,10 +115,8 @@ func TestEnvironmentSpecificParamsEndpointRetryTimeout(t *testing.T) {
 	importedAPICopy := apim.CopyAPI(importedAPI)
 
 	same := "override_with_same_value"
-	apiCopy.SetProductionURL(same)
-	importedAPICopy.SetProductionURL(same)
-	apiCopy.SetProductionConfig(map[interface{}]interface{}{})
-	importedAPICopy.SetProductionConfig(map[interface{}]interface{}{})
+	apiCopy.EndpointConfig = same
+	importedAPICopy.EndpointConfig = same
 
 	testutils.ValidateAPIsEqual(t, &apiCopy, &importedAPICopy)
 }
@@ -128,8 +128,8 @@ func TestEnvironmentSpecificParamsEndpointSecurityFalse(t *testing.T) {
 	superTenantApiCreator := creator.UserName
 	superTenantApiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
 
@@ -156,8 +156,8 @@ func TestEnvironmentSpecificParamsEndpointSecurityDigest(t *testing.T) {
 	superTenantApiCreator := creator.UserName
 	superTenantApiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
 
@@ -186,8 +186,8 @@ func TestEnvironmentSpecificParamsEndpointSecurityBasic(t *testing.T) {
 	superTenantApiCreator := creator.UserName
 	superTenantApiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
 

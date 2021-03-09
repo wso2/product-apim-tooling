@@ -150,6 +150,8 @@ const ApiId = "apiId"
 const DefaultCliApp = "default-apictl-app"
 const DefaultTokenType = "JWT"
 
+const LifeCycleAction = "action"
+
 var ValidInitialStates = []string{"CREATED", "PUBLISHED"}
 
 var EnvReplaceFilePaths = []string{
@@ -183,6 +185,7 @@ const (
 	MetaFileApplication = "application_meta.yaml"
 )
 
+const DeploymentEnvFile = "deployment_environments.yaml"
 const PrivateJetModeConst = "privateJet"
 const SidecarModeConst = "sidecar"
 

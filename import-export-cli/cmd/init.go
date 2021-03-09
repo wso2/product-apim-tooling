@@ -22,11 +22,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/Jeffail/gabs"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"unicode"
+
+	"github.com/Jeffail/gabs"
 
 	jsoniter "github.com/json-iterator/go"
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
@@ -253,6 +254,14 @@ func executeInitCmd() error {
 	apiJSONPath := filepath.Join(initCmdOutputDir, filepath.FromSlash("api.yaml"))
 	utils.Logln(utils.LogPrefixInfo + "Writing " + apiJSONPath)
 	err = ioutil.WriteFile(apiJSONPath, apiData, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	apimProjDeploymentEnvironmentsFilePath := filepath.Join(initCmdOutputDir, "deployment_environments.yaml")
+	utils.Logln(utils.LogPrefixInfo + "Writing " + apimProjDeploymentEnvironmentsFilePath)
+	deploymentEnvironments, _ := box.Get("/init/default_deployment_environments.yaml")
+	err = ioutil.WriteFile(apimProjDeploymentEnvironmentsFilePath, deploymentEnvironments, os.ModePerm)
 	if err != nil {
 		return err
 	}

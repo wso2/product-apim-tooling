@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 	"text/template"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/formatter"
@@ -33,22 +32,22 @@ const (
 	revisionIdHeader          = "ID"
 	revisionNameHeader        = "REVISION"
 	revisionDescriptionHeader = "DESCRIPTION"
-	deployedGatewaysHeader    = "GATEWAYS"
+	deployedGatewayEnvsHeader = "GATEWAY_ENVS"
 
-	defaultRevisionTableFormat = "table {{.Id}}\t{{.RevisionNumber}}\t{{.Description}}\t{{.Gateways}}"
+	defaultRevisionTableFormat = "table {{.Id}}\t{{.RevisionNumber}}\t{{.Description}}\t{{.GatewayEnvs}}"
 )
 
 // revisions struct holds information about an revision for outputting
 type revision struct {
-	id               string
-	revisionNumber   string
-	description      string
-	deployedGateways []string
+	id                  string
+	revisionNumber      string
+	description         string
+	deployedGatewayEnvs []string
 }
 
 // creates a new revision from utils.Revisions
 func newRevisionDefinitionFromRevisions(r utils.Revisions) *revision {
-	return &revision{r.ID, r.RevisionNumber, r.Description, r.Gateways}
+	return &revision{r.ID, r.RevisionNumber, r.Description, r.GatewayEnvs}
 }
 
 // Id of revision
@@ -58,7 +57,7 @@ func (r revision) Id() string {
 
 // Revision number
 func (r revision) RevisionNumber() string {
-	return strings.ReplaceAll(r.revisionNumber, "Revision ", "")
+	return utils.GetRevisionNumFromRevisionName(r.revisionNumber)
 }
 
 // Revision description
@@ -66,9 +65,9 @@ func (r revision) Description() string {
 	return r.description
 }
 
-// Deployed gateways of the revision
-func (r revision) Gateways() []string {
-	return r.deployedGateways
+// Deployed gateway envs of the revision
+func (r revision) GatewayEnvs() []string {
+	return r.deployedGatewayEnvs
 }
 
 // MarshalJSON marshals api using custom marshaller which uses methods instead of fields
@@ -113,11 +112,11 @@ func PrintRevisions(revisions []utils.Revisions, format string) {
 	// create a new renderer function which iterate collection
 	renderer := func(w io.Writer, t *template.Template) error {
 		for _, r := range revisions {
-			var gateways []string
+			var gatewayEnvs []string
 			for _, d := range r.Deployments {
-				gateways = append(gateways, d.Name)
+				gatewayEnvs = append(gatewayEnvs, d.Name)
 			}
-			r.Gateways = gateways
+			r.GatewayEnvs = gatewayEnvs
 			if err := t.Execute(w, newRevisionDefinitionFromRevisions(r)); err != nil {
 				return err
 			}
@@ -131,7 +130,7 @@ func PrintRevisions(revisions []utils.Revisions, format string) {
 		"Id":             revisionIdHeader,
 		"RevisionNumber": revisionNameHeader,
 		"Description":    revisionDescriptionHeader,
-		"Gateways":       deployedGatewaysHeader,
+		"GatewayEnvs":    deployedGatewayEnvsHeader,
 	}
 
 	// execute context

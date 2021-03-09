@@ -117,22 +117,22 @@ func GetAPIList(accessToken, apiListEndpoint, query, limit string) (count int32,
 		if queryParamAdded {
 			return "&"
 		} else {
-			queryParamAdded = true
-			return "?"
+			return ""
 		}
 	}
 
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
-
+	var queryParamSring string
 	if query != "" {
-		apiListEndpoint += getQueryParamConnector() + "query=" + query
+		queryParamSring = "query=" + query
+		queryParamAdded = true
 	}
 	if limit != "" {
-		apiListEndpoint += getQueryParamConnector() + "limit=" + limit
+		queryParamSring += getQueryParamConnector() + "limit=" + limit
 	}
-	utils.Logln(utils.LogPrefixInfo+"URL:", apiListEndpoint)
-	resp, err := utils.InvokeGETRequest(apiListEndpoint, headers)
+	utils.Logln(utils.LogPrefixInfo+"URL:", apiListEndpoint + "?" + queryParamSring)
+	resp, err := utils.InvokeGETRequestWithQueryParamsString(apiListEndpoint, queryParamSring, headers)
 
 	if err != nil {
 		utils.HandleErrorAndExit("Unable to connect to "+apiListEndpoint, err)
@@ -184,14 +184,5 @@ func GetRevisionsList(accessToken, revisionListEndpoint string) (count int32, re
 		return revisionListResponse.Count, revisionListResponse.List, nil
 	} else {
 		return 0, nil, errors.New(string(resp.Body()))
-	}
-}
-
-func getQueryParamConnector() (connector string) {
-	if queryParamAdded {
-		return "&"
-	} else {
-		queryParamAdded = true
-		return "?"
 	}
 }

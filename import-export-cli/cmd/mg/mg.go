@@ -22,16 +22,25 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	mgwAdapterHost string
+)
+
+// common mgw command literals
+const (
+	apisCmdLiteral = "apis"
+	apiCmdLiteral  = "api"
+	envCmdLiteral  = "env"
+)
+
 // mgw command related usage Info
 const (
 	mgCmdLiteral   = "mg"
 	mgCmdShortDesc = "Handle Microgateway related operations"
-	mgCmdLongDesc  = `Initialize, Add, Update an apictl project to the microgateway`
-
-	MgBasepath = "/api/mgw/adapter/0.1"
+	mgCmdLongDesc  = `Deploy, Update, Undepoly an apictl project to/from the microgateway`
 )
 
-// MgwCmd represents the export command
+// MgCmd represents the export command
 var MgCmd = &cobra.Command{
 	Use:   mgCmdLiteral,
 	Short: mgCmdShortDesc,

@@ -76,60 +76,6 @@ func resolveImportFilePath(file, defaultExportDirectory string) (string, error) 
 	return absPath, nil
 }
 
-// resolveAPIParamsPath resolves api_params.yaml path
-// First it will look at AbsolutePath of the import path (the last directory)
-// If not found it will look at current working directory
-// If a path is provided search ends looking up at that path
-func resolveAPIParamsPath(importPath, paramPath string) (string, error) {
-	utils.Logln(utils.LogPrefixInfo + "Scanning for parameters file")
-	if paramPath == utils.ParamFileAPI {
-		// look in importpath
-		if stat, err := os.Stat(importPath); err == nil && stat.IsDir() {
-			loc := filepath.Join(importPath, utils.ParamFileAPI)
-			utils.Logln(utils.LogPrefixInfo+"Scanning for", loc)
-			if info, err := os.Stat(loc); err == nil && !info.IsDir() {
-				// found api_params.yml in the importpath
-				return loc, nil
-			}
-		}
-
-		// look in the basepath of importPath
-		base := filepath.Dir(importPath)
-		fp := filepath.Join(base, utils.ParamFileAPI)
-		utils.Logln(utils.LogPrefixInfo+"Scanning for", fp)
-		if info, err := os.Stat(fp); err == nil && !info.IsDir() {
-			// found api_params.yml in the base path
-			return fp, nil
-		}
-
-		// look in the current working directory
-		wd, err := os.Getwd()
-		if err != nil {
-			return "", err
-		}
-		utils.Logln(utils.LogPrefixInfo+"Scanning for", wd)
-		fp = filepath.Join(wd, utils.ParamFileAPI)
-		if info, err := os.Stat(fp); err == nil && !info.IsDir() {
-			// found api_params.yml in the cwd
-			return fp, nil
-		}
-
-		// no luck, it means paramPath is missing
-		return "", fmt.Errorf("could not find %s. Please check %s exists in basepath of "+
-			"import location or current working directory", utils.ParamFileAPI, utils.ParamFileAPI)
-	} else {
-		//If the environment parameters are provided in a file
-		if info, err := os.Stat(paramPath); err == nil && !info.IsDir() {
-			return paramPath, nil
-		}
-		//If the environment parameters are provided in a directory
-		if info, err := os.Stat(paramPath); err == nil && info.IsDir() {
-			return paramPath, nil
-		}
-		return "", fmt.Errorf("could not find %s", paramPath)
-	}
-}
-
 // resolveYamlOrJSON for a given filepath.
 // first it will look for the yaml file, if not will fallback for json
 // give filename without extension so resolver will resolve for file
@@ -216,32 +162,17 @@ func importAPI(endpoint, filePath, accessToken string, extraParams map[string]st
 	}
 }
 
-func ImportAPIToMGW(endpoint, filePath, accessToken string, extraParams map[string]string, importAPISkipCleanup bool) error {
-	//TODO: (VirajSalaka) support substituting parameters with params file. At the moment it is in hold on state, as the decision to use environments is
-	//not finalized yet.
-	// if apiFilePath contains a directory, zip it. Otherwise, leave it as it is.
-	filePath, err, cleanupFunc := utils.CreateZipFileFromProject(filePath, importAPISkipCleanup)
-	if err != nil {
-		return err
-	}
-	//cleanup the temporary artifacts once consuming the zip file
-	if cleanupFunc != nil {
-		defer cleanupFunc()
-	}
-	return importAPI(endpoint, filePath, accessToken, extraParams, false)
-}
-
 // ImportAPIToEnv function is used with import-api command
 func ImportAPIToEnv(accessOAuthToken, importEnvironment, importPath, apiParamsPath string, importAPIUpdate,
-	preserveProvider, importAPISkipCleanup, importAPIRotateRevision bool) error {
+	preserveProvider, importAPISkipCleanup, importAPIRotateRevision, importAPISkipDeployments bool) error {
 	publisherEndpoint := utils.GetPublisherEndpointOfEnv(importEnvironment, utils.MainConfigFilePath)
 	return ImportAPI(accessOAuthToken, publisherEndpoint, importEnvironment, importPath, apiParamsPath, importAPIUpdate,
-		preserveProvider, importAPISkipCleanup, importAPIRotateRevision)
+		preserveProvider, importAPISkipCleanup, importAPIRotateRevision, importAPISkipDeployments)
 }
 
 // ImportAPI function is used with import-api command
 func ImportAPI(accessOAuthToken, publisherEndpoint, importEnvironment, importPath, apiParamsPath string, importAPIUpdate,
-	preserveProvider, importAPISkipCleanup, importAPIRotateRevision bool) error {
+	preserveProvider, importAPISkipCleanup, importAPIRotateRevision, importAPISkipDeployments bool) error {
 	exportDirectory := filepath.Join(utils.ExportDirectory, utils.ExportedApisDirName)
 	resolvedAPIFilePath, err := resolveImportFilePath(importPath, exportDirectory)
 	if err != nil {
@@ -273,19 +204,22 @@ func ImportAPI(accessOAuthToken, publisherEndpoint, importEnvironment, importPat
 		return err
 	}
 
-	utils.Logln(utils.LogPrefixInfo + "Attempting to process environment configurations directory or file")
-	paramsPath, err := resolveAPIParamsPath(resolvedAPIFilePath, apiParamsPath)
-	if err != nil && apiParamsPath != utils.ParamFileAPI && apiParamsPath != "" {
-		return err
-	}
-	if paramsPath != "" {
+	if apiParamsPath != "" {
 		//Reading API params file and add configurations into temp artifact
-		err := handleCustomizedParameters(apiFilePath, paramsPath, importEnvironment)
+		err := handleCustomizedParameters(apiFilePath, apiParamsPath, importEnvironment)
 		if err != nil {
 			return err
 		}
 	}
-
+	if importAPISkipDeployments {
+		//If skip deployments flag used, deployment_environments files will be removed from import artifacts
+		loc := filepath.Join(apiFilePath, utils.DeploymentEnvFile)
+		utils.Logln(utils.LogPrefixInfo + "Removing the deployment environments file from " + loc)
+		err := utils.RemoveFileIfExists(loc)
+		if err != nil {
+			return err
+		}
+	}
 	// if apiFilePath contains a directory, zip it. Otherwise, leave it as it is.
 	apiFilePath, err, cleanupFunc := utils.CreateZipFileFromProject(apiFilePath, importAPISkipCleanup)
 	if err != nil {

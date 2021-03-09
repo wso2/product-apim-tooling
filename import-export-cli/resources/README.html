@@ -90,12 +90,14 @@
            --version, -v
            --environment, -e
        Optional:
-           --preserveStatus
+           --rev
+           --latest
+           --preserve-status
            --format
            --provider, -r
    Examples:
        apictl export api -n TestAPI -v 1.0.1 -e staging
-       apictl export api -n TestAPI -v 1.0.1 -r admin -e staging
+       apictl export api -n TestAPI -v 1.0.1 --rev 6 -r admin -e staging
 </code></pre>
     </li>
 </ul>
@@ -109,15 +111,17 @@
                 --file, -f
                 --environment, -e
             Optional:
+                --rotate-revision
+                --skip-deployments
                 --params
                 --preserve-provider
                 --update
-                --skipCleanup
+                --skip-cleanup
         Examples:
                 apictl import api -f qa/TwitterAPI.zip -e dev
                 apictl import api -f staging/FacebookAPI.zip -e production
                 apictl import api -f ~/myapi -e production --update
-                apictl import api -f ~/myapi -e production --update
+                apictl import api -f ~/myapi -e production --update --rotate-revision
 </code></pre>
 <ul>
     <li>
@@ -127,11 +131,13 @@
            --name, -n
            --environment, -e
        Optional:
+            --rev
+            --latest
             --provider, -r
             --format
    Examples:
-       apictl export api-product -n LeasingAPIProduct -e dev
-       apictl export api-product -n CreditAPIProduct -v 1.0.0 -r admin -e production
+       apictl export api-product -n LeasingAPIProduct --rev 2 -e dev
+       apictl export api-product -n CreditAPIProduct -v 1.0.0 -r admin --latest -e production
 </code></pre>
     </li>
 </ul>
@@ -143,9 +149,10 @@
            --file, -f
            --environment, -e
        Optional:
+           --rotate-revision
            --import-apis
            --preserve-provider
-           --skipCleanup
+           --skip-cleanup
            --update-api-product
            --update-apis          
    Examples:
@@ -165,7 +172,7 @@
             --owner, -o
             --environment, -e
        Optional:
-            --withKeys
+            --with-keys
             --format
    Examples:
             apictl export app -n SampleApp -o admin -e dev
@@ -183,18 +190,18 @@
                   --file, -f
                   --environment, -e
             Optional
-                  --skipSubscriptions, -s
+                  --skip-subscriptions, -s
                   --owner, -o
-                  --preserveOwner, -r
+                  --preserve-owner, -r
                   --file, -f
                   --environment, -e
-                  --skipCleanup
-                  --skipKeys
+                  --skip-cleanup
+                  --skip-keys
                   --update
         Examples:
             apictl import app -f qa/apps/sampleApp.zip -e dev
             apictl import app -f staging/apps/sampleApp.zip -e prod -o testUser -u admin -p admin
-            apictl import app -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -e staging
+            apictl import app -f qa/apps/sampleApp.zip --preserve-owner --skip-subscriptions -e staging
 </code></pre>
 <ul>
     <li>
@@ -247,6 +254,42 @@
             apictl get apps -e prod -o sampleUser
             apictl get apps -e staging -o sampleUser
             apictl get apps -e dev -l 40        
+</code></pre>
+    </li>
+    <li>
+        <h4 id="get-api-revisions">get api-revisions</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required
+                  --name, -n
+                  --version, -v
+                  --environment
+            Optional
+                  --format
+                  --provider, -p
+                  --query, -q
+        Examples:
+            apictl get api-revisions -n PizzaAPI -v 1.0.0 -e dev
+            apictl get api-revisions -n TwitterAPI -v 1.0.0 -r admin -e dev
+            apictl get api-revisions -n TwitterAPI -v 1.0.0 -r admin -e dev -q deployed:true
+
+</code></pre>
+    </li>
+    <li>
+        <h4 id="get-api-product-revisions">get api-product-revisions</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required
+                  --name, -n
+                  --version, -v
+                  --environment
+            Optional
+                  --format
+                  --provider, -p
+                  --query, -q
+        Examples:
+            apictl get api-product-revisions -n ShopProduct -v 1.0.0 -e dev
+            apictl get api-product-revisions -n MarketProduct -v 1.0.0 -r admin -e dev
+            apictl get api-product-revisions -n DesingProduct -v 1.0.0 -r admin -e dev -q deployed:true
+
 </code></pre>
     </li>
     <li>
@@ -441,7 +484,7 @@
 </ul>
 <ul>
     <li>
-        <h4 id="bundle">gen deployment-dir</h4>
+        <h4 id="bundle">bundle</h4>
         <pre><code class="lang-bash">   Flags:
        Required:
            --source, -s

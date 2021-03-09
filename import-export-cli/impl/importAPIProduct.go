@@ -129,15 +129,18 @@ func preProcessDependentAPIs(apiProductFilePath, importEnvironment string, impor
 
 // ImportAPIProductToEnv function is used with import-api-product command
 func ImportAPIProductToEnv(accessOAuthToken, importEnvironment, importPath string, importAPIs, importAPIsUpdate,
-	importAPIProductUpdate, importAPIProductPreserveProvider, importAPIProductSkipCleanup bool) error {
+	importAPIProductUpdate, importAPIProductPreserveProvider, importAPIProductSkipCleanup, rotateRevision,
+	skipDeployments bool) error {
 	publisherEndpoint := utils.GetPublisherEndpointOfEnv(importEnvironment, utils.MainConfigFilePath)
 	return ImportAPIProduct(accessOAuthToken, publisherEndpoint, importEnvironment, importPath, importAPIs, importAPIsUpdate,
-		importAPIProductUpdate, importAPIProductPreserveProvider, importAPIProductSkipCleanup)
+		importAPIProductUpdate, importAPIProductPreserveProvider, importAPIProductSkipCleanup, rotateRevision,
+		skipDeployments)
 }
 
 // ImportAPIProduct function is used with import-api-product command
 func ImportAPIProduct(accessOAuthToken, publisherEndpoint, importEnvironment, importPath string, importAPIs, importAPIsUpdate,
-	importAPIProductUpdate, importAPIProductPreserveProvider, importAPIProductSkipCleanup bool) error {
+	importAPIProductUpdate, importAPIProductPreserveProvider, importAPIProductSkipCleanup,
+	rotateRevision, skipDeployments bool) error {
 	var exportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedApiProductsDirName)
 
 	resolvedAPIProductFilePath, err := resolveImportAPIProductFilePath(importPath, exportDirectory)
@@ -176,6 +179,16 @@ func ImportAPIProduct(accessOAuthToken, publisherEndpoint, importEnvironment, im
 		return err
 	}
 
+	if skipDeployments {
+		//If skip deployments flag used, deployment_environments files will be removed from import artifacts
+		loc := filepath.Join(apiProductFilePath, utils.DeploymentEnvFile)
+		utils.Logln(utils.LogPrefixInfo + "Removing the deployment environments file from " + loc)
+		err := utils.RemoveFileIfExists(loc)
+		if err!= nil {
+			return err
+		}
+	}
+
 	// If apiProductFilePath contains a directory, zip it. Otherwise, leave it as it is.
 	apiProductFilePath, err, cleanupFunc := utils.CreateZipFileFromProject(apiProductFilePath, importAPIProductSkipCleanup)
 	if err != nil {
@@ -191,7 +204,8 @@ func ImportAPIProduct(accessOAuthToken, publisherEndpoint, importEnvironment, im
 		utils.HandleErrorAndExit("Error getting OAuth Tokens", err)
 	}
 	extraParams := map[string]string{}
-	publisherEndpoint += "/api-products/import" + "?preserveProvider=" + strconv.FormatBool(importAPIProductPreserveProvider)
+	publisherEndpoint += "/api-products/import" + "?preserveProvider=" +
+		strconv.FormatBool(importAPIProductPreserveProvider)+ "&rotateRevision=" + strconv.FormatBool(rotateRevision)
 
 	// If the user has specified import-apis flag or update-apis flag, importAPIs parameter should be passed as true
 	// because update is also an import task

@@ -28,7 +28,7 @@ import (
 
 //List Environments using apictl
 func TestListEnvironmentsDeprecated(t *testing.T) {
-	apim := apimClients[0]
+	apim := GetDevClient()
 	base.SetupEnvWithoutTokenFlag(t, apim.GetEnvName(), apim.GetApimURL())
 	response, _ := base.Execute(t, "list", "envs")
 	base.GetRowsFromTableResponse(response)
@@ -45,7 +45,7 @@ func TestExportApiNonAdminSuperTenantUserDeprecated(t *testing.T) {
 	apiCreator := creator.UserName
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
@@ -68,8 +68,8 @@ func TestExportImportApiDevopsTenantUserDeprecated(t *testing.T) {
 	tenantApiCreator := creator.UserName + "@" + TENANT1
 	tenantApiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	api := testutils.AddAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword)
 
@@ -91,7 +91,7 @@ func TestListApisDevopsTenantUserDeprecated(t *testing.T) {
 	apiCreator := creator.UserName + "@" + TENANT1
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
 		// Add the API to env1
@@ -110,17 +110,19 @@ func TestExportApisWithExportApisCommandDeprecated(t *testing.T) {
 	tenantAdminUsername := superAdminUser + "@" + TENANT1
 	tenantAdminPassword := superAdminPassword
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	var api *apim.API
 	var apisAdded = 0
 	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
 		api = testutils.AddAPI(t, dev, tenantAdminUsername, tenantAdminPassword)
+		testutils.CreateAndDeployAPIRevision(t, dev, tenantAdminUsername, tenantAdminPassword, api.ID)
 		apisAdded++
 	}
 
 	// This will be the API that will be deleted by apictl, so no need to do cleaning
 	api = testutils.AddAPIWithoutCleaning(t, dev, tenantAdminUsername, tenantAdminPassword)
+	testutils.CreateAndDeployAPIRevision(t, dev, tenantAdminUsername, tenantAdminPassword, api.ID)
 
 	args := &testutils.ApiImportExportTestArgs{
 		CtlUser: testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
@@ -141,7 +143,7 @@ func TestListApiProductsDevopsTenantUserDeprecated(t *testing.T) {
 	apiPublisher := publisher.UserName + "@" + TENANT1
 	apiPublisherPassword := publisher.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	// Add the first dependent API to env1
 	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
@@ -174,7 +176,7 @@ func TestExportAppNonAdminSuperTenantDeprecated(t *testing.T) {
 	subscriberUserName := subscriber.UserName
 	subscriberPassword := subscriber.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	app := testutils.AddApp(t, dev, subscriberUserName, subscriberPassword)
 
@@ -195,8 +197,8 @@ func TestExportImportAppDevopsTenantDeprecated(t *testing.T) {
 	tenantAdminUsername := superAdminUser + "@" + TENANT1
 	tenantAdminPassword := superAdminPassword
 
-	dev := apimClients[0]
-	prod := apimClients[1]
+	dev := GetDevClient()
+	prod := GetProdClient()
 
 	app := testutils.AddApp(t, dev, tenantAdminUsername, tenantAdminPassword)
 
@@ -221,7 +223,7 @@ func TestListAppsDevopsTenantUserDeprecated(t *testing.T) {
 	otherUsername := subscriber.UserName + "@" + TENANT1
 	otherPassword := subscriber.Password
 
-	apim := apimClients[0]
+	apim := GetDevClient()
 	testutils.AddApp(t, apim, tenantAdminUsername, tenantAdminPassword)
 	testutils.AddApp(t, apim, otherUsername, otherPassword)
 
@@ -237,7 +239,7 @@ func TestGetKeysNonAdminSuperTenantUserDeprecated(t *testing.T) {
 	apiCreator := creator.UserName
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, api.ID)
@@ -261,9 +263,11 @@ func TestGetKeysAdminSuperTenantUserDeprecated(t *testing.T) {
 	apiCreator := creator.UserName
 	apiCreatorPassword := creator.Password
 
-	dev := apimClients[0]
+	dev := GetDevClient()
 
 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	testutils.CreateAndDeployAPIRevision(t, dev, apiPublisher, apiPublisherPassword, api.ID)
 
 	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, api.ID)
 

@@ -15,19 +15,16 @@ apictl k8s update api [flags]
 ### Examples
 
 ```
-apictl k8s add/update api -n petstore --from-file=./Swagger.json --replicas=3 --namespace=wso2
+apictl k8s add/update api -n petstore -f Swagger.json --namespace=wso2
 ```
 
 ### Options
 
 ```
-  -f, --from-file string   Path to swagger file
+  -f, --file string        Path to swagger, zip file or API project
   -h, --help               help for api
-  -m, --mode string        Property to override the deploying mode. Available modes: privateJet, sidecar
   -n, --name string        Name of the API
       --namespace string   namespace of API
-      --replicas int       replica set (default 1)
-  -v, --version string     Property to override the existing docker image with same name and version
 ```
 
 ### Options inherited from parent commands

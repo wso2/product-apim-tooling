@@ -20,13 +20,12 @@ package impl
 
 import (
 	"fmt"
-	"net/http"
-	"path/filepath"
-	"strconv"
-
 	"github.com/spf13/cast"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"net/http"
+	"path/filepath"
+	"strconv"
 )
 
 var apiExportDir string
@@ -55,8 +54,7 @@ func PrepareResumption(credential credentials.Credential, exportRelatedFilesPath
 	startingApiIndexFromList = getLastSuceededApiIndex(lastSuceededAPI) + 1
 
 	//find count of APIs left to be exported
-	var lastSucceededAPInumber = getLastSuceededApiIndex(lastSuceededAPI) + 1
-	count = int32(len(apis) - lastSucceededAPInumber)
+	count = int32(len(apis) - startingApiIndexFromList)
 
 	if count == 0 {
 		//last iteration had been completed successfully but operation had halted at that point.
@@ -68,7 +66,7 @@ func PrepareResumption(credential credentials.Credential, exportRelatedFilesPath
 			utils.WriteMigrationApisExportMetadataFile(apis, cmdResourceTenantDomain, cmdUsername,
 				exportRelatedFilesPath, apiListOffset)
 		} else {
-			fmt.Println("Command: export-apis execution completed !")
+			fmt.Println("Command: export apis execution completed !")
 		}
 	}
 }
@@ -96,8 +94,8 @@ func PrepareStartFromBeginning(credential credentials.Credential, exportRelatedF
 	startingApiIndexFromList = 0
 	count, apis = getAPIList(credential, cmdExportEnvironment, cmdResourceTenantDomain)
 	//write  migration-apis-export-metadata.yaml file
-	utils.WriteMigrationApisExportMetadataFile(apis, cmdResourceTenantDomain, cmdUsername,
-		exportRelatedFilesPath, apiListOffset)
+	utils.WriteMigrationApisExportMetadataFile(apis, cmdResourceTenantDomain, cmdUsername, exportRelatedFilesPath,
+		apiListOffset)
 }
 
 // get the index of the finally (successfully) exported API from the list of APIs listed in migration-apis-export-metadata.yaml
@@ -134,9 +132,19 @@ func getAPIList(credential credentials.Credential, cmdExportEnvironment, cmdReso
 	return 0, nil
 }
 
+// Get the revisions associated with the api
+func getRevisionsListForAPI(accessToken, cmdExportEnvironment string, api utils.API,
+	exportAllRevisions bool) (count int32, revisions []utils.Revisions, err error) {
+	var query string
+	if !exportAllRevisions {
+		query = "deployed:true"
+	}
+	return GetRevisionListFromEnv(accessToken, cmdExportEnvironment, api.Name, api.Version, api.Provider, query)
+}
+
 // Do the API exportation
-func ExportAPIs(credential credentials.Credential, exportRelatedFilesPath, cmdExportEnvironment, cmdResourceTenantDomain, exportAPIsFormat, cmdUsername, apiExportDir string,
-	exportAPIPreserveStatus, runningExportApiCommand bool) {
+func ExportAPIs(credential credentials.Credential, exportRelatedFilesPath, cmdExportEnvironment, cmdResourceTenantDomain,
+	exportAPIsFormat, cmdUsername, apiExportDir string, exportAPIPreserveStatus, runningExportApiCommand, exportAllRevisions bool) {
 	if count == 0 {
 		fmt.Println("No APIs available to be exported..!")
 	} else {
@@ -148,24 +156,25 @@ func ExportAPIs(credential credentials.Credential, exportRelatedFilesPath, cmdEx
 			accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, cmdExportEnvironment)
 			if preCommandErr == nil {
 				for i := startingApiIndexFromList; i < len(apis); i++ {
-					exportAPIName := apis[i].Name
-					exportAPIVersion := apis[i].Version
-					exportApiProvider := apis[i].Provider
-					resp, err := ExportAPIFromEnv(accessToken, exportAPIName, exportAPIVersion, "", exportApiProvider, exportAPIsFormat,
-						cmdExportEnvironment, exportAPIPreserveStatus, true)
-					if err != nil {
-						utils.HandleErrorAndExit("Error exporting", err)
-					}
-
-					if resp.StatusCode() == http.StatusOK {
-						utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
-						WriteToZip(exportAPIName, exportAPIVersion, apiExportDir, runningExportApiCommand, resp)
-						//write on last-succeeded-api.log
+					if exportAllRevisions {
+						//Export the working copy of the api
+						exportAPIandWriteToZip(apis[i], "", accessToken, cmdExportEnvironment, apiExportDir,
+							exportRelatedFilesPath, exportAPIsFormat, exportAPIPreserveStatus, runningExportApiCommand)
 						counterSuceededAPIs++
-						utils.WriteLastSuceededAPIFileData(exportRelatedFilesPath, apis[i])
-					} else {
-						fmt.Println("Error exporting API:", exportAPIName, "-", exportAPIVersion, " of Provider:", exportApiProvider)
-						utils.PrintErrorResponseAndExit(resp)
+					}
+					revisionCount, revisions, err := getRevisionsListForAPI(accessToken, cmdExportEnvironment, apis[i],
+						exportAllRevisions)
+					if err != nil {
+						fmt.Println("An error occurred while getting the revisions list for API " + apis[i].Version +
+							"_" + apis[i].Version, err)
+					} else if revisionCount > 0 {
+						for j := 0; j < len(revisions); j++ {
+							exportApiRevision := utils.GetRevisionNumFromRevisionName(revisions[j].RevisionNumber)
+							exportAPIandWriteToZip(apis[i], exportApiRevision, accessToken, cmdExportEnvironment,
+								apiExportDir, exportRelatedFilesPath, exportAPIsFormat, exportAPIPreserveStatus,
+								runningExportApiCommand)
+							counterSuceededAPIs++
+						}
 					}
 				}
 			} else {
@@ -185,6 +194,34 @@ func ExportAPIs(credential credentials.Credential, exportRelatedFilesPath, cmdEx
 		fmt.Println("\nTotal number of APIs exported: " + cast.ToString(counterSuceededAPIs))
 		fmt.Println("API export path: " + apiExportDir)
 		fmt.Println("\nCommand: export-apis execution completed !")
+	}
+}
+
+//Export the API and archive to zip format
+func exportAPIandWriteToZip(api utils.API, revisionNumber, accessToken, cmdExportEnvironment, apiExportDir,
+	exportRelatedFilesPath, exportAPIsFormat string, exportAPIPreserveStatus, runningExportApiCommand bool) {
+
+	exportAPIName := api.Name
+	exportAPIVersion := api.Version
+	exportApiProvider := api.Provider
+	var exportApiRevision string
+	if revisionNumber != "" {
+		exportApiRevision = utils.GetRevisionNumFromRevisionName(revisionNumber)
+	}
+	resp, err := ExportAPIFromEnv(accessToken, exportAPIName, exportAPIVersion, exportApiRevision,
+		exportApiProvider, exportAPIsFormat, cmdExportEnvironment, exportAPIPreserveStatus, false)
+	if err != nil {
+		utils.HandleErrorAndExit("Error exporting", err)
+	}
+
+	if resp.StatusCode() == http.StatusOK {
+		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
+		WriteToZip(exportAPIName, exportAPIVersion, exportApiRevision, apiExportDir, runningExportApiCommand, resp)
+		//write on last-succeeded-api.log
+		utils.WriteLastSuceededAPIFileData(exportRelatedFilesPath, api)
+	} else {
+		fmt.Println("Error exporting API:", exportAPIName, "-", exportAPIVersion, " of Provider:", exportApiProvider)
+		utils.PrintErrorResponseAndExit(resp)
 	}
 }
 
