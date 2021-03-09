@@ -30,6 +30,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/Jeffail/gabs"
 	jsoniter "github.com/json-iterator/go"
+	"github.com/ghodss/yaml"
 	
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
  
@@ -175,7 +176,7 @@ func getOAS() error {
 	if err := outputScannerCmd2.Err(); err != nil {
 		fmt.Println("Error reading output from standard output.", err)
 	}
-	//
+
 	err = cmd_2.Wait()
 	if err != nil {
 		fmt.Println("Could not complete get-rest-apis command successfully.", err)
@@ -254,6 +255,104 @@ func getOAS() error {
 	return nil
 }
 
+// loadDefaultAWSDocFromDisk loads document.yaml stored in HOME/.wso2apictl/document.yaml
+func loadDefaultAWSDocFromDisk() (*v2.Document, error) {
+	docData, err := ioutil.ReadFile(utils.DefaultAWSDocFilePath)
+	if err != nil {
+		return nil, err
+	}
+	awsDoc := &v2.Document{}
+	err = yaml.Unmarshal(docData, &awsDoc)
+	if err != nil {
+		return nil, err
+	}
+	return awsDoc, nil
+}
+
+func createAWSDocDirectory(docName string) error {
+	awsDocDirectoryPath := initCmdOutputDir + "/Docs"
+	dirPath := filepath.Join(awsDocDirectoryPath, filepath.FromSlash(docName))
+	utils.Logln(utils.LogPrefixInfo + "Creating directory " + dirPath)
+	err := os.MkdirAll(dirPath, os.ModePerm)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+//write document.yaml file
+func writeDocumentFile(docName string, summary string) error {
+	document, err := loadDefaultAWSDocFromDisk()
+	docData := &document.Data
+	docData.Name = docName
+	docData.Summary = summary
+	docDataByte, err := yaml2.Marshal(document)
+	if err != nil {
+		return err
+	}
+	apiDocFilePath := filepath.Join(initCmdOutputDir, filepath.FromSlash("Docs/" + docName + "/document.yaml"))
+	utils.Logln(utils.LogPrefixInfo + "Writing " + apiDocFilePath)
+	err = ioutil.WriteFile(apiDocFilePath, docDataByte, os.ModePerm)
+	return nil
+}
+
+// create AWS API security documents based on APIs auth type 
+func writeAWSSecurityDocs(oas3ByteValue []byte) error {
+	securitySchemes := &v2.SecuritySchemes{}
+	json.Unmarshal(oas3ByteValue, &securitySchemes)
+	schemes := securitySchemes.Components.SecuritySchemes
+
+	if schemes.CognitoAuthorizer.AuthType == "cognito_user_pools" {
+		docName := "Cognito_Userpool"
+		summary := "This document contains details related to AWS cognito user pools"
+		err = createAWSDocDirectory(docName)
+		cognitoUpDocPath := filepath.Join(initCmdOutputDir, filepath.FromSlash("Docs/" + docName + "/" + docName))
+		utils.Logln(utils.LogPrefixInfo + "Writing " + cognitoUpDocPath)
+		cognitoUpDoc, _ := box.Get("/init/cognito_userpool_doc")
+		err = ioutil.WriteFile(cognitoUpDocPath, cognitoUpDoc, os.ModePerm)
+		if err != nil {
+			return err
+		}
+		err = writeDocumentFile(docName, summary)
+		if err != nil {
+			return err
+		}
+	}
+	if schemes.APIKey.Type == "apiKey" {
+		docName := "AWS_API_Keys"
+		summary := "This document contains details related to AWS API keys"
+		err = createAWSDocDirectory(docName)
+		apiKeyDocPath := filepath.Join(initCmdOutputDir, filepath.FromSlash("Docs/" + docName + "/" + docName))
+		utils.Logln(utils.LogPrefixInfo + "Writing " + apiKeyDocPath)
+		apiKeyDoc, _ := box.Get("/init/aws_apikey_doc")
+		err = ioutil.WriteFile(apiKeyDocPath, apiKeyDoc, os.ModePerm)
+		if err != nil {
+			return err
+		}
+		err = writeDocumentFile(docName, summary)
+		if err != nil {
+			return err
+		}
+	}
+	if schemes.Sigv4.AuthType == "awsSigv4" {
+		docName := "AWS_Signature_Version4"
+		summary := "This document contains details related to AWS signature version 4"
+		err = createAWSDocDirectory(docName)
+		awsSigv4DocPath := filepath.Join(initCmdOutputDir, filepath.FromSlash("Docs/" + docName + "/" + docName))
+		utils.Logln(utils.LogPrefixInfo + "Writing " + awsSigv4DocPath)
+		awsSigv4Doc, _ := box.Get("/init/aws_sigv4_doc")
+		err = ioutil.WriteFile(awsSigv4DocPath, awsSigv4Doc, os.ModePerm)
+		if err != nil {
+			return err
+		}
+		err = writeDocumentFile(docName, summary)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func initializeProject() error {
 	initCmdOutputDir = flagApiNameToGet 
 	swaggerSavePath := filepath.Join(initCmdOutputDir, filepath.FromSlash("Definitions/swagger.yaml"))
@@ -282,19 +381,14 @@ func initializeProject() error {
 	// We use swagger2 loader. It works fine for now
 	// Since we don't use 3.0 specific details its ok
 	// otherwise please use v2.openAPI3 loaders
-	//doc.Spec().Info.Version = doc.Spec().Info.Version[:10]
-
+	def.IsAWSAPI = true 
 	err = v2.Swagger2Populate(def, doc)
 	if err != nil {
 		return err
 	}
 
-	//err = v2.GetServerUrlFromOAS(def, path)
-	//if err != nil {
-	//	return err
-	//}
-
-	//v2.SetAdvertiseOnlyToTrue(def)
+	oas3ByteValue := v2.CreateEpConfigForAwsAPIs(def, path)
+	v2.AddAwsTag(def)
 
 	// convert and save swagger as yaml
 	yamlSwagger, err := utils.JsonToYaml(doc.Raw())
@@ -315,7 +409,6 @@ func initializeProject() error {
 	}
 
 	apiDef := &v2.APIDefinitionFile{}
-	fmt.Println(string(content))
 
 	// substitute env variables
 	utils.Logln(utils.LogPrefixInfo + "Substituting environment variables")
@@ -390,11 +483,15 @@ func initializeProject() error {
 	if err != nil {
 		return err
 	}
-
 	// write api_meta.yaml file to the project directory
 	apiMetaDataPath := filepath.Join(initCmdOutputDir, filepath.FromSlash(utils.MetaFileAPI))
 	utils.Logln(utils.LogPrefixInfo + "Writing " + apiMetaDataPath)
 	err = ioutil.WriteFile(apiMetaDataPath, metaDataContent, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	err = writeAWSSecurityDocs(oas3ByteValue)
 	if err != nil {
 		return err
 	}

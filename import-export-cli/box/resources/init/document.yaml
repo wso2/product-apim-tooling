@@ -1,0 +1,10 @@
+type: document
+version: v4
+data:
+  name: AWSSecurityDocs
+  type: OTHER
+  summary: Contains details related to the AWS APIs security schemes
+  sourceType: MARKDOWN
+  otherTypeName: INFO
+  visibility: API_LEVEL
+  

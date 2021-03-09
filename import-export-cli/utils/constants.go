@@ -57,14 +57,14 @@ const EnvKeysAllFileName = "env_keys_all.yaml"
 const MainConfigFileName = "main_config.yaml"
 const SampleMainConfigFileName = "main_config.yaml.sample"
 const DefaultAPISpecFileName = "default_api.yaml"
-const DefaultAWSAPISpecFileName = "default_aws_api.yaml"
+const DefaultAWSDocFileName = "document.yaml"
 
 var LocalCredentialsDirectoryPath = filepath.Join(HomeDirectory, LocalCredentialsDirectoryName)
 var EnvKeysAllFilePath = filepath.Join(LocalCredentialsDirectoryPath, EnvKeysAllFileName)
 var MainConfigFilePath = filepath.Join(ConfigDirPath, MainConfigFileName)
 var SampleMainConfigFilePath = filepath.Join(ConfigDirPath, SampleMainConfigFileName)
 var DefaultAPISpecFilePath = filepath.Join(ConfigDirPath, DefaultAPISpecFileName)
-var DefaultAWSAPISpecFilePath = filepath.Join(ConfigDirPath, DefaultAWSAPISpecFileName)
+var DefaultAWSDocFilePath = filepath.Join(ConfigDirPath, DefaultAWSDocFileName)
 
 const DefaultExportDirName = "exported"
 const ExportedApisDirName = "apis"
