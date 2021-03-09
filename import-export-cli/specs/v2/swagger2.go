@@ -24,6 +24,10 @@ import (
 	"path"
 	"strings"
 
+<<<<<<< HEAD
+=======
+	"encoding/json"
+>>>>>>> b6a14d5f76aefa7d3b21566833ecc262d3061b85
 	"io/ioutil"
 	"os"
 
@@ -206,6 +210,7 @@ func AddAwsTag(def *APIDTODefinition) {
 }
 
 // generateFieldsFromSwagger3 using swagger
+<<<<<<< HEAD
 func Swagger2Populate(def *APIDTODefinition, document *loads.Document) error {
 	def.Name = document.Spec().Info.Title
 	if def.IsAWSAPI == true {
@@ -221,6 +226,15 @@ func Swagger2Populate(def *APIDTODefinition, document *loads.Document) error {
 		def.Version = document.Spec().Info.Version
 	}
 	def.Provider = "admin"
+=======
+func Swagger2Populate(def *APIDefinition, document *loads.Document) error {
+	def.ID.APIName = document.Spec().Info.Title
+	def.ID.Version = document.Spec().Info.Version
+	//remove timestamp from version 
+	//def.ID.Version = def.ID.Version[:10]
+
+	def.ID.ProviderName = "admin"
+>>>>>>> b6a14d5f76aefa7d3b21566833ecc262d3061b85
 	def.Description = document.Spec().Info.Description
 	def.Context = fmt.Sprintf("/%s/%s", def.Name, def.Version)
 	def.Tags = swagger2Tags(document)

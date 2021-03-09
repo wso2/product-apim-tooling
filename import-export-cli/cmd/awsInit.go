@@ -33,6 +33,8 @@ import (
 	"github.com/ghodss/yaml"
 	
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
+	
+	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
  
 	yaml2 "gopkg.in/yaml.v2"
 	
@@ -176,7 +178,6 @@ func getOAS() error {
 	if err := outputScannerCmd2.Err(); err != nil {
 		fmt.Println("Error reading output from standard output.", err)
 	}
-
 	err = cmd_2.Wait()
 	if err != nil {
 		fmt.Println("Could not complete get-rest-apis command successfully.", err)
