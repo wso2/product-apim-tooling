@@ -96,7 +96,8 @@ func init() {
 		"revisions with each update")
 	ImportAPICmd.Flags().BoolVar(&importAPISkipDeployments, "skip-deployments", false, "Update only "+
 		"the working copy and skip deployment steps in import")
-	ImportAPICmd.Flags().StringVarP(&importAPIParamsFile, "params", "", "", "Provide a API Manager params file")
+	ImportAPICmd.Flags().StringVarP(&importAPIParamsFile, "params", "", "", "Provide an API Manager params file "+
+		"or a directory generated using \"gen deployment-dir\" command")
 	ImportAPICmd.Flags().BoolVarP(&importAPISkipCleanup, "skip-cleanup", "", false, "Leave "+
 		"all temporary files created during import process")
 	// Mark required flags
