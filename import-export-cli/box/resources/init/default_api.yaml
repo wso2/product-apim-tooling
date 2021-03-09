@@ -1,5 +1,5 @@
 type: api
-version: v4
+version: v4.0.0
 data:
   name:
   context:
