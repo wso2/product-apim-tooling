@@ -87,8 +87,12 @@ func executeGenDeploymentDirCmd() error {
 
 	// Check whether the source is existed in the given location
 	if _, err := os.Stat(genDeploymentDirSource); os.IsNotExist(err) {
-		utils.HandleErrorAndContinue("Error retrieving the source file from the given path "+sourceDirectoryPath+" ", err)
+		utils.HandleErrorAndContinue("Error retrieving the source file from the given path "+sourceDirectoryPath, err)
+		if err != nil {
+			return err
+		}
 	}
+
 	// Get the source artifact name
 	deploymentDirName = filepath.Base(genDeploymentDirSource)
 	if info, err := os.Stat(genDeploymentDirSource); err == nil && !info.IsDir() {
