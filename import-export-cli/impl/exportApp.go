@@ -85,11 +85,6 @@ func WriteApplicationToZip(exportAppName, exportAppOwner, zipLocationPath string
 	}
 
 	exportedFinalZip := filepath.Join(zipLocationPath, zipFilename)
-	// Add application_params.yaml file inside the zip and create a new zip file in exportedFinalZip location
-	err = IncludeParamsFileToZip(tempZipFile, exportedFinalZip, utils.ParamFileApplication)
-	if err != nil {
-		utils.HandleErrorAndExit("Error creating the final zip archive", err)
-	}
 
 	// Add application_meta.yaml file inside the zip and create a new zup file in exportedFinalZip location
 	metaData := utils.MetaData{
