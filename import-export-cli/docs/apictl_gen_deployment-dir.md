@@ -13,8 +13,8 @@ apictl gen deployment-dir [flags]
 ### Examples
 
 ```
-apictl gen deployment-dir -s  ~/PizzaShackAPI_1.0.0.zip
-apictl gen deployment-dir -s  ~/PizzaShackAPI_1.0.0.zip  -d /home/Deployment_repo/Dev
+apictl gen deployment-dir -s ~/PizzaShackAPI_1.0.0.zip
+apictl gen deployment-dir -s ~/PizzaShackAPI_1.0.0.zip  -d /home/Deployment_repo/Dev
 ```
 
 ### Options

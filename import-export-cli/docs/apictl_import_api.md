@@ -26,7 +26,7 @@ NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory
   -e, --environment string   Environment from the which the API should be imported
   -f, --file string          Name of the API to be imported
   -h, --help                 help for api
-      --params string        Provide a API Manager params file (default "api_params.yaml")
+      --params string        Provide an API Manager params file or a directory generated using "gen deployment-dir" command
       --preserve-provider    Preserve existing provider of API after importing (default true)
       --rotate-revision      Rotate the revisions with each update
       --skip-cleanup         Leave all temporary files created during import process

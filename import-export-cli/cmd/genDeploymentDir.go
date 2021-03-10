@@ -20,13 +20,14 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
-	"github.com/wso2/product-apim-tooling/import-export-cli/box"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/box"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 var genDeploymentDirDestination string
@@ -39,9 +40,9 @@ const GenDeploymentDirCmdShortDesc = "Generate a sample deployment directory"
 const GenDeploymentDirCmdLongDesc = `Generate a sample deployment directory based on the provided source artifact`
 
 const GenDeploymentDirCmdExamples = utils.ProjectName + ` ` + GenCmdLiteral + ` ` + GenDeploymentDirCmdLiteral + ` ` +
-	`-s  ~/PizzaShackAPI_1.0.0.zip
+	`-s ~/PizzaShackAPI_1.0.0.zip
 ` + utils.ProjectName + ` ` + GenCmdLiteral + ` ` + GenDeploymentDirCmdLiteral + ` ` +
-	`-s  ~/PizzaShackAPI_1.0.0.zip` + ` ` + ` -d /home/Deployment_repo/Dev`
+	`-s ~/PizzaShackAPI_1.0.0.zip` + ` ` + ` -d /home/Deployment_repo/Dev`
 
 // directories to be created
 var directories = []string{
@@ -86,8 +87,12 @@ func executeGenDeploymentDirCmd() error {
 
 	// Check whether the source is existed in the given location
 	if _, err := os.Stat(genDeploymentDirSource); os.IsNotExist(err) {
-		utils.HandleErrorAndContinue("Error retrieving the source file from the given path " + sourceDirectoryPath + " ", err)
+		utils.HandleErrorAndContinue("Error retrieving the source file from the given path "+sourceDirectoryPath, err)
+		if err != nil {
+			return err
+		}
 	}
+
 	// Get the source artifact name
 	deploymentDirName = filepath.Base(genDeploymentDirSource)
 	if info, err := os.Stat(genDeploymentDirSource); err == nil && !info.IsDir() {
@@ -102,7 +107,7 @@ func executeGenDeploymentDirCmd() error {
 		deploymentDirName = strings.Trim(path[0], "/")
 
 		// extract the new source file name after unzipping into the temp directory
-		sourceDirectoryPath = filepath.Join(tempDirPath,path[0])
+		sourceDirectoryPath = filepath.Join(tempDirPath, path[0])
 	} else {
 		sourceDirectoryPath = genDeploymentDirSource
 	}
@@ -157,9 +162,9 @@ func executeGenDeploymentDirCmd() error {
 
 	// add sample api_params.yaml file to deployment directory
 	defaultParamsContent, _ := box.Get("/sample/api_params.yaml")
-	err = ioutil.WriteFile(filepath.Join(deploymentDirPath, "api_params.yaml"), defaultParamsContent, os.ModePerm)
+	err = ioutil.WriteFile(filepath.Join(deploymentDirPath, utils.ParamFile), defaultParamsContent, os.ModePerm)
 	if err != nil {
-		utils.HandleErrorAndExit("Error creating sample api_params.yaml file", err)
+		utils.HandleErrorAndExit("Error creating sample"+utils.ParamFile+" file", err)
 	}
 
 	// Generate required directories inside the deployment directory
