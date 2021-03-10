@@ -171,6 +171,7 @@ const (
 
 // project param files
 const ParamFile = "params.yaml"
+const ParamsIntermediateFile = "intermediate_params.yaml"
 
 const (
 	ParamFileAPI         = "api_params.yaml"

@@ -86,7 +86,7 @@ func init() {
 		"Preserve existing provider of API after importing")
 	ImportAPICmdDeprecated.Flags().BoolVar(&importAPIUpdate, "update", false, "Update an "+
 		"existing API or create a new API")
-	ImportAPICmdDeprecated.Flags().StringVarP(&importAPIParamsFile, "params", "", utils.ParamFileAPI,
+	ImportAPICmdDeprecated.Flags().StringVarP(&importAPIParamsFile, "params", "", "",
 		"Provide a API Manager params file")
 	ImportAPICmdDeprecated.Flags().BoolVarP(&importAPISkipCleanup, "skipCleanup", "", false, "Leave "+
 		"all temporary files created during import process")

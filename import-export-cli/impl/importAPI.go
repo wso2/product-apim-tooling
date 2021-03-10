@@ -205,7 +205,7 @@ func ImportAPI(accessOAuthToken, publisherEndpoint, importEnvironment, importPat
 	}
 
 	if apiParamsPath != "" {
-		//Reading API params file and add configurations into temp artifact
+		//Reading params file of the API and add configurations into temp artifact
 		err := handleCustomizedParameters(apiFilePath, apiParamsPath, importEnvironment)
 		if err != nil {
 			return err
@@ -252,7 +252,7 @@ func envParamsFileProcess(importPath, paramsPath, importEnvironment string) erro
 	if err != nil {
 		return err
 	}
-	// check whether import environment is included in api params configuration
+	// check whether import environment is included in params configuration
 	envParams := apiParams.GetEnv(importEnvironment)
 	if envParams == nil {
 		return errors.New("Environment '" + importEnvironment + "' does not exist in " + paramsPath)
@@ -332,7 +332,7 @@ func envParamsDirectoryProcess(importPath, paramsPath, importEnvironment string)
 	return nil
 }
 
-// handleCustomizedParameters handles the configurations provided with apiParams file and the resources that needs to
+// handleCustomizedParameters handles the configurations provided with params file of the API and the resources that needs to
 // transfer to server side will bundle with the artifact to be imported.
 func handleCustomizedParameters(importPath, paramsPath, importEnvironment string) error {
 	utils.Logln(utils.LogPrefixInfo+"Loading parameters from", paramsPath)
@@ -343,7 +343,7 @@ func handleCustomizedParameters(importPath, paramsPath, importEnvironment string
 			return err
 		}
 	} else {
-		utils.Logln(utils.LogPrefixInfo+"Processing Params directory", paramsPath)
+		utils.Logln(utils.LogPrefixInfo+"Processing Params in the deployment directory", paramsPath)
 		err := envParamsDirectoryProcess(importPath, paramsPath, importEnvironment)
 		if err != nil {
 			return err
@@ -353,7 +353,7 @@ func handleCustomizedParameters(importPath, paramsPath, importEnvironment string
 	return nil
 }
 
-//Process env params and create a temp env_params.yaml in temp artifact
+// Process env params and create the intermediate_params.yaml file to pass to the server
 func handleEnvParams(tempDirectory string, destDirectory string, environmentParams *params.Environment) error {
 	// read api params from external parameters file
 	envParamsJson, err := jsoniter.Marshal(environmentParams.Config)
@@ -369,7 +369,7 @@ func handleEnvParams(tempDirectory string, destDirectory string, environmentPara
 	}
 
 	//over-write the api_params.file with latest configurations
-	apiParamsPath = filepath.Join(destDirectory, "api_params.yaml")
+	apiParamsPath = filepath.Join(destDirectory, utils.ParamsIntermediateFile)
 	utils.Logln(utils.LogPrefixInfo+"Adding the Params file into", apiParamsPath)
 	err = ioutil.WriteFile(apiParamsPath, paramsContent, 0644)
 	if err != nil {
