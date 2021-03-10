@@ -170,6 +170,8 @@ const (
 )
 
 // project param files
+const ParamFile = "params.yaml"
+
 const (
 	ParamFileAPI         = "api_params.yaml"
 	ParamFileAPIProduct  = "api_product_params.yaml"
