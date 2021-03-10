@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -89,42 +88,6 @@ func importAPIProduct(endpoint, filePath, accessToken string, extraParams map[st
 		fmt.Println("Response:", resp)
 		return errors.New(resp.Status())
 	}
-}
-
-// preProcessDependentAPIs pre processes dependent APIs
-func preProcessDependentAPIs(apiProductFilePath, importEnvironment string, importAPIProductPreserveProvider bool) error {
-	// Check whether the APIs directory exists
-	apisDirectoryPath := apiProductFilePath + string(os.PathSeparator) + "APIs"
-	_, err := os.Stat(apisDirectoryPath)
-	if os.IsNotExist(err) {
-		utils.Logln(utils.LogPrefixInfo + "APIs directory does not exists. Ignoring APIs.")
-		return nil
-	}
-
-	// If APIs directory exists, read the directory
-	items, _ := ioutil.ReadDir(apisDirectoryPath)
-	// Iterate through the API directories available
-	for _, item := range items {
-		apiDirectoryPath := apisDirectoryPath + string(os.PathSeparator) + item.Name()
-
-		// Substitutes environment variables in the project files
-		err = replaceEnvVariables(apiDirectoryPath)
-		if err != nil {
-			return err
-		}
-
-		utils.Logln(utils.LogPrefixInfo + "Attempting to inject parameters to the API from api_params.yaml (if exists)")
-		paramsPath := apiDirectoryPath + string(os.PathSeparator) + utils.ParamFileAPI
-		// Check whether api_params.yaml file is available inside the particular API directory
-		if utils.IsFileExist(paramsPath) {
-			// Reading API params file and populate api.yaml
-			err := handleCustomizedParameters(apiDirectoryPath, paramsPath, importEnvironment)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
 }
 
 // ImportAPIProductToEnv function is used with import-api-product command
