@@ -158,9 +158,9 @@ func executeGenDeploymentDirCmd() error {
 
 	// add sample api_params.yaml file to deployment directory
 	defaultParamsContent, _ := box.Get("/sample/api_params.yaml")
-	err = ioutil.WriteFile(filepath.Join(deploymentDirPath, "api_params.yaml"), defaultParamsContent, os.ModePerm)
+	err = ioutil.WriteFile(filepath.Join(deploymentDirPath, utils.ParamFile), defaultParamsContent, os.ModePerm)
 	if err != nil {
-		utils.HandleErrorAndExit("Error creating sample api_params.yaml file", err)
+		utils.HandleErrorAndExit("Error creating sample"+utils.ParamFile+" file", err)
 	}
 
 	// Generate required directories inside the deployment directory
