@@ -19,6 +19,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -127,13 +128,17 @@ func executeGenDeploymentDirCmd() error {
 		return err
 	}
 
+	projectType, err := retreiveProjectTypeByDefinitionFileName(sourceDirectoryPath)
+	if err != nil {
+		return err
+	}
+
 	// Copy *_meta.yaml file from source to deployment directory based on the artifact type
 	files, err := ioutil.ReadDir(sourceDirectoryPath)
 	if err != nil {
 		return err
 	}
 	var metaDataFileFound bool = false
-	var projectType string
 	for _, file := range files {
 		fileName := file.Name()
 		// if project artifact is a API project
@@ -143,7 +148,6 @@ func executeGenDeploymentDirCmd() error {
 			if err != nil {
 				utils.HandleErrorAndExit("Cannot copy metadata file from the source directory ", err)
 			}
-			projectType = utils.ProjectTypeApi
 			break
 		} else if strings.EqualFold(fileName, utils.MetaFileAPIProduct) { // if project artifact is a APIProduct project
 			metaDataFileFound = true
@@ -151,7 +155,6 @@ func executeGenDeploymentDirCmd() error {
 			if err != nil {
 				utils.HandleErrorAndExit("Cannot copy metadata file from the source directory ", err)
 			}
-			projectType = utils.ProjectTypeApiProduct
 			break
 		} else if strings.EqualFold(fileName, utils.MetaFileApplication) { // if project artifact is a Application project
 			metaDataFileFound = true
@@ -159,7 +162,6 @@ func executeGenDeploymentDirCmd() error {
 			if err != nil {
 				utils.HandleErrorAndExit("Cannot copy metadata file from the source directory ", err)
 			}
-			projectType = utils.ProjectTypeApplication
 			break
 		}
 	}
@@ -198,6 +200,30 @@ func executeGenDeploymentDirCmd() error {
 		deploymentDirParent + " directory")
 
 	return nil
+}
+
+// retreiveProjectTypeByDefinitionFileName will decide the project type by checking the definition file name inside the directory
+func retreiveProjectTypeByDefinitionFileName(sourceDirectoryPath string) (string, error) {
+	files, err := ioutil.ReadDir(sourceDirectoryPath)
+	if err != nil {
+		return "", err
+	}
+	for _, file := range files {
+		fileName := file.Name()
+		if strings.EqualFold(fileName, utils.APIDefinitionFileYaml) ||
+			strings.EqualFold(fileName, utils.APIDefinitionFileJson) {
+			return utils.ProjectTypeApi, nil
+		}
+		if strings.EqualFold(fileName, utils.APIProductDefinitionFileYaml) ||
+			strings.EqualFold(fileName, utils.APIProductDefinitionFileJson) {
+			return utils.ProjectTypeApiProduct, nil
+		}
+		if strings.EqualFold(fileName, utils.ApplicationDefinitionFileYaml) ||
+			strings.EqualFold(fileName, utils.ApplicationDefinitionFileJson) {
+			return utils.ProjectTypeApplication, nil
+		}
+	}
+	return "", errors.New("Cannot decide the project type by the definition file name")
 }
 
 // getEnvsCmd represents the envs command
