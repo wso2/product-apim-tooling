@@ -21,7 +21,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/wso2/product-apim-tooling/import-export-cli/cmd/k8s"
 	"io"
 	"io/ioutil"
 	"log"
@@ -31,6 +30,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd/k8s"
 
 	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
@@ -297,7 +298,7 @@ func handleJavaInterceptors(nameSuffix string, path string, operation string, na
 	exists, err := utils.IsDirExists(interceptorsPath)
 	if !exists {
 		if err != nil {
-			fmt.Sprintf("Error: %s", err)
+			fmt.Printf("Error: %s", err)
 		}
 	} else {
 		//get all jars in libs dir
