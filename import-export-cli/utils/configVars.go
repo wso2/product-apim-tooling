@@ -21,6 +21,7 @@ package utils
 import (
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -43,7 +44,7 @@ func SetConfigVars(mainConfigFilePath string) error {
 	// validate config vars
 	if !(mainConfig.Config.HttpRequestTimeout >= 0) {
 		Logln(LogPrefixWarning + "value of HttpRequestTimeout in '" + mainConfigFilePath + "' is less than zero")
-		Logln(LogPrefixInfo + " setting HttpRequestTimeout to " + string(DefaultHttpRequestTimeout))
+		Logln(LogPrefixInfo + " setting HttpRequestTimeout to " + fmt.Sprint(DefaultHttpRequestTimeout))
 	}
 	if strings.TrimSpace(mainConfig.Config.ExportDirectory) == "" ||
 		len(strings.TrimSpace(mainConfig.Config.ExportDirectory)) == 0 {
@@ -54,7 +55,7 @@ func SetConfigVars(mainConfigFilePath string) error {
 	}
 
 	HttpRequestTimeout = mainConfig.Config.HttpRequestTimeout
-	Logln(LogPrefixInfo + "Setting HttpTimeoutRequest to " + string(mainConfig.Config.HttpRequestTimeout))
+	Logln(LogPrefixInfo + "Setting HttpTimeoutRequest to " + fmt.Sprint(mainConfig.Config.HttpRequestTimeout))
 
 	ExportDirectory = mainConfig.Config.ExportDirectory
 	Logln(LogPrefixInfo + "Setting ExportDirectory " + mainConfig.Config.ExportDirectory)
