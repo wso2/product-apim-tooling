@@ -68,7 +68,14 @@ environments:
               - displayOnDevportal:
                 deploymentEnvironment:
               - displayOnDevportal:
-                deploymentEnvironment:  
+                deploymentEnvironment:
+          mutualSslCerts:
+              - tierName:
+                alias:
+                path:
+              - tierName:
+                alias:
+                path: 
           policies:
               - 
               -  
