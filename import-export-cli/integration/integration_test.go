@@ -121,7 +121,6 @@ func readConfigs() {
 	yaml.NewDecoder(reader).Decode(&yamlConfig)
 
 	for _, env := range yamlConfig.Environments {
-		resolveEnvVariables(&env)
 		envs[env.Name] = env
 	}
 
@@ -137,26 +136,6 @@ func readConfigs() {
 
 	if len(envs) != 2 {
 		base.Fatal("Expected number of Envs have not been configured for intergration tests")
-	}
-}
-
-func resolveEnvVariables(env *Environment) {
-	host := os.Getenv(env.Name + "_" + "HOST")
-
-	if host != "" {
-		env.Host = host
-	}
-
-	offset := os.Getenv(env.Name + "_" + "OFFSET")
-
-	if offset != "" {
-		value, err := strconv.Atoi(offset)
-
-		if err != nil {
-			base.Fatal(err)
-		}
-
-		env.Offset = value
 	}
 }
 
