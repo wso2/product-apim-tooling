@@ -42,7 +42,11 @@ const GenDeploymentDirCmdLongDesc = `Generate a sample deployment directory base
 const GenDeploymentDirCmdExamples = utils.ProjectName + ` ` + GenCmdLiteral + ` ` + GenDeploymentDirCmdLiteral + ` ` +
 	`-s ~/PizzaShackAPI_1.0.0.zip
 ` + utils.ProjectName + ` ` + GenCmdLiteral + ` ` + GenDeploymentDirCmdLiteral + ` ` +
-	`-s ~/PizzaShackAPI_1.0.0.zip` + ` ` + ` -d /home/Deployment_repo/Dev`
+	`-s ~/PizzaShackAPI_1.0.0.zip` + ` ` + ` -d /home/deployment_repo/dev
+` + utils.ProjectName + ` ` + GenCmdLiteral + ` ` + GenDeploymentDirCmdLiteral + ` ` +
+	`-s dev/LeasingAPIProduct.zip
+` + utils.ProjectName + ` ` + GenCmdLiteral + ` ` + GenDeploymentDirCmdLiteral + ` ` +
+	`-s dev/LeasingAPIProduct.zip` + ` ` + ` -d /home/deployment_repo/dev`
 
 // directories to be created
 var directories = []string{
@@ -129,6 +133,7 @@ func executeGenDeploymentDirCmd() error {
 		return err
 	}
 	var metaDataFileFound bool = false
+	var projectType string
 	for _, file := range files {
 		fileName := file.Name()
 		// if project artifact is a API project
@@ -138,6 +143,7 @@ func executeGenDeploymentDirCmd() error {
 			if err != nil {
 				utils.HandleErrorAndExit("Cannot copy metadata file from the source directory ", err)
 			}
+			projectType = utils.ProjectTypeApi
 			break
 		} else if strings.EqualFold(fileName, utils.MetaFileAPIProduct) { // if project artifact is a APIProduct project
 			metaDataFileFound = true
@@ -145,6 +151,7 @@ func executeGenDeploymentDirCmd() error {
 			if err != nil {
 				utils.HandleErrorAndExit("Cannot copy metadata file from the source directory ", err)
 			}
+			projectType = utils.ProjectTypeApiProduct
 			break
 		} else if strings.EqualFold(fileName, utils.MetaFileApplication) { // if project artifact is a Application project
 			metaDataFileFound = true
@@ -152,6 +159,7 @@ func executeGenDeploymentDirCmd() error {
 			if err != nil {
 				utils.HandleErrorAndExit("Cannot copy metadata file from the source directory ", err)
 			}
+			projectType = utils.ProjectTypeApplication
 			break
 		}
 	}
@@ -160,8 +168,15 @@ func executeGenDeploymentDirCmd() error {
 		utils.HandleErrorAndExit("Cannot find metadata file inside the source directory ", err)
 	}
 
-	// add sample api_params.yaml file to deployment directory
-	defaultParamsContent, _ := box.Get("/sample/api_params.yaml")
+	var defaultParamsContent []byte
+	// add sample api_params.yaml/api_product_params.yaml file to deployment directory
+	if projectType == utils.ProjectTypeApi {
+		defaultParamsContent, _ = box.Get("/sample/api_params.yaml")
+	} else if projectType == utils.ProjectTypeApiProduct {
+		defaultParamsContent, _ = box.Get("/sample/api_product_params.yaml")
+	} else {
+		utils.HandleErrorAndExit("Error creating sample"+utils.ParamFile+" file due to incorrect project type: "+projectType, err)
+	}
 	err = ioutil.WriteFile(filepath.Join(deploymentDirPath, utils.ParamFile), defaultParamsContent, os.ModePerm)
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating sample"+utils.ParamFile+" file", err)
