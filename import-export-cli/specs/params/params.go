@@ -2,7 +2,6 @@ package params
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -160,7 +159,7 @@ func getEnvSubstitutedFileContent(path string) (string, error) {
 //	It returns an error or a valid ApiParams
 func LoadApiParamsFromDirectory(path string) (*ApiParams, error) {
 	paramsFilePath := filepath.Join(path, utils.ParamFile)
-	fmt.Println(paramsFilePath)
+	utils.Logln(utils.LogPrefixInfo + "Loading params from " + paramsFilePath)
 	fileContent, err := getEnvSubstitutedFileContent(paramsFilePath)
 	if err != nil {
 		return nil, err
