@@ -21,11 +21,12 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"github.com/wso2/product-apim-tooling/import-export-cli/cmd/k8s"
 	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd/k8s"
 
 	"github.com/ghodss/yaml"
 
@@ -140,9 +141,14 @@ func createConfigFiles() {
 
 	if !utils.IsFileExist(utils.MainConfigFilePath) {
 		var mainConfig = new(utils.MainConfig)
-		mainConfig.Config = utils.Config{utils.DefaultHttpRequestTimeout,
-			utils.DefaultExportDirPath, k8sUtils.DefaultKubernetesMode, utils.DefaultTokenType,
-			false, "", utils.TLSRenegotiationNever}
+		mainConfig.Config = utils.Config{HttpRequestTimeout: utils.DefaultHttpRequestTimeout,
+			ExportDirectory:      utils.DefaultExportDirPath,
+			KubernetesMode:       k8sUtils.DefaultKubernetesMode,
+			TokenType:            utils.DefaultTokenType,
+			VCSDeletionEnabled:   false,
+			VCSConfigFilePath:    "",
+			TLSRenegotiationMode: utils.TLSRenegotiationNever}
+
 		utils.WriteConfigFile(mainConfig, utils.MainConfigFilePath)
 	}
 

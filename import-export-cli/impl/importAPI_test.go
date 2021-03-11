@@ -19,81 +19,13 @@
 package impl
 
 import (
-	"net/http"
-	"net/http/httptest"
 	"os"
-	"path/filepath"
-	"strings"
 	"testing"
 
 	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 
-	"github.com/renstrom/dedent"
 	"github.com/stretchr/testify/assert"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
-
-func TestImportAPI1(t *testing.T) {
-	var server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			t.Errorf("Expected '%s', got '%s' instead\n", http.MethodPost, r.Method)
-		}
-
-		w.WriteHeader(http.StatusOK)
-		w.Header().Set(utils.HeaderContentType, utils.HeaderValueApplicationJSON)
-		w.Header().Set(utils.HeaderContentEncoding, utils.HeaderValueGZIP)
-		w.Header().Set(utils.HeaderTransferEncoding, utils.HeaderValueChunked)
-
-		body := dedent.Dedent(`
-		`)
-
-		w.Write([]byte(body))
-	}))
-	defer server.Close()
-
-	name := utils.GetRelativeTestDataPathFromImpl() + "PizzaShackAPI-1.0.0"
-
-	err := ImportAPI("access_token", server.URL, "testEnv", name, "", false,
-		false, true)
-	assert.Nil(t, err, "Error should be nil")
-
-	utils.Insecure = true
-	err = ImportAPI("access_token", server.URL, "testEnv", name, "", false,
-		false, true)
-	assert.Nil(t, err, "Error should be nil")
-}
-
-func TestNewFileUploadRequest(t *testing.T) {
-	var server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPut {
-			t.Errorf("Expected '%s', got '%s' instead\n", http.MethodPut, r.Method)
-		}
-
-		if !strings.Contains(r.Header.Get(utils.HeaderAccept), utils.HeaderValueMultiPartFormData) {
-			t.Errorf("Expected '%s', got '%s' instead\n", utils.HeaderValueApplicationZip,
-				r.Header.Get(utils.HeaderContentType))
-		}
-
-		w.WriteHeader(http.StatusOK)
-		w.Header().Set(utils.HeaderContentType, utils.HeaderValueApplicationJSON)
-		w.Header().Set(utils.HeaderContentEncoding, utils.HeaderValueGZIP)
-		w.Header().Set(utils.HeaderTransferEncoding, utils.HeaderValueChunked)
-
-		body := dedent.Dedent(`
-		`)
-
-		w.Write([]byte(body))
-	}))
-	defer server.Close()
-
-	extraParams := map[string]string{}
-	filePath := filepath.FromSlash(utils.GetRelativeTestDataPathFromImpl() + "sampleapi.zip")
-	accessToken := "access-token"
-	_, err := newFileUploadRequest(server.URL, http.MethodPost, extraParams, "file", filePath, accessToken)
-	if err != nil {
-		t.Errorf("Error: %s\n", err.Error())
-	}
-}
 
 func TestExtractAPIInfoWithCorrectJSON(t *testing.T) {
 	// Correct json

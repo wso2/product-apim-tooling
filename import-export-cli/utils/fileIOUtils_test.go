@@ -77,33 +77,6 @@ func initSampleKeys() {
 	envKeysAll.Environments[qaName] = EnvKeys{"qa_client_id", qaEncryptedClientSecret, qaUsername}
 }
 
-// helper function for unit-testing
-func WriteCorrectMainConfig() {
-	initSampleMainConfig()
-	WriteConfigFile(mainConfig, testMainConfigFilePath)
-}
-
-func initSampleMainConfig() {
-	mainConfig.Config = Config{2500, "/home/exported"}
-	mainConfig.Environments = make(map[string]EnvEndpoints)
-	mainConfig.Environments[devName] = EnvEndpoints{
-		"dev_apim_endpoint",
-		"dev_publisher_endpoint",
-		"dev_devportal_endpoint",
-		"dev_reg_endpoint",
-		"dev_admin_endpoint",
-		"dev_token_endpoint",
-	}
-	mainConfig.Environments[qaName] = EnvEndpoints{
-		"qa_apim_endpoint",
-		"qa_publisher_endpoint",
-		"qa_devportal_endpoint",
-		"qa_reg_endpoint",
-		"qa_admin_endpoint",
-		"dev_token_endpoint",
-	}
-}
-
 func TestWriteConfigFile(t *testing.T) {
 	writeCorrectKeys()
 	var err = os.Remove(testKeysFilePath)
@@ -142,104 +115,6 @@ func TestGetEnvKeysAllFromFile3(t *testing.T) {
 	defer os.Remove(testKeysFilePath)
 }
 */
-
-func TestGetMainConfigFromFile(t *testing.T) {
-	// testing for correct data
-	WriteCorrectMainConfig()
-	mainConfigReturned := GetMainConfigFromFile(testMainConfigFilePath)
-
-	if mainConfigReturned.Environments[devName] != mainConfig.Environments[devName] ||
-		mainConfigReturned.Environments[qaName] != mainConfig.Environments[qaName] {
-		t.Errorf("Error in GetMainConfigFromFile()")
-	}
-
-	var err = os.Remove(testMainConfigFilePath)
-	if err != nil {
-		t.Errorf("Error deleting file " + testKeysFilePath)
-	}
-}
-
-// test case 1 - correct endpoints file
-func TestMainConfig_ParseMainConfigFromFile1(t *testing.T) {
-	var envEndpointsAllLocal MainConfig
-	WriteCorrectMainConfig()
-	data, err := ioutil.ReadFile(testMainConfigFilePath)
-	if err != nil {
-		t.Error("Error")
-	}
-	envEndpointsAllLocal.ParseMainConfigFromFile(data)
-
-	var err1 = os.Remove(testMainConfigFilePath)
-	if err1 != nil {
-		t.Errorf("Error deleting file " + testMainConfigFilePath)
-	}
-}
-
-// test case 2 - incorrect endpoints (blank apim endpoint)
-func TestMainConfig_ParseMainConfigFromFile2(t *testing.T) {
-
-	mainConfig := new(MainConfig)
-	mainConfigFileName := "test_main_config.yaml"
-	mainConfigFilePath := filepath.Join(CurrentDir, mainConfigFileName)
-
-	mainConfig.Environments = make(map[string]EnvEndpoints)
-	mainConfig.Environments[devName] = EnvEndpoints{"", "", "",
-		"dev_reg_endpoint", "", "dev_token_endpoint"}
-	WriteConfigFile(mainConfig, mainConfigFilePath)
-
-	data, _ := ioutil.ReadFile(testMainConfigFilePath)
-
-	err := mainConfig.ParseMainConfigFromFile(data)
-	if err == nil {
-		t.Errorf("Expected '%s', got '%s' instead\n", "error", err)
-	}
-
-	defer os.Remove(testMainConfigFilePath)
-}
-
-// test case 3 - incorrect endpoints (blank reg endpoint)
-func TestMainConfig_ParseMainConfigFromFile3(t *testing.T) {
-
-	mainConfig := new(MainConfig)
-	mainConfigFileName := "test_main_config.yaml"
-	mainConfigFilePath := filepath.Join(CurrentDir, mainConfigFileName)
-
-	mainConfig.Environments = make(map[string]EnvEndpoints)
-	mainConfig.Environments[devName] = EnvEndpoints{"dev_apim_endpoint", "", "",
-		"", "", "dev_token_endpoint"}
-	WriteConfigFile(mainConfig, mainConfigFilePath)
-
-	data, _ := ioutil.ReadFile(testMainConfigFilePath)
-
-	err := mainConfig.ParseMainConfigFromFile(data)
-	if err == nil {
-		t.Errorf("Expected '%s', got '%s' instead\n", "error", err)
-	}
-
-	defer os.Remove(testMainConfigFilePath)
-}
-
-// test case 4 - incorrect endpoints (blank token endpoint)
-func TestMainConfig_ParseMainConfigFromFile4(t *testing.T) {
-
-	mainConfig := new(MainConfig)
-	mainConfigFileName := "test_main_config.yaml"
-	mainConfigFilePath := filepath.Join(CurrentDir, mainConfigFileName)
-
-	mainConfig.Environments = make(map[string]EnvEndpoints)
-	mainConfig.Environments[devName] = EnvEndpoints{"dev_apim_endpoint", "", "",
-		"dev_reg_endpoint", "", ""}
-	WriteConfigFile(mainConfig, mainConfigFilePath)
-
-	data, _ := ioutil.ReadFile(testMainConfigFilePath)
-
-	err := mainConfig.ParseMainConfigFromFile(data)
-	if err == nil {
-		t.Errorf("Expected '%s', got '%s' instead\n", "error", err)
-	}
-
-	defer os.Remove(testMainConfigFilePath)
-}
 
 // test case1 - correct keys
 func TestEnvKeysAll_ParseEnvKeysFromFile1(t *testing.T) {
