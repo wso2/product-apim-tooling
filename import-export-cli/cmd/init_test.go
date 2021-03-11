@@ -19,11 +19,12 @@
 package cmd
 
 import (
-	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
+
+	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -71,9 +72,9 @@ func Test_loadSwagger3YAML(t *testing.T) {
 func Test_APIDefinition_generateFieldsFromSwagger(t *testing.T) {
 	doc, err := loadSwagger("testdata/swaggers/swagger-3.json")
 	assert.Nil(t, err, "Loads correct swagger without errors")
-	def := &v2.APIDefinition{}
+	def := &v2.APIDTODefinition{}
 	err = v2.Swagger2Populate(def, doc)
 	assert.Nil(t, err, "Populate without errors")
-	assert.Equal(t, "SwaggerPetstore", def.ID.APIName, "Should correctly output name")
+	assert.Equal(t, "SwaggerPetstore", def.Name, "Should correctly output name")
 	assert.Equal(t, "/SwaggerPetstore/1.0.0", def.Context, "Should return correct context")
 }

@@ -20,48 +20,14 @@ package impl
 
 import (
 	"fmt"
-	"net/http"
-	"net/http/httptest"
-	"os"
 	"reflect"
 	"testing"
 
 	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 
-	"github.com/renstrom/dedent"
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
-
-func TestImportAPIProduct1(t *testing.T) {
-	var server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			t.Errorf("Expected '%s', got '%s' instead\n", http.MethodPost, r.Method)
-		}
-
-		w.WriteHeader(http.StatusOK)
-		w.Header().Set(utils.HeaderContentType, utils.HeaderValueApplicationJSON)
-		w.Header().Set(utils.HeaderContentEncoding, utils.HeaderValueGZIP)
-		w.Header().Set(utils.HeaderTransferEncoding, utils.HeaderValueChunked)
-
-		body := dedent.Dedent(`
-		`)
-
-		w.Write([]byte(body))
-	}))
-	defer server.Close()
-
-	name := utils.GetRelativeTestDataPathFromImpl() + string(os.PathSeparator) + "MyProduct-1.0.0"
-
-	err := ImportAPIProduct("access_token", server.URL, "test_env", name, false,
-		false, false, true,false)
-	assert.Nil(t, err, "Error should be nil")
-
-	utils.Insecure = true
-	err = ImportAPIProduct("access_token", server.URL, "test_env", name, false,
-		false, false, true,false)
-	assert.Nil(t, err, "Error should be nil")
-}
 
 func TestExtractAPIProductInfoWithCorrectJSON(t *testing.T) {
 	// Correct json
