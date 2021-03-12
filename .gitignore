@@ -69,5 +69,6 @@ import-export-cli/env_keys_all.yaml
 import-export-cli/utils/c.out
 import-export-cli/utils/coverage.out
 import-export-cli/utils/coverage.html
+import-export-cli/integration/coverage.txt
 
 # ==================
