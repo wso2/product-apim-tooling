@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -91,54 +90,18 @@ func importAPIProduct(endpoint, filePath, accessToken string, extraParams map[st
 	}
 }
 
-// preProcessDependentAPIs pre processes dependent APIs
-func preProcessDependentAPIs(apiProductFilePath, importEnvironment string, importAPIProductPreserveProvider bool) error {
-	// Check whether the APIs directory exists
-	apisDirectoryPath := apiProductFilePath + string(os.PathSeparator) + "APIs"
-	_, err := os.Stat(apisDirectoryPath)
-	if os.IsNotExist(err) {
-		utils.Logln(utils.LogPrefixInfo + "APIs directory does not exists. Ignoring APIs.")
-		return nil
-	}
-
-	// If APIs directory exists, read the directory
-	items, _ := ioutil.ReadDir(apisDirectoryPath)
-	// Iterate through the API directories available
-	for _, item := range items {
-		apiDirectoryPath := apisDirectoryPath + string(os.PathSeparator) + item.Name()
-
-		// Substitutes environment variables in the project files
-		err = replaceEnvVariables(apiDirectoryPath)
-		if err != nil {
-			return err
-		}
-
-		utils.Logln(utils.LogPrefixInfo + "Attempting to inject parameters to the API from api_params.yaml (if exists)")
-		paramsPath := apiDirectoryPath + string(os.PathSeparator) + utils.ParamFileAPI
-		// Check whether api_params.yaml file is available inside the particular API directory
-		if utils.IsFileExist(paramsPath) {
-			// Reading API params file and populate api.yaml
-			err := handleCustomizedParameters(apiDirectoryPath, paramsPath, importEnvironment)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
 // ImportAPIProductToEnv function is used with import-api-product command
-func ImportAPIProductToEnv(accessOAuthToken, importEnvironment, importPath string, importAPIs, importAPIsUpdate,
+func ImportAPIProductToEnv(accessOAuthToken, importEnvironment, importPath, apiProductParamsPath string, importAPIs, importAPIsUpdate,
 	importAPIProductUpdate, importAPIProductPreserveProvider, importAPIProductSkipCleanup, rotateRevision,
 	skipDeployments bool) error {
 	publisherEndpoint := utils.GetPublisherEndpointOfEnv(importEnvironment, utils.MainConfigFilePath)
-	return ImportAPIProduct(accessOAuthToken, publisherEndpoint, importEnvironment, importPath, importAPIs, importAPIsUpdate,
-		importAPIProductUpdate, importAPIProductPreserveProvider, importAPIProductSkipCleanup, rotateRevision,
+	return ImportAPIProduct(accessOAuthToken, publisherEndpoint, importEnvironment, importPath, apiProductParamsPath, importAPIs,
+		importAPIsUpdate, importAPIProductUpdate, importAPIProductPreserveProvider, importAPIProductSkipCleanup, rotateRevision,
 		skipDeployments)
 }
 
 // ImportAPIProduct function is used with import-api-product command
-func ImportAPIProduct(accessOAuthToken, publisherEndpoint, importEnvironment, importPath string, importAPIs, importAPIsUpdate,
+func ImportAPIProduct(accessOAuthToken, publisherEndpoint, importEnvironment, importPath, apiProductParamsPath string, importAPIs, importAPIsUpdate,
 	importAPIProductUpdate, importAPIProductPreserveProvider, importAPIProductSkipCleanup,
 	rotateRevision, skipDeployments bool) error {
 	var exportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedApiProductsDirName)
@@ -167,16 +130,18 @@ func ImportAPIProduct(accessOAuthToken, publisherEndpoint, importEnvironment, im
 	}()
 	apiProductFilePath := tmpPath
 
-	// Pre Process dependent APIs
-	err = preProcessDependentAPIs(apiProductFilePath, importEnvironment, importAPIProductPreserveProvider)
-	if err != nil {
-		return err
-	}
-
 	utils.Logln(utils.LogPrefixInfo + "Substituting environment variables in API Product files...")
 	err = replaceEnvVariables(apiProductFilePath)
 	if err != nil {
 		return err
+	}
+
+	if apiProductParamsPath != "" {
+		// Reading params file of the API Product and add configurations into temp artifact
+		err := handleCustomizedParameters(apiProductFilePath, apiProductParamsPath, importEnvironment)
+		if err != nil {
+			return err
+		}
 	}
 
 	if skipDeployments {
@@ -184,7 +149,7 @@ func ImportAPIProduct(accessOAuthToken, publisherEndpoint, importEnvironment, im
 		loc := filepath.Join(apiProductFilePath, utils.DeploymentEnvFile)
 		utils.Logln(utils.LogPrefixInfo + "Removing the deployment environments file from " + loc)
 		err := utils.RemoveFileIfExists(loc)
-		if err!= nil {
+		if err != nil {
 			return err
 		}
 	}
@@ -205,7 +170,7 @@ func ImportAPIProduct(accessOAuthToken, publisherEndpoint, importEnvironment, im
 	}
 	extraParams := map[string]string{}
 	publisherEndpoint += "/api-products/import" + "?preserveProvider=" +
-		strconv.FormatBool(importAPIProductPreserveProvider)+ "&rotateRevision=" + strconv.FormatBool(rotateRevision)
+		strconv.FormatBool(importAPIProductPreserveProvider) + "&rotateRevision=" + strconv.FormatBool(rotateRevision)
 
 	// If the user has specified import-apis flag or update-apis flag, importAPIs parameter should be passed as true
 	// because update is also an import task

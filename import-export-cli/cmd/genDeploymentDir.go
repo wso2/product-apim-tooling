@@ -19,6 +19,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -42,7 +43,15 @@ const GenDeploymentDirCmdLongDesc = `Generate a sample deployment directory base
 const GenDeploymentDirCmdExamples = utils.ProjectName + ` ` + GenCmdLiteral + ` ` + GenDeploymentDirCmdLiteral + ` ` +
 	`-s ~/PizzaShackAPI_1.0.0.zip
 ` + utils.ProjectName + ` ` + GenCmdLiteral + ` ` + GenDeploymentDirCmdLiteral + ` ` +
-	`-s ~/PizzaShackAPI_1.0.0.zip` + ` ` + ` -d /home/Deployment_repo/Dev`
+	`-s ~/PizzaShackAPI_1.0.0.zip` + ` ` + ` -d /home/deployment_repo/dev
+` + utils.ProjectName + ` ` + GenCmdLiteral + ` ` + GenDeploymentDirCmdLiteral + ` ` +
+	`-s ~/PizzaShackAPI_1.0.0` + ` ` + ` -d /home/deployment_repo/dev
+` + utils.ProjectName + ` ` + GenCmdLiteral + ` ` + GenDeploymentDirCmdLiteral + ` ` +
+	`-s dev/LeasingAPIProduct.zip
+` + utils.ProjectName + ` ` + GenCmdLiteral + ` ` + GenDeploymentDirCmdLiteral + ` ` +
+	`-s dev/LeasingAPIProduct.zip` + ` ` + ` -d /home/deployment_repo/dev
+` + utils.ProjectName + ` ` + GenCmdLiteral + ` ` + GenDeploymentDirCmdLiteral + ` ` +
+	`-s dev/LeasingAPIProduct` + ` ` + ` -d /home/deployment_repo/dev`
 
 // directories to be created
 var directories = []string{
@@ -123,6 +132,11 @@ func executeGenDeploymentDirCmd() error {
 		return err
 	}
 
+	projectType, err := retreiveProjectTypeByDefinitionFileName(sourceDirectoryPath)
+	if err != nil {
+		return err
+	}
+
 	// Copy *_meta.yaml file from source to deployment directory based on the artifact type
 	files, err := ioutil.ReadDir(sourceDirectoryPath)
 	if err != nil {
@@ -160,8 +174,15 @@ func executeGenDeploymentDirCmd() error {
 		utils.HandleErrorAndExit("Cannot find metadata file inside the source directory ", err)
 	}
 
-	// add sample api_params.yaml file to deployment directory
-	defaultParamsContent, _ := box.Get("/sample/api_params.yaml")
+	var defaultParamsContent []byte
+	// add sample api_params.yaml/api_product_params.yaml file to deployment directory
+	if projectType == utils.ProjectTypeApi {
+		defaultParamsContent, _ = box.Get("/sample/api_params.yaml")
+	} else if projectType == utils.ProjectTypeApiProduct {
+		defaultParamsContent, _ = box.Get("/sample/api_product_params.yaml")
+	} else {
+		utils.HandleErrorAndExit("Error creating sample"+utils.ParamFile+" file due to incorrect project type: "+projectType, err)
+	}
 	err = ioutil.WriteFile(filepath.Join(deploymentDirPath, utils.ParamFile), defaultParamsContent, os.ModePerm)
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating sample"+utils.ParamFile+" file", err)
@@ -183,6 +204,30 @@ func executeGenDeploymentDirCmd() error {
 		deploymentDirParent + " directory")
 
 	return nil
+}
+
+// retreiveProjectTypeByDefinitionFileName will decide the project type by checking the definition file name inside the directory
+func retreiveProjectTypeByDefinitionFileName(sourceDirectoryPath string) (string, error) {
+	files, err := ioutil.ReadDir(sourceDirectoryPath)
+	if err != nil {
+		return "", err
+	}
+	for _, file := range files {
+		fileName := file.Name()
+		if strings.EqualFold(fileName, utils.APIDefinitionFileYaml) ||
+			strings.EqualFold(fileName, utils.APIDefinitionFileJson) {
+			return utils.ProjectTypeApi, nil
+		}
+		if strings.EqualFold(fileName, utils.APIProductDefinitionFileYaml) ||
+			strings.EqualFold(fileName, utils.APIProductDefinitionFileJson) {
+			return utils.ProjectTypeApiProduct, nil
+		}
+		if strings.EqualFold(fileName, utils.ApplicationDefinitionFileYaml) ||
+			strings.EqualFold(fileName, utils.ApplicationDefinitionFileJson) {
+			return utils.ProjectTypeApplication, nil
+		}
+	}
+	return "", errors.New("Cannot decide the project type by the definition file name")
 }
 
 // getEnvsCmd represents the envs command

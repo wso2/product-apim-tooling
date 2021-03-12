@@ -179,6 +179,15 @@ const (
 	ParamFileApplication = "application_params.yaml"
 )
 
+const (
+	APIDefinitionFileYaml         = "api.yaml"
+	APIDefinitionFileJson         = "api.json"
+	APIProductDefinitionFileYaml  = "api_product.yaml"
+	APIProductDefinitionFileJson  = "api_product.json"
+	ApplicationDefinitionFileYaml = "application.yaml"
+	ApplicationDefinitionFileJson = "application.json"
+)
+
 // project meta files
 const (
 	MetaFileAPI         = "api_meta.yaml"

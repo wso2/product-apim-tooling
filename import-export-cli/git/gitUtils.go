@@ -382,7 +382,7 @@ func deployUpdatedProjects(accessToken, repoId, environment string, totalProject
             }
             importParams := projectParam.ApiProductParams.Deploy.Import
             fmt.Println(strconv.Itoa(i+1) + ": " + projectParam.NickName + ": (" + projectParam.RelativePath + ")")
-            err := impl.ImportAPIProductToEnv(accessToken, environment, projectParam.AbsolutePath,
+            err := impl.ImportAPIProductToEnv(accessToken, environment, projectParam.AbsolutePath, utils.ParamFileAPIProduct,
                 importParams.ImportAPIs, importParams.UpdateAPIs, importParams.UpdateAPIProduct,
                 importParams.PreserveProvider, false, false, false)
             if err != nil {

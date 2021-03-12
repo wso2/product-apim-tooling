@@ -32,6 +32,7 @@ var (
 	importAPIs                          bool
 	importAPIProductUpdate              bool
 	importAPIsUpdate                    bool
+	importAPIProductParamsFile          string
 	importAPIProductSkipCleanup         bool
 	importAPIProductRotateRevision      bool
 	importAPIProductSkipDeployments     bool
@@ -68,8 +69,8 @@ var ImportAPIProductCmd = &cobra.Command{
 		if err != nil {
 			utils.HandleErrorAndExit("Error while getting an access token for importing API Product", err)
 		}
-		err = impl.ImportAPIProductToEnv(accessOAuthToken, importAPIProductEnvironment, importAPIProductFile, importAPIs, importAPIsUpdate,
-			importAPIProductUpdate, importAPIProductCmdPreserveProvider, importAPIProductSkipCleanup,
+		err = impl.ImportAPIProductToEnv(accessOAuthToken, importAPIProductEnvironment, importAPIProductFile, importAPIProductParamsFile,
+			importAPIs, importAPIsUpdate, importAPIProductUpdate, importAPIProductCmdPreserveProvider, importAPIProductSkipCleanup,
 			importAPIProductRotateRevision, importAPIProductSkipDeployments)
 		if err != nil {
 			utils.HandleErrorAndExit("Error importing API Product", err)
@@ -95,9 +96,11 @@ func init() {
 		"existing API Product or create a new API Product")
 	ImportAPIProductCmd.Flags().BoolVarP(&importAPIsUpdate, "update-apis", "", false, "Update existing dependent APIs "+
 		"associated with the API Product")
+	ImportAPIProductCmd.Flags().StringVarP(&importAPIProductParamsFile, "params", "", "", "Provide an API Manager params file "+
+		"or a directory generated using \"gen deployment-dir\" command")
 	ImportAPIProductCmd.Flags().BoolVarP(&importAPIProductSkipCleanup, "skip-cleanup", "", false, "Leave "+
 		"all temporary files created during import process")
-	ImportAPIProductCmd.Flags().BoolVar(&importAPIProductSkipDeployments, "skip-deployments", false, "Update only " +
+	ImportAPIProductCmd.Flags().BoolVar(&importAPIProductSkipDeployments, "skip-deployments", false, "Update only "+
 		"the working copy and skip deployment steps in import")
 	// Mark required flags
 	_ = ImportAPIProductCmd.MarkFlagRequired("environment")

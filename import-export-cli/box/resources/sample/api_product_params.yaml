@@ -1,0 +1,71 @@
+environments:
+    - name:
+      configs:
+          dependentAPIs:
+              <api_1_name>-<api_1_version>:
+                  endpoints:
+                      production:
+                      sandbox:
+                  security:
+                      enabled:
+                      type:
+                      username:
+                      password: 
+                  certs:
+                      - hostName:
+                        alias:
+                        path:
+                      - hostName:
+                        alias:
+                        path:
+                  mutualSslCerts:
+                      - tierName:
+                        alias:
+                        path:
+                      - tierName:
+                        alias:
+                        path:
+                  policies:
+                      -
+                      -
+              <api_2_name>-<api_2_version>:
+                  endpoints:
+                      production:
+                      sandbox:
+                  security:
+                      enabled:
+                      type:
+                      username:
+                      password:
+                  certs:
+                      - hostName:
+                        alias:
+                        path:
+                      - hostName:
+                        alias:
+                        path:
+                  mutualSslCerts:
+                      - tierName:
+                        alias:
+                        path:
+                      - tierName:
+                        alias:
+                        path:
+                  policies:
+                      - 
+                      -   
+          deploymentEnvironments:
+              - displayOnDevportal:
+                deploymentEnvironment:
+              - displayOnDevportal:
+                deploymentEnvironment:
+          mutualSslCerts:
+              - tierName:
+                alias:
+                path:
+              - tierName:
+                alias:
+                path: 
+          policies:
+              - 
+              -  

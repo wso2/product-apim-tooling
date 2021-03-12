@@ -27,6 +27,7 @@ NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory
   -f, --file string          Name of the API Product to be imported
   -h, --help                 help for api-product
       --import-apis          Import dependent APIs associated with the API Product
+      --params string        Provide an API Manager params file or a directory generated using "gen deployment-dir" command
       --preserve-provider    Preserve existing provider of API Product after importing (default true)
       --rotate-revision      If the maximum revision limit is reached, undeploy and delete the earliest revision
       --skip-cleanup         Leave all temporary files created during import process
