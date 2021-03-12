@@ -45,9 +45,13 @@ const GenDeploymentDirCmdExamples = utils.ProjectName + ` ` + GenCmdLiteral + ` 
 ` + utils.ProjectName + ` ` + GenCmdLiteral + ` ` + GenDeploymentDirCmdLiteral + ` ` +
 	`-s ~/PizzaShackAPI_1.0.0.zip` + ` ` + ` -d /home/deployment_repo/dev
 ` + utils.ProjectName + ` ` + GenCmdLiteral + ` ` + GenDeploymentDirCmdLiteral + ` ` +
+	`-s ~/PizzaShackAPI_1.0.0` + ` ` + ` -d /home/deployment_repo/dev
+` + utils.ProjectName + ` ` + GenCmdLiteral + ` ` + GenDeploymentDirCmdLiteral + ` ` +
 	`-s dev/LeasingAPIProduct.zip
 ` + utils.ProjectName + ` ` + GenCmdLiteral + ` ` + GenDeploymentDirCmdLiteral + ` ` +
-	`-s dev/LeasingAPIProduct.zip` + ` ` + ` -d /home/deployment_repo/dev`
+	`-s dev/LeasingAPIProduct.zip` + ` ` + ` -d /home/deployment_repo/dev
+` + utils.ProjectName + ` ` + GenCmdLiteral + ` ` + GenDeploymentDirCmdLiteral + ` ` +
+	`-s dev/LeasingAPIProduct` + ` ` + ` -d /home/deployment_repo/dev`
 
 // directories to be created
 var directories = []string{

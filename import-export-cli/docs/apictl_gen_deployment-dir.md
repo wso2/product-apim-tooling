@@ -15,8 +15,10 @@ apictl gen deployment-dir [flags]
 ```
 apictl gen deployment-dir -s ~/PizzaShackAPI_1.0.0.zip
 apictl gen deployment-dir -s ~/PizzaShackAPI_1.0.0.zip  -d /home/deployment_repo/dev
+apictl gen deployment-dir -s ~/PizzaShackAPI_1.0.0  -d /home/deployment_repo/dev
 apictl gen deployment-dir -s dev/LeasingAPIProduct.zip
 apictl gen deployment-dir -s dev/LeasingAPIProduct.zip  -d /home/deployment_repo/dev
+apictl gen deployment-dir -s dev/LeasingAPIProduct  -d /home/deployment_repo/dev
 ```
 
 ### Options
