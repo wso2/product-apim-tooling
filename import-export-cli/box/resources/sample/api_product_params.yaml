@@ -10,12 +10,7 @@ environments:
                       enabled:
                       type:
                       username:
-                      password:
-                  deploymentEnvironments:
-                      - displayOnDevportal:
-                        deploymentEnvironment:
-                      - displayOnDevportal:
-                        deploymentEnvironment:  
+                      password: 
                   certs:
                       - hostName:
                         alias:
@@ -42,11 +37,6 @@ environments:
                       type:
                       username:
                       password:
-                  deploymentEnvironments:
-                      - displayOnDevportal:
-                        deploymentEnvironment:
-                      - displayOnDevportal:
-                        deploymentEnvironment:  
                   certs:
                       - hostName:
                         alias:
