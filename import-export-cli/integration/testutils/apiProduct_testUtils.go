@@ -163,7 +163,7 @@ func importAPIProduct(t *testing.T, args *ApiProductImportExportTestArgs) (strin
 
 	fileName := base.GetAPIArchiveFilePath(t, args.SrcAPIM.GetEnvName(), args.ApiProduct.Name, utils.DefaultApiProductVersion)
 
-	params := []string{"import", "api-product", "-f", fileName, "-e", args.DestAPIM.EnvName, "-k", "--verbose"}
+	params := []string{"import", "api-product", "-f", fileName, "-e", args.DestAPIM.EnvName, "-k", "--verbose", "--preserve-provider=false"}
 
 	if args.ImportApisFlag {
 		params = append(params, "--import-apis")
