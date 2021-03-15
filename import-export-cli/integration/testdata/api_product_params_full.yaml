@@ -1,0 +1,35 @@
+environments:
+    - name: production
+      configs:
+          dependentAPIs:
+              ${DEPENDENTAPI_2}:
+                  endpoints:
+                      production:
+                          url: https://prod.wso2.com
+                      sandbox:
+                          url: https://sand.wso2.com
+                  security:
+                      enabled: true
+                      type: basic
+                      username: admin
+                      password: admin
+                  certs:
+                      - hostName: https://prod.wso2.com
+                        alias: alice
+                        path: alice.crt
+                  policies:
+                      - Gold
+                      - Silver
+          deploymentEnvironments:
+              - displayOnDevportal: true
+                deploymentEnvironment: Production and Sandbox
+          mutualSslCerts:
+              - tierName: Gold
+                alias: bob
+                path: bob.crt
+              - tierName: Silver
+                alias: carol
+                path: carol.crt
+          policies:
+              - Gold
+              - Silver
