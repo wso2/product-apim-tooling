@@ -90,8 +90,8 @@ var loginCmd = &cobra.Command{
 }
 
 func runLogin(store credentials.Store, environment, username, password string) error {
-	if !utils.EnvExistsInMainConfigFile(environment, utils.MainConfigFilePath) {
-		fmt.Println(environment, "does not exists. Add it using add env")
+	if !utils.APIMExistsInEnv(environment, utils.MainConfigFilePath) {
+		fmt.Println("APIM does not exists in", environment, "Add it using add env")
 		os.Exit(1)
 	}
 
