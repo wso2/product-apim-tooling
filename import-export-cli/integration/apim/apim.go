@@ -638,6 +638,7 @@ func (instance *Client) DeployAPIRevision(t *testing.T, apiID string, revision *
 	deploymentInfo := APIRevisionDeployment{}
 	deploymentInfo.RevisionUUID = revision.ID
 	deploymentInfo.Name = "Production and Sandbox"
+	deploymentInfo.VHost = "localhost"
 	deploymentInfo.DisplayOnDevportal = true
 	deploymentInfoArray = append(deploymentInfoArray, deploymentInfo)
 
@@ -695,6 +696,7 @@ func (instance *Client) DeployAPIProductRevision(t *testing.T, apiProductID stri
 	deploymentInfo := APIRevisionDeployment{}
 	deploymentInfo.RevisionUUID = revision.ID
 	deploymentInfo.Name = "Production and Sandbox"
+	deploymentInfo.VHost = "localhost"
 	deploymentInfo.DisplayOnDevportal = true
 	deploymentInfoArray = append(deploymentInfoArray, deploymentInfo)
 
