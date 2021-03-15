@@ -28,10 +28,17 @@ type Environment struct {
 }
 
 type Configs struct {
-	Endpoints           Endpoints `yaml:"endpoints"`
-	Security            Security  `yaml:"security,omitempty"`
-	GatewayEnvironments []string  `yaml:"gatewayEnvironments,omitempty"`
-	Certs               []Cert    `yaml:"certs,omitempty"`
+	Endpoints              Endpoints                `yaml:"endpoints"`
+	Security               Security                 `yaml:"security,omitempty"`
+	DeploymentEnvironments []DeploymentEnvironments `yaml:"deploymentEnvironments,omitempty"`
+	Certs                  []Cert                   `yaml:"certs,omitempty"`
+	MsslCerts              []MsslCert               `yaml:"mutualSslCerts,omitempty"`
+	Policies               []string                 `yaml:"policies,omitempty"`
+}
+
+type DeploymentEnvironments struct {
+	DisplayOnDevportal    bool   `yaml:"displayOnDevportal,omitempty"`
+	DeploymentEnvironment string `yaml:"deploymentEnvironment,omitempty"`
 }
 
 type Endpoints struct {
@@ -59,6 +66,12 @@ type Security struct {
 
 type Cert struct {
 	HostName string `yaml:"hostName"`
+	Alias    string `yaml:"alias"`
+	Path     string `yaml:"path"`
+}
+
+type MsslCert struct {
+	TierName string `yaml:"tierName"`
 	Alias    string `yaml:"alias"`
 	Path     string `yaml:"path"`
 }
