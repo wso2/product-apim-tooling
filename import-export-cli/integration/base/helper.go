@@ -34,6 +34,8 @@ import (
 	"time"
 
 	"log"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 // logTransport : Flag which determines if http transport level requests and responses are logged
@@ -132,7 +134,7 @@ func MILogin(t *testing.T, env string, username string, password string) {
 // IsAPIArchiveExists : Returns true if exported application archive exists on file system, else returns false
 //
 func IsAPIArchiveExists(t *testing.T, path string, name string, version string) bool {
-	file := constructAPIFilePath(path, name, version)
+	file := ConstructAPIFilePath(path, name, version)
 
 	t.Log("base.IsAPIArchiveExists() - archive file path:", file)
 
@@ -146,7 +148,7 @@ func IsAPIArchiveExists(t *testing.T, path string, name string, version string) 
 // RemoveAPIArchive : Remove exported api archive from file system
 //
 func RemoveAPIArchive(t *testing.T, path string, name string, version string) {
-	file := constructAPIFilePath(path, name, version)
+	file := ConstructAPIFilePath(path, name, version)
 
 	t.Log("base.RemoveAPIArchive() - archive file path:", file)
 
@@ -161,15 +163,21 @@ func RemoveAPIArchive(t *testing.T, path string, name string, version string) {
 
 // GetAPIArchiveFilePath : Get API archive file path
 func GetAPIArchiveFilePath(t *testing.T, path string, name string, version string) string {
-	file := constructAPIFilePath(path, name, version)
+	file := ConstructAPIFilePath(path, name, version)
 
 	t.Log("base.GetAPIArchiveFilePath() - archive file path:", file)
 
 	return file
 }
 
-func constructAPIFilePath(path string, name string, version string) string {
+// ConstructAPIFilePath : Construct API file path from name and version
+func ConstructAPIFilePath(path, name, version string) string {
 	return filepath.Join(path, name+"_"+version+".zip")
+}
+
+// ConstructAPIDeploymentDirectoryPath : Construct the deployment directory path of an API from name and version
+func ConstructAPIDeploymentDirectoryPath(path, name, version string) string {
+	return filepath.Join(path, "/", utils.DeploymentDirPrefix+name+"-"+version)
 }
 
 // IsApplicationArchiveExists : Returns true if exported application archive exists on file system, else returns false
