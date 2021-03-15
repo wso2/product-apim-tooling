@@ -20,6 +20,7 @@ package integration
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strconv"
 	"testing"
@@ -56,7 +57,7 @@ func TestEnvironmentSpecificParamsEndpoint(t *testing.T) {
 
 	importedAPI := testutils.GetImportedAPI(t, args)
 
-	apiParams := testutils.ReadAPIParams(t, args.ParamsFile)
+	apiParams := testutils.ReadParams(t, args.ParamsFile)
 
 	assert.Equal(t, apiParams.Environments[0].Configs.Endpoints.Production["url"], importedAPI.GetProductionURL())
 
@@ -97,7 +98,7 @@ func TestEnvironmentSpecificParamsEndpointRetryTimeout(t *testing.T) {
 
 	importedAPI := testutils.GetImportedAPI(t, args)
 
-	apiParams := testutils.ReadAPIParams(t, args.ParamsFile)
+	apiParams := testutils.ReadParams(t, args.ParamsFile)
 
 	assert.Equal(t, apiParams.Environments[0].Configs.Endpoints.Production["url"], importedAPI.GetProductionURL())
 	paramConfig := apiParams.Environments[0].Configs.Endpoints.Production["config"].(map[interface{}]interface{})
@@ -176,7 +177,7 @@ func TestEnvironmentSpecificParamsEndpointSecurityDigest(t *testing.T) {
 
 	importedAPI := testutils.GetImportedAPI(t, args)
 
-	apiParams := testutils.ReadAPIParams(t, args.ParamsFile)
+	apiParams := testutils.ReadParams(t, args.ParamsFile)
 
 	testutils.ValidateEndpointSecurityDefinition(t, api, apiParams, importedAPI)
 }
@@ -206,7 +207,7 @@ func TestEnvironmentSpecificParamsEndpointSecurityBasic(t *testing.T) {
 
 	importedAPI := testutils.GetImportedAPI(t, args)
 
-	apiParams := testutils.ReadAPIParams(t, args.ParamsFile)
+	apiParams := testutils.ReadParams(t, args.ParamsFile)
 
 	testutils.ValidateEndpointSecurityDefinition(t, api, apiParams, importedAPI)
 }
@@ -254,9 +255,89 @@ func TestExportApiGenDeploymentDirImport(t *testing.T) {
 
 	importedAPI := testutils.GetImportedAPI(t, args)
 
-	apiParams := testutils.ReadAPIParams(t, args.ParamsFile+"/"+utils.ParamFile)
-	testutils.ValidateAPIParamsWithoutCerts(t, apiParams, importedAPI)
+	apiParams := testutils.ReadParams(t, args.ParamsFile+"/"+utils.ParamFile)
+	testutils.ValidateParamsWithoutCerts(t, apiParams, importedAPI, nil, importedAPI.Policies,
+		importedAPI.GatewayEnvironments)
 
 	args.SrcAPIM = prod // The API should be exported from prod env
 	testutils.ValidateExportedAPICerts(t, apiParams, importedAPI, args)
+}
+
+// Export an API Product from one environment and generate the deployment directory for that. Import it to another environment with the params
+// and certificates. Validate the imported API Product with the used params. Again, re-export it to validate the certs.
+func TestExportApiProductGenDeploymentDirImport(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	apiPublisher := publisher.UserName
+	apiPublisherPassword := publisher.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	// Add the first dependent API to env1
+	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI1.ID)
+
+	// Add the second dependent API to env1
+	dependentAPI2 := testutils.AddAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
+	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
+	os.Setenv("DEPENDENTAPI_2", dependentAPI2.Name+"-"+dependentAPI2.Version)
+
+	// Map the real name of the API with the API
+	apisList := map[string]*apim.API{
+		"PizzaShackAPI":   dependentAPI1,
+		"SwaggerPetstore": dependentAPI2,
+	}
+
+	// Add the API Product to env1
+	apiProduct := testutils.AddAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
+
+	args := &testutils.ApiProductImportExportTestArgs{
+		ApiProductProvider: testutils.Credentials{Username: apiPublisher, Password: apiPublisherPassword},
+		CtlUser:            testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		ImportApisFlag:     true,
+		ApiProduct:         apiProduct,
+		SrcAPIM:            dev,
+		DestAPIM:           prod,
+	}
+
+	testutils.ValidateAPIProductExport(t, args)
+
+	genDeploymentDirArgs := &testutils.GenDeploymentDirTestArgs{
+		Source:      base.ConstructAPIFilePath(testutils.GetEnvAPIProductExportPath(dev.GetEnvName()), apiProduct.Name, utils.DefaultApiProductVersion),
+		Destination: testutils.GetEnvAPIProductExportPath(dev.GetEnvName()),
+	}
+
+	testutils.ValidateGenDeploymentDir(t, genDeploymentDirArgs)
+	// Store the deployment directory path to be provided as the params during import
+	args.ParamsFile = base.ConstructAPIDeploymentDirectoryPath(genDeploymentDirArgs.Destination, apiProduct.Name, utils.DefaultApiProductVersion)
+
+	// Move dummay params file of an API Product to the created deployment directory
+	srcPathForParamsFile, _ := filepath.Abs(testutils.APIProductFullParamsFile)
+	destPathForParamsFile := args.ParamsFile + "/" + utils.ParamFile
+	utils.CopyFile(srcPathForParamsFile, destPathForParamsFile)
+
+	srcPathForCertificatesDirectory, _ := filepath.Abs(testutils.CertificatesDirectoryPath)
+	utils.CopyDirectoryContents(srcPathForCertificatesDirectory, args.ParamsFile+"/"+utils.DeploymentCertificatesDirectory)
+
+	importedAPIProduct := testutils.ValidateAPIProductImport(t, args, true)
+
+	apiProductParams := testutils.ReadParams(t, args.ParamsFile+"/"+utils.ParamFile)
+	testutils.ValidateParamsWithoutCerts(t, apiProductParams, nil, importedAPIProduct, importedAPIProduct.Policies,
+		importedAPIProduct.GatewayEnvironments)
+
+	args.SrcAPIM = prod // The API Product should be exported from prod env
+	testutils.ValidateExportedAPIProductCerts(t, apiProductParams, importedAPIProduct, args)
+
+	// Validate the dependent API (SwaggerPetstore will be the only one that is in params file of the product)
+	importedDependentAPI := testutils.GetAPI(t, prod, dependentAPI2.Name, devopsUsername, devopsPassword)
+	srcPathForParamsFile, _ = filepath.Abs(testutils.APIFullParamsFile)
+	apiParams := testutils.ReadParams(t, srcPathForParamsFile)
+
+	testutils.ValidateParamsWithoutCerts(t, apiParams, importedDependentAPI, nil, importedDependentAPI.Policies,
+		importedDependentAPI.GatewayEnvironments)
 }

@@ -18,7 +18,7 @@
 
 package testutils
 
-type APIParams struct {
+type Params struct {
 	Environments []Environment `yaml:"environments"`
 }
 
@@ -34,6 +34,7 @@ type Configs struct {
 	Certs                  []Cert                   `yaml:"certs,omitempty"`
 	MsslCerts              []MsslCert               `yaml:"mutualSslCerts,omitempty"`
 	Policies               []string                 `yaml:"policies,omitempty"`
+	DependentAPIs          map[string]interface{}   `yaml:"dependentAPIs,omitempty"`
 }
 
 type DeploymentEnvironments struct {

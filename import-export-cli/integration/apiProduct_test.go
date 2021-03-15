@@ -524,7 +524,7 @@ func TestExportImportApiProductCrossTenantUserWithImportApis(t *testing.T) {
 
 	// Import the API Product with the dependent APIs to env2 as tenant admin across domains
 	args.CtlUser = tenantAdminUser
-	testutils.ValidateAPIProductImport(t, args)
+	testutils.ValidateAPIProductImport(t, args, false)
 }
 
 // Export an API Product with its dependent APIs from one environment and import to another environment freshly as cross tenant user
@@ -554,7 +554,7 @@ func TestExportImportApiProductCrossTenantDevopsWithImportApis(t *testing.T) {
 
 	// Import the API Product with the dependent APIs to env2 as tenant user with Internal/devops role across domains
 	args.CtlUser = tenantDevopsUser
-	testutils.ValidateAPIProductImport(t, args)
+	testutils.ValidateAPIProductImport(t, args, false)
 }
 
 // Export an API Product with its dependent APIs from one environment as super tenant admin and import to another environment freshly
@@ -584,7 +584,7 @@ func TestExportImportApiProductCrossTenantUserWithUpdateApiProduct(t *testing.T)
 
 	// Import the API Product with the dependent APIs to env2 as tenant admin across domains
 	args.CtlUser = tenantAdminUser
-	testutils.ValidateAPIProductImport(t, args)
+	testutils.ValidateAPIProductImport(t, args, false)
 
 	// Set the --update-api-product flag to update the existing API Product while importing
 	// and make the importApisFlag false
@@ -622,7 +622,7 @@ func TestExportImportApiProductCrossTenantDevopsWithUpdateApiProduct(t *testing.
 
 	// Import the API Product with the dependent APIs to env2 as tenant user with Internal/devops role across domains
 	args.CtlUser = tenantDevopsUser
-	testutils.ValidateAPIProductImport(t, args)
+	testutils.ValidateAPIProductImport(t, args, false)
 
 	// Set the --update-api-product flag to update the existing API Product while importing
 	// and make the importApisFlag false
@@ -661,7 +661,7 @@ func TestExportImportApiProductCrossTenantUserWithUpdateApisAndApiProduct(t *tes
 
 	// Import the API Product with the dependent APIs to env2 as tenant admin across domains
 	args.CtlUser = tenantAdminUser
-	testutils.ValidateAPIProductImport(t, args)
+	testutils.ValidateAPIProductImport(t, args, false)
 
 	// Set the --update-api-product flag to update the existing API Product while importing
 	// and make the importApisFlag false
@@ -700,7 +700,7 @@ func TestExportImportApiProductCrossTenantDevopsWithUpdateApisAndApiProduct(t *t
 
 	// Import the API Product with the dependent APIs to env2 as tenant user with Internal/devops role across domains
 	args.CtlUser = tenantDevopsUser
-	testutils.ValidateAPIProductImport(t, args)
+	testutils.ValidateAPIProductImport(t, args, false)
 
 	// Set the --update-api-product flag to update the existing API Product while importing
 	// and make the importApisFlag false

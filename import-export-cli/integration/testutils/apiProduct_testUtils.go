@@ -160,18 +160,22 @@ func importUpdateAPIProductPreserveProvider(t *testing.T, args *ApiProductImport
 }
 
 func importAPIProduct(t *testing.T, args *ApiProductImportExportTestArgs) (string, error) {
-	var output string
-	var err error
 
 	fileName := base.GetAPIArchiveFilePath(t, args.SrcAPIM.GetEnvName(), args.ApiProduct.Name, utils.DefaultApiProductVersion)
 
+	params := []string{"import", "api-product", "-f", fileName, "-e", args.DestAPIM.EnvName, "-k", "--verbose"}
+
 	if args.ImportApisFlag {
-		output, err = base.Execute(t, "import", "api-product", "-f", fileName, "-e", args.DestAPIM.EnvName, "-k", "--verbose", "--import-apis", "--preserve-provider=false")
-	} else if args.UpdateApisFlag {
-		output, err = base.Execute(t, "import", "api-product", "-f", fileName, "-e", args.DestAPIM.EnvName, "-k", "--verbose", "--update-apis", "--preserve-provider=false")
-	} else {
-		output, err = base.Execute(t, "import", "api-product", "-f", fileName, "-e", args.DestAPIM.EnvName, "-k", "--verbose", "--preserve-provider=false")
+		params = append(params, "--import-apis")
 	}
+	if args.UpdateApisFlag {
+		params = append(params, "--update-apis")
+	}
+	if args.ParamsFile != "" {
+		params = append(params, "--params", args.ParamsFile)
+	}
+
+	output, err := base.Execute(t, params...)
 
 	t.Cleanup(func() {
 		args.DestAPIM.DeleteAPIProductByName(args.ApiProduct.Name)
@@ -329,7 +333,7 @@ func ValidateAPIProductExport(t *testing.T, args *ApiProductImportExportTestArgs
 		args.ApiProduct.Name, utils.DefaultApiProductVersion))
 }
 
-func ValidateAPIProductImport(t *testing.T, args *ApiProductImportExportTestArgs) {
+func ValidateAPIProductImport(t *testing.T, args *ApiProductImportExportTestArgs, skipvalidateAPIProductsEqual bool) *apim.APIProduct {
 	t.Helper()
 
 	// Setup apictl envs
@@ -357,8 +361,12 @@ func ValidateAPIProductImport(t *testing.T, args *ApiProductImportExportTestArgs
 	// Get API Product from env 2
 	importedAPIProduct := getAPIProduct(t, args.DestAPIM, args.ApiProduct.Name, args.ApiProductProvider.Username, args.ApiProductProvider.Password)
 
-	// Validate env 1 and env 2 API Products are equal
-	validateAPIProductsEqualCrossTenant(t, args.ApiProduct, importedAPIProduct)
+	if !skipvalidateAPIProductsEqual {
+		// Validate env 1 and env 2 API Products are equal
+		validateAPIProductsEqualCrossTenant(t, args.ApiProduct, importedAPIProduct)
+	}
+
+	return importedAPIProduct
 }
 
 func ValidateAPIProductImportUpdate(t *testing.T, args *ApiProductImportExportTestArgs) {

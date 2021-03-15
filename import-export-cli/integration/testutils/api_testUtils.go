@@ -142,6 +142,10 @@ func GetEnvAPIExportPath(envName string) string {
 	return filepath.Join(utils.DefaultExportDirPath, utils.ExportedApisDirName, envName)
 }
 
+func GetEnvAPIProductExportPath(envName string) string {
+	return filepath.Join(utils.DefaultExportDirPath, utils.ExportedApiProductsDirName, envName)
+}
+
 func exportAPI(t *testing.T, name string, version string, provider string, env string) (string, error) {
 	var output string
 	var err error
@@ -379,7 +383,7 @@ func GetImportedAPI(t *testing.T, args *ApiImportExportTestArgs) *apim.API {
 	return importedAPI
 }
 
-func ReadAPIParams(t *testing.T, apiParamsPath string) *APIParams {
+func ReadParams(t *testing.T, apiParamsPath string) *Params {
 	reader, err := os.Open(apiParamsPath)
 
 	if err != nil {
@@ -387,7 +391,7 @@ func ReadAPIParams(t *testing.T, apiParamsPath string) *APIParams {
 	}
 	defer reader.Close()
 
-	apiParams := APIParams{}
+	apiParams := Params{}
 	yaml.NewDecoder(reader).Decode(&apiParams)
 
 	return &apiParams

@@ -64,6 +64,12 @@ func EnvironmentSetTokenType(t *testing.T, args *SetTestArgs) (string, error) {
 
 func genDeploymentDir(t *testing.T, args *GenDeploymentDirTestArgs) (string, error) {
 	output, err := base.Execute(t, "gen", "deployment-dir", "-s", args.Source, "-d", args.Destination, "-k", "--verbose")
+
+	t.Cleanup(func() {
+		// Remove generated deployment directory
+		base.RemoveDir(args.Destination)
+	})
+
 	return output, err
 }
 
@@ -144,13 +150,13 @@ func ValidateGenDeploymentDir(t *testing.T, args *GenDeploymentDirTestArgs) {
 		"Generating deployment directory is not successful")
 }
 
-func validateEndpointSecurity(t *testing.T, apiParams *APIParams, api *apim.API) {
+func validateEndpointSecurity(t *testing.T, apiParams *Params, api *apim.API) {
 	assert.Equal(t, strings.ToUpper(apiParams.Environments[0].Configs.Security.Type), api.EndpointSecurity.Type)
 	assert.Equal(t, apiParams.Environments[0].Configs.Security.Username, api.EndpointSecurity.Username)
 	assert.Equal(t, "", api.EndpointSecurity.Password)
 }
 
-func ValidateEndpointSecurityDefinition(t *testing.T, api *apim.API, apiParams *APIParams, importedAPI *apim.API) {
+func ValidateEndpointSecurityDefinition(t *testing.T, api *apim.API, apiParams *Params, importedAPI *apim.API) {
 	t.Helper()
 
 	validateEndpointSecurity(t, apiParams, importedAPI)
@@ -176,28 +182,32 @@ func ValidateEndpointSecurityDefinition(t *testing.T, api *apim.API, apiParams *
 	ValidateAPIsEqual(t, &apiCopy, &importedAPICopy)
 }
 
-func ValidateAPIParamsWithoutCerts(t *testing.T, apiParams *APIParams, api *apim.API) {
+func ValidateParamsWithoutCerts(t *testing.T, params *Params, api *apim.API, apiProduct *apim.APIProduct,
+	policies, gatewayEnvironments []string) {
 	t.Helper()
 
-	// Validate endpoints
-	assert.Equal(t, apiParams.Environments[0].Configs.Endpoints.Production["url"], api.GetProductionURL(),
-		"Mismatched productction URL")
-	assert.Equal(t, apiParams.Environments[0].Configs.Endpoints.Sandbox["url"], api.GetSandboxURL(),
-		"Mismatched sandbox URL")
+	// Endpoints and endpoint security will only be there for APIs, not for API Products
+	if api != nil {
+		// Validate endpoints
+		assert.Equal(t, params.Environments[0].Configs.Endpoints.Production["url"], api.GetProductionURL(),
+			"Mismatched productction URL")
+		assert.Equal(t, params.Environments[0].Configs.Endpoints.Sandbox["url"], api.GetSandboxURL(),
+			"Mismatched sandbox URL")
 
-	// Validate endpoint security
-	validateEndpointSecurity(t, apiParams, api)
+		// Validate endpoint security
+		validateEndpointSecurity(t, params, api)
+	}
 
 	// Validate subscription policies
-	assert.ElementsMatch(t, apiParams.Environments[0].Configs.Policies, api.Policies, "Mismatched policies")
+	assert.ElementsMatch(t, params.Environments[0].Configs.Policies, policies, "Mismatched policies")
 
 	// Validate deployment environments
-	validateDeploymentEnvironments(t, apiParams, api)
+	validateDeploymentEnvironments(t, params, gatewayEnvironments)
 }
 
-func validateDeploymentEnvironments(t *testing.T, apiParams *APIParams, api *apim.API) {
+func validateDeploymentEnvironments(t *testing.T, apiParams *Params, gatewayEnvironments []string) {
 
-	assert.EqualValues(t, len(apiParams.Environments[0].Configs.DeploymentEnvironments), len(api.GatewayEnvironments),
+	assert.EqualValues(t, len(apiParams.Environments[0].Configs.DeploymentEnvironments), len(gatewayEnvironments),
 		"Mismatched number of deployment environments")
 
 	var deploymentEnvironments []string
@@ -205,10 +215,10 @@ func validateDeploymentEnvironments(t *testing.T, apiParams *APIParams, api *api
 		deploymentEnvironments = append(deploymentEnvironments, deploymentEnvironmentFromParams.DeploymentEnvironment)
 	}
 
-	assert.ElementsMatch(t, deploymentEnvironments, api.GatewayEnvironments, "Mismatched deployment environments")
+	assert.ElementsMatch(t, deploymentEnvironments, gatewayEnvironments, "Mismatched deployment environments")
 }
 
-func ValidateExportedAPICerts(t *testing.T, apiParams *APIParams, api *apim.API, args *ApiImportExportTestArgs) {
+func ValidateExportedAPICerts(t *testing.T, apiParams *Params, api *apim.API, args *ApiImportExportTestArgs) {
 	output, _ := exportAPI(t, args.Api.Name, args.Api.Version, args.ApiProvider.Username, args.SrcAPIM.GetEnvName())
 
 	//Unzip exported API and check whether the imported certificates are there
@@ -228,7 +238,26 @@ func ValidateExportedAPICerts(t *testing.T, apiParams *APIParams, api *apim.API,
 	})
 }
 
-func validateEndpointCerts(t *testing.T, apiParams *APIParams, path string) {
+func ValidateExportedAPIProductCerts(t *testing.T, apiProductParams *Params, apiProduct *apim.APIProduct, args *ApiProductImportExportTestArgs) {
+	output, _ := exportAPIProduct(t, args.ApiProduct.Name, utils.DefaultApiProductVersion, args.SrcAPIM.GetEnvName())
+
+	//Unzip exported API Product and check whether the imported certificates are there
+	exportedPath := base.GetExportedPathFromOutput(output)
+	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
+	base.Unzip(relativePath, exportedPath)
+
+	pathOfExportedApiProduct := relativePath + "/" + apiProduct.Name + "-" + utils.DefaultApiProductVersion
+
+	validateMutualSSLCerts(t, apiProductParams, pathOfExportedApiProduct)
+
+	t.Cleanup(func() {
+		//Remove Created project and logout
+		base.RemoveDir(exportedPath)
+		base.RemoveDir(relativePath)
+	})
+}
+
+func validateEndpointCerts(t *testing.T, apiParams *Params, path string) {
 	pathOfExportedEndpointCerts := path + "/" + utils.InitProjectEndpointCertificates
 	isEndpointCertsDirExists, _ := utils.IsDirExists(pathOfExportedEndpointCerts)
 
@@ -250,7 +279,7 @@ func validateEndpointCerts(t *testing.T, apiParams *APIParams, path string) {
 	}
 }
 
-func validateMutualSSLCerts(t *testing.T, apiParams *APIParams, path string) {
+func validateMutualSSLCerts(t *testing.T, apiParams *Params, path string) {
 	pathOfExportedMsslCerts := path + "/" + utils.InitProjectClientCertificates
 	isClientCertsDirExists, _ := utils.IsDirExists(pathOfExportedMsslCerts)
 
