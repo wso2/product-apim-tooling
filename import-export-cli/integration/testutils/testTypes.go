@@ -95,3 +95,8 @@ type ApiChangeLifeCycleStatusTestArgs struct {
 	Provider      string
 	ExpectedState string
 }
+
+type GenDeploymentDirTestArgs struct {
+	Source      string
+	Destination string
+}
