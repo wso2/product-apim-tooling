@@ -211,6 +211,8 @@ func TestEnvironmentSpecificParamsEndpointSecurityBasic(t *testing.T) {
 	testutils.ValidateEndpointSecurityDefinition(t, api, apiParams, importedAPI)
 }
 
+// Export an API from one environment and generate the deployment directory for that. Import it to another environment with the params
+// and certificates. Validate the imported API with the used params. Again, re-export it to validate the certs.
 func TestExportApiGenDeploymentDirImport(t *testing.T) {
 	devopsUsername := devops.UserName
 	devopsPassword := devops.Password
