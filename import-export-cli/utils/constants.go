@@ -71,6 +71,23 @@ const ExportedAppsDirName = "apps"
 const ExportedMigrationArtifactsDirName = "migration"
 const CertificatesDirName = "certs"
 
+const (
+	InitProjectDefinitions          = "Definitions"
+	InitProjectImage                = "Image"
+	InitProjectDocs                 = "Docs"
+	InitProjectSequences            = "Sequences"
+	InitProjectSequencesFault       = "Sequences/fault-sequence"
+	InitProjectSequencesIn          = "Sequences/in-sequence"
+	InitProjectSequencesOut         = "Sequences/out-sequence"
+	InitProjectClientCertificates   = "Client-certificates"
+	InitProjectEndpointCertificates = "Endpoint-certificates"
+	InitProjectInterceptors         = "Interceptors"
+	InitProjectLibs                 = "libs"
+)
+
+const DeploymentDirPrefix = "DeploymentArtifacts_"
+const DeploymentCertificatesDirectory = "certificates"
+
 var DefaultExportDirPath = filepath.Join(ConfigDirPath, DefaultExportDirName)
 var DefaultCertDirPath = filepath.Join(ConfigDirPath, CertificatesDirName)
 
