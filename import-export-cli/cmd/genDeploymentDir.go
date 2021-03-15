@@ -55,7 +55,7 @@ const GenDeploymentDirCmdExamples = utils.ProjectName + ` ` + GenCmdLiteral + ` 
 
 // directories to be created
 var directories = []string{
-	"certificates",
+	utils.DeploymentCertificatesDirectory,
 }
 
 // createDeploymentContentDirectories will create directories in current working directory
@@ -103,7 +103,7 @@ func executeGenDeploymentDirCmd() error {
 	}
 
 	// Get the source artifact name
-	deploymentDirName = filepath.Base(genDeploymentDirSource)
+	deploymentDirName = utils.DeploymentDirPrefix + filepath.Base(genDeploymentDirSource)
 	if info, err := os.Stat(genDeploymentDirSource); err == nil && !info.IsDir() {
 
 		//extract zip to a temp directory
@@ -113,7 +113,7 @@ func executeGenDeploymentDirCmd() error {
 			return err
 		}
 		// if artifact is given as zip the extracted file name will contains "/" character. It should be removed
-		deploymentDirName = strings.Trim(path[0], "/")
+		deploymentDirName = utils.DeploymentDirPrefix + strings.Trim(path[0], "/")
 
 		// extract the new source file name after unzipping into the temp directory
 		sourceDirectoryPath = filepath.Join(tempDirPath, path[0])
