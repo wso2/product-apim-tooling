@@ -20,13 +20,15 @@ package integration
 
 import (
 	"fmt"
+	"path/filepath"
 	"strconv"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 func TestEnvironmentSpecificParamsEndpoint(t *testing.T) {
@@ -176,7 +178,7 @@ func TestEnvironmentSpecificParamsEndpointSecurityDigest(t *testing.T) {
 
 	apiParams := testutils.ReadAPIParams(t, args.ParamsFile)
 
-	validateEndpointSecurityDefinition(t, api, apiParams, importedAPI)
+	testutils.ValidateEndpointSecurityDefinition(t, api, apiParams, importedAPI)
 }
 
 func TestEnvironmentSpecificParamsEndpointSecurityBasic(t *testing.T) {
@@ -206,29 +208,53 @@ func TestEnvironmentSpecificParamsEndpointSecurityBasic(t *testing.T) {
 
 	apiParams := testutils.ReadAPIParams(t, args.ParamsFile)
 
-	validateEndpointSecurityDefinition(t, api, apiParams, importedAPI)
+	testutils.ValidateEndpointSecurityDefinition(t, api, apiParams, importedAPI)
 }
 
-func validateEndpointSecurityDefinition(t *testing.T, api *apim.API, apiParams *testutils.APIParams, importedAPI *apim.API) {
-	t.Helper()
+func TestExportApiGenDeploymentDirImport(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
 
-	assert.Equal(t, strings.ToUpper(apiParams.Environments[0].Configs.Security.Type), importedAPI.EndpointSecurity.Type)
-	assert.Equal(t, apiParams.Environments[0].Configs.Security.Username, importedAPI.EndpointSecurity.Username)
-	assert.Equal(t, "", importedAPI.EndpointSecurity.Password)
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
 
-	apiCopy := apim.CopyAPI(api)
-	importedAPICopy := apim.CopyAPI(importedAPI)
+	dev := GetDevClient()
+	prod := GetProdClient()
 
-	same := "override_with_same_value"
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
-	apiCopy.EndpointSecurity.Type = same
-	importedAPICopy.EndpointSecurity.Type = same
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+	}
 
-	apiCopy.EndpointSecurity.Username = same
-	importedAPICopy.EndpointSecurity.Username = same
+	testutils.ValidateAPIExport(t, args)
 
-	apiCopy.EndpointSecurity.Password = same
-	importedAPICopy.EndpointSecurity.Password = same
+	genDeploymentDirArgs := &testutils.GenDeploymentDirTestArgs{
+		Source:      base.ConstructAPIFilePath(testutils.GetEnvAPIExportPath(dev.GetEnvName()), api.Name, api.Version),
+		Destination: testutils.GetEnvAPIExportPath(dev.GetEnvName()),
+	}
 
-	testutils.ValidateAPIsEqual(t, &apiCopy, &importedAPICopy)
+	testutils.ValidateGenDeploymentDir(t, genDeploymentDirArgs)
+	// Store the deployment directory path to be provided as the params during import
+	args.ParamsFile = base.ConstructAPIDeploymentDirectoryPath(genDeploymentDirArgs.Destination, api.Name, api.Version)
+
+	// Move dummay params file of an API to the created deployment directory
+	srcPathForParamsFile, _ := filepath.Abs(testutils.APIFullParamsFile)
+	destPathForParamsFile := args.ParamsFile + "/" + utils.ParamFile
+	utils.CopyFile(srcPathForParamsFile, destPathForParamsFile)
+
+	srcPathForCertificatesDirectory, _ := filepath.Abs(testutils.CertificatesDirectoryPath)
+	utils.CopyDirectoryContents(srcPathForCertificatesDirectory, args.ParamsFile+"/"+utils.DeploymentCertificatesDirectory)
+
+	importedAPI := testutils.GetImportedAPI(t, args)
+
+	apiParams := testutils.ReadAPIParams(t, args.ParamsFile+"/"+utils.ParamFile)
+	testutils.ValidateAPIParamsWithoutCerts(t, apiParams, importedAPI)
+
+	args.SrcAPIM = prod // The API should be exported from prod env
+	testutils.ValidateExportedAPICerts(t, apiParams, importedAPI, args)
 }
