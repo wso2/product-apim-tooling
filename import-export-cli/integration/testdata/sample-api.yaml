@@ -104,3 +104,6 @@ data:
   categories: []
   keyManagers:
    - all
+  websubSubscriptionConfiguration : ""
+  isRevision : false
+  revisionId : 0
