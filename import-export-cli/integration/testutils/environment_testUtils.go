@@ -21,6 +21,7 @@ package testutils
 import (
 	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -226,7 +227,7 @@ func ValidateExportedAPICerts(t *testing.T, apiParams *Params, api *apim.API, ar
 	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
 	base.Unzip(relativePath, exportedPath)
 
-	pathOfExportedApi := relativePath + "/" + api.Name + "-" + api.Version
+	pathOfExportedApi := relativePath + string(os.PathSeparator) + api.Name + "-" + api.Version
 
 	validateEndpointCerts(t, apiParams, pathOfExportedApi)
 	validateMutualSSLCerts(t, apiParams, pathOfExportedApi)
@@ -246,7 +247,7 @@ func ValidateExportedAPIProductCerts(t *testing.T, apiProductParams *Params, api
 	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
 	base.Unzip(relativePath, exportedPath)
 
-	pathOfExportedApiProduct := relativePath + "/" + apiProduct.Name + "-" + utils.DefaultApiProductVersion
+	pathOfExportedApiProduct := relativePath + string(os.PathSeparator) + apiProduct.Name + "-" + utils.DefaultApiProductVersion
 
 	validateMutualSSLCerts(t, apiProductParams, pathOfExportedApiProduct)
 
@@ -258,7 +259,7 @@ func ValidateExportedAPIProductCerts(t *testing.T, apiProductParams *Params, api
 }
 
 func validateEndpointCerts(t *testing.T, apiParams *Params, path string) {
-	pathOfExportedEndpointCerts := path + "/" + utils.InitProjectEndpointCertificates
+	pathOfExportedEndpointCerts := path + string(os.PathSeparator) + utils.InitProjectEndpointCertificates
 	isEndpointCertsDirExists, _ := utils.IsDirExists(pathOfExportedEndpointCerts)
 
 	if isEndpointCertsDirExists {
@@ -280,7 +281,7 @@ func validateEndpointCerts(t *testing.T, apiParams *Params, path string) {
 }
 
 func validateMutualSSLCerts(t *testing.T, apiParams *Params, path string) {
-	pathOfExportedMsslCerts := path + "/" + utils.InitProjectClientCertificates
+	pathOfExportedMsslCerts := path + string(os.PathSeparator) + utils.InitProjectClientCertificates
 	isClientCertsDirExists, _ := utils.IsDirExists(pathOfExportedMsslCerts)
 
 	if isClientCertsDirExists {

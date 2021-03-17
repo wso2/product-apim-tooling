@@ -247,15 +247,15 @@ func TestExportApiGenDeploymentDirImport(t *testing.T) {
 
 	// Move dummay params file of an API to the created deployment directory
 	srcPathForParamsFile, _ := filepath.Abs(testutils.APIFullParamsFile)
-	destPathForParamsFile := args.ParamsFile + "/" + utils.ParamFile
+	destPathForParamsFile := args.ParamsFile + string(os.PathSeparator) + utils.ParamFile
 	utils.CopyFile(srcPathForParamsFile, destPathForParamsFile)
 
 	srcPathForCertificatesDirectory, _ := filepath.Abs(testutils.CertificatesDirectoryPath)
-	utils.CopyDirectoryContents(srcPathForCertificatesDirectory, args.ParamsFile+"/"+utils.DeploymentCertificatesDirectory)
+	utils.CopyDirectoryContents(srcPathForCertificatesDirectory, args.ParamsFile+string(os.PathSeparator)+utils.DeploymentCertificatesDirectory)
 
 	importedAPI := testutils.GetImportedAPI(t, args)
 
-	apiParams := testutils.ReadParams(t, args.ParamsFile+"/"+utils.ParamFile)
+	apiParams := testutils.ReadParams(t, args.ParamsFile+string(os.PathSeparator)+utils.ParamFile)
 	testutils.ValidateParamsWithoutCerts(t, apiParams, importedAPI, nil, importedAPI.Policies,
 		importedAPI.GatewayEnvironments)
 
@@ -318,15 +318,15 @@ func TestExportApiProductGenDeploymentDirImport(t *testing.T) {
 
 	// Move dummay params file of an API Product to the created deployment directory
 	srcPathForParamsFile, _ := filepath.Abs(testutils.APIProductFullParamsFile)
-	destPathForParamsFile := args.ParamsFile + "/" + utils.ParamFile
+	destPathForParamsFile := args.ParamsFile + string(os.PathSeparator) + utils.ParamFile
 	utils.CopyFile(srcPathForParamsFile, destPathForParamsFile)
 
 	srcPathForCertificatesDirectory, _ := filepath.Abs(testutils.CertificatesDirectoryPath)
-	utils.CopyDirectoryContents(srcPathForCertificatesDirectory, args.ParamsFile+"/"+utils.DeploymentCertificatesDirectory)
+	utils.CopyDirectoryContents(srcPathForCertificatesDirectory, args.ParamsFile+string(os.PathSeparator)+utils.DeploymentCertificatesDirectory)
 
 	importedAPIProduct := testutils.ValidateAPIProductImport(t, args, true)
 
-	apiProductParams := testutils.ReadParams(t, args.ParamsFile+"/"+utils.ParamFile)
+	apiProductParams := testutils.ReadParams(t, args.ParamsFile+string(os.PathSeparator)+utils.ParamFile)
 	testutils.ValidateParamsWithoutCerts(t, apiProductParams, nil, importedAPIProduct, importedAPIProduct.Policies,
 		importedAPIProduct.GatewayEnvironments)
 
