@@ -80,11 +80,11 @@ var (
 )
 
 func GetDevClient() *apim.Client {
-	return apimClients["DEVELOPMENT"]
+	return apimClients["development"]
 }
 
 func GetProdClient() *apim.Client {
-	return apimClients["PRODUCTION"]
+	return apimClients["production"]
 }
 
 func TestMain(m *testing.M) {
@@ -121,7 +121,6 @@ func readConfigs() {
 	yaml.NewDecoder(reader).Decode(&yamlConfig)
 
 	for _, env := range yamlConfig.Environments {
-		resolveEnvVariables(&env)
 		envs[env.Name] = env
 	}
 
@@ -137,26 +136,6 @@ func readConfigs() {
 
 	if len(envs) != 2 {
 		base.Fatal("Expected number of Envs have not been configured for intergration tests")
-	}
-}
-
-func resolveEnvVariables(env *Environment) {
-	host := os.Getenv(env.Name + "_" + "HOST")
-
-	if host != "" {
-		env.Host = host
-	}
-
-	offset := os.Getenv(env.Name + "_" + "OFFSET")
-
-	if offset != "" {
-		value, err := strconv.Atoi(offset)
-
-		if err != nil {
-			base.Fatal(err)
-		}
-
-		env.Offset = value
 	}
 }
 
@@ -180,6 +159,7 @@ func cleanupAPIM() {
 	deleteApps()
 	deleteApiProducts()
 	deleteApis()
+	removeEndpointCerts()
 }
 
 func initTenants(host string, offset int) {
@@ -322,6 +302,18 @@ func deleteApiProducts() {
 		for _, client := range apimClients {
 			client.Login(tenant.AdminUserName+"@"+tenant.Domain, tenant.AdminPassword)
 			client.DeleteAllAPIProducts()
+		}
+	}
+}
+
+func removeEndpointCerts() {
+	for _, client := range apimClients {
+		client.Login(superAdminUser, superAdminPassword)
+		client.RemoveAllEndpointCerts()
+
+		for _, tenant := range tenants {
+			client.Login(tenant.AdminUserName+"@"+tenant.Domain, tenant.AdminPassword)
+			client.RemoveAllEndpointCerts()
 		}
 	}
 }

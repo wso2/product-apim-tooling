@@ -1274,6 +1274,40 @@ func (instance *Client) DeleteAllAPIProducts() {
 	}
 }
 
+// RemoveAllEndpointCerts : Remove All Endpoint Certs from the Truststore
+func (instance *Client) RemoveAllEndpointCerts() {
+	apisGetURL := instance.publisherRestURL + "/endpoint-certificates"
+
+	request := base.CreateGet(apisGetURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.RemoveAllEndpointCerts() getting Certs", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.RemoveAllEndpointCerts() getting Certs", response, 200)
+
+	var certificatesResponse Certificates
+	json.NewDecoder(response.Body).Decode(&certificatesResponse)
+
+	for _, certificate := range certificatesResponse.List {
+		certificatesDeleteURL := instance.publisherRestURL + "/endpoint-certificates/" + certificate.Alias
+		request = base.CreateDelete(certificatesDeleteURL)
+
+		base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+		base.LogRequest("apim.RemoveAllEndpointCerts() deleting Certs", request)
+
+		response = base.SendHTTPRequest(request)
+		defer response.Body.Close()
+
+		base.ValidateAndLogResponse("apim.RemoveAllEndpointCerts() deleting Certs", response, 200)
+	}
+}
+
 func generateSampleAPIOperations() []APIOperations {
 	op1 := APIOperations{}
 	op1.Target = "/order/{orderId}"

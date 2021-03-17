@@ -59,17 +59,17 @@ apictl init MyAwesomeAPI --oas ./swagger.yaml -d definition.yaml`
 
 // directories to be created
 var dirs = []string{
-	"Definitions",
-	"Image",
-	"Docs",
-	"Sequences",
-	"Sequences/fault-sequence",
-	"Sequences/in-sequence",
-	"Sequences/out-sequence",
-	"Client-certificates",
-	"Endpoint-certificates",
-	"Interceptors",
-	"libs",
+	utils.InitProjectDefinitions,
+	utils.InitProjectImage,
+	utils.InitProjectDocs,
+	utils.InitProjectSequences,
+	utils.InitProjectSequencesFault,
+	utils.InitProjectSequencesIn,
+	utils.InitProjectSequencesOut,
+	utils.InitProjectClientCertificates,
+	utils.InitProjectClientCertificates,
+	utils.InitProjectInterceptors,
+	utils.InitProjectLibs,
 }
 
 // createDirectories will create dirs in current working directory

@@ -66,3 +66,12 @@ const APISecurityDigestParamsFile = "testdata/api_params_security_digest.yaml"
 
 // APISecurityBasicParamsFile : Security Basic api_params.yaml
 const APISecurityBasicParamsFile = "testdata/api_params_security_basic.yaml"
+
+// APIFullParamsFile : Full api_params.yaml
+const APIFullParamsFile = "testdata/api_params_full.yaml"
+
+// APIProductFullParamsFile : Full api_product_params.yaml
+const APIProductFullParamsFile = "testdata/api_product_params_full.yaml"
+
+// CertificatesDirectoryPath : Directory path for the dunnmy certificates
+const CertificatesDirectoryPath = "testdata/TestArtifactDirectory/certificates"

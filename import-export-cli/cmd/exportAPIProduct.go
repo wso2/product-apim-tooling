@@ -39,7 +39,6 @@ var exportAPIProductFormat string
 var runningExportAPIProductCommand bool
 var exportAPIProductLatestRevision bool
 
-
 // ExportAPIProduct command related usage info
 const ExportAPIProductCmdLiteral = "api-product"
 const exportAPIProductCmdShortDesc = "Export API Product"
@@ -47,7 +46,7 @@ const exportAPIProductCmdShortDesc = "Export API Product"
 const exportAPIProductCmdLongDesc = "Export an API Product in an environment"
 
 const exportAPIProductCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPIProductCmdLiteral + ` -n LeasingAPIProduct -e dev
-` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPIProductCmdLiteral + ` -n CreditAPIProduct -v 1.0.0 -r admin -e production
+` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPIProductCmdLiteral + ` -n CreditAPIProduct -r admin -e production
 NOTE: Both the flags (--name (-n) and --environment (-e)) are mandatory`
 
 // ExportAPIProductCmd represents the exportAPIProduct command
@@ -80,7 +79,7 @@ func executeExportAPIProductCmd(credential credentials.Credential, exportDirecto
 
 	if preCommandErr == nil {
 		if exportAPIProductVersion == "" {
-			// If the user has not specified the version, use the version as 1.0.0
+			// Since the user cannot specify the version, use the version as 1.0.0
 			exportAPIProductVersion = utils.DefaultApiProductVersion
 		}
 		resp, err := impl.ExportAPIProductFromEnv(accessToken, exportAPIProductName, exportAPIProductVersion,

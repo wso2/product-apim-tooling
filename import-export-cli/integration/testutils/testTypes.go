@@ -45,6 +45,7 @@ type ApiProductImportExportTestArgs struct {
 	ImportApisFlag       bool
 	UpdateApisFlag       bool
 	UpdateApiProductFlag bool
+	ParamsFile           string
 }
 
 type AppImportExportTestArgs struct {
@@ -94,4 +95,9 @@ type ApiChangeLifeCycleStatusTestArgs struct {
 	Action        string
 	Provider      string
 	ExpectedState string
+}
+
+type GenDeploymentDirTestArgs struct {
+	Source      string
+	Destination string
 }
