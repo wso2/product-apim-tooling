@@ -214,7 +214,7 @@ func TestEnvironmentSpecificParamsEndpointSecurityBasic(t *testing.T) {
 // Export an API from one environment and generate the deployment directory for that. Import it to another environment with the params
 // and certificates. Validate the imported API with the used params. Again, re-export it to validate the certs.
 // As a super tenant user with Internal/devops role.
-func TestExportApiGenDeploymentDirImport(t *testing.T) {
+func TestExportApiGenDeploymentDirImportSuperTenant(t *testing.T) {
 	devopsUsername := devops.UserName
 	devopsPassword := devops.Password
 
@@ -248,10 +248,47 @@ func TestExportApiGenDeploymentDirImport(t *testing.T) {
 	testutils.ValidateAPIImportExportWithDeploymentDir(t, args, api)
 }
 
+// Export an API from one environment and generate the deployment directory for that. Import it to another environment with the params
+// and certificates. Validate the imported API with the used params. Again, re-export it to validate the certs.
+// As a tenant user with Internal/devops role.
+func TestExportApiGenDeploymentDirImportTenant(t *testing.T) {
+	devopsUsername := devops.UserName + "@" + TENANT1
+	devopsPassword := devops.Password
+
+	apiCreator := creator.UserName + "@" + TENANT1
+	apiCreatorPassword := creator.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+	}
+
+	testutils.ValidateAPIExport(t, args)
+
+	genDeploymentDirArgs := &testutils.GenDeploymentDirTestArgs{
+		Source:      base.ConstructAPIFilePath(testutils.GetEnvAPIExportPath(dev.GetEnvName()), api.Name, api.Version),
+		Destination: testutils.GetEnvAPIExportPath(dev.GetEnvName()),
+	}
+
+	testutils.ValidateGenDeploymentDir(t, genDeploymentDirArgs)
+
+	// Store the deployment directory path to be provided as the params during import
+	args.ParamsFile = base.ConstructAPIDeploymentDirectoryPath(genDeploymentDirArgs.Destination, api.Name, api.Version)
+	testutils.ValidateAPIImportExportWithDeploymentDir(t, args, api)
+}
+
 // Export an API Product from one environment and generate the deployment directory for that. Import it to another environment with the params
 // and certificates. Validate the imported API Product with the used params. Again, re-export it to validate the certs.
 // As a super tenant user with Internal/devops role.
-func TestExportApiProductGenDeploymentDirImport(t *testing.T) {
+func TestExportApiProductGenDeploymentDirImportSuperTenant(t *testing.T) {
 	devopsUsername := devops.UserName
 	devopsPassword := devops.Password
 
@@ -259,6 +296,68 @@ func TestExportApiProductGenDeploymentDirImport(t *testing.T) {
 	apiPublisherPassword := publisher.Password
 
 	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	// Add the first dependent API to env1
+	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI1.ID)
+
+	// Add the second dependent API to env1
+	dependentAPI2 := testutils.AddAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
+	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
+	os.Setenv("DEPENDENTAPI_2", dependentAPI2.Name+"-"+dependentAPI2.Version)
+
+	// Map the real name of the API with the API
+	apisList := map[string]*apim.API{
+		"PizzaShackAPI":   dependentAPI1,
+		"SwaggerPetstore": dependentAPI2,
+	}
+
+	// Add the API Product to env1
+	apiProduct := testutils.AddAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
+
+	args := &testutils.ApiProductImportExportTestArgs{
+		ApiProductProvider: testutils.Credentials{Username: apiPublisher, Password: apiPublisherPassword},
+		CtlUser:            testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		ImportApisFlag:     true,
+		ApiProduct:         apiProduct,
+		SrcAPIM:            dev,
+		DestAPIM:           prod,
+	}
+
+	testutils.ValidateAPIProductExport(t, args)
+
+	genDeploymentDirArgs := &testutils.GenDeploymentDirTestArgs{
+		Source: base.ConstructAPIFilePath(testutils.GetEnvAPIProductExportPath(dev.GetEnvName()), apiProduct.Name,
+			utils.DefaultApiProductVersion),
+		Destination: testutils.GetEnvAPIProductExportPath(dev.GetEnvName()),
+	}
+
+	testutils.ValidateGenDeploymentDir(t, genDeploymentDirArgs)
+
+	// Store the deployment directory path to be provided as the params during import
+	args.ParamsFile = base.ConstructAPIDeploymentDirectoryPath(genDeploymentDirArgs.Destination, apiProduct.Name, utils.DefaultApiProductVersion)
+	testutils.ValidateAPIProductImportExportWithDeploymentDir(t, args, apiProduct)
+
+	// Validate the dependent API (SwaggerPetstore will be the only one that is in params file of the product)
+	testutils.ValidateDependentAPIWithParams(t, dependentAPI2, prod, devopsUsername, devopsPassword)
+}
+
+// Export an API Product from one environment and generate the deployment directory for that. Import it to another environment with the params
+// and certificates. Validate the imported API Product with the used params. Again, re-export it to validate the certs.
+// As a tenant user with Internal/devops role.
+
+func TestExportApiProductGenDeploymentDirImportTenant(t *testing.T) {
+	devopsUsername := devops.UserName + "@" + TENANT1
+	devopsPassword := devops.Password
+
+	apiPublisher := publisher.UserName + "@" + TENANT1
+	apiPublisherPassword := publisher.Password
+
+	apiCreator := creator.UserName + "@" + TENANT1
 	apiCreatorPassword := creator.Password
 
 	dev := GetDevClient()

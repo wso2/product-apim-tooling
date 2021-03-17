@@ -166,11 +166,11 @@ func ValidateAPIImportExportWithDeploymentDir(t *testing.T, args *ApiImportExpor
 	importedAPI := GetImportedAPI(t, args)
 
 	apiParams := ReadParams(t, args.ParamsFile+string(os.PathSeparator)+utils.ParamFile)
-	ValidateParamsWithoutCerts(t, apiParams, importedAPI, nil, importedAPI.Policies,
+	validateParamsWithoutCerts(t, apiParams, importedAPI, nil, importedAPI.Policies,
 		importedAPI.GatewayEnvironments)
 
 	args.SrcAPIM = args.DestAPIM // The API should be exported from prod env
-	ValidateExportedAPICerts(t, apiParams, importedAPI, args)
+	validateExportedAPICerts(t, apiParams, importedAPI, args)
 }
 
 func ValidateAPIProductImportExportWithDeploymentDir(t *testing.T, args *ApiProductImportExportTestArgs,
@@ -188,10 +188,10 @@ func ValidateAPIProductImportExportWithDeploymentDir(t *testing.T, args *ApiProd
 	importedAPIProduct := ValidateAPIProductImport(t, args, true)
 
 	apiProductParams := ReadParams(t, args.ParamsFile+string(os.PathSeparator)+utils.ParamFile)
-	ValidateParamsWithoutCerts(t, apiProductParams, nil, importedAPIProduct, importedAPIProduct.Policies, importedAPIProduct.GatewayEnvironments)
+	validateParamsWithoutCerts(t, apiProductParams, nil, importedAPIProduct, importedAPIProduct.Policies, importedAPIProduct.GatewayEnvironments)
 
 	args.SrcAPIM = args.DestAPIM // The API Product should be exported from prod env
-	ValidateExportedAPIProductCerts(t, apiProductParams, importedAPIProduct, args)
+	validateExportedAPIProductCerts(t, apiProductParams, importedAPIProduct, args)
 }
 
 func ValidateDependentAPIWithParams(t *testing.T, dependentAPI *apim.API, client *apim.Client, username, password string) {
@@ -200,7 +200,7 @@ func ValidateDependentAPIWithParams(t *testing.T, dependentAPI *apim.API, client
 	srcPathForParamsFile, _ := filepath.Abs(APIFullParamsFile)
 	apiParams := ReadParams(t, srcPathForParamsFile)
 
-	ValidateParamsWithoutCerts(t, apiParams, importedDependentAPI, nil, importedDependentAPI.Policies,
+	validateParamsWithoutCerts(t, apiParams, importedDependentAPI, nil, importedDependentAPI.Policies,
 		importedDependentAPI.GatewayEnvironments)
 }
 
@@ -236,7 +236,7 @@ func ValidateEndpointSecurityDefinition(t *testing.T, api *apim.API, apiParams *
 	ValidateAPIsEqual(t, &apiCopy, &importedAPICopy)
 }
 
-func ValidateParamsWithoutCerts(t *testing.T, params *Params, api *apim.API, apiProduct *apim.APIProduct,
+func validateParamsWithoutCerts(t *testing.T, params *Params, api *apim.API, apiProduct *apim.APIProduct,
 	policies, gatewayEnvironments []string) {
 	t.Helper()
 
@@ -272,7 +272,7 @@ func validateDeploymentEnvironments(t *testing.T, apiParams *Params, gatewayEnvi
 	assert.ElementsMatch(t, deploymentEnvironments, gatewayEnvironments, "Mismatched deployment environments")
 }
 
-func ValidateExportedAPICerts(t *testing.T, apiParams *Params, api *apim.API, args *ApiImportExportTestArgs) {
+func validateExportedAPICerts(t *testing.T, apiParams *Params, api *apim.API, args *ApiImportExportTestArgs) {
 	output, _ := exportAPI(t, args.Api.Name, args.Api.Version, args.ApiProvider.Username, args.SrcAPIM.GetEnvName())
 
 	//Unzip exported API and check whether the imported certificates are there
@@ -292,7 +292,7 @@ func ValidateExportedAPICerts(t *testing.T, apiParams *Params, api *apim.API, ar
 	})
 }
 
-func ValidateExportedAPIProductCerts(t *testing.T, apiProductParams *Params, apiProduct *apim.APIProduct, args *ApiProductImportExportTestArgs) {
+func validateExportedAPIProductCerts(t *testing.T, apiProductParams *Params, apiProduct *apim.APIProduct, args *ApiProductImportExportTestArgs) {
 	output, _ := exportAPIProduct(t, args.ApiProduct.Name, utils.DefaultApiProductVersion, args.SrcAPIM.GetEnvName())
 
 	//Unzip exported API Product and check whether the imported certificates are there
