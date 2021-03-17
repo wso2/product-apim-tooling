@@ -159,6 +159,7 @@ func cleanupAPIM() {
 	deleteApps()
 	deleteApiProducts()
 	deleteApis()
+	removeEndpointCerts()
 }
 
 func initTenants(host string, offset int) {
@@ -301,6 +302,18 @@ func deleteApiProducts() {
 		for _, client := range apimClients {
 			client.Login(tenant.AdminUserName+"@"+tenant.Domain, tenant.AdminPassword)
 			client.DeleteAllAPIProducts()
+		}
+	}
+}
+
+func removeEndpointCerts() {
+	for _, client := range apimClients {
+		client.Login(superAdminUser, superAdminPassword)
+		client.RemoveAllEndpointCerts()
+
+		for _, tenant := range tenants {
+			client.Login(tenant.AdminUserName+"@"+tenant.Domain, tenant.AdminPassword)
+			client.RemoveAllEndpointCerts()
 		}
 	}
 }
