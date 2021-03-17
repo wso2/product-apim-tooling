@@ -21,7 +21,6 @@ package integration
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"strconv"
 	"testing"
 
@@ -214,6 +213,7 @@ func TestEnvironmentSpecificParamsEndpointSecurityBasic(t *testing.T) {
 
 // Export an API from one environment and generate the deployment directory for that. Import it to another environment with the params
 // and certificates. Validate the imported API with the used params. Again, re-export it to validate the certs.
+// As a super tenant user with Internal/devops role.
 func TestExportApiGenDeploymentDirImport(t *testing.T) {
 	devopsUsername := devops.UserName
 	devopsPassword := devops.Password
@@ -242,29 +242,15 @@ func TestExportApiGenDeploymentDirImport(t *testing.T) {
 	}
 
 	testutils.ValidateGenDeploymentDir(t, genDeploymentDirArgs)
+
 	// Store the deployment directory path to be provided as the params during import
 	args.ParamsFile = base.ConstructAPIDeploymentDirectoryPath(genDeploymentDirArgs.Destination, api.Name, api.Version)
-
-	// Move dummay params file of an API to the created deployment directory
-	srcPathForParamsFile, _ := filepath.Abs(testutils.APIFullParamsFile)
-	destPathForParamsFile := args.ParamsFile + string(os.PathSeparator) + utils.ParamFile
-	utils.CopyFile(srcPathForParamsFile, destPathForParamsFile)
-
-	srcPathForCertificatesDirectory, _ := filepath.Abs(testutils.CertificatesDirectoryPath)
-	utils.CopyDirectoryContents(srcPathForCertificatesDirectory, args.ParamsFile+string(os.PathSeparator)+utils.DeploymentCertificatesDirectory)
-
-	importedAPI := testutils.GetImportedAPI(t, args)
-
-	apiParams := testutils.ReadParams(t, args.ParamsFile+string(os.PathSeparator)+utils.ParamFile)
-	testutils.ValidateParamsWithoutCerts(t, apiParams, importedAPI, nil, importedAPI.Policies,
-		importedAPI.GatewayEnvironments)
-
-	args.SrcAPIM = prod // The API should be exported from prod env
-	testutils.ValidateExportedAPICerts(t, apiParams, importedAPI, args)
+	testutils.ValidateAPIImportExportWithDeploymentDir(t, args, api)
 }
 
 // Export an API Product from one environment and generate the deployment directory for that. Import it to another environment with the params
 // and certificates. Validate the imported API Product with the used params. Again, re-export it to validate the certs.
+// As a super tenant user with Internal/devops role.
 func TestExportApiProductGenDeploymentDirImport(t *testing.T) {
 	devopsUsername := devops.UserName
 	devopsPassword := devops.Password
@@ -308,36 +294,17 @@ func TestExportApiProductGenDeploymentDirImport(t *testing.T) {
 	testutils.ValidateAPIProductExport(t, args)
 
 	genDeploymentDirArgs := &testutils.GenDeploymentDirTestArgs{
-		Source:      base.ConstructAPIFilePath(testutils.GetEnvAPIProductExportPath(dev.GetEnvName()), apiProduct.Name, utils.DefaultApiProductVersion),
+		Source: base.ConstructAPIFilePath(testutils.GetEnvAPIProductExportPath(dev.GetEnvName()), apiProduct.Name,
+			utils.DefaultApiProductVersion),
 		Destination: testutils.GetEnvAPIProductExportPath(dev.GetEnvName()),
 	}
 
 	testutils.ValidateGenDeploymentDir(t, genDeploymentDirArgs)
+
 	// Store the deployment directory path to be provided as the params during import
 	args.ParamsFile = base.ConstructAPIDeploymentDirectoryPath(genDeploymentDirArgs.Destination, apiProduct.Name, utils.DefaultApiProductVersion)
-
-	// Move dummay params file of an API Product to the created deployment directory
-	srcPathForParamsFile, _ := filepath.Abs(testutils.APIProductFullParamsFile)
-	destPathForParamsFile := args.ParamsFile + string(os.PathSeparator) + utils.ParamFile
-	utils.CopyFile(srcPathForParamsFile, destPathForParamsFile)
-
-	srcPathForCertificatesDirectory, _ := filepath.Abs(testutils.CertificatesDirectoryPath)
-	utils.CopyDirectoryContents(srcPathForCertificatesDirectory, args.ParamsFile+string(os.PathSeparator)+utils.DeploymentCertificatesDirectory)
-
-	importedAPIProduct := testutils.ValidateAPIProductImport(t, args, true)
-
-	apiProductParams := testutils.ReadParams(t, args.ParamsFile+string(os.PathSeparator)+utils.ParamFile)
-	testutils.ValidateParamsWithoutCerts(t, apiProductParams, nil, importedAPIProduct, importedAPIProduct.Policies,
-		importedAPIProduct.GatewayEnvironments)
-
-	args.SrcAPIM = prod // The API Product should be exported from prod env
-	testutils.ValidateExportedAPIProductCerts(t, apiProductParams, importedAPIProduct, args)
+	testutils.ValidateAPIProductImportExportWithDeploymentDir(t, args, apiProduct)
 
 	// Validate the dependent API (SwaggerPetstore will be the only one that is in params file of the product)
-	importedDependentAPI := testutils.GetAPI(t, prod, dependentAPI2.Name, devopsUsername, devopsPassword)
-	srcPathForParamsFile, _ = filepath.Abs(testutils.APIFullParamsFile)
-	apiParams := testutils.ReadParams(t, srcPathForParamsFile)
-
-	testutils.ValidateParamsWithoutCerts(t, apiParams, importedDependentAPI, nil, importedDependentAPI.Policies,
-		importedDependentAPI.GatewayEnvironments)
+	testutils.ValidateDependentAPIWithParams(t, dependentAPI2, prod, devopsUsername, devopsPassword)
 }

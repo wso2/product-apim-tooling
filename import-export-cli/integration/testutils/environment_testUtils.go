@@ -151,6 +151,59 @@ func ValidateGenDeploymentDir(t *testing.T, args *GenDeploymentDirTestArgs) {
 		"Generating deployment directory is not successful")
 }
 
+func ValidateAPIImportExportWithDeploymentDir(t *testing.T, args *ApiImportExportTestArgs, api *apim.API) {
+
+	// Move dummay params file of an API to the created deployment directory
+	srcPathForParamsFile, _ := filepath.Abs(APIFullParamsFile)
+	destPathForParamsFile := args.ParamsFile + string(os.PathSeparator) + utils.ParamFile
+	utils.CopyFile(srcPathForParamsFile, destPathForParamsFile)
+
+	// Copy dummy certificates to the created deployment directory
+	srcPathForCertificatesDirectory, _ := filepath.Abs(CertificatesDirectoryPath)
+	utils.CopyDirectoryContents(srcPathForCertificatesDirectory,
+		args.ParamsFile+string(os.PathSeparator)+utils.DeploymentCertificatesDirectory)
+
+	importedAPI := GetImportedAPI(t, args)
+
+	apiParams := ReadParams(t, args.ParamsFile+string(os.PathSeparator)+utils.ParamFile)
+	ValidateParamsWithoutCerts(t, apiParams, importedAPI, nil, importedAPI.Policies,
+		importedAPI.GatewayEnvironments)
+
+	args.SrcAPIM = args.DestAPIM // The API should be exported from prod env
+	ValidateExportedAPICerts(t, apiParams, importedAPI, args)
+}
+
+func ValidateAPIProductImportExportWithDeploymentDir(t *testing.T, args *ApiProductImportExportTestArgs,
+	apiProduct *apim.APIProduct) {
+
+	// Move dummay params file of an API Product to the created deployment directory
+	srcPathForParamsFile, _ := filepath.Abs(APIProductFullParamsFile)
+	destPathForParamsFile := args.ParamsFile + string(os.PathSeparator) + utils.ParamFile
+	utils.CopyFile(srcPathForParamsFile, destPathForParamsFile)
+
+	srcPathForCertificatesDirectory, _ := filepath.Abs(CertificatesDirectoryPath)
+	utils.CopyDirectoryContents(srcPathForCertificatesDirectory,
+		args.ParamsFile+string(os.PathSeparator)+utils.DeploymentCertificatesDirectory)
+
+	importedAPIProduct := ValidateAPIProductImport(t, args, true)
+
+	apiProductParams := ReadParams(t, args.ParamsFile+string(os.PathSeparator)+utils.ParamFile)
+	ValidateParamsWithoutCerts(t, apiProductParams, nil, importedAPIProduct, importedAPIProduct.Policies, importedAPIProduct.GatewayEnvironments)
+
+	args.SrcAPIM = args.DestAPIM // The API Product should be exported from prod env
+	ValidateExportedAPIProductCerts(t, apiProductParams, importedAPIProduct, args)
+}
+
+func ValidateDependentAPIWithParams(t *testing.T, dependentAPI *apim.API, client *apim.Client, username, password string) {
+
+	importedDependentAPI := GetAPI(t, client, dependentAPI.Name, username, password)
+	srcPathForParamsFile, _ := filepath.Abs(APIFullParamsFile)
+	apiParams := ReadParams(t, srcPathForParamsFile)
+
+	ValidateParamsWithoutCerts(t, apiParams, importedDependentAPI, nil, importedDependentAPI.Policies,
+		importedDependentAPI.GatewayEnvironments)
+}
+
 func validateEndpointSecurity(t *testing.T, apiParams *Params, api *apim.API) {
 	assert.Equal(t, strings.ToUpper(apiParams.Environments[0].Configs.Security.Type), api.EndpointSecurity.Type)
 	assert.Equal(t, apiParams.Environments[0].Configs.Security.Username, api.EndpointSecurity.Username)
