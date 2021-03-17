@@ -80,11 +80,11 @@ var (
 )
 
 func GetDevClient() *apim.Client {
-	return apimClients["DEVELOPMENT"]
+	return apimClients["development"]
 }
 
 func GetProdClient() *apim.Client {
-	return apimClients["PRODUCTION"]
+	return apimClients["production"]
 }
 
 func TestMain(m *testing.M) {
