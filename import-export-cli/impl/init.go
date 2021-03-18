@@ -140,7 +140,7 @@ func InitAPIProject(initCmdOutputDir, initCmdInitialState, initCmdSwaggerPath, i
 
 		// Substitute env variables to the API definition
 		utils.Logln(utils.LogPrefixInfo + "Substituting environment variables")
-		data, err := utils.EnvSubstitute(string(content))
+		data, err := utils.EnvSubstituteForCurlyBraces(string(content))
 		if err != nil {
 			return err
 		}

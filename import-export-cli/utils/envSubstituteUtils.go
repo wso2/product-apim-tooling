@@ -2,12 +2,13 @@ package utils
 
 import (
 	"fmt"
-	"github.com/hashicorp/go-multierror"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/hashicorp/go-multierror"
 )
 
 // Match for $VAR or ${VAR} and capture VAR inside a group
@@ -26,30 +27,6 @@ func (e ErrRequiredEnvKeyMissing) Error() string {
 	return fmt.Sprintf("%s is required, please set the environment variable", e.Key)
 }
 
-// EnvSubstitute substitutes variables from environment to the content. It uses regex to match variables and look up them in the
-// environment before processing.
-// returns an error if anything happen
-func EnvSubstitute(content string) (string, error) {
-	var errorResults error
-	missingEnvKeys := false
-	matches := re.FindAllStringSubmatch(content, -1) // matches is [][]string
-
-	for _, match := range matches {
-		Logln(LogPrefixInfo + "Looking for:", match[0])
-		if os.Getenv(match[1]) == "" {
-			missingEnvKeys = true
-			errorResults = multierror.Append(errorResults, &ErrRequiredEnvKeyMissing{Key: match[0]})
-		}
-	}
-
-	if missingEnvKeys {
-		return "", errorResults
-	}
-
-	expanded := os.ExpandEnv(content)
-	return expanded, nil
-}
-
 // EnvSubstituteForCurlyBraces substitutes variables from environment to the content.
 // It uses regex to match in ${var} format for variables and look up them in the environment before processing.
 // returns an error if anything happen
@@ -59,7 +36,7 @@ func EnvSubstituteForCurlyBraces(content string) (string, error) {
 	matches := recb.FindAllStringSubmatch(content, -1) // matches is [][]string
 
 	for _, match := range matches {
-		Logln(LogPrefixInfo + "Looking for:", match[0])
+		Logln(LogPrefixInfo+"Looking for:", match[0])
 		if os.Getenv(match[1]) == "" {
 			missingEnvKeys = true
 			errorResults = multierror.Append(errorResults, &ErrRequiredEnvKeyMissing{Key: match[0]})
@@ -91,7 +68,7 @@ func EnvSubstituteInFile(file string) error {
 	if err != nil {
 		return err
 	}
-	return nil;
+	return nil
 }
 
 // Walks through all the files in the given folder and substitutes all the environment variables added in
@@ -108,7 +85,7 @@ func EnvSubstituteInFolder(folderPath string) error {
 				return err
 			}
 			if fi.Mode().IsRegular() {
-				Logln(LogPrefixInfo + "Substituting env variables in: ", path)
+				Logln(LogPrefixInfo+"Substituting env variables in: ", path)
 				err = EnvSubstituteInFile(path)
 				if err != nil {
 					return err
@@ -119,5 +96,5 @@ func EnvSubstituteInFolder(folderPath string) error {
 	if err != nil {
 		return err
 	}
-	return nil;
+	return nil
 }

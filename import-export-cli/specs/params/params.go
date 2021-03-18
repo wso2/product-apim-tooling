@@ -147,7 +147,7 @@ func getEnvSubstitutedFileContent(path string) (string, error) {
 		return "", err
 	}
 
-	str, err := utils.EnvSubstitute(string(data))
+	str, err := utils.EnvSubstituteForCurlyBraces(string(data))
 	if err != nil {
 		return "", err
 	}
