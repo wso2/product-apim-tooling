@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -136,6 +137,12 @@ func ImportAPIProduct(accessOAuthToken, publisherEndpoint, importEnvironment, im
 		return err
 	}
 
+	// Replace the environment variables inside the dependent API directories
+	err = replaceEnvVariablesInDependentAPIs(apiProductFilePath)
+	if err != nil {
+		return err
+	}
+
 	if apiProductParamsPath != "" {
 		// Reading params file of the API Product and add configurations into temp artifact
 		err := handleCustomizedParameters(apiProductFilePath, apiProductParamsPath, importEnvironment)
@@ -191,4 +198,30 @@ func ImportAPIProduct(accessOAuthToken, publisherEndpoint, importEnvironment, im
 	utils.Logln(utils.LogPrefixInfo + "Import URL: " + publisherEndpoint)
 	err = importAPIProduct(publisherEndpoint, apiProductFilePath, accessOAuthToken, extraParams)
 	return err
+}
+
+// replaceEnvVariablesInDependentAPIs replaces the environment variables inside the dependent APIs
+func replaceEnvVariablesInDependentAPIs(apiProductFilePath string) error {
+	// Check whether the APIs directory exists
+	apisDirectoryPath := apiProductFilePath + string(os.PathSeparator) + "APIs"
+	_, err := os.Stat(apisDirectoryPath)
+	if os.IsNotExist(err) {
+		utils.Logln(utils.LogPrefixInfo + "APIs directory does not exists. Ignoring APIs.")
+		return nil
+	}
+
+	// If APIs directory exists, read the directory
+	items, _ := ioutil.ReadDir(apisDirectoryPath)
+	// Iterate through the API directories available
+	for _, item := range items {
+		apiDirectoryPath := apisDirectoryPath + string(os.PathSeparator) + item.Name()
+
+		fmt.Println("hello" + apiDirectoryPath)
+		// Substitutes environment variables in the project files
+		err = replaceEnvVariables(apiDirectoryPath)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
