@@ -20,6 +20,7 @@ package impl
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -53,7 +54,7 @@ var dirs = []string{
 // InitAPIProject function is used to initlialize an API Project
 func InitAPIProject(initCmdOutputDir, initCmdInitialState, initCmdSwaggerPath, initCmdApiDefinitionPath string, isAWSAPI bool) error {
 	var dir string
-	swaggerSavePath := filepath.Join(initCmdOutputDir, filepath.FromSlash("Definitions/swagger.yaml"))
+	swaggerSavePath := filepath.Join(initCmdOutputDir, filepath.FromSlash(utils.InitProjectDefinitionsSwagger))
 
 	if initCmdOutputDir != "" {
 		err := os.MkdirAll(initCmdOutputDir, os.ModePerm)
@@ -74,7 +75,7 @@ func InitAPIProject(initCmdOutputDir, initCmdInitialState, initCmdSwaggerPath, i
 	}
 	fmt.Println("Initializing a new WSO2 API Manager project in", dir)
 
-	definitionFile, err := loadDefaultSpecFromDisk()
+	definitionFile, err := loadDefaultSpec()
 
 	// Get the API DTO specific details to process
 	def := &definitionFile.Data
@@ -181,7 +182,7 @@ func InitAPIProject(initCmdOutputDir, initCmdInitialState, initCmdSwaggerPath, i
 	}
 
 	// Write the API definition to the project directory
-	apiJSONPath := filepath.Join(initCmdOutputDir, filepath.FromSlash("api.yaml"))
+	apiJSONPath := filepath.Join(initCmdOutputDir, filepath.FromSlash(utils.APIDefinitionFileYaml))
 	utils.Logln(utils.LogPrefixInfo + "Writing " + apiJSONPath)
 	err = ioutil.WriteFile(apiJSONPath, apiData, os.ModePerm)
 	if err != nil {
@@ -189,7 +190,7 @@ func InitAPIProject(initCmdOutputDir, initCmdInitialState, initCmdSwaggerPath, i
 	}
 
 	// Populate the deployment environments configuration and write it to the project directory
-	apimProjDeploymentEnvironmentsFilePath := filepath.Join(initCmdOutputDir, "deployment_environments.yaml")
+	apimProjDeploymentEnvironmentsFilePath := filepath.Join(initCmdOutputDir, utils.DeploymentEnvFile)
 	utils.Logln(utils.LogPrefixInfo + "Writing " + apimProjDeploymentEnvironmentsFilePath)
 	deploymentEnvironments, _ := box.Get("/init/default_deployment_environments.yaml")
 	err = ioutil.WriteFile(apimProjDeploymentEnvironmentsFilePath, deploymentEnvironments, os.ModePerm)
@@ -234,14 +235,14 @@ func InitAPIProject(initCmdOutputDir, initCmdInitialState, initCmdSwaggerPath, i
 	return nil
 }
 
-// loadDefaultSpecFromDisk loads the API definition stored in HOME/.wso2apictl/default_api.yaml
-func loadDefaultSpecFromDisk() (*v2.APIDefinitionFile, error) {
-	defaultData, err := ioutil.ReadFile(utils.DefaultAPISpecFilePath)
-	if err != nil {
-		return nil, err
+// loadDefaultSpec loads the API definition
+func loadDefaultSpec() (*v2.APIDefinitionFile, error) {
+	defaultData, ok := box.Get("/init/default_api.yaml")
+	if !ok {
+		return nil, errors.New("Error while retrieving default_api.yaml")
 	}
 	def := &v2.APIDefinitionFile{}
-	err = yaml.Unmarshal(defaultData, &def)
+	err := yaml.Unmarshal(defaultData, &def)
 	if err != nil {
 		return nil, err
 	}

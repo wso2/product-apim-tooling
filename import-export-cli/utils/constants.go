@@ -62,7 +62,6 @@ var LocalCredentialsDirectoryPath = filepath.Join(HomeDirectory, LocalCredential
 var EnvKeysAllFilePath = filepath.Join(LocalCredentialsDirectoryPath, EnvKeysAllFileName)
 var MainConfigFilePath = filepath.Join(ConfigDirPath, MainConfigFileName)
 var SampleMainConfigFilePath = filepath.Join(ConfigDirPath, SampleMainConfigFileName)
-var DefaultAPISpecFilePath = filepath.Join(ConfigDirPath, DefaultAPISpecFileName)
 
 const DefaultExportDirName = "exported"
 const ExportedApisDirName = "apis"
@@ -73,12 +72,13 @@ const CertificatesDirName = "certs"
 
 const (
 	InitProjectDefinitions          = "Definitions"
+	InitProjectDefinitionsSwagger   = InitProjectDefinitions + string(os.PathSeparator) + "swagger.yaml"
 	InitProjectImage                = "Image"
 	InitProjectDocs                 = "Docs"
 	InitProjectSequences            = "Sequences"
-	InitProjectSequencesFault       = "Sequences/fault-sequence"
-	InitProjectSequencesIn          = "Sequences/in-sequence"
-	InitProjectSequencesOut         = "Sequences/out-sequence"
+	InitProjectSequencesFault       = InitProjectSequences + string(os.PathSeparator) + "fault-sequence"
+	InitProjectSequencesIn          = InitProjectSequences + string(os.PathSeparator) + "in-sequence"
+	InitProjectSequencesOut         = InitProjectSequences + string(os.PathSeparator) + "out-sequence"
 	InitProjectClientCertificates   = "Client-certificates"
 	InitProjectEndpointCertificates = "Endpoint-certificates"
 	InitProjectInterceptors         = "Interceptors"
