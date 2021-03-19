@@ -52,7 +52,7 @@ var dirs = []string{
 }
 
 // InitAPIProject function is used to initlialize an API Project
-func InitAPIProject(initCmdOutputDir, initCmdInitialState, initCmdSwaggerPath, initCmdApiDefinitionPath string, isAWSAPI bool) error {
+func InitAPIProject(initCmdOutputDir, initCmdInitialState, initCmdSwaggerPath, initCmdApiDefinitionPath string, isAdvertiseOnly bool) error {
 	var dir string
 	swaggerSavePath := filepath.Join(initCmdOutputDir, filepath.FromSlash(utils.InitProjectDefinitionsSwagger))
 
@@ -182,12 +182,15 @@ func InitAPIProject(initCmdOutputDir, initCmdInitialState, initCmdSwaggerPath, i
 	}
 
 	// Populate the deployment environments configuration and write it to the project directory
-	apimProjDeploymentEnvironmentsFilePath := filepath.Join(initCmdOutputDir, utils.DeploymentEnvFile)
-	utils.Logln(utils.LogPrefixInfo + "Writing " + apimProjDeploymentEnvironmentsFilePath)
-	deploymentEnvironments, _ := box.Get("/init/default_deployment_environments.yaml")
-	err = ioutil.WriteFile(apimProjDeploymentEnvironmentsFilePath, deploymentEnvironments, os.ModePerm)
-	if err != nil {
-		return err
+	// if the API is not an advertise only API
+	if !isAdvertiseOnly {
+		apimProjDeploymentEnvironmentsFilePath := filepath.Join(initCmdOutputDir, utils.DeploymentEnvFile)
+		utils.Logln(utils.LogPrefixInfo + "Writing " + apimProjDeploymentEnvironmentsFilePath)
+		deploymentEnvironments, _ := box.Get("/init/default_deployment_environments.yaml")
+		err = ioutil.WriteFile(apimProjDeploymentEnvironmentsFilePath, deploymentEnvironments, os.ModePerm)
+		if err != nil {
+			return err
+		}
 	}
 
 	// Write the README.md to the project directory
