@@ -8,16 +8,16 @@ import (
 )
 
 func TestInjectEnvShouldFailWhenEnvNotPresent(t *testing.T) {
-	data := `$MYVAR`
-	str, err := EnvSubstitute(data)
+	data := `${MYVAR}`
+	str, err := EnvSubstituteForCurlyBraces(data)
 	assert.Equal(t, "", str, "Should return empty string")
 	assert.Error(t, err, "Should return an error")
 }
 
 func TestInjectEnvShouldPassWhenEnvPresents(t *testing.T) {
-	data := `$MYVAR`
+	data := `${MYVAR}`
 	_ = os.Setenv("MYVAR", "myval")
-	str, err := EnvSubstitute(data)
+	str, err := EnvSubstituteForCurlyBraces(data)
 	assert.Nil(t, err, "Error should be null")
 	assert.Equal(t, "myval", str, "Should correctly replace environment variable")
 }

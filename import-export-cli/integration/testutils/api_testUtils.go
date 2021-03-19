@@ -309,7 +309,7 @@ func ValidateAPIStructure(t *testing.T, api *apim.API, exportedOutput string) {
 	base.Unzip(relativePath, exportedPath)
 
 	// Read the api.yaml file in the exported directory
-	fileData, err := ioutil.ReadFile(relativePath + "/" + api.Name + "-" + api.Version + APIYamlFilePath)
+	fileData, err := ioutil.ReadFile(relativePath + string(os.PathSeparator) + api.Name + "-" + api.Version + APIYamlFilePath)
 	if err != nil {
 		t.Error(err)
 	}

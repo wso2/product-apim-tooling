@@ -28,8 +28,6 @@ import (
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/cmd/k8s"
 
-	"github.com/ghodss/yaml"
-
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
 	"github.com/wso2/product-apim-tooling/import-export-cli/cmd/mg"
 	mi "github.com/wso2/product-apim-tooling/import-export-cli/cmd/mi"
@@ -167,31 +165,6 @@ func createConfigFiles() {
 
 	if !utils.IsFileExist(utils.EnvKeysAllFilePath) {
 		os.Create(utils.EnvKeysAllFilePath)
-	}
-
-	if !utils.IsFileExist(utils.DefaultAPISpecFilePath) {
-		specs, _ := box.Get("/init/default_api.yaml")
-		err = ioutil.WriteFile(utils.DefaultAPISpecFilePath, specs, os.ModePerm)
-		if err != nil {
-			utils.HandleErrorAndExit("Error creating default api spec file", err)
-		}
-	} else {
-		data, err := ioutil.ReadFile(utils.DefaultAPISpecFilePath)
-		if err != nil {
-			utils.HandleErrorAndExit("Error reading default_api.yaml spec file", err)
-		}
-		defaultApiFile := make(map[string]interface{})
-		if err := yaml.Unmarshal(data, &defaultApiFile); err != nil {
-			utils.HandleErrorAndExit("Error reading default_api.yaml", err)
-		}
-
-		//Check whether the EnableStore is provided, if provided keep the given value
-		//otherwise inject default value for the property.
-		_, isEnableStoreProvided := defaultApiFile["enableStore"]
-		if !isEnableStoreProvided {
-			defaultApiFile["enableStore"] = true
-		}
-		utils.WriteConfigFile(defaultApiFile, utils.DefaultAPISpecFilePath)
 	}
 }
 

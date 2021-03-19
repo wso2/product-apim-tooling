@@ -1,27 +1,33 @@
 config:
-  export_directory: /home/wso2user/.wso2apictl/exported
   http_request_timeout: 10000
+  export_directory: /home/wso2user/.wso2apictl/exported
   kubernetes_mode: false
   token_type: JWT
+  vcs_deletion_enabled: false
+  vcs_config_file_path: "/home/wso2user/custom/vcs-config.yaml"
+  tls-renegotiation-mode: never
 environments:
   sample-env1:
-    admin: https://localhost:9443
-    publisher: https://localhost:9443
     apim: https://localhost:9443
-    devportal: https://localhost:9443
-    registration: https://localhost:9443
-    token: https://localhost:8243/token
-  sample-env2:
-    admin:
-    publisher:
-    apim: https://wso2am:9443
-    devportal:
-    registration:
-    token:
-  sample-env3:
-    admin: https://localhost:9443
     publisher: https://localhost:9443
-    apim:
     devportal: https://localhost:9443
     registration: https://localhost:9443
+    admin: https://localhost:9443
     token: https://localhost:8243/token
+    mi: https://localhost:9164
+  sample-env2:
+    apim: https://wso2am:9443
+    publisher: ""
+    devportal: ""
+    registration: ""
+    admin: ""
+    token: ""
+    mi: ""
+  sample-env3:
+    apim: ""
+    publisher: https://localhost:9443
+    devportal: https://localhost:9443
+    registration: https://localhost:9443
+    admin: https://localhost:9443
+    token: https://localhost:8243/token
+    mi: ""
