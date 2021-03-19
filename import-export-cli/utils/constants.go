@@ -169,13 +169,9 @@ const LifeCycleAction = "action"
 
 var ValidInitialStates = []string{"CREATED", "PUBLISHED"}
 
+// The list of repos and directories that can be used when replcing env variables
 var EnvReplaceFilePaths = []string{
-	"Docs" + string(os.PathSeparator) + "docs.yaml",
-	"Docs" + string(os.PathSeparator) + "InlineContents",
-	"Meta-information",
-	"WSDL",
 	"Sequences",
-	"SoapToRest",
 }
 
 // project types
