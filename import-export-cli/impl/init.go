@@ -138,14 +138,6 @@ func InitAPIProject(initCmdOutputDir, initCmdInitialState, initCmdSwaggerPath, i
 
 		apiDef := &v2.APIDefinitionFile{}
 
-		// Substitute env variables to the API definition
-		utils.Logln(utils.LogPrefixInfo + "Substituting environment variables")
-		data, err := utils.EnvSubstituteForCurlyBraces(string(content))
-		if err != nil {
-			return err
-		}
-		content = []byte(data)
-
 		// Read from yaml definition
 		err = yaml2.Unmarshal(content, &apiDef)
 		if err != nil {
