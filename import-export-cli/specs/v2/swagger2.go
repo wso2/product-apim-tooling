@@ -204,20 +204,20 @@ func Swagger2Populate(def *APIDTODefinition, document *loads.Document) error {
 	def.Version = document.Spec().Info.Version
 	def.Provider = "admin"
 	def.Description = document.Spec().Info.Description
-	def.Context = fmt.Sprintf("/%s/%s", def.Name, def.Version)
+	def.Context = fmt.Sprintf("/%s", def.Name)
 	def.Tags = swagger2Tags(document)
 
 	// fill basepath from swagger
 	if document.BasePath() != "" {
-		def.Context = path.Clean(fmt.Sprintf("/%s/%s", document.BasePath(), def.Version))
+		def.Context = path.Clean(fmt.Sprintf("/%s", document.BasePath()))
 	}
 
 	// override basepath if wso2 extension provided
 	if basepath, ok := swagger2XWO2BasePath(document); ok {
 		def.Context = path.Clean(basepath)
 		if !strings.Contains(basepath, "{version}") {
-			def.Context = path.Clean(basepath + "/" + def.Version)
-			def.IsDefaultVersion = true
+			def.Context = path.Clean(basepath)
+			//def.IsDefaultVersion = true
 		} else {
 			def.Context = path.Clean(strings.ReplaceAll(basepath, "{version}", def.Version))
 		}
