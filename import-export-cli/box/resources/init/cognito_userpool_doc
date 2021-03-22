@@ -2,16 +2,20 @@
 
 <h3>Cognito userpool</h3>
 
-        <p>
-            To call any API methods with a user pool enabled, API clients must perform the following tasks: 
-        </p>
-            <ul>
-                <li>Use the Amazon Cognito CLI/SDK or API to sign a user in to the chosen user pool, and obtain an identity token or access token.</li>
-                <li>Use a client-specific framework to call the deployed API Gateway API and supply the appropriate token in the Authorization header.</li>
-            </ul>
-        <p>
-            The API developer must provide the client developers with the user pool ID, a client ID, and possibly the associated client secrets that are defined as part of the user pool. 
-        </p>
-        <p>
-            Find out more about AWS Cognito Userpools here: https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-integrate-with-cognito.html
-        </p>
+<p>
+    To call any API methods with a user pool enabled, API clients must perform the following tasks: 
+</p>
+<ul>
+    <li>Use the Amazon Cognito CLI/SDK or API to sign a user in to the chosen user pool, and obtain an identity token or access token.</li>
+    <li>Use a client-specific framework to call the deployed API Gateway API and supply the appropriate token in the Authorization header.</li>
+</ul>
+<p>
+    The API developer must provide the client developers with the user pool ID, a client ID, and possibly the associated client secrets that are defined as part of the user pool. 
+    Format of a well known URL of an AWS cognito userpool : https://cognito-idp.[region].amazonaws.com/[userpool-id]/.well-known/openid-configuration
+</p>
+<p>
+    Find out more about AWS Cognito Userpools here: 
+    <a href="https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-integrate-with-cognito.html">
+        https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-integrate-with-cognito.html
+    </a>
+</p>

@@ -24,10 +24,7 @@ import (
 	"path"
 	"strings"
 
-<<<<<<< HEAD
-=======
-	"encoding/json"
->>>>>>> b6a14d5f76aefa7d3b21566833ecc262d3061b85
+
 	"io/ioutil"
 	"os"
 
@@ -37,6 +34,48 @@ import (
 	"github.com/go-openapi/loads"
 	"github.com/mitchellh/mapstructure"
 )
+
+// to awsinit
+type Servers struct {
+	Servers []struct {
+		Url       string `json:"url"`
+		Variables struct {
+			BasePath struct {
+				Default string `json:"default"`
+			} `json:"basePath"`
+		} `json:"variables"`
+	} `json:"servers"`
+}
+
+type EndpointConfig struct {
+	EndpointType        string `yaml:"endpoint_type" json:"endpoint_type"`
+	ProductionEndpoints struct {
+		URL string `yaml:"url" json:"url"`
+	} `yaml:"production_endpoints" json:"production_endpoints"`
+	SandboxEndpoints struct {
+		URL string `yaml:"url" json:"url"`
+	} `yaml:"sandbox_endpoints" json:"sandbox_endpoints"`
+}
+
+// SecuritySchemes represent security schemes of an AWS API
+type SecuritySchemes struct {
+	Components struct {
+		SecuritySchemes struct {
+			CognitoAuthorizer struct {
+				AuthType string `json:"x-amazon-apigateway-authtype"`
+			} `json:"CognitoAuthorizer"`
+			APIKey 	 struct {
+				Type string `json:"type"`
+			} `json:"api_key"`
+			Sigv4 	 struct {
+				AuthType string `json:"x-amazon-apigateway-authtype"`
+			} `json:"sigv4"`
+		} `json:"securitySchemes"`
+	}`json:"components"`
+	ResourcePolicy struct {
+		Version string `json:"Version"`
+	}	`json:"x-amazon-apigateway-policy"`
+}
 
 func swagger2XWO2BasePath(document *loads.Document) (string, bool) {
 	if v, ok := document.Spec().Extensions["x-wso2-basePath"]; ok {
@@ -210,12 +249,12 @@ func AddAwsTag(def *APIDTODefinition) {
 }
 
 // generateFieldsFromSwagger3 using swagger
-<<<<<<< HEAD
 func Swagger2Populate(def *APIDTODefinition, document *loads.Document) error {
 	def.Name = document.Spec().Info.Title
 	if def.IsAWSAPI == true {
 		version := document.Spec().Info.Version
-		if version != "Unknown" {
+		versionLength := len(version)
+		if versionLength > 10 {
 			trimmedVersion := version[:10]
 			def.Version = trimmedVersion
 		} else {
@@ -226,15 +265,6 @@ func Swagger2Populate(def *APIDTODefinition, document *loads.Document) error {
 		def.Version = document.Spec().Info.Version
 	}
 	def.Provider = "admin"
-=======
-func Swagger2Populate(def *APIDefinition, document *loads.Document) error {
-	def.ID.APIName = document.Spec().Info.Title
-	def.ID.Version = document.Spec().Info.Version
-	//remove timestamp from version 
-	//def.ID.Version = def.ID.Version[:10]
-
-	def.ID.ProviderName = "admin"
->>>>>>> b6a14d5f76aefa7d3b21566833ecc262d3061b85
 	def.Description = document.Spec().Info.Description
 	def.Context = fmt.Sprintf("/%s/%s", def.Name, def.Version)
 	def.Tags = swagger2Tags(document)
@@ -292,33 +322,6 @@ func Swagger2Populate(def *APIDefinition, document *loads.Document) error {
 	}
 	return nil
 }
-// to awsinit
-type Servers struct {
-	Servers []struct {
-		Url       string `json:"url"`
-		Variables struct {
-			BasePath struct {
-				Default string `json:"default"`
-			} `json:"basePath"`
-		} `json:"variables"`
-	} `json:"servers"`
-}
-// SecuritySchemes represent security schemes of an AWS API
-type SecuritySchemes struct {
-	Components struct {
-		SecuritySchemes struct {
-			CognitoAuthorizer struct {
-				AuthType string `json:"x-amazon-apigateway-authtype"`
-			} `json:"CognitoAuthorizer"`
-			APIKey 	 struct {
-				Type string `json:"type"`
-			} `json:"api_key"`
-			Sigv4 	 struct {
-				AuthType string `json:"x-amazon-apigateway-authtype"`
-			} `json:"sigv4"`
-		} `json:"securitySchemes"`
-	}`json:"components"`
-}
 
 func GetServerUrlAndSecuritySchemes(pathToSwagger string) (string, string, []byte) {
 	oas3File, err := os.Open(pathToSwagger)
@@ -332,24 +335,11 @@ func GetServerUrlAndSecuritySchemes(pathToSwagger string) (string, string, []byt
 	var servers Servers  
 	json.Unmarshal(byteValue, &servers)
 
-	//var securitySchemes SecuritySchemes
-	//json.Unmarshal(byteValue, &securitySchemes)
-
 	url  := servers.Servers[0].Url
 	stage := servers.Servers[0].Variables.BasePath.Default
 	productionUrl := strings.ReplaceAll(url, "/{basePath}", stage)
 	sandboxUrl := strings.ReplaceAll(url, "/{basePath}", stage)
 	return productionUrl, sandboxUrl, byteValue
-}
-
-type EndpointConfig struct {
-	EndpointType        string `yaml:"endpoint_type" json:"endpoint_type"`
-	ProductionEndpoints struct {
-		URL string `yaml:"url" json:"url"`
-	} `yaml:"production_endpoints" json:"production_endpoints"`
-	SandboxEndpoints struct {
-		URL string `yaml:"url" json:"url"`
-	} `yaml:"sandbox_endpoints" json:"sandbox_endpoints"`
 }
 
 func CreateEpConfigForAwsAPIs(def *APIDTODefinition, pathToSwagger string) []byte {

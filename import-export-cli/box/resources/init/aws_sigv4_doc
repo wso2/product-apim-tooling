@@ -34,5 +34,8 @@
 </ul>
 
 <p>
-    Find out more on how to sign a request here: https://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html
+    Find out more on how to sign a request here: 
+        <a href="https://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html">
+            https://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html
+        </a>
 </p>

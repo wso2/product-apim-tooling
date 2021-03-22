@@ -33,8 +33,6 @@ import (
 	"github.com/ghodss/yaml"
 	
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
-	
-	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
  
 	yaml2 "gopkg.in/yaml.v2"
 	
@@ -48,7 +46,7 @@ var flagStageName string		//api stage to get
 var dir string					//dir where the aws init command is executed from
 var path string					//path of the OAS extracted from AWS
 var tmpDir string				//temporary directory created to store the OAS extracted from aws till the project is initialized
-var cmd2_output string 
+var getRestAPIsCmdOutput string 
 var err error 
 var awsInitCmdForced bool
 
@@ -63,17 +61,17 @@ var outputType string = "json"
 //cmd_1 
 var awsCLIVersionFlag string = "--version"
 
-//cmd_2
+//getRestAPIsCmd
 var getAPI string = "get-rest-apis"
 
-//cmd_3
+//getExportCmd
 var getExport string = "get-export"
 var apiIdFlag string = "--rest-api-id"
 var stageNameFlag string = "--stage-name"
 var exportTypeFlag string = "--export-type"
 var exportType string = "oas30"	//default export type is openapi3. Use "swagger" to request for a swagger 2.
 var debugFlag string			//aws cli debug flag for apictl verbose mode 
-
+//
 const awsInitCmdLiteral = "aws init"
 const awsInitCmdShortDesc = "Initialize a API project from a AWS API"
 const awsInitCmdLongDesc = `Downloading the OpenAPI specification of an API from the AWS API Gateway to initialize a WSO2 API project`
@@ -144,48 +142,49 @@ func getOAS() error {
 		debugFlag = "--debug"	//activating the aws cli debug flag in apictl verbose mode 
 	}
 	utils.Logln(utils.LogPrefixInfo + "Executing aws get-rest-apis command in debug mode")
-	cmd_2 := exec.Command(awsCmdLiteral, apiGateway, getAPI, outputFlag, outputType, debugFlag)
-	stderr, err := cmd_2.StderrPipe()
+	//
+	getRestAPIsCmd := exec.Command(awsCmdLiteral, apiGateway, getAPI, outputFlag, outputType, debugFlag)
+	stderr, err := getRestAPIsCmd.StderrPipe()
 	if err != nil {
 		fmt.Println("Error creating pipe to standard error. (get-rest-apis command)", err)
 	}
-	stdout, err := cmd_2.StdoutPipe()
+	stdout, err := getRestAPIsCmd.StdoutPipe()
 	if err != nil {
 		fmt.Println("Error creating pipe to standard output (get-rest-apis command).", err)
 	}
 
-	err = cmd_2.Start()
+	err = getRestAPIsCmd.Start()
 	if err != nil {
 		fmt.Println("Error starting get-rest-apis command.", err)
 	}
 
 	if utils.VerboseModeEnabled() {
-		logsScannerCmd2 := bufio.NewScanner(stderr)
-		for logsScannerCmd2.Scan() {
-			fmt.Println(logsScannerCmd2.Text())
+		logsScannerGetRestAPIsCmd := bufio.NewScanner(stderr)
+		for logsScannerGetRestAPIsCmd.Scan() {
+			fmt.Println(logsScannerGetRestAPIsCmd.Text())
 		}
 
-		if err := logsScannerCmd2.Err(); err != nil {
+		if err := logsScannerGetRestAPIsCmd.Err(); err != nil {
 			fmt.Println("Error reading debug logs from standard error. (get-rest-apis command)", err)
 		}
 	}
 
-	outputScannerCmd2 := bufio.NewScanner(stdout)
-	for outputScannerCmd2.Scan() {
-		cmd2_output = cmd2_output + outputScannerCmd2.Text()
+	outputScannerGetRestAPIsCmd := bufio.NewScanner(stdout)
+	for outputScannerGetRestAPIsCmd.Scan() {
+		getRestAPIsCmdOutput = getRestAPIsCmdOutput + outputScannerGetRestAPIsCmd.Text()
 	}
 
-	if err := outputScannerCmd2.Err(); err != nil {
+	if err := outputScannerGetRestAPIsCmd.Err(); err != nil {
 		fmt.Println("Error reading output from standard output.", err)
 	}
-	err = cmd_2.Wait()
+	err = getRestAPIsCmd.Wait()
 	if err != nil {
 		fmt.Println("Could not complete get-rest-apis command successfully.", err)
 	}
 
 	//Unmarshal from JSON into Apis struct.
 	apis := Apis{}
-	err = json.Unmarshal([]byte(cmd2_output), &apis)
+	err = json.Unmarshal([]byte(getRestAPIsCmdOutput), &apis)
 	if err != nil {
 		return err
 	}
@@ -200,47 +199,47 @@ func getOAS() error {
 	utils.Logln(utils.LogPrefixInfo + "Searching for API ID...")
 	for _, item := range apis.Items {
 		if item.Name == apiName {
-			fmt.Println("API ID found : ", item.Id)
+			utils.Logln("API ID found : ", item.Id)
 			api_id := item.Id 
 			found = true
 
 			utils.Logln(utils.LogPrefixInfo + "Executing aws get-export command in debug mode")
-			cmd_3:= exec.Command(awsCmdLiteral, apiGateway, getExport, apiIdFlag, api_id, stageNameFlag, stageName, exportTypeFlag, exportType, path, outputFlag, outputType, debugFlag)
-			stderr, err := cmd_3.StderrPipe()
+			getExportCmd:= exec.Command(awsCmdLiteral, apiGateway, getExport, apiIdFlag, api_id, stageNameFlag, stageName, exportTypeFlag, exportType, path, outputFlag, outputType, debugFlag)
+			stderr, err := getExportCmd.StderrPipe()
 			if err != nil {
 				fmt.Println("Error creating pipe to standard error. (get-export command)", err)
 			}
-			stdout, err := cmd_3.StdoutPipe()
+			stdout, err := getExportCmd.StdoutPipe()
 			if err != nil {
 				fmt.Println("Error creating pipe to standard output. (get-export command)", err)
 			}
 
-			err = cmd_3.Start()
+			err = getExportCmd.Start()
 			if err != nil {
 				fmt.Println("Error starting get-export command.", err)
 			}
 
 			if utils.VerboseModeEnabled() {
-				logsScannerCmd3 := bufio.NewScanner(stderr)
-				for logsScannerCmd3.Scan() {
-					fmt.Println(logsScannerCmd3.Text())
+				logsScannerGetExportCmd := bufio.NewScanner(stderr)
+				for logsScannerGetExportCmd.Scan() {
+					fmt.Println(logsScannerGetExportCmd.Text())
 				}
-				if err := logsScannerCmd3.Err(); err != nil {
+				if err := logsScannerGetExportCmd.Err(); err != nil {
 					fmt.Println("Error reading debug logs from standard error. (get-export command)", err)
 				}
 			}
 			
 			if utils.VerboseModeEnabled() {
-				outputScannerCmd3 := bufio.NewScanner(stdout)
-				for outputScannerCmd3.Scan() {
-					fmt.Println(outputScannerCmd3.Text())
+				outputScannerGetExportCmd := bufio.NewScanner(stdout)
+				for outputScannerGetExportCmd.Scan() {
+					fmt.Println(outputScannerGetExportCmd.Text())
 				}
-				if err := outputScannerCmd3.Err(); err != nil {
+				if err := outputScannerGetExportCmd.Err(); err != nil {
 					fmt.Println("Error reading output from standard output. (get-export command)", err)
 				}
 			}
 
-			err = cmd_3.Wait()
+			err = getExportCmd.Wait()
 			if err != nil {
 				fmt.Println("Could not complete get-export command successfully.", err)
 			} 
@@ -297,12 +296,27 @@ func writeDocumentFile(docName string, summary string) error {
 	return nil
 }
 
-// create AWS API security documents based on APIs auth type 
+// write AWS API security documents based on APIs security schemes
 func writeAWSSecurityDocs(oas3ByteValue []byte) error {
 	securitySchemes := &v2.SecuritySchemes{}
 	json.Unmarshal(oas3ByteValue, &securitySchemes)
 	schemes := securitySchemes.Components.SecuritySchemes
-
+	if securitySchemes.ResourcePolicy.Version != "" {
+		docName := "Resource_Policy"
+		summary := "This document contains details related to AWS resource policies"
+		err = createAWSDocDirectory(docName)
+		resourcePolicyDocPath := filepath.Join(initCmdOutputDir, filepath.FromSlash("Docs/" + docName + "/" + docName))
+		utils.Logln(utils.LogPrefixInfo + "Writing " + resourcePolicyDocPath)
+		resourcePolicyDoc, _ := box.Get("/init/resource_policy_doc")
+		err = ioutil.WriteFile(resourcePolicyDocPath, resourcePolicyDoc, os.ModePerm)
+		if err != nil {
+			return err
+		}
+		err = writeDocumentFile(docName, summary)
+		if err != nil {
+			return err
+		}
+	}
 	if schemes.CognitoAuthorizer.AuthType == "cognito_user_pools" {
 		docName := "Cognito_Userpool"
 		summary := "This document contains details related to AWS cognito user pools"
@@ -403,51 +417,6 @@ func initializeProject() error {
 		return err
 	}
 
-	utils.Logln(utils.LogPrefixInfo + "Reading API Definition from " + path)
-	content, err := ioutil.ReadFile(path)
-	if err != nil {
-		return err
-	}
-
-	apiDef := &v2.APIDefinitionFile{}
-
-	// substitute env variables
-	utils.Logln(utils.LogPrefixInfo + "Substituting environment variables")
-	data, err := utils.EnvSubstitute(string(content))
-	if err != nil {
-		return err
-	}
-	content = []byte(data)
-
-	// read from yaml definition
-	err = yaml2.Unmarshal(content, &apiDef)
-	if err != nil {
-		return err
-	}
-
-	// marshal original def
-	originalDefBytes, err := jsoniter.Marshal(definitionFile)
-	if err != nil {
-		return err
-	}
-	// marshal new def
-	newDefBytes, err := jsoniter.Marshal(apiDef)
-	if err != nil {
-		return err
-	}
-
-	// merge two definitions
-	finalDefBytes, err := utils.MergeJSON(originalDefBytes, newDefBytes)
-	if err != nil {
-		return err
-	}
-	tmpDef := &v2.APIDefinitionFile{}
-	err = json.Unmarshal(finalDefBytes, &tmpDef)
-	if err != nil {
-		return err
-	}
-	definitionFile.Data = tmpDef.Data
-
 	apiData, err := yaml2.Marshal(definitionFile)
 	if err != nil {
 		return err
@@ -500,7 +469,7 @@ func initializeProject() error {
 	fmt.Println("Project initialized")
 	fmt.Println("Open README file to learn more")
 	return nil
-} 
+}
 
 //execute the aws init command 
 func execute() {
@@ -527,8 +496,7 @@ func execute() {
 }
 
 func init() { 
-		RootCmd.AddCommand(AwsInitCmd)
-		RootCmd.AddCommand(DeleteCmd)
+		RootCmd.AddCommand(AwsInitCmd)		
 		AwsInitCmd.Flags().StringVarP(&flagApiNameToGet, "name", "n", "", "Name of the API to get from AWS Api Gateway")
 		AwsInitCmd.Flags().StringVarP(&flagStageName, "stage", "s", "", "Stage name of the API to get from AWS Api Gateway")
 		AwsInitCmd.Flags().BoolVarP(&awsInitCmdForced, "force", "f", false, "Force create project")

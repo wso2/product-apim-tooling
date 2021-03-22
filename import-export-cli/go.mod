@@ -11,7 +11,7 @@ require (
 	github.com/hashicorp/go-multierror v1.0.0
 	github.com/json-iterator/go v1.1.10
 	github.com/magiconair/properties v1.8.1
-	github.com/mitchellh/mapstructure v1.3.2
+	github.com/mitchellh/mapstructure v1.3.2 // indirect
 	github.com/pavel-v-chernykh/keystore-go/v4 v4.1.0
 	github.com/renstrom/dedent v1.0.0
 	github.com/spf13/cast v1.3.1

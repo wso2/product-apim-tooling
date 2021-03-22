@@ -12,5 +12,8 @@
 </p>
 
 <p>
-    Find out more about AWS usage plans here: https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-api-usage-plans.html
+    Find out more about AWS usage plans here: 
+    <a href="https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-api-usage-plans.html">
+        https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-api-usage-plans.html
+    </a>
 </p>
