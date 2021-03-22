@@ -21,7 +21,6 @@ package integration
 import (
 	"fmt"
 	"os"
-	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -106,9 +105,7 @@ func TestEnvironmentSpecificParamsEndpointRetryTimeout(t *testing.T) {
 
 	for k, v := range paramConfig {
 		key := fmt.Sprintf("%v", k)
-		value, _ := strconv.ParseFloat(fmt.Sprintf("%v", v), 64)
-
-		assert.Equal(t, value, apiEndpointConfig[key])
+		assert.Equal(t, v, apiEndpointConfig[key])
 	}
 
 	assert.Equal(t, len(paramConfig), len(apiEndpointConfig))
