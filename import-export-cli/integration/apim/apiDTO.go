@@ -48,7 +48,6 @@ type API struct {
 	VisibleTenants                  []string             `json:"visibleTenants"`
 	EndpointSecurity                APIEndpointSecurity  `json:"endpointSecurity,omitempty"`
 	GatewayEnvironments             []string             `json:"gatewayEnvironments"`
-	Labels                          []string             `json:"labels"`
 	MediationPolicies               []MediationPolicy    `json:"mediationPolicies,omitempty"`
 	SubscriptionAvailability        string               `json:"subscriptionAvailability"`
 	SubscriptionAvailableTenants    []string             `json:"subscriptionAvailableTenants"`

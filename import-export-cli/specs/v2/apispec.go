@@ -64,7 +64,6 @@ type APIDTODefinition struct {
 	EndpointSecurity             interface{}       `json:"endpointSecurity,omitempty" yaml:"endpointSecurity,omitempty"`
 	GatewayEnvironments          []string          `json:"gatewayEnvironments,omitempty" yaml:"gatewayEnvironments,omitempty"`
 	DeploymentEnvironments       []interface{}     `json:"deploymentEnvironments,omitempty" yaml:"deploymentEnvironments,omitempty"`
-	Labels                       []string          `json:"labels,omitempty" yaml:"labels,omitempty"`
 	MediationPolicies            []interface{}     `json:"mediationPolicies,omitempty" yaml:"mediationPolicies,omitempty"`
 	SubscriptionAvailability     string            `json:"subscriptionAvailability,omitempty" yaml:"subscriptionAvailability,omitempty"`
 	SubscriptionAvailableTenants []string          `json:"subscriptionAvailableTenants,omitempty" yaml:"subscriptionAvailableTenants,omitempty"`

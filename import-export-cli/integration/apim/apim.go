@@ -230,10 +230,6 @@ func CopyAPI(apiToCopy *API) API {
 	apiCopy.GatewayEnvironments = make([]string, len(apiToCopy.GatewayEnvironments))
 	copy(apiCopy.GatewayEnvironments, apiToCopy.GatewayEnvironments)
 
-	// Copy Labels slice
-	apiCopy.Labels = make([]string, len(apiToCopy.Labels))
-	copy(apiCopy.Labels, apiToCopy.Labels)
-
 	// Copy MediationPolicies slice
 	apiCopy.MediationPolicies = make([]MediationPolicy, len(apiToCopy.MediationPolicies))
 	copy(apiCopy.MediationPolicies, apiToCopy.MediationPolicies)
@@ -332,9 +328,6 @@ func SortAPIMembers(api *API) {
 
 	// Sort GatewayEnvironments slice
 	sort.Strings(api.GatewayEnvironments)
-
-	// Sort Labels slice
-	sort.Strings(api.Labels)
 
 	// Sort MediationPolicies slice
 	sort.Sort(ByID(api.MediationPolicies))
