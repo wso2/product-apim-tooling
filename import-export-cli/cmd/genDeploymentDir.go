@@ -19,14 +19,16 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
-	"github.com/spf13/cobra"
-	"github.com/wso2/product-apim-tooling/import-export-cli/box"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/box"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 var genDeploymentDirDestination string
@@ -39,13 +41,21 @@ const GenDeploymentDirCmdShortDesc = "Generate a sample deployment directory"
 const GenDeploymentDirCmdLongDesc = `Generate a sample deployment directory based on the provided source artifact`
 
 const GenDeploymentDirCmdExamples = utils.ProjectName + ` ` + GenCmdLiteral + ` ` + GenDeploymentDirCmdLiteral + ` ` +
-	`-s  ~/PizzaShackAPI_1.0.0.zip
+	`-s ~/PizzaShackAPI_1.0.0.zip
 ` + utils.ProjectName + ` ` + GenCmdLiteral + ` ` + GenDeploymentDirCmdLiteral + ` ` +
-	`-s  ~/PizzaShackAPI_1.0.0.zip` + ` ` + ` -d /home/Deployment_repo/Dev`
+	`-s ~/PizzaShackAPI_1.0.0.zip` + ` ` + ` -d /home/deployment_repo/dev
+` + utils.ProjectName + ` ` + GenCmdLiteral + ` ` + GenDeploymentDirCmdLiteral + ` ` +
+	`-s ~/PizzaShackAPI_1.0.0` + ` ` + ` -d /home/deployment_repo/dev
+` + utils.ProjectName + ` ` + GenCmdLiteral + ` ` + GenDeploymentDirCmdLiteral + ` ` +
+	`-s dev/LeasingAPIProduct.zip
+` + utils.ProjectName + ` ` + GenCmdLiteral + ` ` + GenDeploymentDirCmdLiteral + ` ` +
+	`-s dev/LeasingAPIProduct.zip` + ` ` + ` -d /home/deployment_repo/dev
+` + utils.ProjectName + ` ` + GenCmdLiteral + ` ` + GenDeploymentDirCmdLiteral + ` ` +
+	`-s dev/LeasingAPIProduct` + ` ` + ` -d /home/deployment_repo/dev`
 
 // directories to be created
 var directories = []string{
-	"certificates",
+	utils.DeploymentCertificatesDirectory,
 }
 
 // createDeploymentContentDirectories will create directories in current working directory
@@ -86,10 +96,14 @@ func executeGenDeploymentDirCmd() error {
 
 	// Check whether the source is existed in the given location
 	if _, err := os.Stat(genDeploymentDirSource); os.IsNotExist(err) {
-		utils.HandleErrorAndContinue("Error retrieving the source file from the given path " + sourceDirectoryPath + " ", err)
+		utils.HandleErrorAndContinue("Error retrieving the source file from the given path "+sourceDirectoryPath, err)
+		if err != nil {
+			return err
+		}
 	}
+
 	// Get the source artifact name
-	deploymentDirName = filepath.Base(genDeploymentDirSource)
+	deploymentDirName = utils.DeploymentDirPrefix + filepath.Base(genDeploymentDirSource)
 	if info, err := os.Stat(genDeploymentDirSource); err == nil && !info.IsDir() {
 
 		//extract zip to a temp directory
@@ -99,10 +113,10 @@ func executeGenDeploymentDirCmd() error {
 			return err
 		}
 		// if artifact is given as zip the extracted file name will contains "/" character. It should be removed
-		deploymentDirName = strings.Trim(path[0], "/")
+		deploymentDirName = utils.DeploymentDirPrefix + strings.Trim(path[0], "/")
 
 		// extract the new source file name after unzipping into the temp directory
-		sourceDirectoryPath = filepath.Join(tempDirPath,path[0])
+		sourceDirectoryPath = filepath.Join(tempDirPath, path[0])
 	} else {
 		sourceDirectoryPath = genDeploymentDirSource
 	}
@@ -114,6 +128,11 @@ func executeGenDeploymentDirCmd() error {
 
 	//Create the deployment directory
 	err = utils.CreateDir(deploymentDirPath)
+	if err != nil {
+		return err
+	}
+
+	projectType, err := retreiveProjectTypeByDefinitionFileName(sourceDirectoryPath)
 	if err != nil {
 		return err
 	}
@@ -155,11 +174,18 @@ func executeGenDeploymentDirCmd() error {
 		utils.HandleErrorAndExit("Cannot find metadata file inside the source directory ", err)
 	}
 
-	// add sample api_params.yaml file to deployment directory
-	defaultParamsContent, _ := box.Get("/sample/api_params.yaml")
-	err = ioutil.WriteFile(filepath.Join(deploymentDirPath, "api_params.yaml"), defaultParamsContent, os.ModePerm)
+	var defaultParamsContent []byte
+	// add sample api_params.yaml/api_product_params.yaml file to deployment directory
+	if projectType == utils.ProjectTypeApi {
+		defaultParamsContent, _ = box.Get("/sample/api_params.yaml")
+	} else if projectType == utils.ProjectTypeApiProduct {
+		defaultParamsContent, _ = box.Get("/sample/api_product_params.yaml")
+	} else {
+		utils.HandleErrorAndExit("Error creating sample"+utils.ParamFile+" file due to incorrect project type: "+projectType, err)
+	}
+	err = ioutil.WriteFile(filepath.Join(deploymentDirPath, utils.ParamFile), defaultParamsContent, os.ModePerm)
 	if err != nil {
-		utils.HandleErrorAndExit("Error creating sample api_params.yaml file", err)
+		utils.HandleErrorAndExit("Error creating sample"+utils.ParamFile+" file", err)
 	}
 
 	// Generate required directories inside the deployment directory
@@ -178,6 +204,30 @@ func executeGenDeploymentDirCmd() error {
 		deploymentDirParent + " directory")
 
 	return nil
+}
+
+// retreiveProjectTypeByDefinitionFileName will decide the project type by checking the definition file name inside the directory
+func retreiveProjectTypeByDefinitionFileName(sourceDirectoryPath string) (string, error) {
+	files, err := ioutil.ReadDir(sourceDirectoryPath)
+	if err != nil {
+		return "", err
+	}
+	for _, file := range files {
+		fileName := file.Name()
+		if strings.EqualFold(fileName, utils.APIDefinitionFileYaml) ||
+			strings.EqualFold(fileName, utils.APIDefinitionFileJson) {
+			return utils.ProjectTypeApi, nil
+		}
+		if strings.EqualFold(fileName, utils.APIProductDefinitionFileYaml) ||
+			strings.EqualFold(fileName, utils.APIProductDefinitionFileJson) {
+			return utils.ProjectTypeApiProduct, nil
+		}
+		if strings.EqualFold(fileName, utils.ApplicationDefinitionFileYaml) ||
+			strings.EqualFold(fileName, utils.ApplicationDefinitionFileJson) {
+			return utils.ProjectTypeApplication, nil
+		}
+	}
+	return "", errors.New("Cannot decide the project type by the definition file name")
 }
 
 // getEnvsCmd represents the envs command

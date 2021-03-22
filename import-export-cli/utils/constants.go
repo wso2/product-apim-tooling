@@ -63,7 +63,7 @@ var LocalCredentialsDirectoryPath = filepath.Join(HomeDirectory, LocalCredential
 var EnvKeysAllFilePath = filepath.Join(LocalCredentialsDirectoryPath, EnvKeysAllFileName)
 var MainConfigFilePath = filepath.Join(ConfigDirPath, MainConfigFileName)
 var SampleMainConfigFilePath = filepath.Join(ConfigDirPath, SampleMainConfigFileName)
-var DefaultAPISpecFilePath = filepath.Join(ConfigDirPath, DefaultAPISpecFileName)
+//var DefaultAPISpecFilePath = filepath.Join(ConfigDirPath, DefaultAPISpecFileName)
 var DefaultAWSDocFilePath = filepath.Join(ConfigDirPath, DefaultAWSDocFileName)
 
 const DefaultExportDirName = "exported"
@@ -72,6 +72,24 @@ const ExportedApiProductsDirName = "api-products"
 const ExportedAppsDirName = "apps"
 const ExportedMigrationArtifactsDirName = "migration"
 const CertificatesDirName = "certs"
+
+const (
+	InitProjectDefinitions          = "Definitions"
+	InitProjectDefinitionsSwagger   = InitProjectDefinitions + string(os.PathSeparator) + "swagger.yaml"
+	InitProjectImage                = "Image"
+	InitProjectDocs                 = "Docs"
+	InitProjectSequences            = "Sequences"
+	InitProjectSequencesFault       = InitProjectSequences + string(os.PathSeparator) + "fault-sequence"
+	InitProjectSequencesIn          = InitProjectSequences + string(os.PathSeparator) + "in-sequence"
+	InitProjectSequencesOut         = InitProjectSequences + string(os.PathSeparator) + "out-sequence"
+	InitProjectClientCertificates   = "Client-certificates"
+	InitProjectEndpointCertificates = "Endpoint-certificates"
+	InitProjectInterceptors         = "Interceptors"
+	InitProjectLibs                 = "libs"
+)
+
+const DeploymentDirPrefix = "DeploymentArtifacts_"
+const DeploymentCertificatesDirectory = "certificates"
 
 var DefaultExportDirPath = filepath.Join(ConfigDirPath, DefaultExportDirName)
 var DefaultCertDirPath = filepath.Join(ConfigDirPath, CertificatesDirName)
@@ -154,13 +172,9 @@ const LifeCycleAction = "action"
 
 var ValidInitialStates = []string{"CREATED", "PUBLISHED"}
 
+// The list of repos and directories that can be used when replcing env variables
 var EnvReplaceFilePaths = []string{
-	"Docs" + string(os.PathSeparator) + "docs.yaml",
-	"Docs" + string(os.PathSeparator) + "InlineContents",
-	"Meta-information",
-	"WSDL",
 	"Sequences",
-	"SoapToRest",
 }
 
 // project types
@@ -172,10 +186,22 @@ const (
 )
 
 // project param files
+const ParamFile = "params.yaml"
+const ParamsIntermediateFile = "intermediate_params.yaml"
+
 const (
 	ParamFileAPI         = "api_params.yaml"
 	ParamFileAPIProduct  = "api_product_params.yaml"
 	ParamFileApplication = "application_params.yaml"
+)
+
+const (
+	APIDefinitionFileYaml         = "api.yaml"
+	APIDefinitionFileJson         = "api.json"
+	APIProductDefinitionFileYaml  = "api_product.yaml"
+	APIProductDefinitionFileJson  = "api_product.json"
+	ApplicationDefinitionFileYaml = "application.yaml"
+	ApplicationDefinitionFileJson = "application.json"
 )
 
 // project meta files

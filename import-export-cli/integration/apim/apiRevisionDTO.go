@@ -30,5 +30,6 @@ type APIRevision struct {
 type APIRevisionDeployment struct {
 	RevisionUUID       string `json:"revisionUuid"`
 	Name               string `json:"name"`
+	VHost              string `json:"vhost"`
 	DisplayOnDevportal bool   `json:"displayOnDevportal"`
 }

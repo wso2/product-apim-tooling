@@ -53,6 +53,7 @@ func ExecuteNewFileUploadRequest(uri string, params map[string]string, paramName
 	return utils.InvokePOSTRequestWithFileAndQueryParams(params, uri, headers, paramName, path)
 }
 
+// TODO Remove this after finilazing what to do with vcs command
 // Include x_params.yaml (api_params.yaml, application_params.yaml, .. ) into the sourceZipFile and create a new
 //  new Zip file in the provided targetZipFile location. paramsFile needs to be one of the supported x_params.yaml.
 //  Eg.: api_params.yaml, application_params.yaml, api_product_params.yaml
@@ -74,6 +75,7 @@ func IncludeParamsFileToZip(sourceZipFile, targetZipFile, paramsFile string) err
 	return nil
 }
 
+// TODO Remove this after finilazing what to do with vcs command
 // Creates the initial api_params.yaml/api_product_params.yaml/application_params.yaml in the given file path
 //	The targetFile will be populated with environments and default import parameters for "vcs deploy".
 func ScaffoldParams(targetFile string) error {

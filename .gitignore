@@ -48,6 +48,8 @@ hs_err_pid*
 import-export-cli/apictl
 import-export-cli/import-export-cli
 import-export-cli/build/
+import-export-cli/integration/ci-resources/offset0/distribution/
+import-export-cli/integration/ci-resources/offset1/distribution/
 
 # Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
 import-export-cli/.glide/
@@ -67,5 +69,6 @@ import-export-cli/env_keys_all.yaml
 import-export-cli/utils/c.out
 import-export-cli/utils/coverage.out
 import-export-cli/utils/coverage.html
+import-export-cli/integration/coverage.txt
 
 # ==================

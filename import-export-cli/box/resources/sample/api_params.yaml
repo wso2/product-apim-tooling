@@ -1,20 +1,33 @@
 environments:
     - name:
       configs:
-        endpoints:
-          production:
-          sandbox:
-        certs:
-          - hostName:
-            alias:
-            path:
-          - hostName:
-            alias:
-            path:
-        mutualSslCerts:
-          - tierName:
-            alias:
-            path:
-          - tierName:
-            alias:
-            path:
+          endpoints:
+              production:
+              sandbox:
+          security:
+              enabled:
+              type:
+              username:
+              password:
+          deploymentEnvironments:
+              - displayOnDevportal:
+                deploymentEnvironment:
+              - displayOnDevportal:
+                deploymentEnvironment:  
+          certs:
+              - hostName:
+                alias:
+                path:
+              - hostName:
+                alias:
+                path:
+          mutualSslCerts:
+              - tierName:
+                alias:
+                path:
+              - tierName:
+                alias:
+                path:
+          policies:
+              - 
+              -  

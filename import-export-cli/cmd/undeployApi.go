@@ -20,8 +20,9 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 	"net/http"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 
@@ -96,7 +97,7 @@ func executeUndeployAPICmd(credential credentials.Credential, deployments []util
 //process the args array and create deployments array
 func generateGatewayEnvsArray(args []string, initialGateway string) []utils.Deployment {
 	//Since other flags does not use args[], gateway-env flag will own all the args
-	var deployments = []utils.Deployment{{initialGateway, true}}
+	var deployments = []utils.Deployment{{Name: initialGateway, DisplayOnDevportal: true}}
 	if len(args) != 0 {
 		for _, argument := range args {
 			var deployment utils.Deployment

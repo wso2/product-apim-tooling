@@ -638,6 +638,7 @@ func (instance *Client) DeployAPIRevision(t *testing.T, apiID string, revision *
 	deploymentInfo := APIRevisionDeployment{}
 	deploymentInfo.RevisionUUID = revision.ID
 	deploymentInfo.Name = "Production and Sandbox"
+	deploymentInfo.VHost = "localhost"
 	deploymentInfo.DisplayOnDevportal = true
 	deploymentInfoArray = append(deploymentInfoArray, deploymentInfo)
 
@@ -695,6 +696,7 @@ func (instance *Client) DeployAPIProductRevision(t *testing.T, apiProductID stri
 	deploymentInfo := APIRevisionDeployment{}
 	deploymentInfo.RevisionUUID = revision.ID
 	deploymentInfo.Name = "Production and Sandbox"
+	deploymentInfo.VHost = "localhost"
 	deploymentInfo.DisplayOnDevportal = true
 	deploymentInfoArray = append(deploymentInfoArray, deploymentInfo)
 
@@ -1269,6 +1271,40 @@ func (instance *Client) DeleteAllAPIProducts() {
 		defer response.Body.Close()
 
 		base.ValidateAndLogResponse("apim.DeleteAllAPIProducts() deleting API Products", response, 200)
+	}
+}
+
+// RemoveAllEndpointCerts : Remove All Endpoint Certs from the Truststore
+func (instance *Client) RemoveAllEndpointCerts() {
+	apisGetURL := instance.publisherRestURL + "/endpoint-certificates"
+
+	request := base.CreateGet(apisGetURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.RemoveAllEndpointCerts() getting Certs", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.RemoveAllEndpointCerts() getting Certs", response, 200)
+
+	var certificatesResponse Certificates
+	json.NewDecoder(response.Body).Decode(&certificatesResponse)
+
+	for _, certificate := range certificatesResponse.List {
+		certificatesDeleteURL := instance.publisherRestURL + "/endpoint-certificates/" + certificate.Alias
+		request = base.CreateDelete(certificatesDeleteURL)
+
+		base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+		base.LogRequest("apim.RemoveAllEndpointCerts() deleting Certs", request)
+
+		response = base.SendHTTPRequest(request)
+		defer response.Body.Close()
+
+		base.ValidateAndLogResponse("apim.RemoveAllEndpointCerts() deleting Certs", response, 200)
 	}
 }
 

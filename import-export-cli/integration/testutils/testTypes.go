@@ -45,6 +45,7 @@ type ApiProductImportExportTestArgs struct {
 	ImportApisFlag       bool
 	UpdateApisFlag       bool
 	UpdateApiProductFlag bool
+	ParamsFile           string
 }
 
 type AppImportExportTestArgs struct {
@@ -101,4 +102,9 @@ type AWSInitTestArgs struct {
 	SrcAPIM        *apim.Client
 	ApiNameFlag		 string 
 	ApiStageNameFlag string
+}
+
+type GenDeploymentDirTestArgs struct {
+	Source      string
+	Destination string
 }

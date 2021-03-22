@@ -21,13 +21,12 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"github.com/wso2/product-apim-tooling/import-export-cli/cmd/k8s"
 	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
 
-	"github.com/ghodss/yaml"
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd/k8s"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
 	"github.com/wso2/product-apim-tooling/import-export-cli/cmd/mg"
@@ -140,9 +139,14 @@ func createConfigFiles() {
 
 	if !utils.IsFileExist(utils.MainConfigFilePath) {
 		var mainConfig = new(utils.MainConfig)
-		mainConfig.Config = utils.Config{utils.DefaultHttpRequestTimeout,
-			utils.DefaultExportDirPath, k8sUtils.DefaultKubernetesMode, utils.DefaultTokenType,
-			false, "", utils.TLSRenegotiationNever}
+		mainConfig.Config = utils.Config{HttpRequestTimeout: utils.DefaultHttpRequestTimeout,
+			ExportDirectory:      utils.DefaultExportDirPath,
+			KubernetesMode:       k8sUtils.DefaultKubernetesMode,
+			TokenType:            utils.DefaultTokenType,
+			VCSDeletionEnabled:   false,
+			VCSConfigFilePath:    "",
+			TLSRenegotiationMode: utils.TLSRenegotiationNever}
+
 		utils.WriteConfigFile(mainConfig, utils.MainConfigFilePath)
 	}
 
@@ -161,31 +165,6 @@ func createConfigFiles() {
 
 	if !utils.IsFileExist(utils.EnvKeysAllFilePath) {
 		os.Create(utils.EnvKeysAllFilePath)
-	}
-
-	if !utils.IsFileExist(utils.DefaultAPISpecFilePath) {
-		specs, _ := box.Get("/init/default_api.yaml")
-		err = ioutil.WriteFile(utils.DefaultAPISpecFilePath, specs, os.ModePerm)
-		if err != nil {
-			utils.HandleErrorAndExit("Error creating default api spec file", err)
-		}
-	} else {
-		data, err := ioutil.ReadFile(utils.DefaultAPISpecFilePath)
-		if err != nil {
-			utils.HandleErrorAndExit("Error reading default_api.yaml spec file", err)
-		}
-		defaultApiFile := make(map[string]interface{})
-		if err := yaml.Unmarshal(data, &defaultApiFile); err != nil {
-			utils.HandleErrorAndExit("Error reading default_api.yaml", err)
-		}
-
-		//Check whether the EnableStore is provided, if provided keep the given value
-		//otherwise inject default value for the property.
-		_, isEnableStoreProvided := defaultApiFile["enableStore"]
-		if !isEnableStoreProvided {
-			defaultApiFile["enableStore"] = true
-		}
-		utils.WriteConfigFile(defaultApiFile, utils.DefaultAPISpecFilePath)
 	}
 }
 

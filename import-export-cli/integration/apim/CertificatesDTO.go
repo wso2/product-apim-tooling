@@ -16,22 +16,16 @@
 * under the License.
  */
 
-package cmd
+package apim
 
-import (
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"testing"
-)
+// Certificates : Certificates DTO
+type Certificates struct {
+	Count int            `json:"count"`
+	List  []CertMetadata `json:"certificates"`
+}
 
-func TestPrintEnvs(t *testing.T) {
-	envEndpoints := make(map[string]utils.EnvEndpoints)
-	envEndpoints["dev"] = utils.EnvEndpoints{
-		"apim-endpoint",
-		"api-list-endpoint",
-		"application-list-endpoint",
-		"token-endpoint",
-		"admin-endpoint",
-		"token-endpoint",
-	}
-	//printEnvs(envEndpoints)
+// CertMetadata : CertMetadata DTO
+type CertMetadata struct {
+	Alias    string `json:"alias"`
+	Endpoint string `json:"endpoint"`
 }
