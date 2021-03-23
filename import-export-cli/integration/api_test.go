@@ -968,6 +968,9 @@ func TestChangeLifeCycleStatusOfApiWithActiveSubscriptionWithAdminSuperTenantUse
 	apiPublisher := publisher.UserName
 	apiPublisherPassword := publisher.Password
 
+	apiSubscriber := subscriber.UserName
+	apiSubscriberPassword := subscriber.Password
+
 	dev := GetDevClient()
 
 	// Add the API to env
@@ -978,14 +981,12 @@ func TestChangeLifeCycleStatusOfApiWithActiveSubscriptionWithAdminSuperTenantUse
 
 	testutils.PublishAPI(dev, adminUsername, adminPassword, api.ID)
 
-	args := &testutils.ApiGetKeyTestArgs{
-		CtlUser: testutils.Credentials{Username: adminUsername, Password: adminPassword},
-		Api:     api,
-		Apim:    dev,
-	}
+	// Create an App
+	app := testutils.AddApp(t, dev, apiSubscriber, apiSubscriberPassword)
 
 	//Create an active subscription for Api
-	testutils.ValidateGetKeysWithoutCleanup(t, args)
+	testutils.AddSubscription(t, dev, api.ID, app.ApplicationID, testutils.UnlimitedPolicy,
+		apiSubscriber, apiSubscriberPassword)
 
 	base.WaitForIndexing()
 
@@ -999,7 +1000,6 @@ func TestChangeLifeCycleStatusOfApiWithActiveSubscriptionWithAdminSuperTenantUse
 	}
 
 	testutils.ValidateChangeLifeCycleStatusOfAPI(t, argsToLifeCycleStateChange)
-	testutils.UnsubscribeAPI(dev, args.CtlUser.Username, args.CtlUser.Password, args.Api.ID)
 }
 
 func TestChangeLifeCycleStatusOfApiWithActiveSubscriptionDevopsSuperTenantUser(t *testing.T) {
@@ -1012,6 +1012,9 @@ func TestChangeLifeCycleStatusOfApiWithActiveSubscriptionDevopsSuperTenantUser(t
 	apiPublisher := publisher.UserName
 	apiPublisherPassword := publisher.Password
 
+	apiSubscriber := subscriber.UserName
+	apiSubscriberPassword := subscriber.Password
+
 	dev := GetDevClient()
 
 	// Add the API to env
@@ -1022,14 +1025,12 @@ func TestChangeLifeCycleStatusOfApiWithActiveSubscriptionDevopsSuperTenantUser(t
 
 	testutils.PublishAPI(dev, devopsUsername, devopsPassword, api.ID)
 
-	args := &testutils.ApiGetKeyTestArgs{
-		CtlUser: testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
-		Api:     api,
-		Apim:    dev,
-	}
+	// Create an App
+	app := testutils.AddApp(t, dev, apiSubscriber, apiSubscriberPassword)
 
 	//Create an active subscription for Api
-	testutils.ValidateGetKeysWithoutCleanup(t, args)
+	testutils.AddSubscription(t, dev, api.ID, app.ApplicationID, testutils.UnlimitedPolicy,
+		apiSubscriber, apiSubscriberPassword)
 
 	base.WaitForIndexing()
 
@@ -1043,5 +1044,4 @@ func TestChangeLifeCycleStatusOfApiWithActiveSubscriptionDevopsSuperTenantUser(t
 	}
 
 	testutils.ValidateChangeLifeCycleStatusOfAPI(t, argsToLifeCycleStateChange)
-	testutils.UnsubscribeAPI(dev, args.CtlUser.Username, args.CtlUser.Password, args.Api.ID)
 }

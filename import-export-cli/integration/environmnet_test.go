@@ -82,9 +82,6 @@ func TestChangeExportDirectory(t *testing.T) {
 	//Assert that project import to publisher portal is successful
 	testutils.ValidateImportProject(t, apiArgs)
 
-	//Assert that Export directory change is successful by exporting and asserting that
-	testutils.ValidateExportApisPassed(t, apiArgs, changedExportDirectory)
-
 	//Check exporting as a single API
 	exportArgs := &testutils.ApiImportExportTestArgs{
 		Api: &apim.API{
@@ -93,6 +90,8 @@ func TestChangeExportDirectory(t *testing.T) {
 		},
 		SrcAPIM: apimClient,
 	}
+
+	//Assert that Export directory change is successful
 	testutils.ValidateExportApiPassed(t, exportArgs, changedExportDirectory)
 }
 

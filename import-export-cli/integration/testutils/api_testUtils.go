@@ -170,7 +170,7 @@ func ValidateAllApisOfATenantIsExported(t *testing.T, args *ApiImportExportTestA
 
 	//Derive exported path from output
 	exportedPath := base.GetExportedPathFromOutput(strings.ReplaceAll(output, "Command: export-apis execution completed !", ""))
-	count, _ := base.CountFiles(exportedPath)
+	count, _ := base.CountFiles(t, exportedPath)
 	assert.GreaterOrEqual(t, count, apisAdded, "Error while exporting APIs")
 
 	t.Cleanup(func() {
@@ -629,11 +629,6 @@ func ImportApiFromProjectWithUpdate(t *testing.T, projectName string, client *ap
 	}
 
 	return output, err
-}
-
-func ExportApisWithOneCommand(t *testing.T, args *InitTestArgs) (string, error) {
-	output, error := base.Execute(t, "export", "apis", "-e", args.SrcAPIM.GetEnvName(), "-k", "--force", "--verbose", "--all")
-	return output, error
 }
 
 func ValidateChangeLifeCycleStatusOfAPI(t *testing.T, args *ApiChangeLifeCycleStatusTestArgs) {
