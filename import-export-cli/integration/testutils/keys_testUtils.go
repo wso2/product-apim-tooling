@@ -79,7 +79,7 @@ func invokeWithRetry(t *testing.T, client *http.Client, req *http.Request) (*htt
 
 	attempts := 0
 	for response.StatusCode == http.StatusNotFound {
-		time.Sleep(time.Duration(1000) * time.Millisecond)
+		time.Sleep(time.Duration(3000) * time.Millisecond)
 		response, err = client.Do(req)
 
 		attempts++

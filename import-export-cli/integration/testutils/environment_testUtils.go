@@ -101,24 +101,6 @@ func ValidateExportDirectoryIsChanged(t *testing.T, args *SetTestArgs) {
 	assert.Contains(t, output, "Export Directory is set to", "Export Directory change is not successful")
 }
 
-func ValidateExportApisPassed(t *testing.T, args *InitTestArgs, directoryName string) {
-	t.Helper()
-
-	output, error := ExportApisWithOneCommand(t, args)
-	assert.Nil(t, error, "Error while Exporting APIs")
-	assert.Contains(t, output, "export-apis execution completed", "Error while Exporting APIs")
-
-	//Derive exported path from output
-	exportedPath := base.GetExportedPathFromOutput(strings.ReplaceAll(output, "Command: export-apis execution completed !", ""))
-	count, _ := base.CountFiles(exportedPath)
-	assert.Equal(t, 1, count, "Error while Exporting APIs")
-
-	t.Cleanup(func() {
-		//Remove Exported apis
-		base.RemoveDir(directoryName + TestMigrationDirectorySuffix)
-	})
-}
-
 func ValidateExportApiPassed(t *testing.T, args *ApiImportExportTestArgs, directoryName string) {
 	t.Helper()
 
@@ -134,6 +116,9 @@ func ValidateExportApiPassed(t *testing.T, args *ApiImportExportTestArgs, direct
 
 	assert.True(t, base.IsAPIArchiveExists(t, exportedPath, args.Api.Name, args.Api.Version), "API archive"+
 		" is not correctly exported to "+directoryName)
+
+	count, _ := base.CountFiles(t, exportedPath)
+	assert.Equal(t, 1, count, "Error while Exporting APIs")
 
 	t.Cleanup(func() {
 		//Remove Exported api
@@ -152,6 +137,7 @@ func ValidateGenDeploymentDir(t *testing.T, args *GenDeploymentDirTestArgs) {
 }
 
 func ValidateAPIImportExportWithDeploymentDir(t *testing.T, args *ApiImportExportTestArgs, api *apim.API) {
+	t.Helper()
 
 	// Move dummay params file of an API to the created deployment directory
 	srcPathForParamsFile, _ := filepath.Abs(APIFullParamsFile)
@@ -282,7 +268,7 @@ func validateExportedAPICerts(t *testing.T, apiParams *Params, api *apim.API, ar
 
 	pathOfExportedApi := relativePath + string(os.PathSeparator) + api.Name + "-" + api.Version
 
-	validateEndpointCerts(t, apiParams, pathOfExportedApi)
+	validateEndpointCerts(t, apiParams, args.DestAPIM, args.ApiProvider, pathOfExportedApi)
 	validateMutualSSLCerts(t, apiParams, pathOfExportedApi)
 
 	t.Cleanup(func() {
@@ -311,8 +297,10 @@ func validateExportedAPIProductCerts(t *testing.T, apiProductParams *Params, api
 	})
 }
 
-func validateEndpointCerts(t *testing.T, apiParams *Params, path string) {
+func validateEndpointCerts(t *testing.T, apiParams *Params, client *apim.Client, credentials Credentials, path string) {
 	pathOfExportedEndpointCerts := path + string(os.PathSeparator) + utils.InitProjectEndpointCertificates
+
+	t.Log("validateEndpointCerts() pathOfExportedEndpointCerts = ", pathOfExportedEndpointCerts)
 	isEndpointCertsDirExists, _ := utils.IsDirExists(pathOfExportedEndpointCerts)
 
 	if isEndpointCertsDirExists {
@@ -326,6 +314,11 @@ func validateEndpointCerts(t *testing.T, apiParams *Params, path string) {
 			}
 			if !endpointCertExists {
 				t.Error("Endpoint certificate " + endpointCert.Path + " not exported")
+			} else {
+				t.Cleanup(func() {
+					client.Login(credentials.Username, credentials.Password)
+					client.RemoveEndpointCert(endpointCert.Alias)
+				})
 			}
 		}
 	} else {

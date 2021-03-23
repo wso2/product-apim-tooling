@@ -202,7 +202,7 @@ func validateAllApisOfATenantIsExported(t *testing.T, args *testutils.ApiImportE
 
 	//Derive exported path from output
 	exportedPath := base.GetExportedPathFromOutput(strings.ReplaceAll(output, "Command: export-apis execution completed !", ""))
-	count, _ := base.CountFiles(exportedPath)
+	count, _ := base.CountFiles(t, exportedPath)
 	assert.GreaterOrEqual(t, count, apisAdded, "Error while exporting APIs")
 
 	t.Cleanup(func() {

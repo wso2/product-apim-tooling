@@ -360,14 +360,16 @@ func GetExportedPathFromOutput(output string) string {
 }
 
 //Count number of files in a directory
-func CountFiles(path string) (int, error) {
+func CountFiles(t *testing.T, path string) (int, error) {
 	i := 0
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		return 0, err
 	}
 	for _, file := range files {
+		t.Log("base.CountFiles() - file:", file.Name())
 		if !file.IsDir() {
+			t.Log("base.CountFiles() - file is NOT a directory")
 			i++
 		}
 	}
