@@ -28,8 +28,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/go-resty/resty/v2"
 
@@ -131,8 +131,8 @@ func checkDirForJson(appDirectory string) bool {
 	list, _ := file.Readdirnames(0) // 0 to read all files and folders
 	//list all files and check for supported type file
 	for _, name := range list {
-		match, _ := regexp.MatchString(".*\\.json", name)
-		if match {
+		if strings.EqualFold(name, utils.ApplicationDefinitionFileYaml) ||
+			strings.EqualFold(name, utils.ApplicationDefinitionFileJson) {
 			return true
 		}
 	}
