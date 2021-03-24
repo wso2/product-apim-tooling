@@ -61,9 +61,7 @@ type APIDTODefinition struct {
 	Visibility                   string            `json:"visibility,omitempty" yaml:"visibility,omitempty"`
 	VisibleRoles                 []string          `json:"visibleRoles,omitempty" yaml:"visibleRoles,omitempty"`
 	VisibleTenants               []string          `json:"visibleTenants,omitempty" yaml:"visibleTenants,omitempty"`
-	EndpointSecurity             interface{}       `json:"endpointSecurity,omitempty" yaml:"endpointSecurity,omitempty"`
 	GatewayEnvironments          []string          `json:"gatewayEnvironments,omitempty" yaml:"gatewayEnvironments,omitempty"`
-	DeploymentEnvironments       []interface{}     `json:"deploymentEnvironments,omitempty" yaml:"deploymentEnvironments,omitempty"`
 	MediationPolicies            []interface{}     `json:"mediationPolicies,omitempty" yaml:"mediationPolicies,omitempty"`
 	SubscriptionAvailability     string            `json:"subscriptionAvailability,omitempty" yaml:"subscriptionAvailability,omitempty"`
 	SubscriptionAvailableTenants []string          `json:"subscriptionAvailableTenants,omitempty" yaml:"subscriptionAvailableTenants,omitempty"`

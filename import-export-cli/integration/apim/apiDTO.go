@@ -46,7 +46,6 @@ type API struct {
 	Visibility                      string               `json:"visibility"`
 	VisibleRoles                    []string             `json:"visibleRoles"`
 	VisibleTenants                  []string             `json:"visibleTenants"`
-	EndpointSecurity                APIEndpointSecurity  `json:"endpointSecurity,omitempty"`
 	GatewayEnvironments             []string             `json:"gatewayEnvironments"`
 	MediationPolicies               []MediationPolicy    `json:"mediationPolicies,omitempty"`
 	SubscriptionAvailability        string               `json:"subscriptionAvailability"`
@@ -114,6 +113,18 @@ func (instance *API) SetProductionConfig(config map[interface{}]interface{}) {
 func (instance *API) SetSandboxConfig(config map[interface{}]interface{}) {
 	endpoint := instance.EndpointConfig.(map[string]interface{})["sandbox_endpoints"]
 	endpoint.(map[string]interface{})["config"] = config
+}
+
+// GetProductionSecurityConfig : Get APIs production security config
+func (instance *API) GetProductionSecurityConfig() map[string]interface{} {
+	endpoint := instance.EndpointConfig.(map[string]interface{})["endpoint_security"]
+	return endpoint.(map[string]interface{})["production"].(map[string]interface{})
+}
+
+// GetSandboxSecurityConfig : Get APIs sandbox security config
+func (instance *API) GetSandboxSecurityConfig() map[string]interface{} {
+	endpoint := instance.EndpointConfig.(map[string]interface{})["endpoint_security"]
+	return endpoint.(map[string]interface{})["sandbox"].(map[string]interface{})
 }
 
 // APIMaxTps : Defines Max TPS of backends
