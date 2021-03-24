@@ -62,10 +62,6 @@ var ExportAPICmd = &cobra.Command{
 	Example: exportAPICmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + ExportAPICmdLiteral + " called")
-		if exportRevisionNum == "" && !exportAPILatestRevision {
-			fmt.Println("A Revision number is not provided. Only the working copy without deployment environments will be exported." +
-				"To export the latest revision, please use --latest flag.")
-		}
 		var apisExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedApisDirName)
 
 		cred, err := GetCredentials(CmdExportEnvironment)
