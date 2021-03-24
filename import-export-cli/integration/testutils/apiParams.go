@@ -29,7 +29,7 @@ type Environment struct {
 
 type Configs struct {
 	Endpoints              Endpoints                `yaml:"endpoints"`
-	Security               Security                 `yaml:"security,omitempty"`
+	Security               SecurityEndpoints        `yaml:"security,omitempty"`
 	DeploymentEnvironments []DeploymentEnvironments `yaml:"deploymentEnvironments,omitempty"`
 	Certs                  []Cert                   `yaml:"certs,omitempty"`
 	MsslCerts              []MsslCert               `yaml:"mutualSslCerts,omitempty"`
@@ -56,6 +56,11 @@ type Config struct {
 	RetryTimeOut int `yaml:"retryTimeOut"`
 	RetryDelay   int `yaml:"retryDelay"`
 	Factor       int `yaml:"factor"`
+}
+
+type SecurityEndpoints struct {
+	Production Security `yaml:"production,omitempty"`
+	Sandbox    Security `yaml:"sandbox,omitempty"`
 }
 
 type Security struct {

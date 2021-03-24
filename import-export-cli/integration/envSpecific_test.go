@@ -146,6 +146,12 @@ func TestEnvironmentSpecificParamsEndpointSecurityFalse(t *testing.T) {
 
 	importedAPI := testutils.GetImportedAPI(t, args)
 
+	assert.Equal(t, false, importedAPI.GetProductionSecurityConfig()["enabled"])
+	assert.Equal(t, false, importedAPI.GetSandboxSecurityConfig()["enabled"])
+
+	api.EndpointConfig.(map[string]interface{})["endpoint_security"] = "override_with_the_same_value"
+	importedAPI.EndpointConfig.(map[string]interface{})["endpoint_security"] = "override_with_the_same_value"
+
 	testutils.ValidateAPIsEqual(t, api, importedAPI)
 }
 
