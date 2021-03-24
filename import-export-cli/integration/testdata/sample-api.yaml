@@ -98,6 +98,16 @@ data: # Contains the meta data of the API
       url: https://localhost:9443/am/sample/pizzashack/v1/api/
     production_endpoints: # Production endpoints
       url: https://localhost:9443/am/sample/pizzashack/v1/api/
+    endpoint_security: # Endpoint security
+      production: # Endpoint security for production
+        password: admin
+        customParameters: {}
+        type: BASIC
+        enabled: true
+        username: admin
+      sandbox: # Endpoint security for sandbox
+        customParameters: {}
+        enabled: false
   endpointImplementationType: ENDPOINT # Implementation of endpoints {ENDPOINT|INLINE }
   scopes: [] # Shared Scopes for API
   operations: # Resources of the API. This is not required since the operations will be anyway updated from the swagger definition of the REST API

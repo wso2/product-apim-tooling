@@ -23,7 +23,6 @@ const TestSwagger2DefinitionPath = "testdata/swagger2Definition.yaml"
 const TestOpenAPI3DefinitionPath = "testdata/openAPI3Definition.yaml"
 const TestOpenAPISpecificationURL = "https://petstore.swagger.io/v2/swagger.json"
 const TestMigrationDirectorySuffix = "/migration"
-const TestApiDefinitionPath = "testdata/testAPIDefinition.yaml"
 
 const DefaultApictlTestAppName = "default-apictl-app"
 
