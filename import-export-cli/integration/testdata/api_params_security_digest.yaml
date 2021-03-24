@@ -7,7 +7,13 @@ environments:
             sandbox:
                 url: 'https://localhost:9443/am/sample/pizzashack/v1/api/'
         security:
-            enabled: true
-            type: digest
-            username: admin
-            password: admin
+            production:
+                enabled: true
+                type: digest
+                username: admin
+                password: admin
+            sandbox:
+                enabled: true
+                type: digest
+                username: admin
+                password: admin
