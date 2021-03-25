@@ -105,7 +105,8 @@ func TestEnvironmentSpecificParamsEndpointRetryTimeout(t *testing.T) {
 
 	for k, v := range paramConfig {
 		key := fmt.Sprintf("%v", k)
-		assert.Equal(t, v, apiEndpointConfig[key])
+		value := fmt.Sprintf("%v", v)
+		assert.Equal(t, value, apiEndpointConfig[key])
 	}
 
 	assert.Equal(t, len(paramConfig), len(apiEndpointConfig))
@@ -144,6 +145,12 @@ func TestEnvironmentSpecificParamsEndpointSecurityFalse(t *testing.T) {
 	testutils.ValidateAPIExport(t, args)
 
 	importedAPI := testutils.GetImportedAPI(t, args)
+
+	assert.Equal(t, false, importedAPI.GetProductionSecurityConfig()["enabled"])
+	assert.Equal(t, false, importedAPI.GetSandboxSecurityConfig()["enabled"])
+
+	api.EndpointConfig.(map[string]interface{})["endpoint_security"] = "override_with_the_same_value"
+	importedAPI.EndpointConfig.(map[string]interface{})["endpoint_security"] = "override_with_the_same_value"
 
 	testutils.ValidateAPIsEqual(t, api, importedAPI)
 }

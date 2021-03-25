@@ -190,36 +190,34 @@ func ValidateDependentAPIWithParams(t *testing.T, dependentAPI *apim.API, client
 		importedDependentAPI.GatewayEnvironments)
 }
 
-func validateEndpointSecurity(t *testing.T, apiParams *Params, api *apim.API) {
-	assert.Equal(t, strings.ToUpper(apiParams.Environments[0].Configs.Security.Type), api.EndpointSecurity.Type)
-	assert.Equal(t, apiParams.Environments[0].Configs.Security.Username, api.EndpointSecurity.Username)
-	assert.Equal(t, "", api.EndpointSecurity.Password)
+func validateEndpointSecurity(t *testing.T, apiParams *Params, api *apim.API, endpointType string) {
+	var endpointSecurityForEndpointType Security
+	var endpointSecurityForEndpointTypeInApi map[string]interface{}
+	if strings.EqualFold(endpointType, "production") {
+		endpointSecurityForEndpointType = apiParams.Environments[0].Configs.Security.Production
+		endpointSecurityForEndpointTypeInApi = api.GetProductionSecurityConfig()
+	}
+	if strings.EqualFold(endpointType, "sandbox") {
+		endpointSecurityForEndpointType = apiParams.Environments[0].Configs.Security.Sandbox
+		endpointSecurityForEndpointTypeInApi = api.GetSandboxSecurityConfig()
+	}
+
+	assert.Equal(t, endpointSecurityForEndpointType.Enabled, endpointSecurityForEndpointTypeInApi["enabled"])
+	assert.Equal(t, strings.ToUpper(endpointSecurityForEndpointType.Type), endpointSecurityForEndpointTypeInApi["type"])
+	assert.Equal(t, endpointSecurityForEndpointType.Username, endpointSecurityForEndpointTypeInApi["username"])
+	assert.Equal(t, "", endpointSecurityForEndpointTypeInApi["password"])
 }
 
 func ValidateEndpointSecurityDefinition(t *testing.T, api *apim.API, apiParams *Params, importedAPI *apim.API) {
 	t.Helper()
 
-	validateEndpointSecurity(t, apiParams, importedAPI)
+	validateEndpointSecurity(t, apiParams, importedAPI, "production")
+	validateEndpointSecurity(t, apiParams, importedAPI, "sandbox")
 
-	assert.Equal(t, strings.ToUpper(apiParams.Environments[0].Configs.Security.Type), importedAPI.EndpointSecurity.Type)
-	assert.Equal(t, apiParams.Environments[0].Configs.Security.Username, importedAPI.EndpointSecurity.Username)
-	assert.Equal(t, "", importedAPI.EndpointSecurity.Password)
+	api.EndpointConfig.(map[string]interface{})["endpoint_security"] = "override_with_the_same_value"
+	importedAPI.EndpointConfig.(map[string]interface{})["endpoint_security"] = "override_with_the_same_value"
 
-	apiCopy := apim.CopyAPI(api)
-	importedAPICopy := apim.CopyAPI(importedAPI)
-
-	same := "override_with_same_value"
-
-	apiCopy.EndpointSecurity.Type = same
-	importedAPICopy.EndpointSecurity.Type = same
-
-	apiCopy.EndpointSecurity.Username = same
-	importedAPICopy.EndpointSecurity.Username = same
-
-	apiCopy.EndpointSecurity.Password = same
-	importedAPICopy.EndpointSecurity.Password = same
-
-	ValidateAPIsEqual(t, &apiCopy, &importedAPICopy)
+	ValidateAPIsEqual(t, api, importedAPI)
 }
 
 func validateParamsWithoutCerts(t *testing.T, params *Params, api *apim.API, apiProduct *apim.APIProduct,
@@ -235,7 +233,8 @@ func validateParamsWithoutCerts(t *testing.T, params *Params, api *apim.API, api
 			"Mismatched sandbox URL")
 
 		// Validate endpoint security
-		validateEndpointSecurity(t, params, api)
+		validateEndpointSecurity(t, params, api, "production")
+		validateEndpointSecurity(t, params, api, "sandbox")
 	}
 
 	// Validate subscription policies

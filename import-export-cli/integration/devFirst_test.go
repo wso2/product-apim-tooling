@@ -52,7 +52,7 @@ func TestInitializeAPIWithDefinitionFlag(t *testing.T) {
 		CtlUser:   testutils.Credentials{Username: username, Password: password},
 		SrcAPIM:   apim,
 		InitFlag:  projectName,
-		OasFlag:   testutils.TestApiDefinitionPath,
+		OasFlag:   testutils.SampleAPIYamlFilePath,
 		ForceFlag: false,
 	}
 
