@@ -28,12 +28,12 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"github.com/spf13/cobra"
-	"github.com/Jeffail/gabs"
-	jsoniter "github.com/json-iterator/go"
+	
 	"github.com/ghodss/yaml"
 	
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
  
+	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 	yaml2 "gopkg.in/yaml.v2"
 	
 	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
@@ -95,7 +95,7 @@ func getPath() {
 }
 
 //aws init Cmd
-var AwsInitCmd = &cobra.Command{
+var InitCmd = &cobra.Command{
 	Use:   	awsInitCmdLiteral,
 	Short: 	awsInitCmdShortDesc,
 	Long:  	awsInitCmdLongDesc,
@@ -368,107 +368,111 @@ func writeAWSSecurityDocs(oas3ByteValue []byte) error {
 	return nil
 }
 
+// loadAPISpec loads the API definition from project folder 
+func loadAPISpec() (*v2.APIDefinitionFile, error) {
+	pathToAPIDef := initCmdOutputDir + "/api.yaml"
+	apiDef, err := os.Open(pathToAPIDef)
+	if err != nil {
+		fmt.Println("Error opening API definition from the project folder", err)
+	}
+	byteValue, _ := ioutil.ReadAll(apiDef)
+	apiDefFile := &v2.APIDefinitionFile{}
+	err = yaml.Unmarshal(byteValue, &apiDefFile)
+	if err != nil {
+		return nil, err
+	}
+	return apiDefFile, err
+}
+
+func loadAPIMetaFile() (*utils.MetaData, error) {
+	pathToAPIMetaFile := initCmdOutputDir + "/api_meta.yaml"
+	apiMetaFile, err := os.Open(pathToAPIMetaFile)
+	if err != nil {
+		fmt.Println("Error opening api_meta.yaml in project folder")
+	}
+	byteValue, _ := ioutil.ReadAll(apiMetaFile)
+	apiMetaData := &utils.MetaData{}
+	err = yaml.Unmarshal(byteValue, &apiMetaData)
+	if err != nil {
+		return nil, err
+	}
+	return apiMetaData, err
+}
+
 func initializeProject() error {
-	initCmdOutputDir = flagApiNameToGet 
-	swaggerSavePath := filepath.Join(initCmdOutputDir, filepath.FromSlash("Definitions/swagger.yaml"))
-	fmt.Println("Initializing a new WSO2 API Manager project in", dir)
-	
-	definitionFile, err := loadDefaultSpecFromDisk()
-	
-	// Get the API DTO specific details to process
-	def := &definitionFile.Data
+	initCmdInitialState := "CREATED"
+	initCmdApiDefinitionPath := ""
+	advertiseOnly := true
+	err := impl.InitAPIProject(initCmdOutputDir, initCmdInitialState, path, initCmdApiDefinitionPath, advertiseOnly)
 	if err != nil {
-		return err
+		utils.HandleErrorAndContinue("Error initializing project", err)
+		// Remove the already created project with its content since it is partially created and wrong
+		dir, err := filepath.Abs(initCmdOutputDir)
+		if err != nil {
+			utils.HandleErrorAndExit("Error retrieving file path of the project", err)
+		}
+		fmt.Println("Removing the project directory " + dir + " with its content")
+		err = os.RemoveAll(dir)
+		if err != nil {
+			utils.HandleErrorAndExit("Error removing project directory", err)
+		}
+	}
+	apiDefFile, err := loadAPISpec()
+	if err != nil {
+		fmt.Println("Error loading API definition from project forder", err)
 	}
 
-	err = createDirectories(initCmdOutputDir)
-	if err != nil {
-		return err
-	}
-
-	// use swagger to auto generate
-	// load swagger from tmp directory
-	doc, err := loadSwagger(path)
-	if err != nil {
-		return err
-	}
-
-	// We use swagger2 loader. It works fine for now
-	// Since we don't use 3.0 specific details its ok
-	// otherwise please use v2.openAPI3 loaders
-	def.IsAWSAPI = true 
-	err = v2.Swagger2Populate(def, doc)
-	if err != nil {
-		return err
-	}
+	def := &apiDefFile.Data
+	def.IsAWSAPI = true
+	v2.AddAwsTag(def)
+	version := def.Version
+	versionLength := len(version)
+	if versionLength > 10 {
+		trimmedVersion := version[:10]
+		def.Version = trimmedVersion
+	} else {
+		def.Version = flagStageName
+		fmt.Println("[WARN]: Unknown API version. Stage name was assigned as the API version")
+	}	//
+	def.Context = flagApiNameToGet + string(os.PathSeparator) + def.Version
 
 	oas3ByteValue := v2.CreateEpConfigForAwsAPIs(def, path)
-	v2.AddAwsTag(def)
-
-	// convert and save swagger as yaml
-	yamlSwagger, err := utils.JsonToYaml(doc.Raw())
-	if err != nil {
-		return err
-	}
-
-	// write to file
-	err = ioutil.WriteFile(swaggerSavePath, yamlSwagger, os.ModePerm)
-	if err != nil {
-		return err
-	}
-
-	apiData, err := yaml2.Marshal(definitionFile)
-	if err != nil {
-		return err
-	}
-
-	// write to the disk
-	apiJSONPath := filepath.Join(initCmdOutputDir, filepath.FromSlash("api.yaml"))
-	utils.Logln(utils.LogPrefixInfo + "Writing " + apiJSONPath)
-	err = ioutil.WriteFile(apiJSONPath, apiData, os.ModePerm)
-	if err != nil {
-		return err
-	}
-
-	apimProjReadmeFilePath := filepath.Join(initCmdOutputDir, "README.md")
-	utils.Logln(utils.LogPrefixInfo + "Writing " + apimProjReadmeFilePath)
-	readme, _ := box.Get("/init/README.md")
-	err = ioutil.WriteFile(apimProjReadmeFilePath, readme, os.ModePerm)
-	if err != nil {
-		return err
-	}
-
-	// Create metaData struct using details from definition
-	metaData := utils.MetaData{
-		Name:    definitionFile.Data.Name,
-		Version: definitionFile.Data.Version,
-	}
-	marshaledData, err := jsoniter.Marshal(metaData)
-	if err != nil {
-		return err
-	}
-
-	jsonMetaData, err := gabs.ParseJSON(marshaledData)
-	metaDataContent, err := utils.JsonToYaml(jsonMetaData.Bytes())
-	if err != nil {
-		return err
-	}
-	// write api_meta.yaml file to the project directory
-	apiMetaDataPath := filepath.Join(initCmdOutputDir, filepath.FromSlash(utils.MetaFileAPI))
-	utils.Logln(utils.LogPrefixInfo + "Writing " + apiMetaDataPath)
-	err = ioutil.WriteFile(apiMetaDataPath, metaDataContent, os.ModePerm)
-	if err != nil {
-		return err
-	}
-
 	err = writeAWSSecurityDocs(oas3ByteValue)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("Project initialized")
-	fmt.Println("Open README file to learn more")
-	return nil
+	apiMetaData, err := loadAPIMetaFile()
+	if err != nil {
+		fmt.Println("Error loading api_meta.yaml from project folder", err)
+	}
+	apiMetaData.Version = def.Version
+
+	newAPIMetaData, err := yaml2.Marshal(apiMetaData)
+	if err != nil {
+		return err
+	}
+	apiData, err := yaml2.Marshal(apiDefFile)
+	if err != nil {
+		return err
+	}
+
+	//overriding api.yaml file for AWS APIs with AWS API specific details 
+	apiJSONPath := filepath.Join(initCmdOutputDir, filepath.FromSlash("api.yaml"))
+	utils.Logln(utils.LogPrefixInfo + "Overriding " + apiJSONPath)
+	err = ioutil.WriteFile(apiJSONPath, apiData, os.ModePerm)
+	if err != nil {
+		return err
+	}
+	//overriding api_meta.yaml file for AWS APIs with AWS API specific details 
+	apiMetaDataPath := filepath.Join(initCmdOutputDir, filepath.FromSlash(utils.MetaFileAPI))
+	utils.Logln(utils.LogPrefixInfo + "Overriding " + apiMetaDataPath)
+	err = ioutil.WriteFile(apiMetaDataPath, newAPIMetaData, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	return err
 }
 
 //execute the aws init command 
@@ -496,7 +500,7 @@ func execute() {
 }
 
 func init() { 
-		RootCmd.AddCommand(AwsInitCmd)		
+		RootCmd.AddCommand(InitCmd)		
 		AwsInitCmd.Flags().StringVarP(&flagApiNameToGet, "name", "n", "", "Name of the API to get from AWS Api Gateway")
 		AwsInitCmd.Flags().StringVarP(&flagStageName, "stage", "s", "", "Stage name of the API to get from AWS Api Gateway")
 		AwsInitCmd.Flags().BoolVarP(&awsInitCmdForced, "force", "f", false, "Force create project")

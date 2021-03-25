@@ -251,19 +251,7 @@ func AddAwsTag(def *APIDTODefinition) {
 // generateFieldsFromSwagger3 using swagger
 func Swagger2Populate(def *APIDTODefinition, document *loads.Document) error {
 	def.Name = document.Spec().Info.Title
-	if def.IsAWSAPI == true {
-		version := document.Spec().Info.Version
-		versionLength := len(version)
-		if versionLength > 10 {
-			trimmedVersion := version[:10]
-			def.Version = trimmedVersion
-		} else {
-			def.Version = "Unknown"
-			fmt.Println("[WARN]: Unknown API version")
-		}
-	} else {
-		def.Version = document.Spec().Info.Version
-	}
+	def.Version = document.Spec().Info.Version
 	def.Provider = "admin"
 	def.Description = document.Spec().Info.Description
 	def.Context = fmt.Sprintf("/%s/%s", def.Name, def.Version)
@@ -297,30 +285,27 @@ func Swagger2Populate(def *APIDTODefinition, document *loads.Document) error {
 	if ok {
 		def.CorsConfiguration = cors
 	}
-	if def.IsAWSAPI != true {
-		prodEp, foundProdEp, err := swagger2XWSO2ProductionEndpoints(document)
-		if err != nil && foundProdEp {
-			return err
-		}
-		sandboxEp, foundSandboxEp, err := swagger2XWSO2SandboxEndpoints(document)
-		if err != nil && foundSandboxEp {
-			return err
-		}
-
-		if foundProdEp || foundSandboxEp {
-			ep, err := BuildAPIMEndpoints(prodEp, sandboxEp)
-			if err != nil {
-				return err
-			}
-			var endpointConfig map[string]interface{}
-			err = json.Unmarshal([]byte(ep), &endpointConfig)
-			if err != nil {
-				return err
-			}
-			def.EndpointConfig = &endpointConfig
-		}
+	prodEp, foundProdEp, err := swagger2XWSO2ProductionEndpoints(document)
+	if err != nil && foundProdEp {
+		return err
 	}
-	return nil
+	sandboxEp, foundSandboxEp, err := swagger2XWSO2SandboxEndpoints(document)
+	if err != nil && foundSandboxEp {
+		return err
+	}
+	if foundProdEp || foundSandboxEp {
+		ep, err := BuildAPIMEndpoints(prodEp, sandboxEp)
+		if err != nil {
+			return err
+		}
+		var endpointConfig map[string]interface{}
+		err = json.Unmarshal([]byte(ep), &endpointConfig)
+		if err != nil {
+			return err
+		}
+		def.EndpointConfig = &endpointConfig
+	}
+return nil
 }
 
 func GetServerUrlAndSecuritySchemes(pathToSwagger string) (string, string, []byte) {
