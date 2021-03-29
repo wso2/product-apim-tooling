@@ -61,6 +61,7 @@ type SecretConfig struct {
 	InputFile           string
 	PlainTextAlias      string
 	PlainTextSecretText string
+	Namespace           string
 }
 
 type KeyStoreConfig struct {
@@ -99,7 +100,7 @@ func EncryptSecrets(keyStoreConfig *KeyStoreConfig, secretConfig SecretConfig) e
 		return err
 	}
 	if IsK8(secretConfig.OutputType) {
-		printSecretsToYamlFile(encryptedSecrets)
+		printSecretsToYamlFile(encryptedSecrets, secretConfig.Namespace)
 	} else if IsFile(secretConfig.OutputType) {
 		printSecretsToPropertiesFile(encryptedSecrets)
 	} else {
@@ -208,7 +209,7 @@ func printSecretsToPropertiesFile(secrets map[string]string) {
 	fmt.Println("Secret properties file created in", secretFilePath)
 }
 
-func printSecretsToYamlFile(secrets map[string]string) {
+func printSecretsToYamlFile(secrets map[string]string, namespace string) {
 	secretConfig := k8sSecretConfig{
 		APIVerion:  "v1",
 		Kind:       "Secret",
@@ -216,7 +217,7 @@ func printSecretsToYamlFile(secrets map[string]string) {
 		Type:       "Opaque",
 		MetaData: metaData{
 			Name:      "wso2secret",
-			Namespace: "default",
+			Namespace: namespace,
 		},
 	}
 	secretFilePath := getSecretFilePath(encryptedSecretsYamlFileName)

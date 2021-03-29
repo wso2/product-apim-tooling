@@ -33,6 +33,7 @@ import (
 
 var inputPropertiesfile string
 var encryptionAlgorithm string
+var namespace string
 var outputType string
 
 const secretCreateCmdLiteral = "create"
@@ -41,15 +42,17 @@ const secretCreateCmdShortDesc = "Encrypt secrets"
 const secretCreateCmdLongDesc = "Create secrets based on given arguments"
 
 var secretCreateCmdExamples = "To encrypt secret and get output on console\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + secretCmdLiteral + " " + secretCreateCmdLiteral + "\n" +
+	"  " + utils.ProjectName + " " + secretCmdLiteral + " " + secretCreateCmdLiteral + "\n" +
 	"To encrypt secret and get output as a .properties file (stored in the security folder in apictl executable directory)\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + secretCmdLiteral + " " + secretCreateCmdLiteral + " -o file\n" +
+	"  " + utils.ProjectName + " " + secretCmdLiteral + " " + secretCreateCmdLiteral + " -o file\n" +
 	"To encrypt secret and get output as a .yaml file (stored in the security folder in apictl executable directory)\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + secretCmdLiteral + " " + secretCreateCmdLiteral + " -o k8\n" +
+	"  " + utils.ProjectName + " " + secretCmdLiteral + " " + secretCreateCmdLiteral + " -o k8\n" +
+	"To encrypt secret and get output as a .yaml file (stored in the security folder in apictl executable directory) with given namespace specified as the namespace of the K8s cluster\n" +
+	"  " + utils.ProjectName + " " + secretCmdLiteral + " " + secretCreateCmdLiteral + " -o k8 -n <namespace>\n" +
 	"To bulk encrypt secrets defined in a properties file\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + secretCmdLiteral + " " + secretCreateCmdLiteral + " -f <file_path>\n" +
+	"  " + utils.ProjectName + " " + secretCmdLiteral + " " + secretCreateCmdLiteral + " -f <file_path>\n" +
 	"To bulk encrypt secrets defined in a properties file and get a .yaml file (stored in the security folder in apictl executable directory)\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + secretCmdLiteral + " " + secretCreateCmdLiteral + " -o k8 -f <file_path>"
+	"  " + utils.ProjectName + " " + secretCmdLiteral + " " + secretCreateCmdLiteral + " -o k8 -f <file_path>"
 
 var secretCreateCmd = &cobra.Command{
 	Use:     secretCreateCmdLiteral,
@@ -75,12 +78,14 @@ func init() {
 	secretCreateCmd.Flags().StringVarP(&inputPropertiesfile, "from-file", "f", "", "Path to the properties file which contains secrets to be encrypted")
 	secretCreateCmd.Flags().StringVarP(&outputType, "output", "o", "console", "Get the output in yaml (k8) or properties (file) format. By default the output is printed to the console")
 	secretCreateCmd.Flags().StringVarP(&encryptionAlgorithm, "cipher", "c", "RSA/ECB/OAEPWithSHA1AndMGF1Padding", "Encryption algorithm")
+	secretCreateCmd.Flags().StringVarP(&namespace, "namespace", "n", "default", "Namespace for the K8s cluster")
 }
 
 func initSecretInformation(keyStoreConfig *utils.KeyStoreConfig) {
 	secretConfig := utils.SecretConfig{
 		OutputType: outputType,
 		Algorithm:  encryptionAlgorithm,
+		Namespace:  namespace,
 	}
 	if isNonEmptyString(inputPropertiesfile) {
 		secretConfig.InputType = "file"
