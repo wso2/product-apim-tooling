@@ -68,7 +68,7 @@ type APIDTODefinition struct {
 	AdditionalProperties         map[string]string `json:"additionalProperties,omitempty" yaml:"additionalProperties,omitempty"`
 	Monetization                 interface{}       `json:"monetization,omitempty" yaml:"monetization,omitempty"`
 	AccessControl                string            `json:"accessControl,omitempty" yaml:"accessControl,omitempty"`
-	AcessControlRoles            []string          `json:"accessControlRoles,omitempty" yaml:"accessControlRoles,omitempty"`
+	AccessControlRoles           []string          `json:"accessControlRoles,omitempty" yaml:"accessControlRoles,omitempty"`
 	BusinessInformation          interface{}       `json:"businessInformation,omitempty" yaml:"businessInformation,omitempty"`
 	CorsConfiguration            interface{}       `json:"corsConfiguration,omitempty" yaml:"corsConfiguration,omitempty"`
 	WorkflowStatus               []string          `json:"workflowStatus,omitempty" yaml:"workflowStatus,omitempty"`
@@ -81,6 +81,7 @@ type APIDTODefinition struct {
 	ThreatProtectionPolicies     interface{}       `json:"threatProtectionPolicies,omitempty" yaml:"threatProtectionPolicies,omitempty"`
 	Categories                   []string          `json:"categories,omitempty" yaml:"categories,omitempty"`
 	KeyManagers                  []string          `json:"keyManagers,omitempty" yaml:"keyManagers,omitempty"`
+	AdvertiseInformation         AdvertiseInfo     `json:"advertiseInfo,omitempty" yaml:"advertiseInfo,omitempty"`
 }
 
 // APIDefinition represents an API artifact in APIM
@@ -168,4 +169,11 @@ type CorsConfiguration struct {
 	AccessControlAllowCredentials bool     `json:"accessControlAllowCredentials,omitempty" yaml:"accessControlAllowCredentials,omitempty"`
 	AccessControlAllowHeaders     []string `json:"accessControlAllowHeaders,omitempty" yaml:"accessControlAllowHeaders,omitempty"`
 	AccessControlAllowMethods     []string `json:"accessControlAllowMethods,omitempty" yaml:"accessControlAllowMethods,omitempty"`
+}
+
+// AdvertiseInfo : Advertise only information
+type AdvertiseInfo struct {
+	Advertised           bool   `json:"advertised" yaml:"advertised"`
+	OriginalDevPortalUrl string `json:"originalDevPortalUrl" yaml:"originalDevPortalUrl"`
+	ApiOwner             string `json:"apiOwner" yaml:"apiOwner"`
 }

@@ -32,6 +32,7 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"gopkg.in/yaml.v2"
+	yaml2 "gopkg.in/yaml.v2"
 )
 
 func AddAPI(t *testing.T, client *apim.Client, username string, password string) *apim.API {
@@ -93,6 +94,42 @@ func AddAPIFromOpenAPIDefinitionToTwoEnvs(t *testing.T, client1 *apim.Client, cl
 	api2 := client2.GetAPI(id2)
 
 	return api1, api2
+}
+
+func GenerateAdvertiseOnlyAPIDefinition(t *testing.T) (string, apim.API) {
+	projectPath, _ := filepath.Abs(base.GenerateRandomName(16))
+	base.CreateTempDir(t, projectPath)
+
+	// Read the sample-api.yaml file in the testdata directory
+	sampleData, err := ioutil.ReadFile(SampleAPIYamlFilePath)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Extract the content to a structure
+	sampleContent := apim.APIFile{}
+	err = yaml.Unmarshal(sampleData, &sampleContent)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Inject advertise only API specfic parameters
+	sampleContent.Data.AdvertiseInformation.Advertised = true
+	sampleContent.Data.AdvertiseInformation.ApiOwner = sampleContent.Data.Provider
+	sampleContent.Data.AdvertiseInformation.OriginalDevPortalUrl = "https://localhost:9443/devportal"
+
+	apiData, err := yaml2.Marshal(sampleContent)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Write the API definition to the temp directory
+	advertiseOnlyAPIDefinitionPath := filepath.Join(projectPath, filepath.FromSlash(utils.APIDefinitionFileYaml))
+	err = ioutil.WriteFile(advertiseOnlyAPIDefinitionPath, apiData, os.ModePerm)
+	if err != nil {
+		t.Error(err)
+	}
+	return advertiseOnlyAPIDefinitionPath, sampleContent.Data
 }
 
 func GetAPI(t *testing.T, client *apim.Client, name string, username string, password string) *apim.API {
@@ -181,7 +218,12 @@ func ValidateAllApisOfATenantIsExported(t *testing.T, args *ApiImportExportTestA
 }
 
 func importAPI(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
-	fileName := base.GetAPIArchiveFilePath(t, args.SrcAPIM.GetEnvName(), args.Api.Name, args.Api.Version)
+	var fileName string
+	if args.ImportFilePath == "" {
+		fileName = base.GetAPIArchiveFilePath(t, args.SrcAPIM.GetEnvName(), args.Api.Name, args.Api.Version)
+	} else {
+		fileName = args.ImportFilePath
+	}
 
 	params := []string{"import", "api", "-f", fileName, "-e", args.DestAPIM.EnvName, "-k", "--verbose"}
 
@@ -453,6 +495,14 @@ func ValidateAPIsEqual(t *testing.T, api1 *apim.API, api2 *apim.API) {
 	api1Copy.LastUpdatedTime = same
 	api2Copy.LastUpdatedTime = same
 
+	// If an API is not advertise only, the API owner will be changed during export and import to the current provider
+	if (api1Copy.AdvertiseInformation != apim.AdvertiseInfo{}) {
+		api1Copy.AdvertiseInformation.ApiOwner = same
+	}
+	if (api2Copy.AdvertiseInformation != apim.AdvertiseInfo{}) {
+		api2Copy.AdvertiseInformation.ApiOwner = same
+	}
+
 	// Sort member collections to make equality check possible
 	apim.SortAPIMembers(&api1Copy)
 	apim.SortAPIMembers(&api2Copy)
@@ -516,6 +566,14 @@ func validateAPIsEqualCrossTenant(t *testing.T, api1 *apim.API, api2 *apim.API) 
 
 	api1Copy.Provider = same
 	api2Copy.Provider = same
+
+	// If an API is not advertise only, the API owner will be changed during export and import to the current provider
+	if (api1Copy.AdvertiseInformation != apim.AdvertiseInfo{}) {
+		api1Copy.AdvertiseInformation.ApiOwner = same
+	}
+	if (api2Copy.AdvertiseInformation != apim.AdvertiseInfo{}) {
+		api2Copy.AdvertiseInformation.ApiOwner = same
+	}
 
 	// Sort member collections to make equality check possible
 	apim.SortAPIMembers(&api1Copy)

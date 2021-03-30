@@ -157,3 +157,7 @@ data: # Contains the meta data of the API
   websubSubscriptionConfiguration : "" # Subscription configurations of a WebSub API (Webhook) (This will be in JSON format)
   isRevision : false # Checks whether the API is a revision
   revisionId : 0 # If isRevision=true, then this will contain the UUID of the revision, otherwise it will be 0
+  advertiseInfo: # Advertise only information if an Advertise only API
+      advertised: false # Whether API is an advertised only API or not
+      originalDevPortalUrl: null # The original URL of the Devportal
+      apiOwner: admin # The original owner of the API
