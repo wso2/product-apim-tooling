@@ -27,6 +27,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/adminservices"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
@@ -136,18 +138,11 @@ func ValidateGenDeploymentDir(t *testing.T, args *GenDeploymentDirTestArgs) {
 		"Generating deployment directory is not successful")
 }
 
-func ValidateAPIImportExportWithDeploymentDir(t *testing.T, args *ApiImportExportTestArgs, api *apim.API) {
+func ValidateAPIImportExportWithDeploymentDir(t *testing.T, args *ApiImportExportTestArgs) {
 	t.Helper()
 
-	// Move dummay params file of an API to the created deployment directory
-	srcPathForParamsFile, _ := filepath.Abs(APIFullParamsFile)
-	destPathForParamsFile := args.ParamsFile + string(os.PathSeparator) + utils.ParamFile
-	utils.CopyFile(srcPathForParamsFile, destPathForParamsFile)
-
-	// Copy dummy certificates to the created deployment directory
-	srcPathForCertificatesDirectory, _ := filepath.Abs(CertificatesDirectoryPath)
-	utils.CopyDirectoryContents(srcPathForCertificatesDirectory,
-		args.ParamsFile+string(os.PathSeparator)+utils.DeploymentCertificatesDirectory)
+	// Move dummy params and certificates files of an API to the created deployment directory
+	MoveDummyAPIParamsAndCertificatesToDeploymentDir(args)
 
 	importedAPI := GetImportedAPI(t, args)
 
@@ -159,8 +154,7 @@ func ValidateAPIImportExportWithDeploymentDir(t *testing.T, args *ApiImportExpor
 	validateExportedAPICerts(t, apiParams, importedAPI, args)
 }
 
-func ValidateAPIProductImportExportWithDeploymentDir(t *testing.T, args *ApiProductImportExportTestArgs,
-	apiProduct *apim.APIProduct) {
+func ValidateAPIProductImportExportWithDeploymentDir(t *testing.T, args *ApiProductImportExportTestArgs) {
 
 	// Move dummay params file of an API Product to the created deployment directory
 	srcPathForParamsFile, _ := filepath.Abs(APIProductFullParamsFile)
@@ -178,6 +172,42 @@ func ValidateAPIProductImportExportWithDeploymentDir(t *testing.T, args *ApiProd
 
 	args.SrcAPIM = args.DestAPIM // The API Product should be exported from prod env
 	validateExportedAPIProductCerts(t, apiProductParams, importedAPIProduct, args)
+}
+
+func ValidateAPIImportExportWithDeploymentDirForAdvertiseOnlyAPI(t *testing.T, args *ApiImportExportTestArgs) {
+	t.Helper()
+
+	// Move dummy params and certificates files of an API to the created deployment directory
+	MoveDummyAPIParamsAndCertificatesToDeploymentDir(args)
+
+	importedAPI := GetImportedAPI(t, args)
+
+	assert.Equal(t, args.Api.AdvertiseInformation.Advertised, importedAPI.AdvertiseInformation.Advertised)
+	assert.Equal(t, args.Api.Provider, importedAPI.AdvertiseInformation.ApiOwner)
+
+	if (args.CtlUser.Username == adminservices.AdminUsername) ||
+		(args.CtlUser.Username == adminservices.AdminUsername+"@"+adminservices.Tenant1) {
+		// Only the users who has admin privileges (apim:admin scope) were allowed to set the original devportal URL.
+		assert.Equal(t, args.Api.AdvertiseInformation.OriginalDevPortalUrl,
+			importedAPI.AdvertiseInformation.OriginalDevPortalUrl)
+	} else {
+		assert.Equal(t, "", importedAPI.AdvertiseInformation.OriginalDevPortalUrl)
+	}
+
+	// Certificates should not get exported for advertise only APIs
+	validateNonExportedAPICerts(t, importedAPI, args)
+}
+
+func MoveDummyAPIParamsAndCertificatesToDeploymentDir(args *ApiImportExportTestArgs) {
+	// Move dummay params file of an API to the created deployment directory
+	srcPathForParamsFile, _ := filepath.Abs(APIFullParamsFile)
+	destPathForParamsFile := args.ParamsFile + string(os.PathSeparator) + utils.ParamFile
+	utils.CopyFile(srcPathForParamsFile, destPathForParamsFile)
+
+	// Copy dummy certificates to the created deployment directory
+	srcPathForCertificatesDirectory, _ := filepath.Abs(CertificatesDirectoryPath)
+	utils.CopyDirectoryContents(srcPathForCertificatesDirectory,
+		args.ParamsFile+string(os.PathSeparator)+utils.DeploymentCertificatesDirectory)
 }
 
 func ValidateDependentAPIWithParams(t *testing.T, dependentAPI *apim.API, client *apim.Client, username, password string) {
@@ -272,6 +302,31 @@ func validateExportedAPICerts(t *testing.T, apiParams *Params, api *apim.API, ar
 
 	t.Cleanup(func() {
 		//Remove Created project and logout
+		base.RemoveDir(exportedPath)
+		base.RemoveDir(relativePath)
+	})
+}
+
+func validateNonExportedAPICerts(t *testing.T, api *apim.API, args *ApiImportExportTestArgs) {
+	output, _ := exportAPI(t, args.Api.Name, args.Api.Version, args.ApiProvider.Username, args.SrcAPIM.GetEnvName())
+
+	//Unzip exported API and check whether certificates are there
+	exportedPath := base.GetExportedPathFromOutput(output)
+	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
+	base.Unzip(relativePath, exportedPath)
+
+	pathOfExportedApi := relativePath + string(os.PathSeparator) + api.Name + "-" + api.Version
+
+	pathOfExportedEndpointCerts := pathOfExportedApi + string(os.PathSeparator) + utils.InitProjectEndpointCertificates
+	isEndpointCertsDirExists, _ := utils.IsDirExists(pathOfExportedEndpointCerts)
+	assert.Equal(t, false, isEndpointCertsDirExists)
+
+	pathOfExportedClientCerts := pathOfExportedApi + string(os.PathSeparator) + utils.InitProjectClientCertificates
+	isClientCertsDirExists, _ := utils.IsDirExists(pathOfExportedClientCerts)
+	assert.Equal(t, false, isClientCertsDirExists)
+
+	t.Cleanup(func() {
+		// Remove Created project
 		base.RemoveDir(exportedPath)
 		base.RemoveDir(relativePath)
 	})
