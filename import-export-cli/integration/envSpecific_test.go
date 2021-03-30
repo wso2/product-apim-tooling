@@ -249,7 +249,7 @@ func TestExportApiGenDeploymentDirImportSuperTenant(t *testing.T) {
 
 	// Store the deployment directory path to be provided as the params during import
 	args.ParamsFile = base.ConstructAPIDeploymentDirectoryPath(genDeploymentDirArgs.Destination, api.Name, api.Version)
-	testutils.ValidateAPIImportExportWithDeploymentDir(t, args, api)
+	testutils.ValidateAPIImportExportWithDeploymentDir(t, args)
 }
 
 // Export an API from one environment and generate the deployment directory for that. Import it to another environment with the params
@@ -286,7 +286,7 @@ func TestExportApiGenDeploymentDirImportTenant(t *testing.T) {
 
 	// Store the deployment directory path to be provided as the params during import
 	args.ParamsFile = base.ConstructAPIDeploymentDirectoryPath(genDeploymentDirArgs.Destination, api.Name, api.Version)
-	testutils.ValidateAPIImportExportWithDeploymentDir(t, args, api)
+	testutils.ValidateAPIImportExportWithDeploymentDir(t, args)
 }
 
 // Export an API Product from one environment and generate the deployment directory for that. Import it to another environment with the params
@@ -344,7 +344,7 @@ func TestExportApiProductGenDeploymentDirImportSuperTenant(t *testing.T) {
 
 	// Store the deployment directory path to be provided as the params during import
 	args.ParamsFile = base.ConstructAPIDeploymentDirectoryPath(genDeploymentDirArgs.Destination, apiProduct.Name, utils.DefaultApiProductVersion)
-	testutils.ValidateAPIProductImportExportWithDeploymentDir(t, args, apiProduct)
+	testutils.ValidateAPIProductImportExportWithDeploymentDir(t, args)
 
 	// Validate the dependent API (SwaggerPetstore will be the only one that is in params file of the product)
 	testutils.ValidateDependentAPIWithParams(t, dependentAPI2, prod, devopsUsername, devopsPassword)
@@ -406,7 +406,7 @@ func TestExportApiProductGenDeploymentDirImportTenant(t *testing.T) {
 
 	// Store the deployment directory path to be provided as the params during import
 	args.ParamsFile = base.ConstructAPIDeploymentDirectoryPath(genDeploymentDirArgs.Destination, apiProduct.Name, utils.DefaultApiProductVersion)
-	testutils.ValidateAPIProductImportExportWithDeploymentDir(t, args, apiProduct)
+	testutils.ValidateAPIProductImportExportWithDeploymentDir(t, args)
 
 	// Validate the dependent API (SwaggerPetstore will be the only one that is in params file of the product)
 	testutils.ValidateDependentAPIWithParams(t, dependentAPI2, prod, devopsUsername, devopsPassword)
