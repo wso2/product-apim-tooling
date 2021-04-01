@@ -20,21 +20,19 @@
 
  import (
 	 "github.com/spf13/cobra"
-	 "github.com/wso2/product-apim-tooling/import-export-cli/utils"
  )
  
  const awsCmdShortDesc = "AWS Api-gateway related commands"
- 
  const awsCmdLongDesc = `AWS Api-gateway related commands such as init.`
+ const awsCmdLiteral = "aws"
  
  // MICmd represents the mi command
  var AWSCmd = &cobra.Command{
-	 Use:   "aws",
+	 Use:   awsCmdLiteral,
 	 Short: awsCmdShortDesc,
 	 Long:  awsCmdLongDesc,
-	 // Example: miCmdExamples,
+	 Example: awsInitCmdExamples,
 	 Run: func(cmd *cobra.Command, args []string) {
-		 //utils.Logln(utils.LogPrefixInfo + utils.MiCmdLiteral + " called")
 		 cmd.Help()
 	 },
  }

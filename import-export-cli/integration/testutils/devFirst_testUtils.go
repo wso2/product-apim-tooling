@@ -158,6 +158,22 @@ func ValidateImportProject(t *testing.T, args *InitTestArgs) {
 	})
 }
 
+func ValidateAWSProjectImport(t *testing.T, args *AWSInitTestArgs) {
+	t.Helper()
+	
+	result, error := ImportApiFromProject(t, args.ApiNameFlag, args.SrcAPIM, args.ApiNameFlag, &args.CtlUser, true)
+
+	assert.Nil(t, error, "Error while importing Project")
+	assert.Contains(t, result, "Successfully imported API", "Error while importing Project")
+
+	base.WaitForIndexing()
+
+	//Remove Created project and logout
+	t.Cleanup(func() {
+		base.RemoveDir(args.InitFlag)
+	})
+}
+
 func ValidateImportProjectFailed(t *testing.T, args *InitTestArgs) {
 	t.Helper()
 

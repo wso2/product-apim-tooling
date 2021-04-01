@@ -102,6 +102,7 @@ type AWSInitTestArgs struct {
 	SrcAPIM        *apim.Client
 	ApiNameFlag		 string 
 	ApiStageNameFlag string
+	InitFlag       string
 }
 
 type GenDeploymentDirTestArgs struct {

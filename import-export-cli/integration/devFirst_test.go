@@ -28,10 +28,10 @@ import (
 //Initialize a API project by getting the OAS of a AWS API
 //WARN: To test this you need to have AWS CLI installed and configured
 //WARN: Before running this test create an API on AWS with the name "Shopping" and stage name "Live"
-func TestAWSInit(t *testing.T) {
-	username := superAdminUser
-	password := superAdminPassword
-	apim := apimClients[0]
+func TestAWSInitShoppingAPI(t *testing.T) {
+	username := devops.UserName
+	password := devops.Password
+	apim := GetDevClient()
 	apiName := "Shopping"
 	apiStageName := "Live"
 
@@ -40,9 +40,34 @@ func TestAWSInit(t *testing.T) {
 		SrcAPIM:  apim,
 		ApiNameFlag: apiName,
 		ApiStageNameFlag : apiStageName,
+		InitFlag: apiName,
 	}
 
 	testutils.ValidateAWSInitProject(t, args)
+	//testutils.ImportApiFromProject(t, args.ApiNameFlag, args.SrcAPIM, args.ApiNameFlag, &args.CtlUser, true)
+	testutils.ValidateAWSProjectImport(t, args)
+}
+
+//Initialize a API project by getting the OAS of a AWS API
+//WARN: To test this you need to have AWS CLI installed and configured
+//WARN: Before running this test create an API on AWS with the name "PetStore" and stage name "beta"
+func TestAWSInitPetStoreAPI(t *testing.T) {
+	username := devops.UserName + "@" + TENANT1
+	password := devops.Password
+	apim := GetDevClient()
+	apiName := "PetStore"
+	apiStageName := "beta"
+
+	args := &testutils.AWSInitTestArgs{
+		CtlUser:  testutils.Credentials{Username: username, Password: password},
+		SrcAPIM:  apim,
+		ApiNameFlag: apiName,
+		ApiStageNameFlag : apiStageName,
+		InitFlag: apiName,
+	}
+
+	testutils.ValidateAWSInitProject(t, args)
+	testutils.ValidateAWSProjectImport(t, args)
 }
 
 //Initialize a project Initialize an API without any flag

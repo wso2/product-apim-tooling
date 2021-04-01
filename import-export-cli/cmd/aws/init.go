@@ -16,7 +16,7 @@
 * under the License.
 */
 
-package cmd 
+package aws 
 
 import (
 	"os"
@@ -24,6 +24,8 @@ import (
 	"strconv"
 	"os/exec"
 	"bufio"
+
+	"errors"
 	"encoding/json"
 	"io/ioutil"
 	"path/filepath"
@@ -49,9 +51,9 @@ var tmpDir string				//temporary directory created to store the OAS extracted fr
 var getRestAPIsCmdOutput string 
 var err error 
 var awsInitCmdForced bool
+var initCmdOutputDir string
 
 //common aws cmd flags 
-var awsCmdLiteral string = "aws"
 var apiGateway string = "apigateway"
 
 //aws cmd Output type
@@ -71,15 +73,15 @@ var stageNameFlag string = "--stage-name"
 var exportTypeFlag string = "--export-type"
 var exportType string = "oas30"	//default export type is openapi3. Use "swagger" to request for a swagger 2.
 var debugFlag string			//aws cli debug flag for apictl verbose mode 
-//
-const awsInitCmdLiteral = "aws init"
-const awsInitCmdShortDesc = "Initialize a API project from a AWS API"
+
+const awsInitCmdLiteral = "init"
+const awsInitCmdShortDesc = "Initialize a API project for a AWS API"
 const awsInitCmdLongDesc = `Downloading the OpenAPI specification of an API from the AWS API Gateway to initialize a WSO2 API project`
-const awsInitCmdExamples = utils.ProjectName + ` ` + awsInitCmdLiteral  + ` -n PetStore -s Demo
+const awsInitCmdExamples = utils.ProjectName + ` ` + awsCmdLiteral + ` ` + awsInitCmdLiteral  + ` -n PetStore -s Demo
 
-` + utils.ProjectName + ` ` +  awsInitCmdLiteral + ` --name PetStore --stage Demo
+` + utils.ProjectName + ` ` + awsCmdLiteral + ` ` + awsInitCmdLiteral + ` --name PetStore --stage Demo
 
-` + utils.ProjectName + ` ` +  awsInitCmdLiteral + ` --name Shopping --stage Live
+` + utils.ProjectName + ` ` + awsCmdLiteral + ` ` + awsInitCmdLiteral + ` --name Shopping --stage Live
 
 NOTE: Both flags --name (-n) and --stage (-s) are mandatory as both values are needed to get the openAPI from AWS API Gateway.
 Make sure the API name and Stage Name are correct.
@@ -102,7 +104,7 @@ var InitCmd = &cobra.Command{
 	Example: 	awsInitCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		getPath()
-		initCmdOutputDir = dir + "/" + flagApiNameToGet
+		initCmdOutputDir = dir + string(os.PathSeparator) + flagApiNameToGet
 
 		if stat, err := os.Stat(initCmdOutputDir); !os.IsNotExist(err) {
 			fmt.Printf("%s already exists\n", initCmdOutputDir)
@@ -142,7 +144,7 @@ func getOAS() error {
 		debugFlag = "--debug"	//activating the aws cli debug flag in apictl verbose mode 
 	}
 	utils.Logln(utils.LogPrefixInfo + "Executing aws get-rest-apis command in debug mode")
-	//
+	
 	getRestAPIsCmd := exec.Command(awsCmdLiteral, apiGateway, getAPI, outputFlag, outputType, debugFlag)
 	stderr, err := getRestAPIsCmd.StderrPipe()
 	if err != nil {
@@ -194,7 +196,7 @@ func getOAS() error {
 	var found bool
 	apiName := flagApiNameToGet
 	stageName := flagStageName
-	path = tmpDir + "/" + apiName + ".json"
+	path = tmpDir + string(os.PathSeparator) + apiName + ".json"
 	// Searching for API ID:
 	utils.Logln(utils.LogPrefixInfo + "Searching for API ID...")
 	for _, item := range apis.Items {
@@ -256,10 +258,10 @@ func getOAS() error {
 }
 
 // loadDefaultAWSDocFromDisk loads document.yaml stored in HOME/.wso2apictl/document.yaml
-func loadDefaultAWSDocFromDisk() (*v2.Document, error) {
-	docData, err := ioutil.ReadFile(utils.DefaultAWSDocFilePath)
-	if err != nil {
-		return nil, err
+func loadDefaultAWSDoc() (*v2.Document, error) {
+	docData, ok := box.Get("/init/document.yaml")
+	if !ok {
+		return nil, errors.New("Error while retrieving document.yaml")
 	}
 	awsDoc := &v2.Document{}
 	err = yaml.Unmarshal(docData, &awsDoc)
@@ -270,7 +272,7 @@ func loadDefaultAWSDocFromDisk() (*v2.Document, error) {
 }
 
 func createAWSDocDirectory(docName string) error {
-	awsDocDirectoryPath := initCmdOutputDir + "/Docs"
+	awsDocDirectoryPath := initCmdOutputDir + string(os.PathSeparator) + "Docs"
 	dirPath := filepath.Join(awsDocDirectoryPath, filepath.FromSlash(docName))
 	utils.Logln(utils.LogPrefixInfo + "Creating directory " + dirPath)
 	err := os.MkdirAll(dirPath, os.ModePerm)
@@ -282,7 +284,7 @@ func createAWSDocDirectory(docName string) error {
 
 //write document.yaml file
 func writeDocumentFile(docName string, summary string) error {
-	document, err := loadDefaultAWSDocFromDisk()
+	document, err := loadDefaultAWSDoc()
 	docData := &document.Data
 	docData.Name = docName
 	docData.Summary = summary
@@ -290,7 +292,7 @@ func writeDocumentFile(docName string, summary string) error {
 	if err != nil {
 		return err
 	}
-	apiDocFilePath := filepath.Join(initCmdOutputDir, filepath.FromSlash("Docs/" + docName + "/document.yaml"))
+	apiDocFilePath := filepath.Join(initCmdOutputDir, filepath.FromSlash("Docs" + string(os.PathSeparator) + docName + string(os.PathSeparator) + "document.yaml"))
 	utils.Logln(utils.LogPrefixInfo + "Writing " + apiDocFilePath)
 	err = ioutil.WriteFile(apiDocFilePath, docDataByte, os.ModePerm)
 	return nil
@@ -302,10 +304,10 @@ func writeAWSSecurityDocs(oas3ByteValue []byte) error {
 	json.Unmarshal(oas3ByteValue, &securitySchemes)
 	schemes := securitySchemes.Components.SecuritySchemes
 	if securitySchemes.ResourcePolicy.Version != "" {
-		docName := "Resource_Policy"
+		docName := "Resource Policy"
 		summary := "This document contains details related to AWS resource policies"
 		err = createAWSDocDirectory(docName)
-		resourcePolicyDocPath := filepath.Join(initCmdOutputDir, filepath.FromSlash("Docs/" + docName + "/" + docName))
+		resourcePolicyDocPath := filepath.Join(initCmdOutputDir, filepath.FromSlash("Docs" + string(os.PathSeparator) + docName + string(os.PathSeparator) + docName))
 		utils.Logln(utils.LogPrefixInfo + "Writing " + resourcePolicyDocPath)
 		resourcePolicyDoc, _ := box.Get("/init/resource_policy_doc")
 		err = ioutil.WriteFile(resourcePolicyDocPath, resourcePolicyDoc, os.ModePerm)
@@ -318,10 +320,10 @@ func writeAWSSecurityDocs(oas3ByteValue []byte) error {
 		}
 	}
 	if schemes.CognitoAuthorizer.AuthType == "cognito_user_pools" {
-		docName := "Cognito_Userpool"
+		docName := "Cognito Userpool"
 		summary := "This document contains details related to AWS cognito user pools"
 		err = createAWSDocDirectory(docName)
-		cognitoUpDocPath := filepath.Join(initCmdOutputDir, filepath.FromSlash("Docs/" + docName + "/" + docName))
+		cognitoUpDocPath := filepath.Join(initCmdOutputDir, filepath.FromSlash("Docs" + string(os.PathSeparator) + docName + string(os.PathSeparator) + docName))
 		utils.Logln(utils.LogPrefixInfo + "Writing " + cognitoUpDocPath)
 		cognitoUpDoc, _ := box.Get("/init/cognito_userpool_doc")
 		err = ioutil.WriteFile(cognitoUpDocPath, cognitoUpDoc, os.ModePerm)
@@ -334,10 +336,10 @@ func writeAWSSecurityDocs(oas3ByteValue []byte) error {
 		}
 	}
 	if schemes.APIKey.Type == "apiKey" {
-		docName := "AWS_API_Keys"
+		docName := "AWS APIKeys"
 		summary := "This document contains details related to AWS API keys"
 		err = createAWSDocDirectory(docName)
-		apiKeyDocPath := filepath.Join(initCmdOutputDir, filepath.FromSlash("Docs/" + docName + "/" + docName))
+		apiKeyDocPath := filepath.Join(initCmdOutputDir, filepath.FromSlash("Docs" + string(os.PathSeparator) + docName + string(os.PathSeparator) + docName))
 		utils.Logln(utils.LogPrefixInfo + "Writing " + apiKeyDocPath)
 		apiKeyDoc, _ := box.Get("/init/aws_apikey_doc")
 		err = ioutil.WriteFile(apiKeyDocPath, apiKeyDoc, os.ModePerm)
@@ -350,10 +352,10 @@ func writeAWSSecurityDocs(oas3ByteValue []byte) error {
 		}
 	}
 	if schemes.Sigv4.AuthType == "awsSigv4" {
-		docName := "AWS_Signature_Version4"
+		docName := "AWS Signature Version4"
 		summary := "This document contains details related to AWS signature version 4"
 		err = createAWSDocDirectory(docName)
-		awsSigv4DocPath := filepath.Join(initCmdOutputDir, filepath.FromSlash("Docs/" + docName + "/" + docName))
+		awsSigv4DocPath := filepath.Join(initCmdOutputDir, filepath.FromSlash("Docs" + string(os.PathSeparator) + docName + string(os.PathSeparator) + docName))
 		utils.Logln(utils.LogPrefixInfo + "Writing " + awsSigv4DocPath)
 		awsSigv4Doc, _ := box.Get("/init/aws_sigv4_doc")
 		err = ioutil.WriteFile(awsSigv4DocPath, awsSigv4Doc, os.ModePerm)
@@ -370,7 +372,7 @@ func writeAWSSecurityDocs(oas3ByteValue []byte) error {
 
 // loadAPISpec loads the API definition from project folder 
 func loadAPISpec() (*v2.APIDefinitionFile, error) {
-	pathToAPIDef := initCmdOutputDir + "/api.yaml"
+	pathToAPIDef := initCmdOutputDir + string(os.PathSeparator) + "api.yaml"
 	apiDef, err := os.Open(pathToAPIDef)
 	if err != nil {
 		fmt.Println("Error opening API definition from the project folder", err)
@@ -385,7 +387,7 @@ func loadAPISpec() (*v2.APIDefinitionFile, error) {
 }
 
 func loadAPIMetaFile() (*utils.MetaData, error) {
-	pathToAPIMetaFile := initCmdOutputDir + "/api_meta.yaml"
+	pathToAPIMetaFile := initCmdOutputDir + string(os.PathSeparator) + "api_meta.yaml"
 	apiMetaFile, err := os.Open(pathToAPIMetaFile)
 	if err != nil {
 		fmt.Println("Error opening api_meta.yaml in project folder")
@@ -423,6 +425,7 @@ func initializeProject() error {
 	}
 
 	def := &apiDefFile.Data
+
 	def.IsAWSAPI = true
 	v2.AddAwsTag(def)
 	version := def.Version
@@ -433,7 +436,7 @@ func initializeProject() error {
 	} else {
 		def.Version = flagStageName
 		fmt.Println("[WARN]: Unknown API version. Stage name was assigned as the API version")
-	}	//
+	}
 	def.Context = flagApiNameToGet + string(os.PathSeparator) + def.Version
 
 	oas3ByteValue := v2.CreateEpConfigForAwsAPIs(def, path)
@@ -500,11 +503,10 @@ func execute() {
 }
 
 func init() { 
-		RootCmd.AddCommand(InitCmd)		
-		AwsInitCmd.Flags().StringVarP(&flagApiNameToGet, "name", "n", "", "Name of the API to get from AWS Api Gateway")
-		AwsInitCmd.Flags().StringVarP(&flagStageName, "stage", "s", "", "Stage name of the API to get from AWS Api Gateway")
-		AwsInitCmd.Flags().BoolVarP(&awsInitCmdForced, "force", "f", false, "Force create project")
+		InitCmd.Flags().StringVarP(&flagApiNameToGet, "name", "n", "", "Name of the API to get from AWS Api Gateway")
+		InitCmd.Flags().StringVarP(&flagStageName, "stage", "s", "", "Stage name of the API to get from AWS Api Gateway")
+		InitCmd.Flags().BoolVarP(&awsInitCmdForced, "force", "f", false, "Force create project")
 
-		AwsInitCmd.MarkFlagRequired("name")
-		AwsInitCmd.MarkFlagRequired("stage")
+		InitCmd.MarkFlagRequired("name")
+		InitCmd.MarkFlagRequired("stage")
 }

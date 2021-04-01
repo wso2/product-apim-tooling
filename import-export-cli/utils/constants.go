@@ -64,7 +64,6 @@ var EnvKeysAllFilePath = filepath.Join(LocalCredentialsDirectoryPath, EnvKeysAll
 var MainConfigFilePath = filepath.Join(ConfigDirPath, MainConfigFileName)
 var SampleMainConfigFilePath = filepath.Join(ConfigDirPath, SampleMainConfigFileName)
 //var DefaultAPISpecFilePath = filepath.Join(ConfigDirPath, DefaultAPISpecFileName)
-var DefaultAWSDocFilePath = filepath.Join(ConfigDirPath, DefaultAWSDocFileName)
 
 const DefaultExportDirName = "exported"
 const ExportedApisDirName = "apis"
