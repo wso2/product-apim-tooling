@@ -7,10 +7,16 @@ environments:
             sandbox:
                 url: https://sand.wso2.com
         security:
-            enabled: true
-            type: basic
-            username: admin
-            password: admin
+            production:
+                enabled: true
+                type: basic
+                username: admin
+                password: admin
+            sandbox:
+                enabled: true
+                type: digest
+                username: admin
+                password: admin
         certs:
             - hostName: https://prod.wso2.com
               alias: alice

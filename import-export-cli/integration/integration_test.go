@@ -218,104 +218,146 @@ func deactivateTenants(host string, offset int) {
 func deleteApps() {
 	subscribers := Users["subscriber"]
 	for _, subscriber := range subscribers {
-		for _, client := range apimClients {
-			client.Login(subscriber.UserName, subscriber.Password)
-			client.DeleteAllSubscriptions()
-			client.DeleteAllApplications()
-		}
+		deleteAllTenantUserApps(subscriber.UserName, subscriber.Password)
+	}
 
-		for _, tenant := range tenants {
-			for _, client := range apimClients {
-				client.Login(subscriber.UserName+"@"+tenant.Domain, subscriber.Password)
-				client.DeleteAllSubscriptions()
-				client.DeleteAllApplications()
-			}
-		}
+	devopsUsers := Users["devops"]
+	for _, devops := range devopsUsers {
+		deleteAllTenantUserApps(devops.UserName, devops.Password)
 	}
 
 	for _, client := range apimClients {
-		client.Login(superAdminUser, superAdminPassword)
-		client.DeleteAllSubscriptions()
-		client.DeleteAllApplications()
+		deleteUserApps(client, superAdminUser, superAdminPassword)
 	}
 
 	for _, tenant := range tenants {
 		for _, client := range apimClients {
-			client.Login(tenant.AdminUserName+"@"+tenant.Domain, tenant.AdminPassword)
-			client.DeleteAllSubscriptions()
-			client.DeleteAllApplications()
+			deleteUserApps(client, tenant.AdminUserName+"@"+tenant.Domain, tenant.AdminPassword)
 		}
 	}
+}
+
+func deleteAllTenantUserApps(username string, password string) {
+	for _, client := range apimClients {
+		deleteUserApps(client, username, password)
+	}
+
+	for _, tenant := range tenants {
+		for _, client := range apimClients {
+			deleteUserApps(client, username+"@"+tenant.Domain, password)
+		}
+	}
+}
+
+func deleteUserApps(client *apim.Client, username string, password string) {
+	client.Login(username, password)
+	client.DeleteAllSubscriptions()
+	client.DeleteAllApplications()
 }
 
 func deleteApis() {
 	creators := Users["creator"]
 	for _, creator := range creators {
-		for _, client := range apimClients {
-			client.Login(creator.UserName, creator.Password)
-			client.DeleteAllAPIs()
-		}
+		deleteAllTenantUserApis(creator.UserName, creator.Password)
+	}
 
-		for _, tenant := range tenants {
-			for _, client := range apimClients {
-				client.Login(creator.UserName+"@"+tenant.Domain, creator.Password)
-				client.DeleteAllAPIs()
-			}
-		}
+	devopsUsers := Users["devops"]
+	for _, devops := range devopsUsers {
+		deleteAllTenantUserApis(devops.UserName, devops.Password)
 	}
 
 	for _, client := range apimClients {
-		client.Login(superAdminUser, superAdminPassword)
-		client.DeleteAllAPIs()
+		deleteUserApis(client, superAdminUser, superAdminPassword)
 	}
 
 	for _, tenant := range tenants {
 		for _, client := range apimClients {
-			client.Login(tenant.AdminUserName+"@"+tenant.Domain, tenant.AdminPassword)
-			client.DeleteAllAPIs()
+			deleteUserApis(client, tenant.AdminUserName+"@"+tenant.Domain, tenant.AdminPassword)
 		}
 	}
+}
+
+func deleteAllTenantUserApis(username string, password string) {
+	for _, client := range apimClients {
+		deleteUserApis(client, username, password)
+	}
+
+	for _, tenant := range tenants {
+		for _, client := range apimClients {
+			deleteUserApis(client, username+"@"+tenant.Domain, password)
+		}
+	}
+}
+
+func deleteUserApis(client *apim.Client, username string, password string) {
+	client.Login(username, password)
+	client.DeleteAllAPIs()
 }
 
 func deleteApiProducts() {
 	publishers := Users["publisher"]
 	for _, publisher := range publishers {
-		for _, client := range apimClients {
-			client.Login(publisher.UserName, publisher.Password)
-			client.DeleteAllAPIProducts()
-		}
-
-		for _, tenant := range tenants {
-			for _, client := range apimClients {
-				client.Login(publisher.UserName+"@"+tenant.Domain, publisher.Password)
-				client.DeleteAllAPIProducts()
-			}
-		}
+		deleteAllTenantUserApiProducts(publisher.UserName, publisher.Password)
 	}
 
 	for _, client := range apimClients {
-		client.Login(superAdminUser, superAdminPassword)
-		client.DeleteAllAPIProducts()
+		deleteUserApiProducts(client, superAdminUser, superAdminPassword)
 	}
 
 	for _, tenant := range tenants {
 		for _, client := range apimClients {
-			client.Login(tenant.AdminUserName+"@"+tenant.Domain, tenant.AdminPassword)
-			client.DeleteAllAPIProducts()
+			deleteUserApiProducts(client, tenant.AdminUserName+"@"+tenant.Domain, tenant.AdminPassword)
 		}
 	}
 }
 
-func removeEndpointCerts() {
+func deleteAllTenantUserApiProducts(username string, password string) {
 	for _, client := range apimClients {
-		client.Login(superAdminUser, superAdminPassword)
-		client.RemoveAllEndpointCerts()
+		deleteUserApiProducts(client, username, password)
+	}
 
-		for _, tenant := range tenants {
-			client.Login(tenant.AdminUserName+"@"+tenant.Domain, tenant.AdminPassword)
-			client.RemoveAllEndpointCerts()
+	for _, tenant := range tenants {
+		for _, client := range apimClients {
+			deleteUserApiProducts(client, username+"@"+tenant.Domain, password)
 		}
 	}
+}
+
+func deleteUserApiProducts(client *apim.Client, username string, password string) {
+	client.Login(username, password)
+	client.DeleteAllAPIProducts()
+}
+
+func removeEndpointCerts() {
+	creators := Users["creator"]
+	for _, creator := range creators {
+		removeAllTenantUserEndpointCerts(creator.UserName, creator.Password)
+	}
+
+	for _, client := range apimClients {
+		removeUserEndpointCerts(client, superAdminUser, superAdminPassword)
+
+		for _, tenant := range tenants {
+			removeUserEndpointCerts(client, tenant.AdminUserName+"@"+tenant.Domain, tenant.AdminPassword)
+		}
+	}
+}
+
+func removeAllTenantUserEndpointCerts(username string, password string) {
+	for _, client := range apimClients {
+		removeUserEndpointCerts(client, username, password)
+	}
+
+	for _, tenant := range tenants {
+		for _, client := range apimClients {
+			removeUserEndpointCerts(client, username+"@"+tenant.Domain, password)
+		}
+	}
+}
+
+func removeUserEndpointCerts(client *apim.Client, username string, password string) {
+	client.Login(username, password)
+	client.RemoveAllEndpointCerts()
 }
 
 func getSOAPServiceURL(host string, offset int, service string) string {

@@ -27,6 +27,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/adminservices"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
@@ -101,24 +103,6 @@ func ValidateExportDirectoryIsChanged(t *testing.T, args *SetTestArgs) {
 	assert.Contains(t, output, "Export Directory is set to", "Export Directory change is not successful")
 }
 
-func ValidateExportApisPassed(t *testing.T, args *InitTestArgs, directoryName string) {
-	t.Helper()
-
-	output, error := ExportApisWithOneCommand(t, args)
-	assert.Nil(t, error, "Error while Exporting APIs")
-	assert.Contains(t, output, "export-apis execution completed", "Error while Exporting APIs")
-
-	//Derive exported path from output
-	exportedPath := base.GetExportedPathFromOutput(strings.ReplaceAll(output, "Command: export-apis execution completed !", ""))
-	count, _ := base.CountFiles(exportedPath)
-	assert.Equal(t, 1, count, "Error while Exporting APIs")
-
-	t.Cleanup(func() {
-		//Remove Exported apis
-		base.RemoveDir(directoryName + TestMigrationDirectorySuffix)
-	})
-}
-
 func ValidateExportApiPassed(t *testing.T, args *ApiImportExportTestArgs, directoryName string) {
 	t.Helper()
 
@@ -134,6 +118,9 @@ func ValidateExportApiPassed(t *testing.T, args *ApiImportExportTestArgs, direct
 
 	assert.True(t, base.IsAPIArchiveExists(t, exportedPath, args.Api.Name, args.Api.Version), "API archive"+
 		" is not correctly exported to "+directoryName)
+
+	count, _ := base.CountFiles(t, exportedPath)
+	assert.Equal(t, 1, count, "Error while Exporting APIs")
 
 	t.Cleanup(func() {
 		//Remove Exported api
@@ -151,17 +138,11 @@ func ValidateGenDeploymentDir(t *testing.T, args *GenDeploymentDirTestArgs) {
 		"Generating deployment directory is not successful")
 }
 
-func ValidateAPIImportExportWithDeploymentDir(t *testing.T, args *ApiImportExportTestArgs, api *apim.API) {
+func ValidateAPIImportExportWithDeploymentDir(t *testing.T, args *ApiImportExportTestArgs) {
+	t.Helper()
 
-	// Move dummay params file of an API to the created deployment directory
-	srcPathForParamsFile, _ := filepath.Abs(APIFullParamsFile)
-	destPathForParamsFile := args.ParamsFile + string(os.PathSeparator) + utils.ParamFile
-	utils.CopyFile(srcPathForParamsFile, destPathForParamsFile)
-
-	// Copy dummy certificates to the created deployment directory
-	srcPathForCertificatesDirectory, _ := filepath.Abs(CertificatesDirectoryPath)
-	utils.CopyDirectoryContents(srcPathForCertificatesDirectory,
-		args.ParamsFile+string(os.PathSeparator)+utils.DeploymentCertificatesDirectory)
+	// Move dummy params and certificates files of an API to the created deployment directory
+	MoveDummyAPIParamsAndCertificatesToDeploymentDir(args)
 
 	importedAPI := GetImportedAPI(t, args)
 
@@ -173,8 +154,7 @@ func ValidateAPIImportExportWithDeploymentDir(t *testing.T, args *ApiImportExpor
 	validateExportedAPICerts(t, apiParams, importedAPI, args)
 }
 
-func ValidateAPIProductImportExportWithDeploymentDir(t *testing.T, args *ApiProductImportExportTestArgs,
-	apiProduct *apim.APIProduct) {
+func ValidateAPIProductImportExportWithDeploymentDir(t *testing.T, args *ApiProductImportExportTestArgs) {
 
 	// Move dummay params file of an API Product to the created deployment directory
 	srcPathForParamsFile, _ := filepath.Abs(APIProductFullParamsFile)
@@ -194,6 +174,42 @@ func ValidateAPIProductImportExportWithDeploymentDir(t *testing.T, args *ApiProd
 	validateExportedAPIProductCerts(t, apiProductParams, importedAPIProduct, args)
 }
 
+func ValidateAPIImportExportWithDeploymentDirForAdvertiseOnlyAPI(t *testing.T, args *ApiImportExportTestArgs) {
+	t.Helper()
+
+	// Move dummy params and certificates files of an API to the created deployment directory
+	MoveDummyAPIParamsAndCertificatesToDeploymentDir(args)
+
+	importedAPI := GetImportedAPI(t, args)
+
+	assert.Equal(t, args.Api.AdvertiseInformation.Advertised, importedAPI.AdvertiseInformation.Advertised)
+	assert.Equal(t, args.Api.Provider, importedAPI.AdvertiseInformation.ApiOwner)
+
+	if (args.CtlUser.Username == adminservices.AdminUsername) ||
+		(args.CtlUser.Username == adminservices.AdminUsername+"@"+adminservices.Tenant1) {
+		// Only the users who has admin privileges (apim:admin scope) were allowed to set the original devportal URL.
+		assert.Equal(t, args.Api.AdvertiseInformation.OriginalDevPortalUrl,
+			importedAPI.AdvertiseInformation.OriginalDevPortalUrl)
+	} else {
+		assert.Equal(t, "", importedAPI.AdvertiseInformation.OriginalDevPortalUrl)
+	}
+
+	// Certificates should not get exported for advertise only APIs
+	validateNonExportedAPICerts(t, importedAPI, args)
+}
+
+func MoveDummyAPIParamsAndCertificatesToDeploymentDir(args *ApiImportExportTestArgs) {
+	// Move dummay params file of an API to the created deployment directory
+	srcPathForParamsFile, _ := filepath.Abs(APIFullParamsFile)
+	destPathForParamsFile := args.ParamsFile + string(os.PathSeparator) + utils.ParamFile
+	utils.CopyFile(srcPathForParamsFile, destPathForParamsFile)
+
+	// Copy dummy certificates to the created deployment directory
+	srcPathForCertificatesDirectory, _ := filepath.Abs(CertificatesDirectoryPath)
+	utils.CopyDirectoryContents(srcPathForCertificatesDirectory,
+		args.ParamsFile+string(os.PathSeparator)+utils.DeploymentCertificatesDirectory)
+}
+
 func ValidateDependentAPIWithParams(t *testing.T, dependentAPI *apim.API, client *apim.Client, username, password string) {
 
 	importedDependentAPI := GetAPI(t, client, dependentAPI.Name, username, password)
@@ -204,36 +220,34 @@ func ValidateDependentAPIWithParams(t *testing.T, dependentAPI *apim.API, client
 		importedDependentAPI.GatewayEnvironments)
 }
 
-func validateEndpointSecurity(t *testing.T, apiParams *Params, api *apim.API) {
-	assert.Equal(t, strings.ToUpper(apiParams.Environments[0].Configs.Security.Type), api.EndpointSecurity.Type)
-	assert.Equal(t, apiParams.Environments[0].Configs.Security.Username, api.EndpointSecurity.Username)
-	assert.Equal(t, "", api.EndpointSecurity.Password)
+func validateEndpointSecurity(t *testing.T, apiParams *Params, api *apim.API, endpointType string) {
+	var endpointSecurityForEndpointType Security
+	var endpointSecurityForEndpointTypeInApi map[string]interface{}
+	if strings.EqualFold(endpointType, "production") {
+		endpointSecurityForEndpointType = apiParams.Environments[0].Configs.Security.Production
+		endpointSecurityForEndpointTypeInApi = api.GetProductionSecurityConfig()
+	}
+	if strings.EqualFold(endpointType, "sandbox") {
+		endpointSecurityForEndpointType = apiParams.Environments[0].Configs.Security.Sandbox
+		endpointSecurityForEndpointTypeInApi = api.GetSandboxSecurityConfig()
+	}
+
+	assert.Equal(t, endpointSecurityForEndpointType.Enabled, endpointSecurityForEndpointTypeInApi["enabled"])
+	assert.Equal(t, strings.ToUpper(endpointSecurityForEndpointType.Type), endpointSecurityForEndpointTypeInApi["type"])
+	assert.Equal(t, endpointSecurityForEndpointType.Username, endpointSecurityForEndpointTypeInApi["username"])
+	assert.Equal(t, "", endpointSecurityForEndpointTypeInApi["password"])
 }
 
 func ValidateEndpointSecurityDefinition(t *testing.T, api *apim.API, apiParams *Params, importedAPI *apim.API) {
 	t.Helper()
 
-	validateEndpointSecurity(t, apiParams, importedAPI)
+	validateEndpointSecurity(t, apiParams, importedAPI, "production")
+	validateEndpointSecurity(t, apiParams, importedAPI, "sandbox")
 
-	assert.Equal(t, strings.ToUpper(apiParams.Environments[0].Configs.Security.Type), importedAPI.EndpointSecurity.Type)
-	assert.Equal(t, apiParams.Environments[0].Configs.Security.Username, importedAPI.EndpointSecurity.Username)
-	assert.Equal(t, "", importedAPI.EndpointSecurity.Password)
+	api.EndpointConfig.(map[string]interface{})["endpoint_security"] = "override_with_the_same_value"
+	importedAPI.EndpointConfig.(map[string]interface{})["endpoint_security"] = "override_with_the_same_value"
 
-	apiCopy := apim.CopyAPI(api)
-	importedAPICopy := apim.CopyAPI(importedAPI)
-
-	same := "override_with_same_value"
-
-	apiCopy.EndpointSecurity.Type = same
-	importedAPICopy.EndpointSecurity.Type = same
-
-	apiCopy.EndpointSecurity.Username = same
-	importedAPICopy.EndpointSecurity.Username = same
-
-	apiCopy.EndpointSecurity.Password = same
-	importedAPICopy.EndpointSecurity.Password = same
-
-	ValidateAPIsEqual(t, &apiCopy, &importedAPICopy)
+	ValidateAPIsEqual(t, api, importedAPI)
 }
 
 func validateParamsWithoutCerts(t *testing.T, params *Params, api *apim.API, apiProduct *apim.APIProduct,
@@ -249,7 +263,8 @@ func validateParamsWithoutCerts(t *testing.T, params *Params, api *apim.API, api
 			"Mismatched sandbox URL")
 
 		// Validate endpoint security
-		validateEndpointSecurity(t, params, api)
+		validateEndpointSecurity(t, params, api, "production")
+		validateEndpointSecurity(t, params, api, "sandbox")
 	}
 
 	// Validate subscription policies
@@ -282,11 +297,36 @@ func validateExportedAPICerts(t *testing.T, apiParams *Params, api *apim.API, ar
 
 	pathOfExportedApi := relativePath + string(os.PathSeparator) + api.Name + "-" + api.Version
 
-	validateEndpointCerts(t, apiParams, pathOfExportedApi)
+	validateEndpointCerts(t, apiParams, args.DestAPIM, args.ApiProvider, pathOfExportedApi)
 	validateMutualSSLCerts(t, apiParams, pathOfExportedApi)
 
 	t.Cleanup(func() {
 		//Remove Created project and logout
+		base.RemoveDir(exportedPath)
+		base.RemoveDir(relativePath)
+	})
+}
+
+func validateNonExportedAPICerts(t *testing.T, api *apim.API, args *ApiImportExportTestArgs) {
+	output, _ := exportAPI(t, args.Api.Name, args.Api.Version, args.ApiProvider.Username, args.SrcAPIM.GetEnvName())
+
+	//Unzip exported API and check whether certificates are there
+	exportedPath := base.GetExportedPathFromOutput(output)
+	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
+	base.Unzip(relativePath, exportedPath)
+
+	pathOfExportedApi := relativePath + string(os.PathSeparator) + api.Name + "-" + api.Version
+
+	pathOfExportedEndpointCerts := pathOfExportedApi + string(os.PathSeparator) + utils.InitProjectEndpointCertificates
+	isEndpointCertsDirExists, _ := utils.IsDirExists(pathOfExportedEndpointCerts)
+	assert.Equal(t, false, isEndpointCertsDirExists)
+
+	pathOfExportedClientCerts := pathOfExportedApi + string(os.PathSeparator) + utils.InitProjectClientCertificates
+	isClientCertsDirExists, _ := utils.IsDirExists(pathOfExportedClientCerts)
+	assert.Equal(t, false, isClientCertsDirExists)
+
+	t.Cleanup(func() {
+		// Remove Created project
 		base.RemoveDir(exportedPath)
 		base.RemoveDir(relativePath)
 	})
@@ -311,8 +351,10 @@ func validateExportedAPIProductCerts(t *testing.T, apiProductParams *Params, api
 	})
 }
 
-func validateEndpointCerts(t *testing.T, apiParams *Params, path string) {
+func validateEndpointCerts(t *testing.T, apiParams *Params, client *apim.Client, credentials Credentials, path string) {
 	pathOfExportedEndpointCerts := path + string(os.PathSeparator) + utils.InitProjectEndpointCertificates
+
+	t.Log("validateEndpointCerts() pathOfExportedEndpointCerts = ", pathOfExportedEndpointCerts)
 	isEndpointCertsDirExists, _ := utils.IsDirExists(pathOfExportedEndpointCerts)
 
 	if isEndpointCertsDirExists {
@@ -326,6 +368,11 @@ func validateEndpointCerts(t *testing.T, apiParams *Params, path string) {
 			}
 			if !endpointCertExists {
 				t.Error("Endpoint certificate " + endpointCert.Path + " not exported")
+			} else {
+				t.Cleanup(func() {
+					client.Login(credentials.Username, credentials.Password)
+					client.RemoveEndpointCert(endpointCert.Alias)
+				})
 			}
 		}
 	} else {

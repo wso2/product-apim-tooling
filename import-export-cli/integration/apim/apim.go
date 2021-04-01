@@ -230,10 +230,6 @@ func CopyAPI(apiToCopy *API) API {
 	apiCopy.GatewayEnvironments = make([]string, len(apiToCopy.GatewayEnvironments))
 	copy(apiCopy.GatewayEnvironments, apiToCopy.GatewayEnvironments)
 
-	// Copy Labels slice
-	apiCopy.Labels = make([]string, len(apiToCopy.Labels))
-	copy(apiCopy.Labels, apiToCopy.Labels)
-
 	// Copy MediationPolicies slice
 	apiCopy.MediationPolicies = make([]MediationPolicy, len(apiToCopy.MediationPolicies))
 	copy(apiCopy.MediationPolicies, apiToCopy.MediationPolicies)
@@ -332,9 +328,6 @@ func SortAPIMembers(api *API) {
 
 	// Sort GatewayEnvironments slice
 	sort.Strings(api.GatewayEnvironments)
-
-	// Sort Labels slice
-	sort.Strings(api.Labels)
 
 	// Sort MediationPolicies slice
 	sort.Sort(ByID(api.MediationPolicies))
@@ -942,6 +935,43 @@ func (instance *Client) PublishAPI(apiID string) {
 	base.ValidateAndLogResponse("apim.PublishAPI()", response, 200)
 }
 
+// AddSubscription : Subscribe an App to a given API in APIM
+func (instance *Client) AddSubscription(t *testing.T, apiID string, appID string, throttlePolicy string, username string, password string) {
+	subscriptionURL := instance.devPortalRestURL + "/subscriptions"
+
+	subscription := Subscription{}
+	subscription.APIID = apiID
+	subscription.ApplicationID = appID
+	subscription.ThrottlingPolicy = throttlePolicy
+
+	data, err := json.Marshal(subscription)
+
+	if err != nil {
+		base.Fatal(err)
+	}
+
+	request := base.CreatePost(subscriptionURL, bytes.NewBuffer(data))
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.AddSubscription()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.AddSubscription()", response, 201)
+
+	var subsResponse Subscription
+	json.NewDecoder(response.Body).Decode(&subsResponse)
+
+	t.Cleanup(func() {
+		instance.Login(username, password)
+		instance.deleteSubscription(subsResponse.SubscriptionID)
+	})
+
+}
+
 // DeleteSubscriptions : Delete Subscriptions for an API from APIM
 func (instance *Client) DeleteSubscriptions(apiID string) {
 	subsGetURL := instance.devPortalRestURL + "/subscriptions"
@@ -967,20 +997,24 @@ func (instance *Client) DeleteSubscriptions(apiID string) {
 	json.NewDecoder(response.Body).Decode(&subsResponse)
 
 	for _, sub := range subsResponse.List {
-		subsDeleteURL := instance.devPortalRestURL + "/subscriptions/" + sub.SubscriptionID
-
-		request = base.CreateDelete(subsDeleteURL)
-
-		base.SetDefaultRestAPIHeaders(instance.accessToken, request)
-
-		base.LogRequest("apim.DeleteSubscriptions() deleting Subscriptions", request)
-
-		response = base.SendHTTPRequest(request)
-
-		defer response.Body.Close()
-
-		base.ValidateAndLogResponse("apim.DeleteSubscriptions() deleting Subscriptions", response, 200)
+		instance.deleteSubscription(sub.SubscriptionID)
 	}
+}
+
+func (instance *Client) deleteSubscription(subsID string) {
+	subsDeleteURL := instance.devPortalRestURL + "/subscriptions/" + subsID
+
+	request := base.CreateDelete(subsDeleteURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.deleteSubscription() deleting Subscription", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.deleteSubscription() deleting Subscription", response, 200)
 }
 
 // AddApplication : Add new Application to APIM
@@ -1153,19 +1187,7 @@ func (instance *Client) DeleteAllSubscriptions() {
 		json.NewDecoder(response.Body).Decode(&subsResponse)
 
 		for _, sub := range subsResponse.List {
-			subsDeleteURL := instance.devPortalRestURL + "/subscriptions/" + sub.SubscriptionID
-
-			request = base.CreateDelete(subsDeleteURL)
-
-			base.SetDefaultRestAPIHeaders(instance.accessToken, request)
-
-			base.LogRequest("apim.DeleteAllSubscriptions() deleting Subscriptions", request)
-
-			response = base.SendHTTPRequest(request)
-
-			defer response.Body.Close()
-
-			base.ValidateAndLogResponse("apim.DeleteAllSubscriptions() deleting Subscriptions", response, 200)
+			instance.deleteSubscription(sub.SubscriptionID)
 		}
 	}
 }
@@ -1294,18 +1316,23 @@ func (instance *Client) RemoveAllEndpointCerts() {
 	json.NewDecoder(response.Body).Decode(&certificatesResponse)
 
 	for _, certificate := range certificatesResponse.List {
-		certificatesDeleteURL := instance.publisherRestURL + "/endpoint-certificates/" + certificate.Alias
-		request = base.CreateDelete(certificatesDeleteURL)
-
-		base.SetDefaultRestAPIHeaders(instance.accessToken, request)
-
-		base.LogRequest("apim.RemoveAllEndpointCerts() deleting Certs", request)
-
-		response = base.SendHTTPRequest(request)
-		defer response.Body.Close()
-
-		base.ValidateAndLogResponse("apim.RemoveAllEndpointCerts() deleting Certs", response, 200)
+		instance.RemoveEndpointCert(certificate.Alias)
 	}
+}
+
+// RemoveEndpointCert : Remove Endpoint Cert from the Truststore
+func (instance *Client) RemoveEndpointCert(alias string) {
+	certificatesDeleteURL := instance.publisherRestURL + "/endpoint-certificates/" + alias
+	request := base.CreateDelete(certificatesDeleteURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.RemoveEndpointCert() deleting Cert", request)
+
+	response := base.SendHTTPRequest(request)
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.RemoveEndpointCert() deleting Cert", response, 200)
 }
 
 func generateSampleAPIOperations() []APIOperations {

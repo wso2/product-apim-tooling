@@ -33,6 +33,7 @@ type ApiImportExportTestArgs struct {
 	DestAPIM         *apim.Client
 	OverrideProvider bool
 	ParamsFile       string
+	ImportFilePath   string
 }
 
 type ApiProductImportExportTestArgs struct {
@@ -80,7 +81,7 @@ type InitTestArgs struct {
 	CtlUser        Credentials
 	SrcAPIM        *apim.Client
 	InitFlag       string
-	definitionFlag string
+	DefinitionFlag string
 	ForceFlag      bool
 	OasFlag        string
 	APIName        string

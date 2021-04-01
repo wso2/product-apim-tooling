@@ -7,4 +7,5 @@ environments:
             sandbox:
                 url: 'https://localhost:9443/am/sample/pizzashack/v1/api/'
         security:
-            enabled: false
+            production:
+                enabled: false

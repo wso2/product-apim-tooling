@@ -45,8 +45,6 @@ data: # Contains the meta data of the API
   visibleTenants: [] # Visible tenants of the API
   gatewayEnvironments: # Gateway environments that the API is available as a list
    - Production and Sandbox
-  deploymentEnvironments: [] # Selected deployment environments and clusters of the API as a list
-  labels: [] # Labels of micro-gateway environments attached to the API
   mediationPolicies: # Mediation policies attached to the API that should be executed in the runtime {IN|OUT|FAULT}
    -
     id: 3b8cc0a7-6d98-4678-9111-2aba50fa505c
@@ -100,6 +98,16 @@ data: # Contains the meta data of the API
       url: https://localhost:9443/am/sample/pizzashack/v1/api/
     production_endpoints: # Production endpoints
       url: https://localhost:9443/am/sample/pizzashack/v1/api/
+    endpoint_security: # Endpoint security
+      production: # Endpoint security for production
+        password: admin
+        customParameters: {}
+        type: BASIC
+        enabled: true
+        username: admin
+      sandbox: # Endpoint security for sandbox
+        customParameters: {}
+        enabled: false
   endpointImplementationType: ENDPOINT # Implementation of endpoints {ENDPOINT|INLINE }
   scopes: [] # Shared Scopes for API
   operations: # Resources of the API. This is not required since the operations will be anyway updated from the swagger definition of the REST API
@@ -149,3 +157,7 @@ data: # Contains the meta data of the API
   websubSubscriptionConfiguration : "" # Subscription configurations of a WebSub API (Webhook) (This will be in JSON format)
   isRevision : false # Checks whether the API is a revision
   revisionId : 0 # If isRevision=true, then this will contain the UUID of the revision, otherwise it will be 0
+  advertiseInfo: # Advertise only information if an Advertise only API
+      advertised: false # Whether API is an advertised only API or not
+      originalDevPortalUrl: null # The original URL of the Devportal
+      apiOwner: admin # The original owner of the API

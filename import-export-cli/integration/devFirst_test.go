@@ -94,11 +94,11 @@ func TestInitializeAPIWithDefinitionFlag(t *testing.T) {
 	password := superAdminPassword
 
 	args := &testutils.InitTestArgs{
-		CtlUser:   testutils.Credentials{Username: username, Password: password},
-		SrcAPIM:   apim,
-		InitFlag:  projectName,
-		OasFlag:   testutils.TestApiDefinitionPath,
-		ForceFlag: false,
+		CtlUser:        testutils.Credentials{Username: username, Password: password},
+		SrcAPIM:        apim,
+		InitFlag:       projectName,
+		DefinitionFlag: testutils.SampleAPIYamlFilePath,
+		ForceFlag:      false,
 	}
 
 	testutils.ValidateInitializeProjectWithDefinitionFlag(t, args)

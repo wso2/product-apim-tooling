@@ -41,15 +41,15 @@ const secretCreateCmdShortDesc = "Encrypt secrets"
 const secretCreateCmdLongDesc = "Create secrets based on given arguments"
 
 var secretCreateCmdExamples = "To encrypt secret and get output on console\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + secretCmdLiteral + " " + secretCreateCmdLiteral + "\n" +
+	"  " + utils.ProjectName + " " + secretCmdLiteral + " " + secretCreateCmdLiteral + "\n" +
 	"To encrypt secret and get output as a .properties file (stored in the security folder in apictl executable directory)\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + secretCmdLiteral + " " + secretCreateCmdLiteral + " -o file\n" +
+	"  " + utils.ProjectName + " " + secretCmdLiteral + " " + secretCreateCmdLiteral + " -o file\n" +
 	"To encrypt secret and get output as a .yaml file (stored in the security folder in apictl executable directory)\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + secretCmdLiteral + " " + secretCreateCmdLiteral + " -o k8\n" +
+	"  " + utils.ProjectName + " " + secretCmdLiteral + " " + secretCreateCmdLiteral + " -o k8\n" +
 	"To bulk encrypt secrets defined in a properties file\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + secretCmdLiteral + " " + secretCreateCmdLiteral + " -f <file_path>\n" +
+	"  " + utils.ProjectName + " " + secretCmdLiteral + " " + secretCreateCmdLiteral + " -f <file_path>\n" +
 	"To bulk encrypt secrets defined in a properties file and get a .yaml file (stored in the security folder in apictl executable directory)\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + secretCmdLiteral + " " + secretCreateCmdLiteral + " -o k8 -f <file_path>"
+	"  " + utils.ProjectName + " " + secretCmdLiteral + " " + secretCreateCmdLiteral + " -o k8 -f <file_path>"
 
 var secretCreateCmd = &cobra.Command{
 	Use:     secretCreateCmdLiteral,

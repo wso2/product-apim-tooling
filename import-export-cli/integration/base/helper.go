@@ -180,6 +180,11 @@ func ConstructAPIDeploymentDirectoryPath(path, name, version string) string {
 	return filepath.Join(path, "/", utils.DeploymentDirPrefix+name+"-"+version)
 }
 
+// ConstructAPIDeploymentDirectoryPathFromProjectName : Construct the deployment directory path of an API from the project name
+func ConstructAPIDeploymentDirectoryPathFromProjectName(path, projectName string) string {
+	return filepath.Join(path, "/", utils.DeploymentDirPrefix+projectName)
+}
+
 // IsApplicationArchiveExists : Returns true if exported application archive exists on file system, else returns false
 //
 func IsApplicationArchiveExists(t *testing.T, path string, name string, owner string) bool {
@@ -360,14 +365,16 @@ func GetExportedPathFromOutput(output string) string {
 }
 
 //Count number of files in a directory
-func CountFiles(path string) (int, error) {
+func CountFiles(t *testing.T, path string) (int, error) {
 	i := 0
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		return 0, err
 	}
 	for _, file := range files {
+		t.Log("base.CountFiles() - file:", file.Name())
 		if !file.IsDir() {
+			t.Log("base.CountFiles() - file is NOT a directory")
 			i++
 		}
 	}

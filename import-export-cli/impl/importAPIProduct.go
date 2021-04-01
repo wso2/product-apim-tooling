@@ -216,7 +216,7 @@ func replaceEnvVariablesInDependentAPIs(apiProductFilePath string) error {
 	for _, item := range items {
 		apiDirectoryPath := apisDirectoryPath + string(os.PathSeparator) + item.Name()
 
-		fmt.Println("hello" + apiDirectoryPath)
+		utils.Logln(utils.LogPrefixInfo + "Replacing env variables in" + apiDirectoryPath)
 		// Substitutes environment variables in the project files
 		err = replaceEnvVariables(apiDirectoryPath)
 		if err != nil {

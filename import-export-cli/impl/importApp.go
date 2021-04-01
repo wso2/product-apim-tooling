@@ -23,12 +23,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strconv"
 
 	"github.com/go-resty/resty/v2"
@@ -76,15 +74,9 @@ func ImportApplication(accessToken, devportalApplicationsEndpoint, filename, app
 		utils.SearchAndTag + "update=" + strconv.FormatBool(updateApplication)
 	utils.Logln(utils.LogPrefixInfo + "Import URL: " + applicationImportEndpoint)
 
-	applicationFilePath, err := resolveImportFilePath(filename, exportDirectory)
+	applicationFilePath, err := resolveApplicationImportFilePath(filename, exportDirectory)
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating request.", err)
-	}
-
-	utils.Logln(utils.LogPrefixInfo + "Pre Processing Application...")
-	error := preProcessApplication(applicationFilePath)
-	if error != nil {
-		utils.HandleErrorAndExit("Error importing Application", error)
 	}
 
 	// If applicationFilePath contains a directory, zip it. Otherwise, leave it as it is.
@@ -118,50 +110,25 @@ func ImportApplication(accessToken, devportalApplicationsEndpoint, filename, app
 	}
 }
 
-//This function will check whether the .json file is included in the directory or not
-//True is included false otherwise
-func checkDirForJson(appDirectory string) bool {
-	file, err := os.Open(appDirectory)
-
-	if err != nil {
-		log.Fatalf("failed opening directory: %s", err)
-	}
-	defer file.Close()
-
-	list, _ := file.Readdirnames(0) // 0 to read all files and folders
-	//list all files and check for supported type file
-	for _, name := range list {
-		match, _ := regexp.MatchString(".*\\.json", name)
-		if match {
-			return true
+// resolveApplicationImportFilePath resolves the archive/directory for import
+// First will resolve in given path, if not found will try to load from exported directory
+func resolveApplicationImportFilePath(file, defaultExportDirectory string) (string, error) {
+	// check current path
+	utils.Logln(utils.LogPrefixInfo + "Resolving for Application path...")
+	if _, err := os.Stat(file); os.IsNotExist(err) {
+		// if the file not in given path it might be inside exported directory
+		utils.Logln(utils.LogPrefixInfo+"Looking for Application in", defaultExportDirectory)
+		file = filepath.Join(defaultExportDirectory, file)
+		if _, err := os.Stat(file); os.IsNotExist(err) {
+			return "", err
 		}
 	}
-	return false
-}
-
-// This function will check the path and check the type of the Application artifact
-// Returns an error when the unsupported file type is provided
-func preProcessApplication(appDirectory string) error {
-	utils.Logln(utils.LogPrefixInfo+"Loading Application definition from: ", appDirectory)
-	file, err := os.Open(appDirectory)
+	absPath, err := filepath.Abs(file)
 	if err != nil {
-		log.Fatalf("failed opening directory: %s", err)
+		return "", err
 	}
-	fileStat, error := file.Stat()
-	if error != nil {
-		log.Fatalf("failed checking directory: %s", err)
-	}
-	defer file.Close()
 
-	if fileStat.IsDir() {
-		isJsonFileExisted := checkDirForJson(appDirectory)
-		if isJsonFileExisted {
-			return nil
-		} else {
-			return fmt.Errorf("Supported file type is not found in the %s directory", appDirectory)
-		}
-	}
-	return nil
+	return absPath, nil
 }
 
 // NewFileUploadRequest form an HTTP Put request

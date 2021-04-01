@@ -19,8 +19,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
@@ -60,10 +58,6 @@ var ImportAPICmd = &cobra.Command{
 	Example: importAPICmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + ImportAPICmdLiteral + " called")
-		if importAPIRotateRevision == false {
-			fmt.Println("The Rotate revision flag is set to false. Please note that you can only update and deploy the " +
-				"API 5 times without deleting a revision")
-		}
 		cred, err := GetCredentials(importEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)

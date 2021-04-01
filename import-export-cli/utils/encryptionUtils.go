@@ -216,7 +216,6 @@ func printSecretsToYamlFile(secrets map[string]string) {
 		Type:       "Opaque",
 		MetaData: metaData{
 			Name:      "wso2secret",
-			Namespace: "default",
 		},
 	}
 	secretFilePath := getSecretFilePath(encryptedSecretsYamlFileName)

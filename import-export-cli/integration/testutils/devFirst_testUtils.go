@@ -68,7 +68,7 @@ func InitProjectWithDefinitionFlag(t *testing.T, args *InitTestArgs) (string, er
 	base.SetupEnvWithoutTokenFlag(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL())
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	output, err := base.Execute(t, "init", args.InitFlag, "--definition", args.definitionFlag)
+	output, err := base.Execute(t, "init", args.InitFlag, "--definition", args.DefinitionFlag)
 	return output, err
 }
 
