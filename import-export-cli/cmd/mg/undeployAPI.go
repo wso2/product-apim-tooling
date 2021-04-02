@@ -20,6 +20,7 @@ package mg
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 	mgImpl "github.com/wso2/product-apim-tooling/import-export-cli/impl/mg"
@@ -27,11 +28,14 @@ import (
 )
 
 var (
-	undeployAPICmdAPIName    string
-	undeployAPICmdAPIVersion string
-	undeployAPICmdAPIVHost   string
-	undeployAPIEnv           string
+	undeployAPICmdAPIName        string
+	undeployAPICmdAPIVersion     string
+	undeployAPICmdAPIVHost       string
+	undeployAPICmdAPIGatewayEnvs []string
+	undeployAPIEnv               string
 )
+
+const gatewayNameSeparator = ":"
 
 const (
 	undeployAPICmdShortDesc = "Undeploy an API in Microgateway"
@@ -39,12 +43,16 @@ const (
 		"and optionally vhost"
 )
 
-var undeployAPICmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` --environment dev -n petstore -v 0.0.1
-   ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` -n petstore -v 0.0.1 -e dev --vhost www.pets.com 
-   ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` -n SwaggerPetstore -v 0.0.1 --environment dev` +
+var undeployAPICmdExamples = `  ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` --environment dev -n petstore -v 0.0.1
+  ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` -n petstore -v 0.0.1 -e dev --vhost www.pets.com 
+  ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` -n petstore -v 0.0.1 -e dev -g "Production and Sandbox" -g Label1 -g Label2
+  ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` -n petstore -v 0.0.1 -e dev --vhost www.pets.com --gateway-env "Production and Sandbox" 
+  ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` -n SwaggerPetstore -v 0.0.1 --environment dev
 
-	"\n\nNote: The flags --name (-n), --version (-v), --environment (-e) are mandatory. " +
-	"The user needs to be logged in to use this command."
+Note: The flags --name (-n), --version (-v), --environment (-e) are mandatory.
+If the flag (--gateway-env (-g)) is not provided, API will be undeployed from all deployed gateway environments.
+If the flag (--vhost (-t)) is not provided, API with all VHosts will be undeployed.
+The user needs to be logged in to use this command.`
 
 // UndeployAPICmd represents the undeploy api command
 var UndeployAPICmd = &cobra.Command{
@@ -60,6 +68,7 @@ var UndeployAPICmd = &cobra.Command{
 		queryParams["apiName"] = undeployAPICmdAPIName
 		queryParams["version"] = undeployAPICmdAPIVersion
 		queryParams["vhost"] = undeployAPICmdAPIVHost
+		queryParams["environments"] = strings.Join(undeployAPICmdAPIGatewayEnvs, gatewayNameSeparator)
 		err := mgImpl.UndeployAPI(undeployAPIEnv, queryParams)
 		if err != nil {
 			utils.HandleErrorAndExit("Error undeploying API", err)
@@ -75,6 +84,7 @@ func init() {
 	UndeployAPICmd.Flags().StringVarP(&undeployAPICmdAPIName, "name", "n", "", "API name")
 	UndeployAPICmd.Flags().StringVarP(&undeployAPICmdAPIVersion, "version", "v", "", "API version")
 	UndeployAPICmd.Flags().StringVarP(&undeployAPICmdAPIVHost, "vhost", "t", "", "Virtual host the API needs to be undeployed from")
+	UndeployAPICmd.Flags().StringSliceVarP(&undeployAPICmdAPIGatewayEnvs, "gateway-env", "g", []string{}, "Gateway environments the API needs to be undeployed from")
 
 	_ = UndeployAPICmd.MarkFlagRequired("environment")
 	_ = UndeployAPICmd.MarkFlagRequired("name")
