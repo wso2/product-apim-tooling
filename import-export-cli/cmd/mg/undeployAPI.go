@@ -28,11 +28,11 @@ import (
 )
 
 var (
-	undeployAPICmdAPIName       string
-	undeployAPICmdAPIVersion    string
-	undeployAPICmdAPIVHost      string
-	undeployAPICmdAPIGatewayEnv string
-	undeployAPIEnv              string
+	undeployAPICmdAPIName        string
+	undeployAPICmdAPIVersion     string
+	undeployAPICmdAPIVHost       string
+	undeployAPICmdAPIGatewayEnvs []string
+	undeployAPIEnv               string
 )
 
 const gatewayNameSeparator = ":"
@@ -45,7 +45,7 @@ const (
 
 var undeployAPICmdExamples = `  ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` --environment dev -n petstore -v 0.0.1
   ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` -n petstore -v 0.0.1 -e dev --vhost www.pets.com 
-  ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` -n petstore -v 0.0.1 -e dev --gateway-env "Production and Sandbox" Label1 Label2
+  ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` -n petstore -v 0.0.1 -e dev -g "Production and Sandbox" -g Label1 -g Label2
   ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` -n petstore -v 0.0.1 -e dev --vhost www.pets.com --gateway-env "Production and Sandbox" 
   ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` -n SwaggerPetstore -v 0.0.1 --environment dev
 
@@ -68,9 +68,7 @@ var UndeployAPICmd = &cobra.Command{
 		queryParams["apiName"] = undeployAPICmdAPIName
 		queryParams["version"] = undeployAPICmdAPIVersion
 		queryParams["vhost"] = undeployAPICmdAPIVHost
-		// Since other flags does not use args[], gateway-env flag will own all the args
-		gatewayNames := append(args, undeployAPICmdAPIGatewayEnv)
-		queryParams["environments"] = strings.Join(gatewayNames, gatewayNameSeparator)
+		queryParams["environments"] = strings.Join(undeployAPICmdAPIGatewayEnvs, gatewayNameSeparator)
 		err := mgImpl.UndeployAPI(undeployAPIEnv, queryParams)
 		if err != nil {
 			utils.HandleErrorAndExit("Error undeploying API", err)
@@ -86,7 +84,7 @@ func init() {
 	UndeployAPICmd.Flags().StringVarP(&undeployAPICmdAPIName, "name", "n", "", "API name")
 	UndeployAPICmd.Flags().StringVarP(&undeployAPICmdAPIVersion, "version", "v", "", "API version")
 	UndeployAPICmd.Flags().StringVarP(&undeployAPICmdAPIVHost, "vhost", "t", "", "Virtual host the API needs to be undeployed from")
-	UndeployAPICmd.Flags().StringVarP(&undeployAPICmdAPIGatewayEnv, "gateway-env", "g", "", "Gateway environment the API needs to be undeployed from")
+	UndeployAPICmd.Flags().StringSliceVarP(&undeployAPICmdAPIGatewayEnvs, "gateway-env", "g", []string{}, "Gateway environments the API needs to be undeployed from")
 
 	_ = UndeployAPICmd.MarkFlagRequired("environment")
 	_ = UndeployAPICmd.MarkFlagRequired("name")
