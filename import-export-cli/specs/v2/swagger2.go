@@ -305,7 +305,7 @@ func Swagger2Populate(def *APIDTODefinition, document *loads.Document) error {
 		}
 		def.EndpointConfig = &endpointConfig
 	}
-return nil
+	return nil
 }
 
 func GetServerUrlAndSecuritySchemes(pathToSwagger string) (string, string, []byte) {
