@@ -52,7 +52,7 @@ type APIDTODefinition struct {
 	RevisionID                      int32             `json:"revisionId" yaml:"revisionId"`
 	EnableSchemaValidation          bool              `json:"enableSchemaValidation,omitempty" yaml:"enableSchemaValidation,omitempty"`
 	EnableStore                     bool              `json:"enableStore,omitempty" yaml:"enableStore,omitempty"`
-	IsAWSAPI					 bool			   `json:"isAWSAPI,omitempty" yaml:"isAWSAPI,omitempty"`
+	IsAWSAPI					 	bool			   `json:"isAWSAPI,omitempty" yaml:"isAWSAPI,omitempty"`
 	Type                            string            `json:"type,omitempty" yaml:"type,omitempty"`
 	Transport                       []string          `json:"transport,omitempty" yaml:"transport,omitempty"`
 	Tags                            []string          `json:"tags,omitempty" yaml:"tags,omitempty"`

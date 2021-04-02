@@ -40,3 +40,4 @@
  func init() {
 	 AWSCmd.AddCommand(InitCmd)
  }
+ 
