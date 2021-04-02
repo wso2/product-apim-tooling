@@ -647,9 +647,9 @@ func validateAPIIsDeleted(t *testing.T, api *apim.API, apisListAfterDelete *apim
 	}
 }
 
-func ImportApiFromProject(t *testing.T, projectName string, client *apim.Client, apiName string, credentials *Credentials, isCleanup bool) (string, error) {
+func ImportApiFromProject(t *testing.T, projectName string, client *apim.Client, apiName string, credentials *Credentials, isCleanup, isPreserveProvider bool) (string, error) {
 	projectPath, _ := filepath.Abs(projectName)
-	output, err := base.Execute(t, "import", "api", "-f", projectPath, "-e", client.GetEnvName(), "-k", "--verbose")
+	output, err := base.Execute(t, "import", "api", "-f", projectPath, "-e", client.GetEnvName(), "-k", "--verbose", "--preserve-provider=" + strconv.FormatBool(isPreserveProvider))
 
 	base.WaitForIndexing()
 

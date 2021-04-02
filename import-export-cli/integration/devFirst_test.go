@@ -25,10 +25,11 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 )
 
-//Initialize a API project by getting the OAS of a AWS API
-//WARN: To test this you need to have AWS CLI installed and configured
-//WARN: Before running this test create an API on AWS with the name "Shopping" and stage name "Live"
-func TestAWSInitShoppingAPI(t *testing.T) {
+// Initialize a API project by getting the OAS of a AWS API and import it as a super tenant user with
+// the Internal/devops role
+// WARN: To test this you need to have AWS CLI installed and configured
+// WARN: Before running this test create an API on AWS with the name "Shopping" and stage name "Live"
+func TestAWSInitImportSuperTenant(t *testing.T) {
 	username := devops.UserName
 	password := devops.Password
 	apim := GetDevClient()
@@ -44,14 +45,14 @@ func TestAWSInitShoppingAPI(t *testing.T) {
 	}
 
 	testutils.ValidateAWSInitProject(t, args)
-	//testutils.ImportApiFromProject(t, args.ApiNameFlag, args.SrcAPIM, args.ApiNameFlag, &args.CtlUser, true)
-	testutils.ValidateAWSProjectImport(t, args)
+	testutils.ValidateAWSProjectImport(t, args, true)
 }
 
-//Initialize a API project by getting the OAS of a AWS API
-//WARN: To test this you need to have AWS CLI installed and configured
-//WARN: Before running this test create an API on AWS with the name "PetStore" and stage name "beta"
-func TestAWSInitPetStoreAPI(t *testing.T) {
+// Initialize a API project by getting the OAS of a AWS API and import it as a tenant user with
+// the Internal/devops role
+// WARN: To test this you need to have AWS CLI installed and configured
+// WARN: Before running this test create an API on AWS with the name "PetStore" and stage name "beta"
+func TestAWSInitImportTenant(t *testing.T) {
 	username := devops.UserName + "@" + TENANT1
 	password := devops.Password
 	apim := GetDevClient()
@@ -67,7 +68,8 @@ func TestAWSInitPetStoreAPI(t *testing.T) {
 	}
 
 	testutils.ValidateAWSInitProject(t, args)
-	testutils.ValidateAWSProjectImport(t, args)
+	// making preserveprovider false since this is a cross tenant import 
+	testutils.ValidateAWSProjectImport(t, args, false)
 }
 
 //Initialize a project Initialize an API without any flag
