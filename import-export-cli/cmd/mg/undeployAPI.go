@@ -43,11 +43,11 @@ const (
 		"and optionally vhost"
 )
 
-var undeployAPICmdExamples = utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` --environment dev -n petstore -v 0.0.1
-   ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` -n petstore -v 0.0.1 -e dev --vhost www.pets.com 
-   ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` -n petstore -v 0.0.1 -e dev --gateway-env "Production and Sandbox" Label1 Label2
-   ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` -n petstore -v 0.0.1 -e dev --vhost www.pets.com --gateway-env "Production and Sandbox" 
-   ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` -n SwaggerPetstore -v 0.0.1 --environment dev
+var undeployAPICmdExamples = `  ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` --environment dev -n petstore -v 0.0.1
+  ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` -n petstore -v 0.0.1 -e dev --vhost www.pets.com 
+  ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` -n petstore -v 0.0.1 -e dev --gateway-env "Production and Sandbox" Label1 Label2
+  ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` -n petstore -v 0.0.1 -e dev --vhost www.pets.com --gateway-env "Production and Sandbox" 
+  ` + utils.ProjectName + ` ` + mgCmdLiteral + ` ` + undeployCmdLiteral + ` ` + apiCmdLiteral + ` -n SwaggerPetstore -v 0.0.1 --environment dev
 
 Note: The flags --name (-n), --version (-v), --environment (-e) are mandatory.
 If the flag (--gateway-env (-g)) is not provided, API will be undeployed from all deployed gateway environments.
