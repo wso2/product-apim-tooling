@@ -90,6 +90,14 @@ func WriteApplicationToZip(exportAppName, exportAppOwner, zipLocationPath string
 	metaData := utils.MetaData{
 		Name:  exportAppName,
 		Owner: exportAppOwner,
+		DeployConfig: utils.DeployConfig{
+			Import: utils.ImportConfig{
+				Update:            true,
+				PreserveOwner:     true,
+				SkipSubscriptions: false,
+				SkipKeys:          true,
+			},
+		},
 	}
 	err = IncludeMetaFileToZip(tempZipFile, exportedFinalZip, utils.MetaFileApplication, metaData)
 	if err != nil {
