@@ -353,9 +353,25 @@ type APIData struct {
 
 // Project MetaData struct
 type MetaData struct {
-	Name    string `json:"name"`
-	Version string `json:"version,omitempty"`
-	Owner   string `json:"owner,omitempty"`
+	Name         string       `json:"name"`
+	Version      string       `json:"version,omitempty"`
+	Owner        string       `json:"owner,omitempty"`
+	DeployConfig DeployConfig `json:"deploy,omitempty"`
+}
+
+type DeployConfig struct {
+	Import ImportConfig `json:"import,omitempty"`
+}
+
+type ImportConfig struct {
+	Update            bool `json:"update,omitempty"`
+	PreserveProvider  bool `json:"preserveProvider,omitempty"`
+	ImportAPIs        bool `json:"importApis,omitempty"`
+	UpdateAPIProduct  bool `json:"updateApiProduct,omitempty"`
+	UpdateAPIs        bool `json:"updateApis,omitempty"`
+	PreserveOwner     bool `json:"preserveOwner,omitempty"`
+	SkipSubscriptions bool `json:"skipSubscriptions,omitempty"`
+	SkipKeys          bool `json:"skipKeys,omitempty"`
 }
 
 type RevisionListResponse struct {
