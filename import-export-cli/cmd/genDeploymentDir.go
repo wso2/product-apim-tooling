@@ -28,6 +28,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
+	"github.com/wso2/product-apim-tooling/import-export-cli/git"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
@@ -73,7 +74,7 @@ func createDeploymentContentDirectories(name string) error {
 
 // executeGenDeploymentDirCmd will run gen deployment-dir command
 func executeGenDeploymentDirCmd() error {
-	var deploymentDirParent, deploymentDirName, sourceDirectoryPath, tempDirPath string
+	var deploymentDirParent, sourceDirectoryPath, tempDirPath string
 
 	// Check the validity of destination path when it is given if not given use the working directory
 	if genDeploymentDirDestination != "" {
@@ -102,8 +103,6 @@ func executeGenDeploymentDirCmd() error {
 		}
 	}
 
-	// Get the source artifact name
-	deploymentDirName = utils.DeploymentDirPrefix + filepath.Base(genDeploymentDirSource)
 	if info, err := os.Stat(genDeploymentDirSource); err == nil && !info.IsDir() {
 
 		//extract zip to a temp directory
@@ -112,14 +111,18 @@ func executeGenDeploymentDirCmd() error {
 		if err != nil {
 			return err
 		}
-		// if artifact is given as zip the extracted file name will contains "/" character. It should be removed
-		deploymentDirName = utils.DeploymentDirPrefix + strings.Trim(path[0], "/")
-
 		// extract the new source file name after unzipping into the temp directory
 		sourceDirectoryPath = filepath.Join(tempDirPath, path[0])
 	} else {
 		sourceDirectoryPath = genDeploymentDirSource
 	}
+
+	projectType, err := retreiveProjectTypeByDefinitionFileName(sourceDirectoryPath)
+	if err != nil {
+		return err
+	}
+
+	deploymentDirName := generateDeploymentDirName(projectType, sourceDirectoryPath, genDeploymentDirSource)
 
 	deploymentDirPath, err := filepath.Abs(filepath.Join(deploymentDirParent, deploymentDirName))
 	if err != nil {
@@ -128,11 +131,6 @@ func executeGenDeploymentDirCmd() error {
 
 	//Create the deployment directory
 	err = utils.CreateDir(deploymentDirPath)
-	if err != nil {
-		return err
-	}
-
-	projectType, err := retreiveProjectTypeByDefinitionFileName(sourceDirectoryPath)
 	if err != nil {
 		return err
 	}
@@ -201,7 +199,7 @@ func executeGenDeploymentDirCmd() error {
 	}
 
 	fmt.Println("The deployment directory for " + genDeploymentDirSource + " file is generated at " +
-		deploymentDirParent + " directory")
+		deploymentDirParent + " directory: " + deploymentDirName)
 
 	return nil
 }
@@ -228,6 +226,32 @@ func retreiveProjectTypeByDefinitionFileName(sourceDirectoryPath string) (string
 		}
 	}
 	return "", errors.New("Cannot decide the project type by the definition file name")
+}
+
+// generateDeploymentDirName will derive the name of the deployment directory using the information in the meta data file
+func generateDeploymentDirName(projectType, sourceDirectoryPath, genDeploymentDirSource string) string {
+	var deploymentDirName string
+	var metaDataReadingError error
+	var metaData *utils.MetaData
+	if projectType == utils.ProjectTypeApi {
+		metaData, metaDataReadingError = git.LoadMetaDataFile(sourceDirectoryPath + string(os.PathSeparator) + utils.MetaFileAPI)
+	} else if projectType == utils.ProjectTypeApiProduct {
+		metaData, metaDataReadingError = git.LoadMetaDataFile(sourceDirectoryPath + string(os.PathSeparator) + utils.MetaFileAPIProduct)
+	} else if projectType == utils.ProjectTypeApplication {
+		metaData, metaDataReadingError = git.LoadMetaDataFile(sourceDirectoryPath + string(os.PathSeparator) + utils.MetaFileApplication)
+	}
+	if metaDataReadingError != nil {
+		deploymentDirName = utils.DeploymentDirPrefix + filepath.Base(genDeploymentDirSource)
+		fmt.Println("Error while reading the meta data file from " + sourceDirectoryPath +
+			" . Hence, the deployment directory will have the project name as: " + deploymentDirName)
+	} else {
+		if projectType == utils.ProjectTypeApplication {
+			deploymentDirName = utils.DeploymentDirPrefix + metaData.Name + "-" + metaData.Owner
+		} else {
+			deploymentDirName = utils.DeploymentDirPrefix + metaData.Name + "-" + metaData.Version
+		}
+	}
+	return deploymentDirName
 }
 
 // getEnvsCmd represents the envs command
