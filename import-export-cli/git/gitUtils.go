@@ -654,20 +654,24 @@ func checkProjectTypeOfSpecificPath(repoBasePath, fullPath string,
 	//  *_meta.yaml to determine the project type
 	for _, f := range files {
 		fullPathWithFileName := filepath.Join(fullPath, f.Name())
-		metaData, err := loadMetaDataFile(fullPathWithFileName)
-		projectParams.MetaData = metaData
 		switch f.Name() {
 		case utils.MetaFileAPI:
+			metaData, err := loadMetaDataFile(fullPathWithFileName)
+			projectParams.MetaData = metaData
 			projectParams.Type = utils.ProjectTypeApi
 			if err != nil {
 				utils.HandleErrorAndExit("Error while parsing "+utils.MetaFileAPI+" file:"+fullPathWithFileName, err)
 			}
 		case utils.MetaFileAPIProduct:
+			metaData, err := loadMetaDataFile(fullPathWithFileName)
+			projectParams.MetaData = metaData
 			projectParams.Type = utils.ProjectTypeApiProduct
 			if err != nil {
 				utils.HandleErrorAndExit("Error while parsing "+utils.MetaFileAPIProduct+" file:"+fullPathWithFileName, err)
 			}
 		case utils.MetaFileApplication:
+			metaData, err := loadMetaDataFile(fullPathWithFileName)
+			projectParams.MetaData = metaData
 			projectParams.Type = utils.ProjectTypeApplication
 			if err != nil {
 				utils.HandleErrorAndExit("Error while parsing "+utils.MetaFileApplication+" file:"+fullPathWithFileName, err)
