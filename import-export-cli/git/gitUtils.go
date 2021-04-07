@@ -179,24 +179,72 @@ func failedDuringEarlierDeploy(vcsEnvConfig Environment, projectParams *params.P
 // accesstoken is the access token to access the APIM product REST APIs
 // environment is the environment name
 func Rollback(accessToken, environment string) error {
-	repoId, totalProjectsToUpdate, updatedProjectsPerType := GetStatus(environment, FromRevTypeLastSuccessful)
-	_, envVCSConfig, hasEnv := getVCSEnvironmentDetails(repoId, environment)
+	mainConfig := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
 
-	if !hasEnv || len(envVCSConfig.FailedProjects) == 0 {
+	changeDirectoryToSourceRepo(mainConfig)
+
+	// Get the status of the source repo
+	sourceRepoId, _, sourceRepoUpdatedProjectsPerType := GetStatus(environment, FromRevTypeLastSuccessful)
+	_, envVCSConfigSourceRepo, hasEnvSourceRepo := getVCSEnvironmentDetails(sourceRepoId, environment)
+
+	var deploymentRepoId string
+	var envVCSConfigDeploymentRepo Environment
+	var hasEnvDeploymentRepo bool
+	var deploymentRepoUpdatedProjectsPerType map[string][]*params.ProjectParams
+	if mainConfig.Config.VCSDeploymentRepoPath != "" {
+		changeDirectory(mainConfig.Config.VCSDeploymentRepoPath)
+		// Get the status of the deployment repo
+		deploymentRepoId, _, deploymentRepoUpdatedProjectsPerType = GetStatus(environment, FromRevTypeLastAttempted)
+		_, envVCSConfigDeploymentRepo, hasEnvDeploymentRepo = getVCSEnvironmentDetails(sourceRepoId, environment)
+	}
+
+	if (!hasEnvSourceRepo || !hasEnvDeploymentRepo) ||
+		(len(envVCSConfigSourceRepo.FailedProjects) == 0 || len(envVCSConfigDeploymentRepo.FailedProjects) == 0) {
 		return errors.New("Nothing to rollback")
 	}
 
-	if len(envVCSConfig.LastSuccessfulRev) == 0 {
+	if len(envVCSConfigSourceRepo.LastSuccessfulRev) == 0 || len(envVCSConfigDeploymentRepo.LastSuccessfulRev) == 0 {
 		return errors.New("Failed to rollback as there are no previous successful revisions")
 	}
-	lastSuccessfulRevision := envVCSConfig.LastSuccessfulRev[0]
 
-	currentBranch := getCurrentBranch()
-	tmpBranchName := "tmp-" + lastSuccessfulRevision[0:8]
-	checkoutNewBranchFromRevision(tmpBranchName, lastSuccessfulRevision)
-	deployUpdatedProjects(accessToken, repoId, environment, totalProjectsToUpdate, updatedProjectsPerType)
-	checkoutBranch(currentBranch)
-	deleteTmpBranch(tmpBranchName)
+	// Get the aggregated status of both the source and the deployment repos
+	totalProjectsToUpdate, updatedProjectsPerType := aggregateSourceAndDeploymentStatusResults(sourceRepoUpdatedProjectsPerType,
+		deploymentRepoUpdatedProjectsPerType)
+
+	// Store the last successful revisions of both the source and the deployment repos
+	lastSuccessfulRevisionSourceRepo := envVCSConfigSourceRepo.LastSuccessfulRev[0]
+	lastSuccessfulRevisionDeploymentRepo := envVCSConfigDeploymentRepo.LastSuccessfulRev[0]
+
+	// Change directory to source repo and checkout to a new branch from the revision
+	changeDirectoryToSourceRepo(mainConfig)
+	currentBranchSourceRepo := getCurrentBranch()
+	tmpBranchNameSourceRepo := "tmp-" + lastSuccessfulRevisionSourceRepo[0:8]
+	checkoutNewBranchFromRevision(tmpBranchNameSourceRepo, lastSuccessfulRevisionSourceRepo)
+
+	// Change directory to deployment repo and checkout to a new branch from the revision
+	if mainConfig.Config.VCSDeploymentRepoPath != "" {
+		changeDirectory(mainConfig.Config.VCSDeploymentRepoPath)
+	}
+	currentBranchDeploymentRepo := getCurrentBranch()
+	tmpBranchNameDeploymentRepo := "tmp-" + lastSuccessfulRevisionDeploymentRepo[0:8]
+	checkoutNewBranchFromRevision(tmpBranchNameDeploymentRepo, lastSuccessfulRevisionDeploymentRepo)
+
+	// Again change directory to the source repo and deploy the updated projects
+	changeDirectoryToSourceRepo(mainConfig)
+	deployUpdatedProjects(accessToken, sourceRepoId, deploymentRepoId, environment, totalProjectsToUpdate, updatedProjectsPerType)
+
+	// Checkout to the current branch and delete the tmp branch in source repo
+	checkoutBranch(currentBranchSourceRepo)
+	deleteTmpBranch(tmpBranchNameSourceRepo)
+
+	// Chanage directory to the deployment repo
+	if mainConfig.Config.VCSDeploymentRepoPath != "" {
+		changeDirectory(mainConfig.Config.VCSDeploymentRepoPath)
+	}
+	// Checkout to the current branch and delete the tmp branch in deployment repo
+	checkoutBranch(currentBranchDeploymentRepo)
+	deleteTmpBranch(tmpBranchNameDeploymentRepo)
+
 	return nil
 }
 
@@ -258,8 +306,6 @@ func deployProjectDeletions(accessToken, environment string, deletedProjectsPerT
 			if handleIfError(err, failedProjects, projectParam) {
 				continue
 			}
-			projectParam.ProjectInfo.Name = appInfo.Name
-			projectParam.ProjectInfo.Owner = appInfo.Subscriber.Name
 			resp, err := impl.DeleteApplication(accessToken, environment, appInfo.Name, appInfo.Subscriber.Name)
 			if handleIfError(err, failedProjects, projectParam) {
 				continue
@@ -278,9 +324,6 @@ func deployProjectDeletions(accessToken, environment string, deletedProjectsPerT
 			if handleIfError(err, failedProjects, projectParam) {
 				continue
 			}
-			projectParam.ProjectInfo.Name = apiProductInfo.ID.APIProductName
-			projectParam.ProjectInfo.Owner = apiProductInfo.ID.ProviderName
-			projectParam.ProjectInfo.Version = apiProductInfo.ID.Version
 			resp, err := impl.DeleteAPIProduct(accessToken, environment, apiProductInfo.ID.APIProductName, apiProductInfo.ID.ProviderName)
 			if handleIfError(err, failedProjects, projectParam) {
 				continue
@@ -299,9 +342,6 @@ func deployProjectDeletions(accessToken, environment string, deletedProjectsPerT
 			if handleIfError(err, failedProjects, projectParam) {
 				continue
 			}
-			projectParam.ProjectInfo.Name = apiInfo.ID.APIName
-			projectParam.ProjectInfo.Owner = apiInfo.ID.ProviderName
-			projectParam.ProjectInfo.Version = apiInfo.ID.Version
 			resp, err := impl.DeleteAPI(accessToken, environment, apiInfo.ID.APIName, apiInfo.ID.Version, apiInfo.ID.ProviderName)
 			if handleIfError(err, failedProjects, projectParam) {
 				continue
@@ -325,7 +365,8 @@ func handleIfError(err error, failedProjects map[string][]*params.ProjectParams,
 // Deploys the updated projects. It will only handle new or updated projects and deleted projects will be tracked and
 // skipped. Those deleted projects will be returned from the 2nd return argument.
 // accesstoken is the access token to access the APIM product REST APIs
-// repoId is the id of the git repository (located in vcs.yaml)
+// sourceRepoId is the id of the source git repository (located in vcs.yaml)
+// deploymentRepoId is the id of the deployment git repository (located in vcs.yaml)
 // environment is the environment name
 // totalProjectsToUpdate is the number of total projects that needs to be deployed.
 // updatedProjectsPerType is a map of string -> ProjectParams which consists of updated projects per each type (API, App..)
@@ -334,7 +375,7 @@ func handleIfError(err error, failedProjects map[string][]*params.ProjectParams,
 //  deleted projects
 // Returns map[string][]*params.ProjectParams, a map of project type (API, App.. ) to each project detail which are
 //  failed during the deployment
-func deployUpdatedProjects(accessToken, repoId, environment string, totalProjectsToUpdate int,
+func deployUpdatedProjects(accessToken, sourceRepoId, deploymentRepoId, environment string, totalProjectsToUpdate int,
 	updatedProjectsPerType map[string][]*params.ProjectParams) (bool, map[string][]*params.ProjectParams,
 	map[string][]*params.ProjectParams) {
 	if totalProjectsToUpdate == 0 {
@@ -347,6 +388,7 @@ func deployUpdatedProjects(accessToken, repoId, environment string, totalProject
 	var failedProjects = make(map[string][]*params.ProjectParams)
 	var hasDeletedProjects bool
 	var deletedProjectsPerType = make(map[string][]*params.ProjectParams)
+	mainConfig := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
 
 	// deploying API projects
 	apiProjects := updatedProjectsPerType[utils.ProjectTypeApi]
@@ -361,8 +403,12 @@ func deployUpdatedProjects(accessToken, repoId, environment string, totalProject
 			}
 			importParams := projectParam.MetaData.DeployConfig.Import
 			fmt.Println(strconv.Itoa(i+1) + ": " + projectParam.NickName + ": (" + projectParam.RelativePath + ")")
-			err := impl.ImportAPIToEnv(accessToken, environment, projectParam.AbsolutePath, "",
-				importParams.Update, importParams.PreserveProvider, false, false, false)
+			projectDeploymentParamsDirLocation := generateDeploymentProjectPath(mainConfig, projectParam)
+			if dirExists, _ := utils.IsDirExists(projectDeploymentParamsDirLocation); !dirExists {
+				projectDeploymentParamsDirLocation = ""
+			}
+			err := impl.ImportAPIToEnv(accessToken, environment, generateSourceProjectPath(mainConfig, projectParam),
+				projectDeploymentParamsDirLocation, importParams.Update, importParams.PreserveProvider, false, false, false)
 			if err != nil {
 				fmt.Println("Error... ", err)
 				failedProjects[projectParam.Type] = append(failedProjects[projectParam.Type], projectParam)
@@ -383,8 +429,12 @@ func deployUpdatedProjects(accessToken, repoId, environment string, totalProject
 			}
 			importParams := projectParam.MetaData.DeployConfig.Import
 			fmt.Println(strconv.Itoa(i+1) + ": " + projectParam.NickName + ": (" + projectParam.RelativePath + ")")
-			err := impl.ImportAPIProductToEnv(accessToken, environment, projectParam.AbsolutePath, "",
-				importParams.ImportAPIs, importParams.UpdateAPIs, importParams.UpdateAPIProduct,
+			projectDeploymentParamsDirLocation := generateDeploymentProjectPath(mainConfig, projectParam)
+			if dirExists, _ := utils.IsDirExists(projectDeploymentParamsDirLocation); !dirExists {
+				projectDeploymentParamsDirLocation = ""
+			}
+			err := impl.ImportAPIProductToEnv(accessToken, environment, generateSourceProjectPath(mainConfig, projectParam),
+				projectDeploymentParamsDirLocation, importParams.ImportAPIs, importParams.UpdateAPIs, importParams.UpdateAPIProduct,
 				importParams.PreserveProvider, false, false, false)
 			if err != nil {
 				fmt.Println("\terror... ", err)
@@ -418,7 +468,11 @@ func deployUpdatedProjects(accessToken, repoId, environment string, totalProject
 	// If there are no deleted projects, update the VCS config file as there is nothing remaining to do.
 	//  If there are deleted projects, this needs to handle after deleting those.
 	if !hasDeletedProjects {
-		updateVCSConfig(repoId, environment, failedProjects)
+		updateVCSConfig(sourceRepoId, environment, failedProjects)
+	}
+	if mainConfig.Config.VCSDeploymentRepoPath != "" && deploymentRepoId != "" {
+		changeDirectory(mainConfig.Config.VCSDeploymentRepoPath)
+		updateVCSConfig(deploymentRepoId, environment, failedProjects)
 	}
 
 	return hasDeletedProjects, deletedProjectsPerType, failedProjects
@@ -471,20 +525,39 @@ func handleProjectDeletion(i int, projectParam *params.ProjectParams, deletedPro
 // accesstoken is the access token to access the APIM product REST APIs
 // environment is the environment name
 func DeployChangedFiles(accessToken, environment string) map[string][]*params.ProjectParams {
-	repoId, totalProjectsToUpdate, updatedProjectsPerType := GetStatus(environment, FromRevTypeLastAttempted)
-	hasDeletedProjects, deletedProjectsPerType, failedProjects :=
-		deployUpdatedProjects(accessToken, repoId, environment, totalProjectsToUpdate, updatedProjectsPerType)
+	mainConfig := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
 
+	changeDirectoryToSourceRepo(mainConfig)
+	// Get the status of the source repo
+	sourceRepoId, _, sourceRepoUpdatedProjectsPerType := GetStatus(environment, FromRevTypeLastAttempted)
+
+	var deploymentRepoId string
+	var deploymentRepoUpdatedProjectsPerType map[string][]*params.ProjectParams
+	if mainConfig.Config.VCSDeploymentRepoPath != "" {
+		changeDirectory(mainConfig.Config.VCSDeploymentRepoPath)
+		// Get the status of the deployment repo
+		deploymentRepoId, _, deploymentRepoUpdatedProjectsPerType = GetStatus(environment, FromRevTypeLastAttempted)
+	}
+
+	// Get the aggregated status of both the source and the deployment repos
+	totalProjectsToUpdate, updatedProjectsPerType := aggregateSourceAndDeploymentStatusResults(sourceRepoUpdatedProjectsPerType,
+		deploymentRepoUpdatedProjectsPerType)
+
+	// Again change directory to the source repo and deploy the updated projects
+	changeDirectoryToSourceRepo(mainConfig)
+	hasDeletedProjects, deletedProjectsPerType, failedProjects :=
+		deployUpdatedProjects(accessToken, sourceRepoId, deploymentRepoId, environment, totalProjectsToUpdate, updatedProjectsPerType)
+
+	// Deletion will only be considered for source repo
 	if hasDeletedProjects {
 		//check whether project deletion is disabled
-		mainConfig := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
 		if !mainConfig.Config.VCSDeletionEnabled {
 			utils.HandleErrorAndExit("Error: there are projects to delete while project "+
 				"deletion is disabled via VCS", nil)
 		}
 
 		// work on deleted files
-		_, envVCSConfig, hasEnv := getVCSEnvironmentDetails(repoId, environment)
+		_, envVCSConfig, hasEnv := getVCSEnvironmentDetails(sourceRepoId, environment)
 		if !hasEnv || len(envVCSConfig.LastSuccessfulRev) == 0 {
 			utils.HandleErrorAndExit("Error: there are projects to delete but no last successful "+
 				"revision available in vcs config (vcs_config.yaml)", nil)
@@ -501,7 +574,7 @@ func DeployChangedFiles(accessToken, environment string) map[string][]*params.Pr
 		deleteTmpBranch(tmpBranchName)
 
 		// Update the VCS config with failed projects, last attempted and last successful revisions
-		updateVCSConfig(repoId, environment, failedProjects)
+		updateVCSConfig(sourceRepoId, environment, failedProjects)
 	}
 	return failedProjects
 }
@@ -656,21 +729,21 @@ func checkProjectTypeOfSpecificPath(repoBasePath, fullPath string,
 		fullPathWithFileName := filepath.Join(fullPath, f.Name())
 		switch f.Name() {
 		case utils.MetaFileAPI:
-			metaData, err := loadMetaDataFile(fullPathWithFileName)
+			metaData, err := LoadMetaDataFile(fullPathWithFileName)
 			projectParams.MetaData = metaData
 			projectParams.Type = utils.ProjectTypeApi
 			if err != nil {
 				utils.HandleErrorAndExit("Error while parsing "+utils.MetaFileAPI+" file:"+fullPathWithFileName, err)
 			}
 		case utils.MetaFileAPIProduct:
-			metaData, err := loadMetaDataFile(fullPathWithFileName)
+			metaData, err := LoadMetaDataFile(fullPathWithFileName)
 			projectParams.MetaData = metaData
 			projectParams.Type = utils.ProjectTypeApiProduct
 			if err != nil {
 				utils.HandleErrorAndExit("Error while parsing "+utils.MetaFileAPIProduct+" file:"+fullPathWithFileName, err)
 			}
 		case utils.MetaFileApplication:
-			metaData, err := loadMetaDataFile(fullPathWithFileName)
+			metaData, err := LoadMetaDataFile(fullPathWithFileName)
 			projectParams.MetaData = metaData
 			projectParams.Type = utils.ProjectTypeApplication
 			if err != nil {
@@ -723,7 +796,7 @@ func executeGitCommand(args ...string) (string, error) {
 
 // loadMetaDataFile Loads a meta data file of a Project located in path.
 // It returns an error or a valid MetaData
-func loadMetaDataFile(path string) (*utils.MetaData, error) {
+func LoadMetaDataFile(path string) (*utils.MetaData, error) {
 	fileContent, err := params.GetEnvSubstitutedFileContent(path)
 	if err != nil {
 		return nil, err
@@ -736,4 +809,94 @@ func loadMetaDataFile(path string) (*utils.MetaData, error) {
 	}
 
 	return metaData, err
+}
+
+// aggregateSourceAndDeploymentStatusResults Creates an Aggregated list of source and deployment projects to be updated
+func aggregateSourceAndDeploymentStatusResults(sourceRepoUpdatedProjectsPerType,
+	deploymentRepoUpdatedProjectsPerType map[string][]*params.ProjectParams) (int, map[string][]*params.ProjectParams) {
+
+	var totalNumberOfProjects = 0
+	finalAggregatedProjectsPerType := make(map[string][]*params.ProjectParams)
+
+	finalAggregatedProjectsPerType[utils.ProjectTypeApi] = []*params.ProjectParams{}
+	var updatedApiProjects []string // This will be used only for search to know whether a project is already there
+	addProjectsToUniqueList(sourceRepoUpdatedProjectsPerType, finalAggregatedProjectsPerType,
+		&updatedApiProjects, utils.ProjectTypeApi, &totalNumberOfProjects)
+	addProjectsToUniqueList(deploymentRepoUpdatedProjectsPerType, finalAggregatedProjectsPerType,
+		&updatedApiProjects, utils.ProjectTypeApi, &totalNumberOfProjects)
+
+	finalAggregatedProjectsPerType[utils.ProjectTypeApiProduct] = []*params.ProjectParams{}
+	var updatedApiProductProjects []string // This will be used only for search to know whether a project is already there
+	addProjectsToUniqueList(sourceRepoUpdatedProjectsPerType, finalAggregatedProjectsPerType,
+		&updatedApiProductProjects, utils.ProjectTypeApiProduct, &totalNumberOfProjects)
+	addProjectsToUniqueList(deploymentRepoUpdatedProjectsPerType, finalAggregatedProjectsPerType,
+		&updatedApiProductProjects, utils.ProjectTypeApiProduct, &totalNumberOfProjects)
+
+	finalAggregatedProjectsPerType[utils.ProjectTypeApplication] = []*params.ProjectParams{}
+	var updatedApplicationProjects []string // This will be used only for search to know whether a project is already there
+	addProjectsToUniqueList(sourceRepoUpdatedProjectsPerType, finalAggregatedProjectsPerType,
+		&updatedApplicationProjects, utils.ProjectTypeApplication, &totalNumberOfProjects)
+	addProjectsToUniqueList(deploymentRepoUpdatedProjectsPerType, finalAggregatedProjectsPerType,
+		&updatedApplicationProjects, utils.ProjectTypeApplication, &totalNumberOfProjects)
+
+	return totalNumberOfProjects, finalAggregatedProjectsPerType
+}
+
+// addProjectsToUniqueList will iterates a project list belongs to a particular type (API/API Product)
+// and add to a list if the project is not already in the list
+func addProjectsToUniqueList(projectsPerType, finalAggregatedProjectsPerType map[string][]*params.ProjectParams,
+	updatedProjects *[]string, projectType string, count *int) {
+	if len(projectsPerType[projectType]) > 0 {
+		for _, projectParam := range projectsPerType[projectType] {
+			projectNameAndVersion := projectParam.MetaData.Name + "-" + projectParam.MetaData.Version
+			if !contains(*updatedProjects, projectNameAndVersion) {
+				finalAggregatedProjectsPerType[projectType] = append(finalAggregatedProjectsPerType[projectType],
+					projectParam)
+				*updatedProjects = append(*updatedProjects, projectNameAndVersion)
+				(*count) += 1
+			}
+		}
+	}
+}
+
+// contains will check whether a particular string is inside a string slice/array
+func contains(stringSlice []string, element string) bool {
+	for _, elementFromSlice := range stringSlice {
+		if elementFromSlice == element {
+			return true
+		}
+	}
+	return false
+}
+
+// changeDirectory will change the directory to the repoPath specified
+func changeDirectory(repoPath string) {
+	err := os.Chdir(repoPath)
+	if err != nil {
+		utils.HandleErrorAndExit("Error while changing the current directory to "+repoPath, err)
+	}
+	utils.Logln("Changed the current directory to  " + repoPath)
+}
+
+// changeDirectoryToSourceRepo will change the directory to the source repo set in mainConfig
+func changeDirectoryToSourceRepo(mainConfig *utils.MainConfig) {
+	currentDir, err := os.Getwd()
+	if err != nil {
+		utils.HandleErrorAndExit("Error while retrieving the current directory path.", err)
+	}
+	if !strings.EqualFold(currentDir, mainConfig.Config.VCSSourceRepoPath) {
+		changeDirectory(mainConfig.Config.VCSSourceRepoPath)
+	}
+}
+
+// generateSourceProjectPath will derive the source project path by name and the version of an API/API Product
+func generateSourceProjectPath(mainConfig *utils.MainConfig, projectParam *params.ProjectParams) string {
+	return mainConfig.Config.VCSSourceRepoPath + string(os.PathSeparator) + projectParam.MetaData.Name +
+		"-" + projectParam.MetaData.Version
+}
+
+// generateSourceProjectPath will derive the deployment project path by name and the version of an API/API Product
+func generateDeploymentProjectPath(mainConfig *utils.MainConfig, projectParam *params.ProjectParams) string {
+	return mainConfig.Config.VCSDeploymentRepoPath + string(os.PathSeparator) +
+		utils.DeploymentDirPrefix + projectParam.MetaData.Name + "-" + projectParam.MetaData.Version
 }

@@ -111,7 +111,6 @@ type ProjectParams struct {
 	NickName                   string          `yaml:"nickName,omitempty"`
 	FailedDuringPreviousDeploy bool            `yaml:"failedDuringPreviousDeploy,omitempty"`
 	Deleted                    bool            `yaml:"deleted,omitempty"`
-	ProjectInfo                ProjectInfo     `yaml:"projectInfo,omitempty"`
 	MetaData                   *utils.MetaData `yaml:"metaData,omitempty"`
 }
 
