@@ -52,7 +52,7 @@ type APIDTODefinition struct {
 	RevisionID                      int32             `json:"revisionId" yaml:"revisionId"`
 	EnableSchemaValidation          bool              `json:"enableSchemaValidation,omitempty" yaml:"enableSchemaValidation,omitempty"`
 	EnableStore                     bool              `json:"enableStore,omitempty" yaml:"enableStore,omitempty"`
-	IsAWSAPI					 	bool			   `json:"isAWSAPI,omitempty" yaml:"isAWSAPI,omitempty"`
+	IsAWSAPI                        bool              `json:"isAWSAPI,omitempty" yaml:"isAWSAPI,omitempty"`
 	Type                            string            `json:"type,omitempty" yaml:"type,omitempty"`
 	Transport                       []string          `json:"transport,omitempty" yaml:"transport,omitempty"`
 	Tags                            []string          `json:"tags,omitempty" yaml:"tags,omitempty"`
@@ -175,18 +175,19 @@ type CorsConfiguration struct {
 	AccessControlAllowMethods     []string `json:"accessControlAllowMethods,omitempty" yaml:"accessControlAllowMethods,omitempty"`
 }
 type Document struct {
-	Type    		string 	`json:"type,omitempty" yaml:"type,omitempty"`
-	Version 		string 	`json:"version,omitempty" yaml:"version,omitempty"`
-	Data			Data	`json:"data,omitempty" yaml:"data,omitempty"`
+	Type    string `json:"type,omitempty" yaml:"type,omitempty"`
+	Version string `json:"version,omitempty" yaml:"version,omitempty"`
+	Data    Data   `json:"data,omitempty" yaml:"data,omitempty"`
 }
 type Data struct {
-	Name          	string `json:"name,omitempty" yaml:"name,omitempty"`
-	Type          	string `json:"type,omitempty" yaml:"type,omitempty"`
-	Summary       	string `json:"summary,omitempty" yaml:"summary,omitempty"`
-	SourceType    	string `json:"sourceType,omitempty" yaml:"sourceType,omitempty"`
-	OtherTypeName	string `json:"otherTypeName,omitempty" yaml:"otherTypeName,omitempty"`
-	Visibility    	string `json:"visibility,omitempty" yaml:"visibility,omitempty"`
+	Name          string `json:"name,omitempty" yaml:"name,omitempty"`
+	Type          string `json:"type,omitempty" yaml:"type,omitempty"`
+	Summary       string `json:"summary,omitempty" yaml:"summary,omitempty"`
+	SourceType    string `json:"sourceType,omitempty" yaml:"sourceType,omitempty"`
+	OtherTypeName string `json:"otherTypeName,omitempty" yaml:"otherTypeName,omitempty"`
+	Visibility    string `json:"visibility,omitempty" yaml:"visibility,omitempty"`
 }
+
 // AdvertiseInfo : Advertise only information
 type AdvertiseInfo struct {
 	Advertised           bool   `json:"advertised" yaml:"advertised"`

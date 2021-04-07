@@ -24,18 +24,18 @@ import (
 	"path"
 	"strings"
 
-
 	"io/ioutil"
 	"os"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/specs/params"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 
 	"github.com/Jeffail/gabs"
 	"github.com/go-openapi/loads"
 	"github.com/mitchellh/mapstructure"
 )
 
-// to awsinit
+// Servers represent servers of an AWS API
 type Servers struct {
 	Servers []struct {
 		Url       string `json:"url"`
@@ -47,6 +47,7 @@ type Servers struct {
 	} `json:"servers"`
 }
 
+// EndpointConfig represent EndpointConfigs of an AWS API
 type EndpointConfig struct {
 	EndpointType        string `yaml:"endpoint_type" json:"endpoint_type"`
 	ProductionEndpoints struct {
@@ -64,17 +65,17 @@ type SecuritySchemes struct {
 			CognitoAuthorizer struct {
 				AuthType string `json:"x-amazon-apigateway-authtype"`
 			} `json:"CognitoAuthorizer"`
-			APIKey 	 struct {
+			APIKey struct {
 				Type string `json:"type"`
 			} `json:"api_key"`
-			Sigv4 	 struct {
+			Sigv4 struct {
 				AuthType string `json:"x-amazon-apigateway-authtype"`
 			} `json:"sigv4"`
 		} `json:"securitySchemes"`
-	}`json:"components"`
+	} `json:"components"`
 	ResourcePolicy struct {
 		Version string `json:"Version"`
-	}	`json:"x-amazon-apigateway-policy"`
+	} `json:"x-amazon-apigateway-policy"`
 }
 
 func swagger2XWO2BasePath(document *loads.Document) (string, bool) {
@@ -244,10 +245,6 @@ func buildHttpEndpoint(production *Endpoints, sandbox *Endpoints) string {
 	return jsonObj.String()
 }
 
-func AddAwsTag(def *APIDTODefinition) {
-	def.Tags = append(def.Tags, "AWS") //adding the "aws" tag to all APIs imported using the "aws init" command 
-}
-
 // generateFieldsFromSwagger3 using swagger
 func Swagger2Populate(def *APIDTODefinition, document *loads.Document) error {
 	def.Name = document.Spec().Info.Title
@@ -308,19 +305,23 @@ func Swagger2Populate(def *APIDTODefinition, document *loads.Document) error {
 	return nil
 }
 
+func AddAwsTag(def *APIDTODefinition) {
+	def.Tags = append(def.Tags, "AWS") //adding the "aws" tag to all APIs imported using the "aws init" command
+}
+
 func GetServerUrlAndSecuritySchemes(pathToSwagger string) (string, string, []byte) {
 	oas3File, err := os.Open(pathToSwagger)
 	if err != nil {
-		fmt.Println(err)
+		utils.HandleErrorAndExit("", err)
 	}
 	defer oas3File.Close()
 
 	byteValue, _ := ioutil.ReadAll(oas3File)
 
-	var servers Servers  
+	var servers Servers
 	json.Unmarshal(byteValue, &servers)
 
-	url  := servers.Servers[0].Url
+	url := servers.Servers[0].Url
 	stage := servers.Servers[0].Variables.BasePath.Default
 	productionUrl := strings.ReplaceAll(url, "/{basePath}", stage)
 	sandboxUrl := strings.ReplaceAll(url, "/{basePath}", stage)
