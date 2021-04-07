@@ -20,16 +20,20 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strconv"
+	"text/template"
 
 	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/formatter"
 	"github.com/wso2/product-apim-tooling/import-export-cli/git"
 	"github.com/wso2/product-apim-tooling/import-export-cli/specs/params"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 var flagVCSStatusEnvName string // name of the environment to be added
+var flagVCSStatusFormat string  // format of the output to be printed
 
 // push command related usage Info
 const vcsStatusCmdLiteral = "status"
@@ -58,10 +62,15 @@ var VCSStatusCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Println("Projects to Deploy (" + strconv.Itoa(totalProjectsToUpdate) + ")")
-		printProjectsToUpdate(utils.ProjectTypeApi, updatedProjectsPerType[utils.ProjectTypeApi])
-		printProjectsToUpdate(utils.ProjectTypeApiProduct, updatedProjectsPerType[utils.ProjectTypeApiProduct])
-		printProjectsToUpdate(utils.ProjectTypeApplication, updatedProjectsPerType[utils.ProjectTypeApplication])
+		if flagVCSStatusFormat != "" {
+			printResultJson(flagVCSStatusFormat, updatedProjectsPerType)
+		} else {
+			// Normal print without json
+			fmt.Println("Projects to Deploy (" + strconv.Itoa(totalProjectsToUpdate) + ")")
+			printProjectsToUpdate(utils.ProjectTypeApi, updatedProjectsPerType[utils.ProjectTypeApi])
+			printProjectsToUpdate(utils.ProjectTypeApiProduct, updatedProjectsPerType[utils.ProjectTypeApiProduct])
+			printProjectsToUpdate(utils.ProjectTypeApplication, updatedProjectsPerType[utils.ProjectTypeApplication])
+		}
 	},
 }
 
@@ -85,11 +94,31 @@ func printProjectsToUpdate(projectType string, projects []*params.ProjectParams)
 	}
 }
 
+func printResultJson(format string, updatedProjectsPerType map[string][]*params.ProjectParams) {
+	resultContext := formatter.NewContext(os.Stdout, format)
+
+	// create a new renderer function which iterate collection
+	renderer := func(w io.Writer, t *template.Template) error {
+		if err := t.Execute(w, updatedProjectsPerType); err != nil {
+			return err
+		}
+		_, _ = w.Write([]byte{'\n'})
+		return nil
+	}
+
+	// execute context
+	if err := resultContext.Write(renderer, params.ProjectParams{}); err != nil {
+		fmt.Println("Error executing template:", err.Error())
+	}
+}
+
 func init() {
 	VCSCmd.AddCommand(VCSStatusCmd)
 
 	VCSStatusCmd.Flags().StringVarP(&flagVCSStatusEnvName, "environment", "e", "", "Name of the "+
 		"environment to check the project(s) status")
+	VCSStatusCmd.Flags().StringVarP(&flagVCSStatusFormat, "format", "", "",
+		"Pretty-print status (only supported \"{{ jsonPretty . }}\" and \"{{ json . }}\")")
 
 	_ = VCSStatusCmd.MarkFlagRequired("environment")
 }
