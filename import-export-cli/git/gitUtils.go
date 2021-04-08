@@ -187,7 +187,7 @@ func Rollback(accessToken, environment string) error {
 	sourceRepoId, _, sourceRepoUpdatedProjectsPerType := GetStatus(environment, FromRevTypeLastSuccessful)
 	_, envVCSConfigSourceRepo, hasEnvSourceRepo := getVCSEnvironmentDetails(sourceRepoId, environment)
 
-	var deploymentRepoId string
+	var deploymentRepoId, currentBranchDeploymentRepo, tmpBranchNameDeploymentRepo string
 	var envVCSConfigDeploymentRepo Environment
 	var hasEnvDeploymentRepo bool
 	var deploymentRepoUpdatedProjectsPerType map[string][]*params.ProjectParams
@@ -195,16 +195,24 @@ func Rollback(accessToken, environment string) error {
 		changeDirectory(mainConfig.Config.VCSDeploymentRepoPath)
 		// Get the status of the deployment repo
 		deploymentRepoId, _, deploymentRepoUpdatedProjectsPerType = GetStatus(environment, FromRevTypeLastAttempted)
-		_, envVCSConfigDeploymentRepo, hasEnvDeploymentRepo = getVCSEnvironmentDetails(sourceRepoId, environment)
+		_, envVCSConfigDeploymentRepo, hasEnvDeploymentRepo = getVCSEnvironmentDetails(deploymentRepoId, environment)
 	}
 
-	if (!hasEnvSourceRepo || !hasEnvDeploymentRepo) ||
-		(len(envVCSConfigSourceRepo.FailedProjects) == 0 || len(envVCSConfigDeploymentRepo.FailedProjects) == 0) {
-		return errors.New("Nothing to rollback")
-	}
-
-	if len(envVCSConfigSourceRepo.LastSuccessfulRev) == 0 || len(envVCSConfigDeploymentRepo.LastSuccessfulRev) == 0 {
-		return errors.New("Failed to rollback as there are no previous successful revisions")
+	if mainConfig.Config.VCSDeploymentRepoPath != "" {
+		if (!hasEnvSourceRepo || !hasEnvDeploymentRepo) ||
+			(len(envVCSConfigSourceRepo.FailedProjects) == 0 || len(envVCSConfigDeploymentRepo.FailedProjects) == 0) {
+			return errors.New("Nothing to rollback")
+		}
+		if len(envVCSConfigSourceRepo.LastSuccessfulRev) == 0 || len(envVCSConfigDeploymentRepo.LastSuccessfulRev) == 0 {
+			return errors.New("Failed to rollback as there are no previous successful revisions")
+		}
+	} else {
+		if !hasEnvSourceRepo || len(envVCSConfigSourceRepo.FailedProjects) == 0 {
+			return errors.New("Nothing to rollback")
+		}
+		if len(envVCSConfigSourceRepo.LastSuccessfulRev) == 0 {
+			return errors.New("Failed to rollback as there are no previous successful revisions")
+		}
 	}
 
 	// Get the aggregated status of both the source and the deployment repos
@@ -213,7 +221,10 @@ func Rollback(accessToken, environment string) error {
 
 	// Store the last successful revisions of both the source and the deployment repos
 	lastSuccessfulRevisionSourceRepo := envVCSConfigSourceRepo.LastSuccessfulRev[0]
-	lastSuccessfulRevisionDeploymentRepo := envVCSConfigDeploymentRepo.LastSuccessfulRev[0]
+	var lastSuccessfulRevisionDeploymentRepo string
+	if mainConfig.Config.VCSDeploymentRepoPath != "" {
+		lastSuccessfulRevisionDeploymentRepo = envVCSConfigDeploymentRepo.LastSuccessfulRev[0]
+	}
 
 	// Change directory to source repo and checkout to a new branch from the revision
 	changeDirectoryToSourceRepo(mainConfig)
@@ -224,15 +235,18 @@ func Rollback(accessToken, environment string) error {
 	// Change directory to deployment repo and checkout to a new branch from the revision
 	if mainConfig.Config.VCSDeploymentRepoPath != "" {
 		changeDirectory(mainConfig.Config.VCSDeploymentRepoPath)
+		currentBranchDeploymentRepo = getCurrentBranch()
+		tmpBranchNameDeploymentRepo = "tmp-" + lastSuccessfulRevisionDeploymentRepo[0:8]
+		checkoutNewBranchFromRevision(tmpBranchNameDeploymentRepo, lastSuccessfulRevisionDeploymentRepo)
+
 	}
-	currentBranchDeploymentRepo := getCurrentBranch()
-	tmpBranchNameDeploymentRepo := "tmp-" + lastSuccessfulRevisionDeploymentRepo[0:8]
-	checkoutNewBranchFromRevision(tmpBranchNameDeploymentRepo, lastSuccessfulRevisionDeploymentRepo)
 
 	// Again change directory to the source repo and deploy the updated projects
 	changeDirectoryToSourceRepo(mainConfig)
 	deployUpdatedProjects(accessToken, sourceRepoId, deploymentRepoId, environment, totalProjectsToUpdate, updatedProjectsPerType)
 
+	// Again change directory to the source repo (because inside deployUpdatedProjects the directory must have changed to the deployment)
+	changeDirectoryToSourceRepo(mainConfig)
 	// Checkout to the current branch and delete the tmp branch in source repo
 	checkoutBranch(currentBranchSourceRepo)
 	deleteTmpBranch(tmpBranchNameSourceRepo)
@@ -240,10 +254,11 @@ func Rollback(accessToken, environment string) error {
 	// Chanage directory to the deployment repo
 	if mainConfig.Config.VCSDeploymentRepoPath != "" {
 		changeDirectory(mainConfig.Config.VCSDeploymentRepoPath)
+		// Checkout to the current branch and delete the tmp branch in deployment repo
+		checkoutBranch(currentBranchDeploymentRepo)
+		deleteTmpBranch(tmpBranchNameDeploymentRepo)
+
 	}
-	// Checkout to the current branch and delete the tmp branch in deployment repo
-	checkoutBranch(currentBranchDeploymentRepo)
-	deleteTmpBranch(tmpBranchNameDeploymentRepo)
 
 	return nil
 }
