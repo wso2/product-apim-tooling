@@ -32,56 +32,42 @@ import (
 func TestExtractAPIProductInfoWithCorrectJSON(t *testing.T) {
 	// Correct json
 	content := `{
-	  "id": {
-		"providerName": "admin",
-		"apiProductName": "APIProductName",
-		"version": "1.0.0"
-	  },
-	  "uuid": "e4d0c1be-44e9-43ad-b434-f8e2f02dad11",
-	  "description": "Some API Product Description",
-	  "type": "HTTP",
-	  "context": "/api-product/1.0.0",
-	  "contextTemplate": "/api-product/{version}",
-	  "tags": [
-		"api-product"
-	  ]
+	  "type": "api_product",
+      "version": "v4.0.0",
+	  "data": {
+		"id": "e4d0c1be-44e9-43ad-b434-f8e2f02dad11",
+		"name": "APIProductName",
+		"provider" : "devops"
+	  }
 	}`
 
 	apiProduct, err := extractAPIProductDefinition([]byte(content))
 	assert.Equal(t, err, nil, "Should return nil error for correct json")
-	assert.Equal(t, apiProduct.ID, v2.ProductID{ProviderName: "admin", Version: "1.0.0", APIProductName: "APIProductName"},
+	assert.Equal(t, apiProduct.Data, v2.APIProductDTODefinition{Provider: "devops", Name: "APIProductName"},
 		"Should parse correct json")
 }
 
-func TestExtractAPIProductInfoWhenIDTagMissing(t *testing.T) {
+func TestExtractAPIProductInfoWhenDataTagMissing(t *testing.T) {
 	// When ID tag missing
 	content := `{
-	  "description": "Some API Product Description",
-	  "type": "HTTP",
-	  "context": "/api-product/1.0.0",
-	  "contextTemplate": "/api-product/{version}",
-	  "tags": [
-		"api-product"
-	  ]
-	}`
-
+		"type": "api_product",
+		"version": "v4.0.0"
+	  }`
 	apiProduct, err := extractAPIProductDefinition([]byte(content))
 	assert.Nil(t, err, "Should return nil error")
-	assert.Equal(t, v2.ProductID{}, apiProduct.ID, "Should return empty IDInfo when ID tag missing")
+	assert.Equal(t, v2.APIProductDTODefinition{}, apiProduct.Data, "Should return empty Data when ID tag missing")
 }
 
 func TestExtractAPIProductInfoWithMalformedJSON(t *testing.T) {
 	// Malformed json
 	content := `{
-	  "uuid": "e4d0c1be-44e9-43ad-b434-f8e2f02dad11",
-	  "description": "Some API Product Description",
-	  "type": "HTTP",
-	  "context": "/api-product/1.0.0",
-	  "contextTemplate": "/api-product/{version}",
-	  "tags": [
-		"api-product"
-	  
-	}`
+		"type": "api_product",
+		"version": "v4.0.0",
+		"data": {
+		  "id": "e4d0c1be-44e9-43ad-b434-f8e2f02dad11",
+		  "name": "APIProductName",
+		  "provider" : "devops"
+	  }`
 
 	apiProduct, err := extractAPIProductDefinition([]byte(content))
 	assert.Nil(t, apiProduct, "Should return nil API Product struct")
@@ -91,7 +77,7 @@ func TestExtractAPIProductInfoWithMalformedJSON(t *testing.T) {
 func TestGetAPIProductInfoCorrectDirectoryStructure(t *testing.T) {
 	apiProduct, _, err := GetAPIProductDefinition(utils.GetRelativeTestDataPathFromImpl() + "MyProduct-1.0.0")
 	assert.Nil(t, err, "Should return nil error on reading correct directories")
-	assert.Equal(t, v2.ProductID{APIProductName: "MyProduct", Version: "1.0.0", ProviderName: "admin"}, apiProduct.ID,
+	assert.Equal(t, v2.APIProductDTODefinition{Provider: "admin", Name: "MyProduct"}, apiProduct.Data,
 		"Should return correct values for ID info")
 }
 
