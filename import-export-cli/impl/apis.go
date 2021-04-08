@@ -80,7 +80,7 @@ func GetAPIId(accessToken, environment, apiName, apiVersion, apiProvider string)
 }
 
 // GetAPIDefinition scans filePath and returns APIDefinition or an error
-func GetAPIDefinition(filePath string) (*v2.APIDefinition, []byte, error) {
+func GetAPIDefinition(filePath string) (*v2.APIDefinitionFile, []byte, error) {
 	info, err := os.Stat(filePath)
 	if err != nil {
 		return nil, nil, err
@@ -88,7 +88,7 @@ func GetAPIDefinition(filePath string) (*v2.APIDefinition, []byte, error) {
 
 	var buffer []byte
 	if info.IsDir() {
-		_, content, err := resolveYamlOrJSON(path.Join(filePath, "Meta-information", "api"))
+		_, content, err := resolveYamlOrJSON(path.Join(filePath, "api"))
 		if err != nil {
 			return nil, nil, err
 		}
@@ -131,7 +131,7 @@ func GetAPIList(accessToken, apiListEndpoint, query, limit string) (count int32,
 	if limit != "" {
 		queryParamSring += getQueryParamConnector() + "limit=" + limit
 	}
-	utils.Logln(utils.LogPrefixInfo+"URL:", apiListEndpoint + "?" + queryParamSring)
+	utils.Logln(utils.LogPrefixInfo+"URL:", apiListEndpoint+"?"+queryParamSring)
 	resp, err := utils.InvokeGETRequestWithQueryParamsString(apiListEndpoint, queryParamSring, headers)
 
 	if err != nil {

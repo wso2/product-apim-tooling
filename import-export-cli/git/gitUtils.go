@@ -321,7 +321,8 @@ func deployProjectDeletions(accessToken, environment string, deletedProjectsPerT
 			if handleIfError(err, failedProjects, projectParam) {
 				continue
 			}
-			resp, err := impl.DeleteApplication(accessToken, environment, appInfo.Name, appInfo.Subscriber.Name)
+			resp, err := impl.DeleteApplication(accessToken, environment, appInfo.Data.Applicationinfo.Name,
+				appInfo.Data.Applicationinfo.Owner)
 			if handleIfError(err, failedProjects, projectParam) {
 				continue
 			}
@@ -339,7 +340,7 @@ func deployProjectDeletions(accessToken, environment string, deletedProjectsPerT
 			if handleIfError(err, failedProjects, projectParam) {
 				continue
 			}
-			resp, err := impl.DeleteAPIProduct(accessToken, environment, apiProductInfo.ID.APIProductName, apiProductInfo.ID.ProviderName)
+			resp, err := impl.DeleteAPIProduct(accessToken, environment, apiProductInfo.Data.Name, apiProductInfo.Data.Provider)
 			if handleIfError(err, failedProjects, projectParam) {
 				continue
 			}
@@ -357,7 +358,7 @@ func deployProjectDeletions(accessToken, environment string, deletedProjectsPerT
 			if handleIfError(err, failedProjects, projectParam) {
 				continue
 			}
-			resp, err := impl.DeleteAPI(accessToken, environment, apiInfo.ID.APIName, apiInfo.ID.Version, apiInfo.ID.ProviderName)
+			resp, err := impl.DeleteAPI(accessToken, environment, apiInfo.Data.Name, apiInfo.Data.Version, apiInfo.Data.Provider)
 			if handleIfError(err, failedProjects, projectParam) {
 				continue
 			}
@@ -565,6 +566,7 @@ func DeployChangedFiles(accessToken, environment string) map[string][]*params.Pr
 
 	// Deletion will only be considered for source repo
 	if hasDeletedProjects {
+		changeDirectoryToSourceRepo(mainConfig)
 		//check whether project deletion is disabled
 		if !mainConfig.Config.VCSDeletionEnabled {
 			utils.HandleErrorAndExit("Error: there are projects to delete while project "+
@@ -863,11 +865,10 @@ func addProjectsToUniqueList(projectsPerType, finalAggregatedProjectsPerType map
 	updatedProjects *[]string, projectType string, count *int) {
 	if len(projectsPerType[projectType]) > 0 {
 		for _, projectParam := range projectsPerType[projectType] {
-			projectNameAndVersion := projectParam.MetaData.Name + "-" + projectParam.MetaData.Version
-			if !contains(*updatedProjects, projectNameAndVersion) {
+			if !contains(*updatedProjects, projectParam.NickName) {
 				finalAggregatedProjectsPerType[projectType] = append(finalAggregatedProjectsPerType[projectType],
 					projectParam)
-				*updatedProjects = append(*updatedProjects, projectNameAndVersion)
+				*updatedProjects = append(*updatedProjects, projectParam.NickName)
 				(*count) += 1
 			}
 		}

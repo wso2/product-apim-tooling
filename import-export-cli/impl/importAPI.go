@@ -45,8 +45,8 @@ var (
 )
 
 // extractAPIDefinition extracts API information from jsonContent
-func extractAPIDefinition(jsonContent []byte) (*v2.APIDefinition, error) {
-	api := &v2.APIDefinition{}
+func extractAPIDefinition(jsonContent []byte) (*v2.APIDefinitionFile, error) {
+	api := &v2.APIDefinitionFile{}
 	err := json.Unmarshal(jsonContent, &api)
 	if err != nil {
 		return nil, err

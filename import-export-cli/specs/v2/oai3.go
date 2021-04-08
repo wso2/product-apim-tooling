@@ -20,10 +20,8 @@ package v2
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 func oai3XWSO2Cors(exts map[string]interface{}) (*CorsConfiguration, bool, error) {
@@ -136,38 +134,4 @@ func oai3GetHttpVerbs(item *openapi3.PathItem) (verbs []string) {
 		verbs = append(verbs, "OPTIONS")
 	}
 	return
-}
-
-// generateFieldsFromSwagger3 using swagger
-func OpenAPI3Populate(def *APIDefinition, swagger *openapi3.Swagger) {
-	def.ID.APIName = utils.ToPascalCase(swagger.Info.Title)
-	def.ID.Version = swagger.Info.Version
-	def.Description = swagger.Info.Description
-	def.Context = fmt.Sprintf("/%s/%s", def.ID.APIName, def.ID.Version)
-	def.ContextTemplate = fmt.Sprintf("/%s/{version}", def.ID.APIName)
-
-	// TODO implement xwso2 vendor extensions, since swagger 2.0 parser works out of the box this was not implemented now
-	var uriTemplates []URITemplates
-	for uri, info := range swagger.Paths {
-		uriTemplate := URITemplates{}
-		uriTemplate.URITemplate = uri
-		verbs := oai3GetHttpVerbs(info)
-		uriTemplate.HTTPVerbs = verbs
-		if len(verbs) > 0 {
-			uriTemplate.HTTPVerb = verbs[0]
-		}
-		authTypes := make([]string, len(verbs))
-		throttlingTiers := make([]string, len(verbs))
-		for i := 0; i < len(verbs); i++ {
-			authTypes[i] = "Any"
-			throttlingTiers[i] = "Unlimited"
-		}
-		uriTemplate.AuthType = "Any"
-		uriTemplate.AuthTypes = authTypes
-		uriTemplate.ThrottlingTier = "Unlimited"
-		uriTemplate.ThrottlingTiers = throttlingTiers
-		uriTemplate.Scopes = make([]*Scopes, len(verbs))
-		uriTemplates = append(uriTemplates, uriTemplate)
-	}
-	def.URITemplates = uriTemplates
 }
