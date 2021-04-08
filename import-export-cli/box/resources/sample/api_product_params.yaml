@@ -57,8 +57,10 @@ environments:
           deploymentEnvironments:
               - displayOnDevportal:
                 deploymentEnvironment:
+                deploymentVhost:
               - displayOnDevportal:
                 deploymentEnvironment:
+                deploymentVhost:
           mutualSslCerts:
               - tierName:
                 alias:

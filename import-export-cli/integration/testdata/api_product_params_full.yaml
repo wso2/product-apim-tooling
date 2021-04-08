@@ -29,6 +29,7 @@ environments:
           deploymentEnvironments:
               - displayOnDevportal: true
                 deploymentEnvironment: Production and Sandbox
+                deploymentVhost: localhost
           mutualSslCerts:
               - tierName: Gold
                 alias: bob
