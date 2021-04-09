@@ -67,8 +67,8 @@ func TestInitDeploymentDirImportExportAdvertiseOnlyAPIAdminSuperTenant(t *testin
 	}
 
 	// Store the deployment directory path to be provided as the params during import
-	importExportArgs.ParamsFile = base.ConstructAPIDeploymentDirectoryPathFromProjectName(genDeploymentDirArgs.Destination,
-		projectName)
+	importExportArgs.ParamsFile = base.ConstructAPIDeploymentDirectoryPath(genDeploymentDirArgs.Destination,
+		api.Name, api.Version)
 	testutils.ValidateAPIImportExportWithDeploymentDirForAdvertiseOnlyAPI(t, importExportArgs)
 }
 
@@ -116,8 +116,8 @@ func TestInitDeploymentDirImportExportAdvertiseOnlyAPIAdminTenant(t *testing.T) 
 	}
 
 	// Store the deployment directory path to be provided as the params during import
-	importExportArgs.ParamsFile = base.ConstructAPIDeploymentDirectoryPathFromProjectName(genDeploymentDirArgs.Destination,
-		projectName)
+	importExportArgs.ParamsFile = base.ConstructAPIDeploymentDirectoryPath(genDeploymentDirArgs.Destination,
+		api.Name, api.Version)
 	testutils.ValidateAPIImportExportWithDeploymentDirForAdvertiseOnlyAPI(t, importExportArgs)
 }
 
@@ -165,8 +165,8 @@ func TestInitDeploymentDirImportExportAdvertiseOnlyAPIDevopsSuperTenant(t *testi
 	}
 
 	// Store the deployment directory path to be provided as the params during import
-	importExportArgs.ParamsFile = base.ConstructAPIDeploymentDirectoryPathFromProjectName(genDeploymentDirArgs.Destination,
-		projectName)
+	importExportArgs.ParamsFile = base.ConstructAPIDeploymentDirectoryPath(genDeploymentDirArgs.Destination,
+		api.Name, api.Version)
 	testutils.ValidateAPIImportExportWithDeploymentDirForAdvertiseOnlyAPI(t, importExportArgs)
 }
 
@@ -215,7 +215,7 @@ func TestInitDeploymentDirImportExportAdvertiseOnlyAPIDevopsTenant(t *testing.T)
 	}
 
 	// Store the deployment directory path to be provided as the params during import
-	importExportArgs.ParamsFile = base.ConstructAPIDeploymentDirectoryPathFromProjectName(genDeploymentDirArgs.Destination,
-		projectName)
+	importExportArgs.ParamsFile = base.ConstructAPIDeploymentDirectoryPath(genDeploymentDirArgs.Destination,
+		api.Name, api.Version)
 	testutils.ValidateAPIImportExportWithDeploymentDirForAdvertiseOnlyAPI(t, importExportArgs)
 }
