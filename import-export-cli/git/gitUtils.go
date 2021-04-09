@@ -472,8 +472,8 @@ func deployUpdatedProjects(accessToken, sourceRepoId, deploymentRepoId, environm
 			}
 			importParams := projectParam.MetaData.DeployConfig.Import
 			fmt.Println(strconv.Itoa(i+1) + ": " + projectParam.NickName + ": (" + projectParam.RelativePath + ")")
-			_, err := impl.ImportApplicationToEnv(accessToken, environment, projectParam.AbsolutePath, "", importParams.Update,
-				importParams.PreserveOwner, importParams.SkipSubscriptions, importParams.SkipKeys, false)
+			_, err := impl.ImportApplicationToEnv(accessToken, environment, projectParam.AbsolutePath, projectParam.MetaData.Owner,
+				importParams.Update, importParams.PreserveOwner, importParams.SkipSubscriptions, importParams.SkipKeys, false)
 			if err != nil {
 				fmt.Println("\terror... ", err)
 				failedProjects[projectParam.Type] = append(failedProjects[projectParam.Type], projectParam)
@@ -865,7 +865,14 @@ func addProjectsToUniqueList(projectsPerType, finalAggregatedProjectsPerType map
 	updatedProjects *[]string, projectType string, count *int) {
 	if len(projectsPerType[projectType]) > 0 {
 		for _, projectParam := range projectsPerType[projectType] {
-			if !contains(*updatedProjects, projectParam.NickName) {
+			var projectName string
+			if projectParam.MetaData != nil {
+				projectName = projectParam.MetaData.Name + "-" + projectParam.MetaData.Version
+			} else {
+				// This situation happens when deleting an API/API Product since the meta file is already deleted
+				projectName = projectParam.NickName
+			}
+			if !contains(*updatedProjects, projectName) {
 				finalAggregatedProjectsPerType[projectType] = append(finalAggregatedProjectsPerType[projectType],
 					projectParam)
 				*updatedProjects = append(*updatedProjects, projectParam.NickName)
