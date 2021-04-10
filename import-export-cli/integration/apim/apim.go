@@ -154,7 +154,7 @@ func (instance *Client) GenerateSampleAPIData(provider string) *API {
 	api.AccessControl = "NONE"
 	api.AuthorizationHeader = "Authorization"
 	api.EndpointImplementationType = "ENDPOINT"
-	api.GatewayEnvironments = []string{"Production and Sandbox"}
+	api.GatewayEnvironments = []string{"Default"}
 	api.BusinessInformation = BusinessInfo{"Jane Roe", "marketing@pizzashack.com", "John Doe", "architecture@pizzashack.com"}
 	api.EndpointConfig = HTTPEndpoint{"http", &URLConfig{"https://localhost:" + strconv.Itoa(9443+instance.portOffset) + "/am/sample/pizzashack/v1/api/"},
 		&URLConfig{"https://localhost:" + strconv.Itoa(9443+instance.portOffset) + "/am/sample/pizzashack/v1/api/"}}
@@ -193,7 +193,7 @@ func (instance *Client) GenerateAdditionalProperties(provider string) string {
 			}
 		},
 	"gatewayEnvironments":[
-	   "Production and Sandbox"
+	   "Default"
 	]}`
 	return additionalProperties
 }
@@ -630,7 +630,7 @@ func (instance *Client) DeployAPIRevision(t *testing.T, apiID string, revision *
 	deploymentInfoArray := []APIRevisionDeployment{}
 	deploymentInfo := APIRevisionDeployment{}
 	deploymentInfo.RevisionUUID = revision.ID
-	deploymentInfo.Name = "Production and Sandbox"
+	deploymentInfo.Name = "Default"
 	deploymentInfo.VHost = "localhost"
 	deploymentInfo.DisplayOnDevportal = true
 	deploymentInfoArray = append(deploymentInfoArray, deploymentInfo)
@@ -688,7 +688,7 @@ func (instance *Client) DeployAPIProductRevision(t *testing.T, apiProductID stri
 	deploymentInfoArray := []APIRevisionDeployment{}
 	deploymentInfo := APIRevisionDeployment{}
 	deploymentInfo.RevisionUUID = revision.ID
-	deploymentInfo.Name = "Production and Sandbox"
+	deploymentInfo.Name = "Default"
 	deploymentInfo.VHost = "localhost"
 	deploymentInfo.DisplayOnDevportal = true
 	deploymentInfoArray = append(deploymentInfoArray, deploymentInfo)

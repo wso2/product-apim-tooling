@@ -31,7 +31,7 @@ data:
   visibleRoles: []
   visibleTenants: []
   gatewayEnvironments:
-   - Production and Sandbox
+   - Default
   mediationPolicies: []
   subscriptionAvailability: CURRENT_TENANT
   subscriptionAvailableTenants: []

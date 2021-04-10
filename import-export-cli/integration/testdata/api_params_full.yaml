@@ -30,7 +30,7 @@ environments:
               path: carol.crt
         deploymentEnvironments:
             - displayOnDevportal: true
-              deploymentEnvironment: Production and Sandbox
+              deploymentEnvironment: Default
               deploymentVhost: localhost
         policies:
             - Gold

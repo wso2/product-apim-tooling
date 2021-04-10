@@ -18,7 +18,7 @@ data:
   accessControl: NONE
   accessControlRoles: []
   gatewayEnvironments:
-   - Production and Sandbox
+   - Default
   transport:
    - http
    - https
