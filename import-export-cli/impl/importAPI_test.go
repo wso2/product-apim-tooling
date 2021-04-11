@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -30,42 +31,33 @@ import (
 func TestExtractAPIInfoWithCorrectJSON(t *testing.T) {
 	// Correct json
 	content := `{
-	  "id": {
-		"providerName": "admin",
-		"apiName": "APIName",
-		"version": "1.0.0"
-	  },
-	  "uuid": "e4d0c1be-44e9-43ad-b434-f8e2f02dad11",
-	  "description": "Some API Description",
-	  "type": "HTTP",
-	  "context": "/api/1.0.0",
-	  "contextTemplate": "/api/{version}",
-	  "tags": [
-		"api"
-	  ]
-	}`
+		"type": "api",
+		"version": "v4.0.0",
+		"data": {
+		  "id": "e4d0c1be-44e9-43ad-b434-f8e2f02dad11",
+		  "name": "APIName",
+		  "provider": "devops",
+		  "version": "1.0.0"
+		}
+	  }`
 
 	api, err := extractAPIDefinition([]byte(content))
 	assert.Equal(t, err, nil, "Should return nil error for correct json")
-	assert.Equal(t, api.ID, v2.ID{ProviderName: "admin", Version: "1.0.0", APIName: "APIName"},
-		"Should parse correct json")
+	assert.Equal(t, api.Data.Name, "APIName", "Should parse correct json")
+	assert.Equal(t, api.Data.Provider, "devops", "Should parse correct json")
+	assert.Equal(t, api.Data.Version, "1.0.0", "Should parse correct json")
 }
 
-func TestExtractAPIInfoWhenIDTagMissing(t *testing.T) {
+func TestExtractAPIInfoWhenDataTagMissing(t *testing.T) {
 	// When ID tag missing
 	content := `{
-	  "description": "Some API Description",
-	  "type": "HTTP",
-	  "context": "/api/1.0.0",
-	  "contextTemplate": "/api/{version}",
-	  "tags": [
-		"api"
-	  ]
-	}`
+		"type": "api",
+		"version": "v4.0.0"
+	  }`
 
 	api, err := extractAPIDefinition([]byte(content))
 	assert.Nil(t, err, "Should return nil error")
-	assert.Equal(t, v2.ID{}, api.ID, "Should return empty IDInfo when ID tag missing")
+	assert.Equal(t, v2.APIDTODefinition{}, api.Data, "Should return empty Data when ID tag missing")
 }
 
 func TestExtractAPIInfoWithMalformedJSON(t *testing.T) {
@@ -87,10 +79,11 @@ func TestExtractAPIInfoWithMalformedJSON(t *testing.T) {
 }
 
 func TestGetAPIInfoCorrectDirectoryStructure(t *testing.T) {
-	api, _, err := GetAPIDefinition("testdata/PizzaShackAPI-1.0.0")
+	api, _, err := GetAPIDefinition(utils.GetRelativeTestDataPathFromImpl() + "PizzaShackAPI-1.0.0")
 	assert.Nil(t, err, "Should return nil error on reading correct directories")
-	assert.Equal(t, v2.ID{APIName: "PizzaShackAPI", Version: "1.0.0", ProviderName: "admin"}, api.ID,
-		"Should return correct values for ID info")
+	assert.Equal(t, api.Data.Name, "PizzaShackAPI", "Should return correct values for API name")
+	assert.Equal(t, api.Data.Provider, "admin", "Should return correct values for API provider")
+	assert.Equal(t, api.Data.Version, "1.0.0", "Should return correct values for API version")
 }
 
 func TestGetAPIInfoMalformedDirectory(t *testing.T) {

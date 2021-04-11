@@ -187,12 +187,6 @@ const ParamFile = "params.yaml"
 const ParamsIntermediateFile = "intermediate_params.yaml"
 
 const (
-	ParamFileAPI         = "api_params.yaml"
-	ParamFileAPIProduct  = "api_product_params.yaml"
-	ParamFileApplication = "application_params.yaml"
-)
-
-const (
 	APIDefinitionFileYaml         = "api.yaml"
 	APIDefinitionFileJson         = "api.json"
 	APIProductDefinitionFileYaml  = "api_product.yaml"

@@ -105,16 +105,13 @@ type ApplicationImportParams struct {
 }
 
 type ProjectParams struct {
-	Type                       string             `yaml:"type"`
-	AbsolutePath               string             `yaml:"absolutePath,omitempty"`
-	RelativePath               string             `yaml:"relativePath,omitempty"`
-	NickName                   string             `yaml:"nickName,omitempty"`
-	FailedDuringPreviousDeploy bool               `yaml:"failedDuringPreviousDeploy,omitempty"`
-	Deleted                    bool               `yaml:"deleted,omitempty"`
-	ProjectInfo                ProjectInfo        `yaml:"projectInfo,omitempty"`
-	ApiParams                  *ApiParams         `yaml:"apiParams,omitempty"`
-	ApiProductParams           *ApiProductParams  `yaml:"apiProductParams,omitempty"`
-	ApplicationParams          *ApplicationParams `yaml:"applicationParams,omitempty"`
+	Type                       string          `yaml:"type"`
+	AbsolutePath               string          `yaml:"absolutePath,omitempty"`
+	RelativePath               string          `yaml:"relativePath,omitempty"`
+	NickName                   string          `yaml:"nickName,omitempty"`
+	FailedDuringPreviousDeploy bool            `yaml:"failedDuringPreviousDeploy,omitempty"`
+	Deleted                    bool            `yaml:"deleted,omitempty"`
+	MetaData                   *utils.MetaData `yaml:"metaData,omitempty"`
 }
 
 type ProjectInfo struct {
@@ -133,7 +130,7 @@ type APIEndpointConfig struct {
 
 // loads the given file in path and substitutes environment variables that are defined as ${var} or $var in the file.
 //	returns the file as string.
-func getEnvSubstitutedFileContent(path string) (string, error) {
+func GetEnvSubstitutedFileContent(path string) (string, error) {
 	r, err := os.Open(path)
 	defer func() {
 		_ = r.Close()
@@ -160,7 +157,7 @@ func getEnvSubstitutedFileContent(path string) (string, error) {
 func LoadApiParamsFromDirectory(path string) (*ApiParams, error) {
 	paramsFilePath := filepath.Join(path, utils.ParamFile)
 	utils.Logln(utils.LogPrefixInfo + "Loading params from " + paramsFilePath)
-	fileContent, err := getEnvSubstitutedFileContent(paramsFilePath)
+	fileContent, err := GetEnvSubstitutedFileContent(paramsFilePath)
 	if err != nil {
 		return nil, err
 	}
@@ -174,48 +171,10 @@ func LoadApiParamsFromDirectory(path string) (*ApiParams, error) {
 	return apiParams, err
 }
 
-// LoadApiProductParamsFromFile loads an API Product project configuration YAML file located in path when the root
-// directory is provided instead of yaml file.
-//	It returns an error or a valid ApiProductParams
-func LoadApiProductParamsFromDirectory(path string) (*ApiProductParams, error) {
-	paramsFilePath := filepath.Join(path, utils.ParamFileAPIProduct)
-	fileContent, err := getEnvSubstitutedFileContent(paramsFilePath)
-	if err != nil {
-		return nil, err
-	}
-
-	apiParams := &ApiProductParams{}
-	err = yaml.Unmarshal([]byte(fileContent), &apiParams)
-	if err != nil {
-		return nil, err
-	}
-
-	return apiParams, err
-}
-
-// LoadApplicationParamsFromDirectory loads an Application project configuration YAML file located in path when the root
-// directory is provided instead of yaml file.
-//	It returns an error or a valid ApplicationParams
-func LoadApplicationParamsFromDirectory(path string) (*ApplicationParams, error) {
-	paramsFilePath := filepath.Join(path, utils.ParamFileApplication)
-	fileContent, err := getEnvSubstitutedFileContent(paramsFilePath)
-	if err != nil {
-		return nil, err
-	}
-
-	apiParams := &ApplicationParams{}
-	err = yaml.Unmarshal([]byte(fileContent), &apiParams)
-	if err != nil {
-		return nil, err
-	}
-
-	return apiParams, err
-}
-
 // LoadApiParamsFromFile loads an API Project configuration YAML file located in path.
 //	It returns an error or a valid ApiParams
 func LoadApiParamsFromFile(path string) (*ApiParams, error) {
-	fileContent, err := getEnvSubstitutedFileContent(path)
+	fileContent, err := GetEnvSubstitutedFileContent(path)
 	if err != nil {
 		return nil, err
 	}
@@ -232,7 +191,7 @@ func LoadApiParamsFromFile(path string) (*ApiParams, error) {
 // LoadApiProductParamsFromFile loads an API Product project configuration YAML file located in path.
 //	It returns an error or a valid ApiProductParams
 func LoadApiProductParamsFromFile(path string) (*ApiProductParams, error) {
-	fileContent, err := getEnvSubstitutedFileContent(path)
+	fileContent, err := GetEnvSubstitutedFileContent(path)
 	if err != nil {
 		return nil, err
 	}
@@ -249,7 +208,7 @@ func LoadApiProductParamsFromFile(path string) (*ApiProductParams, error) {
 // LoadApplicationParamsFromFile loads an Application project configuration YAML file located in path.
 //	It returns an error or a valid ApplicationParams
 func LoadApplicationParamsFromFile(path string) (*ApplicationParams, error) {
-	fileContent, err := getEnvSubstitutedFileContent(path)
+	fileContent, err := GetEnvSubstitutedFileContent(path)
 	if err != nil {
 		return nil, err
 	}

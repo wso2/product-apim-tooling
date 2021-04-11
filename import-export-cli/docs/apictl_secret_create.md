@@ -14,15 +14,15 @@ apictl secret create [flags]
 
 ```
 To encrypt secret and get output on console
-  apictl mi secret create
+  apictl secret create
 To encrypt secret and get output as a .properties file (stored in the security folder in apictl executable directory)
-  apictl mi secret create -o file
+  apictl secret create -o file
 To encrypt secret and get output as a .yaml file (stored in the security folder in apictl executable directory)
-  apictl mi secret create -o k8
+  apictl secret create -o k8
 To bulk encrypt secrets defined in a properties file
-  apictl mi secret create -f <file_path>
+  apictl secret create -f <file_path>
 To bulk encrypt secrets defined in a properties file and get a .yaml file (stored in the security folder in apictl executable directory)
-  apictl mi secret create -o k8 -f <file_path>
+  apictl secret create -o k8 -f <file_path>
 ```
 
 ### Options

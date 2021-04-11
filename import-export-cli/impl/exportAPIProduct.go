@@ -92,6 +92,14 @@ func WriteAPIProductToZip(exportAPIProductName, exportAPIProductVersion, zipLoca
 	metaData := utils.MetaData{
 		Name:    exportAPIProductName,
 		Version: exportAPIProductVersion,
+		DeployConfig: utils.DeployConfig{
+			Import: utils.ImportConfig{
+				PreserveProvider: true,
+				ImportAPIs:       true,
+				UpdateAPIProduct: true,
+				UpdateAPIs:       false,
+			},
+		},
 	}
 	err = IncludeMetaFileToZip(tempZipFile, exportedFinalZip, utils.MetaFileAPIProduct, metaData)
 	if err != nil {

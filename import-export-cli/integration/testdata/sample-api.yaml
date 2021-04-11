@@ -44,7 +44,7 @@ data: # Contains the meta data of the API
   visibleRoles: [] # User roles that are able to access the API in Store as a list
   visibleTenants: [] # Visible tenants of the API
   gatewayEnvironments: # Gateway environments that the API is available as a list
-   - Production and Sandbox
+   - Default
   mediationPolicies: # Mediation policies attached to the API that should be executed in the runtime {IN|OUT|FAULT}
    -
     id: 3b8cc0a7-6d98-4678-9111-2aba50fa505c

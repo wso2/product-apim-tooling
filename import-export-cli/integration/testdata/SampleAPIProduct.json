@@ -15,7 +15,7 @@
   "accessControl": "NONE",
   "accessControlRoles": [],
   "gatewayEnvironments": [
-    "Production and Sandbox"
+    "Default"
   ],
   "apiType": "APIPRODUCT",
   "transport": [

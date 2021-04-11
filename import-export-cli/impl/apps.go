@@ -25,7 +25,6 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"path/filepath"
 
 	"github.com/go-resty/resty/v2"
 	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
@@ -82,7 +81,7 @@ func GetApplicationDefinition(filePath string) (*v2.ApplicationDefinition, []byt
 
 	var buffer []byte
 	if info.IsDir() {
-		_, content, err := resolveYamlOrJSON(path.Join(filePath, filepath.Base(filePath)))
+		_, content, err := resolveYamlOrJSON(path.Join(filePath, "application"))
 		if err != nil {
 			return nil, nil, err
 		}

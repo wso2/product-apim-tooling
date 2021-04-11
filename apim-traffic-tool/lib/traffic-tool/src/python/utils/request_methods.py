@@ -177,7 +177,7 @@ def createAPI(gateway_protocol, gateway_host, gateway_port, endpoint, create_tok
             "type": "basic",
             "password": "pass"
         },
-        "gatewayEnvironments": "Production and Sandbox",
+        "gatewayEnvironments": "Default",
         "sequences": [],
         "subscriptionAvailability": None,
         "subscriptionAvailableTenants": [],

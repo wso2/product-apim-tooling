@@ -4,7 +4,9 @@ config:
   kubernetes_mode: false
   token_type: JWT
   vcs_deletion_enabled: false
-  vcs_config_file_path: "/home/wso2user/custom/vcs-config.yaml"
+  vcs_config_file_path: /home/wso2user/custom/vcs-config.yaml
+  vcs_source_repo_path: /home/wso2user/custom/source
+  vcs_deployment_repo_path: /home/wso2user/custom/deployment
   tls-renegotiation-mode: never
 environments:
   sample-env1:

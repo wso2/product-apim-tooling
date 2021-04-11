@@ -180,11 +180,6 @@ func ConstructAPIDeploymentDirectoryPath(path, name, version string) string {
 	return filepath.Join(path, "/", utils.DeploymentDirPrefix+name+"-"+version)
 }
 
-// ConstructAPIDeploymentDirectoryPathFromProjectName : Construct the deployment directory path of an API from the project name
-func ConstructAPIDeploymentDirectoryPathFromProjectName(path, projectName string) string {
-	return filepath.Join(path, "/", utils.DeploymentDirPrefix+projectName)
-}
-
 // IsApplicationArchiveExists : Returns true if exported application archive exists on file system, else returns false
 //
 func IsApplicationArchiveExists(t *testing.T, path string, name string, owner string) bool {

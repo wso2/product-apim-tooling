@@ -206,6 +206,12 @@ func InitAPIProject(initCmdOutputDir, initCmdInitialState, initCmdSwaggerPath, i
 	metaData := utils.MetaData{
 		Name:    definitionFile.Data.Name,
 		Version: definitionFile.Data.Version,
+		DeployConfig: utils.DeployConfig{
+			Import: utils.ImportConfig{
+				Update:           true,
+				PreserveProvider: true,
+			},
+		},
 	}
 	marshaledData, err := jsoniter.Marshal(metaData)
 	if err != nil {

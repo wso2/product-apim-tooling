@@ -35,13 +35,15 @@ type MainConfig struct {
 }
 
 type Config struct {
-	HttpRequestTimeout   int    `yaml:"http_request_timeout"`
-	ExportDirectory      string `yaml:"export_directory"`
-	KubernetesMode       bool   `yaml:"kubernetes_mode"`
-	TokenType            string `yaml:"token_type"`
-	VCSDeletionEnabled   bool   `yaml:"vcs_deletion_enabled"`
-	VCSConfigFilePath    string `yaml:"vcs_config_file_path"`
-	TLSRenegotiationMode string `yaml:"tls-renegotiation-mode"`
+	HttpRequestTimeout    int    `yaml:"http_request_timeout"`
+	ExportDirectory       string `yaml:"export_directory"`
+	KubernetesMode        bool   `yaml:"kubernetes_mode"`
+	TokenType             string `yaml:"token_type"`
+	VCSDeletionEnabled    bool   `yaml:"vcs_deletion_enabled"`
+	VCSConfigFilePath     string `yaml:"vcs_config_file_path"`
+	VCSSourceRepoPath     string `yaml:"vcs_source_repo_path"`
+	VCSDeploymentRepoPath string `yaml:"vcs_deployment_repo_path"`
+	TLSRenegotiationMode  string `yaml:"tls-renegotiation-mode"`
 }
 
 type EnvKeys struct {
@@ -353,9 +355,25 @@ type APIData struct {
 
 // Project MetaData struct
 type MetaData struct {
-	Name    string `json:"name"`
-	Version string `json:"version,omitempty"`
-	Owner   string `json:"owner,omitempty"`
+	Name         string       `json:"name,omitempty" yaml:"name,omitempty"`
+	Version      string       `json:"version,omitempty" yaml:"version,omitempty"`
+	Owner        string       `json:"owner,omitempty" yaml:"owner,omitempty"`
+	DeployConfig DeployConfig `json:"deploy,omitempty" yaml:"deploy,omitempty"`
+}
+
+type DeployConfig struct {
+	Import ImportConfig `json:"import,omitempty" yaml:"import,omitempty"`
+}
+
+type ImportConfig struct {
+	Update            bool `json:"update,omitempty" yaml:"update,omitempty"`
+	PreserveProvider  bool `json:"preserveProvider,omitempty" yaml:"preserveProvider,omitempty"`
+	ImportAPIs        bool `json:"importApis,omitempty" yaml:"importApis,omitempty"`
+	UpdateAPIProduct  bool `json:"updateApiProduct,omitempty" yaml:"updateApiProduct,omitempty"`
+	UpdateAPIs        bool `json:"updateApis,omitempty" yaml:"updateApis,omitempty"`
+	PreserveOwner     bool `json:"preserveOwner,omitempty" yaml:"preserveOwner,omitempty"`
+	SkipSubscriptions bool `json:"skipSubscriptions,omitempty" yaml:"skipSubscriptions,omitempty"`
+	SkipKeys          bool `json:"skipKeys,omitempty" yaml:"skipKeys,omitempty"`
 }
 
 type RevisionListResponse struct {
