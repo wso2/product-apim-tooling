@@ -255,7 +255,6 @@ func getOAS() error {
 	if !found {
 		os.RemoveAll(tmpDir)
 		utils.HandleErrorAndExit("Unable to find an API with the name "+apiName, err)
-		os.Exit(1)
 		return err
 	}
 	return nil
