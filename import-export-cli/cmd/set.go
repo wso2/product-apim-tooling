@@ -34,8 +34,12 @@ var flagTLSRenegotiationMode string
 
 var flagVCSDeletionEnabled bool
 var flagVCSConfigPath string
+var flagVCSSourceRepoPath string
+var flagVCSDeploymentRepoPath string
 
 const flagVCSConfigPathName = "vcs-config-path"
+const flagVCSSourceRepoPathName = "vcs-source-repo-path"
+const flagVCSDeploymentRepoPathName = "vcs-deployment-repo-path"
 
 // Set command related Info
 const setCmdLiteral = "set"
@@ -133,6 +137,14 @@ func executeSetCmd(mainConfigFilePath string, cmd *cobra.Command) {
 		configVars.Config.VCSConfigFilePath = flagVCSConfigPath
 		fmt.Println("VCS config file path is set to : " + flagVCSConfigPath)
 	}
+	if cmd.Flags().Changed(flagVCSSourceRepoPathName) {
+		configVars.Config.VCSSourceRepoPath = flagVCSSourceRepoPath
+		fmt.Println("VCS source repo path is set to : " + flagVCSSourceRepoPath)
+	}
+	if cmd.Flags().Changed(flagVCSDeploymentRepoPathName) {
+		configVars.Config.VCSDeploymentRepoPath = flagVCSDeploymentRepoPath
+		fmt.Println("VCS deployment repo path is set to : " + flagVCSDeploymentRepoPath)
+	}
 
 	utils.WriteConfigFile(configVars, mainConfigFilePath)
 }
@@ -162,11 +174,15 @@ func init() {
 	SetCmd.Flags().StringVar(&flagTLSRenegotiationMode, "tls-renegotiation-mode", utils.TLSRenegotiationNever,
 		"Supported TLS renegotiation mode")
 	SetCmd.Flags().StringVarP(&flagKubernetesMode, "mode", "m", utils.DefaultEnvironmentName,
-		"If mode is set to \"k8s\", apictl is capable of executing Kubectl commands. For example \"apictl get " +
+		"If mode is set to \"k8s\", apictl is capable of executing Kubectl commands. For example \"apictl get "+
 			"pods\" -> \"kubectl get pods\". To go back to the default mode, set the mode to \"default\"")
 	SetCmd.Flags().MarkDeprecated("mode", "if you want to run the commands in kubernetes mode use 'k8s' after 'apictl' (eg: apictl k8s add)")
 	SetCmd.Flags().BoolVar(&flagVCSDeletionEnabled, "vcs-deletion-enabled", false,
 		"Specifies whether project deletion is allowed during deployment.")
 	SetCmd.Flags().StringVar(&flagVCSConfigPath, flagVCSConfigPathName, "",
 		"Path to the VCS Configuration yaml file which keeps the VCS meta data")
+	SetCmd.Flags().StringVar(&flagVCSSourceRepoPath, flagVCSSourceRepoPathName, "",
+		"Path to the source repository to be considered during VCS deploy")
+	SetCmd.Flags().StringVar(&flagVCSDeploymentRepoPath, flagVCSDeploymentRepoPathName, "",
+		"Path to the deoployment repository to be considered during VCS deploy")
 }

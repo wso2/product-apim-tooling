@@ -55,7 +55,11 @@ var DeployCmd = &cobra.Command{
 			fmt.Println(flagVCSDeployEnvName, "does not exists. Add it using add env")
 			os.Exit(1)
 		}
-
+		mainConfig := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
+		if mainConfig.Config.VCSSourceRepoPath == "" {
+			fmt.Println("VSC source repo path cannot be empty. Set it using apictl set command.")
+			os.Exit(1)
+		}
 		credential, err := GetCredentials(flagVCSDeployEnvName)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)

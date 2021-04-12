@@ -21,6 +21,7 @@ apictl vcs status -e dev
 
 ```
   -e, --environment string   Name of the environment to check the project(s) status
+      --format string        Pretty-print status (only supported "{{ jsonPretty . }}" and "{{ json . }}")
   -h, --help                 help for status
 ```
 

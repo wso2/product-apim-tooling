@@ -1,0 +1,119 @@
+type: api_product
+version: v4.0.0
+data:
+  id: 0f788019-385e-4b3f-9bf7-359da79f7d13
+  name: MyProduct
+  context: /myproduct
+  provider: admin
+  state: PUBLISHED
+  enableSchemaValidation: false
+  enableStore: true
+  isRevision: false
+  revisionId: 0
+  responseCachingEnabled: false
+  cacheTimeout: 300
+  visibility: PUBLIC
+  visibleRoles: []
+  visibleTenants: []
+  accessControl: NONE
+  accessControlRoles: []
+  gatewayEnvironments:
+   - Default
+  transport:
+   - http
+   - https
+  tags: []
+  policies:
+   - Unlimited
+  authorizationHeader: Authorization
+  securityScheme:
+   - oauth2
+   - oauth_basic_auth_api_key_mandatory
+  subscriptionAvailability: ALL_TENANTS
+  subscriptionAvailableTenants: []
+  additionalProperties: {}
+  businessInformation: {}
+  corsConfiguration:
+    corsConfigurationEnabled: false
+    accessControlAllowOrigins:
+     - '*'
+    accessControlAllowCredentials: false
+    accessControlAllowHeaders:
+     - authorization
+     - Access-Control-Allow-Origin
+     - Content-Type
+     - SOAPAction
+     - apikey
+     - Internal-Key
+    accessControlAllowMethods:
+     - GET
+     - PUT
+     - POST
+     - DELETE
+     - PATCH
+     - OPTIONS
+  createdTime: 2021-04-05 17:54:21.326
+  lastUpdatedTime: 2021-04-05 17:54:21.512
+  apis:
+   -
+    name: SwaggerPetstore
+    apiId: 8cd7db61-46ab-49eb-bfea-5b59da3863f4
+    version: 1.0.5
+    operations:
+     -
+      id: ""
+      target: /pet
+      verb: PUT
+      authType: Application & Application User
+      throttlingPolicy: Unlimited
+      scopes:
+       - write:pets
+       - read:pets
+      usedProductIds: []
+     -
+      id: ""
+      target: /pet/findByStatus
+      verb: GET
+      authType: Application & Application User
+      throttlingPolicy: Unlimited
+      scopes:
+       - write:pets
+       - read:pets
+      usedProductIds: []
+   -
+    name: PizzaShackAPI
+    apiId: 39325037-1508-4398-a358-e551927ff075
+    version: 1.0.0
+    operations:
+     -
+      id: ""
+      target: /order
+      verb: POST
+      authType: Application & Application User
+      throttlingPolicy: Unlimited
+      scopes: []
+      usedProductIds: []
+     -
+      id: ""
+      target: /menu
+      verb: GET
+      authType: Application & Application User
+      throttlingPolicy: Unlimited
+      scopes: []
+      usedProductIds: []
+  scopes:
+   -
+    scope:
+      name: read:pets
+      displayName: read:pets
+      description: read your pets
+      bindings: []
+    shared: false
+   -
+    scope:
+      name: write:pets
+      displayName: write:pets
+      description: modify pets in your account
+      bindings: []
+    shared: false
+  categories: []

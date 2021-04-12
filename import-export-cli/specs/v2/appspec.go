@@ -20,10 +20,18 @@ package v2
 
 // ApplicationDefinition represents an Application artifact in APIM
 type ApplicationDefinition struct {
-	Name       string     `json:"name,omitempty" yaml:"name,omitempty"`
-	Subscriber Subscriber `json:"subscriber,omitempty" yaml:"subscriber,omitempty"`
+	Type        string                   `json:"type,omitempty" yaml:"type,omitempty"`
+	ApimVersion string                   `json:"version,omitempty" yaml:"version,omitempty"`
+	Data        ApplicationDTODefinition `json:"data,omitempty" yaml:"data,omitempty"`
 }
 
-type Subscriber struct {
-	Name string `json:"name" yaml:"name"`
+// ApplicationDTODefinition represents an Application artifact in APIM
+type ApplicationDTODefinition struct {
+	Applicationinfo ApplicationInfo `json:"applicationInfo,omitempty" yaml:"applicationInfo,omitempty"`
+}
+
+// ApplicationInfo represents an Application information
+type ApplicationInfo struct {
+	Name  string `json:"name,omitempty" yaml:"name,omitempty"`
+	Owner string `json:"owner,omitempty" yaml:"owner,omitempty"`
 }

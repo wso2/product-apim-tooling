@@ -19,12 +19,10 @@
 package impl
 
 import (
-	"errors"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strings"
 	"text/template"
 
 	"github.com/Jeffail/gabs"
@@ -32,7 +30,6 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/wso2/product-apim-tooling/import-export-cli/box"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
@@ -51,46 +48,6 @@ func ExecuteNewFileUploadRequest(uri string, params map[string]string, paramName
 	headers[utils.HeaderAccept] = "application/json"
 	headers[utils.HeaderConnection] = utils.HeaderValueKeepAlive
 	return utils.InvokePOSTRequestWithFileAndQueryParams(params, uri, headers, paramName, path)
-}
-
-// TODO Remove this after finilazing what to do with vcs command
-// Include x_params.yaml (api_params.yaml, application_params.yaml, .. ) into the sourceZipFile and create a new
-//  new Zip file in the provided targetZipFile location. paramsFile needs to be one of the supported x_params.yaml.
-//  Eg.: api_params.yaml, application_params.yaml, api_product_params.yaml
-func IncludeParamsFileToZip(sourceZipFile, targetZipFile, paramsFile string) error {
-	// Now, we need to extract the zip, copy x_params.yaml file inside and then create the zip again
-	//	First, create a temp directory (tmpClonedLoc) by extracting the original zip file.
-	tmpClonedLoc, err := utils.GetTempCloneFromDirOrZip(sourceZipFile)
-	// Create the api_params.yaml file inside the cloned directory.
-	tmpLocationForAPIParamsFile := filepath.Join(tmpClonedLoc, paramsFile)
-	err = ScaffoldParams(tmpLocationForAPIParamsFile)
-	if err != nil {
-		utils.HandleErrorAndExit("Error creating api_params.yaml inside the exported zip archive", err)
-	}
-
-	err = utils.Zip(tmpClonedLoc, targetZipFile)
-	if err != nil {
-		utils.HandleErrorAndExit("Error creating the final zip archive", err)
-	}
-	return nil
-}
-
-// TODO Remove this after finilazing what to do with vcs command
-// Creates the initial api_params.yaml/api_product_params.yaml/application_params.yaml in the given file path
-//	The targetFile will be populated with environments and default import parameters for "vcs deploy".
-func ScaffoldParams(targetFile string) error {
-	envs := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
-	var tmpl []byte
-	if strings.HasSuffix(targetFile, utils.ParamFileAPI) {
-		tmpl, _ = box.Get("/init/api_params.tmpl")
-	} else if strings.HasSuffix(targetFile, utils.ParamFileAPIProduct) {
-		tmpl, _ = box.Get("/init/api_product_params.tmpl")
-	} else if strings.HasSuffix(targetFile, utils.ParamFileApplication) {
-		tmpl, _ = box.Get("/init/application_params.tmpl")
-	} else {
-		return errors.New("Unsupported target file: " + targetFile)
-	}
-	return WriteTargetFileFromTemplate(targetFile, tmpl, envs)
 }
 
 // From the template data (tmpl) writes the target file using the provided mainConfig

@@ -1,6 +1,7 @@
 deploy:
   import:
-    preserveProvider: true
     importApis: true
+    preserveProvider: true
     updateApiProduct: true
-    updateApis: false
+name: MyProduct
+version: 1.0.0

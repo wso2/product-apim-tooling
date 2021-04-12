@@ -12,8 +12,10 @@ environments:
           deploymentEnvironments:
               - displayOnDevportal:
                 deploymentEnvironment:
+                deploymentVhost:
               - displayOnDevportal:
                 deploymentEnvironment:  
+                deploymentVhost:
           certs:
               - hostName:
                 alias:

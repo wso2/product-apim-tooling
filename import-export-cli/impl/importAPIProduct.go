@@ -19,7 +19,6 @@
 package impl
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -29,25 +28,12 @@ import (
 	"regexp"
 	"strconv"
 
-	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
-
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 var (
 	reAPIProductName = regexp.MustCompile(`[~!@#;:%^*()+={}|\\<>"',&/$]`)
 )
-
-// extractAPIProductDefinition extracts API Product information from jsonContent
-func extractAPIProductDefinition(jsonContent []byte) (*v2.APIProductDefinition, error) {
-	apiProduct := &v2.APIProductDefinition{}
-	err := json.Unmarshal(jsonContent, &apiProduct)
-	if err != nil {
-		return nil, err
-	}
-
-	return apiProduct, nil
-}
 
 // resolveImportAPIProductFilePath resolves the archive/directory for import
 // First will resolve in given path, if not found will try to load from exported directory

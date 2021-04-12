@@ -37,8 +37,9 @@ const (
 	apiTypeHeader        = "TYPE"
 	apiContextHeader     = "CONTEXT"
 	apiGatewayEnvsHeader = "GATEWAY_ENVS"
+	apiVhostHeader       = "VHOST"
 
-	defaultAPITableFormat = "table {{.Name}}\t{{.Version}}\t{{.Type}}\t{{.Context}}\t{{.GatewayEnvs}}"
+	defaultAPITableFormat = "table {{.Name}}\t{{.Version}}\t{{.Type}}\t{{.Context}}\t{{.GatewayEnvs}}\t{{.Vhost}}"
 )
 
 // APIMeta holds the response for the GET request
@@ -55,6 +56,7 @@ type APIMetaListItem struct {
 	APIType        string   `json:"apiType"`
 	APIContext     string   `json:"context"`
 	APIGatewayEnvs []string `json:"gateway-envs"`
+	APIVhost       string   `json:"vhost"`
 }
 
 // Name of the API
@@ -80,6 +82,11 @@ func (a APIMetaListItem) Context() string {
 // GatewayEnvs of the API
 func (a APIMetaListItem) GatewayEnvs() []string {
 	return a.APIGatewayEnvs
+}
+
+// Vhost of the API
+func (a APIMetaListItem) Vhost() string {
+	return a.APIVhost
 }
 
 // MarshalJSON marshals api using custom marshaller which uses methods instead of fields
@@ -138,6 +145,7 @@ func PrintAPIs(apis []APIMetaListItem) {
 		"Type":        apiTypeHeader,
 		"Context":     apiContextHeader,
 		"GatewayEnvs": apiGatewayEnvsHeader,
+		"Vhost":       apiVhostHeader,
 	}
 
 	// execute context

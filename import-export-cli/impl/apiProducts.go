@@ -80,7 +80,7 @@ func GetAPIProductId(accessToken, environment, apiProductName, apiProductProvide
 }
 
 // GetAPIProductDefinition scans filePath and returns APIProductDefinition or an error
-func GetAPIProductDefinition(filePath string) (*v2.APIProductDefinition, []byte, error) {
+func GetAPIProductDefinition(filePath string) (*v2.APIProductDefinitionFile, []byte, error) {
 	info, err := os.Stat(filePath)
 	if err != nil {
 		return nil, nil, err
@@ -88,7 +88,7 @@ func GetAPIProductDefinition(filePath string) (*v2.APIProductDefinition, []byte,
 
 	var buffer []byte
 	if info.IsDir() {
-		_, content, err := resolveYamlOrJSON(path.Join(filePath, "Meta-information", "api"))
+		_, content, err := resolveYamlOrJSON(path.Join(filePath, "api_product"))
 		if err != nil {
 			return nil, nil, err
 		}
@@ -101,6 +101,17 @@ func GetAPIProductDefinition(filePath string) (*v2.APIProductDefinition, []byte,
 		return nil, nil, err
 	}
 	return apiProduct, buffer, nil
+}
+
+// extractAPIProductDefinition extracts API Product information from jsonContent
+func extractAPIProductDefinition(jsonContent []byte) (*v2.APIProductDefinitionFile, error) {
+	apiProduct := &v2.APIProductDefinitionFile{}
+	err := json.Unmarshal(jsonContent, &apiProduct)
+	if err != nil {
+		return nil, err
+	}
+
+	return apiProduct, nil
 }
 
 // GetAPIProductList Get the list of API Products available in a particular environment
@@ -125,7 +136,7 @@ func GetAPIProductList(accessToken, unifiedSearchEndpoint, query, limit string) 
 	if limit != "" {
 		queryParamString += "&limit=" + limit
 	}
-	utils.Logln(utils.LogPrefixInfo+"URL:", unifiedSearchEndpoint + "?" + queryParamString)
+	utils.Logln(utils.LogPrefixInfo+"URL:", unifiedSearchEndpoint+"?"+queryParamString)
 	resp, err := utils.InvokeGETRequestWithQueryParamsString(unifiedSearchEndpoint, queryParamString, headers)
 
 	if err != nil {

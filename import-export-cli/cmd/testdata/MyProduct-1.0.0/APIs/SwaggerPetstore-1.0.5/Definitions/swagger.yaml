@@ -30,6 +30,9 @@ tags:
 schemes:
  - https
  - http
+security:
+ -
+  default: []
 paths:
   /pet/{petId}/uploadImage:
     post:
@@ -63,7 +66,7 @@ paths:
         required: false
         type: file
       responses:
-        200:
+        "200":
           description: successful operation
           schema:
             $ref: '#/definitions/ApiResponse'
@@ -76,6 +79,12 @@ paths:
         default:
          - write:pets
          - read:pets
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-wso2-application-security:
+        security-types:
+         - oauth2
+        optional: false
   /pet:
     post:
       tags:
@@ -98,7 +107,7 @@ paths:
         schema:
           $ref: '#/definitions/Pet'
       responses:
-        405:
+        "405":
           description: Invalid input
       security:
        -
@@ -109,6 +118,12 @@ paths:
         default:
          - write:pets
          - read:pets
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-wso2-application-security:
+        security-types:
+         - oauth2
+        optional: false
     put:
       tags:
        - pet
@@ -130,11 +145,11 @@ paths:
         schema:
           $ref: '#/definitions/Pet'
       responses:
-        400:
+        "400":
           description: Invalid ID supplied
-        404:
+        "404":
           description: Pet not found
-        405:
+        "405":
           description: Validation exception
       security:
        -
@@ -145,6 +160,12 @@ paths:
         default:
          - write:pets
          - read:pets
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-wso2-application-security:
+        security-types:
+         - oauth2
+        optional: false
   /pet/findByStatus:
     get:
       tags:
@@ -171,13 +192,13 @@ paths:
           default: available
         collectionFormat: multi
       responses:
-        200:
+        "200":
           description: successful operation
           schema:
             type: array
             items:
               $ref: '#/definitions/Pet'
-        400:
+        "400":
           description: Invalid status value
       security:
        -
@@ -188,6 +209,12 @@ paths:
         default:
          - write:pets
          - read:pets
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-wso2-application-security:
+        security-types:
+         - oauth2
+        optional: false
   /pet/findByTags:
     get:
       tags:
@@ -209,13 +236,13 @@ paths:
           type: string
         collectionFormat: multi
       responses:
-        200:
+        "200":
           description: successful operation
           schema:
             type: array
             items:
               $ref: '#/definitions/Pet'
-        400:
+        "400":
           description: Invalid tag value
       security:
        -
@@ -227,6 +254,12 @@ paths:
          - write:pets
          - read:pets
       deprecated: true
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-wso2-application-security:
+        security-types:
+         - oauth2
+        optional: false
   /pet/{petId}:
     get:
       tags:
@@ -246,19 +279,25 @@ paths:
         type: integer
         format: int64
       responses:
-        200:
+        "200":
           description: successful operation
           schema:
             $ref: '#/definitions/Pet'
-        400:
+        "400":
           description: Invalid ID supplied
-        404:
+        "404":
           description: Pet not found
       security:
        -
         api_key: []
        -
         default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-wso2-application-security:
+        security-types:
+         - oauth2
+        optional: false
     post:
       tags:
        - pet
@@ -291,7 +330,7 @@ paths:
         required: false
         type: string
       responses:
-        405:
+        "405":
           description: Invalid input
       security:
        -
@@ -302,6 +341,12 @@ paths:
         default:
          - write:pets
          - read:pets
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-wso2-application-security:
+        security-types:
+         - oauth2
+        optional: false
     delete:
       tags:
        - pet
@@ -325,9 +370,9 @@ paths:
         type: integer
         format: int64
       responses:
-        400:
+        "400":
           description: Invalid ID supplied
-        404:
+        "404":
           description: Pet not found
       security:
        -
@@ -338,6 +383,12 @@ paths:
         default:
          - write:pets
          - read:pets
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-wso2-application-security:
+        security-types:
+         - oauth2
+        optional: false
   /store/order:
     post:
       tags:
@@ -359,15 +410,21 @@ paths:
         schema:
           $ref: '#/definitions/Order'
       responses:
-        200:
+        "200":
           description: successful operation
           schema:
             $ref: '#/definitions/Order'
-        400:
+        "400":
           description: Invalid Order
       security:
        -
         default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-wso2-application-security:
+        security-types:
+         - oauth2
+        optional: false
   /store/order/{orderId}:
     get:
       tags:
@@ -389,17 +446,23 @@ paths:
         minimum: 1
         format: int64
       responses:
-        200:
+        "200":
           description: successful operation
           schema:
             $ref: '#/definitions/Order'
-        400:
+        "400":
           description: Invalid ID supplied
-        404:
+        "404":
           description: Order not found
       security:
        -
         default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-wso2-application-security:
+        security-types:
+         - oauth2
+        optional: false
     delete:
       tags:
        - store
@@ -419,13 +482,19 @@ paths:
         minimum: 1
         format: int64
       responses:
-        400:
+        "400":
           description: Invalid ID supplied
-        404:
+        "404":
           description: Order not found
       security:
        -
         default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-wso2-application-security:
+        security-types:
+         - oauth2
+        optional: false
   /store/inventory:
     get:
       tags:
@@ -437,7 +506,7 @@ paths:
        - application/json
       parameters: []
       responses:
-        200:
+        "200":
           description: successful operation
           schema:
             type: object
@@ -449,6 +518,12 @@ paths:
         api_key: []
        -
         default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-wso2-application-security:
+        security-types:
+         - oauth2
+        optional: false
   /user/createWithArray:
     post:
       tags:
@@ -477,6 +552,12 @@ paths:
       security:
        -
         default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-wso2-application-security:
+        security-types:
+         - oauth2
+        optional: false
   /user/createWithList:
     post:
       tags:
@@ -505,6 +586,12 @@ paths:
       security:
        -
         default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-wso2-application-security:
+        security-types:
+         - oauth2
+        optional: false
   /user/{username}:
     get:
       tags:
@@ -523,17 +610,23 @@ paths:
         required: true
         type: string
       responses:
-        200:
+        "200":
           description: successful operation
           schema:
             $ref: '#/definitions/User'
-        400:
+        "400":
           description: Invalid username supplied
-        404:
+        "404":
           description: User not found
       security:
        -
         default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-wso2-application-security:
+        security-types:
+         - oauth2
+        optional: false
     put:
       tags:
        - user
@@ -560,13 +653,19 @@ paths:
         schema:
           $ref: '#/definitions/User'
       responses:
-        400:
+        "400":
           description: Invalid user supplied
-        404:
+        "404":
           description: User not found
       security:
        -
         default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-wso2-application-security:
+        security-types:
+         - oauth2
+        optional: false
     delete:
       tags:
        - user
@@ -584,13 +683,19 @@ paths:
         required: true
         type: string
       responses:
-        400:
+        "400":
           description: Invalid username supplied
-        404:
+        "404":
           description: User not found
       security:
        -
         default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-wso2-application-security:
+        security-types:
+         - oauth2
+        optional: false
   /user/login:
     get:
       tags:
@@ -615,7 +720,7 @@ paths:
         required: true
         type: string
       responses:
-        200:
+        "200":
           description: successful operation
           headers:
             X-Expires-After:
@@ -628,11 +733,17 @@ paths:
               description: calls per hour allowed by the user
           schema:
             type: string
-        400:
+        "400":
           description: Invalid username/password supplied
       security:
        -
         default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-wso2-application-security:
+        security-types:
+         - oauth2
+        optional: false
   /user/logout:
     get:
       tags:
@@ -650,6 +761,12 @@ paths:
       security:
        -
         default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-wso2-application-security:
+        security-types:
+         - oauth2
+        optional: false
   /user:
     post:
       tags:
@@ -676,6 +793,12 @@ paths:
       security:
        -
         default: []
+      x-auth-type: Application & Application User
+      x-throttling-tier: Unlimited
+      x-wso2-application-security:
+        security-types:
+         - oauth2
+        optional: false
 securityDefinitions:
   api_key:
     type: apiKey
@@ -690,9 +813,14 @@ securityDefinitions:
       write:pets: modify pets in your account
   default:
     type: oauth2
+    authorizationUrl: https://test.com
+    flow: implicit
     scopes:
-      write:pets: modify pets in your account
       read:pets: read your pets
+      write:pets: modify pets in your account
+    x-scopes-bindings:
+      write:pets: ""
+      read:pets: ""
 definitions:
   ApiResponse:
     type: object
@@ -734,11 +862,15 @@ definitions:
           wrapped: true
         items:
           type: string
+          xml:
+            name: photoUrl
       tags:
         type: array
         xml:
           wrapped: true
         items:
+          xml:
+            name: tag
           $ref: '#/definitions/Tag'
       status:
         type: string
@@ -812,3 +944,42 @@ definitions:
 externalDocs:
   description: Find out more about Swagger
   url: http://swagger.io
+x-wso2-auth-header: Authorization
+x-wso2-cors:
+  corsConfigurationEnabled: false
+  accessControlAllowOrigins:
+   - '*'
+  accessControlAllowCredentials: false
+  accessControlAllowHeaders:
+   - authorization
+   - Access-Control-Allow-Origin
+   - Content-Type
+   - SOAPAction
+   - apikey
+   - Internal-Key
+  accessControlAllowMethods:
+   - GET
+   - PUT
+   - POST
+   - DELETE
+   - PATCH
+   - OPTIONS
+x-wso2-production-endpoints:
+  urls:
+   - petstore.swagger.io
+  type: http
+x-wso2-sandbox-endpoints:
+  urls:
+   - petstore.swagger.io
+  type: http
+x-wso2-basePath: /v2/1.0.5
+x-wso2-transports:
+ - http
+ - https
+x-wso2-application-security:
+  security-types:
+   - oauth2
+  optional: false
+x-wso2-response-cache:
+  enabled: false
+  cacheTimeoutInSeconds: 300
