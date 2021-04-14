@@ -434,7 +434,6 @@ func initializeProject() error {
 
 	def := &apiDefFile.Data
 
-	def.IsAWSAPI = true
 	v2.AddAwsTag(def)
 	version := def.Version
 	versionLength := len(version)
@@ -448,6 +447,8 @@ func initializeProject() error {
 	def.Context = string(os.PathSeparator) + flagApiNameToGet
 
 	oas3ByteValue := v2.CreateEpConfigForAwsAPIs(def, path)
+	def.AdvertiseInformation.Advertised = true
+	def.AdvertiseInformation.Vendor = "AWS"
 	err = writeAWSSecurityDocs(oas3ByteValue)
 	if err != nil {
 		return err
