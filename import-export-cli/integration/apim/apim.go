@@ -35,8 +35,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/adminservices"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
-	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 )
 
 const (
@@ -160,6 +160,7 @@ func (instance *Client) GenerateSampleAPIData(provider string) *API {
 	api.EndpointConfig = HTTPEndpoint{"http", &URLConfig{"https://localhost:" + strconv.Itoa(9443+instance.portOffset) + "/am/sample/pizzashack/v1/api/"},
 		&URLConfig{"https://localhost:" + strconv.Itoa(9443+instance.portOffset) + "/am/sample/pizzashack/v1/api/"}}
 	api.Operations = generateSampleAPIOperations()
+	api.AdvertiseInformation = AdvertiseInfo{Advertised: false}
 
 	return &api
 }
@@ -475,7 +476,7 @@ func (instance *Client) AddAPI(t *testing.T, api *API, username string, password
 
 	if doClean {
 		t.Cleanup(func() {
-			username, password := testutils.RetrieveAdminCredentialsInsteadCreator(username, password)
+			username, password := RetrieveAdminCredentialsInsteadCreator(username, password)
 			instance.Login(username, password)
 			instance.DeleteAPI(apiResponse.ID)
 		})
@@ -530,7 +531,7 @@ func (instance *Client) AddAPIFromOpenAPIDefinition(t *testing.T, path string, a
 	json.NewDecoder(response.Body).Decode(&apiResponse)
 
 	t.Cleanup(func() {
-		username, password := testutils.RetrieveAdminCredentialsInsteadCreator(username, password)
+		username, password := RetrieveAdminCredentialsInsteadCreator(username, password)
 		instance.Login(username, password)
 		instance.DeleteAPI(apiResponse.ID)
 	})
@@ -1483,4 +1484,18 @@ func getPublisherRestURL(host string, offset int, version string) string {
 func getTokenURL(host string, offset int) string {
 	port := 9443 + offset
 	return "https://" + host + ":" + strconv.Itoa(port) + "/oauth2/token"
+}
+
+func RetrieveAdminCredentialsInsteadCreator(username, password string) (string, string) {
+	newUsername := username
+	newPassword := password
+	if strings.EqualFold(adminservices.CreatorUsername, username) {
+		newUsername = adminservices.AdminUsername
+		newPassword = adminservices.AdminPassword
+	}
+	if strings.EqualFold(adminservices.CreatorUsername+"@"+adminservices.Tenant1, username) {
+		newUsername = adminservices.AdminUsername + "@" + adminservices.Tenant1
+		newPassword = adminservices.AdminPassword
+	}
+	return newUsername, newPassword
 }

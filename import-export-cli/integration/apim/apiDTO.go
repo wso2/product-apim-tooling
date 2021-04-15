@@ -223,8 +223,9 @@ type APIOperations struct {
 // AdvertiseInfo : Advertise only information
 type AdvertiseInfo struct {
 	Advertised           bool   `json:"advertised", yaml:"advertised"`
-	OriginalDevPortalUrl string `json:"originalDevPortalUrl" yaml:"originalDevPortalUrl"`
-	ApiOwner             string `json:"apiOwner" yaml:"apiOwner"`
+	OriginalDevPortalUrl string `json:"originalDevPortalUrl,omitempty" yaml:"originalDevPortalUrl,omitempty"`
+	ApiOwner             string `json:"apiOwner,omitempty" yaml:"apiOwner,omitempty"`
+	Vendor               string `json:"vendor,omitempty" yaml:"vendor,omitempty"`
 }
 
 // ByTargetVerb implements sort.Interface based on the Target and Verb fields.
