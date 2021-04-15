@@ -24,12 +24,59 @@ import (
 	"path"
 	"strings"
 
+	"io/ioutil"
+	"os"
+
 	"github.com/wso2/product-apim-tooling/import-export-cli/specs/params"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 
 	"github.com/Jeffail/gabs"
 	"github.com/go-openapi/loads"
 	"github.com/mitchellh/mapstructure"
 )
+
+// Servers represent servers of an AWS API
+type Servers struct {
+	Servers []struct {
+		Url       string `json:"url"`
+		Variables struct {
+			BasePath struct {
+				Default string `json:"default"`
+			} `json:"basePath"`
+		} `json:"variables"`
+	} `json:"servers"`
+}
+
+// EndpointConfig represent EndpointConfigs of an AWS API
+type EndpointConfig struct {
+	EndpointType        string `yaml:"endpoint_type" json:"endpoint_type"`
+	ProductionEndpoints struct {
+		URL string `yaml:"url" json:"url"`
+	} `yaml:"production_endpoints" json:"production_endpoints"`
+	SandboxEndpoints struct {
+		URL string `yaml:"url" json:"url"`
+	} `yaml:"sandbox_endpoints" json:"sandbox_endpoints"`
+}
+
+// SecuritySchemes represent security schemes of an AWS API
+type SecuritySchemes struct {
+	Components struct {
+		SecuritySchemes struct {
+			CognitoAuthorizer struct {
+				AuthType string `json:"x-amazon-apigateway-authtype"`
+			} `json:"CognitoAuthorizer"`
+			APIKey struct {
+				Type string `json:"type"`
+			} `json:"api_key"`
+			Sigv4 struct {
+				AuthType string `json:"x-amazon-apigateway-authtype"`
+			} `json:"sigv4"`
+		} `json:"securitySchemes"`
+	} `json:"components"`
+	ResourcePolicy struct {
+		Version string `json:"Version"`
+	} `json:"x-amazon-apigateway-policy"`
+}
 
 func swagger2XWO2BasePath(document *loads.Document) (string, bool) {
 	if v, ok := document.Spec().Extensions["x-wso2-basePath"]; ok {
@@ -235,7 +282,6 @@ func Swagger2Populate(def *APIDTODefinition, document *loads.Document) error {
 	if ok {
 		def.CorsConfiguration = cors
 	}
-
 	prodEp, foundProdEp, err := swagger2XWSO2ProductionEndpoints(document)
 	if err != nil && foundProdEp {
 		return err
@@ -244,7 +290,6 @@ func Swagger2Populate(def *APIDTODefinition, document *loads.Document) error {
 	if err != nil && foundSandboxEp {
 		return err
 	}
-
 	if foundProdEp || foundSandboxEp {
 		ep, err := BuildAPIMEndpoints(prodEp, sandboxEp)
 		if err != nil {
@@ -258,4 +303,37 @@ func Swagger2Populate(def *APIDTODefinition, document *loads.Document) error {
 		def.EndpointConfig = &endpointConfig
 	}
 	return nil
+}
+
+func AddAwsTag(def *APIDTODefinition) {
+	def.Tags = append(def.Tags, "AWS") //adding the "aws" tag to all APIs imported using the "aws init" command
+}
+
+func GetServerUrlAndSecuritySchemes(pathToSwagger string) (string, string, []byte) {
+	oas3File, err := os.Open(pathToSwagger)
+	if err != nil {
+		utils.HandleErrorAndExit("", err)
+	}
+	defer oas3File.Close()
+
+	byteValue, _ := ioutil.ReadAll(oas3File)
+
+	var servers Servers
+	json.Unmarshal(byteValue, &servers)
+
+	url := servers.Servers[0].Url
+	stage := servers.Servers[0].Variables.BasePath.Default
+	productionUrl := strings.ReplaceAll(url, "/{basePath}", stage)
+	sandboxUrl := strings.ReplaceAll(url, "/{basePath}", stage)
+	return productionUrl, sandboxUrl, byteValue
+}
+
+func CreateEpConfigForAwsAPIs(def *APIDTODefinition, pathToSwagger string) []byte {
+	var endpointConfig EndpointConfig
+	var productionEp, sandboxEp, byteValue = GetServerUrlAndSecuritySchemes(pathToSwagger)
+	endpointConfig.EndpointType = "http"
+	endpointConfig.ProductionEndpoints.URL = productionEp
+	endpointConfig.SandboxEndpoints.URL = sandboxEp
+	def.EndpointConfig = &endpointConfig
+	return byteValue
 }

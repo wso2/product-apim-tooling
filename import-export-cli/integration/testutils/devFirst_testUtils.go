@@ -27,6 +27,33 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 )
 
+func AwsInitProject(t *testing.T, args *AWSInitTestArgs) (string, error) {
+	//Setup Environment and login to it.
+	base.SetupEnvWithoutTokenFlag(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL())
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	output, err := base.Execute(t, "aws", "init", "-n", args.ApiNameFlag, "-s", args.ApiStageNameFlag)
+	return output, err 
+}
+
+func ValidateAWSInitProject(t *testing.T, args *AWSInitTestArgs) {
+	t.Helper()
+
+	output, err := AwsInitProject(t, args)
+	if err != nil {
+		log.Fatal(err)
+	}
+	//Project initialized
+	assert.Nil(t, err, "Error testing aws init command")
+	assert.Contains(t, output, "Project initialized", "Error while executing aws init command")
+
+	//Remove Created project and logout
+	t.Cleanup(func() {
+		base.RemoveDir(args.ApiNameFlag)
+	})	
+	return 
+}
+
 func InitProject(t *testing.T, args *InitTestArgs) (string, error) {
 	//Setup Environment and login to it.
 	base.SetupEnvWithoutTokenFlag(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL())
@@ -118,7 +145,23 @@ func ValidateImportProject(t *testing.T, args *InitTestArgs) {
 	//Initialize a project with API definition
 	ValidateInitializeProjectWithOASFlag(t, args)
 
-	result, error := ImportApiFromProject(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, true)
+	result, error := ImportApiFromProject(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, true, true)
+
+	assert.Nil(t, error, "Error while importing Project")
+	assert.Contains(t, result, "Successfully imported API", "Error while importing Project")
+
+	base.WaitForIndexing()
+
+	//Remove Created project and logout
+	t.Cleanup(func() {
+		base.RemoveDir(args.InitFlag)
+	})
+}
+
+func ValidateAWSProjectImport(t *testing.T, args *AWSInitTestArgs, isPreserveProvider bool) {
+	t.Helper()
+	
+	result, error := ImportApiFromProject(t, args.ApiNameFlag, args.SrcAPIM, args.ApiNameFlag, &args.CtlUser, true, isPreserveProvider)
 
 	assert.Nil(t, error, "Error while importing Project")
 	assert.Contains(t, result, "Successfully imported API", "Error while importing Project")
@@ -134,7 +177,7 @@ func ValidateImportProject(t *testing.T, args *InitTestArgs) {
 func ValidateImportProjectFailed(t *testing.T, args *InitTestArgs) {
 	t.Helper()
 
-	result, _ := ImportApiFromProject(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, false)
+	result, _ := ImportApiFromProject(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, false, true)
 
 	assert.Contains(t, result, "409", "Test failed because API is imported successfully")
 

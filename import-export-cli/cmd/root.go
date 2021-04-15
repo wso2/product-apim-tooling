@@ -27,6 +27,7 @@ import (
 	"os/exec"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/cmd/k8s"
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd/aws"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
 	"github.com/wso2/product-apim-tooling/import-export-cli/cmd/mg"
@@ -116,6 +117,7 @@ func init() {
 	RootCmd.AddCommand(mg.MgCmd)
 	RootCmd.AddCommand(secret.SecretCmd)
 	RootCmd.AddCommand(k8s.Cmd)
+	RootCmd.AddCommand(aws.AWSCmd)
 }
 
 // createConfigFiles() creates the ConfigDir and necessary ConfigFiles inside the user's $HOME directory

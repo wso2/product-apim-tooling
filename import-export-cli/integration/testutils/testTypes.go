@@ -98,6 +98,14 @@ type ApiChangeLifeCycleStatusTestArgs struct {
 	ExpectedState string
 }
 
+type AWSInitTestArgs struct {
+	CtlUser        Credentials
+	SrcAPIM        *apim.Client
+	ApiNameFlag		 string 
+	ApiStageNameFlag string
+	InitFlag       string
+}
+
 type GenDeploymentDirTestArgs struct {
 	Source      string
 	Destination string

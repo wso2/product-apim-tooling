@@ -25,6 +25,56 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 )
 
+// Initialize a API project by getting the OAS of a AWS API and import it as a super tenant user with
+// the Internal/devops role
+// WARN: To test this you need to have AWS CLI installed and configured
+// WARN: Before running this test create an API on AWS with the name "Shopping" and stage name "Live"
+// NOTE: If the above prerequisites are met, uncomment the two aws init test functions and run the aws init tests.
+
+//func TestAWSInitImportSuperTenant(t *testing.T) {
+//	username := devops.UserName
+//	password := devops.Password
+//	apim := GetDevClient()
+//	apiName := "Shopping"
+//	apiStageName := "Live"
+//
+//	args := &testutils.AWSInitTestArgs{
+//		CtlUser:  testutils.Credentials{Username: username, Password: password},
+//		SrcAPIM:  apim,
+//		ApiNameFlag: apiName,
+//		ApiStageNameFlag : apiStageName,
+//		InitFlag: apiName,
+//	}
+//
+//	testutils.ValidateAWSInitProject(t, args)
+//	testutils.ValidateAWSProjectImport(t, args, true)
+//}
+
+// Initialize a API project by getting the OAS of a AWS API and import it as a tenant user with
+// the Internal/devops role
+// WARN: To test this you need to have AWS CLI installed and configured
+// WARN: Before running this test create an API on AWS with the name "PetStore" and stage name "beta"
+
+//func TestAWSInitImportTenant(t *testing.T) {
+//	username := devops.UserName + "@" + TENANT1
+//	password := devops.Password
+//	apim := GetDevClient()
+//	apiName := "PetStore"
+//	apiStageName := "beta"
+//
+//	args := &testutils.AWSInitTestArgs{
+//		CtlUser:  testutils.Credentials{Username: username, Password: password},
+//		SrcAPIM:  apim,
+//		ApiNameFlag: apiName,
+//		ApiStageNameFlag : apiStageName,
+//		InitFlag: apiName,
+//	}
+//
+//	testutils.ValidateAWSInitProject(t, args)
+//	// making preserveprovider false since this is a cross tenant import
+//	testutils.ValidateAWSProjectImport(t, args, false)
+//}
+
 //Initialize a project Initialize an API without any flag
 func TestInitializeProject(t *testing.T) {
 	username := superAdminUser

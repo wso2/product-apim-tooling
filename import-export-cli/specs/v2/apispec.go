@@ -94,10 +94,24 @@ type CorsConfiguration struct {
 	AccessControlAllowHeaders     []string `json:"accessControlAllowHeaders,omitempty" yaml:"accessControlAllowHeaders,omitempty"`
 	AccessControlAllowMethods     []string `json:"accessControlAllowMethods,omitempty" yaml:"accessControlAllowMethods,omitempty"`
 }
+type Document struct {
+	Type    string `json:"type,omitempty" yaml:"type,omitempty"`
+	Version string `json:"version,omitempty" yaml:"version,omitempty"`
+	Data    Data   `json:"data,omitempty" yaml:"data,omitempty"`
+}
+type Data struct {
+	Name          string `json:"name,omitempty" yaml:"name,omitempty"`
+	Type          string `json:"type,omitempty" yaml:"type,omitempty"`
+	Summary       string `json:"summary,omitempty" yaml:"summary,omitempty"`
+	SourceType    string `json:"sourceType,omitempty" yaml:"sourceType,omitempty"`
+	OtherTypeName string `json:"otherTypeName,omitempty" yaml:"otherTypeName,omitempty"`
+	Visibility    string `json:"visibility,omitempty" yaml:"visibility,omitempty"`
+}
 
 // AdvertiseInfo : Advertise only information
 type AdvertiseInfo struct {
 	Advertised           bool   `json:"advertised" yaml:"advertised"`
 	OriginalDevPortalUrl string `json:"originalDevPortalUrl" yaml:"originalDevPortalUrl"`
 	ApiOwner             string `json:"apiOwner" yaml:"apiOwner"`
+	Vendor               string `json:"vendor" yaml:"vendor"`
 }

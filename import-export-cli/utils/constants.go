@@ -212,6 +212,27 @@ const DefaultApiProductsDisplayLimit = 25
 const DefaultAppsDisplayLimit = 25
 const DefaultExportFormat = "YAML"
 
+const InitDirName = string(os.PathSeparator) + "init" + string(os.PathSeparator)
+
+// AWS API security document constants
+const DefaultAWSDocFileName = "document.yaml"
+
+const ResourcePolicyDocName = "resource_policy_doc"
+const ResourcePolicyDocDisplayName = "Resource Policy"
+const ResourcePolicyDocSummary = "This document contains details related to AWS resource policies"
+
+const CognitoUserPoolDocName = "cognito_userpool_doc"
+const CognitoDocDisplayName = "Cognito Userpool"
+const CognitoDocSummary = "This document contains details related to AWS cognito user pools"
+
+const AWSAPIKeyDocName = "aws_apikey_doc"
+const ApiKeysDocDisplayName = "AWS APIKeys"
+const ApiKeysDocSummary = "This document contains details related to AWS API keys"
+
+const AWSSigV4DocName = "aws_sigv4_doc"
+const AWSSigV4DocDisplayName = "AWS Signature Version4"
+const AWSSigV4DocSummary = "This document contains details related to AWS signature version 4"
+
 // MiCmdLiteral denote the alias for micro integrator related commands
 const MiCmdLiteral = "mi"
 

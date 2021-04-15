@@ -1,0 +1,13 @@
+## Access to this API is controlled by AWS resource policies
+
+### AWS Resource Policies
+
+Amazon API Gateway resource policies are JSON policy documents that are attached to an API to control whether 
+a specified principal (typically an IAM user or role) can invoke the API. API Gateway resource policies can be 
+used to allow an API to be securely invoked by:
+
+*   Users from a specified AWS account.
+*   Specified source IP address ranges or CIDR blocks.
+*   Specified virtual private clouds (VPCs) or VPC endpoints (in any account).
+
+For more information on resource policies refer here: [https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-resource-policies.html](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-resource-policies.html)
