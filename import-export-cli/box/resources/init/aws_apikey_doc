@@ -1,19 +1,11 @@
-<h2>This API is secured using an API key</h2>
+## This API is secured using an API key
 
-<p>
-    You need to subscribe to a usage plan and obtain an API key to access this APIs methods
-</p>
+You need to subscribe to a usage plan and obtain an API key to access this APIs methods
 
-<h3>Usage Plans</h3>
+### Usage Plans
 
-<p>
-    A usage plan specifies who can access one or more deployed API stages and methods—and also how much and how fast they 
-    can access them. The plan uses API keys to identify API clients and meters access to the associated API stages for each key.
-</p>
+A usage plan specifies who can access one or more deployed API stages and methods—and also how much and 
+how fast they can access them. The plan uses API keys to identify API clients and meters access to the 
+associated API stages for each key.
 
-<p>
-    Find out more about AWS usage plans here: 
-    <a href="https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-api-usage-plans.html">
-        https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-api-usage-plans.html
-    </a>
-</p>
+Find out more about AWS usage plans here: [https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-api-usage-plans.html](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-api-usage-plans.html)

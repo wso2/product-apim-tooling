@@ -1,41 +1,28 @@
-<h2>This API is secured using AWS signature version 4</h2> 
+## This API is secured using AWS signature version 4
 
-<h3>How AWS Signature Version 4 works</h3>
+### How AWS Signature Version 4 works
 
-<ol>
-    <li> Create a canonical request. </li>
-    <li> Use the canonical request and additional metadata to create a string for signing. </li>
-    <li> Derive a signing key from your AWS secret access key. Then use the signing key, and the string from the previous step, 
-    to create a signature. </li>
-    <li> Add the resulting signature to the HTTP request in a header or as a query string parameter. </li>
-</ol>
+1.  Create a canonical request.
+2.  Use the canonical request and additional metadata to create a string for signing.
+3.  Derive a signing key from your AWS secret access key. Then use the signing key, and the string from 
+    the previous step, to create a signature.
+4.  Add the resulting signature to the HTTP request in a header or as a query string parameter.
 
-<h5>Important</h5>
+##### Important
 
-<p>
-    When you use the AWS Command Line Interface (AWS CLI) or one of the AWS SDKs to make requests to AWS, these tools automatically sign 
-    the requests for you with the security credentials you specify when you configure the tools. When you use these tools, you don't need to 
-    learn how to sign requests yourself. However, when you manually create HTTP requests to access AWS services, you must sign requests that 
-    require signing yourself.
-</p>
+When you use the AWS Command Line Interface (AWS CLI) or one of the AWS SDKs to make requests to AWS, these tools 
+automatically sign the requests for you with the security credentials you specify when you configure the tools.
+ When you use these tools, you don't need to learn how to sign requests yourself. However, when you manually create 
+ HTTP requests to access AWS services, you must sign requests that require signing yourself.
 
-<h5>Signing requests</h5>
+##### Signing requests
 
-<p>
-    To sign a request, you first calculate a hash (digest) of the request. Then you use the hash value, some other information from the 
-    request, and your secret access key to calculate another hash known as the signature. Then you add the signature to the request in one 
-    of the following ways: 
-</p>
+To sign a request, you first calculate a hash (digest) of the request. Then you use the hash value, some other information 
+from the request, and your secret access key to calculate another hash known as the signature. Then you add the signature 
+to the request in one of the following ways:
 
-<ul>
-    <li>Using the HTTP Authorization header.</li>
-    <li>Adding a query string value to the request. Because the signature is part of the URL in this case, this type of URL is called a 
-    presigned URL.</li>
-</ul>
+*   Using the HTTP Authorization header.
+*   Adding a query string value to the request. Because the signature is part of the URL in this case, this type of URL is 
+called a presigned URL.
 
-<p>
-    Find out more on how to sign a request here: 
-        <a href="https://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html">
-            https://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html
-        </a>
-</p>
+Find out more on how to sign a request here: [https://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html](https://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html)
