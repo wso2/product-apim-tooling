@@ -35,6 +35,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/adminservices"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 )
 
@@ -474,6 +475,13 @@ func (instance *Client) AddAPI(t *testing.T, api *API, username string, password
 
 	if doClean {
 		t.Cleanup(func() {
+			if strings.EqualFold(adminservices.CreatorUsername, username) {
+				username = adminservices.AdminUsername
+			}
+			if strings.EqualFold(adminservices.CreatorUsername+"@"+adminservices.Tenant1, username) {
+				username = adminservices.AdminUsername + "@" + adminservices.Tenant1
+			}
+			password = adminservices.AdminPassword
 			instance.Login(username, password)
 			instance.DeleteAPI(apiResponse.ID)
 		})
@@ -528,6 +536,13 @@ func (instance *Client) AddAPIFromOpenAPIDefinition(t *testing.T, path string, a
 	json.NewDecoder(response.Body).Decode(&apiResponse)
 
 	t.Cleanup(func() {
+		if strings.EqualFold(adminservices.CreatorUsername, username) {
+			username = adminservices.AdminUsername
+		}
+		if strings.EqualFold(adminservices.CreatorUsername+"@"+adminservices.Tenant1, username) {
+			username = adminservices.AdminUsername + "@" + adminservices.Tenant1
+		}
+		password = adminservices.AdminPassword
 		instance.Login(username, password)
 		instance.DeleteAPI(apiResponse.ID)
 	})

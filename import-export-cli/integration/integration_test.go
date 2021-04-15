@@ -256,11 +256,6 @@ func deleteUserApps(client *apim.Client, username string, password string) {
 }
 
 func deleteApis() {
-	creators := Users["creator"]
-	for _, creator := range creators {
-		deleteAllTenantUserApis(creator.UserName, creator.Password)
-	}
-
 	devopsUsers := Users["devops"]
 	for _, devops := range devopsUsers {
 		deleteAllTenantUserApis(devops.UserName, devops.Password)
