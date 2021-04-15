@@ -25,7 +25,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/wso2/product-apim-tooling/import-export-cli/integration/adminservices"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
@@ -66,13 +65,8 @@ func importAPI(t *testing.T, args *testutils.ApiImportExportTestArgs) (string, e
 
 	t.Cleanup(func() {
 		if strings.EqualFold("PUBLISHED", args.Api.LifeCycleStatus) {
-			if strings.EqualFold(adminservices.CreatorUsername, args.CtlUser.Username) {
-				args.CtlUser.Username = adminservices.AdminUsername
-			}
-			if strings.EqualFold(adminservices.CreatorUsername+"@"+adminservices.Tenant1, args.CtlUser.Username) {
-				args.CtlUser.Username = adminservices.AdminUsername + "@" + adminservices.Tenant1
-			}
-			args.CtlUser.Password = adminservices.AdminPassword
+			args.CtlUser.Username, args.CtlUser.Password =
+				apim.RetrieveAdminCredentialsInsteadCreator(args.CtlUser.Username, args.CtlUser.Password)
 		}
 		err := args.DestAPIM.DeleteAPIByName(args.Api.Name)
 

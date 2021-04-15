@@ -98,7 +98,7 @@ func flagAPIsAddedViaProductImportForRemoval(t *testing.T, client *apim.Client, 
 	if len(*apiProviders) > 0 {
 		t.Cleanup(func() {
 			for name, credentials := range *apiProviders {
-				username, password := RetrieveAdminCredentialsInsteadCreator(credentials.Username, credentials.Password)
+				username, password := apim.RetrieveAdminCredentialsInsteadCreator(credentials.Username, credentials.Password)
 				client.Login(username, password)
 				err := client.DeleteAPIByName(name)
 
