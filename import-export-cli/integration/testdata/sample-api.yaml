@@ -24,6 +24,7 @@ data: # Contains the meta data of the API
   lifeCycleStatus: PUBLISHED # Life cycle status of the API
   responseCachingEnabled: false # Is response cache is enabled? true|false
   cacheTimeout: 300 # Response cache time out
+  hasThumbnail: false # Whether the API has a thumnail image or not
   isDefaultVersion: false # Is API default? true|false, if set to true APIM will discard version and make the API default
   enableSchemaValidation: false # Is schema validation enabled? true|false
   enableStore: true # Is enabled in store? true|false
