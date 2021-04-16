@@ -83,6 +83,23 @@
 </ul>
 <ul>
     <li>
+        <h4 id="init">init [project-name]</h4>
+        <pre><code class="lang-bash">   Flags:
+       Optional:
+           --definition, -d
+           --force, -f
+           --initial-state
+           --oas
+   Examples:
+       apictl init myapi --oas petstore.yaml
+       apictl init Petstore --oas https://petstore.swagger.io/v2/swagger.json
+       apictl init Petstore --oas https://petstore.swagger.io/v2/swagger.json --initial-state=PUBLISHED
+       apictl init MyAwesomeAPI --oas ./swagger.yaml -d definition.yaml
+</code></pre>
+    </li>
+</ul>
+<ul>
+    <li>
         <h4 id="export-api">export api</h4>
         <pre><code class="lang-bash">   Flags:
        Required:
@@ -498,7 +515,7 @@
 </ul>
 <ul>
     <li>
-        <h4 id="aws-init">aws init</h4>
+        <h4 id="aws-init">aws init [project-name]</h4>
         <pre><code class="lang-bash">   Flags:
        Required:
            --name, -n
