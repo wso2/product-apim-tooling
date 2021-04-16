@@ -155,7 +155,6 @@ func (instance *Client) GenerateSampleAPIData(provider string) *API {
 	api.AccessControl = "NONE"
 	api.AuthorizationHeader = "Authorization"
 	api.EndpointImplementationType = "ENDPOINT"
-	api.GatewayEnvironments = []string{"Default"}
 	api.BusinessInformation = BusinessInfo{"Jane Roe", "marketing@pizzashack.com", "John Doe", "architecture@pizzashack.com"}
 	api.EndpointConfig = HTTPEndpoint{"http", &URLConfig{"https://localhost:" + strconv.Itoa(9443+instance.portOffset) + "/am/sample/pizzashack/v1/api/"},
 		&URLConfig{"https://localhost:" + strconv.Itoa(9443+instance.portOffset) + "/am/sample/pizzashack/v1/api/"}}
@@ -193,10 +192,8 @@ func (instance *Client) GenerateAdditionalProperties(provider string) string {
 			"production_endpoints":{
 					"url":"petstore.swagger.io"
 			}
-		},
-	"gatewayEnvironments":[
-	   "Default"
-	]}`
+		}
+	}`
 	return additionalProperties
 }
 
@@ -227,10 +224,6 @@ func CopyAPI(apiToCopy *API) API {
 	// Copy VisibleTenants slice
 	apiCopy.VisibleTenants = make([]string, len(apiToCopy.VisibleTenants))
 	copy(apiCopy.VisibleTenants, apiToCopy.VisibleTenants)
-
-	// Copy GatewayEnvironments slice
-	apiCopy.GatewayEnvironments = make([]string, len(apiToCopy.GatewayEnvironments))
-	copy(apiCopy.GatewayEnvironments, apiToCopy.GatewayEnvironments)
 
 	// Copy MediationPolicies slice
 	apiCopy.MediationPolicies = make([]MediationPolicy, len(apiToCopy.MediationPolicies))
@@ -284,10 +277,6 @@ func CopyAPIProduct(apiProductToCopy *APIProduct) APIProduct {
 	apiProductCopy.VisibleTenants = make([]string, len(apiProductToCopy.VisibleTenants))
 	copy(apiProductCopy.VisibleTenants, apiProductToCopy.VisibleTenants)
 
-	// Copy GatewayEnvironments slice
-	apiProductCopy.GatewayEnvironments = make([]string, len(apiProductToCopy.GatewayEnvironments))
-	copy(apiProductCopy.GatewayEnvironments, apiProductToCopy.GatewayEnvironments)
-
 	// Copy SubscriptionAvailableTenants slice
 	apiProductCopy.SubscriptionAvailableTenants = make([]string, len(apiProductToCopy.SubscriptionAvailableTenants))
 	copy(apiProductCopy.SubscriptionAvailableTenants, apiProductToCopy.SubscriptionAvailableTenants)
@@ -327,9 +316,6 @@ func SortAPIMembers(api *API) {
 
 	// Sort VisibleTenants slice
 	sort.Strings(api.VisibleTenants)
-
-	// Sort GatewayEnvironments slice
-	sort.Strings(api.GatewayEnvironments)
 
 	// Sort MediationPolicies slice
 	sort.Sort(ByID(api.MediationPolicies))
@@ -384,9 +370,6 @@ func SortAPIProductMembers(apiProduct *APIProduct) {
 
 	// Sort VisibleTenants slice
 	sort.Strings(apiProduct.VisibleTenants)
-
-	// Sort GatewayEnvironments slice
-	sort.Strings(apiProduct.GatewayEnvironments)
 
 	// Sort SubscriptionAvailableTenants slice
 	sort.Strings(apiProduct.SubscriptionAvailableTenants)
@@ -605,6 +588,31 @@ func (instance *Client) AddAPIProductFromJSON(t *testing.T, path string, usernam
 	return apiProductResponse.ID
 }
 
+// GetAPIRevisions : Get API revisions
+func (instance *Client) GetAPIRevisions(apiID, query string) *APIRevisionList {
+	revisioningURL := instance.publisherRestURL + "/apis/" + apiID + "/revisions"
+
+	if query != "" {
+		revisioningURL += "?query=" + query
+	}
+
+	request := base.CreateGet(revisioningURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.GetAPIRevision()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.GetAPIRevision()", response, 200)
+
+	var revisionsList APIRevisionList
+	json.NewDecoder(response.Body).Decode(&revisionsList)
+	return &revisionsList
+}
+
 // CreateAPIRevision : Create API revision
 func (instance *Client) CreateAPIRevision(apiID string) *APIRevision {
 	revisioningURL := instance.publisherRestURL + "/apis/" + apiID + "/revisions"
@@ -661,6 +669,31 @@ func (instance *Client) DeployAPIRevision(t *testing.T, apiID string, revision *
 	defer response.Body.Close()
 
 	base.ValidateAndLogResponse("apim.DeployAPIRevision()", response, 201)
+}
+
+// GetAPIProductRevisions : Get API Product revisions
+func (instance *Client) GetAPIProductRevisions(apiID, query string) *APIRevisionList {
+	revisioningURL := instance.publisherRestURL + "/api-products/" + apiID + "/revisions"
+
+	if query != "" {
+		revisioningURL += "?query=" + query
+	}
+
+	request := base.CreateGet(revisioningURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.GetAPIProductRevisions()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.GetAPIProductRevisions()", response, 200)
+
+	var revisionsList APIRevisionList
+	json.NewDecoder(response.Body).Decode(&revisionsList)
+	return &revisionsList
 }
 
 // CreateAPIProductRevision : Create API Product revision

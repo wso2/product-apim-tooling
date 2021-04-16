@@ -33,3 +33,9 @@ type APIRevisionDeployment struct {
 	VHost              string `json:"vhost"`
 	DisplayOnDevportal bool   `json:"displayOnDevportal"`
 }
+
+// APIRevisionList : API Revisions List DTO
+type APIRevisionList struct {
+	Count string        `json:"count"`
+	List  []APIRevision `json:"list"`
+}

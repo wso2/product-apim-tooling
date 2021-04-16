@@ -50,6 +50,30 @@ func CreateAndDeployAPIRevision(t *testing.T, client *apim.Client, username, pas
 	client.DeployAPIRevision(t, apiID, revision)
 }
 
+func GetDeployedAPIRevisions(t *testing.T, client *apim.Client, username, password,
+	apiID string) *apim.APIRevisionList {
+	client.Login(username, password)
+	revisionsList := client.GetAPIRevisions(apiID, "deployed:true")
+	return revisionsList
+}
+
+func GetDeployedAPIProductRevisions(t *testing.T, client *apim.Client, username, password,
+	apiProductID string) *apim.APIRevisionList {
+	client.Login(username, password)
+	revisionsList := client.GetAPIProductRevisions(apiProductID, "deployed:true")
+	return revisionsList
+}
+
+func GetGatewayEnvironments(apiRevisions *apim.APIRevisionList) []string {
+	var gatewayEnvironments []string
+	for _, apiRevision := range apiRevisions.List {
+		for _, deployment := range apiRevision.DeploymentInfo {
+			gatewayEnvironments = append(gatewayEnvironments, deployment.Name)
+		}
+	}
+	return gatewayEnvironments
+}
+
 func AddAPIWithoutCleaning(t *testing.T, client *apim.Client, username string, password string) *apim.API {
 	client.Login(username, password)
 	api := client.GenerateSampleAPIData(username)

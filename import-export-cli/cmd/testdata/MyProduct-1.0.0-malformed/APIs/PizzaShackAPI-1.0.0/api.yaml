@@ -30,8 +30,6 @@ data:
   visibility: PUBLIC
   visibleRoles: []
   visibleTenants: []
-  gatewayEnvironments:
-   - Default
   mediationPolicies: []
   subscriptionAvailability: CURRENT_TENANT
   subscriptionAvailableTenants: []

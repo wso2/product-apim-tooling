@@ -35,7 +35,6 @@ type APIProduct struct {
 	VisibleTenants               []string             `json:"visibleTenants"`
 	AccessControl                string               `json:"accessControl"`
 	AccessControlRoles           []string             `json:"accessControlRoles"`
-	GatewayEnvironments          []string             `json:"gatewayEnvironments"`
 	APIType                      string               `json:"apiType"`
 	Transport                    []string             `json:"transport"`
 	Tags                         []string             `json:"tags"`

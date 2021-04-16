@@ -17,8 +17,6 @@ data:
   visibleTenants: []
   accessControl: NONE
   accessControlRoles: []
-  gatewayEnvironments:
-   - Default
   transport:
    - http
    - https

@@ -14,9 +14,6 @@
   "visibleTenants": [],
   "accessControl": "NONE",
   "accessControlRoles": [],
-  "gatewayEnvironments": [
-    "Default"
-  ],
   "apiType": "APIPRODUCT",
   "transport": [
     "http",
