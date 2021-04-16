@@ -56,7 +56,7 @@ type API struct {
 	MediationPolicies               []MediationPolicy `json:"mediationPolicies,omitempty" yaml:"mediationPolicies,omitempty"`
 	SubscriptionAvailability        string            `json:"subscriptionAvailability,omitempty" yaml:"subscriptionAvailability,omitempty"`
 	SubscriptionAvailableTenants    []string          `json:"subscriptionAvailableTenants,omitempty" yaml:"subscriptionAvailableTenants,omitempty"`
-	AdditionalProperties            map[string]string `json:"additionalProperties,omitempty" yaml:"additionalProperties,omitempty"`
+	AdditionalProperties            []interface{}     `json:"additionalProperties,omitempty" yaml:"additionalProperties,omitempty"`
 	Monetization                    interface{}       `json:"monetization,omitempty" yaml:"monetization,omitempty"`
 	AccessControl                   string            `json:"accessControl,omitempty" yaml:"accessControl,omitempty"`
 	AccessControlRoles              []string          `json:"accessControlRoles,omitempty" yaml:"accessControlRoles,omitempty"`

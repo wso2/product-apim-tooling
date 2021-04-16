@@ -28,7 +28,7 @@ data:
    - oauth_basic_auth_api_key_mandatory
   subscriptionAvailability: ALL_TENANTS
   subscriptionAvailableTenants: []
-  additionalProperties: {}
+  additionalProperties: []
   businessInformation: {}
   corsConfiguration:
     corsConfigurationEnabled: false

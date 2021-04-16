@@ -32,7 +32,7 @@ data:
   mediationPolicies: []
   subscriptionAvailability: CURRENT_TENANT
   subscriptionAvailableTenants: []
-  additionalProperties: {}
+  additionalProperties: []
   accessControl: NONE
   accessControlRoles: []
   businessInformation:

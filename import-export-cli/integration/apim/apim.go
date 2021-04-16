@@ -323,32 +323,11 @@ func SortAPIMembers(api *API) {
 	// Sort SubscriptionAvailableTenants slice
 	sort.Strings(api.SubscriptionAvailableTenants)
 
-	// Sort AdditionalProperties map
-	sortAdditionalPropertiesOfAPI(api)
-
 	// Sort AccessControlRoles slice
 	sort.Strings(api.AccessControlRoles)
 
 	// Sort Operations slice
 	sort.Sort(ByTargetVerb(api.Operations))
-}
-
-func sortAdditionalPropertiesOfAPI(api *API) {
-	keys := make([]string, 0, len(api.AdditionalProperties))
-
-	for key := range api.AdditionalProperties {
-		keys = append(keys, key)
-	}
-
-	sort.Strings(keys)
-
-	sortedMap := make(map[string]string, len(api.AdditionalProperties))
-
-	for _, key := range keys {
-		sortedMap[key] = api.AdditionalProperties[key]
-	}
-
-	api.AdditionalProperties = sortedMap
 }
 
 // SortAPIProductMembers : Sort API Product object members such as slices
@@ -374,32 +353,11 @@ func SortAPIProductMembers(apiProduct *APIProduct) {
 	// Sort SubscriptionAvailableTenants slice
 	sort.Strings(apiProduct.SubscriptionAvailableTenants)
 
-	// Sort AdditionalProperties map
-	sortAdditionalPropertiesOfAPIProduct(apiProduct)
-
 	// Sort AccessControlRoles slice
 	sort.Strings(apiProduct.AccessControlRoles)
 
 	// Sort APIs slice
 	// sort.Sort(ByTargetVerb(apiProduct.APIs))
-}
-
-func sortAdditionalPropertiesOfAPIProduct(apiProduct *APIProduct) {
-	keys := make([]string, 0, len(apiProduct.AdditionalProperties))
-
-	for key := range apiProduct.AdditionalProperties {
-		keys = append(keys, key)
-	}
-
-	sort.Strings(keys)
-
-	sortedMap := make(map[string]string, len(apiProduct.AdditionalProperties))
-
-	for _, key := range keys {
-		sortedMap[key] = apiProduct.AdditionalProperties[key]
-	}
-
-	apiProduct.AdditionalProperties = sortedMap
 }
 
 // GenerateSampleAppData : Generate sample Application object

@@ -44,7 +44,7 @@ type APIProduct struct {
 	SecurityScheme               []string             `json:"securityScheme"`
 	SubscriptionAvailability     string               `json:"subscriptionAvailability"`
 	SubscriptionAvailableTenants []string             `json:"subscriptionAvailableTenants"`
-	AdditionalProperties         map[string]string    `json:"additionalProperties"`
+	AdditionalProperties         []interface{}        `json:"additionalProperties"`
 	Monetization                 APIMonetization      `json:"monetization,omitempty"`
 	BusinessInformation          BusinessInfo         `json:"businessInformation,omitempty"`
 	CorsConfiguration            APICorsConfiguration `json:"corsConfiguration,omitempty"`
