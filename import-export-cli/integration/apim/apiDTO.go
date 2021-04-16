@@ -35,16 +35,13 @@ type API struct {
 	LifeCycleStatus                 string            `json:"lifeCycleStatus,omitempty" yaml:"lifeCycleStatus,omitempty"`
 	WsdlInfo                        interface{}       `json:"wsdlInfo,omitempty" yaml:"wsdlInfo,omitempty"`
 	WsdlURL                         string            `json:"wsdlUrl,omitempty" yaml:"wsdlUrl,omitempty"`
-	TestKey                         string            `json:"testKey,omitempty" yaml:"testKey,omitempty"`
 	ResponseCachingEnabledKey       bool              `json:"responseCachingEnabled,omitempty" yaml:"responseCachingEnabled,omitempty"`
 	CacheTimeout                    int               `json:"cacheTimeout,omitempty" yaml:"cacheTimeout,omitempty"`
-	DestinationStatsEnabled         string            `json:"destinationStatsEnabled,omitempty" yaml:"destinationStatsEnabled,omitempty"`
 	HasThumbnail                    bool              `json:"hasThumbnail,omitempty" yaml:"hasThumbnail,omitempty"`
 	IsDefaultVersion                bool              `json:"isDefaultVersion,omitempty" yaml:"isDefaultVersion,omitempty"`
 	IsRevision                      bool              `json:"isRevision" yaml:"isRevision"`
 	RevisionID                      int32             `json:"revisionId" yaml:"revisionId"`
 	EnableSchemaValidation          bool              `json:"enableSchemaValidation,omitempty" yaml:"enableSchemaValidation,omitempty"`
-	EnableStore                     bool              `json:"enableStore,omitempty" yaml:"enableStore,omitempty"`
 	Type                            string            `json:"type,omitempty" yaml:"type,omitempty"`
 	Transport                       []string          `json:"transport,omitempty" yaml:"transport,omitempty"`
 	Tags                            []string          `json:"tags,omitempty" yaml:"tags,omitempty"`
@@ -56,11 +53,10 @@ type API struct {
 	Visibility                      string            `json:"visibility,omitempty" yaml:"visibility,omitempty"`
 	VisibleRoles                    []string          `json:"visibleRoles,omitempty" yaml:"visibleRoles,omitempty"`
 	VisibleTenants                  []string          `json:"visibleTenants,omitempty" yaml:"visibleTenants,omitempty"`
-	GatewayEnvironments             []string          `json:"gatewayEnvironments,omitempty" yaml:"gatewayEnvironments,omitempty"`
 	MediationPolicies               []MediationPolicy `json:"mediationPolicies,omitempty" yaml:"mediationPolicies,omitempty"`
 	SubscriptionAvailability        string            `json:"subscriptionAvailability,omitempty" yaml:"subscriptionAvailability,omitempty"`
 	SubscriptionAvailableTenants    []string          `json:"subscriptionAvailableTenants,omitempty" yaml:"subscriptionAvailableTenants,omitempty"`
-	AdditionalProperties            map[string]string `json:"additionalProperties,omitempty" yaml:"additionalProperties,omitempty"`
+	AdditionalProperties            []interface{}     `json:"additionalProperties,omitempty" yaml:"additionalProperties,omitempty"`
 	Monetization                    interface{}       `json:"monetization,omitempty" yaml:"monetization,omitempty"`
 	AccessControl                   string            `json:"accessControl,omitempty" yaml:"accessControl,omitempty"`
 	AccessControlRoles              []string          `json:"accessControlRoles,omitempty" yaml:"accessControlRoles,omitempty"`
@@ -223,8 +219,9 @@ type APIOperations struct {
 // AdvertiseInfo : Advertise only information
 type AdvertiseInfo struct {
 	Advertised           bool   `json:"advertised", yaml:"advertised"`
-	OriginalDevPortalUrl string `json:"originalDevPortalUrl" yaml:"originalDevPortalUrl"`
-	ApiOwner             string `json:"apiOwner" yaml:"apiOwner"`
+	OriginalDevPortalUrl string `json:"originalDevPortalUrl,omitempty" yaml:"originalDevPortalUrl,omitempty"`
+	ApiOwner             string `json:"apiOwner,omitempty" yaml:"apiOwner,omitempty"`
+	Vendor               string `json:"vendor,omitempty" yaml:"vendor,omitempty"`
 }
 
 // ByTargetVerb implements sort.Interface based on the Target and Verb fields.

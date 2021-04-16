@@ -14,9 +14,6 @@
   "visibleTenants": [],
   "accessControl": "NONE",
   "accessControlRoles": [],
-  "gatewayEnvironments": [
-    "Default"
-  ],
   "apiType": "APIPRODUCT",
   "transport": [
     "http",
@@ -35,7 +32,6 @@
   ],
   "subscriptionAvailability": "ALL_TENANTS",
   "subscriptionAvailableTenants": [],
-  "additionalProperties": {},
   "monetization": null,
   "businessInformation": {
     "businessOwner": null,

@@ -7,7 +7,6 @@ data:
   provider: admin
   state: PUBLISHED
   enableSchemaValidation: false
-  enableStore: true
   isRevision: false
   revisionId: 0
   responseCachingEnabled: false
@@ -17,8 +16,6 @@ data:
   visibleTenants: []
   accessControl: NONE
   accessControlRoles: []
-  gatewayEnvironments:
-   - Default
   transport:
    - http
    - https
@@ -31,7 +28,7 @@ data:
    - oauth_basic_auth_api_key_mandatory
   subscriptionAvailability: ALL_TENANTS
   subscriptionAvailableTenants: []
-  additionalProperties: {}
+  additionalProperties: []
   businessInformation: {}
   corsConfiguration:
     corsConfigurationEnabled: false

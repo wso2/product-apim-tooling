@@ -6,7 +6,6 @@ data:
   version: 1.0.0
   provider: admin
   lifeCycleStatus: CREATED
-  enableStore: true
   type: HTTP
   transport:
    - http

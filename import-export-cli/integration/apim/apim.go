@@ -35,6 +35,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/adminservices"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 )
 
@@ -154,11 +155,11 @@ func (instance *Client) GenerateSampleAPIData(provider string) *API {
 	api.AccessControl = "NONE"
 	api.AuthorizationHeader = "Authorization"
 	api.EndpointImplementationType = "ENDPOINT"
-	api.GatewayEnvironments = []string{"Default"}
 	api.BusinessInformation = BusinessInfo{"Jane Roe", "marketing@pizzashack.com", "John Doe", "architecture@pizzashack.com"}
 	api.EndpointConfig = HTTPEndpoint{"http", &URLConfig{"https://localhost:" + strconv.Itoa(9443+instance.portOffset) + "/am/sample/pizzashack/v1/api/"},
 		&URLConfig{"https://localhost:" + strconv.Itoa(9443+instance.portOffset) + "/am/sample/pizzashack/v1/api/"}}
 	api.Operations = generateSampleAPIOperations()
+	api.AdvertiseInformation = AdvertiseInfo{Advertised: false}
 
 	return &api
 }
@@ -191,10 +192,8 @@ func (instance *Client) GenerateAdditionalProperties(provider string) string {
 			"production_endpoints":{
 					"url":"petstore.swagger.io"
 			}
-		},
-	"gatewayEnvironments":[
-	   "Default"
-	]}`
+		}
+	}`
 	return additionalProperties
 }
 
@@ -225,10 +224,6 @@ func CopyAPI(apiToCopy *API) API {
 	// Copy VisibleTenants slice
 	apiCopy.VisibleTenants = make([]string, len(apiToCopy.VisibleTenants))
 	copy(apiCopy.VisibleTenants, apiToCopy.VisibleTenants)
-
-	// Copy GatewayEnvironments slice
-	apiCopy.GatewayEnvironments = make([]string, len(apiToCopy.GatewayEnvironments))
-	copy(apiCopy.GatewayEnvironments, apiToCopy.GatewayEnvironments)
 
 	// Copy MediationPolicies slice
 	apiCopy.MediationPolicies = make([]MediationPolicy, len(apiToCopy.MediationPolicies))
@@ -282,10 +277,6 @@ func CopyAPIProduct(apiProductToCopy *APIProduct) APIProduct {
 	apiProductCopy.VisibleTenants = make([]string, len(apiProductToCopy.VisibleTenants))
 	copy(apiProductCopy.VisibleTenants, apiProductToCopy.VisibleTenants)
 
-	// Copy GatewayEnvironments slice
-	apiProductCopy.GatewayEnvironments = make([]string, len(apiProductToCopy.GatewayEnvironments))
-	copy(apiProductCopy.GatewayEnvironments, apiProductToCopy.GatewayEnvironments)
-
 	// Copy SubscriptionAvailableTenants slice
 	apiProductCopy.SubscriptionAvailableTenants = make([]string, len(apiProductToCopy.SubscriptionAvailableTenants))
 	copy(apiProductCopy.SubscriptionAvailableTenants, apiProductToCopy.SubscriptionAvailableTenants)
@@ -326,41 +317,17 @@ func SortAPIMembers(api *API) {
 	// Sort VisibleTenants slice
 	sort.Strings(api.VisibleTenants)
 
-	// Sort GatewayEnvironments slice
-	sort.Strings(api.GatewayEnvironments)
-
 	// Sort MediationPolicies slice
 	sort.Sort(ByID(api.MediationPolicies))
 
 	// Sort SubscriptionAvailableTenants slice
 	sort.Strings(api.SubscriptionAvailableTenants)
 
-	// Sort AdditionalProperties map
-	sortAdditionalPropertiesOfAPI(api)
-
 	// Sort AccessControlRoles slice
 	sort.Strings(api.AccessControlRoles)
 
 	// Sort Operations slice
 	sort.Sort(ByTargetVerb(api.Operations))
-}
-
-func sortAdditionalPropertiesOfAPI(api *API) {
-	keys := make([]string, 0, len(api.AdditionalProperties))
-
-	for key := range api.AdditionalProperties {
-		keys = append(keys, key)
-	}
-
-	sort.Strings(keys)
-
-	sortedMap := make(map[string]string, len(api.AdditionalProperties))
-
-	for _, key := range keys {
-		sortedMap[key] = api.AdditionalProperties[key]
-	}
-
-	api.AdditionalProperties = sortedMap
 }
 
 // SortAPIProductMembers : Sort API Product object members such as slices
@@ -383,38 +350,14 @@ func SortAPIProductMembers(apiProduct *APIProduct) {
 	// Sort VisibleTenants slice
 	sort.Strings(apiProduct.VisibleTenants)
 
-	// Sort GatewayEnvironments slice
-	sort.Strings(apiProduct.GatewayEnvironments)
-
 	// Sort SubscriptionAvailableTenants slice
 	sort.Strings(apiProduct.SubscriptionAvailableTenants)
-
-	// Sort AdditionalProperties map
-	sortAdditionalPropertiesOfAPIProduct(apiProduct)
 
 	// Sort AccessControlRoles slice
 	sort.Strings(apiProduct.AccessControlRoles)
 
 	// Sort APIs slice
 	// sort.Sort(ByTargetVerb(apiProduct.APIs))
-}
-
-func sortAdditionalPropertiesOfAPIProduct(apiProduct *APIProduct) {
-	keys := make([]string, 0, len(apiProduct.AdditionalProperties))
-
-	for key := range apiProduct.AdditionalProperties {
-		keys = append(keys, key)
-	}
-
-	sort.Strings(keys)
-
-	sortedMap := make(map[string]string, len(apiProduct.AdditionalProperties))
-
-	for _, key := range keys {
-		sortedMap[key] = apiProduct.AdditionalProperties[key]
-	}
-
-	apiProduct.AdditionalProperties = sortedMap
 }
 
 // GenerateSampleAppData : Generate sample Application object
@@ -474,6 +417,7 @@ func (instance *Client) AddAPI(t *testing.T, api *API, username string, password
 
 	if doClean {
 		t.Cleanup(func() {
+			username, password := RetrieveAdminCredentialsInsteadCreator(username, password)
 			instance.Login(username, password)
 			instance.DeleteAPI(apiResponse.ID)
 		})
@@ -528,6 +472,7 @@ func (instance *Client) AddAPIFromOpenAPIDefinition(t *testing.T, path string, a
 	json.NewDecoder(response.Body).Decode(&apiResponse)
 
 	t.Cleanup(func() {
+		username, password := RetrieveAdminCredentialsInsteadCreator(username, password)
 		instance.Login(username, password)
 		instance.DeleteAPI(apiResponse.ID)
 	})
@@ -601,6 +546,31 @@ func (instance *Client) AddAPIProductFromJSON(t *testing.T, path string, usernam
 	return apiProductResponse.ID
 }
 
+// GetAPIRevisions : Get API revisions
+func (instance *Client) GetAPIRevisions(apiID, query string) *APIRevisionList {
+	revisioningURL := instance.publisherRestURL + "/apis/" + apiID + "/revisions"
+
+	if query != "" {
+		revisioningURL += "?query=" + query
+	}
+
+	request := base.CreateGet(revisioningURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.GetAPIRevision()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.GetAPIRevision()", response, 200)
+
+	var revisionsList APIRevisionList
+	json.NewDecoder(response.Body).Decode(&revisionsList)
+	return &revisionsList
+}
+
 // CreateAPIRevision : Create API revision
 func (instance *Client) CreateAPIRevision(apiID string) *APIRevision {
 	revisioningURL := instance.publisherRestURL + "/apis/" + apiID + "/revisions"
@@ -657,6 +627,31 @@ func (instance *Client) DeployAPIRevision(t *testing.T, apiID string, revision *
 	defer response.Body.Close()
 
 	base.ValidateAndLogResponse("apim.DeployAPIRevision()", response, 201)
+}
+
+// GetAPIProductRevisions : Get API Product revisions
+func (instance *Client) GetAPIProductRevisions(apiID, query string) *APIRevisionList {
+	revisioningURL := instance.publisherRestURL + "/api-products/" + apiID + "/revisions"
+
+	if query != "" {
+		revisioningURL += "?query=" + query
+	}
+
+	request := base.CreateGet(revisioningURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.GetAPIProductRevisions()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.GetAPIProductRevisions()", response, 200)
+
+	var revisionsList APIRevisionList
+	json.NewDecoder(response.Body).Decode(&revisionsList)
+	return &revisionsList
 }
 
 // CreateAPIProductRevision : Create API Product revision
@@ -1480,4 +1475,18 @@ func getPublisherRestURL(host string, offset int, version string) string {
 func getTokenURL(host string, offset int) string {
 	port := 9443 + offset
 	return "https://" + host + ":" + strconv.Itoa(port) + "/oauth2/token"
+}
+
+func RetrieveAdminCredentialsInsteadCreator(username, password string) (string, string) {
+	newUsername := username
+	newPassword := password
+	if strings.EqualFold(adminservices.CreatorUsername, username) {
+		newUsername = adminservices.AdminUsername
+		newPassword = adminservices.AdminPassword
+	}
+	if strings.EqualFold(adminservices.CreatorUsername+"@"+adminservices.Tenant1, username) {
+		newUsername = adminservices.AdminUsername + "@" + adminservices.Tenant1
+		newPassword = adminservices.AdminPassword
+	}
+	return newUsername, newPassword
 }

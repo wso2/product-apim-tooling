@@ -35,7 +35,6 @@ type APIProduct struct {
 	VisibleTenants               []string             `json:"visibleTenants"`
 	AccessControl                string               `json:"accessControl"`
 	AccessControlRoles           []string             `json:"accessControlRoles"`
-	GatewayEnvironments          []string             `json:"gatewayEnvironments"`
 	APIType                      string               `json:"apiType"`
 	Transport                    []string             `json:"transport"`
 	Tags                         []string             `json:"tags"`
@@ -45,7 +44,7 @@ type APIProduct struct {
 	SecurityScheme               []string             `json:"securityScheme"`
 	SubscriptionAvailability     string               `json:"subscriptionAvailability"`
 	SubscriptionAvailableTenants []string             `json:"subscriptionAvailableTenants"`
-	AdditionalProperties         map[string]string    `json:"additionalProperties"`
+	AdditionalProperties         []interface{}        `json:"additionalProperties"`
 	Monetization                 APIMonetization      `json:"monetization,omitempty"`
 	BusinessInformation          BusinessInfo         `json:"businessInformation,omitempty"`
 	CorsConfiguration            APICorsConfiguration `json:"corsConfiguration,omitempty"`

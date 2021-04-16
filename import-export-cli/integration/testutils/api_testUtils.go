@@ -50,6 +50,30 @@ func CreateAndDeployAPIRevision(t *testing.T, client *apim.Client, username, pas
 	client.DeployAPIRevision(t, apiID, revision)
 }
 
+func GetDeployedAPIRevisions(t *testing.T, client *apim.Client, username, password,
+	apiID string) *apim.APIRevisionList {
+	client.Login(username, password)
+	revisionsList := client.GetAPIRevisions(apiID, "deployed:true")
+	return revisionsList
+}
+
+func GetDeployedAPIProductRevisions(t *testing.T, client *apim.Client, username, password,
+	apiProductID string) *apim.APIRevisionList {
+	client.Login(username, password)
+	revisionsList := client.GetAPIProductRevisions(apiProductID, "deployed:true")
+	return revisionsList
+}
+
+func GetGatewayEnvironments(apiRevisions *apim.APIRevisionList) []string {
+	var gatewayEnvironments []string
+	for _, apiRevision := range apiRevisions.List {
+		for _, deployment := range apiRevision.DeploymentInfo {
+			gatewayEnvironments = append(gatewayEnvironments, deployment.Name)
+		}
+	}
+	return gatewayEnvironments
+}
+
 func AddAPIWithoutCleaning(t *testing.T, client *apim.Client, username string, password string) *apim.API {
 	client.Login(username, password)
 	api := client.GenerateSampleAPIData(username)
@@ -117,6 +141,7 @@ func GenerateAdvertiseOnlyAPIDefinition(t *testing.T) (string, apim.API) {
 	sampleContent.Data.AdvertiseInformation.Advertised = true
 	sampleContent.Data.AdvertiseInformation.ApiOwner = sampleContent.Data.Provider
 	sampleContent.Data.AdvertiseInformation.OriginalDevPortalUrl = "https://localhost:9443/devportal"
+	sampleContent.Data.AdvertiseInformation.Vendor = "WSO2"
 
 	apiData, err := yaml2.Marshal(sampleContent)
 	if err != nil {
@@ -238,6 +263,10 @@ func importAPI(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
 	output, err := base.Execute(t, params...)
 
 	t.Cleanup(func() {
+		if strings.EqualFold("PUBLISHED", args.Api.LifeCycleStatus) {
+			args.CtlUser.Username, args.CtlUser.Password =
+				apim.RetrieveAdminCredentialsInsteadCreator(args.CtlUser.Username, args.CtlUser.Password)
+		}
 		err := args.DestAPIM.DeleteAPIByName(args.Api.Name)
 
 		if err != nil {
@@ -649,13 +678,14 @@ func validateAPIIsDeleted(t *testing.T, api *apim.API, apisListAfterDelete *apim
 
 func ImportApiFromProject(t *testing.T, projectName string, client *apim.Client, apiName string, credentials *Credentials, isCleanup, isPreserveProvider bool) (string, error) {
 	projectPath, _ := filepath.Abs(projectName)
-	output, err := base.Execute(t, "import", "api", "-f", projectPath, "-e", client.GetEnvName(), "-k", "--verbose", "--preserve-provider=" + strconv.FormatBool(isPreserveProvider))
+	output, err := base.Execute(t, "import", "api", "-f", projectPath, "-e", client.GetEnvName(), "-k", "--verbose", "--preserve-provider="+strconv.FormatBool(isPreserveProvider))
 
 	base.WaitForIndexing()
 
 	if isCleanup {
 		t.Cleanup(func() {
-			client.Login(credentials.Username, credentials.Password)
+			username, password := apim.RetrieveAdminCredentialsInsteadCreator(credentials.Username, credentials.Password)
+			client.Login(username, password)
 			err := client.DeleteAPIByName(apiName)
 
 			if err != nil {
@@ -676,7 +706,8 @@ func ImportApiFromProjectWithUpdate(t *testing.T, projectName string, client *ap
 
 	if isCleanup {
 		t.Cleanup(func() {
-			client.Login(credentials.Username, credentials.Password)
+			username, password := apim.RetrieveAdminCredentialsInsteadCreator(credentials.Username, credentials.Password)
+			client.Login(username, password)
 			err := client.DeleteAPIByName(apiName)
 
 			if err != nil {

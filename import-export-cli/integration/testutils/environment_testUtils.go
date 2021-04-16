@@ -146,9 +146,12 @@ func ValidateAPIImportExportWithDeploymentDir(t *testing.T, args *ApiImportExpor
 
 	importedAPI := GetImportedAPI(t, args)
 
+	apiRevisions := GetDeployedAPIRevisions(t, args.DestAPIM, args.CtlUser.Username,
+		args.CtlUser.Password, importedAPI.ID)
+	gatewayEnvironments := GetGatewayEnvironments(apiRevisions)
+
 	apiParams := ReadParams(t, args.ParamsFile+string(os.PathSeparator)+utils.ParamFile)
-	validateParamsWithoutCerts(t, apiParams, importedAPI, nil, importedAPI.Policies,
-		importedAPI.GatewayEnvironments)
+	validateParamsWithoutCerts(t, apiParams, importedAPI, nil, importedAPI.Policies, gatewayEnvironments)
 
 	args.SrcAPIM = args.DestAPIM // The API should be exported from prod env
 	validateExportedAPICerts(t, apiParams, importedAPI, args)
@@ -167,8 +170,12 @@ func ValidateAPIProductImportExportWithDeploymentDir(t *testing.T, args *ApiProd
 
 	importedAPIProduct := ValidateAPIProductImport(t, args, true)
 
+	apiRevisions := GetDeployedAPIProductRevisions(t, args.DestAPIM, args.CtlUser.Username,
+		args.CtlUser.Password, importedAPIProduct.ID)
+	gatewayEnvironments := GetGatewayEnvironments(apiRevisions)
+
 	apiProductParams := ReadParams(t, args.ParamsFile+string(os.PathSeparator)+utils.ParamFile)
-	validateParamsWithoutCerts(t, apiProductParams, nil, importedAPIProduct, importedAPIProduct.Policies, importedAPIProduct.GatewayEnvironments)
+	validateParamsWithoutCerts(t, apiProductParams, nil, importedAPIProduct, importedAPIProduct.Policies, gatewayEnvironments)
 
 	args.SrcAPIM = args.DestAPIM // The API Product should be exported from prod env
 	validateExportedAPIProductCerts(t, apiProductParams, importedAPIProduct, args)
@@ -217,7 +224,7 @@ func ValidateDependentAPIWithParams(t *testing.T, dependentAPI *apim.API, client
 	apiParams := ReadParams(t, srcPathForParamsFile)
 
 	validateParamsWithoutCerts(t, apiParams, importedDependentAPI, nil, importedDependentAPI.Policies,
-		importedDependentAPI.GatewayEnvironments)
+		nil)
 }
 
 func validateEndpointSecurity(t *testing.T, apiParams *Params, api *apim.API, endpointType string) {
@@ -270,8 +277,11 @@ func validateParamsWithoutCerts(t *testing.T, params *Params, api *apim.API, api
 	// Validate subscription policies
 	assert.ElementsMatch(t, params.Environments[0].Configs.Policies, policies, "Mismatched policies")
 
-	// Validate deployment environments
-	validateDeploymentEnvironments(t, params, gatewayEnvironments)
+	// This will be nil for dependent APIs of an API Product
+	if gatewayEnvironments != nil {
+		// Validate deployment environments
+		validateDeploymentEnvironments(t, params, gatewayEnvironments)
+	}
 }
 
 func validateDeploymentEnvironments(t *testing.T, apiParams *Params, gatewayEnvironments []string) {

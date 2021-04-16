@@ -14,7 +14,6 @@ data:
   isRevision: false
   revisionId: 0
   enableSchemaValidation: false
-  enableStore: true
   type: HTTP
   transport:
    - http
@@ -30,12 +29,10 @@ data:
   visibility: PUBLIC
   visibleRoles: []
   visibleTenants: []
-  gatewayEnvironments:
-   - Default
   mediationPolicies: []
   subscriptionAvailability: CURRENT_TENANT
   subscriptionAvailableTenants: []
-  additionalProperties: {}
+  additionalProperties: []
   accessControl: NONE
   accessControlRoles: []
   businessInformation:

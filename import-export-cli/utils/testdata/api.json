@@ -145,7 +145,7 @@
     "Default"
   ],
   "createdTime": "1554380865606",
-  "additionalProperties": {},
+  "additionalProperties": [],
   "environmentList": [
     "SANDBOX",
     "PRODUCTION"

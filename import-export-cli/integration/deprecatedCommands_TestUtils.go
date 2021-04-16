@@ -64,6 +64,10 @@ func importAPI(t *testing.T, args *testutils.ApiImportExportTestArgs) (string, e
 	output, err := base.Execute(t, params...)
 
 	t.Cleanup(func() {
+		if strings.EqualFold("PUBLISHED", args.Api.LifeCycleStatus) {
+			args.CtlUser.Username, args.CtlUser.Password =
+				apim.RetrieveAdminCredentialsInsteadCreator(args.CtlUser.Username, args.CtlUser.Password)
+		}
 		err := args.DestAPIM.DeleteAPIByName(args.Api.Name)
 
 		if err != nil {

@@ -24,9 +24,9 @@ data: # Contains the meta data of the API
   lifeCycleStatus: PUBLISHED # Life cycle status of the API
   responseCachingEnabled: false # Is response cache is enabled? true|false
   cacheTimeout: 300 # Response cache time out
+  hasThumbnail: false # Whether the API has a thumnail image or not
   isDefaultVersion: false # Is API default? true|false, if set to true APIM will discard version and make the API default
   enableSchemaValidation: false # Is schema validation enabled? true|false
-  enableStore: true # Is enabled in store? true|false
   type: HTTP # Type of the API {HTTP|WS|GRAPHQL|SOAPTOREST} [required]
   transport: # Transport protocols as a list
    - http
@@ -43,8 +43,6 @@ data: # Contains the meta data of the API
   visibility: PUBLIC # Visibility level of the API {PUBLIC|PRIVATE|RESTRICTED} [required]
   visibleRoles: [] # User roles that are able to access the API in Store as a list
   visibleTenants: [] # Visible tenants of the API
-  gatewayEnvironments: # Gateway environments that the API is available as a list
-   - Default
   mediationPolicies: # Mediation policies attached to the API that should be executed in the runtime {IN|OUT|FAULT}
    -
     id: 3b8cc0a7-6d98-4678-9111-2aba50fa505c
@@ -63,7 +61,7 @@ data: # Contains the meta data of the API
     shared: true 
   subscriptionAvailability: CURRENT_TENANT # Subscription availability of the API {CURRENT_TENANT|ALL_TENANTS|SPECIFIC_TENANTS}
   subscriptionAvailableTenants: [] # Subscription available tenants as a list
-  additionalProperties: {} # Map of custom properties of the API
+  additionalProperties: [] # List of custom properties of the API
   accessControl: NONE # Is the API is restricted to certain set of publishers or creators or is it visible to all the publishers and creators? If the accessControl restriction is none, this API can be modified by all the publishers and creators, if not it can only be viewable/modifiable by certain set of publishers and creators, based on the restriction
   accessControlRoles: [] # The user roles that are able to view/modify as API publisher or creator
   businessInformation: # Business information of the API
