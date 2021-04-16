@@ -7,7 +7,6 @@ data:
   provider: admin
   state: PUBLISHED
   enableSchemaValidation: false
-  enableStore: true
   isRevision: false
   revisionId: 0
   responseCachingEnabled: false

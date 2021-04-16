@@ -14,7 +14,6 @@ data:
   isRevision: false
   revisionId: 0
   enableSchemaValidation: false
-  enableStore: true
   type: HTTP
   transport:
    - http
