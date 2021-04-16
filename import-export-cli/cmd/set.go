@@ -45,19 +45,23 @@ const flagVCSDeploymentRepoPathName = "vcs-deployment-repo-path"
 const setCmdLiteral = "set"
 const setCmdShortDesc = "Set configuration parameters"
 
-const setCmdLongDesc = `Set configuration parameters. Use at least one of the following flags
+const setCmdLongDesc = `Set configuration parameters. You can use one of the following flags
 * --http-request-timeout <time-in-milli-seconds>
 * --tls-renegotiation-mode <never|once|freely>
 * --export-directory <path-to-directory-where-apis-should-be-saved>
 * --vcs-deletion-enabled <enable-or-disable-project-deletion-via-vcs>
-* --vcs-config-path <path-to-custom-vcs-config-file>`
+* --vcs-config-path <path-to-custom-vcs-config-file>
+* --vcs-deployment-repo-path <path-to-deployment-repo-for-vcs>
+* --vcs-source-repo-path <path-to-source-repo-for-vcs>`
 
 const setCmdExamples = utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 3600 --export-directory /home/user/exported-apis
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000 --export-directory C:\Documents\exported
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --tls-renegotiation-mode freely
 ` + utils.ProjectName + ` ` + setCmdLiteral + ` --vcs-deletion-enabled=true
-` + utils.ProjectName + ` ` + setCmdLiteral + ` --vcs-config-path /home/user/custom/vcs-config.yaml`
+` + utils.ProjectName + ` ` + setCmdLiteral + ` --vcs-config-path /home/user/custom/vcs-config.yaml
+` + utils.ProjectName + ` ` + setCmdLiteral + ` --vcs-deployment-repo-path /home/user/custom/deployment
+` + utils.ProjectName + ` ` + setCmdLiteral + ` --vcs-source-repo-path /home/user/custom/source`
 
 // SetCmd represents the 'set' command
 var SetCmd = &cobra.Command{
