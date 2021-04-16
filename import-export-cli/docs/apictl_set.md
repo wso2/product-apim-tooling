@@ -4,12 +4,14 @@ Set configuration parameters
 
 ### Synopsis
 
-Set configuration parameters. Use at least one of the following flags
+Set configuration parameters. You can use one of the following flags
 * --http-request-timeout <time-in-milli-seconds>
 * --tls-renegotiation-mode <never|once|freely>
 * --export-directory <path-to-directory-where-apis-should-be-saved>
 * --vcs-deletion-enabled <enable-or-disable-project-deletion-via-vcs>
 * --vcs-config-path <path-to-custom-vcs-config-file>
+* --vcs-deployment-repo-path <path-to-deployment-repo-for-vcs>
+* --vcs-source-repo-path <path-to-source-repo-for-vcs>
 
 ```
 apictl set [flags]
@@ -24,6 +26,8 @@ apictl set --http-request-timeout 5000
 apictl set --tls-renegotiation-mode freely
 apictl set --vcs-deletion-enabled=true
 apictl set --vcs-config-path /home/user/custom/vcs-config.yaml
+apictl set --vcs-deployment-repo-path /home/user/custom/deployment
+apictl set --vcs-source-repo-path /home/user/custom/source
 ```
 
 ### Options
