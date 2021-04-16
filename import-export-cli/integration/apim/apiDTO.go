@@ -37,7 +37,6 @@ type API struct {
 	WsdlURL                         string            `json:"wsdlUrl,omitempty" yaml:"wsdlUrl,omitempty"`
 	ResponseCachingEnabledKey       bool              `json:"responseCachingEnabled,omitempty" yaml:"responseCachingEnabled,omitempty"`
 	CacheTimeout                    int               `json:"cacheTimeout,omitempty" yaml:"cacheTimeout,omitempty"`
-	DestinationStatsEnabled         string            `json:"destinationStatsEnabled,omitempty" yaml:"destinationStatsEnabled,omitempty"`
 	HasThumbnail                    bool              `json:"hasThumbnail,omitempty" yaml:"hasThumbnail,omitempty"`
 	IsDefaultVersion                bool              `json:"isDefaultVersion,omitempty" yaml:"isDefaultVersion,omitempty"`
 	IsRevision                      bool              `json:"isRevision" yaml:"isRevision"`
