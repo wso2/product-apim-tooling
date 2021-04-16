@@ -42,7 +42,6 @@ type APIDTODefinition struct {
 	LifeCycleStatus                 string            `json:"lifeCycleStatus,omitempty" yaml:"lifeCycleStatus,omitempty"`
 	WsdlInfo                        interface{}       `json:"wsdlInfo,omitempty" yaml:"wsdlInfo,omitempty"`
 	WsdlURL                         string            `json:"wsdlUrl,omitempty" yaml:"wsdlUrl,omitempty"`
-	TestKey                         string            `json:"testKey,omitempty" yaml:"testKey,omitempty"`
 	ResponseCachingEnabledKey       bool              `json:"responseCachingEnabled,omitempty" yaml:"responseCachingEnabled,omitempty"`
 	CacheTimeout                    int               `json:"cacheTimeout,omitempty" yaml:"cacheTimeout,omitempty"`
 	DestinationStatsEnabled         string            `json:"destinationStatsEnabled,omitempty" yaml:"destinationStatsEnabled,omitempty"`
