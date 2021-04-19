@@ -35,7 +35,7 @@ var undeployAPIVersion string
 var undeployRevisionNum string
 var undeployProvider string
 var undeployAPIEnvironment string
-var undeployAPIGatewayEnv string
+var undeployAPICmdAPIGatewayEnvs []string
 var undeployAllGatewayEnvs = true
 
 // UndeployAPICmd command related usage info
@@ -44,8 +44,8 @@ const undeployAPICmdShortDesc = "Undeploy API"
 
 const undeployAPICmdLongDesc = "Undeploy an API revision from gateway environments"
 
-const undeployAPICmdExamples = utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -rev 2 -e dev
-` + utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 --rev 6 -g Label1 Label2 Label3 -e production
+const undeployAPICmdExamples = utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 --rev 2 -e dev
+` + utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 --rev 6 -g Label1 -g Label2 -g Label3 -e production
 ` + utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 -r alice --rev 2 -g Label1 -e production
 NOTE: All the 4 flags (--name (-n), --version (-v), --rev, --environment (-e)) are mandatory. 
 If the flag (--gateway-env (-g)) is not provided, revision will be undeployed from all deployed gateway environments.`
@@ -60,10 +60,10 @@ var UndeployAPICmd = &cobra.Command{
 	Example: undeployAPICmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + UndeployAPICmdLiteral + " called")
-		if undeployAPIGatewayEnv != "" {
+		if len(undeployAPICmdAPIGatewayEnvs) > 0 {
 			undeployAllGatewayEnvs = false
 		}
-		gateways := generateGatewayEnvsArray(args, undeployAPIGatewayEnv)
+		gateways := generateGatewayEnvsArray(undeployAPICmdAPIGatewayEnvs)
 
 		cred, err := GetCredentials(undeployAPIEnvironment)
 		if err != nil {
@@ -85,7 +85,8 @@ func executeUndeployAPICmd(credential credentials.Credential, deployments []util
 		// Print info on response
 		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
 		if resp.StatusCode() == http.StatusCreated {
-			fmt.Println(apiNameForStateChange + " API revision successfully undeployed from the gateways!")
+			fmt.Println("Revision " + undeployRevisionNum + " of API " + undeployAPIName + "_" + undeployAPIVersion +
+				" successfully undeployed from the gateways environments")
 		} else {
 			fmt.Println("Error while undeploying the  API: ", resp.Status(), "\n", string(resp.Body()))
 		}
@@ -94,14 +95,13 @@ func executeUndeployAPICmd(credential credentials.Credential, deployments []util
 	}
 }
 
-//process the args array and create deployments array
-func generateGatewayEnvsArray(args []string, initialGateway string) []utils.Deployment {
-	//Since other flags does not use args[], gateway-env flag will own all the args
-	var deployments = []utils.Deployment{{Name: initialGateway, DisplayOnDevportal: true}}
-	if len(args) != 0 {
-		for _, argument := range args {
+// Process the gatewayEnvs array and create deployments array
+func generateGatewayEnvsArray(gatewayEnvs []string) []utils.Deployment {
+	var deployments []utils.Deployment
+	if len(gatewayEnvs) != 0 {
+		for _, gatewayEnv := range gatewayEnvs {
 			var deployment utils.Deployment
-			deployment.Name = argument
+			deployment.Name = gatewayEnv
 			deployment.DisplayOnDevportal = true
 			deployments = append(deployments, deployment)
 		}
@@ -118,7 +118,7 @@ func init() {
 		"Version of the API to be exported")
 	UndeployAPICmd.Flags().StringVarP(&undeployProvider, "provider", "r", "",
 		"Provider of the API")
-	UndeployAPICmd.Flags().StringVarP(&undeployAPIGatewayEnv, "gateway-env", "g", "",
+	UndeployAPICmd.Flags().StringSliceVarP(&undeployAPICmdAPIGatewayEnvs, "gateway-env", "g", []string{},
 		"Gateway environment which the revision has to be undeployed")
 	UndeployAPICmd.Flags().StringVarP(&undeployRevisionNum, "rev", "", "",
 		"Revision number of the API to undeploy")
