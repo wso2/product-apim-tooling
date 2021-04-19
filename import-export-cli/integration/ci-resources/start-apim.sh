@@ -1,7 +1,7 @@
 #!/bin/bash
 
-APIM_DOWNLOAD=https://github.com/wso2/product-apim/releases/download/v4.0.0-alpha/wso2am-4.0.0-alpha.zip
-APIM_PACK=wso2am-4.0.0-alpha
+APIM_DOWNLOAD='https://wso2.org/jenkins/job/products/job/product-apim/lastStableBuild/org.wso2.am$wso2am/artifact/org.wso2.am/wso2am/4.0.0-SNAPSHOT/wso2am-4.0.0-SNAPSHOT.zip'
+APIM_PACK=wso2am-4.0.0-SNAPSHOT
 
 wget $APIM_DOWNLOAD
 
