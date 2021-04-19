@@ -233,7 +233,7 @@
       Examples:
           apictl get apis -e dev
           apictl get apis -e dev -q version:1.0.0
-          apictl get apis -e prod -q provider:admin
+          apictl get apis -e prod -q provider:admin -q version:1.0.0
           apictl get apis -e prod -l 100
           apictl get apis -e staging
 </code></pre>
@@ -250,7 +250,7 @@
       Examples:
           apictl get api-products -e dev
           apictl get api-products -e dev -q provider:devops
-          apictl get api-products -e prod -q provider:admin context:/myproduct
+          apictl get api-products -e prod -q provider:admin -q context:/myproduct
           apictl get api-products -e prod -l 25
           apictl get api-products -e staging
 </code></pre>
@@ -903,4 +903,3 @@
 </code></pre>
     </li>
 </ul>
-

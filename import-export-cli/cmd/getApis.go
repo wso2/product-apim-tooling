@@ -20,6 +20,7 @@ package cmd
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
@@ -30,8 +31,10 @@ import (
 
 var getApisCmdEnvironment string
 var getApisCmdFormat string
-var getApisCmdQuery string
+var getApisCmdQuery []string
 var getApisCmdLimit string
+
+const queryParamSeparator = " "
 
 // GetApisCmd related info
 const GetApisCmdLiteral = "apis"
@@ -41,7 +44,7 @@ const getApisCmdLongDesc = `Display a list of APIs in the environment specified 
 
 var getApisCmdExamples = utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetApisCmdLiteral + ` -e dev
 ` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetApisCmdLiteral + ` -e dev -q version:1.0.0
-` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetApisCmdLiteral + ` -e prod -q provider:admin
+` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetApisCmdLiteral + ` -e prod -q provider:admin -q version:1.0.0
 ` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetApisCmdLiteral + ` -e prod -l 100
 ` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetApisCmdLiteral + ` -e staging
 NOTE: The flag (--environment (-e)) is mandatory`
@@ -58,12 +61,6 @@ var getApisCmd = &cobra.Command{
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
-		//Since other flags does not use args[], query flag will own this
-		if len(args) != 0 && getApisCmdQuery != "" {
-			for _, argument := range args {
-				getApisCmdQuery += " " + argument
-			}
-		}
 		executeGetApisCmd(cred)
 	},
 }
@@ -75,7 +72,8 @@ func executeGetApisCmd(credential credentials.Credential) {
 		utils.HandleErrorAndExit("Error calling '"+GetApisCmdLiteral+"'", err)
 	}
 
-	_, apis, err := impl.GetAPIListFromEnv(accessToken, getApisCmdEnvironment, getApisCmdQuery, getApisCmdLimit)
+	_, apis, err := impl.GetAPIListFromEnv(accessToken, getApisCmdEnvironment,
+		strings.Join(getApisCmdQuery, queryParamSeparator), getApisCmdLimit)
 	if err == nil {
 		impl.PrintAPIs(apis, getApisCmdFormat)
 	} else {
@@ -88,8 +86,8 @@ func init() {
 
 	getApisCmd.Flags().StringVarP(&getApisCmdEnvironment, "environment", "e",
 		"", "Environment to be searched")
-	getApisCmd.Flags().StringVarP(&getApisCmdQuery, "query", "q",
-		"", "Query pattern")
+	getApisCmd.Flags().StringSliceVarP(&getApisCmdQuery, "query", "q",
+		[]string{}, "Query pattern")
 	getApisCmd.Flags().StringVarP(&getApisCmdLimit, "limit", "l",
 		strconv.Itoa(utils.DefaultApisDisplayLimit), "Maximum number of apis to return")
 	getApisCmd.Flags().StringVarP(&getApisCmdFormat, "format", "", "", "Pretty-print apis "+
