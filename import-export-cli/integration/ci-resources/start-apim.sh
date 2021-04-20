@@ -12,11 +12,11 @@ cp offset0/deployment.toml offset0/distribution/$APIM_PACK/repository/conf/.
 cp offset1/deployment.toml offset1/distribution/$APIM_PACK/repository/conf/.
 
 # Start APIM servers
-offset0/distribution/$APIM_PACK/bin/wso2server.sh start 
+offset0/distribution/$APIM_PACK/bin/api-manager.sh start 
 
 echo "Starting APIM Instance 1"
 
-offset1/distribution/$APIM_PACK/bin/wso2server.sh start 
+offset1/distribution/$APIM_PACK/bin/api-manager.sh start 
 
 echo "Starting APIM Instance 2"
 
