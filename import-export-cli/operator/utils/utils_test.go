@@ -50,7 +50,7 @@ func TestGetValidK8sName(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.testName, func(t *testing.T) {
-			validName := GetValidK8sName(test.name)
+			validName := GetValidK8sResourceName(test.name)
 			if validName != test.validName {
 				t.Errorf("got %s, want %s", validName, test.validName)
 			}

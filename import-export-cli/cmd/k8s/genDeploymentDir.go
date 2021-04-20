@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	wso2v1alpha2 "github.com/wso2/k8s-api-operator/api-operator/pkg/apis/wso2/v1alpha2"
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
+	utils2 "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"io/ioutil"
 	"os"
@@ -145,7 +146,7 @@ func executeGenDeploymentDirCmd() error {
 			if errUnmarshal != nil {
 				utils.HandleErrorAndExit("Error unmarshal api configmap into struct ", errUnmarshal)
 			}
-			apiName := utils.GetValidK8sName(apiMetaData.Name)
+			apiName := utils2.GetValidK8sResourceName(apiMetaData.Name)
 			apiCrd.Name = apiName
 			apiCrd.Spec.SwaggerConfigMapName = fmt.Sprintf("%v-cm", apiName)
 			apiCrd.Spec.ParamsValues = fmt.Sprintf("%v-params", apiName)
@@ -166,7 +167,7 @@ func executeGenDeploymentDirCmd() error {
 			if errUnmarshal != nil {
 				utils.HandleErrorAndExit("Error unmarshal api configmap into struct ", errUnmarshal)
 			}
-			apiName := utils.GetValidK8sName(apiMetaData.Name)
+			apiName := utils2.GetValidK8sResourceName(apiMetaData.Name)
 			apiCrd.Name = apiName
 			apiCrd.Spec.SwaggerConfigMapName = fmt.Sprintf("%v-cm", apiName)
 			apiCrd.Spec.ParamsValues = fmt.Sprintf("%v-params", apiName)
@@ -187,7 +188,7 @@ func executeGenDeploymentDirCmd() error {
 			if errUnmarshal != nil {
 				utils.HandleErrorAndExit("Error unmarshal api configmap into struct ", errUnmarshal)
 			}
-			apiName := utils.GetValidK8sName(apiMetaData.Name)
+			apiName := utils2.GetValidK8sResourceName(apiMetaData.Name)
 			apiCrd.Name = apiName
 			apiCrd.Spec.SwaggerConfigMapName = fmt.Sprintf("%v-cm", apiName)
 			apiCrd.Spec.ParamsValues = fmt.Sprintf("%v-params", apiName)
