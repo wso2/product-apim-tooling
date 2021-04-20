@@ -22,8 +22,17 @@ echo "Starting APIM Instance 2"
 
 # Check if APIM servers are ready
 APIM1_STATUS=404
+HALF_MINUTE_COUNTER=0
 while [[ $APIM1_STATUS != 200 ]]
 do
+    if (($HALF_MINUTE_COUNTER > 0)); then        
+        sleep 30s               
+        if (($HALF_MINUTE_COUNTER % 2 == 0)); then                        
+            let MINUTES=($HALF_MINUTE_COUNTER / 2)
+            echo "Waited $MINUTES minute(s) for APIM Instance 1 to start"
+        fi
+    fi  
+    ((++HALF_MINUTE_COUNTER))         
     APIM1_STATUS=$(curl --write-out %{http_code} --silent --output /dev/null "http://localhost:9763/services/Version")
 done
 
@@ -31,8 +40,17 @@ echo "APIM Instance 1 started"
 
 
 APIM2_STATUS=404
+HALF_MINUTE_COUNTER=0
 while [[ $APIM2_STATUS  != 200 ]]
 do
+    if (($HALF_MINUTE_COUNTER > 0)); then
+        sleep 30s        
+        if (($HALF_MINUTE_COUNTER % 2 == 0)); then
+            let MINUTES=($HALF_MINUTE_COUNTER / 2)
+            echo "Waited $MINUTES minute(s) for APIM Instance 2 to start"
+        fi
+    fi
+    ((++HALF_MINUTE_COUNTER))
     APIM2_STATUS=$(curl --write-out %{http_code} --silent --output /dev/null "http://localhost:9764/services/Version")
 done
 
