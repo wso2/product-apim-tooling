@@ -31,7 +31,10 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-
+      - name: Install dependencies
+        run: |
+          sudo apt-get install libcurl4-openssl-dev
+      
       - name: Set up Golang
         uses: actions/setup-go@v2
         with:

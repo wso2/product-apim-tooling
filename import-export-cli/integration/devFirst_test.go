@@ -18,6 +18,7 @@
 package integration
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -392,6 +393,11 @@ func TestUpdateDocAndImageOfAPIOfExistingAPI(t *testing.T) {
 	base.Copy(srcPathForDocUpdate, destPathForDocUpdate)
 
 	//Update image file to created project
+	err := os.Remove(destPathForImage)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	srcPathForIcon, _ := filepath.Abs(testutils.TestCase2JpegPath)
 	destPathForIcon := projectPath + testutils.TestCase2DestJpegPathSuffix
 	base.Copy(srcPathForIcon, destPathForIcon)
