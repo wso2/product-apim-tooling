@@ -1,6 +1,7 @@
 package k8s
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
@@ -8,10 +9,10 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"io/ioutil"
-	corev1 "k8s.io/api/core/v1"
 	"os"
 	"path/filepath"
 	"strings"
+	"text/template"
 )
 
 var genDeploymentDirDestination string
@@ -82,10 +83,11 @@ func executeGenDeploymentDirCmd() error {
 		utils.HandleErrorAndContinue("Error retrieving the source file from the given path "+sourceDirectoryPath+" ", err)
 	}
 	// Get the source artifact name
-	deploymentDirName = filepath.Base(genDeploymentDirSource)
+	// TODO deploymentDirName better to follow the same name as `apictl gen deployment-dir` command
+	deploymentDirName = utils.DeploymentDirPrefix + filepath.Base(genDeploymentDirSource)
 	if info, err := os.Stat(genDeploymentDirSource); err == nil && !info.IsDir() {
 		// if artifact is given as zip remove the ".zip" suffix to get the name for deployment directory
-		deploymentDirName = strings.Trim(deploymentDirName, utils.ZipFileSuffix)
+		deploymentDirName = strings.TrimSuffix(deploymentDirName, utils.ZipFileSuffix)
 		//extract zip to a temp directory
 
 		tempDirPath := os.TempDir()
@@ -208,21 +210,28 @@ func executeGenDeploymentDirCmd() error {
 		utils.HandleErrorAndExit("Error creating api_crd.yaml file", err)
 	}
 
+	// apiParamsCmData do not contains apiParamsData to reduce duplication
+	// hence merge apiParamsData to apiParamsCmData
+	// TODO: (renuka) this merging two files can be optimized if we move this to, go generate, in resource box
 	apiParamsData, _ := box.Get("/sample/api_params.yaml")
+	// indent content of the apiParamsData
+	apiParamsDataStr := strings.ReplaceAll(string(apiParamsData), "\n", "\n    ")
 	apiParamsCmData, _ := box.Get("/kubernetes_resources/api_params_cm.yaml")
-	apiParamsCm := &corev1.ConfigMap{}
-	errUnmarshal = yaml.Unmarshal(apiParamsCmData, apiParamsCm)
-	if errUnmarshal != nil {
-		utils.HandleErrorAndExit("Error unmarshal api configmap into struct ", errUnmarshal)
+	apiParamBuf := &bytes.Buffer{}
+	t, err := template.New("params-config-map").Parse(string(apiParamsCmData))
+	if err != nil {
+		utils.HandleErrorAndExit("Error in template content of API param file config-map", err)
 	}
-	apiParamsCm.Name = apiCrd.Spec.ParamsValues
-	apiParamsCm.Data = map[string]string{"params.yaml": string(apiParamsData)}
-	byteParamsVal, errParamsMarshal := yaml.Marshal(apiParamsCm)
-	if errParamsMarshal != nil {
-		utils.HandleErrorAndExit("Error marshal API configmap ", errMarshal)
+	data := struct{ Name, ParamFileContent string }{
+		Name:             apiCrd.Spec.ParamsValues,
+		ParamFileContent: apiParamsDataStr,
 	}
-	err = ioutil.WriteFile(filepath.Join(deploymentDirPath, fmt.Sprintf("%v-params.yaml", apiMetaData.Name)),
-		byteParamsVal, os.ModePerm)
+	if err = t.Execute(apiParamBuf, data); err != nil {
+		utils.HandleErrorAndExit("Error when rendering content of API param file config-map from template", err)
+	}
+
+	err = ioutil.WriteFile(filepath.Join(deploymentDirPath, "params_cm.yaml"),
+		apiParamBuf.Bytes(), os.ModePerm)
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating sample api_params.yaml file", err)
 	}
