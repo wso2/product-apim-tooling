@@ -143,10 +143,11 @@ func executeGenDeploymentDirCmd() error {
 			if errUnmarshal != nil {
 				utils.HandleErrorAndExit("Error unmarshal api configmap into struct ", errUnmarshal)
 			}
-			apiCrd.Name = apiMetaData.Name
-			apiCrd.Spec.SwaggerConfigMapName = fmt.Sprintf("%v-cm", apiMetaData.Name)
-			apiCrd.Spec.ParamsValues = fmt.Sprintf("%v-params", apiMetaData.Name)
-			apiCrd.Spec.CertsValues = fmt.Sprintf("%v-certs", apiMetaData.Name)
+			apiName := utils.GetValidK8sName(apiMetaData.Name)
+			apiCrd.Name = apiName
+			apiCrd.Spec.SwaggerConfigMapName = fmt.Sprintf("%v-cm", apiName)
+			apiCrd.Spec.ParamsValues = fmt.Sprintf("%v-params", apiName)
+			apiCrd.Spec.CertsValues = fmt.Sprintf("%v-certs", apiName)
 			break
 		} else if strings.EqualFold(fileName, utils.MetaFileAPIProduct) { // if project artifact is a APIProduct project
 			metaDataFileFound = true
@@ -163,10 +164,11 @@ func executeGenDeploymentDirCmd() error {
 			if errUnmarshal != nil {
 				utils.HandleErrorAndExit("Error unmarshal api configmap into struct ", errUnmarshal)
 			}
-			apiCrd.Name = apiMetaData.Name
-			apiCrd.Spec.SwaggerConfigMapName = fmt.Sprintf("%v-cm", apiMetaData.Name)
-			apiCrd.Spec.ParamsValues = fmt.Sprintf("%v-params", apiMetaData.Name)
-			apiCrd.Spec.CertsValues = fmt.Sprintf("%v-certs", apiMetaData.Name)
+			apiName := utils.GetValidK8sName(apiMetaData.Name)
+			apiCrd.Name = apiName
+			apiCrd.Spec.SwaggerConfigMapName = fmt.Sprintf("%v-cm", apiName)
+			apiCrd.Spec.ParamsValues = fmt.Sprintf("%v-params", apiName)
+			apiCrd.Spec.CertsValues = fmt.Sprintf("%v-certs", apiName)
 
 			break
 		} else if strings.EqualFold(fileName, utils.MetaFileApplication) { // if project artifact is a Application project
@@ -183,10 +185,11 @@ func executeGenDeploymentDirCmd() error {
 			if errUnmarshal != nil {
 				utils.HandleErrorAndExit("Error unmarshal api configmap into struct ", errUnmarshal)
 			}
-			apiCrd.Name = apiMetaData.Name
-			apiCrd.Spec.SwaggerConfigMapName = fmt.Sprintf("%v-cm", apiMetaData.Name)
-			apiCrd.Spec.ParamsValues = fmt.Sprintf("%v-params", apiMetaData.Name)
-			apiCrd.Spec.CertsValues = fmt.Sprintf("%v-certs", apiMetaData.Name)
+			apiName := utils.GetValidK8sName(apiMetaData.Name)
+			apiCrd.Name = apiName
+			apiCrd.Spec.SwaggerConfigMapName = fmt.Sprintf("%v-cm", apiName)
+			apiCrd.Spec.ParamsValues = fmt.Sprintf("%v-params", apiName)
+			apiCrd.Spec.CertsValues = fmt.Sprintf("%v-certs", apiName)
 			break
 		}
 	}
