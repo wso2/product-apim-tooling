@@ -15,7 +15,7 @@ apictl get api-products [flags]
 ```
 apictl get api-products -e dev
 apictl get api-products -e dev -q provider:devops
-apictl get api-products -e prod -q provider:admin context:/myproduct
+apictl get api-products -e prod -q provider:admin -q context:/myproduct
 apictl get api-products -e prod -l 25
 apictl get api-products -e staging
 NOTE: The flag (--environment (-e)) is mandatory
@@ -28,7 +28,7 @@ NOTE: The flag (--environment (-e)) is mandatory
       --format string        Pretty-print API Products using Go Templates. Use "{{ jsonPretty . }}" to list all fields
   -h, --help                 help for api-products
   -l, --limit string         Maximum number of API Products to return (default "25")
-  -q, --query string         Query pattern
+  -q, --query strings        Query pattern
 ```
 
 ### Options inherited from parent commands

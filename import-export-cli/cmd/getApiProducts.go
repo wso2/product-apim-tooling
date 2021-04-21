@@ -20,6 +20,7 @@ package cmd
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 
@@ -31,7 +32,7 @@ import (
 
 var getApiProductsCmdEnvironment string
 var getApiProductsCmdFormat string
-var getApiProductsCmdQuery string
+var getApiProductsCmdQuery []string
 var getApiProductsCmdLimit string
 
 // GetApiProductsCmd related info
@@ -42,7 +43,7 @@ const getApiProductsCmdLongDesc = `Display a list of API Products in the environ
 
 var getApiProductsCmdExamples = utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetApiProductsCmdLiteral + ` -e dev
 ` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetApiProductsCmdLiteral + ` -e dev -q provider:devops
-` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetApiProductsCmdLiteral + ` -e prod -q provider:admin context:/myproduct
+` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetApiProductsCmdLiteral + ` -e prod -q provider:admin -q context:/myproduct
 ` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetApiProductsCmdLiteral + ` -e prod -l 25
 ` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetApiProductsCmdLiteral + ` -e staging
 NOTE: The flag (--environment (-e)) is mandatory`
@@ -59,12 +60,6 @@ var getApiProductsCmd = &cobra.Command{
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
-		//Since other flags does not use args[], query flag will own this
-		if len(args) != 0 && getApiProductsCmdQuery != "" {
-			for _, argument := range args {
-				getApiProductsCmdQuery += " " + argument
-			}
-		}
 		executeGetApiProductsCmd(cred)
 	},
 }
@@ -77,7 +72,8 @@ func executeGetApiProductsCmd(credential credentials.Credential) {
 	}
 
 	// Unified Search endpoint from the config file to search API Products
-	_, apiProducts, err := impl.GetAPIProductListFromEnv(accessToken, getApiProductsCmdEnvironment, getApiProductsCmdQuery,
+	_, apiProducts, err := impl.GetAPIProductListFromEnv(accessToken, getApiProductsCmdEnvironment,
+		strings.Join(getApiProductsCmdQuery, queryParamSeparator),
 		getApiProductsCmdLimit)
 	if err == nil {
 		impl.PrintAPIProducts(apiProducts, getApiProductsCmdFormat)
@@ -91,8 +87,8 @@ func init() {
 
 	getApiProductsCmd.Flags().StringVarP(&getApiProductsCmdEnvironment, "environment", "e",
 		"", "Environment to be searched")
-	getApiProductsCmd.Flags().StringVarP(&getApiProductsCmdQuery, "query", "q",
-		"", "Query pattern")
+	getApiProductsCmd.Flags().StringSliceVarP(&getApiProductsCmdQuery, "query", "q",
+		[]string{}, "Query pattern")
 	getApiProductsCmd.Flags().StringVarP(&getApiProductsCmdLimit, "limit", "l",
 		strconv.Itoa(utils.DefaultApiProductsDisplayLimit), "Maximum number of API Products to return")
 	getApiProductsCmd.Flags().StringVarP(&getApiProductsCmdFormat, "format", "", "", "Pretty-print API Products "+

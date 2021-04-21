@@ -13,9 +13,9 @@ apictl undeploy [flags]
 ### Examples
 
 ```
-apictl undeploy api -n TwitterAPI -v 1.0.0 -r admin --rev 1 -g Label1 Label2 -e dev
+apictl undeploy api -n TwitterAPI -v 1.0.0 -r admin --rev 1 -g Label1 -g Label2 -e dev
 apictl undeploy api -n PizzaAPI -v 1.0.0 --rev 2 --all-gateways -e dev
-apictl undeploy api -n LeasingAPIProduct -e dev
+apictl undeploy api-product -n LeasingAPIProduct --rev 3 -g Label1 -e dev
 ```
 
 ### Options

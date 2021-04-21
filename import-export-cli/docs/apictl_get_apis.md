@@ -15,7 +15,7 @@ apictl get apis [flags]
 ```
 apictl get apis -e dev
 apictl get apis -e dev -q version:1.0.0
-apictl get apis -e prod -q provider:admin
+apictl get apis -e prod -q provider:admin -q version:1.0.0
 apictl get apis -e prod -l 100
 apictl get apis -e staging
 NOTE: The flag (--environment (-e)) is mandatory
@@ -28,7 +28,7 @@ NOTE: The flag (--environment (-e)) is mandatory
       --format string        Pretty-print apis using Go Templates. Use "{{ jsonPretty . }}" to list all fields
   -h, --help                 help for apis
   -l, --limit string         Maximum number of apis to return (default "25")
-  -q, --query string         Query pattern
+  -q, --query strings        Query pattern
 ```
 
 ### Options inherited from parent commands
