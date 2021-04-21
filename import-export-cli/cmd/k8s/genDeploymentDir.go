@@ -1,17 +1,19 @@
 package k8s
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
 	wso2v1alpha2 "github.com/wso2/k8s-api-operator/api-operator/pkg/apis/wso2/v1alpha2"
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
+	utils2 "github.com/wso2/product-apim-tooling/import-export-cli/operator/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"io/ioutil"
-	corev1 "k8s.io/api/core/v1"
 	"os"
 	"path/filepath"
 	"strings"
+	"text/template"
 )
 
 var genDeploymentDirDestination string
@@ -54,6 +56,15 @@ func createDeploymentContentDirectories(name string) error {
 	return nil
 }
 
+// updateAPICR updates the API CR with name of the API name
+func updateAPICR(apiCR *wso2v1alpha2.API, name string) {
+	apiName := utils2.GetValidK8sResourceName(name)
+	apiCR.Name = apiName
+	apiCR.Spec.SwaggerConfigMapName = fmt.Sprintf("%v-cm", apiName)
+	apiCR.Spec.ParamsValues = fmt.Sprintf("%v-params", apiName)
+	apiCR.Spec.CertsValues = fmt.Sprintf("%v-certs", apiName)
+}
+
 // executeGenDeploymentDirCmd will run gen deployment-dir command
 func executeGenDeploymentDirCmd() error {
 	var deploymentDirParent, deploymentDirName, sourceDirectoryPath, tempDirPath string
@@ -82,10 +93,11 @@ func executeGenDeploymentDirCmd() error {
 		utils.HandleErrorAndContinue("Error retrieving the source file from the given path "+sourceDirectoryPath+" ", err)
 	}
 	// Get the source artifact name
-	deploymentDirName = filepath.Base(genDeploymentDirSource)
+	// TODO deploymentDirName better to follow the same name as `apictl gen deployment-dir` command
+	deploymentDirName = utils.DeploymentDirPrefix + filepath.Base(genDeploymentDirSource)
 	if info, err := os.Stat(genDeploymentDirSource); err == nil && !info.IsDir() {
 		// if artifact is given as zip remove the ".zip" suffix to get the name for deployment directory
-		deploymentDirName = strings.Trim(deploymentDirName, utils.ZipFileSuffix)
+		deploymentDirName = strings.TrimSuffix(deploymentDirName, utils.ZipFileSuffix)
 		//extract zip to a temp directory
 
 		tempDirPath := os.TempDir()
@@ -143,10 +155,7 @@ func executeGenDeploymentDirCmd() error {
 			if errUnmarshal != nil {
 				utils.HandleErrorAndExit("Error unmarshal api configmap into struct ", errUnmarshal)
 			}
-			apiCrd.Name = apiMetaData.Name
-			apiCrd.Spec.SwaggerConfigMapName = fmt.Sprintf("%v-cm", apiMetaData.Name)
-			apiCrd.Spec.ParamsValues = fmt.Sprintf("%v-params", apiMetaData.Name)
-			apiCrd.Spec.CertsValues = fmt.Sprintf("%v-certs", apiMetaData.Name)
+			updateAPICR(apiCrd, apiMetaData.Name)
 			break
 		} else if strings.EqualFold(fileName, utils.MetaFileAPIProduct) { // if project artifact is a APIProduct project
 			metaDataFileFound = true
@@ -154,7 +163,6 @@ func executeGenDeploymentDirCmd() error {
 			if err != nil {
 				utils.HandleErrorAndExit("Cannot copy metadata file from the source directory ", err)
 			}
-			fmt.Println(fileName)
 			metaDataYamlFile, err := ioutil.ReadFile(filepath.Join(sourceDirectoryPath, fileName))
 			if err != nil {
 				utils.HandleErrorAndExit("Cannot read the meta file", err)
@@ -163,10 +171,7 @@ func executeGenDeploymentDirCmd() error {
 			if errUnmarshal != nil {
 				utils.HandleErrorAndExit("Error unmarshal api configmap into struct ", errUnmarshal)
 			}
-			apiCrd.Name = apiMetaData.Name
-			apiCrd.Spec.SwaggerConfigMapName = fmt.Sprintf("%v-cm", apiMetaData.Name)
-			apiCrd.Spec.ParamsValues = fmt.Sprintf("%v-params", apiMetaData.Name)
-			apiCrd.Spec.CertsValues = fmt.Sprintf("%v-certs", apiMetaData.Name)
+			updateAPICR(apiCrd, apiMetaData.Name)
 
 			break
 		} else if strings.EqualFold(fileName, utils.MetaFileApplication) { // if project artifact is a Application project
@@ -183,10 +188,7 @@ func executeGenDeploymentDirCmd() error {
 			if errUnmarshal != nil {
 				utils.HandleErrorAndExit("Error unmarshal api configmap into struct ", errUnmarshal)
 			}
-			apiCrd.Name = apiMetaData.Name
-			apiCrd.Spec.SwaggerConfigMapName = fmt.Sprintf("%v-cm", apiMetaData.Name)
-			apiCrd.Spec.ParamsValues = fmt.Sprintf("%v-params", apiMetaData.Name)
-			apiCrd.Spec.CertsValues = fmt.Sprintf("%v-certs", apiMetaData.Name)
+			updateAPICR(apiCrd, apiMetaData.Name)
 			break
 		}
 	}
@@ -205,21 +207,28 @@ func executeGenDeploymentDirCmd() error {
 		utils.HandleErrorAndExit("Error creating api_crd.yaml file", err)
 	}
 
+	// apiParamsCmData do not contains apiParamsData to reduce duplication
+	// hence merge apiParamsData to apiParamsCmData
+	// TODO: (renuka) this merging two files can be optimized if we move this to, go generate, in resource box
 	apiParamsData, _ := box.Get("/sample/api_params.yaml")
+	// indent content of the apiParamsData
+	apiParamsDataStr := strings.ReplaceAll(string(apiParamsData), "\n", "\n    ")
 	apiParamsCmData, _ := box.Get("/kubernetes_resources/api_params_cm.yaml")
-	apiParamsCm := &corev1.ConfigMap{}
-	errUnmarshal = yaml.Unmarshal(apiParamsCmData, apiParamsCm)
-	if errUnmarshal != nil {
-		utils.HandleErrorAndExit("Error unmarshal api configmap into struct ", errUnmarshal)
+	apiParamBuf := &bytes.Buffer{}
+	t, err := template.New("params-config-map").Parse(string(apiParamsCmData))
+	if err != nil {
+		utils.HandleErrorAndExit("Error in template content of API param file config-map", err)
 	}
-	apiParamsCm.Name = apiCrd.Spec.ParamsValues
-	apiParamsCm.Data = map[string]string{"params.yaml": string(apiParamsData)}
-	byteParamsVal, errParamsMarshal := yaml.Marshal(apiParamsCm)
-	if errParamsMarshal != nil {
-		utils.HandleErrorAndExit("Error marshal API configmap ", errMarshal)
+	data := struct{ Name, ParamFileContent string }{
+		Name:             apiCrd.Spec.ParamsValues,
+		ParamFileContent: apiParamsDataStr,
 	}
-	err = ioutil.WriteFile(filepath.Join(deploymentDirPath, fmt.Sprintf("%v-params.yaml", apiMetaData.Name)),
-		byteParamsVal, os.ModePerm)
+	if err = t.Execute(apiParamBuf, data); err != nil {
+		utils.HandleErrorAndExit("Error when rendering content of API param file config-map from template", err)
+	}
+
+	err = ioutil.WriteFile(filepath.Join(deploymentDirPath, "params_cm.yaml"),
+		apiParamBuf.Bytes(), os.ModePerm)
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating sample api_params.yaml file", err)
 	}
