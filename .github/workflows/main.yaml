@@ -18,8 +18,7 @@
 name: API Controller Build with Test
 
 on:
-  push:
-    branches: [ master ]
+  push:    
 
   workflow_dispatch:
     
