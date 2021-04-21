@@ -487,6 +487,41 @@
 </ul>
 <ul>
     <li>
+        <h4 id="undeploy-api">undeploy api</h4>
+        <pre><code class="lang-bash">   Flags:
+       Required:
+           --name, -n
+           --version, -v
+           --rev
+           --environment, -e
+       Optional:
+           --gateway-env, -g
+   Examples:
+       apictl undeploy api -n TwitterAPI -v 1.0.0 --rev 2 -e dev
+       apictl undeploy api -n FacebookAPI -v 2.1.0 --rev 6 -g Label1 -g Label2 -g Label3 -e production
+       apictl undeploy api -n FacebookAPI -v 2.1.0 -r alice --rev 2 -g Label1 -e production   
+</code></pre>
+    </li>
+</ul>
+<ul>
+    <li>
+        <h4 id="undeploy-api-product">undeploy api-product</h4>
+        <pre><code class="lang-bash">   Flags:
+       Required:
+           --name, -n
+           --rev
+           --environment, -e
+       Optional:
+           --gateway-env, -g
+   Examples:
+       apictl undeploy api-product -n TwitterAPIProduct --rev 2  -e dev
+       apictl undeploy api-product -n StoreProduct --rev 6 -g Label1 -g Label2 -g Label3 -e production
+       apictl undeploy api-product -n FacebookProduct -r admin --rev 2 -g Label1 -e production     
+</code></pre>
+    </li>
+</ul>
+<ul>
+    <li>
         <h4 id="gen-deployment-dir">gen deployment-dir</h4>
         <pre><code class="lang-bash">   Flags:
        Required:
