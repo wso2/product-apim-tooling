@@ -87,7 +87,7 @@ func executeUndeployAPIProductCmd(credential credentials.Credential, deployments
 		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
 		if resp.StatusCode() == http.StatusCreated {
 			fmt.Println("Revision " + undeployAPIProductRevisionNum + " of API Product " + undeployAPIProductName +
-				" successfully undeployed from the gateway environments")
+				" successfully undeployed from the specified gateway environments")
 		} else {
 			fmt.Println("Error while undeploying the  APIProduct: ", resp.Status(), "\n", string(resp.Body()))
 		}
