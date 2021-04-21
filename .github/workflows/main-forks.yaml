@@ -19,7 +19,6 @@ name: API Controller
 
 on:
   push:
-    branches: [ master ]
 
   workflow_dispatch:
     
