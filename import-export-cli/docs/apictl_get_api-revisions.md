@@ -15,6 +15,7 @@ apictl get api-revisions [flags]
 ```
 apictl get api-revisions -n PizzaAPI -v 1.0.0 -e dev
 apictl get api-revisions -n TwitterAPI -v 1.0.0 -r admin -e dev
+apictl get api-revisions -n PizzaShackAPI -v 1.0.0 -q deployed:true -e dev
 NOTE: All the 3 flags (--name (-n), --version (-v) and --environment (-e)) are mandatory.
 ```
 
@@ -26,7 +27,7 @@ NOTE: All the 3 flags (--name (-n), --version (-v) and --environment (-e)) are m
   -h, --help                 help for api-revisions
   -n, --name string          Name of the API to get the revision
   -r, --provider string      Provider of the API
-  -q, --query string         Query pattern
+  -q, --query strings        Query pattern
   -v, --version string       Version of the API to get the revision
 ```
 

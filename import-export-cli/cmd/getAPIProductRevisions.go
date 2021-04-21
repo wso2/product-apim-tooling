@@ -19,6 +19,8 @@
 package cmd
 
 import (
+	"strings"
+
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 
@@ -30,7 +32,7 @@ var getRevisionsAPIProductName string
 var getRevisionsAPIProductProvider string
 var getAPIProductRevisionsCmdEnvironment string
 var getAPIProductRevisionsCmdFormat string
-var getAPIProductRevisionsCmdQuery string
+var getAPIProductRevisionsCmdQuery []string
 
 // GetAPIProductRevisionsCmd related info
 const GetAPIProductRevisionsCmdLiteral = "api-product-revisions"
@@ -40,6 +42,7 @@ const GetAPIProductRevisionsCmdLongDesc = `Display a list of Revisions available
 
 var getRevisionsCmdExamples = utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetAPIProductRevisionsCmdLiteral + ` -n PizzaProduct -v 1.0.0 -e dev
 ` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetAPIProductRevisionsCmdLiteral + ` -n ShopProduct -v 1.0.0 -r admin -e dev
+` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetAPIProductRevisionsCmdLiteral + ` -n PizzaProduct -q deployed:true -e dev
 NOTE: All the 3 flags (--name (-n), --version (-v) and --environment (-e)) are mandatory.`
 
 // getRevisionsCmd represents the revisions command
@@ -66,7 +69,7 @@ func executeGetAPIProductRevisionsCmd(credential credentials.Credential) {
 	}
 
 	_, revisions, err := impl.GetAPIProductRevisionListFromEnv(accessToken, getAPIProductRevisionsCmdEnvironment,
-		getRevisionsAPIProductName, getRevisionsAPIProductProvider, getAPIProductRevisionsCmdQuery)
+		getRevisionsAPIProductName, getRevisionsAPIProductProvider, strings.Join(getAPIProductRevisionsCmdQuery, queryParamSeparator))
 	if err == nil {
 		impl.PrintRevisions(revisions, getAPIProductRevisionsCmdFormat)
 	} else {
@@ -80,8 +83,8 @@ func init() {
 		"Name of the API Product to get the revision")
 	getAPIProductRevisionsCmd.Flags().StringVarP(&getRevisionsAPIProductProvider, "provider", "r", "",
 		"Provider of the API Product")
-	getAPIProductRevisionsCmd.Flags().StringVarP(&getAPIProductRevisionsCmdQuery, "query", "q",
-		"", "Query pattern")
+	getAPIProductRevisionsCmd.Flags().StringSliceVarP(&getAPIProductRevisionsCmdQuery, "query", "q",
+		[]string{}, "Query pattern")
 	getAPIProductRevisionsCmd.Flags().StringVarP(&getAPIProductRevisionsCmdEnvironment, "environment", "e",
 		"", "Environment to be searched")
 	getAPIProductRevisionsCmd.Flags().StringVarP(&getAPIProductRevisionsCmdFormat, "format", "", "", "Pretty-print revisions "+

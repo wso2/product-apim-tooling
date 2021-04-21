@@ -6,7 +6,10 @@ Get APIs/APIProducts/Applications in an environment or Get the environments
 
 Display a list containing all the APIs available in the environment specified by flag (--environment, -e)/
 Display a list containing all the API Products available in the environment specified by flag (--environment, -e)/
-Display a list of Applications of a specific user in the environment specified by flag (--environment, -e)
+Display a list of Applications of a specific user in the environment specified by flag (--environment, -e)/
+Display a list of API revisions of a specific API in the environment specified by flag (--environment, -e)/
+Display a list of API Product revisions of a specific API Product in the environment specified by flag (--environment, -e)/
+Get a generated JWT token to invoke an API or API Product by subscribing to a default application for testing purposes in the environment specified by flag (--environment, -e)
 OR
 List all the environments
 
@@ -21,6 +24,9 @@ apictl get envs
 apictl get apis -e dev
 apictl get api-products -e dev
 apictl get apps -e dev
+apictl get api-revisions -n PizzaAPI -v 1.0.0 -e dev
+apictl get api-product-revisions -n PizzaProduct -v 1.0.0 -e dev
+apictl get keys -n TwitterAPI -v 1.0.0 -e dev
 ```
 
 ### Options

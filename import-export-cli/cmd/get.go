@@ -23,20 +23,28 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
+const queryParamSeparator = " "
+
 // Get command related usage Info
 const GetCmdLiteral = "get"
 const getCmdShortDesc = "Get APIs/APIProducts/Applications in an environment or Get the environments"
 
 const getCmdLongDesc = `Display a list containing all the APIs available in the environment specified by flag (--environment, -e)/
 Display a list containing all the API Products available in the environment specified by flag (--environment, -e)/
-Display a list of Applications of a specific user in the environment specified by flag (--environment, -e)
+Display a list of Applications of a specific user in the environment specified by flag (--environment, -e)/
+Display a list of API revisions of a specific API in the environment specified by flag (--environment, -e)/
+Display a list of API Product revisions of a specific API Product in the environment specified by flag (--environment, -e)/
+Get a generated JWT token to invoke an API or API Product by subscribing to a default application for testing purposes in the environment specified by flag (--environment, -e)
 OR
 List all the environments`
 
 const getCmdExamples = utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetEnvsCmdLiteral + `
 ` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetApisCmdLiteral + ` -e dev
 ` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetApiProductsCmdLiteral + ` -e dev
-` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetAppsCmdLiteral + ` -e dev`
+` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetAppsCmdLiteral + ` -e dev
+` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetAPIRevisionsCmdLiteral + ` -n PizzaAPI -v 1.0.0 -e dev
+` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetAPIProductRevisionsCmdLiteral + ` -n PizzaProduct -v 1.0.0 -e dev
+` + utils.ProjectName + " " + GetCmdLiteral + " " + GetKeysCmdLiteral + ` -n TwitterAPI -v 1.0.0 -e dev`
 
 // ListCmd represents the list command
 var GetCmd = &cobra.Command{
