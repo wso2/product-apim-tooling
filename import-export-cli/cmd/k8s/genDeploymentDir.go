@@ -56,6 +56,15 @@ func createDeploymentContentDirectories(name string) error {
 	return nil
 }
 
+// updateAPICR updates the API CR with name of the API name
+func updateAPICR(apiCR *wso2v1alpha2.API, name string) {
+	apiName := utils2.GetValidK8sResourceName(name)
+	apiCR.Name = apiName
+	apiCR.Spec.SwaggerConfigMapName = fmt.Sprintf("%v-cm", apiName)
+	apiCR.Spec.ParamsValues = fmt.Sprintf("%v-params", apiName)
+	apiCR.Spec.CertsValues = fmt.Sprintf("%v-certs", apiName)
+}
+
 // executeGenDeploymentDirCmd will run gen deployment-dir command
 func executeGenDeploymentDirCmd() error {
 	var deploymentDirParent, deploymentDirName, sourceDirectoryPath, tempDirPath string
@@ -146,11 +155,7 @@ func executeGenDeploymentDirCmd() error {
 			if errUnmarshal != nil {
 				utils.HandleErrorAndExit("Error unmarshal api configmap into struct ", errUnmarshal)
 			}
-			apiName := utils2.GetValidK8sResourceName(apiMetaData.Name)
-			apiCrd.Name = apiName
-			apiCrd.Spec.SwaggerConfigMapName = fmt.Sprintf("%v-cm", apiName)
-			apiCrd.Spec.ParamsValues = fmt.Sprintf("%v-params", apiName)
-			apiCrd.Spec.CertsValues = fmt.Sprintf("%v-certs", apiName)
+			updateAPICR(apiCrd, apiMetaData.Name)
 			break
 		} else if strings.EqualFold(fileName, utils.MetaFileAPIProduct) { // if project artifact is a APIProduct project
 			metaDataFileFound = true
@@ -158,7 +163,6 @@ func executeGenDeploymentDirCmd() error {
 			if err != nil {
 				utils.HandleErrorAndExit("Cannot copy metadata file from the source directory ", err)
 			}
-			fmt.Println(fileName)
 			metaDataYamlFile, err := ioutil.ReadFile(filepath.Join(sourceDirectoryPath, fileName))
 			if err != nil {
 				utils.HandleErrorAndExit("Cannot read the meta file", err)
@@ -167,11 +171,7 @@ func executeGenDeploymentDirCmd() error {
 			if errUnmarshal != nil {
 				utils.HandleErrorAndExit("Error unmarshal api configmap into struct ", errUnmarshal)
 			}
-			apiName := utils2.GetValidK8sResourceName(apiMetaData.Name)
-			apiCrd.Name = apiName
-			apiCrd.Spec.SwaggerConfigMapName = fmt.Sprintf("%v-cm", apiName)
-			apiCrd.Spec.ParamsValues = fmt.Sprintf("%v-params", apiName)
-			apiCrd.Spec.CertsValues = fmt.Sprintf("%v-certs", apiName)
+			updateAPICR(apiCrd, apiMetaData.Name)
 
 			break
 		} else if strings.EqualFold(fileName, utils.MetaFileApplication) { // if project artifact is a Application project
@@ -188,11 +188,7 @@ func executeGenDeploymentDirCmd() error {
 			if errUnmarshal != nil {
 				utils.HandleErrorAndExit("Error unmarshal api configmap into struct ", errUnmarshal)
 			}
-			apiName := utils2.GetValidK8sResourceName(apiMetaData.Name)
-			apiCrd.Name = apiName
-			apiCrd.Spec.SwaggerConfigMapName = fmt.Sprintf("%v-cm", apiName)
-			apiCrd.Spec.ParamsValues = fmt.Sprintf("%v-params", apiName)
-			apiCrd.Spec.CertsValues = fmt.Sprintf("%v-certs", apiName)
+			updateAPICR(apiCrd, apiMetaData.Name)
 			break
 		}
 	}
