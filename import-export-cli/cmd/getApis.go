@@ -34,8 +34,6 @@ var getApisCmdFormat string
 var getApisCmdQuery []string
 var getApisCmdLimit string
 
-const queryParamSeparator = " "
-
 // GetApisCmd related info
 const GetApisCmdLiteral = "apis"
 const getApisCmdShortDesc = "Display a list of APIs in an environment"

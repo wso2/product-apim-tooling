@@ -19,6 +19,8 @@
 package cmd
 
 import (
+	"strings"
+
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 
@@ -31,7 +33,7 @@ var getAPIRevisionsAPIVersion string
 var getAPIRevisionsAPIProvider string
 var getAPIRevisionsCmdEnvironment string
 var getAPIRevisionsCmdFormat string
-var getAPIRevisionsCmdQuery string
+var getAPIRevisionsCmdQuery []string
 
 // GetRevisionsCmd related info
 const GetAPIRevisionsCmdLiteral = "api-revisions"
@@ -41,6 +43,7 @@ const GetAPIRevisionsCmdLongDesc = `Display a list of Revisions available for th
 
 var getAPIRevisionsCmdExamples = utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetAPIRevisionsCmdLiteral + ` -n PizzaAPI -v 1.0.0 -e dev
 ` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetAPIRevisionsCmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin -e dev
+` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetAPIRevisionsCmdLiteral + ` -n PizzaShackAPI -v 1.0.0 -q deployed:true -e dev
 NOTE: All the 3 flags (--name (-n), --version (-v) and --environment (-e)) are mandatory.`
 
 // getRevisionsCmd represents the revisions command
@@ -67,7 +70,7 @@ func executeGetAPIRevisionsCmd(credential credentials.Credential) {
 	}
 
 	_, revisions, err := impl.GetRevisionListFromEnv(accessToken, getAPIRevisionsCmdEnvironment, getAPIRevisionsAPIName,
-		getAPIRevisionsAPIVersion, getAPIRevisionsAPIProvider, getAPIRevisionsCmdQuery)
+		getAPIRevisionsAPIVersion, getAPIRevisionsAPIProvider, strings.Join(getAPIRevisionsCmdQuery, queryParamSeparator))
 	if err == nil {
 		impl.PrintRevisions(revisions, getAPIRevisionsCmdFormat)
 	} else {
@@ -83,8 +86,8 @@ func init() {
 		"Version of the API to get the revision")
 	getAPIRevisionsCmd.Flags().StringVarP(&getAPIRevisionsAPIProvider, "provider", "r", "",
 		"Provider of the API")
-	getAPIRevisionsCmd.Flags().StringVarP(&getAPIRevisionsCmdQuery, "query", "q",
-		"", "Query pattern")
+	getAPIRevisionsCmd.Flags().StringSliceVarP(&getAPIRevisionsCmdQuery, "query", "q",
+		[]string{}, "Query pattern")
 	getAPIRevisionsCmd.Flags().StringVarP(&getAPIRevisionsCmdEnvironment, "environment", "e",
 		"", "Environment to be searched")
 	getAPIRevisionsCmd.Flags().StringVarP(&getAPIRevisionsCmdFormat, "format", "", "", "Pretty-print revisions "+
