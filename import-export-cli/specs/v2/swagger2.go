@@ -263,7 +263,12 @@ func Swagger2Populate(def *APIDTODefinition, document *loads.Document) error {
 	if basepath, ok := swagger2XWO2BasePath(document); ok {
 		def.Context = path.Clean(basepath)
 		if !strings.Contains(basepath, "{version}") {
-			def.Context = path.Clean(basepath)
+			if strings.Contains(basepath, def.Version) {
+				def.Context = path.Clean(strings.Replace(basepath, def.Version, "",
+					strings.LastIndex(basepath, def.Version)))
+			} else {
+				def.Context = path.Clean(basepath)
+			}
 			def.IsDefaultVersion = true
 		} else {
 			def.Context = path.Clean(strings.ReplaceAll(basepath, "{version}", def.Version))
