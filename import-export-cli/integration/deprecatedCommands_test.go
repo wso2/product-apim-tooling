@@ -36,7 +36,7 @@ func TestListEnvironmentsDeprecated(t *testing.T) {
 	assert.Contains(t, response, apim.GetEnvName(), "TestListEnvironmentsDeprecated Failed")
 }
 
-// Export an API from one environment as a super tenant non admin user (who has API Create and API Publish permissions)
+// Export an API from one environment as a super tenant non admin user (who has Internal/publisher role)
 // by specifying the provider name
 func TestExportApiNonAdminSuperTenantUserDeprecated(t *testing.T) {
 	apiPublisher := publisher.UserName
