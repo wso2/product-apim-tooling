@@ -176,7 +176,7 @@ func getContext(provider string) string {
 }
 
 // GenerateAdditionalProperties : Generate additional properties to create an API from swagger
-func (instance *Client) GenerateAdditionalProperties(provider string) string {
+func (instance *Client) GenerateAdditionalProperties(provider, endpointUrl string) string {
 	additionalProperties := `{"name":"` + generateRandomString() + `",
 	"version":"1.0.5",
 	"context":"` + getContext(provider) + `",
@@ -186,11 +186,11 @@ func (instance *Client) GenerateAdditionalProperties(provider string) string {
 	"endpointConfig":
 		{   "endpoint_type":"http",
 			"sandbox_endpoints":{
-					"url":"petstore.swagger.io"
+					"url":"` + endpointUrl + `"
 		
 			},
 			"production_endpoints":{
-					"url":"petstore.swagger.io"
+				"url":"` + endpointUrl + `"
 			}
 		}
 	}`
@@ -422,6 +422,60 @@ func (instance *Client) AddAPI(t *testing.T, api *API, username string, password
 			instance.DeleteAPI(apiResponse.ID)
 		})
 	}
+
+	return apiResponse.ID
+}
+
+// AddSoapAPI : Add new SOAP API to APIM
+func (instance *Client) AddSoapAPI(t *testing.T, path string, additionalProperties string, username string, password string) string {
+	apisURL := instance.publisherRestURL + "/apis/import-wsdl"
+
+	file, err := os.Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer file.Close()
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, err := writer.CreateFormFile("file", filepath.Base(file.Name()))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = io.Copy(part, file)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	part, err = writer.CreateFormField("additionalProperties")
+	if err != nil {
+		t.Fatal(err)
+	}
+	part.Write([]byte(additionalProperties))
+
+	err = writer.Close()
+
+	request := base.CreatePost(apisURL, body)
+
+	base.SetDefaultRestAPIHeadersToConsumeFormData(instance.accessToken, request)
+
+	base.LogRequest("apim.AddSoapAPI()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.AddSoapAPI()", response, 201)
+
+	var apiResponse API
+	json.NewDecoder(response.Body).Decode(&apiResponse)
+
+	t.Cleanup(func() {
+		username, password := RetrieveAdminCredentialsInsteadCreator(username, password)
+		instance.Login(username, password)
+		instance.DeleteAPI(apiResponse.ID)
+	})
 
 	return apiResponse.ID
 }
