@@ -207,7 +207,13 @@ func (instance *Client) GenerateAdditionalProperties(provider, endpointUrl, apiT
 	"context":"` + getContext(provider) + `",
 	"policies":[
 	   "Bronze"
-	],`
+	],
+	"type":"` + apiType + `",
+	`
+	if operations != nil && len(operations) > 0 {
+		operationsData, _ := json.Marshal(operations)
+		additionalProperties += ` "operations": ` + string(operationsData) + `, `
+	}
 
 	if strings.EqualFold(apiType, "SOAPTOREST") {
 		additionalProperties = additionalProperties +
@@ -223,11 +229,19 @@ func (instance *Client) GenerateAdditionalProperties(provider, endpointUrl, apiT
 					}
 			}
 		}`
+	} else if strings.EqualFold(apiType, "WS") {
+		additionalProperties = additionalProperties +
+			`"endpointConfig": {   
+				"endpoint_type":"ws",
+					"sandbox_endpoints":{
+						"url":"` + endpointUrl + `"
+					},
+					"production_endpoints":{
+						"url":"` + endpointUrl + `"
+					}
+			}
+		}`
 	} else {
-		if operations != nil && len(operations) > 0 {
-			operationsData, _ := json.Marshal(operations)
-			additionalProperties += ` "operations": ` + string(operationsData) + `, `
-		}
 		additionalProperties = additionalProperties +
 			`"endpointConfig": {   
 				"endpoint_type":"http",
@@ -686,6 +700,60 @@ func (instance *Client) ValidateGraphQLSchema(t *testing.T, path, username, pass
 	json.NewDecoder(response.Body).Decode(&validationResponse)
 
 	return validationResponse
+}
+
+// AddStreamingAPI : Add new Streaming API to APIM from definition
+func (instance *Client) AddStreamingAPI(t *testing.T, path, additionalProperties, username, password string) string {
+	apisURL := instance.publisherRestURL + "/apis/import-asyncapi"
+
+	file, err := os.Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer file.Close()
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, err := writer.CreateFormFile("file", filepath.Base(file.Name()))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = io.Copy(part, file)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	part, err = writer.CreateFormField("additionalProperties")
+	if err != nil {
+		t.Fatal(err)
+	}
+	part.Write([]byte(additionalProperties))
+
+	err = writer.Close()
+
+	request := base.CreatePost(apisURL, body)
+
+	base.SetDefaultRestAPIHeadersToConsumeFormData(instance.accessToken, request)
+
+	base.LogRequest("apim.AddStreamingAPI()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.AddStreamingAPI()", response, 201)
+
+	var apiResponse API
+	json.NewDecoder(response.Body).Decode(&apiResponse)
+
+	t.Cleanup(func() {
+		username, password := RetrieveAdminCredentialsInsteadCreator(username, password)
+		instance.Login(username, password)
+		instance.DeleteAPI(apiResponse.ID)
+	})
+
+	return apiResponse.ID
 }
 
 // AddAPIProductFromJSON : Add SampleAPIProduct using using a json file

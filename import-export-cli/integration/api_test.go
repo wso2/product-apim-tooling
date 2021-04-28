@@ -1345,3 +1345,55 @@ func TestExportImportSSEApiDevopsTenantUser(t *testing.T) {
 
 	testutils.ValidateAPIExportImport(t, args, testutils.APITypeSSE)
 }
+
+// Export a Web Socket API (that was created using an Async API definition) from one environment and
+//import to another environment as super tenant user with Internal/devops role by specifying the provider name
+func TestExportImportWebSocketApiFromAsyncApiDefDevopsSuperTenantUser(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	api := testutils.AddWebStreamingAPIFromAsyncAPIDefinition(t, dev, apiCreator, apiCreatorPassword,
+		testutils.APITypeWebScoket)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+	}
+
+	testutils.ValidateAPIExportImport(t, args, testutils.APITypeWebScoket)
+}
+
+// Export a Web Socket API (that was created using an Async API definition) from one environment and
+//import to another environment as a tenant user with Internal/devops role by specifying the provider name
+func TestExportImportWebSocketApiFromAsyncApiDefDevopsTenantUser(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	tenantApiCreator := creator.UserName + "@" + TENANT1
+	tenantApiCreatorPassword := creator.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	api := testutils.AddWebStreamingAPIFromAsyncAPIDefinition(t, dev, tenantApiCreator, tenantApiCreatorPassword,
+		testutils.APITypeWebScoket)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: tenantApiCreator, Password: tenantApiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+	}
+
+	testutils.ValidateAPIExportImport(t, args, testutils.APITypeWebScoket)
+}

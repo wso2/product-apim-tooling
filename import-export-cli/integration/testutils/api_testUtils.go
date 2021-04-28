@@ -54,11 +54,11 @@ func AddSoapAPI(t *testing.T, client *apim.Client, username, password, apiType s
 }
 
 func AddGraphQLAPI(t *testing.T, client *apim.Client, username, password string) *apim.API {
+	client.Login(username, password)
 	path := "testdata/products-schema.graphql"
 	validationResponse := client.ValidateGraphQLSchema(t, path, username, password)
 	if validationResponse.IsValid {
 		operations := validationResponse.GraphQLInfo.Operations
-		client.Login(username, password)
 		additionalProperties := client.GenerateAdditionalProperties(username, GraphQLEndpoint, APITypeGraphQL, operations)
 		id := client.AddGraphQLAPI(t, path, additionalProperties, username, password)
 		api := client.GetAPI(id)
@@ -75,6 +75,15 @@ func AddWebStreamingAPI(t *testing.T, client *apim.Client, username, password, a
 	doClean := true
 	id := client.AddAPI(t, api, username, password, doClean)
 	api = client.GetAPI(id)
+	return api
+}
+
+func AddWebStreamingAPIFromAsyncAPIDefinition(t *testing.T, client *apim.Client, username, password, apiType string) *apim.API {
+	client.Login(username, password)
+	path := "testdata/streetlights.yml"
+	additionalProperties := client.GenerateAdditionalProperties(username, WebSocketEndpoint, apiType, nil)
+	id := client.AddStreamingAPI(t, path, additionalProperties, username, password)
+	api := client.GetAPI(id)
 	return api
 }
 
@@ -134,7 +143,7 @@ func AddAPIToTwoEnvs(t *testing.T, client1 *apim.Client, client2 *apim.Client, u
 func AddAPIFromOpenAPIDefinition(t *testing.T, client *apim.Client, username string, password string) *apim.API {
 	path := "testdata/petstore.yaml"
 	client.Login(username, password)
-	additionalProperties := client.GenerateAdditionalProperties(username, "petstore.swagger.io", APITypeREST, nil)
+	additionalProperties := client.GenerateAdditionalProperties(username, RESTAPIEndpoint, APITypeREST, nil)
 	id := client.AddAPIFromOpenAPIDefinition(t, path, additionalProperties, username, password)
 	api := client.GetAPI(id)
 	return api
@@ -143,7 +152,7 @@ func AddAPIFromOpenAPIDefinition(t *testing.T, client *apim.Client, username str
 func AddAPIFromOpenAPIDefinitionToTwoEnvs(t *testing.T, client1 *apim.Client, client2 *apim.Client, username string, password string) (*apim.API, *apim.API) {
 	path := "testdata/petstore.yaml"
 	client1.Login(username, password)
-	additionalProperties := client1.GenerateAdditionalProperties(username, "petstore.swagger.io", APITypeREST, nil)
+	additionalProperties := client1.GenerateAdditionalProperties(username, RESTAPIEndpoint, APITypeREST, nil)
 	id1 := client1.AddAPIFromOpenAPIDefinition(t, path, additionalProperties, username, password)
 	api1 := client1.GetAPI(id1)
 
