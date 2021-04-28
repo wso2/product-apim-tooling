@@ -1,0 +1,51 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+# Enumeration type for the category
+enum Category {
+  CLOTHING
+  FOOTWEAR
+  COSMETICS
+}
+
+# Our main product type
+type Product {
+  id: ID!
+  name: String!
+  description: String
+  category: Category!
+  customer: [Customer]
+}
+
+# Customer type
+type Customer {
+  id: ID!
+  name: String!
+  description: String
+  product: [Product]
+}
+
+type Query {
+  # Get one product
+  product(id: ID!): Product!
+  # Get one customer
+  customer(id: ID!): Customer!
+  # Get all products
+  allProducts: [Product]
+  # Get all customers
+  allCustomers: [Customer]
+}
+
+type Mutation {
+  addProduct(name: String!, category: Category = CLOTHING): Product
+  addCustomer(name: String!): Customer!
+  removeProduct(id: ID!): Product!
+}
+
+
+
+
+
+

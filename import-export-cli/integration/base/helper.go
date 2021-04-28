@@ -145,26 +145,25 @@ func IsAPIArchiveExists(t *testing.T, path string, name string, version string) 
 	return true
 }
 
-// IsWSDLFileExists : Returns true if WSDL file exists on file system, else returns false
+// IsFileExistsInAPIArchive : Returns true if a particular file exists in API archive, else returns false
 //
-func IsWSDLFileExists(t *testing.T, path string, name string, version string) bool {
-	apiFile := ConstructAPIFilePath(path, name, version)
+func IsFileExistsInAPIArchive(t *testing.T, archivePath, fileToCheck, name, version string) bool {
+	apiFile := ConstructAPIFilePath(archivePath, name, version)
 
 	// Unzip exported archive
 	destPath := strings.ReplaceAll(apiFile, ".zip", "")
 	Unzip(destPath, apiFile)
 
-	wsdlFile := destPath + string(os.PathSeparator) + name + "-" + version + string(os.PathSeparator) +
-		utils.InitProjectWSDL + string(os.PathSeparator) + name + "-" + version + ".wsdl"
+	file := destPath + string(os.PathSeparator) + name + "-" + version + string(os.PathSeparator) + fileToCheck
 
-	t.Log("base.IsWSDLFileExists() - WSDL file path:", wsdlFile)
+	t.Log("base.IsFileExistsInAPIArchive() - File path:", file)
 
 	t.Cleanup(func() {
 		// Remove extracted archive
 		RemoveDir(destPath)
 	})
 
-	if _, err := os.Stat(wsdlFile); os.IsNotExist(err) {
+	if _, err := os.Stat(file); os.IsNotExist(err) {
 		return false
 	}
 

@@ -1145,3 +1145,53 @@ func TestExportImportSoapToRestApiDevopsTenantUser(t *testing.T) {
 
 	testutils.ValidateAPIExportImport(t, args, testutils.APITypeSoapToRest)
 }
+
+// Export a GraphQL API from one environment and import to another environment as super tenant user with
+// Internal/devops role by specifying the provider name
+func TestExportImportGraphQLApiDevopsSuperTenantUser(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	api := testutils.AddGraphQLAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+	}
+
+	testutils.ValidateAPIExportImport(t, args, testutils.APITypeGraphQL)
+}
+
+// Export a GraphQL API from one environment and import to another environment as tenant user with
+// Internal/devops role by specifying the provider name
+func TestExportImportGraphQLApiDevopsTenantUser(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	tenantApiCreator := creator.UserName + "@" + TENANT1
+	tenantApiCreatorPassword := creator.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	api := testutils.AddGraphQLAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: tenantApiCreator, Password: tenantApiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+	}
+
+	testutils.ValidateAPIExportImport(t, args, testutils.APITypeGraphQL)
+}

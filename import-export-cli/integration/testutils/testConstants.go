@@ -82,6 +82,10 @@ const UnlimitedPolicy = "Unlimited"
 const APITypeREST = "REST"
 const APITypeSoap = "SOAP"
 const APITypeSoapToRest = "SOAPTOREST"
+const APITypeGraphQL = "GraphQL"
 
 // SOAP API Endpoint URL
 const SoapEndpointURL = "http://ws.cdyne.com/phoneverify/phoneverify.asmx"
+
+// GraphQL API Endpoint URL
+const GraphQLEndpoint = "http://www.mocky.io/v2/5ea84def2d0000a52d3a3ecd"

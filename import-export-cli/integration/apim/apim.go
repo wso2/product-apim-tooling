@@ -176,7 +176,7 @@ func getContext(provider string) string {
 }
 
 // GenerateAdditionalProperties : Generate additional properties to create an API from swagger
-func (instance *Client) GenerateAdditionalProperties(provider, endpointUrl, apiType string) string {
+func (instance *Client) GenerateAdditionalProperties(provider, endpointUrl, apiType string, operations []interface{}) string {
 	additionalProperties := `{"name":"` + generateRandomString() + `",
 	"version":"1.0.5",
 	"context":"` + getContext(provider) + `",
@@ -199,6 +199,10 @@ func (instance *Client) GenerateAdditionalProperties(provider, endpointUrl, apiT
 			}
 		}`
 	} else {
+		if operations != nil && len(operations) > 0 {
+			operationsData, _ := json.Marshal(operations)
+			additionalProperties += ` "operations": ` + string(operationsData) + `, `
+		}
 		additionalProperties = additionalProperties +
 			`"endpointConfig": {   
 				"endpoint_type":"http",
@@ -555,6 +559,108 @@ func (instance *Client) AddAPIFromOpenAPIDefinition(t *testing.T, path string, a
 	})
 
 	return apiResponse.ID
+}
+
+// AddGraphQLAPI : Add new GraphQL API to APIM
+func (instance *Client) AddGraphQLAPI(t *testing.T, path, additionalProperties, username, password string) string {
+	apisURL := instance.publisherRestURL + "/apis/import-graphql-schema"
+
+	file, err := os.Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer file.Close()
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, err := writer.CreateFormFile("file", filepath.Base(file.Name()))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = io.Copy(part, file)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	part, err = writer.CreateFormField("additionalProperties")
+	if err != nil {
+		t.Fatal(err)
+	}
+	part.Write([]byte(additionalProperties))
+
+	part, err = writer.CreateFormField("implementationType")
+	if err != nil {
+		t.Fatal(err)
+	}
+	part.Write([]byte("GraphQL"))
+
+	err = writer.Close()
+
+	request := base.CreatePost(apisURL, body)
+
+	base.SetDefaultRestAPIHeadersToConsumeFormData(instance.accessToken, request)
+
+	base.LogRequest("apim.AddGraphQLAPI()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.AddGraphQLAPI()", response, 201)
+
+	var apiResponse API
+	json.NewDecoder(response.Body).Decode(&apiResponse)
+
+	t.Cleanup(func() {
+		username, password := RetrieveAdminCredentialsInsteadCreator(username, password)
+		instance.Login(username, password)
+		instance.DeleteAPI(apiResponse.ID)
+	})
+
+	return apiResponse.ID
+}
+
+// ValidateGraphQLSchema : Validate the GraphQL schema
+func (instance *Client) ValidateGraphQLSchema(t *testing.T, path, username, password string) GraphQLValidationResponseDTO {
+	apisURL := instance.publisherRestURL + "/apis/validate-graphql-schema"
+
+	file, err := os.Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer file.Close()
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, err := writer.CreateFormFile("file", filepath.Base(file.Name()))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = io.Copy(part, file)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = writer.Close()
+
+	request := base.CreatePost(apisURL, body)
+
+	base.SetDefaultRestAPIHeadersToConsumeFormData(instance.accessToken, request)
+
+	base.LogRequest("apim.ValidateGraphQLSchema()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.ValidateGraphQLSchema()", response, 200)
+
+	var validationResponse GraphQLValidationResponseDTO
+	json.NewDecoder(response.Body).Decode(&validationResponse)
+
+	return validationResponse
 }
 
 // AddAPIProductFromJSON : Add SampleAPIProduct using using a json file

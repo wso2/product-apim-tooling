@@ -47,10 +47,26 @@ func AddAPI(t *testing.T, client *apim.Client, username string, password string)
 func AddSoapAPI(t *testing.T, client *apim.Client, username, password, apiType string) *apim.API {
 	path := "testdata/phoneverify.wsdl"
 	client.Login(username, password)
-	additionalProperties := client.GenerateAdditionalProperties(username, SoapEndpointURL, apiType)
+	additionalProperties := client.GenerateAdditionalProperties(username, SoapEndpointURL, apiType, nil)
 	id := client.AddSoapAPI(t, path, additionalProperties, username, password, apiType)
 	api := client.GetAPI(id)
 	return api
+}
+
+func AddGraphQLAPI(t *testing.T, client *apim.Client, username, password string) *apim.API {
+	path := "testdata/products-schema.graphql"
+	validationResponse := client.ValidateGraphQLSchema(t, path, username, password)
+	if validationResponse.IsValid {
+		operations := validationResponse.GraphQLInfo.Operations
+		client.Login(username, password)
+		additionalProperties := client.GenerateAdditionalProperties(username, GraphQLEndpoint, APITypeGraphQL, operations)
+		id := client.AddGraphQLAPI(t, path, additionalProperties, username, password)
+		api := client.GetAPI(id)
+		return api
+	} else {
+		t.Error(t, validationResponse.ErrorMessage)
+	}
+	return nil
 }
 
 func CreateAndDeployAPIRevision(t *testing.T, client *apim.Client, username, password, apiID string) {
@@ -109,7 +125,7 @@ func AddAPIToTwoEnvs(t *testing.T, client1 *apim.Client, client2 *apim.Client, u
 func AddAPIFromOpenAPIDefinition(t *testing.T, client *apim.Client, username string, password string) *apim.API {
 	path := "testdata/petstore.yaml"
 	client.Login(username, password)
-	additionalProperties := client.GenerateAdditionalProperties(username, "petstore.swagger.io", APITypeREST)
+	additionalProperties := client.GenerateAdditionalProperties(username, "petstore.swagger.io", APITypeREST, nil)
 	id := client.AddAPIFromOpenAPIDefinition(t, path, additionalProperties, username, password)
 	api := client.GetAPI(id)
 	return api
@@ -118,7 +134,7 @@ func AddAPIFromOpenAPIDefinition(t *testing.T, client *apim.Client, username str
 func AddAPIFromOpenAPIDefinitionToTwoEnvs(t *testing.T, client1 *apim.Client, client2 *apim.Client, username string, password string) (*apim.API, *apim.API) {
 	path := "testdata/petstore.yaml"
 	client1.Login(username, password)
-	additionalProperties := client1.GenerateAdditionalProperties(username, "petstore.swagger.io", APITypeREST)
+	additionalProperties := client1.GenerateAdditionalProperties(username, "petstore.swagger.io", APITypeREST, nil)
 	id1 := client1.AddAPIFromOpenAPIDefinition(t, path, additionalProperties, username, password)
 	api1 := client1.GetAPI(id1)
 
@@ -336,8 +352,14 @@ func ValidateAPIExportImport(t *testing.T, args *ApiImportExportTestArgs, apiTyp
 		args.Api.Name, args.Api.Version))
 
 	if strings.EqualFold(apiType, APITypeSoap) {
-		assert.True(t, base.IsWSDLFileExists(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
+		wsdlFilePathInProject := utils.InitProjectWSDL + string(os.PathSeparator) + args.Api.Name + "-" + args.Api.Version + ".wsdl"
+		assert.True(t, base.IsFileExistsInAPIArchive(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()), wsdlFilePathInProject,
 			args.Api.Name, args.Api.Version))
+	}
+
+	if strings.EqualFold(apiType, APITypeGraphQL) {
+		assert.True(t, base.IsFileExistsInAPIArchive(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
+			utils.InitProjectDefinitionsGraphQLSchema, args.Api.Name, args.Api.Version))
 	}
 
 	// Import api to env 2
