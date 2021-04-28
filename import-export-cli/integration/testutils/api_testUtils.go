@@ -69,6 +69,15 @@ func AddGraphQLAPI(t *testing.T, client *apim.Client, username, password string)
 	return nil
 }
 
+func AddWebSocketAPI(t *testing.T, client *apim.Client, username string, password string) *apim.API {
+	client.Login(username, password)
+	api := client.GenerateSampleStreamingAPIData(username)
+	doClean := true
+	id := client.AddAPI(t, api, username, password, doClean)
+	api = client.GetAPI(id)
+	return api
+}
+
 func CreateAndDeployAPIRevision(t *testing.T, client *apim.Client, username, password, apiID string) {
 	client.Login(username, password)
 	revision := client.CreateAPIRevision(apiID)
@@ -351,6 +360,11 @@ func ValidateAPIExportImport(t *testing.T, args *ApiImportExportTestArgs, apiTyp
 	assert.True(t, base.IsAPIArchiveExists(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
 		args.Api.Name, args.Api.Version))
 
+	if strings.EqualFold(apiType, APITypeREST) {
+		assert.True(t, base.IsFileExistsInAPIArchive(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
+			utils.InitProjectDefinitionsSwagger, args.Api.Name, args.Api.Version))
+	}
+
 	if strings.EqualFold(apiType, APITypeSoap) {
 		wsdlFilePathInProject := utils.InitProjectWSDL + string(os.PathSeparator) + args.Api.Name + "-" + args.Api.Version + ".wsdl"
 		assert.True(t, base.IsFileExistsInAPIArchive(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()), wsdlFilePathInProject,
@@ -360,6 +374,11 @@ func ValidateAPIExportImport(t *testing.T, args *ApiImportExportTestArgs, apiTyp
 	if strings.EqualFold(apiType, APITypeGraphQL) {
 		assert.True(t, base.IsFileExistsInAPIArchive(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
 			utils.InitProjectDefinitionsGraphQLSchema, args.Api.Name, args.Api.Version))
+	}
+
+	if strings.EqualFold(apiType, APITypeWebScoket) {
+		assert.True(t, base.IsFileExistsInAPIArchive(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
+			utils.InitProjectDefinitionsAsyncAPI, args.Api.Name, args.Api.Version))
 	}
 
 	// Import api to env 2

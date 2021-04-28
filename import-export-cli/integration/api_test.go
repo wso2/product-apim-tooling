@@ -1195,3 +1195,53 @@ func TestExportImportGraphQLApiDevopsTenantUser(t *testing.T) {
 
 	testutils.ValidateAPIExportImport(t, args, testutils.APITypeGraphQL)
 }
+
+// Export a WebSocket API from one environment and import to another environment as super tenant user with
+// Internal/devops role by specifying the provider name
+func TestExportImportWebSocketApiDevopsSuperTenantUser(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	api := testutils.AddWebSocketAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+	}
+
+	testutils.ValidateAPIExportImport(t, args, testutils.APITypeWebScoket)
+}
+
+// Export a WebSocket API from one environment and import to another environment as tenant user with
+// Internal/devops role by specifying the provider name
+func TestExportImportWebSocketApiDevopsTenantUser(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	tenantApiCreator := creator.UserName + "@" + TENANT1
+	tenantApiCreatorPassword := creator.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	api := testutils.AddWebSocketAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: tenantApiCreator, Password: tenantApiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+	}
+
+	testutils.ValidateAPIExportImport(t, args, testutils.APITypeWebScoket)
+}

@@ -74,6 +74,7 @@ const (
 	InitProjectDefinitions              = "Definitions"
 	InitProjectDefinitionsSwagger       = InitProjectDefinitions + string(os.PathSeparator) + "swagger.yaml"
 	InitProjectDefinitionsGraphQLSchema = InitProjectDefinitions + string(os.PathSeparator) + "schema.graphql"
+	InitProjectDefinitionsAsyncAPI      = InitProjectDefinitions + string(os.PathSeparator) + "asyncapi.yaml"
 	InitProjectImage                    = "Image"
 	InitProjectDocs                     = "Docs"
 	InitProjectSequences                = "Sequences"
