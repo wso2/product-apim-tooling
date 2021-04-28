@@ -1,0 +1,15 @@
+environments:
+  - name: production
+    configs:
+      endpointType: rest
+      endpointRoutingPolicy: load_balanced
+      loadBalanceEndpoints:
+        production:
+          - url: https://prod1.wso2.com
+          - url: https://prod2.wso2.com
+        sandbox:
+          - url: https://prod1.sandbox.wso2.com
+          - url: https://prod2.sandbox.wso2.com
+        sessionManagement: transport
+        sessionTimeOut: 5000
+        algoClassName: org.apache.synapse.endpoints.algorithms.RoundRobin

@@ -439,7 +439,7 @@ func validateEndpointUrl(t *testing.T, apiParams *Params, api *apim.API, endpoin
 func ValidateHttpEndpointWithoutLoadBalancingAndFailover(t *testing.T, api *apim.API, apiParams *Params, importedAPI *apim.API) {
 	t.Helper()
 	//Validate EndPoint Type
-	validateEndpointType(t,apiParams,importedAPI)
+	validateEndpointType(t, apiParams, importedAPI)
 
 	// Validate endpoint type URLs
 	validateEndpointUrl(t, apiParams, importedAPI, "production")
@@ -456,4 +456,61 @@ func ValidateHttpEndpointWithoutLoadBalancingAndFailover(t *testing.T, api *apim
 	ValidateAPIsEqual(t, api, importedAPI)
 }
 
+func ValidateHttpEndpointWithLoadBalancing(t *testing.T, api *apim.API, apiParams *Params, importedAPI *apim.API) {
+	t.Helper()
+	//Validate EndPoint Type
+	assert.Equal(t, "load_balance", importedAPI.GetEndpointType())
 
+	endPointConfigInApi := importedAPI.EndpointConfig
+
+	// Validate Algorithm class
+	algoClassNameInParams := apiParams.Environments[0].Configs.LoadBalanceEndpoints.AlgorithmClassName
+	algoClassNameInApi := endPointConfigInApi.(map[string]interface{})["algoClassName"].(string)
+	assert.Equal(t, algoClassNameInParams, algoClassNameInApi)
+
+	// Validate Session TimeOut
+	sessionTimeOutInParams := apiParams.Environments[0].Configs.LoadBalanceEndpoints.SessionTimeout
+	sessionTimeOutInApi := endPointConfigInApi.(map[string]interface{})["sessionTimeOut"].(string)
+	assert.Equal(t, strconv.Itoa(sessionTimeOutInParams), sessionTimeOutInApi)
+
+	// Validate Production endpoints
+	productionEndpointsInParams := apiParams.Environments[0].Configs.LoadBalanceEndpoints.Production
+	productionEndpointsInApi := endPointConfigInApi.(map[string]interface{})["production_endpoints"].([]interface{})
+	if strings.EqualFold(apiParams.Environments[0].Configs.LoadBalanceEndpoints.SessionManagement, "transport") {
+		for i := 0; i < len(productionEndpointsInParams); i++ {
+			singleProductionEndpointInApi := productionEndpointsInApi[i].(map[string]interface{})
+			assert.Equal(t, productionEndpointsInParams[i]["url"], singleProductionEndpointInApi["url"])
+		}
+	}
+	if strings.EqualFold(apiParams.Environments[0].Configs.LoadBalanceEndpoints.SessionManagement, "soap") {
+		for i := 0; i < len(productionEndpointsInParams); i++ {
+			singleProductionEndpointInApi := productionEndpointsInApi[i].(map[string]interface{})
+			assert.Equal(t, productionEndpointsInParams[i]["url"], singleProductionEndpointInApi["url"])
+			assert.Equal(t, "address", singleProductionEndpointInApi["endpoint_type"])
+		}
+	}
+
+	// Validate Sandbox endpoints
+	sandboxEndpointsInParams := apiParams.Environments[0].Configs.LoadBalanceEndpoints.Sandbox
+	sandboxEndpointsInApi := endPointConfigInApi.(map[string]interface{})["sandbox_endpoints"].([]interface{})
+	if strings.EqualFold(apiParams.Environments[0].Configs.LoadBalanceEndpoints.SessionManagement, "transport") {
+		for i := 0; i < len(sandboxEndpointsInParams); i++ {
+			singleSandboxEndpointInApi := sandboxEndpointsInApi[i].(map[string]interface{})
+			assert.Equal(t, sandboxEndpointsInParams[i]["url"], singleSandboxEndpointInApi["url"])
+		}
+	}
+	if strings.EqualFold(apiParams.Environments[0].Configs.LoadBalanceEndpoints.SessionManagement, "soap") {
+		for i := 0; i < len(sandboxEndpointsInParams); i++ {
+			singleSandboxEndpointInApi := sandboxEndpointsInApi[i].(map[string]interface{})
+			assert.Equal(t, sandboxEndpointsInParams[i]["url"], singleSandboxEndpointInApi["url"])
+		}
+	}
+
+	same := "override_with_same_value"
+	api.SetEndpointType(same)
+	importedAPI.SetEndpointType(same)
+	api.SetEndPointConfig(same)
+	importedAPI.SetEndPointConfig(same)
+
+	ValidateAPIsEqual(t, api, importedAPI)
+}

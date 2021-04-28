@@ -52,25 +52,25 @@ const TestCase2DestJpegPathSuffix = "/Image/icon.jpeg"
 const TestDefaultExtractedFileName = "/SwaggerPetstoreNew-1.0.0"
 
 // APIEndpointParamsFile : Endpoint URL api_params.yaml
-const APIEndpointParamsFile = "testdata/api_params_endpoint.yaml"
+const APIEndpointParamsFile = "testdata/EnvParamsFiles/api_params_endpoint.yaml"
 
 // APIEndpointRetryTimeoutParamsFile : Endpoint URL and Retry Timeout api_params.yaml
-const APIEndpointRetryTimeoutParamsFile = "testdata/api_params_endpoint_retrytimeout.yaml"
+const APIEndpointRetryTimeoutParamsFile = "testdata/EnvParamsFiles/api_params_endpoint_retrytimeout.yaml"
 
 // APISecurityFalseParamsFile : Security false api_params.yaml
-const APISecurityFalseParamsFile = "testdata/api_params_security_false.yaml"
+const APISecurityFalseParamsFile = "testdata/EnvParamsFiles/api_params_security_false.yaml"
 
 // APISecurityDigestParamsFile : Security Digest api_params.yaml
-const APISecurityDigestParamsFile = "testdata/api_params_security_digest.yaml"
+const APISecurityDigestParamsFile = "testdata/EnvParamsFiles/api_params_security_digest.yaml"
 
 // APISecurityBasicParamsFile : Security Basic api_params.yaml
-const APISecurityBasicParamsFile = "testdata/api_params_security_basic.yaml"
+const APISecurityBasicParamsFile = "testdata/EnvParamsFiles/api_params_security_basic.yaml"
 
 // APIFullParamsFile : Full api_params.yaml
-const APIFullParamsFile = "testdata/api_params_full.yaml"
+const APIFullParamsFile = "testdata/EnvParamsFiles/api_params_full.yaml"
 
 // APIProductFullParamsFile : Full api_product_params.yaml
-const APIProductFullParamsFile = "testdata/api_product_params_full.yaml"
+const APIProductFullParamsFile = "testdata/EnvParamsFiles/api_product_params_full.yaml"
 
 // CertificatesDirectoryPath : Directory path for the dunnmy certificates
 const CertificatesDirectoryPath = "testdata/TestArtifactDirectory/certificates"
@@ -100,10 +100,13 @@ const GraphQLEndpoint = "http://www.mocky.io/v2/5ea84def2d0000a52d3a3ecd"
 const WebSocketEndpoint = "ws://echo.websocket.org:80"
 
 // APIHttpRestEndpointWithoutLoadBalancingOrFailoverParamsFile : HTTP/REST Endpoint without Loadbalancing and Failover URLs in api_params.yaml
-const APIHttpRestEndpointWithoutLoadBalancingOrFailoverParamsFile = "testdata/api_params_http_rest_endpoint_without_lb_or_failover.yaml"
+const APIHttpRestEndpointWithoutLoadBalancingOrFailoverParamsFile = "testdata/EnvParamsFiles/api_params_http_rest_endpoint_without_lb_or_failover.yaml"
 
 // APIHttpSoapEndpointWithoutLoadBalancingOrFailoverParamsFile : HTTP/SOAP Endpoint without Loadbalancing and Failover URLs in api_params.yaml
-const APIHttpSoapEndpointWithoutLoadBalancingOrFailoverParamsFile = "testdata/api_params_http_soap_endpoint_without_lb_or_failover.yaml"
+const APIHttpSoapEndpointWithoutLoadBalancingOrFailoverParamsFile = "testdata/EnvParamsFiles/api_params_http_soap_endpoint_without_lb_or_failover.yaml"
 
 // APIHttpRestEndpointWithLoadBalancingParamsFile : HTTP/REST Endpoint with Loadbalancing URLs in api_params.yaml
-const APIHttpRestEndpointWithLoadBalancingParamsFile = "testdata/api_params_http_rest_endpoint_with_load_balancing.yaml"
+const APIHttpRestEndpointWithLoadBalancingParamsFile = "testdata/EnvParamsFiles/api_params_http_rest_endpoint_with_load_balancing.yaml"
+
+// APIHttpSoapEndpointWithLoadBalancingParamsFile : HTTP/SOAP Endpoint with Loadbalancing URLs in api_params.yaml
+const APIHttpSoapEndpointWithLoadBalancingParamsFile = "testdata/EnvParamsFiles/api_params_http_soap_endpoint_with_load_balancing.yaml"

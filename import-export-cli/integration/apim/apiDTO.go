@@ -89,7 +89,7 @@ func (instance *API) GetEndpointType() string {
 }
 
 // SetEndpointType : Get the Endpoint Type (http/address/aws)
-func (instance *API) SetEndpointType(endPointType string)  {
+func (instance *API) SetEndpointType(endPointType string) {
 	instance.EndpointConfig.(map[string]interface{})["endpoint_type"] = endPointType
 }
 
@@ -145,6 +145,16 @@ func (instance *API) GetProductionSecurityConfig() map[string]interface{} {
 func (instance *API) GetSandboxSecurityConfig() map[string]interface{} {
 	endpoint := instance.EndpointConfig.(map[string]interface{})["endpoint_security"]
 	return endpoint.(map[string]interface{})["sandbox"].(map[string]interface{})
+}
+
+// GetEndPointConfig : Get APIs endpoint config
+func (instance *API) GetEndPointConfig() interface{} {
+	return instance.EndpointConfig
+}
+
+// SetEndPointConfig : Set APIs endpoint config
+func (instance *API) SetEndPointConfig(config interface{}) {
+	instance.EndpointConfig = config
 }
 
 // APIMaxTps : Defines Max TPS of backends

@@ -277,6 +277,68 @@ func TestEnvironmentSpecificParamsHttpSoapEndpointWithoutLoadBalancingOrFailover
 	testutils.ValidateHttpEndpointWithoutLoadBalancingAndFailover(t, api, apiParams, importedAPI)
 }
 
+//  Import an API with the external params file that has HTTP/REST endpoints with load balancing config
+func TestEnvironmentSpecificParamsHttpRestEndpointWithLoadBalancing(t *testing.T) {
+	superTenantAdminUsername := superAdminUser
+	superTenantAdminPassword := superAdminPassword
+
+	superTenantApiCreator := creator.UserName
+	superTenantApiCreatorPassword := creator.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: superTenantAdminUsername, Password: superTenantAdminPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+		ParamsFile:  testutils.APIHttpRestEndpointWithLoadBalancingParamsFile,
+	}
+
+	testutils.ValidateAPIExport(t, args)
+
+	importedAPI := testutils.GetImportedAPI(t, args)
+
+	apiParams := testutils.ReadParams(t, args.ParamsFile)
+
+	testutils.ValidateHttpEndpointWithLoadBalancing(t, api, apiParams, importedAPI)
+}
+
+//  Import an API with the external params file that has HTTP/SOAP endpoints with load balancing config
+func TestEnvironmentSpecificParamsHttpSoapEndpointWithLoadBalancing(t *testing.T) {
+	superTenantAdminUsername := superAdminUser
+	superTenantAdminPassword := superAdminPassword
+
+	superTenantApiCreator := creator.UserName
+	superTenantApiCreatorPassword := creator.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: superTenantAdminUsername, Password: superTenantAdminPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+		ParamsFile:  testutils.APIHttpSoapEndpointWithLoadBalancingParamsFile,
+	}
+
+	testutils.ValidateAPIExport(t, args)
+
+	importedAPI := testutils.GetImportedAPI(t, args)
+
+	apiParams := testutils.ReadParams(t, args.ParamsFile)
+
+	testutils.ValidateHttpEndpointWithLoadBalancing(t, api, apiParams, importedAPI)
+}
+
 // Export an API from one environment and generate the deployment directory for that. Import it to another environment with the params
 // and certificates. Validate the imported API with the used params. Again, re-export it to validate the certs.
 // As a super tenant user with Internal/devops role.
