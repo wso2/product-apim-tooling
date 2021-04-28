@@ -208,7 +208,6 @@ func (instance *Client) GenerateAdditionalProperties(provider, endpointUrl, apiT
 	"policies":[
 	   "Bronze"
 	],
-	"type":"` + apiType + `",
 	`
 	if operations != nil && len(operations) > 0 {
 		operationsData, _ := json.Marshal(operations)
@@ -230,8 +229,8 @@ func (instance *Client) GenerateAdditionalProperties(provider, endpointUrl, apiT
 			}
 		}`
 	} else if strings.EqualFold(apiType, "WS") {
-		additionalProperties = additionalProperties +
-			`"endpointConfig": {   
+		additionalProperties = additionalProperties + `"type":"` + apiType + `",
+			"endpointConfig": {   
 				"endpoint_type":"ws",
 					"sandbox_endpoints":{
 						"url":"` + endpointUrl + `"
