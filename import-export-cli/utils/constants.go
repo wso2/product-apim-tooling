@@ -83,6 +83,7 @@ const (
 	InitProjectEndpointCertificates = "Endpoint-certificates"
 	InitProjectInterceptors         = "Interceptors"
 	InitProjectLibs                 = "libs"
+	InitProjectWSDL                 = "WSDL"
 )
 
 const DeploymentDirPrefix = "DeploymentArtifacts_"

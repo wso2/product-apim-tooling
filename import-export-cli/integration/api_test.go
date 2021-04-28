@@ -97,7 +97,7 @@ func TestExportImportApiAdminSuperTenantUser(t *testing.T) {
 		DestAPIM:    prod,
 	}
 
-	testutils.ValidateAPIExportImport(t, args)
+	testutils.ValidateAPIExportImport(t, args, testutils.APITypeREST)
 }
 
 // Export an API from one environment and import to another environment as super tenant user with
@@ -122,7 +122,7 @@ func TestExportImportApiDevopsSuperTenantUser(t *testing.T) {
 		DestAPIM:    prod,
 	}
 
-	testutils.ValidateAPIExportImport(t, args)
+	testutils.ValidateAPIExportImport(t, args, testutils.APITypeREST)
 }
 
 // Export an API from one environment as tenant non admin user (who has Internal/publisher role)
@@ -169,7 +169,7 @@ func TestExportImportApiAdminTenantUser(t *testing.T) {
 		DestAPIM:    prod,
 	}
 
-	testutils.ValidateAPIExportImport(t, args)
+	testutils.ValidateAPIExportImport(t, args, testutils.APITypeREST)
 }
 
 // Export an API from one environment and import to another environment as tenant user with
@@ -194,7 +194,7 @@ func TestExportImportApiDevopsTenantUser(t *testing.T) {
 		DestAPIM:    prod,
 	}
 
-	testutils.ValidateAPIExportImport(t, args)
+	testutils.ValidateAPIExportImport(t, args, testutils.APITypeREST)
 }
 
 // Export an API as super tenant admin without specifying the provider
@@ -1058,7 +1058,7 @@ func TestExportImportSoapApiDevopsSuperTenantUser(t *testing.T) {
 	dev := GetDevClient()
 	prod := GetProdClient()
 
-	api := testutils.AddSoapAPI(t, dev, apiCreator, apiCreatorPassword)
+	api := testutils.AddSoapAPI(t, dev, apiCreator, apiCreatorPassword, testutils.APITypeSoap)
 
 	args := &testutils.ApiImportExportTestArgs{
 		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
@@ -1068,7 +1068,7 @@ func TestExportImportSoapApiDevopsSuperTenantUser(t *testing.T) {
 		DestAPIM:    prod,
 	}
 
-	testutils.ValidateAPIExportImport(t, args)
+	testutils.ValidateAPIExportImport(t, args, testutils.APITypeSoap)
 }
 
 // Export a SOAP API from one environment and import to another environment as tenant user with
@@ -1083,7 +1083,7 @@ func TestExportImportSoapApiDevopsTenantUser(t *testing.T) {
 	dev := GetDevClient()
 	prod := GetProdClient()
 
-	api := testutils.AddSoapAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword)
+	api := testutils.AddSoapAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword, testutils.APITypeSoap)
 
 	args := &testutils.ApiImportExportTestArgs{
 		ApiProvider: testutils.Credentials{Username: tenantApiCreator, Password: tenantApiCreatorPassword},
@@ -1093,5 +1093,55 @@ func TestExportImportSoapApiDevopsTenantUser(t *testing.T) {
 		DestAPIM:    prod,
 	}
 
-	testutils.ValidateAPIExportImport(t, args)
+	testutils.ValidateAPIExportImport(t, args, testutils.APITypeSoap)
+}
+
+// Export a SOAPTOREST API from one environment and import to another environment as super tenant user with
+// Internal/devops role by specifying the provider name
+func TestExportImportSoapToRestApiDevopsSuperTenantUser(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	api := testutils.AddSoapAPI(t, dev, apiCreator, apiCreatorPassword, testutils.APITypeSoapToRest)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+	}
+
+	testutils.ValidateAPIExportImport(t, args, testutils.APITypeSoapToRest)
+}
+
+// Export a SOAPTOREST API from one environment and import to another environment as tenant user with
+// Internal/devops role by specifying the provider name
+func TestExportImportSoapToRestApiDevopsTenantUser(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	tenantApiCreator := creator.UserName + "@" + TENANT1
+	tenantApiCreatorPassword := creator.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	api := testutils.AddSoapAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword, testutils.APITypeSoapToRest)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: tenantApiCreator, Password: tenantApiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+	}
+
+	testutils.ValidateAPIExportImport(t, args, testutils.APITypeSoapToRest)
 }

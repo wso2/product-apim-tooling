@@ -176,24 +176,41 @@ func getContext(provider string) string {
 }
 
 // GenerateAdditionalProperties : Generate additional properties to create an API from swagger
-func (instance *Client) GenerateAdditionalProperties(provider, endpointUrl string) string {
+func (instance *Client) GenerateAdditionalProperties(provider, endpointUrl, apiType string) string {
 	additionalProperties := `{"name":"` + generateRandomString() + `",
 	"version":"1.0.5",
 	"context":"` + getContext(provider) + `",
 	"policies":[
 	   "Bronze"
-	],
-	"endpointConfig":
-		{   "endpoint_type":"http",
-			"sandbox_endpoints":{
-					"url":"` + endpointUrl + `"
-		
-			},
-			"production_endpoints":{
-				"url":"` + endpointUrl + `"
+	],`
+
+	if strings.EqualFold(apiType, "SOAPTOREST") {
+		additionalProperties = additionalProperties +
+			`"endpointConfig": {   
+				"endpoint_type":"address",
+					"sandbox_endpoints":{
+						"type": "address",
+						"url":"` + endpointUrl + `"
+					},
+					"production_endpoints":{
+						"type": "address",
+						"url":"` + endpointUrl + `"
+					}
 			}
-		}
-	}`
+		}`
+	} else {
+		additionalProperties = additionalProperties +
+			`"endpointConfig": {   
+				"endpoint_type":"http",
+					"sandbox_endpoints":{
+						"url":"` + endpointUrl + `"
+					},
+					"production_endpoints":{
+						"url":"` + endpointUrl + `"
+					}
+			}
+		}`
+	}
 	return additionalProperties
 }
 
@@ -427,7 +444,7 @@ func (instance *Client) AddAPI(t *testing.T, api *API, username string, password
 }
 
 // AddSoapAPI : Add new SOAP API to APIM
-func (instance *Client) AddSoapAPI(t *testing.T, path string, additionalProperties string, username string, password string) string {
+func (instance *Client) AddSoapAPI(t *testing.T, path, additionalProperties, username, password, apiType string) string {
 	apisURL := instance.publisherRestURL + "/apis/import-wsdl"
 
 	file, err := os.Open(path)
@@ -453,6 +470,12 @@ func (instance *Client) AddSoapAPI(t *testing.T, path string, additionalProperti
 		t.Fatal(err)
 	}
 	part.Write([]byte(additionalProperties))
+
+	part, err = writer.CreateFormField("implementationType")
+	if err != nil {
+		t.Fatal(err)
+	}
+	part.Write([]byte(apiType))
 
 	err = writer.Close()
 

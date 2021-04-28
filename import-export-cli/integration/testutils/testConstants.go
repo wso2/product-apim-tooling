@@ -77,3 +77,11 @@ const CertificatesDirectoryPath = "testdata/TestArtifactDirectory/certificates"
 
 // UnlimitedPolicy : Unlimited Throttle Policy
 const UnlimitedPolicy = "Unlimited"
+
+// API types
+const APITypeREST = "REST"
+const APITypeSoap = "SOAP"
+const APITypeSoapToRest = "SOAPTOREST"
+
+// SOAP API Endpoint URL
+const SoapEndpointURL = "http://ws.cdyne.com/phoneverify/phoneverify.asmx"

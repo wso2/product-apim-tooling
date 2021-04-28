@@ -44,11 +44,11 @@ func AddAPI(t *testing.T, client *apim.Client, username string, password string)
 	return api
 }
 
-func AddSoapAPI(t *testing.T, client *apim.Client, username string, password string) *apim.API {
+func AddSoapAPI(t *testing.T, client *apim.Client, username, password, apiType string) *apim.API {
 	path := "testdata/phoneverify.wsdl"
 	client.Login(username, password)
-	additionalProperties := client.GenerateAdditionalProperties(username, "http://ws.cdyne.com/phoneverify/phoneverify.asmx")
-	id := client.AddSoapAPI(t, path, additionalProperties, username, password)
+	additionalProperties := client.GenerateAdditionalProperties(username, SoapEndpointURL, apiType)
+	id := client.AddSoapAPI(t, path, additionalProperties, username, password, apiType)
 	api := client.GetAPI(id)
 	return api
 }
@@ -109,7 +109,7 @@ func AddAPIToTwoEnvs(t *testing.T, client1 *apim.Client, client2 *apim.Client, u
 func AddAPIFromOpenAPIDefinition(t *testing.T, client *apim.Client, username string, password string) *apim.API {
 	path := "testdata/petstore.yaml"
 	client.Login(username, password)
-	additionalProperties := client.GenerateAdditionalProperties(username, "petstore.swagger.io")
+	additionalProperties := client.GenerateAdditionalProperties(username, "petstore.swagger.io", APITypeREST)
 	id := client.AddAPIFromOpenAPIDefinition(t, path, additionalProperties, username, password)
 	api := client.GetAPI(id)
 	return api
@@ -118,7 +118,7 @@ func AddAPIFromOpenAPIDefinition(t *testing.T, client *apim.Client, username str
 func AddAPIFromOpenAPIDefinitionToTwoEnvs(t *testing.T, client1 *apim.Client, client2 *apim.Client, username string, password string) (*apim.API, *apim.API) {
 	path := "testdata/petstore.yaml"
 	client1.Login(username, password)
-	additionalProperties := client1.GenerateAdditionalProperties(username, "petstore.swagger.io")
+	additionalProperties := client1.GenerateAdditionalProperties(username, "petstore.swagger.io", APITypeREST)
 	id1 := client1.AddAPIFromOpenAPIDefinition(t, path, additionalProperties, username, password)
 	api1 := client1.GetAPI(id1)
 
@@ -320,7 +320,7 @@ func ValidateAPIExportFailure(t *testing.T, args *ApiImportExportTestArgs) {
 		args.Api.Name, args.Api.Version))
 }
 
-func ValidateAPIExportImport(t *testing.T, args *ApiImportExportTestArgs) {
+func ValidateAPIExportImport(t *testing.T, args *ApiImportExportTestArgs, apiType string) {
 	t.Helper()
 
 	// Setup apictl envs
@@ -334,6 +334,11 @@ func ValidateAPIExportImport(t *testing.T, args *ApiImportExportTestArgs) {
 
 	assert.True(t, base.IsAPIArchiveExists(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
 		args.Api.Name, args.Api.Version))
+
+	if strings.EqualFold(apiType, APITypeSoap) {
+		assert.True(t, base.IsWSDLFileExists(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
+			args.Api.Name, args.Api.Version))
+	}
 
 	// Import api to env 2
 	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
