@@ -376,7 +376,8 @@ func ValidateAPIExportImport(t *testing.T, args *ApiImportExportTestArgs, apiTyp
 			utils.InitProjectDefinitionsGraphQLSchema, args.Api.Name, args.Api.Version))
 	}
 
-	if strings.EqualFold(apiType, APITypeWebScoket) || strings.EqualFold(apiType, APITypeWebSub) {
+	if strings.EqualFold(apiType, APITypeWebScoket) || strings.EqualFold(apiType, APITypeWebSub) ||
+		strings.EqualFold(apiType, APITypeSSE) {
 		assert.True(t, base.IsFileExistsInAPIArchive(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
 			utils.InitProjectDefinitionsAsyncAPI, args.Api.Name, args.Api.Version))
 	}

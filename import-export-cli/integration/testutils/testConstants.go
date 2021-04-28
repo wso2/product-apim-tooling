@@ -85,6 +85,7 @@ const APITypeSoapToRest = "SOAPTOREST"
 const APITypeGraphQL = "GraphQL"
 const APITypeWebScoket = "WS"
 const APITypeWebSub = "WEBSUB"
+const APITypeSSE = "SSE"
 
 // SOAP API Endpoint URL
 const SoapEndpointURL = "http://ws.cdyne.com/phoneverify/phoneverify.asmx"

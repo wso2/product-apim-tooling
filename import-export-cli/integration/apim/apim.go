@@ -182,6 +182,10 @@ func (instance *Client) GenerateSampleStreamingAPIData(provider, apiType string)
 	if strings.EqualFold(apiType, "WEBSUB") {
 		api.Policies = []string{"AsyncWHUnlimited"}
 	}
+	if strings.EqualFold(apiType, "SSE") {
+		api.Policies = []string{"AsyncUnlimited"}
+		api.EndpointConfig = HTTPEndpoint{"http", &URLConfig{"http://localhost:8080"}, &URLConfig{"http://localhost:8080"}}
+	}
 	return &api
 }
 
