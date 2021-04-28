@@ -98,3 +98,12 @@ const GraphQLEndpoint = "http://www.mocky.io/v2/5ea84def2d0000a52d3a3ecd"
 
 // Web Socket API Endpoint URL
 const WebSocketEndpoint = "ws://echo.websocket.org:80"
+
+// APIHttpRestEndpointWithoutLoadBalancingOrFailoverParamsFile : HTTP/REST Endpoint without Loadbalancing and Failover URLs in api_params.yaml
+const APIHttpRestEndpointWithoutLoadBalancingOrFailoverParamsFile = "testdata/api_params_http_rest_endpoint_without_lb_or_failover.yaml"
+
+// APIHttpSoapEndpointWithoutLoadBalancingOrFailoverParamsFile : HTTP/SOAP Endpoint without Loadbalancing and Failover URLs in api_params.yaml
+const APIHttpSoapEndpointWithoutLoadBalancingOrFailoverParamsFile = "testdata/api_params_http_soap_endpoint_without_lb_or_failover.yaml"
+
+// APIHttpRestEndpointWithLoadBalancingParamsFile : HTTP/REST Endpoint with Loadbalancing URLs in api_params.yaml
+const APIHttpRestEndpointWithLoadBalancingParamsFile = "testdata/api_params_http_rest_endpoint_with_load_balancing.yaml"

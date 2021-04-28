@@ -82,6 +82,17 @@ func (instance *API) GetProductionURL() string {
 	return endpoint.(map[string]interface{})["url"].(string)
 }
 
+// GetEndpointType : Get the Endpoint Type (http/address/aws)
+func (instance *API) GetEndpointType() string {
+	endpoint := instance.EndpointConfig.(map[string]interface{})["endpoint_type"].(string)
+	return endpoint
+}
+
+// SetEndpointType : Get the Endpoint Type (http/address/aws)
+func (instance *API) SetEndpointType(endPointType string)  {
+	instance.EndpointConfig.(map[string]interface{})["endpoint_type"] = endPointType
+}
+
 // GetSandboxURL : Get APIs sandbox URL
 func (instance *API) GetSandboxURL() string {
 	endpoint := instance.EndpointConfig.(map[string]interface{})["sandbox_endpoints"]

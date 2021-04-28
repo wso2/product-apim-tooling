@@ -411,3 +411,49 @@ func validateMutualSSLCerts(t *testing.T, apiParams *Params, path string) {
 		t.Error("Client (MutualSSL) certificates directory does not exist")
 	}
 }
+
+func validateEndpointType(t *testing.T, apiParams *Params, api *apim.API) {
+	var endPointTypeInParams string
+	endPointTypeInParams = apiParams.Environments[0].Configs.EndpointType
+	if strings.EqualFold(endPointTypeInParams, "rest") {
+		endPointTypeInParams = "http"
+	} else if strings.EqualFold(endPointTypeInParams, "soap") {
+		endPointTypeInParams = "address"
+	}
+	assert.Equal(t, endPointTypeInParams, api.GetEndpointType())
+}
+
+func validateEndpointUrl(t *testing.T, apiParams *Params, api *apim.API, endpointType string) {
+	var endpointTypeRecord map[string]interface{}
+
+	if strings.EqualFold(endpointType, "production") {
+		endpointTypeRecord = apiParams.Environments[0].Configs.Endpoints.Production
+		assert.Equal(t, endpointTypeRecord["url"], api.GetSandboxURL())
+	}
+	if strings.EqualFold(endpointType, "sandbox") {
+		endpointTypeRecord = apiParams.Environments[0].Configs.Endpoints.Sandbox
+		assert.Equal(t, endpointTypeRecord["url"], api.GetSandboxURL())
+	}
+}
+
+func ValidateHttpEndpointWithoutLoadBalancingAndFailover(t *testing.T, api *apim.API, apiParams *Params, importedAPI *apim.API) {
+	t.Helper()
+	//Validate EndPoint Type
+	validateEndpointType(t,apiParams,importedAPI)
+
+	// Validate endpoint type URLs
+	validateEndpointUrl(t, apiParams, importedAPI, "production")
+	validateEndpointUrl(t, apiParams, importedAPI, "sandbox")
+
+	same := "override_with_same_value"
+	api.SetEndpointType(same)
+	api.SetProductionURL(same)
+	api.SetSandboxURL(same)
+	importedAPI.SetEndpointType(same)
+	importedAPI.SetProductionURL(same)
+	importedAPI.SetSandboxURL(same)
+
+	ValidateAPIsEqual(t, api, importedAPI)
+}
+
+
