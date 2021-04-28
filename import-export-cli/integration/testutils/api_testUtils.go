@@ -69,9 +69,9 @@ func AddGraphQLAPI(t *testing.T, client *apim.Client, username, password string)
 	return nil
 }
 
-func AddWebSocketAPI(t *testing.T, client *apim.Client, username string, password string) *apim.API {
+func AddWebStreamingAPI(t *testing.T, client *apim.Client, username, password, apiType string) *apim.API {
 	client.Login(username, password)
-	api := client.GenerateSampleStreamingAPIData(username)
+	api := client.GenerateSampleStreamingAPIData(username, apiType)
 	doClean := true
 	id := client.AddAPI(t, api, username, password, doClean)
 	api = client.GetAPI(id)
@@ -376,7 +376,7 @@ func ValidateAPIExportImport(t *testing.T, args *ApiImportExportTestArgs, apiTyp
 			utils.InitProjectDefinitionsGraphQLSchema, args.Api.Name, args.Api.Version))
 	}
 
-	if strings.EqualFold(apiType, APITypeWebScoket) {
+	if strings.EqualFold(apiType, APITypeWebScoket) || strings.EqualFold(apiType, APITypeWebSub) {
 		assert.True(t, base.IsFileExistsInAPIArchive(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
 			utils.InitProjectDefinitionsAsyncAPI, args.Api.Name, args.Api.Version))
 	}

@@ -165,17 +165,23 @@ func (instance *Client) GenerateSampleAPIData(provider string) *API {
 }
 
 // GenerateSampleStreamingAPIData : Generate sample Streaming API object
-func (instance *Client) GenerateSampleStreamingAPIData(provider string) *API {
+func (instance *Client) GenerateSampleStreamingAPIData(provider, apiType string) *API {
 	api := API{}
 	api.Name = generateRandomString() + "API"
 	api.Description = "This is a simple Streaming API."
 	api.Context = getContext(provider)
 	api.Version = "1.0.0"
 	api.Provider = provider
-	api.Policies = []string{"AsyncUnlimited"}
-	api.Type = "WS"
-	api.EndpointConfig = HTTPEndpoint{"ws", &URLConfig{"ws://echo.websocket.org:" + strconv.Itoa(80+instance.portOffset)},
-		&URLConfig{"ws://echo.websocket.org:" + strconv.Itoa(80+instance.portOffset)}}
+	api.Type = apiType
+	if strings.EqualFold(apiType, "WS") {
+		api.Policies = []string{"AsyncUnlimited"}
+		api.EndpointConfig = HTTPEndpoint{"ws", &URLConfig{"ws://echo.websocket.org:" + strconv.Itoa(80+instance.portOffset)},
+			&URLConfig{"ws://echo.websocket.org:" + strconv.Itoa(80+instance.portOffset)}}
+
+	}
+	if strings.EqualFold(apiType, "WEBSUB") {
+		api.Policies = []string{"AsyncWHUnlimited"}
+	}
 	return &api
 }
 
