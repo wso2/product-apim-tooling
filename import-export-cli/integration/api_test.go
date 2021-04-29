@@ -125,9 +125,30 @@ func TestExportImportApiDevopsSuperTenantUser(t *testing.T) {
 	testutils.ValidateAPIExportImport(t, args, testutils.APITypeREST)
 }
 
-// Export an API from one environment as tenant non admin user (who has Internal/publisher role)
-// by specifying the provider name
-func TestExportApiNonAdminTenantUser(t *testing.T) {
+// Export an API from one environment as a super tenant user with Internal/publisher role by specifying the provider name
+func TestExportApiSuperTenantPublisherUser(t *testing.T) {
+	apiPublisher := publisher.UserName
+	apiPublisherPassword := publisher.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := GetDevClient()
+
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: apiPublisher, Password: apiPublisherPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+	}
+
+	testutils.ValidateAPIExport(t, args)
+}
+
+// Export an API from one environment as a tenant user with Internal/publisher role by specifying the provider name
+func TestExportApiTenantPublisherUser(t *testing.T) {
 	tenantApiPublisher := publisher.UserName + "@" + TENANT1
 	tenantApiPublisherPassword := publisher.Password
 
@@ -146,6 +167,50 @@ func TestExportApiNonAdminTenantUser(t *testing.T) {
 	}
 
 	testutils.ValidateAPIExport(t, args)
+}
+
+// Export an API using a super tenant user who does not have the required scopes (who has the role Internal/subscriber)
+func TestExportApiSuperTenantSubscriberUser(t *testing.T) {
+	apiSubscriber := subscriber.UserName
+	apiSubscriberPassword := subscriber.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := GetDevClient()
+
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: apiSubscriber, Password: apiSubscriberPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+	}
+
+	testutils.ValidateAPIExportFailureUnauthenticated(t, args)
+}
+
+// Export an API using a super tenant user who does not have the required scopes (who has the role Internal/subscriber)
+func TestExportApiTenantSubscriberUser(t *testing.T) {
+	tenantApiSubscriber := subscriber.UserName + "@" + TENANT1
+	tenantApiSubscriberPassword := subscriber.Password
+
+	tenantApiCreator := creator.UserName + "@" + TENANT1
+	tenantApiCreatorPassword := creator.Password
+
+	dev := GetDevClient()
+
+	api := testutils.AddAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: tenantApiCreator, Password: tenantApiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: tenantApiSubscriber, Password: tenantApiSubscriberPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+	}
+
+	testutils.ValidateAPIExportFailureUnauthenticated(t, args)
 }
 
 // Export an API from one environment and import to another environment as tenant admin by specifying the provider name

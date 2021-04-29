@@ -351,7 +351,24 @@ func ValidateAPIExportFailure(t *testing.T, args *ApiImportExportTestArgs) {
 
 	// Validate that export failed
 	assert.False(t, base.IsAPIArchiveExists(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
-		args.Api.Name, args.Api.Version))
+		args.Api.Name, args.Api.Version), "Test failed because the API was exported successfully")
+}
+
+func ValidateAPIExportFailureUnauthenticated(t *testing.T, args *ApiImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl env
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	// Attempt exporting api from env
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	result, _ := exportAPI(t, args.Api.Name, args.Api.Version, args.ApiProvider.Username, args.SrcAPIM.GetEnvName())
+	assert.Contains(t, result, "401", "Test failed because the response does not contains Unauthenticated request")
+
+	// Validate that export failed
+	assert.False(t, base.IsAPIArchiveExists(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
+		args.Api.Name, args.Api.Version), "Test failed because the API was exported successfully")
 }
 
 func ValidateAPIExportImport(t *testing.T, args *ApiImportExportTestArgs, apiType string) {
