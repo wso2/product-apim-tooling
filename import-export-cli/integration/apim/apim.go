@@ -164,6 +164,31 @@ func (instance *Client) GenerateSampleAPIData(provider string) *API {
 	return &api
 }
 
+// GenerateSampleStreamingAPIData : Generate sample Streaming API object
+func (instance *Client) GenerateSampleStreamingAPIData(provider, apiType string) *API {
+	api := API{}
+	api.Name = generateRandomString() + "API"
+	api.Description = "This is a simple Streaming API."
+	api.Context = getContext(provider)
+	api.Version = "1.0.0"
+	api.Provider = provider
+	api.Type = apiType
+	if strings.EqualFold(apiType, "WS") {
+		api.Policies = []string{"AsyncUnlimited"}
+		api.EndpointConfig = HTTPEndpoint{"ws", &URLConfig{"ws://echo.websocket.org:" + strconv.Itoa(80+instance.portOffset)},
+			&URLConfig{"ws://echo.websocket.org:" + strconv.Itoa(80+instance.portOffset)}}
+
+	}
+	if strings.EqualFold(apiType, "WEBSUB") {
+		api.Policies = []string{"AsyncWHUnlimited"}
+	}
+	if strings.EqualFold(apiType, "SSE") {
+		api.Policies = []string{"AsyncUnlimited"}
+		api.EndpointConfig = HTTPEndpoint{"http", &URLConfig{"http://localhost:8080"}, &URLConfig{"http://localhost:8080"}}
+	}
+	return &api
+}
+
 func getContext(provider string) string {
 	context := generateRandomString()
 	if strings.Contains(provider, "@") {
@@ -176,24 +201,58 @@ func getContext(provider string) string {
 }
 
 // GenerateAdditionalProperties : Generate additional properties to create an API from swagger
-func (instance *Client) GenerateAdditionalProperties(provider string) string {
+func (instance *Client) GenerateAdditionalProperties(provider, endpointUrl, apiType string, operations []interface{}) string {
 	additionalProperties := `{"name":"` + generateRandomString() + `",
 	"version":"1.0.5",
 	"context":"` + getContext(provider) + `",
 	"policies":[
 	   "Bronze"
 	],
-	"endpointConfig":
-		{   "endpoint_type":"http",
-			"sandbox_endpoints":{
-					"url":"petstore.swagger.io"
-		
-			},
-			"production_endpoints":{
-					"url":"petstore.swagger.io"
+	`
+	if operations != nil && len(operations) > 0 {
+		operationsData, _ := json.Marshal(operations)
+		additionalProperties += ` "operations": ` + string(operationsData) + `, `
+	}
+
+	if strings.EqualFold(apiType, "SOAPTOREST") {
+		additionalProperties = additionalProperties +
+			`"endpointConfig": {   
+				"endpoint_type":"address",
+					"sandbox_endpoints":{
+						"type": "address",
+						"url":"` + endpointUrl + `"
+					},
+					"production_endpoints":{
+						"type": "address",
+						"url":"` + endpointUrl + `"
+					}
 			}
-		}
-	}`
+		}`
+	} else if strings.EqualFold(apiType, "WS") {
+		additionalProperties = additionalProperties + `"type":"` + apiType + `",
+			"endpointConfig": {   
+				"endpoint_type":"ws",
+					"sandbox_endpoints":{
+						"url":"` + endpointUrl + `"
+					},
+					"production_endpoints":{
+						"url":"` + endpointUrl + `"
+					}
+			}
+		}`
+	} else {
+		additionalProperties = additionalProperties +
+			`"endpointConfig": {   
+				"endpoint_type":"http",
+					"sandbox_endpoints":{
+						"url":"` + endpointUrl + `"
+					},
+					"production_endpoints":{
+						"url":"` + endpointUrl + `"
+					}
+			}
+		}`
+	}
 	return additionalProperties
 }
 
@@ -426,6 +485,66 @@ func (instance *Client) AddAPI(t *testing.T, api *API, username string, password
 	return apiResponse.ID
 }
 
+// AddSoapAPI : Add new SOAP API to APIM
+func (instance *Client) AddSoapAPI(t *testing.T, path, additionalProperties, username, password, apiType string) string {
+	apisURL := instance.publisherRestURL + "/apis/import-wsdl"
+
+	file, err := os.Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer file.Close()
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, err := writer.CreateFormFile("file", filepath.Base(file.Name()))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = io.Copy(part, file)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	part, err = writer.CreateFormField("additionalProperties")
+	if err != nil {
+		t.Fatal(err)
+	}
+	part.Write([]byte(additionalProperties))
+
+	part, err = writer.CreateFormField("implementationType")
+	if err != nil {
+		t.Fatal(err)
+	}
+	part.Write([]byte(apiType))
+
+	err = writer.Close()
+
+	request := base.CreatePost(apisURL, body)
+
+	base.SetDefaultRestAPIHeadersToConsumeFormData(instance.accessToken, request)
+
+	base.LogRequest("apim.AddSoapAPI()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.AddSoapAPI()", response, 201)
+
+	var apiResponse API
+	json.NewDecoder(response.Body).Decode(&apiResponse)
+
+	t.Cleanup(func() {
+		username, password := RetrieveAdminCredentialsInsteadCreator(username, password)
+		instance.Login(username, password)
+		instance.DeleteAPI(apiResponse.ID)
+	})
+
+	return apiResponse.ID
+}
+
 // AddAPIFromOpenAPIDefinition : Add Petstore API using an OpenAPI Definition to APIM
 func (instance *Client) AddAPIFromOpenAPIDefinition(t *testing.T, path string, additionalProperties string, username string, password string) string {
 	apisURL := instance.publisherRestURL + "/apis/import-openapi"
@@ -467,6 +586,162 @@ func (instance *Client) AddAPIFromOpenAPIDefinition(t *testing.T, path string, a
 	defer response.Body.Close()
 
 	base.ValidateAndLogResponse("apim.AddAPIFromOpenAPIDefinition()", response, 201)
+
+	var apiResponse API
+	json.NewDecoder(response.Body).Decode(&apiResponse)
+
+	t.Cleanup(func() {
+		username, password := RetrieveAdminCredentialsInsteadCreator(username, password)
+		instance.Login(username, password)
+		instance.DeleteAPI(apiResponse.ID)
+	})
+
+	return apiResponse.ID
+}
+
+// AddGraphQLAPI : Add new GraphQL API to APIM
+func (instance *Client) AddGraphQLAPI(t *testing.T, path, additionalProperties, username, password string) string {
+	apisURL := instance.publisherRestURL + "/apis/import-graphql-schema"
+
+	file, err := os.Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer file.Close()
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, err := writer.CreateFormFile("file", filepath.Base(file.Name()))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = io.Copy(part, file)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	part, err = writer.CreateFormField("additionalProperties")
+	if err != nil {
+		t.Fatal(err)
+	}
+	part.Write([]byte(additionalProperties))
+
+	part, err = writer.CreateFormField("implementationType")
+	if err != nil {
+		t.Fatal(err)
+	}
+	part.Write([]byte("GraphQL"))
+
+	err = writer.Close()
+
+	request := base.CreatePost(apisURL, body)
+
+	base.SetDefaultRestAPIHeadersToConsumeFormData(instance.accessToken, request)
+
+	base.LogRequest("apim.AddGraphQLAPI()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.AddGraphQLAPI()", response, 201)
+
+	var apiResponse API
+	json.NewDecoder(response.Body).Decode(&apiResponse)
+
+	t.Cleanup(func() {
+		username, password := RetrieveAdminCredentialsInsteadCreator(username, password)
+		instance.Login(username, password)
+		instance.DeleteAPI(apiResponse.ID)
+	})
+
+	return apiResponse.ID
+}
+
+// ValidateGraphQLSchema : Validate the GraphQL schema
+func (instance *Client) ValidateGraphQLSchema(t *testing.T, path, username, password string) GraphQLValidationResponseDTO {
+	apisURL := instance.publisherRestURL + "/apis/validate-graphql-schema"
+
+	file, err := os.Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer file.Close()
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, err := writer.CreateFormFile("file", filepath.Base(file.Name()))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = io.Copy(part, file)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = writer.Close()
+
+	request := base.CreatePost(apisURL, body)
+
+	base.SetDefaultRestAPIHeadersToConsumeFormData(instance.accessToken, request)
+
+	base.LogRequest("apim.ValidateGraphQLSchema()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.ValidateGraphQLSchema()", response, 200)
+
+	var validationResponse GraphQLValidationResponseDTO
+	json.NewDecoder(response.Body).Decode(&validationResponse)
+
+	return validationResponse
+}
+
+// AddStreamingAPI : Add new Streaming API to APIM from definition
+func (instance *Client) AddStreamingAPI(t *testing.T, path, additionalProperties, username, password string) string {
+	apisURL := instance.publisherRestURL + "/apis/import-asyncapi"
+
+	file, err := os.Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer file.Close()
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, err := writer.CreateFormFile("file", filepath.Base(file.Name()))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = io.Copy(part, file)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	part, err = writer.CreateFormField("additionalProperties")
+	if err != nil {
+		t.Fatal(err)
+	}
+	part.Write([]byte(additionalProperties))
+
+	err = writer.Close()
+
+	request := base.CreatePost(apisURL, body)
+
+	base.SetDefaultRestAPIHeadersToConsumeFormData(instance.accessToken, request)
+
+	base.LogRequest("apim.AddStreamingAPI()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.AddStreamingAPI()", response, 201)
 
 	var apiResponse API
 	json.NewDecoder(response.Body).Decode(&apiResponse)

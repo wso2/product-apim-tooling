@@ -77,3 +77,24 @@ const CertificatesDirectoryPath = "testdata/TestArtifactDirectory/certificates"
 
 // UnlimitedPolicy : Unlimited Throttle Policy
 const UnlimitedPolicy = "Unlimited"
+
+// API types
+const APITypeREST = "HTTP"
+const APITypeSoap = "SOAP"
+const APITypeSoapToRest = "SOAPTOREST"
+const APITypeGraphQL = "GraphQL"
+const APITypeWebScoket = "WS"
+const APITypeWebSub = "WEBSUB"
+const APITypeSSE = "SSE"
+
+// REST API Endpoint URL
+const RESTAPIEndpoint = "petstore.swagger.io"
+
+// SOAP API Endpoint URL
+const SoapEndpointURL = "http://ws.cdyne.com/phoneverify/phoneverify.asmx"
+
+// GraphQL API Endpoint URL
+const GraphQLEndpoint = "http://www.mocky.io/v2/5ea84def2d0000a52d3a3ecd"
+
+// Web Socket API Endpoint URL
+const WebSocketEndpoint = "ws://echo.websocket.org:80"

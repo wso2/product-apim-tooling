@@ -145,6 +145,31 @@ func IsAPIArchiveExists(t *testing.T, path string, name string, version string) 
 	return true
 }
 
+// IsFileExistsInAPIArchive : Returns true if a particular file exists in API archive, else returns false
+//
+func IsFileExistsInAPIArchive(t *testing.T, archivePath, fileToCheck, name, version string) bool {
+	apiFile := ConstructAPIFilePath(archivePath, name, version)
+
+	// Unzip exported archive
+	destPath := strings.ReplaceAll(apiFile, ".zip", "")
+	Unzip(destPath, apiFile)
+
+	file := destPath + string(os.PathSeparator) + name + "-" + version + string(os.PathSeparator) + fileToCheck
+
+	t.Log("base.IsFileExistsInAPIArchive() - File path:", file)
+
+	t.Cleanup(func() {
+		// Remove extracted archive
+		RemoveDir(destPath)
+	})
+
+	if _, err := os.Stat(file); os.IsNotExist(err) {
+		return false
+	}
+
+	return true
+}
+
 // RemoveAPIArchive : Remove exported api archive from file system
 //
 func RemoveAPIArchive(t *testing.T, path string, name string, version string) {

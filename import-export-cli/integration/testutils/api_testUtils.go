@@ -44,6 +44,49 @@ func AddAPI(t *testing.T, client *apim.Client, username string, password string)
 	return api
 }
 
+func AddSoapAPI(t *testing.T, client *apim.Client, username, password, apiType string) *apim.API {
+	path := "testdata/phoneverify.wsdl"
+	client.Login(username, password)
+	additionalProperties := client.GenerateAdditionalProperties(username, SoapEndpointURL, apiType, nil)
+	id := client.AddSoapAPI(t, path, additionalProperties, username, password, apiType)
+	api := client.GetAPI(id)
+	return api
+}
+
+func AddGraphQLAPI(t *testing.T, client *apim.Client, username, password string) *apim.API {
+	client.Login(username, password)
+	path := "testdata/products-schema.graphql"
+	validationResponse := client.ValidateGraphQLSchema(t, path, username, password)
+	if validationResponse.IsValid {
+		operations := validationResponse.GraphQLInfo.Operations
+		additionalProperties := client.GenerateAdditionalProperties(username, GraphQLEndpoint, APITypeGraphQL, operations)
+		id := client.AddGraphQLAPI(t, path, additionalProperties, username, password)
+		api := client.GetAPI(id)
+		return api
+	} else {
+		t.Error(t, validationResponse.ErrorMessage)
+	}
+	return nil
+}
+
+func AddWebStreamingAPI(t *testing.T, client *apim.Client, username, password, apiType string) *apim.API {
+	client.Login(username, password)
+	api := client.GenerateSampleStreamingAPIData(username, apiType)
+	doClean := true
+	id := client.AddAPI(t, api, username, password, doClean)
+	api = client.GetAPI(id)
+	return api
+}
+
+func AddWebStreamingAPIFromAsyncAPIDefinition(t *testing.T, client *apim.Client, username, password, apiType string) *apim.API {
+	client.Login(username, password)
+	path := "testdata/streetlights.yml"
+	additionalProperties := client.GenerateAdditionalProperties(username, WebSocketEndpoint, apiType, nil)
+	id := client.AddStreamingAPI(t, path, additionalProperties, username, password)
+	api := client.GetAPI(id)
+	return api
+}
+
 func CreateAndDeployAPIRevision(t *testing.T, client *apim.Client, username, password, apiID string) {
 	client.Login(username, password)
 	revision := client.CreateAPIRevision(apiID)
@@ -100,7 +143,7 @@ func AddAPIToTwoEnvs(t *testing.T, client1 *apim.Client, client2 *apim.Client, u
 func AddAPIFromOpenAPIDefinition(t *testing.T, client *apim.Client, username string, password string) *apim.API {
 	path := "testdata/petstore.yaml"
 	client.Login(username, password)
-	additionalProperties := client.GenerateAdditionalProperties(username)
+	additionalProperties := client.GenerateAdditionalProperties(username, RESTAPIEndpoint, APITypeREST, nil)
 	id := client.AddAPIFromOpenAPIDefinition(t, path, additionalProperties, username, password)
 	api := client.GetAPI(id)
 	return api
@@ -109,7 +152,7 @@ func AddAPIFromOpenAPIDefinition(t *testing.T, client *apim.Client, username str
 func AddAPIFromOpenAPIDefinitionToTwoEnvs(t *testing.T, client1 *apim.Client, client2 *apim.Client, username string, password string) (*apim.API, *apim.API) {
 	path := "testdata/petstore.yaml"
 	client1.Login(username, password)
-	additionalProperties := client1.GenerateAdditionalProperties(username)
+	additionalProperties := client1.GenerateAdditionalProperties(username, RESTAPIEndpoint, APITypeREST, nil)
 	id1 := client1.AddAPIFromOpenAPIDefinition(t, path, additionalProperties, username, password)
 	api1 := client1.GetAPI(id1)
 
@@ -308,10 +351,27 @@ func ValidateAPIExportFailure(t *testing.T, args *ApiImportExportTestArgs) {
 
 	// Validate that export failed
 	assert.False(t, base.IsAPIArchiveExists(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
-		args.Api.Name, args.Api.Version))
+		args.Api.Name, args.Api.Version), "Test failed because the API was exported successfully")
 }
 
-func ValidateAPIExportImport(t *testing.T, args *ApiImportExportTestArgs) {
+func ValidateAPIExportFailureUnauthenticated(t *testing.T, args *ApiImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl env
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	// Attempt exporting api from env
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	result, _ := exportAPI(t, args.Api.Name, args.Api.Version, args.ApiProvider.Username, args.SrcAPIM.GetEnvName())
+	assert.Contains(t, result, "401", "Test failed because the response does not contains Unauthenticated request")
+
+	// Validate that export failed
+	assert.False(t, base.IsAPIArchiveExists(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
+		args.Api.Name, args.Api.Version), "Test failed because the API was exported successfully")
+}
+
+func ValidateAPIExportImport(t *testing.T, args *ApiImportExportTestArgs, apiType string) {
 	t.Helper()
 
 	// Setup apictl envs
@@ -325,6 +385,28 @@ func ValidateAPIExportImport(t *testing.T, args *ApiImportExportTestArgs) {
 
 	assert.True(t, base.IsAPIArchiveExists(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
 		args.Api.Name, args.Api.Version))
+
+	if strings.EqualFold(apiType, APITypeREST) {
+		assert.True(t, base.IsFileExistsInAPIArchive(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
+			utils.InitProjectDefinitionsSwagger, args.Api.Name, args.Api.Version))
+	}
+
+	if strings.EqualFold(apiType, APITypeSoap) {
+		wsdlFilePathInProject := utils.InitProjectWSDL + string(os.PathSeparator) + args.Api.Name + "-" + args.Api.Version + ".wsdl"
+		assert.True(t, base.IsFileExistsInAPIArchive(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()), wsdlFilePathInProject,
+			args.Api.Name, args.Api.Version))
+	}
+
+	if strings.EqualFold(apiType, APITypeGraphQL) {
+		assert.True(t, base.IsFileExistsInAPIArchive(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
+			utils.InitProjectDefinitionsGraphQLSchema, args.Api.Name, args.Api.Version))
+	}
+
+	if strings.EqualFold(apiType, APITypeWebScoket) || strings.EqualFold(apiType, APITypeWebSub) ||
+		strings.EqualFold(apiType, APITypeSSE) {
+		assert.True(t, base.IsFileExistsInAPIArchive(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
+			utils.InitProjectDefinitionsAsyncAPI, args.Api.Name, args.Api.Version))
+	}
 
 	// Import api to env 2
 	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
