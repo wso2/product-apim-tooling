@@ -81,7 +81,7 @@ func TestListAppsDevopsTenantUser(t *testing.T) {
 	testutils.ListApps(t, apim.GetEnvName())
 }
 
-//List all the applications in an environment (by specifying the owner)
+// List all the applications in an environment (by specifying the owner)
 func TestListAppWithOwner(t *testing.T) {
 	username := superAdminUser
 	password := superAdminPassword
@@ -98,6 +98,7 @@ func TestListAppWithOwner(t *testing.T) {
 	testutils.ValidateListAppsWithOwner(t, apim.GetEnvName())
 }
 
+// Export an application in the same tenant using a non admin super tenant user (with Intenal/subscriber role)
 func TestExportAppNonAdminSuperTenant(t *testing.T) {
 	subscriberUserName := subscriber.UserName
 	subscriberPassword := subscriber.Password
@@ -116,6 +117,7 @@ func TestExportAppNonAdminSuperTenant(t *testing.T) {
 	testutils.ValidateAppExport(t, args)
 }
 
+// Export an application in the same tenant using a non admin tenant user (with Intenal/subscriber role))
 func TestExportAppNonAdminTenant(t *testing.T) {
 	subscriberUserName := subscriber.UserName + "@" + TENANT1
 	subscriberPassword := subscriber.Password
@@ -134,6 +136,7 @@ func TestExportAppNonAdminTenant(t *testing.T) {
 	testutils.ValidateAppExport(t, args)
 }
 
+// Export an application in same tenant using an admin super tenant user and imported it to another environment
 func TestExportImportOwnAppAdminSuperTenant(t *testing.T) {
 	adminUsername := superAdminUser
 	adminPassword := superAdminPassword
@@ -144,61 +147,19 @@ func TestExportImportOwnAppAdminSuperTenant(t *testing.T) {
 	app := testutils.AddApp(t, dev, adminUsername, adminPassword)
 
 	args := &testutils.AppImportExportTestArgs{
-		AppOwner:    testutils.Credentials{Username: adminUsername, Password: adminPassword},
-		CtlUser:     testutils.Credentials{Username: adminUsername, Password: adminPassword},
-		Application: app,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
+		AppOwner:      testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		CtlUser:       testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		Application:   app,
+		SrcAPIM:       dev,
+		DestAPIM:      prod,
+		PreserveOwner: true,
 	}
 
-	testutils.ValidateAppExportImportWithPreserveOwner(t, args)
+	testutils.ValidateAppExportImport(t, args)
 }
 
-//Import an already export App with already generated Keys with --update flag
-func TestExportImportOwnAppAdminSuperTenantWithUpdate(t *testing.T) {
-	adminUsername := superAdminUser
-	adminPassword := superAdminPassword
-
-	dev := GetDevClient()
-	prod := GetProdClient()
-
-	app := testutils.AddApp(t, dev, adminUsername, adminPassword)
-
-	args := &testutils.AppImportExportTestArgs{
-		AppOwner:    testutils.Credentials{Username: adminUsername, Password: adminPassword},
-		CtlUser:     testutils.Credentials{Username: adminUsername, Password: adminPassword},
-		Application: app,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
-	}
-
-	testutils.ValidateAppExportImportWithUpdate(t, args)
-}
-
-// Import an already export App with already generated Keys with --update flag (Using a user with Internal/devops role)
-func TestExportImportAppDevopsSuperTenantWithUpdate(t *testing.T) {
-	adminUsername := superAdminUser
-	adminPassword := superAdminPassword
-
-	devopsUsername := devops.UserName
-	devopsPassword := devops.Password
-
-	dev := GetDevClient()
-	prod := GetProdClient()
-
-	app := testutils.AddApp(t, dev, adminUsername, adminPassword)
-
-	args := &testutils.AppImportExportTestArgs{
-		AppOwner:    testutils.Credentials{Username: adminUsername, Password: adminPassword},
-		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
-		Application: app,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
-	}
-
-	testutils.ValidateAppExportImportWithUpdate(t, args)
-}
-
+// Export an application in same tenant using an admin super tenant user and
+// import it to another environment with preserve owner
 func TestExportImportOtherAppAdminSuperTenant(t *testing.T) {
 	otherUsername := subscriber.UserName
 	otherPassword := subscriber.Password
@@ -211,17 +172,18 @@ func TestExportImportOtherAppAdminSuperTenant(t *testing.T) {
 	app := testutils.AddApp(t, dev, otherUsername, otherPassword)
 
 	args := &testutils.AppImportExportTestArgs{
-		AppOwner:    testutils.Credentials{Username: otherUsername, Password: otherPassword},
-		CtlUser:     testutils.Credentials{Username: adminUsername, Password: adminPassword},
-		Application: app,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
+		AppOwner:      testutils.Credentials{Username: otherUsername, Password: otherPassword},
+		CtlUser:       testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		Application:   app,
+		SrcAPIM:       dev,
+		DestAPIM:      prod,
+		PreserveOwner: true,
 	}
 
-	testutils.ValidateAppExportImportWithPreserveOwner(t, args)
+	testutils.ValidateAppExportImport(t, args)
 }
 
-// Export an application (created by super tenant user) and import it to another
+// Export an application (created by super tenant admin user) and import it to another
 // environment while preserving the owner by a user with Internal/devops role
 func TestExportImportAppDevopsSuperTenant(t *testing.T) {
 	devopsUsername := devops.UserName
@@ -236,16 +198,19 @@ func TestExportImportAppDevopsSuperTenant(t *testing.T) {
 	app := testutils.AddApp(t, dev, adminUsername, adminPassword)
 
 	args := &testutils.AppImportExportTestArgs{
-		AppOwner:    testutils.Credentials{Username: adminUsername, Password: adminPassword},
-		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
-		Application: app,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
+		AppOwner:      testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		CtlUser:       testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Application:   app,
+		SrcAPIM:       dev,
+		DestAPIM:      prod,
+		PreserveOwner: true,
 	}
 
-	testutils.ValidateAppExportImportWithPreserveOwner(t, args)
+	testutils.ValidateAppExportImport(t, args)
 }
 
+// Export an application in same tenant using an admin tenant user and
+// imported it to another environment with preserve owner
 func TestExportImportOwnAppAdminTenant(t *testing.T) {
 	adminUsername := superAdminUser + "@" + TENANT1
 	adminPassword := superAdminPassword
@@ -256,19 +221,23 @@ func TestExportImportOwnAppAdminTenant(t *testing.T) {
 	app := testutils.AddApp(t, dev, adminUsername, adminPassword)
 
 	args := &testutils.AppImportExportTestArgs{
-		AppOwner:    testutils.Credentials{Username: adminUsername, Password: adminPassword},
-		CtlUser:     testutils.Credentials{Username: adminUsername, Password: adminPassword},
-		Application: app,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
+		AppOwner:      testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		CtlUser:       testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		Application:   app,
+		SrcAPIM:       dev,
+		DestAPIM:      prod,
+		PreserveOwner: true,
 	}
 
-	testutils.ValidateAppExportImportWithPreserveOwner(t, args)
+	testutils.ValidateAppExportImport(t, args)
 }
 
-func TestExportOtherAppAdminTenant(t *testing.T) {
+// Export an application belongs to another user in same tenant using an admin tenant user
+// and import it to another environment with preserve owner
+func TestExportImportOtherAppAdminTenant(t *testing.T) {
 	otherUsername := subscriber.UserName + "@" + TENANT1
 	otherPassword := subscriber.Password
+
 	adminUsername := superAdminUser + "@" + TENANT1
 	adminPassword := superAdminPassword
 
@@ -278,17 +247,18 @@ func TestExportOtherAppAdminTenant(t *testing.T) {
 	app := testutils.AddApp(t, dev, otherUsername, otherPassword)
 
 	args := &testutils.AppImportExportTestArgs{
-		AppOwner:    testutils.Credentials{Username: otherUsername, Password: otherPassword},
-		CtlUser:     testutils.Credentials{Username: adminUsername, Password: adminPassword},
-		Application: app,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
+		AppOwner:      testutils.Credentials{Username: otherUsername, Password: otherPassword},
+		CtlUser:       testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		Application:   app,
+		SrcAPIM:       dev,
+		DestAPIM:      prod,
+		PreserveOwner: true,
 	}
 
-	testutils.ValidateAppExportImportWithPreserveOwner(t, args)
+	testutils.ValidateAppExportImport(t, args)
 }
 
-// Export an application (created by tenant user) and import it to another
+// Export an application (created by tenant admin user) and import it to another
 // environment while preserving the owner by a user with Internal/devops role
 func TestExportImportAppDevopsTenant(t *testing.T) {
 	tenantDevopsUsername := devops.UserName + "@" + TENANT1
@@ -303,19 +273,22 @@ func TestExportImportAppDevopsTenant(t *testing.T) {
 	app := testutils.AddApp(t, dev, tenantAdminUsername, tenantAdminPassword)
 
 	args := &testutils.AppImportExportTestArgs{
-		AppOwner:    testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
-		CtlUser:     testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
-		Application: app,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
+		AppOwner:      testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
+		CtlUser:       testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		Application:   app,
+		SrcAPIM:       dev,
+		DestAPIM:      prod,
+		PreserveOwner: true,
 	}
 
-	testutils.ValidateAppExportImportWithPreserveOwner(t, args)
+	testutils.ValidateAppExportImport(t, args)
 }
 
+// Export an application in a cross tenant using an admin tenant user
 func TestExportCrossTenantAppAdminTenant(t *testing.T) {
 	adminUsername := superAdminUser
 	adminPassword := superAdminPassword
+
 	tenantAdminUsername := superAdminUser + "@" + TENANT1
 	tenantAdminPassword := superAdminPassword
 
@@ -333,8 +306,7 @@ func TestExportCrossTenantAppAdminTenant(t *testing.T) {
 	testutils.ValidateAppExportFailure(t, args)
 }
 
-// Export an application (created by a super tenant user) and
-// import it to another tenant domain by a user with Internal/devops role
+// Export an application (created by a super tenant user) by a user with Internal/devops role
 func TestExportCrossTenantAppDevopsTenant(t *testing.T) {
 	adminUsername := superAdminUser
 	adminPassword := superAdminPassword
@@ -367,7 +339,7 @@ func TestExportAppSecondaryUserStoreAdminSuperTenant(t *testing.T) {
 
 	base.SetupEnv(t, devEnv, devApim, devTokenEP)
 	base.Login(t, devEnv, username, password)
-validateAppExportImportWithPreserveOwner
+
 	exportApp(t, name, owner, devEnv)
 
 	assert.True(t, base.IsApplicationArchiveExists(devAppExportPath, name, owner))

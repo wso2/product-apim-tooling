@@ -20,6 +20,7 @@ package testutils
 
 import (
 	"path/filepath"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -76,12 +77,13 @@ func exportApp(t *testing.T, name string, owner string, env string) (string, err
 	return output, err
 }
 
-func importAppPreserveOwner(t *testing.T, sourceEnv string, app *apim.Application, client *apim.Client) (string, error) {
-	fileName := base.GetApplicationArchiveFilePath(t, sourceEnv, app.Name, app.Owner)
-	output, err := base.Execute(t, "import", "app", "--preserve-owner=true", "-f", fileName, "-e", client.EnvName, "-k", "--verbose")
+func importApp(t *testing.T, args *AppImportExportTestArgs) (string, error) {
+	fileName := base.GetApplicationArchiveFilePath(t, args.SrcAPIM.EnvName, args.Application.Name, args.Application.Owner)
+	output, err := base.Execute(t, "import", "app", "-f", fileName, "--preserve-owner="+strconv.FormatBool(args.PreserveOwner),
+		"--update="+strconv.FormatBool(args.UpdateFlag), "-e", args.DestAPIM.EnvName, "-k", "--verbose")
 
 	t.Cleanup(func() {
-		client.DeleteApplicationByName(app.Name)
+		args.DestAPIM.DeleteApplicationByName(args.Application.Name)
 	})
 
 	return output, err
@@ -126,7 +128,7 @@ func ValidateAppExport(t *testing.T, args *AppImportExportTestArgs) {
 		args.Application.Name, args.AppOwner.Username))
 }
 
-func ValidateAppExportImportWithPreserveOwner(t *testing.T, args *AppImportExportTestArgs) {
+func ValidateAppExportImport(t *testing.T, args *AppImportExportTestArgs) {
 	t.Helper()
 
 	// Setup apictl envs
@@ -144,7 +146,7 @@ func ValidateAppExportImportWithPreserveOwner(t *testing.T, args *AppImportExpor
 	// Import app to env 2
 	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	importAppPreserveOwner(t, args.SrcAPIM.GetEnvName(), args.Application, args.DestAPIM)
+	importApp(t, args)
 
 	// Get App from env 2
 	importedApp := GetApp(t, args.DestAPIM, args.Application.Name, args.AppOwner.Username, args.AppOwner.Password)
