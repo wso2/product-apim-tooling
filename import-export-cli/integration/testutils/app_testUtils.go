@@ -45,10 +45,28 @@ func AddApplicationWithoutCleaning(t *testing.T, client *apim.Client, username s
 	return application
 }
 
+func GenerateKeys(t *testing.T, client *apim.Client, username, password, appId string) apim.ApplicationKey {
+	client.Login(username, password)
+	generateKeyReq := utils.KeygenRequest{
+		KeyType:                 utils.ProductionKeyType,
+		GrantTypesToBeSupported: utils.GrantTypesToBeSupported,
+		ValidityTime:            utils.DefaultTokenValidityPeriod,
+	}
+	keyGenResponse := client.GenerateKeys(t, generateKeyReq, appId)
+	return keyGenResponse
+}
+
 func GetApp(t *testing.T, client *apim.Client, name string, username string, password string) *apim.Application {
 	client.Login(username, password)
 	appInfo := client.GetApplicationByName(name)
 	return client.GetApplication(appInfo.ApplicationID)
+}
+
+func GetOauthKeys(t *testing.T, client *apim.Client, username, password string,
+	application *apim.Application) *apim.ApplicationKey {
+	client.Login(username, password)
+	applicationKey := client.GetOauthKeys(t, application)
+	return applicationKey
 }
 
 func ListApps(t *testing.T, env string) []string {
@@ -67,11 +85,13 @@ func getEnvAppExportPath(envName string) string {
 	return filepath.Join(utils.DefaultExportDirPath, utils.ExportedAppsDirName, envName)
 }
 
-func exportApp(t *testing.T, name string, owner string, env string) (string, error) {
-	output, err := base.Execute(t, "export", "app", "-n", name, "-o", owner, "-e", env, "-k", "--verbose")
+func exportApp(t *testing.T, args *AppImportExportTestArgs) (string, error) {
+	output, err := base.Execute(t, "export", "app", "-n", args.Application.Name, "-o", args.AppOwner.Username,
+		"--with-keys="+strconv.FormatBool(args.WithKeys), "-e", args.SrcAPIM.GetEnvName(), "-k", "--verbose")
 
 	t.Cleanup(func() {
-		base.RemoveApplicationArchive(t, getEnvAppExportPath(env), name, owner)
+		base.RemoveApplicationArchive(t, getEnvAppExportPath(args.SrcAPIM.GetEnvName()),
+			args.Application.Name, args.AppOwner.Username)
 	})
 
 	return output, err
@@ -80,7 +100,8 @@ func exportApp(t *testing.T, name string, owner string, env string) (string, err
 func importApp(t *testing.T, args *AppImportExportTestArgs) (string, error) {
 	fileName := base.GetApplicationArchiveFilePath(t, args.SrcAPIM.EnvName, args.Application.Name, args.Application.Owner)
 	output, err := base.Execute(t, "import", "app", "-f", fileName, "--preserve-owner="+strconv.FormatBool(args.PreserveOwner),
-		"--update="+strconv.FormatBool(args.UpdateFlag), "-e", args.DestAPIM.EnvName, "-k", "--verbose")
+		"--update="+strconv.FormatBool(args.UpdateFlag), "--skip-keys="+strconv.FormatBool(args.SkipKeys),
+		"-e", args.DestAPIM.EnvName, "-k", "--verbose")
 
 	t.Cleanup(func() {
 		args.DestAPIM.DeleteApplicationByName(args.Application.Name)
@@ -105,7 +126,7 @@ func ValidateAppExportFailure(t *testing.T, args *AppImportExportTestArgs) {
 	// Attempt exporting app from env
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	exportApp(t, args.Application.Name, args.AppOwner.Username, args.SrcAPIM.GetEnvName())
+	exportApp(t, args)
 
 	// Validate that export failed
 	assert.False(t, base.IsApplicationArchiveExists(t, getEnvAppExportPath(args.SrcAPIM.GetEnvName()),
@@ -121,14 +142,14 @@ func ValidateAppExport(t *testing.T, args *AppImportExportTestArgs) {
 	// Attempt exporting app from env
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	exportApp(t, args.Application.Name, args.AppOwner.Username, args.SrcAPIM.GetEnvName())
+	exportApp(t, args)
 
 	// Validate that export passed
 	assert.True(t, base.IsApplicationArchiveExists(t, getEnvAppExportPath(args.SrcAPIM.GetEnvName()),
 		args.Application.Name, args.AppOwner.Username))
 }
 
-func ValidateAppExportImport(t *testing.T, args *AppImportExportTestArgs) {
+func ValidateAppExportImport(t *testing.T, args *AppImportExportTestArgs) *apim.Application {
 	t.Helper()
 
 	// Setup apictl envs
@@ -138,7 +159,7 @@ func ValidateAppExportImport(t *testing.T, args *AppImportExportTestArgs) {
 	// Export app from env 1
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	exportApp(t, args.Application.Name, args.AppOwner.Username, args.SrcAPIM.GetEnvName())
+	exportApp(t, args)
 
 	assert.True(t, base.IsApplicationArchiveExists(t, getEnvAppExportPath(args.SrcAPIM.GetEnvName()),
 		args.Application.Name, args.AppOwner.Username))
@@ -153,33 +174,28 @@ func ValidateAppExportImport(t *testing.T, args *AppImportExportTestArgs) {
 
 	// Validate env 1 and env 2 App is equal
 	ValidateAppsEqual(t, args.Application, importedApp)
+
+	return importedApp
 }
 
-func ValidateAppExportImportWithUpdate(t *testing.T, args *AppImportExportTestArgs) {
-	t.Helper()
+func ValidateAppExportImportGeneratedKeys(t *testing.T, args *AppImportExportTestArgs, appId string) {
 
-	// Setup apictl envs
-	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
-	base.SetupEnv(t, args.DestAPIM.GetEnvName(), args.DestAPIM.GetApimURL(), args.DestAPIM.GetTokenURL())
+	// Generate keys for the application in env 1
+	applicationKey := GenerateKeys(t, args.SrcAPIM, args.AppOwner.Username, args.AppOwner.Password, appId)
 
-	// Export app from env 1
-	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+	// Export an application from env 1 and import it to env 2
+	importedApplication := ValidateAppExportImport(t, args)
+	// Retrieve oauth keys of the imported application to env2
+	importedApplicationKey := GetOauthKeys(t, args.DestAPIM, args.AppOwner.Username, args.AppOwner.Password, importedApplication)
 
-	exportApp(t, args.Application.Name, args.AppOwner.Username, args.SrcAPIM.GetEnvName())
-
-	assert.True(t, base.IsApplicationArchiveExists(t, getEnvAppExportPath(args.SrcAPIM.GetEnvName()),
-		args.Application.Name, args.AppOwner.Username))
-
-	// Import app to env 2
-	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
-
-	importAppPreserveOwnerAndUpdate(t, args.SrcAPIM.GetEnvName(), args.Application, args.DestAPIM)
-
-	// Get App from env 2
-	importedApp := GetApp(t, args.DestAPIM, args.Application.Name, args.AppOwner.Username, args.AppOwner.Password)
-
-	// Validate env 1 and env 2 App is equal
-	ValidateAppsEqual(t, args.Application, importedApp)
+	if !args.SkipKeys {
+		// Compare consumer key and secret of the application in env 1 and env 2
+		assert.Equal(t, applicationKey.ConsumerKey, importedApplicationKey.ConsumerKey, "Consumer key mismatched")
+		assert.Equal(t, applicationKey.ConsumerSecret, importedApplicationKey.ConsumerSecret, "Consumer secret mismatched")
+	} else {
+		// Assert whether the imported application's key is empty
+		assert.Equal(t, importedApplicationKey, &apim.ApplicationKey{}, "Application keys are not empty")
+	}
 }
 
 func ValidateAppsEqual(t *testing.T, app1 *apim.Application, app2 *apim.Application) {

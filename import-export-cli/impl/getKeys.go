@@ -680,8 +680,8 @@ func generateApplicationKeys(appId string, token string) (*utils.KeygenResponse,
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + token
 	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
 	generateKeyReq := utils.KeygenRequest{
-		KeyType:                 "PRODUCTION",
-		GrantTypesToBeSupported: []string{"refresh_token", "password", "client_credentials"},
+		KeyType:                 utils.ProductionKeyType,
+		GrantTypesToBeSupported: utils.GrantTypesToBeSupported,
 		ValidityTime:            utils.DefaultTokenValidityPeriod,
 	}
 	body, err := json.Marshal(generateKeyReq)

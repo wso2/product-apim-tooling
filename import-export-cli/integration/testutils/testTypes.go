@@ -57,6 +57,8 @@ type AppImportExportTestArgs struct {
 	DestAPIM      *apim.Client
 	PreserveOwner bool
 	UpdateFlag    bool
+	WithKeys      bool
+	SkipKeys      bool
 }
 
 type ApiGetKeyTestArgs struct {

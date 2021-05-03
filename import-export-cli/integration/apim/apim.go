@@ -37,6 +37,7 @@ import (
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/adminservices"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 const (
@@ -1320,6 +1321,61 @@ func (instance *Client) AddApplication(t *testing.T, application *Application, u
 	}
 
 	return &appResponse
+}
+
+// GenerateKeys : Generate keys for an application
+func (instance *Client) GenerateKeys(t *testing.T, keyGenRequest utils.KeygenRequest, appId string) ApplicationKey {
+	appsURL := instance.devPortalRestURL + "/applications/" + appId + "/generate-keys"
+
+	data, err := json.Marshal(keyGenRequest)
+
+	if err != nil {
+		base.Fatal(err)
+	}
+
+	request := base.CreatePost(appsURL, bytes.NewBuffer(data))
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.GenerateKeys()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.GenerateKeys()", response, 200)
+
+	var keyGenResponse ApplicationKey
+	json.NewDecoder(response.Body).Decode(&keyGenResponse)
+
+	return keyGenResponse
+}
+
+// GetOauthKeys : Get Oauth keys of an application
+func (instance *Client) GetOauthKeys(t *testing.T, application *Application) *ApplicationKey {
+	appsURL := instance.devPortalRestURL + "/applications/" + application.ApplicationID + "/oauth-keys"
+
+	request := base.CreateGet(appsURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.GetOauthKeys()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.GetOauthKeys()", response, 200)
+
+	var applicationKeysList ApplicationKeysList
+	json.NewDecoder(response.Body).Decode(&applicationKeysList)
+
+	if len(applicationKeysList.List) > 0 {
+		return &applicationKeysList.List[0]
+	} else {
+		return &ApplicationKey{}
+	}
+
 }
 
 // DeleteApplication : Delete Application from APIM

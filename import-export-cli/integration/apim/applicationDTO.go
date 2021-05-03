@@ -33,22 +33,3 @@ type Application struct {
 	Owner              string           `json:"owner"`
 	HashEnabled        bool             `json:"hashEnabled"`
 }
-
-// ApplicationKey : Application Key Details
-type ApplicationKey struct {
-	ConsumerKey         string           `json:"consumerKey"`
-	ConsumerSecret      string           `json:"consumerSecret"`
-	SupportedGrantTypes []string         `json:"supportedGrantTypes"`
-	CallbackURL         string           `json:"callbackUrl"`
-	KeyState            string           `json:"keyState"`
-	KeyType             string           `json:"keyType"`
-	GroupID             string           `json:"groupId"`
-	Token               ApplicationToken `json:"token"`
-}
-
-// ApplicationToken : Application Token Details
-type ApplicationToken struct {
-	AccessToken  string   `json:"accessToken"`
-	TokenScopes  []string `json:"tokenScopes"`
-	ValidityTime int64    `json:"validityTime"`
-}
