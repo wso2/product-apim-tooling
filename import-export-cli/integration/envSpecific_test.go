@@ -420,7 +420,7 @@ func TestEnvironmentSpecificParamsAwsLambdaWithRoleSupplied(t *testing.T) {
 		Api:         api,
 		SrcAPIM:     dev,
 		DestAPIM:    prod,
-		ParamsFile:  testutils.APIAwsRoleSuppliedCredentialsParamsFile,
+		ParamsFile:  testutils.APIAwsEndpointWithStoredCredentialsParamsFile,
 	}
 
 	testutils.ValidateAPIExport(t, args)
@@ -451,7 +451,7 @@ func TestEnvironmentSpecificParamsAwsLambdaWithStoredCred(t *testing.T) {
 		Api:         api,
 		SrcAPIM:     dev,
 		DestAPIM:    prod,
-		ParamsFile:  testutils.APIAwsStoredCredentialsParamsFile,
+		ParamsFile:  testutils.APIAwsEndpointWithStoredCredentialsParamsFile,
 	}
 
 	testutils.ValidateAPIExport(t, args)
@@ -461,6 +461,37 @@ func TestEnvironmentSpecificParamsAwsLambdaWithStoredCred(t *testing.T) {
 	apiParams := testutils.ReadParams(t, args.ParamsFile)
 
 	testutils.ValidateAwsEndpoint(t, api, apiParams, importedAPI)
+}
+
+//  Import an API with the external params file that has Dynamic endpoint configs
+func TestEnvironmentSpecificParamsDynamicEndpoint(t *testing.T) {
+	superTenantAdminUsername := superAdminUser
+	superTenantAdminPassword := superAdminPassword
+
+	superTenantApiCreator := creator.UserName
+	superTenantApiCreatorPassword := creator.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: superTenantAdminUsername, Password: superTenantAdminPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+		ParamsFile:  testutils.APIDynamicEndpointParamsFile,
+	}
+
+	testutils.ValidateAPIExport(t, args)
+
+	importedAPI := testutils.GetImportedAPI(t, args)
+
+	apiParams := testutils.ReadParams(t, args.ParamsFile)
+
+	testutils.ValidateDynamicEndpoint(t, api, apiParams, importedAPI)
 }
 
 // Export an API from one environment and generate the deployment directory for that. Import it to another environment with the params

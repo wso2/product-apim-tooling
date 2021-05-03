@@ -614,3 +614,31 @@ func ValidateAwsEndpoint(t *testing.T, api *apim.API, apiParams *Params, importe
 
 	ValidateAPIsEqual(t, api, importedAPI)
 }
+
+func ValidateDynamicEndpoint(t *testing.T, api *apim.API, apiParams *Params, importedAPI *apim.API) {
+	t.Helper()
+
+	//Validate EndPoint Type
+	assert.Equal(t, "default", importedAPI.GetEndpointType())
+
+	endPointConfigInApi := importedAPI.EndpointConfig
+
+	//Validate default failover config
+	failoverConfigEnableInApi := endPointConfigInApi.(map[string]interface{})["failover"].(string)
+	failoverConfigEnableInApiBool, _ := strconv.ParseBool(failoverConfigEnableInApi)
+	assert.Equal(t, false, failoverConfigEnableInApiBool)
+
+	//Validate default url value for sandbox and production endpoint
+	sandboxEndpointsInApi := endPointConfigInApi.(map[string]interface{})["sandbox_endpoints"].(map[string]interface{})
+	productionEndpointsInApi := endPointConfigInApi.(map[string]interface{})["production_endpoints"].(map[string]interface{})
+	assert.Equal(t, "default", sandboxEndpointsInApi["url"])
+	assert.Equal(t, "default", productionEndpointsInApi["url"])
+
+	same := "override_with_same_value"
+	api.SetEndpointType(same)
+	importedAPI.SetEndpointType(same)
+	api.SetEndPointConfig(same)
+	importedAPI.SetEndPointConfig(same)
+
+	ValidateAPIsEqual(t, api, importedAPI)
+}
