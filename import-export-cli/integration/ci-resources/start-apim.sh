@@ -17,7 +17,7 @@ fi
 
 if [ -z "$NAME" ]
 then 
-    APIM_PACK=wso2am-4.0.0
+    APIM_PACK=wso2am-4.0.0-SNAPSHOT
 else
     APIM_PACK=$NAME
 fi
