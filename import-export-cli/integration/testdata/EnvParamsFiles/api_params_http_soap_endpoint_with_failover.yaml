@@ -1,0 +1,16 @@
+environments:
+  - name: production
+    configs:
+      endpointType: soap
+      endpointRoutingPolicy: failover
+      failoverEndpoints:
+        production:
+          url: https://dev.wso2.com
+        productionFailovers:
+          - url: https://dev1.wso2.com
+          - url: https://dev2.wso2.com
+        sandbox:
+          url: https://dev.sandbox.wso2.com
+        sandboxFailovers:
+          - url: https://dev1.sandbox.wso2.com
+          - url: https://dev2.sandbox.wso2.com

@@ -514,3 +514,63 @@ func ValidateHttpEndpointWithLoadBalancing(t *testing.T, api *apim.API, apiParam
 
 	ValidateAPIsEqual(t, api, importedAPI)
 }
+
+func ValidateHttpEndpointWithFailover(t *testing.T, api *apim.API, apiParams *Params, importedAPI *apim.API) {
+	t.Helper()
+	var isSaopEndpoint bool = false
+
+	//Validate EndPoint Type
+	assert.Equal(t, "failover", importedAPI.GetEndpointType())
+
+	endPointConfigInApi := importedAPI.EndpointConfig
+	//Check whether the endpoint are SOAP endpoints
+	if strings.EqualFold(apiParams.Environments[0].Configs.EndpointType, "soap") {
+		isSaopEndpoint = true
+	}
+
+	// Validate Production endpoints
+	productionEndpointInParams := apiParams.Environments[0].Configs.FailoverEndpoints.Production
+	productionEndpointInApi := endPointConfigInApi.(map[string]interface{})["production_endpoints"].(map[string]interface{})
+	assert.Equal(t, productionEndpointInParams.URL, productionEndpointInApi["url"])
+	if isSaopEndpoint {
+		assert.Equal(t, "address", productionEndpointInApi["endpoint_type"])
+	}
+
+	// Validate Production failover endpoints
+	productionFailoverEndpointsInParams := apiParams.Environments[0].Configs.FailoverEndpoints.ProductionFailovers
+	productionFailoverEndpointsInApi := endPointConfigInApi.(map[string]interface{})["production_failovers"].([]interface{})
+	for i := 0; i < len(productionFailoverEndpointsInParams); i++ {
+		singleProductionFailoverEndpointInApi := productionFailoverEndpointsInApi[i].(map[string]interface{})
+		assert.Equal(t, productionFailoverEndpointsInParams[i]["url"], singleProductionFailoverEndpointInApi["url"])
+		if isSaopEndpoint {
+			assert.Equal(t, "address", productionEndpointInApi["endpoint_type"])
+		}
+	}
+
+	// Validate Production endpoints
+	sandboxEndpointInParams := apiParams.Environments[0].Configs.FailoverEndpoints.Sandbox
+	sandboxEndpointInApi := endPointConfigInApi.(map[string]interface{})["sandbox_endpoints"].(map[string]interface{})
+	assert.Equal(t, sandboxEndpointInParams.URL, sandboxEndpointInApi["url"])
+	if isSaopEndpoint {
+		assert.Equal(t, "address", productionEndpointInApi["endpoint_type"])
+	}
+
+	// Validate Sandbox failover endpoints
+	sandboxFailoverEndpointsInParams := apiParams.Environments[0].Configs.FailoverEndpoints.SandboxFailovers
+	sandboxFailoverEndpointsInApi := endPointConfigInApi.(map[string]interface{})["sandbox_failovers"].([]interface{})
+	for i := 0; i < len(sandboxFailoverEndpointsInParams); i++ {
+		singleSandboxFailoverEndpointInApi := sandboxFailoverEndpointsInApi[i].(map[string]interface{})
+		assert.Equal(t, sandboxFailoverEndpointsInParams[i]["url"], singleSandboxFailoverEndpointInApi["url"])
+		if isSaopEndpoint {
+			assert.Equal(t, "address", productionEndpointInApi["endpoint_type"])
+		}
+	}
+
+	same := "override_with_same_value"
+	api.SetEndpointType(same)
+	importedAPI.SetEndpointType(same)
+	api.SetEndPointConfig(same)
+	importedAPI.SetEndPointConfig(same)
+
+	ValidateAPIsEqual(t, api, importedAPI)
+}

@@ -51,10 +51,10 @@ type LoadBalanceEndpointsData struct {
 }
 
 type FailoverEndpointsData struct {
-	Production          Endpoint   `yaml:"production,omitempty"`
-	ProductionFailovers []Endpoint `yaml:"productionFailovers,omitempty"`
-	Sandbox             Endpoint   `yaml:"sandbox,omitempty"`
-	SandboxFailovers    []Endpoint `yaml:"sandboxFailovers,omitempty"`
+	Production          Endpoint                 `yaml:"production,omitempty"`
+	ProductionFailovers []map[string]interface{} `yaml:"productionFailovers,omitempty"`
+	Sandbox             Endpoint                 `yaml:"sandbox,omitempty"`
+	SandboxFailovers    []map[string]interface{} `yaml:"sandboxFailovers,omitempty"`
 }
 
 type AWSLambdaEndpointsData struct {

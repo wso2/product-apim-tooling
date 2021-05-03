@@ -110,3 +110,9 @@ const APIHttpRestEndpointWithLoadBalancingParamsFile = "testdata/EnvParamsFiles/
 
 // APIHttpSoapEndpointWithLoadBalancingParamsFile : HTTP/SOAP Endpoint with Loadbalancing URLs in api_params.yaml
 const APIHttpSoapEndpointWithLoadBalancingParamsFile = "testdata/EnvParamsFiles/api_params_http_soap_endpoint_with_load_balancing.yaml"
+
+// APIHttpRestEndpointWithFailoverParamsFile : HTTP/REST Endpoint with Failover URLs in api_params.yaml
+const APIHttpRestEndpointWithFailoverParamsFile = "testdata/EnvParamsFiles/api_params_http_rest_endpoint_with_failover.yaml"
+
+// APIHttpSoapEndpointWithFailoverParamsFile : HTTP/SOAP Endpoint with Failover URLs in api_params.yaml
+const APIHttpSoapEndpointWithFailoverParamsFile = "testdata/EnvParamsFiles/api_params_http_soap_endpoint_with_failover.yaml"
