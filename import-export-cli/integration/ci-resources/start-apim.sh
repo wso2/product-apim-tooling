@@ -15,7 +15,6 @@ else
     APIM_DOWNLOAD=$DOWNLOAD_LINK
 fi
 
-
 if [ -z "$NAME" ]
 then 
     APIM_PACK=wso2am-4.0.0
