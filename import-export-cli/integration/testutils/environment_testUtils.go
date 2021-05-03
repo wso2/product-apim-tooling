@@ -436,7 +436,7 @@ func validateEndpointUrl(t *testing.T, apiParams *Params, api *apim.API, endpoin
 	}
 }
 
-func ValidateHttpEndpointWithoutLoadBalancingAndFailover(t *testing.T, api *apim.API, apiParams *Params, importedAPI *apim.API) {
+func ValidateHttpEndpointWithoutLoadBalancingAndFailover(t *testing.T, apiParams *Params, api ,importedAPI *apim.API) {
 	t.Helper()
 	//Validate EndPoint Type
 	validateEndpointType(t, apiParams, importedAPI)
@@ -456,7 +456,7 @@ func ValidateHttpEndpointWithoutLoadBalancingAndFailover(t *testing.T, api *apim
 	ValidateAPIsEqual(t, api, importedAPI)
 }
 
-func ValidateHttpEndpointWithLoadBalancing(t *testing.T, api *apim.API, apiParams *Params, importedAPI *apim.API) {
+func ValidateHttpEndpointWithLoadBalancing(t *testing.T, apiParams *Params, api ,importedAPI *apim.API) {
 	t.Helper()
 	//Validate EndPoint Type
 	assert.Equal(t, "load_balance", importedAPI.GetEndpointType())
@@ -515,7 +515,7 @@ func ValidateHttpEndpointWithLoadBalancing(t *testing.T, api *apim.API, apiParam
 	ValidateAPIsEqual(t, api, importedAPI)
 }
 
-func ValidateHttpEndpointWithFailover(t *testing.T, api *apim.API, apiParams *Params, importedAPI *apim.API) {
+func ValidateHttpEndpointWithFailover(t *testing.T, apiParams *Params, api, importedAPI *apim.API) {
 	t.Helper()
 
 	var isSaopEndpoint bool = false
@@ -576,7 +576,7 @@ func ValidateHttpEndpointWithFailover(t *testing.T, api *apim.API, apiParams *Pa
 	ValidateAPIsEqual(t, api, importedAPI)
 }
 
-func ValidateAwsEndpoint(t *testing.T, api *apim.API, apiParams *Params, importedAPI *apim.API) {
+func ValidateAwsEndpoint(t *testing.T, apiParams *Params, api, importedAPI *apim.API) {
 	t.Helper()
 
 	//Validate EndPoint Type
@@ -615,7 +615,7 @@ func ValidateAwsEndpoint(t *testing.T, api *apim.API, apiParams *Params, importe
 	ValidateAPIsEqual(t, api, importedAPI)
 }
 
-func ValidateDynamicEndpoint(t *testing.T, api *apim.API, apiParams *Params, importedAPI *apim.API) {
+func ValidateDynamicEndpoint(t *testing.T, apiParams *Params, api, importedAPI *apim.API) {
 	t.Helper()
 
 	//Validate EndPoint Type

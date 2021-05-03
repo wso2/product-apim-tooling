@@ -215,22 +215,23 @@ func TestEnvironmentSpecificParamsEndpointSecurityBasic(t *testing.T) {
 	testutils.ValidateEndpointSecurityDefinition(t, api, apiParams, importedAPI)
 }
 
-//  Import an API with the external params file that has HTTP/REST endpoints without load balancing or failover configs
-func TestEnvironmentSpecificParamsHttpRestEndpointWithoutLoadBalancingOrFailover(t *testing.T) {
-	superTenantAdminUsername := superAdminUser
-	superTenantAdminPassword := superAdminPassword
+// Import an API with the external params file that has HTTP/REST endpoints without load balancing or failover
+// configs as super tenant user with the Internal/devops role.
+func TestHttpRestEndpointParamsWithoutLoadBalancingOrFailoverSuperTenantDevops(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
 
-	superTenantApiCreator := creator.UserName
-	superTenantApiCreatorPassword := creator.Password
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
 
 	dev := GetDevClient()
 	prod := GetProdClient()
 
-	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
 	args := &testutils.ApiImportExportTestArgs{
-		ApiProvider: testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: superTenantAdminUsername, Password: superTenantAdminPassword},
+		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
 		Api:         api,
 		SrcAPIM:     dev,
 		DestAPIM:    prod,
@@ -243,25 +244,58 @@ func TestEnvironmentSpecificParamsHttpRestEndpointWithoutLoadBalancingOrFailover
 
 	apiParams := testutils.ReadParams(t, args.ParamsFile)
 
-	testutils.ValidateHttpEndpointWithoutLoadBalancingAndFailover(t, api, apiParams, importedAPI)
+	testutils.ValidateHttpEndpointWithoutLoadBalancingAndFailover(t, apiParams, api, importedAPI)
 }
 
-//  Import an API with the external params file that has HTTP/SOAP endpoints without load balancing or failover configs
-func TestEnvironmentSpecificParamsHttpSoapEndpointWithoutLoadBalancingOrFailover(t *testing.T) {
-	superTenantAdminUsername := superAdminUser
-	superTenantAdminPassword := superAdminPassword
+// Import an API with the external params file that has HTTP/REST endpoints without load balancing or failover
+// configs as tenant user with the Internal/devops role.
+func TestHttpRestEndpointParamsWithoutLoadBalancingOrFailoverTenantDevops(t *testing.T) {
+	devopsUsername := devops.UserName + "@" + TENANT1
+	devopsPassword := devops.Password
 
-	superTenantApiCreator := creator.UserName
-	superTenantApiCreatorPassword := creator.Password
+	apiCreator := creator.UserName + "@" + TENANT1
+	apiCreatorPassword := creator.Password
 
 	dev := GetDevClient()
 	prod := GetProdClient()
 
-	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
 	args := &testutils.ApiImportExportTestArgs{
-		ApiProvider: testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: superTenantAdminUsername, Password: superTenantAdminPassword},
+		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+		ParamsFile:  testutils.APIHttpRestEndpointWithoutLoadBalancingOrFailoverParamsFile,
+	}
+
+	testutils.ValidateAPIExport(t, args)
+
+	importedAPI := testutils.GetImportedAPI(t, args)
+
+	apiParams := testutils.ReadParams(t, args.ParamsFile)
+
+	testutils.ValidateHttpEndpointWithoutLoadBalancingAndFailover(t, apiParams, api, importedAPI)
+}
+
+// Import an API with the external params file that has HTTP/SOAP endpoints without load balancing or failover
+// configs as super tenant user with the Internal/devops role.
+func TestHttpSoapEndpointParamsWithoutLoadBalancingOrFailoverSuperTenantDevops(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
 		Api:         api,
 		SrcAPIM:     dev,
 		DestAPIM:    prod,
@@ -274,25 +308,58 @@ func TestEnvironmentSpecificParamsHttpSoapEndpointWithoutLoadBalancingOrFailover
 
 	apiParams := testutils.ReadParams(t, args.ParamsFile)
 
-	testutils.ValidateHttpEndpointWithoutLoadBalancingAndFailover(t, api, apiParams, importedAPI)
+	testutils.ValidateHttpEndpointWithoutLoadBalancingAndFailover(t, apiParams, api, importedAPI)
 }
 
-//  Import an API with the external params file that has HTTP/REST endpoints with load balancing config
-func TestEnvironmentSpecificParamsHttpRestEndpointWithLoadBalancing(t *testing.T) {
-	superTenantAdminUsername := superAdminUser
-	superTenantAdminPassword := superAdminPassword
+// Import an API with the external params file that has HTTP/SOAP endpoints without load balancing or failover
+// configs as tenant user with the Internal/devops role.
+func TestHttpSoapEndpointParamsWithoutLoadBalancingOrFailoverTenantDevops(t *testing.T) {
+	devopsUsername := devops.UserName + "@" + TENANT1
+	devopsPassword := devops.Password
 
-	superTenantApiCreator := creator.UserName
-	superTenantApiCreatorPassword := creator.Password
+	apiCreator := creator.UserName + "@" + TENANT1
+	apiCreatorPassword := creator.Password
 
 	dev := GetDevClient()
 	prod := GetProdClient()
 
-	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
 	args := &testutils.ApiImportExportTestArgs{
-		ApiProvider: testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: superTenantAdminUsername, Password: superTenantAdminPassword},
+		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+		ParamsFile:  testutils.APIHttpSoapEndpointWithoutLoadBalancingOrFailoverParamsFile,
+	}
+
+	testutils.ValidateAPIExport(t, args)
+
+	importedAPI := testutils.GetImportedAPI(t, args)
+
+	apiParams := testutils.ReadParams(t, args.ParamsFile)
+
+	testutils.ValidateHttpEndpointWithoutLoadBalancingAndFailover(t, apiParams, api, importedAPI)
+}
+
+// Import an API with the external params file that has HTTP/REST endpoints with load balancing configs as super tenant
+// user with the Internal/devops role.
+func TestHttpRestEndpointParamsWithLoadBalancingSuperTenantDevops(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
 		Api:         api,
 		SrcAPIM:     dev,
 		DestAPIM:    prod,
@@ -305,25 +372,58 @@ func TestEnvironmentSpecificParamsHttpRestEndpointWithLoadBalancing(t *testing.T
 
 	apiParams := testutils.ReadParams(t, args.ParamsFile)
 
-	testutils.ValidateHttpEndpointWithLoadBalancing(t, api, apiParams, importedAPI)
+	testutils.ValidateHttpEndpointWithLoadBalancing(t, apiParams, api, importedAPI)
 }
 
-//  Import an API with the external params file that has HTTP/SOAP endpoints with load balancing config
-func TestEnvironmentSpecificParamsHttpSoapEndpointWithLoadBalancing(t *testing.T) {
-	superTenantAdminUsername := superAdminUser
-	superTenantAdminPassword := superAdminPassword
+// Import an API with the external params file that has HTTP/REST endpoints with load balancing configs as tenant
+// user with the Internal/devops role.
+func TestHttpRestEndpointParamsWithLoadBalancingTenantDevops(t *testing.T) {
+	devopsUsername := devops.UserName + "@" + TENANT1
+	devopsPassword := devops.Password
 
-	superTenantApiCreator := creator.UserName
-	superTenantApiCreatorPassword := creator.Password
+	apiCreator := creator.UserName + "@" + TENANT1
+	apiCreatorPassword := creator.Password
 
 	dev := GetDevClient()
 	prod := GetProdClient()
 
-	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
 	args := &testutils.ApiImportExportTestArgs{
-		ApiProvider: testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: superTenantAdminUsername, Password: superTenantAdminPassword},
+		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+		ParamsFile:  testutils.APIHttpRestEndpointWithLoadBalancingParamsFile,
+	}
+
+	testutils.ValidateAPIExport(t, args)
+
+	importedAPI := testutils.GetImportedAPI(t, args)
+
+	apiParams := testutils.ReadParams(t, args.ParamsFile)
+
+	testutils.ValidateHttpEndpointWithLoadBalancing(t, apiParams, api, importedAPI)
+}
+
+// Import an API with the external params file that has HTTP/SOAP endpoints with load balancing config as super tenant
+// user with the Internal/devops role.
+func TestHttpSoapEndpointParamsWithLoadBalancingSuperTenantDevops(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
 		Api:         api,
 		SrcAPIM:     dev,
 		DestAPIM:    prod,
@@ -336,25 +436,58 @@ func TestEnvironmentSpecificParamsHttpSoapEndpointWithLoadBalancing(t *testing.T
 
 	apiParams := testutils.ReadParams(t, args.ParamsFile)
 
-	testutils.ValidateHttpEndpointWithLoadBalancing(t, api, apiParams, importedAPI)
+	testutils.ValidateHttpEndpointWithLoadBalancing(t, apiParams, api, importedAPI)
 }
 
-//  Import an API with the external params file that has HTTP/REST endpoints with failover config
-func TestEnvironmentSpecificParamsHttpRestEndpointWithFailover(t *testing.T) {
-	superTenantAdminUsername := superAdminUser
-	superTenantAdminPassword := superAdminPassword
+// Import an API with the external params file that has HTTP/SOAP endpoints with load balancing config as tenant user
+// with the Internal/devops role.
+func TestHttpSoapEndpointParamsWithLoadBalancingTenantDevops(t *testing.T) {
+	devopsUsername := devops.UserName + "@" + TENANT1
+	devopsPassword := devops.Password
 
-	superTenantApiCreator := creator.UserName
-	superTenantApiCreatorPassword := creator.Password
+	apiCreator := creator.UserName + "@" + TENANT1
+	apiCreatorPassword := creator.Password
 
 	dev := GetDevClient()
 	prod := GetProdClient()
 
-	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
 	args := &testutils.ApiImportExportTestArgs{
-		ApiProvider: testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: superTenantAdminUsername, Password: superTenantAdminPassword},
+		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+		ParamsFile:  testutils.APIHttpSoapEndpointWithLoadBalancingParamsFile,
+	}
+
+	testutils.ValidateAPIExport(t, args)
+
+	importedAPI := testutils.GetImportedAPI(t, args)
+
+	apiParams := testutils.ReadParams(t, args.ParamsFile)
+
+	testutils.ValidateHttpEndpointWithLoadBalancing(t, apiParams, api, importedAPI)
+}
+
+// Import an API with the external params file that has HTTP/REST endpoints with failover config as super tenant user
+// with the Internal/devops role.
+func TestHttpRestEndpointParamsWithFailoverSuperTenantDevops(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
 		Api:         api,
 		SrcAPIM:     dev,
 		DestAPIM:    prod,
@@ -367,25 +500,58 @@ func TestEnvironmentSpecificParamsHttpRestEndpointWithFailover(t *testing.T) {
 
 	apiParams := testutils.ReadParams(t, args.ParamsFile)
 
-	testutils.ValidateHttpEndpointWithFailover(t, api, apiParams, importedAPI)
+	testutils.ValidateHttpEndpointWithFailover(t, apiParams, api, importedAPI)
 }
 
-//  Import an API with the external params file that has HTTP/SOAP endpoints with failover config
-func TestEnvironmentSpecificParamsHttpSoapEndpointWithFailover(t *testing.T) {
-	superTenantAdminUsername := superAdminUser
-	superTenantAdminPassword := superAdminPassword
+// Import an API with the external params file that has HTTP/REST endpoints with failover config as tenant user with
+// the Internal/devops role.
+func TestHttpRestEndpointParamsWithFailoverTenantDevops(t *testing.T) {
+	devopsUsername := devops.UserName + "@" + TENANT1
+	devopsPassword := devops.Password
 
-	superTenantApiCreator := creator.UserName
-	superTenantApiCreatorPassword := creator.Password
+	apiCreator := creator.UserName + "@" + TENANT1
+	apiCreatorPassword := creator.Password
 
 	dev := GetDevClient()
 	prod := GetProdClient()
 
-	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
 	args := &testutils.ApiImportExportTestArgs{
-		ApiProvider: testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: superTenantAdminUsername, Password: superTenantAdminPassword},
+		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+		ParamsFile:  testutils.APIHttpRestEndpointWithFailoverParamsFile,
+	}
+
+	testutils.ValidateAPIExport(t, args)
+
+	importedAPI := testutils.GetImportedAPI(t, args)
+
+	apiParams := testutils.ReadParams(t, args.ParamsFile)
+
+	testutils.ValidateHttpEndpointWithFailover(t, apiParams, api, importedAPI)
+}
+
+// Import an API with the external params file that has HTTP/SOAP endpoints with failover config as super tenant
+//user with the Internal/devops role.
+func TestHttpSoapEndpointParamsWithFailoverSuperTenantDevops(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
 		Api:         api,
 		SrcAPIM:     dev,
 		DestAPIM:    prod,
@@ -398,25 +564,122 @@ func TestEnvironmentSpecificParamsHttpSoapEndpointWithFailover(t *testing.T) {
 
 	apiParams := testutils.ReadParams(t, args.ParamsFile)
 
-	testutils.ValidateHttpEndpointWithFailover(t, api, apiParams, importedAPI)
+	testutils.ValidateHttpEndpointWithFailover(t, apiParams, api, importedAPI)
 }
 
-//  Import an API with the external params file that has AWS Lambda Endpoint with role supplied credentials config
-func TestEnvironmentSpecificParamsAwsLambdaWithRoleSupplied(t *testing.T) {
-	superTenantAdminUsername := superAdminUser
-	superTenantAdminPassword := superAdminPassword
+// Import an API with the external params file that has HTTP/SOAP endpoints with failover config as tenant user with
+//the Internal/devops role.
+func TestHttpSoapEndpointParamsWithFailoverTenantDevops(t *testing.T) {
+	devopsUsername := devops.UserName + "@" + TENANT1
+	devopsPassword := devops.Password
 
-	superTenantApiCreator := creator.UserName
-	superTenantApiCreatorPassword := creator.Password
+	apiCreator := creator.UserName + "@" + TENANT1
+	apiCreatorPassword := creator.Password
 
 	dev := GetDevClient()
 	prod := GetProdClient()
 
-	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
 	args := &testutils.ApiImportExportTestArgs{
-		ApiProvider: testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: superTenantAdminUsername, Password: superTenantAdminPassword},
+		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+		ParamsFile:  testutils.APIHttpSoapEndpointWithFailoverParamsFile,
+	}
+
+	testutils.ValidateAPIExport(t, args)
+
+	importedAPI := testutils.GetImportedAPI(t, args)
+
+	apiParams := testutils.ReadParams(t, args.ParamsFile)
+
+	testutils.ValidateHttpEndpointWithFailover(t, apiParams, api, importedAPI)
+}
+
+// Import an API with the external params file that has AWS Lambda Endpoint with role supplied credentials configs
+// as super tenant user with the Internal/devops role.
+func TestAwsLambdaEndpointParamsWithRoleSuppliedSuperTenantDevops(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+		ParamsFile:  testutils.APIAwsRoleSuppliedCredentialsParamsFile,
+	}
+
+	testutils.ValidateAPIExport(t, args)
+
+	importedAPI := testutils.GetImportedAPI(t, args)
+
+	apiParams := testutils.ReadParams(t, args.ParamsFile)
+
+	testutils.ValidateAwsEndpoint(t, apiParams, api, importedAPI)
+}
+
+// Import an API with the external params file that has AWS Lambda Endpoint with role supplied credentials configs
+// as tenant user with the Internal/devops role.
+func TestAwsLambdaEndpointParamsWithRoleSuppliedTenantDevops(t *testing.T) {
+	devopsUsername := devops.UserName + "@" + TENANT1
+	devopsPassword := devops.Password
+
+	apiCreator := creator.UserName + "@" + TENANT1
+	apiCreatorPassword := creator.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+		ParamsFile:  testutils.APIAwsRoleSuppliedCredentialsParamsFile,
+	}
+
+	testutils.ValidateAPIExport(t, args)
+
+	importedAPI := testutils.GetImportedAPI(t, args)
+
+	apiParams := testutils.ReadParams(t, args.ParamsFile)
+
+	testutils.ValidateAwsEndpoint(t, apiParams, api, importedAPI)
+}
+
+// Import an API with the external params file that has AWS Lambda Endpoint with stored credentials config as
+// super tenant user with the Internal/devops role.
+func TestAwsLambdaEndpointParamsWithStoredCredSuperTenantDevops(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
 		Api:         api,
 		SrcAPIM:     dev,
 		DestAPIM:    prod,
@@ -429,25 +692,26 @@ func TestEnvironmentSpecificParamsAwsLambdaWithRoleSupplied(t *testing.T) {
 
 	apiParams := testutils.ReadParams(t, args.ParamsFile)
 
-	testutils.ValidateAwsEndpoint(t, api, apiParams, importedAPI)
+	testutils.ValidateAwsEndpoint(t, apiParams, api, importedAPI)
 }
 
-//  Import an API with the external params file that has AWS Lambda Endpoint with stored credentials config
-func TestEnvironmentSpecificParamsAwsLambdaWithStoredCred(t *testing.T) {
-	superTenantAdminUsername := superAdminUser
-	superTenantAdminPassword := superAdminPassword
+// Import an API with the external params file that has AWS Lambda Endpoint with stored credentials config as
+// tenant user with the Internal/devops role.
+func TestAwsLambdaEndpointParamsWithStoredCredTenantDevops(t *testing.T) {
+	devopsUsername := devops.UserName + "@" + TENANT1
+	devopsPassword := devops.Password
 
-	superTenantApiCreator := creator.UserName
-	superTenantApiCreatorPassword := creator.Password
+	apiCreator := creator.UserName + "@" + TENANT1
+	apiCreatorPassword := creator.Password
 
 	dev := GetDevClient()
 	prod := GetProdClient()
 
-	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
 	args := &testutils.ApiImportExportTestArgs{
-		ApiProvider: testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: superTenantAdminUsername, Password: superTenantAdminPassword},
+		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
 		Api:         api,
 		SrcAPIM:     dev,
 		DestAPIM:    prod,
@@ -460,25 +724,26 @@ func TestEnvironmentSpecificParamsAwsLambdaWithStoredCred(t *testing.T) {
 
 	apiParams := testutils.ReadParams(t, args.ParamsFile)
 
-	testutils.ValidateAwsEndpoint(t, api, apiParams, importedAPI)
+	testutils.ValidateAwsEndpoint(t, apiParams, api, importedAPI)
 }
 
-//  Import an API with the external params file that has Dynamic endpoint configs
-func TestEnvironmentSpecificParamsDynamicEndpoint(t *testing.T) {
-	superTenantAdminUsername := superAdminUser
-	superTenantAdminPassword := superAdminPassword
+// Import an API with the external params file that has Dynamic endpoint config as super tenant user
+// with the Internal/devops role.
+func TestDynamicEndpointParamsSuperTenantDevops(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
 
-	superTenantApiCreator := creator.UserName
-	superTenantApiCreatorPassword := creator.Password
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
 
 	dev := GetDevClient()
 	prod := GetProdClient()
 
-	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
 	args := &testutils.ApiImportExportTestArgs{
-		ApiProvider: testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: superTenantAdminUsername, Password: superTenantAdminPassword},
+		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
 		Api:         api,
 		SrcAPIM:     dev,
 		DestAPIM:    prod,
@@ -491,7 +756,39 @@ func TestEnvironmentSpecificParamsDynamicEndpoint(t *testing.T) {
 
 	apiParams := testutils.ReadParams(t, args.ParamsFile)
 
-	testutils.ValidateDynamicEndpoint(t, api, apiParams, importedAPI)
+	testutils.ValidateDynamicEndpoint(t, apiParams, api, importedAPI)
+}
+
+// Import an API with the external params file that has Dynamic endpoint config as tenant user
+//with the Internal/devops role.
+func TestDynamicEndpointParamsTenantDevops(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+		ParamsFile:  testutils.APIDynamicEndpointParamsFile,
+	}
+
+	testutils.ValidateAPIExport(t, args)
+
+	importedAPI := testutils.GetImportedAPI(t, args)
+
+	apiParams := testutils.ReadParams(t, args.ParamsFile)
+
+	testutils.ValidateDynamicEndpoint(t, apiParams, api, importedAPI)
 }
 
 // Export an API from one environment and generate the deployment directory for that. Import it to another environment with the params
