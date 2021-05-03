@@ -50,11 +50,16 @@ type ApiProductImportExportTestArgs struct {
 }
 
 type AppImportExportTestArgs struct {
-	AppOwner    Credentials
-	CtlUser     Credentials
-	Application *apim.Application
-	SrcAPIM     *apim.Client
-	DestAPIM    *apim.Client
+	AppOwner          Credentials
+	CtlUser           Credentials
+	Application       *apim.Application
+	SrcAPIM           *apim.Client
+	DestAPIM          *apim.Client
+	PreserveOwner     bool
+	UpdateFlag        bool
+	WithKeys          bool
+	SkipKeys          bool
+	SkipSubscriptions bool
 }
 
 type ApiGetKeyTestArgs struct {
@@ -99,11 +104,11 @@ type ApiChangeLifeCycleStatusTestArgs struct {
 }
 
 type AWSInitTestArgs struct {
-	CtlUser        Credentials
-	SrcAPIM        *apim.Client
-	ApiNameFlag		 string 
+	CtlUser          Credentials
+	SrcAPIM          *apim.Client
+	ApiNameFlag      string
 	ApiStageNameFlag string
-	InitFlag       string
+	InitFlag         string
 }
 
 type GenDeploymentDirTestArgs struct {
