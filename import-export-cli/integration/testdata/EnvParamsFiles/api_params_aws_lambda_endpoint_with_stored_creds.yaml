@@ -1,0 +1,9 @@
+environments:
+  - name: production
+    configs:
+      endpointType: aws
+      awsLambdaEndpoints:
+        accessMethod: stored
+        amznRegion: us-west-1
+        amznAccessKey: jdej3kj34jk3l353k553535b353
+        amznSecretKey: 453653nk46j43kewrkj35j2kk32

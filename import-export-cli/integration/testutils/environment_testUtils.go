@@ -517,6 +517,7 @@ func ValidateHttpEndpointWithLoadBalancing(t *testing.T, api *apim.API, apiParam
 
 func ValidateHttpEndpointWithFailover(t *testing.T, api *apim.API, apiParams *Params, importedAPI *apim.API) {
 	t.Helper()
+
 	var isSaopEndpoint bool = false
 
 	//Validate EndPoint Type
@@ -564,6 +565,45 @@ func ValidateHttpEndpointWithFailover(t *testing.T, api *apim.API, apiParams *Pa
 		if isSaopEndpoint {
 			assert.Equal(t, "address", productionEndpointInApi["endpoint_type"])
 		}
+	}
+
+	same := "override_with_same_value"
+	api.SetEndpointType(same)
+	importedAPI.SetEndpointType(same)
+	api.SetEndPointConfig(same)
+	importedAPI.SetEndPointConfig(same)
+
+	ValidateAPIsEqual(t, api, importedAPI)
+}
+
+func ValidateAwsEndpoint(t *testing.T, api *apim.API, apiParams *Params, importedAPI *apim.API) {
+	t.Helper()
+
+	//Validate EndPoint Type
+	assert.Equal(t, "awslambda", importedAPI.GetEndpointType())
+
+	endPointConfigInApi := importedAPI.EndpointConfig
+	//Validate access method
+	accessMethodInParams := apiParams.Environments[0].Configs.AWSLambdaEndpoints.AccessMethod
+	accessMethodInApi := endPointConfigInApi.(map[string]interface{})["access_method"].(string)
+	accessMethodInApi = strings.ReplaceAll(accessMethodInApi, "-", "_")
+	assert.Equal(t, accessMethodInParams, accessMethodInApi)
+
+	//Validate stored mode configurations
+	if strings.EqualFold(accessMethodInApi, "stored") {
+		//Validate Amazon access key
+		accessKeyInParams := apiParams.Environments[0].Configs.AWSLambdaEndpoints.AmznAccessKey
+		accessKeyInApi := endPointConfigInApi.(map[string]interface{})["amznAccessKey"].(string)
+		assert.Equal(t, accessKeyInParams, accessKeyInApi)
+
+		//Validate Amazon access secret key
+		accessSecretKeyInApi := endPointConfigInApi.(map[string]interface{})["amznSecretKey"].(string)
+		assert.Equal(t, "AWS_SECRET_KEY", accessSecretKeyInApi)
+
+		//Validate Amazon region
+		regionInParams := apiParams.Environments[0].Configs.AWSLambdaEndpoints.AmznRegion
+		regionInApi := endPointConfigInApi.(map[string]interface{})["amznRegion"].(string)
+		assert.Equal(t, regionInParams, regionInApi)
 	}
 
 	same := "override_with_same_value"

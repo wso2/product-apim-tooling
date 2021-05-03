@@ -116,3 +116,9 @@ const APIHttpRestEndpointWithFailoverParamsFile = "testdata/EnvParamsFiles/api_p
 
 // APIHttpSoapEndpointWithFailoverParamsFile : HTTP/SOAP Endpoint with Failover URLs in api_params.yaml
 const APIHttpSoapEndpointWithFailoverParamsFile = "testdata/EnvParamsFiles/api_params_http_soap_endpoint_with_failover.yaml"
+
+// APIAwsRoleSuppliedCredentialsParamsFile : AWS Lambda Endpoint with role supplied credentials in api_params.yaml
+const APIAwsRoleSuppliedCredentialsParamsFile = "testdata/EnvParamsFiles/api_params_aws_lambda_endpoint_with_role_supplied_cred.yaml"
+
+// APIAwsStoredCredentialsParamsFile : AWS Lambda Endpoint with stored credentials in api_params.yaml
+const APIAwsStoredCredentialsParamsFile = "testdata/EnvParamsFiles/api_params_aws_lambda_endpoint_with_stored_creds.yaml"
