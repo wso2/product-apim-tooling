@@ -290,7 +290,7 @@ func validateAppExportImportWithPreserveOwner(t *testing.T, args *testutils.AppI
 	importedApp := testutils.GetApp(t, args.DestAPIM, args.Application.Name, args.AppOwner.Username, args.AppOwner.Password)
 
 	// Validate env 1 and env 2 App is equal
-	testutils.ValidateAppsEqual(t, args.Application, importedApp)
+	testutils.ValidateAppsEqual(t, args, importedApp)
 }
 
 func validateGetKeysFailure(t *testing.T, args *testutils.ApiGetKeyTestArgs) {

@@ -155,7 +155,7 @@ func TestExportImportOwnAppAdminSuperTenant(t *testing.T) {
 		PreserveOwner: true,
 	}
 
-	testutils.ValidateAppExportImport(t, args)
+	testutils.ValidateAppExportImport(t, args, true)
 }
 
 // Export an application in same tenant using an admin super tenant user and
@@ -180,7 +180,7 @@ func TestExportImportOtherAppAdminSuperTenant(t *testing.T) {
 		PreserveOwner: true,
 	}
 
-	testutils.ValidateAppExportImport(t, args)
+	testutils.ValidateAppExportImport(t, args, true)
 }
 
 // Export an application (created by super tenant admin user) and import it to another
@@ -206,7 +206,7 @@ func TestExportImportAppDevopsSuperTenant(t *testing.T) {
 		PreserveOwner: true,
 	}
 
-	testutils.ValidateAppExportImport(t, args)
+	testutils.ValidateAppExportImport(t, args, true)
 }
 
 // Export an application (created by super tenant subscriber user) with generated keys and import it to another
@@ -233,7 +233,7 @@ func TestExportImportAppWithGeneratedKeysDevopsSuperTenant(t *testing.T) {
 		WithKeys:      true,
 	}
 
-	testutils.ValidateAppExportImportGeneratedKeys(t, args, app.ApplicationID)
+	testutils.ValidateAppExportImportGeneratedKeys(t, args, app.ApplicationID, true)
 }
 
 // Export an application (created by super tenant subscriber user) with generated keys and import it to another
@@ -261,7 +261,122 @@ func TestExportImportAppWithGeneratedKeysDevopsSuperTenantBySkippingKeys(t *test
 		SkipKeys:      true,
 	}
 
-	testutils.ValidateAppExportImportGeneratedKeys(t, args, app.ApplicationID)
+	testutils.ValidateAppExportImportGeneratedKeys(t, args, app.ApplicationID, true)
+}
+
+// Export an application (created by super tenant subscriber user) with subscriptions and import it to another
+// environment while preserving the owner by a user with Internal/devops role and invoke one API
+func TestExportImportAppWithSubscriptionsDevopsSuperTenant(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	creatorUsername := creator.UserName
+	creatorPassword := creator.Password
+
+	publisherUsername := publisher.UserName
+	publisherPassword := publisher.Password
+
+	subscriberUsername := subscriber.UserName
+	subscriberPassword := subscriber.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	app := testutils.AddApp(t, dev, subscriberUsername, subscriberPassword)
+
+	// Add, deploy and publish the first API to env1 and env2
+	api1ofEnv1, api1ofEnv2 := testutils.AddAPIToTwoEnvs(t, dev, prod, creatorUsername, creatorPassword)
+	testutils.DeployAndPublishAPI(t, dev, publisherUsername, publisherPassword, api1ofEnv1.ID)
+	testutils.DeployAndPublishAPI(t, prod, publisherUsername, publisherPassword, api1ofEnv2.ID)
+
+	// Add, deploy and publish the second API to env1 and env2
+	api2ofEnv1, api2ofEnv2 := testutils.AddAPIFromOpenAPIDefinitionToTwoEnvs(t, dev,
+		prod, creatorUsername, creatorPassword)
+	testutils.DeployAndPublishAPI(t, dev, publisherUsername, publisherPassword, api2ofEnv1.ID)
+	testutils.DeployAndPublishAPI(t, prod, publisherUsername, publisherPassword, api2ofEnv2.ID)
+
+	// Create active subscriptions for APIs in env1
+	testutils.AddSubscription(t, dev, api1ofEnv1.ID, app.ApplicationID, testutils.UnlimitedPolicy,
+		subscriberUsername, subscriberPassword)
+	testutils.AddSubscription(t, dev, api2ofEnv1.ID, app.ApplicationID, testutils.UnlimitedPolicy,
+		subscriberUsername, subscriberPassword)
+
+	args := &testutils.AppImportExportTestArgs{
+		AppOwner:      testutils.Credentials{Username: subscriberUsername, Password: subscriberPassword},
+		CtlUser:       testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Application:   testutils.GetApp(t, dev, app.Name, subscriberUsername, subscriberPassword),
+		SrcAPIM:       dev,
+		DestAPIM:      prod,
+		PreserveOwner: true,
+		WithKeys:      true,
+	}
+
+	importedApplication := testutils.ValidateAppExportImportSubscriptions(t, args, app.ApplicationID, false, true)
+
+	// Generate keys for the imported application in env 2
+	applicationKey := testutils.GenerateKeys(t, args.DestAPIM, args.AppOwner.Username, args.AppOwner.Password,
+		importedApplication.ApplicationID)
+	testutils.InvokeAPI(t, testutils.GetResourceURL(args.DestAPIM, api1ofEnv2), applicationKey.Token.AccessToken, 200)
+}
+
+// Export an application (created by super tenant subscriber user) with subscriptions and import it to another
+// environment while preserving the owner by a user with Internal/devops role by skipping subscriptions.
+// Later add the subscriptions using the update flag.
+func TestExportImportAppWithSubscriptionsDevopsSuperTenantBySkippingSubscriptions(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	creatorUsername := creator.UserName
+	creatorPassword := creator.Password
+
+	publisherUsername := publisher.UserName
+	publisherPassword := publisher.Password
+
+	subscriberUsername := subscriber.UserName
+	subscriberPassword := subscriber.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	app := testutils.AddApp(t, dev, subscriberUsername, subscriberPassword)
+
+	// Add, deploy and publish the first API to env1 and env2
+	api1ofEnv1, api1ofEnv2 := testutils.AddAPIToTwoEnvs(t, dev, prod, creatorUsername, creatorPassword)
+	testutils.DeployAndPublishAPI(t, dev, publisherUsername, publisherPassword, api1ofEnv1.ID)
+	testutils.DeployAndPublishAPI(t, prod, publisherUsername, publisherPassword, api1ofEnv2.ID)
+
+	// Add, deploy and publish the second API to env1 and env2
+	api2ofEnv1, api2ofEnv2 := testutils.AddAPIFromOpenAPIDefinitionToTwoEnvs(t, dev,
+		prod, creatorUsername, creatorPassword)
+	testutils.DeployAndPublishAPI(t, dev, publisherUsername, publisherPassword, api2ofEnv1.ID)
+	testutils.DeployAndPublishAPI(t, prod, publisherUsername, publisherPassword, api2ofEnv2.ID)
+
+	// Create active subscriptions for APIs in env1
+	testutils.AddSubscription(t, dev, api1ofEnv1.ID, app.ApplicationID, testutils.UnlimitedPolicy,
+		subscriberUsername, subscriberPassword)
+	testutils.AddSubscription(t, dev, api2ofEnv1.ID, app.ApplicationID, testutils.UnlimitedPolicy,
+		subscriberUsername, subscriberPassword)
+
+	args := &testutils.AppImportExportTestArgs{
+		AppOwner:          testutils.Credentials{Username: subscriberUsername, Password: subscriberPassword},
+		CtlUser:           testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Application:       testutils.GetApp(t, dev, app.Name, subscriberUsername, subscriberPassword),
+		SrcAPIM:           dev,
+		DestAPIM:          prod,
+		PreserveOwner:     true,
+		WithKeys:          true,
+		SkipSubscriptions: true,
+	}
+
+	// Here the imported application without the subscriptions will get validated
+	testutils.ValidateAppExportImportSubscriptions(t, args, app.ApplicationID, false, true)
+
+	// Make skip subscriptions false and update true, so that the imported application in env 2 will get
+	// updated with the subscriptions
+	args.SkipSubscriptions = false
+	args.UpdateFlag = true
+	// Here the imported application with the subscriptions will get validated
+	testutils.ValidateAppExportImportSubscriptions(t, args, app.ApplicationID, true, false)
 }
 
 // Export an application in same tenant using an admin tenant user and
@@ -284,7 +399,7 @@ func TestExportImportOwnAppAdminTenant(t *testing.T) {
 		PreserveOwner: true,
 	}
 
-	testutils.ValidateAppExportImport(t, args)
+	testutils.ValidateAppExportImport(t, args, true)
 }
 
 // Export an application belongs to another user in same tenant using an admin tenant user
@@ -310,7 +425,7 @@ func TestExportImportOtherAppAdminTenant(t *testing.T) {
 		PreserveOwner: true,
 	}
 
-	testutils.ValidateAppExportImport(t, args)
+	testutils.ValidateAppExportImport(t, args, true)
 }
 
 // Export an application (created by tenant admin user) and import it to another
@@ -336,7 +451,7 @@ func TestExportImportAppDevopsTenant(t *testing.T) {
 		PreserveOwner: true,
 	}
 
-	testutils.ValidateAppExportImport(t, args)
+	testutils.ValidateAppExportImport(t, args, true)
 }
 
 // Export an application (created by tenant subscriber user) with generated keys and import it to another
@@ -363,7 +478,7 @@ func TestExportImportAppWithGeneratedKeysDevopsTenant(t *testing.T) {
 		WithKeys:      true,
 	}
 
-	testutils.ValidateAppExportImportGeneratedKeys(t, args, app.ApplicationID)
+	testutils.ValidateAppExportImportGeneratedKeys(t, args, app.ApplicationID, true)
 }
 
 // Export an application (created by tenant subscriber user) with generated keys and import it to another
@@ -391,7 +506,122 @@ func TestExportImportAppWithGeneratedKeysDevopsTenantBySkippingKeys(t *testing.T
 		SkipKeys:      true,
 	}
 
-	testutils.ValidateAppExportImportGeneratedKeys(t, args, app.ApplicationID)
+	testutils.ValidateAppExportImportGeneratedKeys(t, args, app.ApplicationID, true)
+}
+
+// Export an application (created by tenant subscriber user) with subscriptions and import it to another
+// environment while preserving the owner by a user with Internal/devops role and invoke one API
+func TestExportImportAppWithSubscriptionsDevopsTenant(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	tenantCreatorUsername := creator.UserName + "@" + TENANT1
+	tenantCreatorPassword := creator.Password
+
+	tenantPublisherUsername := publisher.UserName + "@" + TENANT1
+	tenantPublisherPassword := publisher.Password
+
+	tenantSubscriberUsername := subscriber.UserName + "@" + TENANT1
+	tenantSubscriberPassword := subscriber.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	app := testutils.AddApp(t, dev, tenantSubscriberUsername, tenantSubscriberPassword)
+
+	// Add, deploy and publish the first API to env1 and env2
+	api1ofEnv1, api1ofEnv2 := testutils.AddAPIToTwoEnvs(t, dev, prod, tenantCreatorUsername, tenantCreatorPassword)
+	testutils.DeployAndPublishAPI(t, dev, tenantPublisherUsername, tenantPublisherPassword, api1ofEnv1.ID)
+	testutils.DeployAndPublishAPI(t, prod, tenantPublisherUsername, tenantPublisherPassword, api1ofEnv2.ID)
+
+	// Add, deploy and publish the second API to env1 and env2
+	api2ofEnv1, api2ofEnv2 := testutils.AddAPIFromOpenAPIDefinitionToTwoEnvs(t, dev,
+		prod, tenantCreatorUsername, tenantCreatorPassword)
+	testutils.DeployAndPublishAPI(t, dev, tenantPublisherUsername, tenantPublisherPassword, api2ofEnv1.ID)
+	testutils.DeployAndPublishAPI(t, prod, tenantPublisherUsername, tenantPublisherPassword, api2ofEnv2.ID)
+
+	// Create active subscriptions for APIs in env1
+	testutils.AddSubscription(t, dev, api1ofEnv1.ID, app.ApplicationID, testutils.UnlimitedPolicy,
+		tenantSubscriberUsername, tenantSubscriberPassword)
+	testutils.AddSubscription(t, dev, api2ofEnv1.ID, app.ApplicationID, testutils.UnlimitedPolicy,
+		tenantSubscriberUsername, tenantSubscriberPassword)
+
+	args := &testutils.AppImportExportTestArgs{
+		AppOwner:      testutils.Credentials{Username: tenantSubscriberUsername, Password: tenantSubscriberPassword},
+		CtlUser:       testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		Application:   testutils.GetApp(t, dev, app.Name, tenantSubscriberUsername, tenantSubscriberPassword),
+		SrcAPIM:       dev,
+		DestAPIM:      prod,
+		PreserveOwner: true,
+		WithKeys:      true,
+	}
+
+	importedApplication := testutils.ValidateAppExportImportSubscriptions(t, args, app.ApplicationID, false, true)
+
+	// Generate keys for the imported application in env 2
+	applicationKey := testutils.GenerateKeys(t, args.DestAPIM, args.AppOwner.Username, args.AppOwner.Password,
+		importedApplication.ApplicationID)
+	testutils.InvokeAPI(t, testutils.GetResourceURL(args.DestAPIM, api1ofEnv2), applicationKey.Token.AccessToken, 200)
+}
+
+// Export an application (created by tenant subscriber user) with subscriptions and import it to another
+// environment while preserving the owner by a user with Internal/devops role by skipping subscriptions.
+// Later add the subscriptions using the update flag.
+func TestExportImportAppWithSubscriptionsDevopsTenantBySkippingSubscriptions(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	tenantCreatorUsername := creator.UserName + "@" + TENANT1
+	tenantCreatorPassword := creator.Password
+
+	tenantPublisherUsername := publisher.UserName + "@" + TENANT1
+	tenantPublisherPassword := publisher.Password
+
+	tenantSubscriberUsername := subscriber.UserName + "@" + TENANT1
+	tenantSubscriberPassword := subscriber.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	app := testutils.AddApp(t, dev, tenantSubscriberUsername, tenantSubscriberPassword)
+
+	// Add, deploy and publish the first API to env1 and env2
+	api1ofEnv1, api1ofEnv2 := testutils.AddAPIToTwoEnvs(t, dev, prod, tenantCreatorUsername, tenantCreatorPassword)
+	testutils.DeployAndPublishAPI(t, dev, tenantPublisherUsername, tenantPublisherPassword, api1ofEnv1.ID)
+	testutils.DeployAndPublishAPI(t, prod, tenantPublisherUsername, tenantPublisherPassword, api1ofEnv2.ID)
+
+	// Add, deploy and publish the second API to env1 and env2
+	api2ofEnv1, api2ofEnv2 := testutils.AddAPIFromOpenAPIDefinitionToTwoEnvs(t, dev,
+		prod, tenantCreatorUsername, tenantCreatorPassword)
+	testutils.DeployAndPublishAPI(t, dev, tenantPublisherUsername, tenantPublisherPassword, api2ofEnv1.ID)
+	testutils.DeployAndPublishAPI(t, prod, tenantPublisherUsername, tenantPublisherPassword, api2ofEnv2.ID)
+
+	// Create active subscriptions for APIs in env1
+	testutils.AddSubscription(t, dev, api1ofEnv1.ID, app.ApplicationID, testutils.UnlimitedPolicy,
+		tenantSubscriberUsername, tenantSubscriberPassword)
+	testutils.AddSubscription(t, dev, api2ofEnv1.ID, app.ApplicationID, testutils.UnlimitedPolicy,
+		tenantSubscriberUsername, tenantSubscriberPassword)
+
+	args := &testutils.AppImportExportTestArgs{
+		AppOwner:          testutils.Credentials{Username: tenantSubscriberUsername, Password: tenantSubscriberPassword},
+		CtlUser:           testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		Application:       testutils.GetApp(t, dev, app.Name, tenantSubscriberUsername, tenantSubscriberPassword),
+		SrcAPIM:           dev,
+		DestAPIM:          prod,
+		PreserveOwner:     true,
+		WithKeys:          true,
+		SkipSubscriptions: true,
+	}
+
+	// Here the imported application without the subscriptions will get validated
+	testutils.ValidateAppExportImportSubscriptions(t, args, app.ApplicationID, false, true)
+
+	// Make skip subscriptions false and update true, so that the imported application in env 2 will get
+	// updated with the subscriptions
+	args.SkipSubscriptions = false
+	args.UpdateFlag = true
+	// Here the imported application with the subscriptions will get validated
+	testutils.ValidateAppExportImportSubscriptions(t, args, app.ApplicationID, true, false)
 }
 
 // Export an application in a cross tenant using an admin tenant user

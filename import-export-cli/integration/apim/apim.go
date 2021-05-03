@@ -207,7 +207,7 @@ func (instance *Client) GenerateAdditionalProperties(provider, endpointUrl, apiT
 	"version":"1.0.5",
 	"context":"` + getContext(provider) + `",
 	"policies":[
-	   "Bronze"
+	   "Unlimited"
 	],
 	`
 	if operations != nil && len(operations) > 0 {
@@ -1204,6 +1204,32 @@ func (instance *Client) PublishAPI(apiID string) {
 	defer response.Body.Close()
 
 	base.ValidateAndLogResponse("apim.PublishAPI()", response, 200)
+}
+
+// GetApplicationSubscriptions : Get subscriptions of an application
+func (instance *Client) GetApplicationSubscriptions(appID string) *SubscriptionList {
+	appsURL := instance.devPortalRestURL + "/subscriptions"
+
+	request := base.CreateGet(appsURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	values := url.Values{}
+	values.Add("applicationId", appID)
+
+	request.URL.RawQuery = values.Encode()
+
+	base.LogRequest("apim.GetApplicationSubscriptions()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.GetApplicationSubscriptions()", response, 200)
+
+	var subscriptionsList SubscriptionList
+	json.NewDecoder(response.Body).Decode(&subscriptionsList)
+	return &subscriptionsList
 }
 
 // AddSubscription : Subscribe an App to a given API in APIM

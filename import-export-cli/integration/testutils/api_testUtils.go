@@ -93,6 +93,12 @@ func CreateAndDeployAPIRevision(t *testing.T, client *apim.Client, username, pas
 	client.DeployAPIRevision(t, apiID, revision)
 }
 
+func DeployAndPublishAPI(t *testing.T, client *apim.Client, username, password, apiID string) {
+	CreateAndDeployAPIRevision(t, client, username, password, apiID)
+	PublishAPI(client, username, password, apiID)
+	base.WaitForIndexing()
+}
+
 func GetDeployedAPIRevisions(t *testing.T, client *apim.Client, username, password,
 	apiID string) *apim.APIRevisionList {
 	client.Login(username, password)
