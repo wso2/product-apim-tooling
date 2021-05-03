@@ -1,7 +1,26 @@
 #!/bin/bash
 
-APIM_DOWNLOAD='https://wso2.org/jenkins/job/products/job/product-apim/lastStableBuild/artifact/target/checkout/modules/distribution/product/target/wso2am-4.0.0.zip'
-APIM_PACK=wso2am-4.0.0
+while getopts d:n: FLAG
+do
+    case "${FLAG}" in
+        d) DOWNLOAD_LINK=${OPTARG};;
+        n) NAME=${OPTARG};;
+    esac
+done
+
+if [ -z "$DOWNLOAD_LINK" ]
+then 
+    APIM_DOWNLOAD='https://wso2.org/jenkins/job/products/job/product-apim/lastStableBuild/org.wso2.am$wso2am/artifact/org.wso2.am/wso2am/4.0.0-SNAPSHOT/wso2am-4.0.0-SNAPSHOT.zip'
+else
+    APIM_DOWNLOAD=$DOWNLOAD_LINK
+fi
+
+if [ -z "$NAME" ]
+then 
+    APIM_PACK=wso2am-4.0.0
+else
+    APIM_PACK=$NAME
+fi
 
 wget $APIM_DOWNLOAD
 
