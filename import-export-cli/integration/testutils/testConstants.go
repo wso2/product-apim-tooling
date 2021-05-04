@@ -51,6 +51,8 @@ const TestCase2JpegPath = TestArtifact2Path + "/icon.jpeg"
 const TestCase2DestJpegPathSuffix = "/Image/icon.jpeg"
 const TestDefaultExtractedFileName = "/SwaggerPetstoreNew-1.0.0"
 
+const EnvParamsFilesDir = "testdata/EnvParamsFiles"
+
 // APIEndpointParamsFile : Endpoint URL api_params.yaml
 const APIEndpointParamsFile = EnvParamsFilesDir + "/api_params_endpoint.yaml"
 
@@ -98,8 +100,6 @@ const GraphQLEndpoint = "http://www.mocky.io/v2/5ea84def2d0000a52d3a3ecd"
 
 // Web Socket API Endpoint URL
 const WebSocketEndpoint = "ws://echo.websocket.org:80"
-
-const EnvParamsFilesDir = "testdata/EnvParamsFiles"
 
 // APIHttpRestEndpointWithoutLoadBalancingOrFailoverParamsFile : HTTP/REST Endpoint without Loadbalancing and Failover URLs in api_params.yaml
 const APIHttpRestEndpointWithoutLoadBalancingOrFailoverParamsFile = EnvParamsFilesDir + "/api_params_http_rest_endpoint_without_lb_or_failover.yaml"
