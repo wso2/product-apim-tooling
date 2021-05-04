@@ -82,6 +82,9 @@ const CertificatesDirectoryPath = "testdata/TestArtifactDirectory/certificates"
 // UnlimitedPolicy : Unlimited Throttle Policy
 const UnlimitedPolicy = "Unlimited"
 
+// TenPerMinAppThrottlingPolicy: 10 per min application throttling policy
+const TenPerMinAppThrottlingPolicy = "10PerMin"
+
 // API types
 const APITypeREST = "HTTP"
 const APITypeSoap = "SOAP"

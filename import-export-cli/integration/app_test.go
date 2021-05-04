@@ -690,6 +690,120 @@ func TestExportCrossTenantAppDevopsSuperTenant(t *testing.T) {
 	testutils.ValidateAppExportFailure(t, args)
 }
 
+// Export an application from one environment and import it as a directory
+// to another environment as a super tenant user with Internal/devops role
+func TestImportAppAsDirectorySuperTenantDevops(t *testing.T) {
+	subscriberUsername := subscriber.UserName
+	subscriberPassword := subscriber.Password
+
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	app := testutils.AddApp(t, dev, subscriberUsername, subscriberPassword)
+
+	args := &testutils.AppImportExportTestArgs{
+		AppOwner:      testutils.Credentials{Username: subscriberUsername, Password: subscriberPassword},
+		CtlUser:       testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Application:   app,
+		SrcAPIM:       dev,
+		DestAPIM:      prod,
+		PreserveOwner: true,
+	}
+
+	testutils.ValidateExportAppAndDirectoryImport(t, args, true)
+}
+
+// Export an application from one environment and import it as a directory
+// to another environment as a tenant user with Internal/devops role
+func TestImportAppAsDirectoryTenantDevops(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	tenantSubscriberUsername := subscriber.UserName + "@" + TENANT1
+	tenantSubscriberPassword := subscriber.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	app := testutils.AddApp(t, dev, tenantSubscriberUsername, tenantSubscriberPassword)
+
+	args := &testutils.AppImportExportTestArgs{
+		AppOwner:      testutils.Credentials{Username: tenantSubscriberUsername, Password: tenantSubscriberPassword},
+		CtlUser:       testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		Application:   app,
+		SrcAPIM:       dev,
+		DestAPIM:      prod,
+		PreserveOwner: true,
+	}
+
+	testutils.ValidateExportAppAndDirectoryImport(t, args, true)
+}
+
+// Export an application (created by super tenant subscriber user) and import it to another
+// environment while preserving the owner by a user with Internal/devops role.
+// Later update the description and throttling tier.
+func TestExportImportAppDevopsSuperTenantUpdateMetadata(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	subscriberUsername := subscriber.UserName
+	subscriberPassword := subscriber.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	app := testutils.AddApp(t, dev, subscriberUsername, subscriberPassword)
+
+	args := &testutils.AppImportExportTestArgs{
+		AppOwner:      testutils.Credentials{Username: subscriberUsername, Password: subscriberPassword},
+		CtlUser:       testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Application:   app,
+		SrcAPIM:       dev,
+		DestAPIM:      prod,
+		PreserveOwner: true,
+	}
+
+	// Export the application from env 1 and import to env 2
+	testutils.ValidateAppExportImport(t, args, false)
+
+	// Update the application description and the throttling policy and import it
+	testutils.ValidateAppMetaDataUpdateImport(t, args, true)
+}
+
+// Export an application (created by tenant subscriber user) and import it to another
+// environment while preserving the owner by a user with Internal/devops role.
+// Later update the description and throttling tier.
+func TestExportImportAppDevopsTenantUpdateMetadata(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	tenantSubscriberUsername := subscriber.UserName + "@" + TENANT1
+	tenantSubscriberPassword := subscriber.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	app := testutils.AddApp(t, dev, tenantSubscriberUsername, tenantSubscriberPassword)
+
+	args := &testutils.AppImportExportTestArgs{
+		AppOwner:      testutils.Credentials{Username: tenantSubscriberUsername, Password: tenantSubscriberPassword},
+		CtlUser:       testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		Application:   app,
+		SrcAPIM:       dev,
+		DestAPIM:      prod,
+		PreserveOwner: true,
+	}
+
+	// Export the application from env 1 and import to env 2
+	testutils.ValidateAppExportImport(t, args, false)
+
+	// Update the application description and the throttling policy and import it
+	testutils.ValidateAppMetaDataUpdateImport(t, args, true)
+}
+
 // TODO: Secondary user store test cases, need to enabled when later on when secondary user store creation is automated
 /*
 func TestExportAppSecondaryUserStoreAdminSuperTenant(t *testing.T) {

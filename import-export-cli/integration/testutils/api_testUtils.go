@@ -608,6 +608,11 @@ func validateAPIStructure(t *testing.T, fileData *[]byte, sampleFile string) {
 			t.Error("Missing \"" + keyValue + "\" in the API DTO structure from APIM")
 		}
 	}
+
+	t.Cleanup(func() {
+		// Remove extracted directory
+		base.RemoveDir(relativePath)
+	})
 }
 
 func GetImportedAPI(t *testing.T, args *ApiImportExportTestArgs) *apim.API {

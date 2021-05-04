@@ -69,6 +69,7 @@ type AppImportExportTestArgs struct {
 	WithKeys          bool
 	SkipKeys          bool
 	SkipSubscriptions bool
+	ImportFilePath    string
 }
 
 type ApiGetKeyTestArgs struct {

@@ -19,14 +19,19 @@
 package testutils
 
 import (
+	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"gopkg.in/yaml.v2"
+	yaml2 "gopkg.in/yaml.v2"
 )
 
 func AddApp(t *testing.T, client *apim.Client, username string, password string) *apim.Application {
@@ -98,7 +103,14 @@ func exportApp(t *testing.T, args *AppImportExportTestArgs) (string, error) {
 }
 
 func importApp(t *testing.T, args *AppImportExportTestArgs, doClean bool) (string, error) {
-	fileName := base.GetApplicationArchiveFilePath(t, args.SrcAPIM.EnvName, args.Application.Name, args.Application.Owner)
+	var fileName string
+	if args.ImportFilePath == "" {
+		fileName = base.GetApplicationArchiveFilePath(t, args.SrcAPIM.EnvName, args.Application.Name,
+			args.Application.Owner)
+	} else {
+		fileName = args.ImportFilePath
+	}
+
 	output, err := base.Execute(t, "import", "app", "-f", fileName, "--preserve-owner="+strconv.FormatBool(args.PreserveOwner),
 		"--update="+strconv.FormatBool(args.UpdateFlag), "--skip-keys="+strconv.FormatBool(args.SkipKeys),
 		"--skip-subscriptions="+strconv.FormatBool(args.SkipSubscriptions), "-e", args.DestAPIM.EnvName, "-k", "--verbose")
@@ -134,7 +146,7 @@ func ValidateAppExportFailure(t *testing.T, args *AppImportExportTestArgs) {
 		args.Application.Name, args.AppOwner.Username))
 }
 
-func ValidateAppExport(t *testing.T, args *AppImportExportTestArgs) {
+func ValidateAppExport(t *testing.T, args *AppImportExportTestArgs) string {
 	t.Helper()
 
 	// Setup apictl env
@@ -143,14 +155,16 @@ func ValidateAppExport(t *testing.T, args *AppImportExportTestArgs) {
 	// Attempt exporting app from env
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	exportApp(t, args)
+	output, _ := exportApp(t, args)
 
 	// Validate that export passed
 	assert.True(t, base.IsApplicationArchiveExists(t, getEnvAppExportPath(args.SrcAPIM.GetEnvName()),
 		args.Application.Name, args.AppOwner.Username))
+
+	return output
 }
 
-func validateAppImport(t *testing.T, args *AppImportExportTestArgs, doClean bool) *apim.Application {
+func ValidateAppImport(t *testing.T, args *AppImportExportTestArgs, doClean bool) *apim.Application {
 	t.Helper()
 
 	// Setup apictl envs
@@ -168,6 +182,48 @@ func validateAppImport(t *testing.T, args *AppImportExportTestArgs, doClean bool
 	ValidateAppsEqual(t, args, importedApp)
 
 	return importedApp
+}
+
+func ValidateExportAppAndDirectoryImport(t *testing.T, args *AppImportExportTestArgs, doClean bool) {
+	// Export the application from env 1
+	output := ValidateAppExport(t, args)
+
+	// Unzip exported application
+	exportedPath := base.GetExportedPathFromOutput(output)
+	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
+	base.Unzip(relativePath, exportedPath)
+
+	args.ImportFilePath = relativePath + string(os.PathSeparator) + args.Application.Owner +
+		"-" + args.Application.Name
+	ValidateAppImport(t, args, doClean)
+
+	if doClean {
+		t.Cleanup(func() {
+			// Remove extracted directory
+			base.RemoveDir(relativePath)
+		})
+	}
+}
+
+func ValidateAppMetaDataUpdateImport(t *testing.T, args *AppImportExportTestArgs, doClean bool) {
+
+	// Construct the exported application path
+	mainConfig := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
+	exportedAppPath := mainConfig.Config.ExportDirectory + string(os.PathSeparator) +
+		utils.ExportedAppsDirName + string(os.PathSeparator) +
+		base.GetApplicationArchiveFilePath(t, args.SrcAPIM.EnvName, args.Application.Name, args.Application.Owner)
+
+	// Unzip exported application
+	relativePath := strings.ReplaceAll(exportedAppPath, ".zip", "")
+	base.Unzip(relativePath, exportedAppPath)
+
+	args.ImportFilePath = relativePath + string(os.PathSeparator) + args.Application.Owner +
+		"-" + args.Application.Name
+	args.Application = UpdateApplicationMetaData(t, args)
+
+	// Make the update flag true
+	args.UpdateFlag = true
+	ValidateAppImport(t, args, false)
 }
 
 func ValidateAppExportImport(t *testing.T, args *AppImportExportTestArgs, doClean bool) *apim.Application {
@@ -229,7 +285,7 @@ func ValidateAppExportImportSubscriptions(t *testing.T, args *AppImportExportTes
 		// Export an application from env 1 and import it to env 2
 		importedApplication = ValidateAppExportImport(t, args, doClean)
 	} else {
-		importedApplication = validateAppImport(t, args, doClean)
+		importedApplication = ValidateAppImport(t, args, doClean)
 	}
 
 	// Get the subscriptions of the imported application in env 1
@@ -268,7 +324,7 @@ func ValidateAppsEqual(t *testing.T, args *AppImportExportTestArgs, app2 *apim.A
 		app2Copy.SubscriptionScopes = []string{same}
 	}
 
-	assert.Equal(t, app1Copy, app2Copy, "Application obejcts are not equal")
+	assert.Equal(t, app1Copy, app2Copy, "Application objects are not equal")
 
 }
 
@@ -340,4 +396,34 @@ func OverrideDifferedPropertiesOfSubscriptions(subscriptionsList1 *apim.Subscrip
 		subscriptionsList1Copy.List = append(subscriptionsList1Copy.List, subscription)
 	}
 	return &subscriptionsList1Copy
+}
+
+func UpdateApplicationMetaData(t *testing.T, args *AppImportExportTestArgs) *apim.Application {
+	applicationDefinitionFilePath := args.ImportFilePath + string(os.PathSeparator) + utils.ApplicationDefinitionFileYaml
+	// Read the application.yaml file in the exported directory
+	applicationData, err := ioutil.ReadFile(applicationDefinitionFilePath)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Extract the content to a structure
+	applicationContent := apim.ApplicationFile{}
+	err = yaml.Unmarshal(applicationData, &applicationContent)
+	if err != nil {
+		t.Error(err)
+	}
+	applicationContent.Data.ApplicationInfo.Description = "Updated"
+	applicationContent.Data.ApplicationInfo.ThrottlingPolicy = TenPerMinAppThrottlingPolicy
+
+	updatedApplicationData, err := yaml2.Marshal(applicationContent)
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = ioutil.WriteFile(applicationDefinitionFilePath, updatedApplicationData, os.ModePerm)
+	if err != nil {
+		t.Error(err)
+	}
+
+	return &applicationContent.Data.ApplicationInfo
 }
