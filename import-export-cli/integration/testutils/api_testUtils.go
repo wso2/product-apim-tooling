@@ -860,50 +860,6 @@ func validateAPIIsDeleted(t *testing.T, api *apim.API, apisListAfterDelete *apim
 	}
 }
 
-func ImportApiFromProject(t *testing.T, projectName string, client *apim.Client, apiName string, credentials *Credentials, isCleanup, isPreserveProvider bool) (string, error) {
-	projectPath, _ := filepath.Abs(projectName)
-	output, err := base.Execute(t, "import", "api", "-f", projectPath, "-e", client.GetEnvName(), "-k", "--verbose", "--preserve-provider="+strconv.FormatBool(isPreserveProvider))
-
-	base.WaitForIndexing()
-
-	if isCleanup {
-		t.Cleanup(func() {
-			username, password := apim.RetrieveAdminCredentialsInsteadCreator(credentials.Username, credentials.Password)
-			client.Login(username, password)
-			err := client.DeleteAPIByName(apiName)
-
-			if err != nil {
-				t.Fatal(err)
-			}
-			base.WaitForIndexing()
-		})
-	}
-
-	return output, err
-}
-
-func ImportApiFromProjectWithUpdate(t *testing.T, projectName string, client *apim.Client, apiName string, credentials *Credentials, isCleanup bool) (string, error) {
-	projectPath, _ := filepath.Abs(projectName)
-	output, err := base.Execute(t, "import", "api", "-f", projectPath, "-e", client.GetEnvName(), "-k", "--update", "--verbose")
-
-	base.WaitForIndexing()
-
-	if isCleanup {
-		t.Cleanup(func() {
-			username, password := apim.RetrieveAdminCredentialsInsteadCreator(credentials.Username, credentials.Password)
-			client.Login(username, password)
-			err := client.DeleteAPIByName(apiName)
-
-			if err != nil {
-				t.Fatal(err)
-			}
-			base.WaitForIndexing()
-		})
-	}
-
-	return output, err
-}
-
 func ValidateChangeLifeCycleStatusOfAPI(t *testing.T, args *ApiChangeLifeCycleStatusTestArgs) {
 	t.Helper()
 

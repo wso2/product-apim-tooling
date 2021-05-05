@@ -21,6 +21,7 @@ package testutils
 const CustomTestExportDirectory = "CustomExportDirectory"
 const TestSwagger2DefinitionPath = "testdata/swagger2Definition.yaml"
 const TestOpenAPI3DefinitionPath = "testdata/openAPI3Definition.yaml"
+const TestOpenAPI3DefinitionWithoutEndpointsPath = "testdata/openAPI3DefinitionWithoutEndpoints.yaml"
 const TestOpenAPISpecificationURL = "https://petstore.swagger.io/v2/swagger.json"
 const TestMigrationDirectorySuffix = "/migration"
 
@@ -29,6 +30,7 @@ const DefaultApictlTestAppName = "default-apictl-app"
 //Export test cases
 const DevFirstDefaultAPIName = "SwaggerPetstoreNew"
 const DevFirstSwagger2APIName = "PizzaShackAPI"
+const OpenAPI3DefinitionWithoutEndpointsAPIName = "PizzaShackAPI"
 const DevFirstDefaultAPIVersion = "1.0.0"
 const APIYamlFilePath = "api.yaml"
 const DeploymentEnvYamlFilePath = "deployment_environments.yaml"
@@ -72,6 +74,9 @@ const APISecurityBasicParamsFile = EnvParamsFilesDir + "/api_params_security_bas
 
 // APIFullParamsFile : Full api_params.yaml
 const APIFullParamsFile = EnvParamsFilesDir + "/api_params_full.yaml"
+
+// APIDynamicDataParamsFile : api_params.yaml with dynamic data
+const APIDynamicDataParamsFile = EnvParamsFilesDir + "/api_params_dynamic_data.yaml"
 
 // APIProductFullParamsFile : Full api_product_params.yaml
 const APIProductFullParamsFile = EnvParamsFilesDir + "/api_product_params_full.yaml"

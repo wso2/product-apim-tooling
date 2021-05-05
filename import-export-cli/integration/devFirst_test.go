@@ -181,7 +181,7 @@ func TestImportProjectCreatedFromSwagger2Definition(t *testing.T) {
 	}
 
 	//Assert that project import to publisher portal is successful
-	testutils.ValidateImportProject(t, args)
+	testutils.ValidateImportProject(t, args, "")
 }
 
 //Import API from initialized project with openAPI 3 definition
@@ -201,7 +201,7 @@ func TestImportProjectCreatedFromOpenAPI3Definition(t *testing.T) {
 	}
 
 	//Assert that project import to publisher portal is successful
-	testutils.ValidateImportProject(t, args)
+	testutils.ValidateImportProject(t, args, "")
 }
 
 //Import API from initialized project from API definition which is already in publisher without --update flag
@@ -221,10 +221,10 @@ func TestImportProjectCreatedFailWhenAPIIsExisted(t *testing.T) {
 	}
 
 	//Import API for the First time
-	testutils.ValidateImportProject(t, args)
+	testutils.ValidateImportProject(t, args, "")
 
 	//Import API for the second time
-	testutils.ValidateImportProjectFailed(t, args)
+	testutils.ValidateImportProjectFailed(t, args, "")
 }
 
 //Import API from initialized project from API definition which is already in publisher with --update flag
@@ -244,7 +244,7 @@ func TestImportProjectCreatedPassWhenAPIIsExisted(t *testing.T) {
 	}
 
 	//Import API for the First time
-	testutils.ValidateImportProject(t, args)
+	testutils.ValidateImportProject(t, args, "")
 
 	//Import API for the second time with update flag
 	testutils.ValidateImportUpdateProject(t, args)

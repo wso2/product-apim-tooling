@@ -100,7 +100,6 @@ type InitTestArgs struct {
 	ForceFlag      bool
 	OasFlag        string
 	APIName        string
-	srcAPIM        *apim.Client
 }
 
 type ApiChangeLifeCycleStatusTestArgs struct {
