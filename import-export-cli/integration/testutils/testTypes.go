@@ -20,6 +20,13 @@ package testutils
 
 import "github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 
+type TestCaseUsers struct {
+	Description  string
+	ApiCreator   Credentials
+	ApiPublisher Credentials
+	CtlUser      Credentials
+}
+
 type Credentials struct {
 	Username string
 	Password string
@@ -34,6 +41,8 @@ type ApiImportExportTestArgs struct {
 	OverrideProvider bool
 	ParamsFile       string
 	ImportFilePath   string
+	Revision         string
+	IsDeployed       bool
 }
 
 type ApiProductImportExportTestArgs struct {

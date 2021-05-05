@@ -51,6 +51,19 @@ func CreatePost(url string, body io.Reader) *http.Request {
 	return req
 }
 
+// CreatePut : Construct PUT http request
+func CreatePut(url string, body io.Reader) *http.Request {
+	Log("base.CreatePut() - url:", url)
+
+	req, err := http.NewRequest("PUT", url, body)
+
+	if err != nil {
+		Fatal(err)
+	}
+
+	return req
+}
+
 // CreatePostEmptyBody : Construct POST http request with empty body
 func CreatePostEmptyBody(url string) *http.Request {
 	Log("base.CreatePostEmptyBody() - url:", url)
