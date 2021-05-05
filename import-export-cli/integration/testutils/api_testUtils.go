@@ -300,7 +300,7 @@ func GetEnvAPIProductExportPath(envName string) string {
 	return filepath.Join(utils.DefaultExportDirPath, utils.ExportedApiProductsDirName, envName)
 }
 
-func exportAPI(t *testing.T, name string, version string, provider string, env string) (string, error) {
+func exportAPI(t *testing.T, name, version, provider, env string) (string, error) {
 	var output string
 	var err error
 
@@ -317,7 +317,7 @@ func exportAPI(t *testing.T, name string, version string, provider string, env s
 	return output, err
 }
 
-func exportAPIRevision(t *testing.T, name string, version string, provider string, revision string, env string) (string, error) {
+func exportAPIRevision(t *testing.T, name, version, provider, revision, env string) (string, error) {
 	var output string
 	var err error
 
@@ -554,7 +554,6 @@ func validateAPI(t *testing.T, api *apim.API, exportedOutput string, isDeployed 
 	}
 
 	validateAPIStructure(t, &fileData, sampleFile)
-	//validateAPIValues(t, &fileData, api)
 
 	if isDeployed {
 		assert.True(t, base.IsFileAvailable(t, filepath.Join(unzipedProjectPath, DeploymentEnvYamlFilePath)), "Expected deployment_environments.yaml not found")
@@ -609,17 +608,6 @@ func validateAPIStructure(t *testing.T, fileData *[]byte, sampleFile string) {
 			t.Error("Missing \"" + keyValue + "\" in the API DTO structure from APIM")
 		}
 	}
-}
-
-func validateAPIValues(t *testing.T, fileData *[]byte, api *apim.API) {
-	// Extract the "data" field to an interface
-	exportedAPIDefinition := apim.APIFile{}
-	err := yaml.Unmarshal(*fileData, &exportedAPIDefinition)
-	if err != nil {
-		t.Error(err)
-	}
-
-	ValidateAPIsEqual(t, api, &exportedAPIDefinition.Data)
 }
 
 func GetImportedAPI(t *testing.T, args *ApiImportExportTestArgs) *apim.API {
