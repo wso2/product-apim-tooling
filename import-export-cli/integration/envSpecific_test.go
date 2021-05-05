@@ -19,6 +19,7 @@
 package integration
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -98,9 +99,24 @@ func TestEnvironmentSpecificParamsEndpointRetryTimeout(t *testing.T) {
 	apiParams := testutils.ReadParams(t, args.ParamsFile)
 
 	assert.Equal(t, apiParams.Environments[0].Configs.Endpoints.Production["url"], importedAPI.GetProductionURL())
+	paramConfig := apiParams.Environments[0].Configs.Endpoints.Production["config"].(map[interface{}]interface{})
+
+	apiEndpointConfig := importedAPI.GetProductionConfig()
+
+	for k, v := range paramConfig {
+		key := fmt.Sprintf("%v", k)
+		value := fmt.Sprintf("%v", v)
+		assert.Equal(t, value, apiEndpointConfig[key])
+	}
+
+	assert.Equal(t, len(paramConfig), len(apiEndpointConfig))
 
 	apiCopy := apim.CopyAPI(api)
 	importedAPICopy := apim.CopyAPI(importedAPI)
+
+	same := "override_with_same_value"
+	apiCopy.EndpointConfig = same
+	importedAPICopy.EndpointConfig = same
 
 	testutils.ValidateAPIsEqual(t, &apiCopy, &importedAPICopy)
 }
@@ -129,6 +145,12 @@ func TestEnvironmentSpecificParamsEndpointSecurityFalse(t *testing.T) {
 	testutils.ValidateAPIExport(t, args)
 
 	importedAPI := testutils.GetImportedAPI(t, args)
+
+	assert.Equal(t, false, importedAPI.GetProductionSecurityConfig()["enabled"])
+	assert.Equal(t, false, importedAPI.GetSandboxSecurityConfig()["enabled"])
+
+	api.EndpointConfig.(map[string]interface{})["endpoint_security"] = "override_with_the_same_value"
+	importedAPI.EndpointConfig.(map[string]interface{})["endpoint_security"] = "override_with_the_same_value"
 
 	testutils.ValidateAPIsEqual(t, api, importedAPI)
 }
