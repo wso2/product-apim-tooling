@@ -27,6 +27,7 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/adminservices"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 	"gopkg.in/yaml.v2"
 )
 
@@ -77,6 +78,34 @@ var (
 	devops     = Users["devops"][0]
 
 	apimClients = map[string]*apim.Client{}
+
+	// Table driven testing user combinations
+	testCaseUsers = []testutils.TestCaseUsers{
+		{
+			Description:  "CTL user admin Super Tenant",
+			ApiCreator:   testutils.Credentials{Username: creator.UserName, Password: creator.Password},
+			ApiPublisher: testutils.Credentials{Username: publisher.UserName, Password: publisher.Password},
+			CtlUser:      testutils.Credentials{Username: adminservices.AdminUsername, Password: adminservices.AdminPassword},
+		},
+		{
+			Description:  "CTL user admin Tenant",
+			ApiCreator:   testutils.Credentials{Username: creator.UserName + "@" + TENANT1, Password: creator.Password},
+			ApiPublisher: testutils.Credentials{Username: publisher.UserName + "@" + TENANT1, Password: publisher.Password},
+			CtlUser:      testutils.Credentials{Username: adminservices.AdminUsername + "@" + TENANT1, Password: adminservices.AdminPassword},
+		},
+		{
+			Description:  "CTL user devops Super Tenant",
+			ApiCreator:   testutils.Credentials{Username: creator.UserName, Password: creator.Password},
+			ApiPublisher: testutils.Credentials{Username: publisher.UserName, Password: publisher.Password},
+			CtlUser:      testutils.Credentials{Username: devops.UserName, Password: devops.Password},
+		},
+		{
+			Description:  "CTL user devops Tenant",
+			ApiCreator:   testutils.Credentials{Username: creator.UserName + "@" + TENANT1, Password: creator.Password},
+			ApiPublisher: testutils.Credentials{Username: publisher.UserName + "@" + TENANT1, Password: publisher.Password},
+			CtlUser:      testutils.Credentials{Username: devops.UserName + "@" + TENANT1, Password: devops.Password},
+		},
+	}
 )
 
 func GetDevClient() *apim.Client {

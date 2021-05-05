@@ -403,7 +403,9 @@ func CountFiles(t *testing.T, path string) (int, error) {
 
 // IsFileAvailable checks if a file exists and is not a directory before we
 // try using it to prevent further errors.
-func IsFileAvailable(filename string) bool {
+func IsFileAvailable(t *testing.T, filename string) bool {
+	t.Log("base.IsFileAvailable() - file path:", filename)
+
 	info, err := os.Stat(filename)
 	if os.IsNotExist(err) {
 		return false

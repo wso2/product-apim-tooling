@@ -210,7 +210,7 @@ func (instance *Client) GenerateAdditionalProperties(provider, endpointUrl, apiT
 	   "Unlimited"
 	],
 	`
-	if operations != nil && len(operations) > 0 {
+	if len(operations) > 0 {
 		operationsData, _ := json.Marshal(operations)
 		additionalProperties += ` "operations": ` + string(operationsData) + `, `
 	}
@@ -482,6 +482,34 @@ func (instance *Client) AddAPI(t *testing.T, api *API, username string, password
 			instance.DeleteAPI(apiResponse.ID)
 		})
 	}
+
+	return apiResponse.ID
+}
+
+// UpdateAPI : Update API in APIM
+func (instance *Client) UpdateAPI(t *testing.T, api *API, username string, password string) string {
+	apisURL := instance.publisherRestURL + "/apis/" + api.ID
+
+	data, err := json.Marshal(api)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	request := base.CreatePut(apisURL, bytes.NewBuffer(data))
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.UpdateAPI()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.UpdateAPI()", response, 200)
+
+	var apiResponse API
+	json.NewDecoder(response.Body).Decode(&apiResponse)
 
 	return apiResponse.ID
 }
@@ -834,13 +862,13 @@ func (instance *Client) GetAPIRevisions(apiID, query string) *APIRevisionList {
 
 	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
 
-	base.LogRequest("apim.GetAPIRevision()", request)
+	base.LogRequest("apim.GetAPIRevisions()", request)
 
 	response := base.SendHTTPRequest(request)
 
 	defer response.Body.Close()
 
-	base.ValidateAndLogResponse("apim.GetAPIRevision()", response, 200)
+	base.ValidateAndLogResponse("apim.GetAPIRevisions()", response, 200)
 
 	var revisionsList APIRevisionList
 	json.NewDecoder(response.Body).Decode(&revisionsList)

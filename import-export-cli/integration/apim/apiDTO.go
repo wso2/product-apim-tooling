@@ -40,7 +40,7 @@ type API struct {
 	HasThumbnail                    bool              `json:"hasThumbnail,omitempty" yaml:"hasThumbnail,omitempty"`
 	IsDefaultVersion                bool              `json:"isDefaultVersion,omitempty" yaml:"isDefaultVersion,omitempty"`
 	IsRevision                      bool              `json:"isRevision" yaml:"isRevision"`
-	RevisionID                      int32             `json:"revisionId" yaml:"revisionId"`
+	RevisionID                      int               `json:"revisionId" yaml:"revisionId"`
 	EnableSchemaValidation          bool              `json:"enableSchemaValidation,omitempty" yaml:"enableSchemaValidation,omitempty"`
 	Type                            string            `json:"type,omitempty" yaml:"type,omitempty"`
 	Transport                       []string          `json:"transport,omitempty" yaml:"transport,omitempty"`
@@ -165,6 +165,7 @@ type APIMaxTps struct {
 
 // APIEndpointSecurity : API Endpoint Security config
 type APIEndpointSecurity struct {
+	Enabled  bool   `json:"enabled,omitempty"`
 	Type     string `json:"type,omitempty"`
 	Username string `json:"username,omitempty"`
 	Password string `json:"password,omitempty"`
@@ -207,10 +208,10 @@ type BusinessInfo struct {
 // APICorsConfiguration : API CORS Configuration
 type APICorsConfiguration struct {
 	CorsConfigurationEnabled      bool     `json:"corsConfigurationEnabled,omitempty"`
-	AccessControlAllowOrigins     []string `json:"accessControlAllowOrigins,omitempty"`
+	AccessControlAllowOrigins     []string `json:"accessControlAllowOrigins"`
 	AccessControlAllowCredentials bool     `json:"accessControlAllowCredentials,omitempty"`
-	AccessControlAllowHeaders     []string `json:"accessControlAllowHeaders,omitempty"`
-	AccessControlAllowMethods     []string `json:"accessControlAllowMethods,omitempty"`
+	AccessControlAllowHeaders     []string `json:"accessControlAllowHeaders"`
+	AccessControlAllowMethods     []string `json:"accessControlAllowMethods"`
 }
 
 // OAuthScopes : OAuth Scope definition
@@ -231,10 +232,10 @@ type APIOperations struct {
 	ID               string   `json:"id"`
 	Target           string   `json:"target"`
 	Verb             string   `json:"verb"`
-	AuthType         string   `json:"authType"`
-	ThrottlingPolicy string   `json:"throttlingPolicy"`
-	Scopes           []string `json:"scopes"`
-	UsedProductIds   []string `json:"usedProductIds"`
+	AuthType         string   `json:"authType,omitempty"`
+	ThrottlingPolicy string   `json:"throttlingPolicy,omitempty"`
+	Scopes           []string `json:"scopes,omitempty"`
+	UsedProductIds   []string `json:"usedProductIds,omitempty"`
 }
 
 // AdvertiseInfo : Advertise only information

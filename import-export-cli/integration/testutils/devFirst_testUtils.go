@@ -33,7 +33,7 @@ func AwsInitProject(t *testing.T, args *AWSInitTestArgs) (string, error) {
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
 	output, err := base.Execute(t, "aws", "init", "-n", args.ApiNameFlag, "-s", args.ApiStageNameFlag)
-	return output, err 
+	return output, err
 }
 
 func ValidateAWSInitProject(t *testing.T, args *AWSInitTestArgs) {
@@ -50,8 +50,8 @@ func ValidateAWSInitProject(t *testing.T, args *AWSInitTestArgs) {
 	//Remove Created project and logout
 	t.Cleanup(func() {
 		base.RemoveDir(args.ApiNameFlag)
-	})	
-	return 
+	})
+	return
 }
 
 func InitProject(t *testing.T, args *InitTestArgs) (string, error) {
@@ -160,7 +160,7 @@ func ValidateImportProject(t *testing.T, args *InitTestArgs) {
 
 func ValidateAWSProjectImport(t *testing.T, args *AWSInitTestArgs, isPreserveProvider bool) {
 	t.Helper()
-	
+
 	result, error := ImportApiFromProject(t, args.ApiNameFlag, args.SrcAPIM, args.ApiNameFlag, &args.CtlUser, true, isPreserveProvider)
 
 	assert.Nil(t, error, "Error while importing Project")
@@ -236,7 +236,7 @@ func ValidateAPIWithDocIsExported(t *testing.T, args *InitTestArgs, DevFirstDefa
 	docPathOfExportedApi := relativePath + TestDefaultExtractedFileName + TestCaseDestPathSuffix
 
 	//Check whether the file is available
-	isDocExported := base.IsFileAvailable(docPathOfExportedApi)
+	isDocExported := base.IsFileAvailable(t, docPathOfExportedApi)
 	base.Log("Doc is Exported", isDocExported)
 	assert.Equal(t, true, isDocExported, "Error while exporting API with document")
 
@@ -258,7 +258,7 @@ func ValidateAPIWithIconIsExported(t *testing.T, args *InitTestArgs, DevFirstDef
 
 	iconPathOfExportedApi := relativePath + TestDefaultExtractedFileName + TestCase2DestPngPathSuffix
 
-	isIconExported := base.IsFileAvailable(iconPathOfExportedApi)
+	isIconExported := base.IsFileAvailable(t, iconPathOfExportedApi)
 	base.Log("Icon is Exported", isIconExported)
 	assert.Equal(t, true, isIconExported, "Error while exporting API with icon")
 
@@ -279,7 +279,7 @@ func ValidateAPIWithImageIsExported(t *testing.T, args *InitTestArgs, DevFirstDe
 	base.Unzip(relativePath, exportedPath)
 
 	imagePathOfExportedApi := relativePath + TestDefaultExtractedFileName + TestCase2DestJpegPathSuffix
-	isIconExported := base.IsFileAvailable(imagePathOfExportedApi)
+	isIconExported := base.IsFileAvailable(t, imagePathOfExportedApi)
 	base.Log("Image is Exported", isIconExported)
 	assert.Equal(t, true, isIconExported, "Error while exporting API with icon")
 

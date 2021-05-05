@@ -44,6 +44,13 @@ func AddAPI(t *testing.T, client *apim.Client, username string, password string)
 	return api
 }
 
+func UpdateAPI(t *testing.T, client *apim.Client, api *apim.API, username string, password string) *apim.API {
+	client.Login(username, password)
+	id := client.UpdateAPI(t, api, username, password)
+	api = client.GetAPI(id)
+	return api
+}
+
 func AddSoapAPI(t *testing.T, client *apim.Client, username, password, apiType string) *apim.API {
 	path := "testdata/phoneverify.wsdl"
 	client.Login(username, password)
@@ -87,10 +94,11 @@ func AddWebStreamingAPIFromAsyncAPIDefinition(t *testing.T, client *apim.Client,
 	return api
 }
 
-func CreateAndDeployAPIRevision(t *testing.T, client *apim.Client, username, password, apiID string) {
+func CreateAndDeployAPIRevision(t *testing.T, client *apim.Client, username, password, apiID string) string {
 	client.Login(username, password)
 	revision := client.CreateAPIRevision(apiID)
 	client.DeployAPIRevision(t, apiID, revision)
+	return revision.ID
 }
 
 func DeployAndPublishAPI(t *testing.T, client *apim.Client, username, password, apiID string) {
@@ -206,6 +214,41 @@ func GenerateAdvertiseOnlyAPIDefinition(t *testing.T) (string, apim.API) {
 	return advertiseOnlyAPIDefinitionPath, sampleContent.Data
 }
 
+func CreateAndDeploySeriesOfAPIRevisions(t *testing.T, client *apim.Client, api *apim.API,
+	apiCreator *Credentials, apiPublisher *Credentials) map[int]*apim.API {
+
+	apiRevisions := make(map[int]*apim.API)
+
+	revisionIds := make([]string, 0, 3)
+
+	originalApiId := api.ID
+
+	// Create and Deploy Revision 1 of the above API
+	revisionIds = append(revisionIds, CreateAndDeployAPIRevision(t, client, apiPublisher.Username, apiPublisher.Password, originalApiId))
+
+	api.Transport = []string{"https"}
+
+	api = UpdateAPI(t, client, api, apiCreator.Username, apiCreator.Password)
+
+	// Create and Deploy Revision 2 of the above API
+	revisionIds = append(revisionIds, CreateAndDeployAPIRevision(t, client, apiPublisher.Username, apiPublisher.Password, originalApiId))
+
+	api.AuthorizationHeader = "AuthorizationNew"
+
+	UpdateAPI(t, client, api, apiCreator.Username, apiCreator.Password)
+
+	// Create and Deploy Revision 3 of the above API
+	revisionIds = append(revisionIds, CreateAndDeployAPIRevision(t, client, apiPublisher.Username, apiPublisher.Password, originalApiId))
+
+	for _, rev := range revisionIds {
+		api := client.GetAPI(rev)
+		apiRevisions[api.RevisionID] = api
+		t.Log("CreateAndDeploySeriesOfAPIRevisions api.RevisionID: ", api.RevisionID, ", api ID: ", api.ID)
+	}
+
+	return apiRevisions
+}
+
 func GetAPI(t *testing.T, client *apim.Client, name string, username string, password string) *apim.API {
 	if username == adminservices.DevopsUsername {
 		client.Login(adminservices.AdminUsername, adminservices.AdminPassword)
@@ -257,7 +300,7 @@ func GetEnvAPIProductExportPath(envName string) string {
 	return filepath.Join(utils.DefaultExportDirPath, utils.ExportedApiProductsDirName, envName)
 }
 
-func exportAPI(t *testing.T, name string, version string, provider string, env string) (string, error) {
+func exportAPI(t *testing.T, name, version, provider, env string) (string, error) {
 	var output string
 	var err error
 
@@ -265,6 +308,23 @@ func exportAPI(t *testing.T, name string, version string, provider string, env s
 		output, err = base.Execute(t, "export", "api", "-n", name, "-v", version, "-e", env, "-k", "--verbose")
 	} else {
 		output, err = base.Execute(t, "export", "api", "-n", name, "-v", version, "-r", provider, "-e", env, "-k", "--verbose")
+	}
+
+	t.Cleanup(func() {
+		base.RemoveAPIArchive(t, GetEnvAPIExportPath(env), name, version)
+	})
+
+	return output, err
+}
+
+func exportAPIRevision(t *testing.T, name, version, provider, revision, env string) (string, error) {
+	var output string
+	var err error
+
+	if provider == "" {
+		output, err = base.Execute(t, "export", "api", "-n", name, "-v", version, "-e", env, "--rev", revision, "-k", "--verbose")
+	} else {
+		output, err = base.Execute(t, "export", "api", "-n", name, "-v", version, "-r", provider, "-e", env, "--rev", revision, "-k", "--verbose")
 	}
 
 	t.Cleanup(func() {
@@ -455,33 +515,64 @@ func ValidateExportedAPIStructure(t *testing.T, args *ApiImportExportTestArgs) {
 
 	output, _ := exportAPI(t, args.Api.Name, args.Api.Version, args.ApiProvider.Username, args.SrcAPIM.GetEnvName())
 
-	ValidateAPIStructure(t, args.Api, output)
+	validateAPI(t, args.Api, output, args.IsDeployed, SampleAPIYamlFilePath)
 
 	assert.True(t, base.IsAPIArchiveExists(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
 		args.Api.Name, args.Api.Version))
 }
 
-func ValidateAPIStructure(t *testing.T, api *apim.API, exportedOutput string) {
+func ValidateExportedAPIRevisionStructure(t *testing.T, args *ApiImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	// Export api from env 1
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	output, _ := exportAPIRevision(t, args.Api.Name, args.Api.Version, args.ApiProvider.Username, args.Revision, args.SrcAPIM.GetEnvName())
+
+	validateAPI(t, args.Api, output, args.IsDeployed, SampleRevisionedAPIYamlFilePath)
+
+	assert.True(t, base.IsAPIArchiveExists(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
+		args.Api.Name, args.Api.Version))
+}
+
+func validateAPI(t *testing.T, api *apim.API, exportedOutput string, isDeployed bool, sampleFile string) {
 	// Unzip exported API
 	exportedPath := base.GetExportedPathFromOutput(exportedOutput)
 	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
 	base.Unzip(relativePath, exportedPath)
 
+	unzipedProjectPath := relativePath + string(os.PathSeparator) + api.Name + "-" + api.Version
+
 	// Read the api.yaml file in the exported directory
-	fileData, err := ioutil.ReadFile(relativePath + string(os.PathSeparator) + api.Name + "-" + api.Version + APIYamlFilePath)
+	fileData, err := ioutil.ReadFile(filepath.Join(unzipedProjectPath, APIYamlFilePath))
+
 	if err != nil {
 		t.Error(err)
 	}
+
+	validateAPIStructure(t, &fileData, sampleFile)
+
+	if isDeployed {
+		assert.True(t, base.IsFileAvailable(t, filepath.Join(unzipedProjectPath, DeploymentEnvYamlFilePath)), "Expected deployment_environments.yaml not found")
+	} else {
+		assert.False(t, base.IsFileAvailable(t, filepath.Join(unzipedProjectPath, DeploymentEnvYamlFilePath)), "Non required deployment_environments.yaml found")
+	}
+}
+
+func validateAPIStructure(t *testing.T, fileData *[]byte, sampleFile string) {
 	// Extract the "data" field to an interface
 	fileContent := make(map[string]interface{})
-	err = yaml.Unmarshal(fileData, &fileContent)
+	err := yaml.Unmarshal(*fileData, &fileContent)
 	if err != nil {
 		t.Error(err)
 	}
 	apiData := fileContent["data"].(map[interface{}]interface{})
 
 	// Read the sample-api.yaml file in the testdata directory
-	sampleData, err := ioutil.ReadFile(SampleAPIYamlFilePath)
+	sampleData, err := ioutil.ReadFile(sampleFile)
 	if err != nil {
 		t.Error(err)
 	}
