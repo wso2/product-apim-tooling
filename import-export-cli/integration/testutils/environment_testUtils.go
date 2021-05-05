@@ -436,7 +436,7 @@ func validateEndpointUrl(t *testing.T, apiParams *Params, api *apim.API, endpoin
 	}
 }
 
-func ValidateHttpEndpointWithoutLoadBalancingAndFailover(t *testing.T, apiParams *Params, api ,importedAPI *apim.API) {
+func ValidateHttpEndpointWithoutLoadBalancingAndFailover(t *testing.T, apiParams *Params, api, importedAPI *apim.API) {
 	t.Helper()
 	//Validate EndPoint Type
 	validateEndpointType(t, apiParams, importedAPI)
@@ -456,7 +456,7 @@ func ValidateHttpEndpointWithoutLoadBalancingAndFailover(t *testing.T, apiParams
 	ValidateAPIsEqual(t, api, importedAPI)
 }
 
-func ValidateHttpEndpointWithLoadBalancing(t *testing.T, apiParams *Params, api ,importedAPI *apim.API) {
+func ValidateHttpEndpointWithLoadBalancing(t *testing.T, apiParams *Params, api, importedAPI *apim.API) {
 	t.Helper()
 	//Validate EndPoint Type
 	assert.Equal(t, "load_balance", importedAPI.GetEndpointType())
@@ -503,6 +503,7 @@ func ValidateHttpEndpointWithLoadBalancing(t *testing.T, apiParams *Params, api 
 		for i := 0; i < len(sandboxEndpointsInParams); i++ {
 			singleSandboxEndpointInApi := sandboxEndpointsInApi[i].(map[string]interface{})
 			assert.Equal(t, sandboxEndpointsInParams[i]["url"], singleSandboxEndpointInApi["url"])
+			assert.Equal(t, "address", singleSandboxEndpointInApi["endpoint_type"])
 		}
 	}
 
