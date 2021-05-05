@@ -28,6 +28,11 @@ type Environment struct {
 }
 
 type Configs struct {
+	EndpointType           string                   `yaml:"endpointType,omitempty"`
+	EndpointRoutingPolicy  string                   `yaml:"endpointRoutingPolicy,omitempty"`
+	LoadBalanceEndpoints   LoadBalanceEndpointsData `yaml:"loadBalanceEndpoints,omitempty"`
+	FailoverEndpoints      FailoverEndpointsData    `yaml:"failoverEndpoints,omitempty"`
+	AWSLambdaEndpoints     AWSLambdaEndpointsData   `yaml:"awsLambdaEndpoints,omitempty"`
 	Endpoints              Endpoints                `yaml:"endpoints"`
 	Security               SecurityEndpoints        `yaml:"security,omitempty"`
 	DeploymentEnvironments []DeploymentEnvironments `yaml:"deploymentEnvironments,omitempty"`
@@ -37,6 +42,27 @@ type Configs struct {
 	DependentAPIs          map[string]interface{}   `yaml:"dependentAPIs,omitempty"`
 }
 
+type LoadBalanceEndpointsData struct {
+	Production         []map[string]interface{} `yaml:"production,omitempty"`
+	Sandbox            []map[string]interface{} `yaml:"sandbox,omitempty"`
+	SessionManagement  string                   `yaml:"sessionManagement,omitempty"`
+	SessionTimeout     int                      `yaml:"sessionTimeOut,omitempty"`
+	AlgorithmClassName string                   `yaml:"algoClassName,omitempty"`
+}
+
+type FailoverEndpointsData struct {
+	Production          Endpoint                 `yaml:"production,omitempty"`
+	ProductionFailovers []map[string]interface{} `yaml:"productionFailovers,omitempty"`
+	Sandbox             Endpoint                 `yaml:"sandbox,omitempty"`
+	SandboxFailovers    []map[string]interface{} `yaml:"sandboxFailovers,omitempty"`
+}
+
+type AWSLambdaEndpointsData struct {
+	AccessMethod  string `yaml:"accessMethod,omitempty"`
+	AmznRegion    string `yaml:"amznRegion,omitempty"`
+	AmznAccessKey string `yaml:"amznAccessKey,omitempty"`
+	AmznSecretKey string `yaml:"amznSecretKey,omitempty"`
+}
 type DeploymentEnvironments struct {
 	DisplayOnDevportal    bool   `yaml:"displayOnDevportal,omitempty"`
 	DeploymentEnvironment string `yaml:"deploymentEnvironment,omitempty"`

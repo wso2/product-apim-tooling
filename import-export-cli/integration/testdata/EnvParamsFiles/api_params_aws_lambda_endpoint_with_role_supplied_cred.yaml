@@ -1,0 +1,6 @@
+environments:
+  - name: production
+    configs:
+      endpointType: aws
+      awsLambdaEndpoints:
+        accessMethod: role_supplied

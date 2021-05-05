@@ -411,3 +411,234 @@ func validateMutualSSLCerts(t *testing.T, apiParams *Params, path string) {
 		t.Error("Client (MutualSSL) certificates directory does not exist")
 	}
 }
+
+func validateEndpointType(t *testing.T, apiParams *Params, api *apim.API) {
+	var endPointTypeInParams string
+	endPointTypeInParams = apiParams.Environments[0].Configs.EndpointType
+	if strings.EqualFold(endPointTypeInParams, "rest") {
+		endPointTypeInParams = "http"
+	} else if strings.EqualFold(endPointTypeInParams, "soap") {
+		endPointTypeInParams = "address"
+	}
+	assert.Equal(t, endPointTypeInParams, api.GetEndpointType())
+}
+
+func validateEndpointUrl(t *testing.T, apiParams *Params, api *apim.API, endpointType string) {
+	var endpointTypeRecord map[string]interface{}
+
+	if strings.EqualFold(endpointType, "production") {
+		endpointTypeRecord = apiParams.Environments[0].Configs.Endpoints.Production
+		assert.Equal(t, endpointTypeRecord["url"], api.GetSandboxURL())
+	}
+	if strings.EqualFold(endpointType, "sandbox") {
+		endpointTypeRecord = apiParams.Environments[0].Configs.Endpoints.Sandbox
+		assert.Equal(t, endpointTypeRecord["url"], api.GetSandboxURL())
+	}
+}
+
+func ValidateHttpEndpointWithoutLoadBalancingAndFailover(t *testing.T, apiParams *Params, api ,importedAPI *apim.API) {
+	t.Helper()
+	//Validate EndPoint Type
+	validateEndpointType(t, apiParams, importedAPI)
+
+	// Validate endpoint type URLs
+	validateEndpointUrl(t, apiParams, importedAPI, "production")
+	validateEndpointUrl(t, apiParams, importedAPI, "sandbox")
+
+	same := "override_with_same_value"
+	api.SetEndpointType(same)
+	api.SetProductionURL(same)
+	api.SetSandboxURL(same)
+	importedAPI.SetEndpointType(same)
+	importedAPI.SetProductionURL(same)
+	importedAPI.SetSandboxURL(same)
+
+	ValidateAPIsEqual(t, api, importedAPI)
+}
+
+func ValidateHttpEndpointWithLoadBalancing(t *testing.T, apiParams *Params, api ,importedAPI *apim.API) {
+	t.Helper()
+	//Validate EndPoint Type
+	assert.Equal(t, "load_balance", importedAPI.GetEndpointType())
+
+	endPointConfigInApi := importedAPI.EndpointConfig
+
+	// Validate Algorithm class
+	algoClassNameInParams := apiParams.Environments[0].Configs.LoadBalanceEndpoints.AlgorithmClassName
+	algoClassNameInApi := endPointConfigInApi.(map[string]interface{})["algoClassName"].(string)
+	assert.Equal(t, algoClassNameInParams, algoClassNameInApi)
+
+	// Validate Session TimeOut
+	sessionTimeOutInParams := apiParams.Environments[0].Configs.LoadBalanceEndpoints.SessionTimeout
+	sessionTimeOutInApi := endPointConfigInApi.(map[string]interface{})["sessionTimeOut"].(string)
+	assert.Equal(t, strconv.Itoa(sessionTimeOutInParams), sessionTimeOutInApi)
+
+	// Validate Production endpoints
+	productionEndpointsInParams := apiParams.Environments[0].Configs.LoadBalanceEndpoints.Production
+	productionEndpointsInApi := endPointConfigInApi.(map[string]interface{})["production_endpoints"].([]interface{})
+	if strings.EqualFold(apiParams.Environments[0].Configs.LoadBalanceEndpoints.SessionManagement, "transport") {
+		for i := 0; i < len(productionEndpointsInParams); i++ {
+			singleProductionEndpointInApi := productionEndpointsInApi[i].(map[string]interface{})
+			assert.Equal(t, productionEndpointsInParams[i]["url"], singleProductionEndpointInApi["url"])
+		}
+	}
+	if strings.EqualFold(apiParams.Environments[0].Configs.LoadBalanceEndpoints.SessionManagement, "soap") {
+		for i := 0; i < len(productionEndpointsInParams); i++ {
+			singleProductionEndpointInApi := productionEndpointsInApi[i].(map[string]interface{})
+			assert.Equal(t, productionEndpointsInParams[i]["url"], singleProductionEndpointInApi["url"])
+			assert.Equal(t, "address", singleProductionEndpointInApi["endpoint_type"])
+		}
+	}
+
+	// Validate Sandbox endpoints
+	sandboxEndpointsInParams := apiParams.Environments[0].Configs.LoadBalanceEndpoints.Sandbox
+	sandboxEndpointsInApi := endPointConfigInApi.(map[string]interface{})["sandbox_endpoints"].([]interface{})
+	if strings.EqualFold(apiParams.Environments[0].Configs.LoadBalanceEndpoints.SessionManagement, "transport") {
+		for i := 0; i < len(sandboxEndpointsInParams); i++ {
+			singleSandboxEndpointInApi := sandboxEndpointsInApi[i].(map[string]interface{})
+			assert.Equal(t, sandboxEndpointsInParams[i]["url"], singleSandboxEndpointInApi["url"])
+		}
+	}
+	if strings.EqualFold(apiParams.Environments[0].Configs.LoadBalanceEndpoints.SessionManagement, "soap") {
+		for i := 0; i < len(sandboxEndpointsInParams); i++ {
+			singleSandboxEndpointInApi := sandboxEndpointsInApi[i].(map[string]interface{})
+			assert.Equal(t, sandboxEndpointsInParams[i]["url"], singleSandboxEndpointInApi["url"])
+		}
+	}
+
+	same := "override_with_same_value"
+	api.SetEndpointType(same)
+	importedAPI.SetEndpointType(same)
+	api.SetEndPointConfig(same)
+	importedAPI.SetEndPointConfig(same)
+
+	ValidateAPIsEqual(t, api, importedAPI)
+}
+
+func ValidateHttpEndpointWithFailover(t *testing.T, apiParams *Params, api, importedAPI *apim.API) {
+	t.Helper()
+
+	var isSaopEndpoint bool = false
+
+	//Validate EndPoint Type
+	assert.Equal(t, "failover", importedAPI.GetEndpointType())
+
+	endPointConfigInApi := importedAPI.EndpointConfig
+	//Check whether the endpoint are SOAP endpoints
+	if strings.EqualFold(apiParams.Environments[0].Configs.EndpointType, "soap") {
+		isSaopEndpoint = true
+	}
+
+	// Validate Production endpoints
+	productionEndpointInParams := apiParams.Environments[0].Configs.FailoverEndpoints.Production
+	productionEndpointInApi := endPointConfigInApi.(map[string]interface{})["production_endpoints"].(map[string]interface{})
+	assert.Equal(t, productionEndpointInParams.URL, productionEndpointInApi["url"])
+	if isSaopEndpoint {
+		assert.Equal(t, "address", productionEndpointInApi["endpoint_type"])
+	}
+
+	// Validate Production failover endpoints
+	productionFailoverEndpointsInParams := apiParams.Environments[0].Configs.FailoverEndpoints.ProductionFailovers
+	productionFailoverEndpointsInApi := endPointConfigInApi.(map[string]interface{})["production_failovers"].([]interface{})
+	for i := 0; i < len(productionFailoverEndpointsInParams); i++ {
+		singleProductionFailoverEndpointInApi := productionFailoverEndpointsInApi[i].(map[string]interface{})
+		assert.Equal(t, productionFailoverEndpointsInParams[i]["url"], singleProductionFailoverEndpointInApi["url"])
+		if isSaopEndpoint {
+			assert.Equal(t, "address", productionEndpointInApi["endpoint_type"])
+		}
+	}
+
+	// Validate Production endpoints
+	sandboxEndpointInParams := apiParams.Environments[0].Configs.FailoverEndpoints.Sandbox
+	sandboxEndpointInApi := endPointConfigInApi.(map[string]interface{})["sandbox_endpoints"].(map[string]interface{})
+	assert.Equal(t, sandboxEndpointInParams.URL, sandboxEndpointInApi["url"])
+	if isSaopEndpoint {
+		assert.Equal(t, "address", productionEndpointInApi["endpoint_type"])
+	}
+
+	// Validate Sandbox failover endpoints
+	sandboxFailoverEndpointsInParams := apiParams.Environments[0].Configs.FailoverEndpoints.SandboxFailovers
+	sandboxFailoverEndpointsInApi := endPointConfigInApi.(map[string]interface{})["sandbox_failovers"].([]interface{})
+	for i := 0; i < len(sandboxFailoverEndpointsInParams); i++ {
+		singleSandboxFailoverEndpointInApi := sandboxFailoverEndpointsInApi[i].(map[string]interface{})
+		assert.Equal(t, sandboxFailoverEndpointsInParams[i]["url"], singleSandboxFailoverEndpointInApi["url"])
+		if isSaopEndpoint {
+			assert.Equal(t, "address", productionEndpointInApi["endpoint_type"])
+		}
+	}
+
+	same := "override_with_same_value"
+	api.SetEndpointType(same)
+	importedAPI.SetEndpointType(same)
+	api.SetEndPointConfig(same)
+	importedAPI.SetEndPointConfig(same)
+
+	ValidateAPIsEqual(t, api, importedAPI)
+}
+
+func ValidateAwsEndpoint(t *testing.T, apiParams *Params, api, importedAPI *apim.API) {
+	t.Helper()
+
+	//Validate EndPoint Type
+	assert.Equal(t, "awslambda", importedAPI.GetEndpointType())
+
+	endPointConfigInApi := importedAPI.EndpointConfig
+	//Validate access method
+	accessMethodInParams := apiParams.Environments[0].Configs.AWSLambdaEndpoints.AccessMethod
+	accessMethodInApi := endPointConfigInApi.(map[string]interface{})["access_method"].(string)
+	accessMethodInApi = strings.ReplaceAll(accessMethodInApi, "-", "_")
+	assert.Equal(t, accessMethodInParams, accessMethodInApi)
+
+	//Validate stored mode configurations
+	if strings.EqualFold(accessMethodInApi, "stored") {
+		//Validate Amazon access key
+		accessKeyInParams := apiParams.Environments[0].Configs.AWSLambdaEndpoints.AmznAccessKey
+		accessKeyInApi := endPointConfigInApi.(map[string]interface{})["amznAccessKey"].(string)
+		assert.Equal(t, accessKeyInParams, accessKeyInApi)
+
+		//Validate Amazon access secret key
+		accessSecretKeyInApi := endPointConfigInApi.(map[string]interface{})["amznSecretKey"].(string)
+		assert.Equal(t, "AWS_SECRET_KEY", accessSecretKeyInApi)
+
+		//Validate Amazon region
+		regionInParams := apiParams.Environments[0].Configs.AWSLambdaEndpoints.AmznRegion
+		regionInApi := endPointConfigInApi.(map[string]interface{})["amznRegion"].(string)
+		assert.Equal(t, regionInParams, regionInApi)
+	}
+
+	same := "override_with_same_value"
+	api.SetEndpointType(same)
+	importedAPI.SetEndpointType(same)
+	api.SetEndPointConfig(same)
+	importedAPI.SetEndPointConfig(same)
+
+	ValidateAPIsEqual(t, api, importedAPI)
+}
+
+func ValidateDynamicEndpoint(t *testing.T, apiParams *Params, api, importedAPI *apim.API) {
+	t.Helper()
+
+	//Validate EndPoint Type
+	assert.Equal(t, "default", importedAPI.GetEndpointType())
+
+	endPointConfigInApi := importedAPI.EndpointConfig
+
+	//Validate default failover config
+	failoverConfigEnableInApi := endPointConfigInApi.(map[string]interface{})["failover"].(string)
+	failoverConfigEnableInApiBool, _ := strconv.ParseBool(failoverConfigEnableInApi)
+	assert.Equal(t, false, failoverConfigEnableInApiBool)
+
+	//Validate default url value for sandbox and production endpoint
+	sandboxEndpointsInApi := endPointConfigInApi.(map[string]interface{})["sandbox_endpoints"].(map[string]interface{})
+	productionEndpointsInApi := endPointConfigInApi.(map[string]interface{})["production_endpoints"].(map[string]interface{})
+	assert.Equal(t, "default", sandboxEndpointsInApi["url"])
+	assert.Equal(t, "default", productionEndpointsInApi["url"])
+
+	same := "override_with_same_value"
+	api.SetEndpointType(same)
+	importedAPI.SetEndpointType(same)
+	api.SetEndPointConfig(same)
+	importedAPI.SetEndPointConfig(same)
+
+	ValidateAPIsEqual(t, api, importedAPI)
+}
