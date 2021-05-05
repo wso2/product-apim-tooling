@@ -367,9 +367,9 @@ func CreateTempDir(t *testing.T, path string) {
 			t.Fatal(err)
 		}
 
-		t.Cleanup(func() {
-			os.RemoveAll(path)
-		})
+		// t.Cleanup(func() {
+		// 	os.RemoveAll(path)
+		// })
 	}
 }
 

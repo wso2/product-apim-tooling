@@ -22,6 +22,7 @@ import (
 	"flag"
 	"os"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/adminservices"
@@ -387,4 +388,8 @@ func removeUserEndpointCerts(client *apim.Client, username string, password stri
 func getSOAPServiceURL(host string, offset int, service string) string {
 	port := 9443 + offset
 	return "https://" + host + ":" + strconv.Itoa(port) + "/services/" + service
+}
+
+func isTenantUser(username, tenant string) bool {
+	return strings.Contains(username, "@"+tenant)
 }

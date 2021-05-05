@@ -53,7 +53,9 @@ const TestCase2PngPath = TestArtifact2Path + "/icon.png"
 const TestCase2DestPngPathSuffix = "/Image/icon.png"
 const TestCase2JpegPath = TestArtifact2Path + "/icon.jpeg"
 const TestCase2DestJpegPathSuffix = "/Image/icon.jpeg"
+const TestArtifact3Path = "testdata/TestArtifactDirectory/ArtifactSet3"
 const TestDefaultExtractedFileName = "/SwaggerPetstoreNew-1.0.0"
+const CustomDynamicInSequenceName = "custom-header-in.xml"
 
 const EnvParamsFilesDir = "testdata/EnvParamsFiles"
 

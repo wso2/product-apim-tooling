@@ -196,12 +196,11 @@ func ValidateInitializeProjectWithDefinitionFlag(t *testing.T, args *InitTestArg
 	})
 }
 
-func ValidateImportProject(t *testing.T, args *InitTestArgs, paramsPath string) *apim.API {
+func ValidateImportProject(t *testing.T, args *InitTestArgs, paramsPath string, preserveProvider bool) *apim.API {
 	t.Helper()
-	//Initialize a project with API definition
-	ValidateInitializeProjectWithOASFlag(t, args)
 
-	result, error := importApiFromProject(t, args.InitFlag, args.APIName, paramsPath, args.SrcAPIM, &args.CtlUser, true, true)
+	result, error := importApiFromProject(t, args.InitFlag, args.APIName, paramsPath, args.SrcAPIM, &args.CtlUser,
+		true, preserveProvider)
 
 	assert.Nil(t, error, "Error while importing Project")
 	assert.Contains(t, result, "Successfully imported API", "Error while importing Project")

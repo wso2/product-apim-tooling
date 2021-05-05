@@ -182,17 +182,7 @@ func GenerateAdvertiseOnlyAPIDefinition(t *testing.T) (string, apim.API) {
 	base.CreateTempDir(t, projectPath)
 
 	// Read the sample-api.yaml file in the testdata directory
-	sampleData, err := ioutil.ReadFile(SampleAPIYamlFilePath)
-	if err != nil {
-		t.Error(err)
-	}
-
-	// Extract the content to a structure
-	sampleContent := apim.APIFile{}
-	err = yaml.Unmarshal(sampleData, &sampleContent)
-	if err != nil {
-		t.Error(err)
-	}
+	sampleContent := ReadAPIDefinition(t, SampleAPIYamlFilePath)
 
 	// Inject advertise only API specfic parameters
 	sampleContent.Data.AdvertiseInformation.Advertised = true
@@ -200,17 +190,10 @@ func GenerateAdvertiseOnlyAPIDefinition(t *testing.T) (string, apim.API) {
 	sampleContent.Data.AdvertiseInformation.OriginalDevPortalUrl = "https://localhost:9443/devportal"
 	sampleContent.Data.AdvertiseInformation.Vendor = "WSO2"
 
-	apiData, err := yaml2.Marshal(sampleContent)
-	if err != nil {
-		t.Error(err)
-	}
+	advertiseOnlyAPIDefinitionPath := filepath.Join(projectPath, filepath.FromSlash(utils.APIDefinitionFileYaml))
 
 	// Write the API definition to the temp directory
-	advertiseOnlyAPIDefinitionPath := filepath.Join(projectPath, filepath.FromSlash(utils.APIDefinitionFileYaml))
-	err = ioutil.WriteFile(advertiseOnlyAPIDefinitionPath, apiData, os.ModePerm)
-	if err != nil {
-		t.Error(err)
-	}
+	WriteToAPIDefinition(t, sampleContent, advertiseOnlyAPIDefinitionPath)
 	return advertiseOnlyAPIDefinitionPath, sampleContent.Data
 }
 
@@ -608,11 +591,6 @@ func validateAPIStructure(t *testing.T, fileData *[]byte, sampleFile string) {
 			t.Error("Missing \"" + keyValue + "\" in the API DTO structure from APIM")
 		}
 	}
-
-	t.Cleanup(func() {
-		// Remove extracted directory
-		base.RemoveDir(relativePath)
-	})
 }
 
 func GetImportedAPI(t *testing.T, args *ApiImportExportTestArgs) *apim.API {
@@ -650,6 +628,36 @@ func ReadParams(t *testing.T, apiParamsPath string) *Params {
 	yaml.NewDecoder(reader).Decode(&apiParams)
 
 	return &apiParams
+}
+
+func ReadAPIDefinition(t *testing.T, path string) apim.APIFile {
+
+	// Read the file in the path
+	sampleData, err := ioutil.ReadFile(path)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Extract the content to a structure
+	sampleContent := apim.APIFile{}
+	err = yaml.Unmarshal(sampleData, &sampleContent)
+	if err != nil {
+		t.Error(err)
+	}
+
+	return sampleContent
+}
+
+func WriteToAPIDefinition(t *testing.T, content apim.APIFile, path string) {
+	apiData, err := yaml2.Marshal(content)
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = ioutil.WriteFile(path, apiData, os.ModePerm)
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func ValidateAPIImport(t *testing.T, args *ApiImportExportTestArgs) {

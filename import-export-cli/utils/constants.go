@@ -81,6 +81,7 @@ const (
 	InitProjectSequencesFault           = InitProjectSequences + string(os.PathSeparator) + "fault-sequence"
 	InitProjectSequencesIn              = InitProjectSequences + string(os.PathSeparator) + "in-sequence"
 	InitProjectSequencesOut             = InitProjectSequences + string(os.PathSeparator) + "out-sequence"
+	InitProjectSequencesInCustom        = InitProjectSequencesIn + string(os.PathSeparator) + "Custom"
 	InitProjectClientCertificates       = "Client-certificates"
 	InitProjectEndpointCertificates     = "Endpoint-certificates"
 	InitProjectInterceptors             = "Interceptors"

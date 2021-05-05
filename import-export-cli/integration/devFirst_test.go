@@ -180,8 +180,11 @@ func TestImportProjectCreatedFromSwagger2Definition(t *testing.T) {
 		ForceFlag: false,
 	}
 
+	//Initialize a project with API definition
+	testutils.ValidateInitializeProjectWithOASFlag(t, args)
+
 	//Assert that project import to publisher portal is successful
-	testutils.ValidateImportProject(t, args, "")
+	testutils.ValidateImportProject(t, args, "", true)
 }
 
 //Import API from initialized project with openAPI 3 definition
@@ -200,8 +203,11 @@ func TestImportProjectCreatedFromOpenAPI3Definition(t *testing.T) {
 		ForceFlag: false,
 	}
 
+	//Initialize a project with API definition
+	testutils.ValidateInitializeProjectWithOASFlag(t, args)
+
 	//Assert that project import to publisher portal is successful
-	testutils.ValidateImportProject(t, args, "")
+	testutils.ValidateImportProject(t, args, "", true)
 }
 
 //Import API from initialized project from API definition which is already in publisher without --update flag
@@ -220,8 +226,11 @@ func TestImportProjectCreatedFailWhenAPIIsExisted(t *testing.T) {
 		ForceFlag: false,
 	}
 
+	//Initialize a project with API definition
+	testutils.ValidateInitializeProjectWithOASFlag(t, args)
+
 	//Import API for the First time
-	testutils.ValidateImportProject(t, args, "")
+	testutils.ValidateImportProject(t, args, "", true)
 
 	//Import API for the second time
 	testutils.ValidateImportProjectFailed(t, args, "")
@@ -243,8 +252,11 @@ func TestImportProjectCreatedPassWhenAPIIsExisted(t *testing.T) {
 		ForceFlag: false,
 	}
 
+	//Initialize a project with API definition
+	testutils.ValidateInitializeProjectWithOASFlag(t, args)
+
 	//Import API for the First time
-	testutils.ValidateImportProject(t, args, "")
+	testutils.ValidateImportProject(t, args, "", true)
 
 	//Import API for the second time with update flag
 	testutils.ValidateImportUpdateProject(t, args)
