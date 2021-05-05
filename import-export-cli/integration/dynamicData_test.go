@@ -24,6 +24,8 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 )
 
+// Initialize a project and import it with a params file with dynamic data and
+// check whether the env variable values have been set correctly in the imported application
 func TestImportAPIProjectWithDynamicData(t *testing.T) {
 	for _, user := range testCaseUsers {
 		t.Run(user.Description, func(t *testing.T) {
@@ -62,6 +64,8 @@ func TestImportAPIProjectWithDynamicData(t *testing.T) {
 	}
 }
 
+// Initialize a project and import it with a sequence file with dynamic data and export it to
+// check whether the env variable values have been set correctly in the exported sequence
 func TestImportAPIProjectWithDynamicDataSequence(t *testing.T) {
 	for _, user := range testCaseUsers {
 		t.Run(user.Description, func(t *testing.T) {

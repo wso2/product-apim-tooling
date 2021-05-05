@@ -32,22 +32,30 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
+const (
+	devEnvProdUrl          = "DEV_ENV_PROD_URL"
+	devEnvSandUrl          = "DEV_ENV_SAND_URL"
+	devEnvProdRetryDelay   = "DEV_ENV_PROD_RE_DELAY"
+	devEnvProdRetryTimeOut = "DEV_ENV_PROD_RE_TO"
+	envKey                 = "ENV_KEY"
+)
+
 func SetEnvVariablesForAPI(t *testing.T, client *apim.Client) {
 
-	os.Setenv("DEV_ENV_PROD_URL", "https://localhost:"+strconv.Itoa(9443+client.GetPortOffset())+
+	os.Setenv(devEnvProdUrl, "https://localhost:"+strconv.Itoa(9443+client.GetPortOffset())+
 		"/am/sample/pizzashack/v1/api/")
-	os.Setenv("DEV_ENV_SAND_URL", "https://localhost:"+strconv.Itoa(9443+client.GetPortOffset())+
+	os.Setenv(devEnvSandUrl, "https://localhost:"+strconv.Itoa(9443+client.GetPortOffset())+
 		"/am/sample/pizzashack/v1/api/")
-	os.Setenv("DEV_ENV_PROD_RE_DELAY", "10")
-	os.Setenv("DEV_ENV_PROD_RE_TO", "5")
-	os.Setenv("ENV_KEY", "dev_101")
+	os.Setenv(devEnvProdRetryDelay, "10")
+	os.Setenv(devEnvProdRetryTimeOut, "5")
+	os.Setenv(envKey, "dev_101")
 
 	t.Cleanup(func() {
-		os.Unsetenv("DEV_ENV_PROD_URL")
-		os.Unsetenv("DEV_ENV_SAND_URL")
-		os.Unsetenv("DEV_ENV_PROD_RE_DELAY")
-		os.Unsetenv("DEV_ENV_PROD_RE_TO")
-		os.Unsetenv("ENV_KEY")
+		os.Unsetenv(devEnvProdUrl)
+		os.Unsetenv(devEnvSandUrl)
+		os.Unsetenv(devEnvProdRetryDelay)
+		os.Unsetenv(devEnvProdRetryTimeOut)
+		os.Unsetenv(envKey)
 	})
 }
 
@@ -58,18 +66,18 @@ func ValidateDynamicData(t *testing.T, api *apim.API) {
 
 	// Check whether the production endpoint has the expected value set using the env variable
 	productionEndpoints := endpointConfig.(map[string]interface{})["production_endpoints"].(map[string]interface{})
-	assert.Equal(t, os.Getenv("DEV_ENV_PROD_URL"), productionEndpoints["url"], "Production endpoint value mismatched")
+	assert.Equal(t, os.Getenv(devEnvProdUrl), productionEndpoints["url"], "Production endpoint value mismatched")
 
 	// Check whether the sandbox endpoint has the expected value set using the env variable
 	sandboxEndpoints := endpointConfig.(map[string]interface{})["sandbox_endpoints"].(map[string]interface{})
-	assert.Equal(t, os.Getenv("DEV_ENV_SAND_URL"), sandboxEndpoints["url"], "Sandbox endpoint value mismatched")
+	assert.Equal(t, os.Getenv(devEnvSandUrl), sandboxEndpoints["url"], "Sandbox endpoint value mismatched")
 
 	// Check whether the retryDelay and retryTimeOut roduction endpoint
 	// config values has the expected values set using the env variables
-	assert.Equal(t, os.Getenv("DEV_ENV_PROD_RE_DELAY"),
+	assert.Equal(t, os.Getenv(devEnvProdRetryDelay),
 		productionEndpoints["config"].(map[string]interface{})["retryDelay"].(string),
 		"Retry delay value of the production endpoint value mismatched")
-	assert.Equal(t, os.Getenv("DEV_ENV_PROD_RE_TO"),
+	assert.Equal(t, os.Getenv(devEnvProdRetryTimeOut),
 		productionEndpoints["config"].(map[string]interface{})["retryTimeOut"].(string),
 		"Retry time out value of the production endpoint config mismatched")
 }
@@ -125,7 +133,7 @@ func ValidateExportedSequenceWithDynamicData(t *testing.T, args *InitTestArgs, a
 	}
 
 	// The environment variable must have been substituted twice in the sequence
-	assert.Equal(t, strings.Count(string(sequenceData), "dev_101"), 2,
+	assert.Equal(t, strings.Count(string(sequenceData), os.Getenv(envKey)), 2,
 		"Env variable is not substituted correctly in the sequence")
 
 	t.Cleanup(func() {
