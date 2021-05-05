@@ -338,7 +338,8 @@ func validateSubscriptionsOfApp(t *testing.T, subscriptionsOfApp1 *apim.Subscrip
 }
 
 func DeleteAppByCtl(t *testing.T, args *AppImportExportTestArgs) (string, error) {
-	output, err := base.Execute(t, "delete", "app", "-n", args.Application.Name, "-e", args.SrcAPIM.EnvName, "-k", "--verbose")
+	output, err := base.Execute(t, "delete", "app", "-n", args.Application.Name, "-o", args.AppOwner.Username,
+		"-e", args.SrcAPIM.EnvName, "-k", "--verbose")
 	return output, err
 }
 
