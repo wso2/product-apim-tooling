@@ -97,7 +97,7 @@ func AddWebStreamingAPIFromAsyncAPIDefinition(t *testing.T, client *apim.Client,
 func CreateAndDeployAPIRevision(t *testing.T, client *apim.Client, username, password, apiID string) string {
 	client.Login(username, password)
 	revision := client.CreateAPIRevision(apiID)
-	client.DeployAPIRevision(t, apiID, revision)
+	client.DeployAPIRevision(t, apiID, "", "", revision.ID)
 	return revision.ID
 }
 

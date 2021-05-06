@@ -19,6 +19,7 @@
 package base
 
 import (
+	"encoding/base32"
 	"flag"
 	"fmt"
 	"io"
@@ -444,4 +445,15 @@ func GenerateRandomName(n int) string {
 		s[i] = letters[rand.Intn(len(letters))]
 	}
 	return string(s)
+}
+
+func GenerateRandomString() string {
+	b := make([]byte, 10)
+	_, err := rand.Read(b)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(b)
 }
