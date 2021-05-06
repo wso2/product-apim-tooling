@@ -158,6 +158,5 @@ func TestExportImportApiSameGWEnv(t *testing.T) {
 
 			testutils.ValidateAPIRevisionExportImport(t, args, testutils.APITypeREST)
 		})
-		break
 	}
 }
