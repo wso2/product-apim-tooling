@@ -19,6 +19,7 @@
 package testutils
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -69,6 +70,44 @@ func ValidateCustomDirectoryChangeAtInit(t *testing.T, customDirPath string) {
 		// Remove created custom directory directory
 		base.RemoveDir(customDirPath)
 	})
+}
+
+// AddEnvironmentWithTokenFlag : Add new environment with token endpoint url
+func AddEnvironmentWithTokenFlag(t *testing.T, envName, apimUrl, tokenUrl string) (string, error) {
+	return base.Execute(t, "add", "env", envName, "--apim", apimUrl, "--token", tokenUrl)
+}
+
+// AddEnvironmentWithOutTokenFlag : Add new environment without token endpoint url
+func AddEnvironmentWithOutTokenFlag(t *testing.T, envName, apimUrl string) (string, error) {
+	return base.Execute(t, "add", "env", envName, "--apim", apimUrl)
+}
+
+// ValidateAddedEnvironments : Check whether the added environments are added as expected when listed
+func ValidateAddedEnvironments(t *testing.T, output, envName string, skipCleanup bool) {
+
+	expectedOutput := fmt.Sprintf(`Successfully added environment '%v'`, envName)
+	assert.Equal(t, expectedOutput+"\n", output)
+
+	//List all the environments and check for availability of the added environment
+	ValidateEnvsList(t, envName)
+
+	if skipCleanup == false {
+		t.Cleanup(func() {
+			base.Execute(t, "remove", "env", envName)
+		})
+	}
+}
+
+func ValidateEnvsList(t *testing.T, envName string) {
+	// List environments
+	response, err := base.Execute(t, "get", "envs")
+	assert.Nil(t, err)
+
+	base.GetRowsFromTableResponse(response)
+	base.Log(response)
+
+	//Check added environment in the list
+	assert.Contains(t, response, envName, "TestGetEnvironments Failed")
 }
 
 func InitProjectWithOasFlag(t *testing.T, args *InitTestArgs) (string, error) {

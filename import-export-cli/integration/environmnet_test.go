@@ -59,14 +59,34 @@ func TestRunApictlWithCustomDirectoryLocation(t *testing.T) {
 	testutils.ValidateCustomDirectoryChangeAtInit(t, absolutePathOfCustomDir)
 }
 
+// Adding a new Environments with -- token flag and list them and check it
+func TestAddEnvironmentWithToken(t *testing.T) {
+	apim := GetDevClient()
+	output, err := testutils.AddEnvironmentWithTokenFlag(t, apim.GetEnvName(), apim.GetApimURL(), apim.GetTokenURL())
+
+	// Validate added environment
+	assert.Nil(t, err)
+	testutils.ValidateAddedEnvironments(t, output, apim.GetEnvName(), false)
+}
+
+// Adding a new Environments without -- token flag and list them and check it
+func TestAddEnvironmentWithoutToken(t *testing.T) {
+	apim := GetDevClient()
+	output, err := testutils.AddEnvironmentWithOutTokenFlag(t, apim.GetEnvName(), apim.GetApimURL())
+
+	// Validate added environment
+	assert.Nil(t, err)
+	testutils.ValidateAddedEnvironments(t, output, apim.GetEnvName(), false)
+}
+
 //Get Environments using apictl
 func TestGetEnvironments(t *testing.T) {
 	apim := GetDevClient()
+	//Adding a new environment
 	base.SetupEnvWithoutTokenFlag(t, apim.GetEnvName(), apim.GetApimURL())
-	response, _ := base.Execute(t, "get", "envs")
-	base.GetRowsFromTableResponse(response)
-	base.Log(response)
-	assert.Contains(t, response, apim.GetEnvName(), "TestGetEnvironments Failed")
+
+	// Validate added environment list
+	testutils.ValidateEnvsList(t, apim.GetEnvName())
 }
 
 //Change Export directory using apictl and assert the change
