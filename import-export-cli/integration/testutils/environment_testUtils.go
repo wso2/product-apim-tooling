@@ -82,14 +82,19 @@ func AddEnvironmentWithOutTokenFlag(t *testing.T, envName, apimUrl string) (stri
 	return base.Execute(t, "add", "env", envName, "--apim", apimUrl)
 }
 
+// RemoveEnvironment : Remove an added environment
+func RemoveEnvironment(t *testing.T, envName string) (string, error) {
+	return base.Execute(t, "remove", "env", envName)
+}
+
 // ValidateAddedEnvironments : Check whether the added environments are added as expected when listed
 func ValidateAddedEnvironments(t *testing.T, output, envName string, skipCleanup bool) {
 
 	expectedOutput := fmt.Sprintf(`Successfully added environment '%v'`, envName)
-	assert.Equal(t, expectedOutput+"\n", output)
+	assert.Contains(t, output, expectedOutput)
 
 	//List all the environments and check for availability of the added environment
-	ValidateEnvsList(t, envName)
+	ValidateEnvsList(t, envName, true)
 
 	if skipCleanup == false {
 		t.Cleanup(func() {
@@ -98,7 +103,18 @@ func ValidateAddedEnvironments(t *testing.T, output, envName string, skipCleanup
 	}
 }
 
-func ValidateEnvsList(t *testing.T, envName string) {
+// ValidateRemoveEnvironments : Check whether the added environments is removed
+func ValidateRemoveEnvironments(t *testing.T, output, envName string) {
+
+	expectedOutput := fmt.Sprintf(`Successfully removed environment '%v'`, envName)
+	assert.Contains(t, output, expectedOutput)
+
+	//List all the environments and check for availability of the removed environment
+	ValidateEnvsList(t, envName, false)
+}
+
+// ValidateEnvsList : Check the list and verify the given env is in the list or not
+func ValidateEnvsList(t *testing.T, envName string, checkContains bool) {
 	// List environments
 	response, err := base.Execute(t, "get", "envs")
 	assert.Nil(t, err)
@@ -107,7 +123,11 @@ func ValidateEnvsList(t *testing.T, envName string) {
 	base.Log(response)
 
 	//Check added environment in the list
-	assert.Contains(t, response, envName, "TestGetEnvironments Failed")
+	if checkContains == true {
+		assert.Contains(t, response, envName, "TestGetEnvironments Failed")
+	} else {
+		assert.NotContains(t, response, envName, "TestGetEnvironments Failed")
+	}
 }
 
 func InitProjectWithOasFlag(t *testing.T, args *InitTestArgs) (string, error) {

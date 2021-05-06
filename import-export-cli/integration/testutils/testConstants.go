@@ -86,6 +86,9 @@ const APISecurityBasicParamsFile = EnvParamsFilesDir + "/api_params_security_bas
 // APIFullParamsFile : Full api_params.yaml
 const APIFullParamsFile = EnvParamsFilesDir + "/api_params_full.yaml"
 
+// APIDynamicDataParamsFile : api_params.yaml with dynamic data
+const APIDynamicDataParamsFile = EnvParamsFilesDir + "/api_params_dynamic_data.yaml"
+
 // APIProductFullParamsFile : Full api_product_params.yaml
 const APIProductFullParamsFile = EnvParamsFilesDir + "/api_product_params_full.yaml"
 
@@ -95,29 +98,8 @@ const CertificatesDirectoryPath = "testdata/TestArtifactDirectory/certificates"
 // UnlimitedPolicy : Unlimited Throttle Policy
 const UnlimitedPolicy = "Unlimited"
 
-// TenPerMinAppThrottlingPolicy: 10 per min application throttling policy
+// TenPerMinAppThrottlingPolicy : 10 per min application throttling policy
 const TenPerMinAppThrottlingPolicy = "10PerMin"
-
-// API types
-const APITypeREST = "HTTP"
-const APITypeSoap = "SOAP"
-const APITypeSoapToRest = "SOAPTOREST"
-const APITypeGraphQL = "GraphQL"
-const APITypeWebScoket = "WS"
-const APITypeWebSub = "WEBSUB"
-const APITypeSSE = "SSE"
-
-// REST API Endpoint URL
-const RESTAPIEndpoint = "petstore.swagger.io"
-
-// SOAP API Endpoint URL
-const SoapEndpointURL = "http://ws.cdyne.com/phoneverify/phoneverify.asmx"
-
-// GraphQL API Endpoint URL
-const GraphQLEndpoint = "http://www.mocky.io/v2/5ea84def2d0000a52d3a3ecd"
-
-// Web Socket API Endpoint URL
-const WebSocketEndpoint = "ws://echo.websocket.org:80"
 
 // APIHttpRestEndpointWithoutLoadBalancingOrFailoverParamsFile : HTTP/REST Endpoint without Loadbalancing and Failover URLs in api_params.yaml
 const APIHttpRestEndpointWithoutLoadBalancingOrFailoverParamsFile = EnvParamsFilesDir + "/api_params_http_rest_endpoint_without_lb_or_failover.yaml"
@@ -145,3 +127,24 @@ const APIAwsEndpointWithStoredCredentialsParamsFile = EnvParamsFilesDir + "/api_
 
 // APIDynamicEndpointParamsFile : Dynamic Endpoint with stored credentials in api_params.yaml
 const APIDynamicEndpointParamsFile = EnvParamsFilesDir + "/api_params_dynamic_endpoint.yaml"
+
+// API types
+const APITypeREST = "HTTP"
+const APITypeSoap = "SOAP"
+const APITypeSoapToRest = "SOAPTOREST"
+const APITypeGraphQL = "GraphQL"
+const APITypeWebScoket = "WS"
+const APITypeWebSub = "WEBSUB"
+const APITypeSSE = "SSE"
+
+// REST API Endpoint URL
+const RESTAPIEndpoint = "petstore.swagger.io"
+
+// SOAP API Endpoint URL
+const SoapEndpointURL = "http://ws.cdyne.com/phoneverify/phoneverify.asmx"
+
+// GraphQL API Endpoint URL
+const GraphQLEndpoint = "http://www.mocky.io/v2/5ea84def2d0000a52d3a3ecd"
+
+// Web Socket API Endpoint URL
+const WebSocketEndpoint = "ws://echo.websocket.org:80"

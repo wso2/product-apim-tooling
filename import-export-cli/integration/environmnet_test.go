@@ -60,7 +60,7 @@ func TestRunApictlWithCustomDirectoryLocation(t *testing.T) {
 }
 
 // Adding a new Environments with -- token flag and list them and check it
-func TestAddEnvironmentWithToken(t *testing.T) {
+func TestAddEnvironmentWithTokenEndpoint(t *testing.T) {
 	apim := GetDevClient()
 	output, err := testutils.AddEnvironmentWithTokenFlag(t, apim.GetEnvName(), apim.GetApimURL(), apim.GetTokenURL())
 
@@ -70,7 +70,7 @@ func TestAddEnvironmentWithToken(t *testing.T) {
 }
 
 // Adding a new Environments without -- token flag and list them and check it
-func TestAddEnvironmentWithoutToken(t *testing.T) {
+func TestAddEnvironmentWithoutTokenEndpoint(t *testing.T) {
 	apim := GetDevClient()
 	output, err := testutils.AddEnvironmentWithOutTokenFlag(t, apim.GetEnvName(), apim.GetApimURL())
 
@@ -86,7 +86,55 @@ func TestGetEnvironments(t *testing.T) {
 	base.SetupEnvWithoutTokenFlag(t, apim.GetEnvName(), apim.GetApimURL())
 
 	// Validate added environment list
-	testutils.ValidateEnvsList(t, apim.GetEnvName())
+	testutils.ValidateEnvsList(t, apim.GetEnvName(), true)
+}
+
+// Remove an added Environment when an user is logged into the environment
+func TestRemoveEnvironmentWithLoggedInUsers(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			devopsUsername := user.CtlUser.Username
+			devopsPassword := user.CtlUser.Password
+
+			// Add an environment
+			apim := GetDevClient()
+			output, err := testutils.AddEnvironmentWithOutTokenFlag(t, apim.GetEnvName(), apim.GetApimURL())
+
+			// Validate added environment
+			assert.Nil(t, err)
+			testutils.ValidateAddedEnvironments(t, output, apim.GetEnvName(), true)
+
+			// Login to the added environment
+			base.Execute(t, "login", apim.GetEnvName(), "-u", devopsUsername, "-p", devopsPassword)
+
+			// Remove the added environment
+			removeEnvOutput, errr := testutils.RemoveEnvironment(t, apim.GetEnvName())
+			assert.Nil(t, errr)
+
+			//Validate removed environment
+			testutils.ValidateRemoveEnvironments(t, removeEnvOutput, apim.GetEnvName())
+		})
+	}
+}
+
+// Remove an added Environment when an user is logged into the environment
+func TestRemoveEnvironmentWithoutLoggedInUsers(t *testing.T) {
+
+	// Add an environment
+	apim := GetDevClient()
+	output, err := testutils.AddEnvironmentWithOutTokenFlag(t, apim.GetEnvName(), apim.GetApimURL())
+
+	// Validate added environment
+	assert.Nil(t, err)
+	testutils.ValidateAddedEnvironments(t, output, apim.GetEnvName(), true)
+
+	// Remove the added environment
+	removeEnvOutput, errr := testutils.RemoveEnvironment(t, apim.GetEnvName())
+	assert.Nil(t, errr)
+
+	//Validate removed environment
+	testutils.ValidateRemoveEnvironments(t, removeEnvOutput, apim.GetEnvName())
 }
 
 //Change Export directory using apictl and assert the change
