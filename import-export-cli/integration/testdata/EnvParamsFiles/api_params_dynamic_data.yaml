@@ -1,0 +1,11 @@
+environments:
+    - name: development
+      configs:
+          endpoints:
+              production:
+                  url: ${DEV_ENV_PROD_URL}
+                  config:
+                      retryTimeOut: ${DEV_ENV_PROD_RE_TO}
+                      retryDelay: ${DEV_ENV_PROD_RE_DELAY}
+              sandbox:
+                  url: ${DEV_ENV_SAND_URL}

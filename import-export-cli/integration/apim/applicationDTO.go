@@ -18,18 +18,31 @@
 
 package apim
 
+// ApplicationFile : Application File content
+type ApplicationFile struct {
+	Type    string          `json:"type" yaml:"type"`
+	Version string          `json:"version" yaml:"version"`
+	Data    ApplicationData `json:"data" yaml:"data"`
+}
+
+// ApplicationData : Application Data
+type ApplicationData struct {
+	ApplicationInfo Application `json:"applicationInfo" yaml:"applicationInfo"`
+	SubscribedAPIs  interface{} `json:"subscribedAPIs" yaml:"subscribedAPIs"`
+}
+
 // Application : Application DTO
 type Application struct {
-	ApplicationID      string           `json:"applicationId"`
-	Name               string           `json:"name"`
-	ThrottlingPolicy   string           `json:"throttlingPolicy"`
-	Description        string           `json:"description"`
-	TokenType          string           `json:"tokenType"`
-	Status             string           `json:"status"`
-	Groups             []string         `json:"groups"`
-	SubscriptionCount  int              `json:"subscriptionCount"`
-	Keys               []ApplicationKey `json:"keys"`
-	SubscriptionScopes []string         `json:"subscriptionScopes"`
-	Owner              string           `json:"owner"`
-	HashEnabled        bool             `json:"hashEnabled"`
+	ApplicationID      string           `json:"applicationId" yaml:"applicationId"`
+	Name               string           `json:"name" yaml:"name"`
+	ThrottlingPolicy   string           `json:"throttlingPolicy" yaml:"throttlingPolicy"`
+	Description        string           `json:"description" yaml:"description"`
+	TokenType          string           `json:"tokenType" yaml:"tokenType"`
+	Status             string           `json:"status" yaml:"status"`
+	Groups             []string         `json:"groups" yaml:"groups"`
+	SubscriptionCount  int              `json:"subscriptionCount" yaml:"subscriptionCount"`
+	Keys               []ApplicationKey `json:"keys" yaml:"keys"`
+	SubscriptionScopes []string         `json:"subscriptionScopes" yaml:"subscriptionScopes"`
+	Owner              string           `json:"owner" yaml:"owner"`
+	HashEnabled        bool             `json:"hashEnabled" yaml:"hashEnabled"`
 }

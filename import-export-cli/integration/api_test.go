@@ -1111,354 +1111,162 @@ func TestChangeLifeCycleStatusOfApiWithActiveSubscriptionDevopsSuperTenantUser(t
 	testutils.ValidateChangeLifeCycleStatusOfAPI(t, argsToLifeCycleStateChange)
 }
 
-// Export a SOAP API from one environment and import to another environment as super tenant user with
-// Internal/devops role by specifying the provider name
-func TestExportImportSoapApiDevopsSuperTenantUser(t *testing.T) {
-	devopsUsername := devops.UserName
-	devopsPassword := devops.Password
+// Export a SOAP API from one environment and import to another environment by specifying the provider name
+func TestExportImportSoapApi(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+			prod := GetProdClient()
 
-	apiCreator := creator.UserName
-	apiCreatorPassword := creator.Password
+			api := testutils.AddSoapAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password, testutils.APITypeSoap)
 
-	dev := GetDevClient()
-	prod := GetProdClient()
+			args := &testutils.ApiImportExportTestArgs{
+				ApiProvider: testutils.Credentials{Username: user.ApiCreator.Username, Password: user.ApiCreator.Password},
+				CtlUser:     testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Api:         api,
+				SrcAPIM:     dev,
+				DestAPIM:    prod,
+			}
 
-	api := testutils.AddSoapAPI(t, dev, apiCreator, apiCreatorPassword, testutils.APITypeSoap)
+			testutils.ValidateAPIExportImport(t, args, testutils.APITypeSoap)
 
-	args := &testutils.ApiImportExportTestArgs{
-		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
-		Api:         api,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
+		})
 	}
-
-	testutils.ValidateAPIExportImport(t, args, testutils.APITypeSoap)
 }
 
-// Export a SOAP API from one environment and import to another environment as tenant user with
-// Internal/devops role by specifying the provider name
-func TestExportImportSoapApiDevopsTenantUser(t *testing.T) {
-	tenantDevopsUsername := devops.UserName + "@" + TENANT1
-	tenantDevopsPassword := devops.Password
+// Export a SOAPTOREST API from one environment and import to another environment by specifying the provider name
+func TestExportImportSoapToRestApi(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+			prod := GetProdClient()
 
-	tenantApiCreator := creator.UserName + "@" + TENANT1
-	tenantApiCreatorPassword := creator.Password
+			api := testutils.AddSoapAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password, testutils.APITypeSoapToRest)
 
-	dev := GetDevClient()
-	prod := GetProdClient()
+			args := &testutils.ApiImportExportTestArgs{
+				ApiProvider: testutils.Credentials{Username: user.ApiCreator.Username, Password: user.ApiCreator.Password},
+				CtlUser:     testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Api:         api,
+				SrcAPIM:     dev,
+				DestAPIM:    prod,
+			}
 
-	api := testutils.AddSoapAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword, testutils.APITypeSoap)
+			testutils.ValidateAPIExportImport(t, args, testutils.APITypeSoapToRest)
 
-	args := &testutils.ApiImportExportTestArgs{
-		ApiProvider: testutils.Credentials{Username: tenantApiCreator, Password: tenantApiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
-		Api:         api,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
+		})
 	}
-
-	testutils.ValidateAPIExportImport(t, args, testutils.APITypeSoap)
 }
 
-// Export a SOAPTOREST API from one environment and import to another environment as super tenant user with
-// Internal/devops role by specifying the provider name
-func TestExportImportSoapToRestApiDevopsSuperTenantUser(t *testing.T) {
-	devopsUsername := devops.UserName
-	devopsPassword := devops.Password
+// Export a GraphQL API from one environment and import to another environment as by specifying the provider name
+func TestExportImportGraphQLApi(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+			prod := GetProdClient()
 
-	apiCreator := creator.UserName
-	apiCreatorPassword := creator.Password
+			api := testutils.AddGraphQLAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
 
-	dev := GetDevClient()
-	prod := GetProdClient()
+			args := &testutils.ApiImportExportTestArgs{
+				ApiProvider: testutils.Credentials{Username: user.ApiCreator.Username, Password: user.ApiCreator.Password},
+				CtlUser:     testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Api:         api,
+				SrcAPIM:     dev,
+				DestAPIM:    prod,
+			}
 
-	api := testutils.AddSoapAPI(t, dev, apiCreator, apiCreatorPassword, testutils.APITypeSoapToRest)
+			testutils.ValidateAPIExportImport(t, args, testutils.APITypeGraphQL)
 
-	args := &testutils.ApiImportExportTestArgs{
-		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
-		Api:         api,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
+		})
 	}
-
-	testutils.ValidateAPIExportImport(t, args, testutils.APITypeSoapToRest)
 }
 
-// Export a SOAPTOREST API from one environment and import to another environment as tenant user with
-// Internal/devops role by specifying the provider name
-func TestExportImportSoapToRestApiDevopsTenantUser(t *testing.T) {
-	tenantDevopsUsername := devops.UserName + "@" + TENANT1
-	tenantDevopsPassword := devops.Password
+// Export a WebSocket API from one environment and import to another environment by specifying the provider name
+func TestExportImportWebSocketApi(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+			prod := GetProdClient()
 
-	tenantApiCreator := creator.UserName + "@" + TENANT1
-	tenantApiCreatorPassword := creator.Password
+			api := testutils.AddWebStreamingAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password, testutils.APITypeWebScoket)
 
-	dev := GetDevClient()
-	prod := GetProdClient()
+			args := &testutils.ApiImportExportTestArgs{
+				ApiProvider: testutils.Credentials{Username: user.ApiCreator.Username, Password: user.ApiCreator.Password},
+				CtlUser:     testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Api:         api,
+				SrcAPIM:     dev,
+				DestAPIM:    prod,
+			}
 
-	api := testutils.AddSoapAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword, testutils.APITypeSoapToRest)
-
-	args := &testutils.ApiImportExportTestArgs{
-		ApiProvider: testutils.Credentials{Username: tenantApiCreator, Password: tenantApiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
-		Api:         api,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
+			testutils.ValidateAPIExportImport(t, args, testutils.APITypeWebScoket)
+		})
 	}
-
-	testutils.ValidateAPIExportImport(t, args, testutils.APITypeSoapToRest)
 }
 
-// Export a GraphQL API from one environment and import to another environment as super tenant user with
-// Internal/devops role by specifying the provider name
-func TestExportImportGraphQLApiDevopsSuperTenantUser(t *testing.T) {
-	devopsUsername := devops.UserName
-	devopsPassword := devops.Password
+// Export a WebSub/WebHook API from one environment and import to another environment by specifying the provider name
+func TestExportImportWebSubApi(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+			prod := GetProdClient()
 
-	apiCreator := creator.UserName
-	apiCreatorPassword := creator.Password
+			api := testutils.AddWebStreamingAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password, testutils.APITypeWebSub)
 
-	dev := GetDevClient()
-	prod := GetProdClient()
+			args := &testutils.ApiImportExportTestArgs{
+				ApiProvider: testutils.Credentials{Username: user.ApiCreator.Username, Password: user.ApiCreator.Password},
+				CtlUser:     testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Api:         api,
+				SrcAPIM:     dev,
+				DestAPIM:    prod,
+			}
 
-	api := testutils.AddGraphQLAPI(t, dev, apiCreator, apiCreatorPassword)
+			testutils.ValidateAPIExportImport(t, args, testutils.APITypeWebSub)
 
-	args := &testutils.ApiImportExportTestArgs{
-		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
-		Api:         api,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
+		})
 	}
-
-	testutils.ValidateAPIExportImport(t, args, testutils.APITypeGraphQL)
 }
 
-// Export a GraphQL API from one environment and import to another environment as tenant user with
-// Internal/devops role by specifying the provider name
-func TestExportImportGraphQLApiDevopsTenantUser(t *testing.T) {
-	tenantDevopsUsername := devops.UserName + "@" + TENANT1
-	tenantDevopsPassword := devops.Password
+// Export a Server Sent Events API from one environment and import to another environment by specifying the provider name
+func TestExportImportSSEApi(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+			prod := GetProdClient()
 
-	tenantApiCreator := creator.UserName + "@" + TENANT1
-	tenantApiCreatorPassword := creator.Password
+			api := testutils.AddWebStreamingAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password, testutils.APITypeSSE)
 
-	dev := GetDevClient()
-	prod := GetProdClient()
+			args := &testutils.ApiImportExportTestArgs{
+				ApiProvider: testutils.Credentials{Username: user.ApiCreator.Username, Password: user.ApiCreator.Password},
+				CtlUser:     testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Api:         api,
+				SrcAPIM:     dev,
+				DestAPIM:    prod,
+			}
 
-	api := testutils.AddGraphQLAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword)
-
-	args := &testutils.ApiImportExportTestArgs{
-		ApiProvider: testutils.Credentials{Username: tenantApiCreator, Password: tenantApiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
-		Api:         api,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
+			testutils.ValidateAPIExportImport(t, args, testutils.APITypeSSE)
+		})
 	}
-
-	testutils.ValidateAPIExportImport(t, args, testutils.APITypeGraphQL)
-}
-
-// Export a WebSocket API from one environment and import to another environment as super tenant user with
-// Internal/devops role by specifying the provider name
-func TestExportImportWebSocketApiDevopsSuperTenantUser(t *testing.T) {
-	devopsUsername := devops.UserName
-	devopsPassword := devops.Password
-
-	apiCreator := creator.UserName
-	apiCreatorPassword := creator.Password
-
-	dev := GetDevClient()
-	prod := GetProdClient()
-
-	api := testutils.AddWebStreamingAPI(t, dev, apiCreator, apiCreatorPassword, testutils.APITypeWebScoket)
-
-	args := &testutils.ApiImportExportTestArgs{
-		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
-		Api:         api,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
-	}
-
-	testutils.ValidateAPIExportImport(t, args, testutils.APITypeWebScoket)
-}
-
-// Export a WebSocket API from one environment and import to another environment as tenant user with
-// Internal/devops role by specifying the provider name
-func TestExportImportWebSocketApiDevopsTenantUser(t *testing.T) {
-	tenantDevopsUsername := devops.UserName + "@" + TENANT1
-	tenantDevopsPassword := devops.Password
-
-	tenantApiCreator := creator.UserName + "@" + TENANT1
-	tenantApiCreatorPassword := creator.Password
-
-	dev := GetDevClient()
-	prod := GetProdClient()
-
-	api := testutils.AddWebStreamingAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword, testutils.APITypeWebScoket)
-
-	args := &testutils.ApiImportExportTestArgs{
-		ApiProvider: testutils.Credentials{Username: tenantApiCreator, Password: tenantApiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
-		Api:         api,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
-	}
-
-	testutils.ValidateAPIExportImport(t, args, testutils.APITypeWebScoket)
-}
-
-// Export a WebSub/WebHook API from one environment and import to another environment as super tenant user with
-// Internal/devops role by specifying the provider name
-func TestExportImportWebSubApiDevopsSuperTenantUser(t *testing.T) {
-	devopsUsername := devops.UserName
-	devopsPassword := devops.Password
-
-	apiCreator := creator.UserName
-	apiCreatorPassword := creator.Password
-
-	dev := GetDevClient()
-	prod := GetProdClient()
-
-	api := testutils.AddWebStreamingAPI(t, dev, apiCreator, apiCreatorPassword, testutils.APITypeWebSub)
-
-	args := &testutils.ApiImportExportTestArgs{
-		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
-		Api:         api,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
-	}
-
-	testutils.ValidateAPIExportImport(t, args, testutils.APITypeWebSub)
-}
-
-// Export a WebSub/WebHook API from one environment and import to another environment as tenant user with
-// Internal/devops role by specifying the provider name
-func TestExportImportWebSubApiDevopsTenantUser(t *testing.T) {
-	tenantDevopsUsername := devops.UserName + "@" + TENANT1
-	tenantDevopsPassword := devops.Password
-
-	tenantApiCreator := creator.UserName + "@" + TENANT1
-	tenantApiCreatorPassword := creator.Password
-
-	dev := GetDevClient()
-	prod := GetProdClient()
-
-	api := testutils.AddWebStreamingAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword, testutils.APITypeWebSub)
-
-	args := &testutils.ApiImportExportTestArgs{
-		ApiProvider: testutils.Credentials{Username: tenantApiCreator, Password: tenantApiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
-		Api:         api,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
-	}
-
-	testutils.ValidateAPIExportImport(t, args, testutils.APITypeWebSub)
-}
-
-// Export a Server Sent Events API from one environment and import to another environment as super tenant user with
-// Internal/devops role by specifying the provider name
-func TestExportImportSSEApiDevopsSuperTenantUser(t *testing.T) {
-	devopsUsername := devops.UserName
-	devopsPassword := devops.Password
-
-	apiCreator := creator.UserName
-	apiCreatorPassword := creator.Password
-
-	dev := GetDevClient()
-	prod := GetProdClient()
-
-	api := testutils.AddWebStreamingAPI(t, dev, apiCreator, apiCreatorPassword, testutils.APITypeSSE)
-
-	args := &testutils.ApiImportExportTestArgs{
-		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
-		Api:         api,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
-	}
-
-	testutils.ValidateAPIExportImport(t, args, testutils.APITypeSSE)
-}
-
-// Export a Server Sent Events API from one environment and import to another environment as tenant user with
-// Internal/devops role by specifying the provider name
-func TestExportImportSSEApiDevopsTenantUser(t *testing.T) {
-	tenantDevopsUsername := devops.UserName + "@" + TENANT1
-	tenantDevopsPassword := devops.Password
-
-	tenantApiCreator := creator.UserName + "@" + TENANT1
-	tenantApiCreatorPassword := creator.Password
-
-	dev := GetDevClient()
-	prod := GetProdClient()
-
-	api := testutils.AddWebStreamingAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword, testutils.APITypeSSE)
-
-	args := &testutils.ApiImportExportTestArgs{
-		ApiProvider: testutils.Credentials{Username: tenantApiCreator, Password: tenantApiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
-		Api:         api,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
-	}
-
-	testutils.ValidateAPIExportImport(t, args, testutils.APITypeSSE)
 }
 
 // Export a Web Socket API (that was created using an Async API definition) from one environment and
-//import to another environment as super tenant user with Internal/devops role by specifying the provider name
-func TestExportImportWebSocketApiFromAsyncApiDefDevopsSuperTenantUser(t *testing.T) {
-	devopsUsername := devops.UserName
-	devopsPassword := devops.Password
+//import to another environment by specifying the provider name
+func TestExportImportWebSocketApiFromAsyncApiDef(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+			prod := GetProdClient()
 
-	apiCreator := creator.UserName
-	apiCreatorPassword := creator.Password
+			api := testutils.AddWebStreamingAPIFromAsyncAPIDefinition(t, dev, user.ApiCreator.Username, user.ApiCreator.Password,
+				testutils.APITypeWebScoket)
 
-	dev := GetDevClient()
-	prod := GetProdClient()
+			args := &testutils.ApiImportExportTestArgs{
+				ApiProvider: testutils.Credentials{Username: user.ApiCreator.Username, Password: user.ApiCreator.Password},
+				CtlUser:     testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Api:         api,
+				SrcAPIM:     dev,
+				DestAPIM:    prod,
+			}
 
-	api := testutils.AddWebStreamingAPIFromAsyncAPIDefinition(t, dev, apiCreator, apiCreatorPassword,
-		testutils.APITypeWebScoket)
-
-	args := &testutils.ApiImportExportTestArgs{
-		ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
-		Api:         api,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
+			testutils.ValidateAPIExportImport(t, args, testutils.APITypeWebScoket)
+		})
 	}
-
-	testutils.ValidateAPIExportImport(t, args, testutils.APITypeWebScoket)
-}
-
-// Export a Web Socket API (that was created using an Async API definition) from one environment and
-//import to another environment as a tenant user with Internal/devops role by specifying the provider name
-func TestExportImportWebSocketApiFromAsyncApiDefDevopsTenantUser(t *testing.T) {
-	tenantDevopsUsername := devops.UserName + "@" + TENANT1
-	tenantDevopsPassword := devops.Password
-
-	tenantApiCreator := creator.UserName + "@" + TENANT1
-	tenantApiCreatorPassword := creator.Password
-
-	dev := GetDevClient()
-	prod := GetProdClient()
-
-	api := testutils.AddWebStreamingAPIFromAsyncAPIDefinition(t, dev, tenantApiCreator, tenantApiCreatorPassword,
-		testutils.APITypeWebScoket)
-
-	args := &testutils.ApiImportExportTestArgs{
-		ApiProvider: testutils.Credentials{Username: tenantApiCreator, Password: tenantApiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
-		Api:         api,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
-	}
-
-	testutils.ValidateAPIExportImport(t, args, testutils.APITypeWebScoket)
 }

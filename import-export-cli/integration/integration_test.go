@@ -22,6 +22,7 @@ import (
 	"flag"
 	"os"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/adminservices"
@@ -82,28 +83,36 @@ var (
 	// Table driven testing user combinations
 	testCaseUsers = []testutils.TestCaseUsers{
 		{
-			Description:  "CTL user admin Super Tenant",
-			ApiCreator:   testutils.Credentials{Username: creator.UserName, Password: creator.Password},
-			ApiPublisher: testutils.Credentials{Username: publisher.UserName, Password: publisher.Password},
-			CtlUser:      testutils.Credentials{Username: adminservices.AdminUsername, Password: adminservices.AdminPassword},
+			Description:   "CTL user admin Super Tenant",
+			ApiCreator:    testutils.Credentials{Username: creator.UserName, Password: creator.Password},
+			ApiPublisher:  testutils.Credentials{Username: publisher.UserName, Password: publisher.Password},
+			ApiSubscriber: testutils.Credentials{Username: subscriber.UserName, Password: subscriber.Password},
+			Admin:         testutils.Credentials{Username: adminservices.AdminUsername, Password: adminservices.AdminPassword},
+			CtlUser:       testutils.Credentials{Username: adminservices.AdminUsername, Password: adminservices.AdminPassword},
 		},
 		{
-			Description:  "CTL user admin Tenant",
-			ApiCreator:   testutils.Credentials{Username: creator.UserName + "@" + TENANT1, Password: creator.Password},
-			ApiPublisher: testutils.Credentials{Username: publisher.UserName + "@" + TENANT1, Password: publisher.Password},
-			CtlUser:      testutils.Credentials{Username: adminservices.AdminUsername + "@" + TENANT1, Password: adminservices.AdminPassword},
+			Description:   "CTL user admin Tenant",
+			ApiCreator:    testutils.Credentials{Username: creator.UserName + "@" + TENANT1, Password: creator.Password},
+			ApiPublisher:  testutils.Credentials{Username: publisher.UserName + "@" + TENANT1, Password: publisher.Password},
+			ApiSubscriber: testutils.Credentials{Username: subscriber.UserName + "@" + TENANT1, Password: subscriber.Password},
+			Admin:         testutils.Credentials{Username: adminservices.AdminUsername + "@" + TENANT1, Password: adminservices.AdminPassword},
+			CtlUser:       testutils.Credentials{Username: adminservices.AdminUsername + "@" + TENANT1, Password: adminservices.AdminPassword},
 		},
 		{
-			Description:  "CTL user devops Super Tenant",
-			ApiCreator:   testutils.Credentials{Username: creator.UserName, Password: creator.Password},
-			ApiPublisher: testutils.Credentials{Username: publisher.UserName, Password: publisher.Password},
-			CtlUser:      testutils.Credentials{Username: devops.UserName, Password: devops.Password},
+			Description:   "CTL user devops Super Tenant",
+			ApiCreator:    testutils.Credentials{Username: creator.UserName, Password: creator.Password},
+			ApiPublisher:  testutils.Credentials{Username: publisher.UserName, Password: publisher.Password},
+			ApiSubscriber: testutils.Credentials{Username: subscriber.UserName, Password: subscriber.Password},
+			Admin:         testutils.Credentials{Username: adminservices.AdminUsername, Password: adminservices.AdminPassword},
+			CtlUser:       testutils.Credentials{Username: devops.UserName, Password: devops.Password},
 		},
 		{
-			Description:  "CTL user devops Tenant",
-			ApiCreator:   testutils.Credentials{Username: creator.UserName + "@" + TENANT1, Password: creator.Password},
-			ApiPublisher: testutils.Credentials{Username: publisher.UserName + "@" + TENANT1, Password: publisher.Password},
-			CtlUser:      testutils.Credentials{Username: devops.UserName + "@" + TENANT1, Password: devops.Password},
+			Description:   "CTL user devops Tenant",
+			ApiCreator:    testutils.Credentials{Username: creator.UserName + "@" + TENANT1, Password: creator.Password},
+			ApiPublisher:  testutils.Credentials{Username: publisher.UserName + "@" + TENANT1, Password: publisher.Password},
+			ApiSubscriber: testutils.Credentials{Username: subscriber.UserName + "@" + TENANT1, Password: subscriber.Password},
+			Admin:         testutils.Credentials{Username: adminservices.AdminUsername + "@" + TENANT1, Password: adminservices.AdminPassword},
+			CtlUser:       testutils.Credentials{Username: devops.UserName + "@" + TENANT1, Password: devops.Password},
 		},
 	}
 )
@@ -387,4 +396,8 @@ func removeUserEndpointCerts(client *apim.Client, username string, password stri
 func getSOAPServiceURL(host string, offset int, service string) string {
 	port := 9443 + offset
 	return "https://" + host + ":" + strconv.Itoa(port) + "/services/" + service
+}
+
+func isTenantUser(username, tenant string) bool {
+	return strings.Contains(username, "@"+tenant)
 }

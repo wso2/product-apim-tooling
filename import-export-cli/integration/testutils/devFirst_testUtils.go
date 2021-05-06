@@ -20,10 +20,13 @@ package testutils
 
 import (
 	"log"
+	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 )
 
@@ -69,6 +72,59 @@ func InitProjectWithDefinitionFlag(t *testing.T, args *InitTestArgs) (string, er
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
 	output, err := base.Execute(t, "init", args.InitFlag, "--definition", args.DefinitionFlag)
+	return output, err
+}
+
+func importApiFromProject(t *testing.T, projectName, apiName, paramsPath string, client *apim.Client, credentials *Credentials,
+	isCleanup, isPreserveProvider bool) (string, error) {
+	projectPath, _ := filepath.Abs(projectName)
+
+	params := []string{"import", "api", "-f", projectPath, "-e", client.GetEnvName(), "-k",
+		"--verbose", "--preserve-provider=" + strconv.FormatBool(isPreserveProvider)}
+
+	if paramsPath != "" {
+		params = append(params, "--params", paramsPath)
+	}
+
+	output, err := base.Execute(t, params...)
+
+	base.WaitForIndexing()
+
+	if isCleanup {
+		t.Cleanup(func() {
+			username, password := apim.RetrieveAdminCredentialsInsteadCreator(credentials.Username, credentials.Password)
+			client.Login(username, password)
+			err := client.DeleteAPIByName(apiName)
+
+			if err != nil {
+				t.Fatal(err)
+			}
+			base.WaitForIndexing()
+		})
+	}
+
+	return output, err
+}
+
+func importApiFromProjectWithUpdate(t *testing.T, projectName string, client *apim.Client, apiName string, credentials *Credentials, isCleanup bool) (string, error) {
+	projectPath, _ := filepath.Abs(projectName)
+	output, err := base.Execute(t, "import", "api", "-f", projectPath, "-e", client.GetEnvName(), "-k", "--update", "--verbose")
+
+	base.WaitForIndexing()
+
+	if isCleanup {
+		t.Cleanup(func() {
+			username, password := apim.RetrieveAdminCredentialsInsteadCreator(credentials.Username, credentials.Password)
+			client.Login(username, password)
+			err := client.DeleteAPIByName(apiName)
+
+			if err != nil {
+				t.Fatal(err)
+			}
+			base.WaitForIndexing()
+		})
+	}
+
 	return output, err
 }
 
@@ -140,15 +196,17 @@ func ValidateInitializeProjectWithDefinitionFlag(t *testing.T, args *InitTestArg
 	})
 }
 
-func ValidateImportProject(t *testing.T, args *InitTestArgs) {
+func ValidateImportProject(t *testing.T, args *InitTestArgs, paramsPath string, preserveProvider bool) *apim.API {
 	t.Helper()
-	//Initialize a project with API definition
-	ValidateInitializeProjectWithOASFlag(t, args)
 
-	result, error := ImportApiFromProject(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, true, true)
+	result, error := importApiFromProject(t, args.InitFlag, args.APIName, paramsPath, args.SrcAPIM, &args.CtlUser,
+		true, preserveProvider)
 
 	assert.Nil(t, error, "Error while importing Project")
 	assert.Contains(t, result, "Successfully imported API", "Error while importing Project")
+
+	// Get App from env 2
+	importedAPI := GetAPI(t, args.SrcAPIM, args.APIName, args.CtlUser.Username, args.CtlUser.Password)
 
 	base.WaitForIndexing()
 
@@ -156,12 +214,14 @@ func ValidateImportProject(t *testing.T, args *InitTestArgs) {
 	t.Cleanup(func() {
 		base.RemoveDir(args.InitFlag)
 	})
+
+	return importedAPI
 }
 
 func ValidateAWSProjectImport(t *testing.T, args *AWSInitTestArgs, isPreserveProvider bool) {
 	t.Helper()
 
-	result, error := ImportApiFromProject(t, args.ApiNameFlag, args.SrcAPIM, args.ApiNameFlag, &args.CtlUser, true, isPreserveProvider)
+	result, error := importApiFromProject(t, args.ApiNameFlag, args.ApiNameFlag, "", args.SrcAPIM, &args.CtlUser, true, isPreserveProvider)
 
 	assert.Nil(t, error, "Error while importing Project")
 	assert.Contains(t, result, "Successfully imported API", "Error while importing Project")
@@ -174,10 +234,10 @@ func ValidateAWSProjectImport(t *testing.T, args *AWSInitTestArgs, isPreservePro
 	})
 }
 
-func ValidateImportProjectFailed(t *testing.T, args *InitTestArgs) {
+func ValidateImportProjectFailed(t *testing.T, args *InitTestArgs, paramsPath string) {
 	t.Helper()
 
-	result, _ := ImportApiFromProject(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, false, true)
+	result, _ := importApiFromProject(t, args.InitFlag, args.APIName, paramsPath, args.SrcAPIM, &args.CtlUser, false, true)
 
 	assert.Contains(t, result, "409", "Test failed because API is imported successfully")
 
@@ -192,7 +252,7 @@ func ValidateImportProjectFailed(t *testing.T, args *InitTestArgs) {
 func ValidateImportUpdateProject(t *testing.T, args *InitTestArgs) {
 	t.Helper()
 
-	result, error := ImportApiFromProjectWithUpdate(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, false)
+	result, error := importApiFromProjectWithUpdate(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, false)
 
 	assert.Nil(t, error, "Error while generating Project")
 	assert.Contains(t, result, "Successfully imported API", "Test InitializeProjectWithDefinitionFlag Failed")
@@ -206,7 +266,7 @@ func ValidateImportUpdateProject(t *testing.T, args *InitTestArgs) {
 func ValidateImportUpdateProjectNotAlreadyImported(t *testing.T, args *InitTestArgs) {
 	t.Helper()
 
-	result, error := ImportApiFromProjectWithUpdate(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, true)
+	result, error := importApiFromProjectWithUpdate(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, true)
 
 	assert.Nil(t, error, "Error while generating Project")
 	assert.Contains(t, result, "Successfully imported API", "Test InitializeProjectWithDefinitionFlag Failed")

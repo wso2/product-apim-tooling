@@ -79,8 +79,11 @@ func TestChangeExportDirectory(t *testing.T) {
 		ForceFlag: false,
 	}
 
+	//Initialize a project with API definition
+	testutils.ValidateInitializeProjectWithOASFlag(t, apiArgs)
+
 	//Assert that project import to publisher portal is successful
-	testutils.ValidateImportProject(t, apiArgs)
+	testutils.ValidateImportProject(t, apiArgs, "", true)
 
 	//Check exporting as a single API
 	exportArgs := &testutils.ApiImportExportTestArgs{

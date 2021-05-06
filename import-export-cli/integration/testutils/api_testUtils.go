@@ -182,17 +182,7 @@ func GenerateAdvertiseOnlyAPIDefinition(t *testing.T) (string, apim.API) {
 	base.CreateTempDir(t, projectPath)
 
 	// Read the sample-api.yaml file in the testdata directory
-	sampleData, err := ioutil.ReadFile(SampleAPIYamlFilePath)
-	if err != nil {
-		t.Error(err)
-	}
-
-	// Extract the content to a structure
-	sampleContent := apim.APIFile{}
-	err = yaml.Unmarshal(sampleData, &sampleContent)
-	if err != nil {
-		t.Error(err)
-	}
+	sampleContent := ReadAPIDefinition(t, SampleAPIYamlFilePath)
 
 	// Inject advertise only API specfic parameters
 	sampleContent.Data.AdvertiseInformation.Advertised = true
@@ -200,17 +190,10 @@ func GenerateAdvertiseOnlyAPIDefinition(t *testing.T) (string, apim.API) {
 	sampleContent.Data.AdvertiseInformation.OriginalDevPortalUrl = "https://localhost:9443/devportal"
 	sampleContent.Data.AdvertiseInformation.Vendor = "WSO2"
 
-	apiData, err := yaml2.Marshal(sampleContent)
-	if err != nil {
-		t.Error(err)
-	}
+	advertiseOnlyAPIDefinitionPath := filepath.Join(projectPath, filepath.FromSlash(utils.APIDefinitionFileYaml))
 
 	// Write the API definition to the temp directory
-	advertiseOnlyAPIDefinitionPath := filepath.Join(projectPath, filepath.FromSlash(utils.APIDefinitionFileYaml))
-	err = ioutil.WriteFile(advertiseOnlyAPIDefinitionPath, apiData, os.ModePerm)
-	if err != nil {
-		t.Error(err)
-	}
+	WriteToAPIDefinition(t, sampleContent, advertiseOnlyAPIDefinitionPath)
 	return advertiseOnlyAPIDefinitionPath, sampleContent.Data
 }
 
@@ -647,6 +630,36 @@ func ReadParams(t *testing.T, apiParamsPath string) *Params {
 	return &apiParams
 }
 
+func ReadAPIDefinition(t *testing.T, path string) apim.APIFile {
+
+	// Read the file in the path
+	sampleData, err := ioutil.ReadFile(path)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Extract the content to a structure
+	sampleContent := apim.APIFile{}
+	err = yaml.Unmarshal(sampleData, &sampleContent)
+	if err != nil {
+		t.Error(err)
+	}
+
+	return sampleContent
+}
+
+func WriteToAPIDefinition(t *testing.T, content apim.APIFile, path string) {
+	apiData, err := yaml2.Marshal(content)
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = ioutil.WriteFile(path, apiData, os.ModePerm)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
 func ValidateAPIImport(t *testing.T, args *ApiImportExportTestArgs) {
 	t.Helper()
 
@@ -853,50 +866,6 @@ func validateAPIIsDeleted(t *testing.T, api *apim.API, apisListAfterDelete *apim
 	for _, existingAPI := range apisListAfterDelete.List {
 		assert.NotEqual(t, existingAPI.ID, api.ID, "API delete is not successful")
 	}
-}
-
-func ImportApiFromProject(t *testing.T, projectName string, client *apim.Client, apiName string, credentials *Credentials, isCleanup, isPreserveProvider bool) (string, error) {
-	projectPath, _ := filepath.Abs(projectName)
-	output, err := base.Execute(t, "import", "api", "-f", projectPath, "-e", client.GetEnvName(), "-k", "--verbose", "--preserve-provider="+strconv.FormatBool(isPreserveProvider))
-
-	base.WaitForIndexing()
-
-	if isCleanup {
-		t.Cleanup(func() {
-			username, password := apim.RetrieveAdminCredentialsInsteadCreator(credentials.Username, credentials.Password)
-			client.Login(username, password)
-			err := client.DeleteAPIByName(apiName)
-
-			if err != nil {
-				t.Fatal(err)
-			}
-			base.WaitForIndexing()
-		})
-	}
-
-	return output, err
-}
-
-func ImportApiFromProjectWithUpdate(t *testing.T, projectName string, client *apim.Client, apiName string, credentials *Credentials, isCleanup bool) (string, error) {
-	projectPath, _ := filepath.Abs(projectName)
-	output, err := base.Execute(t, "import", "api", "-f", projectPath, "-e", client.GetEnvName(), "-k", "--update", "--verbose")
-
-	base.WaitForIndexing()
-
-	if isCleanup {
-		t.Cleanup(func() {
-			username, password := apim.RetrieveAdminCredentialsInsteadCreator(credentials.Username, credentials.Password)
-			client.Login(username, password)
-			err := client.DeleteAPIByName(apiName)
-
-			if err != nil {
-				t.Fatal(err)
-			}
-			base.WaitForIndexing()
-		})
-	}
-
-	return output, err
 }
 
 func ValidateChangeLifeCycleStatusOfAPI(t *testing.T, args *ApiChangeLifeCycleStatusTestArgs) {
