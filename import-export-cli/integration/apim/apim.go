@@ -991,14 +991,24 @@ func (instance *Client) CreateAPIProductRevision(apiProductID string) *APIRevisi
 }
 
 // DeployAPIProductRevision : Deploy API Product revision
-func (instance *Client) DeployAPIProductRevision(t *testing.T, apiProductID string, revision *APIRevision) {
+func (instance *Client) DeployAPIProductRevision(t *testing.T, apiProductID, deploymentName, vhost, revisionID string) {
 	deployURL := instance.publisherRestURL + "/api-products/" + apiProductID + "/deploy-revision"
 
 	deploymentInfoArray := []APIRevisionDeployment{}
 	deploymentInfo := APIRevisionDeployment{}
-	deploymentInfo.RevisionUUID = revision.ID
-	deploymentInfo.Name = "Default"
-	deploymentInfo.VHost = "localhost"
+	deploymentInfo.RevisionUUID = revisionID
+
+	if deploymentName == "" {
+		deploymentInfo.Name = "Default"
+	} else {
+		deploymentInfo.Name = deploymentName
+	}
+	if vhost == "" {
+		deploymentInfo.VHost = "localhost"
+	} else {
+		deploymentInfo.VHost = vhost
+	}
+
 	deploymentInfo.DisplayOnDevportal = true
 	deploymentInfoArray = append(deploymentInfoArray, deploymentInfo)
 
@@ -1011,7 +1021,7 @@ func (instance *Client) DeployAPIProductRevision(t *testing.T, apiProductID stri
 	request := base.CreatePost(deployURL, bytes.NewBuffer(data))
 
 	values := url.Values{}
-	values.Add("revisionId", revision.ID)
+	values.Add("revisionId", revisionID)
 
 	request.URL.RawQuery = values.Encode()
 

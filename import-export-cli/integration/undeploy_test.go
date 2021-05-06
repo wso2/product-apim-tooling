@@ -47,7 +47,7 @@ func TestUndeployAPIRevisionSingleGateway(t *testing.T) {
 			dev.DeployAPIRevision(t, api.ID, gatewayEnv.Name, gatewayEnv.VHosts[0].Host, revisionId)
 			base.WaitForIndexing()
 
-			args := &testutils.ApiUndeployTestArgs{
+			args := &testutils.UndeployTestArgs{
 				CtlUser:     testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
 				Api:         api,
 				SrcAPIM:     dev,
@@ -84,7 +84,7 @@ func TestUndeployAPIRevisionMulitpleGateways(t *testing.T) {
 			dev.DeployAPIRevision(t, api.ID, gatewayEnv2.Name, gatewayEnv2.VHosts[0].Host, revisionId)
 			base.WaitForIndexing()
 
-			args := &testutils.ApiUndeployTestArgs{
+			args := &testutils.UndeployTestArgs{
 				CtlUser:     testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
 				Api:         api,
 				SrcAPIM:     dev,
@@ -121,7 +121,7 @@ func TestUndeployAPIRevisionAllGateways(t *testing.T) {
 			dev.DeployAPIRevision(t, api.ID, gatewayEnv2.Name, gatewayEnv2.VHosts[0].Host, revisionId)
 			base.WaitForIndexing()
 
-			args := &testutils.ApiUndeployTestArgs{
+			args := &testutils.UndeployTestArgs{
 				CtlUser:    testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
 				Api:        api,
 				SrcAPIM:    dev,
@@ -147,7 +147,7 @@ func TestUndeployAPIRevisionFailure(t *testing.T) {
 			// Create and Deploy Revision of the above API to the default gateway
 			revisionId := testutils.CreateAndDeployAPIRevision(t, dev, user.ApiPublisher.Username, user.ApiPublisher.Password, api.ID)
 
-			args := &testutils.ApiUndeployTestArgs{
+			args := &testutils.UndeployTestArgs{
 				CtlUser:     testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
 				Api:         api,
 				SrcAPIM:     dev,
@@ -157,6 +157,144 @@ func TestUndeployAPIRevisionFailure(t *testing.T) {
 
 			// Validate the undeploy command failure
 			testutils.ValidateAPIUndeployFailure(t, args, "", revisionId)
+		})
+	}
+}
+
+// Undeploy an API Product revision from one gateway
+func TestUndeployAPIProductRevisionSingleGateway(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			dev := GetDevClient()
+
+			// Add the API Product to env
+			apiProductArgs := testutils.AddAPIProductWithTwoDependentAPIs(t, dev, &user.ApiCreator, &user.ApiPublisher)
+
+			// Add a new gateway env by the respective admin user
+			gatewayEnv := testutils.AddGatewayEnv(t, dev, user.Admin.Username, user.Admin.Password)
+
+			// Create and Deploy Revision of the above API to the default gateway
+			revisionId := testutils.CreateAndDeployAPIProductRevision(t, dev, user.ApiPublisher.Username,
+				user.ApiPublisher.Password, apiProductArgs.ApiProduct.ID)
+
+			// Deploy the same revision in another gateway
+			dev.DeployAPIProductRevision(t, apiProductArgs.ApiProduct.ID, gatewayEnv.Name, gatewayEnv.VHosts[0].Host, revisionId)
+			base.WaitForIndexing()
+
+			args := &testutils.UndeployTestArgs{
+				CtlUser:     testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				ApiProduct:  apiProductArgs.ApiProduct,
+				SrcAPIM:     dev,
+				RevisionNo:  revisionNumber,
+				GatewayEnvs: []string{gatewayEnv.Name},
+			}
+
+			// Validate the undeploy command
+			testutils.ValidateAPIProductUndeploy(t, args, "", revisionId)
+		})
+	}
+}
+
+// Undeploy an API Product revision from multiple specified gateways but not all
+func TestUndeployAPIProductRevisionMulitpleGateways(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			dev := GetDevClient()
+
+			// Add the API Product to env
+			apiProductArgs := testutils.AddAPIProductWithTwoDependentAPIs(t, dev, &user.ApiCreator, &user.ApiPublisher)
+
+			// Add two new gateway envs by the respective admin user
+			gatewayEnv1 := testutils.AddGatewayEnv(t, dev, user.Admin.Username, user.Admin.Password)
+			gatewayEnv2 := testutils.AddGatewayEnv(t, dev, user.Admin.Username, user.Admin.Password)
+
+			// Create and Deploy Revision of the above API to the default gateway
+			revisionId := testutils.CreateAndDeployAPIProductRevision(t, dev, user.ApiPublisher.Username,
+				user.ApiPublisher.Password, apiProductArgs.ApiProduct.ID)
+
+			// Deploy the same revision in other gateways
+			dev.DeployAPIProductRevision(t, apiProductArgs.ApiProduct.ID, gatewayEnv1.Name, gatewayEnv1.VHosts[0].Host, revisionId)
+			base.WaitForIndexing()
+			dev.DeployAPIProductRevision(t, apiProductArgs.ApiProduct.ID, gatewayEnv2.Name, gatewayEnv2.VHosts[0].Host, revisionId)
+			base.WaitForIndexing()
+
+			args := &testutils.UndeployTestArgs{
+				CtlUser:     testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				ApiProduct:  apiProductArgs.ApiProduct,
+				SrcAPIM:     dev,
+				RevisionNo:  revisionNumber,
+				GatewayEnvs: []string{gatewayEnv1.Name, gatewayEnv2.Name},
+			}
+
+			// Validate the undeploy command
+			testutils.ValidateAPIProductUndeploy(t, args, "", revisionId)
+		})
+	}
+}
+
+// Undeploy an API Product revision from all the gateways
+func TestUndeployAPIProductRevisionAllGateways(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			dev := GetDevClient()
+
+			// Add the API Product to env
+			apiProductArgs := testutils.AddAPIProductWithTwoDependentAPIs(t, dev, &user.ApiCreator, &user.ApiPublisher)
+
+			// Add two new gateway envs by the respective admin user
+			gatewayEnv1 := testutils.AddGatewayEnv(t, dev, user.Admin.Username, user.Admin.Password)
+			gatewayEnv2 := testutils.AddGatewayEnv(t, dev, user.Admin.Username, user.Admin.Password)
+
+			// Create and Deploy Revision of the above API to the default gateway
+			revisionId := testutils.CreateAndDeployAPIProductRevision(t, dev, user.ApiPublisher.Username,
+				user.ApiPublisher.Password, apiProductArgs.ApiProduct.ID)
+
+			// Deploy the same revision in other gateways
+			dev.DeployAPIProductRevision(t, apiProductArgs.ApiProduct.ID, gatewayEnv1.Name, gatewayEnv1.VHosts[0].Host, revisionId)
+			base.WaitForIndexing()
+			dev.DeployAPIProductRevision(t, apiProductArgs.ApiProduct.ID, gatewayEnv2.Name, gatewayEnv2.VHosts[0].Host, revisionId)
+			base.WaitForIndexing()
+
+			args := &testutils.UndeployTestArgs{
+				CtlUser:    testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				ApiProduct: apiProductArgs.ApiProduct,
+				SrcAPIM:    dev,
+				RevisionNo: revisionNumber,
+			}
+
+			// Validate the undeploy command
+			testutils.ValidateAPIProductUndeploy(t, args, "", revisionId)
+		})
+	}
+}
+
+// Undeploy an API Product revision from a gateway that does not exist
+func TestUndeployAPIProductRevisionFailure(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			dev := GetDevClient()
+
+			// Add the API Product to env
+			apiProductArgs := testutils.AddAPIProductWithTwoDependentAPIs(t, dev, &user.ApiCreator, &user.ApiPublisher)
+
+			// Create and Deploy Revision of the above API to the default gateway
+			revisionId := testutils.CreateAndDeployAPIProductRevision(t, dev, user.ApiPublisher.Username,
+				user.ApiPublisher.Password, apiProductArgs.ApiProduct.ID)
+
+			args := &testutils.UndeployTestArgs{
+				CtlUser:     testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				ApiProduct:  apiProductArgs.ApiProduct,
+				SrcAPIM:     dev,
+				RevisionNo:  revisionNumber,
+				GatewayEnvs: []string{base.GenerateRandomString()},
+			}
+
+			// Validate the undeploy command failure
+			testutils.ValidateAPIProductUndeployFailure(t, args, "", revisionId)
 		})
 	}
 }

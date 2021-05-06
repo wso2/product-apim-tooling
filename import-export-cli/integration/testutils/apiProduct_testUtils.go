@@ -39,7 +39,7 @@ func AddAPIProductFromJSONWithoutCleaning(t *testing.T, client *apim.Client, use
 	doClean := false
 	id := client.AddAPIProductFromJSON(t, path, username, password, apisList, doClean)
 	revision := client.CreateAPIProductRevision(id)
-	client.DeployAPIProductRevision(t, id, revision)
+	client.DeployAPIProductRevision(t, id, "", "", revision.ID)
 	apiProduct := client.GetAPIProduct(id)
 	return apiProduct
 }
@@ -56,10 +56,11 @@ func AddAPIProductFromJSON(t *testing.T, client *apim.Client, username string, p
 	return apiProduct
 }
 
-func CreateAndDeployAPIProductRevision(t *testing.T, client *apim.Client, username, password, apiProductID string) {
+func CreateAndDeployAPIProductRevision(t *testing.T, client *apim.Client, username, password, apiProductID string) string {
 	client.Login(username, password)
 	revision := client.CreateAPIProductRevision(apiProductID)
-	client.DeployAPIProductRevision(t, apiProductID, revision)
+	client.DeployAPIProductRevision(t, apiProductID, "", "", revision.ID)
+	return revision.ID
 }
 
 func getAPIProduct(t *testing.T, client *apim.Client, name string, username string, password string) *apim.APIProduct {

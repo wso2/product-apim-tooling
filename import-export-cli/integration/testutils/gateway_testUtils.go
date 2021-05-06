@@ -48,7 +48,7 @@ func GenerateSampleGatewayData() apim.Environment {
 	return env
 }
 
-func undeployAPI(t *testing.T, args *ApiUndeployTestArgs, provider string) (string, error) {
+func undeployAPI(t *testing.T, args *UndeployTestArgs, provider string) (string, error) {
 	params := []string{"undeploy", "api", "-n", args.Api.Name, "-v", args.Api.Version,
 		"--rev", args.RevisionNo, "-e", args.SrcAPIM.GetEnvName(), "-k", "--verbose"}
 
@@ -67,7 +67,26 @@ func undeployAPI(t *testing.T, args *ApiUndeployTestArgs, provider string) (stri
 	return output, err
 }
 
-func ValidateAPIUndeploy(t *testing.T, args *ApiUndeployTestArgs, provider, revisionId string) {
+func undeployAPIProduct(t *testing.T, args *UndeployTestArgs, provider string) (string, error) {
+	params := []string{"undeploy", "api-product", "-n", args.ApiProduct.Name,
+		"--rev", args.RevisionNo, "-e", args.SrcAPIM.GetEnvName(), "-k", "--verbose"}
+
+	if provider != "" {
+		params = append(params, "-r", provider)
+	}
+
+	if len(args.GatewayEnvs) > 0 {
+		for _, gatewayEnv := range args.GatewayEnvs {
+			params = append(params, "-g", "\""+gatewayEnv+"\"")
+		}
+	}
+
+	output, err := base.Execute(t, params...)
+
+	return output, err
+}
+
+func ValidateAPIUndeploy(t *testing.T, args *UndeployTestArgs, provider, revisionId string) {
 	t.Helper()
 
 	deployedAPIRevisionsBeforeUndeploy := args.SrcAPIM.GetAPIRevisions(args.Api.ID, "deployed:true")
@@ -94,10 +113,9 @@ func ValidateAPIUndeploy(t *testing.T, args *ApiUndeployTestArgs, provider, revi
 		// This scenario is that the API revision is undeployed from all the gateways
 		assert.Equal(t, len(deployedAPIRevisionsAfterUndeploy.List), 0)
 	}
-
 }
 
-func ValidateAPIUndeployFailure(t *testing.T, args *ApiUndeployTestArgs, provider, revisionId string) {
+func ValidateAPIUndeployFailure(t *testing.T, args *UndeployTestArgs, provider, revisionId string) {
 	t.Helper()
 
 	// Setup apictl envs
@@ -110,11 +128,12 @@ func ValidateAPIUndeployFailure(t *testing.T, args *ApiUndeployTestArgs, provide
 	result, err := undeployAPI(t, args, provider)
 
 	assert.NotNil(t, err, "Should not return nil error")
-	assert.Contains(t, base.GetValueOfUniformResponse(result), "Exit status 1")
+	assert.Contains(t, base.GetValueOfUniformResponse(result), "Exit status 1",
+		"Test failed because API Product was undeployed successfully")
 }
 
 func ValidateDeployedGateways(t *testing.T, deployedRevisionsBeforeUndeploy *apim.APIRevisionList,
-	deployedRevisionsAfterUndeploy *apim.APIRevisionList, args *ApiUndeployTestArgs, revisionId string) {
+	deployedRevisionsAfterUndeploy *apim.APIRevisionList, args *UndeployTestArgs, revisionId string) {
 
 	// Validate whether the deployed gateways contain the gateway envs before undeploying
 	assert.True(t, containsGatewaysInDeployment(deployedRevisionsBeforeUndeploy, args.GatewayEnvs, revisionId))
@@ -152,4 +171,51 @@ func containsGatewaysInDeployment(deployedRevisions *apim.APIRevisionList, gatew
 		}
 	}
 	return false
+}
+
+func ValidateAPIProductUndeploy(t *testing.T, args *UndeployTestArgs, provider, revisionId string) {
+	t.Helper()
+
+	deployedAPIProductRevisionsBeforeUndeploy := args.SrcAPIM.GetAPIProductRevisions(args.ApiProduct.ID,
+		"deployed:true")
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	// Export api from env 1
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	// Execute undeploy API Product command
+	result, err := undeployAPIProduct(t, args, provider)
+
+	assert.Nil(t, err, "Should return nil error")
+	assert.Contains(t, result, "Revision "+args.RevisionNo+" of API Product "+
+		args.ApiProduct.Name+" successfully undeployed")
+
+	deployedAPIProductRevisionsAfterUndeploy := args.SrcAPIM.GetAPIProductRevisions(args.ApiProduct.ID,
+		"deployed:true")
+
+	if len(args.GatewayEnvs) > 0 {
+		// Validate the deployed gateways before and after executing the undeploy command
+		ValidateDeployedGateways(t, deployedAPIProductRevisionsBeforeUndeploy,
+			deployedAPIProductRevisionsAfterUndeploy, args, revisionId)
+	} else {
+		// This scenario is that the API revision is undeployed from all the gateways
+		assert.Equal(t, len(deployedAPIProductRevisionsAfterUndeploy.List), 0)
+	}
+}
+
+func ValidateAPIProductUndeployFailure(t *testing.T, args *UndeployTestArgs, provider, revisionId string) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	// Export api from env 1
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	// Execute undeploy API command
+	result, _ := undeployAPIProduct(t, args, provider)
+
+	assert.Contains(t, result, "400", "Test failed because API Product was undeployed successfully")
 }
