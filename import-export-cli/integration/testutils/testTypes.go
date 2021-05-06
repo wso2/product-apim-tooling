@@ -81,6 +81,14 @@ type ApiGetKeyTestArgs struct {
 	Apim       *apim.Client
 }
 
+type ApiUndeployTestArgs struct {
+	CtlUser     Credentials
+	Api         *apim.API
+	SrcAPIM     *apim.Client
+	RevisionNo  string
+	GatewayEnvs []string
+}
+
 type loginTestArgs struct {
 	ctlUser Credentials
 	srcAPIM *apim.Client

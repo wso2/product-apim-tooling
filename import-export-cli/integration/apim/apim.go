@@ -20,8 +20,6 @@ package apim
 
 import (
 	"bytes"
-	"crypto/rand"
-	"encoding/base32"
 	"encoding/json"
 	"errors"
 	"io"
@@ -55,6 +53,7 @@ type Client struct {
 	accessToken      string
 	publisherRestURL string
 	devPortalRestURL string
+	adminRestURL     string
 	EnvName          string
 }
 
@@ -116,6 +115,7 @@ func (instance *Client) Setup(envName string, host string, offset int, dcrVersio
 	instance.dcrURL = getDCRURL(host, offset, dcrVersion)
 	instance.devPortalRestURL = getDevPortalRestURL(host, offset, restAPIVersion)
 	instance.publisherRestURL = getPublisherRestURL(host, offset, restAPIVersion)
+	instance.adminRestURL = getAdminRestURL(host, offset, restAPIVersion)
 	instance.portOffset = offset
 	instance.tokenURL = getTokenURL(host, offset)
 	instance.host = host
@@ -140,7 +140,7 @@ func (instance *Client) GetTokenURL() string {
 // GenerateSampleAPIData : Generate sample Pizzashack API object
 func (instance *Client) GenerateSampleAPIData(provider string) *API {
 	api := API{}
-	api.Name = generateRandomString() + "API"
+	api.Name = base.GenerateRandomString() + "API"
 	api.Description = "This is a simple API for Pizza Shack online pizza delivery store."
 	api.Context = getContext(provider)
 	api.Version = "1.0.0"
@@ -168,7 +168,7 @@ func (instance *Client) GenerateSampleAPIData(provider string) *API {
 // GenerateSampleStreamingAPIData : Generate sample Streaming API object
 func (instance *Client) GenerateSampleStreamingAPIData(provider, apiType string) *API {
 	api := API{}
-	api.Name = generateRandomString() + "API"
+	api.Name = base.GenerateRandomString() + "API"
 	api.Description = "This is a simple Streaming API."
 	api.Context = getContext(provider)
 	api.Version = "1.0.0"
@@ -191,7 +191,7 @@ func (instance *Client) GenerateSampleStreamingAPIData(provider, apiType string)
 }
 
 func getContext(provider string) string {
-	context := generateRandomString()
+	context := base.GenerateRandomString()
 	if strings.Contains(provider, "@") {
 		splits := strings.Split(provider, "@")
 		domain := splits[len(splits)-1]
@@ -203,7 +203,7 @@ func getContext(provider string) string {
 
 // GenerateAdditionalProperties : Generate additional properties to create an API from swagger
 func (instance *Client) GenerateAdditionalProperties(provider, endpointUrl, apiType string, operations []interface{}) string {
-	additionalProperties := `{"name":"` + generateRandomString() + `",
+	additionalProperties := `{"name":"` + base.GenerateRandomString() + `",
 	"version":"1.0.5",
 	"context":"` + getContext(provider) + `",
 	"policies":[
@@ -423,7 +423,7 @@ func SortAPIProductMembers(apiProduct *APIProduct) {
 // GenerateSampleAppData : Generate sample Application object
 func (instance *Client) GenerateSampleAppData() *Application {
 	app := Application{}
-	app.Name = generateRandomString() + "Application"
+	app.Name = base.GenerateRandomString() + "Application"
 	app.ThrottlingPolicy = "Unlimited"
 	app.Description = "Test Application"
 	app.TokenType = "JWT"
@@ -800,7 +800,7 @@ func (instance *Client) AddAPIProductFromJSON(t *testing.T, path string, usernam
 	}
 
 	// Generate a random string as the API Product name and context
-	apiProductData.(map[string]interface{})["name"] = generateRandomString()
+	apiProductData.(map[string]interface{})["name"] = base.GenerateRandomString()
 	apiProductData.(map[string]interface{})["context"] = getContext(username)
 
 	// Retrieve the APIs in the json file of the API Product
@@ -898,14 +898,24 @@ func (instance *Client) CreateAPIRevision(apiID string) *APIRevision {
 }
 
 // DeployAPIRevision : Deploy API revision
-func (instance *Client) DeployAPIRevision(t *testing.T, apiID string, revision *APIRevision) {
+func (instance *Client) DeployAPIRevision(t *testing.T, apiID, deploymentName, vhost, revisionID string) {
 	deployURL := instance.publisherRestURL + "/apis/" + apiID + "/deploy-revision"
 
 	deploymentInfoArray := []APIRevisionDeployment{}
 	deploymentInfo := APIRevisionDeployment{}
-	deploymentInfo.RevisionUUID = revision.ID
-	deploymentInfo.Name = "Default"
-	deploymentInfo.VHost = "localhost"
+	deploymentInfo.RevisionUUID = revisionID
+
+	if deploymentName == "" {
+		deploymentInfo.Name = "Default"
+	} else {
+		deploymentInfo.Name = deploymentName
+	}
+	if vhost == "" {
+		deploymentInfo.VHost = "localhost"
+	} else {
+		deploymentInfo.VHost = vhost
+	}
+
 	deploymentInfo.DisplayOnDevportal = true
 	deploymentInfoArray = append(deploymentInfoArray, deploymentInfo)
 
@@ -918,7 +928,7 @@ func (instance *Client) DeployAPIRevision(t *testing.T, apiID string, revision *
 	request := base.CreatePost(deployURL, bytes.NewBuffer(data))
 
 	values := url.Values{}
-	values.Add("revisionId", revision.ID)
+	values.Add("revisionId", revisionID)
 
 	request.URL.RawQuery = values.Encode()
 
@@ -1048,6 +1058,57 @@ func (instance *Client) DeleteAPIProduct(apiProductID string) {
 	defer response.Body.Close()
 
 	base.ValidateAndLogResponse("apim.DeleteAPIProduct()", response, 200)
+}
+
+// AddGatewayEnv : Add a gateway environment
+func (instance *Client) AddGatewayEnv(t *testing.T, environment Environment, username, password string) *Environment {
+	environmentsURL := instance.adminRestURL + "/environments"
+
+	data, err := json.Marshal(environment)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	request := base.CreatePost(environmentsURL, bytes.NewBuffer(data))
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.AddGatewayEnv()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.AddGatewayEnv()", response, 201)
+
+	var envResponse Environment
+	json.NewDecoder(response.Body).Decode(&envResponse)
+
+	t.Cleanup(func() {
+		username, password := RetrieveAdminCredentialsInsteadCreator(username, password)
+		instance.Login(username, password)
+		instance.DeleteGatewayEnv(envResponse.ID)
+	})
+
+	return &envResponse
+}
+
+// DeleteGatewayEnv : Delete a gateway environment
+func (instance *Client) DeleteGatewayEnv(envID string) {
+	environmentsURL := instance.adminRestURL + "/environments/" + envID
+
+	request := base.CreateDelete(environmentsURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.DeleteGatewayEnv()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.DeleteGatewayEnv()", response, 200)
 }
 
 // DeleteAPIByName : Delete API from APIM by name
@@ -1749,17 +1810,6 @@ func generateSampleAPIOperations() []APIOperations {
 	return []APIOperations{op1, op2, op3, op4, op5}
 }
 
-func generateRandomString() string {
-	b := make([]byte, 10)
-	_, err := rand.Read(b)
-
-	if err != nil {
-		panic(err)
-	}
-
-	return base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(b)
-}
-
 func (instance *Client) getToken(username string, password string) string {
 	registrationResponse := instance.registerClient(username, password)
 
@@ -1772,7 +1822,7 @@ func (instance *Client) getToken(username string, password string) string {
 	values.Add("username", username)
 	values.Add("password", password)
 	values.Add("scope",
-		"apim:api_view apim:api_create apim:api_publish apim:subscribe apim:api_delete "+
+		"apim:admin apim:api_view apim:api_create apim:api_publish apim:subscribe apim:api_delete "+
 			"apim:app_import_export apim:api_import_export apim:api_product_import_export apim:app_manage apim:sub_manage")
 
 	request.URL.RawQuery = values.Encode()
@@ -1855,6 +1905,11 @@ func getDevPortalRestURL(host string, offset int, version string) string {
 func getPublisherRestURL(host string, offset int, version string) string {
 	port := 9443 + offset
 	return "https://" + host + ":" + strconv.Itoa(port) + "/api/am/publisher/" + version
+}
+
+func getAdminRestURL(host string, offset int, version string) string {
+	port := 9443 + offset
+	return "https://" + host + ":" + strconv.Itoa(port) + "/api/am/admin/" + version
 }
 
 func getTokenURL(host string, offset int) string {
