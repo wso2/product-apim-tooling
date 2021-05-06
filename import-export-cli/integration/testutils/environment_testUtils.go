@@ -35,6 +35,42 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
+// InitApictl : Initializes apictl in the local machine and create directories
+func InitApictl(t *testing.T) (string, error) {
+	return base.Execute(t)
+}
+
+// SetApictlWithCustomDirectory : Set custom directory location using environment variable
+func SetApictlWithCustomDirectory(t *testing.T, customDirPath string) {
+
+	t.Log("Setting up the environment variable value for " + EnvVariableNameOfCustomCustomDirectoryAtInit)
+	os.Setenv(EnvVariableNameOfCustomCustomDirectoryAtInit, customDirPath)
+}
+
+// ValidateApictlInit : Check and verify whether the apictl is initialized properly
+func ValidateApictlInit(t *testing.T, err error, output string) {
+
+	// Asserting the apictl initializing message to check whether apictl is initialized or not.
+	assert.Nil(t, err)
+	assert.Contains(t, output, ApictlInitMessage, "Test failed without initializing apictl")
+}
+
+// ValidateCustomDirectoryChangeAtInit :  Validate custom directory change at init
+func ValidateCustomDirectoryChangeAtInit(t *testing.T, customDirPath string) {
+
+	//Check .wso2apictl and .wso2apictl.local directories on custom directories
+	checkConfigDir, _ := utils.IsDirExists(filepath.Join(customDirPath, utils.ConfigDirName))
+	checkLocalCredentialsDir, _ := utils.IsDirExists(filepath.Join(customDirPath, utils.LocalCredentialsDirectoryName))
+
+	assert.Equal(t, true, checkConfigDir)
+	assert.Equal(t, true, checkLocalCredentialsDir)
+
+	t.Cleanup(func() {
+		// Remove created custom directory directory
+		base.RemoveDir(customDirPath)
+	})
+}
+
 func InitProjectWithOasFlag(t *testing.T, args *InitTestArgs) (string, error) {
 	//Setup Environment and login to it.
 	base.SetupEnvWithoutTokenFlag(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL())

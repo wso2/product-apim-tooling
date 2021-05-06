@@ -31,6 +31,34 @@ import (
 
 const defaultExportPath = utils.DefaultExportDirName
 
+// Run apictl without any environments or .wso2apictl config folder
+func TestRunApictlWithoutAnyEnvironments(t *testing.T) {
+
+	output, err := testutils.InitApictl(t)
+
+	// Validate apictl initialization
+	testutils.ValidateApictlInit(t, err, output)
+}
+
+// Run apictl by setting a custom wso2apictl directory location by specifying the APICTL_CONFIG_DIR environment variable
+func TestRunApictlWithCustomDirectoryLocation(t *testing.T) {
+
+	// Get absolute path of the custom Directory and create temp custom directory
+	absolutePathOfCustomDir, _ := filepath.Abs(testutils.CustomDirectoryAtInit)
+	_ = utils.CreateDirIfNotExist(absolutePathOfCustomDir)
+
+	testutils.SetApictlWithCustomDirectory(t, absolutePathOfCustomDir)
+
+	// Initializing apictl
+	output, err := testutils.InitApictl(t)
+
+	// Validate apictl initialization
+	testutils.ValidateApictlInit(t, err, output)
+
+	// Validate custom directory change at init
+	testutils.ValidateCustomDirectoryChangeAtInit(t, absolutePathOfCustomDir)
+}
+
 //Get Environments using apictl
 func TestGetEnvironments(t *testing.T) {
 	apim := GetDevClient()

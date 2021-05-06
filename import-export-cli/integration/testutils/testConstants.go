@@ -18,7 +18,13 @@
 
 package testutils
 
+//Environment management related test constants
+const ApictlInitMessage = "apictl is a Command Line Tool for Importing and Exporting APIs and Applications between " +
+	"different environments of WSO2 API Manager"
 const CustomTestExportDirectory = "CustomExportDirectory"
+const CustomDirectoryAtInit = "CustomExportDirectoryAtInit"
+const EnvVariableNameOfCustomCustomDirectoryAtInit = "APICTL_CONFIG_DIR"
+
 const TestSwagger2DefinitionPath = "testdata/swagger2Definition.yaml"
 const TestOpenAPI3DefinitionPath = "testdata/openAPI3Definition.yaml"
 const TestOpenAPI3DefinitionWithoutEndpointsPath = "testdata/openAPI3DefinitionWithoutEndpoints.yaml"
@@ -57,6 +63,9 @@ const TestArtifact3Path = "testdata/TestArtifactDirectory/ArtifactSet3"
 const TestDefaultExtractedFileName = "/SwaggerPetstoreNew-1.0.0"
 const CustomDynamicInSequenceName = "custom-header-in.xml"
 
+//Environment specific testcase constants
+
+// EnvParamsFilesDir : Directory that stored environment specific test resources
 const EnvParamsFilesDir = "testdata/EnvParamsFiles"
 
 // APIEndpointParamsFile : Endpoint URL api_params.yaml
@@ -77,13 +86,10 @@ const APISecurityBasicParamsFile = EnvParamsFilesDir + "/api_params_security_bas
 // APIFullParamsFile : Full api_params.yaml
 const APIFullParamsFile = EnvParamsFilesDir + "/api_params_full.yaml"
 
-// APIDynamicDataParamsFile : api_params.yaml with dynamic data
-const APIDynamicDataParamsFile = EnvParamsFilesDir + "/api_params_dynamic_data.yaml"
-
 // APIProductFullParamsFile : Full api_product_params.yaml
 const APIProductFullParamsFile = EnvParamsFilesDir + "/api_product_params_full.yaml"
 
-// CertificatesDirectoryPath : Directory path for the dunnmy certificates
+// CertificatesDirectoryPath : Directory path for the dummy certificates
 const CertificatesDirectoryPath = "testdata/TestArtifactDirectory/certificates"
 
 // UnlimitedPolicy : Unlimited Throttle Policy
