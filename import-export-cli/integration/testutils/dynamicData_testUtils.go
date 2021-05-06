@@ -141,3 +141,19 @@ func ValidateExportedSequenceWithDynamicData(t *testing.T, args *InitTestArgs, a
 		base.RemoveDir(exportedPath)
 	})
 }
+
+func ValidateImportProjectFailedWithoutSettingEnvVariables(t *testing.T, args *InitTestArgs, paramsPath string, preserveProvider bool) {
+	t.Helper()
+
+	result, _ := importApiFromProject(t, args.InitFlag, args.APIName, paramsPath, args.SrcAPIM, &args.CtlUser, false,
+		preserveProvider)
+
+	assert.Contains(t, base.GetValueOfUniformResponse(result), "Exit status 1")
+
+	base.WaitForIndexing()
+
+	//Remove Created project and logout
+	t.Cleanup(func() {
+		base.RemoveDir(args.InitFlag)
+	})
+}
