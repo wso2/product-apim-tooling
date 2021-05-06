@@ -25,7 +25,7 @@ import (
 )
 
 // Initialize a project and import it with a params file with dynamic data and
-// check whether the env variable values have been set correctly in the imported application
+// check whether the env variable values have been set correctly in the imported API
 func TestImportAPIProjectWithDynamicData(t *testing.T) {
 	for _, user := range testCaseUsers {
 		t.Run(user.Description, func(t *testing.T) {
