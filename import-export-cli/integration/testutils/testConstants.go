@@ -18,7 +18,13 @@
 
 package testutils
 
+//Environment management related test constants
+const ApictlInitMessage = "apictl is a Command Line Tool for Importing and Exporting APIs and Applications between " +
+	"different environments of WSO2 API Manager"
 const CustomTestExportDirectory = "CustomExportDirectory"
+const CustomDirectoryAtInit = "CustomExportDirectoryAtInit"
+const EnvVariableNameOfCustomCustomDirectoryAtInit = "APICTL_CONFIG_DIR"
+
 const TestSwagger2DefinitionPath = "testdata/swagger2Definition.yaml"
 const TestOpenAPI3DefinitionPath = "testdata/openAPI3Definition.yaml"
 const TestOpenAPI3DefinitionWithoutEndpointsPath = "testdata/openAPI3DefinitionWithoutEndpoints.yaml"
@@ -57,6 +63,9 @@ const TestArtifact3Path = "testdata/TestArtifactDirectory/ArtifactSet3"
 const TestDefaultExtractedFileName = "/SwaggerPetstoreNew-1.0.0"
 const CustomDynamicInSequenceName = "custom-header-in.xml"
 
+//Environment specific testcase constants
+
+// EnvParamsFilesDir : Directory that stored environment specific test resources
 const EnvParamsFilesDir = "testdata/EnvParamsFiles"
 
 // APIEndpointParamsFile : Endpoint URL api_params.yaml
@@ -83,35 +92,14 @@ const APIDynamicDataParamsFile = EnvParamsFilesDir + "/api_params_dynamic_data.y
 // APIProductFullParamsFile : Full api_product_params.yaml
 const APIProductFullParamsFile = EnvParamsFilesDir + "/api_product_params_full.yaml"
 
-// CertificatesDirectoryPath : Directory path for the dunnmy certificates
+// CertificatesDirectoryPath : Directory path for the dummy certificates
 const CertificatesDirectoryPath = "testdata/TestArtifactDirectory/certificates"
 
 // UnlimitedPolicy : Unlimited Throttle Policy
 const UnlimitedPolicy = "Unlimited"
 
-// TenPerMinAppThrottlingPolicy: 10 per min application throttling policy
+// TenPerMinAppThrottlingPolicy : 10 per min application throttling policy
 const TenPerMinAppThrottlingPolicy = "10PerMin"
-
-// API types
-const APITypeREST = "HTTP"
-const APITypeSoap = "SOAP"
-const APITypeSoapToRest = "SOAPTOREST"
-const APITypeGraphQL = "GraphQL"
-const APITypeWebScoket = "WS"
-const APITypeWebSub = "WEBSUB"
-const APITypeSSE = "SSE"
-
-// REST API Endpoint URL
-const RESTAPIEndpoint = "petstore.swagger.io"
-
-// SOAP API Endpoint URL
-const SoapEndpointURL = "http://ws.cdyne.com/phoneverify/phoneverify.asmx"
-
-// GraphQL API Endpoint URL
-const GraphQLEndpoint = "http://www.mocky.io/v2/5ea84def2d0000a52d3a3ecd"
-
-// Web Socket API Endpoint URL
-const WebSocketEndpoint = "ws://echo.websocket.org:80"
 
 // APIHttpRestEndpointWithoutLoadBalancingOrFailoverParamsFile : HTTP/REST Endpoint without Loadbalancing and Failover URLs in api_params.yaml
 const APIHttpRestEndpointWithoutLoadBalancingOrFailoverParamsFile = EnvParamsFilesDir + "/api_params_http_rest_endpoint_without_lb_or_failover.yaml"
@@ -139,3 +127,24 @@ const APIAwsEndpointWithStoredCredentialsParamsFile = EnvParamsFilesDir + "/api_
 
 // APIDynamicEndpointParamsFile : Dynamic Endpoint with stored credentials in api_params.yaml
 const APIDynamicEndpointParamsFile = EnvParamsFilesDir + "/api_params_dynamic_endpoint.yaml"
+
+// API types
+const APITypeREST = "HTTP"
+const APITypeSoap = "SOAP"
+const APITypeSoapToRest = "SOAPTOREST"
+const APITypeGraphQL = "GraphQL"
+const APITypeWebScoket = "WS"
+const APITypeWebSub = "WEBSUB"
+const APITypeSSE = "SSE"
+
+// REST API Endpoint URL
+const RESTAPIEndpoint = "petstore.swagger.io"
+
+// SOAP API Endpoint URL
+const SoapEndpointURL = "http://ws.cdyne.com/phoneverify/phoneverify.asmx"
+
+// GraphQL API Endpoint URL
+const GraphQLEndpoint = "http://www.mocky.io/v2/5ea84def2d0000a52d3a3ecd"
+
+// Web Socket API Endpoint URL
+const WebSocketEndpoint = "ws://echo.websocket.org:80"

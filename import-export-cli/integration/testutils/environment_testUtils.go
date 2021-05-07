@@ -19,6 +19,7 @@
 package testutils
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -34,6 +35,100 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
+
+// InitApictl : Initializes apictl in the local machine and create directories
+func InitApictl(t *testing.T) (string, error) {
+	return base.Execute(t)
+}
+
+// SetApictlWithCustomDirectory : Set custom directory location using environment variable
+func SetApictlWithCustomDirectory(t *testing.T, customDirPath string) {
+
+	t.Log("Setting up the environment variable value for " + EnvVariableNameOfCustomCustomDirectoryAtInit)
+	os.Setenv(EnvVariableNameOfCustomCustomDirectoryAtInit, customDirPath)
+}
+
+// ValidateApictlInit : Check and verify whether the apictl is initialized properly
+func ValidateApictlInit(t *testing.T, err error, output string) {
+
+	// Asserting the apictl initializing message to check whether apictl is initialized or not.
+	assert.Nil(t, err)
+	assert.Contains(t, output, ApictlInitMessage, "Test failed without initializing apictl")
+}
+
+// ValidateCustomDirectoryChangeAtInit :  Validate custom directory change at init
+func ValidateCustomDirectoryChangeAtInit(t *testing.T, customDirPath string) {
+
+	//Check .wso2apictl and .wso2apictl.local directories on custom directories
+	checkConfigDir, _ := utils.IsDirExists(filepath.Join(customDirPath, utils.ConfigDirName))
+	checkLocalCredentialsDir, _ := utils.IsDirExists(filepath.Join(customDirPath, utils.LocalCredentialsDirectoryName))
+
+	assert.Equal(t, true, checkConfigDir)
+	assert.Equal(t, true, checkLocalCredentialsDir)
+
+	t.Cleanup(func() {
+		// Remove created custom directory directory
+		base.RemoveDir(customDirPath)
+	})
+}
+
+// AddEnvironmentWithTokenFlag : Add new environment with token endpoint url
+func AddEnvironmentWithTokenFlag(t *testing.T, envName, apimUrl, tokenUrl string) (string, error) {
+	return base.Execute(t, "add", "env", envName, "--apim", apimUrl, "--token", tokenUrl)
+}
+
+// AddEnvironmentWithOutTokenFlag : Add new environment without token endpoint url
+func AddEnvironmentWithOutTokenFlag(t *testing.T, envName, apimUrl string) (string, error) {
+	return base.Execute(t, "add", "env", envName, "--apim", apimUrl)
+}
+
+// RemoveEnvironment : Remove an added environment
+func RemoveEnvironment(t *testing.T, envName string) (string, error) {
+	return base.Execute(t, "remove", "env", envName)
+}
+
+// ValidateAddedEnvironments : Check whether the added environments are added as expected when listed
+func ValidateAddedEnvironments(t *testing.T, output, envName string, skipCleanup bool) {
+
+	expectedOutput := fmt.Sprintf(`Successfully added environment '%v'`, envName)
+	assert.Contains(t, output, expectedOutput)
+
+	//List all the environments and check for availability of the added environment
+	ValidateEnvsList(t, envName, true)
+
+	if skipCleanup == false {
+		t.Cleanup(func() {
+			base.Execute(t, "remove", "env", envName)
+		})
+	}
+}
+
+// ValidateRemoveEnvironments : Check whether the added environments is removed
+func ValidateRemoveEnvironments(t *testing.T, output, envName string) {
+
+	expectedOutput := fmt.Sprintf(`Successfully removed environment '%v'`, envName)
+	assert.Contains(t, output, expectedOutput)
+
+	//List all the environments and check for availability of the removed environment
+	ValidateEnvsList(t, envName, false)
+}
+
+// ValidateEnvsList : Check the list and verify the given env is in the list or not
+func ValidateEnvsList(t *testing.T, envName string, checkContains bool) {
+	// List environments
+	response, err := base.Execute(t, "get", "envs")
+	assert.Nil(t, err)
+
+	base.GetRowsFromTableResponse(response)
+	base.Log(response)
+
+	//Check added environment in the list
+	if checkContains == true {
+		assert.Contains(t, response, envName, "TestGetEnvironments Failed")
+	} else {
+		assert.NotContains(t, response, envName, "TestGetEnvironments Failed")
+	}
+}
 
 func InitProjectWithOasFlag(t *testing.T, args *InitTestArgs) (string, error) {
 	//Setup Environment and login to it.
