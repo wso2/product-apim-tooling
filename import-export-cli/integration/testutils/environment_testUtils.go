@@ -29,6 +29,7 @@ import (
 	"testing"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/adminservices"
+	"gopkg.in/yaml.v2"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
@@ -738,4 +739,53 @@ func ValidateDynamicEndpoint(t *testing.T, apiParams *Params, api, importedAPI *
 	importedAPI.SetEndPointConfig(same)
 
 	ValidateAPIsEqual(t, api, importedAPI)
+}
+
+// ValidateAPIsEqualWithEndpointConfigsFromParam : Validate endpoint configs from params and the equality of the two APIs
+func ValidateAPIsEqualWithEndpointConfigsFromParam(t *testing.T, api *apim.API, importedAPI *apim.API, apiParams *Params) {
+	assert.Equal(t, apiParams.Environments[0].Configs.Endpoints.Production["url"], importedAPI.GetProductionURL())
+	assert.Equal(t, apiParams.Environments[0].Configs.Endpoints.Sandbox["url"], importedAPI.GetSandboxURL())
+
+	apiCopy := apim.CopyAPI(api)
+	importedAPICopy := apim.CopyAPI(importedAPI)
+
+	same := "override_with_same_value"
+	apiCopy.SetProductionURL(same)
+	importedAPICopy.SetProductionURL(same)
+	apiCopy.SetSandboxURL(same)
+	importedAPICopy.SetSandboxURL(same)
+
+	ValidateAPIsEqual(t, &apiCopy, &importedAPICopy)
+}
+
+func ValidateAPIImportUpdateWithParamsEndpointConfig(t *testing.T, args *ApiImportExportTestArgs, apiParams *Params,
+	username string) {
+
+	// Update the production and sandbox endpoints in the params file
+	apiParams.Environments[0].Configs.Endpoints.Production["url"] = "https://prod-updated.wso2.com"
+	apiParams.Environments[0].Configs.Endpoints.Sandbox["url"] = "https://sand-updated.wso2.com"
+
+	apiData, err := yaml.Marshal(apiParams)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Write the temporary params file
+	tempParams := EnvParamsFilesDir + "temp-" + base.GenerateRandomString() + username + ".yaml"
+	err = ioutil.WriteFile(tempParams, apiData, os.ModePerm)
+	if err != nil {
+		t.Error(err)
+	}
+
+	args.ParamsFile = tempParams
+	args.Update = true
+
+	importedAPIUpdated := GetImportedAPI(t, args)
+
+	assert.Equal(t, apiParams.Environments[0].Configs.Endpoints.Production["url"], importedAPIUpdated.GetProductionURL())
+	assert.Equal(t, apiParams.Environments[0].Configs.Endpoints.Sandbox["url"], importedAPIUpdated.GetSandboxURL())
+
+	t.Cleanup(func() {
+		base.RemoveDir(args.ParamsFile)
+	})
 }
