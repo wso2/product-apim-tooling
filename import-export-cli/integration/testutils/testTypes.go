@@ -45,6 +45,7 @@ type ApiImportExportTestArgs struct {
 	ImportFilePath   string
 	Revision         string
 	IsDeployed       bool
+	IsLatest         bool
 }
 
 type ApiProductImportExportTestArgs struct {

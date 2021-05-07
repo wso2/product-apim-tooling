@@ -78,3 +78,85 @@ func TestExportApiDeloyedRevision(t *testing.T) {
 		})
 	}
 }
+
+func TestExportApiWorkingCopy(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			dev := GetDevClient()
+
+			api := testutils.AddAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
+
+			testutils.CreateAndDeploySeriesOfAPIRevisions(t, dev, api, &user.ApiCreator, &user.ApiPublisher)
+
+			// Export final revision and see if it matches the corresponding API
+			args := &testutils.ApiImportExportTestArgs{
+				ApiProvider: user.ApiCreator,
+				CtlUser:     user.CtlUser,
+				Api:         api,
+				SrcAPIM:     dev,
+			}
+
+			testutils.ValidateExportedAPIStructure(t, args)
+		})
+	}
+}
+
+func TestExportApiLatestRevision(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			dev := GetDevClient()
+
+			api := testutils.AddAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
+
+			apiRevisions := testutils.CreateAndDeploySeriesOfAPIRevisions(t, dev, api, &user.ApiCreator, &user.ApiPublisher)
+
+			finalDeployedRevision := len(apiRevisions)
+
+			// Export final revision and see if it matches the corresponding API
+			args := &testutils.ApiImportExportTestArgs{
+				ApiProvider: user.ApiCreator,
+				CtlUser:     user.CtlUser,
+				Api:         apiRevisions[finalDeployedRevision],
+				SrcAPIM:     dev,
+				Revision:    strconv.Itoa(finalDeployedRevision),
+				IsDeployed:  true,
+				IsLatest:    true,
+			}
+
+			testutils.ValidateExportedAPIRevisionStructure(t, args)
+		})
+	}
+}
+
+func TestExportImportApiSameGWEnv(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			dev := GetDevClient()
+			prod := GetProdClient()
+
+			api := testutils.AddAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
+
+			revision := testutils.CreateAndDeployAPIRevision(t, dev, user.ApiPublisher.Username, user.ApiPublisher.Password, api.ID)
+
+			api = testutils.GetAPIById(t, dev, user.ApiPublisher.Username, user.ApiPublisher.Password, revision)
+
+			// Export final revision and see if it matches the corresponding API
+			args := &testutils.ApiImportExportTestArgs{
+				ApiProvider: user.ApiCreator,
+				CtlUser:     user.CtlUser,
+				Api:         api,
+				SrcAPIM:     dev,
+				DestAPIM:    prod,
+				Revision:    "1",
+				IsDeployed:  true,
+			}
+
+			testutils.ValidateExportedAPIRevisionStructure(t, args)
+
+			testutils.ValidateAPIRevisionExportImport(t, args, testutils.APITypeREST)
+		})
+	}
+}

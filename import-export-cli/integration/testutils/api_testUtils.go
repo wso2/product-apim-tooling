@@ -35,6 +35,11 @@ import (
 	yaml2 "gopkg.in/yaml.v2"
 )
 
+func GetAPIById(t *testing.T, client *apim.Client, username, password, apiId string) *apim.API {
+	client.Login(username, password)
+	return client.GetAPI(apiId)
+}
+
 func AddAPI(t *testing.T, client *apim.Client, username string, password string) *apim.API {
 	client.Login(username, password)
 	api := client.GenerateSampleAPIData(username)
@@ -300,18 +305,26 @@ func exportAPI(t *testing.T, name, version, provider, env string) (string, error
 	return output, err
 }
 
-func exportAPIRevision(t *testing.T, name, version, provider, revision, env string) (string, error) {
+func exportAPIRevision(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
 	var output string
 	var err error
 
-	if provider == "" {
-		output, err = base.Execute(t, "export", "api", "-n", name, "-v", version, "-e", env, "--rev", revision, "-k", "--verbose")
-	} else {
-		output, err = base.Execute(t, "export", "api", "-n", name, "-v", version, "-r", provider, "-e", env, "--rev", revision, "-k", "--verbose")
+	flags := []string{"export", "api", "-n", args.Api.Name, "-v", args.Api.Version, "-e", args.SrcAPIM.GetEnvName(), "-k", "--verbose"}
+
+	if args.ApiProvider.Username != "" {
+		flags = append(flags, "-r", args.ApiProvider.Username)
 	}
 
+	if args.IsLatest {
+		flags = append(flags, "--latest")
+	} else {
+		flags = append(flags, "--rev", args.Revision)
+	}
+
+	output, err = base.Execute(t, flags...)
+
 	t.Cleanup(func() {
-		base.RemoveAPIArchive(t, GetEnvAPIExportPath(env), name, version)
+		base.RemoveAPIArchive(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()), args.Api.Name, args.Api.Version)
 	})
 
 	return output, err
@@ -432,6 +445,53 @@ func ValidateAPIExportImport(t *testing.T, args *ApiImportExportTestArgs, apiTyp
 
 	exportAPI(t, args.Api.Name, args.Api.Version, args.Api.Provider, args.SrcAPIM.GetEnvName())
 
+	validateAPIProject(t, args, apiType)
+
+	// Import api to env 2
+	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	importAPI(t, args)
+
+	// Give time for newly imported API to get indexed, or else GetAPI by name will fail
+	base.WaitForIndexing()
+
+	// Get App from env 2
+	importedAPI := GetAPI(t, args.DestAPIM, args.Api.Name, args.ApiProvider.Username, args.ApiProvider.Password)
+
+	// Validate env 1 and env 2 API is equal
+	ValidateAPIsEqual(t, args.Api, importedAPI)
+}
+
+func ValidateAPIRevisionExportImport(t *testing.T, args *ApiImportExportTestArgs, apiType string) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+	base.SetupEnv(t, args.DestAPIM.GetEnvName(), args.DestAPIM.GetApimURL(), args.DestAPIM.GetTokenURL())
+
+	// Export api from env 1
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	exportAPIRevision(t, args)
+
+	validateAPIProject(t, args, apiType)
+
+	// Import api to env 2
+	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	importAPI(t, args)
+
+	// Give time for newly imported API to get indexed, or else GetAPI by name will fail
+	base.WaitForIndexing()
+
+	// Get App from env 2
+	importedAPI := GetAPI(t, args.DestAPIM, args.Api.Name, args.ApiProvider.Username, args.ApiProvider.Password)
+
+	// Validate env 1 and env 2 API is equal
+	ValidateAPIsEqual(t, args.Api, importedAPI)
+}
+
+func validateAPIProject(t *testing.T, args *ApiImportExportTestArgs, apiType string) {
 	assert.True(t, base.IsAPIArchiveExists(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
 		args.Api.Name, args.Api.Version))
 
@@ -456,20 +516,6 @@ func ValidateAPIExportImport(t *testing.T, args *ApiImportExportTestArgs, apiTyp
 		assert.True(t, base.IsFileExistsInAPIArchive(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
 			utils.InitProjectDefinitionsAsyncAPI, args.Api.Name, args.Api.Version))
 	}
-
-	// Import api to env 2
-	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
-
-	importAPI(t, args)
-
-	// Give time for newly imported API to get indexed, or else GetAPI by name will fail
-	base.WaitForIndexing()
-
-	// Get App from env 2
-	importedAPI := GetAPI(t, args.DestAPIM, args.Api.Name, args.ApiProvider.Username, args.ApiProvider.Password)
-
-	// Validate env 1 and env 2 API is equal
-	ValidateAPIsEqual(t, args.Api, importedAPI)
 }
 
 func ValidateAPIExport(t *testing.T, args *ApiImportExportTestArgs) {
@@ -513,7 +559,7 @@ func ValidateExportedAPIRevisionStructure(t *testing.T, args *ApiImportExportTes
 	// Export api from env 1
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	output, _ := exportAPIRevision(t, args.Api.Name, args.Api.Version, args.ApiProvider.Username, args.Revision, args.SrcAPIM.GetEnvName())
+	output, _ := exportAPIRevision(t, args)
 
 	validateAPI(t, args.Api, output, args.IsDeployed, SampleRevisionedAPIYamlFilePath)
 
