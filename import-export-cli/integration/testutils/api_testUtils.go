@@ -169,8 +169,8 @@ func AddAPIFromOpenAPIDefinition(t *testing.T, client *apim.Client, username str
 }
 
 func AddAPIFromOpenAPIDefinitionToTwoEnvs(t *testing.T, client1 *apim.Client, client2 *apim.Client, username string, password string) (*apim.API, *apim.API) {
-	path := "testdata/petstore.yaml"
 	client1.Login(username, password)
+	path := GetSwaggerPetstoreDefinition(t, username)
 	additionalProperties := client1.GenerateAdditionalProperties(username, RESTAPIEndpoint, APITypeREST, nil)
 	id1 := client1.AddAPIFromOpenAPIDefinition(t, path, additionalProperties, username, password)
 	api1 := client1.GetAPI(id1)
