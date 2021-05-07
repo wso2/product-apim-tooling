@@ -19,6 +19,7 @@
 package integration
 
 import (
+	"fmt"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"os"
 	"testing"
@@ -1311,6 +1312,82 @@ func TestCreateNewVersionOfApiByUpdatingVersion(t *testing.T) {
 			testutils.ValidateImportProject(t, args, "", !isTenantUser(user.CtlUser.Username, TENANT1))
 
 			testutils.ValidateApisListWithVersions(t, args, newVersion)
+		})
+	}
+}
+
+// API search using query parameters
+func TestApiSearchWithQueryParams(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+
+			var searchingApiIndex, redundantApiIndex int
+			var searchQuery string
+
+			maxIndexOfTheArray := 5
+			minIndexOfTheArray := 0
+
+			// Add set of APIs to env and store api details
+			var addedApisList [numberOfAPIs + 1]*apim.API
+			for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
+				// Add the API to env1
+				api := testutils.AddAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
+				addedApisList[apiCount] = api
+			}
+
+			// Add custom API
+			customAPI := addedApisList[3]
+			customAPI.Name = testutils.CustomAPIName
+			customAPI.Version = testutils.CustomAPIVersion
+			customAPI.Context = testutils.CustomAPIContext
+			dev.AddAPI(t, customAPI, user.ApiCreator.Username, user.ApiCreator.Password, true)
+
+			args := &testutils.ApiImportExportTestArgs{
+				CtlUser: testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				SrcAPIM: dev,
+			}
+
+			//Select random name from the added APIs
+			searchingApiIndex = base.GenerateRandomNumber(minIndexOfTheArray, maxIndexOfTheArray)
+			redundantApiIndex = maxIndexOfTheArray - searchingApiIndex
+			apiNameToSearch := addedApisList[searchingApiIndex].Name
+			apiNameNotToSearch := addedApisList[redundantApiIndex].Name
+			searchQuery = fmt.Sprintf("name:%v", apiNameToSearch)
+
+			//Search APIs using query
+			testutils.ValidateSearchApisList(t, args, searchQuery, apiNameToSearch, apiNameNotToSearch)
+
+			//Select random context from the added APIs
+			searchingApiIndex = base.GenerateRandomNumber(minIndexOfTheArray, maxIndexOfTheArray)
+			redundantApiIndex = maxIndexOfTheArray - searchingApiIndex
+			apiContextToSearch := addedApisList[searchingApiIndex].Context
+			apiContextNotToSearch := addedApisList[redundantApiIndex].Context
+			searchQuery = fmt.Sprintf("context:%v", apiContextToSearch)
+
+			//Search APIs using query
+			testutils.ValidateSearchApisList(t, args, searchQuery, apiContextToSearch, apiContextNotToSearch)
+
+			// Search custom API with name
+			randomIndex := base.GenerateRandomNumber(minIndexOfTheArray, maxIndexOfTheArray)
+			searchQuery = fmt.Sprintf("name:%v", testutils.CustomAPIName)
+			testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIName,
+				addedApisList[randomIndex].Name)
+
+			// Search custom API with context
+			searchQuery = fmt.Sprintf("context:%v", testutils.CustomAPIContext)
+			testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIContext,
+				addedApisList[randomIndex].Context)
+
+			// Search custom API with version
+			searchQuery = fmt.Sprintf("version:%v", testutils.CustomAPIVersion)
+			testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIVersion,
+				addedApisList[randomIndex].Version)
+
+			// Search custom API with version and name
+			searchQuery = fmt.Sprintf("version:%v --query name:%v", testutils.CustomAPIVersion, testutils.CustomAPIName)
+			testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIVersion,
+				addedApisList[randomIndex].Version)
 		})
 	}
 }
