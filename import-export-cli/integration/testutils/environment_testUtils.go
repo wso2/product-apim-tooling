@@ -68,6 +68,7 @@ func ValidateCustomDirectoryChangeAtInit(t *testing.T, customDirPath string) {
 
 	t.Cleanup(func() {
 		// Remove created custom directory directory
+		os.Unsetenv(EnvVariableNameOfCustomCustomDirectoryAtInit)
 		base.RemoveDir(customDirPath)
 	})
 }
