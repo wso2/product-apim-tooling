@@ -1322,11 +1322,7 @@ func TestApiSearchWithQueryParams(t *testing.T) {
 		t.Run(user.Description, func(t *testing.T) {
 			dev := GetDevClient()
 
-			var searchingApiIndex, redundantApiIndex int
 			var searchQuery string
-
-			maxIndexOfTheArray := 5
-			minIndexOfTheArray := 0
 
 			// Add set of APIs to env and store api details
 			var addedApisList [numberOfAPIs + 1]*apim.API
@@ -1348,46 +1344,42 @@ func TestApiSearchWithQueryParams(t *testing.T) {
 				SrcAPIM: dev,
 			}
 
-			//Select random name from the added APIs
-			searchingApiIndex = base.GenerateRandomNumber(minIndexOfTheArray, maxIndexOfTheArray)
-			redundantApiIndex = maxIndexOfTheArray - searchingApiIndex
-			apiNameToSearch := addedApisList[searchingApiIndex].Name
-			apiNameNotToSearch := addedApisList[redundantApiIndex].Name
-			searchQuery = fmt.Sprintf("name:%v", apiNameToSearch)
+			for i := 0; i < len(addedApisList); i++ {
+				apiNameToSearch := addedApisList[i].Name
+				apiNameNotToSearch := addedApisList[len(addedApisList)-(i+1)].Name
+				searchQuery = fmt.Sprintf("name:%v", apiNameToSearch)
 
-			//Search APIs using query
-			testutils.ValidateSearchApisList(t, args, searchQuery, apiNameToSearch, apiNameNotToSearch)
+				//Search APIs using query
+				testutils.ValidateSearchApisList(t, args, searchQuery, apiNameToSearch, apiNameNotToSearch)
 
-			//Select random context from the added APIs
-			searchingApiIndex = base.GenerateRandomNumber(minIndexOfTheArray, maxIndexOfTheArray)
-			redundantApiIndex = maxIndexOfTheArray - searchingApiIndex
-			apiContextToSearch := addedApisList[searchingApiIndex].Context
-			apiContextNotToSearch := addedApisList[redundantApiIndex].Context
-			searchQuery = fmt.Sprintf("context:%v", apiContextToSearch)
+				//Select random context from the added APIs
+				apiContextToSearch := addedApisList[i].Context
+				apiContextNotToSearch := addedApisList[len(addedApisList)-(i+1)].Context
+				searchQuery = fmt.Sprintf("context:%v", apiContextToSearch)
 
-			//Search APIs using query
-			testutils.ValidateSearchApisList(t, args, searchQuery, apiContextToSearch, apiContextNotToSearch)
+				//Search APIs using query
+				testutils.ValidateSearchApisList(t, args, searchQuery, apiContextToSearch, apiContextNotToSearch)
+			}
 
 			// Search custom API with name
-			randomIndex := base.GenerateRandomNumber(minIndexOfTheArray, maxIndexOfTheArray)
 			searchQuery = fmt.Sprintf("name:%v", testutils.CustomAPIName)
 			testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIName,
-				addedApisList[randomIndex].Name)
+				addedApisList[1].Name)
 
 			// Search custom API with context
 			searchQuery = fmt.Sprintf("context:%v", testutils.CustomAPIContext)
 			testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIContext,
-				addedApisList[randomIndex].Context)
+				addedApisList[1].Context)
 
 			// Search custom API with version
 			searchQuery = fmt.Sprintf("version:%v", testutils.CustomAPIVersion)
 			testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIVersion,
-				addedApisList[randomIndex].Version)
+				addedApisList[1].Version)
 
 			// Search custom API with version and name
 			searchQuery = fmt.Sprintf("version:%v --query name:%v", testutils.CustomAPIVersion, testutils.CustomAPIName)
 			testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIVersion,
-				addedApisList[randomIndex].Version)
+				addedApisList[1].Version)
 		})
 	}
 }

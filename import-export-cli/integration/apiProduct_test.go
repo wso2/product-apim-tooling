@@ -1135,11 +1135,7 @@ func TestApiProductSearchWithQueryParams(t *testing.T) {
 
 			dev := GetDevClient()
 
-			var searchingApiProductIndex, redundantApiProductIndex int
 			var searchQuery string
-
-			maxIndexOfTheArray := 5
-			minIndexOfTheArray := 0
 
 			// Add the first dependent API to env1
 			dependentAPI1 := testutils.AddAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
@@ -1168,25 +1164,22 @@ func TestApiProductSearchWithQueryParams(t *testing.T) {
 				SrcAPIM: dev,
 			}
 
-			//Select random name from the added API Products
-			searchingApiProductIndex = base.GenerateRandomNumber(minIndexOfTheArray, maxIndexOfTheArray)
-			redundantApiProductIndex = maxIndexOfTheArray - searchingApiProductIndex
-			apiProductNameToSearch := addedApiProductsList[searchingApiProductIndex].Name
-			apiProductNameNotToSearch := addedApiProductsList[redundantApiProductIndex].Name
-			searchQuery = fmt.Sprintf("name:%v", apiProductNameToSearch)
+			for i := 0; i < len(addedApiProductsList); i++ {
+				apiProductNameToSearch := addedApiProductsList[i].Name
+				apiProductNameNotToSearch := addedApiProductsList[len(addedApiProductsList)-(i+1)].Name
+				searchQuery = fmt.Sprintf("name:%v", apiProductNameToSearch)
 
-			//Search API Products using query with name
-			testutils.ValidateSearchApiProductsList(t, args, searchQuery, apiProductNameToSearch, apiProductNameNotToSearch)
+				//Search API Products using query with name
+				testutils.ValidateSearchApiProductsList(t, args, searchQuery, apiProductNameToSearch, apiProductNameNotToSearch)
 
-			//Select random context from the added API Products
-			searchingApiProductIndex = base.GenerateRandomNumber(minIndexOfTheArray, maxIndexOfTheArray)
-			redundantApiProductIndex = maxIndexOfTheArray - searchingApiProductIndex
-			apiProductContextToSearch := addedApiProductsList[searchingApiProductIndex].Context
-			apiProductContextNotToSearch := addedApiProductsList[redundantApiProductIndex].Context
-			searchQuery = fmt.Sprintf("context:%v", apiProductContextToSearch)
+				//Select random context from the added API Products
+				apiProductContextToSearch := addedApiProductsList[i].Context
+				apiProductContextNotToSearch := addedApiProductsList[len(addedApiProductsList)-(i+1)].Context
+				searchQuery = fmt.Sprintf("context:%v", apiProductContextToSearch)
 
-			//Search API Products using query with context
-			testutils.ValidateSearchApiProductsList(t, args, searchQuery, apiProductContextToSearch, apiProductContextNotToSearch)
+				//Search API Products using query with context
+				testutils.ValidateSearchApiProductsList(t, args, searchQuery, apiProductContextToSearch, apiProductContextNotToSearch)
+			}
 		})
 	}
 }
