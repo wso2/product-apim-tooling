@@ -1128,8 +1128,8 @@ func TestDeleteApiProductWithActiveSubscriptionsSuperTenantUser(t *testing.T) {
 	testutils.ValidateAPIProductDeleteFailureWithExistingEnv(t, argsToDelete)
 }
 
-// API products search using query parameters for Super tenant admin user
-func TestApiProductSearchWithQueryParamsAdminSuperTenantUser(t *testing.T) {
+// API products search using query parameters
+func TestApiProductSearchWithQueryParams(t *testing.T) {
 	for _, user := range testCaseUsers {
 		t.Run(user.Description, func(t *testing.T) {
 
