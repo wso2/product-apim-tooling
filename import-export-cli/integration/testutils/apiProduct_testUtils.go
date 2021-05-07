@@ -620,3 +620,32 @@ func ValidateAPIProductDeleteFailureWithExistingEnv(t *testing.T, args *ApiProdu
 		deleteAPIProductByCtl(t, args)
 	})
 }
+
+// Execute get apis command with query parameters
+func searchAPIProductsWithQuery(t *testing.T, args *ApiProductImportExportTestArgs, query string) (string, error) {
+	output, err := base.Execute(t, "get", "api-products", "-e", args.SrcAPIM.EnvName, "--query", query, "-k", "--verbose")
+	return output, err
+}
+
+// ValidateSearchApiProductsList : Validate the received list of API products and verify only the required ones are there and others
+// are not in the command line output
+func ValidateSearchApiProductsList(t *testing.T, args *ApiProductImportExportTestArgs, searchQuery, matchQuery, unmatchedQuery string) {
+
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	base.WaitForIndexing()
+
+	output, _ := searchAPIProductsWithQuery(t, args, searchQuery)
+
+	// Assert the match query is in the output
+	assert.Truef(t, strings.Contains(output, matchQuery), "apiProductsListFromCtl: "+output+
+		" , does not contain the query: "+matchQuery)
+	// Assert the unmatched query is not in the output
+	assert.False(t, strings.Contains(output, unmatchedQuery), "apiProductsListFromCtl: "+output+
+		" , contains the query: "+unmatchedQuery)
+}

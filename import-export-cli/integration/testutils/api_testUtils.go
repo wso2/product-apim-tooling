@@ -988,7 +988,6 @@ func ValidateSearchApisList(t *testing.T, args *ApiImportExportTestArgs, searchQ
 	// Setup apictl envs
 	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
 
-	// List APIs of env 1
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
 	base.WaitForIndexing()
