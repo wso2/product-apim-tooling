@@ -19,6 +19,8 @@
 package integration
 
 import (
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"os"
 	"testing"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
@@ -1267,6 +1269,48 @@ func TestExportImportWebSocketApiFromAsyncApiDef(t *testing.T) {
 			}
 
 			testutils.ValidateAPIExportImport(t, args, testutils.APITypeWebScoket)
+		})
+	}
+}
+
+// Import an API and then create a new version of that API by updating the context and version only and import again
+func TestCreateNewVersionOfApiByUpdatingVersion(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			apim := GetDevClient()
+			projectName := base.GenerateRandomName(16)
+
+			args := &testutils.InitTestArgs{
+				CtlUser:   testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				SrcAPIM:   apim,
+				InitFlag:  projectName,
+				OasFlag:   testutils.TestSwagger2DefinitionPath,
+				APIName:   testutils.DevFirstSwagger2APIName,
+				ForceFlag: false,
+			}
+
+			//Initialize a project with API definition
+			testutils.ValidateInitializeProjectWithOASFlag(t, args)
+
+			//Assert that project import to publisher portal is successful
+			testutils.ValidateImportProject(t, args, "", !isTenantUser(user.CtlUser.Username, TENANT1))
+
+			// Read the API definition file in the project
+			apiDefinitionFilePath := args.InitFlag + string(os.PathSeparator) + utils.APIDefinitionFileYaml
+			apiDefinitionFileContent := testutils.ReadAPIDefinition(t, apiDefinitionFilePath)
+
+			//Change the version
+			newVersion := base.GenerateRandomString()
+			apiDefinitionFileContent.Data.Version = newVersion
+
+			// Write the modified API definition to the directory
+			testutils.WriteToAPIDefinition(t, apiDefinitionFileContent, apiDefinitionFilePath)
+
+			// Import and validate new Api with version change
+			testutils.ValidateImportProject(t, args, "", !isTenantUser(user.CtlUser.Username, TENANT1))
+
+			testutils.ValidateApisListWithVersions(t, args, newVersion)
 		})
 	}
 }
