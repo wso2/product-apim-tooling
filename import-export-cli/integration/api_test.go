@@ -19,6 +19,9 @@
 package integration
 
 import (
+	"fmt"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"os"
 	"testing"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
@@ -1267,6 +1270,116 @@ func TestExportImportWebSocketApiFromAsyncApiDef(t *testing.T) {
 			}
 
 			testutils.ValidateAPIExportImport(t, args, testutils.APITypeWebScoket)
+		})
+	}
+}
+
+// Import an API and then create a new version of that API by updating the context and version only and import again
+func TestCreateNewVersionOfApiByUpdatingVersion(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			apim := GetDevClient()
+			projectName := base.GenerateRandomName(16)
+
+			args := &testutils.InitTestArgs{
+				CtlUser:   testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				SrcAPIM:   apim,
+				InitFlag:  projectName,
+				OasFlag:   testutils.TestSwagger2DefinitionPath,
+				APIName:   testutils.DevFirstSwagger2APIName,
+				ForceFlag: false,
+			}
+
+			//Initialize a project with API definition
+			testutils.ValidateInitializeProjectWithOASFlag(t, args)
+
+			//Assert that project import to publisher portal is successful
+			testutils.ValidateImportProject(t, args, "", !isTenantUser(user.CtlUser.Username, TENANT1))
+
+			// Read the API definition file in the project
+			apiDefinitionFilePath := args.InitFlag + string(os.PathSeparator) + utils.APIDefinitionFileYaml
+			apiDefinitionFileContent := testutils.ReadAPIDefinition(t, apiDefinitionFilePath)
+
+			//Change the version
+			newVersion := base.GenerateRandomString()
+			apiDefinitionFileContent.Data.Version = newVersion
+
+			// Write the modified API definition to the directory
+			testutils.WriteToAPIDefinition(t, apiDefinitionFileContent, apiDefinitionFilePath)
+
+			// Import and validate new Api with version change
+			testutils.ValidateImportProject(t, args, "", !isTenantUser(user.CtlUser.Username, TENANT1))
+
+			testutils.ValidateApisListWithVersions(t, args, newVersion)
+		})
+	}
+}
+
+// API search using query parameters
+func TestApiSearchWithQueryParams(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+
+			var searchQuery string
+
+			// Add set of APIs to env and store api details
+			var addedApisList [numberOfAPIs + 1]*apim.API
+			for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
+				// Add the API to env1
+				api := testutils.AddAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
+				addedApisList[apiCount] = api
+			}
+
+			// Add custom API
+			customAPI := addedApisList[3]
+			customAPI.Name = testutils.CustomAPIName
+			customAPI.Version = testutils.CustomAPIVersion
+			customAPI.Context = testutils.CustomAPIContext
+			dev.AddAPI(t, customAPI, user.ApiCreator.Username, user.ApiCreator.Password, true)
+
+			args := &testutils.ApiImportExportTestArgs{
+				CtlUser: testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				SrcAPIM: dev,
+			}
+
+			for i := 0; i < len(addedApisList); i++ {
+				apiNameToSearch := addedApisList[i].Name
+				apiNameNotToSearch := addedApisList[len(addedApisList)-(i+1)].Name
+				searchQuery = fmt.Sprintf("name:%v", apiNameToSearch)
+
+				//Search APIs using query
+				testutils.ValidateSearchApisList(t, args, searchQuery, apiNameToSearch, apiNameNotToSearch)
+
+				//Select random context from the added APIs
+				apiContextToSearch := addedApisList[i].Context
+				apiContextNotToSearch := addedApisList[len(addedApisList)-(i+1)].Context
+				searchQuery = fmt.Sprintf("context:%v", apiContextToSearch)
+
+				//Search APIs using query
+				testutils.ValidateSearchApisList(t, args, searchQuery, apiContextToSearch, apiContextNotToSearch)
+			}
+
+			// Search custom API with name
+			searchQuery = fmt.Sprintf("name:%v", testutils.CustomAPIName)
+			testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIName,
+				addedApisList[1].Name)
+
+			// Search custom API with context
+			searchQuery = fmt.Sprintf("context:%v", testutils.CustomAPIContext)
+			testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIContext,
+				addedApisList[1].Context)
+
+			// Search custom API with version
+			searchQuery = fmt.Sprintf("version:%v", testutils.CustomAPIVersion)
+			testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIVersion,
+				addedApisList[1].Version)
+
+			// Search custom API with version and name
+			searchQuery = fmt.Sprintf("version:%v --query name:%v", testutils.CustomAPIVersion, testutils.CustomAPIName)
+			testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIVersion,
+				addedApisList[1].Version)
 		})
 	}
 }

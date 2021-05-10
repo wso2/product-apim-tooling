@@ -959,3 +959,51 @@ func ValidateChangeLifeCycleStatusOfAPIFailure(t *testing.T, args *ApiChangeLife
 	assert.NotContains(t, output, "state changed successfully!", "Error while changing life cycle of API")
 	assert.NotEqual(t, args.Api.LifeCycleStatus, args.ExpectedState, "Life Cycle State changed successfully")
 }
+
+func ValidateApisListWithVersions(t *testing.T, args *InitTestArgs, newVersion string) {
+	t.Helper()
+
+	apis := getAPIs(args.SrcAPIM, args.CtlUser.Username, args.CtlUser.Password)
+
+	isV2ApiExsits := false
+	isV1ApiExsits := false
+
+	// Validate required Apis in Apis List
+	for _, api := range apis.List {
+		if strings.EqualFold(api.Version, "1.0.0") && strings.EqualFold(args.APIName, api.Name) {
+			isV1ApiExsits = true
+		}
+		if strings.EqualFold(api.Version, newVersion) && strings.EqualFold(args.APIName, api.Name) {
+			isV2ApiExsits = true
+		}
+	}
+	assert.Equal(t, true, isV1ApiExsits && isV2ApiExsits)
+}
+
+// Execute get apis command with query parameters
+func searchAPIsWithQuery(t *testing.T, args *ApiImportExportTestArgs, query string) (string, error) {
+	output, err := base.Execute(t, "get", "apis", "-e", args.SrcAPIM.EnvName, "--query", query, "-k", "--verbose")
+	return output, err
+}
+
+// ValidateSearchApisList : Validate the received list of APIs and verify only the required ones are there and others
+// are not in the command line output
+func ValidateSearchApisList(t *testing.T, args *ApiImportExportTestArgs, searchQuery, matchQuery, unmatchedQuery string) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	base.WaitForIndexing()
+
+	output, _ := searchAPIsWithQuery(t, args, searchQuery)
+
+	// Assert the match query is in the output
+	assert.Truef(t, strings.Contains(output, matchQuery), "apisListFromCtl: "+output+
+		" , does not contain the query: "+matchQuery)
+	// Assert the unmatched query is not in the output
+	assert.False(t, strings.Contains(output, unmatchedQuery), "apisListFromCtl: "+output+
+		" , contains the query: "+unmatchedQuery)
+}

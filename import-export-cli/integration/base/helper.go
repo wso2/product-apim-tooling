@@ -457,3 +457,8 @@ func GenerateRandomString() string {
 
 	return base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(b)
 }
+
+//Generate random number within the given range
+func GenerateRandomNumber(min,max int) int {
+	return rand.Intn(max - min + 1) + min
+}

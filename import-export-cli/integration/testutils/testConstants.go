@@ -148,3 +148,8 @@ const GraphQLEndpoint = "http://www.mocky.io/v2/5ea84def2d0000a52d3a3ecd"
 
 // Web Socket API Endpoint URL
 const WebSocketEndpoint = "ws://echo.websocket.org:80"
+
+// Search query types
+const CustomAPIName = "Customized_API"
+const CustomAPIVersion = "2.3.4"
+const CustomAPIContext = "/custom"

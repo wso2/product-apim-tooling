@@ -94,9 +94,6 @@ func TestRemoveEnvironmentWithLoggedInUsers(t *testing.T) {
 	for _, user := range testCaseUsers {
 		t.Run(user.Description, func(t *testing.T) {
 
-			devopsUsername := user.CtlUser.Username
-			devopsPassword := user.CtlUser.Password
-
 			// Add an environment
 			apim := GetDevClient()
 			output, err := testutils.AddEnvironmentWithOutTokenFlag(t, apim.GetEnvName(), apim.GetApimURL())
@@ -106,7 +103,7 @@ func TestRemoveEnvironmentWithLoggedInUsers(t *testing.T) {
 			testutils.ValidateAddedEnvironments(t, output, apim.GetEnvName(), true)
 
 			// Login to the added environment
-			base.Execute(t, "login", apim.GetEnvName(), "-u", devopsUsername, "-p", devopsPassword)
+			base.Execute(t, "login", apim.GetEnvName(), "-u", user.CtlUser.Username, "-p", user.CtlUser.Password)
 
 			// Remove the added environment
 			removeEnvOutput, errr := testutils.RemoveEnvironment(t, apim.GetEnvName())
