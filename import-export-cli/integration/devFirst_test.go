@@ -22,8 +22,10 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/magiconair/properties/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 // Initialize a API project by getting the OAS of a AWS API and import it as a super tenant user with
@@ -210,6 +212,46 @@ func TestImportProjectCreatedFromOpenAPI3Definition(t *testing.T) {
 	testutils.ValidateImportProject(t, args, "", true)
 }
 
+// Import API from initialized project from API definition which is already in publisher with --update flag
+func TestImportProjectCreatedPassWhenAPIIsExisted(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			apim := GetDevClient()
+			projectName := base.GenerateRandomString()
+
+			args := &testutils.InitTestArgs{
+				CtlUser:   testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				SrcAPIM:   apim,
+				InitFlag:  projectName,
+				OasFlag:   testutils.TestOpenAPI3DefinitionPath,
+				APIName:   testutils.DevFirstDefaultAPIName,
+				ForceFlag: false,
+			}
+
+			//Initialize a project with API definition
+			testutils.ValidateInitializeProjectWithOASFlag(t, args)
+
+			//Assert that project import to publisher portal is successful
+			testutils.ValidateImportProject(t, args, "", !isTenantUser(user.CtlUser.Username, TENANT1))
+
+			// Read the API definition file in the project
+			apiDefinitionFilePath := args.InitFlag + string(os.PathSeparator) + utils.APIDefinitionFileYaml
+			apiDefinitionFileContent := testutils.ReadAPIDefinition(t, apiDefinitionFilePath)
+
+			// Change the description
+			apiDefinitionFileContent.Data.Description = "Updated description"
+
+			// Write the modified API definition to the directory
+			testutils.WriteToAPIDefinition(t, apiDefinitionFileContent, apiDefinitionFilePath)
+
+			// Import and validate new API with the description change
+			importedApi := testutils.ValidateImportUpdateProject(t, args, !isTenantUser(user.CtlUser.Username, TENANT1))
+
+			assert.Equal(t, importedApi.Description, apiDefinitionFileContent.Data.Description, "Description is not updated")
+		})
+	}
+}
+
 //Import API from initialized project from API definition which is already in publisher without --update flag
 func TestImportProjectCreatedFailWhenAPIIsExisted(t *testing.T) {
 	apim := GetDevClient()
@@ -234,32 +276,6 @@ func TestImportProjectCreatedFailWhenAPIIsExisted(t *testing.T) {
 
 	//Import API for the second time
 	testutils.ValidateImportProjectFailed(t, args, "")
-}
-
-//Import API from initialized project from API definition which is already in publisher with --update flag
-func TestImportProjectCreatedPassWhenAPIIsExisted(t *testing.T) {
-	apim := GetDevClient()
-	projectName := base.GenerateRandomName(16)
-	username := superAdminUser
-	password := superAdminPassword
-
-	args := &testutils.InitTestArgs{
-		CtlUser:   testutils.Credentials{Username: username, Password: password},
-		SrcAPIM:   apim,
-		InitFlag:  projectName,
-		OasFlag:   testutils.TestOpenAPI3DefinitionPath,
-		APIName:   testutils.DevFirstDefaultAPIName,
-		ForceFlag: false,
-	}
-
-	//Initialize a project with API definition
-	testutils.ValidateInitializeProjectWithOASFlag(t, args)
-
-	//Import API for the First time
-	testutils.ValidateImportProject(t, args, "", true)
-
-	//Import API for the second time with update flag
-	testutils.ValidateImportUpdateProject(t, args)
 }
 
 //Import Api with a Document and Export that Api with a Document
@@ -416,7 +432,7 @@ func TestUpdateDocAndImageOfAPIOfExistingAPI(t *testing.T) {
 
 	base.WaitForIndexing()
 	//Import the project with updated Document and updated image thumbnail
-	testutils.ValidateImportUpdateProject(t, args)
+	testutils.ValidateImportUpdateProject(t, args, !isTenantUser(username, TENANT1))
 
 	//Validate that image has been updated
 	testutils.ValidateAPIWithDocIsExported(t, args, testutils.DevFirstDefaultAPIName, testutils.DevFirstDefaultAPIVersion,

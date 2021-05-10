@@ -42,6 +42,7 @@ const (
 
 func SetEnvVariablesForAPI(t *testing.T, client *apim.Client) {
 
+	t.Log("Setting up the environment variable values")
 	os.Setenv(devEnvProdUrl, "https://localhost:"+strconv.Itoa(9443+client.GetPortOffset())+
 		"/am/sample/pizzashack/v1/api/")
 	os.Setenv(devEnvSandUrl, "https://localhost:"+strconv.Itoa(9443+client.GetPortOffset())+
@@ -51,6 +52,7 @@ func SetEnvVariablesForAPI(t *testing.T, client *apim.Client) {
 	os.Setenv(envKey, "dev_101")
 
 	t.Cleanup(func() {
+		t.Log("Unsetting the environment variable values")
 		os.Unsetenv(devEnvProdUrl)
 		os.Unsetenv(devEnvSandUrl)
 		os.Unsetenv(devEnvProdRetryDelay)

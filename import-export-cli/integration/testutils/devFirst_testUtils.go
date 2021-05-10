@@ -106,9 +106,11 @@ func importApiFromProject(t *testing.T, projectName, apiName, paramsPath string,
 	return output, err
 }
 
-func importApiFromProjectWithUpdate(t *testing.T, projectName string, client *apim.Client, apiName string, credentials *Credentials, isCleanup bool) (string, error) {
+func importApiFromProjectWithUpdate(t *testing.T, projectName string, client *apim.Client, apiName string, credentials *Credentials,
+	isCleanup, preserveProvider bool) (string, error) {
 	projectPath, _ := filepath.Abs(projectName)
-	output, err := base.Execute(t, "import", "api", "-f", projectPath, "-e", client.GetEnvName(), "-k", "--update", "--verbose")
+	output, err := base.Execute(t, "import", "api", "-f", projectPath, "-e", client.GetEnvName(),
+		"--preserve-provider="+strconv.FormatBool(preserveProvider), "-k", "--update", "--verbose")
 
 	base.WaitForIndexing()
 
@@ -249,24 +251,30 @@ func ValidateImportProjectFailed(t *testing.T, args *InitTestArgs, paramsPath st
 	})
 }
 
-func ValidateImportUpdateProject(t *testing.T, args *InitTestArgs) {
+func ValidateImportUpdateProject(t *testing.T, args *InitTestArgs, preserveProvider bool) *apim.API {
 	t.Helper()
 
-	result, error := importApiFromProjectWithUpdate(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, false)
+	result, error := importApiFromProjectWithUpdate(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, false, preserveProvider)
 
 	assert.Nil(t, error, "Error while generating Project")
 	assert.Contains(t, result, "Successfully imported API", "Test InitializeProjectWithDefinitionFlag Failed")
+
+	base.WaitForIndexing()
+	// Get App from env 2
+	importedAPI := GetAPI(t, args.SrcAPIM, args.APIName, args.CtlUser.Username, args.CtlUser.Password)
 
 	//Remove Created project and logout
 	t.Cleanup(func() {
 		base.RemoveDir(args.InitFlag)
 	})
+
+	return importedAPI
 }
 
 func ValidateImportUpdateProjectNotAlreadyImported(t *testing.T, args *InitTestArgs) {
 	t.Helper()
 
-	result, error := importApiFromProjectWithUpdate(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, true)
+	result, error := importApiFromProjectWithUpdate(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, true, true)
 
 	assert.Nil(t, error, "Error while generating Project")
 	assert.Contains(t, result, "Successfully imported API", "Test InitializeProjectWithDefinitionFlag Failed")

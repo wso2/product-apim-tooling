@@ -129,7 +129,7 @@ func ValidateAPIUndeployFailure(t *testing.T, args *UndeployTestArgs, provider, 
 
 	assert.NotNil(t, err, "Should not return nil error")
 	assert.Contains(t, base.GetValueOfUniformResponse(result), "Exit status 1",
-		"Test failed because API Product was undeployed successfully")
+		"Test failed because API was undeployed successfully")
 }
 
 func ValidateDeployedGateways(t *testing.T, deployedRevisionsBeforeUndeploy *apim.APIRevisionList,

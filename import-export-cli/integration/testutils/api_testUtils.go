@@ -160,8 +160,8 @@ func AddAPIToTwoEnvs(t *testing.T, client1 *apim.Client, client2 *apim.Client, u
 }
 
 func AddAPIFromOpenAPIDefinition(t *testing.T, client *apim.Client, username string, password string) *apim.API {
-	path := "testdata/petstore.yaml"
 	client.Login(username, password)
+	path := GetSwaggerPetstoreDefinition(t, username)
 	additionalProperties := client.GenerateAdditionalProperties(username, RESTAPIEndpoint, APITypeREST, nil)
 	id := client.AddAPIFromOpenAPIDefinition(t, path, additionalProperties, username, password)
 	api := client.GetAPI(id)
@@ -169,8 +169,8 @@ func AddAPIFromOpenAPIDefinition(t *testing.T, client *apim.Client, username str
 }
 
 func AddAPIFromOpenAPIDefinitionToTwoEnvs(t *testing.T, client1 *apim.Client, client2 *apim.Client, username string, password string) (*apim.API, *apim.API) {
-	path := "testdata/petstore.yaml"
 	client1.Login(username, password)
+	path := GetSwaggerPetstoreDefinition(t, username)
 	additionalProperties := client1.GenerateAdditionalProperties(username, RESTAPIEndpoint, APITypeREST, nil)
 	id1 := client1.AddAPIFromOpenAPIDefinition(t, path, additionalProperties, username, password)
 	api1 := client1.GetAPI(id1)
@@ -365,21 +365,27 @@ func importAPI(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
 		params = append(params, "--params", args.ParamsFile)
 	}
 
+	if args.Update {
+		params = append(params, "--update=true")
+	}
+
 	output, err := base.Execute(t, params...)
 
-	t.Cleanup(func() {
-		if strings.EqualFold("PUBLISHED", args.Api.LifeCycleStatus) {
-			args.CtlUser.Username, args.CtlUser.Password =
-				apim.RetrieveAdminCredentialsInsteadCreator(args.CtlUser.Username, args.CtlUser.Password)
-		}
-		err := args.DestAPIM.DeleteAPIByName(args.Api.Name)
+	if !args.Update {
+		t.Cleanup(func() {
+			if strings.EqualFold("PUBLISHED", args.Api.LifeCycleStatus) {
+				args.CtlUser.Username, args.CtlUser.Password =
+					apim.RetrieveAdminCredentialsInsteadCreator(args.CtlUser.Username, args.CtlUser.Password)
+			}
+			err := args.DestAPIM.DeleteAPIByName(args.Api.Name)
 
-		if err != nil {
-			t.Fatal(err)
-		}
-		base.WaitForIndexing()
-	})
+			if err != nil {
+				t.Fatal(err)
+			}
+			base.WaitForIndexing()
+		})
 
+	}
 	return output, err
 }
 

@@ -46,6 +46,7 @@ type ApiImportExportTestArgs struct {
 	Revision         string
 	IsDeployed       bool
 	IsLatest         bool
+	Update           bool
 }
 
 type ApiProductImportExportTestArgs struct {
