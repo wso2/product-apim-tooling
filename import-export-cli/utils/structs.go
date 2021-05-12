@@ -343,3 +343,10 @@ type APIData struct {
 	Transport []string `json:"transport"`
 	Tags      []string `json:"tags"`
 }
+
+// EndpointCertificate represents content of "endpoint_certificates.yaml" file in the API-CTL project
+type EndpointCertificate struct {
+	HostName    string `yaml:"hostName"`
+	Alias       string `yaml:"alias"`
+	Certificate string `yaml:"certificate"`
+}

@@ -16,9 +16,10 @@ require (
 	github.com/spf13/cast v1.3.0
 	github.com/spf13/cobra v0.0.5
 	github.com/stretchr/testify v1.4.0
-	github.com/wso2/k8s-api-operator/api-operator v0.0.0-20200722085006-f178a61e4fde
+	github.com/wso2/k8s-api-operator/api-operator v0.0.0-20210511124939-b092d086bf6b // indirect
 	golang.org/x/crypto v0.0.0-20200220183623-bac4c82f6975
 	gopkg.in/yaml.v2 v2.2.8
+	k8s.io/api v0.18.2
 )
 
 replace k8s.io/client-go => k8s.io/client-go v0.18.2
