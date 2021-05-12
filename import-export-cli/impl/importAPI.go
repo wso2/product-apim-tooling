@@ -157,6 +157,18 @@ func mergeAPI(apiDirectory string, environmentParams *params.Environment) error 
 		return err
 	}
 
+	// Handle security parameters in api_params.yaml
+	err = handleSecurityEndpointsParams(environmentParams.Security, api)
+	if err != nil {
+		return err
+	}
+
+	// Handle available subscription policies in api_params.yaml
+	err = handleSubscriptionPolicies(environmentParams.Policies, api)
+	if err != nil {
+		return err
+	}
+
 	apiPath = filepath.Join(apiDirectory, "Meta-information", "api.yaml")
 	utils.Logln(utils.LogPrefixInfo+"Writing merged API to:", apiPath)
 	// write this to disk
@@ -167,6 +179,31 @@ func mergeAPI(apiDirectory string, environmentParams *params.Environment) error 
 	err = ioutil.WriteFile(apiPath, content, 0644)
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+// Handle available subscription policies in api_params.yaml
+// @param envPolicies : Available subscription policies from api_params.yaml in the environment
+// @param api : Parameters from api.yaml
+// @return error
+func handleSubscriptionPolicies(envPolicies []string, api *gabs.Container) error {
+	if envPolicies != nil {
+		var availableTiers []v2.AvailableTiers
+		// Iterate the specified policies array
+		for _, tierName := range envPolicies {
+			if tierName != "" {
+				availableTiers = append(availableTiers, v2.AvailableTiers{Name: tierName})
+			}
+		}
+		// If the available tiers are not defined in api_params.yaml, the values in the api.yaml should be considered.
+		// Hence, this if statment will prevent setting the availableTiers in api.yaml to an empty array if the policies
+		// are not properly defined in the api_params.yaml
+		if availableTiers != nil {
+			if _, err := api.SetP(availableTiers, "availableTiers"); err != nil {
+				return err
+			}
+		}
 	}
 	return nil
 }
