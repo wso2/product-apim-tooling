@@ -136,6 +136,7 @@ func executeApiProductsCmd(credential credentials.Credential) {
 	}
 
 	// Unified Search endpoint from the config file to search API Products
+	listApiProductsCmdQuery += "type:\"" + utils.DefaultApiProductType + "\""
 	_, apiProducts, err := impl.GetAPIProductListFromEnv(accessToken, listApiProductsCmdEnvironment, listApiProductsCmdQuery,
 		listApiProductsCmdLimit)
 	if err == nil {

@@ -22,16 +22,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"os"
 	"path"
 	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
+
+	v2 "github.com/wso2/product-apim-tooling/import-export-cli/specs/v2"
 
 	"github.com/Jeffail/gabs"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -100,8 +100,7 @@ func resolveImportAPIProductFilePath(file, defaultExportDirectory string) (strin
 // getAPIProductID returns id of the API Product by using apiProductInfo which contains name, version and provider as info
 func getAPIProductID(name, version, environment, accessOAuthToken string) (string, error) {
 	apiProductQuery := fmt.Sprintf("name:%s version:%s", name, version)
-	apiProductQuery += " type:\"" + utils.DefaultApiProductType + "\""
-	count, apiProducts, err := GetAPIProductListFromEnv(accessOAuthToken, environment, url.QueryEscape(apiProductQuery), "")
+	count, apiProducts, err := GetAPIProductListFromEnv(accessOAuthToken, environment, apiProductQuery, "")
 	if err != nil {
 		return "", err
 	}
@@ -330,11 +329,12 @@ func ImportAPIProduct(accessOAuthToken, adminEndpoint, importEnvironment, import
 
 		if id == "" {
 			updateAPIProduct = false
-			utils.Logln("The specified API Product was not found.")
-			utils.Logln("Creating: %s %s\n", apiProductInfo.ID.APIProductName, apiProductInfo.ID.Version)
+			utils.Logln(utils.LogPrefixInfo + "The specified API Product was not found.")
+			fmt.Println(apiProductInfo.ID.APIProductName)
+			utils.Logln(utils.LogPrefixInfo + "Creating: " + apiProductInfo.ID.APIProductName + "-" + apiProductInfo.ID.Version)
 		} else {
-			utils.Logln("Existing API Product found, attempting to update it...")
-			utils.Logln("API Product ID:", id)
+			utils.Logln(utils.LogPrefixInfo + "Existing API Product found, attempting to update it...")
+			utils.Logln(utils.LogPrefixInfo+"API Product ID:", id)
 			updateAPIProduct = true
 		}
 	}
