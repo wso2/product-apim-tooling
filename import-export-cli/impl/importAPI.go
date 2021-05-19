@@ -204,13 +204,6 @@ func ImportAPI(accessOAuthToken, publisherEndpoint, importEnvironment, importPat
 		return err
 	}
 
-	if apiParamsPath != "" {
-		//Reading params file of the API and add configurations into temp artifact
-		err := handleCustomizedParameters(apiFilePath, apiParamsPath, importEnvironment)
-		if err != nil {
-			return err
-		}
-	}
 	if importAPISkipDeployments {
 		//If skip deployments flag used, deployment_environments files will be removed from import artifacts
 		loc := filepath.Join(apiFilePath, utils.DeploymentEnvFile)
@@ -220,6 +213,15 @@ func ImportAPI(accessOAuthToken, publisherEndpoint, importEnvironment, importPat
 			return err
 		}
 	}
+
+	if apiParamsPath != "" {
+		//Reading params file of the API and add configurations into temp artifact
+		err := handleCustomizedParameters(apiFilePath, apiParamsPath, importEnvironment)
+		if err != nil {
+			return err
+		}
+	}
+
 	// if apiFilePath contains a directory, zip it. Otherwise, leave it as it is.
 	apiFilePath, err, cleanupFunc := utils.CreateZipFileFromProject(apiFilePath, importAPISkipCleanup)
 	if err != nil {
