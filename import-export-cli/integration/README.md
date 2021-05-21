@@ -53,8 +53,9 @@ apictl-version: 4.0.0
 ```   
 
 
-3. Build the apictl source to create the archive distribution of your choice.
-
+4. Build the apictl source to create the archive distribution of your choice.
+   > **Note:** Backup and delete API-CTL user directories (`~/.wso2apictl.local`, `~/.wso2apictl`)
+   > if you already currently worked with different version of API-CTL.
 
 ## Executing command
 
@@ -77,6 +78,14 @@ apictl-version: 4.0.0
 
 
 ### Command ###
+
+> **Note:** If you wish to run integration tests in macOS, increase the maximum limits in macOS file descriptors with following command.
+> Otherwise, you may experience the issue [1].
+> ```sh
+> ulimit -n 10032
+> sudo launchctl limit maxfiles 65536 200000
+> ```
+> Ref: [2]
 
 - Basic command
 
@@ -110,3 +119,7 @@ go test -p 1 -timeout 0 -archive <apictl archive name> -logtransport
 
 example: go test -p 1 -timeout 0 -archive apictl-4.0.0-linux-x64.tar.gz -logtransport
 ```
+
+---
+- [1] https://github.com/golang/go/issues/3575
+- [2] https://wilsonmar.github.io/maximum-limits/
