@@ -259,7 +259,7 @@ func getAPIList() (count int32, apis []utils.API) {
 		if cmdResourceTenantDomain != "" {
 			apiListEndpoint += "&tenantDomain=" + cmdResourceTenantDomain
 		}
-		count, apis, err := GetAPIList("", accessToken, apiListEndpoint)
+		count, apis, err := GetAPIList("", "", accessToken, apiListEndpoint)
 		if err == nil {
 			return count, apis
 		} else {
