@@ -26,8 +26,7 @@ apimcli set --tls_renegotiation_mode freely
 ### Options
 
 ```
-      --export-directory string         Path to directory where APIs should be saved (default "/home/chamindu/.wso2apimcli/exported")
-  -h, --help                            help for set
+      --export-directory string    Path to directory where APIs should be saved (default on Unix, including macOS "$HOME/.wso2apimcli/exported", default on Windows "%HOME%\.wso2apimcli\exported")  -h, --help                            help for set
       --http-request-timeout int        Timeout for HTTP Client (default 10000)
       --tls_renegotiation_mode string   Supported TLS renegotiation mode (default "never")
 ```
