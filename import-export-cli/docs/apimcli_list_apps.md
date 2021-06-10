@@ -18,6 +18,7 @@ apimcli list apps -e dev
 apimcli list apps -e dev -o sampleUser
 apimcli list apps -e prod -o sampleUser
 apimcli list apps -e staging -o sampleUser
+apimcli list apps -e dev -l 40
 ```
 
 ### Options
@@ -26,6 +27,7 @@ apimcli list apps -e staging -o sampleUser
   -e, --environment string   Environment to be searched
       --format string        Pretty-print outputusing Go templates. Use {{jsonPretty .}} to list all fields
   -h, --help                 help for apps
+  -l, --limit string         Maximum number of applications to return
   -o, --owner string         Owner of the Application
 ```
 

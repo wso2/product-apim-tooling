@@ -17,6 +17,7 @@ apimcli list apis [flags]
 apimcli apis list -e dev
 apimcli apis list -e dev -q version:1.0.0
 apimcli apis list -e prod -q provider:admin
+apimcli list apis -e prod -l 100
 apimcli apis list -e staging
 ```
 
@@ -26,6 +27,7 @@ apimcli apis list -e staging
   -e, --environment string   Environment to be searched
       --format string        Pretty-print apis using Go Templates. Use {{ jsonPretty . }} to list all fields
   -h, --help                 help for apis
+  -l, --limit string         Maximum number of APIs to return
   -q, --query string         Query pattern
 ```
 
