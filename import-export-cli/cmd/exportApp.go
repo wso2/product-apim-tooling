@@ -133,11 +133,7 @@ func replaceUserStoreDomainDelimiter(username string) string {
 // @return response Response in the form of *resty.Response
 func getExportAppResponse(name, owner, adminEndpoint, accessToken string) (*resty.Response, error) {
 	adminEndpoint = utils.AppendSlashToString(adminEndpoint)
-	query := "export/applications?appName=" + name + utils.SearchAndTag + "appOwner=" + owner
-
-	if exportAppWithKeys {
-		query += "&withKeys=true"
-	}
+	query := "export/applications"
 
 	url := adminEndpoint + query
 	utils.Logln(utils.LogPrefixInfo+"ExportApp: URL:", url)
@@ -145,7 +141,15 @@ func getExportAppResponse(name, owner, adminEndpoint, accessToken string) (*rest
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 	headers[utils.HeaderAccept] = utils.HeaderValueApplicationZip
 
-	resp, err := utils.InvokeGETRequest(url, headers)
+	queryParams := map[string]string{
+		"appName":  name,
+		"appOwner": owner,
+	}
+	if exportAppWithKeys {
+		queryParams["withKeys"] = "true"
+	}
+
+	resp, err := utils.InvokeGETRequestWithMultipleQueryParams(queryParams, url, headers)
 	if err != nil {
 		return nil, err
 	}

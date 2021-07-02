@@ -433,6 +433,16 @@ func (instance *Client) GenerateSampleAppData() *Application {
 	return &app
 }
 
+// GenerateSampleAppData : Generate sample Application object with space in the application Name
+func (instance *Client) GenerateSampleAppWithNameInSpaceData() *Application {
+	app := Application{}
+	app.Name = generateRandomString() + "Test Application"
+	app.ThrottlingPolicy = "Unlimited"
+	app.Description = "Test Application with space in the name"
+	app.TokenType = "JWT"
+	return &app
+}
+
 // CopyApp : Create a deep copy of an Application object
 func CopyApp(appToCopy *Application) Application {
 	appCopy := Application{}
