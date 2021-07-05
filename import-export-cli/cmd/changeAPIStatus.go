@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-
 	"github.com/go-resty/resty/v2"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
@@ -100,13 +99,19 @@ func getChangeAPIStatusResponse(changeAPIStatusEndpoint, accessToken string, cre
 	if err != nil {
 		utils.HandleErrorAndExit("Error while getting API Id for state change ", err)
 	}
-	url := changeAPIStatusEndpoint + "change-lifecycle?action=" + apiStateChangeAction + "&apiId=" + apiId
+
+	queryParams := map[string]string{
+		"action":  apiStateChangeAction,
+		"apiId": apiId,
+	}
+
+	url := changeAPIStatusEndpoint + "change-lifecycle"
 	utils.Logln(utils.LogPrefixInfo+"APIStateChange: URL:", url)
 	headers := make(map[string]string)
 	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 
-	resp, err := utils.InvokePOSTRequest(url, headers, "")
+	resp, err := utils.InvokePostRequestWithQueryParam(queryParams,url, headers, "")
 
 	if err != nil {
 		return nil, err
