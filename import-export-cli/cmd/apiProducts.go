@@ -21,6 +21,7 @@ package cmd
 import (
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"strconv"
 	"text/template"
@@ -77,9 +78,10 @@ var apiProductsCmd = &cobra.Command{
 		//Since other flags does not use args[], query flag will own this
 		if len(args) != 0 && listApiProductsCmdQuery != "" {
 			for _, argument := range args {
-				listApiProductsCmdQuery += utils.SearchAndTag + argument
+				listApiProductsCmdQuery += " " + argument
 			}
 		}
+		listApisCmdQuery = url.QueryEscape(listApisCmdQuery)
 		executeApiProductsCmd(cred)
 	},
 }
