@@ -77,7 +77,7 @@ var apiProductsCmd = &cobra.Command{
 		//Since other flags does not use args[], query flag will own this
 		if len(args) != 0 && listApiProductsCmdQuery != "" {
 			for _, argument := range args {
-				listApiProductsCmdQuery += "&" + argument
+				listApiProductsCmdQuery += utils.SearchAndTag + argument
 			}
 		}
 		executeApiProductsCmd(cred)

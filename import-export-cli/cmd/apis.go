@@ -80,7 +80,7 @@ var apisCmd = &cobra.Command{
 		//Since other flags does not use args[], query flag will own this
 		if len(args) != 0 && listApisCmdQuery != "" {
 			for _, argument := range args {
-				listApisCmdQuery +=  "&" + argument
+				listApisCmdQuery += utils.SearchAndTag + argument
 			}
 		}
 		executeApisCmd(cred)
