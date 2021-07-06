@@ -21,6 +21,7 @@ package cmd
 import (
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"strconv"
 	"text/template"
@@ -80,6 +81,7 @@ var apiProductsCmd = &cobra.Command{
 				listApiProductsCmdQuery += " " + argument
 			}
 		}
+		listApisCmdQuery = url.QueryEscape(listApisCmdQuery)
 		executeApiProductsCmd(cred)
 	},
 }
@@ -136,7 +138,6 @@ func executeApiProductsCmd(credential credentials.Credential) {
 	}
 
 	// Unified Search endpoint from the config file to search API Products
-	listApiProductsCmdQuery += "type:\"" + utils.DefaultApiProductType + "\""
 	_, apiProducts, err := impl.GetAPIProductListFromEnv(accessToken, listApiProductsCmdEnvironment, listApiProductsCmdQuery,
 		listApiProductsCmdLimit)
 	if err == nil {
