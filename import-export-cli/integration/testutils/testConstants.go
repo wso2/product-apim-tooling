@@ -57,3 +57,14 @@ const APISecurityDigestParamsFile = "testdata/api_params_security_digest.yaml"
 
 // APISecurityBasicParamsFile : Security Basic api_params.yaml
 const APISecurityBasicParamsFile = "testdata/api_params_security_basic.yaml"
+
+// UnlimitedPolicy : Unlimited Throttle Policy
+const UnlimitedPolicy = "Unlimited"
+
+// TenPerMinAppThrottlingPolicy : 10 per min application throttling policy
+const TenPerMinAppThrottlingPolicy = "10PerMin"
+
+// Search query types
+const CustomAPIName = "Customized_API"
+const CustomAPIVersion = "2.3.4"
+const CustomAPIContext = "/custom"

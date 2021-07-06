@@ -16,18 +16,15 @@
 * under the License.
  */
 
-package apim
+package testutils
 
-// SubscriptionList : Subscription List DTO
-type SubscriptionList struct {
-	Count int            `json:"count"`
-	List  []Subscription `json:"list"`
-}
+import (
+	"testing"
 
-// Subscription : Subscription DTO
-type Subscription struct {
-	SubscriptionID   string `json:"subscriptionId"`
-	ApplicationID    string `json:"applicationId"`
-	APIID            string `json:"apiId"`
-	ThrottlingPolicy string `json:"throttlingPolicy"`
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
+)
+
+func AddSubscription(t *testing.T, client *apim.Client, apiID string, appID string, throttlePolicy string, username string, password string) {
+	client.Login(username, password)
+	client.AddSubscription(t, apiID, appID, throttlePolicy, username, password)
 }

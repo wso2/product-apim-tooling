@@ -19,6 +19,8 @@
 package integration
 
 import (
+	"fmt"
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"testing"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
@@ -1072,4 +1074,262 @@ func TestDeleteApiProductSuperTenantUser(t *testing.T) {
 	}
 
 	testutils.ValidateAPIProductDeleteFailure(t, args)
+}
+
+// API products search using query parameters as super tenant admin user
+func TestApiProductSearchWithQueryParamsAdminSuperTenantUser(t *testing.T) {
+	adminUsername := superAdminUser
+	adminPassword := superAdminPassword
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	apiPublisher := publisher.UserName
+	apiPublisherPassword := publisher.Password
+
+	dev := apimClients[0]
+
+	var searchQuery string
+
+	// Add the first dependent API to env1
+	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+	testutils.PublishAPI(dev, adminUsername, adminPassword, dependentAPI1.ID)
+
+	// Add the second dependent API to env1
+	dependentAPI2 := testutils.AddAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
+	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
+
+	// Map the real name of the API with the API
+	apisList := map[string]*apim.API{
+		"PizzaShackAPI":   dependentAPI1,
+		"SwaggerPetstore": dependentAPI2,
+	}
+
+	// Add set of API Products to env and store api details
+	var addedApiProductsList [numberOfAPIProducts + 1]*apim.APIProduct
+	for apiProductCount := 0; apiProductCount <= numberOfAPIProducts; apiProductCount++ {
+		// Add the API Product to env1
+		apiProduct := testutils.AddAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
+		addedApiProductsList[apiProductCount] = apiProduct
+	}
+
+	args := &testutils.ApiProductImportExportTestArgs{
+		CtlUser: testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		SrcAPIM: dev,
+	}
+	base.WaitForIndexing()
+
+
+	for i := 0; i < len(addedApiProductsList); i++ {
+		apiProductNameToSearch := addedApiProductsList[i].Name
+		apiProductNameNotToSearch := addedApiProductsList[len(addedApiProductsList)-(i+1)].Name
+		searchQuery = fmt.Sprintf("name:%v", apiProductNameToSearch)
+
+		//Search API Products using query with name
+		testutils.ValidateSearchApiProductsList(t, args, searchQuery, apiProductNameToSearch, apiProductNameNotToSearch)
+
+		//Select random context from the added API Products
+		apiProductContextToSearch := addedApiProductsList[i].Context
+		apiProductContextNotToSearch := addedApiProductsList[len(addedApiProductsList)-(i+1)].Context
+		searchQuery = fmt.Sprintf("context:%v", apiProductContextToSearch)
+
+		//Search API Products using query with context
+		testutils.ValidateSearchApiProductsList(t, args, searchQuery, apiProductContextToSearch, apiProductContextNotToSearch)
+	}
+	t.Cleanup(func() {
+		base.Execute(t, "logout", args.SrcAPIM.GetEnvName())
+		base.Execute(t, "remove", "env", args.SrcAPIM.GetEnvName())
+	})
+}
+
+// API products search using query parameters as super tenant devops user
+func TestApiProductSearchWithQueryParamsDevOpsSuperTenantUser(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	apiPublisher := publisher.UserName
+	apiPublisherPassword := publisher.Password
+
+	dev := apimClients[0]
+
+	var searchQuery string
+
+	// Add the first dependent API to env1
+	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+	testutils.PublishAPI(dev, devopsUsername, devopsPassword, dependentAPI1.ID)
+
+	// Add the second dependent API to env1
+	dependentAPI2 := testutils.AddAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
+	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
+
+	// Map the real name of the API with the API
+	apisList := map[string]*apim.API{
+		"PizzaShackAPI":   dependentAPI1,
+		"SwaggerPetstore": dependentAPI2,
+	}
+
+	// Add set of API Products to env and store api details
+	var addedApiProductsList [numberOfAPIProducts + 1]*apim.APIProduct
+	for apiProductCount := 0; apiProductCount <= numberOfAPIProducts; apiProductCount++ {
+		// Add the API Product to env1
+		apiProduct := testutils.AddAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
+		addedApiProductsList[apiProductCount] = apiProduct
+	}
+
+	args := &testutils.ApiProductImportExportTestArgs{
+		CtlUser: testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		SrcAPIM: dev,
+	}
+
+	for i := 0; i < len(addedApiProductsList); i++ {
+		apiProductNameToSearch := addedApiProductsList[i].Name
+		apiProductNameNotToSearch := addedApiProductsList[len(addedApiProductsList)-(i+1)].Name
+		searchQuery = fmt.Sprintf("name:%v", apiProductNameToSearch)
+
+		//Search API Products using query with name
+		testutils.ValidateSearchApiProductsList(t, args, searchQuery, apiProductNameToSearch, apiProductNameNotToSearch)
+
+		//Select random context from the added API Products
+		apiProductContextToSearch := addedApiProductsList[i].Context
+		apiProductContextNotToSearch := addedApiProductsList[len(addedApiProductsList)-(i+1)].Context
+		searchQuery = fmt.Sprintf("context:%v", apiProductContextToSearch)
+
+		//Search API Products using query with context
+		testutils.ValidateSearchApiProductsList(t, args, searchQuery, apiProductContextToSearch, apiProductContextNotToSearch)
+	}
+	t.Cleanup(func() {
+		base.Execute(t, "logout", args.SrcAPIM.GetEnvName())
+		base.Execute(t, "remove", "env", args.SrcAPIM.GetEnvName())
+	})
+}
+
+// API products search using query parameters as tenant admin user
+func TestApiProductSearchWithQueryParamsAdminTenantUser(t *testing.T) {
+	tenantAdminUsername := superAdminUser + "@" + TENANT1
+	tenantAdminPassword := superAdminPassword
+
+	apiCreator := creator.UserName + "@" + TENANT1
+	apiCreatorPassword := creator.Password
+
+	apiPublisher := publisher.UserName + "@" + TENANT1
+	apiPublisherPassword := publisher.Password
+
+	dev := apimClients[0]
+
+	var searchQuery string
+
+	// Add the first dependent API to env1
+	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+	testutils.PublishAPI(dev, tenantAdminUsername, tenantAdminPassword, dependentAPI1.ID)
+
+	// Add the second dependent API to env1
+	dependentAPI2 := testutils.AddAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
+	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
+
+	// Map the real name of the API with the API
+	apisList := map[string]*apim.API{
+		"PizzaShackAPI":   dependentAPI1,
+		"SwaggerPetstore": dependentAPI2,
+	}
+
+	// Add set of API Products to env and store api details
+	var addedApiProductsList [numberOfAPIProducts + 1]*apim.APIProduct
+	for apiProductCount := 0; apiProductCount <= numberOfAPIProducts; apiProductCount++ {
+		// Add the API Product to env1
+		apiProduct := testutils.AddAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
+		addedApiProductsList[apiProductCount] = apiProduct
+	}
+
+	args := &testutils.ApiProductImportExportTestArgs{
+		CtlUser: testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
+		SrcAPIM: dev,
+	}
+
+	for i := 0; i < len(addedApiProductsList); i++ {
+		apiProductNameToSearch := addedApiProductsList[i].Name
+		apiProductNameNotToSearch := addedApiProductsList[len(addedApiProductsList)-(i+1)].Name
+		searchQuery = fmt.Sprintf("name:%v", apiProductNameToSearch)
+
+		//Search API Products using query with name
+		testutils.ValidateSearchApiProductsList(t, args, searchQuery, apiProductNameToSearch, apiProductNameNotToSearch)
+
+		//Select random context from the added API Products
+		apiProductContextToSearch := addedApiProductsList[i].Context
+		apiProductContextNotToSearch := addedApiProductsList[len(addedApiProductsList)-(i+1)].Context
+		searchQuery = fmt.Sprintf("context:%v", apiProductContextToSearch)
+
+		//Search API Products using query with context
+		testutils.ValidateSearchApiProductsList(t, args, searchQuery, apiProductContextToSearch, apiProductContextNotToSearch)
+	}
+	t.Cleanup(func() {
+		base.Execute(t, "logout", args.SrcAPIM.GetEnvName())
+		base.Execute(t, "remove", "env", args.SrcAPIM.GetEnvName())
+	})
+}
+
+// API products search using query parameters as tenant devops user
+func TestApiProductSearchWithQueryParamsDevOpsTenantUser(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	apiCreator := creator.UserName + "@" + TENANT1
+	apiCreatorPassword := creator.Password
+
+	apiPublisher := publisher.UserName + "@" + TENANT1
+	apiPublisherPassword := publisher.Password
+
+	dev := apimClients[0]
+
+	var searchQuery string
+
+	// Add the first dependent API to env1
+	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+	testutils.PublishAPI(dev, tenantDevopsUsername, tenantDevopsPassword, dependentAPI1.ID)
+
+	// Add the second dependent API to env1
+	dependentAPI2 := testutils.AddAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
+	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
+
+	// Map the real name of the API with the API
+	apisList := map[string]*apim.API{
+		"PizzaShackAPI":   dependentAPI1,
+		"SwaggerPetstore": dependentAPI2,
+	}
+
+	// Add set of API Products to env and store api details
+	var addedApiProductsList [numberOfAPIProducts + 1]*apim.APIProduct
+	for apiProductCount := 0; apiProductCount <= numberOfAPIProducts; apiProductCount++ {
+		// Add the API Product to env1
+		apiProduct := testutils.AddAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
+		addedApiProductsList[apiProductCount] = apiProduct
+	}
+
+	args := &testutils.ApiProductImportExportTestArgs{
+		CtlUser: testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		SrcAPIM: dev,
+	}
+
+	for i := 0; i < len(addedApiProductsList); i++ {
+		apiProductNameToSearch := addedApiProductsList[i].Name
+		apiProductNameNotToSearch := addedApiProductsList[len(addedApiProductsList)-(i+1)].Name
+		searchQuery = fmt.Sprintf("name:%v", apiProductNameToSearch)
+
+		//Search API Products using query with name
+		testutils.ValidateSearchApiProductsList(t, args, searchQuery, apiProductNameToSearch, apiProductNameNotToSearch)
+
+		//Select random context from the added API Products
+		apiProductContextToSearch := addedApiProductsList[i].Context
+		apiProductContextNotToSearch := addedApiProductsList[len(addedApiProductsList)-(i+1)].Context
+		searchQuery = fmt.Sprintf("context:%v", apiProductContextToSearch)
+
+		//Search API Products using query with context
+		testutils.ValidateSearchApiProductsList(t, args, searchQuery, apiProductContextToSearch, apiProductContextNotToSearch)
+	}
+	t.Cleanup(func() {
+		base.Execute(t, "logout", args.SrcAPIM.GetEnvName())
+		base.Execute(t, "remove", "env", args.SrcAPIM.GetEnvName())
+	})
 }

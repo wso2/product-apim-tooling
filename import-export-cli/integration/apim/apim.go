@@ -1171,6 +1171,62 @@ func (instance *Client) DeleteAllAPIProducts() {
 	}
 }
 
+// AddSubscription : Subscribe an App to a given API in APIM
+func (instance *Client) AddSubscription(t *testing.T, apiID string, appID string, throttlePolicy string, username string, password string) {
+	subscriptionURL := instance.devPortalRestURL + "/subscriptions"
+
+	subscription := Subscription{}
+	subscription.APIID = apiID
+	subscription.ApplicationID = appID
+	subscription.ThrottlingPolicy = throttlePolicy
+
+	data, err := json.Marshal(subscription)
+
+	if err != nil {
+		base.Fatal(err)
+	}
+
+	request := base.CreatePost(subscriptionURL, bytes.NewBuffer(data))
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.AddSubscription()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.AddSubscription()", response, 201)
+
+	var subsResponse Subscription
+	json.NewDecoder(response.Body).Decode(&subsResponse)
+
+	base.WaitForIndexing()
+
+	t.Cleanup(func() {
+		instance.Login(username, password)
+		instance.deleteSubscription(subsResponse.SubscriptionID)
+	})
+
+}
+
+// deleteSubscription : Delete subscription attached with an API
+func (instance *Client) deleteSubscription(subsID string) {
+	subsDeleteURL := instance.devPortalRestURL + "/subscriptions/" + subsID
+
+	request := base.CreateDelete(subsDeleteURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.deleteSubscription() deleting Subscription", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.deleteSubscription() deleting Subscription", response, 200)
+}
+
 func generateSampleAPIOperations() []APIOperations {
 	op1 := APIOperations{}
 	op1.Target = "/order/{orderId}"

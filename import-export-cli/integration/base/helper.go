@@ -375,3 +375,13 @@ func GenerateRandomName(n int) string {
 	}
 	return string(s)
 }
+
+// SetupEnvWithoutCleanUp : Adds a new environment without automatically removes it when the calling test function execution ends
+func SetupEnvWithoutCleanUp(t *testing.T, env string, apim string, tokenEp string) {
+	Execute(t, "add-env", "-e", env, "--apim", apim, "--token", tokenEp)
+}
+
+// LoginWithoutClenUp : Logs into an environment without automatically logs out when the calling test function execution ends
+func LoginWithoutClenUp(t *testing.T, env string, username string, password string) {
+	Execute(t, "login", env, "-u", username, "-p", password, "-k", "--verbose")
+}

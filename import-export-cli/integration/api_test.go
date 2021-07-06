@@ -19,6 +19,8 @@
 package integration
 
 import (
+	"fmt"
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"testing"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
@@ -737,4 +739,473 @@ func TestExportApisWithExportApisCommand(t *testing.T) {
 	}
 
 	testutils.ValidateAllApisOfATenantIsExported(t, args, apisAdded)
+}
+
+// Change the lifecycle status of an API as Super tenant admin user
+func TestChangeLifeCycleStatusOfApiAdminSuperTenantUser(t *testing.T) {
+	adminUsername := superAdminUser
+	adminPassword := superAdminPassword
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+
+	// Add the API to env
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	//Change life cycle state of Api from CREATED to PUBLISHED
+	args := &testutils.ApiChangeLifeCycleStatusTestArgs{
+		CtlUser:       testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		APIM:          dev,
+		Api:           api,
+		Action:        "Publish",
+		ExpectedState: "PUBLISHED",
+	}
+
+	testutils.ValidateChangeLifeCycleStatusOfAPI(t, args)
+
+	//Change life cycle state of Api from PUBLISHED to CREATED
+	argsToNextChange := &testutils.ApiChangeLifeCycleStatusTestArgs{
+		CtlUser:       testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		APIM:          dev,
+		Api:           api,
+		Action:        "Demote to Created",
+		ExpectedState: "CREATED",
+	}
+
+	testutils.ValidateChangeLifeCycleStatusOfAPI(t, argsToNextChange)
+}
+
+// Change the lifecycle status of an API as for Super tenant devops user
+func TestChangeLifeCycleStatusOfApiDevopsSuperTenantUser(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+
+	// Add the API to env
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	//Change life cycle state of Api from CREATED to PUBLISHED
+	args := &testutils.ApiChangeLifeCycleStatusTestArgs{
+		CtlUser:       testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		APIM:          dev,
+		Api:           api,
+		Action:        "Publish",
+		ExpectedState: "PUBLISHED",
+	}
+
+	testutils.ValidateChangeLifeCycleStatusOfAPI(t, args)
+
+	//Change life cycle state of Api from PUBLISHED to CREATED
+	argsToNextChange := &testutils.ApiChangeLifeCycleStatusTestArgs{
+		CtlUser:       testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		APIM:          dev,
+		Api:           api,
+		Action:        "Demote to Created",
+		ExpectedState: "CREATED",
+	}
+
+	testutils.ValidateChangeLifeCycleStatusOfAPI(t, argsToNextChange)
+}
+
+// Change the lifecycle status of an API as tenant admin user
+func TestChangeLifeCycleStatusOfApiAdminTenantUser(t *testing.T) {
+	tenantAdminUsername := superAdminUser + "@" + TENANT1
+	tenantAdminPassword := superAdminPassword
+
+	apiCreator := creator.UserName + "@" + TENANT1
+	apiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+
+	// Add the API to env
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	//Change life cycle state of Api from CREATED to PUBLISHED
+	args := &testutils.ApiChangeLifeCycleStatusTestArgs{
+		CtlUser:       testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
+		APIM:          dev,
+		Api:           api,
+		Action:        "Publish",
+		ExpectedState: "PUBLISHED",
+	}
+
+	testutils.ValidateChangeLifeCycleStatusOfAPI(t, args)
+
+	//Change life cycle state of Api from PUBLISHED to CREATED
+	argsToNextChange := &testutils.ApiChangeLifeCycleStatusTestArgs{
+		CtlUser:       testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
+		APIM:          dev,
+		Api:           api,
+		Action:        "Demote to Created",
+		ExpectedState: "CREATED",
+	}
+
+	testutils.ValidateChangeLifeCycleStatusOfAPI(t, argsToNextChange)
+}
+
+// Change the lifecycle status of an API as tenant devops user
+func TestChangeLifeCycleStatusOfApiDevopsTenantUser(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	apiCreator := creator.UserName + "@" + TENANT1
+	apiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+
+	// Add the API to env
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	//Change life cycle state of Api from CREATED to PUBLISHED
+	args := &testutils.ApiChangeLifeCycleStatusTestArgs{
+		CtlUser:       testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		APIM:          dev,
+		Api:           api,
+		Action:        "Publish",
+		ExpectedState: "PUBLISHED",
+	}
+
+	testutils.ValidateChangeLifeCycleStatusOfAPI(t, args)
+
+	//Change life cycle state of Api from PUBLISHED to CREATED
+	argsToNextChange := &testutils.ApiChangeLifeCycleStatusTestArgs{
+		CtlUser:       testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		APIM:          dev,
+		Api:           api,
+		Action:        "Demote to Created",
+		ExpectedState: "CREATED",
+	}
+
+	testutils.ValidateChangeLifeCycleStatusOfAPI(t, argsToNextChange)
+}
+
+// Change the lifecycle status of an API as an user without permissions
+func TestChangeLifeCycleStatusOfApiFailWithAUserWithoutPermissions(t *testing.T) {
+	subscriberUsername := subscriber.UserName
+	subscriberDevopsPassword := subscriber.Password
+
+	apiCreator := creator.UserName + "@" + TENANT1
+	apiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+
+	// Add the API to env
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+
+	//Change life cycle state of Api from CREATED to PUBLISHED
+	args := &testutils.ApiChangeLifeCycleStatusTestArgs{
+		CtlUser:       testutils.Credentials{Username: subscriberUsername, Password: subscriberDevopsPassword},
+		APIM:          dev,
+		Api:           api,
+		Action:        "Publish",
+		ExpectedState: "PUBLISHED",
+	}
+
+	testutils.ValidateChangeLifeCycleStatusOfAPIFailure(t, args)
+}
+
+// API search using query parameters as super tenant admin user
+func TestApiSearchWithQueryParamsAdminSuperTenantUser(t *testing.T) {
+	adminUsername := superAdminUser
+	adminPassword := superAdminPassword
+
+	dev := apimClients[0]
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	var searchQuery string
+
+	// Add set of APIs to env and store api details
+	var addedApisList [numberOfAPIs + 1]*apim.API
+	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
+		// Add the API to env1
+		api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+		addedApisList[apiCount] = api
+	}
+
+	// Add custom API
+	customAPI := addedApisList[3]
+	customAPI.Name = testutils.CustomAPIName
+	customAPI.Version = testutils.CustomAPIVersion
+	customAPI.Context = testutils.CustomAPIContext
+	dev.AddAPI(t, customAPI, apiCreator, apiCreatorPassword, true)
+
+	args := &testutils.ApiImportExportTestArgs{
+		CtlUser: testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		SrcAPIM: dev,
+	}
+
+	for i := 0; i < len(addedApisList); i++ {
+		apiNameToSearch := addedApisList[i].Name
+		apiNameNotToSearch := addedApisList[len(addedApisList)-(i+1)].Name
+		searchQuery = fmt.Sprintf("name:%v", apiNameToSearch)
+
+		//Search APIs using query
+		testutils.ValidateSearchApisList(t, args, searchQuery, apiNameToSearch, apiNameNotToSearch)
+
+		//Select random context from the added APIs
+		apiContextToSearch := addedApisList[i].Context
+		apiContextNotToSearch := addedApisList[len(addedApisList)-(i+1)].Context
+		searchQuery = fmt.Sprintf("context:%v", apiContextToSearch)
+
+		//Search APIs using query
+		testutils.ValidateSearchApisList(t, args, searchQuery, apiContextToSearch, apiContextNotToSearch)
+	}
+
+	// Search custom API with name
+	searchQuery = fmt.Sprintf("name:%v", testutils.CustomAPIName)
+	testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIName,
+		addedApisList[1].Name)
+
+	// Search custom API with context
+	searchQuery = fmt.Sprintf("context:%v", testutils.CustomAPIContext)
+	testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIContext,
+		addedApisList[1].Context)
+
+	// Search custom API with version
+	searchQuery = fmt.Sprintf("version:%v", testutils.CustomAPIVersion)
+	testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIVersion,
+		addedApisList[1].Version)
+
+	// Search custom API with version and name
+	searchQuery = fmt.Sprintf("version:%v name:%v", testutils.CustomAPIVersion, testutils.CustomAPIName)
+	testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIVersion,
+		addedApisList[1].Version)
+
+	t.Cleanup(func() {
+		base.Execute(t, "logout", args.SrcAPIM.GetEnvName())
+		base.Execute(t, "remove", "env", args.SrcAPIM.GetEnvName())
+	})
+}
+
+// API search using query parameters as super tenant devops user
+func TestApiSearchWithQueryParamsDevOpsSuperTenantUser(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+
+	var searchQuery string
+
+	// Add set of APIs to env and store api details
+	var addedApisList [numberOfAPIs + 1]*apim.API
+	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
+		// Add the API to env1
+		api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+		addedApisList[apiCount] = api
+	}
+
+	// Add custom API
+	customAPI := addedApisList[3]
+	customAPI.Name = testutils.CustomAPIName
+	customAPI.Version = testutils.CustomAPIVersion
+	customAPI.Context = testutils.CustomAPIContext
+	dev.AddAPI(t, customAPI, apiCreator, apiCreatorPassword, true)
+
+	args := &testutils.ApiImportExportTestArgs{
+		CtlUser: testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		SrcAPIM: dev,
+	}
+
+	for i := 0; i < len(addedApisList); i++ {
+		apiNameToSearch := addedApisList[i].Name
+		apiNameNotToSearch := addedApisList[len(addedApisList)-(i+1)].Name
+		searchQuery = fmt.Sprintf("name:%v", apiNameToSearch)
+
+		//Search APIs using query
+		testutils.ValidateSearchApisList(t, args, searchQuery, apiNameToSearch, apiNameNotToSearch)
+
+		//Select random context from the added APIs
+		apiContextToSearch := addedApisList[i].Context
+		apiContextNotToSearch := addedApisList[len(addedApisList)-(i+1)].Context
+		searchQuery = fmt.Sprintf("context:%v", apiContextToSearch)
+
+		//Search APIs using query
+		testutils.ValidateSearchApisList(t, args, searchQuery, apiContextToSearch, apiContextNotToSearch)
+	}
+
+	// Search custom API with name
+	searchQuery = fmt.Sprintf("name:%v", testutils.CustomAPIName)
+	testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIName,
+		addedApisList[1].Name)
+
+	// Search custom API with context
+	searchQuery = fmt.Sprintf("context:%v", testutils.CustomAPIContext)
+	testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIContext,
+		addedApisList[1].Context)
+
+	// Search custom API with version
+	searchQuery = fmt.Sprintf("version:%v", testutils.CustomAPIVersion)
+	testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIVersion,
+		addedApisList[1].Version)
+
+	// Search custom API with version and name
+	searchQuery = fmt.Sprintf("version:%v name:%v", testutils.CustomAPIVersion, testutils.CustomAPIName)
+	testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIVersion,
+		addedApisList[1].Version)
+
+	t.Cleanup(func() {
+		base.Execute(t, "logout", args.SrcAPIM.GetEnvName())
+		base.Execute(t, "remove", "env", args.SrcAPIM.GetEnvName())
+	})
+}
+
+// API search using query parameters as tenant admin user
+func TestApiSearchWithQueryParamsAdminTenantUser(t *testing.T) {
+	tenantAdminUsername := superAdminUser + "@" + TENANT1
+	tenantAdminPassword := superAdminPassword
+
+	apiCreator := creator.UserName + "@" + TENANT1
+	apiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+
+	var searchQuery string
+
+	// Add set of APIs to env and store api details
+	var addedApisList [numberOfAPIs + 1]*apim.API
+	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
+		// Add the API to env1
+		api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+		addedApisList[apiCount] = api
+	}
+
+	// Add custom API
+	customAPI := addedApisList[3]
+	customAPI.Name = testutils.CustomAPIName
+	customAPI.Version = testutils.CustomAPIVersion
+	customAPI.Context = testutils.CustomAPIContext
+	dev.AddAPI(t, customAPI, apiCreator, apiCreatorPassword, true)
+
+	args := &testutils.ApiImportExportTestArgs{
+		CtlUser: testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
+		SrcAPIM: dev,
+	}
+
+	for i := 0; i < len(addedApisList); i++ {
+		apiNameToSearch := addedApisList[i].Name
+		apiNameNotToSearch := addedApisList[len(addedApisList)-(i+1)].Name
+		searchQuery = fmt.Sprintf("name:%v", apiNameToSearch)
+
+		//Search APIs using query
+		testutils.ValidateSearchApisList(t, args, searchQuery, apiNameToSearch, apiNameNotToSearch)
+
+		//Select random context from the added APIs
+		apiContextToSearch := addedApisList[i].Context
+		apiContextNotToSearch := addedApisList[len(addedApisList)-(i+1)].Context
+		searchQuery = fmt.Sprintf("context:%v", apiContextToSearch)
+
+		//Search APIs using query
+		testutils.ValidateSearchApisList(t, args, searchQuery, apiContextToSearch, apiContextNotToSearch)
+	}
+
+	// Search custom API with name
+	searchQuery = fmt.Sprintf("name:%v", testutils.CustomAPIName)
+	testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIName,
+		addedApisList[1].Name)
+
+	// Search custom API with context
+	searchQuery = fmt.Sprintf("context:%v", testutils.CustomAPIContext)
+	testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIContext,
+		addedApisList[1].Context)
+
+	// Search custom API with version
+	searchQuery = fmt.Sprintf("version:%v", testutils.CustomAPIVersion)
+	testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIVersion,
+		addedApisList[1].Version)
+
+	// Search custom API with version and name
+	searchQuery = fmt.Sprintf("version:%v name:%v", testutils.CustomAPIVersion, testutils.CustomAPIName)
+	testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIVersion,
+		addedApisList[1].Version)
+
+	t.Cleanup(func() {
+		base.Execute(t, "logout", args.SrcAPIM.GetEnvName())
+		base.Execute(t, "remove", "env", args.SrcAPIM.GetEnvName())
+	})
+}
+
+// API search using query parameters as tenant devops user
+func TestApiSearchWithQueryParamsDevOpsTenantUser(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	apiCreator := creator.UserName + "@" + TENANT1
+	apiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+
+	var searchQuery string
+
+	// Add set of APIs to env and store api details
+	var addedApisList [numberOfAPIs + 1]*apim.API
+	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
+		// Add the API to env1
+		api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+		addedApisList[apiCount] = api
+	}
+
+	// Add custom API
+	customAPI := addedApisList[3]
+	customAPI.Name = testutils.CustomAPIName
+	customAPI.Version = testutils.CustomAPIVersion
+	customAPI.Context = testutils.CustomAPIContext
+	dev.AddAPI(t, customAPI, apiCreator, apiCreatorPassword, true)
+
+	args := &testutils.ApiImportExportTestArgs{
+		CtlUser: testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		SrcAPIM: dev,
+	}
+
+	for i := 0; i < len(addedApisList); i++ {
+		apiNameToSearch := addedApisList[i].Name
+		apiNameNotToSearch := addedApisList[len(addedApisList)-(i+1)].Name
+		searchQuery = fmt.Sprintf("name:%v", apiNameToSearch)
+
+		//Search APIs using query
+		testutils.ValidateSearchApisList(t, args, searchQuery, apiNameToSearch, apiNameNotToSearch)
+
+		//Select random context from the added APIs
+		apiContextToSearch := addedApisList[i].Context
+		apiContextNotToSearch := addedApisList[len(addedApisList)-(i+1)].Context
+		searchQuery = fmt.Sprintf("context:%v", apiContextToSearch)
+
+		//Search APIs using query
+		testutils.ValidateSearchApisList(t, args, searchQuery, apiContextToSearch, apiContextNotToSearch)
+	}
+
+	// Search custom API with name
+	searchQuery = fmt.Sprintf("name:%v", testutils.CustomAPIName)
+	testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIName,
+		addedApisList[1].Name)
+
+	// Search custom API with context
+	searchQuery = fmt.Sprintf("context:%v", testutils.CustomAPIContext)
+	testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIContext,
+		addedApisList[1].Context)
+
+	// Search custom API with version
+	searchQuery = fmt.Sprintf("version:%v", testutils.CustomAPIVersion)
+	testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIVersion,
+		addedApisList[1].Version)
+
+	// Search custom API with context and name
+	searchQuery = fmt.Sprintf("name:%v context:%v", testutils.CustomAPIName, testutils.CustomAPIContext)
+	testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIContext,
+		addedApisList[1].Context)
+
+	t.Cleanup(func() {
+		base.Execute(t, "logout", args.SrcAPIM.GetEnvName())
+		base.Execute(t, "remove", "env", args.SrcAPIM.GetEnvName())
+	})
 }

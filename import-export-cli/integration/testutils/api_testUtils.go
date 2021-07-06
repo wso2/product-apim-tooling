@@ -461,6 +461,12 @@ func ValidateAPIDelete(t *testing.T, args *ApiImportExportTestArgs) {
 	validateAPIIsDeleted(t, args.Api, apisListAfterDelete)
 }
 
+func changeLifeCycleOfAPI(t *testing.T, args *ApiChangeLifeCycleStatusTestArgs) (string, error) {
+	output, err := base.Execute(t, "change-status", "api", "-a", args.Action, "-n", args.Api.Name,
+		"-v", args.Api.Version, "-e", args.APIM.EnvName, "-k", "--verbose")
+	return output, err
+}
+
 func exportApiImportedFromProject(t *testing.T, APIName string, APIVersion string, EnvName string) (string, error) {
 	return base.Execute(t, "export-api", "-n", APIName, "-v", APIVersion, "-e", EnvName)
 }
@@ -528,4 +534,79 @@ func ImportApiFromProjectWithUpdate(t *testing.T, projectName string, client *ap
 func ExportApisWithOneCommand(t *testing.T, args *InitTestArgs) (string, error) {
 	output, error := base.Execute(t, "export-apis", "-e", args.SrcAPIM.GetEnvName(), "-k", "--force", "--verbose")
 	return output, error
+}
+func GetAPI(t *testing.T, client *apim.Client, name string, username string, password string) *apim.API {
+	if username == adminservices.DevopsUsername {
+		client.Login(adminservices.AdminUsername, adminservices.AdminPassword)
+	} else if username == adminservices.DevopsUsername+"@"+adminservices.Tenant1 {
+		client.Login(adminservices.AdminUsername+"@"+adminservices.Tenant1, adminservices.AdminPassword)
+	} else {
+		client.Login(username, password)
+	}
+	apiInfo, err := client.GetAPIByName(name)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return client.GetAPI(apiInfo.ID)
+}
+
+func ValidateChangeLifeCycleStatusOfAPI(t *testing.T, args *ApiChangeLifeCycleStatusTestArgs) {
+	t.Helper()
+	// Setup apictl envs
+	base.SetupEnv(t, args.APIM.GetEnvName(), args.APIM.GetApimURL(), args.APIM.GetTokenURL())
+	// Login to apictl
+	base.Login(t, args.APIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+	base.WaitForIndexing()
+	//Execute apictl command to change life cycle of an Api
+	output, _ := changeLifeCycleOfAPI(t, args)
+	//Assert apictl output
+	assert.Contains(t, output, "state changed successfully!", "Error while changing life cycle of API")
+	base.WaitForIndexing()
+	//Assert life cycle state after change
+	api := GetAPI(t, args.APIM, args.Api.Name, args.CtlUser.Username, args.CtlUser.Password)
+	assert.Equal(t, args.ExpectedState, api.LifeCycleStatus, "Expected Life cycle state change is not equals to actual status")
+}
+
+func ValidateChangeLifeCycleStatusOfAPIFailure(t *testing.T, args *ApiChangeLifeCycleStatusTestArgs) {
+	t.Helper()
+	// Setup apictl envs
+	base.SetupEnv(t, args.APIM.GetEnvName(), args.APIM.GetApimURL(), args.APIM.GetTokenURL())
+	// Login to apictl
+	base.Login(t, args.APIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+	base.WaitForIndexing()
+	//Execute apictl command to change life cycle of an Api
+	output, _ := changeLifeCycleOfAPI(t, args)
+	//Assert apictl output
+	assert.NotContains(t, output, "state changed successfully!", "Error while changing life cycle of API")
+	assert.NotEqual(t, args.Api.LifeCycleStatus, args.ExpectedState, "Life Cycle State changed successfully")
+}
+
+// Execute get apis command with query parameters
+func searchAPIsWithQuery(t *testing.T, args *ApiImportExportTestArgs, query string) (string, error) {
+	output, err := base.Execute(t, "list", "apis", "-e", args.SrcAPIM.EnvName, "--query", query, "-k", "--verbose")
+	return output, err
+}
+
+// ValidateSearchApisList : Validate the received list of APIs and verify only the required ones are there and others
+// are not in the command line output
+func ValidateSearchApisList(t *testing.T, args *ApiImportExportTestArgs, searchQuery, matchQuery, unmatchedQuery string) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnvWithoutCleanUp(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	base.LoginWithoutClenUp(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	base.WaitForIndexing()
+
+	output, _ := searchAPIsWithQuery(t, args, searchQuery)
+
+	// Assert the match query is in the output
+	assert.Truef(t, strings.Contains(output, matchQuery), "apisListFromCtl: "+output+
+		" , does not contain the query: "+matchQuery)
+	// Assert the unmatched query is not in the output
+	assert.False(t, strings.Contains(output, unmatchedQuery), "apisListFromCtl: "+output+
+		" , contains the query: "+unmatchedQuery)
 }
