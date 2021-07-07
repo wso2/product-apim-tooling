@@ -26,7 +26,8 @@ type SubscriptionList struct {
 
 // Subscription : Subscription DTO
 type Subscription struct {
-	SubscriptionID string `json:"subscriptionId"`
-	ApplicationID  string `json:"applicationId"`
-	APIID          string `json:"apiId"`
+	SubscriptionID   string `json:"subscriptionId"`
+	ApplicationID    string `json:"applicationId"`
+	APIID            string `json:"apiId"`
+	ThrottlingPolicy string `json:"throttlingPolicy"`
 }
