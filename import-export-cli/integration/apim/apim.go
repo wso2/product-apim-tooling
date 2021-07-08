@@ -440,7 +440,6 @@ func (instance *Client) GenerateSampleAppWithNameInSpaceData() *Application {
 	return &app
 }
 
-
 // CopyApp : Create a deep copy of an Application object
 func CopyApp(appToCopy *Application) Application {
 	appCopy := Application{}

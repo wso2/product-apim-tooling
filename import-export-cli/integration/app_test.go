@@ -481,7 +481,6 @@ func TestDeleteApp(t *testing.T) {
 	}
 }
 
-
 // Export an application with space in application name  and import it to another  to check whether the url
 // encoding is working properly
 func TestExportImportOwnAppWithSpaceInAppName(t *testing.T) {
