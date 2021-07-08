@@ -489,10 +489,10 @@ func TestExportImportOwnAppWithSpaceInAppName(t *testing.T) {
 			dev := GetDevClient()
 			prod := GetProdClient()
 
-			app := testutils.AddAppWithSpaceInAppName(t, dev, user.CtlUser.Username, user.CtlUser.Password)
+			app := testutils.AddAppWithSpaceInAppName(t, dev, user.ApiSubscriber.Username, user.ApiSubscriber.Password)
 
 			args := &testutils.AppImportExportTestArgs{
-				AppOwner:      testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				AppOwner:      testutils.Credentials{Username: user.ApiSubscriber.Username, Password: user.ApiSubscriber.Password},
 				CtlUser:       testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
 				Application:   app,
 				SrcAPIM:       dev,
