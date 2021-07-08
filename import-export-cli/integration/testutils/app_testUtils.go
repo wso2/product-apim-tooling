@@ -41,6 +41,13 @@ func AddApp(t *testing.T, client *apim.Client, username string, password string)
 	return client.AddApplication(t, app, username, password, doClean)
 }
 
+func AddAppWithSpaceInAppName(t *testing.T, client *apim.Client, username string, password string) *apim.Application {
+	client.Login(username, password)
+	app := client.GenerateSampleAppWithNameInSpaceData()
+	doClean := true
+	return client.AddApplication(t, app, username, password, doClean)
+}
+
 func AddApplicationWithoutCleaning(t *testing.T, client *apim.Client, username string, password string) *apim.Application {
 	client.Login(username, password)
 	application := client.GenerateSampleAppData()

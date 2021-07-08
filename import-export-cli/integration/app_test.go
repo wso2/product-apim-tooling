@@ -480,3 +480,27 @@ func TestDeleteApp(t *testing.T) {
 		})
 	}
 }
+
+// Export an application with space in application name  and import it to another  to check whether the url
+// encoding is working properly
+func TestExportImportOwnAppWithSpaceInAppName(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+			prod := GetProdClient()
+
+			app := testutils.AddAppWithSpaceInAppName(t, dev, user.ApiSubscriber.Username, user.ApiSubscriber.Password)
+
+			args := &testutils.AppImportExportTestArgs{
+				AppOwner:      testutils.Credentials{Username: user.ApiSubscriber.Username, Password: user.ApiSubscriber.Password},
+				CtlUser:       testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Application:   app,
+				SrcAPIM:       dev,
+				DestAPIM:      prod,
+				PreserveOwner: true,
+			}
+
+			testutils.ValidateAppExportImport(t, args, true)
+		})
+	}
+}
