@@ -414,26 +414,28 @@ func TestDeleteAppSuperTenantUser(t *testing.T) {
 }
 
 
-// Export an application with space in application name  and import it to another  to check whether the url
-// encoding is working properly
+
+// Export an application with space in application name  and import it to another environment while preserving
+// the owner by a user with Internal/devops role to check whether the url encoding is working properly
 func TestExportImportOwnAppWithSpaceInAppName(t *testing.T) {
-	for _, user := range testCaseUsers {
-		t.Run(user.Description, func(t *testing.T) {
-			dev := GetDevClient()
-			prod := GetProdClient()
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
 
-			app := testutils.AddAppWithSpaceInAppName(t, dev, user.CtlUser.Username, user.CtlUser.Password)
+	adminUsername := superAdminUser
+	adminPassword := superAdminPassword
 
-			args := &testutils.AppImportExportTestArgs{
-				AppOwner:      testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
-				CtlUser:       testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
-				Application:   app,
-				SrcAPIM:       dev,
-				DestAPIM:      prod,
-				PreserveOwner: true,
-			}
+	dev := GetDevClient()
+	prod := GetProdClient()
 
-			testutils.ValidateAppExportImport(t, args, true)
-		})
+	app := testutils.AddAppWithSpaceInAppName(t, dev, adminUsername, adminPassword)
+
+	args := &testutils.AppImportExportTestArgs{
+		AppOwner:    testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Application: app,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
 	}
+
+	testutils.ValidateAppExportImportWithPreserveOwner(t, args)
 }
