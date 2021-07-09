@@ -42,15 +42,8 @@ func ExportAppFromEnv(accessToken, name, owner, format, exportEnvironment string
 // @return response Response in the form of *resty.Response
 func ExportApp(name, owner, format, devportalApplicationsEndpoint, accessToken string, exportAppWithKeys bool) (*resty.Response, error) {
 	devportalApplicationsEndpoint = utils.AppendSlashToString(devportalApplicationsEndpoint)
-	query := "export?appName=" + name + utils.SearchAndTag + "appOwner=" + owner
 
-	if exportAppWithKeys {
-		query += "&withKeys=true"
-	}
-
-	if format != "" {
-		query += "&format=" + format
-	}
+	query := "export"
 
 	url := devportalApplicationsEndpoint + query
 	utils.Logln(utils.LogPrefixInfo+"ExportApp: URL:", url)
@@ -58,7 +51,18 @@ func ExportApp(name, owner, format, devportalApplicationsEndpoint, accessToken s
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 	headers[utils.HeaderAccept] = utils.HeaderValueApplicationZip
 
-	resp, err := utils.InvokeGETRequest(url, headers)
+	queryParams := map[string]string{
+		"appName":  name,
+		"appOwner": owner,
+	}
+	if exportAppWithKeys {
+		queryParams["withKeys"] = "true"
+	}
+	if format != "" {
+		queryParams["format"] = format
+	}
+
+	resp, err := utils.InvokeGETRequestWithMultipleQueryParams(queryParams, url, headers)
 	if err != nil {
 		return nil, err
 	}

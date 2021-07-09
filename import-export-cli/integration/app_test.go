@@ -412,3 +412,30 @@ func TestDeleteAppSuperTenantUser(t *testing.T) {
 
 	testutils.ValidateAppDelete(t, args)
 }
+
+
+
+// Export an application with space in application name  and import it to another environment while preserving
+// the owner by a user with Internal/devops role to check whether the url encoding is working properly
+func TestExportImportOwnAppWithSpaceInAppName(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	adminUsername := superAdminUser
+	adminPassword := superAdminPassword
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	app := testutils.AddAppWithSpaceInAppName(t, dev, adminUsername, adminPassword)
+
+	args := &testutils.AppImportExportTestArgs{
+		AppOwner:    testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Application: app,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+	}
+
+	testutils.ValidateAppExportImportWithPreserveOwner(t, args)
+}
