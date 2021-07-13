@@ -21,7 +21,6 @@ package integration
 import (
 	"fmt"
 	"strconv"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -176,7 +175,7 @@ func TestEnvironmentSpecificParamsEndpointSecurityDigest(t *testing.T) {
 
 	apiParams := testutils.ReadAPIParams(t, args.ParamsFile)
 
-	validateEndpointSecurityDefinition(t, api, apiParams, importedAPI)
+	testutils.ValidateEndpointSecurityDefinition(t, api, apiParams, importedAPI)
 }
 
 func TestEnvironmentSpecificParamsEndpointSecurityBasic(t *testing.T) {
@@ -206,29 +205,5 @@ func TestEnvironmentSpecificParamsEndpointSecurityBasic(t *testing.T) {
 
 	apiParams := testutils.ReadAPIParams(t, args.ParamsFile)
 
-	validateEndpointSecurityDefinition(t, api, apiParams, importedAPI)
-}
-
-func validateEndpointSecurityDefinition(t *testing.T, api *apim.API, apiParams *testutils.APIParams, importedAPI *apim.API) {
-	t.Helper()
-
-	assert.Equal(t, strings.ToUpper(apiParams.Environments[0].Security.Type), importedAPI.EndpointSecurity.Type)
-	assert.Equal(t, apiParams.Environments[0].Security.Username, importedAPI.EndpointSecurity.Username)
-	assert.Equal(t, "", importedAPI.EndpointSecurity.Password)
-
-	apiCopy := apim.CopyAPI(api)
-	importedAPICopy := apim.CopyAPI(importedAPI)
-
-	same := "override_with_same_value"
-
-	apiCopy.EndpointSecurity.Type = same
-	importedAPICopy.EndpointSecurity.Type = same
-
-	apiCopy.EndpointSecurity.Username = same
-	importedAPICopy.EndpointSecurity.Username = same
-
-	apiCopy.EndpointSecurity.Password = same
-	importedAPICopy.EndpointSecurity.Password = same
-
-	testutils.ValidateAPIsEqual(t, &apiCopy, &importedAPICopy)
+	testutils.ValidateEndpointSecurityDefinition(t, api, apiParams, importedAPI)
 }
