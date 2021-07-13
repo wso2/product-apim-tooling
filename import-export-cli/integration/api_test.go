@@ -20,8 +20,9 @@ package integration
 
 import (
 	"fmt"
-	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"testing"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 
@@ -927,6 +928,7 @@ func TestApiSearchWithQueryParamsAdminSuperTenantUser(t *testing.T) {
 	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
 		// Add the API to env1
 		api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+		base.WaitForIndexing()
 		addedApisList[apiCount] = api
 	}
 
@@ -936,6 +938,7 @@ func TestApiSearchWithQueryParamsAdminSuperTenantUser(t *testing.T) {
 	customAPI.Version = testutils.CustomAPIVersion
 	customAPI.Context = testutils.CustomAPIContext
 	dev.AddAPI(t, customAPI, apiCreator, apiCreatorPassword, true)
+	base.WaitForIndexing()
 
 	args := &testutils.ApiImportExportTestArgs{
 		CtlUser: testutils.Credentials{Username: adminUsername, Password: adminPassword},
@@ -1002,6 +1005,7 @@ func TestApiSearchWithQueryParamsDevOpsSuperTenantUser(t *testing.T) {
 	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
 		// Add the API to env1
 		api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+		base.WaitForIndexing()
 		addedApisList[apiCount] = api
 	}
 
@@ -1011,6 +1015,7 @@ func TestApiSearchWithQueryParamsDevOpsSuperTenantUser(t *testing.T) {
 	customAPI.Version = testutils.CustomAPIVersion
 	customAPI.Context = testutils.CustomAPIContext
 	dev.AddAPI(t, customAPI, apiCreator, apiCreatorPassword, true)
+	base.WaitForIndexing()
 
 	args := &testutils.ApiImportExportTestArgs{
 		CtlUser: testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
@@ -1077,6 +1082,7 @@ func TestApiSearchWithQueryParamsAdminTenantUser(t *testing.T) {
 	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
 		// Add the API to env1
 		api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+		base.WaitForIndexing()
 		addedApisList[apiCount] = api
 	}
 
@@ -1086,6 +1092,7 @@ func TestApiSearchWithQueryParamsAdminTenantUser(t *testing.T) {
 	customAPI.Version = testutils.CustomAPIVersion
 	customAPI.Context = testutils.CustomAPIContext
 	dev.AddAPI(t, customAPI, apiCreator, apiCreatorPassword, true)
+	base.WaitForIndexing()
 
 	args := &testutils.ApiImportExportTestArgs{
 		CtlUser: testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
@@ -1152,6 +1159,7 @@ func TestApiSearchWithQueryParamsDevOpsTenantUser(t *testing.T) {
 	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
 		// Add the API to env1
 		api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+		base.WaitForIndexing()
 		addedApisList[apiCount] = api
 	}
 
@@ -1161,6 +1169,7 @@ func TestApiSearchWithQueryParamsDevOpsTenantUser(t *testing.T) {
 	customAPI.Version = testutils.CustomAPIVersion
 	customAPI.Context = testutils.CustomAPIContext
 	dev.AddAPI(t, customAPI, apiCreator, apiCreatorPassword, true)
+	base.WaitForIndexing()
 
 	args := &testutils.ApiImportExportTestArgs{
 		CtlUser: testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
