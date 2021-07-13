@@ -148,21 +148,21 @@ func TestEnvironmentSpecificParamsEndpointSecurityFalse(t *testing.T) {
 	testutils.ValidateAPIsEqual(t, api, importedAPI)
 }
 
-func TestEnvironmentSpecificParamsEndpointSecurityDigest(t *testing.T) {
-	superTenantAdminUsername := superAdminUser
-	superTenantAdminPassword := superAdminPassword
+func TestEnvironmentSpecificParamsEndpointSecurityDigestDevopsTenant(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
 
-	superTenantApiCreator := creator.UserName
-	superTenantApiCreatorPassword := creator.Password
+	tenantApiCreator := creator.UserName + "@" + TENANT1
+	tenantApiCreatorPassword := creator.Password
 
 	dev := apimClients[0]
 	prod := apimClients[1]
 
-	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
+	api := testutils.AddAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword)
 
 	args := &testutils.ApiImportExportTestArgs{
-		ApiProvider: testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: superTenantAdminUsername, Password: superTenantAdminPassword},
+		ApiProvider: testutils.Credentials{Username: tenantApiCreator, Password: tenantApiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
 		Api:         api,
 		SrcAPIM:     dev,
 		DestAPIM:    prod,
@@ -178,9 +178,9 @@ func TestEnvironmentSpecificParamsEndpointSecurityDigest(t *testing.T) {
 	testutils.ValidateEndpointSecurityDefinition(t, api, apiParams, importedAPI)
 }
 
-func TestEnvironmentSpecificParamsEndpointSecurityBasic(t *testing.T) {
-	superTenantAdminUsername := superAdminUser
-	superTenantAdminPassword := superAdminPassword
+func TestEnvironmentSpecificParamsEndpointSecurityBasicDevopsSuperTenant(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
 
 	superTenantApiCreator := creator.UserName
 	superTenantApiCreatorPassword := creator.Password
@@ -192,7 +192,37 @@ func TestEnvironmentSpecificParamsEndpointSecurityBasic(t *testing.T) {
 
 	args := &testutils.ApiImportExportTestArgs{
 		ApiProvider: testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: superTenantAdminUsername, Password: superTenantAdminPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+		ParamsFile:  testutils.APISecurityBasicParamsFile,
+	}
+
+	testutils.ValidateAPIExport(t, args)
+
+	importedAPI := testutils.GetImportedAPI(t, args)
+
+	apiParams := testutils.ReadAPIParams(t, args.ParamsFile)
+
+	testutils.ValidateEndpointSecurityDefinition(t, api, apiParams, importedAPI)
+}
+
+func TestEnvironmentSpecificParamsEndpointSecurityBasicDevopsTenant(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	tenantApiCreator := creator.UserName + "@" + TENANT1
+	tenantApiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+	prod := apimClients[1]
+
+	api := testutils.AddAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: tenantApiCreator, Password: tenantApiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
 		Api:         api,
 		SrcAPIM:     dev,
 		DestAPIM:    prod,
