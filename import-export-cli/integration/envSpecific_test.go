@@ -28,6 +28,8 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 )
 
+// Add an API to one environment, export it and re-import it to another environment by overriding the endpoints
+// using the params file by a super tenant admin user
 func TestEnvironmentSpecificParamsEndpoint(t *testing.T) {
 	superTenantAdminUsername := superAdminUser
 	superTenantAdminPassword := superAdminPassword
@@ -67,6 +69,8 @@ func TestEnvironmentSpecificParamsEndpoint(t *testing.T) {
 	testutils.ValidateAPIsEqual(t, &apiCopy, &importedAPICopy)
 }
 
+// Add an API to one environment, export it and re-import it to another environment by setting the retry time out for endpoints
+// using the params file by a super tenant admin user
 func TestEnvironmentSpecificParamsEndpointRetryTimeout(t *testing.T) {
 	superTenantAdminUsername := superAdminUser
 	superTenantAdminPassword := superAdminPassword
@@ -120,6 +124,8 @@ func TestEnvironmentSpecificParamsEndpointRetryTimeout(t *testing.T) {
 	testutils.ValidateAPIsEqual(t, &apiCopy, &importedAPICopy)
 }
 
+// Add an API to one environment, export it and re-import it to another environment by disabling the endpoint security
+// using the params file by a super tenant admin user
 func TestEnvironmentSpecificParamsEndpointSecurityFalse(t *testing.T) {
 	superTenantAdminUsername := superAdminUser
 	superTenantAdminPassword := superAdminPassword
@@ -148,6 +154,8 @@ func TestEnvironmentSpecificParamsEndpointSecurityFalse(t *testing.T) {
 	testutils.ValidateAPIsEqual(t, api, importedAPI)
 }
 
+// Add an API to one environment, export it and re-import it to another environment by overriding the endpoint security
+// (with the security type digest), using the params file by a super tenant user with the Internal/devops role
 func TestEnvironmentSpecificParamsEndpointSecurityDigestDevopsSuperTenant(t *testing.T) {
 	devopsUsername := devops.UserName
 	devopsPassword := devops.Password
@@ -178,6 +186,8 @@ func TestEnvironmentSpecificParamsEndpointSecurityDigestDevopsSuperTenant(t *tes
 	testutils.ValidateEndpointSecurityDefinition(t, api, apiParams, importedAPI)
 }
 
+// Add an API to one environment, export it and re-import it to another environment by overriding the endpoint security
+// (with the security type digest), using the params file by a tenant user with the Internal/devops role
 func TestEnvironmentSpecificParamsEndpointSecurityDigestDevopsTenant(t *testing.T) {
 	tenantDevopsUsername := devops.UserName + "@" + TENANT1
 	tenantDevopsPassword := devops.Password
@@ -208,6 +218,8 @@ func TestEnvironmentSpecificParamsEndpointSecurityDigestDevopsTenant(t *testing.
 	testutils.ValidateEndpointSecurityDefinition(t, api, apiParams, importedAPI)
 }
 
+// Add an API to one environment, export it and re-import it to another environment by overriding the endpoint security
+// (with the security type basic), using the params file by a super tenant user with the Internal/devops role
 func TestEnvironmentSpecificParamsEndpointSecurityBasicDevopsSuperTenant(t *testing.T) {
 	devopsUsername := devops.UserName
 	devopsPassword := devops.Password
@@ -238,6 +250,8 @@ func TestEnvironmentSpecificParamsEndpointSecurityBasicDevopsSuperTenant(t *test
 	testutils.ValidateEndpointSecurityDefinition(t, api, apiParams, importedAPI)
 }
 
+// Add an API to one environment, export it and re-import it to another environment by overriding the endpoint security
+// (with the security type basic), using the params file by a tenant user with the Internal/devops role
 func TestEnvironmentSpecificParamsEndpointSecurityBasicDevopsTenant(t *testing.T) {
 	tenantDevopsUsername := devops.UserName + "@" + TENANT1
 	tenantDevopsPassword := devops.Password
