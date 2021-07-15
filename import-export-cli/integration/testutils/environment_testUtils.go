@@ -26,6 +26,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 )
 
@@ -124,4 +125,51 @@ func ValidateExportApiPassed(t *testing.T, args *ApiImportExportTestArgs, direct
 		//Remove Exported api
 		base.RemoveDir(directoryName)
 	})
+}
+
+func ValidateEndpointSecurityDefinition(t *testing.T, api *apim.API, apiParams *APIParams, importedAPI *apim.API) {
+	t.Helper()
+
+	validateEndpointSecurity(t, apiParams, importedAPI, "production")
+	validateEndpointSecurity(t, apiParams, importedAPI, "sandbox")
+
+	assert.Equal(t, strings.ToUpper(apiParams.Environments[0].Security.Type), importedAPI.EndpointSecurity.Type)
+	assert.Equal(t, apiParams.Environments[0].Security.Username, importedAPI.EndpointSecurity.Username)
+	assert.Equal(t, "", importedAPI.EndpointSecurity.Password)
+
+	apiCopy := apim.CopyAPI(api)
+	importedAPICopy := apim.CopyAPI(importedAPI)
+
+	same := "override_with_same_value"
+
+	apiCopy.EndpointSecurity.Type = same
+	importedAPICopy.EndpointSecurity.Type = same
+
+	apiCopy.EndpointSecurity.Username = same
+	importedAPICopy.EndpointSecurity.Username = same
+
+	apiCopy.EndpointSecurity.Password = same
+	importedAPICopy.EndpointSecurity.Password = same
+
+	apiCopy.EndpointConfig = same
+	importedAPICopy.EndpointConfig = same
+	ValidateAPIsEqual(t, &apiCopy, &importedAPICopy)
+}
+
+func validateEndpointSecurity(t *testing.T, apiParams *APIParams, api *apim.API, endpointType string) {
+	endpointSecurityForEndpointType := apiParams.Environments[0].Security
+	var endpointSecurityForEndpointTypeInApi map[string]interface{}
+
+	if strings.EqualFold(endpointType, "production") {
+		endpointSecurityForEndpointTypeInApi = api.GetProductionSecurityConfig()
+	}
+
+	if strings.EqualFold(endpointType, "sandbox") {
+		endpointSecurityForEndpointTypeInApi = api.GetSandboxSecurityConfig()
+	}
+
+	assert.Equal(t, endpointSecurityForEndpointType.Enabled, endpointSecurityForEndpointTypeInApi["enabled"])
+	assert.Equal(t, strings.ToUpper(endpointSecurityForEndpointType.Type), endpointSecurityForEndpointTypeInApi["type"])
+	assert.Equal(t, endpointSecurityForEndpointType.Username, endpointSecurityForEndpointTypeInApi["username"])
+	assert.Equal(t, "", endpointSecurityForEndpointTypeInApi["password"])
 }
