@@ -1,5 +1,5 @@
 # CLI for Importing and Exporting APIs and Applications
-## For WSO2 API Manager 2.2.0
+## For WSO2 API Manager 2.5.0
 
 Command Line tool for importing and exporting APIs/Applications between different API Environemnts
 
@@ -16,7 +16,7 @@ Command Line tool for importing and exporting APIs/Applications between differen
 - ### Building
     `cd` into `product-apim-tooling/import-export-cli`
     
-    Execute `./build.sh -t apimcli.go -v 1.0.0 -f` to build for all platforms.
+    Execute `./build.sh -t apimcli.go -v 1.1.0 -f` to build for all platforms.
     
     Created packages will be available at `build/target` directory
       
@@ -29,6 +29,11 @@ Command Line tool for importing and exporting APIs/Applications between differen
     
     Execute `apimcli --help` for further instructions.
 
+- ### Generating docs
+  After changing commands run following to generate documents and shell completions
+  `go run tools/gen.go`
+  Commit changes to version control
+  
 - ### Adding Environments
     Add environments by either manually editing `$HOME/.wso2apimcli/main_config.yaml` or using the command
     `apimcli add-env`.
