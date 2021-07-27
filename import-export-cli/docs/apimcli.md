@@ -6,7 +6,7 @@ CLI for Importing and Exporting APIs and Applications
 
 
 
-apimcli is a Command Line Tool for Importing and Exporting APIs and Applications between different environments of WSO2 API Manager 2.2.0
+apimcli is a Command Line Tool for Importing and Exporting APIs and Applications between different environments of WSO2 API Manager 2.5.0
 (Dev, Production, Staging, QA etc.)
 
 
