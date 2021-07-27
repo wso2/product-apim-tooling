@@ -25,8 +25,8 @@ import (
 	"github.com/renstrom/dedent"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"time"
 	"path/filepath"
+	"time"
 )
 
 var verbose bool
@@ -120,9 +120,9 @@ func createConfigFiles() {
 			"https://localhost/apim",
 			"https://localhost/api-import-export",
 			"https://localhost/publisher/apis",
-			"https://localhost:9443/api/am/admin/v0.12/applications",
+			"https://localhost:9443/api/am/admin/v0.13/applications",
 			"https://localhost/register",
-			"https://localhost:9443/api/am/admin/v0.12",
+			"https://localhost:9443/api/am/admin/v0.13",
 			"https://localhost/token",
 		}
 		mainConfig.Environments["sample-env2"] = utils.EnvEndpoints{

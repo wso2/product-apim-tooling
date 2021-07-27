@@ -46,7 +46,7 @@ var exportAppCmdLongDesc = "Export an Application from a specified  environment"
 var exportAppCmdExamples = dedent.Dedent(`
 		Examples:
 		` + utils.ProjectName + ` ` + exportAppCmdLiteral + ` -n SampleApp -o admin -e dev
-		` + utils.ProjectName + ` ` + exportAppCmdLiteral + ` -n SampleApp -o admin -e prod
+		` + utils.ProjectName + ` ` + exportAppCmdLiteral + ` -n SampleApp -o admin -e prod --withKeys
 		NOTE: Flag --name (-n) and --owner (-o) are mandatory
 	`)
 // exportAppCmd represents the exportApp command

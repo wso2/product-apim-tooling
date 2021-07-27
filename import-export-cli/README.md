@@ -129,13 +129,14 @@ Command Line tool for importing and exporting APIs/Applications between differen
                  --name, -n          
                  --owner, -o         
                  --environment, -e
+                 --withKeys
             Optional
                  --username, -u
                  --password, -p   
                  NOTE: user will be prompted to enter credentials if they are not provided with these flags
         Examples:        
             apimcli export-app -n SampleApp -o admin -e dev
-            apimcli export-app -n SampleApp -o admin -e prod         
+            apimcli export-app -n SampleApp -o admin -e prod --withKeys      
 ```
 * #### import-app
 ```bash    
@@ -149,10 +150,12 @@ Command Line tool for importing and exporting APIs/Applications between differen
                   --preserveOwner, -r        
                   --username, -u      
                   --password, -p     
+                  --update
+                  --skipKeys
         Examples:      
             apimcli import-app -f qa/apps/sampleApp.zip -e dev
             apimcli import-app -f staging/apps/sampleApp.zip -e prod -o testUser -u admin -p admin
-            apimcli import-app -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions -e staging               
+            apimcli import-app -f qa/apps/sampleApp.zip --preserveOwner --skipSubscriptions --skipKeys -e staging               
 ```
 * #### list apps
 ```bash
