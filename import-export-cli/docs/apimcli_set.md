@@ -25,7 +25,7 @@ apimcli set [flags]
 ### Options
 
 ```
-      --export-directory string    Path to directory where APIs should be saved (default "/home/chamindu/.wso2apimcli/exported")
+      --export-directory string    Path to directory where APIs should be saved (default "/home/wso2user/.wso2apimcli/exported")
   -h, --help                       help for set
       --http-request-timeout int   Timeout for HTTP Client (default 10000)
 ```
