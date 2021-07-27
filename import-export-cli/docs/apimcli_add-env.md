@@ -10,13 +10,13 @@ Add new environment and its related endpoints to the config file
 
 		Examples:
 		apimcli add-env -n production \
-						--registration https://localhost:9763/client-registration/v0.12/register \
+						--registration https://localhost:9763/client-registration/v0.13/register \
 						--apim  https://localhost:9443 \
 						--token https://localhost:8243/token
 
 		apimcli add-env -n test \
 						--registration https://localhost:9763/client-registration/v0.13/register \
-					    --import-export https://localhost:9443/api-import-export-2.2.0-v2 \
+					    --import-export https://localhost:9443/api-import-export-2.5.0-v2 \
 						--list https://localhsot:9443/api/am/publisher/v0.13/apis \
 						--apim  https://localhost:9443 \
 						--token https://localhost:8243/token
