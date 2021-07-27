@@ -21,19 +21,18 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
-	"github.com/renstrom/dedent"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"net/http"
-	"crypto/tls"
-	"time"
-	"strings"
-	"path/filepath"
 	"bytes"
-	"mime/multipart"
+	"crypto/tls"
+	"github.com/renstrom/dedent"
+	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"io"
+	"mime/multipart"
+	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
+	"time"
 )
 
 var importAppFile string
@@ -43,6 +42,8 @@ var importAppCmdPassword string
 var importAppOwner string
 var preserveOwner bool
 var skipSubscriptions bool
+var importAppSkipKeys bool
+var importAppUpdateApplication bool
 
 // ImportApp command related usage info
 const importAppCmdLiteral = "import-app"
@@ -85,7 +86,7 @@ func executeImportAppCmd(importAppOwner, mainConfigFilePath, envKeysAllFilePath,
 		if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusCreated {
 			// 200 OK or 201 Created
 			utils.Logln(utils.LogPrefixInfo+"Header:", resp.Header)
-			fmt.Println("Succesfully imported Application!")
+			fmt.Println("Successfully imported Application!")
 		} else if resp.StatusCode == http.StatusMultiStatus {
 			// 207 Multi Status
 			fmt.Printf("\nPartially imported Application" +
@@ -111,21 +112,21 @@ func executeImportAppCmd(importAppOwner, mainConfigFilePath, envKeysAllFilePath,
 // @param name: name of the Application (zipped file) to be imported
 // @param apiManagerEndpoint: API Manager endpoint for the environment
 // @param accessToken: OAuth2.0 access token for the resource being accessed
-func ImportApplication(query, appOwner, adminEndpiont, accessToken, exportDirectory string) (*http.Response, error) {
+func ImportApplication(filename, appOwner, adminEndpiont, accessToken, exportDirectory string) (*http.Response, error) {
 	adminEndpiont = utils.AppendSlashToString(adminEndpiont)
 
 	applicationImportEndpoint := adminEndpiont + "import/applications"
 	url := applicationImportEndpoint + "?appOwner=" + appOwner + utils.SearchAndTag + "preserveOwner=" +
 		strconv.FormatBool(preserveOwner) + utils.SearchAndTag + "skipSubscriptions=" +
-		strconv.FormatBool(skipSubscriptions)
+		strconv.FormatBool(skipSubscriptions) + utils.SearchAndTag + "skipApplicationKeys=" + strconv.FormatBool(importAppSkipKeys) +
+		utils.SearchAndTag + "update=" + strconv.FormatBool(importAppUpdateApplication)
+
 	utils.Logln(utils.LogPrefixInfo + "Import URL: " + applicationImportEndpoint)
 
-	sourceEnv := strings.Split(query, "/")[0] // environment from which the Application was exported
-	utils.Logln(utils.LogPrefixInfo + "Source Environment: " + sourceEnv)
-
-	fileName := query // ex:- fileName = dev/sampleApp.zip
-
-	zipFilePath := filepath.Join(exportDirectory, fileName)
+	zipFilePath, err := resolveImportFilePath(filename, exportDirectory)
+	if err != nil {
+		utils.HandleErrorAndExit("Error creating request.", err)
+	}
 	fmt.Println("ZipFilePath:", zipFilePath)
 
 	extraParams := map[string]string{}
@@ -159,7 +160,7 @@ func ImportApplication(query, appOwner, adminEndpiont, accessToken, exportDirect
 		if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK ||
 			resp.StatusCode == http.StatusMultiStatus {
 			// 207 Multi Status or 201 Created or 200 OK
-			fmt.Printf("\nCompleted importing the Application '" + fileName + "'\n")
+			fmt.Printf("\nCompleted importing the Application '" + filename + "'\n")
 		} else {
 			fmt.Printf("\nUnable to import the Application\n")
 			fmt.Println("Status: " + resp.Status)
@@ -172,6 +173,27 @@ func ImportApplication(query, appOwner, adminEndpiont, accessToken, exportDirect
 	}
 
 	return resp, err
+}
+
+// resolveImportFilePath resolves the archive/directory for import
+// First will resolve in given path, if not found will try to load from exported directory
+func resolveImportFilePath(file, defaultExportDirectory string) (string, error) {
+	// check current path
+	utils.Logln(utils.LogPrefixInfo + "Resolving for API path...")
+	if _, err := os.Stat(file); os.IsNotExist(err) {
+		// if the file not in given path it might be inside exported directory
+		utils.Logln(utils.LogPrefixInfo+"Looking for API in", defaultExportDirectory)
+		file = filepath.Join(defaultExportDirectory, file)
+		if _, err := os.Stat(file); os.IsNotExist(err) {
+			return "", err
+		}
+	}
+	absPath, err := filepath.Abs(file)
+	if err != nil {
+		return "", err
+	}
+
+	return absPath, nil
 }
 
 // NewFileUploadRequest form an HTTP Put request
@@ -222,6 +244,10 @@ func init() {
 		"Preserves app owner")
 	ImportAppCmd.Flags().BoolVarP(&skipSubscriptions, "skipSubscriptions", "s", false,
 		"Skip subscriptions of the Application")
+	ImportAppCmd.Flags().BoolVarP(&importAppSkipKeys, "skipKeys", "", false,
+		"Skip importing keys of application")
+	ImportAppCmd.Flags().BoolVarP(&importAppUpdateApplication, "update", "", false,
+		"Update application or create new")
 	ImportAppCmd.Flags().StringVarP(&importAppCmdUsername, "username", "u", "", "Username")
 	ImportAppCmd.Flags().StringVarP(&importAppCmdPassword, "password", "p", "", "Password")
 }

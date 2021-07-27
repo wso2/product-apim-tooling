@@ -19,21 +19,22 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"github.com/renstrom/dedent"
-	"net/http"
 	"fmt"
 	"github.com/go-resty/resty"
-	"path/filepath"
-	"os"
+	"github.com/renstrom/dedent"
+	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"io/ioutil"
+	"net/http"
+	"os"
+	"path/filepath"
 )
 
 var exportAppName string
 var exportAppOwner string
 var exportAppCmdUsername string
 var exportAppCmdPassword string
+var exportAppWithKeys bool
 
 //var flagExportAPICmdToken string
 // ExportApp command related usage info
@@ -109,7 +110,7 @@ func WriteApplicationToZip(exportAppName, exportAppOwner, exportEnvironment, exp
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating zip archive", err)
 	}
-	fmt.Println("Succesfully exported Application!")
+	fmt.Println("Successfully exported Application!")
 	fmt.Println("Find the exported Application at " + pFile)
 }
 
@@ -121,6 +122,10 @@ func WriteApplicationToZip(exportAppName, exportAppOwner, exportEnvironment, exp
 func getExportAppResponse(name, owner, adminEndpoint, accessToken string) *resty.Response {
 	adminEndpoint = utils.AppendSlashToString(adminEndpoint)
 	query := "export/applications?appName=" + name + utils.SearchAndTag + "appOwner=" + owner
+
+	if exportAppWithKeys {
+		query += "&withKeys=true"
+	}
 
 	url := adminEndpoint + query
 	utils.Logln(utils.LogPrefixInfo+"ExportApp: URL:", url)
@@ -144,6 +149,8 @@ func init() {
 		"Name of the Application to be exported")
 	ExportAppCmd.Flags().StringVarP(&exportAppOwner, "owner", "o", "",
 		"Owner of the Application to be exported")
+	ExportAppCmd.Flags().BoolVarP(&exportAppWithKeys, "withKeys", "",
+		false, "Export keys for the application")
 	ExportAppCmd.Flags().StringVarP(&exportEnvironment, "environment", "e",
 		utils.DefaultEnvironmentName, "Environment to which the Application should be exported")
 	ExportAppCmd.Flags().StringVarP(&exportAppCmdUsername, "username", "u", "", "Username")
