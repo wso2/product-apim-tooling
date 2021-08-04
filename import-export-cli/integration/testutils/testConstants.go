@@ -68,3 +68,5 @@ const TenPerMinAppThrottlingPolicy = "10PerMin"
 const CustomAPIName = "Customized_API"
 const CustomAPIVersion = "2.3.4"
 const CustomAPIContext = "/custom"
+
+const ResidentKeyManager = "Resident Key Manager"

@@ -48,11 +48,17 @@ type ApiProductImportExportTestArgs struct {
 }
 
 type AppImportExportTestArgs struct {
-	AppOwner    Credentials
-	CtlUser     Credentials
-	Application *apim.Application
-	SrcAPIM     *apim.Client
-	DestAPIM    *apim.Client
+	AppOwner          Credentials
+	CtlUser           Credentials
+	Application       *apim.Application
+	SrcAPIM           *apim.Client
+	DestAPIM          *apim.Client
+	PreserveOwner     bool
+	UpdateFlag        bool
+	WithKeys          bool
+	SkipKeys          bool
+	SkipSubscriptions bool
+	ImportFilePath    string
 }
 
 type ApiGetKeyTestArgs struct {
