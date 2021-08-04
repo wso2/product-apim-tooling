@@ -20,14 +20,18 @@ package apim
 
 // ApplicationKey : Application Key Details
 type ApplicationKey struct {
-	ConsumerKey         string           `json:"consumerKey"`
-	ConsumerSecret      string           `json:"consumerSecret"`
-	SupportedGrantTypes []string         `json:"supportedGrantTypes"`
-	CallbackURL         string           `json:"callbackUrl"`
-	KeyState            string           `json:"keyState"`
-	KeyType             string           `json:"keyType"`
-	GroupID             string           `json:"groupId"`
-	Token               ApplicationToken `json:"token"`
+	KeyMappingId         string           `json:"keyMappingId" yaml:"keyMappingId"`
+	KeyManager           string           `json:"keyManager" yaml:"keyManager"`
+	ConsumerKey          string           `json:"consumerKey" yaml:"consumerKey"`
+	ConsumerSecret       string           `json:"consumerSecret" yaml:"consumerSecret"`
+	Mode                 string           `json:"mode" yaml:"mode"`
+	SupportedGrantTypes  []string         `json:"supportedGrantTypes" yaml:"supportedGrantTypes"`
+	CallbackURL          string           `json:"callbackUrl" yaml:"callbackUrl"`
+	KeyState             string           `json:"keyState" yaml:"keyState"`
+	KeyType              string           `json:"keyType" yaml:"keyType"`
+	GroupID              string           `json:"groupId" yaml:"groupId"`
+	Token                ApplicationToken `json:"token" yaml:"token"`
+	AdditionalProperties interface{}      `json:"additionalProperties" yaml:"additionalProperties"`
 }
 
 // ApplicationToken : Application Token Details

@@ -24,6 +24,7 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 const numberOfApps = 5 // Number of Applications to be added in a loop
@@ -203,6 +204,40 @@ func TestExportImportAppWithGeneratedKeysBySkippingKeys(t *testing.T) {
 	}
 }
 
+// Export an application (created by a subscriber user) with generated keys and import it to another
+// environment while preserving the owner by a user with Internal/devops role and update the additional properties of the keys
+func TestExportImportAppWithGeneratedKeysUpdateAdditionalProperties(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+			prod := GetProdClient()
+
+			app := testutils.AddApp(t, dev, user.ApiSubscriber.Username, user.ApiSubscriber.Password)
+
+			args := &testutils.AppImportExportTestArgs{
+				AppOwner:      testutils.Credentials{Username: user.ApiSubscriber.Username, Password: user.ApiSubscriber.Password},
+				CtlUser:       testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Application:   app,
+				SrcAPIM:       dev,
+				DestAPIM:      prod,
+				PreserveOwner: true,
+				WithKeys:      true,
+			}
+
+			// Generate keys for the application in env 1
+			testutils.GenerateKeys(t, args.SrcAPIM, args.AppOwner.Username, args.AppOwner.Password, app.ApplicationID, utils.ProductionKeyType)
+			testutils.GenerateKeys(t, args.SrcAPIM, args.AppOwner.Username, args.AppOwner.Password, app.ApplicationID, utils.SandboxKeyType)
+
+			testutils.ValidateAppExport(t, args)
+
+			testutils.ValidateAppImport(t, args, true)
+
+			testutils.ValidateAppAdditionalPropertiesOfKeysUpdateImport(t, args, true)
+
+		})
+	}
+}
+
 // Export an application (created by a subscriber user) with subscriptions and import it to another
 // environment while preserving the owner and invoke one API
 func TestExportImportAppWithSubscriptions(t *testing.T) {
@@ -244,7 +279,7 @@ func TestExportImportAppWithSubscriptions(t *testing.T) {
 
 			// Generate keys for the imported application in env 2
 			applicationKey := testutils.GenerateKeys(t, args.DestAPIM, args.AppOwner.Username, args.AppOwner.Password,
-				importedApplication.ApplicationID)
+				importedApplication.ApplicationID, utils.ProductionKeyType)
 			testutils.InvokeAPI(t, testutils.GetResourceURL(args.DestAPIM, api1ofEnv2), applicationKey.Token.AccessToken, 200)
 
 		})

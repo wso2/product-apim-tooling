@@ -1487,7 +1487,7 @@ func (instance *Client) GenerateKeys(t *testing.T, keyGenRequest utils.KeygenReq
 }
 
 // GetOauthKeys : Get Oauth keys of an application
-func (instance *Client) GetOauthKeys(t *testing.T, application *Application) *ApplicationKey {
+func (instance *Client) GetOauthKeys(t *testing.T, application *Application) *ApplicationKeysList {
 	appsURL := instance.devPortalRestURL + "/applications/" + application.ApplicationID + "/oauth-keys"
 
 	request := base.CreateGet(appsURL)
@@ -1506,9 +1506,9 @@ func (instance *Client) GetOauthKeys(t *testing.T, application *Application) *Ap
 	json.NewDecoder(response.Body).Decode(&applicationKeysList)
 
 	if len(applicationKeysList.List) > 0 {
-		return &applicationKeysList.List[0]
+		return &applicationKeysList
 	} else {
-		return &ApplicationKey{}
+		return &ApplicationKeysList{}
 	}
 
 }
