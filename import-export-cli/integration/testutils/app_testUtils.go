@@ -19,7 +19,12 @@
 package testutils
 
 import (
+	"encoding/json"
+	"io/ioutil"
+	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -51,10 +56,28 @@ func AddApplicationWithoutCleaning(t *testing.T, client *apim.Client, username s
 	return application
 }
 
+func GenerateKeys(t *testing.T, client *apim.Client, username, password, appId, keyType string) apim.ApplicationKey {
+	client.Login(username, password)
+	generateKeyReq := utils.KeygenRequest{
+		KeyType:                 keyType,
+		GrantTypesToBeSupported: utils.GrantTypesToBeSupported,
+		ValidityTime:            utils.DefaultTokenValidityPeriod,
+	}
+	keyGenResponse := client.GenerateKeys(t, generateKeyReq, appId)
+	return keyGenResponse
+}
+
 func getApp(t *testing.T, client *apim.Client, name string, username string, password string) *apim.Application {
 	client.Login(username, password)
 	appInfo := client.GetApplicationByName(name)
 	return client.GetApplication(appInfo.ApplicationID)
+}
+
+func getOauthKeys(t *testing.T, client *apim.Client, username, password string,
+	application *apim.Application) *apim.ApplicationKeysList {
+	client.Login(username, password)
+	applicationKeysList := client.GetOauthKeys(t, application)
+	return applicationKeysList
 }
 
 func ListApps(t *testing.T, env string) []string {
@@ -73,30 +96,36 @@ func getEnvAppExportPath(envName string) string {
 	return filepath.Join(utils.DefaultExportDirPath, utils.ExportedAppsDirName, envName)
 }
 
-func exportApp(t *testing.T, name string, owner string, env string) (string, error) {
-	output, err := base.Execute(t, "export-app", "-n", name, "-o", owner, "-e", env, "-k", "--verbose")
+func exportApp(t *testing.T, args *AppImportExportTestArgs) (string, error) {
+	output, err := base.Execute(t, "export-app", "-n", args.Application.Name, "-o", args.AppOwner.Username,
+		"--withKeys="+strconv.FormatBool(args.WithKeys), "-e", args.SrcAPIM.GetEnvName(), "-k", "--verbose")
 
 	t.Cleanup(func() {
-		base.RemoveApplicationArchive(t, getEnvAppExportPath(env), name, owner)
+		base.RemoveApplicationArchive(t, getEnvAppExportPath(args.SrcAPIM.GetEnvName()),
+			args.Application.Name, args.AppOwner.Username)
 	})
 
 	return output, err
 }
 
-func importAppPreserveOwner(t *testing.T, sourceEnv string, app *apim.Application, client *apim.Client) (string, error) {
-	fileName := base.GetApplicationArchiveFilePath(t, sourceEnv, app.Name, app.Owner)
-	output, err := base.Execute(t, "import-app", "--preserveOwner=true", "-f", fileName, "-e", client.EnvName, "-k", "--verbose")
+func importApp(t *testing.T, args *AppImportExportTestArgs, doClean bool) (string, error) {
+	var fileName string
+	if args.ImportFilePath == "" {
+		fileName = base.GetApplicationArchiveFilePath(t, args.SrcAPIM.EnvName, args.Application.Name,
+			args.Application.Owner)
+	} else {
+		fileName = args.ImportFilePath
+	}
 
-	t.Cleanup(func() {
-		client.DeleteApplicationByName(app.Name)
-	})
+	output, err := base.Execute(t, "import-app", "-f", fileName, "--preserveOwner="+strconv.FormatBool(args.PreserveOwner),
+		"--update="+strconv.FormatBool(args.UpdateFlag), "--skipKeys="+strconv.FormatBool(args.SkipKeys),
+		"--skipSubscriptions="+strconv.FormatBool(args.SkipSubscriptions), "-e", args.DestAPIM.EnvName, "-k", "--verbose")
 
-	return output, err
-}
-
-func importAppPreserveOwnerAndUpdate(t *testing.T, sourceEnv string, app *apim.Application, client *apim.Client) (string, error) {
-	fileName := base.GetApplicationArchiveFilePath(t, sourceEnv, app.Name, app.Owner)
-	output, err := base.Execute(t, "import-app", "--preserveOwner=true", "--update=true", "-f", fileName, "-e", client.EnvName, "-k", "--verbose")
+	if doClean {
+		t.Cleanup(func() {
+			args.DestAPIM.DeleteApplicationByName(args.Application.Name)
+		})
+	}
 
 	return output, err
 }
@@ -110,7 +139,7 @@ func ValidateAppExportFailure(t *testing.T, args *AppImportExportTestArgs) {
 	// Attempt exporting app from env
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	exportApp(t, args.Application.Name, args.AppOwner.Username, args.SrcAPIM.GetEnvName())
+	exportApp(t, args)
 
 	// Validate that export failed
 	assert.False(t, base.IsApplicationArchiveExists(t, getEnvAppExportPath(args.SrcAPIM.GetEnvName()),
@@ -127,7 +156,7 @@ func ValidateAppExportImportWithPreserveOwner(t *testing.T, args *AppImportExpor
 	// Export app from env 1
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	exportApp(t, args.Application.Name, args.AppOwner.Username, args.SrcAPIM.GetEnvName())
+	exportApp(t, args)
 
 	assert.True(t, base.IsApplicationArchiveExists(t, getEnvAppExportPath(args.SrcAPIM.GetEnvName()),
 		args.Application.Name, args.AppOwner.Username))
@@ -135,7 +164,7 @@ func ValidateAppExportImportWithPreserveOwner(t *testing.T, args *AppImportExpor
 	// Import app to env 2
 	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	importAppPreserveOwner(t, args.SrcAPIM.GetEnvName(), args.Application, args.DestAPIM)
+	importApp(t, args, true)
 
 	// Get App from env 2
 	importedApp := getApp(t, args.DestAPIM, args.Application.Name, args.AppOwner.Username, args.AppOwner.Password)
@@ -154,7 +183,7 @@ func ValidateAppExportImportWithUpdate(t *testing.T, args *AppImportExportTestAr
 	// Export app from env 1
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	exportApp(t, args.Application.Name, args.AppOwner.Username, args.SrcAPIM.GetEnvName())
+	exportApp(t, args)
 
 	assert.True(t, base.IsApplicationArchiveExists(t, getEnvAppExportPath(args.SrcAPIM.GetEnvName()),
 		args.Application.Name, args.AppOwner.Username))
@@ -162,13 +191,51 @@ func ValidateAppExportImportWithUpdate(t *testing.T, args *AppImportExportTestAr
 	// Import app to env 2
 	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	importAppPreserveOwnerAndUpdate(t, args.SrcAPIM.GetEnvName(), args.Application, args.DestAPIM)
+	importApp(t, args, true)
 
 	// Get App from env 2
 	importedApp := getApp(t, args.DestAPIM, args.Application.Name, args.AppOwner.Username, args.AppOwner.Password)
 
 	// Validate env 1 and env 2 App is equal
 	validateAppsEqual(t, args.Application, importedApp)
+}
+
+func ValidateAppExport(t *testing.T, args *AppImportExportTestArgs) string {
+	t.Helper()
+
+	// Setup apictl env
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	// Attempt exporting app from env
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	output, _ := exportApp(t, args)
+
+	// Validate that export passed
+	assert.True(t, base.IsApplicationArchiveExists(t, getEnvAppExportPath(args.SrcAPIM.GetEnvName()),
+		args.Application.Name, args.AppOwner.Username))
+
+	return output
+}
+
+func ValidateAppImport(t *testing.T, args *AppImportExportTestArgs, doClean bool) *apim.Application {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.DestAPIM.GetEnvName(), args.DestAPIM.GetApimURL(), args.DestAPIM.GetTokenURL())
+
+	// Import app to env 2
+	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	importApp(t, args, doClean)
+
+	// Get App from env 2
+	importedApp := getApp(t, args.DestAPIM, args.Application.Name, args.AppOwner.Username, args.AppOwner.Password)
+
+	// Validate env 1 and env 2 App is equal
+	validateAppsEqual(t, args.Application, importedApp)
+
+	return importedApp
 }
 
 func validateAppsEqual(t *testing.T, app1 *apim.Application, app2 *apim.Application) {
@@ -227,4 +294,92 @@ func ValidateListAppsWithOwner(t *testing.T, envName string) {
 
 	emptyResponse := ListAppsWithOwner(t, envName, "user1")
 	assert.Equal(t, 0, len(emptyResponse), "Failed when listing Applications with owner as User1")
+}
+
+func ValidateAppAdditionalPropertiesOfKeysUpdateImport(t *testing.T, args *AppImportExportTestArgs, doClean bool) {
+
+	// Construct the exported application path
+	mainConfig := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
+	exportedAppPath := mainConfig.Config.ExportDirectory + string(os.PathSeparator) +
+		utils.ExportedAppsDirName + string(os.PathSeparator) +
+		base.GetApplicationArchiveFilePath(t, args.SrcAPIM.EnvName, args.Application.Name, args.Application.Owner)
+
+	// Unzip exported application
+	relativePath := strings.ReplaceAll(exportedAppPath, ".zip", "")
+	base.Unzip(relativePath, exportedAppPath)
+
+	args.ImportFilePath = relativePath + string(os.PathSeparator) + args.Application.Name
+
+	keyManagerWiseOAuthApp := updateAdditionalPropertiesOfKeys(t, args)
+
+	// Make the update flag true
+	args.UpdateFlag = true
+	updatedImportedApp := ValidateAppImport(t, args, false)
+
+	// Retrieve oauth keys of the updated application
+	updatedApplicationKeysList := getOauthKeys(t, args.DestAPIM, args.AppOwner.Username, args.AppOwner.Password, updatedImportedApp)
+
+	for _, updatedKey := range updatedApplicationKeysList.List {
+		additionalProperties := keyManagerWiseOAuthApp[updatedKey.KeyType].(map[string]interface{})[ResidentKeyManager].(map[string]interface{})["parameters"].(map[string]interface{})["additionalProperties"].(map[string]interface{})
+		assert.EqualValues(t, additionalProperties["id_token_expiry_time"],
+			updatedKey.AdditionalProperties["id_token_expiry_time"], updatedKey.KeyType+" id_token_expiry_time mismatched")
+		assert.EqualValues(t, additionalProperties["application_access_token_expiry_time"],
+			updatedKey.AdditionalProperties["application_access_token_expiry_time"], updatedKey.KeyType+" application_access_token_expiry_time mismatched")
+		assert.EqualValues(t, additionalProperties["user_access_token_expiry_time"],
+			updatedKey.AdditionalProperties["user_access_token_expiry_time"], updatedKey.KeyType+" user_access_token_expiry_time mismatched")
+		assert.EqualValues(t, additionalProperties["refresh_token_expiry_time"],
+			updatedKey.AdditionalProperties["refresh_token_expiry_time"], updatedKey.KeyType+" refresh_token_expiry_time mismatched")
+	}
+
+	if doClean {
+		t.Cleanup(func() {
+			// Remove extracted directory
+			base.RemoveDir(relativePath)
+		})
+	}
+}
+
+func updateAdditionalPropertiesOfKeys(t *testing.T, args *AppImportExportTestArgs) map[string]interface{} {
+	applicationDefinitionFilePath := args.ImportFilePath + string(os.PathSeparator) + args.Application.Name + ".json"
+	// Read the application.yaml file in the exported directory
+	applicationData, err := ioutil.ReadFile(applicationDefinitionFilePath)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Extract the content to a structure
+	applicationContent := make(map[string]interface{})
+	err = json.Unmarshal(applicationData, &applicationContent)
+	if err != nil {
+		t.Error(err)
+	}
+
+	updatedAdditionalPropertiesProduction := map[string]interface{}{
+		"id_token_expiry_time":                 5001,
+		"application_access_token_expiry_time": 5002,
+		"user_access_token_expiry_time":        5003,
+		"refresh_token_expiry_time":            5004,
+	}
+
+	updatedAdditionalPropertiesSandbox := map[string]interface{}{
+		"id_token_expiry_time":                 5005,
+		"application_access_token_expiry_time": 5006,
+		"user_access_token_expiry_time":        5007,
+		"refresh_token_expiry_time":            5008,
+	}
+
+	applicationContent["keyManagerWiseOAuthApp"].(map[string]interface{})[utils.ProductionKeyType].(map[string]interface{})[ResidentKeyManager].(map[string]interface{})["parameters"].(map[string]interface{})["additionalProperties"] = updatedAdditionalPropertiesProduction
+	applicationContent["keyManagerWiseOAuthApp"].(map[string]interface{})[utils.SandboxKeyType].(map[string]interface{})[ResidentKeyManager].(map[string]interface{})["parameters"].(map[string]interface{})["additionalProperties"] = updatedAdditionalPropertiesSandbox
+
+	updatedApplicationData, err := json.Marshal(applicationContent)
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = ioutil.WriteFile(applicationDefinitionFilePath, updatedApplicationData, os.ModePerm)
+	if err != nil {
+		t.Error(err)
+	}
+
+	return applicationContent["keyManagerWiseOAuthApp"].(map[string]interface{})
 }
