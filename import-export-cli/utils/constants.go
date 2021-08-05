@@ -115,6 +115,7 @@ const DefaultApiProductType = "APIProduct"
 
 // Application keys related constants
 const ProductionKeyType = "PRODUCTION"
+const SandboxKeyType = "SANDBOX"
 
 var GrantTypesToBeSupported = []string{"refresh_token", "password", "client_credentials"}
 

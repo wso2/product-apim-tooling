@@ -19,6 +19,7 @@
 package testutils
 
 import (
+	"encoding/base64"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -57,10 +58,10 @@ func AddApplicationWithoutCleaning(t *testing.T, client *apim.Client, username s
 	return application
 }
 
-func GenerateKeys(t *testing.T, client *apim.Client, username, password, appId string) apim.ApplicationKey {
+func GenerateKeys(t *testing.T, client *apim.Client, username, password, appId, keyType string) apim.ApplicationKey {
 	client.Login(username, password)
 	generateKeyReq := utils.KeygenRequest{
-		KeyType:                 utils.ProductionKeyType,
+		KeyType:                 keyType,
 		GrantTypesToBeSupported: utils.GrantTypesToBeSupported,
 		ValidityTime:            utils.DefaultTokenValidityPeriod,
 	}
@@ -75,10 +76,10 @@ func GetApp(t *testing.T, client *apim.Client, name string, username string, pas
 }
 
 func GetOauthKeys(t *testing.T, client *apim.Client, username, password string,
-	application *apim.Application) *apim.ApplicationKey {
+	application *apim.Application) *apim.ApplicationKeysList {
 	client.Login(username, password)
-	applicationKey := client.GetOauthKeys(t, application)
-	return applicationKey
+	applicationKeysList := client.GetOauthKeys(t, application)
+	return applicationKeysList
 }
 
 func ListApps(t *testing.T, env string) []string {
@@ -231,6 +232,60 @@ func ValidateAppMetaDataUpdateImport(t *testing.T, args *AppImportExportTestArgs
 	// Make the update flag true
 	args.UpdateFlag = true
 	ValidateAppImport(t, args, false)
+
+	if doClean {
+		t.Cleanup(func() {
+			// Remove extracted directory
+			base.RemoveDir(relativePath)
+		})
+	}
+}
+
+func ValidateAppAdditionalPropertiesOfKeysUpdateImport(t *testing.T, args *AppImportExportTestArgs, doClean bool) {
+
+	// Construct the exported application path
+	mainConfig := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
+	exportedAppPath := mainConfig.Config.ExportDirectory + string(os.PathSeparator) +
+		utils.ExportedAppsDirName + string(os.PathSeparator) +
+		base.GetApplicationArchiveFilePath(t, args.SrcAPIM.EnvName, args.Application.Name, args.Application.Owner)
+
+	// Unzip exported application
+	relativePath := strings.ReplaceAll(exportedAppPath, ".zip", "")
+	base.Unzip(relativePath, exportedAppPath)
+
+	args.ImportFilePath = relativePath + string(os.PathSeparator) + args.Application.Owner +
+		"-" + args.Application.Name
+	args.Application = updateAdditionalPropertiesOfKeys(t, args)
+
+	// Make the update flag true
+	args.UpdateFlag = true
+	updatedImportedApp := ValidateAppImport(t, args, false)
+
+	// Retrieve oauth keys of the updated application
+	updatedApplicationKeysList := GetOauthKeys(t, args.DestAPIM, args.AppOwner.Username, args.AppOwner.Password, updatedImportedApp)
+
+	for _, key := range updatedApplicationKeysList.List {
+		for _, updatedKey := range args.Application.Keys {
+			if updatedKey.KeyType == key.KeyType {
+				assert.EqualValues(t, updatedKey.AdditionalProperties.(map[string]interface{})["id_token_expiry_time"],
+					key.AdditionalProperties.(map[string]interface{})["id_token_expiry_time"], key.KeyType+" id_token_expiry_time mismatched")
+				assert.EqualValues(t, updatedKey.AdditionalProperties.(map[string]interface{})["application_access_token_expiry_time"],
+					key.AdditionalProperties.(map[string]interface{})["application_access_token_expiry_time"], key.KeyType+" application_access_token_expiry_time mismatched")
+				assert.EqualValues(t, updatedKey.AdditionalProperties.(map[string]interface{})["user_access_token_expiry_time"],
+					key.AdditionalProperties.(map[string]interface{})["user_access_token_expiry_time"], key.KeyType+" user_access_token_expiry_time mismatched")
+				assert.EqualValues(t, updatedKey.AdditionalProperties.(map[string]interface{})["refresh_token_expiry_time"],
+					key.AdditionalProperties.(map[string]interface{})["refresh_token_expiry_time"], key.KeyType+" refresh_token_expiry_time mismatched")
+			}
+		}
+	}
+
+	if doClean {
+		t.Cleanup(func() {
+			// Remove extracted directory
+			base.RemoveDir(relativePath)
+		})
+	}
+
 }
 
 func ValidateAppExportImport(t *testing.T, args *AppImportExportTestArgs, doClean bool) *apim.Application {
@@ -265,20 +320,30 @@ func ValidateAppExportImport(t *testing.T, args *AppImportExportTestArgs, doClea
 func ValidateAppExportImportGeneratedKeys(t *testing.T, args *AppImportExportTestArgs, appId string, doClean bool) {
 
 	// Generate keys for the application in env 1
-	applicationKey := GenerateKeys(t, args.SrcAPIM, args.AppOwner.Username, args.AppOwner.Password, appId)
+	applicationKey1 := GenerateKeys(t, args.SrcAPIM, args.AppOwner.Username, args.AppOwner.Password, appId, utils.ProductionKeyType)
+	applicationKey2 := GenerateKeys(t, args.SrcAPIM, args.AppOwner.Username, args.AppOwner.Password, appId, utils.SandboxKeyType)
 
 	// Export an application from env 1 and import it to env 2
 	importedApplication := ValidateAppExportImport(t, args, doClean)
 	// Retrieve oauth keys of the imported application to env2
-	importedApplicationKey := GetOauthKeys(t, args.DestAPIM, args.AppOwner.Username, args.AppOwner.Password, importedApplication)
+	importedApplicationKeysList := GetOauthKeys(t, args.DestAPIM, args.AppOwner.Username, args.AppOwner.Password, importedApplication)
 
 	if !args.SkipKeys {
 		// Compare consumer key and secret of the application in env 1 and env 2
-		assert.Equal(t, applicationKey.ConsumerKey, importedApplicationKey.ConsumerKey, "Consumer key mismatched")
-		assert.Equal(t, applicationKey.ConsumerSecret, importedApplicationKey.ConsumerSecret, "Consumer secret mismatched")
+		for _, key := range importedApplicationKeysList.List {
+			if key.KeyType == utils.ProductionKeyType {
+				assert.Equal(t, applicationKey1.ConsumerKey, key.ConsumerKey, "Production Consumer key mismatched")
+				assert.Equal(t, base64.StdEncoding.EncodeToString([]byte(applicationKey1.ConsumerSecret)), key.ConsumerSecret, "Production Consumer secret mismatched")
+			}
+			if key.KeyType == utils.SandboxKeyType {
+				assert.Equal(t, applicationKey2.ConsumerKey, key.ConsumerKey, "Sandbox Consumer key mismatched")
+				assert.Equal(t, base64.StdEncoding.EncodeToString([]byte(applicationKey2.ConsumerSecret)), key.ConsumerSecret, "Sandbox Consumer secret mismatched")
+			}
+
+		}
 	} else {
 		// Assert whether the imported application's key is empty
-		assert.Equal(t, importedApplicationKey, &apim.ApplicationKey{}, "Application keys are not empty")
+		assert.Equal(t, importedApplicationKeysList, &apim.ApplicationKeysList{}, "Application keys are not empty")
 	}
 }
 
@@ -331,8 +396,14 @@ func ValidateAppsEqual(t *testing.T, args *AppImportExportTestArgs, app2 *apim.A
 		app2Copy.SubscriptionScopes = []string{same}
 	}
 
-	assert.Equal(t, app1Copy, app2Copy, "Application objects are not equal")
+	// Application keys validation will not be done here. It is handled seperately.
+	if args.WithKeys {
+		sameKeys := []apim.ApplicationKey{}
+		app1Copy.Keys = sameKeys
+		app2Copy.Keys = sameKeys
+	}
 
+	assert.Equal(t, app1Copy, app2Copy, "Application objects are not equal")
 }
 
 func validateSubscriptionsOfApp(t *testing.T, subscriptionsOfApp1 *apim.SubscriptionList,
@@ -422,6 +493,57 @@ func UpdateApplicationMetaData(t *testing.T, args *AppImportExportTestArgs) *api
 	}
 	applicationContent.Data.ApplicationInfo.Description = "Updated"
 	applicationContent.Data.ApplicationInfo.ThrottlingPolicy = TenPerMinAppThrottlingPolicy
+
+	updatedApplicationData, err := yaml2.Marshal(applicationContent)
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = ioutil.WriteFile(applicationDefinitionFilePath, updatedApplicationData, os.ModePerm)
+	if err != nil {
+		t.Error(err)
+	}
+
+	return &applicationContent.Data.ApplicationInfo
+}
+
+func updateAdditionalPropertiesOfKeys(t *testing.T, args *AppImportExportTestArgs) *apim.Application {
+	applicationDefinitionFilePath := args.ImportFilePath + string(os.PathSeparator) + utils.ApplicationDefinitionFileYaml
+	// Read the application.yaml file in the exported directory
+	applicationData, err := ioutil.ReadFile(applicationDefinitionFilePath)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Extract the content to a structure
+	applicationContent := apim.ApplicationFile{}
+	err = yaml.Unmarshal(applicationData, &applicationContent)
+	if err != nil {
+		t.Error(err)
+	}
+
+	updatedAdditionalPropertiesProduction := map[string]interface{}{
+		"id_token_expiry_time":                 5001,
+		"application_access_token_expiry_time": 5002,
+		"user_access_token_expiry_time":        5003,
+		"refresh_token_expiry_time":            5004,
+	}
+
+	updatedAdditionalPropertiesSandbox := map[string]interface{}{
+		"id_token_expiry_time":                 5005,
+		"application_access_token_expiry_time": 5006,
+		"user_access_token_expiry_time":        5007,
+		"refresh_token_expiry_time":            5008,
+	}
+
+	for index, _ := range applicationContent.Data.ApplicationInfo.Keys {
+		if applicationContent.Data.ApplicationInfo.Keys[index].KeyType == utils.ProductionKeyType {
+			applicationContent.Data.ApplicationInfo.Keys[index].AdditionalProperties = updatedAdditionalPropertiesProduction
+		}
+		if applicationContent.Data.ApplicationInfo.Keys[index].KeyType == utils.SandboxKeyType {
+			applicationContent.Data.ApplicationInfo.Keys[index].AdditionalProperties = updatedAdditionalPropertiesSandbox
+		}
+	}
 
 	updatedApplicationData, err := yaml2.Marshal(applicationContent)
 	if err != nil {
