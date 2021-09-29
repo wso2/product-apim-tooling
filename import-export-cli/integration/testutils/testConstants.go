@@ -58,6 +58,12 @@ const APISecurityDigestParamsFile = "testdata/api_params_security_digest.yaml"
 // APISecurityBasicParamsFile : Security Basic api_params.yaml
 const APISecurityBasicParamsFile = "testdata/api_params_security_basic.yaml"
 
+// APISecurityOauthParamsFile : Security Basic api_params.yaml
+const APISecurityOauthParamsFile = "testdata/api_params_security_oauth.yaml"
+
+// APISecurityFalseOauthParamsFile : Security Basic api_params.yaml
+const APISecurityFalseOauthParamsFile = "testdata/api_params_security_oauth_false.yaml"
+
 // UnlimitedPolicy : Unlimited Throttle Policy
 const UnlimitedPolicy = "Unlimited"
 
