@@ -87,6 +87,10 @@ type AWSLambdaEndpointsData struct {
 
 // SecurityData contains the details about endpoint security from api_params.yaml
 type SecurityData struct {
+	// Production endpoint OAuth 2.0 security
+	Production *OAuthEndpointSecurity `yaml:"production" json:"production"`
+	// Sandbox endpoint OAuth 2.0 security
+	Sandbox *OAuthEndpointSecurity `yaml:"sandbox,omitempty" json:"sandbox,omitempty"`
 	// Decides whether the endpoint security is enabled
 	Enabled string `yaml:"enabled" json:"enabled,omitempty"`
 	// Type of the endpoint security (can be Basic or Digest)
@@ -95,6 +99,31 @@ type SecurityData struct {
 	Username string `yaml:"username" json:"username,omitempty"`
 	// Password for the endpoint
 	Password string `yaml:"password" json:"password,omitempty"`
+}
+
+// OAuthEndpointSecurity contains details about the OAuth 2.0 endpoint security
+type OAuthEndpointSecurity struct {
+	// Password for OAuth 2.0 endpoint security
+	Password string `yaml:"password,omitempty" json:"password,omitempty"`
+	// Username for OAuth 2.0 endpoint security
+	Username string `yaml:"username,omitempty" json:"username,omitempty"`
+	// TokenUrl for OAuth 2.0 endpoint security
+	TokenUrl string `yaml:"tokenUrl,omitempty" json:"tokenUrl,omitempty"`
+	// ClientId for OAuth 2.0 endpoint security
+	ClientId string `yaml:"clientId,omitempty" json:"clientId,omitempty"`
+	// ClientSecret for OAuth 2.0 endpoint security
+	ClientSecret string `yaml:"clientSecret,omitempty" json:"clientSecret,omitempty"`
+	// CustomParameters for OAuth 2.0 endpoint security
+	CustomParameters map[string]string `yaml:"customParameters,omitempty" json:"customParameters,omitempty"`
+	// Type for OAuth 2.0 endpoint security (can only be oauth)
+	Type string `yaml:"type,omitempty" json:"type,omitempty"`
+	// GrantType for OAuth 2.0 endpoint security (can be client_credentials or password)
+	GrantType string `yaml:"grantType,omitempty" json:"grantType,omitempty"`
+	// Enabled OAuth 2.0 endpoint security or not
+	Enabled bool `yaml:"enabled,omitempty" json:"enabled,omitempty"`
+	// IsSecretEncrypted for OAuth 2.0 endpoint security (This value will be always true when using a
+	//params file to override these parameters)
+	IsSecretEncrypted bool `yaml:"isSecretEncrypted,omitempty" json:"isSecretEncrypted"`
 }
 
 // Cert stores certificate details
