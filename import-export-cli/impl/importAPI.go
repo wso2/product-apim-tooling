@@ -424,7 +424,6 @@ func handleOAuthSecurityEndpointsParams(envSecurityEndpointParams *params.Securi
 
 // Preprocess OAuth 2.0 security configs in api_params.yaml
 // @param envSecurityPerEndpoint : Environment OAuth 2.0 security endpoint parameters per endpoint type from api_params.yaml
-// @param api : Parameters from api.yaml
 // @return error
 func preprocessOAuthSecurityConfigs(envSecurityPerEndpoint *params.OAuthEndpointSecurity) error {
 	// This is used to denote that the user is supplying a plain text for client secret
