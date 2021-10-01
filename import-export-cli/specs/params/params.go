@@ -88,7 +88,7 @@ type AWSLambdaEndpointsData struct {
 // SecurityData contains the details about endpoint security from api_params.yaml
 type SecurityData struct {
 	// Production endpoint OAuth 2.0 security
-	Production *OAuthEndpointSecurity `yaml:"production" json:"production"`
+	Production *OAuthEndpointSecurity `yaml:"production,omitempty" json:"production,omitempty"`
 	// Sandbox endpoint OAuth 2.0 security
 	Sandbox *OAuthEndpointSecurity `yaml:"sandbox,omitempty" json:"sandbox,omitempty"`
 	// Decides whether the endpoint security is enabled
@@ -123,7 +123,7 @@ type OAuthEndpointSecurity struct {
 	Enabled bool `yaml:"enabled,omitempty" json:"enabled,omitempty"`
 	// IsSecretEncrypted for OAuth 2.0 endpoint security (This value will be always true when using a
 	//params file to override these parameters)
-	IsSecretEncrypted bool `yaml:"isSecretEncrypted,omitempty" json:"isSecretEncrypted"`
+	IsSecretEncrypted bool `yaml:"isSecretEncrypted" json:"isSecretEncrypted"`
 }
 
 // Cert stores certificate details
