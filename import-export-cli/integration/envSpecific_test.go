@@ -281,3 +281,131 @@ func TestEnvironmentSpecificParamsEndpointSecurityBasicDevopsTenant(t *testing.T
 
 	testutils.ValidateEndpointSecurityDefinition(t, api, apiParams, importedAPI)
 }
+
+// Add an API to one environment, export it and re-import it to another environment by overriding the endpoint security
+// (with the security type oauth), using the params file by a super tenant user with the Internal/devops role
+func TestEnvironmentSpecificParamsEndpointSecurityOauthDevopsSuperTenant(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	superTenantApiCreator := creator.UserName
+	superTenantApiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+	prod := apimClients[1]
+
+	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+		ParamsFile:  testutils.APISecurityOauthParamsFile,
+	}
+
+	testutils.ValidateAPIExport(t, args)
+
+	importedAPI := testutils.GetImportedAPI(t, args)
+
+	apiParams := testutils.ReadAPIParams(t, args.ParamsFile)
+
+	testutils.ValidateOAuthEndpointSecurityDefinition(t, api, apiParams, importedAPI)
+}
+
+// Add an API to one environment, export it and re-import it to another environment by overriding the endpoint security
+// (with the security type oauth), using the params file by a tenant user with the Internal/devops role
+func TestEnvironmentSpecificParamsEndpointSecurityOauthDevopsTenant(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	tenantApiCreator := creator.UserName + "@" + TENANT1
+	tenantApiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+	prod := apimClients[1]
+
+	api := testutils.AddAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: tenantApiCreator, Password: tenantApiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+		ParamsFile:  testutils.APISecurityOauthParamsFile,
+	}
+
+	testutils.ValidateAPIExport(t, args)
+
+	importedAPI := testutils.GetImportedAPI(t, args)
+
+	apiParams := testutils.ReadAPIParams(t, args.ParamsFile)
+
+	testutils.ValidateOAuthEndpointSecurityDefinition(t, api, apiParams, importedAPI)
+}
+
+// Add an API to one environment, export it and re-import it to another environment by overriding the endpoint security
+// (with the security type oauth) set to false, using the params file by a super tenant user with the Internal/devops role
+func TestEnvironmentSpecificParamsEndpointSecurityOauthFalseDevopsSuperTenant(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	superTenantApiCreator := creator.UserName
+	superTenantApiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+	prod := apimClients[1]
+
+	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+		ParamsFile:  testutils.APISecurityFalseOauthParamsFile,
+	}
+
+	testutils.ValidateAPIExport(t, args)
+
+	importedAPI := testutils.GetImportedAPI(t, args)
+
+	apiParams := testutils.ReadAPIParams(t, args.ParamsFile)
+
+	testutils.ValidateOAuthEndpointSecurityDefinition(t, api, apiParams, importedAPI)
+}
+
+// Add an API to one environment, export it and re-import it to another environment by overriding the endpoint security
+// (with the security type oauth) set to false, using the params file by a tenant user with the Internal/devops role
+func TestEnvironmentSpecificParamsEndpointSecurityOauthFalseDevopsTenant(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	tenantApiCreator := creator.UserName + "@" + TENANT1
+	tenantApiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+	prod := apimClients[1]
+
+	api := testutils.AddAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: tenantApiCreator, Password: tenantApiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+		ParamsFile:  testutils.APISecurityFalseOauthParamsFile,
+	}
+
+	testutils.ValidateAPIExport(t, args)
+
+	importedAPI := testutils.GetImportedAPI(t, args)
+
+	apiParams := testutils.ReadAPIParams(t, args.ParamsFile)
+
+	testutils.ValidateOAuthEndpointSecurityDefinition(t, api, apiParams, importedAPI)
+}
