@@ -68,8 +68,8 @@ func TestEnvironmentSpecificParamsEndpoint(t *testing.T) {
 	testutils.ValidateAPIsEqual(t, &apiCopy, &importedAPICopy)
 }
 
-// Add an API to one environment, export it and re-import it to another environment by 
-// setting the configs for endpoints using the params file by a super tenant user the Internal/devops role
+// Add an API to one environment, export it and re-import it to another environment by setting 
+// the configs for endpoints using the params file by a super tenant user with the Internal/devops role
 func TestEnvironmentSpecificParamsEndpointConfigsDevopsSuperTenant(t *testing.T) {
 	devopsUsername := devops.UserName
 	devopsPassword := devops.Password
@@ -125,8 +125,8 @@ func TestEnvironmentSpecificParamsEndpointConfigsDevopsSuperTenant(t *testing.T)
 	testutils.ValidateAPIsEqual(t, &apiCopy, &importedAPICopy)
 }
 
-// Add an API to one environment, export it and re-import it to another environment by 
-// setting the configs for endpoints using the params file by a tenant user the Internal/devops role
+// Add an API to one environment, export it and re-import it to another environment by setting 
+// the configs for endpoints using the params file by a tenant user with the Internal/devops role
 func TestEnvironmentSpecificParamsEndpointConfigsDevopsTenant(t *testing.T) {
 	tenantDevopsUsername := devops.UserName + "@" + TENANT1
 	tenantDevopsPassword := devops.Password
