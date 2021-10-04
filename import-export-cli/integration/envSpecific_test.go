@@ -20,7 +20,6 @@ package integration
 
 import (
 	"fmt"
-	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -69,11 +68,11 @@ func TestEnvironmentSpecificParamsEndpoint(t *testing.T) {
 	testutils.ValidateAPIsEqual(t, &apiCopy, &importedAPICopy)
 }
 
-// Add an API to one environment, export it and re-import it to another environment by setting the retry time out for endpoints
-// using the params file by a super tenant admin user
-func TestEnvironmentSpecificParamsEndpointRetryTimeout(t *testing.T) {
-	superTenantAdminUsername := superAdminUser
-	superTenantAdminPassword := superAdminPassword
+// Add an API to one environment, export it and re-import it to another environment by 
+// setting the configs for endpoints using the params file by a super tenant user the Internal/devops role
+func TestEnvironmentSpecificParamsEndpointConfigsDevopsSuperTenant(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
 
 	superTenantApiCreator := creator.UserName
 	superTenantApiCreatorPassword := creator.Password
@@ -84,12 +83,13 @@ func TestEnvironmentSpecificParamsEndpointRetryTimeout(t *testing.T) {
 	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
 
 	args := &testutils.ApiImportExportTestArgs{
-		ApiProvider: testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: superTenantAdminUsername, Password: superTenantAdminPassword},
+		ApiProvider: testutils.Credentials{Username: superTenantApiCreator, 
+			Password: superTenantApiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
 		Api:         api,
 		SrcAPIM:     dev,
 		DestAPIM:    prod,
-		ParamsFile:  testutils.APIEndpointRetryTimeoutParamsFile,
+		ParamsFile:  testutils.APIEndpointConfigsParamsFile,
 	}
 
 	testutils.ValidateAPIExport(t, args)
@@ -105,9 +105,66 @@ func TestEnvironmentSpecificParamsEndpointRetryTimeout(t *testing.T) {
 
 	for k, v := range paramConfig {
 		key := fmt.Sprintf("%v", k)
-		value, _ := strconv.ParseFloat(fmt.Sprintf("%v", v), 64)
+		value := fmt.Sprintf("%v", v)
+		valueInImportedApi := fmt.Sprintf("%v", apiEndpointConfig[key])
 
-		assert.Equal(t, value, apiEndpointConfig[key])
+		assert.Equal(t, value, valueInImportedApi)
+	}
+
+	assert.Equal(t, len(paramConfig), len(apiEndpointConfig))
+
+	apiCopy := apim.CopyAPI(api)
+	importedAPICopy := apim.CopyAPI(importedAPI)
+
+	same := "override_with_same_value"
+	apiCopy.SetProductionURL(same)
+	importedAPICopy.SetProductionURL(same)
+	apiCopy.SetProductionConfig(map[interface{}]interface{}{})
+	importedAPICopy.SetProductionConfig(map[interface{}]interface{}{})
+
+	testutils.ValidateAPIsEqual(t, &apiCopy, &importedAPICopy)
+}
+
+// Add an API to one environment, export it and re-import it to another environment by 
+// setting the configs for endpoints using the params file by a tenant user the Internal/devops role
+func TestEnvironmentSpecificParamsEndpointConfigsDevopsTenant(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	tenantApiCreator := creator.UserName + "@" + TENANT1
+	tenantApiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+	prod := apimClients[1]
+
+	api := testutils.AddAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: tenantApiCreator, Password: tenantApiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+		ParamsFile:  testutils.APIEndpointConfigsParamsFile,
+	}
+
+	testutils.ValidateAPIExport(t, args)
+
+	importedAPI := testutils.GetImportedAPI(t, args)
+
+	apiParams := testutils.ReadAPIParams(t, args.ParamsFile)
+
+	assert.Equal(t, apiParams.Environments[0].Endpoints.Production["url"], importedAPI.GetProductionURL())
+	paramConfig := apiParams.Environments[0].Endpoints.Production["config"].(map[interface{}]interface{})
+
+	apiEndpointConfig := importedAPI.GetProductionConfig()
+
+	for k, v := range paramConfig {
+		key := fmt.Sprintf("%v", k)
+		value := fmt.Sprintf("%v", v)
+		valueInImportedApi := fmt.Sprintf("%v", apiEndpointConfig[key])
+
+		assert.Equal(t, value, valueInImportedApi)
 	}
 
 	assert.Equal(t, len(paramConfig), len(apiEndpointConfig))

@@ -49,6 +49,9 @@ const APIEndpointParamsFile = "testdata/api_params_endpoint.yaml"
 // APIEndpointRetryTimeoutParamsFile : Endpoint URL and Retry Timeout api_params.yaml
 const APIEndpointRetryTimeoutParamsFile = "testdata/api_params_endpoint_retrytimeout.yaml"
 
+// APIEndpointConfigsParamsFile : Endpoint URL and Retry Timeout api_params.yaml
+const APIEndpointConfigsParamsFile = "testdata/api_params_endpoint_configs.yaml"
+
 // APISecurityFalseParamsFile : Security false api_params.yaml
 const APISecurityFalseParamsFile = "testdata/api_params_security_false.yaml"
 
