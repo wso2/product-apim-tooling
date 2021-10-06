@@ -1,0 +1,19 @@
+environments:
+    - name: production
+      endpoints:
+          production:
+              url: 'https://prod.wso2.com'
+              config:
+                  factor: 3
+                  suspendMaxDuration: 25000
+                  suspendDuration: 45000
+                  suspendErrorCode: 
+                      - "101504"
+                      - "101501"
+                  retryTimeOut: 13000
+                  retryDelay: 23000
+                  retryErroCode:
+                      - "101503" 
+                      - "101504"
+                  actionSelect: discard
+                  actionDuration: 75000
