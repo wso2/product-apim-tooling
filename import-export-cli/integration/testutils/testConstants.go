@@ -71,8 +71,8 @@ const EnvParamsFilesDir = "testdata/EnvParamsFiles"
 // APIEndpointParamsFile : Endpoint URL api_params.yaml
 const APIEndpointParamsFile = EnvParamsFilesDir + "/api_params_endpoint.yaml"
 
-// APIEndpointRetryTimeoutParamsFile : Endpoint URL and Retry Timeout api_params.yaml
-const APIEndpointRetryTimeoutParamsFile = EnvParamsFilesDir + "/api_params_endpoint_retrytimeout.yaml"
+// APIEndpointConfigsParamsFile : Endpoint URL and Retry Timeout api_params.yaml
+const APIEndpointConfigsParamsFile = EnvParamsFilesDir + "/api_params_endpoint_configs.yaml"
 
 // APISecurityFalseParamsFile : Security false api_params.yaml
 const APISecurityFalseParamsFile = EnvParamsFilesDir + "/api_params_security_false.yaml"
