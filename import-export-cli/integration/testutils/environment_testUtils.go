@@ -337,7 +337,34 @@ func validateEndpointSecurity(t *testing.T, apiParams *Params, api *apim.API, en
 	}
 
 	assert.Equal(t, endpointSecurityForEndpointType.Enabled, endpointSecurityForEndpointTypeInApi["enabled"])
-	assert.Equal(t, strings.ToUpper(endpointSecurityForEndpointType.Type), endpointSecurityForEndpointTypeInApi["type"])
+
+	if endpointSecurityForEndpointType.Enabled {
+		assert.Equal(t, strings.ToUpper(endpointSecurityForEndpointType.Type), endpointSecurityForEndpointTypeInApi["type"])
+
+		if strings.EqualFold(strings.ToUpper(endpointSecurityForEndpointType.Type), EndpointSecurityTypeOAuth) {
+			// Validate Oauth 2.0 endpoint security related properties
+			assert.Equal(t, endpointSecurityForEndpointType.ClientId, endpointSecurityForEndpointTypeInApi["clientId"])
+			assert.Equal(t, endpointSecurityForEndpointType.ClientSecret, endpointSecurityForEndpointTypeInApi["clientSecret"])
+			assert.Equal(t, endpointSecurityForEndpointType.TokenUrl, endpointSecurityForEndpointTypeInApi["tokenUrl"])
+			assert.Equal(t, strings.ToUpper(endpointSecurityForEndpointType.GrantType), endpointSecurityForEndpointTypeInApi["grantType"])
+
+			if strings.EqualFold(strings.ToUpper(endpointSecurityForEndpointType.GrantType), PasswordGrantType) {
+				validateEndpointSecurityUsernamePassword(t, endpointSecurityForEndpointType,
+					endpointSecurityForEndpointTypeInApi)
+			}
+		}
+
+		if strings.EqualFold(strings.ToUpper(endpointSecurityForEndpointType.Type), EndpointSecurityTypeBasic) ||
+			strings.EqualFold(strings.ToUpper(endpointSecurityForEndpointType.Type), EndpointSecurityTypeDigest) {
+			// Validate basic or digest endpoint security related properties
+			validateEndpointSecurityUsernamePassword(t, endpointSecurityForEndpointType,
+				endpointSecurityForEndpointTypeInApi)
+		}
+	}
+}
+
+func validateEndpointSecurityUsernamePassword(t *testing.T, endpointSecurityForEndpointType Security,
+	endpointSecurityForEndpointTypeInApi map[string]interface{}) {
 	assert.Equal(t, endpointSecurityForEndpointType.Username, endpointSecurityForEndpointTypeInApi["username"])
 	assert.Equal(t, "", endpointSecurityForEndpointTypeInApi["password"])
 }
@@ -351,7 +378,7 @@ func ValidateEndpointSecurityDefinition(t *testing.T, api *apim.API, apiParams *
 	api.EndpointConfig.(map[string]interface{})["endpoint_security"] = "override_with_the_same_value"
 	importedAPI.EndpointConfig.(map[string]interface{})["endpoint_security"] = "override_with_the_same_value"
 
-	ValidateAPIsEqual(t, api, importedAPI)
+	ValidateAPIsEqualWithEndpointConfigsFromParam(t, api, importedAPI, apiParams)
 }
 
 func validateParamsWithoutCerts(t *testing.T, params *Params, api *apim.API, apiProduct *apim.APIProduct,

@@ -90,10 +90,15 @@ type SecurityEndpoints struct {
 }
 
 type Security struct {
-	Enabled  bool   `yaml:"enabled"`
-	Type     string `yaml:"type"`
-	Username string `yaml:"username"`
-	Password string `yaml:"password"`
+	Enabled          bool              `yaml:"enabled"`
+	Type             string            `yaml:"type"`
+	Password         string            `yaml:"password"`
+	Username         string            `yaml:"username"`
+	TokenUrl         string            `yaml:"tokenUrl"`
+	ClientId         string            `yaml:"clientId"`
+	ClientSecret     string            `yaml:"clientSecret"`
+	CustomParameters map[string]string `yaml:"customParameters"`
+	GrantType        string            `yaml:"grantType"`
 }
 
 type Cert struct {

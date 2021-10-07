@@ -209,6 +209,36 @@ func TestEnvironmentSpecificParamsEndpointSecurityBasic(t *testing.T) {
 	}
 }
 
+// Add an API to one environment, export it and re-import it to another environment by overriding the endpoint security
+// (with the security type oauth), using the params file
+func TestEnvironmentSpecificParamsEndpointSecurityOauth(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+			prod := GetProdClient()
+
+			api := testutils.AddAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
+
+			args := &testutils.ApiImportExportTestArgs{
+				ApiProvider: testutils.Credentials{Username: user.ApiCreator.Username, Password: user.ApiCreator.Password},
+				CtlUser:     testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Api:         api,
+				SrcAPIM:     dev,
+				DestAPIM:    prod,
+				ParamsFile:  testutils.APISecurityOauthParamsFile,
+			}
+
+			testutils.ValidateAPIExport(t, args)
+
+			importedAPI := testutils.GetImportedAPI(t, args)
+
+			apiParams := testutils.ReadParams(t, args.ParamsFile)
+
+			testutils.ValidateEndpointSecurityDefinition(t, api, apiParams, importedAPI)
+		})
+	}
+}
+
 // Import an API with the external params file that has HTTP/REST endpoints without load balancing or failover configs
 func TestHttpRestEndpointParamsWithoutLoadBalancingOrFailover(t *testing.T) {
 	for _, user := range testCaseUsers {
