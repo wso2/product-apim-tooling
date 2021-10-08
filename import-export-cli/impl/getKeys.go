@@ -359,7 +359,7 @@ func getApiOrApiProductByType(accessToken, searchType string) (*resty.Response, 
 	//Prepping headers
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
-	//headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
+
 	var queryVal string
 	if apiName != "" {
 		queryVal = "name:\"" + apiName + "\""
