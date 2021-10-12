@@ -444,6 +444,10 @@ func preprocessOAuthSecurityConfigs(envSecurityPerEndpoint *params.OAuthEndpoint
 		return errors.New("You have enabled OAuth 2.0 endpoint security" +
 			" but the Client Secret is not found in the api_params.yaml")
 	}
+	if envSecurityPerEndpoint.TokenUrl == "" {
+		return errors.New("You have enabled OAuth 2.0 endpoint security" +
+			" but Token URL is not found in the api_params.yaml")
+	}
 
 	if strings.EqualFold(strings.ToLower(envSecurityPerEndpoint.GrantType),
 		strings.ToLower(utils.ClientCredentialsGrantType)) {
