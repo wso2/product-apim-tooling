@@ -25,6 +25,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/go-resty/resty/v2"
 	"github.com/renstrom/dedent"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -300,34 +301,35 @@ func searchApplication(appName string, accessToken string) (string, error) {
 // @param accessToken : Access token to call the devportal REST API
 // @return apiId, error
 func searchApiOrProduct(accessToken string) (string, error) {
-	// Unified Search endpoint from the config file to search APIs or API Products
-	unifiedSearchEndpoint := utils.GetUnifiedSearchEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
-
-	//Prepping headers
-	headers := make(map[string]string)
-	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
-	//headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
-	var queryVal string
-	if apiName != "" {
-		queryVal = "name:\"" + apiName + "\""
-		if apiVersion == "" {
-			// If the user has not specified the version, use the version as 1.0.0
-			apiVersion = utils.DefaultApiProductVersion
-		}
-		queryVal = queryVal + " version:\"" + apiVersion + "\""
-		if apiProvider != "" {
-			queryVal = queryVal + " provider:\"" + apiProvider + "\""
-		}
-	}
-	resp, err := utils.InvokeGETRequestWithQueryParam("query", queryVal, unifiedSearchEndpoint, headers)
+	resp, _ := getApiOrApiProductByType(accessToken, "")
 	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
 		// 200 OK or 201 Created
 		apiData := &utils.ApiSearch{}
 		data := []byte(resp.Body())
-		err = json.Unmarshal(data, &apiData)
+		err := json.Unmarshal(data, &apiData)
 		if apiData.Count != 0 {
 			apiId := apiData.List[0].ID
 			return apiId, err
+		}
+		// Search by defining the type as an API Product
+		resp, err = getApiOrApiProductByType(accessToken, utils.DefaultApiProductType)
+		if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
+			// 200 OK or 201 Created
+			apiData := &utils.ApiSearch{}
+			data := []byte(resp.Body())
+			err = json.Unmarshal(data, &apiData)
+			if apiData.Count != 0 {
+				apiId := apiData.List[0].ID
+				return apiId, err
+			}
+		} else {
+			utils.Logf("Error: %s\n", resp.Error())
+			utils.Logf("Body: %s\n", resp.Body())
+			if resp.StatusCode() == http.StatusUnauthorized {
+				// 401 Unauthorized
+				return "", fmt.Errorf("authorization failed while searching API or API Product: " + apiName)
+			}
+			return "", errors.New("Request didn't respond 200 OK for searching APIs and API Products. Status: " + resp.Status())
 		}
 		if apiProvider != "" {
 			return "", errors.New("Requested API is not available in the devportal. API: " + apiName +
@@ -344,6 +346,36 @@ func searchApiOrProduct(accessToken string) (string, error) {
 		}
 		return "", errors.New("Request didn't respond 200 OK for searching APIs and API Products. Status: " + resp.Status())
 	}
+}
+
+// Searching if the API or API Product is available specifying the type
+// @param accessToken : Access token to call the devportal REST API
+// @param searchType : Type of the searching artifact
+// @return response, error
+func getApiOrApiProductByType(accessToken, searchType string) (*resty.Response, error) {
+	// Unified Search endpoint from the config file to search APIs or API Products
+	unifiedSearchEndpoint := utils.GetUnifiedSearchEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath)
+
+	//Prepping headers
+	headers := make(map[string]string)
+	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
+
+	var queryVal string
+	if apiName != "" {
+		queryVal = "name:\"" + apiName + "\""
+		if apiVersion == "" {
+			// If the user has not specified the version, use the version as 1.0.0
+			apiVersion = utils.DefaultApiProductVersion
+		}
+		queryVal = queryVal + " version:\"" + apiVersion + "\""
+		if apiProvider != "" {
+			queryVal = queryVal + " provider:\"" + apiProvider + "\""
+		}
+		if strings.EqualFold(searchType, utils.DefaultApiProductType) {
+			queryVal = queryVal + " type:\"" + searchType + "\""
+		}
+	}
+	return utils.InvokeGETRequestWithQueryParam("query", queryVal, unifiedSearchEndpoint, headers)
 }
 
 // Subscribe API or API Product to a given application

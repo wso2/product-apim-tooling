@@ -63,148 +63,180 @@ func TestEnvironmentSpecificParamsEndpoint(t *testing.T) {
 	}
 }
 
-func TestEnvironmentSpecificParamsEndpointRetryTimeout(t *testing.T) {
-	superTenantAdminUsername := superAdminUser
-	superTenantAdminPassword := superAdminPassword
+// Add an API to one environment, export it and re-import it to another environment by setting
+// the configs for endpoints using the params file
+func TestEnvironmentSpecificParamsEndpointConfigs(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+			prod := GetProdClient()
 
-	superTenantApiCreator := creator.UserName
-	superTenantApiCreatorPassword := creator.Password
+			api := testutils.AddAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
 
-	dev := GetDevClient()
-	prod := GetProdClient()
+			args := &testutils.ApiImportExportTestArgs{
+				ApiProvider: testutils.Credentials{Username: user.ApiCreator.Username, Password: user.ApiCreator.Password},
+				CtlUser:     testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Api:         api,
+				SrcAPIM:     dev,
+				DestAPIM:    prod,
+				ParamsFile:  testutils.APIEndpointConfigsParamsFile,
+			}
 
-	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
+			testutils.ValidateAPIExport(t, args)
 
-	args := &testutils.ApiImportExportTestArgs{
-		ApiProvider: testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: superTenantAdminUsername, Password: superTenantAdminPassword},
-		Api:         api,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
-		ParamsFile:  testutils.APIEndpointRetryTimeoutParamsFile,
+			importedAPI := testutils.GetImportedAPI(t, args)
+
+			apiParams := testutils.ReadParams(t, args.ParamsFile)
+
+			assert.Equal(t, apiParams.Environments[0].Configs.Endpoints.Production["url"], importedAPI.GetProductionURL())
+			paramConfig := apiParams.Environments[0].Configs.Endpoints.Production["config"].(map[interface{}]interface{})
+
+			apiEndpointConfig := importedAPI.GetProductionConfig()
+
+			for k, v := range paramConfig {
+				key := fmt.Sprintf("%v", k)
+				value := fmt.Sprintf("%v", v)
+				valueInImportedApi := fmt.Sprintf("%v", apiEndpointConfig[key])
+
+				assert.Equal(t, value, valueInImportedApi)
+			}
+
+			assert.Equal(t, len(paramConfig), len(apiEndpointConfig))
+
+			apiCopy := apim.CopyAPI(api)
+			importedAPICopy := apim.CopyAPI(importedAPI)
+
+			same := "override_with_same_value"
+			apiCopy.EndpointConfig = same
+			importedAPICopy.EndpointConfig = same
+
+			testutils.ValidateAPIsEqual(t, &apiCopy, &importedAPICopy)
+		})
 	}
-
-	testutils.ValidateAPIExport(t, args)
-
-	importedAPI := testutils.GetImportedAPI(t, args)
-
-	apiParams := testutils.ReadParams(t, args.ParamsFile)
-
-	assert.Equal(t, apiParams.Environments[0].Configs.Endpoints.Production["url"], importedAPI.GetProductionURL())
-	paramConfig := apiParams.Environments[0].Configs.Endpoints.Production["config"].(map[interface{}]interface{})
-
-	apiEndpointConfig := importedAPI.GetProductionConfig()
-
-	for k, v := range paramConfig {
-		key := fmt.Sprintf("%v", k)
-		value := fmt.Sprintf("%v", v)
-		assert.Equal(t, value, apiEndpointConfig[key])
-	}
-
-	assert.Equal(t, len(paramConfig), len(apiEndpointConfig))
-
-	apiCopy := apim.CopyAPI(api)
-	importedAPICopy := apim.CopyAPI(importedAPI)
-
-	same := "override_with_same_value"
-	apiCopy.EndpointConfig = same
-	importedAPICopy.EndpointConfig = same
-
-	testutils.ValidateAPIsEqual(t, &apiCopy, &importedAPICopy)
 }
 
+// Add an API to one environment, export it and re-import it to another environment
+// by disabling the endpoint security using the params file
 func TestEnvironmentSpecificParamsEndpointSecurityFalse(t *testing.T) {
-	superTenantAdminUsername := superAdminUser
-	superTenantAdminPassword := superAdminPassword
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+			prod := GetProdClient()
 
-	superTenantApiCreator := creator.UserName
-	superTenantApiCreatorPassword := creator.Password
+			api := testutils.AddAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
 
-	dev := GetDevClient()
-	prod := GetProdClient()
+			args := &testutils.ApiImportExportTestArgs{
+				ApiProvider: testutils.Credentials{Username: user.ApiCreator.Username, Password: user.ApiCreator.Password},
+				CtlUser:     testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Api:         api,
+				SrcAPIM:     dev,
+				DestAPIM:    prod,
+				ParamsFile:  testutils.APISecurityFalseParamsFile,
+			}
 
-	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
+			testutils.ValidateAPIExport(t, args)
 
-	args := &testutils.ApiImportExportTestArgs{
-		ApiProvider: testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: superTenantAdminUsername, Password: superTenantAdminPassword},
-		Api:         api,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
-		ParamsFile:  testutils.APISecurityFalseParamsFile,
+			importedAPI := testutils.GetImportedAPI(t, args)
+
+			assert.Equal(t, false, importedAPI.GetProductionSecurityConfig()["enabled"])
+			assert.Equal(t, false, importedAPI.GetSandboxSecurityConfig()["enabled"])
+
+			api.EndpointConfig.(map[string]interface{})["endpoint_security"] = "override_with_the_same_value"
+			importedAPI.EndpointConfig.(map[string]interface{})["endpoint_security"] = "override_with_the_same_value"
+
+			testutils.ValidateAPIsEqual(t, api, importedAPI)
+		})
 	}
-
-	testutils.ValidateAPIExport(t, args)
-
-	importedAPI := testutils.GetImportedAPI(t, args)
-
-	assert.Equal(t, false, importedAPI.GetProductionSecurityConfig()["enabled"])
-	assert.Equal(t, false, importedAPI.GetSandboxSecurityConfig()["enabled"])
-
-	api.EndpointConfig.(map[string]interface{})["endpoint_security"] = "override_with_the_same_value"
-	importedAPI.EndpointConfig.(map[string]interface{})["endpoint_security"] = "override_with_the_same_value"
-
-	testutils.ValidateAPIsEqual(t, api, importedAPI)
 }
 
+// Add an API to one environment, export it and re-import it to another environment by overriding the endpoint security
+// (with the security type digest), using the params file
 func TestEnvironmentSpecificParamsEndpointSecurityDigest(t *testing.T) {
-	superTenantAdminUsername := superAdminUser
-	superTenantAdminPassword := superAdminPassword
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+			prod := GetProdClient()
 
-	superTenantApiCreator := creator.UserName
-	superTenantApiCreatorPassword := creator.Password
+			api := testutils.AddAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
 
-	dev := GetDevClient()
-	prod := GetProdClient()
+			args := &testutils.ApiImportExportTestArgs{
+				ApiProvider: testutils.Credentials{Username: user.ApiCreator.Username, Password: user.ApiCreator.Password},
+				CtlUser:     testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Api:         api,
+				SrcAPIM:     dev,
+				DestAPIM:    prod,
+				ParamsFile:  testutils.APISecurityDigestParamsFile,
+			}
 
-	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
+			testutils.ValidateAPIExport(t, args)
 
-	args := &testutils.ApiImportExportTestArgs{
-		ApiProvider: testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: superTenantAdminUsername, Password: superTenantAdminPassword},
-		Api:         api,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
-		ParamsFile:  testutils.APISecurityDigestParamsFile,
+			importedAPI := testutils.GetImportedAPI(t, args)
+
+			apiParams := testutils.ReadParams(t, args.ParamsFile)
+
+			testutils.ValidateEndpointSecurityDefinition(t, api, apiParams, importedAPI)
+		})
 	}
-
-	testutils.ValidateAPIExport(t, args)
-
-	importedAPI := testutils.GetImportedAPI(t, args)
-
-	apiParams := testutils.ReadParams(t, args.ParamsFile)
-
-	testutils.ValidateEndpointSecurityDefinition(t, api, apiParams, importedAPI)
 }
 
+// Add an API to one environment, export it and re-import it to another environment by overriding the endpoint security
+// (with the security type basic), using the params file
 func TestEnvironmentSpecificParamsEndpointSecurityBasic(t *testing.T) {
-	superTenantAdminUsername := superAdminUser
-	superTenantAdminPassword := superAdminPassword
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+			prod := GetProdClient()
 
-	superTenantApiCreator := creator.UserName
-	superTenantApiCreatorPassword := creator.Password
+			api := testutils.AddAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
 
-	dev := GetDevClient()
-	prod := GetProdClient()
+			args := &testutils.ApiImportExportTestArgs{
+				ApiProvider: testutils.Credentials{Username: user.ApiCreator.Username, Password: user.ApiCreator.Password},
+				CtlUser:     testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Api:         api,
+				SrcAPIM:     dev,
+				DestAPIM:    prod,
+				ParamsFile:  testutils.APISecurityBasicParamsFile,
+			}
 
-	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
+			testutils.ValidateAPIExport(t, args)
 
-	args := &testutils.ApiImportExportTestArgs{
-		ApiProvider: testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: superTenantAdminUsername, Password: superTenantAdminPassword},
-		Api:         api,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
-		ParamsFile:  testutils.APISecurityBasicParamsFile,
+			importedAPI := testutils.GetImportedAPI(t, args)
+
+			apiParams := testutils.ReadParams(t, args.ParamsFile)
+
+			testutils.ValidateEndpointSecurityDefinition(t, api, apiParams, importedAPI)
+		})
 	}
+}
 
-	testutils.ValidateAPIExport(t, args)
+// Add an API to one environment, export it and re-import it to another environment by overriding the endpoint security
+// (with the security type oauth), using the params file
+func TestEnvironmentSpecificParamsEndpointSecurityOauth(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+			prod := GetProdClient()
 
-	importedAPI := testutils.GetImportedAPI(t, args)
+			api := testutils.AddAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
 
-	apiParams := testutils.ReadParams(t, args.ParamsFile)
+			args := &testutils.ApiImportExportTestArgs{
+				ApiProvider: testutils.Credentials{Username: user.ApiCreator.Username, Password: user.ApiCreator.Password},
+				CtlUser:     testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Api:         api,
+				SrcAPIM:     dev,
+				DestAPIM:    prod,
+				ParamsFile:  testutils.APISecurityOauthParamsFile,
+			}
 
-	testutils.ValidateEndpointSecurityDefinition(t, api, apiParams, importedAPI)
+			testutils.ValidateAPIExport(t, args)
+
+			importedAPI := testutils.GetImportedAPI(t, args)
+
+			apiParams := testutils.ReadParams(t, args.ParamsFile)
+
+			testutils.ValidateEndpointSecurityDefinition(t, api, apiParams, importedAPI)
+		})
+	}
 }
 
 // Import an API with the external params file that has HTTP/REST endpoints without load balancing or failover configs

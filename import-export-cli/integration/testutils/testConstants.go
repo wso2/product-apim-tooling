@@ -71,8 +71,8 @@ const EnvParamsFilesDir = "testdata/EnvParamsFiles"
 // APIEndpointParamsFile : Endpoint URL api_params.yaml
 const APIEndpointParamsFile = EnvParamsFilesDir + "/api_params_endpoint.yaml"
 
-// APIEndpointRetryTimeoutParamsFile : Endpoint URL and Retry Timeout api_params.yaml
-const APIEndpointRetryTimeoutParamsFile = EnvParamsFilesDir + "/api_params_endpoint_retrytimeout.yaml"
+// APIEndpointConfigsParamsFile : Endpoint URL and Retry Timeout api_params.yaml
+const APIEndpointConfigsParamsFile = EnvParamsFilesDir + "/api_params_endpoint_configs.yaml"
 
 // APISecurityFalseParamsFile : Security false api_params.yaml
 const APISecurityFalseParamsFile = EnvParamsFilesDir + "/api_params_security_false.yaml"
@@ -82,6 +82,9 @@ const APISecurityDigestParamsFile = EnvParamsFilesDir + "/api_params_security_di
 
 // APISecurityBasicParamsFile : Security Basic api_params.yaml
 const APISecurityBasicParamsFile = EnvParamsFilesDir + "/api_params_security_basic.yaml"
+
+// APISecurityOauthParamsFile : Security Basic api_params.yaml
+const APISecurityOauthParamsFile = EnvParamsFilesDir + "/api_params_security_oauth.yaml"
 
 // APIFullParamsFile : Full api_params.yaml
 const APIFullParamsFile = EnvParamsFilesDir + "/api_params_full.yaml"
@@ -138,7 +141,7 @@ const APITypeWebSub = "WEBSUB"
 const APITypeSSE = "SSE"
 
 // REST API Endpoint URL
-const RESTAPIEndpoint = "petstore.swagger.io"
+const RESTAPIEndpoint = "https://petstore.swagger.io"
 
 // SOAP API Endpoint URL
 const SoapEndpointURL = "http://ws.cdyne.com/phoneverify/phoneverify.asmx"
@@ -153,3 +156,9 @@ const WebSocketEndpoint = "ws://echo.websocket.org:80"
 const CustomAPIName = "Customized_API"
 const CustomAPIVersion = "2.3.4"
 const CustomAPIContext = "/custom"
+
+// Endpoint security related constants
+const EndpointSecurityTypeOAuth = "OAUTH"
+const PasswordGrantType = "PASSWORD"
+const EndpointSecurityTypeDigest = "DIGEST"
+const EndpointSecurityTypeBasic = "BASIC"
