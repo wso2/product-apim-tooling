@@ -220,13 +220,13 @@ func TestImportAndExportAPIWithDocument(t *testing.T) {
 
 	projectPath, _ := filepath.Abs(projectName)
 	//Move doc file to created project
-	srcPathForDoc, _ := filepath.Abs(testutils.TestCase1DocPath)
-	destPathForDoc := projectPath + testutils.TestCase1DestPathSuffix
+	srcPathForDoc, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCaseDocPath)
+	destPathForDoc := projectPath + testutils.DevFirstUpdatedSampleCaseDestPathSuffix
 	base.Copy(srcPathForDoc, destPathForDoc)
 
 	//Move docMetaData file to created project
-	srcPathForDocMetadata, _ := filepath.Abs(testutils.TestCase1DocMetaDataPath)
-	destPathForDocMetaData := projectPath + testutils.TestCase1DestMetaDataPathSuffix
+	srcPathForDocMetadata, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCaseDocMetaDataPath)
+	destPathForDocMetaData := projectPath + testutils.DevFirstUpdatedSampleCaseDestMetaDataPathSuffix
 	base.Copy(srcPathForDocMetadata, destPathForDocMetaData)
 
 	//Import the project with Document
@@ -255,8 +255,8 @@ func TestImportAndExportAPIWithPngIcon(t *testing.T) {
 
 	//Move icon file to created project
 	projectPath, _ := filepath.Abs(projectName)
-	srcPathForIcon, _ := filepath.Abs(testutils.TestCase2PngPath)
-	destPathForIcon := projectPath + testutils.TestCase2DestPngPathSuffix
+	srcPathForIcon, _ := filepath.Abs(testutils.DevFirstSampleCasePngPath)
+	destPathForIcon := projectPath + testutils.DevFirstSampleCasePngPathSuffix
 	base.Copy(srcPathForIcon, destPathForIcon)
 
 	//Import the project with icon image(.png)
@@ -285,8 +285,8 @@ func TestImportAndExportAPIWithJpegImage(t *testing.T) {
 
 	//Move Image file to created project
 	projectPath, _ := filepath.Abs(projectName)
-	srcPathForImage, _ := filepath.Abs(testutils.TestCase2JpegPath)
-	destPathForImage := projectPath + testutils.TestCase2DestJpegPathSuffix
+	srcPathForImage, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCaseJpegPath)
+	destPathForImage := projectPath + testutils.DevFirstUpdatedSampleCaseDestJpegPathSuffix
 	base.Copy(srcPathForImage, destPathForImage)
 
 	//Import the project with icon image(.jpeg) provided
@@ -315,26 +315,26 @@ func TestUpdateDocAndImageOfAPIOfExistingAPI(t *testing.T) {
 
 	//Move doc file to created project
 	projectPath, _ := filepath.Abs(projectName)
-	srcPathForDoc, _ := filepath.Abs(testutils.TestCase2DocPath)
-	destPathForDoc := projectPath + testutils.TestCase2DestPathSuffix
+	srcPathForDoc, _ := filepath.Abs(testutils.DevFirstSampleCaseDocPath)
+	destPathForDoc := projectPath + testutils.DevFirstSampleCaseDestPathSuffix
 	base.Copy(srcPathForDoc, destPathForDoc)
 
 	//Move Image file to created project
-	srcPathForImage, _ := filepath.Abs(testutils.TestCase2JpegPath)
-	destPathForImage := projectPath + testutils.TestCase2DestJpegPathSuffix
+	srcPathForImage, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCaseJpegPath)
+	destPathForImage := projectPath + testutils.DevFirstUpdatedSampleCaseDestJpegPathSuffix
 	base.Copy(srcPathForImage, destPathForImage)
 
 	//Import the project with Document and image thumbnail
 	testutils.ValidateImportUpdateProjectNotAlreadyImported(t, args)
 
 	//Update doc file to created project
-	srcPathForDocUpdate, _ := filepath.Abs(testutils.TestCase1DocPath)
-	destPathForDocUpdate := projectPath + testutils.TestCase1DestPathSuffix
+	srcPathForDocUpdate, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCaseDocPath)
+	destPathForDocUpdate := projectPath + testutils.DevFirstUpdatedSampleCaseDestPathSuffix
 	base.Copy(srcPathForDocUpdate, destPathForDocUpdate)
 
 	//Update docMetaData file to created project
-	srcPathForDocMetadataUpdate, _ := filepath.Abs(testutils.TestCase1DocMetaDataPath)
-	destPathForDocMetaDataUpdate := projectPath + testutils.TestCase1DestMetaDataPathSuffix
+	srcPathForDocMetadataUpdate, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCaseDocMetaDataPath)
+	destPathForDocMetaDataUpdate := projectPath + testutils.DevFirstUpdatedSampleCaseDestMetaDataPathSuffix
 	base.Copy(srcPathForDocMetadataUpdate, destPathForDocMetaDataUpdate)
 
 	//Update icon file to created project
@@ -343,8 +343,8 @@ func TestUpdateDocAndImageOfAPIOfExistingAPI(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	srcPathForIcon, _ := filepath.Abs(testutils.TestCase2PngPath)
-	destPathForIcon := projectPath + testutils.TestCase2DestPngPathSuffix
+	srcPathForIcon, _ := filepath.Abs(testutils.DevFirstSampleCasePngPath)
+	destPathForIcon := projectPath + testutils.DevFirstSampleCasePngPathSuffix
 	base.Copy(srcPathForIcon, destPathForIcon)
 
 	base.WaitForIndexing()

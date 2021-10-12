@@ -190,7 +190,7 @@ func ValidateAPIWithDocIsExported(t *testing.T, args *InitTestArgs, DevFirstDefa
 	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
 	base.Unzip(relativePath, exportedPath)
 
-	docPathOfExportedApi := relativePath + TestDefaultExtractedFileName + TestCase1DestPathSuffix
+	docPathOfExportedApi := relativePath + TestDefaultExtractedFileName + DevFirstUpdatedSampleCaseDestPathSuffix
 
 	//Check whether the file is available
 	isDocExported := base.IsFileAvailable(docPathOfExportedApi)
@@ -213,7 +213,7 @@ func ValidateAPIWithIconIsExported(t *testing.T, args *InitTestArgs, DevFirstDef
 	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
 	base.Unzip(relativePath, exportedPath)
 
-	iconPathOfExportedApi := relativePath + TestDefaultExtractedFileName + TestCase2DestPngPathSuffix
+	iconPathOfExportedApi := relativePath + TestDefaultExtractedFileName + DevFirstSampleCasePngPathSuffix
 
 	isIconExported := base.IsFileAvailable(iconPathOfExportedApi)
 	base.Log("Icon is Exported", isIconExported)
@@ -235,7 +235,7 @@ func ValidateAPIWithImageIsExported(t *testing.T, args *InitTestArgs, DevFirstDe
 	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
 	base.Unzip(relativePath, exportedPath)
 
-	imagePathOfExportedApi := relativePath + TestDefaultExtractedFileName + TestCase2DestJpegPathSuffix
+	imagePathOfExportedApi := relativePath + TestDefaultExtractedFileName + DevFirstUpdatedSampleCaseDestJpegPathSuffix
 	isIconExported := base.IsFileAvailable(imagePathOfExportedApi)
 	base.Log("Image is Exported", isIconExported)
 	assert.Equal(t, true, isIconExported, "Error while exporting API with icon")
