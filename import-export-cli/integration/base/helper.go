@@ -29,6 +29,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -341,6 +342,40 @@ func IsFileAvailable(filename string) bool {
 		return false
 	}
 	return !info.IsDir()
+}
+
+// Create a directory
+func CreateDir(path string) (err error) {
+	err = os.Mkdir(path, os.ModePerm)
+	if err != nil {
+		fmt.Println("Error in creating the directory", err.Error())
+	}
+	return err
+}
+
+// Check if a string exists in a given file
+func IsStringAvailable(str, path string) bool {
+	fileContent, err := ioutil.ReadFile(path);
+	if err == nil {
+		isExist, _ := regexp.Match(str, fileContent)
+		return isExist
+	}
+	return false
+}
+
+// Append string to a given file
+func AppendStringToFile(str, path string) error {
+	file, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	_, err = file.WriteString(str)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // Copy the src file to dst. Any existing file will be overwritten
