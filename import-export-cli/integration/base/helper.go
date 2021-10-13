@@ -19,6 +19,7 @@
 package base
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"io"
@@ -29,7 +30,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -353,14 +353,19 @@ func CreateDir(path string) (err error) {
 	return err
 }
 
-// Check if a string exists in a given file
-func IsStringAvailable(str, path string) bool {
-	fileContent, err := ioutil.ReadFile(path);
-	if err == nil {
-		isExist, _ := regexp.Match(str, fileContent)
-		return isExist
+// Check whether the file content is identical
+func IsFileContentIdentical(path1, path2 string) bool {
+	file_1, err_1 := ioutil.ReadFile(path1)
+	if err_1 != nil {
+		panic(err_1)
 	}
-	return false
+
+	file_2, err_2 := ioutil.ReadFile(path2)
+	if err_2 != nil {
+		panic(err_2)
+	}
+
+	return bytes.Equal(file_1, file_2)
 }
 
 // Append string to a given file

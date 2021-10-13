@@ -20,6 +20,7 @@ package testutils
 
 import (
 	"log"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -257,8 +258,9 @@ func ValidateAPIWithUpdatedSequenceIsExported(t *testing.T, args *InitTestArgs, 
 	base.Unzip(relativePath, exportedPath)
 
 	// Check whether the exported custom sequence is equivalent to the latest sequence version
-	sequencePathOfExportedAPI := relativePath + TestDefaultExtractedFileName + DevFirstUpdatedSampleCaseSequencePathSuffix
-	isSequenceUpdated := base.IsStringAvailable("456", sequencePathOfExportedAPI)
+	exportedAPISequencePath := relativePath + TestDefaultExtractedFileName + DevFirstUpdatedSampleCaseSequencePathSuffix
+	lastUpdatedSequencePath, _ := filepath.Abs(DevFirstUpdatedSampleCaseSequencePath)
+	isSequenceUpdated := base.IsFileContentIdentical(exportedAPISequencePath, lastUpdatedSequencePath)
 	base.Log("Exported custom sequence is updated", isSequenceUpdated)
 	assert.Equal(t, true, isSequenceUpdated, "Error while updating the custom sequence of API")
 

@@ -358,7 +358,7 @@ func TestUpdateDocAndImageOfAPIOfExistingAPI(t *testing.T) {
 	testutils.ValidateAPIWithIconIsExported(t, args, testutils.DevFirstDefaultAPIName, testutils.DevFirstDefaultAPIVersion)
 }
 
-// Test sequence update as a super tenant user with Internal/devops role
+// Test a verified (syntactically correct) custom sequence update as a super tenant user with Internal/devops role
 func TestAPISequenceUpdateWithDevopsSuperTenantUser(t *testing.T) {
 	devopsUsername := devops.UserName
 	devopsPassword := devops.Password
@@ -389,7 +389,7 @@ func TestAPISequenceUpdateWithDevopsSuperTenantUser(t *testing.T) {
 	inSequenceStr := "inSequence: " + testutils.CustomSequenceName
 	base.AppendStringToFile(inSequenceStr, apiMetadataYamlPath)
 
-	// Import the project with custom sequence
+	// Import the project with the verified (syntactically correct) custom sequence
 	testutils.ValidateImportUpdateProjectNotAlreadyImported(t, args)
 
 	// Update custom sequence file of created project
