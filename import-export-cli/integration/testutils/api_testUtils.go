@@ -179,6 +179,11 @@ func getAPIs(client *apim.Client, username string, password string) *apim.APILis
 	return client.GetAPIs()
 }
 
+func getDevPortalAPIs(client *apim.Client, username string, password string) *apim.APIList {
+	client.Login(username, password)
+	return client.GetDevPortalAPIs()
+}
+
 func deleteAPIByCtl(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
 	output, err := base.Execute(t, "delete", "api", "-n", args.Api.Name, "-v", args.Api.Version, "-e", args.SrcAPIM.EnvName, "-k", "--verbose")
 	return output, err
@@ -266,6 +271,7 @@ func importAPI(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
 		if strings.EqualFold("PUBLISHED", args.Api.LifeCycleStatus) {
 			args.CtlUser.Username, args.CtlUser.Password =
 				apim.RetrieveAdminCredentialsInsteadCreator(args.CtlUser.Username, args.CtlUser.Password)
+			args.DestAPIM.Login(args.CtlUser.Username, args.CtlUser.Password)
 		}
 		err := args.DestAPIM.DeleteAPIByName(args.Api.Name)
 
@@ -758,4 +764,15 @@ func ValidateChangeLifeCycleStatusOfAPIFailure(t *testing.T, args *ApiChangeLife
 	//Assert apictl output
 	assert.NotContains(t, output, "state changed successfully!", "Error while changing life cycle of API")
 	assert.NotEqual(t, args.Api.LifeCycleStatus, args.ExpectedState, "Life Cycle State changed successfully")
+}
+
+func ValidateGetDevPortalAPIs(t *testing.T, api *apim.API, client *apim.Client, username, password, apiState string) {
+	t.Helper()
+
+	devPortalApisList := getDevPortalAPIs(client, username, password)
+	for _, devPortalAPI := range devPortalApisList.List {
+		if devPortalAPI.Name == api.Name && devPortalAPI.Version == api.Version {
+			assert.Equal(t, strings.ToLower(devPortalAPI.LifeCycleStatus), strings.ToLower(apiState), "API states are not matching")
+		}
+	}
 }
