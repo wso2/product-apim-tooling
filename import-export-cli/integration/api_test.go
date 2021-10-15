@@ -1048,7 +1048,7 @@ func TestChangeLifeCycleStatusOfApiWithActiveSubscriptionDevopsSuperTenantUser(t
 	testutils.ValidateChangeLifeCycleStatusOfAPI(t, argsToLifeCycleStateChange)
 }
 
-// List API from DevPortal after importing a exported published API from a environment
+// List APIs from DevPortal after importing a exported published API from a environment
 // as a devops super tenant user
 func TestListPublishedAPIFromDevPortalAfterExportDevopsSuperTenantUser(t *testing.T) {
 	devopsUsername := superAdminUser
@@ -1086,7 +1086,7 @@ func TestListPublishedAPIFromDevPortalAfterExportDevopsSuperTenantUser(t *testin
 	testutils.ValidateGetDevPortalAPIs(t, api, prod, devopsUsername, devopsPassword, "published")
 }
 
-// List API from DevPortal after importing a exported published API from a environment
+// List APIs from DevPortal after importing a exported published API from a environment
 // as a devops tenant user
 func TestListPublishedAPIFromDevPortalAfterExportDevopsTenantUser(t *testing.T) {
 	tenantDevopsUsername := devops.UserName + "@" + TENANT1
@@ -1101,7 +1101,7 @@ func TestListPublishedAPIFromDevPortalAfterExportDevopsTenantUser(t *testing.T) 
 	dev := GetDevClient()
 	prod := GetProdClient()
 
-	// Add the API to env
+	// Add an API to env
 	api := testutils.AddAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword)
 
 	// Create and Deploy Revision of the above API
