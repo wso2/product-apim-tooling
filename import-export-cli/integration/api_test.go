@@ -1050,7 +1050,7 @@ func TestChangeLifeCycleStatusOfApiWithActiveSubscriptionDevopsSuperTenantUser(t
 
 // List API from DevPortal after importing a exported published API from a environment
 // as a devops super tenant user
-func TestListPublishedAPIFromDevPortaAfterExportlDevopsSuperTenantUser(t *testing.T) {
+func TestListPublishedAPIFromDevPortalAfterExportDevopsSuperTenantUser(t *testing.T) {
 	devopsUsername := superAdminUser
 	devopsPassword := superAdminPassword
 
@@ -1084,4 +1084,42 @@ func TestListPublishedAPIFromDevPortaAfterExportlDevopsSuperTenantUser(t *testin
 	testutils.ValidateAPIExportImport(t, args)
 
 	testutils.ValidateGetDevPortalAPIs(t, api, prod, devopsUsername, devopsPassword, "published")
+}
+
+// List API from DevPortal after importing a exported published API from a environment
+// as a devops tenant user
+func TestListPublishedAPIFromDevPortalAfterExportDevopsTenantUser(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	tenantApiCreator := creator.UserName + "@" + TENANT1
+	tenantApiCreatorPassword := creator.Password
+
+	tenantApiPublisher := publisher.UserName + "@" + TENANT1
+	tenantApiPublisherPassword := publisher.Password
+
+	dev := GetDevClient()
+	prod := GetProdClient()
+
+	// Add the API to env
+	api := testutils.AddAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword)
+
+	// Create and Deploy Revision of the above API
+	testutils.CreateAndDeployAPIRevision(t, dev, tenantApiPublisher, tenantApiPublisherPassword, api.ID)
+
+	testutils.PublishAPI(dev, tenantApiPublisher, tenantApiPublisherPassword, api.ID)
+
+	api.LifeCycleStatus = utils.ValidInitialStates[1]
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: tenantApiCreator, Password: tenantApiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+	}
+
+	testutils.ValidateAPIExportImport(t, args)
+
+	testutils.ValidateGetDevPortalAPIs(t, api, prod, tenantDevopsUsername, tenantDevopsPassword, "published")
 }

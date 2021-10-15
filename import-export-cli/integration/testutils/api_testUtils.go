@@ -180,6 +180,7 @@ func getAPIs(client *apim.Client, username string, password string) *apim.APILis
 }
 
 func getDevPortalAPIs(client *apim.Client, username string, password string) *apim.APIList {
+	base.WaitForIndexing()
 	client.Login(username, password)
 	return client.GetDevPortalAPIs()
 }
@@ -770,6 +771,12 @@ func ValidateGetDevPortalAPIs(t *testing.T, api *apim.API, client *apim.Client, 
 	t.Helper()
 
 	devPortalApisList := getDevPortalAPIs(client, username, password)
+	if devPortalApisList.Count < 1 {
+		base.WaitForIndexing()
+		devPortalApisList = getDevPortalAPIs(client, username, password)
+	}
+	assert.GreaterOrEqual(t, devPortalApisList.Count, 1, "Empty API List retreived from DevPortal")
+
 	for _, devPortalAPI := range devPortalApisList.List {
 		if devPortalAPI.Name == api.Name && devPortalAPI.Version == api.Version {
 			assert.Equal(t, strings.ToLower(devPortalAPI.LifeCycleStatus), strings.ToLower(apiState), "API states are not matching")
