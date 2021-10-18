@@ -770,15 +770,12 @@ func ValidateChangeLifeCycleStatusOfAPIFailure(t *testing.T, args *ApiChangeLife
 func ValidateGetDevPortalAPIs(t *testing.T, api *apim.API, client *apim.Client, username, password, apiState string) {
 	t.Helper()
 
+	base.WaitForIndexing()
 	devPortalApisList := getDevPortalAPIs(client, username, password)
-	if devPortalApisList.Count < 1 {
-		base.WaitForIndexing()
-		devPortalApisList = getDevPortalAPIs(client, username, password)
-	}
 	assert.GreaterOrEqual(t, devPortalApisList.Count, 1, "Empty API List retreived from DevPortal")
 
 	for _, devPortalAPI := range devPortalApisList.List {
-		if devPortalAPI.Name == api.Name && devPortalAPI.Version == api.Version {
+		if strings.EqualFold(devPortalAPI.Name, api.Name) && strings.EqualFold(devPortalAPI.Version, api.Version) {
 			assert.Equal(t, strings.ToLower(devPortalAPI.LifeCycleStatus), strings.ToLower(apiState), "API states are not matching")
 		}
 	}

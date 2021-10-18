@@ -819,7 +819,7 @@ func (instance *Client) GetDevPortalAPIs() *APIList {
 
 	defer response.Body.Close()
 
-	base.ValidateAndLogResponse("apim.GetAPIs()", response, 200)
+	base.ValidateAndLogResponse("apim.GetDevPortalAPIs()", response, 200)
 
 	var apisResponse APIList
 	json.NewDecoder(response.Body).Decode(&apisResponse)
