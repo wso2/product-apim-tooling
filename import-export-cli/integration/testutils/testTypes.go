@@ -99,11 +99,11 @@ type ApiChangeLifeCycleStatusTestArgs struct {
 }
 
 type AWSInitTestArgs struct {
-	CtlUser        Credentials
-	SrcAPIM        *apim.Client
-	ApiNameFlag		 string 
+	CtlUser          Credentials
+	SrcAPIM          *apim.Client
+	ApiNameFlag      string
 	ApiStageNameFlag string
-	InitFlag       string
+	InitFlag         string
 }
 
 type GenDeploymentDirTestArgs struct {

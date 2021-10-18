@@ -805,6 +805,27 @@ func (instance *Client) GetAPIs() *APIList {
 	return &apisResponse
 }
 
+// GetDevPortalAPIs : Get APIs from APIM DevPortal
+func (instance *Client) GetDevPortalAPIs() *APIList {
+	apisURL := instance.devPortalRestURL + "/apis"
+
+	request := base.CreateGet(apisURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.GetAPI()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.GetDevPortalAPIs()", response, 200)
+
+	var apisResponse APIList
+	json.NewDecoder(response.Body).Decode(&apisResponse)
+	return &apisResponse
+}
+
 // GetAPIProduct : Get API Product from APIM
 func (instance *Client) GetAPIProduct(apiProductID string) *APIProduct {
 	apisURL := instance.publisherRestURL + "/api-products/" + apiProductID
