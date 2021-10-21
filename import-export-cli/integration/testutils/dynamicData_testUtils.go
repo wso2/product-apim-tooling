@@ -89,7 +89,7 @@ func AddSequenceWithDynamicDataToAPIProject(t *testing.T, args *InitTestArgs) ap
 
 	base.CreateTempDir(t, inSequencePath)
 	// Move sequence file to created project
-	srcPathForSequence, _ := filepath.Abs(TestArtifact3Path + string(os.PathSeparator) + CustomDynamicInSequenceName)
+	srcPathForSequence, _ := filepath.Abs(DynamicDataSampleCaseArtifactPath + string(os.PathSeparator) + CustomDynamicInSequenceName)
 	destPathForSequence := inSequencePath + string(os.PathSeparator) + CustomDynamicInSequenceName
 	base.Copy(srcPathForSequence, destPathForSequence)
 
