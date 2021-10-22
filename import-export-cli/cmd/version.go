@@ -20,14 +20,16 @@ package cmd
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 // Version command related usage info
-var Version = "v1.0.0"
-var BuildDate = ""
+var Version = "4.1.0"
+// BuildDate Get the updated build date with the given format
+var BuildDate = time.Now().Format("01-02-2006")
 const versionCmdLiteral = "version"
 const versionCmdShortDesc = "Display Version on current " + utils.ProjectName
 const versionCmdLongDesc = "Display the current version of this command line tool"

@@ -4,7 +4,7 @@ if [ $# -eq 0 ]
   then
     echo "Pass the WSO2 Micro Integrator zip archive path as an argument"
     echo "Example:"
-    echo "sh setup_MI.sh /home/micro-integrator/distribution/target/wso2mi-4.0.0-SNAPSHOT.zip"
+    echo "sh setup_MI.sh /home/micro-integrator/distribution/target/wso2mi-4.1.0-SNAPSHOT.zip"
     exit 1
 fi
 
