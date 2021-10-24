@@ -162,3 +162,12 @@ const EndpointSecurityTypeOAuth = "OAUTH"
 const PasswordGrantType = "PASSWORD"
 const EndpointSecurityTypeDigest = "DIGEST"
 const EndpointSecurityTypeBasic = "BASIC"
+
+// Constants for sequence update testcase
+const CustomSequenceDirectory = "/Sequences/in-sequence/Custom"
+const CustomSequenceName = "mockSequence"
+const DevFirstSampleCaseApiMetadataPathSuffix = "/Meta-information/api.yaml"
+const DevFirstSampleCaseSequencePath = DevFirstSampleCaseArtifactPath + "/mockSequence.xml"
+const DevFirstSampleCaseDestSequencePathSuffix = CustomSequenceDirectory + "/mockSequence.xml"
+const DevFirstUpdatedSampleCaseSequencePath = DevFirstUpdatedSampleCaseArtifactPath + "/mockSequence.xml"
+const DevFirstUpdatedSampleCaseSequencePathSuffix = CustomSequenceDirectory + "/mockSequence.xml"
