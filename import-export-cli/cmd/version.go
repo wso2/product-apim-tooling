@@ -20,13 +20,13 @@ package cmd
 
 import (
 	"fmt"
-
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-// Version command related usage info
+// Version of the latest release of apictl
 var Version = "v1.0.0"
+// BuildDate of the latest release of apictl
 var BuildDate = ""
 const versionCmdLiteral = "version"
 const versionCmdShortDesc = "Display Version on current " + utils.ProjectName

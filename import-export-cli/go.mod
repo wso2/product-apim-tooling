@@ -20,7 +20,7 @@ require (
 	github.com/wso2/k8s-api-operator/api-operator v0.0.0-20210223103109-66ee766c8413
 	golang.org/x/crypto v0.0.0-20200414173820-0848c9571904
 	gopkg.in/yaml.v2 v2.3.0
-	k8s.io/api v0.18.2
+	k8s.io/api v0.18.2 // indirect
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )
 
