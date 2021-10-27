@@ -359,7 +359,7 @@ func ValidateAPIWithImageIsExported(t *testing.T, args *InitTestArgs, DevFirstDe
 	})
 }
 
-func ValidateAPIWithUpdatedSequenceIsExported(t *testing.T, args *InitTestArgs, DevFirstDefaultAPIName string, DevFirstDefaultAPIVersion string) {
+func ValidateAPIWithUpdatedSequenceIsExported(t *testing.T, args *InitTestArgs, DevFirstDefaultAPIName, DevFirstDefaultAPIVersion string) {
 	expOutput := ValidateExportImportedAPI(t, args, DevFirstDefaultAPIName, DevFirstDefaultAPIVersion)
 
 	// Unzip exported API and check whether the updated sequence file is in there

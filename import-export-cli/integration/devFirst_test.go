@@ -444,52 +444,55 @@ func TestUpdateDocAndImageOfAPIOfExistingAPI(t *testing.T) {
 
 // Test a verified (syntactically correct) custom sequence update
 func TestAPISequenceUpdate(t *testing.T) {
-	apim := GetProdClient()
-	projectName := base.GenerateRandomName(16)
-	username := superAdminUser
-	password := superAdminPassword
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			apim := GetDevClient()
+			projectName := base.GenerateRandomString()
 
-	args := &testutils.InitTestArgs{
-		CtlUser:   testutils.Credentials{Username: username, Password: password},
-		SrcAPIM:   apim,
-		InitFlag:  projectName,
-		OasFlag:   testutils.TestOpenAPI3DefinitionPath,
-		APIName:   testutils.DevFirstDefaultAPIName,
-		ForceFlag: true,
+			args := &testutils.InitTestArgs{
+				CtlUser:   testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				SrcAPIM:   apim,
+				InitFlag:  projectName,
+				OasFlag:   testutils.TestOpenAPI3DefinitionPath,
+				APIName:   testutils.DevFirstDefaultAPIName,
+				ForceFlag: true,
+			}
+
+			// Initialize the project
+			testutils.ValidateInitializeProjectWithOASFlag(t, args)
+
+			// Add custom sequence file to created project
+			projectPath, _ := filepath.Abs(projectName)
+			srcPathForSequence, _ := filepath.Abs(testutils.DevFirstSampleCaseSequencePath)
+			destPathForSequence := projectPath + testutils.DevFirstSampleCaseDestSequencePathSuffix
+			base.CreateTempDir(t, projectPath + testutils.CustomSequenceDirectory)
+			base.Copy(srcPathForSequence, destPathForSequence)
+
+			// Update api.yaml file of initialized project with sequence related metadata
+			apiMetadataYamlPath := projectPath + testutils.DevFirstSampleCaseApiMetadataPathSuffix
+			inSequenceStr := "inSequence: " + testutils.CustomSequenceName
+			base.AppendStringToFile(inSequenceStr, apiMetadataYamlPath)
+
+			// Import the project with the verified (syntactically correct) custom sequence
+			testutils.ValidateImportProject(t, args, "", !isTenantUser(user.CtlUser.Username, TENANT1))
+
+			// Update custom sequence file of created project
+			srcPathForSequenceUpdate, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCaseSequencePath)
+			destPathForSequenceUpdate := projectPath + testutils.DevFirstUpdatedSampleCaseSequencePathSuffix
+			err := os.Remove(destPathForSequenceUpdate)
+			if err != nil {
+				t.Fatal(err)
+			}
+			base.Copy(srcPathForSequenceUpdate, destPathForSequenceUpdate)
+
+			base.WaitForIndexing()
+
+			// Import the project with updated sequence
+			testutils.ValidateImportUpdateProject(t, args, !isTenantUser(user.CtlUser.Username, TENANT1))
+
+			// Validate that sequence has been updated
+			testutils.ValidateAPIWithUpdatedSequenceIsExported(t, args, testutils.DevFirstDefaultAPIName, testutils.DevFirstDefaultAPIVersion)
+			
+		})
 	}
-
-	// Initialize the project
-	testutils.ValidateInitializeProjectWithOASFlag(t, args)
-
-	// Add custom sequence file to created project
-	projectPath, _ := filepath.Abs(projectName)
-	srcPathForSequence, _ := filepath.Abs(testutils.DevFirstSampleCaseSequencePath)
-	destPathForSequence := projectPath + testutils.DevFirstSampleCaseDestSequencePathSuffix
-	base.CreateTempDir(t, projectPath + testutils.CustomSequenceDirectory)
-	base.Copy(srcPathForSequence, destPathForSequence)
-
-	// Update api.yaml file of initialized project with sequence related metadata
-	apiMetadataYamlPath := projectPath + testutils.DevFirstSampleCaseApiMetadataPathSuffix
-	inSequenceStr := "inSequence: " + testutils.CustomSequenceName
-	base.AppendStringToFile(inSequenceStr, apiMetadataYamlPath)
-
-	// Import the project with the verified (syntactically correct) custom sequence
-	testutils.ValidateImportUpdateProjectNotAlreadyImported(t, args)
-
-	// Update custom sequence file of created project
-	srcPathForSequenceUpdate, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCaseSequencePath)
-	destPathForSequenceUpdate := projectPath + testutils.DevFirstUpdatedSampleCaseSequencePathSuffix
-	err := os.Remove(destPathForSequenceUpdate)
-	if err != nil {
-		t.Fatal(err)
-	}
-	base.Copy(srcPathForSequenceUpdate, destPathForSequenceUpdate)
-
-	base.WaitForIndexing()
-
-	// Import the project with updated sequence
-	testutils.ValidateImportUpdateProject(t, args, !isTenantUser(username, TENANT1))
-
-	// Validate that sequence has been updated
-	testutils.ValidateAPIWithUpdatedSequenceIsExported(t, args, testutils.DevFirstDefaultAPIName, testutils.DevFirstDefaultAPIVersion)
 }
