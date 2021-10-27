@@ -1258,7 +1258,7 @@ func (instance *Client) GetAPIByName(name string) (*APIInfo, error) {
 
 	if len(apiResponse.List) == 0 {
 		return nil, errors.New("apim.GetAPIByName() did not return result for: " + name +
-			", it is possible that sufficient time is not allwed for solr indexing." +
+			", it is possible that sufficient time is not allowed for solr indexing." +
 			"Consider the user of base.WaitForIndexing() in the execution flow where appropriate or " +
 			"increasing the `indexing-delay` value in the integration test config.yaml")
 	}

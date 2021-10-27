@@ -341,7 +341,7 @@ func ValidateAPIWithIconIsExported(t *testing.T, args *InitTestArgs, DevFirstDef
 func ValidateAPIWithImageIsExported(t *testing.T, args *InitTestArgs, DevFirstDefaultAPIName string, DevFirstDefaultAPIVersion string) {
 	expOutput := ValidateExportImportedAPI(t, args, DevFirstDefaultAPIName, DevFirstDefaultAPIVersion)
 
-	//Unzip exported API and check whethers the imported image(.png) is in there
+	//Unzip exported API and check whether the imported image(.png) is in there
 	exportedPath := base.GetExportedPathFromOutput(expOutput)
 	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
 	base.Unzip(relativePath, exportedPath)
@@ -353,6 +353,29 @@ func ValidateAPIWithImageIsExported(t *testing.T, args *InitTestArgs, DevFirstDe
 
 	t.Cleanup(func() {
 		//Remove Created project and logout
+		base.RemoveDir(args.InitFlag)
+		base.RemoveDir(exportedPath)
+		base.RemoveDir(relativePath)
+	})
+}
+
+func ValidateAPIWithUpdatedSequenceIsExported(t *testing.T, args *InitTestArgs, DevFirstDefaultAPIName, DevFirstDefaultAPIVersion string) {
+	expOutput := ValidateExportImportedAPI(t, args, DevFirstDefaultAPIName, DevFirstDefaultAPIVersion)
+
+	// Unzip exported API and check whether the updated sequence file is in there
+	exportedPath := base.GetExportedPathFromOutput(expOutput)
+	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
+	base.Unzip(relativePath, exportedPath)
+
+	// Check whether the exported custom sequence is equivalent to the latest sequence version
+	exportedAPISequencePath := relativePath + TestDefaultExtractedFileName + DevFirstUpdatedSampleCaseSequencePathSuffix
+	lastUpdatedSequencePath, _ := filepath.Abs(DevFirstUpdatedSampleCaseSequencePath)
+	isSequenceUpdated := base.IsFileContentIdentical(exportedAPISequencePath, lastUpdatedSequencePath)
+	base.Log("Exported custom sequence is updated", isSequenceUpdated)
+	assert.Equal(t, true, isSequenceUpdated, "Error while updating the custom sequence of API")
+
+	t.Cleanup(func() {
+		// Remove created project and logout
 		base.RemoveDir(args.InitFlag)
 		base.RemoveDir(exportedPath)
 		base.RemoveDir(relativePath)
