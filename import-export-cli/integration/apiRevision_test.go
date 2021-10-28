@@ -96,7 +96,7 @@ func TestExportApiWorkingCopy(t *testing.T) {
 				CtlUser:     user.CtlUser,
 				Api:         api,
 				SrcAPIM:     dev,
-				IsDeployed:  true,
+				IsDeployed:  false,
 			}
 
 			testutils.ValidateExportedAPIStructure(t, args)
