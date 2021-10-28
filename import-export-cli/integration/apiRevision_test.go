@@ -152,7 +152,7 @@ func TestExportImportApiSameGWEnv(t *testing.T) {
 				Api:         api,
 				SrcAPIM:     dev,
 				DestAPIM:    prod,
-				Revision:    "0",
+				Revision:    "1",
 				IsDeployed:  true,
 			}
 
