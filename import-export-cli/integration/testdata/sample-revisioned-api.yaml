@@ -33,6 +33,7 @@ data: # Contains the meta data of the API
    - https
   tags:  # Tags for the API as a list
    - pizza
+  organizationId: carbon.super # The organization ID
   policies: # Available subscription policies (tiers) as a list
    - Unlimited
   apiThrottlingPolicy: Unlimited # The API level throttling policy selected for the particular API
@@ -62,6 +63,7 @@ data: # Contains the meta data of the API
   subscriptionAvailability: CURRENT_TENANT # Subscription availability of the API {CURRENT_TENANT|ALL_TENANTS|SPECIFIC_TENANTS}
   subscriptionAvailableTenants: [] # Subscription available tenants as a list
   additionalProperties: [] # List of custom properties of the API
+  additionalPropertiesMap: [] # Map of additional properties of the API
   accessControl: NONE # Is the API is restricted to certain set of publishers or creators or is it visible to all the publishers and creators? If the accessControl restriction is none, this API can be modified by all the publishers and creators, if not it can only be viewable/modifiable by certain set of publishers and creators, based on the restriction
   accessControlRoles: [] # The user roles that are able to view/modify as API publisher or creator
   businessInformation: # Business information of the API
