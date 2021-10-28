@@ -45,7 +45,7 @@ func TestExportApiNonDeloyedRevision(t *testing.T) {
 				Api:         apiRevision,
 				SrcAPIM:     dev,
 				Revision:    strconv.Itoa(revNumber),
-				IsDeployed:  true,
+				IsDeployed:  false,
 			}
 
 			testutils.ValidateExportedAPIRevisionStructure(t, args)
@@ -152,7 +152,7 @@ func TestExportImportApiSameGWEnv(t *testing.T) {
 				Api:         api,
 				SrcAPIM:     dev,
 				DestAPIM:    prod,
-				Revision:    "1",
+				Revision:    "0",
 				IsDeployed:  true,
 			}
 
