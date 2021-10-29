@@ -494,7 +494,7 @@ func ValidateAPIRevisionExportImport(t *testing.T, args *ApiImportExportTestArgs
 	importedAPI := GetAPI(t, args.DestAPIM, args.Api.Name, args.ApiProvider.Username, args.ApiProvider.Password)
 
 	// Validate env 1 and env 2 API is equal
-	ValidateAPIsEqual(t, args.Api, importedAPI)
+	ValidateImportedAPIsEqualToRevision(t, args.Api, importedAPI)
 }
 
 func validateAPIProject(t *testing.T, args *ApiImportExportTestArgs, apiType string) {
@@ -767,6 +767,49 @@ func ValidateAPIsEqual(t *testing.T, api1 *apim.API, api2 *apim.API) {
 
 	api1Copy.LastUpdatedTime = same
 	api2Copy.LastUpdatedTime = same
+
+	// If an API is not advertise only, the API owner will be changed during export and import to the current provider
+	if (api1Copy.AdvertiseInformation != apim.AdvertiseInfo{}) {
+		api1Copy.AdvertiseInformation.ApiOwner = same
+	}
+	if (api2Copy.AdvertiseInformation != apim.AdvertiseInfo{}) {
+		api2Copy.AdvertiseInformation.ApiOwner = same
+	}
+
+	// Sort member collections to make equality check possible
+	apim.SortAPIMembers(&api1Copy)
+	apim.SortAPIMembers(&api2Copy)
+
+	assert.Equal(t, api1Copy, api2Copy, "API obejcts are not equal")
+}
+
+// ValidateImportedAPIsEqualToRevision : Validate if the imported API and exported revision is the same by ignoring
+// the unique details and revision specific details.
+func ValidateImportedAPIsEqualToRevision(t *testing.T, api1 *apim.API, api2 *apim.API) {
+	t.Helper()
+
+	api1Copy := apim.CopyAPI(api1)
+	api2Copy := apim.CopyAPI(api2)
+
+	same := "override_with_same_value"
+	// Since the APIs are from too different envs, their respective ID will defer.
+	// Therefore this will be overridden to the same value to ensure that the equality check will pass.
+	api1Copy.ID = same
+	api2Copy.ID = same
+
+	api1Copy.CreatedTime = same
+	api2Copy.CreatedTime = same
+
+	api1Copy.LastUpdatedTime = same
+	api2Copy.LastUpdatedTime = same
+
+	// When imported the revision as API, the "IsRevision" property will be false for the imported API. Hence,
+	//the property of the imported API should be changed
+	api2Copy.IsRevision = true
+
+	// When imported revision as API, the "RevisionID" property will be 0 for the imported API. Hence, the property of
+	// the imported API be changed
+	api2Copy.RevisionID = 1
 
 	// If an API is not advertise only, the API owner will be changed during export and import to the current provider
 	if (api1Copy.AdvertiseInformation != apim.AdvertiseInfo{}) {

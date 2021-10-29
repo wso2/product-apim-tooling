@@ -45,7 +45,7 @@ func TestExportApiNonDeloyedRevision(t *testing.T) {
 				Api:         apiRevision,
 				SrcAPIM:     dev,
 				Revision:    strconv.Itoa(revNumber),
-				IsDeployed:  true,
+				IsDeployed:  false,
 			}
 
 			testutils.ValidateExportedAPIRevisionStructure(t, args)
@@ -96,7 +96,7 @@ func TestExportApiWorkingCopy(t *testing.T) {
 				CtlUser:     user.CtlUser,
 				Api:         api,
 				SrcAPIM:     dev,
-				IsDeployed:  true,
+				IsDeployed:  false,
 			}
 
 			testutils.ValidateExportedAPIStructure(t, args)
