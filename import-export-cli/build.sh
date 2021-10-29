@@ -18,19 +18,25 @@ function showUsageAndExit() {
 }
 
 function detectPlatformSpecificBuild() {
-    platform=$(uname -s)
-    if [[ "${platform}" == "Linux" ]]; then
-        platforms="linux/386/linux/i586 linux/amd64/linux/x64"
-    elif [[ "${platform}" == "Darwin" ]]; then
-        platforms="darwin/amd64/macosx/x64"
-    else
-        platforms="windows/386/windows/i586 windows/amd64/windows/x64"
+    if [ ! -e "$platform" ]; then
+      platform=$(uname -s)
+      if [[ "${platform}" == "Linux" ]]; then
+          platforms="linux/386/linux/i586 linux/amd64/linux/x64"
+      elif [[ "${platform}" == "Darwin" ]]; then
+          platforms="darwin/amd64/macosx/x64"
+      else
+          platforms="windows/386/windows/i586 windows/amd64/windows/x64"
+      fi
     fi
 }
 
 
-while getopts :t:v:f FLAG; do
+while getopts :t:v:f:c FLAG; do
   case $FLAG in
+    c)
+      cgo_enabled=0
+      platforms="linux/amd64/linux/x64"
+      ;;
     t)
       target=$OPTARG
       ;;
@@ -85,6 +91,12 @@ if [ "${full_build}" == "true" ]; then
 else
     detectPlatformSpecificBuild
     echo "Building "$'\e[1m'"${filename^^}:${build_version}"$'\e[0m'" for detected "$'\e[1m'"${platform}"$'\e[0m'" platform..."
+fi
+
+if [ ! -z "${cgo_enabled}" ]
+then
+  echo "CGO is disabled manually hence the generated output will be a static binary."
+  export CGO_ENABLED=0
 fi
 
 for platform in ${platforms}
