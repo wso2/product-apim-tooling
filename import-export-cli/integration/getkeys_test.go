@@ -117,7 +117,7 @@ func TestGetKeysConsecutivelyAdminSuperTenantUser(t *testing.T) {
 		Apim:    dev,
 	}
 	//Get keys for the first time without cleaning subscription
-	testutils.ValidateGetKeysWithoutCleanup(t, args)
+	testutils.ValidateGetKeysWithoutCleanup(t, args, true)
 
 	//Get keys for the second time and remove subscription
 	testutils.ValidateGetKeys(t, args)
@@ -392,7 +392,7 @@ func TestGetKeysConsecutivelyForAPIProductAdminSuperTenantUser(t *testing.T) {
 	}
 
 	//Get keys for the first time without cleaning subscription
-	testutils.ValidateGetKeysWithoutCleanup(t, args)
+	testutils.ValidateGetKeysWithoutCleanup(t, args, true)
 
 	//Get keys for the second time and remove subscription
 	testutils.ValidateGetKeys(t, args)

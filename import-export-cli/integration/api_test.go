@@ -20,11 +20,11 @@ package integration
 
 import (
 	"fmt"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"os"
 	"testing"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 
@@ -806,12 +806,12 @@ func TestDeleteApiWithActiveSubscriptionsSuperTenantUser(t *testing.T) {
 	apiPublisher := publisher.UserName
 	apiPublisherPassword := publisher.Password
 
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
 	dev := GetDevClient()
 
-	var api *apim.API
-
-	// This will be the API that will be deleted by apictl, so no need to do cleaning
-	api = testutils.AddAPIWithoutCleaning(t, dev, adminUser, adminPassword)
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
 	// Create and Deploy Revision of the above API
 	testutils.CreateAndDeployAPIRevision(t, dev, apiPublisher, apiPublisherPassword, api.ID)
@@ -822,16 +822,15 @@ func TestDeleteApiWithActiveSubscriptionsSuperTenantUser(t *testing.T) {
 		Apim:    dev,
 	}
 	//Publish created API
-	testutils.PublishAPI(dev, adminUser, adminPassword, api.ID)
+	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, api.ID)
 
-	testutils.ValidateGetKeysWithoutCleanup(t, args)
+	testutils.ValidateGetKeysWithoutCleanup(t, args, false)
 	//args to delete API
 	argsToDelete := &testutils.ApiImportExportTestArgs{
 		CtlUser: testutils.Credentials{Username: adminUser, Password: adminPassword},
 		Api:     api,
 		SrcAPIM: dev,
 	}
-	base.WaitForIndexing()
 
 	//validate Api with active subscriptions delete failure
 	testutils.ValidateAPIDeleteFailure(t, argsToDelete)
