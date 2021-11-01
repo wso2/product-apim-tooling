@@ -147,7 +147,7 @@ func ValidateGetKeys(t *testing.T, args *ApiGetKeyTestArgs) {
 	}
 }
 
-func ValidateGetKeysWithoutCleanup(t *testing.T, args *ApiGetKeyTestArgs) {
+func ValidateGetKeysWithoutCleanup(t *testing.T, args *ApiGetKeyTestArgs, doInvoke bool) {
 	t.Helper()
 
 	base.SetupEnv(t, args.Apim.GetEnvName(), args.Apim.GetApimURL(), args.Apim.GetTokenURL())
@@ -163,7 +163,9 @@ func ValidateGetKeysWithoutCleanup(t *testing.T, args *ApiGetKeyTestArgs) {
 
 		assert.Nil(t, err, "Error while getting key")
 
-		InvokeAPI(t, GetResourceURL(args.Apim, args.Api), base.GetValueOfUniformResponse(result), 200)
+		if doInvoke {
+			InvokeAPI(t, GetResourceURL(args.Apim, args.Api), base.GetValueOfUniformResponse(result), 200)
+		}
 	}
 
 	if args.ApiProduct != nil {
@@ -174,6 +176,8 @@ func ValidateGetKeysWithoutCleanup(t *testing.T, args *ApiGetKeyTestArgs) {
 
 		assert.Nil(t, err, "Error while getting key")
 
-		invokeAPIProduct(t, getResourceURLForAPIProduct(args.Apim, args.ApiProduct), base.GetValueOfUniformResponse(result), 200)
+		if doInvoke {
+			invokeAPIProduct(t, getResourceURLForAPIProduct(args.Apim, args.ApiProduct), base.GetValueOfUniformResponse(result), 200)
+		}
 	}
 }
