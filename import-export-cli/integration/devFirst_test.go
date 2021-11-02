@@ -94,22 +94,26 @@ func TestInitializeProject(t *testing.T) {
 	testutils.ValidateInitializeProject(t, args)
 }
 
-//Initialize an API with --definition flag
+// Initialize an API with --definition flag and import it
 func TestInitializeAPIWithDefinitionFlag(t *testing.T) {
-	apim := GetDevClient()
-	projectName := base.GenerateRandomName(16)
-	username := superAdminUser
-	password := superAdminPassword
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			apim := GetDevClient()
+			projectName := base.GenerateRandomString()
 
-	args := &testutils.InitTestArgs{
-		CtlUser:        testutils.Credentials{Username: username, Password: password},
-		SrcAPIM:        apim,
-		InitFlag:       projectName,
-		DefinitionFlag: testutils.SampleAPIYamlFilePath,
-		ForceFlag:      false,
+			args := &testutils.InitTestArgs{
+				CtlUser:        testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				SrcAPIM:        apim,
+				InitFlag:       projectName,
+				DefinitionFlag: testutils.SampleAPIYamlFilePath,
+				ForceFlag:      false,
+			}
+
+			testutils.ValidateInitializeProjectWithDefinitionFlag(t, args)
+
+			testutils.ValidateImportUpdateProject(t, args, !isTenantUser(user.CtlUser.Username, TENANT1))
+		})
 	}
-
-	testutils.ValidateInitializeProjectWithDefinitionFlag(t, args)
 }
 
 //Initialize an API from Swagger 2 Specification
@@ -465,7 +469,7 @@ func TestAPISequenceUpdate(t *testing.T) {
 			projectPath, _ := filepath.Abs(projectName)
 			srcPathForSequence, _ := filepath.Abs(testutils.DevFirstSampleCaseSequencePath)
 			destPathForSequence := projectPath + testutils.DevFirstSampleCaseDestSequencePathSuffix
-			base.CreateTempDir(t, projectPath + testutils.CustomSequenceDirectory)
+			base.CreateTempDir(t, projectPath+testutils.CustomSequenceDirectory)
 			base.Copy(srcPathForSequence, destPathForSequence)
 
 			// Update api.yaml file of initialized project with sequence related metadata
@@ -492,7 +496,7 @@ func TestAPISequenceUpdate(t *testing.T) {
 
 			// Validate that sequence has been updated
 			testutils.ValidateAPIWithUpdatedSequenceIsExported(t, args, testutils.DevFirstDefaultAPIName, testutils.DevFirstDefaultAPIVersion)
-			
+
 		})
 	}
 }
