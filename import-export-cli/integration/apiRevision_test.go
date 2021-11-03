@@ -162,3 +162,27 @@ func TestExportImportApiSameGWEnv(t *testing.T) {
 		})
 	}
 }
+
+func TestExportInvalidApiRevision(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			dev := GetDevClient()
+
+			api := testutils.AddAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
+
+			// Create and Deploy Revision of the above API
+			testutils.CreateAndDeployAPIRevision(t, dev, user.ApiPublisher.Username, user.ApiPublisher.Password, api.ID)
+
+			// Export an invalid revision
+			args := &testutils.ApiImportExportTestArgs{
+				CtlUser:  user.CtlUser,
+				Api:      api,
+				SrcAPIM:  dev,
+				Revision: "100",
+			}
+
+			testutils.ValidateExportedAPIRevisionFailure(t, args)
+		})
+	}
+}

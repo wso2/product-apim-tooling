@@ -183,7 +183,7 @@ func AddAPIFromOpenAPIDefinitionToTwoEnvs(t *testing.T, client1 *apim.Client, cl
 }
 
 func GenerateAdvertiseOnlyAPIDefinition(t *testing.T) (string, apim.API) {
-	projectPath, _ := filepath.Abs(base.GenerateRandomName(16))
+	projectPath, _ := filepath.Abs(base.GenerateRandomString())
 	base.CreateTempDir(t, projectPath)
 
 	// Read the sample-api.yaml file in the testdata directory
@@ -573,6 +573,24 @@ func ValidateExportedAPIRevisionStructure(t *testing.T, args *ApiImportExportTes
 		args.Api.Name, args.Api.Version))
 }
 
+func ValidateExportedAPIRevisionFailure(t *testing.T, args *ApiImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	// Export api from env 1
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	output, _ := exportAPIRevision(t, args)
+
+	assert.Contains(t, output, "404", "Test failed because the response does not contains a not found request")
+
+	// Validate that export failed
+	assert.False(t, base.IsAPIArchiveExists(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
+		args.Api.Name, args.Api.Version), "Test failed because the API Revision was exported successfully")
+}
+
 func validateAPI(t *testing.T, api *apim.API, exportedOutput string, isDeployed bool, sampleFile string) {
 	// Unzip exported API
 	exportedPath := base.GetExportedPathFromOutput(exportedOutput)
@@ -595,6 +613,12 @@ func validateAPI(t *testing.T, api *apim.API, exportedOutput string, isDeployed 
 	} else {
 		assert.False(t, base.IsFileAvailable(t, filepath.Join(unzipedProjectPath, DeploymentEnvYamlFilePath)), "Non required deployment_environments.yaml found")
 	}
+
+	t.Cleanup(func() {
+		// Remove the extracted project
+		base.RemoveDir(exportedPath)
+		base.RemoveDir(relativePath)
+	})
 }
 
 func validateAPIStructure(t *testing.T, fileData *[]byte, sampleFile string) {

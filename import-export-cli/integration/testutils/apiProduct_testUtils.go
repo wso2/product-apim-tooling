@@ -122,6 +122,32 @@ func exportAPIProduct(t *testing.T, name string, version string, env string) (st
 	return output, err
 }
 
+func exportAPIProductRevision(t *testing.T, args *ApiProductImportExportTestArgs) (string, error) {
+	var output string
+	var err error
+
+	flags := []string{"export", "api-product", "-n", args.ApiProduct.Name, "-e", args.SrcAPIM.GetEnvName(), "-k", "--verbose"}
+
+	if args.ApiProductProvider.Username != "" {
+		flags = append(flags, "-r", args.ApiProductProvider.Username)
+	}
+
+	if args.IsLatest {
+		flags = append(flags, "--latest")
+	} else {
+		flags = append(flags, "--rev", args.Revision)
+	}
+
+	output, err = base.Execute(t, flags...)
+
+	t.Cleanup(func() {
+		base.RemoveAPIArchive(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()), args.ApiProduct.Name,
+			utils.DefaultApiProductVersion)
+	})
+
+	return output, err
+}
+
 func importAPIProductPreserveProvider(t *testing.T, args *ApiProductImportExportTestArgs) (string, error) {
 	var output string
 	var err error
@@ -619,6 +645,25 @@ func ValidateAPIProductDeleteFailureWithExistingEnv(t *testing.T, args *ApiProdu
 		UnsubscribeAPI(args.SrcAPIM, args.CtlUser.Username, args.CtlUser.Password, args.ApiProduct.ID)
 		deleteAPIProductByCtl(t, args)
 	})
+}
+
+func ValidateExportedAPIProductRevisionFailure(t *testing.T, args *ApiProductImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	// Export api from env 1
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	output, _ := exportAPIProductRevision(t, args)
+
+	assert.Contains(t, output, "404", "Test failed because the response does not contains a not found request")
+
+	// Validate that export failed
+	assert.False(t, base.IsAPIArchiveExists(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
+		args.ApiProduct.Name, utils.DefaultApiProductVersion),
+		"Test failed because the API Product Revision was exported successfully")
 }
 
 // Execute get apis command with query parameters

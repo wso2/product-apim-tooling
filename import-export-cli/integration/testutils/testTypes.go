@@ -60,6 +60,8 @@ type ApiProductImportExportTestArgs struct {
 	UpdateApisFlag       bool
 	UpdateApiProductFlag bool
 	ParamsFile           string
+	Revision             string
+	IsLatest             bool
 }
 
 type AppImportExportTestArgs struct {
