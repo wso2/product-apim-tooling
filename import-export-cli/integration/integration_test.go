@@ -162,6 +162,14 @@ func readConfigs() {
 		envs[env.Name] = env
 	}
 
+	indexingDelayOS := os.Getenv("INDEXING_DELAY")
+
+	if !strings.EqualFold(indexingDelayOS, "") {
+		intVar, _ := strconv.Atoi(indexingDelayOS)
+		yamlConfig.IndexingDelay = intVar
+
+	}
+
 	base.SetIndexingDelay(yamlConfig.IndexingDelay)
 	base.SetMaxInvocationAttempts(yamlConfig.MaxInvocationAttempts)
 

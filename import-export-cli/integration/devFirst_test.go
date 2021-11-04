@@ -106,12 +106,13 @@ func TestInitializeAPIWithDefinitionFlag(t *testing.T) {
 				SrcAPIM:        apim,
 				InitFlag:       projectName,
 				DefinitionFlag: testutils.SampleAPIYamlFilePath,
+				APIName:        testutils.DevFirstDefinitionFlagSampleAPIName,
 				ForceFlag:      false,
 			}
 
 			testutils.ValidateInitializeProjectWithDefinitionFlag(t, args)
 
-			testutils.ValidateImportUpdateProject(t, args, !isTenantUser(user.CtlUser.Username, TENANT1))
+			testutils.ValidateImportProject(t, args, "", !isTenantUser(user.CtlUser.Username, TENANT1))
 		})
 	}
 }
