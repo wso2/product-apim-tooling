@@ -644,6 +644,13 @@ func validateAPIStructure(t *testing.T, fileData *[]byte, sampleFile string) {
 	}
 	sampleAPIData := sampleDataContent["data"].(map[interface{}]interface{})
 
+	// Compare the artifact versions
+	exportedAPIArtifactVersion := fileContent["version"].(string)
+	sampleAPIArtifactVersion := sampleDataContent["version"].(string)
+	assert.Equal(t, exportedAPIArtifactVersion, sampleAPIArtifactVersion,
+		"Exported artifact version: "+exportedAPIArtifactVersion+
+			" does not matches with the sample artifact version: "+sampleAPIArtifactVersion)
+
 	// Check whether the fields of the API DTO structure in APICTL has all the fields in API DTO structure from APIM
 	base.Log("\n-----------------------------------------------------------------------------------------")
 	base.Log("Checking whether the fields of APICTL API DTO struct has all the fields from APIM API DTO struct")
