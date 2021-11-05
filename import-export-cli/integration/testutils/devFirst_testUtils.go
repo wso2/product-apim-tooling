@@ -19,6 +19,7 @@
 package testutils
 
 import (
+	"io/ioutil"
 	"log"
 	"path/filepath"
 	"strconv"
@@ -28,6 +29,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
+	"gopkg.in/yaml.v2"
 )
 
 func AwsInitProject(t *testing.T, args *AWSInitTestArgs) (string, error) {
@@ -368,11 +370,30 @@ func ValidateAPIWithUpdatedSequenceIsExported(t *testing.T, args *InitTestArgs, 
 	base.Unzip(relativePath, exportedPath)
 
 	// Check whether the exported custom sequence is equivalent to the latest sequence version
-	exportedAPISequencePath := relativePath + TestDefaultExtractedFileName + DevFirstUpdatedSampleCaseSequencePathSuffix
+	exportedApiSequencePath := relativePath + TestDefaultExtractedFileName + DevFirstUpdatedSampleCaseSequencePathSuffix
 	lastUpdatedSequencePath, _ := filepath.Abs(DevFirstUpdatedSampleCaseSequencePath)
-	isSequenceUpdated := base.IsFileContentIdentical(exportedAPISequencePath, lastUpdatedSequencePath)
+	isSequenceUpdated := base.IsFileContentIdentical(exportedApiSequencePath, lastUpdatedSequencePath)
 	base.Log("Exported custom sequence is updated", isSequenceUpdated)
 	assert.Equal(t, true, isSequenceUpdated, "Error while updating the custom sequence of API")
+
+	// Check whether the API definition file has accurate mediation policy related metadata
+	exportedApiYamlFilePath := filepath.Join(relativePath, TestDefaultExtractedFileName, DevFirstSampleCaseApiYamlFilePathSuffix)
+	exportedApiYaml, err := ioutil.ReadFile(exportedApiYamlFilePath)
+	if err != nil {
+		t.Error(err)
+	}
+
+	var api *apim.APIFile
+	err = yaml.Unmarshal(exportedApiYaml, &api)
+	if err != nil {
+		t.Error(err)
+	}
+
+	exportedApiMediationPolicies := api.Data.MediationPolicies
+	assert.Equal(t, exportedApiMediationPolicies[0].Name, CustomSequenceName,
+		"Exported API does not have the expected custom sequence related metadata." + 
+		"MediationPolicies list under the API definition file is expected to have an in-sequence with the name: " +
+		CustomSequenceName)
 
 	t.Cleanup(func() {
 		// Remove created project and logout
