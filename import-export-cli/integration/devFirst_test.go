@@ -83,35 +83,41 @@ import (
 
 //Initialize a project Initialize an API without any flag
 func TestInitializeProject(t *testing.T) {
-	username := superAdminUser
-	password := superAdminPassword
-	apim := GetDevClient()
-	projectName := base.GenerateRandomName(16)
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			apim := GetDevClient()
+			projectName := base.GenerateRandomString()
 
-	args := &testutils.InitTestArgs{
-		CtlUser:  testutils.Credentials{Username: username, Password: password},
-		SrcAPIM:  apim,
-		InitFlag: projectName,
+			args := &testutils.InitTestArgs{
+				CtlUser:  testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				SrcAPIM:  apim,
+				InitFlag: projectName,
+				APIName:  projectName, // The logic of apictl init has been written to consider the projectName as
+				// the API name, if an OAS or a definition is not provided
+			}
+
+			testutils.ValidateInitializeProject(t, args)
+
+			projectPath, _ := filepath.Abs(projectName)
+			apiYamlPath := projectPath + string(os.PathSeparator) + testutils.APIYamlFilePath
+
+			// Read the api.yaml file in the exported directory
+			fileData, _ := ioutil.ReadFile(apiYamlPath)
+
+			fileContent := make(map[string]interface{})
+			err := yaml.Unmarshal(fileData, &fileContent)
+			if err != nil {
+				t.Error(err)
+			}
+			apiArtifactVersion := fileContent["version"].(string)
+
+			assert.Equal(t, apiArtifactVersion, "v"+yamlConfig.APICTLVersion,
+				"Artifact version: "+apiArtifactVersion+
+					" does not matches with the APICTL version: v"+yamlConfig.APICTLVersion)
+
+			testutils.ValidateImportProject(t, args, "", !isTenantUser(user.CtlUser.Username, TENANT1))
+		})
 	}
-
-	testutils.ValidateInitializeProject(t, args)
-
-	projectPath, _ := filepath.Abs(projectName)
-	apiYamlPath := projectPath + string(os.PathSeparator) + testutils.APIYamlFilePath
-
-	// Read the api.yaml file in the exported directory
-	fileData, _ := ioutil.ReadFile(apiYamlPath)
-
-	fileContent := make(map[string]interface{})
-	err := yaml.Unmarshal(fileData, &fileContent)
-	if err != nil {
-		t.Error(err)
-	}
-	apiArtifactVersion := fileContent["version"].(string)
-
-	assert.Equal(t, apiArtifactVersion, "v"+yamlConfig.APICTLVersion,
-		"Artifact version: "+apiArtifactVersion+
-			" does not matches with the APICTL version: v"+yamlConfig.APICTLVersion)
 }
 
 // Initialize an API with --definition flag and import it
