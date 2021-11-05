@@ -430,21 +430,6 @@ func IsFileContentIdentical(path1, path2 string) bool {
 	return bytes.Equal(file_1, file_2)
 }
 
-// Append string to a given file
-func AppendStringToFile(str, path string) error {
-	file, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	_, err = file.WriteString(str)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 // Copy the src file to dst. Any existing file will be overwritten
 func Copy(src, dst string) error {
 	in, err := os.Open(src)

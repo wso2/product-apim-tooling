@@ -24,6 +24,7 @@ import (
 	"testing"
 
 	"github.com/magiconair/properties/assert"
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -470,12 +471,12 @@ func TestUpdateDocAndImageOfAPIOfExistingAPI(t *testing.T) {
 func TestAPISequenceUpdate(t *testing.T) {
 	for _, user := range testCaseUsers {
 		t.Run(user.Description, func(t *testing.T) {
-			apim := GetDevClient()
+			dev := GetDevClient()
 			projectName := base.GenerateRandomString()
 
 			args := &testutils.InitTestArgs{
 				CtlUser:   testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
-				SrcAPIM:   apim,
+				SrcAPIM:   dev,
 				InitFlag:  projectName,
 				OasFlag:   testutils.TestOpenAPI3DefinitionPath,
 				APIName:   testutils.DevFirstDefaultAPIName,
@@ -493,9 +494,38 @@ func TestAPISequenceUpdate(t *testing.T) {
 			base.Copy(srcPathForSequence, destPathForSequence)
 
 			// Update api.yaml file of initialized project with sequence related metadata
-			apiMetadataYamlPath := projectPath + testutils.DevFirstSampleCaseApiMetadataPathSuffix
-			inSequenceStr := "inSequence: " + testutils.CustomSequenceName
-			base.AppendStringToFile(inSequenceStr, apiMetadataYamlPath)
+			apiYamlFilePath := filepath.Join(projectPath, testutils.DevFirstSampleCaseApiYamlFilePathSuffix);
+			apiYaml, err := ioutil.ReadFile(apiYamlFilePath)
+			if err != nil {
+				t.Error(err)
+			}
+
+			var api *apim.APIFile
+			err = yaml.Unmarshal(apiYaml, &api)
+			if err != nil {
+				t.Error(err)
+			}
+			
+			// Mediation policy that will be appended to the existing list of mediation policies 
+			mediationPolicy := apim.MediationPolicy{
+				Name:   testutils.CustomSequenceName,
+				Type:   "IN",
+				Shared: false,
+			}
+
+			mediationPolicies := []apim.MediationPolicy{mediationPolicy}
+			api.Data.MediationPolicies = mediationPolicies
+		
+			// Write the modified api.yaml to initialized project
+			apiYamlContent, err := yaml.Marshal(api)
+			if err != nil {
+				t.Error(err)
+			}
+
+			err = ioutil.WriteFile(apiYamlFilePath, apiYamlContent, os.ModePerm)
+			if err != nil {
+				t.Error(err)
+			}
 
 			// Import the project with the verified (syntactically correct) custom sequence
 			testutils.ValidateImportProject(t, args, "", !isTenantUser(user.CtlUser.Username, TENANT1))
@@ -503,7 +533,7 @@ func TestAPISequenceUpdate(t *testing.T) {
 			// Update custom sequence file of created project
 			srcPathForSequenceUpdate, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCaseSequencePath)
 			destPathForSequenceUpdate := projectPath + testutils.DevFirstUpdatedSampleCaseSequencePathSuffix
-			err := os.Remove(destPathForSequenceUpdate)
+			err = os.Remove(destPathForSequenceUpdate)
 			if err != nil {
 				t.Fatal(err)
 			}
