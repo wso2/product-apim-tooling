@@ -18,6 +18,7 @@
 package integration
 
 import (
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -26,6 +27,7 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"gopkg.in/yaml.v2"
 )
 
 // Initialize a API project by getting the OAS of a AWS API and import it as a super tenant user with
@@ -92,6 +94,23 @@ func TestInitializeProject(t *testing.T) {
 	}
 
 	testutils.ValidateInitializeProject(t, args)
+
+	projectPath, _ := filepath.Abs(projectName)
+	apiYamlPath := projectPath + string(os.PathSeparator) + testutils.APIYamlFilePath
+
+	// Read the api.yaml file in the exported directory
+	fileData, _ := ioutil.ReadFile(apiYamlPath)
+
+	fileContent := make(map[string]interface{})
+	err := yaml.Unmarshal(fileData, &fileContent)
+	if err != nil {
+		t.Error(err)
+	}
+	apiArtifactVersion := fileContent["version"].(string)
+
+	assert.Equal(t, apiArtifactVersion, "v"+yamlConfig.APICTLVersion,
+		"Artifact version: "+apiArtifactVersion+
+			" does not matches with the APICTL version: v"+yamlConfig.APICTLVersion)
 }
 
 // Initialize an API with --definition flag and import it
