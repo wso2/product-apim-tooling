@@ -86,7 +86,7 @@ func init() {
 		"Name of the API Product to be imported")
 	ImportAPIProductCmd.Flags().StringVarP(&importAPIProductEnvironment, "environment", "e",
 		"", "Environment from the which the API Product should be imported")
-	ImportAPIProductCmd.Flags().BoolVar(&importAPIProductRotateRevision, "rotate-revision", false,
+	ImportAPIProductCmd.Flags().BoolVar(&importAPIProductRotateRevision, "rotate-revision", true,
 		"If the maximum revision limit is reached, undeploy and delete the earliest revision")
 	ImportAPIProductCmd.Flags().BoolVar(&importAPIProductCmdPreserveProvider, "preserve-provider", true,
 		"Preserve existing provider of API Product after importing")

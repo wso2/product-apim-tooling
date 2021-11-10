@@ -424,7 +424,7 @@ func deployUpdatedProjects(accessToken, sourceRepoId, deploymentRepoId, environm
 				projectDeploymentParamsDirLocation = ""
 			}
 			err := impl.ImportAPIToEnv(accessToken, environment, generateSourceProjectPath(mainConfig, projectParam),
-				projectDeploymentParamsDirLocation, importParams.Update, importParams.PreserveProvider, false, false, false)
+				projectDeploymentParamsDirLocation, importParams.Update, importParams.PreserveProvider, false, importParams.RotateRevision, false)
 			if err != nil {
 				fmt.Println("Error... ", err)
 				failedProjects[projectParam.Type] = append(failedProjects[projectParam.Type], projectParam)
@@ -451,7 +451,7 @@ func deployUpdatedProjects(accessToken, sourceRepoId, deploymentRepoId, environm
 			}
 			err := impl.ImportAPIProductToEnv(accessToken, environment, generateSourceProjectPath(mainConfig, projectParam),
 				projectDeploymentParamsDirLocation, importParams.ImportAPIs, importParams.UpdateAPIs, importParams.UpdateAPIProduct,
-				importParams.PreserveProvider, false, false, false)
+				importParams.PreserveProvider, false, importParams.RotateRevision, false)
 			if err != nil {
 				fmt.Println("\terror... ", err)
 				failedProjects[projectParam.Type] = append(failedProjects[projectParam.Type], projectParam)
