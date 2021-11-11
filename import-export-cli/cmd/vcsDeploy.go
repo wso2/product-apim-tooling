@@ -57,7 +57,7 @@ var DeployCmd = &cobra.Command{
 		}
 		mainConfig := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
 		if mainConfig.Config.VCSSourceRepoPath == "" {
-			fmt.Println("VSC source repo path cannot be empty. Set it using apictl set command.")
+			fmt.Println("VCS source repo path cannot be empty. Set it using apictl set command.")
 			os.Exit(1)
 		}
 		credential, err := GetCredentials(flagVCSDeployEnvName)
