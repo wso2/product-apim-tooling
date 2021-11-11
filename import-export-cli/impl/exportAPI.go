@@ -107,7 +107,7 @@ func WriteToZip(exportAPIName, exportAPIVersion, exportAPIRevisionNumber, zipLoc
 			Import: utils.ImportConfig{
 				Update:           true,
 				PreserveProvider: true,
-				RotateRevision:   true,
+				RotateRevision:   false,
 			},
 		},
 	}

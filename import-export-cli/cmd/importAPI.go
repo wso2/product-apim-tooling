@@ -86,7 +86,7 @@ func init() {
 		"Preserve existing provider of API after importing")
 	ImportAPICmd.Flags().BoolVar(&importAPIUpdate, "update", false, "Update an "+
 		"existing API or create a new API")
-	ImportAPICmd.Flags().BoolVar(&importAPIRotateRevision, "rotate-revision", true, "Rotate the "+
+	ImportAPICmd.Flags().BoolVar(&importAPIRotateRevision, "rotate-revision", false, "Rotate the "+
 		"revisions with each update")
 	ImportAPICmd.Flags().BoolVar(&importAPISkipDeployments, "skip-deployments", false, "Update only "+
 		"the working copy and skip deployment steps in import")
