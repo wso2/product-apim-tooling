@@ -98,6 +98,7 @@ func WriteAPIProductToZip(exportAPIProductName, exportAPIProductVersion, zipLoca
 				ImportAPIs:       true,
 				UpdateAPIProduct: true,
 				UpdateAPIs:       false,
+				RotateRevision:   false,
 			},
 		},
 	}

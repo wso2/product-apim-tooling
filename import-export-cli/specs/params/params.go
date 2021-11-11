@@ -87,6 +87,7 @@ type ApiProductVCSParams struct {
 type APIImportParams struct {
 	Update           bool `yaml:"update"`
 	PreserveProvider bool `yaml:"preserveProvider"`
+	RotateRevision   bool `yaml:"rotateRevision"`
 }
 
 type APIProductImportParams struct {
@@ -94,6 +95,7 @@ type APIProductImportParams struct {
 	UpdateAPIs       bool `yaml:"updateApis"`
 	UpdateAPIProduct bool `yaml:"updateApiProduct"`
 	PreserveProvider bool `yaml:"preserveProvider"`
+	RotateRevision   bool `yaml:"rotateRevision"`
 }
 
 type ApplicationImportParams struct {

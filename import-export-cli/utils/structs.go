@@ -368,6 +368,7 @@ type DeployConfig struct {
 type ImportConfig struct {
 	Update            bool `json:"update,omitempty" yaml:"update,omitempty"`
 	PreserveProvider  bool `json:"preserveProvider,omitempty" yaml:"preserveProvider,omitempty"`
+	RotateRevision    bool `json:"rotateRevision,omitempty" yaml:"rotateRevision,omitempty"`
 	ImportAPIs        bool `json:"importApis,omitempty" yaml:"importApis,omitempty"`
 	UpdateAPIProduct  bool `json:"updateApiProduct,omitempty" yaml:"updateApiProduct,omitempty"`
 	UpdateAPIs        bool `json:"updateApis,omitempty" yaml:"updateApis,omitempty"`
