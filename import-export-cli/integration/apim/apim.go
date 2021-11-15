@@ -1234,6 +1234,7 @@ func (instance *Client) GetAPIProducts() *APIProductList {
 
 // GetAPIByName : Get API by name from APIM
 func (instance *Client) GetAPIByName(name string) (*APIInfo, error) {
+
 	apisURL := instance.publisherRestURL + "/apis"
 
 	request := base.CreateGet(apisURL)
@@ -1245,25 +1246,36 @@ func (instance *Client) GetAPIByName(name string) (*APIInfo, error) {
 
 	request.URL.RawQuery = values.Encode()
 
+	attempts := 0
+
 	base.LogRequest("apim.GetAPIByName()", request)
 
-	response := base.SendHTTPRequest(request)
+	for attempts != base.GetMaxInvocationAttempts() {
 
-	defer response.Body.Close()
+		base.Log("apim.GetAPIByName() attempts = ", attempts)
 
-	base.ValidateAndLogResponse("apim.GetAPIByName()", response, 200)
+		response := base.SendHTTPRequest(request)
 
-	var apiResponse APIList
-	json.NewDecoder(response.Body).Decode(&apiResponse)
+		defer response.Body.Close()
 
-	if len(apiResponse.List) == 0 {
-		return nil, errors.New("apim.GetAPIByName() did not return result for: " + name +
-			", it is possible that sufficient time is not allowed for solr indexing." +
-			"Consider the user of base.WaitForIndexing() in the execution flow where appropriate or " +
-			"increasing the `indexing-delay` value in the integration test config.yaml")
+		base.ValidateAndLogResponse("apim.GetAPIByName()", response, 200)
+
+		var apiResponse APIList
+		json.NewDecoder(response.Body).Decode(&apiResponse)
+
+		if len(apiResponse.List) > 0 {
+			return &apiResponse.List[0], nil
+		}
+
+		base.WaitForIndexing()
+
+		attempts++
 	}
 
-	return &apiResponse.List[0], nil
+	return nil, errors.New("apim.GetAPIByName() did not return result for: " + name +
+		", it is possible that sufficient time is not allowed for solr indexing." +
+		"Consider the user of base.WaitForIndexing() in the execution flow where appropriate or " +
+		"increasing the `indexing-delay` value in the integration test config.yaml")
 }
 
 // GetAPIProductByName : Get API Product by name from APIM
