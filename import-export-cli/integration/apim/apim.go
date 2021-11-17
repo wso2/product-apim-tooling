@@ -373,7 +373,7 @@ func (instance *Client) GenerateSampleAppData() *Application {
 // GenerateSampleAppData : Generate sample Application object with space in the application Name
 func (instance *Client) GenerateSampleAppWithNameInSpaceData() *Application {
 	app := Application{}
-	app.Name = base.GenerateRandomString() + "Test Application"
+	app.Name = generateRandomString() + "Test Application"
 	app.ThrottlingPolicy = "Unlimited"
 	app.Description = "Test Application with space in the name"
 	app.TokenType = "JWT"
