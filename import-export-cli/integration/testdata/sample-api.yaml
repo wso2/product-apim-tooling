@@ -164,3 +164,4 @@ data: # Contains the meta data of the API
       vendor: WSO2 # Vendor of the Advertised only API
   gatewayVendor: null # Gateway vendor
   asyncTransportProtocols: [] # Async transport protocols
+  
