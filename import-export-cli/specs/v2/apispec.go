@@ -81,6 +81,8 @@ type APIDTODefinition struct {
 	KeyManagers                     []string      `json:"keyManagers,omitempty" yaml:"keyManagers,omitempty"`
 	AdvertiseInformation            AdvertiseInfo `json:"advertiseInfo,omitempty" yaml:"advertiseInfo,omitempty"`
 	WebsubSubscriptionConfiguration interface{}   `json:"websubSubscriptionConfiguration" yaml:"websubSubscriptionConfiguration"`
+	GatewayVendor                   string        `json:"gatewayVendor,omitempty" yaml:"gatewayVendor,omitempty"`
+	AsyncTransportProtocols         []string      `json:"asyncTransportProtocols,omitempty" yaml:"asyncTransportProtocols,omitempty"`
 }
 
 type CorsConfiguration struct {
