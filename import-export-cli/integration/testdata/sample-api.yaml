@@ -162,6 +162,6 @@ data: # Contains the meta data of the API
       originalDevPortalUrl: null # The original URL of the Devportal
       apiOwner: admin # The original owner of the API
       vendor: WSO2 # Vendor of the Advertised only API
-  gatewayVendor: null # Gateway vendor
+  gatewayVendor: wso2 # Gateway vendor
   asyncTransportProtocols: [] # Async transport protocols
   
