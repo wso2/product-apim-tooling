@@ -65,6 +65,47 @@ func TestExportApiProductNonAdminSuperTenantUser(t *testing.T) {
 		SrcAPIM:            dev,
 	}
 
+	testutils.ValidateAPIProductExport(t, args)
+}
+
+// Export an API Product with its dependent APIs from one environment as a super tenant non admin user
+// who does not have permission
+func TestExportApiProductNonAdminSuperTenantUserWithoutPermission(t *testing.T) {
+	apiPublisher := publisher.UserName
+	apiPublisherPassword := publisher.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	apiSubscriber := subscriber.UserName
+	apiSubscriberPassword := subscriber.Password
+
+	dev := GetDevClient()
+
+	// Add the first dependent API to env1
+	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI1.ID)
+
+	// Add the second dependent API to env1
+	dependentAPI2 := testutils.AddAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
+	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
+
+	// Map the real name of the API with the API
+	apisList := map[string]*apim.API{
+		"PizzaShackAPI":   dependentAPI1,
+		"SwaggerPetstore": dependentAPI2,
+	}
+
+	// Add the API Product to env1
+	apiProduct := testutils.AddAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
+
+	args := &testutils.ApiProductImportExportTestArgs{
+		ApiProductProvider: testutils.Credentials{Username: apiPublisher, Password: apiPublisherPassword},
+		CtlUser:            testutils.Credentials{Username: apiSubscriber, Password: apiSubscriberPassword},
+		ApiProduct:         apiProduct,
+		SrcAPIM:            dev,
+	}
+
 	testutils.ValidateAPIProductExportFailure(t, args)
 }
 
