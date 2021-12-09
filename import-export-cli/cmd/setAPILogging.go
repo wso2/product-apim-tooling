@@ -1,25 +1,44 @@
+/*
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*  WSO2 Inc. licenses this file to you under the Apache License,
+*  Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+ */
+
 package cmd
 
 import (
+	"fmt"
+	"net/http"
+
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
-	"strings"
 )
 
-var setApiLoggingCmdEnvironment string
-var setApiLoggingCmdFormat string
-var setApiLoggingCmdQuery []string
-var setApiLoggingCmdLimit string
+var setApiLoggingEnvironment string
+var setApiLoggingAPIId string
+var setApiLoggingLogLevel string
 
 const SetApiLoggingCmdLiteral = "api-logging"
-const setApiLoggingCmdShortDesc = "Display a list of API logger in an environment"
-const setApiLoggingCmdLongDesc = `Display a list of API logger in the environment`
+const setApiLoggingCmdShortDesc = "Set the log level for an API in an environment"
+const setApiLoggingCmdLongDesc = `Set the log level for an API in the environment specified`
 
 var setApiLoggingCmdExamples =
-	utils.ProjectName + ` ` + setCmdLiteral + ` ` + SetApiLoggingCmdLiteral + `
-` + utils.ProjectName + ` ` + setCmdLiteral + ` ` + SetApiLoggingCmdLiteral + ` --api-id`
+	utils.ProjectName + ` ` + SetCmdLiteral + ` ` + SetApiLoggingCmdLiteral + ` --api-id bf36ca3a-0332-49ba-abce-e9992228ae06 --log-level full -e dev
+` + utils.ProjectName + ` ` + SetCmdLiteral + ` ` + SetApiLoggingCmdLiteral + ` --api-id bf36ca3a-0332-49ba-abce-e9992228ae06 --log-level off -e dev`
 
 var setApiLoggingCmd = &cobra.Command{
 	Use:     SetApiLoggingCmdLiteral,
@@ -27,8 +46,8 @@ var setApiLoggingCmd = &cobra.Command{
 	Long:    setApiLoggingCmdLongDesc,
 	Example: setApiLoggingCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + SetApiLoggingCmdLiteral + " called")
-		cred, err := GetCredentials(setApiLoggingCmdEnvironment)
+		utils.Logln(utils.LogPrefixInfo + SetCmdLiteral + " " + SetApiLoggingCmdLiteral + " called")
+		cred, err := GetCredentials(setApiLoggingEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
@@ -37,24 +56,30 @@ var setApiLoggingCmd = &cobra.Command{
 }
 
 func executeSetApiLoggingCmd(credential credentials.Credential) {
-	accessToken, err := credentials.GetOAuthAccessToken(credential, setApiLoggingCmdEnvironment)
+	resp, err := impl.SetAPILoggingLevel(credential, setApiLoggingEnvironment, setApiLoggingAPIId, setApiLoggingLogLevel)
 	if err != nil {
-		utils.Logln(utils.LogPrefixError + "calling 'list' " + err.Error())
-		utils.HandleErrorAndExit("Error calling '"+SetApiLoggingCmdLiteral+"'", err)
+		utils.HandleErrorAndExit("Error while setting the log level of the API", err)
 	}
-
-	_, apis, err := impl.GetAPIListFromEnv(accessToken, setApiLoggingCmdEnvironment,
-		strings.Join(setApiLoggingCmdQuery, queryParamSeparator), setApiLoggingCmdLimit)
-	if err == nil {
-		impl.PrintAPIs(apis, setApiLoggingCmdFormat)
+	// Print info on response
+	utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
+	if resp.StatusCode() == http.StatusOK {
+		// 200 OK
+		fmt.Println("Log level " + setApiLoggingLogLevel + " is successfully set to the API.")
 	} else {
-		utils.Logln(utils.LogPrefixError+"Getting List of APIs", err)
+		fmt.Println("Setting the log level of the API: ", resp.Status(), "\n", string(resp.Body()))
 	}
 }
 
 func init() {
 	SetCmd.AddCommand(setApiLoggingCmd)
 
-	setApiLoggingCmd.Flags().StringVarP(&setApiLoggingCmdEnvironment, "api-id", "i",
+	setApiLoggingCmd.Flags().StringVarP(&setApiLoggingAPIId, "api-id", "i",
 		"", "Api ID")
+	setApiLoggingCmd.Flags().StringVarP(&setApiLoggingLogLevel, "log-level", "",
+		"", "Api ID")
+	setApiLoggingCmd.Flags().StringVarP(&setApiLoggingEnvironment, "environment", "e",
+		"", "Environment of the API which the log level should be set")
+	_ = setApiLoggingCmd.MarkFlagRequired("environment")
+	_ = setApiLoggingCmd.MarkFlagRequired("api-id")
+	_ = setApiLoggingCmd.MarkFlagRequired("log-level")
 }

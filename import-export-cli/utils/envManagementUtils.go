@@ -282,6 +282,45 @@ func GetRegistrationEndpointOfEnv(env, filePath string) string {
 	}
 }
 
+// Get APILoggingListEndpoint of a given environment
+func GetAPILoggingListEndpointOfEnv(env, filePath string) string {
+	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
+	if !(envEndpoints.PublisherEndpoint == "" || envEndpoints == nil) {
+		envEndpoints.PublisherEndpoint = AppendSlashToString(envEndpoints.PublisherEndpoint)
+		return envEndpoints.PublisherEndpoint + defaultAPILoggingListEndpoint
+	} else {
+		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
+		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
+		return apiManagerEndpoint + defaultAPILoggingListEndpoint
+	}
+}
+
+// Get APILoggingDetailsEndpoint of a given environment
+func GetAPILoggingDetailsEndpointOfEnv(env, apiId, filePath string) string {
+	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
+	if !(envEndpoints.PublisherEndpoint == "" || envEndpoints == nil) {
+		envEndpoints.PublisherEndpoint = AppendSlashToString(envEndpoints.PublisherEndpoint)
+		return envEndpoints.PublisherEndpoint + defaultAPILoggingBaseEndpoint + "/" + apiId
+	} else {
+		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
+		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
+		return apiManagerEndpoint + defaultAPILoggingBaseEndpoint + "/" + apiId
+	}
+}
+
+// Get APILoggingSetEndpoint of a given environment
+func GetAPILoggingSetEndpointOfEnv(env, apiId, filePath string) string {
+	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
+	if !(envEndpoints.PublisherEndpoint == "" || envEndpoints == nil) {
+		envEndpoints.PublisherEndpoint = AppendSlashToString(envEndpoints.PublisherEndpoint)
+		return envEndpoints.PublisherEndpoint + defaultAPILoggingBaseEndpoint + "/" + apiId
+	} else {
+		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
+		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
+		return apiManagerEndpoint + defaultAPILoggingBaseEndpoint + "/" + apiId
+	}
+}
+
 // Get username of an environment given the environment
 func GetUsernameOfEnv(env, filePath string) string {
 	envKeys, _ := GetKeysOfEnvironment(env, filePath)
