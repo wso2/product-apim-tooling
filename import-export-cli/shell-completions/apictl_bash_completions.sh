@@ -699,6 +699,7 @@ _apictl_change-status()
 
     commands=()
     commands+=("api")
+    commands+=("api-product")
     commands+=("help")
 
     flags=()

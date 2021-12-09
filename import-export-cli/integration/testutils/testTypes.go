@@ -139,3 +139,13 @@ type GenDeploymentDirTestArgs struct {
 	Source      string
 	Destination string
 }
+
+type ApiProductChangeLifeCycleStatusTestArgs struct {
+	ApiProvider   Credentials
+	CtlUser       Credentials
+	ApiProduct    *apim.APIProduct
+	APIM          *apim.Client
+	Action        string
+	Provider      string
+	ExpectedState string
+}
