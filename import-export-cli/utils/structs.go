@@ -93,6 +93,12 @@ type Application struct {
 	GroupID string `json:"groupId"`
 }
 
+type APILogger struct {
+	ID              string `json:"apiId"`
+	Context         string `json:"context"`
+	LogLevel        string `json:"logLevel"`
+}
+
 type RegistrationResponse struct {
 	ClientID     string `json:"clientId"`
 	ClientSecret string `json:"clientSecret"`
@@ -111,6 +117,10 @@ type TokenResponse struct {
 type APIListResponse struct {
 	Count int32 `json:"count"`
 	List  []API `json:"list"`
+}
+
+type APILoggerListResponse struct {
+	Apis  []APILogger  `json:"apis"`
 }
 
 type APIProductListResponse struct {
