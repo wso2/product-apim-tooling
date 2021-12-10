@@ -719,7 +719,7 @@ func ValidateChangeLifeCycleStatusOfAPIProduct(t *testing.T, args *ApiProductCha
 
 	base.WaitForIndexing()
 
-	//Execute apictl command to change life cycle of an Api
+	//Execute apictl command to change life cycle of an Api Product
 	output, _ := changeLifeCycleOfAPIProduct(t, args)
 	//Assert apictl output
 	assert.Contains(t, output, "state changed successfully!", "Error while changing life cycle of API Product")
@@ -744,7 +744,7 @@ func ValidateChangeLifeCycleStatusOfAPIProductFailure(t *testing.T, args *ApiPro
 	//Execute apictl command to change life cycle of an Api Product
 	output, _ := changeLifeCycleOfAPIProduct(t, args)
 	//Assert apictl output
-	assert.NotContains(t, output, "state changed successfully!", "Error while changing life cycle of API")
+	assert.NotContains(t, output, "state changed successfully!", "Error while changing life cycle of API Product")
 	assert.Contains(t, output, "Lifecycle state change action "+args.Action+" is not allowed")
 	assert.NotEqual(t, args.ApiProduct.State, args.ExpectedState, "Life Cycle State changed successfully")
 }
