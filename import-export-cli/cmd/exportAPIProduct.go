@@ -38,6 +38,7 @@ var exportAPIProductProvider string
 var exportAPIProductFormat string
 var runningExportAPIProductCommand bool
 var exportAPIProductLatestRevision bool
+var exportAPIProductPreserveStatus bool
 
 // ExportAPIProduct command related usage info
 const ExportAPIProductCmdLiteral = "api-product"
@@ -80,7 +81,7 @@ func executeExportAPIProductCmd(credential credentials.Credential, exportDirecto
 		}
 		resp, err := impl.ExportAPIProductFromEnv(accessToken, exportAPIProductName, exportAPIProductVersion,
 			exportAPIProductRevisionNum, exportAPIProductProvider, exportAPIProductFormat, CmdExportEnvironment,
-			exportAPIProductLatestRevision)
+			exportAPIProductLatestRevision, exportAPIProductPreserveStatus)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while exporting", err)
 		}
@@ -113,6 +114,8 @@ func init() {
 		"Provider of the API Product")
 	ExportAPIProductCmd.Flags().StringVarP(&CmdExportEnvironment, "environment", "e",
 		"", "Environment to which the API Product should be exported")
+	ExportAPIProductCmd.Flags().BoolVarP(&exportAPIProductPreserveStatus, "preserve-status", "", true,
+		"Preserve API Product status when exporting. Otherwise API Product will be exported in CREATED status")
 	ExportAPIProductCmd.Flags().BoolVarP(&exportAPIProductLatestRevision, "latest", "", false,
 		"Export the latest revision of the API Product")
 	ExportAPIProductCmd.Flags().StringVarP(&exportAPIProductFormat, "format", "", utils.DefaultExportFormat, "File format of exported archive (json or yaml)")
