@@ -24,12 +24,13 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"text/template"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/formatter"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
-	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"net/http"
 )
 
@@ -73,6 +74,8 @@ func (a *loggingApi) MarshalJSON() ([]byte, error) {
 	return formatter.MarshalJSON(a)
 }
 
+var tenantDomain = utils.DefaultTenantDomain
+
 // Add new APILogger object and use it in the array
 func GetPerAPILoggingListFromEnv(credential credentials.Credential, environment string) (apis []utils.APILogger, err error) {
 	// Base64 encoding the credentials
@@ -80,12 +83,16 @@ func GetPerAPILoggingListFromEnv(credential credentials.Credential, environment 
 	// Prepping the headers
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + b64encodedCredentials
-	apiListEndpoint := utils.GetAPILoggingListEndpointOfEnv(environment, utils.MainConfigFilePath)
+	if strings.Contains(credential.Username, "@") {
+		splits := strings.Split(credential.Username, "@")
+		tenantDomain = splits[len(splits)-1]
+	}
+	apiListEndpoint := utils.GetAPILoggingListEndpointOfEnv(environment, tenantDomain, utils.MainConfigFilePath)
 	utils.Logln(utils.LogPrefixInfo+"URL:", apiListEndpoint)
 	resp, err := utils.InvokeGETRequest(apiListEndpoint, headers)
 
 	if err != nil {
-		utils.HandleErrorAndExit("Unable to connect to "+apiListEndpoint, err)
+		utils.HandleErrorAndExit("Unable to connect to " + apiListEndpoint, err)
 	}
 
 	utils.Logln(utils.LogPrefixInfo+"Response:", resp.Status())
@@ -143,7 +150,11 @@ func GetPerAPILoggingDetailsFromEnv(credential credentials.Credential, environme
 	// Prepping the headers
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + b64encodedCredentials
-	apiDetailsEndpoint := utils.GetAPILoggingDetailsEndpointOfEnv(environment, apiId, utils.MainConfigFilePath)
+	if strings.Contains(credential.Username, "@") {
+		splits := strings.Split(credential.Username, "@")
+		tenantDomain = splits[len(splits)-1]
+	}
+	apiDetailsEndpoint := utils.GetAPILoggingDetailsEndpointOfEnv(environment, apiId, tenantDomain, utils.MainConfigFilePath)
 	utils.Logln(utils.LogPrefixInfo+"URL:", apiDetailsEndpoint)
 	resp, err := utils.InvokeGETRequest(apiDetailsEndpoint, headers)
 
@@ -176,7 +187,11 @@ func SetAPILoggingLevel(credential credentials.Credential, environment, apiId, l
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + b64encodedCredentials
 	headers[utils.HeaderAccept] = utils.HeaderValueApplicationJSON
 	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
-	apiSetEndpoint := utils.GetAPILoggingSetEndpointOfEnv(environment, apiId, utils.MainConfigFilePath)
+	if strings.Contains(credential.Username, "@") {
+		splits := strings.Split(credential.Username, "@")
+		tenantDomain = splits[len(splits)-1]
+	}
+	apiSetEndpoint := utils.GetAPILoggingSetEndpointOfEnv(environment, apiId, tenantDomain, utils.MainConfigFilePath)
 	utils.Logln(utils.LogPrefixInfo+"URL:", apiSetEndpoint)
 	body := `{"logLevel":"` + logLevel + `"}`
 	resp, err := utils.InvokePutRequest(nil, apiSetEndpoint, headers, body)
