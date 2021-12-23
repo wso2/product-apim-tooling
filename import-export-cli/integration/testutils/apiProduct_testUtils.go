@@ -56,6 +56,12 @@ func AddAPIProductFromJSON(t *testing.T, client *apim.Client, username string, p
 	return apiProduct
 }
 
+func PublishAPIProduct(client *apim.Client, username string, password string, apiProductID string) {
+	base.WaitForIndexing()
+	client.Login(username, password)
+	client.PublishAPIProduct(apiProductID)
+}
+
 func CreateAndDeployAPIProductRevision(t *testing.T, client *apim.Client, username, password, apiProductID string) string {
 	client.Login(username, password)
 	revision := client.CreateAPIProductRevision(apiProductID)
@@ -672,6 +678,13 @@ func searchAPIProductsWithQuery(t *testing.T, args *ApiProductImportExportTestAr
 	return output, err
 }
 
+// Execute change-status api-product command with parameters
+func changeLifeCycleOfAPIProduct(t *testing.T, args *ApiProductChangeLifeCycleStatusTestArgs) (string, error) {
+	output, err := base.Execute(t, "change-status", "api-product", "-a", args.Action, "-n", args.ApiProduct.Name,
+		"-e", args.APIM.EnvName, "-k", "--verbose")
+	return output, err
+}
+
 // ValidateSearchApiProductsList : Validate the received list of API products and verify only the required ones are there and others
 // are not in the command line output
 func ValidateSearchApiProductsList(t *testing.T, args *ApiProductImportExportTestArgs, searchQuery, matchQuery, unmatchedQuery string) {
@@ -693,4 +706,45 @@ func ValidateSearchApiProductsList(t *testing.T, args *ApiProductImportExportTes
 	// Assert the unmatched query is not in the output
 	assert.False(t, strings.Contains(output, unmatchedQuery), "apiProductsListFromCtl: "+output+
 		" , contains the query: "+unmatchedQuery)
+}
+
+func ValidateChangeLifeCycleStatusOfAPIProduct(t *testing.T, args *ApiProductChangeLifeCycleStatusTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.APIM.GetEnvName(), args.APIM.GetApimURL(), args.APIM.GetTokenURL())
+
+	// Login to apictl
+	base.Login(t, args.APIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	base.WaitForIndexing()
+
+	//Execute apictl command to change life cycle of an Api Product
+	output, _ := changeLifeCycleOfAPIProduct(t, args)
+	//Assert apictl output
+	assert.Contains(t, output, "state changed successfully!", "Error while changing life cycle of API Product")
+
+	base.WaitForIndexing()
+	//Assert life cycle state after change
+	apiProduct := getAPIProduct(t, args.APIM, args.ApiProduct.Name, args.CtlUser.Username, args.CtlUser.Password)
+	assert.Equal(t, args.ExpectedState, apiProduct.State, "Expected Life cycle state change is not equals to actual status")
+}
+
+func ValidateChangeLifeCycleStatusOfAPIProductFailure(t *testing.T, args *ApiProductChangeLifeCycleStatusTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.APIM.GetEnvName(), args.APIM.GetApimURL(), args.APIM.GetTokenURL())
+
+	// Login to apictl
+	base.Login(t, args.APIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	base.WaitForIndexing()
+
+	//Execute apictl command to change life cycle of an Api Product
+	output, _ := changeLifeCycleOfAPIProduct(t, args)
+	//Assert apictl output
+	assert.NotContains(t, output, "state changed successfully!", "Error while changing life cycle of API Product")
+	assert.Contains(t, output, "Lifecycle state change action "+args.Action+" is not allowed")
+	assert.NotEqual(t, args.ApiProduct.State, args.ExpectedState, "Life Cycle State changed successfully")
 }

@@ -487,6 +487,23 @@
 </ul>
 <ul>
     <li>
+        <h4 id="change-status-api-product">change-status api-product</h4>
+        <pre><code class="lang-bash">   Flags:
+       Required:
+           --action, -a
+           --name, -n
+           --environment, -e
+       Optional:
+           --provider, -r
+           NOTE: User will be prompted to enter credentials if the user is not logged in to the environment.
+   Examples:
+       apictl change-status api-product -a Publish -n TestAPIProduct -r admin -e staging
+       apictl change-status api-product -a Publish -n TestAPIProduct -e production
+</code></pre>
+    </li>
+</ul>
+<ul>
+    <li>
         <h4 id="undeploy-api">undeploy api</h4>
         <pre><code class="lang-bash">   Flags:
        Required:

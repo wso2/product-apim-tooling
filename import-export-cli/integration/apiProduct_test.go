@@ -1150,6 +1150,9 @@ func TestDeleteApiProductWithActiveSubscriptionsSuperTenantUser(t *testing.T) {
 	// This will be the API Product that will be deleted by apictl, so no need to do cleaning
 	apiProduct = testutils.AddAPIProductFromJSONWithoutCleaning(t, dev, apiPublisher, apiPublisherPassword, apisList)
 
+	//Change life cycle state of Api Product from CREATED to PUBLISHED
+	testutils.PublishAPIProduct(dev, apiPublisher, apiPublisherPassword, apiProduct.ID)
+
 	args := &testutils.ApiGetKeyTestArgs{
 		CtlUser:    testutils.Credentials{Username: adminUsername, Password: adminPassword},
 		ApiProduct: apiProduct,
@@ -1221,6 +1224,64 @@ func TestApiProductSearchWithQueryParams(t *testing.T) {
 				//Search API Products using query with context
 				testutils.ValidateSearchApiProductsList(t, args, searchQuery, apiProductContextToSearch, apiProductContextNotToSearch)
 			}
+		})
+	}
+}
+
+func TestChangeLifeCycleStatusOfApiProduct(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+
+			// Add the first dependent API to env1
+			dependentAPI1 := testutils.AddAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
+			testutils.PublishAPI(dev, user.ApiPublisher.Username, user.ApiPublisher.Password, dependentAPI1.ID)
+
+			// Add the second dependent API to env1
+			dependentAPI2 := testutils.AddAPIFromOpenAPIDefinition(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
+			testutils.PublishAPI(dev, user.ApiPublisher.Username, user.ApiPublisher.Password, dependentAPI2.ID)
+
+			// Map the real name of the API with the API
+			apisList := map[string]*apim.API{
+				"PizzaShackAPI":   dependentAPI1,
+				"SwaggerPetstore": dependentAPI2,
+			}
+
+			// Add the API Product to env1
+			apiProduct := testutils.AddAPIProductFromJSON(t, dev, user.ApiPublisher.Username, user.ApiPublisher.Password, apisList)
+
+			//Change life cycle state of Api from CREATED to PUBLISHED
+			args := &testutils.ApiProductChangeLifeCycleStatusTestArgs{
+				CtlUser:       testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				APIM:          dev,
+				ApiProduct:    apiProduct,
+				Action:        "Publish",
+				ExpectedState: "PUBLISHED",
+			}
+
+			testutils.ValidateChangeLifeCycleStatusOfAPIProduct(t, args)
+
+			//Change life cycle state of Api from PUBLISHED to REITRED
+			argsToNotAllowedState := &testutils.ApiProductChangeLifeCycleStatusTestArgs{
+				CtlUser:       testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				APIM:          dev,
+				ApiProduct:    apiProduct,
+				Action:        "Retire",
+				ExpectedState: "RETIRED",
+			}
+
+			testutils.ValidateChangeLifeCycleStatusOfAPIProductFailure(t, argsToNotAllowedState)
+
+			//Change life cycle state of Api from PUBLISHED to CREATED
+			argsToNextChange := &testutils.ApiProductChangeLifeCycleStatusTestArgs{
+				CtlUser:       testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				APIM:          dev,
+				ApiProduct:    apiProduct,
+				Action:        "Demote to Created",
+				ExpectedState: "CREATED",
+			}
+
+			testutils.ValidateChangeLifeCycleStatusOfAPIProduct(t, argsToNextChange)
 		})
 	}
 }

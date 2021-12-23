@@ -172,6 +172,7 @@ const LastSuceededContentDelimiter = " " // space
 const DefaultResourceTenantDomain = "tenant-default"
 const ApplicationId = "applicationId"
 const ApiId = "apiId"
+const APIProductId = "apiProductId"
 const DefaultCliApp = "default-apictl-app"
 const DefaultTokenType = "JWT"
 

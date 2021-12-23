@@ -21,6 +21,7 @@ package impl
 import (
 	"fmt"
 	"path/filepath"
+	"strconv"
 
 	"github.com/go-resty/resty/v2"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -28,10 +29,10 @@ import (
 
 // ExportAPIProductFromEnv function is used with export api command
 func ExportAPIProductFromEnv(accessToken, name, version, revisionNum, provider, format,
-	exportEnvironment string, exportLatestRevision bool) (*resty.Response, error) {
+	exportEnvironment string, exportLatestRevision bool, exportAPIProductPreserveStatus bool) (*resty.Response, error) {
 	publisherEndpoint := utils.GetPublisherEndpointOfEnv(exportEnvironment, utils.MainConfigFilePath)
 	return exportAPIProduct(name, version, revisionNum, provider, format, publisherEndpoint, accessToken,
-		exportLatestRevision)
+		exportLatestRevision, exportAPIProductPreserveStatus)
 }
 
 // exportAPIProduct
@@ -42,9 +43,10 @@ func ExportAPIProductFromEnv(accessToken, name, version, revisionNum, provider, 
 // @param accessToken : Access Token for the resource
 // @return response Response in the form of *resty.Response
 func exportAPIProduct(name, version, revisionNum, provider, format, publisherEndpoint, accessToken string,
-	exportLatestRevision bool) (*resty.Response, error) {
+	exportLatestRevision bool, exportAPIProductPreserveStatus bool) (*resty.Response, error) {
 	publisherEndpoint = utils.AppendSlashToString(publisherEndpoint)
-	query := "api-products/export?name=" + name + "&version=" + version + "&providerName=" + provider
+	query := "api-products/export?name=" + name + "&version=" + version + "&providerName=" + provider +
+		"&preserveStatus=" + strconv.FormatBool(exportAPIProductPreserveStatus)
 	if revisionNum != "" {
 		query += "&revisionNumber=" + revisionNum
 	}

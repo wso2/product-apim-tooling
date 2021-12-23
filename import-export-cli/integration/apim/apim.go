@@ -860,6 +860,29 @@ func (instance *Client) AddAPIProductFromJSON(t *testing.T, path string, usernam
 	return apiProductResponse.ID
 }
 
+// PublishAPIProduct : Publish API Product from APIM
+func (instance *Client) PublishAPIProduct(apiProductID string) {
+	lifeCycleURL := instance.publisherRestURL + "/api-products/change-lifecycle"
+
+	request := base.CreatePostEmptyBody(lifeCycleURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	values := url.Values{}
+	values.Add("action", "Publish")
+	values.Add("apiProductId", apiProductID)
+
+	request.URL.RawQuery = values.Encode()
+
+	base.LogRequest("apim.PublishAPIProduct()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.PublishAPIProduct()", response, 200)
+}
+
 // GetAPIRevisions : Get API revisions
 func (instance *Client) GetAPIRevisions(apiID, query string) *APIRevisionList {
 	revisioningURL := instance.publisherRestURL + "/apis/" + apiID + "/revisions"
