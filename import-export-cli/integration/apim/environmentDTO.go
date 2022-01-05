@@ -26,6 +26,7 @@ type Environment struct {
 	Description string  `json:"description"`
 	IsReadOnly  bool    `json:"isReadOnly"`
 	VHosts      []VHost `json:"vhosts"`
+	Provider    string  `json:"provider"`
 }
 
 type VHost struct {
