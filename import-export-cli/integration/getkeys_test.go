@@ -303,6 +303,9 @@ func TestGetKeysForAPIProductAdminSuperTenantUser(t *testing.T) {
 	// Create and Deploy API Product Revision
 	testutils.CreateAndDeployAPIProductRevision(t, dev, apiPublisher, apiPublisherPassword, apiProduct.ID)
 
+	// Change life cycle state of API Product from CREATED to PUBLISHED
+	testutils.PublishAPIProduct(dev, apiPublisher, apiPublisherPassword, apiProduct.ID)
+
 	args := &testutils.ApiGetKeyTestArgs{
 		CtlUser:    testutils.Credentials{Username: adminUser, Password: adminPassword},
 		ApiProduct: apiProduct,
@@ -344,6 +347,9 @@ func TestGetKeysForAPIProductAdminTenantUser(t *testing.T) {
 	// Create and Deploy API Product Revision
 	testutils.CreateAndDeployAPIProductRevision(t, dev, apiPublisher, apiPublisherPassword, apiProduct.ID)
 
+	// Change life cycle state of API Product from CREATED to PUBLISHED
+	testutils.PublishAPIProduct(dev, apiPublisher, apiPublisherPassword, apiProduct.ID)
+
 	args := &testutils.ApiGetKeyTestArgs{
 		CtlUser:    testutils.Credentials{Username: adminUser, Password: adminPassword},
 		ApiProduct: apiProduct,
@@ -384,6 +390,9 @@ func TestGetKeysConsecutivelyForAPIProductAdminSuperTenantUser(t *testing.T) {
 
 	// Create and Deploy API Product Revision
 	testutils.CreateAndDeployAPIProductRevision(t, dev, apiPublisher, apiPublisherPassword, apiProduct.ID)
+
+	// Change life cycle state of API Product from CREATED to PUBLISHED
+	testutils.PublishAPIProduct(dev, apiPublisher, apiPublisherPassword, apiProduct.ID)
 
 	args := &testutils.ApiGetKeyTestArgs{
 		CtlUser:    testutils.Credentials{Username: adminUser, Password: adminPassword},
