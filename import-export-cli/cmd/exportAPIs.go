@@ -105,7 +105,7 @@ func exportAPIs() {
 	} else {
 		var counterSuceededAPIs = 0
 		for count > 0 {
-			utils.Logln(utils.LogPrefixInfo + "Found ", count, "of APIs to be exported in the iteration beginning with the offset #"+
+			utils.Logln(utils.LogPrefixInfo+"Found ", count, "of APIs to be exported in the iteration beginning with the offset #"+
 				strconv.Itoa(apiListOffset)+". Maximum limit of APIs exported in single iteration is "+
 				strconv.Itoa(utils.MaxAPIsToExportOnce))
 			accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, cmdExportEnvironment)
@@ -174,10 +174,9 @@ func prepareResumption() {
 	if count == 0 {
 		//last iteration had been completed successfully but operation had halted at that point.
 		//So get the next set of APIs for next iteration
-		apiListOffset += utils.MaxAPIsToExportOnce
 		startingApiIndexFromList = 0
 		count, apis = getAPIList()
-		if len(apis) > 0 {
+		if len(apis)-lastSucceededAPInumber > 0 {
 			utils.WriteMigrationApisExportMetadataFile(apis, cmdResourceTenantDomain, cmdUsername,
 				exportRelatedFilesPath, apiListOffset)
 		} else {
