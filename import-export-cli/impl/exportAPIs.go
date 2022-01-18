@@ -59,10 +59,9 @@ func PrepareResumption(credential credentials.Credential, exportRelatedFilesPath
 	if count == 0 {
 		//last iteration had been completed successfully but operation had halted at that point.
 		//So get the next set of APIs for next iteration
-		apiListOffset += utils.MaxAPIsToExportOnce
 		startingApiIndexFromList = 0
 		count, apis = getAPIList(credential, cmdExportEnvironment, cmdResourceTenantDomain)
-		if len(apis) > 0 {
+		if len(apis)-startingApiIndexFromList > 0 {
 			utils.WriteMigrationApisExportMetadataFile(apis, cmdResourceTenantDomain, cmdUsername,
 				exportRelatedFilesPath, apiListOffset)
 		} else {
@@ -165,8 +164,8 @@ func ExportAPIs(credential credentials.Credential, exportRelatedFilesPath, cmdEx
 					revisionCount, revisions, err := getRevisionsListForAPI(accessToken, cmdExportEnvironment, apis[i],
 						exportAllRevisions)
 					if err != nil {
-						fmt.Println("An error occurred while getting the revisions list for API " + apis[i].Version +
-							"_" + apis[i].Version, err)
+						fmt.Println("An error occurred while getting the revisions list for API "+apis[i].Version+
+							"_"+apis[i].Version, err)
 					} else if revisionCount > 0 {
 						for j := 0; j < len(revisions); j++ {
 							exportApiRevision := utils.GetRevisionNumFromRevisionName(revisions[j].RevisionNumber)
