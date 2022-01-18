@@ -164,7 +164,7 @@ func ExportAPIs(credential credentials.Credential, exportRelatedFilesPath, cmdEx
 					revisionCount, revisions, err := getRevisionsListForAPI(accessToken, cmdExportEnvironment, apis[i],
 						exportAllRevisions)
 					if err != nil {
-						fmt.Println("An error occurred while getting the revisions list for API " + apis[i].Version+
+						fmt.Println("An error occurred while getting the revisions list for API " + apis[i].Version +
 							"_" + apis[i].Version, err)
 					} else if revisionCount > 0 {
 						for j := 0; j < len(revisions); j++ {
