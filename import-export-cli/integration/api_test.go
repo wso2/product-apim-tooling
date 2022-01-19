@@ -742,6 +742,40 @@ func TestExportApisWithExportApisCommand(t *testing.T) {
 	testutils.ValidateAllApisOfATenantIsExported(t, args, apisAdded)
 }
 
+// Export APIs bunch at once with export apis command and then add new APIs and export APIs once again to check whether
+// the new APIs exported
+func TestExportApisTwiceWithAfterAddingApis(t *testing.T) {
+	tenantAdminUsername := superAdminUser + "@" + TENANT1
+	tenantAdminPassword := superAdminPassword
+
+	dev := apimClients[0]
+
+	var api *apim.API
+	var apisAdded = 0
+	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
+		api = testutils.AddAPI(t, dev, tenantAdminUsername, tenantAdminPassword)
+		apisAdded++
+	}
+
+	// This will be the API that will be deleted by apictl, so no need to do cleaning
+	api = testutils.AddAPIWithoutCleaning(t, dev, tenantAdminUsername, tenantAdminPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		CtlUser: testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
+		Api:     api,
+		SrcAPIM: dev,
+	}
+
+	testutils.ValidateAllApisOfATenantIsExported(t, args, apisAdded)
+
+	// Add new API and deploy
+	api = testutils.AddAPI(t, dev, tenantAdminUsername, tenantAdminPassword)
+	newApiCount := apisAdded + 1
+
+	// Validate again to check whether the newly added API exported properly.
+	testutils.ValidateAllApisOfATenantIsExported(t, args, newApiCount)
+}
+
 // Change the lifecycle status of an API as Super tenant admin user
 func TestChangeLifeCycleStatusOfApiAdminSuperTenantUser(t *testing.T) {
 	adminUsername := superAdminUser
