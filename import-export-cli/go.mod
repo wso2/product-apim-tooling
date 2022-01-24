@@ -13,6 +13,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/renstrom/dedent v1.0.0
+	github.com/savaki/jq v0.0.0-20161209013833-0e6baecebbf8
 	github.com/spf13/cast v1.3.1
 	github.com/spf13/cobra v1.0.0
 	github.com/stretchr/testify v1.5.1
