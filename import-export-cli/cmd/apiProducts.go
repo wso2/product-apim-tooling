@@ -151,7 +151,11 @@ func executeApiProductsCmd(credential credentials.Credential) {
 func printAPIProducts(apiProducts []utils.APIProduct, format string) {
 	if format == "" {
 		format = defaultApiProductTableFormat
+	} else if format == utils.JsonArrayFormatType {
+		utils.ListArtifactsInJsonArrayFormat(apiProducts, utils.ProjectTypeApiProduct)
+		return
 	}
+
 	// create API Product context with standard output
 	apiProductContext := formatter.NewContext(os.Stdout, format)
 
