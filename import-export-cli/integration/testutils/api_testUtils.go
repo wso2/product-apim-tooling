@@ -219,6 +219,12 @@ func listAPIs(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
 	return output, err
 }
 
+func listAPIsWithJsonArrayFormat(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
+	output, err := base.Execute(t, "list", "apis", "-e", args.SrcAPIM.EnvName, "--format", "jsonArray",
+		"-k", "--verbose")
+	return output, err
+}
+
 func ValidateAPIExportFailure(t *testing.T, args *ApiImportExportTestArgs) {
 	t.Helper()
 
@@ -609,4 +615,29 @@ func ValidateSearchApisList(t *testing.T, args *ApiImportExportTestArgs, searchQ
 	// Assert the unmatched query is not in the output
 	assert.False(t, strings.Contains(output, unmatchedQuery), "apisListFromCtl: "+output+
 		" , contains the query: "+unmatchedQuery)
+}
+
+// ValidateAPIsListWithJsonArrayFormat : Validate the received list of APIs are in JsonArray format and verify only
+// the required ones are there and others are not in the command line output
+func ValidateAPIsListWithJsonArrayFormat(t *testing.T, args *ApiImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	// List APIs of env 1
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	base.WaitForIndexing()
+
+	output, _ := listAPIsWithJsonArrayFormat(t, args)
+
+	apisList := args.SrcAPIM.GetAPIs()
+
+	// Validate APIs list with added APIs
+	validateListAPIsEqual(t, output, apisList)
+
+	// Validate JsonArray format
+	assert.Contains(t, output, "[\n {\n", "Error while listing APIs in JsonArray format")
+
 }

@@ -590,6 +590,94 @@ func TestListApisDevopsTenantUser(t *testing.T) {
 	testutils.ValidateAPIsList(t, args)
 }
 
+func TestListApisWithJsonArrayFormatAdminSuperTenantUser(t *testing.T) {
+	adminUsername := superAdminUser
+	adminPassword := superAdminPassword
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+
+	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
+		// Add the API to env1
+		testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+	}
+
+	args := &testutils.ApiImportExportTestArgs{
+		CtlUser: testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		SrcAPIM: dev,
+	}
+
+	testutils.ValidateAPIsListWithJsonArrayFormat(t, args)
+}
+
+func TestListApisWithJsonArrayFormatDevopsSuperTenantUser(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+
+	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
+		// Add the API to env1
+		testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+	}
+
+	args := &testutils.ApiImportExportTestArgs{
+		CtlUser: testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		SrcAPIM: dev,
+	}
+
+	testutils.ValidateAPIsListWithJsonArrayFormat(t, args)
+}
+
+func TestListApisWithJsonArrayFormatAdminTenantUser(t *testing.T) {
+	tenantAdminUsername := superAdminUser + "@" + TENANT1
+	tenantAdminPassword := superAdminPassword
+
+	apiCreator := creator.UserName + "@" + TENANT1
+	apiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+
+	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
+		// Add the API to env1
+		testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+	}
+
+	args := &testutils.ApiImportExportTestArgs{
+		CtlUser: testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
+		SrcAPIM: dev,
+	}
+
+	testutils.ValidateAPIsListWithJsonArrayFormat(t, args)
+}
+
+func TestListApisWithJsonArrayFormatDevopsTenantUser(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	apiCreator := creator.UserName + "@" + TENANT1
+	apiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+
+	for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
+		// Add the API to env1
+		testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+	}
+
+	args := &testutils.ApiImportExportTestArgs{
+		CtlUser: testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		SrcAPIM: dev,
+	}
+
+	testutils.ValidateAPIsListWithJsonArrayFormat(t, args)
+}
+
 func TestDeleteApiAdminSuperTenantUser(t *testing.T) {
 	adminUsername := superAdminUser
 	adminPassword := superAdminPassword
