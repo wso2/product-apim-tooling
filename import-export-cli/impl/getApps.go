@@ -112,7 +112,11 @@ func extractAppDefinition(jsonContent []byte) (*v2.ApplicationDefinition, error)
 func PrintApps(apps []utils.Application, format string) {
 	if format == "" {
 		format = defaultAppTableFormat
+	} else if format == utils.JsonArrayFormatType {
+		utils.ListArtifactsInJsonArrayFormat(apps, utils.ProjectTypeApplication)
+		return
 	}
+
 	// create new app context with standard output
 	appContext := formatter.NewContext(os.Stdout, format)
 
