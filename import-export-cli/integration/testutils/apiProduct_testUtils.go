@@ -183,6 +183,12 @@ func listAPIProducts(t *testing.T, args *ApiProductImportExportTestArgs) (string
 	return output, err
 }
 
+func listAPIProductsWithJsonArrayFormat(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
+	output, err := base.Execute(t, "list", "api-products", "-e", args.SrcAPIM.EnvName, "--format", "jsonArray",
+		"-k", "--verbose")
+	return output, err
+}
+
 func deleteAPIProductByCtl(t *testing.T, args *ApiProductImportExportTestArgs) (string, error) {
 	output, err := base.Execute(t, "delete", "api-product", "-n", args.ApiProduct.Name, "-e", args.SrcAPIM.EnvName, "-k", "--verbose")
 	return output, err
@@ -600,4 +606,28 @@ func ValidateSearchApiProductsList(t *testing.T, args *ApiProductImportExportTes
 	// Assert the unmatched query is not in the output
 	assert.False(t, strings.Contains(output, unmatchedQuery), "apiProductsListFromCtl: "+output+
 		" , contains the query: "+unmatchedQuery)
+}
+
+// ValidateAPIProductsListWithJsonArrayFormat : Validate the received list of API Products are in JsonArray format and
+// verify only the required ones are there and others are not in the command line output
+func ValidateAPIProductsListWithJsonArrayFormat(t *testing.T, args *ApiImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	// List API Products of env 1
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	base.WaitForIndexing()
+
+	output, _ := listAPIProductsWithJsonArrayFormat(t, args)
+
+	apisProductsList := args.SrcAPIM.GetAPIProducts()
+
+	// Validate API Products list with added APIs
+	validateListAPIProductsEqual(t, output, apisProductsList)
+
+	// Validate JsonArray format
+	assert.Contains(t, output, "[\n {\n", "Error while listing APIs in JsonArray format")
 }
