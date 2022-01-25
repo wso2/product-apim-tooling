@@ -192,6 +192,7 @@ const (
 	ProjectTypeApi         = "API"
 	ProjectTypeApiProduct  = "API Product"
 	ProjectTypeApplication = "Application"
+	ProjectTypeRevision    = "Revision"
 )
 
 // project param files

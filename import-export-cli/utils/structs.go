@@ -422,3 +422,11 @@ type ApplicationEntry struct {
 	Owner   string
 	GroupId string
 }
+
+// RevisionEntry Revision List Entry struct to support  different formats of output in the list command
+type RevisionEntry struct {
+	Id             string
+	RevisionNumber string
+	Description    string
+	GatewayEnvs    string
+}
