@@ -350,3 +350,31 @@ type EndpointCertificate struct {
 	Alias       string `yaml:"alias"`
 	Certificate string `yaml:"certificate"`
 }
+
+// APIEntry Api List Entry struct to support  different formats of output in the list command
+type APIEntry struct {
+	Id              string
+	Name            string
+	Context         string
+	Version         string
+	LifeCycleStatus string
+	Provider        string
+}
+
+// APIProductEntry Api Product List Entry struct to support  different formats of output in the list command
+type APIProductEntry struct {
+	Id              string
+	Name            string
+	Context         string
+	LifeCycleStatus string
+	Provider        string
+}
+
+// ApplicationEntry Application List Entry struct to support  different formats of output in the list command
+type ApplicationEntry struct {
+	Id      string
+	Name    string
+	Status  string
+	Owner   string
+	GroupId string
+}

@@ -206,3 +206,6 @@ const OAuthType = "OAUTH"
 const ClientCredentialsGrantType = "CLIENT_CREDENTIALS"
 const PasswordGrantType = "PASSWORD"
 const EndpointSecurityTypeNone = "NONE"
+
+// Output format types
+const JsonArrayFormatType = "jsonArray"
