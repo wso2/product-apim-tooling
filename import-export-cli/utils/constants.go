@@ -62,6 +62,7 @@ var LocalCredentialsDirectoryPath = filepath.Join(HomeDirectory, LocalCredential
 var EnvKeysAllFilePath = filepath.Join(LocalCredentialsDirectoryPath, EnvKeysAllFileName)
 var MainConfigFilePath = filepath.Join(ConfigDirPath, MainConfigFileName)
 var SampleMainConfigFilePath = filepath.Join(ConfigDirPath, SampleMainConfigFileName)
+var DefaultAPISpecFilePath = filepath.Join(ConfigDirPath, DefaultAPISpecFileName)
 
 const DefaultExportDirName = "exported"
 const ExportedApisDirName = "apis"
@@ -278,3 +279,6 @@ const MiManagementExternalVaultsResource = "external-vaults"
 const MiManagementExternalVaultHashiCorpResource = "hashicorp"
 
 const ZipFileSuffix = ".zip"
+
+// Output format types
+const JsonArrayFormatType = "jsonArray"
