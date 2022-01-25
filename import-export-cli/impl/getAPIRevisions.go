@@ -106,7 +106,7 @@ func PrintRevisions(revisions []utils.Revisions, format string) {
 	if format == "" {
 		format = defaultRevisionTableFormat
 	} else if format == utils.JsonArrayFormatType {
-		utils.ListArtifactsInJsonArrayFormat(apis, utils.ProjectTypeRevision)
+		utils.ListArtifactsInJsonArrayFormat(revisions, utils.ProjectTypeRevision)
 		return
 	}
 	// create revision Context with standard output
