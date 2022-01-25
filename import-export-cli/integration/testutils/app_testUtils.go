@@ -86,6 +86,12 @@ func ListApps(t *testing.T, env string) []string {
 	return base.GetRowsFromTableResponse(response)
 }
 
+func listAppsWithJsonArrayFormat(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
+	output, err := base.Execute(t, "list", "apps", "-e", args.SrcAPIM.EnvName, "--format", "jsonArray",
+		"-k", "--verbose")
+	return output, err
+}
+
 func ListAppsWithOwner(t *testing.T, env string, owner string) []string {
 	response, _ := base.Execute(t, "list", "apps", "-e", env, "-k", "--owner", owner)
 
@@ -382,4 +388,23 @@ func updateAdditionalPropertiesOfKeys(t *testing.T, args *AppImportExportTestArg
 	}
 
 	return applicationContent["keyManagerWiseOAuthApp"].(map[string]interface{})
+}
+
+// ValidateAppsListWithJsonArrayFormat : Validate the received list of Applications are in JsonArray format and
+// verify only the required ones are there and others are not in the command line output
+func ValidateAppsListWithJsonArrayFormat(t *testing.T, args *ApiImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	// List APIs of env 1
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	base.WaitForIndexing()
+
+	output, _ := listAppsWithJsonArrayFormat(t, args)
+
+	// Validate JsonArray format
+	assert.Contains(t, output, "[\n {\n", "Error while listing APIs in JsonArray format")
 }
