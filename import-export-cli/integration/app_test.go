@@ -82,6 +82,88 @@ func TestListAppsDevopsTenantUser(t *testing.T) {
 	testutils.ListApps(t, apim.GetEnvName())
 }
 
+func TestListAppsWithJsonArrayFormatAdminSuperTenantUser(t *testing.T) {
+	adminUsername := superAdminUser
+	adminPassword := superAdminPassword
+
+	dev := apimClients[0]
+
+	for appsCount := 0; appsCount <= numberOfApps; appsCount++ {
+		// Add the Application to env1
+		testutils.AddApp(t, dev, adminUsername, adminPassword)
+	}
+
+	args := &testutils.ApiImportExportTestArgs{
+		CtlUser: testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		SrcAPIM: dev,
+	}
+
+	testutils.ValidateAppsListWithJsonArrayFormat(t, args)
+}
+
+func TestListAppsWithJsonArrayFormatDevopsSuperTenantUser(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	adminUsername := superAdminUser
+	adminPassword := superAdminPassword
+
+	dev := apimClients[0]
+
+	for appsCount := 0; appsCount <= numberOfApps; appsCount++ {
+		// Add the Application to env1
+		testutils.AddApp(t, dev, adminUsername, adminPassword)
+	}
+
+	args := &testutils.ApiImportExportTestArgs{
+		CtlUser: testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		SrcAPIM: dev,
+	}
+
+	testutils.ValidateAppsListWithJsonArrayFormat(t, args)
+}
+
+func TestListAppsWithJsonArrayFormatAdminTenantUser(t *testing.T) {
+	tenantAdminUsername := superAdminUser + "@" + TENANT1
+	tenantAdminPassword := superAdminPassword
+
+	dev := apimClients[0]
+
+	for appsCount := 0; appsCount <= numberOfApps; appsCount++ {
+		// Add the Application to env1
+		testutils.AddApp(t, dev, tenantAdminUsername, tenantAdminPassword)
+	}
+
+	args := &testutils.ApiImportExportTestArgs{
+		CtlUser: testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
+		SrcAPIM: dev,
+	}
+
+	testutils.ValidateAppsListWithJsonArrayFormat(t, args)
+}
+
+func TestListAppsWithJsonArrayFormatDevopsTenantUser(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	tenantAdminUsername := superAdminUser + "@" + TENANT1
+	tenantAdminPassword := superAdminPassword
+
+	dev := apimClients[0]
+
+	for appsCount := 0; appsCount <= numberOfApps; appsCount++ {
+		// Add the Application to env1
+		testutils.AddApp(t, dev, tenantAdminUsername, tenantAdminPassword)
+	}
+
+	args := &testutils.ApiImportExportTestArgs{
+		CtlUser: testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		SrcAPIM: dev,
+	}
+
+	testutils.ValidateAppsListWithJsonArrayFormat(t, args)
+}
+
 //List all the applications in an environment (by specifying the owner)
 func TestListAppWithOwner(t *testing.T) {
 	username := superAdminUser
