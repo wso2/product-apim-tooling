@@ -909,6 +909,42 @@ func TestListApiProductsDevopsTenantUser(t *testing.T) {
 	testutils.ValidateAPIProductsList(t, args)
 }
 
+// API products listing with JsonArray format
+func TestListApiProductsWithJsonArrayFormat(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			dev := GetDevClient()
+
+			// Add the first dependent API to env1
+			dependentAPI1 := testutils.AddAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
+			testutils.PublishAPI(dev, user.ApiPublisher.Username, user.ApiPublisher.Password, dependentAPI1.ID)
+
+			// Add the second dependent API to env1
+			dependentAPI2 := testutils.AddAPIFromOpenAPIDefinition(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
+			testutils.PublishAPI(dev, user.ApiPublisher.Username, user.ApiPublisher.Password, dependentAPI2.ID)
+
+			// Map the real name of the API with the API
+			apisList := map[string]*apim.API{
+				"PizzaShackAPI":   dependentAPI1,
+				"SwaggerPetstore": dependentAPI2,
+			}
+
+			for apiProductCount := 0; apiProductCount <= numberOfAPIProducts; apiProductCount++ {
+				// Add the API Product to env1
+				testutils.AddAPIProductFromJSON(t, dev, user.ApiPublisher.Username, user.ApiPublisher.Password, apisList)
+			}
+
+			args := &testutils.ApiImportExportTestArgs{
+				CtlUser: testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				SrcAPIM: dev,
+			}
+
+			testutils.ValidateAPIProductsListWithJsonArrayFormat(t, args)
+		})
+	}
+}
+
 func TestDeleteApiProductAdminSuperTenantUser(t *testing.T) {
 	adminUsername := superAdminUser
 	adminPassword := superAdminPassword
