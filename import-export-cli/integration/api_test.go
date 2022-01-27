@@ -672,6 +672,27 @@ func TestListApisDevopsTenantUser(t *testing.T) {
 	testutils.ValidateAPIsList(t, args)
 }
 
+// APIs listing with JsonArray format
+func TestListApisWithJsonArrayFormat(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+
+			for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
+				// Add the API to env1
+				testutils.AddAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
+			}
+
+			args := &testutils.ApiImportExportTestArgs{
+				CtlUser: testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				SrcAPIM: dev,
+			}
+
+			testutils.ValidateAPIsListWithJsonArrayFormat(t, args)
+		})
+	}
+}
+
 func TestDeleteApiAdminSuperTenantUser(t *testing.T) {
 	adminUsername := superAdminUser
 	adminPassword := superAdminPassword
