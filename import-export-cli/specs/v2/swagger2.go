@@ -340,5 +340,13 @@ func CreateEpConfigForAwsAPIs(def *APIDTODefinition, pathToSwagger string) []byt
 	endpointConfig.ProductionEndpoints.URL = productionEp
 	endpointConfig.SandboxEndpoints.URL = sandboxEp
 	def.EndpointConfig = &endpointConfig
+	var advertiseInfo AdvertiseInfo
+	advertiseInfo.Advertised = def.AdvertiseInformation.Advertised
+	advertiseInfo.ApiOwner = def.AdvertiseInformation.ApiOwner
+	advertiseInfo.Vendor = def.AdvertiseInformation.Vendor
+	advertiseInfo.OriginalDevPortalUrl = def.AdvertiseInformation.OriginalDevPortalUrl
+	advertiseInfo.ApiExternalProductionEndpoint = productionEp
+	advertiseInfo.ApiExternalSandboxEndpoint = sandboxEp
+	def.AdvertiseInformation = advertiseInfo
 	return byteValue
 }
