@@ -43,6 +43,27 @@ func TestListApps(t *testing.T) {
 	}
 }
 
+// Applications listing with JsonArray format
+func TestListAppsWithJsonArrayFormat(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+
+			for appsCount := 0; appsCount <= numberOfApps; appsCount++ {
+				// Add the Application to env1
+				testutils.AddApp(t, dev, user.Admin.Username, user.Admin.Password)
+			}
+
+			args := &testutils.ApiImportExportTestArgs{
+				CtlUser: testutils.Credentials{Username: user.Admin.Username, Password: user.Admin.Password},
+				SrcAPIM: dev,
+			}
+
+			testutils.ValidateAppsListWithJsonArrayFormat(t, args)
+		})
+	}
+}
+
 // List all the applications in an environment (by specifying the owner)
 func TestListAppWithOwner(t *testing.T) {
 	username := superAdminUser
