@@ -288,6 +288,8 @@ func ValidateAPIImportExportWithDeploymentDirForAdvertiseOnlyAPI(t *testing.T, a
 
 	assert.Equal(t, args.Api.AdvertiseInformation.Advertised, importedAPI.AdvertiseInformation.Advertised)
 	assert.Equal(t, args.Api.Provider, importedAPI.AdvertiseInformation.ApiOwner)
+	assert.Equal(t, args.Api.AdvertiseInformation.ApiExternalProductionEndpoint, importedAPI.AdvertiseInformation.ApiExternalProductionEndpoint)
+	assert.Equal(t, args.Api.AdvertiseInformation.ApiExternalSandboxEndpoint, importedAPI.AdvertiseInformation.ApiExternalSandboxEndpoint)
 
 	if (args.CtlUser.Username == adminservices.AdminUsername) ||
 		(args.CtlUser.Username == adminservices.AdminUsername+"@"+adminservices.Tenant1) {
