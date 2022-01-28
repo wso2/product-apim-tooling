@@ -105,6 +105,9 @@ func GetRevisionListFromEnv(accessToken, environment, apiName, apiVersion, provi
 func PrintRevisions(revisions []utils.Revisions, format string) {
 	if format == "" {
 		format = defaultRevisionTableFormat
+	} else if format == utils.JsonArrayFormatType {
+		utils.ListArtifactsInJsonArrayFormat(revisions, utils.ProjectTypeRevision)
+		return
 	}
 	// create revision Context with standard output
 	revisionContext := formatter.NewContext(os.Stdout, format)

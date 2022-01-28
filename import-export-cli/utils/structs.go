@@ -394,3 +394,39 @@ type Deployment struct {
 	Name               string `json:"name"`
 	DisplayOnDevportal bool   `json:"displayOnDevportal"`
 }
+
+// APIEntry Api List Entry struct to support  different formats of output in the list command
+type APIEntry struct {
+	Id              string
+	Name            string
+	Context         string
+	Version         string
+	LifeCycleStatus string
+	Provider        string
+}
+
+// APIProductEntry Api Product List Entry struct to support  different formats of output in the list command
+type APIProductEntry struct {
+	Id              string
+	Name            string
+	Context         string
+	LifeCycleStatus string
+	Provider        string
+}
+
+// ApplicationEntry Application List Entry struct to support  different formats of output in the list command
+type ApplicationEntry struct {
+	Id      string
+	Name    string
+	Status  string
+	Owner   string
+	GroupId string
+}
+
+// RevisionEntry Revision List Entry struct to support  different formats of output in the list command
+type RevisionEntry struct {
+	Id             string
+	RevisionNumber string
+	Description    string
+	GatewayEnvs    string
+}

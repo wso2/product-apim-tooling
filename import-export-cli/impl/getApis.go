@@ -109,7 +109,11 @@ func GetAPIListFromEnv(accessToken, environment, query, limit string) (count int
 func PrintAPIs(apis []utils.API, format string) {
 	if format == "" {
 		format = defaultApiTableFormat
+	} else if format == utils.JsonArrayFormatType {
+		utils.ListArtifactsInJsonArrayFormat(apis, utils.ProjectTypeApi)
+		return
 	}
+
 	// create api context with standard output
 	apiContext := formatter.NewContext(os.Stdout, format)
 
