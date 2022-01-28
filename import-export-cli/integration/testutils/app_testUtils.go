@@ -94,6 +94,12 @@ func ListAppsWithOwner(t *testing.T, env string, owner string) []string {
 	return base.GetRowsFromTableResponse(response)
 }
 
+func listAppsWithJsonArrayFormat(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
+	output, err := base.Execute(t, "get", "apps", "-e", args.SrcAPIM.EnvName, "--format", "jsonArray",
+		"-k", "--verbose")
+	return output, err
+}
+
 func getEnvAppExportPath(envName string) string {
 	return filepath.Join(utils.DefaultExportDirPath, utils.ExportedAppsDirName, envName)
 }
@@ -459,6 +465,25 @@ func ValidateListAppsWithOwner(t *testing.T, envName string) {
 
 	emptyResponse := ListAppsWithOwner(t, envName, "user1")
 	assert.Equal(t, 0, len(emptyResponse), "Failed when listing Applications with owner as User1")
+}
+
+// ValidateAppsListWithJsonArrayFormat : Validate the received list of Applications are in JsonArray format and
+// verify only the required ones are there and others are not in the command line output
+func ValidateAppsListWithJsonArrayFormat(t *testing.T, args *ApiImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	// List APIs of env 1
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	base.WaitForIndexing()
+
+	output, _ := listAppsWithJsonArrayFormat(t, args)
+
+	// Validate JsonArray format
+	assert.Contains(t, output, "[\n {\n", "Error while listing APIs in JsonArray format")
 }
 
 func OverrideDifferedPropertiesOfSubscriptions(subscriptionsList1 *apim.SubscriptionList) *apim.SubscriptionList {

@@ -400,6 +400,12 @@ func listAPIs(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
 	return output, err
 }
 
+func listAPIsWithJsonArrayFormat(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
+	output, err := base.Execute(t, "get", "apis", "-e", args.SrcAPIM.EnvName, "--format", "jsonArray",
+		"-k", "--verbose")
+	return output, err
+}
+
 func changeLifeCycleOfAPI(t *testing.T, args *ApiChangeLifeCycleStatusTestArgs) (string, error) {
 	output, err := base.Execute(t, "change-status", "api", "-a", args.Action, "-n", args.Api.Name,
 		"-v", args.Api.Version, "-e", args.APIM.EnvName, "-k", "--verbose")
@@ -886,6 +892,31 @@ func ValidateListAPIsEqual(t *testing.T, apisListFromCtl string, apisList *apim.
 
 	// Count == 0 means that all the APIs from apisList were in apisListFromCtl
 	assert.Equal(t, 0, unmatchedCount, "API lists are not equal")
+}
+
+// ValidateAPIsListWithJsonArrayFormat : Validate the received list of APIs are in JsonArray format and verify only
+// the required ones are there and others are not in the command line output
+func ValidateAPIsListWithJsonArrayFormat(t *testing.T, args *ApiImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	// List APIs of env 1
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	base.WaitForIndexing()
+
+	output, _ := listAPIsWithJsonArrayFormat(t, args)
+
+	apisList := args.SrcAPIM.GetAPIs()
+
+	// Validate APIs list with added APIs
+	ValidateListAPIsEqual(t, output, apisList)
+
+	// Validate JsonArray format
+	assert.Contains(t, output, "[\n {\n", "Error while listing APIs in JsonArray format")
+
 }
 
 func validateAPIsEqualCrossTenant(t *testing.T, api1 *apim.API, api2 *apim.API) {
