@@ -88,7 +88,7 @@ func executeUndeployAPICmd(credential credentials.Credential, deployments []util
 			fmt.Println("Revision " + undeployRevisionNum + " of API " + undeployAPIName + "_" + undeployAPIVersion +
 				" successfully undeployed from the specified gateways environments")
 		} else {
-			fmt.Println("Error while undeploying the  API: ", resp.Status(), "\n", string(resp.Body()))
+			fmt.Println("Error while undeploying the API: ", resp.Status(), "\n", string(resp.Body()))
 		}
 	} else {
 		fmt.Println("Error getting OAuth tokens to undeploy the API:" + preCommandErr.Error())
