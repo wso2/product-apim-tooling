@@ -20,22 +20,22 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 var getApiLoggingEnvironment string
 var getApiLoggingAPIId string
+var getApiLoggingTenantDomain string
 var getAPILoggingCmdFormat string
 
 const GetApiLoggingCmdLiteral = "api-logging"
 const getApiLoggingCmdShortDesc = "Display a list of API loggers in an environment"
 const getApiLoggingCmdLongDesc = `Display a list of API loggers available for the APIs in the environment specified`
 
-var getApiLoggingCmdExamples =
-	utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetApiLoggingCmdLiteral + ` -e dev
-` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetApiLoggingCmdLiteral + ` --api-id bf36ca3a-0332-49ba-abce-e9992228ae06 -e dev`
+var getApiLoggingCmdExamples = utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetApiLoggingCmdLiteral + ` -e dev --tenant-domain carbon.super
+` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetApiLoggingCmdLiteral + ` --api-id bf36ca3a-0332-49ba-abce-e9992228ae06 -e dev --tenant-domain carbon.super`
 
 var getApiLoggingCmd = &cobra.Command{
 	Use:     GetApiLoggingCmdLiteral,
@@ -54,14 +54,14 @@ var getApiLoggingCmd = &cobra.Command{
 
 func executeGetApiLoggingCmd(credential credentials.Credential) {
 	if getApiLoggingAPIId != "" {
-		api, err := impl.GetPerAPILoggingDetailsFromEnv(credential, getApiLoggingEnvironment, getApiLoggingAPIId)
+		api, err := impl.GetPerAPILoggingDetailsFromEnv(credential, getApiLoggingEnvironment, getApiLoggingAPIId, getApiLoggingTenantDomain)
 		if err == nil {
 			impl.PrintAPILoggers(api, getAPILoggingCmdFormat)
 		} else {
 			utils.Logln(utils.LogPrefixError+"Getting API logger details of the API", err)
 		}
 	} else {
-		apis, err := impl.GetPerAPILoggingListFromEnv(credential, getApiLoggingEnvironment)
+		apis, err := impl.GetPerAPILoggingListFromEnv(credential, getApiLoggingEnvironment, getApiLoggingTenantDomain)
 		if err == nil {
 			impl.PrintAPILoggers(apis, getAPILoggingCmdFormat)
 		} else {
@@ -75,6 +75,8 @@ func init() {
 
 	getApiLoggingCmd.Flags().StringVarP(&getApiLoggingAPIId, "api-id", "i",
 		"", "API ID")
+	getApiLoggingCmd.Flags().StringVarP(&getApiLoggingTenantDomain, "tenant-domain", "",
+		"", "Tenant Domain")
 	getApiLoggingCmd.Flags().StringVarP(&getApiLoggingEnvironment, "environment", "e",
 		"", "Environment of the APIs which the API loggers should be displayed")
 	getApiLoggingCmd.Flags().StringVarP(&getAPILoggingCmdFormat, "format", "", "", "Pretty-print API loggers "+

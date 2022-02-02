@@ -23,22 +23,22 @@ import (
 	"net/http"
 
 	"github.com/spf13/cobra"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 var setApiLoggingEnvironment string
 var setApiLoggingAPIId string
+var setApiLoggingTenantDomain string
 var setApiLoggingLogLevel string
 
 const SetApiLoggingCmdLiteral = "api-logging"
 const setApiLoggingCmdShortDesc = "Set the log level for an API in an environment"
 const setApiLoggingCmdLongDesc = `Set the log level for an API in the environment specified`
 
-var setApiLoggingCmdExamples =
-	utils.ProjectName + ` ` + SetCmdLiteral + ` ` + SetApiLoggingCmdLiteral + ` --api-id bf36ca3a-0332-49ba-abce-e9992228ae06 --log-level full -e dev
-` + utils.ProjectName + ` ` + SetCmdLiteral + ` ` + SetApiLoggingCmdLiteral + ` --api-id bf36ca3a-0332-49ba-abce-e9992228ae06 --log-level off -e dev`
+var setApiLoggingCmdExamples = utils.ProjectName + ` ` + SetCmdLiteral + ` ` + SetApiLoggingCmdLiteral + ` --api-id bf36ca3a-0332-49ba-abce-e9992228ae06 --log-level full -e dev --tenant-domain carbon.super
+` + utils.ProjectName + ` ` + SetCmdLiteral + ` ` + SetApiLoggingCmdLiteral + ` --api-id bf36ca3a-0332-49ba-abce-e9992228ae06 --log-level off -e dev --tenant-domain carbon.super`
 
 var setApiLoggingCmd = &cobra.Command{
 	Use:     SetApiLoggingCmdLiteral,
@@ -56,7 +56,7 @@ var setApiLoggingCmd = &cobra.Command{
 }
 
 func executeSetApiLoggingCmd(credential credentials.Credential) {
-	resp, err := impl.SetAPILoggingLevel(credential, setApiLoggingEnvironment, setApiLoggingAPIId, setApiLoggingLogLevel)
+	resp, err := impl.SetAPILoggingLevel(credential, setApiLoggingEnvironment, setApiLoggingAPIId, setApiLoggingTenantDomain, setApiLoggingLogLevel)
 	if err != nil {
 		utils.HandleErrorAndExit("Error while setting the log level of the API", err)
 	}
@@ -74,9 +74,11 @@ func init() {
 	SetCmd.AddCommand(setApiLoggingCmd)
 
 	setApiLoggingCmd.Flags().StringVarP(&setApiLoggingAPIId, "api-id", "i",
-		"", "Api ID")
+		"", "API ID")
+	setApiLoggingCmd.Flags().StringVarP(&setApiLoggingTenantDomain, "tenant-domain", "",
+		"", "Tenant Domain")
 	setApiLoggingCmd.Flags().StringVarP(&setApiLoggingLogLevel, "log-level", "",
-		"", "Api ID")
+		"", "Log Level")
 	setApiLoggingCmd.Flags().StringVarP(&setApiLoggingEnvironment, "environment", "e",
 		"", "Environment of the API which the log level should be set")
 	_ = setApiLoggingCmd.MarkFlagRequired("environment")

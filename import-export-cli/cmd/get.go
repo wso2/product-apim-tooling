@@ -46,8 +46,8 @@ const getCmdExamples = utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetEnvsCm
 ` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetAPIRevisionsCmdLiteral + ` -n PizzaAPI -v 1.0.0 -e dev
 ` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetAPIProductRevisionsCmdLiteral + ` -n PizzaProduct -v 1.0.0 -e dev
 ` + utils.ProjectName + " " + GetCmdLiteral + " " + GetKeysCmdLiteral + ` -n TwitterAPI -v 1.0.0 -e dev
-` + utils.ProjectName + " " + GetCmdLiteral + " " + GetApiLoggingCmdLiteral + ` -e dev
-` + utils.ProjectName + " " + GetCmdLiteral + " " + GetApiLoggingCmdLiteral + ` --api-id bf36ca3a-0332-49ba-abce-e9992228ae06 -e dev`
+` + utils.ProjectName + " " + GetCmdLiteral + " " + GetApiLoggingCmdLiteral + ` -e dev --tenant-domain carbon.super
+` + utils.ProjectName + " " + GetCmdLiteral + " " + GetApiLoggingCmdLiteral + ` --api-id bf36ca3a-0332-49ba-abce-e9992228ae06 -e dev --tenant-domain carbon.super`
 
 // ListCmd represents the list command
 var GetCmd = &cobra.Command{

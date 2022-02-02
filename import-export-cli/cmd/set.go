@@ -62,7 +62,7 @@ const setCmdExamples = utils.ProjectName + ` ` + SetCmdLiteral + ` --http-reques
 ` + utils.ProjectName + ` ` + SetCmdLiteral + ` --vcs-config-path /home/user/custom/vcs-config.yaml
 ` + utils.ProjectName + ` ` + SetCmdLiteral + ` --vcs-deployment-repo-path /home/user/custom/deployment
 ` + utils.ProjectName + ` ` + SetCmdLiteral + ` --vcs-source-repo-path /home/user/custom/source
-` + utils.ProjectName + ` ` + SetCmdLiteral + ` ` + SetApiLoggingCmdLiteral + ` --api-id bf36ca3a-0332-49ba-abce-e9992228ae06 --log-level full -e dev`
+` + utils.ProjectName + ` ` + SetCmdLiteral + ` ` + SetApiLoggingCmdLiteral + ` --api-id bf36ca3a-0332-49ba-abce-e9992228ae06 --log-level full -e dev --tenant-domain carbon.super`
 
 // SetCmd represents the 'set' command
 var SetCmd = &cobra.Command{
