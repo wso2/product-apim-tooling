@@ -16,21 +16,18 @@
 * under the License.
  */
 
-package adminservices
+package apim
 
-const (
-	xmlNS       = "http://schemas.xmlsoap.org/soap/envelope/"
-	tenantSerNS = "http://services.mgt.tenant.carbon.wso2.org"
-	umSerNS     = "http://service.ws.um.carbon.wso2.org"
-	xsdNS       = "http://beans.common.stratos.carbon.wso2.org/xsd"
-)
+type APILogLevel struct {
+	LogLevel string `json:"logLevel"`
+}
 
-const AdminUsername = "admin"
-const AdminPassword = "admin"
-const PublisherUsername = "publisher"
-const CreatorUsername = "creator"
-const SubscriberUsername = "subscriber"
-const DevopsUsername = "devops"
-const Password = "password"
-const DefaultTenantDomain = "carbon.super"
-const Tenant1 = "test.com"
+type APILogLevelList struct {
+	Apis []Api `json:"apis"`
+}
+
+type Api struct {
+	Context  string `json:"context"`
+	LogLevel string `json:"logLevel"`
+	ApiId    string `json:"apiId"`
+}

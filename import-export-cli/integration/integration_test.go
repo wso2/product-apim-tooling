@@ -54,7 +54,8 @@ const (
 	userMgtService   = "RemoteUserStoreManagerService"
 	tenantMgtService = "TenantMgtAdminService"
 
-	TENANT1 = adminservices.Tenant1
+	DEFAULT_TENANT_DOMAIN = adminservices.DefaultTenantDomain
+	TENANT1               = adminservices.Tenant1
 )
 
 var (

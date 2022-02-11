@@ -58,6 +58,7 @@ var setApiLoggingCmd = &cobra.Command{
 func executeSetApiLoggingCmd(credential credentials.Credential) {
 	resp, err := impl.SetAPILoggingLevel(credential, setApiLoggingEnvironment, setApiLoggingAPIId, setApiLoggingTenantDomain, setApiLoggingLogLevel)
 	if err != nil {
+		utils.Logln(utils.LogPrefixError+"Setting the log level of the API", err)
 		utils.HandleErrorAndExit("Error while setting the log level of the API", err)
 	}
 	// Print info on response
