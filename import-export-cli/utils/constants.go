@@ -265,5 +265,6 @@ const MiManagementTransactionCountResource = "count"
 const MiManagementTransactionReportResource = "report"
 const MiManagementExternalVaultsResource = "external-vaults"
 const MiManagementExternalVaultHashiCorpResource = "hashicorp"
+const MiManagementRoleResource = "roles"
 
 const ZipFileSuffix = ".zip"

@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"os"
 	"syscall"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
@@ -82,15 +83,19 @@ func startConsoleToAddUser(userName string) {
 	userConfirmPassword := string(byteUserConfirmationPassword)
 	fmt.Println()
 
+	fmt.Printf("Enter user store for " + userName + " default (primary): ")
+	domain, _ := reader.ReadString('\n')
+	domain = strings.TrimSuffix(domain, "\n")
+
 	if userConfirmPassword == userPassword {
-		executeAddNewUser(userName, userPassword, isAdmin)
+		executeAddNewUser(userName, userPassword, isAdmin, domain)
 	} else {
 		fmt.Println("Passwords are not matching.")
 	}
 }
 
-func executeAddNewUser(userName, userPassword, isAdmin string) {
-	resp, err := impl.AddMIUser(addUserCmdEnvironment, userName, userPassword, isAdmin)
+func executeAddNewUser(userName, userPassword, isAdmin, domain string) {
+	resp, err := impl.AddMIUser(addUserCmdEnvironment, userName, userPassword, isAdmin, domain)
 	if err != nil {
 		fmt.Println(utils.LogPrefixError+"Adding new user [ "+userName+" ]", err)
 	} else {

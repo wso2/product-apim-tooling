@@ -29,6 +29,7 @@ import (
 )
 
 var deleteUserCmdEnvironment string
+var deleteUserCmdDomain string
 
 const deleteUserCmdLiteral = "user [user-name]"
 const deleteUserCmdShortDesc = "Delete a user from the Micro Integrator"
@@ -36,7 +37,9 @@ const deleteUserCmdShortDesc = "Delete a user from the Micro Integrator"
 const deleteUserCmdLongDesc = "Delete a user with the name specified by the command line argument [user-name] from a Micro Integrator in the environment specified by the flag --environment, -e"
 
 var deleteUserCmdExamples = "To delete a user\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + deleteCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(deleteUserCmdLiteral) + " capp-tester -e dev\n" +
+	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + deleteCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(deleteUserCmdLiteral) + " [user-id] -e dev\n" +
+	"To delete a user in a secondary user store\n" +
+	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + deleteCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(deleteUserCmdLiteral) + " [user-id] -d [domain] -e dev\n" +
 	"NOTE: The flag (--environment (-e)) is mandatory"
 
 var deleteUserCmd = &cobra.Command{
@@ -52,6 +55,7 @@ var deleteUserCmd = &cobra.Command{
 
 func init() {
 	DeleteCmd.AddCommand(deleteUserCmd)
+	deleteUserCmd.Flags().StringVarP(&deleteUserCmdDomain, "domain", "d", "", "select user's domain")
 	deleteUserCmd.Flags().StringVarP(&deleteUserCmdEnvironment, "environment", "e", "", "Environment of the micro integrator from which a user should be deleted")
 	deleteUserCmd.MarkFlagRequired("environment")
 }
@@ -63,7 +67,7 @@ func handledeleteUserCmdArguments(args []string) {
 }
 
 func executeDeleteUser(userName string) {
-	resp, err := impl.DeleteMIUser(deleteUserCmdEnvironment, userName)
+	resp, err := impl.DeleteMIUser(deleteUserCmdEnvironment, userName, deleteUserCmdDomain)
 	if err != nil {
 		fmt.Println(utils.LogPrefixError+"deleting user [ "+userName+" ]", err)
 	} else {
