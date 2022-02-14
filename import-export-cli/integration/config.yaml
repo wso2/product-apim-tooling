@@ -16,5 +16,6 @@ max-invocation-attempts: 10
 
 dcr-version: v0.17
 rest-api-version: v2
+devops-rest-api-version: v1
 apictl-version: 4.1.0
 

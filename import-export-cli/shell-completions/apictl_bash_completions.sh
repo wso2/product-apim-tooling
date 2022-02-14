@@ -1369,6 +1369,55 @@ _apictl_gen()
     noun_aliases=()
 }
 
+_apictl_get_api-logging()
+{
+    last_command="apictl_get_api-logging"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--api-id=")
+    two_word_flags+=("--api-id")
+    two_word_flags+=("-i")
+    local_nonpersistent_flags+=("--api-id")
+    local_nonpersistent_flags+=("--api-id=")
+    local_nonpersistent_flags+=("-i")
+    flags+=("--environment=")
+    two_word_flags+=("--environment")
+    two_word_flags+=("-e")
+    local_nonpersistent_flags+=("--environment")
+    local_nonpersistent_flags+=("--environment=")
+    local_nonpersistent_flags+=("-e")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    local_nonpersistent_flags+=("--format")
+    local_nonpersistent_flags+=("--format=")
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    local_nonpersistent_flags+=("-h")
+    flags+=("--tenant-domain=")
+    two_word_flags+=("--tenant-domain")
+    local_nonpersistent_flags+=("--tenant-domain")
+    local_nonpersistent_flags+=("--tenant-domain=")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_flag+=("--environment=")
+    must_have_one_flag+=("-e")
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
 _apictl_get_api-product-revisions()
 {
     last_command="apictl_get_api-product-revisions"
@@ -1771,6 +1820,7 @@ _apictl_get()
     command_aliases=()
 
     commands=()
+    commands+=("api-logging")
     commands+=("api-product-revisions")
     commands+=("api-products")
     commands+=("api-revisions")
@@ -5003,6 +5053,82 @@ _apictl_secret()
     noun_aliases=()
 }
 
+_apictl_set_api-logging()
+{
+    last_command="apictl_set_api-logging"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--api-id=")
+    two_word_flags+=("--api-id")
+    two_word_flags+=("-i")
+    local_nonpersistent_flags+=("--api-id")
+    local_nonpersistent_flags+=("--api-id=")
+    local_nonpersistent_flags+=("-i")
+    flags+=("--environment=")
+    two_word_flags+=("--environment")
+    two_word_flags+=("-e")
+    local_nonpersistent_flags+=("--environment")
+    local_nonpersistent_flags+=("--environment=")
+    local_nonpersistent_flags+=("-e")
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    local_nonpersistent_flags+=("-h")
+    flags+=("--log-level=")
+    two_word_flags+=("--log-level")
+    local_nonpersistent_flags+=("--log-level")
+    local_nonpersistent_flags+=("--log-level=")
+    flags+=("--tenant-domain=")
+    two_word_flags+=("--tenant-domain")
+    local_nonpersistent_flags+=("--tenant-domain")
+    local_nonpersistent_flags+=("--tenant-domain=")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_flag+=("--api-id=")
+    must_have_one_flag+=("-i")
+    must_have_one_flag+=("--environment=")
+    must_have_one_flag+=("-e")
+    must_have_one_flag+=("--log-level=")
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_apictl_set_help()
+{
+    last_command="apictl_set_help"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    has_completion_function=1
+    noun_aliases=()
+}
+
 _apictl_set()
 {
     last_command="apictl_set"
@@ -5010,6 +5136,8 @@ _apictl_set()
     command_aliases=()
 
     commands=()
+    commands+=("api-logging")
+    commands+=("help")
 
     flags=()
     two_word_flags=()

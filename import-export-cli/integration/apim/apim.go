@@ -110,15 +110,15 @@ func (instance *Client) Login(username string, password string) {
 }
 
 // Setup : Setup APIM Client config
-func (instance *Client) Setup(envName string, host string, offset int, dcrVersion string, restAPIVersion string) {
+func (instance *Client) Setup(envName string, host string, offset int, dcrVersion, restAPIVersion, devopsRestAPIVersion string) {
 	base.Log("apim.Setup() - envName:", envName, ",host:", host, ",offset:", offset, ",dcrVersion:", dcrVersion,
 		",restAPIVersion:", restAPIVersion)
 	instance.apimURL = getApimURL(host, offset)
-	instance.dcrURL = getDCRURL(host, offset, dcrVersion)
-	instance.devPortalRestURL = getDevPortalRestURL(host, offset, restAPIVersion)
-	instance.publisherRestURL = getPublisherRestURL(host, offset, restAPIVersion)
-	instance.adminRestURL = getAdminRestURL(host, offset, restAPIVersion)
-	instance.devopsRestURL = getDevOpsRestURL(host, offset, "v1")
+	instance.dcrURL = getDCRURL(host, dcrVersion, offset)
+	instance.devPortalRestURL = getDevPortalRestURL(host, restAPIVersion, offset)
+	instance.publisherRestURL = getPublisherRestURL(host, restAPIVersion, offset)
+	instance.adminRestURL = getAdminRestURL(host, restAPIVersion, offset)
+	instance.devopsRestURL = getDevOpsRestURL(host, devopsRestAPIVersion, offset)
 	instance.portOffset = offset
 	instance.tokenURL = getTokenURL(host, offset)
 	instance.host = host
@@ -2013,7 +2013,7 @@ func (instance *Client) registerClient(username string, password string) dcrResp
 	return jsonResp
 }
 
-func getDCRURL(host string, offset int, version string) string {
+func getDCRURL(host, version string, offset int) string {
 	port := 9443 + offset
 	return "https://" + host + ":" + strconv.Itoa(port) + "/client-registration/" + version + "/register"
 }
@@ -2023,22 +2023,22 @@ func getApimURL(host string, offset int) string {
 	return "https://" + host + ":" + strconv.Itoa(port)
 }
 
-func getDevPortalRestURL(host string, offset int, version string) string {
+func getDevPortalRestURL(host, version string, offset int) string {
 	port := 9443 + offset
 	return "https://" + host + ":" + strconv.Itoa(port) + "/api/am/devportal/" + version
 }
 
-func getPublisherRestURL(host string, offset int, version string) string {
+func getPublisherRestURL(host, version string, offset int) string {
 	port := 9443 + offset
 	return "https://" + host + ":" + strconv.Itoa(port) + "/api/am/publisher/" + version
 }
 
-func getAdminRestURL(host string, offset int, version string) string {
+func getAdminRestURL(host, version string, offset int) string {
 	port := 9443 + offset
 	return "https://" + host + ":" + strconv.Itoa(port) + "/api/am/admin/" + version
 }
 
-func getDevOpsRestURL(host string, offset int, version string) string {
+func getDevOpsRestURL(host, version string, offset int) string {
 	port := 9443 + offset
 	return "https://" + host + ":" + strconv.Itoa(port) + "/api/am/devops/" + version
 }

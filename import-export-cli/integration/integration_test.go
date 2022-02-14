@@ -38,6 +38,7 @@ type YamlConfig struct {
 	MaxInvocationAttempts int           `yaml:"max-invocation-attempts"`
 	DCRVersion            string        `yaml:"dcr-version"`
 	RESTAPIVersion        string        `yaml:"rest-api-version"`
+	DevOpsRESTAPIVersion  string        `yaml:"devops-rest-api-version"`
 	APICTLVersion         string        `yaml:"apictl-version"`
 }
 
@@ -135,7 +136,7 @@ func TestMain(m *testing.M) {
 
 	for _, env := range envs {
 		client := apim.Client{}
-		client.Setup(env.Name, env.Host, env.Offset, yamlConfig.DCRVersion, yamlConfig.RESTAPIVersion)
+		client.Setup(env.Name, env.Host, env.Offset, yamlConfig.DCRVersion, yamlConfig.RESTAPIVersion, yamlConfig.DevOpsRESTAPIVersion)
 		apimClients[env.Name] = &client
 	}
 
