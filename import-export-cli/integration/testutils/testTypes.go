@@ -149,3 +149,12 @@ type ApiProductChangeLifeCycleStatusTestArgs struct {
 	Provider      string
 	ExpectedState string
 }
+
+type ApiLoggingTestArgs struct {
+	Apis         []*apim.API
+	APIM         *apim.Client
+	CtlUser      Credentials
+	TenantDomain string
+	ApiId        string
+	LogLevel     string
+}

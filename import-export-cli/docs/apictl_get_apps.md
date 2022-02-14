@@ -40,5 +40,5 @@ NOTE: The flag (--environment (-e)) is mandatory
 
 ### SEE ALSO
 
-* [apictl get](apictl_get.md)	 - Get APIs/APIProducts/Applications in an environment or Get the environments
+* [apictl get](apictl_get.md)	 - Get APIs/APIProducts/Applications or revisions of a specific API/APIProduct in an environment or Get the log level of each API in an environment or Get the environments
 

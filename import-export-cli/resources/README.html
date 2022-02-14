@@ -310,6 +310,22 @@
 </code></pre>
     </li>
     <li>
+        <h4 id="get-api-logging">get api-logging</h4>
+        <pre><code class="lang-bash">
+     Flags:
+         Required
+                 --environment, -e
+         Optional
+                 --tenant-domain
+                 --api-id
+     Examples:
+         apictl get api-logging -e dev
+         apictl get api-logging -e dev --tenant-domain test.com
+         apictl get api-logging -e dev --api-id bf36ca3a-0332-49ba-abce-e9992228ae06
+         apictl get api-logging -e dev --tenant-domain test.com --api-id bf36ca3a-0332-49ba-abce-e9992228ae06
+        </code></pre>
+    </li>
+    <li>
         <h4 id="get-envs">get envs</h4>
         <pre><code class="lang-bash">     Flags:
          None
@@ -398,6 +414,18 @@
           apictl set --tls-renegotiation-mode freely
           apictl set --vcs-deletion-enabled=true
           apictl set --vcs-config-path /home/user/custom/vcs-config.yaml
+</code></pre>
+    </li>
+    <li>
+        <h4 id="set-api-logging">set api-logging</h4>
+        <pre><code class="lang-bash">      Flags
+          --environment, -e
+          --tenant-domain
+          --api-id
+          --log-level
+      Examples:
+          apictl set api-logging -e dev --api-id bf36ca3a-0332-49ba-abce-e9992228ae06 --log-level full
+          apictl set api-logging -e dev --tenant-domain test.com --api-id bf36ca3a-0332-49ba-abce-e9992228ae06 --log-level full
 </code></pre>
     </li>
 </ul>

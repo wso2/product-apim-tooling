@@ -20,6 +20,7 @@ package apim
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"io"
@@ -54,6 +55,7 @@ type Client struct {
 	publisherRestURL string
 	devPortalRestURL string
 	adminRestURL     string
+	devopsRestURL    string
 	EnvName          string
 }
 
@@ -108,14 +110,15 @@ func (instance *Client) Login(username string, password string) {
 }
 
 // Setup : Setup APIM Client config
-func (instance *Client) Setup(envName string, host string, offset int, dcrVersion string, restAPIVersion string) {
+func (instance *Client) Setup(envName string, host string, offset int, dcrVersion, restAPIVersion, devopsRestAPIVersion string) {
 	base.Log("apim.Setup() - envName:", envName, ",host:", host, ",offset:", offset, ",dcrVersion:", dcrVersion,
 		",restAPIVersion:", restAPIVersion)
 	instance.apimURL = getApimURL(host, offset)
-	instance.dcrURL = getDCRURL(host, offset, dcrVersion)
-	instance.devPortalRestURL = getDevPortalRestURL(host, offset, restAPIVersion)
-	instance.publisherRestURL = getPublisherRestURL(host, offset, restAPIVersion)
-	instance.adminRestURL = getAdminRestURL(host, offset, restAPIVersion)
+	instance.dcrURL = getDCRURL(host, dcrVersion, offset)
+	instance.devPortalRestURL = getDevPortalRestURL(host, restAPIVersion, offset)
+	instance.publisherRestURL = getPublisherRestURL(host, restAPIVersion, offset)
+	instance.adminRestURL = getAdminRestURL(host, restAPIVersion, offset)
+	instance.devopsRestURL = getDevOpsRestURL(host, devopsRestAPIVersion, offset)
 	instance.portOffset = offset
 	instance.tokenURL = getTokenURL(host, offset)
 	instance.host = host
@@ -1545,7 +1548,6 @@ func (instance *Client) GetOauthKeys(t *testing.T, application *Application) *Ap
 	} else {
 		return &ApplicationKeysList{}
 	}
-
 }
 
 // DeleteApplication : Delete Application from APIM
@@ -1831,6 +1833,75 @@ func (instance *Client) RemoveEndpointCert(alias string) {
 	base.ValidateAndLogResponse("apim.RemoveEndpointCert() deleting Cert", response, 200)
 }
 
+// Retrieve admin credentials
+func RetrieveAdminCredentialsInsteadCreator(username, password string) (string, string) {
+	newUsername := username
+	newPassword := password
+	if strings.EqualFold(adminservices.CreatorUsername, username) {
+		newUsername = adminservices.AdminUsername
+		newPassword = adminservices.AdminPassword
+	}
+	if strings.EqualFold(adminservices.CreatorUsername+"@"+adminservices.Tenant1, username) {
+		newUsername = adminservices.AdminUsername + "@" + adminservices.Tenant1
+		newPassword = adminservices.AdminPassword
+	}
+	return newUsername, newPassword
+}
+
+// Get log level of APIs
+func (instance *Client) GetAPILogLevel(username, password, tenantDomain, apiId string) (*APILogLevelList, error) {
+	url := instance.devopsRestURL + "/tenant-logs/" + tenantDomain + "/apis/" + apiId
+	request := base.CreateGet(url)
+	encoded := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
+
+	request.Header.Set("Authorization", "Basic "+encoded)
+	request.Header.Set("Content-Type", "application/json")
+
+	base.LogRequest("apim.GetAPILogLevel()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	if response.StatusCode == 200 {
+		var apiLogLevelList APILogLevelList
+		json.NewDecoder(response.Body).Decode(&apiLogLevelList)
+		return &apiLogLevelList, nil
+	}
+
+	return nil, errors.New("Error with status code " + response.Status + "while retrieving log levels.")
+}
+
+// Set log level of an API
+func (instance *Client) SetAPILogLevel(username, password, tenantDomain, apiId, logLevel string) (*APILogLevel, error) {
+	url := instance.devopsRestURL + "/tenant-logs/" + tenantDomain + "/apis/" + apiId
+	data, err := json.Marshal(APILogLevel{LogLevel: logLevel})
+
+	if err != nil {
+		return nil, errors.New("Error while building request payload for setting log level of API " + apiId + ".")
+	}
+
+	request := base.CreatePut(url, bytes.NewBuffer(data))
+	encoded := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
+
+	request.Header.Set("Authorization", "Basic "+encoded)
+	request.Header.Set("Content-Type", "application/json")
+
+	base.LogRequest("apim.SetAPILogLevel()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	if response.StatusCode == 200 {
+		var apiLogLevel APILogLevel
+		json.NewDecoder(response.Body).Decode(&apiLogLevel)
+		return &apiLogLevel, nil
+	}
+
+	return nil, errors.New("Error with status code " + response.Status + "while setting log level of API " + apiId + ".")
+}
+
 func generateSampleAPIOperations() []APIOperations {
 	op1 := APIOperations{}
 	op1.Target = "/order/{orderId}"
@@ -1942,7 +2013,7 @@ func (instance *Client) registerClient(username string, password string) dcrResp
 	return jsonResp
 }
 
-func getDCRURL(host string, offset int, version string) string {
+func getDCRURL(host, version string, offset int) string {
 	port := 9443 + offset
 	return "https://" + host + ":" + strconv.Itoa(port) + "/client-registration/" + version + "/register"
 }
@@ -1952,36 +2023,27 @@ func getApimURL(host string, offset int) string {
 	return "https://" + host + ":" + strconv.Itoa(port)
 }
 
-func getDevPortalRestURL(host string, offset int, version string) string {
+func getDevPortalRestURL(host, version string, offset int) string {
 	port := 9443 + offset
 	return "https://" + host + ":" + strconv.Itoa(port) + "/api/am/devportal/" + version
 }
 
-func getPublisherRestURL(host string, offset int, version string) string {
+func getPublisherRestURL(host, version string, offset int) string {
 	port := 9443 + offset
 	return "https://" + host + ":" + strconv.Itoa(port) + "/api/am/publisher/" + version
 }
 
-func getAdminRestURL(host string, offset int, version string) string {
+func getAdminRestURL(host, version string, offset int) string {
 	port := 9443 + offset
 	return "https://" + host + ":" + strconv.Itoa(port) + "/api/am/admin/" + version
+}
+
+func getDevOpsRestURL(host, version string, offset int) string {
+	port := 9443 + offset
+	return "https://" + host + ":" + strconv.Itoa(port) + "/api/am/devops/" + version
 }
 
 func getTokenURL(host string, offset int) string {
 	port := 9443 + offset
 	return "https://" + host + ":" + strconv.Itoa(port) + "/oauth2/token"
-}
-
-func RetrieveAdminCredentialsInsteadCreator(username, password string) (string, string) {
-	newUsername := username
-	newPassword := password
-	if strings.EqualFold(adminservices.CreatorUsername, username) {
-		newUsername = adminservices.AdminUsername
-		newPassword = adminservices.AdminPassword
-	}
-	if strings.EqualFold(adminservices.CreatorUsername+"@"+adminservices.Tenant1, username) {
-		newUsername = adminservices.AdminUsername + "@" + adminservices.Tenant1
-		newPassword = adminservices.AdminPassword
-	}
-	return newUsername, newPassword
 }

@@ -58,14 +58,16 @@ func executeGetApiLoggingCmd(credential credentials.Credential) {
 		if err == nil {
 			impl.PrintAPILoggers(api, getAPILoggingCmdFormat)
 		} else {
-			utils.Logln(utils.LogPrefixError+"Getting API logger details of the API", err)
+			utils.Logln(utils.LogPrefixError+"Getting the log level of the API", err)
+			utils.HandleErrorAndExit("Error while getting the log level of the API", err)
 		}
 	} else {
 		apis, err := impl.GetPerAPILoggingListFromEnv(credential, getApiLoggingEnvironment, getApiLoggingTenantDomain)
 		if err == nil {
 			impl.PrintAPILoggers(apis, getAPILoggingCmdFormat)
 		} else {
-			utils.Logln(utils.LogPrefixError+"Getting List of API loggers for the APIs", err)
+			utils.Logln(utils.LogPrefixError+"Getting list of API log levels for the APIs", err)
+			utils.HandleErrorAndExit("Error while getting list of API log levels for the APIs", err)
 		}
 	}
 }
