@@ -107,7 +107,8 @@ const defaultDevPortalThrottlingPoliciesEndpointSuffix = "api/am/devportal/v2/th
 const defaultClientRegistrationEndpointSuffix = "client-registration/v0.17/register"
 const defaultTokenEndPoint = "oauth2/token"
 const defaultRevokeEndpointSuffix = "oauth2/revoke"
-const defaultAPILoggingBaseEndpoint = "api/am/devops/v0/tenant-logs"
+const defaultAPILoggingBaseEndpoint = "api/am/devops/v1/tenant-logs"
+const defaultAPILoggingListEndpoint = "apis?logging-enabled=false"
 const defaultAPILoggingApisEndpoint = "apis"
 
 const DefaultEnvironmentName = "default"
