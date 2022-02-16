@@ -39,6 +39,8 @@ github.com/pavel-v-chernykh/keystore-go/v4                                      
 
 github.com/renstrom/dedent                                                                          MIT
 
+github.com/savaki/jq                                                                                Apache-2.0
+
 github.com/spf13/cast                                                                               MIT
 
 github.com/spf13/cobra                                                                              Apache-2.0
