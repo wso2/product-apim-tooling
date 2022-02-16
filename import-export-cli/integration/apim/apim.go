@@ -110,14 +110,16 @@ func (instance *Client) Login(username string, password string) {
 }
 
 // Setup : Setup APIM Client config
-func (instance *Client) Setup(envName string, host string, offset int, dcrVersion, restAPIVersion, devopsRestAPIVersion string) {
+func (instance *Client) Setup(envName string, host string, offset int, dcrVersion, adminRestAPIVersion,
+	devportalRestAPIVersion, publisherRestAPIVersion, devopsRestAPIVersion string) {
 	base.Log("apim.Setup() - envName:", envName, ",host:", host, ",offset:", offset, ",dcrVersion:", dcrVersion,
-		",restAPIVersion:", restAPIVersion)
+		",adminRestAPIVersion:", adminRestAPIVersion, ",devportalRestAPIVersion:", devportalRestAPIVersion,
+		",publisherRestAPIVersion:", publisherRestAPIVersion)
 	instance.apimURL = getApimURL(host, offset)
 	instance.dcrURL = getDCRURL(host, dcrVersion, offset)
-	instance.devPortalRestURL = getDevPortalRestURL(host, restAPIVersion, offset)
-	instance.publisherRestURL = getPublisherRestURL(host, restAPIVersion, offset)
-	instance.adminRestURL = getAdminRestURL(host, restAPIVersion, offset)
+	instance.devPortalRestURL = getDevPortalRestURL(host, devportalRestAPIVersion, offset)
+	instance.publisherRestURL = getPublisherRestURL(host, publisherRestAPIVersion, offset)
+	instance.adminRestURL = getAdminRestURL(host, adminRestAPIVersion, offset)
 	instance.devopsRestURL = getDevOpsRestURL(host, devopsRestAPIVersion, offset)
 	instance.portOffset = offset
 	instance.tokenURL = getTokenURL(host, offset)

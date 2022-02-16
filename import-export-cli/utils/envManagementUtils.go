@@ -287,11 +287,11 @@ func GetAPILoggingListEndpointOfEnv(env, tenantDomain, filePath string) string {
 	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
 	if !(envEndpoints.PublisherEndpoint == "" || envEndpoints == nil) {
 		envEndpoints.PublisherEndpoint = AppendSlashToString(envEndpoints.PublisherEndpoint)
-		return envEndpoints.PublisherEndpoint + defaultAPILoggingBaseEndpoint + "/" + tenantDomain + "/" + defaultAPILoggingListEndpoint
+		return envEndpoints.PublisherEndpoint + defaultAPILoggingBaseEndpoint + "/" + tenantDomain + "/" + defaultAPILoggingApisEndpoint
 	} else {
 		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
 		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
-		return apiManagerEndpoint + defaultAPILoggingBaseEndpoint + "/" + tenantDomain + "/" + defaultAPILoggingListEndpoint
+		return apiManagerEndpoint + defaultAPILoggingBaseEndpoint + "/" + tenantDomain + "/" + defaultAPILoggingApisEndpoint
 	}
 }
 
