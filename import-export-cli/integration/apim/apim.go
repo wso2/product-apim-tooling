@@ -1905,35 +1905,41 @@ func (instance *Client) SetAPILogLevel(username, password, tenantDomain, apiId, 
 }
 
 func generateSampleAPIOperations() []APIOperations {
+
 	op1 := APIOperations{}
 	op1.Target = "/order/{orderId}"
 	op1.Verb = "GET"
 	op1.ThrottlingPolicy = "Unlimited"
 	op1.AuthType = "Application & Application User"
+	op1.OperationPolicies = OperationPolicies{[]string{}, []string{}, []string{}}
 
 	op2 := APIOperations{}
 	op2.Target = "/order/{orderId}"
 	op2.Verb = "DELETE"
 	op2.ThrottlingPolicy = "Unlimited"
 	op2.AuthType = "Application & Application User"
+	op2.OperationPolicies = OperationPolicies{[]string{}, []string{}, []string{}}
 
 	op3 := APIOperations{}
 	op3.Target = "/order/{orderId}"
 	op3.Verb = "PUT"
 	op3.ThrottlingPolicy = "Unlimited"
 	op3.AuthType = "Application & Application User"
+	op3.OperationPolicies = OperationPolicies{[]string{}, []string{}, []string{}}
 
 	op4 := APIOperations{}
 	op4.Target = "/menu"
 	op4.Verb = "GET"
 	op4.ThrottlingPolicy = "Unlimited"
 	op4.AuthType = "Application & Application User"
+	op4.OperationPolicies = OperationPolicies{[]string{}, []string{}, []string{}}
 
 	op5 := APIOperations{}
 	op5.Target = "/order"
 	op5.Verb = "POST"
 	op5.ThrottlingPolicy = "Unlimited"
 	op5.AuthType = "Application & Application User"
+	op5.OperationPolicies = OperationPolicies{[]string{}, []string{}, []string{}}
 
 	return []APIOperations{op1, op2, op3, op4, op5}
 }

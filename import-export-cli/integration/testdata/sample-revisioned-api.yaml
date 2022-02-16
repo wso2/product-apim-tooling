@@ -119,6 +119,10 @@ data: # Contains the meta data of the API
     throttlingPolicy: Unlimited
     scopes: []
     usedProductIds: []
+    operationPolicies:
+      request: []
+      response: []
+      fault: []
    -
     id: ""
     target: /menu
@@ -127,6 +131,10 @@ data: # Contains the meta data of the API
     throttlingPolicy: Unlimited
     scopes: []
     usedProductIds: []
+    operationPolicies:
+      request: []
+      response: []
+      fault: []
    -
     id: ""
     target: /order/{orderId}
@@ -135,6 +143,10 @@ data: # Contains the meta data of the API
     throttlingPolicy: Unlimited
     scopes: []
     usedProductIds: []
+    operationPolicies:
+      request: []
+      response: []
+      fault: []
    -
     id: ""
     target: /order/{orderId}
@@ -143,6 +155,10 @@ data: # Contains the meta data of the API
     throttlingPolicy: Unlimited
     scopes: []
     usedProductIds: []
+    operationPolicies:
+      request: []
+      response: []
+      fault: []
    -
     id: ""
     target: /order/{orderId}
@@ -151,6 +167,10 @@ data: # Contains the meta data of the API
     throttlingPolicy: Unlimited
     scopes: []
     usedProductIds: []
+    operationPolicies:
+      request: []
+      response: []
+      fault: []
   categories: [] # List of API Categories that the API belongs to
   keyManagers: # List of key manager endpoints
    - all
