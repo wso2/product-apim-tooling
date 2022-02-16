@@ -1197,7 +1197,7 @@ func TestDeleteApiProductWithActiveSubscriptionsSuperTenantUser(t *testing.T) {
 	base.WaitForIndexing()
 
 	//Get keys for ApiProduct and keep subscription active
-	testutils.ValidateGetKeysWithoutCleanup(t, args, true)
+	testutils.ValidateGetKeysWithoutCleanup(t, args, false)
 
 	argsToDelete := &testutils.ApiProductImportExportTestArgs{
 		CtlUser:    testutils.Credentials{Username: adminUsername, Password: adminPassword},
