@@ -37,11 +37,14 @@ indexing-delay: 1000
 
 - *APIM DCR/REST API versions*
 
-   The DCR and REST API version of the APIM instances mentioned previously.
+   The DCR and REST API versions (Admin, Devportal and Publisher) of the APIM instances mentioned previously.
 
 ```
 dcr-version: v0.17
-rest-api-version: v2
+admin-rest-api-version: v3
+devportal-rest-api-version: v2
+publisher-rest-api-version: v3
+devops-rest-api-version: v0
 ```
 
 - *apictl version*

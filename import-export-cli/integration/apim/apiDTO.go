@@ -231,13 +231,20 @@ type RoleBindings struct {
 
 // APIOperations : API Operations definition
 type APIOperations struct {
-	ID               string   `json:"id"`
-	Target           string   `json:"target"`
-	Verb             string   `json:"verb"`
-	AuthType         string   `json:"authType,omitempty"`
-	ThrottlingPolicy string   `json:"throttlingPolicy,omitempty"`
-	Scopes           []string `json:"scopes,omitempty"`
-	UsedProductIds   []string `json:"usedProductIds,omitempty"`
+	ID                string            `json:"id" yaml:"id"`
+	Target            string            `json:"target" yaml:"target"`
+	Verb              string            `json:"verb" yaml:"verb"`
+	AuthType          string            `json:"authType,omitempty" yaml:"authType,omitempty"`
+	ThrottlingPolicy  string            `json:"throttlingPolicy,omitempty" yaml:"throttlingPolicy,omitempty"`
+	Scopes            []string          `json:"scopes,omitempty" yaml:"scopes,omitempty"`
+	UsedProductIds    []string          `json:"usedProductIds,omitempty" yaml:"usedProductIds,omitempty"`
+	OperationPolicies OperationPolicies `json:"operationPolicies,omitempty" yaml:"operationPolicies,omitempty"`
+}
+
+type OperationPolicies struct {
+	Request  interface{} `json:"request" yaml:"request"`
+	Response interface{} `json:"response" yaml:"response"`
+	Fault    interface{} `json:"fault" yaml:"fault"`
 }
 
 // AdvertiseInfo : Advertise only information

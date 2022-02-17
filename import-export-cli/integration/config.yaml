@@ -15,7 +15,9 @@ indexing-delay: 1000
 max-invocation-attempts: 10
 
 dcr-version: v0.17
-rest-api-version: v2
-devops-rest-api-version: v1
+admin-rest-api-version: v3
+devportal-rest-api-version: v2
+publisher-rest-api-version: v3
+devops-rest-api-version: v0
 apictl-version: 4.1.0
 

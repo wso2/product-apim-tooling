@@ -404,7 +404,7 @@ func subscribe(appId string, accessToken string) (string, error) {
 // @param accessToken : Access token to call the REST API
 // @return API, error
 func getApiOrProduct(apiId string, accessToken string) (*utils.APIData, error) {
-	// Since apis/{api-id} supports retrieving details of both APIs and API Products, we can use it here.
+	// First check whether this is an API
 	apiEndpoint := utils.GetApiListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath) + "/" + apiId
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
@@ -416,13 +416,26 @@ func getApiOrProduct(apiId string, accessToken string) (*utils.APIData, error) {
 		err = json.Unmarshal(data, &apiData)
 		return apiData, err
 	} else {
-		utils.Logf("Error: %s\n", resp.Error())
-		utils.Logf("Body: %s\n", resp.Body())
-		if resp.StatusCode() == http.StatusUnauthorized {
-			// 401 Unauthorized
-			return nil, fmt.Errorf("authorization failed while trying to retrieve the details of API or API Prodcut: " + apiId)
+		// Second check whether this is an API Product
+		apiProductEndpoint := utils.GetApiProductListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath) + "/" + apiId
+		headers := make(map[string]string)
+		headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
+		resp, err := utils.InvokeGETRequest(apiProductEndpoint, headers)
+		if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
+			// 200 OK or 201 Created
+			apiData := &utils.APIData{}
+			data := []byte(resp.Body())
+			err = json.Unmarshal(data, &apiData)
+			return apiData, err
+		} else {
+			utils.Logf("Error: %s\n", resp.Error())
+			utils.Logf("Body: %s\n", resp.Body())
+			if resp.StatusCode() == http.StatusUnauthorized {
+				// 401 Unauthorized
+				return nil, fmt.Errorf("authorization failed while trying to retrieve the details of API or API Prodcut: " + apiId)
+			}
+			return nil, errors.New("Request didn't respond 200 OK for retrieving API or API Product details. Status: " + resp.Status())
 		}
-		return nil, errors.New("Request didn't respond 200 OK for retrieving API or API Product details. Status: " + resp.Status())
 	}
 }
 
