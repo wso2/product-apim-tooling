@@ -165,7 +165,7 @@ func invokeDELETERequestWithRetry(url string, env string) (*resty.Response, erro
 	})
 }
 
-func invokeDELETERequestWithRetryAndParams(url string, env string, params map[string]string) (*resty.Response, error) {
+func invokeDELETERequestWithRetryAndParams(url, env string, params map[string]string) (*resty.Response, error) {
 	return retryHTTPCall(miHTTPRetryCount, env, func(accessToken string) (*resty.Response, error) {
 		headers := make(map[string]string)
 		headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken

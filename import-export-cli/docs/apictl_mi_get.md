@@ -45,6 +45,7 @@ apictl mi get endpoints -e dev
 * [apictl mi get message-processors](apictl_mi_get_message-processors.md)	 - Get information about message processors deployed in a Micro Integrator
 * [apictl mi get message-stores](apictl_mi_get_message-stores.md)	 - Get information about message stores deployed in a Micro Integrator
 * [apictl mi get proxy-services](apictl_mi_get_proxy-services.md)	 - Get information about proxy services deployed in a Micro Integrator
+* [apictl mi get roles](apictl_mi_get_roles.md)	 - Get information about roles
 * [apictl mi get sequences](apictl_mi_get_sequences.md)	 - Get information about sequences deployed in a Micro Integrator
 * [apictl mi get tasks](apictl_mi_get_tasks.md)	 - Get information about tasks deployed in a Micro Integrator
 * [apictl mi get templates](apictl_mi_get_templates.md)	 - Get information about templates deployed in a Micro Integrator

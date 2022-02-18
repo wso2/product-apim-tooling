@@ -39,7 +39,7 @@ const updateUserCmdShortDesc = "Update roles of a user in a Micro Integrator"
 const updateUserCmdLongDesc = "Update the roles of a user named [user-name] specified by the command line arguments in a Micro Integrator in the environment specified by the flag --environment, -e"
 
 var updateUserCmdExamples = "To update the roles\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + updateCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(updateUserCmdLiteral) + " [user-name] DEBUG -e dev\n" +
+	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + updateCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(updateUserCmdLiteral) + " [user-name] -e dev\n" +
 	"NOTE: The flag (--environment (-e)) is mandatory"
 
 var updateUserCmd = &cobra.Command{
@@ -55,7 +55,7 @@ var updateUserCmd = &cobra.Command{
 
 func init() {
 	UpdateCmd.AddCommand(updateUserCmd)
-	updateUserCmd.Flags().StringVarP(&updateUserCmdEnvironment, "environment", "e", "", "Environment of the micro integrator of which the user's roles should be updated")
+	updateUserCmd.Flags().StringVarP(&updateUserCmdEnvironment, "environment", "e", "", "Environment of the Micro Integrator of which the user's roles should be updated")
 	updateUserCmd.MarkFlagRequired("environment")
 }
 
@@ -66,7 +66,7 @@ func handleupdateUserCmdArguments(args []string) {
 }
 
 func executeUpdateUser(userName, domain string, addedRoles, removedRoles []string) {
-	resp, err := impl.UpdateMIUser(updateUserCmdEnvironment,userName, domain, addedRoles, removedRoles)
+	resp, err := impl.UpdateMIUser(updateUserCmdEnvironment, userName, domain, addedRoles, removedRoles)
 	if err != nil {
 		fmt.Println(utils.LogPrefixError+"updating roles of user [ "+userName+" ] ", err)
 	} else {
