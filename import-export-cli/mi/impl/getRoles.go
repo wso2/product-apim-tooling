@@ -65,7 +65,7 @@ func PrintRoleList(roleList *artifactutils.RoleList, format string) {
 			return nil
 		}
 		roleListTableHeaders := map[string]string{
-			"Role": RoleHeader,
+			"Role": roleHeader,
 		}
 		if err := roleListContext.Write(renderer, roleListTableHeaders); err != nil {
 			fmt.Println("Error executing template:", err.Error())

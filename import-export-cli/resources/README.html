@@ -791,10 +791,25 @@
               --format
               --role, -r
               --pattern, -p
+              --domain, -d
       Examples:
-          apictl mi get users -e dev
-          apictl mi get users -r admin -e dev
-          apictl mi get users -p mi -e dev
+          apictl mi get users capp-tester -e dev
+          apictl mi get users capp-tester -r admin -e dev
+          apictl mi get users capp-tester -p mi -e dev
+          apictl mi get users capp-tester -d wso2.com -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="mi-get-roles">mi get roles [role-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --domain, -d
+      Examples:
+          apictl mi get roles -e dev
+          apictl mi get roles tester -e dev
+          apictl mi get roles tester -d wso2.com -e dev
 </code></pre>
     </li>
 </ul>
@@ -807,6 +822,15 @@
       Examples:
           apictl mi add user capp-tester -e dev
 </code></pre>
+    </li>
+    <li>
+        <h4 id="mi-add-role">mi add role [role-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+      Examples:
+          apictl mi add role tester -e dev
+        </code></pre>
     </li>
     <li>
         <h4 id="mi-add-logger">mi add log-level [logger-name] [class-name] [log-level]</h4>
@@ -836,6 +860,15 @@
 </code></pre>
     </li>
     <li>
+        <h4 id="mi-update-user">mi update user [user-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+      Examples:
+          apictl mi update user capp-tester -e dev
+</code></pre>
+    </li>
+    <li>
         <h4 id="mi-delete-user">mi delete user [user-name]</h4>
         <pre><code class="lang-bash">      Flags:
           Required:
@@ -843,6 +876,18 @@
       Examples:
           apictl mi delete user capp-developer -e dev
 </code></pre>
+    </li>
+    <li>
+        <h4 id="mi-delete-role">mi delete role [role-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --domain, -d
+      Examples:
+          apictl mi delete role capp-tester -e dev
+          apictl mi delete role capp-tester -d wso2.com -e dev
+        </code></pre>
     </li>
 </ul>
 <ul>

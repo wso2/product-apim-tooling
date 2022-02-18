@@ -55,8 +55,8 @@ var deleteRoleCmd = &cobra.Command{
 
 func init() {
 	DeleteCmd.AddCommand(deleteRoleCmd)
-	deleteRoleCmd.Flags().StringVarP(&deleteRoleCmdDomain, "domain", "d", "", "select the domain of the role")
-	deleteRoleCmd.Flags().StringVarP(&deleteRoleCmdEnvironment, "environment", "e", "", "Environment of the micro integrator from which a role should be deleted")
+	deleteRoleCmd.Flags().StringVarP(&deleteRoleCmdDomain, "domain", "d", "", "Select the domain of the role")
+	deleteRoleCmd.Flags().StringVarP(&deleteRoleCmdEnvironment, "environment", "e", "", "Environment of the Micro Integrator from which a role should be deleted")
 	deleteRoleCmd.MarkFlagRequired("environment")
 }
 
@@ -69,7 +69,7 @@ func handledeleteRoleCmdArguments(args []string) {
 func executeDeleteRole(roleName string) {
 	resp, err := impl.DeleteMIRole(deleteRoleCmdEnvironment, roleName, deleteRoleCmdDomain)
 	if err != nil {
-		fmt.Println(utils.LogPrefixError+"deleting role [ "+roleName+" ]", err)
+		fmt.Println(utils.LogPrefixError + "deleting role [ "+roleName+" ]", err)
 	} else {
 		fmt.Println("Deleting role [ "+roleName+" ] status:", resp)
 	}

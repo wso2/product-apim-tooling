@@ -14,13 +14,16 @@ apictl mi delete user [user-name] [flags]
 
 ```
 To delete a user
-  apictl mi delete user capp-tester -e dev
+  apictl mi delete user [user-id] -e dev
+To delete a user in a secondary user store
+  apictl mi delete user [user-id] -d [domain] -e dev
 NOTE: The flag (--environment (-e)) is mandatory
 ```
 
 ### Options
 
 ```
+  -d, --domain string        select user's domain
   -e, --environment string   Environment of the micro integrator from which a user should be deleted
   -h, --help                 help for user
 ```
