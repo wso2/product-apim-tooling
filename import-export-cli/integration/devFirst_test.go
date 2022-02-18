@@ -500,7 +500,7 @@ func TestAPISequenceUpdate(t *testing.T) {
 			base.Copy(srcPathForSequence, destPathForSequence)
 
 			// Update api.yaml file of initialized project with sequence related metadata
-			apiYamlFilePath := filepath.Join(projectPath, testutils.DevFirstSampleCaseApiYamlFilePathSuffix);
+			apiYamlFilePath := filepath.Join(projectPath, testutils.DevFirstSampleCaseApiYamlFilePathSuffix)
 			apiYaml, err := ioutil.ReadFile(apiYamlFilePath)
 			if err != nil {
 				t.Error(err)
@@ -511,8 +511,8 @@ func TestAPISequenceUpdate(t *testing.T) {
 			if err != nil {
 				t.Error(err)
 			}
-			
-			// Mediation policy that will be appended to the existing list of mediation policies 
+
+			// Mediation policy that will be appended to the existing list of mediation policies
 			mediationPolicy := apim.MediationPolicy{
 				Name:   testutils.CustomSequenceName,
 				Type:   "IN",
@@ -521,7 +521,7 @@ func TestAPISequenceUpdate(t *testing.T) {
 
 			mediationPolicies := []apim.MediationPolicy{mediationPolicy}
 			api.Data.MediationPolicies = mediationPolicies
-		
+
 			// Write the modified api.yaml to initialized project
 			apiYamlContent, err := yaml.Marshal(api)
 			if err != nil {
