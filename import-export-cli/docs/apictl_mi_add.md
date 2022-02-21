@@ -34,5 +34,6 @@ apictl mi add log-level synapse-api org.apache.synapse.rest.API DEBUG -e dev
 
 * [apictl mi](apictl_mi.md)	 - Micro Integrator related commands
 * [apictl mi add log-level](apictl_mi_add_log-level.md)	 - Add new Logger to a Micro Integrator
+* [apictl mi add role](apictl_mi_add_role.md)	 - Add new role to a Micro Integrator
 * [apictl mi add user](apictl_mi_add_user.md)	 - Add new user to a Micro Integrator
 

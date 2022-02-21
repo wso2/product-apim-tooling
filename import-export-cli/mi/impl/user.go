@@ -28,24 +28,35 @@ type newUserRequestBody struct {
 	UserID   string `json:"userId"`
 	Password string `json:"password"`
 	IsAdmin  string `json:"isAdmin"`
+	Domain  string `json:"domain"`
+}
+
+type updateUserRolesRequestBody struct {
+	UserID       string `json:"userId"`
+	Domain       string `json:"domain"`
+	AddedRoles   []string `json:"addedRoles"`
+	RemovedRoles []string `json:"removedRoles"`
 }
 
 // AddMIUser adds a new user to the micro integrator in a given environment
-func AddMIUser(env, userName, password, isAdmin string) (interface{}, error) {
+func AddMIUser(env, userName, password, isAdmin, domain string) (interface{}, error) {
 	isAdmin = resolveIsAdmin(isAdmin)
 	body := newUserRequestBody{
 		UserID:   userName,
 		Password: password,
 		IsAdmin:  isAdmin,
+		Domain: domain,
 	}
 	url := utils.GetMIManagementEndpointOfResource(utils.MiManagementUserResource, env, utils.MainConfigFilePath)
 	return addNewMIUser(env, url, body)
 }
 
 // DeleteMIUser deletes a user from a micro integrator in a given environment
-func DeleteMIUser(env, userName string) (interface{}, error) {
+func DeleteMIUser(env, userName, domain string) (interface{}, error) {
+    params := make(map[string]string)
+    putNonEmptyValueToMap(params, "domain", domain)
 	url := utils.GetMIManagementEndpointOfResource(utils.MiManagementUserResource, env, utils.MainConfigFilePath) + "/" + userName
-	return deleteMIUser(url, env)
+	return deleteMIUser(url, env, params)
 }
 
 func addNewMIUser(env, url string, body interface{}) (string, error) {
@@ -53,8 +64,24 @@ func addNewMIUser(env, url string, body interface{}) (string, error) {
 	return handleResponse(resp, err, url, "status", "Error")
 }
 
-func deleteMIUser(url, env string) (string, error) {
-	resp, err := invokeDELETERequestWithRetry(url, env)
+func deleteMIUser(url, env string, params map[string]string) (string, error) {
+	resp, err := invokeDELETERequestWithRetryAndParams(url, env, params)
+	return handleResponse(resp, err, url, "status", "Error")
+}
+
+func UpdateMIUser(env, userName, domain string, addedRoles, removedRoles []string) (interface{}, error) {
+	body := updateUserRolesRequestBody{
+		UserID:   userName,
+		Domain: domain,
+		AddedRoles: addedRoles,
+		RemovedRoles: removedRoles,
+	}
+	url := utils.GetMIManagementEndpointOfResource(utils.MiManagementRoleResource, env, utils.MainConfigFilePath)
+	return updateMIUser(env, url, body)
+}
+
+func updateMIUser(env, url string, body interface{}) (string, error) {
+	resp, err := invokePUTRequestWithRetry(env, url, body)
 	return handleResponse(resp, err, url, "status", "Error")
 }
 

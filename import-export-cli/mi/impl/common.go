@@ -165,6 +165,23 @@ func invokeDELETERequestWithRetry(url string, env string) (*resty.Response, erro
 	})
 }
 
+func invokeDELETERequestWithRetryAndParams(url, env string, params map[string]string) (*resty.Response, error) {
+	return retryHTTPCall(miHTTPRetryCount, env, func(accessToken string) (*resty.Response, error) {
+		headers := make(map[string]string)
+		headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
+		return utils.InvokeDELETERequestWithParams(url, params, headers)
+	})
+}
+
+func invokePUTRequestWithRetry(env, url string, body interface{}) (*resty.Response, error) {
+	return retryHTTPCall(miHTTPRetryCount, env, func(accessToken string) (*resty.Response, error) {
+		headers := make(map[string]string)
+		headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
+		headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
+		return utils.InvokePUTRequestWithoutQueryParams(url, headers, body)
+	})
+}
+
 func unmarshalJSONToStringMap(body []byte) map[string]string {
 	var data map[string]string
 	unmarshalError := json.Unmarshal(body, &data)

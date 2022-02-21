@@ -32,5 +32,6 @@ apictl mi delete user capp-tester -e dev
 ### SEE ALSO
 
 * [apictl mi](apictl_mi.md)	 - Micro Integrator related commands
+* [apictl mi delete role](apictl_mi_delete_role.md)	 - Delete a role from the Micro Integrator
 * [apictl mi delete user](apictl_mi_delete_user.md)	 - Delete a user from the Micro Integrator
 
