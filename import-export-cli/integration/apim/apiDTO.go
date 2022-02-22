@@ -242,7 +242,7 @@ type APIOperations struct {
 
 // AdvertiseInfo : Advertise only information
 type AdvertiseInfo struct {
-	Advertised                    bool   `json:"advertised,omitempty" yaml:"advertised,omitempty"`
+	Advertised                    bool   `json:"advertised" yaml:"advertised"`
 	ApiExternalProductionEndpoint string `json:"apiExternalProductionEndpoint,omitempty" yaml:"apiExternalProductionEndpoint,omitempty"`
 	ApiExternalSandboxEndpoint    string `json:"apiExternalSandboxEndpoint,omitempty" yaml:"apiExternalSandboxEndpoint,omitempty"`
 	OriginalDevPortalUrl          string `json:"originalDevPortalUrl,omitempty" yaml:"originalDevPortalUrl,omitempty"`
