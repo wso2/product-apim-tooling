@@ -189,6 +189,21 @@ func InvokePutRequest(queryParam map[string]string, url string, headers map[stri
 	return client.R().SetHeaders(headers).SetQueryParams(queryParam).SetBody(body).Put(url)
 }
 
+func InvokePUTRequestWithoutQueryParams(url string, headers map[string]string, body interface{}) (*resty.Response, error) {
+	client := resty.New()
+
+	if Insecure {
+		client.SetTLSClientConfig(
+			&tls.Config{InsecureSkipVerify: true, // To bypass errors in SSL certificates
+				Renegotiation: TLSRenegotiationMode})
+	} else {
+		client.SetTLSClientConfig(GetTlsConfigWithCertificate())
+	}
+
+	client.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
+	return client.R().SetHeaders(headers).SetBody(body).Put(url)
+}
+
 // Invoke http-delete request using go-resty
 func InvokeDELETERequest(url string, headers map[string]string) (*resty.Response, error) {
 	client := resty.New()

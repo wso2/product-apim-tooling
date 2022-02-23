@@ -81,10 +81,11 @@ func PrintUserList(userList *artifactutils.UserList, format string) {
 }
 
 // GetUserInfo returns a information about a specific user in the micro integrator in a given environment
-func GetUserInfo(env, userID string) (*artifactutils.UserSummary, error) {
+func GetUserInfo(env, userID, domain string) (*artifactutils.UserSummary, error) {
 	var userInfoResource = utils.MiManagementUserResource + "/" + userID
-
-	resp, err := callMIManagementEndpointOfResource(userInfoResource, nil, env, &artifactutils.UserSummary{})
+	params := make(map[string]string)
+	putNonEmptyValueToMap(params, "domain", domain)
+	resp, err := callMIManagementEndpointOfResource(userInfoResource, params, env, &artifactutils.UserSummary{})
 	if err != nil {
 		return nil, err
 	}

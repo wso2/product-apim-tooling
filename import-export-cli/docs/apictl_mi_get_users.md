@@ -23,12 +23,15 @@ To get the list of users with a username matching with the wild card Ex: "*mi*" 
   apictl mi get users -p [pattern] -e dev
 To get details about a user by providing the user-id
   apictl mi get users [user-id] -e dev
+To get details about a user in a secondary user store
+  apictl mi get users [user-id] -d [domain] -e dev
 NOTE: The flag (--environment (-e)) is mandatory
 ```
 
 ### Options
 
 ```
+  -d, --domain string        Filter users by domain
   -e, --environment string   Environment to be searched
       --format string        Pretty-print using Go Templates. Use "{{ jsonPretty . }}" to list all fields
   -h, --help                 help for users
