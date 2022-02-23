@@ -193,6 +193,8 @@ func GenerateAdvertiseOnlyAPIDefinition(t *testing.T) (string, apim.API) {
 	sampleContent.Data.AdvertiseInformation.Advertised = true
 	sampleContent.Data.AdvertiseInformation.ApiOwner = sampleContent.Data.Provider
 	sampleContent.Data.AdvertiseInformation.OriginalDevPortalUrl = "https://localhost:9443/devportal"
+	sampleContent.Data.AdvertiseInformation.ApiExternalProductionEndpoint = "https://production-ep:9443"
+	sampleContent.Data.AdvertiseInformation.ApiExternalSandboxEndpoint = "https://sandbox-ep:9443"
 	sampleContent.Data.AdvertiseInformation.Vendor = "WSO2"
 
 	advertiseOnlyAPIDefinitionPath := filepath.Join(projectPath, filepath.FromSlash(utils.APIDefinitionFileYaml))

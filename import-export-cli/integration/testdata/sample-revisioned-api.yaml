@@ -181,6 +181,8 @@ data: # Contains the meta data of the API
   advertiseInfo: # Advertise only information if an Advertise only API
       advertised: false # Whether API is an advertised only API or not
       originalDevPortalUrl: null # The original URL of the Devportal
+      apiExternalProductionEndpoint: null # The external production endpoint if the
+      apiExternalSandboxEndpoint: null # The original URL of the Devportal
       apiOwner: admin # The original owner of the API
       vendor: WSO2 # Vendor of the Advertised only API
   gatewayVendor: wso2 # Gateway vendor
