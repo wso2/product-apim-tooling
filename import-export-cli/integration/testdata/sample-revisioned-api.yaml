@@ -44,22 +44,7 @@ data: # Contains the meta data of the API
   visibility: PUBLIC # Visibility level of the API {PUBLIC|PRIVATE|RESTRICTED} [required]
   visibleRoles: [] # User roles that are able to access the API in Store as a list
   visibleTenants: [] # Visible tenants of the API
-  mediationPolicies: # Mediation policies attached to the API that should be executed in the runtime {IN|OUT|FAULT}
-   -
-    id: 3b8cc0a7-6d98-4678-9111-2aba50fa505c
-    name: preserve_accept_header
-    type: IN
-    shared: true
-   -
-    id: 35368bb8-c6dc-4297-9703-8b5087dcad75
-    name: log_out_message
-    type: OUT
-    shared: true
-   -
-    id: 1f3a6f24-482f-4ad0-93c6-62f7c6f63017
-    name: debug_json_fault
-    type: FAULT
-    shared: true 
+  mediationPolicies: []
   subscriptionAvailability: CURRENT_TENANT # Subscription availability of the API {CURRENT_TENANT|ALL_TENANTS|SPECIFIC_TENANTS}
   subscriptionAvailableTenants: [] # Subscription available tenants as a list
   additionalProperties: [] # List of custom properties of the API

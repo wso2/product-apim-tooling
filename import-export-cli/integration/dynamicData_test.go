@@ -102,80 +102,80 @@ func TestImportAPIProjectWithDynamicDataFailure(t *testing.T) {
 // Initialize a project and import it with a sequence file with dynamic data
 // (where the env variables have been already set) and export it to check whether
 // the env variable values have been set correctly in the exported sequence
-func TestImportAPIProjectWithDynamicDataSequence(t *testing.T) {
-	for _, user := range testCaseUsers {
-		t.Run(user.Description, func(t *testing.T) {
+// func TestImportAPIProjectWithDynamicDataSequence(t *testing.T) {
+// 	for _, user := range testCaseUsers {
+// 		t.Run(user.Description, func(t *testing.T) {
 
-			preserveProvider := true
-			// The default apictl project will contain the provider as super tenant admin
-			// Hence, if the CTL user is a tenant user, then this will act like a cross tenant project import.
-			// The preserveProvider flag should be false since this is like a cross tenant import.
-			if isTenantUser(user.CtlUser.Username, TENANT1) {
-				preserveProvider = false
-			}
+// 			preserveProvider := true
+// 			// The default apictl project will contain the provider as super tenant admin
+// 			// Hence, if the CTL user is a tenant user, then this will act like a cross tenant project import.
+// 			// The preserveProvider flag should be false since this is like a cross tenant import.
+// 			if isTenantUser(user.CtlUser.Username, TENANT1) {
+// 				preserveProvider = false
+// 			}
 
-			dev := GetDevClient()
+// 			dev := GetDevClient()
 
-			args := &testutils.InitTestArgs{
-				CtlUser:   testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
-				SrcAPIM:   dev,
-				InitFlag:  base.GenerateRandomName(16),
-				OasFlag:   testutils.TestOpenAPI3DefinitionWithoutEndpointsPath,
-				APIName:   testutils.OpenAPI3DefinitionWithoutEndpointsAPIName,
-				ForceFlag: false,
-			}
+// 			args := &testutils.InitTestArgs{
+// 				CtlUser:   testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+// 				SrcAPIM:   dev,
+// 				InitFlag:  base.GenerateRandomName(16),
+// 				OasFlag:   testutils.TestOpenAPI3DefinitionWithoutEndpointsPath,
+// 				APIName:   testutils.OpenAPI3DefinitionWithoutEndpointsAPIName,
+// 				ForceFlag: false,
+// 			}
 
-			// Set environment variables to be used as dynamic data from the params file
-			testutils.SetEnvVariablesForAPI(t, dev)
+// 			// Set environment variables to be used as dynamic data from the params file
+// 			testutils.SetEnvVariablesForAPI(t, dev)
 
-			// Initialize a project with API definition
-			testutils.ValidateInitializeProjectWithOASFlag(t, args)
+// 			// Initialize a project with API definition
+// 			testutils.ValidateInitializeProjectWithOASFlag(t, args)
 
-			// Add the custom IN sequence with dynamic data
-			updatedAPIFileContent := testutils.AddSequenceWithDynamicDataToAPIProject(t, args)
+// 			// Add the custom IN sequence with dynamic data
+// 			updatedAPIFileContent := testutils.AddSequenceWithDynamicDataToAPIProject(t, args)
 
-			// Validate whether the project successfully imported
-			testutils.ValidateImportProject(t, args, "", preserveProvider)
+// 			// Validate whether the project successfully imported
+// 			testutils.ValidateImportProject(t, args, "", preserveProvider)
 
-			// Validate whether the exported project contains the correctly env variables substituted content
-			testutils.ValidateExportedSequenceWithDynamicData(t, args, updatedAPIFileContent.Data)
-		})
-	}
-}
+// 			// Validate whether the exported project contains the correctly env variables substituted content
+// 			testutils.ValidateExportedSequenceWithDynamicData(t, args, updatedAPIFileContent.Data)
+// 		})
+// 	}
+// }
 
 // Initialize a project and import it with a sequence file with dynamic data
 // without setting the env variables
-func TestImportAPIProjectWithDynamicDataSequenceFailure(t *testing.T) {
-	for _, user := range testCaseUsers {
-		t.Run(user.Description, func(t *testing.T) {
+// func TestImportAPIProjectWithDynamicDataSequenceFailure(t *testing.T) {
+// 	for _, user := range testCaseUsers {
+// 		t.Run(user.Description, func(t *testing.T) {
 
-			preserveProvider := true
-			// The default apictl project will contain the provider as super tenant admin
-			// Hence, if the CTL user is a tenant user, then this will act like a cross tenant project import.
-			// The preserveProvider flag should be false since this is like a cross tenant import.
-			if isTenantUser(user.CtlUser.Username, TENANT1) {
-				preserveProvider = false
-			}
+// 			preserveProvider := true
+// 			// The default apictl project will contain the provider as super tenant admin
+// 			// Hence, if the CTL user is a tenant user, then this will act like a cross tenant project import.
+// 			// The preserveProvider flag should be false since this is like a cross tenant import.
+// 			if isTenantUser(user.CtlUser.Username, TENANT1) {
+// 				preserveProvider = false
+// 			}
 
-			dev := GetDevClient()
+// 			dev := GetDevClient()
 
-			args := &testutils.InitTestArgs{
-				CtlUser:   testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
-				SrcAPIM:   dev,
-				InitFlag:  base.GenerateRandomName(16),
-				OasFlag:   testutils.TestOpenAPI3DefinitionWithoutEndpointsPath,
-				APIName:   testutils.OpenAPI3DefinitionWithoutEndpointsAPIName,
-				ForceFlag: false,
-			}
+// 			args := &testutils.InitTestArgs{
+// 				CtlUser:   testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+// 				SrcAPIM:   dev,
+// 				InitFlag:  base.GenerateRandomName(16),
+// 				OasFlag:   testutils.TestOpenAPI3DefinitionWithoutEndpointsPath,
+// 				APIName:   testutils.OpenAPI3DefinitionWithoutEndpointsAPIName,
+// 				ForceFlag: false,
+// 			}
 
-			// Initialize a project with API definition
-			testutils.ValidateInitializeProjectWithOASFlag(t, args)
+// 			// Initialize a project with API definition
+// 			testutils.ValidateInitializeProjectWithOASFlag(t, args)
 
-			// Add the custom IN sequence with dynamic data
-			testutils.AddSequenceWithDynamicDataToAPIProject(t, args)
+// 			// Add the custom IN sequence with dynamic data
+// 			testutils.AddSequenceWithDynamicDataToAPIProject(t, args)
 
-			// Validate whether the project successfully imported
-			testutils.ValidateImportProjectFailedWithoutSettingEnvVariables(t, args, "", preserveProvider)
-		})
-	}
-}
+// 			// Validate whether the project successfully imported
+// 			testutils.ValidateImportProjectFailedWithoutSettingEnvVariables(t, args, "", preserveProvider)
+// 		})
+// 	}
+// }
