@@ -12,10 +12,7 @@
 ├── Docs
 ├── Endpoint-certificates
 ├── Image
-└── Sequences
-    ├── fault-sequence
-    ├── in-sequence
-    └── out-sequence
+└── Policies
 ```
 
 ## Deploy a minimal API
