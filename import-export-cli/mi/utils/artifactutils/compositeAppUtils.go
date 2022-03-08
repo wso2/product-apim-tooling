@@ -19,8 +19,8 @@
 package artifactutils
 
 type CompositeAppList struct {
-	Count         int32                 `json:"count"`
-	CompositeApps []CompositeAppSummary `json:"list"`
+	Count         int32                 `json:"activeCount"`
+	CompositeApps []CompositeAppSummary `json:"activeList"`
 }
 
 type CompositeAppSummary struct {
