@@ -18,14 +18,14 @@ data:
    -
     name: propertyName
     displayName: Property Name
-    description: Name of the property
+    description: Name of the property updated
     type: String
     allowedValues: []
     required: true
    -
     name: propertyValue
     displayName: Property Value
-    description: Value of the property
+    description: Value of the property updated
     type: String
     allowedValues: []
     required: true
