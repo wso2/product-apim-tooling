@@ -473,7 +473,7 @@ func TestUpdateDocAndImageOfAPIOfExistingAPI(t *testing.T) {
 	testutils.ValidateAPIWithImageIsExported(t, args, testutils.DevFirstDefaultAPIName, testutils.DevFirstDefaultAPIVersion)
 }
 
-// Test a verified (syntactically correct) custom sequence update
+// Test a verified (syntactically correct) custom operation policy (sequence) update
 func TestAPISequenceUpdate(t *testing.T) {
 	for _, user := range testCaseUsers {
 		t.Run(user.Description, func(t *testing.T) {
@@ -492,12 +492,17 @@ func TestAPISequenceUpdate(t *testing.T) {
 			// Initialize the project
 			testutils.ValidateInitializeProjectWithOASFlag(t, args)
 
-			// Add custom sequence file to created project
+			// Add custom operation policy (sequence) file to created project
 			projectPath, _ := filepath.Abs(projectName)
-			srcPathForSequence, _ := filepath.Abs(testutils.DevFirstSampleCaseSequencePath)
-			destPathForSequence := projectPath + testutils.DevFirstSampleCaseDestSequencePathSuffix
-			base.CreateTempDir(t, projectPath+testutils.CustomSequenceDirectory)
+			base.CreateTempDir(t, projectPath+testutils.PoliciesDirectory)
+
+			srcPathForSequence, _ := filepath.Abs(testutils.DevFirstSampleCasePolicyPath)
+			destPathForSequence := projectPath + testutils.DevFirstSampleCaseDestPolicyPathSuffix
 			base.Copy(srcPathForSequence, destPathForSequence)
+
+			srcPathForSequenceDefinition, _ := filepath.Abs(testutils.DevFirstSampleCasePolicyDefinitionPath)
+			destPathForSequenceDefinition := projectPath + testutils.DevFirstSampleCaseDestPolicyDefinitionPathSuffix
+			base.Copy(srcPathForSequenceDefinition, destPathForSequenceDefinition)
 
 			// Update api.yaml file of initialized project with sequence related metadata
 			apiYamlFilePath := filepath.Join(projectPath, testutils.DevFirstSampleCaseApiYamlFilePathSuffix)
@@ -512,15 +517,31 @@ func TestAPISequenceUpdate(t *testing.T) {
 				t.Error(err)
 			}
 
-			// Mediation policy that will be appended to the existing list of mediation policies
-			mediationPolicy := apim.MediationPolicy{
-				Name:   testutils.CustomSequenceName,
-				Type:   "IN",
-				Shared: false,
+			// Operation policy that will be added
+			var requestPolicies []interface{}
+			operationPolicies := apim.OperationPolicies{
+				Request: append(requestPolicies, map[string]interface{}{
+					"policyName": testutils.TestSamplePolicyName,
+					"parameters": map[string]string{
+						testutils.TestSampleOperationPolicyPropertyNameField:  testutils.TestSampleOperationPolicyPropertyName,
+						testutils.TestSampleOperationPolicyPropertyValueField: testutils.TestSampleOperationPolicyPropertyValue,
+					}}),
+				Response: []string{},
+				Fault:    []string{},
 			}
 
-			mediationPolicies := []apim.MediationPolicy{mediationPolicy}
-			api.Data.MediationPolicies = mediationPolicies
+			// Assign the above operation policy to a resource
+			apiOperationWithPolicy := apim.APIOperations{
+				Target:            testutils.TestSampleOperationTarget,
+				Verb:              testutils.TestSampleOperationVerb,
+				AuthType:          testutils.TestSampleOperationAuthType,
+				ThrottlingPolicy:  testutils.TestSampleOperationThrottlingPolicy,
+				OperationPolicies: operationPolicies,
+			}
+
+			// Add the operation policy added resource to the API
+			apiOperations := []apim.APIOperations{apiOperationWithPolicy}
+			api.Data.Operations = apiOperations
 
 			// Write the modified api.yaml to initialized project
 			apiYamlContent, err := yaml.Marshal(api)
@@ -533,26 +554,34 @@ func TestAPISequenceUpdate(t *testing.T) {
 				t.Error(err)
 			}
 
-			// Import the project with the verified (syntactically correct) custom sequence
+			// Import the project with the verified (syntactically correct) operation policy
 			testutils.ValidateImportProject(t, args, "", !isTenantUser(user.CtlUser.Username, TENANT1))
 
-			// Update custom sequence file of created project
-			srcPathForSequenceUpdate, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCaseSequencePath)
-			destPathForSequenceUpdate := projectPath + testutils.DevFirstUpdatedSampleCaseSequencePathSuffix
+			// Update operation policy file of created project
+			srcPathForSequenceUpdate, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCasePolicyPath)
+			destPathForSequenceUpdate := projectPath + testutils.DevFirstSampleCaseDestPolicyPathSuffix
 			err = os.Remove(destPathForSequenceUpdate)
 			if err != nil {
 				t.Fatal(err)
 			}
 			base.Copy(srcPathForSequenceUpdate, destPathForSequenceUpdate)
-
 			base.WaitForIndexing()
 
-			// Import the project with updated sequence
+			// Update operation policy file of created project
+			srcPathForSequenceDefinitionUpdate, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCasePolicyDefinitionPath)
+			destPathForSequenceDefinitionUpdate := projectPath + testutils.DevFirstSampleCaseDestPolicyDefinitionPathSuffix
+			err = os.Remove(destPathForSequenceDefinitionUpdate)
+			if err != nil {
+				t.Fatal(err)
+			}
+			base.Copy(srcPathForSequenceDefinitionUpdate, destPathForSequenceDefinitionUpdate)
+			base.WaitForIndexing()
+
+			// Import the project with the updated sequence
 			testutils.ValidateImportUpdateProject(t, args, !isTenantUser(user.CtlUser.Username, TENANT1))
 
 			// Validate that sequence has been updated
 			testutils.ValidateAPIWithUpdatedSequenceIsExported(t, args, testutils.DevFirstDefaultAPIName, testutils.DevFirstDefaultAPIVersion)
-
 		})
 	}
 }

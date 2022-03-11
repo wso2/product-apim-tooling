@@ -1,5 +1,0 @@
-<sequence xmlns="http://ws.apache.org/ns/synapse" name="mockSequence" trace="enable">
-    <log level="custom">
-        <property name="VALUE IS: " value="456"/>
-    </log>
-</sequence>
