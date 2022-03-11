@@ -55,18 +55,38 @@ func EnvSubstituteForCurlyBraces(content string) (string, error) {
 // Substitutes all the environment variables added in the file specified in the 'file' input and changes are
 // updated in the file.
 // If any required environment variable is not set will throw an error.
-func EnvSubstituteInFile(file string) error {
+func EnvSubstituteInFile(file string, fileExtensions []string) error {
+	var substitutedContent string
 	content, err := ioutil.ReadFile(file)
 	if err != nil {
 		return err
 	}
-	substitutedContent, err := EnvSubstituteForCurlyBraces(string(content))
-	if err != nil {
-		return err
-	}
-	err = ioutil.WriteFile(file, []byte(substitutedContent), 0644)
-	if err != nil {
-		return err
+	// If the fileExtensions are nil, env variables will be substituted irrespective of the extension type
+	if fileExtensions == nil {
+		substitutedContent, err = EnvSubstituteForCurlyBraces(string(content))
+		if err != nil {
+			return err
+		}
+		err = ioutil.WriteFile(file, []byte(substitutedContent), 0644)
+		if err != nil {
+			return err
+		}
+	} else {
+		// If the fileExtensions is not nil, env variables will be substituted to the files that will only
+		//  be ending with the set of extensions passed as fileExtensions
+		for _, extension := range fileExtensions {
+			if strings.HasSuffix(file, extension) {
+				Logln(LogPrefixInfo+"Substituting env variables to restricted extensions: ", extension)
+				substitutedContent, err = EnvSubstituteForCurlyBraces(string(content))
+				if err != nil {
+					return err
+				}
+				err = ioutil.WriteFile(file, []byte(substitutedContent), 0644)
+				if err != nil {
+					return err
+				}
+			}
+		}
 	}
 	return nil
 }
@@ -74,7 +94,7 @@ func EnvSubstituteInFile(file string) error {
 // Walks through all the files in the given folder and substitutes all the environment variables added in
 // those files. The files will be updated with the substituted values.
 // If any required environment variable is not set will throw an error.
-func EnvSubstituteInFolder(folderPath string) error {
+func EnvSubstituteInFolder(folderPath string, fileExtensions []string) error {
 	err := filepath.Walk(folderPath,
 		func(path string, info os.FileInfo, err error) error {
 			if err != nil {
@@ -86,7 +106,7 @@ func EnvSubstituteInFolder(folderPath string) error {
 			}
 			if fi.Mode().IsRegular() {
 				Logln(LogPrefixInfo+"Substituting env variables in: ", path)
-				err = EnvSubstituteInFile(path)
+				err = EnvSubstituteInFile(path, fileExtensions)
 				if err != nil {
 					return err
 				}

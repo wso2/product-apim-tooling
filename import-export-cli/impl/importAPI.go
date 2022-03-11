@@ -127,10 +127,14 @@ func replaceEnvVariables(apiFilePath string) error {
 			switch mode := fi.Mode(); {
 			case mode.IsDir():
 				utils.Logln(utils.LogPrefixInfo+"Substituting env variables of files in folder path: ", absFile)
-				err = utils.EnvSubstituteInFolder(absFile)
+				if strings.EqualFold(replacePath, utils.InitProjectSequences) {
+					err = utils.EnvSubstituteInFolder(absFile, utils.EnvReplacePoliciesFileExtensions)
+				} else {
+					err = utils.EnvSubstituteInFolder(absFile, nil)
+				}
 			case mode.IsRegular():
 				utils.Logln(utils.LogPrefixInfo+"Substituting env of file: ", absFile)
-				err = utils.EnvSubstituteInFile(absFile)
+				err = utils.EnvSubstituteInFile(absFile, nil)
 			}
 			if err != nil {
 				return err
