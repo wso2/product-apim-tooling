@@ -60,9 +60,7 @@ const DevFirstSampleCasePngPath = DevFirstSampleCaseArtifactPath + "/icon.png"
 const DevFirstSampleCaseDestPngPathSuffix = "/Image/icon.png"
 const DevFirstUpdatedSampleCaseJpegPath = DevFirstUpdatedSampleCaseArtifactPath + "/icon.jpeg"
 const DevFirstUpdatedSampleCaseDestJpegPathSuffix = "/Image/icon.jpeg"
-const DynamicDataSampleCaseArtifactPath = "testdata/TestArtifactDirectory/DynamicDataSampleCaseArtifacts"
 const TestDefaultExtractedFileName = "/SwaggerPetstoreNew-1.0.0"
-const CustomDynamicInSequenceName = "custom-header-in.xml"
 
 //Environment specific testcase constants
 
@@ -184,4 +182,18 @@ const (
 	TestSampleOperationPolicyPropertyName       = "VALUE IS: "
 	TestSampleOperationPolicyPropertyValue      = "123"
 	TestSamplePolicyName                        = "customAddLogMessage"
+)
+
+// Constants for sequence of the dynamic data test case
+const DynamicDataSampleCaseArtifactPath = "testdata/TestArtifactDirectory/DynamicDataSampleCaseArtifacts"
+const DynamicDataInSequence = "dynamicAddLogMessage.j2"
+const DynamicDataInSequenceDefinition = "dynamicAddLogMessage.yaml"
+const DynamicDataSubstitutedInSequence = DynamicDataSampleCaseArtifactPath + "/dynamicDataSubstitutedAddLogMessage.j2"
+
+const (
+	TestSampleDynamicDataOperationTarget           = "/menu"
+	TestSampleDynamicDataOperationVerb             = "GET"
+	TestSampleDynamicDataOperationAuthType         = "Application & Application User"
+	TestSampleDynamicDataOperationThrottlingPolicy = "Unlimited"
+	TestSampleDynamicDataPolicyName                = "dynamicAddLogMessage"
 )
