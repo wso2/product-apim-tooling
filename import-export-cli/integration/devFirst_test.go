@@ -505,17 +505,8 @@ func TestAPISequenceUpdate(t *testing.T) {
 			base.Copy(srcPathForSequenceDefinition, destPathForSequenceDefinition)
 
 			// Update api.yaml file of initialized project with sequence related metadata
-			apiYamlFilePath := filepath.Join(projectPath, testutils.DevFirstSampleCaseApiYamlFilePathSuffix)
-			apiYaml, err := ioutil.ReadFile(apiYamlFilePath)
-			if err != nil {
-				t.Error(err)
-			}
-
-			var api *apim.APIFile
-			err = yaml.Unmarshal(apiYaml, &api)
-			if err != nil {
-				t.Error(err)
-			}
+			apiDefinitionFilePath := filepath.Join(projectPath, testutils.DevFirstSampleCaseApiYamlFilePathSuffix)
+			apiDefinitionFileContent := testutils.ReadAPIDefinition(t, apiDefinitionFilePath)
 
 			// Operation policy that will be added
 			var requestPolicies []interface{}
@@ -541,18 +532,10 @@ func TestAPISequenceUpdate(t *testing.T) {
 
 			// Add the operation policy added resource to the API
 			apiOperations := []apim.APIOperations{apiOperationWithPolicy}
-			api.Data.Operations = apiOperations
+			apiDefinitionFileContent.Data.Operations = apiOperations
 
-			// Write the modified api.yaml to initialized project
-			apiYamlContent, err := yaml.Marshal(api)
-			if err != nil {
-				t.Error(err)
-			}
-
-			err = ioutil.WriteFile(apiYamlFilePath, apiYamlContent, os.ModePerm)
-			if err != nil {
-				t.Error(err)
-			}
+			// Write the modified API definition to the directory
+			testutils.WriteToAPIDefinition(t, apiDefinitionFileContent, apiDefinitionFilePath)
 
 			// Import the project with the verified (syntactically correct) operation policy
 			testutils.ValidateImportProject(t, args, "", !isTenantUser(user.CtlUser.Username, TENANT1))
@@ -560,7 +543,7 @@ func TestAPISequenceUpdate(t *testing.T) {
 			// Update operation policy file of created project
 			srcPathForSequenceUpdate, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCasePolicyPath)
 			destPathForSequenceUpdate := projectPath + testutils.DevFirstSampleCaseDestPolicyPathSuffix
-			err = os.Remove(destPathForSequenceUpdate)
+			err := os.Remove(destPathForSequenceUpdate)
 			if err != nil {
 				t.Fatal(err)
 			}
