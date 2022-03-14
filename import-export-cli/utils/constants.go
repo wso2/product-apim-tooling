@@ -188,7 +188,7 @@ var EnvReplaceFilePaths = []string{
 // The list of file extensions when replcing env variables related to Policies
 var EnvReplacePoliciesFileExtensions = []string{
 	"j2",
-	"templ",
+	"gotmpl",
 }
 
 // project types
