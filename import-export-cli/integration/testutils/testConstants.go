@@ -60,9 +60,7 @@ const DevFirstSampleCasePngPath = DevFirstSampleCaseArtifactPath + "/icon.png"
 const DevFirstSampleCaseDestPngPathSuffix = "/Image/icon.png"
 const DevFirstUpdatedSampleCaseJpegPath = DevFirstUpdatedSampleCaseArtifactPath + "/icon.jpeg"
 const DevFirstUpdatedSampleCaseDestJpegPathSuffix = "/Image/icon.jpeg"
-const DynamicDataSampleCaseArtifactPath = "testdata/TestArtifactDirectory/DynamicDataSampleCaseArtifacts"
 const TestDefaultExtractedFileName = "/SwaggerPetstoreNew-1.0.0"
-const CustomDynamicInSequenceName = "custom-header-in.xml"
 
 //Environment specific testcase constants
 
@@ -165,10 +163,37 @@ const EndpointSecurityTypeDigest = "DIGEST"
 const EndpointSecurityTypeBasic = "BASIC"
 
 // Constants for sequence update testcase
-const CustomSequenceDirectory = "/Sequences/in-sequence/Custom"
-const CustomSequenceName = "mockSequence"
+const PoliciesDirectory = "/Policies"
 const DevFirstSampleCaseApiYamlFilePathSuffix = "/api.yaml"
-const DevFirstSampleCaseSequencePath = DevFirstSampleCaseArtifactPath + "/mockSequence.xml"
-const DevFirstSampleCaseDestSequencePathSuffix = CustomSequenceDirectory + "/mockSequence.xml"
-const DevFirstUpdatedSampleCaseSequencePath = DevFirstUpdatedSampleCaseArtifactPath + "/mockSequence.xml"
-const DevFirstUpdatedSampleCaseSequencePathSuffix = CustomSequenceDirectory + "/mockSequence.xml"
+const DevFirstSampleCasePolicyPath = DevFirstSampleCaseArtifactPath + "/customAddLogMessage.j2"
+const DevFirstSampleCasePolicyDefinitionPath = DevFirstSampleCaseArtifactPath + "/customAddLogMessage.yaml"
+const DevFirstSampleCaseDestPolicyPathSuffix = PoliciesDirectory + "/customAddLogMessage.j2"
+const DevFirstSampleCaseDestPolicyDefinitionPathSuffix = PoliciesDirectory + "/customAddLogMessage.yaml"
+const DevFirstUpdatedSampleCasePolicyPath = DevFirstUpdatedSampleCaseArtifactPath + "/customAddLogMessage.j2"
+const DevFirstUpdatedSampleCasePolicyDefinitionPath = DevFirstUpdatedSampleCaseArtifactPath + "/customAddLogMessage.yaml"
+
+const (
+	TestSampleOperationTarget                   = "/pet/{petId}"
+	TestSampleOperationVerb                     = "GET"
+	TestSampleOperationAuthType                 = "Application & Application User"
+	TestSampleOperationThrottlingPolicy         = "Unlimited"
+	TestSampleOperationPolicyPropertyNameField  = "propertyName"
+	TestSampleOperationPolicyPropertyValueField = "propertyValue"
+	TestSampleOperationPolicyPropertyName       = "VALUE IS: "
+	TestSampleOperationPolicyPropertyValue      = "123"
+	TestSamplePolicyName                        = "customAddLogMessage"
+)
+
+// Constants for sequence of the dynamic data test case
+const DynamicDataSampleCaseArtifactPath = "testdata/TestArtifactDirectory/DynamicDataSampleCaseArtifacts"
+const DynamicDataInSequence = "dynamicAddLogMessage.j2"
+const DynamicDataInSequenceDefinition = "dynamicAddLogMessage.yaml"
+const DynamicDataSubstitutedInSequence = DynamicDataSampleCaseArtifactPath + "/dynamicDataSubstitutedAddLogMessage.j2"
+
+const (
+	TestSampleDynamicDataOperationTarget           = "/menu"
+	TestSampleDynamicDataOperationVerb             = "GET"
+	TestSampleDynamicDataOperationAuthType         = "Application & Application User"
+	TestSampleDynamicDataOperationThrottlingPolicy = "Unlimited"
+	TestSampleDynamicDataPolicyName                = "dynamicAddLogMessage"
+)

@@ -369,14 +369,21 @@ func ValidateAPIWithUpdatedSequenceIsExported(t *testing.T, args *InitTestArgs, 
 	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
 	base.Unzip(relativePath, exportedPath)
 
-	// Check whether the exported custom sequence is equivalent to the latest sequence version
-	exportedApiSequencePath := relativePath + TestDefaultExtractedFileName + DevFirstUpdatedSampleCaseSequencePathSuffix
-	lastUpdatedSequencePath, _ := filepath.Abs(DevFirstUpdatedSampleCaseSequencePath)
+	// Check whether the exported operation policy is equivalent to the latest operation policy
+	exportedApiSequencePath := relativePath + TestDefaultExtractedFileName + DevFirstSampleCaseDestPolicyPathSuffix
+	lastUpdatedSequencePath, _ := filepath.Abs(DevFirstUpdatedSampleCasePolicyPath)
 	isSequenceUpdated := base.IsFileContentIdentical(exportedApiSequencePath, lastUpdatedSequencePath)
-	base.Log("Exported custom sequence is updated", isSequenceUpdated)
-	assert.Equal(t, true, isSequenceUpdated, "Error while updating the custom sequence of API")
+	base.Log("Exported operation policy is updated", isSequenceUpdated)
+	assert.Equal(t, true, isSequenceUpdated, "Error while updating the operation policy of API")
 
-	// Check whether the API definition file has accurate mediation policy related metadata
+	// Check whether the exported operation policy definition is equivalent to the latest operation policy definition
+	exportedApiSequenceDefinitionPath := relativePath + TestDefaultExtractedFileName + DevFirstSampleCaseDestPolicyDefinitionPathSuffix
+	lastUpdatedSequenceDefinitionPath, _ := filepath.Abs(DevFirstUpdatedSampleCasePolicyDefinitionPath)
+	isSequenceDefinitionUpdated := base.IsFileContentIdentical(exportedApiSequenceDefinitionPath, lastUpdatedSequenceDefinitionPath)
+	base.Log("Exported operation policy definition is updated", isSequenceDefinitionUpdated)
+	assert.Equal(t, true, isSequenceDefinitionUpdated, "Error while updating the operation policy definition of API")
+
+	// Check whether the API definition file has accurate operation policy related metadata
 	exportedApiYamlFilePath := filepath.Join(relativePath, TestDefaultExtractedFileName, DevFirstSampleCaseApiYamlFilePathSuffix)
 	exportedApiYaml, err := ioutil.ReadFile(exportedApiYamlFilePath)
 	if err != nil {
@@ -389,11 +396,33 @@ func ValidateAPIWithUpdatedSequenceIsExported(t *testing.T, args *InitTestArgs, 
 		t.Error(err)
 	}
 
-	exportedApiMediationPolicies := api.Data.MediationPolicies
-	assert.Equal(t, exportedApiMediationPolicies[0].Name, CustomSequenceName,
-		"Exported API does not have the expected custom sequence related metadata." + 
-		"MediationPolicies list under the API definition file is expected to have an in-sequence with the name: " +
-		CustomSequenceName)
+	exportedApiOperations := api.Data.Operations
+	var selectedOperation apim.APIOperations
+	for _, operation := range exportedApiOperations {
+		if strings.EqualFold(operation.Target, TestSampleOperationTarget) {
+			selectedOperation = operation
+		}
+	}
+	assert.NotNil(t, selectedOperation, "Correct operation is not updated")
+
+	assert.Equal(t, selectedOperation.Target, TestSampleOperationTarget, "Exported API does not have the expected operation related metadata. "+
+		"Target of the operation should be "+TestSampleOperationTarget)
+	assert.Equal(t, selectedOperation.Verb, TestSampleOperationVerb, "Exported API does not have the expected operation related metadata. "+
+		"Verb of the operation should be "+TestSampleOperationVerb)
+	assert.Equal(t, selectedOperation.AuthType, TestSampleOperationAuthType, "Exported API does not have the expected operation related metadata. "+
+		"AuthType of the operation should be "+TestSampleOperationAuthType)
+	assert.Equal(t, selectedOperation.ThrottlingPolicy, TestSampleOperationThrottlingPolicy, "Exported API does not have the expected operation related metadata. "+
+		"ThrottlingPolicy of the operation should be "+TestSampleOperationThrottlingPolicy)
+
+	requestOperationPolicy := selectedOperation.OperationPolicies.Request.([]interface{})[0].(map[interface{}]interface{})
+	assert.Equal(t, requestOperationPolicy["policyName"].(string), TestSamplePolicyName, "Exported API does not have the expected operation policy related metadata. ",
+		"policyName of the operation policy should be "+TestSamplePolicyName)
+	assert.Equal(t, requestOperationPolicy["parameters"].(map[interface{}]interface{})[TestSampleOperationPolicyPropertyNameField].(string),
+		TestSampleOperationPolicyPropertyName, "Exported API does not have the expected operation policy related metadata. ",
+		TestSampleOperationPolicyPropertyNameField+" of the operation policy should be "+TestSampleOperationPolicyPropertyName)
+	assert.Equal(t, requestOperationPolicy["parameters"].(map[interface{}]interface{})[TestSampleOperationPolicyPropertyValueField].(string),
+		TestSampleOperationPolicyPropertyValue, "Exported API does not have the expected operation policy related metadata. ",
+		TestSampleOperationPolicyPropertyValueField+" of the operation policy should be "+TestSampleOperationPolicyPropertyValue)
 
 	t.Cleanup(func() {
 		// Remove created project and logout

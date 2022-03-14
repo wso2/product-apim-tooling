@@ -475,6 +475,6 @@ func GenerateRandomString() string {
 }
 
 //Generate random number within the given range
-func GenerateRandomNumber(min,max int) int {
-	return rand.Intn(max - min + 1) + min
+func GenerateRandomNumber(min, max int) int {
+	return rand.Intn(max-min+1) + min
 }
