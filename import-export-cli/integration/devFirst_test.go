@@ -474,7 +474,7 @@ func TestUpdateDocAndImageOfAPIOfExistingAPI(t *testing.T) {
 }
 
 // Test a verified (syntactically correct) custom operation policy (sequence) update
-func TestAPISequenceUpdate(t *testing.T) {
+func TestAPIOperationPolicyUpdate(t *testing.T) {
 	for _, user := range testCaseUsers {
 		t.Run(user.Description, func(t *testing.T) {
 			dev := GetDevClient()
