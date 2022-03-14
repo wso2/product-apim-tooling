@@ -20,12 +20,10 @@ data:
     displayName: Property Name
     description: Name of the property
     type: String
-    allowedValues: []
     required: true
    -
     name: propertyValue
     displayName: Property Value
     description: Value of the property
     type: String
-    allowedValues: []
     required: true
