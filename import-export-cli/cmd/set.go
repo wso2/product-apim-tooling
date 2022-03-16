@@ -42,8 +42,8 @@ const flagVCSSourceRepoPathName = "vcs-source-repo-path"
 const flagVCSDeploymentRepoPathName = "vcs-deployment-repo-path"
 
 // Set command related Info
-const setCmdLiteral = "set"
-const setCmdShortDesc = "Set configuration parameters"
+const SetCmdLiteral = "set"
+const setCmdShortDesc = "Set configuration parameters or per API log levels"
 
 const setCmdLongDesc = `Set configuration parameters. You can use one of the following flags
 * --http-request-timeout <time-in-milli-seconds>
@@ -54,14 +54,15 @@ const setCmdLongDesc = `Set configuration parameters. You can use one of the fol
 * --vcs-deployment-repo-path <path-to-deployment-repo-for-vcs>
 * --vcs-source-repo-path <path-to-source-repo-for-vcs>`
 
-const setCmdExamples = utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 3600 --export-directory /home/user/exported-apis
-` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000 --export-directory C:\Documents\exported
-` + utils.ProjectName + ` ` + setCmdLiteral + ` --http-request-timeout 5000
-` + utils.ProjectName + ` ` + setCmdLiteral + ` --tls-renegotiation-mode freely
-` + utils.ProjectName + ` ` + setCmdLiteral + ` --vcs-deletion-enabled=true
-` + utils.ProjectName + ` ` + setCmdLiteral + ` --vcs-config-path /home/user/custom/vcs-config.yaml
-` + utils.ProjectName + ` ` + setCmdLiteral + ` --vcs-deployment-repo-path /home/user/custom/deployment
-` + utils.ProjectName + ` ` + setCmdLiteral + ` --vcs-source-repo-path /home/user/custom/source`
+const setCmdExamples = utils.ProjectName + ` ` + SetCmdLiteral + ` --http-request-timeout 3600 --export-directory /home/user/exported-apis
+` + utils.ProjectName + ` ` + SetCmdLiteral + ` --http-request-timeout 5000 --export-directory C:\Documents\exported
+` + utils.ProjectName + ` ` + SetCmdLiteral + ` --http-request-timeout 5000
+` + utils.ProjectName + ` ` + SetCmdLiteral + ` --tls-renegotiation-mode freely
+` + utils.ProjectName + ` ` + SetCmdLiteral + ` --vcs-deletion-enabled=true
+` + utils.ProjectName + ` ` + SetCmdLiteral + ` --vcs-config-path /home/user/custom/vcs-config.yaml
+` + utils.ProjectName + ` ` + SetCmdLiteral + ` --vcs-deployment-repo-path /home/user/custom/deployment
+` + utils.ProjectName + ` ` + SetCmdLiteral + ` --vcs-source-repo-path /home/user/custom/source
+` + utils.ProjectName + ` ` + SetCmdLiteral + ` ` + SetApiLoggingCmdLiteral + ` --api-id bf36ca3a-0332-49ba-abce-e9992228ae06 --log-level full -e dev --tenant-domain carbon.super`
 
 // SetCmd represents the 'set' command
 var SetCmd = &cobra.Command{
@@ -70,7 +71,7 @@ var SetCmd = &cobra.Command{
 	Long:    setCmdLongDesc,
 	Example: setCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + setCmdLiteral + " called")
+		utils.Logln(utils.LogPrefixInfo + SetCmdLiteral + " called")
 		executeSetCmd(utils.MainConfigFilePath, cmd)
 	},
 }

@@ -20,11 +20,11 @@ package integration
 
 import (
 	"fmt"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"os"
 	"testing"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 
@@ -672,6 +672,27 @@ func TestListApisDevopsTenantUser(t *testing.T) {
 	testutils.ValidateAPIsList(t, args)
 }
 
+// APIs listing with JsonArray format
+func TestListApisWithJsonArrayFormat(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+
+			for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
+				// Add the API to env1
+				testutils.AddAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
+			}
+
+			args := &testutils.ApiImportExportTestArgs{
+				CtlUser: testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				SrcAPIM: dev,
+			}
+
+			testutils.ValidateAPIsListWithJsonArrayFormat(t, args)
+		})
+	}
+}
+
 func TestDeleteApiAdminSuperTenantUser(t *testing.T) {
 	adminUsername := superAdminUser
 	adminPassword := superAdminPassword
@@ -806,12 +827,12 @@ func TestDeleteApiWithActiveSubscriptionsSuperTenantUser(t *testing.T) {
 	apiPublisher := publisher.UserName
 	apiPublisherPassword := publisher.Password
 
+	apiCreator := creator.UserName
+	apiCreatorPassword := creator.Password
+
 	dev := GetDevClient()
 
-	var api *apim.API
-
-	// This will be the API that will be deleted by apictl, so no need to do cleaning
-	api = testutils.AddAPIWithoutCleaning(t, dev, adminUser, adminPassword)
+	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
 	// Create and Deploy Revision of the above API
 	testutils.CreateAndDeployAPIRevision(t, dev, apiPublisher, apiPublisherPassword, api.ID)
@@ -822,16 +843,15 @@ func TestDeleteApiWithActiveSubscriptionsSuperTenantUser(t *testing.T) {
 		Apim:    dev,
 	}
 	//Publish created API
-	testutils.PublishAPI(dev, adminUser, adminPassword, api.ID)
+	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, api.ID)
 
-	testutils.ValidateGetKeysWithoutCleanup(t, args)
+	testutils.ValidateGetKeysWithoutCleanup(t, args, false)
 	//args to delete API
 	argsToDelete := &testutils.ApiImportExportTestArgs{
 		CtlUser: testutils.Credentials{Username: adminUser, Password: adminPassword},
 		Api:     api,
 		SrcAPIM: dev,
 	}
-	base.WaitForIndexing()
 
 	//validate Api with active subscriptions delete failure
 	testutils.ValidateAPIDeleteFailure(t, argsToDelete)
@@ -862,6 +882,45 @@ func TestExportApisWithExportApisCommand(t *testing.T) {
 	}
 
 	testutils.ValidateAllApisOfATenantIsExported(t, args, apisAdded)
+}
+
+// Export APIs bunch at once with export apis command and then add new APIs and export APIs once again to check whether
+// the new APIs exported
+func TestExportApisTwiceWithAfterAddingApis(t *testing.T) {
+
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+
+			var api *apim.API
+			var apisAdded = 0
+			for apiCount := 0; apiCount <= numberOfAPIs; apiCount++ {
+				api := testutils.AddAPI(t, dev, user.Admin.Username, user.Admin.Password)
+				testutils.CreateAndDeployAPIRevision(t, dev, user.Admin.Username, user.Admin.Password, api.ID)
+				apisAdded++
+			}
+
+			// This will be the API that will be deleted by apictl, so no need to do cleaning
+			api = testutils.AddAPIWithoutCleaning(t, dev, user.Admin.Username, user.Admin.Password)
+			testutils.CreateAndDeployAPIRevision(t, dev, user.Admin.Username, user.Admin.Password, api.ID)
+
+			args := &testutils.ApiImportExportTestArgs{
+				CtlUser: testutils.Credentials{Username: user.Admin.Username, Password: user.Admin.Password},
+				Api:     api,
+				SrcAPIM: dev,
+			}
+
+			testutils.ValidateAllApisOfATenantIsExported(t, args, apisAdded)
+
+			// Add new API and deploy
+			api = testutils.AddAPI(t, dev, user.Admin.Username, user.Admin.Password)
+			testutils.CreateAndDeployAPIRevision(t, dev, user.Admin.Username, user.Admin.Password, api.ID)
+			newApiCount := apisAdded + 1
+
+			// Validate again to check whether the newly added API exported properly.
+			testutils.ValidateAllApisOfATenantIsExported(t, args, newApiCount)
+		})
+	}
 }
 
 func TestChangeLifeCycleStatusOfApiAdminSuperTenantUser(t *testing.T) {

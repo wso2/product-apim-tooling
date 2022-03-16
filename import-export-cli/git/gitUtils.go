@@ -417,14 +417,22 @@ func deployUpdatedProjects(accessToken, sourceRepoId, deploymentRepoId, environm
 				hasDeletedProjects = true
 				continue
 			}
+			projectDeploymentParamsDirLocation := generateDeploymentProjectPath(mainConfig, projectParam)
+			dirExists, _ := utils.IsDirExists(projectDeploymentParamsDirLocation)
+			if !dirExists {
+				projectDeploymentParamsDirLocation = ""
+			} else {
+				err := resolveProjectParamsMetaDataDeployConfig(&projectParam.MetaData.DeployConfig,
+					projectDeploymentParamsDirLocation+string(os.PathSeparator)+utils.MetaFileAPI)
+				if err != nil {
+					fmt.Println("Error... ", err)
+					failedProjects[projectParam.Type] = append(failedProjects[projectParam.Type], projectParam)
+				}
+			}
 			importParams := projectParam.MetaData.DeployConfig.Import
 			fmt.Println(strconv.Itoa(i+1) + ": " + projectParam.NickName + ": (" + projectParam.RelativePath + ")")
-			projectDeploymentParamsDirLocation := generateDeploymentProjectPath(mainConfig, projectParam)
-			if dirExists, _ := utils.IsDirExists(projectDeploymentParamsDirLocation); !dirExists {
-				projectDeploymentParamsDirLocation = ""
-			}
 			err := impl.ImportAPIToEnv(accessToken, environment, generateSourceProjectPath(mainConfig, projectParam),
-				projectDeploymentParamsDirLocation, importParams.Update, importParams.PreserveProvider, false, false, false)
+				projectDeploymentParamsDirLocation, importParams.Update, importParams.PreserveProvider, false, importParams.RotateRevision, false)
 			if err != nil {
 				fmt.Println("Error... ", err)
 				failedProjects[projectParam.Type] = append(failedProjects[projectParam.Type], projectParam)
@@ -443,15 +451,23 @@ func deployUpdatedProjects(accessToken, sourceRepoId, deploymentRepoId, environm
 				hasDeletedProjects = true
 				continue
 			}
+			projectDeploymentParamsDirLocation := generateDeploymentProjectPath(mainConfig, projectParam)
+			dirExists, _ := utils.IsDirExists(projectDeploymentParamsDirLocation)
+			if !dirExists {
+				projectDeploymentParamsDirLocation = ""
+			} else {
+				err := resolveProjectParamsMetaDataDeployConfig(&projectParam.MetaData.DeployConfig,
+					projectDeploymentParamsDirLocation+string(os.PathSeparator)+utils.MetaFileAPIProduct)
+				if err != nil {
+					fmt.Println("Error... ", err)
+					failedProjects[projectParam.Type] = append(failedProjects[projectParam.Type], projectParam)
+				}
+			}
 			importParams := projectParam.MetaData.DeployConfig.Import
 			fmt.Println(strconv.Itoa(i+1) + ": " + projectParam.NickName + ": (" + projectParam.RelativePath + ")")
-			projectDeploymentParamsDirLocation := generateDeploymentProjectPath(mainConfig, projectParam)
-			if dirExists, _ := utils.IsDirExists(projectDeploymentParamsDirLocation); !dirExists {
-				projectDeploymentParamsDirLocation = ""
-			}
 			err := impl.ImportAPIProductToEnv(accessToken, environment, generateSourceProjectPath(mainConfig, projectParam),
 				projectDeploymentParamsDirLocation, importParams.ImportAPIs, importParams.UpdateAPIs, importParams.UpdateAPIProduct,
-				importParams.PreserveProvider, false, false, false)
+				importParams.PreserveProvider, false, importParams.RotateRevision, false)
 			if err != nil {
 				fmt.Println("\terror... ", err)
 				failedProjects[projectParam.Type] = append(failedProjects[projectParam.Type], projectParam)
@@ -492,6 +508,22 @@ func deployUpdatedProjects(accessToken, sourceRepoId, deploymentRepoId, environm
 	}
 
 	return hasDeletedProjects, deletedProjectsPerType, failedProjects
+}
+
+// This method is responsible for resolving the correct meta data deplof configurations
+// for API and API Product projects by considering both the Source and Deployment repositories
+// sourceDeploymentMetaData is the values of the meta data file from the Source repository
+// deploymentDirPath is deployment repository path to retrieve meta data from
+func resolveProjectParamsMetaDataDeployConfig(sourceDeploymentMetaData *utils.DeployConfig,
+	deploymentDirPath string) error {
+	utils.Logln("Resolving deployment parameters in " + deploymentDirPath)
+	metaData, err := LoadMetaDataFile(deploymentDirPath)
+	if err != nil {
+		return err
+	}
+	*sourceDeploymentMetaData = metaData.DeployConfig
+	return nil
+
 }
 
 // This method is responsible for updating the vcs configuration file at the end of the deployment

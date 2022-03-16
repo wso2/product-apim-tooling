@@ -19,6 +19,7 @@
 package testutils
 
 import (
+	"io/ioutil"
 	"log"
 	"path/filepath"
 	"strconv"
@@ -28,6 +29,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
+	"gopkg.in/yaml.v2"
 )
 
 func AwsInitProject(t *testing.T, args *AWSInitTestArgs) (string, error) {
@@ -324,7 +326,7 @@ func ValidateAPIWithIconIsExported(t *testing.T, args *InitTestArgs, DevFirstDef
 	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
 	base.Unzip(relativePath, exportedPath)
 
-	iconPathOfExportedApi := relativePath + TestDefaultExtractedFileName + TestCase2DestPngPathSuffix
+	iconPathOfExportedApi := relativePath + TestDefaultExtractedFileName + DevFirstSampleCaseDestPngPathSuffix
 
 	isIconExported := base.IsFileAvailable(t, iconPathOfExportedApi)
 	base.Log("Icon is Exported", isIconExported)
@@ -341,18 +343,89 @@ func ValidateAPIWithIconIsExported(t *testing.T, args *InitTestArgs, DevFirstDef
 func ValidateAPIWithImageIsExported(t *testing.T, args *InitTestArgs, DevFirstDefaultAPIName string, DevFirstDefaultAPIVersion string) {
 	expOutput := ValidateExportImportedAPI(t, args, DevFirstDefaultAPIName, DevFirstDefaultAPIVersion)
 
-	//Unzip exported API and check whethers the imported image(.png) is in there
+	//Unzip exported API and check whether the imported image(.png) is in there
 	exportedPath := base.GetExportedPathFromOutput(expOutput)
 	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
 	base.Unzip(relativePath, exportedPath)
 
-	imagePathOfExportedApi := relativePath + TestDefaultExtractedFileName + TestCase2DestJpegPathSuffix
+	imagePathOfExportedApi := relativePath + TestDefaultExtractedFileName + DevFirstUpdatedSampleCaseDestJpegPathSuffix
 	isIconExported := base.IsFileAvailable(t, imagePathOfExportedApi)
 	base.Log("Image is Exported", isIconExported)
 	assert.Equal(t, true, isIconExported, "Error while exporting API with icon")
 
 	t.Cleanup(func() {
 		//Remove Created project and logout
+		base.RemoveDir(args.InitFlag)
+		base.RemoveDir(exportedPath)
+		base.RemoveDir(relativePath)
+	})
+}
+
+func ValidateAPIWithUpdatedSequenceIsExported(t *testing.T, args *InitTestArgs, DevFirstDefaultAPIName, DevFirstDefaultAPIVersion string) {
+	expOutput := ValidateExportImportedAPI(t, args, DevFirstDefaultAPIName, DevFirstDefaultAPIVersion)
+
+	// Unzip exported API and check whether the updated sequence file is in there
+	exportedPath := base.GetExportedPathFromOutput(expOutput)
+	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
+	base.Unzip(relativePath, exportedPath)
+
+	// Check whether the exported operation policy is equivalent to the latest operation policy
+	exportedApiSequencePath := relativePath + TestDefaultExtractedFileName + DevFirstSampleCaseDestPolicyPathSuffix
+	lastUpdatedSequencePath, _ := filepath.Abs(DevFirstUpdatedSampleCasePolicyPath)
+	isSequenceUpdated := base.IsFileContentIdentical(exportedApiSequencePath, lastUpdatedSequencePath)
+	base.Log("Exported operation policy is updated", isSequenceUpdated)
+	assert.Equal(t, true, isSequenceUpdated, "Error while updating the operation policy of API")
+
+	// Check whether the exported operation policy definition is equivalent to the latest operation policy definition
+	exportedApiSequenceDefinitionPath := relativePath + TestDefaultExtractedFileName + DevFirstSampleCaseDestPolicyDefinitionPathSuffix
+	lastUpdatedSequenceDefinitionPath, _ := filepath.Abs(DevFirstUpdatedSampleCasePolicyDefinitionPath)
+	isSequenceDefinitionUpdated := base.IsFileContentIdentical(exportedApiSequenceDefinitionPath, lastUpdatedSequenceDefinitionPath)
+	base.Log("Exported operation policy definition is updated", isSequenceDefinitionUpdated)
+	assert.Equal(t, true, isSequenceDefinitionUpdated, "Error while updating the operation policy definition of API")
+
+	// Check whether the API definition file has accurate operation policy related metadata
+	exportedApiYamlFilePath := filepath.Join(relativePath, TestDefaultExtractedFileName, DevFirstSampleCaseApiYamlFilePathSuffix)
+	exportedApiYaml, err := ioutil.ReadFile(exportedApiYamlFilePath)
+	if err != nil {
+		t.Error(err)
+	}
+
+	var api *apim.APIFile
+	err = yaml.Unmarshal(exportedApiYaml, &api)
+	if err != nil {
+		t.Error(err)
+	}
+
+	exportedApiOperations := api.Data.Operations
+	var selectedOperation apim.APIOperations
+	for _, operation := range exportedApiOperations {
+		if strings.EqualFold(operation.Target, TestSampleOperationTarget) {
+			selectedOperation = operation
+		}
+	}
+	assert.NotNil(t, selectedOperation, "Correct operation is not updated")
+
+	assert.Equal(t, selectedOperation.Target, TestSampleOperationTarget, "Exported API does not have the expected operation related metadata. "+
+		"Target of the operation should be "+TestSampleOperationTarget)
+	assert.Equal(t, selectedOperation.Verb, TestSampleOperationVerb, "Exported API does not have the expected operation related metadata. "+
+		"Verb of the operation should be "+TestSampleOperationVerb)
+	assert.Equal(t, selectedOperation.AuthType, TestSampleOperationAuthType, "Exported API does not have the expected operation related metadata. "+
+		"AuthType of the operation should be "+TestSampleOperationAuthType)
+	assert.Equal(t, selectedOperation.ThrottlingPolicy, TestSampleOperationThrottlingPolicy, "Exported API does not have the expected operation related metadata. "+
+		"ThrottlingPolicy of the operation should be "+TestSampleOperationThrottlingPolicy)
+
+	requestOperationPolicy := selectedOperation.OperationPolicies.Request.([]interface{})[0].(map[interface{}]interface{})
+	assert.Equal(t, requestOperationPolicy["policyName"].(string), TestSamplePolicyName, "Exported API does not have the expected operation policy related metadata. ",
+		"policyName of the operation policy should be "+TestSamplePolicyName)
+	assert.Equal(t, requestOperationPolicy["parameters"].(map[interface{}]interface{})[TestSampleOperationPolicyPropertyNameField].(string),
+		TestSampleOperationPolicyPropertyName, "Exported API does not have the expected operation policy related metadata. ",
+		TestSampleOperationPolicyPropertyNameField+" of the operation policy should be "+TestSampleOperationPolicyPropertyName)
+	assert.Equal(t, requestOperationPolicy["parameters"].(map[interface{}]interface{})[TestSampleOperationPolicyPropertyValueField].(string),
+		TestSampleOperationPolicyPropertyValue, "Exported API does not have the expected operation policy related metadata. ",
+		TestSampleOperationPolicyPropertyValueField+" of the operation policy should be "+TestSampleOperationPolicyPropertyValue)
+
+	t.Cleanup(func() {
+		// Remove created project and logout
 		base.RemoveDir(args.InitFlag)
 		base.RemoveDir(exportedPath)
 		base.RemoveDir(relativePath)

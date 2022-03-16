@@ -13,7 +13,7 @@
 # limitations under the License.
 
 type: api # Type of the exported artifact using APICTL
-version: v4.0.0 # API Manager version
+version: v4.1.0 # API Manager version
 data: # Contains the meta data of the API
   id: 28114236-515c-4f40-82e4-6a016e632008 ## API UUID
   name: PizzaShackAPI # Name of the API without Spaces [required] 
@@ -33,6 +33,7 @@ data: # Contains the meta data of the API
    - https
   tags:  # Tags for the API as a list
    - pizza
+  organizationId: carbon.super # The organization ID
   policies: # Available subscription policies (tiers) as a list
    - Unlimited
   apiThrottlingPolicy: Unlimited # The API level throttling policy selected for the particular API
@@ -43,25 +44,11 @@ data: # Contains the meta data of the API
   visibility: PUBLIC # Visibility level of the API {PUBLIC|PRIVATE|RESTRICTED} [required]
   visibleRoles: [] # User roles that are able to access the API in Store as a list
   visibleTenants: [] # Visible tenants of the API
-  mediationPolicies: # Mediation policies attached to the API that should be executed in the runtime {IN|OUT|FAULT}
-   -
-    id: 3b8cc0a7-6d98-4678-9111-2aba50fa505c
-    name: preserve_accept_header
-    type: IN
-    shared: true
-   -
-    id: 35368bb8-c6dc-4297-9703-8b5087dcad75
-    name: log_out_message
-    type: OUT
-    shared: true
-   -
-    id: 1f3a6f24-482f-4ad0-93c6-62f7c6f63017
-    name: debug_json_fault
-    type: FAULT
-    shared: true 
+  mediationPolicies: [] 
   subscriptionAvailability: CURRENT_TENANT # Subscription availability of the API {CURRENT_TENANT|ALL_TENANTS|SPECIFIC_TENANTS}
   subscriptionAvailableTenants: [] # Subscription available tenants as a list
   additionalProperties: [] # List of custom properties of the API
+  additionalPropertiesMap: [] # Map of additional properties of the API
   accessControl: NONE # Is the API is restricted to certain set of publishers or creators or is it visible to all the publishers and creators? If the accessControl restriction is none, this API can be modified by all the publishers and creators, if not it can only be viewable/modifiable by certain set of publishers and creators, based on the restriction
   accessControlRoles: [] # The user roles that are able to view/modify as API publisher or creator
   businessInformation: # Business information of the API
@@ -80,7 +67,7 @@ data: # Contains the meta data of the API
      - Content-Type
      - SOAPAction
      - apikey
-     - testKey
+     - Internal-Key
     accessControlAllowMethods:  # Allowed methods as a list
      - GET
      - PUT
@@ -117,6 +104,10 @@ data: # Contains the meta data of the API
     throttlingPolicy: Unlimited
     scopes: []
     usedProductIds: []
+    operationPolicies:
+      request: []
+      response: []
+      fault: []
    -
     id: ""
     target: /menu
@@ -125,6 +116,10 @@ data: # Contains the meta data of the API
     throttlingPolicy: Unlimited
     scopes: []
     usedProductIds: []
+    operationPolicies:
+      request: []
+      response: []
+      fault: []
    -
     id: ""
     target: /order/{orderId}
@@ -133,6 +128,10 @@ data: # Contains the meta data of the API
     throttlingPolicy: Unlimited
     scopes: []
     usedProductIds: []
+    operationPolicies:
+      request: []
+      response: []
+      fault: []
    -
     id: ""
     target: /order/{orderId}
@@ -141,6 +140,10 @@ data: # Contains the meta data of the API
     throttlingPolicy: Unlimited
     scopes: []
     usedProductIds: []
+    operationPolicies:
+      request: []
+      response: []
+      fault: []
    -
     id: ""
     target: /order/{orderId}
@@ -149,6 +152,10 @@ data: # Contains the meta data of the API
     throttlingPolicy: Unlimited
     scopes: []
     usedProductIds: []
+    operationPolicies:
+      request: []
+      response: []
+      fault: []
   categories: [] # List of API Categories that the API belongs to
   keyManagers: # List of key manager endpoints
    - all
@@ -158,5 +165,10 @@ data: # Contains the meta data of the API
   advertiseInfo: # Advertise only information if an Advertise only API
       advertised: false # Whether API is an advertised only API or not
       originalDevPortalUrl: null # The original URL of the Devportal
+      apiExternalProductionEndpoint: null # The external production endpoint if the
+      apiExternalSandboxEndpoint: null # The original URL of the Devportal
       apiOwner: admin # The original owner of the API
       vendor: WSO2 # Vendor of the Advertised only API
+  gatewayVendor: wso2 # Gateway vendor
+  asyncTransportProtocols: [] # Async transport protocols
+  

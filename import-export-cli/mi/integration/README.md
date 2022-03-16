@@ -5,7 +5,7 @@
 
 2. To setup the Micro Integrator and the MySQL database needed for the tests you can use the `setup_MI.sh` script. You need to pass the zip file path of the Micro Integrator to it as shown in the below example.
 
-   `sh setup_MI.sh /home/micro-integrator/distribution/target/wso2mi-4.0.0-SNAPSHOT.zip`
+   `sh setup_MI.sh /home/micro-integrator/distribution/target/wso2mi-4.1.0-SNAPSHOT.zip`
 
    This script will do the following,
 
@@ -62,7 +62,7 @@
 ```
 go test -archive <apictl archive name>
 
-example: go test -archive apictl-4.0.0-linux-x64.tar.gz
+example: go test -archive apictl-4.1.0-linux-x64.tar.gz
 
 ```
 
@@ -71,7 +71,7 @@ example: go test -archive apictl-4.0.0-linux-x64.tar.gz
 ```
 go test -archive <apictl archive name> -test.run <Test function name or partial name regex>
 
-example: go test -archive apictl-4.0.0-linux-x64.tar.gz -test.run TestGetConnectors
+example: go test -archive apictl-4.1.0-linux-x64.tar.gz -test.run TestGetConnectors
 ```
 
 - Print verbose output
@@ -79,7 +79,7 @@ example: go test -archive apictl-4.0.0-linux-x64.tar.gz -test.run TestGetConnect
 ```
 go test  -archive <apictl archive name> -test.v
 
-example: go test -archive apictl-4.0.0-linux-x64.tar.gz -test.v
+example: go test -archive apictl-4.1.0-linux-x64.tar.gz -test.v
 ```
 
 - Print http transport request/responses
@@ -87,5 +87,5 @@ example: go test -archive apictl-4.0.0-linux-x64.tar.gz -test.v
 ```
 go test -archive <apictl archive name> -logtransport
 
-example: go test -archive apictl-4.0.0-linux-x64.tar.gz -logtransport
+example: go test -archive apictl-4.1.0-linux-x64.tar.gz -logtransport
 ```

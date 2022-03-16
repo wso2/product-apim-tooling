@@ -45,6 +45,7 @@ func TestExportApiNonDeloyedRevision(t *testing.T) {
 				Api:         apiRevision,
 				SrcAPIM:     dev,
 				Revision:    strconv.Itoa(revNumber),
+				IsDeployed:  false,
 			}
 
 			testutils.ValidateExportedAPIRevisionStructure(t, args)
@@ -95,6 +96,7 @@ func TestExportApiWorkingCopy(t *testing.T) {
 				CtlUser:     user.CtlUser,
 				Api:         api,
 				SrcAPIM:     dev,
+				IsDeployed:  false,
 			}
 
 			testutils.ValidateExportedAPIStructure(t, args)
@@ -157,6 +159,30 @@ func TestExportImportApiSameGWEnv(t *testing.T) {
 			testutils.ValidateExportedAPIRevisionStructure(t, args)
 
 			testutils.ValidateAPIRevisionExportImport(t, args, testutils.APITypeREST)
+		})
+	}
+}
+
+func TestExportInvalidApiRevision(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			dev := GetDevClient()
+
+			api := testutils.AddAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
+
+			// Create and Deploy Revision of the above API
+			testutils.CreateAndDeployAPIRevision(t, dev, user.ApiPublisher.Username, user.ApiPublisher.Password, api.ID)
+
+			// Export an invalid revision
+			args := &testutils.ApiImportExportTestArgs{
+				CtlUser:  user.CtlUser,
+				Api:      api,
+				SrcAPIM:  dev,
+				Revision: "100",
+			}
+
+			testutils.ValidateExportedAPIRevisionFailure(t, args)
 		})
 	}
 }

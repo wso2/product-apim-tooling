@@ -60,6 +60,8 @@ type ApiProductImportExportTestArgs struct {
 	UpdateApisFlag       bool
 	UpdateApiProductFlag bool
 	ParamsFile           string
+	Revision             string
+	IsLatest             bool
 }
 
 type AppImportExportTestArgs struct {
@@ -136,4 +138,23 @@ type AWSInitTestArgs struct {
 type GenDeploymentDirTestArgs struct {
 	Source      string
 	Destination string
+}
+
+type ApiProductChangeLifeCycleStatusTestArgs struct {
+	ApiProvider   Credentials
+	CtlUser       Credentials
+	ApiProduct    *apim.APIProduct
+	APIM          *apim.Client
+	Action        string
+	Provider      string
+	ExpectedState string
+}
+
+type ApiLoggingTestArgs struct {
+	Apis         []*apim.API
+	APIM         *apim.Client
+	CtlUser      Credentials
+	TenantDomain string
+	ApiId        string
+	LogLevel     string
 }

@@ -56,6 +56,12 @@ func AddAPIProductFromJSON(t *testing.T, client *apim.Client, username string, p
 	return apiProduct
 }
 
+func PublishAPIProduct(client *apim.Client, username string, password string, apiProductID string) {
+	base.WaitForIndexing()
+	client.Login(username, password)
+	client.PublishAPIProduct(apiProductID)
+}
+
 func CreateAndDeployAPIProductRevision(t *testing.T, client *apim.Client, username, password, apiProductID string) string {
 	client.Login(username, password)
 	revision := client.CreateAPIProductRevision(apiProductID)
@@ -117,6 +123,32 @@ func exportAPIProduct(t *testing.T, name string, version string, env string) (st
 
 	t.Cleanup(func() {
 		base.RemoveAPIArchive(t, getEnvAPIProductExportPath(env), name, version)
+	})
+
+	return output, err
+}
+
+func exportAPIProductRevision(t *testing.T, args *ApiProductImportExportTestArgs) (string, error) {
+	var output string
+	var err error
+
+	flags := []string{"export", "api-product", "-n", args.ApiProduct.Name, "-e", args.SrcAPIM.GetEnvName(), "-k", "--verbose"}
+
+	if args.ApiProductProvider.Username != "" {
+		flags = append(flags, "-r", args.ApiProductProvider.Username)
+	}
+
+	if args.IsLatest {
+		flags = append(flags, "--latest")
+	} else {
+		flags = append(flags, "--rev", args.Revision)
+	}
+
+	output, err = base.Execute(t, flags...)
+
+	t.Cleanup(func() {
+		base.RemoveAPIArchive(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()), args.ApiProduct.Name,
+			utils.DefaultApiProductVersion)
 	})
 
 	return output, err
@@ -206,6 +238,12 @@ func importUpdateAPIProduct(t *testing.T, args *ApiProductImportExportTestArgs) 
 
 func listAPIProducts(t *testing.T, args *ApiProductImportExportTestArgs) (string, error) {
 	output, err := base.Execute(t, "get", "api-products", "-e", args.SrcAPIM.EnvName, "-k", "--verbose")
+	return output, err
+}
+
+func listAPIProductsWithJsonArrayFormat(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
+	output, err := base.Execute(t, "get", "api-products", "-e", args.SrcAPIM.EnvName, "--format", "jsonArray",
+		"-k", "--verbose")
 	return output, err
 }
 
@@ -540,6 +578,30 @@ func ValidateAPIProductsList(t *testing.T, args *ApiProductImportExportTestArgs)
 	ValidateListAPIProductsEqual(t, output, apiProductsList)
 }
 
+// ValidateAPIProductsListWithJsonArrayFormat : Validate the received list of API Products are in JsonArray format and
+// verify only the required ones are there and others are not in the command line output
+func ValidateAPIProductsListWithJsonArrayFormat(t *testing.T, args *ApiImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	// List API Products of env 1
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	base.WaitForIndexing()
+
+	output, _ := listAPIProductsWithJsonArrayFormat(t, args)
+
+	apisProductsList := args.SrcAPIM.GetAPIProducts()
+
+	// Validate API Products list with added APIs
+	ValidateListAPIProductsEqual(t, output, apisProductsList)
+
+	// Validate JsonArray format
+	assert.Contains(t, output, "[\n {\n", "Error while listing APIs in JsonArray format")
+}
+
 func ValidateListAPIProductsEqual(t *testing.T, apiProductsListFromCtl string, apiProductsList *apim.APIProductList) {
 	unmatchedCount := apiProductsList.Count
 	for _, apiProduct := range apiProductsList.List {
@@ -621,9 +683,35 @@ func ValidateAPIProductDeleteFailureWithExistingEnv(t *testing.T, args *ApiProdu
 	})
 }
 
+func ValidateExportedAPIProductRevisionFailure(t *testing.T, args *ApiProductImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	// Export api from env 1
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	output, _ := exportAPIProductRevision(t, args)
+
+	assert.Contains(t, output, "404", "Test failed because the response does not contains a not found request")
+
+	// Validate that export failed
+	assert.False(t, base.IsAPIArchiveExists(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
+		args.ApiProduct.Name, utils.DefaultApiProductVersion),
+		"Test failed because the API Product Revision was exported successfully")
+}
+
 // Execute get apis command with query parameters
 func searchAPIProductsWithQuery(t *testing.T, args *ApiProductImportExportTestArgs, query string) (string, error) {
 	output, err := base.Execute(t, "get", "api-products", "-e", args.SrcAPIM.EnvName, "--query", query, "-k", "--verbose")
+	return output, err
+}
+
+// Execute change-status api-product command with parameters
+func changeLifeCycleOfAPIProduct(t *testing.T, args *ApiProductChangeLifeCycleStatusTestArgs) (string, error) {
+	output, err := base.Execute(t, "change-status", "api-product", "-a", args.Action, "-n", args.ApiProduct.Name,
+		"-e", args.APIM.EnvName, "-k", "--verbose")
 	return output, err
 }
 
@@ -648,4 +736,45 @@ func ValidateSearchApiProductsList(t *testing.T, args *ApiProductImportExportTes
 	// Assert the unmatched query is not in the output
 	assert.False(t, strings.Contains(output, unmatchedQuery), "apiProductsListFromCtl: "+output+
 		" , contains the query: "+unmatchedQuery)
+}
+
+func ValidateChangeLifeCycleStatusOfAPIProduct(t *testing.T, args *ApiProductChangeLifeCycleStatusTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.APIM.GetEnvName(), args.APIM.GetApimURL(), args.APIM.GetTokenURL())
+
+	// Login to apictl
+	base.Login(t, args.APIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	base.WaitForIndexing()
+
+	//Execute apictl command to change life cycle of an Api Product
+	output, _ := changeLifeCycleOfAPIProduct(t, args)
+	//Assert apictl output
+	assert.Contains(t, output, "state changed successfully!", "Error while changing life cycle of API Product")
+
+	base.WaitForIndexing()
+	//Assert life cycle state after change
+	apiProduct := getAPIProduct(t, args.APIM, args.ApiProduct.Name, args.CtlUser.Username, args.CtlUser.Password)
+	assert.Equal(t, args.ExpectedState, apiProduct.State, "Expected Life cycle state change is not equals to actual status")
+}
+
+func ValidateChangeLifeCycleStatusOfAPIProductFailure(t *testing.T, args *ApiProductChangeLifeCycleStatusTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.APIM.GetEnvName(), args.APIM.GetApimURL(), args.APIM.GetTokenURL())
+
+	// Login to apictl
+	base.Login(t, args.APIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	base.WaitForIndexing()
+
+	//Execute apictl command to change life cycle of an Api Product
+	output, _ := changeLifeCycleOfAPIProduct(t, args)
+	//Assert apictl output
+	assert.NotContains(t, output, "state changed successfully!", "Error while changing life cycle of API Product")
+	assert.Contains(t, output, "Lifecycle state change action "+args.Action+" is not allowed")
+	assert.NotEqual(t, args.ApiProduct.State, args.ExpectedState, "Life Cycle State changed successfully")
 }

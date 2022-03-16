@@ -37,11 +37,14 @@ indexing-delay: 1000
 
 - *APIM DCR/REST API versions*
 
-   The DCR and REST API version of the APIM instances mentioned previously.
+   The DCR and REST API versions (Admin, Devportal and Publisher) of the APIM instances mentioned previously.
 
 ```
 dcr-version: v0.17
-rest-api-version: v2
+admin-rest-api-version: v3
+devportal-rest-api-version: v2
+publisher-rest-api-version: v3
+devops-rest-api-version: v0
 ```
 
 - *apictl version*
@@ -49,7 +52,7 @@ rest-api-version: v2
    The version of the apictl that is being integration tested.
 
 ```
-apictl-version: 4.0.1
+apictl-version: 4.1.0
 ```   
 
 
@@ -92,7 +95,7 @@ apictl-version: 4.0.1
 ```
 go test -p 1 -timeout 0 -archive <apictl archive name>
 
-example: go test -p 1 -timeout 0 -archive apictl-4.0.1-linux-x64.tar.gz
+example: go test -p 1 -timeout 0 -archive apictl-4.1.0-linux-x64.tar.gz
 
 ```
 
@@ -101,7 +104,7 @@ example: go test -p 1 -timeout 0 -archive apictl-4.0.1-linux-x64.tar.gz
 ```
 go test -p 1 -timeout 0 -archive <apictl archive name> -run <Test function name or partial name regex>
 
-example: go test -p 1 -timeout 0 -archive apictl-4.0.1-linux-x64.tar.gz -run TestVersion
+example: go test -p 1 -timeout 0 -archive apictl-4.1.0-linux-x64.tar.gz -run TestVersion
 ```
 
 - Print verbose output
@@ -109,7 +112,7 @@ example: go test -p 1 -timeout 0 -archive apictl-4.0.1-linux-x64.tar.gz -run Tes
 ```
 go test -p 1 -timeout 0 -archive <apictl archive name> -v
 
-example: go test -p 1 -timeout 0 -archive apictl-4.0.1-linux-x64.tar.gz -v
+example: go test -p 1 -timeout 0 -archive apictl-4.1.0-linux-x64.tar.gz -v
 ```
 
 - Print http transport request/responses
@@ -117,7 +120,7 @@ example: go test -p 1 -timeout 0 -archive apictl-4.0.1-linux-x64.tar.gz -v
 ```
 go test -p 1 -timeout 0 -archive <apictl archive name> -logtransport
 
-example: go test -p 1 -timeout 0 -archive apictl-4.0.1-linux-x64.tar.gz -logtransport
+example: go test -p 1 -timeout 0 -archive apictl-4.1.0-linux-x64.tar.gz -logtransport
 ```
 
 ---

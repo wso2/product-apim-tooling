@@ -19,6 +19,7 @@
 package base
 
 import (
+	"bytes"
 	"encoding/base32"
 	"flag"
 	"fmt"
@@ -414,6 +415,21 @@ func IsFileAvailable(t *testing.T, filename string) bool {
 	return !info.IsDir()
 }
 
+// Check whether the file content is identical
+func IsFileContentIdentical(path1, path2 string) bool {
+	file_1, err_1 := ioutil.ReadFile(path1)
+	if err_1 != nil {
+		panic(err_1)
+	}
+
+	file_2, err_2 := ioutil.ReadFile(path2)
+	if err_2 != nil {
+		panic(err_2)
+	}
+
+	return bytes.Equal(file_1, file_2)
+}
+
 // Copy the src file to dst. Any existing file will be overwritten
 func Copy(src, dst string) error {
 	in, err := os.Open(src)
@@ -459,6 +475,6 @@ func GenerateRandomString() string {
 }
 
 //Generate random number within the given range
-func GenerateRandomNumber(min,max int) int {
-	return rand.Intn(max - min + 1) + min
+func GenerateRandomNumber(min, max int) int {
+	return rand.Intn(max-min+1) + min
 }

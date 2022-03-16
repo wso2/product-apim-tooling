@@ -18,14 +18,17 @@
 package integration
 
 import (
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/magiconair/properties/assert"
+	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"gopkg.in/yaml.v2"
 )
 
 // Initialize a API project by getting the OAS of a AWS API and import it as a super tenant user with
@@ -80,36 +83,64 @@ import (
 
 //Initialize a project Initialize an API without any flag
 func TestInitializeProject(t *testing.T) {
-	username := superAdminUser
-	password := superAdminPassword
-	apim := GetDevClient()
-	projectName := base.GenerateRandomName(16)
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			apim := GetDevClient()
+			projectName := base.GenerateRandomString()
 
-	args := &testutils.InitTestArgs{
-		CtlUser:  testutils.Credentials{Username: username, Password: password},
-		SrcAPIM:  apim,
-		InitFlag: projectName,
+			args := &testutils.InitTestArgs{
+				CtlUser:  testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				SrcAPIM:  apim,
+				InitFlag: projectName,
+				APIName:  projectName, // The logic of apictl init has been written to consider the projectName as
+				// the API name, if an OAS or a definition is not provided
+			}
+
+			testutils.ValidateInitializeProject(t, args)
+
+			projectPath, _ := filepath.Abs(projectName)
+			apiYamlPath := projectPath + string(os.PathSeparator) + testutils.APIYamlFilePath
+
+			// Read the api.yaml file in the exported directory
+			fileData, _ := ioutil.ReadFile(apiYamlPath)
+
+			fileContent := make(map[string]interface{})
+			err := yaml.Unmarshal(fileData, &fileContent)
+			if err != nil {
+				t.Error(err)
+			}
+			apiArtifactVersion := fileContent["version"].(string)
+
+			assert.Equal(t, apiArtifactVersion, "v"+yamlConfig.APICTLVersion,
+				"Artifact version: "+apiArtifactVersion+
+					" does not matches with the APICTL version: v"+yamlConfig.APICTLVersion)
+
+			testutils.ValidateImportProject(t, args, "", !isTenantUser(user.CtlUser.Username, TENANT1))
+		})
 	}
-
-	testutils.ValidateInitializeProject(t, args)
 }
 
-//Initialize an API with --definition flag
+// Initialize an API with --definition flag and import it
 func TestInitializeAPIWithDefinitionFlag(t *testing.T) {
-	apim := GetDevClient()
-	projectName := base.GenerateRandomName(16)
-	username := superAdminUser
-	password := superAdminPassword
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			apim := GetDevClient()
+			projectName := base.GenerateRandomString()
 
-	args := &testutils.InitTestArgs{
-		CtlUser:        testutils.Credentials{Username: username, Password: password},
-		SrcAPIM:        apim,
-		InitFlag:       projectName,
-		DefinitionFlag: testutils.SampleAPIYamlFilePath,
-		ForceFlag:      false,
+			args := &testutils.InitTestArgs{
+				CtlUser:        testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				SrcAPIM:        apim,
+				InitFlag:       projectName,
+				DefinitionFlag: testutils.SampleAPIYamlFilePath,
+				APIName:        testutils.DevFirstDefinitionFlagSampleAPIName,
+				ForceFlag:      false,
+			}
+
+			testutils.ValidateInitializeProjectWithDefinitionFlag(t, args)
+
+			testutils.ValidateImportProject(t, args, "", !isTenantUser(user.CtlUser.Username, TENANT1))
+		})
 	}
-
-	testutils.ValidateInitializeProjectWithDefinitionFlag(t, args)
 }
 
 //Initialize an API from Swagger 2 Specification
@@ -297,23 +328,23 @@ func TestImportAndExportAPIWithDocument(t *testing.T) {
 	testutils.ValidateInitializeProjectWithOASFlag(t, args)
 
 	projectPath, _ := filepath.Abs(projectName)
-	base.CreateTempDir(t, projectPath+testutils.TestCase1DocName)
+	base.CreateTempDir(t, projectPath+testutils.DevFirstUpdatedSampleCaseDocName)
 
 	//Move doc file to created project
-	srcPathForDoc, _ := filepath.Abs(testutils.TestCase1DocPath)
-	destPathForDoc := projectPath + testutils.TestCase1DestPathSuffix
+	srcPathForDoc, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCaseDocPath)
+	destPathForDoc := projectPath + testutils.DevFirstUpdatedSampleCaseDestPathSuffix
 	base.Copy(srcPathForDoc, destPathForDoc)
 
 	//Move docMetaData file to created project
-	srcPathForDocMetadata, _ := filepath.Abs(testutils.TestCase1DocMetaDataPath)
-	destPathForDocMetaData := projectPath + testutils.TestCase1DestMetaDataPathSuffix
+	srcPathForDocMetadata, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCaseDocMetaDataPath)
+	destPathForDocMetaData := projectPath + testutils.DevFirstUpdatedSampleCaseDestMetaDataPathSuffix
 	base.Copy(srcPathForDocMetadata, destPathForDocMetaData)
 
 	//Import the project with Document
 	testutils.ValidateImportUpdateProjectNotAlreadyImported(t, args)
 
 	testutils.ValidateAPIWithDocIsExported(t, args, testutils.DevFirstDefaultAPIName, testutils.DevFirstDefaultAPIVersion,
-		testutils.TestCase1DestPathSuffix)
+		testutils.DevFirstUpdatedSampleCaseDestPathSuffix)
 }
 
 //Import Api with an Image and Export that Api with an image (.png Type)
@@ -336,8 +367,8 @@ func TestImportAndExportAPIWithPngIcon(t *testing.T) {
 
 	//Move icon file to created project
 	projectPath, _ := filepath.Abs(projectName)
-	srcPathForIcon, _ := filepath.Abs(testutils.TestCase2PngPath)
-	destPathForIcon := projectPath + testutils.TestCase2DestPngPathSuffix
+	srcPathForIcon, _ := filepath.Abs(testutils.DevFirstSampleCasePngPath)
+	destPathForIcon := projectPath + testutils.DevFirstSampleCaseDestPngPathSuffix
 	base.Copy(srcPathForIcon, destPathForIcon)
 
 	//Import the project with icon image(.png)
@@ -366,8 +397,8 @@ func TestImportAndExportAPIWithJpegImage(t *testing.T) {
 
 	//Move Image file to created project
 	projectPath, _ := filepath.Abs(projectName)
-	srcPathForImage, _ := filepath.Abs(testutils.TestCase2JpegPath)
-	destPathForImage := projectPath + testutils.TestCase2DestJpegPathSuffix
+	srcPathForImage, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCaseJpegPath)
+	destPathForImage := projectPath + testutils.DevFirstUpdatedSampleCaseDestJpegPathSuffix
 	base.Copy(srcPathForImage, destPathForImage)
 
 	//Import the project with icon image(.jpeg) provided
@@ -395,29 +426,29 @@ func TestUpdateDocAndImageOfAPIOfExistingAPI(t *testing.T) {
 	testutils.ValidateInitializeProjectWithOASFlag(t, args)
 
 	projectPath, _ := filepath.Abs(projectName)
-	base.CreateTempDir(t, projectPath+testutils.TestCase2DocName)
+	base.CreateTempDir(t, projectPath+testutils.DevFirstSampleCaseDocName)
 
 	//Move doc file to created project
-	srcPathForDoc, _ := filepath.Abs(testutils.TestCase2DocPath)
-	destPathForDoc := projectPath + testutils.TestCase2DestPathSuffix
+	srcPathForDoc, _ := filepath.Abs(testutils.DevFirstSampleCaseDocPath)
+	destPathForDoc := projectPath + testutils.DevFirstSampleCaseDestPathSuffix
 	base.Copy(srcPathForDoc, destPathForDoc)
 
 	//Move docMetaData file to created project
-	srcPathForDocMetadata, _ := filepath.Abs(testutils.TestCase2DocMetaDataPath)
-	destPathForDocMetaData := projectPath + testutils.TestCase2DestMetaDataPathSuffix
+	srcPathForDocMetadata, _ := filepath.Abs(testutils.DevFirstSampleCaseDocMetaDataPath)
+	destPathForDocMetaData := projectPath + testutils.DevFirstSampleCaseDestMetaDataPathSuffix
 	base.Copy(srcPathForDocMetadata, destPathForDocMetaData)
 
 	//Move icon file to created project
-	srcPathForImage, _ := filepath.Abs(testutils.TestCase2PngPath)
-	destPathForImage := projectPath + testutils.TestCase2DestPngPathSuffix
+	srcPathForImage, _ := filepath.Abs(testutils.DevFirstSampleCasePngPath)
+	destPathForImage := projectPath + testutils.DevFirstSampleCaseDestPngPathSuffix
 	base.Copy(srcPathForImage, destPathForImage)
 
 	//Import the project with Document and image thumbnail
 	testutils.ValidateImportUpdateProjectNotAlreadyImported(t, args)
 
 	//Update doc file to created project
-	srcPathForDocUpdate, _ := filepath.Abs(testutils.TestCase1DocPath)
-	destPathForDocUpdate := projectPath + testutils.TestCase2DestPathSuffix
+	srcPathForDocUpdate, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCaseDocPath)
+	destPathForDocUpdate := projectPath + testutils.DevFirstSampleCaseDestPathSuffix
 	base.Copy(srcPathForDocUpdate, destPathForDocUpdate)
 
 	//Update image file to created project
@@ -426,8 +457,8 @@ func TestUpdateDocAndImageOfAPIOfExistingAPI(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	srcPathForIcon, _ := filepath.Abs(testutils.TestCase2JpegPath)
-	destPathForIcon := projectPath + testutils.TestCase2DestJpegPathSuffix
+	srcPathForIcon, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCaseJpegPath)
+	destPathForIcon := projectPath + testutils.DevFirstUpdatedSampleCaseDestJpegPathSuffix
 	base.Copy(srcPathForIcon, destPathForIcon)
 
 	base.WaitForIndexing()
@@ -436,8 +467,104 @@ func TestUpdateDocAndImageOfAPIOfExistingAPI(t *testing.T) {
 
 	//Validate that image has been updated
 	testutils.ValidateAPIWithDocIsExported(t, args, testutils.DevFirstDefaultAPIName, testutils.DevFirstDefaultAPIVersion,
-		testutils.TestCase2DestPathSuffix)
+		testutils.DevFirstSampleCaseDestPathSuffix)
 
 	//Validate that document has been updated
 	testutils.ValidateAPIWithImageIsExported(t, args, testutils.DevFirstDefaultAPIName, testutils.DevFirstDefaultAPIVersion)
+}
+
+// Test a verified (syntactically correct) custom operation policy (sequence) update
+func TestAPIOperationPolicyUpdate(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+			projectName := base.GenerateRandomString()
+
+			args := &testutils.InitTestArgs{
+				CtlUser:   testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				SrcAPIM:   dev,
+				InitFlag:  projectName,
+				OasFlag:   testutils.TestOpenAPI3DefinitionPath,
+				APIName:   testutils.DevFirstDefaultAPIName,
+				ForceFlag: true,
+			}
+
+			// Initialize the project
+			testutils.ValidateInitializeProjectWithOASFlag(t, args)
+
+			// Add custom operation policy (sequence) file to created project
+			projectPath, _ := filepath.Abs(projectName)
+			base.CreateTempDir(t, projectPath+testutils.PoliciesDirectory)
+
+			srcPathForSequence, _ := filepath.Abs(testutils.DevFirstSampleCasePolicyPath)
+			destPathForSequence := projectPath + testutils.DevFirstSampleCaseDestPolicyPathSuffix
+			base.Copy(srcPathForSequence, destPathForSequence)
+
+			srcPathForSequenceDefinition, _ := filepath.Abs(testutils.DevFirstSampleCasePolicyDefinitionPath)
+			destPathForSequenceDefinition := projectPath + testutils.DevFirstSampleCaseDestPolicyDefinitionPathSuffix
+			base.Copy(srcPathForSequenceDefinition, destPathForSequenceDefinition)
+
+			// Update api.yaml file of initialized project with sequence related metadata
+			apiDefinitionFilePath := filepath.Join(projectPath, testutils.DevFirstSampleCaseApiYamlFilePathSuffix)
+			apiDefinitionFileContent := testutils.ReadAPIDefinition(t, apiDefinitionFilePath)
+
+			// Operation policy that will be added
+			var requestPolicies []interface{}
+			operationPolicies := apim.OperationPolicies{
+				Request: append(requestPolicies, map[string]interface{}{
+					"policyName": testutils.TestSamplePolicyName,
+					"parameters": map[string]string{
+						testutils.TestSampleOperationPolicyPropertyNameField:  testutils.TestSampleOperationPolicyPropertyName,
+						testutils.TestSampleOperationPolicyPropertyValueField: testutils.TestSampleOperationPolicyPropertyValue,
+					}}),
+				Response: []string{},
+				Fault:    []string{},
+			}
+
+			// Assign the above operation policy to a resource
+			apiOperationWithPolicy := apim.APIOperations{
+				Target:            testutils.TestSampleOperationTarget,
+				Verb:              testutils.TestSampleOperationVerb,
+				AuthType:          testutils.TestSampleOperationAuthType,
+				ThrottlingPolicy:  testutils.TestSampleOperationThrottlingPolicy,
+				OperationPolicies: operationPolicies,
+			}
+
+			// Add the operation policy added resource to the API
+			apiOperations := []apim.APIOperations{apiOperationWithPolicy}
+			apiDefinitionFileContent.Data.Operations = apiOperations
+
+			// Write the modified API definition to the directory
+			testutils.WriteToAPIDefinition(t, apiDefinitionFileContent, apiDefinitionFilePath)
+
+			// Import the project with the verified (syntactically correct) operation policy
+			testutils.ValidateImportProject(t, args, "", !isTenantUser(user.CtlUser.Username, TENANT1))
+
+			// Update operation policy file of created project
+			srcPathForSequenceUpdate, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCasePolicyPath)
+			destPathForSequenceUpdate := projectPath + testutils.DevFirstSampleCaseDestPolicyPathSuffix
+			err := os.Remove(destPathForSequenceUpdate)
+			if err != nil {
+				t.Fatal(err)
+			}
+			base.Copy(srcPathForSequenceUpdate, destPathForSequenceUpdate)
+			base.WaitForIndexing()
+
+			// Update operation policy file of created project
+			srcPathForSequenceDefinitionUpdate, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCasePolicyDefinitionPath)
+			destPathForSequenceDefinitionUpdate := projectPath + testutils.DevFirstSampleCaseDestPolicyDefinitionPathSuffix
+			err = os.Remove(destPathForSequenceDefinitionUpdate)
+			if err != nil {
+				t.Fatal(err)
+			}
+			base.Copy(srcPathForSequenceDefinitionUpdate, destPathForSequenceDefinitionUpdate)
+			base.WaitForIndexing()
+
+			// Import the project with the updated sequence
+			testutils.ValidateImportUpdateProject(t, args, !isTenantUser(user.CtlUser.Username, TENANT1))
+
+			// Validate that sequence has been updated
+			testutils.ValidateAPIWithUpdatedSequenceIsExported(t, args, testutils.DevFirstDefaultAPIName, testutils.DevFirstDefaultAPIVersion)
+		})
+	}
 }

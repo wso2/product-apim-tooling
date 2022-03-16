@@ -37,31 +37,30 @@ const DefaultApictlTestAppName = "default-apictl-app"
 const DevFirstDefaultAPIName = "SwaggerPetstoreNew"
 const DevFirstSwagger2APIName = "PizzaShackAPI"
 const OpenAPI3DefinitionWithoutEndpointsAPIName = "PizzaShackAPI"
+const DevFirstDefinitionFlagSampleAPIName = "PizzaShackAPI"
 const DevFirstDefaultAPIVersion = "1.0.0"
 const APIYamlFilePath = "api.yaml"
 const DeploymentEnvYamlFilePath = "deployment_environments.yaml"
 const SampleAPIYamlFilePath = "testdata/sample-api.yaml"
 const SampleRevisionedAPIYamlFilePath = "testdata/sample-revisioned-api.yaml"
-const TestArtifact1Path = "testdata/TestArtifactDirectory/ArtifactSet1"
-const TestCase1DocName = "/Docs/Doc1"
-const TestCase1DocPath = TestArtifact1Path + "/Doc1/testDoc.pdf"
-const TestCase1DestPathSuffix = TestCase1DocName + "/testDoc.pdf"
-const TestCase1DocMetaDataPath = TestArtifact1Path + "/Doc1/document.yaml"
-const TestCase1DestMetaDataPathSuffix = TestCase1DocName + "/document.yaml"
-const TestArtifact2Path = "testdata/TestArtifactDirectory/ArtifactSet2"
-const TestCase2DocName = "/Docs/Doc2"
-const TestCase2DocPath = TestArtifact2Path + "/Doc2/mockPdf.pdf"
-const TestCase2DestPathSuffix = TestCase2DocName + "/mockPdf.pdf"
-const TestCase2DestPathSuffixForUpdate = TestCase2DocName + "/testDoc.pdf"
-const TestCase2DocMetaDataPath = TestArtifact2Path + "/Doc2/document.yaml"
-const TestCase2DestMetaDataPathSuffix = TestCase2DocName + "/document.yaml"
-const TestCase2PngPath = TestArtifact2Path + "/icon.png"
-const TestCase2DestPngPathSuffix = "/Image/icon.png"
-const TestCase2JpegPath = TestArtifact2Path + "/icon.jpeg"
-const TestCase2DestJpegPathSuffix = "/Image/icon.jpeg"
-const TestArtifact3Path = "testdata/TestArtifactDirectory/ArtifactSet3"
+const DevFirstUpdatedSampleCaseArtifactPath = "testdata/TestArtifactDirectory/DevFirstUpdatedSampleCaseArtifacts"
+const DevFirstUpdatedSampleCaseDocName = "/Docs/Doc1"
+const DevFirstUpdatedSampleCaseDocPath = DevFirstUpdatedSampleCaseArtifactPath + "/Doc1/testDoc.pdf"
+const DevFirstUpdatedSampleCaseDestPathSuffix = DevFirstUpdatedSampleCaseDocName + "/testDoc.pdf"
+const DevFirstUpdatedSampleCaseDocMetaDataPath = DevFirstUpdatedSampleCaseArtifactPath + "/Doc1/document.yaml"
+const DevFirstUpdatedSampleCaseDestMetaDataPathSuffix = DevFirstUpdatedSampleCaseDocName + "/document.yaml"
+const DevFirstSampleCaseArtifactPath = "testdata/TestArtifactDirectory/DevFirstSampleCaseArtifacts"
+const DevFirstSampleCaseDocName = "/Docs/Doc2"
+const DevFirstSampleCaseDocPath = DevFirstSampleCaseArtifactPath + "/Doc2/mockPdf.pdf"
+const DevFirstSampleCaseDestPathSuffix = DevFirstSampleCaseDocName + "/mockPdf.pdf"
+const DevFirstSampleCaseDestPathSuffixForUpdate = DevFirstSampleCaseDocName + "/testDoc.pdf"
+const DevFirstSampleCaseDocMetaDataPath = DevFirstSampleCaseArtifactPath + "/Doc2/document.yaml"
+const DevFirstSampleCaseDestMetaDataPathSuffix = DevFirstSampleCaseDocName + "/document.yaml"
+const DevFirstSampleCasePngPath = DevFirstSampleCaseArtifactPath + "/icon.png"
+const DevFirstSampleCaseDestPngPathSuffix = "/Image/icon.png"
+const DevFirstUpdatedSampleCaseJpegPath = DevFirstUpdatedSampleCaseArtifactPath + "/icon.jpeg"
+const DevFirstUpdatedSampleCaseDestJpegPathSuffix = "/Image/icon.jpeg"
 const TestDefaultExtractedFileName = "/SwaggerPetstoreNew-1.0.0"
-const CustomDynamicInSequenceName = "custom-header-in.xml"
 
 //Environment specific testcase constants
 
@@ -71,8 +70,8 @@ const EnvParamsFilesDir = "testdata/EnvParamsFiles"
 // APIEndpointParamsFile : Endpoint URL api_params.yaml
 const APIEndpointParamsFile = EnvParamsFilesDir + "/api_params_endpoint.yaml"
 
-// APIEndpointRetryTimeoutParamsFile : Endpoint URL and Retry Timeout api_params.yaml
-const APIEndpointRetryTimeoutParamsFile = EnvParamsFilesDir + "/api_params_endpoint_retrytimeout.yaml"
+// APIEndpointConfigsParamsFile : Endpoint URL and Retry Timeout api_params.yaml
+const APIEndpointConfigsParamsFile = EnvParamsFilesDir + "/api_params_endpoint_configs.yaml"
 
 // APISecurityFalseParamsFile : Security false api_params.yaml
 const APISecurityFalseParamsFile = EnvParamsFilesDir + "/api_params_security_false.yaml"
@@ -82,6 +81,9 @@ const APISecurityDigestParamsFile = EnvParamsFilesDir + "/api_params_security_di
 
 // APISecurityBasicParamsFile : Security Basic api_params.yaml
 const APISecurityBasicParamsFile = EnvParamsFilesDir + "/api_params_security_basic.yaml"
+
+// APISecurityOauthParamsFile : Security Basic api_params.yaml
+const APISecurityOauthParamsFile = EnvParamsFilesDir + "/api_params_security_oauth.yaml"
 
 // APIFullParamsFile : Full api_params.yaml
 const APIFullParamsFile = EnvParamsFilesDir + "/api_params_full.yaml"
@@ -138,7 +140,7 @@ const APITypeWebSub = "WEBSUB"
 const APITypeSSE = "SSE"
 
 // REST API Endpoint URL
-const RESTAPIEndpoint = "petstore.swagger.io"
+const RESTAPIEndpoint = "https://petstore.swagger.io"
 
 // SOAP API Endpoint URL
 const SoapEndpointURL = "http://ws.cdyne.com/phoneverify/phoneverify.asmx"
@@ -153,3 +155,45 @@ const WebSocketEndpoint = "ws://echo.websocket.org:80"
 const CustomAPIName = "Customized_API"
 const CustomAPIVersion = "2.3.4"
 const CustomAPIContext = "/custom"
+
+// Endpoint security related constants
+const EndpointSecurityTypeOAuth = "OAUTH"
+const PasswordGrantType = "PASSWORD"
+const EndpointSecurityTypeDigest = "DIGEST"
+const EndpointSecurityTypeBasic = "BASIC"
+
+// Constants for sequence update testcase
+const PoliciesDirectory = "/Policies"
+const DevFirstSampleCaseApiYamlFilePathSuffix = "/api.yaml"
+const DevFirstSampleCasePolicyPath = DevFirstSampleCaseArtifactPath + "/customAddLogMessage.j2"
+const DevFirstSampleCasePolicyDefinitionPath = DevFirstSampleCaseArtifactPath + "/customAddLogMessage.yaml"
+const DevFirstSampleCaseDestPolicyPathSuffix = PoliciesDirectory + "/customAddLogMessage.j2"
+const DevFirstSampleCaseDestPolicyDefinitionPathSuffix = PoliciesDirectory + "/customAddLogMessage.yaml"
+const DevFirstUpdatedSampleCasePolicyPath = DevFirstUpdatedSampleCaseArtifactPath + "/customAddLogMessage.j2"
+const DevFirstUpdatedSampleCasePolicyDefinitionPath = DevFirstUpdatedSampleCaseArtifactPath + "/customAddLogMessage.yaml"
+
+const (
+	TestSampleOperationTarget                   = "/pet/{petId}"
+	TestSampleOperationVerb                     = "GET"
+	TestSampleOperationAuthType                 = "Application & Application User"
+	TestSampleOperationThrottlingPolicy         = "Unlimited"
+	TestSampleOperationPolicyPropertyNameField  = "propertyName"
+	TestSampleOperationPolicyPropertyValueField = "propertyValue"
+	TestSampleOperationPolicyPropertyName       = "VALUE IS: "
+	TestSampleOperationPolicyPropertyValue      = "123"
+	TestSamplePolicyName                        = "customAddLogMessage"
+)
+
+// Constants for sequence of the dynamic data test case
+const DynamicDataSampleCaseArtifactPath = "testdata/TestArtifactDirectory/DynamicDataSampleCaseArtifacts"
+const DynamicDataInSequence = "dynamicAddLogMessage.j2"
+const DynamicDataInSequenceDefinition = "dynamicAddLogMessage.yaml"
+const DynamicDataSubstitutedInSequence = DynamicDataSampleCaseArtifactPath + "/dynamicDataSubstitutedAddLogMessage.j2"
+
+const (
+	TestSampleDynamicDataOperationTarget           = "/menu"
+	TestSampleDynamicDataOperationVerb             = "GET"
+	TestSampleDynamicDataOperationAuthType         = "Application & Application User"
+	TestSampleDynamicDataOperationThrottlingPolicy = "Unlimited"
+	TestSampleDynamicDataPolicyName                = "dynamicAddLogMessage"
+)

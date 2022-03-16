@@ -59,10 +59,9 @@ func PrepareResumption(credential credentials.Credential, exportRelatedFilesPath
 	if count == 0 {
 		//last iteration had been completed successfully but operation had halted at that point.
 		//So get the next set of APIs for next iteration
-		apiListOffset += utils.MaxAPIsToExportOnce
 		startingApiIndexFromList = 0
 		count, apis = getAPIList(credential, cmdExportEnvironment, cmdResourceTenantDomain)
-		if len(apis) > 0 {
+		if len(apis)-startingApiIndexFromList > 0 {
 			utils.WriteMigrationApisExportMetadataFile(apis, cmdResourceTenantDomain, cmdUsername,
 				exportRelatedFilesPath, apiListOffset)
 		} else {

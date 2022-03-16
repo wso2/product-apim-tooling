@@ -93,6 +93,12 @@ type Application struct {
 	GroupID string `json:"groupId"`
 }
 
+type APILogger struct {
+	ID              string `json:"apiId"`
+	Context         string `json:"context"`
+	LogLevel        string `json:"logLevel"`
+}
+
 type RegistrationResponse struct {
 	ClientID     string `json:"clientId"`
 	ClientSecret string `json:"clientSecret"`
@@ -111,6 +117,10 @@ type TokenResponse struct {
 type APIListResponse struct {
 	Count int32 `json:"count"`
 	List  []API `json:"list"`
+}
+
+type APILoggerListResponse struct {
+	Apis  []APILogger  `json:"apis"`
 }
 
 type APIProductListResponse struct {
@@ -368,6 +378,7 @@ type DeployConfig struct {
 type ImportConfig struct {
 	Update            bool `json:"update,omitempty" yaml:"update,omitempty"`
 	PreserveProvider  bool `json:"preserveProvider,omitempty" yaml:"preserveProvider,omitempty"`
+	RotateRevision    bool `json:"rotateRevision" yaml:"rotateRevision"`
 	ImportAPIs        bool `json:"importApis,omitempty" yaml:"importApis,omitempty"`
 	UpdateAPIProduct  bool `json:"updateApiProduct,omitempty" yaml:"updateApiProduct,omitempty"`
 	UpdateAPIs        bool `json:"updateApis,omitempty" yaml:"updateApis,omitempty"`
@@ -392,4 +403,40 @@ type Revisions struct {
 type Deployment struct {
 	Name               string `json:"name"`
 	DisplayOnDevportal bool   `json:"displayOnDevportal"`
+}
+
+// APIEntry Api List Entry struct to support  different formats of output in the list command
+type APIEntry struct {
+	Id              string
+	Name            string
+	Context         string
+	Version         string
+	LifeCycleStatus string
+	Provider        string
+}
+
+// APIProductEntry Api Product List Entry struct to support  different formats of output in the list command
+type APIProductEntry struct {
+	Id              string
+	Name            string
+	Context         string
+	LifeCycleStatus string
+	Provider        string
+}
+
+// ApplicationEntry Application List Entry struct to support  different formats of output in the list command
+type ApplicationEntry struct {
+	Id      string
+	Name    string
+	Status  string
+	Owner   string
+	GroupId string
+}
+
+// RevisionEntry Revision List Entry struct to support  different formats of output in the list command
+type RevisionEntry struct {
+	Id             string
+	RevisionNumber string
+	Description    string
+	GatewayEnvs    string
 }

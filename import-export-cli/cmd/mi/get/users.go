@@ -33,6 +33,7 @@ var getUserCmdEnvironment string
 var getUserCmdFormat string
 var getUserCmdPattern string
 var getUserCmdRole string
+var getUserCmdDomain string
 
 const getUserCmdLiteral = "users [user-name]"
 
@@ -49,6 +50,8 @@ var getUserCmdExamples = "Example:\n" +
 	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getUserCmdLiteral) + " -p [pattern] -e dev\n" +
 	"To get details about a user by providing the user-id\n" +
 	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getUserCmdLiteral) + " [user-id] -e dev\n" +
+	"To get details about a user in a secondary user store\n" +
+	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getUserCmdLiteral) + " [user-id] -d [domain] -e dev\n" +
 	"NOTE: The flag (--environment (-e)) is mandatory"
 
 var getUserCmd = &cobra.Command{
@@ -79,6 +82,7 @@ func init() {
 	setFormatFlag(getUserCmd, &getUserCmdFormat)
 	getUserCmd.Flags().StringVarP(&getUserCmdRole, "role", "r", "", "Filter users by role")
 	getUserCmd.Flags().StringVarP(&getUserCmdPattern, "pattern", "p", "", "Filter users by regex")
+	getUserCmd.Flags().StringVarP(&getUserCmdDomain, "domain", "d", "", "Filter users by domain")
 }
 
 func handleGetUserCmdArguments(args []string) {
@@ -93,7 +97,7 @@ func handleGetUserCmdArguments(args []string) {
 }
 
 func executeShowUser(userID string) {
-	userInfo, err := impl.GetUserInfo(getUserCmdEnvironment, userID)
+	userInfo, err := impl.GetUserInfo(getUserCmdEnvironment, userID, getUserCmdDomain)
 	if err == nil {
 		impl.PrintUserDetails(userInfo, getUserCmdFormat)
 	} else {

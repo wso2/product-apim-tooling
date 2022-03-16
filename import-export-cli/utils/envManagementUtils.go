@@ -282,6 +282,45 @@ func GetRegistrationEndpointOfEnv(env, filePath string) string {
 	}
 }
 
+// Get APILoggingListEndpoint of a given environment
+func GetAPILoggingListEndpointOfEnv(env, tenantDomain, filePath string) string {
+	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
+	if !(envEndpoints.PublisherEndpoint == "" || envEndpoints == nil) {
+		envEndpoints.PublisherEndpoint = AppendSlashToString(envEndpoints.PublisherEndpoint)
+		return envEndpoints.PublisherEndpoint + defaultAPILoggingBaseEndpoint + "/" + tenantDomain + "/" + defaultAPILoggingApisEndpoint
+	} else {
+		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
+		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
+		return apiManagerEndpoint + defaultAPILoggingBaseEndpoint + "/" + tenantDomain + "/" + defaultAPILoggingApisEndpoint
+	}
+}
+
+// Get APILoggingDetailsEndpoint of a given environment
+func GetAPILoggingDetailsEndpointOfEnv(env, apiId, tenantDomain, filePath string) string {
+	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
+	if !(envEndpoints.PublisherEndpoint == "" || envEndpoints == nil) {
+		envEndpoints.PublisherEndpoint = AppendSlashToString(envEndpoints.PublisherEndpoint)
+		return envEndpoints.PublisherEndpoint + defaultAPILoggingBaseEndpoint + "/" + tenantDomain + "/" + defaultAPILoggingApisEndpoint + "/" + apiId
+	} else {
+		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
+		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
+		return apiManagerEndpoint + defaultAPILoggingBaseEndpoint + "/" + tenantDomain + "/" + defaultAPILoggingApisEndpoint + "/" + apiId
+	}
+}
+
+// Get APILoggingSetEndpoint of a given environment
+func GetAPILoggingSetEndpointOfEnv(env, apiId, tenantDomain, filePath string) string {
+	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
+	if !(envEndpoints.PublisherEndpoint == "" || envEndpoints == nil) {
+		envEndpoints.PublisherEndpoint = AppendSlashToString(envEndpoints.PublisherEndpoint)
+		return envEndpoints.PublisherEndpoint + defaultAPILoggingBaseEndpoint + "/" + tenantDomain + "/" + defaultAPILoggingApisEndpoint + "/" + apiId
+	} else {
+		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
+		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
+		return apiManagerEndpoint + defaultAPILoggingBaseEndpoint + "/" + tenantDomain + "/" + defaultAPILoggingApisEndpoint + "/" + apiId
+	}
+}
+
 // Get username of an environment given the environment
 func GetUsernameOfEnv(env, filePath string) string {
 	envKeys, _ := GetKeysOfEnvironment(env, filePath)

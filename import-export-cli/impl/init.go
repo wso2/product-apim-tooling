@@ -25,6 +25,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/Jeffail/gabs"
 	"github.com/go-openapi/loads"
@@ -42,9 +43,6 @@ var dirs = []string{
 	utils.InitProjectImage,
 	utils.InitProjectDocs,
 	utils.InitProjectSequences,
-	utils.InitProjectSequencesFault,
-	utils.InitProjectSequencesIn,
-	utils.InitProjectSequencesOut,
 	utils.InitProjectClientCertificates,
 	utils.InitProjectClientCertificates,
 	utils.InitProjectInterceptors,
@@ -166,6 +164,16 @@ func InitAPIProject(initCmdOutputDir, initCmdInitialState, initCmdSwaggerPath, i
 			return err
 		}
 		definitionFile.Data = tmpDef.Data
+	}
+
+	// If the name of the API is still empty, set the project name as the API name
+	if strings.EqualFold(definitionFile.Data.Name, "") {
+		definitionFile.Data.Name = filepath.Base(initCmdOutputDir)
+	}
+
+	// If the context of the API is still empty, set the lowercase project name as the API context
+	if strings.EqualFold(definitionFile.Data.Context, "") {
+		definitionFile.Data.Context = "/" + strings.ToLower(filepath.Base(initCmdOutputDir))
 	}
 
 	apiData, err := yaml2.Marshal(definitionFile)

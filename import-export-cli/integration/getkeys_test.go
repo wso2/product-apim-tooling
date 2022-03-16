@@ -117,7 +117,7 @@ func TestGetKeysConsecutivelyAdminSuperTenantUser(t *testing.T) {
 		Apim:    dev,
 	}
 	//Get keys for the first time without cleaning subscription
-	testutils.ValidateGetKeysWithoutCleanup(t, args)
+	testutils.ValidateGetKeysWithoutCleanup(t, args, true)
 
 	//Get keys for the second time and remove subscription
 	testutils.ValidateGetKeys(t, args)
@@ -303,6 +303,9 @@ func TestGetKeysForAPIProductAdminSuperTenantUser(t *testing.T) {
 	// Create and Deploy API Product Revision
 	testutils.CreateAndDeployAPIProductRevision(t, dev, apiPublisher, apiPublisherPassword, apiProduct.ID)
 
+	// Change life cycle state of API Product from CREATED to PUBLISHED
+	testutils.PublishAPIProduct(dev, apiPublisher, apiPublisherPassword, apiProduct.ID)
+
 	args := &testutils.ApiGetKeyTestArgs{
 		CtlUser:    testutils.Credentials{Username: adminUser, Password: adminPassword},
 		ApiProduct: apiProduct,
@@ -343,6 +346,9 @@ func TestGetKeysForAPIProductAdminTenantUser(t *testing.T) {
 
 	// Create and Deploy API Product Revision
 	testutils.CreateAndDeployAPIProductRevision(t, dev, apiPublisher, apiPublisherPassword, apiProduct.ID)
+
+	// Change life cycle state of API Product from CREATED to PUBLISHED
+	testutils.PublishAPIProduct(dev, apiPublisher, apiPublisherPassword, apiProduct.ID)
 
 	args := &testutils.ApiGetKeyTestArgs{
 		CtlUser:    testutils.Credentials{Username: adminUser, Password: adminPassword},
@@ -385,6 +391,9 @@ func TestGetKeysConsecutivelyForAPIProductAdminSuperTenantUser(t *testing.T) {
 	// Create and Deploy API Product Revision
 	testutils.CreateAndDeployAPIProductRevision(t, dev, apiPublisher, apiPublisherPassword, apiProduct.ID)
 
+	// Change life cycle state of API Product from CREATED to PUBLISHED
+	testutils.PublishAPIProduct(dev, apiPublisher, apiPublisherPassword, apiProduct.ID)
+
 	args := &testutils.ApiGetKeyTestArgs{
 		CtlUser:    testutils.Credentials{Username: adminUser, Password: adminPassword},
 		ApiProduct: apiProduct,
@@ -392,7 +401,7 @@ func TestGetKeysConsecutivelyForAPIProductAdminSuperTenantUser(t *testing.T) {
 	}
 
 	//Get keys for the first time without cleaning subscription
-	testutils.ValidateGetKeysWithoutCleanup(t, args)
+	testutils.ValidateGetKeysWithoutCleanup(t, args, true)
 
 	//Get keys for the second time and remove subscription
 	testutils.ValidateGetKeys(t, args)

@@ -183,7 +183,7 @@ func AddAPIFromOpenAPIDefinitionToTwoEnvs(t *testing.T, client1 *apim.Client, cl
 }
 
 func GenerateAdvertiseOnlyAPIDefinition(t *testing.T) (string, apim.API) {
-	projectPath, _ := filepath.Abs(base.GenerateRandomName(16))
+	projectPath, _ := filepath.Abs(base.GenerateRandomString())
 	base.CreateTempDir(t, projectPath)
 
 	// Read the sample-api.yaml file in the testdata directory
@@ -193,6 +193,8 @@ func GenerateAdvertiseOnlyAPIDefinition(t *testing.T) (string, apim.API) {
 	sampleContent.Data.AdvertiseInformation.Advertised = true
 	sampleContent.Data.AdvertiseInformation.ApiOwner = sampleContent.Data.Provider
 	sampleContent.Data.AdvertiseInformation.OriginalDevPortalUrl = "https://localhost:9443/devportal"
+	sampleContent.Data.AdvertiseInformation.ApiExternalProductionEndpoint = "https://production-ep:9443"
+	sampleContent.Data.AdvertiseInformation.ApiExternalSandboxEndpoint = "https://sandbox-ep:9443"
 	sampleContent.Data.AdvertiseInformation.Vendor = "WSO2"
 
 	advertiseOnlyAPIDefinitionPath := filepath.Join(projectPath, filepath.FromSlash(utils.APIDefinitionFileYaml))
@@ -400,6 +402,12 @@ func listAPIs(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
 	return output, err
 }
 
+func listAPIsWithJsonArrayFormat(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
+	output, err := base.Execute(t, "get", "apis", "-e", args.SrcAPIM.EnvName, "--format", "jsonArray",
+		"-k", "--verbose")
+	return output, err
+}
+
 func changeLifeCycleOfAPI(t *testing.T, args *ApiChangeLifeCycleStatusTestArgs) (string, error) {
 	output, err := base.Execute(t, "change-status", "api", "-a", args.Action, "-n", args.Api.Name,
 		"-v", args.Api.Version, "-e", args.APIM.EnvName, "-k", "--verbose")
@@ -494,7 +502,7 @@ func ValidateAPIRevisionExportImport(t *testing.T, args *ApiImportExportTestArgs
 	importedAPI := GetAPI(t, args.DestAPIM, args.Api.Name, args.ApiProvider.Username, args.ApiProvider.Password)
 
 	// Validate env 1 and env 2 API is equal
-	ValidateAPIsEqual(t, args.Api, importedAPI)
+	ValidateImportedAPIsEqualToRevision(t, args.Api, importedAPI)
 }
 
 func validateAPIProject(t *testing.T, args *ApiImportExportTestArgs, apiType string) {
@@ -573,6 +581,24 @@ func ValidateExportedAPIRevisionStructure(t *testing.T, args *ApiImportExportTes
 		args.Api.Name, args.Api.Version))
 }
 
+func ValidateExportedAPIRevisionFailure(t *testing.T, args *ApiImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	// Export api from env 1
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	output, _ := exportAPIRevision(t, args)
+
+	assert.Contains(t, output, "404", "Test failed because the response does not contains a not found request")
+
+	// Validate that export failed
+	assert.False(t, base.IsAPIArchiveExists(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
+		args.Api.Name, args.Api.Version), "Test failed because the API Revision was exported successfully")
+}
+
 func validateAPI(t *testing.T, api *apim.API, exportedOutput string, isDeployed bool, sampleFile string) {
 	// Unzip exported API
 	exportedPath := base.GetExportedPathFromOutput(exportedOutput)
@@ -595,6 +621,12 @@ func validateAPI(t *testing.T, api *apim.API, exportedOutput string, isDeployed 
 	} else {
 		assert.False(t, base.IsFileAvailable(t, filepath.Join(unzipedProjectPath, DeploymentEnvYamlFilePath)), "Non required deployment_environments.yaml found")
 	}
+
+	t.Cleanup(func() {
+		// Remove the extracted project
+		base.RemoveDir(exportedPath)
+		base.RemoveDir(relativePath)
+	})
 }
 
 func validateAPIStructure(t *testing.T, fileData *[]byte, sampleFile string) {
@@ -619,6 +651,13 @@ func validateAPIStructure(t *testing.T, fileData *[]byte, sampleFile string) {
 		t.Error(err)
 	}
 	sampleAPIData := sampleDataContent["data"].(map[interface{}]interface{})
+
+	// Compare the artifact versions
+	exportedAPIArtifactVersion := fileContent["version"].(string)
+	sampleAPIArtifactVersion := sampleDataContent["version"].(string)
+	assert.Equal(t, exportedAPIArtifactVersion, sampleAPIArtifactVersion,
+		"Exported artifact version: "+exportedAPIArtifactVersion+
+			" does not matches with the sample artifact version: "+sampleAPIArtifactVersion)
 
 	// Check whether the fields of the API DTO structure in APICTL has all the fields in API DTO structure from APIM
 	base.Log("\n-----------------------------------------------------------------------------------------")
@@ -783,6 +822,49 @@ func ValidateAPIsEqual(t *testing.T, api1 *apim.API, api2 *apim.API) {
 	assert.Equal(t, api1Copy, api2Copy, "API obejcts are not equal")
 }
 
+// ValidateImportedAPIsEqualToRevision : Validate if the imported API and exported revision is the same by ignoring
+// the unique details and revision specific details.
+func ValidateImportedAPIsEqualToRevision(t *testing.T, api1 *apim.API, api2 *apim.API) {
+	t.Helper()
+
+	api1Copy := apim.CopyAPI(api1)
+	api2Copy := apim.CopyAPI(api2)
+
+	same := "override_with_same_value"
+	// Since the APIs are from too different envs, their respective ID will defer.
+	// Therefore this will be overridden to the same value to ensure that the equality check will pass.
+	api1Copy.ID = same
+	api2Copy.ID = same
+
+	api1Copy.CreatedTime = same
+	api2Copy.CreatedTime = same
+
+	api1Copy.LastUpdatedTime = same
+	api2Copy.LastUpdatedTime = same
+
+	// When imported the revision as API, the "IsRevision" property will be false for the imported API. Hence,
+	//the property of the imported API should be changed
+	api2Copy.IsRevision = true
+
+	// When imported revision as API, the "RevisionID" property will be 0 for the imported API. Hence, the property of
+	// the imported API be changed
+	api2Copy.RevisionID = 1
+
+	// If an API is not advertise only, the API owner will be changed during export and import to the current provider
+	if (api1Copy.AdvertiseInformation != apim.AdvertiseInfo{}) {
+		api1Copy.AdvertiseInformation.ApiOwner = same
+	}
+	if (api2Copy.AdvertiseInformation != apim.AdvertiseInfo{}) {
+		api2Copy.AdvertiseInformation.ApiOwner = same
+	}
+
+	// Sort member collections to make equality check possible
+	apim.SortAPIMembers(&api1Copy)
+	apim.SortAPIMembers(&api2Copy)
+
+	assert.Equal(t, api1Copy, api2Copy, "API obejcts are not equal")
+}
+
 func ValidateAPIsList(t *testing.T, args *ApiImportExportTestArgs) {
 	t.Helper()
 
@@ -812,6 +894,31 @@ func ValidateListAPIsEqual(t *testing.T, apisListFromCtl string, apisList *apim.
 
 	// Count == 0 means that all the APIs from apisList were in apisListFromCtl
 	assert.Equal(t, 0, unmatchedCount, "API lists are not equal")
+}
+
+// ValidateAPIsListWithJsonArrayFormat : Validate the received list of APIs are in JsonArray format and verify only
+// the required ones are there and others are not in the command line output
+func ValidateAPIsListWithJsonArrayFormat(t *testing.T, args *ApiImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	// List APIs of env 1
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	base.WaitForIndexing()
+
+	output, _ := listAPIsWithJsonArrayFormat(t, args)
+
+	apisList := args.SrcAPIM.GetAPIs()
+
+	// Validate APIs list with added APIs
+	ValidateListAPIsEqual(t, output, apisList)
+
+	// Validate JsonArray format
+	assert.Contains(t, output, "[\n {\n", "Error while listing APIs in JsonArray format")
+
 }
 
 func validateAPIsEqualCrossTenant(t *testing.T, api1 *apim.API, api2 *apim.API) {

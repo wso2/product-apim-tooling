@@ -131,7 +131,7 @@ func TestImportAPIProjectWithDynamicDataSequence(t *testing.T) {
 			// Initialize a project with API definition
 			testutils.ValidateInitializeProjectWithOASFlag(t, args)
 
-			// Add the custom IN sequence with dynamic data
+			// Add the custom operation policy with dynamic data
 			updatedAPIFileContent := testutils.AddSequenceWithDynamicDataToAPIProject(t, args)
 
 			// Validate whether the project successfully imported

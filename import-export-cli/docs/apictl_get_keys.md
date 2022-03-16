@@ -38,5 +38,5 @@ You can override the default token endpoint using --token (-t) optional flag pro
 
 ### SEE ALSO
 
-* [apictl get](apictl_get.md)	 - Get APIs/APIProducts/Applications in an environment or Get the environments
+* [apictl get](apictl_get.md)	 - Get APIs/APIProducts/Applications or revisions of a specific API/APIProduct in an environment or Get the log level of each API in an environment or Get the environments
 

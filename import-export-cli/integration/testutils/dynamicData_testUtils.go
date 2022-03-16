@@ -19,7 +19,6 @@
 package testutils
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -85,25 +84,45 @@ func ValidateDynamicData(t *testing.T, api *apim.API) {
 }
 
 func AddSequenceWithDynamicDataToAPIProject(t *testing.T, args *InitTestArgs) apim.APIFile {
-	inSequencePath := args.InitFlag + string(os.PathSeparator) + utils.InitProjectSequencesInCustom
+	operationPolicyPathInProject := args.InitFlag + PoliciesDirectory
 
-	base.CreateTempDir(t, inSequencePath)
 	// Move sequence file to created project
-	srcPathForSequence, _ := filepath.Abs(TestArtifact3Path + string(os.PathSeparator) + CustomDynamicInSequenceName)
-	destPathForSequence := inSequencePath + string(os.PathSeparator) + CustomDynamicInSequenceName
+	srcPathForSequence, _ := filepath.Abs(DynamicDataSampleCaseArtifactPath + string(os.PathSeparator) + DynamicDataInSequence)
+	destPathForSequence := operationPolicyPathInProject + string(os.PathSeparator) + DynamicDataInSequence
 	base.Copy(srcPathForSequence, destPathForSequence)
 
-	// Read the API definition file in the project
+	// Move sequence definition file to created project
+	srcPathForSequenceDefinition, _ := filepath.Abs(DynamicDataSampleCaseArtifactPath + string(os.PathSeparator) +
+		DynamicDataInSequenceDefinition)
+	destPathForSequenceDefinition := operationPolicyPathInProject + string(os.PathSeparator) + DynamicDataInSequenceDefinition
+	base.Copy(srcPathForSequenceDefinition, destPathForSequenceDefinition)
+
+	// Update api.yaml file of initialized project with sequence related metadata
 	apiDefinitionFilePath := args.InitFlag + string(os.PathSeparator) + utils.APIDefinitionFileYaml
 	apiDefinitionFileContent := ReadAPIDefinition(t, apiDefinitionFilePath)
 
-	mediationPolicy := apim.MediationPolicy{
-		Name:   "custom-header-in",
-		Type:   "IN",
-		Shared: false,
+	// Operation policy that will be added
+	var requestPolicies []interface{}
+	operationPolicies := apim.OperationPolicies{
+		Request: append(requestPolicies, map[string]interface{}{
+			"policyName": TestSampleDynamicDataPolicyName,
+		}),
+		Response: []string{},
+		Fault:    []string{},
 	}
-	mediationPolicies := []apim.MediationPolicy{mediationPolicy}
-	apiDefinitionFileContent.Data.MediationPolicies = mediationPolicies
+
+	// Assign the above operation policy to a resource
+	apiOperationWithPolicy := apim.APIOperations{
+		Target:            TestSampleDynamicDataOperationTarget,
+		Verb:              TestSampleDynamicDataOperationVerb,
+		AuthType:          TestSampleDynamicDataOperationAuthType,
+		ThrottlingPolicy:  TestSampleDynamicDataOperationThrottlingPolicy,
+		OperationPolicies: operationPolicies,
+	}
+
+	// Add the operation policy added resource to the API
+	apiOperations := []apim.APIOperations{apiOperationWithPolicy}
+	apiDefinitionFileContent.Data.Operations = apiOperations
 
 	// Write the modified API definition to the directory
 	WriteToAPIDefinition(t, apiDefinitionFileContent, apiDefinitionFilePath)
@@ -120,23 +139,19 @@ func ValidateExportedSequenceWithDynamicData(t *testing.T, args *InitTestArgs, a
 	base.Unzip(relativePath, exportedPath)
 
 	exportedAPIRelativePath := relativePath + string(os.PathSeparator) + api.Name + "-" + api.Version
-	sequencePathOfExportedAPI := exportedAPIRelativePath + string(os.PathSeparator) +
-		utils.InitProjectSequencesInCustom + string(os.PathSeparator) + CustomDynamicInSequenceName
+	sequencePathOfExportedAPI := exportedAPIRelativePath +
+		PoliciesDirectory + string(os.PathSeparator) + DynamicDataInSequence
 
 	// Check whether the sequence file is available
 	isSequenceExported := base.IsFileAvailable(t, sequencePathOfExportedAPI)
 	base.Log("Sequence is Exported ", isSequenceExported)
-	assert.Equal(t, true, isSequenceExported, "Error while exporting API with document")
-
-	// Read the file content of the exported sequence
-	sequenceData, err := ioutil.ReadFile(sequencePathOfExportedAPI)
-	if err != nil {
-		t.Error(err)
-	}
+	assert.Equal(t, true, isSequenceExported, "Error while exporting API with the sequence")
 
 	// The environment variable must have been substituted twice in the sequence
-	assert.Equal(t, strings.Count(string(sequenceData), os.Getenv(envKey)), 2,
-		"Env variable is not substituted correctly in the sequence")
+	dynamicDataSubstitutedSequencePath, _ := filepath.Abs(DynamicDataSubstitutedInSequence)
+	isSequenceDataSubstituted := base.IsFileContentIdentical(sequencePathOfExportedAPI, dynamicDataSubstitutedSequencePath)
+	base.Log("Exported operation policy definition has substitued environment variables", isSequenceDataSubstituted)
+	assert.Equal(t, true, isSequenceDataSubstituted, "Error while substituting the environment variables to the sequence")
 
 	t.Cleanup(func() {
 		base.RemoveDir(relativePath)

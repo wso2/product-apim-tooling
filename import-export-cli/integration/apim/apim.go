@@ -20,6 +20,7 @@ package apim
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"io"
@@ -54,6 +55,7 @@ type Client struct {
 	publisherRestURL string
 	devPortalRestURL string
 	adminRestURL     string
+	devopsRestURL    string
 	EnvName          string
 }
 
@@ -108,14 +110,17 @@ func (instance *Client) Login(username string, password string) {
 }
 
 // Setup : Setup APIM Client config
-func (instance *Client) Setup(envName string, host string, offset int, dcrVersion string, restAPIVersion string) {
+func (instance *Client) Setup(envName string, host string, offset int, dcrVersion, adminRestAPIVersion,
+	devportalRestAPIVersion, publisherRestAPIVersion, devopsRestAPIVersion string) {
 	base.Log("apim.Setup() - envName:", envName, ",host:", host, ",offset:", offset, ",dcrVersion:", dcrVersion,
-		",restAPIVersion:", restAPIVersion)
+		",adminRestAPIVersion:", adminRestAPIVersion, ",devportalRestAPIVersion:", devportalRestAPIVersion,
+		",publisherRestAPIVersion:", publisherRestAPIVersion)
 	instance.apimURL = getApimURL(host, offset)
-	instance.dcrURL = getDCRURL(host, offset, dcrVersion)
-	instance.devPortalRestURL = getDevPortalRestURL(host, offset, restAPIVersion)
-	instance.publisherRestURL = getPublisherRestURL(host, offset, restAPIVersion)
-	instance.adminRestURL = getAdminRestURL(host, offset, restAPIVersion)
+	instance.dcrURL = getDCRURL(host, dcrVersion, offset)
+	instance.devPortalRestURL = getDevPortalRestURL(host, devportalRestAPIVersion, offset)
+	instance.publisherRestURL = getPublisherRestURL(host, publisherRestAPIVersion, offset)
+	instance.adminRestURL = getAdminRestURL(host, adminRestAPIVersion, offset)
+	instance.devopsRestURL = getDevOpsRestURL(host, devopsRestAPIVersion, offset)
 	instance.portOffset = offset
 	instance.tokenURL = getTokenURL(host, offset)
 	instance.host = host
@@ -426,6 +431,16 @@ func (instance *Client) GenerateSampleAppData() *Application {
 	app.Name = base.GenerateRandomString() + "Application"
 	app.ThrottlingPolicy = "Unlimited"
 	app.Description = "Test Application"
+	app.TokenType = "JWT"
+	return &app
+}
+
+// GenerateSampleAppData : Generate sample Application object with space in the application Name
+func (instance *Client) GenerateSampleAppWithNameInSpaceData() *Application {
+	app := Application{}
+	app.Name = base.GenerateRandomString() + "Test Application"
+	app.ThrottlingPolicy = "Unlimited"
+	app.Description = "Test Application with space in the name"
 	app.TokenType = "JWT"
 	return &app
 }
@@ -850,6 +865,29 @@ func (instance *Client) AddAPIProductFromJSON(t *testing.T, path string, usernam
 	return apiProductResponse.ID
 }
 
+// PublishAPIProduct : Publish API Product from APIM
+func (instance *Client) PublishAPIProduct(apiProductID string) {
+	lifeCycleURL := instance.publisherRestURL + "/api-products/change-lifecycle"
+
+	request := base.CreatePostEmptyBody(lifeCycleURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	values := url.Values{}
+	values.Add("action", "Publish")
+	values.Add("apiProductId", apiProductID)
+
+	request.URL.RawQuery = values.Encode()
+
+	base.LogRequest("apim.PublishAPIProduct()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.PublishAPIProduct()", response, 200)
+}
+
 // GetAPIRevisions : Get API revisions
 func (instance *Client) GetAPIRevisions(apiID, query string) *APIRevisionList {
 	revisioningURL := instance.publisherRestURL + "/apis/" + apiID + "/revisions"
@@ -1224,6 +1262,7 @@ func (instance *Client) GetAPIProducts() *APIProductList {
 
 // GetAPIByName : Get API by name from APIM
 func (instance *Client) GetAPIByName(name string) (*APIInfo, error) {
+
 	apisURL := instance.publisherRestURL + "/apis"
 
 	request := base.CreateGet(apisURL)
@@ -1235,25 +1274,36 @@ func (instance *Client) GetAPIByName(name string) (*APIInfo, error) {
 
 	request.URL.RawQuery = values.Encode()
 
+	attempts := 0
+
 	base.LogRequest("apim.GetAPIByName()", request)
 
-	response := base.SendHTTPRequest(request)
+	for attempts != base.GetMaxInvocationAttempts() {
 
-	defer response.Body.Close()
+		base.Log("apim.GetAPIByName() attempts = ", attempts)
 
-	base.ValidateAndLogResponse("apim.GetAPIByName()", response, 200)
+		response := base.SendHTTPRequest(request)
 
-	var apiResponse APIList
-	json.NewDecoder(response.Body).Decode(&apiResponse)
+		defer response.Body.Close()
 
-	if len(apiResponse.List) == 0 {
-		return nil, errors.New("apim.GetAPIByName() did not return result for: " + name +
-			", it is possible that sufficient time is not allwed for solr indexing." +
-			"Consider the user of base.WaitForIndexing() in the execution flow where appropriate or " +
-			"increasing the `indexing-delay` value in the integration test config.yaml")
+		base.ValidateAndLogResponse("apim.GetAPIByName()", response, 200)
+
+		var apiResponse APIList
+		json.NewDecoder(response.Body).Decode(&apiResponse)
+
+		if len(apiResponse.List) > 0 {
+			return &apiResponse.List[0], nil
+		}
+
+		base.WaitForIndexing()
+
+		attempts++
 	}
 
-	return &apiResponse.List[0], nil
+	return nil, errors.New("apim.GetAPIByName() did not return result for: " + name +
+		", it is possible that sufficient time is not allowed for solr indexing." +
+		"Consider the user of base.WaitForIndexing() in the execution flow where appropriate or " +
+		"increasing the `indexing-delay` value in the integration test config.yaml")
 }
 
 // GetAPIProductByName : Get API Product by name from APIM
@@ -1477,7 +1527,7 @@ func (instance *Client) GenerateKeys(t *testing.T, keyGenRequest utils.KeygenReq
 }
 
 // GetOauthKeys : Get Oauth keys of an application
-func (instance *Client) GetOauthKeys(t *testing.T, application *Application) *ApplicationKey {
+func (instance *Client) GetOauthKeys(t *testing.T, application *Application) *ApplicationKeysList {
 	appsURL := instance.devPortalRestURL + "/applications/" + application.ApplicationID + "/oauth-keys"
 
 	request := base.CreateGet(appsURL)
@@ -1496,11 +1546,10 @@ func (instance *Client) GetOauthKeys(t *testing.T, application *Application) *Ap
 	json.NewDecoder(response.Body).Decode(&applicationKeysList)
 
 	if len(applicationKeysList.List) > 0 {
-		return &applicationKeysList.List[0]
+		return &applicationKeysList
 	} else {
-		return &ApplicationKey{}
+		return &ApplicationKeysList{}
 	}
-
 }
 
 // DeleteApplication : Delete Application from APIM
@@ -1786,36 +1835,111 @@ func (instance *Client) RemoveEndpointCert(alias string) {
 	base.ValidateAndLogResponse("apim.RemoveEndpointCert() deleting Cert", response, 200)
 }
 
+// Retrieve admin credentials
+func RetrieveAdminCredentialsInsteadCreator(username, password string) (string, string) {
+	newUsername := username
+	newPassword := password
+	if strings.EqualFold(adminservices.CreatorUsername, username) {
+		newUsername = adminservices.AdminUsername
+		newPassword = adminservices.AdminPassword
+	}
+	if strings.EqualFold(adminservices.CreatorUsername+"@"+adminservices.Tenant1, username) {
+		newUsername = adminservices.AdminUsername + "@" + adminservices.Tenant1
+		newPassword = adminservices.AdminPassword
+	}
+	return newUsername, newPassword
+}
+
+// Get log level of APIs
+func (instance *Client) GetAPILogLevel(username, password, tenantDomain, apiId string) (*APILogLevelList, error) {
+	url := instance.devopsRestURL + "/tenant-logs/" + tenantDomain + "/apis/" + apiId
+	request := base.CreateGet(url)
+	encoded := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
+
+	request.Header.Set("Authorization", "Basic "+encoded)
+	request.Header.Set("Content-Type", "application/json")
+
+	base.LogRequest("apim.GetAPILogLevel()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	if response.StatusCode == 200 {
+		var apiLogLevelList APILogLevelList
+		json.NewDecoder(response.Body).Decode(&apiLogLevelList)
+		return &apiLogLevelList, nil
+	}
+
+	return nil, errors.New("Error with status code " + response.Status + "while retrieving log levels.")
+}
+
+// Set log level of an API
+func (instance *Client) SetAPILogLevel(username, password, tenantDomain, apiId, logLevel string) (*APILogLevel, error) {
+	url := instance.devopsRestURL + "/tenant-logs/" + tenantDomain + "/apis/" + apiId
+	data, err := json.Marshal(APILogLevel{LogLevel: logLevel})
+
+	if err != nil {
+		return nil, errors.New("Error while building request payload for setting log level of API " + apiId + ".")
+	}
+
+	request := base.CreatePut(url, bytes.NewBuffer(data))
+	encoded := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
+
+	request.Header.Set("Authorization", "Basic "+encoded)
+	request.Header.Set("Content-Type", "application/json")
+
+	base.LogRequest("apim.SetAPILogLevel()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	if response.StatusCode == 200 {
+		var apiLogLevel APILogLevel
+		json.NewDecoder(response.Body).Decode(&apiLogLevel)
+		return &apiLogLevel, nil
+	}
+
+	return nil, errors.New("Error with status code " + response.Status + "while setting log level of API " + apiId + ".")
+}
+
 func generateSampleAPIOperations() []APIOperations {
+
 	op1 := APIOperations{}
 	op1.Target = "/order/{orderId}"
 	op1.Verb = "GET"
 	op1.ThrottlingPolicy = "Unlimited"
 	op1.AuthType = "Application & Application User"
+	op1.OperationPolicies = OperationPolicies{[]string{}, []string{}, []string{}}
 
 	op2 := APIOperations{}
 	op2.Target = "/order/{orderId}"
 	op2.Verb = "DELETE"
 	op2.ThrottlingPolicy = "Unlimited"
 	op2.AuthType = "Application & Application User"
+	op2.OperationPolicies = OperationPolicies{[]string{}, []string{}, []string{}}
 
 	op3 := APIOperations{}
 	op3.Target = "/order/{orderId}"
 	op3.Verb = "PUT"
 	op3.ThrottlingPolicy = "Unlimited"
 	op3.AuthType = "Application & Application User"
+	op3.OperationPolicies = OperationPolicies{[]string{}, []string{}, []string{}}
 
 	op4 := APIOperations{}
 	op4.Target = "/menu"
 	op4.Verb = "GET"
 	op4.ThrottlingPolicy = "Unlimited"
 	op4.AuthType = "Application & Application User"
+	op4.OperationPolicies = OperationPolicies{[]string{}, []string{}, []string{}}
 
 	op5 := APIOperations{}
 	op5.Target = "/order"
 	op5.Verb = "POST"
 	op5.ThrottlingPolicy = "Unlimited"
 	op5.AuthType = "Application & Application User"
+	op5.OperationPolicies = OperationPolicies{[]string{}, []string{}, []string{}}
 
 	return []APIOperations{op1, op2, op3, op4, op5}
 }
@@ -1897,7 +2021,7 @@ func (instance *Client) registerClient(username string, password string) dcrResp
 	return jsonResp
 }
 
-func getDCRURL(host string, offset int, version string) string {
+func getDCRURL(host, version string, offset int) string {
 	port := 9443 + offset
 	return "https://" + host + ":" + strconv.Itoa(port) + "/client-registration/" + version + "/register"
 }
@@ -1907,36 +2031,27 @@ func getApimURL(host string, offset int) string {
 	return "https://" + host + ":" + strconv.Itoa(port)
 }
 
-func getDevPortalRestURL(host string, offset int, version string) string {
+func getDevPortalRestURL(host, version string, offset int) string {
 	port := 9443 + offset
 	return "https://" + host + ":" + strconv.Itoa(port) + "/api/am/devportal/" + version
 }
 
-func getPublisherRestURL(host string, offset int, version string) string {
+func getPublisherRestURL(host, version string, offset int) string {
 	port := 9443 + offset
 	return "https://" + host + ":" + strconv.Itoa(port) + "/api/am/publisher/" + version
 }
 
-func getAdminRestURL(host string, offset int, version string) string {
+func getAdminRestURL(host, version string, offset int) string {
 	port := 9443 + offset
 	return "https://" + host + ":" + strconv.Itoa(port) + "/api/am/admin/" + version
+}
+
+func getDevOpsRestURL(host, version string, offset int) string {
+	port := 9443 + offset
+	return "https://" + host + ":" + strconv.Itoa(port) + "/api/am/devops/" + version
 }
 
 func getTokenURL(host string, offset int) string {
 	port := 9443 + offset
 	return "https://" + host + ":" + strconv.Itoa(port) + "/oauth2/token"
-}
-
-func RetrieveAdminCredentialsInsteadCreator(username, password string) (string, string) {
-	newUsername := username
-	newPassword := password
-	if strings.EqualFold(adminservices.CreatorUsername, username) {
-		newUsername = adminservices.AdminUsername
-		newPassword = adminservices.AdminPassword
-	}
-	if strings.EqualFold(adminservices.CreatorUsername+"@"+adminservices.Tenant1, username) {
-		newUsername = adminservices.AdminUsername + "@" + adminservices.Tenant1
-		newPassword = adminservices.AdminPassword
-	}
-	return newUsername, newPassword
 }

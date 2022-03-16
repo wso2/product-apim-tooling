@@ -33,12 +33,15 @@ import (
 )
 
 type YamlConfig struct {
-	Environments          []Environment `yaml:"environments"`
-	IndexingDelay         int           `yaml:"indexing-delay"`
-	MaxInvocationAttempts int           `yaml:"max-invocation-attempts"`
-	DCRVersion            string        `yaml:"dcr-version"`
-	RESTAPIVersion        string        `yaml:"rest-api-version"`
-	APICTLVersion         string        `yaml:"apictl-version"`
+	Environments            []Environment `yaml:"environments"`
+	IndexingDelay           int           `yaml:"indexing-delay"`
+	MaxInvocationAttempts   int           `yaml:"max-invocation-attempts"`
+	DCRVersion              string        `yaml:"dcr-version"`
+	AdminRESTAPIVersion     string        `yaml:"admin-rest-api-version"`
+	DevportalRESTAPIVersion string        `yaml:"devportal-rest-api-version"`
+	PublisherRESTAPIVersion string        `yaml:"publisher-rest-api-version"`
+	DevOpsRESTAPIVersion    string        `yaml:"devops-rest-api-version"`
+	APICTLVersion           string        `yaml:"apictl-version"`
 }
 
 type Environment struct {
@@ -54,7 +57,8 @@ const (
 	userMgtService   = "RemoteUserStoreManagerService"
 	tenantMgtService = "TenantMgtAdminService"
 
-	TENANT1 = adminservices.Tenant1
+	DEFAULT_TENANT_DOMAIN = adminservices.DefaultTenantDomain
+	TENANT1               = adminservices.Tenant1
 )
 
 var (
@@ -134,7 +138,8 @@ func TestMain(m *testing.M) {
 
 	for _, env := range envs {
 		client := apim.Client{}
-		client.Setup(env.Name, env.Host, env.Offset, yamlConfig.DCRVersion, yamlConfig.RESTAPIVersion)
+		client.Setup(env.Name, env.Host, env.Offset, yamlConfig.DCRVersion, yamlConfig.AdminRESTAPIVersion,
+			yamlConfig.DevportalRESTAPIVersion, yamlConfig.PublisherRESTAPIVersion, yamlConfig.DevOpsRESTAPIVersion)
 		apimClients[env.Name] = &client
 	}
 
@@ -162,6 +167,14 @@ func readConfigs() {
 		envs[env.Name] = env
 	}
 
+	indexingDelayOS := os.Getenv("INDEXING_DELAY")
+
+	if !strings.EqualFold(indexingDelayOS, "") {
+		intVar, _ := strconv.Atoi(indexingDelayOS)
+		yamlConfig.IndexingDelay = intVar
+
+	}
+
 	base.SetIndexingDelay(yamlConfig.IndexingDelay)
 	base.SetMaxInvocationAttempts(yamlConfig.MaxInvocationAttempts)
 
@@ -169,7 +182,9 @@ func readConfigs() {
 	base.Log("indexing delay:", yamlConfig.IndexingDelay)
 	base.Log("max invocation attempts", yamlConfig.MaxInvocationAttempts)
 	base.Log("dcr version:", yamlConfig.DCRVersion)
-	base.Log("rest api Version:", yamlConfig.RESTAPIVersion)
+	base.Log("admin rest api Version:", yamlConfig.AdminRESTAPIVersion)
+	base.Log("devportal rest api Version:", yamlConfig.DevportalRESTAPIVersion)
+	base.Log("publisher rest api Version:", yamlConfig.PublisherRESTAPIVersion)
 	base.Log("apictl version:", yamlConfig.APICTLVersion)
 
 	if len(envs) != 2 {

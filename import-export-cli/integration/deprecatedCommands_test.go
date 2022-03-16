@@ -253,29 +253,29 @@ func TestGetKeysNonAdminSuperTenantUserDeprecated(t *testing.T) {
 	validateGetKeysFailure(t, args)
 }
 
-func TestGetKeysAdminSuperTenantUserDeprecated(t *testing.T) {
-	adminUser := superAdminUser
-	adminPassword := superAdminPassword
+// func TestGetKeysAdminSuperTenantUserDeprecated(t *testing.T) {
+// 	adminUser := superAdminUser
+// 	adminPassword := superAdminPassword
 
-	apiPublisher := publisher.UserName
-	apiPublisherPassword := publisher.Password
+// 	apiPublisher := publisher.UserName
+// 	apiPublisherPassword := publisher.Password
 
-	apiCreator := creator.UserName
-	apiCreatorPassword := creator.Password
+// 	apiCreator := creator.UserName
+// 	apiCreatorPassword := creator.Password
 
-	dev := GetDevClient()
+// 	dev := GetDevClient()
 
-	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
+// 	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
 
-	testutils.CreateAndDeployAPIRevision(t, dev, apiPublisher, apiPublisherPassword, api.ID)
+// 	testutils.CreateAndDeployAPIRevision(t, dev, apiPublisher, apiPublisherPassword, api.ID)
 
-	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, api.ID)
+// 	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, api.ID)
 
-	args := &testutils.ApiGetKeyTestArgs{
-		CtlUser: testutils.Credentials{Username: adminUser, Password: adminPassword},
-		Api:     api,
-		Apim:    dev,
-	}
+// 	args := &testutils.ApiGetKeyTestArgs{
+// 		CtlUser: testutils.Credentials{Username: adminUser, Password: adminPassword},
+// 		Api:     api,
+// 		Apim:    dev,
+// 	}
 
-	validateGetKeys(t, args)
-}
+// 	validateGetKeys(t, args)
+// }
