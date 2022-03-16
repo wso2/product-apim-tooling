@@ -464,7 +464,9 @@ func ValidateAPIExportImport(t *testing.T, args *ApiImportExportTestArgs, apiTyp
 	// Import api to env 2
 	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	importAPI(t, args)
+	result, err := importAPI(t, args)
+	assert.Nil(t, err, "Error while importing the API")
+	assert.Contains(t, result, "Successfully imported API", "Error while importing the API")
 
 	// Give time for newly imported API to get indexed, or else GetAPI by name will fail
 	base.WaitForIndexing()
