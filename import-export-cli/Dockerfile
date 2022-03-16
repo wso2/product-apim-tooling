@@ -17,7 +17,7 @@
 # ------------------------------------------------------------------------
 
 # set base docker image for golang first for compiling the source code.
-FROM golang:alpine as builder
+FROM golang:1.14-alpine as builder
 
 # build argument for version of apictl
 ARG version
@@ -36,7 +36,7 @@ RUN bash build.sh -c -v $version -t apictl.go
 RUN tar -xvf /import-export-cli/build/target/apictl-$version-linux-x64.tar.gz -C /import-export-cli/build/target
 
 # use a new base image as alpine/git because git is required for VCS support.
-FROM alpine/git
+FROM alpine/git:v2.26.2
 
 # copy the apictl into new base image
 COPY --from=builder /import-export-cli/build/target/apictl/apictl /usr/bin/

@@ -65,11 +65,11 @@ Command Line tool for importing and exporting APIs/Applications/API Products in 
 
     Usage: `docker build --build-arg version=<version> -t apictl:<version> .`
 
-    Example: `docker build --build-arg version=4.0.0.1 -t apictl:4.0.0.1 .`
+    Example: `docker build --build-arg version=4.1.0.1 -t apictl:4.1.0.1 .`
 
     - ### Using the Docker Image
 
-        `docker run -it -v $(pwd):/git -v ~/.wso2apictl:/root/.wso2apictl -v ~/.wso2apictl.local:/root/.wso2apictl.local apictl:4.0.0.1 <apictl command>`
+        `docker run -it -v $(pwd):/git -v ~/.wso2apictl:/root/.wso2apictl -v ~/.wso2apictl.local:/root/.wso2apictl.local apictl:4.1.0.1 <apictl command>`
 
 ***
 
