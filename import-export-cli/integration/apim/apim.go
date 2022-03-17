@@ -166,6 +166,7 @@ func (instance *Client) GenerateSampleAPIData(provider string) *API {
 		&URLConfig{"https://localhost:" + strconv.Itoa(9443+instance.portOffset) + "/am/sample/pizzashack/v1/api/"}}
 	api.Operations = generateSampleAPIOperations()
 	api.AdvertiseInformation = AdvertiseInfo{Advertised: false}
+	api.GatewayType = "wso2/synapse"
 
 	return &api
 }

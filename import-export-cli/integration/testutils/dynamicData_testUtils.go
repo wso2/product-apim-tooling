@@ -90,12 +90,14 @@ func AddSequenceWithDynamicDataToAPIProject(t *testing.T, args *InitTestArgs) ap
 	srcPathForSequence, _ := filepath.Abs(DynamicDataSampleCaseArtifactPath + string(os.PathSeparator) + DynamicDataInSequence)
 	destPathForSequence := operationPolicyPathInProject + string(os.PathSeparator) + DynamicDataInSequence
 	base.Copy(srcPathForSequence, destPathForSequence)
+	base.WaitForIndexing()
 
 	// Move sequence definition file to created project
 	srcPathForSequenceDefinition, _ := filepath.Abs(DynamicDataSampleCaseArtifactPath + string(os.PathSeparator) +
 		DynamicDataInSequenceDefinition)
 	destPathForSequenceDefinition := operationPolicyPathInProject + string(os.PathSeparator) + DynamicDataInSequenceDefinition
 	base.Copy(srcPathForSequenceDefinition, destPathForSequenceDefinition)
+	base.WaitForIndexing()
 
 	// Update api.yaml file of initialized project with sequence related metadata
 	apiDefinitionFilePath := args.InitFlag + string(os.PathSeparator) + utils.APIDefinitionFileYaml
