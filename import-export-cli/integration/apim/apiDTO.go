@@ -76,6 +76,7 @@ type API struct {
 	WebsubSubscriptionConfiguration interface{}       `json:"websubSubscriptionConfiguration" yaml:"websubSubscriptionConfiguration"`
 	GatewayVendor                   string            `json:"gatewayVendor,omitempty" yaml:"gatewayVendor,omitempty"`
 	AsyncTransportProtocols         []string          `json:"asyncTransportProtocols,omitempty" yaml:"asyncTransportProtocols,omitempty"`
+	GatewayType                     string            `json:"gatewayType,omitempty" yaml:"gatewayType,omitempty"`
 }
 
 // GetProductionURL : Get APIs production URL
