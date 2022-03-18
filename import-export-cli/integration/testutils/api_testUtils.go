@@ -190,12 +190,8 @@ func GenerateAdvertiseOnlyAPIDefinition(t *testing.T) (string, apim.API) {
 	sampleContent := ReadAPIDefinition(t, SampleAPIYamlFilePath)
 
 	// Inject advertise only API specfic parameters
-	sampleContent.Data.AdvertiseInformation.Advertised = true
-	sampleContent.Data.AdvertiseInformation.ApiOwner = sampleContent.Data.Provider
-	sampleContent.Data.AdvertiseInformation.OriginalDevPortalUrl = "https://localhost:9443/devportal"
-	sampleContent.Data.AdvertiseInformation.ApiExternalProductionEndpoint = "https://production-ep:9443"
-	sampleContent.Data.AdvertiseInformation.ApiExternalSandboxEndpoint = "https://sandbox-ep:9443"
-	sampleContent.Data.AdvertiseInformation.Vendor = "WSO2"
+	apim.GenerateAdvertiseOnlyProperties(&sampleContent.Data, "https://localhost:9443/devportal", "https://production-ep:9443",
+		"https://sandbox-ep:9443")
 
 	advertiseOnlyAPIDefinitionPath := filepath.Join(projectPath, filepath.FromSlash(utils.APIDefinitionFileYaml))
 
@@ -478,6 +474,36 @@ func ValidateAPIExportImport(t *testing.T, args *ApiImportExportTestArgs, apiTyp
 	ValidateAPIsEqual(t, args.Api, importedAPI)
 }
 
+func ValidateAPIImportExportForAdvertiseOnlyAPI(t *testing.T, args *ApiImportExportTestArgs, apiType string) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+	base.SetupEnv(t, args.DestAPIM.GetEnvName(), args.DestAPIM.GetApimURL(), args.DestAPIM.GetTokenURL())
+
+	// Export api from env 1
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	exportAPI(t, args.Api.Name, args.Api.Version, args.Api.Provider, args.SrcAPIM.GetEnvName())
+
+	validateAPIProject(t, args, apiType)
+
+	// Import api to env 2
+	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	result, err := importAPI(t, args)
+	assert.Nil(t, err, "Error while importing the API")
+	assert.Contains(t, result, "Successfully imported API", "Error while importing the API")
+
+	// Give time for newly imported API to get indexed, or else GetAPI by name will fail
+	base.WaitForIndexing()
+
+	// Get App from env 2
+	importedAPI := GetAPI(t, args.DestAPIM, args.Api.Name, args.ApiProvider.Username, args.ApiProvider.Password)
+
+	ValidateAdvertiseOnlyAPIsEqual(t, importedAPI, args)
+}
+
 func ValidateAPIRevisionExportImport(t *testing.T, args *ApiImportExportTestArgs, apiType string) {
 	t.Helper()
 
@@ -528,7 +554,7 @@ func validateAPIProject(t *testing.T, args *ApiImportExportTestArgs, apiType str
 	}
 
 	if strings.EqualFold(apiType, APITypeWebScoket) || strings.EqualFold(apiType, APITypeWebSub) ||
-		strings.EqualFold(apiType, APITypeSSE) {
+		strings.EqualFold(apiType, APITypeSSE) || strings.EqualFold(apiType, APITypeAsync) {
 		assert.True(t, base.IsFileExistsInAPIArchive(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
 			utils.InitProjectDefinitionsAsyncAPI, args.Api.Name, args.Api.Version))
 	}
@@ -822,6 +848,27 @@ func ValidateAPIsEqual(t *testing.T, api1 *apim.API, api2 *apim.API) {
 	apim.SortAPIMembers(&api2Copy)
 
 	assert.Equal(t, api1Copy, api2Copy, "API obejcts are not equal")
+}
+
+func ValidateAdvertiseOnlyAPIsEqual(t *testing.T, importedAPI *apim.API, args *ApiImportExportTestArgs) {
+	t.Helper()
+
+	assert.Equal(t, args.Api.AdvertiseInformation.Advertised, importedAPI.AdvertiseInformation.Advertised)
+	assert.Equal(t, args.Api.Provider, importedAPI.AdvertiseInformation.ApiOwner)
+	assert.Equal(t, args.Api.AdvertiseInformation.ApiExternalProductionEndpoint, importedAPI.AdvertiseInformation.ApiExternalProductionEndpoint)
+	assert.Equal(t, args.Api.AdvertiseInformation.ApiExternalSandboxEndpoint, importedAPI.AdvertiseInformation.ApiExternalSandboxEndpoint)
+
+	if (args.CtlUser.Username == adminservices.AdminUsername) ||
+		(args.CtlUser.Username == adminservices.AdminUsername+"@"+adminservices.Tenant1) {
+		// Only the users who has admin privileges (apim:admin scope) were allowed to set the original devportal URL.
+		assert.Equal(t, args.Api.AdvertiseInformation.OriginalDevPortalUrl,
+			importedAPI.AdvertiseInformation.OriginalDevPortalUrl)
+	} else {
+		assert.Equal(t, "", importedAPI.AdvertiseInformation.OriginalDevPortalUrl)
+	}
+
+	// Certificates should not get exported for advertise only APIs
+	validateNonExportedAPICerts(t, importedAPI, args)
 }
 
 // ValidateImportedAPIsEqualToRevision : Validate if the imported API and exported revision is the same by ignoring
