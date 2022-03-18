@@ -501,7 +501,7 @@ func ValidateAPIImportExportForAdvertiseOnlyAPI(t *testing.T, args *ApiImportExp
 	// Get App from env 2
 	importedAPI := GetAPI(t, args.DestAPIM, args.Api.Name, args.ApiProvider.Username, args.ApiProvider.Password)
 
-	ValidateAdvertiseOnlyAPIsEqual(t, importedAPI, args)
+	validateAdvertiseOnlyAPIsEqual(t, importedAPI, args)
 }
 
 func ValidateAPIRevisionExportImport(t *testing.T, args *ApiImportExportTestArgs, apiType string) {
@@ -850,7 +850,7 @@ func ValidateAPIsEqual(t *testing.T, api1 *apim.API, api2 *apim.API) {
 	assert.Equal(t, api1Copy, api2Copy, "API obejcts are not equal")
 }
 
-func ValidateAdvertiseOnlyAPIsEqual(t *testing.T, importedAPI *apim.API, args *ApiImportExportTestArgs) {
+func validateAdvertiseOnlyAPIsEqual(t *testing.T, importedAPI *apim.API, args *ApiImportExportTestArgs) {
 	t.Helper()
 
 	assert.Equal(t, args.Api.AdvertiseInformation.Advertised, importedAPI.AdvertiseInformation.Advertised)

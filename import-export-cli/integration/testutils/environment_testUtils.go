@@ -285,7 +285,7 @@ func ValidateAPIImportExportWithDeploymentDirForAdvertiseOnlyAPI(t *testing.T, a
 
 	importedAPI := GetImportedAPI(t, args)
 
-	ValidateAdvertiseOnlyAPIsEqual(t, importedAPI, args)
+	validateAdvertiseOnlyAPIsEqual(t, importedAPI, args)
 }
 
 func MoveDummyAPIParamsAndCertificatesToDeploymentDir(args *ApiImportExportTestArgs) {
