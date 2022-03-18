@@ -138,6 +138,7 @@ const APITypeGraphQL = "GraphQL"
 const APITypeWebScoket = "WS"
 const APITypeWebSub = "WEBSUB"
 const APITypeSSE = "SSE"
+const APITypeAsync = "ASYNC"
 
 // REST API Endpoint URL
 const RESTAPIEndpoint = "https://petstore.swagger.io"

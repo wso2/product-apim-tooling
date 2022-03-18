@@ -28,7 +28,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/wso2/product-apim-tooling/import-export-cli/integration/adminservices"
 	"gopkg.in/yaml.v2"
 
 	"github.com/stretchr/testify/assert"
@@ -286,22 +285,7 @@ func ValidateAPIImportExportWithDeploymentDirForAdvertiseOnlyAPI(t *testing.T, a
 
 	importedAPI := GetImportedAPI(t, args)
 
-	assert.Equal(t, args.Api.AdvertiseInformation.Advertised, importedAPI.AdvertiseInformation.Advertised)
-	assert.Equal(t, args.Api.Provider, importedAPI.AdvertiseInformation.ApiOwner)
-	assert.Equal(t, args.Api.AdvertiseInformation.ApiExternalProductionEndpoint, importedAPI.AdvertiseInformation.ApiExternalProductionEndpoint)
-	assert.Equal(t, args.Api.AdvertiseInformation.ApiExternalSandboxEndpoint, importedAPI.AdvertiseInformation.ApiExternalSandboxEndpoint)
-
-	if (args.CtlUser.Username == adminservices.AdminUsername) ||
-		(args.CtlUser.Username == adminservices.AdminUsername+"@"+adminservices.Tenant1) {
-		// Only the users who has admin privileges (apim:admin scope) were allowed to set the original devportal URL.
-		assert.Equal(t, args.Api.AdvertiseInformation.OriginalDevPortalUrl,
-			importedAPI.AdvertiseInformation.OriginalDevPortalUrl)
-	} else {
-		assert.Equal(t, "", importedAPI.AdvertiseInformation.OriginalDevPortalUrl)
-	}
-
-	// Certificates should not get exported for advertise only APIs
-	validateNonExportedAPICerts(t, importedAPI, args)
+	validateAdvertiseOnlyAPIsEqual(t, importedAPI, args)
 }
 
 func MoveDummyAPIParamsAndCertificatesToDeploymentDir(args *ApiImportExportTestArgs) {

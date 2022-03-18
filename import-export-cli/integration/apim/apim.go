@@ -196,6 +196,15 @@ func (instance *Client) GenerateSampleStreamingAPIData(provider, apiType string)
 	return &api
 }
 
+func GenerateAdvertiseOnlyProperties(api *API, originalDevportalUrl, productionEp, sandboxEp string) {
+	api.AdvertiseInformation.Advertised = true
+	api.AdvertiseInformation.ApiOwner = api.Provider
+	api.AdvertiseInformation.OriginalDevPortalUrl = originalDevportalUrl
+	api.AdvertiseInformation.ApiExternalProductionEndpoint = productionEp
+	api.AdvertiseInformation.ApiExternalSandboxEndpoint = sandboxEp
+	api.AdvertiseInformation.Vendor = "WSO2"
+}
+
 func getContext(provider string) string {
 	context := base.GenerateRandomString()
 	if strings.Contains(provider, "@") {
@@ -247,6 +256,14 @@ func (instance *Client) GenerateAdditionalProperties(provider, endpointUrl, apiT
 					}
 			}
 		}`
+	} else if strings.EqualFold(apiType, "ASYNC") {
+		api := API{}
+		api.Provider = provider
+		GenerateAdvertiseOnlyProperties(&api, "https://localhost:9443/devportal", "amqp://production-ep:9000",
+			"amqp://sandbox-ep:9000")
+		advertiseInfo, _ := json.Marshal(api.AdvertiseInformation)
+		additionalProperties = additionalProperties + `"type":"` + apiType + `",
+		"advertiseInfo": ` + string(advertiseInfo) + `}`
 	} else {
 		additionalProperties = additionalProperties +
 			`"endpointConfig": {   
