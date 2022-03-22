@@ -1,0 +1,27 @@
+{
+ "policyId": "6df265c5-8402-4a20-88ae-1f97d0791c40",
+ "policyName": "AsyncWHUnlimited",
+ "displayName": "AsyncWHUnlimited",
+ "description": "Allows unlimited events and unlimited active subscriptions",
+ "isDeployed": true,
+ "type": "SubscriptionThrottlePolicy",
+ "defaultLimit": {
+  "type": "EVENTCOUNTLIMIT",
+  "requestCount": {
+   "timeUnit": "",
+   "unitTime": 0,
+   "requestCount": 0
+  },
+  "bandwidth": {
+   "timeUnit": "",
+   "unitTime": 0,
+   "dataAmount": 0,
+   "dataUnit": ""
+  },
+  "eventCount": {
+   "timeUnit": "months",
+   "unitTime": 1,
+   "eventCount": 2147483647
+  }
+ }
+}

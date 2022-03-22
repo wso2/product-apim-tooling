@@ -94,9 +94,9 @@ type Application struct {
 }
 
 type APILogger struct {
-	ID              string `json:"apiId"`
-	Context         string `json:"context"`
-	LogLevel        string `json:"logLevel"`
+	ID       string `json:"apiId"`
+	Context  string `json:"context"`
+	LogLevel string `json:"logLevel"`
 }
 
 type RegistrationResponse struct {
@@ -120,7 +120,7 @@ type APIListResponse struct {
 }
 
 type APILoggerListResponse struct {
-	Apis  []APILogger  `json:"apis"`
+	Apis []APILogger `json:"apis"`
 }
 
 type APIProductListResponse struct {
@@ -286,6 +286,142 @@ type ThrottlingPoliciesList struct {
 	List       []ThrottlingPolicy `json:"list"`
 	Pagination interface{}        `json:"pagination"`
 }
+
+type PoliciesList struct {
+	Count int           `json:"count"`
+	List  []interface{} `json:"list"`
+}
+
+//Throttling policies List
+type SubscriptionExportThrottlePolicyList struct {
+	Count int                            `json:"count"`
+	List  []SubscriptionThrottlingPolicy `json:"list"`
+}
+
+type ApplicationExportThrottlePolicyList struct {
+	Count int                           `json:"count"`
+	List  []ApplicationThrottlingPolicy `json:"list"`
+}
+
+type DenyExportThrottlePolicyList struct {
+	Count int                    `json:"count"`
+	List  []DenyThrottlingPolicy `json:"list"`
+}
+
+type AdvancedExportThrottlePolicyList struct {
+	Count int                        `json:"count"`
+	List  []AdvancedThrottlingPolicy `json:"list"`
+}
+
+type CustomExportThrottlePolicyList struct {
+	Count int                      `json:"count"`
+	List  []CustomThrottlingPolicy `json:"list"`
+}
+
+//For exporting different throttling polcies////////////////////////////////////////////////////////
+type SubscriptionThrottlingPolicy struct {
+	PolicyId     string `json:"policyId"`
+	PolicyName   string `json:"policyName"`
+	DisplayName  string `json:"displayName"`
+	Description  string `json:"description"`
+	IsDeployed   bool   `json:"isDeployed"`
+	Type         string `json:"type"`
+	DefaultLimit struct {
+		Type         string `json:"type"`
+		RequestCount struct {
+			TimeUnit     string `json:"timeUnit"`
+			UnitTime     int    `json:"unitTime"`
+			RequestCount int    `json:"requestCount"`
+		} `json:"requestCount"`
+		Bandwidth struct {
+			TimeUnit   string `json:"timeUnit"`
+			UnitTime   int    `json:"unitTime"`
+			DataAmount int    `json:"dataAmount"`
+			DataUnit   string `json:"dataUnit"`
+		} `json:"bandwidth"`
+		EventCount struct {
+			TimeUnit   string `json:"timeUnit"`
+			UnitTime   int    `json:"unitTime"`
+			EventCount int    `json:"eventCount"`
+		} `json:"eventCount"`
+	} `json:"defaultLimit"`
+}
+
+type ApplicationThrottlingPolicy struct {
+	PolicyId     string `json:"policyId"`
+	PolicyName   string `json:"policyName"`
+	DisplayName  string `json:"displayName"`
+	Description  string `json:"description"`
+	IsDeployed   bool   `json:"isDeployed"`
+	Type         string `json:"type"`
+	DefaultLimit struct {
+		Type         string `json:"type"`
+		RequestCount struct {
+			TimeUnit     string `json:"timeUnit"`
+			UnitTime     int    `json:"unitTime"`
+			RequestCount int    `json:"requestCount"`
+		} `json:"requestCount"`
+		Bandwidth struct {
+			TimeUnit   string `json:"timeUnit"`
+			UnitTime   int    `json:"unitTime"`
+			DataAmount int    `json:"dataAmount"`
+			DataUnit   string `json:"dataUnit"`
+		} `json:"bandwidth"`
+		EventCount struct {
+			TimeUnit   string `json:"timeUnit"`
+			UnitTime   int    `json:"unitTime"`
+			EventCount int    `json:"eventCount"`
+		} `json:"eventCount"`
+	} `json:"defaultLimit"`
+}
+
+type AdvancedThrottlingPolicy struct {
+	PolicyId     string `json:"policyId"`
+	PolicyName   string `json:"policyName"`
+	DisplayName  string `json:"displayName"`
+	Description  string `json:"description"`
+	IsDeployed   bool   `json:"isDeployed"`
+	Type         string `json:"type"`
+	DefaultLimit struct {
+		Type         string `json:"type"`
+		RequestCount struct {
+			TimeUnit     string `json:"timeUnit"`
+			UnitTime     int    `json:"unitTime"`
+			RequestCount int    `json:"requestCount"`
+		} `json:"requestCount"`
+		Bandwidth struct {
+			TimeUnit   string `json:"timeUnit"`
+			UnitTime   int    `json:"unitTime"`
+			DataAmount int    `json:"dataAmount"`
+			DataUnit   string `json:"dataUnit"`
+		} `json:"bandwidth"`
+		EventCount struct {
+			TimeUnit   string `json:"timeUnit"`
+			UnitTime   int    `json:"unitTime"`
+			EventCount int    `json:"eventCount"`
+		} `json:"eventCount"`
+	} `json:"defaultLimit"`
+}
+
+type CustomThrottlingPolicy struct {
+	PolicyId    string `json:"policyId"`
+	PolicyName  string `json:"policyName"`
+	Description string `json:"description"`
+	IsDeployed  bool   `json:"isDeployed"`
+	SiddhiQuery string `json:"siddhiQuery"`
+	KeyTemplate string `json:"keyTemplate"`
+}
+
+type DenyThrottlingPolicy struct {
+	ConditionId     string      `json:"conditionId"`
+	ConditionType   string      `json:"conditionType"`
+	ConditionValue  interface{} `json:"conditionValue"`
+	ConditionStatus bool        `json:"conditionStatus"`
+}
+
+////Deny policy should be added
+
+//////////////////////////////////////////////////////////////////////////////////////
 
 //ThrottlingPolicy
 type ThrottlingPolicy struct {

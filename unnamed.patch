@@ -1,0 +1,975 @@
+Index: import-export-cli/impl/common.go
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/import-export-cli/impl/common.go b/import-export-cli/impl/common.go
+--- a/import-export-cli/impl/common.go	(revision 09b21b97017cb749a9067ed1ce79e3fcd7a60eb4)
++++ b/import-export-cli/impl/common.go	(date 1647841541415)
+@@ -19,6 +19,7 @@
+ package impl
+ 
+ import (
++	"fmt"
+ 	"io"
+ 	"io/ioutil"
+ 	"os"
+@@ -97,6 +98,7 @@
+ 
+ 	err = utils.Zip(tmpClonedLoc, targetZipFile)
+ 	if err != nil {
++		fmt.Println("This is it")
+ 		utils.HandleErrorAndExit("Error creating the final zip archive", err)
+ 	}
+ 	return nil
+Index: import-export-cli/cmd/exportThrottlePolicy.go
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/import-export-cli/cmd/exportThrottlePolicy.go b/import-export-cli/cmd/exportThrottlePolicy.go
+new file mode 100644
+--- /dev/null	(date 1646920806736)
++++ b/import-export-cli/cmd/exportThrottlePolicy.go	(date 1646920806736)
+@@ -0,0 +1,94 @@
++package cmd
++
++import (
++	"fmt"
++	//"github.com/wso2/product-apim-tooling/import-export-cli/impl"
++
++	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
++
++	"github.com/spf13/cobra"
++	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
++
++	//"net/http"
++	"path/filepath"
++)
++
++var exportThrottlePolicyName string
++var exportThrottlePolicyType string
++
++//var runningExportThrottlePolicyCommand bool
++
++// ExportThrottlePolicy command related usage info
++const ExportThrottlePolicyCmdLiteral = "throttlepolicy"
++const exportThrottlePolicyCmdShortDesc = "Export Throttling Policy"
++
++const exportThrottlePolicyCmdLongDesc = "Export a ThrottlingPolicy from an environment"
++
++const exportThrottlePolicyCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + ` -n Policy2 -type custom -e dev
++` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + ` -n AppPolicy -type app -e production
++` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + ` -n SubPolicy -type sub -e dev
++NOTE: All the 3 flags (--name (-n), --type and --environment (-e)) are mandatory.`
++
++// ExportAPICmd represents the exportAPI command
++var ExportThrottlePolicyCmd = &cobra.Command{
++	Use: ExportThrottlePolicyCmdLiteral + " (--name <name-of-the-throttling-policy> --type <type-of-the-throttling-policy> --environment " +
++		"<environment-from-which-the-throttling-policy-should-be-exported>)",
++	Short:   exportThrottlePolicyCmdShortDesc,
++	Long:    exportThrottlePolicyCmdLongDesc,
++	Example: exportThrottlePolicyCmdExamples,
++	Run: func(cmd *cobra.Command, args []string) {
++		utils.Logln(utils.LogPrefixInfo + ExportThrottlePolicyCmdLiteral + " called")
++		var apisExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedApisDirName)
++
++		cred, err := GetCredentials(CmdExportEnvironment)
++		if err != nil {
++			utils.HandleErrorAndExit("Error getting credentials", err)
++		}
++
++		executeExportThrottlePolicyCmd(cred, apisExportDirectory)
++	},
++}
++
++func executeExportThrottlePolicyCmd(credential credentials.Credential, exportDirectory string) {
++	fmt.Println("Code Still in Progress")
++	//runningExportThrottlePolicyCommand = true
++	//accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, CmdExportEnvironment)
++	//
++	//if preCommandErr == nil {
++	//	resp, err := impl.ExportThrottlingFromEnv(accessToken, exportAPIName, exportAPIVersion, exportRevisionNum, exportProvider,
++	//		exportAPIFormat, CmdExportEnvironment, exportAPIPreserveStatus, exportAPILatestRevision)
++	//	if err != nil {
++	//		utils.HandleErrorAndExit("Error while exporting", err)
++	//	}
++	//	// Print info on response
++	//	utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
++	//	apiZipLocationPath := filepath.Join(exportDirectory, CmdExportEnvironment)
++	//	if resp.StatusCode() == http.StatusOK {
++	//		impl.WriteToZip(exportAPIName, exportAPIVersion, "", apiZipLocationPath, runningExportApiCommand, resp)
++	//	} else if resp.StatusCode() == http.StatusInternalServerError {
++	//		// 500 Internal Server Error
++	//		fmt.Println(string(resp.Body()))
++	//	} else {
++	//		// neither 200 nor 500
++	//		fmt.Println("Error exporting API:", resp.Status(), "\n", string(resp.Body()))
++	//	}
++	//} else {
++	//	// error exporting Api
++	//	fmt.Println("Error getting OAuth tokens while exporting API:" + preCommandErr.Error())
++	//}
++}
++
++// init using Cobra
++func init() {
++	ExportCmd.AddCommand(ExportThrottlePolicyCmd)
++	ExportThrottlePolicyCmd.Flags().StringVarP(&exportThrottlePolicyName, "name", "n", "",
++		"Name of the ThrottlingPolicy to be exported")
++	ExportThrottlePolicyCmd.Flags().StringVarP(&exportThrottlePolicyType, "type", "t",
++		"", "Type of the ThrottlingPolicy to be exported")
++	ExportThrottlePolicyCmd.Flags().StringVarP(&CmdExportEnvironment, "environment", "e",
++		"", "Environment to which the Throttling Policy should be exported")
++	_ = ExportThrottlePolicyCmd.MarkFlagRequired("name")
++	_ = ExportThrottlePolicyCmd.MarkFlagRequired("environment")
++	_ = ExportThrottlePolicyCmd.MarkFlagRequired("type")
++
++}
+Index: import-export-cli/impl/importThrottlePolicy.go
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/import-export-cli/impl/importThrottlePolicy.go b/import-export-cli/impl/importThrottlePolicy.go
+new file mode 100644
+--- /dev/null	(date 1647946216517)
++++ b/import-export-cli/impl/importThrottlePolicy.go	(date 1647946216517)
+@@ -0,0 +1,139 @@
++package impl
++
++import (
++	"encoding/json"
++	"errors"
++	"fmt"
++	"github.com/go-resty/resty/v2"
++	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
++	"net/http"
++	"os"
++)
++
++func ImportThrottlingPolicyToEnv(accessOAuthToken string, importEnvironment string, importThrottlingPolicyFile string) error {
++	adminEndpoint := utils.GetAdminEndpointOfEnv(importEnvironment, utils.MainConfigFilePath)
++	return ImportThrottlingPolicy(accessOAuthToken, adminEndpoint, importThrottlingPolicyFile)
++}
++
++func ImportThrottlingPolicy(accessOAuthToken string, adminEndpoint string, importPath string) error {
++	//exportDirectory := filepath.Join(utils.ExportDirectory, utils.ExportedApisDirName)
++	//resolvedThrottlingPolicyFilePath, err := resolveImportFilePath(importPath, exportDirectory)
++	//if err != nil {
++	//	return err
++	//}
++	//utils.Logln(utils.LogPrefixInfo+"throttling Policy Location:", resolvedThrottlingPolicyFilePath)
++
++	utils.Logln(utils.LogPrefixInfo + "Creating workspace")
++	//tmpPath, err := utils.GetTempCloneFromDirOrZip(resolvedThrottlingPolicyFilePath)
++	//if err != nil {
++	//	return err
++	//}
++	uri := adminEndpoint + "/throttling/deny-policies"
++	/////////////////////////////////
++	if _, err := os.Stat(importPath); err != nil {
++		if !os.IsNotExist(err) {
++			return err
++		}
++	}
++
++	//path, data, err := resolveYamlOrJSON(importPath)
++	//fmt.Println(path)
++	//fmt.Println(data)
++	//if err != nil {
++	//	utils.Logln(utils.LogPrefixError, err)
++	//	return err
++	//}
++	//fmt.Println(uri)
++	//fmt.Println(importPath)
++	tmpPath := importPath
++	extraParams := map[string]string{}
++	err := importThrottlingPolicy(uri, tmpPath, accessOAuthToken, extraParams, true)
++	return err
++}
++
++// importAPI imports an API to the API manager
++func importThrottlingPolicy(endpoint, filePath, accessToken string, extraParams map[string]string, isOauth bool) error {
++	resp, err := ExecuteThrottlingPolicyUploadRequest(endpoint, extraParams, "file",
++		filePath, accessToken, isOauth)
++	//fmt.Println(resp.RawResponse)
++	utils.Logf("Response : %v", resp)
++	if err != nil {
++		utils.Logln(utils.LogPrefixError, err)
++		return err
++	}
++	if resp.StatusCode() == http.StatusCreated || resp.StatusCode() == http.StatusOK {
++		// 201 Created or 200 OK
++		fmt.Println("Successfully imported Throttling Policy.")
++		return nil
++	} else {
++		// We have an HTTP error
++		fmt.Println("Error importing Throttling Policy.")
++		fmt.Println("Status: " + resp.Status())
++		fmt.Println("Response:", resp.IsSuccess())
++		return errors.New(resp.Status())
++	}
++}
++
++func ExecuteThrottlingPolicyUploadRequest(uri string, params map[string]string, paramName, path,
++	accessToken string, isOAuthToken bool) (*resty.Response, error) {
++
++	headers := make(map[string]string)
++	if isOAuthToken {
++		headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
++	} else {
++		headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + accessToken
++	}
++	headers[utils.HeaderContentType] = "application/json"
++	headers[utils.HeaderAccept] = "application/json"
++	headers[utils.HeaderConnection] = utils.HeaderValueKeepAlive
++	fmt.Println(headers)
++	fmt.Println(uri)
++	type Data struct {
++		PolicyName   string `json:"policyName"`
++		DisplayName  string `json:"displayName"`
++		Description  string `json:"description"`
++		IsDeployed   bool   `json:"isDeployed"`
++		Type         string `json:"type"`
++		DefaultLimit struct {
++			Type         string `json:"type"`
++			RequestCount struct {
++				TimeUnit     string `json:"timeUnit"`
++				UnitTime     int    `json:"unitTime"`
++				RequestCount int    `json:"requestCount"`
++			} `json:"requestCount"`
++			Bandwidth struct {
++				TimeUnit   string `json:"timeUnit"`
++				UnitTime   int    `json:"unitTime"`
++				DataAmount int    `json:"dataAmount"`
++				DataUnit   string `json:"dataUnit"`
++			} `json:"bandwidth"`
++			EventCount struct {
++				TimeUnit   string `json:"timeUnit"`
++				UnitTime   int    `json:"unitTime"`
++				EventCount int    `json:"eventCount"`
++			} `json:"eventCount"`
++		} `json:"defaultLimit"`
++	}
++
++	json_string := `
++{
++"conditionId": "b513eb68-69e8-4c32-92cf-852c101363cf",
++"conditionType": "IP",
++"conditionValue": {
++"fixedIp": "192.168.1.1",
++"invert": false
++},
++"conditionStatus": true
++}
++`
++
++	var data utils.DenyThrottlingPolicy
++	err := json.Unmarshal([]byte(json_string), &data)
++
++	if err != nil {
++		utils.Logln(utils.LogPrefixError, err)
++		fmt.Println("Cannot unmarshal")
++	}
++	return utils.InvokePOSTRequest(uri, headers, data)
++	//return utils.InvokePUTRequestWithoutQueryParams(uri, headers, data)
++}
+Index: import-export-cli/cmd/exportThrottlePolicies.go
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/import-export-cli/cmd/exportThrottlePolicies.go b/import-export-cli/cmd/exportThrottlePolicies.go
+new file mode 100644
+--- /dev/null	(date 1647427136361)
++++ b/import-export-cli/cmd/exportThrottlePolicies.go	(date 1647427136361)
+@@ -0,0 +1,89 @@
++package cmd
++
++import (
++	"fmt"
++	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
++	"net/http"
++
++	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
++
++	"github.com/spf13/cobra"
++	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
++
++	"path/filepath"
++)
++
++var exportThrottlePoliciesType string
++
++var runningExportThrottlePoliciesCommand bool
++
++// ExportThrottlePolicies command related usage info
++const ExportThrottlePoliciesCmdLiteral = "throttlepolicies"
++const exportThrottlePoliciesCmdShortDesc = "Export Throttling Policies"
++
++const exportThrottlePoliciesCmdLongDesc = "Export ThrottlingPolicies from an environment"
++
++const exportThrottlePoliciesCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportThrottlePoliciesCmdLiteral + `-type custom -e dev
++` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportThrottlePoliciesCmdLiteral + `-type app -e production
++` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportThrottlePoliciesCmdLiteral + `-type sub -e dev
++NOTE: All the 2 flags (--type (-t) and --environment (-e)) are mandatory.`
++
++// ExportThrottlePoliciesCmd represents the export throttlepolicies command
++var ExportThrottlePoliciesCmd = &cobra.Command{
++	Use: ExportThrottlePoliciesCmdLiteral + " (--type <type-of-the-throttling-policy> --environment " +
++		"<environment-from-which-the-throttling-policies-should-be-exported>)",
++	Short:   exportThrottlePoliciesCmdShortDesc,
++	Long:    exportThrottlePoliciesCmdLongDesc,
++	Example: exportThrottlePoliciesCmdExamples,
++	Run: func(cmd *cobra.Command, args []string) {
++		utils.Logln(utils.LogPrefixInfo + ExportThrottlePoliciesCmdLiteral + " called")
++		var throttlepoliciesExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedThrottlePoliciesDirName)
++
++		cred, err := GetCredentials(CmdExportEnvironment)
++		if err != nil {
++			utils.HandleErrorAndExit("Error getting credentials", err)
++		}
++
++		executeExportThrottlePoliciesCmd(cred, throttlepoliciesExportDirectory)
++	},
++}
++
++func executeExportThrottlePoliciesCmd(credential credentials.Credential, exportDirectory string) {
++	runningExportThrottlePoliciesCommand = true
++	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, CmdExportEnvironment)
++
++	if preCommandErr == nil {
++		resp, err := impl.ExportThrottlingPoliciesFromEnv(accessToken, CmdExportEnvironment, exportThrottlePoliciesType)
++		if err != nil {
++			utils.HandleErrorAndExit("Error while exporting", err)
++		}
++		// Print info on response
++		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
++		ThrottlePolicyZipLocationPath := filepath.Join(exportDirectory, CmdExportEnvironment)
++		if resp.StatusCode() == http.StatusOK {
++			//fmt.Println(string(resp.Body()))
++			impl.ThrottlePoliciesWriteToZip(exportThrottlePoliciesType, ThrottlePolicyZipLocationPath, runningExportThrottlePoliciesCommand, resp)
++		} else if resp.StatusCode() == http.StatusInternalServerError {
++			// 500 Internal Server Error
++			fmt.Println(string(resp.Body()))
++		} else {
++			// neither 200 nor 500
++			fmt.Println("Error exporting Throttling Policies:", resp.Status(), "\n", string(resp.Body()))
++		}
++	} else {
++		// error exporting Api
++		fmt.Println("Error getting OAuth tokens while exporting Throttling Policies:" + preCommandErr.Error())
++	}
++}
++
++// init using Cobra
++func init() {
++	ExportCmd.AddCommand(ExportThrottlePoliciesCmd)
++	ExportThrottlePoliciesCmd.Flags().StringVarP(&exportThrottlePoliciesType, "type", "t",
++		"", "Type of the Throttling Policies to be exported (sub,app,custom,advanced,deny)")
++	ExportThrottlePoliciesCmd.Flags().StringVarP(&CmdExportEnvironment, "environment", "e",
++		"", "Environment to which the Throttling Policies should be exported")
++	_ = ExportThrottlePoliciesCmd.MarkFlagRequired("environment")
++	_ = ExportThrottlePoliciesCmd.MarkFlagRequired("type")
++
++}
+Index: import-export-cli/cmd/importThrottlePolicy.go
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/import-export-cli/cmd/importThrottlePolicy.go b/import-export-cli/cmd/importThrottlePolicy.go
+new file mode 100644
+--- /dev/null	(date 1647844825962)
++++ b/import-export-cli/cmd/importThrottlePolicy.go	(date 1647844825962)
+@@ -0,0 +1,80 @@
++/*
++*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
++*
++*  WSO2 Inc. licenses this file to you under the Apache License,
++*  Version 2.0 (the "License"); you may not use this file except
++*  in compliance with the License.
++*  You may obtain a copy of the License at
++*
++*    http://www.apache.org/licenses/LICENSE-2.0
++*
++* Unless required by applicable law or agreed to in writing,
++* software distributed under the License is distributed on an
++* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
++* KIND, either express or implied.  See the License for the
++* specific language governing permissions and limitations
++* under the License.
++ */
++
++package cmd
++
++import (
++	"github.com/spf13/cobra"
++	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
++	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
++	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
++)
++
++var (
++	importThrottlingPolicyFile string
++)
++
++const (
++	// ImportAPI command related usage info
++	ImportThrottlingPolicyCmdLiteral   = "throttlepolicy"
++	importThrottlingPolicyCmdShortDesc = "Import Throttling Policy"
++	importThrottlingPolicyCmdLongDesc  = "Import a Throttling Policy to an environment"
++)
++
++const importThrottlingPolicyCmdExamples = utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportThrottlingPolicyCmdLiteral + ` -f qa/customadvanced.zip -e dev
++` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportThrottlingPolicyCmdLiteral + ` -f Env1/Exported/sub1.zip -e production
++` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportThrottlingPolicyCmdLiteral + ` -f ~/myapi -e production 
++` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportThrottlingPolicyCmdLiteral + ` -f ~/myapi -e production
++NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory`
++
++// ImportAPICmd represents the importAPI command
++var ImportThrottlingPolicyCmd = &cobra.Command{
++	Use: ImportThrottlingPolicyCmdLiteral + " --file <path-to-api> --environment " +
++		"<environment>",
++	Short:   importThrottlingPolicyCmdShortDesc,
++	Long:    importThrottlingPolicyCmdLongDesc,
++	Example: importThrottlingPolicyCmdExamples,
++	Run: func(cmd *cobra.Command, args []string) {
++		utils.Logln(utils.LogPrefixInfo + ImportThrottlingPolicyCmdLiteral + " called")
++		cred, err := GetCredentials(importEnvironment)
++		if err != nil {
++			utils.HandleErrorAndExit("Error getting credentials", err)
++		}
++		accessOAuthToken, err := credentials.GetOAuthAccessToken(cred, importEnvironment)
++		if err != nil {
++			utils.HandleErrorAndExit("Error while getting an access token for importing Throttling Policy", err)
++		}
++		err = impl.ImportThrottlingPolicyToEnv(accessOAuthToken, importEnvironment, importThrottlingPolicyFile)
++		if err != nil {
++			utils.HandleErrorAndExit("Error importing throttling Policy", err)
++			return
++		}
++	},
++}
++
++// init using Cobra
++func init() {
++	ImportCmd.AddCommand(ImportThrottlingPolicyCmd)
++	ImportThrottlingPolicyCmd.Flags().StringVarP(&importThrottlingPolicyFile, "file", "f", "",
++		"File path of the Throttling Policy to be imported")
++	ImportThrottlingPolicyCmd.Flags().StringVarP(&importEnvironment, "environment", "e",
++		"", "Environment from the which the Throttling Policy should be imported")
++	// Mark required flags
++	_ = ImportThrottlingPolicyCmd.MarkFlagRequired("environment")
++	_ = ImportThrottlingPolicyCmd.MarkFlagRequired("file")
++}
+Index: import-export-cli/utils/constants.go
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/import-export-cli/utils/constants.go b/import-export-cli/utils/constants.go
+--- a/import-export-cli/utils/constants.go	(revision 09b21b97017cb749a9067ed1ce79e3fcd7a60eb4)
++++ b/import-export-cli/utils/constants.go	(date 1646987311810)
+@@ -66,6 +66,7 @@
+ 
+ const DefaultExportDirName = "exported"
+ const ExportedApisDirName = "apis"
++const ExportedThrottlePoliciesDirName = "throttle-policies"
+ const ExportedApiProductsDirName = "api-products"
+ const ExportedAppsDirName = "apps"
+ const ExportedMigrationArtifactsDirName = "migration"
+Index: import-export-cli/impl/exportThrottlePolicies.go
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/import-export-cli/impl/exportThrottlePolicies.go b/import-export-cli/impl/exportThrottlePolicies.go
+new file mode 100644
+--- /dev/null	(date 1647946018303)
++++ b/import-export-cli/impl/exportThrottlePolicies.go	(date 1647946018303)
+@@ -0,0 +1,310 @@
++/*
++*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
++*
++*  WSO2 Inc. licenses this file to you under the Apache License,
++*  Version 2.0 (the "License"); you may not use this file except
++*  in compliance with the License.
++*  You may obtain a copy of the License at
++*
++*    http://www.apache.org/licenses/LICENSE-2.0
++*
++* Unless required by applicable law or agreed to in writing,
++* software distributed under the License is distributed on an
++* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
++* KIND, either express or implied.  See the License for the
++* specific language governing permissions and limitations
++* under the License.
++ */
++
++package impl
++
++import (
++	"encoding/json"
++	"fmt"
++	"github.com/go-resty/resty/v2"
++	"github.com/json-iterator/go"
++	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
++	"io/ioutil"
++	"os"
++	"path/filepath"
++)
++
++// ExportThrottlePoliciesFromEnv function is used with export throttlepolicies command
++func ExportThrottlingPoliciesFromEnv(accessToken, exportEnvironment string, exportThrottlePoliciesType string) (*resty.Response, error) {
++	adminEndpoint := utils.GetAdminEndpointOfEnv(exportEnvironment, utils.MainConfigFilePath)
++	return exportThrottlePolicies(adminEndpoint, accessToken, exportThrottlePoliciesType)
++}
++
++// exportAPI function is used with export api command
++// @param name : Name of the API to be exported
++// @param version : Version of the API to be exported
++// @param provider : Provider of the API
++// @param publisherEndpoint : API Manager Publisher Endpoint for the environment
++// @param accessToken : Access Token for the resource
++// @return response Response in the form of *resty.Response
++func exportThrottlePolicies(adminEndpoint, accessToken string, ThrottlePoliciesType string) (*resty.Response, error) {
++	var policytype string
++	adminEndpoint = utils.AppendSlashToString(adminEndpoint)
++	ThrottlePolicyresource := "throttling/policies/"
++	switch ThrottlePoliciesType {
++	case "sub":
++		policytype = "subscription"
++	case "app":
++		policytype = "application"
++	case "deny":
++		policytype = "deny-policies"
++		ThrottlePolicyresource = "throttling/"
++	case "advanced":
++		policytype = "advanced"
++	case "custom":
++		policytype = "custom"
++	}
++
++	url := adminEndpoint + ThrottlePolicyresource + policytype
++
++	utils.Logln(utils.LogPrefixInfo+"ExportThrottlingPolicy: URL:", url)
++	headers := make(map[string]string)
++	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
++	resp, err := utils.InvokeGETRequest(url, headers)
++	if err != nil {
++		return nil, err
++	}
++
++	return resp, nil
++}
++
++// WriteToZip
++// @param exportAPIName : Name of the API to be exported
++// @param exportAPIVersion: Version of the API to be exported
++// @param exportAPIRevisionNumber: Revision number of the api
++// @param zipLocationPath: Path to the export directory
++// @param runningExportApiCommand: Whether the export API command is running
++// @param resp : Response returned from making the HTTP request (only pass a 200 OK)
++// Exported API will be written to a zip file
++func ThrottlePoliciesWriteToZip(PolicyType, zipLocationPath string, runningExportThrottlePoliciesCommand bool, resp *resty.Response) {
++
++	switch PolicyType {
++	case "sub":
++		WriteSubscriptionThrottlingPolicies(zipLocationPath, resp)
++	case "app":
++		WriteApplicationThrottlingPolicies(zipLocationPath, resp)
++	case "deny":
++		WriteDenyThrottlingPolicies(zipLocationPath, resp)
++	case "advanced":
++		WriteAdvancedThrottlingPolicies(zipLocationPath, resp)
++	case "custom":
++		WriteCustomThrottlingPolicies(zipLocationPath, resp)
++	}
++	// Output the final zip file location.
++	if runningExportThrottlePoliciesCommand {
++		fmt.Println("Successfully exported Throttling Policies!")
++		fmt.Println("Find the exported Throttling Policies at " + zipLocationPath)
++	}
++
++}
++
++func WriteSubscriptionThrottlingPolicies(zipLocationPath string, resp *resty.Response) {
++
++	zipLocationPath = filepath.Join(zipLocationPath, "Subscription-Policies")
++	var zipFilename string
++
++	err := utils.CreateDirIfNotExist(zipLocationPath)
++	if err != nil {
++		utils.HandleErrorAndExit("Error creating dir to store zip archives: "+zipLocationPath, err)
++	}
++
++	var ThrottlingPolicyListResponse utils.SubscriptionExportThrottlePolicyList
++
++	err = json.Unmarshal(resp.Body(), &ThrottlingPolicyListResponse)
++	if err != nil {
++		utils.HandleErrorAndExit("Error unmarshelling data", err)
++	}
++
++	var ThrottlePolicyList = ThrottlingPolicyListResponse.List
++	var Count = ThrottlingPolicyListResponse.Count
++
++	for i := 0; i < Count; i++ {
++		policyContent := ThrottlePolicyList[i]
++		zipFilename = policyContent.PolicyName
++		marshaledData, err := jsoniter.MarshalIndent(policyContent, "", " ")
++		if err != nil {
++			utils.HandleErrorAndExit("Error marshelling policy content", err)
++		}
++		_, _ = WriteThrottlingPolicy(zipLocationPath, zipFilename, marshaledData)
++	}
++}
++
++func WriteApplicationThrottlingPolicies(zipLocationPath string, resp *resty.Response) {
++
++	zipLocationPath = filepath.Join(zipLocationPath, "Application-Policies")
++	var zipFilename string
++
++	err := utils.CreateDirIfNotExist(zipLocationPath)
++	if err != nil {
++		utils.HandleErrorAndExit("Error creating dir to store zip archives: "+zipLocationPath, err)
++	}
++
++	var ThrottlingPolicyListResponse utils.ApplicationExportThrottlePolicyList
++
++	err = json.Unmarshal(resp.Body(), &ThrottlingPolicyListResponse)
++	if err != nil {
++		utils.HandleErrorAndExit("Error unmarshelling data", err)
++	}
++
++	var ThrottlePolicyList = ThrottlingPolicyListResponse.List
++	var Count = ThrottlingPolicyListResponse.Count
++
++	for i := 0; i < Count; i++ {
++		policyContent := ThrottlePolicyList[i]
++		zipFilename = policyContent.PolicyName
++		marshaledData, err := jsoniter.MarshalIndent(policyContent, "", " ")
++		if err != nil {
++			utils.HandleErrorAndExit("Error marshelling policy content", err)
++		}
++		_, _ = WriteThrottlingPolicy(zipLocationPath, zipFilename, marshaledData)
++	}
++}
++
++func WriteAdvancedThrottlingPolicies(zipLocationPath string, resp *resty.Response) {
++
++	zipLocationPath = filepath.Join(zipLocationPath, "Advanced-Policies")
++	var zipFilename string
++
++	err := utils.CreateDirIfNotExist(zipLocationPath)
++	if err != nil {
++		utils.HandleErrorAndExit("Error creating dir to store zip archives: "+zipLocationPath, err)
++	}
++
++	var ThrottlingPolicyListResponse utils.AdvancedExportThrottlePolicyList
++
++	err = json.Unmarshal(resp.Body(), &ThrottlingPolicyListResponse)
++	if err != nil {
++		utils.HandleErrorAndExit("Error unmarshelling data", err)
++	}
++
++	var ThrottlePolicyList = ThrottlingPolicyListResponse.List
++	var Count = ThrottlingPolicyListResponse.Count
++
++	for i := 0; i < Count; i++ {
++		policyContent := ThrottlePolicyList[i]
++		zipFilename = policyContent.PolicyName
++		marshaledData, err := jsoniter.MarshalIndent(policyContent, "", " ")
++		if err != nil {
++			utils.HandleErrorAndExit("Error marshelling policy content", err)
++		}
++		_, _ = WriteThrottlingPolicy(zipLocationPath, zipFilename, marshaledData)
++	}
++}
++
++func WriteCustomThrottlingPolicies(zipLocationPath string, resp *resty.Response) {
++
++	zipLocationPath = filepath.Join(zipLocationPath, "Custom-Policies")
++	var zipFilename string
++
++	err := utils.CreateDirIfNotExist(zipLocationPath)
++	if err != nil {
++		utils.HandleErrorAndExit("Error creating dir to store zip archives: "+zipLocationPath, err)
++	}
++
++	var ThrottlingPolicyListResponse utils.CustomExportThrottlePolicyList
++
++	err = json.Unmarshal(resp.Body(), &ThrottlingPolicyListResponse)
++	if err != nil {
++		utils.HandleErrorAndExit("Error unmarshelling data", err)
++	}
++
++	var ThrottlePolicyList = ThrottlingPolicyListResponse.List
++	var Count = ThrottlingPolicyListResponse.Count
++
++	for i := 0; i < Count; i++ {
++		policyContent := ThrottlePolicyList[i]
++		zipFilename = policyContent.PolicyName
++		marshaledData, err := jsoniter.MarshalIndent(policyContent, "", " ")
++		if err != nil {
++			utils.HandleErrorAndExit("Error marshelling policy content", err)
++		}
++		_, _ = WriteThrottlingPolicy(zipLocationPath, zipFilename, marshaledData)
++	}
++}
++
++func WriteDenyThrottlingPolicies(zipLocationPath string, resp *resty.Response) {
++
++	zipLocationPath = filepath.Join(zipLocationPath, "Deny-Policies")
++	var zipFilename string
++
++	err := utils.CreateDirIfNotExist(zipLocationPath)
++	if err != nil {
++		utils.HandleErrorAndExit("Error creating dir to store zip archives: "+zipLocationPath, err)
++	}
++
++	var ThrottlingPolicyListResponse utils.DenyExportThrottlePolicyList
++	fmt.Println(resp)
++	err = json.Unmarshal(resp.Body(), &ThrottlingPolicyListResponse)
++	if err != nil {
++		utils.HandleErrorAndExit("Error unmarshelling data", err)
++	}
++
++	var ThrottlePolicyList = ThrottlingPolicyListResponse.List
++	var Count = ThrottlingPolicyListResponse.Count
++
++	for i := 0; i < Count; i++ {
++		policyContent := ThrottlePolicyList[i]
++		zipFilename = policyContent.ConditionId
++		marshaledData, err := jsoniter.MarshalIndent(policyContent, "", " ")
++		if err != nil {
++			utils.HandleErrorAndExit("Error marshelling policy content", err)
++		}
++		_, _ = WriteThrottlingPolicy(zipLocationPath, zipFilename, marshaledData)
++	}
++}
++
++//func WriteThrottlingPolicy(zipLocationPath string, zipFilename string, marshaledData []byte) (string, error) {
++//	TempJsonFile := zipFilename
++//	TempJsonFile += ".yaml"
++//	tmpDir, err := ioutil.TempDir("", "apim")
++//	if err != nil {
++//		_ = os.RemoveAll(tmpDir)
++//		return "", err
++//	}
++//
++//	tempFile := filepath.Join(tmpDir, TempJsonFile)
++//
++//	jsonMetaData, err := gabs.ParseJSON(marshaledData)
++//	metaContent, err := utils.JsonToYaml(jsonMetaData.Bytes())
++//
++//	//write the content to temp file
++//	err = ioutil.WriteFile(tempFile, metaContent, 0644)
++//	if err != nil {
++//		utils.HandleErrorAndExit("Error creating temp file", err)
++//	}
++//
++//	targetZipFile := filepath.Join(zipLocationPath, zipFilename)
++//	targetZipFile += ".zip"
++//	err = utils.Zip(tempFile, targetZipFile)
++//	return targetZipFile, err
++//}
++
++//////////////////////////////////////////////////
++func WriteThrottlingPolicy(zipLocationPath string, zipFilename string, marshaledData []byte) (string, error) {
++	TempJsonFile := zipFilename
++	TempJsonFile += ".json"
++	tmpDir, err := ioutil.TempDir("", "apim")
++	if err != nil {
++		_ = os.RemoveAll(tmpDir)
++		return "", err
++	}
++
++	tempFile := filepath.Join(tmpDir, TempJsonFile)
++
++	err = ioutil.WriteFile(tempFile, marshaledData, 0644)
++	if err != nil {
++		utils.HandleErrorAndExit("Error writing temp json", err)
++	}
++
++	targetZipFile := filepath.Join(zipLocationPath, zipFilename)
++	targetZipFile += ".zip"
++	err = utils.Zip(tempFile, targetZipFile)
++	return targetZipFile, err
++}
++
++/////////////////////////////////////////////////////////
+Index: import-export-cli/utils/structs.go
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/import-export-cli/utils/structs.go b/import-export-cli/utils/structs.go
+--- a/import-export-cli/utils/structs.go	(revision 09b21b97017cb749a9067ed1ce79e3fcd7a60eb4)
++++ b/import-export-cli/utils/structs.go	(date 1647946800230)
+@@ -94,9 +94,9 @@
+ }
+ 
+ type APILogger struct {
+-	ID              string `json:"apiId"`
+-	Context         string `json:"context"`
+-	LogLevel        string `json:"logLevel"`
++	ID       string `json:"apiId"`
++	Context  string `json:"context"`
++	LogLevel string `json:"logLevel"`
+ }
+ 
+ type RegistrationResponse struct {
+@@ -120,7 +120,7 @@
+ }
+ 
+ type APILoggerListResponse struct {
+-	Apis  []APILogger  `json:"apis"`
++	Apis []APILogger `json:"apis"`
+ }
+ 
+ type APIProductListResponse struct {
+@@ -287,6 +287,142 @@
+ 	Pagination interface{}        `json:"pagination"`
+ }
+ 
++type PoliciesList struct {
++	Count int           `json:"count"`
++	List  []interface{} `json:"list"`
++}
++
++//Throttling policies List
++type SubscriptionExportThrottlePolicyList struct {
++	Count int                            `json:"count"`
++	List  []SubscriptionThrottlingPolicy `json:"list"`
++}
++
++type ApplicationExportThrottlePolicyList struct {
++	Count int                           `json:"count"`
++	List  []ApplicationThrottlingPolicy `json:"list"`
++}
++
++type DenyExportThrottlePolicyList struct {
++	Count int                    `json:"count"`
++	List  []DenyThrottlingPolicy `json:"list"`
++}
++
++type AdvancedExportThrottlePolicyList struct {
++	Count int                        `json:"count"`
++	List  []AdvancedThrottlingPolicy `json:"list"`
++}
++
++type CustomExportThrottlePolicyList struct {
++	Count int                      `json:"count"`
++	List  []CustomThrottlingPolicy `json:"list"`
++}
++
++//For exporting different throttling polcies////////////////////////////////////////////////////////
++type SubscriptionThrottlingPolicy struct {
++	PolicyId     string `json:"policyId"`
++	PolicyName   string `json:"policyName"`
++	DisplayName  string `json:"displayName"`
++	Description  string `json:"description"`
++	IsDeployed   bool   `json:"isDeployed"`
++	Type         string `json:"type"`
++	DefaultLimit struct {
++		Type         string `json:"type"`
++		RequestCount struct {
++			TimeUnit     string `json:"timeUnit"`
++			UnitTime     int    `json:"unitTime"`
++			RequestCount int    `json:"requestCount"`
++		} `json:"requestCount"`
++		Bandwidth struct {
++			TimeUnit   string `json:"timeUnit"`
++			UnitTime   int    `json:"unitTime"`
++			DataAmount int    `json:"dataAmount"`
++			DataUnit   string `json:"dataUnit"`
++		} `json:"bandwidth"`
++		EventCount struct {
++			TimeUnit   string `json:"timeUnit"`
++			UnitTime   int    `json:"unitTime"`
++			EventCount int    `json:"eventCount"`
++		} `json:"eventCount"`
++	} `json:"defaultLimit"`
++}
++
++type ApplicationThrottlingPolicy struct {
++	PolicyId     string `json:"policyId"`
++	PolicyName   string `json:"policyName"`
++	DisplayName  string `json:"displayName"`
++	Description  string `json:"description"`
++	IsDeployed   bool   `json:"isDeployed"`
++	Type         string `json:"type"`
++	DefaultLimit struct {
++		Type         string `json:"type"`
++		RequestCount struct {
++			TimeUnit     string `json:"timeUnit"`
++			UnitTime     int    `json:"unitTime"`
++			RequestCount int    `json:"requestCount"`
++		} `json:"requestCount"`
++		Bandwidth struct {
++			TimeUnit   string `json:"timeUnit"`
++			UnitTime   int    `json:"unitTime"`
++			DataAmount int    `json:"dataAmount"`
++			DataUnit   string `json:"dataUnit"`
++		} `json:"bandwidth"`
++		EventCount struct {
++			TimeUnit   string `json:"timeUnit"`
++			UnitTime   int    `json:"unitTime"`
++			EventCount int    `json:"eventCount"`
++		} `json:"eventCount"`
++	} `json:"defaultLimit"`
++}
++
++type AdvancedThrottlingPolicy struct {
++	PolicyId     string `json:"policyId"`
++	PolicyName   string `json:"policyName"`
++	DisplayName  string `json:"displayName"`
++	Description  string `json:"description"`
++	IsDeployed   bool   `json:"isDeployed"`
++	Type         string `json:"type"`
++	DefaultLimit struct {
++		Type         string `json:"type"`
++		RequestCount struct {
++			TimeUnit     string `json:"timeUnit"`
++			UnitTime     int    `json:"unitTime"`
++			RequestCount int    `json:"requestCount"`
++		} `json:"requestCount"`
++		Bandwidth struct {
++			TimeUnit   string `json:"timeUnit"`
++			UnitTime   int    `json:"unitTime"`
++			DataAmount int    `json:"dataAmount"`
++			DataUnit   string `json:"dataUnit"`
++		} `json:"bandwidth"`
++		EventCount struct {
++			TimeUnit   string `json:"timeUnit"`
++			UnitTime   int    `json:"unitTime"`
++			EventCount int    `json:"eventCount"`
++		} `json:"eventCount"`
++	} `json:"defaultLimit"`
++}
++
++type CustomThrottlingPolicy struct {
++	PolicyId    string `json:"policyId"`
++	PolicyName  string `json:"policyName"`
++	Description string `json:"description"`
++	IsDeployed  bool   `json:"isDeployed"`
++	SiddhiQuery string `json:"siddhiQuery"`
++	KeyTemplate string `json:"keyTemplate"`
++}
++
++type DenyThrottlingPolicy struct {
++	ConditionId     string      `json:"conditionId"`
++	ConditionType   string      `json:"conditionType"`
++	ConditionValue  interface{} `json:"conditionValue"`
++	ConditionStatus bool        `json:"conditionStatus"`
++}
++
++////Deny policy should be added
++
++//////////////////////////////////////////////////////////////////////////////////////
++
+ //ThrottlingPolicy
+ type ThrottlingPolicy struct {
+ 	Name                        string      `json:"name"`
