@@ -5,7 +5,9 @@ environments:
               <api_1_name>-<api_1_version>:
                   endpoints:
                       production:
+                          url:
                       sandbox:
+                          url:
                   security:
                       enabled:
                       type:
@@ -31,7 +33,9 @@ environments:
               <api_2_name>-<api_2_version>:
                   endpoints:
                       production:
+                          url:
                       sandbox:
+                          url:
                   security:
                       enabled:
                       type:
