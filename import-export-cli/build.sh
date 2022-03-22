@@ -31,7 +31,7 @@ function detectPlatformSpecificBuild() {
 }
 
 
-while getopts :t:v:f:c FLAG; do
+while getopts :t:v:fc FLAG; do
   case $FLAG in
     c)
       cgo_enabled=0
