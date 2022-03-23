@@ -28,52 +28,53 @@ import (
 	"os"
 )
 
-func ImportThrottlingPolicyToEnv(accessOAuthToken string, importEnvironment string, importThrottlingPolicyFile string) error {
+func ImportThrottlingPolicyToEnv(accessOAuthToken string, importEnvironment string, importThrottlingPolicyFile string, importThrottlePolicyUpdate bool) error {
 	adminEndpoint := utils.GetAdminEndpointOfEnv(importEnvironment, utils.MainConfigFilePath)
-	return ImportThrottlingPolicy(accessOAuthToken, adminEndpoint, importThrottlingPolicyFile)
+	return ImportThrottlingPolicy(accessOAuthToken, adminEndpoint, importThrottlingPolicyFile, importThrottlePolicyUpdate)
 }
 
-func ImportThrottlingPolicy(accessOAuthToken string, adminEndpoint string, importPath string) error {
-	//exportDirectory := filepath.Join(utils.ExportDirectory, utils.ExportedApisDirName)
-	//resolvedThrottlingPolicyFilePath, err := resolveImportFilePath(importPath, exportDirectory)
-	//if err != nil {
-	//	return err
-	//}
-	//utils.Logln(utils.LogPrefixInfo+"throttling Policy Location:", resolvedThrottlingPolicyFilePath)
+func ImportThrottlingPolicy(accessOAuthToken string, adminEndpoint string, importPath string, importThrottlePolicyUpdate bool) error {
 
-	utils.Logln(utils.LogPrefixInfo + "Creating workspace")
-	//tmpPath, err := utils.GetTempCloneFromDirOrZip(resolvedThrottlingPolicyFilePath)
-	//if err != nil {
-	//	return err
-	//}
-	uri := adminEndpoint + "/throttling/deny-policies"
-	/////////////////////////////////
 	if _, err := os.Stat(importPath); err != nil {
 		if !os.IsNotExist(err) {
 			return err
 		}
 	}
 
-	//path, data, err := resolveYamlOrJSON(importPath)
-	//fmt.Println(path)
-	//fmt.Println(data)
-	//if err != nil {
-	//	utils.Logln(utils.LogPrefixError, err)
-	//	return err
-	//}
-	//fmt.Println(uri)
-	//fmt.Println(importPath)
-	tmpPath := importPath
-	extraParams := map[string]string{}
-	err := importThrottlingPolicy(uri, tmpPath, accessOAuthToken, extraParams, true)
+	_, data, err := resolveYamlOrJSON(importPath)
+	if err != nil {
+		utils.Logln(utils.LogPrefixError, err)
+		return err
+	}
+
+	err, ThrottlingPolicyType, PolicyInfo := ResolveThrottlingPolicyType(data)
+
+	if err != nil {
+		utils.Logln(utils.LogPrefixError, err)
+		return err
+	}
+
+	uri := adminEndpoint + "/throttling/policies"
+
+	switch ThrottlingPolicyType {
+	case "Subscription":
+		uri += "subscription"
+	case "app":
+		uri += "Application"
+	case "Deny":
+		uri = adminEndpoint + "/throttling/deny-policies"
+	case "Advanced":
+		uri += "advanced"
+	case "Custom":
+		uri += "custom"
+	}
+
+	err = importThrottlingPolicy(uri, PolicyInfo, accessOAuthToken, true, importThrottlePolicyUpdate)
 	return err
 }
 
-// importAPI imports an API to the API manager
-func importThrottlingPolicy(endpoint, filePath, accessToken string, extraParams map[string]string, isOauth bool) error {
-	resp, err := ExecuteThrottlingPolicyUploadRequest(endpoint, extraParams, "file",
-		filePath, accessToken, isOauth)
-	//fmt.Println(resp.RawResponse)
+func importThrottlingPolicy(endpoint string, PolicyDetails interface{}, accessToken string, isOauth bool, ThrottlePolicyUpdate bool) error {
+	resp, err := ExecuteThrottlingPolicyUploadRequest(endpoint, PolicyDetails, accessToken, isOauth)
 	utils.Logf("Response : %v", resp)
 	if err != nil {
 		utils.Logln(utils.LogPrefixError, err)
@@ -85,15 +86,20 @@ func importThrottlingPolicy(endpoint, filePath, accessToken string, extraParams 
 		return nil
 	} else {
 		// We have an HTTP error
+
+		if resp.StatusCode() == http.StatusConflict && ThrottlePolicyUpdate {
+			fmt.Println("Cannot Update")
+			//EXecuteThrottlePolicyupdate
+		}
 		fmt.Println("Error importing Throttling Policy.")
 		fmt.Println("Status: " + resp.Status())
 		fmt.Println("Response:", resp.IsSuccess())
+
 		return errors.New(resp.Status())
 	}
 }
 
-func ExecuteThrottlingPolicyUploadRequest(uri string, params map[string]string, paramName, path,
-	accessToken string, isOAuthToken bool) (*resty.Response, error) {
+func ExecuteThrottlingPolicyUploadRequest(uri string, PolicyDetails interface{}, accessToken string, isOAuthToken bool) (*resty.Response, error) {
 
 	headers := make(map[string]string)
 	if isOAuthToken {
@@ -104,54 +110,36 @@ func ExecuteThrottlingPolicyUploadRequest(uri string, params map[string]string, 
 	headers[utils.HeaderContentType] = "application/json"
 	headers[utils.HeaderAccept] = "application/json"
 	headers[utils.HeaderConnection] = utils.HeaderValueKeepAlive
-	fmt.Println(headers)
-	fmt.Println(uri)
-	type Data struct {
-		PolicyName   string `json:"policyName"`
-		DisplayName  string `json:"displayName"`
-		Description  string `json:"description"`
-		IsDeployed   bool   `json:"isDeployed"`
-		Type         string `json:"type"`
-		DefaultLimit struct {
-			Type         string `json:"type"`
-			RequestCount struct {
-				TimeUnit     string `json:"timeUnit"`
-				UnitTime     int    `json:"unitTime"`
-				RequestCount int    `json:"requestCount"`
-			} `json:"requestCount"`
-			Bandwidth struct {
-				TimeUnit   string `json:"timeUnit"`
-				UnitTime   int    `json:"unitTime"`
-				DataAmount int    `json:"dataAmount"`
-				DataUnit   string `json:"dataUnit"`
-			} `json:"bandwidth"`
-			EventCount struct {
-				TimeUnit   string `json:"timeUnit"`
-				UnitTime   int    `json:"unitTime"`
-				EventCount int    `json:"eventCount"`
-			} `json:"eventCount"`
-		} `json:"defaultLimit"`
-	}
 
-	json_string := `
-{
-"conditionId": "b513eb68-69e8-4c32-92cf-852c101363cf",
-"conditionType": "IP",
-"conditionValue": {
-"fixedIp": "192.168.1.1",
-"invert": false
-},
-"conditionStatus": true
-}
-`
-
-	var data utils.DenyThrottlingPolicy
-	err := json.Unmarshal([]byte(json_string), &data)
-
-	if err != nil {
-		utils.Logln(utils.LogPrefixError, err)
-		fmt.Println("Cannot unmarshal")
-	}
-	return utils.InvokePOSTRequest(uri, headers, data)
+	return utils.InvokePOSTRequest(uri, headers, PolicyDetails)
 	//return utils.InvokePUTRequestWithoutQueryParams(uri, headers, data)
+}
+
+func ResolveThrottlingPolicyType(data []byte) (error, string, interface{}) {
+	var GeneralPolicy utils.GeneralThrottlingPolicy
+	var DenyPolicy utils.DenyThrottlingPolicy
+	var CustomPolicy utils.CustomThrottlingPolicy
+	err := json.Unmarshal(data, &GeneralPolicy)
+
+	if GeneralPolicy.Type == "AdvancedThrottlePolicyInfo" && err == nil {
+		return err, "Advanced", GeneralPolicy
+	}
+	if GeneralPolicy.Type == "ApplicationThrottlePolicy" && err == nil {
+		return err, "Application", GeneralPolicy
+	}
+	if GeneralPolicy.Type == "SubscriptionThrottlePolicy" && err == nil {
+		return err, "Subscription", GeneralPolicy
+	}
+	if GeneralPolicy.Type == "" && err == nil {
+		err = json.Unmarshal(data, &CustomPolicy)
+		if CustomPolicy.SiddhiQuery != "" && err == nil {
+			return err, "Custom", CustomPolicy
+		}
+		err = json.Unmarshal(data, &DenyPolicy)
+		if DenyPolicy.ConditionId != "" && err == nil {
+			return err, "Deny", DenyPolicy
+		}
+
+	}
+	return err, "", GeneralPolicy
 }

@@ -27,22 +27,22 @@ import (
 
 var (
 	importThrottlingPolicyFile string
+	importThrottlePolicyUpdate bool
 )
 
 const (
-	// ImportAPI command related usage info
+	// ImportThrottlePolicy command related usage info
 	ImportThrottlingPolicyCmdLiteral   = "throttlepolicy"
 	importThrottlingPolicyCmdShortDesc = "Import Throttling Policy"
 	importThrottlingPolicyCmdLongDesc  = "Import a Throttling Policy to an environment"
 )
 
-const importThrottlingPolicyCmdExamples = utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportThrottlingPolicyCmdLiteral + ` -f qa/customadvanced.zip -e dev
-` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportThrottlingPolicyCmdLiteral + ` -f Env1/Exported/sub1.zip -e production
-` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportThrottlingPolicyCmdLiteral + ` -f ~/myapi -e production 
-` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportThrottlingPolicyCmdLiteral + ` -f ~/myapi -e production
+const importThrottlingPolicyCmdExamples = utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportThrottlingPolicyCmdLiteral + ` -f qa/customadvanced -e dev
+` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportThrottlingPolicyCmdLiteral + ` -f Env1/Exported/sub1 -e production
+` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportThrottlingPolicyCmdLiteral + ` -f ~/CustomPolicy -e production --u
+` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportThrottlingPolicyCmdLiteral + ` -f ~/mythottlepolicy -e production --update
 NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory`
 
-// ImportAPICmd represents the importAPI command
 var ImportThrottlingPolicyCmd = &cobra.Command{
 	Use: ImportThrottlingPolicyCmdLiteral + " --file <path-to-api> --environment " +
 		"<environment>",
@@ -59,7 +59,7 @@ var ImportThrottlingPolicyCmd = &cobra.Command{
 		if err != nil {
 			utils.HandleErrorAndExit("Error while getting an access token for importing Throttling Policy", err)
 		}
-		err = impl.ImportThrottlingPolicyToEnv(accessOAuthToken, importEnvironment, importThrottlingPolicyFile)
+		err = impl.ImportThrottlingPolicyToEnv(accessOAuthToken, importEnvironment, importThrottlingPolicyFile, importThrottlePolicyUpdate)
 		if err != nil {
 			utils.HandleErrorAndExit("Error importing throttling Policy", err)
 			return
@@ -74,6 +74,8 @@ func init() {
 		"File path of the Throttling Policy to be imported")
 	ImportThrottlingPolicyCmd.Flags().StringVarP(&importEnvironment, "environment", "e",
 		"", "Environment from the which the Throttling Policy should be imported")
+	ImportThrottlingPolicyCmd.Flags().BoolVarP(&importThrottlePolicyUpdate, "update", "u", false, "Update an "+
+		"existing Throttling Policy or create a new Throttling Policy")
 	// Mark required flags
 	_ = ImportThrottlingPolicyCmd.MarkFlagRequired("environment")
 	_ = ImportThrottlingPolicyCmd.MarkFlagRequired("file")

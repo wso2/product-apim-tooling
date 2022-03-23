@@ -419,6 +419,35 @@ type DenyThrottlingPolicy struct {
 	ConditionStatus bool        `json:"conditionStatus"`
 }
 
+//For subscription, application and advanced throttling policies
+type GeneralThrottlingPolicy struct {
+	PolicyId     string `json:"policyId"`
+	PolicyName   string `json:"policyName"`
+	DisplayName  string `json:"displayName"`
+	Description  string `json:"description"`
+	IsDeployed   bool   `json:"isDeployed"`
+	Type         string `json:"type"`
+	DefaultLimit struct {
+		Type         string `json:"type"`
+		RequestCount struct {
+			TimeUnit     string `json:"timeUnit"`
+			UnitTime     int    `json:"unitTime"`
+			RequestCount int    `json:"requestCount"`
+		} `json:"requestCount"`
+		Bandwidth struct {
+			TimeUnit   string `json:"timeUnit"`
+			UnitTime   int    `json:"unitTime"`
+			DataAmount int    `json:"dataAmount"`
+			DataUnit   string `json:"dataUnit"`
+		} `json:"bandwidth"`
+		EventCount struct {
+			TimeUnit   string `json:"timeUnit"`
+			UnitTime   int    `json:"unitTime"`
+			EventCount int    `json:"eventCount"`
+		} `json:"eventCount"`
+	} `json:"defaultLimit"`
+}
+
 ////Deny policy should be added
 
 //////////////////////////////////////////////////////////////////////////////////////
