@@ -35,13 +35,6 @@ func ExportThrottlingPoliciesFromEnv(accessToken, exportEnvironment string, expo
 	return exportThrottlePolicies(adminEndpoint, accessToken, exportThrottlePoliciesType)
 }
 
-// exportAPI function is used with export api command
-// @param name : Name of the API to be exported
-// @param version : Version of the API to be exported
-// @param provider : Provider of the API
-// @param publisherEndpoint : API Manager Publisher Endpoint for the environment
-// @param accessToken : Access Token for the resource
-// @return response Response in the form of *resty.Response
 func exportThrottlePolicies(adminEndpoint, accessToken string, ThrottlePoliciesType string) (*resty.Response, error) {
 	var policytype string
 	adminEndpoint = utils.AppendSlashToString(adminEndpoint)
@@ -73,14 +66,6 @@ func exportThrottlePolicies(adminEndpoint, accessToken string, ThrottlePoliciesT
 	return resp, nil
 }
 
-// WriteToZip
-// @param exportAPIName : Name of the API to be exported
-// @param exportAPIVersion: Version of the API to be exported
-// @param exportAPIRevisionNumber: Revision number of the api
-// @param zipLocationPath: Path to the export directory
-// @param runningExportApiCommand: Whether the export API command is running
-// @param resp : Response returned from making the HTTP request (only pass a 200 OK)
-// Exported API will be written to a zip file
 func ThrottlePoliciesWriteToZip(PolicyType, zipLocationPath string, runningExportThrottlePoliciesCommand bool, resp *resty.Response) {
 
 	switch PolicyType {
@@ -114,7 +99,7 @@ func WriteSubscriptionThrottlingPolicies(zipLocationPath string, resp *resty.Res
 	}
 
 	var ThrottlingPolicyListResponse utils.SubscriptionExportThrottlePolicyList
-
+	//fmt.Println(resp.String())
 	err = json.Unmarshal(resp.Body(), &ThrottlingPolicyListResponse)
 	if err != nil {
 		utils.HandleErrorAndExit("Error unmarshelling data", err)

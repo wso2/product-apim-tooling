@@ -54,13 +54,13 @@ func ImportThrottlingPolicy(accessOAuthToken string, adminEndpoint string, impor
 		return err
 	}
 
-	uri := adminEndpoint + "/throttling/policies"
+	uri := adminEndpoint + "/throttling/policies/"
 
 	switch ThrottlingPolicyType {
 	case "Subscription":
 		uri += "subscription"
-	case "app":
-		uri += "Application"
+	case "Application":
+		uri += "application"
 	case "Deny":
 		uri = adminEndpoint + "/throttling/deny-policies"
 	case "Advanced":
@@ -68,7 +68,7 @@ func ImportThrottlingPolicy(accessOAuthToken string, adminEndpoint string, impor
 	case "Custom":
 		uri += "custom"
 	}
-
+	fmt.Println(uri)
 	err = importThrottlingPolicy(uri, PolicyInfo, accessOAuthToken, true, importThrottlePolicyUpdate)
 	return err
 }

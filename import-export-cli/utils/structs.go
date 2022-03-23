@@ -320,13 +320,15 @@ type CustomExportThrottlePolicyList struct {
 
 //For exporting different throttling polcies////////////////////////////////////////////////////////
 type SubscriptionThrottlingPolicy struct {
-	PolicyId     string `json:"policyId"`
-	PolicyName   string `json:"policyName"`
-	DisplayName  string `json:"displayName"`
-	Description  string `json:"description"`
-	IsDeployed   bool   `json:"isDeployed"`
-	Type         string `json:"type"`
-	DefaultLimit struct {
+	PolicyId             string `json:"policyId"`
+	PolicyName           string `json:"policyName"`
+	DisplayName          string `json:"displayName"`
+	Description          string `json:"description"`
+	IsDeployed           bool   `json:"isDeployed"`
+	Type                 string `json:"type"`
+	GraphQLMaxComplexity int    `json:"graphQLMaxComplexity"`
+	GraphQLMaxDepth      int    `json:"graphQLMaxDepth"`
+	DefaultLimit         struct {
 		Type         string `json:"type"`
 		RequestCount struct {
 			TimeUnit     string `json:"timeUnit"`
@@ -345,6 +347,25 @@ type SubscriptionThrottlingPolicy struct {
 			EventCount int    `json:"eventCount"`
 		} `json:"eventCount"`
 	} `json:"defaultLimit"`
+	Monetization struct {
+		MonetizationPlan string `json:"monetizationPlan"`
+		Properties       struct {
+			CurrencyType    string `json:"currencyType"`
+			PricePerRequest string `json:"pricePerRequest"`
+			BillingCycle    string `json:"billingCycle"`
+			FixedPrice      string `json:"fixedPrice"`
+		} `json:"properties"`
+	} `json:"monetization"`
+	RateLimitCount    int    `json:"rateLimitCount"`
+	RateLimitTimeUnit string `json:"rateLimitTimeUnit"`
+	SubscriberCount   int    `json:"subscriberCount"`
+	CustomAttributes  []struct {
+		Name  string `json:"name"`
+		Value string `json:"value"`
+	} `json:"customAttributes"`
+	StopOnQuotaReach bool        `json:"stopOnQuotaReach"`
+	BillingPlan      string      `json:"billingPlan"`
+	Permissions      interface{} `json:"permissions"`
 }
 
 type ApplicationThrottlingPolicy struct {
