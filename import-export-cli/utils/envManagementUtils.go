@@ -164,7 +164,7 @@ func GetPublisherEndpointOfEnv(env, filePath string) string {
 	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
 	if !(envEndpoints.PublisherEndpoint == "" || envEndpoints == nil) {
 		envEndpoints.PublisherEndpoint = AppendSlashToString(envEndpoints.PublisherEndpoint)
-		return envEndpoints.AdminEndpoint + defaultPublisherApiImportExportSuffix
+		return envEndpoints.PublisherEndpoint + defaultPublisherApiImportExportSuffix
 	} else {
 		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
 		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
