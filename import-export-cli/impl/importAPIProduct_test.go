@@ -33,7 +33,7 @@ func TestExtractAPIProductInfoWithCorrectJSON(t *testing.T) {
 	// Correct json
 	content := `{
 	  "type": "api_product",
-      "version": "v4.0.0",
+      "version": "v4.1.0",
 	  "data": {
 		"id": "e4d0c1be-44e9-43ad-b434-f8e2f02dad11",
 		"name": "APIProductName",
@@ -62,7 +62,7 @@ func TestExtractAPIProductInfoWithMalformedJSON(t *testing.T) {
 	// Malformed json
 	content := `{
 		"type": "api_product",
-		"version": "v4.0.0",
+		"version": "v4.1.0",
 		"data": {
 		  "id": "e4d0c1be-44e9-43ad-b434-f8e2f02dad11",
 		  "name": "APIProductName",
