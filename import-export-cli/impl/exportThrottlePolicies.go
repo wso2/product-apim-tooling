@@ -89,7 +89,7 @@ func ThrottlePoliciesWriteToZip(PolicyType, zipLocationPath string, runningExpor
 }
 
 func WriteSubscriptionThrottlingPolicies(zipLocationPath string, resp *resty.Response) {
-
+	fmt.Println(resp.String())
 	zipLocationPath = filepath.Join(zipLocationPath, "Subscription-Policies")
 	var zipFilename string
 
@@ -151,7 +151,7 @@ func WriteApplicationThrottlingPolicies(zipLocationPath string, resp *resty.Resp
 }
 
 func WriteAdvancedThrottlingPolicies(zipLocationPath string, resp *resty.Response) {
-
+	fmt.Println(resp.String())
 	zipLocationPath = filepath.Join(zipLocationPath, "Advanced-Policies")
 	var zipFilename string
 

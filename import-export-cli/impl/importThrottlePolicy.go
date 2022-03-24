@@ -48,7 +48,7 @@ func ImportThrottlingPolicy(accessOAuthToken string, adminEndpoint string, impor
 	}
 
 	err, ThrottlingPolicyType, PolicyInfo := ResolveThrottlingPolicyType(data)
-
+	fmt.Println(ThrottlingPolicyType)
 	if err != nil {
 		utils.Logln(utils.LogPrefixError, err)
 		return err
@@ -89,7 +89,7 @@ func importThrottlingPolicy(endpoint string, PolicyDetails interface{}, accessTo
 
 		if resp.StatusCode() == http.StatusConflict && ThrottlePolicyUpdate {
 			fmt.Println("Cannot Update")
-			//EXecuteThrottlePolicyupdate
+			//Execute Throttle Policy update
 		}
 		fmt.Println("Error importing Throttling Policy.")
 		fmt.Println("Status: " + resp.Status())
@@ -112,23 +112,30 @@ func ExecuteThrottlingPolicyUploadRequest(uri string, PolicyDetails interface{},
 	headers[utils.HeaderConnection] = utils.HeaderValueKeepAlive
 
 	return utils.InvokePOSTRequest(uri, headers, PolicyDetails)
-	//return utils.InvokePUTRequestWithoutQueryParams(uri, headers, data)
+	//uri += "/7c5eae96-8347-412e-aaef-487e82c0afbb"
+	//return utils.InvokeDELETERequest(uri, headers)
+
 }
 
 func ResolveThrottlingPolicyType(data []byte) (error, string, interface{}) {
 	var GeneralPolicy utils.GeneralThrottlingPolicy
 	var DenyPolicy utils.DenyThrottlingPolicy
 	var CustomPolicy utils.CustomThrottlingPolicy
+	var SubscriptionPolicy utils.SubscriptionThrottlingPolicy
+	var AdvancedPolicy utils.AdvancedThrottlingPolicy
 	err := json.Unmarshal(data, &GeneralPolicy)
 
-	if GeneralPolicy.Type == "AdvancedThrottlePolicyInfo" && err == nil {
-		return err, "Advanced", GeneralPolicy
+	if (GeneralPolicy.Type == "AdvancedThrottlePolicyInfo" || GeneralPolicy.Type == "AdvancedThrottlePolicy") && err == nil {
+		err = json.Unmarshal(data, &AdvancedPolicy)
+		return err, "Advanced", AdvancedPolicy
 	}
 	if GeneralPolicy.Type == "ApplicationThrottlePolicy" && err == nil {
 		return err, "Application", GeneralPolicy
 	}
 	if GeneralPolicy.Type == "SubscriptionThrottlePolicy" && err == nil {
-		return err, "Subscription", GeneralPolicy
+		fmt.Println(SubscriptionPolicy)
+		err = json.Unmarshal(data, &SubscriptionPolicy)
+		return err, "Subscription", SubscriptionPolicy
 	}
 	if GeneralPolicy.Type == "" && err == nil {
 		err = json.Unmarshal(data, &CustomPolicy)
@@ -139,7 +146,6 @@ func ResolveThrottlingPolicyType(data []byte) (error, string, interface{}) {
 		if DenyPolicy.ConditionId != "" && err == nil {
 			return err, "Deny", DenyPolicy
 		}
-
 	}
 	return err, "", GeneralPolicy
 }
