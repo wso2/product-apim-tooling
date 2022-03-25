@@ -319,6 +319,7 @@ type CustomExportThrottlePolicyList struct {
 }
 
 //For exporting different throttling polcies////////////////////////////////////////////////////////
+
 type SubscriptionThrottlingPolicy struct {
 	PolicyName           string `json:"policyName"`
 	DisplayName          string `json:"displayName"`
@@ -350,63 +351,20 @@ type SubscriptionThrottlingPolicy struct {
 		MonetizationPlan string      `json:"monetizationPlan"`
 		Properties       interface{} `json:"properties"`
 	} `json:"monetization"`
-	RateLimitCount    int           `json:"rateLimitCount"`
-	RateLimitTimeUnit string        `json:"rateLimitTimeUnit"`
-	SubscriberCount   int           `json:"subscriberCount"`
-	CustomAttributes  []interface{} `json:"customAttributes"`
-	StopOnQuotaReach  bool          `json:"stopOnQuotaReach"`
-	BillingPlan       string        `json:"billingPlan"`
-	Permissions       struct {
+	RateLimitCount    int    `json:"rateLimitCount"`
+	RateLimitTimeUnit string `json:"rateLimitTimeUnit"`
+	SubscriberCount   int    `json:"subscriberCount"`
+	CustomAttributes  []struct {
+		Name  string `json:"name"`
+		Value string `json:"value"`
+	} `json:"customAttributes"`
+	StopOnQuotaReach bool   `json:"stopOnQuotaReach"`
+	BillingPlan      string `json:"billingPlan"`
+	Permissions      struct {
 		PermissionType string   `json:"permissionType"`
 		Roles          []string `json:"roles"`
 	} `json:"permissions"`
 }
-
-//type SubscriptionThrottlingPolicy struct {
-//	PolicyName           string `json:"policyName"`
-//	DisplayName          string `json:"displayName"`
-//	Description          string `json:"description"`
-//	IsDeployed           bool   `json:"isDeployed"`
-//	Type                 string `json:"type"`
-//	GraphQLMaxComplexity int    `json:"graphQLMaxComplexity"`
-//	GraphQLMaxDepth      int    `json:"graphQLMaxDepth"`
-//	DefaultLimit         struct {
-//		Type         string `json:"type"`
-//		RequestCount struct {
-//			TimeUnit     string `json:"timeUnit"`
-//			UnitTime     int    `json:"unitTime"`
-//			RequestCount int    `json:"requestCount"`
-//		} `json:"requestCount"`
-//		Bandwidth struct {
-//			TimeUnit   string `json:"timeUnit"`
-//			UnitTime   int    `json:"unitTime"`
-//			DataAmount int    `json:"dataAmount"`
-//			DataUnit   string `json:"dataUnit"`
-//		} `json:"bandwidth"`
-//		EventCount struct {
-//			TimeUnit   string `json:"timeUnit"`
-//			UnitTime   int    `json:"unitTime"`
-//			EventCount int    `json:"eventCount"`
-//		} `json:"eventCount"`
-//	} `json:"defaultLimit"`
-//	Monetization struct {
-//		MonetizationPlan string `json:"monetizationPlan"`
-//		Properties       struct {
-//			Property1 string `json:"property1"`
-//			Property2 string `json:"property2"`
-//		} `json:"properties"`
-//	} `json:"monetization"`
-//	RateLimitCount    int           `json:"rateLimitCount"`
-//	RateLimitTimeUnit string        `json:"rateLimitTimeUnit"`
-//	SubscriberCount   int           `json:"subscriberCount"`
-//	CustomAttributes  []interface{} `json:"customAttributes"`
-//	StopOnQuotaReach  bool          `json:"stopOnQuotaReach"`
-//	BillingPlan       string        `json:"billingPlan"`
-//	Permissions       struct {
-//		PermissionType string   `json:"permissionType"`
-//		Roles          []string `json:"roles"`
-//	} `json:"permissions"`
-//}
 
 type ApplicationThrottlingPolicy struct {
 	PolicyId     string `json:"policyId"`

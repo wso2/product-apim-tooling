@@ -48,7 +48,7 @@ func ImportThrottlingPolicy(accessOAuthToken string, adminEndpoint string, impor
 	}
 
 	err, ThrottlingPolicyType, PolicyInfo := ResolveThrottlingPolicyType(data)
-	fmt.Println(ThrottlingPolicyType)
+
 	if err != nil {
 		utils.Logln(utils.LogPrefixError, err)
 		return err
@@ -68,7 +68,6 @@ func ImportThrottlingPolicy(accessOAuthToken string, adminEndpoint string, impor
 	case "Custom":
 		uri += "custom"
 	}
-	fmt.Println(uri)
 	err = importThrottlingPolicy(uri, PolicyInfo, accessOAuthToken, true, importThrottlePolicyUpdate)
 	return err
 }
@@ -133,7 +132,6 @@ func ResolveThrottlingPolicyType(data []byte) (error, string, interface{}) {
 		return err, "Application", GeneralPolicy
 	}
 	if GeneralPolicy.Type == "SubscriptionThrottlePolicy" && err == nil {
-		fmt.Println(SubscriptionPolicy)
 		err = json.Unmarshal(data, &SubscriptionPolicy)
 		return err, "Subscription", SubscriptionPolicy
 	}

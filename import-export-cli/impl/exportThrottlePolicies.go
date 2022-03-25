@@ -25,7 +25,6 @@ import (
 	"github.com/json-iterator/go"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"io/ioutil"
-	"os"
 	"path/filepath"
 )
 
@@ -67,29 +66,28 @@ func exportThrottlePolicies(adminEndpoint, accessToken string, ThrottlePoliciesT
 }
 
 func ThrottlePoliciesWriteToZip(PolicyType, zipLocationPath string, runningExportThrottlePoliciesCommand bool, resp *resty.Response) {
-
+	var path = ""
 	switch PolicyType {
 	case "sub":
-		WriteSubscriptionThrottlingPolicies(zipLocationPath, resp)
+		path = WriteSubscriptionThrottlingPolicies(zipLocationPath, resp)
 	case "app":
-		WriteApplicationThrottlingPolicies(zipLocationPath, resp)
+		path = WriteApplicationThrottlingPolicies(zipLocationPath, resp)
 	case "deny":
-		WriteDenyThrottlingPolicies(zipLocationPath, resp)
+		path = WriteDenyThrottlingPolicies(zipLocationPath, resp)
 	case "advanced":
-		WriteAdvancedThrottlingPolicies(zipLocationPath, resp)
+		path = WriteAdvancedThrottlingPolicies(zipLocationPath, resp)
 	case "custom":
-		WriteCustomThrottlingPolicies(zipLocationPath, resp)
+		path = WriteCustomThrottlingPolicies(zipLocationPath, resp)
 	}
 	// Output the final zip file location.
 	if runningExportThrottlePoliciesCommand {
 		fmt.Println("Successfully exported Throttling Policies!")
-		fmt.Println("Find the exported Throttling Policies at " + zipLocationPath)
+		fmt.Println("Find the exported Throttling Policies at " + path)
 	}
 
 }
 
-func WriteSubscriptionThrottlingPolicies(zipLocationPath string, resp *resty.Response) {
-	fmt.Println(resp.String())
+func WriteSubscriptionThrottlingPolicies(zipLocationPath string, resp *resty.Response) string {
 	zipLocationPath = filepath.Join(zipLocationPath, "Subscription-Policies")
 	var zipFilename string
 
@@ -99,7 +97,6 @@ func WriteSubscriptionThrottlingPolicies(zipLocationPath string, resp *resty.Res
 	}
 
 	var ThrottlingPolicyListResponse utils.SubscriptionExportThrottlePolicyList
-	//fmt.Println(resp.String())
 	err = json.Unmarshal(resp.Body(), &ThrottlingPolicyListResponse)
 	if err != nil {
 		utils.HandleErrorAndExit("Error unmarshelling data", err)
@@ -117,10 +114,10 @@ func WriteSubscriptionThrottlingPolicies(zipLocationPath string, resp *resty.Res
 		}
 		_, _ = WriteThrottlingPolicy(zipLocationPath, zipFilename, marshaledData)
 	}
+	return zipLocationPath
 }
 
-func WriteApplicationThrottlingPolicies(zipLocationPath string, resp *resty.Response) {
-
+func WriteApplicationThrottlingPolicies(zipLocationPath string, resp *resty.Response) string {
 	zipLocationPath = filepath.Join(zipLocationPath, "Application-Policies")
 	var zipFilename string
 
@@ -148,10 +145,10 @@ func WriteApplicationThrottlingPolicies(zipLocationPath string, resp *resty.Resp
 		}
 		_, _ = WriteThrottlingPolicy(zipLocationPath, zipFilename, marshaledData)
 	}
+	return zipLocationPath
 }
 
-func WriteAdvancedThrottlingPolicies(zipLocationPath string, resp *resty.Response) {
-	fmt.Println(resp.String())
+func WriteAdvancedThrottlingPolicies(zipLocationPath string, resp *resty.Response) string {
 	zipLocationPath = filepath.Join(zipLocationPath, "Advanced-Policies")
 	var zipFilename string
 
@@ -179,10 +176,10 @@ func WriteAdvancedThrottlingPolicies(zipLocationPath string, resp *resty.Respons
 		}
 		_, _ = WriteThrottlingPolicy(zipLocationPath, zipFilename, marshaledData)
 	}
+	return zipLocationPath
 }
 
-func WriteCustomThrottlingPolicies(zipLocationPath string, resp *resty.Response) {
-
+func WriteCustomThrottlingPolicies(zipLocationPath string, resp *resty.Response) string {
 	zipLocationPath = filepath.Join(zipLocationPath, "Custom-Policies")
 	var zipFilename string
 
@@ -210,10 +207,10 @@ func WriteCustomThrottlingPolicies(zipLocationPath string, resp *resty.Response)
 		}
 		_, _ = WriteThrottlingPolicy(zipLocationPath, zipFilename, marshaledData)
 	}
+	return zipLocationPath
 }
 
-func WriteDenyThrottlingPolicies(zipLocationPath string, resp *resty.Response) {
-
+func WriteDenyThrottlingPolicies(zipLocationPath string, resp *resty.Response) string {
 	zipLocationPath = filepath.Join(zipLocationPath, "Deny-Policies")
 	var zipFilename string
 
@@ -223,7 +220,6 @@ func WriteDenyThrottlingPolicies(zipLocationPath string, resp *resty.Response) {
 	}
 
 	var ThrottlingPolicyListResponse utils.DenyExportThrottlePolicyList
-	fmt.Println(resp)
 	err = json.Unmarshal(resp.Body(), &ThrottlingPolicyListResponse)
 	if err != nil {
 		utils.HandleErrorAndExit("Error unmarshelling data", err)
@@ -241,8 +237,10 @@ func WriteDenyThrottlingPolicies(zipLocationPath string, resp *resty.Response) {
 		}
 		_, _ = WriteThrottlingPolicy(zipLocationPath, zipFilename, marshaledData)
 	}
+	return zipLocationPath
 }
 
+//Writing as .yaml
 //func WriteThrottlingPolicy(zipLocationPath string, zipFilename string, marshaledData []byte) (string, error) {
 //	TempJsonFile := zipFilename
 //	TempJsonFile += ".yaml"
@@ -269,27 +267,38 @@ func WriteDenyThrottlingPolicies(zipLocationPath string, resp *resty.Response) {
 //	return targetZipFile, err
 //}
 
-//////////////////////////////////////////////////
-func WriteThrottlingPolicy(zipLocationPath string, zipFilename string, marshaledData []byte) (string, error) {
-	TempJsonFile := zipFilename
-	TempJsonFile += ".json"
-	tmpDir, err := ioutil.TempDir("", "apim")
+////////////////////////////////////////////////////
+//func WriteThrottlingPolicy(zipLocationPath string, zipFilename string, marshaledData []byte) (string, error) {
+//	TempJsonFile := zipFilename
+//	TempJsonFile += ".json"
+//	tmpDir, err := ioutil.TempDir("", "apim")
+//	if err != nil {
+//		_ = os.RemoveAll(tmpDir)
+//		return "", err
+//	}
+//
+//	tempFile := filepath.Join(tmpDir, TempJsonFile)
+//
+//	err = ioutil.WriteFile(tempFile, marshaledData, 0644)
+//	if err != nil {
+//		utils.HandleErrorAndExit("Error writing temp json", err)
+//	}
+//
+//	targetZipFile := filepath.Join(zipLocationPath, zipFilename)
+//	targetZipFile += ".zip"
+//	err = utils.Zip(tempFile, targetZipFile)
+//	return targetZipFile, err
+//}
+
+func WriteThrottlingPolicy(FilePath string, JsonFilename string, marshaledData []byte) (string, error) {
+
+	JsonFilename += ".json"
+	Filename := filepath.Join(FilePath, JsonFilename)
+	err := ioutil.WriteFile(Filename, marshaledData, 0644)
 	if err != nil {
-		_ = os.RemoveAll(tmpDir)
-		return "", err
+		utils.HandleErrorAndExit("Error writing json", err)
 	}
-
-	tempFile := filepath.Join(tmpDir, TempJsonFile)
-
-	err = ioutil.WriteFile(tempFile, marshaledData, 0644)
-	if err != nil {
-		utils.HandleErrorAndExit("Error writing temp json", err)
-	}
-
-	targetZipFile := filepath.Join(zipLocationPath, zipFilename)
-	targetZipFile += ".zip"
-	err = utils.Zip(tempFile, targetZipFile)
-	return targetZipFile, err
+	return FilePath, err
 }
 
 /////////////////////////////////////////////////////////
