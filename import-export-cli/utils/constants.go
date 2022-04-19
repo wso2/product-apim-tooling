@@ -66,7 +66,8 @@ var DefaultAPISpecFilePath = filepath.Join(ConfigDirPath, DefaultAPISpecFileName
 
 const DefaultExportDirName = "exported"
 const ExportedApisDirName = "apis"
-const ExportedThrottlePoliciesDirName = "throttle-policies"
+const ExportedPoliciesDirName = "policies"
+const ExportedThrottlePoliciesDirName = "rate-limiting"
 const ExportedApiProductsDirName = "api-products"
 const ExportedAppsDirName = "apps"
 const ExportedMigrationArtifactsDirName = "migration"

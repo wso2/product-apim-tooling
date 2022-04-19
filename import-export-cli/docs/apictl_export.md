@@ -42,4 +42,5 @@ apictl export app -n SampleApp -o admin -e dev
 * [apictl export api-product](apictl_export_api-product.md)	 - Export API Product
 * [apictl export apis](apictl_export_apis.md)	 - Export APIs for migration
 * [apictl export app](apictl_export_app.md)	 - Export App
+* [apictl export throttlepolicies](apictl_export_throttlepolicies.md)	 - Export Throttling Policies
 

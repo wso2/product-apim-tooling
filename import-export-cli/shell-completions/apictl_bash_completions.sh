@@ -1243,6 +1243,49 @@ _apictl_export_help()
     noun_aliases=()
 }
 
+_apictl_export_throttlepolicies()
+{
+    last_command="apictl_export_throttlepolicies"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--environment=")
+    two_word_flags+=("--environment")
+    two_word_flags+=("-e")
+    local_nonpersistent_flags+=("--environment")
+    local_nonpersistent_flags+=("--environment=")
+    local_nonpersistent_flags+=("-e")
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    local_nonpersistent_flags+=("-h")
+    flags+=("--type=")
+    two_word_flags+=("--type")
+    two_word_flags+=("-t")
+    local_nonpersistent_flags+=("--type")
+    local_nonpersistent_flags+=("--type=")
+    local_nonpersistent_flags+=("-t")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_flag+=("--environment=")
+    must_have_one_flag+=("-e")
+    must_have_one_flag+=("--type=")
+    must_have_one_flag+=("-t")
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
 _apictl_export()
 {
     last_command="apictl_export"
@@ -1255,6 +1298,7 @@ _apictl_export()
     commands+=("apis")
     commands+=("app")
     commands+=("help")
+    commands+=("throttlepolicies")
 
     flags=()
     two_word_flags=()
@@ -2076,6 +2120,53 @@ _apictl_import_help()
     noun_aliases=()
 }
 
+_apictl_import_throttlepolicy()
+{
+    last_command="apictl_import_throttlepolicy"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--environment=")
+    two_word_flags+=("--environment")
+    two_word_flags+=("-e")
+    local_nonpersistent_flags+=("--environment")
+    local_nonpersistent_flags+=("--environment=")
+    local_nonpersistent_flags+=("-e")
+    flags+=("--file=")
+    two_word_flags+=("--file")
+    two_word_flags+=("-f")
+    local_nonpersistent_flags+=("--file")
+    local_nonpersistent_flags+=("--file=")
+    local_nonpersistent_flags+=("-f")
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    local_nonpersistent_flags+=("-h")
+    flags+=("--update")
+    flags+=("-u")
+    local_nonpersistent_flags+=("--update")
+    local_nonpersistent_flags+=("-u")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_flag+=("--environment=")
+    must_have_one_flag+=("-e")
+    must_have_one_flag+=("--file=")
+    must_have_one_flag+=("-f")
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
 _apictl_import()
 {
     last_command="apictl_import"
@@ -2087,6 +2178,7 @@ _apictl_import()
     commands+=("api-product")
     commands+=("app")
     commands+=("help")
+    commands+=("throttlepolicy")
 
     flags=()
     two_word_flags=()

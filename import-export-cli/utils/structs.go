@@ -280,6 +280,44 @@ type Subscription struct {
 	RedirectionParams interface{} `json:"redirectionParams"`
 }
 
+////////////////////////////////////////////////////////////
+type ExportThrottlePolicyGeneral struct {
+	Type    string `json:"type"`
+	Subtype string `json:"subtype"`
+	Version string `json:"version"`
+	Data    struct {
+		PolicyName string `json:"policyName"`
+	} `json:"data"`
+}
+
+type ExportThrottlePolicySubscription struct {
+	Type    string                       `json:"type"`
+	Subtype string                       `json:"subtype"`
+	Version string                       `json:"version"`
+	Data    SubscriptionThrottlingPolicy `json:"data"`
+}
+
+type ExportThrottlePolicyApplication struct {
+	Type    string                      `json:"type"`
+	Subtype string                      `json:"subtype"`
+	Version string                      `json:"version"`
+	Data    ApplicationThrottlingPolicy `json:"data"`
+}
+
+type ExportThrottlePolicyAdvanced struct {
+	Type    string                   `json:"type"`
+	Subtype string                   `json:"subtype"`
+	Version string                   `json:"version"`
+	Data    AdvancedThrottlingPolicy `json:"data"`
+}
+
+type ExportThrottlePolicyCustom struct {
+	Type    string                 `json:"type"`
+	Subtype string                 `json:"subtype"`
+	Version string                 `json:"version"`
+	Data    CustomThrottlingPolicy `json:"data"`
+}
+
 //Throttling Policies List response struct
 type ThrottlingPoliciesList struct {
 	Count      int                `json:"count"`
@@ -321,6 +359,7 @@ type CustomExportThrottlePolicyList struct {
 //For exporting different throttling polcies////////////////////////////////////////////////////////
 
 type SubscriptionThrottlingPolicy struct {
+	PolicyId             string `json:"policyId"`
 	PolicyName           string `json:"policyName"`
 	DisplayName          string `json:"displayName"`
 	Description          string `json:"description"`
@@ -395,6 +434,7 @@ type ApplicationThrottlingPolicy struct {
 }
 
 type AdvancedThrottlingPolicy struct {
+	PolicyId     string `json:"policyId"`
 	PolicyName   string `json:"policyName"`
 	DisplayName  string `json:"displayName"`
 	Description  string `json:"description"`

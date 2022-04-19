@@ -25,7 +25,7 @@ import (
 
 // Export command related usage Info
 const ExportCmdLiteral = "export"
-const exportCmdShortDesc = "Export an API/API Product/Application in an environment"
+const exportCmdShortDesc = "Export an API/API Product/Application/Policy in an environment"
 
 const exportCmdLongDesc = `Export an API available in the environment specified by flag (--environment, -e)
 Export APIs available in the environment specified by flag (--environment, -e)

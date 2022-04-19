@@ -37,7 +37,8 @@ func ExportThrottlingPoliciesFromEnv(accessToken, exportEnvironment string, expo
 func exportThrottlePolicies(adminEndpoint, accessToken string, ThrottlePoliciesType string) (*resty.Response, error) {
 	var policytype string
 	adminEndpoint = utils.AppendSlashToString(adminEndpoint)
-	ThrottlePolicyresource := "throttling/policies/"
+	ThrottlePolicyresource := "throttling/policies/export?name=TestPolicy&type=custom&format=JSON"
+	//ThrottlePolicyresource := "throttling/policies/"
 	switch ThrottlePoliciesType {
 	case "sub":
 		policytype = "subscription"
@@ -50,14 +51,21 @@ func exportThrottlePolicies(adminEndpoint, accessToken string, ThrottlePoliciesT
 		policytype = "advanced"
 	case "custom":
 		policytype = "custom"
+	case "test":
+		policytype = "export"
 	}
 
-	url := adminEndpoint + ThrottlePolicyresource + policytype
+	url := adminEndpoint + ThrottlePolicyresource
+
+	policytype += "hi"
 
 	utils.Logln(utils.LogPrefixInfo+"ExportThrottlingPolicy: URL:", url)
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 	resp, err := utils.InvokeGETRequest(url, headers)
+	fmt.Println(ThrottlePolicyresource)
+
+	fmt.Println(resp.String())
 	if err != nil {
 		return nil, err
 	}
