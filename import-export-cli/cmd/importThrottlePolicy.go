@@ -31,8 +31,8 @@ var (
 )
 
 const (
-	// ImportThrottlePolicy command related usage info
-	ImportThrottlingPolicyCmdLiteral   = "throttlepolicy"
+	// ImportThrottlingPolicyCmdLiteral command related usage info
+	ImportThrottlingPolicyCmdLiteral   = "rate-limiting"
 	importThrottlingPolicyCmdShortDesc = "Import Throttling Policy"
 	importThrottlingPolicyCmdLongDesc  = "Import a Throttling Policy to an environment"
 )
@@ -69,7 +69,7 @@ var ImportThrottlingPolicyCmd = &cobra.Command{
 
 // init using Cobra
 func init() {
-	ImportCmd.AddCommand(ImportThrottlingPolicyCmd)
+	ImportPolicyCmd.AddCommand(ImportThrottlingPolicyCmd)
 	ImportThrottlingPolicyCmd.Flags().StringVarP(&importThrottlingPolicyFile, "file", "f", "",
 		"File path of the Throttling Policy to be imported")
 	ImportThrottlingPolicyCmd.Flags().StringVarP(&importEnvironment, "environment", "e",

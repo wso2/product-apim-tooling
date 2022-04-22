@@ -290,6 +290,13 @@ type ExportThrottlePolicyGeneral struct {
 	} `json:"data"`
 }
 
+type ExportThrottlePolicy struct {
+	Type    string      `json:"type"`
+	Subtype string      `json:"subtype"`
+	Version string      `json:"version"`
+	Data    interface{} `json:"data"`
+}
+
 type ExportThrottlePolicySubscription struct {
 	Type    string                       `json:"type"`
 	Subtype string                       `json:"subtype"`

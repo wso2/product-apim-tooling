@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-resty/resty/v2"
-	"github.com/json-iterator/go"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -121,7 +121,6 @@ func ResolveThrottlePolicy(exportThrottlePolicyFormat string, resp *resty.Respon
 			utils.HandleErrorAndExit("Error marshaling policy content", err)
 		}
 	}
-	fmt.Println(exportThrottlePolicyFormat)
 	if exportThrottlePolicyFormat == utils.DefaultExportFormat {
 		m := yaml.MapSlice{}
 		err := yaml.Unmarshal(marshaledData, &m)
@@ -132,7 +131,6 @@ func ResolveThrottlePolicy(exportThrottlePolicyFormat string, resp *resty.Respon
 		marshaledData, _ = yaml.Marshal(m)
 	} else {
 		fileName += ".json"
-
 	}
 	return fileName, marshaledData
 }

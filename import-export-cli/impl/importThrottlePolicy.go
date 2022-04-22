@@ -26,6 +26,7 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 func ImportThrottlingPolicyToEnv(accessOAuthToken string, importEnvironment string, importThrottlingPolicyFile string, importThrottlePolicyUpdate bool) error {
@@ -47,28 +48,19 @@ func ImportThrottlingPolicy(accessOAuthToken string, adminEndpoint string, impor
 		return err
 	}
 
-	err, ThrottlingPolicyType, PolicyInfo := ResolveThrottlingPolicyType(data)
+	var policy utils.ExportThrottlePolicy
+
+	err = json.Unmarshal(data, &policy)
 
 	if err != nil {
 		utils.Logln(utils.LogPrefixError, err)
 		return err
 	}
 
-	uri := adminEndpoint + "/throttling/policies/"
-
-	switch ThrottlingPolicyType {
-	case "Subscription":
-		uri += "subscription"
-	case "Application":
-		uri += "application"
-	case "Deny":
-		uri = adminEndpoint + "/throttling/deny-policies"
-	case "Advanced":
-		uri += "advanced"
-	case "Custom":
-		uri += "custom"
-	}
-	err = importThrottlingPolicy(uri, PolicyInfo, accessOAuthToken, true, importThrottlePolicyUpdate)
+	uri := adminEndpoint + "/throttling/policies/import"
+	query := `?overwrite=` + strconv.FormatBool(importThrottlePolicyUpdate)
+	uri += query
+	err = importThrottlingPolicy(uri, policy, accessOAuthToken, true, importThrottlePolicyUpdate)
 	return err
 }
 
@@ -111,39 +103,4 @@ func ExecuteThrottlingPolicyUploadRequest(uri string, PolicyDetails interface{},
 	headers[utils.HeaderConnection] = utils.HeaderValueKeepAlive
 
 	return utils.InvokePOSTRequest(uri, headers, PolicyDetails)
-	//uri += "/7c5eae96-8347-412e-aaef-487e82c0afbb"
-	//return utils.InvokeDELETERequest(uri, headers)
-
-}
-
-func ResolveThrottlingPolicyType(data []byte) (error, string, interface{}) {
-	var GeneralPolicy utils.GeneralThrottlingPolicy
-	var DenyPolicy utils.DenyThrottlingPolicy
-	var CustomPolicy utils.CustomThrottlingPolicy
-	var SubscriptionPolicy utils.SubscriptionThrottlingPolicy
-	var AdvancedPolicy utils.AdvancedThrottlingPolicy
-	err := json.Unmarshal(data, &GeneralPolicy)
-
-	if (GeneralPolicy.Type == "AdvancedThrottlePolicyInfo" || GeneralPolicy.Type == "AdvancedThrottlePolicy") && err == nil {
-		err = json.Unmarshal(data, &AdvancedPolicy)
-		return err, "Advanced", AdvancedPolicy
-	}
-	if GeneralPolicy.Type == "ApplicationThrottlePolicy" && err == nil {
-		return err, "Application", GeneralPolicy
-	}
-	if GeneralPolicy.Type == "SubscriptionThrottlePolicy" && err == nil {
-		err = json.Unmarshal(data, &SubscriptionPolicy)
-		return err, "Subscription", SubscriptionPolicy
-	}
-	if GeneralPolicy.Type == "" && err == nil {
-		err = json.Unmarshal(data, &CustomPolicy)
-		if CustomPolicy.SiddhiQuery != "" && err == nil {
-			return err, "Custom", CustomPolicy
-		}
-		err = json.Unmarshal(data, &DenyPolicy)
-		if DenyPolicy.ConditionId != "" && err == nil {
-			return err, "Deny", DenyPolicy
-		}
-	}
-	return err, "", GeneralPolicy
 }

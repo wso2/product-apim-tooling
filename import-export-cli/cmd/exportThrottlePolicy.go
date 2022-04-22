@@ -42,10 +42,10 @@ const exportThrottlePolicyCmdShortDesc = "Export Throttling Policies"
 
 const exportThrottlePolicyCmdLongDesc = "Export ThrottlingPolicies from an environment"
 
-const exportThrottlePolicyCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + policyCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + `-n Gold -e dev --type sub 
-` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + policyCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + `-n AppPolicy -e prod --type app --format json
-` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + policyCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + `-n TestPolicy -e dev --type advanced 
-` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + policyCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + `-n CustomPolicy -e prod --type custom 
+const exportThrottlePolicyCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + `-n Gold -e dev --type sub 
+` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + `-n AppPolicy -e prod --type app --format json
+` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + `-n TestPolicy -e dev --type advanced 
+` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + `-n CustomPolicy -e prod --type custom 
 NOTE: All the 2 flags (--name (-n) and --environment (-e)) are mandatory.`
 
 // ExportThrottlePolicyCmd represents the export policy rate-limiting command
@@ -96,7 +96,7 @@ func executeExportThrottlePolicyCmd(credential credentials.Credential, exportDir
 
 // init using Cobra
 func init() {
-	policyCmd.AddCommand(ExportThrottlePolicyCmd)
+	ExportPolicyCmd.AddCommand(ExportThrottlePolicyCmd)
 	ExportThrottlePolicyCmd.Flags().StringVarP(&exportThrottlePolicyName, "name", "n",
 		"", "Name of the Throttling Policy to be exported")
 	ExportThrottlePolicyCmd.Flags().StringVarP(&exportThrottlePolicyType, "type", "t",

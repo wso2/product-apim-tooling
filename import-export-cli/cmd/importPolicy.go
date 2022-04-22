@@ -23,20 +23,17 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-// Export command related usage Info
-const policyCmdLiteral = "policy"
-const policyCmdShortDesc = "Export/Import a Policy"
+const ImportPolicyCmdLiteral = "policy"
+const ImportPolicyCmdShortDesc = "Import a Policy"
+const ImportPolicyCmdLongDesc = "Import a Policy in an environment or Import a Policy to an environment"
+const ImportPolicyCmdExamples = utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportPolicyCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + ` -f ~/CustomPolicy -e production --u`
 
-const policyCmdLongDesc = "Export a Policy in an environment or Import a Policy to an environment"
-
-const policyCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + policyCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + ` -n Silver -e prod --type subscription`
-
-// ExportCmd represents the export command
-var policyCmd = &cobra.Command{
-	Use:     policyCmdLiteral,
-	Short:   policyCmdShortDesc,
-	Long:    policyCmdLongDesc,
-	Example: policyCmdExamples,
+// ImportPolicyCmd represents the import command for a policy
+var ImportPolicyCmd = &cobra.Command{
+	Use:     ImportPolicyCmdLiteral,
+	Short:   ImportPolicyCmdShortDesc,
+	Long:    ImportPolicyCmdLongDesc,
+	Example: ImportPolicyCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + ExportCmdLiteral + " called")
 
@@ -45,5 +42,5 @@ var policyCmd = &cobra.Command{
 
 // init using Cobra
 func init() {
-	ExportCmd.AddCommand(policyCmd)
+	ImportCmd.AddCommand(ImportPolicyCmd)
 }
