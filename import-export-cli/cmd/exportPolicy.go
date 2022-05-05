@@ -23,15 +23,13 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-// Export command related usage Info
+// Export policy command related usage Info
 const ExportPolicyCmdLiteral = "policy"
 const ExportPolicyCmdShortDesc = "Export/Import a Policy"
-
 const ExportPolicyCmdLongDesc = "Export/Import a Policy in an environment or Import a Policy to an environment"
-
 const exportPolicyCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + ` -n Silver -e prod --type subscription`
 
-// ExportCmd represents the export command
+// ExportPolicyCmd represents the export policy command
 var ExportPolicyCmd = &cobra.Command{
 	Use:     ExportPolicyCmdLiteral,
 	Short:   ExportPolicyCmdShortDesc,

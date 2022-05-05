@@ -48,7 +48,7 @@ func ImportThrottlingPolicy(accessOAuthToken string, adminEndpoint string, impor
 		return err
 	}
 
-	var policy utils.ExportThrottlePolicy
+	var policy utils.ImportThrottlePolicy
 
 	err = json.Unmarshal(data, &policy)
 
@@ -73,11 +73,10 @@ func importThrottlingPolicy(endpoint string, PolicyDetails interface{}, accessTo
 	}
 	if resp.StatusCode() == http.StatusCreated || resp.StatusCode() == http.StatusOK {
 		// 201 Created or 200 OK
-		fmt.Println("Successfully imported Throttling Policy.")
+		fmt.Println(resp.String())
 		return nil
 	} else {
 		// We have an HTTP error
-
 		if resp.StatusCode() == http.StatusConflict && ThrottlePolicyUpdate {
 			fmt.Println("Cannot Update")
 			//Execute Throttle Policy update
@@ -98,8 +97,8 @@ func ExecuteThrottlingPolicyUploadRequest(uri string, PolicyDetails interface{},
 	} else {
 		headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + accessToken
 	}
-	headers[utils.HeaderContentType] = "application/json"
-	headers[utils.HeaderAccept] = "application/json"
+	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
+	headers[utils.HeaderAccept] = utils.HeaderValueApplicationJSON
 	headers[utils.HeaderConnection] = utils.HeaderValueKeepAlive
 
 	return utils.InvokePOSTRequest(uri, headers, PolicyDetails)

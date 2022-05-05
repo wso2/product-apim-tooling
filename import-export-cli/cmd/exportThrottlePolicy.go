@@ -34,6 +34,7 @@ import (
 var exportThrottlePolicyType string
 var exportThrottlePolicyName string
 var exportThrottlePolicyFormat string
+var CmdExportEnvironment string
 var runningExportThrottlePolicyCommand bool
 
 // ExportThrottlePolicy command related usage info

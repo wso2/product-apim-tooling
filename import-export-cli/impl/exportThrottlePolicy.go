@@ -3,12 +3,34 @@ package impl
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/aybabtme/orderedjson"
 	"github.com/go-resty/resty/v2"
-	jsoniter "github.com/json-iterator/go"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"path/filepath"
+)
+
+const (
+	CmdPolicyTypeSubscription = "sub"
+	CmdPolicyTypeApplication  = "app"
+	CmdPolicyTypeAdvanced     = "advanced"
+	CmdPolicyTypeCustom       = "custom"
+
+	QueryPolicyTypeSubscription = "sub"
+	QueryPolicyTypeApplication  = "app"
+	QueryPolicyTypeAdvanced     = "api"
+	QueryCmdPolicyTypeCustom    = "global"
+
+	ExportPolicyTypeSubscription = "subcription policy"
+	ExportPolicyTypeApplication  = "application policy"
+	ExportPolicyTypeAdvanced     = "advanced policy"
+	ExportPolicyTypeCustom       = "custom rule"
+
+	ExportPolicyFileNamePrefixSubscription = "Subscription"
+	ExportPolicyFileNamePrefixApplication  = "Application"
+	ExportPolicyFileNamePrefixAdvanced     = "Advanced"
+	ExportPolicyFileNamePrefixCustom       = "Custom"
 )
 
 // ExportThrottlingPolicyFromEnv function is used with export policy rate-limiting command
@@ -22,14 +44,14 @@ func exportThrottlePolicy(adminEndpoint, accessToken string, ThrottlePolicyName 
 	adminEndpoint = utils.AppendSlashToString(adminEndpoint)
 	ThrottlePolicyResource := "throttling/policies/export?"
 	switch ThrottlePolicyType {
-	case "sub":
-		PolicyType = "subscription"
-	case "app":
-		PolicyType = "application"
-	case "advanced":
-		PolicyType = "advanced"
-	case "custom":
-		PolicyType = "custom"
+	case CmdPolicyTypeSubscription:
+		PolicyType = QueryPolicyTypeSubscription
+	case CmdPolicyTypeApplication:
+		PolicyType = QueryPolicyTypeApplication
+	case CmdPolicyTypeAdvanced:
+		PolicyType = QueryPolicyTypeAdvanced
+	case CmdPolicyTypeCustom:
+		PolicyType = QueryCmdPolicyTypeCustom
 	}
 
 	query := `name=` + ThrottlePolicyName + `&type=` + PolicyType + `&format=` + exportFormat
@@ -62,74 +84,49 @@ func WriteThrottlePolicyToFile(ExportLocationPath string, resp *resty.Response, 
 	}
 }
 
+func ResolveExportFileName(policyType string, policyName string) string {
+	var fileName string
+	switch policyType {
+	case ExportPolicyTypeSubscription:
+		fileName = ExportPolicyFileNamePrefixSubscription
+	case ExportPolicyTypeApplication:
+		fileName = ExportPolicyFileNamePrefixApplication
+	case ExportPolicyTypeAdvanced:
+		fileName = ExportPolicyFileNamePrefixAdvanced
+	case ExportPolicyTypeCustom:
+		fileName = ExportPolicyFileNamePrefixCustom
+	}
+	fileName = fileName + `-` + policyName
+
+	return fileName
+}
+
 func ResolveThrottlePolicy(exportThrottlePolicyFormat string, resp *resty.Response) (string, []byte) {
 
-	var subscriptionPolicy utils.ExportThrottlePolicySubscription
-	var applicationPolicy utils.ExportThrottlePolicyApplication
-	var advancedPolicy utils.ExportThrottlePolicyAdvanced
-	var customPolicy utils.ExportThrottlePolicyCustom
-	var ExportThrottlingPolicyResponse utils.ExportThrottlePolicyGeneral
 	var marshaledData []byte
-	err := json.Unmarshal(resp.Body(), &ExportThrottlingPolicyResponse)
+	var ExportThrottlingPolicy utils.ExportThrottlePolicy
+
+	err := yaml.Unmarshal(resp.Body(), &ExportThrottlingPolicy)
 	if err != nil {
 		utils.HandleErrorAndExit("Error unmarshalling response data", err)
 	}
+	policyType := ExportThrottlingPolicy.Subtype
+	policyName := ExportThrottlingPolicy.Data[1].Value
 
-	throttlingPolicyType := ExportThrottlingPolicyResponse.Subtype
-	policyName := ExportThrottlingPolicyResponse.Data.PolicyName
-	fileName := throttlingPolicyType + `-` + policyName
+	throttlingPolicyType := fmt.Sprintf("%v", policyType)
+	throttlePolicyName := fmt.Sprintf("%v", policyName)
+	fileName := ResolveExportFileName(throttlingPolicyType, throttlePolicyName)
 
-	switch throttlingPolicyType {
-	case "subcription policy":
-		err = json.Unmarshal(resp.Body(), &subscriptionPolicy)
-		if err != nil {
-			utils.HandleErrorAndExit("Error unmarshalling policy data", err)
-		}
-
-		marshaledData, err = jsoniter.MarshalIndent(subscriptionPolicy, "", " ")
-		if err != nil {
-			utils.HandleErrorAndExit("Error marshaling policy content", err)
-		}
-	case "application policy":
-		err = json.Unmarshal(resp.Body(), &applicationPolicy)
-		if err != nil {
-			utils.HandleErrorAndExit("Error unmarshalling policy data", err)
-		}
-
-		marshaledData, err = jsoniter.MarshalIndent(applicationPolicy, "", " ")
-		if err != nil {
-			utils.HandleErrorAndExit("Error marshaling policy content", err)
-		}
-	case "advanced policy":
-		err = json.Unmarshal(resp.Body(), &advancedPolicy)
-		if err != nil {
-			utils.HandleErrorAndExit("Error unmarshalling policy data", err)
-		}
-
-		marshaledData, err = jsoniter.MarshalIndent(advancedPolicy, "", " ")
-		if err != nil {
-			utils.HandleErrorAndExit("Error marshaling policy content", err)
-		}
-	case "custom rule":
-		err = json.Unmarshal(resp.Body(), &customPolicy)
-		if err != nil {
-			utils.HandleErrorAndExit("Error unmarshalling policy data", err)
-		}
-
-		marshaledData, err = jsoniter.MarshalIndent(customPolicy, "", " ")
-		if err != nil {
-			utils.HandleErrorAndExit("Error marshaling policy content", err)
-		}
-	}
 	if exportThrottlePolicyFormat == utils.DefaultExportFormat {
-		m := yaml.MapSlice{}
-		err := yaml.Unmarshal(marshaledData, &m)
 		fileName += ".yaml"
 		if err != nil {
 			utils.HandleErrorAndExit("Error marshaling policy content", err)
 		}
-		marshaledData, _ = yaml.Marshal(m)
+		marshaledData, _ = yaml.Marshal(ExportThrottlingPolicy)
 	} else {
+		var s orderedjson.Map
+		err = json.Unmarshal(resp.Body(), &s)
+		marshaledData, _ = json.MarshalIndent(s, "", " ")
 		fileName += ".json"
 	}
 	return fileName, marshaledData

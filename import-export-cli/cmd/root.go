@@ -26,8 +26,8 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/wso2/product-apim-tooling/import-export-cli/cmd/k8s"
 	"github.com/wso2/product-apim-tooling/import-export-cli/cmd/aws"
+	"github.com/wso2/product-apim-tooling/import-export-cli/cmd/k8s"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/box"
 	"github.com/wso2/product-apim-tooling/import-export-cli/cmd/mg"
@@ -47,7 +47,6 @@ var cfgFile string
 var insecure bool
 var cmdPassword string
 var CmdUsername string
-var CmdExportEnvironment string
 var CmdResourceTenantDomain string
 var CmdForceStartFromBegin bool
 

@@ -18,6 +18,10 @@
 
 package utils
 
+import (
+	"gopkg.in/yaml.v2"
+)
+
 // ------------------- Structs for YAML Config Files ----------------------------------
 
 // For env_keys_all.yaml
@@ -280,17 +284,30 @@ type Subscription struct {
 	RedirectionParams interface{} `json:"redirectionParams"`
 }
 
-////////////////////////////////////////////////////////////
-type ExportThrottlePolicyGeneral struct {
-	Type    string `json:"type"`
-	Subtype string `json:"subtype"`
-	Version string `json:"version"`
-	Data    struct {
-		PolicyName string `json:"policyName"`
-	} `json:"data"`
+/////////////////////////////////////////////////////////////
+type PolicyList struct {
+	Count      interface{} `json:"count"`
+	List       []Policy    `json:"list"`
+	Pagination interface{} `json:"pagination"`
+}
+type Policy struct {
+	PolicyId    int    `json:"policyId"`
+	Uuid        string `json:"uuid"`
+	PolicyName  string `json:"policyName"`
+	DisplayName string `json:"displayName"`
+	Description string `json:"description"`
+	IsDeployed  bool   `json:"isDeployed"`
+	Type        string `json:"type"`
 }
 
 type ExportThrottlePolicy struct {
+	Type    string        `json:"type"`
+	Subtype string        `json:"subtype"`
+	Version string        `json:"version"`
+	Data    yaml.MapSlice `json:"data"`
+}
+
+type ImportThrottlePolicy struct {
 	Type    string      `json:"type"`
 	Subtype string      `json:"subtype"`
 	Version string      `json:"version"`
