@@ -22,7 +22,7 @@ const (
 	QueryPolicyTypeAdvanced     = "api"
 	QueryCmdPolicyTypeCustom    = "global"
 
-	ExportPolicyTypeSubscription = "subcription policy"
+	ExportPolicyTypeSubscription = "subscription policy"
 	ExportPolicyTypeApplication  = "application policy"
 	ExportPolicyTypeAdvanced     = "advanced policy"
 	ExportPolicyTypeCustom       = "custom rule"

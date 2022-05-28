@@ -94,18 +94,19 @@ func GETThrottlePolicyListFromEnv(accessToken, environment, query, limit string)
 func GetThrottlePolicyList(accessToken, throttlePolicyListEndpoint, query, limit string) (*resty.Response, error) {
 	url := throttlePolicyListEndpoint
 	if query == "" {
-		query = "null"
+		query = "type:all"
 	}
 	queryParamString := "query=" + query
 	utils.Logln(utils.LogPrefixInfo+"ExportThrottlingPolicy: URL:", url)
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
+	//fmt.Println(url)
+	//resp, err := utils.InvokeGETRequest(url, headers)
 	resp, err := utils.InvokeGETRequestWithQueryParamsString(url, queryParamString, headers)
 	return resp, err
 }
 
 func PrintThrottlePolicies(resp *resty.Response, format string) {
-	//fmt.Println(string(resp.Body()))
 	var policyList utils.PolicyList
 	const ProjectTypePolicy = "Policy"
 	err := json.Unmarshal(resp.Body(), &policyList)
