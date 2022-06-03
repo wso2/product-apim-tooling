@@ -31,11 +31,8 @@ import (
 )
 
 const (
-	policyIdHeader                   = "ID"
 	policyUUIDHeader                 = "UUID"
 	policyNameHeader                 = "NAME"
-	policyDisplayNameHeader          = "DISPLAY NAME"
-	DescriptionHeader                = "Description"
 	isDeployedHeader                 = "IS DEPLOYED"
 	policyTypeHeader                 = "TYPE"
 	defaultThrottlePolicyTableFormat = "table {{.UUID}}\t{{.Name}}\t{{.Deployed}}\t{{.PolicyType}}"
@@ -56,24 +53,12 @@ func newPolicyDefinition(a utils.Policy) *policy {
 		a.IsDeployed, a.Type}
 }
 
-func (a policy) ID() string {
-	return string(a.PolicyId)
-}
-
 func (a policy) UUID() string {
 	return a.Uuid
 }
 
 func (a policy) Name() string {
 	return a.PolicyName
-}
-
-func (a policy) Display_Name() string {
-	return a.DisplayName
-}
-
-func (a policy) description() string {
-	return a.Description
 }
 
 func (a policy) Deployed() string {
@@ -84,26 +69,26 @@ func (a policy) PolicyType() string {
 	return a.Type
 }
 
-func GETThrottlePolicyListFromEnv(accessToken, environment, query, limit string) (*resty.Response, error) {
+func GETThrottlePolicyListFromEnv(accessToken, environment, query string) (*resty.Response, error) {
 	adminEndpoint := utils.GetAdminEndpointOfEnv(environment, utils.MainConfigFilePath)
 	throttlePolicyListEndpoint := adminEndpoint + "/throttling/policies/search"
 
-	return GetThrottlePolicyList(accessToken, throttlePolicyListEndpoint, query, limit)
+	return GetThrottlePolicyList(accessToken, throttlePolicyListEndpoint, query)
 }
 
-func GetThrottlePolicyList(accessToken, throttlePolicyListEndpoint, query, limit string) (*resty.Response, error) {
+func GetThrottlePolicyList(accessToken string, throttlePolicyListEndpoint string, query string) (*resty.Response, error) {
 	url := throttlePolicyListEndpoint
-	if query == "" {
-		query = "type:all"
-	}
 	queryParamString := "query=" + query
 	utils.Logln(utils.LogPrefixInfo+"ExportThrottlingPolicy: URL:", url)
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
-	//fmt.Println(url)
-	//resp, err := utils.InvokeGETRequest(url, headers)
-	resp, err := utils.InvokeGETRequestWithQueryParamsString(url, queryParamString, headers)
-	return resp, err
+	if query == "" {
+		resp, err := utils.InvokeGETRequest(url, headers)
+		return resp, err
+	} else {
+		resp, err := utils.InvokeGETRequestWithQueryParamsString(url, queryParamString, headers)
+		return resp, err
+	}
 }
 
 func PrintThrottlePolicies(resp *resty.Response, format string) {
@@ -135,7 +120,6 @@ func PrintThrottlePolicies(resp *resty.Response, format string) {
 		}
 		return nil
 	}
-
 	// headers for table
 	ThrottlePolicyTableHeaders := map[string]string{
 		"UUID":       policyUUIDHeader,
@@ -143,7 +127,6 @@ func PrintThrottlePolicies(resp *resty.Response, format string) {
 		"Deployed":   isDeployedHeader,
 		"PolicyType": policyTypeHeader,
 	}
-
 	// execute context
 	if err := policyContext.Write(renderer, ThrottlePolicyTableHeaders); err != nil {
 		fmt.Println("Error executing template:", err.Error())

@@ -19,7 +19,6 @@
 package impl
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/go-resty/resty/v2"
@@ -35,37 +34,18 @@ func ImportThrottlingPolicyToEnv(accessOAuthToken string, importEnvironment stri
 }
 
 func ImportThrottlingPolicy(accessOAuthToken string, adminEndpoint string, importPath string, importThrottlePolicyUpdate bool) error {
-
 	if _, err := os.Stat(importPath); err != nil {
 		if !os.IsNotExist(err) {
 			return err
 		}
 	}
-
-	_, data, err := resolveYamlOrJSON(importPath)
-	if err != nil {
-		utils.Logln(utils.LogPrefixError, err)
-		return err
-	}
-
-	var policy utils.ImportThrottlePolicy
-
-	err = json.Unmarshal(data, &policy)
-
-	if err != nil {
-		utils.Logln(utils.LogPrefixError, err)
-		return err
-	}
-
 	uri := adminEndpoint + "/throttling/policies/import"
-	query := `?overwrite=` + strconv.FormatBool(importThrottlePolicyUpdate)
-	uri += query
-	err = importThrottlingPolicy(uri, policy, accessOAuthToken, true, importThrottlePolicyUpdate)
+	err := importThrottlingPolicy(uri, importPath, accessOAuthToken, true, importThrottlePolicyUpdate)
 	return err
 }
 
-func importThrottlingPolicy(endpoint string, PolicyDetails interface{}, accessToken string, isOauth bool, ThrottlePolicyUpdate bool) error {
-	resp, err := ExecuteThrottlingPolicyUploadRequest(endpoint, PolicyDetails, accessToken, isOauth)
+func importThrottlingPolicy(endpoint string, importPath string, accessToken string, isOauth bool, ThrottlePolicyUpdate bool) error {
+	resp, err := ExecuteThrottlingPolicyUploadRequest(endpoint, importPath, ThrottlePolicyUpdate, accessToken, isOauth)
 	utils.Logf("Response : %v", resp)
 	if err != nil {
 		utils.Logln(utils.LogPrefixError, err)
@@ -79,7 +59,6 @@ func importThrottlingPolicy(endpoint string, PolicyDetails interface{}, accessTo
 		// We have an HTTP error
 		if resp.StatusCode() == http.StatusConflict && ThrottlePolicyUpdate {
 			fmt.Println("Cannot Update")
-			//Execute Throttle Policy update
 		}
 		fmt.Println("Error importing Throttling Policy.")
 		fmt.Println("Status: " + resp.Status())
@@ -89,7 +68,7 @@ func importThrottlingPolicy(endpoint string, PolicyDetails interface{}, accessTo
 	}
 }
 
-func ExecuteThrottlingPolicyUploadRequest(uri string, PolicyDetails interface{}, accessToken string, isOAuthToken bool) (*resty.Response, error) {
+func ExecuteThrottlingPolicyUploadRequest(uri string, importPath string, update bool, accessToken string, isOAuthToken bool) (*resty.Response, error) {
 
 	headers := make(map[string]string)
 	if isOAuthToken {
@@ -97,9 +76,10 @@ func ExecuteThrottlingPolicyUploadRequest(uri string, PolicyDetails interface{},
 	} else {
 		headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + accessToken
 	}
-	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
 	headers[utils.HeaderAccept] = utils.HeaderValueApplicationJSON
 	headers[utils.HeaderConnection] = utils.HeaderValueKeepAlive
+	params := make(map[string]string)
+	params["overwrite"] = strconv.FormatBool(update)
 
-	return utils.InvokePOSTRequest(uri, headers, PolicyDetails)
+	return utils.InvokePOSTRequestWithFileAndQueryParams(params, uri, headers, "file", importPath)
 }

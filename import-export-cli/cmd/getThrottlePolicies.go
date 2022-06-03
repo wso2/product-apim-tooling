@@ -23,7 +23,6 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -33,7 +32,6 @@ import (
 var getThrottlePoliciesCmdEnvironment string
 var getThrottlePoliciesCmdFormat string
 var getThrottlePoliciesCmdQuery []string
-var getThrottlePoliciesCmdLimit string
 
 // GetThrottlePoliciesCmdLiteral related info
 const GetThrottlePoliciesCmdLiteral = "rate-limiting"
@@ -66,9 +64,8 @@ var getThrottlePoliciesCmd = &cobra.Command{
 func executeGetThrottlePoliciesCmd(credential credentials.Credential) {
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, getThrottlePoliciesCmdEnvironment)
 	if preCommandErr == nil {
-
-		resp, err := impl.GETThrottlePolicyListFromEnv(accessToken, getThrottlePoliciesCmdEnvironment, strings.Join(getThrottlePoliciesCmdQuery, queryParamSeparator), getThrottlePoliciesCmdLimit)
-
+		resp, err := impl.GETThrottlePolicyListFromEnv(accessToken, getThrottlePoliciesCmdEnvironment,
+			strings.Join(getThrottlePoliciesCmdQuery, queryParamSeparator))
 		if err != nil {
 			utils.HandleErrorAndExit("Error while getting throttling policies", err)
 		}
@@ -90,14 +87,11 @@ func executeGetThrottlePoliciesCmd(credential credentials.Credential) {
 
 func init() {
 	GetPoliciesCmd.AddCommand(getThrottlePoliciesCmd)
-
 	getThrottlePoliciesCmd.Flags().StringVarP(&getThrottlePoliciesCmdEnvironment, "environment", "e",
 		"", "Environment to be searched")
 	getThrottlePoliciesCmd.Flags().StringSliceVarP(&getThrottlePoliciesCmdQuery, "query", "q",
 		[]string{}, "Query pattern")
-	getThrottlePoliciesCmd.Flags().StringVarP(&getThrottlePoliciesCmdLimit, "limit", "l",
-		strconv.Itoa(utils.DefaultApisDisplayLimit), "Maximum number of apis to return")
-	getThrottlePoliciesCmd.Flags().StringVarP(&getThrottlePoliciesCmdFormat, "format", "", "", "Pretty-print apis "+
+	getThrottlePoliciesCmd.Flags().StringVarP(&getThrottlePoliciesCmdFormat, "format", "", "", "Pretty-print throttle policies "+
 		"using Go Templates. Use \"{{ jsonPretty . }}\" to list all fields")
 	_ = getThrottlePoliciesCmd.MarkFlagRequired("environment")
 }
