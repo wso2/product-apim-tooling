@@ -93,7 +93,6 @@ func GetThrottlePolicyList(accessToken string, throttlePolicyListEndpoint string
 
 func PrintThrottlePolicies(resp *resty.Response, format string) {
 	var policyList utils.PolicyList
-	const ProjectTypePolicy = "Policy"
 	err := json.Unmarshal(resp.Body(), &policyList)
 	policies := policyList.List
 	if err != nil {
@@ -103,7 +102,7 @@ func PrintThrottlePolicies(resp *resty.Response, format string) {
 	if format == "" {
 		format = defaultThrottlePolicyTableFormat
 	} else if format == utils.JsonArrayFormatType {
-		utils.ListArtifactsInJsonArrayFormat(policies, ProjectTypePolicy)
+		utils.ListArtifactsInJsonArrayFormat(policies, utils.ProjectTypePolicy)
 		return
 	}
 

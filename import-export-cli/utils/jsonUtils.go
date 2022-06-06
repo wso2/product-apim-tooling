@@ -83,6 +83,12 @@ func selectTypeOfOutputEntry(data []byte, artifactType string) ([]byte, error) {
 
 		// Formatting data to get the JsonArray object in prettyPrint format
 		return json.MarshalIndent(applicationEntries, "", " ")
+	} else if artifactType == ProjectTypePolicy {
+		var policyEntries []PolicyEntry
+		json.Unmarshal(data, &policyEntries)
+
+		// Formatting data to get the JsonArray object in prettyPrint format
+		return json.MarshalIndent(policyEntries, "", " ")
 	} else {
 		var revisionEntries []RevisionEntry
 		// Map API information to APIEntry struct

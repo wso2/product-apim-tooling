@@ -284,12 +284,11 @@ type Subscription struct {
 	RedirectionParams interface{} `json:"redirectionParams"`
 }
 
-/////////////////////////////////////////////////////////////
 type PolicyList struct {
-	Count      interface{} `json:"count"`
-	List       []Policy    `json:"list"`
-	Pagination interface{} `json:"pagination"`
+	Count interface{} `json:"count"`
+	List  []Policy    `json:"list"`
 }
+
 type Policy struct {
 	PolicyId    int    `json:"policyId"`
 	Uuid        string `json:"uuid"`
@@ -307,276 +306,12 @@ type ExportThrottlePolicy struct {
 	Data    yaml.MapSlice `json:"data"`
 }
 
-type ImportThrottlePolicy struct {
-	Type    string      `json:"type"`
-	Subtype string      `json:"subtype"`
-	Version string      `json:"version"`
-	Data    interface{} `json:"data"`
-}
-
-type ExportThrottlePolicySubscription struct {
-	Type    string                       `json:"type"`
-	Subtype string                       `json:"subtype"`
-	Version string                       `json:"version"`
-	Data    SubscriptionThrottlingPolicy `json:"data"`
-}
-
-type ExportThrottlePolicyApplication struct {
-	Type    string                      `json:"type"`
-	Subtype string                      `json:"subtype"`
-	Version string                      `json:"version"`
-	Data    ApplicationThrottlingPolicy `json:"data"`
-}
-
-type ExportThrottlePolicyAdvanced struct {
-	Type    string                   `json:"type"`
-	Subtype string                   `json:"subtype"`
-	Version string                   `json:"version"`
-	Data    AdvancedThrottlingPolicy `json:"data"`
-}
-
-type ExportThrottlePolicyCustom struct {
-	Type    string                 `json:"type"`
-	Subtype string                 `json:"subtype"`
-	Version string                 `json:"version"`
-	Data    CustomThrottlingPolicy `json:"data"`
-}
-
 //Throttling Policies List response struct
 type ThrottlingPoliciesList struct {
 	Count      int                `json:"count"`
 	List       []ThrottlingPolicy `json:"list"`
 	Pagination interface{}        `json:"pagination"`
 }
-
-type PoliciesList struct {
-	Count int           `json:"count"`
-	List  []interface{} `json:"list"`
-}
-
-//Throttling policies List
-type SubscriptionExportThrottlePolicyList struct {
-	Count int                            `json:"count"`
-	List  []SubscriptionThrottlingPolicy `json:"list"`
-}
-
-type ApplicationExportThrottlePolicyList struct {
-	Count int                           `json:"count"`
-	List  []ApplicationThrottlingPolicy `json:"list"`
-}
-
-type DenyExportThrottlePolicyList struct {
-	Count int                    `json:"count"`
-	List  []DenyThrottlingPolicy `json:"list"`
-}
-
-type AdvancedExportThrottlePolicyList struct {
-	Count int                        `json:"count"`
-	List  []AdvancedThrottlingPolicy `json:"list"`
-}
-
-type CustomExportThrottlePolicyList struct {
-	Count int                      `json:"count"`
-	List  []CustomThrottlingPolicy `json:"list"`
-}
-
-//For exporting different throttling polcies////////////////////////////////////////////////////////
-
-type SubscriptionThrottlingPolicy struct {
-	PolicyId             string `json:"policyId"`
-	PolicyName           string `json:"policyName"`
-	DisplayName          string `json:"displayName"`
-	Description          string `json:"description"`
-	IsDeployed           bool   `json:"isDeployed"`
-	Type                 string `json:"type"`
-	GraphQLMaxComplexity int    `json:"graphQLMaxComplexity"`
-	GraphQLMaxDepth      int    `json:"graphQLMaxDepth"`
-	DefaultLimit         struct {
-		Type         string `json:"type"`
-		RequestCount struct {
-			TimeUnit     string `json:"timeUnit"`
-			UnitTime     int    `json:"unitTime"`
-			RequestCount int    `json:"requestCount"`
-		} `json:"requestCount"`
-		Bandwidth struct {
-			TimeUnit   string `json:"timeUnit"`
-			UnitTime   int    `json:"unitTime"`
-			DataAmount int    `json:"dataAmount"`
-			DataUnit   string `json:"dataUnit"`
-		} `json:"bandwidth"`
-		EventCount struct {
-			TimeUnit   string `json:"timeUnit"`
-			UnitTime   int    `json:"unitTime"`
-			EventCount int    `json:"eventCount"`
-		} `json:"eventCount"`
-	} `json:"defaultLimit"`
-	Monetization struct {
-		MonetizationPlan string      `json:"monetizationPlan"`
-		Properties       interface{} `json:"properties"`
-	} `json:"monetization"`
-	RateLimitCount    int    `json:"rateLimitCount"`
-	RateLimitTimeUnit string `json:"rateLimitTimeUnit"`
-	SubscriberCount   int    `json:"subscriberCount"`
-	CustomAttributes  []struct {
-		Name  string `json:"name"`
-		Value string `json:"value"`
-	} `json:"customAttributes"`
-	StopOnQuotaReach bool   `json:"stopOnQuotaReach"`
-	BillingPlan      string `json:"billingPlan"`
-	Permissions      struct {
-		PermissionType string   `json:"permissionType"`
-		Roles          []string `json:"roles"`
-	} `json:"permissions"`
-}
-
-type ApplicationThrottlingPolicy struct {
-	PolicyId     string `json:"policyId"`
-	PolicyName   string `json:"policyName"`
-	DisplayName  string `json:"displayName"`
-	Description  string `json:"description"`
-	IsDeployed   bool   `json:"isDeployed"`
-	Type         string `json:"type"`
-	DefaultLimit struct {
-		Type         string `json:"type"`
-		RequestCount struct {
-			TimeUnit     string `json:"timeUnit"`
-			UnitTime     int    `json:"unitTime"`
-			RequestCount int    `json:"requestCount"`
-		} `json:"requestCount"`
-		Bandwidth struct {
-			TimeUnit   string `json:"timeUnit"`
-			UnitTime   int    `json:"unitTime"`
-			DataAmount int    `json:"dataAmount"`
-			DataUnit   string `json:"dataUnit"`
-		} `json:"bandwidth"`
-		EventCount struct {
-			TimeUnit   string `json:"timeUnit"`
-			UnitTime   int    `json:"unitTime"`
-			EventCount int    `json:"eventCount"`
-		} `json:"eventCount"`
-	} `json:"defaultLimit"`
-}
-
-type AdvancedThrottlingPolicy struct {
-	PolicyId     string `json:"policyId"`
-	PolicyName   string `json:"policyName"`
-	DisplayName  string `json:"displayName"`
-	Description  string `json:"description"`
-	IsDeployed   bool   `json:"isDeployed"`
-	Type         string `json:"type"`
-	DefaultLimit struct {
-		Type         string `json:"type"`
-		RequestCount struct {
-			TimeUnit     string `json:"timeUnit"`
-			UnitTime     int    `json:"unitTime"`
-			RequestCount int    `json:"requestCount"`
-		} `json:"requestCount"`
-		Bandwidth struct {
-			TimeUnit   string `json:"timeUnit"`
-			UnitTime   int    `json:"unitTime"`
-			DataAmount int    `json:"dataAmount"`
-			DataUnit   string `json:"dataUnit"`
-		} `json:"bandwidth"`
-		EventCount struct {
-			TimeUnit   string `json:"timeUnit"`
-			UnitTime   int    `json:"unitTime"`
-			EventCount int    `json:"eventCount"`
-		} `json:"eventCount"`
-	} `json:"defaultLimit"`
-	ConditionalGroups []struct {
-		Description string `json:"description"`
-		Conditions  []struct {
-			Type            string `json:"type"`
-			InvertCondition bool   `json:"invertCondition"`
-			HeaderCondition struct {
-				HeaderName  string `json:"headerName"`
-				HeaderValue string `json:"headerValue"`
-			} `json:"headerCondition,omitempty"`
-			IpCondition struct {
-				IpConditionType string      `json:"ipConditionType"`
-				SpecificIP      string      `json:"specificIP"`
-				StartingIP      interface{} `json:"startingIP"`
-				EndingIP        interface{} `json:"endingIP"`
-			} `json:"ipCondition,omitempty"`
-			QueryParameterCondition struct {
-				ParameterName  string `json:"parameterName"`
-				ParameterValue string `json:"parameterValue"`
-			} `json:"queryParameterCondition,omitempty"`
-			JwtClaimsCondition struct {
-				ClaimUrl  string `json:"claimUrl"`
-				Attribute string `json:"attribute"`
-			} `json:"jwtClaimsCondition,omitempty"`
-		} `json:"conditions"`
-		Limit struct {
-			Type         string `json:"type"`
-			RequestCount struct {
-				TimeUnit     string `json:"timeUnit"`
-				UnitTime     int    `json:"unitTime"`
-				RequestCount int    `json:"requestCount"`
-			} `json:"requestCount"`
-			Bandwidth struct {
-				TimeUnit   string `json:"timeUnit"`
-				UnitTime   int    `json:"unitTime"`
-				DataAmount int    `json:"dataAmount"`
-				DataUnit   string `json:"dataUnit"`
-			} `json:"bandwidth"`
-			EventCount struct {
-				TimeUnit   string `json:"timeUnit"`
-				UnitTime   int    `json:"unitTime"`
-				EventCount int    `json:"eventCount"`
-			} `json:"eventCount"`
-		} `json:"limit"`
-	} `json:"conditionalGroups"`
-}
-
-type CustomThrottlingPolicy struct {
-	PolicyId    string `json:"policyId"`
-	PolicyName  string `json:"policyName"`
-	Description string `json:"description"`
-	IsDeployed  bool   `json:"isDeployed"`
-	SiddhiQuery string `json:"siddhiQuery"`
-	KeyTemplate string `json:"keyTemplate"`
-}
-
-type DenyThrottlingPolicy struct {
-	ConditionId     string      `json:"conditionId"`
-	ConditionType   string      `json:"conditionType"`
-	ConditionValue  interface{} `json:"conditionValue"`
-	ConditionStatus bool        `json:"conditionStatus"`
-}
-
-//For subscription, application and advanced throttling policies
-type GeneralThrottlingPolicy struct {
-	PolicyId     string `json:"policyId"`
-	PolicyName   string `json:"policyName"`
-	DisplayName  string `json:"displayName"`
-	Description  string `json:"description"`
-	IsDeployed   bool   `json:"isDeployed"`
-	Type         string `json:"type"`
-	DefaultLimit struct {
-		Type         string `json:"type"`
-		RequestCount struct {
-			TimeUnit     string `json:"timeUnit"`
-			UnitTime     int    `json:"unitTime"`
-			RequestCount int    `json:"requestCount"`
-		} `json:"requestCount"`
-		Bandwidth struct {
-			TimeUnit   string `json:"timeUnit"`
-			UnitTime   int    `json:"unitTime"`
-			DataAmount int    `json:"dataAmount"`
-			DataUnit   string `json:"dataUnit"`
-		} `json:"bandwidth"`
-		EventCount struct {
-			TimeUnit   string `json:"timeUnit"`
-			UnitTime   int    `json:"unitTime"`
-			EventCount int    `json:"eventCount"`
-		} `json:"eventCount"`
-	} `json:"defaultLimit"`
-}
-
-////Deny policy should be added
-
-//////////////////////////////////////////////////////////////////////////////////////
 
 //ThrottlingPolicy
 type ThrottlingPolicy struct {
@@ -730,4 +465,12 @@ type RevisionEntry struct {
 	RevisionNumber string
 	Description    string
 	GatewayEnvs    string
+}
+
+// PolicyEntry  List Entry struct to support  different formats of output in the list command
+type PolicyEntry struct {
+	Uuid       string
+	PolicyName string
+	IsDeployed bool
+	Type       string
 }

@@ -34,17 +34,16 @@ import (
 var exportThrottlePolicyType string
 var exportThrottlePolicyName string
 var exportThrottlePolicyFormat string
-var CmdExportEnvironment string
+var ExportEnvironment string
 var runningExportThrottlePolicyCommand bool
 
 // ExportThrottlePolicy command related usage info
 const ExportThrottlePolicyCmdLiteral = "rate-limiting"
 const exportThrottlePolicyCmdShortDesc = "Export Throttling Policies"
-
 const exportThrottlePolicyCmdLongDesc = "Export ThrottlingPolicies from an environment"
 
 const exportThrottlePolicyCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + `-n Gold -e dev --type sub 
-` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + `-n AppPolicy -e prod --type app --format json
+` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + `-n AppPolicy -e prod --type app --format JSON
 ` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + `-n TestPolicy -e dev --type advanced 
 ` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + `-n CustomPolicy -e prod --type custom 
 NOTE: All the 2 flags (--name (-n) and --environment (-e)) are mandatory.`
@@ -60,7 +59,7 @@ var ExportThrottlePolicyCmd = &cobra.Command{
 		utils.Logln(utils.LogPrefixInfo + ExportThrottlePolicyCmdLiteral + " called")
 		var throttlePoliciesExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedPoliciesDirName, utils.ExportedThrottlePoliciesDirName)
 
-		cred, err := GetCredentials(CmdExportEnvironment)
+		cred, err := GetCredentials(ExportEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
@@ -71,10 +70,10 @@ var ExportThrottlePolicyCmd = &cobra.Command{
 
 func executeExportThrottlePolicyCmd(credential credentials.Credential, exportDirectory string) {
 	runningExportThrottlePolicyCommand = true
-	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, CmdExportEnvironment)
+	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, ExportEnvironment)
 
 	if preCommandErr == nil {
-		resp, err := impl.ExportThrottlingPolicyFromEnv(accessToken, CmdExportEnvironment, exportThrottlePolicyName, exportThrottlePolicyType, exportThrottlePolicyFormat)
+		resp, err := impl.ExportThrottlingPolicyFromEnv(accessToken, ExportEnvironment, exportThrottlePolicyName, exportThrottlePolicyType, exportThrottlePolicyFormat)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while exporting", err)
 		}
@@ -101,10 +100,10 @@ func init() {
 	ExportThrottlePolicyCmd.Flags().StringVarP(&exportThrottlePolicyName, "name", "n",
 		"", "Name of the Throttling Policy to be exported")
 	ExportThrottlePolicyCmd.Flags().StringVarP(&exportThrottlePolicyType, "type", "t",
-		"", "Type of the Throttling Policies to be exported (sub,app,custom,advanced,deny)")
-	ExportThrottlePolicyCmd.Flags().StringVarP(&CmdExportEnvironment, "environment", "e",
+		"", "Type of the Throttling Policies to be exported (sub,app,custom,advanced)")
+	ExportThrottlePolicyCmd.Flags().StringVarP(&ExportEnvironment, "environment", "e",
 		"", "Environment to which the Throttling Policies should be exported")
-	ExportThrottlePolicyCmd.Flags().StringVarP(&exportThrottlePolicyFormat, "format", "", utils.DefaultExportFormat, "File format of exported archive(json or yaml)")
+	ExportThrottlePolicyCmd.Flags().StringVarP(&exportThrottlePolicyFormat, "format", "", utils.DefaultExportFormat, "File format of exported archive(JSON or YAML)")
 	_ = ExportThrottlePolicyCmd.MarkFlagRequired("name")
 	_ = ExportThrottlePolicyCmd.MarkFlagRequired("environment")
 
