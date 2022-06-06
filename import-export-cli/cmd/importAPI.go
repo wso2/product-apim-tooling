@@ -143,23 +143,26 @@ func getAPIDefinition(filePath string) (*v2.APIDefinition, []byte, error) {
 func mergeAPI(apiDirectory string, environmentParams *params.Environment) error {
 	// read api from Meta-information
 	apiPath := filepath.Join(apiDirectory, "Meta-information", "api")
+
 	utils.Logln(utils.LogPrefixInfo + "Reading API definition: ")
 	fp, jsonContent, err := resolveYamlOrJson(apiPath)
 	if err != nil {
 		return err
 	}
+
 	utils.Logln(utils.LogPrefixInfo+"Loaded definition from:", fp)
 	api, err := gabs.ParseJSON(jsonContent)
 	if err != nil {
 		return err
 	}
+
 	// extract environmentParams from file
 	apiEndpointData, err := params.ExtractAPIEndpointConfig(api.Bytes())
 	if err != nil {
 		return err
 	}
 
-	configData, err := json.Marshal(environmentParams.Endpoints)
+	configData, err := setupEndpoints(environmentParams)
 	if err != nil {
 		return err
 	}
@@ -184,10 +187,10 @@ func mergeAPI(apiDirectory string, environmentParams *params.Environment) error 
 
 	// Handle security parameters in api_params.yaml
 	err = handleSecurityEndpointsParams(environmentParams.Security, api)
-	if (err != nil) {
+	if err != nil {
 		return err
 	}
-	
+
 	apiPath = filepath.Join(apiDirectory, "Meta-information", "api.yaml")
 	utils.Logln(utils.LogPrefixInfo+"Writing merged API to:", apiPath)
 	// write this to disk
@@ -195,6 +198,7 @@ func mergeAPI(apiDirectory string, environmentParams *params.Environment) error 
 	if err != nil {
 		return err
 	}
+
 	err = ioutil.WriteFile(apiPath, content, 0644)
 	if err != nil {
 		return err
@@ -205,10 +209,10 @@ func mergeAPI(apiDirectory string, environmentParams *params.Environment) error 
 // Handle security parameters in api_params.yaml
 // @param envSecurityEndpointParams : Environment security endpoint parameters from api_params.yaml
 // @param api : Parameters from api.yaml
-// @return error 
+// @return error
 func handleSecurityEndpointsParams(envSecurityEndpointParams *params.SecurityData, api *gabs.Container) error {
-	// If the user has set (either true or false) the enabled field under security in api_params.yaml, the 
-	// following code should be executed. (if not set, the security endpoint settings will be made 
+	// If the user has set (either true or false) the enabled field under security in api_params.yaml, the
+	// following code should be executed. (if not set, the security endpoint settings will be made
 	// according to the api.yaml file as usually)
 	// In Go, irrespective of whether a boolean value is "" or false, it will contain false by default.
 	// That is why, here a string comparison was  made since strings can have both "" and "false"
@@ -225,7 +229,7 @@ func handleSecurityEndpointsParams(envSecurityEndpointParams *params.SecurityDat
 		if boolEnabled {
 			// Set the security endpoint parameters when the enabled field is set to true
 			err := setSecurityEndpointsParams(envSecurityEndpointParams, api)
-			if (err != nil) {
+			if err != nil {
 				return err
 			}
 		} else {
@@ -246,7 +250,7 @@ func handleSecurityEndpointsParams(envSecurityEndpointParams *params.SecurityDat
 // Set the security endpoint parameters when the enabled field is set to true
 // @param envSecurityEndpointParams : Environment security endpoint parameters from api_params.yaml
 // @param api : Parameters from api.yaml
-// @return error 
+// @return error
 func setSecurityEndpointsParams(envSecurityEndpointParams *params.SecurityData, api *gabs.Container) error {
 	// Check whether the username, password and type fields have set in api_params.yaml
 	if envSecurityEndpointParams.Username == "" {
@@ -276,7 +280,7 @@ func setSecurityEndpointsParams(envSecurityEndpointParams *params.SecurityData, 
 // Set the fields in api.yaml according to the type field in api_params.yaml
 // @param envSecurityEndpointParams : Environment security endpoint parameters from api_params.yaml
 // @param api : Parameters from api.yaml
-// @return error 
+// @return error
 func setEndpointSecurityType(envSecurityEndpointParams *params.SecurityData, api *gabs.Container) error {
 	// Check whether the type is either basic or digest
 	if envSecurityEndpointParams.Type == "digest" {
@@ -383,6 +387,7 @@ func getTempApiDirectory(file string) (string, error) {
 	fileIsDir := false
 	// create a temp directory
 	tmpDir, err := ioutil.TempDir("", "apim")
+
 	if err != nil {
 		_ = os.RemoveAll(tmpDir)
 		return "", err
@@ -420,6 +425,7 @@ func getTempApiDirectory(file string) (string, error) {
 func resolveYamlOrJson(filename string) (string, []byte, error) {
 	// lookup for yaml
 	yamlFp := filename + ".yaml"
+
 	if info, err := os.Stat(yamlFp); err == nil && !info.IsDir() {
 		utils.Logln(utils.LogPrefixInfo+"Loading", yamlFp)
 		// read it
@@ -433,6 +439,7 @@ func resolveYamlOrJson(filename string) (string, []byte, error) {
 		if err != nil {
 			return "", nil, err
 		}
+
 		return fn, jsonContent, nil
 	}
 
@@ -528,6 +535,7 @@ func injectParamsToAPI(importPath, paramsPath, importEnvironment string) error {
 	}
 	// check whether import environment is included in api configuration
 	envParams := apiParams.GetEnv(importEnvironment)
+
 	if envParams == nil {
 		fmt.Println("Using default values as the environment is not present in api_param.yaml file")
 	} else {
@@ -571,6 +579,7 @@ func isEmpty(s string) bool {
 func preProcessAPI(apiDirectory string) error {
 	dirty := false
 	apiPath, jsonData, err := resolveYamlOrJson(filepath.Join(apiDirectory, "Meta-information", "api"))
+
 	if err != nil {
 		return err
 	}
@@ -847,9 +856,11 @@ func ImportAPI(credential credentials.Credential, importPath, adminEndpoint, exp
 
 	utils.Logln(utils.LogPrefixInfo + "Attempting to inject parameters to the API from api_params.yaml (if exists)")
 	paramsPath, err := resolveAPIParamsPath(resolvedApiFilePath, apiParamsPath)
+
 	if err != nil && apiParamsPath != DefaultAPIMParamsFileName && apiParamsPath != "" {
 		return err
 	}
+
 	if paramsPath != "" {
 		//Reading API params file and populate api.yaml
 		err := injectParamsToAPI(apiFilePath, paramsPath, importEnvironment)
@@ -950,7 +961,6 @@ func ImportAPI(credential credentials.Credential, importPath, adminEndpoint, exp
 			fmt.Printf("Creating: %s %s\n", apiInfo.ID.APIName, apiInfo.ID.Version)
 		} else {
 			fmt.Println("Existing API found, attempting to update it...")
-			fmt.Println("API ID:", id)
 			updateAPI = true
 		}
 	}
@@ -983,7 +993,7 @@ func init() {
 		"", "Environment from the which the API should be imported")
 	ImportAPICmd.Flags().BoolVar(&importAPICmdPreserveProvider, "preserve-provider", true,
 		"Preserve existing provider of API after importing")
-	ImportAPICmd.Flags().BoolVar(&importAPIUpdate, "update",  false, "Update an "+
+	ImportAPICmd.Flags().BoolVar(&importAPIUpdate, "update", false, "Update an "+
 		"existing API or create a new API")
 	ImportAPICmd.Flags().StringVarP(&importAPIParamsFile, "params", "", DefaultAPIMParamsFileName,
 		"Provide a API Manager params file")
@@ -992,4 +1002,142 @@ func init() {
 	// Mark required flags
 	_ = ImportAPICmd.MarkFlagRequired("environment")
 	_ = ImportAPICmd.MarkFlagRequired("file")
+}
+
+// setupEndpoints will set up the endpoints accordingly, for the applicable type
+// @param environmentParams : Environment parameters from api_params.yaml
+// @return configData as a byte array
+// @return error
+func setupEndpoints(environmentParams *params.Environment) ([]byte, error) {
+	var configData []byte
+	var err error
+
+	// if the endpoint routing policy or the endpoints field is not specified
+	if environmentParams.EndpointRoutingPolicy == "" && environmentParams.Endpoints == nil {
+		// if endpoint type is Dynamic
+		if environmentParams.EndpointType == utils.DynamicEndpointType {
+			configData = []byte(utils.DynamicEndpointConfig)
+		} else if environmentParams.EndpointType == utils.AwsLambdaEndpointType { // if endpoint type is AWS Lambda
+			if environmentParams.AWSLambdaEndpoints == nil {
+				return nil, errors.New("Please specify awsLambdaEndpoints field for " + environmentParams.Name + " and continue...")
+			}
+			if environmentParams.AWSLambdaEndpoints.AccessMethod == utils.AwsLambdaRoleSuppliedAccessMethod {
+				environmentParams.AWSLambdaEndpoints.AccessMethod = utils.AwsLambdaRoleSuppliedAccessMethodForJSON
+			}
+			environmentParams.AWSLambdaEndpoints.EndpointType = utils.AwsLambdaEndpointTypeForJSON
+			configData, err = json.Marshal(environmentParams.AWSLambdaEndpoints)
+		} else {
+			return nil, errors.New("Please specify the endpoint routing policy or the endpoints field for " + environmentParams.Name + " and continue...")
+		}
+	}
+
+	// if endpoint type is HTTP/REST
+	if environmentParams.EndpointType == utils.HttpRESTEndpointType || environmentParams.EndpointType == utils.HttpRESTEndpointTypeForJSON {
+		environmentParams.EndpointType = utils.HttpRESTEndpointTypeForJSON
+
+		if environmentParams.Endpoints != nil {
+			environmentParams.Endpoints.EndpointType = utils.HttpRESTEndpointTypeForJSON
+		}
+
+		// if the endpoint routing policy is not specified, but the endpoints field is specified, this is the usual scenario
+		if environmentParams.EndpointRoutingPolicy == "" && environmentParams.Endpoints != nil {
+			configData, err = json.Marshal(environmentParams.Endpoints)
+		}
+
+		// if the endpoint routing policy is specified as load balanced
+		if environmentParams.EndpointRoutingPolicy == utils.LoadBalanceEndpointRoutingPolicy { // endpoint routing policy either should be declared or ignored
+			if environmentParams.LoadBalanceEndpoints == nil {
+				return nil, errors.New("Please specify loadBalanceEndpoints field for " + environmentParams.Name + " and continue...")
+			}
+			// The default class of the algorithm to be used should be set to RoundRobin
+			environmentParams.LoadBalanceEndpoints.AlgorithmClassName = utils.LoadBalanceAlgorithmClass
+			environmentParams.LoadBalanceEndpoints.EndpointType = utils.LoadBalanceEndpointTypeForJSON
+			environmentParams.LoadBalanceEndpoints.Failover = false
+
+			if environmentParams.LoadBalanceEndpoints.SessionManagement == utils.TransportSessionManagementMethod {
+				environmentParams.LoadBalanceEndpoints.SessionManagement = utils.TransportSessionManagementMethodForJSON
+			} else if environmentParams.LoadBalanceEndpoints.SessionManagement == utils.ClientIdSessionManagementMethod {
+				environmentParams.LoadBalanceEndpoints.SessionManagement = utils.ClientIdSessionManagementMethodForJSON
+			}
+
+			configData, err = json.Marshal(environmentParams.LoadBalanceEndpoints)
+		}
+
+		// if the endpoint routing policy is specified as failover
+		if environmentParams.EndpointRoutingPolicy == utils.FailoverRoutingPolicy {
+			if environmentParams.FailoverEndpoints == nil {
+				return nil, errors.New("Please specify failoverEndpoints field for " + environmentParams.Name + " and continue...")
+			}
+			environmentParams.FailoverEndpoints.EndpointType = utils.FailoverRoutingPolicy
+			environmentParams.FailoverEndpoints.Failover = true
+			configData, err = json.Marshal(environmentParams.FailoverEndpoints)
+		}
+
+	}
+
+	// if endpoint type is HTTP/SOAP
+	if environmentParams.EndpointType == utils.HttpSOAPEndpointType {
+
+		// if the endpoint routing policy is not specified, but the endpoints field is specified
+		if environmentParams.EndpointRoutingPolicy == "" && environmentParams.Endpoints != nil {
+			environmentParams.Endpoints.EndpointType = utils.HttpSOAPEndpointTypeForJSON
+
+			if environmentParams.Endpoints.Production != nil {
+				environmentParams.Endpoints.Production.EndpointType = utils.HttpSOAPEndpointTypeForJSON
+			}
+
+			if environmentParams.Endpoints.Sandbox != nil {
+				environmentParams.Endpoints.Sandbox.EndpointType = utils.HttpSOAPEndpointTypeForJSON
+			}
+
+			configData, err = json.Marshal(environmentParams.Endpoints)
+
+		}
+
+		// if the endpoint routing policy is specified as load balanced
+		if environmentParams.EndpointRoutingPolicy == utils.LoadBalanceEndpointRoutingPolicy {
+			if environmentParams.LoadBalanceEndpoints == nil {
+				return nil, errors.New("Please specify loadBalanceEndpoints field for " + environmentParams.Name + " and continue...")
+			}
+			// The default class of the algorithm to be used should be set to RoundRobin
+			environmentParams.LoadBalanceEndpoints.AlgorithmClassName = utils.LoadBalanceAlgorithmClass
+			environmentParams.LoadBalanceEndpoints.EndpointType = utils.LoadBalanceEndpointTypeForJSON
+			environmentParams.LoadBalanceEndpoints.Failover = false
+
+			// replace "transport" & "clientId" with apim supported values
+			if environmentParams.LoadBalanceEndpoints.SessionManagement == utils.TransportSessionManagementMethod {
+				environmentParams.LoadBalanceEndpoints.SessionManagement = utils.TransportSessionManagementMethodForJSON
+			} else if environmentParams.LoadBalanceEndpoints.SessionManagement == utils.ClientIdSessionManagementMethod {
+				environmentParams.LoadBalanceEndpoints.SessionManagement = utils.ClientIdSessionManagementMethodForJSON
+			}
+			for index := range environmentParams.LoadBalanceEndpoints.Production {
+				environmentParams.LoadBalanceEndpoints.Production[index].EndpointType = utils.HttpSOAPEndpointTypeForJSON
+			}
+			for index := range environmentParams.LoadBalanceEndpoints.Sandbox {
+				environmentParams.LoadBalanceEndpoints.Sandbox[index].EndpointType = utils.HttpSOAPEndpointTypeForJSON
+			}
+
+			configData, err = json.Marshal(environmentParams.LoadBalanceEndpoints)
+
+		}
+
+		// if the endpoint routing policy is specified as failover
+		if environmentParams.EndpointRoutingPolicy == utils.FailoverRoutingPolicy {
+			if environmentParams.FailoverEndpoints == nil {
+				return nil, errors.New("Please specify failoverEndpoints field for " + environmentParams.Name + " and continue...")
+			}
+			environmentParams.FailoverEndpoints.Production.EndpointType = utils.HttpSOAPEndpointTypeForJSON
+			environmentParams.FailoverEndpoints.Sandbox.EndpointType = utils.HttpSOAPEndpointTypeForJSON
+			for index := range environmentParams.FailoverEndpoints.ProductionFailovers {
+				environmentParams.FailoverEndpoints.ProductionFailovers[index].EndpointType = utils.HttpSOAPEndpointTypeForJSON
+			}
+			for index := range environmentParams.FailoverEndpoints.SandboxFailovers {
+				environmentParams.FailoverEndpoints.SandboxFailovers[index].EndpointType = utils.HttpSOAPEndpointTypeForJSON
+			}
+			environmentParams.FailoverEndpoints.EndpointType = utils.FailoverRoutingPolicy
+			environmentParams.FailoverEndpoints.Failover = true
+			configData, err = json.Marshal(environmentParams.FailoverEndpoints)
+		}
+	}
+	return configData, err
 }
