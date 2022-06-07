@@ -40,9 +40,9 @@ const getThrottlePoliciesCmdShortDesc = "Display a list of APIs in an environmen
 const getThrottlePoliciesCmdLongDesc = `Display a list of APIs in the environment specified by the flag --environment, -e`
 
 var getThrottlePoliciesCmdExamples = utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdExamples + ` ` + GetThrottlePoliciesCmdLiteral + ` -e dev
-` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdLiteral + ` ` + GetThrottlePoliciesCmdLiteral + ` -e prod -q provider:admin -q version:1.0.0
-` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdLiteral + ` ` + GetThrottlePoliciesCmdLiteral + ` -e prod -l 100
-` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdLiteral + ` ` + GetThrottlePoliciesCmdLiteral + ` -e staging
+` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdLiteral + ` ` + GetThrottlePoliciesCmdLiteral + ` -e prod -q type;api
+` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdLiteral + ` ` + GetThrottlePoliciesCmdLiteral + ` -e prod -q type:sub
+` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdLiteral + ` ` + GetThrottlePoliciesCmdLiteral + ` -e staging -q type:global
 NOTE: The flag (--environment (-e)) is mandatory`
 
 // getApisCmd represents the apis command
