@@ -38,5 +38,5 @@ NOTE: All the 3 flags (--name (-n), --owner (-o) and --environment (-e)) are man
 
 ### SEE ALSO
 
-* [apictl export](apictl_export.md)	 - Export an API/API Product/Application in an environment
+* [apictl export](apictl_export.md)	 - Export an API/API Product/Application/Policy in an environment
 

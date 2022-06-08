@@ -61,7 +61,7 @@ var ExportAPIProductCmd = &cobra.Command{
 		utils.Logln(utils.LogPrefixInfo + ExportAPIProductCmdLiteral + " called")
 		var apiProductsExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedApiProductsDirName)
 
-		cred, err := GetCredentials(CmdExportEnvironment)
+		cred, err := GetCredentials(ExportEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
@@ -72,7 +72,7 @@ var ExportAPIProductCmd = &cobra.Command{
 
 func executeExportAPIProductCmd(credential credentials.Credential, exportDirectory string) {
 	runningExportAPIProductCommand = true
-	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, CmdExportEnvironment)
+	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, ExportEnvironment)
 
 	if preCommandErr == nil {
 		if exportAPIProductVersion == "" {
@@ -80,14 +80,14 @@ func executeExportAPIProductCmd(credential credentials.Credential, exportDirecto
 			exportAPIProductVersion = utils.DefaultApiProductVersion
 		}
 		resp, err := impl.ExportAPIProductFromEnv(accessToken, exportAPIProductName, exportAPIProductVersion,
-			exportAPIProductRevisionNum, exportAPIProductProvider, exportAPIProductFormat, CmdExportEnvironment,
+			exportAPIProductRevisionNum, exportAPIProductProvider, exportAPIProductFormat, ExportEnvironment,
 			exportAPIProductLatestRevision, exportAPIProductPreserveStatus)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while exporting", err)
 		}
 		// Print info on response
 		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
-		apiProductZipLocationPath := filepath.Join(exportDirectory, CmdExportEnvironment)
+		apiProductZipLocationPath := filepath.Join(exportDirectory, ExportEnvironment)
 		if resp.StatusCode() == http.StatusOK {
 			impl.WriteAPIProductToZip(exportAPIProductName, exportAPIProductVersion, apiProductZipLocationPath, runningExportAPIProductCommand, resp)
 		} else if resp.StatusCode() == http.StatusInternalServerError {
@@ -112,7 +112,7 @@ func init() {
 		"Revision number of the API Product to be exported")
 	ExportAPIProductCmd.Flags().StringVarP(&exportAPIProductProvider, "provider", "r", "",
 		"Provider of the API Product")
-	ExportAPIProductCmd.Flags().StringVarP(&CmdExportEnvironment, "environment", "e",
+	ExportAPIProductCmd.Flags().StringVarP(&ExportEnvironment, "environment", "e",
 		"", "Environment to which the API Product should be exported")
 	ExportAPIProductCmd.Flags().BoolVarP(&exportAPIProductPreserveStatus, "preserve-status", "", true,
 		"Preserve API Product status when exporting. Otherwise API Product will be exported in CREATED status")

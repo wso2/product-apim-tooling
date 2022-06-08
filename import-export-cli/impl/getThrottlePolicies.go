@@ -26,16 +26,14 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"io"
 	"os"
-	"strconv"
 	"text/template"
 )
 
 const (
 	policyUUIDHeader                 = "UUID"
 	policyNameHeader                 = "NAME"
-	isDeployedHeader                 = "IS DEPLOYED"
 	policyTypeHeader                 = "TYPE"
-	defaultThrottlePolicyTableFormat = "table {{.UUID}}\t{{.Name}}\t{{.Deployed}}\t{{.PolicyType}}"
+	defaultThrottlePolicyTableFormat = "table {{.UUID}}\t{{.Name}}\t{{.PolicyType}}"
 )
 
 type policy struct {
@@ -61,22 +59,18 @@ func (a policy) Name() string {
 	return a.PolicyName
 }
 
-func (a policy) Deployed() string {
-	return strconv.FormatBool(a.IsDeployed)
-}
-
 func (a policy) PolicyType() string {
 	return a.Type
 }
 
-func GETThrottlePolicyListFromEnv(accessToken, environment, query string) (*resty.Response, error) {
+func GetThrottlePolicyListFromEnv(accessToken, environment, query string) (*resty.Response, error) {
 	adminEndpoint := utils.GetAdminEndpointOfEnv(environment, utils.MainConfigFilePath)
 	throttlePolicyListEndpoint := adminEndpoint + "/throttling/policies/search"
 
-	return GetThrottlePolicyList(accessToken, throttlePolicyListEndpoint, query)
+	return getThrottlePolicyList(accessToken, throttlePolicyListEndpoint, query)
 }
 
-func GetThrottlePolicyList(accessToken string, throttlePolicyListEndpoint string, query string) (*resty.Response, error) {
+func getThrottlePolicyList(accessToken string, throttlePolicyListEndpoint string, query string) (*resty.Response, error) {
 	url := throttlePolicyListEndpoint
 	queryParamString := "query=" + query
 	utils.Logln(utils.LogPrefixInfo+"ExportThrottlingPolicy: URL:", url)
@@ -91,6 +85,7 @@ func GetThrottlePolicyList(accessToken string, throttlePolicyListEndpoint string
 	}
 }
 
+// PrintThrottlePolicies prints the policy list in a specific format
 func PrintThrottlePolicies(resp *resty.Response, format string) {
 	var policyList utils.PolicyList
 	err := json.Unmarshal(resp.Body(), &policyList)
@@ -98,36 +93,31 @@ func PrintThrottlePolicies(resp *resty.Response, format string) {
 	if err != nil {
 		utils.HandleErrorAndExit("Error unmarshalling response data", err)
 	}
-
 	if format == "" {
 		format = defaultThrottlePolicyTableFormat
+		// create policy context with standard output
+		policyContext := formatter.NewContext(os.Stdout, format)
+		// create a new renderer function which iterate collection
+		renderer := func(w io.Writer, t *template.Template) error {
+			for _, policy := range policies {
+				if err := t.Execute(w, newPolicyDefinition(policy)); err != nil {
+					return err
+				}
+				_, _ = w.Write([]byte{'\n'})
+			}
+			return nil
+		}
+		// headers for table
+		ThrottlePolicyTableHeaders := map[string]string{
+			"UUID":       policyUUIDHeader,
+			"Name":       policyNameHeader,
+			"PolicyType": policyTypeHeader,
+		}
+		// execute context
+		if err := policyContext.Write(renderer, ThrottlePolicyTableHeaders); err != nil {
+			fmt.Println("Error executing template:", err.Error())
+		}
 	} else if format == utils.JsonArrayFormatType {
 		utils.ListArtifactsInJsonArrayFormat(policies, utils.ProjectTypePolicy)
-		return
-	}
-
-	// create policy context with standard output
-	policyContext := formatter.NewContext(os.Stdout, format)
-
-	// create a new renderer function which iterate collection
-	renderer := func(w io.Writer, t *template.Template) error {
-		for _, policy := range policies {
-			if err := t.Execute(w, newPolicyDefinition(policy)); err != nil {
-				return err
-			}
-			_, _ = w.Write([]byte{'\n'})
-		}
-		return nil
-	}
-	// headers for table
-	ThrottlePolicyTableHeaders := map[string]string{
-		"UUID":       policyUUIDHeader,
-		"Name":       policyNameHeader,
-		"Deployed":   isDeployedHeader,
-		"PolicyType": policyTypeHeader,
-	}
-	// execute context
-	if err := policyContext.Write(renderer, ThrottlePolicyTableHeaders); err != nil {
-		fmt.Println("Error executing template:", err.Error())
 	}
 }

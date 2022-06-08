@@ -471,6 +471,5 @@ type RevisionEntry struct {
 type PolicyEntry struct {
 	Uuid       string
 	PolicyName string
-	IsDeployed bool
 	Type       string
 }

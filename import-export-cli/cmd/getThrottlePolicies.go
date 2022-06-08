@@ -40,12 +40,12 @@ const getThrottlePoliciesCmdShortDesc = "Display a list of APIs in an environmen
 const getThrottlePoliciesCmdLongDesc = `Display a list of APIs in the environment specified by the flag --environment, -e`
 
 var getThrottlePoliciesCmdExamples = utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdExamples + ` ` + GetThrottlePoliciesCmdLiteral + ` -e dev
-` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdLiteral + ` ` + GetThrottlePoliciesCmdLiteral + ` -e prod -q type;api
+` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdLiteral + ` ` + GetThrottlePoliciesCmdLiteral + ` -e prod -q type:api
 ` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdLiteral + ` ` + GetThrottlePoliciesCmdLiteral + ` -e prod -q type:sub
 ` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdLiteral + ` ` + GetThrottlePoliciesCmdLiteral + ` -e staging -q type:global
 NOTE: The flag (--environment (-e)) is mandatory`
 
-// getApisCmd represents the apis command
+// getThrottlePoliciesCmd represents the get policies rate-limiting command
 var getThrottlePoliciesCmd = &cobra.Command{
 	Use:     GetThrottlePoliciesCmdLiteral,
 	Short:   getThrottlePoliciesCmdShortDesc,
@@ -64,7 +64,7 @@ var getThrottlePoliciesCmd = &cobra.Command{
 func executeGetThrottlePoliciesCmd(credential credentials.Credential) {
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, getThrottlePoliciesCmdEnvironment)
 	if preCommandErr == nil {
-		resp, err := impl.GETThrottlePolicyListFromEnv(accessToken, getThrottlePoliciesCmdEnvironment,
+		resp, err := impl.GetThrottlePolicyListFromEnv(accessToken, getThrottlePoliciesCmdEnvironment,
 			strings.Join(getThrottlePoliciesCmdQuery, queryParamSeparator))
 		if err != nil {
 			utils.HandleErrorAndExit("Error while getting throttling policies", err)

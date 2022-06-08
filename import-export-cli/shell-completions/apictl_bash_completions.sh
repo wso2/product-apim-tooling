@@ -1243,9 +1243,33 @@ _apictl_export_help()
     noun_aliases=()
 }
 
-_apictl_export_throttlepolicies()
+_apictl_export_policy_help()
 {
-    last_command="apictl_export_throttlepolicies"
+    last_command="apictl_export_policy_help"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    has_completion_function=1
+    noun_aliases=()
+}
+
+_apictl_export_policy_rate-limiting()
+{
+    last_command="apictl_export_policy_rate-limiting"
 
     command_aliases=()
 
@@ -1263,10 +1287,20 @@ _apictl_export_throttlepolicies()
     local_nonpersistent_flags+=("--environment")
     local_nonpersistent_flags+=("--environment=")
     local_nonpersistent_flags+=("-e")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    local_nonpersistent_flags+=("--format")
+    local_nonpersistent_flags+=("--format=")
     flags+=("--help")
     flags+=("-h")
     local_nonpersistent_flags+=("--help")
     local_nonpersistent_flags+=("-h")
+    flags+=("--name=")
+    two_word_flags+=("--name")
+    two_word_flags+=("-n")
+    local_nonpersistent_flags+=("--name")
+    local_nonpersistent_flags+=("--name=")
+    local_nonpersistent_flags+=("-n")
     flags+=("--type=")
     two_word_flags+=("--type")
     two_word_flags+=("-t")
@@ -1280,8 +1314,37 @@ _apictl_export_throttlepolicies()
     must_have_one_flag=()
     must_have_one_flag+=("--environment=")
     must_have_one_flag+=("-e")
-    must_have_one_flag+=("--type=")
-    must_have_one_flag+=("-t")
+    must_have_one_flag+=("--name=")
+    must_have_one_flag+=("-n")
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_apictl_export_policy()
+{
+    last_command="apictl_export_policy"
+
+    command_aliases=()
+
+    commands=()
+    commands+=("help")
+    commands+=("rate-limiting")
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    local_nonpersistent_flags+=("-h")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
     must_have_one_noun=()
     noun_aliases=()
 }
@@ -1298,7 +1361,7 @@ _apictl_export()
     commands+=("apis")
     commands+=("app")
     commands+=("help")
-    commands+=("throttlepolicies")
+    commands+=("policy")
 
     flags=()
     two_word_flags=()
@@ -1857,6 +1920,104 @@ _apictl_get_keys()
     noun_aliases=()
 }
 
+_apictl_get_policies_help()
+{
+    last_command="apictl_get_policies_help"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    has_completion_function=1
+    noun_aliases=()
+}
+
+_apictl_get_policies_rate-limiting()
+{
+    last_command="apictl_get_policies_rate-limiting"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--environment=")
+    two_word_flags+=("--environment")
+    two_word_flags+=("-e")
+    local_nonpersistent_flags+=("--environment")
+    local_nonpersistent_flags+=("--environment=")
+    local_nonpersistent_flags+=("-e")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    local_nonpersistent_flags+=("--format")
+    local_nonpersistent_flags+=("--format=")
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    local_nonpersistent_flags+=("-h")
+    flags+=("--query=")
+    two_word_flags+=("--query")
+    two_word_flags+=("-q")
+    local_nonpersistent_flags+=("--query")
+    local_nonpersistent_flags+=("--query=")
+    local_nonpersistent_flags+=("-q")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_flag+=("--environment=")
+    must_have_one_flag+=("-e")
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_apictl_get_policies()
+{
+    last_command="apictl_get_policies"
+
+    command_aliases=()
+
+    commands=()
+    commands+=("help")
+    commands+=("rate-limiting")
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    local_nonpersistent_flags+=("-h")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
 _apictl_get()
 {
     last_command="apictl_get"
@@ -1873,6 +2034,7 @@ _apictl_get()
     commands+=("envs")
     commands+=("help")
     commands+=("keys")
+    commands+=("policies")
 
     flags=()
     two_word_flags=()
@@ -2120,9 +2282,33 @@ _apictl_import_help()
     noun_aliases=()
 }
 
-_apictl_import_throttlepolicy()
+_apictl_import_policy_help()
 {
-    last_command="apictl_import_throttlepolicy"
+    last_command="apictl_import_policy_help"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    has_completion_function=1
+    noun_aliases=()
+}
+
+_apictl_import_policy_rate-limiting()
+{
+    last_command="apictl_import_policy_rate-limiting"
 
     command_aliases=()
 
@@ -2167,6 +2353,35 @@ _apictl_import_throttlepolicy()
     noun_aliases=()
 }
 
+_apictl_import_policy()
+{
+    last_command="apictl_import_policy"
+
+    command_aliases=()
+
+    commands=()
+    commands+=("help")
+    commands+=("rate-limiting")
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    local_nonpersistent_flags+=("-h")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
 _apictl_import()
 {
     last_command="apictl_import"
@@ -2178,7 +2393,7 @@ _apictl_import()
     commands+=("api-product")
     commands+=("app")
     commands+=("help")
-    commands+=("throttlepolicy")
+    commands+=("policy")
 
     flags=()
     two_word_flags=()

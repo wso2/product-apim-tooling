@@ -39,5 +39,5 @@ apictl import app -f qa/apps/sampleApp.zip -e dev
 * [apictl import api](apictl_import_api.md)	 - Import API
 * [apictl import api-product](apictl_import_api-product.md)	 - Import API Product
 * [apictl import app](apictl_import_app.md)	 - Import App
-* [apictl import throttlepolicy](apictl_import_throttlepolicy.md)	 - Import Throttling Policy
+* [apictl import policy](apictl_import_policy.md)	 - Import a Policy
 

@@ -28,12 +28,12 @@ import (
 	"strconv"
 )
 
-func ImportThrottlingPolicyToEnv(accessOAuthToken string, importEnvironment string, importThrottlingPolicyFile string, importThrottlePolicyUpdate bool) error {
+func ImportThrottlingPolicyToEnv(accessOAuthToken, importEnvironment, importThrottlingPolicyFile string, importThrottlePolicyUpdate bool) error {
 	adminEndpoint := utils.GetAdminEndpointOfEnv(importEnvironment, utils.MainConfigFilePath)
 	return ImportThrottlingPolicy(accessOAuthToken, adminEndpoint, importThrottlingPolicyFile, importThrottlePolicyUpdate)
 }
 
-func ImportThrottlingPolicy(accessOAuthToken string, adminEndpoint string, importPath string, importThrottlePolicyUpdate bool) error {
+func ImportThrottlingPolicy(accessOAuthToken, adminEndpoint, importPath string, importThrottlePolicyUpdate bool) error {
 	if _, err := os.Stat(importPath); err != nil {
 		if !os.IsNotExist(err) {
 			return err
@@ -45,7 +45,7 @@ func ImportThrottlingPolicy(accessOAuthToken string, adminEndpoint string, impor
 }
 
 func importThrottlingPolicy(endpoint string, importPath string, accessToken string, isOauth bool, ThrottlePolicyUpdate bool) error {
-	resp, err := ExecuteThrottlingPolicyUploadRequest(endpoint, importPath, ThrottlePolicyUpdate, accessToken, isOauth)
+	resp, err := executeThrottlingPolicyUploadRequest(endpoint, importPath, ThrottlePolicyUpdate, accessToken, isOauth)
 	utils.Logf("Response : %v", resp)
 	if err != nil {
 		utils.Logln(utils.LogPrefixError, err)
@@ -68,7 +68,7 @@ func importThrottlingPolicy(endpoint string, importPath string, accessToken stri
 	}
 }
 
-func ExecuteThrottlingPolicyUploadRequest(uri string, importPath string, update bool, accessToken string, isOAuthToken bool) (*resty.Response, error) {
+func executeThrottlingPolicyUploadRequest(uri string, importPath string, update bool, accessToken string, isOAuthToken bool) (*resty.Response, error) {
 
 	headers := make(map[string]string)
 	if isOAuthToken {
@@ -80,6 +80,5 @@ func ExecuteThrottlingPolicyUploadRequest(uri string, importPath string, update 
 	headers[utils.HeaderConnection] = utils.HeaderValueKeepAlive
 	params := make(map[string]string)
 	params["overwrite"] = strconv.FormatBool(update)
-
 	return utils.InvokePOSTRequestWithFileAndQueryParams(params, uri, headers, "file", importPath)
 }

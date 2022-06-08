@@ -39,7 +39,7 @@ const (
 
 const importThrottlingPolicyCmdExamples = utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportThrottlingPolicyCmdLiteral + ` -f qa/customadvanced -e dev
 ` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportThrottlingPolicyCmdLiteral + ` -f Env1/Exported/sub1 -e production
-` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportThrottlingPolicyCmdLiteral + ` -f ~/CustomPolicy -e production --u
+` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportThrottlingPolicyCmdLiteral + ` -f ~/CustomPolicy -e production -u
 ` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportThrottlingPolicyCmdLiteral + ` -f ~/mythottlepolicy -e production --update
 NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory`
 
@@ -62,7 +62,6 @@ var ImportThrottlingPolicyCmd = &cobra.Command{
 		err = impl.ImportThrottlingPolicyToEnv(accessOAuthToken, importEnvironment, importThrottlingPolicyFile, importThrottlePolicyUpdate)
 		if err != nil {
 			utils.HandleErrorAndExit("Error importing throttling Policy", err)
-			return
 		}
 	},
 }

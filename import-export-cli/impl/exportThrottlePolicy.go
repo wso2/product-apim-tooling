@@ -26,6 +26,7 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 )
 
@@ -52,36 +53,30 @@ const (
 )
 
 // ExportThrottlingPolicyFromEnv function is used with export policy rate-limiting command
-func ExportThrottlingPolicyFromEnv(accessToken string, exportEnvironment string, exportThrottlePolicyName string,
-	exportThrottlePolicyType string, exportFormat string) (*resty.Response, error) {
+func ExportThrottlingPolicyFromEnv(accessToken string, exportEnvironment string, throttlePolicyName string,
+	throttlePolicyType string, exportFormat string) (*resty.Response, error) {
 	adminEndpoint := utils.GetAdminEndpointOfEnv(exportEnvironment, utils.MainConfigFilePath)
-	return exportThrottlePolicy(adminEndpoint, accessToken, exportThrottlePolicyName, exportThrottlePolicyType, exportFormat)
-}
-
-func exportThrottlePolicy(adminEndpoint, accessToken string, ThrottlePolicyName string, ThrottlePolicyType string,
-	exportFormat string) (*resty.Response, error) {
-	var PolicyType string
+	var policyType string
 	var query string
 	adminEndpoint = utils.AppendSlashToString(adminEndpoint)
-	ThrottlePolicyResource := "throttling/policies/export?"
-	if ThrottlePolicyType != "" {
-		switch ThrottlePolicyType {
+	throttlePolicyResource := "throttling/policies/export?"
+	if throttlePolicyType != "" {
+		switch throttlePolicyType {
 		case CmdPolicyTypeSubscription:
-			PolicyType = QueryPolicyTypeSubscription
+			policyType = QueryPolicyTypeSubscription
 		case CmdPolicyTypeApplication:
-			PolicyType = QueryPolicyTypeApplication
+			policyType = QueryPolicyTypeApplication
 		case CmdPolicyTypeAdvanced:
-			PolicyType = QueryPolicyTypeAdvanced
+			policyType = QueryPolicyTypeAdvanced
 		case CmdPolicyTypeCustom:
-			PolicyType = QueryCmdPolicyTypeCustom
+			policyType = QueryCmdPolicyTypeCustom
 		}
-		query = `name=` + ThrottlePolicyName + `&type=` + PolicyType + `&format=` + exportFormat
+		query = `name=` + throttlePolicyName + `&type=` + policyType + `&format=` + exportFormat
 	} else {
-		query = `name=` + ThrottlePolicyName + `&format=` + exportFormat
+		query = `name=` + throttlePolicyName + `&format=` + exportFormat
 	}
-
-	ThrottlePolicyResource += query
-	url := adminEndpoint + ThrottlePolicyResource
+	throttlePolicyResource += query
+	url := adminEndpoint + throttlePolicyResource
 	utils.Logln(utils.LogPrefixInfo+"ExportThrottlingPolicy: URL:", url)
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
@@ -92,14 +87,15 @@ func exportThrottlePolicy(adminEndpoint, accessToken string, ThrottlePolicyName 
 	return resp, nil
 }
 
+// WriteThrottlePolicyToFile writes the policy to a specified location
 func WriteThrottlePolicyToFile(ExportLocationPath string, resp *resty.Response, ExportFormat string,
 	runningExportThrottlePolicyCommand bool) {
 	err := utils.CreateDirIfNotExist(ExportLocationPath)
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating dir to store zip archives: "+ExportLocationPath, err)
 	}
-	fileName, marshaledData := ResolveThrottlePolicy(ExportFormat, resp)
-	_, _ = ThrottlingPolicyWrite(ExportLocationPath, fileName, marshaledData)
+	fileName, marshaledData := resolveThrottlePolicy(ExportFormat, resp)
+	_, _ = throttlingPolicyWrite(ExportLocationPath, fileName, marshaledData)
 	if runningExportThrottlePolicyCommand {
 		fmt.Println("Successfully exported Throttling Policy!")
 		fmt.Println("Find the exported Throttling Policies at " +
@@ -107,7 +103,8 @@ func WriteThrottlePolicyToFile(ExportLocationPath string, resp *resty.Response, 
 	}
 }
 
-func ResolveExportFileName(policyType string, policyName string) string {
+// resolves the policy file name with the policy type
+func resolveExportFileName(policyType, policyName string) string {
 	var fileName string
 	switch policyType {
 	case ExportPolicyTypeSubscription:
@@ -123,8 +120,8 @@ func ResolveExportFileName(policyType string, policyName string) string {
 	return fileName
 }
 
-// ResolveThrottlePolicy resolves the policy file name and the marshalled data
-func ResolveThrottlePolicy(exportThrottlePolicyFormat string, resp *resty.Response) (string, []byte) {
+// resolveThrottlePolicy resolves the policy file name and the marshalled data
+func resolveThrottlePolicy(exportThrottlePolicyFormat string, resp *resty.Response) (string, []byte) {
 	var marshaledData []byte
 	var ExportThrottlingPolicy utils.ExportThrottlePolicy
 	err := yaml.Unmarshal(resp.Body(), &ExportThrottlingPolicy)
@@ -135,7 +132,7 @@ func ResolveThrottlePolicy(exportThrottlePolicyFormat string, resp *resty.Respon
 	policyName := ExportThrottlingPolicy.Data[1].Value
 	throttlingPolicyType := fmt.Sprintf("%v", policyType)
 	throttlePolicyName := fmt.Sprintf("%v", policyName)
-	fileName := ResolveExportFileName(throttlingPolicyType, throttlePolicyName)
+	fileName := resolveExportFileName(throttlingPolicyType, throttlePolicyName)
 	if exportThrottlePolicyFormat == utils.DefaultExportFormat {
 		fileName += ".yaml"
 		if err != nil {
@@ -151,11 +148,11 @@ func ResolveThrottlePolicy(exportThrottlePolicyFormat string, resp *resty.Respon
 	return fileName, marshaledData
 }
 
-func ThrottlingPolicyWrite(FilePath string, Filename string, marshaledData []byte) (string, error) {
-	Filename = filepath.Join(FilePath, Filename)
-	err := ioutil.WriteFile(Filename, marshaledData, 0644)
+func throttlingPolicyWrite(filePath string, fileName string, marshaledData []byte) (string, error) {
+	fileName = filepath.Join(filePath, fileName)
+	err := ioutil.WriteFile(fileName, marshaledData, os.ModePerm)
 	if err != nil {
-		utils.HandleErrorAndExit("Error writing file", err)
+		utils.HandleErrorAndExit("Error writing file"+fileName, err)
 	}
-	return FilePath, err
+	return filePath, err
 }

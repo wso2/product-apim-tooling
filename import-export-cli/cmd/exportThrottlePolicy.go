@@ -42,10 +42,10 @@ const ExportThrottlePolicyCmdLiteral = "rate-limiting"
 const exportThrottlePolicyCmdShortDesc = "Export Throttling Policies"
 const exportThrottlePolicyCmdLongDesc = "Export ThrottlingPolicies from an environment"
 
-const exportThrottlePolicyCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + `-n Gold -e dev --type sub 
-` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + `-n AppPolicy -e prod --type app --format JSON
-` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + `-n TestPolicy -e dev --type advanced 
-` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + `-n CustomPolicy -e prod --type custom 
+const exportThrottlePolicyCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + ` -n Gold -e dev --type sub 
+` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + ` -n AppPolicy -e prod --type app --format JSON
+` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + ` -n TestPolicy -e dev --type advanced 
+` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + ` -n CustomPolicy -e prod --type custom 
 NOTE: All the 2 flags (--name (-n) and --environment (-e)) are mandatory.`
 
 // ExportThrottlePolicyCmd represents the export policy rate-limiting command
@@ -71,7 +71,6 @@ var ExportThrottlePolicyCmd = &cobra.Command{
 func executeExportThrottlePolicyCmd(credential credentials.Credential, exportDirectory string) {
 	runningExportThrottlePolicyCommand = true
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, ExportEnvironment)
-
 	if preCommandErr == nil {
 		resp, err := impl.ExportThrottlingPolicyFromEnv(accessToken, ExportEnvironment, exportThrottlePolicyName, exportThrottlePolicyType, exportThrottlePolicyFormat)
 		if err != nil {
@@ -89,7 +88,7 @@ func executeExportThrottlePolicyCmd(credential credentials.Credential, exportDir
 			fmt.Println("Error exporting Throttling Policies:", resp.Status(), "\n", string(resp.Body()))
 		}
 	} else {
-		// error exporting Api
+		// error exporting Throttling Policy
 		fmt.Println("Error getting OAuth tokens while exporting Throttling Policies:" + preCommandErr.Error())
 	}
 }

@@ -56,9 +56,9 @@ var ExportAppCmdDeprecated = &cobra.Command{
 	Deprecated: "instead use \"" + cmd.ExportCmdLiteral + " " + cmd.ExportAppCmdLiteral + "\".",
 	Run: func(deprecatedCmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + exportAppCmdLiteral + " called")
-		var appsExportDirectoryPath = filepath.Join(utils.ExportDirectory, utils.ExportedAppsDirName, cmd.CmdExportEnvironment)
+		var appsExportDirectoryPath = filepath.Join(utils.ExportDirectory, utils.ExportedAppsDirName, cmd.ExportEnvironment)
 
-		cred, err := cmd.GetCredentials(cmd.CmdExportEnvironment)
+		cred, err := cmd.GetCredentials(cmd.ExportEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
@@ -67,11 +67,11 @@ var ExportAppCmdDeprecated = &cobra.Command{
 }
 
 func executeExportAppCmd(credential credentials.Credential, appsExportDirectoryPath string) {
-	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, cmd.CmdExportEnvironment)
+	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, cmd.ExportEnvironment)
 
 	if preCommandErr == nil {
 		// The format flag is not supported from the deprecated command.
-		resp, err := impl.ExportAppFromEnv(accessToken, exportAppName, exportAppOwner, "", cmd.CmdExportEnvironment, exportAppWithKeys)
+		resp, err := impl.ExportAppFromEnv(accessToken, exportAppName, exportAppOwner, "", cmd.ExportEnvironment, exportAppWithKeys)
 		if err != nil {
 			utils.HandleErrorAndExit("Error exporting Application: "+exportAppName, err)
 		}
@@ -96,7 +96,7 @@ func init() {
 		"Name of the Application to be exported")
 	ExportAppCmdDeprecated.Flags().StringVarP(&exportAppOwner, "owner", "o", "",
 		"Owner of the Application to be exported")
-	ExportAppCmdDeprecated.Flags().StringVarP(&cmd.CmdExportEnvironment, "environment", "e",
+	ExportAppCmdDeprecated.Flags().StringVarP(&cmd.ExportEnvironment, "environment", "e",
 		"", "Environment to which the Application should be exported")
 	ExportAppCmdDeprecated.Flags().BoolVarP(&exportAppWithKeys, "withKeys", "",
 		false, "Export keys for the application ")
