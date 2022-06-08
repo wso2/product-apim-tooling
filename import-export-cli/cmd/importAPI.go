@@ -1012,7 +1012,7 @@ func setupEndpoints(environmentParams *params.Environment) ([]byte, error) {
 	var configData []byte
 	var err error
 
-	// if the endpoint routing policy or the endpoints field is not specified
+	// if the endpoint routing policy and the endpoints field is not specified
 	if environmentParams.EndpointRoutingPolicy == "" && environmentParams.Endpoints == nil {
 		// if endpoint type is Dynamic
 		if environmentParams.EndpointType == utils.DynamicEndpointType {
@@ -1031,8 +1031,8 @@ func setupEndpoints(environmentParams *params.Environment) ([]byte, error) {
 		}
 	}
 
-	// if endpoint type is HTTP/REST
-	if environmentParams.EndpointType == utils.HttpRESTEndpointType || environmentParams.EndpointType == utils.HttpRESTEndpointTypeForJSON {
+	// if endpoint type is HTTP/REST or endpoint is not defined
+	if isEmpty(environmentParams.EndpointType) || environmentParams.EndpointType == utils.HttpRESTEndpointType {
 		environmentParams.EndpointType = utils.HttpRESTEndpointTypeForJSON
 
 		if environmentParams.Endpoints != nil {
