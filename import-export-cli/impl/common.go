@@ -19,7 +19,6 @@
 package impl
 
 import (
-	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -98,7 +97,6 @@ func IncludeMetaFileToZip(sourceZipFile, targetZipFile, metaFile string, metaDat
 
 	err = utils.Zip(tmpClonedLoc, targetZipFile)
 	if err != nil {
-		fmt.Println("This is it")
 		utils.HandleErrorAndExit("Error creating the final zip archive", err)
 	}
 	return nil
