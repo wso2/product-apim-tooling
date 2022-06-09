@@ -28,12 +28,8 @@ import (
 	"strconv"
 )
 
-func ImportThrottlingPolicyToEnv(accessOAuthToken, importEnvironment, importThrottlingPolicyFile string, importThrottlePolicyUpdate bool) error {
+func ImportThrottlingPolicyToEnv(accessOAuthToken, importEnvironment, importPath string, importThrottlePolicyUpdate bool) error {
 	adminEndpoint := utils.GetAdminEndpointOfEnv(importEnvironment, utils.MainConfigFilePath)
-	return ImportThrottlingPolicy(accessOAuthToken, adminEndpoint, importThrottlingPolicyFile, importThrottlePolicyUpdate)
-}
-
-func ImportThrottlingPolicy(accessOAuthToken, adminEndpoint, importPath string, importThrottlePolicyUpdate bool) error {
 	if _, err := os.Stat(importPath); err != nil {
 		if !os.IsNotExist(err) {
 			return err
