@@ -56,4 +56,5 @@ apictl get api-logging --api-id bf36ca3a-0332-49ba-abce-e9992228ae06 -e dev --te
 * [apictl get apps](apictl_get_apps.md)	 - Display a list of Applications in an environment specific to an owner
 * [apictl get envs](apictl_get_envs.md)	 - Display the list of environments
 * [apictl get keys](apictl_get_keys.md)	 - Generate access token to invoke the API or API Product
+* [apictl get policies](apictl_get_policies.md)	 - Get Policy list
 

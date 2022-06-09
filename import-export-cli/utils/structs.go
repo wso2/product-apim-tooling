@@ -18,6 +18,10 @@
 
 package utils
 
+import (
+	"gopkg.in/yaml.v2"
+)
+
 // ------------------- Structs for YAML Config Files ----------------------------------
 
 // For env_keys_all.yaml
@@ -94,9 +98,9 @@ type Application struct {
 }
 
 type APILogger struct {
-	ID              string `json:"apiId"`
-	Context         string `json:"context"`
-	LogLevel        string `json:"logLevel"`
+	ID       string `json:"apiId"`
+	Context  string `json:"context"`
+	LogLevel string `json:"logLevel"`
 }
 
 type RegistrationResponse struct {
@@ -120,7 +124,7 @@ type APIListResponse struct {
 }
 
 type APILoggerListResponse struct {
-	Apis  []APILogger  `json:"apis"`
+	Apis []APILogger `json:"apis"`
 }
 
 type APIProductListResponse struct {
@@ -278,6 +282,28 @@ type Subscription struct {
 	ThrottlingPolicy  string      `json:"throttlingPolicy"`
 	Status            string      `json:"status"`
 	RedirectionParams interface{} `json:"redirectionParams"`
+}
+
+type PolicyList struct {
+	Count interface{} `json:"count"`
+	List  []Policy    `json:"list"`
+}
+
+type Policy struct {
+	PolicyId    int    `json:"policyId"`
+	Uuid        string `json:"uuid"`
+	PolicyName  string `json:"policyName"`
+	DisplayName string `json:"displayName"`
+	Description string `json:"description"`
+	IsDeployed  bool   `json:"isDeployed"`
+	Type        string `json:"type"`
+}
+
+type ExportThrottlePolicy struct {
+	Type    string        `json:"type"`
+	Subtype string        `json:"subtype"`
+	Version string        `json:"version"`
+	Data    yaml.MapSlice `json:"data"`
 }
 
 //Throttling Policies List response struct
@@ -439,4 +465,11 @@ type RevisionEntry struct {
 	RevisionNumber string
 	Description    string
 	GatewayEnvs    string
+}
+
+// PolicyEntry  List Entry struct to support  different formats of output in the list command
+type PolicyEntry struct {
+	Uuid       string
+	PolicyName string
+	Type       string
 }

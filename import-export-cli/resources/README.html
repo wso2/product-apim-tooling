@@ -1,50 +1,34 @@
-<h1 id="cli-for-importing-and-exporting-apis-and-applications">CLI for Importing and Exporting APIs and Applications and
-    Managing WSO2 Micro Integrator
-</h1>
+<h1 id="cli-for-importing-and-exporting-apis-and-applications">CLI for Importing and Exporting APIs and Applications and Managing WSO2 Micro Integrator</h1>
 <h2 id="for-wso2-api-manager-4-1-0">For WSO2 API Manager 4.1.0</h2>
-<p>Command Line tool for importing and exporting APIs/Applications/API Products in between different API environments of
-    WSO2 API Manager and managing WSO2 Micro Integrator</p>
+<p>Command Line tool for importing and exporting APIs/Applications/API Products in between different API environments of WSO2 API Manager and managing WSO2 Micro Integrator</p>
 <h2 id="getting-started">Getting Started</h2>
 <ul>
     <li>
         <h3 id="running">Running</h3>
-        <p> Select a generated archive suitable for your platform (Mac, Windows, Linux) and extract it to a desired
-            location and <code>cd</code> into it.<br> Then execute <code>apictl</code> to start the application.</p>
+        <p>Select a generated archive suitable for your platform (Mac, Windows, Linux) and extract it to a desired location and <code>cd</code> into it.<br />Then execute <code>apictl</code> to start the application.</p>
         <blockquote>
-            <p>NOTE: Execute <code>./apictl</code> if the working directory is the same where the executable resides
-            </p>
-            <p>Add the location of extracted folder to your system&#39;s $PATH variable to access the executable from
-                anywhere </p>
+            <p>NOTE: Execute <code>./apictl</code> if the working directory is the same where the executable resides</p>
+            <p>Add the location of extracted folder to your system's $PATH variable to access the executable from anywhere</p>
         </blockquote>
-        <p> Execute <code>apictl --help</code> for further instructions.</p>
+        <p>Execute <code>apictl --help</code> for further instructions.</p>
     </li>
     <li>
         <h3 id="adding-environments">Adding Environments</h3>
-        <p> Add environments by either manually editing <code>$HOME/.wso2apictl/main_config.yaml</code> or using the
-            command<br> <code>apictl add env</code>.</p>
+        <p>Add environments by either manually editing <code>$HOME/.wso2apictl/main_config.yaml</code> or using the command<br /><code>apictl add env</code>.</p>
         <blockquote>
-            <p>NOTE: Directory structure for configuration files (<code>$HOME/.wso2apictl</code>) will be created upon
-                execution of <code>apictl</code></p>
+            <p>NOTE: Directory structure for configuration files (<code>$HOME/.wso2apictl</code>) will be created upon execution of <code>apictl</code></p>
         </blockquote>
-        <p> Execute <code>apictl add env --help</code> for detailed instructions</p>
+        <p>Execute <code>apictl add env --help</code> for detailed instructions</p>
         <blockquote>
-            <p>You can either provide only the 2 flags <code>--apim</code> and <code>--token</code>, or all the other 5
-                flags (<code>--registration</code>, <code>--publisher</code>, <code>--devportal</code>,
-                <code>--admin</code>, <code>--token</code>) without providing <code>--apim</code> flag.
-                If you are omitting any of --registration --publisher --devportal --admin flags, you need to specify
-                --apim flag with the API Manager endpoint.To add a micro integrator instance to an environment you can
-                use the <code>--mi</code> flag.
-            </p>
+            <p>You can either provide only the 2 flags <code>--apim</code> and <code>--token</code>, or all the other 5 flags (<code>--registration</code>, <code>--publisher</code>, <code>--devportal</code>, <code>--admin</code>, <code>--token</code>) without providing <code>--apim</code> flag. If you are omitting any of --registration --publisher --devportal --admin flags, you need to specify --apim flag with the API Manager endpoint.To add a micro integrator instance to an environment you can use the <code>--mi</code> flag.</p>
         </blockquote>
     </li>
     <li>
         <h3 id="command-autocompletion-for-bash-only-">Command Autocompletion (For Bash Only)</h3>
-        <p> Copy the file <code>apictl_bash_completion.sh</code> to <code>/etc/bash_completion.d/</code> and source it
-            with<br> <code>source /etc/bash_completion.d/apictl_bash_completion.sh</code> to enable bash
-            auto-completion.</p>
+        <p>Copy the file <code>apictl_bash_completion.sh</code> to <code>/etc/bash_completion.d/</code> and source it with<br /><code>source /etc/bash_completion.d/apictl_bash_completion.sh</code> to enable bash auto-completion.</p>
     </li>
 </ul>
-<hr>
+<hr />
 <h2 id="usage">Usage</h2>
 <pre><code class="lang-bash">     apictl [command]
 </code></pre>
@@ -171,7 +155,7 @@
            --preserve-provider
            --skip-cleanup
            --update-api-product
-           --update-apis          
+           --update-apis
    Examples:
        apictl import api-product -f qa/LeasingAPIProduct.zip -e dev
        apictl import api-product -f staging/CreditAPIProduct.zip -e production --update-api-product
@@ -222,6 +206,38 @@
 </code></pre>
 <ul>
     <li>
+        <h4 id="export-policy-rate-limiting">export policy rate-limitng</h4>
+        <pre><code class="lang-bash">   Flags:
+       Required:
+            --name, -n
+            --environment, -e
+       Optional:
+            --type, -t
+            --format
+   Examples:
+            apictl export policy rate-limiting -n SamplePolicy -e dev
+            apictl export policy rate-limiting -n TestPolicy -t app -e prod --format json
+</code></pre>
+    </li>
+</ul>
+<ul>
+    <li>
+        <h4 id="import-policy-rate-limiting">import policy rate-limitng</h4>
+    </li>
+</ul>
+<pre><code class="lang-bash">        Flags:
+            Required
+                  --file, -f
+                  --environment, -e
+            Optional
+                  --update, -u
+        Examples:
+            apictl import policy rate-limiting -f qa/policies/rate-limitng/Applicatiion-TestPolicy.yaml -e dev
+            apictl import policy rate-limiting -f ~/policies/rate-limitng/.Custom-samplePolicy.json -e prod  -u
+            apictl import policy rate-limiting -f staging/policies/rate-limitng/Advanced-SamplePolicy.yaml  -e staging
+</code></pre>
+<ul>
+    <li>
         <h4 id="get-apis">get apis</h4>
         <pre><code class="lang-bash">      Flags:
           Required:
@@ -266,11 +282,25 @@
                   --limit, -l
                   --owner, -o
         Examples:
-            apictl get apps -e dev 
+            apictl get apps -e dev
             apictl get apps -e dev -o sampleUser
             apictl get apps -e prod -o sampleUser
             apictl get apps -e staging -o sampleUser
-            apictl get apps -e dev -l 40        
+            apictl get apps -e dev -l 40
+</code></pre>
+    </li>
+    <li>
+        <h4 id="get-policies-rate-limiting">get policies rate-limiting</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required
+                  --environment, -e
+            Optional
+                  --query, -q
+        Examples:
+            apictl get policies rate-limiting -e dev
+            apictl get policies rate-limiting -e dev -q type:app
+            apictl get policies rate-limiting  -e dev -q type:sub
+
 </code></pre>
     </li>
     <li>
@@ -368,7 +398,7 @@
             --admin https://apim.com:9443 \
             --token https://gw.com:8243/token \
             --mi https://localhost:9164
-            
+
         apictl add env prod \
             --apim https://apim.com:9443 \
             --registration https://idp.com:9443 \
@@ -379,7 +409,7 @@
         <h4 id="remove-env">remove env [environment]</h4>
     </li>
 </ul>
-<pre><code class="lang-bash">      
+<pre><code class="lang-bash">
             Examples:
                 apictl remove env dev
 </code></pre>
@@ -544,7 +574,7 @@
    Examples:
        apictl undeploy api -n TwitterAPI -v 1.0.0 --rev 2 -e dev
        apictl undeploy api -n FacebookAPI -v 2.1.0 --rev 6 -g Label1 -g Label2 -g Label3 -e production
-       apictl undeploy api -n FacebookAPI -v 2.1.0 -r alice --rev 2 -g Label1 -e production   
+       apictl undeploy api -n FacebookAPI -v 2.1.0 -r alice --rev 2 -g Label1 -e production
 </code></pre>
     </li>
 </ul>
@@ -561,7 +591,7 @@
    Examples:
        apictl undeploy api-product -n TwitterAPIProduct --rev 2  -e dev
        apictl undeploy api-product -n StoreProduct --rev 6 -g Label1 -g Label2 -g Label3 -e production
-       apictl undeploy api-product -n FacebookProduct -r admin --rev 2 -g Label1 -e production     
+       apictl undeploy api-product -n FacebookProduct -r admin --rev 2 -g Label1 -e production
 </code></pre>
     </li>
 </ul>

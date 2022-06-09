@@ -38,5 +38,5 @@ NOTE: The flag (--environment (-e)) is mandatory
 
 ### SEE ALSO
 
-* [apictl export](apictl_export.md)	 - Export an API/API Product/Application in an environment
+* [apictl export](apictl_export.md)	 - Export an API/API Product/Application/Policy in an environment
 

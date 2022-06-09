@@ -66,6 +66,8 @@ var DefaultAPISpecFilePath = filepath.Join(ConfigDirPath, DefaultAPISpecFileName
 
 const DefaultExportDirName = "exported"
 const ExportedApisDirName = "apis"
+const ExportedPoliciesDirName = "policies"
+const ExportedThrottlePoliciesDirName = "rate-limiting"
 const ExportedApiProductsDirName = "api-products"
 const ExportedAppsDirName = "apps"
 const ExportedMigrationArtifactsDirName = "migration"
@@ -198,6 +200,7 @@ const (
 	ProjectTypeApiProduct  = "API Product"
 	ProjectTypeApplication = "Application"
 	ProjectTypeRevision    = "Revision"
+	ProjectTypePolicy      = "Policy"
 )
 
 // project param files

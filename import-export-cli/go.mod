@@ -2,6 +2,7 @@ go 1.14
 
 require (
 	github.com/Jeffail/gabs v1.4.0
+	github.com/aybabtme/orderedjson v0.1.0
 	github.com/getkin/kin-openapi v0.2.0
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
 	github.com/go-openapi/loads v0.19.5
@@ -17,7 +18,7 @@ require (
 	github.com/savaki/jq v0.0.0-20161209013833-0e6baecebbf8
 	github.com/spf13/cast v1.3.1
 	github.com/spf13/cobra v1.1.1
-	github.com/stretchr/testify v1.6.1
+	github.com/stretchr/testify v1.7.0
 	github.com/wso2/k8s-api-operator/api-operator v0.0.0-20210223103109-66ee766c8413
 	golang.org/x/crypto v0.0.0-20200414173820-0848c9571904
 	gopkg.in/yaml.v2 v2.3.0
