@@ -219,3 +219,29 @@ func TestInitDeploymentDirImportExportAdvertiseOnlyAPIDevopsTenant(t *testing.T)
 		api.Name, api.Version)
 	testutils.ValidateAPIImportExportWithDeploymentDirForAdvertiseOnlyAPI(t, importExportArgs)
 }
+
+// Export a third party Async API from one environment, import to another environment, and reimport it with update
+func TestExportImportAdvertiseOnlyAsyncApiWithUpdate(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+			prod := GetProdClient()
+
+			api := testutils.AddWebStreamingAPIFromAsyncAPIDefinition(t, dev, user.ApiCreator.Username, user.ApiCreator.Password,
+				testutils.APITypeAsync)
+
+			args := &testutils.ApiImportExportTestArgs{
+				ApiProvider: testutils.Credentials{Username: user.ApiCreator.Username, Password: user.ApiCreator.Password},
+				CtlUser:     testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Api:         api,
+				SrcAPIM:     dev,
+				DestAPIM:    prod,
+			}
+
+			testutils.ValidateAPIImportExportForAdvertiseOnlyAPI(t, args, testutils.APITypeAsync)
+
+			args.Update = true
+			testutils.ValidateAPIImportExportForAdvertiseOnlyAPI(t, args, testutils.APITypeAsync)
+		})
+	}
+}

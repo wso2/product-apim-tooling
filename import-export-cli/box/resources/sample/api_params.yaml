@@ -3,7 +3,9 @@ environments:
       configs:
           endpoints:
               production:
+                  url:
               sandbox:
+                  url:
           security:
               enabled:
               type:

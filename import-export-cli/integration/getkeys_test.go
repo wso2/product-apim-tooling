@@ -68,30 +68,25 @@ func TestGetKeysNonAdminTenantUser(t *testing.T) {
 	testutils.ValidateGetKeysFailure(t, args)
 }
 
-func TestGetKeysAdminSuperTenantUser(t *testing.T) {
-	adminUser := superAdminUser
-	adminPassword := superAdminPassword
+func TestGetKeysForAPI(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
 
-	apiPublisher := publisher.UserName
-	apiPublisherPassword := publisher.Password
+			api := testutils.AddAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
+			testutils.CreateAndDeployAPIRevision(t, dev, user.ApiPublisher.Username, user.ApiPublisher.Password, api.ID)
 
-	apiCreator := creator.UserName
-	apiCreatorPassword := creator.Password
+			testutils.PublishAPI(dev, user.ApiPublisher.Username, user.ApiPublisher.Password, api.ID)
 
-	dev := GetDevClient()
+			args := &testutils.ApiGetKeyTestArgs{
+				CtlUser: testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Api:     api,
+				Apim:    dev,
+			}
 
-	api := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
-	testutils.CreateAndDeployAPIRevision(t, dev, apiPublisher, apiPublisherPassword, api.ID)
-
-	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, api.ID)
-
-	args := &testutils.ApiGetKeyTestArgs{
-		CtlUser: testutils.Credentials{Username: adminUser, Password: adminPassword},
-		Api:     api,
-		Apim:    dev,
+			testutils.ValidateGetKeys(t, args)
+		})
 	}
-
-	testutils.ValidateGetKeys(t, args)
 }
 
 func TestGetKeysConsecutivelyAdminSuperTenantUser(t *testing.T) {
@@ -271,92 +266,43 @@ func TestGetKeysForAPIProductNonAdminTenantUser(t *testing.T) {
 	testutils.ValidateGetKeysFailure(t, args)
 }
 
-func TestGetKeysForAPIProductAdminSuperTenantUser(t *testing.T) {
-	adminUser := superAdminUser
-	adminPassword := superAdminPassword
+func TestGetKeysForAPIProduct(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
 
-	apiPublisher := publisher.UserName
-	apiPublisherPassword := publisher.Password
+			// Add the first dependent API to env1
+			dependentAPI1 := testutils.AddAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
+			testutils.PublishAPI(dev, user.ApiPublisher.Username, user.ApiPublisher.Password, dependentAPI1.ID)
 
-	apiCreator := creator.UserName
-	apiCreatorPassword := creator.Password
+			// Add the second dependent API to env1
+			dependentAPI2 := testutils.AddAPIFromOpenAPIDefinition(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
+			testutils.PublishAPI(dev, user.ApiPublisher.Username, user.ApiPublisher.Password, dependentAPI2.ID)
 
-	dev := GetDevClient()
+			// Map the real name of the API with the API
+			apisList := map[string]*apim.API{
+				"PizzaShackAPI":   dependentAPI1,
+				"SwaggerPetstore": dependentAPI2,
+			}
 
-	// Add the first dependent API to env1
-	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
-	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI1.ID)
+			// Add the API Product to env1
+			apiProduct := testutils.AddAPIProductFromJSON(t, dev, user.ApiPublisher.Username, user.ApiPublisher.Password, apisList)
 
-	// Add the second dependent API to env1
-	dependentAPI2 := testutils.AddAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
-	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
+			// Create and Deploy API Product Revision
+			testutils.CreateAndDeployAPIProductRevision(t, dev, user.ApiPublisher.Username, user.ApiPublisher.Password, apiProduct.ID)
 
-	// Map the real name of the API with the API
-	apisList := map[string]*apim.API{
-		"PizzaShackAPI":   dependentAPI1,
-		"SwaggerPetstore": dependentAPI2,
+			// Change life cycle state of API Product from CREATED to PUBLISHED
+			testutils.PublishAPIProduct(dev, user.ApiPublisher.Username, user.ApiPublisher.Password, apiProduct.ID)
+
+			args := &testutils.ApiGetKeyTestArgs{
+				CtlUser:    testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				ApiProduct: apiProduct,
+				Apim:       dev,
+			}
+
+			testutils.ValidateGetKeys(t, args)
+		})
 	}
-
-	// Add the API Product to env1
-	apiProduct := testutils.AddAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
-
-	// Create and Deploy API Product Revision
-	testutils.CreateAndDeployAPIProductRevision(t, dev, apiPublisher, apiPublisherPassword, apiProduct.ID)
-
-	// Change life cycle state of API Product from CREATED to PUBLISHED
-	testutils.PublishAPIProduct(dev, apiPublisher, apiPublisherPassword, apiProduct.ID)
-
-	args := &testutils.ApiGetKeyTestArgs{
-		CtlUser:    testutils.Credentials{Username: adminUser, Password: adminPassword},
-		ApiProduct: apiProduct,
-		Apim:       dev,
-	}
-
-	testutils.ValidateGetKeys(t, args)
-}
-
-func TestGetKeysForAPIProductAdminTenantUser(t *testing.T) {
-	adminUser := superAdminUser + "@" + TENANT1
-	adminPassword := superAdminPassword
-
-	apiPublisher := publisher.UserName + "@" + TENANT1
-	apiPublisherPassword := publisher.Password
-
-	apiCreator := creator.UserName + "@" + TENANT1
-	apiCreatorPassword := creator.Password
-
-	dev := GetDevClient()
-
-	// Add the first dependent API to env1
-	dependentAPI1 := testutils.AddAPI(t, dev, apiCreator, apiCreatorPassword)
-	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI1.ID)
-
-	// Add the second dependent API to env1
-	dependentAPI2 := testutils.AddAPIFromOpenAPIDefinition(t, dev, apiCreator, apiCreatorPassword)
-	testutils.PublishAPI(dev, apiPublisher, apiPublisherPassword, dependentAPI2.ID)
-
-	// Map the real name of the API with the API
-	apisList := map[string]*apim.API{
-		"PizzaShackAPI":   dependentAPI1,
-		"SwaggerPetstore": dependentAPI2,
-	}
-
-	// Add the API Product to env1
-	apiProduct := testutils.AddAPIProductFromJSON(t, dev, apiPublisher, apiPublisherPassword, apisList)
-
-	// Create and Deploy API Product Revision
-	testutils.CreateAndDeployAPIProductRevision(t, dev, apiPublisher, apiPublisherPassword, apiProduct.ID)
-
-	// Change life cycle state of API Product from CREATED to PUBLISHED
-	testutils.PublishAPIProduct(dev, apiPublisher, apiPublisherPassword, apiProduct.ID)
-
-	args := &testutils.ApiGetKeyTestArgs{
-		CtlUser:    testutils.Credentials{Username: adminUser, Password: adminPassword},
-		ApiProduct: apiProduct,
-		Apim:       dev,
-	}
-
-	testutils.ValidateGetKeys(t, args)
 }
 
 func TestGetKeysConsecutivelyForAPIProductAdminSuperTenantUser(t *testing.T) {

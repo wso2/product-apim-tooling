@@ -35,8 +35,6 @@ const (
 	defaultMessageStoreDetailedFormat  = "detail Name - {{.Name}}\n" +
 		"File Name - {{.FileName}}\n" +
 		"Container - {{.Container}}\n" +
-		"Producer - {{.Producer}}\n" +
-		"Consumer - {{.Consumer}}\n" +
 		"Size - {{.Size}}\n" +
 		"Properties :\n" +
 		"{{ if eq (len .Properties) 0 }}" +

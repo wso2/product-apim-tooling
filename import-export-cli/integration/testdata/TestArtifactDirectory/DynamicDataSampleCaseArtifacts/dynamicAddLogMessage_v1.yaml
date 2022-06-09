@@ -1,0 +1,17 @@
+type: operation_policy_specification
+version: v4.1.0
+data:
+  category: Mediation
+  name: dynamicAddLogMessage
+  version: v1
+  displayName: Dynamic Variables Log Policy
+  description: This policy allows you to log the header passed as an environment variable
+  applicableFlows:
+   - request
+   - response
+   - fault
+  supportedGateways:
+   - Synapse
+  supportedApiTypes:
+   - HTTP
+  policyAttributes: []

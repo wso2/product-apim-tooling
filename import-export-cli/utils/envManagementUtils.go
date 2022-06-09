@@ -164,7 +164,7 @@ func GetPublisherEndpointOfEnv(env, filePath string) string {
 	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
 	if !(envEndpoints.PublisherEndpoint == "" || envEndpoints == nil) {
 		envEndpoints.PublisherEndpoint = AppendSlashToString(envEndpoints.PublisherEndpoint)
-		return envEndpoints.AdminEndpoint + defaultPublisherApiImportExportSuffix
+		return envEndpoints.PublisherEndpoint + defaultPublisherApiImportExportSuffix
 	} else {
 		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
 		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
@@ -376,8 +376,8 @@ func GetTokenEndPointFromAPIMEndpoint(apimEndpoint string) string {
 //get default token endpoint given from a publisher endpoint
 // @param publisherEndpoint : Endpoint URL of the publisher endpoint
 func GetTokenEndPointFromPublisherEndpoint(publisherEndpoint string) string {
-	if strings.Contains(publisherEndpoint, "publisher") {
-		trimmedString := strings.Split(publisherEndpoint, "publisher")
+	if strings.Contains(publisherEndpoint, defaultPublisherApiImportExportSuffix) {
+		trimmedString := strings.Split(publisherEndpoint, defaultPublisherApiImportExportSuffix)
 		publisherEndpoint = trimmedString[0]
 	}
 

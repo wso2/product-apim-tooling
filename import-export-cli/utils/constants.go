@@ -184,7 +184,13 @@ var ValidInitialStates = []string{"CREATED", "PUBLISHED"}
 
 // The list of repos and directories that can be used when replcing env variables
 var EnvReplaceFilePaths = []string{
-	"Sequences",
+	"Policies",
+}
+
+// The list of file extensions when replcing env variables related to Policies
+var EnvReplacePoliciesFileExtensions = []string{
+	"j2",
+	"gotmpl",
 }
 
 // project types

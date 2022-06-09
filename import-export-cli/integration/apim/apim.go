@@ -166,6 +166,7 @@ func (instance *Client) GenerateSampleAPIData(provider string) *API {
 		&URLConfig{"https://localhost:" + strconv.Itoa(9443+instance.portOffset) + "/am/sample/pizzashack/v1/api/"}}
 	api.Operations = generateSampleAPIOperations()
 	api.AdvertiseInformation = AdvertiseInfo{Advertised: false}
+	api.GatewayType = "wso2/synapse"
 
 	return &api
 }
@@ -193,6 +194,15 @@ func (instance *Client) GenerateSampleStreamingAPIData(provider, apiType string)
 		api.EndpointConfig = HTTPEndpoint{"http", &URLConfig{"http://localhost:8080"}, &URLConfig{"http://localhost:8080"}}
 	}
 	return &api
+}
+
+func GenerateAdvertiseOnlyProperties(api *API, originalDevportalUrl, productionEp, sandboxEp string) {
+	api.AdvertiseInformation.Advertised = true
+	api.AdvertiseInformation.ApiOwner = api.Provider
+	api.AdvertiseInformation.OriginalDevPortalUrl = originalDevportalUrl
+	api.AdvertiseInformation.ApiExternalProductionEndpoint = productionEp
+	api.AdvertiseInformation.ApiExternalSandboxEndpoint = sandboxEp
+	api.AdvertiseInformation.Vendor = "WSO2"
 }
 
 func getContext(provider string) string {
@@ -246,6 +256,14 @@ func (instance *Client) GenerateAdditionalProperties(provider, endpointUrl, apiT
 					}
 			}
 		}`
+	} else if strings.EqualFold(apiType, "ASYNC") {
+		api := API{}
+		api.Provider = provider
+		GenerateAdvertiseOnlyProperties(&api, "https://localhost:9443/devportal", "amqp://production-ep:9000",
+			"amqp://sandbox-ep:9000")
+		advertiseInfo, _ := json.Marshal(api.AdvertiseInformation)
+		additionalProperties = additionalProperties + `"type":"` + apiType + `",
+		"advertiseInfo": ` + string(advertiseInfo) + `}`
 	} else {
 		additionalProperties = additionalProperties +
 			`"endpointConfig": {   
