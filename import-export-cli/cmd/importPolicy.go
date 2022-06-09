@@ -36,7 +36,6 @@ var ImportPolicyCmd = &cobra.Command{
 	Example: ImportPolicyCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + ExportCmdLiteral + " called")
-
 	},
 }
 

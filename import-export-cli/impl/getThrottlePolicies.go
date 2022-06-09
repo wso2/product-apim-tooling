@@ -66,7 +66,6 @@ func (a policy) PolicyType() string {
 func GetThrottlePolicyListFromEnv(accessToken, environment, query string) (*resty.Response, error) {
 	adminEndpoint := utils.GetAdminEndpointOfEnv(environment, utils.MainConfigFilePath)
 	throttlePolicyListEndpoint := adminEndpoint + "/throttling/policies/search"
-
 	return getThrottlePolicyList(accessToken, throttlePolicyListEndpoint, query)
 }
 

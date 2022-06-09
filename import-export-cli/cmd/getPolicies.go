@@ -36,7 +36,6 @@ var GetPoliciesCmd = &cobra.Command{
 	Example: GetPoliciesCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + GetCmdLiteral + " called")
-
 	},
 }
 

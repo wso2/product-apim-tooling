@@ -42,7 +42,7 @@ try:
         sys.exit()
 
 except FileNotFoundError as e:
-    logger.exception('User creation Failed!. errLog: {}. fileName: {}'.format(e.strerror, e.filename))
+    logger.exception('User creation Failed!. errLog: {}. FileName: {}'.format(e.strerror, e.filename))
     sys.exit()
 
 
