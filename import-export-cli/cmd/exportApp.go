@@ -55,9 +55,9 @@ var ExportAppCmd = &cobra.Command{
 	Example: exportAppCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + ExportAppCmdLiteral + " called")
-		var appsExportDirectoryPath = filepath.Join(utils.ExportDirectory, utils.ExportedAppsDirName, ExportEnvironment)
+		var appsExportDirectoryPath = filepath.Join(utils.ExportDirectory, utils.ExportedAppsDirName, CmdExportEnvironment)
 
-		cred, err := GetCredentials(ExportEnvironment)
+		cred, err := GetCredentials(CmdExportEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
@@ -66,11 +66,11 @@ var ExportAppCmd = &cobra.Command{
 }
 
 func executeExportAppCmd(credential credentials.Credential, appsExportDirectoryPath string) {
-	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, ExportEnvironment)
+	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, CmdExportEnvironment)
 
 	if preCommandErr == nil {
 		resp, err := impl.ExportAppFromEnv(accessToken, exportAppName, exportAppOwner, exportAppFormat,
-			ExportEnvironment, exportAppWithKeys)
+			CmdExportEnvironment, exportAppWithKeys)
 		if err != nil {
 			utils.HandleErrorAndExit("Error exporting Application: "+exportAppName, err)
 		}
@@ -95,7 +95,7 @@ func init() {
 		"Name of the Application to be exported")
 	ExportAppCmd.Flags().StringVarP(&exportAppOwner, "owner", "o", "",
 		"Owner of the Application to be exported")
-	ExportAppCmd.Flags().StringVarP(&ExportEnvironment, "environment", "e",
+	ExportAppCmd.Flags().StringVarP(&CmdExportEnvironment, "environment", "e",
 		"", "Environment to which the Application should be exported")
 	ExportAppCmd.Flags().BoolVarP(&exportAppWithKeys, "with-keys", "",
 		false, "Export keys for the application ")

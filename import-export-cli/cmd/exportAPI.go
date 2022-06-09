@@ -64,7 +64,7 @@ var ExportAPICmd = &cobra.Command{
 		utils.Logln(utils.LogPrefixInfo + ExportAPICmdLiteral + " called")
 		var apisExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedApisDirName)
 
-		cred, err := GetCredentials(ExportEnvironment)
+		cred, err := GetCredentials(CmdExportEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
@@ -75,17 +75,17 @@ var ExportAPICmd = &cobra.Command{
 
 func executeExportAPICmd(credential credentials.Credential, exportDirectory string) {
 	runningExportApiCommand = true
-	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, ExportEnvironment)
+	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, CmdExportEnvironment)
 
 	if preCommandErr == nil {
 		resp, err := impl.ExportAPIFromEnv(accessToken, exportAPIName, exportAPIVersion, exportRevisionNum, exportProvider,
-			exportAPIFormat, ExportEnvironment, exportAPIPreserveStatus, exportAPILatestRevision)
+			exportAPIFormat, CmdExportEnvironment, exportAPIPreserveStatus, exportAPILatestRevision)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while exporting", err)
 		}
 		// Print info on response
 		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
-		apiZipLocationPath := filepath.Join(exportDirectory, ExportEnvironment)
+		apiZipLocationPath := filepath.Join(exportDirectory, CmdExportEnvironment)
 		if resp.StatusCode() == http.StatusOK {
 			impl.WriteToZip(exportAPIName, exportAPIVersion, "", apiZipLocationPath, runningExportApiCommand, resp)
 		} else if resp.StatusCode() == http.StatusInternalServerError {
@@ -112,7 +112,7 @@ func init() {
 		"Provider of the API")
 	ExportAPICmd.Flags().StringVarP(&exportRevisionNum, "rev", "", "",
 		"Revision number of the API to be exported")
-	ExportAPICmd.Flags().StringVarP(&ExportEnvironment, "environment", "e",
+	ExportAPICmd.Flags().StringVarP(&CmdExportEnvironment, "environment", "e",
 		"", "Environment to which the API should be exported")
 	ExportAPICmd.Flags().BoolVarP(&exportAPIPreserveStatus, "preserve-status", "", true,
 		"Preserve API status when exporting. Otherwise API will be exported in CREATED status")

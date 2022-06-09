@@ -47,6 +47,7 @@ var cfgFile string
 var insecure bool
 var cmdPassword string
 var CmdUsername string
+var CmdExportEnvironment string
 var CmdResourceTenantDomain string
 var CmdForceStartFromBegin bool
 

@@ -61,7 +61,7 @@ var ExportAPICmdDeprecated = &cobra.Command{
 		utils.Logln(utils.LogPrefixInfo + exportAPICmdLiteral + " called")
 		var apisExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedApisDirName)
 
-		cred, err := cmd.GetCredentials(cmd.ExportEnvironment)
+		cred, err := cmd.GetCredentials(cmd.CmdExportEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
@@ -72,17 +72,17 @@ var ExportAPICmdDeprecated = &cobra.Command{
 
 func executeExportAPICmd(credential credentials.Credential, exportDirectory string) {
 	runningExportApiCommand = true
-	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, cmd.ExportEnvironment)
+	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, cmd.CmdExportEnvironment)
 
 	if preCommandErr == nil {
 		resp, err := impl.ExportAPIFromEnv(accessToken, exportAPIName, exportAPIVersion, "",
-			exportProvider, exportAPIFormat, cmd.ExportEnvironment, exportAPIPreserveStatus, false)
+			exportProvider, exportAPIFormat, cmd.CmdExportEnvironment, exportAPIPreserveStatus, false)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while exporting", err)
 		}
 		// Print info on response
 		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
-		apiZipLocationPath := filepath.Join(exportDirectory, cmd.ExportEnvironment)
+		apiZipLocationPath := filepath.Join(exportDirectory, cmd.CmdExportEnvironment)
 		if resp.StatusCode() == http.StatusOK {
 			impl.WriteToZip(exportAPIName, exportAPIVersion, "", apiZipLocationPath, runningExportApiCommand, resp)
 		} else if resp.StatusCode() == http.StatusInternalServerError {
@@ -107,7 +107,7 @@ func init() {
 		"Version of the API to be exported")
 	ExportAPICmdDeprecated.Flags().StringVarP(&exportProvider, "provider", "r", "",
 		"Provider of the API")
-	ExportAPICmdDeprecated.Flags().StringVarP(&cmd.ExportEnvironment, "environment", "e",
+	ExportAPICmdDeprecated.Flags().StringVarP(&cmd.CmdExportEnvironment, "environment", "e",
 		"", "Environment to which the API should be exported")
 	ExportAPICmdDeprecated.Flags().BoolVarP(&exportAPIPreserveStatus, "preserveStatus", "", true,
 		"Preserve API status when exporting. Otherwise API will be exported in CREATED status")
