@@ -37,7 +37,7 @@ var getThrottlePoliciesCmdQuery []string
 const GetThrottlePoliciesCmdLiteral = "rate-limiting"
 const getThrottlePoliciesCmdShortDesc = "Display a list of APIs in an environment"
 
-const getThrottlePoliciesCmdLongDesc = `Display a list of APIs in the environment specified by the flag --environment, -e`
+const getThrottlePoliciesCmdLongDesc = `Display a list of Throttling Policies in the environment specified by the flag --environment, -e`
 
 var getThrottlePoliciesCmdExamples = utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdExamples + ` ` + GetThrottlePoliciesCmdLiteral + ` -e dev
 ` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdLiteral + ` ` + GetThrottlePoliciesCmdLiteral + ` -e prod -q type:api

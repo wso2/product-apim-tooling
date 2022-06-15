@@ -4,7 +4,7 @@ Export Throttling Policies
 
 ### Synopsis
 
-Export ThrottlingPolicies from an environment
+Export Throttling Policies from an environment
 
 ```
 apictl export policy rate-limiting (--type <type-of-the-throttling-policy> --environment <environment-from-which-the-throttling-policies-should-be-exported>) [flags]
