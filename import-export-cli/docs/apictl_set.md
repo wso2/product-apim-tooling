@@ -34,7 +34,7 @@ apictl set api-logging --api-id bf36ca3a-0332-49ba-abce-e9992228ae06 --log-level
 ### Options
 
 ```
-      --export-directory string           Path to directory where APIs should be saved (default "/home/ransika/.wso2apictl/exported")
+      --export-directory string           Path to directory where APIs should be saved (default "/Users/wso2user/.wso2apictl/exported")
   -h, --help                              help for set
       --http-request-timeout int          Timeout for HTTP Client (default 10000)
       --tls-renegotiation-mode string     Supported TLS renegotiation mode (default "never")
