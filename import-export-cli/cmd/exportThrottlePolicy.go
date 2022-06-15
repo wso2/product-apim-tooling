@@ -39,7 +39,7 @@ var runningExportThrottlePolicyCommand bool
 // ExportThrottlePolicy command related usage info
 const ExportThrottlePolicyCmdLiteral = "rate-limiting"
 const exportThrottlePolicyCmdShortDesc = "Export Throttling Policies"
-const exportThrottlePolicyCmdLongDesc = "Export ThrottlingPolicies from an environment"
+const exportThrottlePolicyCmdLongDesc = "Export Throttling Policies from an environment"
 
 const exportThrottlePolicyCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + ` -n Gold -e dev --type sub 
 ` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + ` -n AppPolicy -e prod --type app --format JSON

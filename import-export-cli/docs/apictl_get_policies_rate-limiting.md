@@ -4,7 +4,7 @@ Display a list of APIs in an environment
 
 ### Synopsis
 
-Display a list of APIs in the environment specified by the flag --environment, -e
+Display a list of Throttling Policies in the environment specified by the flag --environment, -e
 
 ```
 apictl get policies rate-limiting [flags]
