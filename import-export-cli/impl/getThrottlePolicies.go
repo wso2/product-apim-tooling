@@ -21,12 +21,13 @@ package impl
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/go-resty/resty/v2"
-	"github.com/wso2/product-apim-tooling/import-export-cli/formatter"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"io"
 	"os"
 	"text/template"
+
+	"github.com/go-resty/resty/v2"
+	"github.com/wso2/product-apim-tooling/import-export-cli/formatter"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 const (
@@ -71,7 +72,7 @@ func GetThrottlePolicyListFromEnv(accessToken, environment, query string) (*rest
 
 func getThrottlePolicyList(accessToken string, throttlePolicyListEndpoint string, query string) (*resty.Response, error) {
 	url := throttlePolicyListEndpoint
-	queryParamString := "query=" + query
+	queryParamString := "query=" + query // check again
 	utils.Logln(utils.LogPrefixInfo+"ExportThrottlingPolicy: URL:", url)
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken

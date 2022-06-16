@@ -327,6 +327,19 @@ type ThrottlingPolicy struct {
 	throttlingPolicyPermissions interface{}
 }
 
+type OperationPoliciesList struct {
+	Count int               `json:"count"`
+	List  []OperationPolicy `json:"list"`
+}
+
+type OperationPolicy struct {
+	Id                string   `json:"id"`
+	DisplayName       string   `json:"displayName"`
+	Category          string   `json:"category"`
+	ApplicationFlows  []string `json:"applicationFlows"`
+	SupportedGateways []string `json:"supportedGateways"`
+}
+
 //Subscription creation request
 type SubscriptionCreateRequest struct {
 	ApplicationID    string `json:"applicationId"`

@@ -97,6 +97,7 @@ var DefaultCertDirPath = filepath.Join(ConfigDirPath, CertificatesDirName)
 const defaultApiApplicationImportExportSuffix = "api/am/admin/v3"
 const defaultPublisherApiImportExportSuffix = "api/am/publisher/v3"
 const defaultApiListEndpointSuffix = "api/am/publisher/v3/apis"
+const defaultOperationPolicyListEndpointSuffix = "api/am/publisher/v3/operation-policies"
 const defaultApiProductListEndpointSuffix = "api/am/publisher/v3/api-products"
 const defaultUnifiedSearchEndpointSuffix = "api/am/publisher/v3/search"
 const defaultAdminApplicationListEndpointSuffix = "api/am/admin/v3/applications"

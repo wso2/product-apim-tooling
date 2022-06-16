@@ -19,6 +19,7 @@
 package cmd
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -65,6 +66,7 @@ var getApisCmd = &cobra.Command{
 
 func executeGetApisCmd(credential credentials.Credential) {
 	accessToken, err := credentials.GetOAuthAccessToken(credential, getApisCmdEnvironment)
+	fmt.Println("Access Token: ", accessToken)
 	if err != nil {
 		utils.Logln(utils.LogPrefixError + "calling 'list' " + err.Error())
 		utils.HandleErrorAndExit("Error calling '"+GetApisCmdLiteral+"'", err)

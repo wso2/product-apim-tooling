@@ -102,6 +102,7 @@ func (a *api) MarshalJSON() ([]byte, error) {
 // @return error
 func GetAPIListFromEnv(accessToken, environment, query, limit string) (count int32, apis []utils.API, err error) {
 	apiListEndpoint := utils.GetApiListEndpointOfEnv(environment, utils.MainConfigFilePath)
+	fmt.Println("API List Endpoint: ", apiListEndpoint)
 	return GetAPIList(accessToken, apiListEndpoint, query, limit)
 }
 
