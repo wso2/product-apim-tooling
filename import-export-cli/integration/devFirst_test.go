@@ -245,25 +245,28 @@ func TestImportProjectCreatedFromOpenAPI3Definition(t *testing.T) {
 
 // Import an API from initialized project with an invalid Open API 3 definition
 func TestImportProjectCreatedFromInvalidOpenAPI3Definition(t *testing.T) {
-	apim := GetDevClient()
-	projectName := base.GenerateRandomName(16)
-	username := superAdminUser
-	password := superAdminPassword
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			apim := GetDevClient()
+			projectName := base.GenerateRandomString()
 
-	args := &testutils.InitTestArgs{
-		CtlUser:   testutils.Credentials{Username: username, Password: password},
-		SrcAPIM:   apim,
-		InitFlag:  projectName,
-		OasFlag:   testutils.TestOpenAPI3DefinitionPath,
-		APIName:   "NoahExpressTimeTableAPI",
-		ForceFlag: false,
+			args := &testutils.InitTestArgs{
+				CtlUser:   testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				SrcAPIM:   apim,
+				InitFlag:  projectName,
+				OasFlag:   testutils.TestInvalidOpenAPI3DefinitionPath,
+				APIName:   base.GenerateRandomString() + "API",
+				ForceFlag: false,
+			}
+
+			// Initialize a project with OAS
+			testutils.ValidateInitializeProjectWithOASFlag(t, args)
+
+			// Assert that project import to publisher portal is unsuccessful
+			testutils.ValidateImportProjectWithInvalidSwaggerFailed(t, args, "",
+				!isTenantUser(user.CtlUser.Username, TENANT1))
+		})
 	}
-
-	// Initialize a project with OAS
-	testutils.ValidateInitializeProjectWithOASFlag(t, args)
-
-	// Assert that project import to publisher portal is unsuccessful
-	testutils.ValidateImportProjectFailed(t, args, "")
 }
 
 // Import API from initialized project from API definition which is already in publisher with --update flag
