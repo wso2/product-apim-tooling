@@ -62,7 +62,6 @@ var getOperationPoliciesCmd = &cobra.Command{
 
 func executeGetOperationPoliciesCmd(credential credentials.Credential) {
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, getOperationPoliciesCmdEnvironment)
-	fmt.Println("Access Token: ", accessToken)
 	if preCommandErr == nil {
 		resp, err := impl.GetOperationPolicyListFromEnv(accessToken, getOperationPoliciesCmdEnvironment,
 			strings.Join(getOperationPoliciesCmdQuery, queryParamSeparator))
@@ -72,6 +71,7 @@ func executeGetOperationPoliciesCmd(credential credentials.Credential) {
 		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
 
 		if resp.StatusCode() == http.StatusOK {
+			// fmt.Println("Resp: ", resp)
 			impl.PrintOperationPolicies(resp, getOperationPoliciesCmdFormat)
 		} else if resp.StatusCode() == http.StatusInternalServerError {
 			// 500 Internal Server Error

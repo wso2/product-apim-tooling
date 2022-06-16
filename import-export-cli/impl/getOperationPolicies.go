@@ -31,35 +31,44 @@ import (
 )
 
 const (
-	operationPolicyUUIDHeader              = "ID"
-	operationPolicyNameHeader              = "NAME"
-	operationPolicyCategoryHeader          = "CATEGORY"
-	operationPolicyApplicationFlowsHeaders = "APPLICATION FLOWS"
-	defaultOperationPolicyTableFormat      = "table {{.ID}}\t{{.Name}}\t{{.Category}}\t{{.Applicatio Flows}}"
+	operationPolicyUUIDHeader               = "ID"
+	operationPolicyNameHeader               = "NAME"
+	operationPolicyCategoryHeader           = "CATEGORY"
+	operationPolicyApplicableFlowsHeaders   = "APPLICABLE FLOWS"
+	operationPolicySupportedGatewaysHeaders = "SUPPORTED GATEWAYS"
+	defaultOperationPolicyTableFormat       = "table {{.ID}}\t{{.Name}}\t{{.Category}}\t{{.ApplicableFlows}}\t{{.SupportedGateways}}"
 )
 
 type operationPolicy struct {
-	Id                string   `json:"id"`
-	DisplayName       string   `json:"displayName"`
-	Category          string   `json:"category"`
-	ApplicationFlows  []string `json:"applicationFlows"`
-	SupportedGateways []string `json:"supportedGateways"`
+	id                string
+	name              string
+	category          string
+	applicableFlows   []string
+	supportedGateways []string
 }
 
 func newOperationPolicyDefinition(a utils.OperationPolicy) *operationPolicy {
-	return &operationPolicy{a.Id, a.DisplayName, a.Category, a.ApplicationFlows, a.SupportedGateways}
+	return &operationPolicy{a.Id, a.DisplayName, a.Category, a.ApplicableFlows, a.SupportedGateways}
 }
 
 func (a operationPolicy) ID() string {
-	return a.Id
+	return a.id
 }
 
-func (a operationPolicy) PolicyDisplayName() string {
-	return a.DisplayName
+func (a operationPolicy) Name() string {
+	return a.name
 }
 
-func (a operationPolicy) PolicyApplicationFlows() []string {
-	return a.ApplicationFlows
+func (a operationPolicy) Category() string {
+	return a.category
+}
+
+func (a operationPolicy) ApplicableFlows() []string {
+	return a.applicableFlows
+}
+
+func (a operationPolicy) SupportedGateways() []string {
+	return a.supportedGateways
 }
 
 func GetOperationPolicyListFromEnv(accessToken, environment, query string) (*resty.Response, error) {
@@ -89,11 +98,12 @@ func PrintOperationPolicies(resp *resty.Response, format string) {
 	var operationPolicyList utils.OperationPoliciesList
 	err := json.Unmarshal(resp.Body(), &operationPolicyList)
 	policies := operationPolicyList.List
+	fmt.Println(policies[0])
 	if err != nil {
 		utils.HandleErrorAndExit("Error unmarshalling response data", err)
 	}
 	if format == "" {
-		format = defaultThrottlePolicyTableFormat
+		format = defaultOperationPolicyTableFormat
 		// create policy context with standard output
 		policyContext := formatter.NewContext(os.Stdout, format)
 		// create a new renderer function which iterate collection
@@ -106,12 +116,14 @@ func PrintOperationPolicies(resp *resty.Response, format string) {
 			}
 			return nil
 		}
+
 		// headers for table
 		operationPolicyTableHeaders := map[string]string{
-			"UUID":              operationPolicyUUIDHeader,
+			"ID":                operationPolicyUUIDHeader,
 			"Name":              operationPolicyNameHeader,
-			"CATEGORY":          operationPolicyCategoryHeader,
-			"APPLICATION FLOWS": operationPolicyApplicationFlowsHeaders,
+			"Category":          operationPolicyCategoryHeader,
+			"ApplicableFlows":   operationPolicyApplicableFlowsHeaders,
+			"SupportedGateways": operationPolicySupportedGatewaysHeaders,
 		}
 		// execute context
 		if err := policyContext.Write(renderer, operationPolicyTableHeaders); err != nil {

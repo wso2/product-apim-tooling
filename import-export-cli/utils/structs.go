@@ -336,7 +336,7 @@ type OperationPolicy struct {
 	Id                string   `json:"id"`
 	DisplayName       string   `json:"displayName"`
 	Category          string   `json:"category"`
-	ApplicationFlows  []string `json:"applicationFlows"`
+	ApplicableFlows   []string `json:"applicableFlows"`
 	SupportedGateways []string `json:"supportedGateways"`
 }
 
