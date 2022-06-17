@@ -32,18 +32,17 @@ import (
 	"path/filepath"
 )
 
-// var exportThrottlePolicyType string
-// var exportThrottlePolicyName string
-// var exportThrottlePolicyFormat string
-// var runningExportThrottlePolicyCommand bool
+var exportOperationPolicyName string
+var exportOperationPolicyVersion string
+var runningExportOperationPolicyCommand bool
 
 // ExportOperationPolicy command related usage info
 const ExportOperationPolicyCmdLiteral = "operation"
 const exportOperationPolicyCmdShortDesc = "Export Operation Policies"
 const exportOperationPolicyCmdLongDesc = "Export Operation Policies from an environment"
 
-const exportOperationPolicyCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportOperationPolicyCmdLiteral + ` -n AddHeader -e dev --type sub 
- ` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportOperationPolicyCmdLiteral + ` -n AppPolicy -e prod --type app --format JSON
+const exportOperationPolicyCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportOperationPolicyCmdLiteral + ` -n AddHeader -e dev 
+ ` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportOperationPolicyCmdLiteral + ` -n AddHeader -e prod -v 1.0.0 --format JSON
  ` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportOperationPolicyCmdLiteral + ` -n TestPolicy -e dev --type advanced 
  ` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportOperationPolicyCmdLiteral + ` -n CustomPolicy -e prod --type custom 
  NOTE: All the 2 flags (--name (-n) and --environment (-e)) are mandatory.`
@@ -57,29 +56,30 @@ var ExportOperationPolicyCmd = &cobra.Command{
 	Example: exportOperationPolicyCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + ExportOperationPolicyCmdLiteral + " called")
-		var throttlePoliciesExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedPoliciesDirName, utils.ExportedThrottlePoliciesDirName)
+		var operationPoliciesExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedPoliciesDirName, utils.ExportedOperationPoliciesDirName)
 
 		cred, err := GetCredentials(CmdExportEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
 
-		executeExportThrottlePolicyCmd(cred, throttlePoliciesExportDirectory)
+		executeExportOperationPolicyCmd(cred, operationPoliciesExportDirectory, exportOperationPolicyVersion, exportOperationPolicyName)
 	},
 }
 
-func executeExportOperationPolicyCmd(credential credentials.Credential, exportDirectory string) {
-	runningExportThrottlePolicyCommand = true
+func executeExportOperationPolicyCmd(credential credentials.Credential, exportDirectory string, exportOperationPolicyVersion string, exportOperationPolicyName string) {
+	runningExportOperationPolicyCommand = true
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, CmdExportEnvironment)
 	if preCommandErr == nil {
-		resp, err := impl.ExportThrottlingPolicyFromEnv(accessToken, CmdExportEnvironment, exportThrottlePolicyName, exportThrottlePolicyType, exportThrottlePolicyFormat)
+		resp, err := impl.ExportOperationPolicyFromEnv(accessToken, CmdExportEnvironment, exportOperationPolicyName, exportAPIProductVersion)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while exporting", err)
 		}
 		// Print info on response
 		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
 		if resp.StatusCode() == http.StatusOK {
-			impl.WriteThrottlePolicyToFile(exportDirectory, resp, exportThrottlePolicyFormat, runningExportThrottlePolicyCommand)
+			fmt.Println("Hi")
+			impl.WriteOperationPolicyToFile(exportDirectory, resp, exportOperationPolicyVersion, exportOperationPolicyName, runningExportOperationPolicyCommand)
 		} else if resp.StatusCode() == http.StatusInternalServerError {
 			// 500 Internal Server Error
 			fmt.Println(string(resp.Body()))
@@ -96,12 +96,13 @@ func executeExportOperationPolicyCmd(credential credentials.Credential, exportDi
 // init using Cobra
 func init() {
 	ExportPolicyCmd.AddCommand(ExportOperationPolicyCmd)
-	ExportOperationPolicyCmd.Flags().StringVarP(&exportThrottlePolicyName, "name", "n",
+	ExportOperationPolicyCmd.Flags().StringVarP(&exportOperationPolicyName, "name", "n",
 		"", "Name of the Operation Policy to be exported")
 	ExportOperationPolicyCmd.Flags().StringVarP(&CmdExportEnvironment, "environment", "e",
 		"", "Environment to which the Operation Policies should be exported")
-	ExportOperationPolicyCmd.Flags().StringVarP(&exportThrottlePolicyFormat, "format", "", utils.DefaultExportFormat, "File format of exported archive(JSON or YAML)")
+	ExportOperationPolicyCmd.Flags().StringVarP(&exportOperationPolicyVersion, "version", "v", "", "Policy Version")
 	_ = ExportOperationPolicyCmd.MarkFlagRequired("name")
 	_ = ExportOperationPolicyCmd.MarkFlagRequired("environment")
+	_ = ExportOperationPolicyCmd.MarkFlagRequired("version")
 
 }

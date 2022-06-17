@@ -63,6 +63,8 @@ func exportAPI(name, version, revisionNum, provider, format, publisherEndpoint, 
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 	headers[utils.HeaderAccept] = utils.HeaderValueApplicationZip
 
+	fmt.Println("API export endpoint: ", url)
+
 	resp, err := utils.InvokeGETRequest(url, headers)
 
 	if err != nil {

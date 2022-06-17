@@ -211,7 +211,7 @@ func GetApiListEndpointOfEnv(env, filePath string) string {
 	}
 }
 
-// Get ApiListEndpoint of a given environment
+// Get ExportOperationEndpoint of a given environment
 func GetOperationPolicyListEndpointOfEnv(env, filePath string) string {
 	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
 	if !(envEndpoints.PublisherEndpoint == "" || envEndpoints == nil) {

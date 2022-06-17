@@ -38,6 +38,7 @@ var TLSRenegotiationMode = tls.RenegotiateNever
 // @param mainConfigFilePath : Path to file where Configuration details are stored
 // @return error
 func SetConfigVars(mainConfigFilePath string) error {
+	fmt.Println("Setting Up Configs")
 	mainConfig := GetMainConfigFromFile(mainConfigFilePath)
 	Logln(LogPrefixInfo + " reading '" + mainConfigFilePath + "'")
 
