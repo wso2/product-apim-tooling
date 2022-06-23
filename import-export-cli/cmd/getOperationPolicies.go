@@ -21,7 +21,6 @@ package cmd
 import (
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
@@ -32,7 +31,6 @@ import (
 
 var getOperationPoliciesCmdEnvironment string
 var getOperationPoliciesCmdFormat string
-var getOperationPoliciesCmdQuery []string
 
 // GetOperationPoliciesCmdLiteral related info
 const GetOperationPoliciesCmdLiteral = "operation"
@@ -41,7 +39,6 @@ const getOperationPoliciesCmdShortDesc = "Display a list of Operation Policies i
 const getOperationPoliciesCmdLongDesc = `Display a list of Operation Policies in the environment specified by the flag --environment, -e`
 
 var getOperationPoliciesCmdExamples = utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdExamples + ` ` + GetOperationPoliciesCmdExample + ` -e dev
- ` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdLiteral + ` ` + GetOperationPoliciesCmdExample + ` -e prod -q gateway:choreo
  NOTE: The flag (--environment (-e)) is mandatory`
 
 // getOperationPoliciesCmd represents the get policies rate-limiting command
@@ -63,8 +60,7 @@ var getOperationPoliciesCmd = &cobra.Command{
 func executeGetOperationPoliciesCmd(credential credentials.Credential) {
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, getOperationPoliciesCmdEnvironment)
 	if preCommandErr == nil {
-		resp, err := impl.GetOperationPolicyListFromEnv(accessToken, getOperationPoliciesCmdEnvironment,
-			strings.Join(getOperationPoliciesCmdQuery, queryParamSeparator))
+		resp, err := impl.GetOperationPolicyListFromEnv(accessToken, getOperationPoliciesCmdEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while getting operation policies", err)
 		}
@@ -89,8 +85,6 @@ func init() {
 	GetPoliciesCmd.AddCommand(getOperationPoliciesCmd)
 	getOperationPoliciesCmd.Flags().StringVarP(&getOperationPoliciesCmdEnvironment, "environment", "e",
 		"", "Environment to be searched")
-	getOperationPoliciesCmd.Flags().StringSliceVarP(&getOperationPoliciesCmdQuery, "query", "q",
-		[]string{}, "Query pattern")
 	getOperationPoliciesCmd.Flags().StringVarP(&getOperationPoliciesCmdFormat, "format", "", "", "Pretty-print throttle policies "+
 		"using Go Templates. Use \"{{ jsonPretty . }}\" to list all fields")
 	_ = getOperationPoliciesCmd.MarkFlagRequired("environment")

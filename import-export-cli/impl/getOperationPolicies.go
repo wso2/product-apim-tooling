@@ -30,25 +30,28 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
+// TODO: Add Policy Version
 const (
 	operationPolicyUUIDHeader               = "ID"
 	operationPolicyNameHeader               = "NAME"
+	operationPolicyDisplayNameHeader        = "Display NAME"
 	operationPolicyCategoryHeader           = "CATEGORY"
 	operationPolicyApplicableFlowsHeaders   = "APPLICABLE FLOWS"
 	operationPolicySupportedGatewaysHeaders = "SUPPORTED GATEWAYS"
-	defaultOperationPolicyTableFormat       = "table {{.ID}}\t{{.Name}}\t{{.Category}}\t{{.ApplicableFlows}}\t{{.SupportedGateways}}"
+	defaultOperationPolicyTableFormat       = "table {{.ID}}\t{{.Name}}\t{{.DisplayName}}\t{{.Category}}\t{{.ApplicableFlows}}\t{{.SupportedGateways}}"
 )
 
 type operationPolicy struct {
 	id                string
 	name              string
+	displayName       string
 	category          string
 	applicableFlows   []string
 	supportedGateways []string
 }
 
 func newOperationPolicyDefinition(a utils.OperationPolicy) *operationPolicy {
-	return &operationPolicy{a.Id, a.DisplayName, a.Category, a.ApplicableFlows, a.SupportedGateways}
+	return &operationPolicy{a.Id, a.Name, a.DisplayName, a.Category, a.ApplicableFlows, a.SupportedGateways}
 }
 
 func (a operationPolicy) ID() string {
@@ -57,6 +60,10 @@ func (a operationPolicy) ID() string {
 
 func (a operationPolicy) Name() string {
 	return a.name
+}
+
+func (a operationPolicy) DisplayName() string {
+	return a.displayName
 }
 
 func (a operationPolicy) Category() string {
@@ -71,26 +78,21 @@ func (a operationPolicy) SupportedGateways() []string {
 	return a.supportedGateways
 }
 
-func GetOperationPolicyListFromEnv(accessToken, environment, query string) (*resty.Response, error) {
+func GetOperationPolicyListFromEnv(accessToken, environment string) (*resty.Response, error) {
 	operationPolicyListEndpoint := utils.GetOperationPolicyListEndpointOfEnv(environment, utils.MainConfigFilePath)
 	fmt.Println("Endpoint: ", operationPolicyListEndpoint)
-	return getOperationPolicyList(accessToken, operationPolicyListEndpoint, query)
+	return getOperationPolicyList(accessToken, operationPolicyListEndpoint)
 }
 
-func getOperationPolicyList(accessToken string, operationPolicyListEndpoint string, query string) (*resty.Response, error) {
+func getOperationPolicyList(accessToken string, operationPolicyListEndpoint string) (*resty.Response, error) {
 	url := operationPolicyListEndpoint
-	queryParamString := "query=" + query
+
 	utils.Logln(utils.LogPrefixInfo+"GetOperationPolicy: URL:", url)
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
-	if query == "" {
-		fmt.Println("No Query")
-		resp, err := utils.InvokeGETRequest(url, headers)
-		return resp, err
-	} else {
-		resp, err := utils.InvokeGETRequestWithQueryParamsString(url, queryParamString, headers)
-		return resp, err
-	}
+	resp, err := utils.InvokeGETRequest(url, headers)
+
+	return resp, err
 }
 
 // PrintOperationPolicies prints the policy list in a specific format
@@ -121,6 +123,7 @@ func PrintOperationPolicies(resp *resty.Response, format string) {
 		operationPolicyTableHeaders := map[string]string{
 			"ID":                operationPolicyUUIDHeader,
 			"Name":              operationPolicyNameHeader,
+			"DisplayName":       operationPolicyDisplayNameHeader,
 			"Category":          operationPolicyCategoryHeader,
 			"ApplicableFlows":   operationPolicyApplicableFlowsHeaders,
 			"SupportedGateways": operationPolicySupportedGatewaysHeaders,

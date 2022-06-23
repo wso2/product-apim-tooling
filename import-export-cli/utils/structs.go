@@ -334,6 +334,7 @@ type OperationPoliciesList struct {
 
 type OperationPolicy struct {
 	Id                string   `json:"id"`
+	Name              string   `json:"name"`
 	DisplayName       string   `json:"displayName"`
 	Category          string   `json:"category"`
 	ApplicableFlows   []string `json:"applicableFlows"`
