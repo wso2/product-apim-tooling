@@ -294,3 +294,5 @@ const ZipFileSuffix = ".zip"
 
 // Output format types
 const JsonArrayFormatType = "jsonArray"
+
+const OperationPolicyVersion = "v1"

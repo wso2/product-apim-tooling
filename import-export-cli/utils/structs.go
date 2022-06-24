@@ -334,11 +334,11 @@ type OperationPoliciesList struct {
 
 type OperationPolicy struct {
 	Id                string   `json:"id"`
-	Name              string   `json:"name"`
-	DisplayName       string   `json:"displayName"`
-	Category          string   `json:"category"`
-	ApplicableFlows   []string `json:"applicableFlows"`
-	SupportedGateways []string `json:"supportedGateways"`
+	Name              string   `json:"name,omitempty"`
+	DisplayName       string   `json:"displayName,omitempty"`
+	Category          string   `json:"category,omitempty"`
+	ApplicableFlows   []string `json:"applicableFlows,omitempty"`
+	SupportedGateways []string `json:"supportedGateways,omitempty"`
 }
 
 //Subscription creation request
