@@ -42,9 +42,7 @@ const exportOperationPolicyCmdShortDesc = "Export Operation Policies"
 const exportOperationPolicyCmdLongDesc = "Export Operation Policies from an environment"
 
 const exportOperationPolicyCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportOperationPolicyCmdLiteral + ` -n AddHeader -e dev 
- ` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportOperationPolicyCmdLiteral + ` -n AddHeader -e prod -v 1.0.0 --format JSON
- ` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportOperationPolicyCmdLiteral + ` -n TestPolicy -e dev --type advanced 
- ` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportOperationPolicyCmdLiteral + ` -n CustomPolicy -e prod --type custom 
+ ` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportOperationPolicyCmdLiteral + ` -n AddHeader -e prod --format JSON
  NOTE: All the 2 flags (--name (-n) and --environment (-e)) are mandatory.`
 
 // ExportOperationPolicyCmd represents the export policy operation command
@@ -63,6 +61,7 @@ var ExportOperationPolicyCmd = &cobra.Command{
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
 
+		exportOperationPolicyVersion = utils.OperationPolicyVersion
 		executeExportOperationPolicyCmd(cred, operationPoliciesExportDirectory, exportOperationPolicyVersion, exportOperationPolicyName)
 	},
 }
@@ -71,7 +70,7 @@ func executeExportOperationPolicyCmd(credential credentials.Credential, exportDi
 	runningExportOperationPolicyCommand = true
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, CmdExportEnvironment)
 	if preCommandErr == nil {
-		resp, err := impl.ExportOperationPolicyFromEnv(accessToken, CmdExportEnvironment, exportOperationPolicyName, exportAPIProductVersion)
+		resp, err := impl.ExportOperationPolicyFromEnv(accessToken, CmdExportEnvironment, exportOperationPolicyName, exportOperationPolicyVersion)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while exporting", err)
 		}
@@ -85,11 +84,11 @@ func executeExportOperationPolicyCmd(credential credentials.Credential, exportDi
 			fmt.Println(string(resp.Body()))
 		} else {
 			// neither 200 nor 500
-			fmt.Println("Error exporting Throttling Policies:", resp.Status(), "\n", string(resp.Body()))
+			fmt.Println("Error exporting Operation Policies:", resp.Status(), "\n", string(resp.Body()))
 		}
 	} else {
-		// error exporting Throttling Policy
-		fmt.Println("Error getting OAuth tokens while exporting Throttling Policies:" + preCommandErr.Error())
+		// error exporting Operarion Policy
+		fmt.Println("Error getting OAuth tokens while exporting Operation Policies:" + preCommandErr.Error())
 	}
 }
 
@@ -100,9 +99,7 @@ func init() {
 		"", "Name of the Operation Policy to be exported")
 	ExportOperationPolicyCmd.Flags().StringVarP(&CmdExportEnvironment, "environment", "e",
 		"", "Environment to which the Operation Policies should be exported")
-	ExportOperationPolicyCmd.Flags().StringVarP(&exportOperationPolicyVersion, "version", "v", "", "Policy Version")
 	_ = ExportOperationPolicyCmd.MarkFlagRequired("name")
 	_ = ExportOperationPolicyCmd.MarkFlagRequired("environment")
-	_ = ExportOperationPolicyCmd.MarkFlagRequired("version")
 
 }

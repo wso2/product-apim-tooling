@@ -32,7 +32,7 @@ func ExportOperationPolicyFromEnv(accessToken string, exportEnvironment string, 
 	operationPolicyEndpoint := utils.GetPublisherEndpointOfEnv(exportEnvironment, utils.MainConfigFilePath)
 	// var query string
 	operationPolicyEndpoint = utils.AppendSlashToString(operationPolicyEndpoint)
-	// operationPolicyResource := "operation-policies/export?"
+	// operationPolicyResource := "operation-policies/c86da87e-da70-4977-bed2-57cb089c115f" + "/content"
 	operationPolicyResource := "operation-policies/export?"
 
 	query := `name=` + operationPolicyName + `&version=` + operationPolicyVersion
