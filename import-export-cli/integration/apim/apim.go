@@ -2190,6 +2190,8 @@ func (instance *Client) GenerateSampleThrottlePolicyData(policyType string) inte
 		return &policy
 	case advancedThrottlePolicyType:
 		policy := AdvancedThrottlePolicy{}
+		conditionalGroup := AdvancedPolicyConditionalGroup{}
+		condition := AdvancedPolicyCondition{}
 		policy.PolicyName = base.GenerateRandomString() + "Policy"
 		policy.Description = "This is a Test Advanced Policy"
 		policy.IsDeployed = false
@@ -2198,6 +2200,16 @@ func (instance *Client) GenerateSampleThrottlePolicyData(policyType string) inte
 		policy.DefaultLimit.RequestCount.TimeUnit = "min"
 		policy.DefaultLimit.RequestCount.UnitTime = 10
 		policy.DefaultLimit.RequestCount.RequestCount = 5
+		conditionalGroup.Description = "Sample description about condition group"
+		condition.Type = "HEADERCONDITION"
+		condition.HeaderCondition.HeaderName = "Test"
+		condition.HeaderCondition.HeaderValue = "TestValue"
+		conditionalGroup.Conditions = []AdvancedPolicyCondition{condition}
+		conditionalGroup.Limit.Type = "REQUESTCOUNTLIMIT"
+		conditionalGroup.Limit.RequestCount.TimeUnit = "min"
+		conditionalGroup.Limit.RequestCount.UnitTime = 10
+		conditionalGroup.Limit.RequestCount.RequestCount = 5
+		policy.ConditionalGroups = []AdvancedPolicyConditionalGroup{conditionalGroup}
 		return &policy
 	case subscriptionThrottlePolicyType:
 		policy := SubscriptionThrottlePolicy{}

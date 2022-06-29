@@ -32,16 +32,15 @@ func ValidateThrottlePolicyExportImport(t *testing.T, args *ThrottlePolicyImport
 
 	// Import Throttling Policy to env 2
 	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
-	result, err := importThrottlePolicy(t, args)
+	_, err := importThrottlePolicy(t, args)
 	assert.Nil(t, err, "Error while importing the Throttling Policy")
-	fmt.Println(result)
 	// Give time for newly imported Throttling Policy to get indexed
 	base.WaitForIndexing()
 
-	//// Get Throttle Policy from env 2
+	// Get Throttle Policy from env 2
 	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 	importedPolicy, _ := getThrottlingPolicyByName(t, args.DestAPIM, policyName, policyType)
-	////// Validate env 1 and env 2 policy is equal
+	// Validate env 1 and env 2 policy is equal
 	ValidatePoliciesEqual(t, args, importedPolicy)
 }
 

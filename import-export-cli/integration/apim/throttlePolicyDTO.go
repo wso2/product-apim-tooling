@@ -80,31 +80,43 @@ type AdvancedThrottlePolicy struct {
 			EventCount int    `json:"eventCount"`
 		} `json:"eventCount"`
 	} `json:"defaultLimit"`
-	ConditionalGroups []struct {
-		Description string `json:"description"`
-		Conditions  string `json:"conditions"`
-		Limit       struct {
-			Type         string `json:"type"`
-			RequestCount struct {
-				TimeUnit     string `json:"timeUnit"`
-				UnitTime     int    `json:"unitTime"`
-				RequestCount int    `json:"requestCount"`
-			} `json:"requestCount"`
-			Bandwidth struct {
-				TimeUnit   string `json:"timeUnit"`
-				UnitTime   int    `json:"unitTime"`
-				DataAmount int    `json:"dataAmount"`
-				DataUnit   string `json:"dataUnit"`
-			} `json:"bandwidth"`
-			EventCount struct {
-				TimeUnit   string `json:"timeUnit"`
-				UnitTime   int    `json:"unitTime"`
-				EventCount int    `json:"eventCount"`
-			} `json:"eventCount"`
-		} `json:"limit"`
-	} `json:"conditionalGroups"`
+	ConditionalGroups []AdvancedPolicyConditionalGroup `json:"conditionalGroups"`
 }
 
+type AdvancedPolicyConditionalGroup struct {
+	Description string                    `json:"description"`
+	Conditions  []AdvancedPolicyCondition `json:"conditions"`
+	Limit       struct {
+		Type         string `json:"type"`
+		RequestCount struct {
+			TimeUnit     string `json:"timeUnit"`
+			UnitTime     int    `json:"unitTime"`
+			RequestCount int    `json:"requestCount"`
+		} `json:"requestCount"`
+		Bandwidth  interface{} `json:"bandwidth"`
+		EventCount interface{} `json:"eventCount"`
+	} `json:"limit"`
+}
+
+type AdvancedPolicyCondition struct {
+	Type            string `json:"type"`
+	InvertCondition bool   `json:"invertCondition"`
+	HeaderCondition struct {
+		HeaderName  string `json:"headerName"`
+		HeaderValue string `json:"headerValue"`
+	} `json:"headerCondition"`
+	IpCondition struct {
+		IpConditionType string      `json:"ipConditionType"`
+		SpecificIP      string      `json:"specificIP"`
+		StartingIP      interface{} `json:"startingIP"`
+		EndingIP        interface{} `json:"endingIP"`
+	} `json:"ipCondition"`
+	JwtClaimsCondition      interface{} `json:"jwtClaimsCondition"`
+	QueryParameterCondition *struct {
+		ParameterName  string `json:"parameterName"`
+		ParameterValue string `json:"parameterValue"`
+	} `json:"queryParameterCondition"`
+}
 type SubscriptionThrottlePolicy struct {
 	PolicyName           string `json:"policyName"`
 	DisplayName          string `json:"displayName"`
