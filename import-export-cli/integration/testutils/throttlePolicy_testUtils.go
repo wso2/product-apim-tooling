@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
+	"os"
 	"testing"
 )
 
@@ -43,6 +44,7 @@ func ValidateThrottlePolicyExportImport(t *testing.T, args *ThrottlePolicyImport
 	importedPolicy, _ := getThrottlingPolicyByName(t, args, policyName, policyType)
 	// Validate env 1 and env 2 policy is equal
 	ValidatePoliciesEqual(t, args, importedPolicy)
+	RemoveExportedThrottlingPolicyFile(t, args.ImportFilePath)
 }
 
 func AddNewThrottlePolicy(t *testing.T, client *apim.Client, username, password, policyType string) interface{} {
@@ -84,4 +86,14 @@ func ThrottlePolicyStructToMap(policy interface{}) (map[string]interface{}, erro
 	marshalled, _ := json.Marshal(policy)
 	err := json.Unmarshal(marshalled, &throttlePolicy)
 	return throttlePolicy, err
+}
+
+func RemoveExportedThrottlingPolicyFile(t *testing.T, file string) {
+	t.Log("base.RemoveExportedThrottlingPolicyFile() - file path:", file)
+	if _, err := os.Stat(file); err == nil {
+		err := os.Remove(file)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
 }

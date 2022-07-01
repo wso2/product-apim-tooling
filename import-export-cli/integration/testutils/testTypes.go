@@ -70,7 +70,6 @@ type ThrottlePolicyImportExportTestArgs struct {
 	Policy         map[string]interface{}
 	SrcAPIM        *apim.Client
 	DestAPIM       *apim.Client
-	ParamsFile     string
 	ImportFilePath string
 	Update         bool
 }
