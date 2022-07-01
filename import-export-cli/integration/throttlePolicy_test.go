@@ -98,6 +98,7 @@ func TestExportImportAdvancedThrottlePolicy(t *testing.T) {
 
 // Export a Custom Throttling Policy from one environment and import to another environment as super tenant admin
 func TestExportImportCustomThrottlePolicyAdminSuperTenantUser(t *testing.T) {
+	//Custom throttling polices is accessible only by AdminSuperTenant
 	adminUsername := superAdminUser
 	adminPassword := superAdminPassword
 
@@ -116,16 +117,20 @@ func TestExportImportCustomThrottlePolicyAdminSuperTenantUser(t *testing.T) {
 	testutils.ValidateThrottlePolicyExportImport(t, args, CustomPolicy)
 }
 
-func TestListThrottlePolicyAdminSuperTenantUser(t *testing.T) {
-	adminUsername := superAdminUser
-	adminPassword := superAdminPassword
+func TestGetThrottlePoliciesList(t *testing.T) {
 
-	dev := GetDevClient()
+	//devops users don't have access to view throttling policies
+	for _, user := range testCaseUsers[:2] {
+		t.Run(user.Description, func(t *testing.T) {
 
-	args := &testutils.ThrottlePolicyImportExportTestArgs{
-		CtlUser: testutils.Credentials{Username: adminUsername, Password: adminPassword},
-		SrcAPIM: dev,
+			dev := GetDevClient()
+
+			args := &testutils.ThrottlePolicyImportExportTestArgs{
+				CtlUser: testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				SrcAPIM: dev,
+			}
+
+			testutils.ValidateThrottlePoliciesList(t, args)
+		})
 	}
-
-	testutils.ValidateThrottlePoliciesList(t, args)
 }
