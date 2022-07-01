@@ -2158,6 +2158,7 @@ func (instance *Client) GetThrottlePolicyID(t *testing.T, policyName, policyType
 			break
 		}
 	}
+	//fmt.Println(policyListResponse)
 	return uuid
 }
 

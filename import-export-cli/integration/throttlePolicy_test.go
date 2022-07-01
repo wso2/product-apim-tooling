@@ -125,3 +125,32 @@ func TestExportImportSubscriptionThrottlePolicyAdminSuperTenantUser(t *testing.T
 
 	testutils.ValidateThrottlePolicyExportImport(t, args, SubscriptionPolicy)
 }
+
+// Export a Subscription Throttling Policy from one environment and import to another environment as super tenant admin
+func TestExportImportApplicationThrottlePolicy(t *testing.T) {
+
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			adminUsername := user.CtlUser.Username
+			adminPassword := user.CtlUser.Password
+
+			apiCreator := creator.UserName
+			apiCreatorPassword := creator.Password
+
+			dev := GetDevClient()
+			prod := GetProdClient()
+
+			newPolicy := testutils.AddNewThrottlePolicy(t, dev, user.Admin.Username, user.Admin.Password, ApplicationPolicy)
+			throttlePolicy, _ := testutils.ThrottlePolicyStructToMap(newPolicy)
+			args := &testutils.ThrottlePolicyImportExportTestArgs{
+				ApiProvider: testutils.Credentials{Username: apiCreator, Password: apiCreatorPassword},
+				CtlUser:     testutils.Credentials{Username: adminUsername, Password: adminPassword},
+				Policy:      throttlePolicy,
+				SrcAPIM:     dev,
+				DestAPIM:    prod,
+			}
+			testutils.ValidateThrottlePolicyExportImport(t, args, ApplicationPolicy)
+		})
+	}
+
+}

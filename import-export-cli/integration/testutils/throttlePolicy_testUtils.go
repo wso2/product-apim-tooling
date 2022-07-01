@@ -11,6 +11,7 @@ import (
 
 const (
 	PolicyIDKey   = "policyId"
+	PolicyNameKey = "policyName"
 	PolicyIDReset = "-1"
 )
 
@@ -23,12 +24,12 @@ func ValidateThrottlePolicyExportImport(t *testing.T, args *ThrottlePolicyImport
 
 	// Export policy from env 1
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
-	policyName := fmt.Sprintf("%v", args.Policy["policyName"])
+	policyName := fmt.Sprintf("%v", args.Policy[PolicyNameKey])
 
-	exportedOutput, _ := exportThrottlePolicy(t, policyName, args.SrcAPIM.GetEnvName())
+	exportedOutput, _ := exportThrottlePolicy(t, policyName, policyType, args.SrcAPIM.GetEnvName())
 	args.ImportFilePath = base.GetExportedPathFromOutput(exportedOutput)
 	assert.True(t, base.IsFileAvailable(t, args.ImportFilePath))
-	args.SrcAPIM.DeleteThrottlePolicy(fmt.Sprintf("%v", args.Policy["policyId"]), policyType)
+	args.SrcAPIM.DeleteThrottlePolicy(fmt.Sprintf("%v", args.Policy[PolicyIDKey]), policyType)
 
 	// Import Throttling Policy to env 2
 	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
@@ -41,22 +42,24 @@ func ValidateThrottlePolicyExportImport(t *testing.T, args *ThrottlePolicyImport
 	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 	importedPolicy, _ := getThrottlingPolicyByName(t, args.DestAPIM, policyName, policyType)
 	// Validate env 1 and env 2 policy is equal
-	ValidatePoliciesEqual(t, args, importedPolicy)
+	if importedPolicy != nil {
+		ValidatePoliciesEqual(t, args, importedPolicy)
+	}
 }
 
 func AddNewThrottlePolicy(t *testing.T, client *apim.Client, username, password, policyType string) interface{} {
+	//client.Login(adminservices.AdminUsername, adminservices.AdminPassword)
 	client.Login(username, password)
-	fmt.Println(policyType)
 	generatedPolicy := client.GenerateSampleThrottlePolicyData(policyType)
-	fmt.Println(generatedPolicy)
 	addedPolicy := client.AddThrottlePolicy(t, generatedPolicy, policyType)
 	return addedPolicy
 }
 
-func exportThrottlePolicy(t *testing.T, name string, env string) (string, error) {
+func exportThrottlePolicy(t *testing.T, name, policyType, env string) (string, error) {
 	var output string
 	var err error
-	output, err = base.Execute(t, "export", "policy", "rate-limiting", "-n", name, "-e", env, "-k", "--verbose")
+	output, err = base.Execute(t, "export", "policy", "rate-limiting", "-n", name, "-t", "app", "-e", env, "-k", "--verbose")
+	//output, err = base.Execute(t, "export", "policy", "rate-limiting", "-n", name, "-e", env, "-k", "--verbose")
 	return output, err
 }
 
@@ -68,8 +71,12 @@ func importThrottlePolicy(t *testing.T, args *ThrottlePolicyImportExportTestArgs
 func getThrottlingPolicyByName(t *testing.T, client *apim.Client, throttlePolicyName, policyType string) (map[string]interface{}, error) {
 	uuid := client.GetThrottlePolicyID(t, throttlePolicyName, policyType)
 	policy := client.GetThrottlePolicy(uuid, policyType)
-	client.DeleteThrottlePolicy(uuid, policyType)
-	return ThrottlePolicyStructToMap(policy)
+	if uuid != "" {
+		client.DeleteThrottlePolicy(uuid, policyType)
+		return ThrottlePolicyStructToMap(policy)
+	} else {
+		return nil, nil
+	}
 }
 
 func ValidatePoliciesEqual(t *testing.T, args *ThrottlePolicyImportExportTestArgs, importedPolicy map[string]interface{}) {
