@@ -65,7 +65,7 @@ type ApiProductImportExportTestArgs struct {
 }
 
 type ThrottlePolicyImportExportTestArgs struct {
-	ApiProvider    Credentials
+	Admin          Credentials
 	CtlUser        Credentials
 	Policy         map[string]interface{}
 	SrcAPIM        *apim.Client
