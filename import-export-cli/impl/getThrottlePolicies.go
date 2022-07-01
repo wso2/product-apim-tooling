@@ -94,29 +94,30 @@ func PrintThrottlePolicies(resp *resty.Response, format string) {
 	}
 	if format == "" {
 		format = defaultThrottlePolicyTableFormat
-		// create policy context with standard output
-		policyContext := formatter.NewContext(os.Stdout, format)
-		// create a new renderer function which iterate collection
-		renderer := func(w io.Writer, t *template.Template) error {
-			for _, policy := range policies {
-				if err := t.Execute(w, newPolicyDefinition(policy)); err != nil {
-					return err
-				}
-				_, _ = w.Write([]byte{'\n'})
-			}
-			return nil
-		}
-		// headers for table
-		ThrottlePolicyTableHeaders := map[string]string{
-			"UUID":       policyUUIDHeader,
-			"Name":       policyNameHeader,
-			"PolicyType": policyTypeHeader,
-		}
-		// execute context
-		if err := policyContext.Write(renderer, ThrottlePolicyTableHeaders); err != nil {
-			fmt.Println("Error executing template:", err.Error())
-		}
 	} else if format == utils.JsonArrayFormatType {
 		utils.ListArtifactsInJsonArrayFormat(policies, utils.ProjectTypePolicy)
+		return
+	}
+	// create policy context with standard output
+	policyContext := formatter.NewContext(os.Stdout, format)
+	// create a new renderer function which iterate collection
+	renderer := func(w io.Writer, t *template.Template) error {
+		for _, policy := range policies {
+			if err := t.Execute(w, newPolicyDefinition(policy)); err != nil {
+				return err
+			}
+			_, _ = w.Write([]byte{'\n'})
+		}
+		return nil
+	}
+	// headers for table
+	ThrottlePolicyTableHeaders := map[string]string{
+		"UUID":       policyUUIDHeader,
+		"Name":       policyNameHeader,
+		"PolicyType": policyTypeHeader,
+	}
+	// execute context
+	if err := policyContext.Write(renderer, ThrottlePolicyTableHeaders); err != nil {
+		fmt.Println("Error executing template:", err.Error())
 	}
 }

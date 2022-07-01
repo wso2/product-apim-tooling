@@ -134,3 +134,21 @@ func TestGetThrottlePoliciesList(t *testing.T) {
 		})
 	}
 }
+
+func TestGetThrottlePoliciesListWithJsonArrayFormat(t *testing.T) {
+
+	//devops users don't have access to view throttling policies
+	for _, user := range testCaseUsers[:2] {
+		t.Run(user.Description, func(t *testing.T) {
+
+			dev := GetDevClient()
+
+			args := &testutils.ThrottlePolicyImportExportTestArgs{
+				CtlUser: testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				SrcAPIM: dev,
+			}
+
+			testutils.ValidateThrottlePoliciesListWithJsonPrettyFormat(t, args)
+		})
+	}
+}
