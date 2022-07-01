@@ -48,7 +48,6 @@ func ValidateThrottlePolicyExportImport(t *testing.T, args *ThrottlePolicyImport
 }
 
 func AddNewThrottlePolicy(t *testing.T, client *apim.Client, username, password, policyType string) interface{} {
-	//client.Login(adminservices.AdminUsername, adminservices.AdminPassword)
 	client.Login(username, password)
 	generatedPolicy := client.GenerateSampleThrottlePolicyData(policyType)
 	addedPolicy := client.AddThrottlePolicy(t, generatedPolicy, policyType)
@@ -58,8 +57,7 @@ func AddNewThrottlePolicy(t *testing.T, client *apim.Client, username, password,
 func exportThrottlePolicy(t *testing.T, name, policyType, env string) (string, error) {
 	var output string
 	var err error
-	output, err = base.Execute(t, "export", "policy", "rate-limiting", "-n", name, "-t", "app", "-e", env, "-k", "--verbose")
-	//output, err = base.Execute(t, "export", "policy", "rate-limiting", "-n", name, "-e", env, "-k", "--verbose")
+	output, err = base.Execute(t, "export", "policy", "rate-limiting", "-n", name, "-e", env, "-k", "--verbose")
 	return output, err
 }
 
