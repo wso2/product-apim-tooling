@@ -6,7 +6,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -96,4 +98,39 @@ func RemoveExportedThrottlingPolicyFile(t *testing.T, file string) {
 			t.Fatal(err)
 		}
 	}
+}
+
+func ValidateThrottlePoliciesList(t *testing.T, args *ThrottlePolicyImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	// List APIs of env 1
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	base.WaitForIndexing()
+
+	output, _ := listThrottlePolicies(t, args)
+
+	throttlePoliciesList := args.SrcAPIM.GetThrottlePolicies(t, args.CtlUser.Username, args.CtlUser.Password)
+
+	ValidateListThrottlePoliciesEqual(t, output, throttlePoliciesList)
+}
+
+func listThrottlePolicies(t *testing.T, args *ThrottlePolicyImportExportTestArgs) (string, error) {
+	output, err := base.Execute(t, "get", "policies", "rate-limiting", "-e", args.SrcAPIM.EnvName, "-k", "--verbose")
+	return output, err
+}
+
+func ValidateListThrottlePoliciesEqual(t *testing.T, throttlePoliciesListOutput string, throttlePoliciesList *utils.PolicyList) {
+	unmatchedCount := throttlePoliciesList.Count
+	for _, policy := range throttlePoliciesList.List {
+		// If the output string contains the same Policy ID, then decrement the count
+		assert.Truef(t, strings.Contains(throttlePoliciesListOutput, policy.Uuid), "throttlePoliciesListFromCtl: "+throttlePoliciesListOutput+
+			" , does not contain policy.uuid: "+policy.Uuid)
+		unmatchedCount--
+	}
+	// Count == 0 means that all the policies from throttlePoliciesList were in throttlePoliciesListOutput
+	assert.Equal(t, 0, unmatchedCount, "Throttle policies lists are not equal")
 }

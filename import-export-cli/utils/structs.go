@@ -285,8 +285,8 @@ type Subscription struct {
 }
 
 type PolicyList struct {
-	Count interface{} `json:"count"`
-	List  []Policy    `json:"list"`
+	Count int      `json:"count"`
+	List  []Policy `json:"list"`
 }
 
 type Policy struct {

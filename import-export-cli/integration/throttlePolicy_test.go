@@ -115,3 +115,17 @@ func TestExportImportCustomThrottlePolicyAdminSuperTenantUser(t *testing.T) {
 	}
 	testutils.ValidateThrottlePolicyExportImport(t, args, CustomPolicy)
 }
+
+func TestListThrottlePolicyAdminSuperTenantUser(t *testing.T) {
+	adminUsername := superAdminUser
+	adminPassword := superAdminPassword
+
+	dev := GetDevClient()
+
+	args := &testutils.ThrottlePolicyImportExportTestArgs{
+		CtlUser: testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		SrcAPIM: dev,
+	}
+
+	testutils.ValidateThrottlePoliciesList(t, args)
+}

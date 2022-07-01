@@ -2137,13 +2137,13 @@ func (instance *Client) GetThrottlePolicyID(t *testing.T, username, password, po
 
 	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
 
-	base.LogRequest("apim.GetThrottlePolicies()", request)
+	base.LogRequest("apim.GetThrottlePolicyID()", request)
 
 	response := base.SendHTTPRequest(request)
 
 	defer response.Body.Close()
 
-	base.ValidateAndLogResponse("apim.GetThrottlePolicies()", response, 200)
+	base.ValidateAndLogResponse("apim.GetThrottlePolicyID()", response, 200)
 
 	var policyListResponse utils.PolicyList
 	var uuid string
@@ -2159,6 +2159,33 @@ func (instance *Client) GetThrottlePolicyID(t *testing.T, username, password, po
 		}
 	}
 	return uuid
+}
+
+// GetThrottlePolicyID : Get Throttle Policy UUID using policy name from APIM
+func (instance *Client) GetThrottlePolicies(t *testing.T, username, password string) *utils.PolicyList {
+	instance.Login(username, password)
+
+	getPoliciesURL := instance.adminRestURL + "/throttling/policies/search/?query=type:all"
+
+	request := base.CreateGet(getPoliciesURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.GetThrottlePolicies()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.GetThrottlePolicies()", response, 200)
+
+	var policyListResponse *utils.PolicyList
+	err := json.NewDecoder(response.Body).Decode(&policyListResponse)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return policyListResponse
 }
 
 // GenerateSampleThrottlePolicyData : Generate sample ThrottlePolicy
