@@ -2049,7 +2049,7 @@ func (instance *Client) registerClient(username string, password string) dcrResp
 	return jsonResp
 }
 
-// AddThrottlePolicy : Add new Throttle Policy of different policy types to APIM
+// AddThrottlePolicy : Add new Throttle ThrottlingPolicyDetails of different policy types to APIM
 func (instance *Client) AddThrottlePolicy(t *testing.T, policy interface{}, policyType string) interface{} {
 	var throttlePolicyResponse interface{}
 
@@ -2077,7 +2077,7 @@ func (instance *Client) AddThrottlePolicy(t *testing.T, policy interface{}, poli
 	return throttlePolicyResponse
 }
 
-// DeleteThrottlePolicy : Deletes Throttling Policy from APIM using UUID
+// DeleteThrottlePolicy : Deletes Throttling ThrottlingPolicyDetails from APIM using UUID
 func (instance *Client) DeleteThrottlePolicy(policyID, policyType string) {
 
 	policiesURL := instance.adminRestURL + "/throttling/policies/" + policyType + "/" + policyID
@@ -2095,7 +2095,7 @@ func (instance *Client) DeleteThrottlePolicy(policyID, policyType string) {
 	base.ValidateAndLogResponse("apim.DeleteThrottlePolicy()", response, 200)
 }
 
-// GetThrottlePolicy : Get Throttle Policy from APIM using UUID
+// GetThrottlePolicy : Get Throttle ThrottlingPolicyDetails from APIM using UUID
 func (instance *Client) GetThrottlePolicy(policyID, policyType string) map[string]interface{} {
 	var policyResponse map[string]interface{}
 
@@ -2118,9 +2118,9 @@ func (instance *Client) GetThrottlePolicy(policyID, policyType string) map[strin
 	return policyResponse
 }
 
-// GetThrottlePolicyID : Get Throttle Policy UUID using policy name from APIM
+// GetThrottlePolicyID : Get Throttle ThrottlingPolicyDetails UUID using policy name from APIM
 func (instance *Client) GetThrottlePolicyID(t *testing.T, username, password, policyName, policyType string) string {
-	var policyListResponse utils.PolicyList
+	var policyListResponse utils.ThrottlePolicyDetailsList
 	var uuid string
 
 	instance.Login(username, password)
@@ -2166,8 +2166,8 @@ func (instance *Client) GetThrottlePolicyID(t *testing.T, username, password, po
 }
 
 // GetThrottlePolicies : Get Throttle Policies list of all types from APIM
-func (instance *Client) GetThrottlePolicies(t *testing.T, username, password string) *utils.PolicyList {
-	var policyListResponse *utils.PolicyList
+func (instance *Client) GetThrottlePolicies(t *testing.T, username, password string) *utils.ThrottlePolicyDetailsList {
+	var policyListResponse *utils.ThrottlePolicyDetailsList
 
 	instance.Login(username, password)
 
@@ -2196,7 +2196,7 @@ func (instance *Client) GetThrottlePolicies(t *testing.T, username, password str
 // GenerateSampleThrottlePolicyData : Generate sample ThrottlePolicy of a specific throttling policy type
 func (instance *Client) GenerateSampleThrottlePolicyData(policyType string) interface{} {
 	const (
-		PolicyString      = "Policy"
+		PolicyString      = "ThrottlingPolicyDetails"
 		RequestCountLimit = "REQUESTCOUNTLIMIT"
 		TimeUnit          = "min"
 		UnitTime          = 10
@@ -2207,8 +2207,8 @@ func (instance *Client) GenerateSampleThrottlePolicyData(policyType string) inte
 	case applicationThrottlePolicyType:
 		policy := ApplicationThrottlePolicy{}
 		policy.PolicyName = base.GenerateRandomString() + PolicyString
-		policy.DisplayName = "This is a Test Application Policy"
-		policy.Description = "This is a Test Application Policy"
+		policy.DisplayName = "This is a Test Application ThrottlingPolicyDetails"
+		policy.Description = "This is a Test Application ThrottlingPolicyDetails"
 		policy.IsDeployed = false
 		policy.Type = "ApplicationThrottlePolicy"
 		policy.DefaultLimit.Type = RequestCountLimit
@@ -2219,7 +2219,7 @@ func (instance *Client) GenerateSampleThrottlePolicyData(policyType string) inte
 	case customThrottlePolicyType:
 		policy := CustomThrottlePolicy{}
 		policy.PolicyName = base.GenerateRandomString() + PolicyString
-		policy.Description = "This is a Test Custom Policy"
+		policy.Description = "This is a Test Custom ThrottlingPolicyDetails"
 		policy.IsDeployed = false
 		policy.Type = "CustomRule"
 		policy.SiddhiQuery = "FROM RequestStream\\nSELECT userId, ( userId == 'admin@carbon.super' ) AS isEligible , " +
@@ -2233,7 +2233,7 @@ func (instance *Client) GenerateSampleThrottlePolicyData(policyType string) inte
 		conditionalGroup := AdvancedPolicyConditionalGroup{}
 		condition := AdvancedPolicyCondition{}
 		policy.PolicyName = base.GenerateRandomString() + PolicyString
-		policy.Description = "This is a Test Advanced Policy"
+		policy.Description = "This is a Test Advanced ThrottlingPolicyDetails"
 		policy.IsDeployed = false
 		policy.Type = "AdvancedThrottlePolicy"
 		policy.DefaultLimit.Type = RequestCountLimit
@@ -2254,7 +2254,7 @@ func (instance *Client) GenerateSampleThrottlePolicyData(policyType string) inte
 	case subscriptionThrottlePolicyType:
 		policy := SubscriptionThrottlePolicy{}
 		policy.PolicyName = base.GenerateRandomString() + PolicyString
-		policy.Description = "This is a Test Subscription Policy"
+		policy.Description = "This is a Test Subscription ThrottlingPolicyDetails"
 		policy.IsDeployed = false
 		policy.Type = "SubscriptionThrottlePolicy"
 		policy.DefaultLimit.Type = RequestCountLimit

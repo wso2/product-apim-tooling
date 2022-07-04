@@ -24,8 +24,8 @@ import (
 )
 
 const ImportPolicyCmdLiteral = "policy"
-const ImportPolicyCmdShortDesc = "Import a Policy"
-const ImportPolicyCmdLongDesc = "Import a Policy in an environment or Import a Policy to an environment"
+const ImportPolicyCmdShortDesc = "Import a ThrottlingPolicyDetails"
+const ImportPolicyCmdLongDesc = "Import a ThrottlingPolicyDetails in an environment or Import a ThrottlingPolicyDetails to an environment"
 const ImportPolicyCmdExamples = utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportPolicyCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + ` -f ~/CustomPolicy -e production --u`
 
 // ImportPolicyCmd represents the import command for a policy

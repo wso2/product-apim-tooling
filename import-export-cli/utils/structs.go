@@ -284,12 +284,13 @@ type Subscription struct {
 	RedirectionParams interface{} `json:"redirectionParams"`
 }
 
-type PolicyList struct {
-	Count int      `json:"count"`
-	List  []Policy `json:"list"`
+type ThrottlePolicyDetailsList struct {
+	Count int                       `json:"count"`
+	List  []ThrottlingPolicyDetails `json:"list"`
 }
 
-type Policy struct {
+// Throttling policy basic details
+type ThrottlingPolicyDetails struct {
 	PolicyId    int    `json:"policyId"`
 	Uuid        string `json:"uuid"`
 	PolicyName  string `json:"policyName"`
