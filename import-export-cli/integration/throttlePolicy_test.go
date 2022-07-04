@@ -117,6 +117,7 @@ func TestExportImportCustomThrottlePolicyAdminSuperTenantUser(t *testing.T) {
 	testutils.ValidateThrottlePolicyExportImport(t, args, CustomPolicy)
 }
 
+// Get  Throttle Policy List APICTL output and check whether all policies are included
 func TestGetThrottlePoliciesList(t *testing.T) {
 
 	//devops users don't have access to view throttling policies
@@ -129,13 +130,13 @@ func TestGetThrottlePoliciesList(t *testing.T) {
 				CtlUser: testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
 				SrcAPIM: dev,
 			}
-
 			testutils.ValidateThrottlePoliciesList(t, args)
 		})
 	}
 }
 
-func TestGetThrottlePoliciesListWithJsonArrayFormat(t *testing.T) {
+// Get  Throttle Policy List APICTL output in JsonPretty format and check whether all policies are included
+func TestGetThrottlePoliciesListWithJsonPrettyFormat(t *testing.T) {
 
 	//devops users don't have access to view throttling policies
 	for _, user := range testCaseUsers[:2] {
@@ -147,7 +148,6 @@ func TestGetThrottlePoliciesListWithJsonArrayFormat(t *testing.T) {
 				CtlUser: testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
 				SrcAPIM: dev,
 			}
-
 			testutils.ValidateThrottlePoliciesListWithJsonPrettyFormat(t, args)
 		})
 	}
