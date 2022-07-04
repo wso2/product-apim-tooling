@@ -284,7 +284,7 @@ type Subscription struct {
 	RedirectionParams interface{} `json:"redirectionParams"`
 }
 
-type PolicyList struct {
+type ThrottlePolicyList struct {
 	Count int      `json:"count"`
 	List  []Policy `json:"list"`
 }

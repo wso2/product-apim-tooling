@@ -155,7 +155,7 @@ func listThrottlePoliciesWithJsonPrettyFormat(t *testing.T, args *ThrottlePolicy
 }
 
 // Checks whether apictl output contains all the available throttle policy UUIDs
-func ValidateListThrottlePoliciesEqual(t *testing.T, throttlePoliciesListOutput string, throttlePoliciesList *utils.PolicyList) {
+func ValidateListThrottlePoliciesEqual(t *testing.T, throttlePoliciesListOutput string, throttlePoliciesList *utils.ThrottlePolicyList) {
 	unmatchedCount := throttlePoliciesList.Count
 	for _, policy := range throttlePoliciesList.List {
 		// If the output string contains the same Policy ID, then decrement the count
