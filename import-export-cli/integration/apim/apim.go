@@ -2120,7 +2120,7 @@ func (instance *Client) GetThrottlePolicy(policyID, policyType string) map[strin
 
 // GetThrottlePolicyID : Get Throttle Policy UUID using policy name from APIM
 func (instance *Client) GetThrottlePolicyID(t *testing.T, username, password, policyName, policyType string) string {
-	var policyListResponse utils.ThrottlePolicyList
+	var policyListResponse utils.ThrottlingPoliciesDetailsList
 	var uuid string
 
 	instance.Login(username, password)
@@ -2166,8 +2166,8 @@ func (instance *Client) GetThrottlePolicyID(t *testing.T, username, password, po
 }
 
 // GetThrottlePolicies : Get Throttle Policies list of all types from APIM
-func (instance *Client) GetThrottlePolicies(t *testing.T, username, password string) *utils.ThrottlePolicyList {
-	var policyListResponse *utils.ThrottlePolicyList
+func (instance *Client) GetThrottlePolicies(t *testing.T, username, password string) *utils.ThrottlingPoliciesDetailsList {
+	var policyListResponse *utils.ThrottlingPoliciesDetailsList
 
 	instance.Login(username, password)
 
