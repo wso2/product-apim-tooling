@@ -1,0 +1,27 @@
+openapi: 3.0.1
+info:
+  title: Sample Swagger Specification
+  version: 1.0.0
+  x-wso2-apictl-init: true
+paths:
+  /*:
+    get:
+      responses:
+        '200':
+          description: ''
+    post:
+      responses:
+        '200':
+          description: ''
+    put:
+      responses:
+        '200':
+          description: ''
+    delete:
+      responses:
+        '200':
+          description: ''
+    patch:
+      responses:
+        '200':
+          description: ''

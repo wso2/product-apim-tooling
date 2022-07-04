@@ -1,0 +1,130 @@
+type: api
+version: v4.1.0
+data:
+  id: 28114236-515c-4f40-82e4-6a016e632008
+  name: PizzaShackAPI
+  description: This is a simple API for Pizza Shack online pizza delivery store.
+  context: /pizzashack
+  version: 1.0.0
+  provider: admin
+  lifeCycleStatus: PUBLISHED
+  cacheTimeout: 300
+  isRevision: false
+  revisionId: 0
+  type: HTTP
+  transport:
+  - http
+  - https
+  tags:
+  - pizza
+  policies:
+  - Unlimited
+  apiThrottlingPolicy: Unlimited
+  authorizationHeader: Authorization
+  securityScheme:
+  - oauth2
+  - oauth_basic_auth_api_key_mandatory
+  visibility: PUBLIC
+  subscriptionAvailability: CURRENT_TENANT
+  accessControl: NONE
+  businessInformation:
+    businessOwner: Jane Roe
+    businessOwnerEmail: marketing@pizzashack.com
+    technicalOwner: John Doe
+    technicalOwnerEmail: architecture@pizzashack.com
+  corsConfiguration:
+    accessControlAllowCredentials: false
+    accessControlAllowHeaders:
+    - authorization
+    - Access-Control-Allow-Origin
+    - Content-Type
+    - SOAPAction
+    - apikey
+    - Internal-Key
+    accessControlAllowMethods:
+    - GET
+    - PUT
+    - POST
+    - DELETE
+    - PATCH
+    - OPTIONS
+    accessControlAllowOrigins:
+    - '*'
+    corsConfigurationEnabled: false
+  createdTime: Dec 14, 2020 3:52:06 PM
+  lastUpdatedTime: Dec 14, 2020 3:52:28 PM
+  endpointConfig:
+    endpoint_security:
+      production:
+        customParameters: {}
+        enabled: true
+        password: admin
+        type: BASIC
+        username: admin
+      sandbox:
+        customParameters: {}
+        enabled: false
+    endpoint_type: http
+    production_endpoints:
+      url: https://localhost:9443/am/sample/pizzashack/v1/api/
+    sandbox_endpoints:
+      url: https://localhost:9443/am/sample/pizzashack/v1/api/
+  endpointImplementationType: ENDPOINT
+  operations:
+  - id: ""
+    target: /order
+    verb: POST
+    authType: Application & Application User
+    throttlingPolicy: Unlimited
+    operationPolicies:
+      request: []
+      response: []
+      fault: []
+  - id: ""
+    target: /menu
+    verb: GET
+    authType: Application & Application User
+    throttlingPolicy: Unlimited
+    operationPolicies:
+      request: []
+      response: []
+      fault: []
+  - id: ""
+    target: /order/{orderId}
+    verb: GET
+    authType: Application & Application User
+    throttlingPolicy: Unlimited
+    operationPolicies:
+      request: []
+      response: []
+      fault: []
+  - id: ""
+    target: /order/{orderId}
+    verb: PUT
+    authType: Application & Application User
+    throttlingPolicy: Unlimited
+    operationPolicies:
+      request: []
+      response: []
+      fault: []
+  - id: ""
+    target: /order/{orderId}
+    verb: DELETE
+    authType: Application & Application User
+    throttlingPolicy: Unlimited
+    operationPolicies:
+      request: []
+      response: []
+      fault: []
+  keyManagers:
+  - all
+  advertiseInfo:
+    advertised: true
+    apiExternalProductionEndpoint: https://production-ep:9443
+    apiExternalSandboxEndpoint: https://sandbox-ep:9443
+    originalDevPortalUrl: https://localhost:9443/devportal
+    apiOwner: admin
+    vendor: WSO2
+  websubSubscriptionConfiguration: ""
+  gatewayVendor: wso2
+  gatewayType: wso2/synapse
