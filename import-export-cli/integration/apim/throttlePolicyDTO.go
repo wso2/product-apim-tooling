@@ -18,6 +18,7 @@
 
 package apim
 
+// ApplicationThrottlePolicy : Application Throttle Policy DTO
 type ApplicationThrottlePolicy struct {
 	PolicyName   string `json:"policyName"`
 	DisplayName  string `json:"displayName"`
@@ -45,6 +46,7 @@ type ApplicationThrottlePolicy struct {
 	} `json:"defaultLimit"`
 }
 
+// CustomThrottlePolicy : Custom Throttle Policy DTO
 type CustomThrottlePolicy struct {
 	PolicyName  string `json:"policyName"`
 	DisplayName string `json:"displayName"`
@@ -55,6 +57,7 @@ type CustomThrottlePolicy struct {
 	KeyTemplate string `json:"keyTemplate"`
 }
 
+// AdvancedThrottlePolicy : Advanced Throttle Policy DTO
 type AdvancedThrottlePolicy struct {
 	PolicyName   string `json:"policyName"`
 	DisplayName  string `json:"displayName"`
@@ -83,6 +86,7 @@ type AdvancedThrottlePolicy struct {
 	ConditionalGroups []AdvancedPolicyConditionalGroup `json:"conditionalGroups"`
 }
 
+// AdvancedPolicyConditionalGroup : Conditional Groups in Advanced Throttle Policy DTO
 type AdvancedPolicyConditionalGroup struct {
 	Description string                    `json:"description"`
 	Conditions  []AdvancedPolicyCondition `json:"conditions"`
@@ -98,6 +102,7 @@ type AdvancedPolicyConditionalGroup struct {
 	} `json:"limit"`
 }
 
+// AdvancedPolicyCondition : Advanced Throttle Policy Condition in Conditional Groups
 type AdvancedPolicyCondition struct {
 	Type            string `json:"type"`
 	InvertCondition bool   `json:"invertCondition"`
@@ -117,6 +122,8 @@ type AdvancedPolicyCondition struct {
 		ParameterValue string `json:"parameterValue"`
 	} `json:"queryParameterCondition"`
 }
+
+// SubscriptionThrottlePolicy : Subscription Throttle Policy DTO
 type SubscriptionThrottlePolicy struct {
 	PolicyName           string `json:"policyName"`
 	DisplayName          string `json:"displayName"`

@@ -18,6 +18,7 @@ const (
 	PolicyIDReset = "-1"
 )
 
+// ValidateThrottlePolicyExportImport : Validates Exporting Throttling Policy from source env and Importing to destination env
 func ValidateThrottlePolicyExportImport(t *testing.T, args *ThrottlePolicyImportExportTestArgs, policyType string) {
 	t.Helper()
 
@@ -49,6 +50,7 @@ func ValidateThrottlePolicyExportImport(t *testing.T, args *ThrottlePolicyImport
 	RemoveExportedThrottlingPolicyFile(t, args.ImportFilePath)
 }
 
+// Adds a new Throttling Policy to an env
 func AddNewThrottlePolicy(t *testing.T, client *apim.Client, username, password, policyType string) interface{} {
 	client.Login(username, password)
 	generatedPolicy := client.GenerateSampleThrottlePolicyData(policyType)
@@ -56,18 +58,19 @@ func AddNewThrottlePolicy(t *testing.T, client *apim.Client, username, password,
 	return addedPolicy
 }
 
+// Exports Throttling Policy from an env
 func exportThrottlePolicy(t *testing.T, name, env string) (string, error) {
-	var output string
-	var err error
-	output, err = base.Execute(t, "export", "policy", "rate-limiting", "-n", name, "-e", env, "-k", "--verbose")
+	output, err := base.Execute(t, "export", "policy", "rate-limiting", "-n", name, "-e", env, "-k", "--verbose")
 	return output, err
 }
 
+// Imports Throttling policy to an env
 func importThrottlePolicy(t *testing.T, args *ThrottlePolicyImportExportTestArgs) (string, error) {
 	output, err := base.Execute(t, "import", "policy", "rate-limiting", "-e", args.DestAPIM.GetEnvName(), "-f", args.ImportFilePath, "-u")
 	return output, err
 }
 
+// Retrieve Throttling policy by name
 func getThrottlingPolicyByName(t *testing.T, args *ThrottlePolicyImportExportTestArgs, throttlePolicyName, policyType string) (map[string]interface{}, error) {
 	client := args.DestAPIM
 	uuid := client.GetThrottlePolicyID(t, args.Admin.Username, args.Admin.Password, throttlePolicyName, policyType)
@@ -76,6 +79,7 @@ func getThrottlingPolicyByName(t *testing.T, args *ThrottlePolicyImportExportTes
 	return ThrottlePolicyStructToMap(policy)
 }
 
+// Validates whether throttling policies are equal
 func ValidatePoliciesEqual(t *testing.T, args *ThrottlePolicyImportExportTestArgs, importedPolicy map[string]interface{}) {
 	exportedPolicy := args.Policy
 	exportedPolicy[PolicyIDKey] = PolicyIDReset
@@ -83,6 +87,7 @@ func ValidatePoliciesEqual(t *testing.T, args *ThrottlePolicyImportExportTestArg
 	assert.Equal(t, exportedPolicy, importedPolicy)
 }
 
+// Converts Throttling policy struct to map
 func ThrottlePolicyStructToMap(policy interface{}) (map[string]interface{}, error) {
 	var throttlePolicy map[string]interface{}
 	marshalled, _ := json.Marshal(policy)
@@ -90,6 +95,7 @@ func ThrottlePolicyStructToMap(policy interface{}) (map[string]interface{}, erro
 	return throttlePolicy, err
 }
 
+// Cleanup func for exported throttling policy file
 func RemoveExportedThrottlingPolicyFile(t *testing.T, file string) {
 	t.Log("base.RemoveExportedThrottlingPolicyFile() - file path:", file)
 	if _, err := os.Stat(file); err == nil {
@@ -100,13 +106,13 @@ func RemoveExportedThrottlingPolicyFile(t *testing.T, file string) {
 	}
 }
 
+// Validates whether the throttling policy list is complete
 func ValidateThrottlePoliciesList(t *testing.T, args *ThrottlePolicyImportExportTestArgs) {
 	t.Helper()
 
 	// Setup apictl envs
 	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
 
-	// List APIs of env 1
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
 	base.WaitForIndexing()
@@ -118,13 +124,13 @@ func ValidateThrottlePoliciesList(t *testing.T, args *ThrottlePolicyImportExport
 	ValidateListThrottlePoliciesEqual(t, output, throttlePoliciesList)
 }
 
+// Validates whether the throttling policy list with Json Pretty Format is complete
 func ValidateThrottlePoliciesListWithJsonPrettyFormat(t *testing.T, args *ThrottlePolicyImportExportTestArgs) {
 	t.Helper()
 
 	// Setup apictl envs
 	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
 
-	// List APIs of env 1
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
 	base.WaitForIndexing()
@@ -136,16 +142,19 @@ func ValidateThrottlePoliciesListWithJsonPrettyFormat(t *testing.T, args *Thrott
 	ValidateListThrottlePoliciesEqual(t, output, throttlePoliciesList)
 }
 
+// get the Throttle policy list apictl output
 func listThrottlePolicies(t *testing.T, args *ThrottlePolicyImportExportTestArgs) (string, error) {
 	output, err := base.Execute(t, "get", "policies", "rate-limiting", "-e", args.SrcAPIM.EnvName, "-k", "--verbose")
 	return output, err
 }
 
+// get the Throttle policy list apictl output in Json Pretty format
 func listThrottlePoliciesWithJsonPrettyFormat(t *testing.T, args *ThrottlePolicyImportExportTestArgs) (string, error) {
 	output, err := base.Execute(t, "get", "policies", "rate-limiting", "-e", args.SrcAPIM.EnvName, "--format", "\"{{ jsonPretty . }}\"", "-k", "--verbose")
 	return output, err
 }
 
+// Checks whether apictl output contains all the available throttle policy UUIDs
 func ValidateListThrottlePoliciesEqual(t *testing.T, throttlePoliciesListOutput string, throttlePoliciesList *utils.PolicyList) {
 	unmatchedCount := throttlePoliciesList.Count
 	for _, policy := range throttlePoliciesList.List {
