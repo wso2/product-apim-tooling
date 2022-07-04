@@ -46,7 +46,7 @@ type policy struct {
 	Type        string `json:"type"`
 }
 
-func newPolicyDefinition(a utils.ThrottlingPolicyDetails) *policy {
+func newPolicyDefinition(a utils.Policy) *policy {
 	return &policy{a.PolicyId, a.Uuid, a.PolicyName, a.DisplayName, a.Description,
 		a.IsDeployed, a.Type}
 }
@@ -86,7 +86,7 @@ func getThrottlePolicyList(accessToken string, throttlePolicyListEndpoint string
 
 // PrintThrottlePolicies prints the policy list in a specific format
 func PrintThrottlePolicies(resp *resty.Response, format string) {
-	var policyList utils.ThrottlePolicyDetailsList
+	var policyList utils.PolicyList
 	err := json.Unmarshal(resp.Body(), &policyList)
 	policies := policyList.List
 	if err != nil {

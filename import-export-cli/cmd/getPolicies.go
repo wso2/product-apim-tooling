@@ -24,7 +24,7 @@ import (
 )
 
 const GetPoliciesCmdLiteral = "policies"
-const GetPoliciesCmdShortDesc = "Get ThrottlingPolicyDetails list"
+const GetPoliciesCmdShortDesc = "Get Policy list"
 const GetPoliciesCmdLongDesc = "Get a list of Policies in an environment"
 const GetPoliciesCmdExamples = utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdLiteral + ` ` + GetThrottlePoliciesCmdLiteral + ` -e production -q type:sub`
 

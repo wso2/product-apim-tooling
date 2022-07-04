@@ -56,7 +56,7 @@ func importThrottlingPolicy(endpoint string, importPath string, accessToken stri
 		if resp.StatusCode() == http.StatusConflict && ThrottlePolicyUpdate {
 			fmt.Println("Cannot Update")
 		}
-		fmt.Println("Error importing Throttling ThrottlingPolicyDetails.")
+		fmt.Println("Error importing Throttling Policy.")
 		fmt.Println("Status: " + resp.Status())
 		fmt.Println("Response:", resp.IsSuccess())
 

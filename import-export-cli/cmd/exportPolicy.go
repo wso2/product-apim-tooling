@@ -25,8 +25,8 @@ import (
 
 // Export policy command related usage Info
 const ExportPolicyCmdLiteral = "policy"
-const ExportPolicyCmdShortDesc = "Export/Import a ThrottlingPolicyDetails"
-const ExportPolicyCmdLongDesc = "Export/Import a ThrottlingPolicyDetails in an environment or Import a ThrottlingPolicyDetails to an environment"
+const ExportPolicyCmdShortDesc = "Export/Import a Policy"
+const ExportPolicyCmdLongDesc = "Export/Import a Policy in an environment or Import a Policy to an environment"
 const exportPolicyCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + ` -n Silver -e prod --type subscription`
 
 // ExportPolicyCmd represents the export policy command

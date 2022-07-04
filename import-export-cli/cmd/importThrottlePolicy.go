@@ -33,8 +33,8 @@ var (
 const (
 	// ImportThrottlingPolicyCmdLiteral command related usage info
 	ImportThrottlingPolicyCmdLiteral   = "rate-limiting"
-	importThrottlingPolicyCmdShortDesc = "Import Throttling ThrottlingPolicyDetails"
-	importThrottlingPolicyCmdLongDesc  = "Import a Throttling ThrottlingPolicyDetails to an environment"
+	importThrottlingPolicyCmdShortDesc = "Import Throttling Policy"
+	importThrottlingPolicyCmdLongDesc  = "Import a Throttling Policy to an environment"
 )
 
 const importThrottlingPolicyCmdExamples = utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportThrottlingPolicyCmdLiteral + ` -f qa/customadvanced -e dev
@@ -57,11 +57,11 @@ var ImportThrottlingPolicyCmd = &cobra.Command{
 		}
 		accessOAuthToken, err := credentials.GetOAuthAccessToken(cred, importEnvironment)
 		if err != nil {
-			utils.HandleErrorAndExit("Error while getting an access token for importing Throttling ThrottlingPolicyDetails", err)
+			utils.HandleErrorAndExit("Error while getting an access token for importing Throttling Policy", err)
 		}
 		err = impl.ImportThrottlingPolicyToEnv(accessOAuthToken, importEnvironment, importThrottlingPolicyFile, importThrottlePolicyUpdate)
 		if err != nil {
-			utils.HandleErrorAndExit("Error importing throttling ThrottlingPolicyDetails", err)
+			utils.HandleErrorAndExit("Error importing throttling Policy", err)
 		}
 	},
 }
@@ -70,11 +70,11 @@ var ImportThrottlingPolicyCmd = &cobra.Command{
 func init() {
 	ImportPolicyCmd.AddCommand(ImportThrottlingPolicyCmd)
 	ImportThrottlingPolicyCmd.Flags().StringVarP(&importThrottlingPolicyFile, "file", "f", "",
-		"File path of the Throttling ThrottlingPolicyDetails to be imported")
+		"File path of the Throttling Policy to be imported")
 	ImportThrottlingPolicyCmd.Flags().StringVarP(&importEnvironment, "environment", "e",
-		"", "Environment from the which the Throttling ThrottlingPolicyDetails should be imported")
+		"", "Environment from the which the Throttling Policy should be imported")
 	ImportThrottlingPolicyCmd.Flags().BoolVarP(&importThrottlePolicyUpdate, "update", "u", false, "Update an "+
-		"existing Throttling ThrottlingPolicyDetails or create a new Throttling ThrottlingPolicyDetails")
+		"existing Throttling Policy or create a new Throttling Policy")
 	// Mark required flags
 	_ = ImportThrottlingPolicyCmd.MarkFlagRequired("environment")
 	_ = ImportThrottlingPolicyCmd.MarkFlagRequired("file")

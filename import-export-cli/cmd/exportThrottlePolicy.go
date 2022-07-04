@@ -87,7 +87,7 @@ func executeExportThrottlePolicyCmd(credential credentials.Credential, exportDir
 			fmt.Println("Error exporting Throttling Policies:", resp.Status(), "\n", string(resp.Body()))
 		}
 	} else {
-		// error exporting Throttling ThrottlingPolicyDetails
+		// error exporting Throttling Policy
 		fmt.Println("Error getting OAuth tokens while exporting Throttling Policies:" + preCommandErr.Error())
 	}
 }
@@ -96,7 +96,7 @@ func executeExportThrottlePolicyCmd(credential credentials.Credential, exportDir
 func init() {
 	ExportPolicyCmd.AddCommand(ExportThrottlePolicyCmd)
 	ExportThrottlePolicyCmd.Flags().StringVarP(&exportThrottlePolicyName, "name", "n",
-		"", "Name of the Throttling ThrottlingPolicyDetails to be exported")
+		"", "Name of the Throttling Policy to be exported")
 	ExportThrottlePolicyCmd.Flags().StringVarP(&exportThrottlePolicyType, "type", "t",
 		"", "Type of the Throttling Policies to be exported (sub,app,custom,advanced)")
 	ExportThrottlePolicyCmd.Flags().StringVarP(&CmdExportEnvironment, "environment", "e",

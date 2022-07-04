@@ -200,7 +200,7 @@ const (
 	ProjectTypeApiProduct  = "API Product"
 	ProjectTypeApplication = "Application"
 	ProjectTypeRevision    = "Revision"
-	ProjectTypePolicy      = "ThrottlingPolicyDetails"
+	ProjectTypePolicy      = "Policy"
 )
 
 // project param files
@@ -239,7 +239,7 @@ const InitDirName = string(os.PathSeparator) + "init" + string(os.PathSeparator)
 const DefaultAWSDocFileName = "document.yaml"
 
 const ResourcePolicyDocName = "resource_policy_doc"
-const ResourcePolicyDocDisplayName = "Resource ThrottlingPolicyDetails"
+const ResourcePolicyDocDisplayName = "Resource Policy"
 const ResourcePolicyDocSummary = "This document contains details related to AWS resource policies"
 
 const CognitoUserPoolDocName = "cognito_userpool_doc"

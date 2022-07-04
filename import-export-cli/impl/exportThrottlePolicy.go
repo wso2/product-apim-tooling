@@ -97,7 +97,7 @@ func WriteThrottlePolicyToFile(ExportLocationPath string, resp *resty.Response, 
 	fileName, marshaledData := resolveThrottlePolicy(ExportFormat, resp)
 	_, _ = throttlingPolicyWrite(ExportLocationPath, fileName, marshaledData)
 	if runningExportThrottlePolicyCommand {
-		fmt.Println("Successfully exported Throttling ThrottlingPolicyDetails!")
+		fmt.Println("Successfully exported Throttling Policy!")
 		fmt.Println("Find the exported Throttling Policies at " +
 			utils.AppendSlashToString(ExportLocationPath) + fileName)
 	}
