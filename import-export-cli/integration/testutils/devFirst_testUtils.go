@@ -253,6 +253,22 @@ func ValidateImportProjectFailed(t *testing.T, args *InitTestArgs, paramsPath st
 	})
 }
 
+func ValidateImportProjectWithInvalidSwaggerFailed(t *testing.T, args *InitTestArgs, paramsPath string, preserveProvider bool) {
+	t.Helper()
+
+	result, _ := importApiFromProject(t, args.InitFlag, args.APIName, paramsPath, args.SrcAPIM, &args.CtlUser, false, preserveProvider)
+
+	assert.Contains(t, result, "400", "Test failed because API is imported successfully")
+	assert.Contains(t, result, "Error while parsing OpenAPI definition", "Test failed because API is imported successfully")
+
+	base.WaitForIndexing()
+
+	//Remove Created project and logout
+	t.Cleanup(func() {
+		base.RemoveDir(args.InitFlag)
+	})
+}
+
 func ValidateImportUpdateProject(t *testing.T, args *InitTestArgs, preserveProvider bool) *apim.API {
 	t.Helper()
 
