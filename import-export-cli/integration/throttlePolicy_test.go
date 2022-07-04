@@ -130,7 +130,7 @@ func TestGetThrottlePoliciesList(t *testing.T) {
 				CtlUser: testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
 				SrcAPIM: dev,
 			}
-			testutils.ValidateThrottlePoliciesList(t, args)
+			testutils.ValidateThrottlePoliciesList(t, false, args)
 		})
 	}
 }
@@ -148,7 +148,7 @@ func TestGetThrottlePoliciesListWithJsonPrettyFormat(t *testing.T) {
 				CtlUser: testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
 				SrcAPIM: dev,
 			}
-			testutils.ValidateThrottlePoliciesListWithJsonPrettyFormat(t, args)
+			testutils.ValidateThrottlePoliciesList(t, true, args)
 		})
 	}
 }

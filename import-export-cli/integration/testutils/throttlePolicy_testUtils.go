@@ -83,7 +83,13 @@ func exportThrottlePolicy(t *testing.T, name, env string) (string, error) {
 
 // Imports Throttling policy to an env
 func importThrottlePolicy(t *testing.T, args *ThrottlePolicyImportExportTestArgs) (string, error) {
-	output, err := base.Execute(t, "import", "policy", "rate-limiting", "-e", args.DestAPIM.GetEnvName(), "-f", args.ImportFilePath, "-u")
+	var output string
+	var err error
+	if args.Update {
+		output, err = base.Execute(t, "import", "policy", "rate-limiting", "-e", args.DestAPIM.GetEnvName(), "-f", args.ImportFilePath, "-u")
+	} else {
+		output, err = base.Execute(t, "import", "policy", "rate-limiting", "-e", args.DestAPIM.GetEnvName(), "-f", args.ImportFilePath)
+	}
 	return output, err
 }
 
@@ -124,7 +130,7 @@ func RemoveExportedThrottlingPolicyFile(t *testing.T, file string) {
 }
 
 // Validates whether the throttling policy list is complete
-func ValidateThrottlePoliciesList(t *testing.T, args *ThrottlePolicyImportExportTestArgs) {
+func ValidateThrottlePoliciesList(t *testing.T, jsonPretty bool, args *ThrottlePolicyImportExportTestArgs) {
 	t.Helper()
 
 	// Setup apictl envs
@@ -134,25 +140,7 @@ func ValidateThrottlePoliciesList(t *testing.T, args *ThrottlePolicyImportExport
 
 	base.WaitForIndexing()
 
-	output, _ := listThrottlePolicies(t, args)
-
-	throttlePoliciesList := args.SrcAPIM.GetThrottlePolicies(t, args.CtlUser.Username, args.CtlUser.Password)
-
-	ValidateListThrottlePoliciesEqual(t, output, throttlePoliciesList)
-}
-
-// Validates whether the throttling policy list with Json Pretty Format is complete
-func ValidateThrottlePoliciesListWithJsonPrettyFormat(t *testing.T, args *ThrottlePolicyImportExportTestArgs) {
-	t.Helper()
-
-	// Setup apictl envs
-	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
-
-	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
-
-	base.WaitForIndexing()
-
-	output, _ := listThrottlePoliciesWithJsonPrettyFormat(t, args)
+	output, _ := listThrottlePolicies(t, jsonPretty, args)
 
 	throttlePoliciesList := args.SrcAPIM.GetThrottlePolicies(t, args.CtlUser.Username, args.CtlUser.Password)
 
@@ -160,14 +148,14 @@ func ValidateThrottlePoliciesListWithJsonPrettyFormat(t *testing.T, args *Thrott
 }
 
 // get the Throttle policy list apictl output
-func listThrottlePolicies(t *testing.T, args *ThrottlePolicyImportExportTestArgs) (string, error) {
-	output, err := base.Execute(t, "get", "policies", "rate-limiting", "-e", args.SrcAPIM.EnvName, "-k", "--verbose")
-	return output, err
-}
-
-// get the Throttle policy list apictl output in Json Pretty format
-func listThrottlePoliciesWithJsonPrettyFormat(t *testing.T, args *ThrottlePolicyImportExportTestArgs) (string, error) {
-	output, err := base.Execute(t, "get", "policies", "rate-limiting", "-e", args.SrcAPIM.EnvName, "--format", "\"{{ jsonPretty . }}\"", "-k", "--verbose")
+func listThrottlePolicies(t *testing.T, JsonPretty bool, args *ThrottlePolicyImportExportTestArgs) (string, error) {
+	var output string
+	var err error
+	if JsonPretty {
+		output, err = base.Execute(t, "get", "policies", "rate-limiting", "-e", args.SrcAPIM.EnvName, "--format", "\"{{ jsonPretty . }}\"", "-k", "--verbose")
+	} else {
+		output, err = base.Execute(t, "get", "policies", "rate-limiting", "-e", args.SrcAPIM.EnvName, "-k", "--verbose")
+	}
 	return output, err
 }
 
