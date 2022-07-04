@@ -1,7 +1,0 @@
-deploy:
-  import:
-    preserveProvider: true
-    rotateRevision: false
-    update: true
-name: PizzaShackAPI
-version: 1.0.0

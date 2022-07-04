@@ -20,12 +20,30 @@ package apim
 
 // ApplicationThrottlePolicy : Application Throttle Policy DTO
 type ApplicationThrottlePolicy struct {
-	PolicyName   string       `json:"policyName"`
-	DisplayName  string       `json:"displayName"`
-	Description  string       `json:"description"`
-	IsDeployed   bool         `json:"isDeployed"`
-	Type         string       `json:"type"`
-	DefaultLimit DefaultLimit `json:"defaultLimit"`
+	PolicyName   string `json:"policyName"`
+	DisplayName  string `json:"displayName"`
+	Description  string `json:"description"`
+	IsDeployed   bool   `json:"isDeployed"`
+	Type         string `json:"type"`
+	DefaultLimit struct {
+		Type         string `json:"type"`
+		RequestCount struct {
+			TimeUnit     string `json:"timeUnit"`
+			UnitTime     int    `json:"unitTime"`
+			RequestCount int    `json:"requestCount"`
+		} `json:"requestCount"`
+		Bandwidth struct {
+			TimeUnit   string `json:"timeUnit"`
+			UnitTime   int    `json:"unitTime"`
+			DataAmount int    `json:"dataAmount"`
+			DataUnit   string `json:"dataUnit"`
+		} `json:"bandwidth"`
+		EventCount struct {
+			TimeUnit   string `json:"timeUnit"`
+			UnitTime   int    `json:"unitTime"`
+			EventCount int    `json:"eventCount"`
+		} `json:"eventCount"`
+	} `json:"defaultLimit"`
 }
 
 // CustomThrottlePolicy : Custom Throttle Policy DTO
@@ -41,12 +59,30 @@ type CustomThrottlePolicy struct {
 
 // AdvancedThrottlePolicy : Advanced Throttle Policy DTO
 type AdvancedThrottlePolicy struct {
-	PolicyName        string                           `json:"policyName"`
-	DisplayName       string                           `json:"displayName"`
-	Description       string                           `json:"description"`
-	IsDeployed        bool                             `json:"isDeployed"`
-	Type              string                           `json:"type"`
-	DefaultLimit      DefaultLimit                     `json:"defaultLimit"`
+	PolicyName   string `json:"policyName"`
+	DisplayName  string `json:"displayName"`
+	Description  string `json:"description"`
+	IsDeployed   bool   `json:"isDeployed"`
+	Type         string `json:"type"`
+	DefaultLimit struct {
+		Type         string `json:"type"`
+		RequestCount struct {
+			TimeUnit     string `json:"timeUnit"`
+			UnitTime     int    `json:"unitTime"`
+			RequestCount int    `json:"requestCount"`
+		} `json:"requestCount"`
+		Bandwidth struct {
+			TimeUnit   string `json:"timeUnit"`
+			UnitTime   int    `json:"unitTime"`
+			DataAmount int    `json:"dataAmount"`
+			DataUnit   string `json:"dataUnit"`
+		} `json:"bandwidth"`
+		EventCount struct {
+			TimeUnit   string `json:"timeUnit"`
+			UnitTime   int    `json:"unitTime"`
+			EventCount int    `json:"eventCount"`
+		} `json:"eventCount"`
+	} `json:"defaultLimit"`
 	ConditionalGroups []AdvancedPolicyConditionalGroup `json:"conditionalGroups"`
 }
 
@@ -54,7 +90,16 @@ type AdvancedThrottlePolicy struct {
 type AdvancedPolicyConditionalGroup struct {
 	Description string                    `json:"description"`
 	Conditions  []AdvancedPolicyCondition `json:"conditions"`
-	Limit       DefaultLimit              `json:"limit"`
+	Limit       struct {
+		Type         string `json:"type"`
+		RequestCount struct {
+			TimeUnit     string `json:"timeUnit"`
+			UnitTime     int    `json:"unitTime"`
+			RequestCount int    `json:"requestCount"`
+		} `json:"requestCount"`
+		Bandwidth  interface{} `json:"bandwidth"`
+		EventCount interface{} `json:"eventCount"`
+	} `json:"limit"`
 }
 
 // AdvancedPolicyCondition : Advanced Throttle Policy Condition in Conditional Groups
@@ -80,15 +125,33 @@ type AdvancedPolicyCondition struct {
 
 // SubscriptionThrottlePolicy : Subscription Throttle Policy DTO
 type SubscriptionThrottlePolicy struct {
-	PolicyName           string       `json:"policyName"`
-	DisplayName          string       `json:"displayName"`
-	Description          string       `json:"description"`
-	IsDeployed           bool         `json:"isDeployed"`
-	Type                 string       `json:"type"`
-	GraphQLMaxComplexity int          `json:"graphQLMaxComplexity"`
-	GraphQLMaxDepth      int          `json:"graphQLMaxDepth"`
-	DefaultLimit         DefaultLimit `json:"defaultLimit"`
-	Monetization         struct {
+	PolicyName           string `json:"policyName"`
+	DisplayName          string `json:"displayName"`
+	Description          string `json:"description"`
+	IsDeployed           bool   `json:"isDeployed"`
+	Type                 string `json:"type"`
+	GraphQLMaxComplexity int    `json:"graphQLMaxComplexity"`
+	GraphQLMaxDepth      int    `json:"graphQLMaxDepth"`
+	DefaultLimit         struct {
+		Type         string `json:"type"`
+		RequestCount struct {
+			TimeUnit     string `json:"timeUnit"`
+			UnitTime     int    `json:"unitTime"`
+			RequestCount int    `json:"requestCount"`
+		} `json:"requestCount"`
+		Bandwidth struct {
+			TimeUnit   string `json:"timeUnit"`
+			UnitTime   int    `json:"unitTime"`
+			DataAmount int    `json:"dataAmount"`
+			DataUnit   string `json:"dataUnit"`
+		} `json:"bandwidth"`
+		EventCount struct {
+			TimeUnit   string `json:"timeUnit"`
+			UnitTime   int    `json:"unitTime"`
+			EventCount int    `json:"eventCount"`
+		} `json:"eventCount"`
+	} `json:"defaultLimit"`
+	Monetization struct {
 		MonetizationPlan string `json:"monetizationPlan"`
 		Properties       struct {
 			Property1 string `json:"property1"`
@@ -105,30 +168,4 @@ type SubscriptionThrottlePolicy struct {
 		PermissionType string   `json:"permissionType"`
 		Roles          []string `json:"roles"`
 	} `json:"permissions"`
-}
-
-type DefaultLimit struct {
-	Type         string       `json:"type"`
-	RequestCount RequestCount `json:"requestCount"`
-	Bandwidth    Bandwidth    `json:"bandwidth"`
-	EventCount   EventCount   `json:"eventCount"`
-}
-
-type RequestCount struct {
-	TimeUnit     string `json:"timeUnit"`
-	UnitTime     int    `json:"unitTime"`
-	RequestCount int    `json:"requestCount"`
-}
-
-type Bandwidth struct {
-	TimeUnit   string `json:"timeUnit"`
-	UnitTime   int    `json:"unitTime"`
-	DataAmount int    `json:"dataAmount"`
-	DataUnit   string `json:"dataUnit"`
-}
-
-type EventCount struct {
-	TimeUnit   string `json:"timeUnit"`
-	UnitTime   int    `json:"unitTime"`
-	EventCount int    `json:"eventCount"`
 }
