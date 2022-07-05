@@ -25,15 +25,22 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
 )
 
 const (
-	PolicyIDKey   = "policyId"
-	PolicyNameKey = "policyName"
-	PolicyIDReset = "-1"
+	policyIDKey   = "policyId"
+	policyNameKey = "policyName"
+	policyIDReset = "-1"
+
+	applicationPolicySubType  = "application policy"
+	advancedPolicySubType     = "advanced policy"
+	customPolicySubType       = "custom rule"
+	subscriptionPolicySubType = "subscription policy"
 )
 
 // ValidateThrottlePolicyExportImport : Validates Exporting Throttling Policy from source env and Importing to destination env
@@ -46,12 +53,12 @@ func ValidateThrottlePolicyExportImport(t *testing.T, args *ThrottlePolicyImport
 
 	// Export policy from env 1
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
-	policyName := fmt.Sprintf("%v", args.Policy[PolicyNameKey])
+	policyName := fmt.Sprintf("%v", args.Policy[policyNameKey])
 
 	exportedOutput, _ := exportThrottlePolicy(t, policyName, args.SrcAPIM.GetEnvName())
 	args.ImportFilePath = base.GetExportedPathFromOutput(exportedOutput)
 	assert.True(t, base.IsFileAvailable(t, args.ImportFilePath))
-	args.SrcAPIM.DeleteThrottlePolicy(fmt.Sprintf("%v", args.Policy[PolicyIDKey]), policyType)
+	args.SrcAPIM.DeleteThrottlePolicy(fmt.Sprintf("%v", args.Policy[policyIDKey]), policyType)
 
 	// Import Throttling Policy to env 2
 	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
@@ -65,6 +72,70 @@ func ValidateThrottlePolicyExportImport(t *testing.T, args *ThrottlePolicyImport
 	// Validate env 1 and env 2 policy is equal
 	ValidatePoliciesEqual(t, args, importedPolicy)
 	RemoveExportedThrottlingPolicyFile(t, args.ImportFilePath)
+}
+
+// ValidateThrottlePolicyImportFailure : Validates Importing Throttling Policy failure
+func ValidateThrottlePolicyImportFailureWithCorruptedFile(t *testing.T, args *ThrottlePolicyImportExportTestArgs) {
+	const internalServerError = "500"
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.DestAPIM.GetEnvName(), args.DestAPIM.GetApimURL(), args.DestAPIM.GetTokenURL())
+
+	// Export policy from env 1
+	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	path, _ := createCorruptedFile(t, args.DestAPIM, apim.AdvancedThrottlePolicyType)
+	args.ImportFilePath = path
+	assert.True(t, base.IsFileAvailable(t, args.ImportFilePath))
+
+	//// Import Throttling Policy to dest
+	output, err := importThrottlePolicy(t, args)
+	assert.Error(t, err, "Importation failure expected")
+	assert.Containsf(t, output, internalServerError, "Unexpected error code")
+	RemoveExportedThrottlingPolicyFile(t, args.ImportFilePath)
+}
+
+func createCorruptedFile(t *testing.T, client *apim.Client, policyType string) (string, error) {
+
+	t.Helper()
+	var exportedPolicy utils.ExportThrottlePolicy
+	exportedPolicy.Type = "throttling policy"
+
+	//switch policyType {
+	//case apim.SubscriptionThrottlePolicyType:
+	//	exportedPolicy.Subtype = subscriptionPolicySubType
+	//case apim.AdvancedThrottlePolicyType:
+	//	exportedPolicy.Subtype = advancedPolicySubType
+	//case apim.CustomThrottlePolicyType:
+	//	exportedPolicy.Subtype = customPolicySubType
+	//case apim.ApplicationThrottlePolicyType:
+	//	exportedPolicy.Subtype = applicationPolicySubType
+	//}
+
+	exportedPolicy.Version = "v4.1.0"
+
+	policyData := client.GenerateSampleThrottlePolicyData(policyType)
+	policyMap, _ := ThrottlePolicyStructToMap(policyData)
+	var yamlMap yaml.MapSlice
+	yamlBytes, err := yaml.Marshal(policyMap)
+	err = yaml.Unmarshal(yamlBytes, &yamlMap)
+	if err != nil {
+		return "", err
+	}
+	exportedPolicy.Data = yamlMap
+	policyMarshaledData, _ := yaml.Marshal(exportedPolicy)
+
+	tmpDir, err := ioutil.TempDir("", "apim")
+	if err != nil {
+		_ = os.RemoveAll(tmpDir)
+		return "", err
+	}
+	tempFilePath := tmpDir + "/temp.yaml"
+	err = ioutil.WriteFile(tempFilePath, policyMarshaledData, os.ModePerm)
+	if err != nil {
+	}
+	return tempFilePath, err
 }
 
 // Adds a new Throttling Policy to an env
@@ -105,8 +176,8 @@ func getThrottlingPolicyByName(t *testing.T, args *ThrottlePolicyImportExportTes
 // Validates whether throttling policies are equal
 func ValidatePoliciesEqual(t *testing.T, args *ThrottlePolicyImportExportTestArgs, importedPolicy map[string]interface{}) {
 	exportedPolicy := args.Policy
-	exportedPolicy[PolicyIDKey] = PolicyIDReset
-	importedPolicy[PolicyIDKey] = PolicyIDReset
+	exportedPolicy[policyIDKey] = policyIDReset
+	importedPolicy[policyIDKey] = policyIDReset
 	assert.Equal(t, exportedPolicy, importedPolicy)
 }
 
