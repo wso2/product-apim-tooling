@@ -115,6 +115,178 @@ func TestExportImportCustomThrottlePolicyAdminSuperTenantUser(t *testing.T) {
 	testutils.ValidateThrottlePolicyExportImport(t, args, apim.CustomThrottlePolicyType)
 }
 
+// Import an already existing Application Throttling Policy to the destination env with update
+func TestImportUpdateApplicationThrottlePolicy(t *testing.T) {
+
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			prod := GetProdClient()
+
+			newPolicy := testutils.AddNewThrottlePolicy(t, prod, user.Admin.Username, user.Admin.Password, apim.ApplicationThrottlePolicyType)
+			throttlePolicy, _ := testutils.ThrottlePolicyStructToMap(newPolicy)
+			args := &testutils.ThrottlePolicyImportExportTestArgs{
+				Admin:    testutils.Credentials{Username: user.Admin.Username, Password: user.Admin.Password},
+				CtlUser:  testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Policy:   throttlePolicy,
+				DestAPIM: prod,
+				Update:   true,
+			}
+			testutils.ValidateThrottlePolicyImportUpdate(t, args, apim.ApplicationThrottlePolicyType)
+		})
+	}
+}
+
+// Import an already existing Subscription Throttling Policy to the destination env with update
+func TestImportUpdateSubscriptionThrottlePolicy(t *testing.T) {
+
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			prod := GetProdClient()
+
+			newPolicy := testutils.AddNewThrottlePolicy(t, prod, user.Admin.Username, user.Admin.Password, apim.SubscriptionThrottlePolicyType)
+			throttlePolicy, _ := testutils.ThrottlePolicyStructToMap(newPolicy)
+			args := &testutils.ThrottlePolicyImportExportTestArgs{
+				Admin:    testutils.Credentials{Username: user.Admin.Username, Password: user.Admin.Password},
+				CtlUser:  testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Policy:   throttlePolicy,
+				DestAPIM: prod,
+				Update:   true,
+			}
+			testutils.ValidateThrottlePolicyImportUpdate(t, args, apim.SubscriptionThrottlePolicyType)
+		})
+	}
+}
+
+// Import an already existing Advanced Throttling Policy to the destination env with update
+func TestImportUpdateAdvancedThrottlePolicy(t *testing.T) {
+
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			prod := GetProdClient()
+
+			newPolicy := testutils.AddNewThrottlePolicy(t, prod, user.Admin.Username, user.Admin.Password, apim.AdvancedThrottlePolicyType)
+			throttlePolicy, _ := testutils.ThrottlePolicyStructToMap(newPolicy)
+			args := &testutils.ThrottlePolicyImportExportTestArgs{
+				Admin:    testutils.Credentials{Username: user.Admin.Username, Password: user.Admin.Password},
+				CtlUser:  testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Policy:   throttlePolicy,
+				DestAPIM: prod,
+				Update:   true,
+			}
+			testutils.ValidateThrottlePolicyImportUpdate(t, args, apim.AdvancedThrottlePolicyType)
+		})
+	}
+}
+
+// Import an already existing Custom Throttling Policy to the destination env as super tenant admin with update
+func TestImportUpdateCustomThrottlePolicyAdminSuperTenantUser(t *testing.T) {
+	//Custom throttling polices is accessible only by AdminSuperTenant
+	adminUsername := superAdminUser
+	adminPassword := superAdminPassword
+
+	prod := GetProdClient()
+
+	newPolicy := testutils.AddNewThrottlePolicy(t, prod, adminUsername, adminPassword, apim.CustomThrottlePolicyType)
+	throttlePolicy, _ := testutils.ThrottlePolicyStructToMap(newPolicy)
+	args := &testutils.ThrottlePolicyImportExportTestArgs{
+		Admin:    testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		CtlUser:  testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		Policy:   throttlePolicy,
+		DestAPIM: prod,
+		Update:   true,
+	}
+	testutils.ValidateThrottlePolicyImportUpdate(t, args, apim.CustomThrottlePolicyType)
+}
+
+// Import an already existing Subscription Throttling Policy to the destination env without update
+func TestImportUpdateConflictSubscriptionThrottlePolicy(t *testing.T) {
+
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			prod := GetProdClient()
+
+			newPolicy := testutils.AddNewThrottlePolicy(t, prod, user.Admin.Username, user.Admin.Password, apim.SubscriptionThrottlePolicyType)
+			throttlePolicy, _ := testutils.ThrottlePolicyStructToMap(newPolicy)
+			args := &testutils.ThrottlePolicyImportExportTestArgs{
+				Admin:    testutils.Credentials{Username: user.Admin.Username, Password: user.Admin.Password},
+				CtlUser:  testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Policy:   throttlePolicy,
+				DestAPIM: prod,
+				Update:   false,
+			}
+			testutils.ValidateThrottlePolicyImportUpdateConflict(t, args, apim.SubscriptionThrottlePolicyType)
+		})
+	}
+}
+
+// Import an already existing Application Throttling Policy to the destination env without update
+func TestImportUpdateConflictApplicationThrottlePolicy(t *testing.T) {
+
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			prod := GetProdClient()
+
+			newPolicy := testutils.AddNewThrottlePolicy(t, prod, user.Admin.Username, user.Admin.Password, apim.ApplicationThrottlePolicyType)
+			throttlePolicy, _ := testutils.ThrottlePolicyStructToMap(newPolicy)
+			args := &testutils.ThrottlePolicyImportExportTestArgs{
+				Admin:    testutils.Credentials{Username: user.Admin.Username, Password: user.Admin.Password},
+				CtlUser:  testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Policy:   throttlePolicy,
+				DestAPIM: prod,
+				Update:   false,
+			}
+			testutils.ValidateThrottlePolicyImportUpdateConflict(t, args, apim.ApplicationThrottlePolicyType)
+		})
+	}
+}
+
+// Import an already existing Advanced Throttling Policy to the destination env without update
+func TestImportUpdateConflictAdvancedThrottlePolicy(t *testing.T) {
+
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			prod := GetProdClient()
+
+			newPolicy := testutils.AddNewThrottlePolicy(t, prod, user.Admin.Username, user.Admin.Password, apim.AdvancedThrottlePolicyType)
+			throttlePolicy, _ := testutils.ThrottlePolicyStructToMap(newPolicy)
+			args := &testutils.ThrottlePolicyImportExportTestArgs{
+				Admin:    testutils.Credentials{Username: user.Admin.Username, Password: user.Admin.Password},
+				CtlUser:  testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Policy:   throttlePolicy,
+				DestAPIM: prod,
+				Update:   false,
+			}
+			testutils.ValidateThrottlePolicyImportUpdateConflict(t, args, apim.AdvancedThrottlePolicyType)
+		})
+	}
+}
+
+// Import an already existing Custom Throttling Policy to the destination env as super tenant admin without update
+func TestImportUpdateConflictCustomThrottlePolicyAdminSuperTenantUser(t *testing.T) {
+	//Custom throttling polices is accessible only by AdminSuperTenant
+	adminUsername := superAdminUser
+	adminPassword := superAdminPassword
+
+	prod := GetProdClient()
+
+	newPolicy := testutils.AddNewThrottlePolicy(t, prod, adminUsername, adminPassword, apim.CustomThrottlePolicyType)
+	throttlePolicy, _ := testutils.ThrottlePolicyStructToMap(newPolicy)
+	args := &testutils.ThrottlePolicyImportExportTestArgs{
+		Admin:    testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		CtlUser:  testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		Policy:   throttlePolicy,
+		DestAPIM: prod,
+		Update:   false,
+	}
+	testutils.ValidateThrottlePolicyImportUpdateConflict(t, args, apim.CustomThrottlePolicyType)
+}
+
 // Get  Throttle Policy List APICTL output and check whether all policies are included
 func TestGetThrottlePoliciesList(t *testing.T) {
 	//devops users don't have access to view throttling policies
@@ -163,28 +335,6 @@ func TestImportInvalidThrottlePolicyFile(t *testing.T) {
 				Update:   true,
 			}
 			testutils.ValidateThrottlePolicyImportFailureWithCorruptedFile(t, args)
-		})
-	}
-}
-
-// Import an already existing Application Throttling Policy to the destination env
-func TestImportUpdateApplicationThrottlePolicy(t *testing.T) {
-
-	for _, user := range testCaseUsers {
-		t.Run(user.Description, func(t *testing.T) {
-
-			prod := GetProdClient()
-
-			newPolicy := testutils.AddNewThrottlePolicy(t, prod, user.Admin.Username, user.Admin.Password, apim.ApplicationThrottlePolicyType)
-			throttlePolicy, _ := testutils.ThrottlePolicyStructToMap(newPolicy)
-			args := &testutils.ThrottlePolicyImportExportTestArgs{
-				Admin:    testutils.Credentials{Username: user.Admin.Username, Password: user.Admin.Password},
-				CtlUser:  testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
-				Policy:   throttlePolicy,
-				DestAPIM: prod,
-				Update:   true,
-			}
-			testutils.ValidateThrottlePolicyImportUpdate(t, args, apim.ApplicationThrottlePolicyType)
 		})
 	}
 }

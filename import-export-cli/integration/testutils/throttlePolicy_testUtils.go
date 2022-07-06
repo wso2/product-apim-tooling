@@ -107,6 +107,37 @@ func ValidateThrottlePolicyImportUpdate(t *testing.T, args *ThrottlePolicyImport
 	RemoveExportedThrottlingPolicyFile(t, args.ImportFilePath)
 }
 
+// ValidateThrottlePolicyImportUpdateConflict : Validates importing existing Throttling Policy to create conflict
+func ValidateThrottlePolicyImportUpdateConflict(t *testing.T, args *ThrottlePolicyImportExportTestArgs, policyType string) {
+	const conflictStatusCode = "409"
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.DestAPIM.GetEnvName(), args.DestAPIM.GetApimURL(), args.DestAPIM.GetTokenURL())
+
+	// Export policy from env 1
+	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+	policyName := fmt.Sprintf("%v", args.Policy[policyNameKey])
+
+	exportedOutput, _ := exportThrottlePolicy(t, policyName, args.DestAPIM.GetEnvName())
+	args.ImportFilePath = base.GetExportedPathFromOutput(exportedOutput)
+	assert.True(t, base.IsFileAvailable(t, args.ImportFilePath))
+
+	// Import Throttling Policy to env 2
+	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+	output, err := importThrottlePolicy(t, args)
+	assert.Error(t, err, "Importation conflict expected")
+	assert.Contains(t, output, conflictStatusCode, "Unexpected error code")
+	// Give time for newly imported Throttling Policy to get indexed
+	base.WaitForIndexing()
+
+	// Get Throttle Policy from env 2
+	importedPolicy, _ := getThrottlingPolicyByName(t, args, policyName, policyType)
+	// Validate env 1 and env 2 policy is equal
+	ValidatePoliciesEqual(t, args, importedPolicy)
+	RemoveExportedThrottlingPolicyFile(t, args.ImportFilePath)
+}
+
 // ValidateThrottlePolicyImportFailure : Validates Importing Throttling Policy failure
 func ValidateThrottlePolicyImportFailureWithCorruptedFile(t *testing.T, args *ThrottlePolicyImportExportTestArgs) {
 	const internalServerError = "500"
