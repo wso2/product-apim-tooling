@@ -138,7 +138,6 @@ func ValidateThrottlePolicyImportUpdateConflict(t *testing.T, args *ThrottlePoli
 	RemoveExportedThrottlingPolicyFile(t, args.ImportFilePath)
 }
 
-// ValidateThrottlePolicyImportFailure : Validates Importing Throttling Policy failure
 func ValidateThrottlePolicyImportFailureWithCorruptedFile(t *testing.T, args *ThrottlePolicyImportExportTestArgs) {
 	const internalServerError = "500"
 	t.Helper()
@@ -158,6 +157,20 @@ func ValidateThrottlePolicyImportFailureWithCorruptedFile(t *testing.T, args *Th
 	assert.Error(t, err, "Importation failure expected")
 	assert.Contains(t, output, internalServerError, "Unexpected error code")
 	RemoveExportedThrottlingPolicyFile(t, args.ImportFilePath)
+}
+
+func ValidateThrottlePolicyExportFailure(t *testing.T, args *ThrottlePolicyImportExportTestArgs) {
+	const policyString = "Policy"
+	t.Helper()
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	// Export policy from env 1
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+	policyName := base.GenerateRandomString() + policyString
+
+	output, _ := exportThrottlePolicy(t, policyName, args.SrcAPIM.GetEnvName())
+	assert.Contains(t, output, "Error exporting Throttling Policies", "Exportation error expected")
 }
 
 func createExportedThrottlePolicyFile(t *testing.T, client *apim.Client, policyType string, corrupted bool) (string, interface{}, error) {

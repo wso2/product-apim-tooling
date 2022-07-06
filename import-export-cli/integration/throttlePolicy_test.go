@@ -338,3 +338,19 @@ func TestImportInvalidThrottlePolicyFile(t *testing.T) {
 		})
 	}
 }
+
+// Export an invalid throttling policy
+func TestExportInvalidThrottlePolicy(t *testing.T) {
+
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+
+			args := &testutils.ThrottlePolicyImportExportTestArgs{
+				CtlUser: testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				SrcAPIM: dev,
+			}
+			testutils.ValidateThrottlePolicyExportFailure(t, args)
+		})
+	}
+}
