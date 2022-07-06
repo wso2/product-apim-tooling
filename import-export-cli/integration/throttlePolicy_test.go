@@ -150,6 +150,24 @@ func TestGetThrottlePoliciesListWithJsonPrettyFormat(t *testing.T) {
 }
 
 // Export an Advanced Throttling Policy from one environment and import to another environment
+func TestImportUpdateAdvancedThrottlePolicy(t *testing.T) {
+
+	for _, user := range testCaseUsers[:1] {
+		t.Run(user.Description, func(t *testing.T) {
+			prod := GetProdClient()
+
+			args := &testutils.ThrottlePolicyImportExportTestArgs{
+				Admin:    testutils.Credentials{Username: user.Admin.Username, Password: user.Admin.Password},
+				CtlUser:  testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				DestAPIM: prod,
+				Update:   true,
+			}
+			testutils.ValidateThrottlePolicyImportUpdate(t, args, apim.AdvancedThrottlePolicyType)
+		})
+	}
+}
+
+// Import failure with a corrupted file
 func TestImportInvalidThrottlePolicyFile(t *testing.T) {
 
 	for _, user := range testCaseUsers {
