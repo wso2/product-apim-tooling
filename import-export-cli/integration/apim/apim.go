@@ -2156,9 +2156,9 @@ func (instance *Client) GetThrottlePolicyID(t *testing.T, username, password, po
 		t.Fatal(err)
 	}
 	throttlePolicyList := policyListResponse.List
-	for i := range throttlePolicyList {
-		if throttlePolicyList[i].PolicyName == policyName {
-			uuid = throttlePolicyList[i].Uuid
+	for _, policy := range throttlePolicyList {
+		if policy.PolicyName == policyName {
+			uuid = policy.Uuid
 			break
 		}
 	}
