@@ -55,7 +55,7 @@ func ValidateThrottlePolicyExportImport(t *testing.T, args *PolicyImportExportTe
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 	policyName := fmt.Sprintf("%v", args.Policy[policyNameKey])
 
-	exportedOutput, err := exportThrottlePolicy(t, policyName, args.SrcAPIM.GetEnvName(), args.Type)
+	exportedOutput, err := exportThrottlePolicy(t, policyName, args)
 	assert.Nil(t, err, "Error while exporting the Throttling Policy")
 
 	args.ImportFilePath = base.GetExportedPathFromOutput(exportedOutput)
@@ -74,7 +74,6 @@ func ValidateThrottlePolicyExportImport(t *testing.T, args *PolicyImportExportTe
 	importedPolicy, _ := getThrottlingPolicyByName(t, args, adminUsername, adminPassword, policyName, policyType)
 	// Validate env 1 and env 2 policy is equal
 	validatePoliciesEqual(t, args, importedPolicy)
-	removeExportedThrottlingPolicyFile(t, args.ImportFilePath)
 }
 
 // ValidateThrottlePolicyImportUpdate : Validates importing existing Throttling Policy
@@ -82,18 +81,27 @@ func ValidateThrottlePolicyImportUpdate(t *testing.T, args *PolicyImportExportTe
 	t.Helper()
 
 	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
 	base.SetupEnv(t, args.DestAPIM.GetEnvName(), args.DestAPIM.GetApimURL(), args.DestAPIM.GetTokenURL())
 
 	// Export policy from env 1
-	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 	policyName := fmt.Sprintf("%v", args.Policy[policyNameKey])
 
-	exportedOutput, _ := exportThrottlePolicy(t, policyName, args.DestAPIM.GetEnvName(), args.Type)
+	exportedOutput, _ := exportThrottlePolicy(t, policyName, args)
 	args.ImportFilePath = base.GetExportedPathFromOutput(exportedOutput)
 	assert.True(t, base.IsFileAvailable(t, args.ImportFilePath))
+	args.SrcAPIM.DeleteThrottlePolicy(fmt.Sprintf("%v", args.Policy[policyIDKey]), policyType)
 
 	// Import Throttling Policy to env 2
 	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+	importedOutput, err := importThrottlePolicy(t, args)
+	assert.Nil(t, err, "Error while importing the Throttling Policy")
+	assert.Contains(t, importedOutput, "Successfully imported")
+	// Give time for newly imported Throttling Policy to get indexed
+	base.WaitForIndexing()
+
+	// Import Throttling Policy to env 2 to update
 	output, err := importThrottlePolicy(t, args)
 	assert.Contains(t, output, "Successfully updated")
 	assert.Nil(t, err, "Error while importing the Throttling Policy")
@@ -104,30 +112,37 @@ func ValidateThrottlePolicyImportUpdate(t *testing.T, args *PolicyImportExportTe
 	importedPolicy, _ := getThrottlingPolicyByName(t, args, adminUsername, adminPassword, policyName, policyType)
 	// Validate env 1 and env 2 policy is equal
 	validatePoliciesEqual(t, args, importedPolicy)
-	removeExportedThrottlingPolicyFile(t, args.ImportFilePath)
 }
 
 // ValidateThrottlePolicyImportUpdateConflict : Validates importing existing Throttling Policy to create conflict
 func ValidateThrottlePolicyImportUpdateConflict(t *testing.T, args *PolicyImportExportTestArgs, adminUsername, adminPassword, policyType string) {
-	const conflictStatusCode = "409"
 	t.Helper()
 
 	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
 	base.SetupEnv(t, args.DestAPIM.GetEnvName(), args.DestAPIM.GetApimURL(), args.DestAPIM.GetTokenURL())
 
 	// Export policy from env 1
-	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 	policyName := fmt.Sprintf("%v", args.Policy[policyNameKey])
 
-	exportedOutput, _ := exportThrottlePolicy(t, policyName, args.DestAPIM.GetEnvName(), args.Type)
+	exportedOutput, _ := exportThrottlePolicy(t, policyName, args)
 	args.ImportFilePath = base.GetExportedPathFromOutput(exportedOutput)
 	assert.True(t, base.IsFileAvailable(t, args.ImportFilePath))
+	args.SrcAPIM.DeleteThrottlePolicy(fmt.Sprintf("%v", args.Policy[policyIDKey]), policyType)
 
 	// Import Throttling Policy to env 2
 	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+	importedOutput, err := importThrottlePolicy(t, args)
+	assert.Nil(t, err, "Error while importing the Throttling Policy")
+	assert.Contains(t, importedOutput, "Successfully imported")
+	// Give time for newly imported Throttling Policy to get indexed
+	base.WaitForIndexing()
+
+	// Import Throttling Policy to env 2 for update conflict
 	output, err := importThrottlePolicy(t, args)
 	assert.Error(t, err, "Importation conflict expected")
-	assert.Contains(t, output, conflictStatusCode, "Unexpected error code")
+	assert.Contains(t, output, "409", "Unexpected error code")
 	// Give time for newly imported Throttling Policy to get indexed
 	base.WaitForIndexing()
 
@@ -135,11 +150,9 @@ func ValidateThrottlePolicyImportUpdateConflict(t *testing.T, args *PolicyImport
 	importedPolicy, _ := getThrottlingPolicyByName(t, args, adminUsername, adminPassword, policyName, policyType)
 	// Validate env 1 and env 2 policy is equal
 	validatePoliciesEqual(t, args, importedPolicy)
-	removeExportedThrottlingPolicyFile(t, args.ImportFilePath)
 }
 
 func ValidateThrottlePolicyImportFailureWithCorruptedFile(t *testing.T, args *PolicyImportExportTestArgs) {
-	const internalServerError = "500"
 	t.Helper()
 
 	// Setup apictl envs
@@ -155,8 +168,7 @@ func ValidateThrottlePolicyImportFailureWithCorruptedFile(t *testing.T, args *Po
 	//// Import Throttling Policy to dest
 	output, err := importThrottlePolicy(t, args)
 	assert.Error(t, err, "Importation failure expected")
-	assert.Contains(t, output, internalServerError, "Unexpected error code")
-	removeExportedThrottlingPolicyFile(t, args.ImportFilePath)
+	assert.Contains(t, output, "500", "Unexpected error code")
 }
 
 func ValidateThrottlePolicyExportFailure(t *testing.T, args *PolicyImportExportTestArgs) {
@@ -168,7 +180,7 @@ func ValidateThrottlePolicyExportFailure(t *testing.T, args *PolicyImportExportT
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 	policyName := base.GenerateRandomString() + "Policy"
 
-	output, _ := exportThrottlePolicy(t, policyName, args.SrcAPIM.GetEnvName(), args.Type)
+	output, _ := exportThrottlePolicy(t, policyName, args)
 	assert.Contains(t, output, "Error exporting Throttling Policies", "Exportation error expected")
 }
 
@@ -212,6 +224,11 @@ func createExportedThrottlePolicyFile(t *testing.T, client *apim.Client, policyT
 	err = ioutil.WriteFile(tempFilePath, policyMarshaledData, os.ModePerm)
 	if err != nil {
 	}
+
+	t.Cleanup(func() {
+		removeExportedThrottlingPolicyFile(t, tempFilePath)
+	})
+
 	return tempFilePath, policyData, err
 }
 
@@ -224,14 +241,19 @@ func AddNewThrottlePolicy(t *testing.T, client *apim.Client, username, password,
 }
 
 // Exports Throttling Policy from an env
-func exportThrottlePolicy(t *testing.T, name, env, policyTypeFlagValue string) (string, error) {
+func exportThrottlePolicy(t *testing.T, name string, args *PolicyImportExportTestArgs) (string, error) {
 	var output string
 	var err error
-	if policyTypeFlagValue != "" {
-		output, err = base.Execute(t, "export", "policy", "rate-limiting", "-n", name, "-t", policyTypeFlagValue, "-e", env, "-k", "--verbose")
+	if args.Type != "" {
+		output, err = base.Execute(t, "export", "policy", "rate-limiting", "-n", name, "-t", args.Type, "-e", args.SrcAPIM.EnvName, "-k", "--verbose")
 	} else {
-		output, err = base.Execute(t, "export", "policy", "rate-limiting", "-n", name, "-e", env, "-k", "--verbose")
+		output, err = base.Execute(t, "export", "policy", "rate-limiting", "-n", name, "-e", args.SrcAPIM.EnvName, "-k", "--verbose")
 	}
+
+	t.Cleanup(func() {
+		removeExportedThrottlingPolicyFile(t, args.ImportFilePath)
+	})
+
 	return output, err
 }
 
@@ -244,6 +266,11 @@ func importThrottlePolicy(t *testing.T, args *PolicyImportExportTestArgs) (strin
 	} else {
 		output, err = base.Execute(t, "import", "policy", "rate-limiting", "-e", args.DestAPIM.GetEnvName(), "-f", args.ImportFilePath)
 	}
+
+	t.Cleanup(func() {
+		removeExportedThrottlingPolicyFile(t, args.ImportFilePath)
+	})
+
 	return output, err
 }
 
