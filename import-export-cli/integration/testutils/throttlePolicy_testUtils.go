@@ -160,14 +160,13 @@ func ValidateThrottlePolicyImportFailureWithCorruptedFile(t *testing.T, args *Po
 }
 
 func ValidateThrottlePolicyExportFailure(t *testing.T, args *PolicyImportExportTestArgs) {
-	const policyString = "Policy"
 	t.Helper()
 	// Setup apictl envs
 	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
 
 	// Export policy from env 1
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
-	policyName := base.GenerateRandomString() + policyString
+	policyName := base.GenerateRandomString() + "Policy"
 
 	output, _ := exportThrottlePolicy(t, policyName, args.SrcAPIM.GetEnvName())
 	assert.Contains(t, output, "Error exporting Throttling Policies", "Exportation error expected")
