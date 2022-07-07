@@ -65,9 +65,9 @@ type ApiProductImportExportTestArgs struct {
 }
 
 type PolicyImportExportTestArgs struct {
-	Admin          Credentials
 	CtlUser        Credentials
 	Policy         map[string]interface{}
+	Type           string
 	SrcAPIM        *apim.Client
 	DestAPIM       *apim.Client
 	ImportFilePath string
