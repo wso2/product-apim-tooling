@@ -73,7 +73,7 @@ func ValidateThrottlePolicyExportImport(t *testing.T, args *PolicyImportExportTe
 	// Get Throttle Policy from env 2
 	importedPolicy, _ := getThrottlingPolicyByName(t, args, adminUsername, adminPassword, policyName, policyType)
 	// Validate env 1 and env 2 policy is equal
-	validatePoliciesEqual(t, args, importedPolicy)
+	validatePoliciesEquality(t, true, args, importedPolicy)
 }
 
 // ValidateThrottlePolicyImportUpdate : Validates importing existing Throttling Policy
@@ -101,17 +101,17 @@ func ValidateThrottlePolicyImportUpdate(t *testing.T, args *PolicyImportExportTe
 	// Give time for newly imported Throttling Policy to get indexed
 	base.WaitForIndexing()
 
+	changeExportedThrottlePolicyFile(t, args)
 	// Import Throttling Policy to env 2 to update
 	output, err := importThrottlePolicy(t, args)
 	assert.Contains(t, output, "Successfully updated")
 	assert.Nil(t, err, "Error while importing the Throttling Policy")
 	// Give time for newly imported Throttling Policy to get indexed
 	base.WaitForIndexing()
-
 	// Get Throttle Policy from env 2
 	importedPolicy, _ := getThrottlingPolicyByName(t, args, adminUsername, adminPassword, policyName, policyType)
-	// Validate env 1 and env 2 policy is equal
-	validatePoliciesEqual(t, args, importedPolicy)
+	// Validate  policies are not equal
+	validatePoliciesEquality(t, false, args, importedPolicy)
 }
 
 // ValidateThrottlePolicyImportUpdateConflict : Validates importing existing Throttling Policy to create conflict
@@ -139,6 +139,7 @@ func ValidateThrottlePolicyImportUpdateConflict(t *testing.T, args *PolicyImport
 	// Give time for newly imported Throttling Policy to get indexed
 	base.WaitForIndexing()
 
+	changeExportedThrottlePolicyFile(t, args)
 	// Import Throttling Policy to env 2 for update conflict
 	output, err := importThrottlePolicy(t, args)
 	assert.Error(t, err, "Importation conflict expected")
@@ -148,8 +149,8 @@ func ValidateThrottlePolicyImportUpdateConflict(t *testing.T, args *PolicyImport
 
 	// Get Throttle Policy from env 2
 	importedPolicy, _ := getThrottlingPolicyByName(t, args, adminUsername, adminPassword, policyName, policyType)
-	// Validate env 1 and env 2 policy is equal
-	validatePoliciesEqual(t, args, importedPolicy)
+	// Validate policies are  equal
+	validatePoliciesEquality(t, true, args, importedPolicy)
 }
 
 func ValidateThrottlePolicyImportFailureWithCorruptedFile(t *testing.T, args *PolicyImportExportTestArgs) {
@@ -184,8 +185,34 @@ func ValidateThrottlePolicyExportFailure(t *testing.T, args *PolicyImportExportT
 	assert.Contains(t, output, "Error exporting Throttling Policies", "Exportation error expected")
 }
 
-func createExportedThrottlePolicyFile(t *testing.T, client *apim.Client, policyType string, corrupted bool) (string, interface{}, error) {
+func changeExportedThrottlePolicyFile(t *testing.T, args *PolicyImportExportTestArgs) {
+	t.Helper()
+	var exportedPolicy utils.ExportThrottlePolicy
+	exportedFile, err := ioutil.ReadFile(args.ImportFilePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = yaml.Unmarshal(exportedFile, &exportedPolicy)
+	if err != nil {
+		t.Fatal(err)
+	}
+	policyData := exportedPolicy.Data
+	policyData[2].Value = base.GenerateRandomString()
+	policyData[3].Value = base.GenerateRandomString()
+	marshaledData, _ := yaml.Marshal(exportedPolicy)
 
+	err = ioutil.WriteFile(args.ImportFilePath, marshaledData, os.ModePerm)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Cleanup(func() {
+		removeExportedThrottlingPolicyFile(t, args.ImportFilePath)
+	})
+
+}
+
+func createExportedThrottlePolicyFile(t *testing.T, client *apim.Client, policyType string, corrupted bool) (string, interface{}, error) {
 	t.Helper()
 	var exportedPolicy utils.ExportThrottlePolicy
 	exportedPolicy.Type = "throttling policy"
@@ -223,6 +250,7 @@ func createExportedThrottlePolicyFile(t *testing.T, client *apim.Client, policyT
 	tempFilePath := tmpDir + "/temp.yaml"
 	err = ioutil.WriteFile(tempFilePath, policyMarshaledData, os.ModePerm)
 	if err != nil {
+		t.Fatal(err)
 	}
 
 	t.Cleanup(func() {
@@ -285,11 +313,16 @@ func getThrottlingPolicyByName(t *testing.T, args *PolicyImportExportTestArgs, a
 }
 
 // Validates whether throttling policies are equal
-func validatePoliciesEqual(t *testing.T, args *PolicyImportExportTestArgs, importedPolicy map[string]interface{}) {
+func validatePoliciesEquality(t *testing.T, checkEquality bool, args *PolicyImportExportTestArgs, importedPolicy map[string]interface{}) {
 	exportedPolicy := args.Policy
 	exportedPolicy[policyIDKey] = policyIDReset
 	importedPolicy[policyIDKey] = policyIDReset
-	assert.Equal(t, exportedPolicy, importedPolicy)
+
+	if checkEquality {
+		assert.Equal(t, exportedPolicy, importedPolicy)
+	} else {
+		assert.NotEqual(t, exportedPolicy, importedPolicy)
+	}
 }
 
 // Converts policy struct to map
