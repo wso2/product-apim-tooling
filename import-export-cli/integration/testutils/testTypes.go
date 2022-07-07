@@ -64,7 +64,7 @@ type ApiProductImportExportTestArgs struct {
 	IsLatest             bool
 }
 
-type ThrottlePolicyImportExportTestArgs struct {
+type PolicyImportExportTestArgs struct {
 	Admin          Credentials
 	CtlUser        Credentials
 	Policy         map[string]interface{}
