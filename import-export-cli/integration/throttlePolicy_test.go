@@ -159,7 +159,7 @@ func TestImportUpdateApplicationThrottlePolicy(t *testing.T) {
 				Type:     applicationThrottlePolicyFlag,
 				SrcAPIM:  dev,
 				DestAPIM: prod,
-				Update:   true,
+				Update:   false,
 			}
 			adminUsername := superAdminUser
 			adminPassword := superAdminPassword
@@ -187,7 +187,7 @@ func TestImportUpdateSubscriptionThrottlePolicy(t *testing.T) {
 				Type:     subscriptionThrottlePolicyFlag,
 				SrcAPIM:  dev,
 				DestAPIM: prod,
-				Update:   true,
+				Update:   false,
 			}
 			adminUsername := superAdminUser
 			adminPassword := superAdminPassword
@@ -215,7 +215,7 @@ func TestImportUpdateAdvancedThrottlePolicy(t *testing.T) {
 				Type:     advancedThrottlePolicyFlag,
 				SrcAPIM:  dev,
 				DestAPIM: prod,
-				Update:   true,
+				Update:   false,
 			}
 			adminUsername := superAdminUser
 			adminPassword := superAdminPassword
@@ -246,7 +246,7 @@ func TestImportUpdateCustomThrottlePolicy(t *testing.T) {
 				Type:     customThrottlePolicyFlag,
 				SrcAPIM:  dev,
 				DestAPIM: prod,
-				Update:   true,
+				Update:   false,
 			}
 			adminUsername := superAdminUser
 			adminPassword := superAdminPassword
@@ -411,7 +411,7 @@ func TestImportInvalidThrottlePolicyFile(t *testing.T) {
 			args := &testutils.PolicyImportExportTestArgs{
 				CtlUser:  testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
 				DestAPIM: prod,
-				Update:   true,
+				Update:   false,
 			}
 			testutils.ValidateThrottlePolicyImportFailureWithCorruptedFile(t, args)
 		})

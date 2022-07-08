@@ -23,6 +23,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -2050,8 +2051,8 @@ func (instance *Client) registerClient(username string, password string) dcrResp
 }
 
 // AddThrottlePolicy : Add new Throttle Policy of different policy types to APIM
-func (instance *Client) AddThrottlePolicy(t *testing.T, policy interface{}, policyType string) interface{} {
-	var throttlePolicyResponse interface{}
+func (instance *Client) AddThrottlePolicy(t *testing.T, policy interface{}, username, password, policyType string, doClean bool) interface{} {
+	var throttlePolicyResponse map[string]interface{}
 
 	throttlePolicyURL := instance.adminRestURL + "/throttling/policies/" + policyType
 
@@ -2074,6 +2075,12 @@ func (instance *Client) AddThrottlePolicy(t *testing.T, policy interface{}, poli
 
 	json.NewDecoder(response.Body).Decode(&throttlePolicyResponse)
 
+	if doClean {
+		t.Cleanup(func() {
+			instance.Login(username, password)
+			instance.DeleteThrottlePolicy(fmt.Sprintf("%v", throttlePolicyResponse["policyId"]), policyType)
+		})
+	}
 	return throttlePolicyResponse
 }
 
@@ -2116,6 +2123,25 @@ func (instance *Client) GetThrottlePolicy(policyID, policyType string) map[strin
 	json.NewDecoder(response.Body).Decode(&policyResponse)
 
 	return policyResponse
+}
+
+// DeleteThrottlePolicyByName : Deletes Throttling Policy from APIM using policy name
+func (instance *Client) DeleteThrottlePolicyByName(t *testing.T, policyName, policyType string) {
+
+	policyID := instance.GetThrottlePolicyID(t, policyName, policyType)
+	policiesURL := instance.adminRestURL + "/throttling/policies/" + policyType + "/" + policyID
+
+	request := base.CreateDelete(policiesURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.DeleteThrottlePolicy()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.DeleteThrottlePolicy()", response, 200)
 }
 
 // GetThrottlePolicyID : Get Throttle Policy UUID using policy name from APIM
