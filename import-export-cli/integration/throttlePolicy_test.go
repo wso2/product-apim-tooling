@@ -248,7 +248,7 @@ func TestImportUpdateCustomThrottlePolicy(t *testing.T) {
 }
 
 // Import an already existing Subscription Throttling Policy to the destination env without update
-func TestImportUpdateConflictSubscriptionThrottlePolicy(t *testing.T) {
+func TestSubscriptionThrottlePolicyImportFailureWhenPolicyExisted(t *testing.T) {
 
 	for _, user := range testCaseUsers {
 		t.Run(user.Description, func(t *testing.T) {
@@ -269,13 +269,13 @@ func TestImportUpdateConflictSubscriptionThrottlePolicy(t *testing.T) {
 			if isTenantUser(args.CtlUser.Username, TENANT1) {
 				adminUsername = adminUsername + "@" + TENANT1
 			}
-			testutils.ValidateThrottlePolicyImportUpdateConflict(t, args, adminUsername, adminPassword, apim.SubscriptionThrottlePolicyType)
+			testutils.ValidateThrottlePolicyImportFailureWhenPolicyExisted(t, args, adminUsername, adminPassword, apim.SubscriptionThrottlePolicyType)
 		})
 	}
 }
 
 // Import an already existing Application Throttling Policy to the destination env without update
-func TestImportUpdateConflictApplicationThrottlePolicy(t *testing.T) {
+func TestApplicationThrottlePolicyImportFailureWhenPolicyExisted(t *testing.T) {
 
 	for _, user := range testCaseUsers {
 		t.Run(user.Description, func(t *testing.T) {
@@ -296,13 +296,13 @@ func TestImportUpdateConflictApplicationThrottlePolicy(t *testing.T) {
 			if isTenantUser(args.CtlUser.Username, TENANT1) {
 				adminUsername = adminUsername + "@" + TENANT1
 			}
-			testutils.ValidateThrottlePolicyImportUpdateConflict(t, args, adminUsername, adminPassword, apim.ApplicationThrottlePolicyType)
+			testutils.ValidateThrottlePolicyImportFailureWhenPolicyExisted(t, args, adminUsername, adminPassword, apim.ApplicationThrottlePolicyType)
 		})
 	}
 }
 
 // Import an already existing Advanced Throttling Policy to the destination env without update
-func TestImportUpdateConflictAdvancedThrottlePolicy(t *testing.T) {
+func TestAdvancedThrottlePolicyImportFailureWhenPolicyExisted(t *testing.T) {
 
 	for _, user := range testCaseUsers {
 		t.Run(user.Description, func(t *testing.T) {
@@ -323,13 +323,13 @@ func TestImportUpdateConflictAdvancedThrottlePolicy(t *testing.T) {
 			if isTenantUser(args.CtlUser.Username, TENANT1) {
 				adminUsername = adminUsername + "@" + TENANT1
 			}
-			testutils.ValidateThrottlePolicyImportUpdateConflict(t, args, adminUsername, adminPassword, apim.AdvancedThrottlePolicyType)
+			testutils.ValidateThrottlePolicyImportFailureWhenPolicyExisted(t, args, adminUsername, adminPassword, apim.AdvancedThrottlePolicyType)
 		})
 	}
 }
 
 // Import an already existing Custom Throttling Policy to the destination env without update
-func TestImportUpdateConflictCustomThrottlePolicy(t *testing.T) {
+func TestCustomThrottlePolicyImportFailureWhenPolicyExisted(t *testing.T) {
 	for _, user := range testCaseUsers {
 		// Custom throttling policy importation
 		if isTenantUser(user.CtlUser.Username, TENANT1) {
@@ -350,7 +350,7 @@ func TestImportUpdateConflictCustomThrottlePolicy(t *testing.T) {
 			}
 			adminUsername := superAdminUser
 			adminPassword := superAdminPassword
-			testutils.ValidateThrottlePolicyImportUpdateConflict(t, args, adminUsername, adminPassword, apim.CustomThrottlePolicyType)
+			testutils.ValidateThrottlePolicyImportFailureWhenPolicyExisted(t, args, adminUsername, adminPassword, apim.CustomThrottlePolicyType)
 		})
 	}
 }

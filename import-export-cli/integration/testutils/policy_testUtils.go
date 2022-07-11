@@ -115,8 +115,8 @@ func ValidateThrottlePolicyImportUpdate(t *testing.T, args *PolicyImportExportTe
 	validatePoliciesEquality(t, false, args, importedPolicy)
 }
 
-// ValidateThrottlePolicyImportUpdateConflict : Validates importing existing Throttling Policy to create conflict
-func ValidateThrottlePolicyImportUpdateConflict(t *testing.T, args *PolicyImportExportTestArgs, adminUsername, adminPassword, policyType string) {
+// ValidateThrottlePolicyImportFailureWhenPolicyExisted : Validates importing existing Throttling Policy to create conflict
+func ValidateThrottlePolicyImportFailureWhenPolicyExisted(t *testing.T, args *PolicyImportExportTestArgs, adminUsername, adminPassword, policyType string) {
 	t.Helper()
 
 	// Setup apictl envs
