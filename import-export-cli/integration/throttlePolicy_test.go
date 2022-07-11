@@ -357,7 +357,6 @@ func TestImportUpdateConflictCustomThrottlePolicy(t *testing.T) {
 
 // Get  Throttle Policy List APICTL output and check whether all policies are included
 func TestGetThrottlePoliciesList(t *testing.T) {
-	//devops users don't have access to view throttling policies
 	for _, user := range testCaseUsers {
 		t.Run(user.Description, func(t *testing.T) {
 
@@ -379,7 +378,6 @@ func TestGetThrottlePoliciesList(t *testing.T) {
 
 // Get  Throttle Policy List APICTL output in JsonPretty format and check whether all policies are included
 func TestGetThrottlePoliciesListWithJsonPrettyFormat(t *testing.T) {
-	//devops users don't have access to view throttling policies
 	for _, user := range testCaseUsers {
 		t.Run(user.Description, func(t *testing.T) {
 
