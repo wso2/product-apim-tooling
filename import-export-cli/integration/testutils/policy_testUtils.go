@@ -337,7 +337,7 @@ func removeExportedThrottlingPolicyFile(t *testing.T, file string) {
 }
 
 // Validates whether the throttling policy list is complete
-func ValidateThrottlePoliciesList(t *testing.T, doJsonPrettyFormatting bool, args *PolicyImportExportTestArgs) {
+func ValidateThrottlePoliciesList(t *testing.T, doJsonPrettyFormatting bool, adminUsername, adminPassword string, args *PolicyImportExportTestArgs) {
 	t.Helper()
 
 	// Setup apictl envs
@@ -349,7 +349,7 @@ func ValidateThrottlePoliciesList(t *testing.T, doJsonPrettyFormatting bool, arg
 
 	output, _ := listThrottlePolicies(t, doJsonPrettyFormatting, args)
 
-	args.SrcAPIM.Login(args.CtlUser.Username, args.CtlUser.Password)
+	args.SrcAPIM.Login(adminUsername, adminPassword)
 	throttlePoliciesList := args.SrcAPIM.GetThrottlePolicies(t)
 
 	validateListThrottlePoliciesEqual(t, output, throttlePoliciesList)

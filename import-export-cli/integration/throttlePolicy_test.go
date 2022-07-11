@@ -358,7 +358,7 @@ func TestImportUpdateConflictCustomThrottlePolicy(t *testing.T) {
 // Get  Throttle Policy List APICTL output and check whether all policies are included
 func TestGetThrottlePoliciesList(t *testing.T) {
 	//devops users don't have access to view throttling policies
-	for _, user := range testCaseUsers[:2] {
+	for _, user := range testCaseUsers {
 		t.Run(user.Description, func(t *testing.T) {
 
 			dev := GetDevClient()
@@ -367,7 +367,12 @@ func TestGetThrottlePoliciesList(t *testing.T) {
 				CtlUser: testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
 				SrcAPIM: dev,
 			}
-			testutils.ValidateThrottlePoliciesList(t, true, args)
+			adminUsername := superAdminUser
+			adminPassword := superAdminPassword
+			if isTenantUser(args.CtlUser.Username, TENANT1) {
+				adminUsername = adminUsername + "@" + TENANT1
+			}
+			testutils.ValidateThrottlePoliciesList(t, true, adminUsername, adminPassword, args)
 		})
 	}
 }
@@ -375,7 +380,7 @@ func TestGetThrottlePoliciesList(t *testing.T) {
 // Get  Throttle Policy List APICTL output in JsonPretty format and check whether all policies are included
 func TestGetThrottlePoliciesListWithJsonPrettyFormat(t *testing.T) {
 	//devops users don't have access to view throttling policies
-	for _, user := range testCaseUsers[:2] {
+	for _, user := range testCaseUsers {
 		t.Run(user.Description, func(t *testing.T) {
 
 			dev := GetDevClient()
@@ -384,7 +389,12 @@ func TestGetThrottlePoliciesListWithJsonPrettyFormat(t *testing.T) {
 				CtlUser: testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
 				SrcAPIM: dev,
 			}
-			testutils.ValidateThrottlePoliciesList(t, true, args)
+			adminUsername := superAdminUser
+			adminPassword := superAdminPassword
+			if isTenantUser(args.CtlUser.Username, TENANT1) {
+				adminUsername = adminUsername + "@" + TENANT1
+			}
+			testutils.ValidateThrottlePoliciesList(t, true, adminUsername, adminPassword, args)
 		})
 	}
 }
