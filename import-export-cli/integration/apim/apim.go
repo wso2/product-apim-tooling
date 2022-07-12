@@ -23,6 +23,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -41,6 +42,16 @@ import (
 
 const (
 	restClientPostfix = "-integ-rest-client"
+
+	ApplicationThrottlePolicyType  = "application"
+	CustomThrottlePolicyType       = "custom"
+	AdvancedThrottlePolicyType     = "advanced"
+	SubscriptionThrottlePolicyType = "subscription"
+
+	applicationThrottlePolicyQuery  = "app"
+	customThrottlePolicyQuery       = "global"
+	advancedThrottlePolicyQuery     = "api"
+	subscriptionThrottlePolicyQuery = "sub"
 )
 
 // Client : Enables interacting with an instance of APIM
@@ -2037,6 +2048,217 @@ func (instance *Client) registerClient(username string, password string) dcrResp
 	json.NewDecoder(response.Body).Decode(&jsonResp)
 
 	return jsonResp
+}
+
+// AddThrottlePolicy : Add new Throttle Policy of different policy types to APIM
+func (instance *Client) AddThrottlePolicy(t *testing.T, policy interface{}, username, password, policyType string, doClean bool) map[string]interface{} {
+	var throttlePolicyResponse map[string]interface{}
+
+	throttlePolicyURL := instance.adminRestURL + "/throttling/policies/" + policyType
+
+	data, err := json.Marshal(policy)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	request := base.CreatePost(throttlePolicyURL, bytes.NewBuffer(data))
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+	base.LogRequest("apim.AddThrottlePolicy()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.AddThrottlePolicy()", response, 201)
+
+	json.NewDecoder(response.Body).Decode(&throttlePolicyResponse)
+	policyId := fmt.Sprintf("%v", throttlePolicyResponse["policyId"])
+	if doClean {
+		t.Cleanup(func() {
+			instance.Login(username, password)
+			instance.DeleteThrottlePolicy(policyId, policyType)
+		})
+	}
+	return throttlePolicyResponse
+}
+
+// DeleteThrottlePolicy : Deletes Throttling Policy from APIM using UUID
+func (instance *Client) DeleteThrottlePolicy(policyID, policyType string) {
+	policiesURL := instance.adminRestURL + "/throttling/policies/" + policyType + "/" + policyID
+
+	request := base.CreateDelete(policiesURL)
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+	base.LogRequest("apim.DeleteThrottlePolicy()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.DeleteThrottlePolicy()", response, 200)
+}
+
+// GetThrottlePolicy : Get Throttle Policy from APIM using UUID
+func (instance *Client) GetThrottlePolicy(policyID, policyType string) map[string]interface{} {
+	var policyResponse map[string]interface{}
+
+	policiesURL := instance.adminRestURL + "/throttling/policies/" + policyType + "/" + policyID
+
+	request := base.CreateGet(policiesURL)
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+	base.LogRequest("apim.GetThrottlePolicy()", request)
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.GetThrottlePolicy()", response, 200)
+	json.NewDecoder(response.Body).Decode(&policyResponse)
+
+	return policyResponse
+}
+
+// DeleteThrottlePolicyByName : Deletes Throttling Policy from APIM using policy name
+func (instance *Client) DeleteThrottlePolicyByName(t *testing.T, policyName, policyType string) {
+	policyID := instance.GetThrottlePolicyID(t, policyName, policyType)
+	instance.DeleteThrottlePolicy(policyID, policyType)
+}
+
+// GetThrottlePolicyID : Get Throttle Policy UUID using policy name from APIM
+func (instance *Client) GetThrottlePolicyID(t *testing.T, policyName, policyType string) string {
+	var policyListResponse utils.ThrottlingPoliciesDetailsList
+	var uuid string
+
+	queryType := ""
+	switch policyType {
+	case ApplicationThrottlePolicyType:
+		queryType = applicationThrottlePolicyQuery
+	case CustomThrottlePolicyType:
+		queryType = customThrottlePolicyQuery
+	case AdvancedThrottlePolicyType:
+		queryType = advancedThrottlePolicyQuery
+	case SubscriptionThrottlePolicyType:
+		queryType = subscriptionThrottlePolicyQuery
+	}
+
+	getPoliciesURL := instance.adminRestURL + "/throttling/policies/search/?query=type:" + queryType
+
+	request := base.CreateGet(getPoliciesURL)
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+	base.LogRequest("apim.GetThrottlePolicyID()", request)
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.GetThrottlePolicyID()", response, 200)
+
+	err := json.NewDecoder(response.Body).Decode(&policyListResponse)
+	if err != nil {
+		t.Fatal(err)
+	}
+	throttlePolicyList := policyListResponse.List
+	for _, policy := range throttlePolicyList {
+		if policy.PolicyName == policyName {
+			uuid = policy.Uuid
+			break
+		}
+	}
+	return uuid
+}
+
+// GetThrottlePolicies : Get Throttle Policies list of all types from APIM
+func (instance *Client) GetThrottlePolicies(t *testing.T) *utils.ThrottlingPoliciesDetailsList {
+	var policyListResponse *utils.ThrottlingPoliciesDetailsList
+
+	getPoliciesURL := instance.adminRestURL + "/throttling/policies/search/?query=type:all"
+	request := base.CreateGet(getPoliciesURL)
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+	base.LogRequest("apim.GetThrottlePolicies()", request)
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.GetThrottlePolicies()", response, 200)
+
+	err := json.NewDecoder(response.Body).Decode(&policyListResponse)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return policyListResponse
+}
+
+// GenerateSampleThrottlePolicyData : Generate sample ThrottlePolicy of a specific throttling policy type
+func (instance *Client) GenerateSampleThrottlePolicyData(policyType string) interface{} {
+	const (
+		policyString      = "Policy"
+		requestCountLimit = "REQUESTCOUNTLIMIT"
+		timeUnit          = "min"
+		unitTime          = 10
+		requestCount      = 5
+	)
+
+	switch policyType {
+	case ApplicationThrottlePolicyType:
+		policy := ApplicationThrottlePolicy{}
+		policy.PolicyName = base.GenerateRandomString() + policyString
+		policy.DisplayName = "This is a Test Application Policy"
+		policy.Description = "This is a Test Application Policy"
+		policy.IsDeployed = false
+		policy.Type = "ApplicationThrottlePolicy"
+		policy.DefaultLimit.Type = requestCountLimit
+		policy.DefaultLimit.RequestCount.TimeUnit = timeUnit
+		policy.DefaultLimit.RequestCount.UnitTime = unitTime
+		policy.DefaultLimit.RequestCount.RequestCount = requestCount
+		return &policy
+	case CustomThrottlePolicyType:
+		policy := CustomThrottlePolicy{}
+		policy.PolicyName = base.GenerateRandomString() + policyString
+		policy.Description = "This is a Test Custom Policy"
+		policy.IsDeployed = false
+		policy.Type = "CustomRule"
+		policy.SiddhiQuery = "FROM RequestStream\\nSELECT userId, ( userId == 'admin@carbon.super' ) AS isEligible , " +
+			"str:concat('admin@carbon.super','') as throttleKey\\nINSERT INTO EligibilityStream; \\n\\nFROM " +
+			"EligibilityStream[isEligible==true]#throttler:timeBatch(1 min) \\nSELECT throttleKey, (count(userId) >= 10) " +
+			"as isThrottled, expiryTimeStamp group by throttleKey \\nINSERT ALL EVENTS into ResultStream;\n"
+		policy.KeyTemplate = "$userId"
+		return &policy
+	case AdvancedThrottlePolicyType:
+		policy := AdvancedThrottlePolicy{}
+		conditionalGroup := AdvancedPolicyConditionalGroup{}
+		condition := AdvancedPolicyCondition{}
+		policy.PolicyName = base.GenerateRandomString() + policyString
+		policy.Description = "This is a Test Advanced Policy"
+		policy.IsDeployed = false
+		policy.Type = "AdvancedThrottlePolicy"
+		policy.DefaultLimit.Type = requestCountLimit
+		policy.DefaultLimit.RequestCount.TimeUnit = timeUnit
+		policy.DefaultLimit.RequestCount.UnitTime = unitTime
+		policy.DefaultLimit.RequestCount.RequestCount = requestCount
+		conditionalGroup.Description = "Sample description about condition group"
+		condition.Type = "HEADERCONDITION"
+		condition.HeaderCondition.HeaderName = "Test"
+		condition.HeaderCondition.HeaderValue = "TestValue"
+		conditionalGroup.Conditions = []AdvancedPolicyCondition{condition}
+		conditionalGroup.Limit.Type = requestCountLimit
+		conditionalGroup.Limit.RequestCount.TimeUnit = timeUnit
+		conditionalGroup.Limit.RequestCount.UnitTime = unitTime
+		conditionalGroup.Limit.RequestCount.RequestCount = requestCount
+		policy.ConditionalGroups = []AdvancedPolicyConditionalGroup{conditionalGroup}
+		return &policy
+	case SubscriptionThrottlePolicyType:
+		policy := SubscriptionThrottlePolicy{}
+		policy.PolicyName = base.GenerateRandomString() + policyString
+		policy.Description = "This is a Test Subscription Policy"
+		policy.IsDeployed = false
+		policy.Type = "SubscriptionThrottlePolicy"
+		policy.DefaultLimit.Type = requestCountLimit
+		policy.DefaultLimit.RequestCount.TimeUnit = timeUnit
+		policy.DefaultLimit.RequestCount.UnitTime = unitTime
+		policy.DefaultLimit.RequestCount.RequestCount = requestCount
+		policy.Permissions.PermissionType = "ALLOW"
+		policy.Permissions.Roles = []string{"admin"}
+		return &policy
+	}
+	return nil
 }
 
 func getDCRURL(host, version string, offset int) string {

@@ -64,6 +64,16 @@ type ApiProductImportExportTestArgs struct {
 	IsLatest             bool
 }
 
+type PolicyImportExportTestArgs struct {
+	CtlUser        Credentials
+	Policy         map[string]interface{}
+	Type           string
+	SrcAPIM        *apim.Client
+	DestAPIM       *apim.Client
+	ImportFilePath string
+	Update         bool
+}
+
 type AppImportExportTestArgs struct {
 	AppOwner          Credentials
 	CtlUser           Credentials
