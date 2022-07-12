@@ -2062,9 +2062,7 @@ func (instance *Client) AddThrottlePolicy(t *testing.T, policy interface{}, user
 	}
 
 	request := base.CreatePost(throttlePolicyURL, bytes.NewBuffer(data))
-
 	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
-
 	base.LogRequest("apim.AddThrottlePolicy()", request)
 
 	response := base.SendHTTPRequest(request)
@@ -2086,13 +2084,10 @@ func (instance *Client) AddThrottlePolicy(t *testing.T, policy interface{}, user
 
 // DeleteThrottlePolicy : Deletes Throttling Policy from APIM using UUID
 func (instance *Client) DeleteThrottlePolicy(policyID, policyType string) {
-
 	policiesURL := instance.adminRestURL + "/throttling/policies/" + policyType + "/" + policyID
 
 	request := base.CreateDelete(policiesURL)
-
 	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
-
 	base.LogRequest("apim.DeleteThrottlePolicy()", request)
 
 	response := base.SendHTTPRequest(request)
@@ -2109,17 +2104,13 @@ func (instance *Client) GetThrottlePolicy(policyID, policyType string) map[strin
 	policiesURL := instance.adminRestURL + "/throttling/policies/" + policyType + "/" + policyID
 
 	request := base.CreateGet(policiesURL)
-
 	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
-
 	base.LogRequest("apim.GetThrottlePolicy()", request)
-
 	response := base.SendHTTPRequest(request)
 
 	defer response.Body.Close()
 
 	base.ValidateAndLogResponse("apim.GetThrottlePolicy()", response, 200)
-
 	json.NewDecoder(response.Body).Decode(&policyResponse)
 
 	return policyResponse
@@ -2127,7 +2118,6 @@ func (instance *Client) GetThrottlePolicy(policyID, policyType string) map[strin
 
 // DeleteThrottlePolicyByName : Deletes Throttling Policy from APIM using policy name
 func (instance *Client) DeleteThrottlePolicyByName(t *testing.T, policyName, policyType string) {
-
 	policyID := instance.GetThrottlePolicyID(t, policyName, policyType)
 	instance.DeleteThrottlePolicy(policyID, policyType)
 }
@@ -2152,11 +2142,8 @@ func (instance *Client) GetThrottlePolicyID(t *testing.T, policyName, policyType
 	getPoliciesURL := instance.adminRestURL + "/throttling/policies/search/?query=type:" + queryType
 
 	request := base.CreateGet(getPoliciesURL)
-
 	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
-
 	base.LogRequest("apim.GetThrottlePolicyID()", request)
-
 	response := base.SendHTTPRequest(request)
 
 	defer response.Body.Close()
@@ -2182,13 +2169,9 @@ func (instance *Client) GetThrottlePolicies(t *testing.T) *utils.ThrottlingPolic
 	var policyListResponse *utils.ThrottlingPoliciesDetailsList
 
 	getPoliciesURL := instance.adminRestURL + "/throttling/policies/search/?query=type:all"
-
 	request := base.CreateGet(getPoliciesURL)
-
 	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
-
 	base.LogRequest("apim.GetThrottlePolicies()", request)
-
 	response := base.SendHTTPRequest(request)
 
 	defer response.Body.Close()
