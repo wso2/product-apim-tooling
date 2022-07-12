@@ -60,7 +60,6 @@ func ValidateThrottlePolicyExportImport(t *testing.T, args *PolicyImportExportTe
 
 	args.ImportFilePath = base.GetExportedPathFromOutput(exportedOutput)
 	assert.True(t, base.IsFileAvailable(t, args.ImportFilePath))
-	//args.SrcAPIM.DeleteThrottlePolicy(fmt.Sprintf("%v", args.Policy[policyIDKey]), policyType)
 
 	// Import Throttling Policy to env 2
 	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
