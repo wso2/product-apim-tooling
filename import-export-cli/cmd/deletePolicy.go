@@ -27,7 +27,7 @@ import (
 const DeletePolicyCmdLiteral = "policy"
 const DeletePolicyCmdShortDesc = "Delete a Policy"
 const DeletePolicyCmdLongDesc = "Delete a Policy in an environment"
-const DeletePolicyCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + DeletePolicyCmdLiteral + ` ` + DeleteAPIPolicyCmdLiteral + ` -n addHeader -e prod`
+const DeletePolicyCmdExamples = utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + DeletePolicyCmdLiteral + ` ` + DeleteAPIPolicyCmdLiteral + ` -n addHeader -e prod`
 
 // DeletePolicyCmd represents the export policy command
 var DeletePolicyCmd = &cobra.Command{

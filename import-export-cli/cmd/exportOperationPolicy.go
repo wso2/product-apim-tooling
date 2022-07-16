@@ -41,13 +41,12 @@ const ExportAPIPolicyCmdLiteral = "api"
 const exportAPIPolicyCmdShortDesc = "Export API Policies"
 const exportAPIPolicyCmdLongDesc = "Export API Policies from an environment"
 
-const exportAPIPolicyCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportAPIPolicyCmdLiteral + ` -n AddHeader -e dev 
- ` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportAPIPolicyCmdLiteral + ` -n AddHeader -e prod --format JSON
+const exportAPIPolicyCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportAPIPolicyCmdLiteral + ` -n AddHeader -e dev
  NOTE: All the 2 flags (--name (-n) and --environment (-e)) are mandatory.`
 
 // ExportAPIPolicyCmd represents the export policy api command
 var ExportAPIPolicyCmd = &cobra.Command{
-	Use: ExportAPIPolicyCmdLiteral + " (--environment " +
+	Use: ExportAPIPolicyCmdLiteral + " (--name <name-of-the-api-policy> --environment " +
 		"<environment-from-which-the-api-policies-should-be-exported>)",
 	Short:   exportAPIPolicyCmdShortDesc,
 	Long:    exportAPIPolicyCmdLongDesc,

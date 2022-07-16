@@ -27,7 +27,7 @@ const GetPoliciesCmdLiteral = "policies"
 const GetPoliciesCmdShortDesc = "Get Policy list"
 const GetPoliciesCmdLongDesc = "Get a list of Policies in an environment"
 const GetPoliciesCmdExamples = utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdLiteral + ` ` + GetThrottlePoliciesCmdLiteral + ` -e production -q type:sub`
-const GetAPIPoliciesCmdExample = utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdLiteral + ` ` + GetAPIPoliciesCmdLiteral + ` -e production -q gateway:choreo`
+const GetAPIPoliciesCmdExample = utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdLiteral + ` ` + GetAPIPoliciesCmdLiteral + ` -e production`
 
 // GetPoliciesCmd  represents the get command for policies
 var GetPoliciesCmd = &cobra.Command{

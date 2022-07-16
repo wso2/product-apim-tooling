@@ -41,7 +41,7 @@ const getAPIPoliciesCmdShortDesc = "Display a list of API Policies in an environ
 
 const getAPIPoliciesCmdLongDesc = `Display a list of API Policies in the environment specified by the flag --environment, -e`
 
-var getAPIPoliciesCmdExamples = utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdExamples + ` ` + GetAPIPoliciesCmdExample + ` -e dev
+var getAPIPoliciesCmdExamples = utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdLiteral + ` ` + GetAPIPoliciesCmdLiteral + ` -e dev
  NOTE: The flag (--environment (-e)) is mandatory`
 
 // getAPIPoliciesCmd represents the get policies rate-limiting command

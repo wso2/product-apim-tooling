@@ -38,7 +38,7 @@ const (
 )
 
 const importAPIPolicyCmdExamples = utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAPIPolicyCmdLiteral + ` -f addHeader_v1 -e dev
- ` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAPIPolicyCmdLiteral + ` -f AddHeader -e production
+ ` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportPolicyCmdLiteral + ImportAPIPolicyCmdLiteral + ` -f AddHeader -e production
  NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory`
 
 var ImportAPIPolicyCmd = &cobra.Command{
