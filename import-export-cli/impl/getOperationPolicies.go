@@ -32,16 +32,16 @@ import (
 
 // TODO: Add Policy Version
 const (
-	operationPolicyUUIDHeader               = "ID"
-	operationPolicyNameHeader               = "NAME"
-	operationPolicyDisplayNameHeader        = "Display NAME"
-	operationPolicyCategoryHeader           = "CATEGORY"
-	operationPolicyApplicableFlowsHeaders   = "APPLICABLE FLOWS"
-	operationPolicySupportedGatewaysHeaders = "SUPPORTED GATEWAYS"
-	defaultOperationPolicyTableFormat       = "table {{.ID}}\t{{.Name}}\t{{.DisplayName}}\t{{.Category}}\t{{.ApplicableFlows}}\t{{.SupportedGateways}}"
+	apiPolicyUUIDHeader               = "ID"
+	apiPolicyNameHeader               = "NAME"
+	apiPolicyDisplayNameHeader        = "Display NAME"
+	apiPolicyCategoryHeader           = "CATEGORY"
+	apiPolicyApplicableFlowsHeaders   = "APPLICABLE FLOWS"
+	apiPolicySupportedGatewaysHeaders = "SUPPORTED GATEWAYS"
+	defaultAPIPolicyTableFormat       = "table {{.ID}}\t{{.Name}}\t{{.DisplayName}}\t{{.Category}}\t{{.ApplicableFlows}}\t{{.SupportedGateways}}"
 )
 
-type operationPolicy struct {
+type apiPolicy struct {
 	id                string
 	name              string
 	displayName       string
@@ -50,44 +50,48 @@ type operationPolicy struct {
 	supportedGateways []string
 }
 
-func newOperationPolicyDefinition(a utils.OperationPolicy) *operationPolicy {
-	return &operationPolicy{a.Id, a.Name, a.DisplayName, a.Category, a.ApplicableFlows, a.SupportedGateways}
+func newAPIPolicyDefinition(a utils.APIPolicy) *apiPolicy {
+	return &apiPolicy{a.Id, a.Name, a.DisplayName, a.Category, a.ApplicableFlows, a.SupportedGateways}
 }
 
-func (a operationPolicy) ID() string {
+func (a apiPolicy) ID() string {
 	return a.id
 }
 
-func (a operationPolicy) Name() string {
+func (a apiPolicy) Name() string {
 	return a.name
 }
 
-func (a operationPolicy) DisplayName() string {
+func (a apiPolicy) DisplayName() string {
 	return a.displayName
 }
 
-func (a operationPolicy) Category() string {
+func (a apiPolicy) Category() string {
 	return a.category
 }
 
-func (a operationPolicy) ApplicableFlows() []string {
+func (a apiPolicy) ApplicableFlows() []string {
 	return a.applicableFlows
 }
 
-func (a operationPolicy) SupportedGateways() []string {
+func (a apiPolicy) SupportedGateways() []string {
 	return a.supportedGateways
 }
 
-func GetOperationPolicyListFromEnv(accessToken, environment string) (*resty.Response, error) {
-	operationPolicyListEndpoint := utils.GetOperationPolicyListEndpointOfEnv(environment, utils.MainConfigFilePath)
-	fmt.Println("Endpoint: ", operationPolicyListEndpoint)
-	return getOperationPolicyList(accessToken, operationPolicyListEndpoint)
+func GetAPIPolicyListFromEnv(accessToken, environment, limit string) (*resty.Response, error) {
+	apiPolicyListEndpoint := utils.GetPublisherEndpointOfEnv(environment, utils.MainConfigFilePath)
+	return getAPIPolicyList(accessToken, apiPolicyListEndpoint, limit)
 }
 
-func getOperationPolicyList(accessToken string, operationPolicyListEndpoint string) (*resty.Response, error) {
-	url := operationPolicyListEndpoint
+func getAPIPolicyList(accessToken, apiPolicyListEndpoint, limit string) (*resty.Response, error) {
+	apiPolicyListEndpoint = utils.AppendSlashToString(apiPolicyListEndpoint)
+	apiPolicyResource := "operation-policies?"
 
-	utils.Logln(utils.LogPrefixInfo+"GetOperationPolicy: URL:", url)
+	query := `limit=` + limit
+	apiPolicyResource += query
+	url := apiPolicyListEndpoint + apiPolicyResource
+
+	utils.Logln(utils.LogPrefixInfo+"GetAPIPolicy: URL:", url)
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 	resp, err := utils.InvokeGETRequest(url, headers)
@@ -95,23 +99,22 @@ func getOperationPolicyList(accessToken string, operationPolicyListEndpoint stri
 	return resp, err
 }
 
-// PrintOperationPolicies prints the policy list in a specific format
-func PrintOperationPolicies(resp *resty.Response, format string) {
-	var operationPolicyList utils.OperationPoliciesList
-	err := json.Unmarshal(resp.Body(), &operationPolicyList)
-	policies := operationPolicyList.List
-	fmt.Println(policies[0])
+// PrintAPIPolicies prints the policy list in a specific format
+func PrintAPIPolicies(resp *resty.Response, format string) {
+	var apiPolicyList utils.APIPoliciesList
+	err := json.Unmarshal(resp.Body(), &apiPolicyList)
+	policies := apiPolicyList.List
 	if err != nil {
 		utils.HandleErrorAndExit("Error unmarshalling response data", err)
 	}
 	if format == "" {
-		format = defaultOperationPolicyTableFormat
+		format = defaultAPIPolicyTableFormat
 		// create policy context with standard output
 		policyContext := formatter.NewContext(os.Stdout, format)
 		// create a new renderer function which iterate collection
 		renderer := func(w io.Writer, t *template.Template) error {
 			for _, policy := range policies {
-				if err := t.Execute(w, newOperationPolicyDefinition(policy)); err != nil {
+				if err := t.Execute(w, newAPIPolicyDefinition(policy)); err != nil {
 					return err
 				}
 				_, _ = w.Write([]byte{'\n'})
@@ -120,19 +123,19 @@ func PrintOperationPolicies(resp *resty.Response, format string) {
 		}
 
 		// headers for table
-		operationPolicyTableHeaders := map[string]string{
-			"ID":                operationPolicyUUIDHeader,
-			"Name":              operationPolicyNameHeader,
-			"DisplayName":       operationPolicyDisplayNameHeader,
-			"Category":          operationPolicyCategoryHeader,
-			"ApplicableFlows":   operationPolicyApplicableFlowsHeaders,
-			"SupportedGateways": operationPolicySupportedGatewaysHeaders,
+		apiPolicyTableHeaders := map[string]string{
+			"ID":                apiPolicyUUIDHeader,
+			"Name":              apiPolicyNameHeader,
+			"DisplayName":       apiPolicyDisplayNameHeader,
+			"Category":          apiPolicyCategoryHeader,
+			"ApplicableFlows":   apiPolicyApplicableFlowsHeaders,
+			"SupportedGateways": apiPolicySupportedGatewaysHeaders,
 		}
 		// execute context
-		if err := policyContext.Write(renderer, operationPolicyTableHeaders); err != nil {
+		if err := policyContext.Write(renderer, apiPolicyTableHeaders); err != nil {
 			fmt.Println("Error executing template:", err.Error())
 		}
 	} else if format == utils.JsonArrayFormatType {
-		utils.ListArtifactsInJsonArrayFormat(policies, utils.ProjectTypePolicy)
+		utils.ListArtifactsInJsonArrayFormat(policies, utils.ProjectTypeAPIPolicy)
 	}
 }

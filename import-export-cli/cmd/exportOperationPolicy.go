@@ -32,74 +32,73 @@ import (
 	"path/filepath"
 )
 
-var exportOperationPolicyName string
-var exportOperationPolicyVersion string
-var runningExportOperationPolicyCommand bool
+var exportAPIPolicyName string
+var exportAPIPolicyVersion string
+var runningExportAPIPolicyCommand bool
 
-// ExportOperationPolicy command related usage info
-const ExportOperationPolicyCmdLiteral = "operation"
-const exportOperationPolicyCmdShortDesc = "Export Operation Policies"
-const exportOperationPolicyCmdLongDesc = "Export Operation Policies from an environment"
+// ExportAPIPolicy command related usage info
+const ExportAPIPolicyCmdLiteral = "api"
+const exportAPIPolicyCmdShortDesc = "Export API Policies"
+const exportAPIPolicyCmdLongDesc = "Export API Policies from an environment"
 
-const exportOperationPolicyCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportOperationPolicyCmdLiteral + ` -n AddHeader -e dev 
- ` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportOperationPolicyCmdLiteral + ` -n AddHeader -e prod --format JSON
+const exportAPIPolicyCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportAPIPolicyCmdLiteral + ` -n AddHeader -e dev 
+ ` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportAPIPolicyCmdLiteral + ` -n AddHeader -e prod --format JSON
  NOTE: All the 2 flags (--name (-n) and --environment (-e)) are mandatory.`
 
-// ExportOperationPolicyCmd represents the export policy operation command
-var ExportOperationPolicyCmd = &cobra.Command{
-	Use: ExportOperationPolicyCmdLiteral + " (--environment " +
-		"<environment-from-which-the-operation-policies-should-be-exported>)",
-	Short:   exportOperationPolicyCmdShortDesc,
-	Long:    exportOperationPolicyCmdLongDesc,
-	Example: exportOperationPolicyCmdExamples,
+// ExportAPIPolicyCmd represents the export policy api command
+var ExportAPIPolicyCmd = &cobra.Command{
+	Use: ExportAPIPolicyCmdLiteral + " (--environment " +
+		"<environment-from-which-the-api-policies-should-be-exported>)",
+	Short:   exportAPIPolicyCmdShortDesc,
+	Long:    exportAPIPolicyCmdLongDesc,
+	Example: exportAPIPolicyCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + ExportOperationPolicyCmdLiteral + " called")
-		var operationPoliciesExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedPoliciesDirName, utils.ExportedOperationPoliciesDirName)
+		utils.Logln(utils.LogPrefixInfo + ExportAPIPolicyCmdLiteral + " called")
+		var apiPoliciesExportDirectory = filepath.Join(utils.ExportDirectory, utils.ExportedPoliciesDirName, utils.ExportedAPIPoliciesDirName)
 
 		cred, err := GetCredentials(CmdExportEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
 
-		exportOperationPolicyVersion = utils.OperationPolicyVersion
-		executeExportOperationPolicyCmd(cred, operationPoliciesExportDirectory, exportOperationPolicyVersion, exportOperationPolicyName)
+		exportAPIPolicyVersion = utils.APIPolicyVersion
+		executeExportAPIPolicyCmd(cred, apiPoliciesExportDirectory, exportAPIPolicyVersion, exportAPIPolicyName)
 	},
 }
 
-func executeExportOperationPolicyCmd(credential credentials.Credential, exportDirectory string, exportOperationPolicyVersion string, exportOperationPolicyName string) {
-	runningExportOperationPolicyCommand = true
+func executeExportAPIPolicyCmd(credential credentials.Credential, exportDirectory string, exportAPIPolicyVersion string, exportAPIPolicyName string) {
+	runningExportAPIPolicyCommand = true
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, CmdExportEnvironment)
 	if preCommandErr == nil {
-		resp, err := impl.ExportOperationPolicyFromEnv(accessToken, CmdExportEnvironment, exportOperationPolicyName, exportOperationPolicyVersion)
+		resp, err := impl.ExportAPIPolicyFromEnv(accessToken, CmdExportEnvironment, exportAPIPolicyName, exportAPIPolicyVersion)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while exporting", err)
 		}
 		// Print info on response
 		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
 		if resp.StatusCode() == http.StatusOK {
-			fmt.Println("Hi")
-			impl.WriteOperationPolicyToFile(exportDirectory, resp, exportOperationPolicyVersion, exportOperationPolicyName, runningExportOperationPolicyCommand)
+			impl.WriteAPIPolicyToFile(exportDirectory, resp, exportAPIPolicyVersion, exportAPIPolicyName, runningExportAPIPolicyCommand)
 		} else if resp.StatusCode() == http.StatusInternalServerError {
 			// 500 Internal Server Error
 			fmt.Println(string(resp.Body()))
 		} else {
 			// neither 200 nor 500
-			fmt.Println("Error exporting Operation Policies:", resp.Status(), "\n", string(resp.Body()))
+			fmt.Println("Error exporting API Policies:", resp.Status(), "\n", string(resp.Body()))
 		}
 	} else {
 		// error exporting Operarion Policy
-		fmt.Println("Error getting OAuth tokens while exporting Operation Policies:" + preCommandErr.Error())
+		fmt.Println("Error getting OAuth tokens while exporting API Policies:" + preCommandErr.Error())
 	}
 }
 
 // init using Cobra
 func init() {
-	ExportPolicyCmd.AddCommand(ExportOperationPolicyCmd)
-	ExportOperationPolicyCmd.Flags().StringVarP(&exportOperationPolicyName, "name", "n",
-		"", "Name of the Operation Policy to be exported")
-	ExportOperationPolicyCmd.Flags().StringVarP(&CmdExportEnvironment, "environment", "e",
-		"", "Environment to which the Operation Policies should be exported")
-	_ = ExportOperationPolicyCmd.MarkFlagRequired("name")
-	_ = ExportOperationPolicyCmd.MarkFlagRequired("environment")
+	ExportPolicyCmd.AddCommand(ExportAPIPolicyCmd)
+	ExportAPIPolicyCmd.Flags().StringVarP(&exportAPIPolicyName, "name", "n",
+		"", "Name of the API Policy to be exported")
+	ExportAPIPolicyCmd.Flags().StringVarP(&CmdExportEnvironment, "environment", "e",
+		"", "Environment to which the API Policies should be exported")
+	_ = ExportAPIPolicyCmd.MarkFlagRequired("name")
+	_ = ExportAPIPolicyCmd.MarkFlagRequired("environment")
 
 }

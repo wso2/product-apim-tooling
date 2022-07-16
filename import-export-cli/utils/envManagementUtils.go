@@ -211,16 +211,16 @@ func GetApiListEndpointOfEnv(env, filePath string) string {
 	}
 }
 
-// Get ExportOperationEndpoint of a given environment
-func GetOperationPolicyListEndpointOfEnv(env, filePath string) string {
+// Get ExportAPIEndpoint of a given environment
+func GetAPIPolicyListEndpointOfEnv(env, filePath string) string {
 	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
 	if !(envEndpoints.PublisherEndpoint == "" || envEndpoints == nil) {
 		envEndpoints.PublisherEndpoint = AppendSlashToString(envEndpoints.PublisherEndpoint)
-		return envEndpoints.PublisherEndpoint + defaultOperationPolicyListEndpointSuffix
+		return envEndpoints.PublisherEndpoint + defaultAPIPolicyListEndpointSuffix
 	} else {
 		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
 		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
-		return apiManagerEndpoint + defaultOperationPolicyListEndpointSuffix
+		return apiManagerEndpoint + defaultAPIPolicyListEndpointSuffix
 	}
 }
 

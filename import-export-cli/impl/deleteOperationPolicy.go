@@ -28,26 +28,23 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-// DeleteAPI
+// DeleteAPIPolicy
 // @param accessToken : Access Token for the resource
 // @param environment : Environment where API should be deleted
-// @param deleteAPIName : Name of the API to delete
-// @param deleteAPIVersion : Version of the API to delete
-// @param deleteAPIProvider : Provider of API
+// @param policyName : Name of the API Policy to delete
+// @param policyVersion : Version of the API Policy to delete
 // @return response Response in the form of *resty.Response
-func DeleteOperationPolicy(accessToken, policyName, policyVersion, environment string) (*resty.Response, error) {
-	fmt.Println("Env: ", environment)
-	deleteEndpoint := utils.GetOperationPolicyListEndpointOfEnv(environment, utils.MainConfigFilePath)
+func DeleteAPIPolicy(accessToken, policyName, policyVersion, environment string) (*resty.Response, error) {
+	deleteEndpoint := utils.GetAPIPolicyListEndpointOfEnv(environment, utils.MainConfigFilePath)
 	deleteEndpoint = utils.AppendSlashToString(deleteEndpoint)
 
-	fmt.Println("Endpoint: ", deleteEndpoint)
+	policyId, err := GetAPIPolicyId(accessToken, environment, policyName, policyVersion)
 
-	policyId, err := GetOperationPolicyId(accessToken, environment, policyName, policyVersion)
 	if err != nil {
-		utils.HandleErrorAndExit("Error while getting Operation Policy Id for deletion ", err)
+		utils.HandleErrorAndExit("Error while getting API Policy Id for deletion ", err)
 	}
 	url := deleteEndpoint + policyId
-	utils.Logln(utils.LogPrefixInfo+"DeleteOperationPolicy: URL:", url)
+	utils.Logln(utils.LogPrefixInfo+"DeleteAPIPolicy: URL:", url)
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 
@@ -62,10 +59,10 @@ func DeleteOperationPolicy(accessToken, policyName, policyVersion, environment s
 	return resp, nil
 }
 
-func PrintDeleteOperationPolicyResponse(resp *resty.Response, err error) {
+func PrintDeleteAPIPolicyResponse(resp *resty.Response, err error) {
 	if err != nil {
-		fmt.Println("Error deleting Operation Policy:", err)
+		fmt.Println("Error deleting API Policy:", err)
 	} else {
-		fmt.Println("Operation Policy deleted successfully!. Status: " + strconv.Itoa(resp.StatusCode()))
+		fmt.Println("API Policy deleted successfully!. Status: " + strconv.Itoa(resp.StatusCode()))
 	}
 }

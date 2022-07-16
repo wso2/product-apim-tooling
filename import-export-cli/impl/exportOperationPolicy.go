@@ -27,19 +27,19 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-// ExportOperationPolicyFromEnv function is used with export policy rate-limiting command
-func ExportOperationPolicyFromEnv(accessToken string, exportEnvironment string, operationPolicyName string, operationPolicyVersion string) (*resty.Response, error) {
-	operationPolicyEndpoint := utils.GetPublisherEndpointOfEnv(exportEnvironment, utils.MainConfigFilePath)
+// ExportAPIPolicyFromEnv function is used with export policy rate-limiting command
+func ExportAPIPolicyFromEnv(accessToken string, exportEnvironment string, apiPolicyName string, apiPolicyVersion string) (*resty.Response, error) {
+	apiPolicyEndpoint := utils.GetPublisherEndpointOfEnv(exportEnvironment, utils.MainConfigFilePath)
 	// var query string
-	operationPolicyEndpoint = utils.AppendSlashToString(operationPolicyEndpoint)
-	// operationPolicyResource := "operation-policies/c86da87e-da70-4977-bed2-57cb089c115f" + "/content"
-	operationPolicyResource := "operation-policies/export?"
+	apiPolicyEndpoint = utils.AppendSlashToString(apiPolicyEndpoint)
+	// apiPolicyResource := "api-policies/c86da87e-da70-4977-bed2-57cb089c115f" + "/content"
+	apiPolicyResource := "operation-policies/export?"
 
-	query := `name=` + operationPolicyName + `&version=` + operationPolicyVersion
+	query := `name=` + apiPolicyName + `&version=` + apiPolicyVersion
 
-	operationPolicyResource += query
-	url := operationPolicyEndpoint + operationPolicyResource
-	utils.Logln(utils.LogPrefixInfo+"ExportOperationPolicy: URL:", url)
+	apiPolicyResource += query
+	url := apiPolicyEndpoint + apiPolicyResource
+	utils.Logln(utils.LogPrefixInfo+"ExportAPIPolicy: URL:", url)
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 	resp, err := utils.InvokeGETRequest(url, headers)
@@ -49,17 +49,15 @@ func ExportOperationPolicyFromEnv(accessToken string, exportEnvironment string, 
 	return resp, nil
 }
 
-// WriteOperationPolicyToFile writes the policy to a specified location
-func WriteOperationPolicyToFile(exportLocationPath string, resp *resty.Response, exportOperationPolicyVersion string, exportOperationPolicyName string,
+// WriteAPIPolicyToFile writes the policy to a specified location
+func WriteAPIPolicyToFile(exportLocationPath string, resp *resty.Response, exportAPIPolicyVersion string, exportAPIPolicyName string,
 	runningExportThrottlePolicyCommand bool) {
 	err := utils.CreateDirIfNotExist(exportLocationPath)
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating dir to store zip archives: "+exportLocationPath, err)
 	}
-	zipFileName := exportOperationPolicyName + "_" + exportOperationPolicyVersion + ".zip"
+	zipFileName := exportAPIPolicyName + "_" + exportAPIPolicyVersion + ".zip"
 	zipFile := filepath.Join(exportLocationPath, zipFileName)
-
-	fmt.Println(zipFile)
 
 	err = ioutil.WriteFile(zipFile, resp.Body(), 0644)
 	if err != nil {
@@ -71,8 +69,8 @@ func WriteOperationPolicyToFile(exportLocationPath string, resp *resty.Response,
 	}
 
 	if runningExportThrottlePolicyCommand {
-		fmt.Println("Successfully exported Operation Policy!")
-		fmt.Println("Find the exported Operation Policies at " +
+		fmt.Println("Successfully exported API Policy!")
+		fmt.Println("Find the exported API Policies at " +
 			utils.AppendSlashToString(exportLocationPath) + zipFileName)
 	}
 }

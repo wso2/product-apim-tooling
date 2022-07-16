@@ -21,6 +21,8 @@ package cmd
 import (
 	"fmt"
 	"net/http"
+	"os"
+	"strconv"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
@@ -29,63 +31,76 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-var getOperationPoliciesCmdEnvironment string
-var getOperationPoliciesCmdFormat string
+var getAPIPoliciesCmdEnvironment string
+var getAPIPoliciesCmdFormat string
+var getAPIPolicyListCmdLimit string
 
-// GetOperationPoliciesCmdLiteral related info
-const GetOperationPoliciesCmdLiteral = "operation"
-const getOperationPoliciesCmdShortDesc = "Display a list of Operation Policies in an environment"
+// GetAPIPoliciesCmdLiteral related info
+const GetAPIPoliciesCmdLiteral = "api"
+const getAPIPoliciesCmdShortDesc = "Display a list of API Policies in an environment"
 
-const getOperationPoliciesCmdLongDesc = `Display a list of Operation Policies in the environment specified by the flag --environment, -e`
+const getAPIPoliciesCmdLongDesc = `Display a list of API Policies in the environment specified by the flag --environment, -e`
 
-var getOperationPoliciesCmdExamples = utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdExamples + ` ` + GetOperationPoliciesCmdExample + ` -e dev
+var getAPIPoliciesCmdExamples = utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdExamples + ` ` + GetAPIPoliciesCmdExample + ` -e dev
  NOTE: The flag (--environment (-e)) is mandatory`
 
-// getOperationPoliciesCmd represents the get policies rate-limiting command
-var getOperationPoliciesCmd = &cobra.Command{
-	Use:     GetOperationPoliciesCmdLiteral,
-	Short:   getOperationPoliciesCmdShortDesc,
-	Long:    getOperationPoliciesCmdLongDesc,
-	Example: getOperationPoliciesCmdExamples,
+// getAPIPoliciesCmd represents the get policies rate-limiting command
+var getAPIPoliciesCmd = &cobra.Command{
+	Use:     GetAPIPoliciesCmdLiteral,
+	Short:   getAPIPoliciesCmdShortDesc,
+	Long:    getAPIPoliciesCmdLongDesc,
+	Example: getAPIPoliciesCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + GetOperationPoliciesCmdLiteral + " called")
-		cred, err := GetCredentials(getOperationPoliciesCmdEnvironment)
+		utils.Logln(utils.LogPrefixInfo + GetAPIPoliciesCmdLiteral + " called")
+		cred, err := GetCredentials(getAPIPoliciesCmdEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
-		executeGetOperationPoliciesCmd(cred)
+
+		if limit, err := utils.ValidateFlagWithIntegerValues(getAPIPolicyListCmdLimit); err != nil || limit == -1 {
+			if limit == -1 {
+				fmt.Println("Limit should be greater than or equal zero")
+				os.Exit(1)
+			} else if err != nil {
+				utils.HandleErrorAndExit("Error Converting Limit value", err)
+			}
+		}
+
+		executeGetAPIPoliciesCmd(cred)
 	},
 }
 
-func executeGetOperationPoliciesCmd(credential credentials.Credential) {
-	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, getOperationPoliciesCmdEnvironment)
+func executeGetAPIPoliciesCmd(credential credentials.Credential) {
+	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, getAPIPoliciesCmdEnvironment)
 	if preCommandErr == nil {
-		resp, err := impl.GetOperationPolicyListFromEnv(accessToken, getOperationPoliciesCmdEnvironment)
+		resp, err := impl.GetAPIPolicyListFromEnv(accessToken, getAPIPoliciesCmdEnvironment, getAPIPolicyListCmdLimit)
 		if err != nil {
-			utils.HandleErrorAndExit("Error while getting operation policies", err)
+			utils.HandleErrorAndExit("Error while getting api policies", err)
 		}
 		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
 
 		if resp.StatusCode() == http.StatusOK {
 			// fmt.Println("Resp: ", resp)
-			impl.PrintOperationPolicies(resp, getOperationPoliciesCmdFormat)
+			impl.PrintAPIPolicies(resp, getAPIPoliciesCmdFormat)
 		} else if resp.StatusCode() == http.StatusInternalServerError {
 			// 500 Internal Server Error
 			fmt.Println(string(resp.Body()))
 		} else {
 			// neither 200 nor 500
-			fmt.Println("Error getting Operation Policies:", resp.Status(), "\n", string(resp.Body()))
+			fmt.Println("Error getting API Policies:", resp.Status(), "\n", string(resp.Body()))
 		}
 	} else {
-		fmt.Println("Error getting OAuth tokens while getting Operation Policies:" + preCommandErr.Error())
+		fmt.Println("Error getting OAuth tokens while getting API Policies:" + preCommandErr.Error())
 	}
 }
 
 func init() {
-	GetPoliciesCmd.AddCommand(getOperationPoliciesCmd)
-	getOperationPoliciesCmd.Flags().StringVarP(&getOperationPoliciesCmdEnvironment, "environment", "e",
+	GetPoliciesCmd.AddCommand(getAPIPoliciesCmd)
+	getAPIPoliciesCmd.Flags().StringVarP(&getAPIPoliciesCmdEnvironment, "environment", "e",
 		"", "Environment to be searched")
-	getOperationPoliciesCmd.Flags().StringVarP(&getOperationPoliciesCmdFormat, "format", "", "", "Pretty-print throttle policies "+
+	getAPIPoliciesCmd.Flags().StringVarP(&getAPIPolicyListCmdLimit, "limit", "l",
+		strconv.Itoa(utils.DefaultPoliciesDisplayLimit), "Maximum number of policies to return")
+	getAPIPoliciesCmd.Flags().StringVarP(&getAPIPoliciesCmdFormat, "format", "", "", "Pretty-print throttle policies "+
 		"using Go Templates. Use \"{{ jsonPretty . }}\" to list all fields")
-	_ = getOperationPoliciesCmd.MarkFlagRequired("environment")
+	_ = getAPIPoliciesCmd.MarkFlagRequired("environment")
 }

@@ -27,62 +27,62 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-var deleteOperationPolicyEnvironment string
-var deleteOperationPolicyName string
-var deleteOperationPolicyVersion string
+var deleteAPIPolicyEnvironment string
+var deleteAPIPolicyName string
+var deleteAPIPolicyVersion string
 
-// DeleteOperationPolicy command related usage info
-const DeleteOperationPolicyCmdLiteral = "operation"
-const DeleteOperationPolicyCmdShortDesc = "Delete Operation Policy"
-const DeleteOperationPolicyCmdLongDesc = "Delete an operation policy from an environment"
+// DeleteAPIPolicy command related usage info
+const DeleteAPIPolicyCmdLiteral = "api"
+const DeleteAPIPolicyCmdShortDesc = "Delete API Policy"
+const DeleteAPIPolicyCmdLongDesc = "Delete an api policy from an environment"
 
-const DeleteOperationPolicyCmdExamplesDefault = utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + DeletePolicyCmdLiteral + ` ` + DeleteOperationPolicyCmdLiteral + ` -n addHeader -e dev
+const DeleteAPIPolicyCmdExamplesDefault = utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + DeletePolicyCmdLiteral + ` ` + DeleteAPIPolicyCmdLiteral + ` -n addHeader -e dev
  NOTE: The 2 flags (--name (-n) and --environment (-e)) are mandatory.`
 
-// DeleteOperationPolicyCmd represents the delete api command
-var DeleteOperationPolicyCmd = &cobra.Command{
-	Use: DeleteOperationPolicyCmdLiteral + " (--name <name-of-the-operation-policy> --environment " +
+// DeleteAPIPolicyCmd represents the delete api command
+var DeleteAPIPolicyCmd = &cobra.Command{
+	Use: DeleteAPIPolicyCmdLiteral + " (--name <name-of-the-api-policy> --environment " +
 		"<environment-from-which-the-policy-should-be-deleted>)",
-	Short:   DeleteOperationPolicyCmdShortDesc,
-	Long:    DeleteOperationPolicyCmdLongDesc,
-	Example: DeleteOperationPolicyCmdExamplesDefault,
+	Short:   DeleteAPIPolicyCmdShortDesc,
+	Long:    DeleteAPIPolicyCmdLongDesc,
+	Example: DeleteAPIPolicyCmdExamplesDefault,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + DeleteOperationPolicyCmdLiteral + " called")
+		utils.Logln(utils.LogPrefixInfo + DeleteAPIPolicyCmdLiteral + " called")
 
-		cred, err := GetCredentials(deleteOperationPolicyEnvironment)
+		cred, err := GetCredentials(deleteAPIPolicyEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
 
-		executeDeleteOperationPolicyCmd(cred)
+		executeDeleteAPIPolicyCmd(cred)
 
 	},
 }
 
-// executeDeleteOperationPolicyCmd executes the delete operation policy command
-func executeDeleteOperationPolicyCmd(credential credentials.Credential) {
-	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, deleteOperationPolicyEnvironment)
+// executeDeleteAPIPolicyCmd executes the delete api policy command
+func executeDeleteAPIPolicyCmd(credential credentials.Credential) {
+	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, deleteAPIPolicyEnvironment)
 	if preCommandErr == nil {
-		deleteOperationPolicyVersion = utils.OperationPolicyVersion
-		resp, err := impl.DeleteOperationPolicy(accessToken, deleteOperationPolicyName, deleteOperationPolicyVersion, deleteOperationPolicyEnvironment)
+		deleteAPIPolicyVersion = utils.APIPolicyVersion
+		resp, err := impl.DeleteAPIPolicy(accessToken, deleteAPIPolicyName, deleteAPIPolicyVersion, deleteAPIPolicyEnvironment)
 		if err != nil {
-			utils.HandleErrorAndExit("Error while deleting Operation Policy ", err)
+			utils.HandleErrorAndExit("Error while deleting API Policy ", err)
 		}
-		impl.PrintDeleteOperationPolicyResponse(resp, err)
+		impl.PrintDeleteAPIPolicyResponse(resp, err)
 	} else {
-		// Error deleting Operation Policy
-		fmt.Println("Error getting OAuth tokens while deleting Operation Policy:" + preCommandErr.Error())
+		// Error deleting API Policy
+		fmt.Println("Error getting OAuth tokens while deleting API Policy:" + preCommandErr.Error())
 	}
 }
 
 // Init using Cobra
 func init() {
-	DeletePolicyCmd.AddCommand(DeleteOperationPolicyCmd)
-	DeleteOperationPolicyCmd.Flags().StringVarP(&deleteOperationPolicyName, "name", "n", "",
-		"Name of the Operation Policy to be deleted")
-	DeleteOperationPolicyCmd.Flags().StringVarP(&deleteOperationPolicyEnvironment, "environment", "e",
-		"", "Environment from which the Operation Policy should be deleted")
+	DeletePolicyCmd.AddCommand(DeleteAPIPolicyCmd)
+	DeleteAPIPolicyCmd.Flags().StringVarP(&deleteAPIPolicyName, "name", "n", "",
+		"Name of the API Policy to be deleted")
+	DeleteAPIPolicyCmd.Flags().StringVarP(&deleteAPIPolicyEnvironment, "environment", "e",
+		"", "Environment from which the API Policy should be deleted")
 
-	_ = DeleteOperationPolicyCmd.MarkFlagRequired("name")
-	_ = DeleteOperationPolicyCmd.MarkFlagRequired("environment")
+	_ = DeleteAPIPolicyCmd.MarkFlagRequired("name")
+	_ = DeleteAPIPolicyCmd.MarkFlagRequired("environment")
 }
