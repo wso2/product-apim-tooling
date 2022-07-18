@@ -379,6 +379,7 @@ func GetExportedPathFromOutput(output string) string {
 	//Check directory path to omit changes due to OS differences
 	if strings.Contains(output, ":\\") {
 		arrayOutput := []rune(output)
+		fmt.Println("Array Output: ", arrayOutput[0])
 		extractedPath := string(arrayOutput[strings.Index(output, ":\\")-1:])
 		return strings.ReplaceAll(strings.ReplaceAll(extractedPath, "\n", ""), " ", "")
 	} else {

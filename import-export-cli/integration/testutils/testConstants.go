@@ -51,6 +51,8 @@ const DevFirstUpdatedSampleCaseDestPathSuffix = DevFirstUpdatedSampleCaseDocName
 const DevFirstUpdatedSampleCaseDocMetaDataPath = DevFirstUpdatedSampleCaseArtifactPath + "/Doc1/document.yaml"
 const DevFirstUpdatedSampleCaseDestMetaDataPathSuffix = DevFirstUpdatedSampleCaseDocName + "/document.yaml"
 const DevFirstSampleCaseArtifactPath = "testdata/TestArtifactDirectory/DevFirstSampleCaseArtifacts"
+const DevFirstSampleCaseOperationPolicyArtifactPath = "testdata/TestArtifactDirectory/DevSampleCaseOperationPolicyArtifacts"
+const DevFirstSampleCaseMalformedOperationPolicyArtifactPath = "testdata/TestArtifactDirectory/DevSampleCaseMalformedOperationPolicyArtifacts"
 const DevFirstSampleCaseDocName = "/Docs/Doc2"
 const DevFirstSampleCaseDocPath = DevFirstSampleCaseArtifactPath + "/Doc2/mockPdf.pdf"
 const DevFirstSampleCaseDestPathSuffix = DevFirstSampleCaseDocName + "/mockPdf.pdf"
@@ -169,6 +171,10 @@ const PoliciesDirectory = "/Policies"
 const DevFirstSampleCaseApiYamlFilePathSuffix = "/api.yaml"
 const DevFirstSampleCasePolicyPath = DevFirstSampleCaseArtifactPath + "/customAddLogMessage_v1.j2"
 const DevFirstSampleCasePolicyDefinitionPath = DevFirstSampleCaseArtifactPath + "/customAddLogMessage_v1.yaml"
+const DevSampleCaseOperationPolicyDefinitionPath = DevFirstSampleCaseOperationPolicyArtifactPath + "/customAddLogMessage_v1.yaml"
+const DevSampleCaseOperationPolicyPath = DevFirstSampleCaseOperationPolicyArtifactPath + "/customAddLogMessage_v1.j2"
+const DevSampleCaseMalformedOperationPolicyDefinitionPath = DevFirstSampleCaseMalformedOperationPolicyArtifactPath + "/customAddLogMessage_v1.yaml"
+const DevSampleCaseMalformedOperationPolicyPath = DevFirstSampleCaseMalformedOperationPolicyArtifactPath + "/customAddLogMessage_v1.j2"
 const DevFirstSampleCaseDestPolicyPathSuffix = PoliciesDirectory + "/customAddLogMessage_v1.j2"
 const DevFirstSampleCaseDestPolicyDefinitionPathSuffix = PoliciesDirectory + "/customAddLogMessage_v1.yaml"
 const DevFirstUpdatedSampleCasePolicyPath = DevFirstUpdatedSampleCaseArtifactPath + "/customAddLogMessage_v1.j2"
@@ -199,3 +205,8 @@ const (
 	TestSampleDynamicDataOperationThrottlingPolicy = "Unlimited"
 	TestSampleDynamicDataPolicyName                = "dynamicAddLogMessage"
 )
+
+const DevFirstDefaultPolicyVersion = "v1"
+
+const TestAPIPolicyOffset = "0"
+const TestAPIPolicyLimit = "5"
