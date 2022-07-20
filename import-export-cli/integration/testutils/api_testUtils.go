@@ -474,7 +474,7 @@ func changeLifeCycleOfAPI(t *testing.T, args *ApiChangeLifeCycleStatusTestArgs) 
 }
 
 func exportApiImportedFromProject(t *testing.T, APIName string, APIVersion string, EnvName string) (string, error) {
-	return base.Execute(t, "export-api", "-n", APIName, "-v", APIVersion, "-e", EnvName)
+	return base.Execute(t, "export-api", "-n", APIName, "-v", APIVersion, "-e", EnvName, "-k")
 }
 
 func ExportAllApisOfATenant(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
