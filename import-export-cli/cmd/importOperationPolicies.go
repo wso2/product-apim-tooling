@@ -37,7 +37,7 @@ const (
 	importAPIPolicyCmdLongDesc  = "Import a API Policy to an environment"
 )
 
-const importAPIPolicyCmdExamples = utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAPIPolicyCmdLiteral + ` -f addHeader_v1 -e dev
+const importAPIPolicyCmdExamples = utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportPolicyCmdLiteral + ` ` + ImportAPIPolicyCmdLiteral + ` -f addHeader_v1.zip -e dev
  ` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportPolicyCmdLiteral + ImportAPIPolicyCmdLiteral + ` -f AddHeader -e production
  NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory`
 

@@ -100,7 +100,7 @@ func init() {
 		"", "Environment to be searched")
 	getAPIPoliciesCmd.Flags().StringVarP(&getAPIPolicyListCmdLimit, "limit", "l",
 		strconv.Itoa(utils.DefaultPoliciesDisplayLimit), "Maximum number of policies to return")
-	getAPIPoliciesCmd.Flags().StringVarP(&getAPIPoliciesCmdFormat, "format", "", "", "Pretty-print throttle policies "+
+	getAPIPoliciesCmd.Flags().StringVarP(&getAPIPoliciesCmdFormat, "format", "", "", "Pretty-print API policies "+
 		"using Go Templates. Use \"{{ jsonPretty . }}\" to list all fields")
 	_ = getAPIPoliciesCmd.MarkFlagRequired("environment")
 }

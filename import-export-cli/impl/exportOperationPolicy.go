@@ -27,12 +27,12 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-// ExportAPIPolicyFromEnv function is used with export policy rate-limiting command
+// ExportAPIPolicyFromEnv function is used with export policy api command
 func ExportAPIPolicyFromEnv(accessToken string, exportEnvironment string, apiPolicyName string, apiPolicyVersion string) (*resty.Response, error) {
 	apiPolicyEndpoint := utils.GetPublisherEndpointOfEnv(exportEnvironment, utils.MainConfigFilePath)
 	// var query string
 	apiPolicyEndpoint = utils.AppendSlashToString(apiPolicyEndpoint)
-	// apiPolicyResource := "api-policies/c86da87e-da70-4977-bed2-57cb089c115f" + "/content"
+
 	apiPolicyResource := "operation-policies/export?"
 
 	query := `name=` + apiPolicyName + `&version=` + apiPolicyVersion
@@ -51,7 +51,7 @@ func ExportAPIPolicyFromEnv(accessToken string, exportEnvironment string, apiPol
 
 // WriteAPIPolicyToFile writes the policy to a specified location
 func WriteAPIPolicyToFile(exportLocationPath string, resp *resty.Response, exportAPIPolicyVersion string, exportAPIPolicyName string,
-	runningExportThrottlePolicyCommand bool) {
+	runningExportAPIPolicyCommand bool) {
 	err := utils.CreateDirIfNotExist(exportLocationPath)
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating dir to store zip archives: "+exportLocationPath, err)
@@ -68,7 +68,7 @@ func WriteAPIPolicyToFile(exportLocationPath string, resp *resty.Response, expor
 		utils.HandleErrorAndExit("Error creating the temporary zip file to store the exported API", err)
 	}
 
-	if runningExportThrottlePolicyCommand {
+	if runningExportAPIPolicyCommand {
 		fmt.Println("Successfully exported API Policy!")
 		fmt.Println("Find the exported API Policies at " +
 			utils.AppendSlashToString(exportLocationPath) + zipFileName)

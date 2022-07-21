@@ -39,7 +39,7 @@ const DeleteAPIPolicyCmdLongDesc = "Delete an api policy from an environment"
 const DeleteAPIPolicyCmdExamplesDefault = utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + DeletePolicyCmdLiteral + ` ` + DeleteAPIPolicyCmdLiteral + ` -n addHeader -e dev
  NOTE: The 2 flags (--name (-n) and --environment (-e)) are mandatory.`
 
-// DeleteAPIPolicyCmd represents the delete api command
+// DeleteAPIPolicyCmd represents the delete api policy command
 var DeleteAPIPolicyCmd = &cobra.Command{
 	Use: DeleteAPIPolicyCmdLiteral + " (--name <name-of-the-api-policy> --environment " +
 		"<environment-from-which-the-policy-should-be-deleted>)",

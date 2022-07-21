@@ -154,7 +154,7 @@ func executeAPIPolicyImportRequest(uri string, importPath string, accessToken st
 	return utils.InvokePOSTRequestWithFile(uri, headers, fileParamName, importPath)
 }
 
-// resolveImportFilePath resolves the archive/directory for import
+// resolveImportFilePath resolves the archive/directory for importing API policy
 // First will resolve in given path, if not found will try to load from exported directory
 func resolvePolicyImportFilePath(file, defaultExportDirectory string) (string, error) {
 	// check current path
@@ -207,10 +207,9 @@ func replaceEnvVariablesInPolicies(policyFilePath string) error {
 
 // GetAPIPolicyId Get the ID of an API Policy if available
 // @param accessToken : Token to call the Publisher Rest API
-// @param environment : Environment where API needs to be located
-// @param apiName : Name of the API
-// @param apiVersion : Version of the API
-// @param apiProvider : Provider of API
+// @param environment : Environment where API policy needs to be located
+// @param policyName : Name of the API policy
+// @param policyVersion : Version of the API policy
 // @return apiId, error
 func GetAPIPolicyId(accessToken, environment, policyName, policyVersion string) (string, error) {
 	// Unified Search endpoint from the config file to search APIs
@@ -223,7 +222,7 @@ func GetAPIPolicyId(accessToken, environment, policyName, policyVersion string) 
 	queryParams := `name=` + policyName + `&version=` + policyVersion
 
 	apiPolicyEndpoint = utils.AppendSlashToString(apiPolicyEndpoint)
-	// apiPolicyResource := "operation-policies/c86da87e-da70-4977-bed2-57cb089c115f" + "/content"
+
 	apiPolicyResource := "operation-policies?" + queryParams
 
 	url := apiPolicyEndpoint + apiPolicyResource

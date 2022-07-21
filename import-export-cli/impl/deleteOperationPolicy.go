@@ -30,9 +30,9 @@ import (
 
 // DeleteAPIPolicy
 // @param accessToken : Access Token for the resource
-// @param environment : Environment where API should be deleted
 // @param policyName : Name of the API Policy to delete
 // @param policyVersion : Version of the API Policy to delete
+// @param environment : Environment where API should be deleted
 // @return response Response in the form of *resty.Response
 func DeleteAPIPolicy(accessToken, policyName, policyVersion, environment string) (*resty.Response, error) {
 	deleteEndpoint := utils.GetAPIPolicyListEndpointOfEnv(environment, utils.MainConfigFilePath)
