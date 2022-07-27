@@ -42,8 +42,10 @@ const (
 )
 
 const (
-	DefaultPolicyListLimit  = "-1"
-	DefaultPolicyListOffset = "-1"
+	DefaultPolicyListSize       = "-1"
+	DefaultPolicyListOffsetSize = "-1"
+	DefaultPolicyListLimit      = "25"
+	DefaultPolicyListOffset     = "0"
 )
 
 // ValidateAPIPolicyExportImport : Validates Exporting API Policy from source env and Importing to destination env
@@ -258,7 +260,7 @@ func ValidateAPIPoliciesList(t *testing.T, jsonArray bool, args *PolicyImportExp
 
 	args.SrcAPIM.Login(args.CtlUser.Username, args.CtlUser.Password)
 
-	apiPolicyList := args.SrcAPIM.GetAPIPolicies(t, DefaultPolicyListOffset, DefaultPolicyListLimit)
+	apiPolicyList := args.SrcAPIM.GetAPIPolicies(t, DefaultPolicyListOffsetSize, DefaultPolicyListSize)
 
 	validateListAPIPoliciesEqual(t, output, apiPolicyList)
 }
@@ -294,6 +296,67 @@ func ValidateAPIPoliciesListWithLimit(t *testing.T, args *PolicyImportExportTest
 	}
 
 	validateListAPIPoliciesEqualWithLimit(t, policySpecDataList, apiPolicyList, limit)
+}
+
+// Validates whether the api policy list is complete with no limit flag
+func ValidateAPIPoliciesListWithDefaultLimit(t *testing.T, args *PolicyImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	base.WaitForIndexing()
+
+	output, _ := listAPIPoliciesWithNoLimit(t, args)
+
+	var policySpecDataList []apim.PolicySpecData
+
+	err := json.Unmarshal([]byte(output), &policySpecDataList)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	args.SrcAPIM.Login(args.CtlUser.Username, args.CtlUser.Password)
+
+	apiPolicyList := args.SrcAPIM.GetAPIPolicies(t, DefaultPolicyListOffset, DefaultPolicyListLimit)
+
+	limit, err := strconv.Atoi(DefaultPolicyListLimit)
+	if err != nil {
+		t.Error(err)
+	}
+
+	validateListAPIPoliciesEqualWithLimit(t, policySpecDataList, apiPolicyList, limit)
+}
+
+// Validates whether the api policy list is complete
+func ValidateAPIPoliciesListWithAllFlag(t *testing.T, args *PolicyImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	base.WaitForIndexing()
+
+	output, _ := listAPIPoliciesWithAllFlag(t, args)
+
+	var policySpecDataList []apim.PolicySpecData
+
+	err := json.Unmarshal([]byte(output), &policySpecDataList)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	args.SrcAPIM.Login(args.CtlUser.Username, args.CtlUser.Password)
+
+	apiPolicyResponse := args.SrcAPIM.GetAPIPolicies(t, TestAPIPolicyOffset, TestAPIPolicyLimit)
+
+	validateListAPIPoliciesEqualWithAllFlag(t, policySpecDataList, apiPolicyResponse)
 }
 
 // Validates whether the api policy deletion is complete
@@ -349,6 +412,26 @@ func listAPIPoliciesWithLimit(t *testing.T, args *PolicyImportExportTestArgs) (s
 	return output, err
 }
 
+// get the API policy list apictl output
+func listAPIPoliciesWithNoLimit(t *testing.T, args *PolicyImportExportTestArgs) (string, error) {
+	var output string
+	var err error
+
+	output, err = base.Execute(t, "get", "policies", "api", "-e", args.SrcAPIM.EnvName, "--format", "jsonArray", "-k", "--verbose")
+
+	return output, err
+}
+
+// get the API policy list apictl output
+func listAPIPoliciesWithAllFlag(t *testing.T, args *PolicyImportExportTestArgs) (string, error) {
+	var output string
+	var err error
+
+	output, err = base.Execute(t, "get", "policies", "api", "-e", args.SrcAPIM.EnvName, "--all", "--format", "jsonArray", "-k", "--verbose")
+
+	return output, err
+}
+
 // Checks whether apictl output contains all the available api policy UUIDs
 func validateListAPIPoliciesEqual(t *testing.T, apiPoliciesListOutput string, apiPoliciesList *apim.APIPoliciesList) {
 	unmatchedCount := apiPoliciesList.Count
@@ -366,6 +449,16 @@ func validateListAPIPoliciesEqual(t *testing.T, apiPoliciesListOutput string, ap
 // Checks whether apictl output contains all the available api policy UUIDs
 func validateListAPIPoliciesEqualWithLimit(t *testing.T, apiPoliciesListOutput []apim.PolicySpecData, apiPoliciesList *apim.APIPoliciesList, limit int) {
 	assert.Equal(t, len(apiPoliciesListOutput), limit, "API Policy list output size is not equivalent with Limit")
+	assert.Equal(t, apiPoliciesList.Count, len(apiPoliciesListOutput), "API policies list sizes are not equal")
+
+	for i, policy := range apiPoliciesList.List {
+		// fmt.Println("Policy ID It: ", apiPoliciesListOutput[i].Id)
+		assert.Equal(t, apiPoliciesListOutput[i].Id, policy.Id, "API Policies are not equal")
+	}
+}
+
+// Checks whether apictl output has all policies
+func validateListAPIPoliciesEqualWithAllFlag(t *testing.T, apiPoliciesListOutput []apim.PolicySpecData, apiPoliciesList *apim.APIPoliciesList) {
 	assert.Equal(t, apiPoliciesList.Count, len(apiPoliciesListOutput), "API policies list sizes are not equal")
 
 	for i, policy := range apiPoliciesList.List {

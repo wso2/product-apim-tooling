@@ -89,7 +89,7 @@ func TestGetAPIPoliciesListWithJsonArrayFormat(t *testing.T) {
 	}
 }
 
-// Get API Policy List APICTL output in JsonArray format and check whether all policies are included
+// Get API Policy List APICTL output in JsonArray format and check whether all policies are included under limit
 func TestGetAPIPoliciesListWithLimit(t *testing.T) {
 
 	for _, user := range testCaseUsers {
@@ -102,6 +102,40 @@ func TestGetAPIPoliciesListWithLimit(t *testing.T) {
 				SrcAPIM: dev,
 			}
 			testutils.ValidateAPIPoliciesListWithLimit(t, args)
+		})
+	}
+}
+
+// Get API Policy List APICTL output in JsonArray format and check whether all policies are included
+func TestGetAPIPoliciesListWithAllFlag(t *testing.T) {
+
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			dev := GetDevClient()
+
+			args := &testutils.PolicyImportExportTestArgs{
+				CtlUser: testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				SrcAPIM: dev,
+			}
+			testutils.ValidateAPIPoliciesListWithAllFlag(t, args)
+		})
+	}
+}
+
+// Get API Policy List APICTL output in JsonArray format and check whether all policies are included with default limit
+func TestGetAPIPoliciesListWithDefaultLimit(t *testing.T) {
+
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			dev := GetDevClient()
+
+			args := &testutils.PolicyImportExportTestArgs{
+				CtlUser: testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				SrcAPIM: dev,
+			}
+			testutils.ValidateAPIPoliciesListWithDefaultLimit(t, args)
 		})
 	}
 }
