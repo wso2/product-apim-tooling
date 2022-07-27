@@ -57,7 +57,7 @@ var ImportAPIPolicyCmd = &cobra.Command{
 		if err != nil {
 			utils.HandleErrorAndExit("Error while getting an access token for importing API Policy", err)
 		}
-		err = impl.ImportAPIPolicyToEnv(accessOAuthToken, importEnvironment, importAPIPolicyFile, importAPIPolicyUpdate)
+		err = impl.ImportAPIPolicyToEnv(accessOAuthToken, importEnvironment, importAPIPolicyFile)
 		if err != nil {
 			utils.HandleErrorAndExit("Error importing api Policy", err)
 		}

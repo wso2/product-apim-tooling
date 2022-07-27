@@ -32,7 +32,7 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-func ImportAPIPolicyToEnv(accessOAuthToken, importEnvironment, importPath string, importAPIPolicyUpdate bool) error {
+func ImportAPIPolicyToEnv(accessOAuthToken, importEnvironment, importPath string) error {
 	publisherEndpoint := utils.GetPublisherEndpointOfEnv(importEnvironment, utils.MainConfigFilePath)
 	if _, err := os.Stat(importPath); err != nil {
 		if !os.IsNotExist(err) {
@@ -41,11 +41,11 @@ func ImportAPIPolicyToEnv(accessOAuthToken, importEnvironment, importPath string
 	}
 	publisherEndpoint = utils.AppendSlashToString(publisherEndpoint)
 	uri := publisherEndpoint + "operation-policies/import"
-	err := importAPIPolicy(uri, importPath, accessOAuthToken, true, importAPIPolicyUpdate)
+	err := importAPIPolicy(uri, importPath, accessOAuthToken, true)
 	return err
 }
 
-func importAPIPolicy(endpoint string, importPath string, accessToken string, isOauth bool, APIPolicyUpdate bool) error {
+func importAPIPolicy(endpoint string, importPath string, accessToken string, isOauth bool) error {
 	exportDirectory := filepath.Join(utils.ExportDirectory, utils.ExportedPoliciesDirName+"/"+utils.ExportedAPIPoliciesDirName)
 
 	resolvedPolicyFilePath, err := resolvePolicyImportFilePath(importPath, exportDirectory)
@@ -128,10 +128,6 @@ func importAPIPolicy(endpoint string, importPath string, accessToken string, isO
 		fmt.Println("Successfully Imported API Policy.")
 		return nil
 	} else {
-		// We have an HTTP error
-		if resp.StatusCode() == http.StatusConflict && APIPolicyUpdate {
-			fmt.Println("Cannot Update")
-		}
 		fmt.Println("Error importing API Policy.")
 		fmt.Println("Status: " + resp.Status())
 		fmt.Println("Response:", resp.IsSuccess())
