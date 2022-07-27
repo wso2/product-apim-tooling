@@ -354,7 +354,7 @@ func ValidateAPIPoliciesListWithAllFlag(t *testing.T, args *PolicyImportExportTe
 
 	args.SrcAPIM.Login(args.CtlUser.Username, args.CtlUser.Password)
 
-	apiPolicyResponse := args.SrcAPIM.GetAPIPolicies(t, TestAPIPolicyOffset, TestAPIPolicyLimit)
+	apiPolicyResponse := args.SrcAPIM.GetAPIPolicies(t, DefaultPolicyListOffsetSize, DefaultPolicyListSize)
 
 	validateListAPIPoliciesEqualWithAllFlag(t, policySpecDataList, apiPolicyResponse)
 }
@@ -448,7 +448,7 @@ func validateListAPIPoliciesEqual(t *testing.T, apiPoliciesListOutput string, ap
 
 // Checks whether apictl output contains all the available api policy UUIDs
 func validateListAPIPoliciesEqualWithLimit(t *testing.T, apiPoliciesListOutput []apim.PolicySpecData, apiPoliciesList *apim.APIPoliciesList, limit int) {
-	assert.Equal(t, len(apiPoliciesListOutput), limit, "API Policy list output size is not equivalent with Limit")
+	assert.LessOrEqual(t, len(apiPoliciesListOutput), limit, "API Policy list output size is not less than or equivalent with Limit")
 	assert.Equal(t, apiPoliciesList.Count, len(apiPoliciesListOutput), "API policies list sizes are not equal")
 
 	for i, policy := range apiPoliciesList.List {
