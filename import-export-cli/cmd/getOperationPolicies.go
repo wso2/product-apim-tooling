@@ -34,6 +34,7 @@ import (
 var getAPIPoliciesCmdEnvironment string
 var getAPIPoliciesCmdFormat string
 var getAPIPolicyListCmdLimit string
+var getAllAPIPoliciesAvailable bool
 
 // GetAPIPoliciesCmdLiteral related info
 const GetAPIPoliciesCmdLiteral = "api"
@@ -44,7 +45,7 @@ const getAPIPoliciesCmdLongDesc = `Display a list of API Policies in the environ
 var getAPIPoliciesCmdExamples = utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdLiteral + ` ` + GetAPIPoliciesCmdLiteral + ` -e dev
  NOTE: The flag (--environment (-e)) is mandatory`
 
-// getAPIPoliciesCmd represents the get policies rate-limiting command
+// getAPIPoliciesCmd represents the get policies api command
 var getAPIPoliciesCmd = &cobra.Command{
 	Use:     GetAPIPoliciesCmdLiteral,
 	Short:   getAPIPoliciesCmdShortDesc,
@@ -57,12 +58,16 @@ var getAPIPoliciesCmd = &cobra.Command{
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
 
-		if limit, err := utils.ValidateFlagWithIntegerValues(getAPIPolicyListCmdLimit); err != nil || limit == -1 {
-			if limit == -1 {
-				fmt.Println("Limit should be greater than or equal zero")
-				os.Exit(1)
-			} else if err != nil {
-				utils.HandleErrorAndExit("Error Converting Limit value", err)
+		if getAllAPIPoliciesAvailable {
+			getAPIPolicyListCmdLimit = ""
+		} else {
+			if limit, err := utils.ValidateFlagWithIntegerValues(getAPIPolicyListCmdLimit); err != nil || limit == -1 {
+				if limit == -1 {
+					fmt.Println("Limit should be greater than or equal zero")
+					os.Exit(1)
+				} else if err != nil {
+					utils.HandleErrorAndExit("Error Converting Limit value", err)
+				}
 			}
 		}
 
@@ -72,7 +77,9 @@ var getAPIPoliciesCmd = &cobra.Command{
 
 func executeGetAPIPoliciesCmd(credential credentials.Credential) {
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, getAPIPoliciesCmdEnvironment)
+
 	if preCommandErr == nil {
+
 		resp, err := impl.GetAPIPolicyListFromEnv(accessToken, getAPIPoliciesCmdEnvironment, getAPIPolicyListCmdLimit)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while getting api policies", err)
@@ -98,9 +105,11 @@ func init() {
 	GetPoliciesCmd.AddCommand(getAPIPoliciesCmd)
 	getAPIPoliciesCmd.Flags().StringVarP(&getAPIPoliciesCmdEnvironment, "environment", "e",
 		"", "Environment to be searched")
-	getAPIPoliciesCmd.Flags().StringVarP(&getAPIPolicyListCmdLimit, "limit", "l",
-		strconv.Itoa(utils.DefaultPoliciesDisplayLimit), "Maximum number of policies to return")
 	getAPIPoliciesCmd.Flags().StringVarP(&getAPIPoliciesCmdFormat, "format", "", "", "Pretty-print API policies "+
 		"using Go Templates. Use \"{{ jsonPretty . }}\" to list all fields")
+	getAPIPoliciesCmd.Flags().StringVarP(&getAPIPolicyListCmdLimit, "limit", "l",
+		strconv.Itoa(utils.DefaultPoliciesDisplayLimit), "Maximum number of policies to return")
+	getAPIPoliciesCmd.Flags().BoolVarP(&getAllAPIPoliciesAvailable, "all", "", false, "Get all api polcies")
 	_ = getAPIPoliciesCmd.MarkFlagRequired("environment")
+	getAPIPoliciesCmd.MarkFlagsMutuallyExclusive("limit", "all")
 }

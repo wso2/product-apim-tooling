@@ -85,10 +85,13 @@ func GetAPIPolicyListFromEnv(accessToken, environment, limit string) (*resty.Res
 
 func getAPIPolicyList(accessToken, apiPolicyListEndpoint, limit string) (*resty.Response, error) {
 	apiPolicyListEndpoint = utils.AppendSlashToString(apiPolicyListEndpoint)
-	apiPolicyResource := "operation-policies?"
+	apiPolicyResource := "operation-policies"
 
-	query := `limit=` + limit
-	apiPolicyResource += query
+	if limit != "" {
+		query := `?limit=` + limit
+		apiPolicyResource += query
+	}
+
 	url := apiPolicyListEndpoint + apiPolicyResource
 
 	utils.Logln(utils.LogPrefixInfo+"GetAPIPolicy: URL:", url)
@@ -104,6 +107,7 @@ func PrintAPIPolicies(resp *resty.Response, format string) {
 	var apiPolicyList utils.APIPoliciesList
 	err := json.Unmarshal(resp.Body(), &apiPolicyList)
 	policies := apiPolicyList.List
+
 	if err != nil {
 		utils.HandleErrorAndExit("Error unmarshalling response data", err)
 	}
