@@ -298,3 +298,7 @@ const ZipFileSuffix = ".zip"
 const JsonArrayFormatType = "jsonArray"
 
 const DefaultAPIPolicyVersion = "v1"
+const ThrottlingPolicyTypeSub = "subscription"
+const ThrottlingPolicyTypeApp = "application"
+const ThrottlingPolicyTypeAdv = "advanced"
+const ThrottlingPolicyTypeCus = "custom"
