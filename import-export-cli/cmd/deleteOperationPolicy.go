@@ -64,11 +64,11 @@ func executeDeleteAPIPolicyCmd(credential credentials.Credential) {
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, deleteAPIPolicyEnvironment)
 	if preCommandErr == nil {
 		deleteAPIPolicyVersion = utils.APIPolicyVersion
-		resp, err := impl.DeleteAPIPolicy(accessToken, deleteAPIPolicyName, deleteAPIPolicyVersion, deleteAPIPolicyEnvironment)
+		_, err := impl.DeleteAPIPolicy(accessToken, deleteAPIPolicyName, deleteAPIPolicyVersion, deleteAPIPolicyEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while deleting API Policy ", err)
 		}
-		impl.PrintDeleteAPIPolicyResponse(resp, err)
+		impl.PrintDeleteAPIPolicyResponse(deleteAPIPolicyName, err)
 	} else {
 		// Error deleting API Policy
 		fmt.Println("Error getting OAuth tokens while deleting API Policy:" + preCommandErr.Error())

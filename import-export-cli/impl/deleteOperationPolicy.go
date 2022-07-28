@@ -59,10 +59,10 @@ func DeleteAPIPolicy(accessToken, policyName, policyVersion, environment string)
 	return resp, nil
 }
 
-func PrintDeleteAPIPolicyResponse(resp *resty.Response, err error) {
+func PrintDeleteAPIPolicyResponse(policyName string, err error) {
 	if err != nil {
 		fmt.Println("Error deleting API Policy:", err)
 	} else {
-		fmt.Println("API Policy deleted successfully!. Status: " + strconv.Itoa(resp.StatusCode()))
+		fmt.Println(policyName + " Common API Policy deleted successfully!")
 	}
 }
