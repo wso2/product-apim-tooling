@@ -498,7 +498,7 @@ func TestNonExistingThrottlingPolicyDelete(t *testing.T) {
 				Update:   false,
 			}
 
-			testutils.ValidateThrottlingPolicyDelete(t, args, apim.AdvancedThrottlePolicyType)
+			testutils.ValidateNonExistingThrottlingPolicyDelete(t, args, apim.AdvancedThrottlePolicyType)
 		})
 	}
 }

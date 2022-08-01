@@ -116,7 +116,11 @@ func ValidateNonExistingThrottlingPolicyDelete(t *testing.T, args *PolicyImportE
 
 	_, err := deleteThrottlingPolicy(t, policyName, policyType, args)
 
+	failureReason := "Requested Policy with name" + policyName + "and type" + policyType + "not found"
+
 	assert.Contains(t, err, "Deletion Failed")
+
+	assert.Contains(t, err, failureReason)
 
 }
 
