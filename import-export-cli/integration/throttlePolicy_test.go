@@ -19,9 +19,10 @@
 package integration
 
 import (
+	"testing"
+
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
-	"testing"
 )
 
 const (
@@ -452,6 +453,52 @@ func TestExportImportThrottlePolicyWithoutTypeFlag(t *testing.T) {
 				adminUsername = adminUsername + "@" + TENANT1
 			}
 			testutils.ValidateThrottlePolicyExportImport(t, args, adminUsername, adminPassword, apim.AdvancedThrottlePolicyType)
+		})
+	}
+}
+
+// Delete Throttling Policy by comparing the status code.
+func TestThrottlingPoliciesDelete(t *testing.T) {
+
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			dev := GetDevClient()
+			prod := GetProdClient()
+
+			throttlePolicy := testutils.AddNewThrottlePolicy(t, dev, user.Admin.Username, user.Admin.Password, apim.AdvancedThrottlePolicyType)
+			args := &testutils.PolicyImportExportTestArgs{
+				CtlUser:  testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Policy:   throttlePolicy,
+				SrcAPIM:  dev,
+				DestAPIM: prod,
+				Update:   false,
+			}
+
+			testutils.ValidateThrottlingPolicyDelete(t, args, apim.AdvancedThrottlePolicyType)
+		})
+	}
+}
+
+// Delete Non Existing Throttling Policy by comparing the status code.
+func TestNonExistingThrottlingPolicyDelete(t *testing.T) {
+
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			dev := GetDevClient()
+			prod := GetProdClient()
+
+			throttlePolicy := testutils.AddNewThrottlePolicy(t, dev, user.Admin.Username, user.Admin.Password, apim.AdvancedThrottlePolicyType)
+			args := &testutils.PolicyImportExportTestArgs{
+				CtlUser:  testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Policy:   throttlePolicy,
+				SrcAPIM:  dev,
+				DestAPIM: prod,
+				Update:   false,
+			}
+
+			testutils.ValidateThrottlingPolicyDelete(t, args, apim.AdvancedThrottlePolicyType)
 		})
 	}
 }

@@ -21,15 +21,16 @@ package testutils
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"strings"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"gopkg.in/yaml.v2"
-	"io/ioutil"
-	"os"
-	"strings"
-	"testing"
 )
 
 const (
@@ -73,6 +74,55 @@ func ValidateThrottlePolicyExportImport(t *testing.T, args *PolicyImportExportTe
 	importedPolicy, _ := getThrottlingPolicyByName(t, args, adminUsername, adminPassword, policyName, policyType)
 	// Validate env 1 and env 2 policy is equal
 	validatePoliciesEquality(t, true, args, importedPolicy)
+}
+
+// Validates whether the throttling policy deletion is complete
+func ValidateThrottlingPolicyDelete(t *testing.T, args *PolicyImportExportTestArgs, policyType string) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	base.WaitForIndexing()
+
+	policyName := fmt.Sprintf("%v", args.Policy[policyNameKey])
+
+	policyId := fmt.Sprintf("%v", args.Policy[policyIDKey])
+
+	_, err := deleteThrottlingPolicy(t, policyName, policyType, args)
+
+	assert.Nil(t, err, "Error while deleting the API Policy")
+
+	args.SrcAPIM.Login(args.CtlUser.Username, args.CtlUser.Password)
+
+	args.SrcAPIM.DeleteThrottlePolicy(policyId, policyType)
+
+}
+
+// Validates whether the non exiting throttling policy deletion from the status code
+func ValidateNonExistingThrottlingPolicyDelete(t *testing.T, args *PolicyImportExportTestArgs, policyType string) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	base.WaitForIndexing()
+
+	policyName := fmt.Sprintf("%v", args.Policy[policyNameKey])
+
+	_, err := deleteThrottlingPolicy(t, policyName, policyType, args)
+
+	assert.Contains(t, err, "Deletion Failed")
+
+}
+
+func deleteThrottlingPolicy(t *testing.T, name string, policyType string, args *PolicyImportExportTestArgs) (string, error) {
+	output, err := base.Execute(t, "delete", "policy", "rate-limiting", "-e", args.SrcAPIM.EnvName, "-n", name, "-t", policyType, "-k", "--verbose")
+	return output, err
 }
 
 // ValidateThrottlePolicyImportUpdate : Validates importing existing Throttling Policy
