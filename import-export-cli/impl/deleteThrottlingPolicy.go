@@ -49,8 +49,8 @@ func DeleteThrottlingPolicy(accessToken, policyName, policyType, environment str
 	policyId, err := getThrottlingPolicyId(accessToken, environment, url, policyType, policyName)
 
 	if policyId == "" && err == nil {
-		errMsg := "Requested Policy with name=" + policyName + " and type=" + policyType + " no found."
-		utils.HandleErrorAndExit("Deletion Failed ! ", errors.New(errMsg))
+		errMsg := "Requested Policy with name=" + policyName + " and type=" + policyType + " not found."
+		utils.HandleErrorAndExit("Deletion Failed! ", errors.New(errMsg))
 	}
 
 	if err != nil {
