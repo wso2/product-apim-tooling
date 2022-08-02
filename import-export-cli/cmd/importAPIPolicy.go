@@ -32,7 +32,7 @@ var (
 const (
 	// ImportAPIPolicyCmdLiteral command related usage info
 	ImportAPIPolicyCmdLiteral   = "api"
-	importAPIPolicyCmdShortDesc = "Import API Policy"
+	importAPIPolicyCmdShortDesc = "Import an API Policy"
 	importAPIPolicyCmdLongDesc  = "Import an API Policy to an environment"
 )
 
@@ -58,7 +58,7 @@ var ImportAPIPolicyCmd = &cobra.Command{
 		}
 		err = impl.ImportAPIPolicyToEnv(accessOAuthToken, importEnvironment, importAPIPolicyFile)
 		if err != nil {
-			utils.HandleErrorAndExit("Error importing api Policy", err)
+			utils.HandleErrorAndExit("Error importing the API Policy", err)
 		}
 	},
 }

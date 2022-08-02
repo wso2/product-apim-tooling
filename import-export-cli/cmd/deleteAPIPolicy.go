@@ -33,7 +33,7 @@ var deleteAPIPolicyVersion string
 
 // DeleteAPIPolicy command related usage info
 const DeleteAPIPolicyCmdLiteral = "api"
-const DeleteAPIPolicyCmdShortDesc = "Delete API Policy"
+const DeleteAPIPolicyCmdShortDesc = "Delete an API Policy"
 const DeleteAPIPolicyCmdLongDesc = "Delete an API Policy from an environment"
 
 const DeleteAPIPolicyCmdExamplesDefault = utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + DeletePolicyCmdLiteral + ` ` + DeleteAPIPolicyCmdLiteral + ` -n addHeader -e dev

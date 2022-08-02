@@ -37,8 +37,8 @@ var exportAPIPolicyVersion string
 
 // ExportAPIPolicy command related usage info
 const ExportAPIPolicyCmdLiteral = "api"
-const exportAPIPolicyCmdShortDesc = "Export API Policy"
-const exportAPIPolicyCmdLongDesc = "Export API Policy from an environment"
+const exportAPIPolicyCmdShortDesc = "Export an API Policy"
+const exportAPIPolicyCmdLongDesc = "Export an API Policy from an environment"
 
 const exportAPIPolicyCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportAPIPolicyCmdLiteral + ` -n addHeader -e dev
  NOTE: All the 2 flags (--name (-n) and --environment (-e)) are mandatory.`
@@ -77,11 +77,11 @@ func executeExportAPIPolicyCmd(credential credentials.Credential, exportDirector
 		if resp.StatusCode() == http.StatusOK {
 			impl.WriteAPIPolicyToFile(exportDirectory, resp, exportAPIPolicyVersion, exportAPIPolicyName)
 		} else {
-			fmt.Println("Error exporting API Policy:", resp.Status(), "\n", string(resp.Body()))
+			fmt.Println("Error exporting the API Policy:", resp.Status(), "\n", string(resp.Body()))
 		}
 	} else {
 		// error exporting Operarion Policy
-		fmt.Println("Error getting OAuth tokens while exporting API Policy:" + preCommandErr.Error())
+		fmt.Println("Error getting OAuth tokens while exporting the API Policy:" + preCommandErr.Error())
 	}
 }
 

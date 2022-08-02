@@ -44,5 +44,4 @@ var DeletePolicyCmd = &cobra.Command{
 // init using Cobra
 func init() {
 	DeleteCmd.AddCommand(DeletePolicyCmd)
-
 }

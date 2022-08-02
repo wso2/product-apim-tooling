@@ -37,9 +37,9 @@ var getAllAPIPoliciesAvailable bool
 
 // GetAPIPoliciesCmdLiteral related info
 const GetAPIPoliciesCmdLiteral = "api"
-const getAPIPoliciesCmdShortDesc = "Display a list of API Policies in an environment"
+const getAPIPoliciesCmdShortDesc = "Display a list of API Policies"
 
-const getAPIPoliciesCmdLongDesc = `Display a list of API Policies in the environment specified by the flag --environment, -e`
+const getAPIPoliciesCmdLongDesc = `Display a list of API Policies in the environment`
 
 var getAPIPoliciesCmdExamples = utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdLiteral + ` ` + GetAPIPoliciesCmdLiteral + ` -e dev
 ` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdLiteral + ` ` + GetAPIPoliciesCmdLiteral + ` -e dev --all
@@ -101,11 +101,11 @@ func init() {
 	GetPoliciesCmd.AddCommand(getAPIPoliciesCmd)
 	getAPIPoliciesCmd.Flags().StringVarP(&getAPIPoliciesCmdEnvironment, "environment", "e",
 		"", "Environment to be searched")
-	getAPIPoliciesCmd.Flags().StringVarP(&getAPIPoliciesCmdFormat, "format", "", "", "Pretty-print API policies "+
+	getAPIPoliciesCmd.Flags().StringVarP(&getAPIPoliciesCmdFormat, "format", "", "", "Pretty-print API Policies "+
 		"using Go Templates. Use \"{{ jsonPretty . }}\" to list all fields")
 	getAPIPoliciesCmd.Flags().StringVarP(&getAPIPolicyListCmdLimit, "limit", "l",
-		strconv.Itoa(utils.DefaultPoliciesDisplayLimit), "Maximum number of policies to return")
-	getAPIPoliciesCmd.Flags().BoolVarP(&getAllAPIPoliciesAvailable, "all", "", false, "Get all api polcies")
+		strconv.Itoa(utils.DefaultPoliciesDisplayLimit), "Maximum number of API Policies to return")
+	getAPIPoliciesCmd.Flags().BoolVarP(&getAllAPIPoliciesAvailable, "all", "", false, "Get all API Polcies")
 	_ = getAPIPoliciesCmd.MarkFlagRequired("environment")
 	getAPIPoliciesCmd.MarkFlagsMutuallyExclusive("limit", "all")
 }
