@@ -21,7 +21,6 @@ package cmd
 import (
 	"fmt"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
@@ -43,7 +42,10 @@ const getAPIPoliciesCmdShortDesc = "Display a list of API Policies in an environ
 const getAPIPoliciesCmdLongDesc = `Display a list of API Policies in the environment specified by the flag --environment, -e`
 
 var getAPIPoliciesCmdExamples = utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdLiteral + ` ` + GetAPIPoliciesCmdLiteral + ` -e dev
- NOTE: The flag (--environment (-e)) is mandatory`
+` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdLiteral + ` ` + GetAPIPoliciesCmdLiteral + ` -e dev --all
+` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdLiteral + ` ` + GetAPIPoliciesCmdLiteral + ` -e dev -l 30
+ NOTE: The flag (--environment (-e)) is mandatory
+ NOTE: Flags (--all) and (--limit (-l)) cannot be used at the same time`
 
 // getAPIPoliciesCmd represents the get policies api command
 var getAPIPoliciesCmd = &cobra.Command{
@@ -61,13 +63,11 @@ var getAPIPoliciesCmd = &cobra.Command{
 		if getAllAPIPoliciesAvailable {
 			getAPIPolicyListCmdLimit = ""
 		} else {
-			if limit, err := utils.ValidateFlagWithIntegerValues(getAPIPolicyListCmdLimit); err != nil || limit == -1 {
-				if limit == -1 {
-					fmt.Println("Limit should be greater than or equal zero")
-					os.Exit(1)
-				} else if err != nil {
-					utils.HandleErrorAndExit("Error Converting Limit value", err)
-				}
+			limit, err := utils.ValidateFlagWithIntegerValues(getAPIPolicyListCmdLimit)
+			if limit < 0 {
+				fmt.Println("Limit value should be greater than 0")
+			} else if err != nil {
+				utils.HandleErrorAndExit("Error converting limit value", err)
 			}
 		}
 
@@ -82,16 +82,12 @@ func executeGetAPIPoliciesCmd(credential credentials.Credential) {
 
 		resp, err := impl.GetAPIPolicyListFromEnv(accessToken, getAPIPoliciesCmdEnvironment, getAPIPolicyListCmdLimit)
 		if err != nil {
-			utils.HandleErrorAndExit("Error while getting api policies", err)
+			utils.HandleErrorAndExit("Error while getting API Policies", err)
 		}
 		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
 
 		if resp.StatusCode() == http.StatusOK {
-			// fmt.Println("Resp: ", resp)
 			impl.PrintAPIPolicies(resp, getAPIPoliciesCmdFormat)
-		} else if resp.StatusCode() == http.StatusInternalServerError {
-			// 500 Internal Server Error
-			fmt.Println(string(resp.Body()))
 		} else {
 			// neither 200 nor 500
 			fmt.Println("Error getting API Policies:", resp.Status(), "\n", string(resp.Body()))

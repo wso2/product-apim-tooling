@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -62,32 +61,8 @@ func importAPIPolicy(endpoint string, importPath string, accessToken string, isO
 		return err
 	}
 
-	files, err := ioutil.ReadDir(tmpPath)
-
 	if err != nil {
 		return err
-	}
-
-	policyPaths := strings.Split(tmpPath, "/")
-	policyName := policyPaths[len(policyPaths)-1]
-
-	for _, file := range files {
-		originalFilePath := tmpPath + "/" + file.Name()
-		ext := filepath.Ext(originalFilePath)
-
-		if ext == ".yaml" {
-			policyName, err = utils.GetPolicyNameByPolicyDefinitionFile(originalFilePath)
-			if err != nil {
-				return err
-			}
-		}
-
-		newFilePath := tmpPath + "/" + policyName + ext
-
-		err := os.Rename(originalFilePath, newFilePath)
-		if err != nil {
-			return err
-		}
 	}
 
 	defer func() {
@@ -100,7 +75,9 @@ func importAPIPolicy(endpoint string, importPath string, accessToken string, isO
 
 	policyFilePath := tmpPath
 
-	utils.Logln(utils.LogPrefixInfo + "Substituting environment variables in Policy files...")
+	fmt.Println("Policy File Path: ", policyFilePath)
+
+	utils.Logln(utils.LogPrefixInfo + "Substituting environment variables in API Policy files...")
 	err = replaceEnvVariablesInPolicies(policyFilePath)
 	if err != nil {
 		return err
@@ -127,6 +104,16 @@ func importAPIPolicy(endpoint string, importPath string, accessToken string, isO
 		// 201 Created or 200 OK
 		fmt.Println("Successfully Imported API Policy.")
 		return nil
+	} else if resp.StatusCode() == http.StatusConflict {
+		var errorResponse utils.HttpErrorResponse
+		err := json.Unmarshal(resp.Body(), &errorResponse)
+
+		if err != nil {
+			return err
+		}
+
+		fmt.Println("Error importing API Policy due to: ", errorResponse.Description)
+		fmt.Println("Please change the Policy name and re-import")
 	} else {
 		fmt.Println("Error importing API Policy.")
 		fmt.Println("Status: " + resp.Status())
@@ -134,6 +121,8 @@ func importAPIPolicy(endpoint string, importPath string, accessToken string, isO
 
 		return errors.New(resp.Status())
 	}
+
+	return nil
 }
 
 func executeAPIPolicyImportRequest(uri string, importPath string, accessToken string, isOAuthToken bool) (*resty.Response, error) {

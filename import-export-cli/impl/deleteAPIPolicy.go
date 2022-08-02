@@ -32,7 +32,7 @@ import (
 // @param accessToken : Access Token for the resource
 // @param policyName : Name of the API Policy to delete
 // @param policyVersion : Version of the API Policy to delete
-// @param environment : Environment where API should be deleted
+// @param environment : Environment where API Policy should be deleted
 // @return response Response in the form of *resty.Response
 func DeleteAPIPolicy(accessToken, policyName, policyVersion, environment string) (*resty.Response, error) {
 	deleteEndpoint := utils.GetAPIPolicyListEndpointOfEnv(environment, utils.MainConfigFilePath)
@@ -63,6 +63,6 @@ func PrintDeleteAPIPolicyResponse(policyName string, err error) {
 	if err != nil {
 		fmt.Println("Error deleting API Policy:", err)
 	} else {
-		fmt.Println(policyName + " Common API Policy deleted successfully!")
+		fmt.Println(policyName + " API Policy deleted successfully!")
 	}
 }

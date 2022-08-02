@@ -300,7 +300,7 @@ type ThrottlingPolicyDetails struct {
 }
 
 type PolicyDataImport struct {
-	Data PolicyData `yaml:"data"`
+	Data PolicyData `yaml:"data" json:"data"`
 }
 
 type PolicyData struct {

@@ -21,6 +21,7 @@ package utils
 import (
 	"bufio"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -375,13 +376,19 @@ func GetRevisionNamFromRevisionNum(input string) string {
 	return "Revision-" + input
 }
 
-func GetPolicyNameByPolicyDefinitionFile(originalFilePath string) (string, error) {
+func GetPolicyNameByPolicyDefinitionFile(originalFilePath, ext string) (string, error) {
 	policyDataImport := &PolicyDataImport{}
-	policyDefYamlFile, err := ioutil.ReadFile(originalFilePath)
+	policyDefFile, err := ioutil.ReadFile(originalFilePath)
 	if err != nil {
 		return "", err
 	}
-	err = yaml.Unmarshal(policyDefYamlFile, &policyDataImport)
+
+	if ext == ".yaml" || ext == ".yml" {
+		err = yaml.Unmarshal(policyDefFile, &policyDataImport)
+	} else if ext == ".json" {
+		err = json.Unmarshal(policyDefFile, &policyDataImport)
+	}
+
 	if err != nil {
 		return "", err
 	}
@@ -391,6 +398,7 @@ func GetPolicyNameByPolicyDefinitionFile(originalFilePath string) (string, error
 // validate integer values are correctly provided
 func ValidateFlagWithIntegerValues(value string) (int, error) {
 	limit, err := strconv.Atoi(value)
+	fmt.Println("Limit: ", limit)
 
 	if err != nil {
 		return -1, err

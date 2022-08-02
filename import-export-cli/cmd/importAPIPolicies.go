@@ -26,15 +26,14 @@ import (
 )
 
 var (
-	importAPIPolicyFile   string
-	importAPIPolicyUpdate bool
+	importAPIPolicyFile string
 )
 
 const (
 	// ImportAPIPolicyCmdLiteral command related usage info
 	ImportAPIPolicyCmdLiteral   = "api"
 	importAPIPolicyCmdShortDesc = "Import API Policy"
-	importAPIPolicyCmdLongDesc  = "Import a API Policy to an environment"
+	importAPIPolicyCmdLongDesc  = "Import an API Policy to an environment"
 )
 
 const importAPIPolicyCmdExamples = utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportPolicyCmdLiteral + ` ` + ImportAPIPolicyCmdLiteral + ` -f addHeader_v1.zip -e dev

@@ -34,7 +34,7 @@ var deleteAPIPolicyVersion string
 // DeleteAPIPolicy command related usage info
 const DeleteAPIPolicyCmdLiteral = "api"
 const DeleteAPIPolicyCmdShortDesc = "Delete API Policy"
-const DeleteAPIPolicyCmdLongDesc = "Delete an api policy from an environment"
+const DeleteAPIPolicyCmdLongDesc = "Delete an API Policy from an environment"
 
 const DeleteAPIPolicyCmdExamplesDefault = utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + DeletePolicyCmdLiteral + ` ` + DeleteAPIPolicyCmdLiteral + ` -n addHeader -e dev
  NOTE: The 2 flags (--name (-n) and --environment (-e)) are mandatory.`
@@ -54,6 +54,8 @@ var DeleteAPIPolicyCmd = &cobra.Command{
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
 
+		deleteAPIPolicyVersion = utils.DefaultAPIPolicyVersion
+
 		executeDeleteAPIPolicyCmd(cred)
 
 	},
@@ -63,7 +65,6 @@ var DeleteAPIPolicyCmd = &cobra.Command{
 func executeDeleteAPIPolicyCmd(credential credentials.Credential) {
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, deleteAPIPolicyEnvironment)
 	if preCommandErr == nil {
-		deleteAPIPolicyVersion = utils.APIPolicyVersion
 		_, err := impl.DeleteAPIPolicy(accessToken, deleteAPIPolicyName, deleteAPIPolicyVersion, deleteAPIPolicyEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while deleting API Policy ", err)

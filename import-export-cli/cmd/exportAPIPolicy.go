@@ -34,12 +34,11 @@ import (
 
 var exportAPIPolicyName string
 var exportAPIPolicyVersion string
-var runningExportAPIPolicyCommand bool
 
 // ExportAPIPolicy command related usage info
 const ExportAPIPolicyCmdLiteral = "api"
-const exportAPIPolicyCmdShortDesc = "Export API Policies"
-const exportAPIPolicyCmdLongDesc = "Export API Policies from an environment"
+const exportAPIPolicyCmdShortDesc = "Export API Policy"
+const exportAPIPolicyCmdLongDesc = "Export API Policy from an environment"
 
 const exportAPIPolicyCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportAPIPolicyCmdLiteral + ` -n addHeader -e dev
  NOTE: All the 2 flags (--name (-n) and --environment (-e)) are mandatory.`
@@ -47,7 +46,7 @@ const exportAPIPolicyCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + 
 // ExportAPIPolicyCmd represents the api policy export command
 var ExportAPIPolicyCmd = &cobra.Command{
 	Use: ExportAPIPolicyCmdLiteral + " (--name <name-of-the-api-policy> --environment " +
-		"<environment-from-which-the-api-policies-should-be-exported>)",
+		"<environment-from-which-the-api-policy-should-be-exported>)",
 	Short:   exportAPIPolicyCmdShortDesc,
 	Long:    exportAPIPolicyCmdLongDesc,
 	Example: exportAPIPolicyCmdExamples,
@@ -60,13 +59,13 @@ var ExportAPIPolicyCmd = &cobra.Command{
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
 
-		exportAPIPolicyVersion = utils.APIPolicyVersion
-		executeExportAPIPolicyCmd(cred, apiPoliciesExportDirectory, exportAPIPolicyVersion, exportAPIPolicyName)
+		exportAPIPolicyVersion = utils.DefaultAPIPolicyVersion
+		executeExportAPIPolicyCmd(cred, apiPoliciesExportDirectory, exportAPIPolicyName)
 	},
 }
 
-func executeExportAPIPolicyCmd(credential credentials.Credential, exportDirectory string, exportAPIPolicyVersion string, exportAPIPolicyName string) {
-	runningExportAPIPolicyCommand = true
+func executeExportAPIPolicyCmd(credential credentials.Credential, exportDirectory, exportAPIPolicyName string) {
+	// runningExportAPIPolicyCommand = true
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, CmdExportEnvironment)
 	if preCommandErr == nil {
 		resp, err := impl.ExportAPIPolicyFromEnv(accessToken, CmdExportEnvironment, exportAPIPolicyName, exportAPIPolicyVersion)
@@ -76,17 +75,13 @@ func executeExportAPIPolicyCmd(credential credentials.Credential, exportDirector
 		// Print info on response
 		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
 		if resp.StatusCode() == http.StatusOK {
-			impl.WriteAPIPolicyToFile(exportDirectory, resp, exportAPIPolicyVersion, exportAPIPolicyName, runningExportAPIPolicyCommand)
-		} else if resp.StatusCode() == http.StatusInternalServerError {
-			// 500 Internal Server Error
-			fmt.Println(string(resp.Body()))
+			impl.WriteAPIPolicyToFile(exportDirectory, resp, exportAPIPolicyVersion, exportAPIPolicyName)
 		} else {
-			// neither 200 nor 500
-			fmt.Println("Error exporting API Policies:", resp.Status(), "\n", string(resp.Body()))
+			fmt.Println("Error exporting API Policy:", resp.Status(), "\n", string(resp.Body()))
 		}
 	} else {
 		// error exporting Operarion Policy
-		fmt.Println("Error getting OAuth tokens while exporting API Policies:" + preCommandErr.Error())
+		fmt.Println("Error getting OAuth tokens while exporting API Policy:" + preCommandErr.Error())
 	}
 }
 
@@ -96,7 +91,7 @@ func init() {
 	ExportAPIPolicyCmd.Flags().StringVarP(&exportAPIPolicyName, "name", "n",
 		"", "Name of the API Policy to be exported")
 	ExportAPIPolicyCmd.Flags().StringVarP(&CmdExportEnvironment, "environment", "e",
-		"", "Environment to which the API Policies should be exported")
+		"", "Environment to which the API Policy should be exported")
 	_ = ExportAPIPolicyCmd.MarkFlagRequired("name")
 	_ = ExportAPIPolicyCmd.MarkFlagRequired("environment")
 

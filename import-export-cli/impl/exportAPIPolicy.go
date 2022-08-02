@@ -27,7 +27,7 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-// ExportAPIPolicyFromEnv function is used with export policy api command
+// ExportAPIPolicyFromEnv function is used with export api policy command
 func ExportAPIPolicyFromEnv(accessToken string, exportEnvironment string, apiPolicyName string, apiPolicyVersion string) (*resty.Response, error) {
 	apiPolicyEndpoint := utils.GetPublisherEndpointOfEnv(exportEnvironment, utils.MainConfigFilePath)
 	// var query string
@@ -50,8 +50,7 @@ func ExportAPIPolicyFromEnv(accessToken string, exportEnvironment string, apiPol
 }
 
 // WriteAPIPolicyToFile writes the policy to a specified location
-func WriteAPIPolicyToFile(exportLocationPath string, resp *resty.Response, exportAPIPolicyVersion string, exportAPIPolicyName string,
-	runningExportAPIPolicyCommand bool) {
+func WriteAPIPolicyToFile(exportLocationPath string, resp *resty.Response, exportAPIPolicyVersion string, exportAPIPolicyName string) {
 	err := utils.CreateDirIfNotExist(exportLocationPath)
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating dir to store zip archives: "+exportLocationPath, err)
@@ -60,17 +59,13 @@ func WriteAPIPolicyToFile(exportLocationPath string, resp *resty.Response, expor
 	zipFile := filepath.Join(exportLocationPath, zipFileName)
 
 	err = ioutil.WriteFile(zipFile, resp.Body(), 0644)
-	if err != nil {
-		return
-	}
 
 	if err != nil {
 		utils.HandleErrorAndExit("Error creating the temporary zip file to store the exported API", err)
 	}
 
-	if runningExportAPIPolicyCommand {
-		fmt.Println("Successfully exported API Policy!")
-		fmt.Println("Find the exported API Policies at " +
-			utils.AppendSlashToString(exportLocationPath) + zipFileName)
-	}
+	fmt.Println("Successfully exported API Policy!")
+	fmt.Println("Find the exported API Policy at " +
+		utils.AppendSlashToString(exportLocationPath) + zipFileName)
+
 }
