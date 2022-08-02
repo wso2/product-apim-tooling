@@ -61,10 +61,6 @@ func importAPIPolicy(endpoint string, importPath string, accessToken string, isO
 		return err
 	}
 
-	if err != nil {
-		return err
-	}
-
 	defer func() {
 		utils.Logln(utils.LogPrefixInfo+"Deleting", tmpPath)
 		err := os.RemoveAll(tmpPath)
@@ -74,8 +70,6 @@ func importAPIPolicy(endpoint string, importPath string, accessToken string, isO
 	}()
 
 	policyFilePath := tmpPath
-
-	fmt.Println("Policy File Path: ", policyFilePath)
 
 	utils.Logln(utils.LogPrefixInfo + "Substituting environment variables in API Policy files...")
 	err = replaceEnvVariablesInPolicies(policyFilePath)
@@ -204,16 +198,17 @@ func GetAPIPolicyId(accessToken, environment, policyName, policyVersion string) 
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 
-	queryParams := `name=` + policyName + `&version=` + policyVersion
+	queryParams := `query=name:` + policyName + ` version:` + policyVersion
 
 	apiPolicyEndpoint = utils.AppendSlashToString(apiPolicyEndpoint)
 
-	apiPolicyResource := "operation-policies?" + queryParams
+	apiPolicyResource := "operation-policies"
 
 	url := apiPolicyEndpoint + apiPolicyResource
-	utils.Logln(utils.LogPrefixInfo+"DeleteAPIPolicy: URL:", url)
 
-	resp, err := utils.InvokeGETRequest(url, headers)
+	utils.Logln(utils.LogPrefixInfo+"GetAPIPolicy: URL:", url)
+
+	resp, err := utils.InvokeGETRequestWithQueryParamsString(url, queryParams, headers)
 	if err != nil {
 		return "", err
 	}
@@ -228,14 +223,23 @@ func GetAPIPolicyId(accessToken, environment, policyName, policyVersion string) 
 
 		return "", errors.New("Requested API Policy is not available in the Publisher. Policy: " + policyName +
 			" Version: " + policyVersion)
+	} else if resp.StatusCode() == http.StatusNotFound {
+		var errorResponse utils.HttpErrorResponse
+		err := json.Unmarshal(resp.Body(), &errorResponse)
+
+		if err != nil {
+			return "", err
+		}
+
+		return "", errors.New(errorResponse.Description)
 	} else {
 		utils.Logf("Error: %s\n", resp.Error())
 		utils.Logf("Body: %s\n", resp.Body())
 		if resp.StatusCode() == http.StatusUnauthorized {
 			// 401 Unauthorized
-			return "", fmt.Errorf("Authorization failed while getting API Policy Id: " + policyName)
+			return "", fmt.Errorf("Authorization failed while getting API Policy " + policyName)
 		}
-		return "", errors.New("Request didn't respond 200 OK for getting API Policy Id. Status: " + resp.Status())
+		return "", errors.New("Request didn't respond 200 OK for getting API Policy. Status: " + resp.Status())
 	}
 
 }

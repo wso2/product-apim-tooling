@@ -398,7 +398,6 @@ func GetPolicyNameByPolicyDefinitionFile(originalFilePath, ext string) (string, 
 // validate integer values are correctly provided
 func ValidateFlagWithIntegerValues(value string) (int, error) {
 	limit, err := strconv.Atoi(value)
-	fmt.Println("Limit: ", limit)
 
 	if err != nil {
 		return -1, err

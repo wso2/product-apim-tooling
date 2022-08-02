@@ -19,6 +19,7 @@
 package impl
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -53,7 +54,17 @@ func DeleteAPIPolicy(accessToken, policyName, policyVersion, environment string)
 	if err != nil {
 		return nil, err
 	}
-	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNoContent {
+
+	if resp.StatusCode() == http.StatusNotFound {
+		var errorResponse utils.HttpErrorResponse
+		err := json.Unmarshal(resp.Body(), &errorResponse)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return nil, errors.New(errorResponse.Description)
+	} else if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNoContent {
 		return nil, errors.New(strconv.Itoa(resp.StatusCode()) + ":<" + string(resp.Body()) + ">")
 	}
 	return resp, nil
