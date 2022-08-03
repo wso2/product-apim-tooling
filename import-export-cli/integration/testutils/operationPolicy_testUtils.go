@@ -64,8 +64,6 @@ func ValidateAPIPolicyExportImport(t *testing.T, args *PolicyImportExportTestArg
 
 	exportedOutput, _ := exportAPIPolicy(t, policyName, args.SrcAPIM.GetEnvName())
 
-	// fmt.Println("Exported Output: ", exportedOutput)
-
 	args.ImportFilePath = base.GetExportedPathFromOutput(exportedOutput)
 
 	// fmt.Println("Exported Path: ", args.ImportFilePath)
@@ -166,10 +164,10 @@ func ValidateAPIPolicyImportFailureWhenPolicyExisted(t *testing.T, args *PolicyI
 	// Give time for newly imported Throttling Policy to get indexed
 	base.WaitForIndexing()
 
-	importedOutput, err = importAPIPolicy(t, args)
+	importedOutput, _ = importAPIPolicy(t, args)
 
-	assert.NotNil(t, err, "Error importing API Policy")
-	assert.Contains(t, importedOutput, "409", "Error importing API Policy")
+	// assert.NotNil(t, err, "Error importing API Policy")
+	assert.Contains(t, importedOutput, "Error importing API Policy")
 
 	cleanUpImportExportPolicies(t, args, policyId)
 
@@ -240,6 +238,7 @@ func cleanUpImportExportPolicies(t *testing.T, args *PolicyImportExportTestArgs,
 
 		if policyId != "" {
 			// delete src API Policy from the destination
+			args.DestAPIM.Login(args.CtlUser.Username, args.CtlUser.Password)
 			args.DestAPIM.DeleteAPIPolicy(policyId, "Clean Up")
 		}
 	})
@@ -331,6 +330,25 @@ func ValidateAPIPoliciesListWithDefaultLimit(t *testing.T, args *PolicyImportExp
 	validateListAPIPoliciesEqualWithLimit(t, policySpecDataList, apiPolicyList, limit)
 }
 
+// Validates whether the api policy list is complete with no limit flag
+func ValidateAPIPoliciesListWithLimitAndAllFlagsReturnError(t *testing.T, args *PolicyImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	base.WaitForIndexing()
+
+	output, err := listAPIPoliciesWithLimitAndAllFlags(t, args)
+
+	assert.Contains(t, output, "if any flags in the group [limit all] are set none of the others can be")
+
+	assert.NotNil(t, err, "--all and --limit flags cannot be used at the same time")
+
+}
+
 // Validates whether the api policy list is complete
 func ValidateAPIPoliciesListWithAllFlag(t *testing.T, args *PolicyImportExportTestArgs) {
 	t.Helper()
@@ -418,6 +436,16 @@ func listAPIPoliciesWithNoLimit(t *testing.T, args *PolicyImportExportTestArgs) 
 	var err error
 
 	output, err = base.Execute(t, "get", "policies", "api", "-e", args.SrcAPIM.EnvName, "--format", "jsonArray", "-k", "--verbose")
+
+	return output, err
+}
+
+func listAPIPoliciesWithLimitAndAllFlags(t *testing.T, args *PolicyImportExportTestArgs) (string, error) {
+	var output string
+	var err error
+	limit := TestAPIPolicyLimit
+
+	output, err = base.Execute(t, "get", "policies", "api", "-e", args.SrcAPIM.EnvName, "--all", "--limit", limit, "--format", "jsonArray", "-k", "--verbose")
 
 	return output, err
 }

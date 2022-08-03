@@ -140,6 +140,23 @@ func TestGetAPIPoliciesListWithDefaultLimit(t *testing.T) {
 	}
 }
 
+// Get API Policy List with both the limit and all flags
+func TestGetAPIPoliciesListWithAllAndLimitFlags(t *testing.T) {
+
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			dev := GetDevClient()
+
+			args := &testutils.PolicyImportExportTestArgs{
+				CtlUser: testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				SrcAPIM: dev,
+			}
+			testutils.ValidateAPIPoliciesListWithLimitAndAllFlagsReturnError(t, args)
+		})
+	}
+}
+
 // Delete API Policy by comparing the status code.
 func TestAPIPoliciesDelete(t *testing.T) {
 

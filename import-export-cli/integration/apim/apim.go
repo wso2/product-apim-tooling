@@ -2350,8 +2350,6 @@ func (instance *Client) DeleteAPIPolicy(policyID string, baseTest string) {
 	} else if baseTest == "Emport" || baseTest == "Import" {
 		base.ValidateAndLogResponse("apim.DeleteAPIPolicy()", response, 200)
 	}
-
-	fmt.Println("Policy Delete URL: ", policiesURL)
 }
 
 // GetAPIPolicy : Get API Policy from APIM using Id
@@ -2381,11 +2379,18 @@ func (instance *Client) GetAPIPolicy(policyId string) map[string]interface{} {
 func (instance *Client) GetAPIPolicyID(t *testing.T, policyName, policyVersion string) string {
 	var policyListResponse APIPoliciesList
 
-	queryParams := "name=" + policyName + "&version=" + policyVersion
+	queryParams := "name:" + policyName + " version:" + policyVersion
 
-	getPoliciesURL := instance.publisherRestURL + "/operation-policies?" + queryParams
+	getPoliciesURL := instance.publisherRestURL + "/operation-policies"
 
 	request := base.CreateGet(getPoliciesURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	values := url.Values{}
+	values.Add("query", queryParams)
+
+	request.URL.RawQuery = values.Encode()
 
 	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
 
