@@ -14,6 +14,7 @@ apictl import policy [flags]
 
 ```
 apictl import policy rate-limiting -f ~/CustomPolicy -e production --u
+apictl import policy api -f ~/AddHeader -e production
 ```
 
 ### Options
@@ -32,5 +33,5 @@ apictl import policy rate-limiting -f ~/CustomPolicy -e production --u
 ### SEE ALSO
 
 * [apictl import](apictl_import.md)	 - Import an API/API Product/Application to an environment
-* [apictl import policy rate-limiting](apictl_import_policy_rate-limiting.md)	 - Import Throttling Policy
-
+* [apictl import policy rate-limiting](apictl_import_policy_rate-limiting.md)	 - Import a Throttling Policy
+* [apictl import policy api](apictl_import_policy_api.md)	 - Import an API Policy

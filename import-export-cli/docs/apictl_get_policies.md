@@ -14,6 +14,7 @@ apictl get policies [flags]
 
 ```
 apictl get policies rate-limiting -e production -q type:sub
+apictl get policies api -e production
 ```
 
 ### Options
@@ -32,5 +33,5 @@ apictl get policies rate-limiting -e production -q type:sub
 ### SEE ALSO
 
 * [apictl get](apictl_get.md)	 - Get APIs/APIProducts/Applications or revisions of a specific API/APIProduct in an environment or Get the log level of each API in an environment or Get the environments
-* [apictl get policies rate-limiting](apictl_get_policies_rate-limiting.md)	 - Display a list of APIs in an environment
-
+* [apictl get policies rate-limiting](apictl_get_policies_rate-limiting.md)	 - Display a list of Throttling Policies in an environment
+* [apictl get policies api](apictl_get_policies_api.md)	 - Display a list of API Policies in an environment
