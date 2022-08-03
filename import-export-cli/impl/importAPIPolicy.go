@@ -45,7 +45,7 @@ func ImportAPIPolicyToEnv(accessOAuthToken, importEnvironment, importPath string
 }
 
 func importAPIPolicy(endpoint string, importPath string, accessToken string, isOauth bool) error {
-	exportDirectory := filepath.Join(utils.ExportDirectory, utils.ExportedPoliciesDirName+"/"+utils.ExportedAPIPoliciesDirName)
+	exportDirectory := filepath.Join(utils.ExportDirectory, utils.ExportedPoliciesDirName, utils.ExportedAPIPoliciesDirName)
 
 	resolvedPolicyFilePath, err := resolvePolicyImportFilePath(importPath, exportDirectory)
 	if err != nil {

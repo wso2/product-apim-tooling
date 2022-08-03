@@ -74,8 +74,9 @@ func executeExportAPIPolicyCmd(credential credentials.Credential, exportDirector
 		}
 		// Print info on response
 		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
+		apiPolicyZipLocationPath := filepath.Join(exportDirectory, CmdExportEnvironment)
 		if resp.StatusCode() == http.StatusOK {
-			impl.WriteAPIPolicyToFile(exportDirectory, resp, exportAPIPolicyVersion, exportAPIPolicyName)
+			impl.WriteAPIPolicyToFile(apiPolicyZipLocationPath, resp, exportAPIPolicyVersion, exportAPIPolicyName)
 		} else {
 			fmt.Println("Error exporting the API Policy:", resp.Status(), "\n", string(resp.Body()))
 		}
