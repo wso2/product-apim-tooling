@@ -28,7 +28,7 @@ import (
 )
 
 // ExportAPIPolicyFromEnv function is used with export api policy command
-func ExportAPIPolicyFromEnv(accessToken string, exportEnvironment string, apiPolicyName string, apiPolicyVersion string) (*resty.Response, error) {
+func ExportAPIPolicyFromEnv(accessToken, exportEnvironment, apiPolicyName, apiPolicyVersion, apiPolicyDefFormat string) (*resty.Response, error) {
 	apiPolicyEndpoint := utils.GetPublisherEndpointOfEnv(exportEnvironment, utils.MainConfigFilePath)
 	// var query string
 	apiPolicyEndpoint = utils.AppendSlashToString(apiPolicyEndpoint)
@@ -36,6 +36,12 @@ func ExportAPIPolicyFromEnv(accessToken string, exportEnvironment string, apiPol
 	apiPolicyResource := "operation-policies/export?"
 
 	query := `name=` + apiPolicyName + `&version=` + apiPolicyVersion
+
+	if apiPolicyDefFormat != "" {
+		query += `&format=` + apiPolicyDefFormat
+	} else {
+		query += `&format=` + `YAML`
+	}
 
 	apiPolicyResource += query
 	url := apiPolicyEndpoint + apiPolicyResource

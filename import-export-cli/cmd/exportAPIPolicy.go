@@ -34,6 +34,7 @@ import (
 
 var exportAPIPolicyName string
 var exportAPIPolicyVersion string
+var exportAPIPolicyFormat string
 
 // ExportAPIPolicy command related usage info
 const ExportAPIPolicyCmdLiteral = "api"
@@ -68,7 +69,7 @@ func executeExportAPIPolicyCmd(credential credentials.Credential, exportDirector
 	// runningExportAPIPolicyCommand = true
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, CmdExportEnvironment)
 	if preCommandErr == nil {
-		resp, err := impl.ExportAPIPolicyFromEnv(accessToken, CmdExportEnvironment, exportAPIPolicyName, exportAPIPolicyVersion)
+		resp, err := impl.ExportAPIPolicyFromEnv(accessToken, CmdExportEnvironment, exportAPIPolicyName, exportAPIPolicyVersion, exportAPIPolicyFormat)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while exporting", err)
 		}
@@ -92,7 +93,9 @@ func init() {
 	ExportAPIPolicyCmd.Flags().StringVarP(&exportAPIPolicyName, "name", "n",
 		"", "Name of the API Policy to be exported")
 	ExportAPIPolicyCmd.Flags().StringVarP(&CmdExportEnvironment, "environment", "e",
-		"", "Environment to which the API Policy should be exported")
+		"", "Environment of the API Policy to be exported")
+	ExportAPIPolicyCmd.Flags().StringVarP(&exportAPIPolicyFormat, "format", "",
+		"", "Type of the Policy definition file exported")
 	_ = ExportAPIPolicyCmd.MarkFlagRequired("name")
 	_ = ExportAPIPolicyCmd.MarkFlagRequired("environment")
 
