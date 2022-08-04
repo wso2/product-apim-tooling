@@ -39,14 +39,29 @@ func DeleteThrottlingPolicy(accessToken, policyName, policyType, environment str
 	endpoint := utils.GetAdminEndpointOfEnv(environment, utils.MainConfigFilePath)
 	endpoint = utils.AppendSlashToString(endpoint)
 
+	var throttlingPolicyType string
+
 	resource := "throttling/policies/search"
 	searchEndpoint := endpoint + resource
 
-	queryParam := `?name=` + policyName
+	// queryParamString := `query=name:` + policyName
 
-	url := searchEndpoint + queryParam
+	switch policyType {
+	case CmdPolicyTypeSubscription:
+		throttlingPolicyType = QueryPolicyTypeSubscription
+	case CmdPolicyTypeApplication:
+		throttlingPolicyType = QueryPolicyTypeApplication
+	case CmdPolicyTypeAdvanced:
+		throttlingPolicyType = QueryPolicyTypeAdvanced
+	case CmdPolicyTypeCustom:
+		throttlingPolicyType = QueryCmdPolicyTypeCustom
+	}
 
-	policyId, err := getThrottlingPolicyId(accessToken, environment, url, policyType, policyName)
+	queryParamString := `query=type:` + throttlingPolicyType
+
+	url := searchEndpoint
+
+	policyId, err := getThrottlingPolicyId(accessToken, environment, url, queryParamString, policyName)
 
 	if policyId == "" && err == nil {
 		errMsg := "Requested Policy with name=" + policyName + " and type=" + policyType + " not found."
@@ -91,11 +106,11 @@ func DeleteThrottlingPolicy(accessToken, policyName, policyType, environment str
 	return resp, nil
 }
 
-func getThrottlingPolicyId(accessToken, environment, url, policyType, policyName string) (string, error) {
+func getThrottlingPolicyId(accessToken, environment, url, queryParamString, policyName string) (string, error) {
 	utils.Logln(utils.LogPrefixInfo+"DeleteThrottlingPolicy: URL:", url)
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
-	resp, err := utils.InvokeGETRequest(url, headers)
+	resp, err := utils.InvokeGETRequestWithQueryParamsString(url, queryParamString, headers)
 
 	if err != nil {
 		return "", err
@@ -109,7 +124,7 @@ func getThrottlingPolicyId(accessToken, environment, url, policyType, policyName
 	}
 
 	for _, obj := range policyList.List {
-		if obj.Type == policyType && obj.PolicyName == policyName {
+		if obj.PolicyName == policyName {
 			return obj.Uuid, nil
 		}
 	}
