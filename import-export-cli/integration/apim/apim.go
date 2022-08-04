@@ -2073,6 +2073,7 @@ func (instance *Client) AddThrottlePolicy(t *testing.T, policy interface{}, user
 
 	json.NewDecoder(response.Body).Decode(&throttlePolicyResponse)
 	policyId := fmt.Sprintf("%v", throttlePolicyResponse["policyId"])
+
 	if doClean {
 		t.Cleanup(func() {
 			instance.Login(username, password)
@@ -2095,6 +2096,20 @@ func (instance *Client) DeleteThrottlePolicy(policyID, policyType string) {
 	defer response.Body.Close()
 
 	base.ValidateAndLogResponse("apim.DeleteThrottlePolicy()", response, 200)
+}
+
+// DeleteThrottlePolicyWithouValidation : Deletes Throttling Policy from APIM using UUID without validating
+func (instance *Client) DeleteThrottlePolicyWithouValidation(policyID, policyType string) {
+	policiesURL := instance.adminRestURL + "/throttling/policies/" + policyType + "/" + policyID
+
+	request := base.CreateDelete(policiesURL)
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+	base.LogRequest("apim.DeleteThrottlePolicyWithoutValidation()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
 }
 
 // GetThrottlePolicy : Get Throttle Policy from APIM using UUID

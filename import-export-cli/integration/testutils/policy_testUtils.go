@@ -77,7 +77,7 @@ func ValidateThrottlePolicyExportImport(t *testing.T, args *PolicyImportExportTe
 }
 
 // Validates whether the throttling policy deletion is complete
-func ValidateThrottlingPolicyDelete(t *testing.T, args *PolicyImportExportTestArgs, policyType string) {
+func ValidateThrottlingPolicyDelete(t *testing.T, args *PolicyImportExportTestArgs, username, password, policyType string) {
 	t.Helper()
 
 	// Setup apictl envs
@@ -95,32 +95,10 @@ func ValidateThrottlingPolicyDelete(t *testing.T, args *PolicyImportExportTestAr
 
 	assert.Nil(t, err, "Error while deleting the API Policy")
 
-	args.SrcAPIM.Login(args.CtlUser.Username, args.CtlUser.Password)
-
-	args.SrcAPIM.DeleteThrottlePolicy(policyId, policyType)
-
-}
-
-// Validates whether the non exiting throttling policy deletion from the status code
-func ValidateNonExistingThrottlingPolicyDelete(t *testing.T, args *PolicyImportExportTestArgs, policyType string) {
-	t.Helper()
-
-	// Setup apictl envs
-	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
-
-	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
-
-	base.WaitForIndexing()
-
-	policyName := fmt.Sprintf("%v", args.Policy[policyNameKey])
-
-	_, err := deleteThrottlingPolicy(t, policyName, policyType, args)
-
-	failureReason := "Requested Policy with name" + policyName + "and type" + policyType + "not found"
-
-	assert.Contains(t, err, "Deletion Failed")
-
-	assert.Contains(t, err, failureReason)
+	t.Cleanup(func() {
+		args.SrcAPIM.Login(username, password)
+		args.SrcAPIM.DeleteThrottlePolicyWithouValidation(policyId, policyType)
+	})
 
 }
 
@@ -304,9 +282,8 @@ func createExportedThrottlePolicyFile(t *testing.T, client *apim.Client, policyT
 }
 
 // Adds a new Throttling Policy to an env
-func AddNewThrottlePolicy(t *testing.T, client *apim.Client, adminUsername, adminPassword, policyType string) map[string]interface{} {
+func AddNewThrottlePolicy(t *testing.T, client *apim.Client, adminUsername, adminPassword, policyType string, doClean bool) map[string]interface{} {
 	client.Login(adminUsername, adminPassword)
-	doClean := true
 	generatedPolicy := client.GenerateSampleThrottlePolicyData(policyType)
 	addedPolicy := client.AddThrottlePolicy(t, generatedPolicy, adminUsername, adminPassword, policyType, doClean)
 	return addedPolicy
