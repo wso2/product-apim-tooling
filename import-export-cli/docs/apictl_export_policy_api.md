@@ -23,6 +23,7 @@ NOTE: All the 2 flags (--name (-n) and --environment (-e)) are mandatory.
   -e, --environment string   Environment to which the API Policies should be exported
   -h, --help                 help for api policy
   -n, --name string          Name of the API Policy to be exported
+  --format                   API Policy definition file format to be exported (JSON, YAML)
 ```
 
 ### Options inherited from parent commands
