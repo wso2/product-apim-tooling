@@ -7,7 +7,7 @@ Delete API Policy
 Export API Policy from an environment
 
 ```
-apictl delete policy api (--name <name-of-the-api-policy> --environment <environment-from-which-the-api-policies-should-be-deleted>) [flags]
+apictl delete policy api (--name <name-of-the-api-policy> --environment <environment-from-which-the-api-policy-should-be-deleted>) [flags]
 ```
 
 ### Examples
@@ -20,8 +20,8 @@ NOTE: All the 2 flags (--name (-n) and --environment (-e)) are mandatory.
 ### Options
 
 ```
-  -e, --environment string   Environment to which the API Policy should be deleted
-  -h, --help                 help for api policy
+  -e, --environment string   Environment from which the API Policy should be deleted
+  -h, --help                 help for API Policy
   -n, --name string          Name of the API Policy to be deleted
 ```
 

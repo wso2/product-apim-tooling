@@ -7,7 +7,7 @@ Delete Policy
 Delete a Policy from an environment
 
 ```
-apictl delete policy [policy type] (--environment <environment-from-which-the-application-should-be-deleted>) [flags]
+apictl delete policy [policy type] (--environment <environment-from-which-the-policy-should-be-deleted>) [flags]
 ```
 
 ### Examples
