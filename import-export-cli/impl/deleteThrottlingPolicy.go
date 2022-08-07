@@ -57,7 +57,7 @@ func DeleteThrottlingPolicy(accessToken, policyName, policyType, environment str
 		throttlingPolicyType = QueryCmdPolicyTypeCustom
 	}
 
-	queryParamString := `query=type:` + throttlingPolicyType
+	queryParamString := `query=name:` + policyName + ` type:` + throttlingPolicyType
 
 	url := searchEndpoint
 
@@ -123,10 +123,8 @@ func getThrottlingPolicyId(accessToken, environment, url, queryParamString, poli
 		return "", err
 	}
 
-	for _, obj := range policyList.List {
-		if obj.PolicyName == policyName {
-			return obj.Uuid, nil
-		}
+	if policyList.Count > 0 {
+		return policyList.List[0].Uuid, nil
 	}
 
 	return "", nil
