@@ -72,6 +72,7 @@ type PolicyImportExportTestArgs struct {
 	DestAPIM       *apim.Client
 	ImportFilePath string
 	Update         bool
+	ExportFormat   string
 }
 
 type AppImportExportTestArgs struct {
