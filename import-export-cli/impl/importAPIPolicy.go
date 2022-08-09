@@ -133,6 +133,12 @@ func importAPIPolicy(endpoint string, importPath string, accessToken string, isO
 
 		fmt.Println("Error importing API Policy due to: ", errorResponse.Description)
 		fmt.Println("Please change the Policy name and re-import")
+
+		if err != nil {
+			return err
+		}
+
+		return errors.New(errorResponse.Status)
 	} else {
 		fmt.Println("Error importing API Policy.")
 		fmt.Println("Status: " + resp.Status())
