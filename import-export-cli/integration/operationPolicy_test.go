@@ -216,7 +216,7 @@ func TestGetAPIPoliciesListWithAllAndLimitFlags(t *testing.T) {
 }
 
 // Delete API Policy by comparing the status code.
-func TestAPIPoliciesDelete(t *testing.T) {
+func TestAPIPolicyDelete(t *testing.T) {
 
 	for _, user := range testCaseUsers {
 		t.Run(user.Description, func(t *testing.T) {
@@ -240,7 +240,7 @@ func TestAPIPoliciesDelete(t *testing.T) {
 }
 
 // Import a malformed API Policy to an environment by comparing the status code.
-func TestMalformedAPIPoliciesExportImport(t *testing.T) {
+func TestMalformedAPIPolicyExportImport(t *testing.T) {
 
 	for _, user := range testCaseUsers {
 		t.Run(user.Description, func(t *testing.T) {
@@ -259,7 +259,7 @@ func TestMalformedAPIPoliciesExportImport(t *testing.T) {
 }
 
 // Exprt API Policy from one environment and import twice to another environment by comparing the status code.
-func TestAPIPoliciesImportFailureWhenPolicyExisted(t *testing.T) {
+func TestAPIPolicyImportFailureWhenPolicyExisted(t *testing.T) {
 
 	for _, user := range testCaseUsers {
 		t.Run(user.Description, func(t *testing.T) {
