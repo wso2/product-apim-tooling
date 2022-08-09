@@ -1987,8 +1987,8 @@ func (instance *Client) getToken(username string, password string) string {
 	values.Add("password", password)
 	values.Add("scope",
 		"apim:admin apim:api_view apim:api_create apim:api_publish apim:subscribe apim:api_delete "+
-			"apim:app_import_export apim:api_import_export apim:api_product_import_export apim:app_manage apim:sub_manage"+
-			"apim:common_operation_policy_view apim:common_operation_policy_manage apim:policies_import_export")
+			"apim:app_import_export apim:api_import_export apim:api_product_import_export apim:app_manage apim:sub_manage "+
+			"apim:policies_import_export")
 
 	request.URL.RawQuery = values.Encode()
 

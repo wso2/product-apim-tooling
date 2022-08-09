@@ -69,10 +69,7 @@ func ValidateAPIPolicyExportImport(t *testing.T, args *PolicyImportExportTestArg
 
 	args.ImportFilePath = base.GetExportedPathFromOutput(exportedOutput)
 
-	// fmt.Println("Exported Path: ", args.ImportFilePath)
 	assert.True(t, base.IsFileAvailable(t, args.ImportFilePath))
-
-	// args.SrcAPIM.DeleteAPIPolicy(fmt.Sprintf("%v", args.Policy[PolicyIdKey]), "Export")
 
 	base.SetupEnv(t, args.DestAPIM.GetEnvName(), args.DestAPIM.GetApimURL(), args.DestAPIM.GetTokenURL())
 
@@ -82,7 +79,7 @@ func ValidateAPIPolicyExportImport(t *testing.T, args *PolicyImportExportTestArg
 	importedOutput, err := importAPIPolicy(t, args)
 
 	assert.Nil(t, err, "Error while importing the API Policy")
-	assert.Contains(t, importedOutput, "Successfully Imported API Policy.")
+	assert.Contains(t, importedOutput, "Successfully Imported API Policy")
 	// Give time for newly imported API Policy to get indexed
 	base.WaitForIndexing()
 
@@ -112,7 +109,7 @@ func ValidateAPIPolicyImportWithDirectoryPath(t *testing.T, policyDir string, ar
 	importedOutput, err := importAPIPolicy(t, args)
 
 	assert.Nil(t, err, "Error while importing the API Policy")
-	assert.Contains(t, importedOutput, "Successfully Imported API Policy.")
+	assert.Contains(t, importedOutput, "Successfully Imported API Policy")
 	// Give time for newly imported API Policy to get indexed
 	base.WaitForIndexing()
 
@@ -194,8 +191,6 @@ func ValidateAPIPolicyExportImportWithFormatFlag(t *testing.T, args *PolicyImpor
 	// fmt.Println("Exported Path: ", args.ImportFilePath)
 	assert.True(t, base.IsFileAvailable(t, args.ImportFilePath))
 
-	args.SrcAPIM.DeleteAPIPolicy(fmt.Sprintf("%v", args.Policy[PolicyIdKey]), "Export")
-
 	base.SetupEnv(t, args.DestAPIM.GetEnvName(), args.DestAPIM.GetApimURL(), args.DestAPIM.GetTokenURL())
 
 	// Import API Policy to env 2
@@ -204,7 +199,7 @@ func ValidateAPIPolicyExportImportWithFormatFlag(t *testing.T, args *PolicyImpor
 	importedOutput, err := importAPIPolicy(t, args)
 
 	assert.Nil(t, err, "Error while importing the API Policy")
-	assert.Contains(t, importedOutput, "Successfully Imported API Policy.")
+	assert.Contains(t, importedOutput, "Successfully Imported API Policy")
 	// Give time for newly imported API Policy to get indexed
 	base.WaitForIndexing()
 
@@ -240,13 +235,6 @@ func ValidateMalformedAPIPolicyExportImport(t *testing.T, args *PolicyImportExpo
 
 	assert.NotNil(t, err, "Error while importing the API Policy")
 	assert.Contains(t, importOutput, "500", "Error importing API Policy")
-
-	// changeExportedAPIPolicyFile(t, pathToPolicyhSpecFile)
-
-	// importOutput, err = importAPIPolicy(t, args)
-
-	// assert.NotNil(t, err, "Error while importing the API Policy")
-	// assert.Contains(t, importOutput, "500", "Error importing API Policy")
 }
 
 // ValidateMalformedAPIPolicyExportImport : Validates Exporting API Policy from source env and Importing to destination env
@@ -270,8 +258,6 @@ func ValidateAPIPolicyImportFailureWhenPolicyExisted(t *testing.T, args *PolicyI
 	fmt.Println("Exported Path: ", args.ImportFilePath)
 	assert.True(t, base.IsFileAvailable(t, args.ImportFilePath))
 
-	args.SrcAPIM.DeleteAPIPolicy(fmt.Sprintf("%v", args.Policy[PolicyIdKey]), "Export")
-
 	base.SetupEnv(t, args.DestAPIM.GetEnvName(), args.DestAPIM.GetApimURL(), args.DestAPIM.GetTokenURL())
 
 	// Import API Policy to env 2
@@ -283,15 +269,15 @@ func ValidateAPIPolicyImportFailureWhenPolicyExisted(t *testing.T, args *PolicyI
 
 	policyId := args.DestAPIM.GetAPIPolicyID(t, policyName, policyVersion)
 
-	assert.Nil(t, err, "Error while importing the Throttling Policy")
-	assert.Contains(t, importedOutput, "Successfully Imported API Policy.")
+	assert.Nil(t, err, "Error while importing the API Policy")
+	assert.Contains(t, importedOutput, "Successfully Imported API Policy")
 
-	// Give time for newly imported Throttling Policy to get indexed
+	// Give time for newly imported API Policy to get indexed
 	base.WaitForIndexing()
 
-	importedOutput, _ = importAPIPolicy(t, args)
+	importedOutput, err = importAPIPolicy(t, args)
 
-	// assert.NotNil(t, err, "Error importing API Policy")
+	assert.NotNil(t, err, "Error importing API Policy")
 	assert.Contains(t, importedOutput, "Error importing API Policy")
 
 	cleanUpImportExportPolicies(t, args, policyId, true)
@@ -306,8 +292,6 @@ func AddNewAPIPolicy(t *testing.T, client *apim.Client, username, password, path
 	policyContent := readAPIPolicyDefinition(t, pathToPolicySpecFile)
 	policySpecFileData, err := json.Marshal(policyContent)
 	doClean := true
-
-	// synapseDefFileData, err := ioutil.ReadFile(pathToSynapseDefFile)
 
 	if err != nil {
 		t.Error(err)
@@ -379,7 +363,7 @@ func cleanUpImportExportPolicies(t *testing.T, args *PolicyImportExportTestArgs,
 	})
 }
 
-// Validates whether the throttling policy list is complete
+// Validates whether the api policy list is complete
 func ValidateAPIPoliciesList(t *testing.T, jsonArray bool, args *PolicyImportExportTestArgs) {
 	t.Helper()
 
@@ -524,8 +508,6 @@ func ValidateAPIPolicyDelete(t *testing.T, args *PolicyImportExportTestArgs) {
 	base.WaitForIndexing()
 
 	policyName := fmt.Sprintf("%v", args.Policy[PolicyNameKey])
-	// policyVersion := fmt.Sprintf("%v", args.Policy[PolicyVersionKey])
-	// policyId := fmt.Sprintf("%v", args.Policy[PolicyIdKey])
 
 	_, err := deleteAPIPolicy(t, policyName, args)
 
@@ -613,7 +595,6 @@ func validateListAPIPoliciesEqualWithLimit(t *testing.T, apiPoliciesListOutput [
 	assert.Equal(t, apiPoliciesList.Count, len(apiPoliciesListOutput), "API policies list sizes are not equal")
 
 	for i, policy := range apiPoliciesList.List {
-		// fmt.Println("Policy ID It: ", apiPoliciesListOutput[i].Id)
 		assert.Equal(t, apiPoliciesListOutput[i].Id, policy.Id, "API Policies are not equal")
 	}
 }
@@ -623,7 +604,6 @@ func validateListAPIPoliciesEqualWithAllFlag(t *testing.T, apiPoliciesListOutput
 	assert.Equal(t, apiPoliciesList.Count, len(apiPoliciesListOutput), "API policies list sizes are not equal")
 
 	for i, policy := range apiPoliciesList.List {
-		// fmt.Println("Policy ID It: ", apiPoliciesListOutput[i].Id)
 		assert.Equal(t, apiPoliciesListOutput[i].Id, policy.Id, "API Policies are not equal")
 	}
 }
