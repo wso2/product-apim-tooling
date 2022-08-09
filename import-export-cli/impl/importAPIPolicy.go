@@ -260,7 +260,6 @@ func GetAPIPolicyId(accessToken, environment, policyName, policyVersion string) 
 		if err != nil {
 			return "", err
 		}
-
 		return "", errors.New(errorResponse.Description)
 	} else {
 		utils.Logf("Error: %s\n", resp.Error())

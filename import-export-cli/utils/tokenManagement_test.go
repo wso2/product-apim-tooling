@@ -142,8 +142,7 @@ func getOAuthStubOK(t *testing.T) *httptest.Server {
 			 "scopes":
 					["apim:api_view","apim:api_create","apim:api_publish",
 					 "apim:tier_view","apim:tier_manage","apim:subscription_view",
-					 "apim:subscription_block","apim:subscribe","apim:common_operation_policy_view",
-					 "apim:common_operation_policy_manage"
+					 "apim:subscription_block","apim:subscribe","apim:policy_import_export"
 					]
 			}
 		`)
