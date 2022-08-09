@@ -2330,8 +2330,8 @@ func (instance *Client) GetAPIPolicies(t *testing.T, offset, limit string) *APIP
 	return policyListResponse
 }
 
-// DeleteAPIPolicy : Deletes API Policy from APIM using UUID
-func (instance *Client) DeleteAPIPolicy(policyID string, baseTest string) {
+// DeleteAPIPolicy : Deletes API Policy from APIM using ID
+func (instance *Client) DeleteAPIPolicy(policyID, baseTest string) {
 
 	policiesURL := instance.publisherRestURL + "/operation-policies/" + policyID
 
@@ -2411,8 +2411,8 @@ func (instance *Client) GetAPIPolicyID(t *testing.T, policyName, policyVersion s
 }
 
 // AddAPIPolicy : Add new API Policy of different policy types to APIM
-func (instance *Client) AddAPIpolicy(t *testing.T, policySpec []byte, synapseDefFilePath string) interface{} {
-	var apiPolicyResponse interface{}
+func (instance *Client) AddAPIPolicy(t *testing.T, policySpec []byte, synapseDefFilePath, username, password string, doClean bool) map[string]interface{} {
+	var apiPolicyResponse map[string]interface{}
 
 	apiPolicyURL := instance.publisherRestURL + "/operation-policies"
 
@@ -2469,6 +2469,14 @@ func (instance *Client) AddAPIpolicy(t *testing.T, policySpec []byte, synapseDef
 	base.ValidateAndLogResponse("apim.AddAPIPolicy()", response, 201)
 
 	json.NewDecoder(response.Body).Decode(&apiPolicyResponse)
+
+	json.NewDecoder(response.Body).Decode(&apiPolicyResponse)
+	policyId := fmt.Sprintf("%v", apiPolicyResponse["id"])
+
+	t.Cleanup(func() {
+		instance.Login(username, password)
+		instance.DeleteAPIPolicy(policyId, "Clean Up")
+	})
 
 	return apiPolicyResponse
 }
