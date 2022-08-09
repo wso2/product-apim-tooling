@@ -53,9 +53,7 @@ var DeleteAPIPolicyCmd = &cobra.Command{
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
-
 		deleteAPIPolicyVersion = utils.DefaultAPIPolicyVersion
-
 		executeDeleteAPIPolicyCmd(cred)
 
 	},

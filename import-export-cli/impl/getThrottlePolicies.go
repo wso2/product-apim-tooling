@@ -72,7 +72,7 @@ func GetThrottlePolicyListFromEnv(accessToken, environment, query string) (*rest
 
 func getThrottlePolicyList(accessToken string, throttlePolicyListEndpoint string, query string) (*resty.Response, error) {
 	url := throttlePolicyListEndpoint
-	queryParamString := "query=" + query // check again
+	queryParamString := "query=" + query
 	utils.Logln(utils.LogPrefixInfo+"ExportThrottlingPolicy: URL:", url)
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken

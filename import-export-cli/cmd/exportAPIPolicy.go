@@ -66,7 +66,6 @@ var ExportAPIPolicyCmd = &cobra.Command{
 }
 
 func executeExportAPIPolicyCmd(credential credentials.Credential, exportDirectory, exportAPIPolicyName string) {
-	// runningExportAPIPolicyCommand = true
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, CmdExportEnvironment)
 	if preCommandErr == nil {
 		resp, err := impl.ExportAPIPolicyFromEnv(accessToken, CmdExportEnvironment, exportAPIPolicyName, exportAPIPolicyVersion, exportAPIPolicyFormat)
@@ -82,7 +81,7 @@ func executeExportAPIPolicyCmd(credential credentials.Credential, exportDirector
 			fmt.Println("Error exporting the API Policy:", resp.Status(), "\n", string(resp.Body()))
 		}
 	} else {
-		// error exporting Operarion Policy
+		// error exporting API Policy
 		fmt.Println("Error getting OAuth tokens while exporting the API Policy:" + preCommandErr.Error())
 	}
 }
@@ -98,5 +97,4 @@ func init() {
 		"", "Type of the Policy definition file exported")
 	_ = ExportAPIPolicyCmd.MarkFlagRequired("name")
 	_ = ExportAPIPolicyCmd.MarkFlagRequired("environment")
-
 }

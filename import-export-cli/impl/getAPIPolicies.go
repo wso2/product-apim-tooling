@@ -34,7 +34,7 @@ import (
 const (
 	apiPolicyUUIDHeader               = "ID"
 	apiPolicyNameHeader               = "NAME"
-	apiPolicyDisplayNameHeader        = "Display NAME"
+	apiPolicyDisplayNameHeader        = "DISPLAY NAME"
 	apiPolicyCategoryHeader           = "CATEGORY"
 	apiPolicyApplicableFlowsHeaders   = "APPLICABLE FLOWS"
 	apiPolicySupportedGatewaysHeaders = "SUPPORTED GATEWAYS"

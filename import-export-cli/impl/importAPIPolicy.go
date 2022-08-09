@@ -222,7 +222,6 @@ func replaceEnvVariablesInPolicies(policyFilePath string) error {
 // @param policyVersion : Version of the API policy
 // @return apiId, error
 func GetAPIPolicyId(accessToken, environment, policyName, policyVersion string) (string, error) {
-	// Unified Search endpoint from the config file to search APIs
 	apiPolicyEndpoint := utils.GetPublisherEndpointOfEnv(environment, utils.MainConfigFilePath)
 
 	// Prepping headers
@@ -272,5 +271,4 @@ func GetAPIPolicyId(accessToken, environment, policyName, policyVersion string) 
 		}
 		return "", errors.New("Request didn't respond 200 OK for getting API Policy. Status: " + resp.Status())
 	}
-
 }

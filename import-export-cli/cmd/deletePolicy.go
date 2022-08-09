@@ -29,7 +29,7 @@ const DeletePolicyCmdShortDesc = "Delete a Policy"
 const DeletePolicyCmdLongDesc = "Delete a Policy in an environment"
 const DeletePolicyCmdExamples = utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + DeletePolicyCmdLiteral + ` ` + DeleteAPIPolicyCmdLiteral + ` -n addHeader -e prod`
 
-// DeletePolicyCmd represents the export policy command
+// DeletePolicyCmd represents the delete policy command
 var DeletePolicyCmd = &cobra.Command{
 	Use:     DeletePolicyCmdLiteral,
 	Short:   DeletePolicyCmdShortDesc,
@@ -37,7 +37,6 @@ var DeletePolicyCmd = &cobra.Command{
 	Example: DeletePolicyCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + DeletePolicyCmdLiteral + " called")
-
 	},
 }
 

@@ -30,7 +30,7 @@ import (
 // ExportAPIPolicyFromEnv function is used with export api policy command
 func ExportAPIPolicyFromEnv(accessToken, exportEnvironment, apiPolicyName, apiPolicyVersion, apiPolicyDefFormat string) (*resty.Response, error) {
 	apiPolicyEndpoint := utils.GetPublisherEndpointOfEnv(exportEnvironment, utils.MainConfigFilePath)
-	// var query string
+
 	apiPolicyEndpoint = utils.AppendSlashToString(apiPolicyEndpoint)
 
 	apiPolicyResource := "operation-policies/export?"
@@ -73,5 +73,4 @@ func WriteAPIPolicyToFile(exportLocationPath string, resp *resty.Response, expor
 	fmt.Println("Successfully exported API Policy!")
 	fmt.Println("Find the exported API Policy at " +
 		utils.AppendSlashToString(exportLocationPath) + zipFileName)
-
 }

@@ -79,7 +79,6 @@ func executeGetAPIPoliciesCmd(credential credentials.Credential) {
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, getAPIPoliciesCmdEnvironment)
 
 	if preCommandErr == nil {
-
 		resp, err := impl.GetAPIPolicyListFromEnv(accessToken, getAPIPoliciesCmdEnvironment, getAPIPolicyListCmdLimit)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while getting API Policies", err)
@@ -105,7 +104,7 @@ func init() {
 		"using Go Templates. Use \"{{ jsonPretty . }}\" to list all fields")
 	getAPIPoliciesCmd.Flags().StringVarP(&getAPIPolicyListCmdLimit, "limit", "l",
 		strconv.Itoa(utils.DefaultPoliciesDisplayLimit), "Maximum number of API Policies to return")
-	getAPIPoliciesCmd.Flags().BoolVarP(&getAllAPIPoliciesAvailable, "all", "", false, "Get all API Polcies")
+	getAPIPoliciesCmd.Flags().BoolVarP(&getAllAPIPoliciesAvailable, "all", "", false, "Get all API Policies")
 	_ = getAPIPoliciesCmd.MarkFlagRequired("environment")
 	getAPIPoliciesCmd.MarkFlagsMutuallyExclusive("limit", "all")
 }
