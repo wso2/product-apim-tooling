@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -69,16 +70,37 @@ func importAPIPolicy(endpoint string, importPath string, accessToken string, isO
 		}
 	}()
 
-	policyFilePath := tmpPath
+	files, err := ioutil.ReadDir(tmpPath)
+
+	if err != nil {
+		return err
+	}
+
+	policyPaths := strings.Split(tmpPath, "/")
+	policyName := policyPaths[len(policyPaths)-1]
+
+	for _, file := range files {
+		originalFilePath := tmpPath + "/" + file.Name()
+		ext := filepath.Ext(originalFilePath)
+
+		expectedPolicyFileName := policyName + ext
+
+		isExt := ext == ".yaml" || ext == ".yml" || ext == ".json" || ext == ".j2" || ext == ".gotmpl"
+
+		if isExt && expectedPolicyFileName != file.Name() {
+			errorTxt := file.Name() + " should be equivalent to the policy name " + policyName
+			utils.HandleErrorAndExit("Policy Directory name and policy files are not consistent", errors.New(errorTxt))
+		}
+	}
 
 	utils.Logln(utils.LogPrefixInfo + "Substituting environment variables in API Policy files...")
-	err = replaceEnvVariablesInPolicies(policyFilePath)
+	err = replaceEnvVariablesInPolicies(tmpPath)
 	if err != nil {
 		return err
 	}
 
 	// if policyFilePath contains a directory, zip it. Otherwise, leave it as it is.
-	policyFilePath, err, cleanupFunc := utils.CreateZipFileFromProject(policyFilePath, false)
+	policyFilePath, err, cleanupFunc := utils.CreateZipFileFromProject(tmpPath, false)
 	if err != nil {
 		return err
 	}
