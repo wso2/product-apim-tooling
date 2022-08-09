@@ -21,6 +21,7 @@ package apim
 type APIPolicyFileData struct {
 	Id                string            `json:"id,omitempty" yaml:"id,omitempty"`
 	Name              string            `json:"name,omitempty" yaml:"name,omitempty"`
+	Version           string            `json:"version,omitempty" yaml:"version,omitempty"`
 	DisplayName       string            `json:"displayName,omitempty" yaml:"displayName,omitempty"`
 	Description       string            `json:"description"`
 	Category          string            `json:"category,omitempty" yaml:"category,omitempty"`

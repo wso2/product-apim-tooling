@@ -42,7 +42,7 @@ func TestExportImportAPIPolicy(t *testing.T) {
 			pathToSpecFile := testutils.DevSampleCaseOperationPolicyDefinitionPath
 			pathToSynapseFile := testutils.DevSampleCaseOperationPolicyPath
 
-			newPolicy := testutils.AddNewAPIPolicy(t, dev, user.ApiPublisher.Username, user.ApiPublisher.Password, pathToSpecFile, pathToSynapseFile)
+			newPolicy := testutils.AddNewAPIPolicy(t, dev, user.ApiCreator.Username, user.ApiCreator.Password, pathToSpecFile, pathToSynapseFile)
 			operationPolicy, _ := testutils.APIPolicyStructToMap(newPolicy)
 			args := &testutils.PolicyImportExportTestArgs{
 				CtlUser:  testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
@@ -56,25 +56,41 @@ func TestExportImportAPIPolicy(t *testing.T) {
 }
 
 // Import an API Policy with the directory path
-func TestImportAPIPolicy(t *testing.T) {
+func TestImportAPIPolicyWithDirectoryPath(t *testing.T) {
 
 	for _, user := range testCaseUsers {
 		t.Run(user.Description, func(t *testing.T) {
 			dev := GetDevClient()
 			prod := GetProdClient()
 
-			pathToSpecFile := testutils.DevSampleCaseOperationPolicyDefinitionPath
-			pathToSynapseFile := testutils.DevSampleCaseOperationPolicyPath
+			pathToPolicyDir := testutils.CustomAddLogMessage
 
-			newPolicy := testutils.AddNewAPIPolicy(t, dev, user.ApiPublisher.Username, user.ApiPublisher.Password, pathToSpecFile, pathToSynapseFile)
-			operationPolicy, _ := testutils.APIPolicyStructToMap(newPolicy)
 			args := &testutils.PolicyImportExportTestArgs{
 				CtlUser:  testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
-				Policy:   operationPolicy,
 				SrcAPIM:  dev,
 				DestAPIM: prod,
 			}
-			testutils.ValidateAPIPolicyExportImport(t, args)
+			testutils.ValidateAPIPolicyImportWithDirectoryPath(t, pathToPolicyDir, args)
+		})
+	}
+}
+
+// Import an API Policy with inconsistent policy file names
+func TestImportAPIPolicyWithInconsistentFileNames(t *testing.T) {
+
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+			prod := GetProdClient()
+
+			pathToPolicyDir := testutils.DevSampleCaseOperationPolicyArtifactsWithInconsistentFileNames
+
+			args := &testutils.PolicyImportExportTestArgs{
+				CtlUser:  testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				SrcAPIM:  dev,
+				DestAPIM: prod,
+			}
+			testutils.ValidateAPIPolicyImportWithInconsistentFileNames(t, pathToPolicyDir, args)
 		})
 	}
 }
@@ -90,7 +106,7 @@ func TestExportImportAPIPolicyWithFormatFlag(t *testing.T) {
 			pathToSpecFile := testutils.DevSampleCaseOperationPolicyDefinitionPath
 			pathToSynapseFile := testutils.DevSampleCaseOperationPolicyPath
 
-			newPolicy := testutils.AddNewAPIPolicy(t, dev, user.ApiPublisher.Username, user.ApiPublisher.Password, pathToSpecFile, pathToSynapseFile)
+			newPolicy := testutils.AddNewAPIPolicy(t, dev, user.ApiCreator.Username, user.ApiCreator.Password, pathToSpecFile, pathToSynapseFile)
 			operationPolicy, _ := testutils.APIPolicyStructToMap(newPolicy)
 			args := &testutils.PolicyImportExportTestArgs{
 				CtlUser:      testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
@@ -217,7 +233,7 @@ func TestAPIPoliciesDelete(t *testing.T) {
 			pathToSpecFile := testutils.DevSampleCaseOperationPolicyDefinitionPath
 			pathToSynapseFile := testutils.DevSampleCaseOperationPolicyPath
 
-			newPolicy := testutils.AddNewAPIPolicy(t, dev, user.ApiPublisher.Username, user.ApiPublisher.Password, pathToSpecFile, pathToSynapseFile)
+			newPolicy := testutils.AddNewAPIPolicy(t, dev, user.ApiCreator.Username, user.ApiCreator.Password, pathToSpecFile, pathToSynapseFile)
 			operationPolicy, _ := testutils.APIPolicyStructToMap(newPolicy)
 
 			args := &testutils.PolicyImportExportTestArgs{
@@ -260,7 +276,7 @@ func TestAPIPoliciesImportFailureWhenPolicyExisted(t *testing.T) {
 			pathToSpecFile := testutils.DevSampleCaseOperationPolicyDefinitionPath
 			pathToSynapseFile := testutils.DevSampleCaseOperationPolicyPath
 
-			newPolicy := testutils.AddNewAPIPolicy(t, dev, user.ApiPublisher.Username, user.ApiPublisher.Password, pathToSpecFile, pathToSynapseFile)
+			newPolicy := testutils.AddNewAPIPolicy(t, dev, user.ApiCreator.Username, user.ApiCreator.Password, pathToSpecFile, pathToSynapseFile)
 			operationPolicy, _ := testutils.APIPolicyStructToMap(newPolicy)
 
 			args := &testutils.PolicyImportExportTestArgs{

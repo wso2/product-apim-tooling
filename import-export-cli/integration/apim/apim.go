@@ -2347,7 +2347,7 @@ func (instance *Client) DeleteAPIPolicy(policyID string, baseTest string) {
 
 	if baseTest == "Delete" {
 		base.ValidateAndLogResponse("apim.DeleteAPIPolicy()", response, 404)
-	} else if baseTest == "Emport" || baseTest == "Import" {
+	} else if baseTest == "Export" || baseTest == "Import" {
 		base.ValidateAndLogResponse("apim.DeleteAPIPolicy()", response, 200)
 	}
 }

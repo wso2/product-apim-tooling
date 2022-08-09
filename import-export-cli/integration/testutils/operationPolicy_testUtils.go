@@ -65,6 +65,8 @@ func ValidateAPIPolicyExportImport(t *testing.T, args *PolicyImportExportTestArg
 
 	exportedOutput, _ := exportAPIPolicy(t, policyName, args.SrcAPIM.GetEnvName())
 
+	fmt.Println("Exported Output: ", exportedOutput)
+
 	args.ImportFilePath = base.GetExportedPathFromOutput(exportedOutput)
 
 	// fmt.Println("Exported Path: ", args.ImportFilePath)
@@ -97,27 +99,10 @@ func ValidateAPIPolicyExportImport(t *testing.T, args *PolicyImportExportTestArg
 }
 
 // ValidateAPIPolicyImportWithDirectoryPath : Validates Importing API Policy with directory path given
-func ValidateAPIPolicyImportWithDirectoryPath(t *testing.T, args *PolicyImportExportTestArgs) {
+func ValidateAPIPolicyImportWithDirectoryPath(t *testing.T, policyDir string, args *PolicyImportExportTestArgs) {
 	t.Helper()
 
-	// Setup apictl envs
-	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
-
-	// Export policy from env 1
-	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
-	policyName := fmt.Sprintf("%v", args.Policy[PolicyNameKey])
-	policyVersion := fmt.Sprintf("%v", args.Policy[PolicyVersionKey])
-
-	args.SrcAPIM.Login(args.CtlUser.Username, args.CtlUser.Password)
-
-	exportedOutput, _ := exportAPIPolicy(t, policyName, args.SrcAPIM.GetEnvName())
-
-	args.ImportFilePath = base.GetExportedPathFromOutput(exportedOutput)
-
-	// fmt.Println("Exported Path: ", args.ImportFilePath)
-	assert.True(t, base.IsFileAvailable(t, args.ImportFilePath))
-
-	args.SrcAPIM.DeleteAPIPolicy(fmt.Sprintf("%v", args.Policy[PolicyIdKey]), "Export")
+	args.ImportFilePath = policyDir
 
 	base.SetupEnv(t, args.DestAPIM.GetEnvName(), args.DestAPIM.GetApimURL(), args.DestAPIM.GetTokenURL())
 
@@ -133,14 +118,42 @@ func ValidateAPIPolicyImportWithDirectoryPath(t *testing.T, args *PolicyImportEx
 
 	args.DestAPIM.Login(args.CtlUser.Username, args.CtlUser.Password)
 
+	pathToPolicySpecFile, err := filepath.Abs(CustomAddLogMessagePolicyDefinitionPathImport)
+
+	assert.Nil(t, err, "Error in getting absolute path")
+
+	policyContent := readAPIPolicyDefinition(t, pathToPolicySpecFile)
+
+	assert.NotNil(t, policyContent, "Error in reading policy definition file")
+
+	policyName := policyContent.Name
+	policyVersion := policyContent.Version
+
 	policyId := args.DestAPIM.GetAPIPolicyID(t, policyName, policyVersion)
 
-	// Get API Policy from env 2
-	importedPolicy := args.DestAPIM.GetAPIPolicy(policyId)
+	assert.NotNil(t, policyId, "Policy import was not successful!")
 
-	// Validate env 1 and env 2 policy is equal
-	ValidatePoliciesEqual(t, args, importedPolicy)
-	cleanUpImportExportPolicies(t, args, policyId)
+	t.Cleanup(func() {
+		args.DestAPIM.Login(args.CtlUser.Username, args.CtlUser.Password)
+		args.DestAPIM.DeleteAPIPolicy(policyId, "Clean Up")
+	})
+}
+
+// ValidateAPIPolicyImportWithInconsistentFileNames : Validates Importing API Policy withinconsistent policy file names
+func ValidateAPIPolicyImportWithInconsistentFileNames(t *testing.T, policyDir string, args *PolicyImportExportTestArgs) {
+	t.Helper()
+
+	args.ImportFilePath = policyDir
+
+	base.SetupEnv(t, args.DestAPIM.GetEnvName(), args.DestAPIM.GetApimURL(), args.DestAPIM.GetTokenURL())
+
+	// Import API Policy to env 2
+	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	_, err := importAPIPolicy(t, args)
+
+	assert.NotNil(t, err, "Error while importing the API Policy")
+	assert.Contains(t, err, "Policy Directory name and policy files are not consistent")
 }
 
 // ValidateAPIPolicyExportImport : Validates Exporting API Policy from source env and Importing to destination env
@@ -172,7 +185,8 @@ func ValidateAPIPolicyExportImportWithFormatFlag(t *testing.T, args *PolicyImpor
 	isPolicyFileExist := false
 
 	for _, file := range zipFile.File {
-		if policyDef == file.Name {
+		fmt.Println("File: ", file.Name)
+		if policyDef == strings.Split(file.Name, "/")[1] {
 			isPolicyFileExist = true
 		}
 	}
@@ -346,6 +360,7 @@ func APIPolicyStructToMap(policy interface{}) (map[string]interface{}, error) {
 func cleanUpImportExportPolicies(t *testing.T, args *PolicyImportExportTestArgs, policyId string) {
 
 	file := args.ImportFilePath
+	fmt.Println("Clean: ", policyId)
 	t.Cleanup(func() {
 		t.Log("base.RemoveExportedAPIPolicyFile() - file path:", file)
 		if _, err := os.Stat(file); err == nil {
