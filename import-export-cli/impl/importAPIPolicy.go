@@ -116,12 +116,15 @@ func importAPIPolicy(endpoint string, importPath string, accessToken string, isO
 		utils.Logln(utils.LogPrefixError, err)
 		return err
 	}
+
+	var errorResponse utils.HttpErrorResponse
+
 	if resp.StatusCode() == http.StatusCreated || resp.StatusCode() == http.StatusOK {
 		// 201 Created or 200 OK
 		fmt.Println("Successfully Imported API Policy.")
 		return nil
 	} else if resp.StatusCode() == http.StatusConflict {
-		var errorResponse utils.HttpErrorResponse
+
 		err := json.Unmarshal(resp.Body(), &errorResponse)
 
 		if err != nil {
@@ -135,7 +138,13 @@ func importAPIPolicy(endpoint string, importPath string, accessToken string, isO
 		fmt.Println("Status: " + resp.Status())
 		fmt.Println("Response:", resp.IsSuccess())
 
-		return errors.New(resp.Status())
+		err := json.Unmarshal(resp.Body(), &errorResponse)
+
+		if err != nil {
+			return err
+		}
+
+		return errors.New(errorResponse.Status)
 	}
 
 	return nil
