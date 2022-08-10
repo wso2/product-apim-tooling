@@ -53,6 +53,7 @@ const (
 	customThrottlePolicyQuery       = "global"
 	advancedThrottlePolicyQuery     = "api"
 	subscriptionThrottlePolicyQuery = "sub"
+	operationPolicyResourcePath     = "/operation-policies"
 )
 
 // Client : Enables interacting with an instance of APIM
@@ -2302,7 +2303,7 @@ func getTokenURL(host string, offset int) string {
 func (instance *Client) GetAPIPolicies(t *testing.T, offset, limit string) *APIPoliciesList {
 	var policyListResponse *APIPoliciesList
 
-	getPoliciesURL := instance.publisherRestURL + "/operation-policies"
+	getPoliciesURL := instance.publisherRestURL + operationPolicyResourcePath
 
 	queryParams := "offset=" + offset + "&limit=" + limit
 
@@ -2333,7 +2334,7 @@ func (instance *Client) GetAPIPolicies(t *testing.T, offset, limit string) *APIP
 // DeleteAPIPolicy : Deletes API Policy from APIM using ID
 func (instance *Client) DeleteAPIPolicy(policyID, baseTest string) {
 
-	policiesURL := instance.publisherRestURL + "/operation-policies/" + policyID
+	policiesURL := instance.publisherRestURL + operationPolicyResourcePath + policyID
 
 	request := base.CreateDelete(policiesURL)
 
@@ -2356,7 +2357,7 @@ func (instance *Client) DeleteAPIPolicy(policyID, baseTest string) {
 func (instance *Client) GetAPIPolicy(policyId string) map[string]interface{} {
 	var policyResponse map[string]interface{}
 
-	policiesURL := instance.publisherRestURL + "/operation-policies/" + policyId
+	policiesURL := instance.publisherRestURL + operationPolicyResourcePath + policyId
 
 	request := base.CreateGet(policiesURL)
 
@@ -2381,7 +2382,7 @@ func (instance *Client) GetAPIPolicyID(t *testing.T, policyName, policyVersion s
 
 	queryParams := "name:" + policyName + " version:" + policyVersion
 
-	getPoliciesURL := instance.publisherRestURL + "/operation-policies"
+	getPoliciesURL := instance.publisherRestURL + operationPolicyResourcePath
 
 	request := base.CreateGet(getPoliciesURL)
 
@@ -2414,7 +2415,7 @@ func (instance *Client) GetAPIPolicyID(t *testing.T, policyName, policyVersion s
 func (instance *Client) AddAPIPolicy(t *testing.T, policySpec []byte, synapseDefFilePath, username, password string, doClean bool) map[string]interface{} {
 	var apiPolicyResponse map[string]interface{}
 
-	apiPolicyURL := instance.publisherRestURL + "/operation-policies"
+	apiPolicyURL := instance.publisherRestURL + operationPolicyResourcePath
 
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
