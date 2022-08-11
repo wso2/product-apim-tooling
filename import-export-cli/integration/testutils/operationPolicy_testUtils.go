@@ -513,8 +513,6 @@ func ValidateAPIPolicyDelete(t *testing.T, args *PolicyImportExportTestArgs) {
 
 	assert.Nil(t, err, "Error while deleting the API Policy")
 
-	args.SrcAPIM.Login(args.CtlUser.Username, args.CtlUser.Password)
-
 }
 
 func deleteAPIPolicy(t *testing.T, name string, args *PolicyImportExportTestArgs) (string, error) {
