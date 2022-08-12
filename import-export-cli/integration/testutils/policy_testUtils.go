@@ -89,16 +89,9 @@ func ValidateThrottlingPolicyDelete(t *testing.T, args *PolicyImportExportTestAr
 
 	policyName := fmt.Sprintf("%v", args.Policy[policyNameKey])
 
-	policyId := fmt.Sprintf("%v", args.Policy[policyIDKey])
-
 	_, err := deleteThrottlingPolicy(t, policyName, policyType, args)
 
 	assert.Nil(t, err, "Error while deleting the API Policy")
-
-	t.Cleanup(func() {
-		args.SrcAPIM.Login(username, password)
-		args.SrcAPIM.DeleteThrottlePolicyWithouValidation(policyId, policyType)
-	})
 
 }
 
@@ -256,6 +249,11 @@ func createExportedThrottlePolicyFile(t *testing.T, client *apim.Client, policyT
 	policyMap, _ := PolicyStructToMap(policyData)
 	var yamlMap yaml.MapSlice
 	yamlBytes, err := yaml.Marshal(policyMap)
+
+	if err != nil {
+		return "", "", err
+	}
+
 	err = yaml.Unmarshal(yamlBytes, &yamlMap)
 	if err != nil {
 		return "", policyData, err
@@ -319,7 +317,7 @@ func importThrottlePolicy(t *testing.T, username, password, policyName, policyTy
 	if doClean {
 		t.Cleanup(func() {
 			args.DestAPIM.Login(username, password)
-			args.DestAPIM.DeleteThrottlePolicyByName(t, policyName, policyType)
+			args.DestAPIM.DeleteThrottlePolicyByName(t, policyName, policyType, doClean)
 		})
 	}
 

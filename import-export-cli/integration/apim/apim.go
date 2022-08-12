@@ -2077,14 +2077,14 @@ func (instance *Client) AddThrottlePolicy(t *testing.T, policy interface{}, user
 	if doClean {
 		t.Cleanup(func() {
 			instance.Login(username, password)
-			instance.DeleteThrottlePolicy(policyId, policyType)
+			instance.DeleteThrottlePolicy(policyId, policyType, doClean)
 		})
 	}
 	return throttlePolicyResponse
 }
 
 // DeleteThrottlePolicy : Deletes Throttling Policy from APIM using UUID
-func (instance *Client) DeleteThrottlePolicy(policyID, policyType string) {
+func (instance *Client) DeleteThrottlePolicy(policyID, policyType string, doClean bool) {
 	policiesURL := instance.adminRestURL + "/throttling/policies/" + policyType + "/" + policyID
 
 	request := base.CreateDelete(policiesURL)
@@ -2095,21 +2095,9 @@ func (instance *Client) DeleteThrottlePolicy(policyID, policyType string) {
 
 	defer response.Body.Close()
 
-	base.ValidateAndLogResponse("apim.DeleteThrottlePolicy()", response, 200)
-}
-
-// DeleteThrottlePolicyWithouValidation : Deletes Throttling Policy from APIM using UUID without validating
-func (instance *Client) DeleteThrottlePolicyWithouValidation(policyID, policyType string) {
-	policiesURL := instance.adminRestURL + "/throttling/policies/" + policyType + "/" + policyID
-
-	request := base.CreateDelete(policiesURL)
-	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
-	base.LogRequest("apim.DeleteThrottlePolicyWithoutValidation()", request)
-
-	response := base.SendHTTPRequest(request)
-
-	defer response.Body.Close()
-
+	if !doClean {
+		base.ValidateAndLogResponse("apim.DeleteThrottlePolicy()", response, 200)
+	}
 }
 
 // GetThrottlePolicy : Get Throttle Policy from APIM using UUID
@@ -2132,9 +2120,9 @@ func (instance *Client) GetThrottlePolicy(policyID, policyType string) map[strin
 }
 
 // DeleteThrottlePolicyByName : Deletes Throttling Policy from APIM using policy name
-func (instance *Client) DeleteThrottlePolicyByName(t *testing.T, policyName, policyType string) {
+func (instance *Client) DeleteThrottlePolicyByName(t *testing.T, policyName, policyType string, doClean bool) {
 	policyID := instance.GetThrottlePolicyID(t, policyName, policyType)
-	instance.DeleteThrottlePolicy(policyID, policyType)
+	instance.DeleteThrottlePolicy(policyID, policyType, doClean)
 }
 
 // GetThrottlePolicyID : Get Throttle Policy UUID using policy name from APIM
