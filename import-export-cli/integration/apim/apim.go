@@ -53,7 +53,7 @@ const (
 	customThrottlePolicyQuery       = "global"
 	advancedThrottlePolicyQuery     = "api"
 	subscriptionThrottlePolicyQuery = "sub"
-	operationPolicyResourcePath     = "/operation-policies"
+	operationPolicyResourcePath     = "/operation-policies/"
 )
 
 // Client : Enables interacting with an instance of APIM
@@ -2346,11 +2346,16 @@ func (instance *Client) DeleteAPIPolicy(policyID, baseTest string) {
 
 	defer response.Body.Close()
 
-	if baseTest == "Delete" {
-		base.ValidateAndLogResponse("apim.DeleteAPIPolicy()", response, 404)
-	} else if baseTest == "Export" || baseTest == "Import" {
+	if baseTest != "cleanup" {
 		base.ValidateAndLogResponse("apim.DeleteAPIPolicy()", response, 200)
 	}
+}
+
+// DeleteAPIPolicyByNameAndVersion : Deletes API Policy from APIM using name and version
+func (instance *Client) DeleteAPIPolicyByNameAndVersion(t *testing.T, policyName, policyVersion, baseTest string) {
+
+	policyId := instance.GetAPIPolicyID(t, policyName, policyVersion)
+	instance.DeleteAPIPolicy(policyId, baseTest)
 }
 
 // GetAPIPolicy : Get API Policy from APIM using Id
@@ -2412,7 +2417,7 @@ func (instance *Client) GetAPIPolicyID(t *testing.T, policyName, policyVersion s
 }
 
 // AddAPIPolicy : Add new API Policy of different policy types to APIM
-func (instance *Client) AddAPIPolicy(t *testing.T, policySpec []byte, synapseDefFilePath, username, password string, doClean bool) map[string]interface{} {
+func (instance *Client) AddAPIPolicy(t *testing.T, policySpec []byte, synapseDefFilePath, username, password, cleanUpFunction string, doClean bool) map[string]interface{} {
 	var apiPolicyResponse map[string]interface{}
 
 	apiPolicyURL := instance.publisherRestURL + operationPolicyResourcePath
@@ -2476,7 +2481,7 @@ func (instance *Client) AddAPIPolicy(t *testing.T, policySpec []byte, synapseDef
 
 	t.Cleanup(func() {
 		instance.Login(username, password)
-		instance.DeleteAPIPolicy(policyId, "Clean Up")
+		instance.DeleteAPIPolicy(policyId, cleanUpFunction)
 	})
 
 	return apiPolicyResponse

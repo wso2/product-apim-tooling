@@ -211,7 +211,8 @@ const (
 	TestSampleDynamicDataPolicyName                = "dynamicAddLogMessage"
 )
 
-const DevFirstDefaultPolicyVersion = "v1"
+const DefaultAPIPolicyVersion = "v1"
 
 const TestAPIPolicyOffset = "0"
 const TestAPIPolicyLimit = "5"
+const CleanUpFunction = "cleanup"

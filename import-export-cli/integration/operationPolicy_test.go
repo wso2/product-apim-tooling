@@ -43,6 +43,7 @@ func TestExportImportAPIPolicy(t *testing.T) {
 				SrcAPIM:  dev,
 				DestAPIM: prod,
 			}
+
 			testutils.ValidateAPIPolicyExportImport(t, args)
 		})
 	}
@@ -59,11 +60,12 @@ func TestImportAPIPolicyWithDirectoryPath(t *testing.T) {
 			pathToPolicyDir := testutils.CustomAddLogMessage
 
 			args := &testutils.PolicyImportExportTestArgs{
-				CtlUser:  testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
-				SrcAPIM:  dev,
-				DestAPIM: prod,
+				CtlUser:        testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				SrcAPIM:        dev,
+				DestAPIM:       prod,
+				ImportFilePath: pathToPolicyDir,
 			}
-			testutils.ValidateAPIPolicyImportWithDirectoryPath(t, pathToPolicyDir, args)
+			testutils.ValidateAPIPolicyImportWithDirectoryPath(t, args)
 		})
 	}
 }
@@ -79,11 +81,12 @@ func TestImportAPIPolicyWithInconsistentFileNames(t *testing.T) {
 			pathToPolicyDir := testutils.DevSampleCaseOperationPolicyArtifactsWithInconsistentFileNames
 
 			args := &testutils.PolicyImportExportTestArgs{
-				CtlUser:  testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
-				SrcAPIM:  dev,
-				DestAPIM: prod,
+				CtlUser:        testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				SrcAPIM:        dev,
+				DestAPIM:       prod,
+				ImportFilePath: pathToPolicyDir,
 			}
-			testutils.ValidateAPIPolicyImportWithInconsistentFileNames(t, pathToPolicyDir, args)
+			testutils.ValidateAPIPolicyImportWithInconsistentFileNames(t, args)
 		})
 	}
 }
