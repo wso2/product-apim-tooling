@@ -97,6 +97,21 @@ type Application struct {
 	GroupID string `json:"groupId"`
 }
 
+type CorrelationComponent struct {
+	Name		string `json:"name"`
+	Enabled		string `json:"enabled"`
+	Properties	[]CorrelationProperties `json:"properties"`
+}
+
+type CorrelationProperties struct {
+	Name		string `json:"name"`
+	Value		[]string `json:"value"`
+}
+
+type CorrelationComponentList struct {
+	Components	[]CorrelationComponent `json:"components"`
+}
+
 type APILogger struct {
 	ID       string `json:"apiId"`
 	Context  string `json:"context"`

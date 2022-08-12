@@ -107,6 +107,7 @@ const defaultTokenEndPoint = "oauth2/token"
 const defaultRevokeEndpointSuffix = "oauth2/revoke"
 const defaultAPILoggingBaseEndpoint = "api/am/devops/v0/tenant-logs"
 const defaultAPILoggingApisEndpoint = "apis"
+const defaultCorrelationLoggingEndpoint = "api/am/devops/v0/config/correlation"
 
 const DefaultEnvironmentName = "default"
 const DefaultTenantDomain = "carbon.super"

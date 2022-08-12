@@ -321,6 +321,18 @@ func GetAPILoggingSetEndpointOfEnv(env, apiId, tenantDomain, filePath string) st
 	}
 }
 
+func GetCorrelationLoggingEndPointOfEnv(env, filePath string) string {
+	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)	
+	if !(envEndpoints.PublisherEndpoint == "" || envEndpoints == nil) {
+		envEndpoints.PublisherEndpoint = AppendSlashToString(envEndpoints.PublisherEndpoint)
+		return envEndpoints.PublisherEndpoint + defaultCorrelationLoggingEndpoint
+	} else {
+		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
+		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
+		return apiManagerEndpoint + defaultCorrelationLoggingEndpoint
+	}	
+}
+
 // Get username of an environment given the environment
 func GetUsernameOfEnv(env, filePath string) string {
 	envKeys, _ := GetKeysOfEnvironment(env, filePath)
