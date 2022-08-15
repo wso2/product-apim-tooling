@@ -95,6 +95,25 @@ func ValidateThrottlingPolicyDelete(t *testing.T, args *PolicyImportExportTestAr
 
 }
 
+// Validates whether the throttling policy deletion not exists
+func ValidateThrottlingPolicyDeleteNotExists(t *testing.T, args *PolicyImportExportTestArgs, username, password, policyType string) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	base.WaitForIndexing()
+
+	policyName := base.GenerateRandomString()
+
+	_, err := deleteThrottlingPolicy(t, policyName, policyType, args)
+
+	assert.NotNil(t, err, "Error while deleting the API Policy")
+
+}
+
 func deleteThrottlingPolicy(t *testing.T, name string, policyType string, args *PolicyImportExportTestArgs) (string, error) {
 	output, err := base.Execute(t, "delete", "policy", "rate-limiting", "-e", args.SrcAPIM.EnvName, "-n", name, "-t", policyType, "-k", "--verbose")
 	return output, err

@@ -484,3 +484,31 @@ func TestThrottlingPoliciesDelete(t *testing.T) {
 		})
 	}
 }
+
+// Delete Throttling Policy which is not existing.
+func TestThrottlingPoliciesDeleteNotExists(t *testing.T) {
+
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			dev := GetDevClient()
+			prod := GetProdClient()
+
+			throttlePolicy := testutils.AddNewThrottlePolicy(t, dev, user.Admin.Username, user.Admin.Password, apim.AdvancedThrottlePolicyType, true)
+			args := &testutils.PolicyImportExportTestArgs{
+				CtlUser:  testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Policy:   throttlePolicy,
+				SrcAPIM:  dev,
+				DestAPIM: prod,
+				Update:   false,
+			}
+			adminUsername := superAdminUser
+			adminPassword := superAdminPassword
+			if isTenantUser(args.CtlUser.Username, TENANT1) {
+				adminUsername = adminUsername + "@" + TENANT1
+			}
+
+			testutils.ValidateThrottlingPolicyDeleteNotExists(t, args, adminUsername, adminPassword, apim.AdvancedThrottlePolicyType)
+		})
+	}
+}
