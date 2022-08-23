@@ -458,7 +458,7 @@ func TestExportImportThrottlePolicyWithoutTypeFlag(t *testing.T) {
 }
 
 // Delete Throttling Policy by comparing the status code.
-func TestThrottlingPoliciesDelete(t *testing.T) {
+func TestThrottlingPolicyDelete(t *testing.T) {
 
 	for _, user := range testCaseUsers {
 		t.Run(user.Description, func(t *testing.T) {
@@ -474,19 +474,14 @@ func TestThrottlingPoliciesDelete(t *testing.T) {
 				DestAPIM: prod,
 				Update:   false,
 			}
-			adminUsername := superAdminUser
-			adminPassword := superAdminPassword
-			if isTenantUser(args.CtlUser.Username, TENANT1) {
-				adminUsername = adminUsername + "@" + TENANT1
-			}
 
-			testutils.ValidateThrottlingPolicyDelete(t, args, adminUsername, adminPassword, apim.AdvancedThrottlePolicyType)
+			testutils.ValidateThrottlingPolicyDelete(t, args, apim.AdvancedThrottlePolicyType)
 		})
 	}
 }
 
 // Delete Throttling Policy which is not existing.
-func TestThrottlingPoliciesDeleteNotExists(t *testing.T) {
+func TestThrottlingPolicyDeleteNotExists(t *testing.T) {
 
 	for _, user := range testCaseUsers {
 		t.Run(user.Description, func(t *testing.T) {
@@ -502,13 +497,8 @@ func TestThrottlingPoliciesDeleteNotExists(t *testing.T) {
 				DestAPIM: prod,
 				Update:   false,
 			}
-			adminUsername := superAdminUser
-			adminPassword := superAdminPassword
-			if isTenantUser(args.CtlUser.Username, TENANT1) {
-				adminUsername = adminUsername + "@" + TENANT1
-			}
 
-			testutils.ValidateThrottlingPolicyDeleteNotExists(t, args, adminUsername, adminPassword, apim.AdvancedThrottlePolicyType)
+			testutils.ValidateThrottlingPolicyDeleteNotExists(t, args, apim.AdvancedThrottlePolicyType)
 		})
 	}
 }

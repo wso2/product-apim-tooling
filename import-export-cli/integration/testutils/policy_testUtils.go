@@ -77,7 +77,7 @@ func ValidateThrottlePolicyExportImport(t *testing.T, args *PolicyImportExportTe
 }
 
 // Validates whether the throttling policy deletion is complete
-func ValidateThrottlingPolicyDelete(t *testing.T, args *PolicyImportExportTestArgs, username, password, policyType string) {
+func ValidateThrottlingPolicyDelete(t *testing.T, args *PolicyImportExportTestArgs, policyType string) {
 	t.Helper()
 
 	// Setup apictl envs
@@ -96,7 +96,7 @@ func ValidateThrottlingPolicyDelete(t *testing.T, args *PolicyImportExportTestAr
 }
 
 // Validates whether the throttling policy deletion not exists
-func ValidateThrottlingPolicyDeleteNotExists(t *testing.T, args *PolicyImportExportTestArgs, username, password, policyType string) {
+func ValidateThrottlingPolicyDeleteNotExists(t *testing.T, args *PolicyImportExportTestArgs, policyType string) {
 	t.Helper()
 
 	// Setup apictl envs
