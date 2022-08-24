@@ -187,7 +187,6 @@ func ValidateAPIPolicyExportImportWithFormatFlag(t *testing.T, args *PolicyImpor
 
 	assert.True(t, isPolicyFileExist, "Policy Definition File does not exist in JSON format")
 
-	// fmt.Println("Exported Path: ", args.ImportFilePath)
 	assert.True(t, base.IsFileAvailable(t, args.ImportFilePath))
 
 	base.SetupEnv(t, args.DestAPIM.GetEnvName(), args.DestAPIM.GetApimURL(), args.DestAPIM.GetTokenURL())
