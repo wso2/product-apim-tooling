@@ -293,7 +293,7 @@ func AddNewAPIPolicy(t *testing.T, client *apim.Client, username, password, path
 	doClean := true
 
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	createdPolicy := client.AddAPIPolicy(t, policySpecFileData, pathToSynapseDefFile, username, password, CleanUpFunction, doClean)
@@ -402,7 +402,7 @@ func ValidateAPIPoliciesListWithLimit(t *testing.T, args *PolicyImportExportTest
 	err := json.Unmarshal([]byte(output), &policySpecDataList)
 
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	args.SrcAPIM.Login(args.CtlUser.Username, args.CtlUser.Password)
@@ -411,7 +411,7 @@ func ValidateAPIPoliciesListWithLimit(t *testing.T, args *PolicyImportExportTest
 
 	limit, err := strconv.Atoi(TestAPIPolicyLimit)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	validateListAPIPoliciesEqualWithLimit(t, policySpecDataList, apiPolicyList, limit)
@@ -435,7 +435,7 @@ func ValidateAPIPoliciesListWithDefaultLimit(t *testing.T, args *PolicyImportExp
 	err := json.Unmarshal([]byte(output), &policySpecDataList)
 
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	args.SrcAPIM.Login(args.CtlUser.Username, args.CtlUser.Password)
@@ -444,7 +444,7 @@ func ValidateAPIPoliciesListWithDefaultLimit(t *testing.T, args *PolicyImportExp
 
 	limit, err := strconv.Atoi(DefaultPolicyListLimit)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	validateListAPIPoliciesEqualWithLimit(t, policySpecDataList, apiPolicyList, limit)
@@ -487,7 +487,7 @@ func ValidateAPIPoliciesListWithAllFlag(t *testing.T, args *PolicyImportExportTe
 	err := json.Unmarshal([]byte(output), &policySpecDataList)
 
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	args.SrcAPIM.Login(args.CtlUser.Username, args.CtlUser.Password)
@@ -613,14 +613,14 @@ func readAPIPolicyDefinition(t *testing.T, path string) apim.PolicySpecData {
 	// Read the file in the path
 	sampleData, err := ioutil.ReadFile(path)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	// Extract the content to a structure
 	sampleContent := apim.APIPolicyFile{}
 	err = yaml.Unmarshal(sampleData, &sampleContent)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	policyContent, err := apiPolicyDataStructToMap(sampleContent.Data)
@@ -629,7 +629,7 @@ func readAPIPolicyDefinition(t *testing.T, path string) apim.PolicySpecData {
 	fmt.Println("Mapped Data: ", policyContent)
 
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	return policyContent
