@@ -20,12 +20,13 @@ package impl
 
 import (
 	"fmt"
-	"github.com/spf13/cast"
-	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
 	"path/filepath"
 	"strconv"
+
+	"github.com/spf13/cast"
+	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 var apiExportDir string
@@ -164,8 +165,8 @@ func ExportAPIs(credential credentials.Credential, exportRelatedFilesPath, cmdEx
 					revisionCount, revisions, err := getRevisionsListForAPI(accessToken, cmdExportEnvironment, apis[i],
 						exportAllRevisions)
 					if err != nil {
-						fmt.Println("An error occurred while getting the revisions list for API " + apis[i].Version +
-							"_" + apis[i].Version, err)
+						fmt.Println("An error occurred while getting the revisions list for API "+apis[i].Version+
+							"_"+apis[i].Version, err)
 					} else if revisionCount > 0 {
 						for j := 0; j < len(revisions); j++ {
 							exportApiRevision := utils.GetRevisionNumFromRevisionName(revisions[j].RevisionNumber)

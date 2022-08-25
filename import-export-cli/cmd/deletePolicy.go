@@ -23,24 +23,24 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-const GetPoliciesCmdLiteral = "policies"
-const GetPoliciesCmdShortDesc = "Get Policy list"
-const GetPoliciesCmdLongDesc = "Get a list of Policies in an environment"
-const GetPoliciesCmdExamples = utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdLiteral + ` ` + GetThrottlePoliciesCmdLiteral + ` -e production -q type:sub`
-const GetAPIPoliciesCmdExample = utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetPoliciesCmdLiteral + ` ` + GetAPIPoliciesCmdLiteral + ` -e production`
+// Delete policy command related usage Info
+const DeletePolicyCmdLiteral = "policy"
+const DeletePolicyCmdShortDesc = "Delete a Policy"
+const DeletePolicyCmdLongDesc = "Delete a Policy in an environment"
+const DeletePolicyCmdExamples = utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + DeletePolicyCmdLiteral + ` ` + DeleteAPIPolicyCmdLiteral + ` -n addHeader -e prod`
 
-// GetPoliciesCmd  represents the get command for policies
-var GetPoliciesCmd = &cobra.Command{
-	Use:     GetPoliciesCmdLiteral,
-	Short:   GetPoliciesCmdShortDesc,
-	Long:    GetPoliciesCmdLongDesc,
-	Example: GetPoliciesCmdExamples,
+// DeletePolicyCmd represents the delete policy command
+var DeletePolicyCmd = &cobra.Command{
+	Use:     DeletePolicyCmdLiteral,
+	Short:   DeletePolicyCmdShortDesc,
+	Long:    DeletePolicyCmdLongDesc,
+	Example: DeletePolicyCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + GetCmdLiteral + " called")
+		utils.Logln(utils.LogPrefixInfo + DeletePolicyCmdLiteral + " called")
 	},
 }
 
 // init using Cobra
 func init() {
-	GetCmd.AddCommand(GetPoliciesCmd)
+	DeleteCmd.AddCommand(DeletePolicyCmd)
 }

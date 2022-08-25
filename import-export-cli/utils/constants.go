@@ -68,6 +68,7 @@ const DefaultExportDirName = "exported"
 const ExportedApisDirName = "apis"
 const ExportedPoliciesDirName = "policies"
 const ExportedThrottlePoliciesDirName = "rate-limiting"
+const ExportedAPIPoliciesDirName = "api"
 const ExportedApiProductsDirName = "api-products"
 const ExportedAppsDirName = "apps"
 const ExportedMigrationArtifactsDirName = "migration"
@@ -97,6 +98,7 @@ var DefaultCertDirPath = filepath.Join(ConfigDirPath, CertificatesDirName)
 const defaultApiApplicationImportExportSuffix = "api/am/admin/v3"
 const defaultPublisherApiImportExportSuffix = "api/am/publisher/v3"
 const defaultApiListEndpointSuffix = "api/am/publisher/v3/apis"
+const defaultAPIPolicyListEndpointSuffix = "api/am/publisher/v3/operation-policies"
 const defaultApiProductListEndpointSuffix = "api/am/publisher/v3/api-products"
 const defaultUnifiedSearchEndpointSuffix = "api/am/publisher/v3/search"
 const defaultAdminApplicationListEndpointSuffix = "api/am/admin/v3/applications"
@@ -201,6 +203,7 @@ const (
 	ProjectTypeApplication = "Application"
 	ProjectTypeRevision    = "Revision"
 	ProjectTypePolicy      = "Policy"
+	ProjectTypeAPIPolicy   = "API Policy"
 )
 
 // project param files
@@ -232,6 +235,7 @@ const DefaultApisDisplayLimit = 25
 const DefaultApiProductsDisplayLimit = 25
 const DefaultAppsDisplayLimit = 25
 const DefaultExportFormat = "YAML"
+const DefaultPoliciesDisplayLimit = 25
 
 const InitDirName = string(os.PathSeparator) + "init" + string(os.PathSeparator)
 
@@ -292,3 +296,5 @@ const ZipFileSuffix = ".zip"
 
 // Output format types
 const JsonArrayFormatType = "jsonArray"
+
+const DefaultAPIPolicyVersion = "v1"

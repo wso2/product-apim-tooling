@@ -27,7 +27,8 @@ import (
 const ExportPolicyCmdLiteral = "policy"
 const ExportPolicyCmdShortDesc = "Export/Import a Policy"
 const ExportPolicyCmdLongDesc = "Export/Import a Policy in an environment or Import a Policy to an environment"
-const exportPolicyCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + ` -n Silver -e prod --type subscription`
+const exportPolicyCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportThrottlePolicyCmdLiteral + ` -n Silver -e prod --type subscription
+` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportAPIPolicyCmdLiteral + ` -n addHeader -e prod`
 
 // ExportPolicyCmd represents the export policy command
 var ExportPolicyCmd = &cobra.Command{

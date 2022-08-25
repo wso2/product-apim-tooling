@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/Jeffail/gabs"
 	"github.com/savaki/jq"
 )
@@ -85,6 +86,12 @@ func selectTypeOfOutputEntry(data []byte, artifactType string) ([]byte, error) {
 		return json.MarshalIndent(applicationEntries, "", " ")
 	} else if artifactType == ProjectTypePolicy {
 		var policyEntries []PolicyEntry
+		json.Unmarshal(data, &policyEntries)
+
+		// Formatting data to get the JsonArray object in prettyPrint format
+		return json.MarshalIndent(policyEntries, "", " ")
+	} else if artifactType == ProjectTypeAPIPolicy {
+		var policyEntries []APIPolicy
 		json.Unmarshal(data, &policyEntries)
 
 		// Formatting data to get the JsonArray object in prettyPrint format

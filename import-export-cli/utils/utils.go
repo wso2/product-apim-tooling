@@ -21,16 +21,19 @@ package utils
 import (
 	"bufio"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/go-resty/resty/v2"
 	"golang.org/x/crypto/ssh/terminal"
+	"gopkg.in/yaml.v2"
 )
 
 // Invoke http-post request using go-resty
@@ -99,6 +102,25 @@ func InvokePOSTRequestWithFileAndQueryParams(queryParam map[string]string, url s
 
 	client.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
 	return client.R().SetHeaders(headers).SetQueryParams(queryParam).
+		SetFile(fileParamName, filePath).Post(url)
+}
+
+// Invoke http-post request with file using go-resty
+func InvokePOSTRequestWithFile(url string, headers map[string]string,
+	fileParamName, filePath string) (*resty.Response, error) {
+
+	client := resty.New()
+
+	if Insecure {
+		client.SetTLSClientConfig(
+			&tls.Config{InsecureSkipVerify: true, // To bypass errors in SSL certificates
+				Renegotiation: TLSRenegotiationMode})
+	} else {
+		client.SetTLSClientConfig(GetTlsConfigWithCertificate())
+	}
+
+	client.SetTimeout(time.Duration(HttpRequestTimeout) * time.Millisecond)
+	return client.R().SetHeaders(headers).
 		SetFile(fileParamName, filePath).Post(url)
 }
 
@@ -352,4 +374,34 @@ func GetRevisionNumFromRevisionName(input string) string {
 // Add revision to revision number
 func GetRevisionNamFromRevisionNum(input string) string {
 	return "Revision-" + input
+}
+
+func GetPolicyNameByPolicyDefinitionFile(originalFilePath, ext string) (string, error) {
+	policyDataImport := &PolicyDataImport{}
+	policyDefFile, err := ioutil.ReadFile(originalFilePath)
+	if err != nil {
+		return "", err
+	}
+
+	if ext == ".yaml" || ext == ".yml" {
+		err = yaml.Unmarshal(policyDefFile, &policyDataImport)
+	} else if ext == ".json" {
+		err = json.Unmarshal(policyDefFile, &policyDataImport)
+	}
+
+	if err != nil {
+		return "", err
+	}
+	return policyDataImport.Data.Name, nil
+}
+
+// validate integer values are correctly provided
+func ValidateFlagWithIntegerValues(value string) (int, error) {
+	limit, err := strconv.Atoi(value)
+
+	if err != nil {
+		return -1, err
+	}
+
+	return limit, nil
 }

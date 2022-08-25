@@ -299,6 +299,14 @@ type ThrottlingPolicyDetails struct {
 	Type        string `json:"type"`
 }
 
+type PolicyDataImport struct {
+	Data PolicyData `yaml:"data" json:"data"`
+}
+
+type PolicyData struct {
+	Name string `yaml:"name"`
+}
+
 type ExportThrottlePolicy struct {
 	Type    string        `json:"type"`
 	Subtype string        `json:"subtype"`
@@ -325,6 +333,31 @@ type ThrottlingPolicy struct {
 	StopOnQuotaReach            bool        `json:"stopOnQuotaReach"`
 	MonetizationAttributes      interface{}
 	throttlingPolicyPermissions interface{}
+}
+
+type APIPoliciesList struct {
+	Count int         `json:"count"`
+	List  []APIPolicy `json:"list"`
+}
+
+type APIPolicy struct {
+	Id                string            `json:"id"`
+	Name              string            `json:"name,omitempty"`
+	DisplayName       string            `json:"displayName,omitempty"`
+	Description       string            `json:"description,omitempty"`
+	Category          string            `json:"category,omitempty"`
+	ApplicableFlows   []string          `json:"applicableFlows"`
+	SupportedGateways []string          `json:"supportedGateways"`
+	PolicyAttributes  []PolicyAttribute `json:"policyAttributes,omitempty"`
+}
+
+type PolicyAttribute struct {
+	Name          string   `json:"name"`
+	DisplayName   string   `json:"displayName"`
+	Description   string   `json:"description"`
+	Type          string   `json:"type"`
+	AllowedValues []string `json:"allowedValues"`
+	Required      bool     `json:"required"`
 }
 
 //Subscription creation request
