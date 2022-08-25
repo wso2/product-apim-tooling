@@ -36,4 +36,5 @@ NOTE: Both the flags (--name (-n), and --environment (-e)) are mandatory.
 
 * [apictl delete](apictl_delete.md)	 - Delete an API/APIProduct/Application/Policy in an environment
 * [apictl delete policy api](apictl_delete_policy_api.md) - Delete an API Policy in an environment
+* [apictl delete policy rate-limiting](apictl_delete_policy_rate-limiting.md) - Delete a Throttling Policy in an environment
 
