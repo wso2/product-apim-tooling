@@ -17,11 +17,12 @@ require (
 	github.com/renstrom/dedent v1.0.0
 	github.com/savaki/jq v0.0.0-20161209013833-0e6baecebbf8
 	github.com/spf13/cast v1.3.1
-	github.com/spf13/cobra v1.1.1
+	github.com/spf13/cobra v1.5.0
 	github.com/stretchr/testify v1.7.0
 	github.com/wso2/k8s-api-operator/api-operator v0.0.0-20210223103109-66ee766c8413
 	golang.org/x/crypto v0.0.0-20200414173820-0848c9571904
-	gopkg.in/yaml.v2 v2.3.0
+	golang.org/x/sys v0.0.0-20220823224334-20c2bfdbfe24 // indirect
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 replace k8s.io/client-go => k8s.io/client-go v0.18.2
