@@ -57,9 +57,7 @@ var DeleteThrottlingPolicyCmd = &cobra.Command{
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
-
 		executeDeleteThrottlingPolicyCmd(cred)
-
 	},
 }
 

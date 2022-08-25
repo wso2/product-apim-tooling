@@ -44,8 +44,6 @@ func DeleteThrottlingPolicy(accessToken, policyName, policyType, environment str
 	resource := "throttling/policies/search"
 	searchEndpoint := endpoint + resource
 
-	// queryParamString := `query=name:` + policyName
-
 	switch policyType {
 	case CmdPolicyTypeSubscription:
 		throttlingPolicyType = QueryPolicyTypeSubscription
@@ -85,18 +83,13 @@ func DeleteThrottlingPolicy(accessToken, policyName, policyType, environment str
 		resource += utils.ThrottlingPolicyTypeCus
 	}
 
-	resource = utils.AppendSlashToString(resource)
-
-	resource += policyId
-
+	resource = utils.AppendSlashToString(resource) + policyId
 	url = endpoint + resource
-	fmt.Println(url)
 	utils.Logln(utils.LogPrefixInfo+"DeleteThrottlingPolicy: URL:", url)
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 
 	resp, err := utils.InvokeDELETERequest(url, headers)
-
 	if err != nil {
 		return nil, err
 	}
