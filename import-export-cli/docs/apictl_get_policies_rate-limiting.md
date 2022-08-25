@@ -1,6 +1,6 @@
 ## apictl get policies rate-limiting
 
-Display a list of APIs in an environment
+Display a list of Throttling Policies in an environment
 
 ### Synopsis
 
@@ -13,7 +13,7 @@ apictl get policies rate-limiting [flags]
 ### Examples
 
 ```
-apictl get apictl get policies rate-limiting -e production -q type:sub rate-limiting -e dev
+apictl get policies rate-limiting -e production -q type:sub
 apictl get policies rate-limiting -e prod -q type:api
 apictl get policies rate-limiting -e prod -q type:sub
 apictl get policies rate-limiting -e staging -q type:global

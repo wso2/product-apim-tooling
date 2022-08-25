@@ -238,6 +238,35 @@
 </code></pre>
 <ul>
     <li>
+        <h4 id="export-policy-api">export policy api</h4>
+        <pre><code class="lang-bash">   Flags:
+       Required:
+            --name, -n
+            --environment, -e
+       Optional:
+            --format
+   Examples:
+            apictl export policy api -n AddHeader -e dev
+            apictl export policy api -n AddHeader -e prod --format JSON
+</code></pre>
+    </li>
+</ul>
+<ul>
+    <li>
+        <h4 id="import-policy-api">import policy api</h4>
+    </li>
+</ul>
+<pre><code class="lang-bash">        Flags:
+            Required
+                  --file, -f
+                  --environment, -e
+        Examples:
+            apictl import policy api -f dev/add_header_v1.zip -e dev
+            apictl import policy api -f ~/Desktop/add_header_v1.zip -e prod
+            apictl import policy api -f dev/AddHeader -e dev
+</code></pre>
+<ul>
+    <li>
         <h4 id="get-apis">get apis</h4>
         <pre><code class="lang-bash">      Flags:
           Required:
@@ -300,6 +329,22 @@
             apictl get policies rate-limiting -e dev
             apictl get policies rate-limiting -e dev -q type:app
             apictl get policies rate-limiting  -e dev -q type:sub
+
+</code></pre>
+    </li>
+
+    <li>
+        <h4 id="get-policies-api">get policies api</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required
+                  --environment, -e
+            Optional
+                  --all
+                  --limit, -l
+        Examples:
+            apictl get policies api -e dev
+            apictl get policies api -e dev --all
+            apictl get policies api -e dev --limit 10
 
 </code></pre>
     </li>
@@ -489,6 +534,31 @@
    Examples:
        apictl delete api -n TestAPI -v 1.0.0 -r admin -e staging
        apictl delete api -n TestAPI -v 1.0.0 -e production
+</code></pre>
+    </li>
+</ul>
+<ul>
+    <li>
+        <h4 id="delete-policy-api">delete policy api</h4>
+        <pre><code class="lang-bash">   Flags:
+       Required:
+           --name, -n
+           --environment, -e
+   Examples:
+       apictl delete policy api -n AddHeader -e staging
+</code></pre>
+    </li>
+</ul>
+<ul>
+    <li>
+        <h4 id="delete-policy-rate-limiting">delete policy rate-limiting</h4>
+        <pre><code class="lang-bash">   Flags:
+       Required:
+           --name, -n
+           --type
+           --environment, -e
+   Examples:
+       apictl delete policy rate-limiting -n AppPolicy --type app -e staging
 </code></pre>
     </li>
 </ul>
