@@ -7,15 +7,15 @@ Import an API Policy
 Import an API Policy to an environment
 
 ```
-apictl import policy api --file <path-to-api-policy> --environment <environment> [flags]
+apictl import policy api --file <path-to-api> --environment <environment> [flags]
 ```
 
 ### Examples
 
 ```
-apictl import policy api -f add_header_v1.zip -e dev
-apictl import policy api -f AddHeader -e production
-NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory
+apictl import policy api -f addHeader_v1.zip -e dev
+ apictl import policyapi -f AddHeader -e production
+ NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory
 ```
 
 ### Options
@@ -23,7 +23,7 @@ NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory
 ```
   -e, --environment string   Environment from the which the API Policy should be imported
   -f, --file string          File path of the API Policy to be imported
-  -h, --help                 help for api policy
+  -h, --help                 help for api
 ```
 
 ### Options inherited from parent commands

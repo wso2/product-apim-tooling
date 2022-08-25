@@ -14,16 +14,16 @@ apictl export policy api (--name <name-of-the-api-policy> --environment <environ
 
 ```
 apictl export policy api -n addHeader -e dev
-NOTE: All the 2 flags (--name (-n) and --environment (-e)) are mandatory.
+ NOTE: All the 2 flags (--name (-n) and --environment (-e)) are mandatory.
 ```
 
 ### Options
 
 ```
-  -e, --environment string   Environment to which the API Policies should be exported
-  -h, --help                 help for api policy
+  -e, --environment string   Environment of the API Policy to be exported
+      --format string        Type of the Policy definition file exported
+  -h, --help                 help for api
   -n, --name string          Name of the API Policy to be exported
-  --format                   API Policy definition file format to be exported (JSON, YAML)
 ```
 
 ### Options inherited from parent commands
@@ -35,5 +35,5 @@ NOTE: All the 2 flags (--name (-n) and --environment (-e)) are mandatory.
 
 ### SEE ALSO
 
-* [apictl export policy](apictl_export_policy.md) - Export/Import a Policy
+* [apictl export policy](apictl_export_policy.md)	 - Export/Import a Policy
 

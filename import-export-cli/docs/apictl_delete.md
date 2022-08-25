@@ -39,5 +39,5 @@ apictl delete app -n TestApplication -o admin -e dev
 * [apictl delete api](apictl_delete_api.md)	 - Delete API
 * [apictl delete api-product](apictl_delete_api-product.md)	 - Delete API Product
 * [apictl delete app](apictl_delete_app.md)	 - Delete App
-* [apictl delete policy](apictl_delete_policy.md)	 - Delete Policy
+* [apictl delete policy](apictl_delete_policy.md)	 - Delete a Policy
 
