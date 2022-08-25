@@ -65,8 +65,6 @@ func ValidateAPIPolicyExportImport(t *testing.T, args *PolicyImportExportTestArg
 
 	exportedOutput, _ := exportAPIPolicy(t, policyName, args)
 
-	fmt.Println("Exported Output: ", exportedOutput)
-
 	args.ImportFilePath = base.GetExportedPathFromOutput(exportedOutput)
 
 	assert.True(t, base.IsFileAvailable(t, args.ImportFilePath))
@@ -179,7 +177,6 @@ func ValidateAPIPolicyExportImportWithFormatFlag(t *testing.T, args *PolicyImpor
 	isPolicyFileExist := false
 
 	for _, file := range zipFile.File {
-		fmt.Println("File: ", file.Name)
 		if policyDef == strings.Split(file.Name, "/")[1] {
 			isPolicyFileExist = true
 		}
@@ -255,7 +252,6 @@ func ValidateAPIPolicyImportFailureWhenPolicyExisted(t *testing.T, args *PolicyI
 
 	args.ImportFilePath = base.GetExportedPathFromOutput(exportedOutput)
 
-	fmt.Println("Exported Path: ", args.ImportFilePath)
 	assert.True(t, base.IsFileAvailable(t, args.ImportFilePath))
 
 	base.SetupEnv(t, args.DestAPIM.GetEnvName(), args.DestAPIM.GetApimURL(), args.DestAPIM.GetTokenURL())
@@ -625,7 +621,6 @@ func readAPIPolicyDefinition(t *testing.T, path string) apim.PolicySpecData {
 	policyContent, err := apiPolicyDataStructToMap(sampleContent.Data)
 	policyContent.Type = sampleContent.Type
 	policyContent.Version = DefaultAPIPolicyVersion
-	fmt.Println("Mapped Data: ", policyContent)
 
 	if err != nil {
 		t.Fatal(err)
