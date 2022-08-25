@@ -2454,23 +2454,15 @@ func (instance *Client) AddAPIPolicy(t *testing.T, policySpec []byte, synapseDef
 		t.Error(err)
 	}
 
-	fmt.Println("Body: ", body)
-
 	request := base.CreatePost(apiPolicyURL, body)
 
 	base.SetDefaultRestAPIHeadersToConsumeFormData(instance.accessToken, request)
-
-	fmt.Println("Request: ", request.Header)
-
-	fmt.Println("Request Content: ", request.Body)
 
 	base.LogRequest("apim.AddAPIPolicy()", request)
 
 	response := base.SendHTTPRequest(request)
 
 	defer response.Body.Close()
-
-	fmt.Println("Response Code: ", response.StatusCode)
 
 	base.ValidateAndLogResponse("apim.AddAPIPolicy()", response, 201)
 
