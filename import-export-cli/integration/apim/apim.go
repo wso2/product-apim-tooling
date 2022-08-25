@@ -37,6 +37,7 @@ import (
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/adminservices"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
+
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
@@ -52,6 +53,7 @@ const (
 	customThrottlePolicyQuery       = "global"
 	advancedThrottlePolicyQuery     = "api"
 	subscriptionThrottlePolicyQuery = "sub"
+	operationPolicyResourcePath     = "/operation-policies/"
 )
 
 // Client : Enables interacting with an instance of APIM
@@ -1986,7 +1988,8 @@ func (instance *Client) getToken(username string, password string) string {
 	values.Add("password", password)
 	values.Add("scope",
 		"apim:admin apim:api_view apim:api_create apim:api_publish apim:subscribe apim:api_delete "+
-			"apim:app_import_export apim:api_import_export apim:api_product_import_export apim:app_manage apim:sub_manage")
+			"apim:app_import_export apim:api_import_export apim:api_product_import_export apim:app_manage apim:sub_manage "+
+			"apim:common_operation_policy_view apim:common_operation_policy_manage apim:policies_import_export")
 
 	request.URL.RawQuery = values.Encode()
 
@@ -2294,4 +2297,192 @@ func getDevOpsRestURL(host, version string, offset int) string {
 func getTokenURL(host string, offset int) string {
 	port := 9443 + offset
 	return "https://" + host + ":" + strconv.Itoa(port) + "/oauth2/token"
+}
+
+// GetAPIPolicies : Get API Policies list of all types from APIM
+func (instance *Client) GetAPIPolicies(t *testing.T, offset, limit string) *APIPoliciesList {
+	var policyListResponse *APIPoliciesList
+
+	getPoliciesURL := instance.publisherRestURL + operationPolicyResourcePath
+
+	queryParams := "offset=" + offset + "&limit=" + limit
+
+	if offset != "-1" && limit != "-1" {
+		getPoliciesURL += "?" + queryParams
+	}
+
+	request := base.CreateGet(getPoliciesURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.GetAPIPolicies()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.GetAPIPolicies()", response, 200)
+
+	err := json.NewDecoder(response.Body).Decode(&policyListResponse)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return policyListResponse
+}
+
+// DeleteAPIPolicy : Deletes API Policy from APIM using ID
+func (instance *Client) DeleteAPIPolicy(policyID, baseTest string) {
+
+	policiesURL := instance.publisherRestURL + operationPolicyResourcePath + policyID
+
+	request := base.CreateDelete(policiesURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.DeleteAPIPolicy()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	if baseTest != "cleanup" {
+		base.ValidateAndLogResponse("apim.DeleteAPIPolicy()", response, 200)
+	}
+}
+
+// DeleteAPIPolicyByNameAndVersion : Deletes API Policy from APIM using name and version
+func (instance *Client) DeleteAPIPolicyByNameAndVersion(t *testing.T, policyName, policyVersion, baseTest string) {
+
+	policyId := instance.GetAPIPolicyID(t, policyName, policyVersion)
+	instance.DeleteAPIPolicy(policyId, baseTest)
+}
+
+// GetAPIPolicy : Get API Policy from APIM using Id
+func (instance *Client) GetAPIPolicy(policyId string) map[string]interface{} {
+	var policyResponse map[string]interface{}
+
+	policiesURL := instance.publisherRestURL + operationPolicyResourcePath + policyId
+
+	request := base.CreateGet(policiesURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.GetAPIPolicy()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.GetAPIPolicy()", response, 200)
+
+	json.NewDecoder(response.Body).Decode(&policyResponse)
+
+	return policyResponse
+}
+
+// GetAPIPolicyID : Get API Policy Id using policy name and version from APIM
+func (instance *Client) GetAPIPolicyID(t *testing.T, policyName, policyVersion string) string {
+	var policyListResponse APIPoliciesList
+
+	queryParams := "name:" + policyName + " version:" + policyVersion
+
+	getPoliciesURL := instance.publisherRestURL + operationPolicyResourcePath
+
+	request := base.CreateGet(getPoliciesURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	values := url.Values{}
+	values.Add("query", queryParams)
+
+	request.URL.RawQuery = values.Encode()
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.GetAPIPolicyID()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.GetAPIPolicyID()", response, 200)
+
+	err := json.NewDecoder(response.Body).Decode(&policyListResponse)
+	if err != nil {
+		t.Fatal(err)
+	}
+	apiPolicyList := policyListResponse.List
+	return apiPolicyList[0].Id
+}
+
+// AddAPIPolicy : Add new API Policy of different policy types to APIM
+func (instance *Client) AddAPIPolicy(t *testing.T, policySpec []byte, synapseDefFilePath, username, password, cleanUpFunction string, doClean bool) map[string]interface{} {
+	var apiPolicyResponse map[string]interface{}
+
+	apiPolicyURL := instance.publisherRestURL + operationPolicyResourcePath
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+
+	synapseDefFile, err := os.Open(synapseDefFilePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer synapseDefFile.Close()
+
+	part, err := writer.CreateFormFile("synapsePolicyDefinitionFile", filepath.Base(synapseDefFile.Name()))
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = io.Copy(part, synapseDefFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	part, err = writer.CreateFormField("policySpecFile")
+	if err != nil {
+		t.Fatal(err)
+	}
+	part.Write(policySpec)
+
+	err = writer.Close()
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	fmt.Println("Body: ", body)
+
+	request := base.CreatePost(apiPolicyURL, body)
+
+	base.SetDefaultRestAPIHeadersToConsumeFormData(instance.accessToken, request)
+
+	fmt.Println("Request: ", request.Header)
+
+	fmt.Println("Request Content: ", request.Body)
+
+	base.LogRequest("apim.AddAPIPolicy()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	fmt.Println("Response Code: ", response.StatusCode)
+
+	base.ValidateAndLogResponse("apim.AddAPIPolicy()", response, 201)
+
+	json.NewDecoder(response.Body).Decode(&apiPolicyResponse)
+
+	json.NewDecoder(response.Body).Decode(&apiPolicyResponse)
+	policyId := fmt.Sprintf("%v", apiPolicyResponse["id"])
+
+	t.Cleanup(func() {
+		instance.Login(username, password)
+		instance.DeleteAPIPolicy(policyId, cleanUpFunction)
+	})
+
+	return apiPolicyResponse
 }

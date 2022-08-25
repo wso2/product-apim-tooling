@@ -1,0 +1,26 @@
+type: operation_policy_specification
+version: v4.1.0
+data:
+  name: customAddLogMessageTestOperationPolicy
+  version: v1
+  displayName: Custom Log Policy
+  description: ""
+  category: Mediation
+  applicableFlows:
+  - request
+  - response
+  - fault
+  supportedGateways: []
+  supportedApiTypes:
+  - HTTP
+  policyAttributes:
+  - name: propertyName
+    displayName: Property Name
+    description: Name of the property updated
+    type: String
+    required: true
+  - name: propertyValue
+    displayName: Property Value
+    description: Value of the property updated
+    type: String
+    required: true
