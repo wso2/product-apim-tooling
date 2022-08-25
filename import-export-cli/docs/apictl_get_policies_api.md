@@ -1,10 +1,10 @@
 ## apictl get policies api
 
-Display a list of API Policies in an environment
+Display a list of API Policies
 
 ### Synopsis
 
-Display a list of API Policies in the environment specified by the flag --environment, -e
+Display a list of API Policies in the environment
 
 ```
 apictl get policies api [flags]
@@ -13,22 +13,21 @@ apictl get policies api [flags]
 ### Examples
 
 ```
-apictl get policies api -e production
-apictl get policies api -e prod --all
-apictl get policies api -e prod -l 10
-apictl get policies api -e prod --format jsonArray
-NOTE: The flag (--environment (-e)) is mandatory
-NOTE: Flags (--all) and (--limit (-l)) cannot be used at the same time
+apictl get policies api -e dev
+apictl get policies api -e dev --all
+apictl get policies api -e dev -l 30
+ NOTE: The flag (--environment (-e)) is mandatory
+ NOTE: Flags (--all) and (--limit (-l)) cannot be used at the same time
 ```
 
 ### Options
 
 ```
-  -e, --environment string   Environment of the API Policies to be fetched
-      --format string        Pretty-print API Policies using Go Templates. Use "jsonArray" to list all fields
-  -h, --help                 help for API Policies
-  -l, --limit string         Limit the number of policies fetched
-  --all                      Fetch all available API Policies
+      --all                  Get all API Policies
+  -e, --environment string   Environment to be searched
+      --format string        Pretty-print API Policies using Go Templates. Use "{{ jsonPretty . }}" to list all fields
+  -h, --help                 help for api
+  -l, --limit string         Maximum number of API Policies to return (default "25")
 ```
 
 ### Options inherited from parent commands

@@ -1,28 +1,25 @@
 ## apictl delete policy
 
-Delete Policy
+Delete a Policy
 
 ### Synopsis
 
-Delete a Policy from an environment
+Delete a Policy in an environment
 
 ```
-apictl delete policy [policy type] (--environment <environment-from-which-the-policy-should-be-deleted>) [flags]
+apictl delete policy [flags]
 ```
 
 ### Examples
 
 ```
-apictl delete policy api -n addHeader -e dev
-NOTE: Both the flags (--name (-n), and --environment (-e)) are mandatory.
+apictl delete policy api -n addHeader -e prod
 ```
 
 ### Options
 
 ```
-  -e, --environment string   Environment from which the Policy should be deleted
-  -h, --help                 help for policy
-  -n, --name string          Name of the Policy to be deleted
+  -h, --help   help for policy
 ```
 
 ### Options inherited from parent commands
@@ -34,7 +31,6 @@ NOTE: Both the flags (--name (-n), and --environment (-e)) are mandatory.
 
 ### SEE ALSO
 
-* [apictl delete](apictl_delete.md)	 - Delete an API/APIProduct/Application/Policy in an environment
-* [apictl delete policy api](apictl_delete_policy_api.md) - Delete an API Policy in an environment
-* [apictl delete policy rate-limiting](apictl_delete_policy_rate-limiting.md) - Delete a Throttling Policy in an environment
+* [apictl delete](apictl_delete.md)	 - Delete an API/APIProduct/Application in an environment
+* [apictl delete policy api](apictl_delete_policy_api.md)	 - Delete an API Policy
 
