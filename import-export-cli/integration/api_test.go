@@ -470,8 +470,8 @@ func TestExportImportApiCrossTenantUser(t *testing.T) {
 // Export an API from one environment as super tenant user with Internal/devops role
 // and import to another environment as cross tenant user with Internal/devops role (without preserve-provider=false)
 func TestExportImportApiCrossTenantDevopsUser(t *testing.T) {
-	devopsUsername := devops.UserName
-	devopsPassword := devops.Password
+	superTenantDevopsUsername := devops.UserName
+	superTenantDevopsPassword := devops.Password
 
 	superTenantApiCreator := creator.UserName
 	superTenantApiCreatorPassword := creator.Password
@@ -486,7 +486,7 @@ func TestExportImportApiCrossTenantDevopsUser(t *testing.T) {
 
 	args := &testutils.ApiImportExportTestArgs{
 		ApiProvider: testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
-		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		CtlUser:     testutils.Credentials{Username: superTenantDevopsUsername, Password: superTenantDevopsPassword},
 		Api:         api,
 		SrcAPIM:     dev,
 		DestAPIM:    prod,
@@ -500,6 +500,182 @@ func TestExportImportApiCrossTenantDevopsUser(t *testing.T) {
 
 	// Import the API to env2 as tenant admin across domains
 	testutils.ValidateAPIImportFailure(t, args)
+}
+
+// Export an API with the life cycle status as Blocked and import to another environment as a super tenant user with Internal/devops role
+func TestExportImportApiBlockedSuperTenantDevopsUser(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	superTenantApiCreator := creator.UserName
+	superTenantApiCreatorPassword := creator.Password
+
+	superTenantApiPublisher := publisher.UserName
+	superTenantApiPublisherPassword := publisher.Password
+
+	dev := apimClients[0]
+	prod := apimClients[1]
+
+	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
+	testutils.PublishAPI(dev, superTenantApiPublisher, superTenantApiPublisherPassword, api.ID)
+	api = testutils.ChangeAPILifeCycle(dev, superTenantApiPublisher, superTenantApiPublisherPassword, api.ID, "Block")
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+	}
+
+	testutils.ValidateAPIExportImport(t, args)
+}
+
+// Export an API with the life cycle status as Blocked and import to another environment as a tenant user with Internal/devops role
+func TestExportImportApiBlockedTenantDevopsUser(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	tenantApiCreator := creator.UserName + "@" + TENANT1
+	tenantApiCreatorPassword := creator.Password
+
+	tenantApiPublisher := publisher.UserName + "@" + TENANT1
+	tenantApiPublisherPassword := publisher.Password
+
+	dev := apimClients[0]
+	prod := apimClients[1]
+
+	api := testutils.AddAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword)
+	testutils.PublishAPI(dev, tenantApiPublisher, tenantApiPublisherPassword, api.ID)
+	api = testutils.ChangeAPILifeCycle(dev, tenantApiPublisher, tenantApiPublisherPassword, api.ID, "Block")
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: tenantApiCreator, Password: tenantApiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+	}
+
+	testutils.ValidateAPIExportImport(t, args)
+}
+
+// Export an API with the life cycle status as Deprecated and import to another environment as a super tenant user with Internal/devops role
+func TestExportImportApiDeprecatedSuperTenantDevopsUser(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	superTenantApiCreator := creator.UserName
+	superTenantApiCreatorPassword := creator.Password
+
+	superTenantApiPublisher := publisher.UserName
+	superTenantApiPublisherPassword := publisher.Password
+
+	dev := apimClients[0]
+	prod := apimClients[1]
+
+	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
+	testutils.PublishAPI(dev, superTenantApiPublisher, superTenantApiPublisherPassword, api.ID)
+	api = testutils.ChangeAPILifeCycle(dev, superTenantApiPublisher, superTenantApiPublisherPassword, api.ID, "Deprecate")
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+	}
+
+	testutils.ValidateAPIExportImport(t, args)
+}
+
+// Export an API with the life cycle status as Deprecated and import to another environment as a tenant user with Internal/devops role
+func TestExportImportApiDeprecatedTenantDevopsUser(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	tenantApiCreator := creator.UserName + "@" + TENANT1
+	tenantApiCreatorPassword := creator.Password
+
+	tenantApiPublisher := publisher.UserName + "@" + TENANT1
+	tenantApiPublisherPassword := publisher.Password
+
+	dev := apimClients[0]
+	prod := apimClients[1]
+
+	api := testutils.AddAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword)
+	testutils.PublishAPI(dev, tenantApiPublisher, tenantApiPublisherPassword, api.ID)
+	api = testutils.ChangeAPILifeCycle(dev, tenantApiPublisher, tenantApiPublisherPassword, api.ID, "Deprecate")
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: tenantApiCreator, Password: tenantApiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+	}
+
+	testutils.ValidateAPIExportImport(t, args)
+}
+
+// Export an API with the life cycle status as Retired and import to another environment as a super tenant user with Internal/devops role
+func TestExportImportApiRetiredSuperTenantDevopsUser(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	superTenantApiCreator := creator.UserName
+	superTenantApiCreatorPassword := creator.Password
+
+	superTenantApiPublisher := publisher.UserName
+	superTenantApiPublisherPassword := publisher.Password
+
+	dev := apimClients[0]
+	prod := apimClients[1]
+
+	api := testutils.AddAPI(t, dev, superTenantApiCreator, superTenantApiCreatorPassword)
+	testutils.PublishAPI(dev, superTenantApiPublisher, superTenantApiPublisherPassword, api.ID)
+	testutils.ChangeAPILifeCycle(dev, superTenantApiPublisher, superTenantApiPublisherPassword, api.ID, "Deprecate")
+	api = testutils.ChangeAPILifeCycle(dev, superTenantApiPublisher, superTenantApiPublisherPassword, api.ID, "Retire")
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: superTenantApiCreator, Password: superTenantApiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+	}
+
+	testutils.ValidateAPIExportImport(t, args)
+}
+
+// Export an API with the life cycle status as Retired and import to another environment as a tenant user with Internal/devops role
+func TestExportImportApiRetiredTenantDevopsUser(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	tenantApiCreator := creator.UserName + "@" + TENANT1
+	tenantApiCreatorPassword := creator.Password
+
+	tenantApiPublisher := publisher.UserName + "@" + TENANT1
+	tenantApiPublisherPassword := publisher.Password
+
+	dev := apimClients[0]
+	prod := apimClients[1]
+
+	api := testutils.AddAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword)
+	testutils.PublishAPI(dev, tenantApiPublisher, tenantApiPublisherPassword, api.ID)
+	testutils.ChangeAPILifeCycle(dev, tenantApiPublisher, tenantApiPublisherPassword, api.ID, "Deprecate")
+	api = testutils.ChangeAPILifeCycle(dev, tenantApiPublisher, tenantApiPublisherPassword, api.ID, "Retire")
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: tenantApiCreator, Password: tenantApiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		Api:         api,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+	}
+
+	testutils.ValidateAPIExportImport(t, args)
 }
 
 func TestListApisAdminSuperTenantUser(t *testing.T) {

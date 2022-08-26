@@ -836,6 +836,29 @@ func (instance *Client) PublishAPI(apiID string) {
 	base.ValidateAndLogResponse("apim.PublishAPI()", response, 200)
 }
 
+// ChangeAPILifeCycle : Change Life Cycle Status of an API in APIM
+func (instance *Client) ChangeAPILifeCycle(apiID, action string) {
+	lifeCycleURL := instance.publisherRestURL + "/apis/change-lifecycle"
+
+	request := base.CreatePostEmptyBody(lifeCycleURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	values := url.Values{}
+	values.Add("action", action)
+	values.Add("apiId", apiID)
+
+	request.URL.RawQuery = values.Encode()
+
+	base.LogRequest("apim.ChangeAPILifeCycle()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.ChangeAPILifeCycle()", response, 200)
+}
+
 // DeleteSubscriptions : Delete Subscriptions for an API from APIM
 func (instance *Client) DeleteSubscriptions(apiID string) {
 	subsGetURL := instance.devPortalRestURL + "/subscriptions"

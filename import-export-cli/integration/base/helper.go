@@ -103,7 +103,7 @@ func Login(t *testing.T, env string, username string, password string) {
 	Execute(t, "login", env, "-u", username, "-p", password, "-k", "--verbose")
 
 	t.Cleanup(func() {
-		Execute(t, "logout", env)
+		Execute(t, "logout", env, "-k")
 	})
 }
 
@@ -311,7 +311,7 @@ func CreateTempDir(t *testing.T, path string) {
 func GetExportedPathFromOutput(output string) string {
 	//Check directory path to omit changes due to OS differences
 	if strings.Contains(output, ":\\") {
-		arrayOutput := []rune (output)
+		arrayOutput := []rune(output)
 		extractedPath := string(arrayOutput[strings.Index(output, ":\\")-1:])
 		return strings.ReplaceAll(strings.ReplaceAll(extractedPath, "\n", ""), " ", "")
 	} else {
