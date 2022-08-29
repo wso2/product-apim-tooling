@@ -114,12 +114,13 @@ func ValidateInitializeProjectWithDefinitionFlag(t *testing.T, args *InitTestArg
 	})
 }
 
-func ValidateImportProject(t *testing.T, args *InitTestArgs) {
+func ValidateImportProject(t *testing.T, args *InitTestArgs, preserveProvider bool) {
 	t.Helper()
 	//Initialize a project with API definition
 	ValidateInitializeProjectWithOASFlag(t, args)
 
-	result, error := ImportApiFromProject(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, true)
+	result, error := importApiFromProject(t, args.InitFlag, args.SrcAPIM, args.APIName,
+		&args.CtlUser, true, preserveProvider)
 
 	assert.Nil(t, error, "Error while importing Project")
 	assert.Contains(t, result, "Successfully imported API", "Error while importing Project")
@@ -132,12 +133,29 @@ func ValidateImportProject(t *testing.T, args *InitTestArgs) {
 	})
 }
 
-func ValidateImportProjectFailed(t *testing.T, args *InitTestArgs) {
+func ValidateImportProjectFailed(t *testing.T, args *InitTestArgs, preserveProvider bool) {
 	t.Helper()
 
-	result, _ := ImportApiFromProject(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, false)
+	result, _ := importApiFromProject(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, false,
+		preserveProvider)
 
 	assert.Contains(t, result, "Resource Already Exists", "Test failed because API is imported successfully")
+
+	base.WaitForIndexing()
+
+	//Remove Created project and logout
+	t.Cleanup(func() {
+		base.RemoveDir(args.InitFlag)
+	})
+}
+
+func ValidateImportProjectWithInvalidSwaggerFailed(t *testing.T, args *InitTestArgs, preserveProvider bool) {
+	t.Helper()
+
+	result, _ := importApiFromProject(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, false, preserveProvider)
+
+	assert.Contains(t, result, "500", "Test failed because API is imported successfully")
+	assert.Contains(t, result, "Error while parsing OpenAPI definition", "Test failed because API is imported successfully")
 
 	base.WaitForIndexing()
 
