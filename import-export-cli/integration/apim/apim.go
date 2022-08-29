@@ -919,6 +919,29 @@ func (instance *Client) PublishAPIProduct(apiProductID string) {
 	base.ValidateAndLogResponse("apim.PublishAPIProduct()", response, 200)
 }
 
+// ChangeAPIProductLifeCycle : Change Life Cycle Status of an API Product in APIM
+func (instance *Client) ChangeAPIProductLifeCycle(apiProductID, action string) {
+	lifeCycleURL := instance.publisherRestURL + "/api-products/change-lifecycle"
+
+	request := base.CreatePostEmptyBody(lifeCycleURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	values := url.Values{}
+	values.Add("action", action)
+	values.Add("apiProductId", apiProductID)
+
+	request.URL.RawQuery = values.Encode()
+
+	base.LogRequest("apim.ChangeAPIProductLifeCycle()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.ChangeAPIProductLifeCycle()", response, 200)
+}
+
 // GetAPIRevisions : Get API revisions
 func (instance *Client) GetAPIRevisions(apiID, query string) *APIRevisionList {
 	revisioningURL := instance.publisherRestURL + "/apis/" + apiID + "/revisions"
@@ -1384,6 +1407,29 @@ func (instance *Client) PublishAPI(apiID string) {
 	defer response.Body.Close()
 
 	base.ValidateAndLogResponse("apim.PublishAPI()", response, 200)
+}
+
+// ChangeAPILifeCycle : Change Life Cycle Status of an API in APIM
+func (instance *Client) ChangeAPILifeCycle(apiID, action string) {
+	lifeCycleURL := instance.publisherRestURL + "/apis/change-lifecycle"
+
+	request := base.CreatePostEmptyBody(lifeCycleURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	values := url.Values{}
+	values.Add("action", action)
+	values.Add("apiId", apiID)
+
+	request.URL.RawQuery = values.Encode()
+
+	base.LogRequest("apim.ChangeAPILifeCycle()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.ChangeAPILifeCycle()", response, 200)
 }
 
 // GetApplicationSubscriptions : Get subscriptions of an application
