@@ -76,6 +76,49 @@ func ValidateThrottlePolicyExportImport(t *testing.T, args *PolicyImportExportTe
 	validatePoliciesEquality(t, true, args, importedPolicy)
 }
 
+// Validates whether the throttling policy deletion is complete
+func ValidateThrottlingPolicyDelete(t *testing.T, args *PolicyImportExportTestArgs, policyType string) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	base.WaitForIndexing()
+
+	policyName := fmt.Sprintf("%v", args.Policy[policyNameKey])
+
+	_, err := deleteThrottlingPolicy(t, policyName, policyType, args)
+
+	assert.Nil(t, err, "Error while deleting the API Policy")
+
+}
+
+// Validates whether the throttling policy deletion not exists
+func ValidateThrottlingPolicyDeleteNotExists(t *testing.T, args *PolicyImportExportTestArgs, policyType string) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	base.WaitForIndexing()
+
+	policyName := base.GenerateRandomString()
+
+	_, err := deleteThrottlingPolicy(t, policyName, policyType, args)
+
+	assert.NotNil(t, err, "Error while deleting the API Policy")
+
+}
+
+func deleteThrottlingPolicy(t *testing.T, name string, policyType string, args *PolicyImportExportTestArgs) (string, error) {
+	output, err := base.Execute(t, "delete", "policy", "rate-limiting", "-e", args.SrcAPIM.EnvName, "-n", name, "-t", policyType, "-k", "--verbose")
+	return output, err
+}
+
 // ValidateThrottlePolicyImportUpdate : Validates importing existing Throttling Policy
 func ValidateThrottlePolicyImportUpdate(t *testing.T, args *PolicyImportExportTestArgs, adminUsername, adminPassword, policyType string) {
 	t.Helper()
@@ -225,6 +268,11 @@ func createExportedThrottlePolicyFile(t *testing.T, client *apim.Client, policyT
 	policyMap, _ := PolicyStructToMap(policyData)
 	var yamlMap yaml.MapSlice
 	yamlBytes, err := yaml.Marshal(policyMap)
+
+	if err != nil {
+		return "", "", err
+	}
+
 	err = yaml.Unmarshal(yamlBytes, &yamlMap)
 	if err != nil {
 		return "", policyData, err
@@ -251,9 +299,8 @@ func createExportedThrottlePolicyFile(t *testing.T, client *apim.Client, policyT
 }
 
 // Adds a new Throttling Policy to an env
-func AddNewThrottlePolicy(t *testing.T, client *apim.Client, adminUsername, adminPassword, policyType string) map[string]interface{} {
+func AddNewThrottlePolicy(t *testing.T, client *apim.Client, adminUsername, adminPassword, policyType string, doClean bool) map[string]interface{} {
 	client.Login(adminUsername, adminPassword)
-	doClean := true
 	generatedPolicy := client.GenerateSampleThrottlePolicyData(policyType)
 	addedPolicy := client.AddThrottlePolicy(t, generatedPolicy, adminUsername, adminPassword, policyType, doClean)
 	return addedPolicy
@@ -289,7 +336,7 @@ func importThrottlePolicy(t *testing.T, username, password, policyName, policyTy
 	if doClean {
 		t.Cleanup(func() {
 			args.DestAPIM.Login(username, password)
-			args.DestAPIM.DeleteThrottlePolicyByName(t, policyName, policyType)
+			args.DestAPIM.DeleteThrottlePolicyByName(t, policyName, policyType, doClean)
 		})
 	}
 
