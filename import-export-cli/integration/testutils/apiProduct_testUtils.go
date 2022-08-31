@@ -62,6 +62,14 @@ func PublishAPIProduct(client *apim.Client, username string, password string, ap
 	client.PublishAPIProduct(apiProductID)
 }
 
+func ChangeAPIProductLifeCycle(client *apim.Client, username, password, apiProductID, action string) *apim.APIProduct {
+	base.WaitForIndexing()
+	client.Login(username, password)
+	client.ChangeAPILifeCycle(apiProductID, action)
+	apiProduct := client.GetAPIProduct(apiProductID)
+	return apiProduct
+}
+
 func CreateAndDeployAPIProductRevision(t *testing.T, client *apim.Client, username, password, apiProductID string) string {
 	client.Login(username, password)
 	revision := client.CreateAPIProductRevision(apiProductID)

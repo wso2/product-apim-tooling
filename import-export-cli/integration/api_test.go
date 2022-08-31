@@ -584,6 +584,82 @@ func TestExportImportApiCrossTenantDevopsUser(t *testing.T) {
 	testutils.ValidateAPIImportFailure(t, args)
 }
 
+// Export an API with the life cycle status as Blocked and import to another environment
+func TestExportImportApiBlocked(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			dev := GetDevClient()
+			prod := GetProdClient()
+
+			api := testutils.AddAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
+			testutils.PublishAPI(dev, user.ApiPublisher.Username, user.ApiPublisher.Password, api.ID)
+			api = testutils.ChangeAPILifeCycle(dev, user.ApiPublisher.Username, user.ApiPublisher.Password, api.ID, "Block")
+
+			args := &testutils.ApiImportExportTestArgs{
+				ApiProvider: testutils.Credentials{Username: user.ApiCreator.Username, Password: user.ApiCreator.Password},
+				CtlUser:     testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Api:         api,
+				SrcAPIM:     dev,
+				DestAPIM:    prod,
+			}
+
+			testutils.ValidateAPIExportImport(t, args, testutils.APITypeREST)
+		})
+	}
+}
+
+// Export an API with the life cycle status as Deprecated and import to another environment
+func TestExportImportApiDeprecated(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			dev := GetDevClient()
+			prod := GetProdClient()
+
+			api := testutils.AddAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
+			testutils.PublishAPI(dev, user.ApiPublisher.Username, user.ApiPublisher.Password, api.ID)
+			api = testutils.ChangeAPILifeCycle(dev, user.ApiPublisher.Username, user.ApiPublisher.Password, api.ID, "Deprecate")
+
+			args := &testutils.ApiImportExportTestArgs{
+				ApiProvider: testutils.Credentials{Username: user.ApiCreator.Username, Password: user.ApiCreator.Password},
+				CtlUser:     testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Api:         api,
+				SrcAPIM:     dev,
+				DestAPIM:    prod,
+			}
+
+			testutils.ValidateAPIExportImport(t, args, testutils.APITypeREST)
+		})
+	}
+}
+
+// Export an API with the life cycle status as Retired and import to another environment
+func TestExportImportApiRetired(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			dev := GetDevClient()
+			prod := GetProdClient()
+
+			api := testutils.AddAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
+			testutils.PublishAPI(dev, user.ApiPublisher.Username, user.ApiPublisher.Password, api.ID)
+			testutils.ChangeAPILifeCycle(dev, user.ApiPublisher.Username, user.ApiPublisher.Password, api.ID, "Deprecate")
+			api = testutils.ChangeAPILifeCycle(dev, user.ApiPublisher.Username, user.ApiPublisher.Password, api.ID, "Retire")
+
+			args := &testutils.ApiImportExportTestArgs{
+				ApiProvider: testutils.Credentials{Username: user.ApiCreator.Username, Password: user.ApiCreator.Password},
+				CtlUser:     testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Api:         api,
+				SrcAPIM:     dev,
+				DestAPIM:    prod,
+			}
+
+			testutils.ValidateAPIExportImport(t, args, testutils.APITypeREST)
+		})
+	}
+}
+
 func TestListApisAdminSuperTenantUser(t *testing.T) {
 	adminUsername := superAdminUser
 	adminPassword := superAdminPassword

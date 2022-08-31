@@ -268,6 +268,14 @@ func PublishAPI(client *apim.Client, username string, password string, apiID str
 	client.PublishAPI(apiID)
 }
 
+func ChangeAPILifeCycle(client *apim.Client, username, password, apiID, action string) *apim.API {
+	base.WaitForIndexing()
+	client.Login(username, password)
+	client.ChangeAPILifeCycle(apiID, action)
+	api := client.GetAPI(apiID)
+	return api
+}
+
 func UnsubscribeAPI(client *apim.Client, username string, password string, apiID string) {
 	client.Login(username, password)
 	client.DeleteSubscriptions(apiID)
@@ -371,9 +379,10 @@ func importAPI(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
 
 	if !args.Update {
 		t.Cleanup(func() {
-			if strings.EqualFold("PUBLISHED", args.Api.LifeCycleStatus) {
+			if strings.EqualFold("DEPRECATED", args.Api.LifeCycleStatus) {
 				args.CtlUser.Username, args.CtlUser.Password =
 					apim.RetrieveAdminCredentialsInsteadCreator(args.CtlUser.Username, args.CtlUser.Password)
+				args.DestAPIM.Login(args.CtlUser.Username, args.CtlUser.Password)
 			}
 			err := args.DestAPIM.DeleteAPIByName(args.Api.Name)
 
