@@ -152,8 +152,6 @@ func importAPIPolicy(endpoint string, importPath string, accessToken string, isO
 
 		return errors.New(errorResponse.Status)
 	}
-
-	return nil
 }
 
 func executeAPIPolicyImportRequest(uri string, importPath string, accessToken string, isOAuthToken bool) (*resty.Response, error) {
