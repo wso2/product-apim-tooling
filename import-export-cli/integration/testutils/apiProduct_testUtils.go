@@ -310,7 +310,7 @@ func ValidateAPIProductExportFailure(t *testing.T, args *ApiProductImportExportT
 		args.ApiProduct.Name, utils.DefaultApiProductVersion))
 }
 
-func ValidateAPIProductExportImportPreserveProvider(t *testing.T, args *ApiProductImportExportTestArgs) {
+func ValidateAPIProductExportImportPreserveProvider(t *testing.T, args *ApiProductImportExportTestArgs) *apim.APIProduct {
 	t.Helper()
 
 	// Setup apictl envs

@@ -772,6 +772,13 @@ func TestExportImportApiProductBlocked(t *testing.T) {
 			args.UpdateApisFlag = false
 			args.UpdateApiProductFlag = false
 
+			importedApiProduct := testutils.ValidateAPIProductExportImportPreserveProvider(t, args)
+
+			// Change the lifecycle to Published in the prod environment
+			testutils.ChangeAPIProductLifeCycle(prod, user.ApiPublisher.Username, user.ApiPublisher.Password, importedApiProduct.ID, "Re-Publish")
+
+			args.UpdateApiProductFlag = true
+			args.ImportApisFlag = false
 			testutils.ValidateAPIProductExportImportPreserveProvider(t, args)
 		})
 	}
