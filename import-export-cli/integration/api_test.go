@@ -503,6 +503,7 @@ func TestExportImportApiCrossTenantDevopsUser(t *testing.T) {
 }
 
 // Export an API with the life cycle status as Blocked and import to another environment as a super tenant user with Internal/devops role
+// and again import update it
 func TestExportImportApiBlockedSuperTenantDevopsUser(t *testing.T) {
 	devopsUsername := devops.UserName
 	devopsPassword := devops.Password
@@ -528,10 +529,16 @@ func TestExportImportApiBlockedSuperTenantDevopsUser(t *testing.T) {
 		DestAPIM:    prod,
 	}
 
+	importedApi := testutils.ValidateAPIExportImport(t, args)
+
+	// Change the lifecycle to Published in the prod environment
+	testutils.ChangeAPILifeCycle(prod, superTenantApiPublisher, superTenantApiPublisherPassword, importedApi.ID, "Re-Publish")
+	args.Update = true
 	testutils.ValidateAPIExportImport(t, args)
 }
 
 // Export an API with the life cycle status as Blocked and import to another environment as a tenant user with Internal/devops role
+// and again import update it
 func TestExportImportApiBlockedTenantDevopsUser(t *testing.T) {
 	tenantDevopsUsername := devops.UserName + "@" + TENANT1
 	tenantDevopsPassword := devops.Password
@@ -557,6 +564,11 @@ func TestExportImportApiBlockedTenantDevopsUser(t *testing.T) {
 		DestAPIM:    prod,
 	}
 
+	importedApi := testutils.ValidateAPIExportImport(t, args)
+
+	// Change the lifecycle to Published in the prod environment
+	testutils.ChangeAPILifeCycle(prod, tenantApiPublisher, tenantApiPublisherPassword, importedApi.ID, "Re-Publish")
+	args.Update = true
 	testutils.ValidateAPIExportImport(t, args)
 }
 

@@ -33,6 +33,7 @@ type ApiImportExportTestArgs struct {
 	DestAPIM         *apim.Client
 	OverrideProvider bool
 	ParamsFile       string
+	Update           bool
 }
 
 type ApiProductImportExportTestArgs struct {

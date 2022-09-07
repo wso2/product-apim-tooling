@@ -202,16 +202,22 @@ func importAPI(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
 		params = append(params, "--params", args.ParamsFile)
 	}
 
+	if args.Update {
+		params = append(params, "--update=true")
+	}
+
 	output, err := base.Execute(t, params...)
 
-	t.Cleanup(func() {
-		err := args.DestAPIM.DeleteAPIByName(args.Api.Name)
+	if !args.Update {
+		t.Cleanup(func() {
+			err := args.DestAPIM.DeleteAPIByName(args.Api.Name)
 
-		if err != nil {
-			t.Fatal(err)
-		}
-		base.WaitForIndexing()
-	})
+			if err != nil {
+				t.Fatal(err)
+			}
+			base.WaitForIndexing()
+		})
+	}
 
 	return output, err
 }
@@ -249,7 +255,7 @@ func ValidateAPIExportFailure(t *testing.T, args *ApiImportExportTestArgs) {
 		args.Api.Name, args.Api.Version))
 }
 
-func ValidateAPIExportImport(t *testing.T, args *ApiImportExportTestArgs) {
+func ValidateAPIExportImport(t *testing.T, args *ApiImportExportTestArgs) *apim.API {
 	t.Helper()
 
 	// Setup apictl envs
@@ -277,6 +283,8 @@ func ValidateAPIExportImport(t *testing.T, args *ApiImportExportTestArgs) {
 
 	// Validate env 1 and env 2 API is equal
 	ValidateAPIsEqual(t, args.Api, importedAPI)
+
+	return importedAPI
 }
 
 func ValidateAPIExport(t *testing.T, args *ApiImportExportTestArgs) {
