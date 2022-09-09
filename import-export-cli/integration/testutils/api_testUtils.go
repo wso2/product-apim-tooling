@@ -452,7 +452,7 @@ func ValidateAPIExportFailureUnauthenticated(t *testing.T, args *ApiImportExport
 		args.Api.Name, args.Api.Version), "Test failed because the API was exported successfully")
 }
 
-func ValidateAPIExportImport(t *testing.T, args *ApiImportExportTestArgs, apiType string) {
+func ValidateAPIExportImport(t *testing.T, args *ApiImportExportTestArgs, apiType string) *apim.API {
 	t.Helper()
 
 	// Setup apictl envs
@@ -481,6 +481,8 @@ func ValidateAPIExportImport(t *testing.T, args *ApiImportExportTestArgs, apiTyp
 
 	// Validate env 1 and env 2 API is equal
 	ValidateAPIsEqual(t, args.Api, importedAPI)
+
+	return importedAPI
 }
 
 func ValidateAPIImportExportForAdvertiseOnlyAPI(t *testing.T, args *ApiImportExportTestArgs, apiType string) {

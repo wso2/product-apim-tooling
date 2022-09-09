@@ -585,6 +585,7 @@ func TestExportImportApiCrossTenantDevopsUser(t *testing.T) {
 }
 
 // Export an API with the life cycle status as Blocked and import to another environment
+// and import update it
 func TestExportImportApiBlocked(t *testing.T) {
 	for _, user := range testCaseUsers {
 		t.Run(user.Description, func(t *testing.T) {
@@ -604,6 +605,12 @@ func TestExportImportApiBlocked(t *testing.T) {
 				DestAPIM:    prod,
 			}
 
+			importedApi := testutils.ValidateAPIExportImport(t, args, testutils.APITypeREST)
+
+			// Change the lifecycle to Published in the prod environment
+			testutils.ChangeAPILifeCycle(prod, user.ApiPublisher.Username, user.ApiPublisher.Password, importedApi.ID, "Re-Publish")
+
+			args.Update = true
 			testutils.ValidateAPIExportImport(t, args, testutils.APITypeREST)
 		})
 	}
