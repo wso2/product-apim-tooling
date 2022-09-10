@@ -172,14 +172,18 @@ func importAPIProductPreserveProvider(t *testing.T, args *ApiProductImportExport
 		output, err = base.Execute(t, "import", "api-product", "-f", fileName, "-e", args.DestAPIM.EnvName, "-k", "--verbose", "--import-apis")
 	} else if args.UpdateApisFlag {
 		output, err = base.Execute(t, "import", "api-product", "-f", fileName, "-e", args.DestAPIM.EnvName, "-k", "--verbose", "--update-apis")
+	} else if args.UpdateApiProductFlag {
+		output, err = base.Execute(t, "import", "api-product", "-f", fileName, "-e", args.DestAPIM.EnvName, "-k", "--verbose", "--update-api-product")
 	} else {
 		output, err = base.Execute(t, "import", "api-product", "-f", fileName, "-e", args.DestAPIM.EnvName, "-k", "--verbose")
 	}
 
-	t.Cleanup(func() {
-		args.DestAPIM.DeleteAPIProductByName(args.ApiProduct.Name)
-		base.WaitForIndexing()
-	})
+	if !args.UpdateApiProductFlag {
+		t.Cleanup(func() {
+			args.DestAPIM.DeleteAPIProductByName(args.ApiProduct.Name)
+			base.WaitForIndexing()
+		})
+	}
 
 	return output, err
 }
@@ -328,9 +332,10 @@ func ValidateAPIProductExportImportPreserveProvider(t *testing.T, args *ApiProdu
 	// Import API Product to env 2
 	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	// If any APIs were added via the API Product import, flag them for removal during cleanup
-	flagAPIsAddedViaProductImportForRemoval(t, args.DestAPIM, &args.ApiProviders)
-
+	if !args.UpdateApiProductFlag {
+		// If any APIs were added via the API Product import, flag them for removal during cleanup
+		flagAPIsAddedViaProductImportForRemoval(t, args.DestAPIM, &args.ApiProviders)
+	}
 	importAPIProductPreserveProvider(t, args)
 
 	// Give time for newly imported API Product to get indexed, or else getAPIProduct by name will fail
