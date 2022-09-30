@@ -19,7 +19,6 @@
 package testutils
 
 import (
-	"encoding/base64"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -339,11 +338,11 @@ func ValidateAppExportImportGeneratedKeys(t *testing.T, args *AppImportExportTes
 		for _, key := range importedApplicationKeysList.List {
 			if key.KeyType == utils.ProductionKeyType {
 				assert.Equal(t, applicationKey1.ConsumerKey, key.ConsumerKey, "Production Consumer key mismatched")
-				assert.Equal(t, base64.StdEncoding.EncodeToString([]byte(applicationKey1.ConsumerSecret)), key.ConsumerSecret, "Production Consumer secret mismatched")
+				assert.Equal(t, applicationKey1.ConsumerSecret, key.ConsumerSecret, "Production Consumer secret mismatched")
 			}
 			if key.KeyType == utils.SandboxKeyType {
 				assert.Equal(t, applicationKey2.ConsumerKey, key.ConsumerKey, "Sandbox Consumer key mismatched")
-				assert.Equal(t, base64.StdEncoding.EncodeToString([]byte(applicationKey2.ConsumerSecret)), key.ConsumerSecret, "Sandbox Consumer secret mismatched")
+				assert.Equal(t, applicationKey2.ConsumerSecret, key.ConsumerSecret, "Sandbox Consumer secret mismatched")
 			}
 
 		}
