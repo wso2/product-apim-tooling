@@ -1,5 +1,5 @@
 # CLI for Importing and Exporting APIs and Applications and Managing WSO2 Micro Integrator
-## For WSO2 API Manager 4.1.0
+## For WSO2 API Manager 4.2.0
 
 Command Line tool for importing and exporting APIs/Applications/API Products in between different API environments of WSO2 API Manager and managing WSO2 Micro Integrator
 
@@ -17,7 +17,7 @@ Command Line tool for importing and exporting APIs/Applications/API Products in 
 - ### Building
     `cd` into `product-apim-tooling/import-export-cli`
     
-    Execute `./build.sh -t apictl.go -v 4.1.0 -f` to build for all platforms.
+    Execute `./build.sh -t apictl.go -v 4.2.0 -f` to build for all platforms.
     
     Created packages will be available at `build/target` directory
 
@@ -65,11 +65,11 @@ Command Line tool for importing and exporting APIs/Applications/API Products in 
 
     Usage: `docker build --build-arg version=<version> -t apictl:<version> .`
 
-    Example: `docker build --build-arg version=4.1.0.1 -t apictl:4.1.0.1 .`
+    Example: `docker build --build-arg version=4.2.0.1 -t apictl:4.2.0.1 .`
 
     - ### Using the Docker Image
 
-        `docker run -it -v $(pwd):/git -v ~/.wso2apictl:/root/.wso2apictl -v ~/.wso2apictl.local:/root/.wso2apictl.local apictl:4.1.0.1 <apictl command>`
+        `docker run -it -v $(pwd):/git -v ~/.wso2apictl:/root/.wso2apictl -v ~/.wso2apictl.local:/root/.wso2apictl.local apictl:4.2.0.1 <apictl command>`
 
 ***
 
