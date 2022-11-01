@@ -263,7 +263,7 @@ func createExportedThrottlePolicyFile(t *testing.T, client *apim.Client, policyT
 		}
 	}
 
-	exportedPolicy.Version = "v4.1.0"
+	exportedPolicy.Version = "v4.2.0"
 	policyData := client.GenerateSampleThrottlePolicyData(policyType)
 	policyMap, _ := PolicyStructToMap(policyData)
 	var yamlMap yaml.MapSlice
