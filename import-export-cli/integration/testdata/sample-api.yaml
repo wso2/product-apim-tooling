@@ -172,4 +172,5 @@ data: # Contains the meta data of the API
   gatewayVendor: wso2 # Gateway vendor
   asyncTransportProtocols: [] # Async transport protocols
   gatewayType: wso2/synapse # The gateway type selected for the API policies
+  enableSubscriberVerification: false # To enable subscriber verification of WebSub APIs
   
