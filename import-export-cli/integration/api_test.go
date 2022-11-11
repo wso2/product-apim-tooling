@@ -616,6 +616,38 @@ func TestExportImportApiBlocked(t *testing.T) {
 	}
 }
 
+// Import an API with the default version. Change the version and import the same API again.
+func TestApiVersioning(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			dev := GetDevClient()
+			prod := GetProdClient()
+
+			api1 := testutils.AddAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
+
+			args := &testutils.ApiImportExportTestArgs{
+				ApiProvider: testutils.Credentials{Username: user.ApiCreator.Username, Password: user.ApiCreator.Password},
+				CtlUser:     testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Api:         api1,
+				SrcAPIM:     dev,
+				DestAPIM:    prod,
+			}
+
+			testutils.ValidateAPIExport(t, args)
+			importedAPI := testutils.ValidateAPIImportForMultipleVersions(t, args, "")
+
+			api2 := testutils.AddCustomAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password,
+				api1.Name, testutils.APIVersion2, api1.Context)
+
+			args.Api = api2
+
+			testutils.ValidateAPIExport(t, args)
+			testutils.ValidateAPIImportForMultipleVersions(t, args, importedAPI.ID)
+		})
+	}
+}
+
 // Export an API with the life cycle status as Deprecated and import to another environment
 func TestExportImportApiDeprecated(t *testing.T) {
 	for _, user := range testCaseUsers {

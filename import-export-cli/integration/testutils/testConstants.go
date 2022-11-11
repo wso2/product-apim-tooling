@@ -216,3 +216,6 @@ const DefaultAPIPolicyVersion = "v1"
 const TestAPIPolicyOffset = "0"
 const TestAPIPolicyLimit = "5"
 const CleanUpFunction = "cleanup"
+
+//Constant for API versioning tests
+const APIVersion2 = "2.0.0"
