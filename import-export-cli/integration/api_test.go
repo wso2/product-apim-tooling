@@ -397,6 +397,47 @@ func TestExportImportApiCrossTenantUserWithoutPreserveProvider(t *testing.T) {
 	testutils.ValidateAPIImport(t, args)
 }
 
+// Import an API with the default version. Change the version and import the same API again.
+// For tenant user.
+func TestApiVersioningTenantDevopsUser(t *testing.T) {
+
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	tenantApiCreator := creator.UserName + "@" + TENANT1
+	tenantApiCreatorPassword := creator.Password
+
+	dev := apimClients[0]
+	prod := apimClients[1]
+
+	api1 := testutils.AddAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword)
+
+	args := &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: tenantApiCreator, Password: tenantApiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		Api:         api1,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+	}
+
+	testutils.ValidateAPIExport(t, args)
+	importedAPI := testutils.ValidateAPIImportForMultipleVersions(t, args, "")
+
+	api2 := testutils.AddCustomAPI(t, dev, tenantApiCreator, tenantApiCreatorPassword,
+		api1.Name, testutils.APIVersion2, api1.Context)
+
+	args = &testutils.ApiImportExportTestArgs{
+		ApiProvider: testutils.Credentials{Username: tenantApiCreator, Password: tenantApiCreatorPassword},
+		CtlUser:     testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		Api:         api2,
+		SrcAPIM:     dev,
+		DestAPIM:    prod,
+	}
+
+	testutils.ValidateAPIExport(t, args)
+	testutils.ValidateAPIImportForMultipleVersions(t, args, importedAPI.ID)
+}
+
 // Export an API from one environment as super tenant user with Internal/devops role
 // and import to another environment as cross tenant user with Internal/devops role (with preserve-provider=false)
 func TestExportImportApiCrossTenantDevopsUserWithoutPreserveProvider(t *testing.T) {
