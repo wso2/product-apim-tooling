@@ -125,10 +125,9 @@ func ValidateAPIUndeployFailure(t *testing.T, args *UndeployTestArgs, provider, 
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
 	// Execute undeploy API command
-	result, err := undeployAPI(t, args, provider)
+	result, _ := undeployAPI(t, args, provider)
 
-	assert.NotNil(t, err, "Should not return nil error")
-	assert.Contains(t, base.GetValueOfUniformResponse(result), "Exit status 1",
+	assert.Contains(t, base.GetValueOfUniformResponse(result), "Error while undeploying the API",
 		"Test failed because API was undeployed successfully")
 }
 

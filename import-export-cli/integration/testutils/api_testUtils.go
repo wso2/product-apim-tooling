@@ -103,6 +103,7 @@ func CreateAndDeployAPIRevision(t *testing.T, client *apim.Client, username, pas
 	client.Login(username, password)
 	revision := client.CreateAPIRevision(apiID)
 	client.DeployAPIRevision(t, apiID, "", "", revision.ID)
+	base.WaitForIndexing()
 	return revision.ID
 }
 
