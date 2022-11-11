@@ -43,8 +43,7 @@ func GetAPIById(t *testing.T, client *apim.Client, username, password, apiId str
 func AddAPI(t *testing.T, client *apim.Client, username, password string) *apim.API {
 	client.Login(username, password)
 	api := client.GenerateSampleAPIData(username, "", DevFirstDefaultAPIVersion, "")
-	doClean := true
-	id := client.AddAPI(t, api, username, password, doClean)
+	id := client.AddAPI(t, api, username, password, true)
 	api = client.GetAPI(id)
 	return api
 }
