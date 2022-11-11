@@ -89,3 +89,6 @@ const DevFirstSampleCaseSequencePath = "testdata/TestArtifactDirectory/DevFirstS
 const DevFirstSampleCaseDestSequencePathSuffix = "/Sequences/in-sequence/Custom/mockSequence.xml"
 const DevFirstUpdatedSampleCaseSequencePath = "testdata/TestArtifactDirectory/DevFirstUpdatedSampleCaseArtifacts/mockSequence.xml"
 const DevFirstUpdatedSampleCaseSequencePathSuffix = "/Sequences/in-sequence/Custom/mockSequence.xml"
+
+//Constant for API versioning tests
+const APIVersion2 = "2.0.0"

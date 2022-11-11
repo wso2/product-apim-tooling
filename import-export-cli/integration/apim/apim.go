@@ -137,12 +137,20 @@ func (instance *Client) GetTokenURL() string {
 }
 
 // GenerateSampleAPIData : Generate sample Pizzashack API object
-func (instance *Client) GenerateSampleAPIData(provider string) *API {
+func (instance *Client) GenerateSampleAPIData(provider, name, version, context string) *API {
 	api := API{}
-	api.Name = generateRandomString() + "API"
+	if strings.EqualFold(name, "") {
+		api.Name = generateRandomString() + "API"
+	} else {
+		api.Name = name
+	}
 	api.Description = "This is a simple API for Pizza Shack online pizza delivery store."
-	api.Context = getContext(provider)
-	api.Version = "1.0.0"
+	if strings.EqualFold(context, "") {
+		api.Context = getContext(provider)
+	} else {
+		api.Context = context
+	}
+	api.Version = version
 	api.Provider = provider
 	api.Transport = []string{"http", "https"}
 	api.Tags = []string{"pizza"}
@@ -687,6 +695,7 @@ func (instance *Client) GetAPI(apiID string) *API {
 
 	var apiResponse API
 	json.NewDecoder(response.Body).Decode(&apiResponse)
+
 	return &apiResponse
 }
 
