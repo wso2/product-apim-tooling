@@ -276,9 +276,9 @@ func ValidateImportUpdateProject(t *testing.T, args *InitTestArgs, preserveProvi
 func ValidateImportUpdateProjectNotAlreadyImported(t *testing.T, args *InitTestArgs) {
 	t.Helper()
 
-	result, error := importApiFromProjectWithUpdate(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, true, true)
+	result, err := importApiFromProjectWithUpdate(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, true, true)
 
-	assert.Nil(t, error, "Error while generating Project")
+	assert.Nil(t, err, "Error while generating Project")
 	assert.Contains(t, result, "Successfully imported API", "Test InitializeProjectWithDefinitionFlag Failed")
 
 	//Remove Created project and logout
