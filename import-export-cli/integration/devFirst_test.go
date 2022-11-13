@@ -23,7 +23,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/magiconair/properties/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
@@ -329,44 +329,6 @@ func TestImportAndExportAPIWithDocument(t *testing.T) {
 
 	projectPath, _ := filepath.Abs(projectName)
 	base.CreateTempDir(t, projectPath+testutils.DevFirstUpdatedSampleCaseDocName)
-
-	//Move doc file to created project
-	srcPathForDoc, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCaseDocPath)
-	destPathForDoc := projectPath + testutils.DevFirstUpdatedSampleCaseDestPathSuffix
-	base.Copy(srcPathForDoc, destPathForDoc)
-
-	//Move docMetaData file to created project
-	srcPathForDocMetadata, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCaseDocMetaDataPath)
-	destPathForDocMetaData := projectPath + testutils.DevFirstUpdatedSampleCaseDestMetaDataPathSuffix
-	base.Copy(srcPathForDocMetadata, destPathForDocMetaData)
-
-	//Import the project with Document
-	testutils.ValidateImportUpdateProjectNotAlreadyImported(t, args)
-
-	testutils.ValidateAPIWithDocIsExported(t, args, testutils.DevFirstDefaultAPIName, testutils.DevFirstDefaultAPIVersion,
-		testutils.DevFirstUpdatedSampleCaseDestPathSuffix)
-}
-
-//Import Api with a Document and Export that Api with a Document and hidden files
-func TestImportAndExportAPIWithDocumentAndHiddenFiles(t *testing.T) {
-	username := superAdminUser
-	password := superAdminPassword
-	apim := GetDevClient()
-	projectName := base.GenerateRandomName(16)
-
-	args := &testutils.InitTestArgs{
-		CtlUser:   testutils.Credentials{Username: username, Password: password},
-		SrcAPIM:   apim,
-		InitFlag:  projectName,
-		OasFlag:   testutils.TestOpenAPI3DefinitionPath,
-		APIName:   testutils.DevFirstDefaultAPIName,
-		ForceFlag: false,
-	}
-
-	testutils.ValidateInitializeProjectWithOASFlag(t, args)
-
-	projectPath, _ := filepath.Abs(projectName)
-	base.CreateTempDir(t, projectPath+testutils.DevFirstUpdatedSampleCaseDocName)
 	base.CreateTempDir(t, projectPath+testutils.DevFirstUpdatedSampleCaseDocNameWithHiddenFiles)
 
 	//Move doc file to created project
@@ -379,14 +341,14 @@ func TestImportAndExportAPIWithDocumentAndHiddenFiles(t *testing.T) {
 	destPathForDocMetaData := projectPath + testutils.DevFirstUpdatedSampleCaseDestMetaDataPathSuffix
 	base.Copy(srcPathForDocMetadata, destPathForDocMetaData)
 
-	//Move hidden file to created project
-	srcPathForHiddenFile, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCaseHiddenFilePath)
-	destPathForHiddenFile := projectPath + testutils.DevFirstUpdatedSampleCaseDestHiddenFilesPathSuffix
-	base.Copy(srcPathForHiddenFile, destPathForHiddenFile)
+	// Create hidden files inside the Doc folder
+	destPathForHiddenFiles := projectPath + testutils.DevFirstUpdatedSampleCaseDestHiddenFilesPathSuffix
+	base.CreateFile(destPathForHiddenFiles)
 
-	//Move hidden file to created project
-	destPathForHiddenFileInRootDir := projectPath + testutils.DevFirstUpdatedSampleCaseHiddenFileName
-	base.Copy(srcPathForHiddenFile, destPathForHiddenFileInRootDir)
+	destPathForHiddenFilesInRootDir := projectPath + testutils.DevFirstUpdatedSampleCaseHiddenFilePathInRootDir
+	base.CreateFile(destPathForHiddenFilesInRootDir)
+
+	testutils.ValidateHiddenFilesPresentWithDocs(t, destPathForHiddenFiles, destPathForHiddenFilesInRootDir)
 
 	//Import the project with Document
 	testutils.ValidateImportUpdateProjectNotAlreadyImported(t, args)

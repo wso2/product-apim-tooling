@@ -478,3 +478,11 @@ func GenerateRandomString() string {
 func GenerateRandomNumber(min, max int) int {
 	return rand.Intn(max-min+1) + min
 }
+
+func CreateFile(dst string) {
+	f, err := os.Create(dst)
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+}
