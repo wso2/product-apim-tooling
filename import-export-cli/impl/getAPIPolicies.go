@@ -35,23 +35,25 @@ const (
 	apiPolicyUUIDHeader               = "ID"
 	apiPolicyNameHeader               = "NAME"
 	apiPolicyDisplayNameHeader        = "DISPLAY NAME"
+	apiPolicyVersion                  = "VERSION"
 	apiPolicyCategoryHeader           = "CATEGORY"
 	apiPolicyApplicableFlowsHeaders   = "APPLICABLE FLOWS"
 	apiPolicySupportedGatewaysHeaders = "SUPPORTED GATEWAYS"
-	defaultAPIPolicyTableFormat       = "table {{.ID}}\t{{.Name}}\t{{.DisplayName}}\t{{.Category}}\t{{.ApplicableFlows}}\t{{.SupportedGateways}}"
+	defaultAPIPolicyTableFormat       = "table {{.ID}}\t{{.Name}}\t{{.DisplayName}}\t{{.Version}}\t{{.Category}}\t{{.ApplicableFlows}}\t{{.SupportedGateways}}"
 )
 
 type apiPolicy struct {
 	id                string
 	name              string
 	displayName       string
+	version           string
 	category          string
 	applicableFlows   []string
 	supportedGateways []string
 }
 
 func newAPIPolicyDefinition(a utils.APIPolicy) *apiPolicy {
-	return &apiPolicy{a.Id, a.Name, a.DisplayName, a.Category, a.ApplicableFlows, a.SupportedGateways}
+	return &apiPolicy{a.Id, a.Name, a.DisplayName, a.Version, a.Category, a.ApplicableFlows, a.SupportedGateways}
 }
 
 func (a apiPolicy) ID() string {
@@ -64,6 +66,10 @@ func (a apiPolicy) Name() string {
 
 func (a apiPolicy) DisplayName() string {
 	return a.displayName
+}
+
+func (a apiPolicy) Version() string {
+	return a.version
 }
 
 func (a apiPolicy) Category() string {
@@ -131,6 +137,7 @@ func PrintAPIPolicies(resp *resty.Response, format string) {
 			"ID":                apiPolicyUUIDHeader,
 			"Name":              apiPolicyNameHeader,
 			"DisplayName":       apiPolicyDisplayNameHeader,
+			"Version":           apiPolicyVersion,
 			"Category":          apiPolicyCategoryHeader,
 			"ApplicableFlows":   apiPolicyApplicableFlowsHeaders,
 			"SupportedGateways": apiPolicySupportedGatewaysHeaders,
