@@ -348,7 +348,7 @@ func TestImportAndExportAPIWithDocument(t *testing.T) {
 	destPathForHiddenFilesInRootDir := projectPath + testutils.DevFirstUpdatedSampleCaseHiddenFilePathInRootDir
 	base.CreateFile(destPathForHiddenFilesInRootDir)
 
-	testutils.ValidateHiddenFilesPresentWithDocs(t, destPathForHiddenFiles, destPathForHiddenFilesInRootDir)
+	testutils.ValidateHiddenFilesPresentWithDocsBeforeImport(t, destPathForHiddenFiles, destPathForHiddenFilesInRootDir)
 
 	//Import the project with Document
 	testutils.ValidateImportUpdateProjectNotAlreadyImported(t, args)

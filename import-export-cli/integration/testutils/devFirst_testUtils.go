@@ -287,7 +287,7 @@ func ValidateImportUpdateProjectNotAlreadyImported(t *testing.T, args *InitTestA
 	})
 }
 
-func ValidateHiddenFilesPresentWithDocs(t *testing.T, TestDestPathForHiddenFiles, TestDestPathForHiddenFilesInRootDir string) {
+func ValidateHiddenFilesPresentWithDocsBeforeImport(t *testing.T, TestDestPathForHiddenFiles, TestDestPathForHiddenFilesInRootDir string) {
 	t.Helper()
 
 	isHiddenFilePresent := base.IsFileAvailable(t, TestDestPathForHiddenFiles)
