@@ -53,7 +53,7 @@ var DeleteAPIPolicyCmd = &cobra.Command{
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
-		deleteAPIPolicyVersion = utils.DefaultAPIPolicyVersion
+
 		executeDeleteAPIPolicyCmd(cred)
 
 	},
@@ -79,9 +79,12 @@ func init() {
 	DeletePolicyCmd.AddCommand(DeleteAPIPolicyCmd)
 	DeleteAPIPolicyCmd.Flags().StringVarP(&deleteAPIPolicyName, "name", "n", "",
 		"Name of the API Policy to be deleted")
+	DeleteAPIPolicyCmd.Flags().StringVarP(&deleteAPIPolicyVersion, "version", "v",
+		"", "Version of the API Policy to be deleted")
 	DeleteAPIPolicyCmd.Flags().StringVarP(&deleteAPIPolicyEnvironment, "environment", "e",
 		"", "Environment from which the API Policy should be deleted")
 
 	_ = DeleteAPIPolicyCmd.MarkFlagRequired("name")
+	_ = DeleteAPIPolicyCmd.MarkFlagRequired("version")
 	_ = DeleteAPIPolicyCmd.MarkFlagRequired("environment")
 }
