@@ -234,8 +234,8 @@ func ValidateMalformedAPIPolicyExportImport(t *testing.T, args *PolicyImportExpo
 	assert.Contains(t, importOutput, "500", "Error importing API Policy")
 }
 
-// ValidateMalformedAPIPolicyExportImport : Validates Exporting API Policy from source env and Importing to destination env
-func ValidateAPIPolicyImportFailureWhenPolicyExisted(t *testing.T, args *PolicyImportExportTestArgs) {
+// ValidateAPIPolicyExportImportFailureWhenPolicyExisted : Validates Exporting API Policy from source env and Importing to destination env
+func ValidateAPIPolicyExportImportFailureWhenPolicyExisted(t *testing.T, args *PolicyImportExportTestArgs) {
 	t.Helper()
 
 	// Setup apictl envs
@@ -616,9 +616,6 @@ func readAPIPolicyDefinition(t *testing.T, path string) apim.PolicySpecData {
 	}
 
 	policyContent, err := apiPolicyDataStructToMap(sampleContent.Data)
-	policyContent.Type = sampleContent.Type
-	policyContent.Version = DefaultAPIPolicyVersion
-
 	if err != nil {
 		t.Fatal(err)
 	}
