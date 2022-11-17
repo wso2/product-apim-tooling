@@ -279,14 +279,12 @@ func ValidateAPIPolicyImportFailureWhenPolicyExisted(t *testing.T, args *PolicyI
 }
 
 // Adds a new API Policy to an env
-func AddNewAPIPolicy(t *testing.T, client *apim.Client, username, password, pathToSpec, pathToSynapse string) interface{} {
+func AddNewAPIPolicy(t *testing.T, client *apim.Client, username, password, pathToSpec, pathToSynapse string, doClean bool) interface{} {
 	client.Login(username, password)
 	pathToPolicySpecFile, _ := filepath.Abs(pathToSpec)
 	pathToSynapseDefFile, _ := filepath.Abs(pathToSynapse)
 	policyContent := readAPIPolicyDefinition(t, pathToPolicySpecFile)
 	policySpecFileData, err := json.Marshal(policyContent)
-	doClean := true
-
 	if err != nil {
 		t.Fatal(err)
 	}

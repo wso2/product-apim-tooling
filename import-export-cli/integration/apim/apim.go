@@ -2528,10 +2528,12 @@ func (instance *Client) AddAPIPolicy(t *testing.T, policySpec []byte, synapseDef
 	json.NewDecoder(response.Body).Decode(&apiPolicyResponse)
 	policyId := fmt.Sprintf("%v", apiPolicyResponse["id"])
 
-	t.Cleanup(func() {
-		instance.Login(username, password)
-		instance.DeleteAPIPolicy(policyId, cleanUpFunction)
-	})
+	if doClean {
+		t.Cleanup(func() {
+			instance.Login(username, password)
+			instance.DeleteAPIPolicy(policyId, cleanUpFunction)
+		})
+	}
 
 	return apiPolicyResponse
 }
