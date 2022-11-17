@@ -63,7 +63,7 @@ func ValidateAPIPolicyExportImport(t *testing.T, args *PolicyImportExportTestArg
 
 	args.SrcAPIM.Login(args.CtlUser.Username, args.CtlUser.Password)
 
-	exportedOutput, _ := exportAPIPolicy(t, policyName, args)
+	exportedOutput, _ := exportAPIPolicy(t, policyName, policyVersion, args)
 
 	args.ImportFilePath = base.GetExportedPathFromOutput(exportedOutput)
 
@@ -162,7 +162,7 @@ func ValidateAPIPolicyExportImportWithFormatFlag(t *testing.T, args *PolicyImpor
 
 	args.SrcAPIM.Login(args.CtlUser.Username, args.CtlUser.Password)
 
-	exportedOutput, _ := exportAPIPolicyWithFormat(t, policyName, args)
+	exportedOutput, _ := exportAPIPolicy(t, policyName, policyVersion, args)
 
 	args.ImportFilePath = base.GetExportedPathFromOutput(exportedOutput)
 
@@ -248,7 +248,7 @@ func ValidateAPIPolicyImportFailureWhenPolicyExisted(t *testing.T, args *PolicyI
 
 	args.SrcAPIM.Login(args.CtlUser.Username, args.CtlUser.Password)
 
-	exportedOutput, _ := exportAPIPolicy(t, policyName, args)
+	exportedOutput, _ := exportAPIPolicy(t, policyName, policyVersion, args)
 
 	args.ImportFilePath = base.GetExportedPathFromOutput(exportedOutput)
 
@@ -296,8 +296,16 @@ func AddNewAPIPolicy(t *testing.T, client *apim.Client, username, password, path
 }
 
 // Exports API Policy from an env
-func exportAPIPolicy(t *testing.T, name string, args *PolicyImportExportTestArgs) (string, error) {
-	output, err := base.Execute(t, "export", "policy", "api", "-n", name, "-e", args.SrcAPIM.EnvName, "-k", "--verbose")
+func exportAPIPolicy(t *testing.T, name, version string, args *PolicyImportExportTestArgs) (string, error) {
+
+	flags := []string{"export", "policy", "api", "-n", name, "-v", version, "-e", args.SrcAPIM.EnvName, "-k", "--verbose"}
+
+	if args.ExportFormat != "" {
+		flags = append(flags, "--format", args.ExportFormat)
+	}
+
+	output, err := base.Execute(t, flags...)
+
 	t.Cleanup(func() {
 		removeExportedAPIPolicyFile(t, args.ImportFilePath)
 	})
@@ -313,17 +321,6 @@ func removeExportedAPIPolicyFile(t *testing.T, file string) {
 			t.Fatal(err)
 		}
 	}
-}
-
-// Exports API Policy with JSON/YAML Format Policy Definition from an env
-func exportAPIPolicyWithFormat(t *testing.T, name string, args *PolicyImportExportTestArgs) (string, error) {
-	output, err := base.Execute(t, "export", "policy", "api", "-n", name, "--format", args.ExportFormat, "-e", args.SrcAPIM.EnvName, "-k", "--verbose")
-
-	t.Cleanup(func() {
-		removeExportedAPIPolicyFile(t, args.ImportFilePath)
-	})
-
-	return output, err
 }
 
 // Imports API policy to an env
@@ -504,15 +501,17 @@ func ValidateAPIPolicyDelete(t *testing.T, args *PolicyImportExportTestArgs) {
 	base.WaitForIndexing()
 
 	policyName := fmt.Sprintf("%v", args.Policy[PolicyNameKey])
+	policyVersion := fmt.Sprintf("%v", args.Policy[PolicyVersionKey])
 
-	_, err := deleteAPIPolicy(t, policyName, args)
+	_, err := deleteAPIPolicy(t, policyName, policyVersion, args)
 
 	assert.Nil(t, err, "Error while deleting the API Policy")
 
 }
 
-func deleteAPIPolicy(t *testing.T, name string, args *PolicyImportExportTestArgs) (string, error) {
-	output, err := base.Execute(t, "delete", "policy", "api", "-e", args.SrcAPIM.EnvName, "-n", name, "-k", "--verbose")
+func deleteAPIPolicy(t *testing.T, name, version string, args *PolicyImportExportTestArgs) (string, error) {
+	output, err := base.Execute(t, "delete", "policy", "api", "-e", args.SrcAPIM.EnvName, "-n",
+		name, "-v", version, "-k", "--verbose")
 
 	return output, err
 }
