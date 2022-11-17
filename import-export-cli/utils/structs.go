@@ -349,6 +349,7 @@ type APIPolicy struct {
 	Category          string            `json:"category,omitempty"`
 	ApplicableFlows   []string          `json:"applicableFlows"`
 	SupportedGateways []string          `json:"supportedGateways"`
+	SupportedApiTypes []string          `json:"supportedApiTypes"`
 	PolicyAttributes  []PolicyAttribute `json:"policyAttributes,omitempty"`
 }
 

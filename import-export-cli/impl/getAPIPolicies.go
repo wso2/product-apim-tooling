@@ -35,11 +35,12 @@ const (
 	apiPolicyUUIDHeader               = "ID"
 	apiPolicyNameHeader               = "NAME"
 	apiPolicyDisplayNameHeader        = "DISPLAY NAME"
-	apiPolicyVersion                  = "VERSION"
+	apiPolicyVersionHeader            = "VERSION"
 	apiPolicyCategoryHeader           = "CATEGORY"
 	apiPolicyApplicableFlowsHeaders   = "APPLICABLE FLOWS"
 	apiPolicySupportedGatewaysHeaders = "SUPPORTED GATEWAYS"
-	defaultAPIPolicyTableFormat       = "table {{.ID}}\t{{.Name}}\t{{.DisplayName}}\t{{.Version}}\t{{.Category}}\t{{.ApplicableFlows}}\t{{.SupportedGateways}}"
+	apiPolicySupportedApiTypesHeader  = "SUPPORTED API TYPES"
+	defaultAPIPolicyTableFormat       = "table {{.ID}}\t{{.Name}}\t{{.DisplayName}}\t{{.Version}}\t{{.Category}}\t{{.ApplicableFlows}}\t{{.SupportedGateways}}\t{{.SupportedApiTypes}}"
 )
 
 type apiPolicy struct {
@@ -50,10 +51,12 @@ type apiPolicy struct {
 	category          string
 	applicableFlows   []string
 	supportedGateways []string
+	supportedApiTypes []string
 }
 
 func newAPIPolicyDefinition(a utils.APIPolicy) *apiPolicy {
-	return &apiPolicy{a.Id, a.Name, a.DisplayName, a.Version, a.Category, a.ApplicableFlows, a.SupportedGateways}
+	return &apiPolicy{a.Id, a.Name, a.DisplayName, a.Version, a.Category, a.ApplicableFlows,
+		a.SupportedGateways, a.SupportedApiTypes}
 }
 
 func (a apiPolicy) ID() string {
@@ -82,6 +85,10 @@ func (a apiPolicy) ApplicableFlows() []string {
 
 func (a apiPolicy) SupportedGateways() []string {
 	return a.supportedGateways
+}
+
+func (a apiPolicy) SupportedApiTypes() []string {
+	return a.supportedApiTypes
 }
 
 func GetAPIPolicyListFromEnv(accessToken, environment, limit string) (*resty.Response, error) {
@@ -137,10 +144,11 @@ func PrintAPIPolicies(resp *resty.Response, format string) {
 			"ID":                apiPolicyUUIDHeader,
 			"Name":              apiPolicyNameHeader,
 			"DisplayName":       apiPolicyDisplayNameHeader,
-			"Version":           apiPolicyVersion,
+			"Version":           apiPolicyVersionHeader,
 			"Category":          apiPolicyCategoryHeader,
 			"ApplicableFlows":   apiPolicyApplicableFlowsHeaders,
 			"SupportedGateways": apiPolicySupportedGatewaysHeaders,
+			"SupportedApiTypes": apiPolicySupportedApiTypesHeader,
 		}
 		// execute context
 		if err := policyContext.Write(renderer, apiPolicyTableHeaders); err != nil {
