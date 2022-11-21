@@ -171,8 +171,10 @@ const EndpointSecurityTypeBasic = "BASIC"
 // Constants for sequence update testcase
 const PoliciesDirectory = "/Policies"
 const DevFirstSampleCaseApiYamlFilePathSuffix = "/api.yaml"
-const DevFirstSampleCasePolicyPath = DevFirstSampleCaseArtifactPath + "/customAddLogMessage_v1.j2"
-const DevFirstSampleCasePolicyDefinitionPath = DevFirstSampleCaseArtifactPath + "/customAddLogMessage_v1.yaml"
+const DevFirstSampleCasePolicy1Path = DevFirstSampleCaseArtifactPath + "/customAddLogMessage_v1.j2"
+const DevFirstSampleCasePolicy2Path = DevFirstSampleCaseArtifactPath + "/customAddLogMessage_v2.j2"
+const DevFirstSampleCasePolicyDefinition1Path = DevFirstSampleCaseArtifactPath + "/customAddLogMessage_v1.yaml"
+const DevFirstSampleCasePolicyDefinition2Path = DevFirstSampleCaseArtifactPath + "/customAddLogMessage_v2.yaml"
 const CustomAddLogMessagePolicyDefinitionPathImport = CustomAddLogMessage + "/customAddLogMessage.yaml"
 const DevSampleCaseOperationPolicyDefinition1Path = DevFirstSampleCaseOperationPolicyArtifactPath + "/customAddLogMessage_v1.yaml"
 const DevSampleCaseOperationPolicy1Path = DevFirstSampleCaseOperationPolicyArtifactPath + "/customAddLogMessage_v1.j2"
@@ -182,10 +184,12 @@ const DevSampleCaseInconsistentOperationPolicyDefinitionPath = DevSampleCaseOper
 const DevSampleCaseInconsistentOperationPolicyPath = DevSampleCaseOperationPolicyArtifactsWithInconsistentFileNames + "/customAddLogMessage1.j2"
 const DevSampleCaseMalformedOperationPolicyDefinitionPath = DevFirstSampleCaseMalformedOperationPolicyArtifactPath + "/customAddLogMessage.yaml"
 const DevSampleCaseMalformedOperationPolicyPath = DevFirstSampleCaseMalformedOperationPolicyArtifactPath + "/customAddLogMessage.j2"
-const DevFirstSampleCaseDestPolicyPathSuffix = PoliciesDirectory + "/customAddLogMessage_v1.j2"
-const DevFirstSampleCaseDestPolicyDefinitionPathSuffix = PoliciesDirectory + "/customAddLogMessage_v1.yaml"
-const DevFirstUpdatedSampleCasePolicyPath = DevFirstUpdatedSampleCaseArtifactPath + "/customAddLogMessage_v1.j2"
-const DevFirstUpdatedSampleCasePolicyDefinitionPath = DevFirstUpdatedSampleCaseArtifactPath + "/customAddLogMessage_v1.yaml"
+const DevFirstSampleCaseDestPolicy1PathSuffix = PoliciesDirectory + "/customAddLogMessage_v1.j2"
+const DevFirstSampleCaseDestPolicy2PathSuffix = PoliciesDirectory + "/customAddLogMessage_v2.j2"
+const DevFirstSampleCaseDestPolicyDefinition1PathSuffix = PoliciesDirectory + "/customAddLogMessage_v1.yaml"
+const DevFirstSampleCaseDestPolicyDefinition2PathSuffix = PoliciesDirectory + "/customAddLogMessage_v2.yaml"
+const DevFirstUpdatedSampleCasePolicy1Path = DevFirstUpdatedSampleCaseArtifactPath + "/customAddLogMessage_v1.j2"
+const DevFirstUpdatedSampleCasePolicyDefinition1Path = DevFirstUpdatedSampleCaseArtifactPath + "/customAddLogMessage_v1.yaml"
 
 const (
 	TestSampleOperationTarget                   = "/pet/{petId}"
@@ -197,6 +201,8 @@ const (
 	TestSampleOperationPolicyPropertyName       = "VALUE IS: "
 	TestSampleOperationPolicyPropertyValue      = "123"
 	TestSamplePolicyName                        = "customAddLogMessage"
+	TestSamplePolicyVersion1                    = "v1"
+	TestSamplePolicyVersion2                    = "v2"
 )
 
 // Constants for sequence of the dynamic data test case

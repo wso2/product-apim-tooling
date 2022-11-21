@@ -34,6 +34,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/adminservices"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
@@ -1357,7 +1358,7 @@ func (instance *Client) GetAPIByName(name string) (*APIInfo, error) {
 			return &apiResponse.List[0], nil
 		}
 
-		base.WaitForIndexing()
+		time.Sleep(time.Duration(3000) * time.Millisecond)
 
 		attempts++
 	}

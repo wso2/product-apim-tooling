@@ -896,11 +896,40 @@ func ValidateAPIsEqual(t *testing.T, api1 *apim.API, api2 *apim.API) {
 		api2Copy.AdvertiseInformation.ApiOwner = same
 	}
 
+	if len(api1Copy.Operations) > 0 {
+		overrideOperationPolictIdsInDefinition(&api1Copy)
+		overrideOperationPolictIdsInDefinition(&api2Copy)
+	}
+
 	// Sort member collections to make equality check possible
 	apim.SortAPIMembers(&api1Copy)
 	apim.SortAPIMembers(&api2Copy)
 
 	assert.Equal(t, api1Copy, api2Copy, "API obejcts are not equal")
+}
+
+func overrideOperationPolictIdsInDefinition(apiCopy *apim.API) {
+	same := "override_with_same_value"
+	for _, operation := range apiCopy.Operations {
+		requestPolicies := operation.OperationPolicies.Request.([]interface{})
+		if len(requestPolicies) > 0 {
+			for _, requestPolicy := range requestPolicies {
+				requestPolicy.(map[string]interface{})["policyId"] = same
+			}
+		}
+		responsePolicies := operation.OperationPolicies.Response.([]interface{})
+		if len(responsePolicies) > 0 {
+			for _, responsePolicy := range responsePolicies {
+				responsePolicy.(map[string]interface{})["policyId"] = same
+			}
+		}
+		faultPolicies := operation.OperationPolicies.Fault.([]interface{})
+		if len(faultPolicies) > 0 {
+			for _, faultPolicy := range faultPolicies {
+				faultPolicy.(map[string]interface{})["policyId"] = same
+			}
+		}
+	}
 }
 
 func validateAdvertiseOnlyAPIsEqual(t *testing.T, importedAPI *apim.API, args *ApiImportExportTestArgs) {

@@ -522,12 +522,12 @@ func TestAPIOperationPolicyUpdate(t *testing.T) {
 			projectPath, _ := filepath.Abs(projectName)
 			base.CreateTempDir(t, projectPath+testutils.PoliciesDirectory)
 
-			srcPathForSequence, _ := filepath.Abs(testutils.DevFirstSampleCasePolicyPath)
-			destPathForSequence := projectPath + testutils.DevFirstSampleCaseDestPolicyPathSuffix
+			srcPathForSequence, _ := filepath.Abs(testutils.DevFirstSampleCasePolicy1Path)
+			destPathForSequence := projectPath + testutils.DevFirstSampleCaseDestPolicy1PathSuffix
 			base.Copy(srcPathForSequence, destPathForSequence)
 
-			srcPathForSequenceDefinition, _ := filepath.Abs(testutils.DevFirstSampleCasePolicyDefinitionPath)
-			destPathForSequenceDefinition := projectPath + testutils.DevFirstSampleCaseDestPolicyDefinitionPathSuffix
+			srcPathForSequenceDefinition, _ := filepath.Abs(testutils.DevFirstSampleCasePolicyDefinition1Path)
+			destPathForSequenceDefinition := projectPath + testutils.DevFirstSampleCaseDestPolicyDefinition1PathSuffix
 			base.Copy(srcPathForSequenceDefinition, destPathForSequenceDefinition)
 
 			// Update api.yaml file of initialized project with sequence related metadata
@@ -567,8 +567,8 @@ func TestAPIOperationPolicyUpdate(t *testing.T) {
 			testutils.ValidateImportProject(t, args, "", !isTenantUser(user.CtlUser.Username, TENANT1))
 
 			// Update operation policy file of created project
-			srcPathForSequenceUpdate, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCasePolicyPath)
-			destPathForSequenceUpdate := projectPath + testutils.DevFirstSampleCaseDestPolicyPathSuffix
+			srcPathForSequenceUpdate, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCasePolicy1Path)
+			destPathForSequenceUpdate := projectPath + testutils.DevFirstSampleCaseDestPolicy1PathSuffix
 			err := os.Remove(destPathForSequenceUpdate)
 			if err != nil {
 				t.Fatal(err)
@@ -577,8 +577,8 @@ func TestAPIOperationPolicyUpdate(t *testing.T) {
 			base.WaitForIndexing()
 
 			// Update operation policy file of created project
-			srcPathForSequenceDefinitionUpdate, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCasePolicyDefinitionPath)
-			destPathForSequenceDefinitionUpdate := projectPath + testutils.DevFirstSampleCaseDestPolicyDefinitionPathSuffix
+			srcPathForSequenceDefinitionUpdate, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCasePolicyDefinition1Path)
+			destPathForSequenceDefinitionUpdate := projectPath + testutils.DevFirstSampleCaseDestPolicyDefinition1PathSuffix
 			err = os.Remove(destPathForSequenceDefinitionUpdate)
 			if err != nil {
 				t.Fatal(err)
@@ -591,6 +591,126 @@ func TestAPIOperationPolicyUpdate(t *testing.T) {
 
 			// Validate that sequence has been updated
 			testutils.ValidateAPIWithUpdatedSequenceIsExported(t, args, testutils.DevFirstDefaultAPIName, testutils.DevFirstDefaultAPIVersion)
+		})
+	}
+}
+
+// Testing the flow of conversion of common API policy to API specific policy
+// during the export/import
+func TestExportImportAPIWithAPIPolicies(t *testing.T) {
+
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			dev := GetDevClient()
+			prod := GetProdClient()
+
+			// Add two versions of the same policy to a map
+			operationPoliciesMap := map[int]testutils.PolicySpecFile{
+				1: {
+					Definition: testutils.DevSampleCaseOperationPolicyDefinition1Path,
+					PolicyFile: testutils.DevSampleCaseOperationPolicy1Path,
+				},
+				2: {
+					Definition: testutils.DevSampleCaseOperationPolicyDefinition2Path,
+					PolicyFile: testutils.DevSampleCaseOperationPolicy2Path,
+				},
+			}
+
+			// Add two versions of the same policy to env1
+			for _, policy := range operationPoliciesMap {
+				testutils.AddNewAPIPolicy(t, dev, user.ApiCreator.Username, user.ApiCreator.Password,
+					policy.Definition, policy.PolicyFile, true)
+			}
+
+			projectName := base.GenerateRandomString()
+
+			args1 := &testutils.InitTestArgs{
+				CtlUser:   testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				SrcAPIM:   dev,
+				InitFlag:  projectName,
+				OasFlag:   testutils.TestOpenAPI3DefinitionPath,
+				APIName:   testutils.DevFirstDefaultAPIName,
+				ForceFlag: true,
+			}
+
+			// Initialize the project
+			testutils.ValidateInitializeProjectWithOASFlag(t, args1)
+
+			projectPath, _ := filepath.Abs(projectName)
+			base.CreateTempDir(t, projectPath+testutils.PoliciesDirectory)
+
+			// Add API Policy 1 to the project
+			srcPathForAPIPolicy1, _ := filepath.Abs(testutils.DevFirstSampleCasePolicy1Path)
+			destPathForAPIPolicy1 := projectPath + testutils.DevFirstSampleCaseDestPolicy1PathSuffix
+			base.Copy(srcPathForAPIPolicy1, destPathForAPIPolicy1)
+			srcPathForSequenceDefinition1, _ := filepath.Abs(testutils.DevFirstSampleCasePolicyDefinition1Path)
+			destPathForSequenceDefinition1 := projectPath + testutils.DevFirstSampleCaseDestPolicyDefinition1PathSuffix
+			base.Copy(srcPathForSequenceDefinition1, destPathForSequenceDefinition1)
+
+			// Add API Policy 2 to the project
+			srcPathForAPIPolicy2, _ := filepath.Abs(testutils.DevFirstSampleCasePolicy2Path)
+			destPathForAPIPolicy2 := projectPath + testutils.DevFirstSampleCaseDestPolicy2PathSuffix
+			base.Copy(srcPathForAPIPolicy2, destPathForAPIPolicy2)
+			srcPathForSequenceDefinition2, _ := filepath.Abs(testutils.DevFirstSampleCasePolicyDefinition2Path)
+			destPathForSequenceDefinition2 := projectPath + testutils.DevFirstSampleCaseDestPolicyDefinition2PathSuffix
+			base.Copy(srcPathForSequenceDefinition2, destPathForSequenceDefinition2)
+
+			// Update api.yaml file of initialized project with API policy related metadata
+			apiDefinitionFilePath := filepath.Join(projectPath, testutils.DevFirstSampleCaseApiYamlFilePathSuffix)
+			apiDefinitionFileContent := testutils.ReadAPIDefinition(t, apiDefinitionFilePath)
+
+			// Operation policies that will be added
+			var policies []interface{}
+			operationPolicies := apim.OperationPolicies{
+				Request: append(policies, map[string]interface{}{
+					"policyName":    testutils.TestSamplePolicyName,
+					"policyVersion": testutils.TestSamplePolicyVersion1,
+					"parameters": map[string]string{
+						testutils.TestSampleOperationPolicyPropertyNameField:  testutils.TestSampleOperationPolicyPropertyName,
+						testutils.TestSampleOperationPolicyPropertyValueField: testutils.TestSampleOperationPolicyPropertyValue,
+					}}),
+				Response: append(policies, map[string]interface{}{
+					"policyName":    testutils.TestSamplePolicyName,
+					"policyVersion": testutils.TestSamplePolicyVersion2,
+					"parameters": map[string]string{
+						testutils.TestSampleOperationPolicyPropertyNameField:  testutils.TestSampleOperationPolicyPropertyName,
+						testutils.TestSampleOperationPolicyPropertyValueField: testutils.TestSampleOperationPolicyPropertyValue,
+					}}),
+				Fault: append(policies),
+			}
+
+			// Assign the above API Policies to a resource
+			apiOperationWithPolicies := apim.APIOperations{
+				Target:            testutils.TestSampleOperationTarget,
+				Verb:              testutils.TestSampleOperationVerb,
+				AuthType:          testutils.TestSampleOperationAuthType,
+				ThrottlingPolicy:  testutils.TestSampleOperationThrottlingPolicy,
+				OperationPolicies: operationPolicies,
+			}
+
+			// Add the operation policy added resource to the API
+			apiOperations := []apim.APIOperations{apiOperationWithPolicies}
+			apiDefinitionFileContent.Data.Operations = apiOperations
+
+			// Write the modified API definition to the directory
+			testutils.WriteToAPIDefinition(t, apiDefinitionFileContent, apiDefinitionFilePath)
+
+			// Import the project with the common API policies to env 1 (Here the policies inside the project will be
+			// ignored during the import because the environment already has a similar policy with the same versions inside it)
+			importedApi := testutils.ValidateImportProject(t, args1, "", !isTenantUser(user.CtlUser.Username, TENANT1))
+
+			args2 := &testutils.ApiImportExportTestArgs{
+				ApiProvider: testutils.Credentials{Username: user.ApiCreator.Username, Password: user.ApiCreator.Password},
+				CtlUser:     testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Api:         importedApi,
+				SrcAPIM:     dev,
+				DestAPIM:    prod,
+			}
+
+			// Export the imported API with the policies and import to the other envrironment (Here, since the second environment
+			// does not has the API policies already, the policies inside the project will be imported as API specific policies)
+			testutils.ValidateAPIExportImport(t, args2, testutils.APITypeREST)
 		})
 	}
 }
