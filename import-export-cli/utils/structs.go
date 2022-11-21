@@ -345,7 +345,7 @@ type APIPolicy struct {
 	Name              string            `json:"name"`
 	DisplayName       string            `json:"displayName"`
 	Version           string            `json:"version"`
-	Description       string            `json:"description"`
+	Description       string            `json:"description,omitempty"`
 	Category          string            `json:"category"`
 	ApplicableFlows   []string          `json:"applicableFlows"`
 	SupportedGateways []string          `json:"supportedGateways"`
