@@ -23,6 +23,7 @@ apictl delete policy api -n addHeader -e dev
   -e, --environment string   Environment from which the API Policy should be deleted
   -h, --help                 help for api
   -n, --name string          Name of the API Policy to be deleted
+  -v, --version string       Version of the API Policy to be deleted
 ```
 
 ### Options inherited from parent commands
