@@ -13,8 +13,8 @@ apictl delete policy api (--name <name-of-the-api-policy> --environment <environ
 ### Examples
 
 ```
-apictl delete policy api -n addHeader -e dev
- NOTE: The 2 flags (--name (-n) and --environment (-e)) are mandatory.
+apictl delete policy api -n addHeader -v v1 -e dev
+ NOTE: The 3 flags (--name (-n), --version (-v) and --environment (-e)) are mandatory.
 ```
 
 ### Options
