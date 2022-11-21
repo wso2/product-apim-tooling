@@ -342,12 +342,14 @@ type APIPoliciesList struct {
 
 type APIPolicy struct {
 	Id                string            `json:"id"`
-	Name              string            `json:"name,omitempty"`
-	DisplayName       string            `json:"displayName,omitempty"`
+	Name              string            `json:"name"`
+	DisplayName       string            `json:"displayName"`
+	Version           string            `json:"version"`
 	Description       string            `json:"description,omitempty"`
-	Category          string            `json:"category,omitempty"`
+	Category          string            `json:"category"`
 	ApplicableFlows   []string          `json:"applicableFlows"`
 	SupportedGateways []string          `json:"supportedGateways"`
+	SupportedApiTypes []string          `json:"supportedApiTypes"`
 	PolicyAttributes  []PolicyAttribute `json:"policyAttributes,omitempty"`
 }
 

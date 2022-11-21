@@ -169,3 +169,8 @@ type ApiLoggingTestArgs struct {
 	ApiId        string
 	LogLevel     string
 }
+
+type PolicySpecFile struct {
+	Definition string
+	PolicyFile string
+}

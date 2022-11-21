@@ -41,8 +41,8 @@ const ExportAPIPolicyCmdLiteral = "api"
 const exportAPIPolicyCmdShortDesc = "Export an API Policy"
 const exportAPIPolicyCmdLongDesc = "Export an API Policy from an environment"
 
-const exportAPIPolicyCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportAPIPolicyCmdLiteral + ` -n addHeader -e dev
- NOTE: All the 2 flags (--name (-n) and --environment (-e)) are mandatory.`
+const exportAPIPolicyCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportPolicyCmdLiteral + ` ` + ExportAPIPolicyCmdLiteral + ` -n addHeader -v v1 -e dev
+NOTE: All the 3 flags (--name (-n), --version (-v) and --environment (-e)) are mandatory.`
 
 // ExportAPIPolicyCmd represents the api policy export command
 var ExportAPIPolicyCmd = &cobra.Command{
@@ -60,7 +60,6 @@ var ExportAPIPolicyCmd = &cobra.Command{
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
 
-		exportAPIPolicyVersion = utils.DefaultAPIPolicyVersion
 		executeExportAPIPolicyCmd(cred, apiPoliciesExportDirectory, exportAPIPolicyName)
 	},
 }
@@ -91,10 +90,13 @@ func init() {
 	ExportPolicyCmd.AddCommand(ExportAPIPolicyCmd)
 	ExportAPIPolicyCmd.Flags().StringVarP(&exportAPIPolicyName, "name", "n",
 		"", "Name of the API Policy to be exported")
+	ExportAPIPolicyCmd.Flags().StringVarP(&exportAPIPolicyVersion, "version", "v",
+		"", "Version of the API Policy to be exported")
 	ExportAPIPolicyCmd.Flags().StringVarP(&CmdExportEnvironment, "environment", "e",
 		"", "Environment of the API Policy to be exported")
 	ExportAPIPolicyCmd.Flags().StringVarP(&exportAPIPolicyFormat, "format", "",
 		"", "Type of the Policy definition file exported")
 	_ = ExportAPIPolicyCmd.MarkFlagRequired("name")
+	_ = ExportAPIPolicyCmd.MarkFlagRequired("version")
 	_ = ExportAPIPolicyCmd.MarkFlagRequired("environment")
 }

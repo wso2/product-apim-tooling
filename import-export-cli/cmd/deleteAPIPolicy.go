@@ -36,8 +36,8 @@ const DeleteAPIPolicyCmdLiteral = "api"
 const DeleteAPIPolicyCmdShortDesc = "Delete an API Policy"
 const DeleteAPIPolicyCmdLongDesc = "Delete an API Policy from an environment"
 
-const DeleteAPIPolicyCmdExamplesDefault = utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + DeletePolicyCmdLiteral + ` ` + DeleteAPIPolicyCmdLiteral + ` -n addHeader -e dev
- NOTE: The 2 flags (--name (-n) and --environment (-e)) are mandatory.`
+const DeleteAPIPolicyCmdExamplesDefault = utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + DeletePolicyCmdLiteral + ` ` + DeleteAPIPolicyCmdLiteral + ` -n addHeader -v v1 -e dev
+ NOTE: The 3 flags (--name (-n), --version (-v) and --environment (-e)) are mandatory.`
 
 // DeleteAPIPolicyCmd represents the delete api policy command
 var DeleteAPIPolicyCmd = &cobra.Command{
@@ -53,7 +53,7 @@ var DeleteAPIPolicyCmd = &cobra.Command{
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
-		deleteAPIPolicyVersion = utils.DefaultAPIPolicyVersion
+
 		executeDeleteAPIPolicyCmd(cred)
 
 	},
@@ -67,7 +67,7 @@ func executeDeleteAPIPolicyCmd(credential credentials.Credential) {
 		if err != nil {
 			utils.HandleErrorAndExit("Error while deleting API Policy ", err)
 		}
-		impl.PrintDeleteAPIPolicyResponse(deleteAPIPolicyName, err)
+		impl.PrintDeleteAPIPolicyResponse(deleteAPIPolicyName, deleteAPIPolicyVersion, err)
 	} else {
 		// Error deleting API Policy
 		fmt.Println("Error getting OAuth tokens while deleting API Policy:" + preCommandErr.Error())
@@ -79,9 +79,12 @@ func init() {
 	DeletePolicyCmd.AddCommand(DeleteAPIPolicyCmd)
 	DeleteAPIPolicyCmd.Flags().StringVarP(&deleteAPIPolicyName, "name", "n", "",
 		"Name of the API Policy to be deleted")
+	DeleteAPIPolicyCmd.Flags().StringVarP(&deleteAPIPolicyVersion, "version", "v",
+		"", "Version of the API Policy to be deleted")
 	DeleteAPIPolicyCmd.Flags().StringVarP(&deleteAPIPolicyEnvironment, "environment", "e",
 		"", "Environment from which the API Policy should be deleted")
 
 	_ = DeleteAPIPolicyCmd.MarkFlagRequired("name")
+	_ = DeleteAPIPolicyCmd.MarkFlagRequired("version")
 	_ = DeleteAPIPolicyCmd.MarkFlagRequired("environment")
 }

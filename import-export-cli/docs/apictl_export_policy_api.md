@@ -13,8 +13,8 @@ apictl export policy api (--name <name-of-the-api-policy> --environment <environ
 ### Examples
 
 ```
-apictl export policy api -n addHeader -e dev
- NOTE: All the 2 flags (--name (-n) and --environment (-e)) are mandatory.
+apictl export policy api -n addHeader -v v1 -e dev
+NOTE: All the 3 flags (--name (-n), --version (-v) and --environment (-e)) are mandatory.
 ```
 
 ### Options
@@ -24,6 +24,7 @@ apictl export policy api -n addHeader -e dev
       --format string        Type of the Policy definition file exported
   -h, --help                 help for api
   -n, --name string          Name of the API Policy to be exported
+  -v, --version string       Version of the API Policy to be exported
 ```
 
 ### Options inherited from parent commands

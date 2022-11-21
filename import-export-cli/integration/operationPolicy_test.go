@@ -32,19 +32,32 @@ func TestExportImportAPIPolicy(t *testing.T) {
 			dev := GetDevClient()
 			prod := GetProdClient()
 
-			pathToSpecFile := testutils.DevSampleCaseOperationPolicyDefinitionPath
-			pathToSynapseFile := testutils.DevSampleCaseOperationPolicyPath
-
-			newPolicy := testutils.AddNewAPIPolicy(t, dev, user.ApiCreator.Username, user.ApiCreator.Password, pathToSpecFile, pathToSynapseFile)
-			operationPolicy, _ := testutils.APIPolicyStructToMap(newPolicy)
-			args := &testutils.PolicyImportExportTestArgs{
-				CtlUser:  testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
-				Policy:   operationPolicy,
-				SrcAPIM:  dev,
-				DestAPIM: prod,
+			// Add two versions of the same policy to a map
+			operationPoliciesMap := map[int]testutils.PolicySpecFile{
+				1: {
+					Definition: testutils.DevSampleCaseOperationPolicyDefinition1Path,
+					PolicyFile: testutils.DevSampleCaseOperationPolicy1Path,
+				},
+				2: {
+					Definition: testutils.DevSampleCaseOperationPolicyDefinition2Path,
+					PolicyFile: testutils.DevSampleCaseOperationPolicy2Path,
+				},
 			}
 
-			testutils.ValidateAPIPolicyExportImport(t, args)
+			// Export and import two versions of the same policy
+			for _, policy := range operationPoliciesMap {
+				newPolicy := testutils.AddNewAPIPolicy(t, dev, user.ApiCreator.Username, user.ApiCreator.Password,
+					policy.Definition, policy.PolicyFile, true)
+				operationPolicy, _ := testutils.APIPolicyStructToMap(newPolicy)
+
+				args := &testutils.PolicyImportExportTestArgs{
+					CtlUser:  testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+					Policy:   operationPolicy,
+					SrcAPIM:  dev,
+					DestAPIM: prod,
+				}
+				testutils.ValidateAPIPolicyExportImport(t, args)
+			}
 		})
 	}
 }
@@ -99,19 +112,33 @@ func TestExportImportAPIPolicyWithFormatFlag(t *testing.T) {
 			dev := GetDevClient()
 			prod := GetProdClient()
 
-			pathToSpecFile := testutils.DevSampleCaseOperationPolicyDefinitionPath
-			pathToSynapseFile := testutils.DevSampleCaseOperationPolicyPath
-
-			newPolicy := testutils.AddNewAPIPolicy(t, dev, user.ApiCreator.Username, user.ApiCreator.Password, pathToSpecFile, pathToSynapseFile)
-			operationPolicy, _ := testutils.APIPolicyStructToMap(newPolicy)
-			args := &testutils.PolicyImportExportTestArgs{
-				CtlUser:      testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
-				Policy:       operationPolicy,
-				SrcAPIM:      dev,
-				DestAPIM:     prod,
-				ExportFormat: "JSON",
+			// Add two versions of the same policy to a map
+			operationPoliciesMap := map[int]testutils.PolicySpecFile{
+				1: {
+					Definition: testutils.DevSampleCaseOperationPolicyDefinition1Path,
+					PolicyFile: testutils.DevSampleCaseOperationPolicy1Path,
+				},
+				2: {
+					Definition: testutils.DevSampleCaseOperationPolicyDefinition2Path,
+					PolicyFile: testutils.DevSampleCaseOperationPolicy2Path,
+				},
 			}
-			testutils.ValidateAPIPolicyExportImportWithFormatFlag(t, args)
+
+			// Export and import two versions of the same policy
+			for _, policy := range operationPoliciesMap {
+				newPolicy := testutils.AddNewAPIPolicy(t, dev, user.ApiCreator.Username, user.ApiCreator.Password,
+					policy.Definition, policy.PolicyFile, true)
+				operationPolicy, _ := testutils.APIPolicyStructToMap(newPolicy)
+
+				args := &testutils.PolicyImportExportTestArgs{
+					CtlUser:      testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+					Policy:       operationPolicy,
+					SrcAPIM:      dev,
+					DestAPIM:     prod,
+					ExportFormat: "JSON",
+				}
+				testutils.ValidateAPIPolicyExportImportWithFormatFlag(t, args)
+			}
 		})
 	}
 }
@@ -226,18 +253,31 @@ func TestAPIPolicyDelete(t *testing.T) {
 
 			dev := GetDevClient()
 
-			pathToSpecFile := testutils.DevSampleCaseOperationPolicyDefinitionPath
-			pathToSynapseFile := testutils.DevSampleCaseOperationPolicyPath
-
-			newPolicy := testutils.AddNewAPIPolicy(t, dev, user.ApiCreator.Username, user.ApiCreator.Password, pathToSpecFile, pathToSynapseFile)
-			operationPolicy, _ := testutils.APIPolicyStructToMap(newPolicy)
-
-			args := &testutils.PolicyImportExportTestArgs{
-				CtlUser: testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
-				SrcAPIM: dev,
-				Policy:  operationPolicy,
+			// Add two versions of the same policy to a map
+			operationPoliciesMap := map[int]testutils.PolicySpecFile{
+				1: {
+					Definition: testutils.DevSampleCaseOperationPolicyDefinition1Path,
+					PolicyFile: testutils.DevSampleCaseOperationPolicy1Path,
+				},
+				2: {
+					Definition: testutils.DevSampleCaseOperationPolicyDefinition2Path,
+					PolicyFile: testutils.DevSampleCaseOperationPolicy2Path,
+				},
 			}
-			testutils.ValidateAPIPolicyDelete(t, args)
+
+			// Delete two versions of the same policy
+			for _, policy := range operationPoliciesMap {
+				newPolicy := testutils.AddNewAPIPolicy(t, dev, user.ApiCreator.Username, user.ApiCreator.Password,
+					policy.Definition, policy.PolicyFile, false)
+				operationPolicy, _ := testutils.APIPolicyStructToMap(newPolicy)
+
+				args := &testutils.PolicyImportExportTestArgs{
+					CtlUser: testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+					SrcAPIM: dev,
+					Policy:  operationPolicy,
+				}
+				testutils.ValidateAPIPolicyDelete(t, args)
+			}
 		})
 	}
 }
@@ -269,19 +309,33 @@ func TestAPIPolicyImportFailureWhenPolicyExisted(t *testing.T) {
 
 			dev := GetDevClient()
 			prod := GetProdClient()
-			pathToSpecFile := testutils.DevSampleCaseOperationPolicyDefinitionPath
-			pathToSynapseFile := testutils.DevSampleCaseOperationPolicyPath
 
-			newPolicy := testutils.AddNewAPIPolicy(t, dev, user.ApiCreator.Username, user.ApiCreator.Password, pathToSpecFile, pathToSynapseFile)
-			operationPolicy, _ := testutils.APIPolicyStructToMap(newPolicy)
-
-			args := &testutils.PolicyImportExportTestArgs{
-				CtlUser:  testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
-				SrcAPIM:  dev,
-				DestAPIM: prod,
-				Policy:   operationPolicy,
+			// Add two versions of the same policy to a map
+			operationPoliciesMap := map[int]testutils.PolicySpecFile{
+				1: {
+					Definition: testutils.DevSampleCaseOperationPolicyDefinition1Path,
+					PolicyFile: testutils.DevSampleCaseOperationPolicy1Path,
+				},
+				2: {
+					Definition: testutils.DevSampleCaseOperationPolicyDefinition2Path,
+					PolicyFile: testutils.DevSampleCaseOperationPolicy2Path,
+				},
 			}
-			testutils.ValidateAPIPolicyImportFailureWhenPolicyExisted(t, args)
+
+			// Export and import two versions of the same policy
+			for _, policy := range operationPoliciesMap {
+				newPolicy := testutils.AddNewAPIPolicy(t, dev, user.ApiCreator.Username, user.ApiCreator.Password,
+					policy.Definition, policy.PolicyFile, true)
+				operationPolicy, _ := testutils.APIPolicyStructToMap(newPolicy)
+
+				args := &testutils.PolicyImportExportTestArgs{
+					CtlUser:  testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+					SrcAPIM:  dev,
+					DestAPIM: prod,
+					Policy:   operationPolicy,
+				}
+				testutils.ValidateAPIPolicyExportImportFailureWhenPolicyExisted(t, args)
+			}
 		})
 	}
 }

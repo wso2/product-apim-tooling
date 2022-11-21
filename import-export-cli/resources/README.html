@@ -242,12 +242,13 @@
         <pre><code class="lang-bash">   Flags:
        Required:
             --name, -n
+            -- version, -v
             --environment, -e
        Optional:
             --format
    Examples:
-            apictl export policy api -n AddHeader -e dev
-            apictl export policy api -n AddHeader -e prod --format JSON
+            apictl export policy api -n AddHeader -v v1 -e dev
+            apictl export policy api -n AddHeader -v v2 -e prod --format JSON
 </code></pre>
     </li>
 </ul>
@@ -543,9 +544,10 @@
         <pre><code class="lang-bash">   Flags:
        Required:
            --name, -n
+           --version, -v
            --environment, -e
    Examples:
-       apictl delete policy api -n AddHeader -e staging
+       apictl delete policy api -n AddHeader -v v2 -e staging
 </code></pre>
     </li>
 </ul>
