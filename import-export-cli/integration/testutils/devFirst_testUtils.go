@@ -276,15 +276,25 @@ func ValidateImportUpdateProject(t *testing.T, args *InitTestArgs, preserveProvi
 func ValidateImportUpdateProjectNotAlreadyImported(t *testing.T, args *InitTestArgs) {
 	t.Helper()
 
-	result, error := importApiFromProjectWithUpdate(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, true, true)
+	result, err := importApiFromProjectWithUpdate(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, true, true)
 
-	assert.Nil(t, error, "Error while generating Project")
+	assert.Nil(t, err, "Error while generating Project")
 	assert.Contains(t, result, "Successfully imported API", "Test InitializeProjectWithDefinitionFlag Failed")
 
 	//Remove Created project and logout
 	t.Cleanup(func() {
 		base.RemoveDir(args.InitFlag)
 	})
+}
+
+func ValidateHiddenFilesPresentWithDocsBeforeImport(t *testing.T, TestDestPathForHiddenFiles, TestDestPathForHiddenFilesInRootDir string) {
+	t.Helper()
+
+	isHiddenFilePresent := base.IsFileAvailable(t, TestDestPathForHiddenFiles)
+	assert.Equal(t, true, isHiddenFilePresent, "Error while generating API with document & hidden files")
+
+	isHiddenFilePresent = base.IsFileAvailable(t, TestDestPathForHiddenFilesInRootDir)
+	assert.Equal(t, true, isHiddenFilePresent, "Error while generating API with document & hidden file in root directory")
 }
 
 func ValidateExportImportedAPI(t *testing.T, args *InitTestArgs, DevFirstDefaultAPIName string, DevFirstDefaultAPIVersion string) string {

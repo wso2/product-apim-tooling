@@ -329,6 +329,7 @@ func TestImportAndExportAPIWithDocument(t *testing.T) {
 
 	projectPath, _ := filepath.Abs(projectName)
 	base.CreateTempDir(t, projectPath+testutils.DevFirstUpdatedSampleCaseDocName)
+	base.CreateTempDir(t, projectPath+testutils.DevFirstUpdatedSampleCaseDocNameWithHiddenFiles)
 
 	//Move doc file to created project
 	srcPathForDoc, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCaseDocPath)
@@ -339,6 +340,15 @@ func TestImportAndExportAPIWithDocument(t *testing.T) {
 	srcPathForDocMetadata, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCaseDocMetaDataPath)
 	destPathForDocMetaData := projectPath + testutils.DevFirstUpdatedSampleCaseDestMetaDataPathSuffix
 	base.Copy(srcPathForDocMetadata, destPathForDocMetaData)
+
+	// Create hidden files inside the Doc folder
+	destPathForHiddenFiles := projectPath + testutils.DevFirstUpdatedSampleCaseDestHiddenFilesPathSuffix
+	base.CreateFile(destPathForHiddenFiles)
+
+	destPathForHiddenFilesInRootDir := projectPath + testutils.DevFirstUpdatedSampleCaseHiddenFilePathInRootDir
+	base.CreateFile(destPathForHiddenFilesInRootDir)
+
+	testutils.ValidateHiddenFilesPresentWithDocsBeforeImport(t, destPathForHiddenFiles, destPathForHiddenFilesInRootDir)
 
 	//Import the project with Document
 	testutils.ValidateImportUpdateProjectNotAlreadyImported(t, args)
