@@ -23,6 +23,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/Jeffail/gabs"
@@ -84,6 +85,19 @@ func IncludeMetaFileToZip(sourceZipFile, targetZipFile, metaFile string, metaDat
 	}
 
 	jsonMetaData, err := gabs.ParseJSON(marshaledData)
+
+	// The struct "ImportConfig" is designed with omitemptys which favour the flows of APIs and API Products.
+	// Changing the struct to match with Applications contradicts the flows related to APIs and API Products.
+	// Hence, the meta fields related to applications will be manually handled here in that struct.
+	if strings.EqualFold(metaFile, utils.MetaFileApplication) {
+		if jsonMetaData.ExistsP(utils.DeployImportRotateRevision) {
+			jsonMetaData.DeleteP(utils.DeployImportRotateRevision)
+		}
+		if !jsonMetaData.ExistsP(utils.DeployImportSkipSubscriptions) {
+			jsonMetaData.SetP(false, utils.DeployImportSkipSubscriptions)
+		}
+	}
+
 	metaContent, err := utils.JsonToYaml(jsonMetaData.Bytes())
 	if err != nil {
 		return err

@@ -226,6 +226,10 @@ const (
 	MetaFileApplication = "application_meta.yaml"
 )
 
+// Constants related to meta file structs
+const DeployImportRotateRevision = "deploy.import.rotateRevision"
+const DeployImportSkipSubscriptions = "deploy.import.skipSubscriptions"
+
 const DeploymentEnvFile = "deployment_environments.yaml"
 const PrivateJetModeConst = "privateJet"
 const SidecarModeConst = "sidecar"
