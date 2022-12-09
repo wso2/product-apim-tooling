@@ -41,9 +41,9 @@ indexing-delay: 1000
 
 ```
 dcr-version: v0.17
-admin-rest-api-version: v3
-devportal-rest-api-version: v2
-publisher-rest-api-version: v3
+admin-rest-api-version: v4
+devportal-rest-api-version: v3
+publisher-rest-api-version: v4
 devops-rest-api-version: v0
 ```
 
