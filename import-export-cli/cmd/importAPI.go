@@ -1019,7 +1019,8 @@ func setupEndpoints(environmentParams *params.Environment) ([]byte, error) {
 			configData = []byte(utils.DynamicEndpointConfig)
 		} else if environmentParams.EndpointType == utils.AwsLambdaEndpointType { // if endpoint type is AWS Lambda
 			if environmentParams.AWSLambdaEndpoints == nil {
-				return nil, errors.New("Please specify awsLambdaEndpoints field for " + environmentParams.Name + " and continue...")
+				return nil, errors.New("Please specify awsLambdaEndpoints field for " +
+					environmentParams.Name + " and continue...")
 			}
 			if environmentParams.AWSLambdaEndpoints.AccessMethod == utils.AwsLambdaRoleSuppliedAccessMethod {
 				environmentParams.AWSLambdaEndpoints.AccessMethod = utils.AwsLambdaRoleSuppliedAccessMethodForJSON
@@ -1027,7 +1028,8 @@ func setupEndpoints(environmentParams *params.Environment) ([]byte, error) {
 			environmentParams.AWSLambdaEndpoints.EndpointType = utils.AwsLambdaEndpointTypeForJSON
 			configData, err = json.Marshal(environmentParams.AWSLambdaEndpoints)
 		} else {
-			return nil, errors.New("Please specify the endpoint routing policy or the endpoints field for " + environmentParams.Name + " and continue...")
+			return nil, errors.New("Please specify the endpoint routing policy or the endpoints field for " +
+				environmentParams.Name + " and continue...")
 		}
 	}
 
