@@ -14,7 +14,7 @@ apictl import policy [flags]
 
 ```
 apictl import policy rate-limiting -f ~/CustomPolicy -e production -u
-apictl import policy api  -f ~/AddHeader -e production
+apictl import policy api -f ~/AddHeader -e production
 ```
 
 ### Options
