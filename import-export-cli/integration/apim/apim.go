@@ -2474,7 +2474,8 @@ func (instance *Client) GetAPIPolicyID(t *testing.T, policyName, policyVersion s
 }
 
 // AddAPIPolicy : Add new API Policy of different policy types to APIM
-func (instance *Client) AddAPIPolicy(t *testing.T, policySpec []byte, synapseDefFilePath, username, password, cleanUpFunction string, doClean bool) map[string]interface{} {
+func (instance *Client) AddAPIPolicy(t *testing.T, policySpec []byte, synapseDefFilePath, ccDefFilePath, username, password,
+	cleanUpFunction string, doClean bool) map[string]interface{} {
 	var apiPolicyResponse map[string]interface{}
 
 	apiPolicyURL := instance.publisherRestURL + operationPolicyResourcePath
@@ -2497,6 +2498,25 @@ func (instance *Client) AddAPIPolicy(t *testing.T, policySpec []byte, synapseDef
 	_, err = io.Copy(part, synapseDefFile)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	if ccDefFilePath != "" {
+		ccDefFile, err := os.Open(ccDefFilePath)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer ccDefFile.Close()
+
+		part, err = writer.CreateFormFile("ccPolicyDefinitionFile", filepath.Base(ccDefFile.Name()))
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		_, err = io.Copy(part, ccDefFile)
+		if err != nil {
+			t.Fatal(err)
+		}
 	}
 
 	part, err = writer.CreateFormField("policySpecFile")

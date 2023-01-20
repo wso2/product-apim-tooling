@@ -608,19 +608,19 @@ func TestExportImportAPIWithAPIPolicies(t *testing.T) {
 			// Add two versions of the same policy to a map
 			operationPoliciesMap := map[int]testutils.PolicySpecFile{
 				1: {
-					Definition: testutils.DevSampleCaseOperationPolicyDefinition1Path,
-					PolicyFile: testutils.DevSampleCaseOperationPolicy1Path,
+					Definition:        testutils.DevSampleCaseOperationPolicyDefinition1Path,
+					SynapsePolicyFile: testutils.DevSampleCaseOperationPolicy1Path,
 				},
 				2: {
-					Definition: testutils.DevSampleCaseOperationPolicyDefinition2Path,
-					PolicyFile: testutils.DevSampleCaseOperationPolicy2Path,
+					Definition:        testutils.DevSampleCaseOperationPolicyDefinition2Path,
+					SynapsePolicyFile: testutils.DevSampleCaseOperationPolicy2Path,
 				},
 			}
 
 			// Add two versions of the same policy to env1
 			for _, policy := range operationPoliciesMap {
 				testutils.AddNewAPIPolicy(t, dev, user.ApiCreator.Username, user.ApiCreator.Password,
-					policy.Definition, policy.PolicyFile, true)
+					policy, true)
 			}
 
 			projectName := base.GenerateRandomString()

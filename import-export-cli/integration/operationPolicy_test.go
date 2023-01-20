@@ -35,19 +35,19 @@ func TestExportImportAPIPolicy(t *testing.T) {
 			// Add two versions of the same policy to a map
 			operationPoliciesMap := map[int]testutils.PolicySpecFile{
 				1: {
-					Definition: testutils.DevSampleCaseOperationPolicyDefinition1Path,
-					PolicyFile: testutils.DevSampleCaseOperationPolicy1Path,
+					Definition:        testutils.DevSampleCaseOperationPolicyDefinition1Path,
+					SynapsePolicyFile: testutils.DevSampleCaseOperationPolicy1Path,
 				},
 				2: {
-					Definition: testutils.DevSampleCaseOperationPolicyDefinition2Path,
-					PolicyFile: testutils.DevSampleCaseOperationPolicy2Path,
+					Definition:        testutils.DevSampleCaseOperationPolicyDefinition2Path,
+					SynapsePolicyFile: testutils.DevSampleCaseOperationPolicy2Path,
 				},
 			}
 
 			// Export and import two versions of the same policy
 			for _, policy := range operationPoliciesMap {
 				newPolicy := testutils.AddNewAPIPolicy(t, dev, user.ApiCreator.Username, user.ApiCreator.Password,
-					policy.Definition, policy.PolicyFile, true)
+					policy, true)
 				operationPolicy, _ := testutils.APIPolicyStructToMap(newPolicy)
 
 				args := &testutils.PolicyImportExportTestArgs{
@@ -58,6 +58,39 @@ func TestExportImportAPIPolicy(t *testing.T) {
 				}
 				testutils.ValidateAPIPolicyExportImport(t, args)
 			}
+		})
+	}
+}
+
+// Export an API Policy that supports both Synapse and Choreo Connect gateways from one environment
+// and import to another environment
+func TestExportImportAPIPolicyWithSynapseChoreoConnectTypes(t *testing.T) {
+
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+			prod := GetProdClient()
+
+			// Add a policy that supports both Synapse and Choreo Connect gateways
+			operationPolicyFiles := testutils.PolicySpecFile{
+				Definition:        testutils.TestSynapseChoreoConnectPolicyDefinitionPath,
+				SynapsePolicyFile: testutils.TestSynapseChoreoConnectPolicyPathForSynapseType,
+				CcPolicyFile:      testutils.TestSynapseChoreoConnectPolicyPathForChoreoConnectType,
+			}
+
+			// Export and import the same policy
+			newPolicy := testutils.AddNewAPIPolicy(t, dev, user.ApiCreator.Username, user.ApiCreator.Password,
+				operationPolicyFiles, true)
+			operationPolicy, _ := testutils.APIPolicyStructToMap(newPolicy)
+
+			args := &testutils.PolicyImportExportTestArgs{
+				CtlUser:  testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Policy:   operationPolicy,
+				SrcAPIM:  dev,
+				DestAPIM: prod,
+			}
+			testutils.ValidateAPIPolicyExportImport(t, args)
+
 		})
 	}
 }
@@ -115,19 +148,19 @@ func TestExportImportAPIPolicyWithFormatFlag(t *testing.T) {
 			// Add two versions of the same policy to a map
 			operationPoliciesMap := map[int]testutils.PolicySpecFile{
 				1: {
-					Definition: testutils.DevSampleCaseOperationPolicyDefinition1Path,
-					PolicyFile: testutils.DevSampleCaseOperationPolicy1Path,
+					Definition:        testutils.DevSampleCaseOperationPolicyDefinition1Path,
+					SynapsePolicyFile: testutils.DevSampleCaseOperationPolicy1Path,
 				},
 				2: {
-					Definition: testutils.DevSampleCaseOperationPolicyDefinition2Path,
-					PolicyFile: testutils.DevSampleCaseOperationPolicy2Path,
+					Definition:        testutils.DevSampleCaseOperationPolicyDefinition2Path,
+					SynapsePolicyFile: testutils.DevSampleCaseOperationPolicy2Path,
 				},
 			}
 
 			// Export and import two versions of the same policy
 			for _, policy := range operationPoliciesMap {
 				newPolicy := testutils.AddNewAPIPolicy(t, dev, user.ApiCreator.Username, user.ApiCreator.Password,
-					policy.Definition, policy.PolicyFile, true)
+					policy, true)
 				operationPolicy, _ := testutils.APIPolicyStructToMap(newPolicy)
 
 				args := &testutils.PolicyImportExportTestArgs{
@@ -256,19 +289,19 @@ func TestAPIPolicyDelete(t *testing.T) {
 			// Add two versions of the same policy to a map
 			operationPoliciesMap := map[int]testutils.PolicySpecFile{
 				1: {
-					Definition: testutils.DevSampleCaseOperationPolicyDefinition1Path,
-					PolicyFile: testutils.DevSampleCaseOperationPolicy1Path,
+					Definition:        testutils.DevSampleCaseOperationPolicyDefinition1Path,
+					SynapsePolicyFile: testutils.DevSampleCaseOperationPolicy1Path,
 				},
 				2: {
-					Definition: testutils.DevSampleCaseOperationPolicyDefinition2Path,
-					PolicyFile: testutils.DevSampleCaseOperationPolicy2Path,
+					Definition:        testutils.DevSampleCaseOperationPolicyDefinition2Path,
+					SynapsePolicyFile: testutils.DevSampleCaseOperationPolicy2Path,
 				},
 			}
 
 			// Delete two versions of the same policy
 			for _, policy := range operationPoliciesMap {
 				newPolicy := testutils.AddNewAPIPolicy(t, dev, user.ApiCreator.Username, user.ApiCreator.Password,
-					policy.Definition, policy.PolicyFile, false)
+					policy, false)
 				operationPolicy, _ := testutils.APIPolicyStructToMap(newPolicy)
 
 				args := &testutils.PolicyImportExportTestArgs{
@@ -313,19 +346,19 @@ func TestAPIPolicyImportFailureWhenPolicyExisted(t *testing.T) {
 			// Add two versions of the same policy to a map
 			operationPoliciesMap := map[int]testutils.PolicySpecFile{
 				1: {
-					Definition: testutils.DevSampleCaseOperationPolicyDefinition1Path,
-					PolicyFile: testutils.DevSampleCaseOperationPolicy1Path,
+					Definition:        testutils.DevSampleCaseOperationPolicyDefinition1Path,
+					SynapsePolicyFile: testutils.DevSampleCaseOperationPolicy1Path,
 				},
 				2: {
-					Definition: testutils.DevSampleCaseOperationPolicyDefinition2Path,
-					PolicyFile: testutils.DevSampleCaseOperationPolicy2Path,
+					Definition:        testutils.DevSampleCaseOperationPolicyDefinition2Path,
+					SynapsePolicyFile: testutils.DevSampleCaseOperationPolicy2Path,
 				},
 			}
 
 			// Export and import two versions of the same policy
 			for _, policy := range operationPoliciesMap {
 				newPolicy := testutils.AddNewAPIPolicy(t, dev, user.ApiCreator.Username, user.ApiCreator.Password,
-					policy.Definition, policy.PolicyFile, true)
+					policy, true)
 				operationPolicy, _ := testutils.APIPolicyStructToMap(newPolicy)
 
 				args := &testutils.PolicyImportExportTestArgs{

@@ -171,6 +171,7 @@ type ApiLoggingTestArgs struct {
 }
 
 type PolicySpecFile struct {
-	Definition string
-	PolicyFile string
+	Definition        string
+	SynapsePolicyFile string
+	CcPolicyFile      string
 }

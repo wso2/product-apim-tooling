@@ -279,17 +279,21 @@ func ValidateAPIPolicyExportImportFailureWhenPolicyExisted(t *testing.T, args *P
 }
 
 // Adds a new API Policy to an env
-func AddNewAPIPolicy(t *testing.T, client *apim.Client, username, password, pathToSpec, pathToSynapse string, doClean bool) interface{} {
+func AddNewAPIPolicy(t *testing.T, client *apim.Client, username, password string, policy PolicySpecFile, doClean bool) interface{} {
 	client.Login(username, password)
-	pathToPolicySpecFile, _ := filepath.Abs(pathToSpec)
-	pathToSynapseDefFile, _ := filepath.Abs(pathToSynapse)
+	pathToPolicySpecFile, _ := filepath.Abs(policy.Definition)
+	pathToSynapseDefFile, _ := filepath.Abs(policy.SynapsePolicyFile)
+	pathToChoroConnectDefFile := ""
+	if policy.CcPolicyFile != "" {
+		pathToChoroConnectDefFile, _ = filepath.Abs(policy.CcPolicyFile)
+	}
 	policyContent := readAPIPolicyDefinition(t, pathToPolicySpecFile)
 	policySpecFileData, err := json.Marshal(policyContent)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	createdPolicy := client.AddAPIPolicy(t, policySpecFileData, pathToSynapseDefFile, username, password, CleanUpFunction, doClean)
+	createdPolicy := client.AddAPIPolicy(t, policySpecFileData, pathToSynapseDefFile, pathToChoroConnectDefFile, username, password, CleanUpFunction, doClean)
 	return createdPolicy
 }
 
