@@ -111,7 +111,6 @@ func importAPIPolicy(endpoint string, importPath string, accessToken string, isO
 	}
 
 	resp, err := executeAPIPolicyImportRequest(endpoint, policyFilePath, accessToken, isOauth)
-	utils.Logf("Response : %v", resp)
 	if err != nil {
 		utils.Logln(utils.LogPrefixError, err)
 		return err
