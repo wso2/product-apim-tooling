@@ -143,5 +143,4 @@ components:
         title: List of schedule items information 
         type: array
         items:
-          $ref: '#/components/schemas/ScheduleItem'
-            
+
