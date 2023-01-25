@@ -52,6 +52,7 @@ const DevFirstUpdatedSampleCaseDocMetaDataPath = DevFirstUpdatedSampleCaseArtifa
 const DevFirstUpdatedSampleCaseDestMetaDataPathSuffix = DevFirstUpdatedSampleCaseDocName + "/document.yaml"
 const DevFirstSampleCaseArtifactPath = "testdata/TestArtifactDirectory/DevFirstSampleCaseArtifacts"
 const DevFirstSampleCaseOperationPolicyArtifactPath = "testdata/TestArtifactDirectory/DevSampleCaseOperationPolicyArtifacts"
+const TestSynapseChoreoConnectPolicyArtifactsPath = "testdata/TestArtifactDirectory/TestSynapseChoreoConnectPolicyArtifacts"
 const CustomAddLogMessage = "testdata/TestArtifactDirectory/customAddLogMessage"
 const DevSampleCaseOperationPolicyArtifactsWithInconsistentFileNames = "testdata/TestArtifactDirectory/DevSampleCaseOperationPolicyArtifactsWithInconsistentFileNames/customAddLogMessage"
 const DevFirstSampleCaseMalformedOperationPolicyArtifactPath = "testdata/TestArtifactDirectory/DevSampleCaseMalformedOperationPolicyArtifacts/customAddLogMessage"
@@ -190,6 +191,9 @@ const DevFirstSampleCaseDestPolicyDefinition1PathSuffix = PoliciesDirectory + "/
 const DevFirstSampleCaseDestPolicyDefinition2PathSuffix = PoliciesDirectory + "/customAddLogMessage_v2.yaml"
 const DevFirstUpdatedSampleCasePolicy1Path = DevFirstUpdatedSampleCaseArtifactPath + "/customAddLogMessage_v1.j2"
 const DevFirstUpdatedSampleCasePolicyDefinition1Path = DevFirstUpdatedSampleCaseArtifactPath + "/customAddLogMessage_v1.yaml"
+const TestSynapseChoreoConnectPolicyDefinitionPath = TestSynapseChoreoConnectPolicyArtifactsPath + "/testSynapseChoreoConnectPolicy.yaml"
+const TestSynapseChoreoConnectPolicyPathForSynapseType = TestSynapseChoreoConnectPolicyArtifactsPath + "/testSynapseChoreoConnectPolicy.j2"
+const TestSynapseChoreoConnectPolicyPathForChoreoConnectType = TestSynapseChoreoConnectPolicyArtifactsPath + "/testSynapseChoreoConnectPolicy.gotmpl"
 
 const (
 	TestSampleOperationTarget                   = "/pet/{petId}"
