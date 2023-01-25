@@ -2024,6 +2024,45 @@ _apictl_get_apps()
     noun_aliases=()
 }
 
+_apictl_get_correlation-logging()
+{
+    last_command="apictl_get_correlation-logging"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--environment=")
+    two_word_flags+=("--environment")
+    two_word_flags+=("-e")
+    local_nonpersistent_flags+=("--environment")
+    local_nonpersistent_flags+=("--environment=")
+    local_nonpersistent_flags+=("-e")
+    flags+=("--format=")
+    two_word_flags+=("--format")
+    local_nonpersistent_flags+=("--format")
+    local_nonpersistent_flags+=("--format=")
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    local_nonpersistent_flags+=("-h")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_flag+=("--environment=")
+    must_have_one_flag+=("-e")
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
 _apictl_get_envs()
 {
     last_command="apictl_get_envs"
@@ -2299,6 +2338,7 @@ _apictl_get()
     commands+=("api-revisions")
     commands+=("apis")
     commands+=("apps")
+    commands+=("correlation-logging")
     commands+=("envs")
     commands+=("help")
     commands+=("keys")
@@ -5896,6 +5936,57 @@ _apictl_set_api-logging()
     noun_aliases=()
 }
 
+_apictl_set_correlation-logging()
+{
+    last_command="apictl_set_correlation-logging"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--component-name=")
+    two_word_flags+=("--component-name")
+    two_word_flags+=("-i")
+    local_nonpersistent_flags+=("--component-name")
+    local_nonpersistent_flags+=("--component-name=")
+    local_nonpersistent_flags+=("-i")
+    flags+=("--denied-threads=")
+    two_word_flags+=("--denied-threads")
+    local_nonpersistent_flags+=("--denied-threads")
+    local_nonpersistent_flags+=("--denied-threads=")
+    flags+=("--enable=")
+    two_word_flags+=("--enable")
+    local_nonpersistent_flags+=("--enable")
+    local_nonpersistent_flags+=("--enable=")
+    flags+=("--environment=")
+    two_word_flags+=("--environment")
+    two_word_flags+=("-e")
+    local_nonpersistent_flags+=("--environment")
+    local_nonpersistent_flags+=("--environment=")
+    local_nonpersistent_flags+=("-e")
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
+    local_nonpersistent_flags+=("-h")
+    flags+=("--insecure")
+    flags+=("-k")
+    flags+=("--verbose")
+
+    must_have_one_flag=()
+    must_have_one_flag+=("--component-name=")
+    must_have_one_flag+=("-i")
+    must_have_one_flag+=("--environment=")
+    must_have_one_flag+=("-e")
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
 _apictl_set_help()
 {
     last_command="apictl_set_help"
@@ -5928,6 +6019,7 @@ _apictl_set()
 
     commands=()
     commands+=("api-logging")
+    commands+=("correlation-logging")
     commands+=("help")
 
     flags=()

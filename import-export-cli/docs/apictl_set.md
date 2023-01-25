@@ -1,6 +1,6 @@
 ## apictl set
 
-Set configuration parameters or per API log levels
+Set configuration parameters, per API log levels or correlation component configurations
 
 ### Synopsis
 
@@ -29,6 +29,7 @@ apictl set --vcs-config-path /home/user/custom/vcs-config.yaml
 apictl set --vcs-deployment-repo-path /home/user/custom/deployment
 apictl set --vcs-source-repo-path /home/user/custom/source
 apictl set api-logging --api-id bf36ca3a-0332-49ba-abce-e9992228ae06 --log-level full -e dev --tenant-domain carbon.super
+apictl set correlation-logging --component-name http --enable true -e dev
 ```
 
 ### Options
@@ -55,4 +56,5 @@ apictl set api-logging --api-id bf36ca3a-0332-49ba-abce-e9992228ae06 --log-level
 
 * [apictl](apictl.md)	 - CLI for Importing and Exporting APIs and Applications and Managing WSO2 Micro Integrator
 * [apictl set api-logging](apictl_set_api-logging.md)	 - Set the log level for an API in an environment
+* [apictl set correlation-logging](apictl_set_correlation-logging.md)	 - Set the correlation configs for a correlation logging component in an environment
 
