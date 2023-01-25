@@ -36,10 +36,11 @@ var setCorrelationLoggingEnabled string
 
 const SetCorrelationLoggingCmdLiteral = "correlation-logging"
 const setCorrelationLoggingCmdShortDesc = "Set the correlation configs for a correlation logging component in an environment"
-const setCorrelationLoggingCmdLongDesc = `Set the correlation configs for a correlation logging component the environment specified`
+const setCorrelationLoggingCmdLongDesc = `Set the correlation configs for a correlation logging component in the environment specified
+NOTE: The flags (--component-name (-i), --enable and --environment (-e)) are mandatory.`
 
 var setCorrelationLoggingCmdExamples = utils.ProjectName + ` ` + SetCmdLiteral + ` ` + SetCorrelationLoggingCmdLiteral + ` --component-name http --enable true -e dev
-` + utils.ProjectName + ` ` + SetCmdLiteral + ` ` + SetCorrelationLoggingCmdLiteral + ` --component-name jdbc --enable true --denied-threads MessageDeliveryTaskThreadPool,HumanTaskServer,BPELServer  -e dev`
+` + utils.ProjectName + ` ` + SetCmdLiteral + ` ` + SetCorrelationLoggingCmdLiteral + ` --component-name jdbc --enable true --denied-threads MessageDeliveryTaskThreadPool,HumanTaskServer,BPELServer -e dev`
 
 var setCorrelationLoggingCmd = &cobra.Command{
 	Use:     SetCorrelationLoggingCmdLiteral,
@@ -64,7 +65,7 @@ func executeSetCorrelationLoggingCmd(credential credentials.Credential) {
 	}
 	// Print info on response
 	utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp)
-	if resp.StatusCode() == http.StatusOK { 
+	if resp.StatusCode() == http.StatusOK {
 		// 200 OK
 		if strings.ToLower(setCorrelationLoggingEnabled) == "true" {
 			fmt.Println("Correlation component " + setCorrelationLoggingComponentName + " is successfully enabled.")

@@ -30,7 +30,8 @@ var getCorrelationLoggingCmdFormat string
 
 const GetCorrelationLoggingCmdLiteral = "correlation-logging"
 const getCorrelationLoggingCmdShortDesc = "Display a list of correlation logging components in an environment"
-const getCorrelationLoggingCmdLongDesc = `Display a list of correlation logging components available in the environment specified`
+const getCorrelationLoggingCmdLongDesc = `Display a list of correlation logging components available in the environment specified
+NOTE: The flag (--environment (-e)) is mandatory.`
 
 var getCorrelationLoggingCmdExamples = utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetCorrelationLoggingCmdLiteral + ` -e dev `
 
@@ -51,11 +52,11 @@ var getCorrelationLoggingCmd = &cobra.Command{
 
 func executeGetCorrelationLoggingCmd(credential credentials.Credential) {
 	components, err := impl.GetCorrelationLogComponentListFromEnv(credential, getCorrelationLoggingEnvironment)
-	
+
 	if err == nil {
 		impl.PrintCorrelationLoggers(components, getCorrelationLoggingCmdFormat)
 	} else {
-		utils.Logln(utils.LogPrefixError + "Getting list of correlation log configurations", err)
+		utils.Logln(utils.LogPrefixError+"Getting list of correlation log configurations", err)
 		utils.HandleErrorAndExit("Error while getting list of correlation log configurations", err)
 	}
 }
@@ -65,7 +66,7 @@ func init() {
 
 	getCorrelationLoggingCmd.Flags().StringVarP(&getCorrelationLoggingEnvironment, "environment", "e",
 		"", "Environment which the correlation logging components should be displayed")
-	getCorrelationLoggingCmd.Flags().StringVarP(&getCorrelationLoggingCmdFormat, "format", "", "", "Pretty-print Correlation loggers "+
-		"using Go Templates. Use \"{{ jsonPretty . }}\" to list all fields")
+	getCorrelationLoggingCmd.Flags().StringVarP(&getCorrelationLoggingCmdFormat, "format", "", "",
+		"Pretty-print correlation logging components using Go Templates. Use \"{{ jsonPretty . }}\" to list all fields")
 	_ = getCorrelationLoggingCmd.MarkFlagRequired("environment")
 }
