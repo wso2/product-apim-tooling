@@ -58,7 +58,8 @@ var setCorrelationLoggingCmd = &cobra.Command{
 }
 
 func executeSetCorrelationLoggingCmd(credential credentials.Credential) {
-	resp, err := impl.SetCorrelationLoggingComponent(credential, setCorrelationLoggingEnvironment, setCorrelationLoggingComponentName, setCorrelationLoggingEnabled, setCorrelationLoggingDeniedThreads)
+	resp, err := impl.SetCorrelationLoggingComponent(credential, setCorrelationLoggingEnvironment,
+		setCorrelationLoggingComponentName, setCorrelationLoggingEnabled, setCorrelationLoggingDeniedThreads)
 	if err != nil {
 		utils.Logln(utils.LogPrefixError+"Setting the correlation log component configs", err)
 		utils.HandleErrorAndExit("Error while setting the correlation log component configs", err)
