@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"text/template"
 
 	"net/http"
@@ -39,7 +40,8 @@ const (
 	loggingApiContextHeader  = "API_CONTEXT"
 	loggingApiLogLevelHeader = "LOG_LEVEL"
 
-	defaultLoggingApiTableFormat = "table {{.Id}}\t{{.Context}}\t{{.LogLevel}}"
+	defaultLoggingApiTableFormat         = "table {{.Id}}\t{{.Context}}\t{{.LogLevel}}"
+	defaultLoggingCorrelationTableFormat = "table {{.Name}}\t{{.Enabled}}\t{{.Properties}}"
 )
 
 // LoggingApi holds information about an API for outputting
@@ -47,6 +49,32 @@ type loggingApi struct {
 	id       string
 	context  string
 	logLevel string
+}
+
+type loggingCorrelationComponent struct {
+	name       string
+	enabled    string
+	properties string
+}
+
+func newLoggingCorrelationComponentFromComponent(component utils.CorrelationComponent) *loggingCorrelationComponent {
+	if len(component.Properties) > 0 {
+		return &loggingCorrelationComponent{component.Name, component.Enabled, component.Properties[len(component.Properties)-1].Name +
+			" : " + strings.Join(component.Properties[len(component.Properties)-1].Value, ", ")}
+	}
+	return &loggingCorrelationComponent{component.Name, component.Enabled, "-"}
+}
+
+func (component loggingCorrelationComponent) Name() string {
+	return component.name
+}
+
+func (component loggingCorrelationComponent) Enabled() string {
+	return component.enabled
+}
+
+func (component loggingCorrelationComponent) Properties() string {
+	return component.properties
 }
 
 // Creates a new api from utils.APILogger
@@ -203,4 +231,128 @@ func SetAPILoggingLevel(credential credentials.Credential, environment, apiId, t
 	} else {
 		return nil, errors.New(string(resp.Body()))
 	}
+}
+
+// GET Correlation Components List
+func GetCorrelationLogComponentListFromEnv(credential credentials.Credential, environment string) (components []utils.CorrelationComponent, err error) {
+	// Base64 encoding the credentials
+	b64encodedCredentials := credentials.GetBasicAuth(credential)
+	// Prepping the headers
+	headers := make(map[string]string)
+	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + b64encodedCredentials
+
+	correlationDevOpsEP := utils.GetCorrelationLoggingEndPointOfEnv(environment, utils.MainConfigFilePath)
+	utils.Logln(utils.LogPrefixInfo + "URL : " + correlationDevOpsEP)
+	resp, err := utils.InvokeGETRequest(correlationDevOpsEP, headers)
+
+	if err != nil {
+		utils.HandleErrorAndExit("Unable to connect to "+correlationDevOpsEP, err)
+	}
+
+	utils.Logln(utils.LogPrefixInfo + "Response : " + resp.Status())
+
+	if resp.StatusCode() == http.StatusOK {
+		correlationComponentsResponse := &utils.CorrelationComponentList{}
+		unmarshalError := json.Unmarshal([]byte(resp.Body()), &correlationComponentsResponse)
+
+		if unmarshalError != nil {
+			utils.HandleErrorAndExit(utils.LogPrefixError+"invalid JSON response", unmarshalError)
+		}
+		return correlationComponentsResponse.Components, nil
+	}
+	return nil, errors.New(string(resp.Body()))
+}
+
+func PrintCorrelationLoggers(components []utils.CorrelationComponent, format string) {
+	if format == "" {
+		format = defaultLoggingCorrelationTableFormat
+	}
+
+	formatContext := formatter.NewContext(os.Stdout, format)
+
+	renderer := func(w io.Writer, t *template.Template) error {
+		for _, component := range components {
+			if err := t.Execute(w, newLoggingCorrelationComponentFromComponent(component)); err != nil {
+				return err
+			}
+			_, _ = w.Write([]byte{'\n'})
+		}
+		return nil
+	}
+
+	correlationTableHeaders := map[string]string{
+		"Name":       "COMPONENT_NAME",
+		"Enabled":    "ENABLED",
+		"Properties": "PROPERTIES",
+	}
+
+	if err := formatContext.Write(renderer, correlationTableHeaders); err != nil {
+		fmt.Println("Error executing template", err.Error())
+	}
+}
+func SetCorrelationLoggingComponent(credential credentials.Credential, environment, componentName, enabled, deniedThreads string) (*resty.Response, error) {
+	// Base64 encoding the credentials
+	b64encodedCredentials := credentials.GetBasicAuth(credential)
+
+	correlationDevOpsEP := utils.GetCorrelationLoggingEndPointOfEnv(environment, utils.MainConfigFilePath)
+
+	// Prepping the headers
+	headers := make(map[string]string)
+	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + b64encodedCredentials
+	headers[utils.HeaderAccept] = utils.HeaderValueApplicationJSON
+
+	resp, err := utils.InvokeGETRequest(correlationDevOpsEP, headers)
+
+	if err != nil {
+		utils.HandleErrorAndExit("Unable to connect to "+correlationDevOpsEP, err)
+	}
+
+	utils.Logln(utils.LogPrefixInfo + "GET Response : " + resp.Status())
+
+	if resp.StatusCode() != http.StatusOK {
+		return nil, errors.New(string(resp.Body()))
+	}
+
+	correlationComponentsResponse := &utils.CorrelationComponentList{}
+	unmarshalError := json.Unmarshal([]byte(resp.Body()), &correlationComponentsResponse)
+
+	if unmarshalError != nil {
+		utils.HandleErrorAndExit(utils.LogPrefixError+"invalid JSON response", unmarshalError)
+	}
+
+	responseComponents := correlationComponentsResponse.Components
+	requestComponents := make([]utils.CorrelationComponent, 0)
+
+	for _, cc := range responseComponents {
+		if cc.Name == componentName {
+			cc.Enabled = enabled
+			if len(cc.Properties) > 0 {
+				if cc.Properties[len(cc.Properties)-1].Name == "deniedThreads" {
+					cc.Properties[len(cc.Properties)-1].Value = strings.Split(deniedThreads, ",")
+				}
+			}
+		}
+		requestComponents = append(requestComponents, cc)
+	}
+
+	b, err := json.Marshal(requestComponents)
+	if err != nil {
+		utils.Logln("Error when creating a json ")
+		return nil, nil
+	}
+
+	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
+	body := string(b)
+	body = "{\"components\":" + body + "}"
+	putResp, err := utils.InvokePutRequest(nil, correlationDevOpsEP, headers, body)
+
+	if err != nil {
+		utils.HandleErrorAndExit("Unable to connect to "+correlationDevOpsEP, err)
+	}
+
+	utils.Logln(utils.LogPrefixInfo+"PUT Response:", putResp.Status())
+	if putResp.StatusCode() == http.StatusOK {
+		return putResp, nil
+	}
+	return nil, errors.New(string(putResp.Body()))
 }

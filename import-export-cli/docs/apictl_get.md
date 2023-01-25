@@ -1,6 +1,6 @@
 ## apictl get
 
-Get APIs/APIProducts/Applications or revisions of a specific API/APIProduct in an environment or Get the log level of each API in an environment or Get the environments
+Get APIs/APIProducts/Applications or revisions of a specific API/APIProduct in an environment or Get the Correlation Log Configurations or Get the log level of each API in an environment or Get the environments
 
 ### Synopsis
 
@@ -10,7 +10,8 @@ Display a list of Applications of a specific user in the environment specified b
 Display a list of API revisions of a specific API in the environment specified by flag (--environment, -e)/
 Display a list of API Product revisions of a specific API Product in the environment specified by flag (--environment, -e)/
 Get a generated JWT token to invoke an API or API Product by subscribing to a default application for testing purposes in the environment specified by flag (--environment, -e)/
-Get the log level of each API in the environment specified by flag (--environment, -e)
+Get the log level of each API in the environment specified by flag (--environment, -e)/
+Get the correlation log configurations in the environment specified by flag (--environment, -e)
 OR
 List all the environments
 
@@ -30,6 +31,7 @@ apictl get api-product-revisions -n PizzaProduct -v 1.0.0 -e dev
 apictl get keys -n TwitterAPI -v 1.0.0 -e dev
 apictl get api-logging -e dev --tenant-domain carbon.super
 apictl get api-logging --api-id bf36ca3a-0332-49ba-abce-e9992228ae06 -e dev --tenant-domain carbon.super
+apictl get correlation-logging -e dev
 ```
 
 ### Options
@@ -54,6 +56,7 @@ apictl get api-logging --api-id bf36ca3a-0332-49ba-abce-e9992228ae06 -e dev --te
 * [apictl get api-revisions](apictl_get_api-revisions.md)	 - Display a list of Revisions for the API
 * [apictl get apis](apictl_get_apis.md)	 - Display a list of APIs in an environment
 * [apictl get apps](apictl_get_apps.md)	 - Display a list of Applications in an environment specific to an owner
+* [apictl get correlation-logging](apictl_get_correlation-logging.md)	 - Display a list of correlation logging components in an environment
 * [apictl get envs](apictl_get_envs.md)	 - Display the list of environments
 * [apictl get keys](apictl_get_keys.md)	 - Generate access token to invoke the API or API Product
 * [apictl get policies](apictl_get_policies.md)	 - Get Policy list
