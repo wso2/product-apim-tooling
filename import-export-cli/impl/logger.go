@@ -23,8 +23,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"strings"
 	"os"
+	"strings"
 	"text/template"
 
 	"net/http"
@@ -40,7 +40,7 @@ const (
 	loggingApiContextHeader  = "API_CONTEXT"
 	loggingApiLogLevelHeader = "LOG_LEVEL"
 
-	defaultLoggingApiTableFormat = "table {{.Id}}\t{{.Context}}\t{{.LogLevel}}"
+	defaultLoggingApiTableFormat         = "table {{.Id}}\t{{.Context}}\t{{.LogLevel}}"
 	defaultLoggingCorrelationTableFormat = "table {{.Name}}\t{{.Enabled}}\t{{.Properties}}"
 )
 
@@ -51,17 +51,16 @@ type loggingApi struct {
 	logLevel string
 }
 
-
 type loggingCorrelationComponent struct {
-	name 			string
-	enabled 		string
-	properties 		string
+	name       string
+	enabled    string
+	properties string
 }
 
 func newLoggingCorrelationComponentFromComponent(component utils.CorrelationComponent) *loggingCorrelationComponent {
 	if len(component.Properties) > 0 {
-		return &loggingCorrelationComponent{component.Name, component.Enabled, component.Properties[len(component.Properties)-1].Name + 
-			" : "  + strings.Join(component.Properties[len(component.Properties)-1].Value, ", ")}
+		return &loggingCorrelationComponent{component.Name, component.Enabled, component.Properties[len(component.Properties)-1].Name +
+			" : " + strings.Join(component.Properties[len(component.Properties)-1].Value, ", ")}
 	}
 	return &loggingCorrelationComponent{component.Name, component.Enabled, "-"}
 }
@@ -234,20 +233,20 @@ func SetAPILoggingLevel(credential credentials.Credential, environment, apiId, t
 	}
 }
 
-// GET Correlation Components List 
+// GET Correlation Components List
 func GetCorrelationLogComponentListFromEnv(credential credentials.Credential, environment string) (components []utils.CorrelationComponent, err error) {
 	// Base64 encoding the credentials
 	b64encodedCredentials := credentials.GetBasicAuth(credential)
 	// Prepping the headers
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + b64encodedCredentials
-	
+
 	correlationDevOpsEP := utils.GetCorrelationLoggingEndPointOfEnv(environment, utils.MainConfigFilePath)
-	utils.Logln(utils.LogPrefixInfo+"URL : " + correlationDevOpsEP)
+	utils.Logln(utils.LogPrefixInfo + "URL : " + correlationDevOpsEP)
 	resp, err := utils.InvokeGETRequest(correlationDevOpsEP, headers)
 
 	if err != nil {
-		utils.HandleErrorAndExit("Unable to connect to " + correlationDevOpsEP, err)
+		utils.HandleErrorAndExit("Unable to connect to "+correlationDevOpsEP, err)
 	}
 
 	utils.Logln(utils.LogPrefixInfo + "Response : " + resp.Status())
@@ -257,13 +256,12 @@ func GetCorrelationLogComponentListFromEnv(credential credentials.Credential, en
 		unmarshalError := json.Unmarshal([]byte(resp.Body()), &correlationComponentsResponse)
 
 		if unmarshalError != nil {
-			utils.HandleErrorAndExit(utils.LogPrefixError + "invalid JSON response", unmarshalError)
+			utils.HandleErrorAndExit(utils.LogPrefixError+"invalid JSON response", unmarshalError)
 		}
-		return correlationComponentsResponse.Components, nil 
+		return correlationComponentsResponse.Components, nil
 	}
 	return nil, errors.New(string(resp.Body()))
 }
-
 
 func PrintCorrelationLoggers(components []utils.CorrelationComponent, format string) {
 	if format == "" {
@@ -272,7 +270,7 @@ func PrintCorrelationLoggers(components []utils.CorrelationComponent, format str
 
 	formatContext := formatter.NewContext(os.Stdout, format)
 
-	renderer := func (w io.Writer, t *template.Template) error {
+	renderer := func(w io.Writer, t *template.Template) error {
 		for _, component := range components {
 			if err := t.Execute(w, newLoggingCorrelationComponentFromComponent(component)); err != nil {
 				return err
@@ -281,10 +279,10 @@ func PrintCorrelationLoggers(components []utils.CorrelationComponent, format str
 		}
 		return nil
 	}
-	
+
 	correlationTableHeaders := map[string]string{
-		"Name": "COMPONENT_NAME", 
-		"Enabled": "ENABLED",
+		"Name":       "COMPONENT_NAME",
+		"Enabled":    "ENABLED",
 		"Properties": "PROPERTIES",
 	}
 
@@ -306,7 +304,7 @@ func SetCorrelationLoggingComponent(credential credentials.Credential, environme
 	resp, err := utils.InvokeGETRequest(correlationDevOpsEP, headers)
 
 	if err != nil {
-		utils.HandleErrorAndExit("Unable to connect to " + correlationDevOpsEP, err)
+		utils.HandleErrorAndExit("Unable to connect to "+correlationDevOpsEP, err)
 	}
 
 	utils.Logln(utils.LogPrefixInfo + "GET Response : " + resp.Status())
@@ -319,30 +317,30 @@ func SetCorrelationLoggingComponent(credential credentials.Credential, environme
 	unmarshalError := json.Unmarshal([]byte(resp.Body()), &correlationComponentsResponse)
 
 	if unmarshalError != nil {
-		utils.HandleErrorAndExit(utils.LogPrefixError + "invalid JSON response", unmarshalError)
+		utils.HandleErrorAndExit(utils.LogPrefixError+"invalid JSON response", unmarshalError)
 	}
 
 	responseComponents := correlationComponentsResponse.Components
-	requestComponents  := make([]utils.CorrelationComponent,0)
+	requestComponents := make([]utils.CorrelationComponent, 0)
 
-	for  _ , cc := range  responseComponents{
+	for _, cc := range responseComponents {
 		if cc.Name == componentName {
 			cc.Enabled = enabled
-			if(len(cc.Properties)>0){
-				if(cc.Properties[len(cc.Properties)-1].Name == "deniedThreads"){
+			if len(cc.Properties) > 0 {
+				if cc.Properties[len(cc.Properties)-1].Name == "deniedThreads" {
 					cc.Properties[len(cc.Properties)-1].Value = strings.Split(deniedThreads, ",")
 				}
 			}
 		}
 		requestComponents = append(requestComponents, cc)
 	}
-	
-	b,err := json.Marshal(requestComponents)
+
+	b, err := json.Marshal(requestComponents)
 	if err != nil {
-		utils.Logln("Error when creating a json ")		
-		return nil, nil 
+		utils.Logln("Error when creating a json ")
+		return nil, nil
 	}
-	
+
 	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
 	body := string(b)
 	body = "{\"components\":" + body + "}"
