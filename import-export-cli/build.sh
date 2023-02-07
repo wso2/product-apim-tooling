@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 function showUsageAndExit() {
     echo "Insufficient or invalid options provided"
@@ -88,8 +87,7 @@ fi
 if [ "${full_build}" == "true" ]; then
 # the following line give an error in MacOS
 #    echo "Building "$'\e[1m'"${filename^^}:${build_version}"$'\e[0m'" for all platforms..."
-    # string format: {GOOS}/{GOARCH}/{ZIP_FILE_OS_NAME}/{ZIP_FILE_ARCH_NAME}
-    platforms="darwin/amd64/darwin/amd64 darwin/arm64/darwin/arm64 linux/386/linux/i586 linux/arm64/linux/arm64 linux/amd64/linux/amd64 windows/386/windows/i586 windows/amd64/windows/x64"
+    platforms="darwin/amd64/macosx/x64 linux/386/linux/i586 linux/amd64/linux/x64 windows/386/windows/i586 windows/amd64/windows/x64"
 else
     detectPlatformSpecificBuild
     echo "Building "$'\e[1m'"${filename^^}:${build_version}"$'\e[0m'" for detected "$'\e[1m'"${platform}"$'\e[0m'" platform..."
