@@ -49,7 +49,7 @@ func importThrottlingPolicy(endpoint string, importPath string, accessToken stri
 		return err
 	}
 
-	utils.Logln(utils.LogPrefixInfo+"Policy Location:", resolvedPolicyFilePath)
+	utils.Logln(utils.LogPrefixInfo + "Policy Location: ", resolvedPolicyFilePath)
 
 	resp, err := executeThrottlingPolicyUploadRequest(endpoint, resolvedPolicyFilePath, ThrottlePolicyUpdate, accessToken, isOauth)
 	utils.Logf("Response : %v", resp)
