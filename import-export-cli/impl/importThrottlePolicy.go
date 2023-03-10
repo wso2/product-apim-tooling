@@ -21,11 +21,13 @@ package impl
 import (
 	"errors"
 	"fmt"
-	"github.com/go-resty/resty/v2"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
+
+	"github.com/go-resty/resty/v2"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 func ImportThrottlingPolicyToEnv(accessOAuthToken, importEnvironment, importPath string, importThrottlePolicyUpdate bool) error {
@@ -41,7 +43,15 @@ func ImportThrottlingPolicyToEnv(accessOAuthToken, importEnvironment, importPath
 }
 
 func importThrottlingPolicy(endpoint string, importPath string, accessToken string, isOauth bool, ThrottlePolicyUpdate bool) error {
-	resp, err := executeThrottlingPolicyUploadRequest(endpoint, importPath, ThrottlePolicyUpdate, accessToken, isOauth)
+	exportDirectory := filepath.Join(utils.ExportDirectory, utils.ExportedPoliciesDirName, utils.ExportedThrottlePoliciesDirName)
+	resolvedPolicyFilePath, err := resolvePolicyImportFilePath(importPath, exportDirectory)
+	if err != nil {
+		return err
+	}
+
+	utils.Logln(utils.LogPrefixInfo + "Policy Location: ", resolvedPolicyFilePath)
+
+	resp, err := executeThrottlingPolicyUploadRequest(endpoint, resolvedPolicyFilePath, ThrottlePolicyUpdate, accessToken, isOauth)
 	utils.Logf("Response : %v", resp)
 	if err != nil {
 		utils.Logln(utils.LogPrefixError, err)

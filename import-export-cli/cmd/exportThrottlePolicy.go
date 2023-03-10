@@ -20,8 +20,9 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 	"net/http"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/impl"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 
@@ -77,8 +78,9 @@ func executeExportThrottlePolicyCmd(credential credentials.Credential, exportDir
 		}
 		// Print info on response
 		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
+		throttlePolicyZipLocationPath := filepath.Join(exportDirectory, CmdExportEnvironment)
 		if resp.StatusCode() == http.StatusOK {
-			impl.WriteThrottlePolicyToFile(exportDirectory, resp, exportThrottlePolicyFormat, runningExportThrottlePolicyCommand)
+			impl.WriteThrottlePolicyToFile(throttlePolicyZipLocationPath, resp, exportThrottlePolicyFormat, runningExportThrottlePolicyCommand)
 		} else if resp.StatusCode() == http.StatusInternalServerError {
 			// 500 Internal Server Error
 			fmt.Println(string(resp.Body()))
