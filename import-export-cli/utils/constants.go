@@ -26,10 +26,26 @@ import (
 
 const ProjectName = "apictl"
 
+var MICmd = "apictl"
+
+func GetMICmdName() string {
+	if MICmd == "mi" {
+		return ""
+	}
+	envProjName := os.Getenv("MICmd")
+	if envProjName == "mi" {
+		MICmd = envProjName
+		return ""
+	}
+	return MICmd
+}
+
 // File Names and Paths
 var CurrentDir, _ = os.Getwd()
 
 const ConfigDirName = ".wso2apictl"
+
+const MIConfigDirName = ".wso2mi"
 
 var HomeDirectory = getConfigHomeDir()
 
@@ -50,17 +66,32 @@ func getConfigHomeDir() string {
 	return value
 }
 
+func GetConfigDirPath() string {
+	if MICmd == "mi" {
+		return filepath.Join(HomeDirectory, MIConfigDirName)
+	}
+	return filepath.Join(HomeDirectory, ConfigDirName)
+}
+
+func getLocalCredentialsDirectoryName() string {
+	if MICmd == "mi" {
+		return filepath.Join(HomeDirectory, MILocalCredentialsDirectoryName)
+	}
+	return filepath.Join(HomeDirectory, LocalCredentialsDirectoryName)
+}
+
 var ConfigDirPath = filepath.Join(HomeDirectory, ConfigDirName)
 
 const LocalCredentialsDirectoryName = ".wso2apictl.local"
+const MILocalCredentialsDirectoryName = ".wso2mi.local"
 const EnvKeysAllFileName = "env_keys_all.yaml"
 const MainConfigFileName = "main_config.yaml"
 const SampleMainConfigFileName = "main_config.yaml.sample"
 const DefaultAPISpecFileName = "default_api.yaml"
 
-var LocalCredentialsDirectoryPath = filepath.Join(HomeDirectory, LocalCredentialsDirectoryName)
+var LocalCredentialsDirectoryPath = getLocalCredentialsDirectoryName()
 var EnvKeysAllFilePath = filepath.Join(LocalCredentialsDirectoryPath, EnvKeysAllFileName)
-var MainConfigFilePath = filepath.Join(ConfigDirPath, MainConfigFileName)
+var MainConfigFilePath = filepath.Join(GetConfigDirPath(), MainConfigFileName)
 var SampleMainConfigFilePath = filepath.Join(ConfigDirPath, SampleMainConfigFileName)
 var DefaultAPISpecFilePath = filepath.Join(ConfigDirPath, DefaultAPISpecFileName)
 
@@ -92,7 +123,7 @@ const (
 const DeploymentDirPrefix = "DeploymentArtifacts_"
 const DeploymentCertificatesDirectory = "certificates"
 
-var DefaultExportDirPath = filepath.Join(ConfigDirPath, DefaultExportDirName)
+var DefaultExportDirPath = filepath.Join(GetConfigDirPath(), DefaultExportDirName)
 var DefaultCertDirPath = filepath.Join(ConfigDirPath, CertificatesDirName)
 
 const defaultApiApplicationImportExportSuffix = "api/am/admin/v4"

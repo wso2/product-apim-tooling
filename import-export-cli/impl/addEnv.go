@@ -103,3 +103,33 @@ func AddEnv(envName string, envEndpoints *utils.EnvEndpoints, mainConfigFilePath
 
 	return nil
 }
+
+func AddMIEnv(envName string, envEndpoints *utils.EnvEndpoints, mainConfigFilePath, addEnvCmdLiteral string) error {
+	
+	if envName == "" {
+		// name of the environment is blank
+		return errors.New("Name of the environment cannot be blank")
+	}
+
+	if envEndpoints.ApiManagerEndpoint == "" {
+		if !utils.RequiredMIEndpointsExists(envEndpoints) {
+			utils.ShowHelpCommandTip(addEnvCmdLiteral)
+			return errors.New("Endpoint(s) cannot be blank")
+		}
+	}
+	mainConfig := utils.GetMainConfigFromFile(mainConfigFilePath)
+
+	var validatedEnvEndpoints = utils.EnvEndpoints{
+		MiManagementEndpoint: envEndpoints.MiManagementEndpoint,
+	}
+	if envEndpoints.MiManagementEndpoint != "" {
+		validatedEnvEndpoints.MiManagementEndpoint = envEndpoints.MiManagementEndpoint
+	}
+
+	mainConfig.Environments[envName] = validatedEnvEndpoints
+	utils.WriteConfigFile(mainConfig, mainConfigFilePath)
+
+	fmt.Printf("Successfully added environment '%s'\n", envName)
+
+	return nil
+}

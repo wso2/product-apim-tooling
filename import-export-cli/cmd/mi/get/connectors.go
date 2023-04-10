@@ -34,7 +34,7 @@ const getConnectorCmdShortDesc = "Get information about connectors deployed in a
 const getConnectorCmdLongDesc = "List all the connectors deployed in a Micro Integrator in the environment specified by the flag --environment, -e"
 
 var getConnectorCmdExamples = "To list all the connectors\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + getConnectorCmdLiteral + " -e dev\n" +
+	"  " + utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + getConnectorCmdLiteral + " -e dev\n" +
 	"NOTE: The flag (--environment (-e)) is mandatory"
 
 var getConnectorCmd = &cobra.Command{

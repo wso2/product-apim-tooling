@@ -35,7 +35,7 @@ func generateDeactivateCmdLongDescForArtifact(artifact, argument string) string 
 
 func generateDeactivateCmdExamplesForArtifact(artifact, cmdLiteral, sampleResourceName string) string {
 	return "To deactivate a " + artifact + "\n" +
-		"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + deactivateCmdLiteral + " " + cmdLiteral + " " + sampleResourceName + " -e dev\n" +
+		"  " + utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + deactivateCmdLiteral + " " + cmdLiteral + " " + sampleResourceName + " -e dev\n" +
 		"NOTE: The flag (--environment (-e)) is mandatory"
 }
 

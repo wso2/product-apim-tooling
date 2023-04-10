@@ -29,8 +29,8 @@ const getCmdShortDesc = "Get information about artifacts deployed in a Micro Int
 
 const getCmdLongDesc = `Get information about artifacts deployed in a Micro Integrator instance in the environment specified by the flag (--environment, -e)`
 
-const getCmdExamples = utils.ProjectName + ` ` + utils.MiCmdLiteral + ` ` + GetCmdLiteral + ` ` + `apis` + ` -e dev
-` + utils.ProjectName + ` ` + utils.MiCmdLiteral + ` ` + GetCmdLiteral + ` ` + `endpoints` + ` -e dev`
+var getCmdExamples = utils.GetMICmdName() + ` ` + utils.MiCmdLiteral + ` ` + GetCmdLiteral + ` ` + `apis` + ` -e dev
+` + utils.GetMICmdName() + ` ` + utils.MiCmdLiteral + ` ` + GetCmdLiteral + ` ` + `endpoints` + ` -e dev`
 
 // GetCmd represents the get command
 var GetCmd = &cobra.Command{

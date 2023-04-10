@@ -39,7 +39,7 @@ const addRoleCmdShortDesc = "Add new role to a Micro Integrator"
 const addRoleCmdLongDesc = "Add a new role with the name specified by the command line argument [role-name] to a Micro Integrator in the environment specified by the flag --environment, -e"
 
 var addRoleCmdExamples = "To add a new role\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + addCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(addRoleCmdLiteral) + " [role-name] -e dev\n" +
+	"  " + utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + AddCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(addRoleCmdLiteral) + " [role-name] -e dev\n" +
 	"NOTE: The flag (--environment (-e)) is mandatory"
 
 var addRoleCmd = &cobra.Command{

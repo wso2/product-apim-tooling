@@ -19,6 +19,10 @@
 package mi
 
 import (
+	"fmt"
+	"os"
+	"time"
+
 	"github.com/spf13/cobra"
 	miActivateCmd "github.com/wso2/product-apim-tooling/import-export-cli/cmd/mi/activate"
 	miAddCmd "github.com/wso2/product-apim-tooling/import-export-cli/cmd/mi/add"
@@ -28,6 +32,10 @@ import (
 	miUpdateCmd "github.com/wso2/product-apim-tooling/import-export-cli/cmd/mi/update"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
+
+var verbose bool
+var cfgFile string
+var insecure bool
 
 const miCmdShortDesc = "Micro Integrator related commands"
 
@@ -46,10 +54,67 @@ var MICmd = &cobra.Command{
 }
 
 func init() {
+	if utils.GetMICmdName() == "" {
+		createConfigFiles()
+
+		cobra.OnInitialize(initConfig)
+
+		cobra.EnableCommandSorting = false
+		MICmd.PersistentFlags().BoolVar(&verbose, "verbose", false, "Enable verbose mode")
+		MICmd.PersistentFlags().BoolVarP(&insecure, "insecure", "k", false,
+			"Allow connections to SSL endpoints without certs")
+		err := utils.SetConfigVars(utils.MainConfigFilePath)
+		if err != nil {
+			utils.HandleErrorAndExit("Error reading "+utils.MainConfigFilePath+".", err)
+		}
+	}
 	MICmd.AddCommand(miGetCmd.GetCmd)
 	MICmd.AddCommand(miAddCmd.AddCmd)
 	MICmd.AddCommand(miDeleteCmd.DeleteCmd)
 	MICmd.AddCommand(miUpdateCmd.UpdateCmd)
 	MICmd.AddCommand(miActivateCmd.ActivateCmd)
 	MICmd.AddCommand(miDeactivateCmd.DeactivateCmd)
+}
+
+func createConfigFiles() {
+	err := utils.CreateDirIfNotExist(utils.GetConfigDirPath())
+	if err != nil {
+		utils.HandleErrorAndExit("Error creating config directory: "+utils.ConfigDirPath, err)
+	}
+
+	if !utils.IsFileExist(utils.MainConfigFilePath) {
+		var mainConfig = new(utils.MainConfig)
+		mainConfig.Config = utils.Config{HttpRequestTimeout: utils.DefaultHttpRequestTimeout,
+			ExportDirectory: utils.DefaultExportDirPath}
+
+		utils.WriteConfigFile(mainConfig, utils.MainConfigFilePath)
+	}
+
+	err = utils.CreateDirIfNotExist(utils.LocalCredentialsDirectoryPath)
+	if err != nil {
+		utils.HandleErrorAndExit("Error creating local directory: "+utils.LocalCredentialsDirectoryName, err)
+	}
+}
+
+// initConfig reads in config file and ENV variables if set.
+func initConfig() {
+	if verbose {
+		utils.EnableVerboseMode()
+		t := time.Now()
+		utils.Logf("Executed ImportExportCLI (%s) on %v\n", utils.MICmd, t.Format(time.RFC1123))
+	}
+
+	utils.Logln(utils.LogPrefixInfo+"Insecure:", insecure)
+	if insecure {
+		utils.Insecure = true
+	}
+}
+
+// Execute adds all child commands to the root command sets flags appropriately.
+// This is called by main.main(). It only needs to happen once to the rootCmd.
+func Execute() {
+	if err := MICmd.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(-1)
+	}
 }

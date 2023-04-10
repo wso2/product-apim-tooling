@@ -41,11 +41,11 @@ const getTransactionReportCmdLongDesc = "Generate the transaction count summary 
 
 var getTransactionReportCmdExamples = "Example:\n" +
 	"To generate transaction count report consisting data within a specified time period at a specified location\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getTransactionReportCmdLiteral) + " 2020-05 2020-06 --path </dir_path> -e dev\n" +
+	"  " + utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getTransactionReportCmdLiteral) + " 2020-05 2020-06 --path </dir_path> -e dev\n" +
 	"To generate transaction count report with data from a given month upto the current month at a specified location\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getTransactionReportCmdLiteral) + " 2020-01 -p </dir_path> -e dev\n" +
+	"  " + utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getTransactionReportCmdLiteral) + " 2020-01 -p </dir_path> -e dev\n" +
 	"To generate transaction count report at the current location with data between 2020-01 and 2020-05\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getTransactionReportCmdLiteral) + " 2020-01 2020-05 -e dev\n" +
+	"  " + utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getTransactionReportCmdLiteral) + " 2020-01 2020-05 -e dev\n" +
 	"NOTE: The [start] argument and the flag (--environment (-e)) is mandatory"
 
 var getTransactionReportCmd = &cobra.Command{

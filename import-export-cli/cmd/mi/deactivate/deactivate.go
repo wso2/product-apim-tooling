@@ -28,7 +28,7 @@ const deactivateCmdShortDesc = "Deactivate artifacts deployed in a Micro Integra
 
 const deactivateCmdLongDesc = "Deactivate artifacts deployed in a Micro Integrator instance in the environment specified by the flag (--environment, -e)"
 
-const deactivateCmdExamples = utils.ProjectName + " " + utils.MiCmdLiteral + " " + deactivateCmdLiteral + " " + "endpoint" + " TestEP -e dev"
+var deactivateCmdExamples = utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + deactivateCmdLiteral + " " + "endpoint" + " TestEP -e dev"
 
 // DeactivateCmd represents the deactivate command
 var DeactivateCmd = &cobra.Command{

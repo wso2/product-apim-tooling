@@ -37,9 +37,9 @@ const deleteUserCmdShortDesc = "Delete a user from the Micro Integrator"
 const deleteUserCmdLongDesc = "Delete a user with the name specified by the command line argument [user-name] from a Micro Integrator in the environment specified by the flag --environment, -e"
 
 var deleteUserCmdExamples = "To delete a user\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + deleteCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(deleteUserCmdLiteral) + " [user-id] -e dev\n" +
+	"  " + utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + deleteCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(deleteUserCmdLiteral) + " [user-id] -e dev\n" +
 	"To delete a user in a secondary user store\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + deleteCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(deleteUserCmdLiteral) + " [user-id] -d [domain] -e dev\n" +
+	"  " + utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + deleteCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(deleteUserCmdLiteral) + " [user-id] -d [domain] -e dev\n" +
 	"NOTE: The flag (--environment (-e)) is mandatory"
 
 var deleteUserCmd = &cobra.Command{

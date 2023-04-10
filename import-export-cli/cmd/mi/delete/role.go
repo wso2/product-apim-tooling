@@ -37,9 +37,9 @@ const deleteRoleCmdShortDesc = "Delete a role from the Micro Integrator"
 const deleteRoleCmdLongDesc = "Delete a role with the name specified by the command line argument [role-name] from a Micro Integrator in the environment specified by the flag --environment, -e"
 
 var deleteRoleCmdExamples = "To delete a role\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + deleteCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(deleteRoleCmdLiteral) + " [role-name] -e dev\n" +
+	"  " + utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + deleteCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(deleteRoleCmdLiteral) + " [role-name] -e dev\n" +
 	"To delete a role in a secondary user store\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + deleteCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(deleteRoleCmdLiteral) + " [role-name] -d [domain] -e dev\n" +
+	"  " + utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + deleteCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(deleteRoleCmdLiteral) + " [role-name] -d [domain] -e dev\n" +
 	"NOTE: The flag (--environment (-e)) is mandatory"
 
 var deleteRoleCmd = &cobra.Command{

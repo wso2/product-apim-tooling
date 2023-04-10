@@ -23,26 +23,26 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-const addCmdLiteral = "add"
+const AddCmdLiteral = "add"
 const addCmdShortDesc = "Add new users or loggers to a Micro Integrator instance"
 
 const addCmdLongDesc = "Add new users or loggers to a Micro Integrator instance in the environment specified by the flag (--environment, -e)"
 
-const addCmdExamples = utils.ProjectName + " " + utils.MiCmdLiteral + " " + addCmdLiteral + " " + "user" + " capp-developer -e dev\n" +
-	utils.ProjectName + " " + utils.MiCmdLiteral + " " + addCmdLiteral + " " + "log-level" + " synapse-api org.apache.synapse.rest.API DEBUG -e dev"
+var addCmdExamples = utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + AddCmdLiteral + " " + "user" + " capp-developer -e dev\n" +
+	utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + AddCmdLiteral + " " + "log-level" + " synapse-api org.apache.synapse.rest.API DEBUG -e dev"
 
 // AddCmd represents the add command
 var AddCmd = &cobra.Command{
-	Use:     addCmdLiteral,
+	Use:     AddCmdLiteral,
 	Short:   addCmdShortDesc,
 	Long:    addCmdLongDesc,
 	Example: addCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.Logln(utils.LogPrefixInfo + addCmdLiteral + " called")
+		utils.Logln(utils.LogPrefixInfo + AddCmdLiteral + " called")
 		cmd.Help()
 	},
 }
 
 func printAddCmdVerboseLog(cmd string) {
-	utils.Logln(utils.LogPrefixInfo + addCmdLiteral + " " + cmd + " called")
+	utils.Logln(utils.LogPrefixInfo + AddCmdLiteral + " " + cmd + " called")
 }

@@ -35,7 +35,7 @@ const getLogLevelCmdShortDesc = "Get information about a Logger configured in a 
 const getLogLevelCmdLongDesc = "Get information about the Logger specified by command line argument [logger-name]\nconfigured in a Micro Integrator in the environment specified by the flag --environment, -e"
 
 var getLogLevelCmdExamples = "To get details about a specific logger\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getLogLevelCmdLiteral) + " org-apache-coyote -e dev\n" +
+	"  " + utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getLogLevelCmdLiteral) + " org-apache-coyote -e dev\n" +
 	"NOTE: The flag (--environment (-e)) is mandatory"
 
 var getLogLevelCmd = &cobra.Command{

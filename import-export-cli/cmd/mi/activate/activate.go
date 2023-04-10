@@ -28,7 +28,7 @@ const activateCmdShortDesc = "Activate artifacts deployed in a Micro Integrator 
 
 const activateCmdLongDesc = "Activate artifacts deployed in a Micro Integrator instance in the environment specified by the flag (--environment, -e)"
 
-const activateCmdExamples = utils.ProjectName + " " + utils.MiCmdLiteral + " " + activateCmdLiteral + " " + "endpoint" + " TestEP -e dev"
+var activateCmdExamples = utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + activateCmdLiteral + " " + "endpoint" + " TestEP -e dev"
 
 // ActivateCmd represents the activate command
 var ActivateCmd = &cobra.Command{

@@ -40,9 +40,9 @@ const getLogCmdLongDesc = "Download a log file by providing the file name and do
 
 var getLogCmdExamples = "Example:\n" +
 	"To list all the log files\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getLogCmdLiteral) + " -e dev\n" +
+	"  " + utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getLogCmdLiteral) + " -e dev\n" +
 	"To download a selected log file\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getLogCmdLiteral) + " [file-name] -p [download-location] -e dev\n" +
+	"  " + utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getLogCmdLiteral) + " [file-name] -p [download-location] -e dev\n" +
 	"NOTE: The flag (--environment (-e)) is mandatory"
 
 var getLogCmd = &cobra.Command{
