@@ -39,7 +39,14 @@ var insecure bool
 
 const miCmdShortDesc = "Micro Integrator related commands"
 
-const miCmdLongDesc = `Micro Integrator related commands such as login, logout, get, add, update, delete, activate, deactivate.`
+var miCmdLongDesc = getMiCmdLongDesc()
+
+func getMiCmdLongDesc() string {
+	if utils.GetMICmdName() == "" {
+		return utils.MICmd + " is a Command Line Tool for Managing WSO2 Micro Integrator"
+	}
+	return "Micro Integrator related commands such as login, logout, get, add, update, delete, activate, deactivate."
+}
 
 // MICmd represents the mi command
 var MICmd = &cobra.Command{

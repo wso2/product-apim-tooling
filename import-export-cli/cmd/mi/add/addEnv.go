@@ -28,18 +28,12 @@ var envToBeAdded string         // Name of the environment to be added
 var miManagementEndpoint string // mi management endpoint of the environment to be added
 
 // AddEnv command related Info
-const AddEnvCmdLiteral = "env [environment]"
+const AddEnvCmdLiteral = "env [environment] [mi_management_url]"
 const AddEnvCmdLiteralTrimmed = "env"
 const addEnvCmdShortDesc = "Add Environment to Config file"
 const addEnvCmdLongDesc = "Add new environment and its related endpoints to the config file"
 
 var addEnvCmdExamples = utils.MICmd + ` ` + AddCmdLiteral + ` ` + AddEnvCmdLiteralTrimmed + ` production https://localhost:9164
-
-` + utils.MICmd + ` ` + AddCmdLiteral + ` ` + AddEnvCmdLiteralTrimmed + ` dev https://localhost:9164
-
-` + utils.MICmd + ` ` + AddCmdLiteral + ` ` + AddEnvCmdLiteralTrimmed + ` prod https://localhost:9164
-
-` + utils.MICmd + ` ` + AddCmdLiteral + ` ` + AddEnvCmdLiteralTrimmed + ` test https://localhost:9164
 
 ` + utils.MICmd + ` ` + AddCmdLiteral + ` ` + AddEnvCmdLiteralTrimmed + ` dev https://localhost:9164`
 
@@ -49,7 +43,7 @@ var addEnvCmd = &cobra.Command{
 	Short:   addEnvCmdShortDesc,
 	Long:    addEnvCmdLongDesc,
 	Example: addEnvCmdExamples,
-	Args:    cobra.MinimumNArgs(1),
+	Args:    cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		envToBeAdded = args[0]
 		miManagementEndpoint = args[1]
