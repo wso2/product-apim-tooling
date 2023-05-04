@@ -17,7 +17,7 @@
 # ------------------------------------------------------------------------
 
 # set base docker image for golang first for compiling the source code.
-FROM golang:1.14-alpine as builder
+FROM golang:1.20-alpine as builder
 
 # build argument for version of apictl
 ARG version
