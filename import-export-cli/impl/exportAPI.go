@@ -20,6 +20,7 @@ package impl
 
 import (
 	"fmt"
+	"net/url"
 	"path/filepath"
 	"strconv"
 
@@ -45,7 +46,7 @@ func ExportAPIFromEnv(accessToken, name, version, revisionNum, provider, format,
 func exportAPI(name, version, revisionNum, provider, format, publisherEndpoint, accessToken string, preserveStatus,
 	exportLatestRevision bool) (*resty.Response, error) {
 	publisherEndpoint = utils.AppendSlashToString(publisherEndpoint)
-	query := "apis/export?name=" + name + "&version=" + version + "&providerName=" + provider +
+	query := "apis/export?name=" + url.QueryEscape(name) + "&version=" + version + "&providerName=" + provider +
 		"&preserveStatus=" + strconv.FormatBool(preserveStatus)
 	if format != "" {
 		query += "&format=" + format
