@@ -58,13 +58,13 @@ func exportAPI(name, version, revisionNum, provider, format, publisherEndpoint, 
 		query += "&latestRevision=true"
 	}
 
-	url := publisherEndpoint + query
-	utils.Logln(utils.LogPrefixInfo+"ExportAPI: URL:", url)
+	requestURL := publisherEndpoint + query
+	utils.Logln(utils.LogPrefixInfo+"ExportAPI: URL:", requestURL)
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 	headers[utils.HeaderAccept] = utils.HeaderValueApplicationZip
 
-	resp, err := utils.InvokeGETRequest(url, headers)
+	resp, err := utils.InvokeGETRequest(requestURL, headers)
 
 	if err != nil {
 		return nil, err
