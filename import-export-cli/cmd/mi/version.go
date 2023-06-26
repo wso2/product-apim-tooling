@@ -16,39 +16,44 @@
 * under the License.
  */
 
- package mi
+package mi
 
- import (
-	 "fmt"
-	 "github.com/spf13/cobra"
-	 "github.com/wso2/product-apim-tooling/import-export-cli/utils"
- )
- 
- // Version of the latest release of apictl
- var Version = "v1.0.0"
- // BuildDate of the latest release of apictl
- var BuildDate = ""
- const versionCmdLiteral = "version"
- var versionCmdShortDesc = "Display Version on current " + utils.MICmd
- const versionCmdLongDesc = "Display the current version of this command line tool"
- var versionCmdExamples = utils.MICmd + " " + versionCmdLiteral
- 
- // VersionCmd represents the version command
- var VersionCmd = &cobra.Command{
-	 Use:     versionCmdLiteral,
-	 Short:   versionCmdShortDesc,
-	 Long:    versionCmdLongDesc,
-	 Example: versionCmdExamples,
-	 Run: func(cmd *cobra.Command, args []string) {
-		 fmt.Println("Version:", Version)
-		 fmt.Println("Build Date:", BuildDate)
-	 },
- }
- 
- // init using Cobra
- func init() {
-	if (utils.GetMICmdName() == "") {
+import (
+	"fmt"
+
+	"github.com/spf13/cobra"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
+)
+
+// Version of the latest release of apictl
+var Version = "v1.0.0"
+
+// BuildDate of the latest release of apictl
+var BuildDate = ""
+
+const versionCmdLiteral = "version"
+
+var versionCmdShortDesc = "Display Version on current " + utils.MICmd
+
+const versionCmdLongDesc = "Display the current version of this command line tool"
+
+var versionCmdExamples = utils.MICmd + " " + versionCmdLiteral
+
+// VersionCmd represents the version command
+var VersionCmd = &cobra.Command{
+	Use:     versionCmdLiteral,
+	Short:   versionCmdShortDesc,
+	Long:    versionCmdLongDesc,
+	Example: versionCmdExamples,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("Version:", Version)
+		fmt.Println("Build Date:", BuildDate)
+	},
+}
+
+// init using Cobra
+func init() {
+	if utils.GetMICmdName() == "" {
 		MICmd.AddCommand(VersionCmd)
 	}
- }
- 
+}
