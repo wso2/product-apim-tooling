@@ -39,9 +39,9 @@ const getTransactionCountCmdLongDesc = "Retrieve transaction count based on the 
 	"If year and month not provided, retrieve the count for the current year and month of Micro Integrator in the environment specified by the flag --environment, -e"
 
 var getTransactionCountCmdExamples = "To get the transaction count for the current month\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getTransactionCountCmdLiteral) + " -e dev\n" +
+	"  " + utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getTransactionCountCmdLiteral) + " -e dev\n" +
 	"To get the transaction count for a specific month\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getTransactionCountCmdLiteral) + " 2020 06 -e dev\n" +
+	"  " + utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getTransactionCountCmdLiteral) + " 2020 06 -e dev\n" +
 	"NOTE: The flag (--environment (-e)) is mandatory"
 
 var getTransactionCountCmd = &cobra.Command{

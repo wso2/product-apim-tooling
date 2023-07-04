@@ -42,11 +42,11 @@ const getTemplateCmdLongDesc = "Get information about the template specified by 
 	"If not specified, list all the templates in the environment specified by the flag --environment, -e"
 
 var getTemplateCmdExamples = "To list all the " + artifactTemplates + "\n" +
-	utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getTemplateCmdLiteral) + " -e dev\n" +
+	utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getTemplateCmdLiteral) + " -e dev\n" +
 	"To get details about a specific template type\n" +
-	utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getTemplateCmdLiteral) + " TemplateType\n" +
+	utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getTemplateCmdLiteral) + " TemplateType\n" +
 	"To get details about a specific template\n" +
-	utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getTemplateCmdLiteral) + " TemplateType TemplateName -e dev\n" +
+	utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getTemplateCmdLiteral) + " TemplateType TemplateName -e dev\n" +
 	"NOTE: The flag (--environment (-e)) is mandatory"
 
 const endpointKey string = "endpoint"

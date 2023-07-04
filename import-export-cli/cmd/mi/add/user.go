@@ -22,8 +22,8 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"syscall"
 	"strings"
+	"syscall"
 
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
@@ -41,7 +41,7 @@ const addUserCmdShortDesc = "Add new user to a Micro Integrator"
 const addUserCmdLongDesc = "Add a new user with the name specified by the command line argument [user-name] to a Micro Integrator in the environment specified by the flag --environment, -e"
 
 var addUserCmdExamples = "To add a new user\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + addCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(addUserCmdLiteral) + " capp-tester -e dev\n" +
+	"  " + utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + AddCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(addUserCmdLiteral) + " capp-tester -e dev\n" +
 	"NOTE: The flag (--environment (-e)) is mandatory"
 
 var addUserCmd = &cobra.Command{

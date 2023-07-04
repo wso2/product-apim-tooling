@@ -43,15 +43,15 @@ const getUserCmdLongDesc = "Get information about the users filtered by username
 
 var getUserCmdExamples = "Example:\n" +
 	"To list all the users\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getUserCmdLiteral) + " -e dev\n" +
+	"  " + utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getUserCmdLiteral) + " -e dev\n" +
 	"To get the list of users with specific role\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getUserCmdLiteral) + " -r [role-name] -e dev\n" +
+	"  " + utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getUserCmdLiteral) + " -r [role-name] -e dev\n" +
 	"To get the list of users with a username matching with the wild card Ex: \"*mi*\" matches with \"admin\"\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getUserCmdLiteral) + " -p [pattern] -e dev\n" +
+	"  " + utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getUserCmdLiteral) + " -p [pattern] -e dev\n" +
 	"To get details about a user by providing the user-id\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getUserCmdLiteral) + " [user-id] -e dev\n" +
+	"  " + utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getUserCmdLiteral) + " [user-id] -e dev\n" +
 	"To get details about a user in a secondary user store\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getUserCmdLiteral) + " [user-id] -d [domain] -e dev\n" +
+	"  " + utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getUserCmdLiteral) + " [user-id] -d [domain] -e dev\n" +
 	"NOTE: The flag (--environment (-e)) is mandatory"
 
 var getUserCmd = &cobra.Command{

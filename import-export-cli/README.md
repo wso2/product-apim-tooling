@@ -35,6 +35,10 @@ Command Line tool for importing and exporting APIs/Applications/API Products in 
 - ### Generating docs
     After changing commands run following to generate documents and shell completions
     `go run tools/gen.go`
+
+    If you need to generate docs and shell completions for MI CLI run the following
+     `MICmd=mi go run tools/migen.go`
+     
     Commit changes to version control
       
 - ### Running

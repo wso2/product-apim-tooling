@@ -36,9 +36,9 @@ var loginPasswordStdin bool
 const loginCmdLiteral = "login [environment] [flags]"
 const loginCmdShortDesc = "Login to a Micro Integrator"
 const loginCmdLongDesc = `Login to a Micro Integrator using credentials`
-const loginCmdExamples = utils.ProjectName + " " + utils.MiCmdLiteral + " login dev -u admin -p admin\n" +
-	utils.ProjectName + " " + utils.MiCmdLiteral + " login dev -u admin\n" +
-	"cat ~/.mypassword | " + utils.ProjectName + " " + utils.MiCmdLiteral + " login dev -u admin"
+var loginCmdExamples = utils.GetMICmdName() + " " + utils.MiCmdLiteral + " login dev -u admin -p admin\n" +
+	utils.GetMICmdName() + " " + utils.MiCmdLiteral + " login dev -u admin\n" +
+	"cat ~/.mypassword | " + utils.GetMICmdName() + " " + utils.MiCmdLiteral + " login dev -u admin"
 
 // loginCmd represents the login command
 var loginCmd = &cobra.Command{

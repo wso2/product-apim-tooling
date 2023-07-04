@@ -39,7 +39,7 @@ const updateUserCmdShortDesc = "Update roles of a user in a Micro Integrator"
 const updateUserCmdLongDesc = "Update the roles of a user named [user-name] specified by the command line arguments in a Micro Integrator in the environment specified by the flag --environment, -e"
 
 var updateUserCmdExamples = "To update the roles\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + updateCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(updateUserCmdLiteral) + " [user-name] -e dev\n" +
+	"  " + utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + updateCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(updateUserCmdLiteral) + " [user-name] -e dev\n" +
 	"NOTE: The flag (--environment (-e)) is mandatory"
 
 var updateUserCmd = &cobra.Command{

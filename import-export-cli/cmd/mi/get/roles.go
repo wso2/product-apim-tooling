@@ -40,11 +40,11 @@ const getRoleCmdLongDesc = "Get information about the roles in primary and secon
 	"List all roles of the Micro Integrator in the environment specified by the flag --environment, -e"
 
 var getRoleCmdExamples = "To list all the roles\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getRoleCmdLiteral) + " -e dev\n" +
+	"  " + utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getRoleCmdLiteral) + " -e dev\n" +
 	"To get details about a role by providing the role name\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getRoleCmdLiteral) + " [role-name] -e dev\n" +
+	"  " + utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getRoleCmdLiteral) + " [role-name] -e dev\n" +
 	"To get details about a role in a secondary user store\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getRoleCmdLiteral) + " [role-name] -d [domain] -e dev\n" +
+	"  " + utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(getRoleCmdLiteral) + " [role-name] -d [domain] -e dev\n" +
 	"NOTE: The flag (--environment (-e)) is mandatory"
 
 var getRoleCmd = &cobra.Command{

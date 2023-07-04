@@ -36,7 +36,7 @@ const updateHashiCorpSecretCmdShortDesc = "Update the secret ID of HashiCorp con
 const updateHashiCorpSecretCmdLongDesc = "Update the secret ID of the HashiCorp configuration in a Micro Integrator in the environment specified by the flag --environment, -e"
 
 var updateHashiCorpSecretCmdExamples = "To update the secret ID\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + updateCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(updateHashiCorpSecretCmdLiteral) + " new_secret_id -e dev\n" +
+	"  " + utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + updateCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(updateHashiCorpSecretCmdLiteral) + " new_secret_id -e dev\n" +
 	"NOTE: The flag (--environment (-e)) is mandatory"
 
 var updateHashiCorpSecretCmd = &cobra.Command{

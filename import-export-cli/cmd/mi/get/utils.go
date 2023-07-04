@@ -35,9 +35,9 @@ func generateGetCmdLongDescForArtifact(artifact, argument string) string {
 
 func generateGetCmdExamplesForArtifact(resourceType, cmdLiteral, sampleResourceName string) string {
 	return "To list all the " + resourceType + "\n" +
-		"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + cmdLiteral + " -e dev\n" +
+		"  " + utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + cmdLiteral + " -e dev\n" +
 		"To get details about a specific " + resourceType + "\n" +
-		"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + cmdLiteral + " " + sampleResourceName + " -e dev\n" +
+		"  " + utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + GetCmdLiteral + " " + cmdLiteral + " " + sampleResourceName + " -e dev\n" +
 		"NOTE: The flag (--environment (-e)) is mandatory"
 }
 

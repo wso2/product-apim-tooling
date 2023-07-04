@@ -30,7 +30,7 @@ import (
 const logoutCmdLiteral = "logout [environment]"
 const logoutCmdShortDesc = "Logout from a Micro Integrator"
 const logoutCmdLongDesc = `Logout from a Micro Integrator`
-const logoutCmdExamples = utils.ProjectName + " logout dev"
+var logoutCmdExamples = utils.GetMICmdName() + " logout dev"
 
 // logoutCmd represents the logout command
 var logoutCmd = &cobra.Command{

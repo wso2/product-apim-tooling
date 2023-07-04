@@ -1,0 +1,428 @@
+<h1 id="cli-for-importing-and-exporting-apis-and-applications">CLI for Managing WSO2 Micro Integrator</h1>
+<h2 id="for-wso2-api-manager-4-2-0">For WSO2 Micro Integrator 4.2.0</h2>
+<p>Command Line tool for managing WSO2 Micro Integrator</p>
+<h2 id="getting-started">Getting Started</h2>
+<ul>
+    <li>
+        <h3 id="running">Running</h3>
+        <p>Select a generated archive suitable for your platform (Mac, Windows, Linux) and extract it to a desired location and <code>cd</code> into it.<br />Then execute <code>mi</code> to start the application.</p>
+        <blockquote>
+            <p>NOTE: Execute <code>./mi</code> if the working directory is the same where the executable resides</p>
+            <p>Add the location of extracted folder to your system's $PATH variable to access the executable from anywhere</p>
+        </blockquote>
+        <p>Execute <code>mi --help</code> for further instructions.</p>
+    </li>
+    <li>
+        <h3 id="command-autocompletion-for-bash-only-">Command Autocompletion (For Bash Only)</h3>
+        <p>Copy the file <code>mi_bash_completions.sh</code> to <code>/etc/bash_completion.d/</code> and source it with<br /><code>source /etc/bash_completion.d/mi_bash_completions.sh</code> to enable bash auto-completion.</p>
+    </li>
+</ul>
+<hr />
+<h2 id="usage">Usage</h2>
+<pre><code class="lang-bash">     mi [command]
+</code></pre>
+<h4 id="global-flags">Global Flags</h4>
+<pre><code class="lang-bash">      --verbose
+           Enable verbose logs (Provides more information on execution)
+      --insecure, -k
+          Allow connections to SSL sites without certs
+      --help, -h
+          Display information and example usage of a command
+</code></pre>
+<h3 id="commands">Commands</h3>
+<ul>
+    <li>
+        <h4 id="mi-login">mi login [environment]</h4>
+        <pre><code class="lang-bash">   Flags:
+       Optional:
+           --username, -u
+           --password, -p
+           NOTE: user will be prompted to enter credentials if they are not provided with these flags
+   Examples:
+       mi login dev -u admin -p admin
+       mi login dev -u admin
+       mi login dev
+       cat ~/.mypassword | mi login dev -u admin
+</code></pre>
+    </li>
+</ul>
+<ul>
+    <li>
+        <h4 id="mi-logout">mi logout [environment]</h4>
+        <pre><code class="lang-bash">   Examples:
+       mi logout dev
+</code></pre>
+    </li>
+</ul>
+<ul>
+    <li>
+        <h4 id="mi-get-apis">mi get apis [api-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+      Examples:
+          mi get apis -e dev
+          mi get apis SampleAPI -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="mi-get-composite-apps">mi get composite-apps [app-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+      Examples:
+          mi get composite-apps -e dev
+          mi get composite-apps SampleApp -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="mi-get-connectors">mi get connectors</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+      Examples:
+          mi get connectors -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="get-data-services">mi get data-services [dataservice-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+      Examples:
+          mi get data-services -e dev
+          mi get data-services SampleDataService -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="mi-get-endpoints">mi get endpoints [endpoint-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+      Examples:
+          mi get endpoints -e dev
+          mi get endpoints SampleEndpoint -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="mi-get-inbound-endpoints">mi get inbound-endpoints [inbound-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+      Examples:
+          mi get inbound-endpoints -e dev
+          mi get inbound-endpoints SampleInboundEndpoint -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="mi-get-local-entries">mi get local-entries [localentry-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+      Examples:
+          mi get local-entries -e dev
+          mi get local-entries SampleLocalEntry -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="mi-get-log-levels">mi get log-levels [logger-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+      Examples:
+          mi get log-levels org-apache-coyote -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="mi-get-logs">mi get logs [file-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+              --path, -p
+      Examples:
+          mi get logs -e dev
+          mi get logs wso2error.log -p ./logs -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="mi-get-message-processors">mi get message-processors [messageprocessor-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+      Examples:
+          mi get message-processors -e dev
+          mi get message-processors TestMessageProcessor -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="mi-get-message-stores">mi get message-stores [messagestore-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+      Examples:
+          mi get message-stores -e dev
+          mi get message-stores TestMessageStore -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="mi-get-proxy-services">mi get proxy-services [proxy-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+      Examples:
+          mi get proxy-services -e dev
+          mi get proxy-services SampleProxy -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="mi-get-sequences">mi get sequences [sequence-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+      Examples:
+          mi get sequences -e dev
+          mi get sequences SampleSequence -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="mi-get-tasks">mi get tasks [task-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+      Examples:
+          mi get tasks -e dev
+          mi get tasks SampleTask -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="mi-get-templates">mi get templates [template-type] [template-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+      Examples:
+          mi get templates -e dev
+          mi get templates endpoint -e dev
+          mi get templates endpoint SampleEPTemplate -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="mi-get-transaction-counts">mi get transaction-counts [year] [month]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+      Examples:
+          mi get transaction-counts -e dev
+          mi get transaction-counts 2020 06 -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="mi-get-transaction-reports">mi get transaction-reports [start] [end]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+              --path, -p
+      Examples:
+          mi get transaction-reports 2020-01 2020-05 -e dev
+          mi get transaction-reports 2020-05 2020-06 --path ./reports -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="mi-get-users">mi get users [user-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --format
+              --role, -r
+              --pattern, -p
+              --domain, -d
+      Examples:
+          mi get users capp-tester -e dev
+          mi get users capp-tester -r admin -e dev
+          mi get users capp-tester -p mi -e dev
+          mi get users capp-tester -d wso2.com -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="mi-get-roles">mi get roles [role-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --domain, -d
+      Examples:
+          mi get roles -e dev
+          mi get roles tester -e dev
+          mi get roles tester -d wso2.com -e dev
+</code></pre>
+    </li>
+</ul>
+<ul>
+    <li>
+        <h4 id="mi-add-user">mi add user [user-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+      Examples:
+          mi add user capp-tester -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="mi-add-role">mi add role [role-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+      Examples:
+          mi add role tester -e dev
+        </code></pre>
+    </li>
+    <li>
+        <h4 id="mi-add-logger">mi add log-level [logger-name] [class-name] [log-level]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+      Examples:
+          mi add log-level synapse-api org.apache.synapse.rest.API DEBUG -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="mi-update-logger">mi update log-level [logger-name] [log-level]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+      Examples:
+          mi update log-level org-apache-coyote DEBUG -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="mi-update-hashicorp">mi update hashicorp-secret [secret-id]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+      Examples:
+          mi update hashicorp-secret secret_id -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="mi-update-user">mi update user [user-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+      Examples:
+          mi update user capp-tester -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="mi-delete-user">mi delete user [user-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+      Examples:
+          mi delete user capp-developer -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="mi-delete-role">mi delete role [role-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+          Optional:
+              --domain, -d
+      Examples:
+          mi delete role capp-tester -e dev
+          mi delete role capp-tester -d wso2.com -e dev
+        </code></pre>
+    </li>
+</ul>
+<ul>
+    <li>
+        <h4 id="mi-activate-endpoint">mi activate endpoint [endpoint-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+      Examples:
+          mi activate endpoint TestEP -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="mi-activate-proxy-service">mi activate proxy-service [proxy-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+      Examples:
+          mi activate proxy-service SampleProxy -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="mi-activate-message-processor">mi activate message-processor [messageprocessor-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+      Examples:
+          mi activate message-processor TestMessageProcessor -e dev
+</code></pre>
+    </li>
+</ul>
+<ul>
+    <li>
+        <h4 id="mi-deactivate-endpoint">mi deactivate endpoint [endpoint-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+      Examples:
+          mi deactivate endpoint TestEP -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="mi-deactivate-proxy-service">mi deactivate proxy-service [proxy-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+      Examples:
+          mi deactivate proxy-service SampleProxy -e dev
+</code></pre>
+    </li>
+    <li>
+        <h4 id="mi-deactivate-message-processor">mi deactivate message-processor [messageprocessor-name]</h4>
+        <pre><code class="lang-bash">      Flags:
+          Required:
+              --environment, -e
+      Examples:
+          mi deactivate message-processor TestMessageProcessor -e dev
+</code></pre>
+    </li>
+</ul>

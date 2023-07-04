@@ -36,7 +36,7 @@ const updateLogLevelCmdShortDesc = "Update log level of a Logger in a Micro Inte
 const updateLogLevelCmdLongDesc = "Update the log level of a Logger named [logger-name] to [log-level] specified by the command line arguments in a Micro Integrator in the environment specified by the flag --environment, -e"
 
 var updateLogLevelCmdExamples = "To update the log level\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + updateCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(updateLogLevelCmdLiteral) + " org-apache-coyote DEBUG -e dev\n" +
+	"  " + utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + updateCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(updateLogLevelCmdLiteral) + " org-apache-coyote DEBUG -e dev\n" +
 	"NOTE: The flag (--environment (-e)) is mandatory"
 
 var updateLogLevelCmd = &cobra.Command{

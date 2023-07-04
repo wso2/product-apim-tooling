@@ -28,7 +28,7 @@ const deleteCmdShortDesc = "Delete users from a Micro Integrator instance"
 
 const deleteCmdLongDesc = "Delete users from a Micro Integrator instance in the environment specified by the flag (--environment, -e)"
 
-const deleteCmdExamples = utils.ProjectName + " " + utils.MiCmdLiteral + " " + deleteCmdLiteral + " " + "user" + " capp-tester -e dev"
+var deleteCmdExamples = utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + deleteCmdLiteral + " " + "user" + " capp-tester -e dev"
 
 // DeleteCmd represents the delete command
 var DeleteCmd = &cobra.Command{

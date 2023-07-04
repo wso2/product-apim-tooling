@@ -451,6 +451,12 @@ func RequiredAPIMEndpointsExists(envEndpoints *EnvEndpoints) bool {
 		envEndpoints.TokenEndpoint != ""
 }
 
+// RequiredMIEndpointsExists checks for required apim endpoints.
+// It returns true if all the endpoints are present
+func RequiredMIEndpointsExists(envEndpoints *EnvEndpoints) bool {
+	return envEndpoints.MiManagementEndpoint != "" 
+}
+
 // HasOnlyMIEndpoint checks wether an MI instance is present in a given environment
 // It returns true if the only instance in an environment is MI
 func HasOnlyMIEndpoint(envEndpoints *EnvEndpoints) bool {

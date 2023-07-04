@@ -36,7 +36,7 @@ const addLogLevelCmdShortDesc = "Add new Logger to a Micro Integrator"
 const addLogLevelCmdLongDesc = "Add new Logger named [logger-name] to the [class-name] with log level [log-level] specified by the command line arguments to a Micro Integrator in the environment specified by the flag --environment, -e"
 
 var addLogLevelCmdExamples = "To add a new logger\n" +
-	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + addCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(addLogLevelCmdLiteral) + " synapse-api org.apache.synapse.rest.API DEBUG -e dev\n" +
+	"  " + utils.GetMICmdName() + " " + utils.MiCmdLiteral + " " + AddCmdLiteral + " " + miUtils.GetTrimmedCmdLiteral(addLogLevelCmdLiteral) + " synapse-api org.apache.synapse.rest.API DEBUG -e dev\n" +
 	"NOTE: The flag (--environment (-e)) is mandatory"
 
 var addLogLevelCmd = &cobra.Command{
