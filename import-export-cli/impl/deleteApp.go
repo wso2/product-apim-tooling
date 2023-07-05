@@ -23,6 +23,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 
 	"github.com/go-resty/resty/v2"
@@ -73,7 +74,7 @@ func PrintDeleteAppResponse(resp *resty.Response, err error) {
 func getAppId(accessToken, environment, appName, appOwner string) (string, error) {
 	// Application REST API endpoint of the environment from the config file
 	applicationEndpoint := utils.GetAdminApplicationListEndpointOfEnv(environment, utils.MainConfigFilePath) +
-		"?user=" + appOwner + "&name=" + appName
+		"?user=" + appOwner + "&name=" + url.QueryEscape(appName)
 
 	// Prepping headers
 	headers := make(map[string]string)
