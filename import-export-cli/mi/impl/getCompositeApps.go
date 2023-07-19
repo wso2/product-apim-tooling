@@ -61,7 +61,7 @@ func PrintCompositeAppList(appList *artifactutils.CompositeAppList, format strin
 		fmt.Println("\n----------------------\nFaulty Composite Apps\n----------------------")
 		PrintCompositeAppListTable(appList.FaultyCompositeApps, format)
 	} else {
-		fmt.Println("No Faluty Composite Apps found")
+		fmt.Println("No Faulty Composite Apps found")
 	}
 }
 
