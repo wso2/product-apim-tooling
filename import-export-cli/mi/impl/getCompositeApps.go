@@ -50,29 +50,42 @@ func GetCompositeAppList(env string) (*artifactutils.CompositeAppList, error) {
 
 // PrintCompositeAppList print a list of composite apps according to the given format
 func PrintCompositeAppList(appList *artifactutils.CompositeAppList, format string) {
-	if appList.Count > 0 {
-		apps := appList.CompositeApps
-		appListContext := getContextWithFormat(format, defaultCompositeAppListTableFormat)
-
-		renderer := func(w io.Writer, t *template.Template) error {
-			for _, app := range apps {
-				if err := t.Execute(w, app); err != nil {
-					return err
-				}
-				_, _ = w.Write([]byte{'\n'})
-			}
-			return nil
-		}
-		appListTableHeaders := map[string]string{
-			"Name":    nameHeader,
-			"Version": versionHeader,
-		}
-		if err := appListContext.Write(renderer, appListTableHeaders); err != nil {
-			fmt.Println("Error executing template:", err.Error())
-		}
+	if appList.ActiveCount > 0 {
+		fmt.Println("----------------------\nActive Composite Apps\n----------------------")
+		PrintCompositeAppListTable(appList.ActiveCompositeApps, format)
 	} else {
-		fmt.Println("No Composite Apps found")
+		fmt.Println("No Active Composite Apps found")
 	}
+
+	if appList.FaultyCount > 0 {
+		fmt.Println("\n----------------------\nFaulty Composite Apps\n----------------------")
+		PrintCompositeAppListTable(appList.FaultyCompositeApps, format)
+	} else {
+		fmt.Println("No Faulty Composite Apps found")
+	}
+}
+
+// PrintCompositeAppList print a list of composite apps according to the given format
+func PrintCompositeAppListTable(apps []artifactutils.CompositeAppSummary, format string) {
+	appListContext := getContextWithFormat(format, defaultCompositeAppListTableFormat)
+
+	renderer := func(w io.Writer, t *template.Template) error {
+		for _, app := range apps {
+			if err := t.Execute(w, app); err != nil {
+				return err
+			}
+			_, _ = w.Write([]byte{'\n'})
+		}
+		return nil
+	}
+	appListTableHeaders := map[string]string{
+		"Name":    nameHeader,
+		"Version": versionHeader,
+	}
+	if err := appListContext.Write(renderer, appListTableHeaders); err != nil {
+		fmt.Println("Error executing template:", err.Error())
+	}
+	
 }
 
 // GetCompositeApp returns a information about a specific composite app deployed in the micro integrator in a given environment
