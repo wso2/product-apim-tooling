@@ -7,19 +7,13 @@ Add Environment to Config file
 Add new environment and its related endpoints to the config file
 
 ```
-mi add env [environment] [flags]
+mi add env [environment] [mi_management_url] [flags]
 ```
 
 ### Examples
 
 ```
 mi add env production https://localhost:9164
-
-mi add env dev https://localhost:9164
-
-mi add env prod https://localhost:9164
-
-mi add env test https://localhost:9164
 
 mi add env dev https://localhost:9164
 ```
