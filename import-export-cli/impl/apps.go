@@ -23,6 +23,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 
@@ -37,7 +38,7 @@ import (
 func GetAppId(accessToken, environment, appName, appOwner string) (string, error) {
 	// Application REST API endpoint of the environment from the config file
 	applicationEndpoint := utils.GetAdminApplicationListEndpointOfEnv(environment, utils.MainConfigFilePath) +
-		"?user=" + appOwner + "&name=" + appName
+		"?user=" + appOwner + "&name=" + url.QueryEscape(appName)
 
 	// Prepping headers
 	headers := make(map[string]string)
