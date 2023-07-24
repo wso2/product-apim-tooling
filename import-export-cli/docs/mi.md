@@ -4,7 +4,7 @@ Micro Integrator related commands
 
 ### Synopsis
 
-Micro Integrator related commands such as login, logout, get, add, update, delete, activate, deactivate.
+mi is a Command Line Tool for Managing WSO2 Micro Integrator
 
 ```
 mi [flags]
