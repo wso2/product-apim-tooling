@@ -90,7 +90,6 @@ func BuildAPIMEndpoints(production, sandbox *Endpoints) (string, error) {
 			epType = EpFailover
 		}
 	}
-	fmt.Println("", production)
 	if len(production.Urls) == 0 {
 		if len(sandbox.Urls) > 1 {
 			epType = EpLoadbalance

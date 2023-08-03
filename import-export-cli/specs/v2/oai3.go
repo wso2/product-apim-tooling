@@ -76,7 +76,6 @@ func oai3XWSO2ProductionEndpoints(exts map[string]interface{}) (*Endpoints, bool
 	if v, ok := exts["x-wso2-production-endpoints"]; ok {
 		ep, ok := v.(json.RawMessage)
 		if ok {
-			fmt.Println(ep)
 			var prodEp Endpoints
 			err := json.Unmarshal(ep, &prodEp)
 			if err != nil {
