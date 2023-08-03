@@ -63,14 +63,20 @@ func oai3Tags(exts map[string]interface{}) []string {
 }
 
 type Endpoints struct {
-	Type string   `yaml:"type"`
-	Urls []string `yaml:"urls"`
+	Type                  string             `yaml:"type"`
+	Urls                  []string           `yaml:"urls"`
+	AdvanceEndpointConfig AdvanceConfigForMG `yaml:"advanceEndpointConfig"`
+}
+
+type AdvanceConfigForMG struct {
+	TimeOutInMillis *int `yaml:"timeoutInMillis" json:"timeoutInMillis"`
 }
 
 func oai3XWSO2ProductionEndpoints(exts map[string]interface{}) (*Endpoints, bool, error) {
 	if v, ok := exts["x-wso2-production-endpoints"]; ok {
 		ep, ok := v.(json.RawMessage)
 		if ok {
+			fmt.Println(ep)
 			var prodEp Endpoints
 			err := json.Unmarshal(ep, &prodEp)
 			if err != nil {
