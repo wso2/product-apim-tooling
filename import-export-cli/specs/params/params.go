@@ -20,10 +20,15 @@ type Configuration struct {
 	Factor *int `yaml:"factor" json:"factor,string"`
 }
 
+type AdvanceConfigForMG struct {
+	TimeOutInMillis *int `yaml:"timeoutInMillis" json:"timeoutInMillis"`
+}
+
 // Endpoint details
 type Endpoint struct {
 	// Url of the endpoint
-	Url *string `yaml:"url" json:"url"`
+	Url                   *string            `yaml:"url" json:"url"`
+	AdvanceEndpointConfig AdvanceConfigForMG `yaml:"advanceEndpointConfig" json:"advanceEndpointConfig"`
 	// Config of endpoint
 	Config *Configuration `yaml:"config" json:"config"`
 }
@@ -116,7 +121,6 @@ func ExtractAPIEndpointConfig(b []byte) (string, error) {
 	return apiConfig.EPConfig, err
 }
 
-
 // GetEnv returns the EndpointData associated for key in the ApiParams, if not found returns nil
 func (config ApiParams) GetEnv(key string) *Environment {
 	for index, env := range config.Environments {
@@ -126,4 +130,3 @@ func (config ApiParams) GetEnv(key string) *Environment {
 	}
 	return nil
 }
-
