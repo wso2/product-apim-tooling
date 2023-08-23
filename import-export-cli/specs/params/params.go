@@ -20,7 +20,9 @@ type Configuration struct {
 	Factor *int `yaml:"factor" json:"factor,string"`
 }
 
-type AdvanceConfigForMG struct {
+// Advance endpoint configurations
+type AdvanceEndpointConfiguration struct {
+	// Timeout in milliseconds for endpoint
 	TimeOutInMillis *int `yaml:"timeoutInMillis" json:"timeoutInMillis"`
 }
 
@@ -28,7 +30,8 @@ type AdvanceConfigForMG struct {
 type Endpoint struct {
 	// Url of the endpoint
 	Url                   *string            `yaml:"url" json:"url"`
-	AdvanceEndpointConfig AdvanceConfigForMG `yaml:"advanceEndpointConfig" json:"advanceEndpointConfig"`
+	// Advance endpoint config of the endpoint
+	AdvanceEndpointConfig *AdvanceEndpointConfiguration `yaml:"advanceEndpointConfig,omitempty" json:"advanceEndpointConfig,omitempty"`
 	// Config of endpoint
 	Config *Configuration `yaml:"config" json:"config"`
 }

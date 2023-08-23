@@ -184,13 +184,21 @@ func buildHttpEndpoint(production *Endpoints, sandbox *Endpoints) string {
 	if len(production.Urls) > 0 {
 		var ep params.Endpoint
 		ep.Url = &production.Urls[0]
-		ep.AdvanceEndpointConfig.TimeOutInMillis = production.AdvanceEndpointConfig.TimeOutInMillis
+		if production.AdvanceEndpointConfig != nil && production.AdvanceEndpointConfig.TimeOutInMillis != nil {
+		  ep.AdvanceEndpointConfig = &params.AdvanceEndpointConfiguration {
+        TimeOutInMillis: production.AdvanceEndpointConfig.TimeOutInMillis,
+      }
+    }
 		_, _ = jsonObj.SetP(ep, "production_endpoints")
 	}
 	if len(sandbox.Urls) > 0 {
 		var ep params.Endpoint
 		ep.Url = &sandbox.Urls[0]
-		ep.AdvanceEndpointConfig.TimeOutInMillis = sandbox.AdvanceEndpointConfig.TimeOutInMillis
+		if sandbox.AdvanceEndpointConfig != nil && sandbox.AdvanceEndpointConfig.TimeOutInMillis != nil {
+      ep.AdvanceEndpointConfig = &params.AdvanceEndpointConfiguration {
+        TimeOutInMillis: sandbox.AdvanceEndpointConfig.TimeOutInMillis,
+      }
+    }
 		_, _ = jsonObj.SetP(ep, "sandbox_endpoints")
 	}
 	return jsonObj.String()
