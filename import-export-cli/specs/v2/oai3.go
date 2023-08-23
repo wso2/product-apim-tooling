@@ -65,10 +65,10 @@ func oai3Tags(exts map[string]interface{}) []string {
 type Endpoints struct {
 	Type string   `yaml:"type"`
 	Urls []string `yaml:"urls"`
-	AdvanceEndpointConfig *AdvanceConfigForMG `yaml:"advanceEndpointConfig,omitempty"`
+	AdvanceEndpointConfig *AdvanceEndpointConfiguration `yaml:"advanceEndpointConfig,omitempty"`
 }
 
-type AdvanceConfigForMG struct {
+type AdvanceEndpointConfiguration struct {
 	TimeOutInMillis *int `yaml:"timeoutInMillis" json:"timeoutInMillis"`
 }
 

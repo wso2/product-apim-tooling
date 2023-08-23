@@ -187,7 +187,7 @@ func buildHttpEndpoint(production *Endpoints, sandbox *Endpoints) string {
 		var ep params.Endpoint
 		ep.Url = &production.Urls[0]
 		if production.AdvanceEndpointConfig != nil && production.AdvanceEndpointConfig.TimeOutInMillis != nil {
-			ep.AdvanceEndpointConfig = &params.AdvanceConfigForMG {
+			ep.AdvanceEndpointConfig = &params.AdvanceEndpointConfiguration {
 				TimeOutInMillis: production.AdvanceEndpointConfig.TimeOutInMillis,
 			}
 		}
@@ -197,7 +197,7 @@ func buildHttpEndpoint(production *Endpoints, sandbox *Endpoints) string {
 		var ep params.Endpoint
 		ep.Url = &sandbox.Urls[0]
 		if sandbox.AdvanceEndpointConfig != nil && sandbox.AdvanceEndpointConfig.TimeOutInMillis != nil {
-			ep.AdvanceEndpointConfig = &params.AdvanceConfigForMG {
+			ep.AdvanceEndpointConfig = &params.AdvanceEndpointConfiguration {
 				TimeOutInMillis: sandbox.AdvanceEndpointConfig.TimeOutInMillis,
 			}
 		}

@@ -31,8 +31,8 @@ type Configuration struct {
 	ActionDuration *int `yaml:"actionDuration,omitempty" json:"actionDuration,omitempty"`
 }
 
-// Advance endpoint config for MGW
-type AdvanceConfigForMG struct {
+// Advance endpoint configurations
+type AdvanceEndpointConfiguration struct {
 	// Timeout in milliseconds for endpoint
 	TimeOutInMillis *int `yaml:"timeoutInMillis" json:"timeoutInMillis"`
 }
@@ -44,7 +44,7 @@ type Endpoint struct {
 	// Url of the endpoint
 	Url *string `yaml:"url" json:"url"`
 	// Advance endpoint config of the endpoint
-	AdvanceEndpointConfig *AdvanceConfigForMG `yaml:"advanceEndpointConfig,omitempty" json:"advanceEndpointConfig,omitempty"`
+	AdvanceEndpointConfig *AdvanceEndpointConfiguration `yaml:"advanceEndpointConfig,omitempty" json:"advanceEndpointConfig,omitempty"`
 	// Config of endpoint
 	Config *Configuration `yaml:"config,omitempty" json:"config,omitempty"`
 }
