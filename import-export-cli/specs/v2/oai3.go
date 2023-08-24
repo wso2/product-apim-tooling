@@ -65,6 +65,11 @@ func oai3Tags(exts map[string]interface{}) []string {
 type Endpoints struct {
 	Type string   `yaml:"type"`
 	Urls []string `yaml:"urls"`
+	AdvanceEndpointConfig *AdvanceEndpointConfiguration `yaml:"advanceEndpointConfig,omitempty"`
+}
+
+type AdvanceEndpointConfiguration struct {
+	TimeOutInMillis *int `yaml:"timeoutInMillis" json:"timeoutInMillis"`
 }
 
 func oai3XWSO2ProductionEndpoints(exts map[string]interface{}) (*Endpoints, bool, error) {
