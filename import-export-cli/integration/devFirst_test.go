@@ -154,55 +154,57 @@ func TestImportProjectCreatedFromOpenAPI3Definition(t *testing.T) {
 	testutils.ValidateImportProject(t, args, true)
 }
 
+// These testcases were commented since these issues are fixed in the latest APIM 3.2.0 release and the OAS definitions are parsed without any errors
+
 // Import an API from initialized project with an invalid Open API 3 definition using a super
 // tenant user with Internal/devops role
-func TestImportProjectCreatedFromInvalidOpenAPI3DefinitionSuperTenantDevopsUser(t *testing.T) {
-	apim := apimClients[0]
-	projectName := base.GenerateRandomName(16)
+// func TestImportProjectCreatedFromInvalidOpenAPI3DefinitionSuperTenantDevopsUser(t *testing.T) {
+// 	apim := apimClients[0]
+// 	projectName := base.GenerateRandomName(16)
 
-	devopsUsername := devops.UserName
-	devopsPassword := devops.Password
+// 	devopsUsername := devops.UserName
+// 	devopsPassword := devops.Password
 
-	args := &testutils.InitTestArgs{
-		CtlUser:   testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
-		SrcAPIM:   apim,
-		InitFlag:  projectName,
-		OasFlag:   testutils.TestInvalidOpenAPI3DefinitionPath,
-		APIName:   base.GenerateRandomName(16) + "API",
-		ForceFlag: false,
-	}
+// 	args := &testutils.InitTestArgs{
+// 		CtlUser:   testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+// 		SrcAPIM:   apim,
+// 		InitFlag:  projectName,
+// 		OasFlag:   testutils.TestInvalidOpenAPI3DefinitionPath,
+// 		APIName:   base.GenerateRandomName(16) + "API",
+// 		ForceFlag: false,
+// 	}
 
-	// Initialize a project with OAS
-	testutils.ValidateInitializeProjectWithOASFlag(t, args)
+// 	// Initialize a project with OAS
+// 	testutils.ValidateInitializeProjectWithOASFlag(t, args)
 
-	// Assert that project import to publisher portal is unsuccessful
-	testutils.ValidateImportProjectWithInvalidSwaggerFailed(t, args, true)
-}
+// 	// Assert that project import to publisher portal is unsuccessful
+// 	testutils.ValidateImportProjectWithInvalidSwaggerFailed(t, args, true)
+// }
 
 // Import an API from initialized project with an invalid Open API 3 definition using a
 // tenant user with Internal/devops role
-func TestImportProjectCreatedFromInvalidOpenAPI3DefinitionTenantDevopsUser(t *testing.T) {
-	apim := apimClients[0]
-	projectName := base.GenerateRandomName(16)
+// func TestImportProjectCreatedFromInvalidOpenAPI3DefinitionTenantDevopsUser(t *testing.T) {
+// 	apim := apimClients[0]
+// 	projectName := base.GenerateRandomName(16)
 
-	tenantDevopsUsername := devops.UserName + "@" + TENANT1
-	tenantDevopsPassword := devops.Password
+// 	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+// 	tenantDevopsPassword := devops.Password
 
-	args := &testutils.InitTestArgs{
-		CtlUser:   testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
-		SrcAPIM:   apim,
-		InitFlag:  projectName,
-		OasFlag:   testutils.TestInvalidOpenAPI3DefinitionPath,
-		APIName:   base.GenerateRandomName(16) + "API",
-		ForceFlag: false,
-	}
+// 	args := &testutils.InitTestArgs{
+// 		CtlUser:   testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+// 		SrcAPIM:   apim,
+// 		InitFlag:  projectName,
+// 		OasFlag:   testutils.TestInvalidOpenAPI3DefinitionPath,
+// 		APIName:   base.GenerateRandomName(16) + "API",
+// 		ForceFlag: false,
+// 	}
 
-	// Initialize a project with OAS
-	testutils.ValidateInitializeProjectWithOASFlag(t, args)
+// 	// Initialize a project with OAS
+// 	testutils.ValidateInitializeProjectWithOASFlag(t, args)
 
-	// Assert that project import to publisher portal is unsuccessful
-	testutils.ValidateImportProjectWithInvalidSwaggerFailed(t, args, false)
-}
+// 	// Assert that project import to publisher portal is unsuccessful
+// 	testutils.ValidateImportProjectWithInvalidSwaggerFailed(t, args, false)
+// }
 
 //Import API from initialized project from API definition which is already in publisher without --update flag
 func TestImportProjectCreatedFailWhenAPIIsExisted(t *testing.T) {
