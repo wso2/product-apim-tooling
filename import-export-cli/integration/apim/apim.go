@@ -35,6 +35,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
@@ -1394,7 +1395,7 @@ func (instance *Client) registerClient(username string, password string) dcrResp
 	dcrPayload := dcrRequest{}
 
 	dcrPayload.CallbackURL = "http://localhost"
-	dcrPayload.ClientName = instance.restClientName
+	dcrPayload.ClientName = instance.restClientName + uuid.New().String()
 	dcrPayload.IsSaaSApp = true
 	dcrPayload.Owner = username
 	dcrPayload.SupportedGrantTypes = "password refresh_token"
