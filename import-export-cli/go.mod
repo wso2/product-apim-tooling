@@ -56,7 +56,7 @@ require (
 	golang.org/x/term v0.5.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect
+	gopkg.in/yaml.v3 v3.0.0 // indirect
 	k8s.io/api v0.18.2 // indirect
 	k8s.io/apimachinery v0.18.2 // indirect
 	k8s.io/klog v1.0.0 // indirect
