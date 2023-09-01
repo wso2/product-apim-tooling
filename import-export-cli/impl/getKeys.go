@@ -225,8 +225,9 @@ func CallDCREndpoint(credential credentials.Credential, keyGenEnv string) (strin
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + b64encodedCredentials
 	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
 	//Request body for the devportal REST API
+	updatedUsername := strings.ReplaceAll(credential.Username, "@", "_")
 	body := dedent.Dedent(`{
-								"clientName": "rest_api_devportal",
+								"clientName": "rest_api_devportal_` + updatedUsername + `",
 							   	"callbackUrl": "www.google.lk",
 							   	"grantType":"password refresh_token",
 							   	"saasApp": true,
