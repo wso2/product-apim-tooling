@@ -832,6 +832,9 @@ func ValidateAPIsEqual(t *testing.T, api1 *apim.API, api2 *apim.API) {
 	api1Copy.CreatedTime = same
 	api2Copy.CreatedTime = same
 
+	api1Copy.LastUpdatedTimestamp = same
+	api2Copy.LastUpdatedTimestamp = same
+
 	api1Copy.LastUpdatedTime = same
 	api2Copy.LastUpdatedTime = same
 
@@ -887,6 +890,9 @@ func ValidateImportedAPIsEqualToRevision(t *testing.T, api1 *apim.API, api2 *api
 
 	api1Copy.CreatedTime = same
 	api2Copy.CreatedTime = same
+
+	api1Copy.LastUpdatedTimestamp = same
+	api2Copy.LastUpdatedTimestamp = same
 
 	api1Copy.LastUpdatedTime = same
 	api2Copy.LastUpdatedTime = same
@@ -984,6 +990,9 @@ func validateAPIsEqualCrossTenant(t *testing.T, api1 *apim.API, api2 *apim.API) 
 
 	api1Copy.CreatedTime = same
 	api2Copy.CreatedTime = same
+
+	api1Copy.LastUpdatedTimestamp = same
+	api2Copy.LastUpdatedTimestamp = same
 
 	api1Copy.LastUpdatedTime = same
 	api2Copy.LastUpdatedTime = same

@@ -64,6 +64,7 @@ data:
     signingAlgorithm: SHA-256
     signatureHeader: x-hub-signature
   createdTime: 2021-04-05 17:51:59.909
+  lastUpdatedTimestamp: 1617625320
   lastUpdatedTime: 2021-04-05 17:52:00.313
   endpointConfig:
     endpoint_type: http
