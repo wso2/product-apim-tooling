@@ -843,6 +843,27 @@ func ValidateAPIsEqual(t *testing.T, api1 *apim.API, api2 *apim.API) {
 		api2Copy.AdvertiseInformation.ApiOwner = same
 	}
 
+	// A change is added to import API flow to set default throttlingPolicy for the null values.
+	// Therefore if one of the APIs throttlingPolicy is null this check is bypassed.
+	operationKeys := make(map[string]*apim.APIOperations)
+	for i := range api1Copy.Operations {
+		key := api1Copy.Operations[i].Target + api1Copy.Operations[i].Verb
+		operationKeys[key] = &api1Copy.Operations[i]
+	}
+
+	for i := range api2Copy.Operations {
+		key := api2Copy.Operations[i].Target + api2Copy.Operations[i].Verb
+		if operation, found := operationKeys[key]; found {
+			if operation.ThrottlingPolicy != api2Copy.Operations[i].ThrottlingPolicy {
+				if operation.ThrottlingPolicy == "" {
+					operation.ThrottlingPolicy = api2Copy.Operations[i].ThrottlingPolicy
+				} else if api2Copy.Operations[i].ThrottlingPolicy == "" {
+					api2Copy.Operations[i].ThrottlingPolicy = operation.ThrottlingPolicy
+				}
+			}
+		}
+	}
+
 	// Sort member collections to make equality check possible
 	apim.SortAPIMembers(&api1Copy)
 	apim.SortAPIMembers(&api2Copy)
