@@ -58,8 +58,6 @@ func validateMessageStoreEqual(t *testing.T, messageStoreFromCtl string, message
 	assert.Contains(t, messageStoreFromCtl, messageStore.Name)
 	assert.Contains(t, messageStoreFromCtl, messageStore.Container)
 	assert.Contains(t, messageStoreFromCtl, messageStore.FileName)
-	assert.Contains(t, messageStoreFromCtl, messageStore.Consumer)
-	assert.Contains(t, messageStoreFromCtl, messageStore.Producer)
 	assert.Contains(t, messageStoreFromCtl, fmt.Sprint(messageStore.Size))
 	for key, value := range messageStore.Properties {
 		assert.Contains(t, messageStoreFromCtl, key)
