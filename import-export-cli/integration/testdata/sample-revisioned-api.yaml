@@ -76,6 +76,7 @@ data: # Contains the meta data of the API
      - PATCH
      - OPTIONS
   createdTime: Dec 14, 2020 3:52:06 PM # Created time of the API
+  lastUpdatedTimestamp: 1607941348  # Last updated timestamp of the API
   lastUpdatedTime: Dec 14, 2020 3:52:28 PM # Last updated time of the API
   endpointConfig: # Endpoint configuration of the API. This can be used to provide different types of endpoints including Simple REST Endpoints, Loadbalanced and Failover. [required]
     endpoint_type: http # Endpoint type 

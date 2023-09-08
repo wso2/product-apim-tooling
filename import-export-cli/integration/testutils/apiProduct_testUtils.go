@@ -447,6 +447,9 @@ func validateAPIProductsEqual(t *testing.T, apiProduct1 *apim.APIProduct, apiPro
 	apiProduct1Copy.CreatedTime = same
 	apiProduct2Copy.CreatedTime = same
 
+	apiProduct1Copy.LastUpdatedTimestamp = same
+	apiProduct2Copy.LastUpdatedTimestamp = same
+
 	apiProduct1Copy.LastUpdatedTime = same
 	apiProduct2Copy.LastUpdatedTime = same
 
@@ -477,6 +480,9 @@ func validateAPIProductsEqualCrossTenant(t *testing.T, apiProduct1 *apim.APIProd
 
 	apiProduct1Copy.CreatedTime = same
 	apiProduct2Copy.CreatedTime = same
+
+	apiProduct1Copy.LastUpdatedTimestamp = same
+	apiProduct2Copy.LastUpdatedTimestamp = same
 
 	apiProduct1Copy.LastUpdatedTime = same
 	apiProduct2Copy.LastUpdatedTime = same

@@ -49,6 +49,7 @@ type APIProduct struct {
 	BusinessInformation          BusinessInfo         `json:"businessInformation,omitempty"`
 	CorsConfiguration            APICorsConfiguration `json:"corsConfiguration,omitempty"`
 	CreatedTime                  string               `json:"createdTime"`
+	LastUpdatedTimestamp         string               `json:"lastUpdatedTimestamp"`
 	LastUpdatedTime              string               `json:"lastUpdatedTime"`
 	APIs                         []interface{}        `json:"apis"`
 	Scopes                       []interface{}        `json:"scopes"`
