@@ -71,6 +71,7 @@ type APIDTODefinition struct {
 	CorsConfiguration               interface{}   `json:"corsConfiguration,omitempty" yaml:"corsConfiguration,omitempty"`
 	WorkflowStatus                  []string      `json:"workflowStatus,omitempty" yaml:"workflowStatus,omitempty"`
 	CreatedTime                     string        `json:"createdTime,omitempty" yaml:"createdTime,omitempty"`
+	LastUpdatedTimestamp            string        `json:"lastUpdatedTimestamp,omitempty" yaml:"lastUpdatedTimestamp,omitempty"`
 	LastUpdatedTime                 string        `json:"lastUpdatedTime,omitempty" yaml:"lastUpdatedTime,omitempty"`
 	EndpointConfig                  interface{}   `json:"endpointConfig,omitempty" yaml:"endpointConfig,omitempty"`
 	EndpointImplementationType      string        `json:"endpointImplementationType,omitempty" yaml:"endpointImplementationType,omitempty"`
