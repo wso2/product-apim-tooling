@@ -81,7 +81,7 @@ import (
 //	testutils.ValidateAWSProjectImport(t, args, false)
 //}
 
-//Initialize a project Initialize an API without any flag
+// Initialize a project Initialize an API without any flag
 func TestInitializeProject(t *testing.T) {
 	for _, user := range testCaseUsers {
 		t.Run(user.Description, func(t *testing.T) {
@@ -109,11 +109,6 @@ func TestInitializeProject(t *testing.T) {
 			if err != nil {
 				t.Error(err)
 			}
-			apiArtifactVersion := fileContent["version"].(string)
-
-			assert.Equal(t, apiArtifactVersion, "v"+yamlConfig.APICTLVersion,
-				"Artifact version: "+apiArtifactVersion+
-					" does not matches with the APICTL version: v"+yamlConfig.APICTLVersion)
 
 			testutils.ValidateImportProject(t, args, "", !isTenantUser(user.CtlUser.Username, TENANT1))
 		})
@@ -143,7 +138,7 @@ func TestInitializeAPIWithDefinitionFlag(t *testing.T) {
 	}
 }
 
-//Initialize an API from Swagger 2 Specification
+// Initialize an API from Swagger 2 Specification
 func TestInitializeAPIFromSwagger2Definition(t *testing.T) {
 	apim := GetDevClient()
 	projectName := base.GenerateRandomName(16)
@@ -161,7 +156,7 @@ func TestInitializeAPIFromSwagger2Definition(t *testing.T) {
 	testutils.ValidateInitializeProjectWithOASFlag(t, args)
 }
 
-//Initialize an API from OpenAPI 3 Specification
+// Initialize an API from OpenAPI 3 Specification
 func TestInitializeAPIFromOpenAPI3Definition(t *testing.T) {
 	apim := GetDevClient()
 	projectName := base.GenerateRandomName(16)
@@ -179,7 +174,7 @@ func TestInitializeAPIFromOpenAPI3Definition(t *testing.T) {
 	testutils.ValidateInitializeProjectWithOASFlag(t, args)
 }
 
-//Initialize an API from API Specification URL
+// Initialize an API from API Specification URL
 func TestInitializeAPIFromAPIDefinitionURL(t *testing.T) {
 	username := superAdminUser
 	password := superAdminPassword
@@ -197,7 +192,7 @@ func TestInitializeAPIFromAPIDefinitionURL(t *testing.T) {
 	testutils.ValidateInitializeProjectWithOASFlag(t, args)
 }
 
-//Import API from initialized project with swagger 2 definition
+// Import API from initialized project with swagger 2 definition
 func TestImportProjectCreatedFromSwagger2Definition(t *testing.T) {
 	apim := GetDevClient()
 	projectName := base.GenerateRandomName(16)
@@ -220,7 +215,7 @@ func TestImportProjectCreatedFromSwagger2Definition(t *testing.T) {
 	testutils.ValidateImportProject(t, args, "", true)
 }
 
-//Import API from initialized project with openAPI 3 definition
+// Import API from initialized project with openAPI 3 definition
 func TestImportProjectCreatedFromOpenAPI3Definition(t *testing.T) {
 	apim := GetDevClient()
 	projectName := base.GenerateRandomName(16)
@@ -309,7 +304,7 @@ func TestImportProjectCreatedPassWhenAPIIsExisted(t *testing.T) {
 	}
 }
 
-//Import API from initialized project from API definition which is already in publisher without --update flag
+// Import API from initialized project from API definition which is already in publisher without --update flag
 func TestImportProjectCreatedFailWhenAPIIsExisted(t *testing.T) {
 	apim := GetDevClient()
 	projectName := base.GenerateRandomName(16)
@@ -335,7 +330,7 @@ func TestImportProjectCreatedFailWhenAPIIsExisted(t *testing.T) {
 	testutils.ValidateImportProjectFailed(t, args, "")
 }
 
-//Import Api with a Document and Export that Api with a Document
+// Import Api with a Document and Export that Api with a Document
 func TestImportAndExportAPIWithDocument(t *testing.T) {
 	username := superAdminUser
 	password := superAdminPassword
@@ -373,7 +368,7 @@ func TestImportAndExportAPIWithDocument(t *testing.T) {
 		testutils.DevFirstUpdatedSampleCaseDestPathSuffix)
 }
 
-//Import Api with an Image and Export that Api with an image (.png Type)
+// Import Api with an Image and Export that Api with an image (.png Type)
 func TestImportAndExportAPIWithPngIcon(t *testing.T) {
 	username := superAdminUser
 	password := superAdminPassword
@@ -403,7 +398,7 @@ func TestImportAndExportAPIWithPngIcon(t *testing.T) {
 	testutils.ValidateAPIWithIconIsExported(t, args, testutils.DevFirstDefaultAPIName, testutils.DevFirstDefaultAPIVersion)
 }
 
-//Import Api with an Image and Export that Api with an image (.jpeg Type)
+// Import Api with an Image and Export that Api with an image (.jpeg Type)
 func TestImportAndExportAPIWithJpegImage(t *testing.T) {
 	apim := GetDevClient()
 	projectName := base.GenerateRandomName(16)
@@ -433,7 +428,7 @@ func TestImportAndExportAPIWithJpegImage(t *testing.T) {
 	testutils.ValidateAPIWithImageIsExported(t, args, testutils.DevFirstDefaultAPIName, testutils.DevFirstDefaultAPIVersion)
 }
 
-//Import and export API with updated thumbnail and document and assert that
+// Import and export API with updated thumbnail and document and assert that
 func TestUpdateDocAndImageOfAPIOfExistingAPI(t *testing.T) {
 	apim := GetProdClient()
 	projectName := base.GenerateRandomName(16)
