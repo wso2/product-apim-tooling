@@ -36,8 +36,8 @@ func ValidateCAppsList(t *testing.T, cAppCmd string, config *MiConfig) {
 }
 
 func validateCAppListEqual(t *testing.T, cAppsListFromCtl string, cAppsList *artifactutils.CompositeAppList) {
-	unmatchedCount := cAppsList.Count
-	for _, cApp := range cAppsList.CompositeApps {
+	unmatchedCount := cAppsList.ActiveCount
+	for _, cApp := range cAppsList.ActiveCompositeApps {
 		assert.Truef(t, strings.Contains(cAppsListFromCtl, cApp.Name), "cAppsListFromCtl: "+cAppsListFromCtl+
 			" , does not contain cApp.Name: "+cApp.Name)
 		unmatchedCount--
