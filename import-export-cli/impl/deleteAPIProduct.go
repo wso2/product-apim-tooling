@@ -33,12 +33,13 @@ import (
 // @param accessToken : Access Token for the resource
 // @param environment : Environment where API Product needs to be located
 // @param apiProductName : Name of the API Product
+// @param apiProductVersion : Version of the API to delete
 // @param apiProductProvider : Provider of the API Product
 // @return response Response in the form of *resty.Response
-func DeleteAPIProduct(accessToken, environment, apiProductName, apiProductProvider string) (*resty.Response, error) {
+func DeleteAPIProduct(accessToken, environment, apiProductName, apiProductVersion, apiProductProvider string) (*resty.Response, error) {
 	deleteEndpoint := utils.GetApiProductListEndpointOfEnv(environment, utils.MainConfigFilePath)
 	deleteEndpoint = utils.AppendSlashToString(deleteEndpoint)
-	apiProductId, err := GetAPIProductId(accessToken, environment, apiProductName, apiProductProvider)
+	apiProductId, err := GetAPIProductId(accessToken, environment, apiProductName, apiProductVersion, apiProductProvider)
 	if err != nil {
 		utils.HandleErrorAndExit("Error while getting API Product Id for deletion ", err)
 	}

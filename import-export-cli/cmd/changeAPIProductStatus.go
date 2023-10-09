@@ -30,6 +30,7 @@ import (
 
 var apiProductStateChangeEnvironment string
 var apiProductNameForStateChange string
+var apiProductVersionForStateChange string
 var apiProductProviderForStateChange string
 var apiProductStateChangeAction string
 
@@ -40,11 +41,11 @@ const changeAPIProductStatusCmdLongDesc = "Change the lifecycle status of an API
 
 const changeAPIProductStatusCmdExamples = utils.ProjectName + ` ` + changeStatusCmdLiteral + ` ` + changeAPIProductStatusCmdLiteral + ` -a Publish -n TwitterAPI -r admin -e dev
 ` + utils.ProjectName + ` ` + changeStatusCmdLiteral + ` ` + changeAPIProductStatusCmdLiteral + ` -a Publish -n FacebookAPI -e production
-NOTE: The 3 flags (--action (-a), --name (-n) and --environment (-e)) are mandatory.`
+NOTE: The 3 flags (--action (-a), --name (-n), --version (-v) and --environment (-e)) are mandatory.`
 
 // changeAPIProductStatusCmd represents change-status api command
 var ChangeAPIProductStatusCmd = &cobra.Command{
-	Use: changeAPIProductStatusCmdLiteral + " (--action <action-of-the-api-product-state-change> --name <name-of-the-api-product> --provider " +
+	Use: changeAPIProductStatusCmdLiteral + " (--action <action-of-the-api-product-state-change> --name <name-of-the-api-product> --version <version-of-the-api-product> --provider " +
 		"<provider-of-the-api-product> --environment <environment-from-which-the-api-product-state-should-be-changed>)",
 	Short:   changeAPIProductStatusCmdShortDesc,
 	Long:    changeAPIProductStatusCmdLongDesc,
@@ -64,7 +65,7 @@ func executeChangeAPIProductStatusCmd(credential credentials.Credential) {
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, apiProductStateChangeEnvironment)
 	if preCommandErr == nil {
 		resp, err := impl.ChangeAPIProductStatusInEnv(accessToken, apiProductStateChangeEnvironment, apiProductStateChangeAction,
-			apiProductNameForStateChange, apiProductProviderForStateChange)
+			apiProductNameForStateChange, apiProductVersionForStateChange, apiProductProviderForStateChange)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while changing the API Product status", err)
 		}
@@ -92,6 +93,8 @@ func init() {
 		"Action to be taken to change the status of the API Product")
 	ChangeAPIProductStatusCmd.Flags().StringVarP(&apiProductNameForStateChange, "name", "n", "",
 		"Name of the API Product to be state changed")
+	ChangeAPIProductStatusCmd.Flags().StringVarP(&apiProductVersionForStateChange, "version", "v", "",
+		"Version of the API Product to be state changed")
 	ChangeAPIProductStatusCmd.Flags().StringVarP(&apiProductProviderForStateChange, "provider", "r", "",
 		"Provider of the API Product")
 	ChangeAPIProductStatusCmd.Flags().StringVarP(&apiProductStateChangeEnvironment, "environment", "e",
@@ -99,5 +102,6 @@ func init() {
 	// Mark required flags
 	_ = ChangeAPIProductStatusCmd.MarkFlagRequired("action")
 	_ = ChangeAPIProductStatusCmd.MarkFlagRequired("name")
+	_ = ChangeAPIProductStatusCmd.MarkFlagRequired("version")
 	_ = ChangeAPIProductStatusCmd.MarkFlagRequired("environment")
 }
