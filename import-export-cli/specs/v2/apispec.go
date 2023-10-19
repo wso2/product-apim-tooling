@@ -79,6 +79,7 @@ type APIDefinition struct {
 	EnvironmentList                    []string               `json:"environmentList,omitempty" yaml:"environmentList,omitempty"`
 	APISecurity                        string                 `json:"apiSecurity,omitempty" yaml:"apiSecurity,omitempty"`
 	AccessControl                      string                 `json:"accessControl,omitempty" yaml:"accessControl,omitempty"`
+	AccessControlRoles                 string                 `json:"accessControlRoles,omitempty" yaml:"accessControlRoles,omitempty"`
 	Rating                             float64                `json:"rating,omitempty" yaml:"rating,omitempty"`
 	IsLatest                           bool                   `json:"isLatest,omitempty" yaml:"isLatest,omitempty"`
 	EnableStore                        bool                   `json:"enableStore,omitempty" yaml:"enableStore,omitempty"`
