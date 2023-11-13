@@ -204,6 +204,31 @@ func TestImportProjectCreatedFromOpenAPI3Definition(t *testing.T) {
 	testutils.ValidateImportProject(t, args)
 }
 
+// Import an API from initialized project with an invalid Open API 3 definition
+func TestImportProjectCreatedFromInvalidOpenAPI3Definition(t *testing.T) {
+
+	apim := GetDevClient()
+	projectName := base.GenerateRandomName(16)
+	username := superAdminUser
+	password := superAdminPassword
+
+	args := &testutils.InitTestArgs{
+		CtlUser:   testutils.Credentials{Username: username, Password: password},
+		SrcAPIM:   apim,
+		InitFlag:  projectName,
+		OasFlag:   testutils.TestInvalidOpenAPI3DefinitionPath,
+		APIName:   base.GenerateRandomName(16) + "API",
+		ForceFlag: false,
+	}
+
+	// Initialize a project with OAS
+	testutils.ValidateInitializeProjectWithOASFlag(t, args)
+
+	// Assert that project import to publisher portal is unsuccessful
+	testutils.ValidateImportProjectWithInvalidSwaggerFailed(t, args, "", false)
+
+}
+
 // Import API from initialized project from API definition which is already in publisher without --update flag
 func TestImportProjectCreatedFailWhenAPIIsExisted(t *testing.T) {
 	apim := GetDevClient()
