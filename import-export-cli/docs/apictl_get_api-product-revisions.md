@@ -28,6 +28,7 @@ NOTE: All the 3 flags (--name (-n), --version (-v) and --environment (-e)) are m
   -n, --name string          Name of the API Product to get the revision
   -r, --provider string      Provider of the API Product
   -q, --query strings        Query pattern
+  -v, --version string       Version of the API Product to get the revision
 ```
 
 ### Options inherited from parent commands

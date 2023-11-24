@@ -16,7 +16,7 @@ apictl undeploy api (--name <name-of-the-api> --version <version-of-the-api> --p
 apictl undeploy api -n TwitterAPI -v 1.0.0 --rev 2 -e dev
 apictl undeploy api -n FacebookAPI -v 2.1.0 --rev 6 -g Label1 -g Label2 -g Label3 -e production
 apictl undeploy api -n FacebookAPI -v 2.1.0 -r alice --rev 2 -g Label1 -e production
-NOTE: All the 4 flags (--name (-n), --version (-v), --rev, --environment (-e)) are mandatory. 
+NOTE: All the 4 flags (--name (-n), --version (-v), --rev, --environment (-e)) are mandatory.
 If the flag (--gateway-env (-g)) is not provided, revision will be undeployed from all deployed gateway environments.
 ```
 

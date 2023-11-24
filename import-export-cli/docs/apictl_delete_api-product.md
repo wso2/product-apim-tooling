@@ -7,7 +7,7 @@ Delete API Product
 Delete an API Product from an environment
 
 ```
-apictl delete api-product (--name <name-of-the-api-product> --provider <provider-of-the-api-product> --environment <environment-from-which-the-api-product-should-be-deleted>) [flags]
+apictl delete api-product (--name <name-of-the-api-product> --version <version-of-the-api-product> --provider <provider-of-the-api-product> --environment <environment-from-which-the-api-product-should-be-deleted>) [flags]
 ```
 
 ### Examples
@@ -15,7 +15,7 @@ apictl delete api-product (--name <name-of-the-api-product> --provider <provider
 ```
 apictl delete api-product -n LeasingAPIProduct -r admin -e dev
 apictl delete api-product -n CreditAPIProduct -e production
-NOTE: Both the flags (--name (-n) and --environment (-e)) are mandatory.
+NOTE: Both the flags (--name (-n), --version (-v), and --environment (-e)) are mandatory.
 ```
 
 ### Options
@@ -25,6 +25,7 @@ NOTE: Both the flags (--name (-n) and --environment (-e)) are mandatory.
   -h, --help                 help for api-product
   -n, --name string          Name of the API Product to be deleted
   -r, --provider string      Provider of the API Product to be deleted
+  -v, --version string       Version of the API Product to be deleted
 ```
 
 ### Options inherited from parent commands

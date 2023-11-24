@@ -7,7 +7,7 @@ Change Status of an API Product
 Change the lifecycle status of an API Product in an environment
 
 ```
-apictl change-status api-product (--action <action-of-the-api-product-state-change> --name <name-of-the-api-product> --provider <provider-of-the-api-product> --environment <environment-from-which-the-api-product-state-should-be-changed>) [flags]
+apictl change-status api-product (--action <action-of-the-api-product-state-change> --name <name-of-the-api-product> --version <version-of-the-api-product> --provider <provider-of-the-api-product> --environment <environment-from-which-the-api-product-state-should-be-changed>) [flags]
 ```
 
 ### Examples
@@ -15,7 +15,7 @@ apictl change-status api-product (--action <action-of-the-api-product-state-chan
 ```
 apictl change-status api-product -a Publish -n TwitterAPI -r admin -e dev
 apictl change-status api-product -a Publish -n FacebookAPI -e production
-NOTE: The 3 flags (--action (-a), --name (-n) and --environment (-e)) are mandatory.
+NOTE: The 3 flags (--action (-a), --name (-n), --version (-v) and --environment (-e)) are mandatory.
 ```
 
 ### Options
@@ -26,6 +26,7 @@ NOTE: The 3 flags (--action (-a), --name (-n) and --environment (-e)) are mandat
   -h, --help                 help for api-product
   -n, --name string          Name of the API Product to be state changed
   -r, --provider string      Provider of the API Product
+  -v, --version string       Version of the API Product to be state changed
 ```
 
 ### Options inherited from parent commands
