@@ -29,6 +29,7 @@ import (
 )
 
 var getRevisionsAPIProductName string
+var getRevisionsAPIProductVersion string
 var getRevisionsAPIProductProvider string
 var getAPIProductRevisionsCmdEnvironment string
 var getAPIProductRevisionsCmdFormat string
@@ -69,7 +70,7 @@ func executeGetAPIProductRevisionsCmd(credential credentials.Credential) {
 	}
 
 	_, revisions, err := impl.GetAPIProductRevisionListFromEnv(accessToken, getAPIProductRevisionsCmdEnvironment,
-		getRevisionsAPIProductName, getRevisionsAPIProductProvider, strings.Join(getAPIProductRevisionsCmdQuery, queryParamSeparator))
+		getRevisionsAPIProductName, getRevisionsAPIProductVersion, getRevisionsAPIProductProvider, strings.Join(getAPIProductRevisionsCmdQuery, queryParamSeparator))
 	if err == nil {
 		impl.PrintRevisions(revisions, getAPIProductRevisionsCmdFormat)
 	} else {
@@ -81,6 +82,8 @@ func init() {
 	GetCmd.AddCommand(getAPIProductRevisionsCmd)
 	getAPIProductRevisionsCmd.Flags().StringVarP(&getRevisionsAPIProductName, "name", "n", "",
 		"Name of the API Product to get the revision")
+	getAPIProductRevisionsCmd.Flags().StringVarP(&getRevisionsAPIProductVersion, "version", "v", "",
+		"Version of the API Product to get the revision")
 	getAPIProductRevisionsCmd.Flags().StringVarP(&getRevisionsAPIProductProvider, "provider", "r", "",
 		"Provider of the API Product")
 	getAPIProductRevisionsCmd.Flags().StringSliceVarP(&getAPIProductRevisionsCmdQuery, "query", "q",

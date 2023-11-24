@@ -31,6 +31,7 @@ import (
 )
 
 var undeployAPIProductName string
+var undeployAPIProductVersion string
 var undeployAPIProductRevisionNum string
 var undeployAPIProductProvider string
 var undeployAPIProductEnvironment string
@@ -47,13 +48,13 @@ const undeployAPIProductCmdExamples = utils.
 	ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPIProductCmdLiteral + ` -n TwitterAPIProduct --rev 2  -e dev
 ` + utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPIProductCmdLiteral + ` -n StoreProduct --rev 6 -g Label1 -g Label2 -g Label3 -e production
 ` + utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPIProductCmdLiteral + ` -n FacebookProduct -r admin --rev 2 -g Label1 -e production
-NOTE: All 3 flags (--name (-n), --rev, --environment (-e)) are mandatory.
+NOTE: All 4 flags (--name (-n), --version (-v), --rev, --environment (-e)) are mandatory.
 If the flag (--gateway-env (-g)) is not provided, revision will be undeployed from all deployed gateway environments.`
 
 // UndeployAPIProductCmd represents the deploy API command
 var UndeployAPIProductCmd = &cobra.Command{
 	Use: UndeployAPIProductCmdLiteral + " (--name <name-of-the-api-product> " +
-		"--rev<revision-number-of-the-api-product> --gateway-env <gateway-environment> " +
+		"--version <version-of-the-api-product> --rev<revision-number-of-the-api-product> --gateway-env <gateway-environment> " +
 		"--environment <environment-from-which-the-api-product-should-be-undeployed>)",
 	Short:   undeployAPIProductCmdShortDesc,
 	Long:    undeployAPIProductmdLongDesc,
@@ -78,7 +79,7 @@ func executeUndeployAPIProductCmd(credential credentials.Credential, deployments
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, undeployAPIProductEnvironment)
 	if preCommandErr == nil {
 		resp, err := impl.UndeployAPIProductRevisionFromGateways(accessToken,
-			undeployAPIProductEnvironment, undeployAPIProductName, undeployAPIProductProvider,
+			undeployAPIProductEnvironment, undeployAPIProductName, undeployAPIProductVersion, undeployAPIProductProvider,
 			undeployAPIProductRevisionNum, deployments, undeployAPIProductAllGatewayEnvs)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while undeploying the API Product", err)
@@ -101,6 +102,8 @@ func init() {
 	UndeployCmd.AddCommand(UndeployAPIProductCmd)
 	UndeployAPIProductCmd.Flags().StringVarP(&undeployAPIProductName, "name", "n", "",
 		"Name of the API Product to be exported")
+	UndeployAPIProductCmd.Flags().StringVarP(&undeployAPIProductVersion, "version", "v", "",
+		"Version of the API Product to be exported")
 	UndeployAPIProductCmd.Flags().StringVarP(&undeployAPIProductProvider, "provider", "r", "",
 		"Provider of the API")
 	UndeployAPIProductCmd.Flags().StringSliceVarP(&undeployAPIProductGatewayEnvs, "gateway-env", "g", []string{},

@@ -31,9 +31,9 @@ import (
 // @return count (no. of API Products)
 // @return array of revision objects
 // @return error
-func GetAPIProductRevisionListFromEnv(accessToken, environment, apiProductName, provider,
+func GetAPIProductRevisionListFromEnv(accessToken, environment, apiProductName, apiProductVersion, provider,
 	query string) (count int32, revisions []utils.Revisions, err error) {
-	apiProductId, err := GetAPIProductId(accessToken, environment, apiProductName, provider)
+	apiProductId, err := GetAPIProductId(accessToken, environment, apiProductName, apiProductVersion, provider)
 	if err != nil {
 		utils.HandleErrorAndExit("Error while getting API Product Id to list revisions ", err)
 	}

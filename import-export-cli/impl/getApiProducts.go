@@ -32,10 +32,11 @@ const (
 	apiProductIdHeader       = "ID"
 	apiProductNameHeader     = "NAME"
 	apiProductContextHeader  = "CONTEXT"
+	apiProductVersionHeader  = "VERSION"
 	apiProductProviderHeader = "PROVIDER"
 	apiProductStatusHeader   = "STATUS"
 
-	defaultApiProductTableFormat = "table {{.Id}}\t{{.Name}}\t{{.Context}}\t{{.LifeCycleStatus}}\t{{.Provider}}"
+	defaultApiProductTableFormat = "table {{.Id}}\t{{.Name}}\t{{.Context}}\t{{.Version}}\t{{.LifeCycleStatus}}\t{{.Provider}}"
 )
 
 // apiProduct holds information about an API Product for outputting
@@ -43,6 +44,7 @@ type apiProduct struct {
 	id              string
 	name            string
 	context         string
+	version         string
 	provider        string
 	lifeCycleStatus string
 }
@@ -60,6 +62,11 @@ func (a apiProduct) Name() string {
 // Context of API Product
 func (a apiProduct) Context() string {
 	return a.context
+}
+
+// Version of API Product
+func (a apiProduct) Version() string {
+	return a.version
 }
 
 // Lifecycle Status of API Product
@@ -118,6 +125,7 @@ func PrintAPIProducts(apiProducts []utils.APIProduct, format string) {
 		"Id":              apiProductIdHeader,
 		"Name":            apiProductNameHeader,
 		"Context":         apiProductContextHeader,
+		"Version":         apiProductVersionHeader,
 		"LifeCycleStatus": apiProductStatusHeader,
 		"Provider":        apiProductProviderHeader,
 	}
@@ -130,5 +138,5 @@ func PrintAPIProducts(apiProducts []utils.APIProduct, format string) {
 
 // creates a new API Product from utils.API
 func newApiProductDefinitionFromAPI(a utils.APIProduct) *apiProduct {
-	return &apiProduct{a.ID, a.Name, a.Context, a.Provider, a.LifeCycleStatus}
+	return &apiProduct{a.ID, a.Name, a.Context, a.Version, a.Provider, a.LifeCycleStatus}
 }

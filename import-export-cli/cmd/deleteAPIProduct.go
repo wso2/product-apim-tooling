@@ -30,6 +30,7 @@ import (
 
 var deleteAPIProductEnvironment string
 var deleteAPIProductName string
+var deleteAPIProductVersion string
 var deleteAPIProductProvider string
 
 // DeleteAPIProduct command related usage info
@@ -39,13 +40,13 @@ const deleteAPIProductCmdLongDesc = "Delete an API Product from an environment"
 
 const deleteAPIProductCmdExamples = utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPIProductCmdLiteral + ` -n LeasingAPIProduct -r admin -e dev
 ` + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPIProductCmdLiteral + ` -n CreditAPIProduct -e production
-NOTE: Both the flags (--name (-n) and --environment (-e)) are mandatory.`
+NOTE: Both the flags (--name (-n), --version (-v), and --environment (-e)) are mandatory.`
 
 // TODO Introduce a version flag and mandate it when the versioning support has been implemented for API Products
 
 // DeleteAPIProductCmd represents the delete api-product command
 var DeleteAPIProductCmd = &cobra.Command{
-	Use: deleteAPIProductCmdLiteral + " (--name <name-of-the-api-product> --provider <provider-of-the-api-product> --environment " +
+	Use: deleteAPIProductCmdLiteral + " (--name <name-of-the-api-product> --version <version-of-the-api-product> --provider <provider-of-the-api-product> --environment " +
 		"<environment-from-which-the-api-product-should-be-deleted>)",
 	Short:   deleteAPIProductCmdShortDesc,
 	Long:    deleteAPIProductCmdLongDesc,
@@ -64,7 +65,7 @@ var DeleteAPIProductCmd = &cobra.Command{
 func executeDeleteAPIProductCmd(credential credentials.Credential) {
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, deleteAPIProductEnvironment)
 	if preCommandErr == nil {
-		resp, err := impl.DeleteAPIProduct(accessToken, deleteAPIProductEnvironment, deleteAPIProductName, deleteAPIProductProvider)
+		resp, err := impl.DeleteAPIProduct(accessToken, deleteAPIProductEnvironment, deleteAPIProductName, deleteAPIProductVersion, deleteAPIProductProvider)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while deleting API Product", err)
 		}
@@ -80,11 +81,14 @@ func init() {
 	DeleteCmd.AddCommand(DeleteAPIProductCmd)
 	DeleteAPIProductCmd.Flags().StringVarP(&deleteAPIProductName, "name", "n", "",
 		"Name of the API Product to be deleted")
+	DeleteAPIProductCmd.Flags().StringVarP(&deleteAPIProductVersion, "version", "v", "",
+		"Version of the API Product to be deleted")
 	DeleteAPIProductCmd.Flags().StringVarP(&deleteAPIProductProvider, "provider", "r", "",
 		"Provider of the API Product to be deleted")
 	DeleteAPIProductCmd.Flags().StringVarP(&deleteAPIProductEnvironment, "environment", "e",
 		"", "Environment from which the API Product should be deleted")
 	// Mark required flags
 	_ = DeleteAPIProductCmd.MarkFlagRequired("name")
+	_ = DeleteAPICmd.MarkFlagRequired("version")
 	_ = DeleteAPIProductCmd.MarkFlagRequired("environment")
 }
