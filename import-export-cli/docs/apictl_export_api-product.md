@@ -13,8 +13,8 @@ apictl export api-product (--name <name-of-the-api-product> --version <version-o
 ### Examples
 
 ```
-apictl export api-product -n LeasingAPIProduct -e dev
-apictl export api-product -n CreditAPIProduct -r admin -e production
+apictl export api-product -n LeasingAPIProduct -v 1.0.0 -e dev
+apictl export api-product -n CreditAPIProduct -v 1.0.0 -r admin -e production
 NOTE: Both the flags (--name (-n), --version (-v) and --environment (-e)) are mandatory
 ```
 

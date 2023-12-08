@@ -46,8 +46,8 @@ const exportAPIProductCmdShortDesc = "Export API Product"
 
 const exportAPIProductCmdLongDesc = "Export an API Product in an environment"
 
-const exportAPIProductCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPIProductCmdLiteral + ` -n LeasingAPIProduct -e dev
-` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPIProductCmdLiteral + ` -n CreditAPIProduct -r admin -e production
+const exportAPIProductCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPIProductCmdLiteral + ` -n LeasingAPIProduct -v 1.0.0 -e dev
+` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPIProductCmdLiteral + ` -n CreditAPIProduct -v 1.0.0 -r admin -e production
 NOTE: Both the flags (--name (-n), --version (-v) and --environment (-e)) are mandatory`
 
 // ExportAPIProductCmd represents the exportAPIProduct command

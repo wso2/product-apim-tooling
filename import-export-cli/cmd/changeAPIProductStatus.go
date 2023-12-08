@@ -39,8 +39,8 @@ const changeAPIProductStatusCmdLiteral = "api-product"
 const changeAPIProductStatusCmdShortDesc = "Change Status of an API Product"
 const changeAPIProductStatusCmdLongDesc = "Change the lifecycle status of an API Product in an environment"
 
-const changeAPIProductStatusCmdExamples = utils.ProjectName + ` ` + changeStatusCmdLiteral + ` ` + changeAPIProductStatusCmdLiteral + ` -a Publish -n TwitterAPI -r admin -e dev
-` + utils.ProjectName + ` ` + changeStatusCmdLiteral + ` ` + changeAPIProductStatusCmdLiteral + ` -a Publish -n FacebookAPI -e production
+const changeAPIProductStatusCmdExamples = utils.ProjectName + ` ` + changeStatusCmdLiteral + ` ` + changeAPIProductStatusCmdLiteral + ` -a Publish -n TwitterAPI -v 1.0.0 -r admin -e dev
+` + utils.ProjectName + ` ` + changeStatusCmdLiteral + ` ` + changeAPIProductStatusCmdLiteral + ` -a Publish -n FacebookAPI -v 2.1.0 -e production
 NOTE: The 3 flags (--action (-a), --name (-n), --version (-v) and --environment (-e)) are mandatory.`
 
 // changeAPIProductStatusCmd represents change-status api command

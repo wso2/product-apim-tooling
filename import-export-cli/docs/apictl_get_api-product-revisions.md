@@ -15,7 +15,7 @@ apictl get api-product-revisions [flags]
 ```
 apictl get api-product-revisions -n PizzaProduct -v 1.0.0 -e dev
 apictl get api-product-revisions -n ShopProduct -v 1.0.0 -r admin -e dev
-apictl get api-product-revisions -n PizzaProduct -q deployed:true -e dev
+apictl get api-product-revisions -n PizzaProduct -v 1.0.0 -q deployed:true -e dev
 NOTE: All the 3 flags (--name (-n), --version (-v) and --environment (-e)) are mandatory.
 ```
 

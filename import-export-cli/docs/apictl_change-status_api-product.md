@@ -13,8 +13,8 @@ apictl change-status api-product (--action <action-of-the-api-product-state-chan
 ### Examples
 
 ```
-apictl change-status api-product -a Publish -n TwitterAPI -r admin -e dev
-apictl change-status api-product -a Publish -n FacebookAPI -e production
+apictl change-status api-product -a Publish -n TwitterAPI -v 1.0.0 -r admin -e dev
+apictl change-status api-product -a Publish -n FacebookAPI -v 2.1.0 -e production
 NOTE: The 3 flags (--action (-a), --name (-n), --version (-v) and --environment (-e)) are mandatory.
 ```
 

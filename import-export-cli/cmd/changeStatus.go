@@ -31,7 +31,7 @@ const changeStatusCmdLongDesc = "Change the lifecycle status of an API or API Pr
 
 const changeStatusCmdExamples = utils.ProjectName + ` ` + changeStatusCmdLiteral + ` ` + changeAPIStatusCmdLiteral + ` -a Publish -n TwitterAPI -v 1.0.0 -r admin -e dev
 ` + utils.ProjectName + ` ` + changeStatusCmdLiteral + ` ` + changeAPIStatusCmdLiteral + ` -a Publish -n FacebookAPI -v 2.1.0 -e production
-` + utils.ProjectName + ` ` + changeStatusCmdLiteral + ` ` + changeAPIProductStatusCmdLiteral + ` -a Publish -n SocialMediaProduct -r admin -e dev`
+` + utils.ProjectName + ` ` + changeStatusCmdLiteral + ` ` + changeAPIProductStatusCmdLiteral + ` -a Publish -n SocialMediaProduct -v 1.0.0 -r admin -e dev`
 
 // ChangeStatusCmd represents the change-status command
 var ChangeStatusCmd = &cobra.Command{

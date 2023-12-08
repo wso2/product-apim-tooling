@@ -43,7 +43,7 @@ const GetAPIProductRevisionsCmdLongDesc = `Display a list of Revisions available
 
 var getRevisionsCmdExamples = utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetAPIProductRevisionsCmdLiteral + ` -n PizzaProduct -v 1.0.0 -e dev
 ` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetAPIProductRevisionsCmdLiteral + ` -n ShopProduct -v 1.0.0 -r admin -e dev
-` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetAPIProductRevisionsCmdLiteral + ` -n PizzaProduct -q deployed:true -e dev
+` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetAPIProductRevisionsCmdLiteral + ` -n PizzaProduct -v 1.0.0 -q deployed:true -e dev
 NOTE: All the 3 flags (--name (-n), --version (-v) and --environment (-e)) are mandatory.`
 
 // getRevisionsCmd represents the revisions command
@@ -93,5 +93,6 @@ func init() {
 	getAPIProductRevisionsCmd.Flags().StringVarP(&getAPIProductRevisionsCmdFormat, "format", "", "", "Pretty-print revisions "+
 		"using Go Templates. Use \"{{ jsonPretty . }}\" to list all fields")
 	_ = getAPIProductRevisionsCmd.MarkFlagRequired("name")
+	_ = getAPIProductRevisionsCmd.MarkFlagRequired("version")
 	_ = getAPIProductRevisionsCmd.MarkFlagRequired("environment")
 }

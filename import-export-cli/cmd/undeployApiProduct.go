@@ -45,9 +45,9 @@ const undeployAPIProductCmdShortDesc = "Undeploy API Product"
 const undeployAPIProductmdLongDesc = "Undeploy an API Product revision from gateway environments"
 
 const undeployAPIProductCmdExamples = utils.
-	ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPIProductCmdLiteral + ` -n TwitterAPIProduct --rev 2  -e dev
-` + utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPIProductCmdLiteral + ` -n StoreProduct --rev 6 -g Label1 -g Label2 -g Label3 -e production
-` + utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPIProductCmdLiteral + ` -n FacebookProduct -r admin --rev 2 -g Label1 -e production
+	ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPIProductCmdLiteral + ` -n TwitterAPIProduct -v 1.0.0 --rev 2  -e dev
+` + utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPIProductCmdLiteral + ` -n StoreProduct -v 1.0.0 --rev 6 -g Label1 -g Label2 -g Label3 -e production
+` + utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPIProductCmdLiteral + ` -n FacebookProduct -v 1.0.0 -r admin --rev 2 -g Label1 -e production
 NOTE: All 4 flags (--name (-n), --version (-v), --rev, --environment (-e)) are mandatory.
 If the flag (--gateway-env (-g)) is not provided, revision will be undeployed from all deployed gateway environments.`
 
