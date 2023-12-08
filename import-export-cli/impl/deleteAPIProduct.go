@@ -33,7 +33,7 @@ import (
 // @param accessToken : Access Token for the resource
 // @param environment : Environment where API Product needs to be located
 // @param apiProductName : Name of the API Product
-// @param apiProductVersion : Version of the API to delete
+// @param apiProductVersion : Version of the API Product to delete
 // @param apiProductProvider : Provider of the API Product
 // @return response Response in the form of *resty.Response
 func DeleteAPIProduct(accessToken, environment, apiProductName, apiProductVersion, apiProductProvider string) (*resty.Response, error) {

@@ -388,12 +388,9 @@ func handleIfError(err error, failedProjects map[string][]*params.ProjectParams,
 // updatedProjectsPerType is a map of string -> ProjectParams which consists of updated projects per each type (API, App..)
 // Returns bool, true if any deleted projects exists so the process should continue with project deletion path
 // Returns map[string][]*params.ProjectParams, a map of project type (API, App.. ) to each project detail which are
-//
-//	deleted projects
-//
+//  deleted projects
 // Returns map[string][]*params.ProjectParams, a map of project type (API, App.. ) to each project detail which are
-//
-//	failed during the deployment
+//  failed during the deployment
 func deployUpdatedProjects(accessToken, sourceRepoId, deploymentRepoId, environment string, totalProjectsToUpdate int,
 	updatedProjectsPerType map[string][]*params.ProjectParams) (bool, map[string][]*params.ProjectParams,
 	map[string][]*params.ProjectParams) {
@@ -632,9 +629,8 @@ func DeployChangedFiles(accessToken, environment string) map[string][]*params.Pr
 }
 
 // Create 'vcs.yaml' in the repository root folder with a unique id (uuid) for the repository.
-//
-//	If the value of force is false, and the file is already created, gives an error.
-//	If the value of force is true, It will reinitialize the file even if it already exists.
+//  If the value of force is false, and the file is already created, gives an error.
+//  If the value of force is true, It will reinitialize the file even if it already exists.
 func InitializeRepo(force bool) error {
 	vcsInfoPath, err := getVcsYamlPath()
 	if err != nil {
@@ -704,9 +700,7 @@ func logChangedFiles(changedFileList []string) {
 }
 
 // subPath denotes a single changed file retrieved from "git diff" command. This path is scanned and then identifies the
-//
-//	project type (API, App,.. ) from this method.
-//
+//  project type (API, App,.. ) from this method.
 // envVCSConfig is the environment related VCS configuration
 // repoBasePath is the basepath of the git repository
 // pathInfoMap is a map of path (string) to project info. This is used for caching and avoid repetitive checking

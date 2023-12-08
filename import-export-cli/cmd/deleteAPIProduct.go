@@ -38,11 +38,9 @@ const deleteAPIProductCmdLiteral = "api-product"
 const deleteAPIProductCmdShortDesc = "Delete API Product"
 const deleteAPIProductCmdLongDesc = "Delete an API Product from an environment"
 
-const deleteAPIProductCmdExamples = utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPIProductCmdLiteral + ` -n LeasingAPIProduct -r admin -e dev
-` + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPIProductCmdLiteral + ` -n CreditAPIProduct -e production
+const deleteAPIProductCmdExamples = utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPIProductCmdLiteral + ` -n LeasingAPIProduct -v 1.0.0 -r admin -e dev
+` + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPIProductCmdLiteral + ` -n CreditAPIProduct -v 1.0.0 -e production
 NOTE: Both the flags (--name (-n), --version (-v), and --environment (-e)) are mandatory.`
-
-// TODO Introduce a version flag and mandate it when the versioning support has been implemented for API Products
 
 // DeleteAPIProductCmd represents the delete api-product command
 var DeleteAPIProductCmd = &cobra.Command{
@@ -89,6 +87,6 @@ func init() {
 		"", "Environment from which the API Product should be deleted")
 	// Mark required flags
 	_ = DeleteAPIProductCmd.MarkFlagRequired("name")
-	_ = DeleteAPICmd.MarkFlagRequired("version")
+	_ = DeleteAPIProductCmd.MarkFlagRequired("version")
 	_ = DeleteAPIProductCmd.MarkFlagRequired("environment")
 }
