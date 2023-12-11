@@ -57,7 +57,7 @@ func TestExportAPI(t *testing.T) {
 	}))
 	defer server.Close()
 
-	resp, err := getExportApiResponse("test", "1.0", "admin", "json", server.URL, "", false)
+	resp, err := getExportApiResponse("test", "1.0", "admin", "json", server.URL, "", false, false)
 	assert.Nil(t, err, "Error should be nil")
 	assert.Equal(t, 200, resp.StatusCode())
 }

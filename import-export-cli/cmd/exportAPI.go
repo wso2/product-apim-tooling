@@ -38,6 +38,7 @@ var exportAPIName string
 var exportAPIVersion string
 var exportProvider string
 var exportAPIPreserveStatus bool
+var ignoreSwaggerDefinition bool
 var exportAPIFormat string
 var runnigExportApiCommand bool
 
@@ -77,7 +78,7 @@ func executeExportAPICmd(credential credentials.Credential, exportDirectory stri
 
 	apiImportExportEndpoint := utils.GetApiImportExportEndpointOfEnv(cmdExportEnvironment, utils.MainConfigFilePath)
 	resp, err := getExportApiResponse(exportAPIName, exportAPIVersion, exportProvider, exportAPIFormat, apiImportExportEndpoint,
-		b64encodedCredentials, exportAPIPreserveStatus)
+		b64encodedCredentials, exportAPIPreserveStatus, ignoreSwaggerDefinition)
 	if err != nil {
 		utils.HandleErrorAndExit("Error while exporting", err)
 	}
@@ -129,10 +130,11 @@ func WriteToZip(exportAPIName, exportAPIVersion, zipLocationPath string, resp *r
 // @param apiImportExportEndpoint : API Import Export Endpoint for the environment
 // @param  b64encodedCredentials: Base64 Encoded 'username:password'
 // @return response Response in the form of *resty.Response
-func getExportApiResponse(name, version, provider, format, apiImportExportEndpoint, b64encodedCredentials string, preserveStatus bool) (*resty.Response, error) {
+func getExportApiResponse(name, version, provider, format, apiImportExportEndpoint, b64encodedCredentials string, preserveStatus bool, ignoreSwagger bool) (*resty.Response, error) {
 	apiImportExportEndpoint = utils.AppendSlashToString(apiImportExportEndpoint)
 	query := "export-api?name=" + name + "&version=" + version + "&provider=" + provider +
-		"&preserveStatus=" + strconv.FormatBool(preserveStatus)
+		"&preserveStatus=" + strconv.FormatBool(preserveStatus) +
+		"&ignoreSwagger=" + strconv.FormatBool(ignoreSwagger)
 	if format != "" {
 		query += "&format=" + format
 	}
@@ -165,6 +167,8 @@ func init() {
 		"", "Environment to which the API should be exported")
 	ExportAPICmd.Flags().BoolVarP(&exportAPIPreserveStatus, "preserveStatus", "", true,
 		"Preserve API status when exporting. Otherwise API will be exported in CREATED status")
+	ExportAPICmd.Flags().BoolVarP(&ignoreSwaggerDefinition, "ignore-swagger-definition", "", false,
+		"Ignore swagger definition when exporting. Otherwise API will be exported with the swagger file by default.")
 	ExportAPICmd.Flags().StringVarP(&exportAPIFormat, "format", "", "", "File format of exported archive(json or yaml)")
 	_ = ExportAPICmd.MarkFlagRequired("environment")
 }

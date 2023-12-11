@@ -22,13 +22,14 @@ NOTE: all three flags (--name (-n), --version (-v), --provider (-r)) are mandato
 ### Options
 
 ```
-  -e, --environment string   Environment to which the API should be exported
-      --format string        File format of exported archive(json or yaml)
-  -h, --help                 help for export-api
-  -n, --name string          Name of the API to be exported
-      --preserveStatus       Preserve API status when exporting. Otherwise API will be exported in CREATED status (default true)
-  -r, --provider string      Provider of the API
-  -v, --version string       Version of the API to be exported
+  -e, --environment string          Environment to which the API should be exported
+      --format string               File format of exported archive(json or yaml)
+  -h, --help                        help for export-api
+      --ignore-swagger-definition   Ignore swagger definition when exporting. Otherwise API will be exported with the swagger file by default.
+  -n, --name string                 Name of the API to be exported
+      --preserveStatus              Preserve API status when exporting. Otherwise API will be exported in CREATED status (default true)
+  -r, --provider string             Provider of the API
+  -v, --version string              Version of the API to be exported
 ```
 
 ### Options inherited from parent commands
