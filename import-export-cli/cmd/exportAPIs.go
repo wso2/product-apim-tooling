@@ -45,7 +45,6 @@ var apis []utils.API
 var exportRelatedFilesPath string
 var exportAPIsFormat string
 
-//e.g. /home/samithac/.wso2apimcli/exported/migration/production-2.5/wso2-dot-org
 var startFromBeginning bool
 var isProcessCompleted bool
 var startingApiIndexFromList int
@@ -115,7 +114,7 @@ func exportAPIs() {
 				exportApiProvider := apis[i].Provider
 				apiImportExportEndpoint := utils.GetApiImportExportEndpointOfEnv(cmdExportEnvironment, utils.MainConfigFilePath)
 				resp, err := getExportApiResponse(exportAPIName, exportAPIVersion, exportApiProvider, exportAPIsFormat, apiImportExportEndpoint,
-					b64encodedCredentials, exportAPIPreserveStatus)
+					b64encodedCredentials, exportAPIPreserveStatus, ignoreSwaggerDefinition)
 				if err != nil {
 					utils.HandleErrorAndExit("Error exporting", err)
 				}
@@ -147,7 +146,7 @@ func exportAPIs() {
 	}
 }
 
-//  Prepare resumption of previous-halted export-apis operation
+// Prepare resumption of previous-halted export-apis operation
 func prepareResumption() {
 	var lastSuceededAPI utils.API
 	lastSuceededAPI = utils.ReadLastSucceededAPIFileData(exportRelatedFilesPath)
@@ -283,6 +282,8 @@ func init() {
 			"any, and to export APIs from beginning")
 	ExportAPIsCmd.Flags().BoolVarP(&exportAPIPreserveStatus, "preserveStatus", "", true,
 		"Preserve API status when exporting. Otherwise API will be exported in CREATED status")
+	ExportAPIsCmd.Flags().BoolVarP(&ignoreSwaggerDefinition, "ignore-swagger-definition", "", false,
+		"Ignore swagger definition when exporting. Otherwise API will be exported with the swagger file by default.")
 	ExportAPIsCmd.Flags().StringVarP(&exportAPIsFormat, "format", "", "", "File format of exported archives(json or yaml)")
 	_ = ExportAPIsCmd.MarkFlagRequired("environment")
 }
