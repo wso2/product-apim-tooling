@@ -28,5 +28,6 @@ type APIProductDefinitionFile struct {
 // APIProductDTODefinition represents an API Product artifact in APIM
 type APIProductDTODefinition struct {
 	Name     string `json:"name,omitempty" yaml:"name,omitempty"`
+	Version  string `json:"version,omitempty" yaml:"version,omitempty"`
 	Provider string `json:"provider,omitempty" yaml:"provider,omitempty"`
 }

@@ -18,7 +18,7 @@ apictl export [flags]
 ```
 apictl export api -n TwitterAPI -v 1.0.0 -r admin -e dev
 apictl export apis -e dev
-apictl export api-product -n LeasingAPIProduct -e dev
+apictl export api-product -n LeasingAPIProduct -v 1.0.0 -e dev
 apictl export app -n SampleApp -o admin -e dev
 ```
 

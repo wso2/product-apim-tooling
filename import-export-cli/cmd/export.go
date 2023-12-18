@@ -34,7 +34,7 @@ Export an Application of a specific user (--owner, -o) in the environment specif
 
 const exportCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin -e dev
 ` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPIsCmdLiteral + ` -e dev
-` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPIProductCmdLiteral + ` -n LeasingAPIProduct -e dev
+` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPIProductCmdLiteral + ` -n LeasingAPIProduct -v 1.0.0 -e dev
 ` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAppCmdLiteral + ` -n SampleApp -o admin -e dev`
 
 // ExportCmd represents the export command

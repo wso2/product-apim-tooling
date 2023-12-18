@@ -15,7 +15,7 @@ apictl change-status [flags]
 ```
 apictl change-status api -a Publish -n TwitterAPI -v 1.0.0 -r admin -e dev
 apictl change-status api -a Publish -n FacebookAPI -v 2.1.0 -e production
-apictl change-status api-product -a Publish -n SocialMediaProduct -r admin -e dev
+apictl change-status api-product -a Publish -n SocialMediaProduct -v 1.0.0 -r admin -e dev
 ```
 
 ### Options

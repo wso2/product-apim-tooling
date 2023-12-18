@@ -23,10 +23,10 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-func UndeployAPIProductRevisionFromGateways(accessToken, environment, name, provider, revisionNum string,
+func UndeployAPIProductRevisionFromGateways(accessToken, environment, name, version, provider, revisionNum string,
 	gateways []utils.Deployment, allGatewayEnvironments bool) (*resty.Response, error) {
 
-	apiId, err := GetAPIProductId(accessToken, environment, name, provider)
+	apiId, err := GetAPIProductId(accessToken, environment, name, version, provider)
 	if err != nil {
 		utils.HandleErrorAndExit("Error while getting the API Product Id for undeploy", err)
 	}

@@ -84,6 +84,7 @@ type API struct {
 type APIProduct struct {
 	ID              string `json:"id"`
 	Name            string `json:"name"`
+	Version         string `json:"version"`
 	Context         string `json:"context"`
 	Provider        string `json:"provider"`
 	LifeCycleStatus string `json:"status"`
@@ -98,18 +99,18 @@ type Application struct {
 }
 
 type CorrelationComponent struct {
-	Name		string `json:"name"`
-	Enabled		string `json:"enabled"`
-	Properties	[]CorrelationProperties `json:"properties"`
+	Name       string                  `json:"name"`
+	Enabled    string                  `json:"enabled"`
+	Properties []CorrelationProperties `json:"properties"`
 }
 
 type CorrelationProperties struct {
-	Name		string `json:"name"`
-	Value		[]string `json:"value"`
+	Name  string   `json:"name"`
+	Value []string `json:"value"`
 }
 
 type CorrelationComponentList struct {
-	Components	[]CorrelationComponent `json:"components"`
+	Components []CorrelationComponent `json:"components"`
 }
 
 type APILogger struct {
@@ -167,14 +168,14 @@ type HttpErrorResponse struct {
 	Error       []error `json:"error"`
 }
 
-//Key generation request
+// Key generation request
 type KeygenRequest struct {
 	KeyType                 string   `json:"keyType"`
 	GrantTypesToBeSupported []string `json:"grantTypesToBeSupported"`
 	ValidityTime            int      `json:"validityTime"`
 }
 
-//Key generation response
+// Key generation response
 type KeygenResponse struct {
 	CallbackURL         interface{} `json:"callbackUrl"`
 	ConsumerKey         string      `json:"consumerKey"`
@@ -190,7 +191,7 @@ type KeygenResponse struct {
 	} `json:"token"`
 }
 
-//Application Keys
+// Application Keys
 type AppKeyList struct {
 	Count int              `json:"count"`
 	List  []ApplicationKey `json:"list"`
@@ -202,7 +203,7 @@ type ConsumerSecretRegenResponse struct {
 	ConsumerSecret string `json:"consumerSecret"`
 }
 
-//Applications get response structure
+// Applications get response structure
 type AppList struct {
 	Count int `json:"count"`
 	List  []struct {
@@ -226,7 +227,7 @@ type AppList struct {
 	} `json:"pagination"`
 }
 
-//Specific application details structure
+// Specific application details structure
 type AppDetails struct {
 	ApplicationID     string        `json:"applicationId"`
 	Name              string        `json:"name"`
@@ -267,14 +268,14 @@ type AppCreateRequest struct {
 	TokenType        string `json:"tokenType"`
 }
 
-//Subscriptions List response struct
+// Subscriptions List response struct
 type SubscriptionList struct {
 	Count      int            `json:"count"`
 	List       []Subscription `json:"list"`
 	Pagination interface{}    `json:"pagination"`
 }
 
-//Subscription
+// Subscription
 type Subscription struct {
 	SubscriptionID string `json:"subscriptionId"`
 	ApplicationID  string `json:"applicationId"`
@@ -329,14 +330,14 @@ type ExportThrottlePolicy struct {
 	Data    yaml.MapSlice `json:"data"`
 }
 
-//Throttling Policies List response struct
+// Throttling Policies List response struct
 type ThrottlingPoliciesList struct {
 	Count      int                `json:"count"`
 	List       []ThrottlingPolicy `json:"list"`
 	Pagination interface{}        `json:"pagination"`
 }
 
-//ThrottlingPolicy
+// ThrottlingPolicy
 type ThrottlingPolicy struct {
 	Name                        string      `json:"name"`
 	Description                 string      `json:"description"`
@@ -377,14 +378,14 @@ type PolicyAttribute struct {
 	Required      bool     `json:"required"`
 }
 
-//Subscription creation request
+// Subscription creation request
 type SubscriptionCreateRequest struct {
 	ApplicationID    string `json:"applicationId"`
 	APIID            string `json:"apiId"`
 	ThrottlingPolicy string `json:"throttlingPolicy"`
 }
 
-//API Search response struct. This includes common attributes for both store and publisher REST API search
+// API Search response struct. This includes common attributes for both store and publisher REST API search
 type ApiSearch struct {
 	Count int `json:"count"`
 	List  []struct {
@@ -406,7 +407,7 @@ type ApiSearch struct {
 	} `json:"pagination"`
 }
 
-//get detailed API response
+// get detailed API response
 type APIData struct {
 	ID                  string      `json:"id"`
 	Name                string      `json:"name"`

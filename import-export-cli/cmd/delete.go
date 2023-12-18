@@ -33,7 +33,7 @@ Delete an API Product available in the environment specified by flag (--environm
 Delete an Application of a specific user in the environment specified by flag (--environment, -e)`
 
 const deleteCmdExamples = utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin -e dev
-` + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPIProductCmdLiteral + ` -n TwitterAPI -r admin -e dev 
+` + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPIProductCmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin -e dev 
 ` + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAppCmdLiteral + ` -n TestApplication -o admin -e dev`
 
 // DeleteCmd represents the delete command

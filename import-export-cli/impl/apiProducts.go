@@ -34,9 +34,10 @@ import (
 // @param accessToken : Access token to call the Publisher Rest API
 // @param environment : Environment where API Product needs to be located
 // @param apiProductName : Name of the API Product
+// @param apiProductVersion : Version of the API Product
 // @param apiProductProvider : Provider of the API Product
 // @return apiId, error
-func GetAPIProductId(accessToken, environment, apiProductName, apiProductProvider string) (string, error) {
+func GetAPIProductId(accessToken, environment, apiProductName, apiProductVersion, apiProductProvider string) (string, error) {
 	// Unified Search endpoint from the config file to search API Products
 	unifiedSearchEndpoint := utils.GetUnifiedSearchEndpointOfEnv(environment, utils.MainConfigFilePath)
 
@@ -44,8 +45,9 @@ func GetAPIProductId(accessToken, environment, apiProductName, apiProductProvide
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 	var queryVal string
-	// TODO Search by version as well when the versioning support has been implemented for API Products
-	queryVal = "type:\"" + utils.DefaultApiProductType + "\" name:\"" + apiProductName + "\""
+
+	queryVal = "type:\"" + utils.DefaultApiProductType + "\" name:\"" + apiProductName + "\" version:\"" + apiProductVersion + "\""
+
 	if apiProductProvider != "" {
 		queryVal = queryVal + " provider:\"" + apiProductProvider + "\""
 	}
@@ -65,9 +67,10 @@ func GetAPIProductId(accessToken, environment, apiProductName, apiProductProvide
 		// TODO Print the version as well when the versioning support has been implemented for API Products
 		if apiProductProvider != "" {
 			return "", errors.New("Requested API Product is not available in the Publisher. API Product: " + apiProductName +
-				" Provider: " + apiProductProvider)
+				" Version: " + apiProductVersion + " Provider: " + apiProductProvider)
 		}
-		return "", errors.New("Requested API Product is not available in the Publisher. API Product: " + apiProductName)
+		return "", errors.New("Requested API Product is not available in the Publisher. API Product: " + apiProductName +
+			" Version: " + apiProductVersion)
 	} else {
 		utils.Logf("Error: %s\n", resp.Error())
 		utils.Logf("Body: %s\n", resp.Body())
