@@ -24,6 +24,7 @@ type APIProduct struct {
 	Name                         string               `json:"name"`
 	Description                  string               `json:"description"`
 	Context                      string               `json:"context"`
+	Version                      string               `json:"version"`
 	Provider                     string               `json:"provider"`
 	HasThumbnail                 bool                 `json:"hasThumbnail"`
 	State                        string               `json:"state"`

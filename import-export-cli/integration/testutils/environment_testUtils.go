@@ -453,7 +453,7 @@ func validateNonExportedAPICerts(t *testing.T, api *apim.API, args *ApiImportExp
 }
 
 func validateExportedAPIProductCerts(t *testing.T, apiProductParams *Params, apiProduct *apim.APIProduct, args *ApiProductImportExportTestArgs) {
-	output, _ := exportAPIProduct(t, args.ApiProduct.Name, utils.DefaultApiProductVersion, args.SrcAPIM.GetEnvName())
+	output, _ := exportAPIProduct(t, args.ApiProduct.Name, args.ApiProduct.Version, args.SrcAPIM.GetEnvName())
 
 	//Unzip exported API Product and check whether the imported certificates are there
 	exportedPath := base.GetExportedPathFromOutput(output)

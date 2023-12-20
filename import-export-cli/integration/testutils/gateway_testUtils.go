@@ -68,7 +68,7 @@ func undeployAPI(t *testing.T, args *UndeployTestArgs, provider string) (string,
 }
 
 func undeployAPIProduct(t *testing.T, args *UndeployTestArgs, provider string) (string, error) {
-	params := []string{"undeploy", "api-product", "-n", args.ApiProduct.Name,
+	params := []string{"undeploy", "api-product", "-n", args.ApiProduct.Name, "-v", args.ApiProduct.Version,
 		"--rev", args.RevisionNo, "-e", args.SrcAPIM.GetEnvName(), "-k", "--verbose"}
 
 	if provider != "" {

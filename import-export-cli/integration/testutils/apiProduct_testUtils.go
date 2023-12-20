@@ -127,7 +127,7 @@ func flagAPIsAddedViaProductImportForRemoval(t *testing.T, client *apim.Client, 
 }
 
 func exportAPIProduct(t *testing.T, name string, version string, env string) (string, error) {
-	output, err := base.Execute(t, "export", "api-product", "-n", name, "-e", env, "-k", "--verbose")
+	output, err := base.Execute(t, "export", "api-product", "-n", name, "-v", version, "-e", env, "-k", "--verbose")
 
 	t.Cleanup(func() {
 		base.RemoveAPIArchive(t, getEnvAPIProductExportPath(env), name, version)
@@ -140,7 +140,7 @@ func exportAPIProductRevision(t *testing.T, args *ApiProductImportExportTestArgs
 	var output string
 	var err error
 
-	flags := []string{"export", "api-product", "-n", args.ApiProduct.Name, "-e", args.SrcAPIM.GetEnvName(), "-k", "--verbose"}
+	flags := []string{"export", "api-product", "-n", args.ApiProduct.Name, "-v", args.ApiProduct.Version, "-e", args.SrcAPIM.GetEnvName(), "-k", "--verbose"}
 
 	if args.ApiProductProvider.Username != "" {
 		flags = append(flags, "-r", args.ApiProductProvider.Username)
@@ -260,7 +260,7 @@ func listAPIProductsWithJsonArrayFormat(t *testing.T, args *ApiImportExportTestA
 }
 
 func deleteAPIProductByCtl(t *testing.T, args *ApiProductImportExportTestArgs) (string, error) {
-	output, err := base.Execute(t, "delete", "api-product", "-n", args.ApiProduct.Name, "-e", args.SrcAPIM.EnvName, "-k", "--verbose")
+	output, err := base.Execute(t, "delete", "api-product", "-n", args.ApiProduct.Name, "-v", args.ApiProduct.Version, "-e", args.SrcAPIM.EnvName, "-k", "--verbose")
 	return output, err
 }
 
@@ -307,7 +307,7 @@ func ValidateAPIProductExportFailure(t *testing.T, args *ApiProductImportExportT
 	// Attempt exporting API Product from env
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	exportAPIProduct(t, args.ApiProduct.Name, utils.DefaultApiProductVersion, args.SrcAPIM.GetEnvName())
+	exportAPIProduct(t, args.ApiProduct.Name, args.ApiProduct.Version, args.SrcAPIM.GetEnvName())
 
 	// Validate that export failed
 	assert.False(t, base.IsAPIArchiveExists(t, getEnvAPIProductExportPath(args.SrcAPIM.GetEnvName()),
@@ -324,7 +324,7 @@ func ValidateAPIProductExportImportPreserveProvider(t *testing.T, args *ApiProdu
 	// Export API Product from env 1
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	exportAPIProduct(t, args.ApiProduct.Name, utils.DefaultApiProductVersion, args.SrcAPIM.GetEnvName())
+	exportAPIProduct(t, args.ApiProduct.Name, args.ApiProduct.Version, args.SrcAPIM.GetEnvName())
 
 	assert.True(t, base.IsAPIArchiveExists(t, getEnvAPIProductExportPath(args.SrcAPIM.GetEnvName()),
 		args.ApiProduct.Name, utils.DefaultApiProductVersion))
@@ -382,7 +382,7 @@ func ValidateAPIProductExport(t *testing.T, args *ApiProductImportExportTestArgs
 	// Export API Product from env 1
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	exportAPIProduct(t, args.ApiProduct.Name, utils.DefaultApiProductVersion, args.SrcAPIM.GetEnvName())
+	exportAPIProduct(t, args.ApiProduct.Name, args.ApiProduct.Version, args.SrcAPIM.GetEnvName())
 
 	assert.True(t, base.IsAPIArchiveExists(t, getEnvAPIProductExportPath(args.SrcAPIM.GetEnvName()),
 		args.ApiProduct.Name, utils.DefaultApiProductVersion))
@@ -731,7 +731,7 @@ func searchAPIProductsWithQuery(t *testing.T, args *ApiProductImportExportTestAr
 
 // Execute change-status api-product command with parameters
 func changeLifeCycleOfAPIProduct(t *testing.T, args *ApiProductChangeLifeCycleStatusTestArgs) (string, error) {
-	output, err := base.Execute(t, "change-status", "api-product", "-a", args.Action, "-n", args.ApiProduct.Name,
+	output, err := base.Execute(t, "change-status", "api-product", "-a", args.Action, "-n", args.ApiProduct.Name, "-v", args.ApiProduct.Version,
 		"-e", args.APIM.EnvName, "-k", "--verbose")
 	return output, err
 }
