@@ -2,6 +2,7 @@
   "id": "e62c19bf-51b8-4767-b8b8-690085241f26",
   "name": "SampleAPIProduct",
   "context": "/sampleapiproduct",
+  "version": "1.0.0",
   "description": null,
   "provider": "admin",
   "hasThumbnail": null,
