@@ -52,7 +52,7 @@ devops-rest-api-version: v0
    The version of the apictl that is being integration tested.
 
 ```
-apictl-version: 4.2.2
+apictl-version: 4.2.3
 ```   
 
 
@@ -95,7 +95,7 @@ apictl-version: 4.2.2
 ```
 go test -p 1 -timeout 0 -archive <apictl archive name>
 
-example: go test -p 1 -timeout 0 -archive apictl-4.2.2-linux-amd64.tar.gz
+example: go test -p 1 -timeout 0 -archive apictl-4.2.3-linux-amd64.tar.gz
 
 ```
 
@@ -104,7 +104,7 @@ example: go test -p 1 -timeout 0 -archive apictl-4.2.2-linux-amd64.tar.gz
 ```
 go test -p 1 -timeout 0 -archive <apictl archive name> -run <Test function name or partial name regex>
 
-example: go test -p 1 -timeout 0 -archive apictl-4.2.2-linux-amd64.tar.gz -run TestVersion
+example: go test -p 1 -timeout 0 -archive apictl-4.2.3-linux-amd64.tar.gz -run TestVersion
 ```
 
 - Print verbose output
@@ -112,7 +112,7 @@ example: go test -p 1 -timeout 0 -archive apictl-4.2.2-linux-amd64.tar.gz -run T
 ```
 go test -p 1 -timeout 0 -archive <apictl archive name> -v
 
-example: go test -p 1 -timeout 0 -archive apictl-4.2.2-linux-amd64.tar.gz -v
+example: go test -p 1 -timeout 0 -archive apictl-4.2.3-linux-amd64.tar.gz -v
 ```
 
 - Print http transport request/responses
@@ -120,7 +120,7 @@ example: go test -p 1 -timeout 0 -archive apictl-4.2.2-linux-amd64.tar.gz -v
 ```
 go test -p 1 -timeout 0 -archive <apictl archive name> -logtransport
 
-example: go test -p 1 -timeout 0 -archive apictl-4.2.2-linux-amd64.tar.gz -logtransport
+example: go test -p 1 -timeout 0 -archive apictl-4.2.3-linux-amd64.tar.gz -logtransport
 ```
 
 ---
