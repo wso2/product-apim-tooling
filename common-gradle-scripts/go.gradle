@@ -1,0 +1,69 @@
+/*
+ * Copyright (c) 2022, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); 
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software 
+ * distributed under the License is distributed on an "AS IS" BASIS, 
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+ * See the License for the specific language governing permissions and 
+ * limitations under the License.
+ *
+ */
+
+
+def osName = System.getProperty("os.name").toLowerCase(Locale.ENGLISH)
+def osArch = System.getProperty("os.arch").toLowerCase(Locale.ENGLISH)
+tasks.register('go_clean', Exec) {
+    group 'go'
+    description 'Removes object files from package source directories.'
+    commandLine 'go', 'clean'
+}
+
+tasks.register('go_revive_run', Exec) {
+    group 'go'
+    description 'Running revive.'
+    commandLine 'revive', '-config', 'revive.toml', '-set_exit_status', './...'
+}
+
+tasks.register('go_vet', Exec) {
+    group 'go'
+    description 'Running go vet.'
+    commandLine 'go', 'vet', '-c=5', './...'
+}
+
+tasks.register('go_tidy', Exec) {
+    group 'go'
+    description 'Running go mod tidy.'
+    commandLine 'go', 'mod', 'tidy'
+}
+
+tasks.register('go_build') {
+    group 'go'
+    description 'Compiles the packages named by the import paths, along with their dependencies. AMD64 Archtecture'
+    dependsOn go_mac_os_build
+    dependsOn go_linux_build
+}
+tasks.register('go_mac_os_build', Exec) {
+    group 'go'
+    description 'Compiles the packages named by the import paths, along with their dependencies. AMD64 Archtecture'
+    if (project.hasProperty('file')) {
+        commandLine 'env', 'GOOS=linux', 'GOARCH=arm64','CGO_ENABLED=0', 'go', 'build', '-o','arm64/main', file
+    } else {
+        throw new StopExecutionException('Missing "file" property')
+    }
+    dependsOn go_linux_build
+}
+tasks.register('go_linux_build', Exec) {
+    group 'go'
+    description 'Compiles the packages named by the import paths, along with their dependencies. AMD64 Archtecture'
+    if (project.hasProperty('file')) {
+        commandLine 'env', 'GOOS=linux', 'GOARCH=amd64','CGO_ENABLED=0', 'go', 'build', '-o','amd64/main', file
+    } else {
+        throw new StopExecutionException('Missing "file" property')
+    }
+}

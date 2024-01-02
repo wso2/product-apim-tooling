@@ -1,0 +1,84 @@
+/*
+ * Copyright (c) 2022, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); 
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software 
+ * distributed under the License is distributed on an "AS IS" BASIS, 
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+ * See the License for the specific language governing permissions and 
+ * limitations under the License.
+ *
+ */
+import org.apache.tools.ant.taskdefs.condition.*
+
+
+task bal_build(type: Exec) {
+    group 'ballerina'
+    description 'Build ballerina code'
+    commandLine 'bal', 'build', '--sticky'
+}
+task bal_test(type: Exec) {
+    group 'ballerina'
+    description 'Run ballerina tests with postgres'
+    commandLine 'bal', 'test', '--code-coverage','--coverage-format=xml',"--target-dir=${projectDir}/test-target"
+}
+
+task bal_clean(type: Exec) {
+    group 'ballerina'
+    description 'Run ballerina clean'
+    commandLine 'bal', 'clean'
+}
+task update_toml_files {
+    group 'ballerina'
+    description 'Update Ballerina.toml and Dependencies.toml'
+    doLast {
+        def moduleVersion;
+        if (project.hasProperty("release.releaseVersion")) {
+                moduleVersion = project.property("release.releaseVersion");
+        }else {
+            moduleVersion = project.version;
+        }
+	println 'applying Ballerina.toml.template and Dependencies.toml.template  with version ' + moduleVersion
+        def ballerinaTomlFilePlaceHolder = new File("${projectDir}/Ballerina.toml.template")
+        def dependencyTomlFilePlaceHolder = new File("${projectDir}/Dependencies.toml.template")
+        def newBallerinaToml = ballerinaTomlFilePlaceHolder.text.replace("PROJECT_VERSION", moduleVersion);
+        def newDependenciesToml = dependencyTomlFilePlaceHolder.text.replace("PROJECT_VERSION", moduleVersion);
+        def ballerinaTomlFile = new File("$project.projectDir/Ballerina.toml");
+        def dependenciesTomlFile = new File("$project.projectDir/Dependencies.toml");
+        ballerinaTomlFile.text = newBallerinaToml;
+        dependenciesTomlFile.text = newDependenciesToml;
+    }
+}
+task commit_toml_files {
+    group 'ballerina'
+    description 'Commit updated toml files'
+    dependsOn "update_toml_files"
+    doLast {
+        println 'committing Dependencies.toml and Ballerina.toml'
+        project.exec {
+            ignoreExitValue true
+            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                commandLine 'cmd', '/c', "git commit -m \"[Automated] Update the native jar versions\" Ballerina.toml Dependencies.toml"
+            } else {
+                commandLine 'sh', '-c', "git commit -m '[Automated] Update the native jar versions' Ballerina.toml Dependencies.toml"
+            }
+        }
+    }
+}
+task bal_pack(type: Exec) {
+    group 'ballerina'
+    description 'Pack ballerina code'
+    commandLine 'bal', 'pack', '--sticky'
+    // dependsOn 'bal_build'
+}
+task bal_push(type: Exec) {
+    group 'ballerina'
+    description 'Push ballerina module to local'
+    commandLine 'bal', 'push', '--repository', 'local'
+    dependsOn 'bal_pack'
+}
