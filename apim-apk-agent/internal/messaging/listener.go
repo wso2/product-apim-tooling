@@ -15,24 +15,18 @@
  *
  */
 
-package main
+// Package messaging holds the implementation for event listeners functions
+package messaging
 
 import (
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
-	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/agent"
-	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/loggers"
-	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/logging"
+	msg "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/messaging"
 )
 
-func main() {
-	conf, errReadConfig := config.ReadConfigs()
-	if errReadConfig != nil {
-		logger.LoggerInternalMsg.ErrorC(logging.PrintError(logging.Error1102, logging.CRITICAL, "Error reading the log configs, error: %v", errReadConfig))
-	}
-	agent.Run(conf)
-}
+// ProcessEvents to pass event consumption
+func ProcessEvents(config *config.Config) {
+	msg.InitiateJMSConnection(config.ControlPlane.BrokerConnectionParameters.EventListeningEndpoints)
 
-// Function to be tested
-func getMessage() string {
-	return "Hello, Testing!"
+	go handleNotification()
+	go handleKMConfiguration()
 }
