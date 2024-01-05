@@ -15,24 +15,29 @@
  *
  */
 
-package main
+package config
 
 import (
-	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
-	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/agent"
-	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/loggers"
-	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/logging"
+	"github.com/sirupsen/logrus"
+	"github.com/wso2/apk/adapter/pkg/logging"
 )
 
-func main() {
-	conf, errReadConfig := config.ReadConfigs()
-	if errReadConfig != nil {
-		logger.LoggerInternalMsg.ErrorC(logging.PrintError(logging.Error1102, logging.CRITICAL, "Error reading the log configs, error: %v", errReadConfig))
-	}
-	agent.Run(conf)
+// package name constants
+const (
+	pkgConfig = "github.com/wso2/apk/adapter/config"
+)
+
+// logger package references
+var (
+	loggerConfig logging.Log
+)
+
+func init() {
+	UpdateLoggers()
 }
 
-// Function to be tested
-func getMessage() string {
-	return "Hello, Testing!"
+// UpdateLoggers initializes the logger package references
+func UpdateLoggers() {
+	loggerConfig = logging.InitPackageLogger(pkgConfig)
+	logrus.Info("Updated loggers")
 }

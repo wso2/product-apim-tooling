@@ -60,7 +60,9 @@ RUN \
 WORKDIR ${APK_USER_HOME}
 USER ${APK_USER_ID}
 
+COPY resources/conf/config.toml conf/
 COPY resources/check_health.sh .
+COPY resources/conf/log_config.toml conf/
 
 COPY ./${TARGETARCH}/main apim-apk-agent
 
