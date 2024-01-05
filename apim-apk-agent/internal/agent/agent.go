@@ -27,6 +27,7 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
+	eventhub "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/eventhub"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/loggers"
 	logging "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/logging"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/messaging"
@@ -80,6 +81,10 @@ func Run(conf *config.Config) {
 
 	logger.LoggerInternalMsg.Info("Starting apim-apk-agent ....")
 	eventHubEnabled := conf.ControlPlane.Enabled
+
+	// Load initial data from control plane
+	eventhub.LoadInitialData(conf, nil)
+
 	if eventHubEnabled {
 		var connectionURLList = conf.ControlPlane.BrokerConnectionParameters.EventListeningEndpoints
 		if strings.Contains(connectionURLList[0], amqpProtocol) {

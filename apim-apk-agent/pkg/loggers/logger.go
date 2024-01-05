@@ -43,13 +43,14 @@ const (
 
 // logger package references
 var (
-	LoggerAuth      logging.Log
-	LoggerMsg       logging.Log
-	LoggerHealth    logging.Log
-	LoggerTLSUtils  logging.Log
-	LoggerAdapter   logging.Log
-	LoggerSync      logging.Log
-	LoggerSoapUtils logging.Log
+	LoggerAuth         logging.Log
+	LoggerMsg          logging.Log
+	LoggerHealth       logging.Log
+	LoggerTLSUtils     logging.Log
+	LoggerAdapter      logging.Log
+	LoggerSync         logging.Log
+	LoggerSoapUtils    logging.Log
+	LoggerSubscription logging.Log
 )
 
 func init() {
