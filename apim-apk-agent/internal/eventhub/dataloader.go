@@ -1,6 +1,5 @@
 /*
-/*
- *  Copyright (c) 2023, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -14,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
-*/
+ */
 
 package eventhub
 
@@ -29,10 +28,10 @@ import (
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	common "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/common"
 	pkgAuth "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/auth"
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/health"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
-	"github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
-	"github.com/wso2/product-microgateway/adapter/pkg/health"
-	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/tlsutils"
 )
 
 const (
