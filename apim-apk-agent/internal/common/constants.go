@@ -18,7 +18,7 @@
 // Package common contains the constants, utility methods shared across two or many packages.
 package common
 
-import "github.com/wso2/product-microgateway/adapter/config"
+import "github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 
 const (
 	// OrganizationID query parameter key.
