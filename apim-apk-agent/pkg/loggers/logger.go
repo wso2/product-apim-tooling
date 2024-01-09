@@ -21,7 +21,7 @@ package loggers
 
 import (
 	"github.com/sirupsen/logrus"
-	"github.com/wso2/apk/adapter/pkg/logging"
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/logging"
 )
 
 /* loggers should be initiated only for the main packages
@@ -32,12 +32,12 @@ When you add a new logger instance add the related package name as a constant
 
 // package name constants
 const (
-	pkgAuth      = "github.com/wso2/apk/adapter/pkg/auth"
-	pkgMsg       = "github.com/wso2/apk/adapter/pkg/messaging"
-	pkgHealth    = "github.com/wso2/apk/adapter/pkg/health"
-	pkgTLSUtils  = "github.com/wso2/apk/adapter/pkg/tlsutils"
+	pkgAuth      = "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/auth"
+	pkgMsg       = "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/messaging"
+	pkgHealth    = "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/health"
+	pkgTLSUtils  = "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/tlsutils"
 	pkgAdapter   = "github.com/wso2/apk/adapter/pkg/adapter"
-	pkgSync      = "github.com/wso2/apk/adapter/pkg/synchronizer"
+	pkgSync      = "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/synchronizer"
 	pkgSoapUtils = "github.com/wso2/apk/adapter/pkg/soaputils"
 )
 

@@ -27,7 +27,7 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
-	eventhub "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/eventhub"
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/eventhub"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/loggers"
 	logging "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/logging"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/messaging"

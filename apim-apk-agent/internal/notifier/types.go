@@ -15,29 +15,24 @@
  *
  */
 
-package logging
+package notifier
 
-import "github.com/sirupsen/logrus"
+// DeployedAPIRevision represents Information of deployed API revision data
+type DeployedAPIRevision struct {
+	APIID      string            `json:"apiId"`
+	RevisionID int               `json:"revisionId"`
+	EnvInfo    []DeployedEnvInfo `json:"envInfo"`
+}
 
-// Log Level Constants
-const (
-	defaultLogLevel = logrus.InfoLevel
-	panicLevel      = "PANC"
-	fatalLevel      = "FATL"
-	errorLevel      = "ERRO"
-	warnLevel       = "WARN"
-	infoLevel       = "INFO"
-	debugLevel      = "DEBG"
-)
+// DeployedEnvInfo represents env Information of deployed API revision
+type DeployedEnvInfo struct {
+	Name  string `json:"name"`
+	VHost string `json:"vhost"`
+}
 
-// Log Formalization Constants
-const (
-	TEXT = "TEXT"
-	JSON = "JSON"
-)
-
-// Error Log attribute name constants
-const (
-	SEVERITY  = "severity"
-	ERRORCODE = "error_code"
-)
+// UnDeployedAPIRevision info
+type UnDeployedAPIRevision struct {
+	APIUUID      string `json:"apiUUID"`
+	RevisionUUID string `json:"revisionUUID"`
+	Environment  string `json:"environment"`
+}

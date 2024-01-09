@@ -17,27 +17,16 @@
 
 package logging
 
-import "github.com/sirupsen/logrus"
-
-// Log Level Constants
-const (
-	defaultLogLevel = logrus.InfoLevel
-	panicLevel      = "PANC"
-	fatalLevel      = "FATL"
-	errorLevel      = "ERRO"
-	warnLevel       = "WARN"
-	infoLevel       = "INFO"
-	debugLevel      = "DEBG"
+import (
+	"fmt"
 )
 
-// Log Formalization Constants
-const (
-	TEXT = "TEXT"
-	JSON = "JSON"
-)
-
-// Error Log attribute name constants
-const (
-	SEVERITY  = "severity"
-	ERRORCODE = "error_code"
-)
+// PrintError prints the error details
+func PrintError(code int, severity string, message string, args ...interface{}) ErrorDetails {
+	errorLog := ErrorDetails{
+		ErrorCode: code,
+		Message:   fmt.Sprintf(message, args...),
+		Severity:  severity,
+	}
+	return errorLog
+}
