@@ -18,15 +18,18 @@
 package eventhub
 
 import (
+	"encoding/json"
 	"errors"
 	"io/ioutil"
 	"net/http"
+	"reflect"
 	"strconv"
 	"time"
 
 	loggers "github.com/sirupsen/logrus"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	common "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/common"
+
 	pkgAuth "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/auth"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/health"
@@ -56,8 +59,6 @@ var (
 	subList           *types.SubscriptionList
 	appList           *types.ApplicationList
 	appKeyMappingList *types.ApplicationKeyMappingList
-	appPolicyList     *types.ApplicationPolicyList
-	subPolicyList     *types.SubscriptionPolicyList
 	apiList           *types.APIList
 
 	resources = []resource{
@@ -116,9 +117,9 @@ func LoadInitialData(configFile *config.Config, initialAPIUUIDListMap map[string
 			data := <-responseChannel
 			logger.LoggerSync.Info("Receiving subscription data for an environment")
 			if data.Payload != nil {
-				logger.LoggerSync.Info("Payload data with subscription information received")
-				loggers.Info("Payload data with subscription information received" + string(data.Payload))
-				//retrieveSubscriptionDataFromChannel(data)
+				logger.LoggerSync.Info("Payload data with subscription information recieved")
+				loggers.Info("Payload data with subscription information recieved" + string(data.Payload))
+				retrieveDataFromResponseChannel(data)
 				break
 			} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
 				//Error handle
@@ -203,5 +204,32 @@ func InvokeService(endpoint string, responseType interface{}, queryParamMap map[
 		c <- response{errors.New(string(responseBytes)), nil, resp.StatusCode, endpoint, gatewayLabel, responseType}
 		loggers.Info("Failed to fetch data! "+serviceURL+" responded with "+strconv.Itoa(resp.StatusCode),
 			err)
+	}
+}
+
+func retrieveDataFromResponseChannel(response response) {
+	responseType := reflect.TypeOf(response.Type).Elem()
+	newResponse := reflect.New(responseType).Interface()
+	err := json.Unmarshal(response.Payload, &newResponse)
+
+	if err != nil {
+		logger.LoggerSubscription.Errorf("Error occurred while unmarshalling the response received for: "+response.Endpoint, err)
+	} else {
+		switch t := newResponse.(type) {
+		case *types.SubscriptionList:
+			logger.LoggerSubscription.Debug("Received Subscription information.")
+			subList = newResponse.(*types.SubscriptionList)
+			MarshalMultipleSubscriptions(subList)
+		case *types.ApplicationList:
+			logger.LoggerSubscription.Debug("Received Application information.")
+			appList = newResponse.(*types.ApplicationList)
+			MarshalMultipleApplications(appList)
+		case *types.ApplicationKeyMappingList:
+			logger.LoggerSubscription.Debug("Received Application Key Mapping information.")
+			appKeyMappingList = newResponse.(*types.ApplicationKeyMappingList)
+			MarshalMultipleApplicationKeyMappings(appKeyMappingList)
+		default:
+			logger.LoggerSubscription.Debugf("Unknown type %T", t)
+		}
 	}
 }
