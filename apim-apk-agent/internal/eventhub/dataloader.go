@@ -27,6 +27,7 @@ import (
 	loggers "github.com/sirupsen/logrus"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	common "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/common"
+
 	pkgAuth "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/auth"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/health"
@@ -56,8 +57,6 @@ var (
 	subList           *types.SubscriptionList
 	appList           *types.ApplicationList
 	appKeyMappingList *types.ApplicationKeyMappingList
-	appPolicyList     *types.ApplicationPolicyList
-	subPolicyList     *types.SubscriptionPolicyList
 	apiList           *types.APIList
 
 	resources = []resource{
@@ -116,9 +115,9 @@ func LoadInitialData(configFile *config.Config, initialAPIUUIDListMap map[string
 			data := <-responseChannel
 			logger.LoggerSync.Info("Receiving subscription data for an environment")
 			if data.Payload != nil {
-				logger.LoggerSync.Info("Payload data with subscription information received")
-				loggers.Info("Payload data with subscription information received" + string(data.Payload))
-				//retrieveSubscriptionDataFromChannel(data)
+				logger.LoggerSync.Info("Payload data with subscription information recieved")
+				loggers.Info("Payload data with subscription information recieved" + string(data.Payload))
+				retrieveDataFromResponseChannel(data)
 				break
 			} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
 				//Error handle
