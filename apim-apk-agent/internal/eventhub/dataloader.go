@@ -18,9 +18,11 @@
 package eventhub
 
 import (
+	"encoding/json"
 	"errors"
 	"io/ioutil"
 	"net/http"
+	"reflect"
 	"strconv"
 	"time"
 
@@ -202,5 +204,32 @@ func InvokeService(endpoint string, responseType interface{}, queryParamMap map[
 		c <- response{errors.New(string(responseBytes)), nil, resp.StatusCode, endpoint, gatewayLabel, responseType}
 		loggers.Info("Failed to fetch data! "+serviceURL+" responded with "+strconv.Itoa(resp.StatusCode),
 			err)
+	}
+}
+
+func retrieveDataFromResponseChannel(response response) {
+	responseType := reflect.TypeOf(response.Type).Elem()
+	newResponse := reflect.New(responseType).Interface()
+	err := json.Unmarshal(response.Payload, &newResponse)
+
+	if err != nil {
+		logger.LoggerSubscription.Errorf("Error occurred while unmarshalling the response received for: "+response.Endpoint, err)
+	} else {
+		switch t := newResponse.(type) {
+		case *types.SubscriptionList:
+			logger.LoggerSubscription.Debug("Received Subscription information.")
+			subList = newResponse.(*types.SubscriptionList)
+			MarshalMultipleSubscriptions(subList)
+		case *types.ApplicationList:
+			logger.LoggerSubscription.Debug("Received Application information.")
+			appList = newResponse.(*types.ApplicationList)
+			MarshalMultipleApplications(appList)
+		case *types.ApplicationKeyMappingList:
+			logger.LoggerSubscription.Debug("Received Application Key Mapping information.")
+			appKeyMappingList = newResponse.(*types.ApplicationKeyMappingList)
+			MarshalMultipleApplicationKeyMappings(appKeyMappingList)
+		default:
+			logger.LoggerSubscription.Debugf("Unknown type %T", t)
+		}
 	}
 }
