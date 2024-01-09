@@ -31,6 +31,7 @@ import (
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/loggers"
 	logging "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/logging"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/messaging"
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/synchronizer"
 )
 
 var (
@@ -91,6 +92,9 @@ func Run(conf *config.Config) {
 			go messaging.ProcessEvents(conf)
 		}
 	}
+
+	// Load initial KM data from control plane
+	synchronizer.FetchKeyManagersOnStartUp(conf)
 
 OUTER:
 	for {
