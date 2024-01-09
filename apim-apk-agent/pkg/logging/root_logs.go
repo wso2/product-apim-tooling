@@ -22,7 +22,7 @@ import (
 	"os"
 
 	"github.com/sirupsen/logrus"
-	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
+	"github.com/wso2/apk/adapter/pkg/config"
 	lumberjack "gopkg.in/natefinch/lumberjack.v2"
 )
 

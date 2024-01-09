@@ -100,27 +100,33 @@ func init() {
 
 // LoadInitialData loads subscription/application and keymapping data from control-plane
 func LoadInitialData(configFile *config.Config, initialAPIUUIDListMap map[string]int) {
+	loggers.Info("Inside Load 1")
 	conf = configFile
 	accessToken = pkgAuth.GetBasicAuth(configFile.ControlPlane.Username, configFile.ControlPlane.Password)
-
+	loggers.Info("accessToken: " + accessToken)
 	var responseChannel = make(chan response)
 	for _, url := range resources {
-		go InvokeService(url.endpoint, url.responseType, nil, responseChannel, 0)
+		// Create a local copy of the loop variable
+		localURL := url
+		loggers.Info("Inside loop" + localURL.endpoint)
+
+		go InvokeService(localURL.endpoint, localURL.responseType, nil, responseChannel, 0)
+
 		for {
 			data := <-responseChannel
-			logger.LoggerSync.Debug("Receiving subscription data for an environment")
+			logger.LoggerSync.Info("Receiving subscription data for an environment")
 			if data.Payload != nil {
-				logger.LoggerSync.Info("Payload data with subscription information recieved")
-				loggers.Info("Payload data with subscription information recieved" + string(data.Payload))
+				logger.LoggerSync.Info("Payload data with subscription information received")
+				loggers.Info("Payload data with subscription information received" + string(data.Payload))
 				//retrieveSubscriptionDataFromChannel(data)
 				break
 			} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
 				//Error handle
 				health.SetControlPlaneRestAPIStatus(false)
 			} else {
-				// Keep the iteration going on until a response is recieved.
-				//Error handle
-				go func(d response) {
+				// Keep the iteration going on until a response is received.
+				// Error handle
+				go func(d response, endpoint string, responseType interface{}) {
 					// Retry fetching from control plane after a configured time interval
 					if conf.ControlPlane.RetryInterval == 0 {
 						// Assign default retry interval
@@ -129,8 +135,8 @@ func LoadInitialData(configFile *config.Config, initialAPIUUIDListMap map[string
 					logger.LoggerSync.Debugf("Time Duration for retrying: %v", conf.ControlPlane.RetryInterval*time.Second)
 					time.Sleep(conf.ControlPlane.RetryInterval * time.Second)
 					logger.LoggerSync.Infof("Retrying to fetch APIs from control plane. Time Duration for the next retry: %v", conf.ControlPlane.RetryInterval*time.Second)
-					go InvokeService(url.endpoint, url.responseType, nil, responseChannel, 0)
-				}(data)
+					go InvokeService(endpoint, responseType, nil, responseChannel, 0)
+				}(data, localURL.endpoint, localURL.responseType)
 			}
 		}
 	}
@@ -181,7 +187,7 @@ func InvokeService(endpoint string, responseType interface{}, queryParamMap map[
 		} else {
 			c <- response{err, nil, 0, endpoint, gatewayLabel, responseType}
 		}
-		logger.LoggerSubscription.Errorf("Error occurred while calling the REST API: "+serviceURL, err)
+		loggers.Info("Error occurred while calling the REST API: "+serviceURL, err)
 		return
 	}
 
@@ -189,13 +195,13 @@ func InvokeService(endpoint string, responseType interface{}, queryParamMap map[
 	if resp.StatusCode == http.StatusOK {
 		if err != nil {
 			c <- response{err, nil, resp.StatusCode, endpoint, gatewayLabel, responseType}
-			logger.LoggerSubscription.Errorf("Error occurred while reading the response received for: "+serviceURL, err)
+			loggers.Info("Error occurred while reading the response received for: "+serviceURL, err)
 			return
 		}
 		c <- response{nil, responseBytes, resp.StatusCode, endpoint, gatewayLabel, responseType}
 	} else {
 		c <- response{errors.New(string(responseBytes)), nil, resp.StatusCode, endpoint, gatewayLabel, responseType}
-		logger.LoggerSubscription.Errorf("Failed to fetch data! "+serviceURL+" responded with "+strconv.Itoa(resp.StatusCode),
+		loggers.Info("Failed to fetch data! "+serviceURL+" responded with "+strconv.Itoa(resp.StatusCode),
 			err)
 	}
 }

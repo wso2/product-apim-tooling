@@ -24,10 +24,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/wso2/apk/adapter/pkg/logging"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/synchronizer"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/logging"
 	msg "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/messaging"
 )
 
@@ -180,10 +181,10 @@ func handleAPIEvents(data []byte, eventType string) {
 		return
 	}
 
-	// Per each revision, synchronization should happen.
-	// if strings.EqualFold(deployAPIToGateway, apiEvent.Event.Type) {
-	//go synchronizer.FetchAPIsFromControlPlane(apiEvent.UUID, apiEvent.GatewayLabels)
-	// }
+	//Per each revision, synchronization should happen.
+	if strings.EqualFold(deployAPIToGateway, apiEvent.Event.Type) {
+		go synchronizer.FetchAPIsFromControlPlane(apiEvent.UUID, apiEvent.GatewayLabels)
+	}
 
 	for _, env := range apiEvent.GatewayLabels {
 		if isLaterEvent(apiListTimeStampMap, apiEvent.UUID+":"+env, currentTimeStamp) {

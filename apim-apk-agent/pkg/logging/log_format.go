@@ -25,7 +25,7 @@ import (
 	"strings"
 
 	logrus "github.com/sirupsen/logrus"
-	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
+	"github.com/wso2/apk/adapter/pkg/config"
 )
 
 type plainFormatter struct {
