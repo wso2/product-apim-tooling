@@ -33,6 +33,7 @@ import (
 
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/common"
+	eventhubInternal "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/eventhub"
 	pkgAuth "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/auth"
 	eventhubTypes "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
@@ -122,10 +123,10 @@ func FetchKeyManagersOnStartUp(conf *config.Config) {
 		}
 
 		for _, kmConfig := range keyManagers {
-			//xds.KeyManagerList = append(xds.KeyManagerList, kmConfig)
 			logger.LoggerMsg.Infof("Key Manager %s is added to KeyManagerList", kmConfig.Name)
 		}
-		// xds.GenerateAndUpdateKeyManagerList()
+		eventhubInternal.MarshalKeyManagers(&keyManagers)
+		logger.LoggerMsg.Infof("Startup KeyManagers Map: %v", eventhubInternal.KeyManagerMap)
 	} else {
 		errorMsg = "Failed to fetch data! " + keyManagersEndpoint + " responded with " +
 			strconv.Itoa(resp.StatusCode)

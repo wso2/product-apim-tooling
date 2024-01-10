@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	"github.com/wso2/apk/adapter/pkg/logging"
+	eventhubInternal "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/eventhub"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/loggers"
 	eventhubTypes "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
 	msg "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/messaging"
@@ -112,6 +113,9 @@ func handleKMConfiguration() {
 						Type: notification.Event.PayloadData.Type, Enabled: notification.Event.PayloadData.Enabled,
 						TenantDomain: notification.Event.PayloadData.TenantDomain, Configuration: kmConfigMap}
 					logger.LoggerInternalMsg.Infof("data %v", keyManager.Configuration)
+
+					eventhubInternal.KeyManagerMap[keyManager.Name] = eventhubInternal.MarshalKeyManager(&keyManager)
+					logger.LoggerInternalMsg.Infof("JMS Event KeyManagers Map: %v", eventhubInternal.KeyManagerMap)
 
 					// if isFound {
 					// 	xds.KeyManagerList[indexOfKeymanager] = keyManager

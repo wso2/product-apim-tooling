@@ -21,6 +21,7 @@ import (
 	logger "github.com/sirupsen/logrus"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
+	eventhubTypes "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
 )
 
 // SubscriptionList for struct list of applications
@@ -101,6 +102,14 @@ type Subscription struct {
 	TimeStamp         int64  `json:"timeStamp,omitempty"`
 }
 
+// KeyManager for struct keyManager
+type KeyManager struct {
+	Name        string `json:"name"`
+	Enabled     bool   `json:"enabled"`
+	Issuer      string `json:"issuer"`
+	Certificate string `json:"certificate"`
+}
+
 var (
 	// APIListMap has the following mapping label -> apiUUID -> API (Metadata)
 	APIListMap map[string]map[string]APIs
@@ -110,7 +119,20 @@ var (
 	ApplicationMap map[string]Application
 	// ApplicationKeyMappingMap contains the application key mappings recieved from API Manager Control Plane
 	ApplicationKeyMappingMap map[string]ApplicationKeyMapping
+	// KeyManagerMap contains the key managers recieved from API Manager Control Plane
+	KeyManagerMap map[string]KeyManager
 )
+
+// MarshalKeyManagers is used to update the key managers during the startup where
+// multiple key managers are pulled at once. And then it returns the KeyManagerMap.
+func MarshalKeyManagers(keyManagersList *[]eventhubTypes.KeyManager) map[string]KeyManager {
+	resourceMap := make(map[string]KeyManager)
+	for _, keyManager := range *keyManagersList {
+		resourceMap[keyManager.Name] = MarshalKeyManager(&keyManager)
+	}
+	KeyManagerMap = resourceMap
+	return KeyManagerMap
+}
 
 // MarshalMultipleApplications is used to update the applicationList during the startup where
 // multiple applications are pulled at once. And then it returns the ApplicationList.
@@ -200,6 +222,16 @@ func marshalKeyMapping(keyMappingInternal *types.ApplicationKeyMapping) Applicat
 		TenantID:        keyMappingInternal.TenantID,
 		TenantDomain:    keyMappingInternal.TenantDomain,
 		TimeStamp:       keyMappingInternal.TimeStamp,
+	}
+}
+
+// MarshalKeyManager is used to map Internal key manager
+func MarshalKeyManager(keyManagerInternal *types.KeyManager) KeyManager {
+	return KeyManager{
+		Name:    keyManagerInternal.Name,
+		Enabled: keyManagerInternal.Enabled,
+		// Issuer:      keyManagerInternal.Configuration.Issuer,
+		// Certificate: keyManagerInternal.Configuration.Certificate,
 	}
 }
 
