@@ -139,7 +139,7 @@ func MarshalKeyManagers(keyManagersList *[]eventhubTypes.KeyManager) map[string]
 func MarshalMultipleApplications(appList *types.ApplicationList) map[string]Application {
 	resourceMap := make(map[string]Application)
 	for _, application := range appList.List {
-		applicationSub := marshalApplication(&application)
+		applicationSub := MarshalApplication(&application)
 		resourceMap[application.UUID] = applicationSub
 	}
 	ApplicationMap = resourceMap
@@ -167,13 +167,14 @@ func MarshalMultipleApplicationKeyMappings(keymappingList *types.ApplicationKeyM
 func MarshalMultipleSubscriptions(subscriptionsList *types.SubscriptionList) map[int32]Subscription {
 	resourceMap := make(map[int32]Subscription)
 	for _, sb := range subscriptionsList.List {
-		resourceMap[sb.SubscriptionID] = marshalSubscription(&sb)
+		resourceMap[sb.SubscriptionID] = MarshalSubscription(&sb)
 	}
 	SubscriptionMap = resourceMap
 	return SubscriptionMap
 }
 
-func marshalSubscription(subscriptionInternal *types.Subscription) Subscription {
+// MarshalSubscription is used to map to internal Subscription struct
+func MarshalSubscription(subscriptionInternal *types.Subscription) Subscription {
 	sub := Subscription{
 		SubscriptionID:    subscriptionInternal.SubscriptionID,
 		PolicyID:          subscriptionInternal.PolicyID,
@@ -193,7 +194,8 @@ func marshalSubscription(subscriptionInternal *types.Subscription) Subscription 
 	return sub
 }
 
-func marshalApplication(appInternal *types.Application) Application {
+// MarshalApplication is used to map to internal Application struct
+func MarshalApplication(appInternal *types.Application) Application {
 	app := Application{
 		UUID:         appInternal.UUID,
 		ID:           appInternal.ID,

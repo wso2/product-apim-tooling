@@ -153,7 +153,7 @@ type ScopeList struct {
 
 // KeyManagerList for struct list of KeyManager
 type KeyManagerList struct {
-	List []KeyManager `json:"list"`
+	KeyManagers []KeyManager `json:"KeyManager"`
 }
 
 // KeyManager for struct
