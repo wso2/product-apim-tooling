@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
+	eventhubInternal "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/eventhub"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/synchronizer"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
@@ -318,6 +319,9 @@ func handleApplicationEvents(data []byte, eventType string) {
 
 		logger.LoggerMsg.Infof("Application event data %v", app)
 
+		eventhubInternal.ApplicationMap[app.Name] = eventhubInternal.MarshalApplication(&app)
+		logger.LoggerMsg.Infof("JMS Event Application Map: %v", eventhubInternal.ApplicationMap)
+
 		if isLaterEvent(applicationListTimeStampMap, fmt.Sprint(applicationEvent.ApplicationID), applicationEvent.TimeStamp) {
 			return
 		}
@@ -358,6 +362,9 @@ func handleSubscriptionEvents(data []byte, eventType string) {
 		TenantID: subscriptionEvent.TenantID, TenantDomain: subscriptionEvent.TenantDomain, TimeStamp: subscriptionEvent.TimeStamp}
 
 	logger.LoggerMsg.Infof("Subscription event data %v", sub)
+
+	eventhubInternal.SubscriptionMap[sub.SubscriptionID] = eventhubInternal.MarshalSubscription(&sub)
+	logger.LoggerMsg.Infof("JMS Event Subscription Map: %v", eventhubInternal.SubscriptionMap)
 
 	if isLaterEvent(subsriptionsListTimeStampMap, fmt.Sprint(subscriptionEvent.SubscriptionID), subscriptionEvent.TimeStamp) {
 		return

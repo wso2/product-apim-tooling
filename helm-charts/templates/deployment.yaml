@@ -40,3 +40,10 @@ spec:
           ports:
             - name: http
               containerPort: 8080
+          volumeMounts:
+            - name: log-conf-volume
+              mountPath: /home/wso2/conf/
+      volumes:
+        - name: log-conf-volume
+          configMap:
+            name: {{ .Release.Name }}-log-conf

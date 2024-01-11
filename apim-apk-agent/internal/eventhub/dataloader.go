@@ -30,10 +30,10 @@ import (
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	common "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/common"
 
+	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/loggers"
 	pkgAuth "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/auth"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/health"
-	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/tlsutils"
 )
 

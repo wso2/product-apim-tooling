@@ -21,6 +21,7 @@ import (
 	logger "github.com/sirupsen/logrus"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
+	eventhubTypes "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
 )
 
 // SubscriptionList for struct list of applications
@@ -101,6 +102,14 @@ type Subscription struct {
 	TimeStamp         int64  `json:"timeStamp,omitempty"`
 }
 
+// KeyManager for struct keyManager
+type KeyManager struct {
+	Name        string `json:"name"`
+	Enabled     bool   `json:"enabled"`
+	Issuer      string `json:"issuer"`
+	Certificate string `json:"certificate"`
+}
+
 var (
 	// APIListMap has the following mapping label -> apiUUID -> API (Metadata)
 	APIListMap map[string]map[string]APIs
@@ -110,14 +119,27 @@ var (
 	ApplicationMap map[string]Application
 	// ApplicationKeyMappingMap contains the application key mappings recieved from API Manager Control Plane
 	ApplicationKeyMappingMap map[string]ApplicationKeyMapping
+	// KeyManagerMap contains the key managers recieved from API Manager Control Plane
+	KeyManagerMap map[string]KeyManager
 )
+
+// MarshalKeyManagers is used to update the key managers during the startup where
+// multiple key managers are pulled at once. And then it returns the KeyManagerMap.
+func MarshalKeyManagers(keyManagersList *[]eventhubTypes.KeyManager) map[string]KeyManager {
+	resourceMap := make(map[string]KeyManager)
+	for _, keyManager := range *keyManagersList {
+		resourceMap[keyManager.Name] = MarshalKeyManager(&keyManager)
+	}
+	KeyManagerMap = resourceMap
+	return KeyManagerMap
+}
 
 // MarshalMultipleApplications is used to update the applicationList during the startup where
 // multiple applications are pulled at once. And then it returns the ApplicationList.
 func MarshalMultipleApplications(appList *types.ApplicationList) map[string]Application {
 	resourceMap := make(map[string]Application)
 	for _, application := range appList.List {
-		applicationSub := marshalApplication(&application)
+		applicationSub := MarshalApplication(&application)
 		resourceMap[application.UUID] = applicationSub
 	}
 	ApplicationMap = resourceMap
@@ -145,13 +167,14 @@ func MarshalMultipleApplicationKeyMappings(keymappingList *types.ApplicationKeyM
 func MarshalMultipleSubscriptions(subscriptionsList *types.SubscriptionList) map[int32]Subscription {
 	resourceMap := make(map[int32]Subscription)
 	for _, sb := range subscriptionsList.List {
-		resourceMap[sb.SubscriptionID] = marshalSubscription(&sb)
+		resourceMap[sb.SubscriptionID] = MarshalSubscription(&sb)
 	}
 	SubscriptionMap = resourceMap
 	return SubscriptionMap
 }
 
-func marshalSubscription(subscriptionInternal *types.Subscription) Subscription {
+// MarshalSubscription is used to map to internal Subscription struct
+func MarshalSubscription(subscriptionInternal *types.Subscription) Subscription {
 	sub := Subscription{
 		SubscriptionID:    subscriptionInternal.SubscriptionID,
 		PolicyID:          subscriptionInternal.PolicyID,
@@ -171,7 +194,8 @@ func marshalSubscription(subscriptionInternal *types.Subscription) Subscription 
 	return sub
 }
 
-func marshalApplication(appInternal *types.Application) Application {
+// MarshalApplication is used to map to internal Application struct
+func MarshalApplication(appInternal *types.Application) Application {
 	app := Application{
 		UUID:         appInternal.UUID,
 		ID:           appInternal.ID,
@@ -200,6 +224,16 @@ func marshalKeyMapping(keyMappingInternal *types.ApplicationKeyMapping) Applicat
 		TenantID:        keyMappingInternal.TenantID,
 		TenantDomain:    keyMappingInternal.TenantDomain,
 		TimeStamp:       keyMappingInternal.TimeStamp,
+	}
+}
+
+// MarshalKeyManager is used to map Internal key manager
+func MarshalKeyManager(keyManagerInternal *types.KeyManager) KeyManager {
+	return KeyManager{
+		Name:    keyManagerInternal.Name,
+		Enabled: keyManagerInternal.Enabled,
+		// Issuer:      keyManagerInternal.Configuration.Issuer,
+		// Certificate: keyManagerInternal.Configuration.Certificate,
 	}
 }
 
