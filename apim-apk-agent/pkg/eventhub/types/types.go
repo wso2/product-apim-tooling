@@ -83,7 +83,6 @@ type API struct {
 	Context          string `json:"context" json:"apiContext"`
 	Policy           string `json:"policy"`
 	APIType          string `json:"apiType"`
-	RevisionUUID     string `json:"revisionUUID"`
 	IsDefaultVersion bool   `json:"isDefaultVersion"`
 	APIStatus        string `json:"status"`
 	TenantID         int32  `json:"tenanId,omitempty"`
