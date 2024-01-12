@@ -319,7 +319,8 @@ func FetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 				loggers.Info("API file found: " + file.Name)
 				// Todo:
 			}
-			health.SetControlPlaneRestAPIStatus(err == nil)
+			logger.LoggerMsg.Info("Err", err)
+			//health.SetControlPlaneRestAPIStatus(err == nil)
 
 		} else if data.ErrorCode == 204 {
 			logger.LoggerMsg.Infof("No API Artifacts are available in the control plane for the envionments :%s",
