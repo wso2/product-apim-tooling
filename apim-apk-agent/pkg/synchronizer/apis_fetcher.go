@@ -217,6 +217,7 @@ func ConstructControlPlaneRequest(id *string, gwLabel []string, controlPlanePara
 	// Setting authorization header
 	basicAuth := "Basic " + auth.GetBasicAuth(userName, password)
 	req.Header.Set(Authorization, basicAuth)
+	req.Header.Set("x-wso2-tenant", "ALL")
 	// If API UUID list is present, set the content-type header
 	if apiUUIDList != nil {
 		req.Header.Set("Content-Type", "application/json")
