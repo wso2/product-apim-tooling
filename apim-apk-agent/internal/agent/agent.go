@@ -84,7 +84,7 @@ func Run(conf *config.Config) {
 	eventHubEnabled := conf.ControlPlane.Enabled
 
 	// Load initial data from control plane
-	eventhub.LoadInitialData(conf, nil)
+	eventhub.LoadInitialData(conf)
 
 	if eventHubEnabled {
 		var connectionURLList = conf.ControlPlane.BrokerConnectionParameters.EventListeningEndpoints

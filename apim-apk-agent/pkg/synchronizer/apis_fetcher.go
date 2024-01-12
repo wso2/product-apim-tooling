@@ -217,6 +217,7 @@ func ConstructControlPlaneRequest(id *string, gwLabel []string, controlPlanePara
 	// Setting authorization header
 	basicAuth := "Basic " + auth.GetBasicAuth(userName, password)
 	req.Header.Set(Authorization, basicAuth)
+	req.Header.Set("x-wso2-tenant", "ALL")
 	// If API UUID list is present, set the content-type header
 	if apiUUIDList != nil {
 		req.Header.Set("Content-Type", "application/json")
@@ -251,6 +252,7 @@ func ReadRootFiles(reader *zip.Reader) (*DeploymentDescriptor, map[string]map[st
 	// Read the .zip files within the root apis.zip
 	for _, file := range reader.File {
 		// Open deployment descriptor file
+		logger.LoggerSync.Info("wfewf", file)
 		if strings.EqualFold(file.Name, deploymentDescriptorFile) {
 			logger.LoggerSync.Debugf("Start reading %v file", deploymentDescriptorFile)
 			f, err := file.Open()

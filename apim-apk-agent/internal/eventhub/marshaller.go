@@ -65,28 +65,6 @@ type ApplicationKeyMappingList struct {
 	List []ApplicationKeyMapping `json:"list"`
 }
 
-// APIs for struct Api
-type APIs struct {
-	APIID            int    `json:"apiId"`
-	UUID             string `json:"uuid"`
-	Provider         string `json:"provider" json:"apiProvider"`
-	Name             string `json:"name" json:"apiName"`
-	Version          string `json:"version" json:"apiVersion"`
-	Context          string `json:"context" json:"apiContext"`
-	Policy           string `json:"policy"`
-	APIType          string `json:"apiType"`
-	IsDefaultVersion bool   `json:"isDefaultVersion"`
-	APIStatus        string `json:"status"`
-	TenantID         int32  `json:"tenanId,omitempty"`
-	TenantDomain     string `json:"tenanDomain,omitempty"`
-	TimeStamp        int64  `json:"timeStamp,omitempty"`
-}
-
-// APIList for struct ApiList
-type APIList struct {
-	List []APIs `json:"list"`
-}
-
 // Subscription for struct subscription
 type Subscription struct {
 	SubscriptionID    int32  `json:"subscriptionId"`
@@ -111,8 +89,6 @@ type KeyManager struct {
 }
 
 var (
-	// APIListMap has the following mapping label -> apiUUID -> API (Metadata)
-	APIListMap map[string]map[string]APIs
 	// SubscriptionMap contains the subscriptions recieved from API Manager Control Plane
 	SubscriptionMap map[int32]Subscription
 	// ApplicationMap contains the applications recieved from API Manager Control Plane
@@ -245,11 +221,11 @@ func GetApplicationKeyMappingReference(keyMapping *types.ApplicationKeyMapping) 
 
 // CheckIfAPIMetadataIsAlreadyAvailable returns true only if the API Metadata for the given API UUID
 // is already available
-func CheckIfAPIMetadataIsAlreadyAvailable(apiUUID, label string) bool {
-	if _, labelAvailable := APIListMap[label]; labelAvailable {
-		if _, apiAvailale := APIListMap[label][apiUUID]; apiAvailale {
-			return true
-		}
-	}
-	return false
-}
+// func CheckIfAPIMetadataIsAlreadyAvailable(apiUUID, label string) bool {
+// 	if _, labelAvailable := APIListMap[label]; labelAvailable {
+// 		if _, apiAvailale := APIListMap[label][apiUUID]; apiAvailale {
+// 			return true
+// 		}
+// 	}
+// 	return false
+// }
