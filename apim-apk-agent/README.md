@@ -11,4 +11,4 @@
     6. Execute `./gradlew build` to build the docker image
     7. `cd` into cloned directory and then cd into `product-apim-tooling/helm-charts`
     8. Run `helm install apim-apk-agent . -n apk` to deploy the agent in K8s
-    9. Run `helm uninstall apim-apk-agent` to undeploy the agent in K8s
+    9. Run `helm uninstall apim-apk-agent -n apk` to undeploy the agent in K8s

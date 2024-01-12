@@ -32,7 +32,6 @@ import (
 	"time"
 
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
-	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/common"
 	eventhubInternal "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/eventhub"
 	pkgAuth "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/auth"
 	eventhubTypes "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
@@ -85,7 +84,6 @@ func FetchKeyManagersOnStartUp(conf *config.Config) {
 	}
 
 	var queryParamMap map[string]string
-	queryParamMap = common.PopulateQueryParamForOrganizationID(queryParamMap)
 
 	if queryParamMap != nil && len(queryParamMap) > 0 {
 		q := req.URL.Query()
@@ -97,6 +95,8 @@ func FetchKeyManagersOnStartUp(conf *config.Config) {
 	}
 	// Setting authorization header
 	req.Header.Set(sync.Authorization, basicAuth)
+
+	req.Header.Set("x-wso2-tenant", "ALL")
 
 	// Make the request
 	logger.LoggerSync.Debug("Sending the control plane request")
