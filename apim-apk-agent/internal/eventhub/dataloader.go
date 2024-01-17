@@ -35,7 +35,6 @@ import (
 
 	pkgAuth "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/auth"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
-	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/health"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/logging"
 	sync "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/synchronizer"
@@ -132,7 +131,8 @@ func LoadInitialData(configFile *config.Config) {
 				break
 			} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
 				//Error handle
-				health.SetControlPlaneRestAPIStatus(false)
+				logger.LoggerSync.Info("Error data information received")
+				//health.SetControlPlaneRestAPIStatus(false)
 			} else {
 				// Keep the iteration going on until a response is received.
 				// Error handle
@@ -175,7 +175,7 @@ func LoadInitialData(configFile *config.Config) {
 					Severity:  logging.CRITICAL,
 					ErrorCode: 1600,
 				})
-				health.SetControlPlaneRestAPIStatus(false)
+				//health.SetControlPlaneRestAPIStatus(false)
 			} else {
 				// Keep the iteration going on until a response is recieved.
 				logger.LoggerSync.ErrorC(logging.ErrorDetails{
@@ -325,15 +325,15 @@ func FetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 		} else if data.ErrorCode == 204 {
 			logger.LoggerMsg.Infof("No API Artifacts are available in the control plane for the envionments :%s",
 				strings.Join(envs, ", "))
-			health.SetControlPlaneRestAPIStatus(true)
+			//health.SetControlPlaneRestAPIStatus(true)
 		} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
 			logger.LoggerMsg.ErrorC(logging.ErrorDetails{
 				Message:   fmt.Sprintf("Error occurred when retrieving APIs from control plane(unrecoverable error): %v", data.Err.Error()),
 				Severity:  logging.CRITICAL,
 				ErrorCode: 1106,
 			})
-			isNoAPIArtifacts := data.ErrorCode == 404 && strings.Contains(data.Err.Error(), "No Api artifacts found")
-			health.SetControlPlaneRestAPIStatus(isNoAPIArtifacts)
+			//isNoAPIArtifacts := data.ErrorCode == 404 && strings.Contains(data.Err.Error(), "No Api artifacts found")
+			//health.SetControlPlaneRestAPIStatus(isNoAPIArtifacts)
 		} else {
 			// Keep the iteration still until all the envrionment response properly.
 			i--
@@ -342,7 +342,7 @@ func FetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 				Severity:  logging.MINOR,
 				ErrorCode: 1107,
 			})
-			health.SetControlPlaneRestAPIStatus(false)
+			//health.SetControlPlaneRestAPIStatus(false)
 			sync.RetryFetchingAPIs(c, data, sync.RuntimeArtifactEndpoint, true, queryParamMap)
 		}
 	}
