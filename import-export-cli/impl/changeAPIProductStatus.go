@@ -24,9 +24,9 @@ import (
 )
 
 // ChangeAPIStatusInEnv function is used with change-status api command
-func ChangeAPIProductStatusInEnv(accessToken, environment, stateChangeAction, name, provider string) (*resty.Response, error) {
+func ChangeAPIProductStatusInEnv(accessToken, environment, stateChangeAction, name, version, provider string) (*resty.Response, error) {
 	changeAPIProductStatusEndpoint := utils.GetApiProductListEndpointOfEnv(environment, utils.MainConfigFilePath)
-	return changeAPIProductStatus(changeAPIProductStatusEndpoint, stateChangeAction, name, provider, environment, accessToken)
+	return changeAPIProductStatus(changeAPIProductStatusEndpoint, stateChangeAction, name, version, provider, environment, accessToken)
 }
 
 // changeAPIProductStatus
@@ -37,9 +37,9 @@ func ChangeAPIProductStatusInEnv(accessToken, environment, stateChangeAction, na
 // @param environment : Environment where the API Product resides
 // @param accessToken : Access Token for the resource
 // @return response Response in the form of *resty.Response
-func changeAPIProductStatus(changeAPIProductStatusEndpoint, stateChangeAction, name, provider, environment, accessToken string) (*resty.Response, error) {
+func changeAPIProductStatus(changeAPIProductStatusEndpoint, stateChangeAction, name, version, provider, environment, accessToken string) (*resty.Response, error) {
 	changeAPIProductStatusEndpoint = utils.AppendSlashToString(changeAPIProductStatusEndpoint)
-	apiProductId, err := GetAPIProductId(accessToken, environment, name, provider)
+	apiProductId, err := GetAPIProductId(accessToken, environment, name, version, provider)
 	if err != nil {
 		utils.HandleErrorAndExit("Error while getting API Product Id for state change ", err)
 	}

@@ -29,6 +29,7 @@ import (
 )
 
 var getRevisionsAPIProductName string
+var getRevisionsAPIProductVersion string
 var getRevisionsAPIProductProvider string
 var getAPIProductRevisionsCmdEnvironment string
 var getAPIProductRevisionsCmdFormat string
@@ -42,7 +43,7 @@ const GetAPIProductRevisionsCmdLongDesc = `Display a list of Revisions available
 
 var getRevisionsCmdExamples = utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetAPIProductRevisionsCmdLiteral + ` -n PizzaProduct -v 1.0.0 -e dev
 ` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetAPIProductRevisionsCmdLiteral + ` -n ShopProduct -v 1.0.0 -r admin -e dev
-` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetAPIProductRevisionsCmdLiteral + ` -n PizzaProduct -q deployed:true -e dev
+` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetAPIProductRevisionsCmdLiteral + ` -n PizzaProduct -v 1.0.0 -q deployed:true -e dev
 NOTE: All the 3 flags (--name (-n), --version (-v) and --environment (-e)) are mandatory.`
 
 // getRevisionsCmd represents the revisions command
@@ -69,7 +70,7 @@ func executeGetAPIProductRevisionsCmd(credential credentials.Credential) {
 	}
 
 	_, revisions, err := impl.GetAPIProductRevisionListFromEnv(accessToken, getAPIProductRevisionsCmdEnvironment,
-		getRevisionsAPIProductName, getRevisionsAPIProductProvider, strings.Join(getAPIProductRevisionsCmdQuery, queryParamSeparator))
+		getRevisionsAPIProductName, getRevisionsAPIProductVersion, getRevisionsAPIProductProvider, strings.Join(getAPIProductRevisionsCmdQuery, queryParamSeparator))
 	if err == nil {
 		impl.PrintRevisions(revisions, getAPIProductRevisionsCmdFormat)
 	} else {
@@ -81,6 +82,8 @@ func init() {
 	GetCmd.AddCommand(getAPIProductRevisionsCmd)
 	getAPIProductRevisionsCmd.Flags().StringVarP(&getRevisionsAPIProductName, "name", "n", "",
 		"Name of the API Product to get the revision")
+	getAPIProductRevisionsCmd.Flags().StringVarP(&getRevisionsAPIProductVersion, "version", "v", "",
+		"Version of the API Product to get the revision")
 	getAPIProductRevisionsCmd.Flags().StringVarP(&getRevisionsAPIProductProvider, "provider", "r", "",
 		"Provider of the API Product")
 	getAPIProductRevisionsCmd.Flags().StringSliceVarP(&getAPIProductRevisionsCmdQuery, "query", "q",
@@ -90,5 +93,6 @@ func init() {
 	getAPIProductRevisionsCmd.Flags().StringVarP(&getAPIProductRevisionsCmdFormat, "format", "", "", "Pretty-print revisions "+
 		"using Go Templates. Use \"{{ jsonPretty . }}\" to list all fields")
 	_ = getAPIProductRevisionsCmd.MarkFlagRequired("name")
+	_ = getAPIProductRevisionsCmd.MarkFlagRequired("version")
 	_ = getAPIProductRevisionsCmd.MarkFlagRequired("environment")
 }

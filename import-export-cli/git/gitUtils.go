@@ -340,7 +340,7 @@ func deployProjectDeletions(accessToken, environment string, deletedProjectsPerT
 			if handleIfError(err, failedProjects, projectParam) {
 				continue
 			}
-			resp, err := impl.DeleteAPIProduct(accessToken, environment, apiProductInfo.Data.Name, apiProductInfo.Data.Provider)
+			resp, err := impl.DeleteAPIProduct(accessToken, environment, apiProductInfo.Data.Name, apiProductInfo.Data.Version, apiProductInfo.Data.Provider)
 			if handleIfError(err, failedProjects, projectParam) {
 				continue
 			}

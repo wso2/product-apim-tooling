@@ -47,7 +47,7 @@ const undeployAPICmdLongDesc = "Undeploy an API revision from gateway environmen
 const undeployAPICmdExamples = utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 --rev 2 -e dev
 ` + utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 --rev 6 -g Label1 -g Label2 -g Label3 -e production
 ` + utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPICmdLiteral + ` -n FacebookAPI -v 2.1.0 -r alice --rev 2 -g Label1 -e production
-NOTE: All the 4 flags (--name (-n), --version (-v), --rev, --environment (-e)) are mandatory. 
+NOTE: All the 4 flags (--name (-n), --version (-v), --rev, --environment (-e)) are mandatory.
 If the flag (--gateway-env (-g)) is not provided, revision will be undeployed from all deployed gateway environments.`
 
 // UndeployAPICmd represents the deploy API command

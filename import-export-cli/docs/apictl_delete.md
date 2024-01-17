@@ -16,7 +16,7 @@ apictl delete [flags]
 
 ```
 apictl delete api -n TwitterAPI -v 1.0.0 -r admin -e dev
-apictl delete api-product -n TwitterAPI -r admin -e dev 
+apictl delete api-product -n TwitterAPI -v 1.0.0 -r admin -e dev 
 apictl delete app -n TestApplication -o admin -e dev
 ```
 
