@@ -74,6 +74,7 @@ const (
 //	config resolution.
 type Config struct {
 	ControlPlane controlPlane `toml:"controlPlane"`
+	DataPlane    dataPlane    `toml:"dataPlane"`
 	Agent        agent        `toml:"agent"`
 }
 type agent struct {
@@ -106,6 +107,12 @@ type controlPlane struct {
 	BrokerConnectionParameters brokerConnectionParameters
 	HTTPClient                 httpClient
 	RequestWorkerPool          requestWorkerPool
+}
+
+// Dataplane struct contains the configurations related to the APK
+type dataPlane struct {
+	Enabled            bool
+	K8ResourceEndpoint string
 }
 
 type requestWorkerPool struct {

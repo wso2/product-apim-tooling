@@ -24,9 +24,10 @@
 package synchronizer
 
 import (
+	"fmt"
+
 	"archive/zip"
 	"bytes"
-	"fmt"
 	"strings"
 
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
@@ -39,6 +40,7 @@ import (
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/logging"
 	sync "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/synchronizer"
+	transformer "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/transformer"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	gwapiv1b1 "sigs.k8s.io/gateway-api/apis/v1beta1"
@@ -151,6 +153,47 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUIDList []string, k8sClient clien
 				// Todo: Read the apis.zip and extract the api.zip,deployments.json
 			}
 
+			if err != nil {
+				logger.LoggerMsg.Error("Error while reading zip", err)
+			}
+
+			artifact, decodingError := transformer.DecodeAPIArtifact(data.Resp)
+
+			if decodingError != nil {
+				logger.LoggerSync.Error("Error while decoding the API Project Artifact:", decodingError)
+				return
+			}
+
+			apkConf, _, apkErr := transformer.GenerateAPKConf(artifact.APIJson)
+			logger.LoggerSync.Infof(apkConf)
+
+			if apkErr != nil {
+				logger.LoggerSync.Error("Error while generating apk-conf:", apkErr)
+				return
+			}
+
+			k8ResourceEndpoint := conf.DataPlane.K8ResourceEndpoint
+
+			deploymentDescriptor, err := transformer.ProcessDeploymentDescriptor([]byte(artifact.DeploymentDescriptor))
+			if err != nil {
+				logger.LoggerSync.Error("Error while decoding the API Project Artifact:", err)
+				return
+			}
+
+			crResponse, err := transformer.GenerateUpdatedCRs(apkConf, artifact.Swagger, k8ResourceEndpoint, deploymentDescriptor)
+
+			if err != nil {
+				logger.LoggerSync.Error("Error occured in receiving the updated CRDs:", err)
+				return
+			}
+
+			err = transformer.SaveZipToFile(crResponse, "/home/wso2/tmp/CRSet.zip")
+			if err != nil {
+				logger.LoggerSync.Error("Unable to save the modified zip to the disk(/home/wso2/tmp/):", err)
+				return
+			}
+
+			//health.SetControlPlaneRestAPIStatus(err == nil)
 			envConfig1 := dpv1alpha2.EnvConfig{
 				HTTPRouteRefs: []string{"route1", "route2"},
 			}
@@ -225,11 +268,6 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUIDList []string, k8sClient clien
 			internalk8sClient.CreateBackendCR(backends, k8sClient)
 
 			logger.LoggerMsg.Info("API applied successfully.\n")
-
-			if err != nil {
-				logger.LoggerMsg.Error("Error while reading zip", err)
-			}
-			//health.SetControlPlaneRestAPIStatus(err == nil)
 
 		} else if data.ErrorCode == 204 {
 			logger.LoggerMsg.Infof("No API Artifacts are available in the control plane for the envionments :%s",

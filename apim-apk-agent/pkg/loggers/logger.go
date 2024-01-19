@@ -32,13 +32,14 @@ When you add a new logger instance add the related package name as a constant
 
 // package name constants
 const (
-	pkgAuth      = "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/auth"
-	pkgMsg       = "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/messaging"
-	pkgHealth    = "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/health"
-	pkgTLSUtils  = "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/tlsutils"
-	pkgAdapter   = "github.com/wso2/apk/adapter/pkg/adapter"
-	pkgSync      = "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/synchronizer"
-	pkgSoapUtils = "github.com/wso2/apk/adapter/pkg/soaputils"
+	pkgAuth        = "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/auth"
+	pkgMsg         = "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/messaging"
+	pkgHealth      = "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/health"
+	pkgTLSUtils    = "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/tlsutils"
+	pkgAdapter     = "github.com/wso2/apk/adapter/pkg/adapter"
+	pkgSync        = "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/synchronizer"
+	pkgSoapUtils   = "github.com/wso2/apk/adapter/pkg/soaputils"
+	pkgTransformer = "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/transformer"
 )
 
 // logger package references
@@ -51,6 +52,7 @@ var (
 	LoggerSync         logging.Log
 	LoggerSoapUtils    logging.Log
 	LoggerSubscription logging.Log
+	LoggerTransformer  logging.Log
 )
 
 func init() {
@@ -66,5 +68,6 @@ func UpdateLoggers() {
 	LoggerAdapter = logging.InitPackageLogger(pkgAdapter)
 	LoggerSync = logging.InitPackageLogger(pkgSync)
 	LoggerSoapUtils = logging.InitPackageLogger(pkgSoapUtils)
+	LoggerTransformer = logging.InitPackageLogger(pkgTransformer)
 	logrus.Info("Updated loggers")
 }
