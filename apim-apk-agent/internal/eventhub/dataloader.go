@@ -126,7 +126,7 @@ func LoadInitialData(configFile *config.Config) {
 			data := <-responseChannel
 			logger.LoggerSync.Info("Receiving subscription data for an environment")
 			if data.Payload != nil {
-				logger.LoggerSync.Info("Payload data information received")
+				logger.LoggerSync.Info("Payload data information received" + string(data.Payload))
 				retrieveDataFromResponseChannel(data)
 				break
 			} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
@@ -197,7 +197,11 @@ func LoadInitialData(configFile *config.Config) {
 			}
 		}
 	}
-	FetchAPIsOnStartUp(conf, apiUUIDList)
+	if apiUUIDList == nil || len(apiUUIDList) == 0 {
+		loggers.Info("Empty API List Recieved in fetching")
+	} else {
+		FetchAPIsOnStartUp(conf, apiUUIDList)
+	}
 }
 
 // InvokeService invokes the internal data resource
@@ -232,7 +236,9 @@ func InvokeService(endpoint string, responseType interface{}, queryParamMap map[
 
 	// Setting authorization header
 	req.Header.Set(authorizationHeaderDefault, authorizationBasic+accessToken)
-	req.Header.Set("x-wso2-tenant", "ALL")
+	if reflect.TypeOf(responseType) == reflect.TypeOf(types.APIList{}) {
+		req.Header.Set("x-wso2-tenant", "ALL")
+	}
 
 	// Make the request
 	//logger.LoggerSubscription.Debug("Sending the request to the control plane over the REST API: " + serviceURL)
