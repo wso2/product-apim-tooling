@@ -38,7 +38,7 @@ const (
 func init() {
 	conf, _ := config.ReadConfigs()
 	sync.InitializeWorkerPool(conf.ControlPlane.RequestWorkerPool.PoolSize, conf.ControlPlane.RequestWorkerPool.QueueSizePerPool,
-		conf.ControlPlane.RequestWorkerPool.PauseTimeAfterFailure, conf.Adapter.Truststore.Location,
+		conf.ControlPlane.RequestWorkerPool.PauseTimeAfterFailure, conf.Agent.TrustStore.Location,
 		conf.ControlPlane.SkipSSLVerification, conf.ControlPlane.HTTPClient.RequestTimeOut, conf.ControlPlane.RetryInterval,
 		conf.ControlPlane.ServiceURL, conf.ControlPlane.Username, conf.ControlPlane.Password)
 }

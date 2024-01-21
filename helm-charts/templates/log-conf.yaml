@@ -7,14 +7,14 @@ data:
   config.toml: |
     [controlPlane]
       enabled = true
-      serviceURL = "https://wso2apim:9443/"
+      serviceURL = "https://wso2am-single-node-am-service.apim-deployment.svc.cluster.local:9443/"
       username = "admin"
       password = "admin"
       environmentLabels = ["Default"]
       skipSSLVerification = true
       [controlPlane.brokerConnectionParameters]
-      eventListeningEndpoints = ["amqp://admin:admin@wso2apim:5672?retries='10'&connectdelay='30'"]
-
+      eventListeningEndpoints = ["amqp://admin:admin@wso2am-single-node-am-service.apim-deployment.svc.cluster.local:5672?retries='10'&connectdelay='30'"]
+    
   log_config.toml: |
     # The logging configuration for Adapter
 
