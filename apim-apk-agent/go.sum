@@ -39,8 +39,8 @@ github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcU
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 github.com/wso2/apk/adapter v0.0.0-20231218081229-c5b096fc616f h1:bMSpKQddE/gBOEKCsnGN7PVAw+S+0dWEM+VQFUDHrPM=
 github.com/wso2/apk/adapter v0.0.0-20231218081229-c5b096fc616f/go.mod h1:4SnI4e8Av9HEK282Swm/swh4alvOf5oPBY4Pq/6Lr+o=
-github.com/wso2/apk/common-go-libs v0.0.0-20240117044300-cc7990a030fd h1:iwnlQ9t4yxj5sepVbUHlRxvyCaGRitHYti/L52MF3zw=
-github.com/wso2/apk/common-go-libs v0.0.0-20240117044300-cc7990a030fd/go.mod h1:OJyTVeVKVX2ZHZPb4ua+Db/Z/4gfocntXMjfNIxX6f8=
+github.com/wso2/apk/common-go-libs v0.0.0-20240119065522-0ddbf38d77f3 h1:lwIsxyzthK+LVWgOwtpRMkHn73vX9m93iq2mK+RevsI=
+github.com/wso2/apk/common-go-libs v0.0.0-20240119065522-0ddbf38d77f3/go.mod h1:KmteQmAdPlkO8h5AtVd4RJzHHN/APHoFC8orBihWoZg=
 golang.org/x/net v0.19.0 h1:zTwKpTd2XuCqf8huc7Fo2iSy+4RHPd10s4KzeTnVr1c=
 golang.org/x/net v0.19.0/go.mod h1:CfAk/cbD4CthTvqiEl8NpboMuiuOYsAr/7NOjZJtv1U=
 golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=

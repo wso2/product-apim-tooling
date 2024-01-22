@@ -24,9 +24,15 @@
 package synchronizer
 
 import (
+	"archive/zip"
+	"bytes"
+	"fmt"
+	"strings"
+
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/logging"
 	sync "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/synchronizer"
 )
 
@@ -106,4 +112,79 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 		}
 	}
 
+}
+
+// FetchAPIsOnEvent  will fetch API from control plane during the API Notification Event
+func FetchAPIsOnEvent(conf *config.Config, apiUUIDList []string) {
+	// Populate data from config.
+	envs := conf.ControlPlane.EnvironmentLabels
+
+	// Create a channel for the byte slice (response from the APIs from control plane)
+	c := make(chan sync.SyncAPIResponse)
+
+	var queryParamMap map[string]string
+	//Get API details.
+	if apiUUIDList != nil {
+		GetAPI(c, nil, envs, sync.APIArtifactEndpoint, true, apiUUIDList, queryParamMap)
+	}
+	for i := 0; i < 1; i++ {
+		data := <-c
+		logger.LoggerMsg.Info("Receiving data for an API")
+		if data.Resp != nil {
+			// Reading the root zip
+			zipReader, err := zip.NewReader(bytes.NewReader(data.Resp), int64(len(data.Resp)))
+
+			// apiFiles represents zipped API files fetched from API Manager
+			apiFiles := make(map[string]*zip.File)
+			// Read the .zip files within the root apis.zip and add apis to apiFiles array.
+			for _, file := range zipReader.File {
+				apiFiles[file.Name] = file
+				logger.LoggerSync.Infof("API file found: " + file.Name)
+				// Todo: Read the apis.zip and extract the api.zip,deployments.json
+			}
+			if err != nil {
+				logger.LoggerMsg.Error("Error while reading zip", err)
+			}
+			//health.SetControlPlaneRestAPIStatus(err == nil)
+
+		} else if data.ErrorCode == 204 {
+			logger.LoggerMsg.Infof("No API Artifacts are available in the control plane for the envionments :%s",
+				strings.Join(envs, ", "))
+			//health.SetControlPlaneRestAPIStatus(true)
+		} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
+			logger.LoggerMsg.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error occurred when retrieving APIs from control plane(unrecoverable error): %v", data.Err.Error()),
+				Severity:  logging.CRITICAL,
+				ErrorCode: 1106,
+			})
+			//isNoAPIArtifacts := data.ErrorCode == 404 && strings.Contains(data.Err.Error(), "No Api artifacts found")
+			//health.SetControlPlaneRestAPIStatus(isNoAPIArtifacts)
+		} else {
+			// Keep the iteration still until all the envrionment response properly.
+			i--
+			logger.LoggerMsg.ErrorC(logging.ErrorDetails{
+				Message:   fmt.Sprintf("Error occurred while fetching data from control plane: %v ..retrying..", data.Err),
+				Severity:  logging.MINOR,
+				ErrorCode: 1107,
+			})
+			//health.SetControlPlaneRestAPIStatus(false)
+			sync.RetryFetchingAPIs(c, data, sync.RuntimeArtifactEndpoint, true, queryParamMap)
+		}
+	}
+	logger.LoggerMsg.Info("Fetching API for an event is completed...")
+}
+
+// GetAPI function calls the FetchAPIs() with relevant environment labels defined in the config.
+func GetAPI(c chan sync.SyncAPIResponse, id *string, envs []string, endpoint string, sendType bool, apiUUIDList []string,
+	queryParamMap map[string]string) {
+	if len(envs) > 0 {
+		// If the envrionment labels are present, call the controle plane with labels.
+		logger.LoggerAdapter.Debugf("Environment labels present: %v", envs)
+		go sync.FetchAPIs(id, envs, c, endpoint, sendType, apiUUIDList, queryParamMap)
+	} else {
+		// If the environments are not give, fetch the APIs from default envrionment
+		logger.LoggerAdapter.Debug("Environments label  NOT present. Hence adding \"default\"")
+		envs = append(envs, "default")
+		go sync.FetchAPIs(id, nil, c, endpoint, sendType, apiUUIDList, queryParamMap)
+	}
 }
