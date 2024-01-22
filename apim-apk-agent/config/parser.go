@@ -102,22 +102,8 @@ func ReadConfigs() (*Config, error) {
 		}
 
 		adapterConfig.resolveDeprecatedProperties()
-		if adapterConfig.Enforcer.JwtGenerator.Enabled {
-			invalidConfigError := adapterConfig.resolveJWTGeneratorConfig()
-			if invalidConfigError != nil {
-				loggerConfig.ErrorC(logging.ErrorDetails{
-					Message:   fmt.Sprintf("Error parsing the configurations: %s", invalidConfigError.Error()),
-					Severity:  logging.BLOCKER,
-					ErrorCode: 1003,
-				})
-			}
-		}
-		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Adapter)).Elem(), "Adapter", true)
+
 		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.ControlPlane)).Elem(), "ControlPlane", true)
-		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Envoy)).Elem(), "Router", true)
-		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.GlobalAdapter)).Elem(), "GlobalAdapter", true)
-		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Enforcer)).Elem(), "Enforcer", false)
-		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Analytics)).Elem(), "Analytics", false)
 	})
 	return adapterConfig, e
 }
@@ -130,29 +116,6 @@ func SetConfig(conf *Config) {
 // SetDefaultConfig sets the default configuration to the adapter configuration
 func SetDefaultConfig() {
 	adapterConfig = defaultConfig
-}
-
-// GetDefaultVhost returns the default vhost of given environment read from Adapter
-// configurations. Store the configuration in a map, so do not want to loop through
-// the config value Config.Adapter.VhostMapping
-func GetDefaultVhost(environment string) (string, bool, error) {
-	var err error
-	onceGetDefaultVhost.Do(func() {
-		defaultVhost = make(map[string]string)
-		configs, errConf := ReadConfigs()
-		if errConf != nil {
-			err = errConf
-			return
-		}
-		for _, gateway := range configs.Adapter.VhostMapping {
-			defaultVhost[gateway.Environment] = gateway.Vhost
-		}
-	})
-	vhost, ok := defaultVhost[environment]
-	if !ok && environment == DefaultGatewayName {
-		return DefaultGatewayVHost, true, nil
-	}
-	return vhost, ok, err
 }
 
 // ReadLogConfigs implements adapter/proxy log-configuration read operation.The read operation will happen only once, hence
@@ -204,66 +167,6 @@ func (config *Config) resolveDeprecatedProperties() {
 		printDeprecatedWarningLog("controlPlane.serviceUrl", "controlPlane.serviceURL")
 		config.ControlPlane.ServiceURL = config.ControlPlane.ServiceURLDeprecated
 	}
-	if config.GlobalAdapter.ServiceURLDeprecated != UnassignedAsDeprecated {
-		printDeprecatedWarningLog("globalAdapter.serviceUrl", "globalAdapter.serviceURL")
-		config.GlobalAdapter.ServiceURL = config.GlobalAdapter.ServiceURLDeprecated
-	}
-	if config.Enforcer.Throttling.JmsConnectionProviderURLDeprecated != UnassignedAsDeprecated {
-		printDeprecatedWarningLog("enforcer.throttling.JmsConnectionProviderUrl", "enforcer.throttling.JmsConnectionProviderURL")
-		config.Enforcer.Throttling.JmsConnectionProviderURL = config.Enforcer.Throttling.JmsConnectionProviderURLDeprecated
-	}
-	if config.GlobalAdapter.OverwriteHostName != UnassignedAsDeprecated {
-		printDeprecatedWarningLog("globalAdapter.OverwriteHostName", "globalAdapter.OverrideHostName")
-		config.GlobalAdapter.OverrideHostName = config.GlobalAdapter.OverwriteHostName
-	}
-
-	if len(config.Enforcer.Throttling.Publisher.URLGroupDeprecated) > 0 {
-		printDeprecatedWarningLog("enforcer.throttling.publisher.urlGroup", "enforcer.throttling.publisher.URLGroup")
-		config.Enforcer.Throttling.Publisher.URLGroup = config.Enforcer.Throttling.Publisher.URLGroupDeprecated
-	}
-
-	// For boolean values, adapter check if the condition is changed by checking against the default value it is originally
-	// assigned.
-	if !config.Enforcer.RestServer.Enable {
-		printDeprecatedWarningLog("enforcer.restServer.enable", "enforcer.restServer.enabled")
-		config.Enforcer.RestServer.Enabled = config.Enforcer.RestServer.Enable
-	}
-	if config.Adapter.Consul.Enable {
-		printDeprecatedWarningLog("adapter.consul.enable", "adapter.consul.enabled")
-		config.Adapter.Consul.Enabled = config.Adapter.Consul.Enable
-	}
-	if config.Enforcer.JwtGenerator.Enable {
-		printDeprecatedWarningLog("enforcer.jwtGenerator.enable", "enforcer.jwtGenerator.enabled")
-		config.Enforcer.JwtGenerator.Enabled = config.Enforcer.JwtGenerator.Enable
-	}
-
-}
-
-func (config *Config) resolveJWTGeneratorConfig() error {
-	KeyPairs := config.Enforcer.JwtGenerator.Keypair
-	signingCount := 0
-	for i, keypair := range KeyPairs {
-		if keypair.UseForSigning {
-			signingCount++
-			if keypair.PrivateKeyPath == "" {
-				return fmt.Errorf("private key path has not been set for backend JWT")
-			}
-			if keypair.PublicCertificatePath == "" {
-				return fmt.Errorf("public certificate path has not been set for backend JWT")
-			}
-		} else {
-			// Removing non signing private key paths from config
-			config.Enforcer.JwtGenerator.Keypair[i].PrivateKeyPath = ""
-		}
-	}
-	if signingCount > 1 {
-		return fmt.Errorf("only one keypair should be set to be used for signing the backend JWT")
-	}
-
-	if signingCount == 0 {
-		return fmt.Errorf("atleast one keypair should be set to be used for signing the backend JWT")
-	}
-	return nil
 }
 
 func printDeprecatedWarningLog(deprecatedTerm, currentTerm string) {

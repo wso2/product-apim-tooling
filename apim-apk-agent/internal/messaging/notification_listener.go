@@ -19,18 +19,23 @@
 package messaging
 
 import (
+	"crypto/sha1"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"strings"
 
+	"github.com/google/uuid"
+	"github.com/wso2/apk/common-go-libs/constants"
+	event "github.com/wso2/apk/common-go-libs/pkg/discovery/api/wso2/discovery/subscription"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
-	eventhubInternal "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/eventhub"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/synchronizer"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/logging"
 	msg "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/messaging"
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/utils"
 )
 
 // constant variables
@@ -63,10 +68,9 @@ var (
 	ScopeList = make([]types.Scope, 0)
 	// timestamps needs to be maintained as it is not guranteed to receive them in order,
 	// hence older events should be discarded
-	apiListTimeStampMap               = make(map[string]int64, 0)
-	subsriptionsListTimeStampMap      = make(map[string]int64, 0)
-	applicationKeyMappingTimeStampMap = make(map[string]int64, 0)
-	applicationListTimeStampMap       = make(map[string]int64, 0)
+	apiListTimeStampMap          = make(map[string]int64, 0)
+	subsriptionsListTimeStampMap = make(map[string]int64, 0)
+	applicationListTimeStampMap  = make(map[string]int64, 0)
 )
 
 // handleNotification to process
@@ -276,28 +280,28 @@ func handleApplicationEvents(data []byte, eventType string) {
 				applicationRegistrationEvent.ConsumerKey, applicationRegistrationEvent.TenantDomain)
 			return
 		}
-
-		applicationKeyMapping := types.ApplicationKeyMapping{ApplicationID: applicationRegistrationEvent.ApplicationID,
-			ConsumerKey: applicationRegistrationEvent.ConsumerKey, KeyType: applicationRegistrationEvent.KeyType,
-			KeyManager: applicationRegistrationEvent.KeyManager, TenantID: -1, TenantDomain: applicationRegistrationEvent.TenantDomain,
-			TimeStamp: applicationRegistrationEvent.TimeStamp, ApplicationUUID: applicationRegistrationEvent.ApplicationUUID}
-
-		logger.LoggerMsg.Infof("Application event data %v", applicationKeyMapping)
-
-		//applicationKeyMappingReference := xds.GetApplicationKeyMappingReference(&applicationKeyMapping)
-
-		// if isLaterEvent(applicationKeyMappingTimeStampMap, fmt.Sprint(applicationKeyMappingReference),
-		// 	applicationRegistrationEvent.TimeStamp) {
-		// 	return
-		// }
-
-		// var appKeyMappingList *subscription.ApplicationKeyMappingList
-		// if strings.EqualFold(removeApplicationKeyMapping, eventType) {
-		// 	appKeyMappingList = xds.MarshalApplicationKeyMappingEventAndReturnList(&applicationKeyMapping, xds.DeleteEvent)
-		// } else {
-		// 	appKeyMappingList = xds.MarshalApplicationKeyMappingEventAndReturnList(&applicationKeyMapping, xds.CreateEvent)
-		// }
-		// xds.UpdateEnforcerApplicationKeyMappings(appKeyMappingList)
+		applicationKeyMappingEvent := event.ApplicationKeyMapping{ApplicationUUID: applicationRegistrationEvent.ApplicationUUID,
+			SecurityScheme:        "OAuth2",
+			ApplicationIdentifier: applicationRegistrationEvent.ConsumerKey,
+			KeyType:               applicationRegistrationEvent.KeyType,
+			Organization:          applicationRegistrationEvent.TenantDomain,
+			EnvID:                 "Default",
+		}
+		if strings.EqualFold(applicationRegistration, eventType) {
+			event := event.Event{Type: constants.ApplicationKeyMappingCreated,
+				Uuid:                  uuid.New().String(),
+				TimeStamp:             applicationRegistrationEvent.TimeStamp,
+				ApplicationKeyMapping: &applicationKeyMappingEvent,
+			}
+			utils.SendEvent(&event)
+		} else if strings.EqualFold(removeApplicationKeyMapping, eventType) {
+			event := event.Event{Type: constants.ApplicationKeyMappingDeleted,
+				Uuid:                  uuid.New().String(),
+				TimeStamp:             applicationRegistrationEvent.TimeStamp,
+				ApplicationKeyMapping: &applicationKeyMappingEvent,
+			}
+			utils.SendEvent(&event)
+		}
 	} else {
 		var applicationEvent msg.ApplicationEvent
 		appEventErr := json.Unmarshal([]byte(string(data)), &applicationEvent)
@@ -312,34 +316,42 @@ func handleApplicationEvents(data []byte, eventType string) {
 			return
 		}
 
-		app := types.Application{UUID: applicationEvent.UUID, ID: applicationEvent.ApplicationID,
-			Name: applicationEvent.ApplicationName, SubName: applicationEvent.Subscriber,
-			Policy: applicationEvent.ApplicationPolicy, TokenType: applicationEvent.TokenType, Attributes: nil,
-			TenantID: -1, TenantDomain: applicationEvent.TenantDomain, TimeStamp: applicationEvent.TimeStamp}
-
-		logger.LoggerMsg.Infof("Application event data %v", app)
-
-		eventhubInternal.ApplicationMap[app.Name] = eventhubInternal.MarshalApplication(&app)
-		logger.LoggerMsg.Infof("JMS Event Application Map: %v", eventhubInternal.ApplicationMap)
+		logger.LoggerMsg.Infof("Application event data %v", applicationEvent)
 
 		if isLaterEvent(applicationListTimeStampMap, fmt.Sprint(applicationEvent.ApplicationID), applicationEvent.TimeStamp) {
 			return
 		}
 
-		// var appList *subscription.ApplicationList
-		// if applicationEvent.Event.Type == applicationCreate {
-		// 	appList = xds.MarshalApplicationEventAndReturnList(&app, xds.CreateEvent)
-		// } else if applicationEvent.Event.Type == applicationUpdate {
-		// 	appList = xds.MarshalApplicationEventAndReturnList(&app, xds.UpdateEvent)
-		// } else if applicationEvent.Event.Type == applicationDelete {
-		// 	appList = xds.MarshalApplicationEventAndReturnList(&app, xds.DeleteEvent)
-		// } else {
-		// 	logger.LoggerInternalMsg.Warnf("Application Event Type is not recognized for the Event under "+
-		// 		"Application UUID %s", app.UUID)
-		// 	return
-		// }
-		// xds.UpdateEnforcerApplications(appList)
+		applicationGrpcEvent := event.Application{Uuid: applicationEvent.UUID,
+			Name:         applicationEvent.ApplicationName,
+			Owner:        applicationEvent.Subscriber,
+			Organization: applicationEvent.TenantDomain,
+			Attributes:   marshalAppAttributes(applicationEvent.Attributes),
+		}
+		if applicationEvent.Event.Type == applicationCreate {
+			event := event.Event{Type: constants.ApplicationCreated, Uuid: uuid.New().String(), TimeStamp: applicationEvent.TimeStamp, Application: &applicationGrpcEvent}
+			utils.SendEvent(&event)
+		} else if applicationEvent.Event.Type == applicationUpdate {
+			event := event.Event{Type: constants.ApplicationUpdated, Uuid: uuid.New().String(), TimeStamp: applicationEvent.TimeStamp, Application: &applicationGrpcEvent}
+			utils.SendEvent(&event)
+		} else if applicationEvent.Event.Type == applicationDelete {
+			event := event.Event{Type: constants.ApplicationDeleted, Uuid: uuid.New().String(), TimeStamp: applicationEvent.TimeStamp, Application: &applicationGrpcEvent}
+			utils.SendEvent(&event)
+		} else {
+			logger.LoggerAdapter.Warnf("Application Event Type is not recognized for the Event under "+
+				"Application UUID %s", applicationEvent.UUID)
+			return
+		}
 	}
+}
+func marshalAppAttributes(attributes interface{}) map[string]string {
+	attributesMap := make(map[string]string)
+	if attributes != nil {
+		for key, value := range attributes.(map[string]interface{}) {
+			attributesMap[key] = value.(string)
+		}
+	}
+	return attributesMap
 }
 
 // handleSubscriptionRelatedEvents to process subscription related events
@@ -356,33 +368,42 @@ func handleSubscriptionEvents(data []byte, eventType string) {
 		return
 	}
 
-	sub := types.Subscription{SubscriptionID: subscriptionEvent.SubscriptionID, SubscriptionUUID: subscriptionEvent.SubscriptionUUID,
-		PolicyID: subscriptionEvent.PolicyID, APIUUID: subscriptionEvent.APIUUID, ApplicationUUID: subscriptionEvent.ApplicationUUID,
-		APIID: subscriptionEvent.APIID, AppID: subscriptionEvent.ApplicationID, SubscriptionState: subscriptionEvent.SubscriptionState,
-		TenantID: subscriptionEvent.TenantID, TenantDomain: subscriptionEvent.TenantDomain, TimeStamp: subscriptionEvent.TimeStamp}
-
-	logger.LoggerMsg.Infof("Subscription event data %v", sub)
-
-	eventhubInternal.SubscriptionMap[sub.SubscriptionID] = eventhubInternal.MarshalSubscription(&sub)
-	logger.LoggerMsg.Infof("JMS Event Subscription Map: %v", eventhubInternal.SubscriptionMap)
-
 	if isLaterEvent(subsriptionsListTimeStampMap, fmt.Sprint(subscriptionEvent.SubscriptionID), subscriptionEvent.TimeStamp) {
 		return
 	}
-	// var subList *subscription.SubscriptionList
-	// if subscriptionEvent.Event.Type == subscriptionCreate {
-	// 	subList = xds.MarshalSubscriptionEventAndReturnList(&sub, xds.CreateEvent)
-	// } else if subscriptionEvent.Event.Type == subscriptionUpdate {
-	// 	subList = xds.MarshalSubscriptionEventAndReturnList(&sub, xds.UpdateEvent)
-	// } else if subscriptionEvent.Event.Type == subscriptionDelete {
-	// 	subList = xds.MarshalSubscriptionEventAndReturnList(&sub, xds.DeleteEvent)
-	// } else {
-	// 	logger.LoggerInternalMsg.Warnf("Subscription Event Type is not recognized for the Event under "+
-	// 		"Application UUID %s and API UUID %s", sub.ApplicationUUID, sub.APIUUID)
-	// 	return
-	// }
-	// // EventTypes: SUBSCRIPTIONS_CREATE, SUBSCRIPTIONS_UPDATE, SUBSCRIPTIONS_DELETE
-	// xds.UpdateEnforcerSubscriptions(subList)
+
+	subscription := event.Subscription{Uuid: subscriptionEvent.SubscriptionUUID,
+		SubStatus:     subscriptionEvent.SubscriptionState,
+		Organization:  subscriptionEvent.TenantDomain,
+		SubscribedApi: &event.SubscribedAPI{Name: subscriptionEvent.APIUUID, Version: "1.0.0"},
+	}
+
+	hasher := sha1.New()
+	hasher.Write([]byte(fmt.Sprintf("%s:%s", subscriptionEvent.ApplicationUUID, subscriptionEvent.SubscriptionUUID)))
+
+	// Get the final hash sum
+	hashSum := hasher.Sum(nil)
+
+	// Convert the hash sum to a hexadecimal string
+	hashString := hex.EncodeToString(hashSum)
+	applicationMapping := event.ApplicationMapping{Uuid: hashString, ApplicationRef: subscriptionEvent.ApplicationUUID, SubscriptionRef: subscriptionEvent.SubscriptionUUID, Organization: subscriptionEvent.TenantDomain}
+	if subscriptionEvent.Event.Type == subscriptionCreate {
+		subsEvent := event.Event{Uuid: uuid.New().String(), Type: constants.SubscriptionCreated, TimeStamp: subscriptionEvent.TimeStamp, Subscription: &subscription}
+		utils.SendEvent(&subsEvent)
+		applicationMappingEvent := event.Event{Uuid: uuid.New().String(), Type: constants.ApplicationMappingCreated, TimeStamp: subscriptionEvent.TimeStamp, ApplicationMapping: &applicationMapping}
+		utils.SendEvent(&applicationMappingEvent)
+	} else if subscriptionEvent.Event.Type == subscriptionUpdate {
+		subsEvent := event.Event{Uuid: uuid.New().String(), Type: constants.SubscriptionUpdated, TimeStamp: subscriptionEvent.TimeStamp, Subscription: &subscription}
+		utils.SendEvent(&subsEvent)
+		applicationMappingEvent := event.Event{Uuid: uuid.New().String(), Type: constants.ApplicationMappingUpdated, TimeStamp: subscriptionEvent.TimeStamp, ApplicationMapping: &applicationMapping}
+		utils.SendEvent(&applicationMappingEvent)
+
+	} else if subscriptionEvent.Event.Type == subscriptionDelete {
+		subsEvent := event.Event{Uuid: uuid.New().String(), Type: constants.SubscriptionDeleted, TimeStamp: subscriptionEvent.TimeStamp, Subscription: &subscription}
+		utils.SendEvent(&subsEvent)
+		applicationMappingEvent := event.Event{Uuid: uuid.New().String(), Type: constants.ApplicationMappingDeleted, TimeStamp: subscriptionEvent.TimeStamp, ApplicationMapping: &applicationMapping}
+		utils.SendEvent(&applicationMappingEvent)
+	}
 }
 
 // handlePolicyRelatedEvents to process policy related events
