@@ -34,7 +34,7 @@ spec:
   - apim-apk-agent-service.{{ .Release.Namespace }}.svc.cluster.local
   issuerRef:
     kind: "ClusterIssuer"
-    name: "selfsigned-issuer"
+    name: "apk-agent-selfsigned-issuer"
   secretName: apk-agent-server-cert
 
 

@@ -7,7 +7,7 @@ require (
 	github.com/pelletier/go-toml v1.9.5
 	github.com/sirupsen/logrus v1.9.0
 	github.com/stretchr/testify v1.8.4
-	github.com/wso2/apk/common-go-libs v0.0.0-20240117044300-cc7990a030fd
+	github.com/wso2/apk/common-go-libs v0.0.0-20240119065522-0ddbf38d77f3
 	google.golang.org/grpc v1.58.3
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )

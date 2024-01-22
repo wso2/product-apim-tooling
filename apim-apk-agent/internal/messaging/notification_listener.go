@@ -108,7 +108,7 @@ func processNotificationEvent(conf *config.Config, notification *msg.EventNotifi
 	if strings.Contains(eventType, apiLifeCycleChange) {
 		handleLifeCycleEvents(decodedByte)
 	} else if strings.Contains(eventType, apiEventType) {
-		handleAPIEvents(decodedByte, eventType)
+		handleAPIEvents(decodedByte, eventType, conf)
 	} else if strings.Contains(eventType, applicationEventType) {
 		handleApplicationEvents(decodedByte, eventType)
 	} else if strings.Contains(eventType, subscriptionEventType) {
@@ -143,11 +143,12 @@ func handleDefaultVersionUpdate(event msg.APIEvent) {
 }
 
 // handleAPIEvents to process api related data
-func handleAPIEvents(data []byte, eventType string) {
+func handleAPIEvents(data []byte, eventType string, conf *config.Config) {
 	var (
 		apiEvent              msg.APIEvent
 		currentTimeStamp      int64 = apiEvent.Event.TimeStamp
 		isDefaultVersionEvent bool
+		apiUUIDList           []string
 	)
 
 	apiEventErr := json.Unmarshal([]byte(string(data)), &apiEvent)
@@ -188,7 +189,9 @@ func handleAPIEvents(data []byte, eventType string) {
 
 	//Per each revision, synchronization should happen.
 	if strings.EqualFold(deployAPIToGateway, apiEvent.Event.Type) {
-		go synchronizer.FetchAPIsFromControlPlane(apiEvent.UUID, apiEvent.GatewayLabels)
+		//go synchronizer.FetchAPIsFromControlPlane(apiEvent.UUID, apiEvent.GatewayLabels)
+		apiUUIDList = append(apiUUIDList, apiEvent.UUID)
+		go synchronizer.FetchAPIsOnEvent(conf, apiUUIDList)
 	}
 
 	for _, env := range apiEvent.GatewayLabels {
