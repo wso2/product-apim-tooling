@@ -289,7 +289,7 @@ func envParamsFileProcess(importPath, paramsPath, importEnvironment string) erro
 }
 
 // envParamsDirectoryProcess function is used to process the environment parameters when they are provided as a
-//directory
+// directory
 func envParamsDirectoryProcess(importPath, paramsPath, importEnvironment string) error {
 	apiParams, err := params.LoadApiParamsFromDirectory(paramsPath)
 	if err != nil {
@@ -362,6 +362,10 @@ func handleCustomizedParameters(importPath, paramsPath, importEnvironment string
 // Process env params and create the intermediate_params.yaml file to pass to the server
 func handleEnvParams(tempDirectory string, destDirectory string, environmentParams *params.Environment) error {
 	// read api params from external parameters file
+	if len(environmentParams.Config) == 0 {
+		return errors.New("configs value is empty in the provided parameters")
+	}
+
 	envParamsJson, err := jsoniter.Marshal(environmentParams.Config)
 	if err != nil {
 		return err
