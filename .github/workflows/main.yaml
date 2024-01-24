@@ -58,7 +58,7 @@ jobs:
         run: |
           cd import-export-cli
           go vet ./...
-          ./build.sh -t apictl.go -v 4.1.1
+          ./build.sh -t apictl.go -v 4.1.2
 
       - name: Start APIM
         run: |
@@ -69,4 +69,4 @@ jobs:
       - name: Test
         run: |
           cd import-export-cli/integration
-          go test -p 1 -timeout 0 -archive apictl-4.1.1-linux-x64.tar.gz -race -coverprofile=coverage.txt -covermode=atomic ./pkg/...
+          go test -p 1 -timeout 0 -archive apictl-4.1.2-linux-x64.tar.gz -race -coverprofile=coverage.txt -covermode=atomic ./pkg/...
