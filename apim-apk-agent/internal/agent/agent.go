@@ -31,8 +31,12 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/wso2/apk/adapter/pkg/health"
+	cpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/cp/v1alpha2"
+	dpv1alpha1 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha1"
+	dpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha2"
 	"github.com/wso2/apk/common-go-libs/loggers"
 	"github.com/wso2/apk/common-go-libs/pkg/discovery/api/wso2/discovery/service/apkmgt"
+	"github.com/wso2/apk/common-go-libs/utils"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/eventhub"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/loggers"
@@ -43,6 +47,11 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/keepalive"
+	"k8s.io/apimachinery/pkg/runtime"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+	ctrl "sigs.k8s.io/controller-runtime"
+	gwapiv1b1 "sigs.k8s.io/gateway-api/apis/v1beta1"
 )
 
 var (
@@ -95,13 +104,47 @@ func Run(conf *config.Config) {
 	logger.LoggerInternalMsg.Info("Starting apim-apk-agent ....")
 	eventHubEnabled := conf.ControlPlane.Enabled
 
+	var metricsAddr string
+	var probeAddr string
+	var scheme = runtime.NewScheme()
+	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
+	utilruntime.Must(gwapiv1b1.AddToScheme(scheme))
+	utilruntime.Must(dpv1alpha1.AddToScheme(scheme))
+	utilruntime.Must(dpv1alpha2.AddToScheme(scheme))
+	utilruntime.Must(cpv1alpha2.AddToScheme(scheme))
+	utilruntime.Must(cpv1alpha2.AddToScheme(scheme))
+
+	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+		Scheme:                  scheme,
+		MetricsBindAddress:      metricsAddr,
+		Port:                    9443,
+		HealthProbeBindAddress:  probeAddr,
+		LeaderElection:          true,
+		LeaderElectionID:        "operator-lease.apk.wso2.com",
+		LeaderElectionNamespace: utils.GetOperatorPodNamespace(),
+		// LeaderElectionReleaseOnCancel defines if the leader should step down voluntarily
+		// when the Manager ends. This requires the binary to immediately end when the
+		// Manager is stopped, otherwise, this setting is unsafe. Setting this significantly
+		// speeds up voluntary leader transitions as the new leader don't have to wait
+		// LeaseDuration time first.
+		//
+		// In the default scaffold provided, the program ends immediately after
+		// the manager stops, so would be fine to enable this option. However,
+		// if you are doing or is intended to do any operation such as perform cleanups
+		// after the manager stops then its usage might be unsafe.
+		// LeaderElectionReleaseOnCancel: true,
+	})
+	if err != nil {
+		loggers.LoggerAPKOperator.Error("unable to start kubernetes controller manager", err)
+	}
+
 	// Load initial data from control plane
 	eventhub.LoadInitialData(conf)
 
 	if eventHubEnabled {
 		var connectionURLList = conf.ControlPlane.BrokerConnectionParameters.EventListeningEndpoints
 		if strings.Contains(connectionURLList[0], amqpProtocol) {
-			go messaging.ProcessEvents(conf)
+			go messaging.ProcessEvents(conf, mgr.GetClient())
 		}
 	}
 

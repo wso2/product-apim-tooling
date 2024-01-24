@@ -30,10 +30,18 @@ import (
 	"strings"
 
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	dpv1alpha1 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha1"
+	dpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha2"
+	"github.com/wso2/apk/common-go-libs/utils"
+	internalk8sClient "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/k8sClient"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/logging"
 	sync "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/synchronizer"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	gwapiv1b1 "sigs.k8s.io/gateway-api/apis/v1beta1"
 )
 
 const (
@@ -115,7 +123,7 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 }
 
 // FetchAPIsOnEvent  will fetch API from control plane during the API Notification Event
-func FetchAPIsOnEvent(conf *config.Config, apiUUIDList []string) {
+func FetchAPIsOnEvent(conf *config.Config, apiUUIDList []string, k8sClient client.Client) {
 	// Populate data from config.
 	envs := conf.ControlPlane.EnvironmentLabels
 
@@ -142,6 +150,82 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUIDList []string) {
 				logger.LoggerSync.Infof("API file found: " + file.Name)
 				// Todo: Read the apis.zip and extract the api.zip,deployments.json
 			}
+
+			envConfig1 := dpv1alpha2.EnvConfig{
+				HTTPRouteRefs: []string{"route1", "route2"},
+			}
+
+			// Set up the API object
+			api := &dpv1alpha2.API{
+				TypeMeta: metav1.TypeMeta{
+					Kind:       "API",
+					APIVersion: "dp.wso2.com/v1alpha2",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:              apiUUIDList[0],
+					Namespace:         utils.GetOperatorPodNamespace(),
+					CreationTimestamp: metav1.Now(),
+				},
+				Spec: dpv1alpha2.APISpec{
+					APIName:          "sample-api",
+					APIVersion:       "v1",
+					APIType:          "REST",
+					DefinitionPath:   "/docs",
+					BasePath:         "/" + apiUUIDList[0] + "/v1",
+					IsDefaultVersion: true,
+					Organization:     "default",
+					Sandbox:          []dpv1alpha2.EnvConfig{envConfig1},
+					Production:       []dpv1alpha2.EnvConfig{envConfig1},
+					APIProperties:    []dpv1alpha2.Property{},
+				},
+				Status: dpv1alpha2.APIStatus{},
+			}
+
+			configMap := &corev1.ConfigMap{}
+
+			httpRoute := &gwapiv1b1.HTTPRoute{}
+
+			secret := &corev1.Secret{}
+
+			authPolicy := &dpv1alpha2.Authentication{}
+
+			backendJWT := &dpv1alpha1.BackendJWT{}
+
+			apiPolicies := &dpv1alpha2.APIPolicy{}
+
+			interceptorServices := &dpv1alpha1.InterceptorService{}
+
+			scope := &dpv1alpha1.Scope{}
+
+			rateLimitPolicies := &dpv1alpha1.RateLimitPolicy{}
+
+			backends := &dpv1alpha1.Backend{}
+
+			// Apply the API to the Kubernetes cluster
+			internalk8sClient.CreateAPICR(api, k8sClient)
+			// Apply the ConfigMap to the Kubernetes cluster
+			internalk8sClient.CreateConfigMapCR(configMap, k8sClient)
+			// Apply the HttpRoute to the Kubernetes cluster
+			internalk8sClient.CreateHTTPRouteCR(httpRoute, k8sClient)
+			// Apply the Secret to the Kubernetes cluster
+			internalk8sClient.CreateSecretCR(secret, k8sClient)
+			// Apply the AuthPolicy to the Kubernetes cluster
+			internalk8sClient.CreateAuthenticationCR(authPolicy, k8sClient)
+			// Apply the BackendJWT to the Kubernetes cluster
+			internalk8sClient.CreateBackendJWTCR(backendJWT, k8sClient)
+			// Apply the APIPolicies to the Kubernetes cluster
+			internalk8sClient.CreateAPIPolicyCR(apiPolicies, k8sClient)
+			// Apply the InterceptorServices to the Kubernetes cluster
+			internalk8sClient.CreateInterceptorServicesCR(interceptorServices, k8sClient)
+			// Apply the Scope to the Kubernetes cluster
+			internalk8sClient.CreateScopeCR(scope, k8sClient)
+			// Apply the RateLimitPolicies to the Kubernetes cluster
+			internalk8sClient.CreateRateLimitPolicyCR(rateLimitPolicies, k8sClient)
+			// Apply the Backends to the Kubernetes cluster
+			internalk8sClient.CreateBackendCR(backends, k8sClient)
+
+			logger.LoggerMsg.Info("API applied successfully.\n")
+
 			if err != nil {
 				logger.LoggerMsg.Error("Error while reading zip", err)
 			}
