@@ -63,6 +63,29 @@ func TestEnvironmentSpecificParamsEndpoint(t *testing.T) {
 	}
 }
 
+// Try to import an API with the external params file with invalid format (missing the configs key)
+func TestInvalidEnvironmentSpecificParamsEndpoint(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+			prod := GetProdClient()
+
+			api := testutils.AddAPI(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
+
+			args := &testutils.ApiImportExportTestArgs{
+				ApiProvider: testutils.Credentials{Username: user.ApiCreator.Username, Password: user.ApiCreator.Password},
+				CtlUser:     testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Api:         api,
+				SrcAPIM:     dev,
+				DestAPIM:    prod,
+				ParamsFile:  testutils.InvalidAPIEndpointParamsFile,
+			}
+
+			testutils.ValidateAPIImportFailure(t, args)
+		})
+	}
+}
+
 // Add an API to one environment, export it and re-import it to another environment by setting
 // the configs for endpoints using the params file
 func TestEnvironmentSpecificParamsEndpointConfigs(t *testing.T) {
