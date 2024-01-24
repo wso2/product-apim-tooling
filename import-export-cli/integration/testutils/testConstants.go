@@ -18,7 +18,7 @@
 
 package testutils
 
-//Environment management related test constants
+// Environment management related test constants
 const ApictlInitMessage = "apictl is a Command Line Tool for Importing and Exporting APIs and Applications between " +
 	"different environments of WSO2 API Manager"
 const CustomTestExportDirectory = "CustomExportDirectory"
@@ -34,7 +34,7 @@ const TestMigrationDirectorySuffix = "/migration"
 
 const DefaultApictlTestAppName = "default-apictl-app"
 
-//Export test cases
+// Export test cases
 const DevFirstDefaultAPIName = "SwaggerPetstoreNew"
 const DevFirstSwagger2APIName = "PizzaShackAPI"
 const OpenAPI3DefinitionWithoutEndpointsAPIName = "PizzaShackAPI"
@@ -135,6 +135,9 @@ const APIAwsEndpointWithStoredCredentialsParamsFile = EnvParamsFilesDir + "/api_
 
 // APIDynamicEndpointParamsFile : Dynamic Endpoint with stored credentials in api_params.yaml
 const APIDynamicEndpointParamsFile = EnvParamsFilesDir + "/api_params_dynamic_endpoint.yaml"
+
+// InvalidAPIEndpointParamsFile : Invalid Endpoint URL api_params.yaml
+const InvalidAPIEndpointParamsFile = EnvParamsFilesDir + "/invalid_api_params_endpoint.yaml"
 
 // API types
 const APITypeREST = "HTTP"
