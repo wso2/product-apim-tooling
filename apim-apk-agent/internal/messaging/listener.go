@@ -21,12 +21,13 @@ package messaging
 import (
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	msg "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/messaging"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // ProcessEvents to pass event consumption
-func ProcessEvents(config *config.Config) {
+func ProcessEvents(config *config.Config, c client.Client) {
 	msg.InitiateJMSConnection(config.ControlPlane.BrokerConnectionParameters.EventListeningEndpoints)
 
-	go handleNotification()
+	go handleNotification(c)
 	go handleKMConfiguration()
 }

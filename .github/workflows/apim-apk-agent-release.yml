@@ -1,0 +1,65 @@
+name: Release APIM-APK Agent
+on:
+  workflow_dispatch:
+    inputs:
+      release_version:
+        required: true
+        type: string
+        description: "Release Version"
+      next_version:
+        type: string
+        description: "Next Development Version"
+  pull_request_target:
+    types:
+      - closed
+    paths:
+      - '**/apim-apk-agent/**'
+    branches:
+      - 'master'
+concurrency:
+  group: apim-apk-agent-${{ github.event.number || github.run_id }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: "1.19"
+      - name: Install Revive
+        shell: sh
+        run: |
+          go install github.com/mgechev/revive@v1.3.4
+      - name: Checkout product-apim-tooling-repo
+        uses: actions/checkout@v3
+      - name: checkout pull request and merge.
+        shell: sh
+        if: github.event_name == 'pull_request_target' && contains(github.event.label.name, 'trigger-action')
+        run: |
+          cd product-apim-tooling-repo
+          gh pr checkout ${{ github.event.number }} -b pr-${{ github.event.number }}
+          git checkout pr-${{ github.event.number }}
+          git merge origin/master
+      - name: Run Release Gradle build
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.release_version != '' && github.event.inputs.next_version != ''   
+        run: |
+          git checkout -b apim-apk-agent-1.x
+          git push origin apim-apk-agent-1.x
+          cd apim-apk-agent
+          ./gradlew build
+      - name: Run Gradle Build
+        run: |
+          cd apim-apk-agent
+          ./gradlew build
+      - name: Run Gradle Build
+        if: github.event_name == 'pull_request_target' && github.event.action == 'closed' && github.event.pull_request.merged == true
+        run: |
+          cd apim-apk-agent
+          ./gradlew build
+      - name: run codecov
+        uses: codecov/codecov-action@v3
+        with:
+          verbose: true # optional (default = false)
+          directory: apim-apk-agent
+          flags: apim-apk-agent

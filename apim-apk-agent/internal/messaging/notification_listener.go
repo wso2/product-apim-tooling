@@ -36,6 +36,7 @@ import (
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/logging"
 	msg "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/messaging"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/utils"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // constant variables
@@ -74,7 +75,7 @@ var (
 )
 
 // handleNotification to process
-func handleNotification() {
+func handleNotification(c client.Client) {
 	conf, _ := config.ReadConfigs()
 	for d := range msg.NotificationChannel {
 		var notification msg.EventNotification
@@ -83,7 +84,7 @@ func handleNotification() {
 			continue
 		}
 		logger.LoggerMsg.Infof("Event %s is received", notification.Event.PayloadData.EventType)
-		err := processNotificationEvent(conf, &notification)
+		err := processNotificationEvent(conf, &notification, c)
 		if err != nil {
 			continue
 		}
@@ -92,7 +93,7 @@ func handleNotification() {
 	logger.LoggerMsg.Infof("handle: deliveries channel closed")
 }
 
-func processNotificationEvent(conf *config.Config, notification *msg.EventNotification) error {
+func processNotificationEvent(conf *config.Config, notification *msg.EventNotification, c client.Client) error {
 	var eventType string
 	var decodedByte, err = base64.StdEncoding.DecodeString(notification.Event.PayloadData.Event)
 	if err != nil {
@@ -108,7 +109,7 @@ func processNotificationEvent(conf *config.Config, notification *msg.EventNotifi
 	if strings.Contains(eventType, apiLifeCycleChange) {
 		handleLifeCycleEvents(decodedByte)
 	} else if strings.Contains(eventType, apiEventType) {
-		handleAPIEvents(decodedByte, eventType, conf)
+		handleAPIEvents(decodedByte, eventType, conf, c)
 	} else if strings.Contains(eventType, applicationEventType) {
 		handleApplicationEvents(decodedByte, eventType)
 	} else if strings.Contains(eventType, subscriptionEventType) {
@@ -143,7 +144,7 @@ func handleDefaultVersionUpdate(event msg.APIEvent) {
 }
 
 // handleAPIEvents to process api related data
-func handleAPIEvents(data []byte, eventType string, conf *config.Config) {
+func handleAPIEvents(data []byte, eventType string, conf *config.Config, c client.Client) {
 	var (
 		apiEvent              msg.APIEvent
 		currentTimeStamp      int64 = apiEvent.Event.TimeStamp
@@ -191,7 +192,7 @@ func handleAPIEvents(data []byte, eventType string, conf *config.Config) {
 	if strings.EqualFold(deployAPIToGateway, apiEvent.Event.Type) {
 		//go synchronizer.FetchAPIsFromControlPlane(apiEvent.UUID, apiEvent.GatewayLabels)
 		apiUUIDList = append(apiUUIDList, apiEvent.UUID)
-		go synchronizer.FetchAPIsOnEvent(conf, apiUUIDList)
+		go synchronizer.FetchAPIsOnEvent(conf, apiUUIDList, c)
 	}
 
 	for _, env := range apiEvent.GatewayLabels {
