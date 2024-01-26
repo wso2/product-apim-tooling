@@ -25,5 +25,5 @@ import (
 
 func TestGetMessage(t *testing.T) {
 	result := getMessage()
-	assert.Equal(t, "Hello, Testing!", result)
+	assert.Equal(t, "Hello, Testing! agent", result)
 }

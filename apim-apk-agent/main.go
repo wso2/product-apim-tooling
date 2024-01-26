@@ -35,5 +35,5 @@ func main() {
 
 // Function to be tested
 func getMessage() string {
-	return "Hello, Testing!"
+	return "Hello, Testing! agent"
 }
