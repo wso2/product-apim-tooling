@@ -38,7 +38,6 @@ jobs:
         shell: sh
         if: github.event_name == 'pull_request_target' && contains(github.event.label.name, 'trigger-action')
         run: |
-          cd product-apim-tooling-repo
           gh pr checkout ${{ github.event.number }} -b pr-${{ github.event.number }}
           git checkout pr-${{ github.event.number }}
           git merge origin/master
