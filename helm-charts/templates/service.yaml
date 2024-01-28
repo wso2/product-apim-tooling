@@ -19,10 +19,13 @@ kind: Service
 metadata:
   name: "apim-apk-agent-service"
 spec:
-  type: {{ .Values.service.type }}
   ports:
     - name: grpc-server
       protocol: TCP
       port: 18000
+    - name: rest-server
+      protocol: TCP
+      port: 18001
   selector:
     app.kubernetes.io/app: "apim-apk-agent"
+  

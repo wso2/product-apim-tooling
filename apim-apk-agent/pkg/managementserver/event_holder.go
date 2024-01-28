@@ -1,0 +1,257 @@
+package managementserver
+
+import (
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/loggers"
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/utils"
+)
+
+var (
+	applicationMap           map[string]Application
+	subscriptionMap          map[string]Subscription
+	applicationMappingMap    map[string]ApplicationMapping
+	applicationKeyMappingMap map[string]ApplicationKeyMapping
+)
+
+func init() {
+	applicationMap = make(map[string]Application)
+	subscriptionMap = make(map[string]Subscription)
+	applicationMappingMap = make(map[string]ApplicationMapping)
+	applicationKeyMappingMap = make(map[string]ApplicationKeyMapping)
+}
+
+// AddApplication adds an application to the applicationMap
+func AddApplication(application Application) {
+	applicationMap[application.UUID] = application
+}
+
+// AddSubscription adds a subscription to the subscriptionMap
+func AddSubscription(subscription Subscription) {
+	subscriptionMap[subscription.UUID] = subscription
+}
+
+// AddApplicationMapping adds an application mapping to the applicationMappingMap
+func AddApplicationMapping(applicationMapping ApplicationMapping) {
+	applicationMappingMap[applicationMapping.UUID] = applicationMapping
+}
+
+// AddApplicationKeyMapping adds an application key mapping to the applicationKeyMappingMap
+func AddApplicationKeyMapping(applicationKeyMapping ApplicationKeyMapping) {
+	uuid := utils.GetUniqueIDOfApplicationKeyMapping(applicationKeyMapping.ApplicationUUID, applicationKeyMapping.KeyType, applicationKeyMapping.SecurityScheme, applicationKeyMapping.EnvID, applicationKeyMapping.Organization)
+	loggers.LoggerAPI.Infof("Adding application key mapping with uuid: %v", uuid)
+	applicationKeyMappingMap[uuid] = applicationKeyMapping
+}
+
+// GetAllApplications returns all the applications in the applicationMap
+func GetAllApplications() []Application {
+	var applications []Application
+	for _, application := range applicationMap {
+		applications = append(applications, application)
+	}
+	return applications
+}
+
+// GetAllSubscriptions returns all the subscriptions in the subscriptionMap
+func GetAllSubscriptions() []Subscription {
+	var subscriptions []Subscription
+	for _, subscription := range subscriptionMap {
+		subscriptions = append(subscriptions, subscription)
+	}
+	return subscriptions
+}
+
+// GetAllApplicationMappings returns all the application mappings in the applicationMappingMap
+func GetAllApplicationMappings() []ApplicationMapping {
+	var applicationMappings []ApplicationMapping
+	for _, applicationMapping := range applicationMappingMap {
+		applicationMappings = append(applicationMappings, applicationMapping)
+	}
+	return applicationMappings
+}
+
+// GetAllApplicationKeyMappings returns all the application key mappings in the applicationKeyMappingMap
+func GetAllApplicationKeyMappings() []ApplicationKeyMapping {
+	var applicationKeyMappings []ApplicationKeyMapping
+	for _, applicationKeyMapping := range applicationKeyMappingMap {
+		applicationKeyMappings = append(applicationKeyMappings, applicationKeyMapping)
+	}
+	return applicationKeyMappings
+}
+
+// GetApplication returns an application from the applicationMap
+func GetApplication(uuid string) Application {
+	return applicationMap[uuid]
+}
+
+// GetSubscription returns a subscription from the subscriptionMap
+func GetSubscription(uuid string) Subscription {
+	return subscriptionMap[uuid]
+}
+
+// GetApplicationMapping returns an application mapping from the applicationMappingMap
+func GetApplicationMapping(uuid string) ApplicationMapping {
+	return applicationMappingMap[uuid]
+}
+
+// GetApplicationKeyMapping returns an application key mapping from the applicationKeyMappingMap
+func GetApplicationKeyMapping(uuid string) ApplicationKeyMapping {
+	return applicationKeyMappingMap[uuid]
+}
+
+// DeleteApplication deletes an application from the applicationMap
+func DeleteApplication(uuid string) {
+	delete(applicationMap, uuid)
+}
+
+// DeleteSubscription deletes a subscription from the subscriptionMap
+func DeleteSubscription(uuid string) {
+	delete(subscriptionMap, uuid)
+}
+
+// DeleteApplicationMapping deletes an application mapping from the applicationMappingMap
+func DeleteApplicationMapping(uuid string) {
+	delete(applicationMappingMap, uuid)
+}
+
+// DeleteApplicationKeyMapping deletes an application key mapping from the applicationKeyMappingMap
+func DeleteApplicationKeyMapping(uuid string) {
+	loggers.LoggerAPI.Infof("Deleting application key mapping with uuid: %v", uuid)
+	delete(applicationKeyMappingMap, uuid)
+}
+
+// UpdateApplication updates an application in the applicationMap
+func UpdateApplication(uuid string, application Application) {
+	applicationMap[uuid] = application
+}
+
+// UpdateSubscription updates a subscription in the subscriptionMap
+func UpdateSubscription(uuid string, subscription Subscription) {
+	subscriptionMap[uuid] = subscription
+}
+
+// UpdateApplicationMapping updates an application mapping in the applicationMappingMap
+func UpdateApplicationMapping(uuid string, applicationMapping ApplicationMapping) {
+	applicationMappingMap[uuid] = applicationMapping
+}
+
+// UpdateApplicationKeyMapping updates an application key mapping in the applicationKeyMappingMap
+func UpdateApplicationKeyMapping(uuid string, applicationKeyMapping ApplicationKeyMapping) {
+	applicationKeyMappingMap[uuid] = applicationKeyMapping
+}
+
+// GetApplicationKeyMappingByApplicationUUID returns an application key mapping from the applicationKeyMappingMap
+func GetApplicationKeyMappingByApplicationUUID(uuid string) ApplicationKeyMapping {
+	for _, applicationKeyMapping := range applicationKeyMappingMap {
+		if applicationKeyMapping.ApplicationUUID == uuid {
+			return applicationKeyMapping
+		}
+	}
+	return ApplicationKeyMapping{}
+}
+
+// GetApplicationKeyMappingByApplicationUUIDAndEnvID returns an application key mapping from the applicationKeyMappingMap
+func GetApplicationKeyMappingByApplicationUUIDAndEnvID(uuid string, envID string) ApplicationKeyMapping {
+	for _, applicationKeyMapping := range applicationKeyMappingMap {
+		if applicationKeyMapping.ApplicationUUID == uuid && applicationKeyMapping.EnvID == envID {
+			return applicationKeyMapping
+		}
+	}
+	return ApplicationKeyMapping{}
+}
+
+// GetApplicationKeyMappingByApplicationUUIDAndSecurityScheme returns an application key mapping from the applicationKeyMappingMap
+func GetApplicationKeyMappingByApplicationUUIDAndSecurityScheme(uuid string, securityScheme string) ApplicationKeyMapping {
+	for _, applicationKeyMapping := range applicationKeyMappingMap {
+		if applicationKeyMapping.ApplicationUUID == uuid && applicationKeyMapping.SecurityScheme == securityScheme {
+			return applicationKeyMapping
+		}
+	}
+	return ApplicationKeyMapping{}
+}
+
+// GetApplicationKeyMappingByApplicationUUIDAndSecuritySchemeAndEnvID returns an application key mapping from the applicationKeyMappingMap
+func GetApplicationKeyMappingByApplicationUUIDAndSecuritySchemeAndEnvID(uuid string, securityScheme string, envID string) ApplicationKeyMapping {
+	for _, applicationKeyMapping := range applicationKeyMappingMap {
+		if applicationKeyMapping.ApplicationUUID == uuid && applicationKeyMapping.SecurityScheme == securityScheme && applicationKeyMapping.EnvID == envID {
+			return applicationKeyMapping
+		}
+	}
+	return ApplicationKeyMapping{}
+}
+
+// GetApplicationMappingByApplicationUUID returns an application mapping from the applicationMappingMap
+func GetApplicationMappingByApplicationUUID(uuid string) ApplicationMapping {
+	for _, applicationMapping := range applicationMappingMap {
+		if applicationMapping.ApplicationRef == uuid {
+			return applicationMapping
+		}
+	}
+	return ApplicationMapping{}
+}
+
+// GetApplicationMappingByApplicationUUIDAndSubscriptionUUID returns an application mapping from the applicationMappingMap
+func GetApplicationMappingByApplicationUUIDAndSubscriptionUUID(uuid string, subscriptionUUID string) ApplicationMapping {
+	for _, applicationMapping := range applicationMappingMap {
+		if applicationMapping.ApplicationRef == uuid && applicationMapping.SubscriptionRef == subscriptionUUID {
+			return applicationMapping
+		}
+	}
+	return ApplicationMapping{}
+}
+
+// DeleteAllApplications deletes all the applications in the applicationMap
+func DeleteAllApplications() {
+	applicationMap = make(map[string]Application)
+}
+
+// DeleteAllSubscriptions deletes all the subscriptions in the subscriptionMap
+func DeleteAllSubscriptions() {
+	subscriptionMap = make(map[string]Subscription)
+}
+
+// DeleteAllApplicationMappings deletes all the application mappings in the applicationMappingMap
+func DeleteAllApplicationMappings() {
+	applicationMappingMap = make(map[string]ApplicationMapping)
+}
+
+// DeleteAllApplicationKeyMappings deletes all the application key mappings in the applicationKeyMappingMap
+func DeleteAllApplicationKeyMappings() {
+	applicationKeyMappingMap = make(map[string]ApplicationKeyMapping)
+}
+
+// AddAllSubscriptions adds all the subscriptions in the subscriptionMap
+func AddAllSubscriptions(subscriptionMapTemp map[string]Subscription) {
+	subscriptionMap = subscriptionMapTemp
+}
+
+// AddAllApplications adds all the applications in the applicationMap
+func AddAllApplications(applicationMapTemp map[string]Application) {
+	applicationMap = applicationMapTemp
+}
+
+// AddAllApplicationMappings adds all the application mappings in the applicationMappingMap
+func AddAllApplicationMappings(applicationMappingMapTemp map[string]ApplicationMapping) {
+	applicationMappingMap = applicationMappingMapTemp
+}
+
+// AddAllApplicationKeyMappings adds all the application key mappings in the applicationKeyMappingMap
+func AddAllApplicationKeyMappings(applicationKeyMappingMapTemp map[string]ApplicationKeyMapping) {
+	applicationKeyMappingMap = applicationKeyMappingMapTemp
+}
+
+// DeleteAllSubscriptionsByApplicationsUUID deletes all the subscriptions in the subscriptionMap
+func DeleteAllSubscriptionsByApplicationsUUID(uuid string) {
+	for _, subscription := range subscriptionMap {
+		if subscription.Organization == uuid {
+			delete(subscriptionMap, subscription.UUID)
+		}
+	}
+}
+
+// DeleteAllApplicationMappingsByApplicationsUUID deletes all the application mappings in the applicationMappingMap
+func DeleteAllApplicationMappingsByApplicationsUUID(uuid string) {
+	for _, applicationMapping := range applicationMappingMap {
+		if applicationMapping.UUID == uuid {
+			delete(applicationMappingMap, applicationMapping.UUID)
+		}
+	}
+}

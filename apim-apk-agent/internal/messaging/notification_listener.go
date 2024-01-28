@@ -19,9 +19,7 @@
 package messaging
 
 import (
-	"crypto/sha1"
 	"encoding/base64"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -34,6 +32,7 @@ import (
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/logging"
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/managementserver"
 	msg "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/messaging"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/utils"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -297,14 +296,18 @@ func handleApplicationEvents(data []byte, eventType string) {
 				TimeStamp:             applicationRegistrationEvent.TimeStamp,
 				ApplicationKeyMapping: &applicationKeyMappingEvent,
 			}
-			utils.SendEvent(&event)
+			managementserver.AddApplicationKeyMapping(managementserver.ApplicationKeyMapping{ApplicationUUID: applicationKeyMappingEvent.ApplicationUUID, SecurityScheme: applicationKeyMappingEvent.SecurityScheme, ApplicationIdentifier: applicationKeyMappingEvent.ApplicationIdentifier, KeyType: applicationKeyMappingEvent.KeyType, Organization: applicationKeyMappingEvent.Organization, EnvID: applicationKeyMappingEvent.EnvID})
+			go utils.SendEvent(&event)
 		} else if strings.EqualFold(removeApplicationKeyMapping, eventType) {
 			event := event.Event{Type: constants.ApplicationKeyMappingDeleted,
 				Uuid:                  uuid.New().String(),
 				TimeStamp:             applicationRegistrationEvent.TimeStamp,
 				ApplicationKeyMapping: &applicationKeyMappingEvent,
 			}
-			utils.SendEvent(&event)
+			uuid := utils.GetUniqueIDOfApplicationKeyMapping(applicationKeyMappingEvent.ApplicationUUID, applicationKeyMappingEvent.KeyType, applicationKeyMappingEvent.SecurityScheme, applicationKeyMappingEvent.EnvID, applicationKeyMappingEvent.Organization)
+			logger.LoggerAdapter.Infof("Application Key Mapping event data %v", uuid)
+			managementserver.DeleteApplicationKeyMapping(uuid)
+			go utils.SendEvent(&event)
 		}
 	} else {
 		var applicationEvent msg.ApplicationEvent
@@ -334,12 +337,15 @@ func handleApplicationEvents(data []byte, eventType string) {
 		}
 		if applicationEvent.Event.Type == applicationCreate {
 			event := event.Event{Type: constants.ApplicationCreated, Uuid: uuid.New().String(), TimeStamp: applicationEvent.TimeStamp, Application: &applicationGrpcEvent}
+			managementserver.AddApplication(managementserver.Application{UUID: applicationGrpcEvent.Uuid, Name: applicationGrpcEvent.Name, Owner: applicationGrpcEvent.Owner, Organization: applicationGrpcEvent.Organization, Attributes: applicationGrpcEvent.Attributes})
 			utils.SendEvent(&event)
 		} else if applicationEvent.Event.Type == applicationUpdate {
 			event := event.Event{Type: constants.ApplicationUpdated, Uuid: uuid.New().String(), TimeStamp: applicationEvent.TimeStamp, Application: &applicationGrpcEvent}
+			managementserver.UpdateApplication(applicationGrpcEvent.Uuid, managementserver.Application{UUID: applicationGrpcEvent.Uuid, Name: applicationGrpcEvent.Name, Owner: applicationGrpcEvent.Owner, Organization: applicationGrpcEvent.Organization, Attributes: applicationGrpcEvent.Attributes})
 			utils.SendEvent(&event)
 		} else if applicationEvent.Event.Type == applicationDelete {
 			event := event.Event{Type: constants.ApplicationDeleted, Uuid: uuid.New().String(), TimeStamp: applicationEvent.TimeStamp, Application: &applicationGrpcEvent}
+			managementserver.DeleteApplication(applicationGrpcEvent.Uuid)
 			utils.SendEvent(&event)
 		} else {
 			logger.LoggerAdapter.Warnf("Application Event Type is not recognized for the Event under "+
@@ -382,31 +388,29 @@ func handleSubscriptionEvents(data []byte, eventType string) {
 		SubscribedApi: &event.SubscribedAPI{Name: subscriptionEvent.APIUUID, Version: "1.0.0"},
 	}
 
-	hasher := sha1.New()
-	hasher.Write([]byte(fmt.Sprintf("%s:%s", subscriptionEvent.ApplicationUUID, subscriptionEvent.SubscriptionUUID)))
-
-	// Get the final hash sum
-	hashSum := hasher.Sum(nil)
-
-	// Convert the hash sum to a hexadecimal string
-	hashString := hex.EncodeToString(hashSum)
-	applicationMapping := event.ApplicationMapping{Uuid: hashString, ApplicationRef: subscriptionEvent.ApplicationUUID, SubscriptionRef: subscriptionEvent.SubscriptionUUID, Organization: subscriptionEvent.TenantDomain}
+	applicationMapping := event.ApplicationMapping{Uuid: utils.GetUniqueIDOfApplicationMapping(subscriptionEvent.ApplicationUUID, subscriptionEvent.SubscriptionUUID), ApplicationRef: subscriptionEvent.ApplicationUUID, SubscriptionRef: subscriptionEvent.SubscriptionUUID, Organization: subscriptionEvent.TenantDomain}
 	if subscriptionEvent.Event.Type == subscriptionCreate {
 		subsEvent := event.Event{Uuid: uuid.New().String(), Type: constants.SubscriptionCreated, TimeStamp: subscriptionEvent.TimeStamp, Subscription: &subscription}
-		utils.SendEvent(&subsEvent)
-		applicationMappingEvent := event.Event{Uuid: uuid.New().String(), Type: constants.ApplicationMappingCreated, TimeStamp: subscriptionEvent.TimeStamp, ApplicationMapping: &applicationMapping}
-		utils.SendEvent(&applicationMappingEvent)
+		managementserver.AddSubscription(managementserver.Subscription{UUID: subscription.Uuid, SubStatus: subscription.SubStatus, Organization: subscription.Organization, SubscribedAPI: &managementserver.SubscribedAPI{Name: subscription.SubscribedApi.Name, Version: subscription.SubscribedApi.Version}})
+		go utils.SendEvent(&subsEvent)
+		applicationMappingEvent := event.Event{Uuid: utils.GetUniqueIDOfApplicationMapping(subscriptionEvent.ApplicationUUID, subscriptionEvent.SubscriptionUUID), Type: constants.ApplicationMappingCreated, TimeStamp: subscriptionEvent.TimeStamp, ApplicationMapping: &applicationMapping}
+		managementserver.AddApplicationMapping(managementserver.ApplicationMapping{UUID: applicationMapping.Uuid, ApplicationRef: applicationMapping.ApplicationRef, SubscriptionRef: applicationMapping.SubscriptionRef, Organization: applicationMapping.Organization})
+		go utils.SendEvent(&applicationMappingEvent)
 	} else if subscriptionEvent.Event.Type == subscriptionUpdate {
 		subsEvent := event.Event{Uuid: uuid.New().String(), Type: constants.SubscriptionUpdated, TimeStamp: subscriptionEvent.TimeStamp, Subscription: &subscription}
-		utils.SendEvent(&subsEvent)
-		applicationMappingEvent := event.Event{Uuid: uuid.New().String(), Type: constants.ApplicationMappingUpdated, TimeStamp: subscriptionEvent.TimeStamp, ApplicationMapping: &applicationMapping}
-		utils.SendEvent(&applicationMappingEvent)
+		managementserver.UpdateSubscription(subscription.Uuid, managementserver.Subscription{UUID: subscription.Uuid, SubStatus: subscription.SubStatus, Organization: subscription.Organization, SubscribedAPI: &managementserver.SubscribedAPI{Name: subscription.SubscribedApi.Name, Version: subscription.SubscribedApi.Version}})
+		go utils.SendEvent(&subsEvent)
+		applicationMappingEvent := event.Event{Uuid: utils.GetUniqueIDOfApplicationMapping(subscriptionEvent.ApplicationUUID, subscriptionEvent.SubscriptionUUID), Type: constants.ApplicationMappingUpdated, TimeStamp: subscriptionEvent.TimeStamp, ApplicationMapping: &applicationMapping}
+		managementserver.UpdateApplicationMapping(applicationMappingEvent.Uuid, managementserver.ApplicationMapping{UUID: applicationMappingEvent.Uuid, ApplicationRef: applicationMapping.ApplicationRef, SubscriptionRef: applicationMapping.SubscriptionRef, Organization: applicationMapping.Organization})
+		go utils.SendEvent(&applicationMappingEvent)
 
 	} else if subscriptionEvent.Event.Type == subscriptionDelete {
 		subsEvent := event.Event{Uuid: uuid.New().String(), Type: constants.SubscriptionDeleted, TimeStamp: subscriptionEvent.TimeStamp, Subscription: &subscription}
-		utils.SendEvent(&subsEvent)
-		applicationMappingEvent := event.Event{Uuid: uuid.New().String(), Type: constants.ApplicationMappingDeleted, TimeStamp: subscriptionEvent.TimeStamp, ApplicationMapping: &applicationMapping}
-		utils.SendEvent(&applicationMappingEvent)
+		managementserver.DeleteSubscription(subscription.Uuid)
+		go utils.SendEvent(&subsEvent)
+		applicationMappingEvent := event.Event{Uuid: utils.GetUniqueIDOfApplicationMapping(subscriptionEvent.ApplicationUUID, subscriptionEvent.SubscriptionUUID), Type: constants.ApplicationMappingDeleted, TimeStamp: subscriptionEvent.TimeStamp, ApplicationMapping: &applicationMapping}
+		managementserver.DeleteApplicationMapping(applicationMappingEvent.Uuid)
+		go utils.SendEvent(&applicationMappingEvent)
 	}
 }
 

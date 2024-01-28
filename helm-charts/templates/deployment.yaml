@@ -43,6 +43,8 @@ spec:
           ports:
             - name: grpc-port
               containerPort: 18000
+            - name: rest-port
+              containerPort: 18001
           volumeMounts:
             - name: log-conf-volume
               mountPath: /home/wso2/conf/
