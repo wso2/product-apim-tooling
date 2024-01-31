@@ -25,6 +25,7 @@ type APIProduct struct {
 	Description                  string               `json:"description"`
 	Context                      string               `json:"context"`
 	Provider                     string               `json:"provider"`
+	Version                      string               `json:"version,omitempty" yaml:"version,omitempty"`
 	HasThumbnail                 bool                 `json:"hasThumbnail"`
 	State                        string               `json:"state"`
 	EnableSchemaValidation       bool                 `json:"enableSchemaValidation"`
