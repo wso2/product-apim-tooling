@@ -730,7 +730,7 @@ func searchAPIProductsWithQuery(t *testing.T, args *ApiProductImportExportTestAr
 
 // Execute change-status api-product command with parameters
 func changeLifeCycleOfAPIProduct(t *testing.T, args *ApiProductChangeLifeCycleStatusTestArgs) (string, error) {
-	output, err := base.Execute(t, "change-status", "api-product", "-a", args.Action, "-n", args.ApiProduct.Name,
+	output, err := base.Execute(t, "change-status", "api-product", "-a", args.Action, "-n", args.ApiProduct.Name, "-v", args.ApiProduct.Version,
 		"-e", args.APIM.EnvName, "-k", "--verbose")
 	return output, err
 }
