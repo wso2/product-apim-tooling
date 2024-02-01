@@ -32,15 +32,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
 	"io"
 	"mime/multipart"
 	"net/http"
 
+	"github.com/wso2/apk/common-go-libs/utils"
+
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
+
 	"gopkg.in/yaml.v2"
 )
-
-const apkConfGenerator = "apk_config_generator"
 
 // GenerateAPKConf will Generate the mapped .apk-conf file for a given API Project zip
 func GenerateAPKConf(APIJson string) (string, uint32, error) {
@@ -63,6 +65,7 @@ func GenerateAPKConf(APIJson string) (string, uint32, error) {
 	apk.Version = apiYamlData.Version
 	apk.Type = getAPIType(apiYamlData.Type)
 	apk.DefaultVersion = apiYamlData.DefaultVersion
+	apk.DefinitionPath = "/definition"
 
 	apkOperations := make([]Operation, len(apiYamlData.Operations))
 
@@ -100,12 +103,14 @@ func GenerateAPKConf(APIJson string) (string, uint32, error) {
 	if StringExists("oauth2", apiYamlData.SecuritySchemes) && apiYamlData.AuthorizationHeader == "Authorization" {
 		var authConfigs []AuthConfiguration
 		authConfig := AuthConfiguration{
-			AuthType:   "oauth2",
+			Required:   "mandatory",
+			AuthType:   "OAuth2",
 			HeaderName: apiYamlData.AuthorizationHeader,
+			Enabled:    false,
 		}
 
 		authConfigs = append(authConfigs, authConfig)
-		apk.Authentication = authConfigs
+		apk.Authentication = &authConfigs
 	}
 
 	apk.CorsConfig = &apiYamlData.CORSConfiguration
@@ -296,7 +301,7 @@ func transformCRD(crdZip []byte, vHost string, organization string) ([]byte, err
 
 	defer zipWriter.Close()
 
-	//namespace := config.ReadConfig().Dataplane.Namespace
+	namespace := utils.GetOperatorPodNamespace()
 
 	// Read all the files from zip archive
 	for _, zipFile := range zipReader.File {
@@ -308,7 +313,7 @@ func transformCRD(crdZip []byte, vHost string, organization string) ([]byte, err
 		}
 
 		_ = apkCRDFileBytes // this is unzipped file bytes
-		yamlCrd, err := generateAPKCrdsFromYaml(apkCRDFileBytes, organization, vHost)
+		yamlCrd, err := generateAPKCrdsFromYaml(apkCRDFileBytes, organization, vHost, namespace)
 		if err != nil {
 			logger.LoggerTransformer.Error("Error occured while retrieving the modified CRDs", err)
 			return nil, err
@@ -342,7 +347,7 @@ func transformCRD(crdZip []byte, vHost string, organization string) ([]byte, err
 
 // generateAPKCrdsFromYaml processes the returned APK CRD yaml, replaces the vhost, adds the organization
 // and namespace and returns the json
-func generateAPKCrdsFromYaml(crdYaml []byte, orgUUID, vhost string) ([]byte, error) {
+func generateAPKCrdsFromYaml(crdYaml []byte, orgUUID, vhost string, namespace string) ([]byte, error) {
 	var crdYml map[interface{}]interface{}
 	unMarshalErr := yaml.Unmarshal(crdYaml, &crdYml)
 
@@ -351,7 +356,7 @@ func generateAPKCrdsFromYaml(crdYaml []byte, orgUUID, vhost string) ([]byte, err
 	}
 	replaceVhost(crdYml, vhost)
 	addOrganization(crdYml, orgUUID)
-	//addNamespace(crdYml, namespace)
+	addNamespace(crdYml, namespace)
 
 	processdCrdYml := convertMap(crdYml)
 
@@ -399,6 +404,8 @@ func convertMap(inputMap map[interface{}]interface{}) map[string]interface{} {
 	return result
 }
 
+// replaceVhost will take the httpRoute CR and replace the default vHost with the one passed inside
+// the deploymemt descriptor
 func replaceVhost(inputMap map[interface{}]interface{}, vhost string) {
 	if kind, ok := inputMap[k8sKindField].(string); ok && kind == k8sKindHTTPRoute {
 		if spec, ok := inputMap[k8sSpecField].(map[interface{}]interface{}); ok {
@@ -409,6 +416,8 @@ func replaceVhost(inputMap map[interface{}]interface{}, vhost string) {
 	}
 }
 
+// addOrganization will take the API CR and change the organization to the one passed inside
+// the deploymemt descriptor
 func addOrganization(inputMap map[interface{}]interface{}, organization string) {
 	if kind, ok := inputMap[k8sKindField].(string); ok && kind == k8sKindAPI {
 		if spec, ok := inputMap[k8sSpecField].(map[interface{}]interface{}); ok {
@@ -427,12 +436,14 @@ func addOrganization(inputMap map[interface{}]interface{}, organization string) 
 	}
 }
 
+// addNamespace will set the namespace attribute in the CR to the pods currently operating namespace
 func addNamespace(inputMap map[interface{}]interface{}, namespace string) {
 	if metadata, ok := inputMap[k8sMetadataField].(map[interface{}]interface{}); ok {
 		metadata[k8sNamespaceField] = namespace
 	}
 }
 
+// generateSHA1Hash returns the SHA1 hash for the given string
 func generateSHA1Hash(input string) string {
 	h := sha1.New() /* #nosec */
 	h.Write([]byte(input))

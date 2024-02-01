@@ -19,9 +19,14 @@ package transformer
 
 // AuthConfiguration represents the security configurations made for the API security
 type AuthConfiguration struct {
+	Required          string `yaml:"required,omitempty"`
 	AuthType          string `yaml:"authType,omitempty"`
 	HeaderName        string `yaml:"headerName,omitempty"`
 	SendTokenUpStream bool   `yaml:"sendTokenToUpstream,omitempty"`
+	Enabled           bool   `yaml:"enabled,omitempty"`
+	QueryParamName    string `yaml:"queryParamName,omitempty"`
+	HeaderEnabled     bool   `yaml:"headerEnable,omitempty"`
+	queryParamEnable  bool   `yaml:"queryParamEnable,omitempty"`
 }
 
 // Endpoint represents an API endpoint.
@@ -69,8 +74,9 @@ type API struct {
 	Context                string                 `yaml:"basePath,omitempty"`
 	Type                   string                 `yaml:"type,omitempty"`
 	DefaultVersion         bool                   `yaml:"defaultVersion"`
+	DefinitionPath         string                 `yaml:"definitionPath,omitempty"`
 	EndpointConfigurations *EndpointConfiguration `yaml:"endpointConfigurations,omitempty"`
 	Operations             *[]Operation           `yaml:"operations,omitempty"`
-	Authentication         []AuthConfiguration    `yaml:"authentication,omitempty"`
+	Authentication         *[]AuthConfiguration   `yaml:"authentication,omitempty"`
 	CorsConfig             *CORSConfiguration     `yaml:"corsConfiguration,omitempty"`
 }

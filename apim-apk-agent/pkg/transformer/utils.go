@@ -21,15 +21,13 @@ import (
 	"archive/zip"
 	"bytes"
 	"encoding/json"
-	"fmt"
+
 	"io"
 	"os"
 	"strings"
 
-	loggers "github.com/sirupsen/logrus"
+	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
 )
-
-const clientUtils = "client_utils"
 
 // DecodeAPIArtifact decodes a zip-encoded API payload, extracting API details like JSON, Swagger, and deployment configuration.
 // Returns the APIArtifact or an error if decoding or extraction fails.
@@ -37,55 +35,55 @@ func DecodeAPIArtifact(payload []byte) (*APIArtifact, error) {
 	zipReader, zipReaderError := zip.NewReader(bytes.NewReader(payload), int64(len(payload)))
 	var apiArtifact = &APIArtifact{}
 	if zipReaderError != nil {
-		loggers.Error("Error reading zip file", zipReaderError.Error())
+		logger.LoggerTransformer.Errorf("Error reading zip file: %v", zipReaderError)
 		return nil, zipReaderError
 	}
 
 	// Read the zip file and get the
 	for _, file := range zipReader.File {
-		loggers.Info("Reading " + file.Name)
+		logger.LoggerTransformer.Info("Reading " + file.Name)
 		err := readZipFile(file, apiArtifact)
 
 		if err != nil {
-			loggers.Error("Error reading zip file", err.Error())
+			logger.LoggerTransformer.Errorf("Error reading zip file %v", err)
 			return nil, err
 		}
 	}
 	return apiArtifact, nil
 }
 
+// readZipfile will recursively go through the zip file, read and maps the content inside
+// to its appropriate artifact attribute
 func readZipFile(file *zip.File, apiArtifact *APIArtifact) error {
 	f, fileOpenErr := file.Open()
 
 	if fileOpenErr != nil {
-		//logger.GetLogger(ctx, clientUtils).Error(fmt.Sprintf("error opening file %s in zip archieve", file.Name), fileOpenErr.Error())
-		return fmt.Errorf("error opening file %s in zip archieve", file.Name)
+		logger.LoggerTransformer.Errorf("error opening file %s in zip archieve", file.Name)
+		return fileOpenErr
 	}
 	defer f.Close()
 
 	content, contentError := io.ReadAll(f)
 
 	if contentError != nil {
-		loggers.Error(fmt.Sprintf("error reading file %s in zip archieve", file.Name), contentError.Error())
-		return fmt.Errorf("error reading file %s in zip archieve", file.Name)
+		logger.LoggerTransformer.Errorf("Error reading file %s in zip archieve", file.Name)
+		return contentError
 	}
 
 	if strings.Contains(file.Name, ".zip") {
-		// revisionID := strings.Split(strings.Split(file.Name, ".zip")[0], "-")[1]
-		// apiArtifact.RevisionID = revId
 		zipReader, err := zip.NewReader(bytes.NewReader(content), int64(len(content)))
 
 		if err != nil {
-			loggers.Error("Error reading zip file", err.Error())
-			return fmt.Errorf("error reading zip file %s", file.Name)
+			logger.LoggerTransformer.Errorf("Error reading zip file: ", err)
+			return err
 		}
 
 		for _, file := range zipReader.File {
-			er := readZipFile(file, apiArtifact)
+			err := readZipFile(file, apiArtifact)
 
-			if er != nil {
-				loggers.Error("Error while reading the embedded zip file", er.Error())
-				return fmt.Errorf("error reading embedded zip file %s", file.Name)
+			if err != nil {
+				logger.LoggerTransformer.Errorf("Error while reading the embedded zip file: ", err)
+				return err
 			}
 		}
 	}
@@ -128,27 +126,6 @@ func getZipFileBytes(zf *zip.File) ([]byte, error) {
 	}
 	defer f.Close()
 	return io.ReadAll(f)
-}
-
-// Prints the content inside the files in a given zipfile
-func printZipContents(zipBytes []byte) error {
-	zipReader, err := zip.NewReader(bytes.NewReader(zipBytes), int64(len(zipBytes)))
-	if err != nil {
-		return err
-	}
-
-	for _, zipFile := range zipReader.File {
-		fmt.Printf("\nFile Name: %s\n", zipFile.Name)
-
-		fileContent, err := getZipFileBytes(zipFile)
-		if err != nil {
-			return err
-		}
-
-		fmt.Printf("File Content:\n%s\n", fileContent)
-	}
-
-	return nil
 }
 
 // SaveZipToFile saves the given zipfile to the defined location

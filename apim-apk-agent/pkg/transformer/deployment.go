@@ -19,11 +19,9 @@ package transformer
 
 // Environment represents the configuration details for a specific environment.
 type Environment struct {
-	// Id                string `json:"id"`
-	Name  string `json:"name"`
-	Vhost string `json:"vhost"`
-	// DeploymentType    string `json:"deploymentType"`
-	DeployedTimeStamp int64 `json:"deployedTimeStamp"`
+	Name              string `json:"name"`
+	Vhost             string `json:"vhost"`
+	DeployedTimeStamp int64  `json:"deployedTimeStamp"`
 }
 
 // Deployment represents the deployment details for a set of environments within an organization.

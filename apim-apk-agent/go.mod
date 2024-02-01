@@ -16,6 +16,7 @@ require (
 	k8s.io/client-go v0.27.2
 	sigs.k8s.io/controller-runtime v0.15.0
 	sigs.k8s.io/gateway-api v0.7.1
+	sigs.k8s.io/yaml v1.3.0
 )
 
 require (
@@ -74,7 +75,6 @@ require (
 	k8s.io/utils v0.0.0-20230726121419-3b25d923346b // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.3.0 // indirect
-	sigs.k8s.io/yaml v1.3.0 // indirect
 )
 
 require (
