@@ -15,6 +15,10 @@ data:
       [controlPlane.brokerConnectionParameters]
       eventListeningEndpoints = ["amqp://admin:admin@wso2am-single-node-am-service.apim-deployment.svc.cluster.local:5672?retries='10'&connectdelay='30'"]
     
+    [dataPlane]
+      enabled = true
+      k8ResourceEndpoint = "https://localhost:9443/api/configurator/apis/generate-k8s-resources"
+    
   log_config.toml: |
     # The logging configuration for Adapter
 

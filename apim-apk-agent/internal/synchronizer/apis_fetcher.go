@@ -24,24 +24,27 @@
 package synchronizer
 
 import (
+	"fmt"
+	"io"
+
 	"archive/zip"
 	"bytes"
-	"fmt"
 	"strings"
 
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	dpv1alpha1 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha1"
-	dpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha2"
-	"github.com/wso2/apk/common-go-libs/utils"
 	internalk8sClient "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/k8sClient"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/logging"
 	sync "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/synchronizer"
+	transformer "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/transformer"
+	"gopkg.in/yaml.v2"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	dpv1alpha1 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha1"
+	dpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha2"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	gwapiv1b1 "sigs.k8s.io/gateway-api/apis/v1beta1"
+	k8Yaml "sigs.k8s.io/yaml"
 )
 
 const (
@@ -151,85 +154,75 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUIDList []string, k8sClient clien
 				// Todo: Read the apis.zip and extract the api.zip,deployments.json
 			}
 
-			envConfig1 := dpv1alpha2.EnvConfig{
-				HTTPRouteRefs: []string{"route1", "route2"},
+			if err != nil {
+				logger.LoggerSync.Errorf("Error while reading zip: %v", err)
+				return
 			}
 
-			// Set up the API object
-			api := &dpv1alpha2.API{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "API",
-					APIVersion: "dp.wso2.com/v1alpha2",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:              apiUUIDList[0],
-					Namespace:         utils.GetOperatorPodNamespace(),
-					CreationTimestamp: metav1.Now(),
-				},
-				Spec: dpv1alpha2.APISpec{
-					APIName:          "sample-api",
-					APIVersion:       "v1",
-					APIType:          "REST",
-					DefinitionPath:   "/docs",
-					BasePath:         "/" + apiUUIDList[0] + "/v1",
-					IsDefaultVersion: true,
-					Organization:     "default",
-					Sandbox:          []dpv1alpha2.EnvConfig{envConfig1},
-					Production:       []dpv1alpha2.EnvConfig{envConfig1},
-					APIProperties:    []dpv1alpha2.Property{},
-				},
-				Status: dpv1alpha2.APIStatus{},
+			artifact, decodingError := transformer.DecodeAPIArtifact(data.Resp)
+
+			if decodingError != nil {
+				logger.LoggerSync.Errorf("Error while decoding the API Project Artifact: %v", decodingError)
+				return
 			}
 
-			configMap := &corev1.ConfigMap{}
+			apkConf, _, apkErr := transformer.GenerateAPKConf(artifact.APIJson)
 
-			httpRoute := &gwapiv1b1.HTTPRoute{}
+			if apkErr != nil {
+				logger.LoggerSync.Errorf("Error while generating APK-Conf: %v", apkErr)
+				return
+			}
 
-			secret := &corev1.Secret{}
+			k8ResourceEndpoint := conf.DataPlane.K8ResourceEndpoint
 
-			authPolicy := &dpv1alpha2.Authentication{}
+			deploymentDescriptor, descriptorErr := transformer.ProcessDeploymentDescriptor([]byte(artifact.DeploymentDescriptor))
+			if descriptorErr != nil {
+				logger.LoggerSync.Errorf("Error while decoding the Deployment Descriptor: %v", descriptorErr)
+				return
+			}
 
-			backendJWT := &dpv1alpha1.BackendJWT{}
+			crResponse, err := transformer.GenerateUpdatedCRs(apkConf, artifact.Swagger, k8ResourceEndpoint, deploymentDescriptor)
+			if err != nil {
+				logger.LoggerSync.Errorf("Error occured in receiving the updated CRDs: %v", err)
+				return
+			}
 
-			apiPolicies := &dpv1alpha2.APIPolicy{}
+			mainZip, err := zip.NewReader(bytes.NewReader(crResponse.Bytes()), int64(crResponse.Len()))
+			if err != nil {
+				logger.LoggerSync.Errorf("Error creating zip reader for main zip buffer: %v", err)
+				return
+			}
 
-			interceptorServices := &dpv1alpha1.InterceptorService{}
+			for _, file := range mainZip.File {
+				if strings.HasSuffix(file.Name, ".zip") {
+					subZipReader, err := file.Open()
+					if err != nil {
+						logger.LoggerSync.Errorf("Error opening sub zip file: %v", err)
+						return
+					}
+					defer subZipReader.Close()
 
-			scope := &dpv1alpha1.Scope{}
+					var subZipBuffer bytes.Buffer
+					_, err = subZipBuffer.ReadFrom(subZipReader)
+					if err != nil {
+						logger.LoggerSync.Errorf("Error reading sub zip file: %v", err)
+						return
+					}
 
-			rateLimitPolicies := &dpv1alpha1.RateLimitPolicy{}
+					subZip, err := zip.NewReader(bytes.NewReader(subZipBuffer.Bytes()), int64(subZipBuffer.Len()))
+					if err != nil {
+						logger.LoggerSync.Errorf("Error creating zip reader for sub zip file: %v", err)
+						return
+					}
 
-			backends := &dpv1alpha1.Backend{}
+					for _, subFile := range subZip.File {
+						mapAndCreateCR(subFile, k8sClient)
+					}
 
-			// Apply the API to the Kubernetes cluster
-			internalk8sClient.CreateAPICR(api, k8sClient)
-			// Apply the ConfigMap to the Kubernetes cluster
-			internalk8sClient.CreateConfigMapCR(configMap, k8sClient)
-			// Apply the HttpRoute to the Kubernetes cluster
-			internalk8sClient.CreateHTTPRouteCR(httpRoute, k8sClient)
-			// Apply the Secret to the Kubernetes cluster
-			internalk8sClient.CreateSecretCR(secret, k8sClient)
-			// Apply the AuthPolicy to the Kubernetes cluster
-			internalk8sClient.CreateAuthenticationCR(authPolicy, k8sClient)
-			// Apply the BackendJWT to the Kubernetes cluster
-			internalk8sClient.CreateBackendJWTCR(backendJWT, k8sClient)
-			// Apply the APIPolicies to the Kubernetes cluster
-			internalk8sClient.CreateAPIPolicyCR(apiPolicies, k8sClient)
-			// Apply the InterceptorServices to the Kubernetes cluster
-			internalk8sClient.CreateInterceptorServicesCR(interceptorServices, k8sClient)
-			// Apply the Scope to the Kubernetes cluster
-			internalk8sClient.CreateScopeCR(scope, k8sClient)
-			// Apply the RateLimitPolicies to the Kubernetes cluster
-			internalk8sClient.CreateRateLimitPolicyCR(rateLimitPolicies, k8sClient)
-			// Apply the Backends to the Kubernetes cluster
-			internalk8sClient.CreateBackendCR(backends, k8sClient)
+				}
+			}
 
 			logger.LoggerMsg.Info("API applied successfully.\n")
-
-			if err != nil {
-				logger.LoggerMsg.Error("Error while reading zip", err)
-			}
-			//health.SetControlPlaneRestAPIStatus(err == nil)
 
 		} else if data.ErrorCode == 204 {
 			logger.LoggerMsg.Infof("No API Artifacts are available in the control plane for the envionments :%s",
@@ -271,4 +264,116 @@ func GetAPI(c chan sync.SyncAPIResponse, id *string, envs []string, endpoint str
 		envs = append(envs, "default")
 		go sync.FetchAPIs(id, nil, c, endpoint, sendType, apiUUIDList, queryParamMap)
 	}
+}
+
+// mapAndCreateCR will read the CRD Yaml and based on the Kind of the CR, unmarshal and maps the
+// data and sends to the K8-Client for creating the respective CR inside the cluster
+func mapAndCreateCR(zipFile *zip.File, k8sClient client.Client) (string, interface{}) {
+	fileReader, err := zipFile.Open()
+	if err != nil {
+		logger.LoggerTransformer.Errorf("Failed to open YAML file inside zip: %v", err)
+		return "", nil
+	}
+	defer fileReader.Close()
+
+	yamlData, err := io.ReadAll(fileReader)
+	if err != nil {
+		logger.LoggerTransformer.Errorf("Failed to read YAML file inside zip: %v", err)
+		return "", nil
+	}
+
+	var crdData map[string]interface{}
+	if err := yaml.Unmarshal(yamlData, &crdData); err != nil {
+		logger.LoggerTransformer.Errorf("Failed to unmarshal YAML data to parse the Kind: %v", err)
+		return "", nil
+	}
+
+	kind, ok := crdData["kind"].(string)
+	if !ok {
+		logger.LoggerTransformer.Errorf("Kind attribute not found in the given yaml file.")
+		return "", nil
+	}
+
+	switch kind {
+	case "APIPolicy":
+		var apiPolicy dpv1alpha2.APIPolicy
+		err = k8Yaml.Unmarshal(yamlData, &apiPolicy)
+		if err != nil {
+			logger.LoggerSync.Errorf("Error unmarshaling APIPolicy YAML: %v", err)
+		}
+		internalk8sClient.CreateAPIPolicyCR(&apiPolicy, k8sClient)
+	case "HTTPRoute":
+		var httpRoute gwapiv1b1.HTTPRoute
+		err = k8Yaml.Unmarshal(yamlData, &httpRoute)
+		if err != nil {
+			logger.LoggerSync.Errorf("Error unmarshaling HTTPRoute YAML: %v", err)
+		}
+		internalk8sClient.CreateHTTPRouteCR(&httpRoute, k8sClient)
+	case "Backend":
+		var backend dpv1alpha1.Backend
+		err = k8Yaml.Unmarshal(yamlData, &backend)
+		if err != nil {
+			logger.LoggerSync.Errorf("Error unmarshaling Backend YAML: %v", err)
+		}
+		internalk8sClient.CreateBackendCR(&backend, k8sClient)
+	case "ConfigMap":
+		var configMap corev1.ConfigMap
+		err = k8Yaml.Unmarshal(yamlData, &configMap)
+		if err != nil {
+			logger.LoggerSync.Errorf("Error unmarshaling ConfigMap YAML: %v", err)
+		}
+		internalk8sClient.CreateConfigMapCR(&configMap, k8sClient)
+	case "Authentication":
+		var authPolicy dpv1alpha2.Authentication
+		err = k8Yaml.Unmarshal(yamlData, &authPolicy)
+		if err != nil {
+			logger.LoggerSync.Errorf("Error unmarshaling Authentication YAML: %v", err)
+		}
+		internalk8sClient.CreateAuthenticationCR(&authPolicy, k8sClient)
+	case "API":
+		var api dpv1alpha2.API
+		err = k8Yaml.Unmarshal(yamlData, &api)
+		if err != nil {
+			logger.LoggerSync.Errorf("Error unmarshaling API YAML: %v", err)
+		}
+		internalk8sClient.CreateAPICR(&api, k8sClient)
+	case "InterceptorService":
+		var interceptorService dpv1alpha1.InterceptorService
+		err = k8Yaml.Unmarshal(yamlData, &interceptorService)
+		if err != nil {
+			logger.LoggerSync.Errorf("Error unmarshaling InterceptorService YAML: %v", err)
+		}
+		internalk8sClient.CreateInterceptorServicesCR(&interceptorService, k8sClient)
+	case "BackendJWT":
+		var backendJWT dpv1alpha1.BackendJWT
+		err = k8Yaml.Unmarshal(yamlData, &backendJWT)
+		if err != nil {
+			logger.LoggerSync.Errorf("Error unmarshaling BackendJWT YAML: %v", err)
+		}
+		internalk8sClient.CreateBackendJWTCR(&backendJWT, k8sClient)
+	case "Scope":
+		var scope dpv1alpha1.Scope
+		err = k8Yaml.Unmarshal(yamlData, &scope)
+		if err != nil {
+			logger.LoggerSync.Errorf("Error unmarshaling Scope YAML: %v", err)
+		}
+		internalk8sClient.CreateScopeCR(&scope, k8sClient)
+	case "RateLimitPolicy":
+		var rateLimitPolicy dpv1alpha1.RateLimitPolicy
+		err = k8Yaml.Unmarshal(yamlData, &rateLimitPolicy)
+		if err != nil {
+			logger.LoggerSync.Errorf("Error unmarshaling RateLimitPolicy YAML: %v", err)
+		}
+		internalk8sClient.CreateRateLimitPolicyCR(&rateLimitPolicy, k8sClient)
+	case "Secret":
+		var secret corev1.Secret
+		err = k8Yaml.Unmarshal(yamlData, &secret)
+		if err != nil {
+			logger.LoggerSync.Errorf("Error unmarshaling Secret YAML: %v", err)
+		}
+		internalk8sClient.CreateSecretCR(&secret, k8sClient)
+	default:
+		logger.LoggerSync.Errorf("[!]Unknown Kind parsed from the YAML File: %v", kind)
+	}
+	return kind, crdData
 }
