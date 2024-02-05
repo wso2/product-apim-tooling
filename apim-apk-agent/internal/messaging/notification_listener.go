@@ -385,7 +385,7 @@ func handleSubscriptionEvents(data []byte, eventType string) {
 	subscription := event.Subscription{Uuid: subscriptionEvent.SubscriptionUUID,
 		SubStatus:     subscriptionEvent.SubscriptionState,
 		Organization:  subscriptionEvent.TenantDomain,
-		SubscribedApi: &event.SubscribedAPI{Name: subscriptionEvent.APIUUID, Version: "1.0.0"},
+		SubscribedApi: &event.SubscribedAPI{Name: subscriptionEvent.APIName, Version: subscriptionEvent.APIVersion},
 	}
 
 	applicationMapping := event.ApplicationMapping{Uuid: utils.GetUniqueIDOfApplicationMapping(subscriptionEvent.ApplicationUUID, subscriptionEvent.SubscriptionUUID), ApplicationRef: subscriptionEvent.ApplicationUUID, SubscriptionRef: subscriptionEvent.SubscriptionUUID, Organization: subscriptionEvent.TenantDomain}

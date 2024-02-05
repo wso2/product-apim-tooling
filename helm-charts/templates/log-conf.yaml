@@ -17,8 +17,8 @@ data:
     
     [dataPlane]
       enabled = true
-      k8ResourceEndpoint = "https://localhost:9443/api/configurator/apis/generate-k8s-resources"
-    
+      k8ResourceEndpoint = "https://apk-test-setup-wso2-apk-config-ds-service.apk-integration-test.svc.cluster.local:9443/api/configurator/apis/generate-k8s-resources"
+      namespace = "apk-integration-test"
   log_config.toml: |
     # The logging configuration for Adapter
 

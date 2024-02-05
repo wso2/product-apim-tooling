@@ -151,7 +151,7 @@ func MarshalSubscription(subscriptionInternal *types.Subscription) managementser
 		SubStatus:     subscriptionInternal.SubscriptionState,
 		UUID:          subscriptionInternal.SubscriptionUUID,
 		Organization:  subscriptionInternal.TenantDomain,
-		SubscribedAPI: &managementserver.SubscribedAPI{Name: subscriptionInternal.APIUUID, Version: subscriptionInternal.APIUUID},
+		SubscribedAPI: &managementserver.SubscribedAPI{Name: subscriptionInternal.APIName, Version: subscriptionInternal.APIVersion},
 		TimeStamp:     subscriptionInternal.TimeStamp,
 	}
 	return sub

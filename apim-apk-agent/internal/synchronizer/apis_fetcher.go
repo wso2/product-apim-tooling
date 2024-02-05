@@ -216,7 +216,7 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUIDList []string, k8sClient clien
 					}
 
 					for _, subFile := range subZip.File {
-						mapAndCreateCR(subFile, k8sClient)
+						mapAndCreateCR(subFile, k8sClient, conf)
 					}
 
 				}
@@ -268,7 +268,7 @@ func GetAPI(c chan sync.SyncAPIResponse, id *string, envs []string, endpoint str
 
 // mapAndCreateCR will read the CRD Yaml and based on the Kind of the CR, unmarshal and maps the
 // data and sends to the K8-Client for creating the respective CR inside the cluster
-func mapAndCreateCR(zipFile *zip.File, k8sClient client.Client) (string, interface{}) {
+func mapAndCreateCR(zipFile *zip.File, k8sClient client.Client, conf *config.Config) (string, interface{}) {
 	fileReader, err := zipFile.Open()
 	if err != nil {
 		logger.LoggerTransformer.Errorf("Failed to open YAML file inside zip: %v", err)
@@ -301,6 +301,7 @@ func mapAndCreateCR(zipFile *zip.File, k8sClient client.Client) (string, interfa
 		if err != nil {
 			logger.LoggerSync.Errorf("Error unmarshaling APIPolicy YAML: %v", err)
 		}
+		apiPolicy.ObjectMeta.Namespace = conf.DataPlane.Namespace
 		internalk8sClient.CreateAPIPolicyCR(&apiPolicy, k8sClient)
 	case "HTTPRoute":
 		var httpRoute gwapiv1b1.HTTPRoute
@@ -308,6 +309,7 @@ func mapAndCreateCR(zipFile *zip.File, k8sClient client.Client) (string, interfa
 		if err != nil {
 			logger.LoggerSync.Errorf("Error unmarshaling HTTPRoute YAML: %v", err)
 		}
+		httpRoute.ObjectMeta.Namespace = conf.DataPlane.Namespace
 		internalk8sClient.CreateHTTPRouteCR(&httpRoute, k8sClient)
 	case "Backend":
 		var backend dpv1alpha1.Backend
@@ -315,6 +317,7 @@ func mapAndCreateCR(zipFile *zip.File, k8sClient client.Client) (string, interfa
 		if err != nil {
 			logger.LoggerSync.Errorf("Error unmarshaling Backend YAML: %v", err)
 		}
+		backend.ObjectMeta.Namespace = conf.DataPlane.Namespace
 		internalk8sClient.CreateBackendCR(&backend, k8sClient)
 	case "ConfigMap":
 		var configMap corev1.ConfigMap
@@ -322,6 +325,7 @@ func mapAndCreateCR(zipFile *zip.File, k8sClient client.Client) (string, interfa
 		if err != nil {
 			logger.LoggerSync.Errorf("Error unmarshaling ConfigMap YAML: %v", err)
 		}
+		configMap.ObjectMeta.Namespace = conf.DataPlane.Namespace
 		internalk8sClient.CreateConfigMapCR(&configMap, k8sClient)
 	case "Authentication":
 		var authPolicy dpv1alpha2.Authentication
@@ -329,6 +333,7 @@ func mapAndCreateCR(zipFile *zip.File, k8sClient client.Client) (string, interfa
 		if err != nil {
 			logger.LoggerSync.Errorf("Error unmarshaling Authentication YAML: %v", err)
 		}
+		authPolicy.ObjectMeta.Namespace = conf.DataPlane.Namespace
 		internalk8sClient.CreateAuthenticationCR(&authPolicy, k8sClient)
 	case "API":
 		var api dpv1alpha2.API
@@ -336,6 +341,7 @@ func mapAndCreateCR(zipFile *zip.File, k8sClient client.Client) (string, interfa
 		if err != nil {
 			logger.LoggerSync.Errorf("Error unmarshaling API YAML: %v", err)
 		}
+		api.ObjectMeta.Namespace = conf.DataPlane.Namespace
 		internalk8sClient.CreateAPICR(&api, k8sClient)
 	case "InterceptorService":
 		var interceptorService dpv1alpha1.InterceptorService
@@ -343,6 +349,7 @@ func mapAndCreateCR(zipFile *zip.File, k8sClient client.Client) (string, interfa
 		if err != nil {
 			logger.LoggerSync.Errorf("Error unmarshaling InterceptorService YAML: %v", err)
 		}
+		interceptorService.ObjectMeta.Namespace = conf.DataPlane.Namespace
 		internalk8sClient.CreateInterceptorServicesCR(&interceptorService, k8sClient)
 	case "BackendJWT":
 		var backendJWT dpv1alpha1.BackendJWT
@@ -350,6 +357,7 @@ func mapAndCreateCR(zipFile *zip.File, k8sClient client.Client) (string, interfa
 		if err != nil {
 			logger.LoggerSync.Errorf("Error unmarshaling BackendJWT YAML: %v", err)
 		}
+		backendJWT.ObjectMeta.Namespace = conf.DataPlane.Namespace
 		internalk8sClient.CreateBackendJWTCR(&backendJWT, k8sClient)
 	case "Scope":
 		var scope dpv1alpha1.Scope
@@ -357,6 +365,7 @@ func mapAndCreateCR(zipFile *zip.File, k8sClient client.Client) (string, interfa
 		if err != nil {
 			logger.LoggerSync.Errorf("Error unmarshaling Scope YAML: %v", err)
 		}
+		scope.ObjectMeta.Namespace = conf.DataPlane.Namespace
 		internalk8sClient.CreateScopeCR(&scope, k8sClient)
 	case "RateLimitPolicy":
 		var rateLimitPolicy dpv1alpha1.RateLimitPolicy
@@ -364,6 +373,7 @@ func mapAndCreateCR(zipFile *zip.File, k8sClient client.Client) (string, interfa
 		if err != nil {
 			logger.LoggerSync.Errorf("Error unmarshaling RateLimitPolicy YAML: %v", err)
 		}
+		rateLimitPolicy.ObjectMeta.Namespace = conf.DataPlane.Namespace
 		internalk8sClient.CreateRateLimitPolicyCR(&rateLimitPolicy, k8sClient)
 	case "Secret":
 		var secret corev1.Secret
@@ -371,6 +381,7 @@ func mapAndCreateCR(zipFile *zip.File, k8sClient client.Client) (string, interfa
 		if err != nil {
 			logger.LoggerSync.Errorf("Error unmarshaling Secret YAML: %v", err)
 		}
+		secret.ObjectMeta.Namespace = conf.DataPlane.Namespace
 		internalk8sClient.CreateSecretCR(&secret, k8sClient)
 	default:
 		logger.LoggerSync.Errorf("[!]Unknown Kind parsed from the YAML File: %v", kind)

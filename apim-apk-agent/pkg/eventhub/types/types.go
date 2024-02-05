@@ -30,6 +30,8 @@ type Subscription struct {
 	TenantID          int32  `json:"tenanId,omitempty"`
 	TenantDomain      string `json:"tenanDomain,omitempty"`
 	TimeStamp         int64  `json:"timeStamp,omitempty"`
+	APIName           string `json:"apiName"`
+	APIVersion        string `json:"apiVersion"`
 }
 
 // SubscriptionList for struct list of applications
