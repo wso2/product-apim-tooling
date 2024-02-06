@@ -20,19 +20,7 @@ image:
   repository: apim-apk-agent
   tag: 1.0.0-SNAPSHOT
   pullPolicy: IfNotPresent
-
 service:
   name: apim-apk-agent-service
-  type: LoadBalancer
-  port: 8080
-
-ingress:
-  enabled: false
-  annotations: {}
-  hosts:
-    - host: chart-example.local
-      paths:
-        - /
-  tls: []
 
 resources: {}

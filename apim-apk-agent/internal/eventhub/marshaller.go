@@ -18,10 +18,9 @@
 package eventhub
 
 import (
-	logger "github.com/sirupsen/logrus"
-	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
 	eventhubTypes "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/managementserver"
 )
 
 // SubscriptionList for struct list of applications
@@ -89,13 +88,7 @@ type KeyManager struct {
 }
 
 var (
-	// SubscriptionMap contains the subscriptions recieved from API Manager Control Plane
-	SubscriptionMap map[int32]Subscription
-	// ApplicationMap contains the applications recieved from API Manager Control Plane
-	ApplicationMap map[string]Application
-	// ApplicationKeyMappingMap contains the application key mappings recieved from API Manager Control Plane
-	ApplicationKeyMappingMap map[string]ApplicationKeyMapping
-	// KeyManagerMap contains the key managers recieved from API Manager Control Plane
+	// KeyManagerMap is a map of key managers
 	KeyManagerMap map[string]KeyManager
 )
 
@@ -111,95 +104,80 @@ func MarshalKeyManagers(keyManagersList *[]eventhubTypes.KeyManager) map[string]
 }
 
 // MarshalMultipleApplications is used to update the applicationList during the startup where
-// multiple applications are pulled at once. And then it returns the ApplicationList.
-func MarshalMultipleApplications(appList *types.ApplicationList) map[string]Application {
-	resourceMap := make(map[string]Application)
+func MarshalMultipleApplications(appList *types.ApplicationList) {
+	applicationMap := make(map[string]managementserver.Application)
 	for _, application := range appList.List {
 		applicationSub := MarshalApplication(&application)
-		resourceMap[application.UUID] = applicationSub
+		applicationMap[applicationSub.UUID] = applicationSub
 	}
-	ApplicationMap = resourceMap
-	for appID, app := range ApplicationMap {
-		logger.Info("Application: , Description:", appID, app)
-	}
-	return ApplicationMap
+	managementserver.AddAllApplications(applicationMap)
 }
 
 // MarshalMultipleApplicationKeyMappings is used to update the application key mappings during the startup where
 // multiple key mappings are pulled at once. And then it returns the ApplicationKeyMappingList.
-func MarshalMultipleApplicationKeyMappings(keymappingList *types.ApplicationKeyMappingList) map[string]ApplicationKeyMapping {
-	resourceMap := make(map[string]ApplicationKeyMapping)
+func MarshalMultipleApplicationKeyMappings(keymappingList *types.ApplicationKeyMappingList) {
+	resourceMap := make(map[string]managementserver.ApplicationKeyMapping)
 	for _, keyMapping := range keymappingList.List {
 		applicationKeyMappingReference := GetApplicationKeyMappingReference(&keyMapping)
 		keyMappingSub := marshalKeyMapping(&keyMapping)
 		resourceMap[applicationKeyMappingReference] = keyMappingSub
 	}
-	ApplicationKeyMappingMap = resourceMap
-	return ApplicationKeyMappingMap
+	managementserver.AddAllApplicationKeyMappings(resourceMap)
 }
 
 // MarshalMultipleSubscriptions is used to update the subscriptions during the startup where
 // multiple subscriptions are pulled at once. And then it returns the SubscriptionList.
-func MarshalMultipleSubscriptions(subscriptionsList *types.SubscriptionList) map[int32]Subscription {
-	resourceMap := make(map[int32]Subscription)
-	for _, sb := range subscriptionsList.List {
-		resourceMap[sb.SubscriptionID] = MarshalSubscription(&sb)
+func MarshalMultipleSubscriptions(subscriptionsList *types.SubscriptionList) {
+	subscriptionMap := make(map[string]managementserver.Subscription)
+	applicationMappingMap := make(map[string]managementserver.ApplicationMapping)
+	for _, subscription := range subscriptionsList.List {
+		subscriptionSub := MarshalSubscription(&subscription)
+		subscriptionMap[subscriptionSub.UUID] = subscriptionSub
+		applicationMappingMap[subscriptionSub.UUID] = managementserver.ApplicationMapping{
+			UUID:            subscriptionSub.UUID,
+			ApplicationRef:  subscriptionSub.SubscribedAPI.Name,
+			SubscriptionRef: subscriptionSub.SubscribedAPI.Version,
+			Organization:    subscriptionSub.Organization,
+		}
 	}
-	SubscriptionMap = resourceMap
-	return SubscriptionMap
+	managementserver.AddAllApplicationMappings(applicationMappingMap)
+	managementserver.AddAllSubscriptions(subscriptionMap)
+
 }
 
 // MarshalSubscription is used to map to internal Subscription struct
-func MarshalSubscription(subscriptionInternal *types.Subscription) Subscription {
-	sub := Subscription{
-		SubscriptionID:    subscriptionInternal.SubscriptionID,
-		PolicyID:          subscriptionInternal.PolicyID,
-		APIID:             subscriptionInternal.APIID,
-		AppID:             subscriptionInternal.AppID,
-		SubscriptionState: subscriptionInternal.SubscriptionState,
-		TimeStamp:         subscriptionInternal.TimeStamp,
-		TenantID:          subscriptionInternal.TenantID,
-		TenantDomain:      subscriptionInternal.TenantDomain,
-		SubscriptionUUID:  subscriptionInternal.SubscriptionUUID,
-		APIUUID:           subscriptionInternal.APIUUID,
-		ApplicationUUID:   subscriptionInternal.ApplicationUUID,
-	}
-	if sub.TenantDomain == "" {
-		sub.TenantDomain = config.GetControlPlaneConnectedTenantDomain()
+func MarshalSubscription(subscriptionInternal *types.Subscription) managementserver.Subscription {
+	sub := managementserver.Subscription{
+		SubStatus:     subscriptionInternal.SubscriptionState,
+		UUID:          subscriptionInternal.SubscriptionUUID,
+		Organization:  subscriptionInternal.TenantDomain,
+		SubscribedAPI: &managementserver.SubscribedAPI{Name: subscriptionInternal.APIName, Version: subscriptionInternal.APIVersion},
+		TimeStamp:     subscriptionInternal.TimeStamp,
 	}
 	return sub
 }
 
 // MarshalApplication is used to map to internal Application struct
-func MarshalApplication(appInternal *types.Application) Application {
-	app := Application{
+func MarshalApplication(appInternal *types.Application) managementserver.Application {
+	app := managementserver.Application{
 		UUID:         appInternal.UUID,
-		ID:           appInternal.ID,
 		Name:         appInternal.Name,
-		SubName:      appInternal.SubName,
-		Policy:       appInternal.Policy,
-		TokenType:    appInternal.TokenType,
+		Owner:        appInternal.SubName,
+		Organization: appInternal.TenantDomain,
 		Attributes:   appInternal.Attributes,
-		TenantID:     appInternal.TenantID,
-		TenantDomain: appInternal.TenantDomain,
 		TimeStamp:    appInternal.TimeStamp,
-	}
-	if app.TenantDomain == "" {
-		app.TenantDomain = config.GetControlPlaneConnectedTenantDomain()
 	}
 	return app
 }
 
-func marshalKeyMapping(keyMappingInternal *types.ApplicationKeyMapping) ApplicationKeyMapping {
-	return ApplicationKeyMapping{
-		ConsumerKey:     keyMappingInternal.ConsumerKey,
-		KeyType:         keyMappingInternal.KeyType,
-		KeyManager:      keyMappingInternal.KeyManager,
-		ApplicationID:   keyMappingInternal.ApplicationID,
-		ApplicationUUID: keyMappingInternal.ApplicationUUID,
-		TenantID:        keyMappingInternal.TenantID,
-		TenantDomain:    keyMappingInternal.TenantDomain,
-		TimeStamp:       keyMappingInternal.TimeStamp,
+func marshalKeyMapping(keyMappingInternal *types.ApplicationKeyMapping) managementserver.ApplicationKeyMapping {
+	return managementserver.ApplicationKeyMapping{
+		ApplicationUUID:       keyMappingInternal.ApplicationUUID,
+		ApplicationIdentifier: keyMappingInternal.ConsumerKey,
+		KeyType:               keyMappingInternal.KeyType,
+		SecurityScheme:        "OAuth2",
+		EnvID:                 "Default",
+		Timestamp:             keyMappingInternal.TimeStamp,
 	}
 }
 

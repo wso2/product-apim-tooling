@@ -39,6 +39,7 @@ import (
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/logging"
 	sync "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/synchronizer"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/tlsutils"
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/utils"
 )
 
 const (
@@ -202,6 +203,7 @@ func LoadInitialData(configFile *config.Config) {
 	} else {
 		FetchAPIsOnStartUp(conf, apiUUIDList)
 	}
+	go utils.SendInitialEventToAllConnectedClients()
 }
 
 // InvokeService invokes the internal data resource
@@ -280,15 +282,15 @@ func retrieveDataFromResponseChannel(response response) {
 		switch t := newResponse.(type) {
 		case *types.SubscriptionList:
 			loggers.Info("Received Subscription information.")
-			subList = newResponse.(*types.SubscriptionList)
+			subList := newResponse.(*types.SubscriptionList)
 			MarshalMultipleSubscriptions(subList)
 		case *types.ApplicationList:
 			loggers.Info("Received Application information.")
-			appList = newResponse.(*types.ApplicationList)
+			appList := newResponse.(*types.ApplicationList)
 			MarshalMultipleApplications(appList)
 		case *types.ApplicationKeyMappingList:
 			loggers.Info("Received Application Key Mapping information.")
-			appKeyMappingList = newResponse.(*types.ApplicationKeyMappingList)
+			appKeyMappingList := newResponse.(*types.ApplicationKeyMappingList)
 			MarshalMultipleApplicationKeyMappings(appKeyMappingList)
 		default:
 			logger.LoggerSubscription.Debugf("Unknown type %T", t)

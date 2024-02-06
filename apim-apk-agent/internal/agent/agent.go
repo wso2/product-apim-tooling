@@ -58,8 +58,9 @@ var (
 	debug       bool
 	onlyLogging bool
 
-	port    uint
-	alsPort uint
+	port     uint
+	alsPort  uint
+	restPort uint
 
 	mode string
 )
@@ -76,6 +77,8 @@ func init() {
 	flag.UintVar(&port, "port", 18000, "Management server port")
 	flag.UintVar(&alsPort, "als", 18090, "Accesslog server port")
 	flag.StringVar(&mode, "ads", ads, "Management server type (ads, xds, rest)")
+	flag.UintVar(&restPort, "rest_port", 18001, "Rest server port")
+
 }
 
 // Run starts the XDS server and Rest API server.
@@ -191,6 +194,7 @@ func Run(conf *config.Config) {
 	}
 	apkmgt.RegisterEventStreamServiceServer(grpcServer, &managementserver.EventServer{})
 	loggers.LoggerAPKOperator.Info("port: ", port, " APK agent Listening for gRPC connections")
+	go managementserver.StartInternalServer(restPort)
 	go func() {
 		loggers.LoggerAPKOperator.Info("Starting GRPC server.")
 		health.CommonEnforcerGrpcService.SetStatus(true)

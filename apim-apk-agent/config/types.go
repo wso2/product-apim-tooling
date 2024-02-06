@@ -113,6 +113,7 @@ type controlPlane struct {
 type dataPlane struct {
 	Enabled            bool
 	K8ResourceEndpoint string
+	Namespace          string
 }
 
 type requestWorkerPool struct {
