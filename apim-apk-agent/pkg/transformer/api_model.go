@@ -104,6 +104,7 @@ type APIYaml struct {
 // Swagger definition, deployment descriptor, and revision ID extracted from the API Project Zip.
 type APIArtifact struct {
 	APIJson              string `json:"apiJson"`
+	APIFileName          string `json:"apiFileName"`
 	EnvConfig            string `json:"envConfig"`
 	Swagger              string `json:"swagger"`
 	DeploymentDescriptor string `json:"deploymentDescriptor"`

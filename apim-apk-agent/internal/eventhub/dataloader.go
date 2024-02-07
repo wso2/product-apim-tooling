@@ -32,13 +32,16 @@ import (
 
 	loggers "github.com/sirupsen/logrus"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	mapperUtil "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/mapper"
 	pkgAuth "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/auth"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/logging"
 	sync "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/synchronizer"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/tlsutils"
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/transformer"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/utils"
 )
 
@@ -113,7 +116,7 @@ func init() {
 }
 
 // LoadInitialData loads subscription/application and keymapping data from control-plane
-func LoadInitialData(configFile *config.Config) {
+func LoadInitialData(configFile *config.Config, client client.Client) {
 	conf = configFile
 	accessToken = pkgAuth.GetBasicAuth(configFile.ControlPlane.Username, configFile.ControlPlane.Password)
 	var responseChannel = make(chan response)
@@ -201,7 +204,7 @@ func LoadInitialData(configFile *config.Config) {
 	if apiUUIDList == nil || len(apiUUIDList) == 0 {
 		loggers.Info("Empty API List Recieved in fetching")
 	} else {
-		FetchAPIsOnStartUp(conf, apiUUIDList)
+		FetchAPIsOnStartUp(conf, apiUUIDList, client)
 	}
 	go utils.SendInitialEventToAllConnectedClients()
 }
@@ -300,7 +303,7 @@ func retrieveDataFromResponseChannel(response response) {
 
 // FetchAPIsOnStartUp APIs from control plane during the server start up and push them
 // to the router and enforcer components.
-func FetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
+func FetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string, k8sClient client.Client) {
 	// Populate data from config.
 	envs := conf.ControlPlane.EnvironmentLabels
 
@@ -324,11 +327,82 @@ func FetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 			// Read the .zip files within the root apis.zip and add apis to apiFiles array.
 			for _, file := range zipReader.File {
 				apiFiles[file.Name] = file
-				loggers.Info("API file found: " + file.Name)
-				// Todo:
+				loggers.Infof("API file found: " + file.Name)
 			}
-			logger.LoggerMsg.Info("Err", err)
-			//health.SetControlPlaneRestAPIStatus(err == nil)
+			if err != nil {
+				logger.LoggerSync.Errorf("Error while reading zip: %v", err)
+				return
+			}
+
+			artifacts, decodingError := transformer.DecodeAPIArtifacts(data.Resp)
+			logger.LoggerSync.Infof("Artifacts Count: %v", len(artifacts))
+
+			if decodingError != nil {
+				logger.LoggerSync.Errorf("Error while decoding the API Project Artifacts: %v", decodingError)
+				return
+			}
+
+			for _, artifact := range artifacts {
+				if artifact.APIJson != "" && artifact.DeploymentDescriptor != "" {
+					apkConf, _, apkErr := transformer.GenerateAPKConf(artifact.APIJson)
+
+					if apkErr != nil {
+						logger.LoggerSync.Errorf("Error while generating APK-Conf: %v", apkErr)
+						return
+					}
+
+					k8ResourceEndpoint := conf.DataPlane.K8ResourceEndpoint
+
+					deploymentDescriptor, descriptorErr := transformer.ProcessDeploymentDescriptor([]byte(artifact.DeploymentDescriptor))
+					if descriptorErr != nil {
+						logger.LoggerSync.Errorf("Error while decoding the Deployment Descriptor: %v", descriptorErr)
+						return
+					}
+
+					crResponse, err := transformer.GenerateUpdatedCRs(apkConf, artifact.Swagger, k8ResourceEndpoint, deploymentDescriptor, artifact.APIFileName)
+					if err != nil {
+						logger.LoggerSync.Errorf("Error occured in receiving the updated CRDs: %v", err)
+						return
+					}
+
+					mainZip, err := zip.NewReader(bytes.NewReader(crResponse.Bytes()), int64(crResponse.Len()))
+					if err != nil {
+						logger.LoggerSync.Errorf("Error creating zip reader for main zip buffer: %v", err)
+						return
+					}
+
+					for _, file := range mainZip.File {
+						if strings.HasSuffix(file.Name, ".zip") {
+							subZipReader, err := file.Open()
+							if err != nil {
+								logger.LoggerSync.Errorf("Error opening sub zip file: %v", err)
+								return
+							}
+							defer subZipReader.Close()
+
+							var subZipBuffer bytes.Buffer
+							_, err = subZipBuffer.ReadFrom(subZipReader)
+							if err != nil {
+								logger.LoggerSync.Errorf("Error reading sub zip file: %v", err)
+								return
+							}
+
+							subZip, err := zip.NewReader(bytes.NewReader(subZipBuffer.Bytes()), int64(subZipBuffer.Len()))
+							if err != nil {
+								logger.LoggerSync.Errorf("Error creating zip reader for sub zip file: %v", err)
+								return
+							}
+
+							for _, subFile := range subZip.File {
+								mapperUtil.MapAndCreateCR(subFile, k8sClient, conf)
+							}
+
+						}
+					}
+
+					logger.LoggerMsg.Info("API applied successfully.\n")
+				}
+			}
 
 		} else if data.ErrorCode == 204 {
 			logger.LoggerMsg.Infof("No API Artifacts are available in the control plane for the envionments :%s",

@@ -179,7 +179,7 @@ func getReqAndResInterceptors(reqPolicyCount int, resPolicyCount int) (*[]Operat
 
 // GenerateUpdatedCRs takes the .apk-conf, api definition, vHost and the organization for a particular API and then generate and returns
 // the relavant CRD set as a zip
-func GenerateUpdatedCRs(apkConf string, apiDefinition string, k8ResourceGenEndpoint string, deploymentDescriptor *DeploymentDescriptor) (*bytes.Buffer, error) {
+func GenerateUpdatedCRs(apkConf string, apiDefinition string, k8ResourceGenEndpoint string, deploymentDescriptor *DeploymentDescriptor, apiFileName string) (*bytes.Buffer, error) {
 	if apkConf == "" {
 		logger.LoggerTransformer.Error("Empty apk-conf parameter provided. Unable to generate CRDs.")
 		return nil, errors.New("Error: APK-Conf can't be empty")
@@ -252,29 +252,31 @@ func GenerateUpdatedCRs(apkConf string, apiDefinition string, k8ResourceGenEndpo
 	combinedZip := zip.NewWriter(&allZipsBuffer)
 
 	for _, deployment := range *deploymentDescriptor.Data.Deployments {
-		for _, environment := range *deployment.Environments {
+		if deployment.APIFile == apiFileName {
+			for _, environment := range *deployment.Environments {
 
-			modifiedZip, err := transformCRD(body, environment.Vhost, deployment.OrganizationID)
+				modifiedZip, err := transformCRD(body, environment.Vhost, deployment.OrganizationID)
 
-			if err != nil {
-				logger.LoggerTransformer.Error("Unable to transform the initial CRDs:", err)
-				return nil, err
+				if err != nil {
+					logger.LoggerTransformer.Error("Unable to transform the initial CRDs:", err)
+					return nil, err
+				}
+
+				// Write the modifiedZipData to the combined zip
+				fileName := fmt.Sprintf("%s_%s.zip", deployment.OrganizationID, environment.Vhost)
+				writer, err := combinedZip.Create(fileName)
+				if err != nil {
+					logger.LoggerTransformer.Error("Error creating zip file entry:", err)
+					return nil, err
+				}
+
+				_, err = writer.Write(modifiedZip)
+				if err != nil {
+					logger.LoggerTransformer.Error("Error writing  to the zip file:", err)
+					return nil, err
+				}
+
 			}
-
-			// Write the modifiedZipData to the combined zip
-			fileName := fmt.Sprintf("%s_%s.zip", deployment.OrganizationID, environment.Vhost)
-			writer, err := combinedZip.Create(fileName)
-			if err != nil {
-				logger.LoggerTransformer.Error("Error creating zip file entry:", err)
-				return nil, err
-			}
-
-			_, err = writer.Write(modifiedZip)
-			if err != nil {
-				logger.LoggerTransformer.Error("Error writing  to the zip file:", err)
-				return nil, err
-			}
-
 		}
 	}
 
