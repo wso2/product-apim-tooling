@@ -142,7 +142,7 @@ func Run(conf *config.Config) {
 	}
 
 	// Load initial data from control plane
-	eventhub.LoadInitialData(conf)
+	eventhub.LoadInitialData(conf, mgr.GetClient())
 
 	if eventHubEnabled {
 		var connectionURLList = conf.ControlPlane.BrokerConnectionParameters.EventListeningEndpoints

@@ -71,6 +71,7 @@ func readZipFile(file *zip.File, apiArtifact *APIArtifact) error {
 	}
 
 	if strings.Contains(file.Name, ".zip") {
+		apiArtifact.APIFileName = file.Name
 		zipReader, err := zip.NewReader(bytes.NewReader(content), int64(len(content)))
 
 		if err != nil {
@@ -105,6 +106,126 @@ func readZipFile(file *zip.File, apiArtifact *APIArtifact) error {
 		apiArtifact.DeploymentDescriptor = string(content)
 	}
 	return nil
+}
+
+// readZipfile will recursively go through the zip file, read and maps the content inside
+// to its appropriate artifact attribute
+func readAPIZipFile(file *zip.File, apiArtifact *APIArtifact) error {
+	f, fileOpenErr := file.Open()
+
+	if fileOpenErr != nil {
+		logger.LoggerTransformer.Errorf("error opening file %s in zip archieve", file.Name)
+		return fileOpenErr
+	}
+	defer f.Close()
+
+	content, contentError := io.ReadAll(f)
+
+	if contentError != nil {
+		logger.LoggerTransformer.Errorf("Error reading file %s in zip archieve", file.Name)
+		return contentError
+	}
+
+	if strings.Contains(file.Name, "swagger.json") {
+		apiArtifact.Swagger = string(content)
+
+	}
+
+	if strings.Contains(file.Name, "api.json") {
+		apiArtifact.APIJson = string(content)
+	}
+
+	return nil
+}
+
+// DecodeAPIArtifacts decodes a zip-encoded API payload, extracting API details like JSON, Swagger, and deployment configuration.
+// Returns an array of APIArtifacts or an error if decoding or extraction fails.
+func DecodeAPIArtifacts(payload []byte) ([]APIArtifact, error) {
+	zipReader, zipReaderError := zip.NewReader(bytes.NewReader(payload), int64(len(payload)))
+	if zipReaderError != nil {
+		logger.LoggerTransformer.Errorf("Error reading zip file: %v", zipReaderError)
+		return nil, zipReaderError
+	}
+
+	var apiArtifacts []APIArtifact
+
+	var apiArtifact APIArtifact
+	// Read the zip file and get the
+	for _, file := range zipReader.File {
+		logger.LoggerTransformer.Info("Reading " + file.Name)
+
+		f, fileOpenErr := file.Open()
+
+		if fileOpenErr != nil {
+			logger.LoggerTransformer.Errorf("error opening file %s in zip archieve", file.Name)
+			return nil, fileOpenErr
+		}
+		defer f.Close()
+
+		content, contentError := io.ReadAll(f)
+
+		if contentError != nil {
+			logger.LoggerTransformer.Errorf("Error reading file %s in zip archieve", file.Name)
+			return nil, contentError
+		}
+
+		if strings.Contains(file.Name, "api.json") {
+			apiArtifact.APIJson = string(content)
+		}
+
+		if strings.Contains(file.Name, "env_properties.json") {
+			apiArtifact.EnvConfig = string(content)
+		}
+
+		if strings.Contains(file.Name, "deployments.json") {
+			apiArtifact.DeploymentDescriptor = string(content)
+		}
+	}
+
+	for _, file := range zipReader.File {
+
+		if strings.Contains(file.Name, ".zip") {
+			logger.LoggerTransformer.Info("Reading " + file.Name)
+
+			f, fileOpenErr := file.Open()
+
+			if fileOpenErr != nil {
+				logger.LoggerTransformer.Errorf("error opening file %s in zip archieve", file.Name)
+				return nil, fileOpenErr
+			}
+			defer f.Close()
+
+			content, contentError := io.ReadAll(f)
+
+			if contentError != nil {
+				logger.LoggerTransformer.Errorf("Error reading file %s in zip archieve", file.Name)
+				return nil, contentError
+			}
+			apiArtifact.APIFileName = file.Name
+			zipReader, err := zip.NewReader(bytes.NewReader(content), int64(len(content)))
+
+			if err != nil {
+				logger.LoggerTransformer.Errorf("Error reading zip file: ", err)
+				return nil, err
+			}
+
+			for _, file := range zipReader.File {
+				err := readAPIZipFile(file, &apiArtifact)
+
+				if err != nil {
+					logger.LoggerTransformer.Errorf("Error while reading the embedded zip file: ", err)
+					return nil, err
+				}
+			}
+			apiArtifacts = append(apiArtifacts, apiArtifact)
+		}
+		apiArtifact.APIJson = ""
+		apiArtifact.Swagger = ""
+		apiArtifact.RevisionID = 0
+		apiArtifact.APIFileName = ""
+	}
+
+	return apiArtifacts, nil
 }
 
 // ProcessDeploymentDescriptor processes the artifact and returns the deployment descriptor struct
