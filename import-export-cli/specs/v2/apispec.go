@@ -55,6 +55,7 @@ type APIDTODefinition struct {
 	Policies                        []string      `json:"policies,omitempty" yaml:"policies,omitempty"`
 	APIThrottlingPolicy             string        `json:"apiThrottlingPolicy,omitempty" yaml:"apiThrottlingPolicy,omitempty"`
 	AuthorizationHeader             string        `json:"authorizationHeader,omitempty" yaml:"authorizationHeader,omitempty"`
+	ApiKeyHeader                    string        `json:"apiKeyHeader,omitempty" yaml:"apiKeyHeader,omitempty"`
 	SecurityScheme                  []string      `json:"securityScheme,omitempty" yaml:"securityScheme,omitempty"`
 	MaxTPS                          interface{}   `json:"maxTps,omitempty" yaml:"maxTps,omitempty"`
 	Visibility                      string        `json:"visibility,omitempty" yaml:"visibility,omitempty"`

@@ -27,7 +27,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 func GetKeys(t *testing.T, provider string, name string, version string, env string) (string, error) {
@@ -107,7 +106,7 @@ func ValidateGetKeysFailure(t *testing.T, args *ApiGetKeyTestArgs) {
 	}
 
 	if args.ApiProduct != nil {
-		result, err = GetKeys(t, args.ApiProduct.Provider, args.ApiProduct.Name, utils.DefaultApiProductVersion, args.Apim.GetEnvName())
+		result, err = GetKeys(t, args.ApiProduct.Provider, args.ApiProduct.Name, args.ApiProduct.Version, args.Apim.GetEnvName())
 	}
 
 	assert.NotNil(t, err, "Expected error was not returned")
@@ -135,7 +134,7 @@ func ValidateGetKeys(t *testing.T, args *ApiGetKeyTestArgs) {
 	}
 
 	if args.ApiProduct != nil {
-		result, err = GetKeys(t, args.ApiProduct.Provider, args.ApiProduct.Name, utils.DefaultApiProductVersion, args.Apim.GetEnvName())
+		result, err = GetKeys(t, args.ApiProduct.Provider, args.ApiProduct.Name, args.ApiProduct.Version, args.Apim.GetEnvName())
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -169,7 +168,7 @@ func ValidateGetKeysWithoutCleanup(t *testing.T, args *ApiGetKeyTestArgs, doInvo
 	}
 
 	if args.ApiProduct != nil {
-		result, err = GetKeys(t, args.ApiProduct.Provider, args.ApiProduct.Name, utils.DefaultApiProductVersion, args.Apim.GetEnvName())
+		result, err = GetKeys(t, args.ApiProduct.Provider, args.ApiProduct.Name, args.ApiProduct.Version, args.Apim.GetEnvName())
 		if err != nil {
 			log.Fatal(err)
 		}
