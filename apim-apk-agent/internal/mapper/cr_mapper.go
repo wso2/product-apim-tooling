@@ -75,7 +75,7 @@ func MapAndCreateCR(zipFile *zip.File, k8sClient client.Client, conf *config.Con
 			logger.LoggerSync.Errorf("Error unmarshaling APIPolicy YAML: %v", err)
 		}
 		apiPolicy.ObjectMeta.Namespace = conf.DataPlane.Namespace
-		internalk8sClient.CreateAPIPolicyCR(&apiPolicy, k8sClient)
+		internalk8sClient.DeployAPIPolicyCR(&apiPolicy, k8sClient)
 	case "HTTPRoute":
 		var httpRoute gwapiv1b1.HTTPRoute
 		err = k8Yaml.Unmarshal(yamlData, &httpRoute)
@@ -83,7 +83,7 @@ func MapAndCreateCR(zipFile *zip.File, k8sClient client.Client, conf *config.Con
 			logger.LoggerSync.Errorf("Error unmarshaling HTTPRoute YAML: %v", err)
 		}
 		httpRoute.ObjectMeta.Namespace = conf.DataPlane.Namespace
-		internalk8sClient.CreateHTTPRouteCR(&httpRoute, k8sClient)
+		internalk8sClient.DeployHTTPRouteCR(&httpRoute, k8sClient)
 	case "Backend":
 		var backend dpv1alpha1.Backend
 		err = k8Yaml.Unmarshal(yamlData, &backend)
@@ -91,7 +91,7 @@ func MapAndCreateCR(zipFile *zip.File, k8sClient client.Client, conf *config.Con
 			logger.LoggerSync.Errorf("Error unmarshaling Backend YAML: %v", err)
 		}
 		backend.ObjectMeta.Namespace = conf.DataPlane.Namespace
-		internalk8sClient.CreateBackendCR(&backend, k8sClient)
+		internalk8sClient.DeployBackendCR(&backend, k8sClient)
 	case "ConfigMap":
 		var configMap corev1.ConfigMap
 		err = k8Yaml.Unmarshal(yamlData, &configMap)
@@ -99,7 +99,7 @@ func MapAndCreateCR(zipFile *zip.File, k8sClient client.Client, conf *config.Con
 			logger.LoggerSync.Errorf("Error unmarshaling ConfigMap YAML: %v", err)
 		}
 		configMap.ObjectMeta.Namespace = conf.DataPlane.Namespace
-		internalk8sClient.CreateConfigMapCR(&configMap, k8sClient)
+		internalk8sClient.DeployConfigMapCR(&configMap, k8sClient)
 	case "Authentication":
 		var authPolicy dpv1alpha2.Authentication
 		err = k8Yaml.Unmarshal(yamlData, &authPolicy)
@@ -107,7 +107,7 @@ func MapAndCreateCR(zipFile *zip.File, k8sClient client.Client, conf *config.Con
 			logger.LoggerSync.Errorf("Error unmarshaling Authentication YAML: %v", err)
 		}
 		authPolicy.ObjectMeta.Namespace = conf.DataPlane.Namespace
-		internalk8sClient.CreateAuthenticationCR(&authPolicy, k8sClient)
+		internalk8sClient.DeployAuthenticationCR(&authPolicy, k8sClient)
 	case "API":
 		var api dpv1alpha2.API
 		err = k8Yaml.Unmarshal(yamlData, &api)
@@ -115,7 +115,7 @@ func MapAndCreateCR(zipFile *zip.File, k8sClient client.Client, conf *config.Con
 			logger.LoggerSync.Errorf("Error unmarshaling API YAML: %v", err)
 		}
 		api.ObjectMeta.Namespace = conf.DataPlane.Namespace
-		internalk8sClient.CreateAPICR(&api, k8sClient)
+		internalk8sClient.DeployAPICR(&api, k8sClient)
 	case "InterceptorService":
 		var interceptorService dpv1alpha1.InterceptorService
 		err = k8Yaml.Unmarshal(yamlData, &interceptorService)
@@ -123,7 +123,7 @@ func MapAndCreateCR(zipFile *zip.File, k8sClient client.Client, conf *config.Con
 			logger.LoggerSync.Errorf("Error unmarshaling InterceptorService YAML: %v", err)
 		}
 		interceptorService.ObjectMeta.Namespace = conf.DataPlane.Namespace
-		internalk8sClient.CreateInterceptorServicesCR(&interceptorService, k8sClient)
+		internalk8sClient.DeployInterceptorServicesCR(&interceptorService, k8sClient)
 	case "BackendJWT":
 		var backendJWT dpv1alpha1.BackendJWT
 		err = k8Yaml.Unmarshal(yamlData, &backendJWT)
@@ -131,7 +131,7 @@ func MapAndCreateCR(zipFile *zip.File, k8sClient client.Client, conf *config.Con
 			logger.LoggerSync.Errorf("Error unmarshaling BackendJWT YAML: %v", err)
 		}
 		backendJWT.ObjectMeta.Namespace = conf.DataPlane.Namespace
-		internalk8sClient.CreateBackendJWTCR(&backendJWT, k8sClient)
+		internalk8sClient.DeployBackendJWTCR(&backendJWT, k8sClient)
 	case "Scope":
 		var scope dpv1alpha1.Scope
 		err = k8Yaml.Unmarshal(yamlData, &scope)
@@ -139,7 +139,7 @@ func MapAndCreateCR(zipFile *zip.File, k8sClient client.Client, conf *config.Con
 			logger.LoggerSync.Errorf("Error unmarshaling Scope YAML: %v", err)
 		}
 		scope.ObjectMeta.Namespace = conf.DataPlane.Namespace
-		internalk8sClient.CreateScopeCR(&scope, k8sClient)
+		internalk8sClient.DeployScopeCR(&scope, k8sClient)
 	case "RateLimitPolicy":
 		var rateLimitPolicy dpv1alpha1.RateLimitPolicy
 		err = k8Yaml.Unmarshal(yamlData, &rateLimitPolicy)
@@ -147,7 +147,7 @@ func MapAndCreateCR(zipFile *zip.File, k8sClient client.Client, conf *config.Con
 			logger.LoggerSync.Errorf("Error unmarshaling RateLimitPolicy YAML: %v", err)
 		}
 		rateLimitPolicy.ObjectMeta.Namespace = conf.DataPlane.Namespace
-		internalk8sClient.CreateRateLimitPolicyCR(&rateLimitPolicy, k8sClient)
+		internalk8sClient.DeployRateLimitPolicyCR(&rateLimitPolicy, k8sClient)
 	case "Secret":
 		var secret corev1.Secret
 		err = k8Yaml.Unmarshal(yamlData, &secret)
@@ -155,7 +155,7 @@ func MapAndCreateCR(zipFile *zip.File, k8sClient client.Client, conf *config.Con
 			logger.LoggerSync.Errorf("Error unmarshaling Secret YAML: %v", err)
 		}
 		secret.ObjectMeta.Namespace = conf.DataPlane.Namespace
-		internalk8sClient.CreateSecretCR(&secret, k8sClient)
+		internalk8sClient.DeploySecretCR(&secret, k8sClient)
 	default:
 		logger.LoggerSync.Errorf("[!]Unknown Kind parsed from the YAML File: %v", kind)
 	}

@@ -27,6 +27,7 @@ import (
 	"os"
 	"os/signal"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/fsnotify/fsnotify"
@@ -36,7 +37,6 @@ import (
 	dpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha2"
 	"github.com/wso2/apk/common-go-libs/loggers"
 	"github.com/wso2/apk/common-go-libs/pkg/discovery/api/wso2/discovery/service/apkmgt"
-	"github.com/wso2/apk/common-go-libs/utils"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/eventhub"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/loggers"
@@ -118,13 +118,10 @@ func Run(conf *config.Config) {
 	utilruntime.Must(cpv1alpha2.AddToScheme(scheme))
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-		Scheme:                  scheme,
-		MetricsBindAddress:      metricsAddr,
-		Port:                    9443,
-		HealthProbeBindAddress:  probeAddr,
-		LeaderElection:          true,
-		LeaderElectionID:        "operator-lease.apk.wso2.com",
-		LeaderElectionNamespace: utils.GetOperatorPodNamespace(),
+		Scheme:                 scheme,
+		MetricsBindAddress:     metricsAddr,
+		Port:                   9443,
+		HealthProbeBindAddress: probeAddr,
 		// LeaderElectionReleaseOnCancel defines if the leader should step down voluntarily
 		// when the Manager ends. This requires the binary to immediately end when the
 		// Manager is stopped, otherwise, this setting is unsafe. Setting this significantly
@@ -140,6 +137,17 @@ func Run(conf *config.Config) {
 	if err != nil {
 		loggers.LoggerAPKOperator.Error("unable to start kubernetes controller manager", err)
 	}
+
+	// Start the manager in a goroutine
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		loggers.LoggerAPKOperator.Info("starting manager")
+		if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
+			loggers.LoggerAPKOperator.Warn("problem running manager: %v", err)
+		}
+	}()
 
 	// Load initial data from control plane
 	eventhub.LoadInitialData(conf, mgr.GetClient())
