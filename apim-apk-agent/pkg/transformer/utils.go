@@ -105,6 +105,11 @@ func readZipFile(file *zip.File, apiArtifact *APIArtifact) error {
 	if strings.Contains(file.Name, "deployments.json") {
 		apiArtifact.DeploymentDescriptor = string(content)
 	}
+
+	if strings.Contains(file.Name, "client_certificates.json") {
+		apiArtifact.ClientCerts = string(content)
+	}
+
 	return nil
 }
 
@@ -133,6 +138,10 @@ func readAPIZipFile(file *zip.File, apiArtifact *APIArtifact) error {
 
 	if strings.Contains(file.Name, "api.json") {
 		apiArtifact.APIJson = string(content)
+	}
+
+	if strings.Contains(file.Name, "client_certificates.json") {
+		apiArtifact.ClientCerts = string(content)
 	}
 
 	return nil

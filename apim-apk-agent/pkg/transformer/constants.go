@@ -36,6 +36,8 @@ const (
 	k8sOrganizationField = "organization"
 	k8sHostnamesField    = "hostnames"
 	k8sLabelsField       = "labels"
+	k8RevisionField      = "revisionID"
+	k8APIUuidField       = "apiUUID"
 
 	// K8s CRD values
 	k8sKindHTTPRoute   = "HTTPRoute"

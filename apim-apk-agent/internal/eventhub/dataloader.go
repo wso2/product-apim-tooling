@@ -344,7 +344,7 @@ func FetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string, k8sClient cli
 
 			for _, artifact := range artifacts {
 				if artifact.APIJson != "" && artifact.DeploymentDescriptor != "" {
-					apkConf, _, apkErr := transformer.GenerateAPKConf(artifact.APIJson)
+					apkConf, apiUUID, revisionID, apkErr := transformer.GenerateAPKConf(artifact.APIJson, artifact.ClientCerts)
 
 					if apkErr != nil {
 						logger.LoggerSync.Errorf("Error while generating APK-Conf: %v", apkErr)
@@ -359,7 +359,7 @@ func FetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string, k8sClient cli
 						return
 					}
 
-					crResponse, err := transformer.GenerateUpdatedCRs(apkConf, artifact.Swagger, k8ResourceEndpoint, deploymentDescriptor, artifact.APIFileName)
+					crResponse, err := transformer.GenerateUpdatedCRs(apkConf, artifact.Swagger, k8ResourceEndpoint, deploymentDescriptor, artifact.APIFileName, apiUUID, fmt.Sprint(revisionID))
 					if err != nil {
 						logger.LoggerSync.Errorf("Error occured in receiving the updated CRDs: %v", err)
 						return

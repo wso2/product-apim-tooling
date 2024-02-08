@@ -38,8 +38,12 @@ type CORSConfiguration struct {
 	AccessControlAllowMethods     []string `yaml:"accessControlAllowMethods"`
 }
 
-// AdditionalPropertiesMap represents additional properties for an API in the form of a map.
-type AdditionalPropertiesMap struct{}
+// AdditionalProperties represents additional properties for an API in the form of a map.
+type AdditionalProperties struct {
+	Name               string `yaml:"name"`
+	Value              string `yaml:"value"`
+	DisplayInDevPortal bool   `yaml:"display"`
+}
 
 // InterceptorService holds configuration details for configuring interceptor
 // for a aperticular API requests or responses.
@@ -78,21 +82,22 @@ type APIMOperation struct {
 
 // APIMApi represents an API along with it's all basic information and the operations.
 type APIMApi struct {
-	ID                      string                  `yaml:"id"`
-	Name                    string                  `yaml:"name"`
-	Version                 string                  `yaml:"version"`
-	Context                 string                  `yaml:"context"`
-	DefaultVersion          bool                    `yaml:"isDefaultVersion"`
-	Type                    string                  `yaml:"type"`
-	AuthorizationHeader     string                  `yaml:"authorizationHeader"`
-	SecuritySchemes         []string                `json:"securityScheme"`
-	AdditionalProperties    []string                `yaml:"additionalProperties"`
-	AdditionalPropertiesMap AdditionalPropertiesMap `yaml:"additionalPropertiesMap"`
-	CORSConfiguration       CORSConfiguration       `yaml:"corsConfiguration"`
-	EndpointConfig          EndpointConfig          `yaml:"endpointConfig"`
-	Operations              []APIMOperation         `yaml:"operations"`
-	OrganizationID          string                  `yaml:"organizationId"`
-	RevisionID              uint32                  `yaml:"revisionId"`
+	ID                   string                 `yaml:"id"`
+	Name                 string                 `yaml:"name"`
+	Version              string                 `yaml:"version"`
+	Context              string                 `yaml:"context"`
+	DefaultVersion       bool                   `json:"isDefaultVersion"`
+	Type                 string                 `yaml:"type"`
+	AuthorizationHeader  string                 `yaml:"authorizationHeader"`
+	SecuritySchemes      []string               `json:"securityScheme"`
+	AdditionalProperties []AdditionalProperties `yaml:"additionalProperties"`
+	// AdditionalPropertiesMap []AdditionalPropertiesMap `yaml:"additionalPropertiesMap"`
+	CORSConfiguration CORSConfiguration `yaml:"corsConfiguration"`
+	EndpointConfig    EndpointConfig    `yaml:"endpointConfig"`
+	Operations        []APIMOperation   `yaml:"operations"`
+	OrganizationID    string            `yaml:"organizationId"`
+	RevisionID        uint32            `yaml:"revisionId"`
+	RevisionedAPIID   string            `yaml:"revisionedApiId"`
 }
 
 // APIYaml is a wrapper struct for YAML representation of an API.
@@ -108,5 +113,6 @@ type APIArtifact struct {
 	EnvConfig            string `json:"envConfig"`
 	Swagger              string `json:"swagger"`
 	DeploymentDescriptor string `json:"deploymentDescriptor"`
+	ClientCerts          string `json:"clientCert"`
 	RevisionID           uint32 `json:"revisionId"`
 }
