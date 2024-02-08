@@ -28,6 +28,7 @@ import (
 	"github.com/wso2/apk/common-go-libs/constants"
 	event "github.com/wso2/apk/common-go-libs/pkg/discovery/api/wso2/discovery/subscription"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
+	internalk8sClient "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/k8sClient"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/synchronizer"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
@@ -201,13 +202,7 @@ func handleAPIEvents(data []byte, eventType string, conf *config.Config, c clien
 		// removeFromGateway event with multiple labels could only appear when the API is subjected
 		// to delete. Hence we could simply delete after checking against just one iteration.
 		if strings.EqualFold(removeAPIFromGateway, apiEvent.Event.Type) {
-			// xds.DeleteAPIWithAPIMEvent(apiEvent.UUID, apiEvent.TenantDomain, apiEvent.GatewayLabels, "")
-			// for _, env := range apiEvent.GatewayLabels {
-			// 	xdsAPIList := xds.DeleteAPIAndReturnList(apiEvent.UUID, apiEvent.TenantDomain, env)
-			// 	if xdsAPIList != nil {
-			// 		xds.UpdateEnforcerAPIList(env, xdsAPIList)
-			// 	}
-			// }
+			internalk8sClient.UndeployAPICR(apiEvent.UUID, c)
 			break
 		}
 		if strings.EqualFold(deployAPIToGateway, apiEvent.Event.Type) {

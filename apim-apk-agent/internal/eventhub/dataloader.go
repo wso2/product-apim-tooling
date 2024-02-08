@@ -34,6 +34,7 @@ import (
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	internalk8sClient "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/k8sClient"
 	mapperUtil "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/mapper"
 	pkgAuth "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/auth"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
@@ -428,6 +429,8 @@ func FetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string, k8sClient cli
 			sync.RetryFetchingAPIs(c, data, sync.RuntimeArtifactEndpoint, true, queryParamMap)
 		}
 	}
+	// Remove the APIs which are not in the list
+	internalk8sClient.UndeployAPICRs(apiUUIDList, k8sClient)
 	logger.LoggerMsg.Info("Fetching APIs at startup is completed...")
 }
 

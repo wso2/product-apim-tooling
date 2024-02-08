@@ -52,6 +52,66 @@ func DeployAPICR(api *dpv1alpha2.API, k8sClient client.Client) {
 	}
 }
 
+// UndeployAPICR removes the API Custom Resource from the Kubernetes cluster based on API ID label.
+func UndeployAPICR(apiID string, k8sClient client.Client) {
+	// Define a list to hold API CRs with matching label
+	apiList := &dpv1alpha2.APIList{}
+
+	// Retrieve all API CRs from the Kubernetes cluster
+	if err := k8sClient.List(context.Background(), apiList); err != nil {
+		loggers.LoggerXds.Errorf("Unable to list API CRs: %v", err)
+	}
+
+	// Iterate over each API CR and check if it has the matching label
+	for _, api := range apiList.Items {
+		labels := api.GetLabels()
+		if labels["apiUUID"] == apiID {
+			// Found the API CR with the matching label, delete it
+			if err := k8sClient.Delete(context.Background(), &api); err != nil {
+				loggers.LoggerXds.Errorf("Unable to delete API CR: %v", err)
+			}
+			loggers.LoggerXds.Infof("Deleted API CR: %s", api.Name)
+		}
+	}
+}
+
+// UndeployAPICRs removes the API Custom Resources from the Kubernetes cluster
+// that are not included in the provided apiUUID list.
+func UndeployAPICRs(apiUUIDs []string, k8sClient client.Client) {
+	// Define a list to hold API CRs with matching label
+	apiList := &dpv1alpha2.APIList{}
+
+	// Retrieve all API CRs from the Kubernetes cluster
+	if err := k8sClient.List(context.Background(), apiList); err != nil {
+		loggers.LoggerXds.Errorf("Unable to list API CRs: %v", err)
+	}
+
+	// Iterate over each API CR and check if it has a matching label
+	for _, api := range apiList.Items {
+		if !api.Spec.SystemAPI {
+			// Check if the API CR's UUID is not in the provided list
+			if !contains(apiUUIDs, api.GetLabels()["apiUUID"]) {
+				// Delete the API CR
+				if err := k8sClient.Delete(context.Background(), &api); err != nil {
+					loggers.LoggerXds.Errorf("Unable to delete API CR: %v", err)
+				} else {
+					loggers.LoggerXds.Infof("Deleted API CR: %s", api.Name)
+				}
+			}
+		}
+	}
+}
+
+// contains checks if a string is present in a slice of strings
+func contains(slice []string, str string) bool {
+	for _, s := range slice {
+		if s == str {
+			return true
+		}
+	}
+	return false
+}
+
 // DeployConfigMapCR applies the given ConfigMap struct to the Kubernetes cluster.
 func DeployConfigMapCR(configMap *corev1.ConfigMap, k8sClient client.Client) {
 	crConfigMap := &corev1.ConfigMap{}
