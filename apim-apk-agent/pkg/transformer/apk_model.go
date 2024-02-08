@@ -17,16 +17,29 @@
 
 package transformer
 
+// AdditionalProperty stores the custom properties set by the user for a particular API
+type AdditionalProperty struct {
+	Name  string `yaml:"name"`
+	Value string `yaml:"value"`
+}
+
+// Certificate struct stores the the alias and the name for a particular mTLS configuration
+type Certificate struct {
+	Name string `json:"name"`
+	Key  string `json:"key"`
+}
+
 // AuthConfiguration represents the security configurations made for the API security
 type AuthConfiguration struct {
-	Required          string `yaml:"required,omitempty"`
-	AuthType          string `yaml:"authType,omitempty"`
-	HeaderName        string `yaml:"headerName,omitempty"`
-	SendTokenUpStream bool   `yaml:"sendTokenToUpstream,omitempty"`
-	Enabled           bool   `yaml:"enabled,omitempty"`
-	QueryParamName    string `yaml:"queryParamName,omitempty"`
-	HeaderEnabled     bool   `yaml:"headerEnable,omitempty"`
-	queryParamEnable  bool   `yaml:"queryParamEnable,omitempty"`
+	Required          string        `yaml:"required,omitempty"`
+	AuthType          string        `yaml:"authType,omitempty"`
+	HeaderName        string        `yaml:"headerName,omitempty"`
+	SendTokenUpStream bool          `yaml:"sendTokenToUpstream,omitempty"`
+	Enabled           bool          `yaml:"enabled,omitempty"`
+	QueryParamName    string        `yaml:"queryParamName,omitempty"`
+	HeaderEnabled     bool          `yaml:"headerEnable,omitempty"`
+	queryParamEnable  bool          `yaml:"queryParamEnable,omitempty"`
+	Certificates      []Certificate `yaml:"certificates,omitempty"`
 }
 
 // Endpoint represents an API endpoint.
@@ -79,4 +92,5 @@ type API struct {
 	Operations             *[]Operation           `yaml:"operations,omitempty"`
 	Authentication         *[]AuthConfiguration   `yaml:"authentication,omitempty"`
 	CorsConfig             *CORSConfiguration     `yaml:"corsConfiguration,omitempty"`
+	AdditionalProperties   *[]AdditionalProperty  `yaml:"additionalProperties,omitempty"`
 }

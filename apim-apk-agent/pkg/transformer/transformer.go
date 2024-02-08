@@ -45,7 +45,7 @@ import (
 )
 
 // GenerateAPKConf will Generate the mapped .apk-conf file for a given API Project zip
-func GenerateAPKConf(APIJson string) (string, uint32, error) {
+func GenerateAPKConf(APIJson string, clientCerts string) (string, string, uint32, error) {
 
 	apk := &API{}
 
@@ -54,8 +54,8 @@ func GenerateAPKConf(APIJson string) (string, uint32, error) {
 	apiYamlError := json.Unmarshal([]byte(APIJson), &apiYaml)
 
 	if apiYamlError != nil {
-		logger.LoggerTransformer.Error("Error while unmarshalling api yaml", apiYamlError)
-		return "", 0, apiYamlError
+		logger.LoggerTransformer.Error("Error while unmarshalling api.json content", apiYamlError)
+		return "", "null", 0, apiYamlError
 	}
 
 	apiYamlData := apiYaml.Data
@@ -98,30 +98,44 @@ func GenerateAPKConf(APIJson string) (string, uint32, error) {
 			Endpoint: apiYamlData.EndpointConfig.ProductionEndpoints.URL},
 	}
 
-	//TODO: Currently only the oauth2 is considered when mapping. In further improvemets, this logic should be
-	// changed.
-	if StringExists("oauth2", apiYamlData.SecuritySchemes) && apiYamlData.AuthorizationHeader == "Authorization" {
-		var authConfigs []AuthConfiguration
-		authConfig := AuthConfiguration{
-			Required:   "mandatory",
-			AuthType:   "OAuth2",
-			HeaderName: apiYamlData.AuthorizationHeader,
-			Enabled:    false,
-		}
+	var certList CertDescriptor
+	certAvailable := false
 
-		authConfigs = append(authConfigs, authConfig)
-		apk.Authentication = &authConfigs
+	if clientCerts != "" {
+		certErr := json.Unmarshal([]byte(clientCerts), &certList)
+		if certErr != nil {
+			logger.LoggerTransformer.Errorf("Error while unmarshalling client_cert.json content: ", apiYamlError)
+			return "", "null", 0, certErr
+		}
+		certAvailable = true
+	} else {
+		logger.LoggerTransformer.Info("Alert:client_cert.json empty or not exist for the given zip.")
 	}
 
+	authConfigList := mapAuthConfigs(apiYamlData.AuthorizationHeader, apiYamlData.SecuritySchemes, certAvailable, certList)
+	apk.Authentication = &authConfigList
+
 	apk.CorsConfig = &apiYamlData.CORSConfiguration
+
+	aditionalProperties := make([]AdditionalProperty, len(apiYamlData.AdditionalProperties))
+
+	for i, property := range apiYamlData.AdditionalProperties {
+		prop := &AdditionalProperty{
+			Name:  property.Name,
+			Value: property.Value,
+		}
+		aditionalProperties[i] = *prop
+	}
+
+	apk.AdditionalProperties = &aditionalProperties
 
 	c, marshalError := yaml.Marshal(apk)
 
 	if marshalError != nil {
 		logger.LoggerTransformer.Error("Error while marshalling apk yaml", marshalError)
-		return "", 0, marshalError
+		return "", "null", 0, marshalError
 	}
-	return string(c), apiYamlData.RevisionID, nil
+	return string(c), apiYamlData.RevisionedAPIID, apiYamlData.RevisionID, nil
 }
 
 // getAPIType will be selecting the appropriate API type need to be added in the apk-conf
@@ -177,9 +191,51 @@ func getReqAndResInterceptors(reqPolicyCount int, resPolicyCount int) (*[]Operat
 	return &reqInterceptor, &resInterceptor
 }
 
+// mapAuthConfigs will take the security schemes as the parameter and will return the mapped auth configs to be
+// added into the apk-conf
+func mapAuthConfigs(authHeader string, secSchemes []string, certAvailable bool, certList CertDescriptor) []AuthConfiguration {
+	var authConfigs []AuthConfiguration
+	if StringExists("oauth2", secSchemes) {
+		var newConfig AuthConfiguration
+		newConfig.AuthType = "OAuth2"
+		newConfig.Enabled = true
+		newConfig.HeaderName = authHeader
+		if StringExists("oauth_basic_auth_api_key_mandatory", secSchemes) {
+			newConfig.Required = "mandatory"
+		} else {
+			newConfig.Required = "optional"
+		}
+
+		authConfigs = append(authConfigs, newConfig)
+	}
+	if StringExists("mutualssl", secSchemes) && certAvailable {
+		var newConfig AuthConfiguration
+		newConfig.AuthType = "mTLS"
+		newConfig.Enabled = true
+		if StringExists("mutualssl_mandatory", secSchemes) {
+			newConfig.Required = "mandatory"
+		} else {
+			newConfig.Required = "optional"
+		}
+
+		clientCerts := make([]Certificate, len(certList.CertData))
+
+		for i, cert := range certList.CertData {
+			prop := &Certificate{
+				Name: cert.Alias,
+				Key:  cert.Certificate,
+			}
+			clientCerts[i] = *prop
+		}
+		newConfig.Certificates = clientCerts
+		authConfigs = append(authConfigs, newConfig)
+	}
+	return authConfigs
+}
+
 // GenerateUpdatedCRs takes the .apk-conf, api definition, vHost and the organization for a particular API and then generate and returns
 // the relavant CRD set as a zip
-func GenerateUpdatedCRs(apkConf string, apiDefinition string, k8ResourceGenEndpoint string, deploymentDescriptor *DeploymentDescriptor, apiFileName string) (*bytes.Buffer, error) {
+func GenerateUpdatedCRs(apkConf string, apiDefinition string, k8ResourceGenEndpoint string, deploymentDescriptor *DeploymentDescriptor, apiFileName string, apiID string, revisionID string) (*bytes.Buffer, error) {
 	if apkConf == "" {
 		logger.LoggerTransformer.Error("Empty apk-conf parameter provided. Unable to generate CRDs.")
 		return nil, errors.New("Error: APK-Conf can't be empty")
@@ -255,7 +311,7 @@ func GenerateUpdatedCRs(apkConf string, apiDefinition string, k8ResourceGenEndpo
 		if deployment.APIFile == apiFileName {
 			for _, environment := range *deployment.Environments {
 
-				modifiedZip, err := transformCRD(body, environment.Vhost, deployment.OrganizationID)
+				modifiedZip, err := transformCRD(body, environment.Vhost, deployment.OrganizationID, apiID, revisionID)
 
 				if err != nil {
 					logger.LoggerTransformer.Error("Unable to transform the initial CRDs:", err)
@@ -291,7 +347,7 @@ func GenerateUpdatedCRs(apkConf string, apiDefinition string, k8ResourceGenEndpo
 }
 
 // transformCRD converts the APK CRDs and returns the modified CRDs with modified
-func transformCRD(crdZip []byte, vHost string, organization string) ([]byte, error) {
+func transformCRD(crdZip []byte, vHost string, organization string, apiID string, revisionID string) ([]byte, error) {
 	zipReader, err := zip.NewReader(bytes.NewReader(crdZip), int64(len(crdZip)))
 	if err != nil {
 		logger.LoggerTransformer.Fatal(err)
@@ -315,7 +371,7 @@ func transformCRD(crdZip []byte, vHost string, organization string) ([]byte, err
 		}
 
 		_ = apkCRDFileBytes // this is unzipped file bytes
-		yamlCrd, err := generateAPKCrdsFromYaml(apkCRDFileBytes, organization, vHost, namespace)
+		yamlCrd, err := generateAPKCrdsFromYaml(apkCRDFileBytes, organization, vHost, namespace, apiID, revisionID)
 		if err != nil {
 			logger.LoggerTransformer.Error("Error occured while retrieving the modified CRDs", err)
 			return nil, err
@@ -349,7 +405,7 @@ func transformCRD(crdZip []byte, vHost string, organization string) ([]byte, err
 
 // generateAPKCrdsFromYaml processes the returned APK CRD yaml, replaces the vhost, adds the organization
 // and namespace and returns the json
-func generateAPKCrdsFromYaml(crdYaml []byte, orgUUID, vhost string, namespace string) ([]byte, error) {
+func generateAPKCrdsFromYaml(crdYaml []byte, orgUUID, vhost string, namespace string, apiID string, revisionID string) ([]byte, error) {
 	var crdYml map[interface{}]interface{}
 	unMarshalErr := yaml.Unmarshal(crdYaml, &crdYml)
 
@@ -359,6 +415,7 @@ func generateAPKCrdsFromYaml(crdYaml []byte, orgUUID, vhost string, namespace st
 	replaceVhost(crdYml, vhost)
 	addOrganization(crdYml, orgUUID)
 	addNamespace(crdYml, namespace)
+	addRevisionAndAPIUUID(crdYml, apiID, revisionID)
 
 	processdCrdYml := convertMap(crdYml)
 
@@ -442,6 +499,18 @@ func addOrganization(inputMap map[interface{}]interface{}, organization string) 
 func addNamespace(inputMap map[interface{}]interface{}, namespace string) {
 	if metadata, ok := inputMap[k8sMetadataField].(map[interface{}]interface{}); ok {
 		metadata[k8sNamespaceField] = namespace
+	}
+}
+
+// addRevisionAndAPIUUID will add the API ID and the revision field attributes to the API CR
+func addRevisionAndAPIUUID(inputMap map[interface{}]interface{}, apiID string, revisionID string) {
+	if kind, ok := inputMap[k8sKindField].(string); ok && kind == k8sKindAPI {
+		if metadata, ok := inputMap[k8sMetadataField].(map[interface{}]interface{}); ok {
+			if labels, ok := metadata[k8sLabelsField].(map[interface{}]interface{}); ok {
+				labels[k8APIUuidField] = apiID
+				labels[k8RevisionField] = revisionID
+			}
+		}
 	}
 }
 
