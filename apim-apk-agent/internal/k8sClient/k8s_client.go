@@ -20,13 +20,20 @@ package k8sclient
 
 import (
 	"context"
+	"crypto/sha1"
+	"encoding/hex"
 
 	dpv1alpha1 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha1"
 	dpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha2"
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/loggers"
+	eventhubTypes "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
 	corev1 "k8s.io/api/core/v1"
 	k8error "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/gateway-api/apis/v1alpha2"
 	gwapiv1b1 "sigs.k8s.io/gateway-api/apis/v1beta1"
 )
 
@@ -330,4 +337,130 @@ func DeployBackendCR(backends *dpv1alpha1.Backend, k8sClient client.Client) {
 			loggers.LoggerXds.Info("Backends CR updated: " + backends.Name)
 		}
 	}
+}
+
+// CreateAndUpdateTokenIssuersCR applies the given TokenIssuers struct to the Kubernetes cluster.
+func CreateAndUpdateTokenIssuersCR(keyManager eventhubTypes.ResolvedKeyManager, k8sClient client.Client) error {
+	conf, _ := config.ReadConfigs()
+	sha1ValueofKmName := getSha1Value(keyManager.Name)
+	sha1ValueOfOrganization := getSha1Value(keyManager.TenantDomain)
+	labelMap := map[string]string{"name": sha1ValueofKmName, "organization": sha1ValueOfOrganization}
+
+	tokenIssuer := dpv1alpha2.TokenIssuer{
+		ObjectMeta: metav1.ObjectMeta{Name: keyManager.UUID,
+			Namespace: conf.DataPlane.Namespace,
+			Labels:    labelMap,
+		},
+		Spec: dpv1alpha2.TokenIssuerSpec{
+			Name:                keyManager.Name,
+			Organization:        keyManager.TenantDomain,
+			Issuer:              keyManager.KeyManagerConfig.Issuer,
+			ClaimMappings:       marshalClaimMappings(keyManager.KeyManagerConfig.ClaimMappings),
+			SignatureValidation: marshalSignatureValidation(keyManager.KeyManagerConfig),
+			TargetRef:           &v1alpha2.PolicyTargetReference{Group: "gateway.networking.k8s.io", Kind: "Gateway", Name: "default"},
+		},
+	}
+	tokenIssuer.Spec.ConsumerKeyClaim = "azp"
+	if keyManager.KeyManagerConfig.ConsumerKeyClaim != "" {
+		tokenIssuer.Spec.ConsumerKeyClaim = keyManager.KeyManagerConfig.ConsumerKeyClaim
+	}
+	keyManager.KeyManagerConfig.ScopesClaim = "scope"
+	if keyManager.KeyManagerConfig.ScopesClaim != "" {
+		tokenIssuer.Spec.ScopesClaim = keyManager.KeyManagerConfig.ScopesClaim
+	}
+	err := k8sClient.Create(context.Background(), &tokenIssuer)
+	if err != nil {
+		loggers.LoggerXds.Error("Unable to create TokenIssuer CR: " + err.Error())
+		return err
+	}
+	loggers.LoggerXds.Debug("TokenIssuer CR created: " + tokenIssuer.Name)
+	return nil
+}
+
+// DeleteTokenIssuersCR deletes the TokenIssuers struct from the Kubernetes cluster.
+func DeleteTokenIssuersCR(k8sClient client.Client, keymanagerName string, tenantDomain string) error {
+	conf, _ := config.ReadConfigs()
+	sha1ValueofKmName := getSha1Value(keymanagerName)
+	sha1ValueOfOrganization := getSha1Value(tenantDomain)
+	labelMap := map[string]string{"name": sha1ValueofKmName, "organization": sha1ValueOfOrganization}
+	// Create a list option with the label selector
+	listOption := &client.ListOptions{
+		Namespace:     conf.DataPlane.Namespace,
+		LabelSelector: labels.SelectorFromSet(labelMap),
+	}
+
+	tokenIssuerList := &dpv1alpha2.TokenIssuerList{}
+	err := k8sClient.List(context.Background(), tokenIssuerList, listOption)
+	if err != nil {
+		loggers.LoggerAPI.Error("Unable to list TokenIssuer CR: " + err.Error())
+	}
+	if len(tokenIssuerList.Items) == 0 {
+		loggers.LoggerXds.Debug("No TokenIssuer CR found for deletion")
+	}
+	for _, tokenIssuer := range tokenIssuerList.Items {
+		err := k8sClient.Delete(context.Background(), &tokenIssuer, &client.DeleteOptions{})
+		if err != nil {
+			loggers.LoggerAPI.Error("Unable to delete TokenIssuer CR: " + err.Error())
+			return err
+		}
+		loggers.LoggerXds.Debug("TokenIssuer CR deleted: " + tokenIssuer.Name)
+	}
+	return nil
+}
+
+// UpdateTokenIssuersCR applies the given TokenIssuers struct to the Kubernetes cluster.
+func UpdateTokenIssuersCR(keyManager eventhubTypes.ResolvedKeyManager, k8sClient client.Client) error {
+	conf, _ := config.ReadConfigs()
+	sha1ValueofKmName := getSha1Value(keyManager.Name)
+	sha1ValueOfOrganization := getSha1Value(keyManager.TenantDomain)
+	labelMap := map[string]string{"name": sha1ValueofKmName, "organization": sha1ValueOfOrganization}
+	tokenIssuer := &dpv1alpha2.TokenIssuer{}
+	err := k8sClient.Get(context.Background(), client.ObjectKey{Name: keyManager.UUID, Namespace: conf.DataPlane.Namespace}, tokenIssuer)
+	if err != nil {
+		loggers.LoggerAPI.Error("Unable to get TokenIssuer CR: " + err.Error())
+		return err
+	}
+	tokenIssuer.ObjectMeta.Labels = labelMap
+	tokenIssuer.Spec.Name = keyManager.Name
+	tokenIssuer.Spec.Organization = keyManager.TenantDomain
+	tokenIssuer.Spec.Issuer = keyManager.KeyManagerConfig.Issuer
+	tokenIssuer.Spec.ClaimMappings = marshalClaimMappings(keyManager.KeyManagerConfig.ClaimMappings)
+	tokenIssuer.Spec.SignatureValidation = marshalSignatureValidation(keyManager.KeyManagerConfig)
+	tokenIssuer.Spec.TargetRef = &v1alpha2.PolicyTargetReference{Group: "gateway.networking.k8s.io", Kind: "Gateway", Name: "default"}
+	if keyManager.KeyManagerConfig.ConsumerKeyClaim != "" {
+		tokenIssuer.Spec.ConsumerKeyClaim = keyManager.KeyManagerConfig.ConsumerKeyClaim
+	}
+	if keyManager.KeyManagerConfig.ScopesClaim != "" {
+		tokenIssuer.Spec.ScopesClaim = keyManager.KeyManagerConfig.ScopesClaim
+	}
+	err = k8sClient.Update(context.Background(), tokenIssuer)
+	if err != nil {
+		loggers.LoggerAPI.Error("Unable to update TokenIssuer CR: " + err.Error())
+		return err
+	}
+	loggers.LoggerXds.Debug("TokenIssuer CR updated: " + tokenIssuer.Name)
+	return nil
+}
+func marshalSignatureValidation(keyManagerConfig eventhubTypes.KeyManagerConfig) *dpv1alpha2.SignatureValidation {
+	if keyManagerConfig.CertificateType != "" && keyManagerConfig.CertificateValue != "" {
+		if keyManagerConfig.CertificateType == "JWKS" {
+			return &dpv1alpha2.SignatureValidation{JWKS: &dpv1alpha2.JWKS{URL: keyManagerConfig.CertificateValue}}
+		}
+		return &dpv1alpha2.SignatureValidation{Certificate: &dpv1alpha2.CERTConfig{CertificateInline: &keyManagerConfig.CertificateValue}}
+	}
+	return nil
+}
+
+func marshalClaimMappings(claimMappings []eventhubTypes.Claim) *[]dpv1alpha2.ClaimMapping {
+	resolvedClaimMappings := make([]dpv1alpha2.ClaimMapping, 0)
+	for _, claim := range claimMappings {
+		resolvedClaimMappings = append(resolvedClaimMappings, dpv1alpha2.ClaimMapping{RemoteClaim: claim.RemoteClaim, LocalClaim: claim.LocalClaim})
+	}
+	return &resolvedClaimMappings
+}
+func getSha1Value(input string) string {
+	hasher := sha1.New()
+	hasher.Write([]byte(input))
+	hashBytes := hasher.Sum(nil)
+	return hex.EncodeToString(hashBytes)
 }

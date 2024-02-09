@@ -160,12 +160,24 @@ type KeyManagerList struct {
 
 // KeyManager for struct
 type KeyManager struct {
-	Name          string `json:"name"`
-	Type          string `json:"type"`
-	Enabled       bool   `json:"enabled"`
-	TenantDomain  string `json:"tenantDomain,omitempty"`
-	Configuration map[string]interface{}
-	// Configuration KeyManagerConfig `json:"configuration"`
+	UUID          string                 `json:"uuid"`
+	Name          string                 `json:"name"`
+	Type          string                 `json:"type"`
+	Enabled       bool                   `json:"enabled"`
+	TenantDomain  string                 `json:"tenantDomain,omitempty"`
+	TokenType     string                 `json:"tokenType"`
+	Configuration map[string]interface{} `json:"additionalProperties"`
+}
+
+// ResolvedKeyManager for struct
+type ResolvedKeyManager struct {
+	UUID             string           `json:"uuid"`
+	Name             string           `json:"name"`
+	Type             string           `json:"type"`
+	Enabled          bool             `json:"enabled"`
+	TenantDomain     string           `json:"tenantDomain,omitempty"`
+	TokenType        string           `json:"tokenType"`
+	KeyManagerConfig KeyManagerConfig `json:"configuration"`
 }
 
 // KeyManagerConfig for struct Configuration map[string]interface{} `json:"value"`
@@ -173,7 +185,7 @@ type KeyManagerConfig struct {
 	TokenFormatString          string   `json:"token_format_string"`
 	ServerURL                  string   `json:"ServerURL"`
 	ValidationEnable           bool     `json:"validation_enable"`
-	ClaimMappings              []Claim  `json:"Claim"`
+	ClaimMappings              []Claim  `json:"claim_mappings"`
 	GrantTypes                 []string `json:"grant_types"`
 	EncryptPersistedTokens     bool     `json:"OAuthConfigurations.EncryptPersistedTokens"`
 	EnableOauthAppCreation     bool     `json:"enable_oauth_app_creation"`
@@ -189,6 +201,8 @@ type KeyManagerConfig struct {
 	TokenURL                   string   `json:"TokenURL,token_endpoint"`
 	CertificateType            string   `json:"certificate_type"`
 	CertificateValue           string   `json:"certificate_value"`
+	ConsumerKeyClaim           string   `json:"consumer_key_claim"`
+	ScopesClaim                string   `json:"scopes_claim"`
 }
 
 // Claim for struct

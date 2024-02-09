@@ -24,6 +24,7 @@
 package synchronizer
 
 import (
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -31,13 +32,18 @@ import (
 	"strings"
 	"time"
 
+	dpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha2"
+	"github.com/wso2/apk/common-go-libs/loggers"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
-	eventhubInternal "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/eventhub"
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/eventhub"
+	k8sclient "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/k8sClient"
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/logging"
 	pkgAuth "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/auth"
 	eventhubTypes "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
 	sync "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/synchronizer"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/tlsutils"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
@@ -50,7 +56,7 @@ var retryAttempt int
 // FetchKeyManagersOnStartUp pulls the Key managers calling to the API manager
 // API Manager returns a .zip file as a response and this function
 // returns a byte slice of that ZIP file.
-func FetchKeyManagersOnStartUp(conf *config.Config) {
+func FetchKeyManagersOnStartUp(c client.Client) {
 	logger.LoggerSync.Info("Fetching KeyManagers from Control Plane.")
 
 	// Read configurations and derive the eventHub details
@@ -104,13 +110,13 @@ func FetchKeyManagersOnStartUp(conf *config.Config) {
 	var errorMsg string
 	if err != nil {
 		errorMsg = "Error occurred while calling the REST API: " + keyManagersEndpoint
-		go retryFetchData(conf, errorMsg, err)
+		go retryFetchData(conf, errorMsg, err, c)
 		return
 	}
 	responseBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		errorMsg = "Error occurred while reading the response received for: " + keyManagersEndpoint
-		go retryFetchData(conf, errorMsg, err)
+		go retryFetchData(conf, errorMsg, err, c)
 		return
 	}
 
@@ -121,27 +127,95 @@ func FetchKeyManagersOnStartUp(conf *config.Config) {
 			logger.LoggerMsg.Errorf("Error occurred while unmarshelling Key Managers event data %v", err)
 			return
 		}
-
-		for _, kmConfig := range keyManagers {
-			logger.LoggerMsg.Infof("Key Manager %s is added to KeyManagerList", kmConfig.Name)
-		}
-		eventhubInternal.MarshalKeyManagers(&keyManagers)
-		logger.LoggerMsg.Infof("Startup KeyManagers Map: %v", eventhubInternal.KeyManagerMap)
+		logger.LoggerSync.Debugf("Key Managers received: %v", keyManagers)
+		resolvedKeyManagers := eventhub.MarshalKeyManagers(&keyManagers)
+		applyAllKeymanagerConfifuration(c, resolvedKeyManagers)
 	} else {
 		errorMsg = "Failed to fetch data! " + keyManagersEndpoint + " responded with " +
 			strconv.Itoa(resp.StatusCode)
-		go retryFetchData(conf, errorMsg, err)
+		go retryFetchData(conf, errorMsg, err, c)
 	}
 }
 
-func retryFetchData(conf *config.Config, errorMessage string, err error) {
+func retryFetchData(conf *config.Config, errorMessage string, err error, c client.Client) {
 	logger.LoggerSync.Debugf("Time Duration for retrying: %v",
 		conf.ControlPlane.RetryInterval*time.Second)
 	time.Sleep(conf.ControlPlane.RetryInterval * time.Second)
-	FetchKeyManagersOnStartUp(conf)
+	FetchKeyManagersOnStartUp(c)
 	retryAttempt++
 	if retryAttempt >= retryCount {
 		logger.LoggerSync.Errorf(errorMessage, err)
 		return
 	}
+}
+func applyAllKeymanagerConfifuration(c client.Client, resolvedKeyManagers []eventhubTypes.ResolvedKeyManager) error {
+	tokenIssuersFromK8s, _, err := retrieveAllTokenIssuers(c, "")
+	if err != nil {
+		return err
+	}
+	clonedTokenIssuerListFromK8s := make([]dpv1alpha2.TokenIssuer, len(tokenIssuersFromK8s))
+	copy(clonedTokenIssuerListFromK8s, tokenIssuersFromK8s)
+	clonedTokenIssuers := make([]eventhubTypes.ResolvedKeyManager, len(resolvedKeyManagers))
+	copy(clonedTokenIssuers, resolvedKeyManagers)
+	newTokenissuers := make([]eventhubTypes.ResolvedKeyManager, 0)
+	sameTokenissuers := make([]eventhubTypes.ResolvedKeyManager, 0)
+	for _, tokenIssuer := range clonedTokenIssuers {
+		found := false
+		unFilteredTokenIssuersFRomK8s := make([]dpv1alpha2.TokenIssuer, 0)
+		for _, tokenIssuersFromK8s := range clonedTokenIssuerListFromK8s {
+			if tokenIssuer.UUID == tokenIssuersFromK8s.Name {
+				sameTokenissuers = append(sameTokenissuers, tokenIssuer)
+				found = true
+				break
+			}
+			unFilteredTokenIssuersFRomK8s = append(unFilteredTokenIssuersFRomK8s, tokenIssuersFromK8s)
+		}
+		clonedTokenIssuerListFromK8s = unFilteredTokenIssuersFRomK8s
+		if !found {
+			newTokenissuers = append(newTokenissuers, tokenIssuer)
+		}
+	}
+	for _, tokenIssuer := range newTokenissuers {
+		err := k8sclient.CreateAndUpdateTokenIssuersCR(tokenIssuer, c)
+		if err != nil {
+			return err
+		}
+	}
+	for _, tokenIssuer := range sameTokenissuers {
+		err := k8sclient.UpdateTokenIssuersCR(tokenIssuer, c)
+		if err != nil {
+			return err
+		}
+	}
+	for _, tokenissuer := range clonedTokenIssuerListFromK8s {
+		err := k8sclient.DeleteTokenIssuersCR(c, tokenissuer.Spec.Name, tokenissuer.Spec.Organization)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+func retrieveAllTokenIssuers(c client.Client, nextToken string) ([]dpv1alpha2.TokenIssuer, string, error) {
+	conf, _ := config.ReadConfigs()
+	tokenIssuerList := dpv1alpha2.TokenIssuerList{}
+	resolvedTokenIssuerList := make([]dpv1alpha2.TokenIssuer, 0)
+	var err error
+	if nextToken == "" {
+		err = c.List(context.Background(), &tokenIssuerList, &client.ListOptions{Namespace: conf.DataPlane.Namespace})
+	} else {
+		err = c.List(context.Background(), &tokenIssuerList, &client.ListOptions{Namespace: conf.DataPlane.Namespace, Continue: nextToken})
+	}
+	if err != nil {
+		loggers.LoggerAPKOperator.ErrorC(logging.PrintError(logging.Error1102, logging.CRITICAL, "Failed to get application from k8s %v", err.Error()))
+		return nil, "", err
+	}
+	resolvedTokenIssuerList = append(resolvedTokenIssuerList, tokenIssuerList.Items...)
+	if tokenIssuerList.Continue != "" {
+		tempTokenIssuerList, _, err := retrieveAllTokenIssuers(c, tokenIssuerList.Continue)
+		if err != nil {
+			return nil, "", err
+		}
+		resolvedTokenIssuerList = append(resolvedTokenIssuerList, tempTokenIssuerList...)
+	}
+	return resolvedTokenIssuerList, tokenIssuerList.Continue, nil
 }

@@ -58,12 +58,23 @@ func AddApplicationKeyMapping(applicationKeyMapping ApplicationKeyMapping) {
 }
 
 // GetAllApplications returns all the applications in the applicationMap
-func GetAllApplications() []Application {
-	var applications []Application
+func GetAllApplications() []ResolvedApplication {
+	var applications []ResolvedApplication
 	for _, application := range applicationMap {
-		applications = append(applications, application)
+		resolvedApplication := marshalApplication(application)
+		applications = append(applications, resolvedApplication)
 	}
 	return applications
+}
+func marshalApplication(application Application) ResolvedApplication {
+	resolvedApplication := ResolvedApplication{UUID: application.UUID, Name: application.Name, Owner: application.Owner, Organization: application.Organization, Attributes: application.Attributes, TimeStamp: application.TimeStamp, SecuritySchemes: make([]SecurityScheme, 0)}
+	for _, applicationKeyMapping := range applicationKeyMappingMap {
+		if applicationKeyMapping.ApplicationUUID == application.UUID {
+			securityScheme := SecurityScheme{SecurityScheme: applicationKeyMapping.SecurityScheme, KeyType: applicationKeyMapping.KeyType, EnvID: applicationKeyMapping.EnvID, ApplicationIdentifier: applicationKeyMapping.ApplicationIdentifier}
+			resolvedApplication.SecuritySchemes = append(resolvedApplication.SecuritySchemes, securityScheme)
+		}
+	}
+	return resolvedApplication
 }
 
 // GetAllSubscriptions returns all the subscriptions in the subscriptionMap
@@ -82,15 +93,6 @@ func GetAllApplicationMappings() []ApplicationMapping {
 		applicationMappings = append(applicationMappings, applicationMapping)
 	}
 	return applicationMappings
-}
-
-// GetAllApplicationKeyMappings returns all the application key mappings in the applicationKeyMappingMap
-func GetAllApplicationKeyMappings() []ApplicationKeyMapping {
-	var applicationKeyMappings []ApplicationKeyMapping
-	for _, applicationKeyMapping := range applicationKeyMappingMap {
-		applicationKeyMappings = append(applicationKeyMappings, applicationKeyMapping)
-	}
-	return applicationKeyMappings
 }
 
 // GetApplication returns an application from the applicationMap

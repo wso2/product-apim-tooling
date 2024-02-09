@@ -52,6 +52,30 @@ type ApplicationList struct {
 	List []Application `json:"list"`
 }
 
+// ResolvedApplicationList for struct list of resolved application
+type ResolvedApplicationList struct {
+	List []ResolvedApplication `json:"list"`
+}
+
+// ResolvedApplication for struct resolvedApplication
+type ResolvedApplication struct {
+	UUID            string            `json:"uuid,omitempty"`
+	Name            string            `json:"name,omitempty"`
+	Owner           string            `json:"owner,omitempty"`
+	Organization    string            `json:"organization,omitempty"`
+	Attributes      map[string]string `json:"attributes,omitempty"`
+	TimeStamp       int64             `json:"timeStamp,omitempty"`
+	SecuritySchemes []SecurityScheme  `json:"securitySchemes,omitempty"`
+}
+
+// SecurityScheme for struct securityScheme
+type SecurityScheme struct {
+	SecurityScheme        string `json:"securityScheme,omitempty"`
+	ApplicationIdentifier string `json:"applicationIdentifier,omitempty"`
+	KeyType               string `json:"keyType,omitempty"`
+	EnvID                 string `json:"envID,omitempty"`
+}
+
 // ApplicationKeyMapping for struct applicationKeyMapping
 type ApplicationKeyMapping struct {
 	ApplicationUUID       string `json:"applicationUUID,omitempty"`
