@@ -160,7 +160,7 @@ func Run(conf *config.Config) {
 	}
 
 	// Load initial KM data from control plane
-	synchronizer.FetchKeyManagersOnStartUp(conf)
+	synchronizer.FetchKeyManagersOnStartUp(mgr.GetClient())
 
 	var grpcOptions []grpc.ServerOption
 	grpcOptions = append(grpcOptions, grpc.KeepaliveParams(

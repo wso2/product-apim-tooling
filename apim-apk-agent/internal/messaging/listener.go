@@ -29,5 +29,5 @@ func ProcessEvents(config *config.Config, c client.Client) {
 	msg.InitiateJMSConnection(config.ControlPlane.BrokerConnectionParameters.EventListeningEndpoints)
 
 	go handleNotification(c)
-	go handleKMConfiguration()
+	go handleKMConfiguration(c)
 }

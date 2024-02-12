@@ -33,7 +33,7 @@ func StartInternalServer(port uint) {
 
 	r.GET("/applications", func(c *gin.Context) {
 		applicationList := GetAllApplications()
-		c.JSON(http.StatusOK, ApplicationList{List: applicationList})
+		c.JSON(http.StatusOK, ResolvedApplicationList{List: applicationList})
 	})
 	r.GET("/subscriptions", func(c *gin.Context) {
 		subscriptionList := GetAllSubscriptions()
@@ -42,10 +42,6 @@ func StartInternalServer(port uint) {
 	r.GET("/applicationmappings", func(c *gin.Context) {
 		applicationMappingList := GetAllApplicationMappings()
 		c.JSON(http.StatusOK, ApplicationMappingList{List: applicationMappingList})
-	})
-	r.GET("/applicationkeymappings", func(c *gin.Context) {
-		applicationKeyMappingList := GetAllApplicationKeyMappings()
-		c.JSON(http.StatusOK, ApplicationKeyMappingList{List: applicationKeyMappingList})
 	})
 	gin.SetMode(gin.ReleaseMode)
 	publicKeyLocation, privateKeyLocation, _ := config.GetKeyLocations()

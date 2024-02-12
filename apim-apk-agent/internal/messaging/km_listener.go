@@ -25,10 +25,12 @@ import (
 	"strings"
 
 	"github.com/wso2/apk/adapter/pkg/logging"
-	eventhubInternal "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/eventhub"
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/eventhub"
+	k8sclient "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/k8sClient"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/loggers"
 	eventhubTypes "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
 	msg "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/messaging"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // constants related to key manager events
@@ -40,16 +42,11 @@ const (
 	superTenantDomain     = "carbon.super"
 )
 
-// handleKMEvent
-func handleKMConfiguration() {
-	var (
-		indexOfKeymanager int
-		isFound           bool
-	)
+// handleKMConfiguration
+func handleKMConfiguration(c client.Client) {
 	for d := range msg.KeyManagerChannel {
 		var notification msg.EventKeyManagerNotification
-		// var keyManagerConfig resourceTypes.KeymanagerConfig
-		var kmConfigMap map[string]interface{}
+		var keyManager eventhubTypes.KeyManager
 		unmarshalErr := json.Unmarshal([]byte(string(d.Body)), &notification)
 		if unmarshalErr != nil {
 			logger.LoggerInternalMsg.ErrorC(logging.ErrorDetails{
@@ -60,13 +57,6 @@ func handleKMConfiguration() {
 			return
 		}
 		logger.LoggerInternalMsg.Infof("Event %s is received", notification.Event.PayloadData.EventType)
-		// for i := range xds.KeyManagerList {
-		// 	if strings.EqualFold(notification.Event.PayloadData.Name, xds.KeyManagerList[i].Name) {
-		// 		isFound = true
-		// 		indexOfKeymanager = i
-		// 		break
-		// 	}
-		// }
 
 		var decodedByte, err = base64.StdEncoding.DecodeString(notification.Event.PayloadData.Value)
 
@@ -87,17 +77,11 @@ func handleKMConfiguration() {
 		}
 
 		if strings.EqualFold(keyManagerConfigEvent, notification.Event.PayloadData.EventType) {
-			if isFound && strings.EqualFold(actionDelete, notification.Event.PayloadData.Action) {
-				logger.LoggerInternalMsg.Infof("Found KM %s to be deleted index %d", notification.Event.PayloadData.Name,
-					indexOfKeymanager)
-				// if isFound {
-				// 	xds.KeyManagerList[indexOfKeymanager] = xds.KeyManagerList[len(xds.KeyManagerList)-1]
-				// 	xds.KeyManagerList = xds.KeyManagerList[:len(xds.KeyManagerList)-1]
-				// }
-				// xds.GenerateAndUpdateKeyManagerList()
+			if strings.EqualFold(actionDelete, notification.Event.PayloadData.Action) {
+				k8sclient.DeleteTokenIssuersCR(c, notification.Event.PayloadData.Name, notification.Event.PayloadData.TenantDomain)
 			} else if decodedByte != nil {
 				logger.LoggerInternalMsg.Infof("decoded stream %s", string(decodedByte))
-				kmConfigMapErr := json.Unmarshal([]byte(string(decodedByte)), &kmConfigMap)
+				kmConfigMapErr := json.Unmarshal([]byte(string(decodedByte)), &keyManager)
 				if kmConfigMapErr != nil {
 					logger.LoggerInternalMsg.ErrorC(logging.ErrorDetails{
 						Message:   fmt.Sprintf("Error occurred while unmarshalling key manager config map %v", kmConfigMapErr),
@@ -106,27 +90,20 @@ func handleKMConfiguration() {
 					})
 					return
 				}
-
 				if strings.EqualFold(actionAdd, notification.Event.PayloadData.Action) ||
 					strings.EqualFold(actionUpdate, notification.Event.PayloadData.Action) {
-					keyManager := eventhubTypes.KeyManager{Name: notification.Event.PayloadData.Name,
-						Type: notification.Event.PayloadData.Type, Enabled: notification.Event.PayloadData.Enabled,
-						TenantDomain: notification.Event.PayloadData.TenantDomain, Configuration: kmConfigMap}
-					logger.LoggerInternalMsg.Infof("data %v", keyManager.Configuration)
-
-					eventhubInternal.KeyManagerMap[keyManager.Name] = eventhubInternal.MarshalKeyManager(&keyManager)
-					logger.LoggerInternalMsg.Infof("JMS Event KeyManagers Map: %v", eventhubInternal.KeyManagerMap)
-
-					// if isFound {
-					// 	xds.KeyManagerList[indexOfKeymanager] = keyManager
-					// } else {
-					// 	xds.KeyManagerList = append(xds.KeyManagerList, keyManager)
-					// }
-					// xds.GenerateAndUpdateKeyManagerList()
+					logger.LoggerSync.Infof("Key Managers received: %v", keyManager)
+					resolvedKeyManager := eventhub.MarshalKeyManager(&keyManager)
+					logger.LoggerSync.Infof("Resolved Key Managers received: %v", resolvedKeyManager)
+					if strings.EqualFold(actionAdd, notification.Event.PayloadData.Action) {
+						k8sclient.CreateAndUpdateTokenIssuersCR(resolvedKeyManager, c)
+					} else {
+						k8sclient.UpdateTokenIssuersCR(resolvedKeyManager, c)
+					}
 				}
 			}
 		}
+		logger.LoggerInternalMsg.Info("handle: deliveries channel closed")
 		d.Ack(false)
 	}
-	logger.LoggerInternalMsg.Info("handle: deliveries channel closed")
 }
