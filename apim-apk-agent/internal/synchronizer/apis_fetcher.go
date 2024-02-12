@@ -101,6 +101,8 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUIDList []string, k8sClient clien
 				return
 			}
 
+			logger.LoggerSync.Debugf("APK-Conf Content: %v", apkConf)
+
 			k8ResourceEndpoint := conf.DataPlane.K8ResourceEndpoint
 
 			deploymentDescriptor, descriptorErr := transformer.ProcessDeploymentDescriptor([]byte(artifact.DeploymentDescriptor))
@@ -109,7 +111,7 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUIDList []string, k8sClient clien
 				return
 			}
 
-			crResponse, err := transformer.GenerateUpdatedCRs(apkConf, artifact.Swagger, k8ResourceEndpoint, deploymentDescriptor, artifact.APIFileName, apiUUID, fmt.Sprint(revisionID))
+			crResponse, err := transformer.GenerateUpdatedCRs(apkConf, artifact.Swagger, k8ResourceEndpoint, deploymentDescriptor, artifact.APIFileName, apiUUID, fmt.Sprint(revisionID), artifact.CertMeta)
 			if err != nil {
 				logger.LoggerSync.Errorf("Error occured in receiving the updated CRDs: %v", err)
 				return

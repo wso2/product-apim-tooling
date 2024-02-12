@@ -108,6 +108,16 @@ func readZipFile(file *zip.File, apiArtifact *APIArtifact) error {
 
 	if strings.Contains(file.Name, "client_certificates.json") {
 		apiArtifact.ClientCerts = string(content)
+		apiArtifact.CertMeta.CertAvailable = true
+	}
+
+	if strings.Contains(file.Name, ".crt") {
+		if apiArtifact.CertMeta.ClientCertFiles == nil {
+			apiArtifact.CertMeta.ClientCertFiles = make(map[string]string)
+		}
+
+		pathSegments := strings.Split(file.Name, "/")
+		apiArtifact.CertMeta.ClientCertFiles[pathSegments[len(pathSegments)-1]] = string(content)
 	}
 
 	return nil
@@ -259,6 +269,7 @@ func getZipFileBytes(zf *zip.File) ([]byte, error) {
 }
 
 // SaveZipToFile saves the given zipfile to the defined location
+// Note: Currently using this only for debugging purposes
 func SaveZipToFile(zipContent *bytes.Buffer, filePath string) error {
 	zipFile, err := os.Create(filePath)
 	if err != nil {

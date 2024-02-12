@@ -108,11 +108,18 @@ type APIYaml struct {
 // APIArtifact represents the artifact details of an API, including api details, environment configuration,
 // Swagger definition, deployment descriptor, and revision ID extracted from the API Project Zip.
 type APIArtifact struct {
-	APIJson              string `json:"apiJson"`
-	APIFileName          string `json:"apiFileName"`
-	EnvConfig            string `json:"envConfig"`
-	Swagger              string `json:"swagger"`
-	DeploymentDescriptor string `json:"deploymentDescriptor"`
-	ClientCerts          string `json:"clientCert"`
-	RevisionID           uint32 `json:"revisionId"`
+	APIJson              string       `json:"apiJson"`
+	APIFileName          string       `json:"apiFileName"`
+	EnvConfig            string       `json:"envConfig"`
+	Swagger              string       `json:"swagger"`
+	DeploymentDescriptor string       `json:"deploymentDescriptor"`
+	ClientCerts          string       `json:"clientCert"`
+	RevisionID           uint32       `json:"revisionId"`
+	CertMeta             CertMetadata `json:"certMeta"`
+}
+
+// CertMetadata marks the availability of the cert files provided by the client and their contents
+type CertMetadata struct {
+	CertAvailable   bool              `json:"certAvailable"`
+	ClientCertFiles map[string]string `json:"clientCertFiles"`
 }

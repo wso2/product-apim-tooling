@@ -360,7 +360,7 @@ func FetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string, k8sClient cli
 						return
 					}
 
-					crResponse, err := transformer.GenerateUpdatedCRs(apkConf, artifact.Swagger, k8ResourceEndpoint, deploymentDescriptor, artifact.APIFileName, apiUUID, fmt.Sprint(revisionID))
+					crResponse, err := transformer.GenerateUpdatedCRs(apkConf, artifact.Swagger, k8ResourceEndpoint, deploymentDescriptor, artifact.APIFileName, apiUUID, fmt.Sprint(revisionID), artifact.CertMeta)
 					if err != nil {
 						logger.LoggerSync.Errorf("Error occured in receiving the updated CRDs: %v", err)
 						return

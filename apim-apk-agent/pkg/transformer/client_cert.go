@@ -38,3 +38,17 @@ type ClientCert struct {
 type CertDescriptor struct {
 	CertData []ClientCert `json:"data"`
 }
+
+// MetadataBlock will hold the metadata information belong to the particular configmap
+type MetadataBlock struct {
+	Name      string `yaml:"name"`
+	Namespace string `yaml:"namespace"`
+}
+
+// CertConfigYaml holds the data belong to the main configmap structure created upon enabling mTLS
+type CertConfigYaml struct {
+	APIVersion string            `yaml:"apiVersion"`
+	Kind       string            `yaml:"kind"`
+	Metadata   MetadataBlock     `yaml:"metadata"`
+	Data       map[string]string `yaml:"data"`
+}

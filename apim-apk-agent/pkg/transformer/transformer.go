@@ -32,6 +32,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 
 	"io"
 	"mime/multipart"
@@ -109,7 +110,7 @@ func GenerateAPKConf(APIJson string, clientCerts string) (string, string, uint32
 		}
 		certAvailable = true
 	} else {
-		logger.LoggerTransformer.Info("Alert:client_cert.json empty or not exist for the given zip.")
+		logger.LoggerTransformer.Warn("Warn:client_cert.json empty or not exist for the given zip.")
 	}
 
 	authConfigList := mapAuthConfigs(apiYamlData.AuthorizationHeader, apiYamlData.SecuritySchemes, certAvailable, certList)
@@ -235,7 +236,7 @@ func mapAuthConfigs(authHeader string, secSchemes []string, certAvailable bool, 
 
 // GenerateUpdatedCRs takes the .apk-conf, api definition, vHost and the organization for a particular API and then generate and returns
 // the relavant CRD set as a zip
-func GenerateUpdatedCRs(apkConf string, apiDefinition string, k8ResourceGenEndpoint string, deploymentDescriptor *DeploymentDescriptor, apiFileName string, apiID string, revisionID string) (*bytes.Buffer, error) {
+func GenerateUpdatedCRs(apkConf string, apiDefinition string, k8ResourceGenEndpoint string, deploymentDescriptor *DeploymentDescriptor, apiFileName string, apiID string, revisionID string, certMeta CertMetadata) (*bytes.Buffer, error) {
 	if apkConf == "" {
 		logger.LoggerTransformer.Error("Empty apk-conf parameter provided. Unable to generate CRDs.")
 		return nil, errors.New("Error: APK-Conf can't be empty")
@@ -311,7 +312,7 @@ func GenerateUpdatedCRs(apkConf string, apiDefinition string, k8ResourceGenEndpo
 		if deployment.APIFile == apiFileName {
 			for _, environment := range *deployment.Environments {
 
-				modifiedZip, err := transformCRD(body, environment.Vhost, deployment.OrganizationID, apiID, revisionID)
+				modifiedZip, err := transformCRD(body, environment.Vhost, deployment.OrganizationID, apiID, revisionID, certMeta)
 
 				if err != nil {
 					logger.LoggerTransformer.Error("Unable to transform the initial CRDs:", err)
@@ -347,7 +348,7 @@ func GenerateUpdatedCRs(apkConf string, apiDefinition string, k8ResourceGenEndpo
 }
 
 // transformCRD converts the APK CRDs and returns the modified CRDs with modified
-func transformCRD(crdZip []byte, vHost string, organization string, apiID string, revisionID string) ([]byte, error) {
+func transformCRD(crdZip []byte, vHost string, organization string, apiID string, revisionID string, certMeta CertMetadata) ([]byte, error) {
 	zipReader, err := zip.NewReader(bytes.NewReader(crdZip), int64(len(crdZip)))
 	if err != nil {
 		logger.LoggerTransformer.Fatal(err)
@@ -390,6 +391,34 @@ func transformCRD(crdZip []byte, vHost string, organization string, apiID string
 			logger.LoggerTransformer.Error("Error in writing modified content to the new file", err)
 			return nil, err
 		}
+	}
+
+	// Create ConfigMap to store the cert data if mTLS has enabled
+	if certMeta.CertAvailable {
+		for confKey, confValue := range certMeta.ClientCertFiles {
+			i := 0
+			i++
+			pathSegments := strings.Split(confKey, ".")
+			configName := pathSegments[0]
+			cm := createCongigMap(configName, confKey, confValue)
+			logger.LoggerTransformer.Infof("New ConfigMap Data:", string(cm))
+
+			// Create a new yaml file for the ConfigMap yaml
+			cmFileName := fmt.Sprintf(apiID, "-configmap", "-", i, ".yaml")
+			// Write the new yaml file to the modified zip
+			modifiedFile, err := zipWriter.Create(cmFileName)
+			if err != nil {
+				logger.LoggerTransformer.Error("Error in creating new file in the modified zip", err)
+				return nil, err
+			}
+
+			_, err = modifiedFile.Write(cm)
+			if err != nil {
+				logger.LoggerTransformer.Error("Error in writing modified content to the new file", err)
+				return nil, err
+			}
+		}
+
 	}
 
 	// Finish writing the modified zip file
@@ -519,4 +548,24 @@ func generateSHA1Hash(input string) string {
 	h := sha1.New() /* #nosec */
 	h.Write([]byte(input))
 	return hex.EncodeToString(h.Sum(nil))
+}
+
+// createConfigMap returns a marshalled yaml of ConfigMap kind after adding the given values
+func createCongigMap(configName, dataKey, dataValue string) []byte {
+	cm := CertConfigYaml{}
+	cm.APIVersion = "v1"
+	cm.Kind = "ConfigMap"
+	cm.Metadata = MetadataBlock{
+		Name:      configName,
+		Namespace: "apk-integration-test",
+	}
+	if cm.Data == nil {
+		cm.Data = make(map[string]string)
+	}
+	cm.Data[dataKey] = dataValue
+	configYaml, marshalErr := yaml.Marshal(cm)
+	if marshalErr != nil {
+		logger.LoggerTransformer.Errorf("Error occured while marshalling the config yaml")
+	}
+	return configYaml
 }
