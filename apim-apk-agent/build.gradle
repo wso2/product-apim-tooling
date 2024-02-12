@@ -26,7 +26,7 @@ release {
     tagTemplate = 'apim-apk-agent-$version'
 
     git {
-        requireBranch= "main"
+        requireBranch = project.hasProperty('releaseBranch') ? project.releaseBranch : 'master'
         pushToRemote= "origin"
     }
 }

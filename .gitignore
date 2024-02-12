@@ -54,6 +54,8 @@ import-export-cli/integration/ci-resources/offset1/distribution/
 # Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
 import-export-cli/.glide/
 
+apim-apk-agent/.gradle/
+
 import-export-cli/vendor
 
 # Sample API and App for testing
