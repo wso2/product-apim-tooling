@@ -15,12 +15,22 @@
 # under the License.
 
 replicaCount: 1
-
 image:
   repository: apim-apk-agent
   tag: 1.0.0-SNAPSHOT
   pullPolicy: IfNotPresent
 service:
   name: apim-apk-agent-service
-
 resources: {}
+controlPlane:
+  enabled: true
+  serviceURL: https://am-service.apim-deployment.svc.cluster.local:9443/
+  username: admin
+  password: admin
+  environmentLabels: Default
+  skipSSLVerification: true
+  eventListeningEndpoints: amqp://admin:admin@am-service:apim-deployment:svc:cluster:local:5672?retries='10'&connectdelay='30'
+dataPlane:
+  enabled: true
+  k8ResourceEndpoint: https://apk-test-setup-wso2-apk-config-ds-service.apk-integration-test.svc.cluster.local:9443/api/configurator/apis/generate-k8s-resources
+  namespace: apk-integration-test
