@@ -180,18 +180,23 @@ func applyAllKeymanagerConfifuration(c client.Client, resolvedKeyManagers []even
 		if err != nil {
 			return err
 		}
+		logger.LoggerSync.Infof("Token Issuer created: %v", tokenIssuer)
+
 	}
 	for _, tokenIssuer := range sameTokenissuers {
 		err := k8sclient.UpdateTokenIssuersCR(tokenIssuer, c)
 		if err != nil {
 			return err
 		}
+		logger.LoggerSync.Infof("Token Issuer updated: %v", tokenIssuer)
 	}
+	logger.LoggerSync.Infof("Deleted Token Issuers from K8s: %v", clonedTokenIssuerListFromK8s)
 	for _, tokenissuer := range clonedTokenIssuerListFromK8s {
 		err := k8sclient.DeleteTokenIssuersCR(c, tokenissuer.Spec.Name, tokenissuer.Spec.Organization)
 		if err != nil {
 			return err
 		}
+		logger.LoggerSync.Infof("Token Issuer deleted: %v", tokenissuer)
 	}
 	return nil
 }

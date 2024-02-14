@@ -22,6 +22,7 @@ type Environment struct {
 	Name              string `json:"name"`
 	Vhost             string `json:"vhost"`
 	DeployedTimeStamp int64  `json:"deployedTimeStamp"`
+	Type              string `json:"type"`
 }
 
 // Deployment represents the deployment details for a set of environments within an organization.

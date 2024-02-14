@@ -25,13 +25,16 @@ import (
 
 	dpv1alpha1 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha1"
 	dpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha2"
+	"github.com/wso2/apk/common-go-libs/utils"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/loggers"
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/logging"
 	eventhubTypes "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
 	corev1 "k8s.io/api/core/v1"
 	k8error "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/gateway-api/apis/v1alpha2"
 	gwapiv1b1 "sigs.k8s.io/gateway-api/apis/v1beta1"
@@ -61,52 +64,19 @@ func DeployAPICR(api *dpv1alpha2.API, k8sClient client.Client) {
 
 // UndeployAPICR removes the API Custom Resource from the Kubernetes cluster based on API ID label.
 func UndeployAPICR(apiID string, k8sClient client.Client) {
-	// Define a list to hold API CRs with matching label
-	apiList := &dpv1alpha2.APIList{}
-
+	conf, errReadConfig := config.ReadConfigs()
+	if errReadConfig != nil {
+		loggers.LoggerXds.Errorf("Error reading configurations: %v", errReadConfig)
+	}
+	api := &dpv1alpha2.API{}
 	// Retrieve all API CRs from the Kubernetes cluster
-	if err := k8sClient.List(context.Background(), apiList); err != nil {
+	if err := k8sClient.Get(context.Background(), types.NamespacedName{Name: apiID, Namespace: conf.DataPlane.Namespace}, api); err != nil {
 		loggers.LoggerXds.Errorf("Unable to list API CRs: %v", err)
 	}
-
-	// Iterate over each API CR and check if it has the matching label
-	for _, api := range apiList.Items {
-		labels := api.GetLabels()
-		if labels["apiUUID"] == apiID {
-			// Found the API CR with the matching label, delete it
-			if err := k8sClient.Delete(context.Background(), &api); err != nil {
-				loggers.LoggerXds.Errorf("Unable to delete API CR: %v", err)
-			}
-			loggers.LoggerXds.Infof("Deleted API CR: %s", api.Name)
-		}
+	if err := k8sClient.Delete(context.Background(), api); err != nil {
+		loggers.LoggerXds.Errorf("Unable to delete API CR: %v", err)
 	}
-}
-
-// UndeployAPICRs removes the API Custom Resources from the Kubernetes cluster
-// that are not included in the provided apiUUID list.
-func UndeployAPICRs(apiUUIDs []string, k8sClient client.Client) {
-	// Define a list to hold API CRs with matching label
-	apiList := &dpv1alpha2.APIList{}
-
-	// Retrieve all API CRs from the Kubernetes cluster
-	if err := k8sClient.List(context.Background(), apiList); err != nil {
-		loggers.LoggerXds.Errorf("Unable to list API CRs: %v", err)
-	}
-
-	// Iterate over each API CR and check if it has a matching label
-	for _, api := range apiList.Items {
-		if !api.Spec.SystemAPI {
-			// Check if the API CR's UUID is not in the provided list
-			if !contains(apiUUIDs, api.GetLabels()["apiUUID"]) {
-				// Delete the API CR
-				if err := k8sClient.Delete(context.Background(), &api); err != nil {
-					loggers.LoggerXds.Errorf("Unable to delete API CR: %v", err)
-				} else {
-					loggers.LoggerXds.Infof("Deleted API CR: %s", api.Name)
-				}
-			}
-		}
-	}
+	loggers.LoggerXds.Infof("Deleted API CR: %s", api.Name)
 }
 
 // contains checks if a string is present in a slice of strings
@@ -463,4 +433,29 @@ func getSha1Value(input string) string {
 	hasher.Write([]byte(input))
 	hashBytes := hasher.Sum(nil)
 	return hex.EncodeToString(hashBytes)
+}
+
+// RetrieveAllAPISFromK8s retrieves all the API CRs from the Kubernetes cluster
+func RetrieveAllAPISFromK8s(k8sClient client.Client, nextToken string) ([]dpv1alpha2.API, string, error) {
+	apiList := dpv1alpha2.APIList{}
+	resolvedAPIList := make([]dpv1alpha2.API, 0)
+	var err error
+	if nextToken == "" {
+		err = k8sClient.List(context.Background(), &apiList, &client.ListOptions{Namespace: utils.GetOperatorPodNamespace()})
+	} else {
+		err = k8sClient.List(context.Background(), &apiList, &client.ListOptions{Namespace: utils.GetOperatorPodNamespace(), Continue: nextToken})
+	}
+	if err != nil {
+		loggers.LoggerSync.ErrorC(logging.PrintError(logging.Error1102, logging.CRITICAL, "Failed to get application from k8s %v", err.Error()))
+		return nil, "", err
+	}
+	resolvedAPIList = append(resolvedAPIList, apiList.Items...)
+	if apiList.Continue != "" {
+		tempAPIList, _, err := RetrieveAllAPISFromK8s(k8sClient, apiList.Continue)
+		if err != nil {
+			return nil, "", err
+		}
+		resolvedAPIList = append(resolvedAPIList, tempAPIList...)
+	}
+	return resolvedAPIList, apiList.Continue, nil
 }

@@ -49,7 +49,7 @@ type Application struct {
 	TokenType    string            `json:"tokenType"`
 	Attributes   map[string]string `json:"attributes"`
 	TenantID     int32             `json:"tenanId,omitempty"`
-	TenantDomain string            `json:"tenanDomain,omitempty"`
+	Organization string            `json:"organization,omitempty"`
 	TimeStamp    int64             `json:"timeStamp,omitempty"`
 }
 

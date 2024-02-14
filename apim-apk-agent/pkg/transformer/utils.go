@@ -31,86 +31,72 @@ import (
 
 // DecodeAPIArtifact decodes a zip-encoded API payload, extracting API details like JSON, Swagger, and deployment configuration.
 // Returns the APIArtifact or an error if decoding or extraction fails.
-func DecodeAPIArtifact(payload []byte) (*APIArtifact, error) {
-	zipReader, zipReaderError := zip.NewReader(bytes.NewReader(payload), int64(len(payload)))
-	var apiArtifact = &APIArtifact{}
-	if zipReaderError != nil {
-		logger.LoggerTransformer.Errorf("Error reading zip file: %v", zipReaderError)
-		return nil, zipReaderError
-	}
-
-	// Read the zip file and get the
-	for _, file := range zipReader.File {
-		logger.LoggerTransformer.Info("Reading " + file.Name)
-		err := readZipFile(file, apiArtifact)
-
-		if err != nil {
-			logger.LoggerTransformer.Errorf("Error reading zip file %v", err)
-			return nil, err
-		}
+func DecodeAPIArtifact(apiZip *zip.File) (*APIArtifact, error) {
+	logger.LoggerTransformer.Info("Reading " + apiZip.Name)
+	apiArtifact, err := readZipFile(apiZip)
+	if err != nil {
+		logger.LoggerTransformer.Errorf("Error reading zip file %v", err)
+		return nil, err
 	}
 	return apiArtifact, nil
 }
 
-// readZipfile will recursively go through the zip file, read and maps the content inside
-// to its appropriate artifact attribute
-func readZipFile(file *zip.File, apiArtifact *APIArtifact) error {
+// ReadContent read the content of file
+func ReadContent(file *zip.File) ([]byte, error) {
 	f, fileOpenErr := file.Open()
-
 	if fileOpenErr != nil {
 		logger.LoggerTransformer.Errorf("error opening file %s in zip archieve", file.Name)
-		return fileOpenErr
+		return nil, fileOpenErr
 	}
 	defer f.Close()
-
 	content, contentError := io.ReadAll(f)
-
 	if contentError != nil {
 		logger.LoggerTransformer.Errorf("Error reading file %s in zip archieve", file.Name)
-		return contentError
+		return nil, contentError
 	}
+	return content, nil
+}
 
-	if strings.Contains(file.Name, ".zip") {
-		apiArtifact.APIFileName = file.Name
-		zipReader, err := zip.NewReader(bytes.NewReader(content), int64(len(content)))
+// readZipfile will recursively go through the zip file, read and maps the content inside
+// to its appropriate artifact attribute
+func readZipFile(file *zip.File) (*APIArtifact, error) {
+	var apiArtifact = &APIArtifact{}
 
-		if err != nil {
-			logger.LoggerTransformer.Errorf("Error reading zip file: ", err)
-			return err
-		}
-
-		for _, file := range zipReader.File {
-			err := readZipFile(file, apiArtifact)
-
+	content, err := ReadContent(file)
+	if err != nil {
+		return nil, err
+	}
+	apiArtifact.APIFileName = file.Name
+	zipReader, err := zip.NewReader(bytes.NewReader(content), int64(len(content)))
+	if err != nil {
+		logger.LoggerTransformer.Errorf("Error reading zip file: ", err)
+		return nil, err
+	}
+	for _, file := range zipReader.File {
+		if strings.Contains(file.Name, "swagger.json") {
+			openAPIContent, err := ReadContent(file)
 			if err != nil {
-				logger.LoggerTransformer.Errorf("Error while reading the embedded zip file: ", err)
-				return err
+				return nil, err
 			}
+			apiArtifact.Swagger = string(openAPIContent)
+		}
+
+		if strings.Contains(file.Name, "api.json") {
+			apiJSON, err := ReadContent(file)
+			if err != nil {
+				return nil, err
+			}
+			apiArtifact.APIJson = string(apiJSON)
+		}
+		if strings.Contains(file.Name, "client_certificates.json") {
+			certificateJSON, err := ReadContent(file)
+			if err != nil {
+				return nil, err
+			}
+			apiArtifact.ClientCerts = string(certificateJSON)
 		}
 	}
-
-	if strings.Contains(file.Name, "swagger.json") {
-		apiArtifact.Swagger = string(content)
-
-	}
-
-	if strings.Contains(file.Name, "api.json") {
-		apiArtifact.APIJson = string(content)
-	}
-
-	if strings.Contains(file.Name, "env_properties.json") {
-		apiArtifact.EnvConfig = string(content)
-	}
-
-	if strings.Contains(file.Name, "deployments.json") {
-		apiArtifact.DeploymentDescriptor = string(content)
-	}
-
-	if strings.Contains(file.Name, "client_certificates.json") {
-		apiArtifact.ClientCerts = string(content)
-	}
-
-	return nil
+	return apiArtifact, nil
 }
 
 // readZipfile will recursively go through the zip file, read and maps the content inside
