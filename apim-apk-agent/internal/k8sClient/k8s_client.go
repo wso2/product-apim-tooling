@@ -343,7 +343,7 @@ func DeployBackendCR(backends *dpv1alpha1.Backend, k8sClient client.Client) {
 func CreateAndUpdateTokenIssuersCR(keyManager eventhubTypes.ResolvedKeyManager, k8sClient client.Client) error {
 	conf, _ := config.ReadConfigs()
 	sha1ValueofKmName := getSha1Value(keyManager.Name)
-	sha1ValueOfOrganization := getSha1Value(keyManager.TenantDomain)
+	sha1ValueOfOrganization := getSha1Value(keyManager.Organization)
 	labelMap := map[string]string{"name": sha1ValueofKmName, "organization": sha1ValueOfOrganization}
 
 	tokenIssuer := dpv1alpha2.TokenIssuer{
@@ -353,7 +353,7 @@ func CreateAndUpdateTokenIssuersCR(keyManager eventhubTypes.ResolvedKeyManager, 
 		},
 		Spec: dpv1alpha2.TokenIssuerSpec{
 			Name:                keyManager.Name,
-			Organization:        keyManager.TenantDomain,
+			Organization:        keyManager.Organization,
 			Issuer:              keyManager.KeyManagerConfig.Issuer,
 			ClaimMappings:       marshalClaimMappings(keyManager.KeyManagerConfig.ClaimMappings),
 			SignatureValidation: marshalSignatureValidation(keyManager.KeyManagerConfig),
@@ -412,7 +412,7 @@ func DeleteTokenIssuersCR(k8sClient client.Client, keymanagerName string, tenant
 func UpdateTokenIssuersCR(keyManager eventhubTypes.ResolvedKeyManager, k8sClient client.Client) error {
 	conf, _ := config.ReadConfigs()
 	sha1ValueofKmName := getSha1Value(keyManager.Name)
-	sha1ValueOfOrganization := getSha1Value(keyManager.TenantDomain)
+	sha1ValueOfOrganization := getSha1Value(keyManager.Organization)
 	labelMap := map[string]string{"name": sha1ValueofKmName, "organization": sha1ValueOfOrganization}
 	tokenIssuer := &dpv1alpha2.TokenIssuer{}
 	err := k8sClient.Get(context.Background(), client.ObjectKey{Name: keyManager.UUID, Namespace: conf.DataPlane.Namespace}, tokenIssuer)
@@ -422,7 +422,7 @@ func UpdateTokenIssuersCR(keyManager eventhubTypes.ResolvedKeyManager, k8sClient
 	}
 	tokenIssuer.ObjectMeta.Labels = labelMap
 	tokenIssuer.Spec.Name = keyManager.Name
-	tokenIssuer.Spec.Organization = keyManager.TenantDomain
+	tokenIssuer.Spec.Organization = keyManager.Organization
 	tokenIssuer.Spec.Issuer = keyManager.KeyManagerConfig.Issuer
 	tokenIssuer.Spec.ClaimMappings = marshalClaimMappings(keyManager.KeyManagerConfig.ClaimMappings)
 	tokenIssuer.Spec.SignatureValidation = marshalSignatureValidation(keyManager.KeyManagerConfig)

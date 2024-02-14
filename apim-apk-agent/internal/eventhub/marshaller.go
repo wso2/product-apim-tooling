@@ -272,7 +272,7 @@ func MarshalKeyManager(keyManagerInternal *types.KeyManager) eventhubTypes.Resol
 		Name:             keyManagerInternal.Name,
 		Enabled:          keyManagerInternal.Enabled,
 		Type:             keyManagerInternal.Type,
-		TenantDomain:     keyManagerInternal.TenantDomain,
+		Organization:     keyManagerInternal.Organization,
 		TokenType:        keyManagerInternal.TokenType,
 		KeyManagerConfig: marshalKeyManagrConfig(keyManagerInternal.Configuration),
 	}

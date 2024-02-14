@@ -164,7 +164,7 @@ type KeyManager struct {
 	Name          string                 `json:"name"`
 	Type          string                 `json:"type"`
 	Enabled       bool                   `json:"enabled"`
-	TenantDomain  string                 `json:"tenantDomain,omitempty"`
+	Organization  string                 `json:"organization,omitempty"`
 	TokenType     string                 `json:"tokenType"`
 	Configuration map[string]interface{} `json:"additionalProperties"`
 }
@@ -175,7 +175,7 @@ type ResolvedKeyManager struct {
 	Name             string           `json:"name"`
 	Type             string           `json:"type"`
 	Enabled          bool             `json:"enabled"`
-	TenantDomain     string           `json:"tenantDomain,omitempty"`
+	Organization     string           `json:"organization,omitempty"`
 	TokenType        string           `json:"tokenType"`
 	KeyManagerConfig KeyManagerConfig `json:"configuration"`
 }
