@@ -29,7 +29,7 @@ import (
 	event "github.com/wso2/apk/common-go-libs/pkg/discovery/api/wso2/discovery/subscription"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	internalk8sClient "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/k8sClient"
-	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/synchronizer"
+	internalutils "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/utils"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/logging"
@@ -146,10 +146,8 @@ func handleDefaultVersionUpdate(event msg.APIEvent) {
 // handleAPIEvents to process api related data
 func handleAPIEvents(data []byte, eventType string, conf *config.Config, c client.Client) {
 	var (
-		apiEvent              msg.APIEvent
-		currentTimeStamp      int64 = apiEvent.Event.TimeStamp
-		isDefaultVersionEvent bool
-		apiUUIDList           []string
+		apiEvent         msg.APIEvent
+		currentTimeStamp int64 = apiEvent.Event.TimeStamp
 	)
 
 	apiEventErr := json.Unmarshal([]byte(string(data)), &apiEvent)
@@ -181,18 +179,9 @@ func handleAPIEvents(data []byte, eventType string, conf *config.Config, c clien
 
 	logger.LoggerMsg.Infof("API event data %v", apiEventObj)
 
-	isDefaultVersionEvent = isDefaultVersionUpdate(apiEvent)
-
-	if isDefaultVersionEvent {
-		handleDefaultVersionUpdate(apiEvent)
-		return
-	}
-
 	//Per each revision, synchronization should happen.
 	if strings.EqualFold(deployAPIToGateway, apiEvent.Event.Type) {
-		//go synchronizer.FetchAPIsFromControlPlane(apiEvent.UUID, apiEvent.GatewayLabels)
-		apiUUIDList = append(apiUUIDList, apiEvent.UUID)
-		go synchronizer.FetchAPIsOnEvent(conf, apiUUIDList, c)
+		go internalutils.FetchAPIsOnEvent(conf, &apiEvent.UUID, c)
 	}
 
 	for _, env := range apiEvent.GatewayLabels {

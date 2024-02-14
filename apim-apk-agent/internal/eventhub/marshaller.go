@@ -158,7 +158,7 @@ func MarshalApplication(appInternal *types.Application) managementserver.Applica
 		UUID:         appInternal.UUID,
 		Name:         appInternal.Name,
 		Owner:        appInternal.SubName,
-		Organization: appInternal.TenantDomain,
+		Organization: appInternal.Organization,
 		Attributes:   appInternal.Attributes,
 		TimeStamp:    appInternal.TimeStamp,
 	}
