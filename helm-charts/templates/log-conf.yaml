@@ -6,19 +6,19 @@ metadata:
 data:
   config.toml: |
     [controlPlane]
-      enabled = true
-      serviceURL = "https://am-service.apim-deployment.svc.cluster.local:9443/"
-      username = "admin"
-      password = "admin"
-      environmentLabels = ["Default"]
-      skipSSLVerification = true
+      enabled = {{ .Values.controlPlane.enabled }}
+      serviceURL = "{{ .Values.controlPlane.serviceURL }}"
+      username = "{{ .Values.controlPlane.username }}"
+      password = "{{ .Values.controlPlane.password }}"
+      environmentLabels = ["{{ .Values.controlPlane.environmentLabels }}"]
+      skipSSLVerification = {{ .Values.controlPlane.skipSSLVerification }}
       [controlPlane.brokerConnectionParameters]
-      eventListeningEndpoints = ["amqp://admin:admin@am-service.apim-deployment.svc.cluster.local:5672?retries='10'&connectdelay='30'"]
+      eventListeningEndpoints = ["{{ .Values.controlPlane.eventListeningEndpoints }}"]
     
     [dataPlane]
-      enabled = true
-      k8ResourceEndpoint = "https://apk-test-setup-wso2-apk-config-ds-service.apk-integration-test.svc.cluster.local:9443/api/configurator/apis/generate-k8s-resources"
-      namespace = "apk-integration-test"
+      enabled = {{ .Values.dataPlane.enabled }}
+      k8ResourceEndpoint = "{{ .Values.dataPlane.k8ResourceEndpoint }}"
+      namespace = "{{ .Values.dataPlane.namespace }}"
   log_config.toml: |
     # The logging configuration for Adapter
 
