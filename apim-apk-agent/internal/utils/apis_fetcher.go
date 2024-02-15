@@ -31,6 +31,7 @@ import (
 	"strings"
 
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
+	internalk8sClient "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/k8sClient"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/logging"
 	sync "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/synchronizer"
@@ -58,6 +59,9 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUID *string, k8sClient client.Cli
 	// Populate data from config.
 	envs := conf.ControlPlane.EnvironmentLabels
 
+	apiUUIDs := []string{}
+	startup := false
+
 	// Create a channel for the byte slice (response from the APIs from control plane)
 	c := make(chan sync.SyncAPIResponse)
 
@@ -66,6 +70,7 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUID *string, k8sClient client.Cli
 		GetAPI(c, apiUUID, envs, sync.RuntimeArtifactEndpoint, true)
 	} else {
 		GetAPI(c, nil, envs, sync.RuntimeArtifactEndpoint, true)
+		startup = true
 	}
 	data := <-c
 	logger.LoggerMsg.Info("Receiving data for an API")
@@ -116,6 +121,9 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUID *string, k8sClient client.Cli
 						logger.LoggerSync.Errorf("Error while generating APK-Conf: %v", apkErr)
 						return
 					}
+					if startup {
+						apiUUIDs = append(apiUUIDs, apiUUID)
+					}
 					k8ResourceEndpoint := conf.DataPlane.K8ResourceEndpoint
 					crResponse, err := transformer.GenerateCRs(apkConf, artifact.Swagger, k8ResourceEndpoint)
 					if err != nil {
@@ -127,6 +135,11 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUID *string, k8sClient client.Cli
 					logger.LoggerMsg.Info("API applied successfully.\n")
 				}
 			}
+		}
+
+		if startup {
+			// Undeploy the APIs which are not available in the provided API UUIDs
+			internalk8sClient.UndeployAPICRs(apiUUIDs, k8sClient)
 		}
 
 	} else if data.ErrorCode == 204 {
