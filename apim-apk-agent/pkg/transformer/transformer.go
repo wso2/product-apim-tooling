@@ -37,9 +37,13 @@ import (
 	"mime/multipart"
 	"net/http"
 
-	"github.com/wso2/apk/common-go-libs/utils"
+	dpv1alpha1 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha1"
+	dpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha2"
+	corev1 "k8s.io/api/core/v1"
+	gwapiv1b1 "sigs.k8s.io/gateway-api/apis/v1beta1"
 
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
+	k8Yaml "sigs.k8s.io/yaml"
 
 	"gopkg.in/yaml.v2"
 )
@@ -108,8 +112,6 @@ func GenerateAPKConf(APIJson string, clientCerts string) (string, string, uint32
 			return "", "null", 0, certErr
 		}
 		certAvailable = true
-	} else {
-		logger.LoggerTransformer.Info("Alert:client_cert.json empty or not exist for the given zip.")
 	}
 
 	authConfigList := mapAuthConfigs(apiYamlData.AuthorizationHeader, apiYamlData.SecuritySchemes, certAvailable, certList)
@@ -233,9 +235,10 @@ func mapAuthConfigs(authHeader string, secSchemes []string, certAvailable bool, 
 	return authConfigs
 }
 
-// GenerateUpdatedCRs takes the .apk-conf, api definition, vHost and the organization for a particular API and then generate and returns
+// GenerateCRs takes the .apk-conf, api definition, vHost and the organization for a particular API and then generate and returns
 // the relavant CRD set as a zip
-func GenerateUpdatedCRs(apkConf string, apiDefinition string, k8ResourceGenEndpoint string, deploymentDescriptor *DeploymentDescriptor, apiFileName string, apiID string, revisionID string) (*bytes.Buffer, error) {
+func GenerateCRs(apkConf string, apiDefinition string, k8ResourceGenEndpoint string) (*K8sArtifacts, error) {
+	k8sArtifact := K8sArtifacts{HTTPRoutes: make(map[string]gwapiv1b1.HTTPRoute), Backends: make(map[string]dpv1alpha1.Backend), Scopes: make(map[string]dpv1alpha1.Scope), Authentication: make(map[string]dpv1alpha2.Authentication), APIPolicies: make(map[string]dpv1alpha2.APIPolicy), InterceptorServices: make(map[string]dpv1alpha1.InterceptorService), ConfigMaps: make(map[string]corev1.ConfigMap), Secrets: make(map[string]corev1.Secret), RateLimitPolicies: make(map[string]dpv1alpha1.RateLimitPolicy)}
 	if apkConf == "" {
 		logger.LoggerTransformer.Error("Empty apk-conf parameter provided. Unable to generate CRDs.")
 		return nil, errors.New("Error: APK-Conf can't be empty")
@@ -303,215 +306,244 @@ func GenerateUpdatedCRs(apkConf string, apiDefinition string, k8ResourceGenEndpo
 		logger.LoggerTransformer.Error("Error reading response body:", err)
 		panic(err)
 	}
-
-	var allZipsBuffer bytes.Buffer
-	combinedZip := zip.NewWriter(&allZipsBuffer)
-
-	for _, deployment := range *deploymentDescriptor.Data.Deployments {
-		if deployment.APIFile == apiFileName {
-			for _, environment := range *deployment.Environments {
-
-				modifiedZip, err := transformCRD(body, environment.Vhost, deployment.OrganizationID, apiID, revisionID)
-
-				if err != nil {
-					logger.LoggerTransformer.Error("Unable to transform the initial CRDs:", err)
-					return nil, err
-				}
-
-				// Write the modifiedZipData to the combined zip
-				fileName := fmt.Sprintf("%s_%s.zip", deployment.OrganizationID, environment.Vhost)
-				writer, err := combinedZip.Create(fileName)
-				if err != nil {
-					logger.LoggerTransformer.Error("Error creating zip file entry:", err)
-					return nil, err
-				}
-
-				_, err = writer.Write(modifiedZip)
-				if err != nil {
-					logger.LoggerTransformer.Error("Error writing  to the zip file:", err)
-					return nil, err
-				}
-
-			}
-		}
-	}
-
-	// Close the combined zip
-	err = combinedZip.Close()
+	zipReader, err := zip.NewReader(bytes.NewReader(body), int64(len(body)))
 	if err != nil {
-		logger.LoggerTransformer.Error("Error closing zip file:", err)
+		logger.LoggerTransformer.Error("Unable to transform the initial CRDs:", err)
 		return nil, err
 	}
-
-	return &allZipsBuffer, nil
-}
-
-// transformCRD converts the APK CRDs and returns the modified CRDs with modified
-func transformCRD(crdZip []byte, vHost string, organization string, apiID string, revisionID string) ([]byte, error) {
-	zipReader, err := zip.NewReader(bytes.NewReader(crdZip), int64(len(crdZip)))
-	if err != nil {
-		logger.LoggerTransformer.Fatal(err)
-	}
-
-	//create a new zip writer
-	var modifiedZipBuffer bytes.Buffer
-	zipWriter := zip.NewWriter(&modifiedZipBuffer)
-
-	defer zipWriter.Close()
-
-	namespace := utils.GetOperatorPodNamespace()
-
-	// Read all the files from zip archive
 	for _, zipFile := range zipReader.File {
-		logger.LoggerTransformer.Debugf("Reading file: %s", zipFile.Name)
-		apkCRDFileBytes, err := getZipFileBytes(zipFile)
+		fileReader, err := zipFile.Open()
 		if err != nil {
-			logger.LoggerTransformer.Error(err)
-			continue
+			logger.LoggerTransformer.Errorf("Failed to open YAML file inside zip: %v", err)
+			return nil, err
 		}
+		defer fileReader.Close()
 
-		_ = apkCRDFileBytes // this is unzipped file bytes
-		yamlCrd, err := generateAPKCrdsFromYaml(apkCRDFileBytes, organization, vHost, namespace, apiID, revisionID)
+		yamlData, err := io.ReadAll(fileReader)
 		if err != nil {
-			logger.LoggerTransformer.Error("Error occured while retrieving the modified CRDs", err)
+			logger.LoggerTransformer.Errorf("Failed to read YAML file inside zip: %v", err)
 			return nil, err
 		}
 
-		// Create a new file in the modified zip with the same name
-		modifiedFile, err := zipWriter.Create(zipFile.Name)
-		if err != nil {
-			logger.LoggerTransformer.Error("Error in creating new file in the modified zip", err)
+		var crdData map[string]interface{}
+		if err := yaml.Unmarshal(yamlData, &crdData); err != nil {
+			logger.LoggerTransformer.Errorf("Failed to unmarshal YAML data to parse the Kind: %v", err)
 			return nil, err
 		}
 
-		// Write the modified content to the new file in the modified zip
-		_, err = modifiedFile.Write(yamlCrd)
-		if err != nil {
-			logger.LoggerTransformer.Error("Error in writing modified content to the new file", err)
-			return nil, err
-		}
-	}
-
-	// Finish writing the modified zip file
-	err = zipWriter.Close()
-	if err != nil {
-		logger.LoggerTransformer.Error("Error occured in closing the zip with modified files", err)
-		return nil, err
-	}
-
-	return modifiedZipBuffer.Bytes(), nil
-
-}
-
-// generateAPKCrdsFromYaml processes the returned APK CRD yaml, replaces the vhost, adds the organization
-// and namespace and returns the json
-func generateAPKCrdsFromYaml(crdYaml []byte, orgUUID, vhost string, namespace string, apiID string, revisionID string) ([]byte, error) {
-	var crdYml map[interface{}]interface{}
-	unMarshalErr := yaml.Unmarshal(crdYaml, &crdYml)
-
-	if unMarshalErr != nil {
-		return nil, unMarshalErr
-	}
-	replaceVhost(crdYml, vhost)
-	addOrganization(crdYml, orgUUID)
-	addNamespace(crdYml, namespace)
-	addRevisionAndAPIUUID(crdYml, apiID, revisionID)
-
-	processdCrdYml := convertMap(crdYml)
-
-	yamlCrd, err := yaml.Marshal(processdCrdYml)
-	if err != nil {
-		return nil, err
-	}
-	return yamlCrd, nil
-}
-
-// ConvertMap recursively converts a map[interface{}]interface{} to map[string]interface{}
-func convertMap(inputMap map[interface{}]interface{}) map[string]interface{} {
-	result := make(map[string]interface{})
-
-	for k, v := range inputMap {
-		keyStr, ok := k.(string)
+		kind, ok := crdData["kind"].(string)
 		if !ok {
-			// If the key is not a string, try to convert it
-			keyStr = fmt.Sprintf("%v", k)
+			logger.LoggerTransformer.Errorf("Kind attribute not found in the given yaml file.")
+			return nil, err
 		}
 
-		switch value := v.(type) {
-		case map[interface{}]interface{}:
-			// If the value is a map, recursively convert it
-			result[keyStr] = convertMap(value)
-		case []interface{}:
-			// If the value is an array, convert each element recursively
-			var arr []interface{}
-			for _, elem := range value {
-				if childMap, ok := elem.(map[interface{}]interface{}); ok {
-					arr = append(arr, convertMap(childMap))
-				} else {
-					arr = append(arr, elem)
-				}
+		switch kind {
+		case "APIPolicy":
+			var apiPolicy dpv1alpha2.APIPolicy
+			err = k8Yaml.Unmarshal(yamlData, &apiPolicy)
+			if err != nil {
+				logger.LoggerSync.Errorf("Error unmarshaling APIPolicy YAML: %v", err)
+				continue
 			}
-			result[keyStr] = arr
-		case string:
-			result[keyStr] = value
+			k8sArtifact.APIPolicies[apiPolicy.ObjectMeta.Name] = apiPolicy
+		case "HTTPRoute":
+			var httpRoute gwapiv1b1.HTTPRoute
+			err = k8Yaml.Unmarshal(yamlData, &httpRoute)
+			if err != nil {
+				logger.LoggerSync.Errorf("Error unmarshaling HTTPRoute YAML: %v", err)
+				continue
+			}
+			k8sArtifact.HTTPRoutes[httpRoute.ObjectMeta.Name] = httpRoute
+
+		case "Backend":
+			var backend dpv1alpha1.Backend
+			err = k8Yaml.Unmarshal(yamlData, &backend)
+			if err != nil {
+				logger.LoggerSync.Errorf("Error unmarshaling Backend YAML: %v", err)
+				continue
+			}
+			k8sArtifact.Backends[backend.ObjectMeta.Name] = backend
+
+		case "ConfigMap":
+			var configMap corev1.ConfigMap
+			err = k8Yaml.Unmarshal(yamlData, &configMap)
+			if err != nil {
+				logger.LoggerSync.Errorf("Error unmarshaling ConfigMap YAML: %v", err)
+				continue
+			}
+			k8sArtifact.ConfigMaps[configMap.ObjectMeta.Name] = configMap
+		case "Authentication":
+			var authPolicy dpv1alpha2.Authentication
+			err = k8Yaml.Unmarshal(yamlData, &authPolicy)
+			if err != nil {
+				logger.LoggerSync.Errorf("Error unmarshaling Authentication YAML: %v", err)
+				continue
+			}
+			k8sArtifact.Authentication[authPolicy.ObjectMeta.Name] = authPolicy
+
+		case "API":
+			var api dpv1alpha2.API
+			err = k8Yaml.Unmarshal(yamlData, &api)
+			if err != nil {
+				logger.LoggerSync.Errorf("Error unmarshaling API YAML: %v", err)
+				continue
+			}
+			k8sArtifact.API = api
+		case "InterceptorService":
+			var interceptorService dpv1alpha1.InterceptorService
+			err = k8Yaml.Unmarshal(yamlData, &interceptorService)
+			if err != nil {
+				logger.LoggerSync.Errorf("Error unmarshaling InterceptorService YAML: %v", err)
+				continue
+			}
+			k8sArtifact.InterceptorServices[interceptorService.Name] = interceptorService
+		case "BackendJWT":
+			var backendJWT *dpv1alpha1.BackendJWT
+			err = k8Yaml.Unmarshal(yamlData, &backendJWT)
+			if err != nil {
+				logger.LoggerSync.Errorf("Error unmarshaling BackendJWT YAML: %v", err)
+				continue
+			}
+			k8sArtifact.BackendJWT = backendJWT
+		case "Scope":
+			var scope dpv1alpha1.Scope
+			err = k8Yaml.Unmarshal(yamlData, &scope)
+			if err != nil {
+				logger.LoggerSync.Errorf("Error unmarshaling Scope YAML: %v", err)
+				continue
+			}
+			k8sArtifact.Scopes[scope.Name] = scope
+		case "RateLimitPolicy":
+			var rateLimitPolicy dpv1alpha1.RateLimitPolicy
+			err = k8Yaml.Unmarshal(yamlData, &rateLimitPolicy)
+			if err != nil {
+				logger.LoggerSync.Errorf("Error unmarshaling RateLimitPolicy YAML: %v", err)
+				continue
+			}
+			k8sArtifact.RateLimitPolicies[rateLimitPolicy.Name] = rateLimitPolicy
+		case "Secret":
+			var secret corev1.Secret
+			err = k8Yaml.Unmarshal(yamlData, &secret)
+			if err != nil {
+				logger.LoggerSync.Errorf("Error unmarshaling Secret YAML: %v", err)
+				continue
+			}
+			k8sArtifact.Secrets[secret.Name] = secret
 		default:
-			// Otherwise, keep the value as is
-			result[keyStr] = v
+			logger.LoggerSync.Errorf("[!]Unknown Kind parsed from the YAML File: %v", kind)
 		}
 	}
+	return &k8sArtifact, nil
+}
 
-	return result
+// UpdateCRS cr update
+func UpdateCRS(k8sArtifact *K8sArtifacts, environments *[]Environment, organizationID string, apiUUID string, revisionID string, namespace string) {
+	addOrganization(k8sArtifact, organizationID)
+	addRevisionAndAPIUUID(k8sArtifact, apiUUID, revisionID)
+	for _, environment := range *environments {
+		replaceVhost(k8sArtifact, environment.Vhost, environment.Type)
+	}
 }
 
 // replaceVhost will take the httpRoute CR and replace the default vHost with the one passed inside
 // the deploymemt descriptor
-func replaceVhost(inputMap map[interface{}]interface{}, vhost string) {
-	if kind, ok := inputMap[k8sKindField].(string); ok && kind == k8sKindHTTPRoute {
-		if spec, ok := inputMap[k8sSpecField].(map[interface{}]interface{}); ok {
-			if hostnames, ok := spec[k8sHostnamesField].([]interface{}); ok {
-				hostnames[0] = vhost
+func replaceVhost(k8sArtifact *K8sArtifacts, vhost string, deploymentType string) {
+	if deploymentType == "hybrid" {
+		// append sandbox. part to available vhost to generate sandbox vhost
+		if k8sArtifact.API.Spec.Production != nil {
+			for _, routeName := range k8sArtifact.API.Spec.Production {
+				for _, routes := range routeName.HTTPRouteRefs {
+					httprouteRef, ok := k8sArtifact.HTTPRoutes[routes]
+					if ok {
+						httprouteRef.Spec.Hostnames = append(httprouteRef.Spec.Hostnames, gwapiv1b1.Hostname(vhost))
+					}
+				}
 			}
+		}
+		if k8sArtifact.API.Spec.Sandbox != nil {
+			for _, routeName := range k8sArtifact.API.Spec.Sandbox {
+				for _, routes := range routeName.HTTPRouteRefs {
+					httprouteRef, ok := k8sArtifact.HTTPRoutes[routes]
+					if ok {
+						httprouteRef.Spec.Hostnames = append(httprouteRef.Spec.Hostnames, gwapiv1b1.Hostname("sandbox."+vhost))
+					}
+				}
+			}
+		}
+	} else if deploymentType == "sandbox" {
+		if k8sArtifact.API.Spec.Sandbox != nil {
+			for _, routeName := range k8sArtifact.API.Spec.Sandbox {
+				for _, routes := range routeName.HTTPRouteRefs {
+					httprouteRef, ok := k8sArtifact.HTTPRoutes[routes]
+					if ok {
+						httprouteRef.Spec.Hostnames = append(httprouteRef.Spec.Hostnames, gwapiv1b1.Hostname(vhost))
+					}
+				}
+			}
+		}
+		if k8sArtifact.API.Spec.Production != nil {
+			for _, routeName := range k8sArtifact.API.Spec.Production {
+				for _, routes := range routeName.HTTPRouteRefs {
+					delete(k8sArtifact.HTTPRoutes, routes)
+				}
+			}
+			k8sArtifact.API.Spec.Production = []dpv1alpha2.EnvConfig{}
+		}
+	} else {
+		if k8sArtifact.API.Spec.Sandbox != nil {
+			for _, routeName := range k8sArtifact.API.Spec.Sandbox {
+				for _, routes := range routeName.HTTPRouteRefs {
+					httprouteRef, ok := k8sArtifact.HTTPRoutes[routes]
+					if ok {
+						httprouteRef.Spec.Hostnames = append(httprouteRef.Spec.Hostnames, gwapiv1b1.Hostname(vhost))
+					}
+				}
+			}
+		}
+		if k8sArtifact.API.Spec.Sandbox != nil {
+			for _, routeName := range k8sArtifact.API.Spec.Sandbox {
+				for _, routes := range routeName.HTTPRouteRefs {
+					delete(k8sArtifact.HTTPRoutes, routes)
+				}
+			}
+			k8sArtifact.API.Spec.Sandbox = []dpv1alpha2.EnvConfig{}
 		}
 	}
 }
 
 // addOrganization will take the API CR and change the organization to the one passed inside
 // the deploymemt descriptor
-func addOrganization(inputMap map[interface{}]interface{}, organization string) {
-	if kind, ok := inputMap[k8sKindField].(string); ok && kind == k8sKindAPI {
-		if spec, ok := inputMap[k8sSpecField].(map[interface{}]interface{}); ok {
-			if _, ok := spec[k8sOrganizationField]; ok {
-				spec[k8sOrganizationField] = organization
-			}
-		}
-	}
+func addOrganization(k8sArtifact *K8sArtifacts, organization string) {
+	k8sArtifact.API.Spec.Organization = organization
 	organizationHash := generateSHA1Hash(organization)
-	if metadata, ok := inputMap[k8sMetadataField].(map[interface{}]interface{}); ok {
-		if labels, ok := metadata[k8sLabelsField].(map[interface{}]interface{}); ok {
-			if _, ok := labels[k8sOrganizationField]; ok {
-				labels[k8sOrganizationField] = organizationHash
-			}
-		}
+	k8sArtifact.API.ObjectMeta.Labels[k8sOrganizationField] = organizationHash
+	for _, apiPolicies := range k8sArtifact.APIPolicies {
+		apiPolicies.ObjectMeta.Labels[k8sOrganizationField] = organizationHash
 	}
-}
-
-// addNamespace will set the namespace attribute in the CR to the pods currently operating namespace
-func addNamespace(inputMap map[interface{}]interface{}, namespace string) {
-	if metadata, ok := inputMap[k8sMetadataField].(map[interface{}]interface{}); ok {
-		metadata[k8sNamespaceField] = namespace
+	for _, httproutes := range k8sArtifact.HTTPRoutes {
+		httproutes.ObjectMeta.Labels[k8sOrganizationField] = organizationHash
+	}
+	for _, authentication := range k8sArtifact.Authentication {
+		authentication.ObjectMeta.Labels[k8sOrganizationField] = organizationHash
+	}
+	for _, backend := range k8sArtifact.Backends {
+		backend.ObjectMeta.Labels[k8sOrganizationField] = organizationHash
+	}
+	for _, configMap := range k8sArtifact.ConfigMaps {
+		configMap.ObjectMeta.Labels[k8sOrganizationField] = organizationHash
+	}
+	for _, secret := range k8sArtifact.Secrets {
+		secret.ObjectMeta.Labels[k8sOrganizationField] = organizationHash
+	}
+	for _, scope := range k8sArtifact.Scopes {
+		scope.ObjectMeta.Labels[k8sOrganizationField] = organizationHash
 	}
 }
 
 // addRevisionAndAPIUUID will add the API ID and the revision field attributes to the API CR
-func addRevisionAndAPIUUID(inputMap map[interface{}]interface{}, apiID string, revisionID string) {
-	if kind, ok := inputMap[k8sKindField].(string); ok && kind == k8sKindAPI {
-		if metadata, ok := inputMap[k8sMetadataField].(map[interface{}]interface{}); ok {
-			if labels, ok := metadata[k8sLabelsField].(map[interface{}]interface{}); ok {
-				labels[k8APIUuidField] = apiID
-				labels[k8RevisionField] = revisionID
-			}
-		}
-	}
+func addRevisionAndAPIUUID(k8sArtifact *K8sArtifacts, apiID string, revisionID string) {
+	k8sArtifact.API.ObjectMeta.Labels[k8APIUuidField] = apiID
+	k8sArtifact.API.ObjectMeta.Labels[k8RevisionField] = revisionID
 }
 
 // generateSHA1Hash returns the SHA1 hash for the given string

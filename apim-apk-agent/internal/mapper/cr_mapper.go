@@ -24,140 +24,69 @@
 package mapper
 
 import (
-	"archive/zip"
-	"io"
-
-	dpv1alpha1 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha1"
-	dpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha2"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	internalk8sClient "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/k8sClient"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
-	"gopkg.in/yaml.v2"
-	corev1 "k8s.io/api/core/v1"
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/transformer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	gwapiv1b1 "sigs.k8s.io/gateway-api/apis/v1beta1"
-	k8Yaml "sigs.k8s.io/yaml"
 )
 
 // MapAndCreateCR will read the CRD Yaml and based on the Kind of the CR, unmarshal and maps the
 // data and sends to the K8-Client for creating the respective CR inside the cluster
-func MapAndCreateCR(zipFile *zip.File, k8sClient client.Client, conf *config.Config) (string, interface{}) {
-	fileReader, err := zipFile.Open()
+func MapAndCreateCR(k8sArtifact transformer.K8sArtifacts, k8sClient client.Client) *error {
+	namespace, err := getDeploymentNamespace(k8sArtifact)
 	if err != nil {
-		logger.LoggerTransformer.Errorf("Failed to open YAML file inside zip: %v", err)
-		return "", nil
+		return &err
 	}
-	defer fileReader.Close()
-
-	yamlData, err := io.ReadAll(fileReader)
-	if err != nil {
-		logger.LoggerTransformer.Errorf("Failed to read YAML file inside zip: %v", err)
-		return "", nil
+	k8sArtifact.API.Namespace = namespace
+	internalk8sClient.DeployAPICR(&k8sArtifact.API, k8sClient)
+	for _, apiPolicies := range k8sArtifact.APIPolicies {
+		apiPolicies.Namespace = namespace
+		internalk8sClient.DeployAPIPolicyCR(&apiPolicies, k8sClient)
 	}
-
-	var crdData map[string]interface{}
-	if err := yaml.Unmarshal(yamlData, &crdData); err != nil {
-		logger.LoggerTransformer.Errorf("Failed to unmarshal YAML data to parse the Kind: %v", err)
-		return "", nil
+	for _, httpRoutes := range k8sArtifact.HTTPRoutes {
+		httpRoutes.Namespace = namespace
+		internalk8sClient.DeployHTTPRouteCR(&httpRoutes, k8sClient)
 	}
-
-	kind, ok := crdData["kind"].(string)
-	if !ok {
-		logger.LoggerTransformer.Errorf("Kind attribute not found in the given yaml file.")
-		return "", nil
+	for _, backends := range k8sArtifact.Backends {
+		backends.Namespace = namespace
+		internalk8sClient.DeployBackendCR(&backends, k8sClient)
 	}
-
-	switch kind {
-	case "APIPolicy":
-		var apiPolicy dpv1alpha2.APIPolicy
-		err = k8Yaml.Unmarshal(yamlData, &apiPolicy)
-		if err != nil {
-			logger.LoggerSync.Errorf("Error unmarshaling APIPolicy YAML: %v", err)
-		}
-		apiPolicy.ObjectMeta.Namespace = conf.DataPlane.Namespace
-		internalk8sClient.DeployAPIPolicyCR(&apiPolicy, k8sClient)
-	case "HTTPRoute":
-		var httpRoute gwapiv1b1.HTTPRoute
-		err = k8Yaml.Unmarshal(yamlData, &httpRoute)
-		if err != nil {
-			logger.LoggerSync.Errorf("Error unmarshaling HTTPRoute YAML: %v", err)
-		}
-		httpRoute.ObjectMeta.Namespace = conf.DataPlane.Namespace
-		internalk8sClient.DeployHTTPRouteCR(&httpRoute, k8sClient)
-	case "Backend":
-		var backend dpv1alpha1.Backend
-		err = k8Yaml.Unmarshal(yamlData, &backend)
-		if err != nil {
-			logger.LoggerSync.Errorf("Error unmarshaling Backend YAML: %v", err)
-		}
-		backend.ObjectMeta.Namespace = conf.DataPlane.Namespace
-		internalk8sClient.DeployBackendCR(&backend, k8sClient)
-	case "ConfigMap":
-		var configMap corev1.ConfigMap
-		err = k8Yaml.Unmarshal(yamlData, &configMap)
-		if err != nil {
-			logger.LoggerSync.Errorf("Error unmarshaling ConfigMap YAML: %v", err)
-		}
-		configMap.ObjectMeta.Namespace = conf.DataPlane.Namespace
-		internalk8sClient.DeployConfigMapCR(&configMap, k8sClient)
-	case "Authentication":
-		var authPolicy dpv1alpha2.Authentication
-		err = k8Yaml.Unmarshal(yamlData, &authPolicy)
-		if err != nil {
-			logger.LoggerSync.Errorf("Error unmarshaling Authentication YAML: %v", err)
-		}
-		authPolicy.ObjectMeta.Namespace = conf.DataPlane.Namespace
-		internalk8sClient.DeployAuthenticationCR(&authPolicy, k8sClient)
-	case "API":
-		var api dpv1alpha2.API
-		err = k8Yaml.Unmarshal(yamlData, &api)
-		if err != nil {
-			logger.LoggerSync.Errorf("Error unmarshaling API YAML: %v", err)
-		}
-		api.ObjectMeta.Namespace = conf.DataPlane.Namespace
-		internalk8sClient.DeployAPICR(&api, k8sClient)
-	case "InterceptorService":
-		var interceptorService dpv1alpha1.InterceptorService
-		err = k8Yaml.Unmarshal(yamlData, &interceptorService)
-		if err != nil {
-			logger.LoggerSync.Errorf("Error unmarshaling InterceptorService YAML: %v", err)
-		}
-		interceptorService.ObjectMeta.Namespace = conf.DataPlane.Namespace
-		internalk8sClient.DeployInterceptorServicesCR(&interceptorService, k8sClient)
-	case "BackendJWT":
-		var backendJWT dpv1alpha1.BackendJWT
-		err = k8Yaml.Unmarshal(yamlData, &backendJWT)
-		if err != nil {
-			logger.LoggerSync.Errorf("Error unmarshaling BackendJWT YAML: %v", err)
-		}
-		backendJWT.ObjectMeta.Namespace = conf.DataPlane.Namespace
-		internalk8sClient.DeployBackendJWTCR(&backendJWT, k8sClient)
-	case "Scope":
-		var scope dpv1alpha1.Scope
-		err = k8Yaml.Unmarshal(yamlData, &scope)
-		if err != nil {
-			logger.LoggerSync.Errorf("Error unmarshaling Scope YAML: %v", err)
-		}
-		scope.ObjectMeta.Namespace = conf.DataPlane.Namespace
-		internalk8sClient.DeployScopeCR(&scope, k8sClient)
-	case "RateLimitPolicy":
-		var rateLimitPolicy dpv1alpha1.RateLimitPolicy
-		err = k8Yaml.Unmarshal(yamlData, &rateLimitPolicy)
-		if err != nil {
-			logger.LoggerSync.Errorf("Error unmarshaling RateLimitPolicy YAML: %v", err)
-		}
-		rateLimitPolicy.ObjectMeta.Namespace = conf.DataPlane.Namespace
+	for _, configMaps := range k8sArtifact.ConfigMaps {
+		configMaps.Namespace = namespace
+		internalk8sClient.DeployConfigMapCR(&configMaps, k8sClient)
+	}
+	for _, authPolicies := range k8sArtifact.Authentication {
+		authPolicies.Namespace = namespace
+		internalk8sClient.DeployAuthenticationCR(&authPolicies, k8sClient)
+	}
+	for _, interceptorServices := range k8sArtifact.InterceptorServices {
+		interceptorServices.Namespace = namespace
+		internalk8sClient.DeployInterceptorServicesCR(&interceptorServices, k8sClient)
+	}
+	if k8sArtifact.BackendJWT != nil {
+		k8sArtifact.BackendJWT.Namespace = namespace
+		internalk8sClient.DeployBackendJWTCR(k8sArtifact.BackendJWT, k8sClient)
+	}
+	for _, scopes := range k8sArtifact.Scopes {
+		scopes.Namespace = namespace
+		internalk8sClient.DeployScopeCR(&scopes, k8sClient)
+	}
+	for _, rateLimitPolicy := range k8sArtifact.RateLimitPolicies {
+		rateLimitPolicy.Namespace = namespace
 		internalk8sClient.DeployRateLimitPolicyCR(&rateLimitPolicy, k8sClient)
-	case "Secret":
-		var secret corev1.Secret
-		err = k8Yaml.Unmarshal(yamlData, &secret)
-		if err != nil {
-			logger.LoggerSync.Errorf("Error unmarshaling Secret YAML: %v", err)
-		}
-		secret.ObjectMeta.Namespace = conf.DataPlane.Namespace
-		internalk8sClient.DeploySecretCR(&secret, k8sClient)
-	default:
-		logger.LoggerSync.Errorf("[!]Unknown Kind parsed from the YAML File: %v", kind)
 	}
-	return kind, crdData
+	for _, secrets := range k8sArtifact.Secrets {
+		secrets.Namespace = namespace
+		internalk8sClient.DeploySecretCR(&secrets, k8sClient)
+	}
+	return nil
+}
+func getDeploymentNamespace(k8sArtifact transformer.K8sArtifacts) (string, error) {
+	conf, errReadConfig := config.ReadConfigs()
+	if errReadConfig != nil {
+		logger.LoggerSync.Errorf("Error reading configs: %v", errReadConfig)
+		return "", errReadConfig
+	}
+	return conf.DataPlane.Namespace, nil
 }
