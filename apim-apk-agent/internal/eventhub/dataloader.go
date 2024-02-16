@@ -27,15 +27,16 @@ import (
 	"time"
 
 	loggers "github.com/sirupsen/logrus"
+	dpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha2"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
+	internalk8sClient "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/k8sClient"
 	internalutils "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/utils"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
 	pkgAuth "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/auth"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/tlsutils"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/utils"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
@@ -50,8 +51,6 @@ const (
 	GatewayLabelParam string = "gatewayLabel"
 	// APIUUIDParam is required to call /apis endpoint
 	APIUUIDParam string = "apiId"
-	// ApisEndpoint is the resource path of /apis endpoint
-	ApisEndpoint string = "apis"
 )
 
 var (
@@ -232,5 +231,30 @@ func retrieveDataFromResponseChannel(response response) {
 // FetchAPIsOnStartUp APIs from control plane during the server start up and push them
 // to the router and enforcer components.
 func FetchAPIsOnStartUp(conf *config.Config, k8sClient client.Client) {
-	internalutils.FetchAPIsOnEvent(conf, nil, k8sClient)
+	k8sAPIS, _, err := internalk8sClient.RetrieveAllAPISFromK8s(k8sClient, "")
+	if err != nil {
+		logger.LoggerSubscription.Errorf("Error occurred while fetching APIs from K8s %v", err)
+	}
+	apis, err := internalutils.FetchAPIsOnEvent(conf, nil, k8sClient)
+	if err != nil {
+		logger.LoggerSubscription.Errorf("Error occurred while fetching APIs from control plane %v", err)
+	}
+	removeApis := make([]dpv1alpha2.API, 0)
+	for _, k8sAPI := range k8sAPIS {
+		found := false
+		for _, api := range *apis {
+			if k8sAPI.Name == api {
+				found = true
+				break
+			}
+		}
+		if !found {
+			removeApis = append(removeApis, k8sAPI)
+		}
+	}
+	for _, removeAPI := range removeApis {
+		if !removeAPI.Spec.SystemAPI {
+			internalk8sClient.UndeployAPICR(removeAPI.Name, k8sClient)
+		}
+	}
 }

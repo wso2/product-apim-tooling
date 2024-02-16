@@ -238,7 +238,7 @@ func mapAuthConfigs(authHeader string, secSchemes []string, certAvailable bool, 
 // GenerateCRs takes the .apk-conf, api definition, vHost and the organization for a particular API and then generate and returns
 // the relavant CRD set as a zip
 func GenerateCRs(apkConf string, apiDefinition string, k8ResourceGenEndpoint string) (*K8sArtifacts, error) {
-	k8sArtifact := K8sArtifacts{HTTPRoutes: make(map[string]gwapiv1b1.HTTPRoute), Backends: make(map[string]dpv1alpha1.Backend), Scopes: make(map[string]dpv1alpha1.Scope), Authentication: make(map[string]dpv1alpha2.Authentication), APIPolicies: make(map[string]dpv1alpha2.APIPolicy), InterceptorServices: make(map[string]dpv1alpha1.InterceptorService), ConfigMaps: make(map[string]corev1.ConfigMap), Secrets: make(map[string]corev1.Secret), RateLimitPolicies: make(map[string]dpv1alpha1.RateLimitPolicy)}
+	k8sArtifact := K8sArtifacts{HTTPRoutes: make(map[string]*gwapiv1b1.HTTPRoute), Backends: make(map[string]*dpv1alpha1.Backend), Scopes: make(map[string]*dpv1alpha1.Scope), Authentication: make(map[string]*dpv1alpha2.Authentication), APIPolicies: make(map[string]*dpv1alpha2.APIPolicy), InterceptorServices: make(map[string]*dpv1alpha1.InterceptorService), ConfigMaps: make(map[string]*corev1.ConfigMap), Secrets: make(map[string]*corev1.Secret), RateLimitPolicies: make(map[string]*dpv1alpha1.RateLimitPolicy)}
 	if apkConf == "" {
 		logger.LoggerTransformer.Error("Empty apk-conf parameter provided. Unable to generate CRDs.")
 		return nil, errors.New("Error: APK-Conf can't be empty")
@@ -345,7 +345,7 @@ func GenerateCRs(apkConf string, apiDefinition string, k8ResourceGenEndpoint str
 				logger.LoggerSync.Errorf("Error unmarshaling APIPolicy YAML: %v", err)
 				continue
 			}
-			k8sArtifact.APIPolicies[apiPolicy.ObjectMeta.Name] = apiPolicy
+			k8sArtifact.APIPolicies[apiPolicy.ObjectMeta.Name] = &apiPolicy
 		case "HTTPRoute":
 			var httpRoute gwapiv1b1.HTTPRoute
 			err = k8Yaml.Unmarshal(yamlData, &httpRoute)
@@ -353,7 +353,7 @@ func GenerateCRs(apkConf string, apiDefinition string, k8ResourceGenEndpoint str
 				logger.LoggerSync.Errorf("Error unmarshaling HTTPRoute YAML: %v", err)
 				continue
 			}
-			k8sArtifact.HTTPRoutes[httpRoute.ObjectMeta.Name] = httpRoute
+			k8sArtifact.HTTPRoutes[httpRoute.ObjectMeta.Name] = &httpRoute
 
 		case "Backend":
 			var backend dpv1alpha1.Backend
@@ -362,7 +362,7 @@ func GenerateCRs(apkConf string, apiDefinition string, k8ResourceGenEndpoint str
 				logger.LoggerSync.Errorf("Error unmarshaling Backend YAML: %v", err)
 				continue
 			}
-			k8sArtifact.Backends[backend.ObjectMeta.Name] = backend
+			k8sArtifact.Backends[backend.ObjectMeta.Name] = &backend
 
 		case "ConfigMap":
 			var configMap corev1.ConfigMap
@@ -371,7 +371,7 @@ func GenerateCRs(apkConf string, apiDefinition string, k8ResourceGenEndpoint str
 				logger.LoggerSync.Errorf("Error unmarshaling ConfigMap YAML: %v", err)
 				continue
 			}
-			k8sArtifact.ConfigMaps[configMap.ObjectMeta.Name] = configMap
+			k8sArtifact.ConfigMaps[configMap.ObjectMeta.Name] = &configMap
 		case "Authentication":
 			var authPolicy dpv1alpha2.Authentication
 			err = k8Yaml.Unmarshal(yamlData, &authPolicy)
@@ -379,7 +379,7 @@ func GenerateCRs(apkConf string, apiDefinition string, k8ResourceGenEndpoint str
 				logger.LoggerSync.Errorf("Error unmarshaling Authentication YAML: %v", err)
 				continue
 			}
-			k8sArtifact.Authentication[authPolicy.ObjectMeta.Name] = authPolicy
+			k8sArtifact.Authentication[authPolicy.ObjectMeta.Name] = &authPolicy
 
 		case "API":
 			var api dpv1alpha2.API
@@ -396,7 +396,7 @@ func GenerateCRs(apkConf string, apiDefinition string, k8ResourceGenEndpoint str
 				logger.LoggerSync.Errorf("Error unmarshaling InterceptorService YAML: %v", err)
 				continue
 			}
-			k8sArtifact.InterceptorServices[interceptorService.Name] = interceptorService
+			k8sArtifact.InterceptorServices[interceptorService.Name] = &interceptorService
 		case "BackendJWT":
 			var backendJWT *dpv1alpha1.BackendJWT
 			err = k8Yaml.Unmarshal(yamlData, &backendJWT)
@@ -412,7 +412,7 @@ func GenerateCRs(apkConf string, apiDefinition string, k8ResourceGenEndpoint str
 				logger.LoggerSync.Errorf("Error unmarshaling Scope YAML: %v", err)
 				continue
 			}
-			k8sArtifact.Scopes[scope.Name] = scope
+			k8sArtifact.Scopes[scope.Name] = &scope
 		case "RateLimitPolicy":
 			var rateLimitPolicy dpv1alpha1.RateLimitPolicy
 			err = k8Yaml.Unmarshal(yamlData, &rateLimitPolicy)
@@ -420,7 +420,7 @@ func GenerateCRs(apkConf string, apiDefinition string, k8ResourceGenEndpoint str
 				logger.LoggerSync.Errorf("Error unmarshaling RateLimitPolicy YAML: %v", err)
 				continue
 			}
-			k8sArtifact.RateLimitPolicies[rateLimitPolicy.Name] = rateLimitPolicy
+			k8sArtifact.RateLimitPolicies[rateLimitPolicy.Name] = &rateLimitPolicy
 		case "Secret":
 			var secret corev1.Secret
 			err = k8Yaml.Unmarshal(yamlData, &secret)
@@ -428,7 +428,7 @@ func GenerateCRs(apkConf string, apiDefinition string, k8ResourceGenEndpoint str
 				logger.LoggerSync.Errorf("Error unmarshaling Secret YAML: %v", err)
 				continue
 			}
-			k8sArtifact.Secrets[secret.Name] = secret
+			k8sArtifact.Secrets[secret.Name] = &secret
 		default:
 			logger.LoggerSync.Errorf("[!]Unknown Kind parsed from the YAML File: %v", kind)
 		}
