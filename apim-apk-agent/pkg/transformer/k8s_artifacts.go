@@ -10,14 +10,14 @@ import (
 // K8sArtifacts k8s artifact representation of API
 type K8sArtifacts struct {
 	API                 dpv1alpha2.API
-	HTTPRoutes          map[string]gwapiv1b1.HTTPRoute
-	Backends            map[string]v1alpha1.Backend
-	Scopes              map[string]v1alpha1.Scope
-	Authentication      map[string]dpv1alpha2.Authentication
-	APIPolicies         map[string]dpv1alpha2.APIPolicy
-	InterceptorServices map[string]v1alpha1.InterceptorService
-	ConfigMaps          map[string]corev1.ConfigMap
-	Secrets             map[string]corev1.Secret
+	HTTPRoutes          map[string]*gwapiv1b1.HTTPRoute
+	Backends            map[string]*v1alpha1.Backend
+	Scopes              map[string]*v1alpha1.Scope
+	Authentication      map[string]*dpv1alpha2.Authentication
+	APIPolicies         map[string]*dpv1alpha2.APIPolicy
+	InterceptorServices map[string]*v1alpha1.InterceptorService
+	ConfigMaps          map[string]*corev1.ConfigMap
+	Secrets             map[string]*corev1.Secret
 	BackendJWT          *v1alpha1.BackendJWT
-	RateLimitPolicies   map[string]v1alpha1.RateLimitPolicy
+	RateLimitPolicies   map[string]*v1alpha1.RateLimitPolicy
 }

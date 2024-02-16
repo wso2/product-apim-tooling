@@ -54,8 +54,9 @@ func init() {
 }
 
 // FetchAPIsOnEvent  will fetch API from control plane during the API Notification Event
-func FetchAPIsOnEvent(conf *config.Config, apiUUID *string, k8sClient client.Client) {
+func FetchAPIsOnEvent(conf *config.Config, apiUUID *string, k8sClient client.Client) (*[]string, error) {
 	// Populate data from config.
+	apis := make([]string, 0)
 	envs := conf.ControlPlane.EnvironmentLabels
 
 	// Create a channel for the byte slice (response from the APIs from control plane)
@@ -84,22 +85,22 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUID *string, k8sClient client.Cli
 
 		if err != nil {
 			logger.LoggerSync.Errorf("Error while reading zip: %v", err)
-			return
+			return nil, err
 		}
 		deploymentJSON, exists := apiFiles["deployments.json"]
 		if !exists {
 			logger.LoggerSync.Errorf("deployments.json not found")
-			return
+			return nil, err
 		}
 		deploymentJSONBytes, err := transformer.ReadContent(deploymentJSON)
 		if err != nil {
 			logger.LoggerSync.Errorf("Error while decoding the API Project Artifact: %v", err)
-			return
+			return nil, err
 		}
 		deploymentDescriptor, err := transformer.ProcessDeploymentDescriptor(deploymentJSONBytes)
 		if err != nil {
 			logger.LoggerSync.Errorf("Error while decoding the API Project Artifact: %v", err)
-			return
+			return nil, err
 		}
 		apiDeployments := deploymentDescriptor.Data.Deployments
 		if apiDeployments != nil {
@@ -109,38 +110,38 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUID *string, k8sClient client.Cli
 					artifact, decodingError := transformer.DecodeAPIArtifact(apiZip)
 					if decodingError != nil {
 						logger.LoggerSync.Errorf("Error while decoding the API Project Artifact: %v", decodingError)
-						return
+						return nil, err
 					}
 					apkConf, apiUUID, revisionID, apkErr := transformer.GenerateAPKConf(artifact.APIJson, artifact.ClientCerts)
 					if apkErr != nil {
 						logger.LoggerSync.Errorf("Error while generating APK-Conf: %v", apkErr)
-						return
+						return nil, err
 					}
 					k8ResourceEndpoint := conf.DataPlane.K8ResourceEndpoint
 					crResponse, err := transformer.GenerateCRs(apkConf, artifact.Swagger, k8ResourceEndpoint)
 					if err != nil {
 						logger.LoggerSync.Errorf("Error occured in receiving the updated CRDs: %v", err)
-						return
+						return nil, err
 					}
 					transformer.UpdateCRS(crResponse, apiDeployment.Environments, apiDeployment.OrganizationID, apiUUID, fmt.Sprint(revisionID), "namespace")
 					mapperUtil.MapAndCreateCR(*crResponse, k8sClient)
+					apis = append(apis, apiUUID)
 					logger.LoggerMsg.Info("API applied successfully.\n")
 				}
 			}
+			return &apis, nil
 		}
-
 	} else if data.ErrorCode == 204 {
 		logger.LoggerMsg.Infof("No API Artifacts are available in the control plane for the envionments :%s",
 			strings.Join(envs, ", "))
-		//health.SetControlPlaneRestAPIStatus(true)
+		return &[]string{}, nil
 	} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
 		logger.LoggerMsg.ErrorC(logging.ErrorDetails{
 			Message:   fmt.Sprintf("Error occurred when retrieving APIs from control plane(unrecoverable error): %v", data.Err.Error()),
 			Severity:  logging.CRITICAL,
 			ErrorCode: 1106,
 		})
-		//isNoAPIArtifacts := data.ErrorCode == 404 && strings.Contains(data.Err.Error(), "No Api artifacts found")
-		//health.SetControlPlaneRestAPIStatus(isNoAPIArtifacts)
+		return nil, data.Err
 	} else {
 		// Keep the iteration still until all the envrionment response properly.
 		logger.LoggerMsg.ErrorC(logging.ErrorDetails{
@@ -152,6 +153,7 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUID *string, k8sClient client.Cli
 		sync.RetryFetchingAPIs(c, data, sync.RuntimeArtifactEndpoint, true)
 	}
 	logger.LoggerMsg.Info("Fetching API for an event is completed...")
+	return nil, nil
 }
 
 // GetAPI function calls the FetchAPIs() with relevant environment labels defined in the config.
