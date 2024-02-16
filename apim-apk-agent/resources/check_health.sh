@@ -15,12 +15,17 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-ADAPTER_XDS_PORT="${ADAPTER_XDS_PORT:-18000}"
-ADAPTER_SERVER_NAME="${ADAPTER_SERVER_NAME:-adapter}"
-grpc_health_probe -addr "127.0.0.1:${ADAPTER_XDS_PORT}" \
+# Debugging: Print out the values of variables
+echo "APIM_APK_AGENT_GRPC_PORT: ${APIM_APK_AGENT_GRPC_PORT}"
+echo "APIM_APK_AGENT_SERVER_NAME: ${APIM_APK_AGENT_SERVER_NAME}"
+echo "APIM_APK_AGENT_PUBLIC_CERT_PATH: ${APIM_APK_AGENT_PUBLIC_CERT_PATH}"
+echo "APIM_APK_AGENT_PRIVATE_KEY_PATH: ${APIM_APK_AGENT_PRIVATE_KEY_PATH}"
+
+# Run grpc_health_probe with debugging information
+grpc_health_probe -addr "127.0.0.1:${APIM_APK_AGENT_GRPC_PORT}" \
     -tls \
-    -tls-ca-cert "${ADAPTER_PUBLIC_CERT_PATH}" \
-    -tls-client-cert "${ADAPTER_PUBLIC_CERT_PATH}" \
-    -tls-client-key "${ADAPTER_PRIVATE_KEY_PATH}" \
-    -tls-server-name ${ADAPTER_SERVER_NAME} \
+    -tls-ca-cert "${APIM_APK_AGENT_PUBLIC_CERT_PATH}" \
+    -tls-client-cert "${APIM_APK_AGENT_PUBLIC_CERT_PATH}" \
+    -tls-client-key "${APIM_APK_AGENT_PRIVATE_KEY_PATH}" \
+    -tls-server-name ${APIM_APK_AGENT_SERVER_NAME} \
     -connect-timeout=3s

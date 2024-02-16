@@ -31,7 +31,7 @@ import (
 	"time"
 
 	"github.com/fsnotify/fsnotify"
-	"github.com/wso2/apk/adapter/pkg/health"
+	healthservice "github.com/wso2/apk/adapter/pkg/health/api/wso2/health/service"
 	cpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/cp/v1alpha2"
 	dpv1alpha1 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha1"
 	dpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha2"
@@ -43,6 +43,7 @@ import (
 	logging "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/logging"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/messaging"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/synchronizer"
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/health"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/managementserver"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -151,6 +152,7 @@ func Run(conf *config.Config) {
 
 	// Load initial data from control plane
 	eventhub.LoadInitialData(conf, mgr.GetClient())
+	health.RestService.SetStatus(true)
 
 	if eventHubEnabled {
 		var connectionURLList = conf.ControlPlane.BrokerConnectionParameters.EventListeningEndpoints
@@ -161,6 +163,7 @@ func Run(conf *config.Config) {
 
 	// Load initial KM data from control plane
 	synchronizer.FetchKeyManagersOnStartUp(mgr.GetClient())
+	health.NotificationListenerService.SetStatus(true)
 
 	var grpcOptions []grpc.ServerOption
 	grpcOptions = append(grpcOptions, grpc.KeepaliveParams(
@@ -201,13 +204,15 @@ func Run(conf *config.Config) {
 		loggers.LoggerAPKOperator.ErrorC(logging.PrintError(logging.Error1100, logging.BLOCKER, "Failed to listen on port: %v, error: %v", port, err.Error()))
 	}
 	apkmgt.RegisterEventStreamServiceServer(grpcServer, &managementserver.EventServer{})
+	// register health service
+	healthservice.RegisterHealthServer(grpcServer, &health.Server{})
 	loggers.LoggerAPKOperator.Info("port: ", port, " APK agent Listening for gRPC connections")
 	go managementserver.StartInternalServer(restPort)
 	go func() {
 		loggers.LoggerAPKOperator.Info("Starting GRPC server.")
-		health.CommonEnforcerGrpcService.SetStatus(true)
+		health.CommonControllerGrpcService.SetStatus(true)
 		if err = grpcServer.Serve(lis); err != nil {
-			health.CommonEnforcerGrpcService.SetStatus(false)
+			health.CommonControllerGrpcService.SetStatus(false)
 			loggers.LoggerAPKOperator.ErrorC(logging.PrintError(logging.Error1101, logging.BLOCKER, "Failed to start XDS GRPS server, error: %v", err.Error()))
 		}
 	}()
