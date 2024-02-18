@@ -31,8 +31,16 @@ type SyncAPIResponse struct {
 	Resp          []byte
 	Err           error
 	ErrorCode     int
+	Found         bool
 	APIUUID       string
 	GatewayLabels []string
+}
+
+// RuntimeArtifactResponse struct contains information related to the response of runtime-artifacts
+type RuntimeArtifactResponse struct {
+	Count      int         `json:"count"`
+	List       []string    `json:"list"`
+	Pagination interface{} `json:"pagination"`
 }
 
 // DeploymentDescriptor represents deployment descriptor file contains in Artifact

@@ -70,7 +70,7 @@ func GenerateAPKConf(APIJson string, clientCerts string) (string, string, uint32
 	apk.Type = getAPIType(apiYamlData.Type)
 	apk.DefaultVersion = apiYamlData.DefaultVersion
 	apk.DefinitionPath = "/definition"
-
+	apk.SubscriptionValidation = true
 	apkOperations := make([]Operation, len(apiYamlData.Operations))
 
 	for i, operation := range apiYamlData.Operations {

@@ -25,7 +25,6 @@ import (
 
 	dpv1alpha1 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha1"
 	dpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha2"
-	"github.com/wso2/apk/common-go-libs/utils"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/loggers"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/logging"
@@ -62,6 +61,17 @@ func DeployAPICR(api *dpv1alpha2.API, k8sClient client.Client) {
 	}
 }
 
+// UndeployK8sAPICR removes the API Custom Resource from the Kubernetes cluster based on API ID label.
+func UndeployK8sAPICR(k8sClient client.Client, k8sAPI dpv1alpha2.API) error {
+	err := k8sClient.Delete(context.Background(), &k8sAPI, &client.DeleteOptions{})
+	if err != nil {
+		loggers.LoggerXds.Errorf("Unable to delete API CR: %v", err)
+		return err
+	}
+	loggers.LoggerXds.Infof("Deleted API CR: %s", k8sAPI.Name)
+	return nil
+}
+
 // UndeployAPICR removes the API Custom Resource from the Kubernetes cluster based on API ID label.
 func UndeployAPICR(apiID string, k8sClient client.Client) {
 	conf, errReadConfig := config.ReadConfigs()
@@ -73,20 +83,10 @@ func UndeployAPICR(apiID string, k8sClient client.Client) {
 	if err := k8sClient.Get(context.Background(), types.NamespacedName{Name: apiID, Namespace: conf.DataPlane.Namespace}, api); err != nil {
 		loggers.LoggerXds.Errorf("Unable to list API CRs: %v", err)
 	}
-	if err := k8sClient.Delete(context.Background(), api); err != nil {
+	if err := UndeployK8sAPICR(k8sClient, *api); err != nil {
 		loggers.LoggerXds.Errorf("Unable to delete API CR: %v", err)
 	}
 	loggers.LoggerXds.Infof("Deleted API CR: %s", api.Name)
-}
-
-// contains checks if a string is present in a slice of strings
-func contains(slice []string, str string) bool {
-	for _, s := range slice {
-		if s == str {
-			return true
-		}
-	}
-	return false
 }
 
 // DeployConfigMapCR applies the given ConfigMap struct to the Kubernetes cluster.
@@ -347,6 +347,17 @@ func CreateAndUpdateTokenIssuersCR(keyManager eventhubTypes.ResolvedKeyManager, 
 	return nil
 }
 
+// DeleteTokenIssuerCR deletes the TokenIssuer struct from the Kubernetes cluster.
+func DeleteTokenIssuerCR(k8sClient client.Client, tokenIssuer dpv1alpha2.TokenIssuer) error {
+	err := k8sClient.Delete(context.Background(), &tokenIssuer, &client.DeleteOptions{})
+	if err != nil {
+		loggers.LoggerAPI.Error("Unable to delete TokenIssuer CR: " + err.Error())
+		return err
+	}
+	loggers.LoggerXds.Debug("TokenIssuer CR deleted: " + tokenIssuer.Name)
+	return nil
+}
+
 // DeleteTokenIssuersCR deletes the TokenIssuers struct from the Kubernetes cluster.
 func DeleteTokenIssuersCR(k8sClient client.Client, keymanagerName string, tenantDomain string) error {
 	conf, _ := config.ReadConfigs()
@@ -368,7 +379,7 @@ func DeleteTokenIssuersCR(k8sClient client.Client, keymanagerName string, tenant
 		loggers.LoggerXds.Debug("No TokenIssuer CR found for deletion")
 	}
 	for _, tokenIssuer := range tokenIssuerList.Items {
-		err := k8sClient.Delete(context.Background(), &tokenIssuer, &client.DeleteOptions{})
+		err := DeleteTokenIssuerCR(k8sClient, tokenIssuer)
 		if err != nil {
 			loggers.LoggerAPI.Error("Unable to delete TokenIssuer CR: " + err.Error())
 			return err
@@ -437,13 +448,14 @@ func getSha1Value(input string) string {
 
 // RetrieveAllAPISFromK8s retrieves all the API CRs from the Kubernetes cluster
 func RetrieveAllAPISFromK8s(k8sClient client.Client, nextToken string) ([]dpv1alpha2.API, string, error) {
+	conf, _ := config.ReadConfigs()
 	apiList := dpv1alpha2.APIList{}
 	resolvedAPIList := make([]dpv1alpha2.API, 0)
 	var err error
 	if nextToken == "" {
-		err = k8sClient.List(context.Background(), &apiList, &client.ListOptions{Namespace: utils.GetOperatorPodNamespace()})
+		err = k8sClient.List(context.Background(), &apiList, &client.ListOptions{Namespace: conf.DataPlane.Namespace})
 	} else {
-		err = k8sClient.List(context.Background(), &apiList, &client.ListOptions{Namespace: utils.GetOperatorPodNamespace(), Continue: nextToken})
+		err = k8sClient.List(context.Background(), &apiList, &client.ListOptions{Namespace: conf.DataPlane.Namespace, Continue: nextToken})
 	}
 	if err != nil {
 		loggers.LoggerSync.ErrorC(logging.PrintError(logging.Error1102, logging.CRITICAL, "Failed to get application from k8s %v", err.Error()))
