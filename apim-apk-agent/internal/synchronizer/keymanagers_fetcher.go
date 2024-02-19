@@ -74,7 +74,7 @@ func FetchKeyManagersOnStartUp(c client.Client) {
 	} else {
 		ehURL += "/" + keyManagersEndpoint
 	}
-	logger.LoggerSync.Infof("Fetching KeyManagers from the URL %v: ", ehURL)
+	logger.LoggerSync.Debugf("Fetching KeyManagers from the URL %v: ", ehURL)
 
 	ehUname := ehConfigs.Username
 	ehPass := ehConfigs.Password
@@ -180,7 +180,7 @@ func applyAllKeymanagerConfifuration(c client.Client, resolvedKeyManagers []even
 		if err != nil {
 			return err
 		}
-		logger.LoggerSync.Infof("Token Issuer created: %v", tokenIssuer)
+		logger.LoggerSync.Debugf("Token Issuer created: %v", tokenIssuer)
 
 	}
 	for _, tokenIssuer := range sameTokenissuers {
@@ -188,15 +188,15 @@ func applyAllKeymanagerConfifuration(c client.Client, resolvedKeyManagers []even
 		if err != nil {
 			return err
 		}
-		logger.LoggerSync.Infof("Token Issuer updated: %v", tokenIssuer)
+		logger.LoggerSync.Debugf("Token Issuer updated: %v", tokenIssuer)
 	}
-	logger.LoggerSync.Infof("Deleted Token Issuers from K8s: %v", clonedTokenIssuerListFromK8s)
+	logger.LoggerSync.Debugf("Deleted Token Issuers from K8s: %v", clonedTokenIssuerListFromK8s)
 	for _, tokenissuer := range clonedTokenIssuerListFromK8s {
-		err := k8sclient.DeleteTokenIssuersCR(c, tokenissuer.Spec.Name, tokenissuer.Spec.Organization)
+		err := k8sclient.DeleteTokenIssuerCR(c, tokenissuer)
 		if err != nil {
 			return err
 		}
-		logger.LoggerSync.Infof("Token Issuer deleted: %v", tokenissuer)
+		logger.LoggerSync.Debugf("Token Issuer deleted: %v", tokenissuer)
 	}
 	return nil
 }

@@ -40,11 +40,6 @@ import (
 	mapperUtil "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/mapper"
 )
 
-const (
-	zipExt          string = ".zip"
-	defaultCertPath string = "/home/wso2/security/controlplane.pem"
-)
-
 func init() {
 	conf, _ := config.ReadConfigs()
 	sync.InitializeWorkerPool(conf.ControlPlane.RequestWorkerPool.PoolSize, conf.ControlPlane.RequestWorkerPool.QueueSizePerPool,
@@ -71,64 +66,69 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUID *string, k8sClient client.Cli
 	data := <-c
 	logger.LoggerMsg.Info("Receiving data for an API")
 	if data.Resp != nil {
-		// Reading the root zip
-		zipReader, err := zip.NewReader(bytes.NewReader(data.Resp), int64(len(data.Resp)))
+		if data.Found {
+			// Reading the root zip
+			zipReader, err := zip.NewReader(bytes.NewReader(data.Resp), int64(len(data.Resp)))
 
-		// apiFiles represents zipped API files fetched from API Manager
-		apiFiles := make(map[string]*zip.File)
-		// Read the .zip files within the root apis.zip and add apis to apiFiles array.
-		for _, file := range zipReader.File {
-			apiFiles[file.Name] = file
-			logger.LoggerSync.Infof("API file found: " + file.Name)
-			// Todo: Read the apis.zip and extract the api.zip,deployments.json
-		}
-
-		if err != nil {
-			logger.LoggerSync.Errorf("Error while reading zip: %v", err)
-			return nil, err
-		}
-		deploymentJSON, exists := apiFiles["deployments.json"]
-		if !exists {
-			logger.LoggerSync.Errorf("deployments.json not found")
-			return nil, err
-		}
-		deploymentJSONBytes, err := transformer.ReadContent(deploymentJSON)
-		if err != nil {
-			logger.LoggerSync.Errorf("Error while decoding the API Project Artifact: %v", err)
-			return nil, err
-		}
-		deploymentDescriptor, err := transformer.ProcessDeploymentDescriptor(deploymentJSONBytes)
-		if err != nil {
-			logger.LoggerSync.Errorf("Error while decoding the API Project Artifact: %v", err)
-			return nil, err
-		}
-		apiDeployments := deploymentDescriptor.Data.Deployments
-		if apiDeployments != nil {
-			for _, apiDeployment := range *apiDeployments {
-				apiZip, exists := apiFiles[apiDeployment.APIFile]
-				if exists {
-					artifact, decodingError := transformer.DecodeAPIArtifact(apiZip)
-					if decodingError != nil {
-						logger.LoggerSync.Errorf("Error while decoding the API Project Artifact: %v", decodingError)
-						return nil, err
-					}
-					apkConf, apiUUID, revisionID, apkErr := transformer.GenerateAPKConf(artifact.APIJson, artifact.ClientCerts)
-					if apkErr != nil {
-						logger.LoggerSync.Errorf("Error while generating APK-Conf: %v", apkErr)
-						return nil, err
-					}
-					k8ResourceEndpoint := conf.DataPlane.K8ResourceEndpoint
-					crResponse, err := transformer.GenerateCRs(apkConf, artifact.Swagger, k8ResourceEndpoint)
-					if err != nil {
-						logger.LoggerSync.Errorf("Error occured in receiving the updated CRDs: %v", err)
-						return nil, err
-					}
-					transformer.UpdateCRS(crResponse, apiDeployment.Environments, apiDeployment.OrganizationID, apiUUID, fmt.Sprint(revisionID), "namespace")
-					mapperUtil.MapAndCreateCR(*crResponse, k8sClient)
-					apis = append(apis, apiUUID)
-					logger.LoggerMsg.Info("API applied successfully.\n")
-				}
+			// apiFiles represents zipped API files fetched from API Manager
+			apiFiles := make(map[string]*zip.File)
+			// Read the .zip files within the root apis.zip and add apis to apiFiles array.
+			for _, file := range zipReader.File {
+				apiFiles[file.Name] = file
+				logger.LoggerSync.Infof("API file found: " + file.Name)
+				// Todo: Read the apis.zip and extract the api.zip,deployments.json
 			}
+
+			if err != nil {
+				logger.LoggerSync.Errorf("Error while reading zip: %v", err)
+				return nil, err
+			}
+			deploymentJSON, exists := apiFiles["deployments.json"]
+			if !exists {
+				logger.LoggerSync.Errorf("deployments.json not found")
+				return nil, err
+			}
+			deploymentJSONBytes, err := transformer.ReadContent(deploymentJSON)
+			if err != nil {
+				logger.LoggerSync.Errorf("Error while decoding the API Project Artifact: %v", err)
+				return nil, err
+			}
+			deploymentDescriptor, err := transformer.ProcessDeploymentDescriptor(deploymentJSONBytes)
+			if err != nil {
+				logger.LoggerSync.Errorf("Error while decoding the API Project Artifact: %v", err)
+				return nil, err
+			}
+			apiDeployments := deploymentDescriptor.Data.Deployments
+			if apiDeployments != nil {
+				for _, apiDeployment := range *apiDeployments {
+					apiZip, exists := apiFiles[apiDeployment.APIFile]
+					if exists {
+						artifact, decodingError := transformer.DecodeAPIArtifact(apiZip)
+						if decodingError != nil {
+							logger.LoggerSync.Errorf("Error while decoding the API Project Artifact: %v", decodingError)
+							return nil, err
+						}
+						apkConf, apiUUID, revisionID, apkErr := transformer.GenerateAPKConf(artifact.APIJson, artifact.ClientCerts)
+						if apkErr != nil {
+							logger.LoggerSync.Errorf("Error while generating APK-Conf: %v", apkErr)
+							return nil, err
+						}
+						k8ResourceEndpoint := conf.DataPlane.K8ResourceEndpoint
+						crResponse, err := transformer.GenerateCRs(apkConf, artifact.Swagger, k8ResourceEndpoint)
+						if err != nil {
+							logger.LoggerSync.Errorf("Error occured in receiving the updated CRDs: %v", err)
+							return nil, err
+						}
+						transformer.UpdateCRS(crResponse, apiDeployment.Environments, apiDeployment.OrganizationID, apiUUID, fmt.Sprint(revisionID), "namespace")
+						mapperUtil.MapAndCreateCR(*crResponse, k8sClient)
+						apis = append(apis, apiUUID)
+						logger.LoggerMsg.Info("API applied successfully.\n")
+					}
+				}
+				return &apis, nil
+			}
+		} else {
+			logger.LoggerMsg.Info("API not found.")
 			return &apis, nil
 		}
 	} else if data.ErrorCode == 204 {

@@ -70,7 +70,7 @@ func GenerateAPKConf(APIJson string, clientCerts string) (string, string, uint32
 	apk.Type = getAPIType(apiYamlData.Type)
 	apk.DefaultVersion = apiYamlData.DefaultVersion
 	apk.DefinitionPath = "/definition"
-
+	apk.SubscriptionValidation = true
 	apkOperations := make([]Operation, len(apiYamlData.Operations))
 
 	for i, operation := range apiYamlData.Operations {
@@ -455,7 +455,7 @@ func replaceVhost(k8sArtifact *K8sArtifacts, vhost string, deploymentType string
 				for _, routes := range routeName.HTTPRouteRefs {
 					httprouteRef, ok := k8sArtifact.HTTPRoutes[routes]
 					if ok {
-						httprouteRef.Spec.Hostnames = append(httprouteRef.Spec.Hostnames, gwapiv1b1.Hostname(vhost))
+						httprouteRef.Spec.Hostnames = []gwapiv1b1.Hostname{gwapiv1b1.Hostname(vhost)}
 					}
 				}
 			}
@@ -465,7 +465,7 @@ func replaceVhost(k8sArtifact *K8sArtifacts, vhost string, deploymentType string
 				for _, routes := range routeName.HTTPRouteRefs {
 					httprouteRef, ok := k8sArtifact.HTTPRoutes[routes]
 					if ok {
-						httprouteRef.Spec.Hostnames = append(httprouteRef.Spec.Hostnames, gwapiv1b1.Hostname("sandbox."+vhost))
+						httprouteRef.Spec.Hostnames = []gwapiv1b1.Hostname{gwapiv1b1.Hostname("sandbox." + vhost)}
 					}
 				}
 			}
@@ -476,7 +476,7 @@ func replaceVhost(k8sArtifact *K8sArtifacts, vhost string, deploymentType string
 				for _, routes := range routeName.HTTPRouteRefs {
 					httprouteRef, ok := k8sArtifact.HTTPRoutes[routes]
 					if ok {
-						httprouteRef.Spec.Hostnames = append(httprouteRef.Spec.Hostnames, gwapiv1b1.Hostname(vhost))
+						httprouteRef.Spec.Hostnames = []gwapiv1b1.Hostname{gwapiv1b1.Hostname(vhost)}
 					}
 				}
 			}
@@ -495,7 +495,7 @@ func replaceVhost(k8sArtifact *K8sArtifacts, vhost string, deploymentType string
 				for _, routes := range routeName.HTTPRouteRefs {
 					httprouteRef, ok := k8sArtifact.HTTPRoutes[routes]
 					if ok {
-						httprouteRef.Spec.Hostnames = append(httprouteRef.Spec.Hostnames, gwapiv1b1.Hostname(vhost))
+						httprouteRef.Spec.Hostnames = []gwapiv1b1.Hostname{gwapiv1b1.Hostname(vhost)}
 					}
 				}
 			}

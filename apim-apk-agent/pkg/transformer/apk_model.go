@@ -93,4 +93,5 @@ type API struct {
 	Authentication         *[]AuthConfiguration   `yaml:"authentication,omitempty"`
 	CorsConfig             *CORSConfiguration     `yaml:"corsConfiguration,omitempty"`
 	AdditionalProperties   *[]AdditionalProperty  `yaml:"additionalProperties,omitempty"`
+	SubscriptionValidation bool                   `yaml:"subscriptionValidation,omitempty"`
 }

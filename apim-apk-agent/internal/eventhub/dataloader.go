@@ -243,18 +243,23 @@ func FetchAPIsOnStartUp(conf *config.Config, k8sClient client.Client) {
 	for _, k8sAPI := range k8sAPIS {
 		found := false
 		for _, api := range *apis {
-			if k8sAPI.Name == api {
-				found = true
-				break
+			apiUUID, exist := k8sAPI.ObjectMeta.Labels["apiUUID"]
+			if exist {
+				if apiUUID == api {
+					found = true
+					break
+				}
 			}
 		}
 		if !found {
+			logger.LoggerSync.Infof("API %s is not found in the control plane. Hence removing it from the K8s", k8sAPI.Name)
 			removeApis = append(removeApis, k8sAPI)
 		}
 	}
 	for _, removeAPI := range removeApis {
 		if !removeAPI.Spec.SystemAPI {
-			internalk8sClient.UndeployAPICR(removeAPI.Name, k8sClient)
+			logger.LoggerSync.Infof("Undeploying API %s from K8s", removeAPI.Name)
+			internalk8sClient.UndeployK8sAPICR(k8sClient, removeAPI)
 		}
 	}
 }

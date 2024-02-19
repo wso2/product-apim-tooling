@@ -52,7 +52,6 @@ const (
 	// APIArtifactEndpoint represents the /retrieve-api-artifacts endpoint.
 	APIArtifactEndpoint string = "internal/data/v1/retrieve-api-artifacts"
 	// httpTimeout is for connection timeout of httpClient in seconds
-	httpTimeout time.Duration = 30
 )
 
 // FetchAPIs submits the control plane http request to the thread pool. The thread pool would process it and return
@@ -126,10 +125,31 @@ func SendRequestToControlPlane(req *http.Request, apiID *string, gwLabels []stri
 	}
 	// For successful response, return the byte slice and nil as error
 	if resp.StatusCode == http.StatusOK {
-		respSyncAPI.Err = nil
-		respSyncAPI.Resp = respBytes
-		c <- respSyncAPI
-		return true
+		contentType := resp.Header.Get("Content-Type")
+		if contentType == "application/zip" {
+			respSyncAPI.Err = nil
+			respSyncAPI.Resp = respBytes
+			respSyncAPI.Found = true
+			c <- respSyncAPI
+			return true
+		} else if contentType == "application/json" {
+			runtimeArtifactResponse := RuntimeArtifactResponse{}
+			err := json.Unmarshal(respBytes, &runtimeArtifactResponse)
+			if err != nil {
+				logger.LoggerSync.Errorf("Error occurred while unmarshalling the response received for: %v", err)
+				respSyncAPI.Err = err
+				respSyncAPI.Resp = nil
+				respSyncAPI.Found = false
+				respSyncAPI.ErrorCode = resp.StatusCode
+				c <- respSyncAPI
+				return true
+			}
+			respSyncAPI.Err = nil
+			respSyncAPI.Resp = respBytes
+			respSyncAPI.Found = runtimeArtifactResponse.Count != 0
+			c <- respSyncAPI
+			return true
+		}
 	}
 	// If the response is not successful, create a new error with the response and log it and return
 	// Ex: for 401 scenarios, 403 scenarios.
