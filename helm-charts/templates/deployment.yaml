@@ -45,6 +45,15 @@ spec:
               containerPort: 18000
             - name: rest-port
               containerPort: 18001
+          env:
+            - name: APIM_APK_AGENT_PRIVATE_KEY_PATH
+              value: /home/wso2/security/keystore/apk-agent.key
+            - name: APIM_APK_AGENT_PUBLIC_CERT_PATH
+              value: /home/wso2/security/keystore/apk-agent.crt
+            - name: APIM_APK_AGENT_SERVER_NAME
+              value: apim-apk-agent-service.{{ .Release.Namespace }}.svc
+            - name: APIM_APK_AGENT_GRPC_PORT
+              value: "18000"
           volumeMounts:
             - name: log-conf-volume
               mountPath: /home/wso2/conf/
@@ -57,6 +66,18 @@ spec:
             - name: apk-agent-certificates
               mountPath: /home/wso2/security/truststore/apk-agent-ca.crt
               subPath: ca.crt
+          readinessProbe:
+            exec:
+              command: [ "sh", "check_health.sh" ]
+            initialDelaySeconds: 20
+            periodSeconds: 20
+            failureThreshold: 5
+          livenessProbe:
+            exec:
+              command: [ "sh", "check_health.sh" ]
+            initialDelaySeconds: 20
+            periodSeconds: 20
+            failureThreshold: 5
       volumes:
         - name: log-conf-volume
           configMap:
