@@ -48,6 +48,10 @@ func MapAndCreateCR(k8sArtifact transformer.K8sArtifacts, k8sClient client.Clien
 		httpRoutes.Namespace = namespace
 		internalk8sClient.DeployHTTPRouteCR(httpRoutes, k8sClient)
 	}
+	for _, gqlRoutes := range k8sArtifact.GQLRoutes {
+		gqlRoutes.Namespace = namespace
+		internalk8sClient.DeployGQLRouteCR(gqlRoutes, k8sClient)
+	}
 	for _, backends := range k8sArtifact.Backends {
 		backends.Namespace = namespace
 		internalk8sClient.DeployBackendCR(backends, k8sClient)

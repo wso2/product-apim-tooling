@@ -150,8 +150,8 @@ func getAPIType(protocolType string) string {
 	switch protocolType {
 	case "HTTP", "HTTPS":
 		apiType = "REST"
-	case "GraphQL":
-		apiType = "GraphQL"
+	case "GRAPHQL":
+		apiType = "GRAPHQL"
 	}
 	return apiType
 }
@@ -238,7 +238,7 @@ func mapAuthConfigs(authHeader string, secSchemes []string, certAvailable bool, 
 // GenerateCRs takes the .apk-conf, api definition, vHost and the organization for a particular API and then generate and returns
 // the relavant CRD set as a zip
 func GenerateCRs(apkConf string, apiDefinition string, k8ResourceGenEndpoint string) (*K8sArtifacts, error) {
-	k8sArtifact := K8sArtifacts{HTTPRoutes: make(map[string]*gwapiv1b1.HTTPRoute), Backends: make(map[string]*dpv1alpha1.Backend), Scopes: make(map[string]*dpv1alpha1.Scope), Authentication: make(map[string]*dpv1alpha2.Authentication), APIPolicies: make(map[string]*dpv1alpha2.APIPolicy), InterceptorServices: make(map[string]*dpv1alpha1.InterceptorService), ConfigMaps: make(map[string]*corev1.ConfigMap), Secrets: make(map[string]*corev1.Secret), RateLimitPolicies: make(map[string]*dpv1alpha1.RateLimitPolicy)}
+	k8sArtifact := K8sArtifacts{HTTPRoutes: make(map[string]*gwapiv1b1.HTTPRoute), GQLRoutes: make(map[string]*dpv1alpha2.GQLRoute), Backends: make(map[string]*dpv1alpha1.Backend), Scopes: make(map[string]*dpv1alpha1.Scope), Authentication: make(map[string]*dpv1alpha2.Authentication), APIPolicies: make(map[string]*dpv1alpha2.APIPolicy), InterceptorServices: make(map[string]*dpv1alpha1.InterceptorService), ConfigMaps: make(map[string]*corev1.ConfigMap), Secrets: make(map[string]*corev1.Secret), RateLimitPolicies: make(map[string]*dpv1alpha1.RateLimitPolicy)}
 	if apkConf == "" {
 		logger.LoggerTransformer.Error("Empty apk-conf parameter provided. Unable to generate CRDs.")
 		return nil, errors.New("Error: APK-Conf can't be empty")
@@ -429,6 +429,14 @@ func GenerateCRs(apkConf string, apiDefinition string, k8ResourceGenEndpoint str
 				continue
 			}
 			k8sArtifact.Secrets[secret.Name] = &secret
+		case "GQLRoute":
+			var gqlRoute dpv1alpha2.GQLRoute
+			err = k8Yaml.Unmarshal(yamlData, &gqlRoute)
+			if err != nil {
+				logger.LoggerSync.Errorf("Error unmarshaling GQLRoute YAML: %v", err)
+				continue
+			}
+			k8sArtifact.GQLRoutes[gqlRoute.Name] = &gqlRoute
 		default:
 			logger.LoggerSync.Errorf("[!]Unknown Kind parsed from the YAML File: %v", kind)
 		}
@@ -522,6 +530,9 @@ func addOrganization(k8sArtifact *K8sArtifacts, organization string) {
 	}
 	for _, httproutes := range k8sArtifact.HTTPRoutes {
 		httproutes.ObjectMeta.Labels[k8sOrganizationField] = organizationHash
+	}
+	for _, gqlroutes := range k8sArtifact.GQLRoutes {
+		gqlroutes.ObjectMeta.Labels[k8sOrganizationField] = organizationHash
 	}
 	for _, authentication := range k8sArtifact.Authentication {
 		authentication.ObjectMeta.Labels[k8sOrganizationField] = organizationHash
