@@ -53,6 +53,7 @@ func DeployAPICR(api *dpv1alpha2.API, k8sClient client.Client) {
 		}
 	} else {
 		crAPI.Spec = api.Spec
+		crAPI.ObjectMeta.Labels = api.ObjectMeta.Labels
 		if err := k8sClient.Update(context.Background(), crAPI); err != nil {
 			loggers.LoggerXds.Error("Unable to update API CR: " + err.Error())
 		} else {

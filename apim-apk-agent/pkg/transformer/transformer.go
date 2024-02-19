@@ -455,7 +455,7 @@ func replaceVhost(k8sArtifact *K8sArtifacts, vhost string, deploymentType string
 				for _, routes := range routeName.HTTPRouteRefs {
 					httprouteRef, ok := k8sArtifact.HTTPRoutes[routes]
 					if ok {
-						httprouteRef.Spec.Hostnames = append(httprouteRef.Spec.Hostnames, gwapiv1b1.Hostname(vhost))
+						httprouteRef.Spec.Hostnames = []gwapiv1b1.Hostname{gwapiv1b1.Hostname(vhost)}
 					}
 				}
 			}
@@ -465,7 +465,7 @@ func replaceVhost(k8sArtifact *K8sArtifacts, vhost string, deploymentType string
 				for _, routes := range routeName.HTTPRouteRefs {
 					httprouteRef, ok := k8sArtifact.HTTPRoutes[routes]
 					if ok {
-						httprouteRef.Spec.Hostnames = append(httprouteRef.Spec.Hostnames, gwapiv1b1.Hostname("sandbox."+vhost))
+						httprouteRef.Spec.Hostnames = []gwapiv1b1.Hostname{gwapiv1b1.Hostname("sandbox." + vhost)}
 					}
 				}
 			}
@@ -476,7 +476,7 @@ func replaceVhost(k8sArtifact *K8sArtifacts, vhost string, deploymentType string
 				for _, routes := range routeName.HTTPRouteRefs {
 					httprouteRef, ok := k8sArtifact.HTTPRoutes[routes]
 					if ok {
-						httprouteRef.Spec.Hostnames = append(httprouteRef.Spec.Hostnames, gwapiv1b1.Hostname(vhost))
+						httprouteRef.Spec.Hostnames = []gwapiv1b1.Hostname{gwapiv1b1.Hostname(vhost)}
 					}
 				}
 			}
@@ -495,7 +495,7 @@ func replaceVhost(k8sArtifact *K8sArtifacts, vhost string, deploymentType string
 				for _, routes := range routeName.HTTPRouteRefs {
 					httprouteRef, ok := k8sArtifact.HTTPRoutes[routes]
 					if ok {
-						httprouteRef.Spec.Hostnames = append(httprouteRef.Spec.Hostnames, gwapiv1b1.Hostname(vhost))
+						httprouteRef.Spec.Hostnames = []gwapiv1b1.Hostname{gwapiv1b1.Hostname(vhost)}
 					}
 				}
 			}
