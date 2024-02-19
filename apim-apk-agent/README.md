@@ -1,7 +1,7 @@
 # Agent to integrate APK with APIM
 ## For WSO2 API Manager 4.3.0
 
-## Getting Started
+## Getting Started APIM-APK Agent
 
 - ### Setting up the development environment
     1. Install [Go 1.19](https://golang.org/dl)
