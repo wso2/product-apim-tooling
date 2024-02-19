@@ -78,7 +78,6 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUID *string, k8sClient client.Cli
 				logger.LoggerUtils.Debugf("API file found: " + file.Name)
 				// Todo: Read the apis.zip and extract the api.zip,deployments.json
 			}
-
 			if err != nil {
 				logger.LoggerUtils.Errorf("Error while reading zip: %v", err)
 				return nil, err
@@ -108,13 +107,18 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUID *string, k8sClient client.Cli
 							logger.LoggerUtils.Errorf("Error while decoding the API Project Artifact: %v", decodingError)
 							return nil, err
 						}
-						apkConf, apiUUID, revisionID, apkErr := transformer.GenerateAPKConf(artifact.APIJson, artifact.ClientCerts)
+						apkConf, apiUUID, revisionID, apkErr := transformer.GenerateAPKConf(artifact.APIJson, artifact.CertArtifact)
 						if apkErr != nil {
 							logger.LoggerUtils.Errorf("Error while generating APK-Conf: %v", apkErr)
 							return nil, err
 						}
+						logger.LoggerUtils.Debug("APK Conf:", apkConf)
+						certContainer := transformer.CertContainer{
+							ClientCertObj:   artifact.CertMeta,
+							EndpointCertObj: artifact.EndpointCertMeta,
+						}
 						k8ResourceEndpoint := conf.DataPlane.K8ResourceEndpoint
-						crResponse, err := transformer.GenerateCRs(apkConf, artifact.Schema, k8ResourceEndpoint)
+						crResponse, err := transformer.GenerateCRs(apkConf, artifact.Schema, certContainer, k8ResourceEndpoint)
 						if err != nil {
 							logger.LoggerUtils.Errorf("Error occured in receiving the updated CRDs: %v", err)
 							return nil, err

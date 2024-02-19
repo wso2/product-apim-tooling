@@ -17,6 +17,18 @@
 
 package transformer
 
+// EndpointCertificate struct stores the the alias and the name for a particular endpoint security configuration
+type EndpointCertificate struct {
+	Name string `yaml:"secretName"`
+	Key  string `yaml:"secretKey"`
+}
+
+// EndpointConfiguration stores the data related to endpoints and their related
+type EndpointConfiguration struct {
+	Endpoint       string              `yaml:"endpoint,omitempty"`
+	EndCertificate EndpointCertificate `yaml:"certificate,omitempty"`
+}
+
 // AdditionalProperty stores the custom properties set by the user for a particular API
 type AdditionalProperty struct {
 	Name  string `yaml:"name"`
@@ -43,14 +55,14 @@ type AuthConfiguration struct {
 }
 
 // Endpoint represents an API endpoint.
-type Endpoint struct {
-	Endpoint string `yaml:"endpoint,omitempty"`
-}
+// type Endpoint struct {
+// 	Endpoint string `yaml:"endpoint,omitempty"`
+// }
 
-// EndpointConfiguration holds production and sandbox endpoints.
-type EndpointConfiguration struct {
-	Production *Endpoint `yaml:"production,omitempty"`
-	Sandbox    *Endpoint `yaml:"sandbox,omitempty"`
+// EndpointConfigurations holds production and sandbox endpoints.
+type EndpointConfigurations struct {
+	Production *EndpointConfiguration `yaml:"production,omitempty"`
+	Sandbox    *EndpointConfiguration `yaml:"sandbox,omitempty"`
 }
 
 // OperationPolicies organizes request and response policies for an API operation.
@@ -81,17 +93,17 @@ type VHost struct {
 
 // API represents an main API type definition
 type API struct {
-	Name                   string                 `yaml:"name,omitempty"`
-	ID                     string                 `yaml:"id,omitempty"`
-	Version                string                 `yaml:"version,omitempty"`
-	Context                string                 `yaml:"basePath,omitempty"`
-	Type                   string                 `yaml:"type,omitempty"`
-	DefaultVersion         bool                   `yaml:"defaultVersion"`
-	DefinitionPath         string                 `yaml:"definitionPath,omitempty"`
-	EndpointConfigurations *EndpointConfiguration `yaml:"endpointConfigurations,omitempty"`
-	Operations             *[]Operation           `yaml:"operations,omitempty"`
-	Authentication         *[]AuthConfiguration   `yaml:"authentication,omitempty"`
-	CorsConfig             *CORSConfiguration     `yaml:"corsConfiguration,omitempty"`
-	AdditionalProperties   *[]AdditionalProperty  `yaml:"additionalProperties,omitempty"`
-	SubscriptionValidation bool                   `yaml:"subscriptionValidation,omitempty"`
+	Name                   string                  `yaml:"name,omitempty"`
+	ID                     string                  `yaml:"id,omitempty"`
+	Version                string                  `yaml:"version,omitempty"`
+	Context                string                  `yaml:"basePath,omitempty"`
+	Type                   string                  `yaml:"type,omitempty"`
+	DefaultVersion         bool                    `yaml:"defaultVersion"`
+	DefinitionPath         string                  `yaml:"definitionPath,omitempty"`
+	EndpointConfigurations *EndpointConfigurations `yaml:"endpointConfigurations,omitempty"`
+	Operations             *[]Operation            `yaml:"operations,omitempty"`
+	Authentication         *[]AuthConfiguration    `yaml:"authentication,omitempty"`
+	CorsConfig             *CORSConfiguration      `yaml:"corsConfiguration,omitempty"`
+	AdditionalProperties   *[]AdditionalProperty   `yaml:"additionalProperties,omitempty"`
+	SubscriptionValidation bool                    `yaml:"subscriptionValidation,omitempty"`
 }
