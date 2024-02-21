@@ -21,7 +21,7 @@ package loggers
 
 import (
 	"github.com/sirupsen/logrus"
-	"github.com/wso2/apk/adapter/pkg/logging"
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/logging"
 )
 
 /* loggers should be initiated only for the main packages
@@ -32,40 +32,26 @@ When you add a new logger instance add the related package name as a constant
 
 // package name constants
 const (
-	pkgAPI                  = "github.com/wso2/apk/adapter/internal/api"
-	pkgAuth                 = "github.com/wso2/apk/adapter/internal/auth"
-	pkgMgw                  = "github.com/wso2/apk/adapter/internal/adapter"
-	pkgOasparser            = "github.com/wso2/apk/adapter/internal/oasparser"
-	pkgInterceptor          = "github.com/wso2/apk/adapter/internal/interceptor"
-	pkgXds                  = "github.com/wso2/apk/adapter/internal/discovery/xds"
-	pkgSync                 = "github.com/wso2/apk/adapter/internal/synchronizer"
-	pkgInternalMsg          = "github.com/wso2/apk/adapter/internal/messaging"
-	pkgSvcDiscovery         = "github.com/wso2/apk/adapter/internal/svcDiscovery"
-	pkgSubscription         = "github.com/wso2/apk/adapter/internal/subscription"
-	pkgRouterXdsCallbacks   = "github.com/wso2/apk/adapter/internal/discovery/xds/routercallbacks"
-	pkgEnforcerXdsCallbacks = "github.com/wso2/apk/adapter/internal/discovery/xds/enforcercallbacks"
-	pkgGA                   = "github.com/wso2/apk/adapter/internal/ga"
-	pkgNotifier             = "github.com/wso2/apk/adapter/internal/notifier"
-	pkgSourceWatcher        = "github.com/wso2/apk/adapter/internal/sourcewatcher"
+	pkgAgent        = "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/agent"
+	pkgK8sClient    = "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/k8sclient"
+	pkgMapper       = "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/mapper"
+	pkgMessaging    = "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/messaging"
+	pkgNotifier     = "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/notifier"
+	pkgSynchronizer = "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/synchronizer"
+	pkgUtils        = "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/utils"
+	pkgEventhub     = "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/eventhub"
 )
 
 // logger package references
 var (
-	LoggerAPI                  logging.Log
-	LoggerAuth                 logging.Log
-	LoggerMgw                  logging.Log
-	LoggerOasparser            logging.Log
-	LoggerInterceptor          logging.Log
-	LoggerXds                  logging.Log
-	LoggerSync                 logging.Log
-	LoggerInternalMsg          logging.Log
-	LoggerSvcDiscovery         logging.Log
-	LoggerSubscription         logging.Log
-	LoggerRouterXdsCallbacks   logging.Log
-	LoggerEnforcerXdsCallbacks logging.Log
-	LoggerGA                   logging.Log
-	LoggerNotifier             logging.Log
-	LoggerSourceWatcher        logging.Log
+	LoggerNotifier     logging.Log
+	LoggerK8sClient    logging.Log
+	LoggerMapper       logging.Log
+	LoggerMessaging    logging.Log
+	LoggerSynchronizer logging.Log
+	LoggerUtils        logging.Log
+	LoggerAgent        logging.Log
+	LoggerEventhub     logging.Log
 )
 
 func init() {
@@ -75,20 +61,13 @@ func init() {
 // UpdateLoggers initializes the logger package references
 func UpdateLoggers() {
 
-	LoggerAPI = logging.InitPackageLogger(pkgAPI)
-	LoggerAuth = logging.InitPackageLogger(pkgAuth)
-	LoggerMgw = logging.InitPackageLogger(pkgMgw)
-	LoggerOasparser = logging.InitPackageLogger(pkgOasparser)
-	LoggerInterceptor = logging.InitPackageLogger(pkgInterceptor)
-	LoggerXds = logging.InitPackageLogger(pkgXds)
-	LoggerSync = logging.InitPackageLogger(pkgSync)
-	LoggerInternalMsg = logging.InitPackageLogger(pkgInternalMsg)
-	LoggerSvcDiscovery = logging.InitPackageLogger(pkgSvcDiscovery)
-	LoggerSubscription = logging.InitPackageLogger(pkgSubscription)
-	LoggerRouterXdsCallbacks = logging.InitPackageLogger(pkgRouterXdsCallbacks)
-	LoggerEnforcerXdsCallbacks = logging.InitPackageLogger(pkgEnforcerXdsCallbacks)
-	LoggerGA = logging.InitPackageLogger(pkgGA)
 	LoggerNotifier = logging.InitPackageLogger(pkgNotifier)
-	LoggerSourceWatcher = logging.InitPackageLogger(pkgSourceWatcher)
+	LoggerK8sClient = logging.InitPackageLogger(pkgK8sClient)
+	LoggerMapper = logging.InitPackageLogger(pkgMapper)
+	LoggerMessaging = logging.InitPackageLogger(pkgMessaging)
+	LoggerSynchronizer = logging.InitPackageLogger(pkgSynchronizer)
+	LoggerUtils = logging.InitPackageLogger(pkgUtils)
+	LoggerAgent = logging.InitPackageLogger(pkgAgent)
+	LoggerEventhub = logging.InitPackageLogger(pkgEventhub)
 	logrus.Info("Updated loggers")
 }

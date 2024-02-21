@@ -17,7 +17,7 @@
 package managementserver
 
 import (
-	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/loggers"
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/utils"
 )
 
@@ -53,7 +53,7 @@ func AddApplicationMapping(applicationMapping ApplicationMapping) {
 // AddApplicationKeyMapping adds an application key mapping to the applicationKeyMappingMap
 func AddApplicationKeyMapping(applicationKeyMapping ApplicationKeyMapping) {
 	uuid := utils.GetUniqueIDOfApplicationKeyMapping(applicationKeyMapping.ApplicationUUID, applicationKeyMapping.KeyType, applicationKeyMapping.SecurityScheme, applicationKeyMapping.EnvID, applicationKeyMapping.Organization)
-	loggers.LoggerAPI.Infof("Adding application key mapping with uuid: %v", uuid)
+	loggers.LoggerMgtServer.Infof("Adding application key mapping with uuid: %v", uuid)
 	applicationKeyMappingMap[uuid] = applicationKeyMapping
 }
 
@@ -132,7 +132,7 @@ func DeleteApplicationMapping(uuid string) {
 
 // DeleteApplicationKeyMapping deletes an application key mapping from the applicationKeyMappingMap
 func DeleteApplicationKeyMapping(uuid string) {
-	loggers.LoggerAPI.Infof("Deleting application key mapping with uuid: %v", uuid)
+	loggers.LoggerMgtServer.Infof("Deleting application key mapping with uuid: %v", uuid)
 	delete(applicationKeyMappingMap, uuid)
 }
 

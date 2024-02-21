@@ -17,9 +17,7 @@
 
 package logging
 
-import (
-	logging "github.com/wso2/apk/adapter/pkg/logging"
-)
+import pkgLogging "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/logging"
 
 // Log (Error) severity level constants
 const (
@@ -136,7 +134,7 @@ const (
 )
 
 // Mapper used to keep error details for error logs
-var Mapper = map[int]logging.ErrorDetails{
+var Mapper = map[int]pkgLogging.ErrorDetails{
 	Error1100: {
 		ErrorCode: Error1100,
 		Message:   "Failed to listen on port.",

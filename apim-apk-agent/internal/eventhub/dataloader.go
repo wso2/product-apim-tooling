@@ -26,14 +26,13 @@ import (
 	"strconv"
 	"time"
 
-	loggers "github.com/sirupsen/logrus"
 	dpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha2"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	internalk8sClient "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/k8sClient"
+	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/loggers"
 	internalutils "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/utils"
 	pkgAuth "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/auth"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
-	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/tlsutils"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/utils"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -105,14 +104,14 @@ func LoadInitialData(configFile *config.Config, client client.Client) {
 
 		for {
 			data := <-responseChannel
-			logger.LoggerSync.Info("Receiving subscription data for an environment")
+			logger.LoggerEventhub.Info("Receiving subscription data for an environment")
 			if data.Payload != nil {
-				logger.LoggerSync.Info("Payload data information received" + string(data.Payload))
+				logger.LoggerEventhub.Info("Payload data information received" + string(data.Payload))
 				retrieveDataFromResponseChannel(data)
 				break
 			} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
 				//Error handle
-				logger.LoggerSync.Info("Error data information received")
+				logger.LoggerEventhub.Info("Error data information received")
 				//health.SetControlPlaneRestAPIStatus(false)
 			} else {
 				// Keep the iteration going on until a response is received.
@@ -123,9 +122,9 @@ func LoadInitialData(configFile *config.Config, client client.Client) {
 						// Assign default retry interval
 						conf.ControlPlane.RetryInterval = 5
 					}
-					logger.LoggerSync.Debugf("Time Duration for retrying: %v", conf.ControlPlane.RetryInterval*time.Second)
+					logger.LoggerEventhub.Debugf("Time Duration for retrying: %v", conf.ControlPlane.RetryInterval*time.Second)
 					time.Sleep(conf.ControlPlane.RetryInterval * time.Second)
-					logger.LoggerSync.Infof("Retrying to fetch APIs from control plane. Time Duration for the next retry: %v", conf.ControlPlane.RetryInterval*time.Second)
+					logger.LoggerEventhub.Infof("Retrying to fetch APIs from control plane. Time Duration for the next retry: %v", conf.ControlPlane.RetryInterval*time.Second)
 					go InvokeService(endpoint, responseType, nil, responseChannel, 0)
 				}(data, localURL.endpoint, localURL.responseType)
 			}
@@ -150,7 +149,7 @@ func InvokeService(endpoint string, responseType interface{}, queryParamMap map[
 	}
 	if err != nil {
 		c <- response{err, nil, 0, endpoint, gatewayLabel, responseType}
-		logger.LoggerSubscription.Errorf("Error occurred while creating an HTTP request for serviceURL: "+serviceURL, err)
+		logger.LoggerEventhub.Errorf("Error occurred while creating an HTTP request for serviceURL: "+serviceURL, err)
 		return
 	}
 	q := req.URL.Query()
@@ -173,7 +172,7 @@ func InvokeService(endpoint string, responseType interface{}, queryParamMap map[
 	}
 
 	// Make the request
-	//logger.LoggerSubscription.Debug("Sending the request to the control plane over the REST API: " + serviceURL)
+	//logger.LoggerEventhub.Debug("Sending the request to the control plane over the REST API: " + serviceURL)
 	resp, err := tlsutils.InvokeControlPlane(req, skipSSL)
 
 	if err != nil {
@@ -182,7 +181,7 @@ func InvokeService(endpoint string, responseType interface{}, queryParamMap map[
 		} else {
 			c <- response{err, nil, 0, endpoint, gatewayLabel, responseType}
 		}
-		loggers.Info("Error occurred while calling the REST API: "+serviceURL, err)
+		logger.LoggerEventhub.Errorf("Error occurred while calling the REST API: "+serviceURL, err)
 		return
 	}
 
@@ -190,13 +189,13 @@ func InvokeService(endpoint string, responseType interface{}, queryParamMap map[
 	if resp.StatusCode == http.StatusOK {
 		if err != nil {
 			c <- response{err, nil, resp.StatusCode, endpoint, gatewayLabel, responseType}
-			loggers.Info("Error occurred while reading the response received for: "+serviceURL, err)
+			logger.LoggerEventhub.Info("Error occurred while reading the response received for: "+serviceURL, err)
 			return
 		}
 		c <- response{nil, responseBytes, resp.StatusCode, endpoint, gatewayLabel, responseType}
 	} else {
 		c <- response{errors.New(string(responseBytes)), nil, resp.StatusCode, endpoint, gatewayLabel, responseType}
-		loggers.Info("Failed to fetch data! "+serviceURL+" responded with "+strconv.Itoa(resp.StatusCode),
+		logger.LoggerEventhub.Info("Failed to fetch data! "+serviceURL+" responded with "+strconv.Itoa(resp.StatusCode),
 			err)
 	}
 }
@@ -207,23 +206,23 @@ func retrieveDataFromResponseChannel(response response) {
 	err := json.Unmarshal(response.Payload, &newResponse)
 
 	if err != nil {
-		loggers.Info("Error occurred while unmarshalling the response received for: "+response.Endpoint, err)
+		logger.LoggerEventhub.Info("Error occurred while unmarshalling the response received for: "+response.Endpoint, err)
 	} else {
 		switch t := newResponse.(type) {
 		case *types.SubscriptionList:
-			loggers.Info("Received Subscription information.")
+			logger.LoggerEventhub.Info("Received Subscription information.")
 			subList := newResponse.(*types.SubscriptionList)
 			MarshalMultipleSubscriptions(subList)
 		case *types.ApplicationList:
-			loggers.Info("Received Application information.")
+			logger.LoggerEventhub.Info("Received Application information.")
 			appList := newResponse.(*types.ApplicationList)
 			MarshalMultipleApplications(appList)
 		case *types.ApplicationKeyMappingList:
-			loggers.Info("Received Application Key Mapping information.")
+			logger.LoggerEventhub.Info("Received Application Key Mapping information.")
 			appKeyMappingList := newResponse.(*types.ApplicationKeyMappingList)
 			MarshalMultipleApplicationKeyMappings(appKeyMappingList)
 		default:
-			logger.LoggerSubscription.Debugf("Unknown type %T", t)
+			logger.LoggerEventhub.Debugf("Unknown type %T", t)
 		}
 	}
 }
@@ -233,11 +232,11 @@ func retrieveDataFromResponseChannel(response response) {
 func FetchAPIsOnStartUp(conf *config.Config, k8sClient client.Client) {
 	k8sAPIS, _, err := internalk8sClient.RetrieveAllAPISFromK8s(k8sClient, "")
 	if err != nil {
-		logger.LoggerSubscription.Errorf("Error occurred while fetching APIs from K8s %v", err)
+		logger.LoggerEventhub.Errorf("Error occurred while fetching APIs from K8s %v", err)
 	}
 	apis, err := internalutils.FetchAPIsOnEvent(conf, nil, k8sClient)
 	if err != nil {
-		logger.LoggerSubscription.Errorf("Error occurred while fetching APIs from control plane %v", err)
+		logger.LoggerEventhub.Errorf("Error occurred while fetching APIs from control plane %v", err)
 	}
 	removeApis := make([]dpv1alpha2.API, 0)
 	for _, k8sAPI := range k8sAPIS {
@@ -252,13 +251,13 @@ func FetchAPIsOnStartUp(conf *config.Config, k8sClient client.Client) {
 			}
 		}
 		if !found {
-			logger.LoggerSync.Infof("API %s is not found in the control plane. Hence removing it from the K8s", k8sAPI.Name)
+			logger.LoggerEventhub.Infof("API %s is not found in the control plane. Hence removing it from the K8s", k8sAPI.Name)
 			removeApis = append(removeApis, k8sAPI)
 		}
 	}
 	for _, removeAPI := range removeApis {
 		if !removeAPI.Spec.SystemAPI {
-			logger.LoggerSync.Infof("Undeploying API %s from K8s", removeAPI.Name)
+			logger.LoggerEventhub.Infof("Undeploying API %s from K8s", removeAPI.Name)
 			internalk8sClient.UndeployK8sAPICR(k8sClient, removeAPI)
 		}
 	}

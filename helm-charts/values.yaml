@@ -16,9 +16,9 @@
 
 replicaCount: 1
 image:
-  repository: apim-apk-agent
-  tag: 1.0.0-SNAPSHOT
-  pullPolicy: IfNotPresent
+  repository: wso2/apim-apk-agent
+  tag: latest
+  pullPolicy: Always
 service:
   name: apim-apk-agent-service
 resources: {}

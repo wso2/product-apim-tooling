@@ -33,14 +33,13 @@ import (
 	"time"
 
 	dpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha2"
-	"github.com/wso2/apk/common-go-libs/loggers"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/eventhub"
 	k8sclient "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/k8sClient"
+	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/loggers"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/logging"
 	pkgAuth "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/auth"
 	eventhubTypes "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
-	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
 	sync "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/synchronizer"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/tlsutils"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -57,13 +56,13 @@ var retryAttempt int
 // API Manager returns a .zip file as a response and this function
 // returns a byte slice of that ZIP file.
 func FetchKeyManagersOnStartUp(c client.Client) {
-	logger.LoggerSync.Info("Fetching KeyManagers from Control Plane.")
+	logger.LoggerSynchronizer.Info("Fetching KeyManagers from Control Plane.")
 
 	// Read configurations and derive the eventHub details
 	conf, errReadConfig := config.ReadConfigs()
 	if errReadConfig != nil {
 		// This has to be error. For debugging purpose info
-		logger.LoggerSync.Errorf("Error reading configs: %v", errReadConfig)
+		logger.LoggerSynchronizer.Errorf("Error reading configs: %v", errReadConfig)
 	}
 	// Populate data from the config
 	ehConfigs := conf.ControlPlane
@@ -74,7 +73,7 @@ func FetchKeyManagersOnStartUp(c client.Client) {
 	} else {
 		ehURL += "/" + keyManagersEndpoint
 	}
-	logger.LoggerSync.Debugf("Fetching KeyManagers from the URL %v: ", ehURL)
+	logger.LoggerSynchronizer.Debugf("Fetching KeyManagers from the URL %v: ", ehURL)
 
 	ehUname := ehConfigs.Username
 	ehPass := ehConfigs.Password
@@ -86,7 +85,7 @@ func FetchKeyManagersOnStartUp(c client.Client) {
 	// Create a HTTP request
 	req, err := http.NewRequest("GET", ehURL, nil)
 	if err != nil {
-		logger.LoggerSync.Errorf("Error while creating http request for Key Manager Endpoint : %v", err)
+		logger.LoggerSynchronizer.Errorf("Error while creating http request for Key Manager Endpoint : %v", err)
 	}
 
 	var queryParamMap map[string]string
@@ -105,7 +104,7 @@ func FetchKeyManagersOnStartUp(c client.Client) {
 	req.Header.Set("x-wso2-tenant", "ALL")
 
 	// Make the request
-	logger.LoggerSync.Debug("Sending the control plane request")
+	logger.LoggerSynchronizer.Debug("Sending the control plane request")
 	resp, err := tlsutils.InvokeControlPlane(req, skipSSL)
 	var errorMsg string
 	if err != nil {
@@ -124,10 +123,10 @@ func FetchKeyManagersOnStartUp(c client.Client) {
 		var keyManagers []eventhubTypes.KeyManager
 		err := json.Unmarshal(responseBytes, &keyManagers)
 		if err != nil {
-			logger.LoggerMsg.Errorf("Error occurred while unmarshelling Key Managers event data %v", err)
+			logger.LoggerSynchronizer.Errorf("Error occurred while unmarshelling Key Managers event data %v", err)
 			return
 		}
-		logger.LoggerSync.Debugf("Key Managers received: %v", keyManagers)
+		logger.LoggerSynchronizer.Debugf("Key Managers received: %v", keyManagers)
 		resolvedKeyManagers := eventhub.MarshalKeyManagers(&keyManagers)
 		applyAllKeymanagerConfifuration(c, resolvedKeyManagers)
 	} else {
@@ -138,13 +137,13 @@ func FetchKeyManagersOnStartUp(c client.Client) {
 }
 
 func retryFetchData(conf *config.Config, errorMessage string, err error, c client.Client) {
-	logger.LoggerSync.Debugf("Time Duration for retrying: %v",
+	logger.LoggerSynchronizer.Debugf("Time Duration for retrying: %v",
 		conf.ControlPlane.RetryInterval*time.Second)
 	time.Sleep(conf.ControlPlane.RetryInterval * time.Second)
 	FetchKeyManagersOnStartUp(c)
 	retryAttempt++
 	if retryAttempt >= retryCount {
-		logger.LoggerSync.Errorf(errorMessage, err)
+		logger.LoggerSynchronizer.Errorf(errorMessage, err)
 		return
 	}
 }
@@ -180,7 +179,7 @@ func applyAllKeymanagerConfifuration(c client.Client, resolvedKeyManagers []even
 		if err != nil {
 			return err
 		}
-		logger.LoggerSync.Debugf("Token Issuer created: %v", tokenIssuer)
+		logger.LoggerSynchronizer.Debugf("Token Issuer created: %v", tokenIssuer)
 
 	}
 	for _, tokenIssuer := range sameTokenissuers {
@@ -188,15 +187,15 @@ func applyAllKeymanagerConfifuration(c client.Client, resolvedKeyManagers []even
 		if err != nil {
 			return err
 		}
-		logger.LoggerSync.Debugf("Token Issuer updated: %v", tokenIssuer)
+		logger.LoggerSynchronizer.Debugf("Token Issuer updated: %v", tokenIssuer)
 	}
-	logger.LoggerSync.Debugf("Deleted Token Issuers from K8s: %v", clonedTokenIssuerListFromK8s)
+	logger.LoggerSynchronizer.Debugf("Deleted Token Issuers from K8s: %v", clonedTokenIssuerListFromK8s)
 	for _, tokenissuer := range clonedTokenIssuerListFromK8s {
 		err := k8sclient.DeleteTokenIssuerCR(c, tokenissuer)
 		if err != nil {
 			return err
 		}
-		logger.LoggerSync.Debugf("Token Issuer deleted: %v", tokenissuer)
+		logger.LoggerSynchronizer.Debugf("Token Issuer deleted: %v", tokenissuer)
 	}
 	return nil
 }
@@ -211,7 +210,7 @@ func retrieveAllTokenIssuers(c client.Client, nextToken string) ([]dpv1alpha2.To
 		err = c.List(context.Background(), &tokenIssuerList, &client.ListOptions{Namespace: conf.DataPlane.Namespace, Continue: nextToken})
 	}
 	if err != nil {
-		loggers.LoggerAPKOperator.ErrorC(logging.PrintError(logging.Error1102, logging.CRITICAL, "Failed to get application from k8s %v", err.Error()))
+		logger.LoggerSynchronizer.ErrorC(logging.PrintError(logging.Error1102, logging.CRITICAL, "Failed to get application from k8s %v", err.Error()))
 		return nil, "", err
 	}
 	resolvedTokenIssuerList = append(resolvedTokenIssuerList, tokenIssuerList.Items...)

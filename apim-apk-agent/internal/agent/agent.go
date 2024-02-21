@@ -35,7 +35,6 @@ import (
 	cpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/cp/v1alpha2"
 	dpv1alpha1 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha1"
 	dpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha2"
-	"github.com/wso2/apk/common-go-libs/loggers"
 	"github.com/wso2/apk/common-go-libs/pkg/discovery/api/wso2/discovery/service/apkmgt"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/eventhub"
@@ -77,12 +76,12 @@ func init() {
 	flag.BoolVar(&onlyLogging, "onlyLogging", false, "Only demo AccessLogging Service")
 	flag.UintVar(&port, "port", 18000, "Management server port")
 	flag.UintVar(&alsPort, "als", 18090, "Accesslog server port")
-	flag.StringVar(&mode, "ads", ads, "Management server type (ads, xds, rest)")
+	flag.StringVar(&mode, "ads", ads, "Management server type (ads, grpc, rest)")
 	flag.UintVar(&restPort, "rest_port", 18001, "Rest server port")
 
 }
 
-// Run starts the XDS server and Rest API server.
+// Run starts the GRPC server and Rest API server.
 func Run(conf *config.Config) {
 	sig := make(chan os.Signal, 2)
 	signal.Notify(sig, os.Interrupt)
@@ -92,7 +91,7 @@ func Run(conf *config.Config) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	logger.LoggerInternalMsg.Debugf("Run method started with context : %v", ctx)
+	logger.LoggerAgent.Debugf("Run method started with context : %v", ctx)
 
 	// log config watcher
 	watcherLogConf, _ := fsnotify.NewWatcher()
@@ -102,10 +101,10 @@ func Run(conf *config.Config) {
 	}
 
 	if errC != nil {
-		logger.LoggerInternalMsg.ErrorC(logging.PrintError(logging.Error1102, logging.CRITICAL, "Error reading the log configs, error: %v", errC.Error()))
+		logger.LoggerAgent.ErrorC(logging.PrintError(logging.Error1102, logging.CRITICAL, "Error reading the log configs, error: %v", errC.Error()))
 	}
 
-	logger.LoggerInternalMsg.Info("Starting apim-apk-agent ....")
+	logger.LoggerAgent.Info("Starting apim-apk-agent ....")
 	eventHubEnabled := conf.ControlPlane.Enabled
 
 	var metricsAddr string
@@ -136,7 +135,7 @@ func Run(conf *config.Config) {
 		// LeaderElectionReleaseOnCancel: true,
 	})
 	if err != nil {
-		loggers.LoggerAPKOperator.Error("unable to start kubernetes controller manager", err)
+		logger.LoggerAgent.Error("unable to start kubernetes controller manager", err)
 	}
 
 	// Start the manager in a goroutine
@@ -144,9 +143,9 @@ func Run(conf *config.Config) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		loggers.LoggerAPKOperator.Info("starting manager")
+		logger.LoggerAgent.Info("starting manager")
 		if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-			loggers.LoggerAPKOperator.Warn("problem running manager: %v", err)
+			logger.LoggerAgent.Warn("problem running manager: %v", err)
 		}
 	}()
 
@@ -187,7 +186,7 @@ func Run(conf *config.Config) {
 			}),
 		))
 	} else {
-		loggers.LoggerAPKOperator.Warn("failed to initiate the ssl context: ", err)
+		logger.LoggerAgent.Warn("failed to initiate the ssl context: ", err)
 		panic(err)
 	}
 
@@ -201,19 +200,19 @@ func Run(conf *config.Config) {
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
-		loggers.LoggerAPKOperator.ErrorC(logging.PrintError(logging.Error1100, logging.BLOCKER, "Failed to listen on port: %v, error: %v", port, err.Error()))
+		logger.LoggerAgent.ErrorC(logging.PrintError(logging.Error1100, logging.BLOCKER, "Failed to listen on port: %v, error: %v", port, err.Error()))
 	}
 	apkmgt.RegisterEventStreamServiceServer(grpcServer, &managementserver.EventServer{})
 	// register health service
 	healthservice.RegisterHealthServer(grpcServer, &health.Server{})
-	loggers.LoggerAPKOperator.Info("port: ", port, " APK agent Listening for gRPC connections")
+	logger.LoggerAgent.Info("port: ", port, " APK agent Listening for gRPC connections")
 	go managementserver.StartInternalServer(restPort)
 	go func() {
-		loggers.LoggerAPKOperator.Info("Starting GRPC server.")
+		logger.LoggerAgent.Info("Starting GRPC server.")
 		health.CommonControllerGrpcService.SetStatus(true)
 		if err = grpcServer.Serve(lis); err != nil {
 			health.CommonControllerGrpcService.SetStatus(false)
-			loggers.LoggerAPKOperator.ErrorC(logging.PrintError(logging.Error1101, logging.BLOCKER, "Failed to start XDS GRPS server, error: %v", err.Error()))
+			logger.LoggerAgent.ErrorC(logging.PrintError(logging.Error1101, logging.BLOCKER, "Failed to start GRPC server, error: %v", err.Error()))
 		}
 	}()
 OUTER:
@@ -222,17 +221,17 @@ OUTER:
 		case l := <-watcherLogConf.Events:
 			switch l.Op.String() {
 			case "WRITE":
-				logger.LoggerInternalMsg.Info("Loading updated log config file...")
+				logger.LoggerAgent.Info("Loading updated log config file...")
 				config.ClearLogConfigInstance()
 				logger.UpdateLoggers()
 			}
 		case s := <-sig:
 			switch s {
 			case os.Interrupt:
-				logger.LoggerInternalMsg.Info("Shutting down...")
+				logger.LoggerAgent.Info("Shutting down...")
 				break OUTER
 			}
 		}
 	}
-	logger.LoggerInternalMsg.Info("Bye!")
+	logger.LoggerAgent.Info("Bye!")
 }

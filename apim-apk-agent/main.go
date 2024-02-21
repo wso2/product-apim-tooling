@@ -27,7 +27,7 @@ import (
 func main() {
 	conf, errReadConfig := config.ReadConfigs()
 	if errReadConfig != nil {
-		logger.LoggerInternalMsg.ErrorC(logging.PrintError(logging.Error1102, logging.CRITICAL, "Error reading the log configs, error: %v", errReadConfig))
+		logger.LoggerAgent.ErrorC(logging.PrintError(logging.Error1102, logging.CRITICAL, "Error reading the log configs, error: %v", errReadConfig))
 	}
 	agent.Run(conf)
 
