@@ -111,7 +111,7 @@ type APIArtifact struct {
 	APIJson              string `json:"apiJson"`
 	APIFileName          string `json:"apiFileName"`
 	EnvConfig            string `json:"envConfig"`
-	Swagger              string `json:"swagger"`
+	Schema               string `json:"schema"`
 	DeploymentDescriptor string `json:"deploymentDescriptor"`
 	ClientCerts          string `json:"clientCert"`
 	RevisionID           uint32 `json:"revisionId"`

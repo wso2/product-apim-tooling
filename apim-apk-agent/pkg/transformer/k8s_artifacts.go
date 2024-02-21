@@ -11,6 +11,7 @@ import (
 type K8sArtifacts struct {
 	API                 dpv1alpha2.API
 	HTTPRoutes          map[string]*gwapiv1b1.HTTPRoute
+	GQLRoutes           map[string]*dpv1alpha2.GQLRoute
 	Backends            map[string]*v1alpha1.Backend
 	Scopes              map[string]*v1alpha1.Scope
 	Authentication      map[string]*dpv1alpha2.Authentication

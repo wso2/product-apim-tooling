@@ -114,7 +114,7 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUID *string, k8sClient client.Cli
 							return nil, err
 						}
 						k8ResourceEndpoint := conf.DataPlane.K8ResourceEndpoint
-						crResponse, err := transformer.GenerateCRs(apkConf, artifact.Swagger, k8ResourceEndpoint)
+						crResponse, err := transformer.GenerateCRs(apkConf, artifact.Schema, k8ResourceEndpoint)
 						if err != nil {
 							logger.LoggerSync.Errorf("Error occured in receiving the updated CRDs: %v", err)
 							return nil, err

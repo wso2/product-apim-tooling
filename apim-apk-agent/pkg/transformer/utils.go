@@ -78,7 +78,15 @@ func readZipFile(file *zip.File) (*APIArtifact, error) {
 			if err != nil {
 				return nil, err
 			}
-			apiArtifact.Swagger = string(openAPIContent)
+			apiArtifact.Schema = string(openAPIContent)
+		}
+
+		if strings.Contains(file.Name, "schema.graphql") {
+			graphqlContent, err := ReadContent(file)
+			if err != nil {
+				return nil, err
+			}
+			apiArtifact.Schema = string(graphqlContent)
 		}
 
 		if strings.Contains(file.Name, "api.json") {
@@ -118,8 +126,11 @@ func readAPIZipFile(file *zip.File, apiArtifact *APIArtifact) error {
 	}
 
 	if strings.Contains(file.Name, "swagger.json") {
-		apiArtifact.Swagger = string(content)
+		apiArtifact.Schema = string(content)
+	}
 
+	if strings.Contains(file.Name, "schema.graphql") {
+		apiArtifact.Schema = string(content)
 	}
 
 	if strings.Contains(file.Name, "api.json") {
@@ -215,7 +226,7 @@ func DecodeAPIArtifacts(payload []byte) ([]APIArtifact, error) {
 			apiArtifacts = append(apiArtifacts, apiArtifact)
 		}
 		apiArtifact.APIJson = ""
-		apiArtifact.Swagger = ""
+		apiArtifact.Schema = ""
 		apiArtifact.RevisionID = 0
 		apiArtifact.APIFileName = ""
 	}

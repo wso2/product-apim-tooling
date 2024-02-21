@@ -134,6 +134,28 @@ func DeployHTTPRouteCR(httpRoute *gwapiv1b1.HTTPRoute, k8sClient client.Client) 
 	}
 }
 
+// DeployGQLRouteCR applies the given GqlRoute struct to the Kubernetes cluster.
+func DeployGQLRouteCR(gqlRoute *dpv1alpha2.GQLRoute, k8sClient client.Client) {
+	crGQLRoute := &dpv1alpha2.GQLRoute{}
+	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: gqlRoute.ObjectMeta.Namespace, Name: gqlRoute.Name}, crGQLRoute); err != nil {
+		if !k8error.IsNotFound(err) {
+			loggers.LoggerXds.Error("Unable to get GQLRoute CR: " + err.Error())
+		}
+		if err := k8sClient.Create(context.Background(), gqlRoute); err != nil {
+			loggers.LoggerXds.Error("Unable to create GQLRoute CR: " + err.Error())
+		} else {
+			loggers.LoggerXds.Info("GQLRoute CR created: " + gqlRoute.Name)
+		}
+	} else {
+		crGQLRoute.Spec = gqlRoute.Spec
+		if err := k8sClient.Update(context.Background(), crGQLRoute); err != nil {
+			loggers.LoggerXds.Error("Unable to update GQLRoute CR: " + err.Error())
+		} else {
+			loggers.LoggerXds.Info("GQLRoute CR updated: " + gqlRoute.Name)
+		}
+	}
+}
+
 // DeploySecretCR applies the given Secret struct to the Kubernetes cluster.
 func DeploySecretCR(secret *corev1.Secret, k8sClient client.Client) {
 	crSecret := &corev1.Secret{}
