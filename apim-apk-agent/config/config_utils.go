@@ -70,7 +70,7 @@ func GetKeyLocations() (string, string, string) {
 	return publicKeyLocation, privateKeyLocation, truststoreLocation
 }
 
-// GetServerCertificate returns the certificate (used for the restAPI server and xds server) created based on configuration values.
+// GetServerCertificate returns the certificate (used for the restAPI server and GRPC server) created based on configuration values.
 // Move to pkg. remove config and read from a file path
 func GetServerCertificate(tlsCertificate string, tlsCertificateKey string) (tls.Certificate, error) {
 	certReadErr = nil

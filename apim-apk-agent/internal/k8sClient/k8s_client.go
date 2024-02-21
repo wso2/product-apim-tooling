@@ -44,20 +44,20 @@ func DeployAPICR(api *dpv1alpha2.API, k8sClient client.Client) {
 	crAPI := &dpv1alpha2.API{}
 	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: api.ObjectMeta.Namespace, Name: api.Name}, crAPI); err != nil {
 		if !k8error.IsNotFound(err) {
-			loggers.LoggerXds.Error("Unable to get API CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to get API CR: " + err.Error())
 		}
 		if err := k8sClient.Create(context.Background(), api); err != nil {
-			loggers.LoggerXds.Error("Unable to create API CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to create API CR: " + err.Error())
 		} else {
-			loggers.LoggerXds.Info("API CR created: " + api.Name)
+			loggers.LoggerK8sClient.Info("API CR created: " + api.Name)
 		}
 	} else {
 		crAPI.Spec = api.Spec
 		crAPI.ObjectMeta.Labels = api.ObjectMeta.Labels
 		if err := k8sClient.Update(context.Background(), crAPI); err != nil {
-			loggers.LoggerXds.Error("Unable to update API CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to update API CR: " + err.Error())
 		} else {
-			loggers.LoggerXds.Info("API CR updated: " + api.Name)
+			loggers.LoggerK8sClient.Info("API CR updated: " + api.Name)
 		}
 	}
 }
@@ -66,10 +66,10 @@ func DeployAPICR(api *dpv1alpha2.API, k8sClient client.Client) {
 func UndeployK8sAPICR(k8sClient client.Client, k8sAPI dpv1alpha2.API) error {
 	err := k8sClient.Delete(context.Background(), &k8sAPI, &client.DeleteOptions{})
 	if err != nil {
-		loggers.LoggerXds.Errorf("Unable to delete API CR: %v", err)
+		loggers.LoggerK8sClient.Errorf("Unable to delete API CR: %v", err)
 		return err
 	}
-	loggers.LoggerXds.Infof("Deleted API CR: %s", k8sAPI.Name)
+	loggers.LoggerK8sClient.Infof("Deleted API CR: %s", k8sAPI.Name)
 	return nil
 }
 
@@ -77,17 +77,17 @@ func UndeployK8sAPICR(k8sClient client.Client, k8sAPI dpv1alpha2.API) error {
 func UndeployAPICR(apiID string, k8sClient client.Client) {
 	conf, errReadConfig := config.ReadConfigs()
 	if errReadConfig != nil {
-		loggers.LoggerXds.Errorf("Error reading configurations: %v", errReadConfig)
+		loggers.LoggerK8sClient.Errorf("Error reading configurations: %v", errReadConfig)
 	}
 	api := &dpv1alpha2.API{}
 	// Retrieve all API CRs from the Kubernetes cluster
 	if err := k8sClient.Get(context.Background(), types.NamespacedName{Name: apiID, Namespace: conf.DataPlane.Namespace}, api); err != nil {
-		loggers.LoggerXds.Errorf("Unable to list API CRs: %v", err)
+		loggers.LoggerK8sClient.Errorf("Unable to list API CRs: %v", err)
 	}
 	if err := UndeployK8sAPICR(k8sClient, *api); err != nil {
-		loggers.LoggerXds.Errorf("Unable to delete API CR: %v", err)
+		loggers.LoggerK8sClient.Errorf("Unable to delete API CR: %v", err)
 	}
-	loggers.LoggerXds.Infof("Deleted API CR: %s", api.Name)
+	loggers.LoggerK8sClient.Infof("Deleted API CR: %s", api.Name)
 }
 
 // DeployConfigMapCR applies the given ConfigMap struct to the Kubernetes cluster.
@@ -95,19 +95,19 @@ func DeployConfigMapCR(configMap *corev1.ConfigMap, k8sClient client.Client) {
 	crConfigMap := &corev1.ConfigMap{}
 	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: configMap.ObjectMeta.Namespace, Name: configMap.Name}, crConfigMap); err != nil {
 		if !k8error.IsNotFound(err) {
-			loggers.LoggerXds.Error("Unable to get ConfigMap CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to get ConfigMap CR: " + err.Error())
 		}
 		if err := k8sClient.Create(context.Background(), configMap); err != nil {
-			loggers.LoggerXds.Error("Unable to create ConfigMap CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to create ConfigMap CR: " + err.Error())
 		} else {
-			loggers.LoggerXds.Info("ConfigMap CR created: " + configMap.Name)
+			loggers.LoggerK8sClient.Info("ConfigMap CR created: " + configMap.Name)
 		}
 	} else {
 		crConfigMap.Data = configMap.Data
 		if err := k8sClient.Update(context.Background(), crConfigMap); err != nil {
-			loggers.LoggerXds.Error("Unable to update ConfigMap CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to update ConfigMap CR: " + err.Error())
 		} else {
-			loggers.LoggerXds.Info("ConfigMap CR updated: " + configMap.Name)
+			loggers.LoggerK8sClient.Info("ConfigMap CR updated: " + configMap.Name)
 		}
 	}
 }
@@ -117,19 +117,19 @@ func DeployHTTPRouteCR(httpRoute *gwapiv1b1.HTTPRoute, k8sClient client.Client) 
 	crHTTPRoute := &gwapiv1b1.HTTPRoute{}
 	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: httpRoute.ObjectMeta.Namespace, Name: httpRoute.Name}, crHTTPRoute); err != nil {
 		if !k8error.IsNotFound(err) {
-			loggers.LoggerXds.Error("Unable to get HTTPRoute CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to get HTTPRoute CR: " + err.Error())
 		}
 		if err := k8sClient.Create(context.Background(), httpRoute); err != nil {
-			loggers.LoggerXds.Error("Unable to create HTTPRoute CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to create HTTPRoute CR: " + err.Error())
 		} else {
-			loggers.LoggerXds.Info("HTTPRoute CR created: " + httpRoute.Name)
+			loggers.LoggerK8sClient.Info("HTTPRoute CR created: " + httpRoute.Name)
 		}
 	} else {
 		crHTTPRoute.Spec = httpRoute.Spec
 		if err := k8sClient.Update(context.Background(), crHTTPRoute); err != nil {
-			loggers.LoggerXds.Error("Unable to update HTTPRoute CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to update HTTPRoute CR: " + err.Error())
 		} else {
-			loggers.LoggerXds.Info("HTTPRoute CR updated: " + httpRoute.Name)
+			loggers.LoggerK8sClient.Info("HTTPRoute CR updated: " + httpRoute.Name)
 		}
 	}
 }
@@ -139,19 +139,19 @@ func DeployGQLRouteCR(gqlRoute *dpv1alpha2.GQLRoute, k8sClient client.Client) {
 	crGQLRoute := &dpv1alpha2.GQLRoute{}
 	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: gqlRoute.ObjectMeta.Namespace, Name: gqlRoute.Name}, crGQLRoute); err != nil {
 		if !k8error.IsNotFound(err) {
-			loggers.LoggerXds.Error("Unable to get GQLRoute CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to get GQLRoute CR: " + err.Error())
 		}
 		if err := k8sClient.Create(context.Background(), gqlRoute); err != nil {
-			loggers.LoggerXds.Error("Unable to create GQLRoute CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to create GQLRoute CR: " + err.Error())
 		} else {
-			loggers.LoggerXds.Info("GQLRoute CR created: " + gqlRoute.Name)
+			loggers.LoggerK8sClient.Info("GQLRoute CR created: " + gqlRoute.Name)
 		}
 	} else {
 		crGQLRoute.Spec = gqlRoute.Spec
 		if err := k8sClient.Update(context.Background(), crGQLRoute); err != nil {
-			loggers.LoggerXds.Error("Unable to update GQLRoute CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to update GQLRoute CR: " + err.Error())
 		} else {
-			loggers.LoggerXds.Info("GQLRoute CR updated: " + gqlRoute.Name)
+			loggers.LoggerK8sClient.Info("GQLRoute CR updated: " + gqlRoute.Name)
 		}
 	}
 }
@@ -161,19 +161,19 @@ func DeploySecretCR(secret *corev1.Secret, k8sClient client.Client) {
 	crSecret := &corev1.Secret{}
 	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: secret.ObjectMeta.Namespace, Name: secret.Name}, crSecret); err != nil {
 		if !k8error.IsNotFound(err) {
-			loggers.LoggerXds.Error("Unable to get Secret CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to get Secret CR: " + err.Error())
 		}
 		if err := k8sClient.Create(context.Background(), secret); err != nil {
-			loggers.LoggerXds.Error("Unable to create Secret CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to create Secret CR: " + err.Error())
 		} else {
-			loggers.LoggerXds.Info("Secret CR created: " + secret.Name)
+			loggers.LoggerK8sClient.Info("Secret CR created: " + secret.Name)
 		}
 	} else {
 		crSecret.Data = secret.Data
 		if err := k8sClient.Update(context.Background(), crSecret); err != nil {
-			loggers.LoggerXds.Error("Unable to update Secret CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to update Secret CR: " + err.Error())
 		} else {
-			loggers.LoggerXds.Info("Secret CR updated: " + secret.Name)
+			loggers.LoggerK8sClient.Info("Secret CR updated: " + secret.Name)
 		}
 	}
 }
@@ -183,19 +183,19 @@ func DeployAuthenticationCR(authPolicy *dpv1alpha2.Authentication, k8sClient cli
 	crAuthPolicy := &dpv1alpha2.Authentication{}
 	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: authPolicy.ObjectMeta.Namespace, Name: authPolicy.Name}, crAuthPolicy); err != nil {
 		if !k8error.IsNotFound(err) {
-			loggers.LoggerXds.Error("Unable to get Authentication CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to get Authentication CR: " + err.Error())
 		}
 		if err := k8sClient.Create(context.Background(), authPolicy); err != nil {
-			loggers.LoggerXds.Error("Unable to create Authentication CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to create Authentication CR: " + err.Error())
 		} else {
-			loggers.LoggerXds.Info("Authentication CR created: " + authPolicy.Name)
+			loggers.LoggerK8sClient.Info("Authentication CR created: " + authPolicy.Name)
 		}
 	} else {
 		crAuthPolicy.Spec = authPolicy.Spec
 		if err := k8sClient.Update(context.Background(), crAuthPolicy); err != nil {
-			loggers.LoggerXds.Error("Unable to update Authentication CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to update Authentication CR: " + err.Error())
 		} else {
-			loggers.LoggerXds.Info("Authentication CR updated: " + authPolicy.Name)
+			loggers.LoggerK8sClient.Info("Authentication CR updated: " + authPolicy.Name)
 		}
 	}
 }
@@ -205,19 +205,19 @@ func DeployBackendJWTCR(backendJWT *dpv1alpha1.BackendJWT, k8sClient client.Clie
 	crBackendJWT := &dpv1alpha1.BackendJWT{}
 	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: backendJWT.ObjectMeta.Namespace, Name: backendJWT.Name}, crBackendJWT); err != nil {
 		if !k8error.IsNotFound(err) {
-			loggers.LoggerXds.Error("Unable to get BackendJWT CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to get BackendJWT CR: " + err.Error())
 		}
 		if err := k8sClient.Create(context.Background(), backendJWT); err != nil {
-			loggers.LoggerXds.Error("Unable to create BackendJWT CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to create BackendJWT CR: " + err.Error())
 		} else {
-			loggers.LoggerXds.Info("BackendJWT CR created: " + backendJWT.Name)
+			loggers.LoggerK8sClient.Info("BackendJWT CR created: " + backendJWT.Name)
 		}
 	} else {
 		crBackendJWT.Spec = backendJWT.Spec
 		if err := k8sClient.Update(context.Background(), crBackendJWT); err != nil {
-			loggers.LoggerXds.Error("Unable to update BackendJWT CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to update BackendJWT CR: " + err.Error())
 		} else {
-			loggers.LoggerXds.Info("BackendJWT CR updated: " + backendJWT.Name)
+			loggers.LoggerK8sClient.Info("BackendJWT CR updated: " + backendJWT.Name)
 		}
 	}
 }
@@ -227,19 +227,19 @@ func DeployAPIPolicyCR(apiPolicies *dpv1alpha2.APIPolicy, k8sClient client.Clien
 	crAPIPolicies := &dpv1alpha2.APIPolicy{}
 	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: apiPolicies.ObjectMeta.Namespace, Name: apiPolicies.Name}, crAPIPolicies); err != nil {
 		if !k8error.IsNotFound(err) {
-			loggers.LoggerXds.Error("Unable to get APIPolicies CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to get APIPolicies CR: " + err.Error())
 		}
 		if err := k8sClient.Create(context.Background(), apiPolicies); err != nil {
-			loggers.LoggerXds.Error("Unable to create APIPolicies CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to create APIPolicies CR: " + err.Error())
 		} else {
-			loggers.LoggerXds.Info("APIPolicies CR created: " + apiPolicies.Name)
+			loggers.LoggerK8sClient.Info("APIPolicies CR created: " + apiPolicies.Name)
 		}
 	} else {
 		crAPIPolicies.Spec = apiPolicies.Spec
 		if err := k8sClient.Update(context.Background(), crAPIPolicies); err != nil {
-			loggers.LoggerXds.Error("Unable to update APIPolicies CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to update APIPolicies CR: " + err.Error())
 		} else {
-			loggers.LoggerXds.Info("APIPolicies CR updated: " + apiPolicies.Name)
+			loggers.LoggerK8sClient.Info("APIPolicies CR updated: " + apiPolicies.Name)
 		}
 	}
 }
@@ -249,19 +249,19 @@ func DeployInterceptorServicesCR(interceptorServices *dpv1alpha1.InterceptorServ
 	crInterceptorServices := &dpv1alpha1.InterceptorService{}
 	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: interceptorServices.ObjectMeta.Namespace, Name: interceptorServices.Name}, crInterceptorServices); err != nil {
 		if !k8error.IsNotFound(err) {
-			loggers.LoggerXds.Error("Unable to get InterceptorServices CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to get InterceptorServices CR: " + err.Error())
 		}
 		if err := k8sClient.Create(context.Background(), interceptorServices); err != nil {
-			loggers.LoggerXds.Error("Unable to create InterceptorServices CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to create InterceptorServices CR: " + err.Error())
 		} else {
-			loggers.LoggerXds.Info("InterceptorServices CR created: " + interceptorServices.Name)
+			loggers.LoggerK8sClient.Info("InterceptorServices CR created: " + interceptorServices.Name)
 		}
 	} else {
 		crInterceptorServices.Spec = interceptorServices.Spec
 		if err := k8sClient.Update(context.Background(), crInterceptorServices); err != nil {
-			loggers.LoggerXds.Error("Unable to update InterceptorServices CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to update InterceptorServices CR: " + err.Error())
 		} else {
-			loggers.LoggerXds.Info("InterceptorServices CR updated: " + interceptorServices.Name)
+			loggers.LoggerK8sClient.Info("InterceptorServices CR updated: " + interceptorServices.Name)
 		}
 	}
 }
@@ -271,19 +271,19 @@ func DeployScopeCR(scope *dpv1alpha1.Scope, k8sClient client.Client) {
 	crScope := &dpv1alpha1.Scope{}
 	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: scope.ObjectMeta.Namespace, Name: scope.Name}, crScope); err != nil {
 		if !k8error.IsNotFound(err) {
-			loggers.LoggerXds.Error("Unable to get Scope CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to get Scope CR: " + err.Error())
 		}
 		if err := k8sClient.Create(context.Background(), scope); err != nil {
-			loggers.LoggerXds.Error("Unable to create Scope CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to create Scope CR: " + err.Error())
 		} else {
-			loggers.LoggerXds.Info("Scope CR created: " + scope.Name)
+			loggers.LoggerK8sClient.Info("Scope CR created: " + scope.Name)
 		}
 	} else {
 		crScope.Spec = scope.Spec
 		if err := k8sClient.Update(context.Background(), crScope); err != nil {
-			loggers.LoggerXds.Error("Unable to update Scope CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to update Scope CR: " + err.Error())
 		} else {
-			loggers.LoggerXds.Info("Scope CR updated: " + scope.Name)
+			loggers.LoggerK8sClient.Info("Scope CR updated: " + scope.Name)
 		}
 	}
 }
@@ -293,19 +293,19 @@ func DeployRateLimitPolicyCR(rateLimitPolicies *dpv1alpha1.RateLimitPolicy, k8sC
 	crRateLimitPolicies := &dpv1alpha1.RateLimitPolicy{}
 	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: rateLimitPolicies.ObjectMeta.Namespace, Name: rateLimitPolicies.Name}, crRateLimitPolicies); err != nil {
 		if !k8error.IsNotFound(err) {
-			loggers.LoggerXds.Error("Unable to get RateLimitPolicies CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to get RateLimitPolicies CR: " + err.Error())
 		}
 		if err := k8sClient.Create(context.Background(), rateLimitPolicies); err != nil {
-			loggers.LoggerXds.Error("Unable to create RateLimitPolicies CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to create RateLimitPolicies CR: " + err.Error())
 		} else {
-			loggers.LoggerXds.Info("RateLimitPolicies CR created: " + rateLimitPolicies.Name)
+			loggers.LoggerK8sClient.Info("RateLimitPolicies CR created: " + rateLimitPolicies.Name)
 		}
 	} else {
 		crRateLimitPolicies.Spec = rateLimitPolicies.Spec
 		if err := k8sClient.Update(context.Background(), crRateLimitPolicies); err != nil {
-			loggers.LoggerXds.Error("Unable to update RateLimitPolicies CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to update RateLimitPolicies CR: " + err.Error())
 		} else {
-			loggers.LoggerXds.Info("RateLimitPolicies CR updated: " + rateLimitPolicies.Name)
+			loggers.LoggerK8sClient.Info("RateLimitPolicies CR updated: " + rateLimitPolicies.Name)
 		}
 	}
 }
@@ -315,19 +315,19 @@ func DeployBackendCR(backends *dpv1alpha1.Backend, k8sClient client.Client) {
 	crBackends := &dpv1alpha1.Backend{}
 	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: backends.ObjectMeta.Namespace, Name: backends.Name}, crBackends); err != nil {
 		if !k8error.IsNotFound(err) {
-			loggers.LoggerXds.Error("Unable to get Backends CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to get Backends CR: " + err.Error())
 		}
 		if err := k8sClient.Create(context.Background(), backends); err != nil {
-			loggers.LoggerXds.Error("Unable to create Backends CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to create Backends CR: " + err.Error())
 		} else {
-			loggers.LoggerXds.Info("Backends CR created: " + backends.Name)
+			loggers.LoggerK8sClient.Info("Backends CR created: " + backends.Name)
 		}
 	} else {
 		crBackends.Spec = backends.Spec
 		if err := k8sClient.Update(context.Background(), crBackends); err != nil {
-			loggers.LoggerXds.Error("Unable to update Backends CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to update Backends CR: " + err.Error())
 		} else {
-			loggers.LoggerXds.Info("Backends CR updated: " + backends.Name)
+			loggers.LoggerK8sClient.Info("Backends CR updated: " + backends.Name)
 		}
 	}
 }
@@ -363,10 +363,10 @@ func CreateAndUpdateTokenIssuersCR(keyManager eventhubTypes.ResolvedKeyManager, 
 	}
 	err := k8sClient.Create(context.Background(), &tokenIssuer)
 	if err != nil {
-		loggers.LoggerXds.Error("Unable to create TokenIssuer CR: " + err.Error())
+		loggers.LoggerK8sClient.Error("Unable to create TokenIssuer CR: " + err.Error())
 		return err
 	}
-	loggers.LoggerXds.Debug("TokenIssuer CR created: " + tokenIssuer.Name)
+	loggers.LoggerK8sClient.Debug("TokenIssuer CR created: " + tokenIssuer.Name)
 	return nil
 }
 
@@ -374,10 +374,10 @@ func CreateAndUpdateTokenIssuersCR(keyManager eventhubTypes.ResolvedKeyManager, 
 func DeleteTokenIssuerCR(k8sClient client.Client, tokenIssuer dpv1alpha2.TokenIssuer) error {
 	err := k8sClient.Delete(context.Background(), &tokenIssuer, &client.DeleteOptions{})
 	if err != nil {
-		loggers.LoggerAPI.Error("Unable to delete TokenIssuer CR: " + err.Error())
+		loggers.LoggerK8sClient.Error("Unable to delete TokenIssuer CR: " + err.Error())
 		return err
 	}
-	loggers.LoggerXds.Debug("TokenIssuer CR deleted: " + tokenIssuer.Name)
+	loggers.LoggerK8sClient.Debug("TokenIssuer CR deleted: " + tokenIssuer.Name)
 	return nil
 }
 
@@ -396,18 +396,18 @@ func DeleteTokenIssuersCR(k8sClient client.Client, keymanagerName string, tenant
 	tokenIssuerList := &dpv1alpha2.TokenIssuerList{}
 	err := k8sClient.List(context.Background(), tokenIssuerList, listOption)
 	if err != nil {
-		loggers.LoggerAPI.Error("Unable to list TokenIssuer CR: " + err.Error())
+		loggers.LoggerK8sClient.Error("Unable to list TokenIssuer CR: " + err.Error())
 	}
 	if len(tokenIssuerList.Items) == 0 {
-		loggers.LoggerXds.Debug("No TokenIssuer CR found for deletion")
+		loggers.LoggerK8sClient.Debug("No TokenIssuer CR found for deletion")
 	}
 	for _, tokenIssuer := range tokenIssuerList.Items {
 		err := DeleteTokenIssuerCR(k8sClient, tokenIssuer)
 		if err != nil {
-			loggers.LoggerAPI.Error("Unable to delete TokenIssuer CR: " + err.Error())
+			loggers.LoggerK8sClient.Error("Unable to delete TokenIssuer CR: " + err.Error())
 			return err
 		}
-		loggers.LoggerXds.Debug("TokenIssuer CR deleted: " + tokenIssuer.Name)
+		loggers.LoggerK8sClient.Debug("TokenIssuer CR deleted: " + tokenIssuer.Name)
 	}
 	return nil
 }
@@ -421,7 +421,7 @@ func UpdateTokenIssuersCR(keyManager eventhubTypes.ResolvedKeyManager, k8sClient
 	tokenIssuer := &dpv1alpha2.TokenIssuer{}
 	err := k8sClient.Get(context.Background(), client.ObjectKey{Name: keyManager.UUID, Namespace: conf.DataPlane.Namespace}, tokenIssuer)
 	if err != nil {
-		loggers.LoggerAPI.Error("Unable to get TokenIssuer CR: " + err.Error())
+		loggers.LoggerK8sClient.Error("Unable to get TokenIssuer CR: " + err.Error())
 		return err
 	}
 	tokenIssuer.ObjectMeta.Labels = labelMap
@@ -439,10 +439,10 @@ func UpdateTokenIssuersCR(keyManager eventhubTypes.ResolvedKeyManager, k8sClient
 	}
 	err = k8sClient.Update(context.Background(), tokenIssuer)
 	if err != nil {
-		loggers.LoggerAPI.Error("Unable to update TokenIssuer CR: " + err.Error())
+		loggers.LoggerK8sClient.Error("Unable to update TokenIssuer CR: " + err.Error())
 		return err
 	}
-	loggers.LoggerXds.Debug("TokenIssuer CR updated: " + tokenIssuer.Name)
+	loggers.LoggerK8sClient.Debug("TokenIssuer CR updated: " + tokenIssuer.Name)
 	return nil
 }
 func marshalSignatureValidation(keyManagerConfig eventhubTypes.KeyManagerConfig) *dpv1alpha2.SignatureValidation {
@@ -481,7 +481,7 @@ func RetrieveAllAPISFromK8s(k8sClient client.Client, nextToken string) ([]dpv1al
 		err = k8sClient.List(context.Background(), &apiList, &client.ListOptions{Namespace: conf.DataPlane.Namespace, Continue: nextToken})
 	}
 	if err != nil {
-		loggers.LoggerSync.ErrorC(logging.PrintError(logging.Error1102, logging.CRITICAL, "Failed to get application from k8s %v", err.Error()))
+		loggers.LoggerK8sClient.ErrorC(logging.PrintError(logging.Error1102, logging.CRITICAL, "Failed to get application from k8s %v", err.Error()))
 		return nil, "", err
 	}
 	resolvedAPIList = append(resolvedAPIList, apiList.Items...)

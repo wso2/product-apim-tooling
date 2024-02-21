@@ -24,11 +24,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/wso2/apk/adapter/pkg/logging"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/eventhub"
 	k8sclient "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/k8sClient"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/loggers"
 	eventhubTypes "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/logging"
 	msg "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/messaging"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -49,26 +49,26 @@ func handleKMConfiguration(c client.Client) {
 		var keyManager eventhubTypes.KeyManager
 		unmarshalErr := json.Unmarshal([]byte(string(d.Body)), &notification)
 		if unmarshalErr != nil {
-			logger.LoggerInternalMsg.ErrorC(logging.ErrorDetails{
+			logger.LoggerMessaging.ErrorC(logging.ErrorDetails{
 				Message:   fmt.Sprintf("Error occurred while unmarshalling key manager event data %v", unmarshalErr.Error()),
 				Severity:  logging.CRITICAL,
 				ErrorCode: 2000,
 			})
 			return
 		}
-		logger.LoggerInternalMsg.Infof("Event %s is received", notification.Event.PayloadData.EventType)
+		logger.LoggerMessaging.Infof("Event %s is received", notification.Event.PayloadData.EventType)
 
 		var decodedByte, err = base64.StdEncoding.DecodeString(notification.Event.PayloadData.Value)
 
 		if err != nil {
 			if _, ok := err.(base64.CorruptInputError); ok {
-				logger.LoggerInternalMsg.ErrorC(logging.ErrorDetails{
+				logger.LoggerMessaging.ErrorC(logging.ErrorDetails{
 					Message:   "\nbase64 input is corrupt, check the provided key",
 					Severity:  logging.MINOR,
 					ErrorCode: 2001,
 				})
 			}
-			logger.LoggerInternalMsg.ErrorC(logging.ErrorDetails{
+			logger.LoggerMessaging.ErrorC(logging.ErrorDetails{
 				Message:   fmt.Sprintf("Error occurred while decoding the notification event %v", err.Error()),
 				Severity:  logging.CRITICAL,
 				ErrorCode: 2002,
@@ -80,10 +80,10 @@ func handleKMConfiguration(c client.Client) {
 			if strings.EqualFold(actionDelete, notification.Event.PayloadData.Action) {
 				k8sclient.DeleteTokenIssuersCR(c, notification.Event.PayloadData.Name, notification.Event.PayloadData.TenantDomain)
 			} else if decodedByte != nil {
-				logger.LoggerInternalMsg.Infof("decoded stream %s", string(decodedByte))
+				logger.LoggerMessaging.Infof("decoded stream %s", string(decodedByte))
 				kmConfigMapErr := json.Unmarshal([]byte(string(decodedByte)), &keyManager)
 				if kmConfigMapErr != nil {
-					logger.LoggerInternalMsg.ErrorC(logging.ErrorDetails{
+					logger.LoggerMessaging.ErrorC(logging.ErrorDetails{
 						Message:   fmt.Sprintf("Error occurred while unmarshalling key manager config map %v", kmConfigMapErr),
 						Severity:  logging.CRITICAL,
 						ErrorCode: 2003,
@@ -92,9 +92,9 @@ func handleKMConfiguration(c client.Client) {
 				}
 				if strings.EqualFold(actionAdd, notification.Event.PayloadData.Action) ||
 					strings.EqualFold(actionUpdate, notification.Event.PayloadData.Action) {
-					logger.LoggerSync.Infof("Key Managers received: %v", keyManager)
+					logger.LoggerMessaging.Infof("Key Managers received: %v", keyManager)
 					resolvedKeyManager := eventhub.MarshalKeyManager(&keyManager)
-					logger.LoggerSync.Infof("Resolved Key Managers received: %v", resolvedKeyManager)
+					logger.LoggerMessaging.Infof("Resolved Key Managers received: %v", resolvedKeyManager)
 					if strings.EqualFold(actionAdd, notification.Event.PayloadData.Action) {
 						k8sclient.CreateAndUpdateTokenIssuersCR(resolvedKeyManager, c)
 					} else {
@@ -103,7 +103,7 @@ func handleKMConfiguration(c client.Client) {
 				}
 			}
 		}
-		logger.LoggerInternalMsg.Info("handle: deliveries channel closed")
+		logger.LoggerMessaging.Info("handle: deliveries channel closed")
 		d.Ack(false)
 	}
 }

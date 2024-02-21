@@ -20,7 +20,7 @@ package logging
 import (
 	"fmt"
 
-	logging "github.com/wso2/apk/adapter/pkg/logging"
+	pkgLogging "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/logging"
 )
 
 // GetErrorMessageByCode retrieve the error message corresponds to the provided error code
@@ -33,8 +33,8 @@ func GetErrorMessageByCode(code int) string {
 }
 
 // PrintError prints the error details
-func PrintError(code int, severity string, message string, args ...interface{}) logging.ErrorDetails {
-	errorLog := logging.ErrorDetails{
+func PrintError(code int, severity string, message string, args ...interface{}) pkgLogging.ErrorDetails {
+	errorLog := pkgLogging.ErrorDetails{
 		ErrorCode: code,
 		Message:   fmt.Sprintf(message, args...),
 		Severity:  severity,
@@ -43,8 +43,8 @@ func PrintError(code int, severity string, message string, args ...interface{}) 
 }
 
 // PrintErrorWithDefaultMessage prints the error details with default message
-func PrintErrorWithDefaultMessage(code int, severity string) logging.ErrorDetails {
-	errorLog := logging.ErrorDetails{
+func PrintErrorWithDefaultMessage(code int, severity string) pkgLogging.ErrorDetails {
+	errorLog := pkgLogging.ErrorDetails{
 		ErrorCode: code,
 		Message:   GetErrorMessageByCode(code),
 		Severity:  severity,

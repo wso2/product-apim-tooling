@@ -31,7 +31,7 @@ import (
 	"strings"
 
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
-	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
+	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/loggers"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/logging"
 	sync "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/synchronizer"
 	transformer "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/transformer"
@@ -64,7 +64,7 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUID *string, k8sClient client.Cli
 		GetAPI(c, nil, envs, sync.RuntimeArtifactEndpoint, true)
 	}
 	data := <-c
-	logger.LoggerMsg.Info("Receiving data for an API")
+	logger.LoggerUtils.Debugf("Receiving data for an API: %v", apiUUID)
 	if data.Resp != nil {
 		if data.Found {
 			// Reading the root zip
@@ -75,27 +75,27 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUID *string, k8sClient client.Cli
 			// Read the .zip files within the root apis.zip and add apis to apiFiles array.
 			for _, file := range zipReader.File {
 				apiFiles[file.Name] = file
-				logger.LoggerSync.Infof("API file found: " + file.Name)
+				logger.LoggerUtils.Debugf("API file found: " + file.Name)
 				// Todo: Read the apis.zip and extract the api.zip,deployments.json
 			}
 
 			if err != nil {
-				logger.LoggerSync.Errorf("Error while reading zip: %v", err)
+				logger.LoggerUtils.Errorf("Error while reading zip: %v", err)
 				return nil, err
 			}
 			deploymentJSON, exists := apiFiles["deployments.json"]
 			if !exists {
-				logger.LoggerSync.Errorf("deployments.json not found")
+				logger.LoggerUtils.Errorf("deployments.json not found")
 				return nil, err
 			}
 			deploymentJSONBytes, err := transformer.ReadContent(deploymentJSON)
 			if err != nil {
-				logger.LoggerSync.Errorf("Error while decoding the API Project Artifact: %v", err)
+				logger.LoggerUtils.Errorf("Error while decoding the API Project Artifact: %v", err)
 				return nil, err
 			}
 			deploymentDescriptor, err := transformer.ProcessDeploymentDescriptor(deploymentJSONBytes)
 			if err != nil {
-				logger.LoggerSync.Errorf("Error while decoding the API Project Artifact: %v", err)
+				logger.LoggerUtils.Errorf("Error while decoding the API Project Artifact: %v", err)
 				return nil, err
 			}
 			apiDeployments := deploymentDescriptor.Data.Deployments
@@ -105,38 +105,38 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUID *string, k8sClient client.Cli
 					if exists {
 						artifact, decodingError := transformer.DecodeAPIArtifact(apiZip)
 						if decodingError != nil {
-							logger.LoggerSync.Errorf("Error while decoding the API Project Artifact: %v", decodingError)
+							logger.LoggerUtils.Errorf("Error while decoding the API Project Artifact: %v", decodingError)
 							return nil, err
 						}
 						apkConf, apiUUID, revisionID, apkErr := transformer.GenerateAPKConf(artifact.APIJson, artifact.ClientCerts)
 						if apkErr != nil {
-							logger.LoggerSync.Errorf("Error while generating APK-Conf: %v", apkErr)
+							logger.LoggerUtils.Errorf("Error while generating APK-Conf: %v", apkErr)
 							return nil, err
 						}
 						k8ResourceEndpoint := conf.DataPlane.K8ResourceEndpoint
 						crResponse, err := transformer.GenerateCRs(apkConf, artifact.Schema, k8ResourceEndpoint)
 						if err != nil {
-							logger.LoggerSync.Errorf("Error occured in receiving the updated CRDs: %v", err)
+							logger.LoggerUtils.Errorf("Error occured in receiving the updated CRDs: %v", err)
 							return nil, err
 						}
 						transformer.UpdateCRS(crResponse, apiDeployment.Environments, apiDeployment.OrganizationID, apiUUID, fmt.Sprint(revisionID), "namespace")
 						mapperUtil.MapAndCreateCR(*crResponse, k8sClient)
 						apis = append(apis, apiUUID)
-						logger.LoggerMsg.Info("API applied successfully.\n")
+						logger.LoggerUtils.Info("API applied successfully.\n")
 					}
 				}
 				return &apis, nil
 			}
 		} else {
-			logger.LoggerMsg.Info("API not found.")
+			logger.LoggerUtils.Info("API not found.")
 			return &apis, nil
 		}
 	} else if data.ErrorCode == 204 {
-		logger.LoggerMsg.Infof("No API Artifacts are available in the control plane for the envionments :%s",
+		logger.LoggerUtils.Infof("No API Artifacts are available in the control plane for the envionments :%s",
 			strings.Join(envs, ", "))
 		return &[]string{}, nil
 	} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
-		logger.LoggerMsg.ErrorC(logging.ErrorDetails{
+		logger.LoggerUtils.ErrorC(logging.ErrorDetails{
 			Message:   fmt.Sprintf("Error occurred when retrieving APIs from control plane(unrecoverable error): %v", data.Err.Error()),
 			Severity:  logging.CRITICAL,
 			ErrorCode: 1106,
@@ -144,7 +144,7 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUID *string, k8sClient client.Cli
 		return nil, data.Err
 	} else {
 		// Keep the iteration still until all the envrionment response properly.
-		logger.LoggerMsg.ErrorC(logging.ErrorDetails{
+		logger.LoggerUtils.ErrorC(logging.ErrorDetails{
 			Message:   fmt.Sprintf("Error occurred while fetching data from control plane: %v ..retrying..", data.Err),
 			Severity:  logging.MINOR,
 			ErrorCode: 1107,
@@ -152,7 +152,7 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUID *string, k8sClient client.Cli
 		//health.SetControlPlaneRestAPIStatus(false)
 		sync.RetryFetchingAPIs(c, data, sync.RuntimeArtifactEndpoint, true)
 	}
-	logger.LoggerMsg.Info("Fetching API for an event is completed...")
+	logger.LoggerUtils.Info("Fetching API for an event is completed...")
 	return nil, nil
 }
 
@@ -160,7 +160,7 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUID *string, k8sClient client.Cli
 func GetAPI(c chan sync.SyncAPIResponse, id *string, envs []string, endpoint string, sendType bool) {
 	if len(envs) > 0 {
 		// If the envrionment labels are present, call the controle plane with labels.
-		logger.LoggerAdapter.Debugf("Environment labels present: %v", envs)
+		logger.LoggerUtils.Debugf("Environment labels present: %v", envs)
 		go sync.FetchAPIs(id, envs, c, endpoint, sendType)
 	}
 }

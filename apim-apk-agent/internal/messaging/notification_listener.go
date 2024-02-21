@@ -29,9 +29,9 @@ import (
 	event "github.com/wso2/apk/common-go-libs/pkg/discovery/api/wso2/discovery/subscription"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	internalk8sClient "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/k8sClient"
+	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/loggers"
 	internalutils "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/utils"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
-	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/logging"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/managementserver"
 	msg "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/messaging"
@@ -83,14 +83,14 @@ func handleNotification(c client.Client) {
 		if notificationErr != nil {
 			continue
 		}
-		logger.LoggerMsg.Infof("Event %s is received", notification.Event.PayloadData.EventType)
+		logger.LoggerMessaging.Infof("Event %s is received", notification.Event.PayloadData.EventType)
 		err := processNotificationEvent(conf, &notification, c)
 		if err != nil {
 			continue
 		}
 		d.Ack(false)
 	}
-	logger.LoggerMsg.Infof("handle: deliveries channel closed")
+	logger.LoggerMessaging.Infof("handle: deliveries channel closed")
 }
 
 func processNotificationEvent(conf *config.Config, notification *msg.EventNotification, c client.Client) error {
@@ -98,13 +98,13 @@ func processNotificationEvent(conf *config.Config, notification *msg.EventNotifi
 	var decodedByte, err = base64.StdEncoding.DecodeString(notification.Event.PayloadData.Event)
 	if err != nil {
 		if _, ok := err.(base64.CorruptInputError); ok {
-			logger.LoggerMsg.Error("\nbase64 input is corrupt, check the provided key")
+			logger.LoggerMessaging.Error("\nbase64 input is corrupt, check the provided key")
 		}
-		logger.LoggerMsg.Errorf("Error occurred while decoding the notification event %v. "+
+		logger.LoggerMessaging.Errorf("Error occurred while decoding the notification event %v. "+
 			"Hence dropping the event", err)
 		return err
 	}
-	logger.LoggerMsg.Debugf("\n\n[%s]", decodedByte)
+	logger.LoggerMessaging.Debugf("\n\n[%s]", decodedByte)
 	eventType = notification.Event.PayloadData.EventType
 	if strings.Contains(eventType, apiLifeCycleChange) {
 		handleLifeCycleEvents(decodedByte)
@@ -152,7 +152,7 @@ func handleAPIEvents(data []byte, eventType string, conf *config.Config, c clien
 
 	apiEventErr := json.Unmarshal([]byte(string(data)), &apiEvent)
 	if apiEventErr != nil {
-		logger.LoggerMsg.ErrorC(logging.ErrorDetails{
+		logger.LoggerMessaging.ErrorC(logging.ErrorDetails{
 			Message:   fmt.Sprintf("Error occurred while unmarshalling API event data %v", apiEventErr),
 			Severity:  logging.MAJOR,
 			ErrorCode: 2004,
@@ -169,7 +169,7 @@ func handleAPIEvents(data []byte, eventType string, conf *config.Config, c clien
 		if apiEvent.Version == "" {
 			apiVersion = apiEvent.Version
 		}
-		logger.LoggerMsg.Debugf("API event for the API %s:%s is dropped due to having non related tenantDomain : %s",
+		logger.LoggerMessaging.Debugf("API event for the API %s:%s is dropped due to having non related tenantDomain : %s",
 			apiName, apiVersion, apiEvent.TenantDomain)
 		return
 	}
@@ -177,7 +177,7 @@ func handleAPIEvents(data []byte, eventType string, conf *config.Config, c clien
 	apiEventObj := types.API{UUID: apiEvent.UUID, APIID: apiEvent.APIID, Name: apiEvent.APIName,
 		Context: apiEvent.APIContext, Version: apiEvent.APIVersion, Provider: apiEvent.APIProvider}
 
-	logger.LoggerMsg.Infof("API event data %v", apiEventObj)
+	logger.LoggerMessaging.Infof("API event data %v", apiEventObj)
 
 	//Per each revision, synchronization should happen.
 	if strings.EqualFold(deployAPIToGateway, apiEvent.Event.Type) {
@@ -223,11 +223,11 @@ func handleLifeCycleEvents(data []byte) {
 	var apiEvent msg.APIEvent
 	apiLCEventErr := json.Unmarshal([]byte(string(data)), &apiEvent)
 	if apiLCEventErr != nil {
-		logger.LoggerMsg.Errorf("Error occurred while unmarshalling Lifecycle event data %v", apiLCEventErr)
+		logger.LoggerMessaging.Errorf("Error occurred while unmarshalling Lifecycle event data %v", apiLCEventErr)
 		return
 	}
 	if !belongsToTenant(apiEvent.TenantDomain) {
-		logger.LoggerMsg.Debugf("API Lifecycle event for the API %s:%s is dropped due to having non related tenantDomain : %s",
+		logger.LoggerMessaging.Debugf("API Lifecycle event for the API %s:%s is dropped due to having non related tenantDomain : %s",
 			apiEvent.APIName, apiEvent.APIVersion, apiEvent.TenantDomain)
 		return
 	}
@@ -235,11 +235,11 @@ func handleLifeCycleEvents(data []byte) {
 	apiEventObj := types.API{UUID: apiEvent.UUID, APIID: apiEvent.APIID, Name: apiEvent.APIName,
 		Context: apiEvent.APIContext, Version: apiEvent.APIVersion, Provider: apiEvent.APIProvider}
 
-	logger.LoggerMsg.Infof("API event data %v", apiEventObj)
+	logger.LoggerMessaging.Infof("API event data %v", apiEventObj)
 
 	conf, _ := config.ReadConfigs()
 	configuredEnvs := conf.ControlPlane.EnvironmentLabels
-	logger.LoggerMsg.Debugf("%s : %s API life cycle state change event triggered", apiEvent.APIName, apiEvent.APIVersion)
+	logger.LoggerMessaging.Debugf("%s : %s API life cycle state change event triggered", apiEvent.APIName, apiEvent.APIVersion)
 	if len(configuredEnvs) == 0 {
 		configuredEnvs = append(configuredEnvs, config.DefaultGatewayName)
 	}
@@ -258,12 +258,12 @@ func handleApplicationEvents(data []byte, eventType string) {
 		var applicationRegistrationEvent msg.ApplicationRegistrationEvent
 		appRegEventErr := json.Unmarshal([]byte(string(data)), &applicationRegistrationEvent)
 		if appRegEventErr != nil {
-			logger.LoggerMsg.Errorf("Error occurred while unmarshalling Application Registration event data %v", appRegEventErr)
+			logger.LoggerMessaging.Errorf("Error occurred while unmarshalling Application Registration event data %v", appRegEventErr)
 			return
 		}
 
 		if !belongsToTenant(applicationRegistrationEvent.TenantDomain) {
-			logger.LoggerMsg.Debugf("Application Registration event for the Consumer Key : %s is dropped due to having non related tenantDomain : %s",
+			logger.LoggerMessaging.Debugf("Application Registration event for the Consumer Key : %s is dropped due to having non related tenantDomain : %s",
 				applicationRegistrationEvent.ConsumerKey, applicationRegistrationEvent.TenantDomain)
 			return
 		}
@@ -289,7 +289,7 @@ func handleApplicationEvents(data []byte, eventType string) {
 				ApplicationKeyMapping: &applicationKeyMappingEvent,
 			}
 			uuid := utils.GetUniqueIDOfApplicationKeyMapping(applicationKeyMappingEvent.ApplicationUUID, applicationKeyMappingEvent.KeyType, applicationKeyMappingEvent.SecurityScheme, applicationKeyMappingEvent.EnvID, applicationKeyMappingEvent.Organization)
-			logger.LoggerAdapter.Infof("Application Key Mapping event data %v", uuid)
+			logger.LoggerMessaging.Infof("Application Key Mapping event data %v", uuid)
 			managementserver.DeleteApplicationKeyMapping(uuid)
 			go utils.SendEvent(&event)
 		}
@@ -297,17 +297,17 @@ func handleApplicationEvents(data []byte, eventType string) {
 		var applicationEvent msg.ApplicationEvent
 		appEventErr := json.Unmarshal([]byte(string(data)), &applicationEvent)
 		if appEventErr != nil {
-			logger.LoggerMsg.Errorf("Error occurred while unmarshalling Application event data %v", appEventErr)
+			logger.LoggerMessaging.Errorf("Error occurred while unmarshalling Application event data %v", appEventErr)
 			return
 		}
 
 		if !belongsToTenant(applicationEvent.TenantDomain) {
-			logger.LoggerMsg.Debugf("Application event for the Application : %s (with uuid %s) is dropped due to having non related tenantDomain : %s",
+			logger.LoggerMessaging.Debugf("Application event for the Application : %s (with uuid %s) is dropped due to having non related tenantDomain : %s",
 				applicationEvent.ApplicationName, applicationEvent.UUID, applicationEvent.TenantDomain)
 			return
 		}
 
-		logger.LoggerMsg.Infof("Application event data %v", applicationEvent)
+		logger.LoggerMessaging.Infof("Application event data %v", applicationEvent)
 
 		if isLaterEvent(applicationListTimeStampMap, fmt.Sprint(applicationEvent.ApplicationID), applicationEvent.TimeStamp) {
 			return
@@ -332,7 +332,7 @@ func handleApplicationEvents(data []byte, eventType string) {
 			managementserver.DeleteApplication(applicationGrpcEvent.Uuid)
 			utils.SendEvent(&event)
 		} else {
-			logger.LoggerAdapter.Warnf("Application Event Type is not recognized for the Event under "+
+			logger.LoggerMessaging.Warnf("Application Event Type is not recognized for the Event under "+
 				"Application UUID %s", applicationEvent.UUID)
 			return
 		}
@@ -353,11 +353,11 @@ func handleSubscriptionEvents(data []byte, eventType string) {
 	var subscriptionEvent msg.SubscriptionEvent
 	subEventErr := json.Unmarshal([]byte(string(data)), &subscriptionEvent)
 	if subEventErr != nil {
-		logger.LoggerMsg.Errorf("Error occurred while unmarshalling Subscription event data %v", subEventErr)
+		logger.LoggerMessaging.Errorf("Error occurred while unmarshalling Subscription event data %v", subEventErr)
 		return
 	}
 	if !belongsToTenant(subscriptionEvent.TenantDomain) {
-		logger.LoggerMsg.Debugf("Subscription event for the Application : %s and API %s is dropped due to having non related tenantDomain : %s",
+		logger.LoggerMessaging.Debugf("Subscription event for the Application : %s and API %s is dropped due to having non related tenantDomain : %s",
 			subscriptionEvent.ApplicationUUID, subscriptionEvent.APIUUID, subscriptionEvent.TenantDomain)
 		return
 	}
@@ -403,23 +403,23 @@ func handlePolicyEvents(data []byte, eventType string) {
 	var policyEvent msg.PolicyInfo
 	policyEventErr := json.Unmarshal([]byte(string(data)), &policyEvent)
 	if policyEventErr != nil {
-		logger.LoggerMsg.Errorf("Error occurred while unmarshalling Throttling Policy event data %v", policyEventErr)
+		logger.LoggerMessaging.Errorf("Error occurred while unmarshalling Throttling Policy event data %v", policyEventErr)
 		return
 	}
 	// TODO: Handle policy events
 	if strings.EqualFold(eventType, policyCreate) {
-		logger.LoggerMsg.Infof("Policy: %s for policy type: %s", policyEvent.PolicyName, policyEvent.PolicyType)
+		logger.LoggerMessaging.Infof("Policy: %s for policy type: %s", policyEvent.PolicyName, policyEvent.PolicyType)
 	} else if strings.EqualFold(eventType, policyUpdate) {
-		logger.LoggerMsg.Infof("Policy: %s for policy type: %s", policyEvent.PolicyName, policyEvent.PolicyType)
+		logger.LoggerMessaging.Infof("Policy: %s for policy type: %s", policyEvent.PolicyName, policyEvent.PolicyType)
 	} else if strings.EqualFold(eventType, policyDelete) {
-		logger.LoggerMsg.Infof("Policy: %s for policy type: %s", policyEvent.PolicyName, policyEvent.PolicyType)
+		logger.LoggerMessaging.Infof("Policy: %s for policy type: %s", policyEvent.PolicyName, policyEvent.PolicyType)
 	}
 
 	if strings.EqualFold(applicationEventType, policyEvent.PolicyType) {
 		applicationPolicy := types.ApplicationPolicy{ID: policyEvent.PolicyID, TenantID: policyEvent.Event.TenantID,
 			Name: policyEvent.PolicyName, QuotaType: policyEvent.QuotaType}
 
-		logger.LoggerMsg.Infof("ApplicationPolicy event data %v", applicationPolicy)
+		logger.LoggerMessaging.Infof("ApplicationPolicy event data %v", applicationPolicy)
 		// var applicationPolicyList *subscription.ApplicationPolicyList
 		// if policyEvent.Event.Type == policyCreate {
 		// 	applicationPolicyList = xds.MarshalApplicationPolicyEventAndReturnList(&applicationPolicy, xds.CreateEvent)
@@ -438,7 +438,7 @@ func handlePolicyEvents(data []byte, eventType string) {
 		var subscriptionPolicyEvent msg.SubscriptionPolicyEvent
 		subPolicyErr := json.Unmarshal([]byte(string(data)), &subscriptionPolicyEvent)
 		if subPolicyErr != nil {
-			logger.LoggerMsg.Errorf("Error occurred while unmarshalling Subscription Policy event data %v", subPolicyErr)
+			logger.LoggerMessaging.Errorf("Error occurred while unmarshalling Subscription Policy event data %v", subPolicyErr)
 			return
 		}
 
@@ -449,7 +449,7 @@ func handlePolicyEvents(data []byte, eventType string) {
 			RateLimitTimeUnit: subscriptionPolicyEvent.RateLimitTimeUnit, StopOnQuotaReach: subscriptionPolicyEvent.StopOnQuotaReach,
 			TenantDomain: subscriptionPolicyEvent.TenantDomain, TimeStamp: subscriptionPolicyEvent.TimeStamp}
 
-		logger.LoggerMsg.Infof("SubscriptionPolicy event data %v", subscriptionPolicy)
+		logger.LoggerMessaging.Debugf("SubscriptionPolicy event data %v", subscriptionPolicy)
 
 		// var subscriptionPolicyList *subscription.SubscriptionPolicyList
 		// if subscriptionPolicyEvent.Event.Type == policyCreate {
@@ -490,7 +490,7 @@ func belongsToTenant(tenantDomain string) bool {
 func parseNotificationJSONEvent(data []byte, notification *msg.EventNotification) error {
 	unmarshalErr := json.Unmarshal(data, &notification)
 	if unmarshalErr != nil {
-		logger.LoggerMsg.Errorf("Error occurred while unmarshalling "+
+		logger.LoggerMessaging.Errorf("Error occurred while unmarshalling "+
 			"notification event data %v. Hence dropping the event", unmarshalErr)
 	}
 	return unmarshalErr

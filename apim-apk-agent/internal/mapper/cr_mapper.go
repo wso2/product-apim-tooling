@@ -26,7 +26,7 @@ package mapper
 import (
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	internalk8sClient "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/k8sClient"
-	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
+	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/loggers"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/transformer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -89,7 +89,7 @@ func MapAndCreateCR(k8sArtifact transformer.K8sArtifacts, k8sClient client.Clien
 func getDeploymentNamespace(k8sArtifact transformer.K8sArtifacts) (string, error) {
 	conf, errReadConfig := config.ReadConfigs()
 	if errReadConfig != nil {
-		logger.LoggerSync.Errorf("Error reading configs: %v", errReadConfig)
+		logger.LoggerMapper.Errorf("Error reading configs: %v", errReadConfig)
 		return "", errReadConfig
 	}
 	return conf.DataPlane.Namespace, nil

@@ -25,10 +25,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/wso2/apk/adapter/pkg/logging"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/loggers"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/auth"
+	logging "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/logging"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/tlsutils"
 )
 
