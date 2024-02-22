@@ -19,19 +19,20 @@ package types
 
 // Subscription for struct subscription
 type Subscription struct {
-	SubscriptionID    int32  `json:"subscriptionId"`
-	SubscriptionUUID  string `json:"subscriptionUUID"`
-	PolicyID          string `json:"policyId"`
-	APIID             int32  `json:"apiId"`
-	APIUUID           string `json:"apiUUID"`
-	AppID             int32  `json:"appId" json:"applicationId"`
-	ApplicationUUID   string `json:"applicationUUID"`
-	SubscriptionState string `json:"subscriptionState"`
-	TenantID          int32  `json:"tenanId,omitempty"`
-	TenantDomain      string `json:"tenanDomain,omitempty"`
-	TimeStamp         int64  `json:"timeStamp,omitempty"`
-	APIName           string `json:"apiName"`
-	APIVersion        string `json:"apiVersion"`
+	SubscriptionID          int32  `json:"subscriptionId"`
+	SubscriptionUUID        string `json:"subscriptionUUID"`
+	PolicyID                string `json:"policyId"`
+	APIID                   int32  `json:"apiId"`
+	APIUUID                 string `json:"apiUUID"`
+	AppID                   int32  `json:"appId" json:"applicationId"`
+	ApplicationUUID         string `json:"applicationUUID"`
+	SubscriptionState       string `json:"subscriptionState"`
+	TenantID                int32  `json:"tenanId,omitempty"`
+	APIOrganization         string `json:"apiOrganization,omitempty"`
+	ApplicationOrganization string `json:"applicationOrganization,omitempty"`
+	TimeStamp               int64  `json:"timeStamp,omitempty"`
+	APIName                 string `json:"apiName"`
+	APIVersion              string `json:"apiVersion"`
 }
 
 // SubscriptionList for struct list of applications
