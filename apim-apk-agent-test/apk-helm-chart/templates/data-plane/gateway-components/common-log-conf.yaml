@@ -1,0 +1,103 @@
+{{- if or .Values.wso2.apk.dp.enabled .Values.wso2.apk.cp.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "apk-helm.resource.prefix" . }}-common-log-conf
+  namespace: {{ .Release.Namespace }}
+data:
+  config.toml: | 
+    [commoncontroller]
+      {{- if and .Values.wso2.apk.dp.environment .Values.wso2.apk.dp.environment.name }}
+      environment = "{{ .Values.wso2.apk.dp.environment.name }}"
+      {{- end }}
+    [commoncontroller.server]
+      label = "ratelimiter"
+    {{ if and .Values.wso2.apk.dp.commonController.configs .Values.wso2.apk.dp.commonController.configs.apiNamespaces }}
+    [commoncontroller.operator]
+      namespaces = [{{ include "commaJoinedQuotedList" .Values.wso2.apk.dp.commonController.configs.apiNamespaces}}]
+    {{ end}}  
+    [commoncontroller.keystore]
+      certPath = "/home/wso2/security/keystore/commoncontroller.crt"
+      keyPath = "/home/wso2/security/keystore/commoncontroller.key"
+
+    [commoncontroller.truststore]
+      location = "/home/wso2/security/truststore"
+    
+    [commoncontroller.controlplane]
+      enabled = true
+      host = "apim-apk-agent-service.apk.svc.cluster.local"
+      skipSSLVerification = true
+
+    [commoncontroller.redis]
+    {{- if .Values.wso2.apk.dp.commonController.deployment.redis }}
+      host = "{{ .Values.wso2.apk.dp.commonController.deployment.redis.host | default "redis-master" }}"
+      port = "{{ .Values.wso2.apk.dp.commonController.deployment.redis.port | default "6379" }}"
+      username = "{{ .Values.wso2.apk.dp.commonController.deployment.redis.username | default "default" }}"
+      password = "{{ .Values.wso2.apk.dp.commonController.deployment.redis.password | default "" }}"
+      userCertPath = "{{ .Values.wso2.apk.dp.commonController.deployment.redis.userCertPath | default "/home/wso2/security/keystore/commoncontroller.crt" }}"
+      userKeyPath = "{{ .Values.wso2.apk.dp.commonController.deployment.redis.userKeyPath | default "/home/wso2/security/keystore/commoncontroller.key" }}"
+      cACertPath = "{{ .Values.wso2.apk.dp.commonController.deployment.redis.redisCaCertPath | default "/home/wso2/security/keystore/commoncontroller.crt" }}"
+      tlsEnabled = {{ .Values.wso2.apk.dp.commonController.deployment.redis.tlsEnabled | default false }}
+      revokedTokenChannel = "{{ .Values.wso2.apk.dp.commonController.deployment.redis.channelName | default "wso2-apk-revoked-tokens-channel" }}"
+    {{- else }}
+      host = "redis-master"
+      port = "6379"
+      username = "default"
+      password = ""
+      userCertPath = "/home/wso2/security/keystore/commoncontroller.crt"
+      userKeyPath = "/home/wso2/security/keystore/commoncontroller.key"
+      cACertPath = "/home/wso2/security/keystore/commoncontroller.crt"
+      tlsEnabled = false
+      revokedTokenChannel = "wso2-apk-revoked-tokens-channel"
+    {{- end }}
+    [commoncontroller.sts]
+      authKeyPath = "/home/wso2/security/sts/auth_key.txt"
+      authKeyHeader = "stsAuthKey"
+    
+    [commoncontroller.webServer]
+      port = 9543
+    # [commoncontroller.controlplane]
+    #   host= "apim-apk-agent-service.apk-agent.svc.cluster.local"
+    #   port= 18000
+  log_config.toml: |
+    # The logging configuration for Adapter
+
+    ## Adapter root Level configurations
+
+    logfile = "adapter.log" # This file will be created inside adapter container.
+    logLevel = "INFO" # LogLevels can be "DEBG", "FATL", "ERRO", "WARN", "INFO", "PANC"
+    LogFormat = "TEXT" # Values can be "JSON", "TEXT"
+
+    [rotation]
+    MaxSize = 10    # In MegaBytes (MB)
+    MaxBackups = 3
+    MaxAge =  2   # In days
+    Compress = true
+
+    ## Adapter package Level configurations
+
+    [[pkg]]
+    name = "github.com/wso2/apk/common-adapter/internal/operator"
+    logLevel = "INFO" # LogLevels can be "DEBG", "FATL", "ERRO", "WARN", "INFO", "PANC"
+    [[pkg]]
+    name = "github.com/wso2/apk/common-controller/internal/utils"
+    logLevel = "DEBG" # LogLevels can be "DEBG", "FATL", "ERRO", "WARN", "INFO", "PANC"
+    [[pkg]]
+
+    # The logging configuration for Router
+
+    [accessLogs]
+    enable = false
+    logfile = "/tmp/envoy.access.log" # This file will be created inside router container.
+    format = "[%START_TIME%] '%REQ(:METHOD)% %DYNAMIC_METADATA(envoy.filters.http.ext_authz:originalPath)% %REQ(:PATH)% %PROTOCOL%' %RESPONSE_CODE% %RESPONSE_FLAGS% %BYTES_RECEIVED% %BYTES_SENT% %DURATION% %RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)% '%REQ(X-FORWARDED-FOR)%' '%REQ(USER-AGENT)%' '%REQ(X-REQUEST-ID)%' '%REQ(:AUTHORITY)%' '%UPSTREAM_HOST%'\n"
+
+    [wireLogs]
+    enable = false
+    include = ["Headers", "Body", "Trailers"]
+
+    # [[pkg]]
+    # name = "github.com/wso2/apk/Adapter/pkg/xds"
+    # logLevel = "INFO"
+
+
+{{- end -}}

@@ -1,0 +1,19 @@
+apiVersion: v2
+name: apk-helm
+description: A Helm chart for APK components
+type: application
+version: 1.1.0-m2
+appVersion: "1.16.0"
+dependencies:
+  - name: postgresql
+    version: "11.9.6"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: postgresql.enabled
+  - name: redis
+    version: "17.8.0"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: redis.enabled
+  - name: cert-manager
+    version: "v1.10.1"
+    repository: "https://charts.jetstack.io"
+    condition: certmanager.enabled
