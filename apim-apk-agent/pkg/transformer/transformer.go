@@ -32,6 +32,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 
 	"io"
 	"mime/multipart"
@@ -49,7 +50,7 @@ import (
 )
 
 // GenerateAPKConf will Generate the mapped .apk-conf file for a given API Project zip
-func GenerateAPKConf(APIJson string, clientCerts string) (string, string, uint32, error) {
+func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact) (string, string, uint32, error) {
 
 	apk := &API{}
 
@@ -94,19 +95,31 @@ func GenerateAPKConf(APIJson string, clientCerts string) (string, string, uint32
 
 	apk.Operations = &apkOperations
 
-	apk.EndpointConfigurations = &EndpointConfiguration{
-		// For private PPDPs, we need to treat the token type to be SANDBOX as it is tested by developers.
-		Sandbox: &Endpoint{
-			Endpoint: apiYamlData.EndpointConfig.SandboxEndpoints.URL},
-		Production: &Endpoint{
-			Endpoint: apiYamlData.EndpointConfig.ProductionEndpoints.URL},
+	//Adding Endpoint-certificate configurations to the conf
+	var endpointCertList EndpointCertDescriptor
+	endCertAvailable := false
+
+	if certArtifact.EndpointCerts != "" {
+		certErr := json.Unmarshal([]byte(certArtifact.EndpointCerts), &endpointCertList)
+		if certErr != nil {
+			logger.LoggerTransformer.Errorf("Error while unmarshalling endpoint_cert.json content: ", apiYamlError)
+			return "", "null", 0, certErr
+		}
+		endCertAvailable = true
 	}
 
+	sandboxURL := apiYamlData.EndpointConfig.SandboxEndpoints.URL
+	prodURL := apiYamlData.EndpointConfig.ProductionEndpoints.URL
+	endpointRes := getEndpointConfigs(sandboxURL, prodURL, endCertAvailable, endpointCertList)
+
+	apk.EndpointConfigurations = &endpointRes
+
+	//Adding client-certificate configurations to the conf
 	var certList CertDescriptor
 	certAvailable := false
 
-	if clientCerts != "" {
-		certErr := json.Unmarshal([]byte(clientCerts), &certList)
+	if certArtifact.ClientCerts != "" {
+		certErr := json.Unmarshal([]byte(certArtifact.ClientCerts), &certList)
 		if certErr != nil {
 			logger.LoggerTransformer.Errorf("Error while unmarshalling client_cert.json content: ", apiYamlError)
 			return "", "null", 0, certErr
@@ -235,9 +248,40 @@ func mapAuthConfigs(authHeader string, secSchemes []string, certAvailable bool, 
 	return authConfigs
 }
 
+// getEndpointConfigs will map the endpoints and there security configurations and returns them
+// TODO: Currently the APK-Conf does not support giving multiple certs for a particular endpoint.
+// After fixing this, the following logic should be changed to map multiple cert configs
+func getEndpointConfigs(sandboxURL string, prodURL string, endCertAvailable bool, endpointCertList EndpointCertDescriptor) EndpointConfigurations {
+	var sandboxEndpointConf, prodEndpointConf EndpointConfiguration
+	sandboxEndpointConf.Endpoint = sandboxURL
+	prodEndpointConf.Endpoint = prodURL
+	if endCertAvailable {
+		for _, endCert := range endpointCertList.EndpointCertData {
+			if endCert.Endpoint == sandboxURL {
+				sandboxEndpointConf.EndCertificate = EndpointCertificate{
+					Name: endCert.Alias,
+					Key:  endCert.Certificate,
+				}
+			}
+			if endCert.Endpoint == prodURL {
+				prodEndpointConf.EndCertificate = EndpointCertificate{
+					Name: endCert.Alias,
+					Key:  endCert.Certificate,
+				}
+			}
+		}
+	}
+
+	epconfigs := EndpointConfigurations{
+		Sandbox:    &sandboxEndpointConf,
+		Production: &prodEndpointConf,
+	}
+	return epconfigs
+}
+
 // GenerateCRs takes the .apk-conf, api definition, vHost and the organization for a particular API and then generate and returns
 // the relavant CRD set as a zip
-func GenerateCRs(apkConf string, apiDefinition string, k8ResourceGenEndpoint string) (*K8sArtifacts, error) {
+func GenerateCRs(apkConf string, apiDefinition string, certContainer CertContainer, k8ResourceGenEndpoint string) (*K8sArtifacts, error) {
 	k8sArtifact := K8sArtifacts{HTTPRoutes: make(map[string]*gwapiv1b1.HTTPRoute), GQLRoutes: make(map[string]*dpv1alpha2.GQLRoute), Backends: make(map[string]*dpv1alpha1.Backend), Scopes: make(map[string]*dpv1alpha1.Scope), Authentication: make(map[string]*dpv1alpha2.Authentication), APIPolicies: make(map[string]*dpv1alpha2.APIPolicy), InterceptorServices: make(map[string]*dpv1alpha1.InterceptorService), ConfigMaps: make(map[string]*corev1.ConfigMap), Secrets: make(map[string]*corev1.Secret), RateLimitPolicies: make(map[string]*dpv1alpha1.RateLimitPolicy)}
 	if apkConf == "" {
 		logger.LoggerTransformer.Error("Empty apk-conf parameter provided. Unable to generate CRDs.")
@@ -441,6 +485,16 @@ func GenerateCRs(apkConf string, apiDefinition string, k8ResourceGenEndpoint str
 			logger.LoggerSync.Errorf("[!]Unknown Kind parsed from the YAML File: %v", kind)
 		}
 	}
+	// Create ConfigMap to store the cert data if mTLS has enabled
+	if certContainer.ClientCertObj.CertAvailable {
+		createConfigMaps(certContainer.ClientCertObj.ClientCertFiles, &k8sArtifact)
+	}
+
+	// Create ConfigMap to store the cert data if endpoint security has enabled
+	if certContainer.EndpointCertObj.CertAvailable {
+		createConfigMaps(certContainer.EndpointCertObj.EndpointCertFiles, &k8sArtifact)
+	}
+
 	return &k8sArtifact, nil
 }
 
@@ -562,4 +616,31 @@ func generateSHA1Hash(input string) string {
 	h := sha1.New() /* #nosec */
 	h.Write([]byte(input))
 	return hex.EncodeToString(h.Sum(nil))
+}
+
+// createConfigMaps returns a marshalled yaml of ConfigMap kind after adding the given values
+func createConfigMaps(certFiles map[string]string, k8sArtifact *K8sArtifacts) {
+	for confKey, confValue := range certFiles {
+		pathSegments := strings.Split(confKey, ".")
+		configName := pathSegments[0]
+
+		//TODO: Have to take the version, namespace as parameters instead of hardcoding
+		cm := corev1.ConfigMap{}
+		cm.APIVersion = "v1"
+		cm.Kind = "ConfigMap"
+		cm.ObjectMeta.Name = configName
+
+		if cm.ObjectMeta.Labels == nil {
+			cm.ObjectMeta.Labels = make(map[string]string)
+		}
+
+		if cm.Data == nil {
+			cm.Data = make(map[string]string)
+		}
+		cm.Data[confKey] = confValue
+		certConfigMap := &cm
+
+		logger.LoggerTransformer.Debug("New ConfigMap Data: %v", *certConfigMap)
+		k8sArtifact.ConfigMaps[certConfigMap.ObjectMeta.Name] = certConfigMap
+	}
 }

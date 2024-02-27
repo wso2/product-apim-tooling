@@ -108,11 +108,38 @@ type APIYaml struct {
 // APIArtifact represents the artifact details of an API, including api details, environment configuration,
 // Swagger definition, deployment descriptor, and revision ID extracted from the API Project Zip.
 type APIArtifact struct {
-	APIJson              string `json:"apiJson"`
-	APIFileName          string `json:"apiFileName"`
-	EnvConfig            string `json:"envConfig"`
-	Schema               string `json:"schema"`
-	DeploymentDescriptor string `json:"deploymentDescriptor"`
-	ClientCerts          string `json:"clientCert"`
-	RevisionID           uint32 `json:"revisionId"`
+	APIJson              string               `json:"apiJson"`
+	APIFileName          string               `json:"apiFileName"`
+	EnvConfig            string               `json:"envConfig"`
+	Schema               string               `json:"schema"`
+	DeploymentDescriptor string               `json:"deploymentDescriptor"`
+	CertArtifact         CertificateArtifact  `json:"certArtifact"`
+	RevisionID           uint32               `json:"revisionId"`
+	CertMeta             CertMetadata         `json:"certMeta"`
+	EndpointCertMeta     EndpointCertMetadata `json:"endpintCertMeta"`
+}
+
+// CertificateArtifact stores the parsed file content created inside the API project zip upon enabling certificate aided security options
+type CertificateArtifact struct {
+	ClientCerts   string `json:"clientCert"`
+	EndpointCerts string `json:"endpointCert"`
+}
+
+// CertMetadata marks the availability of the cert files provided by the client and their contents
+type CertMetadata struct {
+	CertAvailable   bool              `json:"certAvailable"`
+	ClientCertFiles map[string]string `json:"clientCertFiles"`
+}
+
+// EndpointCertMetadata marks the availability of the endpoint certificates and stores the cert contents
+type EndpointCertMetadata struct {
+	CertAvailable     bool              `json:"certAvailable"`
+	EndpointCertFiles map[string]string `json:"endpointCertFiles"`
+}
+
+// CertContainer acts as a wrapper to hold onto all the certificate details for both endpoint and client-side security configs
+// belong to a particular API Project
+type CertContainer struct {
+	ClientCertObj   CertMetadata
+	EndpointCertObj EndpointCertMetadata
 }

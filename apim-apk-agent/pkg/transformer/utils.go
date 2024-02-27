@@ -101,8 +101,43 @@ func readZipFile(file *zip.File) (*APIArtifact, error) {
 			if err != nil {
 				return nil, err
 			}
-			apiArtifact.ClientCerts = string(certificateJSON)
+			apiArtifact.CertArtifact.ClientCerts = string(certificateJSON)
+			apiArtifact.CertMeta.CertAvailable = true
 		}
+
+		if strings.Contains(file.Name, "endpoint_certificates.json") {
+			endpointCertificateJSON, err := ReadContent(file)
+			if err != nil {
+				return nil, err
+			}
+			apiArtifact.CertArtifact.EndpointCerts = string(endpointCertificateJSON)
+			apiArtifact.EndpointCertMeta.CertAvailable = true
+		}
+
+		if strings.Contains(file.Name, ".crt") {
+			certificateData, err := ReadContent(file)
+			if err != nil {
+				return nil, err
+			}
+			//NOTE:There is an issue in reading the certificate content. Even the same logic is been used, the
+			// .crt files in the Client-certificates gets parsed in base64 encoded version while the cert files in
+			// Endpoint-certtificate folder gets parsed as original value
+			pathSegments := strings.Split(file.Name, "/")
+			if strings.Contains(file.Name, "Client-certificates") {
+				if apiArtifact.CertMeta.ClientCertFiles == nil {
+					apiArtifact.CertMeta.ClientCertFiles = make(map[string]string)
+				}
+				apiArtifact.CertMeta.ClientCertFiles[pathSegments[len(pathSegments)-1]] = string(certificateData)
+			}
+			if strings.Contains(file.Name, "Endpoint-certificates") {
+				if apiArtifact.EndpointCertMeta.EndpointCertFiles == nil {
+					apiArtifact.EndpointCertMeta.EndpointCertFiles = make(map[string]string)
+				}
+				apiArtifact.EndpointCertMeta.EndpointCertFiles[pathSegments[len(pathSegments)-1]] = string(certificateData)
+			}
+
+		}
+
 	}
 	return apiArtifact, nil
 }
@@ -138,7 +173,7 @@ func readAPIZipFile(file *zip.File, apiArtifact *APIArtifact) error {
 	}
 
 	if strings.Contains(file.Name, "client_certificates.json") {
-		apiArtifact.ClientCerts = string(content)
+		apiArtifact.CertArtifact.ClientCerts = string(content)
 	}
 
 	return nil
