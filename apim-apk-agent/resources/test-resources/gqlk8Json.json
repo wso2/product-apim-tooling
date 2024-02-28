@@ -1,0 +1,706 @@
+{
+  "API": {
+    "kind": "API",
+    "apiVersion": "dp.wso2.com/v1alpha2",
+    "metadata": {
+      "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f",
+      "creationTimestamp": null,
+      "labels": {
+        "api-name": "42ae110427d829f0afc565b706d9a1aae6af1907",
+        "api-version": "91e95be6b6634e3c21072dfcd661146728694326",
+        "managed-by": "apk",
+        "organization": "7505d64a54e061b7acd54ccd58b49dc43500b635"
+      }
+    },
+    "spec": {
+      "apiName": "StartWarsAPI",
+      "apiVersion": "1.0.0",
+      "isDefaultVersion": false,
+      "definitionFileRef": "cb79bb852d72308d9d20151a2eaeac8825249d2f-definition",
+      "definitionPath": "/definition",
+      "production": [
+        {
+          "httpRouteRefs": [
+            "cb79bb852d72308d9d20151a2eaeac8825249d2f-production-gqlroute-1",
+            "cb79bb852d72308d9d20151a2eaeac8825249d2f-production-gqlroute-2"
+          ]
+        }
+      ],
+      "sandbox": [
+        {
+          "httpRouteRefs": [
+            "cb79bb852d72308d9d20151a2eaeac8825249d2f-sandbox-gqlroute-1",
+            "cb79bb852d72308d9d20151a2eaeac8825249d2f-sandbox-gqlroute-2"
+          ]
+        }
+      ],
+      "apiType": "GraphQL",
+      "basePath": "/swapi/1.0.0",
+      "organization": "default",
+      "systemAPI": false
+    },
+    "status": {
+      "deploymentStatus": {
+        "status": "",
+        "message": "",
+        "accepted": false,
+        "transitionTime": null
+      }
+    }
+  },
+  "HTTPRoutes": {},
+  "GQLRoutes": {
+    "cb79bb852d72308d9d20151a2eaeac8825249d2f-production-gqlroute-1": {
+      "kind": "GQLRoute",
+      "apiVersion": "dp.wso2.com/v1alpha2",
+      "metadata": {
+        "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-production-gqlroute-1",
+        "creationTimestamp": null,
+        "labels": {
+          "api-name": "42ae110427d829f0afc565b706d9a1aae6af1907",
+          "api-version": "91e95be6b6634e3c21072dfcd661146728694326",
+          "managed-by": "apk",
+          "organization": "7505d64a54e061b7acd54ccd58b49dc43500b635"
+        }
+      },
+      "spec": {
+        "parentRefs": [
+          {
+            "group": "gateway.networking.k8s.io",
+            "kind": "Gateway",
+            "name": "default",
+            "sectionName": "httpslistener"
+          }
+        ],
+        "hostnames": ["default.gw.wso2.com"],
+        "backendRefs": [
+          {
+            "group": "dp.wso2.com",
+            "kind": "Backend",
+            "name": "backend-aaab6e742130d50703e6022599d8c2e1a40299ac-api"
+          }
+        ],
+        "rules": [
+          {
+            "matches": [{ "type": "QUERY", "path": "droid" }],
+            "filters": [
+              {
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-resource-policy"
+                }
+              }
+            ]
+          },
+          {
+            "matches": [{ "type": "QUERY", "path": "human" }],
+            "filters": [
+              {
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-resource-policy"
+                }
+              }
+            ]
+          },
+          {
+            "matches": [{ "type": "MUTATION", "path": "createReview" }],
+            "filters": [
+              {
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-resource-policy"
+                }
+              }
+            ]
+          },
+          {
+            "matches": [{ "type": "QUERY", "path": "allHumans" }],
+            "filters": [
+              {
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-resource-policy"
+                }
+              }
+            ]
+          },
+          {
+            "matches": [{ "type": "QUERY", "path": "starship" }],
+            "filters": [
+              {
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-resource-policy"
+                }
+              }
+            ]
+          },
+          {
+            "matches": [{ "type": "QUERY", "path": "reviews" }],
+            "filters": [
+              {
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-resource-policy"
+                }
+              }
+            ]
+          },
+          {
+            "matches": [{ "type": "QUERY", "path": "allDroids" }],
+            "filters": [
+              {
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-resource-policy"
+                }
+              }
+            ]
+          },
+          {
+            "matches": [{ "type": "QUERY", "path": "allCharacters" }],
+            "filters": [
+              {
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-resource-policy"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "status": {}
+    },
+    "cb79bb852d72308d9d20151a2eaeac8825249d2f-production-gqlroute-2": {
+      "kind": "GQLRoute",
+      "apiVersion": "dp.wso2.com/v1alpha2",
+      "metadata": {
+        "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-production-gqlroute-2",
+        "creationTimestamp": null,
+        "labels": {
+          "api-name": "42ae110427d829f0afc565b706d9a1aae6af1907",
+          "api-version": "91e95be6b6634e3c21072dfcd661146728694326",
+          "managed-by": "apk",
+          "organization": "7505d64a54e061b7acd54ccd58b49dc43500b635"
+        }
+      },
+      "spec": {
+        "parentRefs": [
+          {
+            "group": "gateway.networking.k8s.io",
+            "kind": "Gateway",
+            "name": "default",
+            "sectionName": "httpslistener"
+          }
+        ],
+        "hostnames": ["default.gw.wso2.com"],
+        "backendRefs": [
+          {
+            "group": "dp.wso2.com",
+            "kind": "Backend",
+            "name": "backend-aaab6e742130d50703e6022599d8c2e1a40299ac-api"
+          }
+        ],
+        "rules": [
+          {
+            "matches": [{ "type": "QUERY", "path": "search" }],
+            "filters": [
+              {
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-resource-policy"
+                }
+              }
+            ]
+          },
+          {
+            "matches": [{ "type": "QUERY", "path": "character" }],
+            "filters": [
+              {
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-resource-policy"
+                }
+              }
+            ]
+          },
+          {
+            "matches": [{ "type": "SUBSCRIPTION", "path": "reviewAdded" }],
+            "filters": [
+              {
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-resource-policy"
+                }
+              }
+            ]
+          },
+          {
+            "matches": [{ "type": "QUERY", "path": "hero" }],
+            "filters": [
+              {
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-resource-policy"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "status": {}
+    },
+    "cb79bb852d72308d9d20151a2eaeac8825249d2f-sandbox-gqlroute-1": {
+      "kind": "GQLRoute",
+      "apiVersion": "dp.wso2.com/v1alpha2",
+      "metadata": {
+        "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-sandbox-gqlroute-1",
+        "creationTimestamp": null,
+        "labels": {
+          "api-name": "42ae110427d829f0afc565b706d9a1aae6af1907",
+          "api-version": "91e95be6b6634e3c21072dfcd661146728694326",
+          "managed-by": "apk",
+          "organization": "7505d64a54e061b7acd54ccd58b49dc43500b635"
+        }
+      },
+      "spec": {
+        "parentRefs": [
+          {
+            "group": "gateway.networking.k8s.io",
+            "kind": "Gateway",
+            "name": "default",
+            "sectionName": "httpslistener"
+          }
+        ],
+        "hostnames": ["default.sandbox.gw.wso2.com"],
+        "backendRefs": [
+          {
+            "group": "dp.wso2.com",
+            "kind": "Backend",
+            "name": "backend-caf0fb11deb635fdc695e6f9f586d4c9b63a91d7-api"
+          }
+        ],
+        "rules": [
+          {
+            "matches": [{ "type": "QUERY", "path": "droid" }],
+            "filters": [
+              {
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-resource-policy"
+                }
+              }
+            ]
+          },
+          {
+            "matches": [{ "type": "QUERY", "path": "human" }],
+            "filters": [
+              {
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-resource-policy"
+                }
+              }
+            ]
+          },
+          {
+            "matches": [{ "type": "MUTATION", "path": "createReview" }],
+            "filters": [
+              {
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-resource-policy"
+                }
+              }
+            ]
+          },
+          {
+            "matches": [{ "type": "QUERY", "path": "allHumans" }],
+            "filters": [
+              {
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-resource-policy"
+                }
+              }
+            ]
+          },
+          {
+            "matches": [{ "type": "QUERY", "path": "starship" }],
+            "filters": [
+              {
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-resource-policy"
+                }
+              }
+            ]
+          },
+          {
+            "matches": [{ "type": "QUERY", "path": "reviews" }],
+            "filters": [
+              {
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-resource-policy"
+                }
+              }
+            ]
+          },
+          {
+            "matches": [{ "type": "QUERY", "path": "allDroids" }],
+            "filters": [
+              {
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-resource-policy"
+                }
+              }
+            ]
+          },
+          {
+            "matches": [{ "type": "QUERY", "path": "allCharacters" }],
+            "filters": [
+              {
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-resource-policy"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "status": {}
+    },
+    "cb79bb852d72308d9d20151a2eaeac8825249d2f-sandbox-gqlroute-2": {
+      "kind": "GQLRoute",
+      "apiVersion": "dp.wso2.com/v1alpha2",
+      "metadata": {
+        "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-sandbox-gqlroute-2",
+        "creationTimestamp": null,
+        "labels": {
+          "api-name": "42ae110427d829f0afc565b706d9a1aae6af1907",
+          "api-version": "91e95be6b6634e3c21072dfcd661146728694326",
+          "managed-by": "apk",
+          "organization": "7505d64a54e061b7acd54ccd58b49dc43500b635"
+        }
+      },
+      "spec": {
+        "parentRefs": [
+          {
+            "group": "gateway.networking.k8s.io",
+            "kind": "Gateway",
+            "name": "default",
+            "sectionName": "httpslistener"
+          }
+        ],
+        "hostnames": ["default.sandbox.gw.wso2.com"],
+        "backendRefs": [
+          {
+            "group": "dp.wso2.com",
+            "kind": "Backend",
+            "name": "backend-caf0fb11deb635fdc695e6f9f586d4c9b63a91d7-api"
+          }
+        ],
+        "rules": [
+          {
+            "matches": [{ "type": "QUERY", "path": "search" }],
+            "filters": [
+              {
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-resource-policy"
+                }
+              }
+            ]
+          },
+          {
+            "matches": [{ "type": "QUERY", "path": "character" }],
+            "filters": [
+              {
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-resource-policy"
+                }
+              }
+            ]
+          },
+          {
+            "matches": [{ "type": "SUBSCRIPTION", "path": "reviewAdded" }],
+            "filters": [
+              {
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-resource-policy"
+                }
+              }
+            ]
+          },
+          {
+            "matches": [{ "type": "QUERY", "path": "hero" }],
+            "filters": [
+              {
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-resource-policy"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "status": {}
+    }
+  },
+  "Backends": {
+    "backend-aaab6e742130d50703e6022599d8c2e1a40299ac-api": {
+      "kind": "Backend",
+      "apiVersion": "dp.wso2.com/v1alpha1",
+      "metadata": {
+        "name": "backend-aaab6e742130d50703e6022599d8c2e1a40299ac-api",
+        "creationTimestamp": null,
+        "labels": {
+          "api-name": "42ae110427d829f0afc565b706d9a1aae6af1907",
+          "api-version": "91e95be6b6634e3c21072dfcd661146728694326",
+          "managed-by": "apk",
+          "organization": "7505d64a54e061b7acd54ccd58b49dc43500b635"
+        }
+      },
+      "spec": {
+        "services": [{ "host": "localhost", "port": 8080 }],
+        "protocol": "http",
+        "basePath": "/graphql"
+      },
+      "status": {}
+    },
+    "backend-caf0fb11deb635fdc695e6f9f586d4c9b63a91d7-api": {
+      "kind": "Backend",
+      "apiVersion": "dp.wso2.com/v1alpha1",
+      "metadata": {
+        "name": "backend-caf0fb11deb635fdc695e6f9f586d4c9b63a91d7-api",
+        "creationTimestamp": null,
+        "labels": {
+          "api-name": "42ae110427d829f0afc565b706d9a1aae6af1907",
+          "api-version": "91e95be6b6634e3c21072dfcd661146728694326",
+          "managed-by": "apk",
+          "organization": "7505d64a54e061b7acd54ccd58b49dc43500b635"
+        }
+      },
+      "spec": {
+        "services": [{ "host": "localhost", "port": 8080 }],
+        "protocol": "http",
+        "basePath": "/graphql"
+      },
+      "status": {}
+    }
+  },
+  "Scopes": {},
+  "Authentication": {
+    "cb79bb852d72308d9d20151a2eaeac8825249d2f-production-authentication": {
+      "kind": "Authentication",
+      "apiVersion": "dp.wso2.com/v1alpha2",
+      "metadata": {
+        "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-production-authentication",
+        "creationTimestamp": null,
+        "labels": {
+          "api-name": "42ae110427d829f0afc565b706d9a1aae6af1907",
+          "api-version": "91e95be6b6634e3c21072dfcd661146728694326",
+          "managed-by": "apk",
+          "organization": "7505d64a54e061b7acd54ccd58b49dc43500b635"
+        }
+      },
+      "spec": {
+        "default": {
+          "disabled": false,
+          "authTypes": {
+            "oauth2": {
+              "required": "mandatory",
+              "disabled": false,
+              "header": "Authorization"
+            },
+            "testConsoleKey": {}
+          }
+        },
+        "targetRef": {
+          "group": "gateway.networking.k8s.io",
+          "kind": "API",
+          "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f"
+        }
+      },
+      "status": {}
+    },
+    "cb79bb852d72308d9d20151a2eaeac8825249d2f-sandbox-authentication": {
+      "kind": "Authentication",
+      "apiVersion": "dp.wso2.com/v1alpha2",
+      "metadata": {
+        "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-sandbox-authentication",
+        "creationTimestamp": null,
+        "labels": {
+          "api-name": "42ae110427d829f0afc565b706d9a1aae6af1907",
+          "api-version": "91e95be6b6634e3c21072dfcd661146728694326",
+          "managed-by": "apk",
+          "organization": "7505d64a54e061b7acd54ccd58b49dc43500b635"
+        }
+      },
+      "spec": {
+        "default": {
+          "disabled": false,
+          "authTypes": {
+            "oauth2": {
+              "required": "mandatory",
+              "disabled": false,
+              "header": "Authorization"
+            },
+            "testConsoleKey": {}
+          }
+        },
+        "targetRef": {
+          "group": "gateway.networking.k8s.io",
+          "kind": "API",
+          "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f"
+        }
+      },
+      "status": {}
+    }
+  },
+  "APIPolicies": {
+    "cb79bb852d72308d9d20151a2eaeac8825249d2f-api-policy": {
+      "kind": "APIPolicy",
+      "apiVersion": "dp.wso2.com/v1alpha2",
+      "metadata": {
+        "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-api-policy",
+        "creationTimestamp": null,
+        "labels": {
+          "api-name": "42ae110427d829f0afc565b706d9a1aae6af1907",
+          "api-version": "91e95be6b6634e3c21072dfcd661146728694326",
+          "managed-by": "apk",
+          "organization": "7505d64a54e061b7acd54ccd58b49dc43500b635"
+        }
+      },
+      "spec": {
+        "default": {
+          "cORSPolicy": {
+            "accessControlAllowHeaders": [
+              "authorization",
+              "Access-Control-Allow-Origin",
+              "Content-Type",
+              "SOAPAction",
+              "apikey",
+              "Internal-Key"
+            ],
+            "accessControlAllowMethods": [
+              "GET",
+              "PUT",
+              "POST",
+              "DELETE",
+              "PATCH",
+              "OPTIONS"
+            ],
+            "accessControlAllowOrigins": ["*"]
+          },
+          "subscriptionValidation": true
+        },
+        "targetRef": {
+          "group": "dp.wso2.com",
+          "kind": "API",
+          "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f"
+        }
+      },
+      "status": {}
+    },
+    "cb79bb852d72308d9d20151a2eaeac8825249d2f-resource-policy": {
+      "kind": "APIPolicy",
+      "apiVersion": "dp.wso2.com/v1alpha2",
+      "metadata": {
+        "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-resource-policy",
+        "creationTimestamp": null,
+        "labels": {
+          "api-name": "42ae110427d829f0afc565b706d9a1aae6af1907",
+          "api-version": "91e95be6b6634e3c21072dfcd661146728694326",
+          "managed-by": "apk",
+          "organization": "7505d64a54e061b7acd54ccd58b49dc43500b635"
+        }
+      },
+      "spec": {
+        "default": {
+          "cORSPolicy": {
+            "accessControlAllowHeaders": [
+              "authorization",
+              "Access-Control-Allow-Origin",
+              "Content-Type",
+              "SOAPAction",
+              "apikey",
+              "Internal-Key"
+            ],
+            "accessControlAllowMethods": [
+              "GET",
+              "PUT",
+              "POST",
+              "DELETE",
+              "PATCH",
+              "OPTIONS"
+            ],
+            "accessControlAllowOrigins": ["*"]
+          },
+          "subscriptionValidation": true
+        },
+        "targetRef": {
+          "group": "dp.wso2.com",
+          "kind": "Resource",
+          "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f"
+        }
+      },
+      "status": {}
+    }
+  },
+  "InterceptorServices": {},
+  "ConfigMaps": {
+    "cb79bb852d72308d9d20151a2eaeac8825249d2f-definition": {
+      "kind": "ConfigMap",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "cb79bb852d72308d9d20151a2eaeac8825249d2f-definition",
+        "creationTimestamp": null,
+        "labels": {
+          "api-name": "42ae110427d829f0afc565b706d9a1aae6af1907",
+          "api-version": "91e95be6b6634e3c21072dfcd661146728694326",
+          "managed-by": "apk",
+          "organization": "7505d64a54e061b7acd54ccd58b49dc43500b635"
+        }
+      },
+      "binaryData": {
+        "definition": "H4sIAAAAAAAA/8VYWW/cNhB+318xRh7qApvAaRGkXaAPjr2GFdRHbbd5CIyClmZXrCVSpSivF0n/e2eG1LGHr4cgL16RHM75zUHXaY6lgi8jgH8bdMsJ/ME/tCwbr7y2ZgIn8Ys26+amTp2uwsHlYDX6bzR6BVc5Bj7glxWOwWHlsEbja1BFAXYGnihoTRSV1bxPfyzYxoG9+QdTD3OnqnzE14MqoluOzu5ipWub4QSm4ePHCRzkyqnUoyMah3caF/UG2Q7Rfb6Qw2s2AZVL812P954s8E6bORNcyvYF1k3hmSxtOe/qbALJ4c6atMxZnQ3ODnnNmjalMoP9Y17TPpkvn/XuTLuaRCfGs1zZvA4EwmOdQDYjQafAOlF3IBZ65epcVwMtLuNWH6U2vNsD1VSZ8ljDAiFVBkp1ixDDRAcqhKfFhUQodUg3gps3QjCOwZlAIEhM1XjWKyx7rYb42q7ZkOIJ/YbwFB2DEvtZhtk2MK0rE0kYogJbdiJ8IkcCoaaw8+UITVO2DETCqwFRu5/8NYF9OMUFHNtgUIGqxozZvv31/fs3dO90+un47Hw6eoAFcWCFpmWlHQpob0mtDyq9XWf3yx6zm56cJxcPc0vYVt840ybkR8z0BqefmdPH6WHyEJ8kEUZ3aObYcrrUPl/l9NPe3jticJlcHQfX7ve5BTNnyzXfNkbfEcBxRIUB3Uyl2Odd9DH7IjlsRaaDrIyIH3VkRpW4jZD32/QfkM+cRpPVGzfGYB0Q0LCs/BIKXXvQQrKEXN2RGGuQmMTrqwn5JHPA+8qytxRBHFJrDNVBxuyCnAmYzbHueR90x4MSMAY1I0ZsO+H4aJ1yYGBpCeME4FzXAwVUVSH7XkulCouECvznGOrrnRC6P432on+Oep77gP/fKf4+56NBeKgGmUy5jMPpQTnbmEysXlhXcJ08mV5NL4Je506XijJqCU3EDBMyQ1oRMLzYf3R2dtUCSIoslcVQdRqHjwJJioHUWdBlVWApxeRxUOWxbK8A6lOufHCdHFPpKQr2JZY1Fnei5QO4yi3BsCqUQb8iQXBlGqprBKfG3Bq7YKlMfi7ULa/A6ljc3nqI6uIMncPg5DFkOFPUvYD0K5GbhDROvrHLBJNhpH4LAWC0FFb5wP5E1VLsbrm6OVXWD6hXEt3KxavOJz/ULVC/RcoEt3+ndAnCn5Eqcns/mEyKt+04sqkoMKRsTtpX5GfC+HZPRf90t3lGid/XMQ9Im8ZbY0vbcMgpn40mTA4Se6NzrSaFzBbPT4oszjibSWHpmLhzQgQrW9Kt+dCef1uwiIjvBZYg/LlgWXFJJeVwCbPGpHHsjltHcacrCm0/7c2KQ/SM3dnjoHd0iPuGFYNwe+sJQlTYbwgF5Mr2IoSTA6rkwTG94eJGkYkqzTf6Wy+dJwohJhdEHaa0vF5PGd9Hc9xFjuYM2qFxYJGjiTKVY2x4MIg01L15FCKJIQ3LMLGyrpWaa0NLM4/tsPMGe1zNkS9M4Dx+7XRJx6Jf5mg2MrqYotVQAXCh1w31ELnhcG2I6fO5G4bp7s0y6B0FUl0QzTjpZLDtXyui+AvMF9Vbu0VvrkL+oNONw2iylTXVs1N6UvGtCXywlgZAE112MZjg4wwe/SYZE8SF4XuAw3AGsD6oD2a7DqNSJIMZkf+cqsYY3r5+15ZQgWz06YEtudyBurGNF7C1wtJwovghPMwxFqf50dLGnc0JQKypV1N14q4r0wg7VBEgF1GVUbg3ePhEI/devwuqvUBFqpPynFHFdmXl7pG6s46GJyIorFu5MotHf8sRYYR/RKkn7ayo6bNt1FJU4Bwt63nER1YWDQF6yyOabnVTNBgXJCw80WJH29pu2tb31Fw/oNvSbsLQs05LZaWwAn0E/kAqPOpecywKufCskSm11mWcRVLRPsv+zvWO9Ge6T5k2/LcCcQhT6NfYeL/27/L/AW5FtmOIEQAA"
+      }
+    }
+  },
+  "Secrets": {},
+  "BackendJWT": null,
+  "RateLimitPolicies": {}
+}

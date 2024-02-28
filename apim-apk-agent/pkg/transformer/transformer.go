@@ -170,7 +170,7 @@ func getAPIType(protocolType string) string {
 }
 
 // Generate the interceptor policy if request or response policy exists
-func getReqAndResInterceptors(reqPolicyCount int, resPolicyCount int) (*[]OperationPolicy, *[]OperationPolicy) {
+func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int) (*[]OperationPolicy, *[]OperationPolicy) {
 	var reqInterceptor, resInterceptor []OperationPolicy
 	var interceptorParams *InterceptorService
 	var interceptorPolicy OperationPolicy
@@ -200,9 +200,7 @@ func getReqAndResInterceptors(reqPolicyCount int, resPolicyCount int) (*[]Operat
 
 	if resPolicyCount > 0 {
 		resInterceptor = append(resInterceptor, interceptorPolicy)
-
 	}
-
 	return &reqInterceptor, &resInterceptor
 }
 
@@ -628,7 +626,7 @@ func createConfigMaps(certFiles map[string]string, k8sArtifact *K8sArtifacts) {
 		cm := corev1.ConfigMap{}
 		cm.APIVersion = "v1"
 		cm.Kind = "ConfigMap"
-		cm.ObjectMeta.Name = configName
+		cm.ObjectMeta.Name = k8sArtifact.API.Name + "-" + configName
 
 		if cm.ObjectMeta.Labels == nil {
 			cm.ObjectMeta.Labels = make(map[string]string)
