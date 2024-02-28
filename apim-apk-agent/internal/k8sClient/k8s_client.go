@@ -33,7 +33,6 @@ import (
 	k8error "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/gateway-api/apis/v1alpha2"
 	gwapiv1b1 "sigs.k8s.io/gateway-api/apis/v1beta1"
@@ -79,15 +78,18 @@ func UndeployAPICR(apiID string, k8sClient client.Client) {
 	if errReadConfig != nil {
 		loggers.LoggerK8sClient.Errorf("Error reading configurations: %v", errReadConfig)
 	}
-	api := &dpv1alpha2.API{}
+	apiList := &dpv1alpha2.APIList{}
+	err := k8sClient.List(context.Background(), apiList, &client.ListOptions{Namespace: conf.DataPlane.Namespace, LabelSelector: labels.SelectorFromSet(map[string]string{"apiUUID": apiID})})
 	// Retrieve all API CRs from the Kubernetes cluster
-	if err := k8sClient.Get(context.Background(), types.NamespacedName{Name: apiID, Namespace: conf.DataPlane.Namespace}, api); err != nil {
+	if err != nil {
 		loggers.LoggerK8sClient.Errorf("Unable to list API CRs: %v", err)
 	}
-	if err := UndeployK8sAPICR(k8sClient, *api); err != nil {
-		loggers.LoggerK8sClient.Errorf("Unable to delete API CR: %v", err)
+	for _, api := range apiList.Items {
+		if err := UndeployK8sAPICR(k8sClient, api); err != nil {
+			loggers.LoggerK8sClient.Errorf("Unable to delete API CR: %v", err)
+		}
+		loggers.LoggerK8sClient.Infof("Deleted API CR: %s", api.Name)
 	}
-	loggers.LoggerK8sClient.Infof("Deleted API CR: %s", api.Name)
 }
 
 // DeployConfigMapCR applies the given ConfigMap struct to the Kubernetes cluster.
