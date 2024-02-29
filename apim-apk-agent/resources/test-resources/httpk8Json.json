@@ -1,0 +1,672 @@
+{
+  "API": {
+    "kind": "API",
+    "apiVersion": "dp.wso2.com/v1alpha2",
+    "metadata": {
+      "name": "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9",
+      "creationTimestamp": null,
+      "labels": {
+        "api-name": "1ed4120e15fab0833626a36d08ffa3ad7bb9d9a6",
+        "api-version": "91e95be6b6634e3c21072dfcd661146728694326",
+        "managed-by": "apk",
+        "organization": "7505d64a54e061b7acd54ccd58b49dc43500b635"
+      }
+    },
+    "spec": {
+      "apiName": "PizzaShackAPI",
+      "apiVersion": "1.0.0",
+      "isDefaultVersion": false,
+      "definitionFileRef": "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9-definition",
+      "definitionPath": "/definition",
+      "production": [
+        {
+          "httpRouteRefs": [
+            "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9-production-httproute-1"
+          ]
+        }
+      ],
+      "sandbox": [
+        {
+          "httpRouteRefs": [
+            "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9-sandbox-httproute-1"
+          ]
+        }
+      ],
+      "apiType": "REST",
+      "basePath": "/pizzashack/1.0.0",
+      "organization": "default",
+      "systemAPI": false
+    },
+    "status": {
+      "deploymentStatus": {
+        "status": "",
+        "message": "",
+        "accepted": false,
+        "transitionTime": null
+      }
+    }
+  },
+  "HTTPRoutes": {
+    "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9-production-httproute-1": {
+      "kind": "HTTPRoute",
+      "apiVersion": "gateway.networking.k8s.io/v1beta1",
+      "metadata": {
+        "name": "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9-production-httproute-1",
+        "creationTimestamp": null,
+        "labels": {
+          "api-name": "1ed4120e15fab0833626a36d08ffa3ad7bb9d9a6",
+          "api-version": "91e95be6b6634e3c21072dfcd661146728694326",
+          "managed-by": "apk",
+          "organization": "7505d64a54e061b7acd54ccd58b49dc43500b635"
+        }
+      },
+      "spec": {
+        "parentRefs": [
+          {
+            "group": "gateway.networking.k8s.io",
+            "kind": "Gateway",
+            "name": "default",
+            "sectionName": "httpslistener"
+          }
+        ],
+        "hostnames": ["default.gw.wso2.com"],
+        "rules": [
+          {
+            "matches": [
+              {
+                "path": { "type": "RegularExpression", "value": "/order" },
+                "method": "POST"
+              }
+            ],
+            "filters": [
+              {
+                "type": "URLRewrite",
+                "urlRewrite": {
+                  "path": {
+                    "type": "ReplaceFullPath",
+                    "replaceFullPath": "/order"
+                  }
+                }
+              },
+              {
+                "type": "ExtensionRef",
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9-resource-policy"
+                }
+              }
+            ],
+            "backendRefs": [
+              {
+                "group": "dp.wso2.com",
+                "kind": "Backend",
+                "name": "backend-f0c4c66d1811b72b1f5c0025879fa55e208cca9e-api"
+              }
+            ]
+          },
+          {
+            "matches": [
+              {
+                "path": { "type": "RegularExpression", "value": "/menu" },
+                "method": "GET"
+              }
+            ],
+            "filters": [
+              {
+                "type": "URLRewrite",
+                "urlRewrite": {
+                  "path": {
+                    "type": "ReplaceFullPath",
+                    "replaceFullPath": "/menu"
+                  }
+                }
+              },
+              {
+                "type": "ExtensionRef",
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9-resource-policy"
+                }
+              }
+            ],
+            "backendRefs": [
+              {
+                "group": "dp.wso2.com",
+                "kind": "Backend",
+                "name": "backend-f0c4c66d1811b72b1f5c0025879fa55e208cca9e-api"
+              }
+            ]
+          },
+          {
+            "matches": [
+              {
+                "path": { "type": "RegularExpression", "value": "/order/(.*)" },
+                "method": "GET"
+              }
+            ],
+            "filters": [
+              {
+                "type": "URLRewrite",
+                "urlRewrite": {
+                  "path": {
+                    "type": "ReplaceFullPath",
+                    "replaceFullPath": "/order/\\1"
+                  }
+                }
+              },
+              {
+                "type": "ExtensionRef",
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9-resource-policy"
+                }
+              }
+            ],
+            "backendRefs": [
+              {
+                "group": "dp.wso2.com",
+                "kind": "Backend",
+                "name": "backend-f0c4c66d1811b72b1f5c0025879fa55e208cca9e-api"
+              }
+            ]
+          },
+          {
+            "matches": [
+              {
+                "path": { "type": "RegularExpression", "value": "/order/(.*)" },
+                "method": "PUT"
+              }
+            ],
+            "filters": [
+              {
+                "type": "URLRewrite",
+                "urlRewrite": {
+                  "path": {
+                    "type": "ReplaceFullPath",
+                    "replaceFullPath": "/order/\\1"
+                  }
+                }
+              },
+              {
+                "type": "ExtensionRef",
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9-resource-policy"
+                }
+              }
+            ],
+            "backendRefs": [
+              {
+                "group": "dp.wso2.com",
+                "kind": "Backend",
+                "name": "backend-f0c4c66d1811b72b1f5c0025879fa55e208cca9e-api"
+              }
+            ]
+          },
+          {
+            "matches": [
+              {
+                "path": { "type": "RegularExpression", "value": "/order/(.*)" },
+                "method": "DELETE"
+              }
+            ],
+            "filters": [
+              {
+                "type": "URLRewrite",
+                "urlRewrite": {
+                  "path": {
+                    "type": "ReplaceFullPath",
+                    "replaceFullPath": "/order/\\1"
+                  }
+                }
+              },
+              {
+                "type": "ExtensionRef",
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9-resource-policy"
+                }
+              }
+            ],
+            "backendRefs": [
+              {
+                "group": "dp.wso2.com",
+                "kind": "Backend",
+                "name": "backend-f0c4c66d1811b72b1f5c0025879fa55e208cca9e-api"
+              }
+            ]
+          }
+        ]
+      },
+      "status": { "parents": null }
+    },
+    "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9-sandbox-httproute-1": {
+      "kind": "HTTPRoute",
+      "apiVersion": "gateway.networking.k8s.io/v1beta1",
+      "metadata": {
+        "name": "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9-sandbox-httproute-1",
+        "creationTimestamp": null,
+        "labels": {
+          "api-name": "1ed4120e15fab0833626a36d08ffa3ad7bb9d9a6",
+          "api-version": "91e95be6b6634e3c21072dfcd661146728694326",
+          "managed-by": "apk",
+          "organization": "7505d64a54e061b7acd54ccd58b49dc43500b635"
+        }
+      },
+      "spec": {
+        "parentRefs": [
+          {
+            "group": "gateway.networking.k8s.io",
+            "kind": "Gateway",
+            "name": "default",
+            "sectionName": "httpslistener"
+          }
+        ],
+        "hostnames": ["default.sandbox.gw.wso2.com"],
+        "rules": [
+          {
+            "matches": [
+              {
+                "path": { "type": "RegularExpression", "value": "/order" },
+                "method": "POST"
+              }
+            ],
+            "filters": [
+              {
+                "type": "URLRewrite",
+                "urlRewrite": {
+                  "path": {
+                    "type": "ReplaceFullPath",
+                    "replaceFullPath": "/order"
+                  }
+                }
+              },
+              {
+                "type": "ExtensionRef",
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9-resource-policy"
+                }
+              }
+            ],
+            "backendRefs": [
+              {
+                "group": "dp.wso2.com",
+                "kind": "Backend",
+                "name": "backend-c0b1d5d79207ae68919775573b07249e82a40976-api"
+              }
+            ]
+          },
+          {
+            "matches": [
+              {
+                "path": { "type": "RegularExpression", "value": "/menu" },
+                "method": "GET"
+              }
+            ],
+            "filters": [
+              {
+                "type": "URLRewrite",
+                "urlRewrite": {
+                  "path": {
+                    "type": "ReplaceFullPath",
+                    "replaceFullPath": "/menu"
+                  }
+                }
+              },
+              {
+                "type": "ExtensionRef",
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9-resource-policy"
+                }
+              }
+            ],
+            "backendRefs": [
+              {
+                "group": "dp.wso2.com",
+                "kind": "Backend",
+                "name": "backend-c0b1d5d79207ae68919775573b07249e82a40976-api"
+              }
+            ]
+          },
+          {
+            "matches": [
+              {
+                "path": { "type": "RegularExpression", "value": "/order/(.*)" },
+                "method": "GET"
+              }
+            ],
+            "filters": [
+              {
+                "type": "URLRewrite",
+                "urlRewrite": {
+                  "path": {
+                    "type": "ReplaceFullPath",
+                    "replaceFullPath": "/order/\\1"
+                  }
+                }
+              },
+              {
+                "type": "ExtensionRef",
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9-resource-policy"
+                }
+              }
+            ],
+            "backendRefs": [
+              {
+                "group": "dp.wso2.com",
+                "kind": "Backend",
+                "name": "backend-c0b1d5d79207ae68919775573b07249e82a40976-api"
+              }
+            ]
+          },
+          {
+            "matches": [
+              {
+                "path": { "type": "RegularExpression", "value": "/order/(.*)" },
+                "method": "PUT"
+              }
+            ],
+            "filters": [
+              {
+                "type": "URLRewrite",
+                "urlRewrite": {
+                  "path": {
+                    "type": "ReplaceFullPath",
+                    "replaceFullPath": "/order/\\1"
+                  }
+                }
+              },
+              {
+                "type": "ExtensionRef",
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9-resource-policy"
+                }
+              }
+            ],
+            "backendRefs": [
+              {
+                "group": "dp.wso2.com",
+                "kind": "Backend",
+                "name": "backend-c0b1d5d79207ae68919775573b07249e82a40976-api"
+              }
+            ]
+          },
+          {
+            "matches": [
+              {
+                "path": { "type": "RegularExpression", "value": "/order/(.*)" },
+                "method": "DELETE"
+              }
+            ],
+            "filters": [
+              {
+                "type": "URLRewrite",
+                "urlRewrite": {
+                  "path": {
+                    "type": "ReplaceFullPath",
+                    "replaceFullPath": "/order/\\1"
+                  }
+                }
+              },
+              {
+                "type": "ExtensionRef",
+                "extensionRef": {
+                  "group": "dp.wso2.com",
+                  "kind": "APIPolicy",
+                  "name": "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9-resource-policy"
+                }
+              }
+            ],
+            "backendRefs": [
+              {
+                "group": "dp.wso2.com",
+                "kind": "Backend",
+                "name": "backend-c0b1d5d79207ae68919775573b07249e82a40976-api"
+              }
+            ]
+          }
+        ]
+      },
+      "status": { "parents": null }
+    }
+  },
+  "GQLRoutes": {},
+  "Backends": {
+    "backend-c0b1d5d79207ae68919775573b07249e82a40976-api": {
+      "kind": "Backend",
+      "apiVersion": "dp.wso2.com/v1alpha1",
+      "metadata": {
+        "name": "backend-c0b1d5d79207ae68919775573b07249e82a40976-api",
+        "creationTimestamp": null,
+        "labels": {
+          "api-name": "1ed4120e15fab0833626a36d08ffa3ad7bb9d9a6",
+          "api-version": "91e95be6b6634e3c21072dfcd661146728694326",
+          "managed-by": "apk",
+          "organization": "7505d64a54e061b7acd54ccd58b49dc43500b635"
+        }
+      },
+      "spec": {
+        "services": [{ "host": "localhost", "port": 9443 }],
+        "protocol": "https",
+        "basePath": "/am/sample/pizzashack/v1/api/"
+      },
+      "status": {}
+    },
+    "backend-f0c4c66d1811b72b1f5c0025879fa55e208cca9e-api": {
+      "kind": "Backend",
+      "apiVersion": "dp.wso2.com/v1alpha1",
+      "metadata": {
+        "name": "backend-f0c4c66d1811b72b1f5c0025879fa55e208cca9e-api",
+        "creationTimestamp": null,
+        "labels": {
+          "api-name": "1ed4120e15fab0833626a36d08ffa3ad7bb9d9a6",
+          "api-version": "91e95be6b6634e3c21072dfcd661146728694326",
+          "managed-by": "apk",
+          "organization": "7505d64a54e061b7acd54ccd58b49dc43500b635"
+        }
+      },
+      "spec": {
+        "services": [{ "host": "localhost", "port": 9443 }],
+        "protocol": "https",
+        "basePath": "/am/sample/pizzashack/v1/api/"
+      },
+      "status": {}
+    }
+  },
+  "Scopes": {},
+  "Authentication": {
+    "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9-production-authentication": {
+      "kind": "Authentication",
+      "apiVersion": "dp.wso2.com/v1alpha2",
+      "metadata": {
+        "name": "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9-production-authentication",
+        "creationTimestamp": null,
+        "labels": {
+          "api-name": "1ed4120e15fab0833626a36d08ffa3ad7bb9d9a6",
+          "api-version": "91e95be6b6634e3c21072dfcd661146728694326",
+          "managed-by": "apk",
+          "organization": "7505d64a54e061b7acd54ccd58b49dc43500b635"
+        }
+      },
+      "spec": {
+        "default": {
+          "disabled": false,
+          "authTypes": {
+            "oauth2": {
+              "required": "mandatory",
+              "disabled": false,
+              "header": "Authorization"
+            },
+            "testConsoleKey": {}
+          }
+        },
+        "targetRef": {
+          "group": "gateway.networking.k8s.io",
+          "kind": "API",
+          "name": "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9"
+        }
+      },
+      "status": {}
+    },
+    "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9-sandbox-authentication": {
+      "kind": "Authentication",
+      "apiVersion": "dp.wso2.com/v1alpha2",
+      "metadata": {
+        "name": "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9-sandbox-authentication",
+        "creationTimestamp": null,
+        "labels": {
+          "api-name": "1ed4120e15fab0833626a36d08ffa3ad7bb9d9a6",
+          "api-version": "91e95be6b6634e3c21072dfcd661146728694326",
+          "managed-by": "apk",
+          "organization": "7505d64a54e061b7acd54ccd58b49dc43500b635"
+        }
+      },
+      "spec": {
+        "default": {
+          "disabled": false,
+          "authTypes": {
+            "oauth2": {
+              "required": "mandatory",
+              "disabled": false,
+              "header": "Authorization"
+            },
+            "testConsoleKey": {}
+          }
+        },
+        "targetRef": {
+          "group": "gateway.networking.k8s.io",
+          "kind": "API",
+          "name": "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9"
+        }
+      },
+      "status": {}
+    }
+  },
+  "APIPolicies": {
+    "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9-api-policy": {
+      "kind": "APIPolicy",
+      "apiVersion": "dp.wso2.com/v1alpha2",
+      "metadata": {
+        "name": "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9-api-policy",
+        "creationTimestamp": null,
+        "labels": {
+          "api-name": "1ed4120e15fab0833626a36d08ffa3ad7bb9d9a6",
+          "api-version": "91e95be6b6634e3c21072dfcd661146728694326",
+          "managed-by": "apk",
+          "organization": "7505d64a54e061b7acd54ccd58b49dc43500b635"
+        }
+      },
+      "spec": {
+        "default": {
+          "cORSPolicy": {
+            "accessControlAllowHeaders": [
+              "authorization",
+              "Access-Control-Allow-Origin",
+              "Content-Type",
+              "SOAPAction",
+              "apikey",
+              "Internal-Key"
+            ],
+            "accessControlAllowMethods": [
+              "GET",
+              "PUT",
+              "POST",
+              "DELETE",
+              "PATCH",
+              "OPTIONS"
+            ],
+            "accessControlAllowOrigins": ["*"]
+          },
+          "subscriptionValidation": true
+        },
+        "targetRef": {
+          "group": "dp.wso2.com",
+          "kind": "API",
+          "name": "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9"
+        }
+      },
+      "status": {}
+    },
+    "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9-resource-policy": {
+      "kind": "APIPolicy",
+      "apiVersion": "dp.wso2.com/v1alpha2",
+      "metadata": {
+        "name": "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9-resource-policy",
+        "creationTimestamp": null,
+        "labels": {
+          "api-name": "1ed4120e15fab0833626a36d08ffa3ad7bb9d9a6",
+          "api-version": "91e95be6b6634e3c21072dfcd661146728694326",
+          "managed-by": "apk",
+          "organization": "7505d64a54e061b7acd54ccd58b49dc43500b635"
+        }
+      },
+      "spec": {
+        "default": {
+          "cORSPolicy": {
+            "accessControlAllowHeaders": [
+              "authorization",
+              "Access-Control-Allow-Origin",
+              "Content-Type",
+              "SOAPAction",
+              "apikey",
+              "Internal-Key"
+            ],
+            "accessControlAllowMethods": [
+              "GET",
+              "PUT",
+              "POST",
+              "DELETE",
+              "PATCH",
+              "OPTIONS"
+            ],
+            "accessControlAllowOrigins": ["*"]
+          },
+          "subscriptionValidation": true
+        },
+        "targetRef": {
+          "group": "dp.wso2.com",
+          "kind": "Resource",
+          "name": "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9"
+        }
+      },
+      "status": {}
+    }
+  },
+  "InterceptorServices": {},
+  "ConfigMaps": {
+    "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9-definition": {
+      "kind": "ConfigMap",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "e7c96c6e9e1a402b0437af3a4e18b2daa0e699b9-definition",
+        "creationTimestamp": null,
+        "labels": {
+          "api-name": "1ed4120e15fab0833626a36d08ffa3ad7bb9d9a6",
+          "api-version": "91e95be6b6634e3c21072dfcd661146728694326",
+          "managed-by": "apk",
+          "organization": "7505d64a54e061b7acd54ccd58b49dc43500b635"
+        }
+      },
+      "binaryData": {
+        "definition": "H4sIAAAAAAAA/9VTPU/DQAz9K8gzatKyZWOsGECqmFCHU+I2Fsnd4fOB2ij/HfsCFRNTl2bx+Z7fx1nKBCGid5GggYdVvVrD/R2QPwRoJhCSARV4ofPZ7XrXvj++bG3gEzlR8AqtlVPDrHcJ28wkJ2jeJujw4PIget7PewWjkz6ZZBW4Q7ZTDEmsMqYYfMICb+raSoepZYqyeDw/wfy/Q4GrEX029hGvLFwyV1Mp227+4xEduxFF11G4XhvV/RlcVqm9vd4axo9MjB00whnNuO1xdGXVp2jMJEz+qKn2ZfwKD7Dl59vJ2uGgEW8jbsHbMKoSeilSv9M7c1/UL5xLkuCy9BtLfRjCVxmiMQ7UUpkyNDCdnSV55UEZvUhMTVUJJlmpI5QH6p9r5Hn5vgGfN83wygMAAA=="
+      }
+    }
+  },
+  "Secrets": {},
+  "BackendJWT": null,
+  "RateLimitPolicies": {}
+}
