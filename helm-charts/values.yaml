@@ -17,20 +17,20 @@
 replicaCount: 1
 image:
   repository: wso2/apim-apk-agent
-  tag: latest
+  tag: 1.1.0-alpha
   pullPolicy: Always
 service:
   name: apim-apk-agent-service
 resources: {}
 controlPlane:
   enabled: true
-  serviceURL: https://am-service.apim-deployment.svc.cluster.local:9443/
+  serviceURL: https://apim-wso2am-cp-1-service.apk.svc.cluster.local:9443/
   username: admin
   password: admin
   environmentLabels: Default
   skipSSLVerification: true
-  eventListeningEndpoints: amqp://admin:admin@am-service:apim-deployment:svc:cluster:local:5672?retries='10'&connectdelay='30'
+  eventListeningEndpoints: amqp://admin:admin@apim-wso2am-cp-1-service.apk.svc.cluster.local:5672?retries='10'&connectdelay='30'
 dataPlane:
   enabled: true
-  k8ResourceEndpoint: https://apk-test-setup-wso2-apk-config-ds-service.apk-integration-test.svc.cluster.local:9443/api/configurator/apis/generate-k8s-resources
-  namespace: apk-integration-test
+  k8ResourceEndpoint: https://apk-wso2-apk-config-ds-service.apk.svc.cluster.local:9443/api/configurator/apis/generate-k8s-resources
+  namespace: apk
