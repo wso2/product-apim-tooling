@@ -512,7 +512,7 @@ func replaceVhost(k8sArtifact *K8sArtifacts, vhost string, deploymentType string
 		// append sandbox. part to available vhost to generate sandbox vhost
 		if k8sArtifact.API.Spec.Production != nil {
 			for _, routeName := range k8sArtifact.API.Spec.Production {
-				for _, routes := range routeName.HTTPRouteRefs {
+				for _, routes := range routeName.RouteRefs {
 					httprouteRef, ok := k8sArtifact.HTTPRoutes[routes]
 					if ok {
 						httprouteRef.Spec.Hostnames = []gwapiv1b1.Hostname{gwapiv1b1.Hostname(vhost)}
@@ -522,7 +522,7 @@ func replaceVhost(k8sArtifact *K8sArtifacts, vhost string, deploymentType string
 		}
 		if k8sArtifact.API.Spec.Sandbox != nil {
 			for _, routeName := range k8sArtifact.API.Spec.Sandbox {
-				for _, routes := range routeName.HTTPRouteRefs {
+				for _, routes := range routeName.RouteRefs {
 					httprouteRef, ok := k8sArtifact.HTTPRoutes[routes]
 					if ok {
 						httprouteRef.Spec.Hostnames = []gwapiv1b1.Hostname{gwapiv1b1.Hostname("sandbox." + vhost)}
@@ -533,7 +533,7 @@ func replaceVhost(k8sArtifact *K8sArtifacts, vhost string, deploymentType string
 	} else if deploymentType == "sandbox" {
 		if k8sArtifact.API.Spec.Sandbox != nil {
 			for _, routeName := range k8sArtifact.API.Spec.Sandbox {
-				for _, routes := range routeName.HTTPRouteRefs {
+				for _, routes := range routeName.RouteRefs {
 					httprouteRef, ok := k8sArtifact.HTTPRoutes[routes]
 					if ok {
 						httprouteRef.Spec.Hostnames = []gwapiv1b1.Hostname{gwapiv1b1.Hostname(vhost)}
@@ -543,7 +543,7 @@ func replaceVhost(k8sArtifact *K8sArtifacts, vhost string, deploymentType string
 		}
 		if k8sArtifact.API.Spec.Production != nil {
 			for _, routeName := range k8sArtifact.API.Spec.Production {
-				for _, routes := range routeName.HTTPRouteRefs {
+				for _, routes := range routeName.RouteRefs {
 					delete(k8sArtifact.HTTPRoutes, routes)
 				}
 			}
@@ -552,7 +552,7 @@ func replaceVhost(k8sArtifact *K8sArtifacts, vhost string, deploymentType string
 	} else {
 		if k8sArtifact.API.Spec.Sandbox != nil {
 			for _, routeName := range k8sArtifact.API.Spec.Sandbox {
-				for _, routes := range routeName.HTTPRouteRefs {
+				for _, routes := range routeName.RouteRefs {
 					httprouteRef, ok := k8sArtifact.HTTPRoutes[routes]
 					if ok {
 						httprouteRef.Spec.Hostnames = []gwapiv1b1.Hostname{gwapiv1b1.Hostname(vhost)}
@@ -562,7 +562,7 @@ func replaceVhost(k8sArtifact *K8sArtifacts, vhost string, deploymentType string
 		}
 		if k8sArtifact.API.Spec.Sandbox != nil {
 			for _, routeName := range k8sArtifact.API.Spec.Sandbox {
-				for _, routes := range routeName.HTTPRouteRefs {
+				for _, routes := range routeName.RouteRefs {
 					delete(k8sArtifact.HTTPRoutes, routes)
 				}
 			}
