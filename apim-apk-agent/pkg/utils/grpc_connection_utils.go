@@ -37,7 +37,7 @@ func SendInitialEventToAllConnectedClients() {
 
 	event := subscription.Event{
 		Uuid:      uuid.New().String(),
-		Type:      constants.AllEvnts,
+		Type:      constants.AllEvents,
 		TimeStamp: milliseconds,
 	}
 	loggers.LoggerAPKOperator.Debugf("Sending initial event to all clients: %v", &event)
@@ -53,7 +53,7 @@ func SendInitialEvent(srv apkmgt.EventStreamService_StreamEventsServer) {
 
 	event := subscription.Event{
 		Uuid:      uuid.New().String(),
-		Type:      constants.AllEvnts,
+		Type:      constants.AllEvents,
 		TimeStamp: milliseconds,
 	}
 	loggers.LoggerAPKOperator.Debugf("Sending initial event to client: %v", &event)

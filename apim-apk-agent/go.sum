@@ -157,10 +157,10 @@ github.com/ugorji/go/codec v1.2.12 h1:9LC83zGrHhuUA9l16C9AHXAqEV/2wBQ4nkvumAE65E
 github.com/ugorji/go/codec v1.2.12/go.mod h1:UNopzCgEMSXjBc6AOMqYvWC1ktqTAfzJZUZgYf6w6lg=
 github.com/vektah/gqlparser v1.3.1 h1:8b0IcD3qZKWJQHSzynbDlrtP3IxVydZ2DZepCGofqfU=
 github.com/vektah/gqlparser v1.3.1/go.mod h1:bkVf0FX+Stjg/MHnm8mEyubuaArhNEqfQhF+OTiAL74=
-github.com/wso2/apk/adapter v0.0.0-20240305081214-016ed1d211d3 h1:iSoXj9Y5GsHpIIIv4Q07uEkfNIdTJdIAiHdrxl/3NwA=
-github.com/wso2/apk/adapter v0.0.0-20240305081214-016ed1d211d3/go.mod h1:7ABToO6nk+WfDQW0PZEx7isR0tJ8LJFCiz1tV2+YWl0=
-github.com/wso2/apk/common-go-libs v0.0.0-20240305081214-016ed1d211d3 h1:Xu0SL3uii6ElfBeRiwhyRPzfznQSpj6UvBk9/Ia+9c0=
-github.com/wso2/apk/common-go-libs v0.0.0-20240305081214-016ed1d211d3/go.mod h1:xwVMx03SIc7wV5q3+Y4R2rtDZbJIZeDOd4I3Nxu93kE=
+github.com/wso2/apk/adapter v0.0.0-20240308033858-171f4ac0c0de h1:ZUgHHVDfbHbh5F8uk2nzsK62qAcMvCHy54EcnqaqAuE=
+github.com/wso2/apk/adapter v0.0.0-20240308033858-171f4ac0c0de/go.mod h1:0zk7Jc8bby+nHB7JjpvHrZ6KEOLCL8OsFZZfl/R8q74=
+github.com/wso2/apk/common-go-libs v0.0.0-20240308033858-171f4ac0c0de h1:nYA2wREDTb1FyQJ0bBg6Mx3AUQ9BYqfCynYX6ysQFvk=
+github.com/wso2/apk/common-go-libs v0.0.0-20240308033858-171f4ac0c0de/go.mod h1:aza/wJVmsAXF+WN7sGWyna5Edlyy0EPvbs5Zp1E6cag=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=

@@ -286,20 +286,20 @@ func TestReplaceVhost(t *testing.T) {
 		replaceVhost(&k8sArtifact, env.Vhost, env.Type)
 		if env.Type == "hybrid" {
 			for _, routeName := range k8sArtifact.API.Spec.Production {
-				for _, routes := range routeName.HTTPRouteRefs {
+				for _, routes := range routeName.RouteRefs {
 					assert.Equal(t, gwapiv1b1.Hostname(env.Vhost), k8sArtifact.HTTPRoutes[routes].Spec.Hostnames[0])
 				}
 			}
 
 			for _, routeName := range k8sArtifact.API.Spec.Sandbox {
-				for _, routes := range routeName.HTTPRouteRefs {
+				for _, routes := range routeName.RouteRefs {
 					assert.Equal(t, gwapiv1b1.Hostname("sandbox."+env.Vhost), k8sArtifact.HTTPRoutes[routes].Spec.Hostnames[0])
 				}
 			}
 
 		} else if env.Type == "sandbox" {
 			for _, routeName := range k8sArtifact.API.Spec.Sandbox {
-				for _, routes := range routeName.HTTPRouteRefs {
+				for _, routes := range routeName.RouteRefs {
 					assert.Equal(t, gwapiv1b1.Hostname(env.Vhost), k8sArtifact.HTTPRoutes[routes].Spec.Hostnames[0])
 				}
 			}
@@ -308,7 +308,7 @@ func TestReplaceVhost(t *testing.T) {
 
 		} else {
 			for _, routeName := range k8sArtifact.API.Spec.Sandbox {
-				for _, routes := range routeName.HTTPRouteRefs {
+				for _, routes := range routeName.RouteRefs {
 					assert.Equal(t, gwapiv1b1.Hostname(env.Vhost), k8sArtifact.HTTPRoutes[routes].Spec.Hostnames[0])
 				}
 			}
