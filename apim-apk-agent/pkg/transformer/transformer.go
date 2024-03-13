@@ -279,7 +279,7 @@ func getEndpointConfigs(sandboxURL string, prodURL string, endCertAvailable bool
 
 // GenerateCRs takes the .apk-conf, api definition, vHost and the organization for a particular API and then generate and returns
 // the relavant CRD set as a zip
-func GenerateCRs(apkConf string, apiDefinition string, certContainer CertContainer, k8ResourceGenEndpoint string) (*K8sArtifacts, error) {
+func GenerateCRs(apkConf string, apiDefinition string, certContainer CertContainer, k8ResourceGenEndpoint string, organizationID string) (*K8sArtifacts, error) {
 	k8sArtifact := K8sArtifacts{HTTPRoutes: make(map[string]*gwapiv1b1.HTTPRoute), GQLRoutes: make(map[string]*dpv1alpha2.GQLRoute), Backends: make(map[string]*dpv1alpha1.Backend), Scopes: make(map[string]*dpv1alpha1.Scope), Authentication: make(map[string]*dpv1alpha2.Authentication), APIPolicies: make(map[string]*dpv1alpha2.APIPolicy), InterceptorServices: make(map[string]*dpv1alpha1.InterceptorService), ConfigMaps: make(map[string]*corev1.ConfigMap), Secrets: make(map[string]*corev1.Secret), RateLimitPolicies: make(map[string]*dpv1alpha1.RateLimitPolicy)}
 	if apkConf == "" {
 		logger.LoggerTransformer.Error("Empty apk-conf parameter provided. Unable to generate CRDs.")
@@ -310,8 +310,10 @@ func GenerateCRs(apkConf string, apiDefinition string, certContainer CertContain
 	// Close the multipart writer
 	writer.Close()
 
+	k8sResourceEndpointWithOrg := k8ResourceGenEndpoint + "?organization=" + organizationID
+
 	// Create the HTTP request
-	request, err := http.NewRequest(postHTTPMethod, k8ResourceGenEndpoint, &requestBody)
+	request, err := http.NewRequest(postHTTPMethod, k8sResourceEndpointWithOrg, &requestBody)
 	if err != nil {
 		logger.LoggerTransformer.Error("Error creating HTTP request:", err)
 		return nil, err

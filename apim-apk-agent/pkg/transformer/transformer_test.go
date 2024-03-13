@@ -370,7 +370,7 @@ func TestBrokenZipHandlingFlow(t *testing.T) {
 						ClientCertObj:   apiArtifact.CertMeta,
 						EndpointCertObj: apiArtifact.EndpointCertMeta,
 					}
-					crResponse, err := GenerateCRs(apkConf, apiArtifact.Schema, certContainer, k8ResourceGenEndpoint)
+					crResponse, err := GenerateCRs(apkConf, apiArtifact.Schema, certContainer, k8ResourceGenEndpoint, "orgID")
 					assert.Error(t, err)
 					assert.Nil(t, crResponse)
 				}
