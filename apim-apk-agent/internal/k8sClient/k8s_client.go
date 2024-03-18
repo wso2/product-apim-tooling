@@ -34,8 +34,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	gwapiv1 "sigs.k8s.io/gateway-api/apis/v1"
 	"sigs.k8s.io/gateway-api/apis/v1alpha2"
-	gwapiv1b1 "sigs.k8s.io/gateway-api/apis/v1beta1"
 )
 
 // DeployAPICR applies the given API struct to the Kubernetes cluster.
@@ -115,8 +115,8 @@ func DeployConfigMapCR(configMap *corev1.ConfigMap, k8sClient client.Client) {
 }
 
 // DeployHTTPRouteCR applies the given HttpRoute struct to the Kubernetes cluster.
-func DeployHTTPRouteCR(httpRoute *gwapiv1b1.HTTPRoute, k8sClient client.Client) {
-	crHTTPRoute := &gwapiv1b1.HTTPRoute{}
+func DeployHTTPRouteCR(httpRoute *gwapiv1.HTTPRoute, k8sClient client.Client) {
+	crHTTPRoute := &gwapiv1.HTTPRoute{}
 	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: httpRoute.ObjectMeta.Namespace, Name: httpRoute.Name}, crHTTPRoute); err != nil {
 		if !k8error.IsNotFound(err) {
 			loggers.LoggerK8sClient.Error("Unable to get HTTPRoute CR: " + err.Error())

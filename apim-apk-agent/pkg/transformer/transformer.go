@@ -41,7 +41,7 @@ import (
 	dpv1alpha1 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha1"
 	dpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha2"
 	corev1 "k8s.io/api/core/v1"
-	gwapiv1b1 "sigs.k8s.io/gateway-api/apis/v1beta1"
+	gwapiv1 "sigs.k8s.io/gateway-api/apis/v1"
 
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
 	k8Yaml "sigs.k8s.io/yaml"
@@ -280,7 +280,7 @@ func getEndpointConfigs(sandboxURL string, prodURL string, endCertAvailable bool
 // GenerateCRs takes the .apk-conf, api definition, vHost and the organization for a particular API and then generate and returns
 // the relavant CRD set as a zip
 func GenerateCRs(apkConf string, apiDefinition string, certContainer CertContainer, k8ResourceGenEndpoint string, organizationID string) (*K8sArtifacts, error) {
-	k8sArtifact := K8sArtifacts{HTTPRoutes: make(map[string]*gwapiv1b1.HTTPRoute), GQLRoutes: make(map[string]*dpv1alpha2.GQLRoute), Backends: make(map[string]*dpv1alpha1.Backend), Scopes: make(map[string]*dpv1alpha1.Scope), Authentication: make(map[string]*dpv1alpha2.Authentication), APIPolicies: make(map[string]*dpv1alpha2.APIPolicy), InterceptorServices: make(map[string]*dpv1alpha1.InterceptorService), ConfigMaps: make(map[string]*corev1.ConfigMap), Secrets: make(map[string]*corev1.Secret), RateLimitPolicies: make(map[string]*dpv1alpha1.RateLimitPolicy)}
+	k8sArtifact := K8sArtifacts{HTTPRoutes: make(map[string]*gwapiv1.HTTPRoute), GQLRoutes: make(map[string]*dpv1alpha2.GQLRoute), Backends: make(map[string]*dpv1alpha1.Backend), Scopes: make(map[string]*dpv1alpha1.Scope), Authentication: make(map[string]*dpv1alpha2.Authentication), APIPolicies: make(map[string]*dpv1alpha2.APIPolicy), InterceptorServices: make(map[string]*dpv1alpha1.InterceptorService), ConfigMaps: make(map[string]*corev1.ConfigMap), Secrets: make(map[string]*corev1.Secret), RateLimitPolicies: make(map[string]*dpv1alpha1.RateLimitPolicy)}
 	if apkConf == "" {
 		logger.LoggerTransformer.Error("Empty apk-conf parameter provided. Unable to generate CRDs.")
 		return nil, errors.New("Error: APK-Conf can't be empty")
@@ -391,7 +391,7 @@ func GenerateCRs(apkConf string, apiDefinition string, certContainer CertContain
 			}
 			k8sArtifact.APIPolicies[apiPolicy.ObjectMeta.Name] = &apiPolicy
 		case "HTTPRoute":
-			var httpRoute gwapiv1b1.HTTPRoute
+			var httpRoute gwapiv1.HTTPRoute
 			err = k8Yaml.Unmarshal(yamlData, &httpRoute)
 			if err != nil {
 				logger.LoggerSync.Errorf("Error unmarshaling HTTPRoute YAML: %v", err)
@@ -517,11 +517,11 @@ func replaceVhost(k8sArtifact *K8sArtifacts, vhost string, deploymentType string
 				for _, routes := range routeName.RouteRefs {
 					httprouteRef, foundHTTPRoute := k8sArtifact.HTTPRoutes[routes]
 					if foundHTTPRoute {
-						httprouteRef.Spec.Hostnames = []gwapiv1b1.Hostname{gwapiv1b1.Hostname(vhost)}
+						httprouteRef.Spec.Hostnames = []gwapiv1.Hostname{gwapiv1.Hostname(vhost)}
 					}
 					gqlRouteRef, foundGQLRoute := k8sArtifact.GQLRoutes[routes]
 					if foundGQLRoute {
-						gqlRouteRef.Spec.Hostnames = []gwapiv1b1.Hostname{gwapiv1b1.Hostname(vhost)}
+						gqlRouteRef.Spec.Hostnames = []gwapiv1.Hostname{gwapiv1.Hostname(vhost)}
 					}
 				}
 			}
@@ -531,11 +531,11 @@ func replaceVhost(k8sArtifact *K8sArtifacts, vhost string, deploymentType string
 				for _, routes := range routeName.RouteRefs {
 					httprouteRef, foundHTTPRoute := k8sArtifact.HTTPRoutes[routes]
 					if foundHTTPRoute {
-						httprouteRef.Spec.Hostnames = []gwapiv1b1.Hostname{gwapiv1b1.Hostname("sandbox." + vhost)}
+						httprouteRef.Spec.Hostnames = []gwapiv1.Hostname{gwapiv1.Hostname("sandbox." + vhost)}
 					}
 					gqlRouteRef, foundGQLRoute := k8sArtifact.GQLRoutes[routes]
 					if foundGQLRoute {
-						gqlRouteRef.Spec.Hostnames = []gwapiv1b1.Hostname{gwapiv1b1.Hostname("sandbox." + vhost)}
+						gqlRouteRef.Spec.Hostnames = []gwapiv1.Hostname{gwapiv1.Hostname("sandbox." + vhost)}
 					}
 				}
 			}
@@ -546,11 +546,11 @@ func replaceVhost(k8sArtifact *K8sArtifacts, vhost string, deploymentType string
 				for _, routes := range routeName.RouteRefs {
 					httprouteRef, foundHTTPRoute := k8sArtifact.HTTPRoutes[routes]
 					if foundHTTPRoute {
-						httprouteRef.Spec.Hostnames = []gwapiv1b1.Hostname{gwapiv1b1.Hostname(vhost)}
+						httprouteRef.Spec.Hostnames = []gwapiv1.Hostname{gwapiv1.Hostname(vhost)}
 					}
 					gqlRouteRef, foundGQLRoute := k8sArtifact.GQLRoutes[routes]
 					if foundGQLRoute {
-						gqlRouteRef.Spec.Hostnames = []gwapiv1b1.Hostname{gwapiv1b1.Hostname(vhost)}
+						gqlRouteRef.Spec.Hostnames = []gwapiv1.Hostname{gwapiv1.Hostname(vhost)}
 					}
 				}
 			}
@@ -570,11 +570,11 @@ func replaceVhost(k8sArtifact *K8sArtifacts, vhost string, deploymentType string
 				for _, routes := range routeName.RouteRefs {
 					httprouteRef, foundHTTPRoute := k8sArtifact.HTTPRoutes[routes]
 					if foundHTTPRoute {
-						httprouteRef.Spec.Hostnames = []gwapiv1b1.Hostname{gwapiv1b1.Hostname(vhost)}
+						httprouteRef.Spec.Hostnames = []gwapiv1.Hostname{gwapiv1.Hostname(vhost)}
 					}
 					gqlRouteRef, foundGQLRoute := k8sArtifact.GQLRoutes[routes]
 					if foundGQLRoute {
-						gqlRouteRef.Spec.Hostnames = []gwapiv1b1.Hostname{gwapiv1b1.Hostname(vhost)}
+						gqlRouteRef.Spec.Hostnames = []gwapiv1.Hostname{gwapiv1.Hostname(vhost)}
 					}
 				}
 			}
