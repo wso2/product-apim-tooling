@@ -76,6 +76,8 @@ type Config struct {
 	ControlPlane controlPlane `toml:"controlPlane"`
 	DataPlane    dataPlane    `toml:"dataPlane"`
 	Agent        agent        `toml:"agent"`
+	// Metric represents configurations to expose/export go metrics
+	Metrics metrics `toml:"metrics"`
 }
 type agent struct {
 	Enabled    bool
@@ -131,4 +133,11 @@ type brokerConnectionParameters struct {
 
 type httpClient struct {
 	RequestTimeOut time.Duration
+}
+
+// Metrics defines the configuration for metrics collection.
+type metrics struct {
+	Enabled bool
+	Type    string
+	Port    int32
 }

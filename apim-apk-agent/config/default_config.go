@@ -53,4 +53,9 @@ var defaultConfig = &Config{
 			Location: "/home/wso2/security/truststore",
 		},
 	},
+	Metrics: metrics{
+		Enabled: false,
+		Port:    18006,
+		Type:    "prometheus",
+	},
 }
