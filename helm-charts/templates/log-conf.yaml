@@ -19,6 +19,11 @@ data:
       enabled = {{ .Values.dataPlane.enabled }}
       k8ResourceEndpoint = "{{ .Values.dataPlane.k8ResourceEndpoint }}"
       namespace = "{{ .Values.dataPlane.namespace }}"
+
+    [metrics]
+      enabled = {{.Values.metrics.enabled}}
+      type = "{{.Values.metrics.type| default "prometheus" }}"
+      port = 18006
   log_config.toml: |
     # The logging configuration for Adapter
 

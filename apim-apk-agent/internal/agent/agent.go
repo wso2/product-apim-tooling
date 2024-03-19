@@ -35,6 +35,7 @@ import (
 	cpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/cp/v1alpha2"
 	dpv1alpha1 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha1"
 	dpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha2"
+	"github.com/wso2/apk/common-go-libs/loggers"
 	"github.com/wso2/apk/common-go-libs/pkg/discovery/api/wso2/discovery/service/apkmgt"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/eventhub"
@@ -44,6 +45,7 @@ import (
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/synchronizer"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/health"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/managementserver"
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/metrics"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/keepalive"
@@ -116,7 +118,7 @@ func Run(conf *config.Config) {
 	utilruntime.Must(cpv1alpha2.AddToScheme(scheme))
 	utilruntime.Must(cpv1alpha2.AddToScheme(scheme))
 
-	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+	options := ctrl.Options{
 		Scheme:                 scheme,
 		HealthProbeBindAddress: probeAddr,
 		// LeaderElectionReleaseOnCancel defines if the leader should step down voluntarily
@@ -130,7 +132,21 @@ func Run(conf *config.Config) {
 		// if you are doing or is intended to do any operation such as perform cleanups
 		// after the manager stops then its usage might be unsafe.
 		// LeaderElectionReleaseOnCancel: true,
-	})
+	}
+
+	if conf.Metrics.Enabled {
+		options.Metrics.BindAddress = fmt.Sprintf(":%d", conf.Metrics.Port)
+		// Register the metrics collector
+		if strings.EqualFold(conf.Metrics.Type, metrics.PrometheusMetricType) {
+			loggers.LoggerAPKOperator.Info("Registering Prometheus metrics collector.")
+			metrics.RegisterPrometheusCollector()
+		}
+	} else {
+		options.Metrics.BindAddress = "0"
+	}
+
+	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), options)
+
 	if err != nil {
 		logger.LoggerAgent.Error("unable to start kubernetes controller manager", err)
 	}
@@ -203,7 +219,9 @@ func Run(conf *config.Config) {
 	// register health service
 	healthservice.RegisterHealthServer(grpcServer, &health.Server{})
 	logger.LoggerAgent.Info("port: ", port, " APK agent Listening for gRPC connections")
+
 	go managementserver.StartInternalServer(restPort)
+
 	go func() {
 		logger.LoggerAgent.Info("Starting GRPC server.")
 		health.CommonControllerGrpcService.SetStatus(true)
