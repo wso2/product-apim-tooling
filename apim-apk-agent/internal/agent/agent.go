@@ -51,7 +51,7 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
-	gwapiv1b1 "sigs.k8s.io/gateway-api/apis/v1beta1"
+	gwapiv1 "sigs.k8s.io/gateway-api/apis/v1"
 )
 
 var (
@@ -107,11 +107,10 @@ func Run(conf *config.Config) {
 	logger.LoggerAgent.Info("Starting apim-apk-agent ....")
 	eventHubEnabled := conf.ControlPlane.Enabled
 
-	var metricsAddr string
 	var probeAddr string
 	var scheme = runtime.NewScheme()
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-	utilruntime.Must(gwapiv1b1.AddToScheme(scheme))
+	utilruntime.Must(gwapiv1.AddToScheme(scheme))
 	utilruntime.Must(dpv1alpha1.AddToScheme(scheme))
 	utilruntime.Must(dpv1alpha2.AddToScheme(scheme))
 	utilruntime.Must(cpv1alpha2.AddToScheme(scheme))
@@ -119,8 +118,6 @@ func Run(conf *config.Config) {
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,
-		MetricsBindAddress:     metricsAddr,
-		Port:                   9443,
 		HealthProbeBindAddress: probeAddr,
 		// LeaderElectionReleaseOnCancel defines if the leader should step down voluntarily
 		// when the Manager ends. This requires the binary to immediately end when the
