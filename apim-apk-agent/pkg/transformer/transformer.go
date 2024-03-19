@@ -43,24 +43,28 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	gwapiv1 "sigs.k8s.io/gateway-api/apis/v1"
 
+	eventHub "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/managementserver"
 	k8Yaml "sigs.k8s.io/yaml"
 
 	"gopkg.in/yaml.v2"
 )
 
 // GenerateAPKConf will Generate the mapped .apk-conf file for a given API Project zip
-func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact) (string, string, uint32, error) {
+func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizationID string) (string, string, uint32, map[string]eventHub.RateLimitPolicy, error) {
 
 	apk := &API{}
 
 	var apiYaml APIYaml
 
+	var configuredRateLimitPoliciesMap = make(map[string]eventHub.RateLimitPolicy)
+
 	apiYamlError := json.Unmarshal([]byte(APIJson), &apiYaml)
 
 	if apiYamlError != nil {
 		logger.LoggerTransformer.Error("Error while unmarshalling api.json content", apiYamlError)
-		return "", "null", 0, apiYamlError
+		return "", "null", 0, nil, apiYamlError
 	}
 
 	apiYamlData := apiYaml.Data
@@ -72,6 +76,17 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact) (string, 
 	apk.DefaultVersion = apiYamlData.DefaultVersion
 	apk.DefinitionPath = "/definition"
 	apk.SubscriptionValidation = true
+
+	if apiYamlData.APIThrottlingPolicy != "" {
+		rateLimitPolicy := managementserver.GetRateLimitPolicy(apiYamlData.APIThrottlingPolicy, organizationID)
+		logger.LoggerTransformer.Debugf("Rate Limit Policy: %v", rateLimitPolicy)
+		var rateLimitPolicyConfigured = RateLimit{
+			RequestsPerUnit: rateLimitPolicy.DefaultLimit.RequestCount.RequestCount,
+			Unit:            rateLimitPolicy.DefaultLimit.RequestCount.TimeUnit,
+		}
+		apk.RateLimit = &rateLimitPolicyConfigured
+		configuredRateLimitPoliciesMap["API"] = rateLimitPolicy
+	}
 	apkOperations := make([]Operation, len(apiYamlData.Operations))
 
 	for i, operation := range apiYamlData.Operations {
@@ -79,6 +94,18 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact) (string, 
 		reqPolicyCount := len(operation.OperationPolicies.Request)
 		resPolicyCount := len(operation.OperationPolicies.Response)
 		reqInterceptor, resInterceptor := getReqAndResInterceptors(reqPolicyCount, resPolicyCount)
+
+		var opRateLimit *RateLimit
+		if apiYamlData.APIThrottlingPolicy == "" && operation.ThrottlingPolicy != "" {
+			rateLimitPolicy := managementserver.GetRateLimitPolicy(operation.ThrottlingPolicy, organizationID)
+			logger.LoggerTransformer.Debugf("Op Rate Limit Policy Name: %v", rateLimitPolicy.Name)
+			var rateLimitPolicyConfigured = RateLimit{
+				RequestsPerUnit: rateLimitPolicy.DefaultLimit.RequestCount.RequestCount,
+				Unit:            rateLimitPolicy.DefaultLimit.RequestCount.TimeUnit,
+			}
+			opRateLimit = &rateLimitPolicyConfigured
+			configuredRateLimitPoliciesMap["Resource"] = rateLimitPolicy
+		}
 
 		op := &Operation{
 			Target:  operation.Target,
@@ -89,6 +116,7 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact) (string, 
 				Request:  *reqInterceptor,
 				Response: *resInterceptor,
 			},
+			RateLimit: opRateLimit,
 		}
 		apkOperations[i] = *op
 	}
@@ -103,7 +131,7 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact) (string, 
 		certErr := json.Unmarshal([]byte(certArtifact.EndpointCerts), &endpointCertList)
 		if certErr != nil {
 			logger.LoggerTransformer.Errorf("Error while unmarshalling endpoint_cert.json content: ", apiYamlError)
-			return "", "null", 0, certErr
+			return "", "null", 0, nil, certErr
 		}
 		endCertAvailable = true
 	}
@@ -122,7 +150,7 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact) (string, 
 		certErr := json.Unmarshal([]byte(certArtifact.ClientCerts), &certList)
 		if certErr != nil {
 			logger.LoggerTransformer.Errorf("Error while unmarshalling client_cert.json content: ", apiYamlError)
-			return "", "null", 0, certErr
+			return "", "null", 0, nil, certErr
 		}
 		certAvailable = true
 	}
@@ -148,9 +176,9 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact) (string, 
 
 	if marshalError != nil {
 		logger.LoggerTransformer.Error("Error while marshalling apk yaml", marshalError)
-		return "", "null", 0, marshalError
+		return "", "null", 0, nil, marshalError
 	}
-	return string(c), apiYamlData.RevisionedAPIID, apiYamlData.RevisionID, nil
+	return string(c), apiYamlData.RevisionedAPIID, apiYamlData.RevisionID, configuredRateLimitPoliciesMap, nil
 }
 
 // getAPIType will be selecting the appropriate API type need to be added in the apk-conf
@@ -499,12 +527,13 @@ func GenerateCRs(apkConf string, apiDefinition string, certContainer CertContain
 }
 
 // UpdateCRS cr update
-func UpdateCRS(k8sArtifact *K8sArtifacts, environments *[]Environment, organizationID string, apiUUID string, revisionID string, namespace string) {
+func UpdateCRS(k8sArtifact *K8sArtifacts, environments *[]Environment, organizationID string, apiUUID string, revisionID string, namespace string, configuredRateLimitPoliciesMap map[string]eventHub.RateLimitPolicy) {
 	addOrganization(k8sArtifact, organizationID)
 	addRevisionAndAPIUUID(k8sArtifact, apiUUID, revisionID)
 	for _, environment := range *environments {
 		replaceVhost(k8sArtifact, environment.Vhost, environment.Type)
 	}
+	addRateLimitPolicyNames(k8sArtifact, configuredRateLimitPoliciesMap)
 }
 
 // replaceVhost will take the httpRoute CR and replace the default vHost with the one passed inside
@@ -627,6 +656,20 @@ func addOrganization(k8sArtifact *K8sArtifacts, organization string) {
 func addRevisionAndAPIUUID(k8sArtifact *K8sArtifacts, apiID string, revisionID string) {
 	k8sArtifact.API.ObjectMeta.Labels[k8APIUuidField] = apiID
 	k8sArtifact.API.ObjectMeta.Labels[k8RevisionField] = revisionID
+}
+
+// addRateLimitPolicyNames will add the rate limit policy names to the respective CRs
+func addRateLimitPolicyNames(k8sArtifact *K8sArtifacts, configuredRateLimitPoliciesMap map[string]eventHub.RateLimitPolicy) {
+	logger.LoggerTransformer.Infof("Rate Limit Policies: %v", configuredRateLimitPoliciesMap)
+	for _, rateLimitPolicy := range k8sArtifact.RateLimitPolicies {
+		if strings.Contains(rateLimitPolicy.Name, "api-") {
+			rateLimitPolicy.ObjectMeta.Labels[k8sRateLimitPolicyNameField] = generateSHA1Hash(configuredRateLimitPoliciesMap["API"].Name)
+			logger.LoggerTransformer.Infof("1 Rate Limit Policy Name: %v", rateLimitPolicy.ObjectMeta.Labels[k8sRateLimitPolicyNameField])
+		} else if strings.Contains(rateLimitPolicy.Name, "resource-") {
+			rateLimitPolicy.ObjectMeta.Labels[k8sRateLimitPolicyNameField] = generateSHA1Hash(configuredRateLimitPoliciesMap["Resource"].Name)
+			logger.LoggerTransformer.Infof("2 Rate Limit Policy Name: %v", rateLimitPolicy.ObjectMeta.Labels[k8sRateLimitPolicyNameField])
+		}
+	}
 }
 
 // generateSHA1Hash returns the SHA1 hash for the given string

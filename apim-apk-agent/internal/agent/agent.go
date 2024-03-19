@@ -146,6 +146,9 @@ func Run(conf *config.Config) {
 		}
 	}()
 
+	// Load initial Policy data from control plane
+	synchronizer.FetchRateLimitPoliciesOnEvent("", "", mgr.GetClient())
+
 	// Load initial data from control plane
 	eventhub.LoadInitialData(conf, mgr.GetClient())
 	health.RestService.SetStatus(true)
@@ -159,6 +162,7 @@ func Run(conf *config.Config) {
 
 	// Load initial KM data from control plane
 	synchronizer.FetchKeyManagersOnStartUp(mgr.GetClient())
+
 	health.NotificationListenerService.SetStatus(true)
 
 	var grpcOptions []grpc.ServerOption

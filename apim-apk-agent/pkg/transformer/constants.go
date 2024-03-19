@@ -29,15 +29,16 @@ const (
 	contentTypeHeader = "Content-Type"
 
 	// K8s CRD fields
-	k8sKindField         = "kind"
-	k8sSpecField         = "spec"
-	k8sMetadataField     = "metadata"
-	k8sNamespaceField    = "namespace"
-	k8sOrganizationField = "organization"
-	k8sHostnamesField    = "hostnames"
-	k8sLabelsField       = "labels"
-	k8RevisionField      = "revisionID"
-	k8APIUuidField       = "apiUUID"
+	k8sKindField                = "kind"
+	k8sSpecField                = "spec"
+	k8sMetadataField            = "metadata"
+	k8sNamespaceField           = "namespace"
+	k8sOrganizationField        = "organization"
+	k8sHostnamesField           = "hostnames"
+	k8sLabelsField              = "labels"
+	k8RevisionField             = "revisionID"
+	k8APIUuidField              = "apiUUID"
+	k8sRateLimitPolicyNameField = "rateLimitPolicyName"
 
 	// K8s CRD values
 	k8sKindHTTPRoute   = "HTTPRoute"

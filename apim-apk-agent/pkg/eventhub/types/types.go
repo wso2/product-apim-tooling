@@ -131,8 +131,8 @@ type SubscriptionPolicyList struct {
 	List []SubscriptionPolicy `json:"list"`
 }
 
-// APIPolicy for struct policy Info events
-type APIPolicy struct {
+// APIPolicyEvent for struct policy Info events
+type APIPolicyEvent struct {
 	PolicyID                 string `json:"policyId"`
 	PolicyName               string `json:"policyName"`
 	QuotaType                string `json:"quotaType"`
@@ -140,6 +140,43 @@ type APIPolicy struct {
 	AddedConditionGroupIds   string `json:"addedConditionGroupIds"`
 	DeletedConditionGroupIds string `json:"deletedConditionGroupIds"`
 	TimeStamp                int64  `json:"timeStamp,omitempty"`
+}
+
+// RateLimitPolicyList for struct list of RateLimitPolicy
+type RateLimitPolicyList struct {
+	Count int               `json:"count"`
+	List  []RateLimitPolicy `json:"list"`
+}
+
+// RateLimitPolicy for struct RateLimitPolicy Info events
+type RateLimitPolicy struct {
+	TenantDomain    string           `json:"tenantDomain"`
+	Name            string           `json:"name"`
+	QuotaType       string           `json:"quotaType"`
+	ConditionGroups []ConditionGroup `json:"conditionGroups"`
+	ApplicableLevel string           `json:"applicableLevel"`
+	DefaultLimit    DefaultLimit     `json:"defaultLimit"`
+}
+
+// ConditionGroup represents the condition group within the response.
+type ConditionGroup struct {
+	PolicyID         int         `json:"policyId"`
+	QuotaType        interface{} `json:"quotaType"`
+	ConditionGroupID int         `json:"conditionGroupId"`
+	Condition        []string    `json:"condition"`
+	DefaultLimit     interface{} `json:"defaultLimit"`
+}
+
+// DefaultLimit represents the default limit within the response.
+type DefaultLimit struct {
+	QuotaType    string `json:"quotaType"`
+	RequestCount struct {
+		TimeUnit     string `json:"timeUnit"`
+		UnitTime     int    `json:"unitTime"`
+		RequestCount int    `json:"requestCount"`
+	} `json:"requestCount"`
+	Bandwidth  interface{} `json:"bandwidth"`
+	EventCount interface{} `json:"eventCount"`
 }
 
 // Scope for struct Scope
