@@ -30,6 +30,7 @@ import (
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	internalk8sClient "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/k8sClient"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/loggers"
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/synchronizer"
 	internalutils "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/utils"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/logging"
@@ -115,7 +116,7 @@ func processNotificationEvent(conf *config.Config, notification *msg.EventNotifi
 	} else if strings.Contains(eventType, subscriptionEventType) {
 		handleSubscriptionEvents(decodedByte, eventType)
 	} else if strings.Contains(eventType, policyEventType) {
-		handlePolicyEvents(decodedByte, eventType)
+		handlePolicyEvents(decodedByte, eventType, c)
 	}
 	// other events will ignore including HEALTH_CHECK event
 	return nil
@@ -399,7 +400,7 @@ func handleSubscriptionEvents(data []byte, eventType string) {
 }
 
 // handlePolicyRelatedEvents to process policy related events
-func handlePolicyEvents(data []byte, eventType string) {
+func handlePolicyEvents(data []byte, eventType string, c client.Client) {
 	var policyEvent msg.PolicyInfo
 	policyEventErr := json.Unmarshal([]byte(string(data)), &policyEvent)
 	if policyEventErr != nil {
@@ -409,10 +410,19 @@ func handlePolicyEvents(data []byte, eventType string) {
 	// TODO: Handle policy events
 	if strings.EqualFold(eventType, policyCreate) {
 		logger.LoggerMessaging.Infof("Policy: %s for policy type: %s", policyEvent.PolicyName, policyEvent.PolicyType)
+		synchronizer.FetchRateLimitPoliciesOnEvent(policyEvent.PolicyName, policyEvent.TenantDomain, c)
+		ratelimitPolicies := managementserver.GetAllRateLimitPolicies()
+		logger.LoggerMessaging.Infof("Rate Limit Policies Internal Map: %v", ratelimitPolicies)
 	} else if strings.EqualFold(eventType, policyUpdate) {
 		logger.LoggerMessaging.Infof("Policy: %s for policy type: %s", policyEvent.PolicyName, policyEvent.PolicyType)
+		synchronizer.FetchRateLimitPoliciesOnEvent(policyEvent.PolicyName, policyEvent.TenantDomain, c)
+		ratelimitPolicies := managementserver.GetAllRateLimitPolicies()
+		logger.LoggerMessaging.Infof("Rate Limit Policies Internal Map: %v", ratelimitPolicies)
 	} else if strings.EqualFold(eventType, policyDelete) {
 		logger.LoggerMessaging.Infof("Policy: %s for policy type: %s", policyEvent.PolicyName, policyEvent.PolicyType)
+		managementserver.DeleteRateLimitPolicy(policyEvent.PolicyName, policyEvent.TenantDomain)
+		ratelimitPolicies := managementserver.GetAllRateLimitPolicies()
+		logger.LoggerMessaging.Infof("Rate Limit Policies Internal Map: %v", ratelimitPolicies)
 	}
 
 	if strings.EqualFold(applicationEventType, policyEvent.PolicyType) {

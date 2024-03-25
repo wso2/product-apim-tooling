@@ -17,6 +17,7 @@
 package managementserver
 
 import (
+	eventHub "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/utils"
 )
@@ -26,6 +27,7 @@ var (
 	subscriptionMap          map[string]Subscription
 	applicationMappingMap    map[string]ApplicationMapping
 	applicationKeyMappingMap map[string]ApplicationKeyMapping
+	rateLimitPolicyMap       map[string]eventHub.RateLimitPolicy
 )
 
 func init() {
@@ -33,6 +35,36 @@ func init() {
 	subscriptionMap = make(map[string]Subscription)
 	applicationMappingMap = make(map[string]ApplicationMapping)
 	applicationKeyMappingMap = make(map[string]ApplicationKeyMapping)
+	rateLimitPolicyMap = make(map[string]eventHub.RateLimitPolicy)
+}
+
+// AddRateLimitPolicy adds a rate limit policy to the rateLimitPolicyMap
+func AddRateLimitPolicy(rateLimitPolicy eventHub.RateLimitPolicy) {
+	rateLimitPolicyMap[rateLimitPolicy.Name+rateLimitPolicy.TenantDomain] = rateLimitPolicy
+}
+
+// GetRateLimitPolicy returns a rate limit policy from the rateLimitPolicyMap
+func GetRateLimitPolicy(name string, tenantDomain string) eventHub.RateLimitPolicy {
+	return rateLimitPolicyMap[name+tenantDomain]
+}
+
+// GetAllRateLimitPolicies returns all the rate limit policies in the rateLimitPolicyMap
+func GetAllRateLimitPolicies() []eventHub.RateLimitPolicy {
+	var rateLimitPolicies []eventHub.RateLimitPolicy
+	for _, rateLimitPolicy := range rateLimitPolicyMap {
+		rateLimitPolicies = append(rateLimitPolicies, rateLimitPolicy)
+	}
+	return rateLimitPolicies
+}
+
+// DeleteRateLimitPolicy deletes a rate limit policy from the rateLimitPolicyMap
+func DeleteRateLimitPolicy(name string, tenantDomain string) {
+	delete(rateLimitPolicyMap, name+tenantDomain)
+}
+
+// UpdateRateLimitPolicy updates a rate limit policy in the rateLimitPolicyMap
+func UpdateRateLimitPolicy(name string, tenantDomain string, rateLimitPolicy eventHub.RateLimitPolicy) {
+	rateLimitPolicyMap[name+tenantDomain] = rateLimitPolicy
 }
 
 // AddApplication adds an application to the applicationMap

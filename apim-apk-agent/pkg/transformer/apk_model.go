@@ -78,11 +78,13 @@ type Operation struct {
 	Scopes            []string           `yaml:"scopes"`
 	Secured           bool               `yaml:"secured,omitempty"`
 	OperationPolicies *OperationPolicies `yaml:"operationPolicies,omitempty"`
-	// Ratelimit             *Ratelimit             `yaml:"ratelimit,omitempty"`
+	RateLimit         *RateLimit         `yaml:"rateLimit,omitempty"`
 }
 
-// Ratelimit is a placeholder for future rate-limiting configuration.
-type Ratelimit struct {
+// RateLimit is a placeholder for future rate-limiting configuration.
+type RateLimit struct {
+	RequestsPerUnit int    `yaml:"requestsPerUnit,omitempty"`
+	Unit            string `yaml:"unit,omitempty"`
 }
 
 // VHost defines virtual hosts for production and sandbox environments.
@@ -106,4 +108,5 @@ type API struct {
 	CorsConfig             *CORSConfiguration      `yaml:"corsConfiguration,omitempty"`
 	AdditionalProperties   *[]AdditionalProperty   `yaml:"additionalProperties,omitempty"`
 	SubscriptionValidation bool                    `yaml:"subscriptionValidation,omitempty"`
+	RateLimit              *RateLimit              `yaml:"rateLimit,omitempty"`
 }

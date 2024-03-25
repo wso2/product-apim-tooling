@@ -312,6 +312,37 @@ func DeployRateLimitPolicyCR(rateLimitPolicies *dpv1alpha1.RateLimitPolicy, k8sC
 	}
 }
 
+// UpdateRateLimitPolicyCR applies the updated policy details to all the RateLimitPolicies struct which has the provided label to the Kubernetes cluster.
+func UpdateRateLimitPolicyCR(policy eventhubTypes.RateLimitPolicy, k8sClient client.Client) {
+	conf, _ := config.ReadConfigs()
+	policyName := getSha1Value(policy.Name)
+	policyOrganization := getSha1Value(policy.TenantDomain)
+
+	// retrieve all RateLimitPolicies from the Kubernetes cluster with the provided label selector "rateLimitPolicyName"
+	rateLimitPolicyList := &dpv1alpha1.RateLimitPolicyList{}
+	labelMap := map[string]string{"rateLimitPolicyName": policyName, "organization": policyOrganization}
+	// Create a list option with the label selector
+	listOption := &client.ListOptions{
+		Namespace:     conf.DataPlane.Namespace,
+		LabelSelector: labels.SelectorFromSet(labelMap),
+	}
+	err := k8sClient.List(context.Background(), rateLimitPolicyList, listOption)
+	if err != nil {
+		loggers.LoggerK8sClient.Errorf("Unable to list RateLimitPolicies CR: %v", err)
+	}
+	loggers.LoggerK8sClient.Infof("RateLimitPolicies CR list retrieved: %v", rateLimitPolicyList.Items)
+	for _, rateLimitPolicy := range rateLimitPolicyList.Items {
+		rateLimitPolicy.Spec.Default.API.RequestsPerUnit = uint32(policy.DefaultLimit.RequestCount.RequestCount)
+		rateLimitPolicy.Spec.Default.API.Unit = policy.DefaultLimit.RequestCount.TimeUnit
+		loggers.LoggerK8sClient.Infof("RateLimitPolicy CR updated: %v", rateLimitPolicy)
+		if err := k8sClient.Update(context.Background(), &rateLimitPolicy); err != nil {
+			loggers.LoggerK8sClient.Errorf("Unable to update RateLimitPolicies CR: %v", err)
+		} else {
+			loggers.LoggerK8sClient.Infof("RateLimitPolicies CR updated: %v", rateLimitPolicy.Name)
+		}
+	}
+}
+
 // DeployBackendCR applies the given Backends struct to the Kubernetes cluster.
 func DeployBackendCR(backends *dpv1alpha1.Backend, k8sClient client.Client) {
 	crBackends := &dpv1alpha1.Backend{}

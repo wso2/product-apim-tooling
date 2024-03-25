@@ -107,12 +107,12 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUID *string, k8sClient client.Cli
 							logger.LoggerUtils.Errorf("Error while decoding the API Project Artifact: %v", decodingError)
 							return nil, err
 						}
-						apkConf, apiUUID, revisionID, apkErr := transformer.GenerateAPKConf(artifact.APIJson, artifact.CertArtifact)
+						apkConf, apiUUID, revisionID, configuredRateLimitPoliciesMap, apkErr := transformer.GenerateAPKConf(artifact.APIJson, artifact.CertArtifact, apiDeployment.OrganizationID)
 						if apkErr != nil {
 							logger.LoggerUtils.Errorf("Error while generating APK-Conf: %v", apkErr)
 							return nil, err
 						}
-						logger.LoggerUtils.Debug("APK Conf:", apkConf)
+						logger.LoggerUtils.Debugf("APK Conf:", apkConf)
 						certContainer := transformer.CertContainer{
 							ClientCertObj:   artifact.CertMeta,
 							EndpointCertObj: artifact.EndpointCertMeta,
@@ -123,7 +123,7 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUID *string, k8sClient client.Cli
 							logger.LoggerUtils.Errorf("Error occured in receiving the updated CRDs: %v", err)
 							return nil, err
 						}
-						transformer.UpdateCRS(crResponse, apiDeployment.Environments, apiDeployment.OrganizationID, apiUUID, fmt.Sprint(revisionID), "namespace")
+						transformer.UpdateCRS(crResponse, apiDeployment.Environments, apiDeployment.OrganizationID, apiUUID, fmt.Sprint(revisionID), "namespace", configuredRateLimitPoliciesMap)
 						mapperUtil.MapAndCreateCR(*crResponse, k8sClient)
 						apis = append(apis, apiUUID)
 						logger.LoggerUtils.Info("API applied successfully.\n")
