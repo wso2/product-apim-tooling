@@ -155,7 +155,7 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 		certAvailable = true
 	}
 
-	authConfigList := mapAuthConfigs(apiYamlData.AuthorizationHeader, apiYamlData.SecuritySchemes, certAvailable, certList)
+	authConfigList := mapAuthConfigs(apiYamlData.ID, apiYamlData.AuthorizationHeader, apiYamlData.SecuritySchemes, certAvailable, certList)
 	apk.Authentication = &authConfigList
 
 	apk.CorsConfig = &apiYamlData.CORSConfiguration
@@ -234,29 +234,29 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int) (*[]OperationP
 
 // mapAuthConfigs will take the security schemes as the parameter and will return the mapped auth configs to be
 // added into the apk-conf
-func mapAuthConfigs(authHeader string, secSchemes []string, certAvailable bool, certList CertDescriptor) []AuthConfiguration {
+func mapAuthConfigs(apiUUID string, authHeader string, secSchemes []string, certAvailable bool, certList CertDescriptor) []AuthConfiguration {
 	var authConfigs []AuthConfiguration
 	if StringExists("oauth2", secSchemes) {
 		var newConfig AuthConfiguration
-		newConfig.AuthType = "OAuth2"
+		newConfig.AuthType = oAuth2
 		newConfig.Enabled = true
 		newConfig.HeaderName = authHeader
 		if StringExists("oauth_basic_auth_api_key_mandatory", secSchemes) {
-			newConfig.Required = "mandatory"
+			newConfig.Required = mandatory
 		} else {
-			newConfig.Required = "optional"
+			newConfig.Required = optional
 		}
 
 		authConfigs = append(authConfigs, newConfig)
 	}
 	if StringExists("mutualssl", secSchemes) && certAvailable {
 		var newConfig AuthConfiguration
-		newConfig.AuthType = "mTLS"
+		newConfig.AuthType = mTLS
 		newConfig.Enabled = true
 		if StringExists("mutualssl_mandatory", secSchemes) {
-			newConfig.Required = "mandatory"
+			newConfig.Required = mandatory
 		} else {
-			newConfig.Required = "optional"
+			newConfig.Required = optional
 		}
 
 		clientCerts := make([]Certificate, len(certList.CertData))
@@ -271,6 +271,14 @@ func mapAuthConfigs(authHeader string, secSchemes []string, certAvailable bool, 
 		newConfig.Certificates = clientCerts
 		authConfigs = append(authConfigs, newConfig)
 	}
+
+	internalKeyAuthConfig := AuthConfiguration{
+		AuthType:   jwt,
+		Enabled:    true,
+		Audience:   []string{apiUUID},
+		HeaderName: internalKeyHeader,
+	}
+	authConfigs = append(authConfigs, internalKeyAuthConfig)
 	return authConfigs
 }
 

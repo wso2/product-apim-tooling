@@ -42,6 +42,7 @@ var defaultConfig = &Config{
 			QueueSizePerPool:      1000,
 			PauseTimeAfterFailure: 5,
 		},
+		InternalKeyIssuer: "http://am.wso2.com:443/token",
 	},
 	Agent: agent{
 		Enabled: true,

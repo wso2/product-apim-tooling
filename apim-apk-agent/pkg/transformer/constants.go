@@ -27,6 +27,7 @@ const (
 	// Http protocol related constants
 	postHTTPMethod    = "POST"
 	contentTypeHeader = "Content-Type"
+	internalKeyHeader = "internal-key"
 
 	// K8s CRD fields
 	k8sKindField                = "kind"
@@ -45,4 +46,13 @@ const (
 	k8sKindAPI         = "API"
 	k8sKindTokenIssuer = "TokenIssuer"
 	apkCRDAPIVersion   = "dp.wso2.com/v1alpha1"
+
+	// Auth Types
+	mTLS   = "mTLS"
+	jwt    = "JWT"
+	oAuth2 = "OAuth2"
+
+	// Optionality constants
+	mandatory = "mandatory"
+	optional  = "optional"
 )

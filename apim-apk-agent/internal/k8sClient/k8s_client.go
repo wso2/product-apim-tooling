@@ -26,6 +26,7 @@ import (
 	dpv1alpha1 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha1"
 	dpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha2"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/constants"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/loggers"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/logging"
 	eventhubTypes "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
@@ -383,18 +384,47 @@ func CreateAndUpdateTokenIssuersCR(keyManager eventhubTypes.ResolvedKeyManager, 
 			Issuer:              keyManager.KeyManagerConfig.Issuer,
 			ClaimMappings:       marshalClaimMappings(keyManager.KeyManagerConfig.ClaimMappings),
 			SignatureValidation: marshalSignatureValidation(keyManager.KeyManagerConfig),
-			TargetRef:           &v1alpha2.PolicyTargetReference{Group: "gateway.networking.k8s.io", Kind: "Gateway", Name: "default"},
+			TargetRef:           &v1alpha2.PolicyTargetReference{Group: constants.GatewayGroup, Kind: constants.GatewayKind, Name: constants.GatewayName},
 		},
 	}
-	tokenIssuer.Spec.ConsumerKeyClaim = "azp"
+	tokenIssuer.Spec.ConsumerKeyClaim = constants.ConsumerKeyClaim
 	if keyManager.KeyManagerConfig.ConsumerKeyClaim != "" {
 		tokenIssuer.Spec.ConsumerKeyClaim = keyManager.KeyManagerConfig.ConsumerKeyClaim
 	}
-	keyManager.KeyManagerConfig.ScopesClaim = "scope"
+	keyManager.KeyManagerConfig.ScopesClaim = constants.ScopesClaim
 	if keyManager.KeyManagerConfig.ScopesClaim != "" {
 		tokenIssuer.Spec.ScopesClaim = keyManager.KeyManagerConfig.ScopesClaim
 	}
 	err := k8sClient.Create(context.Background(), &tokenIssuer)
+	if err != nil {
+		loggers.LoggerK8sClient.Error("Unable to create TokenIssuer CR: " + err.Error())
+		return err
+	}
+
+	internalKeyTokenIssuer := dpv1alpha2.TokenIssuer{
+		ObjectMeta: metav1.ObjectMeta{Name: keyManager.Organization + "-internal-key-issuer",
+			Namespace: conf.DataPlane.Namespace,
+			Labels:    labelMap,
+		},
+		Spec: dpv1alpha2.TokenIssuerSpec{
+			Name:          constants.InternalKeyTokenIssuerName,
+			Organization:  keyManager.Organization,
+			Issuer:        conf.ControlPlane.InternalKeyIssuer,
+			ClaimMappings: marshalClaimMappings(keyManager.KeyManagerConfig.ClaimMappings),
+			SignatureValidation: &dpv1alpha2.SignatureValidation{
+				Certificate: &dpv1alpha2.CERTConfig{
+					SecretRef: &dpv1alpha2.RefConfig{
+						Name: constants.InternalKeySecretName,
+						Key:  constants.InternalKeySecretKey,
+					},
+				},
+			},
+			TargetRef: &v1alpha2.PolicyTargetReference{Group: constants.GatewayGroup, Kind: constants.GatewayKind, Name: constants.GatewayName},
+		},
+	}
+	internalKeyTokenIssuer.Spec.ConsumerKeyClaim = constants.ConsumerKeyClaim
+	internalKeyTokenIssuer.Spec.ScopesClaim = constants.ScopesClaim
+	err = k8sClient.Create(context.Background(), &internalKeyTokenIssuer)
 	if err != nil {
 		loggers.LoggerK8sClient.Error("Unable to create TokenIssuer CR: " + err.Error())
 		return err
@@ -478,6 +508,7 @@ func UpdateTokenIssuersCR(keyManager eventhubTypes.ResolvedKeyManager, k8sClient
 	loggers.LoggerK8sClient.Debug("TokenIssuer CR updated: " + tokenIssuer.Name)
 	return nil
 }
+
 func marshalSignatureValidation(keyManagerConfig eventhubTypes.KeyManagerConfig) *dpv1alpha2.SignatureValidation {
 	if keyManagerConfig.CertificateType != "" && keyManagerConfig.CertificateValue != "" {
 		if keyManagerConfig.CertificateType == "JWKS" {
