@@ -162,8 +162,13 @@ func Run(conf *config.Config) {
 		}
 	}()
 
-	// Load initial Policy data from control plane
-	synchronizer.FetchRateLimitPoliciesOnEvent("", "", mgr.GetClient())
+	AgentMode := conf.Agent.Mode
+	logger.LoggerAgent.Infof("Agent Mode: %v", AgentMode)
+
+	if AgentMode == "CPtoDP" {
+		// Load initial Policy data from control plane
+		synchronizer.FetchRateLimitPoliciesOnEvent("", "", mgr.GetClient())
+	}
 
 	// Load initial data from control plane
 	eventhub.LoadInitialData(conf, mgr.GetClient())

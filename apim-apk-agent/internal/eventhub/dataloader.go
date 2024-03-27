@@ -130,8 +130,10 @@ func LoadInitialData(configFile *config.Config, client client.Client) {
 			}
 		}
 	}
-
-	FetchAPIsOnStartUp(conf, client)
+	AgentMode := conf.Agent.Mode
+	if AgentMode == "CPtoDP" {
+		FetchAPIsOnStartUp(conf, client)
+	}
 	go utils.SendInitialEventToAllConnectedClients()
 }
 

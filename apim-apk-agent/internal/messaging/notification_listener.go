@@ -106,17 +106,24 @@ func processNotificationEvent(conf *config.Config, notification *msg.EventNotifi
 		return err
 	}
 	logger.LoggerMessaging.Debugf("\n\n[%s]", decodedByte)
+	AgentMode := conf.Agent.Mode
 	eventType = notification.Event.PayloadData.EventType
 	if strings.Contains(eventType, apiLifeCycleChange) {
-		handleLifeCycleEvents(decodedByte)
+		if AgentMode == "CPtoDP" {
+			handleLifeCycleEvents(decodedByte)
+		}
 	} else if strings.Contains(eventType, apiEventType) {
-		handleAPIEvents(decodedByte, eventType, conf, c)
+		if AgentMode == "CPtoDP" {
+			handleAPIEvents(decodedByte, eventType, conf, c)
+		}
 	} else if strings.Contains(eventType, applicationEventType) {
 		handleApplicationEvents(decodedByte, eventType)
 	} else if strings.Contains(eventType, subscriptionEventType) {
 		handleSubscriptionEvents(decodedByte, eventType)
 	} else if strings.Contains(eventType, policyEventType) {
-		handlePolicyEvents(decodedByte, eventType, c)
+		if AgentMode == "CPtoDP" {
+			handlePolicyEvents(decodedByte, eventType, c)
+		}
 	}
 	// other events will ignore including HEALTH_CHECK event
 	return nil
