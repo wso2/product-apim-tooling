@@ -52,6 +52,7 @@ var defaultConfig = &Config{
 		TrustStore: truststore{
 			Location: "/home/wso2/security/truststore",
 		},
+		Mode: "DPtoCP",
 	},
 	Metrics: metrics{
 		Enabled: false,

@@ -36,3 +36,5 @@ dataPlane:
   namespace: apk
 metrics:
   enabled: false
+agent:
+  mode: CPtoDP

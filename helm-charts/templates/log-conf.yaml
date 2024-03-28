@@ -24,6 +24,9 @@ data:
       enabled = {{.Values.metrics.enabled}}
       type = "{{.Values.metrics.type| default "prometheus" }}"
       port = 18006
+    
+    [agent]
+        mode = "{{ .Values.agent.mode }}"
   log_config.toml: |
     # The logging configuration for Adapter
 

@@ -83,6 +83,7 @@ type agent struct {
 	Enabled    bool
 	Keystore   keystore
 	TrustStore truststore
+	Mode       string
 }
 type keystore struct {
 	KeyPath  string
