@@ -52,6 +52,7 @@ type AuthConfiguration struct {
 	HeaderEnabled     bool          `yaml:"headerEnable,omitempty"`
 	queryParamEnable  bool          `yaml:"queryParamEnable,omitempty"`
 	Certificates      []Certificate `yaml:"certificates,omitempty"`
+	Audience          []string      `yaml:"audience,omitempty"`
 }
 
 // Endpoint represents an API endpoint.

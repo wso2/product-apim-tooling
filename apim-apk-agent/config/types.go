@@ -110,6 +110,7 @@ type controlPlane struct {
 	BrokerConnectionParameters brokerConnectionParameters
 	HTTPClient                 httpClient
 	RequestWorkerPool          requestWorkerPool
+	InternalKeyIssuer          string
 }
 
 // Dataplane struct contains the configurations related to the APK
