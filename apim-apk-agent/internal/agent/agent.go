@@ -158,7 +158,7 @@ func Run(conf *config.Config) {
 		defer wg.Done()
 		logger.LoggerAgent.Info("starting manager")
 		if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-			logger.LoggerAgent.Warn("problem running manager: %v", err)
+			logger.LoggerAgent.Warnf("problem running manager: %v", err)
 		}
 	}()
 

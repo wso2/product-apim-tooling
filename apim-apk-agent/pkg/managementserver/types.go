@@ -104,3 +104,41 @@ type ApplicationMapping struct {
 type ApplicationMappingList struct {
 	List []ApplicationMapping `json:"list"`
 }
+
+// APICPEvent holds data of a specific API event from adapter
+type APICPEvent struct {
+	Event EventType `json:"event"`
+	API   API       `json:"payload"`
+}
+
+// EventType is the type of api event. One of (CREATE, UPDATE, DELETE)
+type EventType string
+
+const (
+	// CreateEvent is create api event
+	CreateEvent EventType = "CREATE"
+	// DeleteEvent is delete api event
+	DeleteEvent EventType = "DELETE"
+)
+
+// API holds the api data from adapter api event
+type API struct {
+	APIUUID          string     `json:"apiUUID"`
+	APIName          string     `json:"apiName"`
+	APIVersion       string     `json:"apiVersion"`
+	IsDefaultVersion bool       `json:"isDefaultVersion"`
+	Definition       string     `json:"definition"`
+	APIType          string     `json:"apiType"`
+	BasePath         string     `json:"basePath"`
+	Organization     string     `json:"organization"`
+	SystemAPI        bool       `json:"systemAPI"`
+	APIProperties    []Property `json:"apiProperties,omitempty"`
+	Environment      string     `json:"environment,omitempty"`
+	RevisionID       string     `json:"revisionID"`
+}
+
+// Property holds the api property
+type Property struct {
+	Name  string `json:"name,omitempty"`
+	Value string `json:"value,omitempty"`
+}

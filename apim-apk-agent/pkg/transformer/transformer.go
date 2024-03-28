@@ -130,7 +130,7 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 	if certArtifact.EndpointCerts != "" {
 		certErr := json.Unmarshal([]byte(certArtifact.EndpointCerts), &endpointCertList)
 		if certErr != nil {
-			logger.LoggerTransformer.Errorf("Error while unmarshalling endpoint_cert.json content: ", apiYamlError)
+			logger.LoggerTransformer.Errorf("Error while unmarshalling endpoint_cert.json content: %+v", apiYamlError)
 			return "", "null", 0, nil, certErr
 		}
 		endCertAvailable = true
@@ -149,7 +149,7 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 	if certArtifact.ClientCerts != "" {
 		certErr := json.Unmarshal([]byte(certArtifact.ClientCerts), &certList)
 		if certErr != nil {
-			logger.LoggerTransformer.Errorf("Error while unmarshalling client_cert.json content: ", apiYamlError)
+			logger.LoggerTransformer.Errorf("Error while unmarshalling client_cert.json content: %+v", apiYamlError)
 			return "", "null", 0, nil, certErr
 		}
 		certAvailable = true
@@ -709,7 +709,7 @@ func createConfigMaps(certFiles map[string]string, k8sArtifact *K8sArtifacts) {
 		cm.Data[confKey] = confValue
 		certConfigMap := &cm
 
-		logger.LoggerTransformer.Debug("New ConfigMap Data: %v", *certConfigMap)
+		logger.LoggerTransformer.Debugf("New ConfigMap Data: %v", *certConfigMap)
 		k8sArtifact.ConfigMaps[certConfigMap.ObjectMeta.Name] = certConfigMap
 	}
 }
