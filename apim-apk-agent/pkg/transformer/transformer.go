@@ -41,6 +41,7 @@ import (
 	dpv1alpha1 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha1"
 	dpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha2"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	gwapiv1 "sigs.k8s.io/gateway-api/apis/v1"
 
 	eventHub "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
@@ -52,7 +53,7 @@ import (
 )
 
 // GenerateAPKConf will Generate the mapped .apk-conf file for a given API Project zip
-func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizationID string) (string, string, uint32, map[string]eventHub.RateLimitPolicy, error) {
+func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizationID string) (string, string, uint32, map[string]eventHub.RateLimitPolicy, EndpointSecurityConfig, error) {
 
 	apk := &API{}
 
@@ -64,10 +65,11 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 
 	if apiYamlError != nil {
 		logger.LoggerTransformer.Error("Error while unmarshalling api.json content", apiYamlError)
-		return "", "null", 0, nil, apiYamlError
+		return "", "null", 0, nil, EndpointSecurityConfig{}, apiYamlError
 	}
 
 	apiYamlData := apiYaml.Data
+	logger.LoggerTransformer.Infof("New Data: %+v", apiYamlData.EndpointConfig.EndpointSecurity)
 
 	apk.Name = apiYamlData.Name
 	apk.Context = apiYamlData.Context
@@ -131,14 +133,16 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 		certErr := json.Unmarshal([]byte(certArtifact.EndpointCerts), &endpointCertList)
 		if certErr != nil {
 			logger.LoggerTransformer.Errorf("Error while unmarshalling endpoint_cert.json content: ", apiYamlError)
-			return "", "null", 0, nil, certErr
+			return "", "null", 0, nil, EndpointSecurityConfig{}, certErr
 		}
 		endCertAvailable = true
 	}
 
 	sandboxURL := apiYamlData.EndpointConfig.SandboxEndpoints.URL
 	prodURL := apiYamlData.EndpointConfig.ProductionEndpoints.URL
-	endpointRes := getEndpointConfigs(sandboxURL, prodURL, endCertAvailable, endpointCertList)
+	endpointSecurityData := apiYamlData.EndpointConfig.EndpointSecurity
+	apiUniqueID := GetUniqueIDForAPI(apiYamlData.Name, apiYamlData.Version, apiYamlData.OrganizationID)
+	endpointRes := getEndpointConfigs(sandboxURL, prodURL, endCertAvailable, endpointCertList, endpointSecurityData, apiUniqueID)
 
 	apk.EndpointConfigurations = &endpointRes
 
@@ -150,7 +154,7 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 		certErr := json.Unmarshal([]byte(certArtifact.ClientCerts), &certList)
 		if certErr != nil {
 			logger.LoggerTransformer.Errorf("Error while unmarshalling client_cert.json content: ", apiYamlError)
-			return "", "null", 0, nil, certErr
+			return "", "null", 0, nil, EndpointSecurityConfig{}, certErr
 		}
 		certAvailable = true
 	}
@@ -176,9 +180,9 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 
 	if marshalError != nil {
 		logger.LoggerTransformer.Error("Error while marshalling apk yaml", marshalError)
-		return "", "null", 0, nil, marshalError
+		return "", "null", 0, nil, EndpointSecurityConfig{}, marshalError
 	}
-	return string(c), apiYamlData.RevisionedAPIID, apiYamlData.RevisionID, configuredRateLimitPoliciesMap, nil
+	return string(c), apiYamlData.RevisionedAPIID, apiYamlData.RevisionID, configuredRateLimitPoliciesMap, endpointSecurityData, nil
 }
 
 // getAPIType will be selecting the appropriate API type need to be added in the apk-conf
@@ -285,7 +289,7 @@ func mapAuthConfigs(apiUUID string, authHeader string, secSchemes []string, cert
 // getEndpointConfigs will map the endpoints and there security configurations and returns them
 // TODO: Currently the APK-Conf does not support giving multiple certs for a particular endpoint.
 // After fixing this, the following logic should be changed to map multiple cert configs
-func getEndpointConfigs(sandboxURL string, prodURL string, endCertAvailable bool, endpointCertList EndpointCertDescriptor) EndpointConfigurations {
+func getEndpointConfigs(sandboxURL string, prodURL string, endCertAvailable bool, endpointCertList EndpointCertDescriptor, endpointSecurityData EndpointSecurityConfig, apiUniqueID string) EndpointConfigurations {
 	var sandboxEndpointConf, prodEndpointConf EndpointConfiguration
 	sandboxEndpointConf.Endpoint = sandboxURL
 	prodEndpointConf.Endpoint = prodURL
@@ -303,6 +307,24 @@ func getEndpointConfigs(sandboxURL string, prodURL string, endCertAvailable bool
 					Key:  endCert.Certificate,
 				}
 			}
+		}
+	}
+
+	if endpointSecurityData.Sandbox.Enabled {
+		sandboxEndpointConf.EndSecurity.Enabled = true
+		sandboxEndpointConf.EndSecurity.SecurityType = SecretInfo{
+			SecretName:  strings.Join([]string{apiUniqueID, "sandbox", "secret"}, "-"),
+			UsernameKey: "username",
+			PasswordKey: "password",
+		}
+	}
+
+	if endpointSecurityData.Production.Enabled {
+		prodEndpointConf.EndSecurity.Enabled = true
+		prodEndpointConf.EndSecurity.SecurityType = SecretInfo{
+			SecretName:  strings.Join([]string{apiUniqueID, "production", "secret"}, "-"),
+			UsernameKey: "username",
+			PasswordKey: "password",
 		}
 	}
 
@@ -531,6 +553,8 @@ func GenerateCRs(apkConf string, apiDefinition string, certContainer CertContain
 		createConfigMaps(certContainer.EndpointCertObj.EndpointCertFiles, &k8sArtifact)
 	}
 
+	createEndpointSecrets(certContainer.SecretData, &k8sArtifact)
+
 	return &k8sArtifact, nil
 }
 
@@ -711,5 +735,36 @@ func createConfigMaps(certFiles map[string]string, k8sArtifact *K8sArtifacts) {
 
 		logger.LoggerTransformer.Debug("New ConfigMap Data: %v", *certConfigMap)
 		k8sArtifact.ConfigMaps[certConfigMap.ObjectMeta.Name] = certConfigMap
+	}
+}
+
+// createEndpointSecrets creates and links the secret CRs need to be created for handling the endpoint security
+func createEndpointSecrets(secretData EndpointSecurityConfig, k8sArtifact *K8sArtifacts) {
+	createSecret := func(environment string, username, password string) {
+		secret := corev1.Secret{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Secret",
+				APIVersion: "v1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      strings.Join([]string{k8sArtifact.API.Name, environment, "secret"}, "-"),
+				Namespace: k8sArtifact.API.Namespace,
+				Labels:    make(map[string]string),
+			},
+			Data: map[string][]byte{
+				"username": []byte(username),
+				"password": []byte(password),
+			},
+		}
+		logger.LoggerTransformer.Debugf("New Secret Data for %s: %v", environment, secret)
+		k8sArtifact.Secrets[secret.ObjectMeta.Name] = &secret
+	}
+
+	if secretData.Production.Enabled {
+		createSecret("production", secretData.Production.Username, secretData.Production.Password)
+	}
+
+	if secretData.Sandbox.Enabled {
+		createSecret("sandbox", secretData.Sandbox.Username, secretData.Sandbox.Password)
 	}
 }
