@@ -60,6 +60,8 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 
 	var configuredRateLimitPoliciesMap = make(map[string]eventHub.RateLimitPolicy)
 
+	logger.LoggerTransformer.Debugf("APIJson: %v", APIJson)
+
 	apiYamlError := json.Unmarshal([]byte(APIJson), &apiYaml)
 
 	if apiYamlError != nil {
@@ -93,7 +95,8 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 
 		reqPolicyCount := len(operation.OperationPolicies.Request)
 		resPolicyCount := len(operation.OperationPolicies.Response)
-		reqInterceptor, resInterceptor := getReqAndResInterceptors(reqPolicyCount, resPolicyCount)
+		reqInterceptor, resInterceptor := getReqAndResInterceptors(reqPolicyCount, resPolicyCount,
+			operation.OperationPolicies.Request, operation.OperationPolicies.Response)
 
 		var opRateLimit *RateLimit
 		if apiYamlData.APIThrottlingPolicy == "" && operation.ThrottlingPolicy != "" {
@@ -198,24 +201,104 @@ func getAPIType(protocolType string) string {
 }
 
 // Generate the interceptor policy if request or response policy exists
-func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int) (*[]OperationPolicy, *[]OperationPolicy) {
+func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []APIMOperationPolicy, resPolicies []APIMOperationPolicy) (*[]OperationPolicy, *[]OperationPolicy) {
 	var reqInterceptor, resInterceptor []OperationPolicy
 	var interceptorParams *InterceptorService
-	var interceptorPolicy OperationPolicy
+	var requestInterceptorPolicy OperationPolicy
+	var responseInterceptorPolicy OperationPolicy
 
-	if reqPolicyCount > 0 || resPolicyCount > 0 {
+	if reqPolicyCount > 0 {
+		includes := reqPolicies[0].Parameters.Includes
+		substrings := strings.Split(includes, ",")
+		bodyEnabled := false
+		headerEnabled := false
+		trailersEnabled := false
+		contextEnabled := false
+		sslEnabled := false
+		tlsSecretName := ""
+		tlsSecretKey := ""
+		for _, substring := range substrings {
+			if strings.Contains(substring, "request_header") {
+				headerEnabled = true
+			} else if strings.Contains(substring, "request_body") {
+				bodyEnabled = true
+			} else if strings.Contains(substring, "request_trailers") {
+				trailersEnabled = true
+			} else if strings.Contains(substring, "request_context") {
+				contextEnabled = true
+			}
+		}
+
+		if strings.Contains(reqPolicies[0].Parameters.InterceptorServiceURL, "https") {
+			sslEnabled = true
+		}
+
+		if sslEnabled {
+			tlsSecretName = reqPolicies[0].PolicyID + "request-interceptor-tls-secret"
+			tlsSecretKey = "tls.crt"
+		}
+
 		interceptorParams = &InterceptorService{
-			BackendURL:      "https://interceptor-svc.ns:9081",
-			HeadersEnabled:  true,
-			BodyEnabled:     true,
-			TrailersEnabled: true,
-			ContextEnabled:  true,
-			TLSSecretName:   "interceptor-cert",
-			TLSSecretKey:    "ca.crt",
+			BackendURL:      reqPolicies[0].Parameters.InterceptorServiceURL,
+			HeadersEnabled:  headerEnabled,
+			BodyEnabled:     bodyEnabled,
+			TrailersEnabled: trailersEnabled,
+			ContextEnabled:  contextEnabled,
+			TLSSecretName:   tlsSecretName,
+			TLSSecretKey:    tlsSecretKey,
 		}
 
 		// Create an instance of OperationPolicy
-		interceptorPolicy = OperationPolicy{
+		requestInterceptorPolicy = OperationPolicy{
+			PolicyName:    "Interceptor",
+			PolicyVersion: "v1",
+			Parameters:    interceptorParams,
+		}
+	}
+
+	if resPolicyCount > 0 {
+		includes := resPolicies[0].Parameters.Includes
+		substrings := strings.Split(includes, ",")
+		bodyEnabled := false
+		headerEnabled := false
+		trailersEnabled := false
+		contextEnabled := false
+		sslEnabled := false
+		tlsSecretName := ""
+		tlsSecretKey := ""
+		for _, substring := range substrings {
+			if strings.Contains(substring, "request_header") {
+				headerEnabled = true
+			} else if strings.Contains(substring, "request_body") {
+				bodyEnabled = true
+			} else if strings.Contains(substring, "request_trailers") {
+				trailersEnabled = true
+			} else if strings.Contains(substring, "request_context") {
+				contextEnabled = true
+			}
+		}
+
+		if strings.Contains(resPolicies[0].Parameters.InterceptorServiceURL, "https") {
+			sslEnabled = true
+		}
+
+		if sslEnabled {
+			tlsSecretName = resPolicies[0].PolicyID + "response-interceptor-tls-secret"
+			tlsSecretKey = "tls.crt"
+		}
+
+		interceptorParams = &InterceptorService{
+			BackendURL:      resPolicies[0].Parameters.InterceptorServiceURL,
+			HeadersEnabled:  headerEnabled,
+			BodyEnabled:     bodyEnabled,
+			TrailersEnabled: trailersEnabled,
+			ContextEnabled:  contextEnabled,
+			TLSSecretName:   tlsSecretName,
+			TLSSecretKey:    tlsSecretKey,
+		}
+
+		// Create an instance of OperationPolicy
+		responseInterceptorPolicy = OperationPolicy{
 			PolicyName:    "Interceptor",
 			PolicyVersion: "v1",
 			Parameters:    interceptorParams,
@@ -223,11 +306,11 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int) (*[]OperationP
 	}
 
 	if reqPolicyCount > 0 {
-		reqInterceptor = append(reqInterceptor, interceptorPolicy)
+		reqInterceptor = append(reqInterceptor, requestInterceptorPolicy)
 	}
 
 	if resPolicyCount > 0 {
-		resInterceptor = append(resInterceptor, interceptorPolicy)
+		resInterceptor = append(resInterceptor, responseInterceptorPolicy)
 	}
 	return &reqInterceptor, &resInterceptor
 }
