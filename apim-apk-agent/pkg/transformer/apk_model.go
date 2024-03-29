@@ -17,6 +17,19 @@
 
 package transformer
 
+// SecretInfo holds the info related to the created secret upon enabling the endpoint security options like basic auth
+type SecretInfo struct {
+	SecretName  string `yaml:"secretName,omitempty"`
+	UsernameKey string `yaml:"userNameKey,omitempty"`
+	PasswordKey string `yaml:"passwordKey,omitempty"`
+}
+
+// EndpointSecurity comtains the information related to endpoint security configurations enabled by a user for a given API
+type EndpointSecurity struct {
+	Enabled      bool       `yaml:"enabled,omitempty"`
+	SecurityType SecretInfo `yaml:"securityType,omitempty"`
+}
+
 // EndpointCertificate struct stores the the alias and the name for a particular endpoint security configuration
 type EndpointCertificate struct {
 	Name string `yaml:"secretName"`
@@ -27,6 +40,7 @@ type EndpointCertificate struct {
 type EndpointConfiguration struct {
 	Endpoint       string              `yaml:"endpoint,omitempty"`
 	EndCertificate EndpointCertificate `yaml:"certificate,omitempty"`
+	EndSecurity    EndpointSecurity    `yaml:"endpointSecurity,omitempty"`
 }
 
 // AdditionalProperty stores the custom properties set by the user for a particular API

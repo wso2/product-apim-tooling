@@ -107,15 +107,17 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUID *string, k8sClient client.Cli
 							logger.LoggerUtils.Errorf("Error while decoding the API Project Artifact: %v", decodingError)
 							return nil, err
 						}
-						apkConf, apiUUID, revisionID, configuredRateLimitPoliciesMap, apkErr := transformer.GenerateAPKConf(artifact.APIJson, artifact.CertArtifact, apiDeployment.OrganizationID)
+
+						apkConf, apiUUID, revisionID, configuredRateLimitPoliciesMap, endpointSecurityData, apkErr := transformer.GenerateAPKConf(artifact.APIJson, artifact.CertArtifact, apiDeployment.OrganizationID)
 						if apkErr != nil {
 							logger.LoggerUtils.Errorf("Error while generating APK-Conf: %v", apkErr)
 							return nil, err
 						}
-						logger.LoggerUtils.Debugf("APK Conf:", apkConf)
+						logger.LoggerUtils.Debug("APK Conf:", apkConf)
 						certContainer := transformer.CertContainer{
 							ClientCertObj:   artifact.CertMeta,
 							EndpointCertObj: artifact.EndpointCertMeta,
+							SecretData:      endpointSecurityData,
 						}
 						k8ResourceEndpoint := conf.DataPlane.K8ResourceEndpoint
 						crResponse, err := transformer.GenerateCRs(apkConf, artifact.Schema, certContainer, k8ResourceEndpoint, apiDeployment.OrganizationID)
