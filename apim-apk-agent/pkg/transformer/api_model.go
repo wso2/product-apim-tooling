@@ -17,6 +17,30 @@
 
 package transformer
 
+// CustomParams holds the custom parameter values that has been enabled for the selected security mode
+type CustomParams struct {
+	CustomParamMapping map[string]string `json:"customParamMapping"`
+}
+
+// SecurityObj holds the idividual attribute values for each endpoint security config
+type SecurityObj struct {
+	Enabled          bool                   `json:"enabled"`
+	Type             string                 `json:"type"`
+	Username         string                 `json:"username"`
+	Password         string                 `json:"password"`
+	GrantType        string                 `json:"grantType"`
+	TokenURL         string                 `json:"tokenUrl"`
+	ClientID         string                 `json:"clientId"`
+	ClientSecret     string                 `json:"clientSecret"`
+	CustomParameters map[string]interface{} `json:"customParameters"`
+}
+
+// EndpointSecurityConfig holds security configs enabled for endpoints from the API level
+type EndpointSecurityConfig struct {
+	Production SecurityObj `json:"production"`
+	Sandbox    SecurityObj `json:"sandbox"`
+}
+
 // EndpointDetails represents the details of an endpoint, containing its URL.
 type EndpointDetails struct {
 	URL string `json:"url"`
@@ -24,9 +48,10 @@ type EndpointDetails struct {
 
 // EndpointConfig represents the configuration of an endpoint, including its type, sandbox, and production details.
 type EndpointConfig struct {
-	EndpointType        string          `json:"endpoint_type"`
-	SandboxEndpoints    EndpointDetails `json:"sandbox_endpoints"`
-	ProductionEndpoints EndpointDetails `json:"production_endpoints"`
+	EndpointType        string                 `json:"endpoint_type"`
+	SandboxEndpoints    EndpointDetails        `json:"sandbox_endpoints"`
+	ProductionEndpoints EndpointDetails        `json:"production_endpoints"`
+	EndpointSecurity    EndpointSecurityConfig `json:"endpoint_security"`
 }
 
 // CORSConfiguration represents the CORS (Cross-Origin Resource Sharing) configuration for an API.
@@ -65,11 +90,25 @@ type OperationPolicy struct {
 	Parameters    *InterceptorService `yaml:"parameters,omitempty"`
 }
 
+// APIMOperationPolicy defines policies, including interceptor parameters, for API operations.
+type APIMOperationPolicy struct {
+	PolicyName    string                  `yaml:"policyName,omitempty"`
+	PolicyVersion string                  `yaml:"policyVersion,omitempty"`
+	PolicyID      string                  `yaml:"policyId,omitempty"`
+	Parameters    *APIMInterceptorService `yaml:"parameters,omitempty"`
+}
+
+// APIMInterceptorService holds configuration details for configuring interceptor
+type APIMInterceptorService struct {
+	InterceptorServiceURL string `yaml:"interceptorServiceURL,omitempty"`
+	Includes              string `yaml:"includes,omitempty"`
+}
+
 // APIMOperationPolicies organizes request, response, and fault policies for an API operation.
 type APIMOperationPolicies struct {
-	Request  []OperationPolicy `yaml:"request"`
-	Response []OperationPolicy `yaml:"response"`
-	Fault    []OperationPolicy `yaml:"fault"`
+	Request  []APIMOperationPolicy `yaml:"request"`
+	Response []APIMOperationPolicy `yaml:"response"`
+	Fault    []APIMOperationPolicy `yaml:"fault"`
 }
 
 // APIMOperation represents an API operation with its target, verb, scopes, and associated policies.
@@ -144,4 +183,5 @@ type EndpointCertMetadata struct {
 type CertContainer struct {
 	ClientCertObj   CertMetadata
 	EndpointCertObj EndpointCertMetadata
+	SecretData      EndpointSecurityConfig
 }

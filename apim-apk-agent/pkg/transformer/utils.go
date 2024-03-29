@@ -20,6 +20,8 @@ package transformer
 import (
 	"archive/zip"
 	"bytes"
+	"crypto/sha1"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 
@@ -165,4 +167,13 @@ func StringExists(target string, slice []string) bool {
 	}
 	_, exists := set[target]
 	return exists
+}
+
+// GetUniqueIDForAPI will generate a unique ID for newly created APIs
+func GetUniqueIDForAPI(name, version, organization string) string {
+	concatenatedString := strings.Join([]string{organization, name, version}, "-")
+	hash := sha1.New()
+	hash.Write([]byte(concatenatedString))
+	hashedValue := hash.Sum(nil)
+	return hex.EncodeToString(hashedValue)
 }
