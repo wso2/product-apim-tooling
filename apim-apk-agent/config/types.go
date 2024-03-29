@@ -113,6 +113,7 @@ type controlPlane struct {
 	InternalKeyIssuer          string
 	ClientID                   string
 	ClientSecret               string
+	Provider                   string
 }
 
 // Dataplane struct contains the configurations related to the APK
