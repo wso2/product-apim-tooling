@@ -59,9 +59,13 @@ func StartInternalServer(port uint) {
 		} else {
 			apiYaml := createAPIYaml(event)
 			definition := event.API.Definition
+			deploymentContent := createDeployementYaml()
 			zipFiles := []utils.ZipFile{{
 				Path:    fmt.Sprintf("%s-%s/api.yaml", event.API.APIName, event.API.APIVersion),
 				Content: apiYaml,
+			}, {
+				Path:    fmt.Sprintf("%s-%s/deployment_environments.yaml", event.API.APIName, event.API.APIVersion),
+				Content: deploymentContent,
 			}, {
 				Path:    fmt.Sprintf("%s-%s/Definitions/swagger.yaml", event.API.APIName, event.API.APIVersion),
 				Content: definition,
@@ -96,16 +100,16 @@ func createAPIYaml(apiCPEvent APICPEvent) string {
 			"version":                      apiCPEvent.API.APIVersion,
 			"organizationId":               apiCPEvent.API.Organization,
 			"provider":                     "admin",
-			"lifeCycleStatus":              "PUBLISHED", 
-			"responseCachingEnabled":       false,       
-			"cacheTimeout":                 300,         
-			"hasThumbnail":                 false,       
+			"lifeCycleStatus":              "PUBLISHED",
+			"responseCachingEnabled":       false,
+			"cacheTimeout":                 300,
+			"hasThumbnail":                 false,
 			"isDefaultVersion":             apiCPEvent.API.IsDefaultVersion,
-			"isRevision":                   false,                     
-			"revisionId":                   apiCPEvent.API.RevisionID, 
-			"enableSchemaValidation":       false,                     
-			"enableSubscriberVerification": false,                     
-			"type":                         "HTTP",                    
+			"isRevision":                   false,
+			"revisionId":                   apiCPEvent.API.RevisionID,
+			"enableSchemaValidation":       false,
+			"enableSubscriberVerification": false,
+			"type":                         "HTTP",
 			"endpointConfig": map[string]interface{}{
 				"endpoint_type": "http",
 				"sandbox_endpoints": map[string]interface{}{
@@ -119,6 +123,29 @@ func createAPIYaml(apiCPEvent APICPEvent) string {
 			"gatewayType":   "wso2/apk",
 			"gatewayVendor": "wso2",
 		},
+	}
+
+	yamlBytes, _ := yaml.Marshal(data)
+	return string(yamlBytes)
+}
+
+func createDeployementYaml() string {
+	config, err := config.ReadConfigs()
+	envLabel := []string{"Default"}
+	if (err == nil) {
+		envLabel = config.ControlPlane.EnvironmentLabels
+	}
+	deploymentEnvData := []map[string]string{}
+	for _, label := range envLabel {
+		deploymentEnvData = append(deploymentEnvData, map[string]string{
+			"displayOnDevportal":     "true",
+			"deploymentEnvironment":  label,
+		})
+	}
+	data := map[string]interface{}{
+		"type":    "deployment_environments",
+		"version": "v4.3.0",
+		"data":    deploymentEnvData,
 	}
 
 	yamlBytes, _ := yaml.Marshal(data)

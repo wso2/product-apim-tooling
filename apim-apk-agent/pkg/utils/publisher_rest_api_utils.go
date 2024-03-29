@@ -38,7 +38,7 @@ type Scope string
 
 const (
 	// APIImportRelativePath is the relative path of API import in publisher rest API
-	APIImportRelativePath = "api/am/publisher/v4/apis/import?preserveProvider=false&overwrite=true"
+	APIImportRelativePath = "api/am/publisher/v4/apis/import?preserveProvider=false&overwrite=true&rotateRevision=true"
 	// TokenRelativePath is the relative path for getting token in publisher rest API
 	TokenRelativePath = "oauth2/token"
 	// APIDeleteRelativePath is the relative path of delete api in publisher rest API
