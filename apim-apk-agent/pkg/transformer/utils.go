@@ -71,7 +71,7 @@ func readZipFile(file *zip.File) (*APIArtifact, error) {
 	apiArtifact.APIFileName = file.Name
 	zipReader, err := zip.NewReader(bytes.NewReader(content), int64(len(content)))
 	if err != nil {
-		logger.LoggerTransformer.Errorf("Error reading zip file: ", err)
+		logger.LoggerTransformer.Errorf("Error reading zip file: %+v", err)
 		return nil, err
 	}
 	for _, file := range zipReader.File {

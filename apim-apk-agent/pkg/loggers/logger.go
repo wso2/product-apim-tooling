@@ -36,6 +36,7 @@ const (
 	pkgMsg         = "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/messaging"
 	pkgHealth      = "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/health"
 	pkgTLSUtils    = "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/tlsutils"
+	pkgUtils       = "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/utils"
 	pkgAdapter     = "github.com/wso2/apk/adapter/pkg/adapter"
 	pkgSync        = "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/synchronizer"
 	pkgSoapUtils   = "github.com/wso2/apk/adapter/pkg/soaputils"
@@ -49,6 +50,7 @@ var (
 	LoggerMsg          logging.Log
 	LoggerHealth       logging.Log
 	LoggerTLSUtils     logging.Log
+	LoggerUtils     logging.Log
 	LoggerAdapter      logging.Log
 	LoggerSync         logging.Log
 	LoggerSoapUtils    logging.Log
@@ -67,6 +69,7 @@ func UpdateLoggers() {
 	LoggerMsg = logging.InitPackageLogger(pkgMsg)
 	LoggerHealth = logging.InitPackageLogger(pkgHealth)
 	LoggerTLSUtils = logging.InitPackageLogger(pkgTLSUtils)
+	LoggerUtils = logging.InitPackageLogger(pkgUtils)
 	LoggerAdapter = logging.InitPackageLogger(pkgAdapter)
 	LoggerSync = logging.InitPackageLogger(pkgSync)
 	LoggerSoapUtils = logging.InitPackageLogger(pkgSoapUtils)

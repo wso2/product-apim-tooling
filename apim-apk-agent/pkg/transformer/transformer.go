@@ -815,7 +815,7 @@ func createConfigMaps(certFiles map[string]string, k8sArtifact *K8sArtifacts) {
 		cm.Data[confKey] = confValue
 		certConfigMap := &cm
 
-		logger.LoggerTransformer.Debug("New ConfigMap Data: %v", *certConfigMap)
+		logger.LoggerTransformer.Debugf("New ConfigMap Data: %v", *certConfigMap)
 		k8sArtifact.ConfigMaps[certConfigMap.ObjectMeta.Name] = certConfigMap
 	}
 }

@@ -111,6 +111,8 @@ type controlPlane struct {
 	HTTPClient                 httpClient
 	RequestWorkerPool          requestWorkerPool
 	InternalKeyIssuer          string
+	ClientID                   string
+	ClientSecret               string
 }
 
 // Dataplane struct contains the configurations related to the APK
