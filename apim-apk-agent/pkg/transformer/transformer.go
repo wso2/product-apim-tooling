@@ -71,7 +71,6 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 	}
 
 	apiYamlData := apiYaml.Data
-	logger.LoggerTransformer.Infof("New Data: %+v", apiYamlData.EndpointConfig.EndpointSecurity)
 
 	apk.Name = apiYamlData.Name
 	apk.Context = apiYamlData.Context
