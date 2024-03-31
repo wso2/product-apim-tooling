@@ -34,6 +34,7 @@ cp offset1/deployment.toml offset1/distribution/$APIM_PACK/repository/conf/.
 offset0/distribution/$APIM_PACK/bin/api-manager.sh start 
 
 echo "Starting APIM Instance 1"
+tail -f offset0/distribution/$APIM_PACK/repository/logs/wso2carbon.log
 
 offset1/distribution/$APIM_PACK/bin/api-manager.sh start 
 
