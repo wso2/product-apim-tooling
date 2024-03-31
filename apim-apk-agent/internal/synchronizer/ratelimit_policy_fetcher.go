@@ -29,6 +29,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	k8sclient "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/k8sClient"
@@ -113,7 +114,7 @@ func FetchRateLimitPoliciesOnEvent(ratelimitName string, organization string, c 
 	var errorMsg string
 	if err != nil {
 		errorMsg = "Error occurred while calling the REST API: " + policiesEndpoint
-		go retryFetchData(conf, errorMsg, err, c)
+		go retryRLPFetchData(conf, errorMsg, err, c)
 		return
 	}
 	responseBytes, err := ioutil.ReadAll(resp.Body)
@@ -121,7 +122,7 @@ func FetchRateLimitPoliciesOnEvent(ratelimitName string, organization string, c 
 
 	if err != nil {
 		errorMsg = "Error occurred while reading the response received for: " + policiesEndpoint
-		go retryFetchData(conf, errorMsg, err, c)
+		go retryRLPFetchData(conf, errorMsg, err, c)
 		return
 	}
 
@@ -151,6 +152,18 @@ func FetchRateLimitPoliciesOnEvent(ratelimitName string, organization string, c 
 	} else {
 		errorMsg = "Failed to fetch data! " + policiesEndpoint + " responded with " +
 			strconv.Itoa(resp.StatusCode)
-		go retryFetchData(conf, errorMsg, err, c)
+		go retryRLPFetchData(conf, errorMsg, err, c)
+	}
+}
+
+func retryRLPFetchData(conf *config.Config, errorMessage string, err error, c client.Client) {
+	logger.LoggerSynchronizer.Debugf("Time Duration for retrying: %v",
+		conf.ControlPlane.RetryInterval*time.Second)
+	time.Sleep(conf.ControlPlane.RetryInterval * time.Second)
+	FetchRateLimitPoliciesOnEvent("", "", c)
+	retryAttempt++
+	if retryAttempt >= retryCount {
+		logger.LoggerSynchronizer.Errorf(errorMessage, err)
+		return
 	}
 }
