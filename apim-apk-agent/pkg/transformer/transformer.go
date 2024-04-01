@@ -28,6 +28,7 @@ import (
 	"bytes"
 	"crypto/sha1"
 	"crypto/tls"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -161,7 +162,7 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 		certAvailable = true
 	}
 
-	authConfigList := mapAuthConfigs(apiYamlData.ID, apiYamlData.AuthorizationHeader, apiYamlData.SecuritySchemes, certAvailable, certList)
+	authConfigList := mapAuthConfigs(apiYamlData.ID, apiYamlData.AuthorizationHeader, apiYamlData.SecuritySchemes, certAvailable, certList, apiUniqueID)
 	apk.Authentication = &authConfigList
 
 	apk.CorsConfig = &apiYamlData.CORSConfiguration
@@ -320,7 +321,7 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 
 // mapAuthConfigs will take the security schemes as the parameter and will return the mapped auth configs to be
 // added into the apk-conf
-func mapAuthConfigs(apiUUID string, authHeader string, secSchemes []string, certAvailable bool, certList CertDescriptor) []AuthConfiguration {
+func mapAuthConfigs(apiUUID string, authHeader string, secSchemes []string, certAvailable bool, certList CertDescriptor, apiUniqueID string) []AuthConfiguration {
 	var authConfigs []AuthConfiguration
 	if StringExists("oauth2", secSchemes) {
 		var newConfig AuthConfiguration
@@ -349,7 +350,7 @@ func mapAuthConfigs(apiUUID string, authHeader string, secSchemes []string, cert
 
 		for i, cert := range certList.CertData {
 			prop := &Certificate{
-				Name: cert.Alias,
+				Name: apiUniqueID + "-" + cert.Alias,
 				Key:  cert.Certificate,
 			}
 			clientCerts[i] = *prop
@@ -812,7 +813,18 @@ func createConfigMaps(certFiles map[string]string, k8sArtifact *K8sArtifacts) {
 		if cm.Data == nil {
 			cm.Data = make(map[string]string)
 		}
-		cm.Data[confKey] = confValue
+		apimCert := confValue
+		// Remove "-----BEGIN CERTIFICATE-----" and "-----END CERTIFICATE-----" strings
+		pemCert := strings.ReplaceAll(apimCert, "-----BEGIN CERTIFICATE-----", "")
+		pemCert = strings.ReplaceAll(pemCert, "-----END CERTIFICATE-----", "")
+		pemCert = strings.TrimSpace(pemCert)
+		// Decode the Base64 encoded certificate content
+		decodedCert, err := base64.StdEncoding.DecodeString(pemCert)
+		logger.LoggerTransformer.Debugf("Decoded Certificate: %v", decodedCert)
+		if err != nil {
+			logger.LoggerTransformer.Errorf("Error decoding the certificate: %v", err)
+		}
+		cm.Data[confKey] = string(decodedCert)
 		certConfigMap := &cm
 
 		logger.LoggerTransformer.Debugf("New ConfigMap Data: %v", *certConfigMap)
