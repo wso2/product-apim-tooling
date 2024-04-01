@@ -123,22 +123,33 @@ const (
 
 // API holds the api data from adapter api event
 type API struct {
-	APIUUID          string     `json:"apiUUID"`
-	APIName          string     `json:"apiName"`
-	APIVersion       string     `json:"apiVersion"`
-	IsDefaultVersion bool       `json:"isDefaultVersion"`
-	Definition       string     `json:"definition"`
-	APIType          string     `json:"apiType"`
-	BasePath         string     `json:"basePath"`
-	Organization     string     `json:"organization"`
-	SystemAPI        bool       `json:"systemAPI"`
-	APIProperties    []Property `json:"apiProperties,omitempty"`
-	Environment      string     `json:"environment,omitempty"`
-	RevisionID       string     `json:"revisionID"`
+	APIUUID          string            `json:"apiUUID"`
+	APIName          string            `json:"apiName"`
+	APIVersion       string            `json:"apiVersion"`
+	IsDefaultVersion bool              `json:"isDefaultVersion"`
+	Definition       string            `json:"definition"`
+	APIType          string            `json:"apiType"`
+	BasePath         string            `json:"basePath"`
+	Organization     string            `json:"organization"`
+	SystemAPI        bool              `json:"systemAPI"`
+	APIProperties    map[string]string `json:"apiProperties,omitempty"`
+	Environment      string            `json:"environment,omitempty"`
+	RevisionID       string            `json:"revisionID"`
+	SandEndpoint     string            `json:"sandEndpoint"`
+	ProdEndpoint     string            `json:"prodEndpoint"`
+	EndpointProtocol string            `json:"endpointProtocol"`
+	CORSPolicy       *CORSPolicy       `json:"cORSPolicy"`
+	Vhost            string            `json:"vhost"`
+	SecurityScheme   []string          `json:"securityScheme"`
+	AuthHeader       string            `json:"authHeader"`
 }
 
-// Property holds the api property
-type Property struct {
-	Name  string `json:"name,omitempty"`
-	Value string `json:"value,omitempty"`
+// CORSPolicy hold cors configs
+type CORSPolicy struct {
+	AccessControlAllowCredentials bool     `json:"accessControlAllowCredentials,omitempty"`
+	AccessControlAllowHeaders     []string `json:"accessControlAllowHeaders,omitempty"`
+	AccessControlAllowOrigins     []string `json:"accessControlAllowOrigins,omitempty"`
+	AccessControlExposeHeaders    []string `json:"accessControlExposeHeaders,omitempty"`
+	AccessControlMaxAge           *int     `json:"accessControlMaxAge,omitempty"`
+	AccessControlAllowMethods     []string `json:"accessControlAllowMethods,omitempty"`
 }

@@ -45,6 +45,7 @@ var defaultConfig = &Config{
 			PauseTimeAfterFailure: 5,
 		},
 		InternalKeyIssuer: "http://am.wso2.com:443/token",
+		Provider: "admin",
 	},
 	Agent: agent{
 		Enabled: true,

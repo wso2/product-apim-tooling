@@ -18,13 +18,16 @@ package managementserver
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
+	"net/http"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/utils"
 	"gopkg.in/yaml.v2"
-	"net/http"
 )
 
 func init() {
@@ -32,6 +35,11 @@ func init() {
 
 // StartInternalServer starts the internal server
 func StartInternalServer(port uint) {
+	cpConfig, err := config.ReadConfigs()
+	envLabel := []string{"Default"}
+	if err == nil {
+		envLabel = cpConfig.ControlPlane.EnvironmentLabels
+	}
 	r := gin.Default()
 
 	r.GET("/applications", func(c *gin.Context) {
@@ -52,14 +60,36 @@ func StartInternalServer(port uint) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+		logger.LoggerMgtServer.Debugf("Recieved payload for endpoint /apis: %+v", event)
 		if event.Event == DeleteEvent {
 			logger.LoggerMgtServer.Infof("Delete event received with APIUUID: %s", event.API.APIUUID)
+			payload := []map[string]interface{}{
+				{
+					"revisionUuid":       event.API.RevisionID,
+					"name":               envLabel[0],
+					"vhost":              event.API.Vhost,
+					"displayOnDevportal": true,
+				},
+			}
+			jsonPayload, err := json.Marshal(payload)
+			logger.LoggerMgtServer.Debugf("Sending payload for revision undeploy: %+v", string(jsonPayload))
+			if err != nil {
+				logger.LoggerMgtServer.Errorf("Error while preparing payload to delete revision. Processed object: %+v", payload)
+				c.JSON(http.StatusInternalServerError, err.Error())
+				return
+			}
 			// Delete the api
-			utils.DeleteAPI(event.API.APIUUID)
+			errorUndeployRevision := utils.DeleteAPIRevision(event.API.APIUUID, event.API.RevisionID, string(jsonPayload))
+			if errorUndeployRevision != nil {
+				logger.LoggerMgtServer.Errorf("Error while undeploying api revision. RevisionId: %s, API ID: %s . Sending error response to Adapter.", event.API.RevisionID, event.API.APIUUID)
+				c.JSON(http.StatusServiceUnavailable, errorUndeployRevision.Error())
+				return
+			}
+			c.JSON(http.StatusOK, map[string]string{"message": "Success"})
 		} else {
-			apiYaml := createAPIYaml(event)
 			definition := event.API.Definition
-			deploymentContent := createDeployementYaml()
+			apiYaml := createAPIYaml(event)
+			deploymentContent := createDeployementYaml(event.API.Vhost)
 			zipFiles := []utils.ZipFile{{
 				Path:    fmt.Sprintf("%s-%s/api.yaml", event.API.APIName, event.API.APIVersion),
 				Content: apiYaml,
@@ -75,13 +105,13 @@ func StartInternalServer(port uint) {
 				logger.LoggerMgtServer.Errorf("Error while creating apim zip file for api uuid: %s. Error: %+v", event.API.APIUUID, err)
 			}
 
-			id, err := utils.ImportAPI(fmt.Sprintf("admin-%s-%s.zip", event.API.APIName, event.API.APIVersion), &buf)
+			id, revisionID, err := utils.ImportAPI(fmt.Sprintf("admin-%s-%s.zip", event.API.APIName, event.API.APIVersion), &buf)
 			if err != nil {
 				logger.LoggerMgtServer.Errorf("Error while importing API. Sending error response to Adapter.")
-				c.JSON(http.StatusInternalServerError, err.Error())
+				c.JSON(http.StatusServiceUnavailable, err.Error())
 				return
 			}
-			c.JSON(http.StatusOK, map[string]string{"id": id})
+			c.JSON(http.StatusOK, map[string]string{"id": id, "revisionID": revisionID})
 		}
 	})
 	gin.SetMode(gin.ReleaseMode)
@@ -90,56 +120,98 @@ func StartInternalServer(port uint) {
 }
 
 func createAPIYaml(apiCPEvent APICPEvent) string {
+	config, err := config.ReadConfigs()
+	provider := "admin"
+	if err == nil {
+		provider = config.ControlPlane.Provider
+	}
+	context := removeSuffix(apiCPEvent.API.BasePath, apiCPEvent.API.APIVersion)
+	operations, operationsErr := extractOperationsFromOpenAPI(apiCPEvent.API.Definition)
+	if operationsErr != nil {
+		logger.LoggerMgtServer.Errorf("Error occured while extracting operations from open API: %s, \nError: %+v", apiCPEvent.API.Definition, operationsErr)
+		operations = []APIOperation{}
+	}
+	sandEndpoint := ""
+	if apiCPEvent.API.SandEndpoint != "" {
+		sandEndpoint = fmt.Sprintf("%s://%s", apiCPEvent.API.EndpointProtocol, apiCPEvent.API.SandEndpoint)
+	}
+	prodEndpoint := ""
+	if apiCPEvent.API.ProdEndpoint != "" {
+		prodEndpoint = fmt.Sprintf("%s://%s", apiCPEvent.API.EndpointProtocol, apiCPEvent.API.ProdEndpoint)
+	}
+	authHeader := apiCPEvent.API.AuthHeader
 	data := map[string]interface{}{
 		"type":    "api",
 		"version": "v4.3.0",
 		"data": map[string]interface{}{
-			"id":                           apiCPEvent.API.APIUUID,
 			"name":                         apiCPEvent.API.APIName,
-			"context":                      apiCPEvent.API.BasePath,
+			"context":                      context,
 			"version":                      apiCPEvent.API.APIVersion,
 			"organizationId":               apiCPEvent.API.Organization,
-			"provider":                     "admin",
-			"lifeCycleStatus":              "PUBLISHED",
+			"provider":                     provider,
+			"lifeCycleStatus":              "CREATED",
 			"responseCachingEnabled":       false,
 			"cacheTimeout":                 300,
 			"hasThumbnail":                 false,
 			"isDefaultVersion":             apiCPEvent.API.IsDefaultVersion,
 			"isRevision":                   false,
-			"revisionId":                   apiCPEvent.API.RevisionID,
 			"enableSchemaValidation":       false,
 			"enableSubscriberVerification": false,
 			"type":                         "HTTP",
+			"transport":                    []string{"http", "https"},
 			"endpointConfig": map[string]interface{}{
-				"endpoint_type": "http",
+				"endpoint_type": apiCPEvent.API.EndpointProtocol,
 				"sandbox_endpoints": map[string]interface{}{
-					"url": "http://local",
+					"url": sandEndpoint,
 				},
 				"production_endpoints": map[string]interface{}{
-					"url": "http://local",
+					"url": prodEndpoint,
 				},
 			},
-			"policies":      []string{"Unlimited"},
-			"gatewayType":   "wso2/apk",
-			"gatewayVendor": "wso2",
+			"policies":             []string{"Unlimited"},
+			"gatewayType":          "wso2/apk",
+			"gatewayVendor":        "wso2",
+			"operations":           operations,
+			"additionalProperties": createAdditionalProperties(apiCPEvent.API.APIProperties),
+			"securityScheme":       apiCPEvent.API.SecurityScheme,
+			"authorizationHeader":  authHeader,
+			"apiKeyHeader":         "ApiKey",
 		},
 	}
+	if apiCPEvent.API.SandEndpoint == "" {
+		delete(data["data"].(map[string]interface{})["endpointConfig"].(map[string]interface{}), "sandbox_endpoints")
+	}
+	if apiCPEvent.API.ProdEndpoint == "" {
+		delete(data["data"].(map[string]interface{})["endpointConfig"].(map[string]interface{}), "production_endpoints")
+	}
+	if apiCPEvent.API.CORSPolicy != nil {
+		data["data"].(map[string]interface{})["corsConfiguration"] = map[string]interface{}{
+			"corsConfigurationEnabled":      true,
+			"accessControlAllowOrigins":     apiCPEvent.API.CORSPolicy.AccessControlAllowOrigins,
+			"accessControlAllowCredentials": apiCPEvent.API.CORSPolicy.AccessControlAllowCredentials,
+			"accessControlAllowHeaders":     apiCPEvent.API.CORSPolicy.AccessControlAllowHeaders,
+			"accessControlAllowMethods":     apiCPEvent.API.CORSPolicy.AccessControlAllowMethods,
+			"accessControlExposeHeaders":    apiCPEvent.API.CORSPolicy.AccessControlExposeHeaders,
+		}
+	}
 
+	logger.LoggerMgtServer.Infof("Prepared yaml : %+v", data)
 	yamlBytes, _ := yaml.Marshal(data)
 	return string(yamlBytes)
 }
 
-func createDeployementYaml() string {
+func createDeployementYaml(vhost string) string {
 	config, err := config.ReadConfigs()
 	envLabel := []string{"Default"}
-	if (err == nil) {
+	if err == nil {
 		envLabel = config.ControlPlane.EnvironmentLabels
 	}
 	deploymentEnvData := []map[string]string{}
 	for _, label := range envLabel {
 		deploymentEnvData = append(deploymentEnvData, map[string]string{
-			"displayOnDevportal":     "true",
-			"deploymentEnvironment":  label,
+			"displayOnDevportal":    "true",
+			"deploymentEnvironment": label,
+			"deploymentVhost":       vhost,
 		})
 	}
 	data := map[string]interface{}{
@@ -150,4 +222,90 @@ func createDeployementYaml() string {
 
 	yamlBytes, _ := yaml.Marshal(data)
 	return string(yamlBytes)
+}
+
+// APIOperation represents the desired struct format for each API operation
+type APIOperation struct {
+	ID                string   `yaml:"id"`
+	Target            string   `yaml:"target"`
+	Verb              string   `yaml:"verb"`
+	AuthType          string   `yaml:"authType"`
+	ThrottlingPolicy  string   `yaml:"throttlingPolicy"`
+	Scopes            []string `yaml:"scopes"`
+	UsedProductIDs    []string `yaml:"usedProductIds"`
+	OperationPolicies struct {
+		Request  []string `yaml:"request"`
+		Response []string `yaml:"response"`
+		Fault    []string `yaml:"fault"`
+	} `yaml:"operationPolicies"`
+}
+
+// OpenAPIPaths represents the structure of the OpenAPI specification YAML file
+type OpenAPIPaths struct {
+	Paths map[string]map[string]Operation `yaml:"paths"`
+}
+
+// Operation represents the structure of an operation within the OpenAPI specification
+type Operation struct {
+	XAuthType        string `yaml:"x-auth-type"`
+	XThrottlingTier  string `yaml:"x-throttling-tier"`
+	XWSO2AppSecurity struct {
+		SecurityTypes []string `yaml:"security-types"`
+		Optional      bool     `yaml:"optional"`
+	} `yaml:"x-wso2-application-security"`
+}
+
+// AdditionalProperty represents additional properties of the API
+type AdditionalProperty struct {
+	Name    string
+	Value   string
+	Display bool
+}
+
+func extractOperationsFromOpenAPI(openAPI string) ([]APIOperation, error) {
+	var openAPIPaths OpenAPIPaths
+	if err := yaml.Unmarshal([]byte(openAPI), &openAPIPaths); err != nil {
+		return nil, err
+	}
+
+	var apiOperations []APIOperation
+	for path, operations := range openAPIPaths.Paths {
+		for verb, operation := range operations {
+			if operation.XAuthType == "" {
+				operation.XAuthType = "Application & Application User"
+			}
+			if operation.XThrottlingTier == "" {
+				operation.XThrottlingTier = "Unlimited"
+			}
+			apiOp := APIOperation{
+				Target:           path,
+				Verb:             verb,
+				AuthType:         operation.XAuthType,
+				ThrottlingPolicy: operation.XThrottlingTier,
+			}
+			apiOperations = append(apiOperations, apiOp)
+		}
+	}
+	return apiOperations, nil
+}
+
+func removeSuffix(str1, str2 string) string {
+	if strings.HasSuffix(str1, str2) {
+		return strings.TrimSuffix(str1, str2)
+	}
+	return str1
+}
+
+// createAdditionalProperties creates additional property elements from map
+func createAdditionalProperties(data map[string]string) []AdditionalProperty {
+	var properties []AdditionalProperty
+	for key, value := range data {
+		entry := AdditionalProperty{
+			Name:    key,
+			Value:   value,
+			Display: false,
+		}
+		properties = append(properties, entry)
+	}
+	return properties
 }

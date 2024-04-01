@@ -38,7 +38,7 @@ type Scope string
 
 const (
 	// APIImportRelativePath is the relative path of API import in publisher rest API
-	APIImportRelativePath = "api/am/publisher/v4/apis/import?preserveProvider=false&overwrite=true&rotateRevision=true"
+	APIImportRelativePath = "api/am/publisher/v4/apis/import?preserveProvider=false&overwrite=true&rotateRevision=true&preservePortalConfigueation=true"
 	// TokenRelativePath is the relative path for getting token in publisher rest API
 	TokenRelativePath = "oauth2/token"
 	// APIDeleteRelativePath is the relative path of delete api in publisher rest API
@@ -168,24 +168,24 @@ func GetSuitableAuthHeadervalue(scopes []string) (string, error) {
 }
 
 // ImportAPI imports an API from a zip file, returning the ID of the imported API.
-func ImportAPI(apiZipName string, zipFileBytes *bytes.Buffer) (string, error) {
+func ImportAPI(apiZipName string, zipFileBytes *bytes.Buffer) (string, string, error) {
 	authHeaderVal, err := GetSuitableAuthHeadervalue([]string{string(AdminScope), string(ImportExportScope)})
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	part, err := writer.CreateFormFile("file", apiZipName)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	if _, err := io.Copy(part, zipFileBytes); err != nil {
-		return "", err
+		return "", "", err
 	}
 	writer.Close()
 	req, err := http.NewRequest("POST", apiImportURL, body)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	req.Header.Set("Authorization", authHeaderVal)
@@ -193,40 +193,38 @@ func ImportAPI(apiZipName string, zipFileBytes *bytes.Buffer) (string, error) {
 	req.Header.Set("Accept", "application/json")
 	resp, err := tlsutils.InvokeControlPlane(req, skipSSL)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusConflict {
-		logger.LoggerTLSUtils.Infof("API already exists in the CP hence ignoring the event. API zip name %s", apiZipName)
-		return "", nil
-	}
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("unexpected response status: %s", resp.Status)
+	logger.LoggerTLSUtils.Infof("For the API import we received response status: %s Status code: %d. API zip name %s", resp.Status, resp.StatusCode, apiZipName)
+	if resp.StatusCode == http.StatusServiceUnavailable {
+		return "", "", fmt.Errorf("could not reach APIM. Received service unavailable reponse")
 	}
 	// try to parse the body as json and extract id from the response.
 	var responseMap map[string]interface{}
 	err = json.NewDecoder(resp.Body).Decode(&responseMap)
 	if err != nil {
 		// TODO after APIM is able to send json response, we should return error here, Until then return nil for error as its expected.
-		return "", nil
+		return "", "", nil
 	}
 
 	// Assuming the response contains an ID field, you can extract it like this:
 	id, ok := responseMap["id"].(string)
-	if !ok {
-		return "", nil
+	revisionID, revisionOk := responseMap["revision"].(string)
+	if !ok || !revisionOk {
+		return "", "", nil
 	}
-	return id, nil
+	return id, revisionID, nil
 }
 
-// DeleteAPI deletes an API given its UUID.
-func DeleteAPI(apiUUID string) error {
-	deleteURL := apiDeleteURL + apiUUID
+// DeleteAPIRevision deletes an API given its UUID.
+func DeleteAPIRevision(apiUUID string, revisionID string, body string) error {
+	deleteURL := apiDeleteURL + apiUUID + "/undeploy-revision?revisionId=" + revisionID
 	authheaderval, err := GetSuitableAuthHeadervalue([]string{string(AdminScope), string(ImportExportScope)})
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequest("DELETE", deleteURL, nil)
+	req, err := http.NewRequest("POST", deleteURL, bytes.NewBuffer([]byte(body)))
 	if err != nil {
 		return err
 	}
@@ -235,12 +233,13 @@ func DeleteAPI(apiUUID string) error {
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := tlsutils.InvokeControlPlane(req, skipSSL)
 	if err != nil {
+		logger.LoggerTLSUtils.Errorf("Error occured while sending undeploy revision request. Error: %+v", err)
 		return err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("error occured while deleting the API. Status: %s", resp.Status)
+	logger.LoggerTLSUtils.Errorf("For the API undeploy revision request we received response status %s, code: %+v, body: %+v", resp.Status, resp.StatusCode, string(body))
+	if resp.StatusCode == http.StatusServiceUnavailable {
+		return fmt.Errorf("could not reach APIM. Received service unavailable reponse")
 	}
-
 	return nil
 }
