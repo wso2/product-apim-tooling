@@ -374,6 +374,14 @@ func mapAuthConfigs(apiUUID string, authHeader string, secSchemes []string, cert
 // After fixing this, the following logic should be changed to map multiple cert configs
 func getEndpointConfigs(sandboxURL string, prodURL string, endCertAvailable bool, endpointCertList EndpointCertDescriptor, endpointSecurityData EndpointSecurityConfig, apiUniqueID string) EndpointConfigurations {
 	var sandboxEndpointConf, prodEndpointConf EndpointConfiguration
+	var sandBoxEndpointEnabled = false
+	var prodEndpointEnabled = false
+	if sandboxURL != "" {
+		sandBoxEndpointEnabled = true
+	}
+	if prodURL != "" {
+		prodEndpointEnabled = true
+	}
 	sandboxEndpointConf.Endpoint = sandboxURL
 	prodEndpointConf.Endpoint = prodURL
 	if endCertAvailable {
@@ -411,9 +419,20 @@ func getEndpointConfigs(sandboxURL string, prodURL string, endCertAvailable bool
 		}
 	}
 
-	epconfigs := EndpointConfigurations{
-		Sandbox:    &sandboxEndpointConf,
-		Production: &prodEndpointConf,
+	epconfigs := EndpointConfigurations{}
+	if sandBoxEndpointEnabled && prodEndpointEnabled {
+		epconfigs = EndpointConfigurations{
+			Sandbox:    &sandboxEndpointConf,
+			Production: &prodEndpointConf,
+		}
+	} else if sandBoxEndpointEnabled {
+		epconfigs = EndpointConfigurations{
+			Sandbox: &sandboxEndpointConf,
+		}
+	} else if prodEndpointEnabled {
+		epconfigs = EndpointConfigurations{
+			Production: &prodEndpointConf,
+		}
 	}
 	return epconfigs
 }
