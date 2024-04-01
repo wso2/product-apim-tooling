@@ -34,7 +34,6 @@ cp offset1/deployment.toml offset1/distribution/$APIM_PACK/repository/conf/.
 offset0/distribution/$APIM_PACK/bin/api-manager.sh start 
 
 echo "Starting APIM Instance 1"
-tail -f offset0/distribution/$APIM_PACK/repository/logs/wso2carbon.log
 
 offset1/distribution/$APIM_PACK/bin/api-manager.sh start 
 
@@ -54,6 +53,8 @@ do
     fi  
     ((++HALF_MINUTE_COUNTER))         
     APIM1_STATUS=$(curl --write-out %{http_code} --silent --output /dev/null "http://localhost:9763/services/Version")
+    echo "APIM1_STATUS: $APIM1_STATUS"
+    tail -n 100 offset0/distribution/$APIM_PACK/repository/logs/wso2carbon.log
 done
 
 echo "APIM Instance 1 started"
