@@ -124,4 +124,5 @@ type API struct {
 	AdditionalProperties   *[]AdditionalProperty   `yaml:"additionalProperties,omitempty"`
 	SubscriptionValidation bool                    `yaml:"subscriptionValidation,omitempty"`
 	RateLimit              *RateLimit              `yaml:"rateLimit,omitempty"`
+	APIPolicies            *OperationPolicies      `yaml:"apiPolicies,omitempty"`
 }

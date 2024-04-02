@@ -132,13 +132,14 @@ type APIMApi struct {
 	SecuritySchemes      []string               `json:"securityScheme"`
 	AdditionalProperties []AdditionalProperties `yaml:"additionalProperties"`
 	// AdditionalPropertiesMap []AdditionalPropertiesMap `yaml:"additionalPropertiesMap"`
-	CORSConfiguration   CORSConfiguration `yaml:"corsConfiguration"`
-	EndpointConfig      EndpointConfig    `yaml:"endpointConfig"`
-	Operations          []APIMOperation   `yaml:"operations"`
-	OrganizationID      string            `yaml:"organizationId"`
-	RevisionID          uint32            `yaml:"revisionId"`
-	RevisionedAPIID     string            `yaml:"revisionedApiId"`
-	APIThrottlingPolicy string            `yaml:"apiThrottlingPolicy"`
+	CORSConfiguration   CORSConfiguration     `yaml:"corsConfiguration"`
+	EndpointConfig      EndpointConfig        `yaml:"endpointConfig"`
+	Operations          []APIMOperation       `yaml:"operations"`
+	OrganizationID      string                `yaml:"organizationId"`
+	RevisionID          uint32                `yaml:"revisionId"`
+	RevisionedAPIID     string                `yaml:"revisionedApiId"`
+	APIThrottlingPolicy string                `yaml:"apiThrottlingPolicy"`
+	APIPolicies         APIMOperationPolicies `yaml:"apiPolicies"`
 }
 
 // APIYaml is a wrapper struct for YAML representation of an API.
