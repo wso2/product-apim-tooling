@@ -142,6 +142,13 @@ type API struct {
 	Vhost            string            `json:"vhost"`
 	SecurityScheme   []string          `json:"securityScheme"`
 	AuthHeader       string            `json:"authHeader"`
+	Operations       []OperationFromDP `json:"operations"`
+}
+
+// OperationFromDP holds the path, verb, throttling and interceptor policy
+type OperationFromDP struct {
+	Path string `json:"path"`
+	Verb string `json:"verb"`
 }
 
 // CORSPolicy hold cors configs

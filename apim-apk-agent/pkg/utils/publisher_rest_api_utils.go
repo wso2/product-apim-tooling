@@ -196,7 +196,8 @@ func ImportAPI(apiZipName string, zipFileBytes *bytes.Buffer) (string, string, e
 		return "", "", err
 	}
 	defer resp.Body.Close()
-	logger.LoggerTLSUtils.Infof("For the API import we received response status: %s Status code: %d. API zip name %s", resp.Status, resp.StatusCode, apiZipName)
+	respBody, _ := ioutil.ReadAll(resp.Body)
+	logger.LoggerTLSUtils.Infof("For the API import we received response status: %s Status code: %d. API zip name %s, response body: %s", resp.Status, resp.StatusCode, apiZipName, string(respBody))
 	if resp.StatusCode == http.StatusServiceUnavailable {
 		return "", "", fmt.Errorf("could not reach APIM. Received service unavailable reponse")
 	}
@@ -237,7 +238,8 @@ func DeleteAPIRevision(apiUUID string, revisionID string, body string) error {
 		return err
 	}
 	defer resp.Body.Close()
-	logger.LoggerTLSUtils.Errorf("For the API undeploy revision request we received response status %s, code: %+v, body: %+v", resp.Status, resp.StatusCode, string(body))
+	respBody, _ := ioutil.ReadAll(resp.Body)
+	logger.LoggerTLSUtils.Errorf("For the API undeploy revision request we received response status %s, code: %+v, body: %+v", resp.Status, resp.StatusCode, string(respBody))
 	if resp.StatusCode == http.StatusServiceUnavailable {
 		return fmt.Errorf("could not reach APIM. Received service unavailable reponse")
 	}
