@@ -291,7 +291,7 @@ func extractOperationsFromOpenAPI(openAPI string) ([]APIOperation, error) {
 
 func removeSuffix(str1, str2 string) string {
 	if strings.HasSuffix(str1, str2) {
-		return strings.TrimSuffix(str1, str2)
+		return strings.TrimSuffix(str1, fmt.Sprintf("/%s", str2))
 	}
 	return str1
 }
