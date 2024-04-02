@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"io/ioutil"
 
 	"github.com/gin-gonic/gin"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
@@ -90,6 +91,10 @@ func StartInternalServer(port uint) {
 			definition := event.API.Definition
 			apiYaml := createAPIYaml(event)
 			deploymentContent := createDeployementYaml(event.API.Vhost)
+			definitionPath := fmt.Sprintf("%s-%s/Definitions/swagger.yaml", event.API.APIName, event.API.APIVersion)
+			if strings.ToUpper(event.API.APIType) == "GRAPHQL" {
+				definitionPath = fmt.Sprintf("%s-%s/Definitions/schema.graphql", event.API.APIName, event.API.APIVersion)
+			}
 			zipFiles := []utils.ZipFile{{
 				Path:    fmt.Sprintf("%s-%s/api.yaml", event.API.APIName, event.API.APIVersion),
 				Content: apiYaml,
@@ -97,14 +102,14 @@ func StartInternalServer(port uint) {
 				Path:    fmt.Sprintf("%s-%s/deployment_environments.yaml", event.API.APIName, event.API.APIVersion),
 				Content: deploymentContent,
 			}, {
-				Path:    fmt.Sprintf("%s-%s/Definitions/swagger.yaml", event.API.APIName, event.API.APIVersion),
+				Path:    definitionPath,
 				Content: definition,
 			}}
 			var buf bytes.Buffer
 			if err := utils.CreateZipFile(&buf, zipFiles); err != nil {
 				logger.LoggerMgtServer.Errorf("Error while creating apim zip file for api uuid: %s. Error: %+v", event.API.APIUUID, err)
 			}
-
+			
 			id, revisionID, err := utils.ImportAPI(fmt.Sprintf("admin-%s-%s.zip", event.API.APIName, event.API.APIVersion), &buf)
 			if err != nil {
 				logger.LoggerMgtServer.Errorf("Error while importing API. Sending error response to Adapter.")
@@ -126,7 +131,7 @@ func createAPIYaml(apiCPEvent APICPEvent) string {
 		provider = config.ControlPlane.Provider
 	}
 	context := removeSuffix(apiCPEvent.API.BasePath, apiCPEvent.API.APIVersion)
-	operations, operationsErr := extractOperationsFromOpenAPI(apiCPEvent.API.Definition)
+	operations, operationsErr := extractOperations(apiCPEvent)
 	if operationsErr != nil {
 		logger.LoggerMgtServer.Errorf("Error occured while extracting operations from open API: %s, \nError: %+v", apiCPEvent.API.Definition, operationsErr)
 		operations = []APIOperation{}
@@ -140,6 +145,10 @@ func createAPIYaml(apiCPEvent APICPEvent) string {
 		prodEndpoint = fmt.Sprintf("%s://%s", apiCPEvent.API.EndpointProtocol, apiCPEvent.API.ProdEndpoint)
 	}
 	authHeader := apiCPEvent.API.AuthHeader
+	apiType := "HTTP"
+	if apiCPEvent.API.APIType == "GraphQL" {
+		apiType = "GRAPHQL"
+	} 
 	data := map[string]interface{}{
 		"type":    "api",
 		"version": "v4.3.0",
@@ -157,7 +166,7 @@ func createAPIYaml(apiCPEvent APICPEvent) string {
 			"isRevision":                   false,
 			"enableSchemaValidation":       false,
 			"enableSubscriberVerification": false,
-			"type":                         "HTTP",
+			"type":                         apiType,
 			"transport":                    []string{"http", "https"},
 			"endpointConfig": map[string]interface{}{
 				"endpoint_type": apiCPEvent.API.EndpointProtocol,
@@ -262,31 +271,45 @@ type AdditionalProperty struct {
 	Display bool
 }
 
-func extractOperationsFromOpenAPI(openAPI string) ([]APIOperation, error) {
-	var openAPIPaths OpenAPIPaths
-	if err := yaml.Unmarshal([]byte(openAPI), &openAPIPaths); err != nil {
-		return nil, err
-	}
-
+func extractOperations(event APICPEvent) ([]APIOperation, error) {
 	var apiOperations []APIOperation
-	for path, operations := range openAPIPaths.Paths {
-		for verb, operation := range operations {
-			if operation.XAuthType == "" {
-				operation.XAuthType = "Application & Application User"
-			}
-			if operation.XThrottlingTier == "" {
-				operation.XThrottlingTier = "Unlimited"
-			}
+	if strings.ToUpper(event.API.APIType) == "GRAPHQL" {
+		for _, operation := range event.API.Operations {
 			apiOp := APIOperation{
-				Target:           path,
-				Verb:             verb,
-				AuthType:         operation.XAuthType,
-				ThrottlingPolicy: operation.XThrottlingTier,
+				Target:           operation.Path,
+				Verb:             operation.Verb,
+				AuthType:         "Application & Application User",
+				ThrottlingPolicy: "Unlimited",
 			}
 			apiOperations = append(apiOperations, apiOp)
 		}
+	} else if strings.ToUpper(event.API.APIType) == "REST" {
+		var openAPIPaths OpenAPIPaths
+		openAPI := event.API.Definition
+		if err := yaml.Unmarshal([]byte(openAPI), &openAPIPaths); err != nil {
+			return nil, err
+		}
+
+		for path, operations := range openAPIPaths.Paths {
+			for verb, operation := range operations {
+				if operation.XAuthType == "" {
+					operation.XAuthType = "Application & Application User"
+				}
+				if operation.XThrottlingTier == "" {
+					operation.XThrottlingTier = "Unlimited"
+				}
+				apiOp := APIOperation{
+					Target:           path,
+					Verb:             verb,
+					AuthType:         operation.XAuthType,
+					ThrottlingPolicy: operation.XThrottlingTier,
+				}
+				apiOperations = append(apiOperations, apiOp)
+			}
+		}
+		return apiOperations, nil
 	}
-	return apiOperations, nil
+	return []APIOperation{}, nil
 }
 
 func removeSuffix(str1, str2 string) string {
