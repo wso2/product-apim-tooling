@@ -128,6 +128,17 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 
 	apk.Operations = &apkOperations
 
+	//Adding API Level Operation Policies to the conf
+	reqPolicyCount := len(apiYaml.Data.APIPolicies.Request)
+	resPolicyCount := len(apiYaml.Data.APIPolicies.Response)
+	reqInterceptor, resInterceptor := getReqAndResInterceptors(reqPolicyCount, resPolicyCount,
+		apiYaml.Data.APIPolicies.Request, apiYaml.Data.APIPolicies.Response)
+
+	apk.APIPolicies = &OperationPolicies{
+		Request:  *reqInterceptor,
+		Response: *resInterceptor,
+	}
+
 	//Adding Endpoint-certificate configurations to the conf
 	var endpointCertList EndpointCertDescriptor
 	endCertAvailable := false
