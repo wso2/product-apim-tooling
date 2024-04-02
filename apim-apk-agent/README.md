@@ -3,7 +3,7 @@
 
 ## Getting Started APIM-APK Agent
 
-- ### Setting up the development environment
+### Setting up the development environment
     1. Install [Go 1.20](https://golang.org/dl)
     2. Fork the [repository](https://github.com/wso2/product-apim-tooling)
     3. Clone your fork into any directory.
