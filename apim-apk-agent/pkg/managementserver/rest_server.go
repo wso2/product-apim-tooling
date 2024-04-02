@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"io/ioutil"
 
 	"github.com/gin-gonic/gin"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
@@ -130,7 +129,7 @@ func createAPIYaml(apiCPEvent APICPEvent) string {
 	if err == nil {
 		provider = config.ControlPlane.Provider
 	}
-	context := removeSuffix(apiCPEvent.API.BasePath, apiCPEvent.API.APIVersion)
+	context := removeVersionSuffix(apiCPEvent.API.BasePath, apiCPEvent.API.APIVersion)
 	operations, operationsErr := extractOperations(apiCPEvent)
 	if operationsErr != nil {
 		logger.LoggerMgtServer.Errorf("Error occured while extracting operations from open API: %s, \nError: %+v", apiCPEvent.API.Definition, operationsErr)
@@ -312,7 +311,7 @@ func extractOperations(event APICPEvent) ([]APIOperation, error) {
 	return []APIOperation{}, nil
 }
 
-func removeSuffix(str1, str2 string) string {
+func removeVersionSuffix(str1, str2 string) string {
 	if strings.HasSuffix(str1, str2) {
 		return strings.TrimSuffix(str1, fmt.Sprintf("/%s", str2))
 	}
