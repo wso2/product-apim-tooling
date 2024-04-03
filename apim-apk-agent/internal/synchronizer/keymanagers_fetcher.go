@@ -207,7 +207,7 @@ func retrieveAllTokenIssuers(c client.Client, nextToken string) ([]dpv1alpha2.To
 	resolvedTokenIssuerList := make([]dpv1alpha2.TokenIssuer, 0)
 	var err error
 	// Convert the label selector string into a labels.Selector
-	labelSelector := labels.SelectorFromSet(labels.Set{"InitiateFrom": "DP"})
+	labelSelector := labels.SelectorFromSet(labels.Set{"InitiateFrom": "CP"})
 
 	opts := &client.ListOptions{
 		Namespace:     conf.DataPlane.Namespace,
