@@ -31,4 +31,5 @@ const (
 	InternalKeyTokenIssuerName = "Internal Key TokenIssuer"
 	InternalKeySecretName      = "apim-apk-issuer-cert"
 	InternalKeySecretKey       = "wso2.crt"
+	InternalKeySuffix          = "-internal-key-issuer"
 )
