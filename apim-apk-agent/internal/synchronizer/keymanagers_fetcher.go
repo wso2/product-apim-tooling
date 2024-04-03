@@ -42,6 +42,7 @@ import (
 	eventhubTypes "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
 	sync "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/synchronizer"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/tlsutils"
+	"k8s.io/apimachinery/pkg/labels"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -205,10 +206,18 @@ func retrieveAllTokenIssuers(c client.Client, nextToken string) ([]dpv1alpha2.To
 	tokenIssuerList := dpv1alpha2.TokenIssuerList{}
 	resolvedTokenIssuerList := make([]dpv1alpha2.TokenIssuer, 0)
 	var err error
+	// Convert the label selector string into a labels.Selector
+	labelSelector := labels.SelectorFromSet(labels.Set{"InitiateFrom": "DP"})
+
+	opts := &client.ListOptions{
+		Namespace:     conf.DataPlane.Namespace,
+		LabelSelector: labelSelector,
+	}
 	if nextToken == "" {
-		err = c.List(context.Background(), &tokenIssuerList, &client.ListOptions{Namespace: conf.DataPlane.Namespace})
+		err = c.List(context.Background(), &tokenIssuerList, opts)
 	} else {
-		err = c.List(context.Background(), &tokenIssuerList, &client.ListOptions{Namespace: conf.DataPlane.Namespace, Continue: nextToken})
+		opts.Continue = nextToken
+		err = c.List(context.Background(), &tokenIssuerList, opts)
 	}
 	if err != nil {
 		logger.LoggerSynchronizer.ErrorC(logging.PrintError(logging.Error1102, logging.CRITICAL, "Failed to get application from k8s %v", err.Error()))
