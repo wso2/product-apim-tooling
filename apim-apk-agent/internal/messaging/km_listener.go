@@ -98,7 +98,10 @@ func handleKMConfiguration(c client.Client) {
 					if strings.EqualFold(actionAdd, notification.Event.PayloadData.Action) {
 						k8sclient.CreateAndUpdateTokenIssuersCR(resolvedKeyManager, c)
 					} else {
-						k8sclient.UpdateTokenIssuersCR(resolvedKeyManager, c)
+						err = k8sclient.UpdateTokenIssuersCR(resolvedKeyManager, c)
+						if err != nil {
+							k8sclient.CreateAndUpdateTokenIssuersCR(resolvedKeyManager, c)
+						}
 					}
 				}
 			}

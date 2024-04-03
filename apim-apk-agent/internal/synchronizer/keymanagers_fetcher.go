@@ -101,7 +101,8 @@ func FetchKeyManagersOnStartUp(c client.Client) {
 	// Setting authorization header
 	req.Header.Set(sync.Authorization, basicAuth)
 
-	req.Header.Set("x-wso2-tenant", "ALL")
+	//Todo: Need to set ALL when APIM Fix is available
+	req.Header.Set("xWSO2Tenant", "carbon.super")
 
 	// Make the request
 	logger.LoggerSynchronizer.Debug("Sending the control plane request")
