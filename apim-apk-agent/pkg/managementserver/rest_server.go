@@ -214,10 +214,10 @@ func createDeployementYaml(vhost string) string {
 	if err == nil {
 		envLabel = config.ControlPlane.EnvironmentLabels
 	}
-	deploymentEnvData := []map[string]string{}
+	deploymentEnvData := []map[string]interface{}{}
 	for _, label := range envLabel {
-		deploymentEnvData = append(deploymentEnvData, map[string]string{
-			"displayOnDevportal":    "true",
+		deploymentEnvData = append(deploymentEnvData, map[string]interface{}{
+			"displayOnDevportal":    true,
 			"deploymentEnvironment": label,
 			"deploymentVhost":       vhost,
 		})
