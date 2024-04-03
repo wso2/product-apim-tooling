@@ -22,6 +22,7 @@ import (
 	"context"
 	"crypto/sha1"
 	"encoding/hex"
+	"strings"
 
 	dpv1alpha1 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha1"
 	dpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha2"
@@ -402,7 +403,7 @@ func CreateAndUpdateTokenIssuersCR(keyManager eventhubTypes.ResolvedKeyManager, 
 	}
 
 	internalKeyTokenIssuer := dpv1alpha2.TokenIssuer{
-		ObjectMeta: metav1.ObjectMeta{Name: keyManager.Organization + "-internal-key-issuer",
+		ObjectMeta: metav1.ObjectMeta{Name: keyManager.Organization + constants.InternalKeySuffix,
 			Namespace: conf.DataPlane.Namespace,
 			Labels:    labelMap,
 		},
@@ -435,12 +436,15 @@ func CreateAndUpdateTokenIssuersCR(keyManager eventhubTypes.ResolvedKeyManager, 
 
 // DeleteTokenIssuerCR deletes the TokenIssuer struct from the Kubernetes cluster.
 func DeleteTokenIssuerCR(k8sClient client.Client, tokenIssuer dpv1alpha2.TokenIssuer) error {
-	err := k8sClient.Delete(context.Background(), &tokenIssuer, &client.DeleteOptions{})
-	if err != nil {
-		loggers.LoggerK8sClient.Error("Unable to delete TokenIssuer CR: " + err.Error())
-		return err
+	// Skip the deletion if the token issuer is for internal keys
+	if !strings.Contains(tokenIssuer.Name, constants.InternalKeySuffix) {
+		err := k8sClient.Delete(context.Background(), &tokenIssuer, &client.DeleteOptions{})
+		if err != nil {
+			loggers.LoggerK8sClient.Error("Unable to delete TokenIssuer CR: " + err.Error())
+			return err
+		}
+		loggers.LoggerK8sClient.Debug("TokenIssuer CR deleted: " + tokenIssuer.Name)
 	}
-	loggers.LoggerK8sClient.Debug("TokenIssuer CR deleted: " + tokenIssuer.Name)
 	return nil
 }
 
