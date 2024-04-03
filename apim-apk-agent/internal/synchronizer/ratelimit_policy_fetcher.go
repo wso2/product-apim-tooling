@@ -103,9 +103,11 @@ func FetchRateLimitPoliciesOnEvent(ratelimitName string, organization string, c 
 	req.Header.Set(sync.Authorization, basicAuth)
 
 	if organization != "" {
-		req.Header.Set("x-wso2-tenant", organization)
+		logger.LoggerSynchronizer.Debugf("Setting the organization header for the request: %v", organization)
+		req.Header.Set("xWSO2Tenant", organization)
 	} else {
-		req.Header.Set("x-wso2-tenant", "ALL")
+		logger.LoggerSynchronizer.Debugf("Setting the organization header for the request: %v", "ALL")
+		req.Header.Set("xWSO2Tenant", "ALL")
 	}
 
 	// Make the request

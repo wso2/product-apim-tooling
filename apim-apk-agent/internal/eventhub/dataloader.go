@@ -243,12 +243,14 @@ func FetchAPIsOnStartUp(conf *config.Config, k8sClient client.Client) {
 	removeApis := make([]dpv1alpha2.API, 0)
 	for _, k8sAPI := range k8sAPIS {
 		found := false
-		for _, api := range *apis {
-			apiUUID, exist := k8sAPI.ObjectMeta.Labels["apiUUID"]
-			if exist {
-				if apiUUID == api {
-					found = true
-					break
+		if apis != nil {
+			for _, api := range *apis {
+				apiUUID, exist := k8sAPI.ObjectMeta.Labels["apiUUID"]
+				if exist {
+					if apiUUID == api {
+						found = true
+						break
+					}
 				}
 			}
 		}
