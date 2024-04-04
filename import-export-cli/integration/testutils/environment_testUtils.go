@@ -330,7 +330,7 @@ func validateEndpointSecurity(t *testing.T, apiParams *Params, api *apim.API, en
 		if strings.EqualFold(strings.ToUpper(endpointSecurityForEndpointType.Type), EndpointSecurityTypeOAuth) {
 			// Validate Oauth 2.0 endpoint security related properties
 			assert.Equal(t, endpointSecurityForEndpointType.ClientId, endpointSecurityForEndpointTypeInApi["clientId"])
-			assert.Equal(t, endpointSecurityForEndpointType.ClientSecret, "")
+			assert.Equal(t, "", endpointSecurityForEndpointTypeInApi["clientSecret"])
 			assert.Equal(t, endpointSecurityForEndpointType.TokenUrl, endpointSecurityForEndpointTypeInApi["tokenUrl"])
 			assert.Equal(t, strings.ToUpper(endpointSecurityForEndpointType.GrantType), endpointSecurityForEndpointTypeInApi["grantType"])
 
