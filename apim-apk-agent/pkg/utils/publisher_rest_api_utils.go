@@ -38,7 +38,7 @@ type Scope string
 
 const (
 	// APIImportRelativePath is the relative path of API import in publisher rest API
-	APIImportRelativePath = "api/am/publisher/v4/apis/import?preserveProvider=false&overwrite=true&rotateRevision=true&preservePortalConfigueation=true"
+	APIImportRelativePath = "api/am/publisher/v4/apis/import?preserveProvider=false&overwrite=true&rotateRevision=true&preservePortalConfigurations=true"
 	// TokenRelativePath is the relative path for getting token in publisher rest API
 	TokenRelativePath = "oauth2/token"
 	// APIDeleteRelativePath is the relative path of delete api in publisher rest API
@@ -203,9 +203,8 @@ func ImportAPI(apiZipName string, zipFileBytes *bytes.Buffer) (string, string, e
 	}
 	// try to parse the body as json and extract id from the response.
 	var responseMap map[string]interface{}
-	err = json.NewDecoder(resp.Body).Decode(&responseMap)
-	if err != nil {
-		// TODO after APIM is able to send json response, we should return error here, Until then return nil for error as its expected.
+	if err := json.Unmarshal([]byte(respBody), &responseMap); err != nil {
+		logger.LoggerMgtServer.Errorf("Error while retriving id and revision from import response. Error: %+v", err)
 		return "", "", nil
 	}
 
