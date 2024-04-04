@@ -147,8 +147,9 @@ type API struct {
 
 // OperationFromDP holds the path, verb, throttling and interceptor policy
 type OperationFromDP struct {
-	Path string `json:"path"`
-	Verb string `json:"verb"`
+	Path   string   `json:"path"`
+	Verb   string   `json:"verb"`
+	Scopes []string `json:"scopes"`
 }
 
 // CORSPolicy hold cors configs

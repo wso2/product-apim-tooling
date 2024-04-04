@@ -45,7 +45,11 @@ var defaultConfig = &Config{
 			PauseTimeAfterFailure: 5,
 		},
 		InternalKeyIssuer: "http://am.wso2.com:443/token",
-		Provider: "admin",
+		Provider:          "admin",
+		VhostPortMap: map[string]string{
+			"default.gw.wso2.com":         "9095",
+			"sandbox.default.gw.wso2.com": "9095",
+		},
 	},
 	Agent: agent{
 		Enabled: true,
