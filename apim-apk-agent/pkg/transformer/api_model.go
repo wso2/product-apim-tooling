@@ -70,6 +70,19 @@ type AdditionalProperties struct {
 	DisplayInDevPortal bool   `yaml:"display"`
 }
 
+// OperationPolicy defines policies, including interceptor parameters, for API operations.
+type OperationPolicy struct {
+	PolicyName    string    `yaml:"policyName,omitempty"`
+	PolicyVersion string    `yaml:"policyVersion,omitempty"`
+	PolicyID      string    `yaml:"policyId,omitempty"`
+	Parameters    Parameter `yaml:"parameters,omitempty"`
+}
+
+// Parameter interface is used to define the type of parameters that can be used in an operation policy.
+type Parameter interface {
+	isParameter()
+}
+
 // InterceptorService holds configuration details for configuring interceptor
 // for a aperticular API requests or responses.
 type InterceptorService struct {
@@ -82,26 +95,24 @@ type InterceptorService struct {
 	TLSSecretKey    string `yaml:"tlsSecretKey,omitempty"`
 }
 
-// OperationPolicy defines policies, including interceptor parameters, for API operations.
-type OperationPolicy struct {
-	PolicyName    string              `yaml:"policyName,omitempty"`
-	PolicyVersion string              `yaml:"policyVersion,omitempty"`
-	PolicyID      string              `yaml:"policyId,omitempty"`
-	Parameters    *InterceptorService `yaml:"parameters,omitempty"`
+func (s InterceptorService) isParameter() {}
+
+// BackendJWT holds configuration details for configuring JWT for backend
+type BackendJWT struct {
+	Encoding         string `yaml:"encoding,omitempty"`
+	Header           string `yaml:"header,omitempty"`
+	SigningAlgorithm string `yaml:"signingAlgorithm,omitempty"`
+	TokenTTL         int    `yaml:"tokenTTL,omitempty"`
 }
+
+func (j BackendJWT) isParameter() {}
 
 // APIMOperationPolicy defines policies, including interceptor parameters, for API operations.
 type APIMOperationPolicy struct {
-	PolicyName    string                  `yaml:"policyName,omitempty"`
-	PolicyVersion string                  `yaml:"policyVersion,omitempty"`
-	PolicyID      string                  `yaml:"policyId,omitempty"`
-	Parameters    *APIMInterceptorService `yaml:"parameters,omitempty"`
-}
-
-// APIMInterceptorService holds configuration details for configuring interceptor
-type APIMInterceptorService struct {
-	InterceptorServiceURL string `yaml:"interceptorServiceURL,omitempty"`
-	Includes              string `yaml:"includes,omitempty"`
+	PolicyName    string                 `yaml:"policyName,omitempty"`
+	PolicyVersion string                 `yaml:"policyVersion,omitempty"`
+	PolicyID      string                 `yaml:"policyId,omitempty"`
+	Parameters    map[string]interface{} `yaml:"parameters,omitempty"`
 }
 
 // APIMOperationPolicies organizes request, response, and fault policies for an API operation.

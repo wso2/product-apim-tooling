@@ -33,6 +33,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"io"
@@ -217,117 +218,164 @@ func getAPIType(protocolType string) string {
 
 // Generate the interceptor policy if request or response policy exists
 func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []APIMOperationPolicy, resPolicies []APIMOperationPolicy) (*[]OperationPolicy, *[]OperationPolicy) {
-	var reqInterceptor, resInterceptor []OperationPolicy
+	var reqPolicy, resPolicy []OperationPolicy
 	var interceptorParams *InterceptorService
 	var requestInterceptorPolicy OperationPolicy
 	var responseInterceptorPolicy OperationPolicy
+	var requestBackendJWTPolicy OperationPolicy
 
 	if reqPolicyCount > 0 {
-		includes := reqPolicies[0].Parameters.Includes
-		substrings := strings.Split(includes, ",")
-		bodyEnabled := false
-		headerEnabled := false
-		trailersEnabled := false
-		contextEnabled := false
-		sslEnabled := false
-		tlsSecretName := ""
-		tlsSecretKey := ""
-		for _, substring := range substrings {
-			if strings.Contains(substring, "request_header") {
-				headerEnabled = true
-			} else if strings.Contains(substring, "request_body") {
-				bodyEnabled = true
-			} else if strings.Contains(substring, "request_trailers") {
-				trailersEnabled = true
-			} else if strings.Contains(substring, "request_context") {
-				contextEnabled = true
+		for _, reqPolicy := range reqPolicies {
+			logger.LoggerTransformer.Debugf("Request Policy: %v", reqPolicy)
+			if reqPolicy.PolicyName == "ccCallInterceptorService" {
+				logger.LoggerTransformer.Debugf("Interceptor Type Request Policy: %v", reqPolicy)
+				logger.LoggerTransformer.Debugf("Interceptor Service URL: %v", reqPolicy.Parameters["interceptorServiceURL"])
+				logger.LoggerTransformer.Debugf("Interceptor Includes: %v", reqPolicy.Parameters["includes"])
+				interceptorServiceURL := reqPolicy.Parameters["interceptorServiceURL"].(string)
+				includes := reqPolicy.Parameters["includes"].(string)
+				substrings := strings.Split(includes, ",")
+				bodyEnabled := false
+				headerEnabled := false
+				trailersEnabled := false
+				contextEnabled := false
+				sslEnabled := false
+				tlsSecretName := ""
+				tlsSecretKey := ""
+				for _, substring := range substrings {
+					if strings.Contains(substring, "request_header") {
+						headerEnabled = true
+					} else if strings.Contains(substring, "request_body") {
+						bodyEnabled = true
+					} else if strings.Contains(substring, "request_trailers") {
+						trailersEnabled = true
+					} else if strings.Contains(substring, "request_context") {
+						contextEnabled = true
+					}
+				}
+
+				if strings.Contains(interceptorServiceURL, "https") {
+					sslEnabled = true
+				}
+
+				if sslEnabled {
+					tlsSecretName = reqPolicy.PolicyID + "request-interceptor-tls-secret"
+					tlsSecretKey = "tls.crt"
+				}
+
+				interceptorParams = &InterceptorService{
+					BackendURL:      interceptorServiceURL,
+					HeadersEnabled:  headerEnabled,
+					BodyEnabled:     bodyEnabled,
+					TrailersEnabled: trailersEnabled,
+					ContextEnabled:  contextEnabled,
+					TLSSecretName:   tlsSecretName,
+					TLSSecretKey:    tlsSecretKey,
+				}
+
+				// Create an instance of OperationPolicy
+				requestInterceptorPolicy = OperationPolicy{
+					PolicyName:    "Interceptor",
+					PolicyVersion: "v1",
+					Parameters:    interceptorParams,
+				}
+			} else if reqPolicy.PolicyName == "BackEndJWT" {
+				encoding := reqPolicy.Parameters["encoding"].(string)
+				header := reqPolicy.Parameters["header"].(string)
+				signingAlgorithm := reqPolicy.Parameters["signingAlgorithm"].(string)
+				tokenTTL := reqPolicy.Parameters["tokenTTL"].(string)
+				tokenTTLConverted, err := strconv.Atoi(tokenTTL)
+				if err != nil {
+					logger.LoggerTransformer.Errorf("Error while converting tokenTTL to integer: %v", err)
+				}
+
+				if encoding == "Base64Url" {
+					encoding = "Base64url"
+				}
+
+				backendJWTParams := &BackendJWT{
+					Encoding:         encoding,
+					Header:           header,
+					SigningAlgorithm: signingAlgorithm,
+					TokenTTL:         tokenTTLConverted,
+				}
+
+				// Create an instance of OperationPolicy
+				requestBackendJWTPolicy = OperationPolicy{
+					PolicyName:    "BackendJwt",
+					PolicyVersion: "v1",
+					Parameters:    backendJWTParams,
+				}
 			}
-		}
-
-		if strings.Contains(reqPolicies[0].Parameters.InterceptorServiceURL, "https") {
-			sslEnabled = true
-		}
-
-		if sslEnabled {
-			tlsSecretName = reqPolicies[0].PolicyID + "request-interceptor-tls-secret"
-			tlsSecretKey = "tls.crt"
-		}
-
-		interceptorParams = &InterceptorService{
-			BackendURL:      reqPolicies[0].Parameters.InterceptorServiceURL,
-			HeadersEnabled:  headerEnabled,
-			BodyEnabled:     bodyEnabled,
-			TrailersEnabled: trailersEnabled,
-			ContextEnabled:  contextEnabled,
-			TLSSecretName:   tlsSecretName,
-			TLSSecretKey:    tlsSecretKey,
-		}
-
-		// Create an instance of OperationPolicy
-		requestInterceptorPolicy = OperationPolicy{
-			PolicyName:    "Interceptor",
-			PolicyVersion: "v1",
-			Parameters:    interceptorParams,
 		}
 	}
 
 	if resPolicyCount > 0 {
-		includes := resPolicies[0].Parameters.Includes
-		substrings := strings.Split(includes, ",")
-		bodyEnabled := false
-		headerEnabled := false
-		trailersEnabled := false
-		contextEnabled := false
-		sslEnabled := false
-		tlsSecretName := ""
-		tlsSecretKey := ""
-		for _, substring := range substrings {
-			if strings.Contains(substring, "request_header") {
-				headerEnabled = true
-			} else if strings.Contains(substring, "request_body") {
-				bodyEnabled = true
-			} else if strings.Contains(substring, "request_trailers") {
-				trailersEnabled = true
-			} else if strings.Contains(substring, "request_context") {
-				contextEnabled = true
+		for _, resPolicy := range resPolicies {
+			if resPolicy.PolicyName == "ccCallInterceptorService" {
+				interceptorServiceURL := resPolicy.Parameters["interceptorServiceURL"].(string)
+				includes := resPolicy.Parameters["includes"].(string)
+				substrings := strings.Split(includes, ",")
+				bodyEnabled := false
+				headerEnabled := false
+				trailersEnabled := false
+				contextEnabled := false
+				sslEnabled := false
+				tlsSecretName := ""
+				tlsSecretKey := ""
+				for _, substring := range substrings {
+					if strings.Contains(substring, "request_header") {
+						headerEnabled = true
+					} else if strings.Contains(substring, "request_body") {
+						bodyEnabled = true
+					} else if strings.Contains(substring, "request_trailers") {
+						trailersEnabled = true
+					} else if strings.Contains(substring, "request_context") {
+						contextEnabled = true
+					}
+				}
+
+				if strings.Contains(interceptorServiceURL, "https") {
+					sslEnabled = true
+				}
+
+				if sslEnabled {
+					tlsSecretName = resPolicies[0].PolicyID + "response-interceptor-tls-secret"
+					tlsSecretKey = "tls.crt"
+				}
+
+				interceptorParams = &InterceptorService{
+					BackendURL:      interceptorServiceURL,
+					HeadersEnabled:  headerEnabled,
+					BodyEnabled:     bodyEnabled,
+					TrailersEnabled: trailersEnabled,
+					ContextEnabled:  contextEnabled,
+					TLSSecretName:   tlsSecretName,
+					TLSSecretKey:    tlsSecretKey,
+				}
+
+				// Create an instance of OperationPolicy
+				responseInterceptorPolicy = OperationPolicy{
+					PolicyName:    "Interceptor",
+					PolicyVersion: "v1",
+					Parameters:    interceptorParams,
+				}
 			}
-		}
-
-		if strings.Contains(resPolicies[0].Parameters.InterceptorServiceURL, "https") {
-			sslEnabled = true
-		}
-
-		if sslEnabled {
-			tlsSecretName = resPolicies[0].PolicyID + "response-interceptor-tls-secret"
-			tlsSecretKey = "tls.crt"
-		}
-
-		interceptorParams = &InterceptorService{
-			BackendURL:      resPolicies[0].Parameters.InterceptorServiceURL,
-			HeadersEnabled:  headerEnabled,
-			BodyEnabled:     bodyEnabled,
-			TrailersEnabled: trailersEnabled,
-			ContextEnabled:  contextEnabled,
-			TLSSecretName:   tlsSecretName,
-			TLSSecretKey:    tlsSecretKey,
-		}
-
-		// Create an instance of OperationPolicy
-		responseInterceptorPolicy = OperationPolicy{
-			PolicyName:    "Interceptor",
-			PolicyVersion: "v1",
-			Parameters:    interceptorParams,
 		}
 	}
 
 	if reqPolicyCount > 0 {
-		reqInterceptor = append(reqInterceptor, requestInterceptorPolicy)
+		if requestInterceptorPolicy.PolicyName != "" {
+			reqPolicy = append(reqPolicy, requestInterceptorPolicy)
+		}
+		if requestBackendJWTPolicy.PolicyName != "" {
+			reqPolicy = append(reqPolicy, requestBackendJWTPolicy)
+		}
 	}
 
 	if resPolicyCount > 0 {
-		resInterceptor = append(resInterceptor, responseInterceptorPolicy)
+		resPolicy = append(resPolicy, responseInterceptorPolicy)
 	}
-	return &reqInterceptor, &resInterceptor
+	return &reqPolicy, &resPolicy
 }
 
 // mapAuthConfigs will take the security schemes as the parameter and will return the mapped auth configs to be
