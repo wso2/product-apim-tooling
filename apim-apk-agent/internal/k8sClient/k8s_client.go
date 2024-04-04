@@ -372,7 +372,10 @@ func CreateAndUpdateTokenIssuersCR(keyManager eventhubTypes.ResolvedKeyManager, 
 	conf, _ := config.ReadConfigs()
 	sha1ValueofKmName := getSha1Value(keyManager.Name)
 	sha1ValueOfOrganization := getSha1Value(keyManager.Organization)
-	labelMap := map[string]string{"name": sha1ValueofKmName, "organization": sha1ValueOfOrganization}
+	labelMap := map[string]string{"name": sha1ValueofKmName,
+		"organization": sha1ValueOfOrganization,
+		"InitiateFrom": "CP",
+	}
 
 	tokenIssuer := dpv1alpha2.TokenIssuer{
 		ObjectMeta: metav1.ObjectMeta{Name: keyManager.UUID,
