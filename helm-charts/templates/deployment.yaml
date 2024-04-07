@@ -34,6 +34,8 @@ spec:
         app.kubernetes.io/app: "apim-apk-agent"
         app.kubernetes.io/name: {{ .Chart.Name }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/log-conf.yaml") . | sha256sum }}
     spec:
       serviceAccountName: wso2agent-platform
       containers:

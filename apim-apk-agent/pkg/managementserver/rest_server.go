@@ -40,6 +40,7 @@ func StartInternalServer(port uint) {
 	if err == nil {
 		envLabel = cpConfig.ControlPlane.EnvironmentLabels
 	}
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
 	r.GET("/applications", func(c *gin.Context) {
@@ -108,7 +109,7 @@ func StartInternalServer(port uint) {
 			if err := utils.CreateZipFile(&buf, zipFiles); err != nil {
 				logger.LoggerMgtServer.Errorf("Error while creating apim zip file for api uuid: %s. Error: %+v", event.API.APIUUID, err)
 			}
-			
+
 			id, revisionID, err := utils.ImportAPI(fmt.Sprintf("admin-%s-%s.zip", event.API.APIName, event.API.APIVersion), &buf)
 			if err != nil {
 				logger.LoggerMgtServer.Errorf("Error while importing API. Sending error response to Adapter.")
@@ -118,7 +119,6 @@ func StartInternalServer(port uint) {
 			c.JSON(http.StatusOK, map[string]string{"id": id, "revisionID": revisionID})
 		}
 	})
-	gin.SetMode(gin.ReleaseMode)
 	publicKeyLocation, privateKeyLocation, _ := config.GetKeyLocations()
 	r.RunTLS(fmt.Sprintf(":%d", port), publicKeyLocation, privateKeyLocation)
 }
@@ -147,7 +147,7 @@ func createAPIYaml(apiCPEvent APICPEvent) string {
 	apiType := "HTTP"
 	if apiCPEvent.API.APIType == "GraphQL" {
 		apiType = "GRAPHQL"
-	} 
+	}
 	data := map[string]interface{}{
 		"type":    "api",
 		"version": "v4.3.0",

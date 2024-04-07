@@ -40,4 +40,4 @@ metrics:
 agent:
   mode: CPtoDP
 certmanager:
-  enabled: true
+  enabled: false
