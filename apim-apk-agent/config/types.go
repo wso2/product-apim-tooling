@@ -114,7 +114,7 @@ type controlPlane struct {
 	ClientID                   string
 	ClientSecret               string
 	Provider                   string
-	VhostPortMap               map[string]string
+	HostMappings               map[string]string
 }
 
 // Dataplane struct contains the configurations related to the APK

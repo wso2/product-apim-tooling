@@ -20,7 +20,9 @@ Usage: {{ tomlFromYAML .Values.controlPlane.vhostPortMap }}
 */}}
 {{- define "tomlFromYAML" -}}
 {{- $map := . -}}
-{{- range $key, $value := $map }}
-{{ $key }} = "{{ $value }}"
+{{- range $hostMapping := $map }}
+{{- $vhost := index $hostMapping "vhost" }}
+{{- $port := index $hostMapping "port" }}
+"{{ $vhost }}" = "{{ $port }}"
 {{- end }}
 {{- end }}

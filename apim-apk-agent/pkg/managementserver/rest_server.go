@@ -272,7 +272,7 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string) {
 func createDeployementYaml(vhost string) string {
 	config, err := config.ReadConfigs()
 	envLabel := []string{"Default"}
-	vhostPortMap := config.ControlPlane.VhostPortMap
+	vhostPortMap := config.ControlPlane.HostMappings
 	port := "9095"
 	portFromMap, found := vhostPortMap[vhost]
 	if found {

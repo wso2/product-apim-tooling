@@ -46,7 +46,7 @@ var defaultConfig = &Config{
 		},
 		InternalKeyIssuer: "http://am.wso2.com:443/token",
 		Provider:          "admin",
-		VhostPortMap: map[string]string{
+		HostMappings: map[string]string{
 			"default.gw.wso2.com":         "9095",
 			"sandbox.default.gw.wso2.com": "9095",
 		},
