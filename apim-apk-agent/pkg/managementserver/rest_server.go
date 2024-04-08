@@ -259,7 +259,7 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string) {
 			if err != nil {
 				logger.LoggerMgtServer.Errorf("Error while converting openAPI struct to yaml content. openAPI struct: %+v", openAPI)
 			} else {
-				logger.LoggerMgtServer.Infof("Created openAPI yaml: %s", string(yamlBytes))
+				logger.LoggerMgtServer.Debugf("Created openAPI yaml: %s", string(yamlBytes))
 				definition = string(yamlBytes)
 			}
 		}
@@ -406,13 +406,10 @@ func extractOperations(event APICPEvent) ([]APIOperation, []ScopeWrapper, error)
 }
 
 func findMatchingAPKOperation(path string, verb string, operations []OperationFromDP) *OperationFromDP {
-	logger.LoggerMgtServer.Infof("Processing match for path: %s, verb: %s", path, verb)
 	for _, operationFromDP := range operations {
 		if strings.EqualFold(operationFromDP.Verb, verb) {
 			path = processOpenAPIPath(path)
-			logger.LoggerMgtServer.Infof("Processed path: %s, dp path %s", path, operationFromDP.Path)
 			if matchRegex(operationFromDP.Path, path) {
-				logger.LoggerMgtServer.Info("Found match......")
 				return &operationFromDP
 			}
 		}
