@@ -46,10 +46,6 @@ var defaultConfig = &Config{
 		},
 		InternalKeyIssuer: "http://am.wso2.com:443/token",
 		Provider:          "admin",
-		HostMappings: map[string]string{
-			"default.gw.wso2.com":         "9095",
-			"sandbox.default.gw.wso2.com": "9095",
-		},
 	},
 	Agent: agent{
 		Enabled: true,

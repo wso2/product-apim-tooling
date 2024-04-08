@@ -18,8 +18,6 @@ data:
       internalKeyIssuer = "{{ .Values.controlPlane.internalKeyIssuer | default "http://am.wso2.com:443/token" }}"
       [controlPlane.brokerConnectionParameters]
       eventListeningEndpoints = ["{{ .Values.controlPlane.eventListeningEndpoints }}"]
-      [controlPlane.hostMappings]
-{{- include "tomlFromYAML" .Values.controlPlane.hostMappings | indent 6 }}
     
     [dataPlane]
       enabled = {{ .Values.dataPlane.enabled }}
