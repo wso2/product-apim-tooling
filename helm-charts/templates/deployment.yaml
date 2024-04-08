@@ -84,6 +84,13 @@ spec:
             initialDelaySeconds: 20
             periodSeconds: 20
             failureThreshold: 5
+          resources:
+            requests:
+              memory: {{ .Values.resources.requests.memory | default "128Mi" }}
+              cpu: {{ .Values.resources.requests.cpu | default "100m" }}
+            limits:
+              memory: {{ .Values.resources.limits.memory | default "256Mi" }}
+              cpu: {{ .Values.resources.limits.cpu | default "200m" }}
       volumes:
         - name: log-conf-volume
           configMap:
