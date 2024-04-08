@@ -192,9 +192,10 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string) {
 			"scopes":               scopes,
 		},
 	}
-	if apiCPEvent.API.SandEndpoint == "" {
-		delete(data["data"].(map[string]interface{})["endpointConfig"].(map[string]interface{}), "sandbox_endpoints")
-	}
+	// TODO when we start to process sandbox we need to have this if condition. For now we remove sandbox endpoint always.
+	// if apiCPEvent.API.SandEndpoint == "" {
+	delete(data["data"].(map[string]interface{})["endpointConfig"].(map[string]interface{}), "sandbox_endpoints")
+	// }
 	if apiCPEvent.API.ProdEndpoint == "" {
 		delete(data["data"].(map[string]interface{})["endpointConfig"].(map[string]interface{}), "production_endpoints")
 	}
@@ -276,13 +277,13 @@ func createDeployementYaml(vhost string) string {
 		envLabel = config.ControlPlane.EnvironmentLabels
 	}
 	deploymentEnvData := []map[string]interface{}{}
-	for _, label := range envLabel {
-		deploymentEnvData = append(deploymentEnvData, map[string]interface{}{
-			"displayOnDevportal":    true,
-			"deploymentEnvironment": label,
-			"deploymentVhost":       vhost,
-		})
-	}
+			for _, label := range envLabel {
+			deploymentEnvData = append(deploymentEnvData, map[string]interface{}{
+				"displayOnDevportal":    true,
+				"deploymentEnvironment": label,
+				"deploymentVhost":       vhost,
+			})
+			}
 	data := map[string]interface{}{
 		"type":    "deployment_environments",
 		"version": "v4.3.0",
@@ -373,7 +374,11 @@ func extractOperations(event APICPEvent) ([]APIOperation, []ScopeWrapper, error)
 				if operation.XThrottlingTier == "" {
 					operation.XThrottlingTier = "Unlimited"
 				}
-				operationFromDP := *findMatchingAPKOperation(path, verb, event.API.Operations)
+				ptrToOperationFromDP := findMatchingAPKOperation(path, verb, event.API.Operations)
+				if ptrToOperationFromDP == nil {
+					continue
+				}
+				operationFromDP := *ptrToOperationFromDP
 				scopes := operationFromDP.Scopes
 				for _, scope := range scopes {
 					scopewrappers[scope] = ScopeWrapper{

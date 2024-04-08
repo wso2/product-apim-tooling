@@ -140,6 +140,7 @@ type API struct {
 	EndpointProtocol string            `json:"endpointProtocol"`
 	CORSPolicy       *CORSPolicy       `json:"cORSPolicy"`
 	Vhost            string            `json:"vhost"`
+	SandVhost        string            `json:"sandVhost"`
 	SecurityScheme   []string          `json:"securityScheme"`
 	AuthHeader       string            `json:"authHeader"`
 	Operations       []OperationFromDP `json:"operations"`
