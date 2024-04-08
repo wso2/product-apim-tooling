@@ -857,10 +857,10 @@ func addRateLimitPolicyNames(k8sArtifact *K8sArtifacts, configuredRateLimitPolic
 	for _, rateLimitPolicy := range k8sArtifact.RateLimitPolicies {
 		if strings.Contains(rateLimitPolicy.Name, "api-") {
 			rateLimitPolicy.ObjectMeta.Labels[k8sRateLimitPolicyNameField] = generateSHA1Hash(configuredRateLimitPoliciesMap["API"].Name)
-			logger.LoggerTransformer.Infof("1 Rate Limit Policy Name: %v", rateLimitPolicy.ObjectMeta.Labels[k8sRateLimitPolicyNameField])
+			logger.LoggerTransformer.Infof("Rate Limit Policy Name: %v", rateLimitPolicy.ObjectMeta.Labels[k8sRateLimitPolicyNameField])
 		} else if strings.Contains(rateLimitPolicy.Name, "resource-") {
 			rateLimitPolicy.ObjectMeta.Labels[k8sRateLimitPolicyNameField] = generateSHA1Hash(configuredRateLimitPoliciesMap["Resource"].Name)
-			logger.LoggerTransformer.Infof("2 Rate Limit Policy Name: %v", rateLimitPolicy.ObjectMeta.Labels[k8sRateLimitPolicyNameField])
+			logger.LoggerTransformer.Infof("Rate Limit Policy Name: %v", rateLimitPolicy.ObjectMeta.Labels[k8sRateLimitPolicyNameField])
 		}
 	}
 }

@@ -306,6 +306,7 @@ func DeployRateLimitPolicyCR(rateLimitPolicies *dpv1alpha1.RateLimitPolicy, k8sC
 		}
 	} else {
 		crRateLimitPolicies.Spec = rateLimitPolicies.Spec
+		crRateLimitPolicies.ObjectMeta.Labels = rateLimitPolicies.ObjectMeta.Labels
 		if err := k8sClient.Update(context.Background(), crRateLimitPolicies); err != nil {
 			loggers.LoggerK8sClient.Error("Unable to update RateLimitPolicies CR: " + err.Error())
 		} else {
