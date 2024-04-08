@@ -53,7 +53,54 @@ const (
 	// AdminScope admin scope
 	AdminScope Scope = "apim:admin"
 	// ImportExportScope import export api scope
-	ImportExportScope Scope = "apim:api_import_export"
+	ImportExportScope  Scope = "apim:api_import_export"
+	// OpenAPIDefaultYaml default open api spec yaml content 
+	OpenAPIDefaultYaml       = `openapi: 3.0.1
+info:
+  title: test
+  version: '1'
+security:
+- default: []
+paths:
+  "/*":
+    get:
+      responses:
+        '200':
+          description: OK
+      security:
+      - default: []
+    put:
+      responses:
+        '200':
+          description: OK
+      security:
+      - default: []
+    post:
+      responses:
+        '200':
+          description: OK
+      security:
+      - default: []
+    delete:
+      responses:
+        '200':
+          description: OK
+      security:
+      - default: []
+    patch:
+      responses:
+        '200':
+          description: OK
+      security:
+      - default: []
+components:
+  securitySchemes:
+    default:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://test.com
+          scopes: {}`
 )
 
 var (

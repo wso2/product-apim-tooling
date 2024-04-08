@@ -21,11 +21,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"regexp"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
+
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/utils"
 	"gopkg.in/yaml.v2"
 )
@@ -88,9 +90,12 @@ func StartInternalServer(port uint) {
 			}
 			c.JSON(http.StatusOK, map[string]string{"message": "Success"})
 		} else {
-			definition := event.API.Definition
-			apiYaml := createAPIYaml(event)
+			if strings.EqualFold(event.API.APIType, "rest") && event.API.Definition == "" {
+				event.API.Definition = utils.OpenAPIDefaultYaml
+			}
+			apiYaml, definition := createAPIYaml(&event)
 			deploymentContent := createDeployementYaml(event.API.Vhost)
+			logger.LoggerMgtServer.Debugf("Created apiYaml : %s, \n\n\n created definition file: %s", apiYaml, definition)
 			definitionPath := fmt.Sprintf("%s-%s/Definitions/swagger.yaml", event.API.APIName, event.API.APIVersion)
 			if strings.ToUpper(event.API.APIType) == "GRAPHQL" {
 				definitionPath = fmt.Sprintf("%s-%s/Definitions/schema.graphql", event.API.APIName, event.API.APIVersion)
@@ -123,14 +128,14 @@ func StartInternalServer(port uint) {
 	r.RunTLS(fmt.Sprintf(":%d", port), publicKeyLocation, privateKeyLocation)
 }
 
-func createAPIYaml(apiCPEvent APICPEvent) string {
+func createAPIYaml(apiCPEvent *APICPEvent) (string, string) {
 	config, err := config.ReadConfigs()
 	provider := "admin"
 	if err == nil {
 		provider = config.ControlPlane.Provider
 	}
 	context := removeVersionSuffix(apiCPEvent.API.BasePath, apiCPEvent.API.APIVersion)
-	operations, operationsErr := extractOperations(apiCPEvent)
+	operations, scopes, operationsErr := extractOperations(*apiCPEvent)
 	if operationsErr != nil {
 		logger.LoggerMgtServer.Errorf("Error occured while extracting operations from open API: %s, \nError: %+v", apiCPEvent.API.Definition, operationsErr)
 		operations = []APIOperation{}
@@ -184,11 +189,13 @@ func createAPIYaml(apiCPEvent APICPEvent) string {
 			"securityScheme":       apiCPEvent.API.SecurityScheme,
 			"authorizationHeader":  authHeader,
 			"apiKeyHeader":         "ApiKey",
+			"scopes":               scopes,
 		},
 	}
-	if apiCPEvent.API.SandEndpoint == "" {
-		delete(data["data"].(map[string]interface{})["endpointConfig"].(map[string]interface{}), "sandbox_endpoints")
-	}
+	// TODO when we start to process sandbox we need to have this if condition. For now we remove sandbox endpoint always.
+	// if apiCPEvent.API.SandEndpoint == "" {
+	delete(data["data"].(map[string]interface{})["endpointConfig"].(map[string]interface{}), "sandbox_endpoints")
+	// }
 	if apiCPEvent.API.ProdEndpoint == "" {
 		delete(data["data"].(map[string]interface{})["endpointConfig"].(map[string]interface{}), "production_endpoints")
 	}
@@ -202,10 +209,65 @@ func createAPIYaml(apiCPEvent APICPEvent) string {
 			"accessControlExposeHeaders":    apiCPEvent.API.CORSPolicy.AccessControlExposeHeaders,
 		}
 	}
+	logger.LoggerMgtServer.Debugf("Prepared yaml : %+v", data)
+	definition := apiCPEvent.API.Definition
+	if strings.EqualFold(apiCPEvent.API.APIType, "rest") {
+		// Process OpenAPI and set required values
+		openAPI, errConvertYaml := ConvertYAMLToMap(definition)
+		if errConvertYaml == nil {
+			if paths, ok := openAPI["paths"].(map[interface{}]interface{}); ok {
+				for path, pathContent := range paths {
+					if pathContentMap, ok := pathContent.(map[interface{}]interface{}); ok {
+						for verb, verbContent := range pathContentMap {
+							for _, operation := range operations {
+								if strings.EqualFold(path.(string), operation.Target) && strings.EqualFold(verb.(string), operation.Verb) {
+									if len(operation.Scopes) > 0 {
+										if verbContentMap, ok := verbContent.(map[interface{}]interface{}); ok {
+											verbContentMap["security"] = []map[string][]string{
+												{
+													"default": operation.Scopes,
+												},
+											}
+											verbContentMap["x-auth-type"] = "Application & Application User"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			scopesForOpenAPIComponents := map[string]string{}
+			for _, scopeWrapper := range scopes {
+				scopesForOpenAPIComponents[scopeWrapper.Scope.Name] = ""
+			}
+			components := map[string]interface{}{
+				"securitySchemes": map[string]interface{}{
+					"default": map[string]interface{}{
+						"type": "oauth2",
+						"flows": map[string]interface{}{
+							"implicit": map[string]interface{}{
+								"authorizationUrl":  "https://test.com",
+								"scopes":            scopesForOpenAPIComponents,
+								"x-scopes-bindings": scopesForOpenAPIComponents,
+							},
+						},
+					},
+				},
+			}
+			openAPI["components"] = components
+			yamlBytes, err := yaml.Marshal(&openAPI)
+			if err != nil {
+				logger.LoggerMgtServer.Errorf("Error while converting openAPI struct to yaml content. openAPI struct: %+v", openAPI)
+			} else {
+				logger.LoggerMgtServer.Debugf("Created openAPI yaml: %s", string(yamlBytes))
+				definition = string(yamlBytes)
+			}
+		}
+	}
 
-	logger.LoggerMgtServer.Infof("Prepared yaml : %+v", data)
 	yamlBytes, _ := yaml.Marshal(data)
-	return string(yamlBytes)
+	return string(yamlBytes), definition
 }
 
 func createDeployementYaml(vhost string) string {
@@ -270,8 +332,23 @@ type AdditionalProperty struct {
 	Display bool
 }
 
-func extractOperations(event APICPEvent) ([]APIOperation, error) {
+// ScopeWrapper to hold scope sonfigs
+type ScopeWrapper struct {
+	Scope  Scope `yaml:"scope"`
+	Shared bool  `yaml:"shared"`
+}
+
+// Scope to hold scope config
+type Scope struct {
+	Name        string   `yaml:"name"`
+	DisplayName string   `yaml:"displayName"`
+	Description string   `yaml:"description"`
+	Bindings    []string `yaml:"bindings"`
+}
+
+func extractOperations(event APICPEvent) ([]APIOperation, []ScopeWrapper, error) {
 	var apiOperations []APIOperation
+	scopewrappers := map[string]ScopeWrapper{}
 	if strings.ToUpper(event.API.APIType) == "GRAPHQL" {
 		for _, operation := range event.API.Operations {
 			apiOp := APIOperation{
@@ -286,7 +363,7 @@ func extractOperations(event APICPEvent) ([]APIOperation, error) {
 		var openAPIPaths OpenAPIPaths
 		openAPI := event.API.Definition
 		if err := yaml.Unmarshal([]byte(openAPI), &openAPIPaths); err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 
 		for path, operations := range openAPIPaths.Paths {
@@ -297,18 +374,52 @@ func extractOperations(event APICPEvent) ([]APIOperation, error) {
 				if operation.XThrottlingTier == "" {
 					operation.XThrottlingTier = "Unlimited"
 				}
+				ptrToOperationFromDP := findMatchingAPKOperation(path, verb, event.API.Operations)
+				if ptrToOperationFromDP == nil {
+					continue
+				}
+				operationFromDP := *ptrToOperationFromDP
+				scopes := operationFromDP.Scopes
+				for _, scope := range scopes {
+					scopewrappers[scope] = ScopeWrapper{
+						Scope: Scope{
+							Name:        scope,
+							DisplayName: scope,
+							Description: scope,
+							Bindings:    []string{},
+						},
+						Shared: false,
+					}
+				}
 				apiOp := APIOperation{
 					Target:           path,
 					Verb:             verb,
 					AuthType:         operation.XAuthType,
 					ThrottlingPolicy: operation.XThrottlingTier,
+					Scopes:           scopes,
 				}
 				apiOperations = append(apiOperations, apiOp)
 			}
 		}
-		return apiOperations, nil
+		var scopeWrapperSlice []ScopeWrapper
+		for _, value := range scopewrappers {
+			scopeWrapperSlice = append(scopeWrapperSlice, value)
+		}
+		return apiOperations, scopeWrapperSlice, nil
 	}
-	return []APIOperation{}, nil
+	return []APIOperation{}, []ScopeWrapper{}, nil
+}
+
+func findMatchingAPKOperation(path string, verb string, operations []OperationFromDP) *OperationFromDP {
+	for _, operationFromDP := range operations {
+		if strings.EqualFold(operationFromDP.Verb, verb) {
+			path = processOpenAPIPath(path)
+			if matchRegex(operationFromDP.Path, path) {
+				return &operationFromDP
+			}
+		}
+	}
+	return nil
 }
 
 func removeVersionSuffix(str1, str2 string) string {
@@ -330,4 +441,29 @@ func createAdditionalProperties(data map[string]string) []AdditionalProperty {
 		properties = append(properties, entry)
 	}
 	return properties
+}
+
+func matchRegex(regexStr string, targetStr string) bool {
+	regexPattern, err := regexp.Compile(regexStr)
+	if err != nil {
+		fmt.Println("Error compiling regex:", err)
+		return false
+	}
+	return regexPattern.MatchString(targetStr)
+}
+
+func processOpenAPIPath(path string) string {
+	re := regexp.MustCompile(`{[^}]+}`)
+	return re.ReplaceAllString(path, "hardcode")
+}
+
+// ConvertYAMLToMap converts a YAML string to a map[string]interface{}
+func ConvertYAMLToMap(yamlString string) (map[string]interface{}, error) {
+	var yamlData map[string]interface{}
+	err := yaml.Unmarshal([]byte(yamlString), &yamlData)
+	if err != nil {
+		logger.LoggerMgtServer.Errorf("Error while converting openAPI yaml to map: Error: %+v. \n openAPI yaml", err, yamlString)
+		return nil, err
+	}
+	return yamlData, nil
 }

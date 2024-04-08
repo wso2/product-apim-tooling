@@ -140,6 +140,7 @@ type API struct {
 	EndpointProtocol string            `json:"endpointProtocol"`
 	CORSPolicy       *CORSPolicy       `json:"cORSPolicy"`
 	Vhost            string            `json:"vhost"`
+	SandVhost        string            `json:"sandVhost"`
 	SecurityScheme   []string          `json:"securityScheme"`
 	AuthHeader       string            `json:"authHeader"`
 	Operations       []OperationFromDP `json:"operations"`
@@ -147,8 +148,9 @@ type API struct {
 
 // OperationFromDP holds the path, verb, throttling and interceptor policy
 type OperationFromDP struct {
-	Path string `json:"path"`
-	Verb string `json:"verb"`
+	Path   string   `json:"path"`
+	Verb   string   `json:"verb"`
+	Scopes []string `json:"scopes"`
 }
 
 // CORSPolicy hold cors configs
