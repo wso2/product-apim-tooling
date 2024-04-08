@@ -177,7 +177,11 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 	authConfigList := mapAuthConfigs(apiYamlData.ID, apiYamlData.AuthorizationHeader, apiYamlData.SecuritySchemes, certAvailable, certList, apiUniqueID)
 	apk.Authentication = &authConfigList
 
-	apk.CorsConfig = &apiYamlData.CORSConfiguration
+	corsEnabled := apiYamlData.CORSConfiguration.CORSConfigurationEnabled
+
+	if corsEnabled {
+		apk.CorsConfig = &apiYamlData.CORSConfiguration
+	}
 
 	aditionalProperties := make([]AdditionalProperty, len(apiYamlData.AdditionalProperties))
 
