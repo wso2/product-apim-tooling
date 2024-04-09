@@ -94,8 +94,8 @@ func StartInternalServer(port uint) {
 				event.API.Definition = utils.OpenAPIDefaultYaml
 			}
 			if strings.EqualFold(event.API.APIType, "rest") {
-				yaml, errJsonToYaml := JSONToYAML(event.API.Definition)
-				if errJsonToYaml == nil {
+				yaml, errJSONToYaml := JSONToYAML(event.API.Definition)
+				if errJSONToYaml == nil {
 					event.API.Definition = yaml
 				}
 			}
@@ -484,7 +484,7 @@ func ConvertYAMLToMap(yamlString string) (map[string]interface{}, error) {
 	return yamlData, nil
 }
 
-// JSONToYAML
+// JSONToYAML convert json string to yaml
 func JSONToYAML(jsonString string) (string, error) {
 	// Convert JSON string to map[string]interface{}
 	var jsonData map[string]interface{}
