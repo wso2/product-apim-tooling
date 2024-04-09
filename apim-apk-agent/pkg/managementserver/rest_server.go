@@ -63,7 +63,7 @@ func StartInternalServer(port uint) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		logger.LoggerMgtServer.Debugf("Recieved payload for endpoint /apis: %+v", event)
+		logger.LoggerMgtServer.Infof("Recieved payload for endpoint /apis: %+v", event)
 		if event.Event == DeleteEvent {
 			logger.LoggerMgtServer.Infof("Delete event received with APIUUID: %s", event.API.APIUUID)
 			payload := []map[string]interface{}{
@@ -93,9 +93,15 @@ func StartInternalServer(port uint) {
 			if strings.EqualFold(event.API.APIType, "rest") && event.API.Definition == "" {
 				event.API.Definition = utils.OpenAPIDefaultYaml
 			}
+			if strings.EqualFold(event.API.APIType, "rest") {
+				yaml, errJsonToYaml := JSONToYAML(event.API.Definition)
+				if errJsonToYaml == nil {
+					event.API.Definition = yaml
+				}
+			}
 			apiYaml, definition := createAPIYaml(&event)
 			deploymentContent := createDeployementYaml(event.API.Vhost)
-			logger.LoggerMgtServer.Debugf("Created apiYaml : %s, \n\n\n created definition file: %s", apiYaml, definition)
+			logger.LoggerMgtServer.Infof("Created apiYaml : %s, \n\n\n created definition file: %s", apiYaml, definition)
 			definitionPath := fmt.Sprintf("%s-%s/Definitions/swagger.yaml", event.API.APIName, event.API.APIVersion)
 			if strings.ToUpper(event.API.APIType) == "GRAPHQL" {
 				definitionPath = fmt.Sprintf("%s-%s/Definitions/schema.graphql", event.API.APIName, event.API.APIVersion)
@@ -468,6 +474,7 @@ func processOpenAPIPath(path string) string {
 
 // ConvertYAMLToMap converts a YAML string to a map[string]interface{}
 func ConvertYAMLToMap(yamlString string) (map[string]interface{}, error) {
+	logger.LoggerMgtServer.Infof("yaml string recieived: %s", yamlString)
 	var yamlData map[string]interface{}
 	err := yaml.Unmarshal([]byte(yamlString), &yamlData)
 	if err != nil {
@@ -475,4 +482,25 @@ func ConvertYAMLToMap(yamlString string) (map[string]interface{}, error) {
 		return nil, err
 	}
 	return yamlData, nil
+}
+
+// JSONToYAML
+func JSONToYAML(jsonString string) (string, error) {
+    // Convert JSON string to map[string]interface{}
+    var jsonData map[string]interface{}
+    err := json.Unmarshal([]byte(jsonString), &jsonData)
+    if err != nil {
+        return "", err
+    }
+
+    // Convert map[string]interface{} to YAML
+    yamlBytes, err := yaml.Marshal(jsonData)
+    if err != nil {
+        return "", err
+    }
+
+    // Convert YAML bytes to string
+    yamlString := string(yamlBytes)
+
+    return yamlString, nil
 }
