@@ -226,17 +226,20 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string) {
 					if pathContentMap, ok := pathContent.(map[interface{}]interface{}); ok {
 						for verb, verbContent := range pathContentMap {
 							for _, operation := range operations {
+								logger.LoggerMgtServer.Debugf("path.(string) %s operation.Target %s, verb.(string) %s,  operation.Verb %s", path.(string), operation.Target,verb.(string),  operation.Verb)
 								if strings.EqualFold(path.(string), operation.Target) && strings.EqualFold(verb.(string), operation.Verb) {
-									if len(operation.Scopes) > 0 {
-										if verbContentMap, ok := verbContent.(map[interface{}]interface{}); ok {
+									logger.LoggerMgtServer.Debugf("operation::: %+v", operation)
+									if verbContentMap, ok := verbContent.(map[interface{}]interface{}); ok {
+										if len(operation.Scopes) > 0 {
 											verbContentMap["security"] = []map[string][]string{
 												{
 													"default": operation.Scopes,
 												},
 											}
-											verbContentMap["x-auth-type"] = "Application & Application User"
 										}
+										verbContentMap["x-auth-type"] = "Application & Application User"
 									}
+									break
 								}
 							}
 						}
