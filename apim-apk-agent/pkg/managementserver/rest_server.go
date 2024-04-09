@@ -241,21 +241,30 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string) {
 			for _, scopeWrapper := range scopes {
 				scopesForOpenAPIComponents[scopeWrapper.Scope.Name] = ""
 			}
-			components := map[string]interface{}{
-				"securitySchemes": map[string]interface{}{
-					"default": map[string]interface{}{
-						"type": "oauth2",
-						"flows": map[string]interface{}{
-							"implicit": map[string]interface{}{
-								"authorizationUrl":  "https://test.com",
-								"scopes":            scopesForOpenAPIComponents,
-								"x-scopes-bindings": scopesForOpenAPIComponents,
-							},
-						},
-					},
-				},
-			}
+
+			components, ok := openAPI["components"].(map[interface{}]interface{})
+            if !ok {
+                components = make(map[interface{}]interface{})
+            }
+            securitySchemes, ok := components["securitySchemes"].(map[interface{}]interface{})
+            if !ok {
+                securitySchemes = make(map[interface{}]interface{})
+            }
+
+			securitySchemes["default"] = map[interface{}]interface{}{
+                "type": "oauth2",
+                "flows": map[interface{}]interface{}{
+                    "implicit": map[interface{}]interface{}{
+                        "authorizationUrl":  "https://test.com",
+                        "scopes":            scopesForOpenAPIComponents, 
+						"x-scopes-bindings": scopesForOpenAPIComponents,
+                    },
+                },
+            }
+
+			components["securitySchemes"] = securitySchemes
 			openAPI["components"] = components
+
 			yamlBytes, err := yaml.Marshal(&openAPI)
 			if err != nil {
 				logger.LoggerMgtServer.Errorf("Error while converting openAPI struct to yaml content. openAPI struct: %+v", openAPI)
