@@ -383,7 +383,7 @@ func extractOperations(event APICPEvent) ([]APIOperation, []ScopeWrapper, error)
 		}
 
 		for path, operations := range openAPIPaths.Paths {
-			for verb, _ := range operations {
+			for verb := range operations {
 				ptrToOperationFromDP := findMatchingAPKOperation(path, verb, event.API.Operations)
 				if ptrToOperationFromDP == nil {
 					continue
