@@ -93,6 +93,12 @@ func StartInternalServer(port uint) {
 			if strings.EqualFold(event.API.APIType, "rest") && event.API.Definition == "" {
 				event.API.Definition = utils.OpenAPIDefaultYaml
 			}
+			if strings.EqualFold(event.API.APIType, "rest") {
+				yaml, errJSONToYaml := JSONToYAML(event.API.Definition)
+				if errJSONToYaml == nil {
+					event.API.Definition = yaml
+				}
+			}
 			apiYaml, definition := createAPIYaml(&event)
 			deploymentContent := createDeployementYaml(event.API.Vhost)
 			logger.LoggerMgtServer.Debugf("Created apiYaml : %s, \n\n\n created definition file: %s", apiYaml, definition)
@@ -221,16 +227,17 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string) {
 						for verb, verbContent := range pathContentMap {
 							for _, operation := range operations {
 								if strings.EqualFold(path.(string), operation.Target) && strings.EqualFold(verb.(string), operation.Verb) {
-									if len(operation.Scopes) > 0 {
-										if verbContentMap, ok := verbContent.(map[interface{}]interface{}); ok {
+									if verbContentMap, ok := verbContent.(map[interface{}]interface{}); ok {
+										if len(operation.Scopes) > 0 {
 											verbContentMap["security"] = []map[string][]string{
 												{
 													"default": operation.Scopes,
 												},
 											}
-											verbContentMap["x-auth-type"] = "Application & Application User"
 										}
+										verbContentMap["x-auth-type"] = "Application & Application User"
 									}
+									break
 								}
 							}
 						}
@@ -243,24 +250,24 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string) {
 			}
 
 			components, ok := openAPI["components"].(map[interface{}]interface{})
-            if !ok {
-                components = make(map[interface{}]interface{})
-            }
-            securitySchemes, ok := components["securitySchemes"].(map[interface{}]interface{})
-            if !ok {
-                securitySchemes = make(map[interface{}]interface{})
-            }
+			if !ok {
+				components = make(map[interface{}]interface{})
+			}
+			securitySchemes, ok := components["securitySchemes"].(map[interface{}]interface{})
+			if !ok {
+				securitySchemes = make(map[interface{}]interface{})
+			}
 
 			securitySchemes["default"] = map[interface{}]interface{}{
-                "type": "oauth2",
-                "flows": map[interface{}]interface{}{
-                    "implicit": map[interface{}]interface{}{
-                        "authorizationUrl":  "https://test.com",
-                        "scopes":            scopesForOpenAPIComponents, 
+				"type": "oauth2",
+				"flows": map[interface{}]interface{}{
+					"implicit": map[interface{}]interface{}{
+						"authorizationUrl":  "https://test.com",
+						"scopes":            scopesForOpenAPIComponents,
 						"x-scopes-bindings": scopesForOpenAPIComponents,
-                    },
-                },
-            }
+					},
+				},
+			}
 
 			components["securitySchemes"] = securitySchemes
 			openAPI["components"] = components
@@ -321,7 +328,7 @@ type APIOperation struct {
 
 // OpenAPIPaths represents the structure of the OpenAPI specification YAML file
 type OpenAPIPaths struct {
-	Paths map[string]map[string]Operation `yaml:"paths"`
+	Paths map[string]map[string]interface{} `yaml:"paths"`
 }
 
 // Operation represents the structure of an operation within the OpenAPI specification
@@ -376,13 +383,7 @@ func extractOperations(event APICPEvent) ([]APIOperation, []ScopeWrapper, error)
 		}
 
 		for path, operations := range openAPIPaths.Paths {
-			for verb, operation := range operations {
-				if operation.XAuthType == "" {
-					operation.XAuthType = "Application & Application User"
-				}
-				if operation.XThrottlingTier == "" {
-					operation.XThrottlingTier = "Unlimited"
-				}
+			for verb := range operations {
 				ptrToOperationFromDP := findMatchingAPKOperation(path, verb, event.API.Operations)
 				if ptrToOperationFromDP == nil {
 					continue
@@ -403,8 +404,8 @@ func extractOperations(event APICPEvent) ([]APIOperation, []ScopeWrapper, error)
 				apiOp := APIOperation{
 					Target:           path,
 					Verb:             verb,
-					AuthType:         operation.XAuthType,
-					ThrottlingPolicy: operation.XThrottlingTier,
+					AuthType:         "Application & Application User",
+					ThrottlingPolicy: "Unlimited",
 					Scopes:           scopes,
 				}
 				apiOperations = append(apiOperations, apiOp)
@@ -475,4 +476,25 @@ func ConvertYAMLToMap(yamlString string) (map[string]interface{}, error) {
 		return nil, err
 	}
 	return yamlData, nil
+}
+
+// JSONToYAML convert json string to yaml
+func JSONToYAML(jsonString string) (string, error) {
+	// Convert JSON string to map[string]interface{}
+	var jsonData map[string]interface{}
+	err := json.Unmarshal([]byte(jsonString), &jsonData)
+	if err != nil {
+		return "", err
+	}
+
+	// Convert map[string]interface{} to YAML
+	yamlBytes, err := yaml.Marshal(jsonData)
+	if err != nil {
+		return "", err
+	}
+
+	// Convert YAML bytes to string
+	yamlString := string(yamlBytes)
+
+	return yamlString, nil
 }
