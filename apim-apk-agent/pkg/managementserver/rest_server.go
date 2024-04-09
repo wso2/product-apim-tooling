@@ -328,7 +328,7 @@ type APIOperation struct {
 
 // OpenAPIPaths represents the structure of the OpenAPI specification YAML file
 type OpenAPIPaths struct {
-	Paths map[string]map[string]Operation `yaml:"paths"`
+	Paths map[string]map[string]interface{} `yaml:"paths"`
 }
 
 // Operation represents the structure of an operation within the OpenAPI specification
@@ -383,13 +383,7 @@ func extractOperations(event APICPEvent) ([]APIOperation, []ScopeWrapper, error)
 		}
 
 		for path, operations := range openAPIPaths.Paths {
-			for verb, operation := range operations {
-				if operation.XAuthType == "" {
-					operation.XAuthType = "Application & Application User"
-				}
-				if operation.XThrottlingTier == "" {
-					operation.XThrottlingTier = "Unlimited"
-				}
+			for verb, _ := range operations {
 				ptrToOperationFromDP := findMatchingAPKOperation(path, verb, event.API.Operations)
 				if ptrToOperationFromDP == nil {
 					continue
@@ -410,8 +404,8 @@ func extractOperations(event APICPEvent) ([]APIOperation, []ScopeWrapper, error)
 				apiOp := APIOperation{
 					Target:           path,
 					Verb:             verb,
-					AuthType:         operation.XAuthType,
-					ThrottlingPolicy: operation.XThrottlingTier,
+					AuthType:         "Application & Application User",
+					ThrottlingPolicy: "Unlimited",
 					Scopes:           scopes,
 				}
 				apiOperations = append(apiOperations, apiOp)
