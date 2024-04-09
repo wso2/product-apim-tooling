@@ -63,7 +63,7 @@ func StartInternalServer(port uint) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		logger.LoggerMgtServer.Infof("Recieved payload for endpoint /apis: %+v", event)
+		logger.LoggerMgtServer.Debugf("Recieved payload for endpoint /apis: %+v", event)
 		if event.Event == DeleteEvent {
 			logger.LoggerMgtServer.Infof("Delete event received with APIUUID: %s", event.API.APIUUID)
 			payload := []map[string]interface{}{
@@ -101,7 +101,7 @@ func StartInternalServer(port uint) {
 			}
 			apiYaml, definition := createAPIYaml(&event)
 			deploymentContent := createDeployementYaml(event.API.Vhost)
-			logger.LoggerMgtServer.Infof("Created apiYaml : %s, \n\n\n created definition file: %s", apiYaml, definition)
+			logger.LoggerMgtServer.Debugf("Created apiYaml : %s, \n\n\n created definition file: %s", apiYaml, definition)
 			definitionPath := fmt.Sprintf("%s-%s/Definitions/swagger.yaml", event.API.APIName, event.API.APIVersion)
 			if strings.ToUpper(event.API.APIType) == "GRAPHQL" {
 				definitionPath = fmt.Sprintf("%s-%s/Definitions/schema.graphql", event.API.APIName, event.API.APIVersion)
@@ -226,9 +226,7 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string) {
 					if pathContentMap, ok := pathContent.(map[interface{}]interface{}); ok {
 						for verb, verbContent := range pathContentMap {
 							for _, operation := range operations {
-								logger.LoggerMgtServer.Debugf("path.(string) %s operation.Target %s, verb.(string) %s,  operation.Verb %s", path.(string), operation.Target,verb.(string),  operation.Verb)
 								if strings.EqualFold(path.(string), operation.Target) && strings.EqualFold(verb.(string), operation.Verb) {
-									logger.LoggerMgtServer.Debugf("operation::: %+v", operation)
 									if verbContentMap, ok := verbContent.(map[interface{}]interface{}); ok {
 										if len(operation.Scopes) > 0 {
 											verbContentMap["security"] = []map[string][]string{
@@ -252,24 +250,24 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string) {
 			}
 
 			components, ok := openAPI["components"].(map[interface{}]interface{})
-            if !ok {
-                components = make(map[interface{}]interface{})
-            }
-            securitySchemes, ok := components["securitySchemes"].(map[interface{}]interface{})
-            if !ok {
-                securitySchemes = make(map[interface{}]interface{})
-            }
+			if !ok {
+				components = make(map[interface{}]interface{})
+			}
+			securitySchemes, ok := components["securitySchemes"].(map[interface{}]interface{})
+			if !ok {
+				securitySchemes = make(map[interface{}]interface{})
+			}
 
 			securitySchemes["default"] = map[interface{}]interface{}{
-                "type": "oauth2",
-                "flows": map[interface{}]interface{}{
-                    "implicit": map[interface{}]interface{}{
-                        "authorizationUrl":  "https://test.com",
-                        "scopes":            scopesForOpenAPIComponents, 
+				"type": "oauth2",
+				"flows": map[interface{}]interface{}{
+					"implicit": map[interface{}]interface{}{
+						"authorizationUrl":  "https://test.com",
+						"scopes":            scopesForOpenAPIComponents,
 						"x-scopes-bindings": scopesForOpenAPIComponents,
-                    },
-                },
-            }
+					},
+				},
+			}
 
 			components["securitySchemes"] = securitySchemes
 			openAPI["components"] = components
@@ -477,7 +475,6 @@ func processOpenAPIPath(path string) string {
 
 // ConvertYAMLToMap converts a YAML string to a map[string]interface{}
 func ConvertYAMLToMap(yamlString string) (map[string]interface{}, error) {
-	logger.LoggerMgtServer.Infof("yaml string recieived: %s", yamlString)
 	var yamlData map[string]interface{}
 	err := yaml.Unmarshal([]byte(yamlString), &yamlData)
 	if err != nil {
@@ -489,21 +486,21 @@ func ConvertYAMLToMap(yamlString string) (map[string]interface{}, error) {
 
 // JSONToYAML
 func JSONToYAML(jsonString string) (string, error) {
-    // Convert JSON string to map[string]interface{}
-    var jsonData map[string]interface{}
-    err := json.Unmarshal([]byte(jsonString), &jsonData)
-    if err != nil {
-        return "", err
-    }
+	// Convert JSON string to map[string]interface{}
+	var jsonData map[string]interface{}
+	err := json.Unmarshal([]byte(jsonString), &jsonData)
+	if err != nil {
+		return "", err
+	}
 
-    // Convert map[string]interface{} to YAML
-    yamlBytes, err := yaml.Marshal(jsonData)
-    if err != nil {
-        return "", err
-    }
+	// Convert map[string]interface{} to YAML
+	yamlBytes, err := yaml.Marshal(jsonData)
+	if err != nil {
+		return "", err
+	}
 
-    // Convert YAML bytes to string
-    yamlString := string(yamlBytes)
+	// Convert YAML bytes to string
+	yamlString := string(yamlBytes)
 
-    return yamlString, nil
+	return yamlString, nil
 }
