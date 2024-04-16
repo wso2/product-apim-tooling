@@ -28,6 +28,7 @@ const (
 	postHTTPMethod    = "POST"
 	contentTypeHeader = "Content-Type"
 	internalKeyHeader = "internal-key"
+	apiKeyHeader      = "apikey"
 
 	// K8s CRD fields
 	k8sKindField                = "kind"
@@ -51,6 +52,14 @@ const (
 	mTLS   = "mTLS"
 	jwt    = "JWT"
 	oAuth2 = "OAuth2"
+	apiKey = "APIKey"
+
+	// Security Scheme values
+	oAuth2SecScheme    = "oauth2"
+	oAuth2Mandatory    = "oauth_basic_auth_api_key_mandatory"
+	mutualSSL          = "mutualssl"
+	mutualSSLMandatory = "mutualssl_mandatory"
+	apiKeySecScheme    = "api_key"
 
 	// Optionality constants
 	mandatory = "mandatory"

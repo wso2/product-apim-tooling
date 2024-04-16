@@ -140,6 +140,7 @@ type APIMApi struct {
 	DefaultVersion       bool                   `json:"isDefaultVersion"`
 	Type                 string                 `yaml:"type"`
 	AuthorizationHeader  string                 `yaml:"authorizationHeader"`
+	APIKeyHeader         string                 `yaml:"apiKeyHeader"`
 	SecuritySchemes      []string               `json:"securityScheme"`
 	AdditionalProperties []AdditionalProperties `yaml:"additionalProperties"`
 	// AdditionalPropertiesMap []AdditionalPropertiesMap `yaml:"additionalPropertiesMap"`

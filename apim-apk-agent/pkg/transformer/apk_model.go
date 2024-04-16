@@ -64,7 +64,7 @@ type AuthConfiguration struct {
 	Enabled           bool          `yaml:"enabled"`
 	QueryParamName    string        `yaml:"queryParamName,omitempty"`
 	HeaderEnabled     bool          `yaml:"headerEnable,omitempty"`
-	queryParamEnable  bool          `yaml:"queryParamEnable,omitempty"`
+	QueryParamEnable  bool          `yaml:"queryParamEnable,omitempty"`
 	Certificates      []Certificate `yaml:"certificates,omitempty"`
 	Audience          []string      `yaml:"audience,omitempty"`
 }
