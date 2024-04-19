@@ -44,11 +44,12 @@ import (
 // @param skipSubscriptions: Skip importing subscriptions
 // @param skipKeys: skip importing keys of application
 // @param skipCleanup: skip cleaning up temporary files created during the operation
+// @param ignoreTier: skip considering/validating the tier when importing
 func ImportApplicationToEnv(accessToken, environment, filename, appOwner string, updateApplication, preserveOwner,
-	skipSubscriptions, skipKeys, skipCleanup bool) (*http.Response, error) {
+	skipSubscriptions, skipKeys, skipCleanup, ignoreTier bool) (*http.Response, error) {
 	devportalApplicationsEndpoint := utils.GetDevPortalApplicationListEndpointOfEnv(environment, utils.MainConfigFilePath)
 	return ImportApplication(accessToken, devportalApplicationsEndpoint, filename, appOwner, updateApplication, preserveOwner,
-		skipSubscriptions, skipKeys, skipCleanup)
+		skipSubscriptions, skipKeys, skipCleanup, ignoreTier)
 }
 
 // ImportApplication function is used with import-app command
@@ -62,7 +63,7 @@ func ImportApplicationToEnv(accessToken, environment, filename, appOwner string,
 // @param skipKeys: skip importing keys of application
 // @param skipCleanup: skip cleaning up temporary files created during the operation
 func ImportApplication(accessToken, devportalApplicationsEndpoint, filename, appOwner string, updateApplication, preserveOwner,
-	skipSubscriptions, skipKeys, skipCleanup bool) (*http.Response, error) {
+	skipSubscriptions, skipKeys, skipCleanup, ignoreTier bool) (*http.Response, error) {
 
 	exportDirectory := filepath.Join(utils.ExportDirectory, utils.ExportedAppsDirName)
 	devportalApplicationsEndpoint = utils.AppendSlashToString(devportalApplicationsEndpoint)
@@ -71,7 +72,8 @@ func ImportApplication(accessToken, devportalApplicationsEndpoint, filename, app
 	applicationImportUrl := applicationImportEndpoint + "?appOwner=" + appOwner + utils.SearchAndTag + "preserveOwner=" +
 		strconv.FormatBool(preserveOwner) + utils.SearchAndTag + "skipSubscriptions=" +
 		strconv.FormatBool(skipSubscriptions) + utils.SearchAndTag + "skipApplicationKeys=" + strconv.FormatBool(skipKeys) +
-		utils.SearchAndTag + "update=" + strconv.FormatBool(updateApplication)
+		utils.SearchAndTag + "update=" + strconv.FormatBool(updateApplication) +
+		utils.SearchAndTag + "ignoreTier=" + strconv.FormatBool(ignoreTier)
 	utils.Logln(utils.LogPrefixInfo + "Import URL: " + applicationImportEndpoint)
 
 	applicationFilePath, err := resolveApplicationImportFilePath(filename, exportDirectory)

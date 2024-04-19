@@ -375,6 +375,7 @@ type ImportConfig struct {
 	PreserveOwner     bool `json:"preserveOwner,omitempty" yaml:"preserveOwner,omitempty"`
 	SkipSubscriptions bool `json:"skipSubscriptions,omitempty" yaml:"skipSubscriptions,omitempty"`
 	SkipKeys          bool `json:"skipKeys,omitempty" yaml:"skipKeys,omitempty"`
+	IgnoreTier        bool `json:"ignoreTier,omitempty" yaml:"ignoreTier,omitempty"`
 }
 
 type RevisionListResponse struct {
