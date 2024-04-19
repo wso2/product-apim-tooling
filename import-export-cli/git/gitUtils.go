@@ -473,7 +473,7 @@ func deployUpdatedProjects(accessToken, sourceRepoId, deploymentRepoId, environm
 			importParams := projectParam.MetaData.DeployConfig.Import
 			fmt.Println(strconv.Itoa(i+1) + ": " + projectParam.NickName + ": (" + projectParam.RelativePath + ")")
 			_, err := impl.ImportApplicationToEnv(accessToken, environment, projectParam.AbsolutePath, projectParam.MetaData.Owner,
-				importParams.Update, importParams.PreserveOwner, importParams.SkipSubscriptions, importParams.SkipKeys, false)
+				importParams.Update, importParams.PreserveOwner, importParams.SkipSubscriptions, importParams.SkipKeys, false, importParams.IgnoreTier)
 			if err != nil {
 				fmt.Println("\terror... ", err)
 				failedProjects[projectParam.Type] = append(failedProjects[projectParam.Type], projectParam)

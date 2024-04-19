@@ -32,6 +32,7 @@ var importAppOwner string
 var preserveOwner bool
 var skipSubscriptions bool
 var importAppSkipKeys bool
+var ignoreTier bool
 var importAppUpdateApplication bool
 var importAppSkipCleanup bool
 
@@ -70,7 +71,7 @@ func executeImportAppCmd(credential credentials.Credential) {
 		utils.HandleErrorAndExit("Error getting OAuth Tokens", err)
 	}
 	_, err = impl.ImportApplicationToEnv(accessToken, importAppEnvironment, importAppFile, importAppOwner,
-		importAppUpdateApplication, preserveOwner, skipSubscriptions, importAppSkipKeys, importAppSkipCleanup)
+		importAppUpdateApplication, preserveOwner, skipSubscriptions, importAppSkipKeys, importAppSkipCleanup, ignoreTier)
 	if err != nil {
 		utils.HandleErrorAndExit("Error importing Application", err)
 	}

@@ -29,6 +29,7 @@ var importAppFile string
 var importAppEnvironment string
 var importAppOwner string
 var preserveOwner bool
+var ignoreTier bool
 var skipSubscriptions bool
 var importAppSkipKeys bool
 var importAppUpdateApplication bool
@@ -68,7 +69,7 @@ func executeImportAppCmd(credential credentials.Credential) {
 		utils.HandleErrorAndExit("Error getting OAuth Tokens", err)
 	}
 	_, err = impl.ImportApplicationToEnv(accessToken, importAppEnvironment, importAppFile, importAppOwner,
-		importAppUpdateApplication, preserveOwner, skipSubscriptions, importAppSkipKeys, importAppSkipCleanup)
+		importAppUpdateApplication, preserveOwner, skipSubscriptions, importAppSkipKeys, importAppSkipCleanup, ignoreTier)
 	if err != nil {
 		utils.HandleErrorAndExit("Error importing Application", err)
 	}
@@ -84,6 +85,8 @@ func init() {
 		"", "Environment from the which the Application should be imported")
 	ImportAppCmd.Flags().BoolVarP(&preserveOwner, "preserve-owner", "", false,
 		"Preserves app owner")
+	ImportAppCmd.Flags().BoolVarP(&ignoreTier, "ignore-tier", "", false,
+		"Ignores validation of the tier")
 	ImportAppCmd.Flags().BoolVarP(&skipSubscriptions, "skip-subscriptions", "s", false,
 		"Skip subscriptions of the Application")
 	ImportAppCmd.Flags().BoolVarP(&importAppSkipKeys, "skip-keys", "", false,
