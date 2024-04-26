@@ -174,7 +174,7 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 		certAvailable = true
 	}
 
-	authConfigList := mapAuthConfigs(apiYamlData.ID, apiYamlData.AuthorizationHeader, apiYamlData.SecuritySchemes, certAvailable, certList, apiUniqueID)
+	authConfigList := mapAuthConfigs(apiYamlData.ID, apiYamlData.AuthorizationHeader, apiYamlData.APIKeyHeader, apiYamlData.SecuritySchemes, certAvailable, certList, apiUniqueID)
 	apk.Authentication = &authConfigList
 
 	corsEnabled := apiYamlData.CORSConfiguration.CORSConfigurationEnabled
@@ -384,14 +384,14 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 
 // mapAuthConfigs will take the security schemes as the parameter and will return the mapped auth configs to be
 // added into the apk-conf
-func mapAuthConfigs(apiUUID string, authHeader string, secSchemes []string, certAvailable bool, certList CertDescriptor, apiUniqueID string) []AuthConfiguration {
+func mapAuthConfigs(apiUUID string, authHeader string, configuredAPIKeyHeader string, secSchemes []string, certAvailable bool, certList CertDescriptor, apiUniqueID string) []AuthConfiguration {
 	var authConfigs []AuthConfiguration
-	if StringExists("oauth2", secSchemes) {
+	if StringExists(oAuth2SecScheme, secSchemes) {
 		var newConfig AuthConfiguration
 		newConfig.AuthType = oAuth2
 		newConfig.Enabled = true
 		newConfig.HeaderName = authHeader
-		if StringExists("oauth_basic_auth_api_key_mandatory", secSchemes) {
+		if StringExists(oAuth2Mandatory, secSchemes) {
 			newConfig.Required = mandatory
 		} else {
 			newConfig.Required = optional
@@ -406,11 +406,11 @@ func mapAuthConfigs(apiUUID string, authHeader string, secSchemes []string, cert
 		}
 		authConfigs = append(authConfigs, oAuth2DisabledConfig)
 	}
-	if StringExists("mutualssl", secSchemes) && certAvailable {
+	if StringExists(mutualSSL, secSchemes) && certAvailable {
 		var newConfig AuthConfiguration
 		newConfig.AuthType = mTLS
 		newConfig.Enabled = true
-		if StringExists("mutualssl_mandatory", secSchemes) {
+		if StringExists(mutualSSLMandatory, secSchemes) {
 			newConfig.Required = mandatory
 		} else {
 			newConfig.Required = optional
@@ -436,6 +436,17 @@ func mapAuthConfigs(apiUUID string, authHeader string, secSchemes []string, cert
 		HeaderName: internalKeyHeader,
 	}
 	authConfigs = append(authConfigs, internalKeyAuthConfig)
+
+	if StringExists(apiKeySecScheme, secSchemes) {
+		apiKeyAuthConfig := AuthConfiguration{
+			AuthType:       apiKey,
+			Enabled:        true,
+			HeaderName:     configuredAPIKeyHeader,
+			HeaderEnabled:  true,
+			QueryParamName: apiKeyHeader,
+		}
+		authConfigs = append(authConfigs, apiKeyAuthConfig)
+	}
 	return authConfigs
 }
 
