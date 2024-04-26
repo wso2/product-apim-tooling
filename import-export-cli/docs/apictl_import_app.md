@@ -25,6 +25,7 @@ NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory
   -e, --environment string   Environment from the which the Application should be imported
   -f, --file string          Name of the ZIP file of the Application to be imported
   -h, --help                 help for app
+      --ignore-tier          Ignores validation of the tier
   -o, --owner string         Name of the target owner of the Application as desired by the Importer
       --preserve-owner       Preserves app owner
       --skip-cleanup         Leave all temporary files created during import process
