@@ -17,7 +17,7 @@ Command Line tool for importing and exporting APIs/Applications/API Products in 
 - ### Building
     `cd` into `product-apim-tooling/import-export-cli`
     
-    Execute `./build.sh -t apictl.go -v 4.0.4 -f` to build for all platforms.
+    Execute `./build.sh -t apictl.go -v 4.0.5 -f` to build for all platforms.
     
     Created packages will be available at `build/target` directory
 
