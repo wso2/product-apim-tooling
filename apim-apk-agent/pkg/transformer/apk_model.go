@@ -61,7 +61,7 @@ type AuthConfiguration struct {
 	AuthType          string        `yaml:"authType,omitempty"`
 	HeaderName        string        `yaml:"headerName,omitempty"`
 	SendTokenUpStream bool          `yaml:"sendTokenToUpstream,omitempty"`
-	Enabled           bool          `yaml:"enabled,omitempty"`
+	Enabled           bool          `yaml:"enabled"`
 	QueryParamName    string        `yaml:"queryParamName,omitempty"`
 	HeaderEnabled     bool          `yaml:"headerEnable,omitempty"`
 	queryParamEnable  bool          `yaml:"queryParamEnable,omitempty"`

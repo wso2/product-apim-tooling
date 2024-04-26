@@ -399,6 +399,13 @@ func mapAuthConfigs(apiUUID string, authHeader string, secSchemes []string, cert
 
 		authConfigs = append(authConfigs, newConfig)
 	}
+	if !StringExists("oauth2", secSchemes) {
+		oAuth2DisabledConfig := AuthConfiguration{
+			AuthType: oAuth2,
+			Enabled:  false,
+		}
+		authConfigs = append(authConfigs, oAuth2DisabledConfig)
+	}
 	if StringExists("mutualssl", secSchemes) && certAvailable {
 		var newConfig AuthConfiguration
 		newConfig.AuthType = mTLS
