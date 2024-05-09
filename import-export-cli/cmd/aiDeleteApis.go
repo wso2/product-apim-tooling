@@ -30,10 +30,10 @@ import (
 const PurgeAPIsCmdLiteral = "apis"
 const purgeAPIsCmdShortDesc = "Purge APIs and API Products in an environment from a vector database."
 
-const purgeAPIsCmdLongDesc = "Purge APIs and API Products in an environment from a vector database."
-const PurgeAPIsCmdLongDesc = `Purge APIs and API Products available in the environment specified by flag (--environment, -e)`
-const purgeAPIsCmdExamples = utils.ProjectName + ` ` + PurgeCmdLiteral + ` ` + PurgeAPIsCmdLiteral + ` --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 --endpoint https://dev-tools.wso2.com/apim-ai-service -e production
-							NOTE: All the flags (--token, --endpoint and --environment (-e)) are mandatory`
+const purgeAPIsCmdLongDesc = "Purge APIs and API Products of a tenant from one environment from a vector database."
+const PurgeAPIsCmdLongDesc = `Purge APIs and API Products of a tenant from one environment specified by flag (--environment, -e)`
+const purgeAPIsCmdExamples = utils.ProjectName + ` ` + AiCmdLiteral + ` ` + PurgeCmdLiteral + ` ` + PurgeAPIsCmdLiteral + ` --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 --endpoint https://dev-tools.wso2.com/apim-ai-service -e production
+							NOTE: The 2 flags (--token and --environment (-e)) are mandatory`
 
 var PurgeAPIsCmd = &cobra.Command{
 	Use: PurgeAPIsCmdLiteral + " (--endpoint <endpoint-url> --token <on-prem-key-of-the-organization> --environment " +

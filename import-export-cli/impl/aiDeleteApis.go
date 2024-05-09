@@ -28,7 +28,7 @@ import (
 
 func AIDeleteAPIs(OnPremKey, Endpoint, Tenant string) error {
 
-	fmt.Println("Removing existing APIs from vector DB for tenant:", Tenant)
+	fmt.Println("Removing existing APIs and API Products from vector DB for tenant:", Tenant)
 
 	headers := make(map[string]string)
 	headers["API-KEY"] = OnPremKey
@@ -40,12 +40,12 @@ func AIDeleteAPIs(OnPremKey, Endpoint, Tenant string) error {
 	for attempt := 1; attempt <= 2; attempt++ {
 		resp, deleteErr = utils.InvokeDELETERequest(Endpoint+"/ai/spec-populator/bulk-remove", headers)
 		if deleteErr != nil {
-			fmt.Printf("Error removing existing APIs (attempt %d): %v\n", attempt, deleteErr)
+			fmt.Printf("Error removing existing APIs and API Products (attempt %d): %v\n", attempt, deleteErr)
 			continue
 		}
 
 		if resp.StatusCode() != 200 {
-			fmt.Printf("Removing existing APIs failed with status %d %s (attempt %d)\n", resp.StatusCode(), resp.Body(), attempt)
+			fmt.Printf("Removing existing APIs and API Products failed with status %d %s (attempt %d)\n", resp.StatusCode(), resp.Body(), attempt)
 			continue
 		}
 
@@ -58,12 +58,12 @@ func AIDeleteAPIs(OnPremKey, Endpoint, Tenant string) error {
 			continue
 		}
 
-		fmt.Printf("Removed %d APIs successfully from vector database (attempt %d)\n", jsonResp["message"]["delete_count"], attempt)
+		fmt.Printf("Removed %d APIs and API Products successfully from vector database (attempt %d)\n", jsonResp["message"]["delete_count"], attempt)
 		return nil
 	}
 
 	if deleteErr != nil {
-		return fmt.Errorf("Error removing existing APIs after retry: %v", deleteErr)
+		return fmt.Errorf("Error removing existing APIs and API Products after retry: %v", deleteErr)
 	}
-	return fmt.Errorf("Removing existing APIs failed after retry")
+	return fmt.Errorf("Removing existing APIs and API Products failed after retry")
 }

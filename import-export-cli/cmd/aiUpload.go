@@ -25,11 +25,11 @@ import (
 
 // Upload command related usage Info
 const UploadCmdLiteral = "upload"
-const UploadCmdShortDesc = "Upload APIs and API Products in an environment to a vector database to provide context to the marketplace assistant."
-const UploadCmdLongDesc = `Upload APIs and API Products available in the environment specified by flag (--environment, -e)`
-const UploadCmdExamples = utils.ProjectName + ` ` + AiCmdLiteral + ` ` + UploadCmdLiteral + ` ` + UploadAPIsCmdLiteral + ` --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 --endpoint https://dev-tools.wso2.com/apim-ai-service -e production 
-						NOTE: All the flags (--token, --endpoint and --environment (-e)) are mandatory`
-
+const UploadCmdShortDesc = "Upload APIs and API Products of a tenant from one environment to a vector database to provide context to the marketplace assistant."
+const UploadCmdLongDesc = `Upload APIs and API Products of a tenant from one environment specified by flag (--environment, -e)`
+const UploadCmdExamples = utils.ProjectName + ` ` + AiCmdLiteral + ` ` + UploadCmdLiteral + ` ` + UploadAPIsCmdLiteral + ` --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 --endpoint https://dev-tools.wso2.com/apim-ai-service -e production --all
+` + utils.ProjectName + ` ` + AiCmdLiteral + ` ` + UploadCmdLiteral + ` ` + UploadAPIProductsCmdLiteral + ` --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 --endpoint https://dev-tools.wso2.com/apim-ai-service -e production --all
+NOTE: The 2 flags (--token --environment (-e)) are mandatory`
 
 // UploadCmd represents the Upload command
 var UploadCmd = &cobra.Command{

@@ -25,10 +25,10 @@ import (
 
 // Purge command related usage Info
 const PurgeCmdLiteral = "delete"
-const PurgeCmdShortDesc = "Purge APIs and API Products available in an environment from the vector database."
-const PurgeCmdLongDesc = `Purge APIs and API Products available in the environment specified by flag (--environment, -e)`
+const PurgeCmdShortDesc = "Purge APIs and API Products of a tenant from one environment from the vector database."
+const PurgeCmdLongDesc = `Purge APIs and API Products of a tenant from one environment specified by flag (--environment, -e)`
 const PurgeCmdExamples = utils.ProjectName + ` ` + AiCmdLiteral + ` ` + PurgeCmdLiteral + ` ` + PurgeAPIsCmdLiteral + ` --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 --endpoint https://dev-tools.wso2.com/apim-ai-service -e production 
-				NOTE: All the flags (--token, --endpoint and --environment (-e)) are mandatory`
+NOTE: The 2 flags (--token and --environment (-e)) are mandatory`
 
 // PurgeCmd represents the Purge command
 var PurgeCmd = &cobra.Command{

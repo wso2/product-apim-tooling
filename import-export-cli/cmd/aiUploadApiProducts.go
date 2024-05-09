@@ -26,12 +26,14 @@ import (
 )
 
 const UploadAPIProductsCmdLiteral = "api-products"
-const uploadAPIProductsCmdShortDesc = "Upload APIs and API Products to a vector database."
+const uploadAPIProductsCmdShortDesc = "Upload API Products of a tenant from one environment to a vector database."
 
 // const uploadAPIProductsCmdLongDesc = "Upload public APIs and API Products in an environment to a vector database to provide context to the marketplace assistant."
-const uploadAPIProductsCmdLongDesc = `Upload public APIs and API Products available in the environment specified by flag (--environment, -e)`
-const uploadAPIProductsCmdExamples = utils.ProjectName + ` ` + UploadCmdLiteral + ` ` + UploadAPIProductsCmdLiteral + ` --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 --endpoint https://dev-tools.wso2.com/apim-ai-service -e production 
-							 NOTE: All the flags (--token, --endpoint and --environment (-e)) are mandatory`
+const uploadAPIProductsCmdLongDesc = `Upload public API Products of a tenant from one environment specified by flag (--environment, -e)`
+const uploadAPIProductsCmdExamples = utils.ProjectName + ` ` + UploadCmdLiteral + ` ` + UploadAPIProductsCmdLiteral + ` --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 --endpoint https://dev-tools.wso2.com/apim-ai-service -e production --all
+` + utils.ProjectName + ` ` + UploadCmdLiteral + ` ` + UploadAPIProductsCmdLiteral + ` --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 --endpoint https://dev-tools.wso2.com/apim-ai-service -e production 
+` + utils.ProjectName + ` ` + UploadCmdLiteral + ` ` + UploadAPIProductsCmdLiteral + ` --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 -e production 
+NOTE: The 2 flags (--token, --endpoint and --environment (-e)) are mandatory`
 
 var UploadAPIProductsCmd = &cobra.Command{
 	Use: UploadAPIProductsCmdLiteral + " (--endpoint <endpoint-url> --token <on-prem-key-of-the-organization> --environment " +

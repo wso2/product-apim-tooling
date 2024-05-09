@@ -12,7 +12,6 @@ import (
 	"sync/atomic"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/spf13/cast"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
@@ -22,37 +21,30 @@ var apiProducts []utils.APIProduct
 func AddAPIProductsToQueue(apiListQueue chan<- []map[string]interface{}) {
 	fmt.Println("Uploading API Products..!")
 	if count == 0 {
-		fmt.Println("No APIs available to be exported..!")
+		fmt.Println("No API Products available to be exported..!")
 		return
 	}
-
-	var counterSuceededAPIs int32
 	for count > 0 {
 		accessToken, preCommandErr := credentials.GetOAuthAccessToken(Credential, CmdUploadEnvironment)
 		if preCommandErr != nil {
 			fmt.Println("Error getting OAuth Tokens : " + preCommandErr.Error())
 			return
 		}
-
 		apiList := []map[string]interface{}{}
 		for i := startingApiIndexFromList; i < len(apiProducts); i++ {
 			apiPayload := GetAPIPayload(apiProducts[i], accessToken, CmdUploadEnvironment, true)
 			if apiPayload != nil {
 				apiList = append(apiList, apiPayload)
 			}
-			atomic.AddInt32(&counterSuceededAPIs, 1)
 		}
 		atomic.AddInt32(&totalAPIs, int32(len(apiList)))
 		if len(apiList) > 0 {
 			apiListQueue <- apiList
 		}
-
 		apiListOffset += utils.MaxAPIsToExportOnce
 		count, apiProducts, _ = GetAPIProductListFromEnv(accessToken, CmdUploadEnvironment, "", strconv.Itoa(utils.MaxAPIsToExportOnce)+"&offset="+strconv.Itoa(apiListOffset))
 		startingApiIndexFromList = 0
 	}
-
-	fmt.Println("\nTotal number of API Products processed: " + cast.ToString(counterSuceededAPIs))
 }
 
 func GetAPIPayload(apiOrProduct interface{}, accessToken, cmdUploadEnvironment string, uploadProducts bool) map[string]interface{} {

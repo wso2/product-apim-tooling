@@ -9,7 +9,6 @@ import (
 	"sync/atomic"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/spf13/cast"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
@@ -37,8 +36,6 @@ func AIUploadAPIs(credential credentials.Credential, cmdUploadEnvironment, authT
 	Credential = credential
 	UploadAll = uploadAll
 	UploadProducts = uploadProducts
-
-	fmt.Println("Username: ", credential.Username)
 
 	if !strings.Contains(credential.Username, "@") {
 		Tenant = DefaultTenant
@@ -93,6 +90,35 @@ func ProcessAPIs(accessToken string, apiListQueue chan<- []map[string]interface{
 	}
 }
 
+func AddAPIsToQueue(apiListQueue chan<- []map[string]interface{}) {
+	fmt.Println("Uploading APIs..!")
+	if count == 0 {
+		fmt.Println("No APIs available to be uploaded..!")
+	} else {
+		for count > 0 {
+			accessToken, err := credentials.GetOAuthAccessToken(Credential, CmdUploadEnvironment)
+			if err == nil {
+				apiList := []map[string]interface{}{}
+				for i := startingApiIndexFromList; i < len(apis); i++ {
+					apiPayload := GetAPIPayload(apis[i], accessToken, CmdUploadEnvironment, false)
+					if apiPayload != nil {
+						apiList = append(apiList, apiPayload)
+					}
+				}
+				atomic.AddInt32(&totalAPIs, int32(len(apiList)))
+				if len(apiList) > 0 {
+					apiListQueue <- apiList
+				}
+			} else {
+				fmt.Println("Error getting OAuth Tokens : " + err.Error())
+			}
+			apiListOffset += utils.MaxAPIsToExportOnce
+			count, apis = getAPIList(Credential, CmdUploadEnvironment, "")
+			startingApiIndexFromList = 0
+		}
+	}
+}
+
 func ConsumeAPIPayloads(apiListQueue <-chan []map[string]interface{}, wg *sync.WaitGroup) {
 	defer wg.Done()
 
@@ -144,37 +170,5 @@ func InvokePOSTRequest(apiList []map[string]interface{}) {
 
 	if uploadErr != nil {
 		utils.HandleErrorAndContinue("API upload failed after retry. Reason: ", uploadErr)
-	}
-}
-
-func AddAPIsToQueue(apiListQueue chan<- []map[string]interface{}) {
-	fmt.Println("Uploading APIs..!")
-	if count == 0 {
-		fmt.Println("No APIs available to be uploaded..!")
-	} else {
-		var counterSuceededAPIs = 0
-		for count > 0 {
-			accessToken, err := credentials.GetOAuthAccessToken(Credential, CmdUploadEnvironment)
-			if err == nil {
-				apiList := []map[string]interface{}{}
-				for i := startingApiIndexFromList; i < len(apis); i++ {
-					apiPayload := GetAPIPayload(apis[i], accessToken, CmdUploadEnvironment, false)
-					if apiPayload != nil {
-						apiList = append(apiList, apiPayload)
-					}
-					counterSuceededAPIs++
-				}
-				atomic.AddInt32(&totalAPIs, int32(len(apiList)))
-				if len(apiList) > 0 {
-					apiListQueue <- apiList
-				}
-			} else {
-				fmt.Println("Error getting OAuth Tokens : " + err.Error())
-			}
-			apiListOffset += utils.MaxAPIsToExportOnce
-			count, apis = getAPIList(Credential, CmdUploadEnvironment, "")
-			startingApiIndexFromList = 0
-		}
-		fmt.Println("\nTotal number of APIs processed: " + cast.ToString(counterSuceededAPIs))
 	}
 }
