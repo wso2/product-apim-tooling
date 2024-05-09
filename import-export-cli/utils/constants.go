@@ -190,6 +190,8 @@ const SearchAndTag = "&"
 // Other
 const DefaultTokenValidityPeriod = 3600
 const DefaultHttpRequestTimeout = 10000
+const DefaultMarketplaceAssistantThreadCount = 3
+const DefaultAIEndpoint = "https://dev-tools.wso2.com/apim-ai-service"
 
 // TLSRenegotiationNever : never negotiate
 const TLSRenegotiationNever = "never"

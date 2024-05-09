@@ -28,6 +28,7 @@ import (
 )
 
 var flagHttpRequestTimeout int
+var flagMarketplaceAssistantThreadCount int
 var flagExportDirectory string
 var flagKubernetesMode string
 var flagTLSRenegotiationMode string
@@ -47,6 +48,7 @@ const setCmdShortDesc = "Set configuration parameters, per API log levels or cor
 
 const setCmdLongDesc = `Set configuration parameters. You can use one of the following flags
 * --http-request-timeout <time-in-milli-seconds>
+* --marketplace-assistant-thread-count <number-of-threads>
 * --tls-renegotiation-mode <never|once|freely>
 * --export-directory <path-to-directory-where-apis-should-be-saved>
 * --vcs-deletion-enabled <enable-or-disable-project-deletion-via-vcs>
@@ -57,6 +59,7 @@ const setCmdLongDesc = `Set configuration parameters. You can use one of the fol
 const setCmdExamples = utils.ProjectName + ` ` + SetCmdLiteral + ` --http-request-timeout 3600 --export-directory /home/user/exported-apis
 ` + utils.ProjectName + ` ` + SetCmdLiteral + ` --http-request-timeout 5000 --export-directory C:\Documents\exported
 ` + utils.ProjectName + ` ` + SetCmdLiteral + ` --http-request-timeout 5000
+` + utils.ProjectName + ` ` + SetCmdLiteral + ` --marketplace-assistant-thread-count 5
 ` + utils.ProjectName + ` ` + SetCmdLiteral + ` --tls-renegotiation-mode freely
 ` + utils.ProjectName + ` ` + SetCmdLiteral + ` --vcs-deletion-enabled=true
 ` + utils.ProjectName + ` ` + SetCmdLiteral + ` --vcs-config-path /home/user/custom/vcs-config.yaml
@@ -89,6 +92,16 @@ func executeSetCmd(mainConfigFilePath string, cmd *cobra.Command) {
 		configVars.Config.HttpRequestTimeout = flagHttpRequestTimeout
 	} else {
 		fmt.Println("Invalid input for flag --http-request-timeout")
+	}
+
+	if flagMarketplaceAssistantThreadCount > 0 {
+		//Check whether the provided Http time out value is not equal to default value
+		if flagMarketplaceAssistantThreadCount != configVars.Config.MarketplaceAssistantThreadCount {
+			fmt.Println("Marketplace Assistant Thread Size is set to : ", flagMarketplaceAssistantThreadCount)
+		}
+		configVars.Config.MarketplaceAssistantThreadCount = flagMarketplaceAssistantThreadCount
+	} else {
+		fmt.Println("Invalid input for flag --marketplace-assistant-thread-count")
 	}
 
 	//Change Export Directory path
@@ -160,6 +173,7 @@ func init() {
 	RootCmd.AddCommand(SetCmd)
 
 	var defaultHttpRequestTimeout int
+	var defaultMarketplaceAssistantThreadCount int
 	var defaultExportDirectory string
 
 	// read current values in file to be passed into default values for flags below
@@ -169,12 +183,18 @@ func init() {
 		defaultHttpRequestTimeout = mainConfig.Config.HttpRequestTimeout
 	}
 
+	if mainConfig.Config.MarketplaceAssistantThreadCount != 0 {
+		defaultMarketplaceAssistantThreadCount = mainConfig.Config.MarketplaceAssistantThreadCount
+	}
+
 	if mainConfig.Config.ExportDirectory != "" {
 		defaultExportDirectory = mainConfig.Config.ExportDirectory
 	}
 
 	SetCmd.Flags().IntVar(&flagHttpRequestTimeout, "http-request-timeout", defaultHttpRequestTimeout,
 		"Timeout for HTTP Client")
+	SetCmd.Flags().IntVar(&flagMarketplaceAssistantThreadCount, "marketplace-assistant-thread-count", defaultMarketplaceAssistantThreadCount,
+		"No of threads to be used by Marketplace Assistant for parallel processing")
 	SetCmd.Flags().StringVar(&flagExportDirectory, "export-directory", defaultExportDirectory,
 		"Path to directory where APIs should be saved")
 	SetCmd.Flags().StringVar(&flagTLSRenegotiationMode, "tls-renegotiation-mode", utils.TLSRenegotiationNever,
