@@ -32,7 +32,7 @@ const uploadAPIsCmdLongDesc = "Upload APIs of a tenant from one environment to a
 const uploadAPIsCmdExamples = utils.ProjectName + ` ` + UploadCmdLiteral + ` ` + UploadAPIsCmdLiteral + ` --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 --endpoint https://dev-tools.wso2.com/apim-ai-service -e production --all
 ` + utils.ProjectName + ` ` + UploadCmdLiteral + ` ` + UploadAPIsCmdLiteral + ` --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 --endpoint https://dev-tools.wso2.com/apim-ai-service -e production 
 ` + utils.ProjectName + ` ` + UploadCmdLiteral + ` ` + UploadAPIsCmdLiteral + ` --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 -e production 
-NOTE: The 2 flags (--token, --endpoint and --environment (-e)) are mandatory`
+NOTE:The flag (--environment (-e)) is mandatory`
 
 var (
 	token     string
@@ -71,5 +71,4 @@ func init() {
 	UploadAPIsCmd.Flags().BoolVarP(&uploadAll, "all", "", false,
 		"Upload both apis and api products")
 	_ = UploadAPIsCmd.MarkFlagRequired("environment")
-	_ = UploadAPIsCmd.MarkFlagRequired("token")
 }

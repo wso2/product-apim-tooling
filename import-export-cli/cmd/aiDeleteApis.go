@@ -28,12 +28,12 @@ import (
 )
 
 const PurgeAPIsCmdLiteral = "apis"
-const purgeAPIsCmdShortDesc = "Purge APIs and API Products in an environment from a vector database."
+const purgeAPIsCmdShortDesc = "Purge APIs and API Products of a tenant from one environment from a vector database."
 
 const purgeAPIsCmdLongDesc = "Purge APIs and API Products of a tenant from one environment from a vector database."
 const PurgeAPIsCmdLongDesc = `Purge APIs and API Products of a tenant from one environment specified by flag (--environment, -e)`
 const purgeAPIsCmdExamples = utils.ProjectName + ` ` + AiCmdLiteral + ` ` + PurgeCmdLiteral + ` ` + PurgeAPIsCmdLiteral + ` --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 --endpoint https://dev-tools.wso2.com/apim-ai-service -e production
-							NOTE: The 2 flags (--token and --environment (-e)) are mandatory`
+NOTE:The flag (--environment (-e)) is mandatory`
 
 var PurgeAPIsCmd = &cobra.Command{
 	Use: PurgeAPIsCmdLiteral + " (--endpoint <endpoint-url> --token <on-prem-key-of-the-organization> --environment " +
@@ -60,7 +60,7 @@ func executeAIDeleteAPIsCmd(credential credentials.Credential, token, endpoint s
 	} else {
 		Tenant = strings.Split(credential.Username, "@")[1]
 	}
-	impl.AIDeleteAPIs(token, endpoint, Tenant)
+	impl.AIDeleteAPIs(credential, CmdPurgeEnvironment, token, endpoint, Tenant)
 }
 
 func init() {
@@ -70,6 +70,4 @@ func init() {
 	PurgeAPIsCmd.Flags().StringVarP(&token, "token", "", "", "on-prem-key of the organization")
 	PurgeAPIsCmd.Flags().StringVarP(&endpoint, "endpoint", "", "", "endpoint of the marketplace assistant service")
 	_ = PurgeAPIsCmd.MarkFlagRequired("environment")
-	_ = PurgeAPIsCmd.MarkFlagRequired("token")
-	_ = PurgeAPIsCmd.MarkFlagRequired("endpoint")
 }

@@ -40,7 +40,6 @@ type MainConfig struct {
 
 type Config struct {
 	HttpRequestTimeout              int    `yaml:"http_request_timeout"`
-	MarketplaceAssistantThreadCount int    `yaml:"marketplace_assistant_thread_count"`
 	ExportDirectory                 string `yaml:"export_directory"`
 	KubernetesMode                  bool   `yaml:"kubernetes_mode"`
 	TokenType                       string `yaml:"token_type"`
@@ -49,6 +48,8 @@ type Config struct {
 	VCSSourceRepoPath               string `yaml:"vcs_source_repo_path"`
 	VCSDeploymentRepoPath           string `yaml:"vcs_deployment_repo_path"`
 	TLSRenegotiationMode            string `yaml:"tls-renegotiation-mode"`
+	MarketplaceAssistantThreadCount int    `yaml:"ai_thread_count"`
+	OnPremKey                       string `yaml:"ai_token"`
 }
 
 type EnvKeys struct {

@@ -21,18 +21,49 @@ package impl
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-func AIDeleteAPIs(OnPremKey, Endpoint, Tenant string) error {
+var (
+	uploadedAPIs         int32
+	totalAPIs            int32
+	Credential           credentials.Credential
+	CmdUploadEnvironment string
+	UploadProducts       bool
+	UploadAll            bool
+	OnPremKey            string
+	Tenant               string
+	Endpoint             = utils.DefaultAIEndpoint
+)
 
-	fmt.Println("Removing existing APIs and API Products from vector DB for tenant:", Tenant)
+func AIDeleteAPIs(credential credentials.Credential, cmdUploadEnvironment, onPremKey, endpointUrl, tenant string) {
+
+	if endpointUrl != "" {
+		Endpoint = endpointUrl
+	}
+
+	if onPremKey != "" {
+		OnPremKey = onPremKey
+	} else {
+		OnPremKey = utils.OnPremKey
+	}
+
+	if OnPremKey == "" {
+		fmt.Println("You have to provide your on prem key (that you generated for ai features) to do this operation.")
+		os.Exit(1)
+	}
+
+	getAPIList(credential, cmdUploadEnvironment, "")
+
+	fmt.Println("Removing existing APIs and API Products from vector DB for tenant:", tenant)
 
 	headers := make(map[string]string)
 	headers["API-KEY"] = OnPremKey
-	headers["TENANT-DOMAIN"] = Tenant
+	headers["TENANT-DOMAIN"] = tenant
 
 	var resp *resty.Response
 	var deleteErr error
@@ -46,6 +77,10 @@ func AIDeleteAPIs(OnPremKey, Endpoint, Tenant string) error {
 
 		if resp.StatusCode() != 200 {
 			fmt.Printf("Removing existing APIs and API Products failed with status %d %s (attempt %d)\n", resp.StatusCode(), resp.Body(), attempt)
+			if attempt == 2 {
+				fmt.Println("Removing existing APIs and API Products failed.")
+				os.Exit(1)
+			}
 			continue
 		}
 
@@ -59,11 +94,10 @@ func AIDeleteAPIs(OnPremKey, Endpoint, Tenant string) error {
 		}
 
 		fmt.Printf("Removed %d APIs and API Products successfully from vector database (attempt %d)\n", jsonResp["message"]["delete_count"], attempt)
-		return nil
+		return
 	}
 
 	if deleteErr != nil {
-		return fmt.Errorf("Error removing existing APIs and API Products after retry: %v", deleteErr)
+		utils.HandleErrorAndExit("Error removing existing APIs and API Products after retry:", deleteErr)
 	}
-	return fmt.Errorf("Removing existing APIs and API Products failed after retry")
 }

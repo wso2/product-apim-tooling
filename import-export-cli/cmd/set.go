@@ -29,6 +29,7 @@ import (
 
 var flagHttpRequestTimeout int
 var flagMarketplaceAssistantThreadCount int
+var flagOnPremKey string
 var flagExportDirectory string
 var flagKubernetesMode string
 var flagTLSRenegotiationMode string
@@ -48,25 +49,27 @@ const setCmdShortDesc = "Set configuration parameters, per API log levels or cor
 
 const setCmdLongDesc = `Set configuration parameters. You can use one of the following flags
 * --http-request-timeout <time-in-milli-seconds>
-* --marketplace-assistant-thread-count <number-of-threads>
 * --tls-renegotiation-mode <never|once|freely>
 * --export-directory <path-to-directory-where-apis-should-be-saved>
 * --vcs-deletion-enabled <enable-or-disable-project-deletion-via-vcs>
 * --vcs-config-path <path-to-custom-vcs-config-file>
 * --vcs-deployment-repo-path <path-to-deployment-repo-for-vcs>
-* --vcs-source-repo-path <path-to-source-repo-for-vcs>`
+* --vcs-source-repo-path <path-to-source-repo-for-vcs>
+* --ai-thread-count <number-of-threads>
+* --ai-token <on-prem-key-of-ai-features>`
 
 const setCmdExamples = utils.ProjectName + ` ` + SetCmdLiteral + ` --http-request-timeout 3600 --export-directory /home/user/exported-apis
 ` + utils.ProjectName + ` ` + SetCmdLiteral + ` --http-request-timeout 5000 --export-directory C:\Documents\exported
 ` + utils.ProjectName + ` ` + SetCmdLiteral + ` --http-request-timeout 5000
-` + utils.ProjectName + ` ` + SetCmdLiteral + ` --marketplace-assistant-thread-count 5
 ` + utils.ProjectName + ` ` + SetCmdLiteral + ` --tls-renegotiation-mode freely
 ` + utils.ProjectName + ` ` + SetCmdLiteral + ` --vcs-deletion-enabled=true
 ` + utils.ProjectName + ` ` + SetCmdLiteral + ` --vcs-config-path /home/user/custom/vcs-config.yaml
 ` + utils.ProjectName + ` ` + SetCmdLiteral + ` --vcs-deployment-repo-path /home/user/custom/deployment
 ` + utils.ProjectName + ` ` + SetCmdLiteral + ` --vcs-source-repo-path /home/user/custom/source
 ` + utils.ProjectName + ` ` + SetCmdLiteral + ` ` + SetApiLoggingCmdLiteral + ` --api-id bf36ca3a-0332-49ba-abce-e9992228ae06 --log-level full -e dev --tenant-domain carbon.super
-` + utils.ProjectName + ` ` + SetCmdLiteral + ` ` + SetCorrelationLoggingCmdLiteral + ` --component-name http --enable true -e dev`
+` + utils.ProjectName + ` ` + SetCmdLiteral + ` ` + SetCorrelationLoggingCmdLiteral + ` --component-name http --enable true -e dev
+` + utils.ProjectName + ` ` + SetCmdLiteral + ` --ai-thread-count 5
+` + utils.ProjectName + ` ` + SetCmdLiteral + ` --ai-token ad232sda-asa2a-assdsd-sds43`
 
 // SetCmd represents the 'set' command
 var SetCmd = &cobra.Command{
@@ -101,7 +104,18 @@ func executeSetCmd(mainConfigFilePath string, cmd *cobra.Command) {
 		}
 		configVars.Config.MarketplaceAssistantThreadCount = flagMarketplaceAssistantThreadCount
 	} else {
-		fmt.Println("Invalid input for flag --marketplace-assistant-thread-count")
+		fmt.Println("Invalid input for flag --ai-thread-count")
+	}
+
+	//Change Export Directory path
+	if flagOnPremKey != "" && utils.IsValid(flagOnPremKey) {
+		//Check whether the provided export directory is not equal to default value
+		if flagOnPremKey != configVars.Config.OnPremKey {
+			fmt.Println("On Prem Key is set to  : ", flagOnPremKey)
+		}
+		configVars.Config.OnPremKey = flagOnPremKey
+	} else {
+		fmt.Println("Invalid input for flag --ai-token")
 	}
 
 	//Change Export Directory path
@@ -174,6 +188,7 @@ func init() {
 
 	var defaultHttpRequestTimeout int
 	var defaultMarketplaceAssistantThreadCount int
+	var defaultOnPremKey string
 	var defaultExportDirectory string
 
 	// read current values in file to be passed into default values for flags below
@@ -187,14 +202,16 @@ func init() {
 		defaultMarketplaceAssistantThreadCount = mainConfig.Config.MarketplaceAssistantThreadCount
 	}
 
+	if mainConfig.Config.OnPremKey != "" {
+		defaultOnPremKey = mainConfig.Config.OnPremKey
+	}
+
 	if mainConfig.Config.ExportDirectory != "" {
 		defaultExportDirectory = mainConfig.Config.ExportDirectory
 	}
 
 	SetCmd.Flags().IntVar(&flagHttpRequestTimeout, "http-request-timeout", defaultHttpRequestTimeout,
 		"Timeout for HTTP Client")
-	SetCmd.Flags().IntVar(&flagMarketplaceAssistantThreadCount, "marketplace-assistant-thread-count", defaultMarketplaceAssistantThreadCount,
-		"No of threads to be used by Marketplace Assistant for parallel processing")
 	SetCmd.Flags().StringVar(&flagExportDirectory, "export-directory", defaultExportDirectory,
 		"Path to directory where APIs should be saved")
 	SetCmd.Flags().StringVar(&flagTLSRenegotiationMode, "tls-renegotiation-mode", utils.TLSRenegotiationNever,
@@ -211,4 +228,8 @@ func init() {
 		"Path to the source repository to be considered during VCS deploy")
 	SetCmd.Flags().StringVar(&flagVCSDeploymentRepoPath, flagVCSDeploymentRepoPathName, "",
 		"Path to the deoployment repository to be considered during VCS deploy")
+	SetCmd.Flags().IntVar(&flagMarketplaceAssistantThreadCount, "ai-thread-count", defaultMarketplaceAssistantThreadCount,
+		"No of threads to be used by Marketplace Assistant for parallel processing")
+	SetCmd.Flags().StringVar(&flagOnPremKey, "ai-token", defaultOnPremKey,
+		"On prem key of ai features")
 }

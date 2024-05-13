@@ -144,13 +144,14 @@ func createConfigFiles() {
 	if !utils.IsFileExist(utils.MainConfigFilePath) {
 		var mainConfig = new(utils.MainConfig)
 		mainConfig.Config = utils.Config{HttpRequestTimeout: utils.DefaultHttpRequestTimeout,
-			MarketplaceAssistantThreadCount: utils.DefaultMarketplaceAssistantThreadCount,
 			ExportDirectory:                 utils.DefaultExportDirPath,
 			KubernetesMode:                  k8sUtils.DefaultKubernetesMode,
 			TokenType:                       utils.DefaultTokenType,
 			VCSDeletionEnabled:              false,
 			VCSConfigFilePath:               "",
-			TLSRenegotiationMode:            utils.TLSRenegotiationNever}
+			TLSRenegotiationMode:            utils.TLSRenegotiationNever,
+			MarketplaceAssistantThreadCount: utils.DefaultMarketplaceAssistantThreadCount,
+			OnPremKey:                       utils.OnPremKey}
 
 		utils.WriteConfigFile(mainConfig, utils.MainConfigFilePath)
 	}

@@ -203,7 +203,7 @@ const TLSRenegotiationOnce = "once"
 const TLSRenegotiationFreely = "freely"
 
 // Migration export
-const MaxAPIsToExportOnce = 20
+const MaxAPIsToExportOnce = 5
 const MigrationAPIsExportMetadataFileName = "migration-apis-export-metadata.yaml"
 const LastSucceededApiFileName = "last-succeeded-api.log"
 const LastSuceededContentDelimiter = " " // space

@@ -17,21 +17,8 @@ const (
 	DefaultTenant = "carbon.super"
 )
 
-var (
-	uploadedAPIs         int32
-	totalAPIs            int32
-	Credential           credentials.Credential
-	CmdUploadEnvironment string
-	UploadProducts       bool
-	UploadAll            bool
-	OnPremKey            string
-	Tenant               string
-	Endpoint             = utils.DefaultAIEndpoint
-)
+func AIUploadAPIs(credential credentials.Credential, cmdUploadEnvironment, onPremKey, endpointUrl string, uploadAll, uploadProducts bool) {
 
-func AIUploadAPIs(credential credentials.Credential, cmdUploadEnvironment, authToken, endpointUrl string, uploadAll, uploadProducts bool) {
-	OnPremKey = authToken
-	Endpoint = endpointUrl
 	CmdUploadEnvironment = cmdUploadEnvironment
 	Credential = credential
 	UploadAll = uploadAll
@@ -43,7 +30,7 @@ func AIUploadAPIs(credential credentials.Credential, cmdUploadEnvironment, authT
 		Tenant = strings.Split(credential.Username, "@")[1]
 	}
 
-	AIDeleteAPIs(OnPremKey, Endpoint, Tenant)
+	AIDeleteAPIs(Credential, cmdUploadEnvironment, onPremKey, endpointUrl, Tenant)
 
 	accessToken, err := credentials.GetOAuthAccessToken(credential, cmdUploadEnvironment)
 
@@ -77,40 +64,34 @@ func ProcessAPIs(accessToken string, apiListQueue chan<- []map[string]interface{
 	startingApiIndexFromList = 0
 	if UploadAll {
 		count, apis = getAPIList(Credential, CmdUploadEnvironment, "")
-		AddAPIsToQueue(apiListQueue)
+		AddAPIsToQueue(accessToken, apiListQueue)
 		apiListOffset = 0
 		count, apiProducts, _ = GetAPIProductListFromEnv(accessToken, CmdUploadEnvironment, "", strconv.Itoa(utils.MaxAPIsToExportOnce)+"&offset="+strconv.Itoa(apiListOffset))
-		AddAPIProductsToQueue(apiListQueue)
+		AddAPIProductsToQueue(accessToken, apiListQueue)
 	} else if UploadProducts {
 		count, apiProducts, _ = GetAPIProductListFromEnv(accessToken, CmdUploadEnvironment, "", strconv.Itoa(utils.MaxAPIsToExportOnce)+"&offset="+strconv.Itoa(apiListOffset))
-		AddAPIProductsToQueue(apiListQueue)
+		AddAPIProductsToQueue(accessToken, apiListQueue)
 	} else {
 		count, apis = getAPIList(Credential, CmdUploadEnvironment, "")
-		AddAPIsToQueue(apiListQueue)
+		AddAPIsToQueue(accessToken, apiListQueue)
 	}
 }
 
-func AddAPIsToQueue(apiListQueue chan<- []map[string]interface{}) {
-	fmt.Println("Uploading APIs..!")
+func AddAPIsToQueue(accessToken string, apiListQueue chan<- []map[string]interface{}) {
 	if count == 0 {
 		fmt.Println("No APIs available to be uploaded..!")
 	} else {
 		for count > 0 {
-			accessToken, err := credentials.GetOAuthAccessToken(Credential, CmdUploadEnvironment)
-			if err == nil {
-				apiList := []map[string]interface{}{}
-				for i := startingApiIndexFromList; i < len(apis); i++ {
-					apiPayload := GetAPIPayload(apis[i], accessToken, CmdUploadEnvironment, false)
-					if apiPayload != nil {
-						apiList = append(apiList, apiPayload)
-					}
+			apiList := []map[string]interface{}{}
+			for i := startingApiIndexFromList; i < len(apis); i++ {
+				apiPayload := GetAPIPayload(apis[i], accessToken, CmdUploadEnvironment, false)
+				if apiPayload != nil {
+					apiList = append(apiList, apiPayload)
 				}
-				atomic.AddInt32(&totalAPIs, int32(len(apiList)))
-				if len(apiList) > 0 {
-					apiListQueue <- apiList
-				}
-			} else {
-				fmt.Println("Error getting OAuth Tokens : " + err.Error())
+			}
+			atomic.AddInt32(&totalAPIs, int32(len(apiList)))
+			if len(apiList) > 0 {
+				apiListQueue <- apiList
 			}
 			apiListOffset += utils.MaxAPIsToExportOnce
 			count, apis = getAPIList(Credential, CmdUploadEnvironment, "")

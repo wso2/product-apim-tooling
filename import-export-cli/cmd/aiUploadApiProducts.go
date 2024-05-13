@@ -33,7 +33,7 @@ const uploadAPIProductsCmdLongDesc = `Upload public API Products of a tenant fro
 const uploadAPIProductsCmdExamples = utils.ProjectName + ` ` + UploadCmdLiteral + ` ` + UploadAPIProductsCmdLiteral + ` --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 --endpoint https://dev-tools.wso2.com/apim-ai-service -e production --all
 ` + utils.ProjectName + ` ` + UploadCmdLiteral + ` ` + UploadAPIProductsCmdLiteral + ` --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 --endpoint https://dev-tools.wso2.com/apim-ai-service -e production 
 ` + utils.ProjectName + ` ` + UploadCmdLiteral + ` ` + UploadAPIProductsCmdLiteral + ` --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 -e production 
-NOTE: The 2 flags (--token, --endpoint and --environment (-e)) are mandatory`
+NOTE:The flag (--environment (-e)) is mandatory`
 
 var UploadAPIProductsCmd = &cobra.Command{
 	Use: UploadAPIProductsCmdLiteral + " (--endpoint <endpoint-url> --token <on-prem-key-of-the-organization> --environment " +
@@ -66,6 +66,5 @@ func init() {
 	UploadAPIProductsCmd.Flags().BoolVarP(&uploadAll, "all", "", false,
 		"Upload both apis and api products")
 	_ = UploadAPIProductsCmd.MarkFlagRequired("environment")
-	_ = UploadAPIProductsCmd.MarkFlagRequired("token")
 
 }
