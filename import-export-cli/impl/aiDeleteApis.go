@@ -59,7 +59,7 @@ func AIDeleteAPIs(credential credentials.Credential, cmdUploadEnvironment, onPre
 
 	getAPIList(credential, cmdUploadEnvironment, "")
 
-	fmt.Println("Removing existing APIs and API Products from vector DB for tenant:", tenant)
+	fmt.Println("Removing existing APIs and API Products from vector database for tenant:", tenant)
 
 	headers := make(map[string]string)
 	headers["API-KEY"] = OnPremKey
@@ -93,7 +93,7 @@ func AIDeleteAPIs(credential credentials.Credential, cmdUploadEnvironment, onPre
 			continue
 		}
 
-		fmt.Printf("Removed %d APIs and API Products successfully from vector database (attempt %d)\n", jsonResp["message"]["delete_count"], attempt)
+		fmt.Printf("Removed %d APIs and API Products successfully from vector database for tenant: %s (attempt %d)\n", jsonResp["message"]["delete_count"], tenant, attempt)
 		return
 	}
 

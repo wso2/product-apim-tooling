@@ -3,6 +3,7 @@ package impl
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -30,7 +31,22 @@ func AIUploadAPIs(credential credentials.Credential, cmdUploadEnvironment, onPre
 		Tenant = strings.Split(credential.Username, "@")[1]
 	}
 
-	AIDeleteAPIs(Credential, cmdUploadEnvironment, onPremKey, endpointUrl, Tenant)
+	if endpointUrl != "" {
+		Endpoint = endpointUrl
+	}
+
+	if onPremKey != "" {
+		OnPremKey = onPremKey
+	} else {
+		OnPremKey = utils.OnPremKey
+	}
+
+	if OnPremKey == "" {
+		fmt.Println("You have to provide your on prem key (that you generated for ai features) to do this operation.")
+		os.Exit(1)
+	}
+
+	// AIDeleteAPIs(Credential, cmdUploadEnvironment, onPremKey, endpointUrl, Tenant)
 
 	accessToken, err := credentials.GetOAuthAccessToken(credential, cmdUploadEnvironment)
 
@@ -63,6 +79,7 @@ func ProcessAPIs(accessToken string, apiListQueue chan<- []map[string]interface{
 	apiListOffset = 0
 	startingApiIndexFromList = 0
 	if UploadAll {
+		AIDeleteAPIs(Credential, CmdUploadEnvironment, OnPremKey, Endpoint, Tenant)
 		count, apis = getAPIList(Credential, CmdUploadEnvironment, "")
 		AddAPIsToQueue(accessToken, apiListQueue)
 		apiListOffset = 0

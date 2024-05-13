@@ -190,6 +190,8 @@ const SearchAndTag = "&"
 // Other
 const DefaultTokenValidityPeriod = 3600
 const DefaultHttpRequestTimeout = 10000
+
+// AI
 const DefaultMarketplaceAssistantThreadCount = 3
 const DefaultAIEndpoint = "https://dev-tools.wso2.com/apim-ai-service"
 
@@ -203,7 +205,7 @@ const TLSRenegotiationOnce = "once"
 const TLSRenegotiationFreely = "freely"
 
 // Migration export
-const MaxAPIsToExportOnce = 5
+const MaxAPIsToExportOnce = 20
 const MigrationAPIsExportMetadataFileName = "migration-apis-export-metadata.yaml"
 const LastSucceededApiFileName = "last-succeeded-api.log"
 const LastSuceededContentDelimiter = " " // space
