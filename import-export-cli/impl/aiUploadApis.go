@@ -46,8 +46,6 @@ func AIUploadAPIs(credential credentials.Credential, cmdUploadEnvironment, onPre
 		os.Exit(1)
 	}
 
-	// AIDeleteAPIs(Credential, cmdUploadEnvironment, onPremKey, endpointUrl, Tenant)
-
 	accessToken, err := credentials.GetOAuthAccessToken(credential, cmdUploadEnvironment)
 
 	if err != nil {
@@ -79,7 +77,6 @@ func ProcessAPIs(accessToken string, apiListQueue chan<- []map[string]interface{
 	apiListOffset = 0
 	startingApiIndexFromList = 0
 	if UploadAll {
-		AIDeleteAPIs(Credential, CmdUploadEnvironment, OnPremKey, Endpoint, Tenant)
 		count, apis = getAPIList(Credential, CmdUploadEnvironment, "")
 		AddAPIsToQueue(accessToken, apiListQueue)
 		apiListOffset = 0
