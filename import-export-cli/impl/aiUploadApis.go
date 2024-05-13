@@ -58,7 +58,7 @@ func AIUploadAPIs(credential credentials.Credential, cmdUploadEnvironment, onPre
 
 	go ProduceAPIPayloads(accessToken, apiListQueue)
 
-	numConsumers := utils.MarketplaceAssistantThreadCount
+	numConsumers := utils.AIThreadCount
 	var wg sync.WaitGroup
 	for i := 0; i < numConsumers; i++ {
 		wg.Add(1)

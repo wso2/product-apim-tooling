@@ -28,7 +28,7 @@ import (
 )
 
 var flagHttpRequestTimeout int
-var flagMarketplaceAssistantThreadCount int
+var flagAIThreadCount int
 var flagOnPremKey string
 var flagExportDirectory string
 var flagKubernetesMode string
@@ -97,12 +97,12 @@ func executeSetCmd(mainConfigFilePath string, cmd *cobra.Command) {
 		fmt.Println("Invalid input for flag --http-request-timeout")
 	}
 
-	if flagMarketplaceAssistantThreadCount > 0 {
+	if flagAIThreadCount > 0 {
 		//Check whether the provided Http time out value is not equal to default value
-		if flagMarketplaceAssistantThreadCount != configVars.Config.MarketplaceAssistantThreadCount {
-			fmt.Println("Marketplace Assistant Thread Size is set to : ", flagMarketplaceAssistantThreadCount)
+		if flagAIThreadCount != configVars.Config.AIThreadCount {
+			fmt.Println("Marketplace Assistant Thread Size is set to : ", flagAIThreadCount)
 		}
-		configVars.Config.MarketplaceAssistantThreadCount = flagMarketplaceAssistantThreadCount
+		configVars.Config.AIThreadCount = flagAIThreadCount
 	} else {
 		fmt.Println("Invalid input for flag --ai-thread-count")
 	}
@@ -187,7 +187,7 @@ func init() {
 	RootCmd.AddCommand(SetCmd)
 
 	var defaultHttpRequestTimeout int
-	var defaultMarketplaceAssistantThreadCount int
+	var defaultAIThreadCount int
 	var defaultOnPremKey string
 	var defaultExportDirectory string
 
@@ -198,8 +198,8 @@ func init() {
 		defaultHttpRequestTimeout = mainConfig.Config.HttpRequestTimeout
 	}
 
-	if mainConfig.Config.MarketplaceAssistantThreadCount != 0 {
-		defaultMarketplaceAssistantThreadCount = mainConfig.Config.MarketplaceAssistantThreadCount
+	if mainConfig.Config.AIThreadCount != 0 {
+		defaultAIThreadCount = mainConfig.Config.AIThreadCount
 	}
 
 	if mainConfig.Config.OnPremKey != "" {
@@ -228,7 +228,7 @@ func init() {
 		"Path to the source repository to be considered during VCS deploy")
 	SetCmd.Flags().StringVar(&flagVCSDeploymentRepoPath, flagVCSDeploymentRepoPathName, "",
 		"Path to the deoployment repository to be considered during VCS deploy")
-	SetCmd.Flags().IntVar(&flagMarketplaceAssistantThreadCount, "ai-thread-count", defaultMarketplaceAssistantThreadCount,
+	SetCmd.Flags().IntVar(&flagAIThreadCount, "ai-thread-count", defaultAIThreadCount,
 		"No of threads to be used by Marketplace Assistant for parallel processing")
 	SetCmd.Flags().StringVar(&flagOnPremKey, "ai-token", defaultOnPremKey,
 		"On prem key of ai features")

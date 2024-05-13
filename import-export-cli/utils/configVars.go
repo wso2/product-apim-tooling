@@ -28,7 +28,7 @@ import (
 )
 
 var HttpRequestTimeout = DefaultHttpRequestTimeout
-var MarketplaceAssistantThreadCount = DefaultMarketplaceAssistantThreadCount
+var AIThreadCount = DefaultAIThreadCount
 var OnPremKey string
 var Insecure bool
 var ExportDirectory string
@@ -59,8 +59,8 @@ func SetConfigVars(mainConfigFilePath string) error {
 	HttpRequestTimeout = mainConfig.Config.HttpRequestTimeout
 	Logln(LogPrefixInfo + "Setting HttpTimeoutRequest to " + fmt.Sprint(mainConfig.Config.HttpRequestTimeout))
 
-	MarketplaceAssistantThreadCount = mainConfig.Config.MarketplaceAssistantThreadCount
-	Logln(LogPrefixInfo + "Setting MarketplaceAssistantThreadCount to " + fmt.Sprint(mainConfig.Config.MarketplaceAssistantThreadCount))
+	AIThreadCount = mainConfig.Config.AIThreadCount
+	Logln(LogPrefixInfo + "Setting AIThreadCount to " + fmt.Sprint(mainConfig.Config.AIThreadCount))
 
 	OnPremKey = mainConfig.Config.OnPremKey
 	Logln(LogPrefixInfo + "Setting OnPremKey to " + fmt.Sprint(mainConfig.Config.OnPremKey))
