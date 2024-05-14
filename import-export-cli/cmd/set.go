@@ -29,7 +29,7 @@ import (
 
 var flagHttpRequestTimeout int
 var flagAIThreadCount int
-var flagOnPremKey string
+var flagAIToken string
 var flagExportDirectory string
 var flagKubernetesMode string
 var flagTLSRenegotiationMode string
@@ -42,6 +42,7 @@ var flagVCSDeploymentRepoPath string
 const flagVCSConfigPathName = "vcs-config-path"
 const flagVCSSourceRepoPathName = "vcs-source-repo-path"
 const flagVCSDeploymentRepoPathName = "vcs-deployment-repo-path"
+const flagAITokenName = "ai-token"
 
 // Set command related Info
 const SetCmdLiteral = "set"
@@ -108,17 +109,6 @@ func executeSetCmd(mainConfigFilePath string, cmd *cobra.Command) {
 	}
 
 	//Change Export Directory path
-	if flagOnPremKey != "" && utils.IsValid(flagOnPremKey) {
-		//Check whether the provided export directory is not equal to default value
-		if flagOnPremKey != configVars.Config.OnPremKey {
-			fmt.Println("On Prem Key is set to  : ", flagOnPremKey)
-		}
-		configVars.Config.OnPremKey = flagOnPremKey
-	} else {
-		fmt.Println("Invalid input for flag --ai-token")
-	}
-
-	//Change Export Directory path
 	if flagExportDirectory != "" && utils.IsValid(flagExportDirectory) {
 		//Check whether the provided export directory is not equal to default value
 		if flagExportDirectory != configVars.Config.ExportDirectory {
@@ -178,6 +168,10 @@ func executeSetCmd(mainConfigFilePath string, cmd *cobra.Command) {
 		configVars.Config.VCSDeploymentRepoPath = flagVCSDeploymentRepoPath
 		fmt.Println("VCS deployment repo path is set to : " + flagVCSDeploymentRepoPath)
 	}
+	if cmd.Flags().Changed(flagAITokenName) {
+		configVars.Config.AIToken = flagAIToken
+		fmt.Println("AI token is set to  : " + flagAIToken)
+	}
 
 	utils.WriteConfigFile(configVars, mainConfigFilePath)
 }
@@ -188,7 +182,6 @@ func init() {
 
 	var defaultHttpRequestTimeout int
 	var defaultAIThreadCount int
-	var defaultOnPremKey string
 	var defaultExportDirectory string
 
 	// read current values in file to be passed into default values for flags below
@@ -200,10 +193,6 @@ func init() {
 
 	if mainConfig.Config.AIThreadCount != 0 {
 		defaultAIThreadCount = mainConfig.Config.AIThreadCount
-	}
-
-	if mainConfig.Config.OnPremKey != "" {
-		defaultOnPremKey = mainConfig.Config.OnPremKey
 	}
 
 	if mainConfig.Config.ExportDirectory != "" {
@@ -230,6 +219,6 @@ func init() {
 		"Path to the deoployment repository to be considered during VCS deploy")
 	SetCmd.Flags().IntVar(&flagAIThreadCount, "ai-thread-count", defaultAIThreadCount,
 		"No of threads to be used by Marketplace Assistant for parallel processing")
-	SetCmd.Flags().StringVar(&flagOnPremKey, "ai-token", defaultOnPremKey,
-		"On prem key of ai features")
+	SetCmd.Flags().StringVar(&flagAIToken, flagAITokenName, "",
+		"Token (On prem key) of ai features")
 }

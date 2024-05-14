@@ -49,7 +49,7 @@ type Config struct {
 	VCSDeploymentRepoPath string `yaml:"vcs_deployment_repo_path"`
 	TLSRenegotiationMode  string `yaml:"tls-renegotiation-mode"`
 	AIThreadCount         int    `yaml:"ai_thread_count"`
-	OnPremKey             string `yaml:"ai_token"`
+	AIToken               string `yaml:"ai_token"`
 }
 
 type EnvKeys struct {

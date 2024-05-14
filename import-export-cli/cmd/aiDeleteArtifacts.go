@@ -27,7 +27,7 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-const PurgeAPIsCmdLiteral = "apis"
+const PurgeAPIsCmdLiteral = "artifacts"
 const purgeAPIsCmdShortDesc = "Purge APIs and API Products of a tenant from one environment from a vector database."
 
 const purgeAPIsCmdLongDesc = "Purge APIs and API Products of a tenant from one environment from a vector database."

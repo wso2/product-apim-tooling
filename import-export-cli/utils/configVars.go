@@ -29,7 +29,7 @@ import (
 
 var HttpRequestTimeout = DefaultHttpRequestTimeout
 var AIThreadCount = DefaultAIThreadCount
-var OnPremKey string
+var AIToken string
 var Insecure bool
 var ExportDirectory string
 
@@ -62,8 +62,8 @@ func SetConfigVars(mainConfigFilePath string) error {
 	AIThreadCount = mainConfig.Config.AIThreadCount
 	Logln(LogPrefixInfo + "Setting AIThreadCount to " + fmt.Sprint(mainConfig.Config.AIThreadCount))
 
-	OnPremKey = mainConfig.Config.OnPremKey
-	Logln(LogPrefixInfo + "Setting OnPremKey to " + fmt.Sprint(mainConfig.Config.OnPremKey))
+	AIToken = mainConfig.Config.AIToken
+	Logln(LogPrefixInfo + "Setting AIToken to " + fmt.Sprint(mainConfig.Config.AIToken))
 
 	ExportDirectory = mainConfig.Config.ExportDirectory
 	Logln(LogPrefixInfo + "Setting ExportDirectory " + mainConfig.Config.ExportDirectory)

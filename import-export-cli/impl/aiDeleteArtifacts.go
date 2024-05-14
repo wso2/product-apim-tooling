@@ -35,25 +35,25 @@ var (
 	CmdUploadEnvironment string
 	UploadProducts       bool
 	UploadAll            bool
-	OnPremKey            string
+	AIToken              string
 	Tenant               string
 	Endpoint             = utils.DefaultAIEndpoint
 )
 
-func AIDeleteAPIs(credential credentials.Credential, cmdUploadEnvironment, onPremKey, endpointUrl, tenant string) {
+func AIDeleteAPIs(credential credentials.Credential, cmdUploadEnvironment, aiToken, endpointUrl, tenant string) {
 
 	if endpointUrl != "" {
 		Endpoint = endpointUrl
 	}
 
-	if onPremKey != "" {
-		OnPremKey = onPremKey
+	if aiToken != "" {
+		AIToken = aiToken
 	} else {
-		OnPremKey = utils.OnPremKey
+		AIToken = utils.AIToken
 	}
 
-	if OnPremKey == "" {
-		fmt.Println("You have to provide your on prem key (that you generated for ai features) to do this operation.")
+	if AIToken == "" {
+		fmt.Println("You have to provide your on prem key (token that you have generated in choreo for ai features) to do this operation.")
 		os.Exit(1)
 	}
 
@@ -62,7 +62,7 @@ func AIDeleteAPIs(credential credentials.Credential, cmdUploadEnvironment, onPre
 	fmt.Println("Removing existing APIs and API Products from vector database for tenant:", tenant)
 
 	headers := make(map[string]string)
-	headers["API-KEY"] = OnPremKey
+	headers["API-KEY"] = AIToken
 	headers["TENANT-DOMAIN"] = tenant
 
 	var resp *resty.Response

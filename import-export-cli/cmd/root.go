@@ -151,7 +151,7 @@ func createConfigFiles() {
 			VCSConfigFilePath:    "",
 			TLSRenegotiationMode: utils.TLSRenegotiationNever,
 			AIThreadCount:        utils.DefaultAIThreadCount,
-			OnPremKey:            utils.OnPremKey}
+			AIToken:              utils.AIToken}
 
 		utils.WriteConfigFile(mainConfig, utils.MainConfigFilePath)
 	}

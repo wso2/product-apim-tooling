@@ -18,7 +18,7 @@ const (
 	DefaultTenant = "carbon.super"
 )
 
-func AIUploadAPIs(credential credentials.Credential, cmdUploadEnvironment, onPremKey, endpointUrl string, uploadAll, uploadProducts bool) {
+func AIUploadAPIs(credential credentials.Credential, cmdUploadEnvironment, aiToken, endpointUrl string, uploadAll, uploadProducts bool) {
 
 	CmdUploadEnvironment = cmdUploadEnvironment
 	Credential = credential
@@ -35,14 +35,14 @@ func AIUploadAPIs(credential credentials.Credential, cmdUploadEnvironment, onPre
 		Endpoint = endpointUrl
 	}
 
-	if onPremKey != "" {
-		OnPremKey = onPremKey
+	if aiToken != "" {
+		AIToken = aiToken
 	} else {
-		OnPremKey = utils.OnPremKey
+		AIToken = utils.AIToken
 	}
 
-	if OnPremKey == "" {
-		fmt.Println("You have to provide your on prem key (that you generated for ai features) to do this operation.")
+	if AIToken == "" {
+		fmt.Println("You have to provide your on prem key (token that you have generated in choreo for ai features) to do this operation.")
 		os.Exit(1)
 	}
 
@@ -69,11 +69,6 @@ func AIUploadAPIs(credential credentials.Credential, cmdUploadEnvironment, onPre
 }
 
 func ProduceAPIPayloads(accessToken string, apiListQueue chan<- []map[string]interface{}) {
-	ProcessAPIs(accessToken, apiListQueue)
-	close(apiListQueue)
-}
-
-func ProcessAPIs(accessToken string, apiListQueue chan<- []map[string]interface{}) {
 	apiListOffset = 0
 	startingApiIndexFromList = 0
 	if UploadAll {
@@ -89,6 +84,7 @@ func ProcessAPIs(accessToken string, apiListQueue chan<- []map[string]interface{
 		count, apis = getAPIList(Credential, CmdUploadEnvironment, "")
 		AddAPIsToQueue(accessToken, apiListQueue)
 	}
+	close(apiListQueue)
 }
 
 func AddAPIsToQueue(accessToken string, apiListQueue chan<- []map[string]interface{}) {
@@ -131,7 +127,7 @@ func InvokePOSTRequest(apiList []map[string]interface{}) {
 	}
 
 	headers := make(map[string]string)
-	headers["API-KEY"] = OnPremKey
+	headers["API-KEY"] = AIToken
 	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
 
 	var resp *resty.Response
