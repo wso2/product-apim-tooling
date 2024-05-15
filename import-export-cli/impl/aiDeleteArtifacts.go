@@ -57,8 +57,6 @@ func AIDeleteAPIs(credential credentials.Credential, cmdUploadEnvironment, aiTok
 		os.Exit(1)
 	}
 
-	getAPIList(credential, cmdUploadEnvironment, "")
-
 	fmt.Println("Removing existing APIs and API Products from vector database for tenant:", tenant)
 
 	headers := make(map[string]string)
