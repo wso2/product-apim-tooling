@@ -23,6 +23,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"strconv"
+	"sync/atomic"
 
 	"github.com/spf13/cast"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
@@ -39,7 +40,7 @@ var exportAPIsFormat string
 var startingApiIndexFromList int
 var mainConfigFilePath string
 
-//  Prepare resumption of previous-halted export-apis operation
+// Prepare resumption of previous-halted export-apis operation
 func PrepareResumption(credential credentials.Credential, exportRelatedFilesPath, cmdResourceTenantDomain, cmdUsername, cmdExportEnvironment string) {
 	var lastSuceededAPI utils.API
 	lastSuceededAPI = utils.ReadLastSucceededAPIFileData(exportRelatedFilesPath)
@@ -144,7 +145,7 @@ func getRevisionsListForAPI(accessToken, cmdExportEnvironment string, api utils.
 
 // Do the API exportation
 func ExportAPIs(credential credentials.Credential, exportRelatedFilesPath, cmdExportEnvironment, cmdResourceTenantDomain,
-	exportAPIsFormat, cmdUsername, apiExportDir string, exportAPIPreserveStatus, runningExportApiCommand, exportAllRevisions bool) {
+	exportAPIsFormat, cmdUsername, apiExportDir string, exportAPIPreserveStatus, runningExportApiCommand, exportAllRevisions, exportForAI bool) {
 	if count == 0 {
 		fmt.Println("No APIs available to be exported..!")
 	} else {
@@ -155,49 +156,70 @@ func ExportAPIs(credential credentials.Credential, exportRelatedFilesPath, cmdEx
 				strconv.Itoa(utils.MaxAPIsToExportOnce))
 			accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, cmdExportEnvironment)
 			if preCommandErr == nil {
+				apiList := []map[string]interface{}{}
 				for i := startingApiIndexFromList; i < len(apis); i++ {
-					if exportAllRevisions {
-						//Export the working copy of the api
-						exportAPIandWriteToZip(apis[i], "", accessToken, cmdExportEnvironment, apiExportDir,
-							exportRelatedFilesPath, exportAPIsFormat, exportAPIPreserveStatus, runningExportApiCommand)
-						counterSuceededAPIs++
-					}
-					revisionCount, revisions, err := getRevisionsListForAPI(accessToken, cmdExportEnvironment, apis[i],
-						exportAllRevisions)
-					if err != nil {
-						fmt.Println("An error occurred while getting the revisions list for API "+apis[i].Version+
-							"_"+apis[i].Version, err)
-					} else if revisionCount > 0 {
-						for j := 0; j < len(revisions); j++ {
-							exportApiRevision := utils.GetRevisionNumFromRevisionName(revisions[j].RevisionNumber)
-							exportAPIandWriteToZip(apis[i], exportApiRevision, accessToken, cmdExportEnvironment,
-								apiExportDir, exportRelatedFilesPath, exportAPIsFormat, exportAPIPreserveStatus,
-								runningExportApiCommand)
+					if exportForAI {
+						apiPayload := GetAPIPayload(apis[i], accessToken, CmdUploadEnvironment, false)
+						if apiPayload != nil {
+							apiList = append(apiList, apiPayload)
+						}
+						continue
+					} else {
+						if exportAllRevisions {
+							//Export the working copy of the api
+							exportAPIandWriteToZip(apis[i], "", accessToken, cmdExportEnvironment, apiExportDir,
+								exportRelatedFilesPath, exportAPIsFormat, exportAPIPreserveStatus, runningExportApiCommand)
 							counterSuceededAPIs++
 						}
+						revisionCount, revisions, err := getRevisionsListForAPI(accessToken, cmdExportEnvironment, apis[i],
+							exportAllRevisions)
+						if err != nil {
+							fmt.Println("An error occurred while getting the revisions list for API "+apis[i].Version+
+								"_"+apis[i].Version, err)
+						} else if revisionCount > 0 {
+							for j := 0; j < len(revisions); j++ {
+								exportApiRevision := utils.GetRevisionNumFromRevisionName(revisions[j].RevisionNumber)
+								exportAPIandWriteToZip(apis[i], exportApiRevision, accessToken, cmdExportEnvironment,
+									apiExportDir, exportRelatedFilesPath, exportAPIsFormat, exportAPIPreserveStatus,
+									runningExportApiCommand)
+								counterSuceededAPIs++
+							}
+						}
+					}
+				}
+				if exportForAI {
+					atomic.AddInt32(&totalAPIs, int32(len(apiList)))
+					if len(apiList) > 0 {
+						apiListQueue <- apiList
 					}
 				}
 			} else {
 				// error getting OAuth tokens
 				fmt.Println("Error getting OAuth Tokens : " + preCommandErr.Error())
 			}
-			fmt.Println("Batch of " + cast.ToString(count) + " APIs exported successfully..!")
+			if !exportForAI {
+				fmt.Println("Batch of " + cast.ToString(count) + " APIs exported successfully..!")
+			}
 
 			apiListOffset += utils.MaxAPIsToExportOnce
 			count, apis = getAPIList(credential, cmdExportEnvironment, cmdResourceTenantDomain)
 			startingApiIndexFromList = 0
-			if len(apis) > 0 {
-				utils.WriteMigrationApisExportMetadataFile(apis, cmdResourceTenantDomain, cmdUsername,
-					exportRelatedFilesPath, apiListOffset)
+			if !exportForAI {
+				if len(apis) > 0 {
+					utils.WriteMigrationApisExportMetadataFile(apis, cmdResourceTenantDomain, cmdUsername,
+						exportRelatedFilesPath, apiListOffset)
+				}
 			}
 		}
-		fmt.Println("\nTotal number of APIs exported: " + cast.ToString(counterSuceededAPIs))
-		fmt.Println("API export path: " + apiExportDir)
-		fmt.Println("\nCommand: export-apis execution completed !")
+		if !exportForAI {
+			fmt.Println("\nTotal number of APIs exported: " + cast.ToString(counterSuceededAPIs))
+			fmt.Println("API export path: " + apiExportDir)
+			fmt.Println("\nCommand: export-apis execution completed !")
+		}
 	}
 }
 
-//Export the API and archive to zip format
+// Export the API and archive to zip format
 func exportAPIandWriteToZip(api utils.API, revisionNumber, accessToken, cmdExportEnvironment, apiExportDir,
 	exportRelatedFilesPath, exportAPIsFormat string, exportAPIPreserveStatus, runningExportApiCommand bool) {
 
