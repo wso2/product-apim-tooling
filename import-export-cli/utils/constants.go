@@ -193,7 +193,7 @@ const DefaultHttpRequestTimeout = 10000
 
 // AI
 const DefaultAIThreadCount = 3
-const DefaultAIEndpoint = "https://dev-tools.wso2.com/apim-ai-service"
+const DefaultAIEndpoint = "https://e95488c8-8511-4882-967f-ec3ae2a0f86f-prod.e1-us-east-azure.choreoapis.dev/lgpt/interceptor-service/interceptor-service-be2/v1.0"
 
 // TLSRenegotiationNever : never negotiate
 const TLSRenegotiationNever = "never"
