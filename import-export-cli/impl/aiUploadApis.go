@@ -74,7 +74,6 @@ func ProduceAPIPayloads(accessToken string, apiListQueue chan<- []map[string]int
 	if UploadAll {
 		count, apis = getAPIList(Credential, CmdUploadEnvironment, "")
 		ExportAPIs(Credential, "", CmdUploadEnvironment, Tenant, "json", "", "", true, true, false, true)
-		// AddAPIsToQueue(accessToken, apiListQueue)
 		apiListOffset = 0
 		count, apiProducts, _ = GetAPIProductListFromEnv(accessToken, CmdUploadEnvironment, "", strconv.Itoa(utils.MaxAPIsToExportOnce)+"&offset="+strconv.Itoa(apiListOffset))
 		AddAPIProductsToQueue(accessToken, apiListQueue)
@@ -84,34 +83,9 @@ func ProduceAPIPayloads(accessToken string, apiListQueue chan<- []map[string]int
 	} else {
 		count, apis = getAPIList(Credential, CmdUploadEnvironment, "")
 		ExportAPIs(Credential, "", CmdUploadEnvironment, Tenant, "json", "", "", true, true, false, true)
-		// AddAPIsToQueue(accessToken, apiListQueue)
 	}
 	close(apiListQueue)
 }
-
-// can use this instead of editing ExportAPIs
-// func AddAPIsToQueue(accessToken string, apiListQueue chan<- []map[string]interface{}) {
-// 	if count == 0 {
-// 		fmt.Println("No APIs available to be uploaded..!")
-// 	} else {
-// 		for count > 0 {
-// 			apiList := []map[string]interface{}{}
-// 			for i := startingApiIndexFromList; i < len(apis); i++ {
-// 				apiPayload := GetAPIPayload(apis[i], accessToken, CmdUploadEnvironment, false)
-// 				if apiPayload != nil {
-// 					apiList = append(apiList, apiPayload)
-// 				}
-// 			}
-// 			atomic.AddInt32(&totalAPIs, int32(len(apiList)))
-// 			if len(apiList) > 0 {
-// 				apiListQueue <- apiList
-// 			}
-// 			apiListOffset += utils.MaxAPIsToExportOnce
-// 			count, apis = getAPIList(Credential, CmdUploadEnvironment, "")
-// 			startingApiIndexFromList = 0
-// 		}
-// 	}
-// }
 
 func ConsumeAPIPayloads(apiListQueue <-chan []map[string]interface{}, wg *sync.WaitGroup) {
 	defer wg.Done()
