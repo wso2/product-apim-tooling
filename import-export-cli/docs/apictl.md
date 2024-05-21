@@ -22,6 +22,7 @@ apictl [flags]
 ### SEE ALSO
 
 * [apictl add](apictl_add.md)	 - Add Environment to Config file
+* [apictl ai](apictl_ai.md)	 - AI related commands.
 * [apictl aws](apictl_aws.md)	 - AWS Api-gateway related commands
 * [apictl bundle](apictl_bundle.md)	 - Archive any source project artifact to zip format
 * [apictl change-status](apictl_change-status.md)	 - Change Status of an API or API Product

@@ -220,5 +220,5 @@ func init() {
 	SetCmd.Flags().IntVar(&flagAIThreadCount, "ai-thread-count", defaultAIThreadCount,
 		"No of threads to be used by Marketplace Assistant for parallel processing")
 	SetCmd.Flags().StringVar(&flagAIToken, flagAITokenName, "",
-		"Token (On prem key) of ai features")
+		"Token (On prem key) of AI features")
 }

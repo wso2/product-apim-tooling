@@ -53,7 +53,7 @@ func AIDeleteAPIs(credential credentials.Credential, cmdUploadEnvironment, aiTok
 	}
 
 	if AIToken == "" {
-		fmt.Println("You have to provide your on prem key (token that you have generated in choreo for ai features) to do this operation.")
+		fmt.Println("You have to provide your on prem key (token that you have generated in choreo for AI features) to do this operation.")
 		os.Exit(1)
 	}
 
