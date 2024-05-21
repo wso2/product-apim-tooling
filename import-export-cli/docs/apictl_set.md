@@ -12,6 +12,8 @@ Set configuration parameters. You can use one of the following flags
 * --vcs-config-path <path-to-custom-vcs-config-file>
 * --vcs-deployment-repo-path <path-to-deployment-repo-for-vcs>
 * --vcs-source-repo-path <path-to-source-repo-for-vcs>
+* --ai-thread-count <number-of-threads>
+* --ai-token <on-prem-key-of-ai-features>
 
 ```
 apictl set [flags]
@@ -30,14 +32,18 @@ apictl set --vcs-deployment-repo-path /home/user/custom/deployment
 apictl set --vcs-source-repo-path /home/user/custom/source
 apictl set api-logging --api-id bf36ca3a-0332-49ba-abce-e9992228ae06 --log-level full -e dev --tenant-domain carbon.super
 apictl set correlation-logging --component-name http --enable true -e dev
+apictl set --ai-thread-count 5
+apictl set --ai-token ad232sda-asa2a-assdsd-sds43
 ```
 
 ### Options
 
 ```
-      --export-directory string           Path to directory where APIs should be saved (default "/Users/wso2user/.wso2apictl/exported")
+      --ai-thread-count int               No of threads to be used by Marketplace Assistant for parallel processing (default 5)
+      --ai-token string                   Token (On prem key) of AI features
+      --export-directory string           Path to directory where APIs should be saved (default "/home/thenujan/.wso2apictl/exported")
   -h, --help                              help for set
-      --http-request-timeout int          Timeout for HTTP Client (default 10000)
+      --http-request-timeout int          Timeout for HTTP Client (default 100000)
       --tls-renegotiation-mode string     Supported TLS renegotiation mode (default "never")
       --vcs-config-path string            Path to the VCS Configuration yaml file which keeps the VCS meta data
       --vcs-deletion-enabled              Specifies whether project deletion is allowed during deployment.

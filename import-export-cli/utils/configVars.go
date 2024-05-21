@@ -28,6 +28,8 @@ import (
 )
 
 var HttpRequestTimeout = DefaultHttpRequestTimeout
+var AIThreadCount = DefaultAIThreadCount
+var AIToken string
 var Insecure bool
 var ExportDirectory string
 
@@ -56,6 +58,12 @@ func SetConfigVars(mainConfigFilePath string) error {
 
 	HttpRequestTimeout = mainConfig.Config.HttpRequestTimeout
 	Logln(LogPrefixInfo + "Setting HttpTimeoutRequest to " + fmt.Sprint(mainConfig.Config.HttpRequestTimeout))
+
+	AIThreadCount = mainConfig.Config.AIThreadCount
+	Logln(LogPrefixInfo + "Setting AIThreadCount to " + fmt.Sprint(mainConfig.Config.AIThreadCount))
+
+	AIToken = mainConfig.Config.AIToken
+	Logln(LogPrefixInfo + "Setting AIToken to " + fmt.Sprint(mainConfig.Config.AIToken))
 
 	ExportDirectory = mainConfig.Config.ExportDirectory
 	Logln(LogPrefixInfo + "Setting ExportDirectory " + mainConfig.Config.ExportDirectory)

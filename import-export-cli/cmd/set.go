@@ -28,6 +28,8 @@ import (
 )
 
 var flagHttpRequestTimeout int
+var flagAIThreadCount int
+var flagAIToken string
 var flagExportDirectory string
 var flagKubernetesMode string
 var flagTLSRenegotiationMode string
@@ -40,6 +42,7 @@ var flagVCSDeploymentRepoPath string
 const flagVCSConfigPathName = "vcs-config-path"
 const flagVCSSourceRepoPathName = "vcs-source-repo-path"
 const flagVCSDeploymentRepoPathName = "vcs-deployment-repo-path"
+const flagAITokenName = "ai-token"
 
 // Set command related Info
 const SetCmdLiteral = "set"
@@ -52,7 +55,9 @@ const setCmdLongDesc = `Set configuration parameters. You can use one of the fol
 * --vcs-deletion-enabled <enable-or-disable-project-deletion-via-vcs>
 * --vcs-config-path <path-to-custom-vcs-config-file>
 * --vcs-deployment-repo-path <path-to-deployment-repo-for-vcs>
-* --vcs-source-repo-path <path-to-source-repo-for-vcs>`
+* --vcs-source-repo-path <path-to-source-repo-for-vcs>
+* --ai-thread-count <number-of-threads>
+* --ai-token <on-prem-key-of-ai-features>`
 
 const setCmdExamples = utils.ProjectName + ` ` + SetCmdLiteral + ` --http-request-timeout 3600 --export-directory /home/user/exported-apis
 ` + utils.ProjectName + ` ` + SetCmdLiteral + ` --http-request-timeout 5000 --export-directory C:\Documents\exported
@@ -63,7 +68,9 @@ const setCmdExamples = utils.ProjectName + ` ` + SetCmdLiteral + ` --http-reques
 ` + utils.ProjectName + ` ` + SetCmdLiteral + ` --vcs-deployment-repo-path /home/user/custom/deployment
 ` + utils.ProjectName + ` ` + SetCmdLiteral + ` --vcs-source-repo-path /home/user/custom/source
 ` + utils.ProjectName + ` ` + SetCmdLiteral + ` ` + SetApiLoggingCmdLiteral + ` --api-id bf36ca3a-0332-49ba-abce-e9992228ae06 --log-level full -e dev --tenant-domain carbon.super
-` + utils.ProjectName + ` ` + SetCmdLiteral + ` ` + SetCorrelationLoggingCmdLiteral + ` --component-name http --enable true -e dev`
+` + utils.ProjectName + ` ` + SetCmdLiteral + ` ` + SetCorrelationLoggingCmdLiteral + ` --component-name http --enable true -e dev
+` + utils.ProjectName + ` ` + SetCmdLiteral + ` --ai-thread-count 5
+` + utils.ProjectName + ` ` + SetCmdLiteral + ` --ai-token ad232sda-asa2a-assdsd-sds43`
 
 // SetCmd represents the 'set' command
 var SetCmd = &cobra.Command{
@@ -89,6 +96,16 @@ func executeSetCmd(mainConfigFilePath string, cmd *cobra.Command) {
 		configVars.Config.HttpRequestTimeout = flagHttpRequestTimeout
 	} else {
 		fmt.Println("Invalid input for flag --http-request-timeout")
+	}
+
+	if flagAIThreadCount > 0 {
+		//Check whether the provided Http time out value is not equal to default value
+		if flagAIThreadCount != configVars.Config.AIThreadCount {
+			fmt.Println("Marketplace Assistant Thread Size is set to : ", flagAIThreadCount)
+		}
+		configVars.Config.AIThreadCount = flagAIThreadCount
+	} else {
+		fmt.Println("Invalid input for flag --ai-thread-count")
 	}
 
 	//Change Export Directory path
@@ -151,6 +168,10 @@ func executeSetCmd(mainConfigFilePath string, cmd *cobra.Command) {
 		configVars.Config.VCSDeploymentRepoPath = flagVCSDeploymentRepoPath
 		fmt.Println("VCS deployment repo path is set to : " + flagVCSDeploymentRepoPath)
 	}
+	if cmd.Flags().Changed(flagAITokenName) {
+		configVars.Config.AIToken = flagAIToken
+		fmt.Println("AI token is set to  : " + flagAIToken)
+	}
 
 	utils.WriteConfigFile(configVars, mainConfigFilePath)
 }
@@ -160,6 +181,7 @@ func init() {
 	RootCmd.AddCommand(SetCmd)
 
 	var defaultHttpRequestTimeout int
+	var defaultAIThreadCount int
 	var defaultExportDirectory string
 
 	// read current values in file to be passed into default values for flags below
@@ -167,6 +189,10 @@ func init() {
 
 	if mainConfig.Config.HttpRequestTimeout != 0 {
 		defaultHttpRequestTimeout = mainConfig.Config.HttpRequestTimeout
+	}
+
+	if mainConfig.Config.AIThreadCount != 0 {
+		defaultAIThreadCount = mainConfig.Config.AIThreadCount
 	}
 
 	if mainConfig.Config.ExportDirectory != "" {
@@ -191,4 +217,8 @@ func init() {
 		"Path to the source repository to be considered during VCS deploy")
 	SetCmd.Flags().StringVar(&flagVCSDeploymentRepoPath, flagVCSDeploymentRepoPathName, "",
 		"Path to the deoployment repository to be considered during VCS deploy")
+	SetCmd.Flags().IntVar(&flagAIThreadCount, "ai-thread-count", defaultAIThreadCount,
+		"No of threads to be used by Marketplace Assistant for parallel processing")
+	SetCmd.Flags().StringVar(&flagAIToken, flagAITokenName, "",
+		"Token (On prem key) of AI features")
 }
