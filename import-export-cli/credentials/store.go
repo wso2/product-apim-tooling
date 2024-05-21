@@ -32,7 +32,7 @@ type Store interface {
 	// GetMgwAdapterToken returns the Access Token of the Microgateway Adapter
 	GetMGToken(env string) (MgAdapterEnv, error)
 	// SetAPIMCredentials sets credentials for micro integrator using username, password, clientID and client secret
-	SetAPIMCredentials(env, username, password, clientID, clientSecret string) error
+	SetAPIMCredentials(env, username, password, clientID, clientSecret, accessToken string) error
 	// SetMICredentials sets credentials for micro integrator using username, password and access token
 	SetMICredentials(env, username, password, accessToken string) error
 	// SetMGToken sets the Access Token for a Microgateway Adapter env
