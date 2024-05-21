@@ -101,22 +101,27 @@ func (s *JsonStore) GetAPIMCredentials(env string) (Credential, error) {
 		if err != nil {
 			return Credential{}, err
 		}
+		personalAccessToken, err := Base64Decode(environment.APIM.PersonalAccessToken)
+		if err != nil {
+			return Credential{}, err
+		}
 		credential := Credential{
-			username, password, clientID, clientSecret,
+			username, password, clientID, clientSecret, personalAccessToken,
 		}
 		return credential, nil
 	}
 	return Credential{}, fmt.Errorf("credentials not found for APIM in %s, use login", env)
 }
 
-// SetAPIMCredentials sets credentials for micro integrator using username, password, clientID and client secret
-func (s *JsonStore) SetAPIMCredentials(env, username, password, clientId, clientSecret string) error {
+// SetAPIMCredentials sets credentials for apim using username, password, clientID, client secret and access token
+func (s *JsonStore) SetAPIMCredentials(env, username, password, clientId, clientSecret, personalAccessToken string) error {
 	environment := s.credentials.Environments[env]
 	environment.APIM = Credential{
-		Username:     Base64Encode(username),
-		Password:     Base64Encode(password),
-		ClientId:     Base64Encode(clientId),
-		ClientSecret: Base64Encode(clientSecret),
+		Username:            Base64Encode(username),
+		Password:            Base64Encode(password),
+		ClientId:            Base64Encode(clientId),
+		ClientSecret:        Base64Encode(clientSecret),
+		PersonalAccessToken: Base64Encode(personalAccessToken),
 	}
 	s.credentials.Environments[env] = environment
 	err := s.persist()
@@ -267,7 +272,12 @@ func miCredentialsExists(miCred MiCredential) bool {
 }
 
 func apimCredentialsExists(apimCred Credential) bool {
-	return apimCred.ClientId != "" && apimCred.ClientSecret != "" && apimCred.Username != "" && apimCred.Password != ""
+	if apimCred.ClientId != "" && apimCred.ClientSecret != "" && apimCred.Username != "" && apimCred.Password != "" {
+		return true
+	} else if apimCred.PersonalAccessToken != "" {
+		return true
+	}
+	return false
 }
 
 func mgTokenExists(mgwAdapterToken MgAdapterEnv) bool {
