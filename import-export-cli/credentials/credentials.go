@@ -42,7 +42,7 @@ type Credential struct {
 	// ClientSecret for cli
 	ClientSecret string `json:"clientSecret"`
 	// PersonalAccessToken of API Manager
-	PersonalAccessToken string `json:"personalAccessToken"`
+	PersonalAccessToken string `json:"accessToken"`
 }
 
 // Credentials of cli

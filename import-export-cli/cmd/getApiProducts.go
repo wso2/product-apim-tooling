@@ -79,6 +79,7 @@ func executeGetApiProductsCmd(credential credentials.Credential) {
 		impl.PrintAPIProducts(apiProducts, getApiProductsCmdFormat)
 	} else {
 		utils.Logln(utils.LogPrefixError+"Getting List of API Products", err)
+		utils.HandleErrorAndExit("Error getting the list of API Products.", err)
 	}
 }
 
