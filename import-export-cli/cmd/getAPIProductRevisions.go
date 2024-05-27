@@ -75,6 +75,7 @@ func executeGetAPIProductRevisionsCmd(credential credentials.Credential) {
 		impl.PrintRevisions(revisions, getAPIProductRevisionsCmdFormat)
 	} else {
 		utils.Logln(utils.LogPrefixError+"Getting List of Revisions", err)
+		utils.HandleErrorAndExit("Error getting the list of revisions.", err)
 	}
 }
 
