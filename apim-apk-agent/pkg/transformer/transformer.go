@@ -174,7 +174,9 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 		certAvailable = true
 	}
 
-	authConfigList := mapAuthConfigs(apiYamlData.ID, apiYamlData.AuthorizationHeader, apiYamlData.APIKeyHeader, apiYamlData.SecuritySchemes, certAvailable, certList, apiUniqueID)
+	authConfigList := mapAuthConfigs(apiYamlData.ID, apiYamlData.AuthorizationHeader, apiYamlData.APIKeyHeader,
+		apiYamlData.SecuritySchemes, certAvailable, certList, apiUniqueID)
+
 	apk.Authentication = &authConfigList
 
 	corsEnabled := apiYamlData.CORSConfiguration.CORSConfigurationEnabled
@@ -384,7 +386,8 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 
 // mapAuthConfigs will take the security schemes as the parameter and will return the mapped auth configs to be
 // added into the apk-conf
-func mapAuthConfigs(apiUUID string, authHeader string, configuredAPIKeyHeader string, secSchemes []string, certAvailable bool, certList CertDescriptor, apiUniqueID string) []AuthConfiguration {
+func mapAuthConfigs(apiUUID string, authHeader string, configuredAPIKeyHeader string, secSchemes []string, certAvailable bool,
+	certList CertDescriptor, apiUniqueID string) []AuthConfiguration {
 	var authConfigs []AuthConfiguration
 	if StringExists(oAuth2SecScheme, secSchemes) {
 		var newConfig AuthConfiguration
