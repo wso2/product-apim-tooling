@@ -83,6 +83,7 @@ func executeApisCmd(credential credentials.Credential) {
 		impl.PrintAPIs(apis, listApisCmdFormat)
 	} else {
 		utils.Logln(utils.LogPrefixError+"Getting List of APIs", err)
+		utils.HandleErrorAndExit("Error getting the list of APIs.", err)
 	}
 }
 

@@ -41,6 +41,8 @@ type Credential struct {
 	ClientId string `json:"clientId"`
 	// ClientSecret for cli
 	ClientSecret string `json:"clientSecret"`
+	// PersonalAccessToken of API Manager
+	PersonalAccessToken string `json:"accessToken"`
 }
 
 // Credentials of cli
@@ -83,15 +85,19 @@ func GetDefaultCredentialStore() (Store, error) {
 
 // GetOAuthAccessToken generates an accesstoken for CLI
 func GetOAuthAccessToken(credential Credential, env string) (string, error) {
-	tokenEndpoint := utils.GetInternalTokenEndpointOfEnv(env, utils.MainConfigFilePath)
-	data, err := utils.GetOAuthTokens(credential.Username, credential.Password,
-		Base64Encode(credential.ClientId+":"+credential.ClientSecret),
-		tokenEndpoint)
-	if err != nil {
-		return "", err
-	}
-	if accessToken, ok := data["access_token"]; ok {
-		return accessToken, nil
+	if credential.PersonalAccessToken != "" {
+		return credential.PersonalAccessToken, nil
+	} else {
+		tokenEndpoint := utils.GetInternalTokenEndpointOfEnv(env, utils.MainConfigFilePath)
+		data, err := utils.GetOAuthTokens(credential.Username, credential.Password,
+			Base64Encode(credential.ClientId+":"+credential.ClientSecret),
+			tokenEndpoint)
+		if err != nil {
+			return "", err
+		}
+		if accessToken, ok := data["access_token"]; ok {
+			return accessToken, nil
+		}
 	}
 	return "", errors.New("access_token not found")
 }
@@ -101,35 +107,38 @@ func GetBasicAuth(credential Credential) string {
 	return Base64Encode(fmt.Sprintf("%s:%s", credential.Username, credential.Password))
 }
 
-//Revoke access Token when user is logging out from environment
+// Revoke access Token when user is logging out from environment
 func RevokeAccessToken(credential Credential, env string, token string) error {
+	if credential.PersonalAccessToken != "" {
+		return nil
+	} else {
+		//get revoke endpoint
+		tokenRevokeEndpoint := utils.GetTokenRevokeEndpoint(env, utils.MainConfigFilePath)
+		//Encoding client secret and client Id
+		var b64EncodedClientIDClientSecret = utils.GetBase64EncodedCredentials(credential.ClientId, credential.ClientSecret)
+		// set headers to request
+		headers := make(map[string]string)
+		headers[utils.HeaderContentType] = utils.HeaderValueXWWWFormUrlEncoded
+		headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + b64EncodedClientIDClientSecret
 
-	//get revoke endpoint
-	tokenRevokeEndpoint := utils.GetTokenRevokeEndpoint(env, utils.MainConfigFilePath)
-	//Encoding client secret and client Id
-	var b64EncodedClientIDClientSecret = utils.GetBase64EncodedCredentials(credential.ClientId, credential.ClientSecret)
-	// set headers to request
-	headers := make(map[string]string)
-	headers[utils.HeaderContentType] = utils.HeaderValueXWWWFormUrlEncoded
-	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + b64EncodedClientIDClientSecret
+		//Create body for the request
+		body := utils.HeaderToken + token + utils.TokenTypeForRevocation
 
-	//Create body for the request
-	body := utils.HeaderToken + token + utils.TokenTypeForRevocation
+		utils.Logln(utils.LogPrefixInfo + "connecting to " + tokenRevokeEndpoint)
+		resp, err := utils.InvokePOSTRequest(tokenRevokeEndpoint, headers, body)
 
-	utils.Logln(utils.LogPrefixInfo + "connecting to " + tokenRevokeEndpoint)
-	resp, err := utils.InvokePOSTRequest(tokenRevokeEndpoint, headers, body)
+		if err != nil {
+			return err
+		}
 
-	if err != nil {
-		return err
+		//Check status code
+		if resp.StatusCode() != http.StatusOK {
+			return errors.New("Request didn't respond 200 OK for searching token revocation " +
+				"Status: " + resp.Status())
+		}
+		responseDataMap := make(map[string]string) // a map to hold response data
+		data := []byte(resp.Body())
+		json.Unmarshal(data, &responseDataMap) // add response data to the map
+		return nil
 	}
-
-	//Check status code
-	if resp.StatusCode() != http.StatusOK {
-		return errors.New("Request didn't respond 200 OK for searching token revocation " +
-			"Status: " + resp.Status())
-	}
-	responseDataMap := make(map[string]string) // a map to hold response data
-	data := []byte(resp.Body())
-	json.Unmarshal(data, &responseDataMap) // add response data to the map
-	return nil
 }
