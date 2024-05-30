@@ -4,7 +4,7 @@ Login to an API Manager
 
 ### Synopsis
 
-Login to an API Manager using credentials
+Login to an API Manager using credentials or set token for authentication
 
 ```
 apictl login [environment] [flags]
@@ -16,6 +16,7 @@ apictl login [environment] [flags]
 apictl login dev -u admin -p admin
 apictl login dev -u admin
 cat ~/.mypassword | apictl login dev -u admin
+apictl login dev --token e79bda48-3406-3178-acce-f6e4dbdcbb12
 ```
 
 ### Options
@@ -24,6 +25,7 @@ cat ~/.mypassword | apictl login dev -u admin
   -h, --help              help for login
   -p, --password string   Password for login
       --password-stdin    Get password from stdin
+      --token string      Personal access token
   -u, --username string   Username for login
 ```
 

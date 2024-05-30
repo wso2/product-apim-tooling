@@ -81,6 +81,7 @@ func executeAppsCmd(credential credentials.Credential, appOwner string) {
 		impl.PrintApps(apps, listAppsCmdFormat)
 	} else {
 		utils.Logln(utils.LogPrefixError+"Getting List of Applications", err)
+		utils.HandleErrorAndExit("Error getting the list of Applications.", err)
 	}
 }
 
