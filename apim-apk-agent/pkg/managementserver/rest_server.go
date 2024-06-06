@@ -27,7 +27,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
-
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/utils"
 	"gopkg.in/yaml.v2"
 )
@@ -312,18 +311,29 @@ func createDeployementYaml(vhost string) string {
 
 // APIOperation represents the desired struct format for each API operation
 type APIOperation struct {
-	ID                string   `yaml:"id"`
-	Target            string   `yaml:"target"`
-	Verb              string   `yaml:"verb"`
-	AuthType          string   `yaml:"authType"`
-	ThrottlingPolicy  string   `yaml:"throttlingPolicy"`
-	Scopes            []string `yaml:"scopes"`
-	UsedProductIDs    []string `yaml:"usedProductIds"`
-	OperationPolicies struct {
-		Request  []string `yaml:"request"`
-		Response []string `yaml:"response"`
-		Fault    []string `yaml:"fault"`
-	} `yaml:"operationPolicies"`
+	ID                string            `yaml:"id"`
+	Target            string            `yaml:"target"`
+	Verb              string            `yaml:"verb"`
+	AuthType          string            `yaml:"authType"`
+	ThrottlingPolicy  string            `yaml:"throttlingPolicy"`
+	Scopes            []string          `yaml:"scopes"`
+	UsedProductIDs    []string          `yaml:"usedProductIds"`
+	OperationPolicies OperationPolicies `yaml:"operationPolicies"`
+}
+
+// OperationPolicies contains the request, response and fault policies for an operation
+type OperationPolicies struct {
+	Request  []OperationPolicy `yaml:"request"`
+	Response []OperationPolicy `yaml:"response"`
+	Fault    []string          `yaml:"fault"`
+}
+
+// OperationPolicy represents the desired struct format for an Operation Policy
+type OperationPolicy struct {
+	PolicyName    string `yaml:"policyName"`
+	PolicyVersion string `yaml:"policyVersion"`
+	PolicyID      string `yaml:"policyId,omitempty"`
+	Parameters    Header `yaml:"parameters"`
 }
 
 // OpenAPIPaths represents the structure of the OpenAPI specification YAML file
@@ -364,6 +374,8 @@ type Scope struct {
 
 func extractOperations(event APICPEvent) ([]APIOperation, []ScopeWrapper, error) {
 	var apiOperations []APIOperation
+	var requestOperationPolicies []OperationPolicy
+	var responseOperationPolicies []OperationPolicy
 	scopewrappers := map[string]ScopeWrapper{}
 	if strings.ToUpper(event.API.APIType) == "GRAPHQL" {
 		for _, operation := range event.API.Operations {
@@ -401,13 +413,77 @@ func extractOperations(event APICPEvent) ([]APIOperation, []ScopeWrapper, error)
 						Shared: false,
 					}
 				}
+
+				// Request headers
+				requestHeaders := operationFromDP.Headers.RequestHeaders
+				if len(requestHeaders.AddHeaders) > 0 {
+					for _, requestHeader := range requestHeaders.AddHeaders {
+						operationPolicy := OperationPolicy{
+							PolicyName:    "addHeader",
+							PolicyVersion: "v2",
+							Parameters:    requestHeader,
+						}
+						requestOperationPolicies = append(requestOperationPolicies, operationPolicy)
+					}
+				}
+
+				if len(requestHeaders.RemoveHeaders) > 0 {
+					for _, requestHeader := range requestHeaders.RemoveHeaders {
+						operationPolicy := OperationPolicy{
+							PolicyName:    "removeHeader",
+							PolicyVersion: "v1",
+							Parameters:    Header{Name: requestHeader},
+						}
+						requestOperationPolicies = append(requestOperationPolicies, operationPolicy)
+					}
+				}
+
+				// Response headers
+				responseHeaders := operationFromDP.Headers.ResponseHeaders
+				if len(responseHeaders.AddHeaders) > 0 {
+					for _, responseHeader := range responseHeaders.AddHeaders {
+						operationPolicy := OperationPolicy{
+							PolicyName:    "addHeader",
+							PolicyVersion: "v2",
+							Parameters:    responseHeader,
+						}
+						responseOperationPolicies = append(responseOperationPolicies, operationPolicy)
+					}
+				}
+
+				if responseHeaders.RemoveHeaders != nil && len(responseHeaders.RemoveHeaders) > 0 {
+					for _, responseHeader := range responseHeaders.RemoveHeaders {
+						operationPolicy := OperationPolicy{
+							PolicyName:    "removeHeader",
+							PolicyVersion: "v1",
+							Parameters:    Header{Name: responseHeader},
+						}
+						responseOperationPolicies = append(responseOperationPolicies, operationPolicy)
+					}
+				}
+
+				data, _ := json.MarshalIndent(requestOperationPolicies, "", "  ")
+				// Print the JSON
+				fmt.Println(string(data))
+
+				data, _ = json.MarshalIndent(responseOperationPolicies, "", "  ")
+				// Print the JSON
+				fmt.Println(string(data))
+
 				apiOp := APIOperation{
 					Target:           path,
 					Verb:             verb,
 					AuthType:         "Application & Application User",
 					ThrottlingPolicy: "Unlimited",
 					Scopes:           scopes,
+					OperationPolicies: OperationPolicies{
+						Request:  requestOperationPolicies,
+						Response: responseOperationPolicies,
+					},
 				}
+				data, _ = json.MarshalIndent(apiOp, "", "  ")
+				// Print the JSON
+				fmt.Println(string(data))
 				apiOperations = append(apiOperations, apiOp)
 			}
 		}
@@ -472,7 +548,7 @@ func ConvertYAMLToMap(yamlString string) (map[string]interface{}, error) {
 	var yamlData map[string]interface{}
 	err := yaml.Unmarshal([]byte(yamlString), &yamlData)
 	if err != nil {
-		logger.LoggerMgtServer.Errorf("Error while converting openAPI yaml to map: Error: %+v. \n openAPI yaml", err, yamlString)
+		// logger.LoggerMgtServer.Errorf("Error while converting openAPI yaml to map: Error: %+v. \n openAPI yaml", err, yamlString)
 		return nil, err
 	}
 	return yamlData, nil

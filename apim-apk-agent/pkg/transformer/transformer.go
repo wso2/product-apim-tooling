@@ -222,11 +222,19 @@ func getAPIType(protocolType string) string {
 
 // Generate the interceptor policy if request or response policy exists
 func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []APIMOperationPolicy, resPolicies []APIMOperationPolicy) (*[]OperationPolicy, *[]OperationPolicy) {
-	var reqPolicy, resPolicy []OperationPolicy
+	var requestPolicyList, responsePolicyList []OperationPolicy
 	var interceptorParams *InterceptorService
 	var requestInterceptorPolicy OperationPolicy
 	var responseInterceptorPolicy OperationPolicy
 	var requestBackendJWTPolicy OperationPolicy
+	var requestAddHeader OperationPolicy
+	var requestRemoveHeader OperationPolicy
+	var responseAddHeader OperationPolicy
+	var responseRemoveHeader OperationPolicy
+	var requestAddHeaderList []Header
+	var requestRemoveHeaderList []string
+	var responseAddHeaderList []Header
+	var responseRemoveHeaderList []string
 
 	if reqPolicyCount > 0 {
 		for _, reqPolicy := range reqPolicies {
@@ -309,6 +317,27 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 					PolicyVersion: "v1",
 					Parameters:    backendJWTParams,
 				}
+			} else if reqPolicy.PolicyName == "addHeader" {
+				if requestAddHeader.PolicyName == "" {
+					requestAddHeader = OperationPolicy{
+						PolicyName:    addHeaders,
+						PolicyVersion: v2,
+					}
+				}
+				header := Header{
+					HeaderName:  reqPolicy.Parameters["headerName"].(string),
+					HeaderValue: reqPolicy.Parameters["headerValue"].(string),
+				}
+				requestAddHeaderList = append(requestAddHeaderList, header)
+			} else if reqPolicy.PolicyName == "removeHeader" {
+				if requestRemoveHeader.PolicyName == "" {
+					requestRemoveHeader = OperationPolicy{
+						PolicyName:    removeHeaders,
+						PolicyVersion: v1,
+					}
+				}
+				headerName := reqPolicy.Parameters["headerName"].(string)
+				requestRemoveHeaderList = append(requestRemoveHeaderList, headerName)
 			}
 		}
 	}
@@ -363,23 +392,72 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 					PolicyVersion: "v1",
 					Parameters:    interceptorParams,
 				}
+			} else if resPolicy.PolicyName == "addHeader" {
+				if responseAddHeader.PolicyName == "" {
+					responseAddHeader = OperationPolicy{
+						PolicyName:    "AddHeaders",
+						PolicyVersion: "v2",
+					}
+				}
+
+				header := Header{
+					HeaderName:  resPolicy.Parameters["headerName"].(string),
+					HeaderValue: resPolicy.Parameters["headerValue"].(string),
+				}
+				responseAddHeaderList = append(responseAddHeaderList, header)
+			} else if resPolicy.PolicyName == "removeHeader" {
+				if responseRemoveHeader.PolicyName == "" {
+					responseRemoveHeader = OperationPolicy{
+						PolicyName:    "RemoveHeaders",
+						PolicyVersion: "v1",
+					}
+				}
+				headerName := resPolicy.Parameters["headerName"].(string)
+				responseRemoveHeaderList = append(responseRemoveHeaderList, headerName)
+
 			}
 		}
 	}
 
 	if reqPolicyCount > 0 {
 		if requestInterceptorPolicy.PolicyName != "" {
-			reqPolicy = append(reqPolicy, requestInterceptorPolicy)
+			requestPolicyList = append(requestPolicyList, requestInterceptorPolicy)
 		}
 		if requestBackendJWTPolicy.PolicyName != "" {
-			reqPolicy = append(reqPolicy, requestBackendJWTPolicy)
+			requestPolicyList = append(requestPolicyList, requestBackendJWTPolicy)
+		}
+		if requestAddHeader.PolicyName != "" {
+			requestAddHeader.Parameters = HeaderList{
+				Headers: requestAddHeaderList,
+			}
+			requestPolicyList = append(requestPolicyList, requestAddHeader)
+		}
+		if requestRemoveHeader.PolicyName != "" {
+			requestRemoveHeader.Parameters = HeaderList{
+				Names: requestRemoveHeaderList,
+			}
+			requestPolicyList = append(requestPolicyList, requestRemoveHeader)
 		}
 	}
 
 	if resPolicyCount > 0 {
-		resPolicy = append(resPolicy, responseInterceptorPolicy)
+		if responseInterceptorPolicy.PolicyName != "" {
+			responsePolicyList = append(responsePolicyList, responseInterceptorPolicy)
+		}
+		if responseAddHeader.PolicyName != "" {
+			responseAddHeader.Parameters = HeaderList{
+				Headers: responseAddHeaderList,
+			}
+			responsePolicyList = append(responsePolicyList, responseAddHeader)
+		}
+		if responseRemoveHeader.PolicyName != "" {
+			responseRemoveHeader.Parameters = HeaderList{
+				Names: responseRemoveHeaderList,
+			}
+			responsePolicyList = append(responsePolicyList, responseRemoveHeader)
+		}
 	}
-	return &reqPolicy, &resPolicy
+	return &requestPolicyList, &responsePolicyList
 }
 
 // mapAuthConfigs will take the security schemes as the parameter and will return the mapped auth configs to be

@@ -64,4 +64,20 @@ const (
 	// Optionality constants
 	mandatory = "mandatory"
 	optional  = "optional"
+
+	// APIM Interceptor constants
+	apimInterceptor  = "ccCallInterceptorService"
+	apimBackendJWT   = "BackEndJWT"
+	apimAddHeader    = "addHeader"
+	apimRemoveHeader = "removeHeader"
+
+	// APK Interceptor constants
+	interceptor   = "Interceptor"
+	backendJWT    = "BackendJwt"
+	addHeaders    = "AddHeaders"
+	removeHeaders = "RemoveHeaders"
+
+	// Version constants
+	v1 = "v1"
+	v2 = "v2"
 )
