@@ -65,17 +65,43 @@ const (
 	mandatory = "mandatory"
 	optional  = "optional"
 
-	// APIM Interceptor constants
-	apimInterceptor  = "ccCallInterceptorService"
-	apimBackendJWT   = "BackEndJWT"
-	apimAddHeader    = "addHeader"
-	apimRemoveHeader = "removeHeader"
+	// APIM Mediation constants
+	interceptorService = "ccCallInterceptorService"
+	backendJWT         = "BackEndJWT"
+	addHeader          = "addHeader"
+	removeHeader       = "removeHeader"
 
-	// APK Interceptor constants
-	interceptor   = "Interceptor"
-	backendJWT    = "BackendJwt"
-	addHeaders    = "AddHeaders"
-	removeHeaders = "RemoveHeaders"
+	// Interceptor constants
+	requestHeader                 = "request_header"
+	requestBody                   = "request_body"
+	requestTrailers               = "request_trailers"
+	requestContext                = "request_context"
+	includes                      = "includes"
+	interceptorServiceURL         = "interceptorServiceURL"
+	https                         = "https"
+	requestInterceptorSecretName  = "request-interceptor-tls-secret"
+	responseInterceptorSecretName = "response-interceptor-tls-secret"
+	tlsKey                        = "tls.crt"
+
+	// BackendJWT constants
+	encoding         = "encoding"
+	header           = "header"
+	signingAlgorithm = "signingAlgorithm"
+	tokenTTL         = "tokenTTL"
+	base64Url        = "Base64Url"
+
+	// APK Operation Policy constants
+	interceptorPolicy  = "Interceptor"
+	backendJWTPolicy   = "BackendJwt"
+	addHeaderPolicy    = "AddHeaders"
+	removeHeaderPolicy = "RemoveHeaders"
+
+	// APK BackendJWT parameter constants
+	base64url = "Base64url"
+
+	// APK header modification parameter constants
+	headerName  = "headerName"
+	headerValue = "headerValue"
 
 	// Version constants
 	v1 = "v1"

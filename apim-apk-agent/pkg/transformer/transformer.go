@@ -224,27 +224,20 @@ func getAPIType(protocolType string) string {
 func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []APIMOperationPolicy, resPolicies []APIMOperationPolicy) (*[]OperationPolicy, *[]OperationPolicy) {
 	var requestPolicyList, responsePolicyList []OperationPolicy
 	var interceptorParams *InterceptorService
-	var requestInterceptorPolicy OperationPolicy
-	var responseInterceptorPolicy OperationPolicy
-	var requestBackendJWTPolicy OperationPolicy
-	var requestAddHeader OperationPolicy
-	var requestRemoveHeader OperationPolicy
-	var responseAddHeader OperationPolicy
-	var responseRemoveHeader OperationPolicy
-	var requestAddHeaderList []Header
-	var requestRemoveHeaderList []string
-	var responseAddHeaderList []Header
-	var responseRemoveHeaderList []string
+	var requestInterceptorPolicy, responseInterceptorPolicy, requestBackendJWTPolicy OperationPolicy
+	var requestAddHeader, requestRemoveHeader, responseAddHeader, responseRemoveHeader OperationPolicy
+	var requestAddHeaderList, responseAddHeaderList []Header
+	var requestRemoveHeaderList, responseRemoveHeaderList []string
 
 	if reqPolicyCount > 0 {
 		for _, reqPolicy := range reqPolicies {
 			logger.LoggerTransformer.Debugf("Request Policy: %v", reqPolicy)
-			if reqPolicy.PolicyName == "ccCallInterceptorService" {
+			if reqPolicy.PolicyName == interceptorService {
 				logger.LoggerTransformer.Debugf("Interceptor Type Request Policy: %v", reqPolicy)
-				logger.LoggerTransformer.Debugf("Interceptor Service URL: %v", reqPolicy.Parameters["interceptorServiceURL"])
-				logger.LoggerTransformer.Debugf("Interceptor Includes: %v", reqPolicy.Parameters["includes"])
-				interceptorServiceURL := reqPolicy.Parameters["interceptorServiceURL"].(string)
-				includes := reqPolicy.Parameters["includes"].(string)
+				logger.LoggerTransformer.Debugf("Interceptor Service URL: %v", reqPolicy.Parameters[interceptorServiceURL])
+				logger.LoggerTransformer.Debugf("Interceptor Includes: %v", reqPolicy.Parameters[includes])
+				interceptorServiceURL := reqPolicy.Parameters[interceptorServiceURL].(string)
+				includes := reqPolicy.Parameters[includes].(string)
 				substrings := strings.Split(includes, ",")
 				bodyEnabled := false
 				headerEnabled := false
@@ -254,24 +247,24 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 				tlsSecretName := ""
 				tlsSecretKey := ""
 				for _, substring := range substrings {
-					if strings.Contains(substring, "request_header") {
+					if strings.Contains(substring, requestHeader) {
 						headerEnabled = true
-					} else if strings.Contains(substring, "request_body") {
+					} else if strings.Contains(substring, requestBody) {
 						bodyEnabled = true
-					} else if strings.Contains(substring, "request_trailers") {
+					} else if strings.Contains(substring, requestTrailers) {
 						trailersEnabled = true
-					} else if strings.Contains(substring, "request_context") {
+					} else if strings.Contains(substring, requestContext) {
 						contextEnabled = true
 					}
 				}
 
-				if strings.Contains(interceptorServiceURL, "https") {
+				if strings.Contains(interceptorServiceURL, https) {
 					sslEnabled = true
 				}
 
 				if sslEnabled {
-					tlsSecretName = reqPolicy.PolicyID + "request-interceptor-tls-secret"
-					tlsSecretKey = "tls.crt"
+					tlsSecretName = reqPolicy.PolicyID + requestInterceptorSecretName
+					tlsSecretKey = tlsKey
 				}
 
 				interceptorParams = &InterceptorService{
@@ -286,22 +279,22 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 
 				// Create an instance of OperationPolicy
 				requestInterceptorPolicy = OperationPolicy{
-					PolicyName:    "Interceptor",
-					PolicyVersion: "v1",
+					PolicyName:    interceptorPolicy,
+					PolicyVersion: v1,
 					Parameters:    interceptorParams,
 				}
-			} else if reqPolicy.PolicyName == "BackEndJWT" {
-				encoding := reqPolicy.Parameters["encoding"].(string)
-				header := reqPolicy.Parameters["header"].(string)
-				signingAlgorithm := reqPolicy.Parameters["signingAlgorithm"].(string)
-				tokenTTL := reqPolicy.Parameters["tokenTTL"].(string)
+			} else if reqPolicy.PolicyName == backendJWT {
+				encoding := reqPolicy.Parameters[encoding].(string)
+				header := reqPolicy.Parameters[header].(string)
+				signingAlgorithm := reqPolicy.Parameters[signingAlgorithm].(string)
+				tokenTTL := reqPolicy.Parameters[tokenTTL].(string)
 				tokenTTLConverted, err := strconv.Atoi(tokenTTL)
 				if err != nil {
 					logger.LoggerTransformer.Errorf("Error while converting tokenTTL to integer: %v", err)
 				}
 
-				if encoding == "Base64Url" {
-					encoding = "Base64url"
+				if encoding == base64Url {
+					encoding = base64url
 				}
 
 				backendJWTParams := &BackendJWT{
@@ -313,30 +306,32 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 
 				// Create an instance of OperationPolicy
 				requestBackendJWTPolicy = OperationPolicy{
-					PolicyName:    "BackendJwt",
-					PolicyVersion: "v1",
+					PolicyName:    backendJWTPolicy,
+					PolicyVersion: v1,
 					Parameters:    backendJWTParams,
 				}
-			} else if reqPolicy.PolicyName == "addHeader" {
+			} else if reqPolicy.PolicyName == addHeader {
+				logger.LoggerTransformer.Debugf("AddHeader Type Request Policy: %v", reqPolicy)
 				if requestAddHeader.PolicyName == "" {
 					requestAddHeader = OperationPolicy{
-						PolicyName:    addHeaders,
+						PolicyName:    addHeaderPolicy,
 						PolicyVersion: v2,
 					}
 				}
 				header := Header{
-					HeaderName:  reqPolicy.Parameters["headerName"].(string),
-					HeaderValue: reqPolicy.Parameters["headerValue"].(string),
+					HeaderName:  reqPolicy.Parameters[headerName].(string),
+					HeaderValue: reqPolicy.Parameters[headerValue].(string),
 				}
 				requestAddHeaderList = append(requestAddHeaderList, header)
-			} else if reqPolicy.PolicyName == "removeHeader" {
+			} else if reqPolicy.PolicyName == removeHeader {
+				logger.LoggerTransformer.Debugf("RemoveHeader Type Request Policy: %v", reqPolicy)
 				if requestRemoveHeader.PolicyName == "" {
 					requestRemoveHeader = OperationPolicy{
-						PolicyName:    removeHeaders,
+						PolicyName:    removeHeaderPolicy,
 						PolicyVersion: v1,
 					}
 				}
-				headerName := reqPolicy.Parameters["headerName"].(string)
+				headerName := reqPolicy.Parameters[headerName].(string)
 				requestRemoveHeaderList = append(requestRemoveHeaderList, headerName)
 			}
 		}
@@ -344,9 +339,9 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 
 	if resPolicyCount > 0 {
 		for _, resPolicy := range resPolicies {
-			if resPolicy.PolicyName == "ccCallInterceptorService" {
-				interceptorServiceURL := resPolicy.Parameters["interceptorServiceURL"].(string)
-				includes := resPolicy.Parameters["includes"].(string)
+			if resPolicy.PolicyName == interceptorService {
+				interceptorServiceURL := resPolicy.Parameters[interceptorServiceURL].(string)
+				includes := resPolicy.Parameters[includes].(string)
 				substrings := strings.Split(includes, ",")
 				bodyEnabled := false
 				headerEnabled := false
@@ -356,24 +351,24 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 				tlsSecretName := ""
 				tlsSecretKey := ""
 				for _, substring := range substrings {
-					if strings.Contains(substring, "request_header") {
+					if strings.Contains(substring, requestHeader) {
 						headerEnabled = true
-					} else if strings.Contains(substring, "request_body") {
+					} else if strings.Contains(substring, requestBody) {
 						bodyEnabled = true
-					} else if strings.Contains(substring, "request_trailers") {
+					} else if strings.Contains(substring, requestTrailers) {
 						trailersEnabled = true
-					} else if strings.Contains(substring, "request_context") {
+					} else if strings.Contains(substring, requestContext) {
 						contextEnabled = true
 					}
 				}
 
-				if strings.Contains(interceptorServiceURL, "https") {
+				if strings.Contains(interceptorServiceURL, https) {
 					sslEnabled = true
 				}
 
 				if sslEnabled {
-					tlsSecretName = resPolicies[0].PolicyID + "response-interceptor-tls-secret"
-					tlsSecretKey = "tls.crt"
+					tlsSecretName = resPolicies[0].PolicyID + responseInterceptorSecretName
+					tlsSecretKey = tlsKey
 				}
 
 				interceptorParams = &InterceptorService{
@@ -388,31 +383,35 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 
 				// Create an instance of OperationPolicy
 				responseInterceptorPolicy = OperationPolicy{
-					PolicyName:    "Interceptor",
-					PolicyVersion: "v1",
+					PolicyName:    interceptorPolicy,
+					PolicyVersion: v1,
 					Parameters:    interceptorParams,
 				}
-			} else if resPolicy.PolicyName == "addHeader" {
+			} else if resPolicy.PolicyName == addHeader {
+				logger.LoggerTransformer.Debugf("AddHeader Type Response Policy: %v", resPolicy)
+
 				if responseAddHeader.PolicyName == "" {
 					responseAddHeader = OperationPolicy{
-						PolicyName:    "AddHeaders",
-						PolicyVersion: "v2",
+						PolicyName:    addHeaderPolicy,
+						PolicyVersion: v2,
 					}
 				}
 
 				header := Header{
-					HeaderName:  resPolicy.Parameters["headerName"].(string),
-					HeaderValue: resPolicy.Parameters["headerValue"].(string),
+					HeaderName:  resPolicy.Parameters[headerName].(string),
+					HeaderValue: resPolicy.Parameters[headerValue].(string),
 				}
 				responseAddHeaderList = append(responseAddHeaderList, header)
-			} else if resPolicy.PolicyName == "removeHeader" {
+			} else if resPolicy.PolicyName == removeHeader {
+				logger.LoggerTransformer.Debugf("RemoveHeader Type Response Policy: %v", resPolicy)
+
 				if responseRemoveHeader.PolicyName == "" {
 					responseRemoveHeader = OperationPolicy{
-						PolicyName:    "RemoveHeaders",
-						PolicyVersion: "v1",
+						PolicyName:    removeHeaderPolicy,
+						PolicyVersion: v1,
 					}
 				}
-				headerName := resPolicy.Parameters["headerName"].(string)
+				headerName := resPolicy.Parameters[headerName].(string)
 				responseRemoveHeaderList = append(responseRemoveHeaderList, headerName)
 
 			}

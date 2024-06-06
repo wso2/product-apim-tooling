@@ -462,14 +462,6 @@ func extractOperations(event APICPEvent) ([]APIOperation, []ScopeWrapper, error)
 					}
 				}
 
-				data, _ := json.MarshalIndent(requestOperationPolicies, "", "  ")
-				// Print the JSON
-				fmt.Println(string(data))
-
-				data, _ = json.MarshalIndent(responseOperationPolicies, "", "  ")
-				// Print the JSON
-				fmt.Println(string(data))
-
 				apiOp := APIOperation{
 					Target:           path,
 					Verb:             verb,
@@ -481,9 +473,6 @@ func extractOperations(event APICPEvent) ([]APIOperation, []ScopeWrapper, error)
 						Response: responseOperationPolicies,
 					},
 				}
-				data, _ = json.MarshalIndent(apiOp, "", "  ")
-				// Print the JSON
-				fmt.Println(string(data))
 				apiOperations = append(apiOperations, apiOp)
 			}
 		}
@@ -548,7 +537,7 @@ func ConvertYAMLToMap(yamlString string) (map[string]interface{}, error) {
 	var yamlData map[string]interface{}
 	err := yaml.Unmarshal([]byte(yamlString), &yamlData)
 	if err != nil {
-		// logger.LoggerMgtServer.Errorf("Error while converting openAPI yaml to map: Error: %+v. \n openAPI yaml", err, yamlString)
+		logger.LoggerMgtServer.Errorf("Error while converting openAPI yaml to map: Error: %+v. \n openAPI yaml", err, yamlString)
 		return nil, err
 	}
 	return yamlData, nil
