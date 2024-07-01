@@ -68,8 +68,10 @@ const (
 	// APIM Mediation constants
 	interceptorService = "ccCallInterceptorService"
 	backendJWT         = "BackEndJWT"
-	addHeader          = "addHeader"
-	removeHeader       = "removeHeader"
+	addHeader          = "ccAddHeader"
+	removeHeader       = "ccRemoveHeader"
+	mirrorRequest      = "ccMirrorRequest"
+	redirectRequest    = "ccRedirectRequest"
 
 	// Interceptor constants
 	requestHeader                 = "request_header"
@@ -91,15 +93,18 @@ const (
 	base64Url        = "Base64Url"
 
 	// APK Operation Policy constants
-	interceptorPolicy  = "Interceptor"
-	backendJWTPolicy   = "BackendJwt"
-	addHeaderPolicy    = "AddHeaders"
-	removeHeaderPolicy = "RemoveHeaders"
+	interceptorPolicy     = "Interceptor"
+	backendJWTPolicy      = "BackendJwt"
+	addHeaderPolicy       = "AddHeaders"
+	removeHeaderPolicy    = "RemoveHeaders"
+	requestRedirectPolicy = "RequestRedirect"
+	requestMirrorPolicy   = "RequestMirror"
 
 	// APK BackendJWT parameter constants
 	base64url = "Base64url"
 
 	// APK header modification parameter constants
+	url         = "url"
 	headerName  = "headerName"
 	headerValue = "headerValue"
 

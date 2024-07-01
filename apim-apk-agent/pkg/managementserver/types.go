@@ -146,20 +146,21 @@ type API struct {
 	Operations       []OperationFromDP `json:"operations"`
 }
 
-// Headers contains the request and response header modifier information
-type Headers struct {
-	RequestHeaders  HeaderModifier `json:"requestHeaders"`
-	ResponseHeaders HeaderModifier `json:"responseHeaders"`
+// APKHeaders contains the request and response header modifier information
+type APKHeaders struct {
+	Policy
+	RequestHeaders  APKHeaderModifier `json:"requestHeaders"`
+	ResponseHeaders APKHeaderModifier `json:"responseHeaders"`
 }
 
-// HeaderModifier contains header modifier values
-type HeaderModifier struct {
-	AddHeaders    []Header `json:"addHeaders"`
-	RemoveHeaders []string `json:"removeHeaders"`
+// APKHeaderModifier contains header modifier values
+type APKHeaderModifier struct {
+	AddHeaders    []APKHeader `json:"addHeaders"`
+	RemoveHeaders []string    `json:"removeHeaders"`
 }
 
-// Header contains the header information
-type Header struct {
+// APKHeader contains the header information
+type APKHeader struct {
 	Name  string `json:"headerName" yaml:"headerName"`
 	Value string `json:"headerValue,omitempty" yaml:"headerValue,omitempty"`
 }
@@ -169,8 +170,49 @@ type OperationFromDP struct {
 	Path    string   `json:"path"`
 	Verb    string   `json:"verb"`
 	Scopes  []string `json:"scopes"`
-	Headers Headers  `json:"headers"`
+	Filters []Filter `json:"filters"`
 }
+
+// Policy holds the policy name and version
+type Policy struct {
+	PolicyName    string `json:"policyName"`
+	PolicyVersion string `json:"policyVersion"`
+}
+
+// Filter interface is used to define the type of parameters that can be used in an operation policy
+type Filter interface {
+	GetPolicyName() string
+	GetPolicyVersion() string
+	isFilter()
+}
+
+// GetPolicyName returns the name of the policy sent to the APIM
+func (p *Policy) GetPolicyName() string {
+	return p.PolicyName
+}
+
+// GetPolicyVersion returns the version of the policy sent to the APIM
+func (p *Policy) GetPolicyVersion() string {
+	return p.PolicyVersion
+}
+
+func (h APKHeaders) isFilter() {}
+
+// APKRedirectRequest defines the parameters of a redirect request policy sent from the APK
+type APKRedirectRequest struct {
+	Policy
+	URL string `json:"url"`
+}
+
+func (r APKRedirectRequest) isFilter() {}
+
+// APKMirrorRequest defines the parameters of a mirror request policy sent from the APK
+type APKMirrorRequest struct {
+	Policy
+	URLs []string `json:"urls"`
+}
+
+func (m APKMirrorRequest) isFilter() {}
 
 // CORSPolicy hold cors configs
 type CORSPolicy struct {

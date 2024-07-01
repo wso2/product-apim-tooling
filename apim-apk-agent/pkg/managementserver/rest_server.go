@@ -330,11 +330,38 @@ type OperationPolicies struct {
 
 // OperationPolicy represents the desired struct format for an Operation Policy
 type OperationPolicy struct {
-	PolicyName    string `yaml:"policyName"`
-	PolicyVersion string `yaml:"policyVersion"`
-	PolicyID      string `yaml:"policyId,omitempty"`
-	Parameters    Header `yaml:"parameters"`
+	PolicyName    string           `yaml:"policyName"`
+	PolicyVersion string           `yaml:"policyVersion"`
+	PolicyID      string           `yaml:"policyId,omitempty"`
+	Parameters    FilterParameters `yaml:"parameters"`
 }
+
+// FilterParameters interface is used to define the type of parameters that can be used in an operation policy.
+type FilterParameters interface {
+	isFilterParameters()
+}
+
+func (h Header) isFilterParameters() {}
+
+// Header contains the request and response header modifier information
+type Header struct {
+	Name  string `json:"headerName" yaml:"headerName"`
+	Value string `json:"headerValue,omitempty" yaml:"headerValue,omitempty"`
+}
+
+// RedirectRequest contains the url to send the redirected request
+type RedirectRequest struct {
+	URL string `json:"url"`
+}
+
+func (r RedirectRequest) isFilterParameters() {}
+
+// MirrorRequest contains the url to mirror the request to
+type MirrorRequest struct {
+	URL string `json:"url"`
+}
+
+func (m MirrorRequest) isFilterParameters() {}
 
 // OpenAPIPaths represents the structure of the OpenAPI specification YAML file
 type OpenAPIPaths struct {
@@ -413,52 +440,102 @@ func extractOperations(event APICPEvent) ([]APIOperation, []ScopeWrapper, error)
 						Shared: false,
 					}
 				}
+				// Process filters
+				for _, operationLevelFilter := range operationFromDP.Filters {
+					switch filter := operationLevelFilter.(type) {
+					// Header modification policies
+					case *APKHeaders:
+						requestHeaders := filter.RequestHeaders
+						// Add headers
+						if requestHeaders.AddHeaders != nil && len(requestHeaders.AddHeaders) > 0 {
+							logger.LoggerMgtServer.Debugf("Processing request filter for header addition")
+							for _, requestHeader := range requestHeaders.AddHeaders {
+								operationPolicy := OperationPolicy{
+									PolicyName:    "ccAddHeader",
+									PolicyVersion: "v2",
+									Parameters: Header{
+										Name:  requestHeader.Name,
+										Value: requestHeader.Value,
+									},
+								}
+								requestOperationPolicies = append(requestOperationPolicies, operationPolicy)
+							}
+						}
 
-				// Request headers
-				requestHeaders := operationFromDP.Headers.RequestHeaders
-				if len(requestHeaders.AddHeaders) > 0 {
-					for _, requestHeader := range requestHeaders.AddHeaders {
+						// Remove headers
+						if requestHeaders.RemoveHeaders != nil && len(requestHeaders.RemoveHeaders) > 0 {
+							logger.LoggerMgtServer.Debugf("Processing request filter for header removal")
+							for _, requestHeader := range requestHeaders.RemoveHeaders {
+								operationPolicy := OperationPolicy{
+									PolicyName:    "ccRemoveHeader",
+									PolicyVersion: "v2",
+									Parameters: Header{
+										Name: requestHeader,
+									},
+								}
+								requestOperationPolicies = append(responseOperationPolicies, operationPolicy)
+							}
+						}
+
+						responseHeaders := filter.ResponseHeaders
+						// Add headers
+						if responseHeaders.AddHeaders != nil && len(responseHeaders.AddHeaders) > 0 {
+							logger.LoggerMgtServer.Debugf("Processing response filter for header addition")
+							for _, responseHeader := range responseHeaders.AddHeaders {
+								operationPolicy := OperationPolicy{
+									PolicyName:    "ccAddHeader",
+									PolicyVersion: "v2",
+									Parameters: Header{
+										Name:  responseHeader.Name,
+										Value: responseHeader.Value,
+									},
+								}
+								responseOperationPolicies = append(responseOperationPolicies, operationPolicy)
+							}
+						}
+
+						// Remove headers
+						if responseHeaders.RemoveHeaders != nil && len(responseHeaders.RemoveHeaders) > 0 {
+							logger.LoggerMgtServer.Debugf("Processing response filter for header removal")
+							for _, responseHeader := range responseHeaders.RemoveHeaders {
+								operationPolicy := OperationPolicy{
+									PolicyName:    "ccRemoveHeader",
+									PolicyVersion: "v2",
+									Parameters: Header{
+										Name: responseHeader,
+									},
+								}
+								responseOperationPolicies = append(responseOperationPolicies, operationPolicy)
+							}
+						}
+					// Mirror request
+					case *APKMirrorRequest:
+						logger.LoggerMgtServer.Debugf("Processing request filter for request mirroring")
+						for _, url := range filter.URLs {
+							operationPolicy := OperationPolicy{
+								PolicyName:    "ccMirrorRequest",
+								PolicyVersion: "v1",
+								Parameters: MirrorRequest{
+									URL: url,
+								},
+							}
+							requestOperationPolicies = append(requestOperationPolicies, operationPolicy)
+						}
+
+					// Redirect request
+					case *APKRedirectRequest:
+						logger.LoggerMgtServer.Debugf("Processing request filter for request redirection")
 						operationPolicy := OperationPolicy{
-							PolicyName:    "addHeader",
-							PolicyVersion: "v2",
-							Parameters:    requestHeader,
+							PolicyName:    "ccRedirectRequest",
+							PolicyVersion: "v1",
+							Parameters: MirrorRequest{
+								URL: filter.URL,
+							},
 						}
 						requestOperationPolicies = append(requestOperationPolicies, operationPolicy)
-					}
-				}
 
-				if len(requestHeaders.RemoveHeaders) > 0 {
-					for _, requestHeader := range requestHeaders.RemoveHeaders {
-						operationPolicy := OperationPolicy{
-							PolicyName:    "removeHeader",
-							PolicyVersion: "v1",
-							Parameters:    Header{Name: requestHeader},
-						}
-						requestOperationPolicies = append(requestOperationPolicies, operationPolicy)
-					}
-				}
-
-				// Response headers
-				responseHeaders := operationFromDP.Headers.ResponseHeaders
-				if len(responseHeaders.AddHeaders) > 0 {
-					for _, responseHeader := range responseHeaders.AddHeaders {
-						operationPolicy := OperationPolicy{
-							PolicyName:    "addHeader",
-							PolicyVersion: "v2",
-							Parameters:    responseHeader,
-						}
-						responseOperationPolicies = append(responseOperationPolicies, operationPolicy)
-					}
-				}
-
-				if responseHeaders.RemoveHeaders != nil && len(responseHeaders.RemoveHeaders) > 0 {
-					for _, responseHeader := range responseHeaders.RemoveHeaders {
-						operationPolicy := OperationPolicy{
-							PolicyName:    "removeHeader",
-							PolicyVersion: "v1",
-							Parameters:    Header{Name: responseHeader},
-						}
-						responseOperationPolicies = append(responseOperationPolicies, operationPolicy)
+					default:
+						logger.LoggerMgtServer.Errorf("Unknown filter type ")
 					}
 				}
 

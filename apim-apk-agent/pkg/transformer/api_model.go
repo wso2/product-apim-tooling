@@ -83,6 +83,14 @@ type Parameter interface {
 	isParameter()
 }
 
+// URLList contains the urls for mirror and redirect request policies
+type URLList struct {
+	URL  string   `json:"url,omitempty" yaml:"url,omitempty"`
+	URLs []string `json:"urls,omitempty" yaml:"urls,omitempty"`
+}
+
+func (u URLList) isParameter() {}
+
 // HeaderList contains the list of headers for header modification
 type HeaderList struct {
 	Headers []Header

@@ -225,9 +225,9 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 	var requestPolicyList, responsePolicyList []OperationPolicy
 	var interceptorParams *InterceptorService
 	var requestInterceptorPolicy, responseInterceptorPolicy, requestBackendJWTPolicy OperationPolicy
-	var requestAddHeader, requestRemoveHeader, responseAddHeader, responseRemoveHeader OperationPolicy
+	var requestAddHeader, requestRemoveHeader, responseAddHeader, responseRemoveHeader, mirrorRequestPolicy OperationPolicy
 	var requestAddHeaderList, responseAddHeaderList []Header
-	var requestRemoveHeaderList, responseRemoveHeaderList []string
+	var requestRemoveHeaderList, responseRemoveHeaderList, mirrorUrls []string
 
 	if reqPolicyCount > 0 {
 		for _, reqPolicy := range reqPolicies {
@@ -333,6 +333,29 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 				}
 				headerName := reqPolicy.Parameters[headerName].(string)
 				requestRemoveHeaderList = append(requestRemoveHeaderList, headerName)
+			} else if reqPolicy.PolicyName == redirectRequest {
+				logger.LoggerTransformer.Debugf("RedirectRequest Type Request Policy: %v", reqPolicy)
+				redirectRequestPolicy := OperationPolicy{
+					PolicyName:    requestRedirectPolicy,
+					PolicyVersion: v1,
+					Parameters: URLList{
+						URL: reqPolicy.Parameters[url].(string),
+					},
+				}
+				requestPolicyList = append(requestPolicyList, redirectRequestPolicy)
+			} else if reqPolicy.PolicyName == mirrorRequest {
+				logger.LoggerTransformer.Debugf("MirrorRequest Type Request Policy: %v", reqPolicy)
+				if mirrorRequestPolicy.PolicyName == "" {
+					mirrorRequestPolicy = OperationPolicy{
+						PolicyName:    requestMirrorPolicy,
+						PolicyVersion: v1,
+					}
+					mirrorUrls = []string{}
+				}
+				if reqPolicyParameters, ok := reqPolicy.Parameters[url]; ok {
+					url := reqPolicyParameters.(string)
+					mirrorUrls = append(mirrorUrls, url)
+				}
 			}
 		}
 	}
@@ -436,6 +459,12 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 				Names: requestRemoveHeaderList,
 			}
 			requestPolicyList = append(requestPolicyList, requestRemoveHeader)
+		}
+		if mirrorRequestPolicy.PolicyName != "" {
+			mirrorRequestPolicy.Parameters = URLList{
+				URLs: mirrorUrls,
+			}
+			requestPolicyList = append(requestPolicyList, mirrorRequestPolicy)
 		}
 	}
 
