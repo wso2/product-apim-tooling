@@ -83,8 +83,41 @@ type Parameter interface {
 	isParameter()
 }
 
+// URLList contains the urls for mirror and redirect request policies
+type URLList struct {
+	URL  string   `json:"url,omitempty" yaml:"url,omitempty"`
+	URLs []string `json:"urls,omitempty" yaml:"urls,omitempty"`
+}
+
+func (u URLList) isParameter() {}
+
+// HeaderList contains the list of headers for header modification
+type HeaderList struct {
+	Headers []Header
+	Names   []string
+}
+
+// MarshalYAML for both []Header and []string
+func (h HeaderList) MarshalYAML() (interface{}, error) {
+	if len(h.Headers) > 0 {
+		return map[string]interface{}{"headers": h.Headers}, nil
+	}
+	if len(h.Names) > 0 {
+		return map[string]interface{}{"headers": h.Names}, nil
+	}
+	return nil, nil
+}
+
+// Header contains the information for header modification
+type Header struct {
+	HeaderName  string `yaml:"name"`
+	HeaderValue string `yaml:"value,omitempty"`
+}
+
+func (h HeaderList) isParameter() {}
+
 // InterceptorService holds configuration details for configuring interceptor
-// for a aperticular API requests or responses.
+// for particular API requests or responses.
 type InterceptorService struct {
 	BackendURL      string `yaml:"backendUrl,omitempty"`
 	HeadersEnabled  bool   `yaml:"headersEnabled,omitempty"`
