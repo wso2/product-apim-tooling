@@ -65,14 +65,6 @@ const (
 	mandatory = "mandatory"
 	optional  = "optional"
 
-	// APIM Mediation constants
-	interceptorService = "ccCallInterceptorService"
-	backendJWT         = "BackEndJWT"
-	addHeader          = "ccAddHeader"
-	removeHeader       = "ccRemoveHeader"
-	mirrorRequest      = "ccMirrorRequest"
-	redirectRequest    = "ccRedirectRequest"
-
 	// Interceptor constants
 	requestHeader                 = "request_header"
 	requestBody                   = "request_body"

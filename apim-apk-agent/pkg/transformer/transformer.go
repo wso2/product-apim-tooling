@@ -46,6 +46,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	gwapiv1 "sigs.k8s.io/gateway-api/apis/v1"
 
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/constants"
 	eventHub "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/managementserver"
@@ -232,7 +233,7 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 	if reqPolicyCount > 0 {
 		for _, reqPolicy := range reqPolicies {
 			logger.LoggerTransformer.Debugf("Request Policy: %v", reqPolicy)
-			if reqPolicy.PolicyName == interceptorService {
+			if reqPolicy.PolicyName == constants.InterceptorService {
 				logger.LoggerTransformer.Debugf("Interceptor Type Request Policy: %v", reqPolicy)
 				logger.LoggerTransformer.Debugf("Interceptor Service URL: %v", reqPolicy.Parameters[interceptorServiceURL])
 				logger.LoggerTransformer.Debugf("Interceptor Includes: %v", reqPolicy.Parameters[includes])
@@ -283,7 +284,7 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 					PolicyVersion: v1,
 					Parameters:    interceptorParams,
 				}
-			} else if reqPolicy.PolicyName == backendJWT {
+			} else if reqPolicy.PolicyName == constants.BackendJWT {
 				encoding := reqPolicy.Parameters[encoding].(string)
 				header := reqPolicy.Parameters[header].(string)
 				signingAlgorithm := reqPolicy.Parameters[signingAlgorithm].(string)
@@ -310,7 +311,7 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 					PolicyVersion: v1,
 					Parameters:    backendJWTParams,
 				}
-			} else if reqPolicy.PolicyName == addHeader {
+			} else if reqPolicy.PolicyName == constants.AddHeader {
 				logger.LoggerTransformer.Debugf("AddHeader Type Request Policy: %v", reqPolicy)
 				if requestAddHeader.PolicyName == "" {
 					requestAddHeader = OperationPolicy{
@@ -323,7 +324,7 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 					HeaderValue: reqPolicy.Parameters[headerValue].(string),
 				}
 				requestAddHeaderList = append(requestAddHeaderList, header)
-			} else if reqPolicy.PolicyName == removeHeader {
+			} else if reqPolicy.PolicyName == constants.RemoveHeader {
 				logger.LoggerTransformer.Debugf("RemoveHeader Type Request Policy: %v", reqPolicy)
 				if requestRemoveHeader.PolicyName == "" {
 					requestRemoveHeader = OperationPolicy{
@@ -333,7 +334,7 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 				}
 				headerName := reqPolicy.Parameters[headerName].(string)
 				requestRemoveHeaderList = append(requestRemoveHeaderList, headerName)
-			} else if reqPolicy.PolicyName == redirectRequest {
+			} else if reqPolicy.PolicyName == constants.RedirectRequest {
 				logger.LoggerTransformer.Debugf("RedirectRequest Type Request Policy: %v", reqPolicy)
 				redirectRequestPolicy := OperationPolicy{
 					PolicyName:    requestRedirectPolicy,
@@ -343,7 +344,7 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 					},
 				}
 				requestPolicyList = append(requestPolicyList, redirectRequestPolicy)
-			} else if reqPolicy.PolicyName == mirrorRequest {
+			} else if reqPolicy.PolicyName == constants.MirrorRequest {
 				logger.LoggerTransformer.Debugf("MirrorRequest Type Request Policy: %v", reqPolicy)
 				if mirrorRequestPolicy.PolicyName == "" {
 					mirrorRequestPolicy = OperationPolicy{
@@ -362,7 +363,7 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 
 	if resPolicyCount > 0 {
 		for _, resPolicy := range resPolicies {
-			if resPolicy.PolicyName == interceptorService {
+			if resPolicy.PolicyName == constants.InterceptorService {
 				interceptorServiceURL := resPolicy.Parameters[interceptorServiceURL].(string)
 				includes := resPolicy.Parameters[includes].(string)
 				substrings := strings.Split(includes, ",")
@@ -410,7 +411,7 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 					PolicyVersion: v1,
 					Parameters:    interceptorParams,
 				}
-			} else if resPolicy.PolicyName == addHeader {
+			} else if resPolicy.PolicyName == constants.AddHeader {
 				logger.LoggerTransformer.Debugf("AddHeader Type Response Policy: %v", resPolicy)
 
 				if responseAddHeader.PolicyName == "" {
@@ -425,7 +426,7 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 					HeaderValue: resPolicy.Parameters[headerValue].(string),
 				}
 				responseAddHeaderList = append(responseAddHeaderList, header)
-			} else if resPolicy.PolicyName == removeHeader {
+			} else if resPolicy.PolicyName == constants.RemoveHeader {
 				logger.LoggerTransformer.Debugf("RemoveHeader Type Response Policy: %v", resPolicy)
 
 				if responseRemoveHeader.PolicyName == "" {
