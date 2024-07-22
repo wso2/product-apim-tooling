@@ -143,6 +143,7 @@ type API struct {
 	SandVhost        string            `json:"sandVhost"`
 	SecurityScheme   []string          `json:"securityScheme"`
 	AuthHeader       string            `json:"authHeader"`
+	APIKeyHeader     string            `json:"apiKeyHeader"`
 	Operations       []OperationFromDP `json:"operations"`
 }
 
