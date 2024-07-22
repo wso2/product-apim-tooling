@@ -55,11 +55,12 @@ const (
 	apiKey = "APIKey"
 
 	// Security Scheme values
-	oAuth2SecScheme    = "oauth2"
-	oAuth2Mandatory    = "oauth_basic_auth_api_key_mandatory"
-	mutualSSL          = "mutualssl"
-	mutualSSLMandatory = "mutualssl_mandatory"
-	apiKeySecScheme    = "api_key"
+	oAuth2SecScheme              = "oauth2"
+	applicationSecurityMandatory = "oauth_basic_auth_api_key_mandatory"
+	applicationSecurityOptional  = "oauth_basic_auth_api_key_optional"
+	mutualSSL                    = "mutualssl"
+	mutualSSLMandatory           = "mutualssl_mandatory"
+	apiKeySecScheme              = "api_key"
 
 	// Optionality constants
 	mandatory = "mandatory"

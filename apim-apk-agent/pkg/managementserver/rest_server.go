@@ -154,6 +154,7 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string) {
 		prodEndpoint = fmt.Sprintf("%s://%s", apiCPEvent.API.EndpointProtocol, apiCPEvent.API.ProdEndpoint)
 	}
 	authHeader := apiCPEvent.API.AuthHeader
+	apiKeyHeader := apiCPEvent.API.APIKeyHeader
 	apiType := "HTTP"
 	if apiCPEvent.API.APIType == "GraphQL" {
 		apiType = "GRAPHQL"
@@ -193,7 +194,7 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string) {
 			"additionalProperties": createAdditionalProperties(apiCPEvent.API.APIProperties),
 			"securityScheme":       apiCPEvent.API.SecurityScheme,
 			"authorizationHeader":  authHeader,
-			"apiKeyHeader":         "ApiKey",
+			"apiKeyHeader":         apiKeyHeader,
 			"scopes":               scopes,
 		},
 	}
@@ -614,7 +615,7 @@ func ConvertYAMLToMap(yamlString string) (map[string]interface{}, error) {
 	var yamlData map[string]interface{}
 	err := yaml.Unmarshal([]byte(yamlString), &yamlData)
 	if err != nil {
-		logger.LoggerMgtServer.Errorf("Error while converting openAPI yaml to map: Error: %+v. \n openAPI yaml", err, yamlString)
+		// logger.LoggerMgtServer.Errorf("Error while converting openAPI yaml to map: Error: %+v. \n openAPI yaml", err, yamlString)
 		return nil, err
 	}
 	return yamlData, nil
