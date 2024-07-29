@@ -20,11 +20,11 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"strconv"
-
-	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 
 	"github.com/go-resty/resty/v2"
 	"github.com/spf13/cobra"
@@ -132,20 +132,19 @@ func WriteToZip(exportAPIName, exportAPIVersion, zipLocationPath string, resp *r
 // @return response Response in the form of *resty.Response
 func getExportApiResponse(name, version, provider, format, apiImportExportEndpoint, b64encodedCredentials string, preserveStatus bool, ignoreSwagger bool) (*resty.Response, error) {
 	apiImportExportEndpoint = utils.AppendSlashToString(apiImportExportEndpoint)
-	query := "export-api?name=" + name + "&version=" + version + "&provider=" + provider +
+	query := "export-api?name=" + url.QueryEscape(name) + "&version=" + version + "&provider=" + provider +
 		"&preserveStatus=" + strconv.FormatBool(preserveStatus) +
 		"&ignoreSwagger=" + strconv.FormatBool(ignoreSwagger)
 	if format != "" {
 		query += "&format=" + format
 	}
-
-	url := apiImportExportEndpoint + query
-	utils.Logln(utils.LogPrefixInfo+"ExportAPI: URL:", url)
+	urlString := apiImportExportEndpoint + query
+	utils.Logln(utils.LogPrefixInfo+"ExportAPI: URL:", urlString)
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBasicPrefix + " " + b64encodedCredentials
 	headers[utils.HeaderAccept] = utils.HeaderValueApplicationZip
 
-	resp, err := utils.InvokeGETRequest(url, headers)
+	resp, err := utils.InvokeGETRequest(urlString, headers)
 
 	if err != nil {
 		return nil, err
