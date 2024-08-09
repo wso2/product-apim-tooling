@@ -112,12 +112,17 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 			opRateLimit = &rateLimitPolicyConfigured
 			configuredRateLimitPoliciesMap["Resource"] = rateLimitPolicy
 		}
-
+		logger.LoggerTransformer.Debugf("Operation Auth Type: %v", operation.AuthType)
+		AuthSecured := true
+		if operation.AuthType == "None" {
+			logger.LoggerTransformer.Debugf("Setting AuthSecured to false")
+			AuthSecured = false
+		}
 		op := &Operation{
 			Target:  operation.Target,
 			Verb:    operation.Verb,
 			Scopes:  operation.Scopes,
-			Secured: true,
+			Secured: AuthSecured,
 			OperationPolicies: &OperationPolicies{
 				Request:  *reqInterceptor,
 				Response: *resInterceptor,

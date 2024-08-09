@@ -162,6 +162,7 @@ type APIMOperation struct {
 	Scopes            []string               `yaml:"scopes"`
 	OperationPolicies *APIMOperationPolicies `yaml:"operationPolicies"`
 	ThrottlingPolicy  string                 `yaml:"throttlingPolicy"`
+	AuthType          string                 `yaml:"authType"`
 }
 
 // APIMApi represents an API along with it's all basic information and the operations.
