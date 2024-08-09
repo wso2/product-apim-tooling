@@ -91,7 +91,7 @@ type Operation struct {
 	Target            string             `yaml:"target,omitempty"`
 	Verb              string             `yaml:"verb,omitempty"`
 	Scopes            []string           `yaml:"scopes"`
-	Secured           bool               `yaml:"secured,omitempty"`
+	Secured           bool               `yaml:"secured"`
 	OperationPolicies *OperationPolicies `yaml:"operationPolicies,omitempty"`
 	RateLimit         *RateLimit         `yaml:"rateLimit,omitempty"`
 }
