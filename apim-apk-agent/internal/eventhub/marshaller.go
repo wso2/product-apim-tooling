@@ -21,6 +21,7 @@ import (
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
 	eventhubTypes "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/eventhub/types"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/managementserver"
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/utils"
 )
 
 // SubscriptionList for struct list of applications
@@ -129,9 +130,9 @@ func MarshalMultipleSubscriptions(subscriptionsList *types.SubscriptionList) {
 		subscriptionSub := MarshalSubscription(&subscription)
 		subscriptionMap[subscriptionSub.UUID] = subscriptionSub
 		applicationMappingMap[subscriptionSub.UUID] = managementserver.ApplicationMapping{
-			UUID:            subscriptionSub.UUID,
-			ApplicationRef:  subscriptionSub.SubscribedAPI.Name,
-			SubscriptionRef: subscriptionSub.SubscribedAPI.Version,
+			UUID:            utils.GetUniqueIDOfApplicationMapping(subscription.ApplicationUUID, subscription.SubscriptionUUID),
+			ApplicationRef:  subscription.ApplicationUUID,
+			SubscriptionRef: subscription.SubscriptionUUID,
 			Organization:    subscriptionSub.Organization,
 		}
 	}
