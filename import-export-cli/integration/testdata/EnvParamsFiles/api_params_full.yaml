@@ -25,9 +25,11 @@ environments:
             - tierName: Gold
               alias: bob
               path: bob.crt
+              keyType: PRODUCTION
             - tierName: Silver
               alias: carol
               path: carol.crt
+              keyType: SANDBOX
         deploymentEnvironments:
             - displayOnDevportal: true
               deploymentEnvironment: Default

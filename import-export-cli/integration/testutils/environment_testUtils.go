@@ -505,13 +505,17 @@ func validateMutualSSLCerts(t *testing.T, apiParams *Params, path string) {
 	isClientCertsDirExists, _ := utils.IsDirExists(pathOfExportedMsslCerts)
 
 	if isClientCertsDirExists {
-		files, _ := ioutil.ReadDir(pathOfExportedMsslCerts)
 		for _, msslCert := range apiParams.Environments[0].Configs.MsslCerts {
+		    pathToCert := pathOfExportedMsslCerts + string(os.PathSeparator) + msslCert.KeyType
+		    isPathToCertExist, _ := utils.IsDirExists(pathToCert)
 			msslCertExists := false
-			for _, file := range files {
-				if strings.EqualFold(file.Name(), msslCert.Path) {
-					msslCertExists = true
-				}
+			if (isPathToCertExist) {
+			    files, _ := ioutil.ReadDir(pathToCert)
+			    for _, file := range files {
+                    if strings.EqualFold(file.Name(), msslCert.Path) {
+                        msslCertExists = true
+                    }
+                }
 			}
 			if !msslCertExists {
 				t.Error("Client (MutualSSL) certificate " + msslCert.Path + " not exported")
