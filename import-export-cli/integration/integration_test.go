@@ -175,6 +175,12 @@ func readConfigs() {
 
 	}
 
+	versionOS := os.Getenv("VERSION")
+
+	if !strings.EqualFold(versionOS, "") {
+		yamlConfig.APICTLVersion = versionOS
+	}
+
 	base.SetIndexingDelay(yamlConfig.IndexingDelay)
 	base.SetMaxInvocationAttempts(yamlConfig.MaxInvocationAttempts)
 
