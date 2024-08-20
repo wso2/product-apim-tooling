@@ -29,6 +29,7 @@ data:
   subscriptionAvailability: ALL_TENANTS
   subscriptionAvailableTenants: []
   additionalProperties: []
+  audiences: []
   businessInformation: {}
   corsConfiguration:
     corsConfigurationEnabled: false
