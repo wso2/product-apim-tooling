@@ -42,6 +42,7 @@ type API struct {
 	IsRevision                      bool              `json:"isRevision" yaml:"isRevision"`
 	RevisionID                      int               `json:"revisionId" yaml:"revisionId"`
 	EnableSchemaValidation          bool              `json:"enableSchemaValidation,omitempty" yaml:"enableSchemaValidation,omitempty"`
+	Audiences                       []string          `json:"audiences,omitempty" yaml:"audiences,omitempty"`
 	Type                            string            `json:"type,omitempty" yaml:"type,omitempty"`
 	Transport                       []string          `json:"transport,omitempty" yaml:"transport,omitempty"`
 	Tags                            []string          `json:"tags,omitempty" yaml:"tags,omitempty"`

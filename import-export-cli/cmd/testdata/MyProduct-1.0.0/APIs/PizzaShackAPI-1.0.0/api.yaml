@@ -33,6 +33,7 @@ data:
   subscriptionAvailability: CURRENT_TENANT
   subscriptionAvailableTenants: []
   additionalProperties: []
+  audiences: []
   accessControl: NONE
   accessControlRoles: []
   businessInformation:
