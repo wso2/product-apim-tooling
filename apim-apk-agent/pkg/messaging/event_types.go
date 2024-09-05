@@ -178,8 +178,8 @@ type PolicyInfo struct {
 // APIPolicyEvent for struct API policy events
 type APIPolicyEvent struct {
 	PolicyInfo
-	AddedConditionGroupIds   string `json:"addedConditionGroupIds"`
-	DeletedConditionGroupIds string `json:"deletedConditionGroupIds"`
+	AddedConditionGroupIDs   string `json:"addedConditionGroupIds"`
+	DeletedConditionGroupIDs string `json:"deletedConditionGroupIds"`
 }
 
 // SubscriptionPolicyEvent for struct subscriptionPolicy events

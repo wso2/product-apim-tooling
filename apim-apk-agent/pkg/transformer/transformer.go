@@ -152,7 +152,7 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 	if certArtifact.EndpointCerts != "" {
 		certErr := json.Unmarshal([]byte(certArtifact.EndpointCerts), &endpointCertList)
 		if certErr != nil {
-			logger.LoggerTransformer.Errorf("Error while unmarshalling endpoint_cert.json content: ", apiYamlError)
+			logger.LoggerTransformer.Errorf("Error while unmarshalling endpoint_cert.json content: %v", apiYamlError)
 			return "", "null", 0, nil, EndpointSecurityConfig{}, certErr
 		}
 		endCertAvailable = true
@@ -173,7 +173,7 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 	if certArtifact.ClientCerts != "" {
 		certErr := json.Unmarshal([]byte(certArtifact.ClientCerts), &certList)
 		if certErr != nil {
-			logger.LoggerTransformer.Errorf("Error while unmarshalling client_cert.json content: ", apiYamlError)
+			logger.LoggerTransformer.Errorf("Error while unmarshalling client_cert.json content: %v", apiYamlError)
 			return "", "null", 0, nil, EndpointSecurityConfig{}, certErr
 		}
 		certAvailable = true
