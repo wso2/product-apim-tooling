@@ -370,6 +370,7 @@ func marshalAppAttributes(attributes interface{}) map[string]string {
 func handleSubscriptionEvents(data []byte, eventType string) {
 	var subscriptionEvent msg.SubscriptionEvent
 	subEventErr := json.Unmarshal([]byte(string(data)), &subscriptionEvent)
+	logger.LoggerAgent.Info("Subscription Event Received")
 	if subEventErr != nil {
 		logger.LoggerMessaging.Errorf("Error occurred while unmarshalling Subscription event data %v", subEventErr)
 		return
