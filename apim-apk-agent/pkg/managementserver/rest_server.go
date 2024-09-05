@@ -614,7 +614,7 @@ func ConvertYAMLToMap(yamlString string) (map[string]interface{}, error) {
 	var yamlData map[string]interface{}
 	err := yaml.Unmarshal([]byte(yamlString), &yamlData)
 	if err != nil {
-		logger.LoggerMgtServer.Errorf("Error while converting openAPI yaml to map: Error: %+v. \n openAPI yaml", err, yamlString)
+		logger.LoggerMgtServer.Errorf("Error while converting openAPI yaml to map: Error: %+v. \n openAPI yaml", err)
 		return nil, err
 	}
 	return yamlData, nil
