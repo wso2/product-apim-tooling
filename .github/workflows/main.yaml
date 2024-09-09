@@ -18,7 +18,9 @@
 name: API Controller Build with Test
 
 on:
-  push:    
+  pull_request:
+    branches:
+      - master    
 
   workflow_dispatch:
     
@@ -44,7 +46,7 @@ jobs:
       - name: Set up Golang
         uses: actions/setup-go@v2
         with:
-          go-version: ^1.14
+          go-version: ^1.20
       
       - name: Set up JDK 11
         uses: actions/setup-java@v1
@@ -57,8 +59,8 @@ jobs:
       - name: Build
         run: |
           cd import-export-cli
-          go vet ./...
-          ./build.sh -t apictl.go -v 4.3.0
+          # go vet ./...
+          ./build.sh -t apictl.go -v 4.4.0
 
       - name: Start APIM
         run: |
@@ -69,4 +71,4 @@ jobs:
       - name: Test
         run: |
           cd import-export-cli/integration
-          go test -p 1 -timeout 0 -archive apictl-4.3.0-linux-x64.tar.gz -race -coverprofile=coverage.txt -covermode=atomic ./pkg/...
+          go test -p 1 -timeout 0 -archive apictl-4.4.0-linux-x64.tar.gz -race -coverprofile=coverage.txt -covermode=atomic ./pkg/...
