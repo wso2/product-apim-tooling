@@ -33,7 +33,7 @@ func TestExtractAPIProductInfoWithCorrectJSON(t *testing.T) {
 	// Correct json
 	content := `{
 	  "type": "api_product",
-      "version": "v4.3.0",
+      "version": "v4.4.0",
 	  "data": {
 		"id": "e4d0c1be-44e9-43ad-b434-f8e2f02dad11",
 		"name": "APIProductName",
@@ -51,7 +51,7 @@ func TestExtractAPIProductInfoWhenDataTagMissing(t *testing.T) {
 	// When ID tag missing
 	content := `{
 		"type": "api_product",
-		"version": "v4.3.0"
+		"version": "v4.4.0"
 	  }`
 	apiProduct, err := extractAPIProductDefinition([]byte(content))
 	assert.Nil(t, err, "Should return nil error")
@@ -62,7 +62,7 @@ func TestExtractAPIProductInfoWithMalformedJSON(t *testing.T) {
 	// Malformed json
 	content := `{
 		"type": "api_product",
-		"version": "v4.3.0",
+		"version": "v4.4.0",
 		"data": {
 		  "id": "e4d0c1be-44e9-43ad-b434-f8e2f02dad11",
 		  "name": "APIProductName",
