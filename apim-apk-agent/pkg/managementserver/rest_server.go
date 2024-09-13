@@ -154,6 +154,7 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string) {
 		prodEndpoint = fmt.Sprintf("%s://%s", apiCPEvent.API.EndpointProtocol, apiCPEvent.API.ProdEndpoint)
 	}
 	authHeader := apiCPEvent.API.AuthHeader
+	apiKeyHeader := apiCPEvent.API.APIKeyHeader
 	apiType := "HTTP"
 	if apiCPEvent.API.APIType == "GraphQL" {
 		apiType = "GRAPHQL"
@@ -193,7 +194,7 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string) {
 			"additionalProperties": createAdditionalProperties(apiCPEvent.API.APIProperties),
 			"securityScheme":       apiCPEvent.API.SecurityScheme,
 			"authorizationHeader":  authHeader,
-			"apiKeyHeader":         "ApiKey",
+			"apiKeyHeader":         apiKeyHeader,
 			"scopes":               scopes,
 		},
 	}

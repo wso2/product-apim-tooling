@@ -497,37 +497,36 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 
 // mapAuthConfigs will take the security schemes as the parameter and will return the mapped auth configs to be
 // added into the apk-conf
-func mapAuthConfigs(apiUUID string, authHeader string, configuredAPIKeyHeader string, secSchemes []string, certAvailable bool,
-	certList CertDescriptor, apiUniqueID string) []AuthConfiguration {
+func mapAuthConfigs(apiUUID string, authHeader string, configuredAPIKeyHeader string, securitySchemes []string, certAvailable bool, certList CertDescriptor, apiUniqueID string) []AuthConfiguration {
 	var authConfigs []AuthConfiguration
-	if StringExists(oAuth2SecScheme, secSchemes) {
-		var newConfig AuthConfiguration
-		newConfig.AuthType = oAuth2
-		newConfig.Enabled = true
-		newConfig.HeaderName = authHeader
-		if StringExists(oAuth2Mandatory, secSchemes) {
-			newConfig.Required = mandatory
+	if StringExists(oAuth2SecScheme, securitySchemes) {
+		var oauth2Config AuthConfiguration
+		oauth2Config.AuthType = oAuth2
+		oauth2Config.Enabled = true
+		oauth2Config.HeaderName = authHeader
+		if StringExists(applicationSecurityMandatory, securitySchemes) {
+			oauth2Config.Required = mandatory
 		} else {
-			newConfig.Required = optional
+			oauth2Config.Required = optional
 		}
 
-		authConfigs = append(authConfigs, newConfig)
+		authConfigs = append(authConfigs, oauth2Config)
 	}
-	if !StringExists("oauth2", secSchemes) {
+	if !StringExists("oauth2", securitySchemes) {
 		oAuth2DisabledConfig := AuthConfiguration{
 			AuthType: oAuth2,
 			Enabled:  false,
 		}
 		authConfigs = append(authConfigs, oAuth2DisabledConfig)
 	}
-	if StringExists(mutualSSL, secSchemes) && certAvailable {
-		var newConfig AuthConfiguration
-		newConfig.AuthType = mTLS
-		newConfig.Enabled = true
-		if StringExists(mutualSSLMandatory, secSchemes) {
-			newConfig.Required = mandatory
+	if StringExists(mutualSSL, securitySchemes) && certAvailable {
+		var mtlsConfig AuthConfiguration
+		mtlsConfig.AuthType = mTLS
+		mtlsConfig.Enabled = true
+		if StringExists(mutualSSLMandatory, securitySchemes) {
+			mtlsConfig.Required = mandatory
 		} else {
-			newConfig.Required = optional
+			mtlsConfig.Required = optional
 		}
 
 		clientCerts := make([]Certificate, len(certList.CertData))
@@ -539,8 +538,8 @@ func mapAuthConfigs(apiUUID string, authHeader string, configuredAPIKeyHeader st
 			}
 			clientCerts[i] = *prop
 		}
-		newConfig.Certificates = clientCerts
-		authConfigs = append(authConfigs, newConfig)
+		mtlsConfig.Certificates = clientCerts
+		authConfigs = append(authConfigs, mtlsConfig)
 	}
 
 	internalKeyAuthConfig := AuthConfiguration{
@@ -551,13 +550,18 @@ func mapAuthConfigs(apiUUID string, authHeader string, configuredAPIKeyHeader st
 	}
 	authConfigs = append(authConfigs, internalKeyAuthConfig)
 
-	if StringExists(apiKeySecScheme, secSchemes) {
+	if StringExists(apiKeySecScheme, securitySchemes) {
 		apiKeyAuthConfig := AuthConfiguration{
 			AuthType:       apiKey,
 			Enabled:        true,
 			HeaderName:     configuredAPIKeyHeader,
 			HeaderEnabled:  true,
 			QueryParamName: apiKeyHeader,
+		}
+		if StringExists(applicationSecurityMandatory, securitySchemes) {
+			apiKeyAuthConfig.Required = mandatory
+		} else if StringExists(applicationSecurityOptional, securitySchemes) {
+			apiKeyAuthConfig.Required = optional
 		}
 		authConfigs = append(authConfigs, apiKeyAuthConfig)
 	}
