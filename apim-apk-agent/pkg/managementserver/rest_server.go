@@ -26,6 +26,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
+	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/constants"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/utils"
 	"gopkg.in/yaml.v2"
@@ -452,8 +453,8 @@ func extractOperations(event APICPEvent) ([]APIOperation, []ScopeWrapper, error)
 							logger.LoggerMgtServer.Debugf("Processing request filter for header addition")
 							for _, requestHeader := range requestHeaders.AddHeaders {
 								operationPolicy := OperationPolicy{
-									PolicyName:    "ccAddHeader",
-									PolicyVersion: "v2",
+									PolicyName:    constants.AddHeader,
+									PolicyVersion: constants.V1,
 									Parameters: Header{
 										Name:  requestHeader.Name,
 										Value: requestHeader.Value,
@@ -468,8 +469,8 @@ func extractOperations(event APICPEvent) ([]APIOperation, []ScopeWrapper, error)
 							logger.LoggerMgtServer.Debugf("Processing request filter for header removal")
 							for _, requestHeader := range requestHeaders.RemoveHeaders {
 								operationPolicy := OperationPolicy{
-									PolicyName:    "ccRemoveHeader",
-									PolicyVersion: "v2",
+									PolicyName:    constants.RemoveHeader,
+									PolicyVersion: constants.V1,
 									Parameters: Header{
 										Name: requestHeader,
 									},
@@ -484,8 +485,8 @@ func extractOperations(event APICPEvent) ([]APIOperation, []ScopeWrapper, error)
 							logger.LoggerMgtServer.Debugf("Processing response filter for header addition")
 							for _, responseHeader := range responseHeaders.AddHeaders {
 								operationPolicy := OperationPolicy{
-									PolicyName:    "ccAddHeader",
-									PolicyVersion: "v2",
+									PolicyName:    constants.AddHeader,
+									PolicyVersion: constants.V1,
 									Parameters: Header{
 										Name:  responseHeader.Name,
 										Value: responseHeader.Value,
@@ -500,8 +501,8 @@ func extractOperations(event APICPEvent) ([]APIOperation, []ScopeWrapper, error)
 							logger.LoggerMgtServer.Debugf("Processing response filter for header removal")
 							for _, responseHeader := range responseHeaders.RemoveHeaders {
 								operationPolicy := OperationPolicy{
-									PolicyName:    "ccRemoveHeader",
-									PolicyVersion: "v2",
+									PolicyName:    constants.RemoveHeader,
+									PolicyVersion: constants.V1,
 									Parameters: Header{
 										Name: responseHeader,
 									},
@@ -514,8 +515,8 @@ func extractOperations(event APICPEvent) ([]APIOperation, []ScopeWrapper, error)
 						logger.LoggerMgtServer.Debugf("Processing request filter for request mirroring")
 						for _, url := range filter.URLs {
 							operationPolicy := OperationPolicy{
-								PolicyName:    "ccMirrorRequest",
-								PolicyVersion: "v1",
+								PolicyName:    constants.MirrorRequest,
+								PolicyVersion: constants.V1,
 								Parameters: MirrorRequest{
 									URL: url,
 								},
@@ -527,8 +528,8 @@ func extractOperations(event APICPEvent) ([]APIOperation, []ScopeWrapper, error)
 					case *APKRedirectRequest:
 						logger.LoggerMgtServer.Debugf("Processing request filter for request redirection")
 						operationPolicy := OperationPolicy{
-							PolicyName:    "ccRedirectRequest",
-							PolicyVersion: "v1",
+							PolicyName:    constants.RedirectRequest,
+							PolicyVersion: constants.V1,
 							Parameters: MirrorRequest{
 								URL: filter.URL,
 							},

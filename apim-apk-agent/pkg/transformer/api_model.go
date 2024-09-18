@@ -83,38 +83,28 @@ type Parameter interface {
 	isParameter()
 }
 
-// URLList contains the urls for mirror and redirect request policies
+// RedirectPolicy contains the information for redirect request policies
+type RedirectPolicy struct {
+	URL        string `json:"url,omitempty" yaml:"url,omitempty"`
+	StatusCode int    `json:"statusCode,omitempty" yaml:"statusCode,omitempty"`
+}
+
+func (u RedirectPolicy) isParameter() {}
+
+// URLList contains the urls for mirror policies
 type URLList struct {
-	URL  string   `json:"url,omitempty" yaml:"url,omitempty"`
 	URLs []string `json:"urls,omitempty" yaml:"urls,omitempty"`
 }
 
 func (u URLList) isParameter() {}
 
-// HeaderList contains the list of headers for header modification
-type HeaderList struct {
-	Headers []Header
-	Names   []string
-}
-
-// MarshalYAML for both []Header and []string
-func (h HeaderList) MarshalYAML() (interface{}, error) {
-	if len(h.Headers) > 0 {
-		return map[string]interface{}{"headers": h.Headers}, nil
-	}
-	if len(h.Names) > 0 {
-		return map[string]interface{}{"headers": h.Names}, nil
-	}
-	return nil, nil
-}
-
 // Header contains the information for header modification
 type Header struct {
-	HeaderName  string `yaml:"name"`
-	HeaderValue string `yaml:"value,omitempty"`
+	HeaderName  string `yaml:"headerName"`
+	HeaderValue string `yaml:"headerValue,omitempty"`
 }
 
-func (h HeaderList) isParameter() {}
+func (h Header) isParameter() {}
 
 // InterceptorService holds configuration details for configuring interceptor
 // for particular API requests or responses.

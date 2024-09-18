@@ -33,3 +33,17 @@ const (
 	InternalKeySecretKey       = "wso2.crt"
 	InternalKeySuffix          = "-internal-key-issuer"
 )
+
+// APIM Mediation constants
+const (
+	InterceptorService = "apkCallInterceptorService"
+	BackendJWT         = "BackEndJWT"
+	AddHeader          = "apkAddHeader"
+	RemoveHeader       = "apkRemoveHeader"
+	MirrorRequest      = "apkMirrorRequest"
+	RedirectRequest    = "apkRedirectRequest"
+
+	// Version constants
+	V1 = "v1"
+	V2 = "v2"
+)
