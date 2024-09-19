@@ -131,6 +131,31 @@ type SubscriptionPolicyList struct {
 	List []SubscriptionPolicy `json:"list"`
 }
 
+// AIProviderList for struct list of AIProvider
+type AIProviderList struct {
+	APIs []AIProvider `json:"apis"`
+}
+
+// AIProvider for struct AIProvider
+type AIProvider struct {
+	Name           string `json:"name"`
+	APIVersion     string `json:"apiVersion"`
+	Organization   string `json:"organization"`
+	Configurations string `json:"configurations"` // Initially treat as string
+}
+
+// Config for struct Metadata
+type Config struct {
+	Metadata []Fields `json:"metadata"`
+}
+
+// Fields for struct Fields
+type Fields struct {
+	AttributeName       string `json:"attributeName"`
+	InputSource         string `json:"inputSource"`
+	AttributeIdentifier string `json:"attributeIdentifier"`
+}
+
 // APIPolicyEvent for struct policy Info events
 type APIPolicyEvent struct {
 	PolicyID                 string `json:"policyId"`

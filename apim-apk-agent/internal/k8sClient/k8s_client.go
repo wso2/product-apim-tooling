@@ -26,6 +26,7 @@ import (
 
 	dpv1alpha1 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha1"
 	dpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha2"
+	dpv1alpha3 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha3"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/constants"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/loggers"
@@ -289,6 +290,56 @@ func DeployScopeCR(scope *dpv1alpha1.Scope, k8sClient client.Client) {
 		} else {
 			loggers.LoggerK8sClient.Info("Scope CR updated: " + scope.Name)
 		}
+	}
+}
+
+// DeployAIProviderCR applies the given AIProvider struct to the Kubernetes cluster.
+func DeployAIProviderCR(aiProvider *dpv1alpha3.AIProvider, k8sClient client.Client) {
+	crAIProvider := &dpv1alpha3.AIProvider{}
+	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: aiProvider.ObjectMeta.Namespace, Name: aiProvider.Name}, crAIProvider); err != nil {
+		if !k8error.IsNotFound(err) {
+			loggers.LoggerK8sClient.Error("Unable to get AIProvider CR: " + err.Error())
+		}
+		if err := k8sClient.Create(context.Background(), aiProvider); err != nil {
+			loggers.LoggerK8sClient.Error("Unable to create AIProvider CR: " + err.Error())
+		} else {
+			loggers.LoggerK8sClient.Info("AIProvider CR created: " + aiProvider.Name)
+		}
+	} else {
+		crAIProvider.Spec = aiProvider.Spec
+		if err := k8sClient.Update(context.Background(), crAIProvider); err != nil {
+			loggers.LoggerK8sClient.Error("Unable to update AIProvider CR: " + err.Error())
+		} else {
+			loggers.LoggerK8sClient.Info("AIProvider CR updated: " + aiProvider.Name)
+		}
+	}
+}
+
+// DeleteAIProviderCR removes the AIProvider Custom Resource from the Kubernetes cluster based on CR name
+func DeleteAIProviderCR(aiProviderName string, k8sClient client.Client) {
+	conf, errReadConfig := config.ReadConfigs()
+	if errReadConfig != nil {
+		loggers.LoggerK8sClient.Errorf("Error reading configurations: %v", errReadConfig)
+		return
+	}
+
+	crAIProvider := &dpv1alpha3.AIProvider{}
+	err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: conf.DataPlane.Namespace, Name: aiProviderName}, crAIProvider)
+	if err != nil {
+		if k8error.IsNotFound(err) {
+			loggers.LoggerK8sClient.Infof("AI Provider CR not found: %s", aiProviderName)
+		} else {
+			loggers.LoggerK8sClient.Error("Unable to get AIProvider CR: " + err.Error())
+		}
+		return
+	}
+
+	// Proceed to delete the CR if it was successfully retrieved
+	err = k8sClient.Delete(context.Background(), crAIProvider, &client.DeleteOptions{})
+	if err != nil {
+		loggers.LoggerK8sClient.Errorf("Unable to delete AI Provider CR: %v", err)
+	} else {
+		loggers.LoggerK8sClient.Infof("Deleted AI Provider CR: %s Successfully", aiProviderName)
 	}
 }
 

@@ -1,6 +1,8 @@
 module github.com/wso2/product-apim-tooling/apim-apk-agent
 
-go 1.21
+go 1.22
+
+toolchain go1.22.6
 
 require (
 	github.com/gin-gonic/gin v1.9.1
@@ -8,7 +10,7 @@ require (
 	github.com/pelletier/go-toml v1.9.5
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.9.0
-	github.com/wso2/apk/common-go-libs v0.0.0-20240408120204-4e7c39aaa66f
+	github.com/wso2/apk/common-go-libs v0.0.0-20240919082014-14a8b44a534b
 	google.golang.org/grpc v1.62.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gopkg.in/yaml.v2 v2.4.0
