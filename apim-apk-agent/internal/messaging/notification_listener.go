@@ -29,6 +29,7 @@ import (
 	event "github.com/wso2/apk/common-go-libs/pkg/discovery/api/wso2/discovery/subscription"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	internalk8sClient "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/k8sClient"
+	k8sclient "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/k8sClient"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/loggers"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/synchronizer"
 	internalutils "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/utils"
@@ -63,6 +64,10 @@ const (
 	policyDelete                = "POLICY_DELETE"
 	blockedStatus               = "BLOCKED"
 	apiUpdate                   = "API_UPDATE"
+	aiProviderEventType         = "LLM_PROVIDER"
+	aiProviderCreate            = "LLM_PROVIDER_CREATE"
+	aiProviderUpdate            = "LLM_PROVIDER_UPDATE"
+	aiProviderDelete            = "LLM_PROVIDER_DELETE"
 )
 
 // var variables
@@ -85,6 +90,7 @@ func handleNotification(c client.Client) {
 			continue
 		}
 		logger.LoggerMessaging.Infof("Event %s is received", notification.Event.PayloadData.EventType)
+		logger.LoggerMessaging.Infof("Event %s is received with payload %s", notification.Event.PayloadData.EventType, notification.Event.PayloadData.Event)
 		err := processNotificationEvent(conf, &notification, c)
 		if err != nil {
 			continue
@@ -123,6 +129,10 @@ func processNotificationEvent(conf *config.Config, notification *msg.EventNotifi
 	} else if strings.Contains(eventType, policyEventType) {
 		if AgentMode == "CPtoDP" {
 			handlePolicyEvents(decodedByte, eventType, c)
+		}
+	} else if strings.Contains(eventType, aiProviderEventType) {
+		if AgentMode == "CPtoDP" {
+			handleAIProviderEvents(decodedByte, eventType, c)
 		}
 	}
 	// other events will ignore including HEALTH_CHECK event
@@ -403,6 +413,36 @@ func handleSubscriptionEvents(data []byte, eventType string) {
 		applicationMappingEvent := event.Event{Uuid: utils.GetUniqueIDOfApplicationMapping(subscriptionEvent.ApplicationUUID, subscriptionEvent.SubscriptionUUID), Type: constants.ApplicationMappingDeleted, TimeStamp: subscriptionEvent.TimeStamp, ApplicationMapping: &applicationMapping}
 		managementserver.DeleteApplicationMapping(applicationMappingEvent.Uuid)
 		go utils.SendEvent(&applicationMappingEvent)
+	}
+}
+
+// handleAIProviderEvents to process AI Provider related events
+func handleAIProviderEvents(data []byte, eventType string, c client.Client) {
+	var aiProviderEvent msg.AIProviderEvent
+	aiProviderEventErr := json.Unmarshal([]byte(string(data)), &aiProviderEvent)
+	if aiProviderEventErr != nil {
+		logger.LoggerMessaging.Errorf("Error occurred while unmarshalling AI Provider event data %v", aiProviderEventErr)
+		return
+	}
+
+	if strings.EqualFold(aiProviderCreate, eventType) {
+		logger.LoggerMessaging.Infof("Create for AI Provider: %s for tenant: %s", aiProviderEvent.Name, aiProviderEvent.TenantDomain)
+		synchronizer.FetchAIProvidersOnEvent(aiProviderEvent.Name, aiProviderEvent.APIVersion, aiProviderEvent.TenantDomain, c)
+		aiProviders := managementserver.GetAllAIProviders()
+		logger.LoggerMessaging.Debugf("AI Providers Internal Map: %v", aiProviders)
+	} else if strings.EqualFold(aiProviderUpdate, eventType) {
+		logger.LoggerMessaging.Infof("Update for AI Provider: %s for tenant: %s", aiProviderEvent.Name, aiProviderEvent.TenantDomain)
+		synchronizer.FetchAIProvidersOnEvent(aiProviderEvent.Name, aiProviderEvent.APIVersion, aiProviderEvent.TenantDomain, c)
+		aiProviders := managementserver.GetAllAIProviders()
+		logger.LoggerMessaging.Debugf("AI Providers Internal Map: %v", aiProviders)
+	} else if strings.EqualFold(aiProviderDelete, eventType) {
+		logger.LoggerMessaging.Infof("Deletion for AI Provider: %s for tenant: %s", aiProviderEvent.Name, aiProviderEvent.TenantDomain)
+		aiProvider := managementserver.GetAIProvider(aiProviderEvent.Name, aiProviderEvent.APIVersion, aiProviderEvent.TenantDomain)
+		sha1ValueforCRName := synchronizer.GetSha1Value(aiProvider.Name + "-" + aiProvider.APIVersion + "-" + aiProvider.Organization)
+		k8sclient.DeleteAIProviderCR(sha1ValueforCRName, c)
+		managementserver.DeleteAIProvider(aiProviderEvent.Name, aiProviderEvent.APIVersion, aiProviderEvent.TenantDomain)
+		aiProviders := managementserver.GetAllAIProviders()
+		logger.LoggerMessaging.Debugf("AI Providers Internal Map: %v", aiProviders)
 	}
 }
 

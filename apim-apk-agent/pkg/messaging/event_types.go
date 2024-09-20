@@ -175,6 +175,13 @@ type PolicyInfo struct {
 	Event
 }
 
+// AIProviderEvent for struct AI provider events
+type AIProviderEvent struct {
+	Name       string `json:"name"`
+	APIVersion string `json:"apiVersion"`
+	Event
+}
+
 // APIPolicyEvent for struct API policy events
 type APIPolicyEvent struct {
 	PolicyInfo

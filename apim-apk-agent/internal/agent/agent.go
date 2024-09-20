@@ -35,6 +35,7 @@ import (
 	cpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/cp/v1alpha2"
 	dpv1alpha1 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha1"
 	dpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha2"
+	dpv1alpha3 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha3"
 	"github.com/wso2/apk/common-go-libs/loggers"
 	"github.com/wso2/apk/common-go-libs/pkg/discovery/api/wso2/discovery/service/apkmgt"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
@@ -117,6 +118,7 @@ func Run(conf *config.Config) {
 	utilruntime.Must(dpv1alpha2.AddToScheme(scheme))
 	utilruntime.Must(cpv1alpha2.AddToScheme(scheme))
 	utilruntime.Must(cpv1alpha2.AddToScheme(scheme))
+	utilruntime.Must(dpv1alpha3.AddToScheme(scheme))
 
 	options := ctrl.Options{
 		Scheme:                 scheme,
@@ -168,6 +170,8 @@ func Run(conf *config.Config) {
 	if AgentMode == "CPtoDP" {
 		// Load initial Policy data from control plane
 		synchronizer.FetchRateLimitPoliciesOnEvent("", "", mgr.GetClient())
+		// Load initial AI Provider data from control plane
+		synchronizer.FetchAIProvidersOnEvent("", "", "", mgr.GetClient())
 	}
 
 	// Load initial data from control plane
