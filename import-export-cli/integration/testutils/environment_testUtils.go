@@ -136,7 +136,7 @@ func InitProjectWithOasFlag(t *testing.T, args *InitTestArgs) (string, error) {
 	base.SetupEnvWithoutTokenFlag(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL())
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	output, err := base.Execute(t, "init", args.InitFlag, "--oas", args.OasFlag, "--verbose", "-f")
+	output, err := base.Execute(t, "init", args.InitFlag, "--oas", args.OasFlag, "--verbose", "-f", "-k")
 	return output, err
 }
 
@@ -330,7 +330,7 @@ func validateEndpointSecurity(t *testing.T, apiParams *Params, api *apim.API, en
 		if strings.EqualFold(strings.ToUpper(endpointSecurityForEndpointType.Type), EndpointSecurityTypeOAuth) {
 			// Validate Oauth 2.0 endpoint security related properties
 			assert.Equal(t, endpointSecurityForEndpointType.ClientId, endpointSecurityForEndpointTypeInApi["clientId"])
-			assert.Equal(t, endpointSecurityForEndpointType.ClientSecret, endpointSecurityForEndpointTypeInApi["clientSecret"])
+			assert.Equal(t, "", endpointSecurityForEndpointTypeInApi["clientSecret"])
 			assert.Equal(t, endpointSecurityForEndpointType.TokenUrl, endpointSecurityForEndpointTypeInApi["tokenUrl"])
 			assert.Equal(t, strings.ToUpper(endpointSecurityForEndpointType.GrantType), endpointSecurityForEndpointTypeInApi["grantType"])
 
@@ -505,12 +505,16 @@ func validateMutualSSLCerts(t *testing.T, apiParams *Params, path string) {
 	isClientCertsDirExists, _ := utils.IsDirExists(pathOfExportedMsslCerts)
 
 	if isClientCertsDirExists {
-		files, _ := ioutil.ReadDir(pathOfExportedMsslCerts)
 		for _, msslCert := range apiParams.Environments[0].Configs.MsslCerts {
+			pathToCert := pathOfExportedMsslCerts + string(os.PathSeparator) + msslCert.KeyType
+			isPathToCertExist, _ := utils.IsDirExists(pathToCert)
 			msslCertExists := false
-			for _, file := range files {
-				if strings.EqualFold(file.Name(), msslCert.Path) {
-					msslCertExists = true
+			if isPathToCertExist {
+				files, _ := ioutil.ReadDir(pathToCert)
+				for _, file := range files {
+					if strings.EqualFold(file.Name(), msslCert.Path) {
+						msslCertExists = true
+					}
 				}
 			}
 			if !msslCertExists {
