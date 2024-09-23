@@ -19,9 +19,12 @@ package transformer
 
 // SecretInfo holds the info related to the created secret upon enabling the endpoint security options like basic auth
 type SecretInfo struct {
-	SecretName  string `yaml:"secretName,omitempty"`
-	UsernameKey string `yaml:"userNameKey,omitempty"`
-	PasswordKey string `yaml:"passwordKey,omitempty"`
+	SecretName     string `yaml:"secretName,omitempty"`
+	UsernameKey    string `yaml:"userNameKey,omitempty"`
+	PasswordKey    string `yaml:"passwordKey,omitempty"`
+	In             string `yaml:"in,omitempty"`
+	APIKeyNameKey  string `yaml:"apiKeyNameKey,omitempty"`
+	APIKeyValueKey string `yaml:"apiKeyValueKey,omitempty"`
 }
 
 // EndpointSecurity comtains the information related to endpoint security configurations enabled by a user for a given API
@@ -108,6 +111,12 @@ type VHost struct {
 	Sandbox    []string `yaml:"sandbox,omitempty"`
 }
 
+// AIProvider represents the AI provider configuration.
+type AIProvider struct {
+	Name       string `yaml:"name,omitempty"`
+	APIVersion string `yaml:"apiVersion,omitempty"`
+}
+
 // API represents an main API type definition
 type API struct {
 	Name                   string                  `yaml:"name,omitempty"`
@@ -125,4 +134,5 @@ type API struct {
 	SubscriptionValidation bool                    `yaml:"subscriptionValidation,omitempty"`
 	RateLimit              *RateLimit              `yaml:"rateLimit,omitempty"`
 	APIPolicies            *OperationPolicies      `yaml:"apiPolicies,omitempty"`
+	AIProvider             *AIProvider             `yaml:"aiProvider,omitempty"`
 }

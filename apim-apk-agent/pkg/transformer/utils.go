@@ -177,3 +177,11 @@ func GetUniqueIDForAPI(name, version, organization string) string {
 	hashedValue := hash.Sum(nil)
 	return hex.EncodeToString(hashedValue)
 }
+
+// GetSha1Value returns the SHA1 value of the input string
+func GetSha1Value(input string) string {
+	hasher := sha1.New()
+	hasher.Write([]byte(input))
+	hashBytes := hasher.Sum(nil)
+	return hex.EncodeToString(hashBytes)
+}
