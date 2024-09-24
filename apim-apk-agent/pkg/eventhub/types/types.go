@@ -146,7 +146,8 @@ type AIProvider struct {
 
 // Config for struct Metadata
 type Config struct {
-	Metadata []Fields `json:"metadata"`
+	Metadata   []Fields `json:"metadata"`
+	AuthHeader string   `json:"authHeader"`
 }
 
 // Fields for struct Fields

@@ -26,6 +26,8 @@ type CustomParams struct {
 type SecurityObj struct {
 	Enabled          bool                   `json:"enabled"`
 	Type             string                 `json:"type"`
+	APIKeyValue      string                 `json:"apiKeyValue"`
+	APIKeyIdentifier string                 `json:"apiKeyIdentifier"`
 	Username         string                 `json:"username"`
 	Password         string                 `json:"password"`
 	GrantType        string                 `json:"grantType"`
@@ -176,6 +178,13 @@ type APIMApi struct {
 	RevisionedAPIID     string                `yaml:"revisionedApiId"`
 	APIThrottlingPolicy string                `yaml:"apiThrottlingPolicy"`
 	APIPolicies         APIMOperationPolicies `yaml:"apiPolicies"`
+	AIConfiguration     APIMAIConfiguration   `yaml:"aiConfiguration"`
+}
+
+// APIMAIConfiguration holds the configuration details for AI providers
+type APIMAIConfiguration struct {
+	LLMProviderName       string `yaml:"llmProviderName"`
+	LLMProviderAPIVersion string `yaml:"llmProviderApiVersion"`
 }
 
 // APIYaml is a wrapper struct for YAML representation of an API.

@@ -228,8 +228,8 @@ func DeployBackendJWTCR(backendJWT *dpv1alpha1.BackendJWT, k8sClient client.Clie
 }
 
 // DeployAPIPolicyCR applies the given APIPolicies struct to the Kubernetes cluster.
-func DeployAPIPolicyCR(apiPolicies *dpv1alpha2.APIPolicy, k8sClient client.Client) {
-	crAPIPolicies := &dpv1alpha2.APIPolicy{}
+func DeployAPIPolicyCR(apiPolicies *dpv1alpha3.APIPolicy, k8sClient client.Client) {
+	crAPIPolicies := &dpv1alpha3.APIPolicy{}
 	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: apiPolicies.ObjectMeta.Namespace, Name: apiPolicies.Name}, crAPIPolicies); err != nil {
 		if !k8error.IsNotFound(err) {
 			loggers.LoggerK8sClient.Error("Unable to get APIPolicies CR: " + err.Error())
@@ -398,8 +398,8 @@ func UpdateRateLimitPolicyCR(policy eventhubTypes.RateLimitPolicy, k8sClient cli
 }
 
 // DeployBackendCR applies the given Backends struct to the Kubernetes cluster.
-func DeployBackendCR(backends *dpv1alpha1.Backend, k8sClient client.Client) {
-	crBackends := &dpv1alpha1.Backend{}
+func DeployBackendCR(backends *dpv1alpha2.Backend, k8sClient client.Client) {
+	crBackends := &dpv1alpha2.Backend{}
 	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: backends.ObjectMeta.Namespace, Name: backends.Name}, crBackends); err != nil {
 		if !k8error.IsNotFound(err) {
 			loggers.LoggerK8sClient.Error("Unable to get Backends CR: " + err.Error())

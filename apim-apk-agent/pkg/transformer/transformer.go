@@ -42,6 +42,7 @@ import (
 
 	dpv1alpha1 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha1"
 	dpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha2"
+	dpv1alpha3 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha3"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	gwapiv1 "sigs.k8s.io/gateway-api/apis/v1"
@@ -82,6 +83,14 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 	apk.DefaultVersion = apiYamlData.DefaultVersion
 	apk.DefinitionPath = "/definition"
 	apk.SubscriptionValidation = true
+
+	if apiYamlData.AIConfiguration.LLMProviderName != "" && apiYamlData.AIConfiguration.LLMProviderAPIVersion != "" {
+		sha1ValueforCRName := GetSha1Value(apiYamlData.AIConfiguration.LLMProviderName + "-" + apiYamlData.AIConfiguration.LLMProviderAPIVersion + "-" + organizationID)
+		apk.AIProvider = &AIProvider{
+			Name:       sha1ValueforCRName,
+			APIVersion: apiYamlData.AIConfiguration.LLMProviderAPIVersion,
+		}
+	}
 
 	if apiYamlData.APIThrottlingPolicy != "" {
 		rateLimitPolicy := managementserver.GetRateLimitPolicy(apiYamlData.APIThrottlingPolicy, organizationID)
@@ -584,19 +593,37 @@ func getEndpointConfigs(sandboxURL string, prodURL string, endCertAvailable bool
 
 	if endpointSecurityData.Sandbox.Enabled {
 		sandboxEndpointConf.EndSecurity.Enabled = true
-		sandboxEndpointConf.EndSecurity.SecurityType = SecretInfo{
-			SecretName:  strings.Join([]string{apiUniqueID, "sandbox", "secret"}, "-"),
-			UsernameKey: "username",
-			PasswordKey: "password",
+		if endpointSecurityData.Sandbox.Type == "apikey" {
+			sandboxEndpointConf.EndSecurity.SecurityType = SecretInfo{
+				SecretName:     strings.Join([]string{apiUniqueID, "sandbox", "secret"}, "-"),
+				In:             "Header",
+				APIKeyNameKey:  endpointSecurityData.Sandbox.APIKeyIdentifier,
+				APIKeyValueKey: "apiKey",
+			}
+		} else {
+			sandboxEndpointConf.EndSecurity.SecurityType = SecretInfo{
+				SecretName:  strings.Join([]string{apiUniqueID, "sandbox", "secret"}, "-"),
+				UsernameKey: "username",
+				PasswordKey: "password",
+			}
 		}
 	}
 
 	if endpointSecurityData.Production.Enabled {
 		prodEndpointConf.EndSecurity.Enabled = true
-		prodEndpointConf.EndSecurity.SecurityType = SecretInfo{
-			SecretName:  strings.Join([]string{apiUniqueID, "production", "secret"}, "-"),
-			UsernameKey: "username",
-			PasswordKey: "password",
+		if endpointSecurityData.Production.Type == "apikey" {
+			prodEndpointConf.EndSecurity.SecurityType = SecretInfo{
+				SecretName:     strings.Join([]string{apiUniqueID, "production", "secret"}, "-"),
+				In:             "Header",
+				APIKeyNameKey:  endpointSecurityData.Production.APIKeyIdentifier,
+				APIKeyValueKey: "apiKey",
+			}
+		} else {
+			prodEndpointConf.EndSecurity.SecurityType = SecretInfo{
+				SecretName:  strings.Join([]string{apiUniqueID, "production", "secret"}, "-"),
+				UsernameKey: "username",
+				PasswordKey: "password",
+			}
 		}
 	}
 
@@ -621,7 +648,7 @@ func getEndpointConfigs(sandboxURL string, prodURL string, endCertAvailable bool
 // GenerateCRs takes the .apk-conf, api definition, vHost and the organization for a particular API and then generate and returns
 // the relavant CRD set as a zip
 func GenerateCRs(apkConf string, apiDefinition string, certContainer CertContainer, k8ResourceGenEndpoint string, organizationID string) (*K8sArtifacts, error) {
-	k8sArtifact := K8sArtifacts{HTTPRoutes: make(map[string]*gwapiv1.HTTPRoute), GQLRoutes: make(map[string]*dpv1alpha2.GQLRoute), Backends: make(map[string]*dpv1alpha1.Backend), Scopes: make(map[string]*dpv1alpha1.Scope), Authentication: make(map[string]*dpv1alpha2.Authentication), APIPolicies: make(map[string]*dpv1alpha2.APIPolicy), InterceptorServices: make(map[string]*dpv1alpha1.InterceptorService), ConfigMaps: make(map[string]*corev1.ConfigMap), Secrets: make(map[string]*corev1.Secret), RateLimitPolicies: make(map[string]*dpv1alpha1.RateLimitPolicy)}
+	k8sArtifact := K8sArtifacts{HTTPRoutes: make(map[string]*gwapiv1.HTTPRoute), GQLRoutes: make(map[string]*dpv1alpha2.GQLRoute), Backends: make(map[string]*dpv1alpha2.Backend), Scopes: make(map[string]*dpv1alpha1.Scope), Authentication: make(map[string]*dpv1alpha2.Authentication), APIPolicies: make(map[string]*dpv1alpha3.APIPolicy), InterceptorServices: make(map[string]*dpv1alpha1.InterceptorService), ConfigMaps: make(map[string]*corev1.ConfigMap), Secrets: make(map[string]*corev1.Secret), RateLimitPolicies: make(map[string]*dpv1alpha1.RateLimitPolicy)}
 	if apkConf == "" {
 		logger.LoggerTransformer.Error("Empty apk-conf parameter provided. Unable to generate CRDs.")
 		return nil, errors.New("Error: APK-Conf can't be empty")
@@ -724,7 +751,7 @@ func GenerateCRs(apkConf string, apiDefinition string, certContainer CertContain
 
 		switch kind {
 		case "APIPolicy":
-			var apiPolicy dpv1alpha2.APIPolicy
+			var apiPolicy dpv1alpha3.APIPolicy
 			err = k8Yaml.Unmarshal(yamlData, &apiPolicy)
 			if err != nil {
 				logger.LoggerSync.Errorf("Error unmarshaling APIPolicy YAML: %v", err)
@@ -741,7 +768,7 @@ func GenerateCRs(apkConf string, apiDefinition string, certContainer CertContain
 			k8sArtifact.HTTPRoutes[httpRoute.ObjectMeta.Name] = &httpRoute
 
 		case "Backend":
-			var backend dpv1alpha1.Backend
+			var backend dpv1alpha2.Backend
 			err = k8Yaml.Unmarshal(yamlData, &backend)
 			if err != nil {
 				logger.LoggerSync.Errorf("Error unmarshaling Backend YAML: %v", err)
@@ -1034,31 +1061,51 @@ func createConfigMaps(certFiles map[string]string, k8sArtifact *K8sArtifacts) {
 
 // createEndpointSecrets creates and links the secret CRs need to be created for handling the endpoint security
 func createEndpointSecrets(secretData EndpointSecurityConfig, k8sArtifact *K8sArtifacts) {
-	createSecret := func(environment string, username, password string) {
-		secret := corev1.Secret{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "Secret",
-				APIVersion: "v1",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      strings.Join([]string{k8sArtifact.API.Name, environment, "secret"}, "-"),
-				Namespace: k8sArtifact.API.Namespace,
-				Labels:    make(map[string]string),
-			},
-			Data: map[string][]byte{
-				"username": []byte(username),
-				"password": []byte(password),
-			},
+	createSecret := func(environment string, username, password string, apiKeyValue string, securityType string) {
+		var secret corev1.Secret
+		if securityType == "apikey" {
+			secret = corev1.Secret{
+				TypeMeta: metav1.TypeMeta{
+					Kind:       "Secret",
+					APIVersion: "v1",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      strings.Join([]string{k8sArtifact.API.Name, environment, "secret"}, "-"),
+					Namespace: k8sArtifact.API.Namespace,
+					Labels:    make(map[string]string),
+				},
+				Data: map[string][]byte{
+					"apiKey": []byte(apiKeyValue),
+				},
+			}
+		} else {
+			secret = corev1.Secret{
+				TypeMeta: metav1.TypeMeta{
+					Kind:       "Secret",
+					APIVersion: "v1",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      strings.Join([]string{k8sArtifact.API.Name, environment, "secret"}, "-"),
+					Namespace: k8sArtifact.API.Namespace,
+					Labels:    make(map[string]string),
+				},
+				Data: map[string][]byte{
+					"username": []byte(username),
+					"password": []byte(password),
+				},
+			}
 		}
 		logger.LoggerTransformer.Debugf("New Secret Data for %s: %v", environment, secret)
 		k8sArtifact.Secrets[secret.ObjectMeta.Name] = &secret
 	}
 
 	if secretData.Production.Enabled {
-		createSecret("production", secretData.Production.Username, secretData.Production.Password)
+		if secretData.Production.Username == "" || secretData.Production.Password == "" {
+			createSecret("production", secretData.Production.Username, secretData.Production.Password, secretData.Production.APIKeyValue, secretData.Production.Type)
+		}
 	}
 
 	if secretData.Sandbox.Enabled {
-		createSecret("sandbox", secretData.Sandbox.Username, secretData.Sandbox.Password)
+		createSecret("sandbox", secretData.Sandbox.Username, secretData.Sandbox.Password, secretData.Sandbox.APIKeyValue, secretData.Sandbox.Type)
 	}
 }
