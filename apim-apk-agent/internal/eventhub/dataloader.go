@@ -26,7 +26,7 @@ import (
 	"strconv"
 	"time"
 
-	dpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha2"
+	dpv1alpha3 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha3"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	internalk8sClient "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/k8sClient"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/loggers"
@@ -240,7 +240,7 @@ func FetchAPIsOnStartUp(conf *config.Config, k8sClient client.Client) {
 	if err != nil {
 		logger.LoggerEventhub.Errorf("Error occurred while fetching APIs from control plane %v", err)
 	}
-	removeApis := make([]dpv1alpha2.API, 0)
+	removeApis := make([]dpv1alpha3.API, 0)
 	for _, k8sAPI := range k8sAPIS {
 		found := false
 		if apis != nil {

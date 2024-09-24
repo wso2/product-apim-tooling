@@ -794,7 +794,7 @@ func GenerateCRs(apkConf string, apiDefinition string, certContainer CertContain
 			k8sArtifact.Authentication[authPolicy.ObjectMeta.Name] = &authPolicy
 
 		case "API":
-			var api dpv1alpha2.API
+			var api dpv1alpha3.API
 			err = k8Yaml.Unmarshal(yamlData, &api)
 			if err != nil {
 				logger.LoggerSync.Errorf("Error unmarshaling API YAML: %v", err)
@@ -933,7 +933,7 @@ func replaceVhost(k8sArtifact *K8sArtifacts, vhost string, deploymentType string
 					delete(k8sArtifact.GQLRoutes, routes)
 				}
 			}
-			k8sArtifact.API.Spec.Production = []dpv1alpha2.EnvConfig{}
+			k8sArtifact.API.Spec.Production = []dpv1alpha3.EnvConfig{}
 		}
 	} else {
 		if k8sArtifact.API.Spec.Sandbox != nil {
@@ -957,7 +957,7 @@ func replaceVhost(k8sArtifact *K8sArtifacts, vhost string, deploymentType string
 					delete(k8sArtifact.GQLRoutes, routes)
 				}
 			}
-			k8sArtifact.API.Spec.Sandbox = []dpv1alpha2.EnvConfig{}
+			k8sArtifact.API.Spec.Sandbox = []dpv1alpha3.EnvConfig{}
 		}
 	}
 }

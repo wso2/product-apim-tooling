@@ -43,8 +43,8 @@ import (
 )
 
 // DeployAPICR applies the given API struct to the Kubernetes cluster.
-func DeployAPICR(api *dpv1alpha2.API, k8sClient client.Client) {
-	crAPI := &dpv1alpha2.API{}
+func DeployAPICR(api *dpv1alpha3.API, k8sClient client.Client) {
+	crAPI := &dpv1alpha3.API{}
 	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: api.ObjectMeta.Namespace, Name: api.Name}, crAPI); err != nil {
 		if !k8error.IsNotFound(err) {
 			loggers.LoggerK8sClient.Error("Unable to get API CR: " + err.Error())
@@ -66,7 +66,7 @@ func DeployAPICR(api *dpv1alpha2.API, k8sClient client.Client) {
 }
 
 // UndeployK8sAPICR removes the API Custom Resource from the Kubernetes cluster based on API ID label.
-func UndeployK8sAPICR(k8sClient client.Client, k8sAPI dpv1alpha2.API) error {
+func UndeployK8sAPICR(k8sClient client.Client, k8sAPI dpv1alpha3.API) error {
 	err := k8sClient.Delete(context.Background(), &k8sAPI, &client.DeleteOptions{})
 	if err != nil {
 		loggers.LoggerK8sClient.Errorf("Unable to delete API CR: %v", err)
@@ -82,7 +82,7 @@ func UndeployAPICR(apiID string, k8sClient client.Client) {
 	if errReadConfig != nil {
 		loggers.LoggerK8sClient.Errorf("Error reading configurations: %v", errReadConfig)
 	}
-	apiList := &dpv1alpha2.APIList{}
+	apiList := &dpv1alpha3.APIList{}
 	err := k8sClient.List(context.Background(), apiList, &client.ListOptions{Namespace: conf.DataPlane.Namespace, LabelSelector: labels.SelectorFromSet(map[string]string{"apiUUID": apiID})})
 	// Retrieve all API CRs from the Kubernetes cluster
 	if err != nil {
@@ -625,10 +625,10 @@ func getSha1Value(input string) string {
 }
 
 // RetrieveAllAPISFromK8s retrieves all the API CRs from the Kubernetes cluster
-func RetrieveAllAPISFromK8s(k8sClient client.Client, nextToken string) ([]dpv1alpha2.API, string, error) {
+func RetrieveAllAPISFromK8s(k8sClient client.Client, nextToken string) ([]dpv1alpha3.API, string, error) {
 	conf, _ := config.ReadConfigs()
-	apiList := dpv1alpha2.APIList{}
-	resolvedAPIList := make([]dpv1alpha2.API, 0)
+	apiList := dpv1alpha3.APIList{}
+	resolvedAPIList := make([]dpv1alpha3.API, 0)
 	var err error
 	if nextToken == "" {
 		err = k8sClient.List(context.Background(), &apiList, &client.ListOptions{Namespace: conf.DataPlane.Namespace})
