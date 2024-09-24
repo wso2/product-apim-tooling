@@ -111,4 +111,5 @@ type MsslCert struct {
 	TierName string `yaml:"tierName"`
 	Alias    string `yaml:"alias"`
 	Path     string `yaml:"path"`
+	KeyType  string `yaml:"keyType"`
 }
