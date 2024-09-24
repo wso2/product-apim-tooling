@@ -43,8 +43,10 @@ import (
 )
 
 const (
-	policiesEndpoint       string = "internal/data/v1/api-policies"
-	policiesByNameEndpoint string = "internal/data/v1/api-policies?policyName="
+	policiesEndpoint                    string = "internal/data/v1/api-policies"
+	policiesByNameEndpoint              string = "internal/data/v1/api-policies?policyName="
+	subscriptionsPoliciesEndpoint       string = "internal/data/v1//subscription-policies"
+	subscriptionsPoliciesByNameEndpoint string = "internal/data/v1//subscription-policies?policyName="
 )
 
 // FetchRateLimitPoliciesOnEvent fetches the policies from the control plane on the start up and notification event updates
@@ -74,6 +76,7 @@ func FetchRateLimitPoliciesOnEvent(ratelimitName string, organization string, c 
 			ehURL += "/" + policiesEndpoint
 		}
 	}
+
 	logger.LoggerSynchronizer.Debugf("Fetching RateLimit Policies from the URL %v: ", ehURL)
 
 	ehUname := ehConfigs.Username
@@ -149,6 +152,118 @@ func FetchRateLimitPoliciesOnEvent(ratelimitName string, organization string, c 
 			logger.LoggerSynchronizer.Infof("RateLimit Policy added to internal map: %v", policy)
 			// Update the exisitng rate limit policies with current policy
 			k8sclient.UpdateRateLimitPolicyCR(policy, c)
+
+		}
+	} else {
+		errorMsg = "Failed to fetch data! " + policiesEndpoint + " responded with " +
+			strconv.Itoa(resp.StatusCode)
+		go retryRLPFetchData(conf, errorMsg, err, c)
+	}
+}
+
+// FetchSubscriptionRateLimitPoliciesOnEvent fetches the policies from the control plane on the start up and notification event updates
+func FetchSubscriptionRateLimitPoliciesOnEvent(ratelimitName string, organization string, c client.Client) {
+	logger.LoggerSynchronizer.Info("Fetching RateLimit Policies from Control Plane.")
+
+	// Read configurations and derive the eventHub details
+	conf, errReadConfig := config.ReadConfigs()
+	if errReadConfig != nil {
+		// This has to be error. For debugging purpose info
+		logger.LoggerSynchronizer.Errorf("Error reading configs: %v", errReadConfig)
+	}
+	// Populate data from the config
+	ehConfigs := conf.ControlPlane
+	ehURL := ehConfigs.ServiceURL
+	// If the eventHub URL is configured with trailing slash
+	if strings.HasSuffix(ehURL, "/") {
+		if ratelimitName != "" {
+			ehURL += subscriptionsPoliciesByNameEndpoint + ratelimitName
+		} else {
+			ehURL += subscriptionsPoliciesEndpoint
+		}
+	} else {
+		if ratelimitName != "" {
+			ehURL += "/" + subscriptionsPoliciesByNameEndpoint + ratelimitName
+		} else {
+			ehURL += "/" + subscriptionsPoliciesEndpoint
+		}
+	}
+
+	logger.LoggerSynchronizer.Infof("Fetching RateLimit Policies from the URL %v: ", ehURL)
+
+	ehUname := ehConfigs.Username
+	ehPass := ehConfigs.Password
+	basicAuth := "Basic " + pkgAuth.GetBasicAuth(ehUname, ehPass)
+
+	// Check if TLS is enabled
+	skipSSL := ehConfigs.SkipSSLVerification
+
+	// Create a HTTP request
+	req, err := http.NewRequest("GET", ehURL, nil)
+	if err != nil {
+		logger.LoggerSynchronizer.Errorf("Error while creating http request for RateLimit Policies Endpoint : %v", err)
+	}
+
+	var queryParamMap map[string]string
+
+	if queryParamMap != nil && len(queryParamMap) > 0 {
+		q := req.URL.Query()
+		// Making necessary query parameters for the request
+		for queryParamKey, queryParamValue := range queryParamMap {
+			q.Add(queryParamKey, queryParamValue)
+		}
+		req.URL.RawQuery = q.Encode()
+	}
+	// Setting authorization header
+	req.Header.Set(sync.Authorization, basicAuth)
+
+	if organization != "" {
+		logger.LoggerSynchronizer.Debugf("Setting the organization header for the request: %v", organization)
+		req.Header.Set("xWSO2Tenant", organization)
+	} else {
+		logger.LoggerSynchronizer.Debugf("Setting the organization header for the request: %v", "ALL")
+		req.Header.Set("xWSO2Tenant", "ALL")
+	}
+
+	// Make the request
+	logger.LoggerSynchronizer.Debug("Sending the control plane request")
+	resp, err := tlsutils.InvokeControlPlane(req, skipSSL)
+	var errorMsg string
+	if err != nil {
+		errorMsg = "Error occurred while calling the REST API: " + policiesEndpoint
+		go retryRLPFetchData(conf, errorMsg, err, c)
+		return
+	}
+	responseBytes, err := ioutil.ReadAll(resp.Body)
+	logger.LoggerSynchronizer.Debugf("Response String received for Policies: %v", string(responseBytes))
+
+	if err != nil {
+		errorMsg = "Error occurred while reading the response received for: " + policiesEndpoint
+		go retryRLPFetchData(conf, errorMsg, err, c)
+		return
+	}
+
+	if resp.StatusCode == http.StatusOK {
+		var rateLimitPolicyList eventhubTypes.SubscriptionPolicyList
+		err := json.Unmarshal(responseBytes, &rateLimitPolicyList)
+		if err != nil {
+			logger.LoggerSynchronizer.Errorf("Error occurred while unmarshelling RateLimit Policies event data %v", err)
+			return
+		}
+		logger.LoggerSynchronizer.Debugf("Policies received: %v", rateLimitPolicyList.List)
+		var rateLimitPolicies []eventhubTypes.SubscriptionPolicy = rateLimitPolicyList.List
+		for _, policy := range rateLimitPolicies {
+			if policy.DefaultLimit.RequestCount.TimeUnit == "min" {
+				policy.DefaultLimit.RequestCount.TimeUnit = "Minute"
+			} else if policy.DefaultLimit.RequestCount.TimeUnit == "hours" {
+				policy.DefaultLimit.RequestCount.TimeUnit = "Hour"
+			} else if policy.DefaultLimit.RequestCount.TimeUnit == "days" {
+				policy.DefaultLimit.RequestCount.TimeUnit = "Day"
+			}
+			managementserver.AddSubscriptionPolicy(policy)
+			logger.LoggerSynchronizer.Infof("RateLimit Policy added to internal map: %v", policy)
+			// Update the exisitng rate limit policies with current policy
+			k8sclient.DeploySubscriptionRateLimitPolicyCR(policy, c)
 
 		}
 	} else {

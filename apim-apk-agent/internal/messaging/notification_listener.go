@@ -111,7 +111,6 @@ func processNotificationEvent(conf *config.Config, notification *msg.EventNotifi
 			"Hence dropping the event", err)
 		return err
 	}
-	logger.LoggerMessaging.Debugf("\n\n[%s]", decodedByte)
 	AgentMode := conf.Agent.Mode
 	eventType = notification.Event.PayloadData.EventType
 	if strings.Contains(eventType, apiLifeCycleChange) {
@@ -370,7 +369,6 @@ func marshalAppAttributes(attributes interface{}) map[string]string {
 func handleSubscriptionEvents(data []byte, eventType string) {
 	var subscriptionEvent msg.SubscriptionEvent
 	subEventErr := json.Unmarshal([]byte(string(data)), &subscriptionEvent)
-	logger.LoggerAgent.Info("Subscription Event Received")
 	if subEventErr != nil {
 		logger.LoggerMessaging.Errorf("Error occurred while unmarshalling Subscription event data %v", subEventErr)
 		return
@@ -389,19 +387,19 @@ func handleSubscriptionEvents(data []byte, eventType string) {
 		SubStatus:     subscriptionEvent.SubscriptionState,
 		Organization:  subscriptionEvent.TenantDomain,
 		SubscribedApi: &event.SubscribedAPI{Name: subscriptionEvent.APIName, Version: subscriptionEvent.APIVersion},
+		RatelimitTier: subscriptionEvent.PolicyID,
 	}
-
 	applicationMapping := event.ApplicationMapping{Uuid: utils.GetUniqueIDOfApplicationMapping(subscriptionEvent.ApplicationUUID, subscriptionEvent.SubscriptionUUID), ApplicationRef: subscriptionEvent.ApplicationUUID, SubscriptionRef: subscriptionEvent.SubscriptionUUID, Organization: subscriptionEvent.TenantDomain}
 	if subscriptionEvent.Event.Type == subscriptionCreate {
 		subsEvent := event.Event{Uuid: uuid.New().String(), Type: constants.SubscriptionCreated, TimeStamp: subscriptionEvent.TimeStamp, Subscription: &subscription}
-		managementserver.AddSubscription(managementserver.Subscription{UUID: subscription.Uuid, SubStatus: subscription.SubStatus, Organization: subscription.Organization, SubscribedAPI: &managementserver.SubscribedAPI{Name: subscription.SubscribedApi.Name, Version: subscription.SubscribedApi.Version}})
+		managementserver.AddSubscription(managementserver.Subscription{UUID: subscription.Uuid, SubStatus: subscription.SubStatus, Organization: subscription.Organization, RateLimit: subscription.RatelimitTier, SubscribedAPI: &managementserver.SubscribedAPI{Name: subscription.SubscribedApi.Name, Version: subscription.SubscribedApi.Version}})
 		go utils.SendEvent(&subsEvent)
 		applicationMappingEvent := event.Event{Uuid: utils.GetUniqueIDOfApplicationMapping(subscriptionEvent.ApplicationUUID, subscriptionEvent.SubscriptionUUID), Type: constants.ApplicationMappingCreated, TimeStamp: subscriptionEvent.TimeStamp, ApplicationMapping: &applicationMapping}
 		managementserver.AddApplicationMapping(managementserver.ApplicationMapping{UUID: applicationMapping.Uuid, ApplicationRef: applicationMapping.ApplicationRef, SubscriptionRef: applicationMapping.SubscriptionRef, Organization: applicationMapping.Organization})
 		go utils.SendEvent(&applicationMappingEvent)
 	} else if subscriptionEvent.Event.Type == subscriptionUpdate {
 		subsEvent := event.Event{Uuid: uuid.New().String(), Type: constants.SubscriptionUpdated, TimeStamp: subscriptionEvent.TimeStamp, Subscription: &subscription}
-		managementserver.UpdateSubscription(subscription.Uuid, managementserver.Subscription{UUID: subscription.Uuid, SubStatus: subscription.SubStatus, Organization: subscription.Organization, SubscribedAPI: &managementserver.SubscribedAPI{Name: subscription.SubscribedApi.Name, Version: subscription.SubscribedApi.Version}})
+		managementserver.UpdateSubscription(subscription.Uuid, managementserver.Subscription{UUID: subscription.Uuid, SubStatus: subscription.SubStatus, Organization: subscription.Organization, RateLimit: subscription.RatelimitTier, SubscribedAPI: &managementserver.SubscribedAPI{Name: subscription.SubscribedApi.Name, Version: subscription.SubscribedApi.Version}})
 		go utils.SendEvent(&subsEvent)
 		applicationMappingEvent := event.Event{Uuid: utils.GetUniqueIDOfApplicationMapping(subscriptionEvent.ApplicationUUID, subscriptionEvent.SubscriptionUUID), Type: constants.ApplicationMappingUpdated, TimeStamp: subscriptionEvent.TimeStamp, ApplicationMapping: &applicationMapping}
 		managementserver.UpdateApplicationMapping(applicationMappingEvent.Uuid, managementserver.ApplicationMapping{UUID: applicationMappingEvent.Uuid, ApplicationRef: applicationMapping.ApplicationRef, SubscriptionRef: applicationMapping.SubscriptionRef, Organization: applicationMapping.Organization})
@@ -457,10 +455,17 @@ func handlePolicyEvents(data []byte, eventType string, c client.Client) {
 	}
 	// TODO: Handle policy events
 	if strings.EqualFold(eventType, policyCreate) {
-		logger.LoggerMessaging.Infof("Policy: %s for policy type: %s for tenant: %s", policyEvent.PolicyName, policyEvent.PolicyType, policyEvent.TenantDomain)
-		synchronizer.FetchRateLimitPoliciesOnEvent(policyEvent.PolicyName, policyEvent.TenantDomain, c)
-		ratelimitPolicies := managementserver.GetAllRateLimitPolicies()
-		logger.LoggerMessaging.Infof("Rate Limit Policies Internal Map: %v", ratelimitPolicies)
+		if strings.EqualFold(policyEvent.PolicyType, "API") {
+			logger.LoggerMessaging.Infof("Policy: %s for policy type: %s for tenant: %s", policyEvent.PolicyName, policyEvent.PolicyType, policyEvent.TenantDomain)
+			synchronizer.FetchRateLimitPoliciesOnEvent(policyEvent.PolicyName, policyEvent.TenantDomain, c)
+			ratelimitPolicies := managementserver.GetAllRateLimitPolicies()
+			logger.LoggerMessaging.Infof("Rate Limit Policies Internal Map: %v", ratelimitPolicies)
+		} else if strings.EqualFold(policyEvent.PolicyType, "SUBSCRIPTION") {
+			logger.LoggerMessaging.Infof("Policy: %s for policy type: %s", policyEvent.PolicyName, policyEvent.PolicyType)
+			synchronizer.FetchSubscriptionRateLimitPoliciesOnEvent(policyEvent.PolicyName, policyEvent.TenantDomain, c)
+			ratelimitPolicies := managementserver.GetAllRateLimitPolicies()
+			logger.LoggerMessaging.Infof("Rate Limit Policies Internal Map: %v", ratelimitPolicies)
+		}
 	} else if strings.EqualFold(eventType, policyUpdate) {
 		logger.LoggerMessaging.Infof("Policy: %s for policy type: %s for tenant: %s", policyEvent.PolicyName, policyEvent.PolicyType, policyEvent.TenantDomain)
 		synchronizer.FetchRateLimitPoliciesOnEvent(policyEvent.PolicyName, policyEvent.TenantDomain, c)
@@ -500,14 +505,14 @@ func handlePolicyEvents(data []byte, eventType string, c client.Client) {
 			return
 		}
 
-		subscriptionPolicy := types.SubscriptionPolicy{ID: subscriptionPolicyEvent.PolicyID, TenantID: -1,
-			Name: subscriptionPolicyEvent.PolicyName, QuotaType: subscriptionPolicyEvent.QuotaType,
-			GraphQLMaxComplexity: subscriptionPolicyEvent.GraphQLMaxComplexity,
-			GraphQLMaxDepth:      subscriptionPolicyEvent.GraphQLMaxDepth, RateLimitCount: subscriptionPolicyEvent.RateLimitCount,
-			RateLimitTimeUnit: subscriptionPolicyEvent.RateLimitTimeUnit, StopOnQuotaReach: subscriptionPolicyEvent.StopOnQuotaReach,
-			TenantDomain: subscriptionPolicyEvent.TenantDomain, TimeStamp: subscriptionPolicyEvent.TimeStamp}
+		// subscriptionPolicy := types.SubscriptionPolicy{ID: subscriptionPolicyEvent.PolicyID, TenantID: -1,
+		// 	Name: subscriptionPolicyEvent.PolicyName, QuotaType: subscriptionPolicyEvent.QuotaType,
+		// 	GraphQLMaxComplexity: subscriptionPolicyEvent.GraphQLMaxComplexity,
+		// 	GraphQLMaxDepth:      subscriptionPolicyEvent.GraphQLMaxDepth, RateLimitCount: subscriptionPolicyEvent.RateLimitCount,
+		// 	RateLimitTimeUnit: subscriptionPolicyEvent.RateLimitTimeUnit, StopOnQuotaReach: subscriptionPolicyEvent.StopOnQuotaReach,
+		// 	TenantDomain: subscriptionPolicyEvent.TenantDomain, TimeStamp: subscriptionPolicyEvent.TimeStamp}
 
-		logger.LoggerMessaging.Debugf("SubscriptionPolicy event data %v", subscriptionPolicy)
+		// logger.LoggerMessaging.Debugf("SubscriptionPolicy event data %v", subscriptionPolicy)
 
 		// var subscriptionPolicyList *subscription.SubscriptionPolicyList
 		// if subscriptionPolicyEvent.Event.Type == policyCreate {

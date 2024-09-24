@@ -113,22 +113,23 @@ type ApplicationPolicyList struct {
 
 // SubscriptionPolicy for struct list of SubscriptionPolicy
 type SubscriptionPolicy struct {
-	ID                   int32  `json:"id" json:"policyId"`
-	TenantID             int32  `json:"tenantId"`
-	Name                 string `json:"name"`
-	QuotaType            string `json:"quotaType"`
-	GraphQLMaxComplexity int32  `json:"graphQLMaxComplexity"`
-	GraphQLMaxDepth      int32  `json:"graphQLMaxDepth"`
-	RateLimitCount       int32  `json:"rateLimitCount"`
-	RateLimitTimeUnit    string `json:"rateLimitTimeUnit"`
-	StopOnQuotaReach     bool   `json:"stopOnQuotaReach"`
-	TenantDomain         string `json:"tenanDomain,omitempty"`
-	TimeStamp            int64  `json:"timeStamp,omitempty"`
+	TenantID             int32        `json:"tenantId"`
+	TenantDomain         string       `json:"tenantDomain,omitempty"`
+	Name                 string       `json:"name"`
+	QuotaType            string       `json:"quotaType"`
+	GraphQLMaxComplexity int32        `json:"graphQLMaxComplexity"`
+	GraphQLMaxDepth      int32        `json:"graphQLMaxDepth"`
+	RateLimitCount       int32        `json:"rateLimitCount"`
+	RateLimitTimeUnit    string       `json:"rateLimitTimeUnit"`
+	StopOnQuotaReach     bool         `json:"stopOnQuotaReach"`
+	DefaultLimit         DefaultLimit `json:"defaultLimit"`
+	TimeStamp            int64        `json:"timeStamp,omitempty"`
 }
 
 // SubscriptionPolicyList for struct list of SubscriptionPolicy
 type SubscriptionPolicyList struct {
-	List []SubscriptionPolicy `json:"list"`
+	Count int                  `json:"count"`
+	List  []SubscriptionPolicy `json:"list"`
 }
 
 // AIProviderList for struct list of AIProvider
