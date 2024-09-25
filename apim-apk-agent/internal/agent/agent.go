@@ -116,6 +116,7 @@ func Run(conf *config.Config) {
 	utilruntime.Must(gwapiv1.AddToScheme(scheme))
 	utilruntime.Must(dpv1alpha1.AddToScheme(scheme))
 	utilruntime.Must(dpv1alpha2.AddToScheme(scheme))
+	utilruntime.Must(dpv1alpha3.AddToScheme(scheme))
 	utilruntime.Must(cpv1alpha2.AddToScheme(scheme))
 	utilruntime.Must(cpv1alpha2.AddToScheme(scheme))
 	utilruntime.Must(dpv1alpha3.AddToScheme(scheme))

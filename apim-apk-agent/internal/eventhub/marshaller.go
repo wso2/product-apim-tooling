@@ -148,6 +148,7 @@ func MarshalSubscription(subscriptionInternal *types.Subscription) managementser
 		UUID:          subscriptionInternal.SubscriptionUUID,
 		Organization:  subscriptionInternal.ApplicationOrganization,
 		SubscribedAPI: &managementserver.SubscribedAPI{Name: subscriptionInternal.APIName, Version: subscriptionInternal.APIVersion},
+		RateLimit:     subscriptionInternal.PolicyID,
 		TimeStamp:     subscriptionInternal.TimeStamp,
 	}
 	return sub

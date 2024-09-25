@@ -39,6 +39,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	gwapiv1 "sigs.k8s.io/gateway-api/apis/v1"
 	"sigs.k8s.io/gateway-api/apis/v1alpha2"
+	gwapiv1b1 "sigs.k8s.io/gateway-api/apis/v1alpha2"
 )
 
 // DeployAPICR applies the given API struct to the Kubernetes cluster.
@@ -395,6 +396,37 @@ func UpdateRateLimitPolicyCR(policy eventhubTypes.RateLimitPolicy, k8sClient cli
 			loggers.LoggerK8sClient.Infof("RateLimitPolicies CR updated: %v", rateLimitPolicy.Name)
 		}
 	}
+}
+
+// DeploySubscriptionRateLimitPolicyCR applies the given RateLimitPolicies struct to the Kubernetes cluster.
+func DeploySubscriptionRateLimitPolicyCR(policy eventhubTypes.SubscriptionPolicy, k8sClient client.Client) {
+	conf, _ := config.ReadConfigs()
+
+	crRateLimitPolicies := dpv1alpha3.RateLimitPolicy{
+		ObjectMeta: metav1.ObjectMeta{Name: policy.Name,
+			Namespace: conf.DataPlane.Namespace,
+		},
+		Spec: dpv1alpha3.RateLimitPolicySpec{
+			Override: &dpv1alpha3.RateLimitAPIPolicy{
+				Subscription: &dpv1alpha3.SubscriptionRateLimitPolicy{
+					StopOnQuotaReach: policy.StopOnQuotaReach,
+					Organization:     policy.TenantDomain,
+					RequestCount: &dpv1alpha3.RequestCount{
+						RequestsPerUnit: uint32(policy.DefaultLimit.RequestCount.RequestCount),
+						Unit:            policy.DefaultLimit.RequestCount.TimeUnit,
+					},
+				},
+			},
+			TargetRef: gwapiv1b1.PolicyTargetReference{Group: constants.GatewayGroup, Kind: "Subscription", Name: "default"},
+		},
+	}
+
+	if err := k8sClient.Create(context.Background(), &crRateLimitPolicies); err != nil {
+		loggers.LoggerK8sClient.Error("Unable to create RateLimitPolicies CR: " + err.Error())
+	} else {
+		loggers.LoggerK8sClient.Info("RateLimitPolicies CR created: " + crRateLimitPolicies.Name)
+	}
+
 }
 
 // DeployBackendCR applies the given Backends struct to the Kubernetes cluster.

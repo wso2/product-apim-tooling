@@ -29,6 +29,7 @@ var (
 	applicationKeyMappingMap map[string]ApplicationKeyMapping
 	rateLimitPolicyMap       map[string]eventHub.RateLimitPolicy
 	aiProviderMap            map[string]eventHub.AIProvider
+	subscriptionPolicyMap    map[string]eventHub.SubscriptionPolicy
 )
 
 func init() {
@@ -38,6 +39,7 @@ func init() {
 	applicationKeyMappingMap = make(map[string]ApplicationKeyMapping)
 	rateLimitPolicyMap = make(map[string]eventHub.RateLimitPolicy)
 	aiProviderMap = make(map[string]eventHub.AIProvider)
+	subscriptionPolicyMap = make(map[string]eventHub.SubscriptionPolicy)
 }
 
 // AddAIProvider adds an AI provider to the aiProviderMap
@@ -67,6 +69,11 @@ func GetAllAIProviders() []eventHub.AIProvider {
 // AddRateLimitPolicy adds a rate limit policy to the rateLimitPolicyMap
 func AddRateLimitPolicy(rateLimitPolicy eventHub.RateLimitPolicy) {
 	rateLimitPolicyMap[rateLimitPolicy.Name+rateLimitPolicy.TenantDomain] = rateLimitPolicy
+}
+
+// AddSubscriptionPolicy adds a rate limit policy to the subscriptionPolicyMap
+func AddSubscriptionPolicy(rateLimitPolicy eventHub.SubscriptionPolicy) {
+	subscriptionPolicyMap[rateLimitPolicy.Name+rateLimitPolicy.TenantDomain] = rateLimitPolicy
 }
 
 // GetRateLimitPolicy returns a rate limit policy from the rateLimitPolicyMap

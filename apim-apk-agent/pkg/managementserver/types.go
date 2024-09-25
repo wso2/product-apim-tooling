@@ -24,6 +24,7 @@ type Subscription struct {
 	Organization  string         `json:"organization,omitempty"`
 	SubscribedAPI *SubscribedAPI `json:"subscribedApi,omitempty"`
 	TimeStamp     int64          `json:"timeStamp,omitempty"`
+	RateLimit     string         `json:"rateLimit,omitempty"`
 }
 
 // SubscriptionList for struct list of applications
