@@ -429,6 +429,66 @@ func DeploySubscriptionRateLimitPolicyCR(policy eventhubTypes.SubscriptionPolicy
 
 }
 
+// DeployAIRateLimitPolicyCR applies the given AIRateLimitPolicies struct to the Kubernetes cluster.
+func DeployAIRateLimitPolicyCR(policy eventhubTypes.SubscriptionPolicy, k8sClient client.Client) {
+	conf, _ := config.ReadConfigs()
+	tokenCount := &dpv1alpha3.TokenCount{}
+	requestCount := &dpv1alpha3.RequestCount{}
+	if policy.DefaultLimit.AiApiQuota.PromptTokenCount != nil &&
+		policy.DefaultLimit.AiApiQuota.CompletionTokenCount != nil &&
+		policy.DefaultLimit.AiApiQuota.TotalTokenCount != nil {
+		tokenCount = &dpv1alpha3.TokenCount{
+			Unit: policy.DefaultLimit.AiApiQuota.TimeUnit,
+			RequestTokenCount: uint32(*policy.DefaultLimit.AiApiQuota.PromptTokenCount),
+			ResponseTokenCount: uint32(*policy.DefaultLimit.AiApiQuota.CompletionTokenCount),
+			TotalTokenCount: uint32(*policy.DefaultLimit.AiApiQuota.TotalTokenCount),
+		}
+	} else {
+		tokenCount = nil
+	}
+	if policy.DefaultLimit.AiApiQuota.RequestCount != nil {
+		requestCount = &dpv1alpha3.RequestCount{
+			RequestsPerUnit: uint32(*policy.DefaultLimit.AiApiQuota.RequestCount),
+			Unit: policy.DefaultLimit.AiApiQuota.TimeUnit,
+		}
+	} else {
+		requestCount = nil
+	}
+
+	crRateLimitPolicies := dpv1alpha3.AIRateLimitPolicy{
+		ObjectMeta: metav1.ObjectMeta{Name: policy.Name,
+			Namespace: conf.DataPlane.Namespace,
+		},
+		Spec: dpv1alpha3.AIRateLimitPolicySpec{
+			Override: &dpv1alpha3.AIRateLimit{
+				Organization: policy.TenantDomain,
+				TokenCount: tokenCount,
+				RequestCount: requestCount,
+			},
+			TargetRef: gwapiv1b1.PolicyTargetReference{Group: constants.GatewayGroup, Kind: "Subscription", Name: "default"},
+		},
+	}
+	crRateLimitPolicyFetched := &dpv1alpha3.AIRateLimitPolicy{}
+	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: crRateLimitPolicies.ObjectMeta.Namespace, Name: crRateLimitPolicies.Name}, crRateLimitPolicyFetched); err != nil {
+		if !k8error.IsNotFound(err) {
+			loggers.LoggerK8sClient.Error("Unable to get AiratelimitPolicy CR: " + err.Error())
+		}
+		if err := k8sClient.Create(context.Background(), &crRateLimitPolicies); err != nil {
+			loggers.LoggerK8sClient.Error("Unable to create AIRateLimitPolicies CR: " + err.Error())
+		} else {
+			loggers.LoggerK8sClient.Info("AIRateLimitPolicies CR created: " + crRateLimitPolicies.Name)
+		}
+	} else {
+		crRateLimitPolicyFetched.Spec = crRateLimitPolicies.Spec
+		crRateLimitPolicyFetched.ObjectMeta.Labels = crRateLimitPolicies.ObjectMeta.Labels
+		if err := k8sClient.Update(context.Background(), crRateLimitPolicyFetched); err != nil {
+			loggers.LoggerK8sClient.Error("Unable to update AiRatelimitPolicy CR: " + err.Error())
+		} else {
+			loggers.LoggerK8sClient.Info("AiRatelimitPolicy CR updated: " + crRateLimitPolicyFetched.Name)
+		}
+	}
+}
+
 // DeployBackendCR applies the given Backends struct to the Kubernetes cluster.
 func DeployBackendCR(backends *dpv1alpha2.Backend, k8sClient client.Client) {
 	crBackends := &dpv1alpha2.Backend{}

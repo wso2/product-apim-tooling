@@ -196,7 +196,8 @@ type ConditionGroup struct {
 
 // DefaultLimit represents the default limit within the response.
 type DefaultLimit struct {
-	QuotaType    string `json:"quotaType"`
+	AiApiQuota   *AiApiQuota `json:"aiApiQuota"`
+	QuotaType    string     `json:"quotaType"`
 	RequestCount struct {
 		TimeUnit     string `json:"timeUnit"`
 		UnitTime     int    `json:"unitTime"`
@@ -204,6 +205,15 @@ type DefaultLimit struct {
 	} `json:"requestCount"`
 	Bandwidth  interface{} `json:"bandwidth"`
 	EventCount interface{} `json:"eventCount"`
+}
+
+type AiApiQuota struct {
+	CompletionTokenCount *int    `json:"completionTokenCount"`
+	PromptTokenCount     *int    `json:"promptTokenCount"`
+	RequestCount         *int    `json:"requestCount"`
+	TimeUnit             string `json:"timeUnit"`
+	TotalTokenCount      *int    `json:"totalTokenCount"`
+	UnitTime             int    `json:"unitTime"`
 }
 
 // Scope for struct Scope

@@ -179,6 +179,7 @@ type APIMApi struct {
 	APIThrottlingPolicy string                `yaml:"apiThrottlingPolicy"`
 	APIPolicies         APIMOperationPolicies `yaml:"apiPolicies"`
 	AIConfiguration     APIMAIConfiguration   `yaml:"aiConfiguration"`
+	MaxTps              *MaxTps               `yaml:"maxTps"`
 }
 
 // APIMAIConfiguration holds the configuration details for AI providers
@@ -190,6 +191,46 @@ type APIMAIConfiguration struct {
 // APIYaml is a wrapper struct for YAML representation of an API.
 type APIYaml struct {
 	Data APIMApi `json:"data"`
+}
+
+// MaxTps represents the maximum transactions per second (TPS) settings for both
+// production and sandbox environments. It also includes an optional configuration
+// for token-based throttling.
+//
+// Fields:
+// - Production: Maximum TPS for the production environment.
+// - ProductionTimeUnit: The time unit for the production TPS limit (e.g., seconds, minutes).
+// - Sandbox: Maximum TPS for the sandbox environment.
+// - SandboxTimeUnit: The time unit for the sandbox TPS limit.
+// - TokenBasedThrottlingConfiguration: Configuration for token-based throttling.
+type MaxTps struct {
+	Production                        *int                        `yaml:"production"`
+	ProductionTimeUnit                *string                     `yaml:"productionTimeUnit"`
+	Sandbox                           *int                        `yaml:"sandbox"`
+	SandboxTimeUnit                   *string                     `yaml:"sandboxTimeUnit"`
+	TokenBasedThrottlingConfiguration *TokenBasedThrottlingConfig `yaml:"tokenBasedThrottlingConfiguration"`
+}
+
+// TokenBasedThrottlingConfig defines the token-based throttling limits for
+// both production and sandbox environments. Token-based throttling places
+// a limit on the number of prompt and completion tokens that can be used.
+//
+// Fields:
+// - ProductionMaxPromptTokenCount: Maximum number of prompt tokens for production.
+// - ProductionMaxCompletionTokenCount: Maximum number of completion tokens for production.
+// - ProductionMaxTotalTokenCount: Maximum total token count (prompt + completion) for production.
+// - SandboxMaxPromptTokenCount: Maximum number of prompt tokens for sandbox.
+// - SandboxMaxCompletionTokenCount: Maximum number of completion tokens for sandbox.
+// - SandboxMaxTotalTokenCount: Maximum total token count (prompt + completion) for sandbox.
+// - IsTokenBasedThrottlingEnabled: Flag to enable or disable token-based throttling.
+type TokenBasedThrottlingConfig struct {
+	ProductionMaxPromptTokenCount     *int  `yaml:"productionMaxPromptTokenCount"`
+	ProductionMaxCompletionTokenCount *int  `yaml:"productionMaxCompletionTokenCount"`
+	ProductionMaxTotalTokenCount      *int  `yaml:"productionMaxTotalTokenCount"`
+	SandboxMaxPromptTokenCount        *int  `yaml:"sandboxMaxPromptTokenCount"`
+	SandboxMaxCompletionTokenCount    *int  `yaml:"sandboxMaxCompletionTokenCount"`
+	SandboxMaxTotalTokenCount         *int  `yaml:"sandboxMaxTotalTokenCount"`
+	IsTokenBasedThrottlingEnabled     *bool `yaml:"isTokenBasedThrottlingEnabled"`
 }
 
 // APIArtifact represents the artifact details of an API, including api details, environment configuration,

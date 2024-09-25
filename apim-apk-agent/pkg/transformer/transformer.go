@@ -172,7 +172,9 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 	prodURL := apiYamlData.EndpointConfig.ProductionEndpoints.URL
 	endpointSecurityData := apiYamlData.EndpointConfig.EndpointSecurity
 	apiUniqueID := GetUniqueIDForAPI(apiYamlData.Name, apiYamlData.Version, apiYamlData.OrganizationID)
-	endpointRes := getEndpointConfigs(sandboxURL, prodURL, endCertAvailable, endpointCertList, endpointSecurityData, apiUniqueID)
+	logger.LoggerTransformer.Infof("Maxtps: %+v", apiYamlData)
+	prodAIRatelimit, sandAIRatelimit := prepareAIRatelimit(apiYamlData.MaxTps)
+	endpointRes := getEndpointConfigs(sandboxURL, prodURL, endCertAvailable, endpointCertList, endpointSecurityData, apiUniqueID, prodAIRatelimit, sandAIRatelimit)
 
 	apk.EndpointConfigurations = &endpointRes
 
@@ -219,6 +221,64 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 		return "", "null", 0, nil, EndpointSecurityConfig{}, marshalError
 	}
 	return string(c), apiYamlData.RevisionedAPIID, apiYamlData.RevisionID, configuredRateLimitPoliciesMap, endpointSecurityData, nil
+}
+
+// prepareAIRatelimit Function that accepts apiYamlData and returns AIRatelimit
+func prepareAIRatelimit(maxTps *MaxTps) (*AIRatelimit, *AIRatelimit) {
+	if maxTps == nil {
+		logger.LoggerTransformer.Info("Returing nil nil")
+		return nil, nil
+	} 
+	prodAIRL := &AIRatelimit{}
+	if maxTps.TokenBasedThrottlingConfiguration == nil || 
+	maxTps.TokenBasedThrottlingConfiguration.IsTokenBasedThrottlingEnabled == nil ||
+	maxTps.TokenBasedThrottlingConfiguration.ProductionMaxPromptTokenCount == nil ||
+	maxTps.TokenBasedThrottlingConfiguration.ProductionMaxCompletionTokenCount == nil ||
+	maxTps.TokenBasedThrottlingConfiguration.ProductionMaxTotalTokenCount == nil ||
+	maxTps.ProductionTimeUnit == nil {
+		logger.LoggerTransformer.Info("Returing prod nil")
+		prodAIRL = nil
+	} else {
+		prodAIRL = &AIRatelimit{
+			Enabled: *maxTps.TokenBasedThrottlingConfiguration.IsTokenBasedThrottlingEnabled,
+			Token: TokenAIRL{
+				PromptLimit:     *maxTps.TokenBasedThrottlingConfiguration.ProductionMaxPromptTokenCount,
+				CompletionLimit: *maxTps.TokenBasedThrottlingConfiguration.ProductionMaxCompletionTokenCount,
+				TotalLimit:      *maxTps.TokenBasedThrottlingConfiguration.ProductionMaxTotalTokenCount,
+				Unit:            *maxTps.ProductionTimeUnit,
+			},
+			Request: RequestAIRL{
+				RequestLimit: *maxTps.Production,
+				Unit:         *maxTps.ProductionTimeUnit,
+			},
+		}
+	}
+	sandAIRL := &AIRatelimit{}
+	if maxTps.TokenBasedThrottlingConfiguration == nil || 
+	maxTps.TokenBasedThrottlingConfiguration.IsTokenBasedThrottlingEnabled == nil ||
+	maxTps.TokenBasedThrottlingConfiguration.SandboxMaxPromptTokenCount == nil ||
+	maxTps.TokenBasedThrottlingConfiguration.SandboxMaxCompletionTokenCount == nil ||
+	maxTps.TokenBasedThrottlingConfiguration.SandboxMaxTotalTokenCount == nil ||
+	maxTps.SandboxTimeUnit == nil {
+		logger.LoggerTransformer.Info("Returing sand nil")
+		sandAIRL = nil
+	} else {
+		sandAIRL = &AIRatelimit{
+			Enabled: *maxTps.TokenBasedThrottlingConfiguration.IsTokenBasedThrottlingEnabled,
+			Token: TokenAIRL{
+				PromptLimit:     *maxTps.TokenBasedThrottlingConfiguration.SandboxMaxPromptTokenCount,
+				CompletionLimit: *maxTps.TokenBasedThrottlingConfiguration.SandboxMaxCompletionTokenCount,
+				TotalLimit:      *maxTps.TokenBasedThrottlingConfiguration.SandboxMaxTotalTokenCount,
+				Unit:            *maxTps.SandboxTimeUnit,
+			},
+			Request: RequestAIRL{
+				RequestLimit: *maxTps.Sandbox,
+				Unit:         *maxTps.SandboxTimeUnit,
+			},
+		}
+	}
+
+	return prodAIRL, sandAIRL
 }
 
 // getAPIType will be selecting the appropriate API type need to be added in the apk-conf
@@ -562,7 +622,7 @@ func mapAuthConfigs(apiUUID string, authHeader string, configuredAPIKeyHeader st
 // getEndpointConfigs will map the endpoints and there security configurations and returns them
 // TODO: Currently the APK-Conf does not support giving multiple certs for a particular endpoint.
 // After fixing this, the following logic should be changed to map multiple cert configs
-func getEndpointConfigs(sandboxURL string, prodURL string, endCertAvailable bool, endpointCertList EndpointCertDescriptor, endpointSecurityData EndpointSecurityConfig, apiUniqueID string) EndpointConfigurations {
+func getEndpointConfigs(sandboxURL string, prodURL string, endCertAvailable bool, endpointCertList EndpointCertDescriptor, endpointSecurityData EndpointSecurityConfig, apiUniqueID string, prodAIRatelimit *AIRatelimit, sandAIRatelimit *AIRatelimit) EndpointConfigurations {
 	var sandboxEndpointConf, prodEndpointConf EndpointConfiguration
 	var sandBoxEndpointEnabled = false
 	var prodEndpointEnabled = false
@@ -571,6 +631,12 @@ func getEndpointConfigs(sandboxURL string, prodURL string, endCertAvailable bool
 	}
 	if prodURL != "" {
 		prodEndpointEnabled = true
+	}
+	if prodAIRatelimit != nil {
+		prodEndpointConf.AIRatelimit = *prodAIRatelimit
+	}
+	if sandAIRatelimit != nil {
+		sandboxEndpointConf.AIRatelimit = *sandAIRatelimit
 	}
 	sandboxEndpointConf.Endpoint = sandboxURL
 	prodEndpointConf.Endpoint = prodURL
