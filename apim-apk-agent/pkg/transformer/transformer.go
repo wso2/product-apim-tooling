@@ -95,12 +95,14 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 	if apiYamlData.APIThrottlingPolicy != "" {
 		rateLimitPolicy := managementserver.GetRateLimitPolicy(apiYamlData.APIThrottlingPolicy, organizationID)
 		logger.LoggerTransformer.Debugf("Rate Limit Policy: %v", rateLimitPolicy)
-		var rateLimitPolicyConfigured = RateLimit{
-			RequestsPerUnit: rateLimitPolicy.DefaultLimit.RequestCount.RequestCount,
-			Unit:            rateLimitPolicy.DefaultLimit.RequestCount.TimeUnit,
+		if rateLimitPolicy.Name != "Unlimited" {
+			var rateLimitPolicyConfigured = RateLimit{
+				RequestsPerUnit: rateLimitPolicy.DefaultLimit.RequestCount.RequestCount,
+				Unit:            rateLimitPolicy.DefaultLimit.RequestCount.TimeUnit,
+			}
+			apk.RateLimit = &rateLimitPolicyConfigured
+			configuredRateLimitPoliciesMap["API"] = rateLimitPolicy
 		}
-		apk.RateLimit = &rateLimitPolicyConfigured
-		configuredRateLimitPoliciesMap["API"] = rateLimitPolicy
 	}
 	apkOperations := make([]Operation, len(apiYamlData.Operations))
 
@@ -115,12 +117,14 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 		if apiYamlData.APIThrottlingPolicy == "" && operation.ThrottlingPolicy != "" {
 			rateLimitPolicy := managementserver.GetRateLimitPolicy(operation.ThrottlingPolicy, organizationID)
 			logger.LoggerTransformer.Debugf("Op Rate Limit Policy Name: %v", rateLimitPolicy.Name)
-			var rateLimitPolicyConfigured = RateLimit{
-				RequestsPerUnit: rateLimitPolicy.DefaultLimit.RequestCount.RequestCount,
-				Unit:            rateLimitPolicy.DefaultLimit.RequestCount.TimeUnit,
+			if rateLimitPolicy.Name != "Unlimited" {
+				var rateLimitPolicyConfigured = RateLimit{
+					RequestsPerUnit: rateLimitPolicy.DefaultLimit.RequestCount.RequestCount,
+					Unit:            rateLimitPolicy.DefaultLimit.RequestCount.TimeUnit,
+				}
+				opRateLimit = &rateLimitPolicyConfigured
+				configuredRateLimitPoliciesMap["Resource"] = rateLimitPolicy
 			}
-			opRateLimit = &rateLimitPolicyConfigured
-			configuredRateLimitPoliciesMap["Resource"] = rateLimitPolicy
 		}
 		logger.LoggerTransformer.Debugf("Operation Auth Type: %v", operation.AuthType)
 		AuthSecured := true
