@@ -434,22 +434,22 @@ func DeployAIRateLimitPolicyCR(policy eventhubTypes.SubscriptionPolicy, k8sClien
 	conf, _ := config.ReadConfigs()
 	tokenCount := &dpv1alpha3.TokenCount{}
 	requestCount := &dpv1alpha3.RequestCount{}
-	if policy.DefaultLimit.AiApiQuota.PromptTokenCount != nil &&
-		policy.DefaultLimit.AiApiQuota.CompletionTokenCount != nil &&
-		policy.DefaultLimit.AiApiQuota.TotalTokenCount != nil {
+	if policy.DefaultLimit.AiAPIQuota.PromptTokenCount != nil &&
+		policy.DefaultLimit.AiAPIQuota.CompletionTokenCount != nil &&
+		policy.DefaultLimit.AiAPIQuota.TotalTokenCount != nil {
 		tokenCount = &dpv1alpha3.TokenCount{
-			Unit: policy.DefaultLimit.AiApiQuota.TimeUnit,
-			RequestTokenCount: uint32(*policy.DefaultLimit.AiApiQuota.PromptTokenCount),
-			ResponseTokenCount: uint32(*policy.DefaultLimit.AiApiQuota.CompletionTokenCount),
-			TotalTokenCount: uint32(*policy.DefaultLimit.AiApiQuota.TotalTokenCount),
+			Unit:               policy.DefaultLimit.AiAPIQuota.TimeUnit,
+			RequestTokenCount:  uint32(*policy.DefaultLimit.AiAPIQuota.PromptTokenCount),
+			ResponseTokenCount: uint32(*policy.DefaultLimit.AiAPIQuota.CompletionTokenCount),
+			TotalTokenCount:    uint32(*policy.DefaultLimit.AiAPIQuota.TotalTokenCount),
 		}
 	} else {
 		tokenCount = nil
 	}
-	if policy.DefaultLimit.AiApiQuota.RequestCount != nil {
+	if policy.DefaultLimit.AiAPIQuota.RequestCount != nil {
 		requestCount = &dpv1alpha3.RequestCount{
-			RequestsPerUnit: uint32(*policy.DefaultLimit.AiApiQuota.RequestCount),
-			Unit: policy.DefaultLimit.AiApiQuota.TimeUnit,
+			RequestsPerUnit: uint32(*policy.DefaultLimit.AiAPIQuota.RequestCount),
+			Unit:            policy.DefaultLimit.AiAPIQuota.TimeUnit,
 		}
 	} else {
 		requestCount = nil
@@ -462,7 +462,7 @@ func DeployAIRateLimitPolicyCR(policy eventhubTypes.SubscriptionPolicy, k8sClien
 		Spec: dpv1alpha3.AIRateLimitPolicySpec{
 			Override: &dpv1alpha3.AIRateLimit{
 				Organization: policy.TenantDomain,
-				TokenCount: tokenCount,
+				TokenCount:   tokenCount,
 				RequestCount: requestCount,
 			},
 			TargetRef: gwapiv1b1.PolicyTargetReference{Group: constants.GatewayGroup, Kind: "Subscription", Name: "default"},

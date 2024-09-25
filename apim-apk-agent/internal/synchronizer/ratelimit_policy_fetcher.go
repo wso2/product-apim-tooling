@@ -238,7 +238,7 @@ func FetchSubscriptionRateLimitPoliciesOnEvent(ratelimitName string, organizatio
 		logger.LoggerSynchronizer.Infof("Error formatting JSON:", err)
 		return
 	}
-	logger.LoggerSynchronizer.Infof("Json string: %s",string(jsonOutput))
+	logger.LoggerSynchronizer.Infof("Json string: %s", string(jsonOutput))
 	logger.LoggerSynchronizer.Debugf("Response String received for Policies: %v", string(responseBytes))
 
 	if err != nil {
@@ -258,27 +258,27 @@ func FetchSubscriptionRateLimitPoliciesOnEvent(ratelimitName string, organizatio
 		var rateLimitPolicies []eventhubTypes.SubscriptionPolicy = rateLimitPolicyList.List
 		for _, policy := range rateLimitPolicies {
 			if policy.QuotaType == "aiApiQuota" {
-				if policy.DefaultLimit.AiApiQuota != nil {
-					switch policy.DefaultLimit.AiApiQuota.TimeUnit {
+				if policy.DefaultLimit.AiAPIQuota != nil {
+					switch policy.DefaultLimit.AiAPIQuota.TimeUnit {
 					case "min":
-						policy.DefaultLimit.AiApiQuota.TimeUnit = "Minute"
+						policy.DefaultLimit.AiAPIQuota.TimeUnit = "Minute"
 					case "hours":
-						policy.DefaultLimit.AiApiQuota.TimeUnit = "Hour"
+						policy.DefaultLimit.AiAPIQuota.TimeUnit = "Hour"
 					case "days":
-						policy.DefaultLimit.AiApiQuota.TimeUnit = "Day"
+						policy.DefaultLimit.AiAPIQuota.TimeUnit = "Day"
 					default:
-						logger.LoggerSynchronizer.Errorf("Unsupported timeunit %s", policy.DefaultLimit.AiApiQuota.TimeUnit)
+						logger.LoggerSynchronizer.Errorf("Unsupported timeunit %s", policy.DefaultLimit.AiAPIQuota.TimeUnit)
 						continue
 					}
-					if policy.DefaultLimit.AiApiQuota.PromptTokenCount == nil && policy.DefaultLimit.AiApiQuota.TotalTokenCount != nil {
-						policy.DefaultLimit.AiApiQuota.PromptTokenCount = policy.DefaultLimit.AiApiQuota.TotalTokenCount
+					if policy.DefaultLimit.AiAPIQuota.PromptTokenCount == nil && policy.DefaultLimit.AiAPIQuota.TotalTokenCount != nil {
+						policy.DefaultLimit.AiAPIQuota.PromptTokenCount = policy.DefaultLimit.AiAPIQuota.TotalTokenCount
 					}
-					if policy.DefaultLimit.AiApiQuota.CompletionTokenCount == nil && policy.DefaultLimit.AiApiQuota.TotalTokenCount != nil {
-						policy.DefaultLimit.AiApiQuota.CompletionTokenCount = policy.DefaultLimit.AiApiQuota.TotalTokenCount
+					if policy.DefaultLimit.AiAPIQuota.CompletionTokenCount == nil && policy.DefaultLimit.AiAPIQuota.TotalTokenCount != nil {
+						policy.DefaultLimit.AiAPIQuota.CompletionTokenCount = policy.DefaultLimit.AiAPIQuota.TotalTokenCount
 					}
-					if policy.DefaultLimit.AiApiQuota.TotalTokenCount == nil && policy.DefaultLimit.AiApiQuota.PromptTokenCount != nil && policy.DefaultLimit.AiApiQuota.CompletionTokenCount != nil {
-						total := *policy.DefaultLimit.AiApiQuota.PromptTokenCount + *policy.DefaultLimit.AiApiQuota.CompletionTokenCount
-						policy.DefaultLimit.AiApiQuota.TotalTokenCount = &total
+					if policy.DefaultLimit.AiAPIQuota.TotalTokenCount == nil && policy.DefaultLimit.AiAPIQuota.PromptTokenCount != nil && policy.DefaultLimit.AiAPIQuota.CompletionTokenCount != nil {
+						total := *policy.DefaultLimit.AiAPIQuota.PromptTokenCount + *policy.DefaultLimit.AiAPIQuota.CompletionTokenCount
+						policy.DefaultLimit.AiAPIQuota.TotalTokenCount = &total
 					}
 					managementserver.AddSubscriptionPolicy(policy)
 					k8sclient.DeployAIRateLimitPolicyCR(policy, c)
