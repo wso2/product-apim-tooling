@@ -225,20 +225,6 @@ func FetchSubscriptionRateLimitPoliciesOnEvent(ratelimitName string, organizatio
 		return
 	}
 	responseBytes, err := ioutil.ReadAll(resp.Body)
-	var jsonResponse interface{}
-	err = json.Unmarshal(responseBytes, &jsonResponse)
-	if err != nil {
-		logger.LoggerSynchronizer.Infof("Error unmarshalling JSON:", err)
-		return
-	}
-
-	// Print the JSON response in a pretty format
-	jsonOutput, err := json.MarshalIndent(jsonResponse, "", "  ")
-	if err != nil {
-		logger.LoggerSynchronizer.Infof("Error formatting JSON:", err)
-		return
-	}
-	logger.LoggerSynchronizer.Infof("Json string: %s", string(jsonOutput))
 	logger.LoggerSynchronizer.Debugf("Response String received for Policies: %v", string(responseBytes))
 
 	if err != nil {

@@ -113,7 +113,7 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUID *string, k8sClient client.Cli
 							logger.LoggerUtils.Errorf("Error while generating APK-Conf: %v", apkErr)
 							return nil, err
 						}
-						logger.LoggerUtils.Infof("APK Conf: %v", apkConf)
+						logger.LoggerUtils.Debugf("APK Conf: %v", apkConf)
 						certContainer := transformer.CertContainer{
 							ClientCertObj:   artifact.CertMeta,
 							EndpointCertObj: artifact.EndpointCertMeta,

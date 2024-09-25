@@ -86,10 +86,9 @@ func SendRequestToControlPlane(req *http.Request, apiID *string, gwLabels []stri
 	client *http.Client) bool {
 	// Make the request
 	if apiID != nil {
-		logger.LoggerSync.Infof("Sending the control plane request for the API: %q", *apiID)
+		logger.LoggerSync.Debugf("Sending the control plane request for the API: %q", *apiID)
 	} else {
-		logger.LoggerSync.Info("Sending the control plane request")
-		logger.LoggerSync.Infof("Sending url: %s", req.URL.String())
+		logger.LoggerSync.Debugf("Sending the control plane request, url: %s", req.URL.String())
 	}
 	resp, err := client.Do(req)
 
