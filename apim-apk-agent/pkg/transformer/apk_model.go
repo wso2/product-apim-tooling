@@ -44,7 +44,32 @@ type EndpointConfiguration struct {
 	Endpoint       string              `yaml:"endpoint,omitempty"`
 	EndCertificate EndpointCertificate `yaml:"certificate,omitempty"`
 	EndSecurity    EndpointSecurity    `yaml:"endpointSecurity,omitempty"`
+	AIRatelimit    AIRatelimit         `yaml:"aiRatelimit,omitempty"`
 }
+
+// AIRatelimit defines the configuration for AI rate limiting,
+// including whether rate limiting is enabled and the settings 
+// for token and request-based limits.
+type AIRatelimit struct {
+	Enabled bool        `json:"enabled"`
+	Token   TokenAIRL   `json:"token"`
+	Request RequestAIRL `json:"request"`
+}
+
+// TokenAIRL defines the configuration for Token AI rate limit settings.
+type TokenAIRL struct {
+	PromptLimit     int    `json:"promptLimit"`
+	CompletionLimit int    `json:"completionLimit"`
+	TotalLimit      int    `json:"totalLimit"`
+	Unit            string `json:"unit"` // Time unit (Minute, Hour, Day)
+}
+
+// RequestAIRL defines the configuration for Request AI rate limit settings.
+type RequestAIRL struct {
+	RequestLimit int    `json:"requestLimit"`
+	Unit         string `json:"unit"` // Time unit (Minute, Hour, Day)
+}
+
 
 // AdditionalProperty stores the custom properties set by the user for a particular API
 type AdditionalProperty struct {

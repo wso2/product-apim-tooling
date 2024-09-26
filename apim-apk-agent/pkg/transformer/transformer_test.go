@@ -27,7 +27,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	dpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha2"
+	dpv1alpha3 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha3"
 	gwapiv1 "sigs.k8s.io/gateway-api/apis/v1"
 )
 
@@ -307,7 +307,7 @@ func TestReplaceVhost(t *testing.T) {
 					assert.Equal(t, gwapiv1.Hostname(env.Vhost), k8sArtifact.HTTPRoutes[routes].Spec.Hostnames[0])
 				}
 			}
-			assert.IsType(t, []dpv1alpha2.EnvConfig{}, k8sArtifact.API.Spec.Production)
+			assert.IsType(t, []dpv1alpha3.EnvConfig{}, k8sArtifact.API.Spec.Production)
 			assert.Empty(t, k8sArtifact.API.Spec.Production, "Production should be empty")
 
 		} else {
@@ -316,7 +316,7 @@ func TestReplaceVhost(t *testing.T) {
 					assert.Equal(t, gwapiv1.Hostname(env.Vhost), k8sArtifact.HTTPRoutes[routes].Spec.Hostnames[0])
 				}
 			}
-			assert.IsType(t, []dpv1alpha2.EnvConfig{}, k8sArtifact.API.Spec.Sandbox)
+			assert.IsType(t, []dpv1alpha3.EnvConfig{}, k8sArtifact.API.Spec.Sandbox)
 			assert.Empty(t, k8sArtifact.API.Spec.Sandbox, "Sandbox should be empty")
 		}
 	}

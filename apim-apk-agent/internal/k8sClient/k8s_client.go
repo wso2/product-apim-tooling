@@ -43,8 +43,8 @@ import (
 )
 
 // DeployAPICR applies the given API struct to the Kubernetes cluster.
-func DeployAPICR(api *dpv1alpha2.API, k8sClient client.Client) {
-	crAPI := &dpv1alpha2.API{}
+func DeployAPICR(api *dpv1alpha3.API, k8sClient client.Client) {
+	crAPI := &dpv1alpha3.API{}
 	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: api.ObjectMeta.Namespace, Name: api.Name}, crAPI); err != nil {
 		if !k8error.IsNotFound(err) {
 			loggers.LoggerK8sClient.Error("Unable to get API CR: " + err.Error())
@@ -66,7 +66,7 @@ func DeployAPICR(api *dpv1alpha2.API, k8sClient client.Client) {
 }
 
 // UndeployK8sAPICR removes the API Custom Resource from the Kubernetes cluster based on API ID label.
-func UndeployK8sAPICR(k8sClient client.Client, k8sAPI dpv1alpha2.API) error {
+func UndeployK8sAPICR(k8sClient client.Client, k8sAPI dpv1alpha3.API) error {
 	err := k8sClient.Delete(context.Background(), &k8sAPI, &client.DeleteOptions{})
 	if err != nil {
 		loggers.LoggerK8sClient.Errorf("Unable to delete API CR: %v", err)
@@ -82,7 +82,7 @@ func UndeployAPICR(apiID string, k8sClient client.Client) {
 	if errReadConfig != nil {
 		loggers.LoggerK8sClient.Errorf("Error reading configurations: %v", errReadConfig)
 	}
-	apiList := &dpv1alpha2.APIList{}
+	apiList := &dpv1alpha3.APIList{}
 	err := k8sClient.List(context.Background(), apiList, &client.ListOptions{Namespace: conf.DataPlane.Namespace, LabelSelector: labels.SelectorFromSet(map[string]string{"apiUUID": apiID})})
 	// Retrieve all API CRs from the Kubernetes cluster
 	if err != nil {
@@ -429,6 +429,66 @@ func DeploySubscriptionRateLimitPolicyCR(policy eventhubTypes.SubscriptionPolicy
 
 }
 
+// DeployAIRateLimitPolicyCR applies the given AIRateLimitPolicies struct to the Kubernetes cluster.
+func DeployAIRateLimitPolicyCR(policy eventhubTypes.SubscriptionPolicy, k8sClient client.Client) {
+	conf, _ := config.ReadConfigs()
+	tokenCount := &dpv1alpha3.TokenCount{}
+	requestCount := &dpv1alpha3.RequestCount{}
+	if policy.DefaultLimit.AiAPIQuota.PromptTokenCount != nil &&
+		policy.DefaultLimit.AiAPIQuota.CompletionTokenCount != nil &&
+		policy.DefaultLimit.AiAPIQuota.TotalTokenCount != nil {
+		tokenCount = &dpv1alpha3.TokenCount{
+			Unit:               policy.DefaultLimit.AiAPIQuota.TimeUnit,
+			RequestTokenCount:  uint32(*policy.DefaultLimit.AiAPIQuota.PromptTokenCount),
+			ResponseTokenCount: uint32(*policy.DefaultLimit.AiAPIQuota.CompletionTokenCount),
+			TotalTokenCount:    uint32(*policy.DefaultLimit.AiAPIQuota.TotalTokenCount),
+		}
+	} else {
+		tokenCount = nil
+	}
+	if policy.DefaultLimit.AiAPIQuota.RequestCount != nil {
+		requestCount = &dpv1alpha3.RequestCount{
+			RequestsPerUnit: uint32(*policy.DefaultLimit.AiAPIQuota.RequestCount),
+			Unit:            policy.DefaultLimit.AiAPIQuota.TimeUnit,
+		}
+	} else {
+		requestCount = nil
+	}
+
+	crRateLimitPolicies := dpv1alpha3.AIRateLimitPolicy{
+		ObjectMeta: metav1.ObjectMeta{Name: policy.Name,
+			Namespace: conf.DataPlane.Namespace,
+		},
+		Spec: dpv1alpha3.AIRateLimitPolicySpec{
+			Override: &dpv1alpha3.AIRateLimit{
+				Organization: policy.TenantDomain,
+				TokenCount:   tokenCount,
+				RequestCount: requestCount,
+			},
+			TargetRef: gwapiv1b1.PolicyTargetReference{Group: constants.GatewayGroup, Kind: "Subscription", Name: "default"},
+		},
+	}
+	crRateLimitPolicyFetched := &dpv1alpha3.AIRateLimitPolicy{}
+	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: crRateLimitPolicies.ObjectMeta.Namespace, Name: crRateLimitPolicies.Name}, crRateLimitPolicyFetched); err != nil {
+		if !k8error.IsNotFound(err) {
+			loggers.LoggerK8sClient.Error("Unable to get AiratelimitPolicy CR: " + err.Error())
+		}
+		if err := k8sClient.Create(context.Background(), &crRateLimitPolicies); err != nil {
+			loggers.LoggerK8sClient.Error("Unable to create AIRateLimitPolicies CR: " + err.Error())
+		} else {
+			loggers.LoggerK8sClient.Info("AIRateLimitPolicies CR created: " + crRateLimitPolicies.Name)
+		}
+	} else {
+		crRateLimitPolicyFetched.Spec = crRateLimitPolicies.Spec
+		crRateLimitPolicyFetched.ObjectMeta.Labels = crRateLimitPolicies.ObjectMeta.Labels
+		if err := k8sClient.Update(context.Background(), crRateLimitPolicyFetched); err != nil {
+			loggers.LoggerK8sClient.Error("Unable to update AiRatelimitPolicy CR: " + err.Error())
+		} else {
+			loggers.LoggerK8sClient.Info("AiRatelimitPolicy CR updated: " + crRateLimitPolicyFetched.Name)
+		}
+	}
+}
+
 // DeployBackendCR applies the given Backends struct to the Kubernetes cluster.
 func DeployBackendCR(backends *dpv1alpha2.Backend, k8sClient client.Client) {
 	crBackends := &dpv1alpha2.Backend{}
@@ -625,10 +685,10 @@ func getSha1Value(input string) string {
 }
 
 // RetrieveAllAPISFromK8s retrieves all the API CRs from the Kubernetes cluster
-func RetrieveAllAPISFromK8s(k8sClient client.Client, nextToken string) ([]dpv1alpha2.API, string, error) {
+func RetrieveAllAPISFromK8s(k8sClient client.Client, nextToken string) ([]dpv1alpha3.API, string, error) {
 	conf, _ := config.ReadConfigs()
-	apiList := dpv1alpha2.APIList{}
-	resolvedAPIList := make([]dpv1alpha2.API, 0)
+	apiList := dpv1alpha3.APIList{}
+	resolvedAPIList := make([]dpv1alpha3.API, 0)
 	var err error
 	if nextToken == "" {
 		err = k8sClient.List(context.Background(), &apiList, &client.ListOptions{Namespace: conf.DataPlane.Namespace})

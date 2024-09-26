@@ -189,8 +189,8 @@ github.com/vektah/gqlparser v1.3.1 h1:8b0IcD3qZKWJQHSzynbDlrtP3IxVydZ2DZepCGofqf
 github.com/vektah/gqlparser v1.3.1/go.mod h1:bkVf0FX+Stjg/MHnm8mEyubuaArhNEqfQhF+OTiAL74=
 github.com/wso2/apk/adapter v0.0.0-20240408123538-86a74d977eee h1:g0ivVkzybfcEkB0vBGTAXTUuMZpsF3zOTVtAgmW851s=
 github.com/wso2/apk/adapter v0.0.0-20240408123538-86a74d977eee/go.mod h1:xYS5auF/YxnyRykw7NBSn/YR2FHD4hTeyav4Nhec8d0=
-github.com/wso2/apk/common-go-libs v0.0.0-20240920041902-85449a1c0150 h1:X3OezAh2UOxmQIRxsAua87nNqmoIGXx1yfQIvc4a+G4=
-github.com/wso2/apk/common-go-libs v0.0.0-20240920041902-85449a1c0150/go.mod h1:SbZVA1jeiVG9dqk9fGcY/bB0JgEaQgtXqFAlxAfN0Lk=
+github.com/wso2/apk/common-go-libs v0.0.0-20240923143402-ff7fdb0366f9 h1:MwQqG+/ODDIfLfc3xNMYk6jM+hB2ttjwZnaDBeiMOJI=
+github.com/wso2/apk/common-go-libs v0.0.0-20240923143402-ff7fdb0366f9/go.mod h1:SbZVA1jeiVG9dqk9fGcY/bB0JgEaQgtXqFAlxAfN0Lk=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=

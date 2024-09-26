@@ -10,7 +10,7 @@ import (
 
 // K8sArtifacts k8s artifact representation of API
 type K8sArtifacts struct {
-	API                 dpv1alpha2.API
+	API                 dpv1alpha3.API
 	HTTPRoutes          map[string]*gwapiv1.HTTPRoute
 	GQLRoutes           map[string]*dpv1alpha2.GQLRoute
 	Backends            map[string]*dpv1alpha2.Backend
