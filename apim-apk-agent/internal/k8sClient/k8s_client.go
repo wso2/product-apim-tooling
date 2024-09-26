@@ -367,6 +367,29 @@ func DeployRateLimitPolicyCR(rateLimitPolicies *dpv1alpha1.RateLimitPolicy, k8sC
 	}
 }
 
+// DeployAIRateLimitPolicyCR applies the given AIRateLimitPolicies struct to the Kubernetes cluster.
+func DeployAIRateLimitPolicyCR(aiRateLimitPolicies *dpv1alpha3.AIRateLimitPolicy, k8sClient client.Client) {
+	crAIRateLimitPolicies := &dpv1alpha3.AIRateLimitPolicy{}
+	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: aiRateLimitPolicies.ObjectMeta.Namespace, Name: aiRateLimitPolicies.Name}, crAIRateLimitPolicies); err != nil {
+		if !k8error.IsNotFound(err) {
+			loggers.LoggerK8sClient.Error("Unable to get RateLimitPolicies CR: " + err.Error())
+		}
+		if err := k8sClient.Create(context.Background(), aiRateLimitPolicies); err != nil {
+			loggers.LoggerK8sClient.Error("Unable to create RateLimitPolicies CR: " + err.Error())
+		} else {
+			loggers.LoggerK8sClient.Info("RateLimitPolicies CR created: " + aiRateLimitPolicies.Name)
+		}
+	} else {
+		crAIRateLimitPolicies.Spec = aiRateLimitPolicies.Spec
+		crAIRateLimitPolicies.ObjectMeta.Labels = aiRateLimitPolicies.ObjectMeta.Labels
+		if err := k8sClient.Update(context.Background(), crAIRateLimitPolicies); err != nil {
+			loggers.LoggerK8sClient.Error("Unable to update RateLimitPolicies CR: " + err.Error())
+		} else {
+			loggers.LoggerK8sClient.Info("RateLimitPolicies CR updated: " + aiRateLimitPolicies.Name)
+		}
+	}
+}
+
 // UpdateRateLimitPolicyCR applies the updated policy details to all the RateLimitPolicies struct which has the provided label to the Kubernetes cluster.
 func UpdateRateLimitPolicyCR(policy eventhubTypes.RateLimitPolicy, k8sClient client.Client) {
 	conf, _ := config.ReadConfigs()
@@ -429,8 +452,8 @@ func DeploySubscriptionRateLimitPolicyCR(policy eventhubTypes.SubscriptionPolicy
 
 }
 
-// DeployAIRateLimitPolicyCR applies the given AIRateLimitPolicies struct to the Kubernetes cluster.
-func DeployAIRateLimitPolicyCR(policy eventhubTypes.SubscriptionPolicy, k8sClient client.Client) {
+// DeployAIRateLimitPolicyFromCPPolicy applies the given AIRateLimitPolicies struct to the Kubernetes cluster.
+func DeployAIRateLimitPolicyFromCPPolicy(policy eventhubTypes.SubscriptionPolicy, k8sClient client.Client) {
 	conf, _ := config.ReadConfigs()
 	tokenCount := &dpv1alpha3.TokenCount{}
 	requestCount := &dpv1alpha3.RequestCount{}

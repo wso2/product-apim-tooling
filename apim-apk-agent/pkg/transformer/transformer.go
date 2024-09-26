@@ -226,7 +226,6 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 // prepareAIRatelimit Function that accepts apiYamlData and returns AIRatelimit
 func prepareAIRatelimit(maxTps *MaxTps) (*AIRatelimit, *AIRatelimit) {
 	if maxTps == nil {
-		logger.LoggerTransformer.Info("Returing nil nil")
 		return nil, nil
 	} 
 	prodAIRL := &AIRatelimit{}
@@ -236,7 +235,6 @@ func prepareAIRatelimit(maxTps *MaxTps) (*AIRatelimit, *AIRatelimit) {
 	maxTps.TokenBasedThrottlingConfiguration.ProductionMaxCompletionTokenCount == nil ||
 	maxTps.TokenBasedThrottlingConfiguration.ProductionMaxTotalTokenCount == nil ||
 	maxTps.ProductionTimeUnit == nil {
-		logger.LoggerTransformer.Info("Returing prod nil")
 		prodAIRL = nil
 	} else {
 		prodAIRL = &AIRatelimit{
@@ -245,11 +243,11 @@ func prepareAIRatelimit(maxTps *MaxTps) (*AIRatelimit, *AIRatelimit) {
 				PromptLimit:     *maxTps.TokenBasedThrottlingConfiguration.ProductionMaxPromptTokenCount,
 				CompletionLimit: *maxTps.TokenBasedThrottlingConfiguration.ProductionMaxCompletionTokenCount,
 				TotalLimit:      *maxTps.TokenBasedThrottlingConfiguration.ProductionMaxTotalTokenCount,
-				Unit:            *maxTps.ProductionTimeUnit,
+				Unit:             CapitalizeFirstLetter(*maxTps.ProductionTimeUnit),
 			},
 			Request: RequestAIRL{
 				RequestLimit: *maxTps.Production,
-				Unit:         *maxTps.ProductionTimeUnit,
+				Unit:          CapitalizeFirstLetter(*maxTps.ProductionTimeUnit),
 			},
 		}
 	}
@@ -260,7 +258,6 @@ func prepareAIRatelimit(maxTps *MaxTps) (*AIRatelimit, *AIRatelimit) {
 	maxTps.TokenBasedThrottlingConfiguration.SandboxMaxCompletionTokenCount == nil ||
 	maxTps.TokenBasedThrottlingConfiguration.SandboxMaxTotalTokenCount == nil ||
 	maxTps.SandboxTimeUnit == nil {
-		logger.LoggerTransformer.Info("Returing sand nil")
 		sandAIRL = nil
 	} else {
 		sandAIRL = &AIRatelimit{
@@ -269,16 +266,25 @@ func prepareAIRatelimit(maxTps *MaxTps) (*AIRatelimit, *AIRatelimit) {
 				PromptLimit:     *maxTps.TokenBasedThrottlingConfiguration.SandboxMaxPromptTokenCount,
 				CompletionLimit: *maxTps.TokenBasedThrottlingConfiguration.SandboxMaxCompletionTokenCount,
 				TotalLimit:      *maxTps.TokenBasedThrottlingConfiguration.SandboxMaxTotalTokenCount,
-				Unit:            *maxTps.SandboxTimeUnit,
+				Unit:            CapitalizeFirstLetter(*maxTps.SandboxTimeUnit),
 			},
 			Request: RequestAIRL{
 				RequestLimit: *maxTps.Sandbox,
-				Unit:         *maxTps.SandboxTimeUnit,
+				Unit:         CapitalizeFirstLetter(*maxTps.SandboxTimeUnit),
 			},
 		}
 	}
 
 	return prodAIRL, sandAIRL
+}
+
+// CapitalizeFirstLetter takes a string and returns it with the first letter capitalized and the rest in lowercase.
+func CapitalizeFirstLetter(input string) string {
+	if len(input) == 0 {
+		return input // Return empty string if input is empty
+	}
+	// Capitalize the first letter and convert the rest to lowercase
+	return strings.ToUpper(string(input[0])) + strings.ToLower(input[1:])
 }
 
 // getAPIType will be selecting the appropriate API type need to be added in the apk-conf
@@ -714,7 +720,7 @@ func getEndpointConfigs(sandboxURL string, prodURL string, endCertAvailable bool
 // GenerateCRs takes the .apk-conf, api definition, vHost and the organization for a particular API and then generate and returns
 // the relavant CRD set as a zip
 func GenerateCRs(apkConf string, apiDefinition string, certContainer CertContainer, k8ResourceGenEndpoint string, organizationID string) (*K8sArtifacts, error) {
-	k8sArtifact := K8sArtifacts{HTTPRoutes: make(map[string]*gwapiv1.HTTPRoute), GQLRoutes: make(map[string]*dpv1alpha2.GQLRoute), Backends: make(map[string]*dpv1alpha2.Backend), Scopes: make(map[string]*dpv1alpha1.Scope), Authentication: make(map[string]*dpv1alpha2.Authentication), APIPolicies: make(map[string]*dpv1alpha3.APIPolicy), InterceptorServices: make(map[string]*dpv1alpha1.InterceptorService), ConfigMaps: make(map[string]*corev1.ConfigMap), Secrets: make(map[string]*corev1.Secret), RateLimitPolicies: make(map[string]*dpv1alpha1.RateLimitPolicy)}
+	k8sArtifact := K8sArtifacts{HTTPRoutes: make(map[string]*gwapiv1.HTTPRoute), GQLRoutes: make(map[string]*dpv1alpha2.GQLRoute), Backends: make(map[string]*dpv1alpha2.Backend), Scopes: make(map[string]*dpv1alpha1.Scope), Authentication: make(map[string]*dpv1alpha2.Authentication), APIPolicies: make(map[string]*dpv1alpha3.APIPolicy), InterceptorServices: make(map[string]*dpv1alpha1.InterceptorService), ConfigMaps: make(map[string]*corev1.ConfigMap), Secrets: make(map[string]*corev1.Secret), RateLimitPolicies: make(map[string]*dpv1alpha1.RateLimitPolicy), AIRateLimitPolicies: make(map[string]*dpv1alpha3.AIRateLimitPolicy)}
 	if apkConf == "" {
 		logger.LoggerTransformer.Error("Empty apk-conf parameter provided. Unable to generate CRDs.")
 		return nil, errors.New("Error: APK-Conf can't be empty")
@@ -899,6 +905,14 @@ func GenerateCRs(apkConf string, apiDefinition string, certContainer CertContain
 				continue
 			}
 			k8sArtifact.RateLimitPolicies[rateLimitPolicy.Name] = &rateLimitPolicy
+		case "AIRateLimitPolicy":
+			var aiRateLimitPolicy dpv1alpha3.AIRateLimitPolicy
+			err = k8Yaml.Unmarshal(yamlData, &aiRateLimitPolicy)
+			if err != nil {
+				logger.LoggerSync.Errorf("Error unmarshaling AIRateLimitPolicy YAML: %v", err)
+				continue
+			}
+			k8sArtifact.AIRateLimitPolicies[aiRateLimitPolicy.Name] = &aiRateLimitPolicy
 		case "Secret":
 			var secret corev1.Secret
 			err = k8Yaml.Unmarshal(yamlData, &secret)

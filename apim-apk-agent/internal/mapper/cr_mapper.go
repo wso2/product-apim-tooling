@@ -80,6 +80,10 @@ func MapAndCreateCR(k8sArtifact transformer.K8sArtifacts, k8sClient client.Clien
 		rateLimitPolicy.Namespace = namespace
 		internalk8sClient.DeployRateLimitPolicyCR(rateLimitPolicy, k8sClient)
 	}
+	for _, aiRateLimitPolicy := range k8sArtifact.AIRateLimitPolicies {
+		aiRateLimitPolicy.Namespace = namespace
+		internalk8sClient.DeployAIRateLimitPolicyCR(aiRateLimitPolicy, k8sClient)
+	}
 	for _, secrets := range k8sArtifact.Secrets {
 		secrets.Namespace = namespace
 		internalk8sClient.DeploySecretCR(secrets, k8sClient)

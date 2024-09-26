@@ -22,4 +22,5 @@ type K8sArtifacts struct {
 	Secrets             map[string]*corev1.Secret
 	BackendJWT          *v1alpha1.BackendJWT
 	RateLimitPolicies   map[string]*v1alpha1.RateLimitPolicy
+	AIRateLimitPolicies map[string]*dpv1alpha3.AIRateLimitPolicy
 }

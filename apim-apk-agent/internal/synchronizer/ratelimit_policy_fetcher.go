@@ -267,7 +267,7 @@ func FetchSubscriptionRateLimitPoliciesOnEvent(ratelimitName string, organizatio
 						policy.DefaultLimit.AiAPIQuota.TotalTokenCount = &total
 					}
 					managementserver.AddSubscriptionPolicy(policy)
-					k8sclient.DeployAIRateLimitPolicyCR(policy, c)
+					k8sclient.DeployAIRateLimitPolicyFromCPPolicy(policy, c)
 				} else {
 					logger.LoggerSynchronizer.Errorf("AIQuota type response recieved but no data found. %+v", policy.DefaultLimit)
 				}
