@@ -146,6 +146,17 @@ type API struct {
 	AuthHeader       string            `json:"authHeader"`
 	APIKeyHeader     string            `json:"apiKeyHeader"`
 	Operations       []OperationFromDP `json:"operations"`
+	SandAIRL         *AIRL              `json:"sandAIRL"`
+	ProdAIRL         *AIRL              `json:"prodAIRL"`
+}
+
+// AIRL holds AI ratelimit related data
+type AIRL struct {
+	PromptTokenCount     *uint32   `json:"promptTokenCount"`
+	CompletionTokenCount *uint32   `json:"CompletionTokenCount"`
+	TotalTokenCount      *uint32   `json:"totalTokenCount"`
+	TimeUnit             string `json:"timeUnit"`
+	RequestCount         *uint32   `json:"requestCount"`
 }
 
 // APKHeaders contains the request and response header modifier information
