@@ -216,6 +216,52 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string) {
 			"accessControlExposeHeaders":    apiCPEvent.API.CORSPolicy.AccessControlExposeHeaders,
 		}
 	}
+	maxTps := make(map[string]interface{})
+
+	// Handle Production fields
+	if apiCPEvent.API.ProdAIRL != nil {
+		maxTps["production"] = apiCPEvent.API.ProdAIRL.RequestCount
+		maxTps["productionTimeUnit"] = apiCPEvent.API.ProdAIRL.TimeUnit
+
+		tokenConfig := make(map[string]interface{})
+		if apiCPEvent.API.ProdAIRL.PromptTokenCount != nil {
+			tokenConfig["productionMaxPromptTokenCount"] = *apiCPEvent.API.ProdAIRL.PromptTokenCount
+		}
+		if apiCPEvent.API.ProdAIRL.CompletionTokenCount != nil {
+			tokenConfig["productionMaxCompletionTokenCount"] = *apiCPEvent.API.ProdAIRL.CompletionTokenCount
+		}
+		if apiCPEvent.API.ProdAIRL.TotalTokenCount != nil {
+			tokenConfig["productionMaxTotalTokenCount"] = *apiCPEvent.API.ProdAIRL.TotalTokenCount
+		}
+		if len(tokenConfig) > 0 {
+			tokenConfig["isTokenBasedThrottlingEnabled"] = true
+			maxTps["tokenBasedThrottlingConfiguration"] = tokenConfig
+		}
+	}
+
+	// Handle Sandbox fields
+	if apiCPEvent.API.SandAIRL != nil {
+		maxTps["sandbox"] = apiCPEvent.API.SandAIRL.RequestCount
+		maxTps["sandboxTimeUnit"] = apiCPEvent.API.SandAIRL.TimeUnit
+
+		// Add sandbox token-based throttling config
+		if maxTps["tokenBasedThrottlingConfiguration"] == nil {
+			maxTps["tokenBasedThrottlingConfiguration"] = make(map[string]interface{})
+		}
+		tokenConfig := maxTps["tokenBasedThrottlingConfiguration"].(map[string]interface{})
+		if apiCPEvent.API.SandAIRL.PromptTokenCount != nil {
+			tokenConfig["sandboxMaxPromptTokenCount"] = *apiCPEvent.API.SandAIRL.PromptTokenCount
+		}
+		if apiCPEvent.API.SandAIRL.CompletionTokenCount != nil {
+			tokenConfig["sandboxMaxCompletionTokenCount"] = *apiCPEvent.API.SandAIRL.CompletionTokenCount
+		}
+		if apiCPEvent.API.SandAIRL.TotalTokenCount != nil {
+			tokenConfig["sandboxMaxTotalTokenCount"] = *apiCPEvent.API.SandAIRL.TotalTokenCount
+		}
+	}
+	if len(maxTps) > 0 {
+		data["data"].(map[string]interface{})["maxTps"] = maxTps
+	}
 	logger.LoggerMgtServer.Debugf("Prepared yaml : %+v", data)
 	definition := apiCPEvent.API.Definition
 	if strings.EqualFold(apiCPEvent.API.APIType, "rest") {
@@ -285,6 +331,10 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string) {
 
 	yamlBytes, _ := yaml.Marshal(data)
 	return string(yamlBytes), definition
+}
+
+func getUint32OrNil(i *uint32) {
+
 }
 
 func createDeployementYaml(vhost string) string {
