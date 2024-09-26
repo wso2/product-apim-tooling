@@ -51,23 +51,23 @@ type EndpointConfiguration struct {
 // including whether rate limiting is enabled and the settings 
 // for token and request-based limits.
 type AIRatelimit struct {
-	Enabled bool        `json:"enabled"`
-	Token   TokenAIRL   `json:"token"`
-	Request RequestAIRL `json:"request"`
+	Enabled bool        `yaml:"enabled"`
+	Token   TokenAIRL   `yaml:"token"`
+	Request RequestAIRL `yaml:"request"`
 }
 
 // TokenAIRL defines the configuration for Token AI rate limit settings.
 type TokenAIRL struct {
-	PromptLimit     int    `json:"promptLimit"`
-	CompletionLimit int    `json:"completionLimit"`
-	TotalLimit      int    `json:"totalLimit"`
-	Unit            string `json:"unit"` // Time unit (Minute, Hour, Day)
+	PromptLimit     int    `yaml:"promptLimit"`
+	CompletionLimit int    `yaml:"completionLimit"`
+	TotalLimit      int    `yaml:"totalLimit"`
+	Unit            string `yaml:"unit"` // Time unit (Minute, Hour, Day)
 }
 
 // RequestAIRL defines the configuration for Request AI rate limit settings.
 type RequestAIRL struct {
-	RequestLimit int    `json:"requestLimit"`
-	Unit         string `json:"unit"` // Time unit (Minute, Hour, Day)
+	RequestLimit int    `yaml:"requestLimit"`
+	Unit         string `yaml:"unit"` // Time unit (Minute, Hour, Day)
 }
 
 
