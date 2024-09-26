@@ -130,6 +130,7 @@ type API struct {
 	IsDefaultVersion bool              `json:"isDefaultVersion"`
 	Definition       string            `json:"definition"`
 	APIType          string            `json:"apiType"`
+	APISubType       string            `json:"apiSubType"`
 	BasePath         string            `json:"basePath"`
 	Organization     string            `json:"organization"`
 	SystemAPI        bool              `json:"systemAPI"`
@@ -146,17 +147,24 @@ type API struct {
 	AuthHeader       string            `json:"authHeader"`
 	APIKeyHeader     string            `json:"apiKeyHeader"`
 	Operations       []OperationFromDP `json:"operations"`
-	SandAIRL         *AIRL              `json:"sandAIRL"`
-	ProdAIRL         *AIRL              `json:"prodAIRL"`
+	SandAIRL         *AIRL             `json:"sandAIRL"`
+	ProdAIRL         *AIRL             `json:"prodAIRL"`
+	AIConfiguration  AIConfiguration   `json:"aiConfiguration"`
 }
 
 // AIRL holds AI ratelimit related data
 type AIRL struct {
-	PromptTokenCount     *uint32   `json:"promptTokenCount"`
-	CompletionTokenCount *uint32   `json:"CompletionTokenCount"`
-	TotalTokenCount      *uint32   `json:"totalTokenCount"`
-	TimeUnit             string `json:"timeUnit"`
-	RequestCount         *uint32   `json:"requestCount"`
+	PromptTokenCount     *uint32 `json:"promptTokenCount"`
+	CompletionTokenCount *uint32 `json:"CompletionTokenCount"`
+	TotalTokenCount      *uint32 `json:"totalTokenCount"`
+	TimeUnit             string  `json:"timeUnit"`
+	RequestCount         *uint32 `json:"requestCount"`
+}
+
+// AIConfiguration holds the AI configuration
+type AIConfiguration struct {
+	LLMProviderName       string `json:"llmProviderName"`
+	LLMProviderAPIVersion string `json:"llmProviderApiVersion"`
 }
 
 // APKHeaders contains the request and response header modifier information
