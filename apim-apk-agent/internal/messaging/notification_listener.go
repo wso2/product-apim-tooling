@@ -130,9 +130,7 @@ func processNotificationEvent(conf *config.Config, notification *msg.EventNotifi
 			handlePolicyEvents(decodedByte, eventType, c)
 		}
 	} else if strings.Contains(eventType, aiProviderEventType) {
-		if AgentMode == "CPtoDP" {
-			handleAIProviderEvents(decodedByte, eventType, c)
-		}
+		handleAIProviderEvents(decodedByte, eventType, c)
 	}
 	// other events will ignore including HEALTH_CHECK event
 	return nil
