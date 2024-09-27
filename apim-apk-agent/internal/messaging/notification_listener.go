@@ -467,15 +467,29 @@ func handlePolicyEvents(data []byte, eventType string, c client.Client) {
 			logger.LoggerMessaging.Infof("Rate Limit Policies Internal Map: %v", ratelimitPolicies)
 		}
 	} else if strings.EqualFold(eventType, policyUpdate) {
-		logger.LoggerMessaging.Infof("Policy: %s for policy type: %s for tenant: %s", policyEvent.PolicyName, policyEvent.PolicyType, policyEvent.TenantDomain)
-		synchronizer.FetchRateLimitPoliciesOnEvent(policyEvent.PolicyName, policyEvent.TenantDomain, c)
-		ratelimitPolicies := managementserver.GetAllRateLimitPolicies()
-		logger.LoggerMessaging.Infof("Rate Limit Policies Internal Map: %v", ratelimitPolicies)
+		if strings.EqualFold(policyEvent.PolicyType, "API") {
+			logger.LoggerMessaging.Infof("Policy: %s for policy type: %s for tenant: %s", policyEvent.PolicyName, policyEvent.PolicyType, policyEvent.TenantDomain)
+			synchronizer.FetchRateLimitPoliciesOnEvent(policyEvent.PolicyName, policyEvent.TenantDomain, c)
+			ratelimitPolicies := managementserver.GetAllRateLimitPolicies()
+			logger.LoggerMessaging.Infof("Rate Limit Policies Internal Map: %v", ratelimitPolicies)
+		} else if strings.EqualFold(policyEvent.PolicyType, "SUBSCRIPTION") {
+			logger.LoggerMessaging.Infof("Policy: %s for policy type: %s", policyEvent.PolicyName, policyEvent.PolicyType)
+			synchronizer.FetchSubscriptionRateLimitPoliciesOnEvent(policyEvent.PolicyName, policyEvent.TenantDomain, c)
+			ratelimitPolicies := managementserver.GetAllRateLimitPolicies()
+			logger.LoggerMessaging.Infof("Rate Limit Policies Internal Map: %v", ratelimitPolicies)
+		}
 	} else if strings.EqualFold(eventType, policyDelete) {
-		logger.LoggerMessaging.Infof("Policy: %s for policy type: %s", policyEvent.PolicyName, policyEvent.PolicyType)
-		managementserver.DeleteRateLimitPolicy(policyEvent.PolicyName, policyEvent.TenantDomain)
-		ratelimitPolicies := managementserver.GetAllRateLimitPolicies()
-		logger.LoggerMessaging.Infof("Rate Limit Policies Internal Map: %v", ratelimitPolicies)
+		if strings.EqualFold(policyEvent.PolicyType, "API") {
+			logger.LoggerMessaging.Infof("Policy: %s for policy type: %s", policyEvent.PolicyName, policyEvent.PolicyType)
+			managementserver.DeleteRateLimitPolicy(policyEvent.PolicyName, policyEvent.TenantDomain)
+			ratelimitPolicies := managementserver.GetAllRateLimitPolicies()
+			logger.LoggerMessaging.Infof("Rate Limit Policies Internal Map: %v", ratelimitPolicies)
+		} else if strings.EqualFold(policyEvent.PolicyType, "SUBSCRIPTION") {
+			logger.LoggerMessaging.Infof("Policy: %s for policy type: %s", policyEvent.PolicyName, policyEvent.PolicyType)
+			k8sclient.UnDeploySubscriptionRateLimitPolicyCR(policyEvent.PolicyName, c)
+			ratelimitPolicies := managementserver.GetAllRateLimitPolicies()
+			logger.LoggerMessaging.Infof("Rate Limit Policies Internal Map: %v", ratelimitPolicies)
+		}
 	}
 
 	if strings.EqualFold(applicationEventType, policyEvent.PolicyType) {

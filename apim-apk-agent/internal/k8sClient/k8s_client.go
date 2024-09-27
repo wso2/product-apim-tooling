@@ -424,30 +424,41 @@ func UpdateRateLimitPolicyCR(policy eventhubTypes.RateLimitPolicy, k8sClient cli
 // DeploySubscriptionRateLimitPolicyCR applies the given RateLimitPolicies struct to the Kubernetes cluster.
 func DeploySubscriptionRateLimitPolicyCR(policy eventhubTypes.SubscriptionPolicy, k8sClient client.Client) {
 	conf, _ := config.ReadConfigs()
-
-	crRateLimitPolicies := dpv1alpha3.RateLimitPolicy{
-		ObjectMeta: metav1.ObjectMeta{Name: policy.Name,
-			Namespace: conf.DataPlane.Namespace,
-		},
-		Spec: dpv1alpha3.RateLimitPolicySpec{
-			Override: &dpv1alpha3.RateLimitAPIPolicy{
-				Subscription: &dpv1alpha3.SubscriptionRateLimitPolicy{
-					StopOnQuotaReach: policy.StopOnQuotaReach,
-					Organization:     policy.TenantDomain,
-					RequestCount: &dpv1alpha3.RequestCount{
-						RequestsPerUnit: uint32(policy.DefaultLimit.RequestCount.RequestCount),
-						Unit:            policy.DefaultLimit.RequestCount.TimeUnit,
+	crRateLimitPolicy := dpv1alpha3.RateLimitPolicy{}
+	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: conf.DataPlane.Namespace, Name: policy.Name}, &crRateLimitPolicy); err != nil {
+		crRateLimitPolicy = dpv1alpha3.RateLimitPolicy{
+			ObjectMeta: metav1.ObjectMeta{Name: policy.Name,
+				Namespace: conf.DataPlane.Namespace,
+			},
+			Spec: dpv1alpha3.RateLimitPolicySpec{
+				Override: &dpv1alpha3.RateLimitAPIPolicy{
+					Subscription: &dpv1alpha3.SubscriptionRateLimitPolicy{
+						StopOnQuotaReach: policy.StopOnQuotaReach,
+						Organization:     policy.TenantDomain,
+						RequestCount: &dpv1alpha3.RequestCount{
+							RequestsPerUnit: uint32(policy.DefaultLimit.RequestCount.RequestCount),
+							Unit:            policy.DefaultLimit.RequestCount.TimeUnit,
+						},
 					},
 				},
+				TargetRef: gwapiv1b1.PolicyTargetReference{Group: constants.GatewayGroup, Kind: "Subscription", Name: "default"},
 			},
-			TargetRef: gwapiv1b1.PolicyTargetReference{Group: constants.GatewayGroup, Kind: "Subscription", Name: "default"},
-		},
-	}
-
-	if err := k8sClient.Create(context.Background(), &crRateLimitPolicies); err != nil {
-		loggers.LoggerK8sClient.Error("Unable to create RateLimitPolicies CR: " + err.Error())
+		}
+		if err := k8sClient.Create(context.Background(), &crRateLimitPolicy); err != nil {
+			loggers.LoggerK8sClient.Error("Unable to create RateLimitPolicies CR: " + err.Error())
+		} else {
+			loggers.LoggerK8sClient.Info("RateLimitPolicies CR created: " + crRateLimitPolicy.Name)
+		}
 	} else {
-		loggers.LoggerK8sClient.Info("RateLimitPolicies CR created: " + crRateLimitPolicies.Name)
+		crRateLimitPolicy.Spec.Override.Subscription.StopOnQuotaReach = policy.StopOnQuotaReach
+		crRateLimitPolicy.Spec.Override.Subscription.Organization = policy.TenantDomain
+		crRateLimitPolicy.Spec.Override.Subscription.RequestCount.RequestsPerUnit = uint32(policy.DefaultLimit.RequestCount.RequestCount)
+		crRateLimitPolicy.Spec.Override.Subscription.RequestCount.Unit = policy.DefaultLimit.RequestCount.TimeUnit
+		if err := k8sClient.Update(context.Background(), &crRateLimitPolicy); err != nil {
+			loggers.LoggerK8sClient.Error("Unable to update RateLimitPolicies CR: " + err.Error())
+		} else {
+			loggers.LoggerK8sClient.Info("RateLimitPolicies CR updated: " + crRateLimitPolicy.Name)
+		}
 	}
 
 }
@@ -510,6 +521,20 @@ func DeployAIRateLimitPolicyFromCPPolicy(policy eventhubTypes.SubscriptionPolicy
 			loggers.LoggerK8sClient.Info("AiRatelimitPolicy CR updated: " + crRateLimitPolicyFetched.Name)
 		}
 	}
+}
+
+// UnDeploySubscriptionRateLimitPolicyCR applies the given RateLimitPolicies struct to the Kubernetes cluster.
+func UnDeploySubscriptionRateLimitPolicyCR(policyName string, k8sClient client.Client) {
+	conf, _ := config.ReadConfigs()
+	crRateLimitPolicies := &dpv1alpha1.RateLimitPolicy{}
+	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: conf.DataPlane.Namespace, Name: policyName}, crRateLimitPolicies); err != nil {
+		loggers.LoggerK8sClient.Error("Unable to get RateLimitPolicies CR: " + err.Error())
+	}
+	err := k8sClient.Delete(context.Background(), crRateLimitPolicies, &client.DeleteOptions{})
+	if err != nil {
+		loggers.LoggerK8sClient.Error("Unable to delete RateLimitPolicies CR: " + err.Error())
+	}
+	loggers.LoggerK8sClient.Debug("RateLimitPolicies CR deleted: " + crRateLimitPolicies.Name)
 }
 
 // DeployBackendCR applies the given Backends struct to the Kubernetes cluster.
