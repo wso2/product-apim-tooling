@@ -171,8 +171,9 @@ func Run(conf *config.Config) {
 	if AgentMode == "CPtoDP" {
 		// Load initial Policy data from control plane
 		synchronizer.FetchRateLimitPoliciesOnEvent("", "", mgr.GetClient())
-		synchronizer.FetchSubscriptionRateLimitPoliciesOnEvent("", "", mgr.GetClient())
 	}
+	// Load initial Subscription Rate Limit data from control plane
+	synchronizer.FetchSubscriptionRateLimitPoliciesOnEvent("", "", mgr.GetClient())
 	// Load initial AI Provider data from control plane
 	synchronizer.FetchAIProvidersOnEvent("", "", "", mgr.GetClient())
 
