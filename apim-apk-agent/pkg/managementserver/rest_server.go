@@ -234,7 +234,7 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string) {
 	// Handle Production fields
 	if apiCPEvent.API.ProdAIRL != nil {
 		maxTps["production"] = apiCPEvent.API.ProdAIRL.RequestCount
-		maxTps["productionTimeUnit"] = apiCPEvent.API.ProdAIRL.TimeUnit
+		maxTps["productionTimeUnit"] = strings.ToUpper(apiCPEvent.API.ProdAIRL.TimeUnit)
 
 		tokenConfig := make(map[string]interface{})
 		if apiCPEvent.API.ProdAIRL.PromptTokenCount != nil {
@@ -255,7 +255,7 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string) {
 	// Handle Sandbox fields
 	if apiCPEvent.API.SandAIRL != nil {
 		maxTps["sandbox"] = apiCPEvent.API.SandAIRL.RequestCount
-		maxTps["sandboxTimeUnit"] = apiCPEvent.API.SandAIRL.TimeUnit
+		maxTps["sandboxTimeUnit"] = strings.ToUpper(apiCPEvent.API.SandAIRL.TimeUnit)
 
 		// Add sandbox token-based throttling config
 		if maxTps["tokenBasedThrottlingConfiguration"] == nil {
@@ -344,10 +344,6 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string) {
 	logger.LoggerMgtServer.Debugf("API Yaml: %+v", data)
 	yamlBytes, _ := yaml.Marshal(data)
 	return string(yamlBytes), definition
-}
-
-func getUint32OrNil(i *uint32) {
-
 }
 
 func createDeployementYaml(vhost string) string {
