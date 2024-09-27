@@ -126,7 +126,12 @@ func processNotificationEvent(conf *config.Config, notification *msg.EventNotifi
 	} else if strings.Contains(eventType, subscriptionEventType) {
 		handleSubscriptionEvents(decodedByte, eventType)
 	} else if strings.Contains(eventType, policyEventType) {
-		if AgentMode == "CPtoDP" {
+		var policyEvent msg.PolicyInfo
+		policyEventErr := json.Unmarshal([]byte(string(decodedByte)), &policyEvent)
+		if policyEventErr != nil {
+			logger.LoggerMessaging.Errorf("Error occurred while unmarshalling Throttling Policy event data %v", policyEventErr)
+		}
+		if AgentMode == "CPtoDP" || strings.EqualFold(policyEvent.PolicyType, "SUBSCRIPTION") {
 			handlePolicyEvents(decodedByte, eventType, c)
 		}
 	} else if strings.Contains(eventType, aiProviderEventType) {
@@ -460,7 +465,7 @@ func handlePolicyEvents(data []byte, eventType string, c client.Client) {
 			logger.LoggerMessaging.Infof("Rate Limit Policies Internal Map: %v", ratelimitPolicies)
 		} else if strings.EqualFold(policyEvent.PolicyType, "SUBSCRIPTION") {
 			logger.LoggerMessaging.Infof("Policy: %s for policy type: %s", policyEvent.PolicyName, policyEvent.PolicyType)
-			synchronizer.FetchSubscriptionRateLimitPoliciesOnEvent(policyEvent.PolicyName, policyEvent.TenantDomain, c)
+			synchronizer.FetchSubscriptionRateLimitPoliciesOnEvent(policyEvent.PolicyName, policyEvent.TenantDomain, c, false)
 			ratelimitPolicies := managementserver.GetAllRateLimitPolicies()
 			logger.LoggerMessaging.Infof("Rate Limit Policies Internal Map: %v", ratelimitPolicies)
 		}
@@ -472,7 +477,7 @@ func handlePolicyEvents(data []byte, eventType string, c client.Client) {
 			logger.LoggerMessaging.Infof("Rate Limit Policies Internal Map: %v", ratelimitPolicies)
 		} else if strings.EqualFold(policyEvent.PolicyType, "SUBSCRIPTION") {
 			logger.LoggerMessaging.Infof("Policy: %s for policy type: %s", policyEvent.PolicyName, policyEvent.PolicyType)
-			synchronizer.FetchSubscriptionRateLimitPoliciesOnEvent(policyEvent.PolicyName, policyEvent.TenantDomain, c)
+			synchronizer.FetchSubscriptionRateLimitPoliciesOnEvent(policyEvent.PolicyName, policyEvent.TenantDomain, c, false)
 			ratelimitPolicies := managementserver.GetAllRateLimitPolicies()
 			logger.LoggerMessaging.Infof("Rate Limit Policies Internal Map: %v", ratelimitPolicies)
 		}
@@ -484,7 +489,9 @@ func handlePolicyEvents(data []byte, eventType string, c client.Client) {
 			logger.LoggerMessaging.Infof("Rate Limit Policies Internal Map: %v", ratelimitPolicies)
 		} else if strings.EqualFold(policyEvent.PolicyType, "SUBSCRIPTION") {
 			logger.LoggerMessaging.Infof("Policy: %s for policy type: %s", policyEvent.PolicyName, policyEvent.PolicyType)
+			managementserver.DeleteSubscriptionPolicy(policyEvent.PolicyName, policyEvent.TenantDomain)
 			k8sclient.UnDeploySubscriptionRateLimitPolicyCR(policyEvent.PolicyName, c)
+			k8sclient.UndeploySubscriptionAIRateLimitPolicyCR(policyEvent.PolicyName, c)
 			ratelimitPolicies := managementserver.GetAllRateLimitPolicies()
 			logger.LoggerMessaging.Infof("Rate Limit Policies Internal Map: %v", ratelimitPolicies)
 		}

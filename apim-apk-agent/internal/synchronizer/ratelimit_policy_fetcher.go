@@ -162,7 +162,7 @@ func FetchRateLimitPoliciesOnEvent(ratelimitName string, organization string, c 
 }
 
 // FetchSubscriptionRateLimitPoliciesOnEvent fetches the policies from the control plane on the start up and notification event updates
-func FetchSubscriptionRateLimitPoliciesOnEvent(ratelimitName string, organization string, c client.Client) {
+func FetchSubscriptionRateLimitPoliciesOnEvent(ratelimitName string, organization string, c client.Client, cleanupDeletedPolicies bool) {
 	logger.LoggerSynchronizer.Info("Fetching Subscription RateLimit Policies from Control Plane.")
 
 	// Read configurations and derive the eventHub details
@@ -308,7 +308,7 @@ func retrySubscriptionRLPFetchData(conf *config.Config, errorMessage string, err
 	logger.LoggerSynchronizer.Debugf("Time Duration for retrying: %v",
 		conf.ControlPlane.RetryInterval*time.Second)
 	time.Sleep(conf.ControlPlane.RetryInterval * time.Second)
-	FetchSubscriptionRateLimitPoliciesOnEvent("", "", c)
+	FetchSubscriptionRateLimitPoliciesOnEvent("", "", c, false)
 	retryAttempt++
 	if retryAttempt >= retryCount {
 		logger.LoggerSynchronizer.Errorf(errorMessage, err)
