@@ -427,7 +427,7 @@ func DeploySubscriptionRateLimitPolicyCR(policy eventhubTypes.SubscriptionPolicy
 	crRateLimitPolicy := dpv1alpha3.RateLimitPolicy{}
 	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: conf.DataPlane.Namespace, Name: policy.Name}, &crRateLimitPolicy); err != nil {
 		crRateLimitPolicy = dpv1alpha3.RateLimitPolicy{
-			ObjectMeta: metav1.ObjectMeta{Name: policy.Name,
+			ObjectMeta: metav1.ObjectMeta{Name: getSha1Value(policy.Name),
 				Namespace: conf.DataPlane.Namespace,
 			},
 			Spec: dpv1alpha3.RateLimitPolicySpec{
