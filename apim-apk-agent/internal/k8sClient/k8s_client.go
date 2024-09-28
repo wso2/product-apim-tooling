@@ -490,7 +490,8 @@ func DeployAIRateLimitPolicyFromCPPolicy(policy eventhubTypes.SubscriptionPolicy
 	}
 
 	crRateLimitPolicies := dpv1alpha3.AIRateLimitPolicy{
-		ObjectMeta: metav1.ObjectMeta{Name: policy.Name,
+		ObjectMeta: metav1.ObjectMeta{
+			Name: getSha1Value(policy.Name),
 			Namespace: conf.DataPlane.Namespace,
 		},
 		Spec: dpv1alpha3.AIRateLimitPolicySpec{
@@ -527,7 +528,7 @@ func DeployAIRateLimitPolicyFromCPPolicy(policy eventhubTypes.SubscriptionPolicy
 func UnDeploySubscriptionRateLimitPolicyCR(policyName string, k8sClient client.Client) {
 	conf, _ := config.ReadConfigs()
 	crRateLimitPolicies := &dpv1alpha1.RateLimitPolicy{}
-	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: conf.DataPlane.Namespace, Name: policyName}, crRateLimitPolicies); err != nil {
+	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: conf.DataPlane.Namespace, Name: getSha1Value(policyName)}, crRateLimitPolicies); err != nil {
 		loggers.LoggerK8sClient.Error("Unable to get RateLimitPolicies CR: " + err.Error())
 	}
 	err := k8sClient.Delete(context.Background(), crRateLimitPolicies, &client.DeleteOptions{})
@@ -535,6 +536,20 @@ func UnDeploySubscriptionRateLimitPolicyCR(policyName string, k8sClient client.C
 		loggers.LoggerK8sClient.Error("Unable to delete RateLimitPolicies CR: " + err.Error())
 	}
 	loggers.LoggerK8sClient.Debug("RateLimitPolicies CR deleted: " + crRateLimitPolicies.Name)
+}
+
+// UndeploySubscriptionAIRateLimitPolicyCR applies the given AIRateLimitPolicies struct to the Kubernetes cluster.
+func UndeploySubscriptionAIRateLimitPolicyCR(policyName string, k8sClient client.Client) {
+	conf, _ := config.ReadConfigs()
+	crAIRateLimitPolicies := &dpv1alpha3.AIRateLimitPolicy{}
+	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: conf.DataPlane.Namespace, Name: getSha1Value(policyName)}, crAIRateLimitPolicies); err != nil {
+		loggers.LoggerK8sClient.Error("Unable to get AIRateLimitPolicies CR: " + err.Error())
+	}
+	err := k8sClient.Delete(context.Background(), crAIRateLimitPolicies, &client.DeleteOptions{})
+	if err != nil {
+		loggers.LoggerK8sClient.Error("Unable to delete AIRateLimitPolicies CR: " + err.Error())
+	}
+	loggers.LoggerK8sClient.Debug("AIRateLimitPolicies CR deleted: " + crAIRateLimitPolicies.Name)
 }
 
 // DeployBackendCR applies the given Backends struct to the Kubernetes cluster.
