@@ -28,6 +28,7 @@ data: # Contains the meta data of the API
   isDefaultVersion: false # Is API default? true|false, if set to true APIM will discard version and make the API default
   enableSchemaValidation: false # Is schema validation enabled? true|false
   type: HTTP # Type of the API {HTTP|WS|GRAPHQL|SOAPTOREST} [required]
+  subtype: DEFAULT
   audiences: # Allowed audiences of the API as a list
    - all
   transport: # Transport protocols as a list
@@ -177,4 +178,5 @@ data: # Contains the meta data of the API
   gatewayVendor: wso2 # Gateway vendor
   asyncTransportProtocols: [] # Async transport protocols
   gatewayType: wso2/synapse # The gateway type selected for the API policies
+  egress: false # Whether the API is an egress API or not
   enableSubscriberVerification: false # To enable subscriber verification of WebSub APIs
