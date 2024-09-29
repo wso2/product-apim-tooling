@@ -344,6 +344,34 @@ func DeleteAIProviderCR(aiProviderName string, k8sClient client.Client) {
 	}
 }
 
+// DeleteAIRatelimitPolicy removes the AIRatelimitPolicy Custom Resource from the Kubernetes cluster based on CR name
+func DeleteAIRatelimitPolicy(airlName string, k8sClient client.Client) {
+	conf, errReadConfig := config.ReadConfigs()
+	if errReadConfig != nil {
+		loggers.LoggerK8sClient.Errorf("Error reading configurations: %v", errReadConfig)
+		return
+	}
+
+	crAIRatelimitPolicy := &dpv1alpha3.AIRateLimitPolicy{}
+	err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: conf.DataPlane.Namespace, Name: airlName}, crAIRatelimitPolicy)
+	if err != nil {
+		if k8error.IsNotFound(err) {
+			loggers.LoggerK8sClient.Infof("AIRatelimitPolicy CR not found: %s", airlName)
+		} else {
+			loggers.LoggerK8sClient.Error("Unable to get AIRatelimitPolicy CR: " + err.Error())
+		}
+		return
+	}
+
+	// Proceed to delete the CR if it was successfully retrieved
+	err = k8sClient.Delete(context.Background(), crAIRatelimitPolicy, &client.DeleteOptions{})
+	if err != nil {
+		loggers.LoggerK8sClient.Errorf("Unable to delete AIRatelimitPolicy CR: %v", err)
+	} else {
+		loggers.LoggerK8sClient.Infof("Deleted AIRatelimitPolicy CR: %s Successfully", airlName)
+	}
+}
+
 // DeployRateLimitPolicyCR applies the given RateLimitPolicies struct to the Kubernetes cluster.
 func DeployRateLimitPolicyCR(rateLimitPolicies *dpv1alpha1.RateLimitPolicy, k8sClient client.Client) {
 	crRateLimitPolicies := &dpv1alpha1.RateLimitPolicy{}
