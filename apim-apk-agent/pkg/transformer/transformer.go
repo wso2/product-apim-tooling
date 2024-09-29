@@ -57,7 +57,7 @@ import (
 )
 
 // GenerateAPKConf will Generate the mapped .apk-conf file for a given API Project zip
-func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizationID string) (string, string, uint32, map[string]eventHub.RateLimitPolicy, EndpointSecurityConfig, error) {
+func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizationID string) (string, string, uint32, map[string]eventHub.RateLimitPolicy, EndpointSecurityConfig, *API, *AIRatelimit, *AIRatelimit, error) {
 
 	apk := &API{}
 
@@ -71,7 +71,7 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 
 	if apiYamlError != nil {
 		logger.LoggerTransformer.Error("Error while unmarshalling api.json content", apiYamlError)
-		return "", "null", 0, nil, EndpointSecurityConfig{}, apiYamlError
+		return "", "null", 0, nil, EndpointSecurityConfig{}, nil, nil, nil, apiYamlError
 	}
 
 	apiYamlData := apiYaml.Data
@@ -167,7 +167,7 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 		certErr := json.Unmarshal([]byte(certArtifact.EndpointCerts), &endpointCertList)
 		if certErr != nil {
 			logger.LoggerTransformer.Errorf("Error while unmarshalling endpoint_cert.json content: %v", apiYamlError)
-			return "", "null", 0, nil, EndpointSecurityConfig{}, certErr
+			return "", "null", 0, nil, EndpointSecurityConfig{}, nil, nil, nil, certErr
 		}
 		endCertAvailable = true
 	}
@@ -190,7 +190,7 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 		certErr := json.Unmarshal([]byte(certArtifact.ClientCerts), &certList)
 		if certErr != nil {
 			logger.LoggerTransformer.Errorf("Error while unmarshalling client_cert.json content: %v", apiYamlError)
-			return "", "null", 0, nil, EndpointSecurityConfig{}, certErr
+			return "", "null", 0, nil, EndpointSecurityConfig{}, nil, nil, nil, certErr
 		}
 		certAvailable = true
 	}
@@ -222,9 +222,9 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 
 	if marshalError != nil {
 		logger.LoggerTransformer.Error("Error while marshalling apk yaml", marshalError)
-		return "", "null", 0, nil, EndpointSecurityConfig{}, marshalError
+		return "", "null", 0, nil, EndpointSecurityConfig{}, nil, prodAIRatelimit, sandAIRatelimit, marshalError
 	}
-	return string(c), apiYamlData.RevisionedAPIID, apiYamlData.RevisionID, configuredRateLimitPoliciesMap, endpointSecurityData, nil
+	return string(c), apiYamlData.RevisionedAPIID, apiYamlData.RevisionID, configuredRateLimitPoliciesMap, endpointSecurityData, apk, prodAIRatelimit, sandAIRatelimit, nil
 }
 
 // prepareAIRatelimit Function that accepts apiYamlData and returns AIRatelimit

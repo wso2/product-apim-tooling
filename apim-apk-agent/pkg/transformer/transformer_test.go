@@ -145,7 +145,7 @@ func TestAPKConfGeneration(t *testing.T) {
 				assert.NoError(t, err)
 				assert.IsType(t, &APIArtifact{}, apiArtifact)
 
-				apkConf, apiUUID, revisionID, configuredRateLimitPoliciesMap, endpointSecurityData, apkErr := GenerateAPKConf(apiArtifact.APIJson, apiArtifact.CertArtifact, "default")
+				apkConf, apiUUID, revisionID, configuredRateLimitPoliciesMap, endpointSecurityData, _, _, _, apkErr := GenerateAPKConf(apiArtifact.APIJson, apiArtifact.CertArtifact, "default")
 
 				assert.NoError(t, apkErr)
 				assert.NotEmpty(t, apkConf)
@@ -359,7 +359,7 @@ func TestBrokenZipHandlingFlow(t *testing.T) {
 					assert.Error(t, err)
 				}
 
-				apkConf, apiUUID, revisionID, configuredRateLimitPoliciesMap, endpointSecurityData, apkErr := GenerateAPKConf(apiArtifact.APIJson, apiArtifact.CertArtifact, "orgID")
+				apkConf, apiUUID, revisionID, configuredRateLimitPoliciesMap, endpointSecurityData, _, _, _, apkErr := GenerateAPKConf(apiArtifact.APIJson, apiArtifact.CertArtifact, "orgID")
 
 				//When all the contents are empty or some properties are missing, an unmarshalling error should occur when creating the apiArtifact
 				if strings.Contains(zipFile.Name, "All_Empty") {

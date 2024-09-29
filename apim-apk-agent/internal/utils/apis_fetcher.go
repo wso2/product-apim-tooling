@@ -25,6 +25,8 @@ package synchronizer
 
 import (
 	"fmt"
+	"crypto/sha1"
+	"encoding/hex"
 
 	"archive/zip"
 	"bytes"
@@ -38,6 +40,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	mapperUtil "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/mapper"
+	k8sclientUtil "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/k8sClient"
 )
 
 func init() {
@@ -108,7 +111,15 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUID *string, k8sClient client.Cli
 							return nil, err
 						}
 
-						apkConf, apiUUID, revisionID, configuredRateLimitPoliciesMap, endpointSecurityData, apkErr := transformer.GenerateAPKConf(artifact.APIJson, artifact.CertArtifact, apiDeployment.OrganizationID)
+						apkConf, apiUUID, revisionID, configuredRateLimitPoliciesMap, endpointSecurityData, api, prodAIRL, sandAIRL,  apkErr := transformer.GenerateAPKConf(artifact.APIJson, artifact.CertArtifact, apiDeployment.OrganizationID)
+						if prodAIRL == nil {
+							// Try to delete production AI ratelimit for this api
+							k8sclientUtil.DeleteAIRatelimitPolicy(generateSHA1HexHash(api.Name, api.Version, "production"), k8sClient)
+						}
+						if sandAIRL == nil {
+							// Try to delete production AI ratelimit for this api
+							k8sclientUtil.DeleteAIRatelimitPolicy(generateSHA1HexHash(api.Name, api.Version, "sandbox"), k8sClient)
+						}
 						if apkErr != nil {
 							logger.LoggerUtils.Errorf("Error while generating APK-Conf: %v", apkErr)
 							return nil, err
@@ -160,6 +171,15 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUID *string, k8sClient client.Cli
 	}
 	logger.LoggerUtils.Info("Fetching API for an event is completed...")
 	return nil, nil
+}
+
+// generateSHA1HexHash hashes the concatenated strings and returns the SHA-1 hash in base16 (hex) encoding.
+func generateSHA1HexHash(name, version, env string) string {
+	data := name + version + env
+	hasher := sha1.New()
+	hasher.Write([]byte(data))
+	hashBytes := hasher.Sum(nil)
+	return hex.EncodeToString(hashBytes)
 }
 
 // GetAPI function calls the FetchAPIs() with relevant environment labels defined in the config.
