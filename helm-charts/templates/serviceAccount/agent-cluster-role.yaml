@@ -131,4 +131,13 @@ rules:
   - apiGroups: [ "dp.wso2.com" ]
     resources: [ "aiproviders/finalizers" ]
     verbs: [ "update" ]
+  - apiGroups: ["dp.wso2.com"]
+    resources: ["airatelimitpolicies"]
+    verbs: ["get","list","watch","update","delete","create"]
+  - apiGroups: ["dp.wso2.com"]
+    resources: ["airatelimitpolicies/finalizers"]
+    verbs: ["update"]
+  - apiGroups: ["dp.wso2.com"]
+    resources: ["airatelimitpolicies/status"]
+    verbs: ["get","patch","update"]
 {{- end }}
