@@ -62,7 +62,7 @@ jobs:
         run: |
           cd apim-apk-agent
           ./gradlew build
-      - name: Run Gradle Build
+      - name: Push docker images to docker hub
         if: github.event_name == 'pull_request_target' && github.event.action == 'closed' && github.event.pull_request.merged == true
         run: |
           cd apim-apk-agent
