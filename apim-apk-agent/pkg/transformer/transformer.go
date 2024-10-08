@@ -231,14 +231,14 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 func prepareAIRatelimit(maxTps *MaxTps) (*AIRatelimit, *AIRatelimit) {
 	if maxTps == nil {
 		return nil, nil
-	} 
+	}
 	prodAIRL := &AIRatelimit{}
-	if maxTps.TokenBasedThrottlingConfiguration == nil || 
-	maxTps.TokenBasedThrottlingConfiguration.IsTokenBasedThrottlingEnabled == nil ||
-	maxTps.TokenBasedThrottlingConfiguration.ProductionMaxPromptTokenCount == nil ||
-	maxTps.TokenBasedThrottlingConfiguration.ProductionMaxCompletionTokenCount == nil ||
-	maxTps.TokenBasedThrottlingConfiguration.ProductionMaxTotalTokenCount == nil ||
-	maxTps.ProductionTimeUnit == nil {
+	if maxTps.TokenBasedThrottlingConfiguration == nil ||
+		maxTps.TokenBasedThrottlingConfiguration.IsTokenBasedThrottlingEnabled == nil ||
+		maxTps.TokenBasedThrottlingConfiguration.ProductionMaxPromptTokenCount == nil ||
+		maxTps.TokenBasedThrottlingConfiguration.ProductionMaxCompletionTokenCount == nil ||
+		maxTps.TokenBasedThrottlingConfiguration.ProductionMaxTotalTokenCount == nil ||
+		maxTps.ProductionTimeUnit == nil {
 		prodAIRL = nil
 	} else {
 		prodAIRL = &AIRatelimit{
@@ -247,21 +247,21 @@ func prepareAIRatelimit(maxTps *MaxTps) (*AIRatelimit, *AIRatelimit) {
 				PromptLimit:     *maxTps.TokenBasedThrottlingConfiguration.ProductionMaxPromptTokenCount,
 				CompletionLimit: *maxTps.TokenBasedThrottlingConfiguration.ProductionMaxCompletionTokenCount,
 				TotalLimit:      *maxTps.TokenBasedThrottlingConfiguration.ProductionMaxTotalTokenCount,
-				Unit:             CapitalizeFirstLetter(*maxTps.ProductionTimeUnit),
+				Unit:            CapitalizeFirstLetter(*maxTps.ProductionTimeUnit),
 			},
 			Request: RequestAIRL{
 				RequestLimit: *maxTps.Production,
-				Unit:          CapitalizeFirstLetter(*maxTps.ProductionTimeUnit),
+				Unit:         CapitalizeFirstLetter(*maxTps.ProductionTimeUnit),
 			},
 		}
 	}
 	sandAIRL := &AIRatelimit{}
-	if maxTps.TokenBasedThrottlingConfiguration == nil || 
-	maxTps.TokenBasedThrottlingConfiguration.IsTokenBasedThrottlingEnabled == nil ||
-	maxTps.TokenBasedThrottlingConfiguration.SandboxMaxPromptTokenCount == nil ||
-	maxTps.TokenBasedThrottlingConfiguration.SandboxMaxCompletionTokenCount == nil ||
-	maxTps.TokenBasedThrottlingConfiguration.SandboxMaxTotalTokenCount == nil ||
-	maxTps.SandboxTimeUnit == nil {
+	if maxTps.TokenBasedThrottlingConfiguration == nil ||
+		maxTps.TokenBasedThrottlingConfiguration.IsTokenBasedThrottlingEnabled == nil ||
+		maxTps.TokenBasedThrottlingConfiguration.SandboxMaxPromptTokenCount == nil ||
+		maxTps.TokenBasedThrottlingConfiguration.SandboxMaxCompletionTokenCount == nil ||
+		maxTps.TokenBasedThrottlingConfiguration.SandboxMaxTotalTokenCount == nil ||
+		maxTps.SandboxTimeUnit == nil {
 		sandAIRL = nil
 	} else {
 		sandAIRL = &AIRatelimit{

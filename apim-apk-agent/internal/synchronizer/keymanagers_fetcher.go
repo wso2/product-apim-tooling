@@ -103,7 +103,7 @@ func FetchKeyManagersOnStartUp(c client.Client) {
 	req.Header.Set(sync.Authorization, basicAuth)
 
 	//Todo: Need to set ALL when APIM Fix is available
-	req.Header.Set("xWSO2Tenant", "carbon.super")
+	req.Header.Set("xWSO2Tenant", "ALL")
 
 	// Make the request
 	logger.LoggerSynchronizer.Debug("Sending the control plane request")
@@ -128,7 +128,7 @@ func FetchKeyManagersOnStartUp(c client.Client) {
 			logger.LoggerSynchronizer.Errorf("Error occurred while unmarshelling Key Managers event data %v", err)
 			return
 		}
-		logger.LoggerSynchronizer.Debugf("Key Managers received: %v", keyManagers)
+		logger.LoggerSynchronizer.Infof("Key Managers received: %v", keyManagers)
 		resolvedKeyManagers := eventhub.MarshalKeyManagers(&keyManagers)
 		applyAllKeymanagerConfifuration(c, resolvedKeyManagers)
 	} else {
