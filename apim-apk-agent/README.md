@@ -1,10 +1,10 @@
 # Agent to integrate APK with APIM
-## For WSO2 API Manager 4.3.0
+## For WSO2 API Manager 4.4.0
 
 ## Getting Started APIM-APK Agent
 
 ### Setting up the development environment
-    1. Install [Go 1.20](https://golang.org/dl)
+    1. Install [Go 1.22](https://golang.org/dl)
     2. Fork the [repository](https://github.com/wso2/product-apim-tooling)
     3. Clone your fork into any directory.
     5. `cd` into cloned directory and then cd into `product-apim-tooling/apim-apk-agent`
