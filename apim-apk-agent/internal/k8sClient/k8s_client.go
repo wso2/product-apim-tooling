@@ -519,7 +519,7 @@ func DeployAIRateLimitPolicyFromCPPolicy(policy eventhubTypes.SubscriptionPolicy
 
 	crRateLimitPolicies := dpv1alpha3.AIRateLimitPolicy{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: getSha1Value(policy.Name),
+			Name:      getSha1Value(policy.Name),
 			Namespace: conf.DataPlane.Namespace,
 		},
 		Spec: dpv1alpha3.AIRateLimitPolicySpec{
@@ -634,10 +634,24 @@ func CreateAndUpdateTokenIssuersCR(keyManager eventhubTypes.ResolvedKeyManager, 
 	if keyManager.KeyManagerConfig.ScopesClaim != "" {
 		tokenIssuer.Spec.ScopesClaim = keyManager.KeyManagerConfig.ScopesClaim
 	}
-	err := k8sClient.Create(context.Background(), &tokenIssuer)
-	if err != nil {
-		loggers.LoggerK8sClient.Error("Unable to create TokenIssuer CR: " + err.Error())
-		return err
+	crTokenIssuer := &dpv1alpha2.TokenIssuer{}
+	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: tokenIssuer.ObjectMeta.Namespace, Name: tokenIssuer.Name}, crTokenIssuer); err != nil {
+		if !k8error.IsNotFound(err) {
+			loggers.LoggerK8sClient.Error("Unable to get TokenIssuer CR: " + err.Error())
+		}
+		err := k8sClient.Create(context.Background(), &tokenIssuer)
+		if err != nil {
+			loggers.LoggerK8sClient.Error("Unable to create TokenIssuer CR: " + err.Error())
+			return err
+		}
+		loggers.LoggerK8sClient.Infof("TokenIssuer CR created: " + tokenIssuer.Name)
+	} else {
+		crTokenIssuer.Spec = tokenIssuer.Spec
+		if err := k8sClient.Update(context.Background(), crTokenIssuer); err != nil {
+			loggers.LoggerK8sClient.Error("Unable to update TokenIssuer CR: " + err.Error())
+		} else {
+			loggers.LoggerK8sClient.Info("TokenIssuer CR updated: " + tokenIssuer.Name)
+		}
 	}
 
 	internalKeyTokenIssuer := dpv1alpha2.TokenIssuer{
@@ -663,12 +677,25 @@ func CreateAndUpdateTokenIssuersCR(keyManager eventhubTypes.ResolvedKeyManager, 
 	}
 	internalKeyTokenIssuer.Spec.ConsumerKeyClaim = constants.ConsumerKeyClaim
 	internalKeyTokenIssuer.Spec.ScopesClaim = constants.ScopesClaim
-	err = k8sClient.Create(context.Background(), &internalKeyTokenIssuer)
-	if err != nil {
-		loggers.LoggerK8sClient.Error("Unable to create TokenIssuer CR: " + err.Error())
-		return err
+	crInternalTokenIssuer := &dpv1alpha2.TokenIssuer{}
+	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: internalKeyTokenIssuer.ObjectMeta.Namespace, Name: internalKeyTokenIssuer.Name}, crInternalTokenIssuer); err != nil {
+		if !k8error.IsNotFound(err) {
+			loggers.LoggerK8sClient.Error("Unable to get Internal TokenIssuer CR: " + err.Error())
+		}
+		err = k8sClient.Create(context.Background(), &internalKeyTokenIssuer)
+		if err != nil {
+			loggers.LoggerK8sClient.Error("Unable to create Internal TokenIssuer CR: " + err.Error())
+			return err
+		}
+		loggers.LoggerK8sClient.Infof("Internal TokenIssuer CR created: " + internalKeyTokenIssuer.Name)
+	} else {
+		crInternalTokenIssuer.Spec = internalKeyTokenIssuer.Spec
+		if err := k8sClient.Update(context.Background(), crInternalTokenIssuer); err != nil {
+			loggers.LoggerK8sClient.Error("Unable to update Internal TokenIssuer CR: " + err.Error())
+		} else {
+			loggers.LoggerK8sClient.Info("TokenIssuer CR updated: " + internalKeyTokenIssuer.Name)
+		}
 	}
-	loggers.LoggerK8sClient.Debug("TokenIssuer CR created: " + tokenIssuer.Name)
 	return nil
 }
 
