@@ -95,7 +95,7 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 	if apiYamlData.APIThrottlingPolicy != "" {
 		rateLimitPolicy := managementserver.GetRateLimitPolicy(apiYamlData.APIThrottlingPolicy, organizationID)
 		logger.LoggerTransformer.Debugf("Rate Limit Policy: %v", rateLimitPolicy)
-		if rateLimitPolicy.Name != "Unlimited" {
+		if rateLimitPolicy.Name != "" && rateLimitPolicy.Name != "Unlimited" {
 			var rateLimitPolicyConfigured = RateLimit{
 				RequestsPerUnit: rateLimitPolicy.DefaultLimit.RequestCount.RequestCount,
 				Unit:            rateLimitPolicy.DefaultLimit.RequestCount.TimeUnit,
@@ -117,7 +117,7 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 		if apiYamlData.APIThrottlingPolicy == "" && operation.ThrottlingPolicy != "" {
 			rateLimitPolicy := managementserver.GetRateLimitPolicy(operation.ThrottlingPolicy, organizationID)
 			logger.LoggerTransformer.Debugf("Op Rate Limit Policy Name: %v", rateLimitPolicy.Name)
-			if rateLimitPolicy.Name != "Unlimited" {
+			if rateLimitPolicy.Name != "" && rateLimitPolicy.Name != "Unlimited" {
 				var rateLimitPolicyConfigured = RateLimit{
 					RequestsPerUnit: rateLimitPolicy.DefaultLimit.RequestCount.RequestCount,
 					Unit:            rateLimitPolicy.DefaultLimit.RequestCount.TimeUnit,
