@@ -209,8 +209,10 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string) {
 			"authorizationHeader":  authHeader,
 			"apiKeyHeader":         apiKeyHeader,
 			"scopes":               scopes,
-			"aiConfiguration":      aiConfiguration,
 		},
+	}
+	if len(aiConfiguration) > 0 {
+		data["data"].(map[string]interface{})["aiConfiguration"] = aiConfiguration
 	}
 	// TODO when we start to process sandbox we need to have this if condition. For now we remove sandbox endpoint always.
 	// if apiCPEvent.API.SandEndpoint == "" {
