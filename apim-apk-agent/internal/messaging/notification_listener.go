@@ -490,8 +490,8 @@ func handlePolicyEvents(data []byte, eventType string, c client.Client) {
 		} else if strings.EqualFold(policyEvent.PolicyType, "SUBSCRIPTION") {
 			logger.LoggerMessaging.Infof("Policy: %s for policy type: %s", policyEvent.PolicyName, policyEvent.PolicyType)
 			managementserver.DeleteSubscriptionPolicy(policyEvent.PolicyName, policyEvent.TenantDomain)
-			k8sclient.UnDeploySubscriptionRateLimitPolicyCR(policyEvent.PolicyName, c)
-			k8sclient.UndeploySubscriptionAIRateLimitPolicyCR(fmt.Sprintf("%s-%s",policyEvent.PolicyName, policyEvent.TenantDomain), c)
+			k8sclient.UnDeploySubscriptionRateLimitPolicyCR(fmt.Sprintf("%s-%s", policyEvent.PolicyName, policyEvent.TenantDomain), c)
+			k8sclient.UndeploySubscriptionAIRateLimitPolicyCR(fmt.Sprintf("%s-%s", policyEvent.PolicyName, policyEvent.TenantDomain), c)
 			ratelimitPolicies := managementserver.GetAllRateLimitPolicies()
 			logger.LoggerMessaging.Infof("Rate Limit Policies Internal Map: %v", ratelimitPolicies)
 		}
