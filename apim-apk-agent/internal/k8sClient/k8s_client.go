@@ -22,6 +22,7 @@ import (
 	"context"
 	"crypto/sha1"
 	"encoding/hex"
+	"fmt"
 	"strings"
 
 	dpv1alpha1 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha1"
@@ -519,7 +520,7 @@ func DeployAIRateLimitPolicyFromCPPolicy(policy eventhubTypes.SubscriptionPolicy
 
 	crRateLimitPolicies := dpv1alpha3.AIRateLimitPolicy{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      getSha1Value(policy.Name),
+			Name: getSha1Value(fmt.Sprintf("%s-%s",policy.Name, policy.TenantDomain)),
 			Namespace: conf.DataPlane.Namespace,
 		},
 		Spec: dpv1alpha3.AIRateLimitPolicySpec{
