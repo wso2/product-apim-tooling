@@ -22,6 +22,7 @@ import (
 	"context"
 	"crypto/sha1"
 	"encoding/hex"
+	"fmt"
 	"strings"
 
 	dpv1alpha1 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha1"
@@ -453,9 +454,11 @@ func UpdateRateLimitPolicyCR(policy eventhubTypes.RateLimitPolicy, k8sClient cli
 func DeploySubscriptionRateLimitPolicyCR(policy eventhubTypes.SubscriptionPolicy, k8sClient client.Client) {
 	conf, _ := config.ReadConfigs()
 	crRateLimitPolicy := dpv1alpha3.RateLimitPolicy{}
-	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: conf.DataPlane.Namespace, Name: policy.Name}, &crRateLimitPolicy); err != nil {
+	crName := PrepareSubscritionPolicyCRName(policy.Name, policy.TenantDomain)
+	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: conf.DataPlane.Namespace, Name: crName}, &crRateLimitPolicy); err != nil {
 		crRateLimitPolicy = dpv1alpha3.RateLimitPolicy{
-			ObjectMeta: metav1.ObjectMeta{Name: getSha1Value(policy.Name),
+			ObjectMeta: metav1.ObjectMeta{
+				Name: crName,
 				Namespace: conf.DataPlane.Namespace,
 			},
 			Spec: dpv1alpha3.RateLimitPolicySpec{
@@ -519,7 +522,7 @@ func DeployAIRateLimitPolicyFromCPPolicy(policy eventhubTypes.SubscriptionPolicy
 
 	crRateLimitPolicies := dpv1alpha3.AIRateLimitPolicy{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      getSha1Value(policy.Name),
+			Name: PrepareSubscritionPolicyCRName(policy.Name, policy.TenantDomain),
 			Namespace: conf.DataPlane.Namespace,
 		},
 		Spec: dpv1alpha3.AIRateLimitPolicySpec{
@@ -553,10 +556,10 @@ func DeployAIRateLimitPolicyFromCPPolicy(policy eventhubTypes.SubscriptionPolicy
 }
 
 // UnDeploySubscriptionRateLimitPolicyCR applies the given RateLimitPolicies struct to the Kubernetes cluster.
-func UnDeploySubscriptionRateLimitPolicyCR(policyName string, k8sClient client.Client) {
+func UnDeploySubscriptionRateLimitPolicyCR(crName string, k8sClient client.Client) {
 	conf, _ := config.ReadConfigs()
 	crRateLimitPolicies := &dpv1alpha1.RateLimitPolicy{}
-	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: conf.DataPlane.Namespace, Name: getSha1Value(policyName)}, crRateLimitPolicies); err != nil {
+	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: conf.DataPlane.Namespace, Name: crName}, crRateLimitPolicies); err != nil {
 		loggers.LoggerK8sClient.Error("Unable to get RateLimitPolicies CR: " + err.Error())
 	}
 	err := k8sClient.Delete(context.Background(), crRateLimitPolicies, &client.DeleteOptions{})
@@ -567,10 +570,10 @@ func UnDeploySubscriptionRateLimitPolicyCR(policyName string, k8sClient client.C
 }
 
 // UndeploySubscriptionAIRateLimitPolicyCR applies the given AIRateLimitPolicies struct to the Kubernetes cluster.
-func UndeploySubscriptionAIRateLimitPolicyCR(policyName string, k8sClient client.Client) {
+func UndeploySubscriptionAIRateLimitPolicyCR(crName string, k8sClient client.Client) {
 	conf, _ := config.ReadConfigs()
 	crAIRateLimitPolicies := &dpv1alpha3.AIRateLimitPolicy{}
-	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: conf.DataPlane.Namespace, Name: getSha1Value(policyName)}, crAIRateLimitPolicies); err != nil {
+	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: conf.DataPlane.Namespace, Name: crName}, crAIRateLimitPolicies); err != nil {
 		loggers.LoggerK8sClient.Error("Unable to get AIRateLimitPolicies CR: " + err.Error())
 	}
 	err := k8sClient.Delete(context.Background(), crAIRateLimitPolicies, &client.DeleteOptions{})
@@ -826,4 +829,9 @@ func RetrieveAllAPISFromK8s(k8sClient client.Client, nextToken string) ([]dpv1al
 		resolvedAPIList = append(resolvedAPIList, tempAPIList...)
 	}
 	return resolvedAPIList, apiList.Continue, nil
+}
+
+// PrepareSubscritionPolicyCRName prepare the cr name for a given policy name and organization pair
+func PrepareSubscritionPolicyCRName(name, org string) string {
+	return getSha1Value(fmt.Sprintf("%s-%s",name, org))
 }
