@@ -50,7 +50,7 @@ const (
 )
 
 // FetchAIProvidersOnEvent fetches the AI Providers from the control plane on the start up and notification event updates
-func FetchAIProvidersOnEvent(aiProviderName string, aiProviderVersion string, organization string, c client.Client) {
+func FetchAIProvidersOnEvent(aiProviderName string, aiProviderVersion string, organization string, c client.Client, cleanupDeletedProviders bool) {
 	logger.LoggerSynchronizer.Info("Fetching AI Providers from Control Plane.")
 
 	// Read configurations and derive the eventHub details
@@ -141,6 +141,29 @@ func FetchAIProvidersOnEvent(aiProviderName string, aiProviderVersion string, or
 		}
 		logger.LoggerSynchronizer.Debugf("AI Providers received: %v", aiProviderList.APIs)
 		var aiProviders []eventhubTypes.AIProvider = aiProviderList.APIs
+
+		if cleanupDeletedProviders {
+			aiProvidersFromK8, _, errK8 := k8sclient.RetrieveAllAIProvidersFromK8s(c, "")
+			if errK8 == nil {
+				for _, aiP := range aiProvidersFromK8 {
+					if cpName, exists := aiP.ObjectMeta.Labels["CPName"]; exists {
+						found := false
+						for _, aiProviderFromCP := range aiProviders {
+							if (aiProviderFromCP.Name == cpName) {
+								found = true
+								break
+							}
+						}
+						if !found {
+							// Delete the airatelimitpolicy
+							k8sclient.DeleteAIProviderCR(aiP.Name, c)
+						}
+					}
+				}
+			} else {
+				logger.LoggerSynchronizer.Errorf("Error while fetching aiproviders for cleaning up outdataed crs. Error: %+v", errK8)
+			}
+		}
 		for _, aiProvider := range aiProviders {
 			managementserver.AddAIProvider(aiProvider)
 			logger.LoggerSynchronizer.Debugf("AI Provider added to internal map: %v", aiProvider)
@@ -167,6 +190,7 @@ func createAIProvider(aiProvider *eventhubTypes.AIProvider) dpv1alpha3.AIProvide
 	labelMap := map[string]string{"name": sha1ValueofAIProviderName,
 		"organization": sha1ValueOfOrganization,
 		"InitiateFrom": "CP",
+		"CPName" : aiProvider.Name,
 	}
 	var modelInputSource string
 	var modelAttributeIdentifier string

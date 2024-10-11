@@ -175,7 +175,7 @@ func Run(conf *config.Config) {
 	// Load initial Subscription Rate Limit data from control plane
 	synchronizer.FetchSubscriptionRateLimitPoliciesOnEvent("", "", mgr.GetClient(), true)
 	// Load initial AI Provider data from control plane
-	synchronizer.FetchAIProvidersOnEvent("", "", "", mgr.GetClient())
+	synchronizer.FetchAIProvidersOnEvent("", "", "", mgr.GetClient(), true)
 
 	// Load initial data from control plane
 	eventhub.LoadInitialData(conf, mgr.GetClient())

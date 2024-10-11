@@ -429,12 +429,12 @@ func handleAIProviderEvents(data []byte, eventType string, c client.Client) {
 
 	if strings.EqualFold(aiProviderCreate, eventType) {
 		logger.LoggerMessaging.Infof("Create for AI Provider: %s for tenant: %s", aiProviderEvent.Name, aiProviderEvent.TenantDomain)
-		synchronizer.FetchAIProvidersOnEvent(aiProviderEvent.Name, aiProviderEvent.APIVersion, aiProviderEvent.TenantDomain, c)
+		synchronizer.FetchAIProvidersOnEvent(aiProviderEvent.Name, aiProviderEvent.APIVersion, aiProviderEvent.TenantDomain, c, false)
 		aiProviders := managementserver.GetAllAIProviders()
 		logger.LoggerMessaging.Debugf("AI Providers Internal Map: %v", aiProviders)
 	} else if strings.EqualFold(aiProviderUpdate, eventType) {
 		logger.LoggerMessaging.Infof("Update for AI Provider: %s for tenant: %s", aiProviderEvent.Name, aiProviderEvent.TenantDomain)
-		synchronizer.FetchAIProvidersOnEvent(aiProviderEvent.Name, aiProviderEvent.APIVersion, aiProviderEvent.TenantDomain, c)
+		synchronizer.FetchAIProvidersOnEvent(aiProviderEvent.Name, aiProviderEvent.APIVersion, aiProviderEvent.TenantDomain, c, false)
 		aiProviders := managementserver.GetAllAIProviders()
 		logger.LoggerMessaging.Debugf("AI Providers Internal Map: %v", aiProviders)
 	} else if strings.EqualFold(aiProviderDelete, eventType) {

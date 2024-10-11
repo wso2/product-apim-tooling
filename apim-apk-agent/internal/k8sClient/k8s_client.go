@@ -455,11 +455,16 @@ func DeploySubscriptionRateLimitPolicyCR(policy eventhubTypes.SubscriptionPolicy
 	conf, _ := config.ReadConfigs()
 	crRateLimitPolicy := dpv1alpha3.RateLimitPolicy{}
 	crName := PrepareSubscritionPolicyCRName(policy.Name, policy.TenantDomain)
+	labelMap := map[string]string{
+		"InitiateFrom": "CP",
+		"CPName" : policy.Name,
+	}
 	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: conf.DataPlane.Namespace, Name: crName}, &crRateLimitPolicy); err != nil {
 		crRateLimitPolicy = dpv1alpha3.RateLimitPolicy{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: crName,
 				Namespace: conf.DataPlane.Namespace,
+				Labels: labelMap,
 			},
 			Spec: dpv1alpha3.RateLimitPolicySpec{
 				Override: &dpv1alpha3.RateLimitAPIPolicy{
@@ -519,11 +524,16 @@ func DeployAIRateLimitPolicyFromCPPolicy(policy eventhubTypes.SubscriptionPolicy
 	} else {
 		requestCount = nil
 	}
+	labelMap := map[string]string{
+		"InitiateFrom": "CP",
+		"CPName" : policy.Name,
+	}
 
 	crRateLimitPolicies := dpv1alpha3.AIRateLimitPolicy{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: PrepareSubscritionPolicyCRName(policy.Name, policy.TenantDomain),
 			Namespace: conf.DataPlane.Namespace,
+			Labels:    labelMap,
 		},
 		Spec: dpv1alpha3.AIRateLimitPolicySpec{
 			Override: &dpv1alpha3.AIRateLimit{
@@ -829,6 +839,84 @@ func RetrieveAllAPISFromK8s(k8sClient client.Client, nextToken string) ([]dpv1al
 		resolvedAPIList = append(resolvedAPIList, tempAPIList...)
 	}
 	return resolvedAPIList, apiList.Continue, nil
+}
+
+// RetrieveAllAIProvidersFromK8s retrieves all the API CRs from the Kubernetes cluster
+func RetrieveAllAIProvidersFromK8s(k8sClient client.Client, nextToken string) ([]dpv1alpha3.AIProvider, string, error) {
+	conf, _ := config.ReadConfigs()
+	aiProviderList := dpv1alpha3.AIProviderList{}
+	resolvedAIProviderList := make([]dpv1alpha3.AIProvider, 0)
+	var err error
+	if nextToken == "" {
+		err = k8sClient.List(context.Background(), &aiProviderList, &client.ListOptions{Namespace: conf.DataPlane.Namespace})
+	} else {
+		err = k8sClient.List(context.Background(), &aiProviderList, &client.ListOptions{Namespace: conf.DataPlane.Namespace, Continue: nextToken})
+	}
+	if err != nil {
+		loggers.LoggerK8sClient.ErrorC(logging.PrintError(logging.Error1102, logging.CRITICAL, "Failed to get ai provider from k8s %v", err.Error()))
+		return nil, "", err
+	}
+	resolvedAIProviderList = append(resolvedAIProviderList, aiProviderList.Items...)
+	if aiProviderList.Continue != "" {
+		tempAIProviderList, _, err := RetrieveAllAIProvidersFromK8s(k8sClient, aiProviderList.Continue)
+		if err != nil {
+			return nil, "", err
+		}
+		resolvedAIProviderList = append(resolvedAIProviderList, tempAIProviderList...)
+	}
+	return resolvedAIProviderList, aiProviderList.Continue, nil
+}
+
+// RetrieveAllRatelimitPoliciesSFromK8s retrieves all the API CRs from the Kubernetes cluster
+func RetrieveAllRatelimitPoliciesSFromK8s(k8sClient client.Client, nextToken string) ([]dpv1alpha3.RateLimitPolicy, string, error) {
+	conf, _ := config.ReadConfigs()
+	rlList := dpv1alpha3.RateLimitPolicyList{}
+	resolvedRLList := make([]dpv1alpha3.RateLimitPolicy, 0)
+	var err error
+	if nextToken == "" {
+		err = k8sClient.List(context.Background(), &rlList, &client.ListOptions{Namespace: conf.DataPlane.Namespace})
+	} else {
+		err = k8sClient.List(context.Background(), &rlList, &client.ListOptions{Namespace: conf.DataPlane.Namespace, Continue: nextToken})
+	}
+	if err != nil {
+		loggers.LoggerK8sClient.ErrorC(logging.PrintError(logging.Error1102, logging.CRITICAL, "Failed to get ratelimitpolicies from k8s %v", err.Error()))
+		return nil, "", err
+	}
+	resolvedRLList = append(resolvedRLList, rlList.Items...)
+	if rlList.Continue != "" {
+		tempRLList, _, err := RetrieveAllRatelimitPoliciesSFromK8s(k8sClient, rlList.Continue)
+		if err != nil {
+			return nil, "", err
+		}
+		resolvedRLList = append(resolvedRLList, tempRLList...)
+	}
+	return resolvedRLList, rlList.Continue, nil
+}
+
+// RetrieveAllAIRatelimitPoliciesSFromK8s retrieves all the API CRs from the Kubernetes cluster
+func RetrieveAllAIRatelimitPoliciesSFromK8s(k8sClient client.Client, nextToken string) ([]dpv1alpha3.AIRateLimitPolicy, string, error) {
+	conf, _ := config.ReadConfigs()
+	airlList := dpv1alpha3.AIRateLimitPolicyList{}
+	resolvedAIRLList := make([]dpv1alpha3.AIRateLimitPolicy, 0)
+	var err error
+	if nextToken == "" {
+		err = k8sClient.List(context.Background(), &airlList, &client.ListOptions{Namespace: conf.DataPlane.Namespace})
+	} else {
+		err = k8sClient.List(context.Background(), &airlList, &client.ListOptions{Namespace: conf.DataPlane.Namespace, Continue: nextToken})
+	}
+	if err != nil {
+		loggers.LoggerK8sClient.ErrorC(logging.PrintError(logging.Error1102, logging.CRITICAL, "Failed to get airatelimitpolicies from k8s %v", err.Error()))
+		return nil, "", err
+	}
+	resolvedAIRLList = append(resolvedAIRLList, airlList.Items...)
+	if airlList.Continue != "" {
+		tempAIRLList, _, err := RetrieveAllAIRatelimitPoliciesSFromK8s(k8sClient, airlList.Continue)
+		if err != nil {
+			return nil, "", err
+		}
+		resolvedAIRLList = append(resolvedAIRLList, tempAIRLList...)
+	}
+	return resolvedAIRLList, airlList.Continue, nil
 }
 
 // PrepareSubscritionPolicyCRName prepare the cr name for a given policy name and organization pair
