@@ -21,6 +21,7 @@ package testutils
 import (
 	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -149,7 +150,7 @@ func ValidateInitializeProject(t *testing.T, args *InitTestArgs) {
 	})
 }
 
-//Function to initialize a project using API definition
+// Function to initialize a project using API definition
 func ValidateInitializeProjectWithOASFlag(t *testing.T, args *InitTestArgs) {
 	t.Helper()
 
@@ -168,7 +169,7 @@ func ValidateInitializeProjectWithOASFlag(t *testing.T, args *InitTestArgs) {
 	})
 }
 
-//Function to initialize a project using API definition
+// Function to initialize a project using API definition
 func ValidateInitializeProjectWithOASFlagWithoutCleaning(t *testing.T, args *InitTestArgs) {
 	t.Helper()
 
@@ -182,7 +183,7 @@ func ValidateInitializeProjectWithOASFlagWithoutCleaning(t *testing.T, args *Ini
 
 }
 
-//Function to initialize a project using API definition using --definition flag
+// Function to initialize a project using API definition using --definition flag
 func ValidateInitializeProjectWithDefinitionFlag(t *testing.T, args *InitTestArgs) {
 	t.Helper()
 
@@ -280,6 +281,7 @@ func ValidateImportUpdateProject(t *testing.T, args *InitTestArgs, preserveProvi
 	base.WaitForIndexing()
 	// Get App from env 2
 	importedAPI := GetAPI(t, args.SrcAPIM, args.APIName, args.CtlUser.Username, args.CtlUser.Password)
+	base.Log("#importedAPIOperations : ", importedAPI.Operations)
 
 	//Remove Created project and logout
 	t.Cleanup(func() {
@@ -385,15 +387,22 @@ func ValidateAPIWithUpdatedSequenceIsExported(t *testing.T, args *InitTestArgs, 
 	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
 	base.Unzip(relativePath, exportedPath)
 
+	//
+	dstDir := filepath.Join(os.Getenv("HOME"), "Downloads", filepath.Base(exportedPath))
+	base.Copy(exportedPath, dstDir)
+
 	// Check whether the exported operation policy is equivalent to the latest operation policy
-	exportedApiSequencePath := relativePath + TestDefaultExtractedFileName + DevFirstSampleCaseDestPolicy1PathSuffix
+	exportedApiSequencePath := relativePath + TestDefaultExtractedFileName + DevFirstSampleCaseDestExportedPolicy1PathSuffix
+	base.Log("#exportedApiSequencePath : ", exportedApiSequencePath)
+
 	lastUpdatedSequencePath, _ := filepath.Abs(DevFirstUpdatedSampleCasePolicy1Path)
+	base.Log("#lastUpdatedSequencePath : ", lastUpdatedSequencePath)
 	isSequenceUpdated := base.IsFileContentIdentical(exportedApiSequencePath, lastUpdatedSequencePath)
 	base.Log("Exported operation policy is updated", isSequenceUpdated)
 	assert.Equal(t, true, isSequenceUpdated, "Error while updating the operation policy of API")
 
 	// Check whether the exported operation policy definition is equivalent to the latest operation policy definition
-	exportedApiSequenceDefinitionPath := relativePath + TestDefaultExtractedFileName + DevFirstSampleCaseDestPolicyDefinition1PathSuffix
+	exportedApiSequenceDefinitionPath := relativePath + TestDefaultExtractedFileName + DevFirstSampleCaseDestExportedPolicyDefinition1PathSuffix
 	lastUpdatedSequenceDefinitionPath, _ := filepath.Abs(DevFirstUpdatedSampleCasePolicyDefinition1Path)
 	isSequenceDefinitionUpdated := base.IsFileContentIdentical(exportedApiSequenceDefinitionPath, lastUpdatedSequenceDefinitionPath)
 	base.Log("Exported operation policy definition is updated", isSequenceDefinitionUpdated)
