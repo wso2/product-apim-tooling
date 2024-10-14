@@ -242,6 +242,51 @@ func FetchSubscriptionRateLimitPoliciesOnEvent(ratelimitName string, organizatio
 		}
 		logger.LoggerSynchronizer.Debugf("Policies received: %v", rateLimitPolicyList.List)
 		var rateLimitPolicies []eventhubTypes.SubscriptionPolicy = rateLimitPolicyList.List
+		if cleanupDeletedPolicies {
+			// This logic is executed once at the startup time so no need to worry about the nested for loops for performance.
+			// Fetch all AiRatelimitPolicies
+			airls, _, retrieveAllAIRLErr := k8sclient.RetrieveAllAIRatelimitPoliciesSFromK8s(c, "")
+			rls, _, retrieveAllRLErr := k8sclient.RetrieveAllRatelimitPoliciesSFromK8s(c, "")
+			if retrieveAllAIRLErr == nil {
+				for _, airl := range airls {
+					if cpName, exists := airl.ObjectMeta.Labels["CPName"]; exists {
+						found := false
+						for _, policy := range rateLimitPolicies {
+							if (policy.Name == cpName) {
+								found = true
+								break
+							}
+						}
+						if !found {
+							// Delete the airatelimitpolicy
+							k8sclient.UndeploySubscriptionAIRateLimitPolicyCR(airl.Name, c)
+						}
+					}
+				}
+			} else {
+				logger.LoggerSynchronizer.Errorf("Error while fetching airatelimitpolicies for cleaning up outdataed crs. Error: %+v", retrieveAllAIRLErr)
+			}
+			if retrieveAllRLErr == nil {
+				for _, rl := range rls {
+					if cpName, exists := rl.ObjectMeta.Labels["CPName"]; exists {
+						found := false
+						for _, policy := range rateLimitPolicies {
+							if (policy.Name == cpName) {
+								found = true
+								break
+							}
+						}
+						if !found {
+							// Delete the airatelimitpolicy
+							k8sclient.UnDeploySubscriptionRateLimitPolicyCR(rl.Name, c)
+						}
+					}
+				}
+			} else {
+				logger.LoggerSynchronizer.Errorf("Error while fetching ratelimitpolicies for cleaning up outdataed crs. Error: %+v", retrieveAllRLErr)
+			}
+		}
+		
 		for _, policy := range rateLimitPolicies {
 			if policy.QuotaType == "aiApiQuota" {
 				if policy.DefaultLimit.AiAPIQuota != nil {
