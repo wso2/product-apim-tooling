@@ -148,6 +148,7 @@ const APITypeWebScoket = "WS"
 const APITypeWebSub = "WEBSUB"
 const APITypeSSE = "SSE"
 const APITypeAsync = "ASYNC"
+const APITypeAI = "AIAPI"
 
 // REST API Endpoint URL
 const RESTAPIEndpoint = "https://petstore.swagger.io"
@@ -160,6 +161,9 @@ const GraphQLEndpoint = "http://www.mocky.io/v2/5ea84def2d0000a52d3a3ecd"
 
 // Web Socket API Endpoint URL
 const WebSocketEndpoint = "ws://echo.websocket.org:80"
+
+// AI API Endpoint URL
+const AIAPIEndpoint = "https://api.mistral.ai"
 
 // Search query types
 const CustomAPIName = "Customized_API"

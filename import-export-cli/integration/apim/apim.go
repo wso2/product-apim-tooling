@@ -50,11 +50,11 @@ const (
 	SubscriptionThrottlePolicyType      = "subscription"
 	AiApiSubscriptionThrottlePolicyType = "aiApiSubscription"
 
-	applicationThrottlePolicyQuery       = "app"
-	customThrottlePolicyQuery            = "global"
-	advancedThrottlePolicyQuery          = "api"
-	subscriptionThrottlePolicyQuery      = "sub"
-	operationPolicyResourcePath          = "/operation-policies/"
+	applicationThrottlePolicyQuery  = "app"
+	customThrottlePolicyQuery       = "global"
+	advancedThrottlePolicyQuery     = "api"
+	subscriptionThrottlePolicyQuery = "sub"
+	operationPolicyResourcePath     = "/operation-policies/"
 )
 
 // Client : Enables interacting with an instance of APIM
@@ -286,6 +286,24 @@ func (instance *Client) GenerateAdditionalProperties(provider, endpointUrl, apiT
 		advertiseInfo, _ := json.Marshal(api.AdvertiseInformation)
 		additionalProperties = additionalProperties + `"type":"` + apiType + `",
 		"advertiseInfo": ` + string(advertiseInfo) + `}`
+	} else if strings.EqualFold(apiType, "AIAPI") {
+		additionalProperties = additionalProperties +
+			`"aiConfiguration": {
+				"llmProviderName": "MistralAI",
+				"llmProviderApiVersion": "1.0.0"
+			},
+			"securityScheme": ["api_key"],
+			"egress": true,
+			"endpointConfig": {   
+				"endpoint_type":"http",
+				"sandbox_endpoints":{
+					"url":"` + endpointUrl + `"
+				},
+				"production_endpoints":{
+					"url":"` + endpointUrl + `"
+				}
+			}
+		}`
 	} else {
 		additionalProperties = additionalProperties +
 			`"endpointConfig": {   
@@ -670,6 +688,56 @@ func (instance *Client) AddAPIFromOpenAPIDefinition(t *testing.T, path string, a
 	defer response.Body.Close()
 
 	base.ValidateAndLogResponse("apim.AddAPIFromOpenAPIDefinition()", response, 201)
+
+	var apiResponse API
+	json.NewDecoder(response.Body).Decode(&apiResponse)
+
+	t.Cleanup(func() {
+		username, password := RetrieveAdminCredentialsInsteadCreator(username, password)
+		instance.Login(username, password)
+		instance.DeleteAPI(apiResponse.ID)
+	})
+
+	return apiResponse.ID
+}
+
+// AddAIAPIFromOpenAPIDefinition : Add Mistral AI API using an OpenAPI Definition to APIM
+func (instance *Client) AddAIAPIFromOpenAPIDefinition(t *testing.T, path string, additionalProperties string, username string, password string) string {
+	apisURL := instance.publisherRestURL + "/apis/import-openapi"
+
+	inlineAPIDefinition, err := ioutil.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+
+	part, err := writer.CreateFormField("inlineAPIDefinition")
+	if err != nil {
+		t.Fatal(err)
+	}
+	part.Write([]byte(inlineAPIDefinition))
+
+	part, err = writer.CreateFormField("additionalProperties")
+	if err != nil {
+		t.Fatal(err)
+	}
+	part.Write([]byte(additionalProperties))
+
+	err = writer.Close()
+
+	request := base.CreatePost(apisURL, body)
+
+	base.SetDefaultRestAPIHeadersToConsumeFormData(instance.accessToken, request)
+
+	base.LogRequest("apim.AddAIAPIFromOpenAPIDefinition()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.AddAIAPIFromOpenAPIDefinition()", response, 201)
 
 	var apiResponse API
 	json.NewDecoder(response.Body).Decode(&apiResponse)
@@ -2113,7 +2181,7 @@ func (instance *Client) AddThrottlePolicy(t *testing.T, policy interface{}, user
 	var throttlePolicyResponse map[string]interface{}
 
 	// AiApiSubscriptionThrottlePolicyType should have the type as SubscriptionThrottlePolicyType as it falls under the type "sub"
-	if (policyType == AiApiSubscriptionThrottlePolicyType) {
+	if policyType == AiApiSubscriptionThrottlePolicyType {
 		policyType = SubscriptionThrottlePolicyType
 	}
 
