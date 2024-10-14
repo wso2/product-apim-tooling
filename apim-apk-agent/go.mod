@@ -8,7 +8,7 @@ require (
 	github.com/pelletier/go-toml v1.9.5
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.9.0
-	github.com/wso2/apk/common-go-libs v0.0.0-20241009065849-c09a29e9dae6
+	github.com/wso2/apk/common-go-libs v0.0.0-20241014091357-55754a144d6e
 	google.golang.org/grpc v1.67.1
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gopkg.in/yaml.v2 v2.4.0
@@ -81,7 +81,7 @@ require (
 	github.com/tklauser/numcpus v0.9.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
-	github.com/vektah/gqlparser v1.3.1 // indirect
+	github.com/vektah/gqlparser/v2 v2.5.17 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	golang.org/x/arch v0.11.0 // indirect
@@ -109,6 +109,6 @@ require (
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/streadway/amqp v1.1.0
-	github.com/wso2/apk/adapter v0.0.0-20241009065849-c09a29e9dae6
+	github.com/wso2/apk/adapter v0.0.0-20241014091357-55754a144d6e
 	golang.org/x/sys v0.26.0 // indirect
 )
