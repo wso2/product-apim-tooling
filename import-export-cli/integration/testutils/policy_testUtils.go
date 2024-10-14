@@ -184,8 +184,8 @@ func ValidateThrottlePolicyImportFailureWhenPolicyExisted(t *testing.T, args *Po
 	base.WaitForIndexing()
 
 	changeExportedThrottlePolicyFile(t, args)
-	// Import Throttling Policy to env 2 for update conflict
 
+	// Import Throttling Policy to env 2 for update conflict
 	output, err := importThrottlePolicy(t, adminUsername, adminPassword, policyName, policyType, true, args)
 	assert.Error(t, err, "Importation conflict expected")
 	assert.Contains(t, output, "409", "Unexpected error code")

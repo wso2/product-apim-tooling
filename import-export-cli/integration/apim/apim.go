@@ -44,16 +44,17 @@ import (
 const (
 	restClientPostfix = "-integ-rest-client"
 
-	ApplicationThrottlePolicyType  = "application"
-	CustomThrottlePolicyType       = "custom"
-	AdvancedThrottlePolicyType     = "advanced"
-	SubscriptionThrottlePolicyType = "subscription"
+	ApplicationThrottlePolicyType       = "application"
+	CustomThrottlePolicyType            = "custom"
+	AdvancedThrottlePolicyType          = "advanced"
+	SubscriptionThrottlePolicyType      = "subscription"
+	AiApiSubscriptionThrottlePolicyType = "aiApiSubscription"
 
-	applicationThrottlePolicyQuery  = "app"
-	customThrottlePolicyQuery       = "global"
-	advancedThrottlePolicyQuery     = "api"
-	subscriptionThrottlePolicyQuery = "sub"
-	operationPolicyResourcePath     = "/operation-policies/"
+	applicationThrottlePolicyQuery       = "app"
+	customThrottlePolicyQuery            = "global"
+	advancedThrottlePolicyQuery          = "api"
+	subscriptionThrottlePolicyQuery      = "sub"
+	operationPolicyResourcePath          = "/operation-policies/"
 )
 
 // Client : Enables interacting with an instance of APIM
@@ -2111,6 +2112,11 @@ func (instance *Client) registerClient(username string, password string) dcrResp
 func (instance *Client) AddThrottlePolicy(t *testing.T, policy interface{}, username, password, policyType string, doClean bool) map[string]interface{} {
 	var throttlePolicyResponse map[string]interface{}
 
+	// AiApiSubscriptionThrottlePolicyType should have the type as SubscriptionThrottlePolicyType as it falls under the type "sub"
+	if (policyType == AiApiSubscriptionThrottlePolicyType) {
+		policyType = SubscriptionThrottlePolicyType
+	}
+
 	throttlePolicyURL := instance.adminRestURL + "/throttling/policies/" + policyType
 
 	data, err := json.Marshal(policy)
@@ -2249,11 +2255,15 @@ func (instance *Client) GetThrottlePolicies(t *testing.T) *utils.ThrottlingPolic
 // GenerateSampleThrottlePolicyData : Generate sample ThrottlePolicy of a specific throttling policy type
 func (instance *Client) GenerateSampleThrottlePolicyData(policyType string) interface{} {
 	const (
-		policyString      = "Policy"
-		requestCountLimit = "REQUESTCOUNTLIMIT"
-		timeUnit          = "min"
-		unitTime          = 10
-		requestCount      = 5
+		policyString         = "Policy"
+		requestCountLimit    = "REQUESTCOUNTLIMIT"
+		aiApiQuotaLimit      = "AIAPIQUOTALIMIT"
+		timeUnit             = "min"
+		unitTime             = 10
+		requestCount         = 5
+		totalTokenCount      = 50
+		promptTokenCount     = 20
+		completionTokenCount = 30
 	)
 
 	switch policyType {
@@ -2314,6 +2324,22 @@ func (instance *Client) GenerateSampleThrottlePolicyData(policyType string) inte
 		policy.DefaultLimit.RequestCount.TimeUnit = timeUnit
 		policy.DefaultLimit.RequestCount.UnitTime = unitTime
 		policy.DefaultLimit.RequestCount.RequestCount = requestCount
+		policy.Permissions.PermissionType = "ALLOW"
+		policy.Permissions.Roles = []string{"admin"}
+		return &policy
+	case AiApiSubscriptionThrottlePolicyType:
+		policy := SubscriptionThrottlePolicy{}
+		policy.PolicyName = base.GenerateRandomString() + policyString
+		policy.Description = "This is a Test AI API Subscription Policy"
+		policy.IsDeployed = false
+		policy.Type = "SubscriptionThrottlePolicy"
+		policy.DefaultLimit.Type = aiApiQuotaLimit
+		policy.DefaultLimit.AiApiQuota.TimeUnit = timeUnit
+		policy.DefaultLimit.AiApiQuota.UnitTime = unitTime
+		policy.DefaultLimit.AiApiQuota.RequestCount = requestCount
+		policy.DefaultLimit.AiApiQuota.TotalTokenCount = totalTokenCount
+		policy.DefaultLimit.AiApiQuota.PromptTokenCount = promptTokenCount
+		policy.DefaultLimit.AiApiQuota.CompletionTokenCount = completionTokenCount
 		policy.Permissions.PermissionType = "ALLOW"
 		policy.Permissions.Roles = []string{"admin"}
 		return &policy

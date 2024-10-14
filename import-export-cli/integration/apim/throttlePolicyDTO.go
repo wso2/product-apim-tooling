@@ -112,6 +112,7 @@ type DefaultLimit struct {
 	RequestCount RequestCount `json:"requestCount"`
 	Bandwidth    Bandwidth    `json:"bandwidth"`
 	EventCount   EventCount   `json:"eventCount"`
+	AiApiQuota   AiApiQuota   `json:"aiApiQuota"`
 }
 
 type RequestCount struct {
@@ -131,4 +132,13 @@ type EventCount struct {
 	TimeUnit   string `json:"timeUnit"`
 	UnitTime   int    `json:"unitTime"`
 	EventCount int    `json:"eventCount"`
+}
+
+type AiApiQuota struct {
+	TimeUnit             string `json:"timeUnit"`
+	UnitTime             int    `json:"unitTime"`
+	RequestCount         int    `json:"requestCount"`
+	TotalTokenCount      int    `json:"totalTokenCount"`
+	PromptTokenCount     int    `json:"promptTokenCount"`
+	CompletionTokenCount int    `json:"completionTokenCount"`
 }

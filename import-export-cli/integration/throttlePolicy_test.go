@@ -86,6 +86,33 @@ func TestExportImportSubscriptionThrottlePolicy(t *testing.T) {
 	}
 }
 
+// Export an AI API Subscription Throttling Policy from one environment and import to another environment
+func TestExportImportAIAPISubscriptionThrottlePolicy(t *testing.T) {
+
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+			prod := GetProdClient()
+
+			throttlePolicy := testutils.AddNewThrottlePolicy(t, dev, user.Admin.Username, user.Admin.Password, apim.AiApiSubscriptionThrottlePolicyType, true)
+			args := &testutils.PolicyImportExportTestArgs{
+				CtlUser:  testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Policy:   throttlePolicy,
+				Type:     subscriptionThrottlePolicyFlag,
+				SrcAPIM:  dev,
+				DestAPIM: prod,
+				Update:   false,
+			}
+			adminUsername := superAdminUser
+			adminPassword := superAdminPassword
+			if isTenantUser(args.CtlUser.Username, TENANT1) {
+				adminUsername = adminUsername + "@" + TENANT1
+			}
+			testutils.ValidateThrottlePolicyExportImport(t, args, adminUsername, adminPassword, apim.SubscriptionThrottlePolicyType)
+		})
+	}
+}
+
 // Export an Advanced Throttling Policy from one environment and import to another environment
 func TestExportImportAdvancedThrottlePolicy(t *testing.T) {
 
@@ -194,6 +221,33 @@ func TestImportUpdateSubscriptionThrottlePolicy(t *testing.T) {
 	}
 }
 
+// Import an already existing AI API Subscription Throttling Policy to the destination env with update
+func TestImportUpdateAIAPISubscriptionThrottlePolicy(t *testing.T) {
+
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+			prod := GetProdClient()
+
+			throttlePolicy := testutils.AddNewThrottlePolicy(t, dev, user.Admin.Username, user.Admin.Password, apim.AiApiSubscriptionThrottlePolicyType, true)
+			args := &testutils.PolicyImportExportTestArgs{
+				CtlUser:  testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Policy:   throttlePolicy,
+				Type:     subscriptionThrottlePolicyFlag,
+				SrcAPIM:  dev,
+				DestAPIM: prod,
+				Update:   false,
+			}
+			adminUsername := superAdminUser
+			adminPassword := superAdminPassword
+			if isTenantUser(args.CtlUser.Username, TENANT1) {
+				adminUsername = adminUsername + "@" + TENANT1
+			}
+			testutils.ValidateThrottlePolicyImportUpdate(t, args, adminUsername, adminPassword, apim.SubscriptionThrottlePolicyType)
+		})
+	}
+}
+
 // Import an already existing Advanced Throttling Policy to the destination env with update
 func TestImportUpdateAdvancedThrottlePolicy(t *testing.T) {
 
@@ -257,6 +311,33 @@ func TestSubscriptionThrottlePolicyImportFailureWhenPolicyExisted(t *testing.T) 
 			prod := GetProdClient()
 
 			throttlePolicy := testutils.AddNewThrottlePolicy(t, dev, user.Admin.Username, user.Admin.Password, apim.SubscriptionThrottlePolicyType, true)
+			args := &testutils.PolicyImportExportTestArgs{
+				CtlUser:  testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Policy:   throttlePolicy,
+				Type:     subscriptionThrottlePolicyFlag,
+				SrcAPIM:  dev,
+				DestAPIM: prod,
+				Update:   false,
+			}
+			adminUsername := superAdminUser
+			adminPassword := superAdminPassword
+			if isTenantUser(args.CtlUser.Username, TENANT1) {
+				adminUsername = adminUsername + "@" + TENANT1
+			}
+			testutils.ValidateThrottlePolicyImportFailureWhenPolicyExisted(t, args, adminUsername, adminPassword, apim.SubscriptionThrottlePolicyType)
+		})
+	}
+}
+
+// Import an already existing AI API Subscription Throttling Policy to the destination env without update
+func TestAIAPISubscriptionThrottlePolicyImportFailureWhenPolicyExisted(t *testing.T) {
+
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+			prod := GetProdClient()
+
+			throttlePolicy := testutils.AddNewThrottlePolicy(t, dev, user.Admin.Username, user.Admin.Password, apim.AiApiSubscriptionThrottlePolicyType, true)
 			args := &testutils.PolicyImportExportTestArgs{
 				CtlUser:  testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
 				Policy:   throttlePolicy,
