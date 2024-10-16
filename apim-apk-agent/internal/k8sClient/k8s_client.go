@@ -457,14 +457,14 @@ func DeploySubscriptionRateLimitPolicyCR(policy eventhubTypes.SubscriptionPolicy
 	crName := PrepareSubscritionPolicyCRName(policy.Name, policy.TenantDomain)
 	labelMap := map[string]string{
 		"InitiateFrom": "CP",
-		"CPName" : policy.Name,
+		"CPName":       policy.Name,
 	}
 	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: conf.DataPlane.Namespace, Name: crName}, &crRateLimitPolicy); err != nil {
 		crRateLimitPolicy = dpv1alpha3.RateLimitPolicy{
 			ObjectMeta: metav1.ObjectMeta{
-				Name: crName,
+				Name:      crName,
 				Namespace: conf.DataPlane.Namespace,
-				Labels: labelMap,
+				Labels:    labelMap,
 			},
 			Spec: dpv1alpha3.RateLimitPolicySpec{
 				Override: &dpv1alpha3.RateLimitAPIPolicy{
@@ -477,7 +477,7 @@ func DeploySubscriptionRateLimitPolicyCR(policy eventhubTypes.SubscriptionPolicy
 						},
 					},
 				},
-				TargetRef: gwapiv1b1.PolicyTargetReference{Group: constants.GatewayGroup, Kind: "Subscription", Name: "default"},
+				TargetRef: gwapiv1b1.NamespacedPolicyTargetReference{Group: constants.GatewayGroup, Kind: "Subscription", Name: "default"},
 			},
 		}
 		if err := k8sClient.Create(context.Background(), &crRateLimitPolicy); err != nil {
@@ -526,12 +526,12 @@ func DeployAIRateLimitPolicyFromCPPolicy(policy eventhubTypes.SubscriptionPolicy
 	}
 	labelMap := map[string]string{
 		"InitiateFrom": "CP",
-		"CPName" : policy.Name,
+		"CPName":       policy.Name,
 	}
 
 	crRateLimitPolicies := dpv1alpha3.AIRateLimitPolicy{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: PrepareSubscritionPolicyCRName(policy.Name, policy.TenantDomain),
+			Name:      PrepareSubscritionPolicyCRName(policy.Name, policy.TenantDomain),
 			Namespace: conf.DataPlane.Namespace,
 			Labels:    labelMap,
 		},
@@ -541,7 +541,7 @@ func DeployAIRateLimitPolicyFromCPPolicy(policy eventhubTypes.SubscriptionPolicy
 				TokenCount:   tokenCount,
 				RequestCount: requestCount,
 			},
-			TargetRef: gwapiv1b1.PolicyTargetReference{Group: constants.GatewayGroup, Kind: "Subscription", Name: "default"},
+			TargetRef: gwapiv1b1.NamespacedPolicyTargetReference{Group: constants.GatewayGroup, Kind: "Subscription", Name: "default"},
 		},
 	}
 	crRateLimitPolicyFetched := &dpv1alpha3.AIRateLimitPolicy{}
@@ -636,7 +636,7 @@ func CreateAndUpdateTokenIssuersCR(keyManager eventhubTypes.ResolvedKeyManager, 
 			Issuer:              keyManager.KeyManagerConfig.Issuer,
 			ClaimMappings:       marshalClaimMappings(keyManager.KeyManagerConfig.ClaimMappings),
 			SignatureValidation: marshalSignatureValidation(keyManager.KeyManagerConfig),
-			TargetRef:           &v1alpha2.PolicyTargetReference{Group: constants.GatewayGroup, Kind: constants.GatewayKind, Name: constants.GatewayName},
+			TargetRef:           &v1alpha2.NamespacedPolicyTargetReference{Group: constants.GatewayGroup, Kind: constants.GatewayKind, Name: constants.GatewayName},
 		},
 	}
 	tokenIssuer.Spec.ConsumerKeyClaim = constants.ConsumerKeyClaim
@@ -685,7 +685,7 @@ func CreateAndUpdateTokenIssuersCR(keyManager eventhubTypes.ResolvedKeyManager, 
 					},
 				},
 			},
-			TargetRef: &v1alpha2.PolicyTargetReference{Group: constants.GatewayGroup, Kind: constants.GatewayKind, Name: constants.GatewayName},
+			TargetRef: &v1alpha2.NamespacedPolicyTargetReference{Group: constants.GatewayGroup, Kind: constants.GatewayKind, Name: constants.GatewayName},
 		},
 	}
 	internalKeyTokenIssuer.Spec.ConsumerKeyClaim = constants.ConsumerKeyClaim
@@ -775,7 +775,7 @@ func UpdateTokenIssuersCR(keyManager eventhubTypes.ResolvedKeyManager, k8sClient
 	tokenIssuer.Spec.Issuer = keyManager.KeyManagerConfig.Issuer
 	tokenIssuer.Spec.ClaimMappings = marshalClaimMappings(keyManager.KeyManagerConfig.ClaimMappings)
 	tokenIssuer.Spec.SignatureValidation = marshalSignatureValidation(keyManager.KeyManagerConfig)
-	tokenIssuer.Spec.TargetRef = &v1alpha2.PolicyTargetReference{Group: "gateway.networking.k8s.io", Kind: "Gateway", Name: "default"}
+	tokenIssuer.Spec.TargetRef = &v1alpha2.NamespacedPolicyTargetReference{Group: "gateway.networking.k8s.io", Kind: "Gateway", Name: "default"}
 	if keyManager.KeyManagerConfig.ConsumerKeyClaim != "" {
 		tokenIssuer.Spec.ConsumerKeyClaim = keyManager.KeyManagerConfig.ConsumerKeyClaim
 	}
@@ -921,5 +921,5 @@ func RetrieveAllAIRatelimitPoliciesSFromK8s(k8sClient client.Client, nextToken s
 
 // PrepareSubscritionPolicyCRName prepare the cr name for a given policy name and organization pair
 func PrepareSubscritionPolicyCRName(name, org string) string {
-	return getSha1Value(fmt.Sprintf("%s-%s",name, org))
+	return getSha1Value(fmt.Sprintf("%s-%s", name, org))
 }
