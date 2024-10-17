@@ -24,9 +24,9 @@
 package synchronizer
 
 import (
-	"fmt"
 	"crypto/sha1"
 	"encoding/hex"
+	"fmt"
 
 	"archive/zip"
 	"bytes"
@@ -39,8 +39,8 @@ import (
 	transformer "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/transformer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	mapperUtil "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/mapper"
 	k8sclientUtil "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/k8sClient"
+	mapperUtil "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/mapper"
 )
 
 func init() {
@@ -111,7 +111,7 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUID *string, k8sClient client.Cli
 							return nil, err
 						}
 
-						apkConf, apiUUID, revisionID, configuredRateLimitPoliciesMap, endpointSecurityData, api, prodAIRL, sandAIRL,  apkErr := transformer.GenerateAPKConf(artifact.APIJson, artifact.CertArtifact, apiDeployment.OrganizationID)
+						apkConf, apiUUID, revisionID, configuredRateLimitPoliciesMap, endpointSecurityData, api, prodAIRL, sandAIRL, apkErr := transformer.GenerateAPKConf(artifact.APIJson, artifact.CertArtifact, apiDeployment.OrganizationID)
 						if prodAIRL == nil {
 							// Try to delete production AI ratelimit for this api
 							k8sclientUtil.DeleteAIRatelimitPolicy(generateSHA1HexHash(api.Name, api.Version, "production"), k8sClient)

@@ -44,17 +44,17 @@ func init() {
 
 // AddAIProvider adds an AI provider to the aiProviderMap
 func AddAIProvider(aiProvider eventHub.AIProvider) {
-	aiProviderMap[aiProvider.Name+aiProvider.APIVersion+aiProvider.Organization] = aiProvider
+	aiProviderMap[aiProvider.ID] = aiProvider
 }
 
 // GetAIProvider returns an AI provider from the aiProviderMap
-func GetAIProvider(name string, apiVersion string, organization string) eventHub.AIProvider {
-	return aiProviderMap[name+apiVersion+organization]
+func GetAIProvider(id string) eventHub.AIProvider {
+	return aiProviderMap[id]
 }
 
 // DeleteAIProvider deletes an AI provider from the aiProviderMap
-func DeleteAIProvider(name string, apiVersion string, organization string) {
-	delete(aiProviderMap, name+apiVersion+organization)
+func DeleteAIProvider(id string) {
+	delete(aiProviderMap, id)
 }
 
 // GetAllAIProviders returns all the AI providers in the aiProviderMap
@@ -101,7 +101,7 @@ func DeleteRateLimitPolicy(name string, tenantDomain string) {
 }
 
 // DeleteSubscriptionPolicy deletes a subscription policy from the subscriptionPolicyMap
-func DeleteSubscriptionPolicy(name string, tenantDomain string){
+func DeleteSubscriptionPolicy(name string, tenantDomain string) {
 	delete(subscriptionPolicyMap, name+tenantDomain)
 }
 

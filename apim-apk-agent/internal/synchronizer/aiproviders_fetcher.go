@@ -149,7 +149,7 @@ func FetchAIProvidersOnEvent(aiProviderName string, aiProviderVersion string, or
 					if cpName, exists := aiP.ObjectMeta.Labels["CPName"]; exists {
 						found := false
 						for _, aiProviderFromCP := range aiProviders {
-							if (aiProviderFromCP.Name == cpName) {
+							if aiProviderFromCP.Name == cpName {
 								found = true
 								break
 							}
@@ -186,11 +186,10 @@ func createAIProvider(aiProvider *eventhubTypes.AIProvider) dpv1alpha3.AIProvide
 	conf, _ := config.ReadConfigs()
 	sha1ValueofAIProviderName := GetSha1Value(aiProvider.Name)
 	sha1ValueOfOrganization := GetSha1Value(aiProvider.Organization)
-	sha1ValueforCRName := GetSha1Value(aiProvider.Name + "-" + aiProvider.APIVersion + "-" + aiProvider.Organization)
 	labelMap := map[string]string{"name": sha1ValueofAIProviderName,
 		"organization": sha1ValueOfOrganization,
 		"InitiateFrom": "CP",
-		"CPName" : aiProvider.Name,
+		"CPName":       aiProvider.Name,
 	}
 	var modelInputSource string
 	var modelAttributeIdentifier string
@@ -225,7 +224,7 @@ func createAIProvider(aiProvider *eventhubTypes.AIProvider) dpv1alpha3.AIProvide
 
 	crAIProvider := dpv1alpha3.AIProvider{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      sha1ValueforCRName,
+			Name:      aiProvider.ID,
 			Namespace: conf.DataPlane.Namespace,
 			Labels:    labelMap,
 		},

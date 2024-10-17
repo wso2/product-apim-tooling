@@ -179,6 +179,7 @@ type PolicyInfo struct {
 type AIProviderEvent struct {
 	Name       string `json:"name"`
 	APIVersion string `json:"apiVersion"`
+	ID         string `json:"id"`
 	Event
 }
 
