@@ -75,6 +75,7 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 	}
 
 	apiYamlData := apiYaml.Data
+	logger.LoggerTransformer.Debugf("apiYamlData: %v", apiYamlData)
 
 	apk.Name = apiYamlData.Name
 	apk.Context = apiYamlData.Context
@@ -84,11 +85,18 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 	apk.DefinitionPath = "/definition"
 	apk.SubscriptionValidation = true
 
-	if apiYamlData.AIConfiguration.LLMProviderName != "" && apiYamlData.AIConfiguration.LLMProviderAPIVersion != "" {
-		sha1ValueforCRName := GetSha1Value(apiYamlData.AIConfiguration.LLMProviderName + "-" + apiYamlData.AIConfiguration.LLMProviderAPIVersion + "-" + organizationID)
+	if apiYamlData.SubtypeConfiguration.Subtype == "AIAPI" && apiYamlData.SubtypeConfiguration.Configuration != "" {
+		// Unmarshal the _configuration field into the Configuration struct
+		var config Configuration
+		err := json.Unmarshal([]byte(apiYamlData.SubtypeConfiguration.Configuration), &config)
+		if err != nil {
+			fmt.Println("Error unmarshalling _configuration:", err)
+			return "", "null", 0, nil, EndpointSecurityConfig{}, nil, nil, nil, err
+		}
+		sha1ValueforCRName := config.LLMProviderID
 		apk.AIProvider = &AIProvider{
 			Name:       sha1ValueforCRName,
-			APIVersion: apiYamlData.AIConfiguration.LLMProviderAPIVersion,
+			APIVersion: "1",
 		}
 	}
 

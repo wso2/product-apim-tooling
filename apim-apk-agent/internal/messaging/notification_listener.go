@@ -428,21 +428,20 @@ func handleAIProviderEvents(data []byte, eventType string, c client.Client) {
 	}
 
 	if strings.EqualFold(aiProviderCreate, eventType) {
-		logger.LoggerMessaging.Infof("Create for AI Provider: %s for tenant: %s", aiProviderEvent.Name, aiProviderEvent.TenantDomain)
-		synchronizer.FetchAIProvidersOnEvent(aiProviderEvent.Name, aiProviderEvent.APIVersion, aiProviderEvent.TenantDomain, c, false)
+		logger.LoggerMessaging.Infof("Create for AI Provider: %s for tenant: %s", aiProviderEvent.Name, aiProviderEvent.Event.TenantDomain)
+		synchronizer.FetchAIProvidersOnEvent(aiProviderEvent.Name, aiProviderEvent.APIVersion, aiProviderEvent.Event.TenantDomain, c, false)
 		aiProviders := managementserver.GetAllAIProviders()
 		logger.LoggerMessaging.Debugf("AI Providers Internal Map: %v", aiProviders)
 	} else if strings.EqualFold(aiProviderUpdate, eventType) {
-		logger.LoggerMessaging.Infof("Update for AI Provider: %s for tenant: %s", aiProviderEvent.Name, aiProviderEvent.TenantDomain)
-		synchronizer.FetchAIProvidersOnEvent(aiProviderEvent.Name, aiProviderEvent.APIVersion, aiProviderEvent.TenantDomain, c, false)
+		logger.LoggerMessaging.Infof("Update for AI Provider: %s for tenant: %s", aiProviderEvent.Name, aiProviderEvent.Event.TenantDomain)
+		synchronizer.FetchAIProvidersOnEvent(aiProviderEvent.Name, aiProviderEvent.APIVersion, aiProviderEvent.Event.TenantDomain, c, false)
 		aiProviders := managementserver.GetAllAIProviders()
 		logger.LoggerMessaging.Debugf("AI Providers Internal Map: %v", aiProviders)
 	} else if strings.EqualFold(aiProviderDelete, eventType) {
-		logger.LoggerMessaging.Infof("Deletion for AI Provider: %s for tenant: %s", aiProviderEvent.Name, aiProviderEvent.TenantDomain)
-		aiProvider := managementserver.GetAIProvider(aiProviderEvent.Name, aiProviderEvent.APIVersion, aiProviderEvent.TenantDomain)
-		sha1ValueforCRName := synchronizer.GetSha1Value(aiProvider.Name + "-" + aiProvider.APIVersion + "-" + aiProvider.Organization)
-		k8sclient.DeleteAIProviderCR(sha1ValueforCRName, c)
-		managementserver.DeleteAIProvider(aiProviderEvent.Name, aiProviderEvent.APIVersion, aiProviderEvent.TenantDomain)
+		logger.LoggerMessaging.Infof("Deletion for AI Provider: %s for tenant: %s", aiProviderEvent.Name, aiProviderEvent.Event.TenantDomain)
+		aiProvider := managementserver.GetAIProvider(aiProviderEvent.ID)
+		k8sclient.DeleteAIProviderCR(aiProvider.ID, c)
+		managementserver.DeleteAIProvider(aiProviderEvent.ID)
 		aiProviders := managementserver.GetAllAIProviders()
 		logger.LoggerMessaging.Debugf("AI Providers Internal Map: %v", aiProviders)
 	}

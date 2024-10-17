@@ -170,22 +170,27 @@ type APIMApi struct {
 	SecuritySchemes      []string               `json:"securityScheme"`
 	AdditionalProperties []AdditionalProperties `yaml:"additionalProperties"`
 	// AdditionalPropertiesMap []AdditionalPropertiesMap `yaml:"additionalPropertiesMap"`
-	CORSConfiguration   CORSConfiguration     `yaml:"corsConfiguration"`
-	EndpointConfig      EndpointConfig        `yaml:"endpointConfig"`
-	Operations          []APIMOperation       `yaml:"operations"`
-	OrganizationID      string                `yaml:"organizationId"`
-	RevisionID          uint32                `yaml:"revisionId"`
-	RevisionedAPIID     string                `yaml:"revisionedApiId"`
-	APIThrottlingPolicy string                `yaml:"apiThrottlingPolicy"`
-	APIPolicies         APIMOperationPolicies `yaml:"apiPolicies"`
-	AIConfiguration     APIMAIConfiguration   `yaml:"aiConfiguration"`
-	MaxTps              *MaxTps               `yaml:"maxTps"`
+	CORSConfiguration    CORSConfiguration     `yaml:"corsConfiguration"`
+	EndpointConfig       EndpointConfig        `yaml:"endpointConfig"`
+	Operations           []APIMOperation       `yaml:"operations"`
+	OrganizationID       string                `yaml:"organizationId"`
+	RevisionID           uint32                `yaml:"revisionId"`
+	RevisionedAPIID      string                `yaml:"revisionedApiId"`
+	APIThrottlingPolicy  string                `yaml:"apiThrottlingPolicy"`
+	APIPolicies          APIMOperationPolicies `yaml:"apiPolicies"`
+	SubtypeConfiguration SubtypeConfiguration  `yaml:"subtypeConfiguration"`
+	MaxTps               *MaxTps               `yaml:"maxTps"`
 }
 
-// APIMAIConfiguration holds the configuration details for AI providers
-type APIMAIConfiguration struct {
-	LLMProviderName       string `yaml:"llmProviderName"`
-	LLMProviderAPIVersion string `yaml:"llmProviderApiVersion"`
+// SubtypeConfiguration holds the details for Subtypes
+type SubtypeConfiguration struct {
+	Subtype       string `json:"subtype"`
+	Configuration string `json:"_configuration"`
+}
+
+// Configuration holds the configuration details for the subtype
+type Configuration struct {
+	LLMProviderID string `json:"llmProviderId"`
 }
 
 // APIYaml is a wrapper struct for YAML representation of an API.
