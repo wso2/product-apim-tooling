@@ -160,17 +160,18 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string) {
 	if apiCPEvent.API.APIType == "GraphQL" {
 		apiType = "GRAPHQL"
 	}
-	apiSubType := "DEFAULT"
-	if apiCPEvent.API.APISubType != "" {
-		apiSubType = apiCPEvent.API.APISubType
-	}
-	var aiConfiguration = make(map[string]interface{})
-	if apiCPEvent.API.AIConfiguration.LLMProviderName != "" || apiCPEvent.API.AIConfiguration.LLMProviderAPIVersion != "" {
+
+	var subTypeConfiguration = make(map[string]interface{})
+	if apiCPEvent.API.APISubType != "" || apiCPEvent.API.AIConfiguration.LLMProviderID != "" ||
+		apiCPEvent.API.AIConfiguration.LLMProviderName != "" ||
+		apiCPEvent.API.AIConfiguration.LLMProviderAPIVersion != "" {
 		logger.LoggerMgtServer.Debugf("AI Configuration: %+v", apiCPEvent.API.AIConfiguration)
-		aiConfiguration["llmProviderName"] = apiCPEvent.API.AIConfiguration.LLMProviderName
-		aiConfiguration["llmProviderApiVersion"] = apiCPEvent.API.AIConfiguration.LLMProviderAPIVersion
+		subTypeConfiguration["subtype"] = apiCPEvent.API.APISubType
+		subTypeConfiguration["_configuration"] = "{\"llmProviderId\":\"" +
+			apiCPEvent.API.AIConfiguration.LLMProviderID + "\"}"
 	}
-	logger.LoggerMgtServer.Debugf("Recieved AI Configuration: %+v", aiConfiguration)
+	logger.LoggerMgtServer.Debugf("Subtype Configuration: %+v", subTypeConfiguration)
+
 	data := map[string]interface{}{
 		"type":    "api",
 		"version": "v4.4.0",
@@ -189,7 +190,6 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string) {
 			"enableSchemaValidation":       false,
 			"enableSubscriberVerification": false,
 			"type":                         apiType,
-			"subType":                      apiSubType,
 			"transport":                    []string{"http", "https"},
 			"endpointConfig": map[string]interface{}{
 				"endpoint_type": apiCPEvent.API.EndpointProtocol,
@@ -211,8 +211,8 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string) {
 			"scopes":               scopes,
 		},
 	}
-	if len(aiConfiguration) > 0 {
-		data["data"].(map[string]interface{})["aiConfiguration"] = aiConfiguration
+	if len(subTypeConfiguration) > 0 {
+		data["data"].(map[string]interface{})["subtypeConfiguration"] = subTypeConfiguration
 	}
 	// TODO when we start to process sandbox we need to have this if condition. For now we remove sandbox endpoint always.
 	// if apiCPEvent.API.SandEndpoint == "" {
