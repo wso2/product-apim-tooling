@@ -139,8 +139,8 @@ func FetchAIProvidersOnEvent(aiProviderName string, aiProviderVersion string, or
 			logger.LoggerSynchronizer.Errorf("Error occurred while unmarshelling AI Provider event data %v", err)
 			return
 		}
-		logger.LoggerSynchronizer.Debugf("AI Providers received: %v", aiProviderList.APIs)
-		var aiProviders []eventhubTypes.AIProvider = aiProviderList.APIs
+		logger.LoggerSynchronizer.Debugf("AI Providers received: %v", aiProviderList.AIProviders)
+		var aiProviders []eventhubTypes.AIProvider = aiProviderList.AIProviders
 
 		if cleanupDeletedProviders {
 			aiProvidersFromK8, _, errK8 := k8sclient.RetrieveAllAIProvidersFromK8s(c, "")
