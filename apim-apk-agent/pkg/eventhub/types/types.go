@@ -134,7 +134,7 @@ type SubscriptionPolicyList struct {
 
 // AIProviderList for struct list of AIProvider
 type AIProviderList struct {
-	APIs []AIProvider `json:"apis"`
+	AIProviders []AIProvider `json:"llmProviders"`
 }
 
 // AIProvider for struct AIProvider
