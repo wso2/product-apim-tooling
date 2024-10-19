@@ -39,23 +39,7 @@ func MapAndCreateCR(k8sArtifact transformer.K8sArtifacts, k8sClient client.Clien
 		return &err
 	}
 	k8sArtifact.API.Namespace = namespace
-	internalk8sClient.DeployAPICR(&k8sArtifact.API, k8sClient)
-	for _, apiPolicies := range k8sArtifact.APIPolicies {
-		apiPolicies.Namespace = namespace
-		internalk8sClient.DeployAPIPolicyCR(apiPolicies, k8sClient)
-	}
-	for _, httpRoutes := range k8sArtifact.HTTPRoutes {
-		httpRoutes.Namespace = namespace
-		internalk8sClient.DeployHTTPRouteCR(httpRoutes, k8sClient)
-	}
-	for _, gqlRoutes := range k8sArtifact.GQLRoutes {
-		gqlRoutes.Namespace = namespace
-		internalk8sClient.DeployGQLRouteCR(gqlRoutes, k8sClient)
-	}
-	for _, backends := range k8sArtifact.Backends {
-		backends.Namespace = namespace
-		internalk8sClient.DeployBackendCR(backends, k8sClient)
-	}
+	
 	for _, configMaps := range k8sArtifact.ConfigMaps {
 		configMaps.Namespace = namespace
 		internalk8sClient.DeployConfigMapCR(configMaps, k8sClient)
@@ -88,6 +72,23 @@ func MapAndCreateCR(k8sArtifact transformer.K8sArtifacts, k8sClient client.Clien
 		secrets.Namespace = namespace
 		internalk8sClient.DeploySecretCR(secrets, k8sClient)
 	}
+	for _, apiPolicies := range k8sArtifact.APIPolicies {
+		apiPolicies.Namespace = namespace
+		internalk8sClient.DeployAPIPolicyCR(apiPolicies, k8sClient)
+	}
+	for _, httpRoutes := range k8sArtifact.HTTPRoutes {
+		httpRoutes.Namespace = namespace
+		internalk8sClient.DeployHTTPRouteCR(httpRoutes, k8sClient)
+	}
+	for _, gqlRoutes := range k8sArtifact.GQLRoutes {
+		gqlRoutes.Namespace = namespace
+		internalk8sClient.DeployGQLRouteCR(gqlRoutes, k8sClient)
+	}
+	for _, backends := range k8sArtifact.Backends {
+		backends.Namespace = namespace
+		internalk8sClient.DeployBackendCR(backends, k8sClient)
+	}
+	internalk8sClient.DeployAPICR(&k8sArtifact.API, k8sClient)
 	return nil
 }
 func getDeploymentNamespace(k8sArtifact transformer.K8sArtifacts) (string, error) {
