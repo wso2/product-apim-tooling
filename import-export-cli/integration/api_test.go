@@ -1448,6 +1448,29 @@ func TestExportImportWebSocketApiFromAsyncApiDef(t *testing.T) {
 	}
 }
 
+// Export an AI API from one environment and import to another environment by specifying the provider name
+func TestExportImportAiApi(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			dev := GetDevClient()
+			prod := GetProdClient()
+
+			api := testutils.AddAIAPIFromOpenAPIDefinition(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
+
+			args := &testutils.ApiImportExportTestArgs{
+				ApiProvider: testutils.Credentials{Username: user.ApiCreator.Username, Password: user.ApiCreator.Password},
+				CtlUser:     testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				Api:         api,
+				SrcAPIM:     dev,
+				DestAPIM:    prod,
+			}
+
+			testutils.ValidateAIAPIExportImport(t, args, testutils.APITypeAI)
+
+		})
+	}
+}
+
 // Import an API and then create a new version of that API by updating the context and version only and import again
 func TestCreateNewVersionOfApiByUpdatingVersion(t *testing.T) {
 	for _, user := range testCaseUsers {
