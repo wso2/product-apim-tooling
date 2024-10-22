@@ -288,9 +288,12 @@ func (instance *Client) GenerateAdditionalProperties(provider, endpointUrl, apiT
 		"advertiseInfo": ` + string(advertiseInfo) + `}`
 	} else if strings.EqualFold(apiType, "AIAPI") {
 		additionalProperties = additionalProperties +
-			`"aiConfiguration": {
-				"llmProviderName": "MistralAI",
-				"llmProviderApiVersion": "1.0.0"
+			`"subtypeConfiguration": {
+				"subtype":"AIAPI",
+				"configuration":{
+					"llmProviderName": "MistralAI",
+					"llmProviderApiVersion": "1.0.0"
+				}
 			},
 			"securityScheme": ["api_key"],
 			"egress": true,
