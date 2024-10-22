@@ -162,8 +162,8 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string) {
 	}
 
 	var subTypeConfiguration = make(map[string]interface{})
-	if apiCPEvent.API.APISubType != "" || apiCPEvent.API.AIConfiguration.LLMProviderID != "" ||
-		apiCPEvent.API.AIConfiguration.LLMProviderName != "" ||
+	if apiCPEvent.API.APISubType != "" && apiCPEvent.API.AIConfiguration.LLMProviderID != "" &&
+		apiCPEvent.API.AIConfiguration.LLMProviderName != "" &&
 		apiCPEvent.API.AIConfiguration.LLMProviderAPIVersion != "" {
 		logger.LoggerMgtServer.Debugf("AI Configuration: %+v", apiCPEvent.API.AIConfiguration)
 		subTypeConfiguration["subtype"] = apiCPEvent.API.APISubType
