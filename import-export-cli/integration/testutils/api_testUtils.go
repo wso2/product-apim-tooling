@@ -190,6 +190,15 @@ func AddAPIFromOpenAPIDefinitionToTwoEnvs(t *testing.T, client1 *apim.Client, cl
 	return api1, api2
 }
 
+func AddAIAPIFromOpenAPIDefinition(t *testing.T, client *apim.Client, username string, password string) *apim.API {
+	client.Login(username, password)
+	path := "testdata/sample-ai-api.yaml"
+	additionalProperties := client.GenerateAdditionalProperties(username, AIAPIEndpoint, APITypeAI, nil)
+	id := client.AddAIAPIFromOpenAPIDefinition(t, path, additionalProperties, username, password)
+	api := client.GetAPI(id)
+	return api
+}
+
 func GenerateAdvertiseOnlyAPIDefinition(t *testing.T) (string, apim.API) {
 	projectPath, _ := filepath.Abs(base.GenerateRandomString())
 	base.CreateTempDir(t, projectPath)
@@ -493,6 +502,39 @@ func ValidateAPIExportImport(t *testing.T, args *ApiImportExportTestArgs, apiTyp
 	return importedAPI
 }
 
+func ValidateAIAPIExportImport(t *testing.T, args *ApiImportExportTestArgs, apiType string) *apim.API {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+	base.SetupEnv(t, args.DestAPIM.GetEnvName(), args.DestAPIM.GetApimURL(), args.DestAPIM.GetTokenURL())
+
+	// Export api from env 1
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	exportAPI(t, args.Api.Name, args.Api.Version, args.Api.Provider, args.SrcAPIM.GetEnvName())
+
+	validateAPIProject(t, args, apiType)
+
+	// Import api to env 2
+	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	result, err := importAPI(t, args, true)
+	assert.Nil(t, err, "Error while importing the API")
+	assert.Contains(t, result, "Successfully imported API", "Error while importing the API")
+
+	// Give time for newly imported API to get indexed, or else GetAPI by name will fail
+	base.WaitForIndexing()
+
+	// Get App from env 2
+	importedAPI := GetAPI(t, args.DestAPIM, args.Api.Name, args.ApiProvider.Username, args.ApiProvider.Password)
+
+	// Validate env 1 and env 2 API is equal
+	ValidateAPIsEqual(t, args.Api, importedAPI)
+
+	return importedAPI
+}
+
 func ValidateAPIImportExportForAdvertiseOnlyAPI(t *testing.T, args *ApiImportExportTestArgs, apiType string) {
 	t.Helper()
 
@@ -556,7 +598,7 @@ func validateAPIProject(t *testing.T, args *ApiImportExportTestArgs, apiType str
 	assert.True(t, base.IsAPIArchiveExists(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
 		args.Api.Name, args.Api.Version))
 
-	if strings.EqualFold(apiType, APITypeREST) {
+	if strings.EqualFold(apiType, APITypeREST) || strings.EqualFold(apiType, APITypeAI) {
 		assert.True(t, base.IsFileExistsInAPIArchive(t, GetEnvAPIExportPath(args.SrcAPIM.GetEnvName()),
 			utils.InitProjectDefinitionsSwagger, args.Api.Name, args.Api.Version))
 	}
