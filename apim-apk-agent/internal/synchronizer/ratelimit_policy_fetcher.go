@@ -45,8 +45,8 @@ import (
 const (
 	policiesEndpoint                    string = "internal/data/v1/api-policies"
 	policiesByNameEndpoint              string = "internal/data/v1/api-policies?policyName="
-	subscriptionsPoliciesEndpoint       string = "internal/data/v1//subscription-policies"
-	subscriptionsPoliciesByNameEndpoint string = "internal/data/v1//subscription-policies?policyName="
+	subscriptionsPoliciesEndpoint       string = "internal/data/v1/subscription-policies"
+	subscriptionsPoliciesByNameEndpoint string = "internal/data/v1/subscription-policies?policyName="
 )
 
 // FetchRateLimitPoliciesOnEvent fetches the policies from the control plane on the start up and notification event updates
@@ -252,7 +252,7 @@ func FetchSubscriptionRateLimitPoliciesOnEvent(ratelimitName string, organizatio
 					if cpName, exists := airl.ObjectMeta.Labels["CPName"]; exists {
 						found := false
 						for _, policy := range rateLimitPolicies {
-							if (policy.Name == cpName) {
+							if policy.Name == cpName {
 								found = true
 								break
 							}
@@ -271,7 +271,7 @@ func FetchSubscriptionRateLimitPoliciesOnEvent(ratelimitName string, organizatio
 					if cpName, exists := rl.ObjectMeta.Labels["CPName"]; exists {
 						found := false
 						for _, policy := range rateLimitPolicies {
-							if (policy.Name == cpName) {
+							if policy.Name == cpName {
 								found = true
 								break
 							}
@@ -286,7 +286,7 @@ func FetchSubscriptionRateLimitPoliciesOnEvent(ratelimitName string, organizatio
 				logger.LoggerSynchronizer.Errorf("Error while fetching ratelimitpolicies for cleaning up outdataed crs. Error: %+v", retrieveAllRLErr)
 			}
 		}
-		
+
 		for _, policy := range rateLimitPolicies {
 			if policy.QuotaType == "aiApiQuota" {
 				if policy.DefaultLimit.AiAPIQuota != nil {
