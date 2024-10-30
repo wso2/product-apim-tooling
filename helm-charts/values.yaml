@@ -14,6 +14,9 @@
 # specific language governing permissions and limitations
 # under the License.
 
+wso2:
+  subscription:
+    imagePullSecrets: ""
 replicaCount: 1
 image:
   repository: wso2/apim-apk-agent

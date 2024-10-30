@@ -91,6 +91,10 @@ spec:
             limits:
               memory: {{ .Values.resources.limits.memory | default "256Mi" }}
               cpu: {{ .Values.resources.limits.cpu | default "200m" }}
+      {{- if and .Values.wso2.subscription .Values.wso2.subscription.imagePullSecrets }}
+      imagePullSecrets:
+        - name: {{ .Values.wso2.subscription.imagePullSecrets }}
+      {{ end }}
       volumes:
         - name: log-conf-volume
           configMap:
