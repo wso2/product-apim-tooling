@@ -58,7 +58,7 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v3 v3.0.0 // indirect
 	k8s.io/api v0.18.2 // indirect
-	k8s.io/apimachinery v0.18.2 // indirect
+	k8s.io/apimachinery v0.18.8 // indirect
 	k8s.io/klog v1.0.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20200410145947-bcb3869e6f29 // indirect
 	sigs.k8s.io/controller-runtime v0.6.0 // indirect
