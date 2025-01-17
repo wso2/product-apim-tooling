@@ -75,7 +75,7 @@ func readZipFile(file *zip.File) (*APIArtifact, error) {
 		return nil, err
 	}
 	for _, file := range zipReader.File {
-		if strings.Contains(file.Name, "swagger.json") {
+		if strings.Contains(file.Name, "swagger.json") || strings.Contains(file.Name, "swagger.yaml") {
 			openAPIContent, err := ReadContent(file)
 			if err != nil {
 				return nil, err
