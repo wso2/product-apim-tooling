@@ -68,9 +68,12 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 	logger.LoggerTransformer.Debugf("APIJson: %v", APIJson)
 
 	apiYamlError := json.Unmarshal([]byte(APIJson), &apiYaml)
+	if apiYamlError != nil {
+		apiYamlError = yaml.Unmarshal([]byte(APIJson), &apiYaml)
+	}
 
 	if apiYamlError != nil {
-		logger.LoggerTransformer.Error("Error while unmarshalling api.json content", apiYamlError)
+		logger.LoggerTransformer.Error("Error while unmarshalling api.json/api.yaml content", apiYamlError)
 		return "", "null", 0, nil, EndpointSecurityConfig{}, nil, nil, nil, apiYamlError
 	}
 
@@ -326,7 +329,7 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 	if reqPolicyCount > 0 {
 		for _, reqPolicy := range reqPolicies {
 			logger.LoggerTransformer.Debugf("Request Policy: %v", reqPolicy)
-			if reqPolicy.PolicyName == constants.InterceptorService {
+			if strings.HasSuffix(reqPolicy.PolicyName, constants.InterceptorService) {
 				logger.LoggerTransformer.Debugf("Interceptor Type Request Policy: %v", reqPolicy)
 				logger.LoggerTransformer.Debugf("Interceptor Service URL: %v", reqPolicy.Parameters[interceptorServiceURL])
 				logger.LoggerTransformer.Debugf("Interceptor Includes: %v", reqPolicy.Parameters[includes])

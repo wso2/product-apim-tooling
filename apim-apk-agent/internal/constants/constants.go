@@ -36,7 +36,7 @@ const (
 
 // APIM Mediation constants
 const (
-	InterceptorService = "apkCallInterceptorService"
+	InterceptorService = "CallInterceptorService"
 	BackendJWT         = "backEndJWT"
 	AddHeader          = "apkAddHeader"
 	RemoveHeader       = "apkRemoveHeader"
