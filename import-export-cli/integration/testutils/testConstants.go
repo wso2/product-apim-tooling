@@ -194,10 +194,12 @@ const DevSampleCaseMalformedOperationPolicyDefinitionPath = DevFirstSampleCaseMa
 const DevSampleCaseMalformedOperationPolicyPath = DevFirstSampleCaseMalformedOperationPolicyArtifactPath + "/customAddLogMessage.j2"
 const DevFirstSampleCaseDestPolicy1PathSuffix = PoliciesDirectory + "/customAddLogMessage_v1.j2"
 const DevFirstSampleCaseDestPolicy2PathSuffix = PoliciesDirectory + "/customAddLogMessage_v2.j2"
+const DevFirstSampleCaseDestExportedPolicy1PathSuffix = PoliciesDirectory + "/customAddLogMessage_v1_api.j2"
 const DevFirstSampleCaseDestPolicyDefinition1PathSuffix = PoliciesDirectory + "/customAddLogMessage_v1.yaml"
 const DevFirstSampleCaseDestPolicyDefinition2PathSuffix = PoliciesDirectory + "/customAddLogMessage_v2.yaml"
-const DevFirstUpdatedSampleCasePolicy1Path = DevFirstUpdatedSampleCaseArtifactPath + "/customAddLogMessage_v1.j2"
-const DevFirstUpdatedSampleCasePolicyDefinition1Path = DevFirstUpdatedSampleCaseArtifactPath + "/customAddLogMessage_v1.yaml"
+const DevFirstSampleCaseDestExportedPolicyDefinition1PathSuffix = PoliciesDirectory + "/customAddLogMessage_v1_api.yaml"
+const DevFirstUpdatedSampleCasePolicy1Path = DevFirstUpdatedSampleCaseArtifactPath + "/customAddLogMessage_v1_api.j2"
+const DevFirstUpdatedSampleCasePolicyDefinition1Path = DevFirstUpdatedSampleCaseArtifactPath + "/customAddLogMessage_v1_api.yaml"
 const TestSynapseChoreoConnectPolicyDefinitionPath = TestSynapseChoreoConnectPolicyArtifactsPath + "/testSynapseChoreoConnectPolicy.yaml"
 const TestSynapseChoreoConnectPolicyPathForSynapseType = TestSynapseChoreoConnectPolicyArtifactsPath + "/testSynapseChoreoConnectPolicy.j2"
 const TestSynapseChoreoConnectPolicyPathForChoreoConnectType = TestSynapseChoreoConnectPolicyArtifactsPath + "/testSynapseChoreoConnectPolicy.gotmpl"
@@ -218,9 +220,9 @@ const (
 
 // Constants for sequence of the dynamic data test case
 const DynamicDataSampleCaseArtifactPath = "testdata/TestArtifactDirectory/DynamicDataSampleCaseArtifacts"
-const DynamicDataInSequence = "dynamicAddLogMessage_v1.j2"
-const DynamicDataInSequenceDefinition = "dynamicAddLogMessage_v1.yaml"
-const DynamicDataSubstitutedInSequence = DynamicDataSampleCaseArtifactPath + "/dynamicDataSubstitutedAddLogMessage_v1.j2"
+const DynamicDataInSequence = "dynamicAddLogMessage_v1_api.j2"
+const DynamicDataInSequenceDefinition = "dynamicAddLogMessage_v1_api.yaml"
+const DynamicDataSubstitutedInSequence = DynamicDataSampleCaseArtifactPath + "/dynamicDataSubstitutedAddLogMessage_v1_api.j2"
 
 const (
 	TestSampleDynamicDataOperationTarget           = "/menu"
