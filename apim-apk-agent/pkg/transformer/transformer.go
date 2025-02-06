@@ -43,6 +43,7 @@ import (
 	dpv1alpha1 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha1"
 	dpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha2"
 	dpv1alpha3 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha3"
+	dpv1alpha4 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha4"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	gwapiv1 "sigs.k8s.io/gateway-api/apis/v1"
@@ -715,18 +716,24 @@ func getEndpointConfigs(sandboxURL string, prodURL string, endCertAvailable bool
 	}
 
 	epconfigs := EndpointConfigurations{}
+	sandboxEndpoints := []EndpointConfiguration{}
+	productionEndpoints := []EndpointConfiguration{}
 	if sandBoxEndpointEnabled && prodEndpointEnabled {
+		sandboxEndpoints = append(sandboxEndpoints, sandboxEndpointConf)
+		productionEndpoints = append(productionEndpoints, prodEndpointConf)
 		epconfigs = EndpointConfigurations{
-			Sandbox:    &sandboxEndpointConf,
-			Production: &prodEndpointConf,
+			Sandbox:    &sandboxEndpoints,
+			Production: &productionEndpoints,
 		}
 	} else if sandBoxEndpointEnabled {
+		sandboxEndpoints = append(sandboxEndpoints, sandboxEndpointConf)
 		epconfigs = EndpointConfigurations{
-			Sandbox: &sandboxEndpointConf,
+			Sandbox: &sandboxEndpoints,
 		}
 	} else if prodEndpointEnabled {
+		productionEndpoints = append(productionEndpoints, prodEndpointConf)
 		epconfigs = EndpointConfigurations{
-			Production: &prodEndpointConf,
+			Production: &productionEndpoints,
 		}
 	}
 	return epconfigs
@@ -735,7 +742,7 @@ func getEndpointConfigs(sandboxURL string, prodURL string, endCertAvailable bool
 // GenerateCRs takes the .apk-conf, api definition, vHost and the organization for a particular API and then generate and returns
 // the relavant CRD set as a zip
 func GenerateCRs(apkConf string, apiDefinition string, certContainer CertContainer, k8ResourceGenEndpoint string, organizationID string) (*K8sArtifacts, error) {
-	k8sArtifact := K8sArtifacts{HTTPRoutes: make(map[string]*gwapiv1.HTTPRoute), GQLRoutes: make(map[string]*dpv1alpha2.GQLRoute), Backends: make(map[string]*dpv1alpha2.Backend), Scopes: make(map[string]*dpv1alpha1.Scope), Authentication: make(map[string]*dpv1alpha2.Authentication), APIPolicies: make(map[string]*dpv1alpha3.APIPolicy), InterceptorServices: make(map[string]*dpv1alpha1.InterceptorService), ConfigMaps: make(map[string]*corev1.ConfigMap), Secrets: make(map[string]*corev1.Secret), RateLimitPolicies: make(map[string]*dpv1alpha1.RateLimitPolicy), AIRateLimitPolicies: make(map[string]*dpv1alpha3.AIRateLimitPolicy)}
+	k8sArtifact := K8sArtifacts{HTTPRoutes: make(map[string]*gwapiv1.HTTPRoute), GQLRoutes: make(map[string]*dpv1alpha2.GQLRoute), Backends: make(map[string]*dpv1alpha2.Backend), Scopes: make(map[string]*dpv1alpha1.Scope), Authentication: make(map[string]*dpv1alpha2.Authentication), APIPolicies: make(map[string]*dpv1alpha4.APIPolicy), InterceptorServices: make(map[string]*dpv1alpha1.InterceptorService), ConfigMaps: make(map[string]*corev1.ConfigMap), Secrets: make(map[string]*corev1.Secret), RateLimitPolicies: make(map[string]*dpv1alpha1.RateLimitPolicy), AIRateLimitPolicies: make(map[string]*dpv1alpha3.AIRateLimitPolicy)}
 	if apkConf == "" {
 		logger.LoggerTransformer.Error("Empty apk-conf parameter provided. Unable to generate CRDs.")
 		return nil, errors.New("Error: APK-Conf can't be empty")
@@ -838,7 +845,7 @@ func GenerateCRs(apkConf string, apiDefinition string, certContainer CertContain
 
 		switch kind {
 		case "APIPolicy":
-			var apiPolicy dpv1alpha3.APIPolicy
+			var apiPolicy dpv1alpha4.APIPolicy
 			err = k8Yaml.Unmarshal(yamlData, &apiPolicy)
 			if err != nil {
 				logger.LoggerSync.Errorf("Error unmarshaling APIPolicy YAML: %v", err)

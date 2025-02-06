@@ -28,6 +28,7 @@ import (
 	dpv1alpha1 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha1"
 	dpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha2"
 	dpv1alpha3 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha3"
+	dpv1alpha4 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha4"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/constants"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/loggers"
@@ -230,8 +231,8 @@ func DeployBackendJWTCR(backendJWT *dpv1alpha1.BackendJWT, k8sClient client.Clie
 }
 
 // DeployAPIPolicyCR applies the given APIPolicies struct to the Kubernetes cluster.
-func DeployAPIPolicyCR(apiPolicies *dpv1alpha3.APIPolicy, k8sClient client.Client) {
-	crAPIPolicies := &dpv1alpha3.APIPolicy{}
+func DeployAPIPolicyCR(apiPolicies *dpv1alpha4.APIPolicy, k8sClient client.Client) {
+	crAPIPolicies := &dpv1alpha4.APIPolicy{}
 	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: apiPolicies.ObjectMeta.Namespace, Name: apiPolicies.Name}, crAPIPolicies); err != nil {
 		if !k8error.IsNotFound(err) {
 			loggers.LoggerK8sClient.Error("Unable to get APIPolicies CR: " + err.Error())
@@ -296,8 +297,8 @@ func DeployScopeCR(scope *dpv1alpha1.Scope, k8sClient client.Client) {
 }
 
 // DeployAIProviderCR applies the given AIProvider struct to the Kubernetes cluster.
-func DeployAIProviderCR(aiProvider *dpv1alpha3.AIProvider, k8sClient client.Client) {
-	crAIProvider := &dpv1alpha3.AIProvider{}
+func DeployAIProviderCR(aiProvider *dpv1alpha4.AIProvider, k8sClient client.Client) {
+	crAIProvider := &dpv1alpha4.AIProvider{}
 	if err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: aiProvider.ObjectMeta.Namespace, Name: aiProvider.Name}, crAIProvider); err != nil {
 		if !k8error.IsNotFound(err) {
 			loggers.LoggerK8sClient.Error("Unable to get AIProvider CR: " + err.Error())
@@ -325,7 +326,7 @@ func DeleteAIProviderCR(aiProviderName string, k8sClient client.Client) {
 		return
 	}
 
-	crAIProvider := &dpv1alpha3.AIProvider{}
+	crAIProvider := &dpv1alpha4.AIProvider{}
 	err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: conf.DataPlane.Namespace, Name: aiProviderName}, crAIProvider)
 	if err != nil {
 		if k8error.IsNotFound(err) {
@@ -842,10 +843,10 @@ func RetrieveAllAPISFromK8s(k8sClient client.Client, nextToken string) ([]dpv1al
 }
 
 // RetrieveAllAIProvidersFromK8s retrieves all the API CRs from the Kubernetes cluster
-func RetrieveAllAIProvidersFromK8s(k8sClient client.Client, nextToken string) ([]dpv1alpha3.AIProvider, string, error) {
+func RetrieveAllAIProvidersFromK8s(k8sClient client.Client, nextToken string) ([]dpv1alpha4.AIProvider, string, error) {
 	conf, _ := config.ReadConfigs()
-	aiProviderList := dpv1alpha3.AIProviderList{}
-	resolvedAIProviderList := make([]dpv1alpha3.AIProvider, 0)
+	aiProviderList := dpv1alpha4.AIProviderList{}
+	resolvedAIProviderList := make([]dpv1alpha4.AIProvider, 0)
 	var err error
 	if nextToken == "" {
 		err = k8sClient.List(context.Background(), &aiProviderList, &client.ListOptions{Namespace: conf.DataPlane.Namespace})

@@ -8,7 +8,7 @@ require (
 	github.com/pelletier/go-toml v1.9.5
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.9.0
-	github.com/wso2/apk/common-go-libs v0.0.0-20241016075419-fc842057860d
+	github.com/wso2/apk/common-go-libs v0.0.0-20250205155648-9e8c0cede3b7
 	google.golang.org/grpc v1.67.1
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gopkg.in/yaml.v2 v2.4.0
@@ -109,6 +109,6 @@ require (
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/streadway/amqp v1.1.0
-	github.com/wso2/apk/adapter v0.0.0-20241016075419-fc842057860d
+	github.com/wso2/apk/adapter v0.0.0-20250205155648-9e8c0cede3b7
 	golang.org/x/sys v0.28.0 // indirect
 )

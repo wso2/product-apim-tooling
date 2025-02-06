@@ -48,7 +48,7 @@ type EndpointConfiguration struct {
 }
 
 // AIRatelimit defines the configuration for AI rate limiting,
-// including whether rate limiting is enabled and the settings 
+// including whether rate limiting is enabled and the settings
 // for token and request-based limits.
 type AIRatelimit struct {
 	Enabled bool        `yaml:"enabled"`
@@ -69,7 +69,6 @@ type RequestAIRL struct {
 	RequestLimit int    `yaml:"requestLimit"`
 	Unit         string `yaml:"unit"` // Time unit (Minute, Hour, Day)
 }
-
 
 // AdditionalProperty stores the custom properties set by the user for a particular API
 type AdditionalProperty struct {
@@ -104,8 +103,8 @@ type AuthConfiguration struct {
 
 // EndpointConfigurations holds production and sandbox endpoints.
 type EndpointConfigurations struct {
-	Production *EndpointConfiguration `yaml:"production,omitempty"`
-	Sandbox    *EndpointConfiguration `yaml:"sandbox,omitempty"`
+	Production *[]EndpointConfiguration `yaml:"production,omitempty"`
+	Sandbox    *[]EndpointConfiguration `yaml:"sandbox,omitempty"`
 }
 
 // OperationPolicies organizes request and response policies for an API operation.
