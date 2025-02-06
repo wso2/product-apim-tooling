@@ -32,7 +32,7 @@ import (
 	"strconv"
 	"strings"
 
-	dpv1alpha3 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha3"
+	dpv1alpha4 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha4"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	k8sclient "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/k8sClient"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/internal/loggers"
@@ -182,7 +182,7 @@ func FetchAIProvidersOnEvent(aiProviderName string, aiProviderVersion string, or
 }
 
 // createAIProvider creates the AI provider CR
-func createAIProvider(aiProvider *eventhubTypes.AIProvider) dpv1alpha3.AIProvider {
+func createAIProvider(aiProvider *eventhubTypes.AIProvider) dpv1alpha4.AIProvider {
 	conf, _ := config.ReadConfigs()
 	sha1ValueofAIProviderName := GetSha1Value(aiProvider.Name)
 	sha1ValueOfOrganization := GetSha1Value(aiProvider.Organization)
@@ -222,30 +222,35 @@ func createAIProvider(aiProvider *eventhubTypes.AIProvider) dpv1alpha3.AIProvide
 		}
 	}
 
-	crAIProvider := dpv1alpha3.AIProvider{
+	crAIProvider := dpv1alpha4.AIProvider{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      aiProvider.ID,
 			Namespace: conf.DataPlane.Namespace,
 			Labels:    labelMap,
 		},
-		Spec: dpv1alpha3.AIProviderSpec{
+		Spec: dpv1alpha4.AIProviderSpec{
 			ProviderName:       aiProvider.Name,
 			ProviderAPIVersion: aiProvider.APIVersion,
 			Organization:       aiProvider.Organization,
-			Model: dpv1alpha3.ValueDetails{
+			RequestModel: dpv1alpha4.ValueDetails{
 				In:    modelInputSource,
 				Value: modelAttributeIdentifier,
 			},
-			RateLimitFields: dpv1alpha3.RateLimitFields{
-				PromptTokens: dpv1alpha3.ValueDetails{
+			ResponseModel: dpv1alpha4.ValueDetails{
+				In:    modelInputSource,
+				Value: modelAttributeIdentifier,
+			},
+			SupportedModels: []string{"gtp-4.5", "gtp-4o", "gtp-3.5"},
+			RateLimitFields: dpv1alpha4.RateLimitFields{
+				PromptTokens: dpv1alpha4.ValueDetails{
 					In:    promptTokenCountInputSource,
 					Value: promptTokenCountAttributeIdentifier,
 				},
-				CompletionToken: dpv1alpha3.ValueDetails{
+				CompletionToken: dpv1alpha4.ValueDetails{
 					In:    completionTokenCountInputSource,
 					Value: completionTokenCountAttributeIdentifier,
 				},
-				TotalToken: dpv1alpha3.ValueDetails{
+				TotalToken: dpv1alpha4.ValueDetails{
 					In:    totalTokenCountInputSource,
 					Value: totalTokenCountAttributeIdentifier,
 				},

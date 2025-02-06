@@ -36,6 +36,7 @@ import (
 	dpv1alpha1 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha1"
 	dpv1alpha2 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha2"
 	dpv1alpha3 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha3"
+	dpv1alpha4 "github.com/wso2/apk/common-go-libs/apis/dp/v1alpha4"
 	"github.com/wso2/apk/common-go-libs/loggers"
 	"github.com/wso2/apk/common-go-libs/pkg/discovery/api/wso2/discovery/service/apkmgt"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
@@ -120,6 +121,7 @@ func Run(conf *config.Config) {
 	utilruntime.Must(cpv1alpha2.AddToScheme(scheme))
 	utilruntime.Must(cpv1alpha2.AddToScheme(scheme))
 	utilruntime.Must(dpv1alpha3.AddToScheme(scheme))
+	utilruntime.Must(dpv1alpha4.AddToScheme(scheme))
 
 	options := ctrl.Options{
 		Scheme:                 scheme,
