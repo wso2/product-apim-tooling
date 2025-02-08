@@ -10,7 +10,7 @@ done
 
 if [ -z "$DOWNLOAD_LINK" ]
 then 
-    APIM_DOWNLOAD='https://wso2.org/jenkins/job/products/job/product-apim/lastStableBuild/org.wso2.am$wso2am/artifact/org.wso2.am/wso2am/4.5.0-SNAPSHOT/wso2am-4.5.0-SNAPSHOT.zip'
+    APIM_DOWNLOAD='https://wso2.org/jenkins/job/products/job/product_apim/job/product-apim/lastStableBuild/org.wso2.am$wso2am/artifact/org.wso2.am/wso2am/4.5.0-SNAPSHOT/wso2am-4.5.0-SNAPSHOT.zip'
 else
     APIM_DOWNLOAD=$DOWNLOAD_LINK
 fi
