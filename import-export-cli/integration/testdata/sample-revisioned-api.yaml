@@ -40,6 +40,7 @@ data: # Contains the meta data of the API
   organizationId: carbon.super # The organization ID
   policies: # Available subscription policies (tiers) as a list
    - Unlimited
+  organizationPolicies: [] # Organization based subscription policies
   apiThrottlingPolicy: Unlimited # The API level throttling policy selected for the particular API
   authorizationHeader: Authorization # Authorization header for requests when invoking the API
   securityScheme: # Security schemes of the API as a list
@@ -48,6 +49,7 @@ data: # Contains the meta data of the API
   visibility: PUBLIC # Visibility level of the API {PUBLIC|PRIVATE|RESTRICTED} [required]
   visibleRoles: [] # User roles that are able to access the API in Store as a list
   visibleTenants: [] # Visible tenants of the API
+  visibleOrganizations: [] # The organizations that are able to access the API in the Developer Portal
   apiKeyHeader: ""
   mediationPolicies: []
   subscriptionAvailability: CURRENT_TENANT # Subscription availability of the API {CURRENT_TENANT|ALL_TENANTS|SPECIFIC_TENANTS}
