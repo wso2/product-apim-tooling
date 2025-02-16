@@ -58,24 +58,36 @@ import (
 )
 
 // GenerateAPKConf will Generate the mapped .apk-conf file for a given API Project zip
-func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizationID string) (string, string, uint32, map[string]eventHub.RateLimitPolicy, EndpointSecurityConfig, *API, *AIRatelimit, *AIRatelimit, error) {
+func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, endpoints string, organizationID string) (string, string, uint32, map[string]eventHub.RateLimitPolicy, []EndpointSecurityConfig, *API, *AIRatelimit, *AIRatelimit, error) {
 
 	apk := &API{}
 
 	var apiYaml APIYaml
+	var endpointsYaml EndpointsYaml
 
 	var configuredRateLimitPoliciesMap = make(map[string]eventHub.RateLimitPolicy)
 
-	logger.LoggerTransformer.Debugf("APIJson: %v", APIJson)
+	logger.LoggerTransformer.Infof("APIJson: %v", APIJson)
+	logger.LoggerTransformer.Infof("Endpoints: %v", endpoints)
 
 	apiYamlError := json.Unmarshal([]byte(APIJson), &apiYaml)
 	if apiYamlError != nil {
 		apiYamlError = yaml.Unmarshal([]byte(APIJson), &apiYaml)
 	}
 
+	endpointsYamlError := json.Unmarshal([]byte(endpoints), &endpointsYaml)
+	if endpointsYamlError != nil {
+		endpointsYamlError = yaml.Unmarshal([]byte(endpoints), &endpointsYaml)
+	}
+
 	if apiYamlError != nil {
 		logger.LoggerTransformer.Error("Error while unmarshalling api.json/api.yaml content", apiYamlError)
-		return "", "null", 0, nil, EndpointSecurityConfig{}, nil, nil, nil, apiYamlError
+		return "", "null", 0, nil, []EndpointSecurityConfig{}, nil, nil, nil, apiYamlError
+	}
+
+	if endpointsYamlError != nil {
+		logger.LoggerTransformer.Error("Error while unmarshalling endpoints.json/endpoints.yaml content", endpointsYamlError)
+		return "", "null", 0, nil, []EndpointSecurityConfig{}, nil, nil, nil, endpointsYamlError
 	}
 
 	apiYamlData := apiYaml.Data
@@ -95,7 +107,7 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 		err := json.Unmarshal([]byte(apiYamlData.SubtypeConfiguration.Configuration), &config)
 		if err != nil {
 			fmt.Println("Error unmarshalling _configuration:", err)
-			return "", "null", 0, nil, EndpointSecurityConfig{}, nil, nil, nil, err
+			return "", "null", 0, nil, []EndpointSecurityConfig{}, nil, nil, nil, err
 		}
 		sha1ValueforCRName := config.LLMProviderID
 		apk.AIProvider = &AIProvider{
@@ -179,20 +191,31 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 		certErr := json.Unmarshal([]byte(certArtifact.EndpointCerts), &endpointCertList)
 		if certErr != nil {
 			logger.LoggerTransformer.Errorf("Error while unmarshalling endpoint_cert.json content: %v", apiYamlError)
-			return "", "null", 0, nil, EndpointSecurityConfig{}, nil, nil, nil, certErr
+			return "", "null", 0, nil, []EndpointSecurityConfig{}, nil, nil, nil, certErr
 		}
 		endCertAvailable = true
 	}
 
 	sandboxURL := apiYamlData.EndpointConfig.SandboxEndpoints.URL
 	prodURL := apiYamlData.EndpointConfig.ProductionEndpoints.URL
-	endpointSecurityData := apiYamlData.EndpointConfig.EndpointSecurity
+	primaryProdEndpointID := apiYamlData.PrimaryProductionEndpointID
+	primarySandboxEndpointID := apiYamlData.PrimarySandboxEndpointID
+	endpointList := endpointsYaml.Data
+	endpointSecurityDataList := []EndpointSecurityConfig{}
+
 	apiUniqueID := GetUniqueIDForAPI(apiYamlData.Name, apiYamlData.Version, apiYamlData.OrganizationID)
 	logger.LoggerTransformer.Infof("Maxtps: %+v", apiYamlData)
 	prodAIRatelimit, sandAIRatelimit := prepareAIRatelimit(apiYamlData.MaxTps)
-	endpointRes := getEndpointConfigs(sandboxURL, prodURL, endCertAvailable, endpointCertList, endpointSecurityData, apiUniqueID, prodAIRatelimit, sandAIRatelimit)
-
-	apk.EndpointConfigurations = &endpointRes
+	endpointRes := EndpointConfigurations{}
+	if len(endpointList) == 0 {
+		endpointSecurityData := apiYamlData.EndpointConfig.EndpointSecurity
+		endpointRes, endpointSecurityData = getEndpointConfigs(sandboxURL, prodURL, endCertAvailable, endpointCertList, endpointSecurityData, apiUniqueID, prodAIRatelimit, sandAIRatelimit)
+		apk.EndpointConfigurations = &endpointRes
+		endpointSecurityDataList = append(endpointSecurityDataList, endpointSecurityData)
+	} else {
+		endpointRes, endpointSecurityDataList = getMultiEndpointConfigs(endpointList, primaryProdEndpointID, primarySandboxEndpointID, endCertAvailable, endpointCertList, apiUniqueID, prodAIRatelimit, sandAIRatelimit)
+		apk.EndpointConfigurations = &endpointRes
+	}
 
 	//Adding client-certificate configurations to the conf
 	var certList CertDescriptor
@@ -202,7 +225,7 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 		certErr := json.Unmarshal([]byte(certArtifact.ClientCerts), &certList)
 		if certErr != nil {
 			logger.LoggerTransformer.Errorf("Error while unmarshalling client_cert.json content: %v", apiYamlError)
-			return "", "null", 0, nil, EndpointSecurityConfig{}, nil, nil, nil, certErr
+			return "", "null", 0, nil, []EndpointSecurityConfig{}, nil, nil, nil, certErr
 		}
 		certAvailable = true
 	}
@@ -234,9 +257,9 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, organizat
 
 	if marshalError != nil {
 		logger.LoggerTransformer.Error("Error while marshalling apk yaml", marshalError)
-		return "", "null", 0, nil, EndpointSecurityConfig{}, nil, prodAIRatelimit, sandAIRatelimit, marshalError
+		return "", "null", 0, nil, []EndpointSecurityConfig{}, nil, prodAIRatelimit, sandAIRatelimit, marshalError
 	}
-	return string(c), apiYamlData.RevisionedAPIID, apiYamlData.RevisionID, configuredRateLimitPoliciesMap, endpointSecurityData, apk, prodAIRatelimit, sandAIRatelimit, nil
+	return string(c), apiYamlData.RevisionedAPIID, apiYamlData.RevisionID, configuredRateLimitPoliciesMap, endpointSecurityDataList, apk, prodAIRatelimit, sandAIRatelimit, nil
 }
 
 // prepareAIRatelimit Function that accepts apiYamlData and returns AIRatelimit
@@ -644,7 +667,7 @@ func mapAuthConfigs(apiUUID string, authHeader string, configuredAPIKeyHeader st
 // getEndpointConfigs will map the endpoints and there security configurations and returns them
 // TODO: Currently the APK-Conf does not support giving multiple certs for a particular endpoint.
 // After fixing this, the following logic should be changed to map multiple cert configs
-func getEndpointConfigs(sandboxURL string, prodURL string, endCertAvailable bool, endpointCertList EndpointCertDescriptor, endpointSecurityData EndpointSecurityConfig, apiUniqueID string, prodAIRatelimit *AIRatelimit, sandAIRatelimit *AIRatelimit) EndpointConfigurations {
+func getEndpointConfigs(sandboxURL string, prodURL string, endCertAvailable bool, endpointCertList EndpointCertDescriptor, endpointSecurityData EndpointSecurityConfig, apiUniqueID string, prodAIRatelimit *AIRatelimit, sandAIRatelimit *AIRatelimit) (EndpointConfigurations, EndpointSecurityConfig) {
 	var sandboxEndpointConf, prodEndpointConf EndpointConfiguration
 	var sandBoxEndpointEnabled = false
 	var prodEndpointEnabled = false
@@ -680,17 +703,18 @@ func getEndpointConfigs(sandboxURL string, prodURL string, endCertAvailable bool
 	}
 
 	if endpointSecurityData.Sandbox.Enabled {
+		endpointSecurityData.Sandbox.EndpointUUID = "primary"
 		sandboxEndpointConf.EndSecurity.Enabled = true
 		if endpointSecurityData.Sandbox.Type == "apikey" {
 			sandboxEndpointConf.EndSecurity.SecurityType = SecretInfo{
-				SecretName:     strings.Join([]string{apiUniqueID, "sandbox", "secret"}, "-"),
+				SecretName:     strings.Join([]string{apiUniqueID, generateSHA1Hash(endpointSecurityData.Sandbox.EndpointUUID), "sandbox", "secret"}, "-"),
 				In:             "Header",
 				APIKeyNameKey:  endpointSecurityData.Sandbox.APIKeyIdentifier,
 				APIKeyValueKey: "apiKey",
 			}
 		} else {
 			sandboxEndpointConf.EndSecurity.SecurityType = SecretInfo{
-				SecretName:  strings.Join([]string{apiUniqueID, "sandbox", "secret"}, "-"),
+				SecretName:  strings.Join([]string{apiUniqueID, generateSHA1Hash(endpointSecurityData.Sandbox.EndpointUUID), "sandbox", "secret"}, "-"),
 				UsernameKey: "username",
 				PasswordKey: "password",
 			}
@@ -698,17 +722,18 @@ func getEndpointConfigs(sandboxURL string, prodURL string, endCertAvailable bool
 	}
 
 	if endpointSecurityData.Production.Enabled {
+		endpointSecurityData.Production.EndpointUUID = "primary"
 		prodEndpointConf.EndSecurity.Enabled = true
 		if endpointSecurityData.Production.Type == "apikey" {
 			prodEndpointConf.EndSecurity.SecurityType = SecretInfo{
-				SecretName:     strings.Join([]string{apiUniqueID, "production", "secret"}, "-"),
+				SecretName:     strings.Join([]string{apiUniqueID, generateSHA1Hash(endpointSecurityData.Production.EndpointUUID), "production", "secret"}, "-"),
 				In:             "Header",
 				APIKeyNameKey:  endpointSecurityData.Production.APIKeyIdentifier,
 				APIKeyValueKey: "apiKey",
 			}
 		} else {
 			prodEndpointConf.EndSecurity.SecurityType = SecretInfo{
-				SecretName:  strings.Join([]string{apiUniqueID, "production", "secret"}, "-"),
+				SecretName:  strings.Join([]string{apiUniqueID, generateSHA1Hash(endpointSecurityData.Production.EndpointUUID), "production", "secret"}, "-"),
 				UsernameKey: "username",
 				PasswordKey: "password",
 			}
@@ -736,7 +761,110 @@ func getEndpointConfigs(sandboxURL string, prodURL string, endCertAvailable bool
 			Production: &productionEndpoints,
 		}
 	}
-	return epconfigs
+	return epconfigs, endpointSecurityData
+}
+
+// getMultiEndpointConfigs will map the endpoints and there security configurations and returns them
+func getMultiEndpointConfigs(endpointList []Endpoint, primaryProdEndpointID string, primarySandboxEndpointID string, endCertAvailable bool, endpointCertList EndpointCertDescriptor, apiUniqueID string, prodAIRatelimit *AIRatelimit, sandAIRatelimit *AIRatelimit) (EndpointConfigurations, []EndpointSecurityConfig) {
+	sandboxEndpoints := []EndpointConfiguration{}
+	productionEndpoints := []EndpointConfiguration{}
+	endpointSecurityConfigs := []EndpointSecurityConfig{}
+	if primaryProdEndpointID == "" && primarySandboxEndpointID == "" {
+		logger.LoggerTransformer.Error("Primary Production and Sandbox Endpoint ID's are empty. Unable to map the endpoints.")
+	}
+	for _, endpoint := range endpointList {
+		prodURL := endpoint.EndpointConfig.ProductionEndpoints.URL
+		sandboxURL := endpoint.EndpointConfig.SandboxEndpoints.URL
+		endpointSecurityData := endpoint.EndpointConfig.EndpointSecurity
+		endpointSecurityData.Production.EndpointUUID = endpoint.EndpointUUID
+		endpointSecurityData.Sandbox.EndpointUUID = endpoint.EndpointUUID
+		endpointSecurityConfigs = append(endpointSecurityConfigs, endpointSecurityData)
+		var sandboxEndpointConf, prodEndpointConf EndpointConfiguration
+		var sandBoxEndpointEnabled = false
+		var prodEndpointEnabled = false
+		if sandboxURL != "" {
+			sandBoxEndpointEnabled = true
+		}
+		if prodURL != "" {
+			prodEndpointEnabled = true
+		}
+		if prodAIRatelimit != nil {
+			prodEndpointConf.AIRatelimit = *prodAIRatelimit
+		}
+		if sandAIRatelimit != nil {
+			sandboxEndpointConf.AIRatelimit = *sandAIRatelimit
+		}
+		sandboxEndpointConf.Endpoint = sandboxURL
+		prodEndpointConf.Endpoint = prodURL
+		if endCertAvailable {
+			for _, endCert := range endpointCertList.EndpointCertData {
+				if endCert.Endpoint == sandboxURL {
+					sandboxEndpointConf.EndCertificate = EndpointCertificate{
+						Name: endCert.Alias,
+						Key:  endCert.Certificate,
+					}
+				}
+				if endCert.Endpoint == prodURL {
+					prodEndpointConf.EndCertificate = EndpointCertificate{
+						Name: endCert.Alias,
+						Key:  endCert.Certificate,
+					}
+				}
+			}
+		}
+
+		if endpointSecurityData.Sandbox.Enabled {
+			sandboxEndpointConf.EndSecurity.Enabled = true
+
+			if endpointSecurityData.Sandbox.Type == "apikey" {
+				sandboxEndpointConf.EndSecurity.SecurityType = SecretInfo{
+					SecretName:     strings.Join([]string{apiUniqueID, generateSHA1Hash(endpoint.EndpointUUID), "sandbox", "secret"}, "-"),
+					In:             "Header",
+					APIKeyNameKey:  endpointSecurityData.Sandbox.APIKeyIdentifier,
+					APIKeyValueKey: "apiKey",
+				}
+			} else {
+				sandboxEndpointConf.EndSecurity.SecurityType = SecretInfo{
+					SecretName:  strings.Join([]string{apiUniqueID, generateSHA1Hash(endpoint.EndpointUUID), "sandbox", "secret"}, "-"),
+					UsernameKey: "username",
+					PasswordKey: "password",
+				}
+			}
+		}
+
+		if endpointSecurityData.Production.Enabled {
+			prodEndpointConf.EndSecurity.Enabled = true
+			if endpointSecurityData.Production.Type == "apikey" {
+				prodEndpointConf.EndSecurity.SecurityType = SecretInfo{
+					SecretName:     strings.Join([]string{apiUniqueID, generateSHA1Hash(endpoint.EndpointUUID), "production", "secret"}, "-"),
+					In:             "Header",
+					APIKeyNameKey:  endpointSecurityData.Production.APIKeyIdentifier,
+					APIKeyValueKey: "apiKey",
+				}
+			} else {
+				prodEndpointConf.EndSecurity.SecurityType = SecretInfo{
+					SecretName:  strings.Join([]string{apiUniqueID, generateSHA1Hash(endpoint.EndpointUUID), "production", "secret"}, "-"),
+					UsernameKey: "username",
+					PasswordKey: "password",
+				}
+			}
+		}
+
+		if sandBoxEndpointEnabled && prodEndpointEnabled {
+			sandboxEndpoints = append(sandboxEndpoints, sandboxEndpointConf)
+			productionEndpoints = append(productionEndpoints, prodEndpointConf)
+		} else if sandBoxEndpointEnabled {
+			sandboxEndpoints = append(sandboxEndpoints, sandboxEndpointConf)
+		} else if prodEndpointEnabled {
+			productionEndpoints = append(productionEndpoints, prodEndpointConf)
+		}
+	}
+	epconfigs := EndpointConfigurations{
+		Sandbox:    &sandboxEndpoints,
+		Production: &productionEndpoints,
+	}
+	logger.LoggerTransformer.Debugf("Endpoint Configurations: %v", epconfigs)
+	return epconfigs, endpointSecurityConfigs
 }
 
 // GenerateCRs takes the .apk-conf, api definition, vHost and the organization for a particular API and then generate and returns
@@ -1162,8 +1290,8 @@ func createConfigMaps(certFiles map[string]string, k8sArtifact *K8sArtifacts) {
 }
 
 // createEndpointSecrets creates and links the secret CRs need to be created for handling the endpoint security
-func createEndpointSecrets(secretData EndpointSecurityConfig, k8sArtifact *K8sArtifacts) {
-	createSecret := func(environment string, username, password string, apiKeyValue string, securityType string) {
+func createEndpointSecrets(secretDataList []EndpointSecurityConfig, k8sArtifact *K8sArtifacts) {
+	createSecret := func(environment string, username, password string, apiKeyValue string, securityType string, endpointUUID string) {
 		var secret corev1.Secret
 		if securityType == "apikey" {
 			secret = corev1.Secret{
@@ -1172,7 +1300,7 @@ func createEndpointSecrets(secretData EndpointSecurityConfig, k8sArtifact *K8sAr
 					APIVersion: "v1",
 				},
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      strings.Join([]string{k8sArtifact.API.Name, environment, "secret"}, "-"),
+					Name:      strings.Join([]string{k8sArtifact.API.Name, generateSHA1Hash(endpointUUID), environment, "secret"}, "-"),
 					Namespace: k8sArtifact.API.Namespace,
 					Labels:    make(map[string]string),
 				},
@@ -1187,7 +1315,7 @@ func createEndpointSecrets(secretData EndpointSecurityConfig, k8sArtifact *K8sAr
 					APIVersion: "v1",
 				},
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      strings.Join([]string{k8sArtifact.API.Name, environment, "secret"}, "-"),
+					Name:      strings.Join([]string{k8sArtifact.API.Name, generateSHA1Hash(endpointUUID), environment, "secret"}, "-"),
 					Namespace: k8sArtifact.API.Namespace,
 					Labels:    make(map[string]string),
 				},
@@ -1201,13 +1329,12 @@ func createEndpointSecrets(secretData EndpointSecurityConfig, k8sArtifact *K8sAr
 		k8sArtifact.Secrets[secret.ObjectMeta.Name] = &secret
 	}
 
-	if secretData.Production.Enabled {
-		if secretData.Production.Username == "" || secretData.Production.Password == "" {
-			createSecret("production", secretData.Production.Username, secretData.Production.Password, secretData.Production.APIKeyValue, secretData.Production.Type)
+	for _, secretData := range secretDataList {
+		if secretData.Production.Enabled {
+			createSecret("production", secretData.Production.Username, secretData.Production.Password, secretData.Production.APIKeyValue, secretData.Production.Type, secretData.Production.EndpointUUID)
 		}
-	}
-
-	if secretData.Sandbox.Enabled {
-		createSecret("sandbox", secretData.Sandbox.Username, secretData.Sandbox.Password, secretData.Sandbox.APIKeyValue, secretData.Sandbox.Type)
+		if secretData.Sandbox.Enabled {
+			createSecret("sandbox", secretData.Sandbox.Username, secretData.Sandbox.Password, secretData.Sandbox.APIKeyValue, secretData.Sandbox.Type, secretData.Sandbox.EndpointUUID)
+		}
 	}
 }

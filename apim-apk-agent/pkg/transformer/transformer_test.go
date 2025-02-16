@@ -145,14 +145,14 @@ func TestAPKConfGeneration(t *testing.T) {
 				assert.NoError(t, err)
 				assert.IsType(t, &APIArtifact{}, apiArtifact)
 
-				apkConf, apiUUID, revisionID, configuredRateLimitPoliciesMap, endpointSecurityData, _, _, _, apkErr := GenerateAPKConf(apiArtifact.APIJson, apiArtifact.CertArtifact, "default")
+				apkConf, apiUUID, revisionID, configuredRateLimitPoliciesMap, endpointSecurityData, _, _, _, apkErr := GenerateAPKConf(apiArtifact.APIJson, apiArtifact.CertArtifact, apiArtifact.Endpoints, "default")
 
 				assert.NoError(t, apkErr)
 				assert.NotEmpty(t, apkConf)
 				assert.NotEqual(t, "null", apiUUID)
 				assert.NotEqual(t, uint32(0), revisionID)
 				assert.NotNil(t, configuredRateLimitPoliciesMap)
-				assert.IsType(t, EndpointSecurityConfig{}, endpointSecurityData) // Need to be refined maybe
+				assert.IsType(t, []EndpointSecurityConfig{}, endpointSecurityData) // Need to be refined maybe
 			}
 		}
 	}
@@ -359,7 +359,7 @@ func TestBrokenZipHandlingFlow(t *testing.T) {
 					assert.Error(t, err)
 				}
 
-				apkConf, apiUUID, revisionID, configuredRateLimitPoliciesMap, endpointSecurityData, _, _, _, apkErr := GenerateAPKConf(apiArtifact.APIJson, apiArtifact.CertArtifact, "orgID")
+				apkConf, apiUUID, revisionID, configuredRateLimitPoliciesMap, endpointSecurityData, _, _, _, apkErr := GenerateAPKConf(apiArtifact.APIJson, apiArtifact.CertArtifact, apiArtifact.Endpoints, "orgID")
 
 				//When all the contents are empty or some properties are missing, an unmarshalling error should occur when creating the apiArtifact
 				if strings.Contains(zipFile.Name, "All_Empty") {
@@ -368,7 +368,7 @@ func TestBrokenZipHandlingFlow(t *testing.T) {
 					assert.Equal(t, uint32(0), revisionID)
 					assert.Error(t, apkErr)
 					assert.NotNil(t, configuredRateLimitPoliciesMap)
-					assert.IsType(t, EndpointSecurityConfig{}, endpointSecurityData) // Need to be refined maybe
+					assert.IsType(t, []EndpointSecurityConfig{}, endpointSecurityData) // Need to be refined maybe
 				}
 				// If API_Json is broken then the generate conf is invalid hence it will be failed in CR generation
 				if strings.Contains(zipFile.Name, "Empty_Definition") {

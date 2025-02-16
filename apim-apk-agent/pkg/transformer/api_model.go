@@ -25,6 +25,7 @@ type CustomParams struct {
 // SecurityObj holds the idividual attribute values for each endpoint security config
 type SecurityObj struct {
 	Enabled          bool                   `json:"enabled"`
+	EndpointUUID     string                 `json:"endpointUUID"`
 	Type             string                 `json:"type"`
 	APIKeyValue      string                 `json:"apiKeyValue"`
 	APIKeyIdentifier string                 `json:"apiKeyIdentifier"`
@@ -170,16 +171,18 @@ type APIMApi struct {
 	SecuritySchemes      []string               `json:"securityScheme"`
 	AdditionalProperties []AdditionalProperties `yaml:"additionalProperties"`
 	// AdditionalPropertiesMap []AdditionalPropertiesMap `yaml:"additionalPropertiesMap"`
-	CORSConfiguration    CORSConfiguration     `yaml:"corsConfiguration"`
-	EndpointConfig       EndpointConfig        `yaml:"endpointConfig"`
-	Operations           []APIMOperation       `yaml:"operations"`
-	OrganizationID       string                `yaml:"organizationId"`
-	RevisionID           uint32                `yaml:"revisionId"`
-	RevisionedAPIID      string                `yaml:"revisionedApiId"`
-	APIThrottlingPolicy  string                `yaml:"apiThrottlingPolicy"`
-	APIPolicies          APIMOperationPolicies `yaml:"apiPolicies"`
-	SubtypeConfiguration SubtypeConfiguration  `yaml:"subtypeConfiguration"`
-	MaxTps               *MaxTps               `yaml:"maxTps"`
+	CORSConfiguration           CORSConfiguration     `yaml:"corsConfiguration"`
+	EndpointConfig              EndpointConfig        `yaml:"endpointConfig"`
+	PrimaryProductionEndpointID string                `yaml:"primaryProductionEndpointId"`
+	PrimarySandboxEndpointID    string                `yaml:"primarySandboxEndpointId"`
+	Operations                  []APIMOperation       `yaml:"operations"`
+	OrganizationID              string                `yaml:"organizationId"`
+	RevisionID                  uint32                `yaml:"revisionId"`
+	RevisionedAPIID             string                `yaml:"revisionedApiId"`
+	APIThrottlingPolicy         string                `yaml:"apiThrottlingPolicy"`
+	APIPolicies                 APIMOperationPolicies `yaml:"apiPolicies"`
+	SubtypeConfiguration        SubtypeConfiguration  `yaml:"subtypeConfiguration"`
+	MaxTps                      *MaxTps               `yaml:"maxTps"`
 }
 
 // SubtypeConfiguration holds the details for Subtypes
@@ -196,6 +199,21 @@ type Configuration struct {
 // APIYaml is a wrapper struct for YAML representation of an API.
 type APIYaml struct {
 	Data APIMApi `json:"data"`
+}
+
+// EndpointsYaml is a wrapper struct for YAML representation of a list of endpoints.
+type EndpointsYaml struct {
+	Type    string     `json:"type"`
+	Version string     `json:"version"`
+	Data    []Endpoint `json:"data"`
+}
+
+// Endpoint represents an endpoint with its UUID, name, configuration, and deployment stage.
+type Endpoint struct {
+	EndpointUUID    string         `json:"endpointUuid"`
+	EndpointName    string         `json:"endpointName"`
+	EndpointConfig  EndpointConfig `json:"endpointConfig"`
+	DeploymentStage string         `json:"deploymentStage"`
 }
 
 // MaxTps represents the maximum transactions per second (TPS) settings for both
@@ -250,6 +268,7 @@ type APIArtifact struct {
 	RevisionID           uint32               `json:"revisionId"`
 	CertMeta             CertMetadata         `json:"certMeta"`
 	EndpointCertMeta     EndpointCertMetadata `json:"endpintCertMeta"`
+	Endpoints            string               `json:"endpoints"`
 }
 
 // CertificateArtifact stores the parsed file content created inside the API project zip upon enabling certificate aided security options
@@ -275,5 +294,5 @@ type EndpointCertMetadata struct {
 type CertContainer struct {
 	ClientCertObj   CertMetadata
 	EndpointCertObj EndpointCertMetadata
-	SecretData      EndpointSecurityConfig
+	SecretData      []EndpointSecurityConfig
 }

@@ -111,7 +111,7 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUID *string, k8sClient client.Cli
 							return nil, err
 						}
 
-						apkConf, apiUUID, revisionID, configuredRateLimitPoliciesMap, endpointSecurityData, api, prodAIRL, sandAIRL, apkErr := transformer.GenerateAPKConf(artifact.APIJson, artifact.CertArtifact, apiDeployment.OrganizationID)
+						apkConf, apiUUID, revisionID, configuredRateLimitPoliciesMap, endpointSecurityData, api, prodAIRL, sandAIRL, apkErr := transformer.GenerateAPKConf(artifact.APIJson, artifact.CertArtifact, artifact.Endpoints, apiDeployment.OrganizationID)
 						if prodAIRL == nil {
 							// Try to delete production AI ratelimit for this api
 							k8sclientUtil.DeleteAIRatelimitPolicy(generateSHA1HexHash(api.Name, api.Version, "production"), k8sClient)
@@ -124,7 +124,7 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUID *string, k8sClient client.Cli
 							logger.LoggerUtils.Errorf("Error while generating APK-Conf: %v", apkErr)
 							return nil, err
 						}
-						logger.LoggerUtils.Debugf("APK Conf: %v", apkConf)
+						logger.LoggerUtils.Infof("APK Conf: %v", apkConf)
 						certContainer := transformer.CertContainer{
 							ClientCertObj:   artifact.CertMeta,
 							EndpointCertObj: artifact.EndpointCertMeta,

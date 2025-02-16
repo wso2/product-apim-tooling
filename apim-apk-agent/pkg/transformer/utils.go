@@ -98,6 +98,13 @@ func readZipFile(file *zip.File) (*APIArtifact, error) {
 			}
 			apiArtifact.APIJson = string(apiJSON)
 		}
+		if strings.Contains(file.Name, "endpoints.json") || strings.Contains(file.Name, "endpoints.yaml") {
+			endpointJSON, err := ReadContent(file)
+			if err != nil {
+				return nil, err
+			}
+			apiArtifact.Endpoints = string(endpointJSON)
+		}
 		if strings.Contains(file.Name, "client_certificates.json") {
 			certificateJSON, err := ReadContent(file)
 			if err != nil {
