@@ -296,3 +296,33 @@ type CertContainer struct {
 	EndpointCertObj EndpointCertMetadata
 	SecretData      []EndpointSecurityConfig
 }
+
+// ModelConfig holds the configuration details of a model
+type ModelConfig struct {
+	Model      string `json:"model"`
+	EndpointID string `json:"endpointId"`
+	Weight     int    `json:"weight"`
+}
+
+// Config holds the configuration details of the transformer
+type Config struct {
+	Production      []ModelConfig `json:"production"`
+	Sandbox         []ModelConfig `json:"sandbox"`
+	SuspendDuration int           `json:"suspendDuration"`
+}
+
+// ModelBasedRoundRobin holds the configuration details of the model based round robin
+type ModelBasedRoundRobin struct {
+	OnQuotaExceedSuspendDuration int              `yaml:"onQuotaExceedSuspendDuration"`
+	ProductionModels             []ModelEndpoints `yaml:"productionModels"`
+	SandboxModels                []ModelEndpoints `yaml:"sandboxModels"`
+}
+
+// ModelEndpoints holds the model and endpoint details
+type ModelEndpoints struct {
+	Model    string `yaml:"model"`
+	Endpoint string `yaml:"endpoint"`
+	Weight   int    `yaml:"weight"`
+}
+
+func (u ModelBasedRoundRobin) isParameter() {}

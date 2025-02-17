@@ -92,6 +92,7 @@ const (
 	removeHeaderPolicy    = "RemoveHeader"
 	requestRedirectPolicy = "RequestRedirect"
 	requestMirrorPolicy   = "RequestMirror"
+	modelBasedRoundRobin  = "ModelBasedRoundRobin"
 
 	// APK BackendJWT parameter constants
 	base64url = "Base64url"

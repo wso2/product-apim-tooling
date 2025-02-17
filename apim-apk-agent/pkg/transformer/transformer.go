@@ -67,8 +67,8 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, endpoints
 
 	var configuredRateLimitPoliciesMap = make(map[string]eventHub.RateLimitPolicy)
 
-	logger.LoggerTransformer.Infof("APIJson: %v", APIJson)
-	logger.LoggerTransformer.Infof("Endpoints: %v", endpoints)
+	logger.LoggerTransformer.Debugf("APIJson: %v", APIJson)
+	logger.LoggerTransformer.Debugf("Endpoints: %v", endpoints)
 
 	apiYamlError := json.Unmarshal([]byte(APIJson), &apiYaml)
 	if apiYamlError != nil {
@@ -89,6 +89,8 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, endpoints
 		logger.LoggerTransformer.Error("Error while unmarshalling endpoints.json/endpoints.yaml content", endpointsYamlError)
 		return "", "null", 0, nil, []EndpointSecurityConfig{}, nil, nil, nil, endpointsYamlError
 	}
+
+	endpointList := endpointsYaml.Data
 
 	apiYamlData := apiYaml.Data
 	logger.LoggerTransformer.Debugf("apiYamlData: %v", apiYamlData)
@@ -135,7 +137,7 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, endpoints
 		reqPolicyCount := len(operation.OperationPolicies.Request)
 		resPolicyCount := len(operation.OperationPolicies.Response)
 		reqInterceptor, resInterceptor := getReqAndResInterceptors(reqPolicyCount, resPolicyCount,
-			operation.OperationPolicies.Request, operation.OperationPolicies.Response)
+			operation.OperationPolicies.Request, operation.OperationPolicies.Response, endpointList)
 
 		var opRateLimit *RateLimit
 		if apiYamlData.APIThrottlingPolicy == "" && operation.ThrottlingPolicy != "" {
@@ -176,7 +178,7 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, endpoints
 	reqPolicyCount := len(apiYaml.Data.APIPolicies.Request)
 	resPolicyCount := len(apiYaml.Data.APIPolicies.Response)
 	reqInterceptor, resInterceptor := getReqAndResInterceptors(reqPolicyCount, resPolicyCount,
-		apiYaml.Data.APIPolicies.Request, apiYaml.Data.APIPolicies.Response)
+		apiYaml.Data.APIPolicies.Request, apiYaml.Data.APIPolicies.Response, endpointList)
 
 	apk.APIPolicies = &OperationPolicies{
 		Request:  *reqInterceptor,
@@ -200,7 +202,6 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, endpoints
 	prodURL := apiYamlData.EndpointConfig.ProductionEndpoints.URL
 	primaryProdEndpointID := apiYamlData.PrimaryProductionEndpointID
 	primarySandboxEndpointID := apiYamlData.PrimarySandboxEndpointID
-	endpointList := endpointsYaml.Data
 	endpointSecurityDataList := []EndpointSecurityConfig{}
 
 	apiUniqueID := GetUniqueIDForAPI(apiYamlData.Name, apiYamlData.Version, apiYamlData.OrganizationID)
@@ -343,7 +344,7 @@ func getAPIType(protocolType string) string {
 }
 
 // Generate the interceptor policy if request or response policy exists
-func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []APIMOperationPolicy, resPolicies []APIMOperationPolicy) (*[]OperationPolicy, *[]OperationPolicy) {
+func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []APIMOperationPolicy, resPolicies []APIMOperationPolicy, endpointList []Endpoint) (*[]OperationPolicy, *[]OperationPolicy) {
 	var requestPolicyList, responsePolicyList []OperationPolicy
 	var interceptorParams *InterceptorService
 	var requestInterceptorPolicy, responseInterceptorPolicy, requestBackendJWTPolicy OperationPolicy
@@ -488,6 +489,63 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 					url := reqPolicyParameters.(string)
 					mirrorUrls = append(mirrorUrls, url)
 				}
+			} else if reqPolicy.PolicyName == constants.ModelRoundRobin || reqPolicy.PolicyName == constants.ModelWeightedRoundRobin {
+				logger.LoggerTransformer.Debugf("ModelRoundRobin Type Request Policy: %v", reqPolicy)
+				modelRoundRobinPolicy := OperationPolicy{
+					PolicyName:    modelBasedRoundRobin,
+					PolicyVersion: v1,
+				}
+				configs := reqPolicy.Parameters["weightedRoundRobinConfigs"]
+				logger.LoggerTransformer.Debugf("Configs: %v", configs)
+				// Convert interface{} to string, then to []byte
+				configStr, ok := configs.(string)
+				if !ok {
+					fmt.Println("Error: expected a JSON string, but got a different type")
+				}
+				// Replace single quotes with double quotes to make valid JSON
+				configStr = strings.ReplaceAll(configStr, "'", "\"")
+				jsonBytes := []byte(configStr)
+				var config Config
+				if err := json.Unmarshal(jsonBytes, &config); err != nil {
+					fmt.Println("Error unmarshalling JSON:", err)
+				}
+				logger.LoggerTransformer.Debugf("Parsed Config: %+v\n", config)
+				parameters := ModelBasedRoundRobin{
+					OnQuotaExceedSuspendDuration: config.SuspendDuration,
+				}
+				var productionModels []ModelEndpoints
+				var sandboxModels []ModelEndpoints
+				var endpointIdtoURL = make(map[string]string)
+				for _, endpoint := range endpointList {
+					if endpoint.EndpointConfig.ProductionEndpoints.URL != "" {
+						endpointIdtoURL[endpoint.EndpointUUID] = endpoint.EndpointConfig.ProductionEndpoints.URL
+					}
+					if endpoint.EndpointConfig.SandboxEndpoints.URL != "" {
+						endpointIdtoURL[endpoint.EndpointUUID] = endpoint.EndpointConfig.SandboxEndpoints.URL
+					}
+				}
+				for _, model := range config.Production {
+					endpointURL := endpointIdtoURL[model.EndpointID]
+					modelEndpoints := ModelEndpoints{
+						Model:    model.Model,
+						Weight:   model.Weight,
+						Endpoint: endpointURL,
+					}
+					productionModels = append(productionModels, modelEndpoints)
+				}
+				for _, model := range config.Sandbox {
+					endpointURL := endpointIdtoURL[model.EndpointID]
+					modelEndpoints := ModelEndpoints{
+						Model:    model.Model,
+						Weight:   model.Weight,
+						Endpoint: endpointURL,
+					}
+					sandboxModels = append(sandboxModels, modelEndpoints)
+				}
+				parameters.ProductionModels = productionModels
+				parameters.SandboxModels = sandboxModels
+				modelRoundRobinPolicy.Parameters = parameters
+				requestPolicyList = append(requestPolicyList, modelRoundRobinPolicy)
 			}
 		}
 	}
