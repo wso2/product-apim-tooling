@@ -51,7 +51,7 @@ type apiPolicy struct {
 	category          string
 	applicableFlows   []string
 	supportedGateways []string
-	supportedApiTypes []string
+	supportedApiTypes []any
 }
 
 func newAPIPolicyDefinition(a utils.APIPolicy) *apiPolicy {
@@ -87,7 +87,7 @@ func (a apiPolicy) SupportedGateways() []string {
 	return a.supportedGateways
 }
 
-func (a apiPolicy) SupportedApiTypes() []string {
+func (a apiPolicy) SupportedApiTypes() []any {
 	return a.supportedApiTypes
 }
 
