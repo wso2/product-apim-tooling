@@ -27,7 +27,7 @@ type APIPolicyFileData struct {
 	Category          string            `json:"category,omitempty" yaml:"category,omitempty"`
 	ApplicableFlows   []string          `json:"applicableFlows" yaml:"applicableFlows"`
 	SupportedGateways []string          `json:"supportedGateways" yaml:"supportedGateways"`
-	SupportedApiTypes []string          `json:"supportedApiTypes" yaml:"supportedApiTypes"`
+	SupportedApiTypes []any             `json:"supportedApiTypes" yaml:"supportedApiTypes"`
 	PolicyAttributes  []PolicyAttribute `json:"policyAttributes,omitempty" yaml:"policyAttributes,omitempty"`
 }
 
@@ -62,7 +62,7 @@ type PolicySpecData struct {
 	Description       string            `json:"description,omitempty" yaml:"description,omitempty"`
 	ApplicableFlows   []string          `json:"applicableFlows" yaml:"applicableFlows"`
 	SupportedGateways []string          `json:"supportedGateways" yaml:"supportedGateways"`
-	SupportedApiTypes []string          `json:"supportedApiTypes" yaml:"supportedApiTypes"`
+	SupportedApiTypes []any             `json:"supportedApiTypes" yaml:"supportedApiTypes"`
 	PolicyAttributes  []PolicyAttribute `json:"policyAttributes,omitempty" yaml:"policyAttributes,omitempty"`
 }
 
