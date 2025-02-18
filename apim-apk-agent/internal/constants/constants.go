@@ -36,12 +36,14 @@ const (
 
 // APIM Mediation constants
 const (
-	InterceptorService = "CallInterceptorService"
-	BackendJWT         = "backEndJWT"
-	AddHeader          = "apkAddHeader"
-	RemoveHeader       = "apkRemoveHeader"
-	MirrorRequest      = "apkMirrorRequest"
-	RedirectRequest    = "apkRedirectRequest"
+	InterceptorService      = "CallInterceptorService"
+	BackendJWT              = "backEndJWT"
+	AddHeader               = "apkAddHeader"
+	RemoveHeader            = "apkRemoveHeader"
+	MirrorRequest           = "apkMirrorRequest"
+	RedirectRequest         = "apkRedirectRequest"
+	ModelWeightedRoundRobin = "modelWeightedRoundRobin"
+	ModelRoundRobin         = "modelRoundRobin"
 
 	// Version constants
 	V1 = "v1"
