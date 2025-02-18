@@ -35,7 +35,12 @@ vendor
 .vscode/
 
 *.tar.gz
+*.tgz
 *.rar
+
+# APIM APK Agent builds
+apim-apk-agent/arm64/main
+apim-apk-agent/amd64/main
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
