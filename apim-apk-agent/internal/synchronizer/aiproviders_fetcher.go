@@ -240,7 +240,7 @@ func createAIProvider(aiProvider *eventhubTypes.AIProvider) dpv1alpha4.AIProvide
 				In:    modelInputSource,
 				Value: modelAttributeIdentifier,
 			},
-			SupportedModels: []string{"gtp-4.5", "gtp-4o", "gtp-3.5"},
+			SupportedModels: []string{"gpt-4o", "gpt-3.5", "gpt-4o-mini"},
 			RateLimitFields: dpv1alpha4.RateLimitFields{
 				PromptTokens: dpv1alpha4.ValueDetails{
 					In:    promptTokenCountInputSource,
