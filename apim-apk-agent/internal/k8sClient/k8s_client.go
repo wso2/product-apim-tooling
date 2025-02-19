@@ -776,7 +776,7 @@ func UpdateTokenIssuersCR(keyManager eventhubTypes.ResolvedKeyManager, k8sClient
 	tokenIssuer.Spec.Issuer = keyManager.KeyManagerConfig.Issuer
 	tokenIssuer.Spec.ClaimMappings = marshalClaimMappings(keyManager.KeyManagerConfig.ClaimMappings)
 	tokenIssuer.Spec.SignatureValidation = marshalSignatureValidation(keyManager.KeyManagerConfig)
-	tokenIssuer.Spec.TargetRef = &v1alpha2.NamespacedPolicyTargetReference{Group: "gateway.networking.k8s.io", Kind: "Gateway", Name: "default"}
+	tokenIssuer.Spec.TargetRef = &v1alpha2.NamespacedPolicyTargetReference{Group: constants.GatewayGroup, Kind: constants.GatewayKind, Name: constants.GatewayName}
 	if keyManager.KeyManagerConfig.ConsumerKeyClaim != "" {
 		tokenIssuer.Spec.ConsumerKeyClaim = keyManager.KeyManagerConfig.ConsumerKeyClaim
 	}
