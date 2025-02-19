@@ -511,7 +511,14 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 				}
 				logger.LoggerTransformer.Debugf("Parsed Config: %+v\n", config)
 				parameters := ModelBasedRoundRobin{
-					OnQuotaExceedSuspendDuration: config.SuspendDuration,
+					OnQuotaExceedSuspendDuration: func() int {
+						duration, err := strconv.Atoi(config.SuspendDuration)
+						if err != nil {
+							logger.LoggerTransformer.Errorf("Error while converting SuspendDuration to integer: %v", err)
+							return 0
+						}
+						return duration
+					}(),
 				}
 				var productionModels []ModelEndpoints
 				var sandboxModels []ModelEndpoints

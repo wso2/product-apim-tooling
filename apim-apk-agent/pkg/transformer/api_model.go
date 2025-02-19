@@ -308,7 +308,7 @@ type ModelConfig struct {
 type Config struct {
 	Production      []ModelConfig `json:"production"`
 	Sandbox         []ModelConfig `json:"sandbox"`
-	SuspendDuration int           `json:"suspendDuration"`
+	SuspendDuration string        `json:"suspendDuration"`
 }
 
 // ModelBasedRoundRobin holds the configuration details of the model based round robin
