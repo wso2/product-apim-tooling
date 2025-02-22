@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/config"
 	"github.com/wso2/product-apim-tooling/apim-apk-agent/internal/constants"
 	logger "github.com/wso2/product-apim-tooling/apim-apk-agent/pkg/loggers"
@@ -99,9 +100,9 @@ func StartInternalServer(port uint) {
 					event.API.Definition = yaml
 				}
 			}
-			apiYaml, definition := createAPIYaml(&event)
+			apiYaml, definition, endpointsYaml := createAPIYaml(&event)
 			deploymentContent := createDeployementYaml(event.API.Vhost)
-			logger.LoggerMgtServer.Debugf("Created apiYaml : %s, \n\n\n created definition file: %s", apiYaml, definition)
+			logger.LoggerMgtServer.Infof("Created apiYaml : %s, \n\n\n created definition file: %s, \n\n\n created endpointYaml : %s", apiYaml, definition, endpointsYaml)
 			definitionPath := fmt.Sprintf("%s-%s/Definitions/swagger.yaml", event.API.APIName, event.API.APIVersion)
 			if strings.ToUpper(event.API.APIType) == "GRAPHQL" {
 				definitionPath = fmt.Sprintf("%s-%s/Definitions/schema.graphql", event.API.APIName, event.API.APIVersion)
@@ -109,6 +110,9 @@ func StartInternalServer(port uint) {
 			zipFiles := []utils.ZipFile{{
 				Path:    fmt.Sprintf("%s-%s/api.yaml", event.API.APIName, event.API.APIVersion),
 				Content: apiYaml,
+			}, {
+				Path:    fmt.Sprintf("%s-%s/endpoints.yaml", event.API.APIName, event.API.APIVersion),
+				Content: endpointsYaml,
 			}, {
 				Path:    fmt.Sprintf("%s-%s/deployment_environments.yaml", event.API.APIName, event.API.APIVersion),
 				Content: deploymentContent,
@@ -134,7 +138,7 @@ func StartInternalServer(port uint) {
 	r.RunTLS(fmt.Sprintf(":%d", port), publicKeyLocation, privateKeyLocation)
 }
 
-func createAPIYaml(apiCPEvent *APICPEvent) (string, string) {
+func createAPIYaml(apiCPEvent *APICPEvent) (string, string, string) {
 	config, err := config.ReadConfigs()
 	provider := "admin"
 	if err == nil {
@@ -174,7 +178,7 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string) {
 
 	data := map[string]interface{}{
 		"type":    "api",
-		"version": "v4.4.0",
+		"version": "v4.5.0",
 		"data": map[string]interface{}{
 			"name":                         apiCPEvent.API.APIName,
 			"context":                      context,
@@ -243,6 +247,7 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string) {
 	}
 	if len(subTypeConfiguration) > 0 {
 		data["data"].(map[string]interface{})["subtypeConfiguration"] = subTypeConfiguration
+		//data["data"].(map[string]interface{})["egress"] = true
 	}
 	// TODO when we start to process sandbox we need to have this if condition. For now we remove sandbox endpoint always.
 	// if apiCPEvent.API.SandEndpoint == "" {
@@ -373,9 +378,222 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string) {
 			}
 		}
 	}
-	logger.LoggerMgtServer.Debugf("API Yaml: %+v", data)
+	multiEndpoints := apiCPEvent.API.MultiEndpoints
+	apimEndpints := []APIMEndpoint{}
+	prodCount := 0
+	sandCount := 0
+	primaryProductionEndpointID := ""
+	primarySandboxEndpointID := ""
+	primaryProdcutionURL := ""
+	primarySandboxURL := ""
+	for _, endpoint := range multiEndpoints.ProdEndpoints {
+		prodCount++
+		var endpointName string
+		if prodCount == 1 {
+			endpointName = "Default Production Endpoint"
+		} else {
+			endpointName = fmt.Sprintf("%d Production Endpoint", prodCount)
+		}
+		prodEndpoint := ""
+		if endpoint.URL != "" {
+			prodEndpoint = fmt.Sprintf("%s://%s", multiEndpoints.Protocol, endpoint.URL)
+		}
+		endpointUUID := uuid.New().String() + "--PRODUCTION"
+		if prodCount == 1 {
+			primaryProductionEndpointID = endpointUUID
+			primaryProdcutionURL = prodEndpoint
+		}
+		apimEndpints = append(apimEndpints, APIMEndpoint{
+			DeploymentStage: "PRODUCTION",
+			EndpointUUID:    endpointUUID,
+			EndpointName:    endpointName,
+			EndpointConfig: APIMEndpointConfig{
+				EndpointType: multiEndpoints.Protocol,
+				ProductionEndpoints: Endpoints{
+					URL: prodEndpoint,
+				},
+				EndpointSecurity: APIMEndpointSecurity{
+					Production: SecurityConfig{
+						Enabled:                          endpoint.SecurityEnabled,
+						Type:                             endpoint.SecurityType,
+						Username:                         endpoint.BasicUsername,
+						Password:                         endpoint.BasicPassword,
+						APIKeyIdentifier:                 endpoint.APIKeyName,
+						APIKeyValue:                      endpoint.APIKeyValue,
+						APIKeyIdentifierType:             endpoint.APIKeyIn,
+						ConnectionTimeoutDuration:        -1.0,
+						SocketTimeoutDuration:            -1.0,
+						ConnectionRequestTimeoutDuration: -1.0,
+					},
+				},
+			},
+		})
+	}
+	for _, endpoint := range multiEndpoints.SandEndpoints {
+		sandCount++
+		var endpointName string
+		if sandCount == 1 {
+			endpointName = "Default Sandbox Endpoint"
+		} else {
+			endpointName = fmt.Sprintf("%d Sandbox Endpoint", sandCount)
+		}
+
+		sandEndpoint := ""
+		if endpoint.URL != "" {
+			sandEndpoint = fmt.Sprintf("%s://%s", multiEndpoints.Protocol, endpoint.URL)
+		}
+		endpointUUID := uuid.New().String() + "--SANDBOX"
+		if sandCount == 1 {
+			primarySandboxEndpointID = endpointUUID
+			primarySandboxURL = sandEndpoint
+		}
+		apimEndpints = append(apimEndpints, APIMEndpoint{
+			DeploymentStage: "SANDBOX",
+			EndpointUUID:    endpointUUID,
+			EndpointName:    endpointName,
+			EndpointConfig: APIMEndpointConfig{
+				EndpointType: multiEndpoints.Protocol,
+				SandboxEndpoints: Endpoints{
+					URL: sandEndpoint,
+				},
+				EndpointSecurity: APIMEndpointSecurity{
+					Sandbox: SecurityConfig{
+						Enabled:                          endpoint.SecurityEnabled,
+						Type:                             endpoint.SecurityType,
+						Username:                         endpoint.BasicUsername,
+						Password:                         endpoint.BasicPassword,
+						APIKeyIdentifier:                 endpoint.APIKeyName,
+						APIKeyValue:                      endpoint.APIKeyValue,
+						APIKeyIdentifierType:             endpoint.APIKeyIn,
+						ConnectionTimeoutDuration:        -1.0,
+						SocketTimeoutDuration:            -1.0,
+						ConnectionRequestTimeoutDuration: -1.0,
+					},
+				},
+			},
+		})
+	}
+
+	dataArr := make([]map[string]interface{}, 0, len(apimEndpints))
+
+	for _, e := range apimEndpints {
+		// Build the top-level map for this endpoint
+		endpointMap := map[string]interface{}{
+			"endpointUuid":    e.EndpointUUID,
+			"endpointName":    e.EndpointName,
+			"deploymentStage": e.DeploymentStage, // e.g. "PRODUCTION" or "SANDBOX"
+		}
+
+		// Build the endpointConfig sub-map
+		configMap := map[string]interface{}{
+			"endpoint_type": e.EndpointConfig.EndpointType, // e.g. "http" or "https"
+		}
+
+		// Depending on PRODUCTION or SANDBOX, fill the right endpoints key
+		if e.DeploymentStage == "PRODUCTION" {
+			configMap["production_endpoints"] = map[string]interface{}{
+				"url": e.EndpointConfig.ProductionEndpoints.URL,
+			}
+		} else if e.DeploymentStage == "SANDBOX" {
+			configMap["sandbox_endpoints"] = map[string]interface{}{
+				"url": e.EndpointConfig.SandboxEndpoints.URL,
+			}
+		}
+
+		// Build endpoint_security sub-map
+		endpointSecurityMap := map[string]interface{}{}
+
+		// Production or Sandbox security
+		if e.DeploymentStage == "PRODUCTION" {
+			sec := e.EndpointConfig.EndpointSecurity.Production
+			endpointSecurityMap["production"] = map[string]interface{}{
+				"enabled":                          sec.Enabled,
+				"type":                             sec.Type,
+				"apiKeyIdentifier":                 sec.APIKeyIdentifier,
+				"apiKeyValue":                      sec.APIKeyValue,
+				"apiKeyIdentifierType":             sec.APIKeyIdentifierType,
+				"username":                         sec.Username,
+				"customParameters":                 sec.CustomParameters, // Or map[string]string{}
+				"connectionTimeoutDuration":        sec.ConnectionTimeoutDuration,
+				"connectionRequestTimeoutDuration": sec.ConnectionRequestTimeoutDuration,
+				"socketTimeoutDuration":            sec.SocketTimeoutDuration,
+				"grantType":                        "",
+				"tokenUrl":                         "",
+				"proxyConfigs": map[string]interface{}{
+					"proxyEnabled":  "",
+					"proxyHost":     "",
+					"proxyPort":     "",
+					"proxyUsername": "",
+					"proxyPassword": "",
+					"proxyProtocol": "",
+				},
+			}
+		} else if e.DeploymentStage == "SANDBOX" {
+			sec := e.EndpointConfig.EndpointSecurity.Sandbox
+			endpointSecurityMap["sandbox"] = map[string]interface{}{
+				"enabled":                          sec.Enabled,
+				"type":                             sec.Type,
+				"apiKeyIdentifier":                 sec.APIKeyIdentifier,
+				"apiKeyValue":                      sec.APIKeyValue,
+				"apiKeyIdentifierType":             sec.APIKeyIdentifierType,
+				"username":                         sec.Username,
+				"customParameters":                 sec.CustomParameters,
+				"connectionTimeoutDuration":        sec.ConnectionTimeoutDuration,
+				"connectionRequestTimeoutDuration": sec.ConnectionRequestTimeoutDuration,
+				"socketTimeoutDuration":            sec.SocketTimeoutDuration,
+				"grantType":                        "",
+				"tokenUrl":                         "",
+				"proxyConfigs": map[string]interface{}{
+					"proxyEnabled":  "",
+					"proxyHost":     "",
+					"proxyPort":     "",
+					"proxyUsername": "",
+					"proxyPassword": "",
+					"proxyProtocol": "",
+				},
+			}
+		}
+		endpointSecurityMap["customParameters"] = "null"
+
+		// Attach endpoint_security to configMap
+		configMap["endpoint_security"] = endpointSecurityMap
+
+		// Put endpointConfig in the main endpointMap
+		endpointMap["endpointConfig"] = configMap
+
+		// Append this endpoint to dataArr
+		dataArr = append(dataArr, endpointMap)
+	}
+
+	var endpointsData map[string]interface{}
+	if prodCount > 0 || sandCount > 0 {
+		endpointsData = map[string]interface{}{
+			"type":    "endpoints",
+			"version": "v4.5.0",
+			"data":    dataArr,
+		}
+	}
+
+	if primaryProductionEndpointID != "" || primarySandboxEndpointID != "" {
+		data["data"].(map[string]interface{})["primaryProductionEndpointId"] = primaryProductionEndpointID
+		data["data"].(map[string]interface{})["primarySandboxEndpointId"] = primarySandboxEndpointID
+		data["data"].(map[string]interface{})["endpointImplementationType"] = "ENDPOINT"
+		data["data"].(map[string]interface{})["endpointConfig"] = map[string]interface{}{
+			"endpoint_type": apiCPEvent.API.EndpointProtocol,
+			"sandbox_endpoints": map[string]interface{}{
+				"url": primarySandboxURL,
+			},
+			"production_endpoints": map[string]interface{}{
+				"url": primaryProdcutionURL,
+			},
+		}
+	}
+
+	logger.LoggerMgtServer.Infof("API Yaml: %+v", data)
 	yamlBytes, _ := yaml.Marshal(data)
-	return string(yamlBytes), definition
+	logger.LoggerMgtServer.Infof("Endpoint Yaml: %v", endpointsData)
+	endpointBytes, _ := yaml.Marshal(endpointsData)
+	return string(yamlBytes), definition, string(endpointBytes)
 }
 
 func createDeployementYaml(vhost string) string {
