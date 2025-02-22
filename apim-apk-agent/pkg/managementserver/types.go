@@ -152,6 +152,69 @@ type API struct {
 	SandAIRL             *AIRL             `json:"sandAIRL"`
 	ProdAIRL             *AIRL             `json:"prodAIRL"`
 	AIConfiguration      AIConfiguration   `json:"aiConfiguration"`
+	MultiEndpoints       APIEndpoints      `json:"multiEndpoints"`
+}
+
+// APIMEndpoint holds the endpoint data from adapter api event
+type APIMEndpoint struct {
+	EndpointUUID    string             `json:"endpointUuid" yaml:"endpointUuid"`
+	EndpointName    string             `json:"endpointName" yaml:"endpointName"`
+	EndpointConfig  APIMEndpointConfig `json:"endpointConfig" yaml:"endpointConfig"`
+	DeploymentStage string             `json:"deploymentStage" yaml:"deploymentStage"`
+}
+
+// APIMEndpointConfig holds the endpoint configuration data from adapter api event
+type APIMEndpointConfig struct {
+	EndpointType        string               `json:"endpoint_type" yaml:"endpoint_type"`
+	SandboxEndpoints    Endpoints            `json:"sandbox_endpoints" yaml:"sandbox_endpoints"`
+	ProductionEndpoints Endpoints            `json:"production_endpoints" yaml:"production_endpoints"`
+	EndpointSecurity    APIMEndpointSecurity `json:"endpoint_security" yaml:"endpoint_security"`
+}
+
+// APIMEndpointSecurity holds the endpoint security data from adapter api event
+type APIMEndpointSecurity struct {
+	Sandbox    SecurityConfig `json:"sandbox" yaml:"sandbox"`
+	Production SecurityConfig `json:"production" yaml:"production"`
+}
+
+// SecurityConfig holds the security configuration data from adapter api event
+type SecurityConfig struct {
+	APIKeyValue                      string                 `json:"apiKeyValue" yaml:"apiKeyValue"`
+	APIKeyIdentifier                 string                 `json:"apiKeyIdentifier" yaml:"apiKeyIdentifier"`
+	APIKeyIdentifierType             string                 `json:"apiKeyIdentifierType" yaml:"apiKeyIdentifierType"`
+	Type                             string                 `json:"type" yaml:"type"`
+	Username                         string                 `json:"username" yaml:"username"`
+	Password                         string                 `json:"password" yaml:"password"`
+	Enabled                          bool                   `json:"enabled" yaml:"enabled"`
+	AdditionalProperties             map[string]interface{} `json:"additionalProperties" yaml:"additionalProperties"`
+	CustomParameters                 map[string]interface{} `json:"customParameters" yaml:"customParameters"`
+	ConnectionTimeoutDuration        float64                `json:"connectionTimeoutDuration" yaml:"connectionTimeoutDuration"`
+	SocketTimeoutDuration            float64                `json:"socketTimeoutDuration" yaml:"socketTimeoutDuration"`
+	ConnectionRequestTimeoutDuration float64                `json:"connectionRequestTimeoutDuration" yaml:"connectionRequestTimeoutDuration"`
+}
+
+// Endpoints holds the endpoint URLs
+type Endpoints struct {
+	URL string `json:"url" yaml:"url"`
+}
+
+// EndpointConfig holds endpoint-specific settings.
+type EndpointConfig struct { // "prod" or "sand"
+	URL             string
+	SecurityType    string
+	SecurityEnabled bool
+	APIKeyName      string
+	APIKeyIn        string
+	APIKeyValue     string
+	BasicUsername   string
+	BasicPassword   string
+}
+
+// APIEndpoints holds the common protocol and a list of endpoint configurations.
+type APIEndpoints struct {
+	Protocol      string
+	ProdEndpoints []EndpointConfig
+	SandEndpoints []EndpointConfig
 }
 
 // AIRL holds AI ratelimit related data
