@@ -91,6 +91,7 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, endpoints
 	}
 
 	endpointList := endpointsYaml.Data
+	logger.LoggerTransformer.Debugf("EndpointList: %v", endpointList)
 
 	apiYamlData := apiYaml.Data
 	logger.LoggerTransformer.Debugf("apiYamlData: %v", apiYamlData)
@@ -102,6 +103,41 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, endpoints
 	apk.DefaultVersion = apiYamlData.DefaultVersion
 	apk.DefinitionPath = "/definition"
 	apk.SubscriptionValidation = true
+
+	sandboxURL := apiYamlData.EndpointConfig.SandboxEndpoints.URL
+	prodURL := apiYamlData.EndpointConfig.ProductionEndpoints.URL
+	primaryProdEndpointID := apiYamlData.PrimaryProductionEndpointID
+	primarySandboxEndpointID := apiYamlData.PrimarySandboxEndpointID
+
+	primaryProdEndpoint := Endpoint{
+		ID:   primaryProdEndpointID,
+		Name: "Primary Production Endpoint",
+		EndpointConfig: EndpointConfig{
+			ProductionEndpoints: EndpointDetails{
+				URL: prodURL,
+			},
+			EndpointType:     apiYamlData.EndpointConfig.EndpointType,
+			EndpointSecurity: apiYamlData.EndpointConfig.EndpointSecurity,
+		},
+		DeploymentStage: "PRODUCTION",
+	}
+
+	primarySandboxEndpoint := Endpoint{
+		ID:   primarySandboxEndpointID,
+		Name: "Primary Sandbox Endpoint",
+		EndpointConfig: EndpointConfig{
+			SandboxEndpoints: EndpointDetails{
+				URL: sandboxURL,
+			},
+			EndpointType:     apiYamlData.EndpointConfig.EndpointType,
+			EndpointSecurity: apiYamlData.EndpointConfig.EndpointSecurity,
+		},
+		DeploymentStage: "SANDBOX",
+	}
+
+	var defaultEndpointList []Endpoint
+	defaultEndpointList = append(defaultEndpointList, primaryProdEndpoint)
+	defaultEndpointList = append(defaultEndpointList, primarySandboxEndpoint)
 
 	if apiYamlData.SubtypeConfiguration.Subtype == "AIAPI" && apiYamlData.SubtypeConfiguration.Configuration != "" {
 		// Unmarshal the _configuration field into the Configuration struct
@@ -137,7 +173,7 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, endpoints
 		reqPolicyCount := len(operation.OperationPolicies.Request)
 		resPolicyCount := len(operation.OperationPolicies.Response)
 		reqInterceptor, resInterceptor := getReqAndResInterceptors(reqPolicyCount, resPolicyCount,
-			operation.OperationPolicies.Request, operation.OperationPolicies.Response, endpointList)
+			operation.OperationPolicies.Request, operation.OperationPolicies.Response, endpointList, defaultEndpointList)
 
 		var opRateLimit *RateLimit
 		if apiYamlData.APIThrottlingPolicy == "" && operation.ThrottlingPolicy != "" {
@@ -178,7 +214,7 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, endpoints
 	reqPolicyCount := len(apiYaml.Data.APIPolicies.Request)
 	resPolicyCount := len(apiYaml.Data.APIPolicies.Response)
 	reqInterceptor, resInterceptor := getReqAndResInterceptors(reqPolicyCount, resPolicyCount,
-		apiYaml.Data.APIPolicies.Request, apiYaml.Data.APIPolicies.Response, endpointList)
+		apiYaml.Data.APIPolicies.Request, apiYaml.Data.APIPolicies.Response, endpointList, defaultEndpointList)
 
 	apk.APIPolicies = &OperationPolicies{
 		Request:  *reqInterceptor,
@@ -198,23 +234,21 @@ func GenerateAPKConf(APIJson string, certArtifact CertificateArtifact, endpoints
 		endCertAvailable = true
 	}
 
-	sandboxURL := apiYamlData.EndpointConfig.SandboxEndpoints.URL
-	prodURL := apiYamlData.EndpointConfig.ProductionEndpoints.URL
-	primaryProdEndpointID := apiYamlData.PrimaryProductionEndpointID
-	primarySandboxEndpointID := apiYamlData.PrimarySandboxEndpointID
 	endpointSecurityDataList := []EndpointSecurityConfig{}
 
 	apiUniqueID := GetUniqueIDForAPI(apiYamlData.Name, apiYamlData.Version, apiYamlData.OrganizationID)
-	logger.LoggerTransformer.Infof("Maxtps: %+v", apiYamlData)
+	logger.LoggerTransformer.Debugf("Maxtps: %+v", apiYamlData)
 	prodAIRatelimit, sandAIRatelimit := prepareAIRatelimit(apiYamlData.MaxTps)
 	endpointRes := EndpointConfigurations{}
+	logger.LoggerTransformer.Debugf("EndpointList len: %d", len(endpointList))
 	if len(endpointList) == 0 {
 		endpointSecurityData := apiYamlData.EndpointConfig.EndpointSecurity
 		endpointRes, endpointSecurityData = getEndpointConfigs(sandboxURL, prodURL, endCertAvailable, endpointCertList, endpointSecurityData, apiUniqueID, prodAIRatelimit, sandAIRatelimit)
 		apk.EndpointConfigurations = &endpointRes
 		endpointSecurityDataList = append(endpointSecurityDataList, endpointSecurityData)
 	} else {
-		endpointRes, endpointSecurityDataList = getMultiEndpointConfigs(endpointList, primaryProdEndpointID, primarySandboxEndpointID, endCertAvailable, endpointCertList, apiUniqueID, prodAIRatelimit, sandAIRatelimit)
+		mergedEndpointList := append(endpointList, defaultEndpointList...)
+		endpointRes, endpointSecurityDataList = getMultiEndpointConfigs(mergedEndpointList, primaryProdEndpointID, primarySandboxEndpointID, endCertAvailable, endpointCertList, apiUniqueID, prodAIRatelimit, sandAIRatelimit)
 		apk.EndpointConfigurations = &endpointRes
 	}
 
@@ -344,7 +378,7 @@ func getAPIType(protocolType string) string {
 }
 
 // Generate the interceptor policy if request or response policy exists
-func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []APIMOperationPolicy, resPolicies []APIMOperationPolicy, endpointList []Endpoint) (*[]OperationPolicy, *[]OperationPolicy) {
+func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []APIMOperationPolicy, resPolicies []APIMOperationPolicy, endpointList []Endpoint, defaultEndpointList []Endpoint) (*[]OperationPolicy, *[]OperationPolicy) {
 	var requestPolicyList, responsePolicyList []OperationPolicy
 	var interceptorParams *InterceptorService
 	var requestInterceptorPolicy, responseInterceptorPolicy, requestBackendJWTPolicy OperationPolicy
@@ -525,10 +559,18 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 				var endpointIdtoURL = make(map[string]string)
 				for _, endpoint := range endpointList {
 					if endpoint.EndpointConfig.ProductionEndpoints.URL != "" {
-						endpointIdtoURL[endpoint.EndpointUUID] = endpoint.EndpointConfig.ProductionEndpoints.URL
+						endpointIdtoURL[endpoint.ID] = endpoint.EndpointConfig.ProductionEndpoints.URL
 					}
 					if endpoint.EndpointConfig.SandboxEndpoints.URL != "" {
-						endpointIdtoURL[endpoint.EndpointUUID] = endpoint.EndpointConfig.SandboxEndpoints.URL
+						endpointIdtoURL[endpoint.ID] = endpoint.EndpointConfig.SandboxEndpoints.URL
+					}
+				}
+				for _, endpoint := range defaultEndpointList {
+					if endpoint.EndpointConfig.ProductionEndpoints.URL != "" {
+						endpointIdtoURL[endpoint.ID] = endpoint.EndpointConfig.ProductionEndpoints.URL
+					}
+					if endpoint.EndpointConfig.SandboxEndpoints.URL != "" {
+						endpointIdtoURL[endpoint.ID] = endpoint.EndpointConfig.SandboxEndpoints.URL
 					}
 				}
 				for _, model := range config.Production {
@@ -841,8 +883,8 @@ func getMultiEndpointConfigs(endpointList []Endpoint, primaryProdEndpointID stri
 		prodURL := endpoint.EndpointConfig.ProductionEndpoints.URL
 		sandboxURL := endpoint.EndpointConfig.SandboxEndpoints.URL
 		endpointSecurityData := endpoint.EndpointConfig.EndpointSecurity
-		endpointSecurityData.Production.EndpointUUID = endpoint.EndpointUUID
-		endpointSecurityData.Sandbox.EndpointUUID = endpoint.EndpointUUID
+		endpointSecurityData.Production.EndpointUUID = endpoint.ID
+		endpointSecurityData.Sandbox.EndpointUUID = endpoint.ID
 		endpointSecurityConfigs = append(endpointSecurityConfigs, endpointSecurityData)
 		var sandboxEndpointConf, prodEndpointConf EndpointConfiguration
 		var sandBoxEndpointEnabled = false
@@ -883,14 +925,14 @@ func getMultiEndpointConfigs(endpointList []Endpoint, primaryProdEndpointID stri
 
 			if endpointSecurityData.Sandbox.Type == "apikey" {
 				sandboxEndpointConf.EndSecurity.SecurityType = SecretInfo{
-					SecretName:     strings.Join([]string{apiUniqueID, generateSHA1Hash(endpoint.EndpointUUID), "sandbox", "secret"}, "-"),
+					SecretName:     strings.Join([]string{apiUniqueID, generateSHA1Hash(endpoint.ID), "sandbox", "secret"}, "-"),
 					In:             "Header",
 					APIKeyNameKey:  endpointSecurityData.Sandbox.APIKeyIdentifier,
 					APIKeyValueKey: "apiKey",
 				}
 			} else {
 				sandboxEndpointConf.EndSecurity.SecurityType = SecretInfo{
-					SecretName:  strings.Join([]string{apiUniqueID, generateSHA1Hash(endpoint.EndpointUUID), "sandbox", "secret"}, "-"),
+					SecretName:  strings.Join([]string{apiUniqueID, generateSHA1Hash(endpoint.ID), "sandbox", "secret"}, "-"),
 					UsernameKey: "username",
 					PasswordKey: "password",
 				}
@@ -901,14 +943,14 @@ func getMultiEndpointConfigs(endpointList []Endpoint, primaryProdEndpointID stri
 			prodEndpointConf.EndSecurity.Enabled = true
 			if endpointSecurityData.Production.Type == "apikey" {
 				prodEndpointConf.EndSecurity.SecurityType = SecretInfo{
-					SecretName:     strings.Join([]string{apiUniqueID, generateSHA1Hash(endpoint.EndpointUUID), "production", "secret"}, "-"),
+					SecretName:     strings.Join([]string{apiUniqueID, generateSHA1Hash(endpoint.ID), "production", "secret"}, "-"),
 					In:             "Header",
 					APIKeyNameKey:  endpointSecurityData.Production.APIKeyIdentifier,
 					APIKeyValueKey: "apiKey",
 				}
 			} else {
 				prodEndpointConf.EndSecurity.SecurityType = SecretInfo{
-					SecretName:  strings.Join([]string{apiUniqueID, generateSHA1Hash(endpoint.EndpointUUID), "production", "secret"}, "-"),
+					SecretName:  strings.Join([]string{apiUniqueID, generateSHA1Hash(endpoint.ID), "production", "secret"}, "-"),
 					UsernameKey: "username",
 					PasswordKey: "password",
 				}
@@ -916,14 +958,19 @@ func getMultiEndpointConfigs(endpointList []Endpoint, primaryProdEndpointID stri
 		}
 
 		if sandBoxEndpointEnabled && prodEndpointEnabled {
+			logger.LoggerTransformer.Debugf("Sandbox/Prod both Endpoints Enabled: %v", sandBoxEndpointEnabled)
 			sandboxEndpoints = append(sandboxEndpoints, sandboxEndpointConf)
 			productionEndpoints = append(productionEndpoints, prodEndpointConf)
 		} else if sandBoxEndpointEnabled {
+			logger.LoggerTransformer.Debugf("Sandbox Endpoint Enabled: %v", sandBoxEndpointEnabled)
 			sandboxEndpoints = append(sandboxEndpoints, sandboxEndpointConf)
 		} else if prodEndpointEnabled {
+			logger.LoggerTransformer.Debugf("Production Endpoint Enabled: %v", prodEndpointEnabled)
 			productionEndpoints = append(productionEndpoints, prodEndpointConf)
 		}
 	}
+	logger.LoggerTransformer.Debugf("Sandbox Endpoints: %v", sandboxEndpoints)
+	logger.LoggerTransformer.Debugf("Production Endpoints: %v", productionEndpoints)
 	epconfigs := EndpointConfigurations{
 		Sandbox:    &sandboxEndpoints,
 		Production: &productionEndpoints,
