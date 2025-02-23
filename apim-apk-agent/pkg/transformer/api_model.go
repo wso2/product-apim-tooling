@@ -17,6 +17,8 @@
 
 package transformer
 
+import "encoding/json"
+
 // CustomParams holds the custom parameter values that has been enabled for the selected security mode
 type CustomParams struct {
 	CustomParamMapping map[string]string `json:"customParamMapping"`
@@ -24,37 +26,37 @@ type CustomParams struct {
 
 // SecurityObj holds the idividual attribute values for each endpoint security config
 type SecurityObj struct {
-	Enabled          bool                   `json:"enabled"`
-	EndpointUUID     string                 `json:"endpointUUID"`
-	Type             string                 `json:"type"`
-	APIKeyValue      string                 `json:"apiKeyValue"`
-	APIKeyIdentifier string                 `json:"apiKeyIdentifier"`
-	Username         string                 `json:"username"`
-	Password         string                 `json:"password"`
-	GrantType        string                 `json:"grantType"`
-	TokenURL         string                 `json:"tokenUrl"`
-	ClientID         string                 `json:"clientId"`
-	ClientSecret     string                 `json:"clientSecret"`
-	CustomParameters map[string]interface{} `json:"customParameters"`
+	Enabled          bool            `json:"enabled" yaml:"enabled"`
+	EndpointUUID     string          `json:"endpointUUID" yaml:"endpointUUID"`
+	Type             string          `json:"type" yaml:"type"`
+	APIKeyValue      string          `json:"apiKeyValue" yaml:"apiKeyValue"`
+	APIKeyIdentifier string          `json:"apiKeyIdentifier" yaml:"apiKeyIdentifier"`
+	Username         string          `json:"username" yaml:"username"`
+	Password         string          `json:"password" yaml:"password"`
+	GrantType        string          `json:"grantType" yaml:"grantType"`
+	TokenURL         string          `json:"tokenUrl" yaml:"tokenUrl"`
+	ClientID         string          `json:"clientId" yaml:"clientId"`
+	ClientSecret     string          `json:"clientSecret" yaml:"clientSecret"`
+	CustomParameters json.RawMessage `json:"customParameters" yaml:"customParameters"`
 }
 
 // EndpointSecurityConfig holds security configs enabled for endpoints from the API level
 type EndpointSecurityConfig struct {
-	Production SecurityObj `json:"production"`
-	Sandbox    SecurityObj `json:"sandbox"`
+	Production SecurityObj `json:"production" yaml:"production"`
+	Sandbox    SecurityObj `json:"sandbox" yaml:"sandbox"`
 }
 
 // EndpointDetails represents the details of an endpoint, containing its URL.
 type EndpointDetails struct {
-	URL string `json:"url"`
+	URL string `json:"url" yaml:"url"`
 }
 
 // EndpointConfig represents the configuration of an endpoint, including its type, sandbox, and production details.
 type EndpointConfig struct {
-	EndpointType        string                 `json:"endpoint_type"`
-	SandboxEndpoints    EndpointDetails        `json:"sandbox_endpoints"`
-	ProductionEndpoints EndpointDetails        `json:"production_endpoints"`
-	EndpointSecurity    EndpointSecurityConfig `json:"endpoint_security"`
+	EndpointType        string                 `json:"endpoint_type" yaml:"endpoint_type"`
+	SandboxEndpoints    EndpointDetails        `json:"sandbox_endpoints" yaml:"sandbox_endpoints"`
+	ProductionEndpoints EndpointDetails        `json:"production_endpoints" yaml:"production_endpoints"`
+	EndpointSecurity    EndpointSecurityConfig `json:"endpoint_security" yaml:"endpoint_security"`
 }
 
 // CORSConfiguration represents the CORS (Cross-Origin Resource Sharing) configuration for an API.
@@ -210,10 +212,10 @@ type EndpointsYaml struct {
 
 // Endpoint represents an endpoint with its UUID, name, configuration, and deployment stage.
 type Endpoint struct {
-	EndpointUUID    string         `json:"endpointUuid"`
-	EndpointName    string         `json:"endpointName"`
-	EndpointConfig  EndpointConfig `json:"endpointConfig"`
-	DeploymentStage string         `json:"deploymentStage"`
+	ID              string         `json:"id" yaml:"id"`
+	Name            string         `json:"name" yaml:"name"`
+	EndpointConfig  EndpointConfig `json:"endpointConfig" yaml:"endpointConfig"`
+	DeploymentStage string         `json:"deploymentStage" yaml:"deploymentStage"`
 }
 
 // MaxTps represents the maximum transactions per second (TPS) settings for both
