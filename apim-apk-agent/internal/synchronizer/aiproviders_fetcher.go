@@ -191,8 +191,10 @@ func createAIProvider(aiProvider *eventhubTypes.AIProvider) dpv1alpha4.AIProvide
 		"InitiateFrom": "CP",
 		"CPName":       aiProvider.Name,
 	}
-	var modelInputSource string
-	var modelAttributeIdentifier string
+	var requestModelInputSource string
+	var requestModelAttributeIdentifier string
+	var responseModelInputSource string
+	var responseModelAttributeIdentifier string
 	var promptTokenCountInputSource string
 	var promptTokenCountAttributeIdentifier string
 	var completionTokenCountInputSource string
@@ -207,9 +209,12 @@ func createAIProvider(aiProvider *eventhubTypes.AIProvider) dpv1alpha4.AIProvide
 	}
 
 	for _, field := range config.Metadata {
-		if field.AttributeName == "model" {
-			modelInputSource = field.InputSource
-			modelAttributeIdentifier = field.AttributeIdentifier
+		if field.AttributeName == "requestModel" {
+			requestModelInputSource = field.InputSource
+			requestModelAttributeIdentifier = field.AttributeIdentifier
+		} else if field.AttributeName == "responseModel" {
+			responseModelInputSource = field.InputSource
+			responseModelAttributeIdentifier = field.AttributeIdentifier
 		} else if field.AttributeName == "promptTokenCount" {
 			promptTokenCountInputSource = field.InputSource
 			promptTokenCountAttributeIdentifier = field.AttributeIdentifier
@@ -233,12 +238,12 @@ func createAIProvider(aiProvider *eventhubTypes.AIProvider) dpv1alpha4.AIProvide
 			ProviderAPIVersion: aiProvider.APIVersion,
 			Organization:       aiProvider.Organization,
 			RequestModel: dpv1alpha4.ValueDetails{
-				In:    modelInputSource,
-				Value: modelAttributeIdentifier,
+				In:    requestModelInputSource,
+				Value: requestModelAttributeIdentifier,
 			},
 			ResponseModel: dpv1alpha4.ValueDetails{
-				In:    modelInputSource,
-				Value: modelAttributeIdentifier,
+				In:    responseModelInputSource,
+				Value: responseModelAttributeIdentifier,
 			},
 			SupportedModels: []string{"gpt-4o", "gpt-3.5", "gpt-4o-mini"},
 			RateLimitFields: dpv1alpha4.RateLimitFields{
