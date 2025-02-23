@@ -107,19 +107,36 @@ func StartInternalServer(port uint) {
 			if strings.ToUpper(event.API.APIType) == "GRAPHQL" {
 				definitionPath = fmt.Sprintf("%s-%s/Definitions/schema.graphql", event.API.APIName, event.API.APIVersion)
 			}
-			zipFiles := []utils.ZipFile{{
-				Path:    fmt.Sprintf("%s-%s/api.yaml", event.API.APIName, event.API.APIVersion),
-				Content: apiYaml,
-			}, {
-				Path:    fmt.Sprintf("%s-%s/endpoints.yaml", event.API.APIName, event.API.APIVersion),
-				Content: endpointsYaml,
-			}, {
-				Path:    fmt.Sprintf("%s-%s/deployment_environments.yaml", event.API.APIName, event.API.APIVersion),
-				Content: deploymentContent,
-			}, {
-				Path:    definitionPath,
-				Content: definition,
-			}}
+			var zipFiles []utils.ZipFile
+			logger.LoggerMgtServer.Debugf("endpoints yaml: %s", endpointsYaml)
+			if endpointsYaml != "{}\n" {
+				logger.LoggerMgtServer.Debugf("Creating zip file with endpoints")
+				zipFiles = []utils.ZipFile{{
+					Path:    fmt.Sprintf("%s-%s/api.yaml", event.API.APIName, event.API.APIVersion),
+					Content: apiYaml,
+				}, {
+					Path:    fmt.Sprintf("%s-%s/endpoints.yaml", event.API.APIName, event.API.APIVersion),
+					Content: endpointsYaml,
+				}, {
+					Path:    fmt.Sprintf("%s-%s/deployment_environments.yaml", event.API.APIName, event.API.APIVersion),
+					Content: deploymentContent,
+				}, {
+					Path:    definitionPath,
+					Content: definition,
+				}}
+			} else {
+				logger.LoggerMgtServer.Debugf("Creating zip file without endpoints")
+				zipFiles = []utils.ZipFile{{
+					Path:    fmt.Sprintf("%s-%s/api.yaml", event.API.APIName, event.API.APIVersion),
+					Content: apiYaml,
+				}, {
+					Path:    fmt.Sprintf("%s-%s/deployment_environments.yaml", event.API.APIName, event.API.APIVersion),
+					Content: deploymentContent,
+				}, {
+					Path:    definitionPath,
+					Content: definition,
+				}}
+			}
 			var buf bytes.Buffer
 			if err := utils.CreateZipFile(&buf, zipFiles); err != nil {
 				logger.LoggerMgtServer.Errorf("Error while creating apim zip file for api uuid: %s. Error: %+v", event.API.APIUUID, err)
@@ -479,8 +496,8 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string, string) {
 	for _, e := range apimEndpints {
 		// Build the top-level map for this endpoint
 		endpointMap := map[string]interface{}{
-			"endpointUuid":    e.EndpointUUID,
-			"endpointName":    e.EndpointName,
+			"id":              e.EndpointUUID,
+			"name":            e.EndpointName,
 			"deploymentStage": e.DeploymentStage, // e.g. "PRODUCTION" or "SANDBOX"
 		}
 
@@ -513,7 +530,7 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string, string) {
 				"apiKeyValue":                      sec.APIKeyValue,
 				"apiKeyIdentifierType":             sec.APIKeyIdentifierType,
 				"username":                         sec.Username,
-				"customParameters":                 sec.CustomParameters, // Or map[string]string{}
+				"customParameters":                 "{}", // Or map[string]string{}
 				"connectionTimeoutDuration":        sec.ConnectionTimeoutDuration,
 				"connectionRequestTimeoutDuration": sec.ConnectionRequestTimeoutDuration,
 				"socketTimeoutDuration":            sec.SocketTimeoutDuration,
@@ -537,7 +554,7 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string, string) {
 				"apiKeyValue":                      sec.APIKeyValue,
 				"apiKeyIdentifierType":             sec.APIKeyIdentifierType,
 				"username":                         sec.Username,
-				"customParameters":                 sec.CustomParameters,
+				"customParameters":                 "{}",
 				"connectionTimeoutDuration":        sec.ConnectionTimeoutDuration,
 				"connectionRequestTimeoutDuration": sec.ConnectionRequestTimeoutDuration,
 				"socketTimeoutDuration":            sec.SocketTimeoutDuration,
@@ -566,7 +583,7 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string, string) {
 	}
 
 	var endpointsData map[string]interface{}
-	if prodCount > 0 || sandCount > 0 {
+	if prodCount > 1 || sandCount > 1 {
 		endpointsData = map[string]interface{}{
 			"type":    "endpoints",
 			"version": "v4.5.0",
@@ -586,12 +603,42 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string, string) {
 			"production_endpoints": map[string]interface{}{
 				"url": primaryProdcutionURL,
 			},
+			"endpoint_security": map[string]interface{}{
+				"sandbox": map[string]interface{}{
+					"apiKeyValue":                      apiCPEvent.API.SandEndpointSecurity.APIKeyValue,
+					"apiKeyIdentifier":                 apiCPEvent.API.SandEndpointSecurity.APIKeyName,
+					"apiKeyIdentifierType":             "HEADER",
+					"type":                             apiCPEvent.API.SandEndpointSecurity.SecurityType,
+					"username":                         apiCPEvent.API.SandEndpointSecurity.BasicUsername,
+					"password":                         apiCPEvent.API.SandEndpointSecurity.BasicPassword,
+					"enabled":                          apiCPEvent.API.SandEndpointSecurity.Enabled,
+					"additionalProperties":             map[string]interface{}{},
+					"customParameters":                 map[string]interface{}{},
+					"connectionTimeoutDuration":        -1.0,
+					"socketTimeoutDuration":            -1.0,
+					"connectionRequestTimeoutDuration": -1.0,
+				},
+				"production": map[string]interface{}{
+					"apiKeyValue":                      apiCPEvent.API.ProdEndpointSecurity.APIKeyValue,
+					"apiKeyIdentifier":                 apiCPEvent.API.ProdEndpointSecurity.APIKeyName,
+					"apiKeyIdentifierType":             "HEADER",
+					"type":                             apiCPEvent.API.ProdEndpointSecurity.SecurityType,
+					"username":                         apiCPEvent.API.ProdEndpointSecurity.BasicUsername,
+					"password":                         apiCPEvent.API.ProdEndpointSecurity.BasicPassword,
+					"enabled":                          apiCPEvent.API.ProdEndpointSecurity.Enabled,
+					"additionalProperties":             map[string]interface{}{},
+					"customParameters":                 map[string]interface{}{},
+					"connectionTimeoutDuration":        -1.0,
+					"socketTimeoutDuration":            -1.0,
+					"connectionRequestTimeoutDuration": -1.0,
+				},
+			},
 		}
 	}
 
-	logger.LoggerMgtServer.Infof("API Yaml: %+v", data)
+	logger.LoggerMgtServer.Debugf("API Yaml: %+v", data)
 	yamlBytes, _ := yaml.Marshal(data)
-	logger.LoggerMgtServer.Infof("Endpoint Yaml: %v", endpointsData)
+	logger.LoggerMgtServer.Debugf("Endpoint Yaml: %v", endpointsData)
 	endpointBytes, _ := yaml.Marshal(endpointsData)
 	return string(yamlBytes), definition, string(endpointBytes)
 }
