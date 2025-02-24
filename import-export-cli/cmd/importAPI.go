@@ -34,6 +34,8 @@ var (
 	importAPISkipCleanup         bool
 	importAPIRotateRevision      bool
 	importAPISkipDeployments     bool
+	dryRun                       bool
+	apiLoggingCmdFormat          string
 )
 
 const (
@@ -67,7 +69,8 @@ var ImportAPICmd = &cobra.Command{
 			utils.HandleErrorAndExit("Error while getting an access token for importing API", err)
 		}
 		err = impl.ImportAPIToEnv(accessOAuthToken, importEnvironment, importAPIFile, importAPIParamsFile, importAPIUpdate,
-			importAPICmdPreserveProvider, importAPISkipCleanup, importAPIRotateRevision, importAPISkipDeployments)
+			importAPICmdPreserveProvider, importAPISkipCleanup, importAPIRotateRevision, importAPISkipDeployments, dryRun,
+			apiLoggingCmdFormat)
 		if err != nil {
 			utils.HandleErrorAndExit("Error importing API", err)
 			return
@@ -94,6 +97,10 @@ func init() {
 		"or a directory generated using \"gen deployment-dir\" command")
 	ImportAPICmd.Flags().BoolVarP(&importAPISkipCleanup, "skip-cleanup", "", false, "Leave "+
 		"all temporary files created during import process")
+	ImportAPICmd.Flags().BoolVarP(&dryRun, "dry-run", "", false, "Get "+
+		"verification of the governance compliance of the API without importing it")
+	ImportAPICmd.Flags().StringVarP(&apiLoggingCmdFormat, "format", "", "", "Output format of violation results in "+
+		"dry-run mode. Supported formats: [table, json, list]. If not provided, the default format is table.")
 	// Mark required flags
 	_ = ImportAPICmd.MarkFlagRequired("environment")
 	_ = ImportAPICmd.MarkFlagRequired("file")
