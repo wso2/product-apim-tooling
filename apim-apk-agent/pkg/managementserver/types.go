@@ -124,35 +124,50 @@ const (
 
 // API holds the api data from adapter api event
 type API struct {
-	APIUUID              string            `json:"apiUUID"`
-	APIName              string            `json:"apiName"`
-	APIVersion           string            `json:"apiVersion"`
-	IsDefaultVersion     bool              `json:"isDefaultVersion"`
-	Definition           string            `json:"definition"`
-	APIType              string            `json:"apiType"`
-	APISubType           string            `json:"apiSubType"`
-	BasePath             string            `json:"basePath"`
-	Organization         string            `json:"organization"`
-	SystemAPI            bool              `json:"systemAPI"`
-	APIProperties        map[string]string `json:"apiProperties,omitempty"`
-	Environment          string            `json:"environment,omitempty"`
-	RevisionID           string            `json:"revisionID"`
-	SandEndpoint         string            `json:"sandEndpoint"`
-	SandEndpointSecurity EndpointSecurity  `json:"sandEndpointSecurity"`
-	ProdEndpoint         string            `json:"prodEndpoint"`
-	ProdEndpointSecurity EndpointSecurity  `json:"prodEndpointSecurity"`
-	EndpointProtocol     string            `json:"endpointProtocol"`
-	CORSPolicy           *CORSPolicy       `json:"cORSPolicy"`
-	Vhost                string            `json:"vhost"`
-	SandVhost            string            `json:"sandVhost"`
-	SecurityScheme       []string          `json:"securityScheme"`
-	AuthHeader           string            `json:"authHeader"`
-	APIKeyHeader         string            `json:"apiKeyHeader"`
-	Operations           []OperationFromDP `json:"operations"`
-	SandAIRL             *AIRL             `json:"sandAIRL"`
-	ProdAIRL             *AIRL             `json:"prodAIRL"`
-	AIConfiguration      AIConfiguration   `json:"aiConfiguration"`
-	MultiEndpoints       APIEndpoints      `json:"multiEndpoints"`
+	APIUUID                string                  `json:"apiUUID"`
+	APIName                string                  `json:"apiName"`
+	APIVersion             string                  `json:"apiVersion"`
+	IsDefaultVersion       bool                    `json:"isDefaultVersion"`
+	Definition             string                  `json:"definition"`
+	APIType                string                  `json:"apiType"`
+	APISubType             string                  `json:"apiSubType"`
+	BasePath               string                  `json:"basePath"`
+	Organization           string                  `json:"organization"`
+	SystemAPI              bool                    `json:"systemAPI"`
+	APIProperties          map[string]string       `json:"apiProperties,omitempty"`
+	Environment            string                  `json:"environment,omitempty"`
+	RevisionID             string                  `json:"revisionID"`
+	SandEndpoint           string                  `json:"sandEndpoint"`
+	SandEndpointSecurity   EndpointSecurity        `json:"sandEndpointSecurity"`
+	ProdEndpoint           string                  `json:"prodEndpoint"`
+	ProdEndpointSecurity   EndpointSecurity        `json:"prodEndpointSecurity"`
+	EndpointProtocol       string                  `json:"endpointProtocol"`
+	CORSPolicy             *CORSPolicy             `json:"cORSPolicy"`
+	Vhost                  string                  `json:"vhost"`
+	SandVhost              string                  `json:"sandVhost"`
+	SecurityScheme         []string                `json:"securityScheme"`
+	AuthHeader             string                  `json:"authHeader"`
+	APIKeyHeader           string                  `json:"apiKeyHeader"`
+	Operations             []OperationFromDP       `json:"operations"`
+	SandAIRL               *AIRL                   `json:"sandAIRL"`
+	ProdAIRL               *AIRL                   `json:"prodAIRL"`
+	AIConfiguration        AIConfiguration         `json:"aiConfiguration"`
+	MultiEndpoints         APIEndpoints            `json:"multiEndpoints"`
+	AIModelBasedRoundRobin *AIModelBasedRoundRobin `json:"modelBasedRoundRobin"`
+}
+
+// AIModelBasedRoundRobin holds the model based round robin configurations
+type AIModelBasedRoundRobin struct {
+	OnQuotaExceedSuspendDuration int             `json:"onQuotaExceedSuspendDuration,omitempty"`
+	ProductionModels             []AIModelWeight `json:"productionModels"`
+	SandboxModels                []AIModelWeight `json:"sandboxModels"`
+}
+
+// AIModelWeight holds the model configurations
+type AIModelWeight struct {
+	Model    string `json:"model"`
+	Endpoint string `json:"endpoint"`
+	Weight   int    `json:"weight,omitempty"`
 }
 
 // APIMEndpoint holds the endpoint data from adapter api event
@@ -265,10 +280,11 @@ type APKHeader struct {
 
 // OperationFromDP holds the path, verb, throttling and interceptor policy
 type OperationFromDP struct {
-	Path    string   `json:"path"`
-	Verb    string   `json:"verb"`
-	Scopes  []string `json:"scopes"`
-	Filters []Filter `json:"filters"`
+	Path                   string                  `json:"path"`
+	Verb                   string                  `json:"verb"`
+	Scopes                 []string                `json:"scopes"`
+	Filters                []Filter                `json:"filters"`
+	AIModelBasedRoundRobin *AIModelBasedRoundRobin `json:"aiModelBasedRoundRobin"`
 }
 
 // Policy holds the policy name and version

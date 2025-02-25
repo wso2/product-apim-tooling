@@ -48,4 +48,7 @@ const (
 	// Version constants
 	V1 = "v1"
 	V2 = "v2"
+
+	// Policy Types
+	CommonType = "common"
 )
