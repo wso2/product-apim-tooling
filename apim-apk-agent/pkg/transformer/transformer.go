@@ -529,7 +529,13 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 					PolicyName:    modelBasedRoundRobin,
 					PolicyVersion: v1,
 				}
-				configs := reqPolicy.Parameters["weightedRoundRobinConfigs"]
+				var configs interface{}
+				if reqPolicy.PolicyName == constants.ModelRoundRobin {
+					configs = reqPolicy.Parameters["roundRobinConfigs"]
+				} else if reqPolicy.PolicyName == constants.ModelWeightedRoundRobin {
+					configs = reqPolicy.Parameters["weightedRoundRobinConfigs"]
+				}
+
 				logger.LoggerTransformer.Debugf("Configs: %v", configs)
 				// Convert interface{} to string, then to []byte
 				configStr, ok := configs.(string)
@@ -575,6 +581,9 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 				}
 				for _, model := range config.Production {
 					endpointURL := endpointIdtoURL[model.EndpointID]
+					if model.Weight == 0 {
+						model.Weight = 1
+					}
 					modelEndpoints := ModelEndpoints{
 						Model:    model.Model,
 						Weight:   model.Weight,
@@ -583,6 +592,9 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 					productionModels = append(productionModels, modelEndpoints)
 				}
 				for _, model := range config.Sandbox {
+					if model.Weight == 0 {
+						model.Weight = 1
+					}
 					endpointURL := endpointIdtoURL[model.EndpointID]
 					modelEndpoints := ModelEndpoints{
 						Model:    model.Model,
