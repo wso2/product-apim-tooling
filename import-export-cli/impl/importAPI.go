@@ -171,9 +171,8 @@ func importAPI(endpoint, filePath, accessToken string, extraParams map[string]st
 			var data JSONData
 			err := json.Unmarshal([]byte(resp.String()), &data)
 			if err != nil {
-				fmt.Println("Error parsing JSON:", err)
-				fmt.Println("Status: " + resp.Status())
-				fmt.Println("Response:", resp)
+				utils.Logln(utils.LogPrefixError, err)
+				fmt.Println("Error occurred while validating API")
 				return errors.New(resp.Status())
 			}
 			if data.ComplianceCheck.Result == "fail" {
@@ -183,9 +182,8 @@ func importAPI(endpoint, filePath, accessToken string, extraParams map[string]st
 			}
 		} else {
 			// We have an HTTP error
-			fmt.Println("Error importing API.")
-			fmt.Println("Status: " + resp.Status())
-			fmt.Println("Response:", resp)
+			utils.Logln(utils.LogPrefixError, err)
+			fmt.Println("Error occurred while validating API")
 			return errors.New(resp.Status())
 		}
 	} else {
@@ -194,9 +192,7 @@ func importAPI(endpoint, filePath, accessToken string, extraParams map[string]st
 			fmt.Println("Successfully imported API.")
 		} else {
 			// We have an HTTP error
-			fmt.Println("Error importing API.")
-			fmt.Println("Status: " + resp.Status())
-			fmt.Println("Response:", resp)
+			utils.Logln(utils.LogPrefixError, err)
 			return errors.New(resp.Status())
 		}
 	}
