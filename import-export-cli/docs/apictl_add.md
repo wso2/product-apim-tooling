@@ -24,13 +24,13 @@ apictl add env test \
 --publisher https://apim.com:9443 \
 --devportal  https://apps.com:9443 \
 --admin  https://apim.com:9443 \
---token https://gw.com:8243/token \
+--token https://gw.com:9443/oauth2/token \
 --mi https://localhost:9164
 
 apictl add env dev \
 --apim https://apim.com:9443 \
 --registration https://idp.com:9443 \
---token https://gw.com:8243/token
+--token https://gw.com:9443/oauth2/token
 
 NOTE: The flag --environment (-e) is mandatory.
 You can either provide only the flag --apim , or all the other 4 flags (--registration --publisher --devportal --admin) without providing --apim flag.

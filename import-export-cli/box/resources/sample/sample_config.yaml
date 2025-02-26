@@ -15,7 +15,7 @@ environments:
     devportal: https://localhost:9443
     registration: https://localhost:9443
     admin: https://localhost:9443
-    token: https://localhost:8243/token
+    token: https://localhost:9443/oauth2/token
     mi: https://localhost:9164
   sample-env2:
     apim: https://wso2am:9443
@@ -31,5 +31,5 @@ environments:
     devportal: https://localhost:9443
     registration: https://localhost:9443
     admin: https://localhost:9443
-    token: https://localhost:8243/token
+    token: https://localhost:9443/oauth2/token
     mi: ""
