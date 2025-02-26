@@ -40,6 +40,17 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
+// JSONData represents the JSON data
+type JSONData struct {
+	ComplianceCheck ComplianceCheck `json:"compliance-check"`
+}
+
+// ComplianceCheck represents the compliance check
+type ComplianceCheck struct {
+	Result     string      `json:"result"`
+	Violations []Violation `json:"violations"`
+}
+
 var (
 	reAPIName = regexp.MustCompile(`[~!@#;:%^*()+={}|\\<>"',&/$]`)
 )
@@ -145,7 +156,8 @@ func replaceEnvVariables(apiFilePath string) error {
 }
 
 // importAPI imports an API to the API manager
-func importAPI(endpoint, filePath, accessToken string, extraParams map[string]string, isOauth bool) error {
+func importAPI(endpoint, filePath, accessToken string, extraParams map[string]string, isOauth bool, dryRun bool,
+	apiLoggingCmdFormat string) error {
 	resp, err := ExecuteNewFileUploadRequest(endpoint, extraParams, "file",
 		filePath, accessToken, isOauth)
 	utils.Logf("Response : %v", resp)
@@ -153,30 +165,53 @@ func importAPI(endpoint, filePath, accessToken string, extraParams map[string]st
 		utils.Logln(utils.LogPrefixError, err)
 		return err
 	}
-	if resp.StatusCode() == http.StatusCreated || resp.StatusCode() == http.StatusOK {
-		// 201 Created or 200 OK
-		fmt.Println("Successfully imported API.")
-		return nil
+	if dryRun {
+		if resp.StatusCode() == http.StatusOK && resp.String() != "" {
+			// 200 OK
+			var data JSONData
+			err := json.Unmarshal([]byte(resp.String()), &data)
+			if err != nil {
+				utils.Logln(utils.LogPrefixError, err)
+				fmt.Println("Error occurred while validating API")
+				return errors.New(resp.Status())
+			}
+			if data.ComplianceCheck.Result == "fail" {
+				PrintViolations(data.ComplianceCheck.Violations, apiLoggingCmdFormat)
+			} else if resp.StatusCode() == http.StatusOK {
+				fmt.Printf("No violations found for the API")
+			}
+		} else {
+			// We have an HTTP error
+			utils.Logln(utils.LogPrefixError, err)
+			fmt.Println("Error occurred while validating API")
+			return errors.New(resp.Status())
+		}
 	} else {
-		// We have an HTTP error
-		fmt.Println("Error importing API.")
-		fmt.Println("Status: " + resp.Status())
-		fmt.Println("Response:", resp)
-		return errors.New(resp.Status())
+		if resp.StatusCode() == http.StatusCreated || resp.StatusCode() == http.StatusOK {
+			// 201 Created or 200 OK
+			fmt.Println("Successfully imported API.")
+		} else {
+			// We have an HTTP error
+			utils.Logln(utils.LogPrefixError, err)
+			return errors.New(resp.Status())
+		}
 	}
+	return nil
 }
 
 // ImportAPIToEnv function is used with import-api command
 func ImportAPIToEnv(accessOAuthToken, importEnvironment, importPath, apiParamsPath string, importAPIUpdate,
-	preserveProvider, importAPISkipCleanup, importAPIRotateRevision, importAPISkipDeployments bool) error {
+	preserveProvider, importAPISkipCleanup, importAPIRotateRevision, importAPISkipDeployments bool, dryRun bool,
+	apiLoggingCmdFormat string) error {
 	publisherEndpoint := utils.GetPublisherEndpointOfEnv(importEnvironment, utils.MainConfigFilePath)
 	return ImportAPI(accessOAuthToken, publisherEndpoint, importEnvironment, importPath, apiParamsPath, importAPIUpdate,
-		preserveProvider, importAPISkipCleanup, importAPIRotateRevision, importAPISkipDeployments)
+		preserveProvider, importAPISkipCleanup, importAPIRotateRevision, importAPISkipDeployments, dryRun, apiLoggingCmdFormat)
 }
 
 // ImportAPI function is used with import-api command
 func ImportAPI(accessOAuthToken, publisherEndpoint, importEnvironment, importPath, apiParamsPath string, importAPIUpdate,
-	preserveProvider, importAPISkipCleanup, importAPIRotateRevision, importAPISkipDeployments bool) error {
+	preserveProvider, importAPISkipCleanup, importAPIRotateRevision, importAPISkipDeployments bool,
+	dryRun bool, apiLoggingCmdFormat string) error {
 	exportDirectory := filepath.Join(utils.ExportDirectory, utils.ExportedApisDirName)
 	resolvedAPIFilePath, err := resolveImportFilePath(importPath, exportDirectory)
 	if err != nil {
@@ -246,9 +281,13 @@ func ImportAPI(accessOAuthToken, publisherEndpoint, importEnvironment, importPat
 		publisherEndpoint += "?preserveProvider=" + strconv.FormatBool(preserveProvider) + "&rotateRevision=" +
 			strconv.FormatBool(importAPIRotateRevision)
 	}
+
+	if dryRun {
+		publisherEndpoint += "&dryRun=" + strconv.FormatBool(true)
+	}
 	utils.Logln(utils.LogPrefixInfo + "Import URL: " + publisherEndpoint)
 
-	err = importAPI(publisherEndpoint, apiFilePath, accessOAuthToken, extraParams, true)
+	err = importAPI(publisherEndpoint, apiFilePath, accessOAuthToken, extraParams, true, dryRun, apiLoggingCmdFormat)
 	return err
 }
 
