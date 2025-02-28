@@ -23,8 +23,10 @@ NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory
 ### Options
 
 ```
+      --dry-run              Get verification of the governance compliance of the API without importing it
   -e, --environment string   Environment from the which the API should be imported
   -f, --file string          Name of the API to be imported
+      --format string        Output format of violation results in dry-run mode. Supported formats: [table, json, list]. If not provided, the default format is table.
   -h, --help                 help for api
       --params string        Provide an API Manager params file or a directory generated using "gen deployment-dir" command
       --preserve-provider    Preserve existing provider of API after importing (default true)
