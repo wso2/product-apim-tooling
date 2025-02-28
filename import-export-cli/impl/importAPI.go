@@ -193,6 +193,8 @@ func importAPI(endpoint, filePath, accessToken string, extraParams map[string]st
 		} else {
 			// We have an HTTP error
 			utils.Logln(utils.LogPrefixError, err)
+			fmt.Println("Status: " + resp.Status())
+			fmt.Println("Response:", resp)
 			return errors.New(resp.Status())
 		}
 	}
