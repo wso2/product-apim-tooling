@@ -35,15 +35,15 @@ controlPlane:
   enabled: true
   serviceURL: https://apim-acp-wso2am-cp-1-service:9443/
   username: admin
-  password: adminksr
-  environmentLabels: Default_apk
+  password: admin
+  environmentLabels: Default
   skipSSLVerification: true
-  eventListeningEndpoints: amqp://admin:adminksr@apim-acp-wso2am-cp-1-service:5672?retries='10'&connectdelay='30'
+  eventListeningEndpoints: amqp://admin:admin@apim-acp-wso2am-cp-1-service:5672?retries='10'&connectdelay='30'
   # internalKeyIssuer: http://am.wso2.com:443/token
 dataPlane:
   enabled: true
   k8ResourceEndpoint: https://apk-wso2-apk-config-ds-service:9443/api/configurator/apis/generate-k8s-resources
-  namespace: default
+  namespace: apk
 metrics:
   enabled: false
 agent:
