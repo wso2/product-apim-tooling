@@ -108,6 +108,7 @@ func AddSequenceWithDynamicDataToAPIProject(t *testing.T, args *InitTestArgs) ap
 	operationPolicies := apim.OperationPolicies{
 		Request: append(requestPolicies, map[string]interface{}{
 			"policyName": TestSampleDynamicDataPolicyName,
+			"policyType": "api",
 		}),
 		Response: []string{},
 		Fault:    []string{},

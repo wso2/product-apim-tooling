@@ -386,14 +386,15 @@ func ValidateAPIWithUpdatedSequenceIsExported(t *testing.T, args *InitTestArgs, 
 	base.Unzip(relativePath, exportedPath)
 
 	// Check whether the exported operation policy is equivalent to the latest operation policy
-	exportedApiSequencePath := relativePath + TestDefaultExtractedFileName + DevFirstSampleCaseDestPolicy1PathSuffix
+	exportedApiSequencePath := relativePath + TestDefaultExtractedFileName + DevFirstSampleCaseDestExportedPolicy1PathSuffix
+
 	lastUpdatedSequencePath, _ := filepath.Abs(DevFirstUpdatedSampleCasePolicy1Path)
 	isSequenceUpdated := base.IsFileContentIdentical(exportedApiSequencePath, lastUpdatedSequencePath)
 	base.Log("Exported operation policy is updated", isSequenceUpdated)
 	assert.Equal(t, true, isSequenceUpdated, "Error while updating the operation policy of API")
 
 	// Check whether the exported operation policy definition is equivalent to the latest operation policy definition
-	exportedApiSequenceDefinitionPath := relativePath + TestDefaultExtractedFileName + DevFirstSampleCaseDestPolicyDefinition1PathSuffix
+	exportedApiSequenceDefinitionPath := relativePath + TestDefaultExtractedFileName + DevFirstSampleCaseDestExportedPolicyDefinition1PathSuffix
 	lastUpdatedSequenceDefinitionPath, _ := filepath.Abs(DevFirstUpdatedSampleCasePolicyDefinition1Path)
 	isSequenceDefinitionUpdated := base.IsFileContentIdentical(exportedApiSequenceDefinitionPath, lastUpdatedSequenceDefinitionPath)
 	base.Log("Exported operation policy definition is updated", isSequenceDefinitionUpdated)
