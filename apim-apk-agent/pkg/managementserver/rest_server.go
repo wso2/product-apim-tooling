@@ -102,7 +102,7 @@ func StartInternalServer(port uint) {
 			}
 			apiYaml, definition, endpointsYaml := createAPIYaml(&event)
 			deploymentContent := createDeployementYaml(event.API.Vhost)
-			logger.LoggerMgtServer.Infof("Created apiYaml : %s, \n\n\n created definition file: %s, \n\n\n created endpointYaml : %s", apiYaml, definition, endpointsYaml)
+			logger.LoggerMgtServer.Debugf("Created apiYaml : %s, \n\n\n created definition file: %s, \n\n\n created endpointYaml : %s", apiYaml, definition, endpointsYaml)
 			definitionPath := fmt.Sprintf("%s-%s/Definitions/swagger.yaml", event.API.APIName, event.API.APIVersion)
 			if strings.ToUpper(event.API.APIType) == "GRAPHQL" {
 				definitionPath = fmt.Sprintf("%s-%s/Definitions/schema.graphql", event.API.APIName, event.API.APIVersion)
@@ -642,7 +642,7 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string, string) {
 	var requestOperationPolicies []OperationPolicy
 	if apiCPEvent.API.AIModelBasedRoundRobin != nil {
 		aiModelBasedRoundRobin := apiCPEvent.API.AIModelBasedRoundRobin
-		logger.LoggerMgtServer.Infof("AIModelBasedRoundRobin : %+v", aiModelBasedRoundRobin)
+		logger.LoggerMgtServer.Debugf("AIModelBasedRoundRobin : %+v", aiModelBasedRoundRobin)
 		wrr := ModelBasedRoundRobinConfig{
 			Production:      convertAIModelWeightsToModelConfigs(aiModelBasedRoundRobin.ProductionModels, apimEndpints, true),
 			Sandbox:         convertAIModelWeightsToModelConfigs(aiModelBasedRoundRobin.SandboxModels, apimEndpints, false),
@@ -668,9 +668,9 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string, string) {
 		Request: requestOperationPolicies,
 	}
 
-	logger.LoggerMgtServer.Infof("API Yaml: %+v", data)
+	logger.LoggerMgtServer.Debugf("API Yaml: %+v", data)
 	yamlBytes, _ := yaml.Marshal(data)
-	logger.LoggerMgtServer.Infof("Endpoint Yaml: %v", endpointsData)
+	logger.LoggerMgtServer.Debugf("Endpoint Yaml: %v", endpointsData)
 	endpointBytes, _ := yaml.Marshal(endpointsData)
 	return string(yamlBytes), definition, string(endpointBytes)
 }
