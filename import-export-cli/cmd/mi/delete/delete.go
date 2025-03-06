@@ -36,6 +36,7 @@ var DeleteCmd = &cobra.Command{
 	Short:   deleteCmdShortDesc,
 	Long:    deleteCmdLongDesc,
 	Example: deleteCmdExamples,
+	Deprecated: "instead refer to https://mi.docs.wso2.com/en/latest/observe-and-manage/managing-integrations-with-micli/ for updated usage.",
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + deleteCmdLiteral + " called")
 		cmd.Help()

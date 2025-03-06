@@ -54,6 +54,7 @@ var getTransactionReportCmd = &cobra.Command{
 	Long:    getTransactionReportCmdLongDesc,
 	Example: getTransactionReportCmdExamples,
 	Args:    cobra.RangeArgs(1, 2),
+	Deprecated: "instead refer to https://mi.docs.wso2.com/en/latest/observe-and-manage/managing-integrations-with-micli/ for updated usage.",
 	Run: func(cmd *cobra.Command, args []string) {
 		handleGetTransactionReportCmdArguments(args)
 	},

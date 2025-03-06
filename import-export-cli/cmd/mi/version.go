@@ -45,6 +45,7 @@ var VersionCmd = &cobra.Command{
 	Short:   versionCmdShortDesc,
 	Long:    versionCmdLongDesc,
 	Example: versionCmdExamples,
+	Deprecated: "instead refer to https://mi.docs.wso2.com/en/latest/observe-and-manage/managing-integrations-with-micli/ for updated usage.",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Version:", Version)
 		fmt.Println("Build Date:", BuildDate)

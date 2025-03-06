@@ -51,6 +51,7 @@ var getLogCmd = &cobra.Command{
 	Long:    getLogCmdLongDesc,
 	Example: getLogCmdExamples,
 	Args:    cobra.MaximumNArgs(1),
+	Deprecated: "instead refer to https://mi.docs.wso2.com/en/latest/observe-and-manage/managing-integrations-with-micli/ for updated usage.",
 	Run: func(cmd *cobra.Command, args []string) {
 		handleGetLogCmdArguments(args)
 	},

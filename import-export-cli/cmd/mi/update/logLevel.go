@@ -45,6 +45,7 @@ var updateLogLevelCmd = &cobra.Command{
 	Long:    updateLogLevelCmdLongDesc,
 	Example: updateLogLevelCmdExamples,
 	Args:    cobra.ExactArgs(2),
+	Deprecated: "instead refer to https://mi.docs.wso2.com/en/latest/observe-and-manage/managing-integrations-with-micli/ for updated usage.",
 	Run: func(cmd *cobra.Command, args []string) {
 		handleupdateLogLevelCmdArguments(args)
 	},
