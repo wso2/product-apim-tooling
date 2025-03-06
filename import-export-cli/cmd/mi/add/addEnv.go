@@ -44,6 +44,7 @@ var addEnvCmd = &cobra.Command{
 	Long:    addEnvCmdLongDesc,
 	Example: addEnvCmdExamples,
 	Args:    cobra.ExactArgs(2),
+	Deprecated: "instead refer to https://mi.docs.wso2.com/en/latest/observe-and-manage/managing-integrations-with-micli/ for updated usage.",
 	Run: func(cmd *cobra.Command, args []string) {
 		envToBeAdded = args[0]
 		miManagementEndpoint = args[1]

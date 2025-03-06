@@ -37,6 +37,7 @@ var getProxyServiceCmd = &cobra.Command{
 	Long:    generateGetCmdLongDescForArtifact(artifactProxyServices, "proxy-name"),
 	Example: generateGetCmdExamplesForArtifact(artifactProxyServices, miUtils.GetTrimmedCmdLiteral(getProxyServiceCmdLiteral), "SampleProxy"),
 	Args:    cobra.MaximumNArgs(1),
+	Deprecated: "instead refer to https://mi.docs.wso2.com/en/latest/observe-and-manage/managing-integrations-with-micli/ for updated usage.",
 	Run: func(cmd *cobra.Command, args []string) {
 		handleGetProxyServiceCmdArguments(args)
 	},

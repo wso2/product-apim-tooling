@@ -37,6 +37,7 @@ var getApplicationCmd = &cobra.Command{
 	Long:    generateGetCmdLongDescForArtifact(artifactCompositeApps, "app-name"),
 	Example: generateGetCmdExamplesForArtifact(artifactCompositeApps, miUtils.GetTrimmedCmdLiteral(getApplicationCmdLiteral), "SampleApp"),
 	Args:    cobra.MaximumNArgs(1),
+	Deprecated: "instead refer to https://mi.docs.wso2.com/en/latest/observe-and-manage/managing-integrations-with-micli/ for updated usage.",
 	Run: func(cmd *cobra.Command, args []string) {
 		handleGetApplicationCmdArguments(args)
 	},

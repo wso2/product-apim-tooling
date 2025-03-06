@@ -36,6 +36,7 @@ var DeactivateCmd = &cobra.Command{
 	Short:   deactivateCmdShortDesc,
 	Long:    deactivateCmdLongDesc,
 	Example: deactivateCmdExamples,
+	Deprecated: "instead refer to https://mi.docs.wso2.com/en/latest/observe-and-manage/managing-integrations-with-micli/ for updated usage.",
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + deactivateCmdLiteral + " called")
 		cmd.Help()

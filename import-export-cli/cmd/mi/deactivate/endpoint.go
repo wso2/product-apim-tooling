@@ -38,6 +38,7 @@ var deactivateEndpointCmd = &cobra.Command{
 	Long:    generateDeactivateCmdLongDescForArtifact(artifactEndpoint, "endpoint-name"),
 	Example: generateDeactivateCmdExamplesForArtifact(artifactEndpoint, miUtils.GetTrimmedCmdLiteral(deactivateEndpointCmdLiteral), "TestEP"),
 	Args:    cobra.ExactArgs(1),
+	Deprecated: "instead refer to https://mi.docs.wso2.com/en/latest/observe-and-manage/managing-integrations-with-micli/ for updated usage.",
 	Run: func(cmd *cobra.Command, args []string) {
 		handleDeactivateEndpointCmdArguments(args)
 	},

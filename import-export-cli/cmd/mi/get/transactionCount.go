@@ -49,6 +49,7 @@ var getTransactionCountCmd = &cobra.Command{
 	Short:   getTransactionCountCmdShortDesc,
 	Long:    getTransactionCountCmdLongDesc,
 	Example: getTransactionCountCmdExamples,
+	Deprecated: "instead refer to https://mi.docs.wso2.com/en/latest/observe-and-manage/managing-integrations-with-micli/ for updated usage.",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 0 || len(args) == 2 {
 			return nil

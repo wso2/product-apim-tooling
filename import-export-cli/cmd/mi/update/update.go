@@ -36,6 +36,7 @@ var UpdateCmd = &cobra.Command{
 	Short:   updateCmdShortDesc,
 	Long:    updateCmdLongDesc,
 	Example: updateCmdExamples,
+	Deprecated: "instead refer to https://mi.docs.wso2.com/en/latest/observe-and-manage/managing-integrations-with-micli/ for updated usage.",
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + updateCmdLiteral + " called")
 		cmd.Help()
