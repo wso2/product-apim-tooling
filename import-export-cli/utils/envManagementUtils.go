@@ -185,6 +185,26 @@ func GetAdminEndpointOfEnv(env, filePath string) string {
 	}
 }
 
+// Get AIServiceEndpoint of a given environment
+func GetAIServiceEndpointOfEnv(env, filePath string) string {
+	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
+	if !(envEndpoints.AIServiceEndpoint == "" || envEndpoints == nil) {
+		return envEndpoints.AIServiceEndpoint
+	} else {
+		return defaultAIServiceEndpoint
+	}
+}
+
+// Get AITokenServiceEndpoint of a given environment
+func GetAITokenServiceEndpointOfEnv(env, filePath string) string {
+	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
+	if !(envEndpoints.AITokenServiceEndpoint == "" || envEndpoints == nil) {
+		return envEndpoints.AITokenServiceEndpoint
+	} else {
+		return defaultAITokenServiceEndpoint
+	}
+}
+
 // Get UnifiedSearchEndpoint of a given environment
 func GetUnifiedSearchEndpointOfEnv(env, filePath string) string {
 	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
@@ -457,12 +477,13 @@ func RequiredMIEndpointsExists(envEndpoints *EnvEndpoints) bool {
 	return envEndpoints.MiManagementEndpoint != "" 
 }
 
-// HasOnlyMIEndpoint checks wether an MI instance is present in a given environment
+// HasOnlyMIEndpoint checks whether an MI instance is present in a given environment
 // It returns true if the only instance in an environment is MI
 func HasOnlyMIEndpoint(envEndpoints *EnvEndpoints) bool {
 	return envEndpoints.ApiManagerEndpoint == "" && envEndpoints.AdminEndpoint == "" && envEndpoints.DevPortalEndpoint == "" &&
 		envEndpoints.PublisherEndpoint == "" && envEndpoints.RegistrationEndpoint == "" &&
-		envEndpoints.TokenEndpoint == "" && envEndpoints.MiManagementEndpoint != ""
+		envEndpoints.TokenEndpoint == "" && envEndpoints.MiManagementEndpoint != "" &&
+		envEndpoints.AIServiceEndpoint == "" && envEndpoints.AITokenServiceEndpoint == ""
 }
 
 // GetMIManagementEndpointOfEnv return the Mi Management Endpoint of a given environment

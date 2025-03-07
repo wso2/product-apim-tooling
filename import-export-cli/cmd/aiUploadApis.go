@@ -27,12 +27,11 @@ import (
 
 const UploadAPIsCmdLiteral = "apis"
 const uploadAPIsCmdShortDesc = "Upload APIs of a tenant from one environment to a vector database."
-
 const uploadAPIsCmdLongDesc = "Upload APIs of a tenant from one environment to a vector database to provide context to the marketplace assistant."
-const uploadAPIsCmdExamples = utils.ProjectName + ` ` + UploadCmdLiteral + ` ` + UploadAPIsCmdLiteral + ` --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 --endpoint https://dev-tools.wso2.com/apim-ai-service -e production --all
-` + utils.ProjectName + ` ` + UploadCmdLiteral + ` ` + UploadAPIsCmdLiteral + ` --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 --endpoint https://dev-tools.wso2.com/apim-ai-service -e production 
-` + utils.ProjectName + ` ` + UploadCmdLiteral + ` ` + UploadAPIsCmdLiteral + ` --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 -e production 
-NOTE:The flag (--environment (-e)) is mandatory`
+const uploadAPIsCmdExamples = utils.ProjectName + ` ` + UploadCmdLiteral + ` ` + UploadAPIsCmdLiteral + ` --key Zk9DaTR2Tko1OVBwSHVjQzJDQVlmWXVBRGRNYTphNEZ3SGxxMGlDSUtWczJNUElJRG5lcFpuWU1h -e production --all
+` + utils.ProjectName + ` ` + UploadCmdLiteral + ` ` + UploadAPIsCmdLiteral + ` --key Zk9DaTR2Tko1OVBwSHVjQzJDQVlmWXVBRGRNYTphNEZ3SGxxMGlDSUtWczJNUElJRG5lcFpuWU1h -e production
+` + utils.ProjectName + ` ` + UploadCmdLiteral + ` ` + UploadAPIsCmdLiteral + ` --key Zk9DaTR2Tko1OVBwSHVjQzJDQVlmWXVBRGRNYTphNEZ3SGxxMGlDSUtWczJNUElJRG5lcFpuWU1h -e production
+NOTE:The flags (--key and --environment (-e)) are mandatory`
 
 var (
 	token     string
@@ -41,8 +40,7 @@ var (
 )
 
 var UploadAPIsCmd = &cobra.Command{
-	Use: UploadAPIsCmdLiteral + " (--endpoint <endpoint-url> --token <on-prem-key-of-the-organization> --environment " +
-		"<environment-from-which-artifacts-should-be-uploaded> --all)",
+	Use: UploadAPIsCmdLiteral + " (--key <base64-encoded-client_id-and-client_secret> --environment <environment-from-which-artifacts-should-be-uploaded> --all)",
 	Short:   uploadAPIsCmdShortDesc,
 	Long:    uploadAPIsCmdLongDesc,
 	Example: uploadAPIsCmdExamples,
@@ -53,22 +51,27 @@ var UploadAPIsCmd = &cobra.Command{
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
-		executeAIUploadAPIsCmd(cred, token, endpoint)
+		token, err := impl.GetAIToken(CmdUploadKey, CmdUploadEnvironment)
+		if err != nil {
+            utils.HandleErrorAndExit("Error getting AI token", err)
+        }
+		executeAIUploadAPIsCmd(cred, token)
 	},
 }
 
 // Do operatioSns to upload APIs to the vector database
-func executeAIUploadAPIsCmd(credential credentials.Credential, token, endpoint string) {
-	impl.AIUploadAPIs(credential, CmdUploadEnvironment, token, endpoint, uploadAll, false)
+func executeAIUploadAPIsCmd(credential credentials.Credential, token string) {
+	impl.AIUploadAPIs(credential, CmdUploadEnvironment, token, uploadAll, false)
 }
 
 func init() {
 	UploadCmd.AddCommand(UploadAPIsCmd)
 	UploadAPIsCmd.Flags().StringVarP(&CmdUploadEnvironment, "environment", "e",
 		"", "Environment from which the APIs should be uploaded")
-	UploadAPIsCmd.Flags().StringVarP(&token, "token", "", "", "on-prem-key of the organization")
-	UploadAPIsCmd.Flags().StringVarP(&endpoint, "endpoint", "", "", "endpoint of the marketplace assistant service")
+	UploadAPIsCmd.Flags().StringVarP(&CmdUploadKey, "key", "",
+    		"", "Base64 encoded client_id and client_secret pair")
 	UploadAPIsCmd.Flags().BoolVarP(&uploadAll, "all", "", false,
 		"Upload both apis and api products")
 	_ = UploadAPIsCmd.MarkFlagRequired("environment")
+	_ = UploadAPIsCmd.MarkFlagRequired("key")
 }

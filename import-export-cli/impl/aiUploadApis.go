@@ -3,7 +3,6 @@ package impl
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -20,7 +19,7 @@ const (
 
 var apiListQueue = make(chan []map[string]interface{}, 10)
 
-func AIUploadAPIs(credential credentials.Credential, cmdUploadEnvironment, aiToken, endpointUrl string, uploadAll, uploadProducts bool) {
+func AIUploadAPIs(credential credentials.Credential, cmdUploadEnvironment, aiToken string, uploadAll, uploadProducts bool) {
 
 	CmdUploadEnvironment = cmdUploadEnvironment
 	Credential = credential
@@ -33,19 +32,12 @@ func AIUploadAPIs(credential credentials.Credential, cmdUploadEnvironment, aiTok
 		Tenant = strings.Split(credential.Username, "@")[1]
 	}
 
-	if endpointUrl != "" {
-		Endpoint = endpointUrl
-	}
+	Endpoint = utils.GetAIServiceEndpointOfEnv(cmdUploadEnvironment, utils.MainConfigFilePath)
 
 	if aiToken != "" {
 		AIToken = aiToken
 	} else {
 		AIToken = utils.AIToken
-	}
-
-	if AIToken == "" {
-		fmt.Println("You have to provide your on prem key (token that you have generated in choreo for ai features) to do this operation.")
-		os.Exit(1)
 	}
 
 	accessToken, err := credentials.GetOAuthAccessToken(credential, cmdUploadEnvironment)

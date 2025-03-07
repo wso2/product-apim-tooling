@@ -66,6 +66,8 @@ type EnvEndpoints struct {
 	AdminEndpoint        string `yaml:"admin"`
 	TokenEndpoint        string `yaml:"token"`
 	MiManagementEndpoint string `yaml:"mi"`
+	AIServiceEndpoint    string `yaml:"ai_service"`
+    AITokenServiceEndpoint string `yaml:"ai_token_service"`
 }
 
 type MgwEndpoints struct {

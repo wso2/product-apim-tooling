@@ -40,11 +40,7 @@ var (
 	Endpoint             = utils.DefaultAIEndpoint
 )
 
-func AIDeleteAPIs(credential credentials.Credential, cmdUploadEnvironment, aiToken, endpointUrl, tenant string) {
-
-	if endpointUrl != "" {
-		Endpoint = endpointUrl
-	}
+func AIDeleteAPIs(credential credentials.Credential, CmdUploadEnvironment, aiToken, tenant string) {
 
 	if aiToken != "" {
 		AIToken = aiToken
@@ -52,10 +48,7 @@ func AIDeleteAPIs(credential credentials.Credential, cmdUploadEnvironment, aiTok
 		AIToken = utils.AIToken
 	}
 
-	if AIToken == "" {
-		fmt.Println("You have to provide your on prem key (token that you have generated in choreo for AI features) to do this operation.")
-		os.Exit(1)
-	}
+	Endpoint := utils.GetAIServiceEndpointOfEnv(CmdUploadEnvironment, utils.MainConfigFilePath)
 
 	fmt.Println("Removing existing APIs and API Products from vector database for tenant:", tenant)
 
