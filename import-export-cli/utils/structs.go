@@ -67,7 +67,7 @@ type EnvEndpoints struct {
 	TokenEndpoint        string `yaml:"token"`
 	MiManagementEndpoint string `yaml:"mi"`
 	AIServiceEndpoint    string `yaml:"ai_service"`
-    AITokenServiceEndpoint string `yaml:"ai_token_service"`
+	AITokenServiceEndpoint string `yaml:"ai_token_service"`
 }
 
 type MgwEndpoints struct {

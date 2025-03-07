@@ -53,8 +53,8 @@ var UploadAPIsCmd = &cobra.Command{
 		}
 		token, err := impl.GetAIToken(CmdUploadKey, CmdUploadEnvironment)
 		if err != nil {
-            utils.HandleErrorAndExit("Error getting AI token", err)
-        }
+			utils.HandleErrorAndExit("Error getting AI token", err)
+		}
 		executeAIUploadAPIsCmd(cred, token)
 	},
 }
@@ -69,7 +69,7 @@ func init() {
 	UploadAPIsCmd.Flags().StringVarP(&CmdUploadEnvironment, "environment", "e",
 		"", "Environment from which the APIs should be uploaded")
 	UploadAPIsCmd.Flags().StringVarP(&CmdUploadKey, "key", "",
-    		"", "Base64 encoded client_id and client_secret pair")
+		"", "Base64 encoded client_id and client_secret pair")
 	UploadAPIsCmd.Flags().BoolVarP(&uploadAll, "all", "", false,
 		"Upload both apis and api products")
 	_ = UploadAPIsCmd.MarkFlagRequired("environment")

@@ -97,12 +97,12 @@ func AddEnv(envName string, envEndpoints *utils.EnvEndpoints, mainConfigFilePath
 	}
 
 	if envEndpoints.AIServiceEndpoint != "" {
-    		validatedEnvEndpoints.AIServiceEndpoint = envEndpoints.AIServiceEndpoint
-    }
+		validatedEnvEndpoints.AIServiceEndpoint = envEndpoints.AIServiceEndpoint
+	}
 
-    if envEndpoints.AITokenServiceEndpoint != "" {
-    		validatedEnvEndpoints.AITokenServiceEndpoint = envEndpoints.AITokenServiceEndpoint
-    }
+	if envEndpoints.AITokenServiceEndpoint != "" {
+		validatedEnvEndpoints.AITokenServiceEndpoint = envEndpoints.AITokenServiceEndpoint
+	}
 
 	mainConfig.Environments[envName] = validatedEnvEndpoints
 	utils.WriteConfigFile(mainConfig, mainConfigFilePath)

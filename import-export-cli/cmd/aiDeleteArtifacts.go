@@ -48,9 +48,9 @@ var PurgeAPIsCmd = &cobra.Command{
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
 		token, err := impl.GetAIToken(CmdPurgeKey, CmdPurgeEnvironment)
-        if err != nil {
-            utils.HandleErrorAndExit("Error getting AI token", err)
-        }
+		if err != nil {
+			utils.HandleErrorAndExit("Error getting AI token", err)
+		}
 		executeAIDeleteAPIsCmd(cred, token)
 	},
 }
@@ -71,7 +71,7 @@ func init() {
 	PurgeAPIsCmd.Flags().StringVarP(&CmdPurgeEnvironment, "environment", "e",
 		"", "Environment from which the APIs should be Purged")
 	PurgeAPIsCmd.Flags().StringVarP(&CmdPurgeKey, "key", "",
-    		"", "Base64 encoded client_id and client_secret pair")
+		"", "Base64 encoded client_id and client_secret pair")
 	_ = PurgeAPIsCmd.MarkFlagRequired("environment")
 	_ = PurgeAPIsCmd.MarkFlagRequired("key")
 }
