@@ -13,8 +13,8 @@ apictl ai delete [flags]
 ### Examples
 
 ```
-apictl ai delete artifacts --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 --endpoint https://dev-tools.wso2.com/apim-ai-service -e production 
-NOTE:The flag (--environment (-e)) is mandatory
+apictl ai delete artifacts --key Zk9DaTR2Tko1OVBwSHVjQzJDQVlmWXVBRGRNYTphNEZ3SGxxMGlDSUtWczJNUElJRG5lcFpuWU1h -e production
+NOTE:The flags (--key and --environment (-e)) are mandatory
 ```
 
 ### Options

@@ -13,11 +13,11 @@ apictl ai [flags]
 ### Examples
 
 ```
-apictl ai upload apis --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 --endpoint https://dev-tools.wso2.com/apim-ai-service -e production
-apictl ai upload api-products --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 --endpoint https://dev-tools.wso2.com/apim-ai-service -e production 
-apictl ai upload apis --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 --endpoint https://dev-tools.wso2.com/apim-ai-service -e production --all
-apictl ai delete apis --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 -e -endpoint https://dev-tools.wso2.com/apim-ai-service production --all
-NOTE:The flag (--environment (-e)) is mandatory
+apictl ai upload apis --key Zk9DaTR2Tko1OVBwSHVjQzJDQVlmWXVBRGRNYTphNEZ3SGxxMGlDSUtWczJNUElJRG5lcFpuWU1h -e production
+apictl ai upload api-products --key Zk9DaTR2Tko1OVBwSHVjQzJDQVlmWXVBRGRNYTphNEZ3SGxxMGlDSUtWczJNUElJRG5lcFpuWU1h -e production
+apictl ai upload apis --key Zk9DaTR2Tko1OVBwSHVjQzJDQVlmWXVBRGRNYTphNEZ3SGxxMGlDSUtWczJNUElJRG5lcFpuWU1h -e production --all
+apictl ai delete apis --key Zk9DaTR2Tko1OVBwSHVjQzJDQVlmWXVBRGRNYTphNEZ3SGxxMGlDSUtWczJNUElJRG5lcFpuWU1h -e production --all
+NOTE:The flags (--key and --environment (-e)) are mandatory
 ```
 
 ### Options
