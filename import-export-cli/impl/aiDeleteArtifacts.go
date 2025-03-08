@@ -40,7 +40,7 @@ var (
 	Endpoint             = utils.DefaultAIEndpoint
 )
 
-func AIDeleteAPIs(credential credentials.Credential, CmdUploadEnvironment, aiToken, tenant string) {
+func AIDeleteAPIs(credential credentials.Credential, CmdPurgeEnvironment, aiToken, oldEndpoint, tenant string) {
 
 	headers := make(map[string]string)
 	if aiToken != "" {
@@ -50,7 +50,11 @@ func AIDeleteAPIs(credential credentials.Credential, CmdUploadEnvironment, aiTok
 		headers["API-KEY"] = AIToken
 	}
 
-	Endpoint := utils.GetAIServiceEndpointOfEnv(CmdUploadEnvironment, utils.MainConfigFilePath)
+	if (oldEndpoint != "") {
+		Endpoint = oldEndpoint
+	} else {
+		Endpoint = utils.GetAIServiceEndpointOfEnv(CmdPurgeEnvironment, utils.MainConfigFilePath)
+	}
 
 	fmt.Println("Removing existing APIs and API Products from vector database for tenant:", tenant)
 

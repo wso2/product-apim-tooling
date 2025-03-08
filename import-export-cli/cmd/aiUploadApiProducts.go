@@ -34,7 +34,8 @@ const uploadAPIProductsCmdExamples = utils.ProjectName + ` ` + UploadCmdLiteral 
 NOTE:The flag (--environment (-e)) is mandatory`
 
 var UploadAPIProductsCmd = &cobra.Command{
-	Use: UploadAPIProductsCmdLiteral + " (--environment <environment-from-which-artifacts-should-be-uploaded>)",
+	Use: UploadAPIProductsCmdLiteral + " (--endpoint <endpoint-url> --token <on-prem-key-of-the-organization> --environment " +
+         "<environment-from-which-artifacts-should-be-uploaded>)",
 	Short:   uploadAPIProductsCmdShortDesc,
 	Long:    uploadAPIProductsCmdLongDesc,
 	Example: uploadAPIProductsCmdExamples,
@@ -45,27 +46,33 @@ var UploadAPIProductsCmd = &cobra.Command{
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
-		key, err := utils.GetAIKeyOfEnv(CmdUploadEnvironment, utils.MainConfigFilePath)
-		if err != nil {
-			utils.HandleErrorAndExit("Error getting AI key", err)
+		if (oldToken != "") {
+			token = oldToken
+		} else {
+			key, err := utils.GetAIKeyOfEnv(CmdUploadEnvironment, utils.MainConfigFilePath)
+			if err != nil {
+			    utils.HandleErrorAndExit("Error getting AI key", err)
+			}
+			token, err = impl.GetAIToken(key, CmdUploadEnvironment)
+			if err != nil {
+			    utils.HandleErrorAndExit("Error getting AI token", err)
+			}
 		}
-		token, err := impl.GetAIToken(key, CmdUploadEnvironment)
-		if err != nil {
-			utils.HandleErrorAndExit("Error getting AI token", err)
-		}
-		executeAIUploadAPIProductsCmd(cred, token)
+		executeAIUploadAPIProductsCmd(cred, token, oldEndpoint)
 	},
 }
 
 // Do operations to upload APIs to the vector database
-func executeAIUploadAPIProductsCmd(credential credentials.Credential, token string) {
-	impl.AIUploadAPIs(credential, CmdUploadEnvironment, token, uploadAll, true)
+func executeAIUploadAPIProductsCmd(credential credentials.Credential, token, oldEndpoint string) {
+	impl.AIUploadAPIs(credential, CmdUploadEnvironment, token, oldEndpoint, uploadAll, true)
 }
 
 func init() {
 	UploadCmd.AddCommand(UploadAPIProductsCmd)
 	UploadAPIProductsCmd.Flags().StringVarP(&CmdUploadEnvironment, "environment", "e",
 		"", "Environment from which the APIs should be uploaded")
+	UploadAPIProductsCmd.Flags().StringVarP(&oldToken, "token", "", "", "on-prem-key of the organization")
+	UploadAPIProductsCmd.Flags().StringVarP(&oldEndpoint, "endpoint", "", "", "endpoint of the marketplace assistant service")
 	UploadAPIProductsCmd.Flags().BoolVarP(&uploadAll, "all", "", false,
 		"Upload both apis and api products")
 	_ = UploadAPIProductsCmd.MarkFlagRequired("environment")

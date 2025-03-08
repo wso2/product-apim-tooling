@@ -16,7 +16,7 @@ apictl ai [flags]
 apictl ai upload apis -e production
 apictl ai upload api-products -e production
 apictl ai upload apis -e production --all
-apictl ai delete apis -e production --all
+apictl ai delete artifacts -e production --all
 NOTE:The flag (--environment (-e)) is mandatory
 ```
 

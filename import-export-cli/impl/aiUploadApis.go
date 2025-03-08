@@ -19,7 +19,7 @@ const (
 
 var apiListQueue = make(chan []map[string]interface{}, 10)
 
-func AIUploadAPIs(credential credentials.Credential, cmdUploadEnvironment, aiToken string, uploadAll, uploadProducts bool) {
+func AIUploadAPIs(credential credentials.Credential, cmdUploadEnvironment, aiToken, oldEndpoint string, uploadAll, uploadProducts bool) {
 
 	CmdUploadEnvironment = cmdUploadEnvironment
 	Credential = credential
@@ -32,7 +32,11 @@ func AIUploadAPIs(credential credentials.Credential, cmdUploadEnvironment, aiTok
 		Tenant = strings.Split(credential.Username, "@")[1]
 	}
 
-	Endpoint = utils.GetAIServiceEndpointOfEnv(cmdUploadEnvironment, utils.MainConfigFilePath)
+	if (oldEndpoint != "") {
+		Endpoint = oldEndpoint
+	} else {
+		Endpoint = utils.GetAIServiceEndpointOfEnv(CmdUploadEnvironment, utils.MainConfigFilePath)
+	}
 
 	headers := make(map[string]string)
 	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
@@ -44,7 +48,7 @@ func AIUploadAPIs(credential credentials.Credential, cmdUploadEnvironment, aiTok
 		headers["API-KEY"] = AIToken
 	}
 
-	accessToken, err := credentials.GetOAuthAccessToken(credential, cmdUploadEnvironment)
+	accessToken, err := credentials.GetOAuthAccessToken(credential, CmdUploadEnvironment)
 
 	if err != nil {
 		utils.HandleErrorAndExit("Error getting OAuth Tokens", err)
@@ -52,7 +56,11 @@ func AIUploadAPIs(credential credentials.Credential, cmdUploadEnvironment, aiTok
 
 	ProduceAPIPayloads(accessToken, apiListQueue)
 
-	numConsumers := utils.AIThreadCount
+	numConsumers := utils.DefaultAIThreadCount
+	configVars := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
+	if configVars.Config.AIThreadCount != 0 {
+		numConsumers = configVars.Config.AIThreadCount
+	}
 	var wg sync.WaitGroup
 	for i := 0; i < numConsumers; i++ {
 		wg.Add(1)

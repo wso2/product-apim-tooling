@@ -30,7 +30,7 @@ const AiCmdLongDesc = `Perform AI related operations such as uploading APIs and 
 const AiCmdExamples = utils.ProjectName + ` ` + AiCmdLiteral + ` ` + UploadCmdLiteral + ` ` + UploadAPIsCmdLiteral + ` -e production
 ` + utils.ProjectName + ` ` + AiCmdLiteral + ` ` + UploadCmdLiteral + ` ` + UploadAPIProductsCmdLiteral + ` -e production
 ` + utils.ProjectName + ` ` + AiCmdLiteral + ` ` + UploadCmdLiteral + ` ` + UploadAPIsCmdLiteral + ` -e production --all
-` + utils.ProjectName + ` ` + AiCmdLiteral + ` ` + PurgeCmdLiteral + ` ` + UploadAPIsCmdLiteral + ` -e production --all
+` + utils.ProjectName + ` ` + AiCmdLiteral + ` ` + PurgeCmdLiteral + ` ` + PurgeAPIsCmdLiteral + ` -e production --all
 NOTE:The flag (--environment (-e)) is mandatory`
 
 // AiCmd represents the Ai command

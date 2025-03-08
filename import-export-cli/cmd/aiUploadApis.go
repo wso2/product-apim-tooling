@@ -34,13 +34,14 @@ const uploadAPIsCmdExamples = utils.ProjectName + ` ` + UploadCmdLiteral + ` ` +
 NOTE:The flag (--environment (-e)) is mandatory`
 
 var (
-	token     string
-	endpoint  string
+	oldToken     string
+	oldEndpoint  string
 	uploadAll bool
 )
 
 var UploadAPIsCmd = &cobra.Command{
-	Use: UploadAPIsCmdLiteral + " (--environment <environment-from-which-artifacts-should-be-uploaded> --all)",
+	Use: UploadAPIsCmdLiteral + " (--endpoint <endpoint-url> --token <on-prem-key-of-the-organization> --environment " +
+         "<environment-from-which-artifacts-should-be-uploaded> --all)",
 	Short:   uploadAPIsCmdShortDesc,
 	Long:    uploadAPIsCmdLongDesc,
 	Example: uploadAPIsCmdExamples,
@@ -51,27 +52,33 @@ var UploadAPIsCmd = &cobra.Command{
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
-		key, err := utils.GetAIKeyOfEnv(CmdUploadEnvironment, utils.MainConfigFilePath)
-		if err != nil {
-			utils.HandleErrorAndExit("Error getting AI key", err)
+		if (oldToken != "") {
+			token = oldToken
+		} else {
+			key, err := utils.GetAIKeyOfEnv(CmdUploadEnvironment, utils.MainConfigFilePath)
+			if err != nil {
+			    utils.HandleErrorAndExit("Error getting AI key", err)
+			}
+			token, err = impl.GetAIToken(key, CmdUploadEnvironment)
+			if err != nil {
+			    utils.HandleErrorAndExit("Error getting AI token", err)
+			}
 		}
-		token, err := impl.GetAIToken(key, CmdUploadEnvironment)
-		if err != nil {
-			utils.HandleErrorAndExit("Error getting AI token", err)
-		}
-		executeAIUploadAPIsCmd(cred, token)
+		executeAIUploadAPIsCmd(cred, token, oldEndpoint)
 	},
 }
 
-// Do operatioSns to upload APIs to the vector database
-func executeAIUploadAPIsCmd(credential credentials.Credential, token string) {
-	impl.AIUploadAPIs(credential, CmdUploadEnvironment, token, uploadAll, false)
+// Do operations to upload APIs to the vector database
+func executeAIUploadAPIsCmd(credential credentials.Credential, token, oldEndpoint string) {
+	impl.AIUploadAPIs(credential, CmdUploadEnvironment, token, oldEndpoint, uploadAll, false)
 }
 
 func init() {
 	UploadCmd.AddCommand(UploadAPIsCmd)
 	UploadAPIsCmd.Flags().StringVarP(&CmdUploadEnvironment, "environment", "e",
 		"", "Environment from which the APIs should be uploaded")
+	UploadAPIsCmd.Flags().StringVarP(&oldToken, "token", "", "", "on-prem-key of the organization")
+	UploadAPIsCmd.Flags().StringVarP(&oldEndpoint, "endpoint", "", "", "endpoint of the marketplace assistant service")
 	UploadAPIsCmd.Flags().BoolVarP(&uploadAll, "all", "", false,
 		"Upload both apis and api products")
 	_ = UploadAPIsCmd.MarkFlagRequired("environment")
