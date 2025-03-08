@@ -55,6 +55,7 @@ func AIDeleteAPIs(credential credentials.Credential, CmdUploadEnvironment, aiTok
 	fmt.Println("Removing existing APIs and API Products from vector database for tenant:", tenant)
 
 	headers["TENANT-DOMAIN"] = tenant
+	headers["User-Agent"] = "WSO2-API-Controller"
 	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
 
 	var resp *resty.Response

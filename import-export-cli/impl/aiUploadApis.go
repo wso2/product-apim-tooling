@@ -36,6 +36,7 @@ func AIUploadAPIs(credential credentials.Credential, cmdUploadEnvironment, aiTok
 
 	headers := make(map[string]string)
 	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
+	headers["User-Agent"] = "WSO2-API-Controller"
 	if aiToken != "" {
 		headers["Authorization"] = "Bearer " + aiToken
 	} else {
