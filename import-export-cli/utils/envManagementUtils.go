@@ -185,6 +185,36 @@ func GetAdminEndpointOfEnv(env, filePath string) string {
 	}
 }
 
+// Get AIServiceEndpoint of a given environment
+func GetAIServiceEndpointOfEnv(env, filePath string) string {
+	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
+	if !(envEndpoints.AIServiceEndpoint == "" || envEndpoints == nil) {
+		return envEndpoints.AIServiceEndpoint
+	} else {
+		return defaultAIServiceEndpoint
+	}
+}
+
+// Get AITokenServiceEndpoint of a given environment
+func GetAITokenServiceEndpointOfEnv(env, filePath string) string {
+	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
+	if !(envEndpoints.AITokenServiceEndpoint == "" || envEndpoints == nil) {
+		return envEndpoints.AITokenServiceEndpoint
+	} else {
+		return defaultAITokenServiceEndpoint
+	}
+}
+
+// Get AIKey of a given environment
+func GetAIKeyOfEnv(env, filePath string) (string, error) {
+	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
+	if !(envEndpoints.AIKey == "" || envEndpoints == nil) {
+		return envEndpoints.AIKey, nil
+	} else {
+		return "", errors.New("AI key is empty!")
+	}
+}
+
 // Get UnifiedSearchEndpoint of a given environment
 func GetUnifiedSearchEndpointOfEnv(env, filePath string) string {
 	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
@@ -451,18 +481,27 @@ func RequiredAPIMEndpointsExists(envEndpoints *EnvEndpoints) bool {
 		envEndpoints.TokenEndpoint != ""
 }
 
-// RequiredMIEndpointsExists checks for required apim endpoints.
+// RequiredAIEndpointsExists checks for required ai endpoints.
+// It returns true if all the endpoints are present
+func RequiredAIEndpointsExists(envEndpoints *EnvEndpoints) bool {
+	return envEndpoints.AIServiceEndpoint != "" && envEndpoints.AITokenServiceEndpoint != "" &&
+		envEndpoints.AIKey != ""
+}
+
+// RequiredMIEndpointsExists checks for required mi endpoints.
 // It returns true if all the endpoints are present
 func RequiredMIEndpointsExists(envEndpoints *EnvEndpoints) bool {
 	return envEndpoints.MiManagementEndpoint != "" 
 }
 
-// HasOnlyMIEndpoint checks wether an MI instance is present in a given environment
+// HasOnlyMIEndpoint checks whether an MI instance is present in a given environment
 // It returns true if the only instance in an environment is MI
 func HasOnlyMIEndpoint(envEndpoints *EnvEndpoints) bool {
 	return envEndpoints.ApiManagerEndpoint == "" && envEndpoints.AdminEndpoint == "" && envEndpoints.DevPortalEndpoint == "" &&
 		envEndpoints.PublisherEndpoint == "" && envEndpoints.RegistrationEndpoint == "" &&
-		envEndpoints.TokenEndpoint == "" && envEndpoints.MiManagementEndpoint != ""
+		envEndpoints.TokenEndpoint == "" && envEndpoints.MiManagementEndpoint != "" &&
+		envEndpoints.AIServiceEndpoint == "" && envEndpoints.AITokenServiceEndpoint == "" &&
+		envEndpoints.AIKey == ""
 }
 
 // GetMIManagementEndpointOfEnv return the Mi Management Endpoint of a given environment
@@ -483,7 +522,7 @@ func GetMIManagementEndpointOfResource(resource, env, filePath string) string {
 	return miEndpoint + "/" + MiManagementAPIContext + "/" + resource
 }
 
-// MIExistsInEnv check wether there is a micro integrator in the environment
+// MIExistsInEnv check whether there is a micro integrator in the environment
 func MIExistsInEnv(env, filePath string) bool {
 	miEndpoint, err := GetMIManagementEndpointOfEnv(env, filePath)
 	if err != nil {
@@ -492,7 +531,7 @@ func MIExistsInEnv(env, filePath string) bool {
 	return miEndpoint != ""
 }
 
-// APIMExistsInEnv check wether there is a apim in the environment
+// APIMExistsInEnv check whether there is a apim in the environment
 func APIMExistsInEnv(env, filePath string) bool {
 	envEndpoints, err := GetEndpointsOfEnvironment(env, filePath)
 	if err != nil {

@@ -32,12 +32,16 @@ const purgeAPIsCmdShortDesc = "Purge APIs and API Products of a tenant from one 
 
 const purgeAPIsCmdLongDesc = "Purge APIs and API Products of a tenant from one environment from a vector database."
 const PurgeAPIsCmdLongDesc = `Purge APIs and API Products of a tenant from one environment specified by flag (--environment, -e)`
-const purgeAPIsCmdExamples = utils.ProjectName + ` ` + AiCmdLiteral + ` ` + PurgeCmdLiteral + ` ` + PurgeAPIsCmdLiteral + ` --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 --endpoint https://dev-tools.wso2.com/apim-ai-service -e production
+const purgeAPIsCmdExamples = utils.ProjectName + ` ` + AiCmdLiteral + ` ` + PurgeCmdLiteral + ` ` + PurgeAPIsCmdLiteral + ` -e production
 NOTE:The flag (--environment (-e)) is mandatory`
+
+var (
+	token  string
+)
 
 var PurgeAPIsCmd = &cobra.Command{
 	Use: PurgeAPIsCmdLiteral + " (--endpoint <endpoint-url> --token <on-prem-key-of-the-organization> --environment " +
-		"<environment-from-which-artifacts-should-be-purgeed>)",
+         "<environment-from-which-artifacts-should-be-purged>)",
 	Short:   purgeAPIsCmdShortDesc,
 	Long:    purgeAPIsCmdLongDesc,
 	Example: purgeAPIsCmdExamples,
@@ -48,26 +52,38 @@ var PurgeAPIsCmd = &cobra.Command{
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
-		executeAIDeleteAPIsCmd(cred, token, endpoint)
+		if (oldToken != "") {
+			token = oldToken
+		} else {
+			key, err := utils.GetAIKeyOfEnv(CmdPurgeEnvironment, utils.MainConfigFilePath)
+			if err != nil {
+			    utils.HandleErrorAndExit("Error getting AI key", err)
+			}
+			token, err = impl.GetAIToken(key, CmdPurgeEnvironment)
+			if err != nil {
+			    utils.HandleErrorAndExit("Error getting AI token", err)
+			}
+		}
+		executeAIDeleteAPIsCmd(cred, token, oldEndpoint)
 	},
 }
 
 // Do operations to Purge APIs to the vector database
-func executeAIDeleteAPIsCmd(credential credentials.Credential, token, endpoint string) {
+func executeAIDeleteAPIsCmd(credential credentials.Credential, token, oldEndpoint string) {
 	var Tenant string
 	if !strings.Contains(credential.Username, "@") {
 		Tenant = "carbon.super"
 	} else {
 		Tenant = strings.Split(credential.Username, "@")[1]
 	}
-	impl.AIDeleteAPIs(credential, CmdPurgeEnvironment, token, endpoint, Tenant)
+	impl.AIDeleteAPIs(credential, CmdPurgeEnvironment, token, oldEndpoint, Tenant)
 }
 
 func init() {
 	PurgeCmd.AddCommand(PurgeAPIsCmd)
 	PurgeAPIsCmd.Flags().StringVarP(&CmdPurgeEnvironment, "environment", "e",
-		"", "Environment from which the APIs should be Purgeed")
-	PurgeAPIsCmd.Flags().StringVarP(&token, "token", "", "", "on-prem-key of the organization")
-	PurgeAPIsCmd.Flags().StringVarP(&endpoint, "endpoint", "", "", "endpoint of the marketplace assistant service")
+		"", "Environment from which the APIs should be Purged")
+	PurgeAPIsCmd.Flags().StringVarP(&oldToken, "token", "", "", "on-prem-key of the organization")
+	PurgeAPIsCmd.Flags().StringVarP(&oldEndpoint, "endpoint", "", "", "endpoint of the marketplace assistant service")
 	_ = PurgeAPIsCmd.MarkFlagRequired("environment")
 }

@@ -3,7 +3,6 @@ package impl
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -20,7 +19,7 @@ const (
 
 var apiListQueue = make(chan []map[string]interface{}, 10)
 
-func AIUploadAPIs(credential credentials.Credential, cmdUploadEnvironment, aiToken, endpointUrl string, uploadAll, uploadProducts bool) {
+func AIUploadAPIs(credential credentials.Credential, cmdUploadEnvironment, aiToken, oldEndpoint string, uploadAll, uploadProducts bool) {
 
 	CmdUploadEnvironment = cmdUploadEnvironment
 	Credential = credential
@@ -33,34 +32,39 @@ func AIUploadAPIs(credential credentials.Credential, cmdUploadEnvironment, aiTok
 		Tenant = strings.Split(credential.Username, "@")[1]
 	}
 
-	if endpointUrl != "" {
-		Endpoint = endpointUrl
+	if (oldEndpoint != "") {
+		Endpoint = oldEndpoint
+	} else {
+		Endpoint = utils.GetAIServiceEndpointOfEnv(CmdUploadEnvironment, utils.MainConfigFilePath)
 	}
 
+	headers := make(map[string]string)
+	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
+	headers["User-Agent"] = "WSO2-API-Controller"
 	if aiToken != "" {
-		AIToken = aiToken
+		headers["Authorization"] = "Bearer " + aiToken
 	} else {
 		AIToken = utils.AIToken
+		headers["API-KEY"] = AIToken
 	}
 
-	if AIToken == "" {
-		fmt.Println("You have to provide your on prem key (token that you have generated in choreo for ai features) to do this operation.")
-		os.Exit(1)
-	}
-
-	accessToken, err := credentials.GetOAuthAccessToken(credential, cmdUploadEnvironment)
+	accessToken, err := credentials.GetOAuthAccessToken(credential, CmdUploadEnvironment)
 
 	if err != nil {
 		utils.HandleErrorAndExit("Error getting OAuth Tokens", err)
 	}
 
-	go ProduceAPIPayloads(accessToken, apiListQueue)
+	ProduceAPIPayloads(accessToken, apiListQueue)
 
-	numConsumers := utils.AIThreadCount
+	numConsumers := utils.DefaultAIThreadCount
+	configVars := utils.GetMainConfigFromFile(utils.MainConfigFilePath)
+	if configVars.Config.AIThreadCount != 0 {
+		numConsumers = configVars.Config.AIThreadCount
+	}
 	var wg sync.WaitGroup
 	for i := 0; i < numConsumers; i++ {
 		wg.Add(1)
-		go ConsumeAPIPayloads(apiListQueue, &wg)
+		go ConsumeAPIPayloads(headers, apiListQueue, &wg)
 	}
 
 	wg.Wait()
@@ -87,25 +91,21 @@ func ProduceAPIPayloads(accessToken string, apiListQueue chan<- []map[string]int
 	close(apiListQueue)
 }
 
-func ConsumeAPIPayloads(apiListQueue <-chan []map[string]interface{}, wg *sync.WaitGroup) {
+func ConsumeAPIPayloads(headers map[string]string, apiListQueue <-chan []map[string]interface{}, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	for apiList := range apiListQueue {
-		InvokePOSTRequest(apiList)
+		InvokePOSTRequest(headers, apiList)
 	}
 }
 
-func InvokePOSTRequest(apiList []map[string]interface{}) {
+func InvokePOSTRequest(headers map[string]string, apiList []map[string]interface{}) {
 	fmt.Printf("Uploading %d APIs for tenant: %s\n", len(apiList), apiList[0]["tenant_domain"])
 	payload, err := json.Marshal(map[string]interface{}{"apis": apiList})
 	if err != nil {
 		utils.HandleErrorAndContinue("Error in marshalling payload:", err)
 		return
 	}
-
-	headers := make(map[string]string)
-	headers["API-KEY"] = AIToken
-	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
 
 	var resp *resty.Response
 	var uploadErr error
