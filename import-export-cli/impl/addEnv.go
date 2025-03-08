@@ -61,6 +61,13 @@ func AddEnv(envName string, envEndpoints *utils.EnvEndpoints, mainConfigFilePath
 		}
 	}
 
+	if envEndpoints.AIServiceEndpoint != "" || envEndpoints.AITokenServiceEndpoint != "" || envEndpoints.AIKey != "" {
+        if !utils.RequiredAIEndpointsExists(envEndpoints) {
+            utils.ShowHelpCommandTip(addEnvCmdLiteral)
+            return errors.New("One or more AI Endpoint(s) are blank")
+        }
+	}
+
 	if utils.EnvExistsInMainConfigFile(envName, mainConfigFilePath) {
 		// environment already exists
 		return errors.New("Environment '" + envName + "' already exists in " + mainConfigFilePath)
@@ -102,6 +109,10 @@ func AddEnv(envName string, envEndpoints *utils.EnvEndpoints, mainConfigFilePath
 
 	if envEndpoints.AITokenServiceEndpoint != "" {
 		validatedEnvEndpoints.AITokenServiceEndpoint = envEndpoints.AITokenServiceEndpoint
+	}
+
+	if envEndpoints.AIKey != "" {
+		validatedEnvEndpoints.AIKey = envEndpoints.AIKey
 	}
 
 	mainConfig.Environments[envName] = validatedEnvEndpoints

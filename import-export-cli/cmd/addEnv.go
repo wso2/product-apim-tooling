@@ -35,6 +35,7 @@ var flagAdminEndpoint string        // admin endpoint of the environment to be a
 var flagMiManagementEndpoint string // mi management endpoint of the environment to be added
 var flagAIServiceEndpoint string // ai service endpoint of the environment to be added
 var flagAITokenServiceEndpoint string // ai token service endpoint of the environment to be added
+var flagAIKey string // base-64 encoded client_id and client_secret of the environment to be added
 
 // AddEnv command related Info
 const AddEnvCmdLiteral = "env [environment]"
@@ -62,7 +63,8 @@ const addEnvCmdExamples = utils.ProjectName + ` ` + AddCmdLiteral + ` ` + AddEnv
 ` + utils.ProjectName + ` ` + AddCmdLiteral + ` ` + AddEnvCmdLiteralTrimmed + ` prod \
 --apim  https://apim.com:9443 \
 --ai-service https://dev-tools.wso2.com/apim-ai-service/v2 \
---ai-token-service https://api.asgardeo.io/t/wso2devtools/oauth2/token
+--ai-token-service https://api.asgardeo.io/t/wso2devtools/oauth2/token \
+--ai-key Zk9DaTR2Tko1OVBwSHVjQzJDQVlmWXVBRGRNYTphNEZ3SGxxMGlDSUtWczJNUElJRG5lcFpuWU1h
 
 ` + utils.ProjectName + ` ` + AddCmdLiteral + ` ` + AddEnvCmdLiteralTrimmed + ` test \
 --registration https://idp.com:9443 \
@@ -70,7 +72,8 @@ const addEnvCmdExamples = utils.ProjectName + ` ` + AddCmdLiteral + ` ` + AddEnv
 --devportal  https://apps.com:9443 \
 --admin  https://apim.com:9443 \
 --ai-service https://dev-tools.wso2.com/apim-ai-service/v2 \
---ai-token-service https://api.asgardeo.io/t/wso2devtools/oauth2/token
+--ai-token-service https://api.asgardeo.io/t/wso2devtools/oauth2/token \
+--ai-key Zk9DaTR2Tko1OVBwSHVjQzJDQVlmWXVBRGRNYTphNEZ3SGxxMGlDSUtWczJNUElJRG5lcFpuWU1h
 
 ` + utils.ProjectName + ` ` + AddCmdLiteral + ` ` + AddEnvCmdLiteralTrimmed + ` dev \
 --apim https://apim.com:9443 \
@@ -81,7 +84,7 @@ You can either provide only the flag --apim , or all the other 4 flags (--regist
 If you are omitting any of --registration --publisher --devportal --admin flags, you need to specify --apim flag with the API Manager endpoint. In both of the
 cases --token flag is optional and use it to specify the gateway token endpoint. This will be used for "apictl get-keys" operation.
 To add a micro integrator instance to an environment you can use the --mi flag.
-To add ai related service endpoints to an environment you can use the --ai-service and --ai-token-service flags.`
+To add ai related service endpoints to an environment you can use the --ai-service, --ai-token-service and --ai-key flags.`
 
 // addEnvCmd represents the addEnv command
 var addEnvCmd = &cobra.Command{
@@ -109,6 +112,7 @@ func executeAddEnvCmd(mainConfigFilePath string) {
 	envEndpoints.MiManagementEndpoint = flagMiManagementEndpoint
 	envEndpoints.AIServiceEndpoint = flagAIServiceEndpoint
 	envEndpoints.AITokenServiceEndpoint = flagAITokenServiceEndpoint
+	envEndpoints.AIKey = flagAIKey
 	err := impl.AddEnv(envToBeAdded, envEndpoints, mainConfigFilePath, AddEnvCmdLiteral)
 	if err != nil {
 		utils.HandleErrorAndExit("Error adding environment", err)
@@ -129,5 +133,6 @@ func init() {
 	addEnvCmd.Flags().StringVar(&flagMiManagementEndpoint, "mi", "", "Micro Integrator Management endpoint for the environment")
 	addEnvCmd.Flags().StringVar(&flagAIServiceEndpoint, "ai-service", "", "AI service endpoint for the environment")
 	addEnvCmd.Flags().StringVar(&flagAITokenServiceEndpoint, "ai-token-service", "", "AI token service endpoint for the environment")
+	addEnvCmd.Flags().StringVar(&flagAIKey, "ai-key", "", "Base64 encoded client_id and client_secret for the environment")
 	_ = addEnvCmd.MarkFlagRequired("environment")
 }

@@ -32,11 +32,11 @@ const purgeAPIsCmdShortDesc = "Purge APIs and API Products of a tenant from one 
 
 const purgeAPIsCmdLongDesc = "Purge APIs and API Products of a tenant from one environment from a vector database."
 const PurgeAPIsCmdLongDesc = `Purge APIs and API Products of a tenant from one environment specified by flag (--environment, -e)`
-const purgeAPIsCmdExamples = utils.ProjectName + ` ` + AiCmdLiteral + ` ` + PurgeCmdLiteral + ` ` + PurgeAPIsCmdLiteral + ` --key Zk9DaTR2Tko1OVBwSHVjQzJDQVlmWXVBRGRNYTphNEZ3SGxxMGlDSUtWczJNUElJRG5lcFpuWU1h -e production
-NOTE:The flags (--key and --environment (-e)) are mandatory`
+const purgeAPIsCmdExamples = utils.ProjectName + ` ` + AiCmdLiteral + ` ` + PurgeCmdLiteral + ` ` + PurgeAPIsCmdLiteral + ` -e production
+NOTE:The flag (--environment (-e)) is mandatory`
 
 var PurgeAPIsCmd = &cobra.Command{
-	Use: PurgeAPIsCmdLiteral + " (--key <base64-encoded-client_id-and-client_secret> --environment <environment-from-which-artifacts-should-be-purged>)",
+	Use: PurgeAPIsCmdLiteral + " (--environment <environment-from-which-artifacts-should-be-purged>)",
 	Short:   purgeAPIsCmdShortDesc,
 	Long:    purgeAPIsCmdLongDesc,
 	Example: purgeAPIsCmdExamples,
@@ -47,7 +47,11 @@ var PurgeAPIsCmd = &cobra.Command{
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting credentials", err)
 		}
-		token, err := impl.GetAIToken(CmdPurgeKey, CmdPurgeEnvironment)
+		key, err := utils.GetAIKeyOfEnv(CmdPurgeEnvironment, utils.MainConfigFilePath)
+		if err != nil {
+			utils.HandleErrorAndExit("Error getting AI key", err)
+		}
+		token, err := impl.GetAIToken(key, CmdPurgeEnvironment)
 		if err != nil {
 			utils.HandleErrorAndExit("Error getting AI token", err)
 		}
@@ -70,8 +74,5 @@ func init() {
 	PurgeCmd.AddCommand(PurgeAPIsCmd)
 	PurgeAPIsCmd.Flags().StringVarP(&CmdPurgeEnvironment, "environment", "e",
 		"", "Environment from which the APIs should be Purged")
-	PurgeAPIsCmd.Flags().StringVarP(&CmdPurgeKey, "key", "",
-		"", "Base64 encoded client_id and client_secret pair")
 	_ = PurgeAPIsCmd.MarkFlagRequired("environment")
-	_ = PurgeAPIsCmd.MarkFlagRequired("key")
 }

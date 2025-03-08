@@ -27,8 +27,8 @@ import (
 const PurgeCmdLiteral = "delete"
 const PurgeCmdShortDesc = "Purge APIs and API Products of a tenant from one environment from the vector database."
 const PurgeCmdLongDesc = `Purge APIs and API Products of a tenant from one environment specified by flag (--environment, -e)`
-const PurgeCmdExamples = utils.ProjectName + ` ` + AiCmdLiteral + ` ` + PurgeCmdLiteral + ` ` + PurgeAPIsCmdLiteral + ` --key Zk9DaTR2Tko1OVBwSHVjQzJDQVlmWXVBRGRNYTphNEZ3SGxxMGlDSUtWczJNUElJRG5lcFpuWU1h -e production
-NOTE:The flags (--key and --environment (-e)) are mandatory`
+const PurgeCmdExamples = utils.ProjectName + ` ` + AiCmdLiteral + ` ` + PurgeCmdLiteral + ` ` + PurgeAPIsCmdLiteral + ` -e production
+NOTE:The flag (--environment (-e)) is mandatory`
 
 // PurgeCmd represents the Purge command
 var PurgeCmd = &cobra.Command{
