@@ -13,11 +13,11 @@ apictl ai [flags]
 ### Examples
 
 ```
-apictl ai upload apis --key Zk9DaTR2Tko1OVBwSHVjQzJDQVlmWXVBRGRNYTphNEZ3SGxxMGlDSUtWczJNUElJRG5lcFpuWU1h -e production
-apictl ai upload api-products --key Zk9DaTR2Tko1OVBwSHVjQzJDQVlmWXVBRGRNYTphNEZ3SGxxMGlDSUtWczJNUElJRG5lcFpuWU1h -e production
-apictl ai upload apis --key Zk9DaTR2Tko1OVBwSHVjQzJDQVlmWXVBRGRNYTphNEZ3SGxxMGlDSUtWczJNUElJRG5lcFpuWU1h -e production --all
-apictl ai delete apis --key Zk9DaTR2Tko1OVBwSHVjQzJDQVlmWXVBRGRNYTphNEZ3SGxxMGlDSUtWczJNUElJRG5lcFpuWU1h -e production --all
-NOTE:The flags (--key and --environment (-e)) are mandatory
+apictl ai upload apis -e production
+apictl ai upload api-products -e production
+apictl ai upload apis -e production --all
+apictl ai delete apis -e production --all
+NOTE:The flag (--environment (-e)) is mandatory
 ```
 
 ### Options

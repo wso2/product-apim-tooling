@@ -13,8 +13,8 @@ apictl ai delete [flags]
 ### Examples
 
 ```
-apictl ai delete artifacts --key Zk9DaTR2Tko1OVBwSHVjQzJDQVlmWXVBRGRNYTphNEZ3SGxxMGlDSUtWczJNUElJRG5lcFpuWU1h -e production
-NOTE:The flags (--key and --environment (-e)) are mandatory
+apictl ai delete artifacts -e production
+NOTE:The flag (--environment (-e)) is mandatory
 ```
 
 ### Options

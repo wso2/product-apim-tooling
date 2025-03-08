@@ -7,14 +7,14 @@ Purge APIs and API Products of a tenant from one environment from a vector datab
 Purge APIs and API Products of a tenant from one environment from a vector database.
 
 ```
-apictl ai delete artifacts (--key <base64-encoded-client_id-and-client_secret> --environment <environment-from-which-artifacts-should-be-purged>) [flags]
+apictl ai delete artifacts (--environment <environment-from-which-artifacts-should-be-purged>) [flags]
 ```
 
 ### Examples
 
 ```
-apictl ai delete artifacts --key Zk9DaTR2Tko1OVBwSHVjQzJDQVlmWXVBRGRNYTphNEZ3SGxxMGlDSUtWczJNUElJRG5lcFpuWU1h -e production
-NOTE:The flags (--key and --environment (-e)) are mandatory
+apictl ai delete artifacts -e production
+NOTE:The flag (--environment (-e)) is mandatory
 ```
 
 ### Options
@@ -22,7 +22,6 @@ NOTE:The flags (--key and --environment (-e)) are mandatory
 ```
   -e, --environment string   Environment from which the APIs should be Purged
   -h, --help                 help for artifacts
-      --key string           Base64 encoded client_id and client_secret pair
 ```
 
 ### Options inherited from parent commands
