@@ -50,7 +50,7 @@ func AIUploadAPIs(credential credentials.Credential, cmdUploadEnvironment, aiTok
 		utils.HandleErrorAndExit("Error getting OAuth Tokens", err)
 	}
 
-	go ProduceAPIPayloads(accessToken, apiListQueue)
+	ProduceAPIPayloads(accessToken, apiListQueue)
 
 	numConsumers := utils.AIThreadCount
 	var wg sync.WaitGroup
