@@ -34,10 +34,13 @@ func AIUploadAPIs(credential credentials.Credential, cmdUploadEnvironment, aiTok
 
 	Endpoint = utils.GetAIServiceEndpointOfEnv(cmdUploadEnvironment, utils.MainConfigFilePath)
 
+	headers := make(map[string]string)
+	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
 	if aiToken != "" {
-		AIToken = aiToken
+		headers["Authorization"] = "Bearer " + aiToken
 	} else {
 		AIToken = utils.AIToken
+		headers["API-KEY"] = AIToken
 	}
 
 	accessToken, err := credentials.GetOAuthAccessToken(credential, cmdUploadEnvironment)
@@ -52,7 +55,7 @@ func AIUploadAPIs(credential credentials.Credential, cmdUploadEnvironment, aiTok
 	var wg sync.WaitGroup
 	for i := 0; i < numConsumers; i++ {
 		wg.Add(1)
-		go ConsumeAPIPayloads(apiListQueue, &wg)
+		go ConsumeAPIPayloads(headers, apiListQueue, &wg)
 	}
 
 	wg.Wait()
@@ -79,25 +82,21 @@ func ProduceAPIPayloads(accessToken string, apiListQueue chan<- []map[string]int
 	close(apiListQueue)
 }
 
-func ConsumeAPIPayloads(apiListQueue <-chan []map[string]interface{}, wg *sync.WaitGroup) {
+func ConsumeAPIPayloads(headers map[string]string, apiListQueue <-chan []map[string]interface{}, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	for apiList := range apiListQueue {
-		InvokePOSTRequest(apiList)
+		InvokePOSTRequest(headers, apiList)
 	}
 }
 
-func InvokePOSTRequest(apiList []map[string]interface{}) {
+func InvokePOSTRequest(headers map[string]string, apiList []map[string]interface{}) {
 	fmt.Printf("Uploading %d APIs for tenant: %s\n", len(apiList), apiList[0]["tenant_domain"])
 	payload, err := json.Marshal(map[string]interface{}{"apis": apiList})
 	if err != nil {
 		utils.HandleErrorAndContinue("Error in marshalling payload:", err)
 		return
 	}
-
-	headers := make(map[string]string)
-	headers["API-KEY"] = AIToken
-	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
 
 	var resp *resty.Response
 	var uploadErr error

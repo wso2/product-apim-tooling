@@ -42,19 +42,20 @@ var (
 
 func AIDeleteAPIs(credential credentials.Credential, CmdUploadEnvironment, aiToken, tenant string) {
 
+	headers := make(map[string]string)
 	if aiToken != "" {
-		AIToken = aiToken
+		headers["Authorization"] = "Bearer " + aiToken
 	} else {
 		AIToken = utils.AIToken
+		headers["API-KEY"] = AIToken
 	}
 
 	Endpoint := utils.GetAIServiceEndpointOfEnv(CmdUploadEnvironment, utils.MainConfigFilePath)
 
 	fmt.Println("Removing existing APIs and API Products from vector database for tenant:", tenant)
 
-	headers := make(map[string]string)
-	headers["API-KEY"] = AIToken
 	headers["TENANT-DOMAIN"] = tenant
+	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
 
 	var resp *resty.Response
 	var deleteErr error
