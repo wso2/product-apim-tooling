@@ -27,8 +27,8 @@ import (
 const UploadCmdLiteral = "upload"
 const UploadCmdShortDesc = "Upload APIs and API Products of a tenant from one environment to a vector database to provide context to the marketplace assistant."
 const UploadCmdLongDesc = `Upload APIs and API Products of a tenant from one environment specified by flag (--environment, -e)`
-const UploadCmdExamples = utils.ProjectName + ` ` + AiCmdLiteral + ` ` + UploadCmdLiteral + ` ` + UploadAPIsCmdLiteral + ` --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 --endpoint https://dev-tools.wso2.com/apim-ai-service -e production --all
-` + utils.ProjectName + ` ` + AiCmdLiteral + ` ` + UploadCmdLiteral + ` ` + UploadAPIProductsCmdLiteral + ` --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 --endpoint https://dev-tools.wso2.com/apim-ai-service -e production --all
+const UploadCmdExamples = utils.ProjectName + ` ` + AiCmdLiteral + ` ` + UploadCmdLiteral + ` ` + UploadAPIsCmdLiteral + ` -e production --all
+` + utils.ProjectName + ` ` + AiCmdLiteral + ` ` + UploadCmdLiteral + ` ` + UploadAPIProductsCmdLiteral + ` -e production --all
 NOTE:The flag (--environment (-e)) is mandatory`
 
 // UploadCmd represents the Upload command

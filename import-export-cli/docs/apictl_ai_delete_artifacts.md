@@ -7,13 +7,13 @@ Purge APIs and API Products of a tenant from one environment from a vector datab
 Purge APIs and API Products of a tenant from one environment from a vector database.
 
 ```
-apictl ai delete artifacts (--endpoint <endpoint-url> --token <on-prem-key-of-the-organization> --environment <environment-from-which-artifacts-should-be-purgeed>) [flags]
+apictl ai delete artifacts (--endpoint <endpoint-url> --token <on-prem-key-of-the-organization> --environment <environment-from-which-artifacts-should-be-purged>) [flags]
 ```
 
 ### Examples
 
 ```
-apictl ai delete artifacts --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 --endpoint https://dev-tools.wso2.com/apim-ai-service -e production
+apictl ai delete artifacts -e production
 NOTE:The flag (--environment (-e)) is mandatory
 ```
 
@@ -21,7 +21,7 @@ NOTE:The flag (--environment (-e)) is mandatory
 
 ```
       --endpoint string      endpoint of the marketplace assistant service
-  -e, --environment string   Environment from which the APIs should be Purgeed
+  -e, --environment string   Environment from which the APIs should be Purged
   -h, --help                 help for artifacts
       --token string         on-prem-key of the organization
 ```

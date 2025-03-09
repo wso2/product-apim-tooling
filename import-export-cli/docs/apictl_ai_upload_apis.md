@@ -13,9 +13,9 @@ apictl ai upload apis (--endpoint <endpoint-url> --token <on-prem-key-of-the-org
 ### Examples
 
 ```
-apictl upload apis --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 --endpoint https://dev-tools.wso2.com/apim-ai-service -e production --all
-apictl upload apis --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 --endpoint https://dev-tools.wso2.com/apim-ai-service -e production 
-apictl upload apis --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 -e production 
+apictl upload apis -e production --all
+apictl upload apis -e production
+apictl upload apis -e production
 NOTE:The flag (--environment (-e)) is mandatory
 ```
 

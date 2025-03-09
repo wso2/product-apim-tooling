@@ -141,6 +141,8 @@ const defaultRevokeEndpointSuffix = "oauth2/revoke"
 const defaultAPILoggingBaseEndpoint = "api/am/devops/v0/tenant-logs"
 const defaultAPILoggingApisEndpoint = "apis"
 const defaultCorrelationLoggingEndpoint = "api/am/devops/v0/config/correlation"
+const defaultAIServiceEndpoint = "https://dev-tools.wso2.com/apim-ai-service/v2"
+const defaultAITokenServiceEndpoint = "https://api.asgardeo.io/t/wso2devtools/oauth2/token"
 
 const DefaultEnvironmentName = "default"
 const DefaultTenantDomain = "carbon.super"

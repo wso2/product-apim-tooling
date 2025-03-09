@@ -50,6 +50,8 @@ var CmdUsername string
 var CmdExportEnvironment string
 var CmdUploadEnvironment string
 var CmdPurgeEnvironment string
+var CmdPurgeKey string
+var CmdUploadKey string
 var CmdResourceTenantDomain string
 var CmdForceStartFromBegin bool
 
