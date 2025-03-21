@@ -87,7 +87,8 @@ func executeExportAPIsCmd(credential credentials.Credential, exportDirectory str
 	}
 
 	impl.ExportAPIs(credential, exportRelatedFilesPath, CmdExportEnvironment, CmdResourceTenantDomain, exportAPIsFormat,
-		CmdUsername, apiExportDir, exportAPIPreserveStatus, runningExportApiCommand, exportAPIsAllRevisions)
+		CmdUsername, apiExportDir, exportAPIPreserveStatus, runningExportApiCommand, exportAPIsAllRevisions,
+		exportAPIPreserveCredentials)
 }
 
 func init() {
@@ -99,6 +100,8 @@ func init() {
 			"any, and to export APIs from beginning")
 	ExportAPIsCmd.Flags().BoolVarP(&exportAPIPreserveStatus, "preserve-status", "", true,
 		"Preserve API status when exporting. Otherwise API will be exported in CREATED status")
+	ExportAPIsCmd.Flags().BoolVarP(&exportAPIPreserveCredentials, "preserve-credentials", "", false,
+        "Preserve endpoint credentials when exporting. Otherwise credentials will not be exported")
 	ExportAPIsCmd.Flags().BoolVarP(&exportAPIsAllRevisions, "all", "", false,
 		"Export working copy and all revisions for the APIs in the environments ")
 	ExportAPIsCmd.Flags().StringVarP(&exportAPIsFormat, "format", "", utils.DefaultExportFormat, "File format of exported archives(json or yaml)")
