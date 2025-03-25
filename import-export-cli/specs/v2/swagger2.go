@@ -131,6 +131,14 @@ func swagger2XWSO2SandboxEndpoints(document *loads.Document) (*Endpoints, bool, 
 	return &Endpoints{}, false, nil
 }
 
+func swagger2XWSO2AuthHeader(document *loads.Document) (string, bool) {
+	if v, ok := document.Spec().Extensions["x-wso2-auth-header"]; ok {
+		str, ok := v.(string)
+		return str, ok
+	}
+	return "", false
+}
+
 // BuildAPIMEndpoints builds endpointConfig for given config
 func BuildAPIMEndpoints(production, sandbox *Endpoints) (string, error) {
 	epType := EpHttp
@@ -317,6 +325,12 @@ func Swagger2Populate(def *APIDTODefinition, document *loads.Document) error {
 		}
 		def.EndpointConfig = &endpointConfig
 	}
+
+	authHeader, ok := swagger2XWSO2AuthHeader(document)
+	if ok {
+		def.AuthorizationHeader = authHeader
+	}
+
 	return nil
 }
 
