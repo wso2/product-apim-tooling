@@ -100,6 +100,21 @@ func oai3XWso2SandboxEndpoints(exts map[string]interface{}) (*Endpoints, bool, e
 	return nil, true, nil
 }
 
+func oai3XWSO2AuthHeader(exts map[string]interface{}) (string, bool) {
+	if v, ok := exts["x-wso2-auth-header"]; ok {
+		data, ok := v.(json.RawMessage)
+		if ok {
+			var auth string
+			err := json.Unmarshal(data, &auth)
+			if err != nil {
+				return "", false
+			}
+			return auth, true
+		}
+	}
+	return "", false
+}
+
 func oai3WSO2Basepath(exts map[string]interface{}) (string, bool, error) {
 	if v, ok := exts["x-wso2-basePath"]; ok {
 		data, ok := v.(json.RawMessage)
