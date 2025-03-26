@@ -1521,7 +1521,7 @@ func TestApiSearchWithQueryParams(t *testing.T) {
 			for i := 0; i < len(addedApisList); i++ {
 				apiNameToSearch := addedApisList[i].Name
 				apiNameNotToSearch := addedApisList[len(addedApisList)-(i+1)].Name
-				searchQuery = fmt.Sprintf("name:%v", apiNameToSearch)
+				searchQuery = fmt.Sprintf("--query name:%v", apiNameToSearch)
 
 				//Search APIs using query
 				testutils.ValidateSearchApisList(t, args, searchQuery, apiNameToSearch, apiNameNotToSearch)
@@ -1529,29 +1529,29 @@ func TestApiSearchWithQueryParams(t *testing.T) {
 				//Select random context from the added APIs
 				apiContextToSearch := addedApisList[i].Context
 				apiContextNotToSearch := addedApisList[len(addedApisList)-(i+1)].Context
-				searchQuery = fmt.Sprintf("context:%v", apiContextToSearch)
+				searchQuery = fmt.Sprintf("--query context:%v", apiContextToSearch)
 
 				//Search APIs using query
 				testutils.ValidateSearchApisList(t, args, searchQuery, apiContextToSearch, apiContextNotToSearch)
 			}
 
 			// Search custom API with name
-			searchQuery = fmt.Sprintf("name:%v", testutils.CustomAPIName)
+			searchQuery = fmt.Sprintf("--query name:%v", testutils.CustomAPIName)
 			testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIName,
 				addedApisList[1].Name)
 
 			// Search custom API with context
-			searchQuery = fmt.Sprintf("context:%v", testutils.CustomAPIContext)
+			searchQuery = fmt.Sprintf("--query context:%v", testutils.CustomAPIContext)
 			testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIContext,
 				addedApisList[1].Context)
 
 			// Search custom API with version
-			searchQuery = fmt.Sprintf("version:%v", testutils.CustomAPIVersion)
+			searchQuery = fmt.Sprintf("--query version:%v", testutils.CustomAPIVersion)
 			testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIVersion,
 				addedApisList[1].Version)
 
 			// Search custom API with version and name
-			searchQuery = fmt.Sprintf("version:%v --query name:%v", testutils.CustomAPIVersion, testutils.CustomAPIName)
+			searchQuery = fmt.Sprintf("--query version:%v --query name:%v", testutils.CustomAPIVersion, testutils.CustomAPIName)
 			testutils.ValidateSearchApisList(t, args, searchQuery, testutils.CustomAPIVersion,
 				addedApisList[1].Version)
 		})
