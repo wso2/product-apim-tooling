@@ -143,7 +143,8 @@ func getRevisionsListForAPI(accessToken, cmdExportEnvironment string, api utils.
 
 // Do the API exportation
 func ExportAPIs(credential credentials.Credential, exportRelatedFilesPath, cmdExportEnvironment, cmdResourceTenantDomain,
-	exportAPIsFormat, cmdUsername, apiExportDir string, exportAPIPreserveStatus, runningExportApiCommand, exportAllRevisions bool) {
+	exportAPIsFormat, cmdUsername, apiExportDir string, exportAPIPreserveStatus, runningExportApiCommand,
+ 	exportAllRevisions, exportAPIPreserveCredentials bool) {
 	if count == 0 {
 		fmt.Println("No APIs available to be exported..!")
 	} else {
@@ -158,7 +159,8 @@ func ExportAPIs(credential credentials.Credential, exportRelatedFilesPath, cmdEx
 					if exportAllRevisions {
 						//Export the working copy of the api
 						exportAPIandWriteToZip(apis[i], "", accessToken, cmdExportEnvironment, apiExportDir,
-							exportRelatedFilesPath, exportAPIsFormat, exportAPIPreserveStatus, runningExportApiCommand)
+							exportRelatedFilesPath, exportAPIsFormat, exportAPIPreserveStatus, runningExportApiCommand,
+							exportAPIPreserveCredentials)
 						counterSuceededAPIs++
 					}
 					revisionCount, revisions, err := getRevisionsListForAPI(accessToken, cmdExportEnvironment, apis[i],
@@ -171,7 +173,7 @@ func ExportAPIs(credential credentials.Credential, exportRelatedFilesPath, cmdEx
 							exportApiRevision := utils.GetRevisionNumFromRevisionName(revisions[j].RevisionNumber)
 							exportAPIandWriteToZip(apis[i], exportApiRevision, accessToken, cmdExportEnvironment,
 								apiExportDir, exportRelatedFilesPath, exportAPIsFormat, exportAPIPreserveStatus,
-								runningExportApiCommand)
+								runningExportApiCommand, exportAPIPreserveCredentials)
 							counterSuceededAPIs++
 						}
 					}
@@ -198,7 +200,8 @@ func ExportAPIs(credential credentials.Credential, exportRelatedFilesPath, cmdEx
 
 //Export the API and archive to zip format
 func exportAPIandWriteToZip(api utils.API, revisionNumber, accessToken, cmdExportEnvironment, apiExportDir,
-	exportRelatedFilesPath, exportAPIsFormat string, exportAPIPreserveStatus, runningExportApiCommand bool) {
+	exportRelatedFilesPath, exportAPIsFormat string, exportAPIPreserveStatus, runningExportApiCommand,
+ 	exportAPIPreserveCredentials bool) {
 
 	exportAPIName := api.Name
 	exportAPIVersion := api.Version
@@ -208,7 +211,8 @@ func exportAPIandWriteToZip(api utils.API, revisionNumber, accessToken, cmdExpor
 		exportApiRevision = utils.GetRevisionNumFromRevisionName(revisionNumber)
 	}
 	resp, err := ExportAPIFromEnv(accessToken, exportAPIName, exportAPIVersion, exportApiRevision,
-		exportApiProvider, exportAPIsFormat, cmdExportEnvironment, exportAPIPreserveStatus, false)
+		exportApiProvider, exportAPIsFormat, cmdExportEnvironment, exportAPIPreserveStatus, false,
+ 		exportAPIPreserveCredentials)
 	if err != nil {
 		utils.HandleErrorAndExit("Error exporting", err)
 	}
