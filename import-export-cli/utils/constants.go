@@ -208,8 +208,11 @@ const TLSRenegotiationFreely = "freely"
 
 // Migration export
 const MaxAPIsToExportOnce = 20
+const MaxAppsToExportOnce = 20
 const MigrationAPIsExportMetadataFileName = "migration-apis-export-metadata.yaml"
+const MigrationAppsExportMetadataFileName = "migration-apps-export-metadata.yaml"
 const LastSucceededApiFileName = "last-succeeded-api.log"
+const LastSucceededAppFileName = "last-succeeded-app.log"
 const LastSuceededContentDelimiter = " " // space
 const DefaultResourceTenantDomain = "tenant-default"
 const ApplicationId = "applicationId"

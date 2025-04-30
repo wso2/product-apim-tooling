@@ -35,7 +35,6 @@ var exportAppOwner string
 var exportAppWithKeys bool
 var exportAppFormat string
 
-//var flagExportAPICmdToken string
 // ExportApp command related usage info
 const ExportAppCmdLiteral = "app"
 const exportAppCmdShortDesc = "Export App"
