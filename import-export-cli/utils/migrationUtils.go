@@ -56,6 +56,20 @@ func ReadLastSucceededAPIFileData(exportRelatedFilesPath string) API {
 	return api
 }
 
+// Read the details of finally and successfully exported App into the last-succeeded-app.log file
+func ReadLastSucceededAppFileData(exportRelatedFilesPath string) Application {
+	var lastSucceededAppFilePath = filepath.Join(exportRelatedFilesPath, LastSucceededAppFileName)
+	data, err := ioutil.ReadFile(lastSucceededAppFilePath)
+	str := string(data)
+	var splittedString = strings.Split(str, " ")
+	var app = Application{"", strings.TrimSpace(splittedString[0]), "", strings.TrimSpace(splittedString[1]) , ""}
+
+	if err != nil {
+		HandleErrorAndExit("Error in reading file "+lastSucceededAppFilePath, err)
+	}
+	return app
+}
+
 // Write the last-succeeded-api.log file. It includes the meta data of the API, which was successfully exported finally
 func WriteLastSuceededAPIFileData(exportRelatedFilesPath string, api API) {
 	var lastSucceededApiFilePath = filepath.Join(exportRelatedFilesPath, LastSucceededApiFileName)
@@ -68,6 +82,18 @@ func WriteLastSuceededAPIFileData(exportRelatedFilesPath string, api API) {
 	}
 }
 
+// Write the last-succeeded-app.log file. It includes the meta data of the App, which was successfully exported finally
+func WriteLastSuceededAppFileData(exportRelatedFilesPath string, app Application) {
+	var lastSucceededAppFilePath = filepath.Join(exportRelatedFilesPath, LastSucceededAppFileName)
+	var content []byte
+	content = []byte(app.Name + LastSuceededContentDelimiter + app.Owner)
+	var error = ioutil.WriteFile(lastSucceededAppFilePath, content, 0644)
+
+	if error != nil {
+		HandleErrorAndExit("Error in writing file "+lastSucceededAppFilePath, error)
+	}
+}
+
 // Read the migration-apis-export-metadata.yaml file
 func (migrationApisExportMetadata *MigrationApisExportMetadata) ReadMigrationApisExportMetadataFile(filePath string) error {
 	data, err := ioutil.ReadFile(filePath)
@@ -75,6 +101,18 @@ func (migrationApisExportMetadata *MigrationApisExportMetadata) ReadMigrationApi
 		return err
 	}
 	if err := yaml.Unmarshal(data, migrationApisExportMetadata); err != nil {
+		return err
+	}
+	return nil
+}
+
+// Read the migration-apps-export-metadata.yaml file
+func (migrationAppsExportMetadata *MigrationAppsExportMetadata) ReadMigrationAppsExportMetadataFile(filePath string) error {
+	data, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return err
+	}
+	if err := yaml.Unmarshal(data, migrationAppsExportMetadata); err != nil {
 		return err
 	}
 	return nil
@@ -94,4 +132,15 @@ func WriteMigrationApisExportMetadataFile(apis []API, cmdResourceTenantDomain st
 	exportMetaData.User = cmdUsername
 
 	WriteConfigFile(exportMetaData, filepath.Join(exportRelatedFilesPath, MigrationAPIsExportMetadataFileName))
+}
+
+func WriteMigrationAppsExportMetadataFile(apps []Application, cmdResourceTenantDomain string,
+	cmdUsername string, exportRelatedFilesPath string, appListOffset int) {
+	var exportMetaData = new(MigrationAppsExportMetadata)
+	exportMetaData.AppListOffset = appListOffset
+	exportMetaData.AppListToExport = apps
+	exportMetaData.OnTenant = cmdResourceTenantDomain
+	exportMetaData.User = cmdUsername
+
+	WriteConfigFile(exportMetaData, filepath.Join(exportRelatedFilesPath, MigrationAppsExportMetadataFileName))
 }

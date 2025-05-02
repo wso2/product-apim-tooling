@@ -160,6 +160,13 @@ type MigrationApisExportMetadata struct {
 	ApiListToExport []API  `yaml:"apis_to_export"`
 }
 
+type MigrationAppsExportMetadata struct {
+	AppListOffset   int    `yaml:"app_list_offset"`
+	User            string `yaml:"user"`
+	OnTenant        string `yaml:"on_tenant"`
+	AppListToExport []Application  `yaml:"apps_to_export"`
+}
+
 type HttpErrorResponse struct {
 	Code        int     `json:"code"`
 	Status      string  `json:"message"`
