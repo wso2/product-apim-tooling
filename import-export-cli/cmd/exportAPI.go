@@ -40,6 +40,7 @@ var exportAPIPreserveStatus bool
 var exportAPIFormat string
 var runningExportApiCommand bool
 var exportAPILatestRevision bool
+var exportAPIPreserveCredentials bool
 
 // ExportAPI command related usage info
 const ExportAPICmdLiteral = "api"
@@ -79,7 +80,8 @@ func executeExportAPICmd(credential credentials.Credential, exportDirectory stri
 
 	if preCommandErr == nil {
 		resp, err := impl.ExportAPIFromEnv(accessToken, exportAPIName, exportAPIVersion, exportRevisionNum, exportProvider,
-			exportAPIFormat, CmdExportEnvironment, exportAPIPreserveStatus, exportAPILatestRevision)
+			exportAPIFormat, CmdExportEnvironment, exportAPIPreserveStatus, exportAPILatestRevision,
+ 			exportAPIPreserveCredentials)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while exporting", err)
 		}
@@ -116,6 +118,8 @@ func init() {
 		"", "Environment to which the API should be exported")
 	ExportAPICmd.Flags().BoolVarP(&exportAPIPreserveStatus, "preserve-status", "", true,
 		"Preserve API status when exporting. Otherwise API will be exported in CREATED status")
+	ExportAPICmd.Flags().BoolVarP(&exportAPIPreserveCredentials, "preserve-credentials", "", false,
+		"Preserve endpoint credentials when exporting. Otherwise credentials will not be exported")
 	ExportAPICmd.Flags().BoolVarP(&exportAPILatestRevision, "latest", "", false,
 		"Export the latest revision of the API")
 	ExportAPICmd.Flags().StringVarP(&exportAPIFormat, "format", "", utils.DefaultExportFormat, "File format of exported archive(json or yaml)")
