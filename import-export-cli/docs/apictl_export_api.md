@@ -23,15 +23,16 @@ without deployment environments will be exported.
 ### Options
 
 ```
-  -e, --environment string   Environment to which the API should be exported
-      --format string        File format of exported archive(json or yaml) (default "YAML")
-  -h, --help                 help for api
-      --latest               Export the latest revision of the API
-  -n, --name string          Name of the API to be exported
-      --preserve-status      Preserve API status when exporting. Otherwise API will be exported in CREATED status (default true)
-  -r, --provider string      Provider of the API
-      --rev string           Revision number of the API to be exported
-  -v, --version string       Version of the API to be exported
+  -e, --environment string     Environment to which the API should be exported
+      --format string          File format of exported archive(json or yaml) (default "YAML")
+  -h, --help                   help for api
+      --latest                 Export the latest revision of the API
+  -n, --name string            Name of the API to be exported
+      --preserve-credentials   Preserve endpoint credentials when exporting. Otherwise credentials will not be exported
+      --preserve-status        Preserve API status when exporting. Otherwise API will be exported in CREATED status (default true)
+  -r, --provider string        Provider of the API
+      --rev string             Revision number of the API to be exported
+  -v, --version string         Version of the API to be exported
 ```
 
 ### Options inherited from parent commands
