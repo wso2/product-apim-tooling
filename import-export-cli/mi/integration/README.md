@@ -62,7 +62,7 @@
 ```
 go test -archive <apictl archive name>
 
-example: go test -archive apictl-4.2.6-linux-amd64.tar.gz
+example: go test -archive apictl-4.2.7-linux-amd64.tar.gz
 
 ```
 
@@ -71,7 +71,7 @@ example: go test -archive apictl-4.2.6-linux-amd64.tar.gz
 ```
 go test -archive <apictl archive name> -test.run <Test function name or partial name regex>
 
-example: go test -archive apictl-4.2.6-linux-amd64.tar.gz -test.run TestGetConnectors
+example: go test -archive apictl-4.2.7-linux-amd64.tar.gz -test.run TestGetConnectors
 ```
 
 - Print verbose output
@@ -79,7 +79,7 @@ example: go test -archive apictl-4.2.6-linux-amd64.tar.gz -test.run TestGetConne
 ```
 go test  -archive <apictl archive name> -test.v
 
-example: go test -archive apictl-4.2.6-linux-amd64.tar.gz -test.v
+example: go test -archive apictl-4.2.7-linux-amd64.tar.gz -test.v
 ```
 
 - Print http transport request/responses
@@ -87,5 +87,5 @@ example: go test -archive apictl-4.2.6-linux-amd64.tar.gz -test.v
 ```
 go test -archive <apictl archive name> -logtransport
 
-example: go test -archive apictl-4.2.6-linux-amd64.tar.gz -logtransport
+example: go test -archive apictl-4.2.7-linux-amd64.tar.gz -logtransport
 ```
