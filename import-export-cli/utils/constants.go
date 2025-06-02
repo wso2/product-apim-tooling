@@ -141,6 +141,8 @@ const defaultRevokeEndpointSuffix = "oauth2/revoke"
 const defaultAPILoggingBaseEndpoint = "api/am/devops/v0/tenant-logs"
 const defaultAPILoggingApisEndpoint = "apis"
 const defaultCorrelationLoggingEndpoint = "api/am/devops/v0/config/correlation"
+const defaultAIServiceEndpoint = "https://dev-tools.wso2.com/apim-ai-service/v2"
+const defaultAITokenServiceEndpoint = "https://api.asgardeo.io/t/wso2devtools/oauth2/token"
 
 const DefaultEnvironmentName = "default"
 const DefaultTenantDomain = "carbon.super"
@@ -206,8 +208,11 @@ const TLSRenegotiationFreely = "freely"
 
 // Migration export
 const MaxAPIsToExportOnce = 20
+const MaxAppsToExportOnce = 20
 const MigrationAPIsExportMetadataFileName = "migration-apis-export-metadata.yaml"
+const MigrationAppsExportMetadataFileName = "migration-apps-export-metadata.yaml"
 const LastSucceededApiFileName = "last-succeeded-api.log"
+const LastSucceededAppFileName = "last-succeeded-app.log"
 const LastSuceededContentDelimiter = " " // space
 const DefaultResourceTenantDomain = "tenant-default"
 const ApplicationId = "applicationId"

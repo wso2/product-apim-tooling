@@ -40,28 +40,27 @@ var (
 	Endpoint             = utils.DefaultAIEndpoint
 )
 
-func AIDeleteAPIs(credential credentials.Credential, cmdUploadEnvironment, aiToken, endpointUrl, tenant string) {
+func AIDeleteAPIs(credential credentials.Credential, CmdPurgeEnvironment, aiToken, oldEndpoint, tenant string) {
 
-	if endpointUrl != "" {
-		Endpoint = endpointUrl
-	}
-
+	headers := make(map[string]string)
 	if aiToken != "" {
-		AIToken = aiToken
+		headers["Authorization"] = "Bearer " + aiToken
 	} else {
 		AIToken = utils.AIToken
+		headers["API-KEY"] = AIToken
 	}
 
-	if AIToken == "" {
-		fmt.Println("You have to provide your on prem key (token that you have generated in choreo for AI features) to do this operation.")
-		os.Exit(1)
+	if (oldEndpoint != "") {
+		Endpoint = oldEndpoint
+	} else {
+		Endpoint = utils.GetAIServiceEndpointOfEnv(CmdPurgeEnvironment, utils.MainConfigFilePath)
 	}
 
 	fmt.Println("Removing existing APIs and API Products from vector database for tenant:", tenant)
 
-	headers := make(map[string]string)
-	headers["API-KEY"] = AIToken
 	headers["TENANT-DOMAIN"] = tenant
+	headers["User-Agent"] = "WSO2-API-Controller"
+	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
 
 	var resp *resty.Response
 	var deleteErr error

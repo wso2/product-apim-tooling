@@ -27,7 +27,7 @@ import (
 const PurgeCmdLiteral = "delete"
 const PurgeCmdShortDesc = "Purge APIs and API Products of a tenant from one environment from the vector database."
 const PurgeCmdLongDesc = `Purge APIs and API Products of a tenant from one environment specified by flag (--environment, -e)`
-const PurgeCmdExamples = utils.ProjectName + ` ` + AiCmdLiteral + ` ` + PurgeCmdLiteral + ` ` + PurgeAPIsCmdLiteral + ` --token 2fdca1b6-6a28-4aea-add6-77c97033bdb9 --endpoint https://dev-tools.wso2.com/apim-ai-service -e production 
+const PurgeCmdExamples = utils.ProjectName + ` ` + AiCmdLiteral + ` ` + PurgeCmdLiteral + ` ` + PurgeAPIsCmdLiteral + ` -e production
 NOTE:The flag (--environment (-e)) is mandatory`
 
 // PurgeCmd represents the Purge command
