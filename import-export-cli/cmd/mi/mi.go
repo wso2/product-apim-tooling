@@ -54,7 +54,7 @@ var MICmd = &cobra.Command{
 	Short: miCmdShortDesc,
 	Long:  miCmdLongDesc,
 	// Example: miCmdExamples,
-		Deprecated: "instead refer to https://mi.docs.wso2.com/en/latest/observe-and-manage/managing-integrations-with-micli/ for updated usage.",
+	Deprecated: "instead refer to https://mi.docs.wso2.com/en/latest/observe-and-manage/managing-integrations-with-micli/ for updated usage.",
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + utils.MiCmdLiteral + " called")
 		cmd.Help()
