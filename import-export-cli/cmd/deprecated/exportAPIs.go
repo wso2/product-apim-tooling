@@ -87,7 +87,7 @@ func executeExportAPIsCmd(credential credentials.Credential, exportDirectory str
 	}
 
 	impl.ExportAPIs(credential, exportRelatedFilesPath, cmd.CmdExportEnvironment, cmd.CmdResourceTenantDomain, exportAPIsFormat, cmd.CmdUsername,
-		apiExportDir, exportAPIPreserveStatus, runningExportApiCommand, false, false)
+		apiExportDir, exportAPIPreserveStatus, runningExportApiCommand, false, false, false)
 }
 
 func init() {
