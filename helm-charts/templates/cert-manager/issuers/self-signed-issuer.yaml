@@ -13,6 +13,7 @@
 # KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations
 # under the License.
+{{ if and .Values.certmanager .Values.certmanager.enableClusterIssuer }}
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
@@ -20,3 +21,4 @@ metadata:
 spec:
   ca:
     secretName: apk-agent-root-certificate
+{{ end }}
