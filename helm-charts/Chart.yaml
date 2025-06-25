@@ -18,7 +18,7 @@ apiVersion: v2
 name: apim-apk-agent
 description: A Helm chart for deploying apim-apk-agent
 type: application
-version: 1.3.0
+version: 1.3.0-1
 appVersion: "1.3.0"
 dependencies:
   - name: cert-manager
