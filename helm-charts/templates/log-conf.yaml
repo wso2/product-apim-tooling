@@ -11,13 +11,9 @@ data:
       {{- if .Values.controlPlane.secretName }}
       username = "$env{CONTROL_PLANE_USERNAME}"
       password = "$env{CONTROL_PLANE_PASSWORD}"
-      [controlPlane.brokerConnectionParameters]
-      eventListeningEndpoints = ["$env{AMQP_URL}"]
       {{- else }}
       username = "{{ .Values.controlPlane.username }}"
       password = "{{ .Values.controlPlane.password }}"
-      [controlPlane.brokerConnectionParameters]
-      eventListeningEndpoints = ["{{ .Values.controlPlane.eventListeningEndpoints }}"]
       {{- end }}
       clientID = "{{ .Values.controlPlane.clientID }}"
       clientSecret = "{{ .Values.controlPlane.clientSecret }}"
@@ -25,7 +21,14 @@ data:
       environmentLabels = ["{{ .Values.controlPlane.environmentLabels }}"]
       skipSSLVerification = {{ .Values.controlPlane.skipSSLVerification }}
       internalKeyIssuer = "{{ .Values.controlPlane.internalKeyIssuer | default "http://am.wso2.com:443/token" }}"
-    
+      {{- if .Values.controlPlane.secretName }}
+      [controlPlane.brokerConnectionParameters]
+      eventListeningEndpoints = ["$env{AMQP_URL}"]
+      {{- else }}
+      [controlPlane.brokerConnectionParameters]
+      eventListeningEndpoints = ["{{ .Values.controlPlane.eventListeningEndpoints }}"]
+      {{- end }}
+
     [dataPlane]
       enabled = {{ .Values.dataPlane.enabled }}
       k8ResourceEndpoint = "{{ .Values.dataPlane.k8ResourceEndpoint }}"

@@ -60,9 +60,11 @@ spec:
               value: apim-apk-agent-service.{{ .Release.Namespace }}.svc
             - name: APIM_APK_AGENT_GRPC_PORT
               value: "18000"
+          {{- if .Values.controlPlane.secretName }}
           envFrom:
             - secretRef:
-                name: agent-controlplane-secret
+                name: {{ .Values.controlPlane.secretName }}
+          {{- end }}
           volumeMounts:
             - name: log-conf-volume
               mountPath: /home/wso2/conf/
