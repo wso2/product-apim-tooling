@@ -2442,7 +2442,7 @@ func (instance *Client) GetAPIPolicy(policyId string) map[string]interface{} {
 func (instance *Client) GetAPIPolicyID(t *testing.T, policyName, policyVersion string) string {
 	var policyListResponse APIPoliciesList
 
-	queryParams := "name:" + policyName + "&version:" + policyVersion
+	queryParams := "name:" + policyName + " version:" + policyVersion
 
 	getPoliciesURL := instance.publisherRestURL + operationPolicyResourcePath
 
