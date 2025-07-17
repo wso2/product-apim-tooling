@@ -231,7 +231,7 @@ func GetAPIPolicyId(accessToken, environment, policyName, policyVersion string) 
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 
-	queryParams := `query=name:` + policyName + `&version:` + policyVersion
+	queryParams := `query=name:` + policyName + ` version:` + policyVersion
 
 	apiPolicyEndpoint = utils.AppendSlashToString(apiPolicyEndpoint)
 
