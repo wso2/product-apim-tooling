@@ -330,7 +330,7 @@ func importAPIPolicy(t *testing.T, username, password, policyName, policyVersion
 	var output string
 	var err error
 
-	output, err = base.Execute(t, "import", "policy", "api", "-e", args.DestAPIM.GetEnvName(), "-f", args.ImportFilePath)
+	output, err = base.Execute(t, "import", "policy", "api", "-e", args.DestAPIM.GetEnvName(), "-f", args.ImportFilePath, "-k")
 
 	if doClean {
 		t.Cleanup(func() {
