@@ -328,9 +328,9 @@ func importThrottlePolicy(t *testing.T, username, password, policyName, policyTy
 	var output string
 	var err error
 	if args.Update {
-		output, err = base.Execute(t, "import", "policy", "rate-limiting", "-e", args.DestAPIM.GetEnvName(), "-f", args.ImportFilePath, "-u")
+		output, err = base.Execute(t, "import", "policy", "rate-limiting", "-e", args.DestAPIM.GetEnvName(), "-f", args.ImportFilePath, "-u", "-k")
 	} else {
-		output, err = base.Execute(t, "import", "policy", "rate-limiting", "-e", args.DestAPIM.GetEnvName(), "-f", args.ImportFilePath)
+		output, err = base.Execute(t, "import", "policy", "rate-limiting", "-e", args.DestAPIM.GetEnvName(), "-f", args.ImportFilePath, "-k")
 	}
 
 	if doClean {
