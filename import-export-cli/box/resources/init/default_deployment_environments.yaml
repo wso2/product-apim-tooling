@@ -1,5 +1,5 @@
 type: deployment_environments
-version: v4.5.0
+version: v4.6.0
 data:
  -
    displayOnDevportal: true
