@@ -32,7 +32,7 @@ func TestExtractAPIInfoWithCorrectJSON(t *testing.T) {
 	// Correct json
 	content := `{
 		"type": "api",
-		"version": "v4.5.0",
+		"version": "v4.6.0",
 		"data": {
 		  "id": "e4d0c1be-44e9-43ad-b434-f8e2f02dad11",
 		  "name": "APIName",
@@ -52,7 +52,7 @@ func TestExtractAPIInfoWhenDataTagMissing(t *testing.T) {
 	// When ID tag missing
 	content := `{
 		"type": "api",
-		"version": "v4.5.0"
+		"version": "v4.6.0"
 	  }`
 
 	api, err := extractAPIDefinition([]byte(content))

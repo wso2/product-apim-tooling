@@ -292,7 +292,7 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string, string) {
 
 	data := map[string]interface{}{
 		"type":    "api",
-		"version": "v4.5.0",
+		"version": "v4.6.0",
 		"data": map[string]interface{}{
 			"name":                         apiCPEvent.API.APIName,
 			"context":                      context,
@@ -589,7 +589,7 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string, string) {
 	if prodCount > 1 || sandCount > 1 {
 		endpointsData = map[string]interface{}{
 			"type":    "endpoints",
-			"version": "v4.5.0",
+			"version": "v4.6.0",
 			"data":    dataArr,
 		}
 	}
