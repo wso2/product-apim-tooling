@@ -52,7 +52,6 @@ const DevFirstUpdatedSampleCaseDocMetaDataPath = DevFirstUpdatedSampleCaseArtifa
 const DevFirstUpdatedSampleCaseDestMetaDataPathSuffix = DevFirstUpdatedSampleCaseDocName + "/document.yaml"
 const DevFirstSampleCaseArtifactPath = "testdata/TestArtifactDirectory/DevFirstSampleCaseArtifacts"
 const DevFirstSampleCaseOperationPolicyArtifactPath = "testdata/TestArtifactDirectory/DevSampleCaseOperationPolicyArtifacts"
-const TestSynapseChoreoConnectPolicyArtifactsPath = "testdata/TestArtifactDirectory/TestSynapseChoreoConnectPolicyArtifacts"
 const CustomAddLogMessage = "testdata/TestArtifactDirectory/customAddLogMessage"
 const DevSampleCaseOperationPolicyArtifactsWithInconsistentFileNames = "testdata/TestArtifactDirectory/DevSampleCaseOperationPolicyArtifactsWithInconsistentFileNames/customAddLogMessage"
 const DevFirstSampleCaseMalformedOperationPolicyArtifactPath = "testdata/TestArtifactDirectory/DevSampleCaseMalformedOperationPolicyArtifacts/customAddLogMessage"
@@ -200,9 +199,6 @@ const DevFirstSampleCaseDestPolicyDefinition2PathSuffix = PoliciesDirectory + "/
 const DevFirstSampleCaseDestExportedPolicyDefinition1PathSuffix = PoliciesDirectory + "/customAddLogMessage_v1_api.yaml"
 const DevFirstUpdatedSampleCasePolicy1Path = DevFirstUpdatedSampleCaseArtifactPath + "/customAddLogMessage_v1_api.j2"
 const DevFirstUpdatedSampleCasePolicyDefinition1Path = DevFirstUpdatedSampleCaseArtifactPath + "/customAddLogMessage_v1_api.yaml"
-const TestSynapseChoreoConnectPolicyDefinitionPath = TestSynapseChoreoConnectPolicyArtifactsPath + "/testSynapseChoreoConnectPolicy.yaml"
-const TestSynapseChoreoConnectPolicyPathForSynapseType = TestSynapseChoreoConnectPolicyArtifactsPath + "/testSynapseChoreoConnectPolicy.j2"
-const TestSynapseChoreoConnectPolicyPathForChoreoConnectType = TestSynapseChoreoConnectPolicyArtifactsPath + "/testSynapseChoreoConnectPolicy.gotmpl"
 
 const (
 	TestSampleOperationTarget                   = "/pet/{petId}"
@@ -238,5 +234,5 @@ const TestAPIPolicyOffset = "0"
 const TestAPIPolicyLimit = "5"
 const CleanUpFunction = "cleanup"
 
-//Constant for API versioning tests
+// Constant for API versioning tests
 const APIVersion2 = "2.0.0"

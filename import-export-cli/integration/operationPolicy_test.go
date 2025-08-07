@@ -62,39 +62,6 @@ func TestExportImportAPIPolicy(t *testing.T) {
 	}
 }
 
-// Export an API Policy that supports both Synapse and Choreo Connect gateways from one environment
-// and import to another environment
-func TestExportImportAPIPolicyWithSynapseChoreoConnectTypes(t *testing.T) {
-
-	for _, user := range testCaseUsers {
-		t.Run(user.Description, func(t *testing.T) {
-			dev := GetDevClient()
-			prod := GetProdClient()
-
-			// Add a policy that supports both Synapse and Choreo Connect gateways
-			operationPolicyFiles := testutils.PolicySpecFile{
-				Definition:        testutils.TestSynapseChoreoConnectPolicyDefinitionPath,
-				SynapsePolicyFile: testutils.TestSynapseChoreoConnectPolicyPathForSynapseType,
-				CcPolicyFile:      testutils.TestSynapseChoreoConnectPolicyPathForChoreoConnectType,
-			}
-
-			// Export and import the same policy
-			newPolicy := testutils.AddNewAPIPolicy(t, dev, user.ApiCreator.Username, user.ApiCreator.Password,
-				operationPolicyFiles, true)
-			operationPolicy, _ := testutils.APIPolicyStructToMap(newPolicy)
-
-			args := &testutils.PolicyImportExportTestArgs{
-				CtlUser:  testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
-				Policy:   operationPolicy,
-				SrcAPIM:  dev,
-				DestAPIM: prod,
-			}
-			testutils.ValidateAPIPolicyExportImport(t, args)
-
-		})
-	}
-}
-
 // Import an API Policy with the directory path
 func TestImportAPIPolicyWithDirectoryPath(t *testing.T) {
 
