@@ -59,16 +59,16 @@ type EnvKeys struct {
 }
 
 type EnvEndpoints struct {
-	ApiManagerEndpoint   string `yaml:"apim"`
-	PublisherEndpoint    string `yaml:"publisher"`
-	DevPortalEndpoint    string `yaml:"devportal"`
-	RegistrationEndpoint string `yaml:"registration"`
-	AdminEndpoint        string `yaml:"admin"`
-	TokenEndpoint        string `yaml:"token"`
-	MiManagementEndpoint string `yaml:"mi"`
-	AIServiceEndpoint    string `yaml:"ai_service"`
+	ApiManagerEndpoint     string `yaml:"apim"`
+	PublisherEndpoint      string `yaml:"publisher"`
+	DevPortalEndpoint      string `yaml:"devportal"`
+	RegistrationEndpoint   string `yaml:"registration"`
+	AdminEndpoint          string `yaml:"admin"`
+	TokenEndpoint          string `yaml:"token"`
+	MiManagementEndpoint   string `yaml:"mi"`
+	AIServiceEndpoint      string `yaml:"ai_service"`
 	AITokenServiceEndpoint string `yaml:"ai_token_endpoint"`
-	AIKey string `yaml:"ai_key"`
+	AIKey                  string `yaml:"ai_key"`
 }
 
 type MgwEndpoints struct {
@@ -81,6 +81,22 @@ type API struct {
 	ID              string `json:"id"`
 	Name            string `json:"name"`
 	Context         string `json:"context"`
+	Version         string `json:"version"`
+	Provider        string `json:"provider"`
+	LifeCycleStatus string `json:"lifeCycleStatus"`
+}
+
+type MCPServerListResponse struct {
+	Count int32       `json:"count"`
+	List  []MCPServer `json:"list"`
+}
+
+// MCPServer represents an MCP Server
+type MCPServer struct {
+	ID              string `json:"id"`
+	Name            string `json:"name"`
+	Context         string `json:"context"`
+	Description     string `json:"description"`
 	Version         string `json:"version"`
 	Provider        string `json:"provider"`
 	LifeCycleStatus string `json:"lifeCycleStatus"`
@@ -166,10 +182,10 @@ type MigrationApisExportMetadata struct {
 }
 
 type MigrationAppsExportMetadata struct {
-	AppListOffset   int    `yaml:"app_list_offset"`
-	User            string `yaml:"user"`
-	OnTenant        string `yaml:"on_tenant"`
-	AppListToExport []Application  `yaml:"apps_to_export"`
+	AppListOffset   int           `yaml:"app_list_offset"`
+	User            string        `yaml:"user"`
+	OnTenant        string        `yaml:"on_tenant"`
+	AppListToExport []Application `yaml:"apps_to_export"`
 }
 
 type HttpErrorResponse struct {

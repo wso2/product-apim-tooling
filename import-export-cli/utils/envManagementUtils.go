@@ -241,6 +241,19 @@ func GetApiListEndpointOfEnv(env, filePath string) string {
 	}
 }
 
+// Get McpListEndpoint of a given environment
+func GetMcpListEndpointOfEnv(env, filePath string) string {
+	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
+	if !(envEndpoints.MiManagementEndpoint == "" || envEndpoints == nil) {
+		envEndpoints.MiManagementEndpoint = AppendSlashToString(envEndpoints.MiManagementEndpoint)
+		return envEndpoints.MiManagementEndpoint + defaultMcpListEndpointSuffix
+	} else {
+		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
+		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
+		return apiManagerEndpoint + defaultMcpListEndpointSuffix
+	}
+}
+
 // Get ExportAPIEndpoint of a given environment
 func GetAPIPolicyListEndpointOfEnv(env, filePath string) string {
 	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
@@ -365,7 +378,7 @@ func GetAPILoggingSetEndpointOfEnv(env, apiId, tenantDomain, filePath string) st
 }
 
 func GetCorrelationLoggingEndPointOfEnv(env, filePath string) string {
-	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)	
+	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
 	if !(envEndpoints.PublisherEndpoint == "" || envEndpoints == nil) {
 		envEndpoints.PublisherEndpoint = AppendSlashToString(envEndpoints.PublisherEndpoint)
 		return envEndpoints.PublisherEndpoint + defaultCorrelationLoggingEndpoint
@@ -373,7 +386,7 @@ func GetCorrelationLoggingEndPointOfEnv(env, filePath string) string {
 		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
 		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
 		return apiManagerEndpoint + defaultCorrelationLoggingEndpoint
-	}	
+	}
 }
 
 // Get username of an environment given the environment
@@ -418,7 +431,7 @@ func GetDefaultEnvironment(mainConfigFilePath string) string {
 	return ""
 }
 
-//get default token endpoint given from an apim endpoint
+// get default token endpoint given from an apim endpoint
 // @param apimEndpoint : Endpoint URL of the apim endpoint
 func GetTokenEndPointFromAPIMEndpoint(apimEndpoint string) string {
 	if strings.HasSuffix(apimEndpoint, "/") {
@@ -428,7 +441,7 @@ func GetTokenEndPointFromAPIMEndpoint(apimEndpoint string) string {
 	}
 }
 
-//get default token endpoint given from a publisher endpoint
+// get default token endpoint given from a publisher endpoint
 // @param publisherEndpoint : Endpoint URL of the publisher endpoint
 func GetTokenEndPointFromPublisherEndpoint(publisherEndpoint string) string {
 	if strings.Contains(publisherEndpoint, defaultPublisherApiImportExportSuffix) {
@@ -460,10 +473,10 @@ func GetInternalTokenEndpointOfEnv(env, filePath string) string {
 	return internalTokenEndpoint
 }
 
-//Get token endpoint for Token revocation
+// Get token endpoint for Token revocation
 // @param env : Name of the environment
 // @param filePath : Path to file where tokens are stored
-//@return endpoint URL of token revocation endpoint
+// @return endpoint URL of token revocation endpoint
 func GetTokenRevokeEndpoint(env, filePath string) string {
 	//Get Internal token endpoint for the environment
 	internalTokenEndpoint := GetInternalTokenEndpointOfEnv(env, filePath)
@@ -491,7 +504,7 @@ func RequiredAIEndpointsExists(envEndpoints *EnvEndpoints) bool {
 // RequiredMIEndpointsExists checks for required mi endpoints.
 // It returns true if all the endpoints are present
 func RequiredMIEndpointsExists(envEndpoints *EnvEndpoints) bool {
-	return envEndpoints.MiManagementEndpoint != "" 
+	return envEndpoints.MiManagementEndpoint != ""
 }
 
 // HasOnlyMIEndpoint checks whether an MI instance is present in a given environment
