@@ -30,10 +30,7 @@ import (
 // GetMCPServerId returns the id of an MCP server
 func GetMCPServerId(accessToken, environment, mcpServerName, mcpServerVersion, mcpServerProvider string) (string, error) {
 	// Unified Search endpoint from the config file to search MCP Servers
-	fmt.Println("Searching MCP Server:", mcpServerName, "Version:", mcpServerVersion, "Provider:", mcpServerProvider)
-	fmt.Println("Environment:", environment)
 	unifiedSearchEndpoint := utils.GetUnifiedSearchEndpointOfEnv(environment, utils.MainConfigFilePath)
-	fmt.Println("Searching MCP Server from:", unifiedSearchEndpoint)
 
 	// Prepping headers
 	headers := make(map[string]string)
