@@ -98,7 +98,7 @@ func (s *mcpServer) MarshalJSON() ([]byte, error) {
 // @return array of MCPServer objects
 // @return error
 func GetMCPServerListFromEnv(accessToken, environment, query, limit string) (count int32, servers []utils.MCPServer, err error) {
-	mcpListEndpoint := utils.GetMcpListEndpointOfEnv(environment, utils.MainConfigFilePath)
+	mcpListEndpoint := utils.GetMcpServerListEndpointOfEnv(environment, utils.MainConfigFilePath)
 	return GetMCPServerList(accessToken, mcpListEndpoint, query, limit)
 }
 

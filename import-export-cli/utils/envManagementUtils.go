@@ -242,15 +242,15 @@ func GetApiListEndpointOfEnv(env, filePath string) string {
 }
 
 // Get McpListEndpoint of a given environment
-func GetMcpListEndpointOfEnv(env, filePath string) string {
+func GetMcpServerListEndpointOfEnv(env, filePath string) string {
 	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
 	if !(envEndpoints.MiManagementEndpoint == "" || envEndpoints == nil) {
 		envEndpoints.MiManagementEndpoint = AppendSlashToString(envEndpoints.MiManagementEndpoint)
-		return envEndpoints.MiManagementEndpoint + defaultMcpListEndpointSuffix
+		return envEndpoints.MiManagementEndpoint + defaultMcpServerListEndpointSuffix
 	} else {
 		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
 		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
-		return apiManagerEndpoint + defaultMcpListEndpointSuffix
+		return apiManagerEndpoint + defaultMcpServerListEndpointSuffix
 	}
 }
 
