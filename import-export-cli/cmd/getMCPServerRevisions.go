@@ -72,7 +72,7 @@ func executeGetMCPServerRevisionsCmd(credential credentials.Credential) {
 	_, revisions, err := impl.GetMCPServerRevisionListFromEnv(accessToken, getMCPServerRevisionsCmdEnvironment, getMCPServerRevisionsMCPServerName,
 		getMCPServerRevisionsMCPServerVersion, getMCPServerRevisionsMCPServerProvider, strings.Join(getMCPServerRevisionsCmdQuery, queryParamSeparator))
 	if err == nil {
-		impl.PrintMCPServerRevisions(revisions, getMCPServerRevisionsCmdFormat)
+		impl.PrintRevisions(revisions, getMCPServerRevisionsCmdFormat)
 	} else {
 		utils.Logln(utils.LogPrefixError+"Getting List of MCP Server Revisions", err)
 		utils.HandleErrorAndExit("Error getting the list of MCP Server revisions.", err)

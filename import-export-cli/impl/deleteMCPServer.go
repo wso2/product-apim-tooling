@@ -38,7 +38,7 @@ import (
 func DeleteMCPServer(accessToken, environment, deleteMCPServerName, deleteMCPServerVersion, deleteMCPServerProvider string) (*resty.Response, error) {
 	deleteEndpoint := utils.GetMcpServerListEndpointOfEnv(environment, utils.MainConfigFilePath)
 	deleteEndpoint = utils.AppendSlashToString(deleteEndpoint)
-	mcpId, err := GetAPIId(accessToken, environment, deleteMCPServerName, deleteMCPServerVersion, deleteMCPServerProvider)
+	mcpId, err := GetMCPServerId(accessToken, environment, deleteMCPServerName, deleteMCPServerVersion, deleteMCPServerProvider)
 	if err != nil {
 		utils.HandleErrorAndExit("Error while getting MCP Server Id for deletion ", err)
 	}

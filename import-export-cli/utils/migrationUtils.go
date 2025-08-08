@@ -62,7 +62,7 @@ func ReadLastSucceededAppFileData(exportRelatedFilesPath string) Application {
 	data, err := ioutil.ReadFile(lastSucceededAppFilePath)
 	str := string(data)
 	var splittedString = strings.Split(str, " ")
-	var app = Application{"", strings.TrimSpace(splittedString[0]), "", strings.TrimSpace(splittedString[1]) , ""}
+	var app = Application{"", strings.TrimSpace(splittedString[0]), "", strings.TrimSpace(splittedString[1]), ""}
 
 	if err != nil {
 		HandleErrorAndExit("Error in reading file "+lastSucceededAppFilePath, err)
@@ -73,9 +73,8 @@ func ReadLastSucceededAppFileData(exportRelatedFilesPath string) Application {
 // Write the last-succeeded-api.log file. It includes the meta data of the API, which was successfully exported finally
 func WriteLastSuceededAPIFileData(exportRelatedFilesPath string, api API) {
 	var lastSucceededApiFilePath = filepath.Join(exportRelatedFilesPath, LastSucceededApiFileName)
-	var content []byte
-	content = []byte(api.Name + LastSuceededContentDelimiter + api.Version + LastSuceededContentDelimiter + api.Provider)
-	var error = ioutil.WriteFile(lastSucceededApiFilePath, content, 0644)
+	content := []byte(api.Name + LastSuceededContentDelimiter + api.Version + LastSuceededContentDelimiter + api.Provider)
+	error := ioutil.WriteFile(lastSucceededApiFilePath, content, 0644)
 
 	if error != nil {
 		HandleErrorAndExit("Error in writing file "+lastSucceededApiFilePath, error)
@@ -85,9 +84,8 @@ func WriteLastSuceededAPIFileData(exportRelatedFilesPath string, api API) {
 // Write the last-succeeded-app.log file. It includes the meta data of the App, which was successfully exported finally
 func WriteLastSuceededAppFileData(exportRelatedFilesPath string, app Application) {
 	var lastSucceededAppFilePath = filepath.Join(exportRelatedFilesPath, LastSucceededAppFileName)
-	var content []byte
-	content = []byte(app.Name + LastSuceededContentDelimiter + app.Owner)
-	var error = ioutil.WriteFile(lastSucceededAppFilePath, content, 0644)
+	content := []byte(app.Name + LastSuceededContentDelimiter + app.Owner)
+	error := ioutil.WriteFile(lastSucceededAppFilePath, content, 0644)
 
 	if error != nil {
 		HandleErrorAndExit("Error in writing file "+lastSucceededAppFilePath, error)
@@ -143,4 +141,61 @@ func WriteMigrationAppsExportMetadataFile(apps []Application, cmdResourceTenantD
 	exportMetaData.User = cmdUsername
 
 	WriteConfigFile(exportMetaData, filepath.Join(exportRelatedFilesPath, MigrationAppsExportMetadataFileName))
+}
+
+// Read the details of finally and successfully exported MCP Server into the last-succeeded-mcp-server.log file
+func ReadLastSucceededMCPServerFileData(exportRelatedFilesPath string) MCPServer {
+	var lastSucceededMCPServerFilePath = filepath.Join(exportRelatedFilesPath, LastSucceededMCPServerFileName)
+	data, err := ioutil.ReadFile(lastSucceededMCPServerFilePath)
+	str := string(data)
+	var splittedString = strings.Split(str, " ")
+	var mcpServer = MCPServer{
+		Name:     strings.TrimSpace(splittedString[0]),
+		Version:  strings.TrimSpace(splittedString[1]),
+		Provider: strings.TrimSpace(splittedString[2]),
+	}
+
+	if err != nil {
+		HandleErrorAndExit("Error in reading file "+lastSucceededMCPServerFilePath, err)
+	}
+	return mcpServer
+}
+
+// Write the last-succeeded-mcp-server.log file. It includes the meta data of the MCP Server, which was successfully exported finally
+func WriteLastSucceededMCPServerFileData(exportRelatedFilesPath string, mcpServer MCPServer) {
+	var lastSucceededMCPServerFilePath = filepath.Join(exportRelatedFilesPath, LastSucceededMCPServerFileName)
+	content := []byte(mcpServer.Name + LastSuceededContentDelimiter + mcpServer.Version + LastSuceededContentDelimiter + mcpServer.Provider)
+	error := ioutil.WriteFile(lastSucceededMCPServerFilePath, content, 0644)
+
+	if error != nil {
+		HandleErrorAndExit("Error in writing file "+lastSucceededMCPServerFilePath, error)
+	}
+}
+
+// Read the migration-mcp-servers-export-metadata.yaml file
+func (migrationMCPServersExportMetadata *MigrationMCPServersExportMetadata) ReadMigrationMCPServersExportMetadataFile(filePath string) error {
+	data, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return err
+	}
+	if err := yaml.Unmarshal(data, migrationMCPServersExportMetadata); err != nil {
+		return err
+	}
+	return nil
+}
+
+// Write the migration-mcp-servers-export-metadata.yaml file. This includes the below meta data of the MCP Server export process,
+// including the list of MCP Servers exported at each iteration. (MCP Servers are exported as multiple iterations)
+// mcp_server_list_offset => offset index of list of MCP Servers fetched from APIM server at the particular iteration
+// user => username of the user that executes the operation
+// on_tenant => which tenant's MCP Servers are exported
+func WriteMigrationMCPServersExportMetadataFile(mcpServers []MCPServer, cmdResourceTenantDomain string,
+	cmdUsername string, exportRelatedFilesPath string, mcpServerListOffset int) {
+	var exportMetaData = new(MigrationMCPServersExportMetadata)
+	exportMetaData.MCPServerListOffset = mcpServerListOffset
+	exportMetaData.MCPServerListToExport = mcpServers
+	exportMetaData.OnTenant = cmdResourceTenantDomain
+	exportMetaData.User = cmdUsername
+
+	WriteConfigFile(exportMetaData, filepath.Join(exportRelatedFilesPath, MigrationMCPServersExportMetadataFileName))
 }

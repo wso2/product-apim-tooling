@@ -211,14 +211,16 @@ const TLSRenegotiationFreely = "freely"
 // Migration export
 const MaxAPIsToExportOnce = 20
 const MaxAppsToExportOnce = 20
+const MaxMCPServersToExportOnce = 20
 const MigrationAPIsExportMetadataFileName = "migration-apis-export-metadata.yaml"
 const MigrationAppsExportMetadataFileName = "migration-apps-export-metadata.yaml"
+const MigrationMCPServersExportMetadataFileName = "migration-mcp-servers-export-metadata.yaml"
 const LastSucceededApiFileName = "last-succeeded-api.log"
 const LastSucceededAppFileName = "last-succeeded-app.log"
+const LastSucceededMCPServerFileName = "last_succeeded_mcp_server.log"
 const LastSuceededContentDelimiter = " " // space
 const DefaultResourceTenantDomain = "tenant-default"
 const ApplicationId = "applicationId"
-const LastSucceededMCPServerFileName = "last_succeeded_mcp_server.log"
 const ApiId = "apiId"
 const APIProductId = "apiProductId"
 const DefaultCliApp = "default-apictl-app"
