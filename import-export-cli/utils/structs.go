@@ -188,6 +188,13 @@ type MigrationAppsExportMetadata struct {
 	AppListToExport []Application `yaml:"apps_to_export"`
 }
 
+type MigrationMCPServersExportMetadata struct {
+	MCPServerListOffset   int         `yaml:"mcp_server_list_offset"`
+	User                  string      `yaml:"user"`
+	OnTenant              string      `yaml:"on_tenant"`
+	MCPServerListToExport []MCPServer `yaml:"mcp_servers_to_export"`
+}
+
 type HttpErrorResponse struct {
 	Code        int     `json:"code"`
 	Status      string  `json:"message"`
@@ -416,6 +423,27 @@ type SubscriptionCreateRequest struct {
 // API Search response struct. This includes common attributes for both store and publisher REST API search
 type ApiSearch struct {
 	Count int `json:"count"`
+	List  []struct {
+		ID              string      `json:"id"`
+		Name            string      `json:"name"`
+		Description     interface{} `json:"description"`
+		Context         string      `json:"context"`
+		Version         string      `json:"version"`
+		Provider        string      `json:"provider"`
+		Type            string      `json:"type"`
+		LifeCycleStatus string      `json:"lifeCycleStatus"`
+	} `json:"list"`
+	Pagination struct {
+		Offset   int    `json:"offset"`
+		Limit    int    `json:"limit"`
+		Total    int    `json:"total"`
+		Next     string `json:"next"`
+		Previous string `json:"previous"`
+	} `json:"pagination"`
+}
+
+type MCPServerSearch struct {
+	Count int32 `json:"count"`
 	List  []struct {
 		ID              string      `json:"id"`
 		Name            string      `json:"name"`
