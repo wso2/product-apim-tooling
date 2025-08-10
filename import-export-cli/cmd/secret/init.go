@@ -39,7 +39,7 @@ const secretInitCmdLongDesc = "Initialize the Key Store information required for
 
 var secretInitCmdExamples = "To initialize a Key Store information\n" +
 	"  " + utils.ProjectName + " " + utils.MiCmdLiteral + " " + secretCmdLiteral + " " + secretInitCmdLiteral + "\n" +
-	"NOTE: Secret encryption supports only JKS Key Stores"
+	"NOTE: Secret encryption supports JKS and PKCS12 Key Stores (.jks, .p12, .pfx)"
 
 var secretInitCmd = &cobra.Command{
 	Use:     secretInitCmdLiteral,
@@ -62,8 +62,8 @@ func startConsoleForKeyStore() {
 
 	fmt.Printf("Enter Key Store location: ")
 	path, _ := reader.ReadString('\n')
-	if !isJKSKeyStore(path) {
-		utils.HandleErrorAndExit("Invalid Key Store Type. Supports only JKS Key Stores", nil)
+	if !isValidKeyStore(path) {
+		utils.HandleErrorAndExit("Invalid Key Store Type. Supports only JKS and PKCS12 Key Stores (.jks, .p12, .pfx)", nil)
 	}
 	keyStoreConfig.KeyStorePath = strings.TrimSpace(path)
 
@@ -99,4 +99,13 @@ func updateMap(params map[string]string, key, value string) {
 
 func isJKSKeyStore(path string) bool {
 	return filepath.Ext(strings.TrimSpace(path)) == ".jks"
+}
+
+func isPKCS12KeyStore(path string) bool {
+	ext := strings.ToLower(filepath.Ext(strings.TrimSpace(path)))
+	return ext == ".p12" || ext == ".pfx"
+}
+
+func isValidKeyStore(path string) bool {
+	return isJKSKeyStore(path) || isPKCS12KeyStore(path)
 }
