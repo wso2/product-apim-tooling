@@ -377,6 +377,45 @@ func GetAPILoggingSetEndpointOfEnv(env, apiId, tenantDomain, filePath string) st
 	}
 }
 
+// Get MCPServerLoggingListEndpoint of a given environment
+func GetMCPServerLoggingListEndpointOfEnv(env, tenantDomain, filePath string) string {
+	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
+	if !(envEndpoints.PublisherEndpoint == "" || envEndpoints == nil) {
+		envEndpoints.PublisherEndpoint = AppendSlashToString(envEndpoints.PublisherEndpoint)
+		return envEndpoints.PublisherEndpoint + defaultAPILoggingBaseEndpoint + "/" + tenantDomain + "/" + defaultAPILoggingApisEndpoint
+	} else {
+		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
+		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
+		return apiManagerEndpoint + defaultAPILoggingBaseEndpoint + "/" + tenantDomain + "/" + defaultAPILoggingApisEndpoint
+	}
+}
+
+// Get MCPServerLoggingDetailsEndpoint of a given environment
+func GetMCPServerLoggingDetailsEndpointOfEnv(env, mcpServerId, tenantDomain, filePath string) string {
+	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
+	if !(envEndpoints.PublisherEndpoint == "" || envEndpoints == nil) {
+		envEndpoints.PublisherEndpoint = AppendSlashToString(envEndpoints.PublisherEndpoint)
+		return envEndpoints.PublisherEndpoint + defaultAPILoggingBaseEndpoint + "/" + tenantDomain + "/" + defaultAPILoggingApisEndpoint + "/" + mcpServerId
+	} else {
+		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
+		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
+		return apiManagerEndpoint + defaultAPILoggingBaseEndpoint + "/" + tenantDomain + "/" + defaultAPILoggingApisEndpoint + "/" + mcpServerId
+	}
+}
+
+// Get MCPServerLoggingSetEndpoint of a given environment
+func GetMCPServerLoggingSetEndpointOfEnv(env, mcpServerId, tenantDomain, filePath string) string {
+	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
+	if !(envEndpoints.PublisherEndpoint == "" || envEndpoints == nil) {
+		envEndpoints.PublisherEndpoint = AppendSlashToString(envEndpoints.PublisherEndpoint)
+		return envEndpoints.PublisherEndpoint + defaultAPILoggingBaseEndpoint + "/" + tenantDomain + "/" + defaultAPILoggingApisEndpoint + "/" + mcpServerId
+	} else {
+		apiManagerEndpoint := GetApiManagerEndpointOfEnv(env, filePath)
+		apiManagerEndpoint = AppendSlashToString(apiManagerEndpoint)
+		return apiManagerEndpoint + defaultAPILoggingBaseEndpoint + "/" + tenantDomain + "/" + defaultAPILoggingApisEndpoint + "/" + mcpServerId
+	}
+}
+
 func GetCorrelationLoggingEndPointOfEnv(env, filePath string) string {
 	envEndpoints, _ := GetEndpointsOfEnvironment(env, filePath)
 	if !(envEndpoints.PublisherEndpoint == "" || envEndpoints == nil) {

@@ -96,7 +96,6 @@ type MCPServer struct {
 	ID              string `json:"id"`
 	Name            string `json:"name"`
 	Context         string `json:"context"`
-	Description     string `json:"description"`
 	Version         string `json:"version"`
 	Provider        string `json:"provider"`
 	LifeCycleStatus string `json:"lifeCycleStatus"`
@@ -162,6 +161,16 @@ type APIListResponse struct {
 
 type APILoggerListResponse struct {
 	Apis []APILogger `json:"apis"`
+}
+
+type MCPServerLogger struct {
+	ID       string `json:"apiId"`
+	Context  string `json:"context"`
+	LogLevel string `json:"logLevel"`
+}
+
+type MCPServerLoggerListResponse struct {
+	MCPServers []MCPServerLogger `json:"apis"`
 }
 
 type APIProductListResponse struct {

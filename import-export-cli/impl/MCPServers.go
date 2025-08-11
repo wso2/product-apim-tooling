@@ -35,9 +35,10 @@ func GetMCPServerId(accessToken, environment, mcpServerName, mcpServerVersion, m
 	// Prepping headers
 	headers := make(map[string]string)
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
-
 	var queryVal string
-	queryVal = "name:\"" + mcpServerName + "\" version:\"" + mcpServerVersion + "\""
+
+	queryVal = "type:\"" + utils.DefaultMcpServerType + "\" name:\"" + mcpServerName + "\" version:\"" + mcpServerVersion + "\""
+
 	if mcpServerProvider != "" {
 		queryVal = queryVal + " provider:\"" + mcpServerProvider + "\""
 	}

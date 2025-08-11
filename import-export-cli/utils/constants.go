@@ -142,6 +142,7 @@ const defaultTokenEndPoint = "oauth2/token"
 const defaultRevokeEndpointSuffix = "oauth2/revoke"
 const defaultAPILoggingBaseEndpoint = "api/am/devops/v0/tenant-logs"
 const defaultAPILoggingApisEndpoint = "apis"
+const defaultMCPServerLoggingMCPServersEndpoint = "mcp-servers"
 const defaultCorrelationLoggingEndpoint = "api/am/devops/v0/config/correlation"
 const defaultAIServiceEndpoint = "https://dev-tools.wso2.com/apim-ai-service/v2"
 const defaultAITokenServiceEndpoint = "https://api.asgardeo.io/t/wso2devtools/oauth2/token"
@@ -152,6 +153,9 @@ const DefaultTenantDomain = "carbon.super"
 // API Product related constants
 const DefaultApiProductVersion = "1.0.0"
 const DefaultApiProductType = "APIProduct"
+
+// MCP Server related constants
+const DefaultMcpServerType = "MCPServer"
 
 // Application keys related constants
 const ProductionKeyType = "PRODUCTION"
