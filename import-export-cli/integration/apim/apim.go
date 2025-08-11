@@ -160,9 +160,12 @@ func (instance *Client) GetTokenURL() string {
 func (instance *Client) GenerateSampleAPIData(provider, name, version, context string) *API {
 	api := API{}
 	if strings.EqualFold(name, "") {
-		api.Name = base.GenerateRandomString() + "API"
+		apiName := base.GenerateRandomString() + "API"
+		api.Name = apiName
+		api.DisplayName = apiName
 	} else {
 		api.Name = name
+		api.DisplayName = name
 	}
 	api.Description = "This is a simple API for Pizza Shack online pizza delivery store."
 	if strings.EqualFold(context, "") {
@@ -189,14 +192,16 @@ func (instance *Client) GenerateSampleAPIData(provider, name, version, context s
 	api.Operations = generateSampleAPIOperations()
 	api.AdvertiseInformation = AdvertiseInfo{Advertised: false}
 	api.GatewayType = "wso2/synapse"
-
+	api.InitiatedFromGateway = false
 	return &api
 }
 
 // GenerateSampleStreamingAPIData : Generate sample Streaming API object
 func (instance *Client) GenerateSampleStreamingAPIData(provider, apiType string) *API {
 	api := API{}
-	api.Name = base.GenerateRandomString() + "API"
+	apiName := base.GenerateRandomString() + "StreamingAPI"
+	api.Name = apiName
+	api.DisplayName = apiName
 	api.Description = "This is a simple Streaming API."
 	api.Context = getContext(provider)
 	api.Version = "1.0.0"

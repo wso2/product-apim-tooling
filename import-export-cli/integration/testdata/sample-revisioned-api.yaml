@@ -16,7 +16,8 @@ type: api # Type of the exported artifact using APICTL
 version: v4.6.0 # API Manager version
 data: # Contains the meta data of the API
   id: 28114236-515c-4f40-82e4-6a016e632008 ## API UUID
-  name: PizzaShackAPI # Name of the API without Spaces [required] 
+  name: PizzaShackAPI # Name of the API without Spaces [required]
+  displayName: PizzaShackAPI # Display name of the API
   description: This is a simple API for Pizza Shack online pizza delivery store. # Description of the API
   context: /pizzashack # Context of the API with a leading slash [required]
   version: 1.0.0 # Version of the API [required]
@@ -181,5 +182,6 @@ data: # Contains the meta data of the API
   gatewayVendor: wso2 # Gateway vendor
   asyncTransportProtocols: [] # Async transport protocols
   gatewayType: wso2/synapse # The gateway type selected for the API policies
+  initiatedFromGateway: false # Whether the API is initiated from the gateway
   egress: false # Whether the API is an egress API or not
   enableSubscriberVerification: false # To enable subscriber verification of WebSub APIs

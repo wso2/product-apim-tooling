@@ -35,6 +35,7 @@ type APIDefinitionFile struct {
 type APIDTODefinition struct {
 	ID                              string        `json:"id,omitempty" yaml:"id,omitempty"`
 	Name                            string        `json:"name,omitempty" yaml:"name,omitempty"`
+	DisplayName                     string        `json:"displayName,omitempty" yaml:"displayName,omitempty"`
 	Description                     string        `json:"description,omitempty" yaml:"description,omitempty"`
 	Context                         string        `json:"context,omitempty" yaml:"context,omitempty"`
 	Version                         string        `json:"version,omitempty" yaml:"version,omitempty"`
@@ -86,6 +87,7 @@ type APIDTODefinition struct {
 	GatewayVendor                   string        `json:"gatewayVendor,omitempty" yaml:"gatewayVendor,omitempty"`
 	AsyncTransportProtocols         []string      `json:"asyncTransportProtocols,omitempty" yaml:"asyncTransportProtocols,omitempty"`
 	GatewayType                     string        `json:"gatewayType,omitempty" yaml:"gatewayType,omitempty"`
+	InitiatedFromGateway            bool          `json:"initiatedFromGateway,omitempty" yaml:"initiatedFromGateway,omitempty"`
 	EnableSubscriberVerification    bool          `json:"enableSubscriberVerification,omitempty" yaml:"enableSubscriberVerification,omitempty"`
 }
 
