@@ -155,7 +155,7 @@ const DefaultApiProductVersion = "1.0.0"
 const DefaultApiProductType = "APIProduct"
 
 // MCP Server related constants
-const DefaultMcpServerType = "MCPServer"
+const DefaultMcpServerType = "MCP"
 
 // Application keys related constants
 const ProductionKeyType = "PRODUCTION"
