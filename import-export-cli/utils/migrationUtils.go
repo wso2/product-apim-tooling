@@ -73,8 +73,9 @@ func ReadLastSucceededAppFileData(exportRelatedFilesPath string) Application {
 // Write the last-succeeded-api.log file. It includes the meta data of the API, which was successfully exported finally
 func WriteLastSuceededAPIFileData(exportRelatedFilesPath string, api API) {
 	var lastSucceededApiFilePath = filepath.Join(exportRelatedFilesPath, LastSucceededApiFileName)
-	content := []byte(api.Name + LastSuceededContentDelimiter + api.Version + LastSuceededContentDelimiter + api.Provider)
-	error := ioutil.WriteFile(lastSucceededApiFilePath, content, 0644)
+	var content []byte
+	content = []byte(api.Name + LastSuceededContentDelimiter + api.Version + LastSuceededContentDelimiter + api.Provider)
+	var error = ioutil.WriteFile(lastSucceededApiFilePath, content, 0644)
 
 	if error != nil {
 		HandleErrorAndExit("Error in writing file "+lastSucceededApiFilePath, error)
@@ -84,8 +85,9 @@ func WriteLastSuceededAPIFileData(exportRelatedFilesPath string, api API) {
 // Write the last-succeeded-app.log file. It includes the meta data of the App, which was successfully exported finally
 func WriteLastSuceededAppFileData(exportRelatedFilesPath string, app Application) {
 	var lastSucceededAppFilePath = filepath.Join(exportRelatedFilesPath, LastSucceededAppFileName)
-	content := []byte(app.Name + LastSuceededContentDelimiter + app.Owner)
-	error := ioutil.WriteFile(lastSucceededAppFilePath, content, 0644)
+	var content []byte
+	content = []byte(app.Name + LastSuceededContentDelimiter + app.Owner)
+	var error = ioutil.WriteFile(lastSucceededAppFilePath, content, 0644)
 
 	if error != nil {
 		HandleErrorAndExit("Error in writing file "+lastSucceededAppFilePath, error)
