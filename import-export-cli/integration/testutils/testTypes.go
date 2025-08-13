@@ -49,6 +49,21 @@ type ApiImportExportTestArgs struct {
 	Update           bool
 }
 
+type MCPServerImportExportTestArgs struct {
+	MCPServerProvider Credentials
+	CtlUser           Credentials
+	MCPServer         *apim.MCPServer
+	SrcAPIM           *apim.Client
+	DestAPIM          *apim.Client
+	OverrideProvider  bool
+	ParamsFile        string
+	ImportFilePath    string
+	Revision          string
+	IsDeployed        bool
+	IsLatest          bool
+	Update            bool
+}
+
 type ApiProductImportExportTestArgs struct {
 	ApiProviders         map[string]Credentials
 	ApiProductProvider   Credentials
@@ -138,6 +153,16 @@ type ApiChangeLifeCycleStatusTestArgs struct {
 	ExpectedState string
 }
 
+type MCPServerChangeLifeCycleStatusTestArgs struct {
+	MCPServerProvider Credentials
+	CtlUser           Credentials
+	MCPServer         *apim.MCPServer
+	APIM              *apim.Client
+	Action            string
+	Provider          string
+	ExpectedState     string
+}
+
 type AWSInitTestArgs struct {
 	CtlUser          Credentials
 	SrcAPIM          *apim.Client
@@ -167,6 +192,15 @@ type ApiLoggingTestArgs struct {
 	CtlUser      Credentials
 	TenantDomain string
 	ApiId        string
+	LogLevel     string
+}
+
+type MCPServerLoggingTestArgs struct {
+	MCPServers   []*apim.MCPServer
+	APIM         *apim.Client
+	CtlUser      Credentials
+	TenantDomain string
+	MCPServerId  string
 	LogLevel     string
 }
 
