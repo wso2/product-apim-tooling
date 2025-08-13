@@ -25,13 +25,15 @@ import (
 
 // Import command related usage Info
 const ImportCmdLiteral = "import"
-const importCmdShortDesc = "Import an API/API Product/Application to an environment"
+const importCmdShortDesc = "Import an API/MCP Server/API Product/Application to an environment"
 
 const importCmdLongDesc = `Import an API to the environment specified by flag (--environment, -e)
 Import an API Product to the environment specified by flag (--environment, -e)
+Import an MCP Server to the environment specified by flag (--environment, -e)
 Import an Application to the environment specified by flag (--environment, -e)`
 
 const importCmdExamples = utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAPICmdLiteral + ` -f qa/TwitterAPI.zip -e dev
+` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportMCPServerCmdLiteral + ` -f qa/WeatherMCPServer.zip -e dev
 ` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + importAPIProductCmdLiteral + ` -f qa/LeasingAPIProduct.zip -e dev
 ` + utils.ProjectName + ` ` + ImportCmdLiteral + ` ` + ImportAppCmdLiteral + ` -f qa/apps/sampleApp.zip -e dev`
 
