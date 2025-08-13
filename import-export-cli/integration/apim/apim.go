@@ -330,12 +330,13 @@ func (instance *Client) GenerateAdditionalProperties(provider, endpointUrl, apiT
 
 func (instance *Client) GenerateSampleMCPServerData(provider, name, version, context string) *MCPServer {
 	mcpServer := MCPServer{}
+	mcpServer.ID = "3094fe10-2816-4971-b9a3-fdb956ced147"
 	if strings.EqualFold(name, "") {
 		mcpServer.Name = base.GenerateRandomString() + "MCPServer"
 	} else {
 		mcpServer.Name = name
 	}
-	mcpServer.Description = "This is a simple MCP Server for Pizza Shack online pizza delivery store."
+	mcpServer.Description = "This is a test"
 	if strings.EqualFold(context, "") {
 		mcpServer.Context = getContext(provider)
 	} else {
@@ -343,24 +344,57 @@ func (instance *Client) GenerateSampleMCPServerData(provider, name, version, con
 	}
 	mcpServer.Version = version
 	mcpServer.Provider = provider
+	mcpServer.LifeCycleStatus = "CREATED"
+	mcpServer.HasThumbnail = false
+	mcpServer.IsDefaultVersion = false
+	mcpServer.IsRevision = false
+	mcpServer.RevisionID = 0
+	mcpServer.EnableSchemaValidation = false
 	mcpServer.Transport = []string{"http", "https"}
-	mcpServer.Tags = []string{"pizza"}
-	mcpServer.Policies = []string{"Unlimited"}
-	mcpServer.APIThrottlingPolicy = "Unlimited"
-	mcpServer.SecurityScheme = []string{"oauth2"}
-	mcpServer.Visibility = "PUBLIC"
-	mcpServer.Type = "HTTP"
-	mcpServer.SubscriptionAvailability = "CURRENT_TENANT"
-	mcpServer.AccessControl = "NONE"
+	mcpServer.Tags = []string{}
+	mcpServer.Policies = []string{}
 	mcpServer.AuthorizationHeader = "Authorization"
-	mcpServer.EndpointImplementationType = "ENDPOINT"
-	mcpServer.BusinessInformation = BusinessInfo{"Jane Roe", "marketing@pizzashack.com", "John Doe", "architecture@pizzashack.com"}
-	mcpServer.EndpointConfig = HTTPEndpoint{"http", &URLConfig{"https://localhost:" + strconv.Itoa(9443+instance.portOffset) + "/am/sample/pizzashack/v1/mcpserver/"},
-		&URLConfig{"https://localhost:" + strconv.Itoa(9443+instance.portOffset) + "/am/sample/pizzashack/v1/mcpserver/"}}
-	mcpServer.Operations = generateSampleMCPServerOperations()
-	mcpServer.AdvertiseInformation = AdvertiseInfo{Advertised: false}
+	mcpServer.SecurityScheme = []string{"oauth_basic_auth_api_key_mandatory", "oauth2"}
+	mcpServer.Visibility = "PUBLIC"
+	mcpServer.VisibleRoles = []string{}
+	mcpServer.VisibleTenants = []string{}
+	mcpServer.SubscriptionAvailability = "CURRENT_TENANT"
+	mcpServer.SubscriptionAvailableTenants = []string{}
+	mcpServer.AccessControl = "NONE"
+	mcpServer.AccessControlRoles = []string{}
+	mcpServer.BusinessInformation = BusinessInfo{}
+	mcpServer.CreatedTime = "1754977276669"
+	mcpServer.LastUpdatedTimestamp = "1754977276689"
+	mcpServer.LastUpdatedTime = "2025-08-12 11:11:16.689"
+	mcpServer.Operations = []MCPServerOperations{
+		{
+			ID:                "",
+			Target:            "echo",
+			Feature:           "TOOL",
+			AuthType:          "Application & Application User",
+			ThrottlingPolicy:  "Unlimited",
+			Scopes:            []string{"write:pets", "read:pets"},
+			SchemaDefinition:  "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"additionalProperties\":false,\"type\":\"object\",\"properties\":{\"message\":{\"description\":\"Message to echo\",\"type\":\"string\"}},\"required\":[\"message\"]}",
+			Description:       "Echoes back the input",
+			OperationPolicies: OperationPolicies{[]string{}, []string{}, []string{}},
+		},
+		{
+			ID:                "",
+			Target:            "viewPizzaMenu",
+			Feature:           "TOOL",
+			AuthType:          "Application & Application User",
+			ThrottlingPolicy:  "Unlimited",
+			Scopes:            []string{},
+			SchemaDefinition:  "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"additionalProperties\":false,\"type\":\"object\",\"properties\":{}}",
+			Description:       "View the pizza menu. This tool provides a list of available pizzas.",
+			OperationPolicies: OperationPolicies{[]string{}, []string{}, []string{}},
+		},
+	}
+	mcpServer.Categories = []string{}
+	mcpServer.KeyManagers = []string{"all"}
+	mcpServer.GatewayVendor = "wso2"
 	mcpServer.GatewayType = "wso2/synapse"
-
+	mcpServer.InitiatedFromGateway = false
 	return &mcpServer
 }
 
@@ -726,26 +760,113 @@ func (instance *Client) AddAPI(t *testing.T, api *API, username string, password
 	return apiResponse.ID
 }
 
-// AddMCPServer : Add new MCP Server to APIM
+// AddMCPServer : Add MCP Server to APIM using build-from-mcp-server endpoint with form data
 func (instance *Client) AddMCPServer(t *testing.T, mcpServer *MCPServer, username string, password string, doClean bool) string {
-	mcpServersURL := instance.publisherRestURL + "/mcp-servers"
+	mcpServersURL := instance.publisherRestURL + "/mcp-servers/build-from-mcp-server"
 
-	data, err := json.Marshal(mcpServer)
+	// Create form data
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+
+	// Add URL field - using a default MCP server URL for testing
+	mcpServerURL := "https://db720294-98fd-40f4-85a1-cc6a3b65bc9a-prod.e1-us-east-azure.choreoapis.dev/godzilla/mcp-everything-server/v1.0/mcp"
+	err := writer.WriteField("url", mcpServerURL)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	request := base.CreatePost(mcpServersURL, bytes.NewBuffer(data))
-	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+	// Create additional properties JSON from mcpServer object
+	additionalProperties := map[string]interface{}{
+		"name":        mcpServer.Name,
+		"version":     mcpServer.Version,
+		"context":     mcpServer.Context,
+		"description": mcpServer.Description,
+		"subtypeConfiguration": map[string]string{
+			"subtype": "SERVER_PROXY",
+		},
+		"endpointConfig": map[string]interface{}{
+			"endpoint_type": "http",
+			"sandbox_endpoints": map[string]string{
+				"url": mcpServerURL,
+			},
+			"production_endpoints": map[string]string{
+				"url": mcpServerURL,
+			},
+			"endpoint_security": map[string]interface{}{
+				"sandbox": map[string]interface{}{
+					"type":    "NONE",
+					"enabled": false,
+				},
+				"production": map[string]interface{}{
+					"type":    "NONE",
+					"enabled": false,
+				},
+			},
+		},
+		"operations": []map[string]interface{}{
+			{
+				"feature": "TOOL",
+				"backendOperationMapping": map[string]interface{}{
+					"backendId": "",
+					"backendOperation": map[string]string{
+						"target": "echo",
+						"verb":   "TOOL",
+					},
+				},
+			},
+		},
+	}
+
+	additionalPropertiesJSON, err := json.Marshal(additionalProperties)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = writer.WriteField("additionalProperties", string(additionalPropertiesJSON))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Add security info
+	securityInfo := map[string]interface{}{
+		"isSecure": false,
+		"header":   "Authorization",
+		"value":    "Bearer abc",
+	}
+
+	securityInfoJSON, err := json.Marshal(securityInfo)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = writer.WriteField("securityInfo", string(securityInfoJSON))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = writer.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	request := base.CreatePost(mcpServersURL, body)
+
+	// Set form data headers
+	request.Header.Set("Content-Type", writer.FormDataContentType())
+	request.Header.Set("Authorization", "Bearer "+instance.accessToken)
+
 	base.LogRequest("apim.AddMCPServer()", request)
 
 	response := base.SendHTTPRequest(request)
+
 	defer response.Body.Close()
 
 	base.ValidateAndLogResponse("apim.AddMCPServer()", response, 201)
 
 	var mcpServerResponse MCPServer
 	json.NewDecoder(response.Body).Decode(&mcpServerResponse)
+
+	base.Log("responseeeeee", mcpServerResponse.Name, mcpServerResponse.Version, mcpServerResponse.Context)
 
 	if doClean {
 		t.Cleanup(func() {
@@ -757,6 +878,38 @@ func (instance *Client) AddMCPServer(t *testing.T, mcpServer *MCPServer, usernam
 
 	return mcpServerResponse.ID
 }
+
+// // AddMCPServer : Add new MCP Server to APIM
+// func (instance *Client) AddMCPServer(t *testing.T, mcpServer *MCPServer, username string, password string, doClean bool) string {
+// 	mcpServersURL := instance.publisherRestURL + "/mcp-servers"
+
+// 	data, err := json.Marshal(mcpServer)
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+
+// 	request := base.CreatePost(mcpServersURL, bytes.NewBuffer(data))
+// 	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+// 	base.LogRequest("apim.AddMCPServer()", request)
+
+// 	response := base.SendHTTPRequest(request)
+// 	defer response.Body.Close()
+
+// 	base.ValidateAndLogResponse("apim.AddMCPServer()", response, 201)
+
+// 	var mcpServerResponse MCPServer
+// 	json.NewDecoder(response.Body).Decode(&mcpServerResponse)
+
+// 	if doClean {
+// 		t.Cleanup(func() {
+// 			username, password := RetrieveAdminCredentialsInsteadCreator(username, password)
+// 			instance.Login(username, password)
+// 			instance.DeleteMCPServer(mcpServerResponse.ID)
+// 		})
+// 	}
+
+// 	return mcpServerResponse.ID
+// }
 
 // UpdateAPI : Update API in APIM
 func (instance *Client) UpdateAPI(t *testing.T, api *API, username string, password string) string {

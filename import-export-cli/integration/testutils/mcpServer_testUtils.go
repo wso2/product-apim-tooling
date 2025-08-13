@@ -290,7 +290,7 @@ func importMCPServer(t *testing.T, args *MCPServerImportExportTestArgs, doClean 
 		fileName = args.ImportFilePath
 	}
 
-	params := []string{"import", "api", "-f", fileName, "-e", args.DestAPIM.EnvName, "-k", "--verbose"}
+	params := []string{"import", "mcp-server", "-f", fileName, "-e", args.DestAPIM.EnvName, "-k", "--verbose"}
 
 	if args.OverrideProvider {
 		params = append(params, "--preserve-provider=false")
