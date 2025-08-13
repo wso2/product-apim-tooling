@@ -19,6 +19,7 @@
 package utils
 
 import (
+	"bytes"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha1"
@@ -172,14 +173,6 @@ func getEncryptionKey(keyStoreConfig *KeyStoreConfig) (*rsa.PublicKey, error) {
 
 // detectKeystoreType detects whether the keystore is JKS or PKCS12 based on file extension and magic bytes
 func detectKeystoreType(keyStorePath string) (string, error) {
-	// Check file extension first
-	ext := strings.ToLower(filepath.Ext(keyStorePath))
-	if ext == ".p12" || ext == ".pfx" {
-		return "PKCS12", nil
-	}
-	if ext == ".jks" {
-		return "JKS", nil
-	}
 
 	// If extension is ambiguous, try to read magic bytes
 	file, err := os.Open(keyStorePath)
@@ -195,9 +188,36 @@ func detectKeystoreType(keyStorePath string) (string, error) {
 		return "", err
 	}
 
-	// PKCS12 files typically start with 0x30 (ASN.1 SEQUENCE)
-	if header[0] == 0x30 && header[1] == 0x82 {
+	// PKCS12 files start with ASN.1 SEQUENCE tag (0x30)
+	// Additional validation for proper ASN.1 length encoding
+	if header[0] == 0x30 {
+		// Check length encoding
+		if header[1]&0x80 == 0 {
+			// Short form length
+			if header[1] > 0 {
+				return "PKCS12", nil
+			}
+		} else {
+			// Long form length - validate length-of-length
+			lengthBytes := int(header[1] & 0x7F)
+			if lengthBytes > 0 && lengthBytes <= 4 {
+				return "PKCS12", nil
+			}
+		}
+	}
+
+	jksMagic := []byte{0xFE, 0xED, 0xFE, 0xED}
+	if bytes.Equal(header[:4], jksMagic) {
+		return "JKS", nil
+	}
+
+	// Check file extension
+	ext := strings.ToLower(filepath.Ext(keyStorePath))
+	if ext == ".p12" || ext == ".pfx" {
 		return "PKCS12", nil
+	}
+	if ext == ".jks" {
+		return "JKS", nil
 	}
 
 	// Default to JKS for other cases
