@@ -38,5 +38,5 @@ NOTE: The 3 flags (--action (-a), --name (-n), --version (-v) and --environment 
 
 ### SEE ALSO
 
-* [apictl change-status](apictl_change-status.md)	 - Change Status of an API or API Product
+* [apictl change-status](apictl_change-status.md)	 - Change Status of an API, MCP Server or Product
 

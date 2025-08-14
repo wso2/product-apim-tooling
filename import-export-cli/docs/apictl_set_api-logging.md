@@ -36,5 +36,5 @@ apictl set api-logging --api-id bf36ca3a-0332-49ba-abce-e9992228ae06 --log-level
 
 ### SEE ALSO
 
-* [apictl set](apictl_set.md)	 - Set configuration parameters, per API log levels or correlation component configurations
+* [apictl set](apictl_set.md)	 - Set configuration parameters, per API log levels, MCP Server log levels or correlation component configurations
 

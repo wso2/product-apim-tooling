@@ -27,29 +27,35 @@ const queryParamSeparator = " "
 
 // Get command related usage Info
 const GetCmdLiteral = "get"
-const getCmdShortDesc = "Get APIs/APIProducts/Applications or revisions of a specific API/APIProduct in an environment or Get the Correlation Log Configurations or Get the log level of each API in an environment or Get the environments"
+const getCmdShortDesc = "Get APIs/MCPServers/APIProducts/Applications or revisions of a specific API/MCPServers/APIProduct in an environment or Get the Correlation Log Configurations or Get the log level of each API/MCPServers in an environment or Get the environments"
 
 const getCmdLongDesc = `Display a list containing all the APIs available in the environment specified by flag (--environment, -e)/
+Display a list containing all the MCP Servers available in the environment specified by flag (--environment, -e)/
 Display a list containing all the API Products available in the environment specified by flag (--environment, -e)/
 Display a list of Applications of a specific user in the environment specified by flag (--environment, -e)/
 Display a list of API revisions of a specific API in the environment specified by flag (--environment, -e)/
+Display a list of MCP Server revisions of a specific MCP Server in the environment specified by flag (--environment, -e)/
 Display a list of API Product revisions of a specific API Product in the environment specified by flag (--environment, -e)/
 Get a generated JWT token to invoke an API or API Product by subscribing to a default application for testing purposes in the environment specified by flag (--environment, -e)/
 Get the log level of each API in the environment specified by flag (--environment, -e)/
+Get the log level of each MCP Server in the environment specified by flag (--environment, -e)/
 Get the correlation log configurations in the environment specified by flag (--environment, -e)
 OR
 List all the environments`
 
 const getCmdExamples = utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetEnvsCmdLiteral + `
 ` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetApisCmdLiteral + ` -e dev
+` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetMCPServersCmdLiteral + ` -e dev
 ` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetApiProductsCmdLiteral + ` -e dev
 ` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetAppsCmdLiteral + ` -e dev
 ` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetAPIRevisionsCmdLiteral + ` -n PizzaAPI -v 1.0.0 -e dev
+` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetMCPServerRevisionsCmdLiteral + ` -n WeatherMCPServer -v 1.0.0 -e dev
 ` + utils.ProjectName + ` ` + GetCmdLiteral + ` ` + GetAPIProductRevisionsCmdLiteral + ` -n PizzaProduct -v 1.0.0 -e dev
 ` + utils.ProjectName + " " + GetCmdLiteral + " " + GetKeysCmdLiteral + ` -n TwitterAPI -v 1.0.0 -e dev
 ` + utils.ProjectName + " " + GetCmdLiteral + " " + GetApiLoggingCmdLiteral + ` -e dev --tenant-domain carbon.super
 ` + utils.ProjectName + " " + GetCmdLiteral + " " + GetApiLoggingCmdLiteral + ` --api-id bf36ca3a-0332-49ba-abce-e9992228ae06 -e dev --tenant-domain carbon.super
-` + utils.ProjectName + " " + GetCmdLiteral + " " + GetCorrelationLoggingCmdLiteral + ` -e dev` 
+` + utils.ProjectName + " " + GetCmdLiteral + " " + GetMCPServerLoggingCmdLiteral + ` --mcp-server-id bf36ca3a-0332-49ba-abce-e9992228ae06 -e dev --tenant-domain carbon.super
+` + utils.ProjectName + " " + GetCmdLiteral + " " + GetCorrelationLoggingCmdLiteral + ` -e dev`
 
 // ListCmd represents the list command
 var GetCmd = &cobra.Command{

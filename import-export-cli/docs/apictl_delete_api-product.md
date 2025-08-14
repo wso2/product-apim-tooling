@@ -37,5 +37,5 @@ NOTE: Both the flags (--name (-n), --version (-v), and --environment (-e)) are m
 
 ### SEE ALSO
 
-* [apictl delete](apictl_delete.md)	 - Delete an API/APIProduct/Application in an environment
+* [apictl delete](apictl_delete.md)	 - Delete an API/MCPServer/APIProduct/Application in an environment
 

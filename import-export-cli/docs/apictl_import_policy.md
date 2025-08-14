@@ -32,7 +32,7 @@ apictl import policy api  -f ~/AddHeader -e production
 
 ### SEE ALSO
 
-* [apictl import](apictl_import.md)	 - Import an API/API Product/Application to an environment
+* [apictl import](apictl_import.md)	 - Import an API/MCP Server/API Product/Application to an environment
 * [apictl import policy api](apictl_import_policy_api.md)	 - Import an API Policy
 * [apictl import policy rate-limiting](apictl_import_policy_rate-limiting.md)	 - Import Throttling Policy
 

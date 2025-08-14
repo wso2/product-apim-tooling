@@ -25,15 +25,17 @@ import (
 
 // Export command related usage Info
 const ExportCmdLiteral = "export"
-const exportCmdShortDesc = "Export an API/API Product/Application/Policy in an environment"
+const exportCmdShortDesc = "Export an API/MCPServer/API Product/Application/Policy in an environment"
 
 const exportCmdLongDesc = `Export an API available in the environment specified by flag (--environment, -e)
 Export APIs available in the environment specified by flag (--environment, -e)
+Export an MCP Server available in the environment specified by flag (--environment, -e)
 Export an API Product available in the environment specified by flag (--environment, -e)
 Export an Application of a specific user (--owner, -o) in the environment specified by flag (--environment, -e)`
 
 const exportCmdExamples = utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin -e dev
 ` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPIsCmdLiteral + ` -e dev
+` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportMCPServerCmdLiteral + ` -n WeatherMCPServer -v 1.0.0 -e dev
 ` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAPIProductCmdLiteral + ` -n LeasingAPIProduct -v 1.0.0 -e dev
 ` + utils.ProjectName + ` ` + ExportCmdLiteral + ` ` + ExportAppCmdLiteral + ` -n SampleApp -o admin -e dev`
 

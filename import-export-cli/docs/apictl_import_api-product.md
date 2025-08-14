@@ -45,5 +45,5 @@ NOTE: Both the flags (--file (-f) and --environment (-e)) are mandatory
 
 ### SEE ALSO
 
-* [apictl import](apictl_import.md)	 - Import an API/API Product/Application to an environment
+* [apictl import](apictl_import.md)	 - Import an API/MCP Server/API Product/Application to an environment
 
