@@ -32,7 +32,7 @@ apictl export policy api -n addHeader -e prod
 
 ### SEE ALSO
 
-* [apictl export](apictl_export.md)	 - Export an API/API Product/Application/Policy in an environment
+* [apictl export](apictl_export.md)	 - Export an API/MCPServer/API Product/Application/Policy in an environment
 * [apictl export policy api](apictl_export_policy_api.md)	 - Export an API Policy
 * [apictl export policy rate-limiting](apictl_export_policy_rate-limiting.md)	 - Export Throttling Policies
 

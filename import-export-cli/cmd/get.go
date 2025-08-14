@@ -27,7 +27,7 @@ const queryParamSeparator = " "
 
 // Get command related usage Info
 const GetCmdLiteral = "get"
-const getCmdShortDesc = "Get APIs/MCPServers/APIProducts/Applications or revisions of a specific API/APIProduct in an environment or Get the Correlation Log Configurations or Get the log level of each API in an environment or Get the environments"
+const getCmdShortDesc = "Get APIs/MCPServers/APIProducts/Applications or revisions of a specific API/MCPServers/APIProduct in an environment or Get the Correlation Log Configurations or Get the log level of each API/MCPServers in an environment or Get the environments"
 
 const getCmdLongDesc = `Display a list containing all the APIs available in the environment specified by flag (--environment, -e)/
 Display a list containing all the MCP Servers available in the environment specified by flag (--environment, -e)/

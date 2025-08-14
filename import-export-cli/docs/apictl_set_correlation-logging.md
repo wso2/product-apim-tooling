@@ -37,5 +37,5 @@ apictl set correlation-logging --component-name jdbc --enable true --denied-thre
 
 ### SEE ALSO
 
-* [apictl set](apictl_set.md)	 - Set configuration parameters, per API log levels or correlation component configurations
+* [apictl set](apictl_set.md)	 - Set configuration parameters, per API log levels, MCP Server log levels or correlation component configurations
 

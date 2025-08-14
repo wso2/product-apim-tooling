@@ -94,7 +94,7 @@ func ImportMCPServer(accessOAuthToken, publisherEndpoint, importEnvironment, imp
 	if err != nil {
 		return err
 	}
-	utils.Logln(utils.LogPrefixInfo+"MCP Server Location:", resolvedMCPServerFilePath)
+	utils.Logln(utils.LogPrefixInfo+"MCP Server Location: ", resolvedMCPServerFilePath)
 
 	utils.Logln(utils.LogPrefixInfo + "Creating workspace")
 	tmpPath, err := utils.GetTempCloneFromDirOrZip(resolvedMCPServerFilePath)

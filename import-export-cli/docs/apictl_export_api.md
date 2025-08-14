@@ -44,5 +44,5 @@ without deployment environments will be exported.
 
 ### SEE ALSO
 
-* [apictl export](apictl_export.md)	 - Export an API/API Product/Application/Policy in an environment
+* [apictl export](apictl_export.md)	 - Export an API/MCPServer/API Product/Application/Policy in an environment
 

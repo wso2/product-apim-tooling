@@ -412,14 +412,14 @@ func GetPerMCPServerLoggingListFromEnv(credential credentials.Credential, enviro
 		utils.HandleErrorAndExit("Unable to connect to "+mcpServerListEndpoint, err)
 	}
 
-	utils.Logln(utils.LogPrefixInfo+"Response:", resp.Status())
+	utils.Logln(utils.LogPrefixInfo+" Response: ", resp.Status())
 
 	if resp.StatusCode() == http.StatusOK {
 		mcpServerLoggerListResponse := &utils.MCPServerLoggerListResponse{}
 		unmarshalError := json.Unmarshal([]byte(resp.Body()), &mcpServerLoggerListResponse)
 
 		if unmarshalError != nil {
-			utils.HandleErrorAndExit(utils.LogPrefixError+"invalid JSON response", unmarshalError)
+			utils.HandleErrorAndExit(utils.LogPrefixError+"invalid JSON response ", unmarshalError)
 		}
 
 		return mcpServerLoggerListResponse.MCPServers, nil
@@ -446,14 +446,14 @@ func GetPerMCPServerLoggingDetailsFromEnv(credential credentials.Credential, env
 		utils.HandleErrorAndExit("Unable to connect to "+mcpServerDetailsEndpoint, err)
 	}
 
-	utils.Logln(utils.LogPrefixInfo+"Response:", resp.Status())
+	utils.Logln(utils.LogPrefixInfo+"Response: ", resp.Status())
 
 	if resp.StatusCode() == http.StatusOK {
 		mcpServerLoggerListResponse := &utils.MCPServerLoggerListResponse{}
 		unmarshalError := json.Unmarshal([]byte(resp.Body()), &mcpServerLoggerListResponse)
 
 		if unmarshalError != nil {
-			utils.HandleErrorAndExit(utils.LogPrefixError+"invalid JSON response", unmarshalError)
+			utils.HandleErrorAndExit(utils.LogPrefixError+"invalid JSON response ", unmarshalError)
 		}
 
 		return mcpServerLoggerListResponse.MCPServers, nil
@@ -483,7 +483,7 @@ func SetMCPServerLoggingLevel(credential credentials.Credential, environment, mc
 		utils.HandleErrorAndExit("Unable to connect to "+mcpServerSetEndpoint, err)
 	}
 
-	utils.Logln(utils.LogPrefixInfo+"Response:", resp.Status())
+	utils.Logln(utils.LogPrefixInfo+"Response: ", resp.Status())
 
 	if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
 		// 200 OK or 201 Created
@@ -521,6 +521,6 @@ func PrintMCPServerLoggers(mcpServers []utils.MCPServerLogger, format string) {
 
 	// Execute context
 	if err := mcpServerContext.Write(renderer, mcpServerLoggerTableHeaders); err != nil {
-		fmt.Println("Error executing template:", err.Error())
+		fmt.Println("Error executing template: ", err.Error())
 	}
 }

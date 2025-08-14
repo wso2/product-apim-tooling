@@ -137,6 +137,6 @@ func PrintMCPServers(servers []utils.MCPServer, format string) {
 
 	// execute context
 	if err := mcpServerContext.Write(renderer, mcpServerTableHeaders); err != nil {
-		fmt.Println("Error executing template:", err.Error())
+		fmt.Println("Error executing template: ", err.Error())
 	}
 }

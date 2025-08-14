@@ -99,7 +99,7 @@ func GetMCPServerList(accessToken, publisherEndpoint, query, limit string) (coun
 		utils.HandleErrorAndExit("Unable to connect to "+publisherEndpoint, err)
 	}
 
-	utils.Logln(utils.LogPrefixInfo+"Response:", resp.Status())
+	utils.Logln(utils.LogPrefixInfo+"Response: ", resp.Status())
 
 	if resp.StatusCode() == http.StatusOK {
 		mcpServerListResponse := &utils.MCPServerListResponse{}
@@ -132,7 +132,7 @@ func GetMCPServerRevisionsList(accessToken, revisionListEndpoint string) (count 
 		utils.HandleErrorAndExit("Unable to connect to "+revisionListEndpoint, err)
 	}
 
-	utils.Logln(utils.LogPrefixInfo+"Response:", resp.Status())
+	utils.Logln(utils.LogPrefixInfo+"Response: ", resp.Status())
 
 	if resp.StatusCode() == http.StatusOK {
 		revisionListResponse := &utils.RevisionListResponse{}

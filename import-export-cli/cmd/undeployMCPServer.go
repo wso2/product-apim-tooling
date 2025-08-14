@@ -44,7 +44,7 @@ const undeployMCPServerCmdExamples = utils.ProjectName + ` ` + UndeployCmdLitera
 ` + utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployMCPServerCmdLiteral + ` -n MyMCPServer -v 2.1.0 --rev 6 -g Label1 -g Label2 -g Label3 -e production
 ` + utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployMCPServerCmdLiteral + ` -n MyMCPServer -v 2.1.0 -r alice --rev 2 -g Label1 -e production
 NOTE: All the 4 flags (--name (-n), --version (-v), --rev, --environment (-e)) are mandatory.
-If the flag (--gateway-env (-g)) is not provided, revision will be undeployed from all deployed gateway environments.`
+If the flag (--gateway-env (-g)) is not provided, revision will be undeployed from all the deployed gateway environments.`
 
 var UndeployMCPServerCmd = &cobra.Command{
 	Use: UndeployMCPServerCmdLiteral + " (--name <name-of-the-mcpserver> --version <version-of-the-mcpserver> --provider <provider-of-the-mcpserver> " +

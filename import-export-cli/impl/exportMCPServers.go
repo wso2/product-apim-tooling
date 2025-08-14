@@ -47,7 +47,7 @@ func PrepareMCPServerResumption(credential credentials.Credential, exportRelated
 	err := migrationMCPServersExportMetadata.ReadMigrationMCPServersExportMetadataFile(filepath.Join(exportRelatedFilesPath,
 		utils.MigrationMCPServersExportMetadataFileName))
 	if err != nil {
-		utils.HandleErrorAndExit("Error loading metadata for resume from"+filepath.Join(exportRelatedFilesPath,
+		utils.HandleErrorAndExit("Error loading metadata for resume from "+filepath.Join(exportRelatedFilesPath,
 			utils.MigrationMCPServersExportMetadataFileName), err)
 	}
 	mcpServers = migrationMCPServersExportMetadata.MCPServerListToExport
@@ -230,33 +230,3 @@ func exportMCPServerAndWriteToZip(mcpServer utils.MCPServer, revisionNumber, acc
 		utils.PrintErrorResponseAndExit(resp)
 	}
 }
-
-// // Create the required directory structure to save the exported MCP Servers
-// func CreateExportMCPServerDirStructure(artifactExportDirectory, cmdResourceTenantDomain, cmdExportEnvironment string, cmdForceStartFromBegin bool) string {
-// 	var resourceTenantDirName = utils.GetMigrationExportTenantDirName(cmdResourceTenantDomain)
-
-// 	var createDirError error
-// 	createDirError = utils.CreateDirIfNotExist(artifactExportDirectory)
-
-// 	migrationsArtifactsEnvPath := filepath.Join(artifactExportDirectory, cmdExportEnvironment)
-// 	migrationsArtifactsEnvTenantPath := filepath.Join(migrationsArtifactsEnvPath, resourceTenantDirName)
-// 	migrationsArtifactsEnvTenantMCPServersPath := filepath.Join(migrationsArtifactsEnvTenantPath, utils.ExportedMCPServersDirName)
-
-// 	createDirError = utils.CreateDirIfNotExist(migrationsArtifactsEnvPath)
-// 	createDirError = utils.CreateDirIfNotExist(migrationsArtifactsEnvTenantPath)
-
-// 	if dirExists, _ := utils.IsDirExists(migrationsArtifactsEnvTenantMCPServersPath); dirExists {
-// 		if cmdForceStartFromBegin {
-// 			utils.RemoveDirectory(migrationsArtifactsEnvTenantMCPServersPath)
-// 			createDirError = utils.CreateDir(migrationsArtifactsEnvTenantMCPServersPath)
-// 		}
-// 	} else {
-// 		createDirError = utils.CreateDir(migrationsArtifactsEnvTenantMCPServersPath)
-// 	}
-
-// 	if createDirError != nil {
-// 		utils.HandleErrorAndExit("Error in creating directory structure for the MCP Server export for migration .",
-// 			createDirError)
-// 	}
-// 	return migrationsArtifactsEnvTenantMCPServersPath
-// }
