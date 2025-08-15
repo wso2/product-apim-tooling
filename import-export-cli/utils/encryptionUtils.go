@@ -142,14 +142,14 @@ func GetKeyStoreConfigFilePath() string {
 func GetKeyStoreConfigFromFile(filePath string) (*KeyStoreConfig, error) {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
-		return nil, errors.New("config file not found.\nExecute 'apictl secret init --help' for more information")
+		return nil, errors.New("Config file not found.\nExecute 'apictl secret init --help' for more information")
 	}
 	config := &KeyStoreConfig{}
 	if err := yaml.Unmarshal(data, config); err != nil {
-		return nil, errors.New("parsing error.\nExecute 'apictl secret init --help' for more information")
+		return nil, errors.New("Parsing error.\nExecute 'apictl secret init --help' for more information")
 	}
 	if !IsValidKeyStoreConfig(config) {
-		return nil, errors.New("missing required fields.\nExecute 'apictl secret init --help' for more information")
+		return nil, errors.New("Missing required fields.\nExecute 'apictl secret init --help' for more information")
 	}
 	return config, nil
 }
@@ -161,7 +161,7 @@ func getEncryptionKey(keyStoreConfig *KeyStoreConfig) (*rsa.PublicKey, error) {
 	// Detect keystore type and handle accordingly
 	keystoreType, err := detectKeystoreType(keyStorePath)
 	if err != nil {
-		return nil, errors.New("Detecting keystore type: " + err.Error())
+		return nil, errors.New("Error while detecting keystore type: " + err.Error())
 	}
 
 	if keystoreType == "PKCS12" {
@@ -249,7 +249,7 @@ func getPublicKeyFromPKCS12(keyStorePath string, keyStorePassword []byte, keySto
 	// Read PKCS12 file
 	p12Data, err := os.ReadFile(keyStorePath)
 	if err != nil {
-		return nil, errors.New("reading PKCS12 file: " + err.Error())
+		return nil, errors.New("Reading PKCS12 file: " + err.Error())
 	}
 
 	// Decode PKCS12 data using the improved go-pkcs12 library
@@ -259,7 +259,7 @@ func getPublicKeyFromPKCS12(keyStorePath string, keyStorePassword []byte, keySto
 		keyPassword, _ := base64.StdEncoding.DecodeString(keyStoreConfig.KeyPassword)
 		privateKey, certificate, caCerts, err = pkcs12.DecodeChain(p12Data, string(keyPassword))
 		if err != nil {
-			return nil, errors.New("decoding PKCS12 keystore: " + err.Error())
+			return nil, errors.New("Decoding PKCS12 keystore: " + err.Error())
 		}
 	}
 
@@ -283,7 +283,7 @@ func getPublicKeyFromPKCS12(keyStorePath string, keyStorePassword []byte, keySto
 	if certificate != nil {
 		if pubKey, ok := certificate.PublicKey.(*rsa.PublicKey); ok {
 			if pubKey.N.Cmp(rsaKey.N) != 0 || pubKey.E != rsaKey.E {
-				return nil, errors.New("certificate public key does not match private key in PKCS12")
+				return nil, errors.New("Certificate public key does not match private key in PKCS12")
 			}
 		}
 	}
