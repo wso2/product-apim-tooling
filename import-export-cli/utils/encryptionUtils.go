@@ -253,21 +253,14 @@ func getPublicKeyFromPKCS12(keyStorePath string, keyStorePassword []byte, keySto
 	}
 
 	// Decode PKCS12 data using the improved go-pkcs12 library
-	privateKey, certificate, caCerts, err := pkcs12.DecodeChain(p12Data, string(keyStorePassword))
+	privateKey, certificate, _, err := pkcs12.DecodeChain(p12Data, string(keyStorePassword))
 	if err != nil {
 		// Try with alias-specific password if main password fails
 		keyPassword, _ := base64.StdEncoding.DecodeString(keyStoreConfig.KeyPassword)
-		privateKey, certificate, caCerts, err = pkcs12.DecodeChain(p12Data, string(keyPassword))
+		privateKey, certificate, _, err = pkcs12.DecodeChain(p12Data, string(keyPassword))
 		if err != nil {
 			return nil, errors.New("Decoding PKCS12 keystore: " + err.Error())
 		}
-	}
-
-	// Handle case where we need to find a specific alias
-	if keyStoreConfig.KeyAlias != "" {
-		// For PKCS12 with aliases, we might need additional logic
-		// For now, we'll use the decoded certificate and key
-		_ = caCerts // Keep for potential future use
 	}
 
 	// Extract RSA private key
