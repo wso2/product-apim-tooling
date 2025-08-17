@@ -272,6 +272,7 @@ const (
 // project meta files
 const (
 	MetaFileAPI         = "api_meta.yaml"
+	MetaFileMCPServer   = "mcp_server_meta.yaml"
 	MetaFileAPIProduct  = "api_product_meta.yaml"
 	MetaFileApplication = "application_meta.yaml"
 )

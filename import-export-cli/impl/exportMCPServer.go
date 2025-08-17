@@ -74,25 +74,25 @@ func exportMCPServer(name, version, revisionNum, provider, format, publisherEndp
 	return resp, nil
 }
 
-// WriteToZip
-// @param exportAPIName : Name of the API to be exported
-// @param exportAPIVersion: Version of the API to be exported
-// @param exportAPIRevisionNumber: Revision number of the api
+// WriteMCPServerToZip
+// @param exportMCPServerName : Name of the MCP Server to be exported
+// @param exportMCPServerVersion: Version of the MCP Server to be exported
+// @param exportMCPServerRevisionNumber: Revision number of the MCP Server
 // @param zipLocationPath: Path to the export directory
-// @param runningExportApiCommand: Whether the export API command is running
+// @param runningExportMCPServerCommand: Whether the export MCP Server command is running
 // @param resp : Response returned from making the HTTP request (only pass a 200 OK)
-// Exported API will be written to a zip file
+// Exported MCP Server will be written to a zip file
 func WriteMCPServerToZip(exportMCPServerName, exportMCPServerVersion, exportMCPServerRevisionNumber, zipLocationPath string,
-	runningExportApiCommand bool, resp *resty.Response) {
+	runningExportMCPServerCommand bool, resp *resty.Response) {
 	zipFilename := exportMCPServerName + "_" + exportMCPServerVersion
 	if exportMCPServerRevisionNumber != "" {
 		zipFilename += "_" + utils.GetRevisionNamFromRevisionNum(exportMCPServerRevisionNumber)
 	}
-	zipFilename += ".zip" // MyAPI_1.0.0_Revision-1.zip
-	// Writes the REST API response to a temporary zip file
+	zipFilename += ".zip" // MyMCPServer_1.0.0_Revision-1.zip
+	// Writes the REST MCP Server response to a temporary zip file
 	tempZipFile, err := utils.WriteResponseToTempZip(zipFilename, resp)
 	if err != nil {
-		utils.HandleErrorAndExit("Error creating the temporary zip file to store the exported API", err)
+		utils.HandleErrorAndExit("Error creating the temporary zip file to store the exported MCP Server", err)
 	}
 
 	err = utils.CreateDirIfNotExist(zipLocationPath)
@@ -101,7 +101,7 @@ func WriteMCPServerToZip(exportMCPServerName, exportMCPServerVersion, exportMCPS
 	}
 	exportedFinalZip := filepath.Join(zipLocationPath, zipFilename)
 
-	// Add api_meta.yaml file inside the zip and create a new zup file in exportedFinalZip location
+	// Add mcp_server_meta.yaml file inside the zip and create a new zup file in exportedFinalZip location
 	metaData := utils.MetaData{
 		Name:    exportMCPServerName,
 		Version: exportMCPServerVersion,
@@ -113,13 +113,13 @@ func WriteMCPServerToZip(exportMCPServerName, exportMCPServerVersion, exportMCPS
 			},
 		},
 	}
-	err = IncludeMetaFileToZip(tempZipFile, exportedFinalZip, utils.MetaFileAPI, metaData)
+	err = IncludeMetaFileToZip(tempZipFile, exportedFinalZip, utils.MetaFileMCPServer, metaData)
 	if err != nil {
-		utils.HandleErrorAndExit("Error creating the final zip archive with api_meta.yaml file", err)
+		utils.HandleErrorAndExit("Error creating the final zip archive with mcp_server_meta.yaml file", err)
 	}
 
 	// Output the final zip file location.
-	if runningExportApiCommand {
+	if runningExportMCPServerCommand {
 		fmt.Println("Successfully exported MCP Server!")
 		fmt.Println("Find the exported MCP Server at " + exportedFinalZip)
 	}
