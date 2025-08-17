@@ -352,13 +352,13 @@ func (instance *Client) GenerateSampleMCPServerData(provider, name, version, con
 	mcpServer.EnableSchemaValidation = false
 	mcpServer.Transport = []string{"http", "https"}
 	mcpServer.Tags = []string{}
-	mcpServer.Policies = []string{}
+	mcpServer.Policies = []string{"Bronze"}
 	mcpServer.AuthorizationHeader = "Authorization"
 	mcpServer.SecurityScheme = []string{"oauth_basic_auth_api_key_mandatory", "oauth2"}
 	mcpServer.Visibility = "PUBLIC"
 	mcpServer.VisibleRoles = []string{}
 	mcpServer.VisibleTenants = []string{}
-	mcpServer.SubscriptionAvailability = "CURRENT_TENANT"
+	mcpServer.SubscriptionAvailability = "ALL_TENANTS"
 	mcpServer.SubscriptionAvailableTenants = []string{}
 	mcpServer.AccessControl = "NONE"
 	mcpServer.AccessControlRoles = []string{}
@@ -760,17 +760,129 @@ func (instance *Client) AddAPI(t *testing.T, api *API, username string, password
 	return apiResponse.ID
 }
 
-// AddMCPServer : Add MCP Server to APIM using build-from-mcp-server endpoint with form data
+// AddMCPServer : Add MCP Server to APIM using generate-from-mcp-server endpoint with JSON data
 func (instance *Client) AddMCPServer(t *testing.T, mcpServer *MCPServer, username string, password string, doClean bool) string {
-	mcpServersURL := instance.publisherRestURL + "/mcp-servers/build-from-mcp-server"
+	mcpServersURL := instance.publisherRestURL + "/mcp-servers/generate-from-mcp-server"
+
+	// MCP server URL without /mcp at the end
+	mcpServerURL := "https://db720294-98fd-40f4-85a1-cc6a3b65bc9a-prod.e1-us-east-azure.choreoapis.dev/godzilla/mcp-everything-server/v1.0"
+
+	// Create request payload as JSON
+	requestPayload := map[string]interface{}{
+		"url": mcpServerURL,
+		"additionalProperties": map[string]interface{}{
+			"name":     mcpServer.Name,
+			"version":  mcpServer.Version,
+			"context":  mcpServer.Context,
+			"policies": mcpServer.Policies,
+			"operations": []map[string]interface{}{
+				{
+					"description": "Echoes back the input",
+					"feature":     "TOOL",
+					"backendOperationMapping": map[string]interface{}{
+						"backendId": "",
+						"backendOperation": map[string]string{
+							"target": "echo",
+							"verb":   "TOOL",
+						},
+					},
+				},
+				{
+					"description": "Adds two numbers",
+					"feature":     "TOOL",
+					"backendOperationMapping": map[string]interface{}{
+						"backendId": "",
+						"backendOperation": map[string]string{
+							"target": "add",
+							"verb":   "TOOL",
+						},
+					},
+				},
+				{
+					"description": "View the pizza menu. This tool provides a list of available pizzas.",
+					"feature":     "TOOL",
+					"backendOperationMapping": map[string]interface{}{
+						"backendId": "",
+						"backendOperation": map[string]string{
+							"target": "viewPizzaMenu",
+							"verb":   "TOOL",
+						},
+					},
+				},
+				{
+					"description": "Order a pizza from the menu. This tool allows you to place an order for a pizza.",
+					"feature":     "TOOL",
+					"backendOperationMapping": map[string]interface{}{
+						"backendId": "",
+						"backendOperation": map[string]string{
+							"target": "orderPizza",
+							"verb":   "TOOL",
+						},
+					},
+				},
+			},
+			"endpointConfig": map[string]interface{}{
+				"endpoint_type": "http",
+				"sandbox_endpoints": map[string]string{
+					"url": mcpServerURL,
+				},
+				"production_endpoints": map[string]string{
+					"url": mcpServerURL,
+				},
+			},
+		},
+		"securityInfo": map[string]interface{}{
+			"isSecure": false,
+			"header":   "",
+			"value":    "",
+		},
+	}
+
+	// Marshal the request payload to JSON
+	requestBody, err := json.Marshal(requestPayload)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	request := base.CreatePost(mcpServersURL, bytes.NewBuffer(requestBody))
+
+	// Set JSON headers
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Authorization", "Bearer "+instance.accessToken)
+
+	base.LogRequest("apim.AddMCPServer()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.AddMCPServer()", response, 201)
+
+	var mcpServerResponse MCPServer
+	json.NewDecoder(response.Body).Decode(&mcpServerResponse)
+
+	if doClean {
+		t.Cleanup(func() {
+			username, password := RetrieveAdminCredentialsInsteadCreator(username, password)
+			instance.Login(username, password)
+			instance.DeleteMCPServer(mcpServerResponse.ID)
+		})
+	}
+
+	return mcpServerResponse.ID
+}
+
+// AddMCPServerFromOpenAPI : Add MCP Server to APIM using generate-from-openapi endpoint with form data
+func (instance *Client) AddMCPServerFromOpenAPI(t *testing.T, mcpServer *MCPServer, username string, password string, doClean bool) string {
+	mcpServersURL := instance.publisherRestURL + "/mcp-servers/generate-from-openapi"
 
 	// Create form data
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
-	// Add URL field - using a default MCP server URL for testing
-	mcpServerURL := "https://db720294-98fd-40f4-85a1-cc6a3b65bc9a-prod.e1-us-east-azure.choreoapis.dev/godzilla/mcp-everything-server/v1.0/mcp"
-	err := writer.WriteField("url", mcpServerURL)
+	// Add URL field - using petstore OpenAPI URL
+	openAPIURL := "https://petstore3.swagger.io/api/v3/openapi.json"
+	err := writer.WriteField("url", openAPIURL)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -780,39 +892,207 @@ func (instance *Client) AddMCPServer(t *testing.T, mcpServer *MCPServer, usernam
 		"name":        mcpServer.Name,
 		"version":     mcpServer.Version,
 		"context":     mcpServer.Context,
-		"description": mcpServer.Description,
-		"subtypeConfiguration": map[string]string{
-			"subtype": "SERVER_PROXY",
-		},
-		"endpointConfig": map[string]interface{}{
-			"endpoint_type": "http",
-			"sandbox_endpoints": map[string]string{
-				"url": mcpServerURL,
-			},
-			"production_endpoints": map[string]string{
-				"url": mcpServerURL,
-			},
-			"endpoint_security": map[string]interface{}{
-				"sandbox": map[string]interface{}{
-					"type":    "NONE",
-					"enabled": false,
-				},
-				"production": map[string]interface{}{
-					"type":    "NONE",
-					"enabled": false,
-				},
-			},
-		},
+		"gatewayType": "wso2/synapse",
+		"policies":    mcpServer.Policies,
 		"operations": []map[string]interface{}{
 			{
 				"feature": "TOOL",
 				"backendOperationMapping": map[string]interface{}{
 					"backendId": "",
 					"backendOperation": map[string]string{
-						"target": "echo",
-						"verb":   "TOOL",
+						"target": "/pet",
+						"verb":   "PUT",
 					},
 				},
+			},
+			{
+				"feature": "TOOL",
+				"backendOperationMapping": map[string]interface{}{
+					"backendId": "",
+					"backendOperation": map[string]string{
+						"target": "/pet",
+						"verb":   "POST",
+					},
+				},
+			},
+			{
+				"feature": "TOOL",
+				"backendOperationMapping": map[string]interface{}{
+					"backendId": "",
+					"backendOperation": map[string]string{
+						"target": "/pet/findByStatus",
+						"verb":   "GET",
+					},
+				},
+			},
+			{
+				"feature": "TOOL",
+				"backendOperationMapping": map[string]interface{}{
+					"backendId": "",
+					"backendOperation": map[string]string{
+						"target": "/pet/findByTags",
+						"verb":   "GET",
+					},
+				},
+			},
+			{
+				"feature": "TOOL",
+				"backendOperationMapping": map[string]interface{}{
+					"backendId": "",
+					"backendOperation": map[string]string{
+						"target": "/pet/{petId}",
+						"verb":   "GET",
+					},
+				},
+			},
+			{
+				"feature": "TOOL",
+				"backendOperationMapping": map[string]interface{}{
+					"backendId": "",
+					"backendOperation": map[string]string{
+						"target": "/pet/{petId}",
+						"verb":   "POST",
+					},
+				},
+			},
+			{
+				"feature": "TOOL",
+				"backendOperationMapping": map[string]interface{}{
+					"backendId": "",
+					"backendOperation": map[string]string{
+						"target": "/pet/{petId}",
+						"verb":   "DELETE",
+					},
+				},
+			},
+			{
+				"feature": "TOOL",
+				"backendOperationMapping": map[string]interface{}{
+					"backendId": "",
+					"backendOperation": map[string]string{
+						"target": "/pet/{petId}/uploadImage",
+						"verb":   "POST",
+					},
+				},
+			},
+			{
+				"feature": "TOOL",
+				"backendOperationMapping": map[string]interface{}{
+					"backendId": "",
+					"backendOperation": map[string]string{
+						"target": "/store/inventory",
+						"verb":   "GET",
+					},
+				},
+			},
+			{
+				"feature": "TOOL",
+				"backendOperationMapping": map[string]interface{}{
+					"backendId": "",
+					"backendOperation": map[string]string{
+						"target": "/store/order",
+						"verb":   "POST",
+					},
+				},
+			},
+			{
+				"feature": "TOOL",
+				"backendOperationMapping": map[string]interface{}{
+					"backendId": "",
+					"backendOperation": map[string]string{
+						"target": "/store/order/{orderId}",
+						"verb":   "GET",
+					},
+				},
+			},
+			{
+				"feature": "TOOL",
+				"backendOperationMapping": map[string]interface{}{
+					"backendId": "",
+					"backendOperation": map[string]string{
+						"target": "/store/order/{orderId}",
+						"verb":   "DELETE",
+					},
+				},
+			},
+			{
+				"feature": "TOOL",
+				"backendOperationMapping": map[string]interface{}{
+					"backendId": "",
+					"backendOperation": map[string]string{
+						"target": "/user",
+						"verb":   "POST",
+					},
+				},
+			},
+			{
+				"feature": "TOOL",
+				"backendOperationMapping": map[string]interface{}{
+					"backendId": "",
+					"backendOperation": map[string]string{
+						"target": "/user/createWithList",
+						"verb":   "POST",
+					},
+				},
+			},
+			{
+				"feature": "TOOL",
+				"backendOperationMapping": map[string]interface{}{
+					"backendId": "",
+					"backendOperation": map[string]string{
+						"target": "/user/login",
+						"verb":   "GET",
+					},
+				},
+			},
+			{
+				"feature": "TOOL",
+				"backendOperationMapping": map[string]interface{}{
+					"backendId": "",
+					"backendOperation": map[string]string{
+						"target": "/user/logout",
+						"verb":   "GET",
+					},
+				},
+			},
+			{
+				"feature": "TOOL",
+				"backendOperationMapping": map[string]interface{}{
+					"backendId": "",
+					"backendOperation": map[string]string{
+						"target": "/user/{username}",
+						"verb":   "GET",
+					},
+				},
+			},
+			{
+				"feature": "TOOL",
+				"backendOperationMapping": map[string]interface{}{
+					"backendId": "",
+					"backendOperation": map[string]string{
+						"target": "/user/{username}",
+						"verb":   "PUT",
+					},
+				},
+			},
+			{
+				"feature": "TOOL",
+				"backendOperationMapping": map[string]interface{}{
+					"backendId": "",
+					"backendOperation": map[string]string{
+						"target": "/user/{username}",
+						"verb":   "DELETE",
+					},
+				},
+			},
+		},
+		"endpointConfig": map[string]interface{}{
+			"endpoint_type": "http",
+			"sandbox_endpoints": map[string]string{
+				"url": "https://petstore3.swagger.io/api/v3",
+			},
+			"production_endpoints": map[string]string{
+				"url": "https://petstore3.swagger.io/api/v3",
 			},
 		},
 	}
@@ -823,23 +1103,6 @@ func (instance *Client) AddMCPServer(t *testing.T, mcpServer *MCPServer, usernam
 	}
 
 	err = writer.WriteField("additionalProperties", string(additionalPropertiesJSON))
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Add security info
-	securityInfo := map[string]interface{}{
-		"isSecure": false,
-		"header":   "Authorization",
-		"value":    "Bearer abc",
-	}
-
-	securityInfoJSON, err := json.Marshal(securityInfo)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	err = writer.WriteField("securityInfo", string(securityInfoJSON))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -866,8 +1129,6 @@ func (instance *Client) AddMCPServer(t *testing.T, mcpServer *MCPServer, usernam
 	var mcpServerResponse MCPServer
 	json.NewDecoder(response.Body).Decode(&mcpServerResponse)
 
-	base.Log("responseeeeee", mcpServerResponse.Name, mcpServerResponse.Version, mcpServerResponse.Context)
-
 	if doClean {
 		t.Cleanup(func() {
 			username, password := RetrieveAdminCredentialsInsteadCreator(username, password)
@@ -879,37 +1140,37 @@ func (instance *Client) AddMCPServer(t *testing.T, mcpServer *MCPServer, usernam
 	return mcpServerResponse.ID
 }
 
-// // AddMCPServer : Add new MCP Server to APIM
-// func (instance *Client) AddMCPServer(t *testing.T, mcpServer *MCPServer, username string, password string, doClean bool) string {
-// 	mcpServersURL := instance.publisherRestURL + "/mcp-servers"
+// AddMCPServerStandard : Add new MCP Server to APIM using standard endpoint
+func (instance *Client) AddMCPServerStandard(t *testing.T, mcpServer *MCPServer, username string, password string, doClean bool) string {
+	mcpServersURL := instance.publisherRestURL + "/mcp-servers"
 
-// 	data, err := json.Marshal(mcpServer)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
+	data, err := json.Marshal(mcpServer)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-// 	request := base.CreatePost(mcpServersURL, bytes.NewBuffer(data))
-// 	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
-// 	base.LogRequest("apim.AddMCPServer()", request)
+	request := base.CreatePost(mcpServersURL, bytes.NewBuffer(data))
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+	base.LogRequest("apim.AddMCPServer()", request)
 
-// 	response := base.SendHTTPRequest(request)
-// 	defer response.Body.Close()
+	response := base.SendHTTPRequest(request)
+	defer response.Body.Close()
 
-// 	base.ValidateAndLogResponse("apim.AddMCPServer()", response, 201)
+	base.ValidateAndLogResponse("apim.AddMCPServer()", response, 201)
 
-// 	var mcpServerResponse MCPServer
-// 	json.NewDecoder(response.Body).Decode(&mcpServerResponse)
+	var mcpServerResponse MCPServer
+	json.NewDecoder(response.Body).Decode(&mcpServerResponse)
 
-// 	if doClean {
-// 		t.Cleanup(func() {
-// 			username, password := RetrieveAdminCredentialsInsteadCreator(username, password)
-// 			instance.Login(username, password)
-// 			instance.DeleteMCPServer(mcpServerResponse.ID)
-// 		})
-// 	}
+	if doClean {
+		t.Cleanup(func() {
+			username, password := RetrieveAdminCredentialsInsteadCreator(username, password)
+			instance.Login(username, password)
+			instance.DeleteMCPServer(mcpServerResponse.ID)
+		})
+	}
 
-// 	return mcpServerResponse.ID
-// }
+	return mcpServerResponse.ID
+}
 
 // UpdateAPI : Update API in APIM
 func (instance *Client) UpdateAPI(t *testing.T, api *API, username string, password string) string {
@@ -2007,7 +2268,8 @@ func (instance *Client) GetMCPServerByName(name string) (*MCPServerInfo, error) 
 	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
 
 	values := url.Values{}
-	values.Add("query", name)
+	queryVal := "type:\"MCP\" name:\"" + name + "\""
+	values.Add("query", queryVal)
 
 	request.URL.RawQuery = values.Encode()
 

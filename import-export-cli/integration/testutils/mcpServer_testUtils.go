@@ -313,7 +313,7 @@ func importMCPServer(t *testing.T, args *MCPServerImportExportTestArgs, doClean 
 					apim.RetrieveAdminCredentialsInsteadCreator(args.CtlUser.Username, args.CtlUser.Password)
 				args.DestAPIM.Login(args.CtlUser.Username, args.CtlUser.Password)
 			}
-			err := args.DestAPIM.DeleteAPIByName(args.MCPServer.Name)
+			err := args.DestAPIM.DeleteMCPServerByName(args.MCPServer.Name)
 
 			if err != nil {
 				t.Fatal(err)
@@ -392,6 +392,8 @@ func ValidateMCPServerExportImport(t *testing.T, args *MCPServerImportExportTest
 
 	exportMCPServer(t, args.MCPServer.Name, args.MCPServer.Version, args.MCPServerProvider.Username, args.SrcAPIM.GetEnvName())
 
+	validateMCPServerProject(t, args)
+
 	assert.True(t, base.IsMCPServerArchiveExists(t, GetEnvMCPServerExportPath(args.SrcAPIM.GetEnvName()),
 		args.MCPServer.Name, args.MCPServer.Version), "Exported MCP Server archive does not exist")
 
@@ -405,7 +407,7 @@ func ValidateMCPServerExportImport(t *testing.T, args *MCPServerImportExportTest
 	base.WaitForIndexing()
 
 	// Get MCP Server from env 2
-	importedMCPServer := GetMCPServer(t, args.DestAPIM, args.MCPServerProvider.Username, args.MCPServerProvider.Password, args.MCPServer.Name)
+	importedMCPServer := GetMCPServer(t, args.DestAPIM, args.MCPServer.Name, args.MCPServerProvider.Username, args.MCPServerProvider.Password)
 
 	// Validate env 1 and env 2 MCP Server is equal
 	ValidateMCPServersEqual(t, args.MCPServer, importedMCPServer)
@@ -434,7 +436,7 @@ func ValidateMCPServerRevisionExportImport(t *testing.T, args *MCPServerImportEx
 	base.WaitForIndexing()
 
 	// Get MCP Server from env 2
-	importedMCPServer := GetMCPServer(t, args.DestAPIM, args.MCPServerProvider.Username, args.MCPServerProvider.Password, args.MCPServer.Name)
+	importedMCPServer := GetMCPServer(t, args.DestAPIM, args.MCPServer.Name, args.MCPServerProvider.Username, args.MCPServerProvider.Password)
 
 	// Validate env 1 and env 2 MCP Server are equal
 	ValidateMCPServersEqual(t, args.MCPServer, importedMCPServer)
@@ -465,9 +467,9 @@ func ValidateExportedMCPServerStructure(t *testing.T, args *MCPServerImportExpor
 	// Export MCP Server from env 1
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	output, _ := exportMCPServer(t, args.MCPServer.Name, args.MCPServer.Version, args.MCPServerProvider.Username, args.SrcAPIM.GetEnvName())
+	exportMCPServer(t, args.MCPServer.Name, args.MCPServer.Version, args.MCPServerProvider.Username, args.SrcAPIM.GetEnvName())
 
-	validateMCPServer(t, args.MCPServer, output, args.IsDeployed, SampleMCPServerYamlFilePath)
+	validateMCPServerProject(t, args)
 
 	assert.True(t, base.IsMCPServerArchiveExists(t, GetEnvMCPServerExportPath(args.SrcAPIM.GetEnvName()),
 		args.MCPServer.Name, args.MCPServer.Version))
@@ -482,9 +484,9 @@ func ValidateExportedMCPServerRevisionStructure(t *testing.T, args *MCPServerImp
 	// Export MCP Server revision from env 1
 	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	output, _ := exportMCPServerRevision(t, args)
+	exportMCPServerRevision(t, args)
 
-	validateMCPServer(t, args.MCPServer, output, args.IsDeployed, SampleMCPServerYamlFilePath)
+	validateMCPServerProject(t, args)
 
 	assert.True(t, base.IsMCPServerArchiveExists(t, GetEnvMCPServerExportPath(args.SrcAPIM.GetEnvName()),
 		args.MCPServer.Name, args.MCPServer.Version))
@@ -508,32 +510,13 @@ func ValidateExportedMCPServerRevisionFailure(t *testing.T, args *MCPServerImpor
 		args.MCPServer.Name, args.MCPServer.Version), "Test failed because the MCP Server Revision was exported successfully")
 }
 
-func validateMCPServer(t *testing.T, mcpServer *apim.MCPServer, exportedOutput string, isDeployed bool, sampleFile string) {
-	// Unzip exported MCP Server
-	exportedPath := base.GetExportedPathFromOutput(exportedOutput)
-	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
-	base.Unzip(relativePath, exportedPath)
+func validateMCPServerProject(t *testing.T, args *MCPServerImportExportTestArgs) {
+	assert.True(t, base.IsMCPServerArchiveExists(t, GetEnvMCPServerExportPath(args.SrcAPIM.GetEnvName()),
+		args.MCPServer.Name, args.MCPServer.Version))
 
-	unzippedProjectPath := relativePath + string(os.PathSeparator) + mcpServer.Name + "-" + mcpServer.Version
-
-	// Read the mcp_server.yaml file in the exported directory
-	fileData, err := os.ReadFile(filepath.Join(unzippedProjectPath, MCPServerYamlFilePath))
-	if err != nil {
-		t.Error(err)
-	}
-
-	validateMCPServerStructure(t, &fileData, sampleFile)
-
-	if isDeployed {
-		assert.True(t, base.IsFileAvailable(t, filepath.Join(unzippedProjectPath, DeploymentEnvYamlFilePath)), "Expected deployment_environments.yaml not found")
-	} else {
-		assert.False(t, base.IsFileAvailable(t, filepath.Join(unzippedProjectPath, DeploymentEnvYamlFilePath)), "Non required deployment_environments.yaml found")
-	}
-
-	t.Cleanup(func() {
-		base.RemoveDir(exportedPath)
-		base.RemoveDir(relativePath)
-	})
+	// Check for the existence of the main MCP Server definition file in the archive
+	assert.True(t, base.IsFileExistsInMCPServerArchive(t, GetEnvMCPServerExportPath(args.SrcAPIM.GetEnvName()),
+		utils.InitProjectDefinitionsSwagger, args.MCPServer.Name, args.MCPServer.Version))
 }
 
 func validateMCPServerStructure(t *testing.T, fileData *[]byte, sampleFile string) {
@@ -628,7 +611,7 @@ func ValidateMCPServerImport(t *testing.T, args *MCPServerImportExportTestArgs) 
 	base.WaitForIndexing()
 
 	// Get MCP Server from env 2
-	importedMCPServer := GetMCPServer(t, args.DestAPIM, args.MCPServerProvider.Username, args.MCPServerProvider.Password, args.MCPServer.Name)
+	importedMCPServer := GetMCPServer(t, args.DestAPIM, args.MCPServer.Name, args.MCPServerProvider.Username, args.MCPServerProvider.Password)
 
 	// Validate env 1 and env 2 MCP Server is equal
 	validateMCPServersEqualCrossTenant(t, args.MCPServer, importedMCPServer)
@@ -659,7 +642,7 @@ func ValidateMCPServerImportForMultipleVersions(t *testing.T, args *MCPServerImp
 	}
 
 	// Get MCP Server from env 2
-	importedMCPServer := GetMCPServer(t, args.DestAPIM, args.MCPServerProvider.Username, args.MCPServerProvider.Password, args.MCPServer.Name)
+	importedMCPServer := GetMCPServer(t, args.DestAPIM, args.MCPServer.Name, args.MCPServerProvider.Username, args.MCPServerProvider.Password)
 
 	// Validate env 1 and env 2 MCP Server is equal
 	validateMCPServersEqualCrossTenant(t, args.MCPServer, importedMCPServer)
@@ -704,6 +687,9 @@ func ValidateMCPServersEqual(t *testing.T, mcpServer1 *apim.MCPServer, mcpServer
 
 	mcpServer1Copy.LastUpdatedTime = same
 	mcpServer2Copy.LastUpdatedTime = same
+
+	mcpServer1Copy.Provider = same
+	mcpServer2Copy.Provider = same
 
 	// If an MCP Server is not advertise only, the API owner will be changed during export and import to the current provider
 	if (mcpServer1Copy.AdvertiseInformation != apim.AdvertiseInfo{}) {
@@ -978,7 +964,7 @@ func ValidateChangeLifeCycleStatusOfMCPServer(t *testing.T, args *MCPServerChang
 
 	base.WaitForIndexing()
 	// Assert life cycle state after change
-	mcpServer := GetMCPServer(t, args.APIM, args.CtlUser.Username, args.CtlUser.Password, args.MCPServer.Name)
+	mcpServer := GetMCPServer(t, args.APIM, args.MCPServer.Name, args.CtlUser.Username, args.CtlUser.Password)
 	assert.Equal(t, args.ExpectedState, mcpServer.LifeCycleStatus, "Expected Life cycle state change is not equals to actual status")
 }
 
@@ -1013,6 +999,25 @@ func ValidateMCPServersListWithVersions(t *testing.T, args *MCPServerImportExpor
 			isV1MCPServerExists = true
 		}
 		if strings.EqualFold(mcpServer.Version, newVersion) && strings.EqualFold(args.MCPServer.Name, mcpServer.Name) {
+			isV2MCPServerExists = true
+		}
+	}
+	assert.Equal(t, true, isV1MCPServerExists && isV2MCPServerExists)
+}
+
+func ValidateMCPServersListWithVersionsFromInitArgs(t *testing.T, args *InitTestArgs, newVersion string) {
+	t.Helper()
+
+	mcpServers := getMCPServers(args.SrcAPIM, args.CtlUser.Username, args.CtlUser.Password)
+
+	isV1MCPServerExists := false
+	isV2MCPServerExists := false
+
+	for _, mcpServer := range mcpServers.List {
+		if strings.EqualFold(mcpServer.Version, "1.0.0") && strings.EqualFold(args.APIName, mcpServer.Name) {
+			isV1MCPServerExists = true
+		}
+		if strings.EqualFold(mcpServer.Version, newVersion) && strings.EqualFold(args.APIName, mcpServer.Name) {
 			isV2MCPServerExists = true
 		}
 	}
