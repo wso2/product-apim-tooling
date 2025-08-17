@@ -63,7 +63,7 @@ var ExportMCPServersCmd = &cobra.Command{
 // exportDirectory = <export_directory>/migration/
 func executeExportMCPServersCmd(credential credentials.Credential, exportDirectory string) {
 	//create dir structure
-	mcpServerExportDir := impl.CreateExportAPIsDirStructure(exportDirectory, CmdResourceTenantDomain, CmdExportEnvironment,
+	mcpServerExportDir := impl.CreateExportMCPServersDirStructure(exportDirectory, CmdResourceTenantDomain, CmdExportEnvironment,
 		CmdForceStartFromBegin)
 	exportRelatedFilesPath := filepath.Join(exportDirectory, CmdExportEnvironment,
 		utils.GetMigrationExportTenantDirName(CmdResourceTenantDomain))

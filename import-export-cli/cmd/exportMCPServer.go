@@ -89,7 +89,7 @@ func executeExportMCPServerCmd(credential credentials.Credential, exportDirector
 		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
 		mcpServerZipLocationPath := filepath.Join(exportDirectory, CmdExportEnvironment)
 		if resp.StatusCode() == http.StatusOK {
-			impl.WriteToZip(exportMCPServerName, exportMCPServerVersion, "", mcpServerZipLocationPath, runningExportMCPServerCommand, resp)
+			impl.WriteMCPServerToZip(exportMCPServerName, exportMCPServerVersion, "", mcpServerZipLocationPath, runningExportMCPServerCommand, resp)
 		} else if resp.StatusCode() == http.StatusInternalServerError {
 			// 500 Internal Server Error
 			fmt.Println(string(resp.Body()))

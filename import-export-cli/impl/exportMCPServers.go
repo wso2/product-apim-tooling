@@ -29,15 +29,11 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-var mcpServerExportDir string
 var mcpServerListOffset int //from which index of MCP Server, the MCP Servers will be fetched from APIM server
 var mcpServerCount int32    // size of MCP Server list to be exported or number of MCP Servers left to be exported from last iteration
 var mcpServers []utils.MCPServer
-var exportMCPServersRelatedFilesPath string
-var exportMCPServersFormat string
 
 var startingMCPServerIndexFromList int
-var mcpServerMainConfigFilePath string
 
 // Prepare resumption of previous-halted export-mcp-servers operation
 func PrepareMCPServerResumption(credential credentials.Credential, exportRelatedFilesPath, cmdResourceTenantDomain, cmdUsername, cmdExportEnvironment string) {
@@ -161,7 +157,7 @@ func ExportMCPServers(credential credentials.Credential, exportRelatedFilesPath,
 				for i := startingMCPServerIndexFromList; i < len(mcpServers); i++ {
 					if allRevisions {
 						// Export the working copy of the MCP server
-						exportMCPServerAndWriteToZip(mcpServers[i], "", accessToken, environment, mcpServerExportDir,
+						exportMCPServerAndWriteToZip(mcpServers[i], "", accessToken, environment, exportDir,
 							exportRelatedFilesPath, format, preserveStatus, runningExportMCPServerCommand,
 							preserveCredentials)
 						counterSucceededMCPServers++
@@ -175,7 +171,7 @@ func ExportMCPServers(credential credentials.Credential, exportRelatedFilesPath,
 						for j := 0; j < len(revisions); j++ {
 							exportMCPServerRevision := utils.GetRevisionNumFromRevisionName(revisions[j].RevisionNumber)
 							exportMCPServerAndWriteToZip(mcpServers[i], exportMCPServerRevision, accessToken, environment,
-								mcpServerExportDir, exportRelatedFilesPath, format, preserveStatus, runningExportMCPServerCommand,
+								exportDir, exportRelatedFilesPath, format, preserveStatus, runningExportMCPServerCommand,
 								preserveCredentials)
 							counterSucceededMCPServers++
 						}
@@ -222,11 +218,41 @@ func exportMCPServerAndWriteToZip(mcpServer utils.MCPServer, revisionNumber, acc
 
 	if resp.StatusCode() == http.StatusOK {
 		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
-		WriteToZip(exportMCPServerName, exportMCPServerVersion, exportMCPServerRevision, mcpServerExportDir, runningExportMCPServerCommand, resp)
+		WriteMCPServerToZip(exportMCPServerName, exportMCPServerVersion, exportMCPServerRevision, mcpServerExportDir, runningExportMCPServerCommand, resp)
 		//write on last-succeeded-mcp-server.log
 		utils.WriteLastSucceededMCPServerFileData(exportRelatedFilesPath, mcpServer)
 	} else {
 		fmt.Printf("Error exporting MCP Server: %s - %s of Provider: %s\n", exportMCPServerName, exportMCPServerVersion, exportMCPServerProvider)
 		utils.PrintErrorResponseAndExit(resp)
 	}
+}
+
+// Create the required directory structure to save the exported APIs
+func CreateExportMCPServersDirStructure(artifactExportDirectory, cmdResourceTenantDomain, cmdExportEnvironment string, cmdForceStartFromBegin bool) string {
+	var resourceTenantDirName = utils.GetMigrationExportTenantDirName(cmdResourceTenantDomain)
+
+	var createDirError error
+	createDirError = utils.CreateDirIfNotExist(artifactExportDirectory)
+
+	migrationsArtifactsEnvPath := filepath.Join(artifactExportDirectory, cmdExportEnvironment)
+	migrationsArtifactsEnvTenantPath := filepath.Join(migrationsArtifactsEnvPath, resourceTenantDirName)
+	migrationsArtifactsEnvTenantApisPath := filepath.Join(migrationsArtifactsEnvTenantPath, utils.ExportedMCPServersDirName)
+
+	createDirError = utils.CreateDirIfNotExist(migrationsArtifactsEnvPath)
+	createDirError = utils.CreateDirIfNotExist(migrationsArtifactsEnvTenantPath)
+
+	if dirExists, _ := utils.IsDirExists(migrationsArtifactsEnvTenantApisPath); dirExists {
+		if cmdForceStartFromBegin {
+			utils.RemoveDirectory(migrationsArtifactsEnvTenantApisPath)
+			createDirError = utils.CreateDir(migrationsArtifactsEnvTenantApisPath)
+		}
+	} else {
+		createDirError = utils.CreateDir(migrationsArtifactsEnvTenantApisPath)
+	}
+
+	if createDirError != nil {
+		utils.HandleErrorAndExit("Error in creating directory structure for the API export for migration .",
+			createDirError)
+	}
+	return migrationsArtifactsEnvTenantApisPath
 }
