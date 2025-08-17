@@ -227,7 +227,7 @@ func exportMCPServerAndWriteToZip(mcpServer utils.MCPServer, revisionNumber, acc
 	}
 }
 
-// Create the required directory structure to save the exported APIs
+// Create the required directory structure to save the exported MCP Servers
 func CreateExportMCPServersDirStructure(artifactExportDirectory, cmdResourceTenantDomain, cmdExportEnvironment string, cmdForceStartFromBegin bool) string {
 	var resourceTenantDirName = utils.GetMigrationExportTenantDirName(cmdResourceTenantDomain)
 
@@ -236,23 +236,23 @@ func CreateExportMCPServersDirStructure(artifactExportDirectory, cmdResourceTena
 
 	migrationsArtifactsEnvPath := filepath.Join(artifactExportDirectory, cmdExportEnvironment)
 	migrationsArtifactsEnvTenantPath := filepath.Join(migrationsArtifactsEnvPath, resourceTenantDirName)
-	migrationsArtifactsEnvTenantApisPath := filepath.Join(migrationsArtifactsEnvTenantPath, utils.ExportedMCPServersDirName)
+	migrationsArtifactsEnvTenantMCPServersPath := filepath.Join(migrationsArtifactsEnvTenantPath, utils.ExportedMCPServersDirName)
 
 	createDirError = utils.CreateDirIfNotExist(migrationsArtifactsEnvPath)
 	createDirError = utils.CreateDirIfNotExist(migrationsArtifactsEnvTenantPath)
 
-	if dirExists, _ := utils.IsDirExists(migrationsArtifactsEnvTenantApisPath); dirExists {
+	if dirExists, _ := utils.IsDirExists(migrationsArtifactsEnvTenantMCPServersPath); dirExists {
 		if cmdForceStartFromBegin {
-			utils.RemoveDirectory(migrationsArtifactsEnvTenantApisPath)
-			createDirError = utils.CreateDir(migrationsArtifactsEnvTenantApisPath)
+			utils.RemoveDirectory(migrationsArtifactsEnvTenantMCPServersPath)
+			createDirError = utils.CreateDir(migrationsArtifactsEnvTenantMCPServersPath)
 		}
 	} else {
-		createDirError = utils.CreateDir(migrationsArtifactsEnvTenantApisPath)
+		createDirError = utils.CreateDir(migrationsArtifactsEnvTenantMCPServersPath)
 	}
 
 	if createDirError != nil {
-		utils.HandleErrorAndExit("Error in creating directory structure for the API export for migration .",
+		utils.HandleErrorAndExit("Error in creating directory structure for the MCP Server export for migration .",
 			createDirError)
 	}
-	return migrationsArtifactsEnvTenantApisPath
+	return migrationsArtifactsEnvTenantMCPServersPath
 }
