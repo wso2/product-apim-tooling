@@ -141,7 +141,7 @@ func getRevisionsListForMCPServer(accessToken, environment string, mcpServer uti
 
 // Do the MCP Server exportation
 func ExportMCPServers(credential credentials.Credential, exportRelatedFilesPath, environment, tenantDomain, format,
-	username, exportDir string, preserveStatus, runningExportMCPServerCommand, allRevisions,
+	username, mcpServerExportDir string, preserveStatus, runningExportMCPServerCommand, allRevisions,
 	preserveCredentials bool) {
 
 	if mcpServerCount == 0 {
@@ -157,7 +157,7 @@ func ExportMCPServers(credential credentials.Credential, exportRelatedFilesPath,
 				for i := startingMCPServerIndexFromList; i < len(mcpServers); i++ {
 					if allRevisions {
 						// Export the working copy of the MCP server
-						exportMCPServerAndWriteToZip(mcpServers[i], "", accessToken, environment, exportDir,
+						exportMCPServerAndWriteToZip(mcpServers[i], "", accessToken, environment, mcpServerExportDir,
 							exportRelatedFilesPath, format, preserveStatus, runningExportMCPServerCommand,
 							preserveCredentials)
 						counterSucceededMCPServers++
@@ -171,7 +171,7 @@ func ExportMCPServers(credential credentials.Credential, exportRelatedFilesPath,
 						for j := 0; j < len(revisions); j++ {
 							exportMCPServerRevision := utils.GetRevisionNumFromRevisionName(revisions[j].RevisionNumber)
 							exportMCPServerAndWriteToZip(mcpServers[i], exportMCPServerRevision, accessToken, environment,
-								exportDir, exportRelatedFilesPath, format, preserveStatus, runningExportMCPServerCommand,
+								mcpServerExportDir, exportRelatedFilesPath, format, preserveStatus, runningExportMCPServerCommand,
 								preserveCredentials)
 							counterSucceededMCPServers++
 						}
@@ -192,7 +192,7 @@ func ExportMCPServers(credential credentials.Credential, exportRelatedFilesPath,
 			}
 		}
 		fmt.Println("\nTotal number of MCP Servers exported: " + cast.ToString(counterSucceededMCPServers))
-		fmt.Println("MCP Server export path: " + exportDir)
+		fmt.Println("MCP Server export path: " + mcpServerExportDir)
 		fmt.Println("\nCommand: export-mcp-servers execution completed !")
 	}
 }
