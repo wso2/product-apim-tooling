@@ -29,15 +29,11 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
-var mcpServerExportDir string
 var mcpServerListOffset int //from which index of MCP Server, the MCP Servers will be fetched from APIM server
 var mcpServerCount int32    // size of MCP Server list to be exported or number of MCP Servers left to be exported from last iteration
 var mcpServers []utils.MCPServer
-var exportMCPServersRelatedFilesPath string
-var exportMCPServersFormat string
 
 var startingMCPServerIndexFromList int
-var mcpServerMainConfigFilePath string
 
 // Prepare resumption of previous-halted export-mcp-servers operation
 func PrepareMCPServerResumption(credential credentials.Credential, exportRelatedFilesPath, cmdResourceTenantDomain, cmdUsername, cmdExportEnvironment string) {
@@ -145,7 +141,7 @@ func getRevisionsListForMCPServer(accessToken, environment string, mcpServer uti
 
 // Do the MCP Server exportation
 func ExportMCPServers(credential credentials.Credential, exportRelatedFilesPath, environment, tenantDomain, format,
-	username, exportDir string, preserveStatus, runningExportMCPServerCommand, allRevisions,
+	username, mcpServerExportDir string, preserveStatus, runningExportMCPServerCommand, allRevisions,
 	preserveCredentials bool) {
 
 	if mcpServerCount == 0 {
@@ -196,7 +192,7 @@ func ExportMCPServers(credential credentials.Credential, exportRelatedFilesPath,
 			}
 		}
 		fmt.Println("\nTotal number of MCP Servers exported: " + cast.ToString(counterSucceededMCPServers))
-		fmt.Println("MCP Server export path: " + exportDir)
+		fmt.Println("MCP Server export path: " + mcpServerExportDir)
 		fmt.Println("\nCommand: export-mcp-servers execution completed !")
 	}
 }
@@ -222,11 +218,41 @@ func exportMCPServerAndWriteToZip(mcpServer utils.MCPServer, revisionNumber, acc
 
 	if resp.StatusCode() == http.StatusOK {
 		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
-		WriteToZip(exportMCPServerName, exportMCPServerVersion, exportMCPServerRevision, mcpServerExportDir, runningExportMCPServerCommand, resp)
+		WriteMCPServerToZip(exportMCPServerName, exportMCPServerVersion, exportMCPServerRevision, mcpServerExportDir, runningExportMCPServerCommand, resp)
 		//write on last-succeeded-mcp-server.log
 		utils.WriteLastSucceededMCPServerFileData(exportRelatedFilesPath, mcpServer)
 	} else {
 		fmt.Printf("Error exporting MCP Server: %s - %s of Provider: %s\n", exportMCPServerName, exportMCPServerVersion, exportMCPServerProvider)
 		utils.PrintErrorResponseAndExit(resp)
 	}
+}
+
+// Create the required directory structure to save the exported MCP Servers
+func CreateExportMCPServersDirStructure(artifactExportDirectory, cmdResourceTenantDomain, cmdExportEnvironment string, cmdForceStartFromBegin bool) string {
+	var resourceTenantDirName = utils.GetMigrationExportTenantDirName(cmdResourceTenantDomain)
+
+	var createDirError error
+	createDirError = utils.CreateDirIfNotExist(artifactExportDirectory)
+
+	migrationsArtifactsEnvPath := filepath.Join(artifactExportDirectory, cmdExportEnvironment)
+	migrationsArtifactsEnvTenantPath := filepath.Join(migrationsArtifactsEnvPath, resourceTenantDirName)
+	migrationsArtifactsEnvTenantMCPServersPath := filepath.Join(migrationsArtifactsEnvTenantPath, utils.ExportedMCPServersDirName)
+
+	createDirError = utils.CreateDirIfNotExist(migrationsArtifactsEnvPath)
+	createDirError = utils.CreateDirIfNotExist(migrationsArtifactsEnvTenantPath)
+
+	if dirExists, _ := utils.IsDirExists(migrationsArtifactsEnvTenantMCPServersPath); dirExists {
+		if cmdForceStartFromBegin {
+			utils.RemoveDirectory(migrationsArtifactsEnvTenantMCPServersPath)
+			createDirError = utils.CreateDir(migrationsArtifactsEnvTenantMCPServersPath)
+		}
+	} else {
+		createDirError = utils.CreateDir(migrationsArtifactsEnvTenantMCPServersPath)
+	}
+
+	if createDirError != nil {
+		utils.HandleErrorAndExit("Error in creating directory structure for the MCP Server export for migration .",
+			createDirError)
+	}
+	return migrationsArtifactsEnvTenantMCPServersPath
 }

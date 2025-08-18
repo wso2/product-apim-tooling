@@ -19,7 +19,9 @@
 package impl
 
 import (
+	"fmt"
 	"net/url"
+	"path/filepath"
 	"strconv"
 
 	"github.com/go-resty/resty/v2"
@@ -70,4 +72,55 @@ func exportMCPServer(name, version, revisionNum, provider, format, publisherEndp
 	}
 
 	return resp, nil
+}
+
+// WriteMCPServerToZip
+// @param exportMCPServerName : Name of the MCP Server to be exported
+// @param exportMCPServerVersion: Version of the MCP Server to be exported
+// @param exportMCPServerRevisionNumber: Revision number of the MCP Server
+// @param zipLocationPath: Path to the export directory
+// @param runningExportMCPServerCommand: Whether the export MCP Server command is running
+// @param resp : Response returned from making the HTTP request (only pass a 200 OK)
+// Exported MCP Server will be written to a zip file
+func WriteMCPServerToZip(exportMCPServerName, exportMCPServerVersion, exportMCPServerRevisionNumber, zipLocationPath string,
+	runningExportMCPServerCommand bool, resp *resty.Response) {
+	zipFilename := exportMCPServerName + "_" + exportMCPServerVersion
+	if exportMCPServerRevisionNumber != "" {
+		zipFilename += "_" + utils.GetRevisionNamFromRevisionNum(exportMCPServerRevisionNumber)
+	}
+	zipFilename += ".zip" // MyMCPServer_1.0.0_Revision-1.zip
+	// Writes the REST MCP Server response to a temporary zip file
+	tempZipFile, err := utils.WriteResponseToTempZip(zipFilename, resp)
+	if err != nil {
+		utils.HandleErrorAndExit("Error creating the temporary zip file to store the exported MCP Server", err)
+	}
+
+	err = utils.CreateDirIfNotExist(zipLocationPath)
+	if err != nil {
+		utils.HandleErrorAndExit("Error creating dir to store zip archive: "+zipLocationPath, err)
+	}
+	exportedFinalZip := filepath.Join(zipLocationPath, zipFilename)
+
+	// Add mcp_server_meta.yaml file inside the zip and create a new zup file in exportedFinalZip location
+	metaData := utils.MetaData{
+		Name:    exportMCPServerName,
+		Version: exportMCPServerVersion,
+		DeployConfig: utils.DeployConfig{
+			Import: utils.ImportConfig{
+				Update:           true,
+				PreserveProvider: true,
+				RotateRevision:   false,
+			},
+		},
+	}
+	err = IncludeMetaFileToZip(tempZipFile, exportedFinalZip, utils.MetaFileMCPServer, metaData)
+	if err != nil {
+		utils.HandleErrorAndExit("Error creating the final zip archive with mcp_server_meta.yaml file", err)
+	}
+
+	// Output the final zip file location.
+	if runningExportMCPServerCommand {
+		fmt.Println("Successfully exported MCP Server!")
+		fmt.Println("Find the exported MCP Server at " + exportedFinalZip)
+	}
 }
