@@ -216,6 +216,10 @@ func retreiveProjectTypeByDefinitionFileName(sourceDirectoryPath string) (string
 			strings.EqualFold(fileName, utils.APIDefinitionFileJson) {
 			return utils.ProjectTypeApi, nil
 		}
+		if strings.EqualFold(fileName, utils.MCPServerDefinitionFileYaml) ||
+			strings.EqualFold(fileName, utils.MCPServerDefinitionFileJson) {
+			return utils.ProjectTypeMcpServer, nil
+		}
 		if strings.EqualFold(fileName, utils.APIProductDefinitionFileYaml) ||
 			strings.EqualFold(fileName, utils.APIProductDefinitionFileJson) {
 			return utils.ProjectTypeApiProduct, nil

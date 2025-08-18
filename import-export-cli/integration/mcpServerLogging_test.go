@@ -25,259 +25,282 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
 )
 
-type MCPServerLoggingTestArgs struct {
-	MCPServers   []*apim.MCPServer
-	APIM         *apim.Client
-	CtlUser      testutils.Credentials
-	TenantDomain string
-	MCPServerId  string
-	LogLevel     string
-}
-
-func TestGetMCPServerLogLevels(t *testing.T) {
-	for _, user := range testCaseUsers {
-		t.Run(user.Description, func(t *testing.T) {
-			dev := GetDevClient()
-			mcpServer1 := testutils.AddMCPServer(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
-			mcpServer2 := testutils.AddMCPServer(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
-			mcpServer3 := testutils.AddMCPServer(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
-			args := &testutils.MCPServerLoggingTestArgs{
-				CtlUser:      user.CtlUser,
-				MCPServers:   []*apim.MCPServer{mcpServer1, mcpServer2, mcpServer3},
-				APIM:         dev,
-				TenantDomain: user.CtlUser.Username,
-			}
-			testutils.ValidateGetMCPServerLogLevel(t, args)
-		})
-	}
-}
-
-func TestSetMCPServerLogLevel(t *testing.T) {
-	for _, user := range testCaseUsers {
-		t.Run(user.Description, func(t *testing.T) {
-			dev := GetDevClient()
-			mcpServer := testutils.AddMCPServer(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
-			args := &testutils.MCPServerLoggingTestArgs{
-				CtlUser:      user.CtlUser,
-				MCPServers:   []*apim.MCPServer{mcpServer},
-				APIM:         dev,
-				TenantDomain: user.CtlUser.Username,
-				MCPServerId:  mcpServer.ID,
-				LogLevel:     "FULL",
-			}
-			testutils.ValidateSetMCPServerLogLevel(t, args)
-		})
-	}
-}
-
-// Test get MCP Server logging for devops super tenant user
-func TestGetMCPServerLoggingDevopsSuperTenantUser(t *testing.T) {
-	devopsUsername := devops.UserName
-	devopsPassword := devops.Password
-
-	mcpServerCreator := creator.UserName
-	mcpServerCreatorPassword := creator.Password
-
-	dev := GetDevClient()
-
-	mcpServer := testutils.AddMCPServer(t, dev, mcpServerCreator, mcpServerCreatorPassword)
-
-	args := &testutils.MCPServerImportExportTestArgs{
-		MCPServerProvider: testutils.Credentials{Username: mcpServerCreator, Password: mcpServerCreatorPassword},
-		CtlUser:           testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
-		MCPServer:         mcpServer,
-		SrcAPIM:           dev,
-	}
-
-	// This test would need specific logging validation functions
-	// For now, we'll use the basic export validation
-	testutils.ValidateMCPServerExport(t, args)
-}
-
-// Test get MCP Server logging for publisher super tenant user should fail
-func TestGetMCPServerLoggingPublisherSuperTenantUser(t *testing.T) {
-	publisherUsername := publisher.UserName
-	publisherPassword := publisher.Password
-
-	mcpServerCreator := creator.UserName
-	mcpServerCreatorPassword := creator.Password
-
-	dev := GetDevClient()
-
-	mcpServer := testutils.AddMCPServer(t, dev, mcpServerCreator, mcpServerCreatorPassword)
-
-	args := &testutils.MCPServerImportExportTestArgs{
-		MCPServerProvider: testutils.Credentials{Username: mcpServerCreator, Password: mcpServerCreatorPassword},
-		CtlUser:           testutils.Credentials{Username: publisherUsername, Password: publisherPassword},
-		MCPServer:         mcpServer,
-		SrcAPIM:           dev,
-	}
-
-	// This would typically fail as publishers don't have logging access
-	testutils.ValidateMCPServerExport(t, args)
-}
-
-// Test get MCP Server logging for subscriber super tenant user should fail
-func TestGetMCPServerLoggingSubscriberSuperTenantUser(t *testing.T) {
-	subscriberUsername := subscriber.UserName
-	subscriberPassword := subscriber.Password
-
-	mcpServerCreator := creator.UserName
-	mcpServerCreatorPassword := creator.Password
-
-	dev := GetDevClient()
-
-	mcpServer := testutils.AddMCPServer(t, dev, mcpServerCreator, mcpServerCreatorPassword)
-
-	args := &testutils.MCPServerImportExportTestArgs{
-		MCPServerProvider: testutils.Credentials{Username: mcpServerCreator, Password: mcpServerCreatorPassword},
-		CtlUser:           testutils.Credentials{Username: subscriberUsername, Password: subscriberPassword},
-		MCPServer:         mcpServer,
-		SrcAPIM:           dev,
-	}
-
-	// This should fail as subscribers don't have logging access
-	testutils.ValidateMCPServerExportFailure(t, args)
-}
-
-// Test get MCP Server logging for tenant admin user
-func TestGetMCPServerLoggingAdminTenantUser(t *testing.T) {
-	tenantAdminUsername := superAdminUser + "@" + TENANT1
-	tenantAdminPassword := superAdminPassword
-
-	tenantCreator := creator.UserName + "@" + TENANT1
-	tenantCreatorPassword := creator.Password
-
-	dev := GetDevClient()
-
-	mcpServer := testutils.AddMCPServer(t, dev, tenantCreator, tenantCreatorPassword)
-
-	args := &testutils.MCPServerImportExportTestArgs{
-		MCPServerProvider: testutils.Credentials{Username: tenantCreator, Password: tenantCreatorPassword},
-		CtlUser:           testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
-		MCPServer:         mcpServer,
-		SrcAPIM:           dev,
-	}
-
-	// This test would need specific logging validation functions
-	// For now, we'll use the basic export validation
-	testutils.ValidateMCPServerExport(t, args)
-}
-
-// Test get MCP Server logging for tenant devops user
-func TestGetMCPServerLoggingDevopsTenantUser(t *testing.T) {
-	tenantDevopsUsername := devops.UserName + "@" + TENANT1
-	tenantDevopsPassword := devops.Password
-
-	tenantCreator := creator.UserName + "@" + TENANT1
-	tenantCreatorPassword := creator.Password
-
-	dev := GetDevClient()
-
-	mcpServer := testutils.AddMCPServer(t, dev, tenantCreator, tenantCreatorPassword)
-
-	args := &testutils.MCPServerImportExportTestArgs{
-		MCPServerProvider: testutils.Credentials{Username: tenantCreator, Password: tenantCreatorPassword},
-		CtlUser:           testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
-		MCPServer:         mcpServer,
-		SrcAPIM:           dev,
-	}
-
-	// This test would need specific logging validation functions
-	// For now, we'll use the basic export validation
-	testutils.ValidateMCPServerExport(t, args)
-}
-
-// Test get MCP Server logging for tenant publisher user should fail
-func TestGetMCPServerLoggingPublisherTenantUser(t *testing.T) {
-	tenantPublisherUsername := publisher.UserName + "@" + TENANT1
-	tenantPublisherPassword := publisher.Password
-
-	tenantCreator := creator.UserName + "@" + TENANT1
-	tenantCreatorPassword := creator.Password
-
-	dev := GetDevClient()
-
-	mcpServer := testutils.AddMCPServer(t, dev, tenantCreator, tenantCreatorPassword)
-
-	args := &testutils.MCPServerImportExportTestArgs{
-		MCPServerProvider: testutils.Credentials{Username: tenantCreator, Password: tenantCreatorPassword},
-		CtlUser:           testutils.Credentials{Username: tenantPublisherUsername, Password: tenantPublisherPassword},
-		MCPServer:         mcpServer,
-		SrcAPIM:           dev,
-	}
-
-	// This would typically fail as publishers don't have logging access
-	testutils.ValidateMCPServerExport(t, args)
-}
-
-// Test get MCP Server logging for tenant subscriber user should fail
-func TestGetMCPServerLoggingSubscriberTenantUser(t *testing.T) {
-	tenantSubscriberUsername := subscriber.UserName + "@" + TENANT1
-	tenantSubscriberPassword := subscriber.Password
-
-	tenantCreator := creator.UserName + "@" + TENANT1
-	tenantCreatorPassword := creator.Password
-
-	dev := GetDevClient()
-
-	mcpServer := testutils.AddMCPServer(t, dev, tenantCreator, tenantCreatorPassword)
-
-	args := &testutils.MCPServerImportExportTestArgs{
-		MCPServerProvider: testutils.Credentials{Username: tenantCreator, Password: tenantCreatorPassword},
-		CtlUser:           testutils.Credentials{Username: tenantSubscriberUsername, Password: tenantSubscriberPassword},
-		MCPServer:         mcpServer,
-		SrcAPIM:           dev,
-	}
-
-	// This should fail as subscribers don't have logging access
-	testutils.ValidateMCPServerExportFailure(t, args)
-}
-
-// Test set MCP Server logging for admin super tenant user
-func TestSetMCPServerLoggingAdminSuperTenantUser(t *testing.T) {
+// Get log levels of MCP Servers of the carbon.super tenant in an environment as a super admin user
+func TestGetMCPServerLogLevelsSuperAdminUser(t *testing.T) {
 	adminUsername := superAdminUser
 	adminPassword := superAdminPassword
 
-	mcpServerCreator := creator.UserName
+	mcpServerCreatorUsername := creator.UserName
 	mcpServerCreatorPassword := creator.Password
 
 	dev := GetDevClient()
 
-	mcpServer := testutils.AddMCPServer(t, dev, mcpServerCreator, mcpServerCreatorPassword)
+	mcpServer1 := testutils.AddMCPServer(t, dev, mcpServerCreatorUsername, mcpServerCreatorPassword)
+	mcpServer2 := testutils.AddMCPServer(t, dev, mcpServerCreatorUsername, mcpServerCreatorPassword)
+	mcpServer3 := testutils.AddMCPServer(t, dev, mcpServerCreatorUsername, mcpServerCreatorPassword)
 
-	args := &testutils.MCPServerImportExportTestArgs{
-		MCPServerProvider: testutils.Credentials{Username: mcpServerCreator, Password: mcpServerCreatorPassword},
-		CtlUser:           testutils.Credentials{Username: adminUsername, Password: adminPassword},
-		MCPServer:         mcpServer,
-		SrcAPIM:           dev,
+	args := &testutils.MCPServerLoggingTestArgs{
+		CtlUser:      testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		MCPServers:   []*apim.MCPServer{mcpServer1, mcpServer2, mcpServer3},
+		APIM:         dev,
+		TenantDomain: DEFAULT_TENANT_DOMAIN,
 	}
 
-	// This test would need specific logging set validation functions
-	// For now, we'll use the basic export validation
-	testutils.ValidateMCPServerExport(t, args)
+	testutils.ValidateGetMCPServerLogLevel(t, args)
 }
 
-// Test set MCP Server logging for devops super tenant user
-func TestSetMCPServerLoggingDevopsSuperTenantUser(t *testing.T) {
-	devopsUsername := devops.UserName
-	devopsPassword := devops.Password
+// Get log levels of MCP Servers of the carbon.super tenant in an environment as a non super admin user
+func TestGetMCPServerLogLevelsNonSuperAdminUser(t *testing.T) {
+	tenantAdminUsername := superAdminUser + "@" + TENANT1
+	tenantAdminPassword := superAdminPassword
 
-	mcpServerCreator := creator.UserName
+	mcpServerCreatorUsername := creator.UserName
 	mcpServerCreatorPassword := creator.Password
 
 	dev := GetDevClient()
 
-	mcpServer := testutils.AddMCPServer(t, dev, mcpServerCreator, mcpServerCreatorPassword)
+	mcpServer := testutils.AddMCPServer(t, dev, mcpServerCreatorUsername, mcpServerCreatorPassword)
 
-	args := &testutils.MCPServerImportExportTestArgs{
-		MCPServerProvider: testutils.Credentials{Username: mcpServerCreator, Password: mcpServerCreatorPassword},
-		CtlUser:           testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
-		MCPServer:         mcpServer,
-		SrcAPIM:           dev,
+	args := &testutils.MCPServerLoggingTestArgs{
+		CtlUser:      testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
+		MCPServers:   []*apim.MCPServer{mcpServer},
+		APIM:         dev,
+		TenantDomain: DEFAULT_TENANT_DOMAIN,
 	}
 
-	// This test would need specific logging set validation functions
-	// For now, we'll use the basic export validation
-	testutils.ValidateMCPServerExport(t, args)
+	testutils.ValidateGetMCPServerLogLevelError(t, args)
+}
+
+// Get log levels of MCP Servers of another tenant in an environment as a super admin user
+func TestGetMCPServerLogLevelsAnotherTenantSuperAdminUser(t *testing.T) {
+	adminUsername := superAdminUser
+	adminPassword := superAdminPassword
+
+	mcpServerCreatorUsername := testCaseUsers[1].ApiCreator.Username
+	mcpServerCreatorPassword := testCaseUsers[1].ApiCreator.Password
+
+	dev := GetDevClient()
+
+	mcpServer1 := testutils.AddMCPServer(t, dev, mcpServerCreatorUsername, mcpServerCreatorPassword)
+	mcpServer2 := testutils.AddMCPServer(t, dev, mcpServerCreatorUsername, mcpServerCreatorPassword)
+	mcpServer3 := testutils.AddMCPServer(t, dev, mcpServerCreatorUsername, mcpServerCreatorPassword)
+
+	args := &testutils.MCPServerLoggingTestArgs{
+		CtlUser:      testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		MCPServers:   []*apim.MCPServer{mcpServer1, mcpServer2, mcpServer3},
+		APIM:         dev,
+		TenantDomain: TENANT1,
+	}
+
+	testutils.ValidateGetMCPServerLogLevel(t, args)
+}
+
+// Get log levels of MCP Servers of another tenant in an environment as a non super admin user
+func TestGetMCPServerLogLevelsAnotherTenantNonSuperAdminUser(t *testing.T) {
+	tenantAdminUsername := superAdminUser + "@" + TENANT1
+	tenantAdminPassword := superAdminPassword
+
+	mcpServerCreatorUsername := testCaseUsers[1].ApiCreator.Username
+	mcpServerCreatorPassword := testCaseUsers[1].ApiCreator.Password
+
+	dev := GetDevClient()
+
+	mcpServer := testutils.AddMCPServer(t, dev, mcpServerCreatorUsername, mcpServerCreatorPassword)
+
+	args := &testutils.MCPServerLoggingTestArgs{
+		CtlUser:      testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
+		MCPServers:   []*apim.MCPServer{mcpServer},
+		APIM:         dev,
+		TenantDomain: TENANT1,
+	}
+
+	testutils.ValidateGetMCPServerLogLevelError(t, args)
+}
+
+// Get log level of an MCP Server of the carbon.super tenant in an environment as a super admin user
+func TestGetMCPServerLogLevelSuperAdminUserSingle(t *testing.T) {
+	adminUsername := superAdminUser
+	adminPassword := superAdminPassword
+
+	mcpServerCreatorUsername := creator.UserName
+	mcpServerCreatorPassword := creator.Password
+
+	dev := GetDevClient()
+
+	mcpServer := testutils.AddMCPServer(t, dev, mcpServerCreatorUsername, mcpServerCreatorPassword)
+
+	args := &testutils.MCPServerLoggingTestArgs{
+		CtlUser:      testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		MCPServers:   []*apim.MCPServer{mcpServer},
+		APIM:         dev,
+		TenantDomain: DEFAULT_TENANT_DOMAIN,
+		MCPServerId:  mcpServer.ID,
+	}
+
+	testutils.ValidateGetMCPServerLogLevel(t, args)
+}
+
+// Get log level of an MCP Server of the carbon.super tenant in an environment as a non super admin user
+func TestGetMCPServerLogLevelNonSuperAdminUserSingle(t *testing.T) {
+	tenantAdminUsername := superAdminUser + "@" + TENANT1
+	tenantAdminPassword := superAdminPassword
+
+	mcpServerCreatorUsername := creator.UserName
+	mcpServerCreatorPassword := creator.Password
+
+	dev := GetDevClient()
+
+	mcpServer := testutils.AddMCPServer(t, dev, mcpServerCreatorUsername, mcpServerCreatorPassword)
+
+	args := &testutils.MCPServerLoggingTestArgs{
+		CtlUser:      testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
+		MCPServers:   []*apim.MCPServer{mcpServer},
+		APIM:         dev,
+		TenantDomain: DEFAULT_TENANT_DOMAIN,
+		MCPServerId:  mcpServer.ID,
+	}
+
+	testutils.ValidateGetMCPServerLogLevelError(t, args)
+}
+
+// Get log level of an MCP Server of another tenant in an environment as a super admin user
+func TestGetMCPServerLogLevelAnotherTenantSuperAdminUserSingle(t *testing.T) {
+	adminUsername := superAdminUser
+	adminPassword := superAdminPassword
+
+	mcpServerCreatorUsername := testCaseUsers[1].ApiCreator.Username
+	mcpServerCreatorPassword := testCaseUsers[1].ApiCreator.Password
+
+	dev := GetDevClient()
+
+	mcpServer := testutils.AddMCPServer(t, dev, mcpServerCreatorUsername, mcpServerCreatorPassword)
+
+	args := &testutils.MCPServerLoggingTestArgs{
+		CtlUser:      testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		MCPServers:   []*apim.MCPServer{mcpServer},
+		APIM:         dev,
+		TenantDomain: TENANT1,
+		MCPServerId:  mcpServer.ID,
+	}
+
+	testutils.ValidateGetMCPServerLogLevel(t, args)
+}
+
+// Get log level of an MCP Server of another tenant in an environment as a non super admin user
+func TestGetMCPServerLogLevelAnotherTenantNonSuperAdminUser(t *testing.T) {
+	tenantAdminUsername := superAdminUser + "@" + TENANT1
+	tenantAdminPassword := superAdminPassword
+
+	mcpServerCreatorUsername := testCaseUsers[1].ApiCreator.Username
+	mcpServerCreatorPassword := testCaseUsers[1].ApiCreator.Password
+
+	dev := GetDevClient()
+
+	mcpServer := testutils.AddMCPServer(t, dev, mcpServerCreatorUsername, mcpServerCreatorPassword)
+
+	args := &testutils.MCPServerLoggingTestArgs{
+		CtlUser:      testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
+		MCPServers:   []*apim.MCPServer{mcpServer},
+		APIM:         dev,
+		TenantDomain: TENANT1,
+		MCPServerId:  mcpServer.ID,
+	}
+
+	testutils.ValidateGetMCPServerLogLevelError(t, args)
+}
+
+// Set log level of an MCP Server of the carbon.super tenant in an environment as a super admin user
+func TestSetMCPServerLogLevelSuperAdminUser(t *testing.T) {
+	adminUsername := superAdminUser
+	adminPassword := superAdminPassword
+
+	mcpServerCreatorUsername := creator.UserName
+	mcpServerCreatorPassword := creator.Password
+
+	dev := GetDevClient()
+
+	mcpServer := testutils.AddMCPServer(t, dev, mcpServerCreatorUsername, mcpServerCreatorPassword)
+
+	args := &testutils.MCPServerLoggingTestArgs{
+		CtlUser:      testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		MCPServers:   []*apim.MCPServer{mcpServer},
+		APIM:         dev,
+		TenantDomain: DEFAULT_TENANT_DOMAIN,
+		MCPServerId:  mcpServer.ID,
+		LogLevel:     "FULL",
+	}
+
+	testutils.ValidateSetMCPServerLogLevel(t, args)
+}
+
+// Set log level of an MCP Server of the carbon.super tenant in an environment as a non super admin user
+func TestSetMCPServerLogLevelNonSuperAdminUser(t *testing.T) {
+	tenantAdminUsername := superAdminUser + "@" + TENANT1
+	tenantAdminPassword := superAdminPassword
+
+	mcpServerCreatorUsername := creator.UserName
+	mcpServerCreatorPassword := creator.Password
+
+	dev := GetDevClient()
+
+	mcpServer := testutils.AddMCPServer(t, dev, mcpServerCreatorUsername, mcpServerCreatorPassword)
+
+	args := &testutils.MCPServerLoggingTestArgs{
+		CtlUser:      testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
+		MCPServers:   []*apim.MCPServer{mcpServer},
+		APIM:         dev,
+		TenantDomain: DEFAULT_TENANT_DOMAIN,
+		MCPServerId:  mcpServer.ID,
+		LogLevel:     "STANDARD",
+	}
+
+	testutils.ValidateSetMCPServerLogLevelError(t, args)
+}
+
+// Set log level of an MCP Server of another tenant in an environment as a super admin user
+func TestSetMCPServerLogLevelAnotherTenantSuperAdminUser(t *testing.T) {
+	adminUsername := superAdminUser
+	adminPassword := superAdminPassword
+
+	mcpServerCreatorUsername := testCaseUsers[1].ApiCreator.Username
+	mcpServerCreatorPassword := testCaseUsers[1].ApiCreator.Password
+
+	dev := GetDevClient()
+
+	mcpServer := testutils.AddMCPServer(t, dev, mcpServerCreatorUsername, mcpServerCreatorPassword)
+
+	args := &testutils.MCPServerLoggingTestArgs{
+		CtlUser:      testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		MCPServers:   []*apim.MCPServer{mcpServer},
+		APIM:         dev,
+		TenantDomain: TENANT1,
+		MCPServerId:  mcpServer.ID,
+		LogLevel:     "BASIC",
+	}
+
+	testutils.ValidateSetMCPServerLogLevel(t, args)
+}
+
+// Set log level of an MCP Server of another tenant in an environment as a non super admin user
+func TestSetMCPServerLogLevelAnotherTenantNonSuperAdminUser(t *testing.T) {
+	tenantAdminUsername := superAdminUser + "@" + TENANT1
+	tenantAdminPassword := superAdminPassword
+
+	mcpServerCreatorUsername := testCaseUsers[1].ApiCreator.Username
+	mcpServerCreatorPassword := testCaseUsers[1].ApiCreator.Password
+
+	dev := GetDevClient()
+
+	mcpServer := testutils.AddMCPServer(t, dev, mcpServerCreatorUsername, mcpServerCreatorPassword)
+
+	args := &testutils.MCPServerLoggingTestArgs{
+		CtlUser:      testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
+		MCPServers:   []*apim.MCPServer{mcpServer},
+		APIM:         dev,
+		TenantDomain: TENANT1,
+		MCPServerId:  mcpServer.ID,
+		LogLevel:     "OFF",
+	}
+
+	testutils.ValidateSetMCPServerLogLevelError(t, args)
 }

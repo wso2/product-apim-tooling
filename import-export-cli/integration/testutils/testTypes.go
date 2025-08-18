@@ -108,6 +108,7 @@ type ApiGetKeyTestArgs struct {
 	CtlUser    Credentials
 	Api        *apim.API
 	ApiProduct *apim.APIProduct
+	MCPServer  *apim.MCPServer
 	Apim       *apim.Client
 }
 
@@ -115,6 +116,7 @@ type UndeployTestArgs struct {
 	CtlUser     Credentials
 	Api         *apim.API
 	ApiProduct  *apim.APIProduct
+	MCPServer   *apim.MCPServer
 	SrcAPIM     *apim.Client
 	RevisionNo  string
 	GatewayEnvs []string

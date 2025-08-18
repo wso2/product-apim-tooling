@@ -86,6 +86,25 @@ func undeployAPIProduct(t *testing.T, args *UndeployTestArgs, provider string) (
 	return output, err
 }
 
+func undeployMCPServer(t *testing.T, args *UndeployTestArgs, provider string) (string, error) {
+	params := []string{"undeploy", "mcp-server", "-n", args.MCPServer.Name, "-v", args.MCPServer.Version,
+		"--rev", args.RevisionNo, "-e", args.SrcAPIM.GetEnvName(), "-k", "--verbose"}
+
+	if provider != "" {
+		params = append(params, "-r", provider)
+	}
+
+	if len(args.GatewayEnvs) > 0 {
+		for _, gatewayEnv := range args.GatewayEnvs {
+			params = append(params, "-g", "\""+gatewayEnv+"\"")
+		}
+	}
+
+	output, err := base.Execute(t, params...)
+
+	return output, err
+}
+
 func ValidateAPIUndeploy(t *testing.T, args *UndeployTestArgs, provider, revisionId string) {
 	t.Helper()
 
@@ -217,4 +236,90 @@ func ValidateAPIProductUndeployFailure(t *testing.T, args *UndeployTestArgs, pro
 	result, _ := undeployAPIProduct(t, args, provider)
 
 	assert.Contains(t, result, "400", "Test failed because API Product was undeployed successfully")
+}
+
+func ValidateMCPServerUndeploy(t *testing.T, args *UndeployTestArgs, provider, revisionId string) {
+	t.Helper()
+
+	deployedMCPServerRevisionsBeforeUndeploy := args.SrcAPIM.GetMCPServerRevisions(args.MCPServer.ID, "deployed:true")
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	// Export api from env 1
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	// Execute undeploy MCP Server command
+	result, err := undeployMCPServer(t, args, provider)
+
+	assert.Nil(t, err, "Should return nil error")
+	assert.Contains(t, result, "Revision "+args.RevisionNo+" of MCP Server "+args.MCPServer.Name+"_"+
+		args.MCPServer.Version+" successfully undeployed")
+
+	deployedMCPServerRevisionsAfterUndeploy := args.SrcAPIM.GetMCPServerRevisions(args.MCPServer.ID, "deployed:true")
+
+	if len(args.GatewayEnvs) > 0 {
+		// Validate the deployed gateways before and after executing the undeploy command
+		ValidateMCPServerDeployedGateways(t, deployedMCPServerRevisionsBeforeUndeploy, deployedMCPServerRevisionsAfterUndeploy, args, revisionId)
+	} else {
+		// This scenario is that the MCP Server revision is undeployed from all the gateways
+		assert.Equal(t, len(deployedMCPServerRevisionsAfterUndeploy.List), 0)
+	}
+}
+
+func ValidateMCPServerUndeployFailure(t *testing.T, args *UndeployTestArgs, provider, revisionId string) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	// Export api from env 1
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	// Execute undeploy MCP Server command
+	result, _ := undeployMCPServer(t, args, provider)
+
+	assert.Contains(t, base.GetValueOfUniformResponse(result), "Error while undeploying the MCP Server",
+		"Test failed because MCP Server was undeployed successfully")
+}
+
+func ValidateMCPServerDeployedGateways(t *testing.T, deployedRevisionsBeforeUndeploy *apim.MCPServerRevisionList,
+	deployedRevisionsAfterUndeploy *apim.MCPServerRevisionList, args *UndeployTestArgs, revisionId string) {
+
+	// Validate whether the deployed gateways contain the gateway envs before undeploying
+	assert.True(t, containsGatewaysInMCPServerDeployment(deployedRevisionsBeforeUndeploy, args.GatewayEnvs, revisionId))
+
+	// Validate whether the deployed gateways do not contain the gateway envs after undeploying
+	assert.False(t, containsGatewaysInMCPServerDeployment(deployedRevisionsAfterUndeploy, args.GatewayEnvs, revisionId))
+}
+
+func containsGatewaysInMCPServerDeployment(deployedRevisions *apim.MCPServerRevisionList, gatewayEnvs []string,
+	revisionId string) bool {
+	for _, deployedRevision := range deployedRevisions.List {
+		if strings.EqualFold(deployedRevision.ID, revisionId) {
+			containsGatewaysInDeployment := []bool{}
+
+			// Check whether the passed gateway labels to the command are there in the deployed list
+			// If so mark it as true, else false
+			for _, gatewayEnv := range gatewayEnvs {
+				containsGateway := false
+				for _, deployment := range deployedRevision.DeploymentInfo {
+					if strings.EqualFold(deployment.Name, gatewayEnv) {
+						containsGateway = true
+						break
+					}
+				}
+				containsGatewaysInDeployment = append(containsGatewaysInDeployment, containsGateway)
+			}
+
+			// If any of the gateways are not inside the deployed list, false should be returned
+			for _, containsGatewayInDeployment := range containsGatewaysInDeployment {
+				if !containsGatewayInDeployment {
+					return false
+				}
+			}
+			return true
+		}
+	}
+	return false
 }

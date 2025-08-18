@@ -34,8 +34,9 @@ func TestExportInvalidMCPServerRevision(t *testing.T) {
 				CtlUser:           user.CtlUser,
 				MCPServer:         mcpServer,
 				SrcAPIM:           dev,
+				Revision:          "999", // Invalid revision number
 			}
-			testutils.ValidateMCPServerExportFailure(t, args)
+			testutils.ValidateMCPServerRevisionExportFailure(t, args)
 		})
 	}
 }

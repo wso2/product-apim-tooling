@@ -20,13 +20,11 @@ package integration
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 const numberOfMCPServers = 5 // Number of MCP Servers to be added in a loop
@@ -412,11 +410,10 @@ func TestExportMCPServerAdminTenantUserFromAnotherTenantWithoutProvider(t *testi
 	mcpServer := testutils.AddMCPServer(t, dev, superTenantMCPServerCreator, superTenantMCPServerCreatorPassword)
 
 	args := &testutils.MCPServerImportExportTestArgs{
-		MCPServerProvider: testutils.Credentials{Username: "", Password: ""},
-		CtlUser:           testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
-		MCPServer:         mcpServer,
-		SrcAPIM:           dev,
-		DestAPIM:          prod,
+		CtlUser:   testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
+		MCPServer: mcpServer,
+		SrcAPIM:   dev,
+		DestAPIM:  prod,
 	}
 
 	testutils.ValidateMCPServerExportFailure(t, args)
@@ -436,11 +433,10 @@ func TestExportMCPServerDevopsTenantUserFromAnotherTenantWithoutProvider(t *test
 	mcpServer := testutils.AddMCPServer(t, dev, superTenantMCPServerCreator, superTenantMCPServerCreatorPassword)
 
 	args := &testutils.MCPServerImportExportTestArgs{
-		MCPServerProvider: testutils.Credentials{Username: "", Password: ""},
-		CtlUser:           testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
-		MCPServer:         mcpServer,
-		SrcAPIM:           dev,
-		DestAPIM:          prod,
+		CtlUser:   testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		MCPServer: mcpServer,
+		SrcAPIM:   dev,
+		DestAPIM:  prod,
 	}
 
 	testutils.ValidateMCPServerExportFailure(t, args)
@@ -467,9 +463,9 @@ func TestExportImportMCPServerCrossTenantUserWithoutPreserveProvider(t *testing.
 		MCPServerProvider: testutils.Credentials{Username: superTenantMCPServerCreator, Password: superTenantMCPServerCreatorPassword},
 		CtlUser:           testutils.Credentials{Username: superTenantAdminUsername, Password: superTenantAdminPassword},
 		MCPServer:         mcpServer,
+		OverrideProvider:  true,
 		SrcAPIM:           dev,
 		DestAPIM:          prod,
-		OverrideProvider:  true,
 	}
 
 	testutils.ValidateMCPServerExport(t, args)
@@ -961,8 +957,16 @@ func TestDeleteMCPServerWithActiveSubscriptionsSuperTenantUser(t *testing.T) {
 	// Create and Deploy Revision of the above MCP Server
 	testutils.CreateAndDeployMCPServerRevision(t, dev, mcpServerPublisher, mcpServerPublisherPassword, mcpServer.ID)
 
+	args := &testutils.ApiGetKeyTestArgs{
+		CtlUser:   testutils.Credentials{Username: adminUser, Password: adminPassword},
+		MCPServer: mcpServer,
+		Apim:      dev,
+	}
+
 	//Publish created MCP Server
 	testutils.PublishMCPServer(dev, mcpServerPublisher, mcpServerPublisherPassword, mcpServer.ID)
+
+	testutils.ValidateGetKeysWithoutCleanup(t, args, false)
 
 	//args to delete MCP Server
 	argsToDelete := &testutils.MCPServerImportExportTestArgs{
@@ -1289,48 +1293,6 @@ func TestChangeLifeCycleStatusOfMCPServerWithActiveSubscriptionDevopsSuperTenant
 	}
 
 	testutils.ValidateChangeLifeCycleStatusOfMCPServer(t, argsToLifeCycleStateChange)
-}
-
-// Import a MCP Server and then create a new version of that MCP Server by updating the context and version only and import again
-func TestCreateNewVersionOfMCPServerByUpdatingVersion(t *testing.T) {
-	for _, user := range testCaseUsers {
-		t.Run(user.Description, func(t *testing.T) {
-
-			apim := GetDevClient()
-			projectName := base.GenerateRandomName(16)
-
-			args := &testutils.InitTestArgs{
-				CtlUser:   testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
-				SrcAPIM:   apim,
-				InitFlag:  projectName,
-				OasFlag:   testutils.TestSwagger2DefinitionPath,
-				APIName:   testutils.DevFirstSwagger2APIName,
-				ForceFlag: false,
-			}
-
-			//Initialize a project with MCP Server definition
-			testutils.ValidateInitializeProjectWithOASFlag(t, args)
-
-			//Assert that project import to publisher portal is successful
-			testutils.ValidateImportProject(t, args, "", !isTenantUser(user.CtlUser.Username, TENANT1))
-
-			// Read the MCP Server definition file in the project
-			mcpServerDefinitionFilePath := args.InitFlag + string(os.PathSeparator) + utils.APIDefinitionFileYaml
-			mcpServerDefinitionFileContent := testutils.ReadAPIDefinition(t, mcpServerDefinitionFilePath)
-
-			//Change the version
-			newVersion := base.GenerateRandomString()
-			mcpServerDefinitionFileContent.Data.Version = newVersion
-
-			// Write the modified MCP Server definition to the directory
-			testutils.WriteToAPIDefinition(t, mcpServerDefinitionFileContent, mcpServerDefinitionFilePath)
-
-			// Import and validate new MCP Server with version change
-			testutils.ValidateImportProject(t, args, "", !isTenantUser(user.CtlUser.Username, TENANT1))
-
-			testutils.ValidateMCPServersListWithVersionsFromInitArgs(t, args, newVersion)
-		})
-	}
 }
 
 // MCP Server search using query parameters

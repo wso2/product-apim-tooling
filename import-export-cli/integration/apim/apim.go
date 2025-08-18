@@ -352,7 +352,7 @@ func (instance *Client) GenerateSampleMCPServerData(provider, name, version, con
 	mcpServer.EnableSchemaValidation = false
 	mcpServer.Transport = []string{"http", "https"}
 	mcpServer.Tags = []string{}
-	mcpServer.Policies = []string{"Bronze"}
+	mcpServer.Policies = []string{"Unlimited"}
 	mcpServer.AuthorizationHeader = "Authorization"
 	mcpServer.SecurityScheme = []string{"oauth_basic_auth_api_key_mandatory", "oauth2"}
 	mcpServer.Visibility = "PUBLIC"
@@ -2964,7 +2964,7 @@ func (instance *Client) SetAPILogLevel(username, password, tenantDomain, apiId, 
 }
 
 func (instance *Client) GetMCPServerLogLevel(username, password, tenantDomain, mcpServerId string) (*MCPServerLogLevelList, error) {
-	url := instance.devopsRestURL + "/tenant-logs/" + tenantDomain + "/mcp-servers/" + mcpServerId
+	url := instance.devopsRestURL + "/tenant-logs/" + tenantDomain + "/apis/" + mcpServerId
 	request := base.CreateGet(url)
 	encoded := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
 
@@ -2987,7 +2987,7 @@ func (instance *Client) GetMCPServerLogLevel(username, password, tenantDomain, m
 }
 
 func (instance *Client) SetMCPServerLogLevel(username, password, tenantDomain, mcpServerId, logLevel string) (*MCPServerLogLevel, error) {
-	url := instance.devopsRestURL + "/tenant-logs/" + tenantDomain + "/mcp-servers/" + mcpServerId
+	url := instance.devopsRestURL + "/tenant-logs/" + tenantDomain + "/apis/" + mcpServerId
 	data, err := json.Marshal(MCPServerLogLevel{LogLevel: logLevel})
 
 	if err != nil {

@@ -347,6 +347,10 @@ func changeMCPServerLifeCycle(t *testing.T, args *MCPServerChangeLifeCycleStatus
 	return output, err
 }
 
+func GetMCPServerResourceURL(apim *apim.Client, mcpServer *apim.MCPServer) string {
+	return apim.GetApimURL() + "/" + mcpServer.Context + "/" + mcpServer.Version
+}
+
 func ValidateMCPServerExportFailure(t *testing.T, args *MCPServerImportExportTestArgs) {
 	t.Helper()
 
@@ -361,6 +365,23 @@ func ValidateMCPServerExportFailure(t *testing.T, args *MCPServerImportExportTes
 	// Validate that export failed
 	assert.False(t, base.IsMCPServerArchiveExists(t, GetEnvMCPServerExportPath(args.SrcAPIM.GetEnvName()),
 		args.MCPServer.Name, args.MCPServer.Version), "Test failed because the MCP Server was exported successfully")
+}
+
+// ValidateMCPServerRevisionExportFailure validates that MCP Server revision export fails
+func ValidateMCPServerRevisionExportFailure(t *testing.T, args *MCPServerImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl env
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	// Attempt exporting MCP Server revision from env
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	exportMCPServerRevision(t, args)
+
+	// Validate that export failed
+	assert.False(t, base.IsMCPServerArchiveExists(t, GetEnvMCPServerExportPath(args.SrcAPIM.GetEnvName()),
+		args.MCPServer.Name, args.MCPServer.Version), "Test failed because the MCP Server revision was exported successfully")
 }
 
 // ValidateMCPServerExportFailureUnauthenticated validates that MCP Server export fails for unauthenticated user

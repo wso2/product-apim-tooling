@@ -93,6 +93,26 @@ func invokeWithRetry(t *testing.T, client *http.Client, req *http.Request) (*htt
 	return response, err
 }
 
+func InvokeMCPServer(t *testing.T, url string, key string, expectedCode int) {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+
+	req, err := http.NewRequest("GET", url, nil)
+
+	assert.Nil(t, err, "Error while generating GET")
+
+	base.SetDefaultRestAPIHeaders(key, req)
+
+	base.LogRequest("invokeMCPServer()", req)
+
+	response, err := invokeWithRetry(t, client, req)
+
+	assert.Nil(t, err, "Error while invoking MCP Server")
+	assert.Equal(t, expectedCode, response.StatusCode, "MCP Server Invocation failed")
+}
+
 func ValidateGetKeysFailure(t *testing.T, args *ApiGetKeyTestArgs) {
 	t.Helper()
 
@@ -177,6 +197,19 @@ func ValidateGetKeysWithoutCleanup(t *testing.T, args *ApiGetKeyTestArgs, doInvo
 
 		if doInvoke {
 			invokeAPIProduct(t, getResourceURLForAPIProduct(args.Apim, args.ApiProduct), base.GetValueOfUniformResponse(result), 200)
+		}
+	}
+
+	if args.MCPServer != nil {
+		result, err = GetKeys(t, args.MCPServer.Provider, args.MCPServer.Name, args.MCPServer.Version, args.Apim.GetEnvName())
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		assert.Nil(t, err, "Error while getting key")
+
+		if doInvoke {
+			InvokeMCPServer(t, GetMCPServerResourceURL(args.Apim, args.MCPServer), base.GetValueOfUniformResponse(result), 200)
 		}
 	}
 }

@@ -263,6 +263,8 @@ const ParamsIntermediateFile = "intermediate_params.yaml"
 const (
 	APIDefinitionFileYaml         = "api.yaml"
 	APIDefinitionFileJson         = "api.json"
+	MCPServerDefinitionFileYaml   = "mcp_server.yaml"
+	MCPServerDefinitionFileJson   = "mcp_server.json"
 	APIProductDefinitionFileYaml  = "api_product.yaml"
 	APIProductDefinitionFileJson  = "api_product.json"
 	ApplicationDefinitionFileYaml = "application.yaml"
