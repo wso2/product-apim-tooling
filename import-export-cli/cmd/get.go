@@ -36,7 +36,7 @@ Display a list of Applications of a specific user in the environment specified b
 Display a list of API revisions of a specific API in the environment specified by flag (--environment, -e)/
 Display a list of MCP Server revisions of a specific MCP Server in the environment specified by flag (--environment, -e)/
 Display a list of API Product revisions of a specific API Product in the environment specified by flag (--environment, -e)/
-Get a generated JWT token to invoke an API or API Product by subscribing to a default application for testing purposes in the environment specified by flag (--environment, -e)/
+Get a generated JWT token to invoke an API or API Product or MCP Server by subscribing to a default application for testing purposes in the environment specified by flag (--environment, -e)/
 Get the log level of each API in the environment specified by flag (--environment, -e)/
 Get the log level of each MCP Server in the environment specified by flag (--environment, -e)/
 Get the correlation log configurations in the environment specified by flag (--environment, -e)
