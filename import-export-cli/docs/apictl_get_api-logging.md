@@ -36,5 +36,5 @@ apictl get api-logging --api-id bf36ca3a-0332-49ba-abce-e9992228ae06 -e dev --te
 
 ### SEE ALSO
 
-* [apictl get](apictl_get.md)	 - Get APIs/APIProducts/Applications or revisions of a specific API/APIProduct in an environment or Get the Correlation Log Configurations or Get the log level of each API in an environment or Get the environments
+* [apictl get](apictl_get.md)	 - Get APIs/MCPServers/APIProducts/Applications or revisions of a specific API/MCPServers/APIProduct in an environment or Get the Correlation Log Configurations or Get the log level of each API/MCPServers in an environment or Get the environments
 

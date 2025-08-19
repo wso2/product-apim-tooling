@@ -41,5 +41,5 @@ If the flag (--gateway-env (-g)) is not provided, revision will be undeployed fr
 
 ### SEE ALSO
 
-* [apictl undeploy](apictl_undeploy.md)	 - Undeploy an API/API Product revision from a gateway environment
+* [apictl undeploy](apictl_undeploy.md)	 - Undeploy an API/MCP Server/API Product revision from a gateway environment
 

@@ -3,6 +3,7 @@ version: v4.0.0
 data:
   id: 8cd7db61-46ab-49eb-bfea-5b59da3863f4
   name: SwaggerPetstore
+  displayName: SwaggerPetstore
   context: /v2
   version: 1.0.5
   provider: admin
@@ -263,3 +264,4 @@ data:
   advertiseInfo:
     advertised: false
     apiOwner: admin
+  initiatedFromGateway: false

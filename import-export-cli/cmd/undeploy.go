@@ -25,12 +25,13 @@ import (
 
 // Undeploy command related usage Info
 const UndeployCmdLiteral = "undeploy"
-const undeployCmdShortDesc = "Undeploy an API/API Product revision from a gateway environment"
+const undeployCmdShortDesc = "Undeploy an API/MCP Server/API Product revision from a gateway environment"
 
-const undeployCmdLongDesc = `Undeploy an API/API Product revision available in the environment specified by flag (--environment, -e) from the gateway specified by flag (--gateway, -g)`
+const undeployCmdLongDesc = `Undeploy an API/MCP Server/API Product revision available in the environment specified by flag (--environment, -e) from the gateway specified by flag (--gateway, -g)`
 
 const undeployCmdExamples = utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin --rev 1 -g Label1 -g Label2 -e dev
 ` + utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPICmdLiteral + ` -n PizzaAPI -v 1.0.0 --rev 2 --all-gateways -e dev
+` + utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployMCPServerCmdLiteral + ` -n WeatherMCPServer -v 1.0.0 --rev 1 -g Label1 -g Label2 -e dev
 ` + utils.ProjectName + ` ` + UndeployCmdLiteral + ` ` + UndeployAPIProductCmdLiteral + ` -n LeasingAPIProduct -v 1.0.0 --rev 3 -g Label1 -e dev`
 
 // UndeployCmd represents the undeploy command

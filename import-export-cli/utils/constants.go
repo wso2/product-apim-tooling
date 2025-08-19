@@ -97,6 +97,7 @@ var DefaultAPISpecFilePath = filepath.Join(ConfigDirPath, DefaultAPISpecFileName
 
 const DefaultExportDirName = "exported"
 const ExportedApisDirName = "apis"
+const ExportedMCPServersDirName = "mcp-servers"
 const ExportedPoliciesDirName = "policies"
 const ExportedThrottlePoliciesDirName = "rate-limiting"
 const ExportedAPIPoliciesDirName = "api"
@@ -129,6 +130,7 @@ var DefaultCertDirPath = filepath.Join(ConfigDirPath, CertificatesDirName)
 const defaultApiApplicationImportExportSuffix = "api/am/admin/v4"
 const defaultPublisherApiImportExportSuffix = "api/am/publisher/v4"
 const defaultApiListEndpointSuffix = "api/am/publisher/v4/apis"
+const defaultMcpServerListEndpointSuffix = "api/am/publisher/v4/mcp-servers"
 const defaultAPIPolicyListEndpointSuffix = "api/am/publisher/v4/operation-policies"
 const defaultApiProductListEndpointSuffix = "api/am/publisher/v4/api-products"
 const defaultUnifiedSearchEndpointSuffix = "api/am/publisher/v4/search"
@@ -150,6 +152,9 @@ const DefaultTenantDomain = "carbon.super"
 // API Product related constants
 const DefaultApiProductVersion = "1.0.0"
 const DefaultApiProductType = "APIProduct"
+
+// MCP Server related constants
+const DefaultMcpServerType = "MCP"
 
 // Application keys related constants
 const ProductionKeyType = "PRODUCTION"
@@ -209,10 +214,13 @@ const TLSRenegotiationFreely = "freely"
 // Migration export
 const MaxAPIsToExportOnce = 20
 const MaxAppsToExportOnce = 20
+const MaxMCPServersToExportOnce = 20
 const MigrationAPIsExportMetadataFileName = "migration-apis-export-metadata.yaml"
 const MigrationAppsExportMetadataFileName = "migration-apps-export-metadata.yaml"
+const MigrationMCPServersExportMetadataFileName = "migration-mcp-servers-export-metadata.yaml"
 const LastSucceededApiFileName = "last-succeeded-api.log"
 const LastSucceededAppFileName = "last-succeeded-app.log"
+const LastSucceededMCPServerFileName = "last_succeeded_mcp_server.log"
 const LastSuceededContentDelimiter = " " // space
 const DefaultResourceTenantDomain = "tenant-default"
 const ApplicationId = "applicationId"
@@ -240,6 +248,7 @@ var EnvReplacePoliciesFileExtensions = []string{
 const (
 	ProjectTypeNone        = "None"
 	ProjectTypeApi         = "API"
+	ProjectTypeMcpServer   = "MCP Server"
 	ProjectTypeApiProduct  = "API Product"
 	ProjectTypeApplication = "Application"
 	ProjectTypeRevision    = "Revision"
@@ -263,6 +272,7 @@ const (
 // project meta files
 const (
 	MetaFileAPI         = "api_meta.yaml"
+	MetaFileMCPServer   = "mcp_server_meta.yaml"
 	MetaFileAPIProduct  = "api_product_meta.yaml"
 	MetaFileApplication = "application_meta.yaml"
 )

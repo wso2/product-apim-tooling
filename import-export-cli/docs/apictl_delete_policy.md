@@ -31,7 +31,7 @@ apictl delete policy api -n addHeader -e prod
 
 ### SEE ALSO
 
-* [apictl delete](apictl_delete.md)	 - Delete an API/APIProduct/Application in an environment
+* [apictl delete](apictl_delete.md)	 - Delete an API/MCPServer/APIProduct/Application in an environment
 * [apictl delete policy api](apictl_delete_policy_api.md)	 - Delete an API Policy
 * [apictl delete policy rate-limiting](apictl_delete_policy_rate-limiting.md)	 - Delete Throttling Policy
 

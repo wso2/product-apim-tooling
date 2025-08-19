@@ -59,16 +59,16 @@ type EnvKeys struct {
 }
 
 type EnvEndpoints struct {
-	ApiManagerEndpoint   string `yaml:"apim"`
-	PublisherEndpoint    string `yaml:"publisher"`
-	DevPortalEndpoint    string `yaml:"devportal"`
-	RegistrationEndpoint string `yaml:"registration"`
-	AdminEndpoint        string `yaml:"admin"`
-	TokenEndpoint        string `yaml:"token"`
-	MiManagementEndpoint string `yaml:"mi"`
-	AIServiceEndpoint    string `yaml:"ai_service"`
+	ApiManagerEndpoint     string `yaml:"apim"`
+	PublisherEndpoint      string `yaml:"publisher"`
+	DevPortalEndpoint      string `yaml:"devportal"`
+	RegistrationEndpoint   string `yaml:"registration"`
+	AdminEndpoint          string `yaml:"admin"`
+	TokenEndpoint          string `yaml:"token"`
+	MiManagementEndpoint   string `yaml:"mi"`
+	AIServiceEndpoint      string `yaml:"ai_service"`
 	AITokenServiceEndpoint string `yaml:"ai_token_endpoint"`
-	AIKey string `yaml:"ai_key"`
+	AIKey                  string `yaml:"ai_key"`
 }
 
 type MgwEndpoints struct {
@@ -78,6 +78,21 @@ type MgwEndpoints struct {
 // ---------------- End of Structs for YAML Config Files ---------------------------------
 
 type API struct {
+	ID              string `json:"id"`
+	Name            string `json:"name"`
+	Context         string `json:"context"`
+	Version         string `json:"version"`
+	Provider        string `json:"provider"`
+	LifeCycleStatus string `json:"lifeCycleStatus"`
+}
+
+type MCPServerListResponse struct {
+	Count int32       `json:"count"`
+	List  []MCPServer `json:"list"`
+}
+
+// MCPServer represents an MCP Server
+type MCPServer struct {
 	ID              string `json:"id"`
 	Name            string `json:"name"`
 	Context         string `json:"context"`
@@ -148,6 +163,16 @@ type APILoggerListResponse struct {
 	Apis []APILogger `json:"apis"`
 }
 
+type MCPServerLogger struct {
+	ID       string `json:"apiId"`
+	Context  string `json:"context"`
+	LogLevel string `json:"logLevel"`
+}
+
+type MCPServerLoggerListResponse struct {
+	MCPServers []MCPServerLogger `json:"apis"`
+}
+
 type APIProductListResponse struct {
 	Count int32        `json:"count"`
 	List  []APIProduct `json:"list"`
@@ -166,10 +191,17 @@ type MigrationApisExportMetadata struct {
 }
 
 type MigrationAppsExportMetadata struct {
-	AppListOffset   int    `yaml:"app_list_offset"`
-	User            string `yaml:"user"`
-	OnTenant        string `yaml:"on_tenant"`
-	AppListToExport []Application  `yaml:"apps_to_export"`
+	AppListOffset   int           `yaml:"app_list_offset"`
+	User            string        `yaml:"user"`
+	OnTenant        string        `yaml:"on_tenant"`
+	AppListToExport []Application `yaml:"apps_to_export"`
+}
+
+type MigrationMCPServersExportMetadata struct {
+	MCPServerListOffset   int         `yaml:"mcp_server_list_offset"`
+	User                  string      `yaml:"user"`
+	OnTenant              string      `yaml:"on_tenant"`
+	MCPServerListToExport []MCPServer `yaml:"mcp_servers_to_export"`
 }
 
 type HttpErrorResponse struct {
@@ -400,6 +432,27 @@ type SubscriptionCreateRequest struct {
 // API Search response struct. This includes common attributes for both store and publisher REST API search
 type ApiSearch struct {
 	Count int `json:"count"`
+	List  []struct {
+		ID              string      `json:"id"`
+		Name            string      `json:"name"`
+		Description     interface{} `json:"description"`
+		Context         string      `json:"context"`
+		Version         string      `json:"version"`
+		Provider        string      `json:"provider"`
+		Type            string      `json:"type"`
+		LifeCycleStatus string      `json:"lifeCycleStatus"`
+	} `json:"list"`
+	Pagination struct {
+		Offset   int    `json:"offset"`
+		Limit    int    `json:"limit"`
+		Total    int    `json:"total"`
+		Next     string `json:"next"`
+		Previous string `json:"previous"`
+	} `json:"pagination"`
+}
+
+type MCPServerSearch struct {
+	Count int32 `json:"count"`
 	List  []struct {
 		ID              string      `json:"id"`
 		Name            string      `json:"name"`

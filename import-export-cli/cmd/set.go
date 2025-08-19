@@ -46,7 +46,7 @@ const flagAITokenName = "ai-token"
 
 // Set command related Info
 const SetCmdLiteral = "set"
-const setCmdShortDesc = "Set configuration parameters, per API log levels or correlation component configurations"
+const setCmdShortDesc = "Set configuration parameters, per API log levels, MCP Server log levels or correlation component configurations"
 
 const setCmdLongDesc = `Set configuration parameters. You can use one of the following flags
 * --http-request-timeout <time-in-milli-seconds>
@@ -68,6 +68,7 @@ const setCmdExamples = utils.ProjectName + ` ` + SetCmdLiteral + ` --http-reques
 ` + utils.ProjectName + ` ` + SetCmdLiteral + ` --vcs-deployment-repo-path /home/user/custom/deployment
 ` + utils.ProjectName + ` ` + SetCmdLiteral + ` --vcs-source-repo-path /home/user/custom/source
 ` + utils.ProjectName + ` ` + SetCmdLiteral + ` ` + SetApiLoggingCmdLiteral + ` --api-id bf36ca3a-0332-49ba-abce-e9992228ae06 --log-level full -e dev --tenant-domain carbon.super
+` + utils.ProjectName + ` ` + SetCmdLiteral + ` ` + SetMCPServerLoggingCmdLiteral + ` --mcp-server-id bf36ca3a-0332-49ba-abce-e9992228ae06 --log-level full -e dev --tenant-domain carbon.super
 ` + utils.ProjectName + ` ` + SetCmdLiteral + ` ` + SetCorrelationLoggingCmdLiteral + ` --component-name http --enable true -e dev
 ` + utils.ProjectName + ` ` + SetCmdLiteral + ` --ai-thread-count 5
 ` + utils.ProjectName + ` ` + SetCmdLiteral + ` --ai-token ad232sda-asa2a-assdsd-sds43`

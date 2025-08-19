@@ -27,12 +27,14 @@ import (
 
 // Delete command related usage Info
 const deleteCmdLiteral = "delete"
-const deleteCmdShortDesc = "Delete an API/APIProduct/Application in an environment"
+const deleteCmdShortDesc = "Delete an API/MCPServer/APIProduct/Application in an environment"
 const deleteCmdLongDesc = `Delete an API available in the environment specified by flag (--environment, -e)
+Delete an MCP Server available in the environment specified by flag (--environment, -e)
 Delete an API Product available in the environment specified by flag (--environment, -e)
 Delete an Application of a specific user in the environment specified by flag (--environment, -e)`
 
 const deleteCmdExamples = utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPICmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin -e dev
+` + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteMCPServerCmdLiteral + ` -n WeatherMCPServer -v 1.0.0 -r admin -e dev
 ` + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAPIProductCmdLiteral + ` -n TwitterAPI -v 1.0.0 -r admin -e dev 
 ` + utils.ProjectName + ` ` + deleteCmdLiteral + ` ` + deleteAppCmdLiteral + ` -n TestApplication -o admin -e dev`
 

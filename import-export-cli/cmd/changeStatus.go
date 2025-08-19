@@ -14,7 +14,7 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package cmd
 
@@ -26,11 +26,12 @@ import (
 
 // ChangeStatus command related usage info
 const changeStatusCmdLiteral = "change-status"
-const changeStatusCmdShortDesc = "Change Status of an API or API Product"
-const changeStatusCmdLongDesc = "Change the lifecycle status of an API or API Product in an environment"
+const changeStatusCmdShortDesc = "Change Status of an API, MCP Server or Product"
+const changeStatusCmdLongDesc = "Change the lifecycle status of an API, MCP Server or API Product in an environment"
 
 const changeStatusCmdExamples = utils.ProjectName + ` ` + changeStatusCmdLiteral + ` ` + changeAPIStatusCmdLiteral + ` -a Publish -n TwitterAPI -v 1.0.0 -r admin -e dev
 ` + utils.ProjectName + ` ` + changeStatusCmdLiteral + ` ` + changeAPIStatusCmdLiteral + ` -a Publish -n FacebookAPI -v 2.1.0 -e production
+` + utils.ProjectName + ` ` + changeStatusCmdLiteral + ` ` + changeMCPServerStatusCmdLiteral + ` -a Publish -n WeatherMCPServer -v 1.0.0 -r admin -e dev
 ` + utils.ProjectName + ` ` + changeStatusCmdLiteral + ` ` + changeAPIProductStatusCmdLiteral + ` -a Publish -n SocialMediaProduct -v 1.0.0 -r admin -e dev`
 
 // ChangeStatusCmd represents the change-status command
