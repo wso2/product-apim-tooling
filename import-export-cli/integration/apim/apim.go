@@ -843,38 +843,6 @@ func (instance *Client) AddMCPServer(t *testing.T, mcpServer *MCPServer, usernam
 	return mcpServerResponse.ID
 }
 
-// AddMCPServerStandard : Add new MCP Server to APIM using standard endpoint
-func (instance *Client) AddMCPServerStandard(t *testing.T, mcpServer *MCPServer, username string, password string, doClean bool) string {
-	mcpServersURL := instance.publisherRestURL + "/mcp-servers"
-
-	data, err := json.Marshal(mcpServer)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	request := base.CreatePost(mcpServersURL, bytes.NewBuffer(data))
-	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
-	base.LogRequest("apim.AddMCPServer()", request)
-
-	response := base.SendHTTPRequest(request)
-	defer response.Body.Close()
-
-	base.ValidateAndLogResponse("apim.AddMCPServer()", response, 201)
-
-	var mcpServerResponse MCPServer
-	json.NewDecoder(response.Body).Decode(&mcpServerResponse)
-
-	if doClean {
-		t.Cleanup(func() {
-			username, password := RetrieveAdminCredentialsInsteadCreator(username, password)
-			instance.Login(username, password)
-			instance.DeleteMCPServer(mcpServerResponse.ID)
-		})
-	}
-
-	return mcpServerResponse.ID
-}
-
 // UpdateAPI : Update API in APIM
 func (instance *Client) UpdateAPI(t *testing.T, api *API, username string, password string) string {
 	apisURL := instance.publisherRestURL + "/apis/" + api.ID
