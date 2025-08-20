@@ -92,3 +92,25 @@ type MCPServerOperations struct {
 	UsedProductIds    []string          `json:"usedProductIds,omitempty" yaml:"usedProductIds,omitempty"`
 	OperationPolicies OperationPolicies `json:"operationPolicies,omitempty" yaml:"operationPolicies,omitempty"`
 }
+
+// ByTargetVerbMCPServer implements sort.Interface based on the Target and Verb fields for MCPServerOperations.
+type ByTargetVerbMCPServer []MCPServerOperations
+
+// Len : Returns length of slice
+func (a ByTargetVerbMCPServer) Len() int { return len(a) }
+
+// Less : Compare two elements in slice for sorting
+func (a ByTargetVerbMCPServer) Less(i, j int) bool {
+	if a[i].Target < a[j].Target {
+		return true
+	}
+
+	if a[i].Target > a[j].Target {
+		return false
+	}
+
+	return a[i].Verb < a[j].Verb
+}
+
+// Swap : Swap two elements in slice
+func (a ByTargetVerbMCPServer) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
