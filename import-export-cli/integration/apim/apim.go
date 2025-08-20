@@ -369,24 +369,38 @@ func (instance *Client) GenerateSampleMCPServerData(provider, name, version, con
 	mcpServer.Operations = []MCPServerOperations{
 		{
 			ID:                "",
-			Target:            "echo",
-			Feature:           "TOOL",
-			AuthType:          "Application & Application User",
-			ThrottlingPolicy:  "Unlimited",
-			Scopes:            []string{"write:pets", "read:pets"},
-			SchemaDefinition:  "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"additionalProperties\":false,\"type\":\"object\",\"properties\":{\"message\":{\"description\":\"Message to echo\",\"type\":\"string\"}},\"required\":[\"message\"]}",
-			Description:       "Echoes back the input",
-			OperationPolicies: OperationPolicies{[]string{}, []string{}, []string{}},
-		},
-		{
-			ID:                "",
-			Target:            "viewPizzaMenu",
+			Target:            "updatePet",
+			Verb:              "PUT",
 			Feature:           "TOOL",
 			AuthType:          "Application & Application User",
 			ThrottlingPolicy:  "Unlimited",
 			Scopes:            []string{},
-			SchemaDefinition:  "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"additionalProperties\":false,\"type\":\"object\",\"properties\":{}}",
-			Description:       "View the pizza menu. This tool provides a list of available pizzas.",
+			SchemaDefinition:  "{\"type\":\"object\",\"properties\":{\"requestBody\":{\"type\":\"object\",\"contentType\":\"application/json\",\"properties\":{\"id\":{\"type\":\"integer\",\"format\":\"int64\",\"example\":10,\"exampleSetFlag\":true,\"types\":[\"integer\"]},\"name\":{\"type\":\"string\",\"example\":\"doggie\",\"exampleSetFlag\":true,\"types\":[\"string\"]},\"category\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"integer\",\"format\":\"int64\",\"example\":1,\"exampleSetFlag\":true,\"types\":[\"integer\"]},\"name\":{\"type\":\"string\",\"example\":\"Dogs\",\"exampleSetFlag\":true,\"types\":[\"string\"]}},\"xml\":{\"name\":\"category\"},\"exampleSetFlag\":false,\"types\":[\"object\"]},\"photoUrls\":{\"type\":\"array\",\"xml\":{\"wrapped\":true},\"exampleSetFlag\":false,\"items\":{\"type\":\"string\",\"xml\":{\"name\":\"photoUrl\"},\"exampleSetFlag\":false,\"types\":[\"string\"]}},\"types\":[\"array\"]},\"tags\":{\"type\":\"array\",\"xml\":{\"wrapped\":true},\"exampleSetFlag\":false,\"items\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"integer\",\"format\":\"int64\",\"exampleSetFlag\":false,\"types\":[\"integer\"]},\"name\":{\"type\":\"string\",\"exampleSetFlag\":false,\"types\":[\"string\"]}},\"xml\":{\"name\":\"tag\"},\"exampleSetFlag\":false,\"types\":[\"object\"]}},\"types\":[\"array\"]},\"status\":{\"type\":\"string\",\"description\":\"pet status in the store\",\"exampleSetFlag\":false,\"types\":[\"string\"],\"enum\":[\"available\",\"pending\",\"sold\"]}},\"required\":[\"name\",\"photoUrls\"]}},\"required\":[\"requestBody\"]}",
+			Description:       "Update an existing pet by Id.",
+			OperationPolicies: OperationPolicies{[]string{}, []string{}, []string{}},
+		},
+		{
+			ID:                "",
+			Target:            "addPet",
+			Verb:              "POST",
+			Feature:           "TOOL",
+			AuthType:          "Application & Application User",
+			ThrottlingPolicy:  "Unlimited",
+			Scopes:            []string{},
+			SchemaDefinition:  "{\"type\":\"object\",\"properties\":{\"requestBody\":{\"type\":\"object\",\"contentType\":\"application/json\",\"properties\":{\"id\":{\"type\":\"integer\",\"format\":\"int64\",\"example\":10,\"exampleSetFlag\":true,\"types\":[\"integer\"]},\"name\":{\"type\":\"string\",\"example\":\"doggie\",\"exampleSetFlag\":true,\"types\":[\"string\"]},\"category\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"integer\",\"format\":\"int64\",\"example\":1,\"exampleSetFlag\":true,\"types\":[\"integer\"]},\"name\":{\"type\":\"string\",\"example\":\"Dogs\",\"exampleSetFlag\":true,\"types\":[\"string\"]}},\"xml\":{\"name\":\"category\"},\"exampleSetFlag\":false,\"types\":[\"object\"]},\"photoUrls\":{\"type\":\"array\",\"xml\":{\"wrapped\":true},\"exampleSetFlag\":false,\"items\":{\"type\":\"string\",\"xml\":{\"name\":\"photoUrl\"},\"exampleSetFlag\":false,\"types\":[\"string\"]}},\"types\":[\"array\"]},\"tags\":{\"type\":\"array\",\"xml\":{\"wrapped\":true},\"exampleSetFlag\":false,\"items\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"integer\",\"format\":\"int64\",\"exampleSetFlag\":false,\"types\":[\"integer\"]},\"name\":{\"type\":\"string\",\"exampleSetFlag\":false,\"types\":[\"string\"]}},\"xml\":{\"name\":\"tag\"},\"exampleSetFlag\":false,\"types\":[\"object\"]}},\"types\":[\"array\"]},\"status\":{\"type\":\"string\",\"description\":\"pet status in the store\",\"exampleSetFlag\":false,\"types\":[\"string\"],\"enum\":[\"available\",\"pending\",\"sold\"]}},\"required\":[\"name\",\"photoUrls\"]}},\"required\":[\"requestBody\"]}",
+			Description:       "Add a new pet to the store.",
+			OperationPolicies: OperationPolicies{[]string{}, []string{}, []string{}},
+		},
+		{
+			ID:                "",
+			Target:            "findPetsByStatus",
+			Verb:              "GET",
+			Feature:           "TOOL",
+			AuthType:          "Application & Application User",
+			ThrottlingPolicy:  "Unlimited",
+			Scopes:            []string{},
+			SchemaDefinition:  "{\"type\":\"object\",\"properties\":{\"query_status\":{\"type\":\"string\",\"enum\":[\"available\",\"pending\",\"sold\"],\"default\":\"available\",\"description\":\"Status values that need to be considered for filter\"}},\"required\":[\"query_status\"]}",
+			Description:       "Multiple status values can be provided with comma separated strings.",
 			OperationPolicies: OperationPolicies{[]string{}, []string{}, []string{}},
 		},
 	}
@@ -396,45 +410,6 @@ func (instance *Client) GenerateSampleMCPServerData(provider, name, version, con
 	mcpServer.GatewayType = "wso2/synapse"
 	mcpServer.InitiatedFromGateway = false
 	return &mcpServer
-}
-
-func generateSampleMCPServerOperations() []MCPServerOperations {
-	op1 := MCPServerOperations{}
-	op1.Target = "/order/{orderId}"
-	op1.Verb = "GET"
-	op1.ThrottlingPolicy = "Unlimited"
-	op1.AuthType = "Application & Application User"
-	op1.OperationPolicies = OperationPolicies{[]string{}, []string{}, []string{}}
-
-	op2 := MCPServerOperations{}
-	op2.Target = "/order/{orderId}"
-	op2.Verb = "DELETE"
-	op2.ThrottlingPolicy = "Unlimited"
-	op2.AuthType = "Application & Application User"
-	op2.OperationPolicies = OperationPolicies{[]string{}, []string{}, []string{}}
-
-	op3 := MCPServerOperations{}
-	op3.Target = "/order/{orderId}"
-	op3.Verb = "PUT"
-	op3.ThrottlingPolicy = "Unlimited"
-	op3.AuthType = "Application & Application User"
-	op3.OperationPolicies = OperationPolicies{[]string{}, []string{}, []string{}}
-
-	op4 := MCPServerOperations{}
-	op4.Target = "/menu"
-	op4.Verb = "GET"
-	op4.ThrottlingPolicy = "Unlimited"
-	op4.AuthType = "Application & Application User"
-	op4.OperationPolicies = OperationPolicies{[]string{}, []string{}, []string{}}
-
-	op5 := MCPServerOperations{}
-	op5.Target = "/order"
-	op5.Verb = "POST"
-	op5.ThrottlingPolicy = "Unlimited"
-	op5.AuthType = "Application & Application User"
-	op5.OperationPolicies = OperationPolicies{[]string{}, []string{}, []string{}}
-
-	return []MCPServerOperations{op1, op2, op3, op4, op5}
 }
 
 // CopyAPI : Create a deep copy of an API object
@@ -809,26 +784,6 @@ func (instance *Client) AddMCPServer(t *testing.T, mcpServer *MCPServer, usernam
 					"backendId": "",
 					"backendOperation": map[string]string{
 						"target": "/pet/findByStatus",
-						"verb":   "GET",
-					},
-				},
-			},
-			{
-				"feature": "TOOL",
-				"backendOperationMapping": map[string]interface{}{
-					"backendId": "",
-					"backendOperation": map[string]string{
-						"target": "/pet/findByTags",
-						"verb":   "GET",
-					},
-				},
-			},
-			{
-				"feature": "TOOL",
-				"backendOperationMapping": map[string]interface{}{
-					"backendId": "",
-					"backendOperation": map[string]string{
-						"target": "/pet/{petId}",
 						"verb":   "GET",
 					},
 				},
