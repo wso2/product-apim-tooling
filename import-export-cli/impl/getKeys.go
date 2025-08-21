@@ -40,7 +40,7 @@ var apiProvider string
 var keyGenEnv string
 var keyGenTokenEndpoint string
 
-//Subscribe the given API or API Product to the default application and generate an access token
+// Subscribe the given API, API Product or MCP Server to the default application and generate an access token
 func GetKeys(cred credentials.Credential, envName, name, version, provider, tokenEndpoint string) {
 	keyGenEnv = envName
 	apiName = name
@@ -58,8 +58,8 @@ func GetKeys(cred credentials.Credential, envName, name, version, provider, toke
 	tiers, err := getAvailableAPITiers(accessToken)
 
 	if tiers != nil && err == nil {
-		utils.Logln(utils.LogPrefixInfo+"Retrieved available subscription tiers of the API or API Product: ", tiers)
-		// Needs an available subscription tier when subscribing to the particular API or API Product using the application
+		utils.Logln(utils.LogPrefixInfo+"Retrieved available subscription tiers of the API, API Product or MCP Server: ", tiers)
+		// Needs an available subscription tier when subscribing to the particular API, API Product or MCP Server using the application
 		subscriptionThrottlingTier = tiers[0]
 	} else {
 		utils.HandleErrorAndExit("Internal error occurred", err)
@@ -139,7 +139,7 @@ func GetKeys(cred credentials.Credential, envName, name, version, provider, toke
 			//if error occurred while creating the application, then
 			utils.HandleErrorAndExit("Error while creating the CLI application:", err)
 		}
-		//Search the if the given API or API Product is present to subscribe
+		//Search if the given API, API Product or MCP Server is present to subscribe
 		subId, err := subscribe(appId, accessToken)
 		//If subscription failed
 		if subId == "" && err != nil {
@@ -168,7 +168,7 @@ func GetKeys(cred credentials.Credential, envName, name, version, provider, toke
 	}
 }
 
-// Retrieve an available throttling tiers of the API or API Product
+// Retrieve an available throttling tiers of the API, API Product or MCP Server
 // @param accessToken : Access token to authenticate the devportal REST API
 // @return tiers, error
 func getAvailableAPITiers(accessToken string) ([]string, error) {
@@ -298,7 +298,7 @@ func searchApplication(appName string, accessToken string) (string, error) {
 	}
 }
 
-// Searching if the API or API Product is available
+// Searching if the artifact is available
 // @param accessToken : Access token to call the devportal REST API
 // @return apiId, error
 func searchApiOrProduct(accessToken string) (string, error) {
@@ -332,11 +332,33 @@ func searchApiOrProduct(accessToken string) (string, error) {
 			}
 			return "", errors.New("Request didn't respond 200 OK for searching APIs and API Products. Status: " + resp.Status())
 		}
+
+		// Search by defining the type as an MCP Server
+		resp, err = getApiOrApiProductByType(accessToken, utils.DefaultMcpServerType)
+		if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
+			// 200 OK or 201 Created
+			apiData := &utils.ApiSearch{}
+			data := []byte(resp.Body())
+			err = json.Unmarshal(data, &apiData)
+			if apiData.Count != 0 {
+				apiId := apiData.List[0].ID
+				return apiId, err
+			}
+		} else {
+			utils.Logf("Error: %s\n", resp.Error())
+			utils.Logf("Body: %s\n", resp.Body())
+			if resp.StatusCode() == http.StatusUnauthorized {
+				// 401 Unauthorized
+				return "", fmt.Errorf("authorization failed while searching MCP Server: " + apiName)
+			}
+			return "", errors.New("Request didn't respond 200 OK for searching MCP Servers. Status: " + resp.Status())
+		}
+
 		if apiProvider != "" {
-			return "", errors.New("Requested API is not available in the devportal. API: " + apiName +
+			return "", errors.New("Requested API, API Product, or MCP Server is not available in the devportal. Name: " + apiName +
 				" Version: " + apiVersion + " Provider: " + apiProvider)
 		}
-		return "", errors.New("Requested API is not available in the devportal. API: " + apiName +
+		return "", errors.New("Requested API, API Product, or MCP Server is not available in the devportal. Name: " + apiName +
 			" Version: " + apiVersion)
 	} else {
 		utils.Logf("Error: %s\n", resp.Error())
@@ -349,7 +371,7 @@ func searchApiOrProduct(accessToken string) (string, error) {
 	}
 }
 
-// Searching if the API or API Product is available specifying the type
+// Searching if the API, API Product or MCP Server is available specifying the type
 // @param accessToken : Access token to call the devportal REST API
 // @param searchType : Type of the searching artifact
 // @return response, error
@@ -375,32 +397,35 @@ func getApiOrApiProductByType(accessToken, searchType string) (*resty.Response, 
 		if strings.EqualFold(searchType, utils.DefaultApiProductType) {
 			queryVal = queryVal + " type:\"" + searchType + "\""
 		}
+		if strings.EqualFold(searchType, utils.DefaultMcpServerType) {
+			queryVal = queryVal + " type:\"" + searchType + "\""
+		}
 	}
 	return utils.InvokeGETRequestWithQueryParam("query", queryVal, unifiedSearchEndpoint, headers)
 }
 
-// Subscribe API or API Product to a given application
-// @param appId : Application ID to subscribe the API or API Product
+// Subscribe API, API Product or MCP Server to a given application
+// @param appId : Application ID to subscribe the API, API Product or MCP Server
 // @param accessToken : Token to call REST API
 // @return subscriptionId, error
 func subscribe(appId string, accessToken string) (string, error) {
 	apiId, err := searchApiOrProduct(accessToken)
 	if apiId != "" && err == nil {
-		//If the API or API Product is present, subscribe that API or API Product to the application
-		utils.Logln(utils.LogPrefixInfo+"API or API Product name: ", apiName, "& version: ", apiVersion, "exists")
+		//If the API, API Product or MCP Server is present, perform application subscription
+		utils.Logln(utils.LogPrefixInfo+"API, API Product or MCP Server name: ", apiName, "& version: ", apiVersion, "exists")
 		subId, err := subscribeApiOrProduct(apiId, appId, accessToken)
 		if subId != "" {
-			utils.Logln(utils.LogPrefixInfo+"API or API Product", apiName, ":", apiVersion, "subscribed successfully.")
+			utils.Logln(utils.LogPrefixInfo+"API, API Product or MCP Server", apiName, ":", apiVersion, "subscribed successfully.")
 		} else {
-			utils.HandleErrorAndExit("Error while subscribing the CLI application to the API: "+appId, err)
+			utils.HandleErrorAndExit("Error while subscribing the CLI application to the API, API Product, or MCP Server: "+appId, err)
 		}
 		return subId, err
 	} else {
-		return "", errors.New("API or API Product is not found. Name: " + apiName + " version: " + apiVersion)
+		return "", errors.New("API, API Product or MCP Server is not found. Name: " + apiName + " version: " + apiVersion)
 	}
 }
 
-// Get API or API Product specific details of a given API or API Product
+// Get API, API Product or MCP Server specific details of a given API, API Product or MCP Server
 // @param apiId : API ID to retrieve the information
 // @param accessToken : Access token to call the REST API
 // @return API, error
@@ -429,19 +454,32 @@ func getApiOrProduct(apiId string, accessToken string) (*utils.APIData, error) {
 			err = json.Unmarshal(data, &apiData)
 			return apiData, err
 		} else {
-			utils.Logf("Error: %s\n", resp.Error())
-			utils.Logf("Body: %s\n", resp.Body())
-			if resp.StatusCode() == http.StatusUnauthorized {
-				// 401 Unauthorized
-				return nil, fmt.Errorf("authorization failed while trying to retrieve the details of API or API Prodcut: " + apiId)
+			// Third check whether this is an MCP Server
+			mcpServerEndpoint := utils.GetMcpServerListEndpointOfEnv(keyGenEnv, utils.MainConfigFilePath) + "/" + apiId
+			headers := make(map[string]string)
+			headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
+			resp, err := utils.InvokeGETRequest(mcpServerEndpoint, headers)
+			if resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusCreated {
+				// 200 OK or 201 Created
+				apiData := &utils.APIData{}
+				data := []byte(resp.Body())
+				err = json.Unmarshal(data, &apiData)
+				return apiData, err
+			} else {
+				utils.Logf("Error: %s\n", resp.Error())
+				utils.Logf("Body: %s\n", resp.Body())
+				if resp.StatusCode() == http.StatusUnauthorized {
+					// 401 Unauthorized
+					return nil, fmt.Errorf("authorization failed while trying to retrieve the details of API, API Product, or MCP Server: " + apiId)
+				}
+				return nil, errors.New("Request didn't respond 200 OK for retrieving API, API Product, or MCP Server details. Status: " + resp.Status())
 			}
-			return nil, errors.New("Request didn't respond 200 OK for retrieving API or API Product details. Status: " + resp.Status())
 		}
 	}
 }
 
-// Subscribe the API or API Product to a given Application
-// @param apiId : API or API Product ID to be subscribed
+// Subscribe the API, API Product or MCP Server to a given Application
+// @param apiId : API, API Product or MCP Server ID to be subscribed
 // @param appId : Application ID to be subscribed
 // @param accessToken : Access token to call the REST API
 // @return subscriptionId, error
@@ -495,15 +533,15 @@ func subscribeApiOrProduct(apiId string, appId string, accessToken string) (stri
 			utils.Logf("Body: %s\n", resp.Body())
 			if resp.StatusCode() == http.StatusUnauthorized {
 				// 401 Unauthorized
-				return "", fmt.Errorf("authorization failed while trying to subscribe to the API or API Product: " + apiId)
+				return "", fmt.Errorf("authorization failed while trying to subscribe to the API, API Product, or MCP Server: " + apiId)
 			}
-			return "", errors.New("Request didn't respond 200 OK for subscribing to the API or API Product. Status: " + resp.Status())
+			return "", errors.New("Request didn't respond 200 OK for subscribing to the API, API Product, or MCP Server. Status: " + resp.Status())
 		}
 	} else {
 		utils.Logf("Error: %s\n", subResp.Error())
 		utils.Logf("Body: %s\n", subResp.Body())
 		if subResp.StatusCode() == http.StatusUnauthorized {
-			return "", fmt.Errorf("authorization failed while trying to check existing subscriptions of API or API Product: " +
+			return "", fmt.Errorf("authorization failed while trying to check existing subscriptions of API, API Product, or MCP Server: " +
 				apiId)
 		}
 		return "", errors.New("Request didn't respond 200 OK: " + subResp.Status())
