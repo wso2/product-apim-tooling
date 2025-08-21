@@ -23,6 +23,7 @@ require (
 	github.com/wso2/k8s-api-operator/api-operator v0.0.0-20210223103109-66ee766c8413
 	golang.org/x/crypto v0.31.0
 	gopkg.in/yaml.v2 v2.4.0
+	software.sslmate.com/src/go-pkcs12 v0.6.0
 )
 
 require (
@@ -72,6 +73,8 @@ require (
 	sigs.k8s.io/structured-merge-diff/v3 v3.0.0 // indirect
 )
 
+module github.com/wso2/product-apim-tooling/import-export-cli
+
 replace k8s.io/client-go => k8s.io/client-go v0.18.2
 
-module github.com/wso2/product-apim-tooling/import-export-cli
+exclude github.com/ugorji/go v1.1.4
