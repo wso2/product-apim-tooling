@@ -370,7 +370,6 @@ func (instance *Client) GenerateSampleMCPServerData(provider, name, version, con
 		{
 			ID:                "",
 			Target:            "updatePet",
-			Verb:              "PUT",
 			Feature:           "TOOL",
 			AuthType:          "Application & Application User",
 			ThrottlingPolicy:  "Unlimited",
@@ -382,7 +381,6 @@ func (instance *Client) GenerateSampleMCPServerData(provider, name, version, con
 		{
 			ID:                "",
 			Target:            "addPet",
-			Verb:              "POST",
 			Feature:           "TOOL",
 			AuthType:          "Application & Application User",
 			ThrottlingPolicy:  "Unlimited",
@@ -394,7 +392,6 @@ func (instance *Client) GenerateSampleMCPServerData(provider, name, version, con
 		{
 			ID:                "",
 			Target:            "findPetsByStatus",
-			Verb:              "GET",
 			Feature:           "TOOL",
 			AuthType:          "Application & Application User",
 			ThrottlingPolicy:  "Unlimited",
@@ -540,18 +537,9 @@ func CopyMCPServer(mcpServerToCopy *MCPServer) MCPServer {
 	mcpServerCopy.VisibleTenants = make([]string, len(mcpServerToCopy.VisibleTenants))
 	copy(mcpServerCopy.VisibleTenants, mcpServerToCopy.VisibleTenants)
 
-	// Copy MediationPolicies slice
-	mcpServerCopy.MediationPolicies = make([]MediationPolicy, len(mcpServerToCopy.MediationPolicies))
-	copy(mcpServerCopy.MediationPolicies, mcpServerToCopy.MediationPolicies)
-
 	// Copy SubscriptionAvailableTenants slice
 	mcpServerCopy.SubscriptionAvailableTenants = make([]string, len(mcpServerToCopy.SubscriptionAvailableTenants))
 	copy(mcpServerCopy.SubscriptionAvailableTenants, mcpServerToCopy.SubscriptionAvailableTenants)
-
-	// Copy AdditionalProperties
-	for key, value := range mcpServerToCopy.AdditionalProperties {
-		mcpServerCopy.AdditionalProperties[key] = value
-	}
 
 	// Copy AccessControlRoles slice
 	mcpServerCopy.AccessControlRoles = make([]string, len(mcpServerToCopy.AccessControlRoles))
@@ -645,9 +633,6 @@ func SortMCPServerMembers(mcpServer *MCPServer) {
 
 	// Sort VisibleTenants slice
 	sort.Strings(mcpServer.VisibleTenants)
-
-	// Sort MediationPolicies slice
-	sort.Sort(ByID(mcpServer.MediationPolicies))
 
 	// Sort SubscriptionAvailableTenants slice
 	sort.Strings(mcpServer.SubscriptionAvailableTenants)

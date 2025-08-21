@@ -712,14 +712,6 @@ func ValidateMCPServersEqual(t *testing.T, mcpServer1 *apim.MCPServer, mcpServer
 	mcpServer1Copy.Provider = same
 	mcpServer2Copy.Provider = same
 
-	// If an MCP Server is not advertise only, the API owner will be changed during export and import to the current provider
-	if (mcpServer1Copy.AdvertiseInformation != apim.AdvertiseInfo{}) {
-		mcpServer1Copy.AdvertiseInformation.ApiOwner = same
-	}
-	if (mcpServer2Copy.AdvertiseInformation != apim.AdvertiseInfo{}) {
-		mcpServer2Copy.AdvertiseInformation.ApiOwner = same
-	}
-
 	if len(mcpServer1Copy.Operations) > 0 {
 		overrideOperationPolicyIdsInMcpDefinition(&mcpServer1Copy)
 		overrideOperationPolicyIdsInMcpDefinition(&mcpServer2Copy)
@@ -785,14 +777,6 @@ func ValidateImportedMCPServersEqualToRevision(t *testing.T, mcpServer1 *apim.MC
 	// When imported revision as MCP Server, the "RevisionID" property will be 0 for the imported MCP Server. Hence, the property of
 	// the imported MCP Server should be changed
 	mcpServer2Copy.RevisionID = 1
-
-	// If an API is not advertise only, the API owner will be changed during export and import to the current provider
-	if (mcpServer1Copy.AdvertiseInformation != apim.AdvertiseInfo{}) {
-		mcpServer1Copy.AdvertiseInformation.ApiOwner = same
-	}
-	if (mcpServer2Copy.AdvertiseInformation != apim.AdvertiseInfo{}) {
-		mcpServer2Copy.AdvertiseInformation.ApiOwner = same
-	}
 
 	// Sort member collections to make equality check possible
 	apim.SortMCPServerMembers(&mcpServer1Copy)
@@ -886,14 +870,6 @@ func validateMCPServersEqualCrossTenant(t *testing.T, mcpServer1 *apim.MCPServer
 
 	mcpServer1Copy.Provider = same
 	mcpServer2Copy.Provider = same
-
-	// If an MCP Server is not advertise only, the API owner will be changed during export and import to the current provider
-	if (mcpServer1Copy.AdvertiseInformation != apim.AdvertiseInfo{}) {
-		mcpServer1Copy.AdvertiseInformation.ApiOwner = same
-	}
-	if (mcpServer2Copy.AdvertiseInformation != apim.AdvertiseInfo{}) {
-		mcpServer2Copy.AdvertiseInformation.ApiOwner = same
-	}
 
 	// Sort member collections to make equality check possible
 	apim.SortMCPServerMembers(&mcpServer1Copy)
