@@ -54,7 +54,6 @@ func init() {
 }
 
 // Execute : Run apictl command
-//
 func Execute(t *testing.T, args ...string) (string, error) {
 	cmd := exec.Command(RelativeBinaryPath+BinaryName, args...)
 
@@ -68,7 +67,6 @@ func Execute(t *testing.T, args ...string) (string, error) {
 
 // GetRowsFromTableResponse : Parse tabular apictl output to retrieve an array of rows.
 // This friendly format aids in asserting results during testing via simple string comparison.
-//
 func GetRowsFromTableResponse(response string) []string {
 	// Replace Windows carriage return if exists and split by new line to get rows
 	result := strings.Split(strings.ReplaceAll(response, "\r\n", "\n"), "\n")
@@ -78,13 +76,11 @@ func GetRowsFromTableResponse(response string) []string {
 }
 
 // GetValueOfUniformResponse : Trim uniformally formatted output from apictl.
-//
 func GetValueOfUniformResponse(response string) string {
 	return strings.TrimSpace(strings.Split(response, "output: ")[0])
 }
 
 // SetupEnv : Adds a new environment and automatically removes it when the calling test function execution ends
-//
 func SetupEnv(t *testing.T, env string, apim string, tokenEp string) {
 	Execute(t, "add", "env", env, "--apim", apim, "--token", tokenEp)
 
@@ -104,7 +100,6 @@ func SetupEnvWithoutTokenFlag(t *testing.T, env string, apim string) {
 }
 
 // SetupMIEnv : Adds a new mi environment and automatically removes it when the calling test function execution ends
-//
 func SetupMIEnv(t *testing.T, env, mi string) {
 	Execute(t, "add", "env", env, "--mi", mi)
 
@@ -114,7 +109,6 @@ func SetupMIEnv(t *testing.T, env, mi string) {
 }
 
 // Login : Logs into an environment and automatically logs out when the calling test function execution ends
-//
 func Login(t *testing.T, env string, username string, password string) {
 	Execute(t, "login", env, "-u", username, "-p", password, "-k", "--verbose")
 
@@ -124,7 +118,6 @@ func Login(t *testing.T, env string, username string, password string) {
 }
 
 // MILogin : Logs into an mi environment and automatically logs out when the calling test function execution ends
-//
 func MILogin(t *testing.T, env string, username string, password string) {
 	Execute(t, "mi", "login", env, "-u", username, "-p", password, "-k", "--verbose")
 
@@ -134,7 +127,6 @@ func MILogin(t *testing.T, env string, username string, password string) {
 }
 
 // IsAPIArchiveExists : Returns true if exported application archive exists on file system, else returns false
-//
 func IsAPIArchiveExists(t *testing.T, path string, name string, version string) bool {
 	file := ConstructAPIFilePath(path, name, version)
 
@@ -148,7 +140,6 @@ func IsAPIArchiveExists(t *testing.T, path string, name string, version string) 
 }
 
 // IsFileExistsInAPIArchive : Returns true if a particular file exists in API archive, else returns false
-//
 func IsFileExistsInAPIArchive(t *testing.T, archivePath, fileToCheck, name, version string) bool {
 	apiFile := ConstructAPIFilePath(archivePath, name, version)
 
@@ -173,7 +164,6 @@ func IsFileExistsInAPIArchive(t *testing.T, archivePath, fileToCheck, name, vers
 }
 
 // RemoveAPIArchive : Remove exported api archive from file system
-//
 func RemoveAPIArchive(t *testing.T, path string, name string, version string) {
 	file := ConstructAPIFilePath(path, name, version)
 
@@ -208,7 +198,6 @@ func ConstructAPIDeploymentDirectoryPath(path, name, version string) string {
 }
 
 // IsApplicationArchiveExists : Returns true if exported application archive exists on file system, else returns false
-//
 func IsApplicationArchiveExists(t *testing.T, path string, name string, owner string) bool {
 	file := constructAppFilePath(path, name, owner)
 
@@ -222,7 +211,6 @@ func IsApplicationArchiveExists(t *testing.T, path string, name string, owner st
 }
 
 // RemoveApplicationArchive : Remove exported application archive from file system
-//
 func RemoveApplicationArchive(t *testing.T, path string, name string, owner string) {
 	file := constructAppFilePath(path, name, owner)
 
@@ -386,7 +374,7 @@ func GetExportedPathFromOutput(output string) string {
 	}
 }
 
-//Count number of files in a directory
+// Count number of files in a directory
 func CountFiles(t *testing.T, path string) (int, error) {
 	i := 0
 	files, err := ioutil.ReadDir(path)
@@ -452,7 +440,7 @@ func Copy(src, dst string) error {
 	return nil
 }
 
-//Generate random strings with given length
+// Generate random strings with given length
 func GenerateRandomName(n int) string {
 	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 
@@ -474,7 +462,91 @@ func GenerateRandomString() string {
 	return base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(b)
 }
 
-//Generate random number within the given range
+// Generate random number within the given range
 func GenerateRandomNumber(min, max int) int {
 	return rand.Intn(max-min+1) + min
+}
+
+// IsMCPServerArchiveExists : Returns true if exported MCP Server archive exists on file system, else returns false
+func IsMCPServerArchiveExists(t *testing.T, path string, name string, version string) bool {
+	file := ConstructMCPServerFilePath(path, name, version)
+
+	t.Log("base.IsMCPServerArchiveExists() - archive file path:", file)
+
+	if _, err := os.Stat(file); os.IsNotExist(err) {
+		return false
+	}
+
+	return true
+}
+
+// IsFileExistsInMCPServerArchive : Returns true if a particular file exists in MCP Server archive, else returns false
+func IsFileExistsInMCPServerArchive(t *testing.T, archivePath, fileToCheck, name, version string) bool {
+	mcpServerFile := ConstructMCPServerFilePath(archivePath, name, version)
+
+	// Unzip exported archive
+	destPath := strings.ReplaceAll(mcpServerFile, ".zip", "")
+	Unzip(destPath, mcpServerFile)
+
+	file := destPath + string(os.PathSeparator) + name + "-" + version + string(os.PathSeparator) + fileToCheck
+
+	t.Log("base.IsFileExistsInMCPServerArchive() - File path:", file)
+
+	t.Cleanup(func() {
+		// Remove extracted archive
+		RemoveDir(destPath)
+	})
+
+	if _, err := os.Stat(file); os.IsNotExist(err) {
+		return false
+	}
+
+	return true
+}
+
+// RemoveMCPServerArchive : Remove exported MCP Server archive from file system
+func RemoveMCPServerArchive(t *testing.T, path string, name string, version string) {
+	file := ConstructMCPServerFilePath(path, name, version)
+
+	t.Log("base.RemoveMCPServerArchive() - archive file path:", file)
+
+	if _, err := os.Stat(file); err == nil {
+		err := os.Remove(file)
+
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+}
+
+// GetMCPServerArchiveFilePath : Get MCP Server archive file path
+func GetMCPServerArchiveFilePath(t *testing.T, path string, name string, version string) string {
+	file := ConstructMCPServerFilePath(path, name, version)
+
+	t.Log("base.GetMCPServerArchiveFilePath() - archive file path:", file)
+
+	return file
+}
+
+// ConstructMCPServerFilePath : Construct MCP Server file path from name and version
+func ConstructMCPServerFilePath(path, name, version string) string {
+	return filepath.Join(path, name+"_"+version+".zip")
+}
+
+// ExtractMCPServerArchive : Extract MCP Server archive and return the extracted path
+func ExtractMCPServerArchive(t *testing.T, archivePath, name, version string) string {
+	mcpServerFile := ConstructMCPServerFilePath(archivePath, name, version)
+
+	// Unzip exported archive
+	destPath := strings.ReplaceAll(mcpServerFile, ".zip", "")
+	Unzip(destPath, mcpServerFile)
+
+	extractedPath := destPath + string(os.PathSeparator) + name + "-" + version
+
+	t.Cleanup(func() {
+		// Remove extracted archive
+		RemoveDir(destPath)
+	})
+
+	return extractedPath
 }

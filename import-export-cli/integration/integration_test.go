@@ -218,6 +218,7 @@ func cleanupAPIM() {
 	deleteApps()
 	deleteApiProducts()
 	deleteApis()
+	deleteMCPServers()
 	removeEndpointCerts()
 }
 
@@ -312,6 +313,40 @@ func deleteUserApps(client *apim.Client, username string, password string) {
 	client.Login(username, password)
 	client.DeleteAllSubscriptions()
 	client.DeleteAllApplications()
+}
+
+func deleteMCPServers() {
+	devopsUsers := Users["devops"]
+	for _, devops := range devopsUsers {
+		deleteAllTenantUserMcpServers(devops.UserName, devops.Password)
+	}
+
+	for _, client := range apimClients {
+		deleteUserMcpServers(client, superAdminUser, superAdminPassword)
+	}
+
+	for _, tenant := range tenants {
+		for _, client := range apimClients {
+			deleteUserMcpServers(client, tenant.AdminUserName+"@"+tenant.Domain, tenant.AdminPassword)
+		}
+	}
+}
+
+func deleteAllTenantUserMcpServers(username string, password string) {
+	for _, client := range apimClients {
+		deleteUserMcpServers(client, username, password)
+	}
+
+	for _, tenant := range tenants {
+		for _, client := range apimClients {
+			deleteUserMcpServers(client, username+"@"+tenant.Domain, password)
+		}
+	}
+}
+
+func deleteUserMcpServers(client *apim.Client, username string, password string) {
+	client.Login(username, password)
+	client.DeleteAllMCPServers()
 }
 
 func deleteApis() {

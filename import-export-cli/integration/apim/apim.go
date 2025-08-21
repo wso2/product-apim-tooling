@@ -328,6 +328,87 @@ func (instance *Client) GenerateAdditionalProperties(provider, endpointUrl, apiT
 	return additionalProperties
 }
 
+func (instance *Client) GenerateSampleMCPServerData(provider, name, version, context string) *MCPServer {
+	mcpServer := MCPServer{}
+	mcpServer.ID = "3094fe10-2816-4971-b9a3-fdb956ced147"
+	if strings.EqualFold(name, "") {
+		mcpServer.Name = base.GenerateRandomString() + "MCPServer"
+	} else {
+		mcpServer.Name = name
+	}
+	mcpServer.Description = "This is a test"
+	if strings.EqualFold(context, "") {
+		mcpServer.Context = getContext(provider)
+	} else {
+		mcpServer.Context = context
+	}
+	mcpServer.Version = version
+	mcpServer.Provider = provider
+	mcpServer.LifeCycleStatus = "CREATED"
+	mcpServer.HasThumbnail = false
+	mcpServer.IsDefaultVersion = false
+	mcpServer.IsRevision = false
+	mcpServer.RevisionID = 0
+	mcpServer.EnableSchemaValidation = false
+	mcpServer.Transport = []string{"http", "https"}
+	mcpServer.Tags = []string{}
+	mcpServer.Policies = []string{"Unlimited"}
+	mcpServer.AuthorizationHeader = "Authorization"
+	mcpServer.SecurityScheme = []string{"oauth_basic_auth_api_key_mandatory", "oauth2"}
+	mcpServer.Visibility = "PUBLIC"
+	mcpServer.VisibleRoles = []string{}
+	mcpServer.VisibleTenants = []string{}
+	mcpServer.SubscriptionAvailability = "ALL_TENANTS"
+	mcpServer.SubscriptionAvailableTenants = []string{}
+	mcpServer.AccessControl = "NONE"
+	mcpServer.AccessControlRoles = []string{}
+	mcpServer.BusinessInformation = BusinessInfo{}
+	mcpServer.CreatedTime = "1754977276669"
+	mcpServer.LastUpdatedTimestamp = "1754977276689"
+	mcpServer.LastUpdatedTime = "2025-08-12 11:11:16.689"
+	mcpServer.Operations = []MCPServerOperations{
+		{
+			ID:                "",
+			Target:            "updatePet",
+			Feature:           "TOOL",
+			AuthType:          "Application & Application User",
+			ThrottlingPolicy:  "Unlimited",
+			Scopes:            []string{},
+			SchemaDefinition:  "{\"type\":\"object\",\"properties\":{\"requestBody\":{\"type\":\"object\",\"contentType\":\"application/json\",\"properties\":{\"id\":{\"type\":\"integer\",\"format\":\"int64\",\"example\":10,\"exampleSetFlag\":true,\"types\":[\"integer\"]},\"name\":{\"type\":\"string\",\"example\":\"doggie\",\"exampleSetFlag\":true,\"types\":[\"string\"]},\"category\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"integer\",\"format\":\"int64\",\"example\":1,\"exampleSetFlag\":true,\"types\":[\"integer\"]},\"name\":{\"type\":\"string\",\"example\":\"Dogs\",\"exampleSetFlag\":true,\"types\":[\"string\"]}},\"xml\":{\"name\":\"category\"},\"exampleSetFlag\":false,\"types\":[\"object\"]},\"photoUrls\":{\"type\":\"array\",\"xml\":{\"wrapped\":true},\"exampleSetFlag\":false,\"items\":{\"type\":\"string\",\"xml\":{\"name\":\"photoUrl\"},\"exampleSetFlag\":false,\"types\":[\"string\"]}},\"types\":[\"array\"]},\"tags\":{\"type\":\"array\",\"xml\":{\"wrapped\":true},\"exampleSetFlag\":false,\"items\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"integer\",\"format\":\"int64\",\"exampleSetFlag\":false,\"types\":[\"integer\"]},\"name\":{\"type\":\"string\",\"exampleSetFlag\":false,\"types\":[\"string\"]}},\"xml\":{\"name\":\"tag\"},\"exampleSetFlag\":false,\"types\":[\"object\"]}},\"types\":[\"array\"]},\"status\":{\"type\":\"string\",\"description\":\"pet status in the store\",\"exampleSetFlag\":false,\"types\":[\"string\"],\"enum\":[\"available\",\"pending\",\"sold\"]}},\"required\":[\"name\",\"photoUrls\"]}},\"required\":[\"requestBody\"]}",
+			Description:       "Update an existing pet by Id.",
+			OperationPolicies: OperationPolicies{[]string{}, []string{}, []string{}},
+		},
+		{
+			ID:                "",
+			Target:            "addPet",
+			Feature:           "TOOL",
+			AuthType:          "Application & Application User",
+			ThrottlingPolicy:  "Unlimited",
+			Scopes:            []string{},
+			SchemaDefinition:  "{\"type\":\"object\",\"properties\":{\"requestBody\":{\"type\":\"object\",\"contentType\":\"application/json\",\"properties\":{\"id\":{\"type\":\"integer\",\"format\":\"int64\",\"example\":10,\"exampleSetFlag\":true,\"types\":[\"integer\"]},\"name\":{\"type\":\"string\",\"example\":\"doggie\",\"exampleSetFlag\":true,\"types\":[\"string\"]},\"category\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"integer\",\"format\":\"int64\",\"example\":1,\"exampleSetFlag\":true,\"types\":[\"integer\"]},\"name\":{\"type\":\"string\",\"example\":\"Dogs\",\"exampleSetFlag\":true,\"types\":[\"string\"]}},\"xml\":{\"name\":\"category\"},\"exampleSetFlag\":false,\"types\":[\"object\"]},\"photoUrls\":{\"type\":\"array\",\"xml\":{\"wrapped\":true},\"exampleSetFlag\":false,\"items\":{\"type\":\"string\",\"xml\":{\"name\":\"photoUrl\"},\"exampleSetFlag\":false,\"types\":[\"string\"]}},\"types\":[\"array\"]},\"tags\":{\"type\":\"array\",\"xml\":{\"wrapped\":true},\"exampleSetFlag\":false,\"items\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"integer\",\"format\":\"int64\",\"exampleSetFlag\":false,\"types\":[\"integer\"]},\"name\":{\"type\":\"string\",\"exampleSetFlag\":false,\"types\":[\"string\"]}},\"xml\":{\"name\":\"tag\"},\"exampleSetFlag\":false,\"types\":[\"object\"]}},\"types\":[\"array\"]},\"status\":{\"type\":\"string\",\"description\":\"pet status in the store\",\"exampleSetFlag\":false,\"types\":[\"string\"],\"enum\":[\"available\",\"pending\",\"sold\"]}},\"required\":[\"name\",\"photoUrls\"]}},\"required\":[\"requestBody\"]}",
+			Description:       "Add a new pet to the store.",
+			OperationPolicies: OperationPolicies{[]string{}, []string{}, []string{}},
+		},
+		{
+			ID:                "",
+			Target:            "findPetsByStatus",
+			Feature:           "TOOL",
+			AuthType:          "Application & Application User",
+			ThrottlingPolicy:  "Unlimited",
+			Scopes:            []string{},
+			SchemaDefinition:  "{\"type\":\"object\",\"properties\":{\"query_status\":{\"type\":\"string\",\"enum\":[\"available\",\"pending\",\"sold\"],\"default\":\"available\",\"description\":\"Status values that need to be considered for filter\"}},\"required\":[\"query_status\"]}",
+			Description:       "Multiple status values can be provided with comma separated strings.",
+			OperationPolicies: OperationPolicies{[]string{}, []string{}, []string{}},
+		},
+	}
+	mcpServer.Categories = []string{}
+	mcpServer.KeyManagers = []string{"all"}
+	mcpServer.GatewayVendor = "wso2"
+	mcpServer.GatewayType = "wso2/synapse"
+	mcpServer.InitiatedFromGateway = false
+	return &mcpServer
+}
+
 // CopyAPI : Create a deep copy of an API object
 func CopyAPI(apiToCopy *API) API {
 	apiCopy := *apiToCopy
@@ -428,6 +509,49 @@ func CopyAPIProduct(apiProductToCopy *APIProduct) APIProduct {
 	return apiProductCopy
 }
 
+// CopyMCPServer : Create a deep copy of an MCP Server object
+func CopyMCPServer(mcpServerToCopy *MCPServer) MCPServer {
+	mcpServerCopy := *mcpServerToCopy
+
+	// Copy Transport slice
+	mcpServerCopy.Transport = make([]string, len(mcpServerToCopy.Transport))
+	copy(mcpServerCopy.Transport, mcpServerToCopy.Transport)
+
+	// Copy Tags slice
+	mcpServerCopy.Tags = make([]string, len(mcpServerToCopy.Tags))
+	copy(mcpServerCopy.Tags, mcpServerToCopy.Tags)
+
+	// Copy Policies slice
+	mcpServerCopy.Policies = make([]string, len(mcpServerToCopy.Policies))
+	copy(mcpServerCopy.Policies, mcpServerToCopy.Policies)
+
+	// Copy SecurityScheme slice
+	mcpServerCopy.SecurityScheme = make([]string, len(mcpServerToCopy.SecurityScheme))
+	copy(mcpServerCopy.SecurityScheme, mcpServerToCopy.SecurityScheme)
+
+	// Copy VisibleRoles slice
+	mcpServerCopy.VisibleRoles = make([]string, len(mcpServerToCopy.VisibleRoles))
+	copy(mcpServerCopy.VisibleRoles, mcpServerToCopy.VisibleRoles)
+
+	// Copy VisibleTenants slice
+	mcpServerCopy.VisibleTenants = make([]string, len(mcpServerToCopy.VisibleTenants))
+	copy(mcpServerCopy.VisibleTenants, mcpServerToCopy.VisibleTenants)
+
+	// Copy SubscriptionAvailableTenants slice
+	mcpServerCopy.SubscriptionAvailableTenants = make([]string, len(mcpServerToCopy.SubscriptionAvailableTenants))
+	copy(mcpServerCopy.SubscriptionAvailableTenants, mcpServerToCopy.SubscriptionAvailableTenants)
+
+	// Copy AccessControlRoles slice
+	mcpServerCopy.AccessControlRoles = make([]string, len(mcpServerToCopy.AccessControlRoles))
+	copy(mcpServerCopy.AccessControlRoles, mcpServerToCopy.AccessControlRoles)
+
+	// Copy Operations slice
+	mcpServerCopy.Operations = make([]MCPServerOperations, len(mcpServerToCopy.Operations))
+	copy(mcpServerCopy.Operations, mcpServerToCopy.Operations)
+
+	return mcpServerCopy
+}
+
 // SortAPIMembers : Sort API object members such as slices
 func SortAPIMembers(api *API) {
 	// Sort Transport slice
@@ -489,6 +613,35 @@ func SortAPIProductMembers(apiProduct *APIProduct) {
 
 	// Sort APIs slice
 	// sort.Sort(ByTargetVerb(apiProduct.APIs))
+}
+
+func SortMCPServerMembers(mcpServer *MCPServer) {
+	// Sort Transport slice
+	sort.Strings(mcpServer.Transport)
+
+	// Sort Tags slice
+	sort.Strings(mcpServer.Tags)
+
+	// Sort Policies slice
+	sort.Strings(mcpServer.Policies)
+
+	// Sort SecurityScheme slice
+	sort.Strings(mcpServer.SecurityScheme)
+
+	// Sort VisibleRoles slice
+	sort.Strings(mcpServer.VisibleRoles)
+
+	// Sort VisibleTenants slice
+	sort.Strings(mcpServer.VisibleTenants)
+
+	// Sort SubscriptionAvailableTenants slice
+	sort.Strings(mcpServer.SubscriptionAvailableTenants)
+
+	// Sort AccessControlRoles slice
+	sort.Strings(mcpServer.AccessControlRoles)
+
+	// Sort Operations slice
+	sort.Sort(ByTargetVerbMCPServer(mcpServer.Operations))
 }
 
 // GenerateSampleAppData : Generate sample Application object
@@ -567,6 +720,114 @@ func (instance *Client) AddAPI(t *testing.T, api *API, username string, password
 	return apiResponse.ID
 }
 
+// AddMCPServerFromOpenAPI : Add MCP Server to APIM using generate-from-openapi endpoint with form data
+func (instance *Client) AddMCPServer(t *testing.T, mcpServer *MCPServer, username string, password string, doClean bool) string {
+	mcpServersURL := instance.publisherRestURL + "/mcp-servers/generate-from-openapi"
+
+	// Create form data
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+
+	// Add URL field - using petstore OpenAPI URL
+	openAPIURL := "https://petstore3.swagger.io/api/v3/openapi.json"
+	err := writer.WriteField("url", openAPIURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Create additional properties JSON from mcpServer object
+	additionalProperties := map[string]interface{}{
+		"name":        mcpServer.Name,
+		"version":     mcpServer.Version,
+		"context":     mcpServer.Context,
+		"gatewayType": "wso2/synapse",
+		"policies":    mcpServer.Policies,
+		"operations": []map[string]interface{}{
+			{
+				"feature": "TOOL",
+				"backendOperationMapping": map[string]interface{}{
+					"backendId": "",
+					"backendOperation": map[string]string{
+						"target": "/pet",
+						"verb":   "PUT",
+					},
+				},
+			},
+			{
+				"feature": "TOOL",
+				"backendOperationMapping": map[string]interface{}{
+					"backendId": "",
+					"backendOperation": map[string]string{
+						"target": "/pet",
+						"verb":   "POST",
+					},
+				},
+			},
+			{
+				"feature": "TOOL",
+				"backendOperationMapping": map[string]interface{}{
+					"backendId": "",
+					"backendOperation": map[string]string{
+						"target": "/pet/findByStatus",
+						"verb":   "GET",
+					},
+				},
+			},
+		},
+		"endpointConfig": map[string]interface{}{
+			"endpoint_type": "http",
+			"sandbox_endpoints": map[string]string{
+				"url": "https://petstore3.swagger.io/api/v3",
+			},
+			"production_endpoints": map[string]string{
+				"url": "https://petstore3.swagger.io/api/v3",
+			},
+		},
+	}
+
+	additionalPropertiesJSON, err := json.Marshal(additionalProperties)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = writer.WriteField("additionalProperties", string(additionalPropertiesJSON))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = writer.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	request := base.CreatePost(mcpServersURL, body)
+
+	// Set form data headers
+	request.Header.Set("Content-Type", writer.FormDataContentType())
+	request.Header.Set("Authorization", "Bearer "+instance.accessToken)
+
+	base.LogRequest("apim.AddMCPServer()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.AddMCPServer()", response, 201)
+
+	var mcpServerResponse MCPServer
+	json.NewDecoder(response.Body).Decode(&mcpServerResponse)
+
+	if doClean {
+		t.Cleanup(func() {
+			username, password := RetrieveAdminCredentialsInsteadCreator(username, password)
+			instance.Login(username, password)
+			instance.DeleteMCPServer(mcpServerResponse.ID)
+		})
+	}
+
+	return mcpServerResponse.ID
+}
+
 // UpdateAPI : Update API in APIM
 func (instance *Client) UpdateAPI(t *testing.T, api *API, username string, password string) string {
 	apisURL := instance.publisherRestURL + "/apis/" + api.ID
@@ -593,6 +854,33 @@ func (instance *Client) UpdateAPI(t *testing.T, api *API, username string, passw
 	json.NewDecoder(response.Body).Decode(&apiResponse)
 
 	return apiResponse.ID
+}
+
+// UpdateMCPServer : Update MCP Server in APIM
+func (instance *Client) UpdateMCPServer(t *testing.T, mcpServer *MCPServer, username string, password string) string {
+	mcpServersURL := instance.publisherRestURL + "/mcp-servers/" + mcpServer.ID
+
+	data, err := json.Marshal(mcpServer)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	request := base.CreatePut(mcpServersURL, bytes.NewBuffer(data))
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.UpdateMCPServer()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.UpdateMCPServer()", response, 200)
+
+	var mcpServerResponse MCPServer
+	json.NewDecoder(response.Body).Decode(&mcpServerResponse)
+
+	return mcpServerResponse.ID
 }
 
 // AddSoapAPI : Add new SOAP API to APIM
@@ -1052,6 +1340,30 @@ func (instance *Client) GetAPIRevisions(apiID, query string) *APIRevisionList {
 	return &revisionsList
 }
 
+func (instance *Client) GetMCPServerRevisions(mcpServerID, query string) *MCPServerRevisionList {
+	revisioningURL := instance.publisherRestURL + "/mcp-servers/" + mcpServerID + "/revisions"
+
+	if query != "" {
+		revisioningURL += "?query=" + query
+	}
+
+	request := base.CreateGet(revisioningURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.GetMCPServerRevisions()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.GetMCPServerRevisions()", response, 200)
+
+	var revisionsList MCPServerRevisionList
+	json.NewDecoder(response.Body).Decode(&revisionsList)
+	return &revisionsList
+}
+
 // CreateAPIRevision : Create API revision
 func (instance *Client) CreateAPIRevision(apiID string) *APIRevision {
 	revisioningURL := instance.publisherRestURL + "/apis/" + apiID + "/revisions"
@@ -1067,6 +1379,28 @@ func (instance *Client) CreateAPIRevision(apiID string) *APIRevision {
 	defer response.Body.Close()
 
 	base.ValidateAndLogResponse("apim.CreateAPIRevision()", response, 201)
+
+	var revision APIRevision
+	json.NewDecoder(response.Body).Decode(&revision)
+
+	return &revision
+}
+
+// CreateMCPServerRevision : Create MCP Server revision
+func (instance *Client) CreateMCPServerRevision(mcpServerID string) *APIRevision {
+	revisioningURL := instance.publisherRestURL + "/mcp-servers/" + mcpServerID + "/revisions"
+
+	request := base.CreatePost(revisioningURL, bytes.NewBuffer([]byte("{ \"description\": \"\" }")))
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.CreateMCPServerRevision()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.CreateMCPServerRevision()", response, 201)
 
 	var revision APIRevision
 	json.NewDecoder(response.Body).Decode(&revision)
@@ -1118,6 +1452,50 @@ func (instance *Client) DeployAPIRevision(t *testing.T, apiID, deploymentName, v
 	defer response.Body.Close()
 
 	base.ValidateAndLogResponse("apim.DeployAPIRevision()", response, 201)
+}
+
+func (instance *Client) DeployMCPServerRevision(t *testing.T, mcpServerID, deploymentName, vhost, revisionID string) {
+	deployURL := instance.publisherRestURL + "/mcp-servers/" + mcpServerID + "/deploy-revision"
+
+	deploymentInfoArray := []APIRevisionDeployment{}
+	deploymentInfo := APIRevisionDeployment{}
+	deploymentInfo.RevisionUUID = revisionID
+
+	if deploymentName == "" {
+		deploymentInfo.Name = "Default"
+	} else {
+		deploymentInfo.Name = deploymentName
+	}
+	if vhost == "" {
+		deploymentInfo.VHost = "localhost"
+	} else {
+		deploymentInfo.VHost = vhost
+	}
+
+	deploymentInfo.DisplayOnDevportal = true
+	deploymentInfoArray = append(deploymentInfoArray, deploymentInfo)
+
+	data, err := json.Marshal(deploymentInfoArray)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	request := base.CreatePost(deployURL, bytes.NewBuffer(data))
+
+	values := url.Values{}
+	values.Add("revisionId", revisionID)
+
+	request.URL.RawQuery = values.Encode()
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.DeployMCPServerRevision()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.DeployMCPServerRevision()", response, 201)
 }
 
 // GetAPIProductRevisions : Get API Product revisions
@@ -1230,6 +1608,23 @@ func (instance *Client) DeleteAPI(apiID string) {
 	base.ValidateAndLogResponse("apim.DeleteAPI()", response, 200)
 }
 
+// DeleteMCPServer : Delete MCP Server from APIM
+func (instance *Client) DeleteMCPServer(mcpServerID string) {
+	mcpServersURL := instance.publisherRestURL + "/mcp-servers/" + mcpServerID
+
+	request := base.CreateDelete(mcpServersURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.DeleteMCPServer()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.DeleteMCPServer()", response, 200)
+}
+
 // DeleteAPIProduct : Delete API Product from APIM
 func (instance *Client) DeleteAPIProduct(apiProductID string) {
 	apiProductsURL := instance.publisherRestURL + "/api-products/" + apiProductID
@@ -1306,6 +1701,14 @@ func (instance *Client) DeleteAPIByName(name string) error {
 		instance.DeleteAPI(apiInfo.ID)
 	}
 
+	return err
+}
+
+func (instance *Client) DeleteMCPServerByName(name string) error {
+	mcpServerInfo, err := instance.GetMCPServerByName(name)
+	if err == nil {
+		instance.DeleteMCPServer(mcpServerInfo.ID)
+	}
 	return err
 }
 
@@ -1399,6 +1802,48 @@ func (instance *Client) GetAPIProducts() *APIProductList {
 	return &apiProductsResponse
 }
 
+// GetMCPServer : Get MCP Server from APIM
+func (instance *Client) GetMCPServer(mcpServerID string) *MCPServer {
+	mcpServersURL := instance.publisherRestURL + "/mcp-servers/" + mcpServerID
+
+	request := base.CreateGet(mcpServersURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.GetMCPServer()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.GetMCPServer()", response, 200)
+
+	var mcpServerResponse MCPServer
+	json.NewDecoder(response.Body).Decode(&mcpServerResponse)
+	return &mcpServerResponse
+}
+
+// GetMCPServers : Get MCP Servers from APIM
+func (instance *Client) GetMCPServers() *MCPServerList {
+	mcpServersURL := instance.publisherRestURL + "/mcp-servers"
+
+	request := base.CreateGet(mcpServersURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.GetMCPServers()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.GetMCPServers()", response, 200)
+
+	var mcpServersResponse MCPServerList
+	json.NewDecoder(response.Body).Decode(&mcpServersResponse)
+	return &mcpServersResponse
+}
+
 // GetAPIByName : Get API by name from APIM
 func (instance *Client) GetAPIByName(name string) (*APIInfo, error) {
 
@@ -1471,6 +1916,37 @@ func (instance *Client) GetAPIProductByName(name string) *APIProductInfo {
 	return &apiProductResponse.List[0]
 }
 
+func (instance *Client) GetMCPServerByName(name string) (*MCPServerInfo, error) {
+	mcpServersURL := instance.publisherRestURL + "/mcp-servers"
+
+	request := base.CreateGet(mcpServersURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	values := url.Values{}
+	queryVal := "type:\"MCP\" name:\"" + name + "\""
+	values.Add("query", queryVal)
+
+	request.URL.RawQuery = values.Encode()
+
+	base.LogRequest("apim.GetMCPServerByName()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.GetMCPServerByName()", response, 200)
+
+	var mcpServerResponse MCPServerList
+	json.NewDecoder(response.Body).Decode(&mcpServerResponse)
+
+	if len(mcpServerResponse.List) > 0 {
+		return &mcpServerResponse.List[0], nil
+	}
+
+	return nil, errors.New("apim.GetMCPServerByName() did not return result for: " + name)
+}
+
 // PublishAPI : Publish API from APIM
 func (instance *Client) PublishAPI(apiID string) {
 	lifeCycleURL := instance.publisherRestURL + "/apis/change-lifecycle"
@@ -1494,6 +1970,28 @@ func (instance *Client) PublishAPI(apiID string) {
 	base.ValidateAndLogResponse("apim.PublishAPI()", response, 200)
 }
 
+func (instance *Client) PublishMCPServer(mcpServerID string) {
+	lifeCycleURL := instance.publisherRestURL + "/mcp-servers/change-lifecycle"
+
+	request := base.CreatePostEmptyBody(lifeCycleURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	values := url.Values{}
+	values.Add("action", "Publish")
+	values.Add("mcpServerId", mcpServerID)
+
+	request.URL.RawQuery = values.Encode()
+
+	base.LogRequest("apim.PublishMCPServer()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.PublishMCPServer()", response, 200)
+}
+
 // ChangeAPILifeCycle : Change Life Cycle Status of an API in APIM
 func (instance *Client) ChangeAPILifeCycle(apiID, action string) {
 	lifeCycleURL := instance.publisherRestURL + "/apis/change-lifecycle"
@@ -1515,6 +2013,28 @@ func (instance *Client) ChangeAPILifeCycle(apiID, action string) {
 	defer response.Body.Close()
 
 	base.ValidateAndLogResponse("apim.ChangeAPILifeCycle()", response, 200)
+}
+
+func (instance *Client) ChangeMCPServerLifeCycle(mcpServerID, action string) {
+	lifeCycleURL := instance.publisherRestURL + "/mcp-servers/change-lifecycle"
+
+	request := base.CreatePostEmptyBody(lifeCycleURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	values := url.Values{}
+	values.Add("action", action)
+	values.Add("mcpServerId", mcpServerID)
+
+	request.URL.RawQuery = values.Encode()
+
+	base.LogRequest("apim.ChangeMCPServerLifeCycle()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.ChangeMCPServerLifeCycle()", response, 200)
 }
 
 // GetApplicationSubscriptions : Get subscriptions of an application
@@ -1922,6 +2442,39 @@ func (instance *Client) DeleteAllAPIs() {
 	}
 }
 
+func (instance *Client) DeleteAllMCPServers() {
+	mcpServersGetURL := instance.publisherRestURL + "/mcp-servers"
+
+	request := base.CreateGet(mcpServersGetURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.DeleteAllMCPServers() getting MCP Servers", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.DeleteAllMCPServers() getting MCP Servers", response, 200)
+
+	var mcpServersResponse MCPServerList
+	json.NewDecoder(response.Body).Decode(&mcpServersResponse)
+
+	for _, mcpServer := range mcpServersResponse.List {
+		mcpServersDeleteURL := instance.publisherRestURL + "/mcp-servers/" + mcpServer.ID
+		request = base.CreateDelete(mcpServersDeleteURL)
+
+		base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+		base.LogRequest("apim.DeleteAllMCPServers() deleting MCP Servers", request)
+
+		response = base.SendHTTPRequest(request)
+		defer response.Body.Close()
+
+		base.ValidateAndLogResponse("apim.DeleteAllMCPServers() deleting MCP Servers", response, 200)
+	}
+}
+
 // DeleteAllAPIProducts : Delete All API Products from APIM
 func (instance *Client) DeleteAllAPIProducts() {
 	apiProductsGetURL := instance.publisherRestURL + "/api-products"
@@ -2066,6 +2619,58 @@ func (instance *Client) SetAPILogLevel(username, password, tenantDomain, apiId, 
 	return nil, errors.New("Error with status code " + response.Status + "while setting log level of API " + apiId + ".")
 }
 
+func (instance *Client) GetMCPServerLogLevel(username, password, tenantDomain, mcpServerId string) (*MCPServerLogLevelList, error) {
+	url := instance.devopsRestURL + "/tenant-logs/" + tenantDomain + "/apis/" + mcpServerId
+	request := base.CreateGet(url)
+	encoded := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
+
+	request.Header.Set("Authorization", "Basic "+encoded)
+	request.Header.Set("Content-Type", "application/json")
+
+	base.LogRequest("apim.GetMCPServerLogLevel()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	if response.StatusCode == 200 {
+		var mcpServerLogLevelList MCPServerLogLevelList
+		json.NewDecoder(response.Body).Decode(&mcpServerLogLevelList)
+		return &mcpServerLogLevelList, nil
+	}
+
+	return nil, errors.New("Error with status code " + response.Status + " while retrieving log levels.")
+}
+
+func (instance *Client) SetMCPServerLogLevel(username, password, tenantDomain, mcpServerId, logLevel string) (*MCPServerLogLevel, error) {
+	url := instance.devopsRestURL + "/tenant-logs/" + tenantDomain + "/apis/" + mcpServerId
+	data, err := json.Marshal(MCPServerLogLevel{LogLevel: logLevel})
+
+	if err != nil {
+		return nil, errors.New("Error while building request payload for setting log level of MCP Server " + mcpServerId + ".")
+	}
+
+	request := base.CreatePut(url, bytes.NewBuffer(data))
+	encoded := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
+
+	request.Header.Set("Authorization", "Basic "+encoded)
+	request.Header.Set("Content-Type", "application/json")
+
+	base.LogRequest("apim.SetMCPServerLogLevel()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	if response.StatusCode == 200 {
+		var mcpServerLogLevel MCPServerLogLevel
+		json.NewDecoder(response.Body).Decode(&mcpServerLogLevel)
+		return &mcpServerLogLevel, nil
+	}
+
+	return nil, errors.New("Error with status code " + response.Status + " while setting log level of MCP Server " + mcpServerId + ".")
+}
+
 func generateSampleAPIOperations() []APIOperations {
 
 	op1 := APIOperations{}
@@ -2120,7 +2725,8 @@ func (instance *Client) getToken(username string, password string) string {
 	values.Add("scope",
 		"apim:admin apim:api_view apim:api_create apim:api_publish apim:subscribe apim:api_delete "+
 			"apim:app_import_export apim:api_import_export apim:api_product_import_export apim:app_manage apim:sub_manage "+
-			"apim:common_operation_policy_view apim:common_operation_policy_manage apim:policies_import_export")
+			"apim:common_operation_policy_view apim:common_operation_policy_manage apim:policies_import_export apim:mcp_server_view "+
+			"apim:mcp_server_list_view apim:mcp_server_create apim:mcp_server_delete apim:mcp_server_publish apim:mcp_server_manage apim:mcp_server_import_export")
 
 	request.URL.RawQuery = values.Encode()
 

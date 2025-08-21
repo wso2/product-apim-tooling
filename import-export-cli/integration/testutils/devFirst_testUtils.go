@@ -108,6 +108,38 @@ func importApiFromProject(t *testing.T, projectName, apiName, paramsPath string,
 	return output, err
 }
 
+// importMCPServerFromProject imports an MCP Server from a project directory.
+func importMCPServerFromProject(t *testing.T, projectName, mcpServerName, paramsPath string, client *apim.Client, credentials *Credentials,
+	isCleanup, isPreserveProvider bool) (string, error) {
+	projectPath, _ := filepath.Abs(projectName)
+
+	params := []string{"import", "mcp-server", "-f", projectPath, "-e", client.GetEnvName(), "-k",
+		"--verbose", "--preserve-provider=" + strconv.FormatBool(isPreserveProvider)}
+
+	if paramsPath != "" {
+		params = append(params, "--params", paramsPath)
+	}
+
+	output, err := base.Execute(t, params...)
+
+	base.WaitForIndexing()
+
+	if isCleanup {
+		t.Cleanup(func() {
+			username, password := apim.RetrieveAdminCredentialsInsteadCreator(credentials.Username, credentials.Password)
+			client.Login(username, password)
+			err := client.DeleteMCPServerByName(mcpServerName)
+
+			if err != nil {
+				t.Fatal(err)
+			}
+			base.WaitForIndexing()
+		})
+	}
+
+	return output, err
+}
+
 func importApiFromProjectWithUpdate(t *testing.T, projectName string, client *apim.Client, apiName string, credentials *Credentials,
 	isCleanup, preserveProvider bool) (string, error) {
 	projectPath, _ := filepath.Abs(projectName)
@@ -149,7 +181,7 @@ func ValidateInitializeProject(t *testing.T, args *InitTestArgs) {
 	})
 }
 
-//Function to initialize a project using API definition
+// Function to initialize a project using API definition
 func ValidateInitializeProjectWithOASFlag(t *testing.T, args *InitTestArgs) {
 	t.Helper()
 
@@ -168,7 +200,7 @@ func ValidateInitializeProjectWithOASFlag(t *testing.T, args *InitTestArgs) {
 	})
 }
 
-//Function to initialize a project using API definition
+// Function to initialize a project using API definition
 func ValidateInitializeProjectWithOASFlagWithoutCleaning(t *testing.T, args *InitTestArgs) {
 	t.Helper()
 
@@ -182,7 +214,7 @@ func ValidateInitializeProjectWithOASFlagWithoutCleaning(t *testing.T, args *Ini
 
 }
 
-//Function to initialize a project using API definition using --definition flag
+// Function to initialize a project using API definition using --definition flag
 func ValidateInitializeProjectWithDefinitionFlag(t *testing.T, args *InitTestArgs) {
 	t.Helper()
 
@@ -220,6 +252,28 @@ func ValidateImportProject(t *testing.T, args *InitTestArgs, paramsPath string, 
 	})
 
 	return importedAPI
+}
+
+func ValidateMCPServerImportProject(t *testing.T, args *InitTestArgs, paramsPath string, preserveProvider bool) *apim.MCPServer {
+	t.Helper()
+
+	result, error := importMCPServerFromProject(t, args.InitFlag, args.APIName, paramsPath, args.SrcAPIM, &args.CtlUser,
+		true, preserveProvider)
+
+	assert.Nil(t, error, "Error while importing Project")
+	assert.Contains(t, result, "Successfully imported API", "Error while importing Project")
+
+	// Get App from env 2
+	importedMCPServer := GetMCPServer(t, args.SrcAPIM, args.APIName, args.CtlUser.Username, args.CtlUser.Password)
+
+	base.WaitForIndexing()
+
+	//Remove Created project and logout
+	t.Cleanup(func() {
+		base.RemoveDir(args.InitFlag)
+	})
+
+	return importedMCPServer
 }
 
 func ValidateAWSProjectImport(t *testing.T, args *AWSInitTestArgs, isPreserveProvider bool) {

@@ -298,3 +298,137 @@ func TestUndeployAPIProductRevisionFailure(t *testing.T) {
 		})
 	}
 }
+
+// Undeploy an MCP Server revision from one gateway
+func TestUndeployMCPServerRevisionSingleGateway(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			dev := GetDevClient()
+
+			// Add the MCP Server to env
+			mcpServer := testutils.AddMCPServer(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
+
+			// Add a new gateway env by the respective admin user
+			gatewayEnv := testutils.AddGatewayEnv(t, dev, user.Admin.Username, user.Admin.Password)
+
+			// Create and Deploy Revision of the above MCP Server to the default gateway
+			revisionId := testutils.CreateAndDeployMCPServerRevision(t, dev, user.ApiPublisher.Username, user.ApiPublisher.Password, mcpServer.ID)
+
+			// Deploy the same revision in another gateway
+			dev.DeployMCPServerRevision(t, mcpServer.ID, gatewayEnv.Name, gatewayEnv.VHosts[0].Host, revisionId)
+			base.WaitForIndexing()
+
+			args := &testutils.UndeployTestArgs{
+				CtlUser:     testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				MCPServer:   mcpServer,
+				SrcAPIM:     dev,
+				RevisionNo:  revisionNumber,
+				GatewayEnvs: []string{gatewayEnv.Name},
+			}
+
+			// Validate the undeploy command
+			testutils.ValidateMCPServerUndeploy(t, args, "", revisionId)
+		})
+	}
+}
+
+// Undeploy an MCP Server revision from multiple gateways but not all
+func TestUndeployMCPServerRevisionMultipleGateways(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			dev := GetDevClient()
+
+			// Add the MCP Server to env
+			mcpServer := testutils.AddMCPServer(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
+
+			// Add two new gateway envs by the respective admin user
+			gatewayEnv1 := testutils.AddGatewayEnv(t, dev, user.Admin.Username, user.Admin.Password)
+			gatewayEnv2 := testutils.AddGatewayEnv(t, dev, user.Admin.Username, user.Admin.Password)
+
+			// Create and Deploy Revision of the above MCP Server to the default gateway
+			revisionId := testutils.CreateAndDeployMCPServerRevision(t, dev, user.ApiPublisher.Username, user.ApiPublisher.Password, mcpServer.ID)
+
+			// Deploy the same revision in other gateways
+			dev.DeployMCPServerRevision(t, mcpServer.ID, gatewayEnv1.Name, gatewayEnv1.VHosts[0].Host, revisionId)
+			base.WaitForIndexing()
+			dev.DeployMCPServerRevision(t, mcpServer.ID, gatewayEnv2.Name, gatewayEnv2.VHosts[0].Host, revisionId)
+			base.WaitForIndexing()
+
+			args := &testutils.UndeployTestArgs{
+				CtlUser:     testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				MCPServer:   mcpServer,
+				SrcAPIM:     dev,
+				RevisionNo:  revisionNumber,
+				GatewayEnvs: []string{gatewayEnv1.Name, gatewayEnv2.Name},
+			}
+
+			// Validate the undeploy command
+			testutils.ValidateMCPServerUndeploy(t, args, "", revisionId)
+		})
+	}
+}
+
+// Undeploy an MCP Server revision from all the gateways
+func TestUndeployMCPServerRevisionAllGateways(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			dev := GetDevClient()
+
+			// Add the MCP Server to env
+			mcpServer := testutils.AddMCPServer(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
+
+			// Add two new gateway envs by the respective admin user
+			gatewayEnv1 := testutils.AddGatewayEnv(t, dev, user.Admin.Username, user.Admin.Password)
+			gatewayEnv2 := testutils.AddGatewayEnv(t, dev, user.Admin.Username, user.Admin.Password)
+
+			// Create and Deploy Revision of the above MCP Server to the default gateway
+			revisionId := testutils.CreateAndDeployMCPServerRevision(t, dev, user.ApiPublisher.Username, user.ApiPublisher.Password, mcpServer.ID)
+
+			// Deploy the same revision in other gateways
+			dev.DeployMCPServerRevision(t, mcpServer.ID, gatewayEnv1.Name, gatewayEnv1.VHosts[0].Host, revisionId)
+			base.WaitForIndexing()
+			dev.DeployMCPServerRevision(t, mcpServer.ID, gatewayEnv2.Name, gatewayEnv2.VHosts[0].Host, revisionId)
+			base.WaitForIndexing()
+
+			args := &testutils.UndeployTestArgs{
+				CtlUser:    testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				MCPServer:  mcpServer,
+				SrcAPIM:    dev,
+				RevisionNo: revisionNumber,
+			}
+
+			// Validate the undeploy command
+			testutils.ValidateMCPServerUndeploy(t, args, "", revisionId)
+		})
+	}
+}
+
+// Undeploy an MCP Server revision from a gateway that does not exist
+func TestUndeployMCPServerRevisionFailure(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+
+			dev := GetDevClient()
+
+			// Add the MCP Server to env
+			mcpServer := testutils.AddMCPServer(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
+
+			// Create and Deploy Revision of the above MCP Server to the default gateway
+			revisionId := testutils.CreateAndDeployMCPServerRevision(t, dev, user.ApiPublisher.Username, user.ApiPublisher.Password, mcpServer.ID)
+
+			args := &testutils.UndeployTestArgs{
+				CtlUser:     testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				MCPServer:   mcpServer,
+				SrcAPIM:     dev,
+				RevisionNo:  revisionNumber,
+				GatewayEnvs: []string{base.GenerateRandomString()},
+			}
+
+			// Validate the undeploy command failure
+			testutils.ValidateMCPServerUndeployFailure(t, args, "", revisionId)
+		})
+	}
+}
