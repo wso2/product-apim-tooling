@@ -26,8 +26,8 @@ import (
 
 // keys command related Info
 const GetKeysCmdLiteral = "keys"
-const getKeysCmdShortDesc = "Generate access token to invoke the API or API Product or MCP Server"
-const getKeysCmdLongDesc = `Generate JWT token to invoke the API or API Product or MCP Server by subscribing to a default application for testing purposes`
+const getKeysCmdShortDesc = "Generate access token to invoke the API, API Product or MCP Server"
+const getKeysCmdLongDesc = `Generate JWT token to invoke the API, API Product or MCP Server by subscribing to a default application for testing purposes`
 const getKeysCmdExamples = utils.ProjectName + " " + GetCmdLiteral + " " + GetKeysCmdLiteral + ` -n TwitterAPI -v 1.0.0 -e dev --provider admin
 NOTE: Both the flags (--name (-n) and --environment (-e)) are mandatory.
 You can override the default token endpoint using --token (-t) optional flag providing a new token endpoint`
@@ -61,13 +61,13 @@ var getKeysCmd = &cobra.Command{
 	},
 }
 
-//init function to add the cli command to the root command
+// init function to add the cli command to the root command
 func init() {
 	GetCmd.AddCommand(getKeysCmd)
 	getKeysCmd.Flags().StringVarP(&keyGenEnv, "environment", "e", "", "Key generation environment")
-	getKeysCmd.Flags().StringVarP(&apiName, "name", "n", "", "API or API Product or MCP Server to generate keys")
-	getKeysCmd.Flags().StringVarP(&apiVersion, "version", "v", "", "Version of the API or API Product or MCP Server")
-	getKeysCmd.Flags().StringVarP(&apiProvider, "provider", "r", "", "Provider of the API or API Product or MCP Server")
+	getKeysCmd.Flags().StringVarP(&apiName, "name", "n", "", "API, API Product or MCP Server to generate keys")
+	getKeysCmd.Flags().StringVarP(&apiVersion, "version", "v", "", "Version of the API, API Product or MCP Server")
+	getKeysCmd.Flags().StringVarP(&apiProvider, "provider", "r", "", "Provider of the API, API Product or MCP Server")
 	getKeysCmd.Flags().StringVarP(&keyGenTokenEndpoint, "token", "t", "", "Token endpoint URL of Environment")
 	_ = getKeysCmd.MarkFlagRequired("name")
 	_ = getKeysCmd.MarkFlagRequired("environment")

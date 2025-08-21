@@ -11,7 +11,7 @@ Display a list of Applications of a specific user in the environment specified b
 Display a list of API revisions of a specific API in the environment specified by flag (--environment, -e)/
 Display a list of MCP Server revisions of a specific MCP Server in the environment specified by flag (--environment, -e)/
 Display a list of API Product revisions of a specific API Product in the environment specified by flag (--environment, -e)/
-Get a generated JWT token to invoke an API or API Product or MCP Server by subscribing to a default application for testing purposes in the environment specified by flag (--environment, -e)/
+Get a generated JWT token to invoke an API, API Product or MCP Server by subscribing to a default application for testing purposes in the environment specified by flag (--environment, -e)/
 Get the log level of each API in the environment specified by flag (--environment, -e)/
 Get the log level of each MCP Server in the environment specified by flag (--environment, -e)/
 Get the correlation log configurations in the environment specified by flag (--environment, -e)
@@ -64,7 +64,7 @@ apictl get correlation-logging -e dev
 * [apictl get apps](apictl_get_apps.md)	 - Display a list of Applications in an environment specific to an owner
 * [apictl get correlation-logging](apictl_get_correlation-logging.md)	 - Display a list of correlation logging components in an environment
 * [apictl get envs](apictl_get_envs.md)	 - Display the list of environments
-* [apictl get keys](apictl_get_keys.md)	 - Generate access token to invoke the API or API Product or MCP Server
+* [apictl get keys](apictl_get_keys.md)	 - Generate access token to invoke the API, API Product or MCP Server
 * [apictl get mcp-server-logging](apictl_get_mcp-server-logging.md)	 - Display a list of MCP Server loggers in an environment
 * [apictl get mcp-server-revisions](apictl_get_mcp-server-revisions.md)	 - Display a list of Revisions for the MCP Server
 * [apictl get mcp-servers](apictl_get_mcp-servers.md)	 - Display a list of MCP Servers in an environment
