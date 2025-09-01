@@ -32,35 +32,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// // MCPServerImportExportTestArgs holds the arguments needed for MCP Server import/export tests
-// type MCPServerImportExportTestArgs struct {
-// 	MCPServerProvider Credentials
-// 	CtlUser           Credentials
-// 	MCPServer         *apim.MCPServer
-// 	SrcAPIM           *apim.Client
-// 	DestAPIM          *apim.Client
-// 	IsDeployed        bool
-// 	ImportFilePath    string
-// 	UpdateFlag        bool
-// 	PreserveProvider  bool
-// }
-
-// // MCPServerChangeLifeCycleStatusTestArgs holds the arguments needed for MCP Server lifecycle change tests
-// type MCPServerChangeLifeCycleStatusTestArgs struct {
-// 	CtlUser       Credentials
-// 	MCPServer     *apim.MCPServer
-// 	APIM          *apim.Client
-// 	Action        string
-// 	ExpectedState string
-// }
-
-// const (
-// 	DevFirstDefaultMCPServerVersion = "1.0.0"
-// 	SampleMCPServerYamlFilePath     = "testdata/TestArtifactDirectory/MCPServerSampleArtifacts/mcp_server.yaml"
-// 	// Additional constants for MCP Server testing
-// 	MCPServerYamlFilePath = "mcp_server.yaml"
-// )
-
 // GetMCPServerById returns MCP Server by ID
 func GetMCPServerById(t *testing.T, client *apim.Client, username, password, mcpServerId string) *apim.MCPServer {
 	client.Login(username, password)
