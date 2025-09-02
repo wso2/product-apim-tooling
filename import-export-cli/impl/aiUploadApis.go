@@ -77,7 +77,7 @@ func ProduceAPIPayloads(accessToken string, apiListQueue chan<- []map[string]int
 	startingApiIndexFromList = 0
 	if UploadAll {
 		count, apis = getAPIList(Credential, CmdUploadEnvironment, "")
-		ExportAPIs(Credential, "", CmdUploadEnvironment, Tenant, "json", "", "", true, true, false, true)
+		ExportAPIs(Credential, "", CmdUploadEnvironment, Tenant, "json", "", "", true, true, false, true, false)
 		apiListOffset = 0
 		count, apiProducts, _ = GetAPIProductListFromEnv(accessToken, CmdUploadEnvironment, "", strconv.Itoa(utils.MaxAPIsToExportOnce)+"&offset="+strconv.Itoa(apiListOffset))
 		AddAPIProductsToQueue(accessToken, apiListQueue)
@@ -86,7 +86,7 @@ func ProduceAPIPayloads(accessToken string, apiListQueue chan<- []map[string]int
 		AddAPIProductsToQueue(accessToken, apiListQueue)
 	} else {
 		count, apis = getAPIList(Credential, CmdUploadEnvironment, "")
-		ExportAPIs(Credential, "", CmdUploadEnvironment, Tenant, "json", "", "", true, true, false, true)
+		ExportAPIs(Credential, "", CmdUploadEnvironment, Tenant, "json", "", "", true, true, false, true, false)
 	}
 	close(apiListQueue)
 }

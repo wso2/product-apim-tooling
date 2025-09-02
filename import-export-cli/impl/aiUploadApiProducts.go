@@ -57,7 +57,7 @@ func GetAPIPayload(apiOrProduct interface{}, accessToken, cmdUploadEnvironment s
 		if api.LifeCycleStatus != "PUBLISHED" && api.LifeCycleStatus != "PROTOTYPED" {
 			return nil
 		}
-		resp, err = ExportAPIFromEnv(accessToken, api.Name, api.Version, "", api.Provider, "json", cmdUploadEnvironment, true, false)
+		resp, err = ExportAPIFromEnv(accessToken, api.Name, api.Version, "", api.Provider, "json", cmdUploadEnvironment, true, false, false)
 		name = api.Name + "-" + api.Version
 	}
 
