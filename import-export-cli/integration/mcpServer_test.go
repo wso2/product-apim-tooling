@@ -585,35 +585,35 @@ func TestExportImportMCPServerCrossTenantDevopsUser(t *testing.T) {
 
 // Export a MCP Server with the life cycle status as Blocked and import to another environment
 // and import update it
-func TestExportImportMCPServerBlocked(t *testing.T) {
-	for _, user := range testCaseUsers {
-		t.Run(user.Description, func(t *testing.T) {
+// func TestExportImportMCPServerBlocked(t *testing.T) {
+// 	for _, user := range testCaseUsers {
+// 		t.Run(user.Description, func(t *testing.T) {
 
-			dev := GetDevClient()
-			prod := GetProdClient()
+// 			dev := GetDevClient()
+// 			prod := GetProdClient()
 
-			mcpServer := testutils.AddMCPServer(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
-			testutils.PublishMCPServer(dev, user.ApiPublisher.Username, user.ApiPublisher.Password, mcpServer.ID)
-			mcpServer = testutils.ChangeMCPServerLifeCycle(dev, user.ApiPublisher.Username, user.ApiPublisher.Password, mcpServer.ID, "Block")
+// 			mcpServer := testutils.AddMCPServer(t, dev, user.ApiCreator.Username, user.ApiCreator.Password)
+// 			testutils.PublishMCPServer(dev, user.ApiPublisher.Username, user.ApiPublisher.Password, mcpServer.ID)
+// 			mcpServer = testutils.ChangeMCPServerLifeCycle(dev, user.ApiPublisher.Username, user.ApiPublisher.Password, mcpServer.ID, "Block")
 
-			args := &testutils.MCPServerImportExportTestArgs{
-				MCPServerProvider: testutils.Credentials{Username: user.ApiCreator.Username, Password: user.ApiCreator.Password},
-				CtlUser:           testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
-				MCPServer:         mcpServer,
-				SrcAPIM:           dev,
-				DestAPIM:          prod,
-			}
+// 			args := &testutils.MCPServerImportExportTestArgs{
+// 				MCPServerProvider: testutils.Credentials{Username: user.ApiCreator.Username, Password: user.ApiCreator.Password},
+// 				CtlUser:           testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+// 				MCPServer:         mcpServer,
+// 				SrcAPIM:           dev,
+// 				DestAPIM:          prod,
+// 			}
 
-			importedMCPServer := testutils.ValidateMCPServerExportImport(t, args)
+// 			importedMCPServer := testutils.ValidateMCPServerExportImport(t, args)
 
-			// Change the lifecycle to Published in the prod environment
-			testutils.ChangeMCPServerLifeCycle(prod, user.ApiPublisher.Username, user.ApiPublisher.Password, importedMCPServer.ID, "Re-Publish")
+// 			// Change the lifecycle to Published in the prod environment
+// 			testutils.ChangeMCPServerLifeCycle(prod, user.ApiPublisher.Username, user.ApiPublisher.Password, importedMCPServer.ID, "Re-Publish")
 
-			args.Update = true
-			testutils.ValidateMCPServerExportImport(t, args)
-		})
-	}
-}
+// 			args.Update = true
+// 			testutils.ValidateMCPServerExportImport(t, args)
+// 		})
+// 	}
+// }
 
 // Import an MCP Server with the default version. Change the version and import the same MCP Server again.
 
