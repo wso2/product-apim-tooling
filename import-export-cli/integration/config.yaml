@@ -19,4 +19,4 @@ admin-rest-api-version: v4
 devportal-rest-api-version: v3
 publisher-rest-api-version: v4
 devops-rest-api-version: v0
-apictl-version: 4.5.0
+apictl-version: 4.5.1
