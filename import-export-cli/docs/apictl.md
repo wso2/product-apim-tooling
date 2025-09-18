@@ -36,7 +36,6 @@ apictl [flags]
 * [apictl login](apictl_login.md)	 - Login to an API Manager
 * [apictl logout](apictl_logout.md)	 - Logout to from an API Manager
 * [apictl mg](apictl_mg.md)	 - Handle Microgateway related operations
-* [apictl mi](apictl_mi.md)	 - Micro Integrator related commands
 * [apictl remove](apictl_remove.md)	 - Remove an environment
 * [apictl secret](apictl_secret.md)	 - Manage sensitive information
 * [apictl set](apictl_set.md)	 - Set configuration parameters, per API log levels or correlation component configurations
