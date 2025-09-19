@@ -613,7 +613,7 @@ func getReqAndResInterceptors(reqPolicyCount, resPolicyCount int, reqPolicies []
 
 	if resPolicyCount > 0 {
 		for _, resPolicy := range resPolicies {
-			if resPolicy.PolicyName == constants.InterceptorService {
+			if strings.HasSuffix(resPolicy.PolicyName, constants.InterceptorService) {
 				interceptorServiceURL := resPolicy.Parameters[interceptorServiceURL].(string)
 				includes := resPolicy.Parameters[includes].(string)
 				substrings := strings.Split(includes, ",")
