@@ -156,6 +156,10 @@ func StartInternalServer(port uint) {
 }
 
 func createAPIYaml(apiCPEvent *APICPEvent) (string, string, string) {
+
+	logger.LoggerMgtServer.Infof("Creating API YAML for API: %+v", apiCPEvent.API)
+
+
 	config, err := config.ReadConfigs()
 	provider := "admin"
 	if err == nil {
@@ -171,6 +175,7 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string, string) {
 	primarySandboxEndpointID := ""
 	primaryProdcutionURL := ""
 	primarySandboxURL := ""
+	logger.LoggerMgtServer.Infof("Production Multi-endpoint configs: %d", len(multiEndpoints.ProdEndpoints))
 	for _, endpoint := range multiEndpoints.ProdEndpoints {
 		prodCount++
 		var endpointName string
@@ -214,6 +219,7 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string, string) {
 			},
 		})
 	}
+	logger.LoggerMgtServer.Infof("Sandbox Multi-endpoint configs: %d", len(multiEndpoints.SandEndpoints))
 	for _, endpoint := range multiEndpoints.SandEndpoints {
 		sandCount++
 		var endpointName string
@@ -264,11 +270,12 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string, string) {
 		logger.LoggerMgtServer.Errorf("Error occured while extracting operations from open API: %s, \nError: %+v", apiCPEvent.API.Definition, operationsErr)
 		operations = []APIOperation{}
 	}
-	sandEndpoint := ""
+	sandEndpoint := apiCPEvent.API.SandEndpoint
 	if apiCPEvent.API.SandEndpoint != "" {
 		sandEndpoint = fmt.Sprintf("%s://%s", apiCPEvent.API.EndpointProtocol, apiCPEvent.API.SandEndpoint)
 	}
-	prodEndpoint := ""
+	prodEndpoint := apiCPEvent.API.ProdEndpoint
+	logger.LoggerMgtServer.Infof("Sandbox Endpoint: %s, Production Endpoint: %s", sandEndpoint, prodEndpoint)
 	if apiCPEvent.API.ProdEndpoint != "" {
 		prodEndpoint = fmt.Sprintf("%s://%s", apiCPEvent.API.EndpointProtocol, apiCPEvent.API.ProdEndpoint)
 	}
@@ -289,7 +296,14 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string, string) {
 			apiCPEvent.API.AIConfiguration.LLMProviderID + "\"}"
 	}
 	logger.LoggerMgtServer.Debugf("Subtype Configuration: %+v", subTypeConfiguration)
-
+	sandboxSecType := apiCPEvent.API.SandEndpointSecurity.SecurityType
+	if sandboxSecType == "" {
+		sandboxSecType = "NONE"
+	}
+	prodSecType := apiCPEvent.API.ProdEndpointSecurity.SecurityType
+	if prodSecType == "" {
+		prodSecType = "NONE"
+	}
 	data := map[string]interface{}{
 		"type":    "api",
 		"version": "v4.6.0",
@@ -322,7 +336,7 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string, string) {
 						"apiKeyValue":                      apiCPEvent.API.SandEndpointSecurity.APIKeyValue,
 						"apiKeyIdentifier":                 apiCPEvent.API.SandEndpointSecurity.APIKeyName,
 						"apiKeyIdentifierType":             "HEADER",
-						"type":                             apiCPEvent.API.SandEndpointSecurity.SecurityType,
+						"type":                             sandboxSecType,
 						"username":                         apiCPEvent.API.SandEndpointSecurity.BasicUsername,
 						"password":                         apiCPEvent.API.SandEndpointSecurity.BasicPassword,
 						"enabled":                          apiCPEvent.API.SandEndpointSecurity.Enabled,
@@ -336,7 +350,7 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string, string) {
 						"apiKeyValue":                      apiCPEvent.API.ProdEndpointSecurity.APIKeyValue,
 						"apiKeyIdentifier":                 apiCPEvent.API.ProdEndpointSecurity.APIKeyName,
 						"apiKeyIdentifierType":             "HEADER",
-						"type":                             apiCPEvent.API.ProdEndpointSecurity.SecurityType,
+						"type":                             prodSecType,
 						"username":                         apiCPEvent.API.ProdEndpointSecurity.BasicUsername,
 						"password":                         apiCPEvent.API.ProdEndpointSecurity.BasicPassword,
 						"enabled":                          apiCPEvent.API.ProdEndpointSecurity.Enabled,
@@ -364,10 +378,12 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string, string) {
 		//data["data"].(map[string]interface{})["egress"] = true
 	}
 	// TODO when we start to process sandbox we need to have this if condition. For now we remove sandbox endpoint always.
-	// if apiCPEvent.API.SandEndpoint == "" {
-	delete(data["data"].(map[string]interface{})["endpointConfig"].(map[string]interface{}), "sandbox_endpoints")
-	// }
+	if apiCPEvent.API.SandEndpoint == "" {
+		logger.LoggerMgtServer.Debug("Sandbox endpoint is empty. Removing sandbox endpoints from the endpoint config")
+		delete(data["data"].(map[string]interface{})["endpointConfig"].(map[string]interface{}), "sandbox_endpoints")
+	}
 	if apiCPEvent.API.ProdEndpoint == "" {
+		logger.LoggerMgtServer.Debug("Production endpoint is empty. Removing production endpoints from the endpoint config")
 		delete(data["data"].(map[string]interface{})["endpointConfig"].(map[string]interface{}), "production_endpoints")
 	}
 	if apiCPEvent.API.CORSPolicy != nil {
@@ -385,6 +401,7 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string, string) {
 
 	// Handle Production fields
 	if apiCPEvent.API.ProdAIRL != nil {
+		logger.LoggerMgtServer.Infof("Production AIRL is not nil")
 		maxTps["production"] = apiCPEvent.API.ProdAIRL.RequestCount
 		maxTps["productionTimeUnit"] = strings.ToUpper(apiCPEvent.API.ProdAIRL.TimeUnit)
 
@@ -406,6 +423,7 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string, string) {
 
 	// Handle Sandbox fields
 	if apiCPEvent.API.SandAIRL != nil {
+		logger.LoggerMgtServer.Infof("Sandbox AIRL is not nil")
 		maxTps["sandbox"] = apiCPEvent.API.SandAIRL.RequestCount
 		maxTps["sandboxTimeUnit"] = strings.ToUpper(apiCPEvent.API.SandAIRL.TimeUnit)
 
@@ -577,6 +595,7 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string, string) {
 
 		// Attach endpoint_security to configMap
 		configMap["endpoint_security"] = endpointSecurityMap
+		logger.LoggerMgtServer.Debugf("Endpoint Security Map: %+v", endpointSecurityMap)
 
 		// Put endpointConfig in the main endpointMap
 		endpointMap["endpointConfig"] = configMap
@@ -586,6 +605,7 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string, string) {
 	}
 
 	var endpointsData map[string]interface{}
+	logger.LoggerMgtServer.Debugf("Prod Count: %d || Sand Count: %d", prodCount, sandCount)
 	if prodCount > 1 || sandCount > 1 {
 		endpointsData = map[string]interface{}{
 			"type":    "endpoints",
@@ -593,8 +613,15 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string, string) {
 			"data":    dataArr,
 		}
 	}
+	logger.LoggerMgtServer.Debugf("\n\nSandbox Endpoint Sec Config: %+v\n\n", apiCPEvent.API.SandEndpointSecurity)
+	logger.LoggerMgtServer.Debugf("\n\nProd Endpoint Sec Config: %+v\n\n", apiCPEvent.API.ProdEndpointSecurity)
 
 	if primaryProductionEndpointID != "" || primarySandboxEndpointID != "" {
+		logger.LoggerMgtServer.Debugf("Multi-endpoint config enabled")
+		logger.LoggerMgtServer.Debugf("\n\nPrimary Production Endpoint ID: %s || Primary Sandbox Endpoint ID: %s\n\n", primaryProductionEndpointID, primarySandboxEndpointID)
+		logger.LoggerMgtServer.Debugf("Primary Production URL: %s", primaryProdcutionURL)
+		logger.LoggerMgtServer.Debugf("Primary Sandbox URL: %s", primarySandboxURL)
+
 		data["data"].(map[string]interface{})["primaryProductionEndpointId"] = primaryProductionEndpointID
 		data["data"].(map[string]interface{})["primarySandboxEndpointId"] = primarySandboxEndpointID
 		data["data"].(map[string]interface{})["endpointImplementationType"] = "ENDPOINT"
