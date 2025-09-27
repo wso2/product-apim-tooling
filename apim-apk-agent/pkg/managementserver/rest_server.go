@@ -157,9 +157,6 @@ func StartInternalServer(port uint) {
 
 func createAPIYaml(apiCPEvent *APICPEvent) (string, string, string) {
 
-	logger.LoggerMgtServer.Infof("Creating API YAML for API: %+v", apiCPEvent.API)
-
-
 	config, err := config.ReadConfigs()
 	provider := "admin"
 	if err == nil {
@@ -175,7 +172,7 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string, string) {
 	primarySandboxEndpointID := ""
 	primaryProdcutionURL := ""
 	primarySandboxURL := ""
-	logger.LoggerMgtServer.Infof("Production Multi-endpoint configs: %d", len(multiEndpoints.ProdEndpoints))
+	logger.LoggerMgtServer.Debugf("Production Multi-endpoint configs: %d", len(multiEndpoints.ProdEndpoints))
 	for _, endpoint := range multiEndpoints.ProdEndpoints {
 		prodCount++
 		var endpointName string
@@ -219,7 +216,7 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string, string) {
 			},
 		})
 	}
-	logger.LoggerMgtServer.Infof("Sandbox Multi-endpoint configs: %d", len(multiEndpoints.SandEndpoints))
+	logger.LoggerMgtServer.Debugf("Sandbox Multi-endpoint configs: %d", len(multiEndpoints.SandEndpoints))
 	for _, endpoint := range multiEndpoints.SandEndpoints {
 		sandCount++
 		var endpointName string
@@ -667,7 +664,7 @@ func createAPIYaml(apiCPEvent *APICPEvent) (string, string, string) {
 	}
 
 	var requestOperationPolicies []OperationPolicy
-	if apiCPEvent.API.AIModelBasedRoundRobin != nil {
+	if apiCPEvent.API.AIModelBasedRoundRobin != nil && apiCPEvent.API.APIType != "GraphQL" {
 		aiModelBasedRoundRobin := apiCPEvent.API.AIModelBasedRoundRobin
 		logger.LoggerMgtServer.Debugf("AIModelBasedRoundRobin : %+v", aiModelBasedRoundRobin)
 		wrr := ModelBasedRoundRobinConfig{
