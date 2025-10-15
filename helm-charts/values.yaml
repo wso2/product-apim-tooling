@@ -33,12 +33,12 @@ resources:
     cpu: "200m"
 controlPlane:
   enabled: true
-  serviceURL: https://apim-acp-wso2am-cp-1-service:9443/
+  serviceURL: https://apim-wso2am-acp-1-service.default.svc.cluster.local:9443/
   username: admin
   password: admin
   environmentLabels: Default
   skipSSLVerification: true
-  eventListeningEndpoints: amqp://admin:admin@apim-acp-wso2am-cp-1-service:5672?retries='10'&connectdelay='30'
+  eventListeningEndpoints: amqp://admin:admin@apim-wso2am-acp-1-service.default.svc.cluster.local:5672?retries='10'&connectdelay='30'
   # internalKeyIssuer: http://am.wso2.com:443/token
 dataPlane:
   enabled: true
@@ -50,6 +50,7 @@ agent:
   mode: CPtoDP
 certmanager:
   enabled: false
+  enableClusterIssuer: true
 serviceAccount:
   enableServiceAccountCreation: true
   enableClusterRoleCreation: true
