@@ -1,0 +1,148 @@
+type: mcp_server
+version: v4.6.0
+data:
+  id: 46267ecd-908c-4e3e-984e-a7ddfcfb7d1d
+  name: SampleMCP
+  displayName: SampleMCP
+  context: /samplemcp
+  version: 1.0.0
+  provider: admin
+  lifeCycleStatus: PUBLISHED
+  hasThumbnail: false
+  isDefaultVersion: false
+  isRevision: false
+  revisionId: 0
+  enableSchemaValidation: false
+  audiences:
+   - all
+  transport:
+   - http
+   - https
+  tags: []
+  policies:
+   - Unlimited
+  organizationPolicies: []
+  authorizationHeader: Authorization
+  apiKeyHeader: ApiKey
+  securityScheme:
+   - oauth_basic_auth_api_key_mandatory
+   - oauth2
+  visibility: PUBLIC
+  visibleRoles: []
+  visibleTenants: []
+  visibleOrganizations:
+   - none
+  subscriptionAvailability: CURRENT_TENANT
+  subscriptionAvailableTenants: []
+  additionalPropertiesMap: {}
+  accessControl: NONE
+  accessControlRoles: []
+  businessInformation: {}
+  corsConfiguration:
+    corsConfigurationEnabled: true
+    accessControlAllowOrigins:
+     - '*'
+    accessControlAllowCredentials: false
+    accessControlAllowHeaders:
+     - authorization
+     - Access-Control-Allow-Origin
+     - Content-Type
+     - SOAPAction
+     - apikey
+     - Internal-Key
+     - MCP-Protocol-Version
+     - Mcp-Session-Id
+    accessControlAllowMethods:
+     - GET
+     - PUT
+     - POST
+     - DELETE
+     - PATCH
+     - OPTIONS
+  protocolVersion: 2025-06-18
+  createdTime: "1761041176230"
+  lastUpdatedTimestamp: "1761041182913"
+  lastUpdatedTime: 2025-10-21 15:36:22.913
+  subtypeConfiguration:
+    subtype: SERVER_PROXY
+  scopes: []
+  operations:
+   -
+    id: ""
+    target: add
+    feature: TOOL
+    authType: Application & Application User
+    throttlingPolicy: Unlimited
+    scopes: []
+    schemaDefinition: "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"additionalProperties\":false,\"type\":\"object\",\"properties\":{\"a\":{\"description\":\"First number\",\"type\":\"number\"},\"b\":{\"description\":\"Second number\",\"type\":\"number\"}},\"required\":[\"a\",\"b\"]}"
+    description: Adds two numbers
+    operationPolicies:
+      request: []
+      response: []
+      fault: []
+    backendOperationMapping:
+      backendId: 44d5229c-75ee-4eb5-88f4-b39f58e376f7
+      backendOperation:
+        target: add
+        verb: TOOL
+   -
+    id: ""
+    target: echo
+    feature: TOOL
+    authType: Application & Application User
+    throttlingPolicy: Unlimited
+    scopes: []
+    schemaDefinition: "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"additionalProperties\":false,\"type\":\"object\",\"properties\":{\"message\":{\"description\":\"Message to echo\",\"type\":\"string\"}},\"required\":[\"message\"]}"
+    description: Echoes back the input
+    operationPolicies:
+      request: []
+      response: []
+      fault: []
+    backendOperationMapping:
+      backendId: 44d5229c-75ee-4eb5-88f4-b39f58e376f7
+      backendOperation:
+        target: echo
+        verb: TOOL
+   -
+    id: ""
+    target: orderPizza
+    feature: TOOL
+    authType: Application & Application User
+    throttlingPolicy: Unlimited
+    scopes: []
+    schemaDefinition: "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"additionalProperties\":false,\"type\":\"object\",\"properties\":{\"pizzaType\":{\"description\":\"Type of pizza to order\",\"type\":\"string\"},\"quantity\":{\"description\":\"Number of pizzas to order\",\"type\":\"integer\",\"minimum\":1},\"deliveryAddress\":{\"description\":\"Delivery address for the order\",\"type\":\"string\"},\"creditCardNumber\":{\"description\":\"Credit card number for payment\",\"type\":\"string\"},\"customerName\":{\"description\":\"Name of the customer\",\"type\":\"string\"}},\"required\":[\"pizzaType\",\"quantity\",\"customerName\",\"deliveryAddress\",\"creditCardNumber\"]}"
+    description: Order a pizza from the menu. This tool allows you to place an order for a pizza.
+    operationPolicies:
+      request: []
+      response: []
+      fault: []
+    backendOperationMapping:
+      backendId: 44d5229c-75ee-4eb5-88f4-b39f58e376f7
+      backendOperation:
+        target: orderPizza
+        verb: TOOL
+   -
+    id: ""
+    target: viewPizzaMenu
+    feature: TOOL
+    authType: Application & Application User
+    throttlingPolicy: Unlimited
+    scopes: []
+    schemaDefinition: "{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"additionalProperties\":false,\"type\":\"object\",\"properties\":{}}"
+    description: View the pizza menu. This tool provides a list of available pizzas.
+    operationPolicies:
+      request: []
+      response: []
+      fault: []
+    backendOperationMapping:
+      backendId: 44d5229c-75ee-4eb5-88f4-b39f58e376f7
+      backendOperation:
+        target: viewPizzaMenu
+        verb: TOOL
+  categories: []
+  keyManagers:
+   - all
+  gatewayVendor: wso2
+  gatewayType: wso2/synapse
+  initiatedFromGateway: false
+  organizationId: carbon.super
