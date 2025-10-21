@@ -1,0 +1,245 @@
+type: mcp_server
+version: v4.6.0
+data:
+  id: 2e7b2ecc-74ea-40f8-a0b6-219194044ce4
+  name: ReadingListMCPServer
+  displayName: ReadingListMCPServer
+  description: This is a sample proxy that manages a list of reading items.
+  context: /readinglistmcp
+  version: "1.0"
+  provider: admin
+  lifeCycleStatus: PUBLISHED
+  hasThumbnail: false
+  isDefaultVersion: false
+  isRevision: false
+  revisionId: 0
+  enableSchemaValidation: false
+  audiences:
+   - all
+  transport:
+   - http
+   - https
+  tags: []
+  policies:
+   - Unlimited
+  organizationPolicies: []
+  authorizationHeader: Authorization
+  apiKeyHeader: ApiKey
+  securityScheme:
+   - oauth_basic_auth_api_key_mandatory
+   - oauth2
+  visibility: PUBLIC
+  visibleRoles: []
+  visibleTenants: []
+  visibleOrganizations:
+   - none
+  subscriptionAvailability: CURRENT_TENANT
+  subscriptionAvailableTenants: []
+  additionalPropertiesMap: {}
+  accessControl: NONE
+  accessControlRoles: []
+  businessInformation: {}
+  corsConfiguration:
+    corsConfigurationEnabled: true
+    accessControlAllowOrigins:
+     - '*'
+    accessControlAllowCredentials: false
+    accessControlAllowHeaders:
+     - authorization
+     - Access-Control-Allow-Origin
+     - Content-Type
+     - SOAPAction
+     - apikey
+     - Internal-Key
+     - MCP-Protocol-Version
+     - Mcp-Session-Id
+    accessControlAllowMethods:
+     - GET
+     - PUT
+     - POST
+     - DELETE
+     - PATCH
+     - OPTIONS
+  protocolVersion: 2025-06-18
+  createdTime: "1761036763860"
+  lastUpdatedTimestamp: "1761036806564"
+  lastUpdatedTime: 2025-10-21 14:23:26.564
+  subtypeConfiguration:
+    subtype: DIRECT_BACKEND
+  scopes: []
+  operations:
+   -
+    id: ""
+    target: createBook
+    feature: TOOL
+    authType: Application & Application User
+    throttlingPolicy: Unlimited
+    scopes: []
+    schemaDefinition: |-
+      {
+        "type" : "object",
+        "properties" : {
+          "requestBody" : {
+            "type" : "object",
+            "contentType" : "application/json",
+            "properties" : {
+              "author" : {
+                "type" : "string",
+                "example" : "J. R. R. Tolkien",
+                "exampleSetFlag" : true,
+                "types" : [ "string" ]
+              },
+              "status" : {
+                "type" : "string",
+                "example" : "to_read",
+                "exampleSetFlag" : true,
+                "types" : [ "string" ],
+                "enum" : [ "read", "to_read", "reading" ]
+              },
+              "title" : {
+                "type" : "string",
+                "example" : "The Lord of the Rings",
+                "exampleSetFlag" : true,
+                "types" : [ "string" ]
+              }
+            }
+          }
+        },
+        "required" : [ "requestBody" ]
+      }
+    description: "Adds a new book to the reading list. Requires the title, author, and initial reading status. The system automatically assigns an ID to the book."
+    operationPolicies:
+      request: []
+      response: []
+      fault: []
+    backendOperationMapping:
+      backendId: 663735aa-5fc0-40ae-9912-5cc237ec769d
+      backendOperation:
+        target: /books
+        verb: POST
+   -
+    id: ""
+    target: deleteBookById
+    feature: TOOL
+    authType: Application & Application User
+    throttlingPolicy: Unlimited
+    scopes: []
+    schemaDefinition: |-
+      {
+        "type" : "object",
+        "properties" : {
+          "path_id" : {
+            "type" : "string",
+            "description" : "Book ID"
+          }
+        },
+        "required" : [ "path_id" ]
+      }
+    description: "Deletes the book with the given ID from the reading list. Returns the ID of the deleted book if the operation was successful. If the book is not found, a 404 response is returned."
+    operationPolicies:
+      request: []
+      response: []
+      fault: []
+    backendOperationMapping:
+      backendId: 663735aa-5fc0-40ae-9912-5cc237ec769d
+      backendOperation:
+        target: "/books/{id}"
+        verb: DELETE
+   -
+    id: ""
+    target: getBookById
+    feature: TOOL
+    authType: Application & Application User
+    throttlingPolicy: Unlimited
+    scopes: []
+    schemaDefinition: |-
+      {
+        "type" : "object",
+        "properties" : {
+          "path_id" : {
+            "type" : "string",
+            "description" : "Book ID"
+          }
+        },
+        "required" : [ "path_id" ]
+      }
+    description: "Fetches the details of a specific book in the reading list by its unique ID. If the book is not found, a 404 response is returned."
+    operationPolicies:
+      request: []
+      response: []
+      fault: []
+    backendOperationMapping:
+      backendId: 663735aa-5fc0-40ae-9912-5cc237ec769d
+      backendOperation:
+        target: "/books/{id}"
+        verb: GET
+   -
+    id: ""
+    target: listBooks
+    feature: TOOL
+    authType: Application & Application User
+    throttlingPolicy: Unlimited
+    scopes: []
+    schemaDefinition: |-
+      {
+        "type" : "object",
+        "properties" : { }
+      }
+    description: "Returns a list of all books currently in the reading list. Each book includes the title, author, status (to_read, reading, read), and its unique identifier."
+    operationPolicies:
+      request: []
+      response: []
+      fault: []
+    backendOperationMapping:
+      backendId: 663735aa-5fc0-40ae-9912-5cc237ec769d
+      backendOperation:
+        target: /books
+        verb: GET
+   -
+    id: ""
+    target: updateBookById
+    feature: TOOL
+    authType: Application & Application User
+    throttlingPolicy: Unlimited
+    scopes: []
+    schemaDefinition: |-
+      {
+        "type" : "object",
+        "properties" : {
+          "path_id" : {
+            "type" : "string",
+            "description" : "Book ID"
+          },
+          "requestBody" : {
+            "type" : "object",
+            "contentType" : "application/json",
+            "properties" : {
+              "status" : {
+                "type" : "string",
+                "example" : "reading",
+                "exampleSetFlag" : true,
+                "types" : [ "string" ],
+                "enum" : [ "read", "to_read", "reading" ]
+              }
+            }
+          }
+        },
+        "required" : [ "path_id", "requestBody" ]
+      }
+    description: "Updates the reading status of an existing book identified by its ID. Only the status field (to_read, reading, read) can be updated. Returns the updated book object."
+    operationPolicies:
+      request: []
+      response: []
+      fault: []
+    backendOperationMapping:
+      backendId: 663735aa-5fc0-40ae-9912-5cc237ec769d
+      backendOperation:
+        target: "/books/{id}"
+        verb: PUT
+  categories: []
+  keyManagers:
+   - all
+  gatewayVendor: wso2
+  gatewayType: wso2/synapse
+  initiatedFromGateway: false
+  organizationId: carbon.super
