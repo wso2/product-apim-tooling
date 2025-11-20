@@ -1,6 +1,6 @@
 module github.com/wso2/product-apim-tooling/apim-apk-agent
 
-go 1.23.6
+go 1.24.0
 
 require (
 	github.com/gin-gonic/gin v1.10.0
@@ -82,12 +82,12 @@ require (
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	golang.org/x/arch v0.14.0 // indirect
-	golang.org/x/crypto v0.35.0 // indirect
+	golang.org/x/crypto v0.45.0 // indirect
 	golang.org/x/exp v0.0.0-20250228200357-dead58393ab7 // indirect
-	golang.org/x/net v0.35.0 // indirect
+	golang.org/x/net v0.47.0 // indirect
 	golang.org/x/oauth2 v0.27.0 // indirect
-	golang.org/x/term v0.29.0 // indirect
-	golang.org/x/text v0.22.0 // indirect
+	golang.org/x/term v0.37.0 // indirect
+	golang.org/x/text v0.31.0 // indirect
 	golang.org/x/time v0.10.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.4.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250227231956-55c901821b1e // indirect
@@ -108,5 +108,5 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/streadway/amqp v1.1.0
 	github.com/wso2/apk/adapter v0.0.0-20250301092338-35fc1435165d
-	golang.org/x/sys v0.30.0 // indirect
+	golang.org/x/sys v0.38.0 // indirect
 )
