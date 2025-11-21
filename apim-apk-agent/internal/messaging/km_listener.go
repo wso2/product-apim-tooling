@@ -80,7 +80,7 @@ func handleKMConfiguration(c client.Client) {
 			if strings.EqualFold(actionDelete, notification.Event.PayloadData.Action) {
 				k8sclient.DeleteTokenIssuersCR(c, notification.Event.PayloadData.Name, notification.Event.PayloadData.TenantDomain)
 			} else if decodedByte != nil {
-				logger.LoggerMessaging.Infof("decoded stream %s", string(decodedByte))
+				logger.LoggerMessaging.Debugf("decoded stream %s", string(decodedByte))
 				kmConfigMapErr := json.Unmarshal([]byte(string(decodedByte)), &keyManager)
 				if kmConfigMapErr != nil {
 					logger.LoggerMessaging.ErrorC(logging.ErrorDetails{
@@ -92,9 +92,9 @@ func handleKMConfiguration(c client.Client) {
 				}
 				if strings.EqualFold(actionAdd, notification.Event.PayloadData.Action) ||
 					strings.EqualFold(actionUpdate, notification.Event.PayloadData.Action) {
-					logger.LoggerMessaging.Infof("Key Managers received: %v", keyManager)
+					logger.LoggerMessaging.Debugf("Key Managers received: %v", keyManager)
 					resolvedKeyManager := eventhub.MarshalKeyManager(&keyManager)
-					logger.LoggerMessaging.Infof("Resolved Key Managers received: %v", resolvedKeyManager)
+					logger.LoggerMessaging.Debugf("Resolved Key Managers received: %v", resolvedKeyManager)
 					if strings.EqualFold(actionAdd, notification.Event.PayloadData.Action) {
 						k8sclient.CreateAndUpdateTokenIssuersCR(resolvedKeyManager, c)
 					} else {
