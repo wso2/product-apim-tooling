@@ -21,6 +21,7 @@ package k8sclient
 import (
 	"context"
 	"crypto/sha1"
+	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 	"strings"
@@ -795,9 +796,21 @@ func UpdateTokenIssuersCR(keyManager eventhubTypes.ResolvedKeyManager, k8sClient
 func marshalSignatureValidation(keyManagerConfig eventhubTypes.KeyManagerConfig) *dpv1alpha2.SignatureValidation {
 	if keyManagerConfig.CertificateType != "" && keyManagerConfig.CertificateValue != "" {
 		if keyManagerConfig.CertificateType == "JWKS" {
+			loggers.LoggerK8sClient.Debugf("Using JWKS for signature validation")
 			return &dpv1alpha2.SignatureValidation{JWKS: &dpv1alpha2.JWKS{URL: keyManagerConfig.CertificateValue}}
 		}
-		return &dpv1alpha2.SignatureValidation{Certificate: &dpv1alpha2.CERTConfig{CertificateInline: &keyManagerConfig.CertificateValue}}
+		loggers.LoggerK8sClient.Debugf("Using Certificate for signature validation %s", keyManagerConfig.CertificateValue)
+		certValue := keyManagerConfig.CertificateValue
+		// Check if the certificate value is base64 encoded and decode it
+		if decodedCert, err := base64.StdEncoding.DecodeString(certValue); err == nil {
+			// Successfully decoded, use the decoded value
+			decodedCertStr := string(decodedCert)
+			loggers.LoggerK8sClient.Debugf("Certificate value was base64 encoded, using decoded value")
+			return &dpv1alpha2.SignatureValidation{Certificate: &dpv1alpha2.CERTConfig{CertificateInline: &decodedCertStr}}
+		}
+		// Not base64 encoded or decoding failed, use original value
+		loggers.LoggerK8sClient.Debugf("Using certificate value as-is (not base64 encoded)")
+		return &dpv1alpha2.SignatureValidation{Certificate: &dpv1alpha2.CERTConfig{CertificateInline: &certValue}}
 	}
 	return nil
 }
