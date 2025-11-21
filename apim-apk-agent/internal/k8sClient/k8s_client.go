@@ -21,7 +21,10 @@ package k8sclient
 import (
 	"context"
 	"crypto/sha1"
+	"crypto/x509"
+	"encoding/base64"
 	"encoding/hex"
+	"encoding/pem"
 	"fmt"
 	"strings"
 
@@ -632,14 +635,19 @@ func CreateAndUpdateTokenIssuersCR(keyManager eventhubTypes.ResolvedKeyManager, 
 			Labels:    labelMap,
 		},
 		Spec: dpv1alpha2.TokenIssuerSpec{
-			Name:                keyManager.Name,
-			Organization:        keyManager.Organization,
-			Issuer:              keyManager.KeyManagerConfig.Issuer,
-			ClaimMappings:       marshalClaimMappings(keyManager.KeyManagerConfig.ClaimMappings),
-			SignatureValidation: marshalSignatureValidation(keyManager.KeyManagerConfig),
-			TargetRef:           &v1alpha2.NamespacedPolicyTargetReference{Group: constants.GatewayGroup, Kind: constants.GatewayKind, Name: constants.GatewayName},
+			Name:          keyManager.Name,
+			Organization:  keyManager.Organization,
+			Issuer:        keyManager.KeyManagerConfig.Issuer,
+			ClaimMappings: marshalClaimMappings(keyManager.KeyManagerConfig.ClaimMappings),
+			TargetRef:     &v1alpha2.NamespacedPolicyTargetReference{Group: constants.GatewayGroup, Kind: constants.GatewayKind, Name: constants.GatewayName},
 		},
 	}
+	signatureValidation, err := marshalSignatureValidation(keyManager.KeyManagerConfig)
+	if err != nil {
+		loggers.LoggerK8sClient.Errorf("Failed to marshal signature validation: %v", err)
+		return err
+	}
+	tokenIssuer.Spec.SignatureValidation = signatureValidation
 	tokenIssuer.Spec.ConsumerKeyClaim = constants.ConsumerKeyClaim
 	if keyManager.KeyManagerConfig.ConsumerKeyClaim != "" {
 		tokenIssuer.Spec.ConsumerKeyClaim = keyManager.KeyManagerConfig.ConsumerKeyClaim
@@ -775,7 +783,12 @@ func UpdateTokenIssuersCR(keyManager eventhubTypes.ResolvedKeyManager, k8sClient
 	tokenIssuer.Spec.Organization = keyManager.Organization
 	tokenIssuer.Spec.Issuer = keyManager.KeyManagerConfig.Issuer
 	tokenIssuer.Spec.ClaimMappings = marshalClaimMappings(keyManager.KeyManagerConfig.ClaimMappings)
-	tokenIssuer.Spec.SignatureValidation = marshalSignatureValidation(keyManager.KeyManagerConfig)
+	signatureValidation, err := marshalSignatureValidation(keyManager.KeyManagerConfig)
+	if err != nil {
+		loggers.LoggerK8sClient.Errorf("Failed to marshal signature validation: %v", err)
+		return err
+	}
+	tokenIssuer.Spec.SignatureValidation = signatureValidation
 	tokenIssuer.Spec.TargetRef = &v1alpha2.NamespacedPolicyTargetReference{Group: constants.GatewayGroup, Kind: constants.GatewayKind, Name: constants.GatewayName}
 	if keyManager.KeyManagerConfig.ConsumerKeyClaim != "" {
 		tokenIssuer.Spec.ConsumerKeyClaim = keyManager.KeyManagerConfig.ConsumerKeyClaim
@@ -792,14 +805,36 @@ func UpdateTokenIssuersCR(keyManager eventhubTypes.ResolvedKeyManager, k8sClient
 	return nil
 }
 
-func marshalSignatureValidation(keyManagerConfig eventhubTypes.KeyManagerConfig) *dpv1alpha2.SignatureValidation {
+func marshalSignatureValidation(keyManagerConfig eventhubTypes.KeyManagerConfig) (*dpv1alpha2.SignatureValidation, error) {
 	if keyManagerConfig.CertificateType != "" && keyManagerConfig.CertificateValue != "" {
 		if keyManagerConfig.CertificateType == "JWKS" {
-			return &dpv1alpha2.SignatureValidation{JWKS: &dpv1alpha2.JWKS{URL: keyManagerConfig.CertificateValue}}
+			loggers.LoggerK8sClient.Debugf("Using JWKS for signature validation")
+			return &dpv1alpha2.SignatureValidation{JWKS: &dpv1alpha2.JWKS{URL: keyManagerConfig.CertificateValue}}, nil
 		}
-		return &dpv1alpha2.SignatureValidation{Certificate: &dpv1alpha2.CERTConfig{CertificateInline: &keyManagerConfig.CertificateValue}}
+		loggers.LoggerK8sClient.Debugf("Using Certificate for signature validation %s", keyManagerConfig.CertificateValue)
+		certValue := keyManagerConfig.CertificateValue
+		// Check if the certificate value is base64 encoded and decode it
+		if decodedCert, err := base64.StdEncoding.DecodeString(certValue); err == nil {
+			// Successfully decoded, use the decoded value
+			decodedCertStr := string(decodedCert)
+			loggers.LoggerK8sClient.Debugf("Certificate value was base64 encoded, using decoded value")
+			certValue = decodedCertStr
+		}
+		// Validate that the certificate is in proper PEM format
+		block, _ := pem.Decode([]byte(certValue))
+		if block == nil {
+			loggers.LoggerK8sClient.Errorf("Failed to decode PEM block from certificate")
+			return nil, fmt.Errorf("certificate is not in valid PEM format")
+		}
+		// Validate that it's a valid X.509 certificate
+		if _, err := x509.ParseCertificate(block.Bytes); err != nil {
+			loggers.LoggerK8sClient.Errorf("Failed to parse X.509 certificate: %v", err)
+			return nil, fmt.Errorf("invalid X.509 certificate: %w", err)
+		}
+		loggers.LoggerK8sClient.Debugf("Certificate validated successfully")
+		return &dpv1alpha2.SignatureValidation{Certificate: &dpv1alpha2.CERTConfig{CertificateInline: &certValue}}, nil
 	}
-	return nil
+	return nil, nil
 }
 
 func marshalClaimMappings(claimMappings []eventhubTypes.Claim) *[]dpv1alpha2.ClaimMapping {

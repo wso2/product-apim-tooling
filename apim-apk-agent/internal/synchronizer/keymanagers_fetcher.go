@@ -128,7 +128,7 @@ func FetchKeyManagersOnStartUp(c client.Client) {
 			logger.LoggerSynchronizer.Errorf("Error occurred while unmarshelling Key Managers event data %v", err)
 			return
 		}
-		logger.LoggerSynchronizer.Infof("Key Managers received: %v", keyManagers)
+		logger.LoggerSynchronizer.Debugf("Key Managers received: %v", keyManagers)
 		resolvedKeyManagers := eventhub.MarshalKeyManagers(&keyManagers)
 		applyAllKeymanagerConfifuration(c, resolvedKeyManagers)
 	} else {
