@@ -1,6 +1,6 @@
 module github.com/wso2/product-apim-tooling/apim-apk-agent
 
-go 1.23.6
+go 1.25.4
 
 require (
 	github.com/gin-gonic/gin v1.10.0
