@@ -70,13 +70,13 @@ spec:
               mountPath: /home/wso2/conf/
             - name: apk-agent-certificates
               mountPath: /home/wso2/security/keystore/apk-agent.key
-              subPath: tls.key
+              subPath: {{ .Values.configs.tls.certKeyFilename | default "tls.key" }}
             - name: apk-agent-certificates
               mountPath: /home/wso2/security/keystore/apk-agent.crt
-              subPath: tls.crt
+              subPath: {{ .Values.configs.tls.certFilename | default "tls.crt" }}
             - name: apk-agent-certificates
               mountPath: /home/wso2/security/truststore/apk-agent-ca.crt
-              subPath: ca.crt
+              subPath: {{ .Values.configs.tls.certCAFilename | default "ca.crt" }}
           readinessProbe:
             exec:
               command: [ "sh", "check_health.sh" ]
@@ -106,4 +106,4 @@ spec:
             name: {{ .Release.Name }}-log-conf
         - name: apk-agent-certificates
           secret:
-            secretName: apk-agent-server-cert
+            secretName: {{ .Values.configs.tls.secretName | default "apk-agent-server-cert"}}
