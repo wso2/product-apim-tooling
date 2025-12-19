@@ -178,12 +178,14 @@ type RateLimitPolicyList struct {
 
 // RateLimitPolicy for struct RateLimitPolicy Info events
 type RateLimitPolicy struct {
-	TenantDomain    string           `json:"tenantDomain"`
-	Name            string           `json:"name"`
-	QuotaType       string           `json:"quotaType"`
-	ConditionGroups []ConditionGroup `json:"conditionGroups"`
-	ApplicableLevel string           `json:"applicableLevel"`
-	DefaultLimit    DefaultLimit     `json:"defaultLimit"`
+	TenantDomain      string           `json:"tenantDomain"`
+	Name              string           `json:"name"`
+	QuotaType         string           `json:"quotaType"`
+	ConditionGroups   []ConditionGroup `json:"conditionGroups"`
+	ApplicableLevel   string           `json:"applicableLevel"`
+	DefaultLimit      DefaultLimit     `json:"defaultLimit"`
+	RateLimitCount    int              `json:"rateLimitCount"`
+	RateLimitTimeUnit string           `json:"rateLimitTimeUnit"`
 }
 
 // ConditionGroup represents the condition group within the response.
