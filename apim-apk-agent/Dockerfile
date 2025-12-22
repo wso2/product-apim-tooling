@@ -24,8 +24,8 @@ ENV LANG=C.UTF-8
 
 ARG APK_USER=wso2
 ARG APK_USER_ID=10001
-ARG CHECKSUM_AMD64="8302d54fc41d4ffbfea6871b6a04584265d5eabbe738aee2966f9a574b6f17d1"
-ARG CHECKSUM_ARM64="8ebe934e7cf29a65ca31d671a97949467fba6977d656b5e6d6c40902ae7402f6"
+ARG CHECKSUM_AMD64="b92eeb7e9ffbc3b156f85f3bb18129bd18a27f739330f6e9d3fcb630898df442"
+ARG CHECKSUM_ARM64="e5d1951a7d57de20ea88e660d555bb2563c82f520406e43bf5f4d67fa53b4606"
 ARG APK_USER_GROUP=wso2
 ARG APK_USER_GROUP_ID=10001
 ARG APK_USER_HOME=/home/${APK_USER}
@@ -47,7 +47,7 @@ RUN \
     && echo '[ ! -z "${TERM}" -a -r /etc/motd ] && cat /etc/motd' >> /etc/bash.bashrc; echo "${MOTD}" > /etc/motd
 
 RUN \
-    wget -q https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v0.4.37/grpc_health_probe-linux-${TARGETARCH} \
+    wget -q https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v0.4.42/grpc_health_probe-linux-${TARGETARCH} \
     && mv grpc_health_probe-linux-${TARGETARCH} ${GRPC_HEALTH_PROBE_PATH} \
     && if [ "${TARGETARCH}" = "amd64" ]; then echo "${CHECKSUM_AMD64}  ${GRPC_HEALTH_PROBE_PATH}" | sha256sum -c -; fi
     

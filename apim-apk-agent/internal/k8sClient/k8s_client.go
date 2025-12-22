@@ -479,6 +479,10 @@ func DeploySubscriptionRateLimitPolicyCR(policy eventhubTypes.SubscriptionPolicy
 							RequestsPerUnit: uint32(policy.DefaultLimit.RequestCount.RequestCount),
 							Unit:            policy.DefaultLimit.RequestCount.TimeUnit,
 						},
+						BurstControl: &dpv1alpha3.BurstControl{
+							RequestsPerUnit: uint32(policy.RateLimitCount),
+							Unit:            policy.RateLimitTimeUnit,
+						},
 					},
 				},
 				TargetRef: gwapiv1b1.NamespacedPolicyTargetReference{Group: constants.GatewayGroup, Kind: "Subscription", Name: "default"},
@@ -492,8 +496,16 @@ func DeploySubscriptionRateLimitPolicyCR(policy eventhubTypes.SubscriptionPolicy
 	} else {
 		crRateLimitPolicy.Spec.Override.Subscription.StopOnQuotaReach = policy.StopOnQuotaReach
 		crRateLimitPolicy.Spec.Override.Subscription.Organization = policy.TenantDomain
+		if crRateLimitPolicy.Spec.Override.Subscription.RequestCount == nil {
+			crRateLimitPolicy.Spec.Override.Subscription.RequestCount = &dpv1alpha3.RequestCount{}
+		}
 		crRateLimitPolicy.Spec.Override.Subscription.RequestCount.RequestsPerUnit = uint32(policy.DefaultLimit.RequestCount.RequestCount)
 		crRateLimitPolicy.Spec.Override.Subscription.RequestCount.Unit = policy.DefaultLimit.RequestCount.TimeUnit
+		if crRateLimitPolicy.Spec.Override.Subscription.BurstControl == nil {
+			crRateLimitPolicy.Spec.Override.Subscription.BurstControl = &dpv1alpha3.BurstControl{}
+		}
+		crRateLimitPolicy.Spec.Override.Subscription.BurstControl.RequestsPerUnit = uint32(policy.RateLimitCount)
+		crRateLimitPolicy.Spec.Override.Subscription.BurstControl.Unit = policy.RateLimitTimeUnit
 		if err := k8sClient.Update(context.Background(), &crRateLimitPolicy); err != nil {
 			loggers.LoggerK8sClient.Error("Unable to update RateLimitPolicies CR: " + err.Error())
 		} else {

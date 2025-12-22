@@ -56,3 +56,9 @@ serviceAccount:
   enableClusterRoleCreation: true
   serviceAccountName: wso2agent-platform
   roleName: wso2agent-role
+# configs:
+#   tls:
+#     secretName: "apk-agent-tls-secret"
+#     certKeyFilename: "tls.key"
+#     certFilename: "tls.crt"
+#     certCAFilename: "ca.crt"

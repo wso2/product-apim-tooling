@@ -141,12 +141,25 @@ func FetchRateLimitPoliciesOnEvent(ratelimitName string, organization string, c 
 		logger.LoggerSynchronizer.Debugf("Policies received: %v", rateLimitPolicyList.List)
 		var rateLimitPolicies []eventhubTypes.RateLimitPolicy = rateLimitPolicyList.List
 		for _, policy := range rateLimitPolicies {
-			if policy.DefaultLimit.RequestCount.TimeUnit == "min" {
+			switch policy.DefaultLimit.RequestCount.TimeUnit {
+			case "min":
 				policy.DefaultLimit.RequestCount.TimeUnit = "Minute"
-			} else if policy.DefaultLimit.RequestCount.TimeUnit == "hour" {
+			case "hour":
 				policy.DefaultLimit.RequestCount.TimeUnit = "Hour"
-			} else if policy.DefaultLimit.RequestCount.TimeUnit == "day" {
+			case "day":
 				policy.DefaultLimit.RequestCount.TimeUnit = "Day"
+			default:
+				logger.LoggerSynchronizer.Errorf("Unsupported timeunit %s", policy.DefaultLimit.RequestCount.TimeUnit)
+				continue
+			}
+			switch policy.RateLimitTimeUnit {
+			case "min":
+				policy.RateLimitTimeUnit = "Minute"
+			case "sec":
+				policy.RateLimitTimeUnit = "Second"
+			default:
+				logger.LoggerSynchronizer.Errorf("Unsupported timeunit %s", policy.RateLimitTimeUnit)
+				continue
 			}
 			managementserver.AddRateLimitPolicy(policy)
 			logger.LoggerSynchronizer.Infof("RateLimit Policy added to internal map: %v", policy)
@@ -317,12 +330,25 @@ func FetchSubscriptionRateLimitPoliciesOnEvent(ratelimitName string, organizatio
 					logger.LoggerSynchronizer.Errorf("AIQuota type response recieved but no data found. %+v", policy.DefaultLimit)
 				}
 			} else {
-				if policy.DefaultLimit.RequestCount.TimeUnit == "min" {
+				switch policy.DefaultLimit.RequestCount.TimeUnit {
+				case "min":
 					policy.DefaultLimit.RequestCount.TimeUnit = "Minute"
-				} else if policy.DefaultLimit.RequestCount.TimeUnit == "hours" {
+				case "hours":
 					policy.DefaultLimit.RequestCount.TimeUnit = "Hour"
-				} else if policy.DefaultLimit.RequestCount.TimeUnit == "days" {
+				case "days":
 					policy.DefaultLimit.RequestCount.TimeUnit = "Day"
+				default:
+					logger.LoggerSynchronizer.Errorf("Unsupported timeunit %s", policy.DefaultLimit.RequestCount.TimeUnit)
+					continue
+				}
+				switch policy.RateLimitTimeUnit {
+				case "min":
+					policy.RateLimitTimeUnit = "Minute"
+				case "sec":
+					policy.RateLimitTimeUnit = "Second"
+				default:
+					logger.LoggerSynchronizer.Errorf("Unsupported timeunit %s", policy.RateLimitTimeUnit)
+					continue
 				}
 				managementserver.AddSubscriptionPolicy(policy)
 				logger.LoggerSynchronizer.Infof("RateLimit Policy added to internal map: %v", policy)
