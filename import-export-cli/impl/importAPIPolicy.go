@@ -76,7 +76,8 @@ func importAPIPolicy(endpoint string, importPath string, accessToken string, isO
 		return err
 	}
 
-	policyPaths := strings.Split(tmpPath, "/")
+	tmpPath2 := strings.ReplaceAll(tmpPath, "\\", "/")
+	policyPaths := strings.Split(tmpPath2, "/")
 	policyName := policyPaths[len(policyPaths)-1]
 
 	for _, file := range files {
