@@ -115,7 +115,7 @@ func FetchAIProvidersOnEvent(aiProviderName string, aiProviderVersion string, or
 	}
 
 	// Make the request
-	logger.LoggerSynchronizer.Debugf("Sending the control plane request" + req.RequestURI)
+	logger.LoggerSynchronizer.Debugf("Sending the control plane request %s", req.RequestURI)
 	resp, err := tlsutils.InvokeControlPlane(req, skipSSL)
 	var errorMsg string
 	if err != nil {

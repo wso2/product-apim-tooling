@@ -75,10 +75,10 @@ func FetchAPIsOnEvent(conf *config.Config, apiUUID *string, k8sClient client.Cli
 
 			// apiFiles represents zipped API files fetched from API Manager
 			apiFiles := make(map[string]*zip.File)
-			// Read the .zip files within the root apis.zip and add apis to apiFiles array.
-			for _, file := range zipReader.File {
-				apiFiles[file.Name] = file
-				logger.LoggerUtils.Debugf("API file found: " + file.Name)
+		// Read the .zip files within the root apis.zip and add apis to apiFiles array.
+		for _, file := range zipReader.File {
+			apiFiles[file.Name] = file
+			logger.LoggerUtils.Debugf("API file found: %s", file.Name)
 				// Todo: Read the apis.zip and extract the api.zip,deployments.json
 			}
 			if err != nil {
