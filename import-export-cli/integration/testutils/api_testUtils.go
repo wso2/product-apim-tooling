@@ -1229,7 +1229,7 @@ func ValidateApisListWithVersions(t *testing.T, args *InitTestArgs, newVersion s
 
 // Execute get apis command with query parameters
 func searchAPIsWithQuery(t *testing.T, args *ApiImportExportTestArgs, query string) (string, error) {
-	output, err := base.Execute(t, "get", "apis", "-e", args.SrcAPIM.EnvName, "--query", query, "-k", "--verbose")
+	output, err := base.Execute(t, "get", "apis", "-e", args.SrcAPIM.EnvName, query, "-k", "--verbose")
 	return output, err
 }
 
