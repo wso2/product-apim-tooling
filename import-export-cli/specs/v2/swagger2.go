@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"path"
+	"sort"
 	"strings"
 
 	"io/ioutil"
@@ -317,7 +318,261 @@ func Swagger2Populate(def *APIDTODefinition, document *loads.Document) error {
 		}
 		def.EndpointConfig = &endpointConfig
 	}
+
+	def.Scopes = swaggerScopes(document)
+	def.Operations = swaggerOperations(document)
 	return nil
+}
+
+func swaggerScopes(document *loads.Document) []interface{} {
+	raw := map[string]interface{}{}
+	if err := json.Unmarshal(document.Raw(), &raw); err != nil {
+		return nil
+	}
+
+	type scopeDef struct {
+		Name        string
+		Description string
+		Bindings    []string
+	}
+
+	scopeMap := map[string]scopeDef{}
+	mergeScopes := func(scopes map[string]interface{}, bindings map[string]interface{}) {
+		for scopeName, v := range scopes {
+			desc := fmt.Sprintf("%v", v)
+			if existing, found := scopeMap[scopeName]; found {
+				if existing.Description == "" && desc != "" {
+					existing.Description = desc
+				}
+				if len(existing.Bindings) == 0 {
+					existing.Bindings = bindingsFromValue(bindings[scopeName])
+				}
+				scopeMap[scopeName] = existing
+				continue
+			}
+
+			scopeMap[scopeName] = scopeDef{
+				Name:        scopeName,
+				Description: desc,
+				Bindings:    bindingsFromValue(bindings[scopeName]),
+			}
+		}
+	}
+
+	// Swagger 2: securityDefinitions
+	if securityDefinitions, ok := interfaceMap(raw["securityDefinitions"]); ok {
+		for _, definition := range securityDefinitions {
+			definitionMap, ok := interfaceMap(definition)
+			if !ok {
+				continue
+			}
+			scopes, _ := interfaceMap(definitionMap["scopes"])
+			bindings, _ := interfaceMap(definitionMap["x-scopes-bindings"])
+			mergeScopes(scopes, bindings)
+		}
+	}
+
+	// OpenAPI 3: components.securitySchemes.*.flows.*
+	if components, ok := interfaceMap(raw["components"]); ok {
+		if securitySchemes, ok := interfaceMap(components["securitySchemes"]); ok {
+			for _, scheme := range securitySchemes {
+				schemeMap, ok := interfaceMap(scheme)
+				if !ok {
+					continue
+				}
+
+				fallbackBindings, _ := interfaceMap(schemeMap["x-scopes-bindings"])
+				if flows, ok := interfaceMap(schemeMap["flows"]); ok {
+					for _, flow := range flows {
+						flowMap, ok := interfaceMap(flow)
+						if !ok {
+							continue
+						}
+						scopes, _ := interfaceMap(flowMap["scopes"])
+						bindings, hasBindings := interfaceMap(flowMap["x-scopes-bindings"])
+						if !hasBindings {
+							bindings = fallbackBindings
+						}
+						mergeScopes(scopes, bindings)
+					}
+				}
+			}
+		}
+	}
+
+	if len(scopeMap) == 0 {
+		return nil
+	}
+
+	names := make([]string, 0, len(scopeMap))
+	for name := range scopeMap {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+
+	scopes := make([]interface{}, 0, len(names))
+	for _, name := range names {
+		scope := scopeMap[name]
+		scopes = append(scopes, map[string]interface{}{
+			"scope": map[string]interface{}{
+				"name":        scope.Name,
+				"displayName": scope.Name,
+				"description": scope.Description,
+				"bindings":    scope.Bindings,
+			},
+			"shared": false,
+		})
+	}
+
+	return scopes
+}
+
+func swaggerOperations(document *loads.Document) []interface{} {
+	raw := map[string]interface{}{}
+	if err := json.Unmarshal(document.Raw(), &raw); err != nil {
+		return nil
+	}
+
+	paths, ok := interfaceMap(raw["paths"])
+	if !ok || len(paths) == 0 {
+		return nil
+	}
+
+	pathKeys := make([]string, 0, len(paths))
+	for p := range paths {
+		pathKeys = append(pathKeys, p)
+	}
+	sort.Strings(pathKeys)
+
+	methodOrder := []string{"get", "put", "post", "delete", "patch", "options", "head", "trace"}
+
+	operations := make([]interface{}, 0)
+	for _, target := range pathKeys {
+		pathObj, ok := interfaceMap(paths[target])
+		if !ok {
+			continue
+		}
+
+		pathLevelScopes := extractScopesFromSecurity(pathObj["security"])
+		apiLevelScopes := extractScopesFromSecurity(raw["security"])
+
+		for _, method := range methodOrder {
+			opObj, ok := interfaceMap(pathObj[method])
+			if !ok {
+				continue
+			}
+
+			authType := stringValue(opObj["x-auth-type"])
+			throttlingTier := stringValue(opObj["x-throttling-tier"])
+
+			scopes := extractScopesFromSecurity(opObj["security"])
+			if len(scopes) == 0 {
+				scopes = pathLevelScopes
+			}
+			if len(scopes) == 0 {
+				scopes = apiLevelScopes
+			}
+
+			operations = append(operations, map[string]interface{}{
+				"id":               "",
+				"target":           target,
+				"verb":             strings.ToUpper(method),
+				"authType":         authType,
+				"throttlingPolicy": throttlingTier,
+				"scopes":           scopes,
+				"usedProductIds":   []string{},
+				"operationPolicies": map[string]interface{}{
+					"request":  []string{},
+					"response": []string{},
+					"fault":    []string{},
+				},
+			})
+		}
+	}
+
+	if len(operations) == 0 {
+		return nil
+	}
+
+	return operations
+}
+
+func interfaceMap(v interface{}) (map[string]interface{}, bool) {
+	m, ok := v.(map[string]interface{})
+	return m, ok
+}
+
+func stringValue(v interface{}) string {
+	str, ok := v.(string)
+	if !ok {
+		return ""
+	}
+	return str
+}
+
+func bindingsFromValue(v interface{}) []string {
+	if v == nil {
+		return []string{}
+	}
+
+	if value, ok := v.(string); ok {
+		if value == "" {
+			return []string{}
+		}
+		return []string{value}
+	}
+
+	arr, ok := v.([]interface{})
+	if !ok {
+		return []string{}
+	}
+
+	bindings := make([]string, 0, len(arr))
+	seen := map[string]bool{}
+	for _, item := range arr {
+		value := stringValue(item)
+		if value == "" || seen[value] {
+			continue
+		}
+		seen[value] = true
+		bindings = append(bindings, value)
+	}
+	sort.Strings(bindings)
+	return bindings
+}
+
+func extractScopesFromSecurity(v interface{}) []string {
+	requirements, ok := v.([]interface{})
+	if !ok {
+		return []string{}
+	}
+
+	scopes := make([]string, 0)
+	seen := map[string]bool{}
+	for _, requirement := range requirements {
+		requirementMap, ok := interfaceMap(requirement)
+		if !ok {
+			continue
+		}
+
+		for _, rawScopes := range requirementMap {
+			scopeArray, ok := rawScopes.([]interface{})
+			if !ok {
+				continue
+			}
+			for _, scope := range scopeArray {
+				scopeName := stringValue(scope)
+				if scopeName == "" || seen[scopeName] {
+					continue
+				}
+				seen[scopeName] = true
+				scopes = append(scopes, scopeName)
+			}
+		}
+	}
+
+	sort.Strings(scopes)
+	return scopes
 }
 
 func AddAwsTag(def *APIDTODefinition) {

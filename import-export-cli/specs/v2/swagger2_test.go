@@ -25,6 +25,21 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func findOperation(t *testing.T, operations []interface{}, target, verb string) map[string]interface{} {
+	t.Helper()
+	for _, op := range operations {
+		opMap, ok := op.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		if opMap["target"] == target && opMap["verb"] == verb {
+			return opMap
+		}
+	}
+	t.Fatalf("operation not found: %s %s", verb, target)
+	return nil
+}
+
 func Test_swagger2WSO2Cors(t *testing.T) {
 	doc, err := loads.Spec("testdata/petstore_swagger2.yaml")
 	assert.Nil(t, err, "err should be nil")
@@ -91,4 +106,23 @@ func TestSwagger2PopulateWithBasePath(t *testing.T) {
 
 	assert.Equal(t, "/petstore/v1/1.0.0", def2.Context)
 	assert.Equal(t, false, def2.IsDefaultVersion)
+}
+
+func TestSwagger2PopulateAddsScopesAndOperations(t *testing.T) {
+	var def APIDTODefinition
+	doc, err := loads.Spec("testdata/petstore_swagger2.yaml")
+	assert.Nil(t, err, "err should be nil")
+	err = Swagger2Populate(&def, doc)
+	assert.Nil(t, err, "err should be nil")
+
+	assert.Len(t, def.Scopes, 2, "expected oauth scopes to be populated")
+	assert.NotEmpty(t, def.Operations, "expected operations to be populated")
+
+	postOp := findOperation(t, def.Operations, "/pet", "POST")
+	assert.Equal(t, "POST", postOp["verb"])
+	assert.Equal(t, "/pet", postOp["target"])
+	assert.ElementsMatch(t, []string{"read:pets", "write:pets"}, postOp["scopes"].([]string))
+
+	getByID := findOperation(t, def.Operations, "/pet/{petId}", "GET")
+	assert.ElementsMatch(t, []string{}, getByID["scopes"].([]string))
 }
