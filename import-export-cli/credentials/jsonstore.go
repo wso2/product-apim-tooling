@@ -192,13 +192,46 @@ func (s *JsonStore) SetMGToken(env, accessToken string) error {
 	return nil
 }
 
+// GetDefaultAppKeys returns the consumer key and secret for the default CLI app in a given env
+func (s *JsonStore) GetDefaultAppKeys(env string) (string, string, error) {
+	if environment, ok := s.credentials.Environments[env]; ok {
+		if environment.DefaultApp != nil {
+			key, err := Base64Decode(environment.DefaultApp.ConsumerKey)
+			if err != nil {
+				return "", "", err
+			}
+			secret, err := Base64Decode(environment.DefaultApp.ConsumerSecret)
+			if err != nil {
+				return "", "", err
+			}
+			return key, secret, nil
+		}
+	}
+	return "", "", fmt.Errorf("default app keys not found for env %s", env)
+}
+
+// SetDefaultAppKeys stores the consumer key and secret for the default CLI app in a given env
+func (s *JsonStore) SetDefaultAppKeys(env, consumerKey, consumerSecret string) error {
+	environment := s.credentials.Environments[env]
+	environment.DefaultApp = &DefaultAppKey{
+		ConsumerKey:    Base64Encode(consumerKey),
+		ConsumerSecret: Base64Encode(consumerSecret),
+	}
+	s.credentials.Environments[env] = environment
+	if err := s.persist(); err != nil {
+		return err
+	}
+	fmt.Printf(PlainTextWarnMessage, s.Path)
+	return nil
+}
+
 // EraseAPIM remove apim credentials from the store
 func (s *JsonStore) EraseAPIM(env string) error {
 	environment, ok := s.credentials.Environments[env]
 	if !ok {
 		return fmt.Errorf("%s was not found", env)
 	}
-	if !miCredentialsExists(environment.MI) {
+	if !miCredentialsExists(environment.MI) && !defaultAppExists(environment.DefaultApp) {
 		// delete the environment
 		delete(s.credentials.Environments, env)
 	} else {
@@ -282,4 +315,8 @@ func apimCredentialsExists(apimCred Credential) bool {
 
 func mgTokenExists(mgwAdapterToken MgAdapterEnv) bool {
 	return mgwAdapterToken.AccessToken != ""
+}
+
+func defaultAppExists(app *DefaultAppKey) bool {
+	return app != nil && app.ConsumerKey != "" && app.ConsumerSecret != ""
 }

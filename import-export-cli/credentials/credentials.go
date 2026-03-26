@@ -55,10 +55,17 @@ type Credentials struct {
 	CredStore string `json:"credStore,omitempty"`
 }
 
+// DefaultAppKey stores consumer key/secret for the default CLI app
+type DefaultAppKey struct {
+	ConsumerKey    string `json:"consumerKey"`
+	ConsumerSecret string `json:"consumerSecret"`
+}
+
 // Environment containing credentials of apim and mi
 type Environment struct {
-	APIM Credential   `json:"apim"`
-	MI   MiCredential `json:"mi"`
+	APIM       Credential    `json:"apim"`
+	MI         MiCredential  `json:"mi"`
+	DefaultApp *DefaultAppKey `json:"defaultApp,omitempty"`
 }
 
 type MgAdapterEnv struct {

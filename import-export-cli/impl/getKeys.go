@@ -103,8 +103,16 @@ func GetKeys(cred credentials.Credential, envName, name, version, provider, toke
 
 			//if keys have been already generated before, then update the consumer key and secret
 			if appKeys.Count != 0 {
+				// Use stored consumer key/secret
+				appKey := &appKeys.List[0]
+				if store, storeErr := credentials.GetDefaultCredentialStore(); storeErr == nil {
+					if storedKey, storedSecret, loadErr := store.GetDefaultAppKeys(keyGenEnv); loadErr == nil {
+						appKey.ConsumerKey = storedKey
+						appKey.ConsumerSecret = storedSecret
+					}
+				}
 				//If the keys have not been generated and the application is updated
-				token, err := getNewToken(&appKeys.List[0], scopes)
+				token, err := getNewToken(appKey, scopes)
 				//Assert token endpoint related fails and errors
 				if err != nil {
 					utils.HandleErrorAndExit("Error while generating token. ", err)
@@ -121,6 +129,9 @@ func GetKeys(cred credentials.Credential, envName, name, version, provider, toke
 				keygenResponse, err := generateApplicationKeys(appId, accessToken)
 				if keygenResponse == nil && err != nil {
 					utils.HandleErrorAndExit("Error occurred while generating CLI application keys.", err)
+				}
+				if store, storeErr := credentials.GetDefaultCredentialStore(); storeErr == nil {
+					store.SetDefaultAppKeys(keyGenEnv, keygenResponse.ConsumerKey, keygenResponse.ConsumerSecret)
 				}
 				// Access Token generated successfully.
 				fmt.Println(keygenResponse.Token.AccessToken)
@@ -154,6 +165,10 @@ func GetKeys(cred credentials.Credential, envName, name, version, provider, toke
 		keygenResponse, err := generateApplicationKeys(appId, accessToken)
 		if err != nil {
 			utils.HandleErrorAndExit("Error while generating CLI application keys", err)
+		}
+		// Save consumer key/secret so it can be reloaded as APIM masks it in GET responses
+		if store, storeErr := credentials.GetDefaultCredentialStore(); storeErr == nil {
+			store.SetDefaultAppKeys(keyGenEnv, keygenResponse.ConsumerKey, keygenResponse.ConsumerSecret)
 		}
 		appKey := &utils.ApplicationKey{}
 		appKey.ConsumerKey = keygenResponse.ConsumerKey

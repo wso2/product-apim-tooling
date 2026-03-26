@@ -43,6 +43,10 @@ type Store interface {
 	EraseMI(env string) error
 	// Erase mg token in a given microgateway Adapter env
 	EraseMG(env string) error
+	// GetDefaultAppKeys returns consumer key and secret for the default CLI app in a given env
+	GetDefaultAppKeys(env string) (string, string, error)
+	// SetDefaultAppKeys stores consumer key and secret for the default CLI app in a given env
+	SetDefaultAppKeys(env, consumerKey, consumerSecret string) error
 	// Load store
 	Load() error
 }
