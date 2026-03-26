@@ -715,7 +715,9 @@ func TestExportImportApiProductCrossTenantUserWithUpdateApisAndApiProduct(t *tes
 }
 
 // Export an API Product with its dependent APIs from one environment as super tenant user with Internal/devops role
-//  and import to another environment freshly as tenant admin and try to update that API Product and dependent APIs.
+//
+//	and import to another environment freshly as tenant admin and try to update that API Product and dependent APIs.
+//
 // This same command can be used to update only the dependent APIs as well.
 func TestExportImportApiProductCrossTenantDevopsWithUpdateApisAndApiProduct(t *testing.T) {
 	devopsUser := testutils.Credentials{Username: devops.UserName, Password: devops.Password}

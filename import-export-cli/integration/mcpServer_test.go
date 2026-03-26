@@ -950,6 +950,9 @@ func TestDeleteMCPServerWithActiveSubscriptionsSuperTenantUser(t *testing.T) {
 	mcpServerCreator := creator.UserName
 	mcpServerCreatorPassword := creator.Password
 
+	mcpServerSubscriber := subscriber.UserName
+	mcpServerSubscriberPassword := subscriber.Password
+
 	dev := GetDevClient()
 
 	mcpServer := testutils.AddMCPServer(t, dev, mcpServerCreator, mcpServerCreatorPassword)
@@ -957,16 +960,15 @@ func TestDeleteMCPServerWithActiveSubscriptionsSuperTenantUser(t *testing.T) {
 	// Create and Deploy Revision of the above MCP Server
 	testutils.CreateAndDeployMCPServerRevision(t, dev, mcpServerPublisher, mcpServerPublisherPassword, mcpServer.ID)
 
-	args := &testutils.ApiGetKeyTestArgs{
-		CtlUser:   testutils.Credentials{Username: adminUser, Password: adminPassword},
-		MCPServer: mcpServer,
-		Apim:      dev,
-	}
-
 	//Publish created MCP Server
 	testutils.PublishMCPServer(dev, mcpServerPublisher, mcpServerPublisherPassword, mcpServer.ID)
 
-	testutils.ValidateGetKeysWithoutCleanup(t, args, false)
+	// Create an app and subscribe to the MCP Server directly via REST API to create an active subscription
+	app := testutils.AddApp(t, dev, mcpServerSubscriber, mcpServerSubscriberPassword)
+	testutils.AddSubscription(t, dev, mcpServer.ID, app.ApplicationID, testutils.UnlimitedPolicy,
+		mcpServerSubscriber, mcpServerSubscriberPassword)
+
+	dev.Login(adminUser, adminPassword)
 
 	//args to delete MCP Server
 	argsToDelete := &testutils.MCPServerImportExportTestArgs{

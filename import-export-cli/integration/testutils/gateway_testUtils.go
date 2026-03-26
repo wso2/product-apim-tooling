@@ -44,6 +44,7 @@ func GenerateSampleGatewayData() apim.Environment {
 	}
 	env.VHosts = []apim.VHost{}
 	env.VHosts = append(env.VHosts, vhost)
+	env.Provider = "wso2"
 
 	return env
 }

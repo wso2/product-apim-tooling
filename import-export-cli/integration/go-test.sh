@@ -28,13 +28,14 @@ esac
 # Checking the OS
 case "`uname`" in
 Linux*) OS_STR="linux";;
-Darwin*) OS_STR="macosx"
+Darwin*) OS_STR="darwin"
 esac
 
 # Checking the architecture 32bit/64bit
 case "`uname -m`" in
 x86_64*) ARCH_STR="x64";;
-i386*) ARCH_STR="i586"
+i386*) ARCH_STR="i586";;
+arm64*) ARCH_STR="arm64";;
 esac
 
 
