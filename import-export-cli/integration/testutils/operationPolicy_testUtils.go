@@ -522,7 +522,7 @@ func deleteAPIPolicy(t *testing.T, name, version string, args *PolicyImportExpor
 func listAPIPolicies(t *testing.T, jsonArray bool, args *PolicyImportExportTestArgs) (string, error) {
 	var output string
 	var err error
-	limit := "55" // Set limit to a value higher than the total number of policies to ensure all policies are returned
+	limit := "100" // Set limit to a value higher than the total number of policies to ensure all policies are returned
 	if jsonArray {
 		output, err = base.Execute(t, "get", "policies", "api", "-e", args.SrcAPIM.EnvName, "-l", limit, "--format", "jsonArray", "-k", "--verbose")
 	} else {
