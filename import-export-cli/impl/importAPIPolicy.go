@@ -76,8 +76,8 @@ func importAPIPolicy(endpoint string, importPath string, accessToken string, isO
 		return err
 	}
 
-	policyPaths := strings.Split(tmpPath, "/")
-	policyName := policyPaths[len(policyPaths)-1]
+	// Make the file name platform independent
+	policyName := filepath.Base(tmpPath)
 
 	for _, file := range files {
 		originalFilePath := tmpPath + "/" + file.Name()
