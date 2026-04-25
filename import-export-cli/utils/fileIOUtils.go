@@ -413,24 +413,29 @@ func CreateZipFileFromProject(projectPath string, skipCleanup bool) (string, err
 		if err != nil {
 			return "", err, nil
 		}
-		Logln(LogPrefixInfo+"Creating the project artifact", tmp.Name())
-		err = Zip(projectPath, tmp.Name())
+		// Read the filename and close the file to avoid file locking in windows
+		tmpPath := tmp.Name()
+		if err := tmp.Close(); err != nil {
+			return "", err, nil
+		}
+		Logln(LogPrefixInfo+"Creating the project artifact", tmpPath)
+		err = Zip(projectPath, tmpPath)
 		if err != nil {
 			return "", err, nil
 		}
 		//creates a function to cleanup the temporary folders
 		cleanup := func() {
 			if skipCleanup {
-				Logln(LogPrefixInfo+"Leaving", tmp.Name())
+				Logln(LogPrefixInfo+"Leaving", tmpPath)
 				return
 			}
-			Logln(LogPrefixInfo+"Deleting", tmp.Name())
-			err := os.Remove(tmp.Name())
+			Logln(LogPrefixInfo+"Deleting", tmpPath)
+			err := os.Remove(tmpPath)
 			if err != nil {
 				Logln(LogPrefixError + err.Error())
 			}
 		}
-		projectPath = tmp.Name()
+		projectPath = tmpPath
 		return projectPath, nil, cleanup
 	}
 	return projectPath, nil, nil
