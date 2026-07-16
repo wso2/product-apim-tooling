@@ -1,0 +1,18 @@
+openapi: 3.0.1
+info: {title: NonStringScopeDescription, version: 1.0.0}
+paths:
+  /test:
+    get:
+      security:
+        - default: [null_scope, object_scope]
+      responses: {"200": {description: OK}}
+components:
+  securitySchemes:
+    default:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://test.com
+          scopes:
+            null_scope: null
+            object_scope: {key: value}

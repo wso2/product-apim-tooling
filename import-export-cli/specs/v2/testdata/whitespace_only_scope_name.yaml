@@ -1,0 +1,15 @@
+swagger: "2.0"
+info: {title: WhitespaceOnlyScopeName, version: 1.0.0}
+paths:
+  /test:
+    get:
+      security: [{default: [real_scope]}]
+      responses: {"200": {description: OK}}
+securityDefinitions:
+  default:
+    type: oauth2
+    flow: implicit
+    authorizationUrl: https://test.com
+    scopes:
+      "   ": "a scope whose name is nothing but whitespace"
+      real_scope: "a normal scope"

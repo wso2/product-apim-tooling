@@ -1,0 +1,33 @@
+swagger: "2.0"
+info: {title: BindingEdgeCases, version: 1.0.0}
+paths:
+  /dup:
+    get:
+      security: [{default: [dup_binding_scope]}]
+      responses: {"200": {description: OK}}
+  /nobindings:
+    get:
+      security: [{default: [no_bindings_scope]}]
+      responses: {"200": {description: OK}}
+  /allinvalid:
+    get:
+      security: [{default: [all_invalid_bindings_scope]}]
+      responses: {"200": {description: OK}}
+  /commabound:
+    get:
+      security: [{default: [comma_binding_scope]}]
+      responses: {"200": {description: OK}}
+securityDefinitions:
+  default:
+    type: oauth2
+    flow: implicit
+    authorizationUrl: https://test.com
+    scopes:
+      dup_binding_scope: "role appears twice in the bindings array"
+      no_bindings_scope: "scope declared with no x-scopes-bindings entry for it at all"
+      all_invalid_bindings_scope: "every element in the bindings array is a non-string"
+      comma_binding_scope: "bound to two roles via the real APIM-supported comma-separated string form"
+    x-scopes-bindings:
+      dup_binding_scope: [role_a, role_a, role_b]
+      all_invalid_bindings_scope: [123, true, null]
+      comma_binding_scope: "role_a, role_b"
