@@ -1,0 +1,41 @@
+openapi: 3.0.1
+info:
+  title: ScopesAPI
+  description: OpenAPI 3 spec with local scopes and role bindings
+  version: 1.0.0
+servers:
+  - url: https://localhost:9443/scopesapi/1.0.0
+paths:
+  /menu:
+    get:
+      summary: Get menu, protected by a scope with no explicit auth/throttling extensions
+      security:
+        - default:
+            - test4_scope
+      responses:
+        '200':
+          description: OK
+  /order:
+    post:
+      summary: Place an order, with explicit auth type and throttling tier set
+      x-auth-type: Application
+      x-throttling-tier: Gold
+      responses:
+        '200':
+          description: OK
+    get:
+      summary: List orders, no security requirement anywhere
+      responses:
+        '200':
+          description: OK
+components:
+  securitySchemes:
+    default:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://localhost:9443/authorize
+          scopes:
+            test4_scope: Scope to protect menu resource
+          x-scopes-bindings:
+            test4_scope: role4

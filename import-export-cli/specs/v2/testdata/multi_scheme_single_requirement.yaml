@@ -1,0 +1,23 @@
+swagger: "2.0"
+info: {title: MultiSchemeSingleRequirement, version: 1.0.0}
+paths:
+  /both-required:
+    get:
+      summary: A single security requirement entry naming two schemes together (AND within one alternative) - both schemes' scopes should be captured
+      security:
+        - oauth_a: [scope_from_a]
+          oauth_b: [scope_from_b]
+      responses: {"200": {description: OK}}
+securityDefinitions:
+  oauth_a:
+    type: oauth2
+    flow: implicit
+    authorizationUrl: https://test.com
+    scopes: {scope_from_a: "from scheme A"}
+    x-scopes-bindings: {scope_from_a: role_a}
+  oauth_b:
+    type: oauth2
+    flow: implicit
+    authorizationUrl: https://test.com
+    scopes: {scope_from_b: "from scheme B"}
+    x-scopes-bindings: {scope_from_b: role_b}

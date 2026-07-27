@@ -1,0 +1,66 @@
+swagger: "2.0"
+info:
+  title: MultiSchemeAPI
+  version: 1.0.0
+basePath: /multischeme/1.0.0
+paths:
+  /shared:
+    get:
+      summary: Scope declared under both schemes; scheme_b's binding should fill in since scheme_a declares none for it
+      security:
+        - scheme_a:
+            - shared_scope
+      responses:
+        '200':
+          description: OK
+  /orders:
+    get:
+      summary: Operation-level scope, from scheme_b
+      security:
+        - scheme_b:
+            - order_read
+      responses:
+        '200':
+          description: OK
+    post:
+      summary: Operation-level scope overrides the API-level default below
+      security:
+        - scheme_a:
+            - order_write
+      responses:
+        '200':
+          description: OK
+  /admin:
+    put:
+      summary: No security requirement of its own, must fall back to the API-level (global) security
+      responses:
+        '200':
+          description: OK
+security:
+  - scheme_a:
+      - api_level_scope
+securityDefinitions:
+  scheme_a:
+    type: oauth2
+    flow: implicit
+    authorizationUrl: 'https://test.com/authorize'
+    scopes:
+      shared_scope: description from scheme_a
+      order_write: write access to orders
+      api_level_scope: api level default scope
+    x-scopes-bindings:
+      shared_scope: []
+      order_write: role_writer
+      api_level_scope:
+        - role_admin
+        - role_superadmin
+  scheme_b:
+    type: oauth2
+    flow: password
+    tokenUrl: 'https://test.com/token'
+    scopes:
+      shared_scope: description from scheme_b, should not override scheme_a's non-empty description
+      order_read: read access to orders
+    x-scopes-bindings:
+      shared_scope: role_shared_reader
+      order_read: role_reader

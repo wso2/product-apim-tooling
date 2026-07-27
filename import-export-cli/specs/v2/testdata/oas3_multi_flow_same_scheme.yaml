@@ -1,0 +1,29 @@
+openapi: 3.0.1
+info: {title: MultiFlowSameScheme, version: 1.0.0}
+paths:
+  /resource:
+    get:
+      security:
+        - default: [shared_flow_scope]
+      responses: {"200": {description: OK}}
+components:
+  securitySchemes:
+    default:
+      type: oauth2
+      flows:
+        # "authorizationCode" sorts alphabetically before "password", so its
+        # non-empty description/binding must win when the same scope name is
+        # declared under both flows of the same scheme.
+        authorizationCode:
+          authorizationUrl: https://test.com/authorize
+          tokenUrl: https://test.com/token
+          scopes:
+            shared_flow_scope: "description from authorizationCode flow"
+          x-scopes-bindings:
+            shared_flow_scope: role_from_auth_code_flow
+        password:
+          tokenUrl: https://test.com/token
+          scopes:
+            shared_flow_scope: "description from password flow, should not override authorizationCode's"
+          x-scopes-bindings:
+            shared_flow_scope: role_from_password_flow

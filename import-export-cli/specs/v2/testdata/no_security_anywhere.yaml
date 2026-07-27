@@ -1,0 +1,6 @@
+swagger: "2.0"
+info: {title: NoSecurityAnywhere, version: 1.0.0}
+paths:
+  /open:
+    get:
+      responses: {"200": {description: OK}}

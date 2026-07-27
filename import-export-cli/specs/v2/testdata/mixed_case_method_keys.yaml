@@ -1,0 +1,18 @@
+swagger: "2.0"
+info: {title: MixedCaseMethodKeys, version: 1.0.0}
+paths:
+  /test:
+    GET:
+      security: [{default: [get_scope]}]
+      responses: {"200": {description: OK}}
+    Get:
+      security: [{default: [alt_get_scope]}]
+      responses: {"200": {description: OK}}
+securityDefinitions:
+  default:
+    type: oauth2
+    flow: implicit
+    authorizationUrl: https://test.com
+    scopes:
+      get_scope: "declared under the 'GET' key - must be the one that wins, since sortedKeys puts 'GET' before 'Get' (uppercase 'E' < lowercase 'e')"
+      alt_get_scope: "declared under the 'Get' key - must NOT show up in the resolved operation, proving which variant wins is deterministic rather than just 'collapses to one operation'"

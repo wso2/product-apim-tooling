@@ -1,0 +1,35 @@
+openapi: 3.0.1
+info:
+  title: AWSPetstore
+  version: '1.0'
+servers:
+  - url: https://abc123.execute-api.us-east-1.amazonaws.com/{basePath}
+    variables:
+      basePath:
+        default: prod
+paths:
+  /pets:
+    get:
+      responses:
+        '200':
+          description: OK
+      security:
+        - sigv4: []
+components:
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: x-api-key
+      in: header
+    sigv4:
+      type: apiKey
+      name: Authorization
+      in: header
+      x-amazon-apigateway-authtype: awsSigv4
+    CognitoAuthorizer:
+      type: apiKey
+      name: Authorization
+      in: header
+      x-amazon-apigateway-authtype: cognito_user_pools
+x-amazon-apigateway-policy:
+  Version: '2012-10-17'

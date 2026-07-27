@@ -1,0 +1,18 @@
+swagger: "2.0"
+info: {title: OrphanScopeUnreferenced, version: 1.0.0}
+paths:
+  /test:
+    get:
+      security: [{default: [used_scope]}]
+      responses: {"200": {description: OK}}
+securityDefinitions:
+  default:
+    type: oauth2
+    flow: implicit
+    authorizationUrl: https://test.com
+    scopes:
+      used_scope: "referenced by /test"
+      orphan_scope: "declared under securityDefinitions but never referenced by any operation's security requirement"
+    x-scopes-bindings:
+      used_scope: role_used
+      orphan_scope: role_orphan

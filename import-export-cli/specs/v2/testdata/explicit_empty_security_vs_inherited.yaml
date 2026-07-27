@@ -1,0 +1,21 @@
+swagger: "2.0"
+info: {title: ExplicitEmptySecurityProbe, version: 1.0.0}
+paths:
+  /public:
+    get:
+      summary: Explicitly opts out of the API-level security via an empty array - should be public
+      security: []
+      responses: {"200": {description: OK}}
+  /inherits:
+    get:
+      summary: No security key at all - should inherit the API-level scope
+      responses: {"200": {description: OK}}
+security:
+  - default: [api_level_scope]
+securityDefinitions:
+  default:
+    type: oauth2
+    flow: implicit
+    authorizationUrl: https://test.com
+    scopes: {api_level_scope: "api level default"}
+    x-scopes-bindings: {api_level_scope: some_role}
