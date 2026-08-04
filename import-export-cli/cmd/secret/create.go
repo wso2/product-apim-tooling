@@ -34,6 +34,7 @@ import (
 var inputPropertiesfile string
 var encryptionAlgorithm string
 var outputType string
+var symmetricFormat string
 
 const secretCreateCmdLiteral = "create"
 const secretCreateCmdShortDesc = "Encrypt secrets"
@@ -44,6 +45,10 @@ var secretCreateCmdExamples = "To encrypt secret and get output on console\n" +
 	"  " + utils.ProjectName + " " + secretCmdLiteral + " " + secretCreateCmdLiteral + "\n" +
 	"To encrypt secret using an initialized symmetric encryption key and get output on console\n" +
 	"  " + utils.ProjectName + " " + secretCmdLiteral + " " + secretCreateCmdLiteral + " " + symmetricModeLiteral + "\n" +
+	"To encrypt secret in the carbon-crypto-service ciphertext format\n" +
+	"  " + utils.ProjectName + " " + secretCmdLiteral + " " + secretCreateCmdLiteral + " " + symmetricModeLiteral + " " + symmetricInternalModeLiteral + "\n" +
+	"To encrypt secret in the cipher-tool/carbon-secvault/carbon-mediation ciphertext format\n" +
+	"  " + utils.ProjectName + " " + secretCmdLiteral + " " + secretCreateCmdLiteral + " " + symmetricModeLiteral + " " + symmetricExternalModeLiteral + "\n" +
 	"To encrypt secret and get output as a .properties file (stored in the security folder in apictl executable directory)\n" +
 	"  " + utils.ProjectName + " " + secretCmdLiteral + " " + secretCreateCmdLiteral + " -o file\n" +
 	"To encrypt secret and get output as a .yaml file (stored in the security folder in apictl executable directory)\n" +
@@ -54,13 +59,18 @@ var secretCreateCmdExamples = "To encrypt secret and get output on console\n" +
 	"  " + utils.ProjectName + " " + secretCmdLiteral + " " + secretCreateCmdLiteral + " -o k8 -f <file_path>"
 
 var secretCreateCmd = &cobra.Command{
-	Use:     secretCreateCmdLiteral + " [" + symmetricModeLiteral + "]",
+	Use: secretCreateCmdLiteral + " [" + symmetricModeLiteral + " [" + symmetricInternalModeLiteral +
+		"|" + symmetricExternalModeLiteral + "]]",
 	Short:   secretCreateCmdShortDesc,
 	Long:    secretCreateCmdLongDesc,
 	Example: secretCreateCmdExamples,
 	Args:    validateSymmetricModeCreateArg,
 	Run: func(cmd *cobra.Command, args []string) {
 		resolveCreateCipher(cmd, args)
+		symmetricFormat = ""
+		if len(args) == 2 {
+			symmetricFormat = args[1]
+		}
 		err := validateFlags()
 		if err != nil {
 			utils.HandleErrorAndExit("Invalid flag", err)
@@ -99,7 +109,7 @@ func resolveCreateCipher(cmd *cobra.Command, args []string) {
 	if cmd.Flags().Changed(cipherFlagLiteral) {
 		return
 	}
-	if len(args) == 1 && args[0] == symmetricModeLiteral {
+	if len(args) >= 1 && args[0] == symmetricModeLiteral {
 		encryptionAlgorithm = utils.SecretEncryptionAlgorithmAESGCM
 		return
 	}
@@ -108,8 +118,9 @@ func resolveCreateCipher(cmd *cobra.Command, args []string) {
 
 func initSecretInformation(keyStoreConfig *utils.KeyStoreConfig, encryptionKeyConfig *utils.EncryptionKeyConfig) {
 	secretConfig := utils.SecretConfig{
-		OutputType: outputType,
-		Algorithm:  encryptionAlgorithm,
+		OutputType:      outputType,
+		Algorithm:       encryptionAlgorithm,
+		SymmetricFormat: symmetricFormat,
 	}
 	if utils.IsAES256Encryption(secretConfig.Algorithm) {
 		encryptionKey, err := utils.GetStoredEncryptionKey(encryptionKeyConfig)
@@ -168,13 +179,17 @@ func validateFlags() error {
 }
 
 func validateSymmetricModeCreateArg(cmd *cobra.Command, args []string) error {
-	if len(args) > 1 {
-		return cobra.MaximumNArgs(1)(cmd, args)
+	if len(args) > 2 {
+		return cobra.MaximumNArgs(2)(cmd, args)
 	}
-	if len(args) == 1 && args[0] != symmetricModeLiteral {
-		return errors.New("accepts only '" + symmetricModeLiteral + "' as an optional argument")
+	if len(args) >= 1 && args[0] != symmetricModeLiteral {
+		return errors.New("accepts only '" + symmetricModeLiteral + "' as the first optional argument")
 	}
-	if len(args) == 1 && args[0] == symmetricModeLiteral && cmd.Flags().Changed(cipherFlagLiteral) &&
+	if len(args) == 2 && args[1] != symmetricInternalModeLiteral && args[1] != symmetricExternalModeLiteral {
+		return errors.New("accepts only '" + symmetricInternalModeLiteral + "' or '" + symmetricExternalModeLiteral +
+			"' as the second optional argument")
+	}
+	if len(args) >= 1 && args[0] == symmetricModeLiteral && cmd.Flags().Changed(cipherFlagLiteral) &&
 		!utils.IsAES256Encryption(encryptionAlgorithm) {
 		return errors.New("the optional argument '" + symmetricModeLiteral + "' only supports AES/GCM/NoPadding or AES256 with -c")
 	}
