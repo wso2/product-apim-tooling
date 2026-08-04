@@ -234,6 +234,42 @@ func TestDecryptAES256LegacyFlatFormat(t *testing.T) {
 	}
 }
 
+// TestDecryptAES256LegacyNonceSize confirms DecryptAES256 still reads ciphertext written with the
+// former 128-byte GCM nonce size (the flat {"cipherText","iv"} shape produced by the AES-256
+// implementation that shipped before GCMIVSize was corrected to 12), not just the current
+// 12-byte nonce.
+func TestDecryptAES256LegacyNonceSize(t *testing.T) {
+	keyBytes, err := ResolveAES256Key("12345678901234567890123456789012")
+	if err != nil {
+		t.Fatalf("ResolveAES256Key() returned an error: %v", err)
+	}
+
+	const formerNonceSize = 128
+	plainText := "legacyNonceSizeValue"
+	block, err := aes.NewCipher(keyBytes)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	gcm, err := cipher.NewGCMWithNonceSize(block, formerNonceSize)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	iv := make([]byte, formerNonceSize)
+	cipherBytes := gcm.Seal(nil, iv, []byte(plainText), nil)
+
+	legacyJSON := `{"cipherText":"` + base64.StdEncoding.EncodeToString(cipherBytes) +
+		`","iv":"` + base64.StdEncoding.EncodeToString(iv) + `"}`
+	legacyStored := base64.StdEncoding.EncodeToString([]byte(legacyJSON))
+
+	decrypted, err := DecryptAES256(keyBytes, legacyStored)
+	if err != nil {
+		t.Fatalf("unexpected error decrypting former-nonce-size ciphertext: %v", err)
+	}
+	if decrypted != plainText {
+		t.Fatalf("expected %q, got %q", plainText, decrypted)
+	}
+}
+
 // TestEncryptAES256ExternalOutputFormat asserts EncryptAES256External produces the flat
 // {"cipherText","iv"} shape (no "c"/"t" envelope), and that it round-trips through DecryptAES256.
 func TestEncryptAES256ExternalOutputFormat(t *testing.T) {

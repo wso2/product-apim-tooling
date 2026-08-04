@@ -236,10 +236,6 @@ func DecryptAES256(key []byte, cryptoText string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	aesGCM, err := cipher.NewGCMWithNonceSize(block, GCMIVSize)
-	if err != nil {
-		return "", err
-	}
 
 	var outer map[string]interface{}
 	if err = json.Unmarshal(outerBytes, &outer); err != nil {
@@ -249,6 +245,10 @@ func DecryptAES256(key []byte, cryptoText string) (string, error) {
 		}
 		iv := outerBytes[:GCMIVSize]
 		ciphertext := outerBytes[GCMIVSize:]
+		aesGCM, err := cipher.NewGCMWithNonceSize(block, len(iv))
+		if err != nil {
+			return "", err
+		}
 		plainText, err := aesGCM.Open(nil, iv, ciphertext, nil)
 		if err != nil {
 			return "", err
@@ -296,6 +296,11 @@ func DecryptAES256(key []byte, cryptoText string) (string, error) {
 		return "", err
 	}
 	iv, err := base64.StdEncoding.DecodeString(ivB64)
+	if err != nil {
+		return "", err
+	}
+
+	aesGCM, err := cipher.NewGCMWithNonceSize(block, len(iv))
 	if err != nil {
 		return "", err
 	}

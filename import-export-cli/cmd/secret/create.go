@@ -185,7 +185,7 @@ func validateSymmetricModeCreateArg(cmd *cobra.Command, args []string) error {
 	if len(args) >= 1 && args[0] != symmetricModeLiteral {
 		return errors.New("accepts only '" + symmetricModeLiteral + "' as the first optional argument")
 	}
-	if len(args) == 2 && args[1] != symmetricInternalModeLiteral && args[1] != symmetricExternalModeLiteral {
+	if len(args) == 2 && !strings.EqualFold(args[1], symmetricInternalModeLiteral) && !strings.EqualFold(args[1], symmetricExternalModeLiteral) {
 		return errors.New("accepts only '" + symmetricInternalModeLiteral + "' or '" + symmetricExternalModeLiteral +
 			"' as the second optional argument")
 	}
