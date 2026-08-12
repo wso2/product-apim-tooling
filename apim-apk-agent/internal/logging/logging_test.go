@@ -48,7 +48,7 @@ func TestPrintError(t *testing.T) {
 		Severity:  severity,
 	}
 
-	errorLog := PrintError(code, severity, message)
+	errorLog := PrintError(code, severity, "%s", message)
 	if errorLog != expectedError {
 		t.Errorf("PrintError returned unexpected result. Expected: %v, Got: %v", expectedError, errorLog)
 	}
