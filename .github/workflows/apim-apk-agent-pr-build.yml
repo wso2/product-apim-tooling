@@ -1,0 +1,52 @@
+name: Build APIM-APK Agent (PR)
+
+# Validates pull request code. Uses `pull_request`, not `pull_request_target`, so
+# for fork pull requests this runs WITHOUT access to repository secrets - which is
+# what makes it safe to build contributor code here.
+#
+# This replaces the previous `trigger-action` label flow in
+# apim-apk-agent-release.yml, and runs automatically instead of needing a label.
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+    paths:
+      - '**/apim-apk-agent/**'
+    branches:
+      - 'master'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: apim-apk-agent-pr-${{ github.event.number }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: "1.23"
+      - name: Install Revive
+        shell: sh
+        run: |
+          go install github.com/mgechev/revive@v1.3.4
+      - name: Checkout pull request
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+      - name: Run Gradle Build
+        run: |
+          cd apim-apk-agent
+          ./gradlew build
+      - name: run codecov
+        uses: codecov/codecov-action@v3
+        with:
+          verbose: true # optional (default = false)
+          directory: apim-apk-agent
+          flags: apim-apk-agent

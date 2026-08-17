@@ -9,9 +9,11 @@ on:
       next_version:
         type: string
         description: "Next Development Version"
+  # Only `closed`. This workflow runs with repository secrets, so it must never
+  # execute code from an unmerged pull request. PR validation lives in
+  # apim-apk-agent-pr-build.yml, which runs without secrets.
   pull_request_target:
     types:
-      - labeled
       - closed
     paths:
       - '**/apim-apk-agent/**'
@@ -19,12 +21,18 @@ on:
       - 'master'
 env:
   GH_TOKEN: ${{ secrets.APK_BOT_TOKEN }}
+permissions:
+  contents: read
 concurrency:
   group: apim-apk-agent-${{ github.event.number || github.run_id }}
   cancel-in-progress: true
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Skip pull requests that were closed without being merged.
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.action == 'closed' && github.event.pull_request.merged == true)
     steps:
       - name: Install Go
         uses: actions/setup-go@v3
@@ -34,6 +42,7 @@ jobs:
         shell: sh
         run: |
           go install github.com/mgechev/revive@v1.3.4
+      # Always checks out the base branch, never pull request head code.
       - name: Checkout product-apim-tooling-repo
         uses: actions/checkout@v3
         with:
@@ -41,33 +50,39 @@ jobs:
           token: ${{ secrets.APK_BOT_TOKEN }}
       - name: Set release username and email
         shell: sh
+        env:
+          BOT_USER: ${{ secrets.APK_BOT_USER }}
+          BOT_EMAIL: ${{ secrets.APK_BOT_EMAIL }}
         run: |
-          git config --global user.name ${{ secrets.APK_BOT_USER }}
-          git config --global user.email ${{ secrets.APK_BOT_EMAIL }}
-      - name: checkout pull request and merge.
-        shell: sh
-        if: github.event_name == 'pull_request_target' && contains(github.event.label.name, 'trigger-action')
-        run: |
-          gh pr checkout ${{ github.event.number }} -b pr-${{ github.event.number }}
-          git checkout pr-${{ github.event.number }}
-          git merge origin/master
+          git config --global user.name "$BOT_USER"
+          git config --global user.email "$BOT_EMAIL"
       - name: Run Release Gradle build
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.release_version != '' && github.event.inputs.next_version != ''   
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.release_version != '' && github.event.inputs.next_version != ''
+        env:
+          RELEASE_VERSION: ${{ github.event.inputs.release_version }}
+          NEXT_VERSION: ${{ github.event.inputs.next_version }}
+          DOCKER_ORGANIZATION: ${{ secrets.DOCKER_ORGANIZATION }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
           git checkout -b apim-apk-agent-1.x
           git push origin apim-apk-agent-1.x -f
           cd apim-apk-agent
-          ./gradlew release -Prelease.useAutomaticVersion=true -Pdocker_organization=${{ secrets.DOCKER_ORGANIZATION }} -Pdocker_username=${{ secrets.DOCKER_USERNAME }} -Pdocker_password=${{ secrets.DOCKER_PASSWORD }} -Prelease.releaseVersion=${{ github.event.inputs.release_version }} -Prelease.newVersion=${{ github.event.inputs.next_version }} -PmultiArch=true -PreleaseBranch=apim-apk-agent-1.x
+          ./gradlew release -Prelease.useAutomaticVersion=true -Pdocker_organization="$DOCKER_ORGANIZATION" -Pdocker_username="$DOCKER_USERNAME" -Pdocker_password="$DOCKER_PASSWORD" -Prelease.releaseVersion="$RELEASE_VERSION" -Prelease.newVersion="$NEXT_VERSION" -PmultiArch=true -PreleaseBranch=apim-apk-agent-1.x
       - name: Run Gradle Build
         run: |
           cd apim-apk-agent
           ./gradlew build
       - name: Push docker images to docker hub
         if: github.event_name == 'pull_request_target' && github.event.action == 'closed' && github.event.pull_request.merged == true
+        env:
+          DOCKER_ORGANIZATION: ${{ secrets.DOCKER_ORGANIZATION }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
           cd apim-apk-agent
-          ./gradlew docker_push -Pdocker_organization=${{ secrets.DOCKER_ORGANIZATION }} -Pdocker_username=${{ secrets.DOCKER_USERNAME }} -Pdocker_password=${{ secrets.DOCKER_PASSWORD }} -Pimage_version=latest -PmultiArch=true
-          ./gradlew docker_push -Pdocker_organization=${{ secrets.DOCKER_ORGANIZATION }} -Pdocker_username=${{ secrets.DOCKER_USERNAME }} -Pdocker_password=${{ secrets.DOCKER_PASSWORD }} -Pimage_version=${{ github.sha }} -PmultiArch=true
+          ./gradlew docker_push -Pdocker_organization="$DOCKER_ORGANIZATION" -Pdocker_username="$DOCKER_USERNAME" -Pdocker_password="$DOCKER_PASSWORD" -Pimage_version=latest -PmultiArch=true
+          ./gradlew docker_push -Pdocker_organization="$DOCKER_ORGANIZATION" -Pdocker_username="$DOCKER_USERNAME" -Pdocker_password="$DOCKER_PASSWORD" -Pimage_version="${{ github.sha }}" -PmultiArch=true
       - name: run codecov
         uses: codecov/codecov-action@v3
         with:
