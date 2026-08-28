@@ -21,6 +21,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/magiconair/properties/assert"
@@ -134,6 +135,45 @@ func TestInitializeAPIWithDefinitionFlag(t *testing.T) {
 			testutils.ValidateInitializeProjectWithDefinitionFlag(t, args)
 
 			testutils.ValidateImportProject(t, args, "", !isTenantUser(user.CtlUser.Username, TENANT1))
+		})
+	}
+}
+
+// Initialize an AI API with with a definition
+func TestInitializeAIAPIWithDefinitionFlag(t *testing.T) {
+	for _, user := range testCaseUsers {
+		t.Run(user.Description, func(t *testing.T) {
+			apim := GetDevClient()
+			projectName := base.GenerateRandomString()
+
+			args := &testutils.InitTestArgs{
+				CtlUser:        testutils.Credentials{Username: user.CtlUser.Username, Password: user.CtlUser.Password},
+				SrcAPIM:        apim,
+				InitFlag:       projectName,
+				DefinitionFlag: testutils.SampleAIAPIDefinitionYamlFilePath,
+				APIName:        testutils.DevFirstAIAPIName,
+				ForceFlag:      false,
+			}
+
+			testutils.ValidateInitializeProjectWithDefinitionFlag(t, args)
+
+			projectPath, _ := filepath.Abs(projectName)
+			apiYamlPath := projectPath + string(os.PathSeparator) + testutils.APIYamlFilePath
+
+			apiDefinition := testutils.ReadAPIDefinition(t, apiYamlPath)
+			assert.Equal(t, apiDefinition.Data.SubtypeConfiguration != nil, true,
+				"subtypeConfiguration should be present in the generated api.yaml for AI APIs")
+
+			subtypeConfig, ok := apiDefinition.Data.SubtypeConfiguration.(map[interface{}]interface{})
+			assert.Equal(t, ok, true, "subtypeConfiguration should unmarshal to a map")
+			assert.Equal(t, subtypeConfig["subtype"], "AIAPI", "subtype should be AIAPI")
+
+			fileData, err := ioutil.ReadFile(apiYamlPath)
+			if err != nil {
+				t.Error(err)
+			}
+			assert.Equal(t, strings.Contains(string(fileData), "llmProviderName"), true,
+				"the AI API configuration should be carried through into the generated api.yaml")
 		})
 	}
 }
