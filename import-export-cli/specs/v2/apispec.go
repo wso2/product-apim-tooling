@@ -90,6 +90,7 @@ type APIDTODefinition struct {
 	InitiatedFromGateway            bool          `json:"initiatedFromGateway,omitempty" yaml:"initiatedFromGateway,omitempty"`
 	EnableSubscriberVerification    bool          `json:"enableSubscriberVerification,omitempty" yaml:"enableSubscriberVerification,omitempty"`
 	ApiPolicies                     interface{}   `json:"apiPolicies,omitempty" yaml:"apiPolicies,omitempty"`
+	SubtypeConfiguration            interface{}   `json:"subtypeConfiguration,omitempty" yaml:"subtypeConfiguration,omitempty"`
 }
 
 type CorsConfiguration struct {

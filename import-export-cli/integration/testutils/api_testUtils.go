@@ -19,6 +19,7 @@
 package testutils
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -946,11 +947,49 @@ func ValidateAPIsEqual(t *testing.T, api1 *apim.API, api2 *apim.API) {
 		overrideOperationPolictIdsInDefinition(&api2Copy)
 	}
 
+	// The LLM provider of an AI API is registered per environment, hence its ID will defer between the two APIs
+	overrideLLMProviderIdInSubtypeConfiguration(&api1Copy)
+	overrideLLMProviderIdInSubtypeConfiguration(&api2Copy)
+
 	// Sort member collections to make equality check possible
 	apim.SortAPIMembers(&api1Copy)
 	apim.SortAPIMembers(&api2Copy)
 
 	assert.Equal(t, api1Copy, api2Copy, "API obejcts are not equal")
+}
+
+// Override the LLM provider ID in the subtypeConfiguration of an AI API, since it is unique per environment
+func overrideLLMProviderIdInSubtypeConfiguration(apiCopy *apim.API) {
+	same := "override_with_same_value"
+
+	subtypeConfiguration, ok := apiCopy.SubtypeConfiguration.(map[string]interface{})
+	if !ok {
+		return
+	}
+
+	configuration, ok := subtypeConfiguration["configuration"].(string)
+	if !ok {
+		return
+	}
+
+	aiConfiguration := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(configuration), &aiConfiguration); err != nil {
+		return
+	}
+	aiConfiguration["llmProviderId"] = same
+
+	overriddenConfiguration, err := json.Marshal(aiConfiguration)
+	if err != nil {
+		return
+	}
+
+	// Copy the map to avoid mutating the subtypeConfiguration of the original API
+	overriddenSubtypeConfiguration := make(map[string]interface{})
+	for key, value := range subtypeConfiguration {
+		overriddenSubtypeConfiguration[key] = value
+	}
+	overriddenSubtypeConfiguration["configuration"] = string(overriddenConfiguration)
+	apiCopy.SubtypeConfiguration = overriddenSubtypeConfiguration
 }
 
 func overrideOperationPolictIdsInDefinition(apiCopy *apim.API) {
