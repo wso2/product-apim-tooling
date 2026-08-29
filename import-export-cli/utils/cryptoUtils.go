@@ -23,6 +23,7 @@ import (
 	"crypto/cipher"
 	"crypto/md5"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
@@ -35,14 +36,28 @@ import (
 const (
 	AES256KeySize    = 32
 	AES256HexKeySize = 64
-	GCMIVSize        = 128
+	GCMIVSize        = 12
 	GCMTagSize       = 128
 	hexCharacters    = "0123456789abcdefABCDEF"
 )
 
-type gcmCipherText struct {
+type cipherInitializationVectorHolder struct {
+	Cipher               string `json:"cipher"`
+	InitializationVector string `json:"initializationVector"`
+	KeyId                string `json:"keyId,omitempty"`
+}
+
+type cipherMetaDataHolder struct {
+	C  string `json:"c"`
+	T  string `json:"t"`
+	Iv string `json:"iv"`
+}
+
+// legacyCipherHolder is the flat ciphertext shape used by cipher-tool, carbon-secvault, and
+// carbon-mediation's current secure vault.
+type legacyCipherHolder struct {
 	CipherText string `json:"cipherText"`
-	IV         string `json:"iv"`
+	Iv         string `json:"iv"`
 }
 
 // Returns md5 hash of a given string
@@ -122,50 +137,97 @@ func ResolveAES256Key(encryptionKey string) ([]byte, error) {
 	return keyBytes, nil
 }
 
-// EncryptAES256 encrypts plain text using AES-256 GCM and returns a self-contained ciphertext.
-func EncryptAES256(key []byte, text string) (string, error) {
+// newAES256GCMWithRandomIV builds an AES-256/GCM cipher for key and generates a fresh random IV.
+func newAES256GCMWithRandomIV(key []byte) (cipher.AEAD, []byte, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		return "", err
+		return nil, nil, err
 	}
 	aesGCM, err := cipher.NewGCMWithNonceSize(block, GCMIVSize)
 	if err != nil {
-		return "", err
+		return nil, nil, err
 	}
-
 	iv := make([]byte, GCMIVSize)
 	if _, err = io.ReadFull(rand.Reader, iv); err != nil {
+		return nil, nil, err
+	}
+	return aesGCM, iv, nil
+}
+
+// EncryptAES256 encrypts plain text using AES-256 GCM and returns a self-contained ciphertext in
+// the nested {"c","t","iv"} shape used by carbon-crypto-service.
+func EncryptAES256(key []byte, text string) (string, error) {
+	aesGCM, iv, err := newAES256GCMWithRandomIV(key)
+	if err != nil {
 		return "", err
 	}
 
 	ciphertext := aesGCM.Seal(nil, iv, []byte(text), nil)
-	payload, err := json.Marshal(gcmCipherText{
-		CipherText: base64.StdEncoding.EncodeToString(ciphertext),
-		IV:         base64.StdEncoding.EncodeToString(iv),
-	})
+
+	inner := cipherInitializationVectorHolder{
+		Cipher:               base64.StdEncoding.EncodeToString(ciphertext),
+		InitializationVector: base64.StdEncoding.EncodeToString(iv),
+		KeyId:                aes256KeyId(key),
+	}
+	innerJSON, err := json.Marshal(inner)
 	if err != nil {
 		return "", err
 	}
-	return base64.StdEncoding.EncodeToString(payload), nil
+	outer := cipherMetaDataHolder{
+		C:  base64.StdEncoding.EncodeToString(innerJSON),
+		T:  SecretEncryptionAlgorithmAESGCM,
+		Iv: base64.StdEncoding.EncodeToString(iv),
+	}
+	outerJSON, err := json.Marshal(outer)
+	if err != nil {
+		return "", err
+	}
+	return base64.StdEncoding.EncodeToString(outerJSON), nil
 }
 
-// DecryptAES256 decrypts self-contained AES-256 GCM ciphertext into plain text.
+// EncryptAES256External encrypts plain text using AES-256 GCM and returns ciphertext in the flat
+// {"cipherText","iv"} shape used by cipher-tool, carbon-secvault, and carbon-mediation's current
+// ciphertext format.
+func EncryptAES256External(key []byte, text string) (string, error) {
+	aesGCM, iv, err := newAES256GCMWithRandomIV(key)
+	if err != nil {
+		return "", err
+	}
+
+	ciphertext := aesGCM.Seal(nil, iv, []byte(text), nil)
+
+	holder := legacyCipherHolder{
+		CipherText: base64.StdEncoding.EncodeToString(ciphertext),
+		Iv:         base64.StdEncoding.EncodeToString(iv),
+	}
+	holderJSON, err := json.Marshal(holder)
+	if err != nil {
+		return "", err
+	}
+	return base64.StdEncoding.EncodeToString(holderJSON), nil
+}
+
+// EncryptAES256Plain encrypts plain text using AES-256 GCM and returns a single opaque base64
+// value (the IV prepended to the ciphertext) - no JSON envelope, just the encrypted value itself.
+func EncryptAES256Plain(key []byte, text string) (string, error) {
+	aesGCM, iv, err := newAES256GCMWithRandomIV(key)
+	if err != nil {
+		return "", err
+	}
+
+	sealed := aesGCM.Seal(iv, iv, []byte(text), nil)
+	return base64.StdEncoding.EncodeToString(sealed), nil
+}
+
+func aes256KeyId(key []byte) string {
+	hash := sha256.Sum256(key)
+	return base64.StdEncoding.EncodeToString(hash[:])
+}
+
+// DecryptAES256 decrypts AES-256 GCM ciphertext produced by EncryptAES256, EncryptAES256External
+// or EncryptAES256Plain, auto-detecting which of the three shapes cryptoText is in.
 func DecryptAES256(key []byte, cryptoText string) (string, error) {
-	payload, err := base64.StdEncoding.DecodeString(strings.TrimSpace(cryptoText))
-	if err != nil {
-		return "", err
-	}
-
-	var encryptedValue gcmCipherText
-	if err = json.Unmarshal(payload, &encryptedValue); err != nil {
-		return "", err
-	}
-
-	ciphertext, err := base64.StdEncoding.DecodeString(encryptedValue.CipherText)
-	if err != nil {
-		return "", err
-	}
-	iv, err := base64.StdEncoding.DecodeString(encryptedValue.IV)
+	outerBytes, err := base64.StdEncoding.DecodeString(strings.TrimSpace(cryptoText))
 	if err != nil {
 		return "", err
 	}
@@ -174,7 +236,71 @@ func DecryptAES256(key []byte, cryptoText string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	aesGCM, err := cipher.NewGCMWithNonceSize(block, GCMIVSize)
+
+	var outer map[string]interface{}
+	if err = json.Unmarshal(outerBytes, &outer); err != nil {
+		// Not a JSON envelope - treat it as the plain iv||ciphertext blob.
+		if len(outerBytes) < GCMIVSize {
+			return "", errors.New("Ciphertext too short")
+		}
+		iv := outerBytes[:GCMIVSize]
+		ciphertext := outerBytes[GCMIVSize:]
+		aesGCM, err := cipher.NewGCMWithNonceSize(block, len(iv))
+		if err != nil {
+			return "", err
+		}
+		plainText, err := aesGCM.Open(nil, iv, ciphertext, nil)
+		if err != nil {
+			return "", err
+		}
+		return string(plainText), nil
+	}
+
+	var cipherB64, ivB64 string
+	if c, ok := outer["c"]; ok {
+		// Current format: {"c": <base64 inner json>, "t": ..., "iv": ...}
+		cStr, ok := c.(string)
+		if !ok {
+			return "", errors.New("Invalid ciphertext format: \"c\" field is not a string")
+		}
+		innerJSONBytes, err := base64.StdEncoding.DecodeString(cStr)
+		if err != nil {
+			return "", errors.New("Invalid base64 in \"c\" field")
+		}
+		var inner cipherInitializationVectorHolder
+		if err = json.Unmarshal(innerJSONBytes, &inner); err != nil {
+			return "", errors.New("Invalid inner ciphertext JSON")
+		}
+		cipherB64 = inner.Cipher
+		ivB64 = inner.InitializationVector
+	} else if ct, ok := outer["cipherText"]; ok {
+		// Flat format: {"cipherText": ..., "iv": ...}
+		cipherStr, ok := ct.(string)
+		if !ok {
+			return "", errors.New("Invalid ciphertext format: \"cipherText\" field is not a string")
+		}
+		cipherB64 = cipherStr
+		if iv, ok := outer["iv"]; ok {
+			ivStr, ok := iv.(string)
+			if !ok {
+				return "", errors.New("Invalid ciphertext format: \"iv\" field is not a string")
+			}
+			ivB64 = ivStr
+		}
+	} else {
+		return "", errors.New("Unrecognized ciphertext format")
+	}
+
+	ciphertext, err := base64.StdEncoding.DecodeString(cipherB64)
+	if err != nil {
+		return "", err
+	}
+	iv, err := base64.StdEncoding.DecodeString(ivB64)
+	if err != nil {
+		return "", err
+	}
+
+	aesGCM, err := cipher.NewGCMWithNonceSize(block, len(iv))
 	if err != nil {
 		return "", err
 	}

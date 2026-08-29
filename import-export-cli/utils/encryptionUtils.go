@@ -60,6 +60,7 @@ type SecretConfig struct {
 	OutputType          string
 	Algorithm           string
 	EncryptionKey       string
+	SymmetricFormat     string
 	InputType           string
 	InputFile           string
 	PlainTextAlias      string
@@ -122,7 +123,11 @@ func EncryptSecrets(keyStoreConfig *KeyStoreConfig, secretConfig SecretConfig) e
 		if keyErr != nil {
 			return keyErr
 		}
-		encryptedSecrets, err = encryptSymmetric(encryptionKey, plainTextSecrets, EncryptAES256)
+		symmetricEncryptFn, formatErr := symmetricEncryptFuncFor(secretConfig.SymmetricFormat)
+		if formatErr != nil {
+			return formatErr
+		}
+		encryptedSecrets, err = encryptSymmetric(encryptionKey, plainTextSecrets, symmetricEncryptFn)
 	} else {
 		encryptionKey, keyErr := getEncryptionKey(keyStoreConfig)
 		if keyErr != nil {
@@ -249,6 +254,23 @@ func encrypt(encryptionKey *rsa.PublicKey, plainTextSecrets map[string]string, e
 		encryptedSecrets[alias] = encryptedSecret
 	}
 	return encryptedSecrets, nil
+}
+
+// symmetricEncryptFuncFor picks the AES-256 ciphertext shape for the requested sub-mode:
+// "internal" mirrors carbon-crypto-service, "external" mirrors cipher-tool/carbon-secvault/
+// carbon-mediation, and an empty format (the bare "symmetric" mode) is a single opaque blob.
+// Any other, unrecognized format is rejected rather than silently falling back to a default.
+func symmetricEncryptFuncFor(format string) (symmetricEncryptFunc, error) {
+	switch {
+	case format == "":
+		return EncryptAES256Plain, nil
+	case strings.EqualFold(format, "internal"):
+		return EncryptAES256, nil
+	case strings.EqualFold(format, "external"):
+		return EncryptAES256External, nil
+	default:
+		return nil, fmt.Errorf("unrecognized symmetric ciphertext format %q: expected \"internal\", \"external\", or empty for the default", format)
+	}
 }
 
 func encryptSymmetric(encryptionKey []byte, plainTextSecrets map[string]string,
