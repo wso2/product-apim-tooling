@@ -863,6 +863,9 @@ func newFileUploadRequest(uri string, method string, params map[string]string, p
 	request.Header.Add(utils.HeaderContentType, writer.FormDataContentType())
 	request.Header.Add(utils.HeaderAccept, "*/*")
 	request.Header.Add(utils.HeaderConnection, utils.HeaderValueKeepAlive)
+	if utils.CustomHeader.Key != "" && utils.CustomHeader.Value != "" {
+		request.Header.Add(utils.CustomHeader.Key, utils.CustomHeader.Value)
+	}
 
 	return request, err
 }

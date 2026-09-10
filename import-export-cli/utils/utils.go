@@ -33,8 +33,19 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
+func applyCustomHeaders(headers map[string]string) map[string]string {
+	if headers == nil {
+		headers = map[string]string{}
+	}
+	if CustomHeader.Key != "" && CustomHeader.Value != "" {
+		headers[CustomHeader.Key] = CustomHeader.Value
+	}
+	return headers
+}
+
 // Invoke http-post request using go-resty
 func InvokePOSTRequest(url string, headers map[string]string, body string) (*resty.Response, error) {
+	headers = applyCustomHeaders(headers)
 	if Insecure {
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
 	} else {
@@ -48,6 +59,7 @@ func InvokePOSTRequest(url string, headers map[string]string, body string) (*res
 
 // Invoke http-post request without body using go-resty
 func InvokePOSTRequestWithoutBody(url string, headers map[string]string) (*resty.Response, error) {
+	headers = applyCustomHeaders(headers)
 	if Insecure {
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
 	} else {
@@ -61,6 +73,7 @@ func InvokePOSTRequestWithoutBody(url string, headers map[string]string) (*resty
 
 // Invoke http-get request using go-resty
 func InvokeGETRequest(url string, headers map[string]string) (*resty.Response, error) {
+	headers = applyCustomHeaders(headers)
 	if Insecure {
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
 	} else {
@@ -75,6 +88,7 @@ func InvokeGETRequest(url string, headers map[string]string) (*resty.Response, e
 // Invoke http-get request with query param
 func InvokeGETRequestWithQueryParam(queryParam string, paramValue string, url string, headers map[string]string) (
 	*resty.Response, error) {
+	headers = applyCustomHeaders(headers)
 	if Insecure {
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
 	} else {
@@ -89,6 +103,7 @@ func InvokeGETRequestWithQueryParam(queryParam string, paramValue string, url st
 // Invoke http-get request with multiple query params
 func InvokeGETRequestWithMultipleQueryParams(queryParam map[string]string, url string, headers map[string]string) (
 	*resty.Response, error) {
+	headers = applyCustomHeaders(headers)
 	if Insecure {
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
 	} else {
@@ -103,6 +118,7 @@ func InvokeGETRequestWithMultipleQueryParams(queryParam map[string]string, url s
 // Invoke http-put request
 func InvokePutRequest(queryParam map[string]string, url string, headers map[string]string, body string) (
 	*resty.Response, error) {
+	headers = applyCustomHeaders(headers)
 	if Insecure {
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
 	} else {
@@ -117,6 +133,7 @@ func InvokePutRequest(queryParam map[string]string, url string, headers map[stri
 //Invoke POST request with query parameters
 func InvokePostRequestWithQueryParam(queryParam map[string]string, url string, headers map[string]string, body string) (
 	*resty.Response, error) {
+	headers = applyCustomHeaders(headers)
 	if Insecure {
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
 	} else {
@@ -130,6 +147,7 @@ func InvokePostRequestWithQueryParam(queryParam map[string]string, url string, h
 
 // Invoke http-delete request using go-resty
 func InvokeDELETERequest(url string, headers map[string]string) (*resty.Response, error) {
+	headers = applyCustomHeaders(headers)
 	if Insecure {
 		resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) // To bypass errors in SSL certificates
 	} else {
