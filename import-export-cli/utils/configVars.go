@@ -28,6 +28,28 @@ import (
 var HttpRequestTimeout = DefaultHttpRequestTimeout
 var Insecure bool
 var ExportDirectory string
+var CustomHeader struct {
+	Key  string
+	Value string
+}
+
+func ParseCustomHeader(header string) error {
+	CustomHeader = struct {
+		Key  string
+		Value string
+	}{}
+	if strings.TrimSpace(header) == "" {
+		return nil
+	}
+
+	parts := strings.SplitN(header, ":", 2)
+	if len(parts) != 2 || strings.TrimSpace(parts[0]) == "" || strings.TrimSpace(parts[1]) == "" {
+		return errors.New("invalid custom header format: " + header + "; expected HeaderName:HeaderValue")
+	}
+	CustomHeader.Key = strings.TrimSpace(parts[0])
+	CustomHeader.Value = strings.TrimSpace(parts[1])
+	return nil
+}
 
 // SetConfigVars
 // @param mainConfigFilePath : Path to file where Configuration details are stored

@@ -65,6 +65,9 @@ func ExecuteNewFileUploadRequest(uri string, params map[string]string, paramName
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 	headers[utils.HeaderAccept] = "*/*"
 	headers[utils.HeaderConnection] = utils.HeaderValueKeepAlive
+  if utils.CustomHeader.Key != "" && utils.CustomHeader.Value != "" {
+      headers[utils.CustomHeader.Key] = utils.CustomHeader.Value
+  }
 
 	resp, err := utils.InvokePOSTRequestWithBytes(uri, headers, body.Bytes())
 

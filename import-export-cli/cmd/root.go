@@ -45,6 +45,7 @@ var cmdUsername string
 var cmdExportEnvironment string
 var cmdResourceTenantDomain string
 var cmdForceStartFromBegin bool
+var cmdCustomHeader string
 
 // RootCmd related info
 const RootCmdShortDesc = "CLI for Importing and Exporting APIs and Applications"
@@ -64,6 +65,11 @@ var RootCmd = &cobra.Command{
 	DisableFlagParsing: isK8sEnabled(),
 	Short:              RootCmdShortDesc,
 	Long:               RootCmdLongDesc,
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		if err := utils.ParseCustomHeader(cmdCustomHeader); err != nil {
+			utils.HandleErrorAndExit("Invalid custom header value. Use --header Name:Value", err)
+		}
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		if isK8sEnabled() {
 			executeKubernetes(args...)
@@ -92,6 +98,8 @@ func init() {
 	RootCmd.PersistentFlags().BoolVar(&verbose, "verbose", false, "Enable verbose mode")
 	RootCmd.PersistentFlags().BoolVarP(&insecure, "insecure", "k", false,
 		"Allow connections to SSL endpoints without certs")
+	RootCmd.PersistentFlags().StringVar(&cmdCustomHeader, "header", "",
+		"Custom header to send in APIM requests using Name:Value format")
 	//RootCmd.PersistentFlags().StringP("author", "a", "", "WSO2")
 
 	//viper.BindPFlag("author", RootCmd.PersistentFlags().Lookup("author"))
