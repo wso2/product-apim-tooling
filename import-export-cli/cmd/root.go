@@ -67,7 +67,7 @@ var RootCmd = &cobra.Command{
 	Long:               RootCmdLongDesc,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		if err := utils.ParseCustomHeader(cmdCustomHeader); err != nil {
-			utils.HandleErrorAndExit("Invalid custom header value. Use --header Name:Value; repeat the flag for multiple headers.", err)
+			utils.HandleErrorAndExit("Invalid custom header value. Use --header Name:Value", err)
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
