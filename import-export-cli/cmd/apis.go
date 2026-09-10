@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"text/template"
@@ -80,9 +81,10 @@ var apisCmd = &cobra.Command{
 		//Since other flags does not use args[], query flag will own this
 		if len(args) != 0 && listApisCmdQuery != "" {
 			for _, argument := range args {
-				listApisCmdQuery +=  " " + argument
+				listApisCmdQuery += " " + argument
 			}
 		}
+		listApisCmdQuery = url.QueryEscape(listApisCmdQuery)
 		executeApisCmd(cred)
 	},
 }
@@ -208,7 +210,11 @@ func getQueryParamConnector () (connector string) {
 func printAPIs(apis []utils.API, format string) {
 	if format == "" {
 		format = defaultApiTableFormat
+	} else if format == utils.JsonArrayFormatType {
+		utils.ListArtifactsInJsonArrayFormat(apis, utils.ProjectTypeApi)
+		return
 	}
+
 	// create api context with standard output
 	apiContext := formatter.NewContext(os.Stdout, format)
 

@@ -18,6 +18,7 @@
 package integration
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -130,7 +131,7 @@ func TestImportProjectCreatedFromSwagger2Definition(t *testing.T) {
 	}
 
 	//Assert that project import to publisher portal is successful
-	testutils.ValidateImportProject(t, args)
+	testutils.ValidateImportProject(t, args, true)
 }
 
 //Import API from initialized project with openAPI 3 definition
@@ -150,8 +151,60 @@ func TestImportProjectCreatedFromOpenAPI3Definition(t *testing.T) {
 	}
 
 	//Assert that project import to publisher portal is successful
-	testutils.ValidateImportProject(t, args)
+	testutils.ValidateImportProject(t, args, true)
 }
+
+// These testcases were commented since these issues are fixed in the latest APIM 3.2.0 release and the OAS definitions are parsed without any errors
+
+// Import an API from initialized project with an invalid Open API 3 definition using a super
+// tenant user with Internal/devops role
+// func TestImportProjectCreatedFromInvalidOpenAPI3DefinitionSuperTenantDevopsUser(t *testing.T) {
+// 	apim := apimClients[0]
+// 	projectName := base.GenerateRandomName(16)
+
+// 	devopsUsername := devops.UserName
+// 	devopsPassword := devops.Password
+
+// 	args := &testutils.InitTestArgs{
+// 		CtlUser:   testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+// 		SrcAPIM:   apim,
+// 		InitFlag:  projectName,
+// 		OasFlag:   testutils.TestInvalidOpenAPI3DefinitionPath,
+// 		APIName:   base.GenerateRandomName(16) + "API",
+// 		ForceFlag: false,
+// 	}
+
+// 	// Initialize a project with OAS
+// 	testutils.ValidateInitializeProjectWithOASFlag(t, args)
+
+// 	// Assert that project import to publisher portal is unsuccessful
+// 	testutils.ValidateImportProjectWithInvalidSwaggerFailed(t, args, true)
+// }
+
+// Import an API from initialized project with an invalid Open API 3 definition using a
+// tenant user with Internal/devops role
+// func TestImportProjectCreatedFromInvalidOpenAPI3DefinitionTenantDevopsUser(t *testing.T) {
+// 	apim := apimClients[0]
+// 	projectName := base.GenerateRandomName(16)
+
+// 	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+// 	tenantDevopsPassword := devops.Password
+
+// 	args := &testutils.InitTestArgs{
+// 		CtlUser:   testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+// 		SrcAPIM:   apim,
+// 		InitFlag:  projectName,
+// 		OasFlag:   testutils.TestInvalidOpenAPI3DefinitionPath,
+// 		APIName:   base.GenerateRandomName(16) + "API",
+// 		ForceFlag: false,
+// 	}
+
+// 	// Initialize a project with OAS
+// 	testutils.ValidateInitializeProjectWithOASFlag(t, args)
+
+// 	// Assert that project import to publisher portal is unsuccessful
+// 	testutils.ValidateImportProjectWithInvalidSwaggerFailed(t, args, false)
+// }
 
 //Import API from initialized project from API definition which is already in publisher without --update flag
 func TestImportProjectCreatedFailWhenAPIIsExisted(t *testing.T) {
@@ -170,10 +223,10 @@ func TestImportProjectCreatedFailWhenAPIIsExisted(t *testing.T) {
 	}
 
 	//Import API for the First time
-	testutils.ValidateImportProject(t, args)
+	testutils.ValidateImportProject(t, args, true)
 
 	//Import API for the second time
-	testutils.ValidateImportProjectFailed(t, args)
+	testutils.ValidateImportProjectFailed(t, args, true)
 }
 
 //Import API from initialized project from API definition which is already in publisher with --update flag
@@ -193,7 +246,7 @@ func TestImportProjectCreatedPassWhenAPIIsExisted(t *testing.T) {
 	}
 
 	//Import API for the First time
-	testutils.ValidateImportProject(t, args)
+	testutils.ValidateImportProject(t, args, true)
 
 	//Import API for the second time
 	testutils.ValidateImportUpdateProject(t, args)
@@ -219,13 +272,13 @@ func TestImportAndExportAPIWithDocument(t *testing.T) {
 
 	projectPath, _ := filepath.Abs(projectName)
 	//Move doc file to created project
-	srcPathForDoc, _ := filepath.Abs(testutils.TestCase1DocPath)
-	destPathForDoc := projectPath + testutils.TestCase1DestPathSuffix
+	srcPathForDoc, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCaseDocPath)
+	destPathForDoc := projectPath + testutils.DevFirstUpdatedSampleCaseDestPathSuffix
 	base.Copy(srcPathForDoc, destPathForDoc)
 
 	//Move docMetaData file to created project
-	srcPathForDocMetadata, _ := filepath.Abs(testutils.TestCase1DocMetaDataPath)
-	destPathForDocMetaData := projectPath + testutils.TestCase1DestMetaDataPathSuffix
+	srcPathForDocMetadata, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCaseDocMetaDataPath)
+	destPathForDocMetaData := projectPath + testutils.DevFirstUpdatedSampleCaseDestMetaDataPathSuffix
 	base.Copy(srcPathForDocMetadata, destPathForDocMetaData)
 
 	//Import the project with Document
@@ -254,8 +307,8 @@ func TestImportAndExportAPIWithPngIcon(t *testing.T) {
 
 	//Move icon file to created project
 	projectPath, _ := filepath.Abs(projectName)
-	srcPathForIcon, _ := filepath.Abs(testutils.TestCase2PngPath)
-	destPathForIcon := projectPath + testutils.TestCase2DestPngPathSuffix
+	srcPathForIcon, _ := filepath.Abs(testutils.DevFirstSampleCasePngPath)
+	destPathForIcon := projectPath + testutils.DevFirstSampleCasePngPathSuffix
 	base.Copy(srcPathForIcon, destPathForIcon)
 
 	//Import the project with icon image(.png)
@@ -284,8 +337,8 @@ func TestImportAndExportAPIWithJpegImage(t *testing.T) {
 
 	//Move Image file to created project
 	projectPath, _ := filepath.Abs(projectName)
-	srcPathForImage, _ := filepath.Abs(testutils.TestCase2JpegPath)
-	destPathForImage := projectPath + testutils.TestCase2DestJpegPathSuffix
+	srcPathForImage, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCaseJpegPath)
+	destPathForImage := projectPath + testutils.DevFirstUpdatedSampleCaseDestJpegPathSuffix
 	base.Copy(srcPathForImage, destPathForImage)
 
 	//Import the project with icon image(.jpeg) provided
@@ -314,31 +367,36 @@ func TestUpdateDocAndImageOfAPIOfExistingAPI(t *testing.T) {
 
 	//Move doc file to created project
 	projectPath, _ := filepath.Abs(projectName)
-	srcPathForDoc, _ := filepath.Abs(testutils.TestCase2DocPath)
-	destPathForDoc := projectPath + testutils.TestCase2DestPathSuffix
+	srcPathForDoc, _ := filepath.Abs(testutils.DevFirstSampleCaseDocPath)
+	destPathForDoc := projectPath + testutils.DevFirstSampleCaseDestPathSuffix
 	base.Copy(srcPathForDoc, destPathForDoc)
 
 	//Move Image file to created project
-	srcPathForImage, _ := filepath.Abs(testutils.TestCase2JpegPath)
-	destPathForImage := projectPath + testutils.TestCase2DestJpegPathSuffix
+	srcPathForImage, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCaseJpegPath)
+	destPathForImage := projectPath + testutils.DevFirstUpdatedSampleCaseDestJpegPathSuffix
 	base.Copy(srcPathForImage, destPathForImage)
 
 	//Import the project with Document and image thumbnail
 	testutils.ValidateImportUpdateProjectNotAlreadyImported(t, args)
 
 	//Update doc file to created project
-	srcPathForDocUpdate, _ := filepath.Abs(testutils.TestCase1DocPath)
-	destPathForDocUpdate := projectPath + testutils.TestCase1DestPathSuffix
+	srcPathForDocUpdate, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCaseDocPath)
+	destPathForDocUpdate := projectPath + testutils.DevFirstUpdatedSampleCaseDestPathSuffix
 	base.Copy(srcPathForDocUpdate, destPathForDocUpdate)
 
 	//Update docMetaData file to created project
-	srcPathForDocMetadataUpdate, _ := filepath.Abs(testutils.TestCase1DocMetaDataPath)
-	destPathForDocMetaDataUpdate := projectPath + testutils.TestCase1DestMetaDataPathSuffix
+	srcPathForDocMetadataUpdate, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCaseDocMetaDataPath)
+	destPathForDocMetaDataUpdate := projectPath + testutils.DevFirstUpdatedSampleCaseDestMetaDataPathSuffix
 	base.Copy(srcPathForDocMetadataUpdate, destPathForDocMetaDataUpdate)
 
 	//Update icon file to created project
-	srcPathForIcon, _ := filepath.Abs(testutils.TestCase2PngPath)
-	destPathForIcon := projectPath + testutils.TestCase2DestPngPathSuffix
+	err := os.Remove(destPathForImage)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	srcPathForIcon, _ := filepath.Abs(testutils.DevFirstSampleCasePngPath)
+	destPathForIcon := projectPath + testutils.DevFirstSampleCasePngPathSuffix
 	base.Copy(srcPathForIcon, destPathForIcon)
 
 	base.WaitForIndexing()
@@ -350,4 +408,56 @@ func TestUpdateDocAndImageOfAPIOfExistingAPI(t *testing.T) {
 
 	//Validate that document has been updated
 	testutils.ValidateAPIWithIconIsExported(t, args, testutils.DevFirstDefaultAPIName, testutils.DevFirstDefaultAPIVersion)
+}
+
+// Test a verified (syntactically correct) custom sequence update as a super tenant user with Internal/devops role
+func TestAPISequenceUpdateWithDevopsSuperTenantUser(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+	apim := apimClients[1]
+	projectName := base.GenerateRandomName(16)
+
+	args := &testutils.InitTestArgs{
+		CtlUser:   testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		SrcAPIM:   apim,
+		InitFlag:  projectName,
+		OasFlag:   testutils.TestOpenAPI3DefinitionPath,
+		APIName:   testutils.DevFirstDefaultAPIName,
+		ForceFlag: true,
+	}
+
+	// Initialize the project
+	testutils.ValidateInitializeProjectWithOASFlag(t, args)
+
+	// Add custom sequence file to created project
+	projectPath, _ := filepath.Abs(projectName)
+	srcPathForSequence, _ := filepath.Abs(testutils.DevFirstSampleCaseSequencePath)
+	destPathForSequence := projectPath + testutils.DevFirstSampleCaseDestSequencePathSuffix
+	base.CreateDir(projectPath + testutils.CustomSequenceDirectory)
+	base.Copy(srcPathForSequence, destPathForSequence)
+
+	// Update api.yaml file of initialized project with sequence related metadata
+	apiMetadataYamlPath := projectPath + testutils.DevFirstSampleCaseApiMetadataPathSuffix
+	inSequenceStr := "inSequence: " + testutils.CustomSequenceName
+	base.AppendStringToFile(inSequenceStr, apiMetadataYamlPath)
+
+	// Import the project with the verified (syntactically correct) custom sequence
+	testutils.ValidateImportUpdateProjectNotAlreadyImported(t, args)
+
+	// Update custom sequence file of created project
+	srcPathForSequenceUpdate, _ := filepath.Abs(testutils.DevFirstUpdatedSampleCaseSequencePath)
+	destPathForSequenceUpdate := projectPath + testutils.DevFirstUpdatedSampleCaseSequencePathSuffix
+	err := os.Remove(destPathForSequenceUpdate)
+	if err != nil {
+		t.Fatal(err)
+	}
+	base.Copy(srcPathForSequenceUpdate, destPathForSequenceUpdate)
+
+	base.WaitForIndexing()
+
+	// Import the project with updated sequence
+	testutils.ValidateImportUpdateProject(t, args)
+
+	// Validate that sequence has been updated
+	testutils.ValidateAPIWithUpdatedSequenceIsExported(t, args, testutils.DevFirstDefaultAPIName, testutils.DevFirstDefaultAPIVersion)
 }

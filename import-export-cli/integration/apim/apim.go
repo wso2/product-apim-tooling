@@ -35,7 +35,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 const (
@@ -136,12 +138,20 @@ func (instance *Client) GetTokenURL() string {
 }
 
 // GenerateSampleAPIData : Generate sample Pizzashack API object
-func (instance *Client) GenerateSampleAPIData(provider string) *API {
+func (instance *Client) GenerateSampleAPIData(provider, name, version, context string) *API {
 	api := API{}
-	api.Name = generateRandomString() + "API"
+	if strings.EqualFold(name, "") {
+		api.Name = generateRandomString() + "API"
+	} else {
+		api.Name = name
+	}
 	api.Description = "This is a simple API for Pizza Shack online pizza delivery store."
-	api.Context = getContext(provider)
-	api.Version = "1.0.0"
+	if strings.EqualFold(context, "") {
+		api.Context = getContext(provider)
+	} else {
+		api.Context = context
+	}
+	api.Version = version
 	api.Provider = provider
 	api.Transport = []string{"http", "https"}
 	api.Tags = []string{"pizza"}
@@ -433,6 +443,16 @@ func (instance *Client) GenerateSampleAppData() *Application {
 	return &app
 }
 
+// GenerateSampleAppData : Generate sample Application object with space in the application Name
+func (instance *Client) GenerateSampleAppWithNameInSpaceData() *Application {
+	app := Application{}
+	app.Name = generateRandomString() + "Test Application"
+	app.ThrottlingPolicy = "Unlimited"
+	app.Description = "Test Application with space in the name"
+	app.TokenType = "JWT"
+	return &app
+}
+
 // CopyApp : Create a deep copy of an Application object
 func CopyApp(appToCopy *Application) Application {
 	appCopy := Application{}
@@ -676,6 +696,7 @@ func (instance *Client) GetAPI(apiID string) *API {
 
 	var apiResponse API
 	json.NewDecoder(response.Body).Decode(&apiResponse)
+
 	return &apiResponse
 }
 
@@ -825,6 +846,29 @@ func (instance *Client) PublishAPI(apiID string) {
 	base.ValidateAndLogResponse("apim.PublishAPI()", response, 200)
 }
 
+// ChangeAPILifeCycle : Change Life Cycle Status of an API in APIM
+func (instance *Client) ChangeAPILifeCycle(apiID, action string) {
+	lifeCycleURL := instance.publisherRestURL + "/apis/change-lifecycle"
+
+	request := base.CreatePostEmptyBody(lifeCycleURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	values := url.Values{}
+	values.Add("action", action)
+	values.Add("apiId", apiID)
+
+	request.URL.RawQuery = values.Encode()
+
+	base.LogRequest("apim.ChangeAPILifeCycle()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.ChangeAPILifeCycle()", response, 200)
+}
+
 // DeleteSubscriptions : Delete Subscriptions for an API from APIM
 func (instance *Client) DeleteSubscriptions(apiID string) {
 	subsGetURL := instance.devPortalRestURL + "/subscriptions"
@@ -899,6 +943,61 @@ func (instance *Client) AddApplication(t *testing.T, application *Application, u
 	}
 
 	return &appResponse
+}
+
+// GenerateKeys : Generate keys for an application
+func (instance *Client) GenerateKeys(t *testing.T, keyGenRequest utils.KeygenRequest, appId string) ApplicationKey {
+	appsURL := instance.devPortalRestURL + "/applications/" + appId + "/generate-keys"
+
+	data, err := json.Marshal(keyGenRequest)
+
+	if err != nil {
+		base.Fatal(err)
+	}
+
+	request := base.CreatePost(appsURL, bytes.NewBuffer(data))
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.GenerateKeys()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.GenerateKeys()", response, 200)
+
+	var keyGenResponse ApplicationKey
+	json.NewDecoder(response.Body).Decode(&keyGenResponse)
+
+	return keyGenResponse
+}
+
+// GetOauthKeys : Get Oauth keys of an application
+func (instance *Client) GetOauthKeys(t *testing.T, application *Application) *ApplicationKeysList {
+	appsURL := instance.devPortalRestURL + "/applications/" + application.ApplicationID + "/oauth-keys"
+
+	request := base.CreateGet(appsURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.GetOauthKeys()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.GetOauthKeys()", response, 200)
+
+	var applicationKeysList ApplicationKeysList
+	json.NewDecoder(response.Body).Decode(&applicationKeysList)
+
+	if len(applicationKeysList.List) > 0 {
+		return &applicationKeysList
+	} else {
+		return &ApplicationKeysList{}
+	}
+
 }
 
 // DeleteApplication : Delete Application from APIM
@@ -1161,6 +1260,62 @@ func (instance *Client) DeleteAllAPIProducts() {
 	}
 }
 
+// AddSubscription : Subscribe an App to a given API in APIM
+func (instance *Client) AddSubscription(t *testing.T, apiID string, appID string, throttlePolicy string, username string, password string) {
+	subscriptionURL := instance.devPortalRestURL + "/subscriptions"
+
+	subscription := Subscription{}
+	subscription.APIID = apiID
+	subscription.ApplicationID = appID
+	subscription.ThrottlingPolicy = throttlePolicy
+
+	data, err := json.Marshal(subscription)
+
+	if err != nil {
+		base.Fatal(err)
+	}
+
+	request := base.CreatePost(subscriptionURL, bytes.NewBuffer(data))
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.AddSubscription()", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.AddSubscription()", response, 201)
+
+	var subsResponse Subscription
+	json.NewDecoder(response.Body).Decode(&subsResponse)
+
+	base.WaitForIndexing()
+
+	t.Cleanup(func() {
+		instance.Login(username, password)
+		instance.deleteSubscription(subsResponse.SubscriptionID)
+	})
+
+}
+
+// deleteSubscription : Delete subscription attached with an API
+func (instance *Client) deleteSubscription(subsID string) {
+	subsDeleteURL := instance.devPortalRestURL + "/subscriptions/" + subsID
+
+	request := base.CreateDelete(subsDeleteURL)
+
+	base.SetDefaultRestAPIHeaders(instance.accessToken, request)
+
+	base.LogRequest("apim.deleteSubscription() deleting Subscription", request)
+
+	response := base.SendHTTPRequest(request)
+
+	defer response.Body.Close()
+
+	base.ValidateAndLogResponse("apim.deleteSubscription() deleting Subscription", response, 200)
+}
+
 func generateSampleAPIOperations() []APIOperations {
 	op1 := APIOperations{}
 	op1.Target = "/order/{orderId}"
@@ -1240,7 +1395,7 @@ func (instance *Client) registerClient(username string, password string) dcrResp
 	dcrPayload := dcrRequest{}
 
 	dcrPayload.CallbackURL = "http://localhost"
-	dcrPayload.ClientName = instance.restClientName
+	dcrPayload.ClientName = instance.restClientName + uuid.New().String()
 	dcrPayload.IsSaaSApp = true
 	dcrPayload.Owner = username
 	dcrPayload.SupportedGrantTypes = "password refresh_token"

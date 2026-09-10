@@ -36,14 +36,15 @@ type Application struct {
 
 // ApplicationKey : Application Key Details
 type ApplicationKey struct {
-	ConsumerKey         string           `json:"consumerKey"`
-	ConsumerSecret      string           `json:"consumerSecret"`
-	SupportedGrantTypes []string         `json:"supportedGrantTypes"`
-	CallbackURL         string           `json:"callbackUrl"`
-	KeyState            string           `json:"keyState"`
-	KeyType             string           `json:"keyType"`
-	GroupID             string           `json:"groupId"`
-	Token               ApplicationToken `json:"token"`
+	ConsumerKey          string                 `json:"consumerKey"`
+	ConsumerSecret       string                 `json:"consumerSecret"`
+	SupportedGrantTypes  []string               `json:"supportedGrantTypes"`
+	CallbackURL          string                 `json:"callbackUrl"`
+	KeyState             string                 `json:"keyState"`
+	KeyType              string                 `json:"keyType"`
+	GroupID              string                 `json:"groupId"`
+	Token                ApplicationToken       `json:"token"`
+	AdditionalProperties map[string]interface{} `json:"additionalProperties"`
 }
 
 // ApplicationToken : Application Token Details
@@ -51,4 +52,10 @@ type ApplicationToken struct {
 	AccessToken  string   `json:"accessToken"`
 	TokenScopes  []string `json:"tokenScopes"`
 	ValidityTime int64    `json:"validityTime"`
+}
+
+// ApplicationKeysList : Applications list
+type ApplicationKeysList struct {
+	Count int              `json:"count"`
+	List  []ApplicationKey `json:"list"`
 }

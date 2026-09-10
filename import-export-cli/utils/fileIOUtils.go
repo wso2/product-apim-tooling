@@ -21,7 +21,7 @@ package utils
 import (
 	"errors"
 	"fmt"
-	"github.com/go-resty/resty"
+	"github.com/go-resty/resty/v2"
 	"io"
 	"io/ioutil"
 	"os"
@@ -330,7 +330,7 @@ func CreateTempFile(pattern string, content []byte) (string, error) {
 // @return error
 // @return func() can be called to cleanup the temporary items created during this function execution. Needs to call
 //	this once the zip file is consumed
-func CreateZipFileFromProject(projectPath string, skipCleanup bool) (string, error, func()){
+func CreateZipFileFromProject(projectPath string, skipCleanup bool) (string, error, func()) {
 	// If the projectPath contains a directory, zip it
 	if info, err := os.Stat(projectPath); err == nil && info.IsDir() {
 		tmp, err := ioutil.TempFile("", "project-artifact*.zip")
@@ -413,7 +413,7 @@ func extractArchive(src, dest string) (string, error) {
 
 // Creates a temporary folder and creates a zip file with a given name (zipFileName) from the given REST API response.
 //	Returns the location of the created zip file.
-func WriteResponseToTempZip(zipFileName string,resp *resty.Response) (string, error) {
+func WriteResponseToTempZip(zipFileName string, resp *resty.Response) (string, error) {
 	// Create a temp directory to save the original zip from the REST API
 	tmpDir, err := ioutil.TempDir("", "apim")
 	if err != nil {

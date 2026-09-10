@@ -14,7 +14,7 @@
 * KIND, either express or implied.  See the License for the
 * specific language governing permissions and limitations
 * under the License.
-*/
+ */
 
 package cmd
 
@@ -22,8 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-
-	"github.com/go-resty/resty"
+	"github.com/go-resty/resty/v2"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
@@ -47,10 +46,10 @@ NOTE: The 4 flags (--action (-a), --name (-n), --version (-v), and --environment
 
 // changeAPIStatusCmd represents change-status api command
 var ChangeAPIStatusCmd = &cobra.Command{
-	Use:   changeAPIStatusCmdLiteral + " (--action <action-of-the-api-state-change> --name <name-of-the-api> --version <version-of-the-api> --provider " +
+	Use: changeAPIStatusCmdLiteral + " (--action <action-of-the-api-state-change> --name <name-of-the-api> --version <version-of-the-api> --provider " +
 		"<provider-of-the-api> --environment <environment-from-which-the-api-state-should-be-changed>)",
-	Short: changeAPIStatusCmdShortDesc,
-	Long: changeAPIStatusCmdLongDesc,
+	Short:   changeAPIStatusCmdShortDesc,
+	Long:    changeAPIStatusCmdLongDesc,
 	Example: changeAPIStatusCmdExamples,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Logln(utils.LogPrefixInfo + changeAPIStatusCmdLiteral + " called")
@@ -63,7 +62,7 @@ var ChangeAPIStatusCmd = &cobra.Command{
 }
 
 // executeChangeAPIStatusCmd executes the change api status command
-func executeChangeAPIStatusCmd(credential credentials.Credential)  {
+func executeChangeAPIStatusCmd(credential credentials.Credential) {
 	accessToken, preCommandErr := credentials.GetOAuthAccessToken(credential, apiStateChangeEnvironment)
 	if preCommandErr == nil {
 		changeAPIStatusEndpoint := utils.GetApiListEndpointOfEnv(apiStateChangeEnvironment, utils.MainConfigFilePath)
@@ -72,7 +71,7 @@ func executeChangeAPIStatusCmd(credential credentials.Credential)  {
 			utils.HandleErrorAndExit("Error while changing the API status", err)
 		}
 		// Print info on response
-		utils.Logf(utils.LogPrefixInfo + "ResponseStatus: %v\n", resp.Status())
+		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
 		if resp.StatusCode() == http.StatusOK {
 			// 200 OK
 			fmt.Println(apiNameForStateChange + " API state changed successfully!")
@@ -100,13 +99,19 @@ func getChangeAPIStatusResponse(changeAPIStatusEndpoint, accessToken string, cre
 	if err != nil {
 		utils.HandleErrorAndExit("Error while getting API Id for state change ", err)
 	}
-	url := changeAPIStatusEndpoint + "change-lifecycle?action=" + apiStateChangeAction + "&apiId=" + apiId
+
+	queryParams := map[string]string{
+		"action":  apiStateChangeAction,
+		"apiId": apiId,
+	}
+
+	url := changeAPIStatusEndpoint + "change-lifecycle"
 	utils.Logln(utils.LogPrefixInfo+"APIStateChange: URL:", url)
 	headers := make(map[string]string)
 	headers[utils.HeaderContentType] = utils.HeaderValueApplicationJSON
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 
-	resp, err := utils.InvokePOSTRequest(url, headers, "")
+	resp, err := utils.InvokePostRequestWithQueryParam(queryParams,url, headers, "")
 
 	if err != nil {
 		return nil, err

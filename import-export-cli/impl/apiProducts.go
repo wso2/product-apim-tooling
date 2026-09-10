@@ -21,8 +21,9 @@ package impl
 import (
 	"encoding/json"
 	"errors"
-	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"net/http"
+
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 // GetAPIProductListFromEnv
@@ -38,7 +39,7 @@ func GetAPIProductListFromEnv(accessToken, environment, query, limit string) (co
 	return GetAPIProductList(accessToken, unifiedSearchEndpoint, query, limit)
 }
 
-// GetAPIProductList
+// GetAPIProductList Get the list of API Products available in a particular environment
 // @param accessToken : Access Token for the environment
 // @param unifiedSearchEndpoint : Unified Search Endpoint for the environment to retreive API Product list
 // @param query : String to be matched against the API Product names
@@ -51,17 +52,17 @@ func GetAPIProductList(accessToken, unifiedSearchEndpoint, query, limit string) 
 	headers[utils.HeaderAuthorization] = utils.HeaderValueAuthBearerPrefix + " " + accessToken
 
 	// To filter API Products from unified search
-	unifiedSearchEndpoint += "?query=type:\"" + utils.DefaultApiProductType + "\""
+	queryParamString := "query=type:\"" + utils.DefaultApiProductType + "\""
 
 	// Setting up the query parameter and limit parameter
 	if query != "" {
-		unifiedSearchEndpoint += " " + query
+		queryParamString += " " + query
 	}
 	if limit != "" {
-		unifiedSearchEndpoint += "&limit=" + limit
+		queryParamString += "&limit=" + limit
 	}
-	utils.Logln(utils.LogPrefixInfo+"URL:", unifiedSearchEndpoint)
-	resp, err := utils.InvokeGETRequest(unifiedSearchEndpoint, headers)
+	utils.Logln(utils.LogPrefixInfo+"URL:", unifiedSearchEndpoint+"?"+queryParamString)
+	resp, err := utils.InvokeGETRequestWithQueryParamsString(unifiedSearchEndpoint, queryParamString, headers)
 
 	if err != nil {
 		utils.HandleErrorAndExit("Unable to connect to "+unifiedSearchEndpoint, err)

@@ -1,0 +1,147 @@
+openapi: 3.0.1
+info:
+  title: NoahExpressTimeTableAPI
+  description: | 
+    This is the definition of the API for the public community to get the Noah Express train schedules
+  version: 1.0.0
+servers:
+  - url: http://backend-service:8080/train-operations/v1
+paths:
+  /schedules:
+    get:
+      parameters:
+       - in: query
+         name: from
+         schema:
+           type: string
+           description: Train starting station
+       - in: query
+         name: to
+         schema:
+           type: string
+           description: Train starting station
+       - in: query
+         name: startTime
+         schema:
+           type: string
+           description: Train starting station
+       - in: query
+         name: endTime
+         schema:
+           type: string
+           description: Train starting station
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleItemList'
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleItem'
+        required: true
+      responses:
+        '200':
+          description: ok
+  /schedules/{id1}_{id2}:
+    get:
+      parameters:
+        - name: id1
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: string
+        - name: id2
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleItem'
+    put:
+      parameters:
+        - name: id1
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: string
+        - name: id2
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: string
+      responses:
+        '200':
+          description: ok
+    delete:
+      parameters:
+        - name: id1
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: string
+        - name: id2
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: string
+      responses:
+        '200':
+          description: ok
+components:
+  schemas:
+    ScheduleItem:
+      title: Schedule information 
+      type: object
+      properties:
+        entryId:
+          type: string
+          description: Id of the schedule item.
+        startTime:
+          type: string
+          description: Train starting time.
+        endTime:
+          type: string
+          description: Train destination arrival time.
+        from:
+          type: string
+          description: Train starting station.
+        to:
+          type: string
+          description: Train destination station.
+        trainType:
+          type: string
+          description: Train category.
+    ScheduleItemList:
+        title: List of schedule items information 
+        type: array
+        items:
+          $ref: '#/components/schemas/ScheduleItem'
+            

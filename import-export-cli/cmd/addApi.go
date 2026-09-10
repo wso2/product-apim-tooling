@@ -29,6 +29,7 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 	"io"
 	"io/ioutil"
+	"k8s.io/api/core/v1"
 	"log"
 	"math/rand"
 	"os"
@@ -58,6 +59,10 @@ available modes are as follows
 const addApiExamples = utils.ProjectName + " add/update " + addApiCmdLiteral +
 	` -n petstore --from-file=./Swagger.json --replicas=3 --namespace=wso2`
 
+const (
+	endpointCertYamlFile = "Meta-information/endpoint_certificates.yaml"
+)
+
 // addApiCmd represents the api command
 var addApiCmd = &cobra.Command{
 	Use:     addApiCmdLiteral,
@@ -76,6 +81,7 @@ func handleAddApi(nameSuffix string) {
 	swaggerCmNames := make([]string, len(flagSwaggerFilePaths))
 	balInterceptorsCmNames := make([]string, 0, len(flagSwaggerFilePaths))
 	var javaInterceptorsCmNames []string
+	epCrtSecretNames := make([]string, 0, len(flagSwaggerFilePaths))
 
 	for i, flagSwaggerFilePath := range flagSwaggerFilePaths {
 		// log processing only if there are more projects
@@ -110,6 +116,12 @@ func handleAddApi(nameSuffix string) {
 			if tempJavaIntCms != nil {
 				javaInterceptorsCmNames = append(javaInterceptorsCmNames, tempJavaIntCms...)
 			}
+
+			//handle endpoint certificates
+			epCrtSecretName := fmt.Sprintf("%v-%v-ep-crt-%%v%s", flagApiName, i+1, nameSuffix)
+			tempEpCrtSecrets := handleEndpointCerts(epCrtSecretName, flagSwaggerFilePath, flagNamespace)
+			epCrtSecretNames = append(epCrtSecretNames, tempEpCrtSecrets...)
+
 		//check if the swagger path is a file
 		case mode.IsRegular():
 			//creating kubernetes configmap with swagger definition
@@ -124,7 +136,7 @@ func handleAddApi(nameSuffix string) {
 
 	//create API
 	fmt.Println("creating API definition")
-	createAPI(swaggerCmNames, nameSuffix, balInterceptorsCmNames, javaInterceptorsCmNames)
+	createAPI(swaggerCmNames, nameSuffix, balInterceptorsCmNames, javaInterceptorsCmNames, epCrtSecretNames)
 }
 
 // validateAddApiCommand validates for required flags and if invalid print error and exit
@@ -187,7 +199,7 @@ func createConfigMapWithNamespace(configMapName string, filePath string, namespa
 	return nil
 }
 
-func createAPI(configMapNames []string, timestamp string, balInterceptors []string, javaInterceptors []string) {
+func createAPI(configMapNames []string, timestamp string, balInterceptors, javaInterceptors, epCrtSecretNames []string) {
 	//get API definition from file
 	apiConfigMapData, _ := box.Get("/kubernetes_resources/api_cr.yaml")
 	apiCrd := &wso2v1alpha1.API{}
@@ -199,6 +211,7 @@ func createAPI(configMapNames []string, timestamp string, balInterceptors []stri
 	apiCrd.Name = flagApiName
 	apiCrd.Namespace = flagNamespace
 	apiCrd.Spec.Definition.SwaggerConfigmapNames = configMapNames
+	apiCrd.Spec.Definition.EndpointCertificates = epCrtSecretNames
 	apiCrd.Spec.Replicas = flagReplicas
 	apiCrd.Spec.Override = flagOverride
 	apiCrd.Spec.ApiEndPoint = flagApiEndPoint
@@ -337,6 +350,49 @@ func handleJavaInterceptors(nameSuffix string, path string, operation string, na
 	return javaInterceptorsConfNames
 }
 
+func handleEndpointCerts(nameSuffix, path, namespace string) []string {
+	epCertYamlPath := filepath.Join(path, filepath.FromSlash(endpointCertYamlFile))
+	data, err := ioutil.ReadFile(epCertYamlPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		} else {
+			utils.HandleErrorAndExit("Error reading endpoint certificates in "+endpointCertYamlFile, err)
+		}
+	}
+	fmt.Println("creating secret with endpoint certificates")
+	epCertYaml := make([]utils.EndpointCertificate, 0)
+	if err = yaml.Unmarshal(data, &epCertYaml); err != nil {
+		utils.HandleErrorAndExit("Error parsing endpoint certificate file", err)
+	}
+
+	var secretNames []string
+	for i, certData := range epCertYaml {
+		certSecret := &v1.Secret{}
+		secretName := fmt.Sprintf(nameSuffix, i+1)
+		certSecret.APIVersion = "v1"
+		certSecret.Kind = "Secret"
+		certSecret.Name = secretName
+		certSecret.Namespace = namespace
+
+		cert := fmt.Sprintf("-----BEGIN CERTIFICATE-----\n%s\n-----END CERTIFICATE-----", certData.Certificate)
+		certSecret.Data = map[string][]byte{
+			"hostName":        []byte(certData.HostName),
+			"alias":           []byte(certData.Alias),
+			"certificate.crt": []byte(cert),
+		}
+		certSecretData, err := yaml.Marshal(certSecret)
+		if err != nil {
+			utils.HandleErrorAndExit("Error parsing endpoint certificate k8s secret", err)
+		}
+		if err := k8sUtils.K8sApplyFromStdin(string(certSecretData)); err != nil {
+			utils.HandleErrorAndExit("Error applying endpoint certificate k8s secret to cluster", err)
+		}
+		secretNames = append(secretNames, secretName)
+	}
+	return secretNames
+}
+
 // rollbackConfigs deletes configs defined in the API CR given
 func rollbackConfigs(apiCr *wso2v1alpha1.API) {
 	var rollbackConfMaps []string // configmap names to be deleted
@@ -360,6 +416,19 @@ func rollbackConfigs(apiCr *wso2v1alpha1.API) {
 	delConfErr := k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sArgs...)
 	if delConfErr != nil {
 		utils.HandleErrorAndExit("error deleting configmaps of the API: "+apiCr.Name, delConfErr)
+	}
+
+	var rollbackSecrets []string // secrets names to be deleted
+	// endpoint certs
+	rollbackSecrets = append(rollbackSecrets, apiCr.Spec.Definition.EndpointCertificates...)
+	if len(rollbackSecrets) == 0 {
+		return
+	}
+	k8sArgs = []string{k8sUtils.K8sDelete, "secret"}
+	k8sArgs = append(k8sArgs, rollbackSecrets...)
+	delSecretErr := k8sUtils.ExecuteCommand(k8sUtils.Kubectl, k8sArgs...)
+	if delSecretErr != nil {
+		utils.HandleErrorAndExit("error deleting secrets of the API: "+apiCr.Name, delSecretErr)
 	}
 }
 

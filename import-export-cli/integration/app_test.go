@@ -24,6 +24,7 @@ import (
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/apim"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/base"
 	"github.com/wso2/product-apim-tooling/import-export-cli/integration/testutils"
+	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 )
 
 const numberOfApps = 5 // Number of Applications to be added in a loop
@@ -79,6 +80,88 @@ func TestListAppsDevopsTenantUser(t *testing.T) {
 	base.SetupEnv(t, apim.GetEnvName(), apim.GetApimURL(), apim.GetTokenURL())
 	base.Login(t, apim.GetEnvName(), tenantDevopsUsername, tenantDevopsPassword)
 	testutils.ListApps(t, apim.GetEnvName())
+}
+
+func TestListAppsWithJsonArrayFormatAdminSuperTenantUser(t *testing.T) {
+	adminUsername := superAdminUser
+	adminPassword := superAdminPassword
+
+	dev := apimClients[0]
+
+	for appsCount := 0; appsCount <= numberOfApps; appsCount++ {
+		// Add the Application to env1
+		testutils.AddApp(t, dev, adminUsername, adminPassword)
+	}
+
+	args := &testutils.ApiImportExportTestArgs{
+		CtlUser: testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		SrcAPIM: dev,
+	}
+
+	testutils.ValidateAppsListWithJsonArrayFormat(t, args)
+}
+
+func TestListAppsWithJsonArrayFormatDevopsSuperTenantUser(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	adminUsername := superAdminUser
+	adminPassword := superAdminPassword
+
+	dev := apimClients[0]
+
+	for appsCount := 0; appsCount <= numberOfApps; appsCount++ {
+		// Add the Application to env1
+		testutils.AddApp(t, dev, adminUsername, adminPassword)
+	}
+
+	args := &testutils.ApiImportExportTestArgs{
+		CtlUser: testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		SrcAPIM: dev,
+	}
+
+	testutils.ValidateAppsListWithJsonArrayFormat(t, args)
+}
+
+func TestListAppsWithJsonArrayFormatAdminTenantUser(t *testing.T) {
+	tenantAdminUsername := superAdminUser + "@" + TENANT1
+	tenantAdminPassword := superAdminPassword
+
+	dev := apimClients[0]
+
+	for appsCount := 0; appsCount <= numberOfApps; appsCount++ {
+		// Add the Application to env1
+		testutils.AddApp(t, dev, tenantAdminUsername, tenantAdminPassword)
+	}
+
+	args := &testutils.ApiImportExportTestArgs{
+		CtlUser: testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
+		SrcAPIM: dev,
+	}
+
+	testutils.ValidateAppsListWithJsonArrayFormat(t, args)
+}
+
+func TestListAppsWithJsonArrayFormatDevopsTenantUser(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	tenantAdminUsername := superAdminUser + "@" + TENANT1
+	tenantAdminPassword := superAdminPassword
+
+	dev := apimClients[0]
+
+	for appsCount := 0; appsCount <= numberOfApps; appsCount++ {
+		// Add the Application to env1
+		testutils.AddApp(t, dev, tenantAdminUsername, tenantAdminPassword)
+	}
+
+	args := &testutils.ApiImportExportTestArgs{
+		CtlUser: testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		SrcAPIM: dev,
+	}
+
+	testutils.ValidateAppsListWithJsonArrayFormat(t, args)
 }
 
 //List all the applications in an environment (by specifying the owner)
@@ -144,11 +227,12 @@ func TestExportImportOwnAppAdminSuperTenant(t *testing.T) {
 	app := testutils.AddApp(t, dev, adminUsername, adminPassword)
 
 	args := &testutils.AppImportExportTestArgs{
-		AppOwner:    testutils.Credentials{Username: adminUsername, Password: adminPassword},
-		CtlUser:     testutils.Credentials{Username: adminUsername, Password: adminPassword},
-		Application: app,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
+		AppOwner:      testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		CtlUser:       testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		Application:   app,
+		SrcAPIM:       dev,
+		DestAPIM:      prod,
+		PreserveOwner: true,
 	}
 
 	testutils.ValidateAppExportImportWithPreserveOwner(t, args)
@@ -170,6 +254,7 @@ func TestExportImportOwnAppAdminSuperTenantWithUpdate(t *testing.T) {
 		Application: app,
 		SrcAPIM:     dev,
 		DestAPIM:    prod,
+		UpdateFlag:  true,
 	}
 
 	testutils.ValidateAppExportImportWithUpdate(t, args)
@@ -189,11 +274,13 @@ func TestExportImportAppDevopsSuperTenantWithUpdate(t *testing.T) {
 	app := testutils.AddApp(t, dev, adminUsername, adminPassword)
 
 	args := &testutils.AppImportExportTestArgs{
-		AppOwner:    testutils.Credentials{Username: adminUsername, Password: adminPassword},
-		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
-		Application: app,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
+		AppOwner:      testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		CtlUser:       testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Application:   app,
+		SrcAPIM:       dev,
+		DestAPIM:      prod,
+		PreserveOwner: true,
+		UpdateFlag:    true,
 	}
 
 	testutils.ValidateAppExportImportWithUpdate(t, args)
@@ -211,11 +298,12 @@ func TestExportImportOtherAppAdminSuperTenant(t *testing.T) {
 	app := testutils.AddApp(t, dev, otherUsername, otherPassword)
 
 	args := &testutils.AppImportExportTestArgs{
-		AppOwner:    testutils.Credentials{Username: otherUsername, Password: otherPassword},
-		CtlUser:     testutils.Credentials{Username: adminUsername, Password: adminPassword},
-		Application: app,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
+		AppOwner:      testutils.Credentials{Username: otherUsername, Password: otherPassword},
+		CtlUser:       testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		Application:   app,
+		SrcAPIM:       dev,
+		DestAPIM:      prod,
+		PreserveOwner: true,
 	}
 
 	testutils.ValidateAppExportImportWithPreserveOwner(t, args)
@@ -236,11 +324,12 @@ func TestExportImportAppDevopsSuperTenant(t *testing.T) {
 	app := testutils.AddApp(t, dev, adminUsername, adminPassword)
 
 	args := &testutils.AppImportExportTestArgs{
-		AppOwner:    testutils.Credentials{Username: adminUsername, Password: adminPassword},
-		CtlUser:     testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
-		Application: app,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
+		AppOwner:      testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		CtlUser:       testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Application:   app,
+		SrcAPIM:       dev,
+		DestAPIM:      prod,
+		PreserveOwner: true,
 	}
 
 	testutils.ValidateAppExportImportWithPreserveOwner(t, args)
@@ -256,11 +345,12 @@ func TestExportImportOwnAppAdminTenant(t *testing.T) {
 	app := testutils.AddApp(t, dev, adminUsername, adminPassword)
 
 	args := &testutils.AppImportExportTestArgs{
-		AppOwner:    testutils.Credentials{Username: adminUsername, Password: adminPassword},
-		CtlUser:     testutils.Credentials{Username: adminUsername, Password: adminPassword},
-		Application: app,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
+		AppOwner:      testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		CtlUser:       testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		Application:   app,
+		SrcAPIM:       dev,
+		DestAPIM:      prod,
+		PreserveOwner: true,
 	}
 
 	testutils.ValidateAppExportImportWithPreserveOwner(t, args)
@@ -278,11 +368,12 @@ func TestExportOtherAppAdminTenant(t *testing.T) {
 	app := testutils.AddApp(t, dev, otherUsername, otherPassword)
 
 	args := &testutils.AppImportExportTestArgs{
-		AppOwner:    testutils.Credentials{Username: otherUsername, Password: otherPassword},
-		CtlUser:     testutils.Credentials{Username: adminUsername, Password: adminPassword},
-		Application: app,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
+		AppOwner:      testutils.Credentials{Username: otherUsername, Password: otherPassword},
+		CtlUser:       testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		Application:   app,
+		SrcAPIM:       dev,
+		DestAPIM:      prod,
+		PreserveOwner: true,
 	}
 
 	testutils.ValidateAppExportImportWithPreserveOwner(t, args)
@@ -303,11 +394,12 @@ func TestExportImportAppDevopsTenant(t *testing.T) {
 	app := testutils.AddApp(t, dev, tenantAdminUsername, tenantAdminPassword)
 
 	args := &testutils.AppImportExportTestArgs{
-		AppOwner:    testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
-		CtlUser:     testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
-		Application: app,
-		SrcAPIM:     dev,
-		DestAPIM:    prod,
+		AppOwner:      testutils.Credentials{Username: tenantAdminUsername, Password: tenantAdminPassword},
+		CtlUser:       testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		Application:   app,
+		SrcAPIM:       dev,
+		DestAPIM:      prod,
+		PreserveOwner: true,
 	}
 
 	testutils.ValidateAppExportImportWithPreserveOwner(t, args)
@@ -411,4 +503,100 @@ func TestDeleteAppSuperTenantUser(t *testing.T) {
 	}
 
 	testutils.ValidateAppDelete(t, args)
+}
+
+// Export an application with space in application name  and import it to another environment while preserving
+// the owner by a user with Internal/devops role to check whether the url encoding is working properly
+func TestExportImportOwnAppWithSpaceInAppName(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	adminUsername := superAdminUser
+	adminPassword := superAdminPassword
+
+	dev := apimClients[0]
+	prod := apimClients[1]
+
+	app := testutils.AddAppWithSpaceInAppName(t, dev, adminUsername, adminPassword)
+
+	args := &testutils.AppImportExportTestArgs{
+		AppOwner:      testutils.Credentials{Username: adminUsername, Password: adminPassword},
+		CtlUser:       testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Application:   app,
+		SrcAPIM:       dev,
+		DestAPIM:      prod,
+		PreserveOwner: true,
+	}
+
+	testutils.ValidateAppExportImportWithPreserveOwner(t, args)
+}
+
+// Export an application (created by a subscriber user) with generated keys and import it to another environment while
+// preserving the owner by a super tenant user with Internal/devops role and update the additional properties of the keys
+func TestExportImportAppWithGeneratedKeysUpdateAdditionalPropertiesDevopsSuperTenant(t *testing.T) {
+	devopsUsername := devops.UserName
+	devopsPassword := devops.Password
+
+	subscriberUsername := subscriber.UserName
+	subscriberPassword := subscriber.Password
+
+	dev := apimClients[0]
+	prod := apimClients[1]
+
+	app := testutils.AddApp(t, dev, subscriberUsername, subscriberPassword)
+
+	args := &testutils.AppImportExportTestArgs{
+		AppOwner:      testutils.Credentials{Username: subscriberUsername, Password: subscriberPassword},
+		CtlUser:       testutils.Credentials{Username: devopsUsername, Password: devopsPassword},
+		Application:   app,
+		SrcAPIM:       dev,
+		DestAPIM:      prod,
+		PreserveOwner: true,
+		WithKeys:      true,
+	}
+
+	// Generate keys for the application in env 1
+	testutils.GenerateKeys(t, args.SrcAPIM, args.AppOwner.Username, args.AppOwner.Password, app.ApplicationID, utils.ProductionKeyType)
+	testutils.GenerateKeys(t, args.SrcAPIM, args.AppOwner.Username, args.AppOwner.Password, app.ApplicationID, utils.SandboxKeyType)
+
+	testutils.ValidateAppExport(t, args)
+
+	testutils.ValidateAppImport(t, args, true)
+
+	testutils.ValidateAppAdditionalPropertiesOfKeysUpdateImport(t, args, true)
+}
+
+// Export an application (created by a subscriber user) with generated keys and import it to another environment while
+// preserving the owner by a tenant user with Internal/devops role and update the additional properties of the keys
+func TestExportImportAppWithGeneratedKeysUpdateAdditionalPropertiesDevopsTenant(t *testing.T) {
+	tenantDevopsUsername := devops.UserName + "@" + TENANT1
+	tenantDevopsPassword := devops.Password
+
+	tenantSubscriberUsername := subscriber.UserName + "@" + TENANT1
+	tenantSubscriberPassword := subscriber.Password
+
+	dev := apimClients[0]
+	prod := apimClients[1]
+
+	app := testutils.AddApp(t, dev, tenantSubscriberUsername, tenantSubscriberPassword)
+
+	args := &testutils.AppImportExportTestArgs{
+		AppOwner:      testutils.Credentials{Username: tenantSubscriberUsername, Password: tenantSubscriberPassword},
+		CtlUser:       testutils.Credentials{Username: tenantDevopsUsername, Password: tenantDevopsPassword},
+		Application:   app,
+		SrcAPIM:       dev,
+		DestAPIM:      prod,
+		PreserveOwner: true,
+		WithKeys:      true,
+	}
+
+	// Generate keys for the application in env 1
+	testutils.GenerateKeys(t, args.SrcAPIM, args.AppOwner.Username, args.AppOwner.Password, app.ApplicationID, utils.ProductionKeyType)
+	testutils.GenerateKeys(t, args.SrcAPIM, args.AppOwner.Username, args.AppOwner.Password, app.ApplicationID, utils.SandboxKeyType)
+
+	testutils.ValidateAppExport(t, args)
+
+	testutils.ValidateAppImport(t, args, true)
+
+	testutils.ValidateAppAdditionalPropertiesOfKeysUpdateImport(t, args, true)
 }

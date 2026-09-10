@@ -33,6 +33,7 @@ type ApiImportExportTestArgs struct {
 	DestAPIM         *apim.Client
 	OverrideProvider bool
 	ParamsFile       string
+	Update           bool
 }
 
 type ApiProductImportExportTestArgs struct {
@@ -48,11 +49,17 @@ type ApiProductImportExportTestArgs struct {
 }
 
 type AppImportExportTestArgs struct {
-	AppOwner    Credentials
-	CtlUser     Credentials
-	Application *apim.Application
-	SrcAPIM     *apim.Client
-	DestAPIM    *apim.Client
+	AppOwner          Credentials
+	CtlUser           Credentials
+	Application       *apim.Application
+	SrcAPIM           *apim.Client
+	DestAPIM          *apim.Client
+	PreserveOwner     bool
+	UpdateFlag        bool
+	WithKeys          bool
+	SkipKeys          bool
+	SkipSubscriptions bool
+	ImportFilePath    string
 }
 
 type ApiGetKeyTestArgs struct {
@@ -84,4 +91,14 @@ type InitTestArgs struct {
 	OasFlag        string
 	APIName        string
 	srcAPIM        *apim.Client
+}
+
+type ApiChangeLifeCycleStatusTestArgs struct {
+	ApiProvider   Credentials
+	CtlUser       Credentials
+	Api           *apim.API
+	APIM          *apim.Client
+	Action        string
+	Provider      string
+	ExpectedState string
 }

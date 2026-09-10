@@ -102,6 +102,18 @@ func (instance *API) GetSandboxConfig() map[string]interface{} {
 	return endpoint.(map[string]interface{})["config"].(map[string]interface{})
 }
 
+// GetProductionSecurityConfig : Get APIs production security config
+func (instance *API) GetProductionSecurityConfig() map[string]interface{} {
+	endpoint := instance.EndpointConfig.(map[string]interface{})["endpoint_security"]
+	return endpoint.(map[string]interface{})["production"].(map[string]interface{})
+}
+
+// GetSandboxSecurityConfig : Get APIs sandbox security config
+func (instance *API) GetSandboxSecurityConfig() map[string]interface{} {
+	endpoint := instance.EndpointConfig.(map[string]interface{})["endpoint_security"]
+	return endpoint.(map[string]interface{})["sandbox"].(map[string]interface{})
+}
+
 // SetProductionConfig : Set APIs production Config
 func (instance *API) SetProductionConfig(config map[interface{}]interface{}) {
 	endpoint := instance.EndpointConfig.(map[string]interface{})["production_endpoints"]

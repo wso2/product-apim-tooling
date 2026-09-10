@@ -25,7 +25,7 @@ import (
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/credentials"
 
-	"github.com/go-resty/resty"
+	"github.com/go-resty/resty/v2"
 	"github.com/spf13/cobra"
 	"github.com/wso2/product-apim-tooling/import-export-cli/utils"
 
@@ -82,7 +82,7 @@ func executeExportAPICmd(credential credentials.Credential, exportDirectory stri
 			utils.HandleErrorAndExit("Error while exporting", err)
 		}
 		// Print info on response
-		utils.Logf(utils.LogPrefixInfo + "ResponseStatus: %v\n", resp.Status())
+		utils.Logf(utils.LogPrefixInfo+"ResponseStatus: %v\n", resp.Status())
 		apiZipLocationPath := filepath.Join(exportDirectory, cmdExportEnvironment)
 		if resp.StatusCode() == http.StatusOK {
 			WriteToZip(exportAPIName, exportAPIVersion, apiZipLocationPath, resp)
@@ -108,12 +108,12 @@ func WriteToZip(exportAPIName, exportAPIVersion, zipLocationPath string, resp *r
 	// Writes the REST API response to a temporary zip file
 	tempZipFile, err := utils.WriteResponseToTempZip(zipFilename, resp)
 	if err != nil {
-		utils.HandleErrorAndExit("Error creating the temporary zip file to store the exported API" , err)
+		utils.HandleErrorAndExit("Error creating the temporary zip file to store the exported API", err)
 	}
 
 	err = utils.CreateDirIfNotExist(zipLocationPath)
 	if err != nil {
-		utils.HandleErrorAndExit("Error creating dir to store zip archive: " + zipLocationPath, err)
+		utils.HandleErrorAndExit("Error creating dir to store zip archive: "+zipLocationPath, err)
 	}
 	exportedFinalZip := filepath.Join(zipLocationPath, zipFilename)
 	// Add api_params.yaml file inside the zip and create a new zip file in exportedFinalZip location
@@ -132,7 +132,7 @@ func WriteToZip(exportAPIName, exportAPIVersion, zipLocationPath string, resp *r
 // ExportAPI
 // @param name : Name of the API to be exported
 // @param version : Version of the API to be exported
-// @param provider : Provider of the API 
+// @param provider : Provider of the API
 // @param adminEndpoint : API Manager Admin Endpoint for the environment
 // @param accessToken : Access Token for the resource
 // @return response Response in the form of *resty.Response
@@ -155,7 +155,7 @@ func getExportApiResponse(name, version, provider, format, adminEndpoint, access
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return resp, nil
 }
 

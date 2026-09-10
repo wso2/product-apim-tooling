@@ -19,15 +19,11 @@
 package impl
 
 import (
-	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
-	"mime/multipart"
 	"net/http"
 	"net/url"
 	"os"
@@ -36,7 +32,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/wso2/product-apim-tooling/import-export-cli/specs/params"
 
@@ -162,6 +157,12 @@ func mergeAPI(apiDirectory string, environmentParams *params.Environment) error 
 		return err
 	}
 
+	// Handle available subscription policies in api_params.yaml
+	err = handleSubscriptionPolicies(environmentParams.Policies, api)
+	if err != nil {
+		return err
+	}
+
 	apiPath = filepath.Join(apiDirectory, "Meta-information", "api.yaml")
 	utils.Logln(utils.LogPrefixInfo+"Writing merged API to:", apiPath)
 	// write this to disk
@@ -172,6 +173,31 @@ func mergeAPI(apiDirectory string, environmentParams *params.Environment) error 
 	err = ioutil.WriteFile(apiPath, content, 0644)
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+// Handle available subscription policies in api_params.yaml
+// @param envPolicies : Available subscription policies from api_params.yaml in the environment
+// @param api : Parameters from api.yaml
+// @return error
+func handleSubscriptionPolicies(envPolicies []string, api *gabs.Container) error {
+	if envPolicies != nil {
+		var availableTiers []v2.AvailableTiers
+		// Iterate the specified policies array
+		for _, tierName := range envPolicies {
+			if tierName != "" {
+				availableTiers = append(availableTiers, v2.AvailableTiers{Name: tierName})
+			}
+		}
+		// If the available tiers are not defined in api_params.yaml, the values in the api.yaml should be considered.
+		// Hence, this if statment will prevent setting the availableTiers in api.yaml to an empty array if the policies
+		// are not properly defined in the api_params.yaml
+		if availableTiers != nil {
+			if _, err := api.SetP(availableTiers, "availableTiers"); err != nil {
+				return err
+			}
+		}
 	}
 	return nil
 }
@@ -296,6 +322,13 @@ func setupMultipleEndpoints(environmentParams *params.Environment) ([]byte, erro
 // @param api : Parameters from api.yaml
 // @return error
 func handleSecurityEndpointsParams(envSecurityEndpointParams *params.SecurityData, api *gabs.Container) error {
+
+	// Handle OAuth 2.0 endpoint security from the params file
+	err := handleOAuthSecurityEndpointsParams(envSecurityEndpointParams, api)
+	if err != nil {
+		return err
+	}
+
 	// If the user has set (either true or false) the enabled field under security in api_params.yaml, the
 	// following code should be executed. (if not set, the security endpoint settings will be made
 	// according to the api.yaml file as usually)
@@ -332,7 +365,114 @@ func handleSecurityEndpointsParams(envSecurityEndpointParams *params.SecurityDat
 	return nil
 }
 
-// Set the security endpoint parameters when the enabled field is set to true
+// Handle OAuth 2.0 security parameters in api_params.yaml
+// @param envSecurityEndpointParams : Environment security endpoint parameters from api_params.yaml
+// @param api : Parameters from api.yaml
+// @return error
+func handleOAuthSecurityEndpointsParams(envSecurityEndpointParams *params.SecurityData, api *gabs.Container) error {
+	var endpointConfig map[string]interface{}
+	json.Unmarshal([]byte(api.Path("endpointConfig").Data().(string)), &endpointConfig)
+
+	if envSecurityEndpointParams != nil {
+		// For the convinience and the easy processing endpoint_security object will be directly written to
+		// the endpointConfig by the end of this logic. Hence, maintaining a variable to know any modifications
+		// have happened to endpoint_security.
+		modifiedEndpointSecurity := false
+		if envSecurityEndpointParams.Production != nil && envSecurityEndpointParams.Production.Enabled {
+			err := preprocessOAuthSecurityConfigs(envSecurityEndpointParams.Production)
+			if err != nil {
+				return err
+			}
+			modifiedEndpointSecurity = true
+		} else if envSecurityEndpointParams.Enabled == "" {
+			// if the global enable flag is specified skip this step
+			productionSecurity := &params.OAuthEndpointSecurity{}
+			productionSecurity.Type = utils.EndpointSecurityTypeNone
+			envSecurityEndpointParams.Production = productionSecurity
+			modifiedEndpointSecurity = true
+		}
+
+		if envSecurityEndpointParams.Sandbox != nil && envSecurityEndpointParams.Sandbox.Enabled {
+			err := preprocessOAuthSecurityConfigs(envSecurityEndpointParams.Sandbox)
+			if err != nil {
+				return err
+			}
+			modifiedEndpointSecurity = true
+		} else if envSecurityEndpointParams.Enabled == "" {
+			// if the global enable flag is specified skip this step
+			sandBoxSecurity := &params.OAuthEndpointSecurity{}
+			sandBoxSecurity.Type = utils.EndpointSecurityTypeNone
+			envSecurityEndpointParams.Sandbox = sandBoxSecurity
+			modifiedEndpointSecurity = true
+		}
+
+		if modifiedEndpointSecurity {
+			endpointConfig["endpoint_security"] = envSecurityEndpointParams
+			modifiedEndpointConfig, err := json.Marshal(endpointConfig)
+			if err != nil {
+				return err
+			}
+
+			// Replace original endpointConfig with the modified one with the Oauth security
+			if _, err := api.SetP(string(modifiedEndpointConfig), "endpointConfig"); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// Preprocess OAuth 2.0 security configs in api_params.yaml
+// @param envSecurityPerEndpoint : Environment OAuth 2.0 security endpoint parameters per endpoint type from api_params.yaml
+// @return error
+func preprocessOAuthSecurityConfigs(envSecurityPerEndpoint *params.OAuthEndpointSecurity) error {
+	// This is used to denote that the user is supplying a plain text for client secret
+	// and will be encrypted in the server side
+	envSecurityPerEndpoint.IsSecretEncrypted = false
+
+	if strings.EqualFold(strings.ToLower(envSecurityPerEndpoint.Type), strings.ToLower(utils.OAuthType)) {
+		envSecurityPerEndpoint.Type = utils.OAuthType
+	} else {
+		return errors.New("Endpoint security type is not specified in the api_params.yaml")
+	}
+
+	if envSecurityPerEndpoint.ClientId == "" {
+		return errors.New("You have enabled OAuth 2.0 endpoint security" +
+			" but the Client ID is not found in the api_params.yaml")
+	}
+	if envSecurityPerEndpoint.ClientSecret == "" {
+		return errors.New("You have enabled OAuth 2.0 endpoint security" +
+			" but the Client Secret is not found in the api_params.yaml")
+	}
+	if envSecurityPerEndpoint.TokenUrl == "" {
+		return errors.New("You have enabled OAuth 2.0 endpoint security" +
+			" but Token URL is not found in the api_params.yaml")
+	}
+
+	if strings.EqualFold(strings.ToLower(envSecurityPerEndpoint.GrantType),
+		strings.ToLower(utils.ClientCredentialsGrantType)) {
+		envSecurityPerEndpoint.GrantType = utils.ClientCredentialsGrantType
+		// Setting username and password to empty string in order to omit sending these to backend
+		envSecurityPerEndpoint.Username = ""
+		envSecurityPerEndpoint.Password = ""
+	} else if strings.EqualFold(strings.ToLower(envSecurityPerEndpoint.GrantType),
+		strings.ToLower(utils.PasswordGrantType)) {
+		envSecurityPerEndpoint.GrantType = utils.PasswordGrantType
+		if envSecurityPerEndpoint.Username == "" {
+			return errors.New("You have enabled OAuth 2.0 endpoint security with the password grant type" +
+				" but the username is not found in the api_params.yaml")
+		}
+		if envSecurityPerEndpoint.Password == "" {
+			return errors.New("You have enabled OAuth 2.0 endpoint security with the password grant type" +
+				" but the password is not found in the api_params.yaml")
+		}
+	} else {
+		return errors.New("Invalid grant type provided: " + envSecurityPerEndpoint.GrantType)
+	}
+	return nil
+}
+
+// Set the endpoint security parameters when the enabled field is set to true
 // @param envSecurityEndpointParams : Environment security endpoint parameters from api_params.yaml
 // @param api : Parameters from api.yaml
 // @return error
@@ -641,16 +781,15 @@ func injectParamsToAPI(importPath, paramsPath, importEnvironment string, preserv
 		if err != nil {
 			return err
 		}
-	}
 
-	// generate certificates for mutualssl, only if the field is specified
-	if envParams.MutualSslCerts != nil {
-		err = generateMutualSslCertificates(importPath, envParams, preserveProvider)
-		if err != nil {
-			return err
+		// generate certificates for mutualssl, only if the field is specified
+		if envParams.MutualSslCerts != nil {
+			err = generateMutualSslCertificates(importPath, envParams, preserveProvider)
+			if err != nil {
+				return err
+			}
 		}
 	}
-
 	return nil
 }
 
@@ -826,100 +965,24 @@ func validateAPIDefinition(def *v2.APIDefinition) error {
 	return nil
 }
 
-// newFileUploadRequest forms an HTTP request
-// Helper function for forming multi-part form data
-// Returns the formed http request and errors
-func newFileUploadRequest(uri string, method string, params map[string]string, paramName, path,
-	accessToken string) (*http.Request, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		_ = file.Close()
-	}()
-
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	part, err := writer.CreateFormFile(paramName, filepath.Base(path))
-	if err != nil {
-		return nil, err
-	}
-	_, err = io.Copy(part, file)
-
-	for key, val := range params {
-		_ = writer.WriteField(key, val)
-	}
-	err = writer.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	request, err := http.NewRequest(method, uri, body)
-	if err != nil {
-		return nil, err
-	}
-	request.Header.Add(utils.HeaderAuthorization, utils.HeaderValueAuthBearerPrefix+" "+accessToken)
-	request.Header.Add(utils.HeaderContentType, writer.FormDataContentType())
-	request.Header.Add(utils.HeaderAccept, "*/*")
-	request.Header.Add(utils.HeaderConnection, utils.HeaderValueKeepAlive)
-	if utils.CustomHeader.Key != "" && utils.CustomHeader.Value != "" {
-		request.Header.Add(utils.CustomHeader.Key, utils.CustomHeader.Value)
-	}
-
-	return request, err
-}
-
 // importAPI imports an API to the API manager
-func importAPI(endpoint, httpMethod, filePath, accessToken string, extraParams map[string]string) error {
-	req, err := newFileUploadRequest(endpoint, httpMethod, extraParams, "file",
+func importAPI(endpoint, filePath, accessToken string, extraParams map[string]string) error {
+	resp, err := ExecuteNewFileUploadRequest(endpoint, extraParams, "file",
 		filePath, accessToken)
-	if err != nil {
-		return err
-	}
-
-	var tr *http.Transport
-	if utils.Insecure {
-		tr = &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}
-	} else {
-		tr = &http.Transport{
-			TLSClientConfig: utils.GetTlsConfigWithCertificate(),
-		}
-	}
-
-	client := &http.Client{
-		Transport: tr,
-		Timeout:   time.Duration(utils.HttpRequestTimeout) * time.Second,
-	}
-
-	resp, err := client.Do(req)
 	if err != nil {
 		utils.Logln(utils.LogPrefixError, err)
 		return err
 	}
-
-	if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
+	if resp.StatusCode() == http.StatusCreated || resp.StatusCode() == http.StatusOK {
 		// 201 Created or 200 OK
-		_ = resp.Body.Close()
-		fmt.Println("Successfully imported API")
+		fmt.Println("Successfully imported API.")
 		return nil
 	} else {
 		// We have an HTTP error
 		fmt.Println("Error importing API.")
-		fmt.Println("Status: " + resp.Status)
-
-		bodyBuf, err := ioutil.ReadAll(resp.Body)
-		_ = resp.Body.Close()
-		if err != nil {
-			return err
-		}
-
-		strBody := string(bodyBuf)
-		fmt.Println("Response:", strBody)
-
-		return errors.New(resp.Status)
+		fmt.Println("Status: " + resp.Status())
+		fmt.Println("Response:", resp)
+		return errors.New(resp.Status())
 	}
 }
 
@@ -1057,7 +1120,6 @@ func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, a
 		}
 	}
 	extraParams := map[string]string{}
-	httpMethod := http.MethodPost
 	adminEndpoint += "/import/api"
 	if updateAPI {
 		adminEndpoint += "?overwrite=" + strconv.FormatBool(true) + "&preserveProvider=" +
@@ -1067,6 +1129,6 @@ func ImportAPI(accessOAuthToken, adminEndpoint, importEnvironment, importPath, a
 	}
 	utils.Logln(utils.LogPrefixInfo + "Import URL: " + adminEndpoint)
 
-	err = importAPI(adminEndpoint, httpMethod, apiFilePath, accessOAuthToken, extraParams)
+	err = importAPI(adminEndpoint, apiFilePath, accessOAuthToken, extraParams)
 	return err
 }

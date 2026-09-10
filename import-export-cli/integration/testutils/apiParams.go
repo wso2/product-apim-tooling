@@ -47,10 +47,26 @@ type Config struct {
 }
 
 type Security struct {
-	Enabled  bool   `yaml:"enabled"`
-	Type     string `yaml:"type"`
-	Username string `yaml:"username"`
-	Password string `yaml:"password"`
+	Production OAuthEndpointSecurity `yaml:"production"`
+	Sandbox    OAuthEndpointSecurity `yaml:"sandbox"`
+	Enabled    bool                  `yaml:"enabled"`
+	Type       string                `yaml:"type"`
+	Username   string                `yaml:"username"`
+	Password   string                `yaml:"password"`
+}
+
+// OAuthEndpointSecurity contains details about the OAuth 2.0 endpoint security
+type OAuthEndpointSecurity struct {
+	Password          string            `yaml:"password"`
+	Username          string            `yaml:"username"`
+	TokenUrl          string            `yaml:"tokenUrl"`
+	ClientId          string            `yaml:"clientId"`
+	ClientSecret      string            `yaml:"clientSecret"`
+	CustomParameters  map[string]string `yaml:"customParameters"`
+	Type              string            `yaml:"type"`
+	GrantType         string            `yaml:"grantType"`
+	Enabled           bool              `yaml:"enabled"`
+	IsSecretEncrypted bool              `yaml:"isSecretEncrypted"`
 }
 
 type Cert struct {

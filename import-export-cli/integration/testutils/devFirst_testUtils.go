@@ -20,6 +20,7 @@ package testutils
 
 import (
 	"log"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -113,12 +114,13 @@ func ValidateInitializeProjectWithDefinitionFlag(t *testing.T, args *InitTestArg
 	})
 }
 
-func ValidateImportProject(t *testing.T, args *InitTestArgs) {
+func ValidateImportProject(t *testing.T, args *InitTestArgs, preserveProvider bool) {
 	t.Helper()
 	//Initialize a project with API definition
 	ValidateInitializeProjectWithOASFlag(t, args)
 
-	result, error := ImportApiFromProject(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, true)
+	result, error := importApiFromProject(t, args.InitFlag, args.SrcAPIM, args.APIName,
+		&args.CtlUser, true, preserveProvider)
 
 	assert.Nil(t, error, "Error while importing Project")
 	assert.Contains(t, result, "Successfully imported API", "Error while importing Project")
@@ -131,12 +133,29 @@ func ValidateImportProject(t *testing.T, args *InitTestArgs) {
 	})
 }
 
-func ValidateImportProjectFailed(t *testing.T, args *InitTestArgs) {
+func ValidateImportProjectFailed(t *testing.T, args *InitTestArgs, preserveProvider bool) {
 	t.Helper()
 
-	result, _ := ImportApiFromProject(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, false)
+	result, _ := importApiFromProject(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, false,
+		preserveProvider)
 
 	assert.Contains(t, result, "Resource Already Exists", "Test failed because API is imported successfully")
+
+	base.WaitForIndexing()
+
+	//Remove Created project and logout
+	t.Cleanup(func() {
+		base.RemoveDir(args.InitFlag)
+	})
+}
+
+func ValidateImportProjectWithInvalidSwaggerFailed(t *testing.T, args *InitTestArgs, preserveProvider bool) {
+	t.Helper()
+
+	result, _ := importApiFromProject(t, args.InitFlag, args.SrcAPIM, args.APIName, &args.CtlUser, false, preserveProvider)
+
+	assert.Contains(t, result, "500", "Test failed because API is imported successfully")
+	assert.Contains(t, result, "Error while parsing OpenAPI definition", "Test failed because API is imported successfully")
 
 	base.WaitForIndexing()
 
@@ -190,7 +209,7 @@ func ValidateAPIWithDocIsExported(t *testing.T, args *InitTestArgs, DevFirstDefa
 	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
 	base.Unzip(relativePath, exportedPath)
 
-	docPathOfExportedApi := relativePath + TestDefaultExtractedFileName + TestCase1DestPathSuffix
+	docPathOfExportedApi := relativePath + TestDefaultExtractedFileName + DevFirstUpdatedSampleCaseDestPathSuffix
 
 	//Check whether the file is available
 	isDocExported := base.IsFileAvailable(docPathOfExportedApi)
@@ -213,7 +232,7 @@ func ValidateAPIWithIconIsExported(t *testing.T, args *InitTestArgs, DevFirstDef
 	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
 	base.Unzip(relativePath, exportedPath)
 
-	iconPathOfExportedApi := relativePath + TestDefaultExtractedFileName + TestCase2DestPngPathSuffix
+	iconPathOfExportedApi := relativePath + TestDefaultExtractedFileName + DevFirstSampleCasePngPathSuffix
 
 	isIconExported := base.IsFileAvailable(iconPathOfExportedApi)
 	base.Log("Icon is Exported", isIconExported)
@@ -230,18 +249,41 @@ func ValidateAPIWithIconIsExported(t *testing.T, args *InitTestArgs, DevFirstDef
 func ValidateAPIWithImageIsExported(t *testing.T, args *InitTestArgs, DevFirstDefaultAPIName string, DevFirstDefaultAPIVersion string) {
 	expOutput := ValidateExportImportedAPI(t, args, DevFirstDefaultAPIName, DevFirstDefaultAPIVersion)
 
-	//Unzip exported API and check whethers the imported image(.png) is in there
+	//Unzip exported API and check whether the imported image(.png) is in there
 	exportedPath := base.GetExportedPathFromOutput(expOutput)
 	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
 	base.Unzip(relativePath, exportedPath)
 
-	imagePathOfExportedApi := relativePath + TestDefaultExtractedFileName + TestCase2DestJpegPathSuffix
+	imagePathOfExportedApi := relativePath + TestDefaultExtractedFileName + DevFirstUpdatedSampleCaseDestJpegPathSuffix
 	isIconExported := base.IsFileAvailable(imagePathOfExportedApi)
 	base.Log("Image is Exported", isIconExported)
 	assert.Equal(t, true, isIconExported, "Error while exporting API with icon")
 
 	t.Cleanup(func() {
 		//Remove Created project and logout
+		base.RemoveDir(args.InitFlag)
+		base.RemoveDir(exportedPath)
+		base.RemoveDir(relativePath)
+	})
+}
+
+func ValidateAPIWithUpdatedSequenceIsExported(t *testing.T, args *InitTestArgs, DevFirstDefaultAPIName string, DevFirstDefaultAPIVersion string) {
+	expOutput := ValidateExportImportedAPI(t, args, DevFirstDefaultAPIName, DevFirstDefaultAPIVersion)
+
+	// Unzip exported API and check whether the updated sequence file is in there
+	exportedPath := base.GetExportedPathFromOutput(expOutput)
+	relativePath := strings.ReplaceAll(exportedPath, ".zip", "")
+	base.Unzip(relativePath, exportedPath)
+
+	// Check whether the exported custom sequence is equivalent to the latest sequence version
+	exportedAPISequencePath := relativePath + TestDefaultExtractedFileName + DevFirstUpdatedSampleCaseSequencePathSuffix
+	lastUpdatedSequencePath, _ := filepath.Abs(DevFirstUpdatedSampleCaseSequencePath)
+	isSequenceUpdated := base.IsFileContentIdentical(exportedAPISequencePath, lastUpdatedSequencePath)
+	base.Log("Exported custom sequence is updated", isSequenceUpdated)
+	assert.Equal(t, true, isSequenceUpdated, "Error while updating the custom sequence of API")
+
+	t.Cleanup(func() {
+		// Remove created project and logout
 		base.RemoveDir(args.InitFlag)
 		base.RemoveDir(exportedPath)
 		base.RemoveDir(relativePath)

@@ -17,6 +17,24 @@ type Configuration struct {
 	RetryDelay *int `yaml:"retryDelay,omitempty" json:"retryDelay,omitempty"`
 	// Factor used for config
 	Factor *int `yaml:"factor,omitempty" json:"factor,omitempty"`
+	// RetryErroCode used for config
+	RetryErroCode *[]string `yaml:"retryErroCode,omitempty" json:"retryErroCode,omitempty"`
+	// SuspendErrorCode used for config
+	SuspendErrorCode *[]string `yaml:"suspendErrorCode,omitempty" json:"suspendErrorCode,omitempty"`
+	// SuspendDuration used for config
+	SuspendDuration *int `yaml:"suspendDuration,omitempty" json:"suspendDuration,omitempty"`
+	// SuspendMaxDuration used for config
+	SuspendMaxDuration *int `yaml:"suspendMaxDuration,omitempty" json:"suspendMaxDuration,omitempty"`
+	// ActionSelect used for config (values can be "discard" and "fault")
+	ActionSelect *string `yaml:"actionSelect,omitempty" json:"actionSelect,omitempty"`
+	// ActionDuration used for config
+	ActionDuration *int `yaml:"actionDuration,omitempty" json:"actionDuration,omitempty"`
+}
+
+// Advance endpoint configurations
+type AdvanceEndpointConfiguration struct {
+	// Timeout in milliseconds for endpoint
+	TimeOutInMillis *int `yaml:"timeoutInMillis" json:"timeoutInMillis"`
 }
 
 // Endpoint details
@@ -25,6 +43,8 @@ type Endpoint struct {
 	EndpointType string `json:"endpoint_type,omitempty"`
 	// Url of the endpoint
 	Url *string `yaml:"url" json:"url"`
+	// Advance endpoint config of the endpoint
+	AdvanceEndpointConfig *AdvanceEndpointConfiguration `yaml:"advanceEndpointConfig,omitempty" json:"advanceEndpointConfig,omitempty"`
 	// Config of endpoint
 	Config *Configuration `yaml:"config,omitempty" json:"config,omitempty"`
 }
@@ -87,6 +107,10 @@ type AWSLambdaEndpointsData struct {
 
 // SecurityData contains the details about endpoint security from api_params.yaml
 type SecurityData struct {
+	// Production endpoint OAuth 2.0 security
+	Production *OAuthEndpointSecurity `yaml:"production,omitempty" json:"production,omitempty"`
+	// Sandbox endpoint OAuth 2.0 security
+	Sandbox *OAuthEndpointSecurity `yaml:"sandbox,omitempty" json:"sandbox,omitempty"`
 	// Decides whether the endpoint security is enabled
 	Enabled string `yaml:"enabled" json:"enabled,omitempty"`
 	// Type of the endpoint security (can be Basic or Digest)
@@ -95,6 +119,31 @@ type SecurityData struct {
 	Username string `yaml:"username" json:"username,omitempty"`
 	// Password for the endpoint
 	Password string `yaml:"password" json:"password,omitempty"`
+}
+
+// OAuthEndpointSecurity contains details about the OAuth 2.0 endpoint security
+type OAuthEndpointSecurity struct {
+	// Password for OAuth 2.0 endpoint security
+	Password string `yaml:"password,omitempty" json:"password,omitempty"`
+	// Username for OAuth 2.0 endpoint security
+	Username string `yaml:"username,omitempty" json:"username,omitempty"`
+	// TokenUrl for OAuth 2.0 endpoint security
+	TokenUrl string `yaml:"tokenUrl,omitempty" json:"tokenUrl,omitempty"`
+	// ClientId for OAuth 2.0 endpoint security
+	ClientId string `yaml:"clientId,omitempty" json:"clientId,omitempty"`
+	// ClientSecret for OAuth 2.0 endpoint security
+	ClientSecret string `yaml:"clientSecret,omitempty" json:"clientSecret,omitempty"`
+	// CustomParameters for OAuth 2.0 endpoint security
+	CustomParameters map[string]string `yaml:"customParameters,omitempty" json:"customParameters,omitempty"`
+	// Type for OAuth 2.0 endpoint security (can only be oauth)
+	Type string `yaml:"type,omitempty" json:"type,omitempty"`
+	// GrantType for OAuth 2.0 endpoint security (can be client_credentials or password)
+	GrantType string `yaml:"grantType,omitempty" json:"grantType,omitempty"`
+	// Enabled OAuth 2.0 endpoint security or not
+	Enabled bool `yaml:"enabled,omitempty" json:"enabled,omitempty"`
+	// IsSecretEncrypted for OAuth 2.0 endpoint security (This value will be always true when using a
+	//params file to override these parameters)
+	IsSecretEncrypted bool `yaml:"isSecretEncrypted" json:"isSecretEncrypted"`
 }
 
 // Cert stores certificate details
@@ -159,6 +208,8 @@ type Environment struct {
 	MutualSslCerts []MutualSslCert `yaml:"mutualSslCerts"`
 	// VCS params for the environment
 	VCS APIVCSParams `yaml:"vcs"`
+	// Policies contains the available subscription policies in an environment that can be enforced to an API
+	Policies []string `yaml:"policies"`
 }
 
 // ApiParams represents environments defined in configuration file

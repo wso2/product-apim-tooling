@@ -35,16 +35,24 @@ import (
 
 func AddAPI(t *testing.T, client *apim.Client, username string, password string) *apim.API {
 	client.Login(username, password)
-	api := client.GenerateSampleAPIData(username)
+	api := client.GenerateSampleAPIData(username, "", DevFirstDefaultAPIVersion, "")
 	doClean := true
 	id := client.AddAPI(t, api, username, password, doClean)
 	api = client.GetAPI(id)
 	return api
 }
 
+func AddCustomAPI(t *testing.T, client *apim.Client, username, password, name, version, context string) *apim.API {
+	client.Login(username, password)
+	api := client.GenerateSampleAPIData(username, name, version, context)
+	id := client.AddAPI(t, api, username, password, true)
+	api = client.GetAPI(id)
+	return api
+}
+
 func AddAPIWithoutCleaning(t *testing.T, client *apim.Client, username string, password string) *apim.API {
 	client.Login(username, password)
-	api := client.GenerateSampleAPIData(username)
+	api := client.GenerateSampleAPIData(username, "", DevFirstDefaultAPIVersion, "")
 	doClean := false
 	id := client.AddAPI(t, api, username, password, doClean)
 	api = client.GetAPI(id)
@@ -53,7 +61,7 @@ func AddAPIWithoutCleaning(t *testing.T, client *apim.Client, username string, p
 
 func AddAPIToTwoEnvs(t *testing.T, client1 *apim.Client, client2 *apim.Client, username string, password string) (*apim.API, *apim.API) {
 	client1.Login(username, password)
-	api := client1.GenerateSampleAPIData(username)
+	api := client1.GenerateSampleAPIData(username, "", DevFirstDefaultAPIVersion, "")
 	doClean := true
 	id1 := client1.AddAPI(t, api, username, password, doClean)
 	api1 := client1.GetAPI(id1)
@@ -133,6 +141,14 @@ func PublishAPI(client *apim.Client, username string, password string, apiID str
 	client.PublishAPI(apiID)
 }
 
+func ChangeAPILifeCycle(client *apim.Client, username, password, apiID, action string) *apim.API {
+	base.WaitForIndexing()
+	client.Login(username, password)
+	client.ChangeAPILifeCycle(apiID, action)
+	api := client.GetAPI(apiID)
+	return api
+}
+
 func UnsubscribeAPI(client *apim.Client, username string, password string, apiID string) {
 	client.Login(username, password)
 	client.DeleteSubscriptions(apiID)
@@ -181,7 +197,7 @@ func ValidateAllApisOfATenantIsExported(t *testing.T, args *ApiImportExportTestA
 	})
 }
 
-func importAPI(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
+func importAPI(t *testing.T, args *ApiImportExportTestArgs, doClean bool) (string, error) {
 	fileName := base.GetAPIArchiveFilePath(t, args.SrcAPIM.GetEnvName(), args.Api.Name, args.Api.Version)
 
 	params := []string{"import-api", "-f", fileName, "-e", args.DestAPIM.EnvName, "-k", "--verbose"}
@@ -194,16 +210,22 @@ func importAPI(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
 		params = append(params, "--params", args.ParamsFile)
 	}
 
+	if args.Update {
+		params = append(params, "--update=true")
+	}
+
 	output, err := base.Execute(t, params...)
 
-	t.Cleanup(func() {
-		err := args.DestAPIM.DeleteAPIByName(args.Api.Name)
+	if !args.Update && doClean {
+		t.Cleanup(func() {
+			err := args.DestAPIM.DeleteAPIByName(args.Api.Name)
 
-		if err != nil {
-			t.Fatal(err)
-		}
-		base.WaitForIndexing()
-	})
+			if err != nil {
+				t.Fatal(err)
+			}
+			base.WaitForIndexing()
+		})
+	}
 
 	return output, err
 }
@@ -216,6 +238,12 @@ func importAPIPreserveProviderFailure(t *testing.T, sourceEnv string, api *apim.
 
 func listAPIs(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
 	output, err := base.Execute(t, "list", "apis", "-e", args.SrcAPIM.EnvName, "-k", "--verbose")
+	return output, err
+}
+
+func listAPIsWithJsonArrayFormat(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
+	output, err := base.Execute(t, "list", "apis", "-e", args.SrcAPIM.EnvName, "--format", "jsonArray",
+		"-k", "--verbose")
 	return output, err
 }
 
@@ -235,7 +263,7 @@ func ValidateAPIExportFailure(t *testing.T, args *ApiImportExportTestArgs) {
 		args.Api.Name, args.Api.Version))
 }
 
-func ValidateAPIExportImport(t *testing.T, args *ApiImportExportTestArgs) {
+func ValidateAPIExportImport(t *testing.T, args *ApiImportExportTestArgs) *apim.API {
 	t.Helper()
 
 	// Setup apictl envs
@@ -253,7 +281,7 @@ func ValidateAPIExportImport(t *testing.T, args *ApiImportExportTestArgs) {
 	// Import api to env 2
 	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	importAPI(t, args)
+	importAPI(t, args, true)
 
 	// Give time for newly imported API to get indexed, or else getAPI by name will fail
 	base.WaitForIndexing()
@@ -263,6 +291,8 @@ func ValidateAPIExportImport(t *testing.T, args *ApiImportExportTestArgs) {
 
 	// Validate env 1 and env 2 API is equal
 	ValidateAPIsEqual(t, args.Api, importedAPI)
+
+	return importedAPI
 }
 
 func ValidateAPIExport(t *testing.T, args *ApiImportExportTestArgs) {
@@ -287,7 +317,7 @@ func GetImportedAPI(t *testing.T, args *ApiImportExportTestArgs) *apim.API {
 	// Import api to env 2
 	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	_, err := importAPI(t, args)
+	_, err := importAPI(t, args, true)
 
 	if err != nil {
 		t.Fatal(err)
@@ -322,7 +352,7 @@ func ValidateAPIImport(t *testing.T, args *ApiImportExportTestArgs) {
 	// Import api to env 2
 	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
 
-	importAPI(t, args)
+	importAPI(t, args, true)
 
 	// Give time for newly imported API to get indexed, or else getAPI by name will fail
 	base.WaitForIndexing()
@@ -332,6 +362,37 @@ func ValidateAPIImport(t *testing.T, args *ApiImportExportTestArgs) {
 
 	// Validate env 1 and env 2 API is equal
 	validateAPIsEqualCrossTenant(t, args.Api, importedAPI)
+}
+
+func ValidateAPIImportForMultipleVersions(t *testing.T, args *ApiImportExportTestArgs, firstImportedAPIId string) *apim.API {
+
+	isFirstImport := false
+	if strings.EqualFold(firstImportedAPIId, "") {
+		isFirstImport = true
+	}
+
+	t.Helper()
+
+	// Import api to env 2
+	base.Login(t, args.DestAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	importAPI(t, args, isFirstImport)
+
+	// Give time for newly imported API to get indexed, or else getAPI by name will fail
+	base.WaitForIndexing()
+
+	if !isFirstImport {
+		args.DestAPIM.DeleteAPI(firstImportedAPIId)
+		base.WaitForIndexing()
+	}
+
+	// Get App from env 2
+	importedAPI := getAPI(t, args.DestAPIM, args.Api.Name, args.ApiProvider.Username, args.ApiProvider.Password)
+
+	// Validate env 1 and env 2 API is equal
+	validateAPIsEqualCrossTenant(t, args.Api, importedAPI)
+
+	return importedAPI
 }
 
 func ValidateAPIImportFailure(t *testing.T, args *ApiImportExportTestArgs) {
@@ -461,8 +522,14 @@ func ValidateAPIDelete(t *testing.T, args *ApiImportExportTestArgs) {
 	validateAPIIsDeleted(t, args.Api, apisListAfterDelete)
 }
 
+func changeLifeCycleOfAPI(t *testing.T, args *ApiChangeLifeCycleStatusTestArgs) (string, error) {
+	output, err := base.Execute(t, "change-status", "api", "-a", args.Action, "-n", args.Api.Name,
+		"-v", args.Api.Version, "-e", args.APIM.EnvName, "-k", "--verbose")
+	return output, err
+}
+
 func exportApiImportedFromProject(t *testing.T, APIName string, APIVersion string, EnvName string) (string, error) {
-	return base.Execute(t, "export-api", "-n", APIName, "-v", APIVersion, "-e", EnvName)
+	return base.Execute(t, "export-api", "-n", APIName, "-v", APIVersion, "-e", EnvName, "-k")
 }
 
 func ExportAllApisOfATenant(t *testing.T, args *ApiImportExportTestArgs) (string, error) {
@@ -483,9 +550,12 @@ func validateAPIIsDeleted(t *testing.T, api *apim.API, apisListAfterDelete *apim
 	}
 }
 
-func ImportApiFromProject(t *testing.T, projectName string, client *apim.Client, apiName string, credentials *Credentials, isCleanup bool) (string, error) {
+func importApiFromProject(t *testing.T, projectName string, client *apim.Client, apiName string, credentials *Credentials,
+	isCleanup, isPreserveProvider bool) (string, error) {
 	projectPath, _ := filepath.Abs(projectName)
-	output, err := base.Execute(t, "import-api", "-f", projectPath, "-e", client.GetEnvName(), "-k", "--verbose")
+
+	output, err := base.Execute(t, "import-api", "-f", projectPath, "-e", client.GetEnvName(), "-k", "--verbose",
+		"--preserve-provider="+strconv.FormatBool(isPreserveProvider))
 
 	base.WaitForIndexing()
 
@@ -528,4 +598,104 @@ func ImportApiFromProjectWithUpdate(t *testing.T, projectName string, client *ap
 func ExportApisWithOneCommand(t *testing.T, args *InitTestArgs) (string, error) {
 	output, error := base.Execute(t, "export-apis", "-e", args.SrcAPIM.GetEnvName(), "-k", "--force", "--verbose")
 	return output, error
+}
+func GetAPI(t *testing.T, client *apim.Client, name string, username string, password string) *apim.API {
+	if username == adminservices.DevopsUsername {
+		client.Login(adminservices.AdminUsername, adminservices.AdminPassword)
+	} else if username == adminservices.DevopsUsername+"@"+adminservices.Tenant1 {
+		client.Login(adminservices.AdminUsername+"@"+adminservices.Tenant1, adminservices.AdminPassword)
+	} else {
+		client.Login(username, password)
+	}
+	apiInfo, err := client.GetAPIByName(name)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return client.GetAPI(apiInfo.ID)
+}
+
+func ValidateChangeLifeCycleStatusOfAPI(t *testing.T, args *ApiChangeLifeCycleStatusTestArgs) {
+	t.Helper()
+	// Setup apictl envs
+	base.SetupEnv(t, args.APIM.GetEnvName(), args.APIM.GetApimURL(), args.APIM.GetTokenURL())
+	// Login to apictl
+	base.Login(t, args.APIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+	base.WaitForIndexing()
+	//Execute apictl command to change life cycle of an Api
+	output, _ := changeLifeCycleOfAPI(t, args)
+	//Assert apictl output
+	assert.Contains(t, output, "state changed successfully!", "Error while changing life cycle of API")
+	base.WaitForIndexing()
+	//Assert life cycle state after change
+	api := GetAPI(t, args.APIM, args.Api.Name, args.CtlUser.Username, args.CtlUser.Password)
+	assert.Equal(t, args.ExpectedState, api.LifeCycleStatus, "Expected Life cycle state change is not equals to actual status")
+}
+
+func ValidateChangeLifeCycleStatusOfAPIFailure(t *testing.T, args *ApiChangeLifeCycleStatusTestArgs) {
+	t.Helper()
+	// Setup apictl envs
+	base.SetupEnv(t, args.APIM.GetEnvName(), args.APIM.GetApimURL(), args.APIM.GetTokenURL())
+	// Login to apictl
+	base.Login(t, args.APIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+	base.WaitForIndexing()
+	//Execute apictl command to change life cycle of an Api
+	output, _ := changeLifeCycleOfAPI(t, args)
+	//Assert apictl output
+	assert.NotContains(t, output, "state changed successfully!", "Error while changing life cycle of API")
+	assert.NotEqual(t, args.Api.LifeCycleStatus, args.ExpectedState, "Life Cycle State changed successfully")
+}
+
+// Execute get apis command with query parameters
+func searchAPIsWithQuery(t *testing.T, args *ApiImportExportTestArgs, query string) (string, error) {
+	output, err := base.Execute(t, "list", "apis", "-e", args.SrcAPIM.EnvName, "--query", query, "-k", "--verbose")
+	return output, err
+}
+
+// ValidateSearchApisList : Validate the received list of APIs and verify only the required ones are there and others
+// are not in the command line output
+func ValidateSearchApisList(t *testing.T, args *ApiImportExportTestArgs, searchQuery, matchQuery, unmatchedQuery string) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnvWithoutCleanUp(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	base.LoginWithoutClenUp(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	base.WaitForIndexing()
+
+	output, _ := searchAPIsWithQuery(t, args, searchQuery)
+
+	// Assert the match query is in the output
+	assert.Truef(t, strings.Contains(output, matchQuery), "apisListFromCtl: "+output+
+		" , does not contain the query: "+matchQuery)
+	// Assert the unmatched query is not in the output
+	assert.False(t, strings.Contains(output, unmatchedQuery), "apisListFromCtl: "+output+
+		" , contains the query: "+unmatchedQuery)
+}
+
+// ValidateAPIsListWithJsonArrayFormat : Validate the received list of APIs are in JsonArray format and verify only
+// the required ones are there and others are not in the command line output
+func ValidateAPIsListWithJsonArrayFormat(t *testing.T, args *ApiImportExportTestArgs) {
+	t.Helper()
+
+	// Setup apictl envs
+	base.SetupEnv(t, args.SrcAPIM.GetEnvName(), args.SrcAPIM.GetApimURL(), args.SrcAPIM.GetTokenURL())
+
+	// List APIs of env 1
+	base.Login(t, args.SrcAPIM.GetEnvName(), args.CtlUser.Username, args.CtlUser.Password)
+
+	base.WaitForIndexing()
+
+	output, _ := listAPIsWithJsonArrayFormat(t, args)
+
+	apisList := args.SrcAPIM.GetAPIs()
+
+	// Validate APIs list with added APIs
+	validateListAPIsEqual(t, output, apisList)
+
+	// Validate JsonArray format
+	assert.Contains(t, output, "[\n {\n", "Error while listing APIs in JsonArray format")
+
 }

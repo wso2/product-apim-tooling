@@ -1,0 +1,18 @@
+environments:
+    - name: production
+      endpoints:
+        production:
+              url: 'https://prod.wso2.com'
+        sandbox:
+              url: 'https://sand.wso2.com'
+      security:
+          production:
+              enabled: false
+              type: oauth
+              tokenUrl: https://prod.token.com
+              clientId: Poc7i6mTj0ac3LyTW0szFzdt1gwa
+              clientSecret: edDEOOjlY0kgClxVlntwWVFve64a
+              grantType: client_credentials
+              customParameters: 
+                  param1: val1
+                  param2: val2

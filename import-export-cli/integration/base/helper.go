@@ -19,6 +19,7 @@
 package base
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"io"
@@ -102,7 +103,7 @@ func Login(t *testing.T, env string, username string, password string) {
 	Execute(t, "login", env, "-u", username, "-p", password, "-k", "--verbose")
 
 	t.Cleanup(func() {
-		Execute(t, "logout", env)
+		Execute(t, "logout", env, "-k")
 	})
 }
 
@@ -310,7 +311,7 @@ func CreateTempDir(t *testing.T, path string) {
 func GetExportedPathFromOutput(output string) string {
 	//Check directory path to omit changes due to OS differences
 	if strings.Contains(output, ":\\") {
-		arrayOutput := []rune (output)
+		arrayOutput := []rune(output)
 		extractedPath := string(arrayOutput[strings.Index(output, ":\\")-1:])
 		return strings.ReplaceAll(strings.ReplaceAll(extractedPath, "\n", ""), " ", "")
 	} else {
@@ -341,6 +342,45 @@ func IsFileAvailable(filename string) bool {
 		return false
 	}
 	return !info.IsDir()
+}
+
+// Create a directory
+func CreateDir(path string) (err error) {
+	err = os.Mkdir(path, os.ModePerm)
+	if err != nil {
+		fmt.Println("Error in creating the directory", err.Error())
+	}
+	return err
+}
+
+// Check whether the file content is identical
+func IsFileContentIdentical(path1, path2 string) bool {
+	file_1, err_1 := ioutil.ReadFile(path1)
+	if err_1 != nil {
+		panic(err_1)
+	}
+
+	file_2, err_2 := ioutil.ReadFile(path2)
+	if err_2 != nil {
+		panic(err_2)
+	}
+
+	return bytes.Equal(file_1, file_2)
+}
+
+// Append string to a given file
+func AppendStringToFile(str, path string) error {
+	file, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	_, err = file.WriteString(str)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // Copy the src file to dst. Any existing file will be overwritten
@@ -374,4 +414,14 @@ func GenerateRandomName(n int) string {
 		s[i] = letters[rand.Intn(len(letters))]
 	}
 	return string(s)
+}
+
+// SetupEnvWithoutCleanUp : Adds a new environment without automatically removes it when the calling test function execution ends
+func SetupEnvWithoutCleanUp(t *testing.T, env string, apim string, tokenEp string) {
+	Execute(t, "add-env", "-e", env, "--apim", apim, "--token", tokenEp)
+}
+
+// LoginWithoutClenUp : Logs into an environment without automatically logs out when the calling test function execution ends
+func LoginWithoutClenUp(t *testing.T, env string, username string, password string) {
+	Execute(t, "login", env, "-u", username, "-p", password, "-k", "--verbose")
 }
