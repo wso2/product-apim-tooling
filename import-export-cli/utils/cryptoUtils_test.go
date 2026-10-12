@@ -321,41 +321,62 @@ func TestEncryptAES256ExternalOutputFormat(t *testing.T) {
 	}
 }
 
-// TestEncryptAES256PlainOutputFormat asserts EncryptAES256Plain produces a single opaque
-// base64 blob (no JSON envelope at all), and that it round-trips through DecryptAES256.
-func TestEncryptAES256PlainOutputFormat(t *testing.T) {
+// TestSymmetricDefaultFormatKeepsLegacyFlatShape asserts the bare "symmetric" mode (empty format)
+// still produces the flat {"cipherText","iv"} shape that earlier apictl releases produced, so
+// existing users and scripts keep working, and that it round-trips through DecryptAES256.
+func TestSymmetricDefaultFormatKeepsLegacyFlatShape(t *testing.T) {
 	keyBytes, err := ResolveAES256Key("12345678901234567890123456789012")
 	if err != nil {
 		t.Fatalf("ResolveAES256Key() returned an error: %v", err)
 	}
 
-	plainText := "PlainSecret#789"
-	stored, err := EncryptAES256Plain(keyBytes, plainText)
+	encryptFn, err := symmetricEncryptFuncFor("")
+	if err != nil {
+		t.Fatalf("symmetricEncryptFuncFor(\"\") returned an error: %v", err)
+	}
+	stored, err := encryptFn(keyBytes, "DefaultSecret#789")
 	if err != nil {
 		t.Fatalf("unexpected error encrypting: %v", err)
 	}
 
-	decodedBytes, err := base64.StdEncoding.DecodeString(stored)
+	outerBytes, err := base64.StdEncoding.DecodeString(stored)
 	if err != nil {
 		t.Fatalf("stored value is not valid base64: %v", err)
 	}
-	if json.Valid(decodedBytes) {
-		t.Fatalf("plain format should not be a JSON envelope, got %s", decodedBytes)
+	var outer map[string]interface{}
+	if err := json.Unmarshal(outerBytes, &outer); err != nil {
+		t.Fatalf("default format should be a JSON envelope, got %s", outerBytes)
 	}
-
-	// GCMIVSize bytes of IV, plus ciphertext, plus a 16-byte GCM auth tag.
-	const gcmTagSizeBytes = 16
-	expectedLen := GCMIVSize + len(plainText) + gcmTagSizeBytes
-	if len(decodedBytes) != expectedLen {
-		t.Fatalf("expected %d decoded bytes (iv+ciphertext+tag), got %d", expectedLen, len(decodedBytes))
+	if len(outer) != 2 || outer["cipherText"] == nil || outer["iv"] == nil {
+		t.Fatalf("default format should be exactly {\"cipherText\",\"iv\"}, got %v", outer)
 	}
 
 	decrypted, err := DecryptAES256(keyBytes, stored)
 	if err != nil {
 		t.Fatalf("DecryptAES256() returned an error: %v", err)
 	}
-	if decrypted != plainText {
-		t.Fatalf("expected %q, got %q", plainText, decrypted)
+	if decrypted != "DefaultSecret#789" {
+		t.Fatalf("expected %q, got %q", "DefaultSecret#789", decrypted)
+	}
+}
+
+// TestSymmetricEncryptFuncForRejectsUnknownFormat confirms an unrecognized sub-mode is rejected
+// rather than silently falling back to the default shape.
+func TestSymmetricEncryptFuncForRejectsUnknownFormat(t *testing.T) {
+	if _, err := symmetricEncryptFuncFor("bogus"); err == nil {
+		t.Fatalf("expected an error for an unrecognized format")
+	}
+}
+
+// TestDecryptAES256RejectsNonJSONValue confirms a base64 value that is not a JSON envelope is
+// rejected with an error.
+func TestDecryptAES256RejectsNonJSONValue(t *testing.T) {
+	keyBytes, err := ResolveAES256Key("12345678901234567890123456789012")
+	if err != nil {
+		t.Fatalf("ResolveAES256Key() returned an error: %v", err)
+	}
+	if _, err := DecryptAES256(keyBytes, base64.StdEncoding.EncodeToString([]byte("not-json-at-all"))); err == nil {
+		t.Fatalf("expected an error for a non-JSON value")
 	}
 }
 

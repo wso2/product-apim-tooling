@@ -258,12 +258,13 @@ func encrypt(encryptionKey *rsa.PublicKey, plainTextSecrets map[string]string, e
 
 // symmetricEncryptFuncFor picks the AES-256 ciphertext shape for the requested sub-mode:
 // "internal" mirrors carbon-crypto-service, "external" mirrors cipher-tool/carbon-secvault/
-// carbon-mediation, and an empty format (the bare "symmetric" mode) is a single opaque blob.
+// carbon-mediation, and an empty format (the bare "symmetric" mode) keeps the flat
+// {"cipherText","iv"} shape that earlier apictl releases produced, for backward compatibility.
 // Any other, unrecognized format is rejected rather than silently falling back to a default.
 func symmetricEncryptFuncFor(format string) (symmetricEncryptFunc, error) {
 	switch {
 	case format == "":
-		return EncryptAES256Plain, nil
+		return EncryptAES256External, nil
 	case strings.EqualFold(format, "internal"):
 		return EncryptAES256, nil
 	case strings.EqualFold(format, "external"):

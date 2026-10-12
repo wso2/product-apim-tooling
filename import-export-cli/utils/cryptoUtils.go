@@ -207,25 +207,13 @@ func EncryptAES256External(key []byte, text string) (string, error) {
 	return base64.StdEncoding.EncodeToString(holderJSON), nil
 }
 
-// EncryptAES256Plain encrypts plain text using AES-256 GCM and returns a single opaque base64
-// value (the IV prepended to the ciphertext) - no JSON envelope, just the encrypted value itself.
-func EncryptAES256Plain(key []byte, text string) (string, error) {
-	aesGCM, iv, err := newAES256GCMWithRandomIV(key)
-	if err != nil {
-		return "", err
-	}
-
-	sealed := aesGCM.Seal(iv, iv, []byte(text), nil)
-	return base64.StdEncoding.EncodeToString(sealed), nil
-}
-
 func aes256KeyId(key []byte) string {
 	hash := sha256.Sum256(key)
 	return base64.StdEncoding.EncodeToString(hash[:])
 }
 
-// DecryptAES256 decrypts AES-256 GCM ciphertext produced by EncryptAES256, EncryptAES256External
-// or EncryptAES256Plain, auto-detecting which of the three shapes cryptoText is in.
+// DecryptAES256 decrypts AES-256 GCM ciphertext produced by EncryptAES256 or EncryptAES256External,
+// auto-detecting which of the two shapes cryptoText is in.
 func DecryptAES256(key []byte, cryptoText string) (string, error) {
 	outerBytes, err := base64.StdEncoding.DecodeString(strings.TrimSpace(cryptoText))
 	if err != nil {
@@ -239,21 +227,7 @@ func DecryptAES256(key []byte, cryptoText string) (string, error) {
 
 	var outer map[string]interface{}
 	if err = json.Unmarshal(outerBytes, &outer); err != nil {
-		// Not a JSON envelope - treat it as the plain iv||ciphertext blob.
-		if len(outerBytes) < GCMIVSize {
-			return "", errors.New("Ciphertext too short")
-		}
-		iv := outerBytes[:GCMIVSize]
-		ciphertext := outerBytes[GCMIVSize:]
-		aesGCM, err := cipher.NewGCMWithNonceSize(block, len(iv))
-		if err != nil {
-			return "", err
-		}
-		plainText, err := aesGCM.Open(nil, iv, ciphertext, nil)
-		if err != nil {
-			return "", err
-		}
-		return string(plainText), nil
+		return "", errors.New("Unrecognized ciphertext format")
 	}
 
 	var cipherB64, ivB64 string
