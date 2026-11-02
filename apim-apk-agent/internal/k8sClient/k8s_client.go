@@ -479,10 +479,7 @@ func DeploySubscriptionRateLimitPolicyCR(subscriptionRLPolicy eventhubTypes.Subs
 							RequestsPerUnit: uint32(subscriptionRLPolicy.DefaultLimit.RequestCount.RequestCount),
 							Unit:            subscriptionRLPolicy.DefaultLimit.RequestCount.TimeUnit,
 						},
-						BurstControl: &dpv1alpha3.BurstControl{
-							RequestsPerUnit: uint32(subscriptionRLPolicy.RateLimitCount),
-							Unit:            subscriptionRLPolicy.RateLimitTimeUnit,
-						},
+						BurstControl: subscriptionBurstControl(subscriptionRLPolicy),
 					},
 				},
 				TargetRef: gwapiv1b1.NamespacedPolicyTargetReference{
@@ -511,16 +508,26 @@ func DeploySubscriptionRateLimitPolicyCR(subscriptionRLPolicy eventhubTypes.Subs
 		}
 		rateLimitPolicyCR.Spec.Override.Subscription.RequestCount.RequestsPerUnit = uint32(subscriptionRLPolicy.DefaultLimit.RequestCount.RequestCount)
 		rateLimitPolicyCR.Spec.Override.Subscription.RequestCount.Unit = subscriptionRLPolicy.DefaultLimit.RequestCount.TimeUnit
-		if rateLimitPolicyCR.Spec.Override.Subscription.BurstControl == nil {
-			rateLimitPolicyCR.Spec.Override.Subscription.BurstControl = &dpv1alpha3.BurstControl{}
-		}
-		rateLimitPolicyCR.Spec.Override.Subscription.BurstControl.RequestsPerUnit = uint32(subscriptionRLPolicy.RateLimitCount)
-		rateLimitPolicyCR.Spec.Override.Subscription.BurstControl.Unit = subscriptionRLPolicy.RateLimitTimeUnit
+		// Replace the burst control as a whole so that it is removed from the CR when burst control is
+		// removed from the policy in the control plane.
+		rateLimitPolicyCR.Spec.Override.Subscription.BurstControl = subscriptionBurstControl(subscriptionRLPolicy)
 		if err := k8sClient.Update(context.Background(), &rateLimitPolicyCR); err != nil {
 			loggers.LoggerK8sClient.Error("Unable to update RateLimitPolicies CR for subscription level: " + err.Error())
 		} else {
 			loggers.LoggerK8sClient.Info("RateLimitPolicies CR updated for subscription level: " + rateLimitPolicyCR.Name)
 		}
+	}
+}
+
+// subscriptionBurstControl returns the burst control configuration of the given subscription policy,
+// or nil when burst control is not configured for the policy.
+func subscriptionBurstControl(subscriptionRLPolicy eventhubTypes.SubscriptionPolicy) *dpv1alpha3.BurstControl {
+	if subscriptionRLPolicy.RateLimitCount <= 0 || subscriptionRLPolicy.RateLimitTimeUnit == "" {
+		return nil
+	}
+	return &dpv1alpha3.BurstControl{
+		RequestsPerUnit: uint32(subscriptionRLPolicy.RateLimitCount),
+		Unit:            subscriptionRLPolicy.RateLimitTimeUnit,
 	}
 }
 
