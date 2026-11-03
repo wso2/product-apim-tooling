@@ -7,7 +7,7 @@ Encrypt secrets
 Create secrets based on given arguments
 
 ```
-apictl secret create [symmetric] [flags]
+apictl secret create [symmetric [internal|external]] [flags]
 ```
 
 ### Examples
@@ -17,6 +17,10 @@ To encrypt secret and get output on console
   apictl secret create
 To encrypt secret using an initialized symmetric encryption key and get output on console
   apictl secret create symmetric
+To encrypt secret in the carbon-crypto-service ciphertext format
+  apictl secret create symmetric internal
+To encrypt secret in the cipher-tool/carbon-secvault/carbon-mediation ciphertext format
+  apictl secret create symmetric external
 To encrypt secret and get output as a .properties file (stored in the security folder in apictl executable directory)
   apictl secret create -o file
 To encrypt secret and get output as a .yaml file (stored in the security folder in apictl executable directory)
