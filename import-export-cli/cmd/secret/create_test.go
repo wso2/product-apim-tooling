@@ -48,6 +48,7 @@ func TestSecretCreateSymmetricUsesInitializedEncryptionKey(t *testing.T) {
 	oldInputPropertiesFile := inputPropertiesfile
 	oldEncryptionAlgorithm := encryptionAlgorithm
 	oldOutputType := outputType
+	oldSymmetricFormat := symmetricFormat
 
 	cipherFlag := secretCreateCmd.Flags().Lookup(cipherFlagLiteral)
 	if cipherFlag == nil {
@@ -58,6 +59,7 @@ func TestSecretCreateSymmetricUsesInitializedEncryptionKey(t *testing.T) {
 		inputPropertiesfile = oldInputPropertiesFile
 		encryptionAlgorithm = oldEncryptionAlgorithm
 		outputType = oldOutputType
+		symmetricFormat = oldSymmetricFormat
 		cipherFlag.Changed = oldCipherFlagChanged
 	}()
 
